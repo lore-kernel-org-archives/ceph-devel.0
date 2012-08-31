@@ -1,39 +1,129 @@
-From: "Atchley, Scott" <atchleyes@ornl.gov>
-Subject: Re: Best insertion point for storage shim
-Date: Fri, 31 Aug 2012 11:59:43 -0400
-Message-ID: <038F2DC9-0576-4372-BA5C-BD5B196934A4@ornl.gov>
-References: <00b201cd8210$077de070$1679a150$@netmass.com>
- <alpine.DEB.2.00.1208240938070.29719@cobra.newdream.net>
- <002f01cd8786$31b62340$952269c0$@netmass.com>
- <CADvuQRFoReXqk0h2f_RpG-T9KJHV2p-7zzh4ceo6jqcC0BQDtw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: e: mon memory issue
+Date: Fri, 31 Aug 2012 09:03:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208310858070.1531@cobra.newdream.net>
+References: <50407DA0.7070608@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta01.ornl.gov ([128.219.14.70]:49011 "EHLO mta01.ornl.gov"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754378Ab2HaP7q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 11:59:46 -0400
-In-Reply-To: <CADvuQRFoReXqk0h2f_RpG-T9KJHV2p-7zzh4ceo6jqcC0BQDtw@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:47179 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754203Ab2HaQDk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:03:40 -0400
+In-Reply-To: <50407DA0.7070608@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Stephen Perkins <perkins@netmass.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Xiaopong Tran <xiaopong.tran@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Aug 31, 2012, at 11:15 AM, Tommi Virtanen wrote:
+On Fri, 31 Aug 2012, Xiaopong Tran wrote:
 
-> On Fri, Aug 31, 2012 at 10:37 AM, Stephen Perkins <perkins@netmass.com> wrote:
->> Would this require 2 clusters because of the need to have RADOS keep N
->> copies on one and 1 copy on the other?
+> Hi,
 > 
-> That's doable with just multiple RADOS pools, no need for multiple clusters.
+> Is there any known memory issue with mon? We have 3 mons running, and
+> on keeps on crashing after 2 or 3 days, and I think it's because mon
+> sucks up all memory.
 > 
-> And CephFS is even able to pick what pool to put a file in, at the
-> time of its creation (see set_layout).
+> Here's mon after starting for 10 minutes:
+> 
+>   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
+> 13700 root      20   0  163m  32m 3712 S   4.3  0.1   0:05.15 ceph-mon 
+>  2595 root      20   0 1672m 523m    0 S   1.7  1.6 954:33.56 ceph-osd 
+>  1941 root      20   0 1292m 220m    0 S   0.7  0.7 946:40.69 ceph-osd 
+>  2316 root      20   0 1169m 198m    0 S   0.7  0.6 420:26.74 ceph-osd 
+>  2395 root      20   0 1149m 184m    0 S   0.7  0.6 364:29.08 ceph-osd 
+>  2487 root      20   0 1354m 373m    0 S   0.7  1.2 401:13.97 ceph-osd 
+>   235 root      20   0     0    0    0 S   0.3  0.0   0:37.68 kworker/4:1
+>  1304 root      20   0     0    0    0 S   0.3  0.0   0:00.16 jbd2/sda3-8
+>  1327 root      20   0     0    0    0 S   0.3  0.0  13:07.00 xfsaild/sdf1
+>  2011 root      20   0 1240m 177m    0 S   0.3  0.6 411:52.91 ceph-osd 
+>  2153 root      20   0 1095m 166m    0 S   0.3  0.5 370:56.01 ceph-osd 
+>  2725 root      20   0 1214m 186m    0 S   0.3  0.6 378:16.59 ceph-osd 
+> 
+> Here's the memory situation of mon on another machine, after mon has
+> been running for 3 hours:
+> 
+>   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
+>  1716 root      20   0 1923m 1.6g 4028 S   7.6  5.2   8:45.82 ceph-mon 
+>  1923 root      20   0  774m 138m 5052 S   0.7  0.4   1:28.56 ceph-osd 
+>  2114 root      20   0  836m 143m 4864 S   0.7  0.4   1:20.14 ceph-osd 
+>  2304 root      20   0  863m 176m 4988 S   0.7  0.5   1:13.30 ceph-osd 
+>  2578 root      20   0  823m 150m 5056 S   0.7  0.5   1:24.55 ceph-osd 
+>  2781 root      20   0  819m 131m 4900 S   0.7  0.4   1:12.14 ceph-osd 
+>  2995 root      20   0  863m 179m 5024 S   0.7  0.6   1:41.96 ceph-osd 
+>  3474 root      20   0  888m 208m 5608 S   0.7  0.6   7:08.08 ceph-osd 
+>  1228 root      20   0     0    0    0 S   0.3  0.0   0:07.01 jbd2/sda3-8
+>  1853 root      20   0  859m 176m 4820 S   0.3  0.5   1:17.01 ceph-osd 
+>  3373 root      20   0  789m 118m 4916 S   0.3  0.4   1:06.26 ceph-osd
+> 
+> And here is the situation on a third node, mon has been running
+> for over a week:
+> 
+>   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
+>  1717 root      20   0 68.8g  26g 2044 S  91.5 84.1   9220:40 ceph-mon 
+>  1986 root      20   0 1281m 226m    0 S   1.7  0.7   1225:28 ceph-osd 
+>  2196 root      20   0 1501m 538m    0 S   1.0  1.7   1221:54 ceph-osd 
+>  2266 root      20   0 1121m 176m    0 S   0.7  0.5 399:23.70 ceph-osd 
+>  2056 root      20   0 1072m 167m    0 S   0.3  0.5 403:49.76 ceph-osd 
+>  2126 root      20   0 1412m 458m    0 S   0.3  1.4   1215:48 ceph-osd 
+>  2337 root      20   0 1128m 188m    0 S   0.3  0.6 408:31.88 ceph-osd 
+> 
+> So, after a while, sooner or later, mon is going to crash, just
+> a matter of time.
+> 
+> Does anyone see anything like this? This is kinda scary.
+> 
+> OS: Debian Wheezy 3.2.0-3-amd64
+> Ceph: 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
 
-I think what he is looking for is not to bring data to a client to convert from replication to/from erasure coding, but to have the servers do it based on some metric _or_ have the client indicate which file needs to be converted and have the servers do the work.
+Can you try with 0.48.1argonaut? 
 
-I believe what you are saying is that I can have a directory using the replicated pool and another directory (or sub-directory) that uses the coding pool. The client would then copy the file from one directory to the other. The question becomes "Who does the erasure encoding?". The client (read back from the replica pool and write to the erasure pool) or the servers (copy data to the erasure pool and calculate on the servers)?
+If it still happens, can you run ceph-mon through massif? 
 
-Scott
+ valgrind --tool=massif ceph-mon -i whatever
+
+That'll generate a massif.out file (make sure it's there; you may need to 
+specify the output file for valgrind) over time.  Once ceph-mon starts 
+eating ram, send us a copy of the file and we can hopefully see what is 
+leaking.
+
+Thanks!
+sage
+
+
+> 
+> With this issue on hand, I'll have to monitor it closely and
+> restart mon once in a while, or I will get a crash (which is
+> still good enough), or a system that does not respond at
+> all because memory is exhausted, and the whole ceph cluster
+> is unreachable. We had this problem in the morning, mon on one
+> node exhausted the memory, none of the ceph command responds
+> anymore, the only thing left to do is to hard reset the node.
+> The whole cluster was basically done at that time.
+> 
+> Here is our usage situation:
+> 
+> 1) A few applications which read and write data through
+> librados API, we have about 20-30 connections at any one time.
+> So far, our apps have no such memory issue, we have been
+> monitoring them closely.
+> 
+> 2) We have a few scripts which pull data from an old storage
+> system, and use the rados command to put it into ceph.
+> Basically, just shell script. Each rados command is run
+> to write one object (one file), and exit. We run about
+> 25 scripts simultaneously, which means at any one time,
+> there are at most 25 connections.
+> 
+> I don't think this is a very busy system. But this
+> memory issue is definitely a problem for us.
+> 
+> Thanks for helping.
+> 
+> Xiaopong
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
