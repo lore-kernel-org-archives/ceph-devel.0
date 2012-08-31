@@ -1,56 +1,42 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Very unbalanced storage
-Date: Fri, 31 Aug 2012 09:10:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208310908520.1531@cobra.newdream.net>
-References: <50409BDC.5010006@gmail.com> <5040D179.5000008@aktzero.com>
+Subject: Re: Building and starting ceph: init-ceph and
+Date: Fri, 31 Aug 2012 09:12:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208310910590.1531@cobra.newdream.net>
+References: <CAEj+kbnh_-iO-gJJzqD=zZQ9CRv-B+goR8scJJ6Ku69ET4oy=w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47223 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47231 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754473Ab2HaQKn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:10:43 -0400
-In-Reply-To: <5040D179.5000008@aktzero.com>
+	with ESMTP id S1753829Ab2HaQMc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:12:32 -0400
+In-Reply-To: <CAEj+kbnh_-iO-gJJzqD=zZQ9CRv-B+goR8scJJ6Ku69ET4oy=w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Thompson <andrewkt@aktzero.com>
-Cc: Xiaopong Tran <xiaopong.tran@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tim Flavin <tim.flavin@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, 31 Aug 2012, Andrew Thompson wrote:
-> On 8/31/2012 7:11 AM, Xiaopong Tran wrote:
-> > Hi,
-> > 
-> > Ceph storage on each disk in the cluster is very unbalanced. On each
-> > node, the data seems to go to one or two disks, while other disks
-> > are almost empty.
-> > 
-> > I can't find anything wrong from the crush map, it's just the
-> > default for now. Attached is the crush map.
-> 
-> Have you been reweight-ing osds? I went round and round with my cluster a few
-> days ago reloading different crush maps only to find that it re-injecting a
-> crush map didn't seem to overwrite reweights.
-> 
-> Take a look at `ceph osd tree` to see if the reweight column matches the
-> weight column.
+On Fri, 31 Aug 2012, Tim Flavin wrote:
+> I build ceph from a tar file, currently ceph-0.48.1argonaut.   After
+> doing a make install, everything winds up in the right place except
+> for the startup file /etc/init.d/ceph.   I have to manually copy
+> ~/ceph-0.48.1argonaut/src/init-ceph to /etc/init.d.
 
-Note that the ideal situation is for reweight to be 1, regardless of what 
-the crush weight is.  If you find the utilizations are skewed, I would 
-look for other causes before resorting to reweight-by-utilization; it is 
-meant to adjust the normal statistical variation you expect from a 
-(pseudo)random placement, but if the variance is high there is likely 
-another cause.
+'make install' doesn't install it because it's system-dependent 
+(/etc/init.d on debian, /etc/rc.d/init.d or something like that on redhat, 
+etc.).  
+
+> Also after running mkcephfs -a -c ceph.conf, the command: service ceph
+> start complains that ceph is not configured unless I copy ceph.conf to
+> /usr/local/etc/ceph/ceph.conf.  (mkcephfs copies it into
+> /etc/ceph.conf.
+
+./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --sbindir=/sbin
 
 sage
 
-> 
-> Note: I'm new at this. This is my experience only, with 0.48.1, and may not be
-> entirely correct.
-> 
-> -- 
-> Andrew Thompson
-> http://aktzero.com/
-> 
+
+> Am I confused or doing something wrong?
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
