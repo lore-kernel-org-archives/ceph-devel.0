@@ -1,45 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Building and starting ceph: init-ceph and
-Date: Fri, 31 Aug 2012 09:12:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208310910590.1531@cobra.newdream.net>
-References: <CAEj+kbnh_-iO-gJJzqD=zZQ9CRv-B+goR8scJJ6Ku69ET4oy=w@mail.gmail.com>
+From: Andrew Thompson <andrewkt@aktzero.com>
+Subject: Re: Very unbalanced storage
+Date: Fri, 31 Aug 2012 12:24:18 -0400
+Message-ID: <5040E532.6040306@aktzero.com>
+References: <50409BDC.5010006@gmail.com> <5040D179.5000008@aktzero.com> <alpine.DEB.2.00.1208310908520.1531@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47231 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753829Ab2HaQMc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:12:32 -0400
-In-Reply-To: <CAEj+kbnh_-iO-gJJzqD=zZQ9CRv-B+goR8scJJ6Ku69ET4oy=w@mail.gmail.com>
+Received: from mx1a.cologlobal.com ([96.125.182.177]:57505 "EHLO
+	mx1.cologlobal.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753666Ab2HaQZn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:25:43 -0400
+Received: from mail3.hspheredns.com ([208.77.157.24])
+	by mx1.cologlobal.com with esmtps (TLSv1:DHE-RSA-AES256-SHA:256)
+	(Exim 4.80)
+	(envelope-from <andrewkt@aktzero.com>)
+	id 1T7U2N-0007mj-KT
+	for ceph-devel@vger.kernel.org; Fri, 31 Aug 2012 12:25:42 -0400
+In-Reply-To: <alpine.DEB.2.00.1208310908520.1531@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Flavin <tim.flavin@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 31 Aug 2012, Tim Flavin wrote:
-> I build ceph from a tar file, currently ceph-0.48.1argonaut.   After
-> doing a make install, everything winds up in the right place except
-> for the startup file /etc/init.d/ceph.   I have to manually copy
-> ~/ceph-0.48.1argonaut/src/init-ceph to /etc/init.d.
+On 8/31/2012 12:10 PM, Sage Weil wrote:
+> On Fri, 31 Aug 2012, Andrew Thompson wrote:
+>> Have you been reweight-ing osds? I went round and round with my 
+>> cluster a few days ago reloading different crush maps only to find 
+>> that it re-injecting a crush map didn't seem to overwrite reweights. 
+>> Take a look at `ceph osd tree` to see if the reweight column matches 
+>> the weight column. 
+> Note that the ideal situation is for reweight to be 1, regardless of what
+> the crush weight is.  If you find the utilizations are skewed, I would
+> look for other causes before resorting to reweight-by-utilization; it is
+> meant to adjust the normal statistical variation you expect from a
+> (pseudo)random placement, but if the variance is high there is likely
+> another cause.
 
-'make install' doesn't install it because it's system-dependent 
-(/etc/init.d on debian, /etc/rc.d/init.d or something like that on redhat, 
-etc.).  
+So if someone(me, guilty) had been messing with reweight, will setting 
+them all to 1 return it to a normal un-reweight-ed state?
 
-> Also after running mkcephfs -a -c ceph.conf, the command: service ceph
-> start complains that ceph is not configured unless I copy ceph.conf to
-> /usr/local/etc/ceph/ceph.conf.  (mkcephfs copies it into
-> /etc/ceph.conf.
+-- 
+Andrew Thompson
+http://aktzero.com/
 
-./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --sbindir=/sbin
-
-sage
-
-
-> Am I confused or doing something wrong?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
