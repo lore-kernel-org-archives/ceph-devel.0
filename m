@@ -1,129 +1,127 @@
 From: Sage Weil <sage@inktank.com>
-Subject: e: mon memory issue
-Date: Fri, 31 Aug 2012 09:03:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208310858070.1531@cobra.newdream.net>
-References: <50407DA0.7070608@gmail.com>
+Subject: Re: Very unbalanced storage
+Date: Fri, 31 Aug 2012 09:05:49 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208310904570.1531@cobra.newdream.net>
+References: <50409BDC.5010006@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47179 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47193 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754203Ab2HaQDk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:03:40 -0400
-In-Reply-To: <50407DA0.7070608@gmail.com>
+	with ESMTP id S1754424Ab2HaQFt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Aug 2012 12:05:49 -0400
+In-Reply-To: <50409BDC.5010006@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Xiaopong Tran <xiaopong.tran@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 On Fri, 31 Aug 2012, Xiaopong Tran wrote:
-
 > Hi,
 > 
-> Is there any known memory issue with mon? We have 3 mons running, and
-> on keeps on crashing after 2 or 3 days, and I think it's because mon
-> sucks up all memory.
+> Ceph storage on each disk in the cluster is very unbalanced. On each
+> node, the data seems to go to one or two disks, while other disks
+> are almost empty.
 > 
-> Here's mon after starting for 10 minutes:
-> 
->   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
-> 13700 root      20   0  163m  32m 3712 S   4.3  0.1   0:05.15 ceph-mon 
->  2595 root      20   0 1672m 523m    0 S   1.7  1.6 954:33.56 ceph-osd 
->  1941 root      20   0 1292m 220m    0 S   0.7  0.7 946:40.69 ceph-osd 
->  2316 root      20   0 1169m 198m    0 S   0.7  0.6 420:26.74 ceph-osd 
->  2395 root      20   0 1149m 184m    0 S   0.7  0.6 364:29.08 ceph-osd 
->  2487 root      20   0 1354m 373m    0 S   0.7  1.2 401:13.97 ceph-osd 
->   235 root      20   0     0    0    0 S   0.3  0.0   0:37.68 kworker/4:1
->  1304 root      20   0     0    0    0 S   0.3  0.0   0:00.16 jbd2/sda3-8
->  1327 root      20   0     0    0    0 S   0.3  0.0  13:07.00 xfsaild/sdf1
->  2011 root      20   0 1240m 177m    0 S   0.3  0.6 411:52.91 ceph-osd 
->  2153 root      20   0 1095m 166m    0 S   0.3  0.5 370:56.01 ceph-osd 
->  2725 root      20   0 1214m 186m    0 S   0.3  0.6 378:16.59 ceph-osd 
-> 
-> Here's the memory situation of mon on another machine, after mon has
-> been running for 3 hours:
-> 
->   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
->  1716 root      20   0 1923m 1.6g 4028 S   7.6  5.2   8:45.82 ceph-mon 
->  1923 root      20   0  774m 138m 5052 S   0.7  0.4   1:28.56 ceph-osd 
->  2114 root      20   0  836m 143m 4864 S   0.7  0.4   1:20.14 ceph-osd 
->  2304 root      20   0  863m 176m 4988 S   0.7  0.5   1:13.30 ceph-osd 
->  2578 root      20   0  823m 150m 5056 S   0.7  0.5   1:24.55 ceph-osd 
->  2781 root      20   0  819m 131m 4900 S   0.7  0.4   1:12.14 ceph-osd 
->  2995 root      20   0  863m 179m 5024 S   0.7  0.6   1:41.96 ceph-osd 
->  3474 root      20   0  888m 208m 5608 S   0.7  0.6   7:08.08 ceph-osd 
->  1228 root      20   0     0    0    0 S   0.3  0.0   0:07.01 jbd2/sda3-8
->  1853 root      20   0  859m 176m 4820 S   0.3  0.5   1:17.01 ceph-osd 
->  3373 root      20   0  789m 118m 4916 S   0.3  0.4   1:06.26 ceph-osd
-> 
-> And here is the situation on a third node, mon has been running
-> for over a week:
-> 
->   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND 
->  1717 root      20   0 68.8g  26g 2044 S  91.5 84.1   9220:40 ceph-mon 
->  1986 root      20   0 1281m 226m    0 S   1.7  0.7   1225:28 ceph-osd 
->  2196 root      20   0 1501m 538m    0 S   1.0  1.7   1221:54 ceph-osd 
->  2266 root      20   0 1121m 176m    0 S   0.7  0.5 399:23.70 ceph-osd 
->  2056 root      20   0 1072m 167m    0 S   0.3  0.5 403:49.76 ceph-osd 
->  2126 root      20   0 1412m 458m    0 S   0.3  1.4   1215:48 ceph-osd 
->  2337 root      20   0 1128m 188m    0 S   0.3  0.6 408:31.88 ceph-osd 
-> 
-> So, after a while, sooner or later, mon is going to crash, just
-> a matter of time.
-> 
-> Does anyone see anything like this? This is kinda scary.
-> 
-> OS: Debian Wheezy 3.2.0-3-amd64
-> Ceph: 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+> I can't find anything wrong from the crush map, it's just the
+> default for now. Attached is the crush map.
 
-Can you try with 0.48.1argonaut? 
+This is usually a problem with the pg_num for the pool you are using.  Can 
+you include the output from 'ceph osd dump | grep ^pool'?  By default, 
+pools get 8 pgs, which will distribute poorly.
 
-If it still happens, can you run ceph-mon through massif? 
-
- valgrind --tool=massif ceph-mon -i whatever
-
-That'll generate a massif.out file (make sure it's there; you may need to 
-specify the output file for valgrind) over time.  Once ceph-mon starts 
-eating ram, send us a copy of the file and we can hopefully see what is 
-leaking.
-
-Thanks!
 sage
 
 
 > 
-> With this issue on hand, I'll have to monitor it closely and
-> restart mon once in a while, or I will get a crash (which is
-> still good enough), or a system that does not respond at
-> all because memory is exhausted, and the whole ceph cluster
-> is unreachable. We had this problem in the morning, mon on one
-> node exhausted the memory, none of the ceph command responds
-> anymore, the only thing left to do is to hard reset the node.
-> The whole cluster was basically done at that time.
+> Here is the current situation on node s100001:
 > 
-> Here is our usage situation:
+> Filesystem                                              Size  Used Avail Use%
+> Mounted on
+> /dev/sdb1                                               932G  4.3G  927G   1%
+> /disk1
+> /dev/sdc1                                               932G  4.3G  927G   1%
+> /disk2
+> /dev/sdd1                                               932G  4.3G  927G   1%
+> /disk3
+> /dev/sde1                                               932G  4.3G  927G   1%
+> /disk4
+> /dev/sdf1                                               932G  4.3G  927G   1%
+> /disk5
+> /dev/sdg1                                               932G  4.3G  927G   1%
+> /disk6
+> /dev/sdh1                                               932G  4.3G  927G   1%
+> /disk7
+> /dev/sdi1                                               932G  4.3G  927G   1%
+> /disk8
+> /dev/sdj1                                               932G  4.3G  927G   1%
+> /disk9
+> /dev/sdk1                                               932G  445G  487G  48%
+> /disk10
 > 
-> 1) A few applications which read and write data through
-> librados API, we have about 20-30 connections at any one time.
-> So far, our apps have no such memory issue, we have been
-> monitoring them closely.
+> Here, we can see that all data seem to go to one osd only, while others
+> are almost empty.
 > 
-> 2) We have a few scripts which pull data from an old storage
-> system, and use the rados command to put it into ceph.
-> Basically, just shell script. Each rados command is run
-> to write one object (one file), and exit. We run about
-> 25 scripts simultaneously, which means at any one time,
-> there are at most 25 connections.
+> And here's the situation on node s200001:
 > 
-> I don't think this is a very busy system. But this
-> memory issue is definitely a problem for us.
+> Filesystem                                              Size  Used Avail Use%
+> Mounted on
+> /dev/sdb1                                               932G  443G  489G  48%
+> /disk1
+> /dev/sdc1                                               932G  4.3G  927G   1%
+> /disk2
+> /dev/sdd1                                               932G  4.3G  927G   1%
+> /disk3
+> /dev/sde1                                               932G  4.3G  927G   1%
+> /disk4
+> /dev/sdf1                                               932G  4.3G  927G   1%
+> /disk5
+> /dev/sdg1                                               932G  4.3G  927G   1%
+> /disk6
+> /dev/sdh1                                               932G  4.3G  927G   1%
+> /disk7
+> /dev/sdi1                                               932G  4.3G  927G   1%
+> /disk8
+> /dev/sdj1                                               932G  449G  483G  49%
+> /disk9
+> /dev/sdk1                                               932G  4.3G  927G   1%
+> /disk10
 > 
-> Thanks for helping.
+> The situation is a bit better, but not much, the data are stored on two
+> disks mainly.
+> 
+> Here is a better situation, on node s100002:
+> 
+> Filesystem                                              Size  Used Avail Use%
+> Mounted on
+> /dev/sdb1                                               1.9T  453G  1.4T  25%
+> /disk1
+> /dev/sdc1                                               1.9T  4.3G  1.9T   1%
+> /disk2
+> /dev/sdd1                                               1.9T  4.4G  1.9T   1%
+> /disk3
+> /dev/sde1                                               1.9T  4.3G  1.9T   1%
+> /disk4
+> /dev/sdf1                                               1.9T  457G  1.4T  25%
+> /disk5
+> /dev/sdg1                                               1.9T  443G  1.4T  24%
+> /disk6
+> /dev/sdh1                                               1.9T  4.4G  1.9T   1%
+> /disk7
+> /dev/sdi1                                               1.9T  4.4G  1.9T   1%
+> /disk8
+> /dev/sdj1                                               1.9T  427G  1.5T  23%
+> /disk9
+> /dev/sdk1                                               1.9T  4.4G  1.9T   1%
+> /disk10
+> 
+> It's better than the other two, but still not what I expected. I
+> expected the data to be spread out according to the weight of each
+> osd, as defined in the crush map. Or at least, as close to that
+> as possible. It might be just some obviously stupid config error,
+> but I don't know. This can't be normal, can it?
+> 
+> Thanks for any hint.
 > 
 > Xiaopong
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 > 
