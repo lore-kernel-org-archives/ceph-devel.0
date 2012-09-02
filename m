@@ -1,30 +1,44 @@
 From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: radosgw keeps dying
-Date: Sat, 01 Sep 2012 23:34:10 -0600
-Message-ID: <50429B7202000099000E95DE@collaborate.seakr.com>
+Subject: Re: radosgw keeps dying
+Date: Sun, 02 Sep 2012 07:36:38 -0600
+Message-ID: <50430C8602000099000E95E5@collaborate.seakr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:60271 "EHLO mx1.seakr.com"
+Received: from mx1.seakr.com ([64.2.143.10]:45391 "EHLO mx1.seakr.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751528Ab2IBFeO convert rfc822-to-8bit (ORCPT
+	id S1752063Ab2IBNgm convert rfc822-to-8bit (ORCPT
 	<rfc822;groupwise-ceph-devel@vger.kernel.org:1:1>);
-	Sun, 2 Sep 2012 01:34:14 -0400
+	Sun, 2 Sep 2012 09:36:42 -0400
 Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q825W6La001422
-	for <ceph-devel@vger.kernel.org>; Sat, 1 Sep 2012 23:32:06 -0600
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q82DYSdV001080
+	for <ceph-devel@vger.kernel.org>; Sun, 2 Sep 2012 07:34:28 -0600
 Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 9584044CFC
-	for <ceph-devel@vger.kernel.org>; Sat,  1 Sep 2012 23:34:11 -0600 (MDT)
+	by mx-inside.seakr.com (Postfix) with ESMTP id 98A2B44CFE
+	for <ceph-devel@vger.kernel.org>; Sun,  2 Sep 2012 07:36:39 -0600 (MDT)
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-So, I'm running ceph 0.48.1, I have my mds, mon, and osds up and running, and now I'm trying to get radosgw working, as well.  However, I'm running into an issue where the radosgw daemon runs for a minute and then exits without any explanation - nothing in the log files, system output, etc., to indicate why it's quitting.  If I run "strace" ahead of radosgw I see some "Connection timed out" messages toward the end of the output, but there's no indication as to what it's trying to connect to and why it's failing.  Is there any way to get radosgw to actually log anything, or send some debug output to the console, so I can figure out why it's failing?
+One additional piece of info...I did find the "-d" flag (documented in the radosgw-admin man page, but not in the radosgw man page) that keeps the daemon in the foreground and prints messages to stderr.  When I use this flag I get the following:
+[root@desktop-ceph ~]# radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway -d
+2012-09-02 07:35:27.495864 423d6940 -1 Initialization timeout, failed to initialize
 
-Thanks - Nick
+I'm not sure where it's timing out, though, what it's trying to contact that it cannot.  Any additional help in getting this going would be greatly appreciated!
+
+-Nick
+
+
+> So, I'm running ceph 0.48.1, I have my mds, mon, and osds up and running, and now I'm trying to get radosgw
+> working, as well.  However, I'm running into an issue where the radosgw daemon runs for a minute and then exits 
+> without any explanation - nothing in the log files, system output, etc., to indicate why it's quitting.  If I run "strace" 
+> ahead of radosgw I see some "Connection timed out" messages toward the end of the output, but there's no 
+> indication as to what it's trying to connect to and why it's failing.  Is there any way to get radosgw to actually log 
+> anything, or send some debug output to the console, so I can figure out why it's failing?
+> 
+> Thanks - Nick
 
 
 
