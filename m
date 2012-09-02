@@ -1,63 +1,33 @@
-From: Andrew Thompson <andrewkt@aktzero.com>
-Subject: Re: Very unbalanced storage
-Date: Sat, 01 Sep 2012 02:58:12 -0400
-Message-ID: <5041B204.7000008@aktzero.com>
-References: <50409BDC.5010006@gmail.com> <alpine.DEB.2.00.1208310904570.1531@cobra.newdream.net> <5041785E.3040707@gmail.com> <alpine.DEB.2.00.1208312000160.27708@cobra.newdream.net>
+From: "Nick Couchman" <Nick.Couchman@seakr.com>
+Subject: radosgw keeps dying
+Date: Sat, 01 Sep 2012 23:34:10 -0600
+Message-ID: <50429B7202000099000E95DE@collaborate.seakr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1a.cologlobal.com ([96.125.182.177]:44514 "EHLO
-	mx1.cologlobal.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751350Ab2IAG7k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Sep 2012 02:59:40 -0400
-Received: from mail3.hspheredns.com ([208.77.157.24])
-	by mx1.cologlobal.com with esmtps (TLSv1:DHE-RSA-AES256-SHA:256)
-	(Exim 4.80)
-	(envelope-from <andrewkt@aktzero.com>)
-	id 1T7hg5-0008AL-DE
-	for ceph-devel@vger.kernel.org; Sat, 01 Sep 2012 02:59:39 -0400
-In-Reply-To: <alpine.DEB.2.00.1208312000160.27708@cobra.newdream.net>
+Received: from mx1.seakr.com ([64.2.143.10]:60271 "EHLO mx1.seakr.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751528Ab2IBFeO convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:1:1>);
+	Sun, 2 Sep 2012 01:34:14 -0400
+Received: from mx-inside.seakr.com ([192.168.100.31])
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q825W6La001422
+	for <ceph-devel@vger.kernel.org>; Sat, 1 Sep 2012 23:32:06 -0600
+Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
+	by mx-inside.seakr.com (Postfix) with ESMTP id 9584044CFC
+	for <ceph-devel@vger.kernel.org>; Sat,  1 Sep 2012 23:34:11 -0600 (MDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 8/31/2012 11:05 PM, Sage Weil wrote:
-> Sadly you can't yet adjust pg_num for an active pool.  You can create a
-> new pool,
->
-> 	ceph osd pool create <name> <pg_num>
->
-> I would aim for 20 * num_osd, or thereabouts.. see
->
-> 	http://ceph.com/docs/master/ops/manage/grow/placement-groups/
->
-> Then you can copy the data from the old pool to the new one with
->
-> 	rados cppool yunio2 yunio3
->
-> This won't be particularly fast, but it will work.  You can also do
->
-> 	ceph osd pool rename <oldname> <newname>
-> 	ceph osd pool delete <name>
->
-> I hope this solves your problem!
+So, I'm running ceph 0.48.1, I have my mds, mon, and osds up and running, and now I'm trying to get radosgw working, as well.  However, I'm running into an issue where the radosgw daemon runs for a minute and then exits without any explanation - nothing in the log files, system output, etc., to indicate why it's quitting.  If I run "strace" ahead of radosgw I see some "Connection timed out" messages toward the end of the output, but there's no indication as to what it's trying to connect to and why it's failing.  Is there any way to get radosgw to actually log anything, or send some debug output to the console, so I can figure out why it's failing?
 
-Looking at old archives, I found this thread which shows that to mount a 
-pool as cephfs, it needs to be added to mds:
+Thanks - Nick
 
-http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/5685
 
-I started a `rados cppool data tempstore` a couple hours ago. When it 
-finishes, will I need to remove the current pool from mds somehow(other 
-than just deleting the pool)?
 
-Is `ceph mds add_data_pool <poolname>` still required? (It's not listed 
-in `ceph --help`.)
+--------
 
-Thanks.
-
--- 
-Andrew Thompson
-http://aktzero.com/
-
+This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
