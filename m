@@ -1,49 +1,51 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Is there any way to throttle recovery?
-Date: Mon, 03 Sep 2012 10:11:47 +0200
-Message-ID: <50446643.2010705@widodh.nl>
-References: <50445150.7080804@bashkirtsev.com>
+From: ramu eppa <ramu.freesystems@gmail.com>
+Subject: RADOS gateway and the S3 compatibility.
+Date: Mon, 3 Sep 2012 08:51:46 +0000 (UTC)
+Message-ID: <loom.20120903T104858-555@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:44490 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756013Ab2ICILw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Sep 2012 04:11:52 -0400
-In-Reply-To: <50445150.7080804@bashkirtsev.com>
+Received: from plane.gmane.org ([80.91.229.3]:52299 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754797Ab2ICIwA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 3 Sep 2012 04:52:00 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T8SNy-0001t8-Qy
+	for ceph-devel@vger.kernel.org; Mon, 03 Sep 2012 10:51:59 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 10:51:58 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 10:51:58 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hi all,
+   I configured radosgateway through,
+"http://ceph.com/docs/master/radosgw/config/" this documentation.
 
+But after restarting apache2 server, 
+it was not starting and it was showing error.
 
-On 09/03/2012 08:42 AM, Vladimir Bashkirtsev wrote:
-> Hello devs,
->
-> I have noticed that while ceph recovering from OSD failure RBD
-> performance becomes dismal. Judging by load on the net ceph attempts to
-> shuffle around huge amount of data leaving virtually no bandwidth for
-> normal operations. Is there any way to throttle recovery process?
-> Network throttling is out of question as it will slow everything down.
-> So I guess ceph should have (or already has) a setting which says do not
-> recover faster than X.
->
+The error is,
+Starting web server apache2.
+                                                                                                      
+Syntax error on line 1 of /etc/apache2/sites-enabled/rgw.conf.
 
-I don't know if there is a bandwidth throttle, but you could lower the 
-number of recovery ops with:
+FastCgiExternalServer:redefinition of previously defined class 
+"/var/www/s3gw.fcgi".
 
-osd recovery max active = 1
+Action 'start' failed.
+The Apache error log may have more information.
 
-By default it is set to 5, by tuning this down you'll put less stress on 
-the OSDs and it will probably also result in less network traffic.
+There is no error logs in apache2 error.log file.
+Please help me to radosgw and s3.
 
-Wido
+Thanks,
+Ramu.
 
-> Regards,
-> Vladimir
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
