@@ -1,51 +1,56 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: RADOS gateway and the S3 compatibility.
-Date: Mon, 3 Sep 2012 08:51:46 +0000 (UTC)
-Message-ID: <loom.20120903T104858-555@post.gmane.org>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: [Xen-users] Ceph + RBD + Xen: Complete collapse -> Network issue
+ in domU / Bad data for OSD / OOM Kill
+Date: Mon, 3 Sep 2012 11:24:00 +0200
+Message-ID: <CAF6-1L6FkkGTE25bXVYVHbMA7U86igx9HgjPRmXCAR2274p=dg@mail.gmail.com>
+References: <CAF6-1L5t9CGk_kB08UPKdrOhQeZZXdbr5n+we1Oae+STpodxtg@mail.gmail.com>
+	<503F7C25.2000303@inktank.com>
+	<CAG1y0scr2T2vbhVBm4nMttAtZJ+H_3q2zoCCtjTUyPQeyXj7XA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52299 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754797Ab2ICIwA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Sep 2012 04:52:00 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1T8SNy-0001t8-Qy
-	for ceph-devel@vger.kernel.org; Mon, 03 Sep 2012 10:51:59 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 10:51:58 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 10:51:58 +0200
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:38145 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755574Ab2ICJYB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Sep 2012 05:24:01 -0400
+Received: by vcbfk26 with SMTP id fk26so5238010vcb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 02:24:00 -0700 (PDT)
+In-Reply-To: <CAG1y0scr2T2vbhVBm4nMttAtZJ+H_3q2zoCCtjTUyPQeyXj7XA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Fajar A. Nugraha" <list@fajar.net>
+Cc: Alex Elder <elder@inktank.com>, xen-users@lists.xen.org, ceph-devel@vger.kernel.org
 
-Hi all,
-   I configured radosgateway through,
-"http://ceph.com/docs/master/radosgw/config/" this documentation.
+On Thu, Aug 30, 2012 at 5:04 PM, Fajar A. Nugraha <list@fajar.net> wrote:
+> On Thu, Aug 30, 2012 at 9:43 PM, Alex Elder <elder@inktank.com> wrote:
+>> On 08/30/2012 09:06 AM, Sylvain Munaut wrote:
+>>> Hi,
+>>
+>> I posted the following comments on IRC but am putting it here
+>> just so it's visible along with the original post.  All of the
+>> following is deduced from about 10 minutes of scanning through
+>> unfamiliar code, so I may be way off.  (I've edited my the
+>> comments I posted for readability.)
+>>
+>> The code is in drivers/net/xen-netfront.c, in the function
+>> xennet_get_responses().
+>
+> IIRC that's the xen PV driver.
 
-But after restarting apache2 server, 
-it was not starting and it was showing error.
+I've been digging a bit and it seems issuing a
 
-The error is,
-Starting web server apache2.
-                                                                                                      
-Syntax error on line 1 of /etc/apache2/sites-enabled/rgw.conf.
+ethtool -K vif1.0 tx off
 
-FastCgiExternalServer:redefinition of previously defined class 
-"/var/www/s3gw.fcgi".
+in the dom0 prevents the issue.
 
-Action 'start' failed.
-The Apache error log may have more information.
+Note that it needs to be in the dom0 on the VIF and not in the domU on
+the eth0 interface like I originally tried. It's also not enough to
+disable gso and/or tso, you need to turn off all tx accel.
 
-There is no error logs in apache2 error.log file.
-Please help me to radosgw and s3.
+I will start another subject in xen-devel seems it appears to be a bug
+in the PV driver.
 
-Thanks,
-Ramu.
 
+Cheers,
+
+    Sylvain
