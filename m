@@ -1,78 +1,50 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Inject configuration change into cluster
-Date: Tue, 04 Sep 2012 11:36:00 +0200
-Message-ID: <5045CB80.50508@widodh.nl>
-References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl> <5045B928.1050706@widodh.nl> <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
+From: =?utf-8?B?U2tvd3JvbiBTxYJhd29taXI=?=
+	<slawomir.skowron@grupaonet.pl>
+Subject: RE: Inject configuration change into cluster
+Date: Tue, 4 Sep 2012 12:11:34 +0200
+Message-ID: <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C4D@MXMBON05.grupa.onet>
+References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
+ <5045B928.1050706@widodh.nl>
+ <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
+ <5045CB80.50508@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45573 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756576Ab2IDJgD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 05:36:03 -0400
-In-Reply-To: <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
+Received: from onsmg01.portal.onet.pl ([213.180.147.237]:63077 "EHLO
+	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752253Ab2IDKLj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 06:11:39 -0400
+In-Reply-To: <5045CB80.50508@widodh.nl>
+Content-Language: pl-PL
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?U2tvd3JvbiBTxYJhd29taXI=?= <slawomir.skowron@grupaonet.pl>
+To: 'Wido den Hollander' <wido@widodh.nl>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 09/04/2012 10:30 AM, Skowron S=C5=82awomir wrote:
-> Ok, thanks.
->
-> Number of workers used for recover, or numer of disk threads.
->
-
-I think those can be changed while the OSD is running. You could always=
-=20
-give it a try.
-
-Wido
-
-> -----Original Message-----
-> From: Wido den Hollander [mailto:wido@widodh.nl]
-> Sent: Tuesday, September 04, 2012 10:18 AM
-> To: Skowron S=C5=82awomir
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Inject configuration change into cluster
->
-> On 09/04/2012 07:04 AM, Skowron S=C5=82awomir wrote:
->> Is there any way now, to inject new configuration change, without re=
-starting daemons ??
->>
->
-> Yes, you can use the injectargs command.
->
-> $ ceph osd tell 0 injectargs '--debug-osd 20'
->
-> What do you want to change? Not everything can be changed while the O=
-SD is running.
->
-> Wido
->
->> Regards
->>
->> Slawomir Skowron--
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=EF=BF=BDf=EF=BF=BD=
-=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=1E=EF=BF=BDw=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=EF=BF=
-=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=07=
-=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=
-=BD=EF=BF=BD!tml=3D
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WWVzIGkgd2lsbCB0cnkgOikgdGhhbmtzLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogV2lkbyBkZW4gSG9sbGFuZGVyIFttYWlsdG86d2lkb0B3aWRvZGgubmxdIA0KU2VudDog
+VHVlc2RheSwgU2VwdGVtYmVyIDA0LCAyMDEyIDExOjM2IEFNDQpUbzogU2tvd3JvbiBTxYJhd29t
+aXINCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IEluamVjdCBj
+b25maWd1cmF0aW9uIGNoYW5nZSBpbnRvIGNsdXN0ZXINCg0KT24gMDkvMDQvMjAxMiAxMDozMCBB
+TSwgU2tvd3JvbiBTxYJhd29taXIgd3JvdGU6DQo+IE9rLCB0aGFua3MuDQo+DQo+IE51bWJlciBv
+ZiB3b3JrZXJzIHVzZWQgZm9yIHJlY292ZXIsIG9yIG51bWVyIG9mIGRpc2sgdGhyZWFkcy4NCj4N
+Cg0KSSB0aGluayB0aG9zZSBjYW4gYmUgY2hhbmdlZCB3aGlsZSB0aGUgT1NEIGlzIHJ1bm5pbmcu
+IFlvdSBjb3VsZCBhbHdheXMgZ2l2ZSBpdCBhIHRyeS4NCg0KV2lkbw0KDQo+IC0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFdpZG8gZGVuIEhvbGxhbmRlciBbbWFpbHRvOndpZG9A
+d2lkb2RoLm5sXQ0KPiBTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIgMDQsIDIwMTIgMTA6MTggQU0N
+Cj4gVG86IFNrb3dyb24gU8WCYXdvbWlyDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zw0KPiBTdWJqZWN0OiBSZTogSW5qZWN0IGNvbmZpZ3VyYXRpb24gY2hhbmdlIGludG8gY2x1c3Rl
+cg0KPg0KPiBPbiAwOS8wNC8yMDEyIDA3OjA0IEFNLCBTa293cm9uIFPFgmF3b21pciB3cm90ZToN
+Cj4+IElzIHRoZXJlIGFueSB3YXkgbm93LCB0byBpbmplY3QgbmV3IGNvbmZpZ3VyYXRpb24gY2hh
+bmdlLCB3aXRob3V0IHJlc3RhcnRpbmcgZGFlbW9ucyA/Pw0KPj4NCj4NCj4gWWVzLCB5b3UgY2Fu
+IHVzZSB0aGUgaW5qZWN0YXJncyBjb21tYW5kLg0KPg0KPiAkIGNlcGggb3NkIHRlbGwgMCBpbmpl
+Y3RhcmdzICctLWRlYnVnLW9zZCAyMCcNCj4NCj4gV2hhdCBkbyB5b3Ugd2FudCB0byBjaGFuZ2U/
+IE5vdCBldmVyeXRoaW5nIGNhbiBiZSBjaGFuZ2VkIHdoaWxlIHRoZSBPU0QgaXMgcnVubmluZy4N
+Cj4NCj4gV2lkbw0KPg0KPj4gUmVnYXJkcw0KPj4NCj4+IFNsYXdvbWlyIFNrb3dyb24tLQ0KPj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4NCj4gTiAgICAgciAgeSAgIGIgWCAg
+x6d2IF4gKd66ey5uICsgICB6IF16IHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICANCiAg
+IGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAg3aJqIiAgIXRtbD0NCj4NCg0K
