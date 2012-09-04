@@ -1,73 +1,61 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH] rbd: rename block_name -> object_prefix
-Date: Tue, 04 Sep 2012 13:59:54 -0700
-Message-ID: <50466BCA.1040508@inktank.com>
-References: <504643B7.1060507@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] rbd: add new snapshots at the tail
+Date: Tue, 04 Sep 2012 15:43:59 -0700
+Message-ID: <5046842F.7050804@inktank.com>
+References: <50464390.3010107@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48585 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:35063 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757621Ab2IDU77 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 16:59:59 -0400
-Received: by pbbrr13 with SMTP id rr13so10077803pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 13:59:59 -0700 (PDT)
-In-Reply-To: <504643B7.1060507@inktank.com>
+	with ESMTP id S1757824Ab2IDWoC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 18:44:02 -0400
+Received: by pbbrr13 with SMTP id rr13so10189028pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 15:44:02 -0700 (PDT)
+In-Reply-To: <50464390.3010107@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Dan Mick <dan.mick@inktank.com>
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 09/04/2012 11:08 AM, Alex Elder wrote:
-> In the on-disk image header structure there is a field "block_name"
-> which represents what we now call the "object prefix" for an rbd
-> image.  Rename this field "object_prefix" to be consistent with
-> modern usage.
+> This fixes a bug that went in with this commit:
 >
-> This appears to be the only remaining vestige of the use of "block"
-> in symbols that represent objects in the rbd code.
+>      commit f6e0c99092cca7be00fca4080cfc7081739ca544
+>      Author: Alex Elder <elder@inktank.com>
+>      Date:   Thu Aug 2 11:29:46 2012 -0500
+>      rbd: simplify __rbd_init_snaps_header()
 >
-> This addresses http://tracker.newdream.net/issues/1761
+> The problem is that a new rbd snapshot needs to go either after an
+> existing snapshot entry, or at the *end* of an rbd device's snapshot
+> list.  As originally coded, it is placed at the beginning.  This was
+> based on the assumption the list would be empty (so it wouldn't
+> matter), but in fact if multiple new snapshots are added to an empty
+> list in one shot the list will be non-empty after the first one is
+> added.
+>
+> This addresses http://tracker.newdream.net/issues/3063
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c       |    4 ++--
->   drivers/block/rbd_types.h |    2 +-
->   2 files changed, 3 insertions(+), 3 deletions(-)
+>   drivers/block/rbd.c |    2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fd51f9d..2b40a4a 100644
+> index 8e6e29e..fd51f9d 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -522,11 +522,11 @@ static int rbd_header_from_disk(struct
-> rbd_image_header *header,
+> @@ -2187,7 +2187,7 @@ static int __rbd_init_snaps_header(struct
+> rbd_device *rbd_dev)
+>   			if (snap)
+>   				list_add_tail(&new_snap->node, &snap->node);
+>   			else
+> -				list_add(&new_snap->node, head);
+> +				list_add_tail(&new_snap->node, head);
+>   		} else {
+>   			/* Already have this one */
 >
->   	snap_count = le32_to_cpu(ondisk->snap_count);
->
-> -	size = sizeof (ondisk->block_name) + 1;
-> +	size = sizeof (ondisk->object_prefix) + 1;
->   	header->object_prefix = kmalloc(size, GFP_KERNEL);
->   	if (!header->object_prefix)
->   		return -ENOMEM;
-> -	memcpy(header->object_prefix, ondisk->block_name, size - 1);
-> +	memcpy(header->object_prefix, ondisk->object_prefix, size - 1);
->   	header->object_prefix[size - 1] = '\0';
->
->   	if (snap_count) {
-> diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
-> index 0924e9e..d9d8a77 100644
-> --- a/drivers/block/rbd_types.h
-> +++ b/drivers/block/rbd_types.h
-> @@ -47,7 +47,7 @@ struct rbd_image_snap_ondisk {
->
->   struct rbd_image_header_ondisk {
->   	char text[40];
-> -	char block_name[24];
-> +	char object_prefix[24];
->   	char signature[4];
->   	char version[8];
->   	struct {
->
+
