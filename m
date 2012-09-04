@@ -1,516 +1,189 @@
-From: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Subject: Re: SimpleMessenger dispatching: cause of performance problems?
-Date: Tue, 04 Sep 2012 08:09:39 +0200
-Message-ID: <50459B23.2070401@itxperts.de>
-References: <502D1B07.3030101@itxperts.de>	<alpine.DEB.2.00.1208160951190.26904@cobra.newdream.net>	<50323001.5050300@itxperts.de>	<alpine.DEB.2.00.1208201320160.26904@cobra.newdream.net>	<5033599C.70504@itxperts.de>	<alpine.DEB.2.00.1208211105170.32470@cobra.newdream.net>	<alpine.DEB.2.00.1208211217560.29978@cobra.newdream.net>	<CA+4uBUan6jUon6SbVTxZTcTcAa4GYOWeXLgLW7upW41LLO=Vog@mail.gmail.com>	<50346E3B.60602@itxperts.de> <CA+4uBUYt5R7v7GoWqww0HG4H7r8-F582OSp+tvdZX1A3Dc7fYA@mail.gmail.com> <5035F9EA.1060100@itxperts.de>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: OSD crash
+Date: Tue, 4 Sep 2012 12:13:19 +0400
+Message-ID: <CABYiri-sn=efBgw94eaZvg1Un_=px-CpeL8LGzU3S6EconH8ZQ@mail.gmail.com>
+References: <CABYiri_Fi4uMSqLnoFLp4_2kQ8FSXv=jjSSQiER=DwCOG0hqkA@mail.gmail.com>
+ <alpine.DEB.2.00.1208221532350.29719@cobra.newdream.net> <CABYiri_y+GeKWoxNpmxMDbWThqb-9JmazohN2Zeroq9KNOZFTg@mail.gmail.com>
+ <CAPYLRzgUviKbU5i7XDDkcTdHKS6JGYxwEoEXbDRUB8rHeAN5Bg@mail.gmail.com>
+ <CABYiri_d1tRmiPfpc6wO3Kg6=wQ90xd1feBKT3mO0iYjEjk6KA@mail.gmail.com> <CABYiri_Lcwi4fxMQH=VeOri-A3_9eQX5-1CXC9F4yATdPNSF4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.itxperts.de ([212.202.108.166]:48448 "EHLO
-	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751445Ab2IDGJn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 02:09:43 -0400
-In-Reply-To: <5035F9EA.1060100@itxperts.de>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:35011 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751727Ab2IDINo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 04:13:44 -0400
+Received: by wicr5 with SMTP id r5so4973305wic.1
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 01:13:40 -0700 (PDT)
+In-Reply-To: <CABYiri_Lcwi4fxMQH=VeOri-A3_9eQX5-1CXC9F4yATdPNSF4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
 Hi,
 
-I have run tests with v0.50 and see the same symptom.
+Almost always one or more osd dies when doing overlapped recovery -
+e.g. add new crushmap and remove some newly added osds from cluster
+some minutes later during remap or inject two slightly different
+crushmaps after a short time(surely preserving at least one of
+replicas online). Seems that osd dying on excessive amount of
+operations in queue because under normal test, e.g. rados, iowait does
+not break one percent barrier but during recovery it may raise up to
+ten percents(2108 w/ cache, splitted disks as R0 each).
 
-However: I have also the impression that the problem is related
-to the frequency at which requests arrive at the OSD.
+#0  0x00007f62f193a445 in raise () from /lib/x86_64-linux-gnu/libc.so.6
+#1  0x00007f62f193db9b in abort () from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x00007f62f2236665 in __gnu_cxx::__verbose_terminate_handler() ()
+from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#3  0x00007f62f2234796 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x00007f62f22347c3 in std::terminate() () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#5  0x00007f62f22349ee in __cxa_throw () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#6  0x0000000000844e11 in ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*) ()
+#7  0x000000000073148f in
+FileStore::_do_transaction(ObjectStore::Transaction&, unsigned long,
+int) ()
+#8  0x000000000073484e in
+FileStore::do_transactions(std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, unsigned long) ()
+#9  0x000000000070c680 in FileStore::_do_op(FileStore::OpSequencer*) ()
+#10 0x000000000083ce01 in ThreadPool::worker() ()
+#11 0x00000000006823ed in ThreadPool::WorkThread::entry() ()
+#12 0x00007f62f345ee9a in start_thread () from
+/lib/x86_64-linux-gnu/libpthread.so.0
+#13 0x00007f62f19f64cd in clone () from /lib/x86_64-linux-gnu/libc.so.6
+#14 0x0000000000000000 in ?? ()
+ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
 
-I have run tests with rbd kernel client using 126 KByte and
-512 KByte size for write requests. In the 2nd case, the
-average time to dispatch a message from SM to OSD is
-in the range of 0.2 ms, without too much of a variance.
-In first case the time to dispatch has a large variance and
-at an average is in the range of 2 ms (i.e. a factor of 10 higher).
-
-The difference between the two cases is the rate at which
-requests arrive at the OSD.
-
-So it looks that the dispatching code itself is efficient, but
-collapses on the locks if the request rate for a single OSD
-hits some threshold.
-
-
-Best Regards
-
-Andreas Bluemle
-
-
-Andreas Bluemle wrote:
-> Hi,
+On Sun, Aug 26, 2012 at 8:52 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> During recovery, following crash happens(simular to
+> http://tracker.newdream.net/issues/2126 which marked resolved long
+> ago):
 >
-> the size of the rbd data objects on the OSD is 4 MByte (default).
+> http://xdel.ru/downloads/ceph-log/osd-2012-08-26.txt
 >
->
-> Best Regards
->
-> Andreas
->
-> Samuel Just wrote:
->> What rbd block size were you using?
->> -Sam
+> On Sat, Aug 25, 2012 at 12:30 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>> On Thu, Aug 23, 2012 at 4:09 AM, Gregory Farnum <greg@inktank.com> wrote:
+>>> The tcmalloc backtrace on the OSD suggests this may be unrelated, but
+>>> what's the fd limit on your monitor process? You may be approaching
+>>> that limit if you've got 500 OSDs and a similar number of clients.
+>>>
 >>
->> On Tue, Aug 21, 2012 at 10:29 PM, Andreas Bluemle
->> <andreas.bluemle@itxperts.de> wrote:
->>  
->>> Hi,
->>>
->>>
->>> Samuel Just wrote:
->>>    
->>>> Was the cluster complete healthy at the time that those traces were 
->>>> taken?
->>>> If there were osds going in/out/up/down, it would trigger osdmap 
->>>> updates
->>>> which
->>>> would tend to hold the osd_lock for an extended period of time.
->>>>
->>>>
->>>>       
->>> The cluster was completely healthy.
->>>
->>>    
->>>> v0.50 included some changes that drastically reduce the purview of
->>>> osd_lock.
->>>> In particular, pg op handling no longer grabs the osd_lock and
->>>> handle_osd_map
->>>> can proceed independently of the pg worker threads.  Trying that 
->>>> might be
->>>> interesting.
->>>>
->>>>
->>>>       
->>> I'll grab v0.50 and take a look.
->>>
->>>
->>>    
->>>> -Sam
->>>>
->>>> On Tue, Aug 21, 2012 at 12:20 PM, Sage Weil <sage@inktank.com> wrote:
->>>>
->>>>      
->>>>> On Tue, 21 Aug 2012, Sage Weil wrote:
->>>>>
->>>>>        
->>>>>> On Tue, 21 Aug 2012, Andreas Bluemle wrote:
+>> Thanks! I didn`t measured a # of connection because of bearing in mind
+>> 1 conn per client, raising limit did the thing. Previously mentioned
+>> qemu-kvm zombie does not related to rbd itself - it can be created by
+>> destroying libvirt domain which is in saving state or vice-versa, so
+>> I`ll put a workaround on this. Right now I am faced different problem
+>> - osds dying silently, e.g. not leaving a core, I`ll check logs on the
+>> next testing phase.
+>>
+>>> On Wed, Aug 22, 2012 at 6:55 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>>>> On Thu, Aug 23, 2012 at 2:33 AM, Sage Weil <sage@inktank.com> wrote:
+>>>>> On Thu, 23 Aug 2012, Andrey Korolyov wrote:
+>>>>>> Hi,
 >>>>>>
->>>>>>          
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> as mentioned, the workload is a single sequential write on
->>>>>>> the client. The write is not O_DIRECT; and consequently
->>>>>>> the messages arrive at the OSD with 124 KByte per write request.
->>>>>>>
->>>>>>> The attached pdf shows a timing diagram of two concurrent
->>>>>>> write operations (one primary and one replication / secondary).
->>>>>>>
->>>>>>> The time spent on the primary write to get the OSD.:osd_lock
->>>>>>> releates nicely with the time when this lock is released by the
->>>>>>> secondary write.
->>>>>>>
->>>>>>>             
->>>>> Looking again at this diagram, I'm a bit confused.  Is the Y 
->>>>> access the
->>>>> thread id or something?  And the X axis is time in seconds?
+>>>>>> today during heavy test a pair of osds and one mon died, resulting to
+>>>>>> hard lockup of some kvm processes - they went unresponsible and was
+>>>>>> killed leaving zombie processes ([kvm] <defunct>). Entire cluster
+>>>>>> contain sixteen osd on eight nodes and three mons, on first and last
+>>>>>> node and on vm outside cluster.
+>>>>>>
+>>>>>> osd bt:
+>>>>>> #0  0x00007fc37d490be3 in
+>>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>>> (gdb) bt
+>>>>>> #0  0x00007fc37d490be3 in
+>>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>>> #1  0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
+>>>>>> /usr/lib/libtcmalloc.so.4
+>>>>>> #2  0x00007fc37d4a2287 in tc_delete () from /usr/lib/libtcmalloc.so.4
+>>>>>> #3  0x00000000008b1224 in _M_dispose (__a=..., this=0x6266d80) at
+>>>>>> /usr/include/c++/4.7/bits/basic_string.h:246
+>>>>>> #4  ~basic_string (this=0x7fc3736639d0, __in_chrg=<optimized out>) at
+>>>>>> /usr/include/c++/4.7/bits/basic_string.h:536
+>>>>>> #5  ~basic_stringbuf (this=0x7fc373663988, __in_chrg=<optimized out>)
+>>>>>> at /usr/include/c++/4.7/sstream:60
+>>>>>> #6  ~basic_ostringstream (this=0x7fc373663980, __in_chrg=<optimized
+>>>>>> out>, __vtt_parm=<optimized out>) at /usr/include/c++/4.7/sstream:439
+>>>>>> #7  pretty_version_to_str () at common/version.cc:40
+>>>>>> #8  0x0000000000791630 in ceph::BackTrace::print (this=0x7fc373663d10,
+>>>>>> out=...) at common/BackTrace.cc:19
+>>>>>> #9  0x000000000078f450 in handle_fatal_signal (signum=11) at
+>>>>>> global/signal_handler.cc:91
+>>>>>> #10 <signal handler called>
+>>>>>> #11 0x00007fc37d490be3 in
+>>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>>> #12 0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
+>>>>>> /usr/lib/libtcmalloc.so.4
+>>>>>> #13 0x00007fc37d49eb97 in tc_free () from /usr/lib/libtcmalloc.so.4
+>>>>>> #14 0x00007fc37d1c6670 in __gnu_cxx::__verbose_terminate_handler() ()
+>>>>>> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>>> #15 0x00007fc37d1c4796 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>>> #16 0x00007fc37d1c47c3 in std::terminate() () from
+>>>>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>>> #17 0x00007fc37d1c49ee in __cxa_throw () from
+>>>>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>>> #18 0x0000000000844e11 in ceph::__ceph_assert_fail (assertion=0x90c01c
+>>>>>> "0 == \"unexpected error\"", file=<optimized out>, line=3007,
+>>>>>>     func=0x90ef80 "unsigned int
+>>>>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)")
+>>>>>> at common/assert.cc:77
 >>>>>
+>>>>> This means it got an unexpected error when talking to the file system.  If
+>>>>> you look in the osd log, it may tell you what that was.  (It may
+>>>>> not--there isn't usually the other tcmalloc stuff triggered from the
+>>>>> assert handler.)
 >>>>>
->>>>>         
->>> X-Axis is time, Y Axis is absolute offset of the write request on 
->>> the rados
->>> block device.
->>>
->>>    
->>>>> The big question for me is what on earth the secondary write (or 
->>>>> primary,
->>>>> for that matter) is doing with osd_lock for a full 3 ms...  If my 
->>>>> reading
->>>>> of the units is correct, *that* is the real problem.  It shouldn't be
->>>>> doing anything that takes that long.  The exception is osdmap 
->>>>> handling,
->>>>> which can do more work, but request processing should be very fast.
+>>>>> What happens if you restart that ceph-osd daemon?
 >>>>>
->>>>> Thanks-
 >>>>> sage
 >>>>>
 >>>>>
->>>>>
->>>>>        
->>>>>> Ah, I see.
->>>>>>
->>>>>> There isn't a trivial way to pull osd_lock out of the picture; 
->>>>>> there are
->>>>>> several data structures it's protecting (pg_map, osdmaps, peer epoch
->>>>>> map,
->>>>>> etc.).  Before we try going down that road, I suspect it might be 
->>>>>> more
->>>>>> fruitful to see where cpu time is being spent while osd_lock is 
->>>>>> held.
->>>>>>
->>>>>> How much of an issue does it look like this specific contention 
->>>>>> is for
->>>>>> you?  Does it go away with larger writes?
->>>>>>
->>>>>> sage
->>>>>>
->>>>>>
->>>>>>
->>>>>>          
->>>>>>> Hope this helps
->>>>>>>
->>>>>>> Andreas
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> Sage Weil wrote:
->>>>>>>
->>>>>>>            
->>>>>>>> On Mon, 20 Aug 2012, Andreas Bluemle wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>>              
->>>>>>>>> Hi Sage,
->>>>>>>>>
->>>>>>>>> Sage Weil wrote:
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>                
->>>>>>>>>> Hi Andreas,
->>>>>>>>>>
->>>>>>>>>> On Thu, 16 Aug 2012, Andreas Bluemle wrote:
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>                  
->>>>>>>>>>> Hi,
->>>>>>>>>>>
->>>>>>>>>>> I have been trying to migrate a ceph cluster 
->>>>>>>>>>> (ceph-0.48argonaut)
->>>>>>>>>>> to a high speed cluster network and encounter scalability 
->>>>>>>>>>> problems:
->>>>>>>>>>> the overall performance of the ceph cluster does not scale well
->>>>>>>>>>> with an increase in the underlying networking speed.
->>>>>>>>>>>
->>>>>>>>>>> In short:
->>>>>>>>>>>
->>>>>>>>>>> I believe that the dispatching from SimpleMessenger to
->>>>>>>>>>> OSD worker queues causes that scalability issue.
->>>>>>>>>>>
->>>>>>>>>>> Question: is it possible that this dispatching is causing
->>>>>>>>>>> performance
->>>>>>>>>>> problems?
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>                     
->>>>>>>>>> There is a single 'dispatch' thread that's processing this 
->>>>>>>>>> queue,
->>>>>>>>>> and
->>>>>>>>>> conveniently perf lets you break down its profiling data on a
->>>>>>>>>> per-thread
->>>>>>>>>> basis.  Once you've ruled out the throttler as the culprit, you
->>>>>>>>>> might
->>>>>>>>>> try
->>>>>>>>>> running the daemon with 'perf record -g -- ceph-osd ...' and 
->>>>>>>>>> then
->>>>>>>>>> look
->>>>>>>>>> specifically at where that thread is spending its time.  We
->>>>>>>>>> shouldn't be
->>>>>>>>>> burning that much CPU just doing the sanity checks and then 
->>>>>>>>>> handing
->>>>>>>>>> requests
->>>>>>>>>> off to PGs...
->>>>>>>>>>
->>>>>>>>>> sage
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>                   
->>>>>>>>>   The effect, which I am seeing, may be related to some locking
->>>>>>>>> issue.
->>>>>>>>> As I read the code, there are multiple dispatchers running: 
->>>>>>>>> one per
->>>>>>>>> SimpleMessenger.
->>>>>>>>>
->>>>>>>>> On a typical OSD node, there is
->>>>>>>>>
->>>>>>>>> - the instance of the SimpleMessenger processing input from the
->>>>>>>>> client
->>>>>>>>> (primary writes)
->>>>>>>>> - other instances of SimpleMessenger, which process input from
->>>>>>>>> neighbor
->>>>>>>>> OSD
->>>>>>>>> nodes
->>>>>>>>>
->>>>>>>>> the latter generate replication writes to the OSD I am looking 
->>>>>>>>> at.
->>>>>>>>>
->>>>>>>>> On the other hand, there is a single instance of the OSD object
->>>>>>>>> within the
->>>>>>>>> ceph-osd daemon.
->>>>>>>>> When dispatching messages to the OSD, then the OSD::osd_lock 
->>>>>>>>> is held
->>>>>>>>> for
->>>>>>>>> the
->>>>>>>>> complete
->>>>>>>>> process of dispatching; see code below.
->>>>>>>>>
->>>>>>>>> When the write load increases, then multiple SimpleMessenger
->>>>>>>>> instances
->>>>>>>>> start
->>>>>>>>> to
->>>>>>>>> congest on the OSD::osd_lock.
->>>>>>>>> And this may cause delays in the individual dispatch process.
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>                 
->>>>>>>> This is definitely possible, yes, although it would surprise me if
->>>>>>>> it's
->>>>>>>> happening here (unless your workload is all small writes).  
->>>>>>>> Just to
->>>>>>>> confirm,
->>>>>>>> are you actually observing osd_lock contention, or speculating 
->>>>>>>> about
->>>>>>>> what is
->>>>>>>> causing the delays you're seeing?
->>>>>>>>
->>>>>>>> I'm not sure what the best tool is to measure lock contention.  
->>>>>>>> Mark
->>>>>>>> was
->>>>>>>> playing with a 'poor man's wall clock profiler' using stack trace
->>>>>>>> sampling
->>>>>>>> from gdb.  That would tell us whether threads were really blocking
->>>>>>>> while
->>>>>>>> obtaining the osd_lock...
->>>>>>>>
->>>>>>>> Can you tell us a bit more about what your workload is?
->>>>>>>>
->>>>>>>> sage
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>              
->>>>>>>>> bool OSD::ms_dispatch(Message *m)
->>>>>>>>> {
->>>>>>>>> // lock!
->>>>>>>>> osd_lock.Lock();
->>>>>>>>>
->>>>>>>>> while (dispatch_running) {
->>>>>>>>> dout(10) << "ms_dispatch waiting for other dispatch thread to
->>>>>>>>> complete" <<
->>>>>>>>> dendl;
->>>>>>>>> dispatch_cond.Wait(osd_lock);
->>>>>>>>> }
->>>>>>>>> dispatch_running = true;
->>>>>>>>>
->>>>>>>>> do_waiters();
->>>>>>>>> _dispatch(m);
->>>>>>>>> do_waiters();
->>>>>>>>>
->>>>>>>>> dispatch_running = false;
->>>>>>>>> dispatch_cond.Signal();
->>>>>>>>>
->>>>>>>>> osd_lock.Unlock();
->>>>>>>>> return true;
->>>>>>>>> }
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>                
->>>>>>>>>>> In detail:
->>>>>>>>>>>
->>>>>>>>>>> In order to find out more about this problem, I have added
->>>>>>>>>>> profiling
->>>>>>>>>>> to
->>>>>>>>>>> the ceph code in various place; for write operations to the 
->>>>>>>>>>> primary
->>>>>>>>>>> or
->>>>>>>>>>> the
->>>>>>>>>>> secondary, timestamps are recorded for OSD object, offset and
->>>>>>>>>>> length
->>>>>>>>>>> of
->>>>>>>>>>> the such a write request.
->>>>>>>>>>>
->>>>>>>>>>> Timestamps record:
->>>>>>>>>>>  - receipt time at SimpleMessenger
->>>>>>>>>>>  - processing time at osd
->>>>>>>>>>>  - for primary write operations: wait time until replication
->>>>>>>>>>> operation
->>>>>>>>>>>    is acknowledged.
->>>>>>>>>>>
->>>>>>>>>>> What I believe is happening: dispatching requests from
->>>>>>>>>>> SimpleMessenger
->>>>>>>>>>> to
->>>>>>>>>>> OSD worker threads seems to consume a fair amount of time. This
->>>>>>>>>>> ends
->>>>>>>>>>> up in a widening gap between subsequent receipts of requests 
->>>>>>>>>>> and
->>>>>>>>>>> the
->>>>>>>>>>> start
->>>>>>>>>>> of OSD processing them.
->>>>>>>>>>>
->>>>>>>>>>> A primary write suffers twice from this problem: first because
->>>>>>>>>>> the delay happens on the primary OSD and second because the
->>>>>>>>>>> replicating
->>>>>>>>>>> OSD also suffers from the same problem - and hence causes
->>>>>>>>>>> additional
->>>>>>>>>>> delays
->>>>>>>>>>> at the primary OSD when it waits for the commit from the
->>>>>>>>>>> replicating
->>>>>>>>>>> OSD.
->>>>>>>>>>>
->>>>>>>>>>> In the attached graphics, the x-axis shows the time (in 
->>>>>>>>>>> seconds)
->>>>>>>>>>> The y-axis shows the offset where a request to write happened.
->>>>>>>>>>>
->>>>>>>>>>> The red bar represents the SimpleMessenger receive, i.e. from
->>>>>>>>>>> reading
->>>>>>>>>>> the message header until enqueuing the completely decoded 
->>>>>>>>>>> message
->>>>>>>>>>> into
->>>>>>>>>>> the SImpleMessenger dispatch queue.
->>>>>>>>>>>
->>>>>>>>>>> The green bar represents the time required for local 
->>>>>>>>>>> processing,
->>>>>>>>>>> i.e.
->>>>>>>>>>> dispatching the the OSD worker, writing to filesystem and 
->>>>>>>>>>> journal,
->>>>>>>>>>> send
->>>>>>>>>>> out the replication operation to the replicating OSD. It right
->>>>>>>>>>> end of the green bar is the time when locally everything has
->>>>>>>>>>> finished
->>>>>>>>>>> and a commit could happen.
->>>>>>>>>>>
->>>>>>>>>>> The blue bar represents the time until the replicating OSD 
->>>>>>>>>>> has sent
->>>>>>>>>>> a
->>>>>>>>>>> commit
->>>>>>>>>>> back to the primary OSD and the original write request can be
->>>>>>>>>>> committed to
->>>>>>>>>>> the client.
->>>>>>>>>>>
->>>>>>>>>>> The green bar is interrupted by a black bar: the left end
->>>>>>>>>>> represents
->>>>>>>>>>> the time when the request has been enqueued on the OSD worker
->>>>>>>>>>> queue.
->>>>>>>>>>> The
->>>>>>>>>>> right end gives the time when the request is taken off the OSD
->>>>>>>>>>> worker
->>>>>>>>>>> queue and actual OSD processing starts.
->>>>>>>>>>>
->>>>>>>>>>> The test was a simple sequential write to a rados block device.
->>>>>>>>>>>
->>>>>>>>>>> Receiption of the write requests at the OSD is also 
->>>>>>>>>>> sequential in
->>>>>>>>>>> the
->>>>>>>>>>> graphics: the bar to the bottom of the graphics shows an 
->>>>>>>>>>> earlier
->>>>>>>>>>> write
->>>>>>>>>>> request.
->>>>>>>>>>>
->>>>>>>>>>> Note that the dispatching of a later request in all cases 
->>>>>>>>>>> relates
->>>>>>>>>>> to
->>>>>>>>>>> the
->>>>>>>>>>> enqueue time at the OSD worker queue of the previous write 
->>>>>>>>>>> request:
->>>>>>>>>>> the
->>>>>>>>>>> left
->>>>>>>>>>> end of a black bar relates nicely to the beginning of a 
->>>>>>>>>>> green bar
->>>>>>>>>>> above
->>>>>>>>>>> it.
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> -- 
->>>>>>>>>>> Andreas Bluemle
->>>>>>>>>>> mailto:Andreas.Bluemle@itxperts.de
->>>>>>>>>>> ITXperts GmbH                       http://www.itxperts.de
->>>>>>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
->>>>>>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
->>>>>>>>>>>
->>>>>>>>>>> Company details: http://www.itxperts.de/imprint.htm
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>                     
->>>>>>>>> -- 
->>>>>>>>> Andreas Bluemle
->>>>>>>>> mailto:Andreas.Bluemle@itxperts.de
->>>>>>>>> ITXperts GmbH                       http://www.itxperts.de
->>>>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
->>>>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
->>>>>>>>>
->>>>>>>>> Company details: http://www.itxperts.de/imprint.htm
->>>>>>>>>
->>>>>>>>> -- 
->>>>>>>>> To unsubscribe from this list: send the line "unsubscribe 
->>>>>>>>> ceph-devel"
->>>>>>>>> in
->>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>> More majordomo info at  
->>>>>>>>> http://vger.kernel.org/majordomo-info.html
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>                 
->>>>>>>>
->>>>>>>>
->>>>>>>>               
->>>>>>> -- 
->>>>>>> Andreas Bluemle                     
->>>>>>> mailto:Andreas.Bluemle@itxperts.de
->>>>>>> ITXperts GmbH                       http://www.itxperts.de
->>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
->>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
->>>>>>>
->>>>>>> Company details: http://www.itxperts.de/imprint.htm
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>>             
->>>>> -- 
->>>>> To unsubscribe from this list: send the line "unsubscribe 
->>>>> ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>         
 >>>>
+>>>> Unfortunately I have completely disabled logs during test, so there
+>>>> are no suggestion of assert_fail. The main problem was revealed -
+>>>> created VMs was pointed to one monitor instead set of three, so there
+>>>> may be some unusual things(btw, crashed mon isn`t one from above, but
+>>>> a neighbor of crashed osds on first node). After IPMI reset node
+>>>> returns back well and cluster behavior seems to be okay - stuck kvm
+>>>> I/O somehow prevented even other module load|unload on this node, so I
+>>>> finally decided to do hard reset. Despite I`m using almost generic
+>>>> wheezy, glibc was updated to 2.15, may be because of this my trace
+>>>> appears first time ever. I`m almost sure that fs does not triggered
+>>>> this crash and mainly suspecting stuck kvm processes. I`ll rerun test
+>>>> with same conditions tomorrow(~500 vms pointed to one mon and very
+>>>> high I/O, but with osd logging).
 >>>>
->>>>       
->>>
->>> -- 
->>> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
->>> ITXperts GmbH                       http://www.itxperts.de
->>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
->>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
->>>
->>> Company details: http://www.itxperts.de/imprint.htm
->>>
->>>     
->>
->>
->>   
->
->
-
-
--- 
-Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-ITXperts GmbH                       http://www.itxperts.de
-Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-
-Company details: http://www.itxperts.de/imprint.htm
-
+>>>>>> #19 0x000000000073148f in FileStore::_do_transaction
+>>>>>> (this=this@entry=0x2cde000, t=..., op_seq=op_seq@entry=429545,
+>>>>>> trans_num=trans_num@entry=0) at os/FileStore.cc:3007
+>>>>>> #20 0x000000000073484e in FileStore::do_transactions (this=0x2cde000,
+>>>>>> tls=..., op_seq=429545) at os/FileStore.cc:2436
+>>>>>> #21 0x000000000070c680 in FileStore::_do_op (this=0x2cde000,
+>>>>>> osr=<optimized out>) at os/FileStore.cc:2259
+>>>>>> #22 0x000000000083ce01 in ThreadPool::worker (this=0x2cde828) at
+>>>>>> common/WorkQueue.cc:54
+>>>>>> #23 0x00000000006823ed in ThreadPool::WorkThread::entry
+>>>>>> (this=<optimized out>) at ./common/WorkQueue.h:126
+>>>>>> #24 0x00007fc37e3eee9a in start_thread () from
+>>>>>> /lib/x86_64-linux-gnu/libpthread.so.0
+>>>>>> #25 0x00007fc37c9864cd in clone () from /lib/x86_64-linux-gnu/libc.so.6
+>>>>>> #26 0x0000000000000000 in ?? ()
+>>>>>>
+>>>>>> mon bt was exactly the same as in http://tracker.newdream.net/issues/2762
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>
+>>>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
