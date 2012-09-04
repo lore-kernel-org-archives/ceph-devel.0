@@ -1,49 +1,22 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RADOS gateway and the S3 compatibility.
-Date: Mon, 3 Sep 2012 21:08:21 -0700
-Message-ID: <CAC-hyiGqcK5WhCJKPxnnJ67VNUFYbxq=-W_b60wNv+LeGZHQqw@mail.gmail.com>
-References: <loom.20120903T104858-555@post.gmane.org>
-	<CAC-hyiESAAtXu2woKQRN6K0U=8PV8LRkMYAozMcD_yq9W9PqUA@mail.gmail.com>
-	<loom.20120903T145424-592@post.gmane.org>
-	<504473FC02000099000E9622@collaborate.seakr.com>
-	<loom.20120904T055945-878@post.gmane.org>
+From: =?iso-8859-2?Q?Skowron_S=B3awomir?= <slawomir.skowron@grupaonet.pl>
+Subject: Inject configuration change into cluster
+Date: Tue, 4 Sep 2012 07:04:29 +0200
+Message-ID: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:58551 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750778Ab2IDEIW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 00:08:22 -0400
-Received: by bkwj10 with SMTP id j10so2429741bkw.19
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Sep 2012 21:08:21 -0700 (PDT)
-In-Reply-To: <loom.20120904T055945-878@post.gmane.org>
+Received: from onsmg01.portal.onet.pl ([213.180.147.237]:58951 "EHLO
+	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751172Ab2IDFJh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 01:09:37 -0400
+Content-Language: pl-PL
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu eppa <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 3, 2012 at 9:02 PM, ramu eppa <ramu.freesystems@gmail.com> wrote:
-> Hi,
->
-> This is the FastcgiExternalServer status in apache2,
->
-> grep -RIs "FastCgiExternalServer" /etc/apache2
->
-> /etc/apache2/httpd.conf:FastCgiExternalServer /var/www/s3gw.fcgi -socket
-> /tmp/radosgw.sock
+Is there any way now, to inject new configuration change, without restarting daemons ??
 
-Remove this one (/etc/apache2/httpd.conf).
+Regards
 
-> /etc/apache2/sites-available/rgw.conf:FastCgiExternalServer /var/www/s3gw.fcgi -
-> socket /tmp/radosgw.sock
-> /etc/apache2/sites-enabled/rgw.conf:FastCgiExternalServer /var/www/s3gw.fcgi -
-> socket /tmp/radosgw.sock
->
->
-> Thanks,
-> Ramu.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Slawomir Skowron
