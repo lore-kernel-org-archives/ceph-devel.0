@@ -1,36 +1,71 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: radosgw keeps dying
-Date: Tue, 4 Sep 2012 09:07:59 -0700
-Message-ID: <CADvuQRE5SPyiboP2W3mOx9S7u_=vOpukrobPeJBmna4sHZKP1A@mail.gmail.com>
-References: <50430C8602000099000E95E5@collaborate.seakr.com>
+From: Andrew Thompson <andrewkt@aktzero.com>
+Subject: Re: Very unbalanced storage
+Date: Tue, 04 Sep 2012 12:19:07 -0400
+Message-ID: <504629FB.30801@aktzero.com>
+References: <50409BDC.5010006@gmail.com> <alpine.DEB.2.00.1208310904570.1531@cobra.newdream.net> <5041785E.3040707@gmail.com> <alpine.DEB.2.00.1208312000160.27708@cobra.newdream.net> <5041B204.7000008@aktzero.com> <CADvuQRGGE9hcqO+NevwTdj97hmUe2eCPCO6mBT5B-oon0zaODw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:41244 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751102Ab2IDQIU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 12:08:20 -0400
-Received: by yenl14 with SMTP id l14so1270754yen.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 09:08:20 -0700 (PDT)
-In-Reply-To: <50430C8602000099000E95E5@collaborate.seakr.com>
+Received: from mx2b.cologlobal.com ([67.22.138.240]:55284 "EHLO
+	mx2.cologlobal.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757135Ab2IDQhx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 12:37:53 -0400
+Received: from mail3.hspheredns.com ([208.77.157.24])
+	by mx2.cologlobal.com with esmtps (TLSv1:DHE-RSA-AES256-SHA:256)
+	(Exim 4.80)
+	(envelope-from <andrewkt@aktzero.com>)
+	id 1T8vqL-0007TH-Kj
+	for ceph-devel@vger.kernel.org; Tue, 04 Sep 2012 12:19:28 -0400
+In-Reply-To: <CADvuQRGGE9hcqO+NevwTdj97hmUe2eCPCO6mBT5B-oon0zaODw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Couchman <Nick.Couchman@seakr.com>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sun, Sep 2, 2012 at 6:36 AM, Nick Couchman <Nick.Couchman@seakr.com> wrote:
-> One additional piece of info...I did find the "-d" flag (documented in the radosgw-admin man page, but not in the radosgw man page) that keeps the daemon in the foreground and prints messages to stderr.  When I use this flag I get the following:
-> [root@desktop-ceph ~]# radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway -d
-> 2012-09-02 07:35:27.495864 423d6940 -1 Initialization timeout, failed to initialize
+On 9/4/2012 11:59 AM, Tommi Virtanen wrote:
+> On Fri, Aug 31, 2012 at 11:58 PM, Andrew Thompson <andrewkt@aktzero.com> wrote:
+>> Looking at old archives, I found this thread which shows that to mount a
+>> pool as cephfs, it needs to be added to mds:
+>>
+>> http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/5685
+>>
+>> I started a `rados cppool data tempstore` a couple hours ago. When it
+>> finishes, will I need to remove the current pool from mds somehow(other than
+>> just deleting the pool)?
+>>
+>> Is `ceph mds add_data_pool <poolname>` still required? (It's not listed in
+>> `ceph --help`.)
+> If the pool you are trying to grow pg_num for really is a CephFS data
+> pool, I fear a "rados cppool" is nowhere near enough to perform a
+> migration. My understanding is that each of the inodes stored in
+> cephfs/on ceph-mds'es knows what pool the file data resides in; you
+> shoveling the objects into another pool with "rados cppool" doesn't
+> change these pointers, removing the old pool will just break the
+> filesystem.
 >
-> I'm not sure where it's timing out, though, what it's trying to contact that it cannot.  Any additional help in getting this going would be greatly appreciated!
+> Before we go too far down this road: is your problem pool *really*
+> being use as a cephfs data pool? Based on how it's not named "data"
+> and you're just now asking about "ceph mds add_data_pool", it seems
+> that's not likely..
 
-Try putting in your ceph.conf:
+Well, I guess it's time to wipe this cluster and start over.
 
-[client.radosgw.gateway]
-debug ms = 1
+Yes, it was my `data` pool I was trying to grow. After renaming and 
+removing the original data pool, I can `ls` my folders/files, but not 
+access them.
 
-and see if that gives you more information.
+I attempted a tar backup beforehand, so unless it flaked out, I should 
+be able to recover data.
 
-The message you are seeing is because this chunk of code takes too long:
-https://github.com/ceph/ceph/blob/v0.48.1argonaut/src/rgw/rgw_main.cc#L401-431
+I was concerned the small number of PGs created by default by mkcephfs 
+would be an issue, so I was trying to up it a bit. I'm not going to have 
+100+ OSDs or petabytes of data. I just want a relatively safe place to 
+store my files that I can easily extend as needed.
+
+So far, I'm 0 and 5... I keep blowing up the filesystem, one way or another.
+
+-- 
+Andrew Thompson
+http://aktzero.com/
+
