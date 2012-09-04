@@ -1,25 +1,25 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
 Subject: Re: [PATCH] rbd: rename block_name -> object_prefix
-Date: Tue, 04 Sep 2012 13:57:42 -0700
-Message-ID: <50466B46.1040000@inktank.com>
+Date: Tue, 04 Sep 2012 13:59:54 -0700
+Message-ID: <50466BCA.1040508@inktank.com>
 References: <504643B7.1060507@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:42951 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48585 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757043Ab2IDU5p (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 16:57:45 -0400
-Received: by pbbrr13 with SMTP id rr13so10075210pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 13:57:45 -0700 (PDT)
+	with ESMTP id S1757621Ab2IDU77 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Sep 2012 16:59:59 -0400
+Received: by pbbrr13 with SMTP id rr13so10077803pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 13:59:59 -0700 (PDT)
 In-Reply-To: <504643B7.1060507@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
 On 09/04/2012 11:08 AM, Alex Elder wrote:
 > In the on-disk image header structure there is a field "block_name"
@@ -71,4 +71,3 @@ On 09/04/2012 11:08 AM, Alex Elder wrote:
 >   	char version[8];
 >   	struct {
 >
-
