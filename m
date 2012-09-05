@@ -1,183 +1,57 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: [PATCH] docs: Add CloudStack documentation
-Date: Wed, 05 Sep 2012 17:28:46 +0200
-Message-ID: <50476FAE.8030107@widodh.nl>
-References: <1344462671-21848-1-git-send-email-wido@widodh.nl> <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: Initial rest-bench execution failure
+Date: Wed, 05 Sep 2012 16:41:34 +0100
+Message-ID: <504772AE.2070403@ubuntu.com>
+References: <50473D4F.4010903@ubuntu.com> <CAC-hyiEicrcTCK9qtRAKkkM4Pc6A7dgHh777VFCTz7Wn3jfs1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:35667 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753187Ab2IEP2t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 11:28:49 -0400
-In-Reply-To: <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:38724 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753085Ab2IEPlh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 11:41:37 -0400
+In-Reply-To: <CAC-hyiEicrcTCK9qtRAKkkM4Pc6A7dgHh777VFCTz7Wn3jfs1w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Calvin Morrow <calvin.morrow@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 09/05/2012 05:21 PM, Calvin Morrow wrote:
-> I saw the limitations section references only being able to configure
-> a single monitor.  Some followup questions for someone interested in
-> using RBD with Cloudstack 4:
->
-> Is it that you can only specify a single monitor to connect to within
-> Cloudstack 4 (but can still have a 3 monitor configuration) ... or
-> must you only have a single monitor for some reason?
->
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-You can only specify one monitor in CloudStack, but your cluster can 
-have multiple.
+On 05/09/12 15:38, Yehuda Sadeh wrote:
+>>> Any ideas?  It looks like it might be a bug in libs3 as this is
+>>> where the ConnectionRefused return code status is set.
+>>> 
+> Sounds like a short timeout on the bucket creation operation, might
+> be a libs3 configurable. The first time it takes a bit longer (2
+> seconds in this example) as it needs to create some initial pools
+> for rgw to operate.
 
-This is due to the internals of CloudStack. It stores storage pools in a 
-URI format, like: rbd://admin:secret@1.2.3.4/rbd
+Sounds probably - I'll have a poke and see if I can increase that
+timeout then.
 
-In that format there is no way of storing multiple monitors.
+- -- 
+James Page
+Ubuntu Core Developer
+Debian Maintainer
+james.page@ubuntu.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://www.enigmail.net/
 
-> If you have a ceph.conf on the kvm nodes with more monitors, will it
-> pick up on the additional monitors?
->
-
-That is a good question, I'm not sure, but I wouldn't recommend it. It 
-could confuse you.
-
-With CloudStack two components are involved:
-* libvirt with a storage pool
-* Qemu connecting to RBD
-
-Both could read the ceph.conf since librbd does it, but I don't know if 
-it will pick up any additional monitors.
-
-> Is it possible to use a "floating" ip address resource in a pacemaker
-> configuration for the CloudStack "monitor" IP address?  Is there any
-> other way around a single-monitor point of failure?
->
-
-Your Virtual Machines will not stop functioning if that monitor dies. As 
-soon as librbd connects it receives the full monitor map and it functions.
-
-You won't be able to start instances or do any RBD operations as long as 
-that monitor is down.
-
-I don't know if you can use VRRP for a monitor, but it wouldn't put all 
-the effort in it.
-
-It's on my roadmap to implement RBD layering in a upcoming CloudStack 
-release, since the whole storage layer is getting a make-over.
-
-This should enable me to also tune caching settings per pool and 
-probably sqeeuze in a way to use multiple monitors as well.
-
-I'm aiming for CloudStack 4.1 or 4.2 for this to be implemented.
-
-> Thanks for your hard work and any guidance you can provide!
->
-
-You're welcome!
-
-Wido
-
-> Calvin
->
-> On Wed, Aug 8, 2012 at 3:51 PM, Wido den Hollander <wido@widodh.nl> wrote:
->>
->> The basic documentation about how you can use RBD with CloudStack
->>
->> Signed-off-by: Wido den Hollander <wido@widodh.nl>
->> ---
->>   doc/rbd/rbd-cloudstack.rst |   49
->> ++++++++++++++++++++++++++++++++++++++++++++
->>   doc/rbd/rbd.rst            |    2 +-
->>   2 files changed, 50 insertions(+), 1 deletion(-)
->>   create mode 100644 doc/rbd/rbd-cloudstack.rst
->>
->> diff --git a/doc/rbd/rbd-cloudstack.rst b/doc/rbd/rbd-cloudstack.rst
->> new file mode 100644
->> index 0000000..04e1a7c
->> --- /dev/null
->> +++ b/doc/rbd/rbd-cloudstack.rst
->> @@ -0,0 +1,49 @@
->> +===================
->> + RBD and Apache CloudStack
->> +===================
->> +You can use RBD to run instances on in Apache CloudStack.
->> +
->> +This can be done by adding a RBD pool as Primary Storage.
->> +
->> +There are a couple of prerequisites:
->> +* You need to CloudStack 4.0 or higher
->> +* Qemu on the Hypervisor has to be compiled with RBD enabled
->> +* The libvirt version on the Hypervisor has to be at least 0.10 with RBD
->> enabled
->> +
->> +Make sure you meet this requirements before installing the CloudStack
->> Agent on the Hypervisor(s)!
->> +
->> +.. important:: To use RBD with CloudStack, you must have a running Ceph
->> cluster!
->> +
->> +Limitations
->> +-------------
->> +Running instances from RBD has a couple of limitations:
->> +
->> +* An additional NFS Primary Storage pool is required for running System
->> VM's
->> +* Snapshotting RBD volumes is not possible (at this moment)
->> +* Only one monitor can be configured
->> +
->> +Add Hypervisor
->> +-------------
->> +Please follow the official CloudStack documentation how to do this.
->> +
->> +There is no special way of adding a Hypervisor when using RBD, nor is any
->> configuration needed on the hypervisor.
->> +
->> +Add RBD Primary Storage
->> +-------------
->> +Once the hypervisor has been added, log on to the CloudStack UI.
->> +
->> +* Infrastructure
->> +* Primary Storage
->> +* "Add Primary Storage"
->> +* Select "Protocol" RBD
->> +* Fill in your cluster information (cephx is supported)
->> +* Optionally add the tag 'rbd'
->> +
->> +Now you should be able to deploy instances on RBD.
->> +
->> +RBD Disk Offering
->> +-------------
->> +Create a special "Disk Offering" which needs to match the tag 'rbd' so
->> you can make sure the StoragePoolAllocator
->> +chooses the RBD pool when searching for a suiteable storage pool.
->> +
->> +Since there is also a NFS storage pool it's possible that instances get
->> deployed on NFS instead of RBD.
->> diff --git a/doc/rbd/rbd.rst b/doc/rbd/rbd.rst
->> index af1682f..6fd1999 100644
->> --- a/doc/rbd/rbd.rst
->> +++ b/doc/rbd/rbd.rst
->> @@ -31,7 +31,7 @@ the Ceph FS filesystem, and RADOS block devices
->> simultaneously.
->>          QEMU and RBD <qemu-rbd>
->>          libvirt <libvirt>
->>          RBD and OpenStack <rbd-openstack>
->> -
->> +       RBD and CloudStack <rbd-cloudstack>
->>
->>
->>
->> --
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+iQIcBAEBCAAGBQJQR3KuAAoJEL/srsug59jDct8QAJDSvEIBO1+LkSQJe3Xzj2Ao
+PUjnh6azFoNYLKPpmbiZLRIBuudCjFh4r5IG3K6/3vTcNHKG8rSiz6NCLThGctPD
+Hwsno45VatOWfdYzrAAyb7zZZ5IbgFqUe5rySaX45fB8hXlsQ3kPxpbW0HYXd40E
+gY8hhrJbhnYjsHcItoQ8R95IVxyXsfb2vxeEfTJLF8iP+/PTIbm92XHngG3WBiga
+hyHHDP/VVOwG0VSyV/vZDsdph6vDm0RHEA5hczJp3AF60QrmpWsB1pp9OihBo255
+xVC/AUS9USnQIfDEhjertZ8GtT50ng452jYPKc+tCYL5tyT588wX4eAzhWPoy2py
+cZpCuKg2cs/r9NbOWWRrOJZK3QGeyqqCwJrPqT18I3OSniQ01ZSsI5uPpDJqU8fC
+UMXrzVtdBc9Cqt88VpHJgcFnKx6Vf95OHOARMWRZwq+5Tr4nobsXPTqTxI06JoCL
+aPiQq3hzd39HHgNqyTYO4mUdHMSKd/ozT8jsck9H421WNaKrL1ZVospLIEYDqGNU
+bPhX/bQA1tqujnvnDq/a4DRQPA52zYfeNGayI3F7NHKwyRy2NV1FNs80yGi2oLq5
+4EXW/tuYSK06lhai/ApMND4sQCaLmkLO8ClWCcxuw6oFCj95OMO+JOn9WpUjoiaA
+9WT1zF2lIEiSsBKDeKPb
+=icp5
+-----END PGP SIGNATURE-----
