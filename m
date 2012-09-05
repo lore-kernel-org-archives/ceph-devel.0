@@ -1,257 +1,87 @@
-From: Steven Whitehouse <swhiteho@redhat.com>
-Subject: Re: [PATCH] fs: encode_fh: return FILEID_INVALID if invalid
- fid_type
-Date: Wed, 05 Sep 2012 12:22:57 +0100
-Message-ID: <1346844177.2799.82.camel@menhir>
-References: <1346431601-3477-1-git-send-email-linkinjeon@gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Port no For data Transfer between OSDs
+Date: Wed, 05 Sep 2012 13:50:58 +0200
+Message-ID: <50473CA2.3050806@widodh.nl>
+References: <CAGfy=6mz04CoytQdt4Zj-RdOqU+0XEv3eHAuPQ1E-Pu=6gAa+g@mail.gmail.com> <50471810.6000608@widodh.nl> <CAGfy=6koSdDSVSiYMwwm5Fm2JeQSCP8Pm4S8UAfSna45Gp0Ntw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36215 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751876Ab2IELYe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 5 Sep 2012 07:24:34 -0400
-In-Reply-To: <1346431601-3477-1-git-send-email-linkinjeon@gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:47049 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751318Ab2IELvD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 07:51:03 -0400
+In-Reply-To: <CAGfy=6koSdDSVSiYMwwm5Fm2JeQSCP8Pm4S8UAfSna45Gp0Ntw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: bfields@fieldses.org, akpm@linux-foundation.org, viro@zeniv.linux.org.uk, chris.mason@fusionio.com, sage@inktank.com, miklos@szeredi.hu, konishi.ryusuke@lab.ntt.co.jp, mfasheh@suse.com, jlbec@ejvilplan.org, jack@suse.cz, bpm@sgi.com, elder@kernel.org, linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-nilfs@vger.kernel.org, reiserfs-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Vivek Trivedi <vtrivedi018@gmail.com>
+To: hemant surale <hemant.surale@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On 09/05/2012 01:20 PM, hemant surale wrote:
+> Hi Wido , Community ,
+>
+> if we use number =2
+> in cmd as follows
+> "ceph osd pool set <poolname>  size <#no>"
+>
+> does it means for perticular Object we have 2 replica Or total 2
+> copies in cluster?
+>
 
-On Fri, 2012-08-31 at 12:46 -0400, Namjae Jeon wrote:
-> This patch is a follow up on below patch:
-> 
-> [PATCH] exportfs: add FILEID_INVALID to indicate invalid fid_type
-> https://patchwork.kernel.org/patch/1385131/
-> 
-> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
-> Signed-off-by: Vivek Trivedi <vtrivedi018@gmail.com>
-Acked-by: Steven Whitehouse <swhiteho@redhat.com>
+That will set replication to "2". That means, every object stored in the 
+cluster will be stored twice.
 
-for the gfs2 bits,
+It is NOT object + 2, no it's object * 2.
 
-Steve.
+Wido
 
-> ---
->  fs/btrfs/export.c   |    4 ++--
->  fs/ceph/export.c    |    4 ++--
->  fs/fuse/inode.c     |    2 +-
->  fs/gfs2/export.c    |    4 ++--
->  fs/isofs/export.c   |    4 ++--
->  fs/nilfs2/namei.c   |    4 ++--
->  fs/ocfs2/export.c   |    4 ++--
->  fs/reiserfs/inode.c |    4 ++--
->  fs/udf/namei.c      |    4 ++--
->  fs/xfs/xfs_export.c |    4 ++--
->  mm/cleancache.c     |    2 +-
->  mm/shmem.c          |    2 +-
->  12 files changed, 21 insertions(+), 21 deletions(-)
-> 
-> diff --git a/fs/btrfs/export.c b/fs/btrfs/export.c
-> index 614f34a..81ee29e 100644
-> --- a/fs/btrfs/export.c
-> +++ b/fs/btrfs/export.c
-> @@ -22,10 +22,10 @@ static int btrfs_encode_fh(struct inode *inode, u32 *fh, int *max_len,
->  
->  	if (parent && (len < BTRFS_FID_SIZE_CONNECTABLE)) {
->  		*max_len = BTRFS_FID_SIZE_CONNECTABLE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	} else if (len < BTRFS_FID_SIZE_NON_CONNECTABLE) {
->  		*max_len = BTRFS_FID_SIZE_NON_CONNECTABLE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	len  = BTRFS_FID_SIZE_NON_CONNECTABLE;
-> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> index 8e1b60e..98bde89 100644
-> --- a/fs/ceph/export.c
-> +++ b/fs/ceph/export.c
-> @@ -79,7 +79,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
->  		if (parent_inode) {
->  			/* nfsd wants connectable */
->  			*max_len = connected_handle_length;
-> -			type = 255;
-> +			type = FILEID_INVALID;
->  		} else {
->  			dout("encode_fh %p\n", dentry);
->  			fh->ino = ceph_ino(inode);
-> @@ -88,7 +88,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
->  		}
->  	} else {
->  		*max_len = handle_length;
-> -		type = 255;
-> +		type = FILEID_INVALID;
->  	}
->  	return type;
->  }
-> diff --git a/fs/fuse/inode.c b/fs/fuse/inode.c
-> index 2690a76..b787a6f 100644
-> --- a/fs/fuse/inode.c
-> +++ b/fs/fuse/inode.c
-> @@ -672,7 +672,7 @@ static int fuse_encode_fh(struct inode *inode, u32 *fh, int *max_len,
->  
->  	if (*max_len < len) {
->  		*max_len = len;
-> -		return  255;
-> +		return  FILEID_INVALID;
->  	}
->  
->  	nodeid = get_fuse_inode(inode)->nodeid;
-> diff --git a/fs/gfs2/export.c b/fs/gfs2/export.c
-> index e8ed6d4..f7a8092 100644
-> --- a/fs/gfs2/export.c
-> +++ b/fs/gfs2/export.c
-> @@ -37,10 +37,10 @@ static int gfs2_encode_fh(struct inode *inode, __u32 *p, int *len,
->  
->  	if (parent && (*len < GFS2_LARGE_FH_SIZE)) {
->  		*len = GFS2_LARGE_FH_SIZE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	} else if (*len < GFS2_SMALL_FH_SIZE) {
->  		*len = GFS2_SMALL_FH_SIZE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	fh[0] = cpu_to_be32(ip->i_no_formal_ino >> 32);
-> diff --git a/fs/isofs/export.c b/fs/isofs/export.c
-> index 1d38044..5e693b3 100644
-> --- a/fs/isofs/export.c
-> +++ b/fs/isofs/export.c
-> @@ -125,10 +125,10 @@ isofs_export_encode_fh(struct inode *inode,
->  	 */
->  	if (parent && (len < 5)) {
->  		*max_len = 5;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	} else if (len < 3) {
->  		*max_len = 3;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	len = 3;
-> diff --git a/fs/nilfs2/namei.c b/fs/nilfs2/namei.c
-> index 1d0c0b8..9de78f0 100644
-> --- a/fs/nilfs2/namei.c
-> +++ b/fs/nilfs2/namei.c
-> @@ -517,11 +517,11 @@ static int nilfs_encode_fh(struct inode *inode, __u32 *fh, int *lenp,
->  
->  	if (parent && *lenp < NILFS_FID_SIZE_CONNECTABLE) {
->  		*lenp = NILFS_FID_SIZE_CONNECTABLE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  	if (*lenp < NILFS_FID_SIZE_NON_CONNECTABLE) {
->  		*lenp = NILFS_FID_SIZE_NON_CONNECTABLE;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	fid->cno = root->cno;
-> diff --git a/fs/ocfs2/export.c b/fs/ocfs2/export.c
-> index 322216a..2965116 100644
-> --- a/fs/ocfs2/export.c
-> +++ b/fs/ocfs2/export.c
-> @@ -195,11 +195,11 @@ static int ocfs2_encode_fh(struct inode *inode, u32 *fh_in, int *max_len,
->  
->  	if (parent && (len < 6)) {
->  		*max_len = 6;
-> -		type = 255;
-> +		type = FILEID_INVALID;
->  		goto bail;
->  	} else if (len < 3) {
->  		*max_len = 3;
-> -		type = 255;
-> +		type = FILEID_INVALID;
->  		goto bail;
->  	}
->  
-> diff --git a/fs/reiserfs/inode.c b/fs/reiserfs/inode.c
-> index 855da58..1a212ed 100644
-> --- a/fs/reiserfs/inode.c
-> +++ b/fs/reiserfs/inode.c
-> @@ -1599,10 +1599,10 @@ int reiserfs_encode_fh(struct inode *inode, __u32 * data, int *lenp,
->  
->  	if (parent && (maxlen < 5)) {
->  		*lenp = 5;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	} else if (maxlen < 3) {
->  		*lenp = 3;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	data[0] = inode->i_ino;
-> diff --git a/fs/udf/namei.c b/fs/udf/namei.c
-> index 95fee27..102c072 100644
-> --- a/fs/udf/namei.c
-> +++ b/fs/udf/namei.c
-> @@ -1270,10 +1270,10 @@ static int udf_encode_fh(struct inode *inode, __u32 *fh, int *lenp,
->  
->  	if (parent && (len < 5)) {
->  		*lenp = 5;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	} else if (len < 3) {
->  		*lenp = 3;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	*lenp = 3;
-> diff --git a/fs/xfs/xfs_export.c b/fs/xfs/xfs_export.c
-> index 4267922..a5a4e52 100644
-> --- a/fs/xfs/xfs_export.c
-> +++ b/fs/xfs/xfs_export.c
-> @@ -47,7 +47,7 @@ static int xfs_fileid_length(int fileid_type)
->  	case FILEID_INO32_GEN_PARENT | XFS_FILEID_TYPE_64FLAG:
->  		return 6;
->  	}
-> -	return 255; /* invalid */
-> +	return FILEID_INVALID; /* invalid */
->  }
->  
->  STATIC int
-> @@ -89,7 +89,7 @@ xfs_fs_encode_fh(
->  	len = xfs_fileid_length(fileid_type);
->  	if (*max_len < len) {
->  		*max_len = len;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  	*max_len = len;
->  
-> diff --git a/mm/cleancache.c b/mm/cleancache.c
-> index 32e6f41..d76ba74 100644
-> --- a/mm/cleancache.c
-> +++ b/mm/cleancache.c
-> @@ -89,7 +89,7 @@ static int cleancache_get_key(struct inode *inode,
->  		fhfn = sb->s_export_op->encode_fh;
->  		if  (fhfn) {
->  			len = (*fhfn)(inode, &key->u.fh[0], &maxlen, NULL);
-> -			if (len <= 0 || len == 255)
-> +			if (len <= FILEID_ROOT || len == FILEID_INVALID)
->  				return -1;
->  			if (maxlen > CLEANCACHE_KEY_MAX)
->  				return -1;
-> diff --git a/mm/shmem.c b/mm/shmem.c
-> index 1d04904..5cbae30 100644
-> --- a/mm/shmem.c
-> +++ b/mm/shmem.c
-> @@ -2386,7 +2386,7 @@ static int shmem_encode_fh(struct inode *inode, __u32 *fh, int *len,
->  {
->  	if (*len < 3) {
->  		*len = 3;
-> -		return 255;
-> +		return FILEID_INVALID;
->  	}
->  
->  	if (inode_unhashed(inode)) {
-
+>
+> Regards,
+> Hemant Surale.
+>
+> On Wed, Sep 5, 2012 at 2:44 PM, Wido den Hollander <wido@widodh.nl> wrote:
+>> On 09/05/2012 07:30 AM, hemant surale wrote:
+>>>
+>>> Hi Community ,
+>>>               I want to trace the data transfer rates occurring between
+>>> osds while injecting data into ceph cluster. Can you please tell me
+>>> what ports should I monitor or keep track of?
+>>>               Thanks !
+>>
+>>
+>> OSDs start binding from port 6800 and counting up from there.
+>>
+>> For example, a machine with 4 OSDs running:
+>>
+>> root@atom0:~# netstat -nap|grep LISTEN|grep -E ^tcp|grep ceph-osd
+>> tcp6       0      0 :::6800                 :::* LISTEN      24329/ceph-osd
+>> tcp6       0      0 :::6801                 :::* LISTEN      24329/ceph-osd
+>> tcp6       0      0 :::6802                 :::* LISTEN      24329/ceph-osd
+>> tcp6       0      0 :::6803                 :::* LISTEN      24596/ceph-osd
+>> tcp6       0      0 :::6804                 :::* LISTEN      24596/ceph-osd
+>> tcp6       0      0 :::6805                 :::* LISTEN      24596/ceph-osd
+>> tcp6       0      0 :::6806                 :::* LISTEN      25316/ceph-osd
+>> tcp6       0      0 :::6807                 :::* LISTEN      25316/ceph-osd
+>> tcp6       0      0 :::6808                 :::* LISTEN      25316/ceph-osd
+>> tcp6       0      0 :::6809                 :::* LISTEN      25839/ceph-osd
+>> tcp6       0      0 :::6810                 :::* LISTEN      25839/ceph-osd
+>> tcp6       0      0 :::6811                 :::* LISTEN      25839/ceph-osd
+>> root@atom0:~#
+>>
+>> Wido
+>>
+>>>
+>>> Regards,
+>>> Hemant Surale.
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
