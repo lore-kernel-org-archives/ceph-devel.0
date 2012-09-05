@@ -1,81 +1,56 @@
-From: =?utf-8?B?U2tvd3JvbiBTxYJhd29taXI=?=
-	<slawomir.skowron@grupaonet.pl>
-Subject: Re: Inject configuration change into cluster
-Date: Wed, 5 Sep 2012 21:35:26 +0200
-Message-ID: <58915F57-D1DA-4BBE-A205-A5063DDCD789@grupaonet.pl>
-References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
- <5045B928.1050706@widodh.nl>
- <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
- <5045CB80.50508@widodh.nl>
- <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
- <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com>
- <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: wip-crush
+Date: Wed, 5 Sep 2012 13:04:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209051303570.14139@cobra.newdream.net>
+References: <alpine.DEB.2.00.1208211807330.12167@cobra.newdream.net> <5034F0B4.3060107@hastexo.com> <C4813C81-696A-4261-A4E7-991C719C0DB2@ornl.gov> <alpine.DEB.2.00.1208220929390.32470@cobra.newdream.net> <CAPYLRzjmcOuSkxG1iO8GqEZPeLchKwKP94KizB7mXWzAU2a57w@mail.gmail.com>
+ <alpine.DEB.2.00.1208221047460.29719@cobra.newdream.net> <alpine.DEB.2.00.1208311331000.2525@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from onsmg01.portal.onet.pl ([213.180.147.237]:56281 "EHLO
-	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754515Ab2IETfe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 15:35:34 -0400
-In-Reply-To: <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net>
-Content-Language: pl-PL
+Received: from cobra.newdream.net ([66.33.216.30]:49479 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759283Ab2IEUEd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 16:04:33 -0400
+In-Reply-To: <alpine.DEB.2.00.1208311331000.2525@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: =?utf-8?B?U8WCYXdvbWlyIFNrb3dyb24=?= <szibis@gmail.com>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Florian Haas <florian@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-RG5pYSA1IHdyeiAyMDEyIG8gZ29kei4gMTc6NTMgIlNhZ2UgV2VpbCIgPHNhZ2VAaW5rdGFuay5j
-b20+IG5hcGlzYcWCKGEpOg0KDQo+IE9uIFdlZCwgNSBTZXAgMjAxMiwgUz9hd29taXIgU2tvd3Jv
-biB3cm90ZToNCj4+IE9rLCBidXQgaW4gZ2xvYmFsIGNhc2UsIHdoZW4gaSB1c2UsIGEgY2hlZi9w
-dXBwZXQgb3IgYW55IG90aGVyLCBpIHdpc2gNCj4+IHRvIGNoYW5nZSBjb25maWd1cmF0aW9uIGlu
-IGNlcGguY29uZiwgYW5kIHJlbG9hZCBkYWVtb24gdG8gZ2V0IG5ldw0KPj4gY29uZmlndXJhdGlv
-biBjaGFuZ2VzIGZyb20gY2VwaC5jb25mLCB0aGlzIGZlYXR1cmUgd291bGQgYmUgdmVyeQ0KPj4g
-aGVscGZ1bCBpbiBjZXBoIGFkbWluaXN0cmF0aW9uLg0KPj4gDQo+PiBJbmplY3QgaXMgb2ssIGZv
-ciB0ZXN0aW5nLCBvciBkZWJ1Z2luZy4NCj4gDQo+IE9wZW5lZCBodHRwOi8vdHJhY2tlci5uZXdk
-cmVhbS5uZXQvaXNzdWVzLzMwODYuICBUaGVyZSBpcyBhbHJlYWR5IGFuIGlzc3VlIA0KPiBvcGVu
-IGZvciByZWxvYWRpbmcgdGhlIGNvbmZpZyBmaWxlLCANCj4gaHR0cDovL3RyYWNrZXIubmV3ZHJl
-YW0ubmV0L2lzc3Vlcy8yNDU5Lg0KPiANCg0KVGhhbmtzLiBUaGlzIGlzIHdoYXQgaSBtZWFuLiAN
-CklzIHRoaXMgZmVhdHVyZSBoYXZlIGEgY2hhbmNlLCB0byBiZSBpbXBsZW1lbnRlZCBpbiBuZXh0
-IG1vbnRocyA/Pw0KDQo+IHNhZ2UNCj4gDQo+PiANCj4+IE9uIFR1ZSwgU2VwIDQsIDIwMTIgYXQg
-NTozNCBQTSwgU2FnZSBXZWlsIDxzYWdlQGlua3RhbmsuY29tPiB3cm90ZToNCj4+PiBPbiBUdWUs
-IDQgU2VwIDIwMTIsIFdpZG8gZGVuIEhvbGxhbmRlciB3cm90ZToNCj4+Pj4gT24gMDkvMDQvMjAx
-MiAxMDozMCBBTSwgU2tvd3JvbiBTP2F3b21pciB3cm90ZToNCj4+Pj4+IE9rLCB0aGFua3MuDQo+
-Pj4+PiANCj4+Pj4+IE51bWJlciBvZiB3b3JrZXJzIHVzZWQgZm9yIHJlY292ZXIsIG9yIG51bWVy
-IG9mIGRpc2sgdGhyZWFkcy4NCj4+Pj4+IA0KPj4+PiANCj4+Pj4gSSB0aGluayB0aG9zZSBjYW4g
-YmUgY2hhbmdlZCB3aGlsZSB0aGUgT1NEIGlzIHJ1bm5pbmcuIFlvdSBjb3VsZCBhbHdheXMgZ2l2
-ZQ0KPj4+PiBpdCBhIHRyeS4NCj4+PiANCj4+PiBUaGUgdGhyZWFkIHBvb2wgc2l6ZXMgY2FuJ3Qg
-Y3VycmVudGx5IGJlIGFkanVzdGVkLCB1bmZvcnR1bmF0ZWx5LiAgSXQNCj4+PiB3b3VsZG4ndCBi
-ZSB0b28gZGlmZmljdWx0IHRvIGNoYW5nZSB0aGF0Li4uDQo+Pj4gDQo+Pj4gc2FnZQ0KPj4+IA0K
-Pj4+PiANCj4+Pj4gV2lkbw0KPj4+PiANCj4+Pj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+Pj4+PiBGcm9tOiBXaWRvIGRlbiBIb2xsYW5kZXIgW21haWx0bzp3aWRvQHdpZG9kaC5ubF0N
-Cj4+Pj4+IFNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAwNCwgMjAxMiAxMDoxOCBBTQ0KPj4+Pj4g
-VG86IFNrb3dyb24gUz9hd29taXINCj4+Pj4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zw0KPj4+Pj4gU3ViamVjdDogUmU6IEluamVjdCBjb25maWd1cmF0aW9uIGNoYW5nZSBpbnRvIGNs
-dXN0ZXINCj4+Pj4+IA0KPj4+Pj4gT24gMDkvMDQvMjAxMiAwNzowNCBBTSwgU2tvd3JvbiBTP2F3
-b21pciB3cm90ZToNCj4+Pj4+PiBJcyB0aGVyZSBhbnkgd2F5IG5vdywgdG8gaW5qZWN0IG5ldyBj
-b25maWd1cmF0aW9uIGNoYW5nZSwgd2l0aG91dA0KPj4+Pj4+IHJlc3RhcnRpbmcgZGFlbW9ucyA/
-Pw0KPj4+Pj4+IA0KPj4+Pj4gDQo+Pj4+PiBZZXMsIHlvdSBjYW4gdXNlIHRoZSBpbmplY3Rhcmdz
-IGNvbW1hbmQuDQo+Pj4+PiANCj4+Pj4+ICQgY2VwaCBvc2QgdGVsbCAwIGluamVjdGFyZ3MgJy0t
-ZGVidWctb3NkIDIwJw0KPj4+Pj4gDQo+Pj4+PiBXaGF0IGRvIHlvdSB3YW50IHRvIGNoYW5nZT8g
-Tm90IGV2ZXJ5dGhpbmcgY2FuIGJlIGNoYW5nZWQgd2hpbGUgdGhlIE9TRCBpcw0KPj4+Pj4gcnVu
-bmluZy4NCj4+Pj4+IA0KPj4+Pj4gV2lkbw0KPj4+Pj4gDQo+Pj4+Pj4gUmVnYXJkcw0KPj4+Pj4+
-IA0KPj4+Pj4+IFNsYXdvbWlyIFNrb3dyb24tLQ0KPj4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
-dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+Pj4+
-IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
-cmUgbWFqb3Jkb21vDQo+Pj4+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
-cmRvbW8taW5mby5odG1sDQo+Pj4+Pj4gDQo+Pj4+PiANCj4+Pj4+IE4/Pz8/Pz8/Pz8/Pz8/Pz9y
-Pz8/Pz8/eT8/Pz8/Pz8/P2I/Pz9YPz8/Pz8/P3Y/Pz9ePz8/KT97Lm4/Pz8rPz8/Pz8/Pz8/ej8/
-P116Pz8/e2F5Pz8/ID8/Pz8/LGogPz8/Pz8/Zj8/Pz8/Pz8/P2g/Pz8/Pz8/Pz96Pz8/ID8/P3c/
-Pz8/Pz8/Pz8NCj4+Pj4+ID8/Pz8/Pz8/P2o6K3Y/Pz8/Pz8/Pz93Pz8/aj8/P20/Pz8/Pz8/Pz8/
-Pz8gPz8/Pz8/Pz8/Pz8/elorPz8/Pz8/P2oiPz8/Pz8/IXRtbD0NCj4+Pj4+IA0KPj4+PiANCj4+
-Pj4gLS0NCj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
-InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+Pj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+Pj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+PiANCj4+Pj4g
-DQo+Pj4gLS0NCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
-dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4gDQo+PiANCj4+
-IA0KPj4gLS0gDQo+PiAtLS0tLQ0KPj4gUG96ZHJhd2lhbQ0KPj4gDQo+PiBTP2F3ZWsgInNaaUJp
-cyIgU2tvd3Jvbg0KPj4gDQo+PiANCg==
+On Fri, 31 Aug 2012, Sage Weil wrote:
+> Okay, it's trivial to change 'pool' to 'root' in the default generated 
+> crush map, and update all the docs accordingly.  The problem is that some 
+> stuff built on top of ceph has 'pool=default' in there, including our chef 
+> cookbooks and those that other people are building.
+> 
+> I see a few options:
+> 
+> 1) - Document that pool=default should be used for clusters created 
+>      pre-0.52, and root=default for clusters created after that (at 
+>      http://ceph.com/docs/...).
+>    - Tell new tools to use root=default
+>    - Encourage existing tools to use *both* root=default pool=default (if 
+>      the type is not present, it will be ignored).  They will break on 
+>      newly created clusters with new code, but it will at least happen 
+>      quickly (on cluster creation).
+>    - Make noise in the release notes+announcement.
+
+Okay, #1 it is!  I'll make some more noise when v0.52 is released.  
+Merging this into master.
+
+sage
+
+> 
+> 2) Make 'pool' be silently translated to 'root' (and the other way around) 
+>    if the type is not present.  That way new tools with old clusters will 
+>    work, and new clusters with old automation will work.
+> 
+> Other ideas?  I don't much like #2.
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
