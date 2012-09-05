@@ -1,148 +1,133 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: rbd 0.48 storage support for kvm proxmox distribution available
-Date: Wed, 05 Sep 2012 07:47:27 -0700
-Message-ID: <98d1cf0435798ed2bd11fa95c406766b@hq.newdream.net>
-References: <de08e94f-aa29-4ff7-b3a2-98ead9463886@mailpro>
- <50474704.2000800@widodh.nl>
+From: Calvin Morrow <calvin.morrow@gmail.com>
+Subject: Re: [PATCH] docs: Add CloudStack documentation
+Date: Wed, 5 Sep 2012 09:21:27 -0600
+Message-ID: <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com>
+References: <1344462671-21848-1-git-send-email-wido@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hapkido.dreamhost.com ([66.33.216.122]:36141 "EHLO
-	hapkido.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752686Ab2IEOrA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 10:47:00 -0400
-Received: from pochacco.sd.dreamhost.com (pochacco.sd.dreamhost.com [66.33.195.34])
-	by hapkido.dreamhost.com (Postfix) with ESMTP id 8A17B78310
-	for <ceph-devel@vger.kernel.org>; Wed,  5 Sep 2012 07:47:00 -0700 (PDT)
-In-Reply-To: <50474704.2000800@widodh.nl>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:33995 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340Ab2IEPV2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 11:21:28 -0400
+Received: by obbuo13 with SMTP id uo13so427422obb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 08:21:27 -0700 (PDT)
+In-Reply-To: <1344462671-21848-1-git-send-email-wido@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 05 Sep 2012 14:35:16 +0200, Wido den Hollander <wido@widodh.nl>
-wrote:
-> On 09/05/2012 11:30 AM, Alexandre DERUMIER wrote:
->>>> Proxmox doesn't use libvirt, does it?
->> Yes, we don't use libvirt.
->>
->>>> Any plans to implement the RBD caching?
->>
->> It's already implemented (cache=3Dwriteback), patched qemu-kvm 1.1. =
-(and qemu-kvm 1.2 is coming in the next days)
->>
->> Tunning of cache size can be done with a /etc/ceph.conf file
->>
->=20
-> That is kind of dangerous imho and for a couple of reasons.
->=20
-> For configuring the storage you have /etc/pve/storage.cfg where you
-> can add the RBD pool, configure the monitors and cephx, but for
-> caching you rely in librbd reading ceph.conf?
->=20
-> That is hidden from the user, reading /etc/ceph/ceph.conf will go
-> without your knowledge. I'd opt for passing down all the options to
-> Qemu and being able to run without a ceph.conf
->=20
-> I've ran into the same problems with libvirt and CloudStack. I
-> couldn't figure out why libvirt was still able to connect to a
-> specific cluster until I found out my ceph.conf was still in place.
->=20
-> I also thought it is on the roadmap to not read /etc/ceph/ceph.conf
-> by default with librbd/librados to take away these kind of issues.
+I saw the limitations section references only being able to configure
+a single monitor.  Some followup questions for someone interested in
+using RBD with Cloudstack 4:
 
-I don't think we'll want to change the default behavior (qemu reading
-/etc/ceph/ceph.conf) for backwards compatibility, but I agree that we
-should avoid relying on it in the future.
+Is it that you can only specify a single monitor to connect to within
+Cloudstack 4 (but can still have a 3 monitor configuration) ... or
+must you only have a single monitor for some reason?
 
-Josh
+If you have a ceph.conf on the kvm nodes with more monitors, will it
+pick up on the additional monitors?
 
-> And you would also have this weird situation where the ceph.conf
-> could have a couple of monitor entries and your "storage.cfg", how
-> will that work out?
->=20
-> I would try not to rely on the ceph.conf at all and have Proxmox pass
-> all the configuration options down to Qemu.
->=20
-> Wido
->=20
->>
->>
->> ----- Mail original -----
->>
->> De: "Wido den Hollander" <wido@widodh.nl>
->> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
->> Cc: ceph-devel@vger.kernel.org
->> Envoy=C3=A9: Mercredi 5 Septembre 2012 11:11:27
->> Objet: Re: rbd 0.48 storage support for kvm proxmox distribution ava=
-ilable
->>
->> On 09/05/2012 06:31 AM, Alexandre DERUMIER wrote:
->>> Hi List,
->>>
->>> We have added rbd 0.48 support to the proxmox 2.1 kvm distribution
->>> http://www.proxmox.com/products/proxmox-ve
->>>
->>>
->>> Proxmox setup:
->>>
->>> edit the /etc/pve/storage.cfg and add the configuration (gui creati=
-on is not available yet)
->>>
->>> rbd: mycephcluster
->>> monhost 192.168.0.1:6789;192.168.0.2:6789;192.168.0.3:6789
->>> pool rbd
->>> username admin
->>> authsupported cephx;none
->>> content images
->>>
->>
->> Proxmox doesn't use libvirt, does it?
->>
->> Any plans to implement the RBD caching?
->>
->> Nice work though!
->>
->> Wido
->>
->>>
->>> then you need to copy the keyring file from ceph to proxmox
->>>
->>> scp cephserver1:/etc/ceph/client.admin.keyring /etc/pve/priv/ceph/m=
-ycephcluster.keyring
->>>
->>>
->>>
->>> For now, you can add/delete/resize rbd volumes from gui.
->>> Snapshots/cloning will be added soon (when layering will be availab=
-le)
->>>
->>>
->>> Regards,
->>>
->>> Alexandre Derumier
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->=20
+Is it possible to use a "floating" ip address resource in a pacemaker
+configuration for the CloudStack "monitor" IP address?  Is there any
+other way around a single-monitor point of failure?
+
+Thanks for your hard work and any guidance you can provide!
+
+Calvin
+
+On Wed, Aug 8, 2012 at 3:51 PM, Wido den Hollander <wido@widodh.nl> wrote:
+>
+> The basic documentation about how you can use RBD with CloudStack
+>
+> Signed-off-by: Wido den Hollander <wido@widodh.nl>
+> ---
+>  doc/rbd/rbd-cloudstack.rst |   49
+> ++++++++++++++++++++++++++++++++++++++++++++
+>  doc/rbd/rbd.rst            |    2 +-
+>  2 files changed, 50 insertions(+), 1 deletion(-)
+>  create mode 100644 doc/rbd/rbd-cloudstack.rst
+>
+> diff --git a/doc/rbd/rbd-cloudstack.rst b/doc/rbd/rbd-cloudstack.rst
+> new file mode 100644
+> index 0000000..04e1a7c
+> --- /dev/null
+> +++ b/doc/rbd/rbd-cloudstack.rst
+> @@ -0,0 +1,49 @@
+> +===================
+> + RBD and Apache CloudStack
+> +===================
+> +You can use RBD to run instances on in Apache CloudStack.
+> +
+> +This can be done by adding a RBD pool as Primary Storage.
+> +
+> +There are a couple of prerequisites:
+> +* You need to CloudStack 4.0 or higher
+> +* Qemu on the Hypervisor has to be compiled with RBD enabled
+> +* The libvirt version on the Hypervisor has to be at least 0.10 with RBD
+> enabled
+> +
+> +Make sure you meet this requirements before installing the CloudStack
+> Agent on the Hypervisor(s)!
+> +
+> +.. important:: To use RBD with CloudStack, you must have a running Ceph
+> cluster!
+> +
+> +Limitations
+> +-------------
+> +Running instances from RBD has a couple of limitations:
+> +
+> +* An additional NFS Primary Storage pool is required for running System
+> VM's
+> +* Snapshotting RBD volumes is not possible (at this moment)
+> +* Only one monitor can be configured
+> +
+> +Add Hypervisor
+> +-------------
+> +Please follow the official CloudStack documentation how to do this.
+> +
+> +There is no special way of adding a Hypervisor when using RBD, nor is any
+> configuration needed on the hypervisor.
+> +
+> +Add RBD Primary Storage
+> +-------------
+> +Once the hypervisor has been added, log on to the CloudStack UI.
+> +
+> +* Infrastructure
+> +* Primary Storage
+> +* "Add Primary Storage"
+> +* Select "Protocol" RBD
+> +* Fill in your cluster information (cephx is supported)
+> +* Optionally add the tag 'rbd'
+> +
+> +Now you should be able to deploy instances on RBD.
+> +
+> +RBD Disk Offering
+> +-------------
+> +Create a special "Disk Offering" which needs to match the tag 'rbd' so
+> you can make sure the StoragePoolAllocator
+> +chooses the RBD pool when searching for a suiteable storage pool.
+> +
+> +Since there is also a NFS storage pool it's possible that instances get
+> deployed on NFS instead of RBD.
+> diff --git a/doc/rbd/rbd.rst b/doc/rbd/rbd.rst
+> index af1682f..6fd1999 100644
+> --- a/doc/rbd/rbd.rst
+> +++ b/doc/rbd/rbd.rst
+> @@ -31,7 +31,7 @@ the Ceph FS filesystem, and RADOS block devices
+> simultaneously.
+>         QEMU and RBD <qemu-rbd>
+>         libvirt <libvirt>
+>         RBD and OpenStack <rbd-openstack>
+> -
+> +       RBD and CloudStack <rbd-cloudstack>
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
