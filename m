@@ -1,46 +1,66 @@
-From: Wei Yongjun <weiyj.lk@gmail.com>
-Subject: [PATCH] ceph: [PATCH] ceph: use list_move_tail instead of list_del/list_add_tail
-Date: Wed, 5 Sep 2012 14:34:32 +0800
-Message-ID: <CAPgLHd-+oONn90yq4yy6-NKDcSwTduqu44ZUFbSCDP8bci84qw@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: rbd 0.48 storage support for kvm proxmox distribution available
+Date: Wed, 05 Sep 2012 11:11:27 +0200
+Message-ID: <5047173F.9030501@widodh.nl>
+References: <cf402294-b0f9-4b8c-8b08-6a51aa64cab4@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:32788 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751085Ab2IEGed (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 02:34:33 -0400
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:35537 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753211Ab2IEJLa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 05:11:30 -0400
+In-Reply-To: <cf402294-b0f9-4b8c-8b08-6a51aa64cab4@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, davem@davemloft.net
-Cc: yongjun_wei@trendmicro.com.cn, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel@vger.kernel.org
 
-From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+On 09/05/2012 06:31 AM, Alexandre DERUMIER wrote:
+> Hi List,
+>
+> We have added rbd 0.48 support to the proxmox 2.1 kvm distribution
+> http://www.proxmox.com/products/proxmox-ve
+>
+>
+> Proxmox setup:
+>
+> edit the /etc/pve/storage.cfg and add the configuration (gui creation is not available yet)
+>
+> rbd: mycephcluster
+>         monhost 192.168.0.1:6789;192.168.0.2:6789;192.168.0.3:6789
+>         pool rbd
+>         username admin
+>         authsupported cephx;none
+>         content images
+>
 
-Using list_move_tail() instead of list_del() + list_add_tail().
+Proxmox doesn't use libvirt, does it?
 
-Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
----
- net/ceph/pagelist.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+Any plans to implement the RBD caching?
 
-diff --git a/net/ceph/pagelist.c b/net/ceph/pagelist.c
-index 665cd23..92866be 100644
---- a/net/ceph/pagelist.c
-+++ b/net/ceph/pagelist.c
-@@ -1,4 +1,3 @@
--
- #include <linux/module.h>
- #include <linux/gfp.h>
- #include <linux/pagemap.h>
-@@ -134,8 +133,8 @@ int ceph_pagelist_truncate(struct ceph_pagelist *pl,
- 	ceph_pagelist_unmap_tail(pl);
- 	while (pl->head.prev != c->page_lru) {
- 		page = list_entry(pl->head.prev, struct page, lru);
--		list_del(&page->lru);                /* remove from pagelist */
--		list_add_tail(&page->lru, &pl->free_list); /* add to reserve */
-+		/* move from pagelist to reserve */
-+		list_move_tail(&page->lru, &pl->free_list);
- 		++pl->num_pages_free;
- 	}
- 	pl->room = c->room;
+Nice work though!
+
+Wido
+
+>
+> then you need to copy the keyring file from ceph to proxmox
+>
+> scp cephserver1:/etc/ceph/client.admin.keyring /etc/pve/priv/ceph/mycephcluster.keyring
+>
+>
+>
+> For now, you can add/delete/resize rbd volumes from gui.
+> Snapshots/cloning will be added soon (when layering will be available)
+>
+>
+> Regards,
+>
+> Alexandre Derumier
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
