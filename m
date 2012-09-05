@@ -1,25 +1,46 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Port no For data Transfer between OSDs
-Date: Wed, 5 Sep 2012 11:00:53 +0530
-Message-ID: <CAGfy=6mz04CoytQdt4Zj-RdOqU+0XEv3eHAuPQ1E-Pu=6gAa+g@mail.gmail.com>
+From: Wei Yongjun <weiyj.lk@gmail.com>
+Subject: [PATCH] ceph: [PATCH] ceph: use list_move_tail instead of list_del/list_add_tail
+Date: Wed, 5 Sep 2012 14:34:32 +0800
+Message-ID: <CAPgLHd-+oONn90yq4yy6-NKDcSwTduqu44ZUFbSCDP8bci84qw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:44970 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750984Ab2IEFax (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 01:30:53 -0400
-Received: by vcbfk26 with SMTP id fk26so156795vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Sep 2012 22:30:53 -0700 (PDT)
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:32788 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751085Ab2IEGed (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 02:34:33 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: sage@inktank.com, davem@davemloft.net
+Cc: yongjun_wei@trendmicro.com.cn, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
 
-Hi Community ,
-            I want to trace the data transfer rates occurring between
-osds while injecting data into ceph cluster. Can you please tell me
-what ports should I monitor or keep track of?
-            Thanks !
+From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 
-Regards,
-Hemant Surale.
+Using list_move_tail() instead of list_del() + list_add_tail().
+
+Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+---
+ net/ceph/pagelist.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/net/ceph/pagelist.c b/net/ceph/pagelist.c
+index 665cd23..92866be 100644
+--- a/net/ceph/pagelist.c
++++ b/net/ceph/pagelist.c
+@@ -1,4 +1,3 @@
+-
+ #include <linux/module.h>
+ #include <linux/gfp.h>
+ #include <linux/pagemap.h>
+@@ -134,8 +133,8 @@ int ceph_pagelist_truncate(struct ceph_pagelist *pl,
+ 	ceph_pagelist_unmap_tail(pl);
+ 	while (pl->head.prev != c->page_lru) {
+ 		page = list_entry(pl->head.prev, struct page, lru);
+-		list_del(&page->lru);                /* remove from pagelist */
+-		list_add_tail(&page->lru, &pl->free_list); /* add to reserve */
++		/* move from pagelist to reserve */
++		list_move_tail(&page->lru, &pl->free_list);
+ 		++pl->num_pages_free;
+ 	}
+ 	pl->room = c->room;
+
