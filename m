@@ -1,38 +1,67 @@
 From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: [PATCH] docs: Add CloudStack documentation
-Date: Wed, 5 Sep 2012 09:14:19 -0700
-Message-ID: <CADvuQRGsRQ2AYM7ceaQiR-F+7J1P1TR-_AXfPLWHznYetkhoog@mail.gmail.com>
-References: <1344462671-21848-1-git-send-email-wido@widodh.nl>
- <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com> <50476FAE.8030107@widodh.nl>
+Subject: Re: ceph-fs tests
+Date: Wed, 5 Sep 2012 09:22:47 -0700
+Message-ID: <CADvuQRGy9gCSwy3jMw+DGAF0MfoeohhYNgR2PJ+vDU1WW9cM+A@mail.gmail.com>
+References: <50468E0E.6070807@smart-weblications.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:53842 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754052Ab2IEQOl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 12:14:41 -0400
-Received: by vcbfk26 with SMTP id fk26so1053665vcb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 09:14:40 -0700 (PDT)
-In-Reply-To: <50476FAE.8030107@widodh.nl>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:62214 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751999Ab2IEQXJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 12:23:09 -0400
+Received: by vbbff1 with SMTP id ff1so305413vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 09:23:08 -0700 (PDT)
+In-Reply-To: <50468E0E.6070807@smart-weblications.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: Calvin Morrow <calvin.morrow@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: f.wiessner@smart-weblications.de
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 5, 2012 at 8:28 AM, Wido den Hollander <wido@widodh.nl> wrote:
-> You can only specify one monitor in CloudStack, but your cluster can have
-> multiple.
+On Tue, Sep 4, 2012 at 4:26 PM, Smart Weblications GmbH - Florian
+Wiessner <f.wiessner@smart-weblications.de> wrote:
+> i set up a 3 node ceph cluster 0.48.1argonaut to test ceph-fs.
 >
-> This is due to the internals of CloudStack. It stores storage pools in a URI
-> format, like: rbd://admin:secret@1.2.3.4/rbd
+> i mount ceph via fuse, then i downloaded kernel tree and decompressed=
+ a few
+> times, then stopping one osd (osd.1), afer a while of recovering, sud=
+denly:
+>
+> tar: linux-3.5.3/drivers/media/video/zoran/zr36060.h: Kann write nich=
+t
+> ausf=C3=83=C2=BChren: Auf dem Ger=C3=83=C2=A4t ist kein Speicherplatz=
+ mehr verf=C3=83=C2=BCgbar
+> linux-3.5.3/drivers/media/video/zr364xx.c
+> tar: linux-3.5.3/drivers/media/video/zr364xx.c: Kann write nicht ausf=
+=C3=83=C2=BChren: Auf
+> dem Ger=C3=83=C2=A4t ist kein Speicherplatz mehr verf=C3=83=C2=BCgbar
+> linux-3.5.3/drivers/memory/
 
-You know, for a custom scheme like "rbd:", any generic URI parser has
-no business dictating what's allowed and what's not. Just don't use
-"//" and you're not forced to follow those rules.
+Please provide English error messages when you share things with the
+list. In this case I can figure out what the message is, but really,
+we're all pattern matching animals and the specific strings in
+/usr/include/asm-generic/errno.h are what we know.
 
-For example, rbd:?id=admin&secret=s3kr1t&mon=1.2.3.4&mon=5.6.7.8&pool=rbd
-is perfectly legal.
+> no space left on device, but:
+>
+> 2012-09-04 18:46:38.242840 mon.0 [INF] pgmap v2883: 576 pgs: 512 acti=
+ve+clean,
+> 64 active+recovering; 1250 MB data, 14391 MB used, 844 MB / 15236 MB =
+avail;
+> 36677/215076 degraded (17.053%)
+>
+> there is space left?
 
-Whether some Java library fails to implement generic URIs is another concern..
+Only 844 MB available, with the pseudo-random placement policies,
+means you practically are out of space.
 
-http://tools.ietf.org/html/rfc3986#section-3
+It looks like you had only 15GB to begin with, and with typical
+replication, that's <5GB usable space. That is dangerously small for
+any real use; Ceph currently does not cope very well with running out
+of space.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
