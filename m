@@ -1,63 +1,65 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: rbd 0.48 storage support for kvm proxmox distribution available
-Date: Wed, 05 Sep 2012 11:11:27 +0200
-Message-ID: <5047173F.9030501@widodh.nl>
-References: <cf402294-b0f9-4b8c-8b08-6a51aa64cab4@mailpro>
+Subject: Re: Port no For data Transfer between OSDs
+Date: Wed, 05 Sep 2012 11:14:56 +0200
+Message-ID: <50471810.6000608@widodh.nl>
+References: <CAGfy=6mz04CoytQdt4Zj-RdOqU+0XEv3eHAuPQ1E-Pu=6gAa+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:35537 "EHLO
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:35795 "EHLO
 	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753211Ab2IEJLa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 05:11:30 -0400
-In-Reply-To: <cf402294-b0f9-4b8c-8b08-6a51aa64cab4@mailpro>
+	with ESMTP id S1751143Ab2IEJO6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 05:14:58 -0400
+In-Reply-To: <CAGfy=6mz04CoytQdt4Zj-RdOqU+0XEv3eHAuPQ1E-Pu=6gAa+g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
+To: hemant surale <hemant.surale@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/05/2012 06:31 AM, Alexandre DERUMIER wrote:
-> Hi List,
->
-> We have added rbd 0.48 support to the proxmox 2.1 kvm distribution
-> http://www.proxmox.com/products/proxmox-ve
->
->
-> Proxmox setup:
->
-> edit the /etc/pve/storage.cfg and add the configuration (gui creation is not available yet)
->
-> rbd: mycephcluster
->         monhost 192.168.0.1:6789;192.168.0.2:6789;192.168.0.3:6789
->         pool rbd
->         username admin
->         authsupported cephx;none
->         content images
->
+On 09/05/2012 07:30 AM, hemant surale wrote:
+> Hi Community ,
+>              I want to trace the data transfer rates occurring between
+> osds while injecting data into ceph cluster. Can you please tell me
+> what ports should I monitor or keep track of?
+>              Thanks !
 
-Proxmox doesn't use libvirt, does it?
+OSDs start binding from port 6800 and counting up from there.
 
-Any plans to implement the RBD caching?
+For example, a machine with 4 OSDs running:
 
-Nice work though!
+root@atom0:~# netstat -nap|grep LISTEN|grep -E ^tcp|grep ceph-osd
+tcp6       0      0 :::6800                 :::* 
+LISTEN      24329/ceph-osd
+tcp6       0      0 :::6801                 :::* 
+LISTEN      24329/ceph-osd
+tcp6       0      0 :::6802                 :::* 
+LISTEN      24329/ceph-osd
+tcp6       0      0 :::6803                 :::* 
+LISTEN      24596/ceph-osd
+tcp6       0      0 :::6804                 :::* 
+LISTEN      24596/ceph-osd
+tcp6       0      0 :::6805                 :::* 
+LISTEN      24596/ceph-osd
+tcp6       0      0 :::6806                 :::* 
+LISTEN      25316/ceph-osd
+tcp6       0      0 :::6807                 :::* 
+LISTEN      25316/ceph-osd
+tcp6       0      0 :::6808                 :::* 
+LISTEN      25316/ceph-osd
+tcp6       0      0 :::6809                 :::* 
+LISTEN      25839/ceph-osd
+tcp6       0      0 :::6810                 :::* 
+LISTEN      25839/ceph-osd
+tcp6       0      0 :::6811                 :::* 
+LISTEN      25839/ceph-osd
+root@atom0:~#
 
 Wido
 
 >
-> then you need to copy the keyring file from ceph to proxmox
->
-> scp cephserver1:/etc/ceph/client.admin.keyring /etc/pve/priv/ceph/mycephcluster.keyring
->
->
->
-> For now, you can add/delete/resize rbd volumes from gui.
-> Snapshots/cloning will be added soon (when layering will be available)
->
->
 > Regards,
->
-> Alexandre Derumier
+> Hemant Surale.
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
