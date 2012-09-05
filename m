@@ -1,117 +1,74 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Inject configuration change into cluster
-Date: Wed, 5 Sep 2012 12:37:11 +0200
-Message-ID: <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com>
-References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
-	<5045B928.1050706@widodh.nl>
-	<1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
-	<5045CB80.50508@widodh.nl>
-	<alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: Port no For data Transfer between OSDs
+Date: Wed, 5 Sep 2012 16:50:07 +0530
+Message-ID: <CAGfy=6koSdDSVSiYMwwm5Fm2JeQSCP8Pm4S8UAfSna45Gp0Ntw@mail.gmail.com>
+References: <CAGfy=6mz04CoytQdt4Zj-RdOqU+0XEv3eHAuPQ1E-Pu=6gAa+g@mail.gmail.com>
+	<50471810.6000608@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:41414 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758110Ab2IEKhL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 06:37:11 -0400
-Received: by qaas11 with SMTP id s11so4409613qaa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 03:37:11 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:54747 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751328Ab2IELUI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 07:20:08 -0400
+Received: by vcbfk26 with SMTP id fk26so555013vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 04:20:07 -0700 (PDT)
+In-Reply-To: <50471810.6000608@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, =?ISO-8859-2?Q?Skowron_S=B3awomir?= <slawomir.skowron@grupaonet.pl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org
 
-Ok, but in global case, when i use, a chef/puppet or any other, i wish
-to change configuration in ceph.conf, and reload daemon to get new
-configuration changes from ceph.conf, this feature would be very
-helpful in ceph administration.
+Hi Wido , Community ,
 
-Inject is ok, for testing, or debuging.
+if we use number =2
+in cmd as follows
+"ceph osd pool set <poolname>  size <#no> "
 
-On Tue, Sep 4, 2012 at 5:34 PM, Sage Weil <sage@inktank.com> wrote:
-> On Tue, 4 Sep 2012, Wido den Hollander wrote:
->> On 09/04/2012 10:30 AM, Skowron S?awomir wrote:
->> > Ok, thanks.
->> >
->> > Number of workers used for recover, or numer of disk threads.
->> >
+does it means for perticular Object we have 2 replica Or total 2
+copies in cluster?
+
+
+Regards,
+Hemant Surale.
+
+On Wed, Sep 5, 2012 at 2:44 PM, Wido den Hollander <wido@widodh.nl> wrote:
+> On 09/05/2012 07:30 AM, hemant surale wrote:
 >>
->> I think those can be changed while the OSD is running. You could alw=
-ays give
->> it a try.
+>> Hi Community ,
+>>              I want to trace the data transfer rates occurring between
+>> osds while injecting data into ceph cluster. Can you please tell me
+>> what ports should I monitor or keep track of?
+>>              Thanks !
 >
-> The thread pool sizes can't currently be adjusted, unfortunately.  It
-> wouldn't be too difficult to change that...
 >
-> sage
+> OSDs start binding from port 6800 and counting up from there.
+>
+> For example, a machine with 4 OSDs running:
+>
+> root@atom0:~# netstat -nap|grep LISTEN|grep -E ^tcp|grep ceph-osd
+> tcp6       0      0 :::6800                 :::* LISTEN      24329/ceph-osd
+> tcp6       0      0 :::6801                 :::* LISTEN      24329/ceph-osd
+> tcp6       0      0 :::6802                 :::* LISTEN      24329/ceph-osd
+> tcp6       0      0 :::6803                 :::* LISTEN      24596/ceph-osd
+> tcp6       0      0 :::6804                 :::* LISTEN      24596/ceph-osd
+> tcp6       0      0 :::6805                 :::* LISTEN      24596/ceph-osd
+> tcp6       0      0 :::6806                 :::* LISTEN      25316/ceph-osd
+> tcp6       0      0 :::6807                 :::* LISTEN      25316/ceph-osd
+> tcp6       0      0 :::6808                 :::* LISTEN      25316/ceph-osd
+> tcp6       0      0 :::6809                 :::* LISTEN      25839/ceph-osd
+> tcp6       0      0 :::6810                 :::* LISTEN      25839/ceph-osd
+> tcp6       0      0 :::6811                 :::* LISTEN      25839/ceph-osd
+> root@atom0:~#
+>
+> Wido
 >
 >>
->> Wido
->>
->> > -----Original Message-----
->> > From: Wido den Hollander [mailto:wido@widodh.nl]
->> > Sent: Tuesday, September 04, 2012 10:18 AM
->> > To: Skowron S?awomir
->> > Cc: ceph-devel@vger.kernel.org
->> > Subject: Re: Inject configuration change into cluster
->> >
->> > On 09/04/2012 07:04 AM, Skowron S?awomir wrote:
->> > > Is there any way now, to inject new configuration change, withou=
-t
->> > > restarting daemons ??
->> > >
->> >
->> > Yes, you can use the injectargs command.
->> >
->> > $ ceph osd tell 0 injectargs '--debug-osd 20'
->> >
->> > What do you want to change? Not everything can be changed while th=
-e OSD is
->> > running.
->> >
->> > Wido
->> >
->> > > Regards
->> > >
->> > > Slawomir Skowron--
->> > > To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel"
->> > > in the body of a message to majordomo@vger.kernel.org More major=
-domo
->> > > info at  http://vger.kernel.org/majordomo-info.html
->> > >
->> >
->> > N???????????????r??????y?????????b???X???????v???^???)?{.n???+????=
-?????z???]z???{ay??? ?????,j ??????f?????????h?????????z??? ???w???????=
-??
->> > ?????????j:+v?????????w???j???m???????????? ????????????zZ+???????=
-j"??????!tml=3D
->> >
->>
+>> Regards,
+>> Hemant Surale.
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
------
-Pozdrawiam
-
-S=B3awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
