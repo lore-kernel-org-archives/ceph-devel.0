@@ -1,56 +1,53 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: wip-crush
-Date: Wed, 5 Sep 2012 13:04:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209051303570.14139@cobra.newdream.net>
-References: <alpine.DEB.2.00.1208211807330.12167@cobra.newdream.net> <5034F0B4.3060107@hastexo.com> <C4813C81-696A-4261-A4E7-991C719C0DB2@ornl.gov> <alpine.DEB.2.00.1208220929390.32470@cobra.newdream.net> <CAPYLRzjmcOuSkxG1iO8GqEZPeLchKwKP94KizB7mXWzAU2a57w@mail.gmail.com>
- <alpine.DEB.2.00.1208221047460.29719@cobra.newdream.net> <alpine.DEB.2.00.1208311331000.2525@cobra.newdream.net>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: [PATCH] docs: Add CloudStack documentation
+Date: Thu, 06 Sep 2012 00:39:23 +0200
+Message-ID: <5047D49B.3060105@widodh.nl>
+References: <1344462671-21848-1-git-send-email-wido@widodh.nl> <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com> <50476FAE.8030107@widodh.nl> <CADvuQRGsRQ2AYM7ceaQiR-F+7J1P1TR-_AXfPLWHznYetkhoog@mail.gmail.com> <5047866B.80102@widodh.nl> <CADvuQREoGMAL+fKTMpYDk73-8f5yWVNHTAjpiHrLFEO6noFJ4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49479 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759283Ab2IEUEd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 16:04:33 -0400
-In-Reply-To: <alpine.DEB.2.00.1208311331000.2525@cobra.newdream.net>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:58278 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759739Ab2IEWjZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 18:39:25 -0400
+In-Reply-To: <CADvuQREoGMAL+fKTMpYDk73-8f5yWVNHTAjpiHrLFEO6noFJ4w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Florian Haas <florian@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 31 Aug 2012, Sage Weil wrote:
-> Okay, it's trivial to change 'pool' to 'root' in the default generated 
-> crush map, and update all the docs accordingly.  The problem is that some 
-> stuff built on top of ceph has 'pool=default' in there, including our chef 
-> cookbooks and those that other people are building.
-> 
-> I see a few options:
-> 
-> 1) - Document that pool=default should be used for clusters created 
->      pre-0.52, and root=default for clusters created after that (at 
->      http://ceph.com/docs/...).
->    - Tell new tools to use root=default
->    - Encourage existing tools to use *both* root=default pool=default (if 
->      the type is not present, it will be ignored).  They will break on 
->      newly created clusters with new code, but it will at least happen 
->      quickly (on cluster creation).
->    - Make noise in the release notes+announcement.
 
-Okay, #1 it is!  I'll make some more noise when v0.52 is released.  
-Merging this into master.
 
-sage
+On 09/05/2012 08:22 PM, Tommi Virtanen wrote:
+> On Wed, Sep 5, 2012 at 10:05 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>>> For example, rbd:?id=admin&secret=s3kr1t&mon=1.2.3.4&mon=5.6.7.8&pool=rbd
+>>> is perfectly legal.
+>>>
+>>> Whether some Java library fails to implement generic URIs is another
+>>> concern..
+>> It is indeed a Java library in this case:
+>> http://docs.oracle.com/javase/6/docs/api/java/net/URI.html
+>
+> I don't see anything on that page to prevent you from doing
+> u.getQuery() and using the fields from that (and then living with Java
+> lack of good stdlib and using something like
+> http://stackoverflow.com/questions/1667278/parsing-query-strings-in-java
+> to actually parse the string into key=value pairs).
+>
 
-> 
-> 2) Make 'pool' be silently translated to 'root' (and the other way around) 
->    if the type is not present.  That way new tools with old clusters will 
->    work, and new clusters with old automation will work.
-> 
-> Other ideas?  I don't much like #2.
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+The main problem with that is how CloudStack internally stores the data. 
+At the storage driver the URI doesn't arrive in plain format, it gets 
+splitted with getHost(), getAuthUsername(), getPath() and arrives in 
+these separate variables at the point where libvirt is being called.
+
+Wido
+
+> Or, use *exactly* what the QEmu RBD code is doing, by getting the data
+> our of the URI with getSchemeSpecificPart -- that'll work as long as
+> you don't start the part with a slash ("rbd:/").
+>
+> I see no reason here why the
+> rbd:poolname/devicename[@snapshotname][:option1=value1[:option2=value2...]]
+> syntax from QEmu wouldn't work, just as is.
+>
