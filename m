@@ -1,53 +1,45 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Tommi Virtanen <tv@inktank.com>
 Subject: Re: [PATCH] docs: Add CloudStack documentation
-Date: Wed, 05 Sep 2012 19:05:47 +0200
-Message-ID: <5047866B.80102@widodh.nl>
-References: <1344462671-21848-1-git-send-email-wido@widodh.nl> <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com> <50476FAE.8030107@widodh.nl> <CADvuQRGsRQ2AYM7ceaQiR-F+7J1P1TR-_AXfPLWHznYetkhoog@mail.gmail.com>
+Date: Wed, 5 Sep 2012 11:22:36 -0700
+Message-ID: <CADvuQREoGMAL+fKTMpYDk73-8f5yWVNHTAjpiHrLFEO6noFJ4w@mail.gmail.com>
+References: <1344462671-21848-1-git-send-email-wido@widodh.nl>
+ <CADxhoDR-3guBfFXc_QSmvPthVp5R=vS9tB2zpn-WRaLCSAu=ZA@mail.gmail.com>
+ <50476FAE.8030107@widodh.nl> <CADvuQRGsRQ2AYM7ceaQiR-F+7J1P1TR-_AXfPLWHznYetkhoog@mail.gmail.com>
+ <5047866B.80102@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:41437 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750841Ab2IERGA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 13:06:00 -0400
-In-Reply-To: <CADvuQRGsRQ2AYM7ceaQiR-F+7J1P1TR-_AXfPLWHznYetkhoog@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:34243 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754114Ab2IESW7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Sep 2012 14:22:59 -0400
+Received: by vbbff1 with SMTP id ff1so445801vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Sep 2012 11:22:58 -0700 (PDT)
+In-Reply-To: <5047866B.80102@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: Calvin Morrow <calvin.morrow@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 09/05/2012 06:14 PM, Tommi Virtanen wrote:
-> On Wed, Sep 5, 2012 at 8:28 AM, Wido den Hollander <wido@widodh.nl> wrote:
->> You can only specify one monitor in CloudStack, but your cluster can have
->> multiple.
+On Wed, Sep 5, 2012 at 10:05 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>> For example, rbd:?id=admin&secret=s3kr1t&mon=1.2.3.4&mon=5.6.7.8&pool=rbd
+>> is perfectly legal.
 >>
->> This is due to the internals of CloudStack. It stores storage pools in a URI
->> format, like: rbd://admin:secret@1.2.3.4/rbd
->
-> You know, for a custom scheme like "rbd:", any generic URI parser has
-> no business dictating what's allowed and what's not. Just don't use
-> "//" and you're not forced to follow those rules.
->
-> For example, rbd:?id=admin&secret=s3kr1t&mon=1.2.3.4&mon=5.6.7.8&pool=rbd
-> is perfectly legal.
->
-> Whether some Java library fails to implement generic URIs is another concern..
->
+>> Whether some Java library fails to implement generic URIs is another
+>> concern..
+> It is indeed a Java library in this case:
+> http://docs.oracle.com/javase/6/docs/api/java/net/URI.html
 
-It is indeed a Java library in this case: 
-http://docs.oracle.com/javase/6/docs/api/java/net/URI.html
+I don't see anything on that page to prevent you from doing
+u.getQuery() and using the fields from that (and then living with Java
+lack of good stdlib and using something like
+http://stackoverflow.com/questions/1667278/parsing-query-strings-in-java
+to actually parse the string into key=value pairs).
 
-But Sage's suggestion about using Round-Robin DNS seems great as well. 
-Didn't know that was supported.
+Or, use *exactly* what the QEmu RBD code is doing, by getting the data
+our of the URI with getSchemeSpecificPart -- that'll work as long as
+you don't start the part with a slash ("rbd:/").
 
-Wido
-
-> http://tools.ietf.org/html/rfc3986#section-3
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+I see no reason here why the
+rbd:poolname/devicename[@snapshotname][:option1=value1[:option2=value2...]]
+syntax from QEmu wouldn't work, just as is.
