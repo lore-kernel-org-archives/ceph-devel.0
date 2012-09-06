@@ -1,123 +1,137 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH, v2 03/11] rbd: kill incore snap_names_len
-Date: Thu, 06 Sep 2012 10:36:22 -0500
-Message-ID: <5048C2F6.8090102@inktank.com>
-References: <5037AB20.4000103@inktank.com> <5037ACC0.1000108@inktank.com>
+Subject: [PATCH, v2 06/11] rbd: add read_only rbd map option
+Date: Thu, 06 Sep 2012 10:36:24 -0500
+Message-ID: <5048C2F8.90505@inktank.com>
+References: <5037AB20.4000103@inktank.com> <5037AD10.9010203@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:63065 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758152Ab2IFPg2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 11:36:28 -0400
-Received: by iahk25 with SMTP id k25so2179097iah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 08:36:27 -0700 (PDT)
-In-Reply-To: <5037ACC0.1000108@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:50522 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754434Ab2IFPgb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 11:36:31 -0400
+Received: by ieje11 with SMTP id e11so3247159iej.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 08:36:31 -0700 (PDT)
+In-Reply-To: <5037AD10.9010203@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The only thing the on-disk snap_names_len field is needed is to
-size the buffer allocated to hold a copy of the snapshot names
-for an rbd image.
-
-So don't bother saving it in the in-core rbd_image_header structure.
-Just use a local variable to hold the required buffer size while
-it's needed.
-
-Move the code that actually copies the snapshot names up closer
-to where the required length is saved.
+Add the ability to map an rbd image read-only, by specifying either
+"read_only" or "ro" as an option on the rbd "command line."  Also
+allow the inverse to be explicitly specified using "read_write" or
+"rw".
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
-v2: - Return -EIO rather than BUG_ON() as suggested by Yehuda.
-    - Added a comment explaining why a memcpy() will not exceed
-      the length of the on-disk buffer, in response to Yehuda's
-      concern.
+v2: - Made the read_only/ro flag explicitly make the mapping
+      read-only rather than having it toggle.
+    - Added read_write/rw flags to allow a writable mapping to
+      be explicitly requested.  Snapshot mappings are silently
+      mapped read-only (even if read_write was requested).
 
- drivers/block/rbd.c |   26 +++++++++++++-------------
- 1 file changed, 13 insertions(+), 13 deletions(-)
+ drivers/block/rbd.c |   28 ++++++++++++++++++++++++----
+ 1 file changed, 24 insertions(+), 4 deletions(-)
 
 Index: b/drivers/block/rbd.c
 ===================================================================
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -81,7 +81,6 @@ struct rbd_image_header {
- 	__u8 crypt_type;
- 	__u8 comp_type;
- 	struct ceph_snap_context *snapc;
--	u64 snap_names_len;
- 	u32 total_snaps;
+@@ -69,7 +69,8 @@
+ #define DEV_NAME_LEN		32
+ #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
 
- 	char *snap_names;
-@@ -534,12 +533,21 @@ static int rbd_header_from_disk(struct r
- 	header->object_prefix[len] = '\0';
+-#define RBD_NOTIFY_TIMEOUT_DEFAULT 10
++#define RBD_NOTIFY_TIMEOUT_DEFAULT	10
++#define RBD_READ_ONLY_DEFAULT		false
 
- 	if (snap_count) {
--		header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
--		BUG_ON(header->snap_names_len > (u64) SIZE_MAX);
--		header->snap_names = kmalloc(header->snap_names_len,
--					     GFP_KERNEL);
-+		u64 snap_names_len = le64_to_cpu(ondisk->snap_names_len);
-+
-+		if (snap_names_len > (u64) SIZE_MAX)
-+			return -EIO;
-+		header->snap_names = kmalloc(snap_names_len, GFP_KERNEL);
- 		if (!header->snap_names)
- 			goto out_err;
-+		/*
-+		 * Note that rbd_dev_v1_header_read() guarantees
-+		 * the ondisk buffer we're working with has
-+		 * snap_names_len bytes beyond the end of the
-+		 * snapshot id array, this memcpy() is safe.
-+		 */
-+		memcpy(header->snap_names, &ondisk->snaps[snap_count],
-+			snap_names_len);
+ /*
+  * block device image metadata (in-memory version)
+@@ -91,6 +92,7 @@ struct rbd_image_header {
 
- 		size = snap_count * sizeof (*header->snap_sizes);
- 		header->snap_sizes = kmalloc(size, GFP_KERNEL);
-@@ -547,7 +555,6 @@ static int rbd_header_from_disk(struct r
- 			goto out_err;
+ struct rbd_options {
+ 	int	notify_timeout;
++	bool	read_only;
+ };
+
+ /*
+@@ -176,7 +178,7 @@ struct rbd_device {
+ 	u64                     snap_id;	/* current snapshot id */
+ 	/* whether the snap_id this device reads from still exists */
+ 	bool                    snap_exists;
+-	int                     read_only;
++	bool			read_only;
+
+ 	struct list_head	node;
+
+@@ -351,12 +353,21 @@ enum {
+ 	/* int args above */
+ 	Opt_last_string,
+ 	/* string args above */
++	Opt_read_only,
++	Opt_read_write,
++	/* Boolean args above */
++	Opt_last_bool,
+ };
+
+ static match_table_t rbd_opts_tokens = {
+ 	{Opt_notify_timeout, "notify_timeout=%d"},
+ 	/* int args above */
+ 	/* string args above */
++	{Opt_read_only, "read_only"},
++	{Opt_read_only, "ro"},		/* Alternate spelling */
++	{Opt_read_write, "read_write"},
++	{Opt_read_write, "rw"},		/* Alternate spelling */
++	/* Boolean args above */
+ 	{-1, NULL}
+ };
+
+@@ -381,6 +392,8 @@ static int parse_rbd_opts_token(char *c,
+ 	} else if (token > Opt_last_int && token < Opt_last_string) {
+ 		dout("got string token %d val %s\n", token,
+ 		     argstr[0].from);
++	} else if (token > Opt_last_string && token < Opt_last_bool) {
++		dout("got Boolean token %d\n", token);
  	} else {
- 		WARN_ON(ondisk->snap_names_len);
--		header->snap_names_len = 0;
- 		header->snap_names = NULL;
- 		header->snap_sizes = NULL;
+ 		dout("got token %d\n", token);
  	}
-@@ -579,10 +586,6 @@ static int rbd_header_from_disk(struct r
- 			header->snap_sizes[i] =
- 				le64_to_cpu(ondisk->snaps[i].image_size);
- 		}
--
--		/* copy snapshot names */
--		memcpy(header->snap_names, &ondisk->snaps[snap_count],
--			header->snap_names_len);
+@@ -389,6 +402,12 @@ static int parse_rbd_opts_token(char *c,
+ 	case Opt_notify_timeout:
+ 		rbd_opts->notify_timeout = intval;
+ 		break;
++	case Opt_read_only:
++		rbd_opts->read_only = true;
++		break;
++	case Opt_read_write:
++		rbd_opts->read_only = false;
++		break;
+ 	default:
+ 		BUG_ON(token);
+ 	}
+@@ -407,6 +426,7 @@ static int rbd_get_client(struct rbd_dev
+ 	struct rbd_client *rbdc;
+
+ 	rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
++	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+
+ 	ceph_opts = ceph_parse_options(options, mon_addr,
+ 					mon_addr + mon_addr_len,
+@@ -620,7 +640,7 @@ static int rbd_header_set_snap(struct rb
+ 		    sizeof (RBD_SNAP_HEAD_NAME))) {
+ 		rbd_dev->snap_id = CEPH_NOSNAP;
+ 		rbd_dev->snap_exists = false;
+-		rbd_dev->read_only = 0;
++		rbd_dev->read_only = rbd_dev->rbd_opts.read_only;
+ 		if (size)
+ 			*size = rbd_dev->header.image_size;
+ 	} else {
+@@ -632,7 +652,7 @@ static int rbd_header_set_snap(struct rb
+ 			goto done;
+ 		rbd_dev->snap_id = snap_id;
+ 		rbd_dev->snap_exists = true;
+-		rbd_dev->read_only = 1;
++		rbd_dev->read_only = true;	/* No choice for snapshots */
  	}
 
- 	return 0;
-@@ -592,7 +595,6 @@ out_err:
- 	header->snap_sizes = NULL;
- 	kfree(header->snap_names);
- 	header->snap_names = NULL;
--	header->snap_names_len = 0;
- 	kfree(header->object_prefix);
- 	header->object_prefix = NULL;
-
-@@ -660,7 +662,6 @@ static void rbd_header_free(struct rbd_i
- 	header->snap_sizes = NULL;
- 	kfree(header->snap_names);
- 	header->snap_names = NULL;
--	header->snap_names_len = 0;
- 	ceph_put_snap_context(header->snapc);
- 	header->snapc = NULL;
- }
-@@ -1800,7 +1801,6 @@ static int __rbd_refresh_header(struct r
- 	rbd_dev->header.total_snaps = h.total_snaps;
- 	rbd_dev->header.snapc = h.snapc;
- 	rbd_dev->header.snap_names = h.snap_names;
--	rbd_dev->header.snap_names_len = h.snap_names_len;
- 	rbd_dev->header.snap_sizes = h.snap_sizes;
- 	/* Free the extra copy of the object prefix */
- 	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
-
+ 	ret = 0;
