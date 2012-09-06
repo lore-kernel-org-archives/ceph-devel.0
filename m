@@ -1,37 +1,24 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: issues with adjusting the crushmap in 0.51
-Date: Thu, 6 Sep 2012 13:31:15 -0700
-Message-ID: <CADvuQRFz9oZr3BGRdzUhG4xhdYUu69v7UxKDuS4d0-kTisrr6Q@mail.gmail.com>
-References: <20120906175821.GA32205@tchpc.tcd.ie> <sfid-H20120906-191917-+051.46-1@marduk.tchpc.tcd.ie>
- <CAPYLRzggLqcgvMJWFDYOsHvQNK2oOvHmmTEnufK60R4=mdEQNw@mail.gmail.com> <20120906185104.GA6518@tchpc.tcd.ie>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Is using the 'discard' mount option safe on an rbd?
+Date: Thu, 6 Sep 2012 14:57:23 -0700
+Message-ID: <CAPud5_62LcGbmdQEdOP+KgdO4y6t=A6OvW3f9s8hxg5ULD-inA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:57951 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759770Ab2IFUbh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 16:31:37 -0400
-Received: by vbbff1 with SMTP id ff1so1975998vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 13:31:36 -0700 (PDT)
-In-Reply-To: <20120906185104.GA6518@tchpc.tcd.ie>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:58103 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752343Ab2IFV5Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 17:57:24 -0400
+Received: by ieje11 with SMTP id e11so3923037iej.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 14:57:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jimmy Tang <jtang@tchpc.tcd.ie>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Sep 6, 2012 at 11:51 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
-> Also, the "ceph osd setcrushmap..." command doesn't up when a ceph
-> --help is run in the 0.51 release, however it is documented on the
-> wiki as far as I recall. It'd be real nice if the applications emitted
-> all the available commands, it would make experimenting much nicer and
-> fun.
+Is it safe to use the discard mount option when mounting a xfs
+filesystem on an rbd (using the kernel driver)?  We're currently using
+kernel 3.5.3 and Ceph 0.48.1.
 
-"ceph" is just a client app that sends (most of) the commands to
-ceph-mon for execution; it's --help is problematic to keep up to
-date.. We're trying to do better. Patches appreciated, see ticket at
-the end..
-
-Background:
-http://www.spinics.net/lists/ceph-devel/msg08471.html
-http://www.spinics.net/lists/ceph-devel/msg08472.html
-http://www.tracker.newdream.net/issues/2894
+Also, are there any stability issues doing it from a qemu VM?  It
+looks like support for rbd discard was added in qemu 1.1, but I wasn't
+sure how stable it was.
