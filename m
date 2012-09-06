@@ -1,68 +1,123 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 00/11] rbd: another set of patches
-Date: Thu, 06 Sep 2012 10:34:29 -0500
-Message-ID: <5048C285.1030202@inktank.com>
-References: <5037AB20.4000103@inktank.com>
+Subject: [PATCH, v2 03/11] rbd: kill incore snap_names_len
+Date: Thu, 06 Sep 2012 10:36:22 -0500
+Message-ID: <5048C2F6.8090102@inktank.com>
+References: <5037AB20.4000103@inktank.com> <5037ACC0.1000108@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:57791 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:63065 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753187Ab2IFPec (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 11:34:32 -0400
-Received: by iahk25 with SMTP id k25so2176819iah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 08:34:32 -0700 (PDT)
-In-Reply-To: <5037AB20.4000103@inktank.com>
+	with ESMTP id S1758152Ab2IFPg2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 11:36:28 -0400
+Received: by iahk25 with SMTP id k25so2179097iah.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 08:36:27 -0700 (PDT)
+In-Reply-To: <5037ACC0.1000108@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 08/24/2012 11:26 AM, Alex Elder wrote:
-> I keep moving simple and simplifying patches to the front of
-> my patch queue.  This is my latest set of things that are
-> ready to get reviewed and committed.
-> 
-> 					-Alex
+The only thing the on-disk snap_names_len field is needed is to
+size the buffer allocated to hold a copy of the snapshot names
+for an rbd image.
 
-I'm about to send updates to two patches in this series, based
-on comments from Yehuda's review.  I'm not going to re-send the
-entire series.
+So don't bother saving it in the in-core rbd_image_header structure.
+Just use a local variable to hold the required buffer size while
+it's needed.
 
-Updated are patches 03 and 06.  I also am still awaiting
-confirmation of review for patch 05 (which has not changed
-and I am not re-sending).
+Move the code that actually copies the snapshot names up closer
+to where the required length is saved.
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: - Return -EIO rather than BUG_ON() as suggested by Yehuda.
+    - Added a comment explaining why a memcpy() will not exceed
+      the length of the on-disk buffer, in response to Yehuda's
+      concern.
 
-> 
-> [PATCH 01/11] rbd: handle locking inside __rbd_client_find()
->     This simplifies a little code.
-> [PATCH 02/11] rbd: don't over-allocate space for object prefix
->     Don't allocate the max required space for the object prefix.
->     This also ensures that the object prefix is either terminated
->     with '\0' or else is maximally-sized.
-> [PATCH 03/11] rbd: kill incore snap_names_len
->     Eliminate an unnecessary field in struct rbd_image_header.
-> [PATCH 04/11] rbd: more cleanup in rbd_header_from_disk()
->     Rearrange some code, for better logical grouping.
-> [PATCH 05/11] rbd: move rbd_opts to struct rbd_device
->     Tie rbd-specific options to the rbd_device, not the client.
-> [PATCH 06/11] rbd: add read_only rbd map option
-> [PATCH 07/11] rbd: kill notify_timeout option
->     These two were done together, in this order, to preserve the
->     argument parsing code.  The first adds the ability to map an
->     rbd image read-only.  The second eliminates the only other
->     rbd option, which is otherwise unused.
-> [PATCH 08/11] rbd: bio_chain_clone() cleanups
->     Simple refactoring.
-> [PATCH 09/11] rbd: drop needless test in rbd_rq_fn()
->     Trivial.
-> [PATCH 10/11] rbd: check for overflow in rbd_get_num_segments()
->     Make sure we don't exceed 64-bit maximum when adding offset
->     and length.
-> [PATCH 11/11] rbd: split up rbd_get_segment()
->     Refactor rbd_get_segment() into three separate functions,
->     which return a segment name, offset, and length.
-> 
+ drivers/block/rbd.c |   26 +++++++++++++-------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
+
+Index: b/drivers/block/rbd.c
+===================================================================
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -81,7 +81,6 @@ struct rbd_image_header {
+ 	__u8 crypt_type;
+ 	__u8 comp_type;
+ 	struct ceph_snap_context *snapc;
+-	u64 snap_names_len;
+ 	u32 total_snaps;
+
+ 	char *snap_names;
+@@ -534,12 +533,21 @@ static int rbd_header_from_disk(struct r
+ 	header->object_prefix[len] = '\0';
+
+ 	if (snap_count) {
+-		header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
+-		BUG_ON(header->snap_names_len > (u64) SIZE_MAX);
+-		header->snap_names = kmalloc(header->snap_names_len,
+-					     GFP_KERNEL);
++		u64 snap_names_len = le64_to_cpu(ondisk->snap_names_len);
++
++		if (snap_names_len > (u64) SIZE_MAX)
++			return -EIO;
++		header->snap_names = kmalloc(snap_names_len, GFP_KERNEL);
+ 		if (!header->snap_names)
+ 			goto out_err;
++		/*
++		 * Note that rbd_dev_v1_header_read() guarantees
++		 * the ondisk buffer we're working with has
++		 * snap_names_len bytes beyond the end of the
++		 * snapshot id array, this memcpy() is safe.
++		 */
++		memcpy(header->snap_names, &ondisk->snaps[snap_count],
++			snap_names_len);
+
+ 		size = snap_count * sizeof (*header->snap_sizes);
+ 		header->snap_sizes = kmalloc(size, GFP_KERNEL);
+@@ -547,7 +555,6 @@ static int rbd_header_from_disk(struct r
+ 			goto out_err;
+ 	} else {
+ 		WARN_ON(ondisk->snap_names_len);
+-		header->snap_names_len = 0;
+ 		header->snap_names = NULL;
+ 		header->snap_sizes = NULL;
+ 	}
+@@ -579,10 +586,6 @@ static int rbd_header_from_disk(struct r
+ 			header->snap_sizes[i] =
+ 				le64_to_cpu(ondisk->snaps[i].image_size);
+ 		}
+-
+-		/* copy snapshot names */
+-		memcpy(header->snap_names, &ondisk->snaps[snap_count],
+-			header->snap_names_len);
+ 	}
+
+ 	return 0;
+@@ -592,7 +595,6 @@ out_err:
+ 	header->snap_sizes = NULL;
+ 	kfree(header->snap_names);
+ 	header->snap_names = NULL;
+-	header->snap_names_len = 0;
+ 	kfree(header->object_prefix);
+ 	header->object_prefix = NULL;
+
+@@ -660,7 +662,6 @@ static void rbd_header_free(struct rbd_i
+ 	header->snap_sizes = NULL;
+ 	kfree(header->snap_names);
+ 	header->snap_names = NULL;
+-	header->snap_names_len = 0;
+ 	ceph_put_snap_context(header->snapc);
+ 	header->snapc = NULL;
+ }
+@@ -1800,7 +1801,6 @@ static int __rbd_refresh_header(struct r
+ 	rbd_dev->header.total_snaps = h.total_snaps;
+ 	rbd_dev->header.snapc = h.snapc;
+ 	rbd_dev->header.snap_names = h.snap_names;
+-	rbd_dev->header.snap_names_len = h.snap_names_len;
+ 	rbd_dev->header.snap_sizes = h.snap_sizes;
+ 	/* Free the extra copy of the object prefix */
+ 	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
 
