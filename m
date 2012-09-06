@@ -1,44 +1,206 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: [GIT PULL v5] java: add libcephfs Java bindings
-Date: Thu, 6 Sep 2012 11:02:20 -0700
-Message-ID: <CAPrxi5-_AYV0UUuABCM+LkSpRVOM63R5XPDmjz9HE3UxFBe7AA@mail.gmail.com>
-References: <CAPrxi5-6JAWzUdsgdfHw=pG+6r5LN5i8X92DwxdejosY0xT0Dw@mail.gmail.com>
-	<alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: issues with adjusting the crushmap in 0.51
+Date: Thu, 6 Sep 2012 18:58:21 +0100
+Message-ID: <20120906175821.GA32205@tchpc.tcd.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="/9DWx/yDrRhgMJTb"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:49473 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932671Ab2IFSCX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 14:02:23 -0400
-Received: by ieje11 with SMTP id e11so3519202iej.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 11:02:22 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:59795 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932313Ab2IFSGV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 14:06:21 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id D140383BFA
+	for <ceph-devel@vger.kernel.org>; Thu,  6 Sep 2012 18:58:22 +0100 (IST)
+Received: from tabaet.tchpc.tcd.ie ([127.0.0.1])
+	by localhost (tabaet.tchpc.tcd.ie [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id bjGRDWoQISLM for <ceph-devel@vger.kernel.org>;
+	Thu,  6 Sep 2012 18:58:21 +0100 (IST)
+Received: from marduk.tchpc.tcd.ie (marduk.tchpc.tcd.ie [134.226.112.36])
+	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 5A35483BF7
+	for <ceph-devel@vger.kernel.org>; Thu,  6 Sep 2012 18:58:21 +0100 (IST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: gcs@debian.hu, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Sep 6, 2012 at 8:42 AM, Sage Weil <sage@inktank.com> wrote:
->
-> Also, I noticed the automake patch removes CephException.java, added in
-> the previous patch... probably an accident?
 
-I left CephException out intentionally because it could be replaced by
-generic exceptions in Java like IOException or FileNotFoundException.
-My belief is that CephException (and specializations of this) will
-need to be re-introduced as more error cases are covered. For example,
-I think we'll want a CephBadFileDescriptor, but currently libcephfs
-doesn't appear to return -EBADF (the client is crashing do to fd_map
-assert). So, the Java wrappers should be as stable as the C API, but
-both seem to need some loose ends tied up.
+--/9DWx/yDrRhgMJTb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> Can't wait to pull this in!  BTW, Noah, do you know if this is still an
-> issue?
->
->         http://tracker.newdream.net/issues/2778
+Hi All,
 
-It does appear that -ENOENT is now returned. I added a unit test that
-expects FileNotFoundException and that works out nicely.
+I've been playing around with 0.51 of ceph on two test machines in
+work, I was experimenting with adjusting the crushmap to change from
+replicating across osd's to replicating across hosts. When I change
+the rule for my data pool from type osd to type host, compile up the
+crushmap and then a "ceph osd setcrushmap -i crush.new" it crashes my
+monitor if I have one running, if I have two, then one of them crashes
+and the process just hangs and leaves my test filesystem in an unclean
+state.
 
-- Noah
+I changed the rule data {} to this
+
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type host
+        step emit
+}
+
+Are there any constraints for changing the rules on where things get
+replicated? i.e. to go from osd to host to rack with the data and
+metadata?
+
+Here's my ceph.conf file and crushmap before the changes
+
+[global]
+        #auth supported =3D cephx
+        #keyring =3D /etc/ceph/ceph.keyring
+        filestore xattr use omap =3D true
+ =20
+[osd]
+        osd journal size =3D 1000
+        filestore xattr use omap =3D true
+
+[mon.a]
+        host =3D 134.226.112.194
+        mon addr =3D 134.226.112.194:6789
+        mon data =3D /data/mon.$id
+[mon.b]
+        host =3D 134.226.112.138
+        mon addr =3D 134.226.112.138:6789
+        mon data =3D /home/mon.$id
+
+[mds.a]
+        host =3D 134.226.112.194
+        mon data =3D /data/mds.$id
+
+[mds.b]
+        host =3D 134.226.112.138
+        mon data =3D /home/mds.$id
+
+[osd.0]
+        host =3D 134.226.112.194
+        osd data =3D /data/osd.$id
+        osd journal =3D /data/osd.$id.journal
+
+[osd.1]
+        host =3D 134.226.112.194
+        osd data =3D /data$id/osd.$id
+        osd journal =3D /data$id/osd.$id.journal
+
+[osd.2]
+        host =3D 134.226.112.138
+        osd data =3D /home/osd.$id
+        osd journal =3D /home/osd.$id.journal
+
+
+My crushmap
+
+# begin crush map
+
+# devices
+device 0 osd.0
+device 1 osd.1
+device 2 osd.2
+
+# types
+type 0 osd
+type 1 host
+type 2 rack
+type 3 row
+type 4 room
+type 5 datacenter
+type 6 pool
+
+# buckets
+host 134.226.112.194 {
+        id -2           # do not change unnecessarily
+        # weight 2.000
+        alg straw
+        hash 0  # rjenkins1
+        item osd.1 weight 1.000
+        item osd.0 weight 1.000
+}
+host 134.226.112.138 {
+        id -4           # do not change unnecessarily
+        # weight 1.000
+        alg straw
+        hash 0  # rjenkins1
+        item osd.2 weight 1.000
+}
+rack rack-1 {
+        id -3           # do not change unnecessarily
+        # weight 3.000
+        alg straw
+        hash 0  # rjenkins1
+        item 134.226.112.194 weight 2.000
+        item 134.226.112.138 weight 1.000
+}
+pool default {
+        id -1           # do not change unnecessarily
+        # weight 2.000
+        alg straw
+        hash 0  # rjenkins1
+        item rack-1 weight 2.000
+}
+
+# rules
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+rule rbd {
+        ruleset 2
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+
+
+Jimmy
+
+--=20
+Jimmy Tang
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/
+
+--/9DWx/yDrRhgMJTb
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEABECAAYFAlBI5DoACgkQmRvHlXBDSylHfACgutGn0Hn2kUINhXn7hPAKX2S5
+hFgAoPhaIaHpaqM9bWD7jaZ7EfnMXhA4
+=8QRt
+-----END PGP SIGNATURE-----
+
+--/9DWx/yDrRhgMJTb--
