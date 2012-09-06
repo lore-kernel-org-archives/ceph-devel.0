@@ -1,235 +1,210 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: [PATCH v5] rbd: fix the memory leak of bio_chain_clone
-Date: Thu,  6 Sep 2012 19:30:51 +0800
-Message-ID: <1346931051-8252-1-git-send-email-gzhao@suse.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 05/11] rbd: move rbd_opts to struct rbd_device
+Date: Thu, 06 Sep 2012 09:21:32 -0500
+Message-ID: <5048B16C.30709@inktank.com>
+References: <5037AB20.4000103@inktank.com> <5037ACF3.5000506@inktank.com> <CAC-hyiE42C1CahCDAxh0LawehFdY2c2VYiUxWcinqVAf4uJ27A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:42072 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab2IFLbI (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Thu, 6 Sep 2012 07:31:08 -0400
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:61081 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755498Ab2IFOVf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 10:21:35 -0400
+Received: by iahk25 with SMTP id k25so2091219iah.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 07:21:34 -0700 (PDT)
+In-Reply-To: <CAC-hyiE42C1CahCDAxh0LawehFdY2c2VYiUxWcinqVAf4uJ27A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-The bio_pair alloced in bio_chain_clone would not be freed,
-this will cause a memory leak. It could be freed actually only
-after 3 times release, because the reference count of bio_pair
-is initialized to 3 when bio_split and bio_pair_release only
-drops the reference count.
+On 08/30/2012 12:07 PM, Yehuda Sadeh wrote:
+> On Fri, Aug 24, 2012 at 9:33 AM, Alex Elder <elder@inktank.com> wrote:
+>> The rbd options don't really apply to the ceph client.  So don't
+>> store a pointer to it in the ceph_client structure, and put them
+>> (a struct, not a pointer) into the rbd_dev structure proper.
+>>
+>> Pass the rbd device structure to rbd_client_create() so it can
+>> assign rbd_dev->rbdc if successful, and have it return an error code
+>> instead of the rbd client pointer.
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>  drivers/block/rbd.c |   49
+>> ++++++++++++++++---------------------------------
+>>  1 file changed, 16 insertions(+), 33 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 130dbc2..b40f553 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -98,7 +98,6 @@ struct rbd_options {
+>>   */
+>>  struct rbd_client {
+>>         struct ceph_client      *client;
+>> -       struct rbd_options      *rbd_opts;
+>>         struct kref             kref;
+>>         struct list_head        node;
+>>  };
+>> @@ -152,6 +151,7 @@ struct rbd_device {
+>>         struct gendisk          *disk;          /* blkdev's gendisk and rq */
+>>         struct request_queue    *q;
+>>
+>> +       struct rbd_options      rbd_opts;
+>>         struct rbd_client       *rbd_client;
+>>
+>>         char                    name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
+>> @@ -273,8 +273,7 @@ static const struct block_device_operations
+>> rbd_bd_ops = {
+>>   * Initialize an rbd client instance.
+>>   * We own *ceph_opts.
+>>   */
+>> -static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts,
+>> -                                           struct rbd_options *rbd_opts)
+>> +static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts)
+>>  {
+>>         struct rbd_client *rbdc;
+>>         int ret = -ENOMEM;
+>> @@ -298,8 +297,6 @@ static struct rbd_client *rbd_client_create(struct
+>> ceph_options *ceph_opts,
+>>         if (ret < 0)
+>>                 goto out_err;
+>>
+>> -       rbdc->rbd_opts = rbd_opts;
+>> -
+>>         spin_lock(&rbd_client_list_lock);
+>>         list_add_tail(&rbdc->node, &rbd_client_list);
+>>         spin_unlock(&rbd_client_list_lock);
+>> @@ -402,42 +399,33 @@ static int parse_rbd_opts_token(char *c, void
+>> *private)
+>>   * Get a ceph client with specific addr and configuration, if one does
+>>   * not exist create it.
+>>   */
+>> -static struct rbd_client *rbd_get_client(const char *mon_addr,
+>> -                                        size_t mon_addr_len,
+>> -                                        char *options)
+>> +static int rbd_get_client(struct rbd_device *rbd_dev, const char *mon_addr,
+>> +                               size_t mon_addr_len, char *options)
+>>  {
+>> -       struct rbd_client *rbdc;
+>> +       struct rbd_options *rbd_opts = &rbd_dev->rbd_opts;
+>>         struct ceph_options *ceph_opts;
+>> -       struct rbd_options *rbd_opts;
+>> -
+>> -       rbd_opts = kzalloc(sizeof(*rbd_opts), GFP_KERNEL);
+>> -       if (!rbd_opts)
+>> -               return ERR_PTR(-ENOMEM);
+>> +       struct rbd_client *rbdc;
+>>
+>>         rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
+>>
+>>         ceph_opts = ceph_parse_options(options, mon_addr,
+>>                                         mon_addr + mon_addr_len,
+>>                                         parse_rbd_opts_token, rbd_opts);
+>> -       if (IS_ERR(ceph_opts)) {
+>> -               kfree(rbd_opts);
+>> -               return ERR_CAST(ceph_opts);
+>> -       }
+>> +       if (IS_ERR(ceph_opts))
+>> +               return PTR_ERR(ceph_opts);
+>>
+>>         rbdc = rbd_client_find(ceph_opts);
+>>         if (rbdc) {
+>>                 /* using an existing client */
+>>                 ceph_destroy_options(ceph_opts);
+> 
+> It'll probably be better to use a reference count to control ceph_opts lifecycle
 
-The function bio_pair_release must be called three times for
-releasing bio_pair, and the callback functions of bios on the
-requests will be called when the last release time in bio_pair_release,
-however, these functions will also be called in rbd_req_cb. In
-other words, they will be called twice, and it may cause serious
-consequences.
+I looked at this.
 
-This patch clones bio chain from the origin directly instead of
-bio_split. The old bios which will be split may be modified by
-the callback fn, so their copys need to be saved(called split_bio).
-The new bio chain can be released whenever we don't need it.
+In this case, ceph_opts is directly tied to a ceph_client.
+If a ceph client exists whose options match the one that
+has been created here, that client will be used, and its
+options get destroyed when the ceph_client gets destroyed
+(and the ceph_client is refcounted).  The ceph_opts
+created here will never be referenced by anything else
+so it's safe to just destroy it.
 
-This patch can just handle the split of *single page* bios, but
-it's enough here for the following reasons:
+If no existing rbd_client has a ceph_client with matching
+ceph_options, then one is created below and it will use
+the ceph_opts created here and thus its life cycle will
+be managed by that ceph_client's reference count.
 
-Only bios span across multiple osds need to be split, and these bios
-*must* be single page because of rbd_merge_bvec. With the function,
-the new bvec will not permitted to merge, if it make the bio cross
-the osd boundary, except it is the first one. In other words, there
-are two types of bio:
+I believe this means there is no reason to reference count
+ceph_opts.
 
-	- the bios don't cross the osd boundary
-	  They have one or more pages. The value of offset will
-	  always be 0 in this case, so nothing will be changed, and
-	  the code changes tmp bios doesn't take effact at all.
+Yehuda, please let me know if you disagree with this.  If
+not, would you sign off on this?
 
-	- the bios cross the osd boundary
-	  Each one have only one page. These bios need to be split,
-	  and the offset is used to indicate the next bio, it makes
-	  sense only in this instance.
 
-The original bios may be modifid by the callback fn before the next 
-bio_chain_clone() called, when a bio need to be split, so its copy 
-will be saved.
 
-Signed-off-by: Guangliang Zhao <gzhao@suse.com>
----
+There is a different problem here though, which I will
+address separately.  The rbd_client_find() has protection
+of rbd_client_list_lock(), and inserting a new rbd
+client into the list in rbd_client_create() gets the
+same protection, but there's a race between the two
+that could lead to the creation of multiple clients for
+the same set of options.  This may still produce correct
+behavior but it's not the way it should work.
 
- drivers/block/rbd.c |  102 ++++++++++++++++++++++++++++++---------------------
- 1 file changed, 60 insertions(+), 42 deletions(-)
+I've created this bug to track getting this fixed at
+some (near) future date:
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 9917943..a605e1c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -717,50 +717,70 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
- 	}
- }
- 
--/*
-+/**
-  * bio_chain_clone - clone a chain of bios up to a certain length.
-- * might return a bio_pair that will need to be released.
-+ * @old: bio to clone
-+ * @split_bio: bio which will be split
-+ * @offset: start point for bio clone
-+ * @len: length of bio chain
-+ * @gfp_mask: allocation priority
-+ *
-+ * Value of split_bio will be !NULL only when there is a bio need to be
-+ * split. NULL otherwise.
-+ *
-+ * RETURNS:
-+ * Pointer to new bio chain on success, NULL on failure.
-  */
--static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
--				   struct bio_pair **bp,
--				   int len, gfp_t gfpmask)
-+static struct bio *bio_chain_clone(struct bio **old, struct bio **split_bio,
-+				   int *offset, int len, gfp_t gfpmask)
- {
--	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
--	int total = 0;
--
--	if (*bp) {
--		bio_pair_release(*bp);
--		*bp = NULL;
--	}
-+	struct bio *tmp, *old_chain, *split, *new_chain = NULL, *tail = NULL;
-+	int total = 0, need = len;
- 
-+	split = *split_bio;
-+	old_chain = split ? split : *old;
- 	while (old_chain && (total < len)) {
- 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
- 		if (!tmp)
- 			goto err_out;
- 
--		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
--
--			/*
--			 * this split can only happen with a single paged bio,
--			 * split_bio will BUG_ON if this is not the case
--			 */
--			dout("bio_chain_clone split! total=%d remaining=%d"
--			     "bi_size=%u\n",
--			     total, len - total, old_chain->bi_size);
--
--			/* split the bio. We'll release it either in the next
--			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
--				goto err_out;
--
--			__bio_clone(tmp, &bp->bio1);
--
--			*next = &bp->bio2;
-+		__bio_clone(tmp, old_chain);
-+		tmp->bi_sector += *offset >> SECTOR_SHIFT;
-+		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-+		/*
-+		 * The bios span across multiple osd objects must be
-+		 * single paged, rbd_merge_bvec would guarantee it.
-+		 * So we needn't worry about other things.
-+		 */
-+		if (tmp->bi_size - *offset > need) {
-+			tmp->bi_size = need;
-+			tmp->bi_io_vec->bv_len = need;
-+			*offset += need;
-+			if (!split) {
-+				/*
-+				 * Because the old bio may be modified by the
-+				 * callback function, its copy should be saved.
-+				 */
-+				split = bio_clone(old_chain, gfpmask);
-+				/*
-+				 * This is always the last allocation in this
-+				 * loop, so we only need release the bio chain
-+				 * when failed.
-+				 */
-+				if (!split)
-+					goto err_out;
-+
-+				split->bi_next = old_chain->bi_next;
-+			}
- 		} else {
--			__bio_clone(tmp, old_chain);
--			*next = old_chain->bi_next;
-+			old_chain = old_chain->bi_next;
-+			tmp->bi_size -= *offset;
-+			tmp->bi_io_vec->bv_len -= *offset;
-+			*offset = 0;
-+			if (split) {
-+				bio_put(split);
-+				split = NULL;
-+			}
- 		}
- 
- 		tmp->bi_bdev = NULL;
-@@ -773,9 +793,9 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 			tail->bi_next = tmp;
- 			tail = tmp;
- 		}
--		old_chain = old_chain->bi_next;
- 
- 		total += tmp->bi_size;
-+		need -= tmp->bi_size;
- 	}
- 
- 	BUG_ON(total < len);
-@@ -784,6 +804,7 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 		tail->bi_next = NULL;
- 
- 	*old = old_chain;
-+	*split_bio = split;
- 
- 	return new_chain;
- 
-@@ -1434,16 +1455,15 @@ static void rbd_rq_fn(struct request_queue *q)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	struct request *rq;
--	struct bio_pair *bp = NULL;
- 
- 	while ((rq = blk_fetch_request(q))) {
- 		struct bio *bio;
--		struct bio *rq_bio, *next_bio = NULL;
-+		struct bio *rq_bio, *split_bio = NULL;
- 		bool do_write;
- 		unsigned int size;
- 		u64 op_size = 0;
- 		u64 ofs;
--		int num_segs, cur_seg = 0;
-+		int num_segs, cur_seg = 0, offset = 0;
- 		struct rbd_req_coll *coll;
- 		struct ceph_snap_context *snapc;
- 
-@@ -1507,7 +1527,7 @@ static void rbd_rq_fn(struct request_queue *q)
- 						  ofs, size,
- 						  NULL, NULL);
- 			kref_get(&coll->kref);
--			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-+			bio = bio_chain_clone(&rq_bio, &split_bio, &offset,
- 					      op_size, GFP_ATOMIC);
- 			if (!bio) {
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
-@@ -1535,12 +1555,10 @@ next_seg:
- 			ofs += op_size;
- 
- 			cur_seg++;
--			rq_bio = next_bio;
- 		} while (size > 0);
- 		kref_put(&coll->kref, rbd_coll_release);
- 
--		if (bp)
--			bio_pair_release(bp);
-+		BUG_ON(split_bio);
- 		spin_lock_irq(q->queue_lock);
- 
- 		ceph_put_snap_context(snapc);
--- 
-1.7.10.4
+    http://tracker.newdream.net/issues/3094
+
+					-Alex
+
+>> -               kfree(rbd_opts);
+>> -
+>> -               return rbdc;
+>> +       } else {
+>> +               rbdc = rbd_client_create(ceph_opts);
+>> +               if (IS_ERR(rbdc))
+>> +                       return PTR_ERR(rbdc);
+>>         }
+>> +       rbd_dev->rbd_client = rbdc;
+>>
+>> -       rbdc = rbd_client_create(ceph_opts, rbd_opts);
+>> -       if (IS_ERR(rbdc))
+>> -               kfree(rbd_opts);
+>> -
+>> -       return rbdc;
+>> +       return 0;
+>>  }
+>>
+>>  /*
+>> @@ -455,7 +443,6 @@ static void rbd_client_release(struct kref *kref)
+>>         spin_unlock(&rbd_client_list_lock);
+>>
+>>         ceph_destroy_client(rbdc->client);
+>> -       kfree(rbdc->rbd_opts);
+>>         kfree(rbdc);
+>>  }
+>>
+>> @@ -2526,13 +2513,9 @@ static ssize_t rbd_add(struct bus_type *bus,
+>>         if (rc)
+>>                 goto err_put_id;
+>>
+>> -       rbd_dev->rbd_client = rbd_get_client(mon_addrs, mon_addrs_size - 1,
+>> -                                               options);
+>> -       if (IS_ERR(rbd_dev->rbd_client)) {
+>> -               rc = PTR_ERR(rbd_dev->rbd_client);
+>> -               rbd_dev->rbd_client = NULL;
+>> +       rc = rbd_get_client(rbd_dev, mon_addrs, mon_addrs_size - 1, options);
+>> +       if (rc < 0)
+>>                 goto err_put_id;
+>> -       }
+>>
+>>         /* pick the pool */
+>>         osdc = &rbd_dev->rbd_client->client->osdc;
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
