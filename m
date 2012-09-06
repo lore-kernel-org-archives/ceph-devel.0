@@ -1,98 +1,44 @@
-From: Sage Weil <sage@inktank.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
 Subject: Re: [GIT PULL v5] java: add libcephfs Java bindings
-Date: Thu, 6 Sep 2012 08:42:18 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
+Date: Thu, 6 Sep 2012 11:02:20 -0700
+Message-ID: <CAPrxi5-_AYV0UUuABCM+LkSpRVOM63R5XPDmjz9HE3UxFBe7AA@mail.gmail.com>
 References: <CAPrxi5-6JAWzUdsgdfHw=pG+6r5LN5i8X92DwxdejosY0xT0Dw@mail.gmail.com>
+	<alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54778 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756847Ab2IFPmT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 11:42:19 -0400
-In-Reply-To: <CAPrxi5-6JAWzUdsgdfHw=pG+6r5LN5i8X92DwxdejosY0xT0Dw@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:49473 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932671Ab2IFSCX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 14:02:23 -0400
+Received: by ieje11 with SMTP id e11so3519202iej.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 11:02:22 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>, gcs@debian.hu
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: gcs@debian.hu, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 5 Sep 2012, Noah Watkins wrote:
-> Latest version of Java bindings. There is ~full coverage of the
-> libcephfs API, and nearly a complete set of unit tests covering
-> success, and common failure cases. In addition to the basic review, I
-> think the Debian integration needs review.
-> 
-> Patches are here:
-> 
->   git://github.com/noahdesu/ceph.git wip-java-cephfs
+On Thu, Sep 6, 2012 at 8:42 AM, Sage Weil <sage@inktank.com> wrote:
+>
+> Also, I noticed the automake patch removes CephException.java, added in
+> the previous patch... probably an accident?
 
-The debian bits look okay to my untrained eye.  Laszlo, do you mind taking 
-a quick look?
+I left CephException out intentionally because it could be replaced by
+generic exceptions in Java like IOException or FileNotFoundException.
+My belief is that CephException (and specializations of this) will
+need to be re-introduced as more error cases are covered. For example,
+I think we'll want a CephBadFileDescriptor, but currently libcephfs
+doesn't appear to return -EBADF (the client is crashing do to fd_map
+assert). So, the Java wrappers should be as stable as the C API, but
+both seem to need some loose ends tied up.
 
-Also, I noticed the automake patch removes CephException.java, added in 
-the previous patch... probably an accident?
+> Can't wait to pull this in!  BTW, Noah, do you know if this is still an
+> issue?
+>
+>         http://tracker.newdream.net/issues/2778
 
-Can't wait to pull this in!  BTW, Noah, do you know if this is still an 
-issue?
+It does appear that -ENOENT is now returned. I added a unit test that
+expects FileNotFoundException and that works out nicely.
 
-	http://tracker.newdream.net/issues/2778
-
-Thanks!
-sage
-
-> 
-> ----------------------------------------------------------------
-> Noah Watkins (4):
->       libcephfs: return error when not mounted
->       java: add Java and C++ source files
->       automake: setup autotools to build cephfs-java
->       debian: add libcephfs-java package
-> 
-> Sage Weil (2):
->       do_autogen.sh: add -j flag to enable java stuff
->       Makefile: add src/include to #include path for libcephfs_jni_la
-> 
->  configure.ac                                       |   74 +
->  debian/.gitignore                                  |    1 +
->  debian/control                                     |    7 +-
->  debian/libceph1-java.install                       |    2 +
->  debian/rules                                       |    1 +
->  do_autogen.sh                                      |    5 +-
->  src/Makefile.am                                    |   15 +-
->  src/common/config_opts.h                           |    1 +
->  src/include/cephfs/libcephfs.h                     |    7 +
->  src/java/.gitignore                                |    4 +
->  src/java/Makefile.am                               |   43 +
->  src/java/README                                    |   48 +
->  src/java/build.xml                                 |   67 +
->  src/java/java/com/ceph/fs/CephMount.java           |  645 ++++++
->  src/java/java/com/ceph/fs/CephNativeLoader.java    |   35 +
->  .../java/com/ceph/fs/CephNotMountedException.java  |   42 +
->  src/java/java/com/ceph/fs/CephStat.java            |   45 +
->  src/java/java/com/ceph/fs/CephStatVFS.java         |   33 +
->  src/java/native/libcephfs_jni.cc                   | 2383 ++++++++++++++++++++
->  src/java/test/CephMountCreateTest.java             |   88 +
->  src/java/test/CephMountTest.java                   |  797 +++++++
->  src/java/test/CephUnmountedTest.java               |  143 ++
->  src/libcephfs.cc                                   |  134 +-
->  23 files changed, 4614 insertions(+), 6 deletions(-)
->  create mode 100644 debian/libceph1-java.install
->  create mode 100644 src/java/.gitignore
->  create mode 100644 src/java/Makefile.am
->  create mode 100644 src/java/README
->  create mode 100644 src/java/build.xml
->  create mode 100644 src/java/java/com/ceph/fs/CephMount.java
->  create mode 100644 src/java/java/com/ceph/fs/CephNativeLoader.java
->  create mode 100644 src/java/java/com/ceph/fs/CephNotMountedException.java
->  create mode 100644 src/java/java/com/ceph/fs/CephStat.java
->  create mode 100644 src/java/java/com/ceph/fs/CephStatVFS.java
->  create mode 100644 src/java/native/libcephfs_jni.cc
->  create mode 100644 src/java/test/CephMountCreateTest.java
->  create mode 100644 src/java/test/CephMountTest.java
->  create mode 100644 src/java/test/CephUnmountedTest.java
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+- Noah
