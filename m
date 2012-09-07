@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/5] rbd: define rbd_assert()
-Date: Fri, 07 Sep 2012 11:13:35 -0700
-Message-ID: <504A394F.5090200@inktank.com>
-References: <5049F7F5.1070609@inktank.com> <5049F903.4070003@inktank.com>
+Subject: Re: [PATCH 2/5] rbd: rename rbd_id_get()
+Date: Fri, 07 Sep 2012 11:14:19 -0700
+Message-ID: <504A397B.4040901@inktank.com>
+References: <5049F7F5.1070609@inktank.com> <5049F90C.5040504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:57231 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:40925 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342Ab2IGSNi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:13:38 -0400
-Received: by pbbrr13 with SMTP id rr13so4378132pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:13:38 -0700 (PDT)
-In-Reply-To: <5049F903.4070003@inktank.com>
+	with ESMTP id S1752803Ab2IGSOV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:14:21 -0400
+Received: by pbbrr13 with SMTP id rr13so4378836pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:14:21 -0700 (PDT)
+In-Reply-To: <5049F90C.5040504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -22,133 +22,122 @@ Cc: ceph-devel@vger.kernel.org
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 09/07/2012 06:39 AM, Alex Elder wrote:
-> Define rbd_assert() and use it in place of various BUG_ON() calls
-> now present in the code.  By default assertion checking is enabled;
-> we want to do this differently at some point.
+> This should have been done as part of this commit:
+>
+>      commit de71a2970d57463d3d965025e33ec3adcf391248
+>      Author: Alex Elder <elder@inktank.com>
+>      Date:   Tue Jul 3 16:01:19 2012 -0500
+>      rbd: rename rbd_device->id
+>
+> rbd_id_get() is assigning the rbd_dev->dev_id field.  Change the
+> name of that function as well as rbd_id_put() and rbd_id_max
+> to reflect what they are affecting.
+>
+> Add some dynamic debug statements related to rbd device id activity.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   35 ++++++++++++++++++++++++++---------
->   1 file changed, 26 insertions(+), 9 deletions(-)
+>   drivers/block/rbd.c |   25 +++++++++++++++----------
+>   1 file changed, 15 insertions(+), 10 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 7ba70c4..d84b534 100644
+> index d84b534..8cb8e0a 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -41,6 +41,8 @@
->
->   #include "rbd_types.h"
->
-> +#define RBD_DEBUG	/* Activate rbd_assert() calls */
-> +
->   /*
->    * The basic unit of block I/O is a sector.  It is interpreted in a
->    * number of contexts in Linux (blk, bio, genhd), but the default is
-> @@ -232,6 +234,18 @@ static struct device rbd_root_dev = {
->   	.release =      rbd_root_dev_release,
->   };
->
-> +#ifdef RBD_DEBUG
-> +#define rbd_assert(expr)						\
-> +		if (unlikely(!(expr))) {				\
-> +			printk(KERN_ERR "\nAssertion failure in %s() "	\
-> +						"at line %d:\n\n"	\
-> +					"\trbd_assert(%s);\n\n",	\
-> +					__func__, __LINE__, #expr);	\
-> +			BUG();						\
-> +		}
-> +#else /* !RBD_DEBUG */
-> +#  define rbd_assert(expr)	((void) 0)
-> +#endif /* !RBD_DEBUG */
->
->   static struct device *rbd_get_dev(struct rbd_device *rbd_dev)
->   {
-> @@ -406,7 +420,8 @@ static int parse_rbd_opts_token(char *c, void *private)
->   		rbd_opts->read_only = false;
->   		break;
->   	default:
-> -		BUG_ON(token);
-> +		rbd_assert(false);
-> +		break;
->   	}
->   	return 0;
->   }
-> @@ -705,7 +720,7 @@ static u64 rbd_segment_length(struct rbd_device
-> *rbd_dev,
->
->   	offset &= segment_size - 1;
->
-> -	BUG_ON(length > U64_MAX - offset);
-> +	rbd_assert(length <= U64_MAX - offset);
->   	if (offset + length > segment_size)
->   		length = segment_size - offset;
->
-> @@ -842,7 +857,7 @@ static struct bio *bio_chain_clone(struct bio **old,
-> struct bio **next,
->   		total += tmp->bi_size;
->   	}
->
-> -	BUG_ON(total < len);
-> +	rbd_assert(total == len);
->
->   	*old = old_chain;
->
-> @@ -1101,7 +1116,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
->   	struct page **pages;
->   	int num_pages;
->
-> -	BUG_ON(ops == NULL);
-> +	rbd_assert(ops != NULL);
->
->   	num_pages = calc_pages_for(ofs , len);
->   	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
-> @@ -1163,7 +1178,7 @@ static int rbd_do_op(struct request *rq,
->   	/* we've taken care of segment sizes earlier when we
->   	   cloned the bios. We should never have a segment
->   	   truncated at this point */
-> -	BUG_ON(seg_len < len);
-> +	rbd_assert(seg_len == len);
->
->   	ret = rbd_do_request(rq, rbd_dev, snapc, snapid,
->   			     seg_name, seg_ofs, seg_len,
-> @@ -2186,7 +2201,7 @@ static int __rbd_init_snaps_header(struct
-> rbd_device *rbd_dev)
->   					     : CEPH_NOSNAP;
->   		snap = links != head ? list_entry(links, struct rbd_snap, node)
->   				     : NULL;
-> -		BUG_ON(snap && snap->id == CEPH_NOSNAP);
-> +		rbd_assert(!snap || snap->id != CEPH_NOSNAP);
->
->   		if (snap_id == CEPH_NOSNAP || (snap && snap->id > snap_id)) {
->   			struct list_head *next = links->next;
-> @@ -2222,8 +2237,9 @@ static int __rbd_init_snaps_header(struct
-> rbd_device *rbd_dev)
->   		} else {
->   			/* Already have this one */
->
-> -			BUG_ON(snap->size != rbd_dev->header.snap_sizes[index]);
-> -			BUG_ON(strcmp(snap->name, snap_name));
-> +			rbd_assert(snap->size ==
-> +					rbd_dev->header.snap_sizes[index]);
-> +			rbd_assert(!strcmp(snap->name, snap_name));
->
->   			/* Done with this list entry; advance */
->
-> @@ -2313,7 +2329,7 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
->   	int rbd_id = rbd_dev->dev_id;
->   	int max_id;
->
-> -	BUG_ON(rbd_id < 1);
-> +	rbd_assert(rbd_id > 0);
->
->   	spin_lock(&rbd_dev_list_lock);
->   	list_del_init(&rbd_dev->node);
-> @@ -2705,6 +2721,7 @@ static ssize_t rbd_remove(struct bus_type *bus,
->
->   done:
->   	mutex_unlock(&ctl_mutex);
-> +
+> @@ -2304,26 +2304,28 @@ static int rbd_init_watch_dev(struct rbd_device
+> *rbd_dev)
 >   	return ret;
 >   }
+>
+> -static atomic64_t rbd_id_max = ATOMIC64_INIT(0);
+> +static atomic64_t rbd_dev_id_max = ATOMIC64_INIT(0);
+>
+>   /*
+>    * Get a unique rbd identifier for the given new rbd_dev, and add
+>    * the rbd_dev to the global list.  The minimum rbd id is 1.
+>    */
+> -static void rbd_id_get(struct rbd_device *rbd_dev)
+> +static void rbd_dev_id_get(struct rbd_device *rbd_dev)
+>   {
+> -	rbd_dev->dev_id = atomic64_inc_return(&rbd_id_max);
+> +	rbd_dev->dev_id = atomic64_inc_return(&rbd_dev_id_max);
+>
+>   	spin_lock(&rbd_dev_list_lock);
+>   	list_add_tail(&rbd_dev->node, &rbd_dev_list);
+>   	spin_unlock(&rbd_dev_list_lock);
+> +	dout("rbd_dev %p given dev id %llu\n", rbd_dev,
+> +		(unsigned long long) rbd_dev->dev_id);
+>   }
+>
+>   /*
+>    * Remove an rbd_dev from the global list, and record that its
+>    * identifier is no longer in use.
+>    */
+> -static void rbd_id_put(struct rbd_device *rbd_dev)
+> +static void rbd_dev_id_put(struct rbd_device *rbd_dev)
+>   {
+>   	struct list_head *tmp;
+>   	int rbd_id = rbd_dev->dev_id;
+> @@ -2331,6 +2333,8 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+>
+>   	rbd_assert(rbd_id > 0);
+>
+> +	dout("rbd_dev %p released dev id %llu\n", rbd_dev,
+> +		(unsigned long long) rbd_dev->dev_id);
+>   	spin_lock(&rbd_dev_list_lock);
+>   	list_del_init(&rbd_dev->node);
+>
+> @@ -2338,7 +2342,7 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+>   	 * If the id being "put" is not the current maximum, there
+>   	 * is nothing special we need to do.
+>   	 */
+> -	if (rbd_id != atomic64_read(&rbd_id_max)) {
+> +	if (rbd_id != atomic64_read(&rbd_dev_id_max)) {
+>   		spin_unlock(&rbd_dev_list_lock);
+>   		return;
+>   	}
+> @@ -2359,12 +2363,13 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+>   	spin_unlock(&rbd_dev_list_lock);
+>
+>   	/*
+> -	 * The max id could have been updated by rbd_id_get(), in
+> +	 * The max id could have been updated by rbd_dev_id_get(), in
+>   	 * which case it now accurately reflects the new maximum.
+>   	 * Be careful not to overwrite the maximum value in that
+>   	 * case.
+>   	 */
+> -	atomic64_cmpxchg(&rbd_id_max, rbd_id, max_id);
+> +	atomic64_cmpxchg(&rbd_dev_id_max, rbd_id, max_id);
+> +	dout("  max dev id has been reset\n");
+>   }
+>
+>   /*
+> @@ -2563,7 +2568,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	init_rwsem(&rbd_dev->header_rwsem);
+>
+>   	/* generate unique id: find highest unique id, add one */
+> -	rbd_id_get(rbd_dev);
+> +	rbd_dev_id_get(rbd_dev);
+>
+>   	/* Fill in the device name, now that we have its id. */
+>   	BUILD_BUG_ON(DEV_NAME_LEN
+> @@ -2631,7 +2636,7 @@ err_put_id:
+>   		kfree(rbd_dev->image_name);
+>   		kfree(rbd_dev->pool_name);
+>   	}
+> -	rbd_id_put(rbd_dev);
+> +	rbd_dev_id_put(rbd_dev);
+>   err_nomem:
+>   	kfree(rbd_dev);
+>   	kfree(options);
+> @@ -2683,7 +2688,7 @@ static void rbd_dev_release(struct device *dev)
+>   	kfree(rbd_dev->header_name);
+>   	kfree(rbd_dev->pool_name);
+>   	kfree(rbd_dev->image_name);
+> -	rbd_id_put(rbd_dev);
+> +	rbd_dev_id_put(rbd_dev);
+>   	kfree(rbd_dev);
+>
+>   	/* release module ref */
 >
 
