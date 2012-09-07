@@ -1,55 +1,43 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/9] rbd: rearrange initialization sequence
-Date: Fri, 07 Sep 2012 10:50:32 -0500
-Message-ID: <504A17C8.3050502@inktank.com>
-References: <504A152E.4000905@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Telling an osd to reload a cls library
+Date: Fri, 7 Sep 2012 08:51:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209070849260.9861@cobra.newdream.net>
+References: <CAEVWPAVfRk-2pg0RATzH8ph0zqXWrodm4viWhjDHJh3+P-zh7g@mail.gmail.com> <50494C6B.5090005@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:51404 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750746Ab2IGPuf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 11:50:35 -0400
-Received: by ieje11 with SMTP id e11so5273114iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 08:50:34 -0700 (PDT)
-In-Reply-To: <504A152E.4000905@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35289 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750746Ab2IGPva (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 11:51:30 -0400
+In-Reply-To: <50494C6B.5090005@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Ian Pye <ianpye@gmail.com>, ceph-devel@vger.kernel.org
 
-On 09/07/2012 10:39 AM, Alex Elder wrote:
-> This fifth series rearranges the order of a bunch of steps that
-> occur during initialization of a new rbd device structure.  It
-> consists almost entirely of simple movements of code, but it
-> significantly separates updating a device's snapshot list from
-> registering devices for newly-found snapshots (which will be
-> for the benefit of format 2 image initialization).
+On Thu, 6 Sep 2012, Josh Durgin wrote:
+> On 09/06/2012 06:17 PM, Ian Pye wrote:
+> > Hi,
+> > 
+> > Is there a way to tell an osd to reload a cls.so file without
+> > re-starting the osd?
+> > 
+> > Thanks,
+> > 
+> > Ian
 > 
-> It is available as branch "wip-rbd-review-4" on the ceph-client git
-> repository, and is based on the branch "wip-rbd-review-3".
-> 
->     https://github.com/ceph/ceph-client/tree/wip-rbd-review-4
+> Not right now, although there could be an admin socket or
+> 'ceph osd tell' command to do so I guess.
 
-Whoops, forgot to update after copy/paste.  This should have read:
+In order to make this work right, I think ClassHandler needs to be updated 
+to return a shared_ptr<> to ClassData and make the ~ClassData do a 
+dlclose()... or something along those lines so that a reload won't screw 
+up other threads that are currently executing the class you're trying to 
+close.
 
+The 'reload' is mostly just a 'close', since on the next request it will 
+get loaded automatically (tho it could do an explicit load so that you see 
+any errors immediately).
 
-It is available as branch "wip-rbd-review-5" on the ceph-client git
-repository, and is based on the branch "wip-rbd-review-4".
-
-    https://github.com/ceph/ceph-client/tree/wip-rbd-review-5
-
-> 
-> 					-Alex
-> 
-> [PATCH 1/9]  d58dd5e rbd: assign header name later
-> [PATCH 2/9]  c8fd9cf rbd: defer registering snapshot devices
-> [PATCH 3/9]  bf469fa rbd: call set_snap() before snap_devs_update()
-> [PATCH 4/9]  1ee626d rbd: read the header before registering device
-> [PATCH 5/9]  f05c12d rbd: defer setting device id
-> [PATCH 6/9]  8b8b8b7 rbd: call rbd_init_disk() sooner
-> [PATCH 7/9]  f1194c2 rbd: drop dev registration check for new snap
-> [PATCH 8/9]  345936d rbd: set initial capacity in rbd_init_disk()
-> [PATCH 9/9]  527bbdd rbd: set up watch before announcing disk
-> 
-
+sage
