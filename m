@@ -1,152 +1,45 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 8/9] rbd: define rbd_dev_v2_snapc_refresh()
-Date: Fri, 07 Sep 2012 16:15:33 -0500
-Message-ID: <504A63F5.4070307@inktank.com>
+Subject: [PATCH 9/9] rbd: activate v2 image support
+Date: Fri, 07 Sep 2012 16:15:40 -0500
+Message-ID: <504A63FC.1080005@inktank.com>
 References: <504A6273.7030807@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:45931 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756794Ab2IGVPg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 17:15:36 -0400
-Received: by mail-ie0-f174.google.com with SMTP id e11so43209iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 14:15:36 -0700 (PDT)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:41314 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756794Ab2IGVPn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 17:15:43 -0400
+Received: by iahk25 with SMTP id k25so23159iah.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 14:15:42 -0700 (PDT)
 In-Reply-To: <504A6273.7030807@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Define a new function rbd_dev_v2_snapc_refresh() to update/refresh
-the snapshot context for a format version 2 rbd image.
-
-Update rbd_refresh_header() so it selects which function to use
-based on the image format.
-
-Rename __rbd_refresh_header() to be rbd_dev_v1_snapc_refresh()
-to be consistent with the naming of its version 2 counterpart.
-Similarly rename rbd_refresh_header to be rbd_dev_snapc_refresh().
-
-Unrelated--we use rbd_image_format_valid() here.  Delete the other
-use of it, which was primarily put in place to ensure that function
-was referenced at the time it was defined.
+Now that v2 images support is fully implemented, have
+rbd_dev_v2_probe() return 0 to indicate a successful probe.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   41 +++++++++++++++++++++++++++++++++--------
- 1 file changed, 33 insertions(+), 8 deletions(-)
+ drivers/block/rbd.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index ad27be2..b466393 100644
+index b466393..2f83f71 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -268,7 +268,8 @@ static void rbd_put_dev(struct rbd_device *rbd_dev)
- 	put_device(&rbd_dev->dev);
- }
-
--static int rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver);
-+static int rbd_dev_snapc_refresh(struct rbd_device *rbd_dev, u64 *hver);
-+static int rbd_dev_v2_snapc_refresh(struct rbd_device *rbd_dev, u64 *hver);
-
- static int rbd_open(struct block_device *bdev, fmode_t mode)
- {
-@@ -1303,7 +1304,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
- 	dout("rbd_watch_cb %s notify_id=%llu opcode=%u\n",
- 		rbd_dev->header_name, (unsigned long long) notify_id,
- 		(unsigned int) opcode);
--	rc = rbd_refresh_header(rbd_dev, &hver);
-+	rc = rbd_dev_snapc_refresh(rbd_dev, &hver);
- 	if (rc)
- 		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
- 			   " update snaps: %d\n", rbd_dev->major, rc);
-@@ -1718,7 +1719,7 @@ static void __rbd_remove_all_snaps(struct
-rbd_device *rbd_dev)
- /*
-  * only read the first part of the ondisk header, without the snaps info
-  */
--static int __rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_v1_snapc_refresh(struct rbd_device *rbd_dev, u64 *hver)
- {
- 	int ret;
- 	struct rbd_image_header h;
-@@ -1767,12 +1768,16 @@ static int __rbd_refresh_header(struct
-rbd_device *rbd_dev, u64 *hver)
- 	return ret;
- }
-
--static int rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_snapc_refresh(struct rbd_device *rbd_dev, u64 *hver)
- {
- 	int ret;
-
-+	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--	ret = __rbd_refresh_header(rbd_dev, hver);
-+	if (rbd_dev->image_format == 1)
-+		ret = rbd_dev_v1_snapc_refresh(rbd_dev, hver);
-+	else
-+		ret = rbd_dev_v2_snapc_refresh(rbd_dev, hver);
- 	mutex_unlock(&ctl_mutex);
-
- 	return ret;
-@@ -1932,7 +1937,7 @@ static ssize_t rbd_image_refresh(struct device *dev,
- 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
- 	int ret;
-
--	ret = rbd_refresh_header(rbd_dev, NULL);
-+	ret = rbd_dev_snapc_refresh(rbd_dev, NULL);
-
- 	return ret < 0 ? ret : size;
- }
-@@ -2389,6 +2394,27 @@ static char *rbd_dev_snap_info(struct rbd_device
-*rbd_dev, u32 which,
- 	return ERR_PTR(-EINVAL);
- }
-
-+static int rbd_dev_v2_snapc_refresh(struct rbd_device *rbd_dev, u64 *hver)
-+{
-+	int ret;
-+
-+	down_write(&rbd_dev->header_rwsem);
-+	ret = rbd_dev_v2_snap_context(rbd_dev, hver);
-+	dout("rbd_dev_v2_snap_context returned %d\n", ret);
-+	if (ret)
-+		goto out;
-+	ret = rbd_dev_snaps_update(rbd_dev);
-+	dout("rbd_dev_snaps_update returned %d\n", ret);
-+	if (ret)
-+		goto out;
-+	ret = rbd_dev_snaps_register(rbd_dev);
-+	dout("rbd_dev_snaps_register returned %d\n", ret);
-+out:
-+	up_write(&rbd_dev->header_rwsem);
-+
-+	return 0;
-+}
-+
- /*
-  * Scan the rbd device's current snapshot list and compare it to the
-  * newly-received snapshot context.  Remove any existing snapshots
-@@ -2551,7 +2577,7 @@ static int rbd_init_watch_dev(struct rbd_device
+@@ -2973,7 +2973,7 @@ static int rbd_dev_v2_probe(struct rbd_device
 *rbd_dev)
- 	do {
- 		ret = rbd_req_sync_watch(rbd_dev);
- 		if (ret == -ERANGE) {
--			rc = rbd_refresh_header(rbd_dev, NULL);
-+			rc = rbd_dev_snapc_refresh(rbd_dev, NULL);
- 			if (rc < 0)
- 				return rc;
- 		}
-@@ -3034,7 +3060,6 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	rc = rbd_dev_probe(rbd_dev);
- 	if (rc < 0)
- 		goto err_out_client;
--	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
+ 	dout("discovered version 2 image, header name is %s\n",
+ 		rbd_dev->header_name);
 
- 	rc = rbd_dev_snaps_update(rbd_dev);
- 	if (rc)
+-	return -ENOTSUPP;
++	return 0;
+ out_err:
+ 	kfree(rbd_dev->header_name);
+ 	rbd_dev->header_name = NULL;
 -- 
 1.7.9.5
 
