@@ -1,221 +1,184 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/3] rbd: add an rbd features field
-Date: Fri, 07 Sep 2012 14:25:05 -0500
-Message-ID: <504A4A11.4050905@inktank.com>
-References: <504A498D.30708@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 3/7] rbd: return snap name from rbd_add_parse_args()
+Date: Fri, 07 Sep 2012 12:32:23 -0700
+Message-ID: <504A4BC7.2030603@inktank.com>
+References: <5049F951.2030706@inktank.com> <5049FA78.9080603@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:49934 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756733Ab2IGTZI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 15:25:08 -0400
-Received: by iahk25 with SMTP id k25so3526991iah.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 12:25:07 -0700 (PDT)
-In-Reply-To: <504A498D.30708@inktank.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:58584 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751024Ab2IGTc0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 15:32:26 -0400
+Received: by dady13 with SMTP id y13so1986669dad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 12:32:26 -0700 (PDT)
+In-Reply-To: <5049FA78.9080603@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Record the features values for each rbd image and each of its
-snapshots.  This is really something that only becomes meaningful
-for version 2 images, so this is just putting in place code
-that will form common infrastructure.
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-It may be useful to expand the sysfs entries--and therefore the
-information we maintain--for the image and for each snapshot.
-But I'm going to hold off doing that until we start making
-active use of the feature bits.
+On 09/07/2012 06:45 AM, Alex Elder wrote:
+> This is the first of two patches aimed at isolating the code that
+> sets the mapping information into a single spot.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   72
+> ++++++++++++++++++++++++++-------------------------
+>   1 file changed, 37 insertions(+), 35 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 4377a83..1a64ba2 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -2477,28 +2477,31 @@ static inline char *dup_token(const char **buf,
+> size_t *lenp)
+>   }
+>
+>   /*
+> - * This fills in the pool_name, image_name, image_name_len, snap_name,
+> - * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
+> - * on the list of monitor addresses and other options provided via
+> - * /sys/bus/rbd/add.
+> + * This fills in the pool_name, image_name, image_name_len, rbd_dev,
+> + * rbd_md_name, and name fields of the given rbd_dev, based on the
+> + * list of monitor addresses and other options provided via
+> + * /sys/bus/rbd/add.  Returns a pointer to a dynamically-allocated
+> + * copy of the snapshot name to map if successful, or a
+> + * pointer-coded error otherwise.
+>    *
+>    * Note: rbd_dev is assumed to have been initially zero-filled.
+>    */
+> -static int rbd_add_parse_args(struct rbd_device *rbd_dev,
+> -			      const char *buf,
+> -			      const char **mon_addrs,
+> -			      size_t *mon_addrs_size,
+> -			      char *options,
+> -			     size_t options_size)
+> +static char *rbd_add_parse_args(struct rbd_device *rbd_dev,
+> +				const char *buf,
+> +				const char **mon_addrs,
+> +				size_t *mon_addrs_size,
+> +				char *options,
+> +				size_t options_size)
+>   {
+>   	size_t len;
+> -	int ret;
+> +	char *err_ptr = ERR_PTR(-EINVAL);
+> +	char *snap_name;
+>
+>   	/* The first four tokens are required */
+>
+>   	len = next_token(&buf);
+>   	if (!len)
+> -		return -EINVAL;
+> +		return err_ptr;
+>   	*mon_addrs_size = len + 1;
+>   	*mon_addrs = buf;
+>
+> @@ -2506,9 +2509,9 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>
+>   	len = copy_token(&buf, options, options_size);
+>   	if (!len || len >= options_size)
+> -		return -EINVAL;
+> +		return err_ptr;
+>
+> -	ret = -ENOMEM;
+> +	err_ptr = ERR_PTR(-ENOMEM);
+>   	rbd_dev->pool_name = dup_token(&buf, NULL);
+>   	if (!rbd_dev->pool_name)
+>   		goto out_err;
+> @@ -2526,26 +2529,21 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   		goto out_err;
+>   	sprintf(rbd_dev->header_name, "%s%s", rbd_dev->image_name, RBD_SUFFIX);
+>
+> -	/*
+> -	 * The snapshot name is optional.  If none is is supplied,
+> -	 * we use the default value.
+> -	 */
+> -	rbd_dev->mapping.snap_name = dup_token(&buf, &len);
+> -	if (!rbd_dev->mapping.snap_name)
+> -		goto out_err;
+> +	/* Snapshot name is optional */
+> +	len = next_token(&buf);
+>   	if (!len) {
+> -		/* Replace the empty name with the default */
+> -		kfree(rbd_dev->mapping.snap_name);
+> -		rbd_dev->mapping.snap_name
+> -			= kmalloc(sizeof (RBD_SNAP_HEAD_NAME), GFP_KERNEL);
+> -		if (!rbd_dev->mapping.snap_name)
+> -			goto out_err;
+> -
+> -		memcpy(rbd_dev->mapping.snap_name, RBD_SNA
+Here are the points to cover on this call with Alcatel Lucent.
+Bryan would like for you to run the call and clarify the plan of action.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- Documentation/ABI/testing/sysfs-bus-rbd |    7 +++++
- drivers/block/rbd.c                     |   43
-+++++++++++++++++++++++++++++--
- 2 files changed, 48 insertions(+), 2 deletions(-)
+Primary objectives for Proof of Concept phase:
 
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
-b/Documentation/ABI/testing/sysfs-bus-rbd
-index 6fe4224..1cf2adf 100644
---- a/Documentation/ABI/testing/sysfs-bus-rbd
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -25,6 +25,10 @@ client_id
 
- 	The ceph unique client id that was assigned for this specific session.
+1. Ceph demo - on Ubuntu 12.04
+Show Qemu - kvm migration and recovery
+Show block device in a cloud environment
 
-+features
-+
-+	A hexadecimal encoding of the feature bits for this image.
-+
- major
-
- 	The block device major number.
-@@ -78,4 +82,7 @@ snap_size
-
- 	The size of the image when this snapshot was taken.
-
-+snap_features
-+
-+	A hexadecimal encoding of the feature bits for this snapshot.
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2b048e3..c62d3f4 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -85,6 +85,7 @@
- struct rbd_image_header {
- 	/* These four fields never change for a given rbd image */
- 	char *object_prefix;
-+	u64 features;
- 	__u8 obj_order;
- 	__u8 crypt_type;
- 	__u8 comp_type;
-@@ -148,12 +149,14 @@ struct rbd_snap {
- 	u64			size;
- 	struct list_head	node;
- 	u64			id;
-+	u64			features;
- };
-
- struct rbd_mapping {
- 	char                    *snap_name;
- 	u64                     snap_id;
- 	u64                     size;
-+	u64                     features;
- 	bool                    snap_exists;
- 	bool			read_only;
- };
-@@ -590,6 +593,7 @@ static int rbd_header_from_disk(struct
-rbd_image_header *header,
- 		header->snap_sizes = NULL;
- 	}
-
-+	header->features = 0;	/* No features support in v1 images */
- 	header->obj_order = ondisk->options.order;
- 	header->crypt_type = ondisk->options.crypt_type;
- 	header->comp_type = ondisk->options.comp_type;
-@@ -632,6 +636,7 @@ static int snap_by_name(struct rbd_device *rbd_dev,
-const char *snap_name)
- 		if (!strcmp(snap_name, snap->name)) {
- 			rbd_dev->mapping.snap_id = snap->id;
- 			rbd_dev->mapping.size = snap->size;
-+			rbd_dev->mapping.features = snap->features;
-
- 			return 0;
- 		}
-@@ -648,6 +653,7 @@ static int rbd_dev_set_mapping(struct rbd_device
-*rbd_dev, char *snap_name)
- 		    sizeof (RBD_SNAP_HEAD_NAME))) {
- 		rbd_dev->mapping.snap_id = CEPH_NOSNAP;
- 		rbd_dev->mapping.size = rbd_dev->header.image_size;
-+		rbd_dev->mapping.features = rbd_dev->header.features;
- 		rbd_dev->mapping.snap_exists = false;
- 		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
- 		ret = 0;
-@@ -1835,6 +1841,19 @@ static ssize_t rbd_size_show(struct device *dev,
- 	return sprintf(buf, "%llu\n", (unsigned long long) size * SECTOR_SIZE);
- }
-
-+/*
-+ * Note this shows the features for whatever's mapped, which is not
-+ * necessarily the base image.
-+ */
-+static ssize_t rbd_features_show(struct device *dev,
-+			     struct device_attribute *attr, char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-+
-+	return sprintf(buf, "0x%016llx\n",
-+			(unsigned long long) rbd_dev->mapping.features);
-+}
-+
- static ssize_t rbd_major_show(struct device *dev,
- 			      struct device_attribute *attr, char *buf)
- {
-@@ -1884,6 +1903,10 @@ static ssize_t rbd_image_id_show(struct device *dev,
- 	return sprintf(buf, "%s\n", rbd_dev->image_id);
- }
-
-+/*
-+ * Shows the name of the currently-mapped snapshot (or
-+ * RBD_SNAP_HEAD_NAME for the base image).
-+ */
- static ssize_t rbd_snap_show(struct device *dev,
- 			     struct device_attribute *attr,
- 			     char *buf)
-@@ -1907,6 +1930,7 @@ static ssize_t rbd_image_refresh(struct device *dev,
- }
-
- static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
-+static DEVICE_ATTR(features, S_IRUGO, rbd_features_show, NULL);
- static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
- static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
- static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
-@@ -1918,6 +1942,7 @@ static DEVICE_ATTR(current_snap, S_IRUGO,
-rbd_snap_show, NULL);
-
- static struct attribute *rbd_attrs[] = {
- 	&dev_attr_size.attr,
-+	&dev_attr_features.attr,
- 	&dev_attr_major.attr,
- 	&dev_attr_client_id.attr,
- 	&dev_attr_pool.attr,
-@@ -1971,12 +1996,24 @@ static ssize_t rbd_snap_id_show(struct device *dev,
- 	return sprintf(buf, "%llu\n", (unsigned long long)snap->id);
- }
-
-+static ssize_t rbd_snap_features_show(struct device *dev,
-+				struct device_attribute *attr,
-+				char *buf)
-+{
-+	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
-+
-+	return sprintf(buf, "0x%016llx\n",
-+			(unsigned long long) snap->features);
-+}
-+
- static DEVICE_ATTR(snap_size, S_IRUGO, rbd_snap_size_show, NULL);
- static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
-+static DEVICE_ATTR(snap_features, S_IRUGO, rbd_snap_features_show, NULL);
-
- static struct attribute *rbd_snap_attrs[] = {
- 	&dev_attr_snap_size.attr,
- 	&dev_attr_snap_id.attr,
-+	&dev_attr_snap_features.attr,
- 	NULL,
- };
-
-@@ -2032,7 +2069,8 @@ static int rbd_register_snap_dev(struct rbd_snap
-*snap,
-
- static struct rbd_snap *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
- 						const char *snap_name,
--						u64 snap_id, u64 snap_size)
-+						u64 snap_id, u64 snap_size,
-+						u64 snap_features)
- {
- 	struct rbd_snap *snap;
- 	int ret;
-@@ -2048,6 +2086,7 @@ static struct rbd_snap *__rbd_add_snap_dev(struct
-rbd_device *rbd_dev,
-
- 	snap->id = snap_id;
- 	snap->size = snap_size;
-+	snap->features = snap_features;
-
- 	return snap;
-
-@@ -2118,7 +2157,7 @@ static int rbd_dev_snaps_update(struct rbd_device
-*rbd_dev)
- 			/* We haven't seen this snapshot before */
-
- 			new_snap = __rbd_add_snap_dev(rbd_dev, snap_name,
--					snap_id, header->snap_sizes[index]);
-+					snap_id, header->snap_sizes[index], 0);
- 			if (IS_ERR(new_snap)) {
- 				int err = PTR_ERR(new_snap);
-
--- 
-1.7.9.5
+2. Training and demo of RBD access paths
+Determine how that matches AL's configuration plans
+P_HEAD_NAME,
+> -			sizeof (RBD_SNAP_HEAD_NAME));
+> +		buf = RBD_SNAP_HEAD_NAME; /* No snapshot supplied */
+> +		len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
+>   	}
+> +	snap_name = kmalloc(len + 1, GFP_KERNEL);
+> +	if (!snap_name)
+> +		goto out_err;
+> +	memcpy(snap_name, buf, len);
+> +	*(snap_name + len) = '\0';
+>
+> -	return 0;
+> +dout("    SNAP_NAME is <%s>, len is %zd\n", snap_name, len);
+> +
+> +	return snap_name;
+>
+>   out_err:
+>   	kfree(rbd_dev->header_name);
+> @@ -2556,7 +2554,7 @@ out_err:
+>   	kfree(rbd_dev->pool_name);
+>   	rbd_dev->pool_name = NULL;
+>
+> -	return ret;
+> +	return err_ptr;
+>   }
+>
+>   static ssize_t rbd_add(struct bus_type *bus,
+> @@ -2569,6 +2567,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	size_t mon_addrs_size = 0;
+>   	struct ceph_osd_client *osdc;
+>   	int rc = -ENOMEM;
+> +	char *snap_name;
+>
+>   	if (!try_module_get(THIS_MODULE))
+>   		return -ENODEV;
+> @@ -2595,10 +2594,13 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
+>
+>   	/* parse add command */
+> -	rc = rbd_add_parse_args(rbd_dev, buf, &mon_addrs, &mon_addrs_size,
+> -				options, count);
+> -	if (rc)
+> +	snap_name = rbd_add_parse_args(rbd_dev, buf,
+> +				&mon_addrs, &mon_addrs_size, options, count);
+> +	if (IS_ERR(snap_name)) {
+> +		rc = PTR_ERR(snap_name);
+>   		goto err_put_id;
+> +	}
+> +	rbd_dev->mapping.snap_name = snap_name;
+>
+>   	rc = rbd_get_client(rbd_dev, mon_addrs, mon_addrs_size - 1, options);
+>   	if (rc < 0)
+>
 
