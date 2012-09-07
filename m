@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/7] rbd: simplify snap_by_name() interface
-Date: Fri, 07 Sep 2012 12:41:51 -0700
-Message-ID: <504A4DFF.4000009@inktank.com>
-References: <5049F951.2030706@inktank.com> <5049FA95.3040505@inktank.com>
+Subject: Re: [PATCH 6/7] rbd: do some header initialization earlier
+Date: Fri, 07 Sep 2012 13:32:00 -0700
+Message-ID: <504A59C0.1080707@inktank.com>
+References: <5049F951.2030706@inktank.com> <5049FA9D.5050504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:39407 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752023Ab2IGTly (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 15:41:54 -0400
-Received: by dady13 with SMTP id y13so1990914dad.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 12:41:53 -0700 (PDT)
-In-Reply-To: <5049FA95.3040505@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43255 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752298Ab2IGUcF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 16:32:05 -0400
+Received: by pbbrr13 with SMTP id rr13so129055pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 13:32:05 -0700 (PDT)
+In-Reply-To: <5049FA9D.5050504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,63 +21,119 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 09/07/2012 06:45 AM, Alex Elder wrote:
-> There is only one caller of snap_by_name(), and it passes two values
-> to be assigned, both of which are found within an rbd device
-> structure.
+On 09/07/2012 06:46 AM, Alex Elder wrote:
+> Move some of the code that initializes an rbd header out of
+> rbd_init_disk() and into its caller.
 >
-> Change the interface so it just passes the address of the rbd_dev,
-> and make the assignments to its fields directly.
+> Move the code at the end of rbd_init_disk() that sets the device
+> capacity and activates the Linux device out of that function and
+> into the caller, ensuring we still have the disk size available
+> where we need it.
+>
+> Update rbd_free_disk() so it still aligns well as an inverse of
+> rbd_init_disk(), moving the rbd_header_free() call out to its
+> caller.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   15 ++++++---------
->   1 file changed, 6 insertions(+), 9 deletions(-)
+>   drivers/block/rbd.c |   51
+> +++++++++++++++++++++++++++------------------------
+>   1 file changed, 27 insertions(+), 24 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 23fa962..46b8f8e 100644
+> index 46b8f8e..6e735a7 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -621,10 +621,10 @@ out_err:
->   	return -ENOMEM;
->   }
+> @@ -1652,8 +1652,6 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
+>   	if (!disk)
+>   		return;
 >
-> -static int snap_by_name(struct rbd_image_header *header, const char
-> *snap_name,
-> -			u64 *seq, u64 *size)
-> +static int snap_by_name(struct rbd_device *rbd_dev, const char *snap_name)
->   {
->   	int i;
-> +	struct rbd_image_header *header = &rbd_dev->header;
->   	char *p = header->snap_names;
+> -	rbd_header_free(&rbd_dev->header);
+> -
+>   	if (disk->flags & GENHD_FL_UP)
+>   		del_gendisk(disk);
+>   	if (disk->queue)
+> @@ -1875,20 +1873,6 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+>   	int rc;
+>   	u64 segment_size;
 >
->   	rbd_assert(header->snapc != NULL);
-> @@ -633,10 +633,9 @@ static int snap_by_name(struct rbd_image_header
-> *header, const char *snap_name,
+> -	/* contact OSD, request size info about the object being mapped */
+> -	rc = rbd_read_header(rbd_dev, &rbd_dev->header);
+> -	if (rc)
+> -		return rc;
+> -
+> -	/* no need to lock here, as rbd_dev is not registered yet */
+> -	rc = rbd_dev_snap_devs_update(rbd_dev);
+> -	if (rc)
+> -		return rc;
+> -
+> -	rc = rbd_header_set_snap(rbd_dev, snap_name);
+> -	if (rc)
+> -		return rc;
+> -
+>   	/* create gendisk info */
+>   	rc = -ENOMEM;
+>   	disk = alloc_disk(RBD_MINORS_PER_MAJOR);
+> @@ -1925,12 +1909,6 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
 >
->   			/* Found it.  Pass back its id and/or size */
+>   	rbd_dev->disk = disk;
 >
-> -			if (seq)
-> -				*seq = header->snapc->snaps[i];
-> -			if (size)
-> -				*size = header->snap_sizes[i];
-> +			rbd_dev->mapping.snap_id = header->snapc->snaps[i];
-> +			rbd_dev->mapping.size = header->snap_sizes[i];
+> -	/* finally, announce the disk to the world */
+> -	set_capacity(disk, (sector_t) rbd_dev->mapping.size / SECTOR_SIZE);
+> -	add_disk(disk);
+> -
+> -	pr_info("%s: added with size 0x%llx\n",
+> -		disk->disk_name, (unsigned long long) rbd_dev->mapping.size);
+>   	return 0;
+>
+>   out_disk:
+> @@ -2622,13 +2600,35 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	/*
+>   	 * At this point cleanup in the event of an error is the job
+>   	 * of the sysfs code (initiated by rbd_bus_del_dev()).
+> -	 *
+> -	 * Set up and announce blkdev mapping.
+>   	 */
 > +
->   			return i;
->   		}
->   		p += strlen(p) + 1;	/* Skip ahead to the next name */
-> @@ -657,9 +656,7 @@ static int rbd_header_set_snap(struct rbd_device
-> *rbd_dev, char *snap_name)
->   		rbd_dev->mapping.snap_exists = false;
->   		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
->   	} else {
-> -		ret = snap_by_name(&rbd_dev->header, snap_name,
-> -					&rbd_dev->mapping.snap_id,
-> -					&rbd_dev->mapping.size);
-> +		ret = snap_by_name(rbd_dev, snap_name);
->   		if (ret < 0)
->   			goto done;
->   		rbd_dev->mapping.snap_exists = true;
+> +	/* contact OSD, request size info about the object being mapped */
+> +	rc = rbd_read_header(rbd_dev, &rbd_dev->header);
+> +	if (rc)
+> +		goto err_out_bus;
+> +
+> +	/* no need to lock here, as rbd_dev is not registered yet */
+> +	rc = rbd_dev_snap_devs_update(rbd_dev);
+> +	if (rc)
+> +		goto err_out_bus;
+> +
+> +	rc = rbd_header_set_snap(rbd_dev, snap_name);
+> +	if (rc)
+> +		goto err_out_bus;
+> +
+> +	/* Set up the blkdev mapping. */
+> +
+>   	rc = rbd_init_disk(rbd_dev);
+>   	if (rc)
+>   		goto err_out_bus;
+>
+> +	/* Everything's ready.  Announce the disk to the world. */
+> +
+> +	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
+> +	add_disk(rbd_dev->disk);
+> +	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
+> +		(unsigned long long) rbd_dev->mapping.size);
+> +
+>   	rc = rbd_init_watch_dev(rbd_dev);
+>   	if (rc)
+>   		goto err_out_bus;
+> @@ -2700,6 +2700,9 @@ static void rbd_dev_release(struct device *dev)
+>   	rbd_free_disk(rbd_dev);
+>   	unregister_blkdev(rbd_dev->major, rbd_dev->name);
+>
+> +	/* release allocated disk header fields */
+> +	rbd_header_free(&rbd_dev->header);
+> +
+>   	/* done with the id, and with the rbd_dev */
+>   	kfree(rbd_dev->mapping.snap_name);
+>   	kfree(rbd_dev->header_name);
 >
 
