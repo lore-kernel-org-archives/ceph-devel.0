@@ -1,149 +1,74 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/5] rbd: rename __rbd_init_snaps_header()
-Date: Fri, 07 Sep 2012 08:39:32 -0500
-Message-ID: <5049F914.1050306@inktank.com>
+Subject: [PATCH 5/5]  rbd: kill rbd_image_header->total_snaps
+Date: Fri, 07 Sep 2012 08:39:49 -0500
+Message-ID: <5049F925.5050001@inktank.com>
 References: <5049F7F5.1070609@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:60946 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760484Ab2IGNjg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 09:39:36 -0400
-Received: by mail-ie0-f174.google.com with SMTP id e11so5001652iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 06:39:36 -0700 (PDT)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:58520 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760098Ab2IGNjw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 09:39:52 -0400
+Received: by iahk25 with SMTP id k25so3202941iah.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 06:39:51 -0700 (PDT)
 In-Reply-To: <5049F7F5.1070609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The name __rbd_init_snaps_header() doesn't really convey what that
-function does very well.  Its purpose is to scan a new snapshot
-context and either create or destroy snapshot device entries so
-that local host's view is consistent with the reality maintained
-on the OSDs.  This patch just changes the name of this function,
-to be rbd_dev_snap_devs_update().  Still not perfect, but I think
-better.
-
-Also add some dynamic debug statements to this function.
+The "total_snaps" field in an rbd header structure is never any
+different from the value of "num_snaps" stored within a snapshot
+context.  Avoid any confusion by just using the value held within
+the snapshot context, and get rid of the "total_snaps" field.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   27 +++++++++++++++++++++------
- 1 file changed, 21 insertions(+), 6 deletions(-)
+ drivers/block/rbd.c |    6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8cb8e0a..7726368 100644
+index 774a36b..eb6b772 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -201,7 +201,7 @@ static DEFINE_SPINLOCK(rbd_dev_list_lock);
- static LIST_HEAD(rbd_client_list);		/* clients */
- static DEFINE_SPINLOCK(rbd_client_list_lock);
+@@ -87,7 +87,6 @@ struct rbd_image_header {
+ 	__u8 crypt_type;
+ 	__u8 comp_type;
+ 	struct ceph_snap_context *snapc;
+-	u32 total_snaps;
 
--static int __rbd_init_snaps_header(struct rbd_device *rbd_dev);
-+static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev);
- static void rbd_dev_release(struct device *dev);
- static ssize_t rbd_snap_add(struct device *dev,
- 			    struct device_attribute *attr,
-@@ -1848,7 +1848,7 @@ static int __rbd_refresh_header(struct rbd_device
+ 	char *snap_names;
+ 	u64 *snap_sizes;
+@@ -588,7 +587,6 @@ static int rbd_header_from_disk(struct
+rbd_image_header *header,
+ 	header->obj_order = ondisk->options.order;
+ 	header->crypt_type = ondisk->options.crypt_type;
+ 	header->comp_type = ondisk->options.comp_type;
+-	header->total_snaps = snap_count;
+
+ 	/* Allocate and fill in the snapshot context */
+
+@@ -624,7 +622,8 @@ static int snap_by_name(struct rbd_image_header
+*header, const char *snap_name,
+ 	int i;
+ 	char *p = header->snap_names;
+
+-	for (i = 0; i < header->total_snaps; i++) {
++	rbd_assert(header->snapc != NULL);
++	for (i = 0; i < header->snapc->num_snaps; i++) {
+ 		if (!strcmp(snap_name, p)) {
+
+ 			/* Found it.  Pass back its id and/or size */
+@@ -1839,7 +1838,6 @@ static int __rbd_refresh_header(struct rbd_device
 *rbd_dev, u64 *hver)
- 	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
- 	kfree(h.object_prefix);
-
--	ret = __rbd_init_snaps_header(rbd_dev);
-+	ret = rbd_dev_snap_devs_update(rbd_dev);
-
- 	up_write(&rbd_dev->header_rwsem);
-
-@@ -1880,7 +1880,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 		return rc;
-
- 	/* no need to lock here, as rbd_dev is not registered yet */
--	rc = __rbd_init_snaps_header(rbd_dev);
-+	rc = rbd_dev_snap_devs_update(rbd_dev);
- 	if (rc)
- 		return rc;
-
-@@ -2184,7 +2184,7 @@ err:
-  * snapshot id, highest id first.  (Snapshots in the rbd_dev's list
-  * are also maintained in that order.)
-  */
--static int __rbd_init_snaps_header(struct rbd_device *rbd_dev)
-+static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev)
- {
- 	struct ceph_snap_context *snapc = rbd_dev->header.snapc;
- 	const u32 snap_count = snapc->num_snaps;
-@@ -2193,6 +2193,7 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
- 	struct list_head *links = head->next;
- 	u32 index = 0;
-
-+	dout("%s: snap count is %u\n", __func__, (unsigned int) snap_count);
- 	while (index < snap_count || links != head) {
- 		u64 snap_id;
- 		struct rbd_snap *snap;
-@@ -2211,6 +2212,9 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
- 			if (rbd_dev->snap_id == snap->id)
- 				rbd_dev->snap_exists = false;
- 			__rbd_remove_snap_dev(snap);
-+			dout("%ssnap id %llu has been removed\n",
-+				rbd_dev->snap_id == snap->id ? "mapped " : "",
-+				(unsigned long long) snap->id);
-
- 			/* Done with this list entry; advance */
-
-@@ -2218,6 +2222,8 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
- 			continue;
- 		}
-
-+		dout("entry %u: snap_id = %llu\n", (unsigned int) snap_count,
-+			(unsigned long long) snap_id);
- 		if (!snap || (snap_id != CEPH_NOSNAP && snap->id < snap_id)) {
- 			struct rbd_snap *new_snap;
-
-@@ -2225,11 +2231,17 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
-
- 			new_snap = __rbd_add_snap_dev(rbd_dev, index,
- 							snap_name);
--			if (IS_ERR(new_snap))
--				return PTR_ERR(new_snap);
-+			if (IS_ERR(new_snap)) {
-+				int err = PTR_ERR(new_snap);
-+
-+				dout("  failed to add dev, error %d\n", err);
-+
-+				return err;
-+			}
-
- 			/* New goes before existing, or at end of list */
-
-+			dout("  added dev%s\n", snap ? "" : " at end\n");
- 			if (snap)
- 				list_add_tail(&new_snap->node, &snap->node);
- 			else
-@@ -2237,6 +2249,8 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
- 		} else {
- 			/* Already have this one */
-
-+			dout("  already present\n");
-+
- 			rbd_assert(snap->size ==
- 					rbd_dev->header.snap_sizes[index]);
- 			rbd_assert(!strcmp(snap->name, snap_name));
-@@ -2251,6 +2265,7 @@ static int __rbd_init_snaps_header(struct
-rbd_device *rbd_dev)
- 		index++;
- 		snap_name += strlen(snap_name) + 1;
- 	}
-+	dout("%s: done\n", __func__);
-
- 	return 0;
- }
+ 		*hver = h.obj_version;
+ 	rbd_dev->header.obj_version = h.obj_version;
+ 	rbd_dev->header.image_size = h.image_size;
+-	rbd_dev->header.total_snaps = h.total_snaps;
+ 	rbd_dev->header.snapc = h.snapc;
+ 	rbd_dev->header.snap_names = h.snap_names;
+ 	rbd_dev->header.snap_sizes = h.snap_sizes;
 -- 
 1.7.9.5
 
