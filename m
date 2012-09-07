@@ -1,117 +1,73 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/5] rbd: support data returned from OSD methods
-Date: Fri, 07 Sep 2012 13:19:21 -0500
-Message-ID: <504A3AA9.80004@inktank.com>
+Subject: [PATCH 3/5] rbd: define some new format constants
+Date: Fri, 07 Sep 2012 13:19:27 -0500
+Message-ID: <504A3AAF.1000403@inktank.com>
 References: <504A39E0.1040107@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:41755 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753283Ab2IGSTY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:19:24 -0400
-Received: by iahk25 with SMTP id k25so3471231iah.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:19:24 -0700 (PDT)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:35579 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753283Ab2IGSTa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:19:30 -0400
+Received: by mail-ie0-f174.google.com with SMTP id e11so5532930iej.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:19:30 -0700 (PDT)
 In-Reply-To: <504A39E0.1040107@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-An OSD object method call can be made using rbd_req_sync_exec().
-Until now this has only been used for creating a new RBD snapshot,
-and that has only required sending data out, not receiving anything
-back from the OSD.
-
-We will now need to get data back from an OSD on a method call, so
-add parameters to rbd_req_sync_exec() that allow a buffer into which
-returned data should be placed to be specified, along with its size.
-
-Previously, rbd_req_sync_exec() passed a null pointer and zero
-size to rbd_req_sync_op(); change this so the new inbound buffer
-information is provided instead.
-
-Rename the "buf" and "len" parameters in rbd_req_sync_op() to
-make it more obvious they are describing inbound data.
+Define constant symbols related to the rbd format 2 object names.
+This begins to bring this version of the "rbd_types.h" header
+more in line with the current user-space version of that file.
+Complete reconciliation of differences will be done at some
+point later, as a separate task.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   19 +++++++++++--------
- 1 file changed, 11 insertions(+), 8 deletions(-)
+ drivers/block/rbd_types.h |   25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4e84f99..ba68566 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1098,8 +1098,8 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 			   int flags,
- 			   struct ceph_osd_req_op *ops,
- 			   const char *object_name,
--			   u64 ofs, u64 len,
--			   char *buf,
-+			   u64 ofs, u64 inbound_size,
-+			   char *inbound,
- 			   struct ceph_osd_request **linger_req,
- 			   u64 *ver)
- {
-@@ -1109,13 +1109,13 @@ static int rbd_req_sync_op(struct rbd_device
-*rbd_dev,
+diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
+index d9d8a77..cbe77fa 100644
+--- a/drivers/block/rbd_types.h
++++ b/drivers/block/rbd_types.h
+@@ -15,15 +15,30 @@
 
- 	rbd_assert(ops != NULL);
+ #include <linux/types.h>
 
--	num_pages = calc_pages_for(ofs , len);
-+	num_pages = calc_pages_for(ofs, inbound_size);
- 	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
++/* For format version 2, rbd image 'foo' consists of objects
++ *   rbd_id.foo		- id of image
++ *   rbd_header.<id>	- image metadata
++ *   rbd_data.<id>.0000000000000000
++ *   rbd_data.<id>.0000000000000001
++ *   ...		- data
++ * Clients do not access header data directly in rbd format 2.
++ */
++
++#define RBD_HEADER_PREFIX      "rbd_header."
++#define RBD_DATA_PREFIX        "rbd_data."
++#define RBD_ID_PREFIX          "rbd_id."
++
+ /*
+- * rbd image 'foo' consists of objects
+- *   foo.rbd      - image metadata
+- *   foo.00000000
+- *   foo.00000001
+- *   ...          - data
++ * For format version 1, rbd image 'foo' consists of objects
++ *   foo.rbd		- image metadata
++ *   rb.<idhi>.<idlo>.00000000
++ *   rb.<idhi>.<idlo>.00000001
++ *   ...		- data
++ * There is no notion of a persistent image id in rbd format 1.
+  */
 
- 	ret = rbd_do_request(NULL, rbd_dev, snapc, snapid,
--			  object_name, ofs, len, NULL,
-+			  object_name, ofs, inbound_size, NULL,
- 			  pages, num_pages,
- 			  flags,
- 			  ops,
-@@ -1125,8 +1125,8 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 	if (ret < 0)
- 		goto done;
-
--	if ((flags & CEPH_OSD_FLAG_READ) && buf)
--		ret = ceph_copy_from_page_vector(pages, buf, ofs, ret);
-+	if ((flags & CEPH_OSD_FLAG_READ) && inbound)
-+		ret = ceph_copy_from_page_vector(pages, inbound, ofs, ret);
-
- done:
- 	ceph_release_page_vector(pages, num_pages);
-@@ -1445,6 +1445,8 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 			     const char *method_name,
- 			     const char *outbound,
- 			     size_t outbound_size,
-+			     char *inbound,
-+			     size_t inbound_size,
- 			     int flags,
- 			     u64 *ver)
- {
-@@ -1478,7 +1480,8 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			       CEPH_NOSNAP,
- 			       flags, ops,
--			       object_name, 0, 0, NULL, NULL, ver);
-+			       object_name, 0, inbound_size, inbound,
-+			       NULL, ver);
-
- 	rbd_destroy_ops(ops);
-
-@@ -1789,7 +1792,7 @@ static int rbd_header_add_snap(struct rbd_device
-*rbd_dev,
-
- 	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
- 				"rbd", "snap_add",
--				data, (size_t) (p - data),
-+				data, (size_t) (p - data), NULL, 0,
- 				CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 				NULL);
+ #define RBD_SUFFIX		".rbd"
++
+ #define RBD_DIRECTORY           "rbd_directory"
+ #define RBD_INFO                "rbd_info"
 
 -- 
 1.7.9.5
