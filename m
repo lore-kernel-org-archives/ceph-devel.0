@@ -1,43 +1,154 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: ceph-fuse mount options
-Date: Fri, 7 Sep 2012 09:22:34 -0700
-Message-ID: <CAPYLRzgc_-9nTE+-Y6rm9aiBBVeEMZTfBs-ycRw3cFV8tL2AHg@mail.gmail.com>
-References: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/5] rbd: define rbd_assert()
+Date: Fri, 07 Sep 2012 11:13:35 -0700
+Message-ID: <504A394F.5090200@inktank.com>
+References: <5049F7F5.1070609@inktank.com> <5049F903.4070003@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:46896 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750777Ab2IGQWf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 12:22:35 -0400
-Received: by ieje11 with SMTP id e11so5333879iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 09:22:35 -0700 (PDT)
-In-Reply-To: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:57231 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751342Ab2IGSNi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:13:38 -0400
+Received: by pbbrr13 with SMTP id rr13so4378132pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:13:38 -0700 (PDT)
+In-Reply-To: <5049F903.4070003@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jimmy Tang <jtang@tchpc.tcd.ie>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Sep 7, 2012 at 9:03 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
-> Hi All,
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+On 09/07/2012 06:39 AM, Alex Elder wrote:
+> Define rbd_assert() and use it in place of various BUG_ON() calls
+> now present in the code.  By default assertion checking is enabled;
+> we want to do this differently at some point.
 >
-> I know that cephfs has the option picking which pools to use, will ce=
-ph-fuse be gaining this feature at any point in the future? Or is this =
-feature available but isn't documented?
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   35 ++++++++++++++++++++++++++---------
+>   1 file changed, 26 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 7ba70c4..d84b534 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -41,6 +41,8 @@
+>
+>   #include "rbd_types.h"
+>
+> +#define RBD_DEBUG	/* Activate rbd_assert() calls */
+> +
+>   /*
+>    * The basic unit of block I/O is a sector.  It is interpreted in a
+>    * number of contexts in Linux (blk, bio, genhd), but the default is
+> @@ -232,6 +234,18 @@ static struct device rbd_root_dev = {
+>   	.release =      rbd_root_dev_release,
+>   };
+>
+> +#ifdef RBD_DEBUG
+> +#define rbd_assert(expr)						\
+> +		if (unlikely(!(expr))) {				\
+> +			printk(KERN_ERR "\nAssertion failure in %s() "	\
+> +						"at line %d:\n\n"	\
+> +					"\trbd_assert(%s);\n\n",	\
+> +					__func__, __LINE__, #expr);	\
+> +			BUG();						\
+> +		}
+> +#else /* !RBD_DEBUG */
+> +#  define rbd_assert(expr)	((void) 0)
+> +#endif /* !RBD_DEBUG */
+>
+>   static struct device *rbd_get_dev(struct rbd_device *rbd_dev)
+>   {
+> @@ -406,7 +420,8 @@ static int parse_rbd_opts_token(char *c, void *private)
+>   		rbd_opts->read_only = false;
+>   		break;
+>   	default:
+> -		BUG_ON(token);
+> +		rbd_assert(false);
+> +		break;
+>   	}
+>   	return 0;
+>   }
+> @@ -705,7 +720,7 @@ static u64 rbd_segment_length(struct rbd_device
+> *rbd_dev,
+>
+>   	offset &= segment_size - 1;
+>
+> -	BUG_ON(length > U64_MAX - offset);
+> +	rbd_assert(length <= U64_MAX - offset);
+>   	if (offset + length > segment_size)
+>   		length = segment_size - offset;
+>
+> @@ -842,7 +857,7 @@ static struct bio *bio_chain_clone(struct bio **old,
+> struct bio **next,
+>   		total += tmp->bi_size;
+>   	}
+>
+> -	BUG_ON(total < len);
+> +	rbd_assert(total == len);
+>
+>   	*old = old_chain;
+>
+> @@ -1101,7 +1116,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+>   	struct page **pages;
+>   	int num_pages;
+>
+> -	BUG_ON(ops == NULL);
+> +	rbd_assert(ops != NULL);
+>
+>   	num_pages = calc_pages_for(ofs , len);
+>   	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
+> @@ -1163,7 +1178,7 @@ static int rbd_do_op(struct request *rq,
+>   	/* we've taken care of segment sizes earlier when we
+>   	   cloned the bios. We should never have a segment
+>   	   truncated at this point */
+> -	BUG_ON(seg_len < len);
+> +	rbd_assert(seg_len == len);
+>
+>   	ret = rbd_do_request(rq, rbd_dev, snapc, snapid,
+>   			     seg_name, seg_ofs, seg_len,
+> @@ -2186,7 +2201,7 @@ static int __rbd_init_snaps_header(struct
+> rbd_device *rbd_dev)
+>   					     : CEPH_NOSNAP;
+>   		snap = links != head ? list_entry(links, struct rbd_snap, node)
+>   				     : NULL;
+> -		BUG_ON(snap && snap->id == CEPH_NOSNAP);
+> +		rbd_assert(!snap || snap->id != CEPH_NOSNAP);
+>
+>   		if (snap_id == CEPH_NOSNAP || (snap && snap->id > snap_id)) {
+>   			struct list_head *next = links->next;
+> @@ -2222,8 +2237,9 @@ static int __rbd_init_snaps_header(struct
+> rbd_device *rbd_dev)
+>   		} else {
+>   			/* Already have this one */
+>
+> -			BUG_ON(snap->size != rbd_dev->header.snap_sizes[index]);
+> -			BUG_ON(strcmp(snap->name, snap_name));
+> +			rbd_assert(snap->size ==
+> +					rbd_dev->header.snap_sizes[index]);
+> +			rbd_assert(!strcmp(snap->name, snap_name));
+>
+>   			/* Done with this list entry; advance */
+>
+> @@ -2313,7 +2329,7 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+>   	int rbd_id = rbd_dev->dev_id;
+>   	int max_id;
+>
+> -	BUG_ON(rbd_id < 1);
+> +	rbd_assert(rbd_id > 0);
+>
+>   	spin_lock(&rbd_dev_list_lock);
+>   	list_del_init(&rbd_dev->node);
+> @@ -2705,6 +2721,7 @@ static ssize_t rbd_remove(struct bus_type *bus,
+>
+>   done:
+>   	mutex_unlock(&ctl_mutex);
+> +
+>   	return ret;
+>   }
+>
 
-It's not available =97=A0making it work would require implementing FUSE=
-'s
-ioctl system, which we will probably do at some point, but is yet to
-be prioritized or placed anywhere.
-
-However, ceph-fuse does of course respect settings put in place by the
-kernel client, so if you just want to do a one-time configuration then
-you can do it via the kernel on one machine and use ceph-fuse
-elsewhere...
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
