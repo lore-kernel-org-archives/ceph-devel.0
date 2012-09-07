@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/5] rbd: rename rbd_id_get()
-Date: Fri, 07 Sep 2012 08:39:24 -0500
-Message-ID: <5049F90C.5040504@inktank.com>
+Subject: [PATCH 3/5] rbd: rename __rbd_init_snaps_header()
+Date: Fri, 07 Sep 2012 08:39:32 -0500
+Message-ID: <5049F914.1050306@inktank.com>
 References: <5049F7F5.1070609@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,132 +9,141 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-ie0-f174.google.com ([209.85.223.174]:60946 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759156Ab2IGNjZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 09:39:25 -0400
+	with ESMTP id S1760484Ab2IGNjg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 09:39:36 -0400
 Received: by mail-ie0-f174.google.com with SMTP id e11so5001652iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 06:39:25 -0700 (PDT)
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 06:39:36 -0700 (PDT)
 In-Reply-To: <5049F7F5.1070609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This should have been done as part of this commit:
+The name __rbd_init_snaps_header() doesn't really convey what that
+function does very well.  Its purpose is to scan a new snapshot
+context and either create or destroy snapshot device entries so
+that local host's view is consistent with the reality maintained
+on the OSDs.  This patch just changes the name of this function,
+to be rbd_dev_snap_devs_update().  Still not perfect, but I think
+better.
 
-    commit de71a2970d57463d3d965025e33ec3adcf391248
-    Author: Alex Elder <elder@inktank.com>
-    Date:   Tue Jul 3 16:01:19 2012 -0500
-    rbd: rename rbd_device->id
-
-rbd_id_get() is assigning the rbd_dev->dev_id field.  Change the
-name of that function as well as rbd_id_put() and rbd_id_max
-to reflect what they are affecting.
-
-Add some dynamic debug statements related to rbd device id activity.
+Also add some dynamic debug statements to this function.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   25 +++++++++++++++----------
- 1 file changed, 15 insertions(+), 10 deletions(-)
+ drivers/block/rbd.c |   27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d84b534..8cb8e0a 100644
+index 8cb8e0a..7726368 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2304,26 +2304,28 @@ static int rbd_init_watch_dev(struct rbd_device
-*rbd_dev)
- 	return ret;
- }
+@@ -201,7 +201,7 @@ static DEFINE_SPINLOCK(rbd_dev_list_lock);
+ static LIST_HEAD(rbd_client_list);		/* clients */
+ static DEFINE_SPINLOCK(rbd_client_list_lock);
 
--static atomic64_t rbd_id_max = ATOMIC64_INIT(0);
-+static atomic64_t rbd_dev_id_max = ATOMIC64_INIT(0);
+-static int __rbd_init_snaps_header(struct rbd_device *rbd_dev);
++static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev);
+ static void rbd_dev_release(struct device *dev);
+ static ssize_t rbd_snap_add(struct device *dev,
+ 			    struct device_attribute *attr,
+@@ -1848,7 +1848,7 @@ static int __rbd_refresh_header(struct rbd_device
+*rbd_dev, u64 *hver)
+ 	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
+ 	kfree(h.object_prefix);
 
- /*
-  * Get a unique rbd identifier for the given new rbd_dev, and add
-  * the rbd_dev to the global list.  The minimum rbd id is 1.
+-	ret = __rbd_init_snaps_header(rbd_dev);
++	ret = rbd_dev_snap_devs_update(rbd_dev);
+
+ 	up_write(&rbd_dev->header_rwsem);
+
+@@ -1880,7 +1880,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 		return rc;
+
+ 	/* no need to lock here, as rbd_dev is not registered yet */
+-	rc = __rbd_init_snaps_header(rbd_dev);
++	rc = rbd_dev_snap_devs_update(rbd_dev);
+ 	if (rc)
+ 		return rc;
+
+@@ -2184,7 +2184,7 @@ err:
+  * snapshot id, highest id first.  (Snapshots in the rbd_dev's list
+  * are also maintained in that order.)
   */
--static void rbd_id_get(struct rbd_device *rbd_dev)
-+static void rbd_dev_id_get(struct rbd_device *rbd_dev)
+-static int __rbd_init_snaps_header(struct rbd_device *rbd_dev)
++static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev)
  {
--	rbd_dev->dev_id = atomic64_inc_return(&rbd_id_max);
-+	rbd_dev->dev_id = atomic64_inc_return(&rbd_dev_id_max);
+ 	struct ceph_snap_context *snapc = rbd_dev->header.snapc;
+ 	const u32 snap_count = snapc->num_snaps;
+@@ -2193,6 +2193,7 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 	struct list_head *links = head->next;
+ 	u32 index = 0;
 
- 	spin_lock(&rbd_dev_list_lock);
- 	list_add_tail(&rbd_dev->node, &rbd_dev_list);
- 	spin_unlock(&rbd_dev_list_lock);
-+	dout("rbd_dev %p given dev id %llu\n", rbd_dev,
-+		(unsigned long long) rbd_dev->dev_id);
- }
++	dout("%s: snap count is %u\n", __func__, (unsigned int) snap_count);
+ 	while (index < snap_count || links != head) {
+ 		u64 snap_id;
+ 		struct rbd_snap *snap;
+@@ -2211,6 +2212,9 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 			if (rbd_dev->snap_id == snap->id)
+ 				rbd_dev->snap_exists = false;
+ 			__rbd_remove_snap_dev(snap);
++			dout("%ssnap id %llu has been removed\n",
++				rbd_dev->snap_id == snap->id ? "mapped " : "",
++				(unsigned long long) snap->id);
 
- /*
-  * Remove an rbd_dev from the global list, and record that its
-  * identifier is no longer in use.
-  */
--static void rbd_id_put(struct rbd_device *rbd_dev)
-+static void rbd_dev_id_put(struct rbd_device *rbd_dev)
- {
- 	struct list_head *tmp;
- 	int rbd_id = rbd_dev->dev_id;
-@@ -2331,6 +2333,8 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+ 			/* Done with this list entry; advance */
 
- 	rbd_assert(rbd_id > 0);
+@@ -2218,6 +2222,8 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 			continue;
+ 		}
 
-+	dout("rbd_dev %p released dev id %llu\n", rbd_dev,
-+		(unsigned long long) rbd_dev->dev_id);
- 	spin_lock(&rbd_dev_list_lock);
- 	list_del_init(&rbd_dev->node);
++		dout("entry %u: snap_id = %llu\n", (unsigned int) snap_count,
++			(unsigned long long) snap_id);
+ 		if (!snap || (snap_id != CEPH_NOSNAP && snap->id < snap_id)) {
+ 			struct rbd_snap *new_snap;
 
-@@ -2338,7 +2342,7 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
- 	 * If the id being "put" is not the current maximum, there
- 	 * is nothing special we need to do.
- 	 */
--	if (rbd_id != atomic64_read(&rbd_id_max)) {
-+	if (rbd_id != atomic64_read(&rbd_dev_id_max)) {
- 		spin_unlock(&rbd_dev_list_lock);
- 		return;
+@@ -2225,11 +2231,17 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+
+ 			new_snap = __rbd_add_snap_dev(rbd_dev, index,
+ 							snap_name);
+-			if (IS_ERR(new_snap))
+-				return PTR_ERR(new_snap);
++			if (IS_ERR(new_snap)) {
++				int err = PTR_ERR(new_snap);
++
++				dout("  failed to add dev, error %d\n", err);
++
++				return err;
++			}
+
+ 			/* New goes before existing, or at end of list */
+
++			dout("  added dev%s\n", snap ? "" : " at end\n");
+ 			if (snap)
+ 				list_add_tail(&new_snap->node, &snap->node);
+ 			else
+@@ -2237,6 +2249,8 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 		} else {
+ 			/* Already have this one */
+
++			dout("  already present\n");
++
+ 			rbd_assert(snap->size ==
+ 					rbd_dev->header.snap_sizes[index]);
+ 			rbd_assert(!strcmp(snap->name, snap_name));
+@@ -2251,6 +2265,7 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 		index++;
+ 		snap_name += strlen(snap_name) + 1;
  	}
-@@ -2359,12 +2363,13 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
- 	spin_unlock(&rbd_dev_list_lock);
++	dout("%s: done\n", __func__);
 
- 	/*
--	 * The max id could have been updated by rbd_id_get(), in
-+	 * The max id could have been updated by rbd_dev_id_get(), in
- 	 * which case it now accurately reflects the new maximum.
- 	 * Be careful not to overwrite the maximum value in that
- 	 * case.
- 	 */
--	atomic64_cmpxchg(&rbd_id_max, rbd_id, max_id);
-+	atomic64_cmpxchg(&rbd_dev_id_max, rbd_id, max_id);
-+	dout("  max dev id has been reset\n");
+ 	return 0;
  }
-
- /*
-@@ -2563,7 +2568,7 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	init_rwsem(&rbd_dev->header_rwsem);
-
- 	/* generate unique id: find highest unique id, add one */
--	rbd_id_get(rbd_dev);
-+	rbd_dev_id_get(rbd_dev);
-
- 	/* Fill in the device name, now that we have its id. */
- 	BUILD_BUG_ON(DEV_NAME_LEN
-@@ -2631,7 +2636,7 @@ err_put_id:
- 		kfree(rbd_dev->image_name);
- 		kfree(rbd_dev->pool_name);
- 	}
--	rbd_id_put(rbd_dev);
-+	rbd_dev_id_put(rbd_dev);
- err_nomem:
- 	kfree(rbd_dev);
- 	kfree(options);
-@@ -2683,7 +2688,7 @@ static void rbd_dev_release(struct device *dev)
- 	kfree(rbd_dev->header_name);
- 	kfree(rbd_dev->pool_name);
- 	kfree(rbd_dev->image_name);
--	rbd_id_put(rbd_dev);
-+	rbd_dev_id_put(rbd_dev);
- 	kfree(rbd_dev);
-
- 	/* release module ref */
 -- 
 1.7.9.5
 
