@@ -1,286 +1,292 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 5/5] rbd: kill create_snap sysfs entry
-Date: Fri, 07 Sep 2012 13:19:45 -0500
-Message-ID: <504A3AC1.6090308@inktank.com>
-References: <504A39E0.1040107@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/7] rbd: separate mapping info in rbd_dev
+Date: Fri, 07 Sep 2012 11:58:38 -0700
+Message-ID: <504A43DE.4010207@inktank.com>
+References: <5049F951.2030706@inktank.com> <5049FA67.3060904@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:35579 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755751Ab2IGSTs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:19:48 -0400
-Received: by mail-ie0-f174.google.com with SMTP id e11so5532930iej.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:19:47 -0700 (PDT)
-In-Reply-To: <504A39E0.1040107@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:55660 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751737Ab2IGS6l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:58:41 -0400
+Received: by pbbrr13 with SMTP id rr13so32862pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:58:41 -0700 (PDT)
+In-Reply-To: <5049FA67.3060904@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Josh proposed the following change, and I don't think I could
-explain it any better than he did:
+Might want to keep the comments about the fields
+moved to the mapping struct, but it looks good to me.
 
-    From: Josh Durgin <josh.durgin@inktank.com>
-    Date: Tue, 24 Jul 2012 14:22:11 -0700
-    To: ceph-devel <ceph-devel@vger.kernel.org>
-    Message-ID: <500F1203.9050605@inktank.com>
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-    Right now the kernel still has one piece of rbd management
-    duplicated from the rbd command line tool: snapshot creation.
-    There's nothing special about snapshot creation that makes it
-    advantageous to do from the kernel, so I'd like to remove the
-    create_snap sysfs interface.  That is,
-	/sys/bus/rbd/devices/<id>/create_snap
-    would be removed.
-
-    Does anyone rely on the sysfs interface for creating rbd
-    snapshots?  If so, how hard would it be to replace with:
-
-	rbd snap create pool/image@snap
-
-    Is there any benefit to the sysfs interface that I'm missing?
-
-    Josh
-
-This patch implements this proposal, removing the code that
-implements the "snap_create" sysfs interface for rbd images.
-As a result, quite a lot of other supporting code goes away.
-
-Suggested-by: Josh Durgin <josh.durgin@inktank.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- Documentation/ABI/testing/sysfs-bus-rbd |    6 --
- drivers/block/rbd.c                     |  158
--------------------------------
- 2 files changed, 164 deletions(-)
-
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
-b/Documentation/ABI/testing/sysfs-bus-rbd
-index 7cbbe34..6fe4224 100644
---- a/Documentation/ABI/testing/sysfs-bus-rbd
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -62,12 +62,6 @@ current_snap
-
- 	The current snapshot for which the device is mapped.
-
--create_snap
--
--	Create a snapshot:
--
--	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
--
- snap_*
-
- 	A directory per each snapshot
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 5a3132e..d73edb1 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -212,10 +212,6 @@ static int rbd_dev_snaps_update(struct rbd_device
-*rbd_dev);
- static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
-
- static void rbd_dev_release(struct device *dev);
--static ssize_t rbd_snap_add(struct device *dev,
--			    struct device_attribute *attr,
--			    const char *buf,
--			    size_t count);
- static void __rbd_remove_snap_dev(struct rbd_snap *snap);
-
- static ssize_t rbd_add(struct bus_type *bus, const char *buf,
-@@ -1375,71 +1371,6 @@ static int rbd_req_sync_unwatch(struct rbd_device
-*rbd_dev)
- 	return ret;
- }
-
--struct rbd_notify_info {
--	struct rbd_device *rbd_dev;
--};
--
--static void rbd_notify_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
--{
--	struct rbd_device *rbd_dev = (struct rbd_device *)data;
--	if (!rbd_dev)
--		return;
--
--	dout("rbd_notify_cb %s notify_id=%llu opcode=%u\n",
--			rbd_dev->header_name, (unsigned long long) notify_id,
--			(unsigned int) opcode);
--}
--
--/*
-- * Request sync osd notify
-- */
--static int rbd_req_sync_notify(struct rbd_device *rbd_dev)
--{
--	struct ceph_osd_req_op *ops;
--	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
--	struct ceph_osd_event *event;
--	struct rbd_notify_info info;
--	int payload_len = sizeof(u32) + sizeof(u32);
--	int ret;
--
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY, payload_len);
--	if (!ops)
--		return -ENOMEM;
--
--	info.rbd_dev = rbd_dev;
--
--	ret = ceph_osdc_create_event(osdc, rbd_notify_cb, 1,
--				     (void *)&info, &event);
--	if (ret < 0)
--		goto fail;
--
--	ops[0].watch.ver = 1;
--	ops[0].watch.flag = 1;
--	ops[0].watch.cookie = event->cookie;
--	ops[0].watch.prot_ver = RADOS_NOTIFY_VER;
--	ops[0].watch.timeout = 12;
--
--	ret = rbd_req_sync_op(rbd_dev, NULL,
--			       CEPH_NOSNAP,
--			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
--			       ops,
--			       rbd_dev->header_name,
--			       0, 0, NULL, NULL, NULL);
--	if (ret < 0)
--		goto fail_event;
--
--	ret = ceph_osdc_wait_event(event, CEPH_OSD_TIMEOUT_DEFAULT);
--	dout("ceph_osdc_wait_event returned %d\n", ret);
--	rbd_destroy_ops(ops);
--	return 0;
--
--fail_event:
--	ceph_osdc_cancel_event(event);
--fail:
--	rbd_destroy_ops(ops);
--	return ret;
--}
--
- /*
-  * Synchronous osd object method call
-  */
-@@ -1761,52 +1692,6 @@ static int rbd_read_header(struct rbd_device
-*rbd_dev,
- 	return ret;
- }
-
--/*
-- * create a snapshot
-- */
--static int rbd_header_add_snap(struct rbd_device *rbd_dev,
--			       const char *snap_name,
--			       gfp_t gfp_flags)
--{
--	int name_len = strlen(snap_name);
--	u64 new_snapid;
--	int ret;
--	void *data, *p, *e;
--	struct ceph_mon_client *monc;
--
--	/* we should create a snapshot only if we're pointing at the head */
--	if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
--		return -EINVAL;
--
--	monc = &rbd_dev->rbd_client->client->monc;
--	ret = ceph_monc_create_snapid(monc, rbd_dev->pool_id, &new_snapid);
--	dout("created snapid=%llu\n", (unsigned long long) new_snapid);
--	if (ret < 0)
--		return ret;
--
--	data = kmalloc(name_len + 16, gfp_flags);
--	if (!data)
--		return -ENOMEM;
--
--	p = data;
--	e = data + name_len + 16;
--
--	ceph_encode_string_safe(&p, e, snap_name, name_len, bad);
--	ceph_encode_64_safe(&p, e, new_snapid, bad);
--
--	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
--				"rbd", "snap_add",
--				data, (size_t) (p - data), NULL, 0,
--				CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
--				NULL);
--
--	kfree(data);
--
--	return ret < 0 ? ret : 0;
--bad:
--	return -ERANGE;
--}
--
- static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
- {
- 	struct rbd_snap *snap;
-@@ -2030,7 +1915,6 @@ static DEVICE_ATTR(name, S_IRUGO, rbd_name_show,
-NULL);
- static DEVICE_ATTR(image_id, S_IRUGO, rbd_image_id_show, NULL);
- static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
- static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
--static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
-
- static struct attribute *rbd_attrs[] = {
- 	&dev_attr_size.attr,
-@@ -2042,7 +1926,6 @@ static struct attribute *rbd_attrs[] = {
- 	&dev_attr_image_id.attr,
- 	&dev_attr_current_snap.attr,
- 	&dev_attr_refresh.attr,
--	&dev_attr_create_snap.attr,
- 	NULL
- };
-
-@@ -2888,47 +2771,6 @@ done:
- 	return ret;
- }
-
--static ssize_t rbd_snap_add(struct device *dev,
--			    struct device_attribute *attr,
--			    const char *buf,
--			    size_t count)
--{
--	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
--	int ret;
--	char *name = kmalloc(count + 1, GFP_KERNEL);
--	if (!name)
--		return -ENOMEM;
--
--	snprintf(name, count, "%s", buf);
--
--	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--
--	ret = rbd_header_add_snap(rbd_dev,
--				  name, GFP_KERNEL);
--	if (ret < 0)
--		goto err_unlock;
--
--	ret = __rbd_refresh_header(rbd_dev, NULL);
--	if (ret < 0)
--		goto err_unlock;
--
--	/* shouldn't hold ctl_mutex when notifying.. notify might
--	   trigger a watch callback that would need to get that mutex */
--	mutex_unlock(&ctl_mutex);
--
--	/* make a best effort, don't error if failed */
--	rbd_req_sync_notify(rbd_dev);
--
--	ret = count;
--	kfree(name);
--	return ret;
--
--err_unlock:
--	mutex_unlock(&ctl_mutex);
--	kfree(name);
--	return ret;
--}
--
- /*
-  * create control files in sysfs
-  * /sys/bus/rbd/...
--- 
-1.7.9.5
+On 09/07/2012 06:45 AM, Alex Elder wrote:
+> Several fields in a struct rbd_dev are related to what is mapped, as
+> opposed to the actual base rbd image.  If the base image is mapped
+> these are almost unneeded, but if a snapshot is mapped they describe
+> information about that snapshot.
+>
+> In some contexts this can be a little bit confusing.  So group these
+> mapping-related field into a structure to make it clear what they
+> are describing.
+>
+> This also includes a minor change that rearranges the fields in the
+> in-core image header structure so that invariant fields are at the
+> top, followed by those that change.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   83
+> ++++++++++++++++++++++++++++-----------------------
+>   1 file changed, 45 insertions(+), 38 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index eb6b772..dff6210 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -81,13 +81,15 @@
+>    * block device image metadata (in-memory version)
+>    */
+>   struct rbd_image_header {
+> -	u64 image_size;
+> +	/* These four fields never change for a given rbd image */
+>   	char *object_prefix;
+>   	__u8 obj_order;
+>   	__u8 crypt_type;
+>   	__u8 comp_type;
+> -	struct ceph_snap_context *snapc;
+>
+> +	/* The remaining fields need to be updated occasionally */
+> +	u64 image_size;
+> +	struct ceph_snap_context *snapc;
+>   	char *snap_names;
+>   	u64 *snap_sizes;
+>
+> @@ -146,6 +148,13 @@ struct rbd_snap {
+>   	u64			id;
+>   };
+>
+> +struct rbd_mapping {
+> +	char                    *snap_name;
+> +	u64                     snap_id;
+> +	bool                    snap_exists;
+> +	bool			read_only;
+> +};
+> +
+>   /*
+>    * a single device
+>    */
+> @@ -174,13 +183,8 @@ struct rbd_device {
+>
+>   	/* protects updating the header */
+>   	struct rw_semaphore     header_rwsem;
+> -	/* name of the snapshot this device reads from */
+> -	char                    *snap_name;
+> -	/* id of the snapshot this device reads from */
+> -	u64                     snap_id;	/* current snapshot id */
+> -	/* whether the snap_id this device reads from still exists */
+> -	bool                    snap_exists;
+> -	bool			read_only;
+> +
+> +	struct rbd_mapping	mapping;
+>
+>   	struct list_head	node;
+>
+> @@ -261,11 +265,11 @@ static int rbd_open(struct block_device *bdev,
+> fmode_t mode)
+>   {
+>   	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
+>
+> -	if ((mode & FMODE_WRITE) && rbd_dev->read_only)
+> +	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
+>   		return -EROFS;
+>
+>   	rbd_get_dev(rbd_dev);
+> -	set_device_ro(bdev, rbd_dev->read_only);
+> +	set_device_ro(bdev, rbd_dev->mapping.read_only);
+>
+>   	return 0;
+>   }
+> @@ -375,7 +379,7 @@ enum {
+>   static match_table_t rbd_opts_tokens = {
+>   	/* int args above */
+>   	/* string args above */
+> -	{Opt_read_only, "read_only"},
+> +	{Opt_read_only, "mapping.read_only"},
+>   	{Opt_read_only, "ro"},		/* Alternate spelling */
+>   	{Opt_read_write, "read_write"},
+>   	{Opt_read_write, "rw"},		/* Alternate spelling */
+> @@ -583,13 +587,13 @@ static int rbd_header_from_disk(struct
+> rbd_image_header *header,
+>   		header->snap_sizes = NULL;
+>   	}
+>
+> -	header->image_size = le64_to_cpu(ondisk->image_size);
+>   	header->obj_order = ondisk->options.order;
+>   	header->crypt_type = ondisk->options.crypt_type;
+>   	header->comp_type = ondisk->options.comp_type;
+>
+>   	/* Allocate and fill in the snapshot context */
+>
+> +	header->image_size = le64_to_cpu(ondisk->image_size);
+>   	size = sizeof (struct ceph_snap_context);
+>   	size += snap_count * sizeof (header->snapc->snaps[0]);
+>   	header->snapc = kzalloc(size, GFP_KERNEL);
+> @@ -645,23 +649,24 @@ static int rbd_header_set_snap(struct rbd_device
+> *rbd_dev, u64 *size)
+>
+>   	down_write(&rbd_dev->header_rwsem);
+>
+> -	if (!memcmp(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+> +	if (!memcmp(rbd_dev->mapping.snap_name, RBD_SNAP_HEAD_NAME,
+>   		    sizeof (RBD_SNAP_HEAD_NAME))) {
+> -		rbd_dev->snap_id = CEPH_NOSNAP;
+> -		rbd_dev->snap_exists = false;
+> -		rbd_dev->read_only = rbd_dev->rbd_opts.read_only;
+> +		rbd_dev->mapping.snap_id = CEPH_NOSNAP;
+> +		rbd_dev->mapping.snap_exists = false;
+> +		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
+>   		if (size)
+>   			*size = rbd_dev->header.image_size;
+>   	} else {
+>   		u64 snap_id = 0;
+>
+> -		ret = snap_by_name(&rbd_dev->header, rbd_dev->snap_name,
+> +		ret = snap_by_name(&rbd_dev->header,
+> +					rbd_dev->mapping.snap_name,
+>   					&snap_id, size);
+>   		if (ret < 0)
+>   			goto done;
+> -		rbd_dev->snap_id = snap_id;
+> -		rbd_dev->snap_exists = true;
+> -		rbd_dev->read_only = true;	/* No choice for snapshots */
+> +		rbd_dev->mapping.snap_id = snap_id;
+> +		rbd_dev->mapping.snap_exists = true;
+> +		rbd_dev->mapping.read_only = true;
+>   	}
+>
+>   	ret = 0;
+> @@ -1532,7 +1537,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>   		size = blk_rq_bytes(rq);
+>   		ofs = blk_rq_pos(rq) * SECTOR_SIZE;
+>   		rq_bio = rq->bio;
+> -		if (do_write && rbd_dev->read_only) {
+> +		if (do_write && rbd_dev->mapping.read_only) {
+>   			__blk_end_request_all(rq, -EROFS);
+>   			continue;
+>   		}
+> @@ -1541,7 +1546,8 @@ static void rbd_rq_fn(struct request_queue *q)
+>
+>   		down_read(&rbd_dev->header_rwsem);
+>
+> -		if (rbd_dev->snap_id != CEPH_NOSNAP && !rbd_dev->snap_exists) {
+> +		if (rbd_dev->mapping.snap_id != CEPH_NOSNAP &&
+> +				!rbd_dev->mapping.snap_exists) {
+>   			up_read(&rbd_dev->header_rwsem);
+>   			dout("request for non-existent snapshot");
+>   			spin_lock_irq(q->queue_lock);
+> @@ -1595,7 +1601,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>   					      coll, cur_seg);
+>   			else
+>   				rbd_req_read(rq, rbd_dev,
+> -					     rbd_dev->snap_id,
+> +					     rbd_dev->mapping.snap_id,
+>   					     ofs,
+>   					     op_size, bio,
+>   					     coll, cur_seg);
+> @@ -1767,7 +1773,7 @@ static int rbd_header_add_snap(struct rbd_device
+> *rbd_dev,
+>   	struct ceph_mon_client *monc;
+>
+>   	/* we should create a snapshot only if we're pointing at the head */
+> -	if (rbd_dev->snap_id != CEPH_NOSNAP)
+> +	if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
+>   		return -EINVAL;
+>
+>   	monc = &rbd_dev->rbd_client->client->monc;
+> @@ -1821,7 +1827,7 @@ static int __rbd_refresh_header(struct rbd_device
+> *rbd_dev, u64 *hver)
+>   	down_write(&rbd_dev->header_rwsem);
+>
+>   	/* resized? */
+> -	if (rbd_dev->snap_id == CEPH_NOSNAP) {
+> +	if (rbd_dev->mapping.snap_id == CEPH_NOSNAP) {
+>   		sector_t size = (sector_t) h.image_size / SECTOR_SIZE;
+>
+>   		dout("setting size to %llu sectors", (unsigned long long) size);
+> @@ -2004,7 +2010,7 @@ static ssize_t rbd_snap_show(struct device *dev,
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	return sprintf(buf, "%s\n", rbd_dev->snap_name);
+> +	return sprintf(buf, "%s\n", rbd_dev->mapping.snap_name);
+>   }
+>
+>   static ssize_t rbd_image_refresh(struct device *dev,
+> @@ -2205,11 +2211,12 @@ static int rbd_dev_snap_devs_update(struct
+> rbd_device *rbd_dev)
+>
+>   			/* Existing snapshot not in the new snap context */
+>
+> -			if (rbd_dev->snap_id == snap->id)
+> -				rbd_dev->snap_exists = false;
+> +			if (rbd_dev->mapping.snap_id == snap->id)
+> +				rbd_dev->mapping.snap_exists = false;
+>   			__rbd_remove_snap_dev(snap);
+>   			dout("%ssnap id %llu has been removed\n",
+> -				rbd_dev->snap_id == snap->id ? "mapped " : "",
+> +				rbd_dev->mapping.snap_id == snap->id ?
+> +								"mapped " : "",
+>   				(unsigned long long) snap->id);
+>
+>   			/* Done with this list entry; advance */
+> @@ -2522,18 +2529,18 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   	 * The snapshot name is optional.  If none is is supplied,
+>   	 * we use the default value.
+>   	 */
+> -	rbd_dev->snap_name = dup_token(&buf, &len);
+> -	if (!rbd_dev->snap_name)
+> +	rbd_dev->mapping.snap_name = dup_token(&buf, &len);
+> +	if (!rbd_dev->mapping.snap_name)
+>   		goto out_err;
+>   	if (!len) {
+>   		/* Replace the empty name with the default */
+> -		kfree(rbd_dev->snap_name);
+> -		rbd_dev->snap_name
+> +		kfree(rbd_dev->mapping.snap_name);
+> +		rbd_dev->mapping.snap_name
+>   			= kmalloc(sizeof (RBD_SNAP_HEAD_NAME), GFP_KERNEL);
+> -		if (!rbd_dev->snap_name)
+> +		if (!rbd_dev->mapping.snap_name)
+>   			goto out_err;
+>
+> -		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+> +		memcpy(rbd_dev->mapping.snap_name, RBD_SNAP_HEAD_NAME,
+>   			sizeof (RBD_SNAP_HEAD_NAME));
+>   	}
+>
+> @@ -2642,7 +2649,7 @@ err_out_client:
+>   	rbd_put_client(rbd_dev);
+>   err_put_id:
+>   	if (rbd_dev->pool_name) {
+> -		kfree(rbd_dev->snap_name);
+> +		kfree(rbd_dev->mapping.snap_name);
+>   		kfree(rbd_dev->header_name);
+>   		kfree(rbd_dev->image_name);
+>   		kfree(rbd_dev->pool_name);
+> @@ -2695,7 +2702,7 @@ static void rbd_dev_release(struct device *dev)
+>   	unregister_blkdev(rbd_dev->major, rbd_dev->name);
+>
+>   	/* done with the id, and with the rbd_dev */
+> -	kfree(rbd_dev->snap_name);
+> +	kfree(rbd_dev->mapping.snap_name);
+>   	kfree(rbd_dev->header_name);
+>   	kfree(rbd_dev->pool_name);
+>   	kfree(rbd_dev->image_name);
+>
 
