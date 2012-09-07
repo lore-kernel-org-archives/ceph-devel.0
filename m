@@ -1,35 +1,47 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Telling an osd to reload a cls library
-Date: Thu, 06 Sep 2012 18:22:51 -0700
-Message-ID: <50494C6B.5090005@inktank.com>
-References: <CAEVWPAVfRk-2pg0RATzH8ph0zqXWrodm4viWhjDHJh3+P-zh7g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] osd/OSD.cc: Fix typo in OSD::heartbeat_check()
+Date: Fri,  7 Sep 2012 13:49:27 +0800
+Message-ID: <1346996967-6380-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:41183 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755637Ab2IGBWz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Sep 2012 21:22:55 -0400
-Received: by iahk25 with SMTP id k25so2709427iah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Sep 2012 18:22:55 -0700 (PDT)
-In-Reply-To: <CAEVWPAVfRk-2pg0RATzH8ph0zqXWrodm4viWhjDHJh3+P-zh7g@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:27715 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752463Ab2IGFtb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 7 Sep 2012 01:49:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ian Pye <ianpye@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On 09/06/2012 06:17 PM, Ian Pye wrote:
-> Hi,
->
-> Is there a way to tell an osd to reload a cls.so file without
-> re-starting the osd?
->
-> Thanks,
->
-> Ian
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Not right now, although there could be an admin socket or
-'ceph osd tell' command to do so I guess.
+The check 'p->second.last_tx > cutoff' should always be false
+since last_tx is periodically updated by OSD::heartbeat()
 
-Josh
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/osd/OSD.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
+index 5add675..562fd25 100644
+--- a/src/osd/OSD.cc
++++ b/src/osd/OSD.cc
+@@ -1946,13 +1946,13 @@ void OSD::heartbeat_check()
+        p != heartbeat_peers.end();
+        p++) {
+     dout(25) << "heartbeat_check osd." << p->first
+-	     << " first_rx " << p->second.first_tx
++	     << " first_tx " << p->second.first_tx
+ 	     << " last_tx " << p->second.last_tx
+ 	     << " last_rx " << p->second.last_rx
+ 	     << dendl;
+     if (p->second.last_rx == utime_t()) {
+       if (p->second.last_tx == utime_t() ||
+-	  p->second.last_tx > cutoff)
++	  p->second.first_tx > cutoff)
+ 	continue;  // just started sending recently
+       derr << "heartbeat_check: no reply from osd." << p->first
+ 	   << " ever, first ping sent " << p->second.first_tx
+-- 
+1.7.11.4
+
