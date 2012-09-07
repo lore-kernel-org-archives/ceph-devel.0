@@ -1,43 +1,39 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Telling an osd to reload a cls library
-Date: Fri, 7 Sep 2012 08:51:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209070849260.9861@cobra.newdream.net>
-References: <CAEVWPAVfRk-2pg0RATzH8ph0zqXWrodm4viWhjDHJh3+P-zh7g@mail.gmail.com> <50494C6B.5090005@inktank.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: ceph-fuse mount options
+Date: Fri, 7 Sep 2012 17:03:58 +0100
+Message-ID: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
+Mime-Version: 1.0 (Apple Message framework v1278)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35289 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750746Ab2IGPva (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 11:51:30 -0400
-In-Reply-To: <50494C6B.5090005@inktank.com>
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:58969 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750753Ab2IGQEB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 12:04:01 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id C339183C1D
+	for <ceph-devel@vger.kernel.org>; Fri,  7 Sep 2012 17:03:59 +0100 (IST)
+Received: from tabaet.tchpc.tcd.ie ([127.0.0.1])
+	by localhost (tabaet.tchpc.tcd.ie [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id tbH0T8U68Wpx for <ceph-devel@vger.kernel.org>;
+	Fri,  7 Sep 2012 17:03:59 +0100 (IST)
+Received: from x00.tchpc.tcd.ie (x00.tchpc.tcd.ie [134.226.112.149])
+	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 4BE8883BEF
+	for <ceph-devel@vger.kernel.org>; Fri,  7 Sep 2012 17:03:59 +0100 (IST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Ian Pye <ianpye@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 6 Sep 2012, Josh Durgin wrote:
-> On 09/06/2012 06:17 PM, Ian Pye wrote:
-> > Hi,
-> > 
-> > Is there a way to tell an osd to reload a cls.so file without
-> > re-starting the osd?
-> > 
-> > Thanks,
-> > 
-> > Ian
-> 
-> Not right now, although there could be an admin socket or
-> 'ceph osd tell' command to do so I guess.
+Hi All,
 
-In order to make this work right, I think ClassHandler needs to be updated 
-to return a shared_ptr<> to ClassData and make the ~ClassData do a 
-dlclose()... or something along those lines so that a reload won't screw 
-up other threads that are currently executing the class you're trying to 
-close.
+I know that cephfs has the option picking which pools to use, will ceph-fuse be gaining this feature at any point in the future? Or is this feature available but isn't documented?
 
-The 'reload' is mostly just a 'close', since on the next request it will 
-get loaded automatically (tho it could do an explicit load so that you see 
-any errors immediately).
+Regards,
+Jimmy Tang
 
-sage
+--
+Senior Software Engineer, Digital Repository of Ireland (DRI)
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/
+
