@@ -1,77 +1,110 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/5]  rbd: kill rbd_image_header->total_snaps
-Date: Fri, 07 Sep 2012 11:17:14 -0700
-Message-ID: <504A3A2A.1080808@inktank.com>
-References: <5049F7F5.1070609@inktank.com> <5049F925.5050001@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 1/5] rbd: pass flags to rbd_req_sync_exec()
+Date: Fri, 07 Sep 2012 13:19:13 -0500
+Message-ID: <504A3AA1.6090603@inktank.com>
+References: <504A39E0.1040107@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:44325 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342Ab2IGSRQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:17:16 -0400
-Received: by mail-pz0-f46.google.com with SMTP id y13so1949925dad.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:17:16 -0700 (PDT)
-In-Reply-To: <5049F925.5050001@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:35579 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753283Ab2IGSTQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 14:19:16 -0400
+Received: by ieje11 with SMTP id e11so5532930iej.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 11:19:16 -0700 (PDT)
+In-Reply-To: <504A39E0.1040107@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+In order to allow both read requests and write requests to be
+initiated using rbd_req_sync_exec(), add an OSD flags value
+which can be passed down to rbd_req_sync_op().  Rename the "data"
+and "len" parameters to be more clear that they represent data
+that is outbound.
 
-On 09/07/2012 06:39 AM, Alex Elder wrote:
-> The "total_snaps" field in an rbd header structure is never any
-> different from the value of "num_snaps" stored within a snapshot
-> context.  Avoid any confusion by just using the value held within
-> the snapshot context, and get rid of the "total_snaps" field.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    6 ++----
->   1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 774a36b..eb6b772 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -87,7 +87,6 @@ struct rbd_image_header {
->   	__u8 crypt_type;
->   	__u8 comp_type;
->   	struct ceph_snap_context *snapc;
-> -	u32 total_snaps;
->
->   	char *snap_names;
->   	u64 *snap_sizes;
-> @@ -588,7 +587,6 @@ static int rbd_header_from_disk(struct
-> rbd_image_header *header,
->   	header->obj_order = ondisk->options.order;
->   	header->crypt_type = ondisk->options.crypt_type;
->   	header->comp_type = ondisk->options.comp_type;
-> -	header->total_snaps = snap_count;
->
->   	/* Allocate and fill in the snapshot context */
->
-> @@ -624,7 +622,8 @@ static int snap_by_name(struct rbd_image_header
-> *header, const char *snap_name,
->   	int i;
->   	char *p = header->snap_names;
->
-> -	for (i = 0; i < header->total_snaps; i++) {
-> +	rbd_assert(header->snapc != NULL);
-> +	for (i = 0; i < header->snapc->num_snaps; i++) {
->   		if (!strcmp(snap_name, p)) {
->
->   			/* Found it.  Pass back its id and/or size */
-> @@ -1839,7 +1838,6 @@ static int __rbd_refresh_header(struct rbd_device
-> *rbd_dev, u64 *hver)
->   		*hver = h.obj_version;
->   	rbd_dev->header.obj_version = h.obj_version;
->   	rbd_dev->header.image_size = h.image_size;
-> -	rbd_dev->header.total_snaps = h.total_snaps;
->   	rbd_dev->header.snapc = h.snapc;
->   	rbd_dev->header.snap_names = h.snap_names;
->   	rbd_dev->header.snap_sizes = h.snap_sizes;
->
+At this point, this function is still only used (and only works) for
+write requests.
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index daa428e3..4e84f99 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1437,23 +1437,33 @@ fail:
+ }
+
+ /*
+- * Request sync osd read
++ * Synchronous osd object method call
+  */
+ static int rbd_req_sync_exec(struct rbd_device *rbd_dev,
+ 			     const char *object_name,
+ 			     const char *class_name,
+ 			     const char *method_name,
+-			     const char *data,
+-			     int len,
++			     const char *outbound,
++			     size_t outbound_size,
++			     int flags,
+ 			     u64 *ver)
+ {
+ 	struct ceph_osd_req_op *ops;
+ 	int class_name_len = strlen(class_name);
+ 	int method_name_len = strlen(method_name);
++	int payload_size;
+ 	int ret;
+
+-	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_CALL,
+-				    class_name_len + method_name_len + len);
++	/*
++	 * Any input parameters required by the method we're calling
++	 * will be sent along with the class and method names as
++	 * part of the message payload.  That data and its size are
++	 * supplied via the indata and indata_len fields (named from
++	 * the perspective of the server side) in the OSD request
++	 * operation.
++	 */
++	payload_size = class_name_len + method_name_len + outbound_size;
++	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_CALL, payload_size);
+ 	if (!ops)
+ 		return -ENOMEM;
+
+@@ -1462,13 +1472,12 @@ static int rbd_req_sync_exec(struct rbd_device
+*rbd_dev,
+ 	ops[0].cls.method_name = method_name;
+ 	ops[0].cls.method_len = (__u8) method_name_len;
+ 	ops[0].cls.argc = 0;
+-	ops[0].cls.indata = data;
+-	ops[0].cls.indata_len = len;
++	ops[0].cls.indata = outbound;
++	ops[0].cls.indata_len = outbound_size;
+
+ 	ret = rbd_req_sync_op(rbd_dev, NULL,
+ 			       CEPH_NOSNAP,
+-			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+-			       ops,
++			       flags, ops,
+ 			       object_name, 0, 0, NULL, NULL, ver);
+
+ 	rbd_destroy_ops(ops);
+@@ -1780,7 +1789,9 @@ static int rbd_header_add_snap(struct rbd_device
+*rbd_dev,
+
+ 	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "snap_add",
+-				data, p - data, NULL);
++				data, (size_t) (p - data),
++				CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
++				NULL);
+
+ 	kfree(data);
+
+-- 
+1.7.9.5
 
