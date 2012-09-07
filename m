@@ -1,39 +1,43 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: ceph-fuse mount options
-Date: Fri, 7 Sep 2012 17:03:58 +0100
-Message-ID: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph-fuse mount options
+Date: Fri, 7 Sep 2012 09:22:34 -0700
+Message-ID: <CAPYLRzgc_-9nTE+-Y6rm9aiBBVeEMZTfBs-ycRw3cFV8tL2AHg@mail.gmail.com>
+References: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:58969 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750753Ab2IGQEB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 12:04:01 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id C339183C1D
-	for <ceph-devel@vger.kernel.org>; Fri,  7 Sep 2012 17:03:59 +0100 (IST)
-Received: from tabaet.tchpc.tcd.ie ([127.0.0.1])
-	by localhost (tabaet.tchpc.tcd.ie [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id tbH0T8U68Wpx for <ceph-devel@vger.kernel.org>;
-	Fri,  7 Sep 2012 17:03:59 +0100 (IST)
-Received: from x00.tchpc.tcd.ie (x00.tchpc.tcd.ie [134.226.112.149])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 4BE8883BEF
-	for <ceph-devel@vger.kernel.org>; Fri,  7 Sep 2012 17:03:59 +0100 (IST)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:46896 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777Ab2IGQWf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 12:22:35 -0400
+Received: by ieje11 with SMTP id e11so5333879iej.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 09:22:35 -0700 (PDT)
+In-Reply-To: <C601985E-3865-4582-99DA-BC0168893968@tchpc.tcd.ie>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jimmy Tang <jtang@tchpc.tcd.ie>
+Cc: ceph-devel@vger.kernel.org
 
-Hi All,
+On Fri, Sep 7, 2012 at 9:03 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
+> Hi All,
+>
+> I know that cephfs has the option picking which pools to use, will ce=
+ph-fuse be gaining this feature at any point in the future? Or is this =
+feature available but isn't documented?
 
-I know that cephfs has the option picking which pools to use, will ceph-fuse be gaining this feature at any point in the future? Or is this feature available but isn't documented?
+It's not available =97=A0making it work would require implementing FUSE=
+'s
+ioctl system, which we will probably do at some point, but is yet to
+be prioritized or placed anywhere.
 
-Regards,
-Jimmy Tang
-
+However, ceph-fuse does of course respect settings put in place by the
+kernel client, so if you just want to do a one-time configuration then
+you can do it via the kernel on one machine and use ceph-fuse
+elsewhere...
+-Greg
 --
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-Trinity Centre for High Performance Computing,
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/
-
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
