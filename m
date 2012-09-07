@@ -1,153 +1,305 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH 05/11] rbd: move rbd_opts to struct rbd_device
-Date: Fri, 7 Sep 2012 14:40:20 -0700
-Message-ID: <CAC-hyiHNkqLR_sE+k=erEXemZc5W8b9ACo7tRm1civ1UWQvAvQ@mail.gmail.com>
-References: <5037AB20.4000103@inktank.com>
-	<5037ACF3.5000506@inktank.com>
-	<CAC-hyiE42C1CahCDAxh0LawehFdY2c2VYiUxWcinqVAf4uJ27A@mail.gmail.com>
-	<5048B16C.30709@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 1/7] rbd: separate mapping info in rbd_dev
+Date: Fri, 07 Sep 2012 16:51:11 -0500
+Message-ID: <504A6C4F.7060602@inktank.com>
+References: <5049F951.2030706@inktank.com> <5049FA67.3060904@inktank.com> <504A43DE.4010207@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:33163 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757072Ab2IGVkW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 17:40:22 -0400
-Received: by eaac11 with SMTP id c11so17996eaa.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 14:40:20 -0700 (PDT)
-In-Reply-To: <5048B16C.30709@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:57181 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751101Ab2IGVvO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Sep 2012 17:51:14 -0400
+Received: by ieje11 with SMTP id e11so70993iej.19
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Sep 2012 14:51:14 -0700 (PDT)
+In-Reply-To: <504A43DE.4010207@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Sep 6, 2012 at 7:21 AM, Alex Elder <elder@inktank.com> wrote:
-> On 08/30/2012 12:07 PM, Yehuda Sadeh wrote:
->> On Fri, Aug 24, 2012 at 9:33 AM, Alex Elder <elder@inktank.com> wrote:
->>> The rbd options don't really apply to the ceph client.  So don't
->>> store a pointer to it in the ceph_client structure, and put them
->>> (a struct, not a pointer) into the rbd_dev structure proper.
->>>
->>> Pass the rbd device structure to rbd_client_create() so it can
->>> assign rbd_dev->rbdc if successful, and have it return an error code
->>> instead of the rbd client pointer.
->>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>  drivers/block/rbd.c |   49
->>> ++++++++++++++++---------------------------------
->>>  1 file changed, 16 insertions(+), 33 deletions(-)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index 130dbc2..b40f553 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -98,7 +98,6 @@ struct rbd_options {
->>>   */
->>>  struct rbd_client {
->>>         struct ceph_client      *client;
->>> -       struct rbd_options      *rbd_opts;
->>>         struct kref             kref;
->>>         struct list_head        node;
->>>  };
->>> @@ -152,6 +151,7 @@ struct rbd_device {
->>>         struct gendisk          *disk;          /* blkdev's gendisk and rq */
->>>         struct request_queue    *q;
->>>
->>> +       struct rbd_options      rbd_opts;
->>>         struct rbd_client       *rbd_client;
->>>
->>>         char                    name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
->>> @@ -273,8 +273,7 @@ static const struct block_device_operations
->>> rbd_bd_ops = {
->>>   * Initialize an rbd client instance.
->>>   * We own *ceph_opts.
->>>   */
->>> -static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts,
->>> -                                           struct rbd_options *rbd_opts)
->>> +static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts)
->>>  {
->>>         struct rbd_client *rbdc;
->>>         int ret = -ENOMEM;
->>> @@ -298,8 +297,6 @@ static struct rbd_client *rbd_client_create(struct
->>> ceph_options *ceph_opts,
->>>         if (ret < 0)
->>>                 goto out_err;
->>>
->>> -       rbdc->rbd_opts = rbd_opts;
->>> -
->>>         spin_lock(&rbd_client_list_lock);
->>>         list_add_tail(&rbdc->node, &rbd_client_list);
->>>         spin_unlock(&rbd_client_list_lock);
->>> @@ -402,42 +399,33 @@ static int parse_rbd_opts_token(char *c, void
->>> *private)
->>>   * Get a ceph client with specific addr and configuration, if one does
->>>   * not exist create it.
->>>   */
->>> -static struct rbd_client *rbd_get_client(const char *mon_addr,
->>> -                                        size_t mon_addr_len,
->>> -                                        char *options)
->>> +static int rbd_get_client(struct rbd_device *rbd_dev, const char *mon_addr,
->>> +                               size_t mon_addr_len, char *options)
->>>  {
->>> -       struct rbd_client *rbdc;
->>> +       struct rbd_options *rbd_opts = &rbd_dev->rbd_opts;
->>>         struct ceph_options *ceph_opts;
->>> -       struct rbd_options *rbd_opts;
->>> -
->>> -       rbd_opts = kzalloc(sizeof(*rbd_opts), GFP_KERNEL);
->>> -       if (!rbd_opts)
->>> -               return ERR_PTR(-ENOMEM);
->>> +       struct rbd_client *rbdc;
->>>
->>>         rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
->>>
->>>         ceph_opts = ceph_parse_options(options, mon_addr,
->>>                                         mon_addr + mon_addr_len,
->>>                                         parse_rbd_opts_token, rbd_opts);
->>> -       if (IS_ERR(ceph_opts)) {
->>> -               kfree(rbd_opts);
->>> -               return ERR_CAST(ceph_opts);
->>> -       }
->>> +       if (IS_ERR(ceph_opts))
->>> +               return PTR_ERR(ceph_opts);
->>>
->>>         rbdc = rbd_client_find(ceph_opts);
->>>         if (rbdc) {
->>>                 /* using an existing client */
->>>                 ceph_destroy_options(ceph_opts);
+On 09/07/2012 01:58 PM, Josh Durgin wrote:
+> Might want to keep the comments about the fields
+> moved to the mapping struct, but it looks good to me.
+> 
+> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+I'm going to leave this as-is.  I'm going to definitely be
+reworking all these structures in the coming weeks to more
+clearly separate images from snapshots, and I'll try to
+improve how things are documented as I go.
+
+					-Alex
+
+> On 09/07/2012 06:45 AM, Alex Elder wrote:
+>> Several fields in a struct rbd_dev are related to what is mapped, as
+>> opposed to the actual base rbd image.  If the base image is mapped
+>> these are almost unneeded, but if a snapshot is mapped they describe
+>> information about that snapshot.
 >>
->> It'll probably be better to use a reference count to control ceph_opts lifecycle
->
-> I looked at this.
->
-> In this case, ceph_opts is directly tied to a ceph_client.
-> If a ceph client exists whose options match the one that
-> has been created here, that client will be used, and its
-> options get destroyed when the ceph_client gets destroyed
-> (and the ceph_client is refcounted).  The ceph_opts
-> created here will never be referenced by anything else
-> so it's safe to just destroy it.
->
-> If no existing rbd_client has a ceph_client with matching
-> ceph_options, then one is created below and it will use
-> the ceph_opts created here and thus its life cycle will
-> be managed by that ceph_client's reference count.
->
-> I believe this means there is no reason to reference count
-> ceph_opts.
->
-> Yehuda, please let me know if you disagree with this.  If
-> not, would you sign off on this?
->
+>> In some contexts this can be a little bit confusing.  So group these
+>> mapping-related field into a structure to make it clear what they
+>> are describing.
+>>
+>> This also includes a minor change that rearranges the fields in the
+>> in-core image header structure so that invariant fields are at the
+>> top, followed by those that change.
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c |   83
+>> ++++++++++++++++++++++++++++-----------------------
+>>   1 file changed, 45 insertions(+), 38 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index eb6b772..dff6210 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -81,13 +81,15 @@
+>>    * block device image metadata (in-memory version)
+>>    */
+>>   struct rbd_image_header {
+>> -    u64 image_size;
+>> +    /* These four fields never change for a given rbd image */
+>>       char *object_prefix;
+>>       __u8 obj_order;
+>>       __u8 crypt_type;
+>>       __u8 comp_type;
+>> -    struct ceph_snap_context *snapc;
+>>
+>> +    /* The remaining fields need to be updated occasionally */
+>> +    u64 image_size;
+>> +    struct ceph_snap_context *snapc;
+>>       char *snap_names;
+>>       u64 *snap_sizes;
+>>
+>> @@ -146,6 +148,13 @@ struct rbd_snap {
+>>       u64            id;
+>>   };
+>>
+>> +struct rbd_mapping {
+>> +    char                    *snap_name;
+>> +    u64                     snap_id;
+>> +    bool                    snap_exists;
+>> +    bool            read_only;
+>> +};
+>> +
+>>   /*
+>>    * a single device
+>>    */
+>> @@ -174,13 +183,8 @@ struct rbd_device {
+>>
+>>       /* protects updating the header */
+>>       struct rw_semaphore     header_rwsem;
+>> -    /* name of the snapshot this device reads from */
+>> -    char                    *snap_name;
+>> -    /* id of the snapshot this device reads from */
+>> -    u64                     snap_id;    /* current snapshot id */
+>> -    /* whether the snap_id this device reads from still exists */
+>> -    bool                    snap_exists;
+>> -    bool            read_only;
+>> +
+>> +    struct rbd_mapping    mapping;
+>>
+>>       struct list_head    node;
+>>
+>> @@ -261,11 +265,11 @@ static int rbd_open(struct block_device *bdev,
+>> fmode_t mode)
+>>   {
+>>       struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
+>>
+>> -    if ((mode & FMODE_WRITE) && rbd_dev->read_only)
+>> +    if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
+>>           return -EROFS;
+>>
+>>       rbd_get_dev(rbd_dev);
+>> -    set_device_ro(bdev, rbd_dev->read_only);
+>> +    set_device_ro(bdev, rbd_dev->mapping.read_only);
+>>
+>>       return 0;
+>>   }
+>> @@ -375,7 +379,7 @@ enum {
+>>   static match_table_t rbd_opts_tokens = {
+>>       /* int args above */
+>>       /* string args above */
+>> -    {Opt_read_only, "read_only"},
+>> +    {Opt_read_only, "mapping.read_only"},
+>>       {Opt_read_only, "ro"},        /* Alternate spelling */
+>>       {Opt_read_write, "read_write"},
+>>       {Opt_read_write, "rw"},        /* Alternate spelling */
+>> @@ -583,13 +587,13 @@ static int rbd_header_from_disk(struct
+>> rbd_image_header *header,
+>>           header->snap_sizes = NULL;
+>>       }
+>>
+>> -    header->image_size = le64_to_cpu(ondisk->image_size);
+>>       header->obj_order = ondisk->options.order;
+>>       header->crypt_type = ondisk->options.crypt_type;
+>>       header->comp_type = ondisk->options.comp_type;
+>>
+>>       /* Allocate and fill in the snapshot context */
+>>
+>> +    header->image_size = le64_to_cpu(ondisk->image_size);
+>>       size = sizeof (struct ceph_snap_context);
+>>       size += snap_count * sizeof (header->snapc->snaps[0]);
+>>       header->snapc = kzalloc(size, GFP_KERNEL);
+>> @@ -645,23 +649,24 @@ static int rbd_header_set_snap(struct rbd_device
+>> *rbd_dev, u64 *size)
+>>
+>>       down_write(&rbd_dev->header_rwsem);
+>>
+>> -    if (!memcmp(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+>> +    if (!memcmp(rbd_dev->mapping.snap_name, RBD_SNAP_HEAD_NAME,
+>>               sizeof (RBD_SNAP_HEAD_NAME))) {
+>> -        rbd_dev->snap_id = CEPH_NOSNAP;
+>> -        rbd_dev->snap_exists = false;
+>> -        rbd_dev->read_only = rbd_dev->rbd_opts.read_only;
+>> +        rbd_dev->mapping.snap_id = CEPH_NOSNAP;
+>> +        rbd_dev->mapping.snap_exists = false;
+>> +        rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
+>>           if (size)
+>>               *size = rbd_dev->header.image_size;
+>>       } else {
+>>           u64 snap_id = 0;
+>>
+>> -        ret = snap_by_name(&rbd_dev->header, rbd_dev->snap_name,
+>> +        ret = snap_by_name(&rbd_dev->header,
+>> +                    rbd_dev->mapping.snap_name,
+>>                       &snap_id, size);
+>>           if (ret < 0)
+>>               goto done;
+>> -        rbd_dev->snap_id = snap_id;
+>> -        rbd_dev->snap_exists = true;
+>> -        rbd_dev->read_only = true;    /* No choice for snapshots */
+>> +        rbd_dev->mapping.snap_id = snap_id;
+>> +        rbd_dev->mapping.snap_exists = true;
+>> +        rbd_dev->mapping.read_only = true;
+>>       }
+>>
+>>       ret = 0;
+>> @@ -1532,7 +1537,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>>           size = blk_rq_bytes(rq);
+>>           ofs = blk_rq_pos(rq) * SECTOR_SIZE;
+>>           rq_bio = rq->bio;
+>> -        if (do_write && rbd_dev->read_only) {
+>> +        if (do_write && rbd_dev->mapping.read_only) {
+>>               __blk_end_request_all(rq, -EROFS);
+>>               continue;
+>>           }
+>> @@ -1541,7 +1546,8 @@ static void rbd_rq_fn(struct request_queue *q)
+>>
+>>           down_read(&rbd_dev->header_rwsem);
+>>
+>> -        if (rbd_dev->snap_id != CEPH_NOSNAP && !rbd_dev->snap_exists) {
+>> +        if (rbd_dev->mapping.snap_id != CEPH_NOSNAP &&
+>> +                !rbd_dev->mapping.snap_exists) {
+>>               up_read(&rbd_dev->header_rwsem);
+>>               dout("request for non-existent snapshot");
+>>               spin_lock_irq(q->queue_lock);
+>> @@ -1595,7 +1601,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>>                             coll, cur_seg);
+>>               else
+>>                   rbd_req_read(rq, rbd_dev,
+>> -                         rbd_dev->snap_id,
+>> +                         rbd_dev->mapping.snap_id,
+>>                            ofs,
+>>                            op_size, bio,
+>>                            coll, cur_seg);
+>> @@ -1767,7 +1773,7 @@ static int rbd_header_add_snap(struct rbd_device
+>> *rbd_dev,
+>>       struct ceph_mon_client *monc;
+>>
+>>       /* we should create a snapshot only if we're pointing at the
+>> head */
+>> -    if (rbd_dev->snap_id != CEPH_NOSNAP)
+>> +    if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
+>>           return -EINVAL;
+>>
+>>       monc = &rbd_dev->rbd_client->client->monc;
+>> @@ -1821,7 +1827,7 @@ static int __rbd_refresh_header(struct rbd_device
+>> *rbd_dev, u64 *hver)
+>>       down_write(&rbd_dev->header_rwsem);
+>>
+>>       /* resized? */
+>> -    if (rbd_dev->snap_id == CEPH_NOSNAP) {
+>> +    if (rbd_dev->mapping.snap_id == CEPH_NOSNAP) {
+>>           sector_t size = (sector_t) h.image_size / SECTOR_SIZE;
+>>
+>>           dout("setting size to %llu sectors", (unsigned long long)
+>> size);
+>> @@ -2004,7 +2010,7 @@ static ssize_t rbd_snap_show(struct device *dev,
+>>   {
+>>       struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>>
+>> -    return sprintf(buf, "%s\n", rbd_dev->snap_name);
+>> +    return sprintf(buf, "%s\n", rbd_dev->mapping.snap_name);
+>>   }
+>>
+>>   static ssize_t rbd_image_refresh(struct device *dev,
+>> @@ -2205,11 +2211,12 @@ static int rbd_dev_snap_devs_update(struct
+>> rbd_device *rbd_dev)
+>>
+>>               /* Existing snapshot not in the new snap context */
+>>
+>> -            if (rbd_dev->snap_id == snap->id)
+>> -                rbd_dev->snap_exists = false;
+>> +            if (rbd_dev->mapping.snap_id == snap->id)
+>> +                rbd_dev->mapping.snap_exists = false;
+>>               __rbd_remove_snap_dev(snap);
+>>               dout("%ssnap id %llu has been removed\n",
+>> -                rbd_dev->snap_id == snap->id ? "mapped " : "",
+>> +                rbd_dev->mapping.snap_id == snap->id ?
+>> +                                "mapped " : "",
+>>                   (unsigned long long) snap->id);
+>>
+>>               /* Done with this list entry; advance */
+>> @@ -2522,18 +2529,18 @@ static int rbd_add_parse_args(struct rbd_device
+>> *rbd_dev,
+>>        * The snapshot name is optional.  If none is is supplied,
+>>        * we use the default value.
+>>        */
+>> -    rbd_dev->snap_name = dup_token(&buf, &len);
+>> -    if (!rbd_dev->snap_name)
+>> +    rbd_dev->mapping.snap_name = dup_token(&buf, &len);
+>> +    if (!rbd_dev->mapping.snap_name)
+>>           goto out_err;
+>>       if (!len) {
+>>           /* Replace the empty name with the default */
+>> -        kfree(rbd_dev->snap_name);
+>> -        rbd_dev->snap_name
+>> +        kfree(rbd_dev->mapping.snap_name);
+>> +        rbd_dev->mapping.snap_name
+>>               = kmalloc(sizeof (RBD_SNAP_HEAD_NAME), GFP_KERNEL);
+>> -        if (!rbd_dev->snap_name)
+>> +        if (!rbd_dev->mapping.snap_name)
+>>               goto out_err;
+>>
+>> -        memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+>> +        memcpy(rbd_dev->mapping.snap_name, RBD_SNAP_HEAD_NAME,
+>>               sizeof (RBD_SNAP_HEAD_NAME));
+>>       }
+>>
+>> @@ -2642,7 +2649,7 @@ err_out_client:
+>>       rbd_put_client(rbd_dev);
+>>   err_put_id:
+>>       if (rbd_dev->pool_name) {
+>> -        kfree(rbd_dev->snap_name);
+>> +        kfree(rbd_dev->mapping.snap_name);
+>>           kfree(rbd_dev->header_name);
+>>           kfree(rbd_dev->image_name);
+>>           kfree(rbd_dev->pool_name);
+>> @@ -2695,7 +2702,7 @@ static void rbd_dev_release(struct device *dev)
+>>       unregister_blkdev(rbd_dev->major, rbd_dev->name);
+>>
+>>       /* done with the id, and with the rbd_dev */
+>> -    kfree(rbd_dev->snap_name);
+>> +    kfree(rbd_dev->mapping.snap_name);
+>>       kfree(rbd_dev->header_name);
+>>       kfree(rbd_dev->pool_name);
+>>       kfree(rbd_dev->image_name);
+>>
+> 
+> 
+> 
 
-Yeah, I see it now. Not sure whether the way it is now is the cleanest
-way to approach it, but it'll work for now. Maybe we should keep the
-existing ceph_opts in libceph, and have ceph_parse_options() test and
-increase reference if exists. Though, it might be that it's what we
-did before and it was problematic as rbd was sharing configs with
-cephfs.
-
-Anyway,
-
-Reviewed-by: Yehuda Sadeh <yehuda@inktank.com>
