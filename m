@@ -1,64 +1,43 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Access Dienied for bucket upload - 403 code
-Date: Tue, 11 Sep 2012 09:48:03 -0700
-Message-ID: <CAC-hyiGo2D1oErBx3B3n9Vr=vT_R9L0qQ80vuuHKO_1gjbVPYg@mail.gmail.com>
-References: <CAMwB3Tg6L1F8bg_DJ9g0ySGn5hjJsiCW0DmKANodrHbESpVqfg@mail.gmail.com>
-	<CAC-hyiGYPJpMCLhW6t00ysxXYovAnsnztaxO8LL-dQLtgfbYUQ@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: does ceph consider the device performance for distributing data?
+Date: Tue, 11 Sep 2012 09:51:40 -0700
+Message-ID: <CADvuQRHWuFRqAs7w4D+mXEC24e5Sc5hpG5eXWGPMfZvkZE9gYg@mail.gmail.com>
+References: <CAB7xdi=XvPL=pkht-gVnmMwyfA6aVn2HWV9_v4Taitjegc=zWQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:44813 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756348Ab2IKQsF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 12:48:05 -0400
-Received: by eekc1 with SMTP id c1so597419eek.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 09:48:03 -0700 (PDT)
-In-Reply-To: <CAC-hyiGYPJpMCLhW6t00ysxXYovAnsnztaxO8LL-dQLtgfbYUQ@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:42114 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756792Ab2IKQwC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 12:52:02 -0400
+Received: by vcbfy27 with SMTP id fy27so891657vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 09:52:01 -0700 (PDT)
+In-Reply-To: <CAB7xdi=XvPL=pkht-gVnmMwyfA6aVn2HWV9_v4Taitjegc=zWQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>, ceph-devel@vger.kernel.org
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Sep 11, 2012 at 9:45 AM, Yehuda Sadeh <yehuda@inktank.com> wrot=
-e:
-> On Tue, Sep 11, 2012 at 7:28 AM, S=C5=82awomir Skowron <szibis@gmail.=
-com> wrote:
->> Every acl operation ending with 403 in PUT.
->>
->> ~# s3 -u test oc
->>                          Bucket                                  Sta=
-tus
->> --------------------------------------------------------  ----------=
-----------
->> oc                                                        Access Den=
-ied
->>
->> Anyone know why, and how to enable this bucket ?? Now i have problem=
-s
->> with cluster, because there is no way to upload new file
->>
->> ~# s3 -u getacl oc
->>
->> ERROR: ErrorAccessDenied
->>
->
-> User somehow lost bucket ownership (was it actually the owner?). Do
-> you know how to reproduce the issue? any remaining logs?
->
-> Try getting bucket info:
->
-> # radosgw-admin bucket stats --bucket=3Doc
->
-> If that doesn't fail and actually shows relevant info, try checking
-> whether the user credentials match the s3 tool credentials.
->
-Oh, and thinking about it some more.. 'oc' is a too short name for a
-bucket (requires min of 3 chars). How did you create it? The failure
-may be related.
+On Mon, Sep 10, 2012 at 8:54 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+> i have a simple question.
+> for distribution workload among OSDs, does ceph do any online modeling
+> for OSDs, i.e. collect the online IO latency and try to distribute
+> more workloads to lower latency OSDs? or only based on
+> capacity/utilization balance?
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've heard this question now several times. Ceph does not contain the
+logic to adjust OSD weights based on such measurements. Ceph will
+collect some measurements that are useful for this ("perf counters",
+mostly).
+
+For a holistic systems view, the metrics Ceph collects aren't enough.
+You also want to take into account things like CPU load, available
+memory, hardware temperature sensors, network link utilization,
+network error rate, etc. And once you start looking at that angle, you
+realize that this is a completely generic "machine health" indicator,
+where Ceph is just one of the data sources.
+
+Hence, I view this as something that ultimately consumes more
+information than just Ceph. Ceph should play nice, and both feed
+information into such a system, and let the system set OSD weights;
+but I do believe it belongs outside of Ceph core.
