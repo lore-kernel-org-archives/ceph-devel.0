@@ -1,243 +1,26 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 4/5] rbd: define rbd_dev_image_id()
-Date: Tue, 11 Sep 2012 08:50:44 -0700
-Message-ID: <504F5DD4.7070905@inktank.com>
-References: <504A39E0.1040107@inktank.com> <504A3AB7.2020600@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: crush create-or-move
+Date: Tue, 11 Sep 2012 09:09:36 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209110831260.1305@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:46129 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759562Ab2IKPur (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 11:50:47 -0400
-Received: by pbbrr13 with SMTP id rr13so971967pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 08:50:47 -0700 (PDT)
-In-Reply-To: <504A3AB7.2020600@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40302 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751244Ab2IKQJh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 12:09:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: tv@inktank.com
 Cc: ceph-devel@vger.kernel.org
 
-On 09/07/2012 11:19 AM, Alex Elder wrote:
-> New format 2 rbd images are permanently identified by a unique image
-> id.  Each rbd image also has a name, but the name can be changed.
-> A format 2 rbd image will have an object--whose name is based on the
-> image name--which maps an image's name to its image id.
->
-> Create a new function rbd_dev_image_id() that checks for the
-> existence of the image id object, and if it's found, records the
-> image id in the rbd_device structure.
->
-> Create a new rbd device attribute (/sys/bus/rbd/<num>/image_id) that
-> makes this information available.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   Documentation/ABI/testing/sysfs-bus-rbd |    5 ++
->   drivers/block/rbd.c                     |   99
-> +++++++++++++++++++++++++++++++
->   2 files changed, 104 insertions(+)
->
-> diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
-> b/Documentation/ABI/testing/sysfs-bus-rbd
-> index 3c17b62..7cbbe34 100644
-> --- a/Documentation/ABI/testing/sysfs-bus-rbd
-> +++ b/Documentation/ABI/testing/sysfs-bus-rbd
-> @@ -33,6 +33,11 @@ name
->
->   	The name of the rbd image.
->
-> +image_id
-> +
-> +	The unique id for the rbd image.  (For rbd image format 1
-> +	this is empty.)
-> +
->   pool
->
->   	The name of the storage pool where this rbd image resides.
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index ba68566..5a3132e 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -66,6 +66,8 @@
->
->   #define RBD_SNAP_HEAD_NAME	"-"
->
-> +#define	RBD_IMAGE_ID_LEN_MAX	64
-> +
->   /*
->    * An RBD device name will be "rbd#", where the "rbd" comes from
->    * RBD_DRV_NAME above, and # is a unique integer identifier.
-> @@ -173,6 +175,8 @@ struct rbd_device {
->   	spinlock_t		lock;		/* queue lock */
->
->   	struct rbd_image_header	header;
-> +	char			*image_id;
-> +	size_t			image_id_len;
->   	char			*image_name;
->   	size_t			image_name_len;
->   	char			*header_name;
-> @@ -1987,6 +1991,14 @@ static ssize_t rbd_name_show(struct device *dev,
->   	return sprintf(buf, "%s\n", rbd_dev->image_name);
->   }
->
-> +static ssize_t rbd_image_id_show(struct device *dev,
-> +			     struct device_attribute *attr, char *buf)
-> +{
-> +	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-> +
-> +	return sprintf(buf, "%s\n", rbd_dev->image_id);
-> +}
-> +
->   static ssize_t rbd_snap_show(struct device *dev,
->   			     struct device_attribute *attr,
->   			     char *buf)
-> @@ -2015,6 +2027,7 @@ static DEVICE_ATTR(client_id, S_IRUGO,
-> rbd_client_id_show, NULL);
->   static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
->   static DEVICE_ATTR(pool_id, S_IRUGO, rbd_pool_id_show, NULL);
->   static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
-> +static DEVICE_ATTR(image_id, S_IRUGO, rbd_image_id_show, NULL);
->   static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
->   static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
->   static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
-> @@ -2026,6 +2039,7 @@ static struct attribute *rbd_attrs[] = {
->   	&dev_attr_pool.attr,
->   	&dev_attr_pool_id.attr,
->   	&dev_attr_name.attr,
-> +	&dev_attr_image_id.attr,
->   	&dev_attr_current_snap.attr,
->   	&dev_attr_refresh.attr,
->   	&dev_attr_create_snap.attr,
-> @@ -2548,6 +2562,75 @@ out_err:
->   	return err_ptr;
->   }
->
-> +/*
-> + * An rbd format 2 image has a unique identifier, distinct from the
-> + * name given to it by the user.  Internally, that identifier is
-> + * what's used to specify the names of objects related to the image.
-> + *
-> + * A special "rbd id" object is used to map an rbd image name to its
-> + * id.  If that object doesn't exist, then there is no v2 rbd image
-> + * with the supplied name.
-> + *
-> + * This function will record the given rbd_dev's image_id field if
-> + * it can be determined, and in that case will return 0.  If any
-> + * errors occur a negative errno will be returned and the rbd_dev's
-> + * image_id field will be unchanged (and should be NULL).
-> + */
-> +static int rbd_dev_image_id(struct rbd_device *rbd_dev)
-> +{
-> +	int ret;
-> +	size_t size;
-> +	char *object_name;
-> +	void *response;
-> +	void *p;
-> +
-> +	/*
-> +	 * First, see if the format 2 image id file exists, and if
-> +	 * so, get the image's persistent id from it.
-> +	 */
-> +	size = sizeof (RBD_ID_PREFIX) + rbd_dev->image_name_len;
-> +	object_name = kmalloc(size, GFP_NOIO);
-> +	if (!object_name)
-> +		return -ENOMEM;
-> +	sprintf(object_name, "%s%s", RBD_ID_PREFIX, rbd_dev->image_name);
-> +	dout("rbd id object name is %s\n", object_name);
-> +
-> +	/* Response will be an encoded string, which includes a length */
-> +
-> +	size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
-> +	response = kzalloc(size, GFP_NOIO);
-> +	if (!response) {
-> +		ret = -ENOMEM;
-> +		goto out;
-> +	}
-> +
-> +	ret = rbd_req_sync_exec(rbd_dev, object_name,
-> +				"rbd", "get_id",
-> +				NULL, 0,
-> +				response, RBD_IMAGE_ID_LEN_MAX,
-> +				CEPH_OSD_FLAG_READ, NULL);
-> +	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
-> +	if (ret < 0)
-> +		goto out;
-> +	ret = 0;	/* rbd_req_sync_exec() can return positive */
+Hey Tommi-
 
-The get_id class method will not return positive.
+I pushed a wip-crush branch that implements 'ceph osd crush create-or-move 
+...'.  I don't think it's worth backporting this to argonaut, since the 
+user is actually in the deploy scripts, so any chef/juju/whatever won't 
+care if they're running against argonaut or bobtail in this case.  
+(Right?)  (It also depends on a bunch of option parsing cleanups that I'd 
+rather not wade through.)
 
-> +
-> +	p = response;
-> +	rbd_dev->image_id = ceph_extract_encoded_string(&p,
-> +						p + RBD_IMAGE_ID_LEN_MAX,
-> +						&rbd_dev->image_id_len,
-> +						GFP_NOIO);
-> +	if (IS_ERR(rbd_dev->image_id)) {
-> +		ret = PTR_ERR(rbd_dev->image_id);
-> +		rbd_dev->image_id = NULL;
-
-It would be clearer that this can't stay NULL if it were initialized
-here instead of in the caller.
-
-> +	} else
-> +		dout("image_id is %s\n", rbd_dev->image_id);
-
-If the first branch got braces, the second one should too.
-
-> +out:
-> +	kfree(response);
-> +	kfree(object_name);
-> +
-> +	return ret;
-> +}
-> +
->   static ssize_t rbd_add(struct bus_type *bus,
->   		       const char *buf,
->   		       size_t count)
-> @@ -2597,6 +2680,20 @@ static ssize_t rbd_add(struct bus_type *bus,
->   		goto err_out_client;
->   	rbd_dev->pool_id = rc;
->
-> +	rc = rbd_dev_image_id(rbd_dev);
-> +	if (rc == -ENOENT) {
-
-It's more than just -ENOENT. If the osd doesn't have a get_id method
-for example, it will be -EINVAL. It's probably best to try format 1
-if any error occurred, rather than trying to come up with an exhaustive
-list that won't change in the future.
-
-> +		/* Version 1 images have no id; empty string is used */
-> +		rbd_dev->image_id = kstrdup("", GFP_KERNEL);
-> +		if (!rbd_dev->image_id) {
-> +			rc = -ENOMEM;
-> +			goto err_out_client;
-> +		}
-> +		rbd_dev->image_id_len = 0;
-> +	} else {
-> +	        /* Not actually supporting format 2 yet */
-> +		goto err_out_client;
-> +	}
-> +
->   	/* Create the name of the header object */
->
->   	rbd_dev->header_name = kmalloc(rbd_dev->image_name_len
-> @@ -2688,6 +2785,7 @@ err_out_header:
->   err_out_client:
->   	kfree(rbd_dev->header_name);
->   	rbd_put_client(rbd_dev);
-> +	kfree(rbd_dev->image_id);
->   err_out_args:
->   	kfree(rbd_dev->mapping.snap_name);
->   	kfree(rbd_dev->image_name);
-> @@ -2744,6 +2842,7 @@ static void rbd_dev_release(struct device *dev)
->
->   	/* done with the id, and with the rbd_dev */
->   	kfree(rbd_dev->mapping.snap_name);
-> +	kfree(rbd_dev->image_id);
->   	kfree(rbd_dev->header_name);
->   	kfree(rbd_dev->pool_name);
->   	kfree(rbd_dev->image_name);
->
-
+sage
