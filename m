@@ -1,127 +1,197 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/4] rbd: expand lock protection in rbd_add()
-Date: Tue, 11 Sep 2012 07:33:52 -0700
-Message-ID: <504F4BD0.5000706@inktank.com>
-References: <504A090F.7000706@inktank.com> <504A09AD.80905@inktank.com> <504E643A.4050003@inktank.com> <504F422D.3090006@inktank.com>
+Subject: Re: [PATCH 2/9] rbd: defer registering snapshot devices
+Date: Tue, 11 Sep 2012 07:56:24 -0700
+Message-ID: <504F5118.8030404@inktank.com>
+References: <504A152E.4000905@inktank.com> <504A165F.1030406@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:46164 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750891Ab2IKOd7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 10:33:59 -0400
-Received: by dady13 with SMTP id y13so348537dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 07:33:59 -0700 (PDT)
-In-Reply-To: <504F422D.3090006@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:40302 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751642Ab2IKO41 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 10:56:27 -0400
+Received: by pbbrr13 with SMTP id rr13so902053pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 07:56:27 -0700 (PDT)
+In-Reply-To: <504A165F.1030406@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/11/2012 06:52 AM, Alex Elder wrote:
-> On 09/10/2012 05:05 PM, Josh Durgin wrote:
->> Looking closer, I don't think we need to protect this section at all.
->> The device isn't initialized yet, so nothing else can access the
->> rbd_dev->header. It'd be good to have a comment to that effect.
->>
->> Josh
+On 09/07/2012 08:44 AM, Alex Elder wrote:
+> When a new snapshot is found in an rbd device's updated snapshot
+> context, __rbd_add_snap_dev() is called to create and insert an
+> entry in the rbd devices list of snapshots.  In addition, a Linux
+> device is registered to represent the snapshot.
 >
-> For the most part that's true.
+> For version 2 rbd images, it will be undesirable to initialize the
+> device right away.  So in anticipation of that, this patch separates
+> the insertion of a snapshot entry in the snaps list from the
+> creation of devices for those snapshots.
 >
-> However as soon as it's possible to refresh the header, the
-> lock should be held.  And in the code as of this point that
-> happens as soon as rbd_bus_add_dev() gets called.  In that
-> respect this change fixes a bug, because the header refresh
-> could have been initiated before the header had even been
-> read yet.
+> To do this, create a new function rbd_dev_snaps_register() which
+> traverses the list of snapshots and calls rbd_register_snap_dev()
+> on any that have not yet been registered.
 >
-> Upcoming patches rearrange the order of this stuff quite a
-> bit though, which was why I just grabbed the lock immediately
-> and held onto it until everything is set up, for simplicity.
+> Rename rbd_dev_snap_devs_update() to be rbd_dev_snaps_update()
+> to better reflect that only the entry in the snaps list and not
+> the snapshot's device is affected by the function.
 >
-> After all of these are in place I can reduce the range over
-> which the lock is held during initialization.  But as I
-> said in the commit commit, it doesn't really hurt to hold
-> it.  I will add a comment in the code to that effect before
-> I commit.
+> For now, call rbd_dev_snaps_register() immediately after each
+> call to rbd_dev_snaps_update().
 >
-> 					-Alex
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   58
+> ++++++++++++++++++++++++++++++++++++++++-----------
+>   1 file changed, 46 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 14034e3..d03fb0f 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -204,7 +204,9 @@ static DEFINE_SPINLOCK(rbd_dev_list_lock);
+>   static LIST_HEAD(rbd_client_list);		/* clients */
+>   static DEFINE_SPINLOCK(rbd_client_list_lock);
+>
+> -static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev);
+> +static int rbd_dev_snaps_update(struct rbd_device *rbd_dev);
+> +static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
+> +
+>   static void rbd_dev_release(struct device *dev);
+>   static ssize_t rbd_snap_add(struct device *dev,
+>   			    struct device_attribute *attr,
+> @@ -648,6 +650,7 @@ static int rbd_header_set_snap(struct rbd_device
+> *rbd_dev, char *snap_name)
+>   		rbd_dev->mapping.size = rbd_dev->header.image_size;
+>   		rbd_dev->mapping.snap_exists = false;
+>   		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
+> +		ret = 0;
+>   	} else {
+>   		ret = snap_by_name(rbd_dev, snap_name);
+>   		if (ret < 0)
+> @@ -656,8 +659,6 @@ static int rbd_header_set_snap(struct rbd_device
+> *rbd_dev, char *snap_name)
+>   		rbd_dev->mapping.read_only = true;
+>   	}
+>   	rbd_dev->mapping.snap_name = snap_name;
+> -
+> -	ret = 0;
+>   done:
+>   	return ret;
+>   }
 
-OK, I see what you mean now. I'd forgotten about the possible manual
-refresh via sysfs.
+This hunk seems to be a separate clean up.
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+> @@ -1840,7 +1841,9 @@ static int __rbd_refresh_header(struct rbd_device
+> *rbd_dev, u64 *hver)
+>   	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
+>   	kfree(h.object_prefix);
+>
+> -	ret = rbd_dev_snap_devs_update(rbd_dev);
+> +	ret = rbd_dev_snaps_update(rbd_dev);
+> +	if (!ret)
+> +		ret = rbd_dev_snaps_register(rbd_dev);
+>
+>   	up_write(&rbd_dev->header_rwsem);
+>
+> @@ -2085,10 +2088,16 @@ static struct device_type rbd_snap_device_type = {
+>   	.release	= rbd_snap_dev_release,
+>   };
+>
+> +static bool rbd_snap_registered(struct rbd_snap *snap)
+> +{
+> +	return snap->dev.type == &rbd_snap_device_type;
+> +}
+> +
+>   static void __rbd_remove_snap_dev(struct rbd_snap *snap)
+>   {
+>   	list_del(&snap->node);
+> -	device_unregister(&snap->dev);
+> +	if (rbd_snap_registered(snap))
 
->>
->> On 09/07/2012 07:50 AM, Alex Elder wrote:
->>> Expand the region of code in rbd_add() protected by the header
->>> semaphore to include the complete initialization sequence.  It may
->>> not be strictly necessary, but it doesn't hurt.  And with the
->>> upcoming changes to the order of steps here this offers easy
->>> protection.
->>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>    drivers/block/rbd.c |   16 ++++++++++------
->>>    1 file changed, 10 insertions(+), 6 deletions(-)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index 214c937..6af09f1 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -2553,6 +2553,8 @@ static ssize_t rbd_add(struct bus_type *bus,
->>>        INIT_LIST_HEAD(&rbd_dev->snaps);
->>>        init_rwsem(&rbd_dev->header_rwsem);
->>>
->>> +    down_write(&rbd_dev->header_rwsem);
->>> +
->>>        /* generate unique id: find highest unique id, add one */
->>>        rbd_dev_id_get(rbd_dev);
->>>
->>> @@ -2598,18 +2600,17 @@ static ssize_t rbd_add(struct bus_type *bus,
->>>        /* contact OSD, request size info about the object being mapped */
->>>        rc = rbd_read_header(rbd_dev, &rbd_dev->header);
->>>        if (rc)
->>> -        goto err_out_bus;
->>> +        goto err_out_unlock;
->>>
->>> -    /* no need to lock here, as rbd_dev is not registered yet */
->>>        rc = rbd_dev_snap_devs_update(rbd_dev);
->>>        if (rc)
->>> -        goto err_out_bus;
->>> +        goto err_out_unlock;
->>>
->>> -    down_write(&rbd_dev->header_rwsem);
->>>        rc = rbd_header_set_snap(rbd_dev, snap_name);
->>> -    up_write(&rbd_dev->header_rwsem);
->>>        if (rc)
->>> -        goto err_out_bus;
->>> +        goto err_out_unlock;
->>> +
->>> +    up_write(&rbd_dev->header_rwsem);
->>>
->>>        /* Set up the blkdev mapping. */
->>>
->>> @@ -2630,6 +2631,8 @@ static ssize_t rbd_add(struct bus_type *bus,
->>>
->>>        return count;
->>>
->>> +err_out_unlock:
->>> +    up_write(&rbd_dev->header_rwsem);
->>>    err_out_bus:
->>>        /* this will also clean up rest of rbd_dev stuff */
->>>
->>> @@ -2649,6 +2652,7 @@ err_put_id:
->>>            kfree(rbd_dev->pool_name);
->>>        }
->>>        rbd_dev_id_put(rbd_dev);
->>> +    up_write(&rbd_dev->header_rwsem);
->>>    err_nomem:
->>>        kfree(rbd_dev);
->>>        kfree(options);
->>>
->>
->>
->>
+Could this be device_is_registered(snap->dev)?
+
+> +		device_unregister(&snap->dev);
+>   }
+>
+>   static int rbd_register_snap_dev(struct rbd_snap *snap,
+> @@ -2101,6 +2110,8 @@ static int rbd_register_snap_dev(struct rbd_snap
+> *snap,
+>   	dev->parent = parent;
+>   	dev->release = rbd_snap_dev_release;
+>   	dev_set_name(dev, "snap_%s", snap->name);
+> +	dout("%s: registering device for snapshot %s\n", __func__, snap->name);
+> +
+>   	ret = device_register(dev);
+>
+>   	return ret;
+> @@ -2123,11 +2134,6 @@ static struct rbd_snap *__rbd_add_snap_dev(struct
+> rbd_device *rbd_dev,
+>
+>   	snap->size = rbd_dev->header.snap_sizes[i];
+>   	snap->id = rbd_dev->header.snapc->snaps[i];
+> -	if (device_is_registered(&rbd_dev->dev)) {
+> -		ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
+> -		if (ret < 0)
+> -			goto err;
+> -	}
+>
+>   	return snap;
+>
+> @@ -2150,7 +2156,7 @@ err:
+>    * snapshot id, highest id first.  (Snapshots in the rbd_dev's list
+>    * are also maintained in that order.)
+>    */
+> -static int rbd_dev_snap_devs_update(struct rbd_device *rbd_dev)
+> +static int rbd_dev_snaps_update(struct rbd_device *rbd_dev)
+>   {
+>   	struct ceph_snap_context *snapc = rbd_dev->header.snapc;
+>   	const u32 snap_count = snapc->num_snaps;
+> @@ -2237,6 +2243,31 @@ static int rbd_dev_snap_devs_update(struct
+> rbd_device *rbd_dev)
+>   	return 0;
+>   }
+>
+> +/*
+> + * Scan the list of snapshots and register the devices for any that
+> + * have not already been registered.
+> + */
+> +static int rbd_dev_snaps_register(struct rbd_device *rbd_dev)
+> +{
+> +	struct rbd_snap *snap;
+> +	int ret = 0;
+> +
+> +	dout("%s called\n", __func__);
+> +	if (!device_is_registered(&rbd_dev->dev))
+> +		return 0;
+> +
+> +	list_for_each_entry(snap, &rbd_dev->snaps, node) {
+> +		if (!rbd_snap_registered(snap)) {
+> +			ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
+> +			if (ret < 0)
+> +				break;
+> +		}
+> +	}
+> +	dout("%s: returning %d\n", __func__, ret);
+> +
+> +	return ret;
+> +}
+> +
+>   static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
+>   {
+>   	struct device *dev;
+> @@ -2587,7 +2618,10 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	if (rc)
+>   		goto err_out_unlock;
+>
+> -	rc = rbd_dev_snap_devs_update(rbd_dev);
+> +	rc = rbd_dev_snaps_update(rbd_dev);
+> +	if (rc)
+> +		goto err_out_unlock;
+> +	rc = rbd_dev_snaps_register(rbd_dev);
+>   	if (rc)
+>   		goto err_out_unlock;
+>
 
