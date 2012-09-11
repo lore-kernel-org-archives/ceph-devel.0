@@ -1,289 +1,248 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/5] rbd: kill create_snap sysfs entry
-Date: Tue, 11 Sep 2012 13:53:04 -0700
-Message-ID: <504FA4B0.6080800@inktank.com>
-References: <504A39E0.1040107@inktank.com> <504A3AC1.6090308@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH v5] rbd: fix the memory leak of bio_chain_clone
+Date: Tue, 11 Sep 2012 16:17:47 -0500
+Message-ID: <504FAA7B.8080001@inktank.com>
+References: <1346931051-8252-1-git-send-email-gzhao@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:33097 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755608Ab2IKUxI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 16:53:08 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr13so1310254pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 13:53:07 -0700 (PDT)
-In-Reply-To: <504A3AC1.6090308@inktank.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:39178 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751612Ab2IKVRw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 17:17:52 -0400
+Received: by iahk25 with SMTP id k25so749418iah.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 14:17:51 -0700 (PDT)
+In-Reply-To: <1346931051-8252-1-git-send-email-gzhao@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Guangliang Zhao <gzhao@suse.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+On 09/06/2012 06:30 AM, Guangliang Zhao wrote:
+> The bio_pair alloced in bio_chain_clone would not be freed,
+> this will cause a memory leak. It could be freed actually only
+> after 3 times release, because the reference count of bio_pair
+> is initialized to 3 when bio_split and bio_pair_release only
+> drops the reference count.
+> 
+> The function bio_pair_release must be called three times for
+> releasing bio_pair, and the callback functions of bios on the
+> requests will be called when the last release time in bio_pair_release,
+> however, these functions will also be called in rbd_req_cb. In
+> other words, they will be called twice, and it may cause serious
+> consequences.
 
-On 09/07/2012 11:19 AM, Alex Elder wrote:
-> Josh proposed the following change, and I don't think I could
-> explain it any better than he did:
->
->      From: Josh Durgin <josh.durgin@inktank.com>
->      Date: Tue, 24 Jul 2012 14:22:11 -0700
->      To: ceph-devel <ceph-devel@vger.kernel.org>
->      Message-ID: <500F1203.9050605@inktank.com>
->
->      Right now the kernel still has one piece of rbd management
->      duplicated from the rbd command line tool: snapshot creation.
->      There's nothing special about snapshot creation that makes it
->      advantageous to do from the kernel, so I'd like to remove the
->      create_snap sysfs interface.  That is,
-> 	/sys/bus/rbd/devices/<id>/create_snap
->      would be removed.
->
->      Does anyone rely on the sysfs interface for creating rbd
->      snapshots?  If so, how hard would it be to replace with:
->
-> 	rbd snap create pool/image@snap
->
->      Is there any benefit to the sysfs interface that I'm missing?
->
->      Josh
->
-> This patch implements this proposal, removing the code that
-> implements the "snap_create" sysfs interface for rbd images.
-> As a result, quite a lot of other supporting code goes away.
->
-> Suggested-by: Josh Durgin <josh.durgin@inktank.com>
-> Signed-off-by: Alex Elder <elder@inktank.com>
+
+I just want you to know I'm looking at this patch now.  This is a
+pretty complex bit of code though, so it may take me a bit to get
+back to you.
+
+					-Alex
+
+> This patch clones bio chain from the origin directly instead of
+> bio_split. The old bios which will be split may be modified by
+> the callback fn, so their copys need to be saved(called split_bio).
+> The new bio chain can be released whenever we don't need it.
+> 
+> This patch can just handle the split of *single page* bios, but
+> it's enough here for the following reasons:
+> 
+> Only bios span across multiple osds need to be split, and these bios
+> *must* be single page because of rbd_merge_bvec. With the function,
+> the new bvec will not permitted to merge, if it make the bio cross
+> the osd boundary, except it is the first one. In other words, there
+> are two types of bio:
+> 
+> 	- the bios don't cross the osd boundary
+> 	  They have one or more pages. The value of offset will
+> 	  always be 0 in this case, so nothing will be changed, and
+> 	  the code changes tmp bios doesn't take effact at all.
+> 
+> 	- the bios cross the osd boundary
+> 	  Each one have only one page. These bios need to be split,
+> 	  and the offset is used to indicate the next bio, it makes
+> 	  sense only in this instance.
+> 
+> The original bios may be modifid by the callback fn before the next 
+> bio_chain_clone() called, when a bio need to be split, so its copy 
+> will be saved.
+> 
+> Signed-off-by: Guangliang Zhao <gzhao@suse.com>
 > ---
->   Documentation/ABI/testing/sysfs-bus-rbd |    6 --
->   drivers/block/rbd.c                     |  158
-> -------------------------------
->   2 files changed, 164 deletions(-)
->
-> diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
-> b/Documentation/ABI/testing/sysfs-bus-rbd
-> index 7cbbe34..6fe4224 100644
-> --- a/Documentation/ABI/testing/sysfs-bus-rbd
-> +++ b/Documentation/ABI/testing/sysfs-bus-rbd
-> @@ -62,12 +62,6 @@ current_snap
->
->   	The current snapshot for which the device is mapped.
->
-> -create_snap
-> -
-> -	Create a snapshot:
-> -
-> -	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
-> -
->   snap_*
->
->   	A directory per each snapshot
+> 
+>  drivers/block/rbd.c |  102 ++++++++++++++++++++++++++++++---------------------
+>  1 file changed, 60 insertions(+), 42 deletions(-)
+> 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 5a3132e..d73edb1 100644
+> index 9917943..a605e1c 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -212,10 +212,6 @@ static int rbd_dev_snaps_update(struct rbd_device
-> *rbd_dev);
->   static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
->
->   static void rbd_dev_release(struct device *dev);
-> -static ssize_t rbd_snap_add(struct device *dev,
-> -			    struct device_attribute *attr,
-> -			    const char *buf,
-> -			    size_t count);
->   static void __rbd_remove_snap_dev(struct rbd_snap *snap);
->
->   static ssize_t rbd_add(struct bus_type *bus, const char *buf,
-> @@ -1375,71 +1371,6 @@ static int rbd_req_sync_unwatch(struct rbd_device
-> *rbd_dev)
->   	return ret;
->   }
->
-> -struct rbd_notify_info {
-> -	struct rbd_device *rbd_dev;
-> -};
-> -
-> -static void rbd_notify_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
-> -{
-> -	struct rbd_device *rbd_dev = (struct rbd_device *)data;
-> -	if (!rbd_dev)
-> -		return;
-> -
-> -	dout("rbd_notify_cb %s notify_id=%llu opcode=%u\n",
-> -			rbd_dev->header_name, (unsigned long long) notify_id,
-> -			(unsigned int) opcode);
-> -}
-> -
+> @@ -717,50 +717,70 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
+>  	}
+>  }
+>  
 > -/*
-> - * Request sync osd notify
-> - */
-> -static int rbd_req_sync_notify(struct rbd_device *rbd_dev)
-> -{
-> -	struct ceph_osd_req_op *ops;
-> -	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-> -	struct ceph_osd_event *event;
-> -	struct rbd_notify_info info;
-> -	int payload_len = sizeof(u32) + sizeof(u32);
-> -	int ret;
+> +/**
+>   * bio_chain_clone - clone a chain of bios up to a certain length.
+> - * might return a bio_pair that will need to be released.
+> + * @old: bio to clone
+> + * @split_bio: bio which will be split
+> + * @offset: start point for bio clone
+> + * @len: length of bio chain
+> + * @gfp_mask: allocation priority
+> + *
+> + * Value of split_bio will be !NULL only when there is a bio need to be
+> + * split. NULL otherwise.
+> + *
+> + * RETURNS:
+> + * Pointer to new bio chain on success, NULL on failure.
+>   */
+> -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+> -				   struct bio_pair **bp,
+> -				   int len, gfp_t gfpmask)
+> +static struct bio *bio_chain_clone(struct bio **old, struct bio **split_bio,
+> +				   int *offset, int len, gfp_t gfpmask)
+>  {
+> -	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
+> -	int total = 0;
 > -
-> -	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY, payload_len);
-> -	if (!ops)
-> -		return -ENOMEM;
+> -	if (*bp) {
+> -		bio_pair_release(*bp);
+> -		*bp = NULL;
+> -	}
+> +	struct bio *tmp, *old_chain, *split, *new_chain = NULL, *tail = NULL;
+> +	int total = 0, need = len;
+>  
+> +	split = *split_bio;
+> +	old_chain = split ? split : *old;
+>  	while (old_chain && (total < len)) {
+>  		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
+>  		if (!tmp)
+>  			goto err_out;
+>  
+> -		if (total + old_chain->bi_size > len) {
+> -			struct bio_pair *bp;
 > -
-> -	info.rbd_dev = rbd_dev;
+> -			/*
+> -			 * this split can only happen with a single paged bio,
+> -			 * split_bio will BUG_ON if this is not the case
+> -			 */
+> -			dout("bio_chain_clone split! total=%d remaining=%d"
+> -			     "bi_size=%u\n",
+> -			     total, len - total, old_chain->bi_size);
 > -
-> -	ret = ceph_osdc_create_event(osdc, rbd_notify_cb, 1,
-> -				     (void *)&info, &event);
-> -	if (ret < 0)
-> -		goto fail;
+> -			/* split the bio. We'll release it either in the next
+> -			   call, or it will have to be released outside */
+> -			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
+> -			if (!bp)
+> -				goto err_out;
 > -
-> -	ops[0].watch.ver = 1;
-> -	ops[0].watch.flag = 1;
-> -	ops[0].watch.cookie = event->cookie;
-> -	ops[0].watch.prot_ver = RADOS_NOTIFY_VER;
-> -	ops[0].watch.timeout = 12;
+> -			__bio_clone(tmp, &bp->bio1);
 > -
-> -	ret = rbd_req_sync_op(rbd_dev, NULL,
-> -			       CEPH_NOSNAP,
-> -			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-> -			       ops,
-> -			       rbd_dev->header_name,
-> -			       0, 0, NULL, NULL, NULL);
-> -	if (ret < 0)
-> -		goto fail_event;
-> -
-> -	ret = ceph_osdc_wait_event(event, CEPH_OSD_TIMEOUT_DEFAULT);
-> -	dout("ceph_osdc_wait_event returned %d\n", ret);
-> -	rbd_destroy_ops(ops);
-> -	return 0;
-> -
-> -fail_event:
-> -	ceph_osdc_cancel_event(event);
-> -fail:
-> -	rbd_destroy_ops(ops);
-> -	return ret;
-> -}
-> -
->   /*
->    * Synchronous osd object method call
->    */
-> @@ -1761,52 +1692,6 @@ static int rbd_read_header(struct rbd_device
-> *rbd_dev,
->   	return ret;
->   }
->
-> -/*
-> - * create a snapshot
-> - */
-> -static int rbd_header_add_snap(struct rbd_device *rbd_dev,
-> -			       const char *snap_name,
-> -			       gfp_t gfp_flags)
-> -{
-> -	int name_len = strlen(snap_name);
-> -	u64 new_snapid;
-> -	int ret;
-> -	void *data, *p, *e;
-> -	struct ceph_mon_client *monc;
-> -
-> -	/* we should create a snapshot only if we're pointing at the head */
-> -	if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
-> -		return -EINVAL;
-> -
-> -	monc = &rbd_dev->rbd_client->client->monc;
-> -	ret = ceph_monc_create_snapid(monc, rbd_dev->pool_id, &new_snapid);
-> -	dout("created snapid=%llu\n", (unsigned long long) new_snapid);
-> -	if (ret < 0)
-> -		return ret;
-> -
-> -	data = kmalloc(name_len + 16, gfp_flags);
-> -	if (!data)
-> -		return -ENOMEM;
-> -
-> -	p = data;
-> -	e = data + name_len + 16;
-> -
-> -	ceph_encode_string_safe(&p, e, snap_name, name_len, bad);
-> -	ceph_encode_64_safe(&p, e, new_snapid, bad);
-> -
-> -	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
-> -				"rbd", "snap_add",
-> -				data, (size_t) (p - data), NULL, 0,
-> -				CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-> -				NULL);
-> -
-> -	kfree(data);
-> -
-> -	return ret < 0 ? ret : 0;
-> -bad:
-> -	return -ERANGE;
-> -}
-> -
->   static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
->   {
->   	struct rbd_snap *snap;
-> @@ -2030,7 +1915,6 @@ static DEVICE_ATTR(name, S_IRUGO, rbd_name_show,
-> NULL);
->   static DEVICE_ATTR(image_id, S_IRUGO, rbd_image_id_show, NULL);
->   static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
->   static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
-> -static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
->
->   static struct attribute *rbd_attrs[] = {
->   	&dev_attr_size.attr,
-> @@ -2042,7 +1926,6 @@ static struct attribute *rbd_attrs[] = {
->   	&dev_attr_image_id.attr,
->   	&dev_attr_current_snap.attr,
->   	&dev_attr_refresh.attr,
-> -	&dev_attr_create_snap.attr,
->   	NULL
->   };
->
-> @@ -2888,47 +2771,6 @@ done:
->   	return ret;
->   }
->
-> -static ssize_t rbd_snap_add(struct device *dev,
-> -			    struct device_attribute *attr,
-> -			    const char *buf,
-> -			    size_t count)
-> -{
-> -	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-> -	int ret;
-> -	char *name = kmalloc(count + 1, GFP_KERNEL);
-> -	if (!name)
-> -		return -ENOMEM;
-> -
-> -	snprintf(name, count, "%s", buf);
-> -
-> -	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-> -
-> -	ret = rbd_header_add_snap(rbd_dev,
-> -				  name, GFP_KERNEL);
-> -	if (ret < 0)
-> -		goto err_unlock;
-> -
-> -	ret = __rbd_refresh_header(rbd_dev, NULL);
-> -	if (ret < 0)
-> -		goto err_unlock;
-> -
-> -	/* shouldn't hold ctl_mutex when notifying.. notify might
-> -	   trigger a watch callback that would need to get that mutex */
-> -	mutex_unlock(&ctl_mutex);
-> -
-> -	/* make a best effort, don't error if failed */
-> -	rbd_req_sync_notify(rbd_dev);
-> -
-> -	ret = count;
-> -	kfree(name);
-> -	return ret;
-> -
-> -err_unlock:
-> -	mutex_unlock(&ctl_mutex);
-> -	kfree(name);
-> -	return ret;
-> -}
-> -
->   /*
->    * create control files in sysfs
->    * /sys/bus/rbd/...
->
+> -			*next = &bp->bio2;
+> +		__bio_clone(tmp, old_chain);
+> +		tmp->bi_sector += *offset >> SECTOR_SHIFT;
+> +		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
+> +		/*
+> +		 * The bios span across multiple osd objects must be
+> +		 * single paged, rbd_merge_bvec would guarantee it.
+> +		 * So we needn't worry about other things.
+> +		 */
+> +		if (tmp->bi_size - *offset > need) {
+> +			tmp->bi_size = need;
+> +			tmp->bi_io_vec->bv_len = need;
+> +			*offset += need;
+> +			if (!split) {
+> +				/*
+> +				 * Because the old bio may be modified by the
+> +				 * callback function, its copy should be saved.
+> +				 */
+> +				split = bio_clone(old_chain, gfpmask);
+> +				/*
+> +				 * This is always the last allocation in this
+> +				 * loop, so we only need release the bio chain
+> +				 * when failed.
+> +				 */
+> +				if (!split)
+> +					goto err_out;
+> +
+> +				split->bi_next = old_chain->bi_next;
+> +			}
+>  		} else {
+> -			__bio_clone(tmp, old_chain);
+> -			*next = old_chain->bi_next;
+> +			old_chain = old_chain->bi_next;
+> +			tmp->bi_size -= *offset;
+> +			tmp->bi_io_vec->bv_len -= *offset;
+> +			*offset = 0;
+> +			if (split) {
+> +				bio_put(split);
+> +				split = NULL;
+> +			}
+>  		}
+>  
+>  		tmp->bi_bdev = NULL;
+> @@ -773,9 +793,9 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+>  			tail->bi_next = tmp;
+>  			tail = tmp;
+>  		}
+> -		old_chain = old_chain->bi_next;
+>  
+>  		total += tmp->bi_size;
+> +		need -= tmp->bi_size;
+>  	}
+>  
+>  	BUG_ON(total < len);
+> @@ -784,6 +804,7 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+>  		tail->bi_next = NULL;
+>  
+>  	*old = old_chain;
+> +	*split_bio = split;
+>  
+>  	return new_chain;
+>  
+> @@ -1434,16 +1455,15 @@ static void rbd_rq_fn(struct request_queue *q)
+>  {
+>  	struct rbd_device *rbd_dev = q->queuedata;
+>  	struct request *rq;
+> -	struct bio_pair *bp = NULL;
+>  
+>  	while ((rq = blk_fetch_request(q))) {
+>  		struct bio *bio;
+> -		struct bio *rq_bio, *next_bio = NULL;
+> +		struct bio *rq_bio, *split_bio = NULL;
+>  		bool do_write;
+>  		unsigned int size;
+>  		u64 op_size = 0;
+>  		u64 ofs;
+> -		int num_segs, cur_seg = 0;
+> +		int num_segs, cur_seg = 0, offset = 0;
+>  		struct rbd_req_coll *coll;
+>  		struct ceph_snap_context *snapc;
+>  
+> @@ -1507,7 +1527,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>  						  ofs, size,
+>  						  NULL, NULL);
+>  			kref_get(&coll->kref);
+> -			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
+> +			bio = bio_chain_clone(&rq_bio, &split_bio, &offset,
+>  					      op_size, GFP_ATOMIC);
+>  			if (!bio) {
+>  				rbd_coll_end_req_index(rq, coll, cur_seg,
+> @@ -1535,12 +1555,10 @@ next_seg:
+>  			ofs += op_size;
+>  
+>  			cur_seg++;
+> -			rq_bio = next_bio;
+>  		} while (size > 0);
+>  		kref_put(&coll->kref, rbd_coll_release);
+>  
+> -		if (bp)
+> -			bio_pair_release(bp);
+> +		BUG_ON(split_bio);
+>  		spin_lock_irq(q->queue_lock);
+>  
+>  		ceph_put_snap_context(snapc);
+> 
 
