@@ -1,491 +1,289 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Access Dienied for bucket upload - 403 code
-Date: Tue, 11 Sep 2012 13:46:25 -0700
-Message-ID: <CAC-hyiGF4yt1vewrZQNNcrqvCJJZBWMTukefq5BDBuYR7U1CEg@mail.gmail.com>
-References: <CAMwB3Tg6L1F8bg_DJ9g0ySGn5hjJsiCW0DmKANodrHbESpVqfg@mail.gmail.com>
-	<CAC-hyiGYPJpMCLhW6t00ysxXYovAnsnztaxO8LL-dQLtgfbYUQ@mail.gmail.com>
-	<CAC-hyiGo2D1oErBx3B3n9Vr=vT_R9L0qQ80vuuHKO_1gjbVPYg@mail.gmail.com>
-	<CAMwB3TiPiwBCwwnFKZFeMAwKKAzc0rVWHKHoc9vnqkTXZL1P7w@mail.gmail.com>
-	<CAMwB3ThhS5Y=GP259HTJbNDZudLmSVaCqD4jgWdhvQXCygPGcw@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 5/5] rbd: kill create_snap sysfs entry
+Date: Tue, 11 Sep 2012 13:53:04 -0700
+Message-ID: <504FA4B0.6080800@inktank.com>
+References: <504A39E0.1040107@inktank.com> <504A3AC1.6090308@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:52172 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751925Ab2IKUq1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 16:46:27 -0400
-Received: by eaac11 with SMTP id c11so487050eaa.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 13:46:25 -0700 (PDT)
-In-Reply-To: <CAMwB3ThhS5Y=GP259HTJbNDZudLmSVaCqD4jgWdhvQXCygPGcw@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:33097 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755608Ab2IKUxI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 16:53:08 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr13so1310254pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 13:53:07 -0700 (PDT)
+In-Reply-To: <504A3AC1.6090308@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Sep 11, 2012 at 1:41 PM, S=C5=82awomir Skowron <szibis@gmail.co=
-m> wrote:
-> And more logs:
->
->
-> 2012-09-11 21:03:38.357304 7faf0bf4f700  1 =3D=3D=3D=3D=3D=3D req don=
-e
-> req=3D0x141a650 http_status=3D403 =3D=3D=3D=3D=3D=3D
-> 2012-09-11 21:23:54.423185 7faf0bf4f700 20 dequeued request req=3D0x1=
-39a3d0
-> 2012-09-11 21:23:54.423192 7faf0bf4f700 20 RGWWQ: empty
-> 2012-09-11 21:23:54.423198 7faf0bf4f700  1 =3D=3D=3D=3D=3D=3D startin=
-g new request
-> req=3D0x139a3d0 =3D=3D=3D=3D=3D
-> 2012-09-11 21:23:54.423237 7faf0bf4f700  2 req 58098:0.000039::::init=
-ializing
-> 2012-09-11 21:23:54.423258 7faf0bf4f700 10 s->object=3D<NULL> s->buck=
-et=3D<NULL>
-> 2012-09-11 21:23:54.423265 7faf0bf4f700 20 FCGI_ROLE=3DRESPONDER
-> 2012-09-11 21:23:54.423267 7faf0bf4f700 20 SCRIPT_FILENAME=3D/var/www=
-/radosgw.fcgi
-> 2012-09-11 21:23:54.423269 7faf0bf4f700 20 QUERY_STRING=3D
-> 2012-09-11 21:23:54.423270 7faf0bf4f700 20 REQUEST_METHOD=3DGET
-> 2012-09-11 21:23:54.423272 7faf0bf4f700 20 CONTENT_TYPE=3D
-> 2012-09-11 21:23:54.423273 7faf0bf4f700 20 CONTENT_LENGTH=3D
-> 2012-09-11 21:23:54.423274 7faf0bf4f700 20 HTTP_CONTENT_LENGTH=3D
-> 2012-09-11 21:23:54.423276 7faf0bf4f700 20 SCRIPT_NAME=3D/
-> 2012-09-11 21:23:54.423277 7faf0bf4f700 20 REQUEST_URI=3D/
-> 2012-09-11 21:23:54.423279 7faf0bf4f700 20 DOCUMENT_URI=3D/
-> 2012-09-11 21:23:54.423280 7faf0bf4f700 20 DOCUMENT_ROOT=3D/var/www
-> 2012-09-11 21:23:54.423282 7faf0bf4f700 20 SERVER_PROTOCOL=3DHTTP/1.0
-> 2012-09-11 21:23:54.423283 7faf0bf4f700 20 GATEWAY_INTERFACE=3DCGI/1.=
-1
-> 2012-09-11 21:23:54.423284 7faf0bf4f700 20 SERVER_SOFTWARE=3Dnginx/1.=
-2.0
-> 2012-09-11 21:23:54.423286 7faf0bf4f700 20 REMOTE_ADDR=3D10.177.95.19
-> 2012-09-11 21:23:54.423287 7faf0bf4f700 20 REMOTE_PORT=3D60477
-> 2012-09-11 21:23:54.423289 7faf0bf4f700 20 SERVER_ADDR=3D10.177.64.4
-> 2012-09-11 21:23:54.423290 7faf0bf4f700 20 SERVER_PORT=3D80
-> ...skipping...
-> 2012-09-11 22:23:44.530567 7faf0bf4f700 10
-> s->object=3Dimages/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134=
-566905cf252.jpg
-> s->bucket=3Docdn
-> 2012-09-11 22:23:44.530586 7faf0bf4f700 20 FCGI_ROLE=3DRESPONDER
-> 2012-09-11 22:23:44.530588 7faf0bf4f700 20 SCRIPT_FILENAME=3D/var/www=
-/radosgw.fcgi
-> 2012-09-11 22:23:44.530589 7faf0bf4f700 20 QUERY_STRING=3D
-> 2012-09-11 22:23:44.530591 7faf0bf4f700 20 REQUEST_METHOD=3DGET
-> 2012-09-11 22:23:44.530592 7faf0bf4f700 20 CONTENT_TYPE=3D
-> 2012-09-11 22:23:44.530593 7faf0bf4f700 20 CONTENT_LENGTH=3D
-> 2012-09-11 22:23:44.530594 7faf0bf4f700 20 HTTP_CONTENT_LENGTH=3D
-> 2012-09-11 22:23:44.530595 7faf0bf4f700 20
-> SCRIPT_NAME=3D/ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e850=
-62de6134566905cf252.jpg
-> 2012-09-11 22:23:44.530596 7faf0bf4f700 20
-> REQUEST_URI=3D/ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e850=
-62de6134566905cf252.jpg
-> 2012-09-11 22:23:44.530598 7faf0bf4f700 20
-> DOCUMENT_URI=3D/ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85=
-062de6134566905cf252.jpg
-> 2012-09-11 22:23:44.530600 7faf0bf4f700 20 DOCUMENT_ROOT=3D/var/www
-> 2012-09-11 22:23:44.530603 7faf0bf4f700 20 SERVER_PROTOCOL=3DHTTP/1.1
-> 2012-09-11 22:23:44.530604 7faf0bf4f700 20 GATEWAY_INTERFACE=3DCGI/1.=
-1
-> 2012-09-11 22:23:44.530605 7faf0bf4f700 20 SERVER_SOFTWARE=3Dnginx/1.=
-2.0
-> 2012-09-11 22:23:44.530606 7faf0bf4f700 20 REMOTE_ADDR=3D10.167.14.53
-> 2012-09-11 22:23:44.530607 7faf0bf4f700 20 REMOTE_PORT=3D62145
-> 2012-09-11 22:23:44.530608 7faf0bf4f700 20 SERVER_ADDR=3D10.177.64.4
-> 2012-09-11 22:23:44.530609 7faf0bf4f700 20 SERVER_PORT=3D80
-> 2012-09-11 22:23:44.530610 7faf0bf4f700 20 SERVER_NAME=3D
-> 2012-09-11 22:23:44.530610 7faf0bf4f700 20 REDIRECT_STATUS=3D200
-> 2012-09-11 22:23:44.530611 7faf0bf4f700 20 RGW_SHOULD_LOG=3Dno
-> 2012-09-11 22:23:44.530612 7faf0bf4f700 20 HTTP_HOST=3D10.177.64.4
-> 2012-09-11 22:23:44.530613 7faf0bf4f700 20 HTTP_CONNECTION=3Dkeep-ali=
-ve
-> 2012-09-11 22:23:44.530614 7faf0bf4f700 20 HTTP_USER_AGENT=3DMozilla/=
-5.0
-> (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like
-> Gecko) Chrome/21.0.1180.89 Safari/537.1
-> 2012-09-11 22:23:44.530615 7faf0bf4f700 20
-> HTTP_ACCEPT=3Dtext/html,application/xhtml+xml,application/xml;q=3D0.9=
-,*/*;q=3D0.8
-> 2012-09-11 22:23:44.530616 7faf0bf4f700 20
-> HTTP_ACCEPT_ENCODING=3Dgzip,deflate,sdch
-> 2012-09-11 22:23:44.530617 7faf0bf4f700 20 HTTP_ACCEPT_LANGUAGE=3Den-=
-US,en;q=3D0.8
-> 2012-09-11 22:23:44.530618 7faf0bf4f700 20
-> HTTP_ACCEPT_CHARSET=3DISO-8859-1,utf-8;q=3D0.7,*;q=3D0.3
-> 2012-09-11 22:23:44.530620 7faf0bf4f700  2 req 68518:0.000117:s3:GET
-> /ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134566905=
-cf252.jpg::getting
-> op
-> 2012-09-11 22:23:44.530626 7faf0bf4f700  2 req 68518:0.000123:s3:GET
-> /ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134566905=
-cf252.jpg:get_obj:authorizing
-> 2012-09-11 22:23:44.530630 7faf0bf4f700  2 req 68518:0.000127:s3:GET
-> /ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134566905=
-cf252.jpg:get_obj:reading
-> permissions
-> 2012-09-11 22:23:44.530646 7faf0bf4f700 20 get_obj_state:
-> rctx=3D0x7fb01c0122c0 obj=3D.rgw:ocdn state=3D0x7fb01c013248
-> s->prefetch_data=3D0
-> 2012-09-11 22:23:44.531746 7faf0bf4f700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:23:44.531760 7faf0bf4f700 20 get_obj_state:
-> rctx=3D0x7fb01c0122c0 obj=3D.rgw:ocdn state=3D0x7fb01c013248
-> s->prefetch_data=3D0
-> 2012-09-11 22:23:44.531767 7faf0bf4f700 20 get_obj_state:
-> rctx=3D0x7fb01c0122c0 obj=3D.rgw:ocdn state=3D0x7fb01c013248
-> s->prefetch_data=3D0
-> 2012-09-11 22:23:44.531771 7faf0bf4f700 20 state for obj=3D.rgw:ocdn =
-is
-> not atomic, not appending atomic test
-> 2012-09-11 22:23:44.531773 7faf0bf4f700 20 rados->read obj-ofs=3D0
-> read_ofs=3D0 read_len=3D16384
-> 2012-09-11 22:23:44.532701 7faf0bf4f700 20 rados->read r=3D0 bl.lengt=
-h=3D65
-> 2012-09-11 22:23:44.532721 7faf0bf4f700 20 rgw_get_bucket_info:
-> bucket=3Docdn(@.rgw.buckets[4168.2]) owner 0
-> 2012-09-11 22:23:44.532734 7faf0bf4f700 20 get_obj_state:
-> rctx=3D0x7fb01c0122c0 obj=3Docdn: state=3D0x7fb01c013248 s->prefetch_=
-data=3D0
-> 2012-09-11 22:23:44.532750 7faf0bf4f700 15 Read
-> AccessControlPolicy<AccessControlPolicy
-> xmlns=3D"http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>0</ID><D=
-isplayName>ocdn</DisplayName></Owner><AccessControlList><Grant><Grantee
-> xmlns:xsi=3D"http://www.w3.org/2001/XMLSchema-instance"
-> xsi:type=3D"Group"><URI>http://acs.amazonaws.com/groups/global/AllUse=
-rs</URI></Grantee><Permission>READ</Permission></Grant><Grant><Grantee
-> xmlns:xsi=3D"http://www.w3.org/2001/XMLSchema-instance"
-> xsi:type=3D"CanonicalUser"><ID>0</ID><DisplayName>ocdn</DisplayName><=
-/Grantee><Permission>FULL_CONTROL</Permission></Grant></AccessControlLi=
-st></AccessControlPolicy>
-> 2012-09-11 22:23:44.532770 7faf0bf4f700 20 get_obj_state:
-> rctx=3D0x7fb01c0122c0
-> obj=3Docdn:images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de61345=
-66905cf252.jpg
-> state=3D0x7fb01c00a608 s->prefetch_data=3D1
-> 2012-09-11 22:23:44.534298 7faf0bf4f700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:23:44.534315 7faf0bf4f700 15 Read
-> AccessControlPolicy<AccessControlPolicy
-> xmlns=3D"http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>0</ID><D=
-isplayName>ocdn</DisplayName></Owner><AccessControlList><Grant><Grantee
-> xmlns:xsi=3D"http://www.w3.org/2001/XMLSchema-instance"
-> xsi:type=3D"CanonicalUser"><ID>0</ID><DisplayName>ocdn</DisplayName><=
-/Grantee><Permission>FULL_CONTROL</Permission></Grant></AccessControlLi=
-st></AccessControlPolicy>
-> 2012-09-11 22:23:44.534327 7faf0bf4f700  2 req 68518:0.003823:s3:GET
-> /ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134566905=
-cf252.jpg:get_obj:verifying
-> op permissions
-> 2012-09-11 22:23:44.534334 7faf0bf4f700  5 Searching permissions for
-> uid=3Danonymous mask=3D1
-> 2012-09-11 22:23:44.534336 7faf0bf4f700  5 Permissions for user not f=
-ound
-> 2012-09-11 22:23:44.534337 7faf0bf4f700  5 Searching permissions for
-> group=3D1 mask=3D1
-> 2012-09-11 22:23:44.534338 7faf0bf4f700  5 Permissions for group not =
-found
-> 2012-09-11 22:23:44.534339 7faf0bf4f700  5 Getting permissions
-> id=3Danonymous owner=3D0 perm=3D0
-> 2012-09-11 22:23:44.534341 7faf0bf4f700 10  uid=3Danonymous requested
-> perm (type)=3D1, policy perm=3D0, user_perm_mask=3D15, acl perm=3D0
-> 2012-09-11 22:23:44.534343 7faf0bf4f700  5 Searching permissions for
-> uid=3Danonymous mask=3D16
-> 2012-09-11 22:23:44.534344 7faf0bf4f700  5 Permissions for user not f=
-ound
-> 2012-09-11 22:23:44.534345 7faf0bf4f700  5 Searching permissions for
-> group=3D1 mask=3D16
-> 2012-09-11 22:23:44.534347 7faf0bf4f700  5 Found permission: 1
-> 2012-09-11 22:23:44.534348 7faf0bf4f700  5 Getting permissions
-> id=3Danonymous owner=3D0 perm=3D0
-> 2012-09-11 22:23:44.534349 7faf0bf4f700 10  uid=3Danonymous requested
-> perm (type)=3D16, policy perm=3D0, user_perm_mask=3D16, acl perm=3D0
-> 2012-09-11 22:23:44.534357 7faf0bf4f700 10 --> Status: 403
-> 2012-09-11 22:23:44.534367 7faf0bf4f700 10 --> Content-Length: 78
-> 2012-09-11 22:23:44.534370 7faf0bf4f700 10 --> Accept-Ranges: bytes
-> 2012-09-11 22:23:44.534373 7faf0bf4f700 10 --> Content-type: applicat=
-ion/xml
-> 2012-09-11 22:23:44.534480 7faf0bf4f700  2 req 68518:0.003976:s3:GET
-> /ocdn/images/pulscms/NjQ7MDMsMWUwLDAsMCwx/0a9915212e85062de6134566905=
-cf252.jpg:get_obj:http
-> status=3D403
-> 2012-09-11 22:23:44.534765 7faf0bf4f700  1 =3D=3D=3D=3D=3D=3D req don=
-e
-> req=3D0x13995c0 http_status=3D403 =3D=3D=3D=3D=3D=3D
->
-> Good put, and 403 after:
->
-> 2012-09-11 22:37:34.677422 7fafddffb700  1 =3D=3D=3D=3D=3D=3D startin=
-g new request
-> req=3D0x139a3d0 =3D=3D=3D=3D=3D
-> 2012-09-11 22:37:34.677466 7fafddffb700  2 req 71187:0.000044::::init=
-ializing
-> 2012-09-11 22:37:34.677492 7fafddffb700 10
-> s->object=3Dfiles/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1
-> s->bucket=3Docdn
-> 2012-09-11 22:37:34.677501 7fafddffb700 20 FCGI_ROLE=3DRESPONDER
-> 2012-09-11 22:37:34.677502 7fafddffb700 20 SCRIPT_FILENAME=3D/var/www=
-/radosgw.fcgi
-> 2012-09-11 22:37:34.677503 7fafddffb700 20 QUERY_STRING=3D
-> 2012-09-11 22:37:34.677504 7fafddffb700 20 REQUEST_METHOD=3DPUT
-> 2012-09-11 22:37:34.677505 7fafddffb700 20 CONTENT_TYPE=3Dtext/plain
-> 2012-09-11 22:37:34.677506 7fafddffb700 20 CONTENT_LENGTH=3D4721
-> 2012-09-11 22:37:34.677507 7fafddffb700 20 HTTP_CONTENT_LENGTH=3D4721
-> 2012-09-11 22:37:34.677508 7fafddffb700 20
-> SCRIPT_NAME=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f4633391=
-2049b1
-> 2012-09-11 22:37:34.677509 7fafddffb700 20
-> REQUEST_URI=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f4633391=
-2049b1
-> 2012-09-11 22:37:34.677510 7fafddffb700 20
-> DOCUMENT_URI=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f463339=
-12049b1
-> 2012-09-11 22:37:34.677511 7fafddffb700 20 DOCUMENT_ROOT=3D/var/www
-> 2012-09-11 22:37:34.677512 7fafddffb700 20 SERVER_PROTOCOL=3DHTTP/1.1
-> 2012-09-11 22:37:34.677512 7fafddffb700 20 GATEWAY_INTERFACE=3DCGI/1.=
-1
-> 2012-09-11 22:37:34.677513 7fafddffb700 20 SERVER_SOFTWARE=3Dnginx/1.=
-2.0
-> 2012-09-11 22:37:34.677514 7fafddffb700 20 REMOTE_ADDR=3D10.174.53.77
-> 2012-09-11 22:37:34.677515 7fafddffb700 20 REMOTE_PORT=3D48588
-> 2012-09-11 22:37:34.677516 7fafddffb700 20 SERVER_ADDR=3D10.177.0.3
-> 2012-09-11 22:37:34.677516 7fafddffb700 20 SERVER_PORT=3D80
-> 2012-09-11 22:37:34.677517 7fafddffb700 20 SERVER_NAME=3D
-> 2012-09-11 22:37:34.677518 7fafddffb700 20 REDIRECT_STATUS=3D200
-> 2012-09-11 22:37:34.677519 7fafddffb700 20 RGW_SHOULD_LOG=3Dno
-> 2012-09-11 22:37:34.677520 7fafddffb700 20 HTTP_HOST=3D10.177.0.3
-> 2012-09-11 22:37:34.677520 7fafddffb700 20 HTTP_ACCEPT_ENCODING=3Dide=
-ntity
-> 2012-09-11 22:37:34.677521 7fafddffb700 20
-> HTTP_CONTENT_MD5=3D7Ous3d6VIkuW9GMzkSBJsQ=3D=3D
-> 2012-09-11 22:37:34.677522 7fafddffb700 20 HTTP_EXPECT=3D100-Continue
-> 2012-09-11 22:37:34.677523 7fafddffb700 20 HTTP_DATE=3DTue, 11 Sep 20=
-12
-> 20:37:46 GMT
-> 2012-09-11 22:37:34.677524 7fafddffb700 20 HTTP_USER_AGENT=3DBoto/2.5=
-=2E1 (linux2)
-> 2012-09-11 22:37:34.677525 7fafddffb700 20 HTTP_CONTENT_TYPE=3Dtext/p=
-lain
-> 2012-09-11 22:37:34.677526 7fafddffb700 20 HTTP_AUTHORIZATION=3DAWS
-> 73VF66Q2JH5PT5K7QJ3A:5ucLfRdtJtAdcIcns2pgMowWAEE=3D
-> 2012-09-11 22:37:34.677529 7fafddffb700  2 req 71187:0.000108:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1::gettin=
-g
-> op
-> 2012-09-11 22:37:34.677534 7fafddffb700  2 req 71187:0.000113:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:authorizing
-> 2012-09-11 22:37:34.677552 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c004960 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb00c004a18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.679069 7fafddffb700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:37:34.679086 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c004960 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb00c004a18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.680427 7fafddffb700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:37:34.680441 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c004960 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb00c004a18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.680452 7fafddffb700 20 state for
-> obj=3D.users:73VF66Q2JH5PT5K7QJ3A is not atomic, not appending atomic
-> test
-> 2012-09-11 22:37:34.680457 7fafddffb700 20 rados->read obj-ofs=3D0
-> read_ofs=3D0 read_len=3D16384
-> 2012-09-11 22:37:34.681685 7fafddffb700 20 rados->read r=3D0 bl.lengt=
-h=3D231
-> 2012-09-11 22:37:34.681748 7fafddffb700 10 get_canon_resource():
-> dest=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1
-> 2012-09-11 22:37:34.681766 7fafddffb700 10 auth_hdr:
-> 2012-09-11 22:37:34.681911 7fafddffb700 15 b64=3D5ucLfRdtJtAdcIcns2pg=
-MowWAEE=3D
-> 2012-09-11 22:37:34.681921 7fafddffb700 15
-> auth_sign=3D5ucLfRdtJtAdcIcns2pgMowWAEE=3D
-> 2012-09-11 22:37:34.681922 7fafddffb700 15 compare=3D0
-> 2012-09-11 22:37:34.681926 7fafddffb700  2 req 71187:0.004504:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:reading
-> permissions
-> 2012-09-11 22:37:34.681941 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c007050 obj=3D.rgw:ocdn state=3D0x7fb00c006578
-> s->prefetch_data=3D0
-> 2012-09-11 22:37:34.683575 7fafddffb700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:37:34.683588 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c007050 obj=3D.rgw:ocdn state=3D0x7fb00c006578
-> s->prefetch_data=3D0
-> 2012-09-11 22:37:34.683596 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c007050 obj=3D.rgw:ocdn state=3D0x7fb00c006578
-> s->prefetch_data=3D0
-> 2012-09-11 22:37:34.683599 7fafddffb700 20 state for obj=3D.rgw:ocdn =
-is
-> not atomic, not appending atomic test
-> 2012-09-11 22:37:34.683601 7fafddffb700 20 rados->read obj-ofs=3D0
-> read_ofs=3D0 read_len=3D16384
-> 2012-09-11 22:37:34.684735 7fafddffb700 20 rados->read r=3D0 bl.lengt=
-h=3D65
-> 2012-09-11 22:37:34.684755 7fafddffb700 20 rgw_get_bucket_info:
-> bucket=3Docdn(@.rgw.buckets[4168.2]) owner 0
-> 2012-09-11 22:37:34.684769 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c007050 obj=3Docdn: state=3D0x7fb00c006578 s->prefetch_=
-data=3D0
-> 2012-09-11 22:37:34.684786 7fafddffb700 15 Read
-> AccessControlPolicy<AccessControlPolicy
-> xmlns=3D"http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>0</ID><D=
-isplayName>ocdn</DisplayName></Owner><AccessControlList><Grant><Grantee
-> xmlns:xsi=3D"http://www.w3.org/2001/XMLSchema-instance"
-> xsi:type=3D"Group"><URI>http://acs.amazonaws.com/groups/global/AllUse=
-rs</URI></Grantee><Permission>READ</Permission></Grant><Grant><Grantee
-> xmlns:xsi=3D"http://www.w3.org/2001/XMLSchema-instance"
-> xsi:type=3D"CanonicalUser"><ID>0</ID><DisplayName>ocdn</DisplayName><=
-/Grantee><Permission>FULL_CONTROL</Permission></Grant></AccessControlLi=
-st></AccessControlPolicy>
-> 2012-09-11 22:37:34.684796 7fafddffb700  2 req 71187:0.007375:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:verifying
-> op permissions
-> 2012-09-11 22:37:34.684801 7fafddffb700  5 Searching permissions for
-> uid=3D0 mask=3D2
-> 2012-09-11 22:37:34.684803 7fafddffb700  5 Found permission: 15
-> 2012-09-11 22:37:34.684804 7fafddffb700 10  uid=3D0 requested perm
-> (type)=3D2, policy perm=3D2, user_perm_mask=3D2, acl perm=3D2
-> 2012-09-11 22:37:34.684808 7fafddffb700  2 req 71187:0.007387:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:verifying
-> op params
-> 2012-09-11 22:37:34.684811 7fafddffb700  2 req 71187:0.007390:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:executing
-> 2012-09-11 22:37:34.684831 7fafddffb700 15
-> supplied_md5_b64=3D7Ous3d6VIkuW9GMzkSBJsQ=3D=3D
-> 2012-09-11 22:37:34.684834 7fafddffb700 15 ceph_armor ret=3D16
-> 2012-09-11 22:37:34.684841 7fafddffb700 15
-> supplied_md5=3Decebacddde95224b96f46333912049b1
-> 2012-09-11 22:37:34.684901 7fafddffb700 20 get_obj_state:
-> rctx=3D0x7fb00c007050
-> obj=3Docdn:files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1
-> state=3D0x7fb00c00bda8 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.686278 7fafddffb700 20
-> prepare_atomic_for_write_impl: state is not atomic.
-> state=3D0x7fb00c00bda8
-> 2012-09-11 22:37:34.704899 7fafddffb700 10 --> ETag: "ecebacddde95224=
-b96f46333
-> 2012-09-11 22:37:34.704949 7fafddffb700 10 --> Content-Length: 0
-> 2012-09-11 22:37:34.704954 7fafddffb700 10 --> Accept-Ranges: bytes
-> 2012-09-11 22:37:34.704958 7fafddffb700 10 --> Status: 200
-> 2012-09-11 22:37:34.704963 7fafddffb700 10 --> Content-type: applicat=
-ion/xml
-> 2012-09-11 22:37:34.705099 7fafddffb700  2 req 71187:0.027678:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:http
-> status=3D200
-> 2012-09-11 22:37:34.705454 7fafddffb700  1 =3D=3D=3D=3D=3D=3D req don=
-e
-> req=3D0x139a3d0 http_status=3D200 =3D=3D=3D=3D=3D=3D
->
->
-> 2012-09-11 22:37:34.708316 7faec76c6700 20 dequeued request req=3D0x1=
-368860
-> 2012-09-11 22:37:34.708326 7faec76c6700 20 RGWWQ: empty
-> 2012-09-11 22:37:34.708333 7faec76c6700  1 =3D=3D=3D=3D=3D=3D startin=
-g new request
-> req=3D0x1368860 =3D=3D=3D=3D=3D
-> 2012-09-11 22:37:34.708375 7faec76c6700  2 req 71188:0.000042::::init=
-ializing
-> 2012-09-11 22:37:34.708402 7faec76c6700 10
-> s->object=3Dfiles/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1
-> s->bucket=3Docdn
-> 2012-09-11 22:37:34.708408 7faec76c6700 10 meta>> HTTP_X_AMZ_ACL=3Dpu=
-blic-read
-> 2012-09-11 22:37:34.708425 7faec76c6700 10 x>> x-amz-acl:public-read
-> 2012-09-11 22:37:34.708431 7faec76c6700 20 FCGI_ROLE=3DRESPONDER
-> 2012-09-11 22:37:34.708432 7faec76c6700 20 SCRIPT_FILENAME=3D/var/www=
-/radosgw.fcgi
-> 2012-09-11 22:37:34.708434 7faec76c6700 20 QUERY_STRING=3Dacl
-> 2012-09-11 22:37:34.708435 7faec76c6700 20 REQUEST_METHOD=3DPUT
-> 2012-09-11 22:37:34.708437 7faec76c6700 20 CONTENT_TYPE=3D
-> 2012-09-11 22:37:34.708438 7faec76c6700 20 CONTENT_LENGTH=3D0
-> 2012-09-11 22:37:34.708439 7faec76c6700 20 HTTP_CONTENT_LENGTH=3D0
-> 2012-09-11 22:37:34.708440 7faec76c6700 20
-> SCRIPT_NAME=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f4633391=
-2049b1
-> 2012-09-11 22:37:34.708441 7faec76c6700 20
-> REQUEST_URI=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f4633391=
-2049b1
-> 2012-09-11 22:37:34.708441 7faec76c6700 20
-> DOCUMENT_URI=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f463339=
-12049b1
-> 2012-09-11 22:37:34.708442 7faec76c6700 20 DOCUMENT_ROOT=3D/var/www
-> 2012-09-11 22:37:34.708443 7faec76c6700 20 SERVER_PROTOCOL=3DHTTP/1.1
-> 2012-09-11 22:37:34.708444 7faec76c6700 20 GATEWAY_INTERFACE=3DCGI/1.=
-1
-> 2012-09-11 22:37:34.708446 7faec76c6700 20 SERVER_SOFTWARE=3Dnginx/1.=
-2.0
-> 2012-09-11 22:37:34.708447 7faec76c6700 20 REMOTE_ADDR=3D10.174.53.77
-> 2012-09-11 22:37:34.708447 7faec76c6700 20 REMOTE_PORT=3D48588
-> 2012-09-11 22:37:34.708448 7faec76c6700 20 SERVER_ADDR=3D10.177.0.3
-> 2012-09-11 22:37:34.708450 7faec76c6700 20 SERVER_PORT=3D80
-> 2012-09-11 22:37:34.708451 7faec76c6700 20 SERVER_NAME=3D
-> 2012-09-11 22:37:34.708452 7faec76c6700 20 REDIRECT_STATUS=3D200
-> 2012-09-11 22:37:34.708453 7faec76c6700 20 RGW_SHOULD_LOG=3Dno
-> 2012-09-11 22:37:34.708454 7faec76c6700 20 HTTP_HOST=3D10.177.0.3
-> 2012-09-11 22:37:34.708455 7faec76c6700 20 HTTP_ACCEPT_ENCODING=3Dide=
-ntity
-> 2012-09-11 22:37:34.708456 7faec76c6700 20 HTTP_DATE=3DTue, 11 Sep 20=
-12
-> 20:37:46 GMT
-> 2012-09-11 22:37:34.708457 7faec76c6700 20 HTTP_X_AMZ_ACL=3Dpublic-re=
-ad
-> 2012-09-11 22:37:34.708458 7faec76c6700 20 HTTP_AUTHORIZATION=3DAWS
-> 73VF66Q2JH5PT5K7QJ3A:xHPA2K5QvuehAvKH9WdOvf+ZKzE=3D
-> 2012-09-11 22:37:34.708458 7faec76c6700 20 HTTP_USER_AGENT=3DBoto/2.5=
-=2E1 (linux2)
-> 2012-09-11 22:37:34.708462 7faec76c6700  2 req 71188:0.000129:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1::gettin=
-g
-> op
-> 2012-09-11 22:37:34.708467 7faec76c6700  2 req 71188:0.000134:s3:PUT
-> /ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1:put_obj=
-:authorizing
-> 2012-09-11 22:37:34.708486 7faec76c6700 20 get_obj_state:
-> rctx=3D0x7fb2a4007e60 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb2a4007f18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.709812 7faec76c6700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:37:34.709828 7faec76c6700 20 get_obj_state:
-> rctx=3D0x7fb2a4007e60 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb2a4007f18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.711091 7faec76c6700 20 get_obj_state: s->obj_tag
-> was set empty
-> 2012-09-11 22:37:34.711101 7faec76c6700 20 get_obj_state:
-> rctx=3D0x7fb2a4007e60 obj=3D.users:73VF66Q2JH5PT5K7QJ3A
-> state=3D0x7fb2a4007f18 s->prefetch_data=3D0
-> 2012-09-11 22:37:34.711108 7faec76c6700 20 state for
-> obj=3D.users:73VF66Q2JH5PT5K7QJ3A is not atomic, not appending atomic
-> test
-> 2012-09-11 22:37:34.711111 7faec76c6700 20 rados->read obj-ofs=3D0
-> read_ofs=3D0 read_len=3D16384
-> 2012-09-11 22:37:34.712485 7faec76c6700 20 rados->read r=3D0 bl.lengt=
-h=3D231
-> 2012-09-11 22:37:34.712655 7faec76c6700 10 get_canon_resource():
-> dest=3D/ocdn/files/pulscms/MjU7MDA_/ecebacddde95224b96f46333912049b1
-> 2012-09-11 22:37:34.712659 7faec76c6700 10 auth_hdr:
-> 2012-09-11 22:37:34.712735 7faec76c6700 15 b64=3D7pIUzzJaX/EyTV89LMXw=
-cqvS06w=3D
-> 2012-09-11 22:37:34.712742 7faec76c6700 15
-> auth_sign=3DxHPA2K5QvuehAvKH9WdOvf+ZKzE=3D
-> 2012-09-11 22:37:34.712744 7faec76c6700 15 compare=3D65
-> 2012-09-11 22:37:34.712747 7faec76c6700 10 failed to authorize reques=
-t
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-The request itself fails to authorize. I think it's related to trying
-to do canned acl put_acl. Not sure if that's actually supposed to
-work.
+On 09/07/2012 11:19 AM, Alex Elder wrote:
+> Josh proposed the following change, and I don't think I could
+> explain it any better than he did:
+>
+>      From: Josh Durgin <josh.durgin@inktank.com>
+>      Date: Tue, 24 Jul 2012 14:22:11 -0700
+>      To: ceph-devel <ceph-devel@vger.kernel.org>
+>      Message-ID: <500F1203.9050605@inktank.com>
+>
+>      Right now the kernel still has one piece of rbd management
+>      duplicated from the rbd command line tool: snapshot creation.
+>      There's nothing special about snapshot creation that makes it
+>      advantageous to do from the kernel, so I'd like to remove the
+>      create_snap sysfs interface.  That is,
+> 	/sys/bus/rbd/devices/<id>/create_snap
+>      would be removed.
+>
+>      Does anyone rely on the sysfs interface for creating rbd
+>      snapshots?  If so, how hard would it be to replace with:
+>
+> 	rbd snap create pool/image@snap
+>
+>      Is there any benefit to the sysfs interface that I'm missing?
+>
+>      Josh
+>
+> This patch implements this proposal, removing the code that
+> implements the "snap_create" sysfs interface for rbd images.
+> As a result, quite a lot of other supporting code goes away.
+>
+> Suggested-by: Josh Durgin <josh.durgin@inktank.com>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   Documentation/ABI/testing/sysfs-bus-rbd |    6 --
+>   drivers/block/rbd.c                     |  158
+> -------------------------------
+>   2 files changed, 164 deletions(-)
+>
+> diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
+> b/Documentation/ABI/testing/sysfs-bus-rbd
+> index 7cbbe34..6fe4224 100644
+> --- a/Documentation/ABI/testing/sysfs-bus-rbd
+> +++ b/Documentation/ABI/testing/sysfs-bus-rbd
+> @@ -62,12 +62,6 @@ current_snap
+>
+>   	The current snapshot for which the device is mapped.
+>
+> -create_snap
+> -
+> -	Create a snapshot:
+> -
+> -	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
+> -
+>   snap_*
+>
+>   	A directory per each snapshot
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 5a3132e..d73edb1 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -212,10 +212,6 @@ static int rbd_dev_snaps_update(struct rbd_device
+> *rbd_dev);
+>   static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
+>
+>   static void rbd_dev_release(struct device *dev);
+> -static ssize_t rbd_snap_add(struct device *dev,
+> -			    struct device_attribute *attr,
+> -			    const char *buf,
+> -			    size_t count);
+>   static void __rbd_remove_snap_dev(struct rbd_snap *snap);
+>
+>   static ssize_t rbd_add(struct bus_type *bus, const char *buf,
+> @@ -1375,71 +1371,6 @@ static int rbd_req_sync_unwatch(struct rbd_device
+> *rbd_dev)
+>   	return ret;
+>   }
+>
+> -struct rbd_notify_info {
+> -	struct rbd_device *rbd_dev;
+> -};
+> -
+> -static void rbd_notify_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
+> -{
+> -	struct rbd_device *rbd_dev = (struct rbd_device *)data;
+> -	if (!rbd_dev)
+> -		return;
+> -
+> -	dout("rbd_notify_cb %s notify_id=%llu opcode=%u\n",
+> -			rbd_dev->header_name, (unsigned long long) notify_id,
+> -			(unsigned int) opcode);
+> -}
+> -
+> -/*
+> - * Request sync osd notify
+> - */
+> -static int rbd_req_sync_notify(struct rbd_device *rbd_dev)
+> -{
+> -	struct ceph_osd_req_op *ops;
+> -	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> -	struct ceph_osd_event *event;
+> -	struct rbd_notify_info info;
+> -	int payload_len = sizeof(u32) + sizeof(u32);
+> -	int ret;
+> -
+> -	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY, payload_len);
+> -	if (!ops)
+> -		return -ENOMEM;
+> -
+> -	info.rbd_dev = rbd_dev;
+> -
+> -	ret = ceph_osdc_create_event(osdc, rbd_notify_cb, 1,
+> -				     (void *)&info, &event);
+> -	if (ret < 0)
+> -		goto fail;
+> -
+> -	ops[0].watch.ver = 1;
+> -	ops[0].watch.flag = 1;
+> -	ops[0].watch.cookie = event->cookie;
+> -	ops[0].watch.prot_ver = RADOS_NOTIFY_VER;
+> -	ops[0].watch.timeout = 12;
+> -
+> -	ret = rbd_req_sync_op(rbd_dev, NULL,
+> -			       CEPH_NOSNAP,
+> -			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+> -			       ops,
+> -			       rbd_dev->header_name,
+> -			       0, 0, NULL, NULL, NULL);
+> -	if (ret < 0)
+> -		goto fail_event;
+> -
+> -	ret = ceph_osdc_wait_event(event, CEPH_OSD_TIMEOUT_DEFAULT);
+> -	dout("ceph_osdc_wait_event returned %d\n", ret);
+> -	rbd_destroy_ops(ops);
+> -	return 0;
+> -
+> -fail_event:
+> -	ceph_osdc_cancel_event(event);
+> -fail:
+> -	rbd_destroy_ops(ops);
+> -	return ret;
+> -}
+> -
+>   /*
+>    * Synchronous osd object method call
+>    */
+> @@ -1761,52 +1692,6 @@ static int rbd_read_header(struct rbd_device
+> *rbd_dev,
+>   	return ret;
+>   }
+>
+> -/*
+> - * create a snapshot
+> - */
+> -static int rbd_header_add_snap(struct rbd_device *rbd_dev,
+> -			       const char *snap_name,
+> -			       gfp_t gfp_flags)
+> -{
+> -	int name_len = strlen(snap_name);
+> -	u64 new_snapid;
+> -	int ret;
+> -	void *data, *p, *e;
+> -	struct ceph_mon_client *monc;
+> -
+> -	/* we should create a snapshot only if we're pointing at the head */
+> -	if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
+> -		return -EINVAL;
+> -
+> -	monc = &rbd_dev->rbd_client->client->monc;
+> -	ret = ceph_monc_create_snapid(monc, rbd_dev->pool_id, &new_snapid);
+> -	dout("created snapid=%llu\n", (unsigned long long) new_snapid);
+> -	if (ret < 0)
+> -		return ret;
+> -
+> -	data = kmalloc(name_len + 16, gfp_flags);
+> -	if (!data)
+> -		return -ENOMEM;
+> -
+> -	p = data;
+> -	e = data + name_len + 16;
+> -
+> -	ceph_encode_string_safe(&p, e, snap_name, name_len, bad);
+> -	ceph_encode_64_safe(&p, e, new_snapid, bad);
+> -
+> -	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
+> -				"rbd", "snap_add",
+> -				data, (size_t) (p - data), NULL, 0,
+> -				CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+> -				NULL);
+> -
+> -	kfree(data);
+> -
+> -	return ret < 0 ? ret : 0;
+> -bad:
+> -	return -ERANGE;
+> -}
+> -
+>   static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
+>   {
+>   	struct rbd_snap *snap;
+> @@ -2030,7 +1915,6 @@ static DEVICE_ATTR(name, S_IRUGO, rbd_name_show,
+> NULL);
+>   static DEVICE_ATTR(image_id, S_IRUGO, rbd_image_id_show, NULL);
+>   static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
+>   static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
+> -static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
+>
+>   static struct attribute *rbd_attrs[] = {
+>   	&dev_attr_size.attr,
+> @@ -2042,7 +1926,6 @@ static struct attribute *rbd_attrs[] = {
+>   	&dev_attr_image_id.attr,
+>   	&dev_attr_current_snap.attr,
+>   	&dev_attr_refresh.attr,
+> -	&dev_attr_create_snap.attr,
+>   	NULL
+>   };
+>
+> @@ -2888,47 +2771,6 @@ done:
+>   	return ret;
+>   }
+>
+> -static ssize_t rbd_snap_add(struct device *dev,
+> -			    struct device_attribute *attr,
+> -			    const char *buf,
+> -			    size_t count)
+> -{
+> -	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+> -	int ret;
+> -	char *name = kmalloc(count + 1, GFP_KERNEL);
+> -	if (!name)
+> -		return -ENOMEM;
+> -
+> -	snprintf(name, count, "%s", buf);
+> -
+> -	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+> -
+> -	ret = rbd_header_add_snap(rbd_dev,
+> -				  name, GFP_KERNEL);
+> -	if (ret < 0)
+> -		goto err_unlock;
+> -
+> -	ret = __rbd_refresh_header(rbd_dev, NULL);
+> -	if (ret < 0)
+> -		goto err_unlock;
+> -
+> -	/* shouldn't hold ctl_mutex when notifying.. notify might
+> -	   trigger a watch callback that would need to get that mutex */
+> -	mutex_unlock(&ctl_mutex);
+> -
+> -	/* make a best effort, don't error if failed */
+> -	rbd_req_sync_notify(rbd_dev);
+> -
+> -	ret = count;
+> -	kfree(name);
+> -	return ret;
+> -
+> -err_unlock:
+> -	mutex_unlock(&ctl_mutex);
+> -	kfree(name);
+> -	return ret;
+> -}
+> -
+>   /*
+>    * create control files in sysfs
+>    * /sys/bus/rbd/...
+>
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
