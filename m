@@ -1,51 +1,82 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Access Dienied for bucket upload - 403 code
-Date: Tue, 11 Sep 2012 14:55:34 -0700
-Message-ID: <CAC-hyiFy62RzF_z+YUVqbeFnMYwJ0Nqs4D2cq1HFkQaWM7u3qg@mail.gmail.com>
-References: <CAMwB3Tg6L1F8bg_DJ9g0ySGn5hjJsiCW0DmKANodrHbESpVqfg@mail.gmail.com>
-	<CAC-hyiGYPJpMCLhW6t00ysxXYovAnsnztaxO8LL-dQLtgfbYUQ@mail.gmail.com>
-	<CAC-hyiGo2D1oErBx3B3n9Vr=vT_R9L0qQ80vuuHKO_1gjbVPYg@mail.gmail.com>
-	<CAMwB3TiPiwBCwwnFKZFeMAwKKAzc0rVWHKHoc9vnqkTXZL1P7w@mail.gmail.com>
-	<CAMwB3ThhS5Y=GP259HTJbNDZudLmSVaCqD4jgWdhvQXCygPGcw@mail.gmail.com>
-	<CAC-hyiGF4yt1vewrZQNNcrqvCJJZBWMTukefq5BDBuYR7U1CEg@mail.gmail.com>
-	<CAMwB3Tjg-Oyb9CRMDWY8EXCNfTC9aB6w=qGOC=Rz5O0yfn27YA@mail.gmail.com>
-	<CAC-hyiFiL4yX75NNLPEaxt6XbLZj5YLnzi5Fk5oidUwy2ooGPw@mail.gmail.com>
-	<CAMwB3Th5wjGeQsDxv2aCXvwsUk-hw_-_Cs+WyvwpbN9N1wGdiw@mail.gmail.com>
-	<CAC-hyiF--FVokkNNO0mzWr3sFJL0xqv5h6uZKrzW3TQX-3rXpQ@mail.gmail.com>
-	<CAMwB3Th06AF=BigLifBusJQZXj7+HOS_D3JcwYjj9sVjGyMw3Q@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/3] rbd: don't use index in __rbd_add_snap_dev()
+Date: Tue, 11 Sep 2012 15:49:20 -0700
+Message-ID: <504FBFF0.5030007@inktank.com>
+References: <504A498D.30708@inktank.com> <504A4A06.8050101@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:58689 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750870Ab2IKVzf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 17:55:35 -0400
-Received: by eekc1 with SMTP id c1so804373eek.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 14:55:34 -0700 (PDT)
-In-Reply-To: <CAMwB3Th06AF=BigLifBusJQZXj7+HOS_D3JcwYjj9sVjGyMw3Q@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:35198 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751788Ab2IKWtX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Sep 2012 18:49:23 -0400
+Received: by pbbrr13 with SMTP id rr13so1426398pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Sep 2012 15:49:23 -0700 (PDT)
+In-Reply-To: <504A4A06.8050101@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Sep 11, 2012 at 2:50 PM, S=C5=82awomir Skowron <szibis@gmail.co=
-m> wrote:
-> Ehh my ideas run out for this day.
->
-> libs3                            2.0-1
->
-> s3 -u create foo
->
-> Bucket successfully created.
->
-> s3 -u getacl foo | s3 -u setacl ocdn < /tmp/acl
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-Hmm.. I had a typo
+On 09/07/2012 12:24 PM, Alex Elder wrote:
+> Pass the snapshot id and snapshot size rather than an index
+> to __rbd_add_snap_dev() to specify values for a new snapshot.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   14 ++++++++------
+>   1 file changed, 8 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index d73edb1..2b048e3 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -2031,7 +2031,8 @@ static int rbd_register_snap_dev(struct rbd_snap
+> *snap,
+>   }
+>
+>   static struct rbd_snap *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
+> -					      int i, const char *name)
+> +						const char *snap_name,
+> +						u64 snap_id, u64 snap_size)
+>   {
+>   	struct rbd_snap *snap;
+>   	int ret;
+> @@ -2041,12 +2042,12 @@ static struct rbd_snap
+> *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
+>   		return ERR_PTR(-ENOMEM);
+>
+>   	ret = -ENOMEM;
+> -	snap->name = kstrdup(name, GFP_KERNEL);
+> +	snap->name = kstrdup(snap_name, GFP_KERNEL);
+>   	if (!snap->name)
+>   		goto err;
+>
+> -	snap->size = rbd_dev->header.snap_sizes[i];
+> -	snap->id = rbd_dev->header.snapc->snaps[i];
+> +	snap->id = snap_id;
+> +	snap->size = snap_size;
+>
+>   	return snap;
+>
+> @@ -2111,12 +2112,13 @@ static int rbd_dev_snaps_update(struct
+> rbd_device *rbd_dev)
+>   		dout("entry %u: snap_id = %llu\n", (unsigned int) snap_count,
+>   			(unsigned long long) snap_id);
+>   		if (!snap || (snap_id != CEPH_NOSNAP && snap->id < snap_id)) {
+> +			struct rbd_image_header	*header = &rbd_dev->header;
+>   			struct rbd_snap *new_snap;
+>
+>   			/* We haven't seen this snapshot before */
+>
+> -			new_snap = __rbd_add_snap_dev(rbd_dev, index,
+> -							snap_name);
+> +			new_snap = __rbd_add_snap_dev(rbd_dev, snap_name,
+> +					snap_id, header->snap_sizes[index]);
+>   			if (IS_ERR(new_snap)) {
+>   				int err = PTR_ERR(new_snap);
+>
 
-# s3 -u getacl foo | s3 -u setacl ocdn
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
