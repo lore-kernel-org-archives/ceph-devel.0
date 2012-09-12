@@ -1,72 +1,76 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: rbd map error with new rbd format
-Date: Wed, 12 Sep 2012 07:28:05 -0700
-Message-ID: <50509BF5.1040402@inktank.com>
-References: <50508692.3050209@tuxadero.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: enabling cephx by default
+Date: Wed, 12 Sep 2012 16:55:06 +0200
+Message-ID: <5050A24A.7090608@widodh.nl>
+References: <alpine.DEB.2.00.1209111722100.2433@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45652 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758985Ab2ILO2N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 10:28:13 -0400
-Received: by pbbrr13 with SMTP id rr13so2348182pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Sep 2012 07:28:13 -0700 (PDT)
-In-Reply-To: <50508692.3050209@tuxadero.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:60884 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753634Ab2ILOzL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 10:55:11 -0400
+In-Reply-To: <alpine.DEB.2.00.1209111722100.2433@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/12/2012 05:56 AM, Martin Mailand wrote:
-> Hi,
+On 09/12/2012 02:25 AM, Sage Weil wrote:
+> The next stable release will have cephx authentication enabled by default.
+> We will probably do it in the next development release (v0.53) to work out
+> any upgrade kinks well before that.  The process for setting up teh
+> authentication keys on an existing cluster is at
 >
-> whilst testing the new rbd layering feature I found a problem with rbd
-> map. It seems rbd map doesn't support the new format.
+> 	http://ceph.com/docs/master/cluster-ops/authentication/
+>
+> This needs a few eyeballs to make sure the upgrade process makes sense...
+>
 
-Yeah, format 2 and layering support is in progress for kernel rbd,
-but not ready yet. The userspace side is all ready in the master
-branch, but it takes more time to implement in the kernel.
+"Generate a secret key for every OSD, where {$id} is the OSD number:"
 
-Btw, instead of --new-format you should use --format 2. It's in
-the man page in the master branch.
+Where does {$id} come from? I know it's just a variable which the users 
+needs to fill in, but it could be somewhat confusing.
 
-Josh
+You could do:
 
+for id in {0..10}; do
+ceph auth get-or-create osd.${id} mon 'allow rwx' osd 'allow *' -o 
+/var/lib/ceph/osd/ceph-${id}/keyring;
+done
+
+I know this doesn't work for the mds which uses alpha-numeric names, but 
+imho the {$id} variable seems to come from nowhere.
+
+Maybe an example to make it more clear, because later in the page $id is 
+used without the brackets ( { & } )
+
+
+Later on, this command won't work:
+$ sudo ceph auth get-or-create client.admin mds 'allow' osd 'allow *' 
+mon 'allow *' > /etc/ceph/keyring
+
+The "ceph" command gets executed as root, but the output won't, so 
+writing to /etc/ceph/keyring will fail.
+
+We could assume everybody executes these commands as root, but it might 
+be somewhat confusing if one command has "sudo" prefixed and other 
+don't. That might suggest it's somewhat special.
+
+The same goes for a couple of commands after the one mentioned above.
+
+I haven't tested the upgrade itself, but this is what I noticed while 
+reading the docs.
+
+Wido
+
+
+> Thanks!
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> -martin
->
->
-> ceph -v
-> ceph version 0.51-265-gc7d11cd
-> (commit:c7d11cd7b813a47167108c160358f70ec1aab7d6)
->
->
-> rbd create --size 100000 --new-format new
-> rbd map new
-> add failed: (2) No such file or directory
->
->
-> rbd create --size 100000 old
-> rbd map old
-> rbd showmapped
-> id      pool    image   snap    device
-> 1       rbd     old     -       /dev/rbd1
->
->
-> rbd info new
-> rbd image 'new':
->          size 100000 MB in 25000 objects
->          order 22 (4096 KB objects)
->          block_name_prefix: rbd_data.101e1a89b511
->          old format: False
->          features: layering
-> rbd info old
-> rbd image 'old':
->          size 100000 MB in 25000 objects
->          order 22 (4096 KB objects)
->          block_name_prefix: rb.0.1021.23697452
->          old format: True
->          features:
 
