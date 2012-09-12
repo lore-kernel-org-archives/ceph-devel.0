@@ -1,87 +1,60 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: Re: issues with adjusting the crushmap in 0.51
-Date: Wed, 12 Sep 2012 12:13:04 +0100
-Message-ID: <0CCF2B3E-B9BB-4121-92F1-D179D1A0C85E@tchpc.tcd.ie>
-References: <20120906175821.GA32205@tchpc.tcd.ie> <CAPYLRzggLqcgvMJWFDYOsHvQNK2oOvHmmTEnufK60R4=mdEQNw@mail.gmail.com> <20120906185104.GA6518@tchpc.tcd.ie>  <sfid-H20120906-213138-+033.83-1@marduk.tchpc.tcd.ie> <CADvuQRFz9oZr3BGRdzUhG4xhdYUu69v7UxKDuS4d0-kTisrr6Q@mail.gmail.com>  (sfid-H20120906-213138-+033.83-1@marduk.tchpc.tcd.ie)
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Martin Mailand <martin@tuxadero.com>
+Subject: rbd map error with new rbd format
+Date: Wed, 12 Sep 2012 14:56:50 +0200
+Message-ID: <50508692.3050209@tuxadero.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:53899 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750779Ab2ILLNI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 07:13:08 -0400
-In-Reply-To: <CADvuQRFz9oZr3BGRdzUhG4xhdYUu69v7UxKDuS4d0-kTisrr6Q@mail.gmail.com>  (sfid-H20120906-213138-+033.83-1@marduk.tchpc.tcd.ie)
+Received: from einhorn.in-berlin.de ([192.109.42.8]:37050 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932119Ab2ILM46 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 08:56:58 -0400
+Received: from [172.30.1.184] ([192.166.201.59])
+	(authenticated bits=0)
+	by einhorn.in-berlin.de (8.13.6/8.13.6/Debian-1) with ESMTP id q8CCuoIf001136
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Sep 2012 14:56:56 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Tommi.
+Hi,
 
+whilst testing the new rbd layering feature I found a problem with rbd 
+map. It seems rbd map doesn't support the new format.
 
-On 6 Sep 2012, at 21:31, Tommi Virtanen wrote:
-
-> On Thu, Sep 6, 2012 at 11:51 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
->> Also, the "ceph osd setcrushmap..." command doesn't up when a ceph
->> --help is run in the 0.51 release, however it is documented on the
->> wiki as far as I recall. It'd be real nice if the applications emitted
->> all the available commands, it would make experimenting much nicer and
->> fun.
-> 
-> "ceph" is just a client app that sends (most of) the commands to
-> ceph-mon for execution; it's --help is problematic to keep up to
-> date.. We're trying to do better. Patches appreciated, see ticket at
-> the end..
+-martin
 
 
-Just to scratch an itch, here's some documentation additions from testing locally,
-
-[jtang@x00 ceph (master)]$ git diff
-diff --git a/doc/cluster-ops/control.rst b/doc/cluster-ops/control.rst
-index 9af4562..9946229 100644
---- a/doc/cluster-ops/control.rst
-+++ b/doc/cluster-ops/control.rst
-@@ -293,6 +293,10 @@ Enables debug messages. ::
- 
- Displays the status of all metadata servers.
- 
-+Make a pool usable by the fs with::
-+
-+       ceph mds add_data_pool {pool-name}
-+
- .. todo:: ``ceph mds`` subcommands missing docs: set_max_mds, dump, getmap, stop, setmap
- 
- 
-diff --git a/src/tools/ceph.cc b/src/tools/ceph.cc
-index 0435771..306d67a 100644
---- a/src/tools/ceph.cc
-+++ b/src/tools/ceph.cc
-@@ -62,6 +62,7 @@ static void usage()
-   cout << "\n";
-   cout << "METADATA SERVER (MDS) COMMANDS\n";
-   cout << "  ceph mds stat\n";
-+  cout << "  ceph mds add_data_pool <pool>\n";
-   cout << "  ceph mds tell <mds-id or *> injectargs '--<switch> <value> [--<switch> <value>...]'\n";
-   cout << "\n";
-   cout << "MONITOR (MON) COMMANDS\n";
-@@ -82,6 +83,7 @@ static void usage()
-   cout << "  ceph osd unpause\n";
-   cout << "  ceph osd tell <osd-id or *> injectargs '--<switch> <value> [--<switch> <value>...]'\n";
-   cout << "  ceph osd getcrushmap -o <file>\n";
-+  cout << "  ceph osd setcrushmap -i <file>\n";
-   cout << "  ceph osd getmap -o <file>\n";
-   cout << "  ceph osd crush set <osd-id> <weight> <loc1> [<loc2> ...]\n";
-   cout << "  ceph osd crush move <bucketname> <loc1> [<loc2> ...]\n";
+ceph -v
+ceph version 0.51-265-gc7d11cd 
+(commit:c7d11cd7b813a47167108c160358f70ec1aab7d6)
 
 
+rbd create --size 100000 --new-format new
+rbd map new
+add failed: (2) No such file or directory
 
-Regards,
-Jimmy Tang
 
---
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-Trinity Centre for High Performance Computing,
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/
+rbd create --size 100000 old
+rbd map old
+rbd showmapped
+id      pool    image   snap    device
+1       rbd     old     -       /dev/rbd1
 
+
+rbd info new
+rbd image 'new':
+         size 100000 MB in 25000 objects
+         order 22 (4096 KB objects)
+         block_name_prefix: rbd_data.101e1a89b511
+         old format: False
+         features: layering
+rbd info old
+rbd image 'old':
+         size 100000 MB in 25000 objects
+         order 22 (4096 KB objects)
+         block_name_prefix: rb.0.1021.23697452
+         old format: True
+         features:
