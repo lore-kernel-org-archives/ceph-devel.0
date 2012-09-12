@@ -1,65 +1,52 @@
 From: Jan Engelhardt <jengelh@inai.de>
-Subject: ceph-level build system fixes & cleanup
-Date: Wed, 12 Sep 2012 04:22:01 +0200
-Message-ID: <1347416527-19752-1-git-send-email-jengelh@inai.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH 4/6] build: make use of aux dir to unclutter the root a bit
+Date: Wed, 12 Sep 2012 04:22:05 +0200
+Message-ID: <1347416527-19752-5-git-send-email-jengelh@inai.de>
+References: <1347416527-19752-1-git-send-email-jengelh@inai.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ares07.inai.de ([5.9.24.206]:48869 "EHLO seven.medozas.de"
+Received: from ares07.inai.de ([5.9.24.206]:48874 "EHLO seven.medozas.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757178Ab2ILCWQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	id S1758721Ab2ILCWQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
 	Tue, 11 Sep 2012 22:22:16 -0400
+In-Reply-To: <1347416527-19752-1-git-send-email-jengelh@inai.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: sage@newdream.net
 Cc: ceph-devel@vger.kernel.org
 
+Signed-off-by: Jan Engelhardt <jengelh@inai.de>
+---
+ .gitignore   |    4 +---
+ configure.ac |    1 +
+ 2 files changed, 2 insertions(+), 3 deletions(-)
 
-Hi,
+diff --git a/.gitignore b/.gitignore
+index 6071e8c..bf40c93 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,11 +2,9 @@
+ /Makefile.in
+ /aclocal.m4
+ /autom4te.cache/
++/build-aux/
+ /config.h.in*
+ /configure
+-/depcomp
+-/install-sh
+-/missing
+ 
+ # created by ./configure
+ /.deps/
+diff --git a/configure.ac b/configure.ac
+index 667d81d..6a26ab9 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,4 +1,5 @@
+ AC_INIT([leveldb], [0.1], [leveldb@googlegroups.com])
++AC_CONFIG_AUX_DIR([build-aux])
+ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+ AC_PROG_CC
+-- 
+1.7.10.4
 
-per our short exchange in private, I am taking to spruce up the
-ceph build system definitions. First comes leveldb, more shall
-follow soonish.
-
-Patches #1=E2=80=932 are mandatory for continued successful operation,
-#3=E2=80=935 cosmetical, and #6 a proposal.
-You are free to merge, pick or give blame :)
-
-=3D=3D
-The following changes since commit eee22bb3eca01404983f38109232034a3fcf=
-f474:
-
-  .gitignore: TAGS (2012-03-16 09:42:18 -0700)
-
-are available in the git repository at:
-
-  git://git.inai.de/ceph-leveldb master
-
-for you to fetch changes up to d37b898848d28401dc50d4688ad82b162faa9ada=
-:
-
-  build: provide libleveldb as a shared library (2012-09-12 04:14:13 +0=
-200)
-
-----------------------------------------------------------------
-Jan Engelhardt (6):
-      build: do not modify user variables
-      build: support for automake-1.12
-      build: remove redundant leading ./ from file lists
-      build: make use of aux dir to unclutter the root a bit
-      build: consolidate LDADD
-      build: provide libleveldb as a shared library
-
- .gitignore    |   10 +--
- Makefile.am   |  214 ++++++++++++++++++++++++++-----------------------=
---------
- configure.ac  |    6 +-
- m4/.gitignore |    2 +
- 4 files changed, 112 insertions(+), 120 deletions(-)
- create mode 100644 m4/.gitignore
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
