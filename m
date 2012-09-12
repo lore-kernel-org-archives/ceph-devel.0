@@ -1,76 +1,69 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: enabling cephx by default
-Date: Wed, 12 Sep 2012 16:55:06 +0200
-Message-ID: <5050A24A.7090608@widodh.nl>
-References: <alpine.DEB.2.00.1209111722100.2433@cobra.newdream.net>
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: Quick CentOS/RHEL question ...
+Date: Wed, 12 Sep 2012 16:42:18 +0100
+Message-ID: <20120912154218.GA14887@tchpc.tcd.ie>
+References: <50185964.3010803@scalableinformatics.com> <sfid-H20120801-021007-+045.02-1@marduk.tchpc.tcd.ie> <CAC-hyiF3jkA_VnPM8Ty9B+GnzH2xDbun9RQs+CE4yHgAp5OfnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="yrj/dFKFPuw6o+aM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:60884 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753634Ab2ILOzL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 10:55:11 -0400
-In-Reply-To: <alpine.DEB.2.00.1209111722100.2433@cobra.newdream.net>
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:42239 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753588Ab2ILPmY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 11:42:24 -0400
+Content-Disposition: inline
+In-Reply-To: <CAC-hyiF3jkA_VnPM8Ty9B+GnzH2xDbun9RQs+CE4yHgAp5OfnA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
-
-On 09/12/2012 02:25 AM, Sage Weil wrote:
-> The next stable release will have cephx authentication enabled by default.
-> We will probably do it in the next development release (v0.53) to work out
-> any upgrade kinks well before that.  The process for setting up teh
-> authentication keys on an existing cluster is at
->
-> 	http://ceph.com/docs/master/cluster-ops/authentication/
->
-> This needs a few eyeballs to make sure the upgrade process makes sense...
->
-
-"Generate a secret key for every OSD, where {$id} is the OSD number:"
-
-Where does {$id} come from? I know it's just a variable which the users 
-needs to fill in, but it could be somewhat confusing.
-
-You could do:
-
-for id in {0..10}; do
-ceph auth get-or-create osd.${id} mon 'allow rwx' osd 'allow *' -o 
-/var/lib/ceph/osd/ceph-${id}/keyring;
-done
-
-I know this doesn't work for the mds which uses alpha-numeric names, but 
-imho the {$id} variable seems to come from nowhere.
-
-Maybe an example to make it more clear, because later in the page $id is 
-used without the brackets ( { & } )
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: landman@scalableinformatics.com, ceph-devel@vger.kernel.org
 
 
-Later on, this command won't work:
-$ sudo ceph auth get-or-create client.admin mds 'allow' osd 'allow *' 
-mon 'allow *' > /etc/ceph/keyring
+--yrj/dFKFPuw6o+aM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The "ceph" command gets executed as root, but the output won't, so 
-writing to /etc/ceph/keyring will fail.
+On Tue, Jul 31, 2012 at 06:09:59PM -0700, Yehuda Sadeh wrote:
+> On Tue, Jul 31, 2012 at 3:17 PM, Joe Landman
+> <landman@scalableinformatics.com> wrote:
+> > Hi folks
+> >
+> >   I was struggling and failing to get Ceph properly built/installed for
+> > CentOS 6 (and 5) last week.  Is this simply not a recommended platform?
+> > Please advise.  Thanks!
+>=20
+> As mentioned by the other responses, it is possible to get Ceph built
+> for RHEL/CentOS even though it's probably not trivial. Getting proper
+> packaging for these distributions is pretty high on our list. We'd
+> love to hear about specific the issues that you have had.
+>=20
 
-We could assume everybody executes these commands as root, but it might 
-be somewhat confusing if one command has "sudo" prefixed and other 
-don't. That might suggest it's somewhat special.
+Will there also be backports of the kernel modules for cephfs and rbd?
+That's probably a make or break feature for anyone using RHEL based
+distros as they are not likely to want to upgrade their kernels
+manually and maintain them for security fixes. I guess if there are no
+kernel modules for cephfs and rbd RHEL could still be used as a osd,
+mon or mds.
 
-The same goes for a couple of commands after the one mentioned above.
+Jimmy.
 
-I haven't tested the upgrade itself, but this is what I noticed while 
-reading the docs.
+--=20
+Jimmy Tang
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/
 
-Wido
+--yrj/dFKFPuw6o+aM
+Content-Type: application/pgp-signature
+Content-Disposition: inline
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
 
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+iEYEABECAAYFAlBQrVgACgkQmRvHlXBDSynl5ACgz9e8gfjbyp3rGHzjRcJbKdDv
+u0kAoLkj5PnBHU7Qi0qG+6B7LO5yl84q
+=kWHZ
+-----END PGP SIGNATURE-----
 
+--yrj/dFKFPuw6o+aM--
