@@ -1,56 +1,64 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Collection of strange lockups on 0.51
-Date: Wed, 12 Sep 2012 14:09:25 -0700
-Message-ID: <CADvuQRFMaGpH9MdFHDDworDMEePsj=vn1A6vbE0b0G6+oS41Lg@mail.gmail.com>
-References: <CABYiri8t9yXQ39WOW1+Rib5jxp8qUCUY8iSht=p2PSQZtn3ZEA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] osd/ReplicatedPG: set truncate_seq when handling
+ CEPH_OSD_OP_APPEND
+Date: Wed, 12 Sep 2012 14:12:47 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209121411530.19850@cobra.newdream.net>
+References: <1347333326-6392-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:51649 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753749Ab2ILVJq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 17:09:46 -0400
-Received: by qaas11 with SMTP id s11so1490015qaa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Sep 2012 14:09:45 -0700 (PDT)
-In-Reply-To: <CABYiri8t9yXQ39WOW1+Rib5jxp8qUCUY8iSht=p2PSQZtn3ZEA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51137 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753141Ab2ILVMs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Sep 2012 17:12:48 -0400
+In-Reply-To: <1347333326-6392-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Sep 12, 2012 at 10:33 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
-> Hi,
-> This is completely off-list, but I`m asking because only ceph trigger
-> such a bug :) .
->
-> With 0.51, following happens: if I kill an osd, one or more neighbor
-> nodes may go to hanged state with cpu lockups, not related to
-> temperature or overall interrupt count or la and it happens randomly
-> over 16-node cluster. Almost sure that ceph triggerizing some hardware
-> bug, but I don`t quite sure of which origin. Also after a short time
-> after reset from such crash a new lockup may be created by any action.
+Hi,
 
-From the log, it looks like your ethernet driver is crapping out.
+On Tue, 11 Sep 2012, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> We need set truncate_seq when redirect the newop to CEPH_OSD_OP_WRITE,
+> otherwise the code handles CEPH_OSD_OP_WRITE may quietly drop the data.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
-[172517.057886] NETDEV WATCHDOG: eth0 (igb): transmit queue 7 timed out
-...
-[172517.058622]  [<ffffffff812b2975>] ? netif_tx_lock+0x40/0x76
+Applying.
 
-etc.
+This is correct, but I don't think there are any APPEND users currently in 
+the tree.  Did you run across this via inspection, or were you using this 
+code in some other way?
 
-The later oopses are talking about paravirt_write_msr etc, which makes
-me thing you're using Xen? You probably don't want to run Ceph servers
-inside virtualization (for production).
+Thanks!
+sage
 
-[172696.503900]  [<ffffffff8100d025>] ? paravirt_write_msr+0xb/0xe
-[172696.503942]  [<ffffffff810325f3>] ? leave_mm+0x3e/0x3e
 
-and *then* you get
-
-[172695.041709] sd 0:2:0:0: [sda] megasas: RESET cmd=2a retries=0
-[172695.041745] megasas: [ 0]waiting for 35 commands to complete
-[172696.045602] megaraid_sas: no pending cmds after reset
-[172696.045644] megasas: reset successful
-
-which just adds more awesomeness to the soup -- though I do wonder if
-this could be caused by the soft hang from earlier.
+> ---
+>  src/osd/ReplicatedPG.cc | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+> index f353090..fcd8be7 100644
+> --- a/src/osd/ReplicatedPG.cc
+> +++ b/src/osd/ReplicatedPG.cc
+> @@ -2310,6 +2310,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
+>  	newop.op.op = CEPH_OSD_OP_WRITE;
+>  	newop.op.extent.offset = oi.size;
+>  	newop.op.extent.length = op.extent.length;
+> +	newop.op.extent.truncate_seq = oi.truncate_seq;
+>          newop.indata = osd_op.indata;
+>  	do_osd_ops(ctx, nops);
+>  	osd_op.outdata.claim(newop.outdata);
+> -- 
+> 1.7.11.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
