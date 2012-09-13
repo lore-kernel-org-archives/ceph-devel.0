@@ -1,213 +1,102 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: messaging/IO/radosbench results
-Date: Thu, 13 Sep 2012 06:08:35 -0500
-Message-ID: <5051BEB3.9080007@inktank.com>
-References: <20120910201539.GA5733@splice> <504E501E.5080108@inktank.com> <20120912200804.GA4993@oder.mch.fsc.net> <50510BE0.9060706@inktank.com> <20120913072425.GA13027@oder.kd-bie.de>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: mds'es stuck in resolve(and one duplicated?)
+Date: Thu, 13 Sep 2012 11:37:13 -0700
+Message-ID: <CAPYLRzi3Hn3-fMY=9oeRE8VdgDdga_XY3xXDOgnKt_2jj8atDg@mail.gmail.com>
+References: <504E5D40.10006@aktzero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:58524 "EHLO
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:55887 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754116Ab2IMLIh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Sep 2012 07:08:37 -0400
-Received: by ieje11 with SMTP id e11so4666732iej.19
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Sep 2012 04:08:36 -0700 (PDT)
-In-Reply-To: <20120913072425.GA13027@oder.kd-bie.de>
+	with ESMTP id S1752268Ab2IMShO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Sep 2012 14:37:14 -0400
+Received: by ieje11 with SMTP id e11so5420323iej.19
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Sep 2012 11:37:13 -0700 (PDT)
+In-Reply-To: <504E5D40.10006@aktzero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dieter Kasper <d.kasper@kabelmail.de>
-Cc: Mike Ryan <mike.ryan@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrew Thompson <andrewkt@aktzero.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 09/13/2012 02:24 AM, Dieter Kasper wrote:
-> On Thu, Sep 13, 2012 at 12:25:36AM +0200, Mark Nelson wrote:
->> On 09/12/2012 03:08 PM, Dieter Kasper wrote:
->>> On Mon, Sep 10, 2012 at 10:39:58PM +0200, Mark Nelson wrote:
->>>> On 09/10/2012 03:15 PM, Mike Ryan wrote:
->>>>> *Disclaimer*: these results are an investigation into potential
->>>>> bottlenecks in RADOS.
->>> I appreciate this investigation very much !
->>>
->>>>> The test setup is wholly unrealistic, and these
->>>>> numbers SHOULD NOT be used as an indication of the performance of OSDs,
->>>>> messaging, RADOS, or ceph in general.
->>>>>
->>>>>
->>>>> Executive summary: rados bench has some internal bottleneck. Once that's
->>>>> cleared up, we're still having some issues saturating a single
->>>>> connection to an OSD. Having 2-3 connection in parallel alleviates that
->>>>> (either by having>    1 OSD or having multiple bencher clients).
->>>>>
->>>>>
->>>>> I've run three separate tests: msbench, smalliobench, and rados bench.
->>>>> In all cases I was trying to determine where bottleneck(s) exist. All
->>>>> the tests were run on a machine with 192 GB of RAM. The backing stores
->>>>> for all OSDs and journals are RAMdisks. The stores are running XFS.
->>>>>
->>>>> smalliobench: I ran tests varying the number of OSDs and bencher
->>>>> clients. In all cases, the number of PG's per OSD is 100.
->>>>>
->>>>> OSD     Bencher     Throughput (mbyte/sec)
->>>>> 1       1           510
->>>>> 1       2           800
->>>>> 1       3           850
->>>>> 2       1           640
->>>>> 2       2           660
->>>>> 2       3           670
->>>>> 3       1           780
->>>>> 3       2           820
->>>>> 3       3           870
->>>>> 4       1           850
->>>>> 4       2           970
->>>>> 4       3           990
->>>>>
->>>>> Note: these numbers are fairly fuzzy. I eyeballed them and they're only
->>>>> really accurate to about 10 mbyte/sec. The small IO bencher was run with
->>>>> 100 ops in flight, 4 mbyte io's, 4 mbyte files.
->>>>>
->>>>> msbench: ran tests trying to determine max throughput of raw messaging
->>>>> layer. Varied the number of concurrently connected msbench clients and
->>>>> measured aggregate throughput. Take-away: a messaging client can very
->>>>> consistently push 400-500 mbytes/sec through a single socket.
->>>>>
->>>>> Clients     Throughput (mbyte/sec)
->>>>> 1           520
->>>>> 2           880
->>>>> 3           1300
->>>>> 4           1900
->>>>>
->>>>> Finally, rados bench, which seems to have its own bottleneck. Running
->>>>> varying numbers of these, each client seems to get 250 mbyte/sec up till
->>>>> the aggregate rate is around 1000 mbyte/sec (appx line speed as measured
->>>>> by iperf). These were run on a pool with 100 PGs/OSD.
->>>>>
->>>>> Clients     Throughput (mbyte/sec)
->>>>> 1           250
->>>>> 2           500
->>>>> 3           750
->>>>> 4           1000 (very fuzzy, probably 1000 +/- 75)
->>>>> 5           1000, seems to level out here
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>> Hi guys,
->>>>
->>>> Some background on all of this:
->>>>
->>>> We've been doing some performance testing at Inktank and noticed that
->>>> performance with a single rados bench instance was plateauing at between
->>>> 600-700MB/s.
->>>
->>> 4-nodes with 10GbE interconnect; journals in RAM-Disk; replica=2
->>>
->>> # rados bench -p pbench 20 write
->>>    Maintaining 16 concurrent writes of 4194304 bytes for at least 20 seconds.
->>>      sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
->>>        0       0         0         0         0         0         -         0
->>>        1      16       288       272   1087.81      1088  0.051123 0.0571643
->>>        2      16       579       563   1125.85      1164  0.045729 0.0561784
->>>        3      16       863       847   1129.19      1136  0.042012 0.0560869
->>>        4      16      1150      1134   1133.87      1148   0.05466 0.0559281
->>>        5      16      1441      1425   1139.87      1164  0.036852 0.0556809
->>>        6      16      1733      1717   1144.54      1168  0.054594 0.0556124
->>>        7      16      2007      1991   1137.59      1096   0.04454 0.0556698
->>>        8      16      2290      2274   1136.88      1132  0.046777 0.0560103
->>>        9      16      2580      2564   1139.44      1160  0.073328 0.0559353
->>>       10      16      2871      2855   1141.88      1164  0.034091 0.0558576
->>>       11      16      3158      3142   1142.43      1148  0.250688 0.0558404
->>>       12      16      3445      3429   1142.88      1148  0.046941 0.0558071
->>>       13      16      3726      3710   1141.42      1124  0.054092    0.0559
->>>       14      16      4014      3998   1142.17      1152   0.03531 0.0558533
->>>       15      16      4298      4282   1141.75      1136  0.040005 0.0559383
->>>       16      16      4582      4566   1141.39      1136  0.048431 0.0559162
->>>       17      16      4859      4843   1139.42      1108  0.045805 0.0559891
->>>       18      16      5145      5129   1139.66      1144  0.046805 0.0560177
->>>       19      16      5422      5406   1137.99      1108  0.037295 0.0561341
->>> 2012-09-08 14:36:32.460311min lat: 0.029503 max lat: 0.47757 avg lat: 0.0561424
->>>      sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
->>>       20      16      5701      5685   1136.89      1116  0.041493 0.0561424
->>>    Total time run:         20.197129
->>> Total writes made:      5702
->>> Write size:             4194304
->>> Bandwidth (MB/sec):     1129.269
->>>
->>> Stddev Bandwidth:       23.7487
->>> Max bandwidth (MB/sec): 1168
->>> Min bandwidth (MB/sec): 1088
->>> Average Latency:        0.0564675
->>> Stddev Latency:         0.0327582
->>> Max latency:            0.47757
->>> Min latency:            0.029503
->>>
->>>
->>> Best Regards,
->>> -Dieter
->>>
->>
->> Well look at that! :)  Now I've gotta figure out what the difference is.
->>    How fast are the CPUs in your rados bench machine there?
+On Mon, Sep 10, 2012 at 2:36 PM, Andrew Thompson <andrewkt@aktzero.com>=
+ wrote:
+> Greetings,
 >
-> One CPU socket in each node:
-> model name      : Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
-> Logial CPUs: 12
-> MemTotal:       32856332 kB
+> Has anyone seen this or got ideas on how to fix it?
+>
+> mdsmap e18399: 3/3/3 up {0=3Db=3Dup:resolve,1=3Da=3Dup:resolve(laggy =
+or
+> crashed),2=3Da=3Dup:resolve(laggy or crashed)}
+>
+> Notice that the 2nd and 3rd mds are the same letter("a"). I'm not sur=
+e how
+> that happened, I'm guessing a typo in my ceph.conf.
 
-I'm using 2x E5-2360L at 2.0GHz.  So yours are slightly faster, but not 
-significantly so.  I am running the tests on localhost though, so 
-perhaps that is having a negative effect rather than a positive one. 
-Soon I will be testing on 10GbE and bonded 10GbE.
+So you actually have three configured MDSes?
+What you're seeing there is that the logical[1] MDS 1 and MDS 2 have
+both taken so long to report in that the monitor thinks they've
+probably died ("laggy or crashed"). You should check out your
+ceph.conf and see if you in fact have two named the same =97 the other
+possibility is that mds.a actually was the most recent one to take
+ownership of both of those logical identities (probably both have a
+corrupted state that is causing the daemon to assert out, and perhaps
+your MDSes are being restarted by upstart but mds.a went a little
+longer than mds.c?), although if it did that's certainly a bug.
+
+> Taking mds.a down doesn't help, b just stays in resolve.
+Indeed not =97=A0the resolve phase is when the MDS daemons agree on who
+has authority over what part of the filesystem hierarchy.
+
+> mds.a is only running on a single instance, even though it shows as u=
+p
+> twice.
+>
+> When I take a mds down, and start it back up, it goes through a coupl=
+e of
+> states and then sticks at resolve.
+>
+> I've tried the method listed here, but can't see any change:
+> http://www.sebastien-han.fr/blog/2012/07/04/remove-a-mds-server-from-=
+a-ceph-cluster/
+>
+> I tried "ceph mds stop X" as mentioned here
+> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/2585 , b=
+ut see
+> the results below:
+>
+> athompson@ceph01:~$ sudo ceph mds stop 0
+> mds.0 not active (up:resolve)
+> athompson@ceph01:~$ sudo ceph mds stop 1
+> mds.1 not active (up:resolve)
+> athompson@ceph01:~$ sudo ceph mds stop 2
+> mds.2 not active (up:resolve)
+
+"Stopping" an MDS requires it to cooperatively give its hierarchy away
+to other MDS daemons. Since it's not running, it can't do that.
 
 >
->>
->> Also, I should mention that at these speeds, we noticed that crc32c
->> calculations were actually having a pretty big effect.
+> I've attached the results of `ceph mds dump -o -`
 >
-> perf report
->
-> Events: 39K cycles
-> +     26.29%         ceph-osd  ceph-osd                    [.] 0x45e60b
-> +      4.74%         ceph-osd  [kernel.kallsyms]           [k] copy_user_generic_string
-> +      3.37%         ceph-mon  ceph-mon                    [.] MHeartbeat::decode_payload()
-> +      2.88%         ceph-osd  [kernel.kallsyms]           [k] futex_wake
-> +      2.61%          swapper  [kernel.kallsyms]           [k] intel_idle
-> +      2.34%         ceph-osd  [kernel.kallsyms]           [k] __memcpy
-> +      1.71%         ceph-osd  libc-2.11.3.so              [.] memcpy
-> +      1.70%         ceph-osd  [kernel.kallsyms]           [k] __copy_user_nocache
-> +      1.66%         ceph-osd  [kernel.kallsyms]           [k] futex_requeue
-> +      1.33%         ceph-mon  ceph-mon                    [.] MOSDOpReply::~MOSDOpReply()
-> +      1.18%         ceph-mon  libc-2.11.3.so              [.] memcpy
-> +      1.16%         ceph-mon  ceph-mon                    [.] MOSDPGInfo::decode_payload()
-> +      0.97%         ceph-osd  [kernel.kallsyms]           [k] futex_wake_op
-> +      0.86%         ceph-mon  ceph-mon                    [.] MExportDirDiscoverAck::print(std::ostream&) const
-> +      0.79%         ceph-osd  [kernel.kallsyms]           [k] _raw_spin_lock
-> +      0.74%         ceph-mon  ceph-mon                    [.] MOSDPing::decode_payload()
-> +      0.52%         ceph-osd  libtcmalloc.so.0.3.0        [.] operator new(unsigned long)
-> +      0.51%         ceph-mon  ceph-mon                    [.] MDiscover::print(std::ostream&) const
-> +      0.48%         ceph-osd  [xfs]                       [k] xfs_bmap_add_extent
-> +      0.43%         ceph-mon  [kernel.kallsyms]           [k] copy_user_generic_string
-> +      0.39%         ceph-osd  [kernel.kallsyms]           [k] iov_iter_fault_in_readable
+> Currently, mds.b.log is full of these reset/connect's and then where =
+I
+> issued a `service ceph stop mds` a few minutes ago(see attached).
 
-Looks like you are having the same issues I do with user symbols in 
-ceph-osd not showing up in perf.  They show up fine in sysprof for me. 
-I bet a good chunk of the 26.29% at the top is crc32c calculation.
+You'll want to go look at mds.a =97=A0its log should have a backtrace t=
+hat
+might tell us more. Figuring this out will probably also require
+enabling some debug logging, but I have to warn you it might not turn
+out well =97 we say the POSIX filesystem isn't production ready for a
+reason!
 
->
-> Regards,
-> -Dieter
->
->
->> Turning them off
->> gave us a 10% performance boost.  We're looking at faster
->> implementations now.
->>
->> Mark
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+Sorry your email dropped through the cracks for a few days; I hope this=
+ helps.
+-Greg
+[1]: Since an MDS has no local storage, each configured system can be
+associated with any "logical MDS", which consists solely of the MDS
+log and the responsibility for part of the tree.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
