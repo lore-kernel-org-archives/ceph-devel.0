@@ -1,116 +1,67 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: safe to defrag XFS on live system?
-Date: Fri, 14 Sep 2012 14:56:27 -0400
-Message-ID: <CACkq2mpFVXzSHn6KKRg4biuGz48-da8G4N+t7TD5K_G__xj26Q@mail.gmail.com>
-References: <CACkq2moNPAopPQ1KRSd_v0Dm6wrkV3xS-2X-qWgu=BP98rSKCg@mail.gmail.com>
- <CADvuQREvqUG0Xe7gf_LMtXsvZMxX88TT7imi8Cfj2ihA0s+VeQ@mail.gmail.com>
- <505311CD02000099000EA409@collaborate.seakr.com> <50537C21.2060001@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Lots of misdirected client requests with 73984 PGs/pool
+Date: Fri, 14 Sep 2012 12:04:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209141203170.16552@cobra.newdream.net>
+References: <503D3FA7.2050603@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:40618 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757773Ab2INS4s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Sep 2012 14:56:48 -0400
-Received: by qcro28 with SMTP id o28so3035027qcr.19
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Sep 2012 11:56:47 -0700 (PDT)
-In-Reply-To: <50537C21.2060001@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:37265 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759860Ab2INTEg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Sep 2012 15:04:36 -0400
+In-Reply-To: <503D3FA7.2050603@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Nick Couchman <Nick.Couchman@seakr.com>, Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Mark,
+Hi Jim,
 
-That's pretty definitive!  Thanks for doing that test so quickly, and
-the link to the mailing list discussions.  Sounds like -o allocsize
-isn't really useful these days.  I guess those are the consequences of
-looking at slightly older blog posts about performance tuning (on my
-part)...
+On Tue, 28 Aug 2012, Jim Schutt wrote:
+> Hi,
+> 
+> I was testing on 288 OSDs with pg_bits=8, for 73984 PGs/pool,
+> 221952 total PGs.
+> 
+> Writing from CephFS clients generates lots of messages like this:
+> 
+> 2012-08-28 14:53:33.772344 osd.235 [WRN] client.4533
+> 172.17.135.45:0/1432642641 misdirected client.4533.1:124 pg 0.8b9d12d4 to
+> osd.235 in e7, client e7 pg 0.112d4 features 262282
+> 
+> There's no trouble with 288 OSDs and pg_bits=7 (36992 PGs/pool).
+> 
+> This is all with current Linus master branch + ceph-client testing
+> branch, and master branch on the server side.
+> 
+> Does this have anything to do with old_pg_t AKA struct ceph_pg
+> only using 16 bits for the placement seed?
 
- - Travis
+I think so.  We just need to update the kernel to understand the new 
+structures.. unfortunately that inlcudes a bunch of message types (MOSDOp 
+and MOSDMap for starters, I think), but it'll be nice to move things 
+forward.
 
-On Fri, Sep 14, 2012 at 2:49 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
-> On 09/14/2012 12:15 PM, Nick Couchman wrote:
->>>
->>>
->>>> While I'm talking about XFS...  I know that RBD's use a default object
->>>> size of 4MB.  I've stuck with that so far..  Would it be beneficial to
->>>> mount XFS with -o allocsize=4M ?  What is the object size that gets
->>>> used for non-RBD cases -- i.e. just dumping objects into data pool?
->>>
->>>
->>> Don't know about -o allocsize -- benchmark it!
->>
->>
->> ...and let us know what you come up with!  I'm also using XFS for the
->> underlying filesystem on which CEPH runs (and using RBD), and would be
->> really interested to know if changing the alloc size improves performance!
->>
->> -Nick
->
->
-> Hi Guys,
->
-> There was a change 2.6.38 to the way that speculative preallocation works
-> that basically lets small writes behave like allocsize is not set, and large
-> writes behave like a large one is set:
->
-> http://permalink.gmane.org/gmane.comp.file-systems.xfs.general/38403
->
-> Having said that, I had my test gear all ready to go so I decided to give it
-> a try:
->
-> Setup:
->
-> - 1 node
-> - 6 OSDs with 7200rpm data disks.
-> - Journals on 2 Intel 520 SSDs (3 per SSD)
-> - LSI SAS2008 Controller (9211-8i)
-> - Network: Localhost
-> - Ceph 0.50
-> - Ubuntu 12.04
-> - Kernel 3.4
-> - XFS mkfs options: -f -i size=2048
-> - Common XFS mount options: -o noatime
-> - No replication
-> - 8 concurrent rados bench instances.
-> - 32 concurrent 4MB ops per instance (256 concurrent ops total)
->
-> Without allocsize=4M:
->
-> 781.454MB/s
->
-> With allocsize=4M:
->
-> 453.335MB/s
->
-> I'm guessing that it's perhaps slower as we've told XFS to optimize for
-> large files, but the metadata in /meta is very small, and we were already
-> getting benefits from the new speculative preallocation patches that were
-> introduced in 2.6.38 to combat fragmentation of the 4MB objects.
->
-> Mark
->>
->>
->>
->>
->>
->> --------
->> This e-mail may contain confidential and privileged material for the sole
->> use of the intended recipient.  If this email is not intended for you, or
->> you are not responsible for the delivery of this message to the intended
->> recipient, please note that this message may contain SEAKR Engineering
->> (SEAKR) Privileged/Proprietary Information.  In such a case, you are
->> strictly prohibited from downloading, photocopying, distributing or
->> otherwise using this message, its contents or attachments in any way.  If
->> you have received this message in error, please notify us immediately by
->> replying to this e-mail and delete the message from your mailbox.
->> Information contained in this message that does not relate to the business
->> of SEAKR is neither endorsed by nor attributable to SEAKR.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+sage
+
+> 
+> I'd about to start testing on 576 OSDs, and was hoping to use
+> pg_bits=7 to get more uniform data placement across OSDs.
+> My first step on that path was 288 OSDs with pg_bits=8.
+> 
+> Maybe I can't, or I have to just ignore the warnings, until
+> the kernel's libceph learns about 32-bit placement seeds?
+> 
+> Or maybe this 16-bit seed theory is all wrong, and something
+> else is going on?  If so, what more information is needed
+> to help sort this out?
+> 
+> Thanks -- Jim
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
