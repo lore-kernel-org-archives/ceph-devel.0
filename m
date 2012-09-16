@@ -1,56 +1,26 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Mike Ryan <mike.ryan@inktank.com>
 Subject: Re: www.ceph.com down?
-Date: Sun, 16 Sep 2012 18:46:53 +0200
-Message-ID: <5056027D.2040002@widodh.nl>
+Date: Sun, 16 Sep 2012 10:12:29 -0700
+Message-ID: <20120916171229.GA13042@splice>
 References: <CANLRBozydbXZwT1vgqEvKFOD0k+=_ceY=4iQ9gSiibQ-rQaQyQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:59063 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751543Ab2IPQqy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Sep 2012 12:46:54 -0400
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:33486 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750726Ab2IPRMh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Sep 2012 13:12:37 -0400
+Received: by dady13 with SMTP id y13so388106dad.19
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Sep 2012 10:12:37 -0700 (PDT)
+Content-Disposition: inline
 In-Reply-To: <CANLRBozydbXZwT1vgqEvKFOD0k+=_ceY=4iQ9gSiibQ-rQaQyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Tren Blackburn <tren@eotnetworks.com>
 Cc: ceph-devel@vger.kernel.org
 
+On Sun, Sep 16, 2012 at 09:06:15AM -0700, Tren Blackburn wrote:
+> Has something happened to the ceph.com webserver?
 
-
-On 09/16/2012 06:06 PM, Tren Blackburn wrote:
-> Has something happened to the ceph.com webserver? When I surf to the
-> site I am greeted with:
->
-> "It works!
->
-> This is the default web page for this server.
->
-> The web server software is running but no content has been added, yet."
->
-> Is there a mirror of your wiki and documentation pages?
-
-Yes, there is a EU mirror of the ceph.com docs, source code and Debian 
-packages at http://eu.ceph.com/
-
-It's not a full-clone of the website, but it should contain everything 
-you need, the the docs, see: http://eu.ceph.com/docs/master/
-
->
-> Hope nothing bad happened!
->
-
-Doesn't seem so. I don't have root access, but it seems to be an Apache 
-configuration issue, all the files are still present :)
-
-Wido
-
-> Regards,
->
-> Tren
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+It appears to be working from my box. Can you ctrl-shift-R and see if
+it's working for you?
