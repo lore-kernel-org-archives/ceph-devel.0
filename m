@@ -1,49 +1,174 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: RBD image max simultaneous mounts
-Date: Sun, 16 Sep 2012 23:55:04 -0700
-Message-ID: <a492ca49d3642786d9786179203d293c@hq.newdream.net>
-References: <50568E3B.3060403@bashkirtsev.com>
+Subject: Re: Inject configuration change into cluster
+Date: Mon, 17 Sep 2012 00:29:37 -0700
+Message-ID: <e712fd7a98e1d702636968a323ab2d28@hq.newdream.net>
+References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
+ <5045B928.1050706@widodh.nl>
+ <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
+ <5045CB80.50508@widodh.nl>
+ <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
+ <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com>
+ <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net>
+ <58915F57-D1DA-4BBE-A205-A5063DDCD789@grupaonet.pl>
+ <alpine.DEB.2.00.1209141211010.18057@cobra.newdream.net>
+ <CAMwB3TgAYd1UNqpsmBbub-vK05Lu5Jn2JH=+_dW-PGY7Q9YsHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hapkido.dreamhost.com ([66.33.216.122]:47865 "EHLO
-	hapkido.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750919Ab2IQGwK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Sep 2012 02:52:10 -0400
-Received: from pochacco.sd.dreamhost.com (pochacco.sd.dreamhost.com [66.33.195.34])
-	by hapkido.dreamhost.com (Postfix) with ESMTP id 7B3A1DD90C
-	for <ceph-devel@vger.kernel.org>; Sun, 16 Sep 2012 23:52:10 -0700 (PDT)
-In-Reply-To: <50568E3B.3060403@bashkirtsev.com>
+Received: from pochacco.sd.dreamhost.com ([66.33.195.34]:40947 "EHLO
+	pochacco.sd.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751367Ab2IQHaF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Sep 2012 03:30:05 -0400
+In-Reply-To: <CAMwB3TgAYd1UNqpsmBbub-vK05Lu5Jn2JH=+_dW-PGY7Q9YsHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?Q?S=C5=82awomir_Skowron?= <szibis@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, =?UTF-8?Q?Skowron_S=C5=82awomir?= <slawomir.skowron@grupaonet.pl>, Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-On Mon, 17 Sep 2012 12:13:07 +0930, Vladimir Bashkirtsev
-<vladimir@bashkirtsev.com> wrote:
-> Dear devs,
-> 
-> We just had an incident where two instances of the same VM started up
-> on different hosts and mounted the same RBD image. Image had ext4
-> partition and it became corrupted quickly. Therefore it would be good
-> to have some setting in RBD info like max_simultaneous_mounts which
-> will dictate how many simultaneous mounts of the same RBD image may be
-> in existence. Obviously such glusterfs would not have such issue in
-> RBD image but old trusty extfs fails miserably. It may be hard to
-> implement in ceph due to distributed nature. Then basic check in
-> QEMU-RBD driver would be good as well.
-> 
-> Regards,
-> Vladimir
+On Mon, 17 Sep 2012 08:36:09 +0200, S=C5=82awomir Skowron <szibis@gmail=
+=2Ecom>
+wrote:
+> Ok, i will try, but i have all day meeting today, and tomorrow.
+>=20
+> One more question, is there any way to check configuration not from
+> ceph.conf, but from running daemon in cluster ??
 
-This is what locking and fencing of rbd images is intended to address.
+You can do this with the admin socket:
 
-The original discussion:
-http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/7094
-
-The current status:
-http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/9210
+ceph --admin-daemon /path/to/admin/socket show config
 
 Josh
+
+>=20
+> On Fri, Sep 14, 2012 at 9:12 PM, Sage Weil <sage@inktank.com> wrote:
+>> Hi,
+>>
+>> <On Wed, 5 Sep 2012, Skowron S?awomir wrote:
+>>> Dnia 5 wrz 2012 o godz. 17:53 "Sage Weil" <sage@inktank.com> napisa=
+?(a):
+>>>
+>>> > On Wed, 5 Sep 2012, S?awomir Skowron wrote:
+>>> >> Ok, but in global case, when i use, a chef/puppet or any other, =
+i wish
+>>> >> to change configuration in ceph.conf, and reload daemon to get n=
+ew
+>>> >> configuration changes from ceph.conf, this feature would be very
+>>> >> helpful in ceph administration.
+>>> >>
+>>> >> Inject is ok, for testing, or debuging.
+>>> >
+>>> > Opened http://tracker.newdream.net/issues/3086.  There is already=
+ an issue
+>>> > open for reloading the config file,
+>>> > http://tracker.newdream.net/issues/2459.
+>>> >
+>>>
+>>> Thanks. This is what i mean.
+>>> Is this feature have a chance, to be implemented in next months ??
+>>
+>> I pushed a branch, wip-tp, that implements this.  Want to give it a =
+spin?
+>> Just inject the config option change (via the admin socket or inject=
+args)
+>> and it'll resize the thread pool.
+>>
+>> sage
+>>
+>>>
+>>> > sage
+>>> >
+>>> >>
+>>> >> On Tue, Sep 4, 2012 at 5:34 PM, Sage Weil <sage@inktank.com> wro=
+te:
+>>> >>> On Tue, 4 Sep 2012, Wido den Hollander wrote:
+>>> >>>> On 09/04/2012 10:30 AM, Skowron S?awomir wrote:
+>>> >>>>> Ok, thanks.
+>>> >>>>>
+>>> >>>>> Number of workers used for recover, or numer of disk threads.
+>>> >>>>>
+>>> >>>>
+>>> >>>> I think those can be changed while the OSD is running. You cou=
+ld always give
+>>> >>>> it a try.
+>>> >>>
+>>> >>> The thread pool sizes can't currently be adjusted, unfortunatel=
+y.  It
+>>> >>> wouldn't be too difficult to change that...
+>>> >>>
+>>> >>> sage
+>>> >>>
+>>> >>>>
+>>> >>>> Wido
+>>> >>>>
+>>> >>>>> -----Original Message-----
+>>> >>>>> From: Wido den Hollander [mailto:wido@widodh.nl]
+>>> >>>>> Sent: Tuesday, September 04, 2012 10:18 AM
+>>> >>>>> To: Skowron S?awomir
+>>> >>>>> Cc: ceph-devel@vger.kernel.org
+>>> >>>>> Subject: Re: Inject configuration change into cluster
+>>> >>>>>
+>>> >>>>> On 09/04/2012 07:04 AM, Skowron S?awomir wrote:
+>>> >>>>>> Is there any way now, to inject new configuration change, wi=
+thout
+>>> >>>>>> restarting daemons ??
+>>> >>>>>>
+>>> >>>>>
+>>> >>>>> Yes, you can use the injectargs command.
+>>> >>>>>
+>>> >>>>> $ ceph osd tell 0 injectargs '--debug-osd 20'
+>>> >>>>>
+>>> >>>>> What do you want to change? Not everything can be changed whi=
+le the OSD is
+>>> >>>>> running.
+>>> >>>>>
+>>> >>>>> Wido
+>>> >>>>>
+>>> >>>>>> Regards
+>>> >>>>>>
+>>> >>>>>> Slawomir Skowron--
+>>> >>>>>> To unsubscribe from this list: send the line "unsubscribe ce=
+ph-devel"
+>>> >>>>>> in the body of a message to majordomo@vger.kernel.org More m=
+ajordomo
+>>> >>>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>> >>>>>>
+>>> >>>>>
+>>> >>>>> N???????????????r??????y?????????b???X???????v???^???)?{.n???=
++?????????z???]z???{ay??? ?????,j ??????f?????????h?????????z??? ???w??=
+???????
+>>> >>>>> ?????????j:+v?????????w???j???m???????????? ????????????zZ+??=
+?????j"??????!tml=3D
+>>> >>>>>
+>>> >>>>
+>>> >>>> --
+>>> >>>> To unsubscribe from this list: send the line "unsubscribe ceph=
+-devel" in
+>>> >>>> the body of a message to majordomo@vger.kernel.org
+>>> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.=
+html
+>>> >>>>
+>>> >>>>
+>>> >>> --
+>>> >>> To unsubscribe from this list: send the line "unsubscribe ceph-=
+devel" in
+>>> >>> the body of a message to majordomo@vger.kernel.org
+>>> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.h=
+tml
+>>> >>
+>>> >>
+>>> >>
+>>> >> --
+>>> >> -----
+>>> >> Pozdrawiam
+>>> >>
+>>> >> S?awek "sZiBis" Skowron
+>>> >>
+>>> >>
+>>>
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
