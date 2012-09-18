@@ -1,82 +1,135 @@
-From: Tren Blackburn <tren@eotnetworks.com>
-Subject: Re: Why does mkcephfs take approximately 30 seconds per osd on ceph 0.51?
-Date: Tue, 18 Sep 2012 14:11:14 -0700
-Message-ID: <CANLRBoy599tgAjqPKBhuEBGdkysXTYUsc80qMrZ_NdOe5qyGmA@mail.gmail.com>
-References: <CANLRBoy-rNWadmVt=ZcCZNLWFG-oaH2bsZp6Yvjd9DUqtn4xOA@mail.gmail.com>
-	<alpine.DEB.2.00.1209181358270.23570@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Inject configuration change into cluster
+Date: Tue, 18 Sep 2012 14:18:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209181417290.23570@cobra.newdream.net>
+References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl> <5045B928.1050706@widodh.nl> <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet> <5045CB80.50508@widodh.nl> <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
+ <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com> <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net> <58915F57-D1DA-4BBE-A205-A5063DDCD789@grupaonet.pl> <alpine.DEB.2.00.1209141211010.18057@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:50961 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755100Ab2IRVLP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Sep 2012 17:11:15 -0400
-Received: by vbbff1 with SMTP id ff1so415437vbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Sep 2012 14:11:14 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1209181358270.23570@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:33722 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755463Ab2IRVSD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Sep 2012 17:18:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1209141211010.18057@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?Skowron_S=B3awomir?= <slawomir.skowron@grupaonet.pl>
+Cc: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 18, 2012 at 1:58 PM, Sage Weil <sage@inktank.com> wrote:
-> On Tue, 18 Sep 2012, Tren Blackburn wrote:
->> Hi List;
->>
->> I've been working with ceph 0.51 lately, and have noticed this for a
->> while now, but it hasn't been a big enough issue for me to report.
->> However today I'm turning up a 192 OSD cluster, and 30 seconds per OSD
->> adds up pretty quick. For some reason it's taking 30 seconds between
->> checking the OSD for a pre-existing store:
->>
->> 2012-09-18 13:53:28.400590 7fe895d25780 -1 filestore(/var/ceph/disk11)
->> could not find 23c2fcde/osd_superblock/0//-1 in index: (2) No such
->> file or directory
->>
->> And then actually creating the new store:
->>
->> 2012-09-18 13:53:57.371396 7fe895d25780 -1 created object store
->> /var/ceph/disk11 journal /dev/mapper/vg-journal.disk11 for osd.34 fsid
->> bca82801-04d7-402e-917f-8023a4b161a8
->> 2012-09-18 13:53:57.371449 7fe895d25780 -1 auth: error reading file:
->> /var/ceph/disk11/keyring: can't open /var/ceph/disk11/keyring: (2) No
->> such file or directory
->> 2012-09-18 13:53:57.371527 7fe895d25780 -1 created new key in keyring
->> /var/ceph/disk11/keyring
->>
->> I can provide many examples as I'm watching it slowly plod through
->> currently. Also, the horse power of the server makes no difference.
->> The servers in question here are dual E5-2600's with 96GB ram and
->> 12x2TB drives.
->>
->> What information can I provide to help debug this? Or is this an
->> already known issue?
->
-> If you add -x to the #!/bin/bash line in mkcephfs we can see exactly which
-> command(s) are going slow...
+On Fri, 14 Sep 2012, Sage Weil wrote:
+> Hi,
+> 
+> <On Wed, 5 Sep 2012, Skowron S?awomir wrote:
+> > Dnia 5 wrz 2012 o godz. 17:53 "Sage Weil" <sage@inktank.com> napisa?(a):
+> > 
+> > > On Wed, 5 Sep 2012, S?awomir Skowron wrote:
+> > >> Ok, but in global case, when i use, a chef/puppet or any other, i wish
+> > >> to change configuration in ceph.conf, and reload daemon to get new
+> > >> configuration changes from ceph.conf, this feature would be very
+> > >> helpful in ceph administration.
+> > >> 
+> > >> Inject is ok, for testing, or debuging.
+> > > 
+> > > Opened http://tracker.newdream.net/issues/3086.  There is already an issue 
+> > > open for reloading the config file, 
+> > > http://tracker.newdream.net/issues/2459.
+> > > 
+> > 
+> > Thanks. This is what i mean. 
+> > Is this feature have a chance, to be implemented in next months ??
+> 
+> I pushed a branch, wip-tp, that implements this.  Want to give it a spin?  
+> Just inject the config option change (via the admin socket or injectargs) 
+> and it'll resize the thread pool.
 
-It looks like it's the ceph-osd command taking the time:
+This is merged into master and will be in v0.53.
 
-+ /usr/bin/ceph-osd -c /tmp/mkfs.ceph.9006/conf --monmap
-/tmp/mkfs.ceph.9006/monmap -i 000 --mkfs --mkkey
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
-2012-09-18 14:08:11.265921 7fb41bd04780 -1 journal check: ondisk fsid
-00000000-0000-0000-0000-000000000000 doesn't match expected
-aa1f859e-4d3c-4b02-87c5-0190bb51dd48, invalid (someone else's?)
-journal
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
-2012-09-18 14:08:11.440522 7fb41bd04780 -1 filestore(/var/ceph/disk01)
-could not find 23c2fcde/osd_superblock/0//-1 in index: (2) No such
-file or directory
-2012-09-18 14:08:40.424981 7fb41bd04780 -1 created object store
-/var/ceph/disk01 journal /dev/mapper/vg-journal.disk01 for osd.0 fsid
-ad1bcd15-081a-4d6b-abf1-2fcf79764c9b
-2012-09-18 14:08:40.425032 7fb41bd04780 -1 auth: error reading file:
-/var/ceph/disk01/keyring: can't open /var/ceph/disk01/keyring: (2) No
-such file or directory
-2012-09-18 14:08:40.425109 7fb41bd04780 -1 created new key in keyring
-/var/ceph/disk01/keyring
+sage
 
-t.
+> 
+> sage
+> 
+> > 
+> > > sage
+> > > 
+> > >> 
+> > >> On Tue, Sep 4, 2012 at 5:34 PM, Sage Weil <sage@inktank.com> wrote:
+> > >>> On Tue, 4 Sep 2012, Wido den Hollander wrote:
+> > >>>> On 09/04/2012 10:30 AM, Skowron S?awomir wrote:
+> > >>>>> Ok, thanks.
+> > >>>>> 
+> > >>>>> Number of workers used for recover, or numer of disk threads.
+> > >>>>> 
+> > >>>> 
+> > >>>> I think those can be changed while the OSD is running. You could always give
+> > >>>> it a try.
+> > >>> 
+> > >>> The thread pool sizes can't currently be adjusted, unfortunately.  It
+> > >>> wouldn't be too difficult to change that...
+> > >>> 
+> > >>> sage
+> > >>> 
+> > >>>> 
+> > >>>> Wido
+> > >>>> 
+> > >>>>> -----Original Message-----
+> > >>>>> From: Wido den Hollander [mailto:wido@widodh.nl]
+> > >>>>> Sent: Tuesday, September 04, 2012 10:18 AM
+> > >>>>> To: Skowron S?awomir
+> > >>>>> Cc: ceph-devel@vger.kernel.org
+> > >>>>> Subject: Re: Inject configuration change into cluster
+> > >>>>> 
+> > >>>>> On 09/04/2012 07:04 AM, Skowron S?awomir wrote:
+> > >>>>>> Is there any way now, to inject new configuration change, without
+> > >>>>>> restarting daemons ??
+> > >>>>>> 
+> > >>>>> 
+> > >>>>> Yes, you can use the injectargs command.
+> > >>>>> 
+> > >>>>> $ ceph osd tell 0 injectargs '--debug-osd 20'
+> > >>>>> 
+> > >>>>> What do you want to change? Not everything can be changed while the OSD is
+> > >>>>> running.
+> > >>>>> 
+> > >>>>> Wido
+> > >>>>> 
+> > >>>>>> Regards
+> > >>>>>> 
+> > >>>>>> Slawomir Skowron--
+> > >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > >>>>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+> > >>>>>> info at  http://vger.kernel.org/majordomo-info.html
+> > >>>>>> 
+> > >>>>> 
+> > >>>>> N???????????????r??????y?????????b???X???????v???^???)?{.n???+?????????z???]z???{ay??? ?????,j ??????f?????????h?????????z??? ???w?????????
+> > >>>>> ?????????j:+v?????????w???j???m???????????? ????????????zZ+???????j"??????!tml=
+> > >>>>> 
+> > >>>> 
+> > >>>> --
+> > >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > >>>> the body of a message to majordomo@vger.kernel.org
+> > >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>> 
+> > >>>> 
+> > >>> --
+> > >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > >>> the body of a message to majordomo@vger.kernel.org
+> > >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >> 
+> > >> 
+> > >> 
+> > >> -- 
+> > >> -----
+> > >> Pozdrawiam
+> > >> 
+> > >> S?awek "sZiBis" Skowron
+> > >> 
+> > >> 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
