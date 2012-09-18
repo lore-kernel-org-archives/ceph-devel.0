@@ -1,214 +1,102 @@
-From: "Plaetinck, Dieter" <dieter@vimeo.com>
+From: Travis Rhoden <trhoden@gmail.com>
 Subject: Re: How are you using Ceph?
-Date: Tue, 18 Sep 2012 17:46:15 +0200
-Message-ID: <20120918174615.26f20d06@dieter-t420s>
+Date: Tue, 18 Sep 2012 12:01:43 -0400
+Message-ID: <CACkq2moDS27CAk6-RTrqZXW-95XYSdsEVM0nSop-oSQtGd9H1A@mail.gmail.com>
 References: <CAHb+bZ+x3NxLBYWb-dt8CD4x4Zzud9Cqp90ug-vS=hC-O-f4wg@mail.gmail.com>
-	<5057543902000099000EA573@collaborate.seakr.com>
-	<5057A9E9.8060108@inktank.com>
-	<CAMmJxtJERSc822Uy=_zsh2_D+_V9dnpzyQoSqDrSrJ3W_J7o8w@mail.gmail.com>
-	<20120918094702.43a63480@dieter-t420s>
-	<CAMmJxtJP5WVDcE89sPQYKnkpM75dCnAY7fEdxAzRyFtUxG=9ig@mail.gmail.com>
-	<20120918165125.463c31ae@dieter-t420s>
-	<50588BB2.2030305@inktank.com>
-	<20120918171952.00fc5a0d@dieter-t420s>
-	<505892F8.1010400@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ny-iacmail.iac.com ([63.119.10.45]:51590 "EHLO
-	ny-iacmail.iac.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753581Ab2IRPrp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Sep 2012 11:47:45 -0400
-In-Reply-To: <505892F8.1010400@inktank.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:62982 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755326Ab2IRQCF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Sep 2012 12:02:05 -0400
+Received: by qaas11 with SMTP id s11so142655qaa.19
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Sep 2012 09:02:03 -0700 (PDT)
+In-Reply-To: <CAHb+bZ+x3NxLBYWb-dt8CD4x4Zzud9Cqp90ug-vS=hC-O-f4wg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ross Turk <ross@inktank.com>, ceph-devel@vger.kernel.org
 
-Right, it just takes time to grow these things.
-Maybe the process could be accelerated by being more out there, but what do I know about marketing.. not much :)
+I am using Ceph mainly for it's KVM and OpenStack integration, and
+also RBD.  I also needed to provide shared storage to clusters of
+nodes, and thus far I haven't needed the highest-possible performance.
+ Thus, I create RBDs, format them with ext4, and re-export them with
+NFS.  Clients do both NFS v3 and v4 mounts.
 
-Dieter
+I'm using such an NFS mount for my "nova-instances" directory in
+OpenStack, which allows me to do live-migration of VMs between compute
+nodes.  OpenStack Glance speaks to Ceph directly, and I am using that
+as well.
 
-On Tue, 18 Sep 2012 10:27:52 -0500
-Mark Nelson <mark.nelson@inktank.com> wrote:
+CephFS would be simpler for most of my scenarios, but I've elected to
+wait until Inktank is slightly more confident about it.  However,
+given comments I've seen on here, it sounds like I should at least
+give it a shot -- a SPOF from one MDS is no different than my current
+single NFS  server.  =)  For me, Ceph's strong points lie in the
+administrative capabilities to create custom pools with custom
+replication rules.  And they are easy to change!  Taking down a node
+(or OSD's) and watching new objects get copied in order to keep the
+required number of copies is very reassuring.
 
-> Hi Dieter,
-> 
-> It sounds like some of those things will come with time (more 
-> experienced community, docs, deployments, papers, etc).  Are there other 
-> things we could be doing that would make Ceph feel less risky for people 
-> doing similar comparisons?
-> 
-> Thanks,
-> Mark
-> 
-> On 09/18/2012 10:19 AM, Plaetinck, Dieter wrote:
-> > I don't mind.
-> > Ultimately it came down to ceph vs swift for us.
-> > Nothing is cast in stone yet, but we choose swift for our new not-yet-production cluster, because
-> > swift has has been around longer and has more production deployments, and hence a bigger/more experienced community, better documentation (both official as well as unofficial, blogs, tutorials etc), more conferences/techtalks.
-> > It's also a more simple system that reuses more existing technology, which makes it (a bit?) less efficient, but makes it easier to understand. (http protocol vs custom protocol, cluster metadata in sqlite, python which I'm more comfortable with than C, etc).
-> > I would like to implement Ceph (because on paper it's just awesome) but running it involves a certain uncertainty/risk I personally don't want to take yet.
-> >
-> > Dieter
-> >
-> > On Tue, 18 Sep 2012 09:56:50 -0500
-> > Mark Nelson<mark.nelson@inktank.com>  wrote:
-> >
-> >> Agreed, this was a really interesting writeup!  Thanks John!
-> >>
-> >> Dieter, do you mind if I ask what is compelling for you in choosing
-> >> swift vs the other options you've looked at including Ceph?
-> >>
-> >> Thanks,
-> >> Mark
-> >>
-> >> On 09/18/2012 09:51 AM, Plaetinck, Dieter wrote:
-> >>> thanks a lot for the detailed writeup, I found it quite useful.
-> >>> the list of contestants is similar to the list I made when researching (and I also had luwak);
-> >>> while I also think ceph is very promising and probably deserves to dominate in the future,
-> >>> I'm focusing on openstack swift for now. FWIW
-> >>>
-> >>> Dieter
-> >>>
-> >>> On Tue, 18 Sep 2012 16:34:23 +0200
-> >>> John Axel Eriksson<john@insane.se>   wrote:
-> >>>
-> >>>> I actually opted to not specifically mention the product we had
-> >>>> problems with since there have been lots of changes and fixes to it,
-> >>>> which we unfortunately were unable to make use of(you'll know why
-> >>>> later). But I guess it's interesting enough to go into a little more
-> >>>> detail so... before moving to Ceph we were using the Riak Distributed
-> >>>> Database from Basho - http://riak.basho.com.
-> >>>>
-> >>>> First I have to say that Riak is actually pretty awesome in many ways
-> >>>> - not in the least operations wise. Compared to Ceph it's alot easier
-> >>>> to get up and running and add storage as you go... basically just one
-> >>>> command to add a node to the cluster and you only need the address of
-> >>>> any other existing node for this. With Riak, every node is the same,
-> >>>> so there is no SPOF by default (eg. no MDS, no MON - just nodes).
-> >>>>
-> >>>> As you might have thought already "Distributed Database isn't exactly
-> >>>> the same as Distributed Storage" so why did we use it? Well, there is
-> >>>> an add-on to Riak called Luwak, also created and supported by Basho,
-> >>>> that is touted as "Large Object Support" where you can store as large
-> >>>> objects as you want. I think our main problem was with using this
-> >>>> add-on (as I said created and supported by Basho). An object in
-> >>>> "standard" riak k/v is limited to... I think around 40 MB, or at least
-> >>>> you shouldn't store larger objects than that because it means
-> >>>> "trouble". Anyway, we went with Luwak which seemed to be a perfect
-> >>>> solution for the type of storage we do.
-> >>>>
-> >>>> We ran with Luwak for almost two years and usually it served us pretty
-> >>>> well. Unfortunately there were bugs and hidden problems which i.m.o
-> >>>> Basho should have been more open about. One issue is that Riak is
-> >>>> based on a repair mechanism called "read-repair" - that pretty much
-> >>>> tells you how it works, data will only be repaired on a read. Now that
-> >>>> is a problem in itself when you archive data which we do (eg. not
-> >>>> reading it very often or at all).
-> >>>>
-> >>>> With Luwak(the large-object add-on), data is split into many keys and
-> >>>> values and stored in the "normal" riak k/v store... unfortunately
-> >>>> read-repair in this scenario doesn't seem to work at all and if
-> >>>> something was missing - Riak had a tendency to crash HARD, sometimes
-> >>>> managing to take the whole machine with it. There were also strange
-> >>>> issues where one crashing node seemed to affect it's neighbors so that
-> >>>> they also crashed... a domino effect which makes "distributed" a
-> >>>> little too "distributed". This didn't always happen but it did happen
-> >>>> several times in our case. The logs were often pretty hard to
-> >>>> understand and more often than not left us completely in the dark
-> >>>> about what was going on.
-> >>>>
-> >>>> We also discovered that deleting data in Luwak doesn't actually DO
-> >>>> anything... sure the key is gone but data is still on disk - seemingly
-> >>>> orphaned, so deleting was more or less a noop. This was nowhere to be
-> >>>> found in the docs.
-> >>>>
-> >>>> Finally, I think 3rd of June this year, we requested paid support from
-> >>>> Basho to help us in our last crash-and-burn situation and that's when
-> >>>> we, among other things, were told about the fact that DELETEing just
-> >>>> seems to work. We were also told that Luwak was originally created to
-> >>>> store email and not really the types of things we store (eg. files).
-> >>>> This information wasn't available anywhere - Luwak simply had the
-> >>>> wrong "table of contents" associated with it. All this was quite a
-> >>>> turn-off for us. To Bashos credit they really did help us fix our
-> >>>> cluster and they're really nice, friendly and helpful guys.
-> >>>>
-> >>>> Actually I think the last straw was when Luwak was suddenly - out of
-> >>>> nowhere really - discontinued around the beginning of this year,
-> >>>> probably because of the bugs and hidden problems that I think may have
-> >>>> come from a less than stellar implementation of large-object support
-> >>>> from the start... so by then we were on something completely
-> >>>> unsupported. We couldn't switch to something else immediately of
-> >>>> course but we started looking around for something else at that time.
-> >>>> That's when I found Ceph among other more or less distributed systems,
-> >>>> where the others were:
-> >>>>
-> >>>> Tahoe-LAFS       https://tahoe-lafs.org/trac/tahoe-lafs
-> >>>> XtreemFS         http://www.xtreemfs.org
-> >>>> HDFS             http://hadoop.apache.org/hdfs/
-> >>>> GlusterFS        http://www.gluster.org
-> >>>> PomegranateFS    https://github.com/macan/Pomegranate/wiki
-> >>>> moosefs          http://www.moosefs.org
-> >>>> Openstack Swift  http://docs.openstack.org/developer/swift/
-> >>>> MongoDB GridFS   http://www.mongodb.org/display/DOCS/GridFS
-> >>>> LS4              http://ls4.sourceforge.net/
-> >>>>
-> >>>> After trying most of these I decided to look closer at a few of them,
-> >>>> MooseFS, HDFS, XtreemFS and Ceph - the others were either not really
-> >>>> suited for our use case or just too complicated to setup and keep
-> >>>> running (i.m.o). For a short while I dabbled in writing my own storage
-> >>>> system using zeromq for communication but it's just not what our
-> >>>> company does - so I gave that up pretty quickly :-). In the end I
-> >>>> chose Ceph. Ceph wasn't as easy as Riak/Luwak operationally but in
-> >>>> every other aspect better and definitely a good fit. The Rados
-> >>>> Gateway(S3 compat) was really a big thing for us as well.
-> >>>>
-> >>>> As I started out saying: there have been many improvements to Riak not
-> >>>> in the least to the large-object support... but that large-object
-> >>>> support is not built on Luwak but a completely new thing and it's not
-> >>>> open source or free. It's called Riak CS(CS for Cluster Storage I
-> >>>> guess) and has an S3 compatible interface and it seems to be pretty
-> >>>> good. We had many discussions internally if Riak CS was the right move
-> >>>> for us but in the end we decided on Ceph since we couldn't justify the
-> >>>> cost of Riak CS.
-> >>>>
-> >>>> To sum it up: we made, in retrospect, a bad choice - not because Riak
-> >>>> itself doesn't work or isn't any good for the things it's good at(it
-> >>>> really is!) but because the add-on Luwak was misrepresented and not a
-> >>>> good fit for us.
-> >>>>
-> >>>> I really have high hopes for Ceph and I think it has a bright future
-> >>>> in our company and in general. Riak CS would probably have been a very
-> >>>> good fit as well if it wasn't for the cost involved.
-> >>>>
-> >>>> So there you have it - not just failure scenarios but bad decisions,
-> >>>> misrepresenation of features and somewhat sparse documentation. By the
-> >>>> the way, Ceph has improved it's docs alot but still could use some
-> >>>> work.
-> >>>>
-> >>>> -John
-> >>>>
-> >>>>
-> >>>> On Tue, Sep 18, 2012 at 9:47 AM, Plaetinck, Dieter<dieter@vimeo.com>   wrote:
-> >>>>> On Tue, 18 Sep 2012 01:26:03 +0200
-> >>>>> John Axel Eriksson<john@insane.se>   wrote:
-> >>>>>
-> >>>>>> another distributed
-> >>>>>> storage solution that had failed us more than once and we lost data.
-> >>>>>> Since the old system had an http interface (not S3 compatible though)
-> >>>>>
-> >>>>> can you say a bit more about this? failure stories are very interesting and useful.
-> >>>>>
-> >>>>> Dieter
-> >>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >
-> 
+The main competitor when I was exploring options for my project was
+GlusterFS.  I played with it for a few months.  It worked for my okay,
+but I found it to be slow, and surprisingly, very static.  I pretty
+much had to define my volume/replication level ahead of time, and that
+was fixed for all time.  I didn't like that I had to define that brick
+X on host Y is mirrored to brick A on host B.  I wanted what Ceph does
+-- make sure there are two copies of X, and make sure they are not on
+the same host (or rack, or row, etc.).
 
+The ability to grow the cluster and add storage while the cluster was
+live was also critical.  Adjusting the crush map and having the
+objects take immediate advantage of the new OSDs is great.  I wanted
+to keep the HW fairly simple, so in keeping with commodity hardware
+wanted something that was strictly software based -- no hardware RAID.
+That has worked well for me.
+
+Things I would like to see:
+The RBD advisory locking and fencing (this seems to be close!)
+CephFS of course
+more docs re: best practices, performance tuning, HW configs, etc.
+Some information (whitepaper?) about how Ceph could be used in more of
+an HPC environment, in addition to cloud storage.  I feel like I read
+somewhere that part of the inspiration for Ceph originally came out of
+frustration with Lustre.  I've also had bad Lustre experiences, and
+would like to see Ceph compete on that space.
+
+ - Travis
+
+On Mon, Sep 17, 2012 at 6:14 PM, Ross Turk <ross@inktank.com> wrote:
+> Hi, all!
+>
+> One of the most important parts of Inktank's mission is to spread the
+> word about Ceph. We want everyone to know what it is and how to use
+> it.
+>
+> In order to tell a better story to potential new users, I'm trying to
+> get a sense for today's deployments. We've spent the last few months
+> talking to folks around the world, but I'm sure there are a few great
+> stories we haven't heard yet!
+>
+> If you've got a spare five minutes, I would love to hear what you're
+> up to. What kind of projects are you working on, and in what stage?
+> What is your workload? Are you using Ceph alongside other
+> technologies? How has your experience been?
+>
+> This is also a good opportunity for me to introduce myself to those I
+> haven't met yet! Feel free to copy the list if you think others would
+> be interested (and you don't mind sharing).
+>
+> Cheers,
+> Ross
+>
+> --
+> Ross Turk
+> Ceph Community Guy
+>
+> "Any sufficiently advanced technology is indistinguishable from magic."
+> -- Arthur C. Clarke
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
