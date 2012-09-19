@@ -1,50 +1,34 @@
-From: Josh Durgin <joshd@hq.newdream.net>
-Subject: Re: [PATCH 9/9] rbd: activate v2 image support
-Date: Wed, 19 Sep 2012 12:56:28 -0700
-Message-ID: <505A236C.9000103@hq.newdream.net>
-References: <504A6273.7030807@inktank.com> <504A63FC.1080005@inktank.com>
+From: Tren Blackburn <tren@eotnetworks.com>
+Subject: Memory usage of ceph-mds
+Date: Wed, 19 Sep 2012 13:44:13 -0700
+Message-ID: <CANLRBoyZ5JCTfdu_ntf+aOYBPa2C4w5TLM8-2Q4_=YWg8=VL1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:49173 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751366Ab2ISUGZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 16:06:25 -0400
-In-Reply-To: <504A63FC.1080005@inktank.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:54401 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751884Ab2ISUoP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 16:44:15 -0400
+Received: by vbbff1 with SMTP id ff1so1783262vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 13:44:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Until layering is implemented, this should report an
-error if features is not 0. Layering is feature bit 1.
+Hey List;
 
-You can copy the userspace header from ceph.git in
-src/include/librbd/features.h to use the same feature macros.
+I'm in the process of rsyncing in about 7TB of data to Ceph across
+approximately 58565475 files (okay, so I guess that's not so
+approximate). It's only managed to copy a small portion of this so far
+(about 35GB) and the server that currently is the mds master shows the
+ceph-mds process closing in on 2GB of RAM used. I'm getting a little
+nervous about this steep increase.
 
-On 09/07/2012 02:15 PM, Alex Elder wrote:
-> Now that v2 images support is fully implemented, have
-> rbd_dev_v2_probe() return 0 to indicate a successful probe.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b466393..2f83f71 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2973,7 +2973,7 @@ static int rbd_dev_v2_probe(struct rbd_device
-> *rbd_dev)
->   	dout("discovered version 2 image, header name is %s\n",
->   		rbd_dev->header_name);
->
-> -	return -ENOTSUPP;
-> +	return 0;
->   out_err:
->   	kfree(rbd_dev->header_name);
->   	rbd_dev->header_name = NULL;
->
+fern ceph # ps wwaux | grep ceph-mds
+root     29943  3.7  0.9 2473884 1915468 ?     Ssl  08:42  11:22
+/usr/bin/ceph-mds -i 1 --pid-file /var/run/ceph/mds.1.pid -c
+/etc/ceph/ceph.conf
 
+Thank in advance!
+
+t.
