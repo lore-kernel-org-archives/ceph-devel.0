@@ -1,98 +1,56 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 7/9] rbd: update remaining header fields for v2
-Date: Wed, 19 Sep 2012 12:38:08 -0700
-Message-ID: <505A1F20.8040301@inktank.com>
-References: <504A6273.7030807@inktank.com> <504A63ED.5070008@inktank.com>
+Subject: Re: [PATCH 9/9] rbd: activate v2 image support
+Date: Wed, 19 Sep 2012 12:57:11 -0700
+Message-ID: <505A2397.4070106@inktank.com>
+References: <504A6273.7030807@inktank.com> <504A63FC.1080005@inktank.com> <505A236C.9000103@hq.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:43499 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:36971 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750769Ab2ISTiK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 15:38:10 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr13so3238208pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 12:38:10 -0700 (PDT)
-In-Reply-To: <504A63ED.5070008@inktank.com>
+	with ESMTP id S1750851Ab2IST5O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 15:57:14 -0400
+Received: by pbbrr13 with SMTP id rr13so3273161pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 12:57:14 -0700 (PDT)
+In-Reply-To: <505A236C.9000103@hq.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/07/2012 02:15 PM, Alex Elder wrote:
-> There are three fields that are not yet updated for format 2 rbd
-> image headers:  the version of the header object; the encryption
-> type; and the compression type.  There is no interface defined for
-> fetching the latter two, so just initialize them explicitly to 0 for
-> now.
+On 09/19/2012 12:56 PM, Josh Durgin wrote:
+> Until layering is implemented, this should report an
+> error if features is not 0. Layering is feature bit 1.
+>
+> You can copy the userspace header from ceph.git in
+> src/include/librbd/features.h to use the same feature macros.
 
-Encryption and compression type are never actually used, even for
-format 1 images. They were just placeholders.
+err, that's src/include/rbd/features.h
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
-> Change rbd_dev_v2_snap_context() so the caller can be supplied the
-> version for the header object.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   16 ++++++++++++----
->   1 file changed, 12 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index c6922a1..ad27be2 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2235,7 +2235,7 @@ static int rbd_dev_v2_features(struct rbd_device
-> *rbd_dev)
->   						&rbd_dev->header.features);
->   }
->
-> -static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev)
-> +static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev, u64 *ver)
->   {
->   	size_t size;
->   	int ret;
-> @@ -2263,7 +2263,7 @@ static int rbd_dev_v2_snap_context(struct
-> rbd_device *rbd_dev)
->   				"rbd", "get_snapcontext",
->   				NULL, 0,
->   				reply_buf, size,
-> -				CEPH_OSD_FLAG_READ, NULL);
-> +				CEPH_OSD_FLAG_READ, ver);
->   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
->   	if (ret < 0)
->   		goto out;
-> @@ -2899,6 +2899,7 @@ static int rbd_dev_v2_probe(struct rbd_device
-> *rbd_dev)
->   {
->   	size_t size;
->   	int ret;
-> +	u64 ver = 0;
->
->   	/*
->   	 * Image id was filled in by the caller.  Record the header
-> @@ -2929,11 +2930,18 @@ static int rbd_dev_v2_probe(struct rbd_device
-> *rbd_dev)
->   	if (ret < 0)
->   		goto out_err;
->
-> -	/* Get the snapshot context */
-> +	/* crypto and compression type aren't (yet) supported for v2 images */
-> +
-> +	rbd_dev->header.crypt_type = 0;
-> +	rbd_dev->header.comp_type = 0;
->
-> -	ret = rbd_dev_v2_snap_context(rbd_dev);
-> +	/* Get the snapshot context, plus the header version */
-> +
-> +	ret = rbd_dev_v2_snap_context(rbd_dev, &ver);
->   	if (ret)
->   		goto out_err;
-> +	rbd_dev->header.obj_version = ver;
-> +
->   	rbd_dev->image_format = 2;
->
->   	dout("discovered version 2 image, header name is %s\n",
+> On 09/07/2012 02:15 PM, Alex Elder wrote:
+>> Now that v2 images support is fully implemented, have
+>> rbd_dev_v2_probe() return 0 to indicate a successful probe.
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c |    2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index b466393..2f83f71 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -2973,7 +2973,7 @@ static int rbd_dev_v2_probe(struct rbd_device
+>> *rbd_dev)
+>>       dout("discovered version 2 image, header name is %s\n",
+>>           rbd_dev->header_name);
+>>
+>> -    return -ENOTSUPP;
+>> +    return 0;
+>>   out_err:
+>>       kfree(rbd_dev->header_name);
+>>       rbd_dev->header_name = NULL;
+>>
 >
 
