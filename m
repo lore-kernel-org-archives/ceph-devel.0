@@ -1,110 +1,144 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 4/9] rbd: get image features for a v2 image
-Date: Wed, 19 Sep 2012 12:02:15 -0700
-Message-ID: <505A16B7.1040202@inktank.com>
-References: <504A6273.7030807@inktank.com> <504A638A.8030007@inktank.com>
+Subject: Re: [PATCH 5/9] rbd: get the snapshot context for a v2 image
+Date: Wed, 19 Sep 2012 12:17:35 -0700
+Message-ID: <505A1A4F.3040204@inktank.com>
+References: <504A6273.7030807@inktank.com> <504A6394.203@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:49770 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:33321 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933094Ab2ISTCS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 15:02:18 -0400
-Received: by pbbrr13 with SMTP id rr13so3170926pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 12:02:17 -0700 (PDT)
-In-Reply-To: <504A638A.8030007@inktank.com>
+	with ESMTP id S932495Ab2ISTRi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 15:17:38 -0400
+Received: by pbbrr13 with SMTP id rr13so3201297pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 12:17:38 -0700 (PDT)
+In-Reply-To: <504A6394.203@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/07/2012 02:13 PM, Alex Elder wrote:
-> The features values for an rbd format 2 image are fetched from the
-> server using a "get_features" method.  The same method is used for
-> getting the features for a snapshot, so structure this addition with
-> a generic helper routine that can get this information for either.
->
-> The server will provide two 64-bit feature masks, one representing
-> the features used for this image (or snapshot) and one representing
-> features which cannot be used by the client when working with the
-> image (or snapshot).
-
-This second mask is features that are required for the client to
-access the image correctly. They are called incompatible because
-the are the subset of features used for this image that are not
-backwards compatible with clients that do not support them.
-
-With the commit message fixed:
-
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-> For the time being, neither of these is really used so we keep
-> things simple and just record the first feature vector.  Once we
-> start using these feature masks, what we record and what we expose
-> to the user will most likely change.
+On 09/07/2012 02:13 PM, Alex Elder wrote:
+> Fetch the snapshot context for an rbd format 2 image by calling
+> the "get_snapcontext" method on its header object.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   40 ++++++++++++++++++++++++++++++++++++++++
->   1 file changed, 40 insertions(+)
+>   drivers/block/rbd.c |   85
+> +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   1 file changed, 85 insertions(+)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 36e848a..d48f025 100644
+> index d48f025..8ff84fd 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2200,6 +2200,40 @@ out:
->   	return ret;
+> @@ -62,6 +62,7 @@
+>   #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
+>
+>   #define RBD_MAX_SNAP_NAME_LEN	32
+> +#define RBD_MAX_SNAP_COUNT	510	/* allows max snapc to fit in 4KB */
+>   #define RBD_MAX_OPT_LEN		1024
+>
+>   #define RBD_SNAP_HEAD_NAME	"-"
+> @@ -2234,6 +2235,84 @@ static int rbd_dev_v2_features(struct rbd_device
+> *rbd_dev)
+>   						&rbd_dev->header.features);
 >   }
 >
-> +static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64
-> snap_id,
-> +		u64 *snap_features)
+> +static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev)
 > +{
-> +	__le64 snapid = cpu_to_le64(snap_id);
-> +	struct {
-> +		__le64 features;
-> +		__le64 incompat;
-> +	} features_buf = { 0 };
+> +	size_t size;
 > +	int ret;
+> +	void *reply_buf;
+> +	void *p;
+> +	void *end;
+> +	u64 seq;
+> +	u32 snap_count;
+> +	struct ceph_snap_context *snapc;
+> +	u32 i;
+> +
+> +	/*
+> +	 * We'll need room for the seq value (maximum snapshot id),
+> +	 * snapshot count, and array of that many snapshot ids.
+> +	 * For now we have a fixed upper limit on the number we're
+> +	 * prepared to receive.
+> +	 */
+> +	size = sizeof (__le64) + sizeof (__le32) +
+> +			RBD_MAX_SNAP_COUNT * sizeof (__le64);
+> +	reply_buf = kzalloc(size, GFP_KERNEL);
+> +	if (!reply_buf)
+> +		return -ENOMEM;
 > +
 > +	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
-> +				"rbd", "get_features",
-> +				(char *) &snapid, sizeof (snapid),
-> +				(char *) &features_buf, sizeof (features_buf),
+> +				"rbd", "get_snapcontext",
+> +				NULL, 0,
+> +				reply_buf, size,
 > +				CEPH_OSD_FLAG_READ, NULL);
 > +	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
 > +	if (ret < 0)
-> +		return ret;
-> +	*snap_features = le64_to_cpu(features_buf.features);
+> +		goto out;
 > +
-> +	dout("  snap_id 0x%016llx features = 0x%016llx incompat = 0x%016llx\n",
-> +		(unsigned long long) snap_id,
-> +		(unsigned long long) *snap_features,
-> +		(unsigned long long) le64_to_cpu(features_buf.incompat));
+> +	ret = -ERANGE;
+> +	p = reply_buf;
+> +	end = (char *) reply_buf + size;
+> +	ceph_decode_64_safe(&p, end, seq, out);
+> +	ceph_decode_32_safe(&p, end, snap_count, out);
+> +
+> +	/*
+> +	 * Make sure the reported number of snapshot ids wouldn't go
+> +	 * beyond the end of our buffer.  But before checking that,
+> +	 * make sure the computed size of the snapshot context we
+> +	 * allocate is representable in a size_t.
+> +	 */
+> +	if (snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
+> +				 / sizeof (u64)) {
+> +		ret = -EINVAL;
+> +		goto out;
+> +	}
+> +	if (!ceph_has_room(&p, end, snap_count * sizeof (__le64)))
+> +		goto out;
+> +
+> +	size = sizeof (struct ceph_snap_context) +
+> +				snap_count * sizeof (snapc->snaps[0]);
+> +	snapc = kmalloc(size, GFP_KERNEL);
+> +	if (!snapc) {
+> +		ret = -ENOMEM;
+> +		goto out;
+> +	}
+> +
+> +	atomic_set(&snapc->nref, 1);
+> +	snapc->seq = seq;
+> +	snapc->num_snaps = snap_count;
+> +	for (i = 0; i < snap_count; i++)
+> +		snapc->snaps[i] = ceph_decode_64(&p);
+> +
+> +	rbd_dev->header.snapc = snapc;
+> +
+> +	dout("  snap context seq = %llu, snap_count = %u\n",
+> +		(unsigned long long) seq, (unsigned int) snap_count);
+> +
+> +out:
+> +	kfree(reply_buf);
 > +
 > +	return 0;
-> +}
-> +
-> +static int rbd_dev_v2_features(struct rbd_device *rbd_dev)
-> +{
-> +	return _rbd_dev_v2_snap_features(rbd_dev, CEPH_NOSNAP,
-> +						&rbd_dev->header.features);
 > +}
 > +
 >   /*
 >    * Scan the rbd device's current snapshot list and compare it to the
 >    * newly-received snapshot context.  Remove any existing snapshots
-> @@ -2733,6 +2767,12 @@ static int rbd_dev_v2_probe(struct rbd_device
+> @@ -2773,6 +2852,12 @@ static int rbd_dev_v2_probe(struct rbd_device
 > *rbd_dev)
->   	ret = rbd_dev_v2_object_prefix(rbd_dev);
+>   	ret = rbd_dev_v2_features(rbd_dev);
 >   	if (ret < 0)
 >   		goto out_err;
 > +
-> +	/* Get the features for the image */
+> +	/* Get the snapshot context */
 > +
-> +	ret = rbd_dev_v2_features(rbd_dev);
-> +	if (ret < 0)
+> +	ret = rbd_dev_v2_snap_context(rbd_dev);
+> +	if (ret)
 > +		goto out_err;
 >   	rbd_dev->image_format = 2;
 >
