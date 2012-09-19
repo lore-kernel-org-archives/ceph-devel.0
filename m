@@ -1,87 +1,63 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] mds: Clean up finished two phase commits
-Date: Wed, 19 Sep 2012 15:52:36 +0800
-Message-ID: <1348041156-2990-1-git-send-email-zheng.z.yan@intel.com>
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: OSD-crash on 0.48.1argonout, error "void ReplicatedPG::recover_got(hobject_t,
+ eversion_t)" not seen on list
+Date: Wed, 19 Sep 2012 10:53:38 +0200
+Message-ID: <50598812.7030102@filoo.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:48196 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752217Ab2ISHwj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Sep 2012 03:52:39 -0400
+Received: from mail-5.de-punkt.de ([93.190.64.35]:44853 "EHLO
+	mail-5.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752786Ab2ISIxm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 04:53:42 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: ceph-devel@vger.kernel.org
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hi all,
 
-When handling master request with slaves, the mds could crash
-after receiving all slaves' commit acknowledgement, but before
-journalling the ECommitted. Current MDS recovery code does not
-handle this case correctly, the request will be left in
-LogSegment's uncommitted_masters after recovery is finished.
-It prevents LogSegment from being trimmed. The fix is find and
-clean up request of this kind when recovery enters rejoin stage.
+after adding a new node into our ceph-cluster yesterday, we had a crash=
+=20
+of one OSD.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/MDCache.cc | 18 ++++++++++++++++++
- src/mds/MDCache.h  |  1 +
- src/mds/MDS.cc     |  1 +
- 3 files changed, 20 insertions(+)
+I have found this kind of message in the bugtracker as being solved (=20
+http://tracker.newdream.net/issues/2075),
+I will update this one for my convenience and attach the according log =
+(=20
+due to productive site, there is no more
+verbose debug available, sorry).
 
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 9ac7a62..da3affb 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -2163,6 +2163,24 @@ void MDCache::committed_master_slave(metareqid_t r, int from)
- }
- 
- 
-+/*
-+ * The mds could crash after receiving all slaves' commit acknowledgement,
-+ * but before journalling the ECommitted.
-+ */
-+void MDCache::finish_committed_masters()
-+{
-+  map<metareqid_t, umaster>::iterator p = uncommitted_masters.begin();
-+  while (p != uncommitted_masters.end()) {
-+    if (p->second.slaves.empty()) {
-+      metareqid_t reqid = p->first;
-+      dout(10) << "finish_committed_masters " << reqid << dendl;
-+      ++p;
-+      log_master_commit(reqid);
-+    } else {
-+      ++p;
-+    }
-+  }
-+}
- 
- /*
-  * at end of resolve... we must journal a commit|abort for all slave
-diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
-index 9c7b096..12bdb03 100644
---- a/src/mds/MDCache.h
-+++ b/src/mds/MDCache.h
-@@ -291,6 +291,7 @@ public:
-   void log_master_commit(metareqid_t reqid);
-   void _logged_master_commit(metareqid_t reqid, LogSegment *ls, list<Context*> &waiters);
-   void committed_master_slave(metareqid_t r, int from);
-+  void finish_committed_masters();
- 
-   void _logged_slave_commit(int from, metareqid_t reqid);
- 
-diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-index ce306c4..d0aac30 100644
---- a/src/mds/MDS.cc
-+++ b/src/mds/MDS.cc
-@@ -1413,6 +1413,7 @@ void MDS::reconnect_done()
- void MDS::rejoin_joint_start()
- {
-   dout(1) << "rejoin_joint_start" << dendl;
-+  mdcache->finish_committed_masters();
-   mdcache->rejoin_send_rejoins();
- }
- void MDS::rejoin_done()
--- 
-1.7.11.4
+Other than that, everything went almost smoothly, except the annoying=20
+"slow requests",
+which are hopefully not only fixed in 0.51, ... when do we expect next=20
+stable, btw?
 
+The replication was fast, due to a SSD-cached LSI-controller, 4 OSDs pe=
+r=20
+node, one per HDD,
+1Gbit was completely saturated, time for next step towards 10Gbit ;)
+
+Regards,
+
+Oliver.
+
+--=20
+
+Oliver Francke
+
+filoo GmbH
+Moltkestra=DFe 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
+
+Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
+
+=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
