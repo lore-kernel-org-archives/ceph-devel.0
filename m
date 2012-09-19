@@ -1,127 +1,104 @@
-From: Dustin Kirkland <dustin.kirkland@gazzang.com>
-Subject: Re: on disk encryption
-Date: Tue, 18 Sep 2012 20:53:31 -0500
-Message-ID: <CANT6BaObaeTF9giuTi-f=2gjW4BUVHyZxRSvETNhunqAta=6FA@mail.gmail.com>
-References: <alpine.DEB.2.00.1209150428490.16190@cobra.newdream.net>
+From: =?utf-8?B?U2tvd3JvbiBTxYJhd29taXI=?=
+	<slawomir.skowron@grupaonet.pl>
+Subject: Re: Inject configuration change into cluster
+Date: Wed, 19 Sep 2012 07:00:52 +0200
+Message-ID: <2A2CF63C-FE66-4DEA-BE50-08E448286FB4@grupaonet.pl>
+References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
+ <5045B928.1050706@widodh.nl>
+ <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
+ <5045CB80.50508@widodh.nl>
+ <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
+ <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com>
+ <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net>
+ <58915F57-D1DA-4BBE-A205-A5063DDCD789@grupaonet.pl>
+ <alpine.DEB.2.00.1209141211010.18057@cobra.newdream.net>
+ <alpine.DEB.2.00.1209181417290.23570@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:51355 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754677Ab2ISBxd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Sep 2012 21:53:33 -0400
-Received: by lbbgj3 with SMTP id gj3so460801lbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Sep 2012 18:53:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1209150428490.16190@cobra.newdream.net>
+Received: from onsmg01.portal.onet.pl ([213.180.147.237]:50650 "EHLO
+	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752936Ab2ISFBD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 01:01:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1209181417290.23570@cobra.newdream.net>
+Content-Language: pl-PL
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: =?utf-8?B?U8WCYXdvbWlyIFNrb3dyb24=?= <szibis@gmail.com>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Sep 15, 2012 at 6:54 AM, Sage Weil <sage@inktank.com> wrote:
-> Hey,
->
-> A common requirement that's come up in conversation a few times now is
-> on-disk, at-rest encryption.  Usually, this is really just about making
-> sure the bits on an individual disk are useless in isolation, so that
-> drives can be safely discarded or RMAed without compromising customer
-> data.
-
-Hi Sage,
-
-Thanks for bringing this up on your devel list.  This is certainly
-something that I experience on a daily basis around Linux storage
-systems in general in the enterprise.
-
-> I suspect the simplest way to accomplish this would be through something
-> like dm-crypt.  The trick would be keeping the keys for the osd's block
-> device and journal elsewhere.
-
-Right, so using established technologies within the Linux kernel, I'd
-think you should consider at least dm-crypt and eCryptfs, each of
-which have their own costs and benefits.  (Full disclosure: I'm one of
-the maintainers of eCryptfs).
-
-dm-crypt is a block level encryption solution, whereas eCryptfs
-handles its encryption on a per-file basis.
-
-With dm-crypt, you must pre-allocate a disk, partition, or loopback
-device, configure it using cryptsetup, LUKS, and optionally LVM,
-format the partition with your filesystem of choice, and then perform
-the mount of the device mapped encrypted block device to your mount
-point.  The entire block device is encrypted using the same set of
-keys, which cannot be easily changed or rotated.  I/O performance is
-maximized if using AES-NI cryptographic acceleration on CPUs
-supporting the instruction set.  Keys are loaded into LUKS and only
-necessary at mount time.
-
-eCryptfs is a layered filesystem, where one directory is mounted on
-"top" of another.  The upper directory is just a virtual
-representation of the files/directories, with reads and writes being
-passed through the kernel and handling any decryption or encryption
-before actually dealing with the real files which are written to disk
-in the lower directory.  There's no need to "pre-allocate" space in a
-partition, disk, or loop device, as you just use a directory in your
-current filesystem, which can be any of the Linux filesystems.
-Because the encryption happens on a per-file basis, you could actually
-use unique or distinct keys for different files.  Some users or
-processes on the local system may or may not have access to the
-cryptographic keys necessary to mount, read, and write these files.
-Also, incremental backups of the encrypted data is possible by using a
-simple rsync or similar utility.  There is a little more overhead than
-dmcrypt here, since each fread and fwrite has to perform its own
-encryption, but honestly, the performance is usually quite tolerable
-when encryption is essential to a given workload.  While eCryptfs does
-not yet correctly leverage AES-NI, there is an patchset from Colin
-King, pending approval by Tyler Hicks on the docket for the next merge
-window.  (This does improve performance in some cases on modern
-hardware, though there were some initial concerns about costing
-performance on some older platforms that don't support AES-NI.)
-
-> One option would be to use the monitor as a lock box to securely store the
-> disk encryption key, secured by the osd's existing cephx key is provided.
-> The startup scripts (triggered via upstart, sysvinit, whatever) would need
-> to get the keyring off the disk (separate, unencrypted partition?), get
-> the disk key from the monitor, set up the dm-crypt devices, mount the
-> osd's fs, and then start ceph-osd.  An attacker in possession of a
-> recovered disk would be need network connectivity to the cluster (prior to
-> the keys getting revoked/destroyed) in order to decrypt it.
-
-Yeah, so that's always the trick with a crypto solution...key
-management.  You have to store the key somewhere other than on the
-encrypted device to ensure the protection and integrity of the data.
-
-Without turning this into an advertisement, my company has a
-Linux-based (though proprietary) key server product in this space.
-Fundamentally, you would need, as you say, a startup script with
-network access to authenticate to a trusted, remote server, request
-the necessary keys, have the server apply a flexible set of policies
-to ensure that the key request is legitimate, and if so, return the
-key material to the requesting server.  When a server is known to be
-compromised, subsequent access to that key is revoked at the server,
-thereby protecting access to the encrypted data.
-
-There is an OASIS standard for such a protocol called KMIP, but it's
-some 200+ pages long and there are no open implementations of KMIP
-that I know of.
-
-> Looking forward, another option might be to implement encryption inside
-> btrfs (placeholder fields are there in the disk format, introduced along
-> with the compression code way back when).  This would let ceph-osd handle
-> more of the key handling internally and do something like, say, only
-> encrypt the current/ and snap_*/ subdirectories.
->
-> Other ideas?  Thoughts?
->
-> sage
-
-I love the idea of btrfs supporting encryption natively much like it
-does compression.  It may be some time before that happens, so in the
-meantime, I'd love to see Ceph support dm-crypt and/or eCryptfs
-beneath.
-
-
-Cheers,
--- 
-Dustin Kirkland  |  Chief Technical Officer
-Gazzang, Inc.
+T2ssIHRoYW5rcywgaSB0cnkgdGhpcyBvbiBJTlQsIGJ1dCBvbiBwcm9kdWN0aW9uLCBpIHdpbGwg
+c3RheSB3aXRoIHN0YWJsZSByZWxlYXNlLCBhbmQgd2FpdCBmb3IgbWVyZ2UgaW4gbmV4dCBzdGFi
+bGUuDQoNClJlZ2FyZHMNCg0KU2xhd29taXIgU2tvd3Jvbg0KDQpEbmlhIDE4IHdyeiAyMDEyIG8g
+Z29kei4gMjM6MTggIlNhZ2UgV2VpbCIgPHNhZ2VAaW5rdGFuay5jb20+IG5hcGlzYcWCKGEpOg0K
+DQo+IE9uIEZyaSwgMTQgU2VwIDIwMTIsIFNhZ2UgV2VpbCB3cm90ZToNCj4+IEhpLA0KPj4gDQo+
+PiA8T24gV2VkLCA1IFNlcCAyMDEyLCBTa293cm9uIFM/YXdvbWlyIHdyb3RlOg0KPj4+IERuaWEg
+NSB3cnogMjAxMiBvIGdvZHouIDE3OjUzICJTYWdlIFdlaWwiIDxzYWdlQGlua3RhbmsuY29tPiBu
+YXBpc2E/KGEpOg0KPj4+IA0KPj4+PiBPbiBXZWQsIDUgU2VwIDIwMTIsIFM/YXdvbWlyIFNrb3dy
+b24gd3JvdGU6DQo+Pj4+PiBPaywgYnV0IGluIGdsb2JhbCBjYXNlLCB3aGVuIGkgdXNlLCBhIGNo
+ZWYvcHVwcGV0IG9yIGFueSBvdGhlciwgaSB3aXNoDQo+Pj4+PiB0byBjaGFuZ2UgY29uZmlndXJh
+dGlvbiBpbiBjZXBoLmNvbmYsIGFuZCByZWxvYWQgZGFlbW9uIHRvIGdldCBuZXcNCj4+Pj4+IGNv
+bmZpZ3VyYXRpb24gY2hhbmdlcyBmcm9tIGNlcGguY29uZiwgdGhpcyBmZWF0dXJlIHdvdWxkIGJl
+IHZlcnkNCj4+Pj4+IGhlbHBmdWwgaW4gY2VwaCBhZG1pbmlzdHJhdGlvbi4NCj4+Pj4+IA0KPj4+
+Pj4gSW5qZWN0IGlzIG9rLCBmb3IgdGVzdGluZywgb3IgZGVidWdpbmcuDQo+Pj4+IA0KPj4+PiBP
+cGVuZWQgaHR0cDovL3RyYWNrZXIubmV3ZHJlYW0ubmV0L2lzc3Vlcy8zMDg2LiAgVGhlcmUgaXMg
+YWxyZWFkeSBhbiBpc3N1ZSANCj4+Pj4gb3BlbiBmb3IgcmVsb2FkaW5nIHRoZSBjb25maWcgZmls
+ZSwgDQo+Pj4+IGh0dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC9pc3N1ZXMvMjQ1OS4NCj4+Pj4g
+DQo+Pj4gDQo+Pj4gVGhhbmtzLiBUaGlzIGlzIHdoYXQgaSBtZWFuLiANCj4+PiBJcyB0aGlzIGZl
+YXR1cmUgaGF2ZSBhIGNoYW5jZSwgdG8gYmUgaW1wbGVtZW50ZWQgaW4gbmV4dCBtb250aHMgPz8N
+Cj4+IA0KPj4gSSBwdXNoZWQgYSBicmFuY2gsIHdpcC10cCwgdGhhdCBpbXBsZW1lbnRzIHRoaXMu
+ICBXYW50IHRvIGdpdmUgaXQgYSBzcGluPyAgDQo+PiBKdXN0IGluamVjdCB0aGUgY29uZmlnIG9w
+dGlvbiBjaGFuZ2UgKHZpYSB0aGUgYWRtaW4gc29ja2V0IG9yIGluamVjdGFyZ3MpIA0KPj4gYW5k
+IGl0J2xsIHJlc2l6ZSB0aGUgdGhyZWFkIHBvb2wuDQo+IA0KPiBUaGlzIGlzIG1lcmdlZCBpbnRv
+IG1hc3RlciBhbmQgd2lsbCBiZSBpbiB2MC41My4NCj4gDQo+IHNhZ2UNCj4gDQo+PiANCj4+IHNh
+Z2UNCj4+IA0KPj4+IA0KPj4+PiBzYWdlDQo+Pj4+IA0KPj4+Pj4gDQo+Pj4+PiBPbiBUdWUsIFNl
+cCA0LCAyMDEyIGF0IDU6MzQgUE0sIFNhZ2UgV2VpbCA8c2FnZUBpbmt0YW5rLmNvbT4gd3JvdGU6
+DQo+Pj4+Pj4gT24gVHVlLCA0IFNlcCAyMDEyLCBXaWRvIGRlbiBIb2xsYW5kZXIgd3JvdGU6DQo+
+Pj4+Pj4+IE9uIDA5LzA0LzIwMTIgMTA6MzAgQU0sIFNrb3dyb24gUz9hd29taXIgd3JvdGU6DQo+
+Pj4+Pj4+PiBPaywgdGhhbmtzLg0KPj4+Pj4+Pj4gDQo+Pj4+Pj4+PiBOdW1iZXIgb2Ygd29ya2Vy
+cyB1c2VkIGZvciByZWNvdmVyLCBvciBudW1lciBvZiBkaXNrIHRocmVhZHMuDQo+Pj4+Pj4+PiAN
+Cj4+Pj4+Pj4gDQo+Pj4+Pj4+IEkgdGhpbmsgdGhvc2UgY2FuIGJlIGNoYW5nZWQgd2hpbGUgdGhl
+IE9TRCBpcyBydW5uaW5nLiBZb3UgY291bGQgYWx3YXlzIGdpdmUNCj4+Pj4+Pj4gaXQgYSB0cnku
+DQo+Pj4+Pj4gDQo+Pj4+Pj4gVGhlIHRocmVhZCBwb29sIHNpemVzIGNhbid0IGN1cnJlbnRseSBi
+ZSBhZGp1c3RlZCwgdW5mb3J0dW5hdGVseS4gIEl0DQo+Pj4+Pj4gd291bGRuJ3QgYmUgdG9vIGRp
+ZmZpY3VsdCB0byBjaGFuZ2UgdGhhdC4uLg0KPj4+Pj4+IA0KPj4+Pj4+IHNhZ2UNCj4+Pj4+PiAN
+Cj4+Pj4+Pj4gDQo+Pj4+Pj4+IFdpZG8NCj4+Pj4+Pj4gDQo+Pj4+Pj4+PiAtLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KPj4+Pj4+Pj4gRnJvbTogV2lkbyBkZW4gSG9sbGFuZGVyIFttYWlsdG86
+d2lkb0B3aWRvZGgubmxdDQo+Pj4+Pj4+PiBTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIgMDQsIDIw
+MTIgMTA6MTggQU0NCj4+Pj4+Pj4+IFRvOiBTa293cm9uIFM/YXdvbWlyDQo+Pj4+Pj4+PiBDYzog
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+Pj4+Pj4+IFN1YmplY3Q6IFJlOiBJbmplY3Qg
+Y29uZmlndXJhdGlvbiBjaGFuZ2UgaW50byBjbHVzdGVyDQo+Pj4+Pj4+PiANCj4+Pj4+Pj4+IE9u
+IDA5LzA0LzIwMTIgMDc6MDQgQU0sIFNrb3dyb24gUz9hd29taXIgd3JvdGU6DQo+Pj4+Pj4+Pj4g
+SXMgdGhlcmUgYW55IHdheSBub3csIHRvIGluamVjdCBuZXcgY29uZmlndXJhdGlvbiBjaGFuZ2Us
+IHdpdGhvdXQNCj4+Pj4+Pj4+PiByZXN0YXJ0aW5nIGRhZW1vbnMgPz8NCj4+Pj4+Pj4+PiANCj4+
+Pj4+Pj4+IA0KPj4+Pj4+Pj4gWWVzLCB5b3UgY2FuIHVzZSB0aGUgaW5qZWN0YXJncyBjb21tYW5k
+Lg0KPj4+Pj4+Pj4gDQo+Pj4+Pj4+PiAkIGNlcGggb3NkIHRlbGwgMCBpbmplY3RhcmdzICctLWRl
+YnVnLW9zZCAyMCcNCj4+Pj4+Pj4+IA0KPj4+Pj4+Pj4gV2hhdCBkbyB5b3Ugd2FudCB0byBjaGFu
+Z2U/IE5vdCBldmVyeXRoaW5nIGNhbiBiZSBjaGFuZ2VkIHdoaWxlIHRoZSBPU0QgaXMNCj4+Pj4+
+Pj4+IHJ1bm5pbmcuDQo+Pj4+Pj4+PiANCj4+Pj4+Pj4+IFdpZG8NCj4+Pj4+Pj4+IA0KPj4+Pj4+
+Pj4+IFJlZ2FyZHMNCj4+Pj4+Pj4+PiANCj4+Pj4+Pj4+PiBTbGF3b21pciBTa293cm9uLS0NCj4+
+Pj4+Pj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+Pj4+Pj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPj4+Pj4+Pj4+IGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+Pj4+
+Pj4+IA0KPj4+Pj4+Pj4gDQo+Pj4+Pj4+PiBOPz8/Pz8/Pz8/Pz8/Pz8/cj8/Pz8/P3k/Pz8/Pz8/
+Pz9iPz8/WD8/Pz8/Pz92Pz8/Xj8/Pyk/ey5uPz8/Kz8/Pz8/Pz8/P3o/Pz9dej8/P3theT8/PyA/
+Pz8/PyxqID8/Pz8/P2Y/Pz8/Pz8/Pz9oPz8/Pz8/Pz8/ej8/PyA/Pz93Pz8/Pz8/Pz8/DQo+Pj4+
+Pj4+PiA/Pz8/Pz8/Pz9qOit2Pz8/Pz8/Pz8/dz8/P2o/Pz9tPz8/Pz8/Pz8/Pz8/ID8/Pz8/Pz8/
+Pz8/P3paKz8/Pz8/Pz9qIj8/Pz8/PyF0bWw9DQo+Pj4+Pj4+PiANCj4+Pj4+Pj4gDQo+Pj4+Pj4+
+IC0tDQo+Pj4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
+ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPj4+Pj4+PiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4+Pj4+PiBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pj4+
+Pj4gDQo+Pj4+Pj4+IA0KPj4+Pj4+IC0tDQo+Pj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+Pj4+Pj4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4+Pj4+
+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
+by1pbmZvLmh0bWwNCj4+Pj4+IA0KPj4+Pj4gDQo+Pj4+PiANCj4+Pj4+IC0tIA0KPj4+Pj4gLS0t
+LS0NCj4+Pj4+IFBvemRyYXdpYW0NCj4+Pj4+IA0KPj4+Pj4gUz9hd2VrICJzWmlCaXMiIFNrb3dy
+b24NCj4+Pj4+IA0KPj4+Pj4gDQo+Pj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9y
+ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo+PiANCj4+IA0K
