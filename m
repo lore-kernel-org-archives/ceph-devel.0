@@ -1,121 +1,113 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 3/9] rbd: get the object prefix for a v2 rbd image
-Date: Wed, 19 Sep 2012 11:57:41 -0700
-Message-ID: <505A15A5.2090304@inktank.com>
-References: <504A6273.7030807@inktank.com> <504A6381.30604@inktank.com>
+Subject: Re: [PATCH 4/9] rbd: get image features for a v2 image
+Date: Wed, 19 Sep 2012 12:02:15 -0700
+Message-ID: <505A16B7.1040202@inktank.com>
+References: <504A6273.7030807@inktank.com> <504A638A.8030007@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:38354 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:49770 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932282Ab2ISS5o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 14:57:44 -0400
-Received: by pbbrr13 with SMTP id rr13so3161525pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 11:57:44 -0700 (PDT)
-In-Reply-To: <504A6381.30604@inktank.com>
+	with ESMTP id S933094Ab2ISTCS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Sep 2012 15:02:18 -0400
+Received: by pbbrr13 with SMTP id rr13so3170926pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Sep 2012 12:02:17 -0700 (PDT)
+In-Reply-To: <504A638A.8030007@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-One minor nit below. Otherwise looks good to me.
+On 09/07/2012 02:13 PM, Alex Elder wrote:
+> The features values for an rbd format 2 image are fetched from the
+> server using a "get_features" method.  The same method is used for
+> getting the features for a snapshot, so structure this addition with
+> a generic helper routine that can get this information for either.
+>
+> The server will provide two 64-bit feature masks, one representing
+> the features used for this image (or snapshot) and one representing
+> features which cannot be used by the client when working with the
+> image (or snapshot).
+
+This second mask is features that are required for the client to
+access the image correctly. They are called incompatible because
+the are the subset of features used for this image that are not
+backwards compatible with clients that do not support them.
+
+With the commit message fixed:
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 09/07/2012 02:13 PM, Alex Elder wrote:
-> The object prefix of an rbd format 2 image is fetched from the
-> server using a "get_object_prefix" method.
+> For the time being, neither of these is really used so we keep
+> things simple and just record the first feature vector.  Once we
+> start using these feature masks, what we record and what we expose
+> to the user will most likely change.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   47 ++++++++++++++++++++++++++++++++++++++++++++++-
->   1 file changed, 46 insertions(+), 1 deletion(-)
+>   drivers/block/rbd.c |   40 ++++++++++++++++++++++++++++++++++++++++
+>   1 file changed, 40 insertions(+)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 24d12e3..36e848a 100644
+> index 36e848a..d48f025 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -66,7 +66,8 @@
->
->   #define RBD_SNAP_HEAD_NAME	"-"
->
-> -#define	RBD_IMAGE_ID_LEN_MAX	64
-> +#define RBD_IMAGE_ID_LEN_MAX	64
-> +#define RBD_OBJ_PREFIX_LEN_MAX	64
->
->   /*
->    * An RBD device name will be "rbd#", where the "rbd" comes from
-> @@ -2163,6 +2164,42 @@ static int rbd_dev_v2_image_size(struct
-> rbd_device *rbd_dev)
->   					&rbd_dev->header.image_size);
+> @@ -2200,6 +2200,40 @@ out:
+>   	return ret;
 >   }
 >
-> +static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
+> +static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64
+> snap_id,
+> +		u64 *snap_features)
 > +{
-> +	void *reply_buf;
+> +	__le64 snapid = cpu_to_le64(snap_id);
+> +	struct {
+> +		__le64 features;
+> +		__le64 incompat;
+> +	} features_buf = { 0 };
 > +	int ret;
-> +	void *p;
-> +
-> +	reply_buf = kzalloc(RBD_OBJ_PREFIX_LEN_MAX, GFP_KERNEL);
-> +	if (!reply_buf)
-> +		return -ENOMEM;
 > +
 > +	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
-> +				"rbd", "get_object_prefix",
-> +				NULL, 0,
-> +				reply_buf, RBD_OBJ_PREFIX_LEN_MAX,
+> +				"rbd", "get_features",
+> +				(char *) &snapid, sizeof (snapid),
+> +				(char *) &features_buf, sizeof (features_buf),
 > +				CEPH_OSD_FLAG_READ, NULL);
 > +	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
 > +	if (ret < 0)
-> +		goto out;
+> +		return ret;
+> +	*snap_features = le64_to_cpu(features_buf.features);
 > +
-> +	p = reply_buf;
-> +	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
-> +						p + RBD_OBJ_PREFIX_LEN_MAX,
-> +						NULL, GFP_NOIO);
+> +	dout("  snap_id 0x%016llx features = 0x%016llx incompat = 0x%016llx\n",
+> +		(unsigned long long) snap_id,
+> +		(unsigned long long) *snap_features,
+> +		(unsigned long long) le64_to_cpu(features_buf.incompat));
 > +
-> +	if (IS_ERR(rbd_dev->header.object_prefix)) {
-> +		ret = PTR_ERR(rbd_dev->header.object_prefix);
-> +		rbd_dev->header.object_prefix = NULL;
-> +	} else
-> +		dout("  object_prefix = %s\n", rbd_dev->header.object_prefix);
-
-The else block should use braces as well.
-
+> +	return 0;
+> +}
 > +
-> +out:
-> +	kfree(reply_buf);
-> +
-> +	return ret;
+> +static int rbd_dev_v2_features(struct rbd_device *rbd_dev)
+> +{
+> +	return _rbd_dev_v2_snap_features(rbd_dev, CEPH_NOSNAP,
+> +						&rbd_dev->header.features);
 > +}
 > +
 >   /*
 >    * Scan the rbd device's current snapshot list and compare it to the
 >    * newly-received snapshot context.  Remove any existing snapshots
-> @@ -2690,6 +2727,12 @@ static int rbd_dev_v2_probe(struct rbd_device
+> @@ -2733,6 +2767,12 @@ static int rbd_dev_v2_probe(struct rbd_device
 > *rbd_dev)
->   	ret = rbd_dev_v2_image_size(rbd_dev);
+>   	ret = rbd_dev_v2_object_prefix(rbd_dev);
 >   	if (ret < 0)
 >   		goto out_err;
 > +
-> +	/* Get the object prefix (a.k.a. block_name) for the image */
+> +	/* Get the features for the image */
 > +
-> +	ret = rbd_dev_v2_object_prefix(rbd_dev);
+> +	ret = rbd_dev_v2_features(rbd_dev);
 > +	if (ret < 0)
 > +		goto out_err;
 >   	rbd_dev->image_format = 2;
 >
 >   	dout("discovered version 2 image, header name is %s\n",
-> @@ -2699,6 +2742,8 @@ static int rbd_dev_v2_probe(struct rbd_device
-> *rbd_dev)
->   out_err:
->   	kfree(rbd_dev->header_name);
->   	rbd_dev->header_name = NULL;
-> +	kfree(rbd_dev->header.object_prefix);
-> +	rbd_dev->header.object_prefix = NULL;
->
->   	return ret;
->   }
 >
 
