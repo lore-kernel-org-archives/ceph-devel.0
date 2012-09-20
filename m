@@ -1,41 +1,60 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: Fix oops when handling mdsmap that decreases max_mds
-Date: Thu, 20 Sep 2012 17:42:25 +0800
-Message-ID: <1348134145-4646-1-git-send-email-zheng.z.yan@intel.com>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: ceph 0.48.2
+Date: Thu, 20 Sep 2012 17:12:59 +0200
+Message-ID: <505B327B.2050609@smart-weblications.de>
+Reply-To: f.wiessner@smart-weblications.de
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:50871 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753772Ab2ITJm1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 20 Sep 2012 05:42:27 -0400
+Received: from mx02.smart-weblications.de ([188.65.144.37]:42449 "EHLO
+	mx02.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753102Ab2ITPMg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Sep 2012 11:12:36 -0400
+Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
+	by mx02.smart-weblications.de (Postfix) with ESMTPA id BD3AAC3613C
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Sep 2012 15:12:34 +0000 (UTC)
+Received: from [192.168.200.13] (callosum.office.smart-weblications.net [192.168.200.13])
+	by office.smart-weblications.net (Postfix) with ESMTP id 5485B11404D3
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Sep 2012 17:12:34 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: ceph-devel@vger.kernel.org
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hi,
 
-When i >= newmap->m_max_mds, ceph_mdsmap_get_addr(newmap, i) return
-NULL. Passing NULL to memcmp() triggers oops.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/mds_client.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+i noticed there is 0.48.2 ready - why isn't there any changelog or info=
+ on the
+website?
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index a5a7354..1bcf712 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2625,7 +2625,8 @@ static void check_new_map(struct ceph_mds_client *mdsc,
- 		     ceph_mdsmap_is_laggy(newmap, i) ? " (laggy)" : "",
- 		     session_state_name(s->s_state));
- 
--		if (memcmp(ceph_mdsmap_get_addr(oldmap, i),
-+		if (i >= newmap->m_max_mds ||
-+		    memcmp(ceph_mdsmap_get_addr(oldmap, i),
- 			   ceph_mdsmap_get_addr(newmap, i),
- 			   sizeof(struct ceph_entity_addr))) {
- 			if (s->s_state == CEPH_MDS_SESSION_OPENING) {
--- 
-1.7.11.4
 
+ceph 0.48.2argonaut-1~bpo60+1
+
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
