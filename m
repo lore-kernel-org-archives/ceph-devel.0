@@ -1,7 +1,7 @@
 From: Tren Blackburn <tren@eotnetworks.com>
 Subject: Re: Why does mkcephfs take approximately 30 seconds per osd on ceph 0.51?
-Date: Thu, 20 Sep 2012 13:26:29 -0700
-Message-ID: <CANLRBoxSHF_x44XhXK8+joTtrcB6ATFvcUtieuPXbTWBCaEXEA@mail.gmail.com>
+Date: Fri, 21 Sep 2012 10:59:26 -0700
+Message-ID: <CANLRBoykQrPaTZZrpC=6nLGs7Pu2i+=onSW79Yh5gXV4_R_Q1A@mail.gmail.com>
 References: <CANLRBoy-rNWadmVt=ZcCZNLWFG-oaH2bsZp6Yvjd9DUqtn4xOA@mail.gmail.com>
 	<alpine.DEB.2.00.1209181358270.23570@cobra.newdream.net>
 	<CANLRBoy599tgAjqPKBhuEBGdkysXTYUsc80qMrZ_NdOe5qyGmA@mail.gmail.com>
@@ -12,12 +12,12 @@ References: <CANLRBoy-rNWadmVt=ZcCZNLWFG-oaH2bsZp6Yvjd9DUqtn4xOA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:43728 "EHLO
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:37038 "EHLO
 	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751351Ab2ITU0a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Sep 2012 16:26:30 -0400
-Received: by vcbfo13 with SMTP id fo13so3124892vcb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Sep 2012 13:26:29 -0700 (PDT)
+	with ESMTP id S1753379Ab2IUR72 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Sep 2012 13:59:28 -0400
+Received: by vcbfo13 with SMTP id fo13so4285082vcb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Sep 2012 10:59:27 -0700 (PDT)
 In-Reply-To: <505A4972.8000709@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -146,37 +146,13 @@ On Wed, Sep 19, 2012 at 3:38 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
 > 16:43:12.199531 futex(0x337a92c, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647,
 > 0x337a8e8, 118) = 2
 >
+
 Hi Josh;
 
-I'm in the process of wiping the cluster and converting over to XFS
-based OSD's and I wanted to let you know that this delay doesn't
-happen on XFS, it only seems to happen on btrfs.
+I just wanted to mention that I've wiped the cluster to start again,
+and the delay is gone now. Not sure what changed, since I script the
+wipes, but it's fine now.
 
-=== osd.000 ===
-pushing conf and monmap to ocr31-ire:/tmp/mkfs.ceph.10373
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
-2012-09-20 13:24:12.649837 7f7360886780 -1 journal check: ondisk fsid
-00000000-0000-0000-0000-000000000000 doesn't match expected
-fd211791-812d-4f5a-a3c9-059b06e87db4, invalid (someone else's?)
-journal
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
- HDIO_DRIVE_CMD(identify) failed: Invalid argument
-2012-09-20 13:24:12.697840 7f7360886780 -1 filestore(/var/ceph/disk01)
-could not find 23c2fcde/osd_superblock/0//-1 in index: (2) No such
-file or directory
-2012-09-20 13:24:12.733505 7f7360886780 -1 created object store
-/var/ceph/disk01 journal /dev/mapper/vg-journal.disk01 for osd.0 fsid
-fcde16cb-d97d-485b-8294-68f37def2634
-2012-09-20 13:24:12.733546 7f7360886780 -1 auth: error reading file:
-/var/ceph/disk01/keyring: can't open /var/ceph/disk01/keyring: (2) No
-such file or directory
-2012-09-20 13:24:12.733761 7f7360886780 -1 created new key in keyring
-/var/ceph/disk01/keyring
-collecting osd.000 key
-
-hopefully that helps you narrow down the issue. If there's any other
-information I can provide about my setup that would help, please let
-me know.
+Thanks for your assistance on this!
 
 t.
