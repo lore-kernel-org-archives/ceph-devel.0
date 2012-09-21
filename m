@@ -1,18 +1,18 @@
 From: Alex Elder <elder@inktank.com>
 Subject: Re: Machine hangs while writing to ceph filesystem
-Date: Fri, 21 Sep 2012 15:39:40 -0500
-Message-ID: <505CD08C.4000407@inktank.com>
+Date: Fri, 21 Sep 2012 17:45:22 -0500
+Message-ID: <505CEE02.1030507@inktank.com>
 References: <201209212023.q8LKNm45003481@ayesha.phys.virginia.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:45877 "EHLO
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:45773 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755919Ab2IUUjn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Sep 2012 16:39:43 -0400
-Received: by ieak13 with SMTP id k13so6538517iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 21 Sep 2012 13:39:42 -0700 (PDT)
+	with ESMTP id S1754581Ab2IUWpZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Sep 2012 18:45:25 -0400
+Received: by ieak13 with SMTP id k13so6777290iea.19
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Sep 2012 15:45:24 -0700 (PDT)
 In-Reply-To: <201209212023.q8LKNm45003481@ayesha.phys.virginia.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -27,13 +27,7 @@ On 09/21/2012 03:23 PM, Bryan K. Wright wrote:
 > to copy something into it, the client host hangs after some
 > random, small, amount of data has been copied.  The last error
 > messages displayed are:
-
-I have reproduced this problem myself, while trying to track
-down a different problem.  Have you opened a bug for this?
-I'll take a look to see if it's been reported before.
-
-					-Alex
-
+> 
 >  kernel:Process kworker/0:0 (pid: 4913, ti=f6042000 task=f6008a90 task.ti=f6042000)
 >  kernel:Stack:
 >  kernel:Call Trace:
@@ -44,7 +38,18 @@ I'll take a look to see if it's been reported before.
 > kernel.  The osd, mon and mds machines are all 64-bit Centos 6.3, with
 > the stock Centos 2.6.32 kernel.  The ceph version in all cases is
 > 0.48.2.  The OSDS are using XFS for their data stores.
-> 
+
+
+If you are able to and are comfortable with it, could you please
+try to mount your file system with the "nocrc" mount option?
+
+I believe I have found the cause of this problem, but it would
+be useful to have you verify that it goes away when this option
+is used.
+
+					-Alex
+
+
 > 	There are no error messages in the ceph logs.
 > 
 > 	After rebooting the client machine and re-mounting the
