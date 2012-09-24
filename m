@@ -1,38 +1,74 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph fixes for 3.6
-Date: Sun, 23 Sep 2012 19:58:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209231956000.11925@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 2/2] mds: Adjust mydir auth when starting MDS that was stopped cleanly
+Date: Mon, 24 Sep 2012 16:37:54 +0800
+Message-ID: <1348475874-30464-2-git-send-email-zheng.z.yan@intel.com>
+References: <1348475874-30464-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36970 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754700Ab2IXC6c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Sep 2012 22:58:32 -0400
+Received: from mga11.intel.com ([192.55.52.93]:27318 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755245Ab2IXIh5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Sep 2012 04:37:57 -0400
+In-Reply-To: <1348475874-30464-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: sage@inktank.com, ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Hi Linus,
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Please pull the following fixes for Ceph from
+When starting a MDS that was stopped cleanly, we need manually
+adjust mydir's auth. This is because MDS log is empty in this case,
+mydir's auth can not be adjusted during log replay.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/MDCache.cc | 7 +++++++
+ src/mds/MDCache.h  | 1 +
+ src/mds/MDS.cc     | 1 +
+ 3 files changed, 9 insertions(+)
 
-The first fixes a leak in the rbd setup error path, and the second fixes a 
-more serious problem with mismatched kmap/kunmap that surfaced after the 
-recent refactoring work.
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index da3affb..1a0e399 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -531,6 +531,13 @@ void MDCache::open_mydir_inode(Context *c)
+   in->fetch(c);
+ }
+ 
++void MDCache::adjust_mydir_auth()
++{
++  CDir *mydir = myin->get_or_open_dirfrag(this, frag_t());
++  assert(mydir);
++  adjust_subtree_auth(mydir, mds->whoami);
++}
++
+ void MDCache::open_root()
+ {
+   dout(10) << "open_root" << dendl;
+diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
+index 12bdb03..fffb083 100644
+--- a/src/mds/MDCache.h
++++ b/src/mds/MDCache.h
+@@ -643,6 +643,7 @@ public:
+   void open_root_inode(Context *c);
+   void open_root();
+   void open_mydir_inode(Context *c);
++  void adjust_mydir_auth();
+   void populate_mydir();
+ 
+   void _create_system_file(CDir *dir, const char *name, CInode *in, Context *fin);
+diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
+index d0aac30..d369229 100644
+--- a/src/mds/MDS.cc
++++ b/src/mds/MDS.cc
+@@ -1232,6 +1232,7 @@ void MDS::starting_done()
+   // start new segment
+   mdlog->start_new_segment(0);
+ 
++  mdcache->adjust_mydir_auth();
+   mdcache->open_root();
+ }
+ 
+-- 
+1.7.11.4
 
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Alex Elder (2):
-      rbd: drop dev reference on error in rbd_open()
-      libceph: only kunmap kmapped pages
-
- drivers/block/rbd.c  |    7 +++----
- net/ceph/messenger.c |    5 +----
- 2 files changed, 4 insertions(+), 8 deletions(-)
