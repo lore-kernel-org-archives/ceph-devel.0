@@ -1,187 +1,199 @@
-From: Christian Huang <ythuang@gmail.com>
-Subject: Re: CEPH RBD client kernel panic when OSD connection is lost on
- kernel 3.2, 3.5, 3.5.4
-Date: Tue, 25 Sep 2012 12:33:30 +0800
-Message-ID: <CAP5wSLcVt5AqbNoe=snK_2gCscAion-=s9YuPQo_KeYNVCx+oQ@mail.gmail.com>
-References: <CAP5wSLcy90qhsTnNxM=t+_SB1kpfNvchrSqdAG91P6tCe0RPRA@mail.gmail.com>
-	<5060E5B5.8040807@inktank.com>
-	<CAP5wSLeuLhJxrqmiaz8-4SXo_Sfzs8xY23UMO2O7vivnBMNDBg@mail.gmail.com>
-	<50612747.6090805@inktank.com>
+From: peacebull <peacebull@gmail.com>
+Subject: Re: File Writing gets very slow after adding 1000 or more files in a folder
+Date: Tue, 25 Sep 2012 13:29:52 +0800
+Message-ID: <CAAzmXi9oBGZkZyjMAqdD+TuA3CvKA70c9az5fHXjUZjeNBs-eA@mail.gmail.com>
+References: <CAAzmXi9jVvhLoEE+GtAeE_qivboQm1JVFu64FjD8zMyQhyaPQQ@mail.gmail.com>
+	<5060C131.7070408@inktank.com>
+	<CAAzmXi-jYsNSndiNS2-qtwKSDmVyH8mSVktQ4x4wLrpA08YnKw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:55702 "EHLO
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:54827 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751334Ab2IYEda (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 00:33:30 -0400
-Received: by ieak13 with SMTP id k13so12905404iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Sep 2012 21:33:30 -0700 (PDT)
-In-Reply-To: <50612747.6090805@inktank.com>
+	with ESMTP id S1752086Ab2IYF3x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 01:29:53 -0400
+Received: by ieak13 with SMTP id k13so12973253iea.19
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Sep 2012 22:29:53 -0700 (PDT)
+In-Reply-To: <CAAzmXi-jYsNSndiNS2-qtwKSDmVyH8mSVktQ4x4wLrpA08YnKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Alex,
-   is this issue what you are referring to?
-   http://tracker.newdream.net/issues/2260
+  There isn't any other activity on the server or to the cluster. I
+marked "======" on the slow output row ,as they are slower than 30s.
+> Are things like directory listings or other metadata operations slow as well?
+  Yes,when it's just idle, ls and rm command(without any params) also
+becomes quite slow(no response in minutes). But ceph health is ok and
+no slow log in ceph.log.
 
-   we will give the patch a try and see if resolves the issue.
+  Thanks.
+Allen
 
-Best Regards.
-Chris.
-
-On Tue, Sep 25, 2012 at 11:38 AM, Alex Elder <elder@inktank.com> wrote:
-> On 09/24/2012 08:25 PM, Christian Huang wrote:
->> Hi Alex,
->>     we have used several kernel versions, some built from source,
->>     some stock kernel, from ubuntu repository.
+2012/9/25 Mark Nelson <mark.nelson@inktank.com>:
+> Hello!
+>
+> Can you tell me a bit about when it gets slow?  IE, is it when there is a
+> lot of other activity, or just sitting idle?  Are things like directory
+> listings or other metadata operations slow as well?  There are a couple of
+> different potential culprits here.  Also, is the same operation to a
+> directory with fewer files fast?
+>
+> Thanks,
+> Mark
+>
+>
+> On 09/24/2012 12:09 PM, peacebull wrote:
 >>
->>     for the version you are referring to, we used a stock kernel from
->> ubuntu repository.
+>> Hi,
+>>    We installed Development release packages on our servers to use a
+>> storage of small text files. As there are more  than ten thousand
+>> files in one folder, we find sometimes ceph becomes very slow to add
+>> one file to one folder. then we build a short php test.
+>>    Appreciate if anyone can help.
 >>
->>     for building from source, we follow instructions from this page
->>     http://blog.avirtualhome.com/compile-linux-kernel-3-2-for-ubuntu-11-10/
->>     and use the following tag from precise git repo.
->>     Ubuntu-3.2.0-29.46
->
-> These two bits of information:
->
->>     please also note that we reproduced the issue with kernel 3.5.4
->> from kernel ppa
->>     http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.5.4-quantal/
+>>    Environment:
+>>     Machine:(cpu = Xeon E5620*2, memory = 48G)*3
+>>     OS:Ubuntu 12.10*2 + 12.04*1
+>>     Ceph conf:
+>>       osd nodes: btrfs 3TB drivers mapped as osd 0-3 on server 3
+>>       mds:server1,server2
+>>       monitor:server1,server2,server3
+>>       osd journal size = 10000
+>>       test client: server1 Ubuntu 12.04
 >>
->>     it seems the following version does not have the issue
->>     http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.6-rc7-quantal/
+>> test program:
+>>
+>> #!/usr/bin/php
+>> <?php
+>> $testString = 'Hello World!';
+>> $path = '/srv/ceph/test/';
+>>
+>> $start = microtime(true);
+>>
+>> for($i=1;$i<=10000;$i++){
+>>         file_put_contents($path.substr(strval($i+10000),1,4),$testString);
+>>
+>>         if($i%100 ==0){
+>>                 $stop = microtime(true);
+>>                 echo
+>> substr(strval($i+10000),1,4).':'.($stop-$start)."s\n";
+>>                 $start = microtime(true);
+>>         }
+>> }
+>>
+>>       output:
+>> 0100:0.097404003143311s
+>> 0200:0.095574140548706s
+>> ...
+>> 0900:0.10510206222534s
+>> 1000:0.10704207420349s
+>> 1100:46.122488021851s=========
+>> 1200:0.053461074829102s
+>> 1300:0.0539710521698s
+>> ...
+>> 1800:0.11577081680298s
+>> 1900:0.11810994148254s
+>> 2000:0.12025594711304s
+>> 2100:40.39636015892s=========
+>> 2200:0.048443078994751s
+>> 2300:0.050076007843018s
+>> 2400:0.05461597442627s
+>> ...
+>> 2900:0.059355974197388s
+>> 3000:0.063041925430298s
+>> 3100:87.312695980072s
+>> 3200:0.13697504997253s
+>> ...
+>> 3800:0.11908078193665s
+>> 3900:0.12016081809998s
+>> 4000:0.12331390380859s
+>> 4100:160.46773886681s=========
+>> 4200:0.11050891876221s
+>> 4300:0.10846281051636s
+>> ...
+>> 4600:0.11165809631348s
+>> 4700:0.21804213523865s===
+>> 4800:0.11986589431763s
+>> 4900:0.11911988258362s
+>> 5000:0.11548614501953s
+>> 5100:0.1159200668335s
+>> 5200:0.12873601913452s
+>> 5300:0.12601613998413s
+>> 5400:0.13019204139709s
+>> 5500:0.24311089515686s===
+>> 5600:0.12152814865112s
+>> 5700:0.12629795074463s
+>> 5800:0.12915205955505s
+>> 5900:0.12966799736023s
+>> 6000:0.12927007675171s
+>> 6100:0.12512397766113s
+>> 6200:0.17450404167175s
+>> 6300:0.15322089195251s
+>> 6400:56.091526031494s========
+>> 6500:0.16710710525513s
+>> 6600:0.16718292236328s
+>> 6700:0.16933989524841s
+>> 6800:0.16525483131409s
+>> 6900:0.17328906059265s
+>> 7000:0.17068290710449s
+>> 7100:0.17441511154175s
+>> 7200:0.16244316101074s
+>> 7300:0.15795588493347s
+>> 7400:58.798840045929s========
+>> 7500:0.14478087425232s
+>> 7600:0.15008687973022s
+>> 7700:0.14457392692566s
+>> 7800:0.14960598945618s
+>> 7900:0.15370583534241s
+>> 8000:0.15670108795166s
+>> 8100:0.15051817893982s
+>> 8200:0.1520562171936s
+>> 8300:0.18154978752136s
+>> 8400:63.490166902542s========
+>> 8500:0.15436792373657s
+>> 8600:0.15621995925903s
+>> 8700:0.15948700904846s
+>> 8800:0.1606719493866s
+>> 8900:0.16889405250549s
+>> 9000:0.16176605224609s
+>> 9100:0.16810297966003s
+>> 9200:0.16848587989807s
+>> 9300:0.19355988502502s
+>> 9400:34.964991807938s========
+>> 9500:0.1543390750885s
+>> 9600:0.15556597709656s
+>> 9700:0.15196895599365s
+>> 9800:0.15592002868652s
+>> 9900:0.16526699066162s
+>> 0000:0.15764379501343s
+>>
+>> log:
+>> 2012-09-24 22:36:37.543709 osd.0 192.168.1.203:6800/1343 3048 : [WRN]
+>> 38 slow requests, 3 included below; oldest blocked for>  54.642729
+>> secs
+>> 2012-09-24 22:36:37.543714 osd.0 192.168.1.203:6800/1343 3049 : [WRN]
+>> slow request 54.641117 seconds old, received at 2012-09-24
+>> 22:35:42.902514: osd_op(client.4212.1:4645970 1000048a9b5.00000000
+>> [write 0~12] 0.5d2e649b snapc 1=[]) currently waiting for sub ops
+>> 2012-09-24 22:36:37.543717 osd.0 192.168.1.203:6800/1343 3050 : [WRN]
+>> slow request 54.641067 seconds old, received at 2012-09-24
+>> 22:35:42.902564: osd_op(client.4212.1:4645978 1000048a9bd.00000000
+>> [write 0~12] 0.6c603b03 snapc 1=[]) currently waiting for sub ops
+>> 2012-09-24 22:36:37.543726 osd.0 192.168.1.203:6800/1343 3051 : [WRN]
+>> slow request 54.641047 seconds old, received at 2012-09-24
+>> 22:35:42.902584: osd_op(client.4212.1:4645982 1000048a9c1.00000000
+>> [write 0~12] 0.40595f72 snapc 1=[]) currently waiting for sub ops
+>> 2012-09-24 22:36:59.020583 mon.0 192.168.1.201:6789/0 21551 : [INF]
+>> pgmap v269563: 768 pgs: 768 active+clean; 43016 MB data, 161 GB used,
+>> 7938 GB / 8383 GB avail
+>>
+>>
+>> Thanks in advance!
+>>
+>> Allen
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> ...are very helpful.
->
-> There is a very important bug that got fixed between those two
-> releases, and it has symptoms like what you are reporting.
-> I can't say with 100% confidence that you are hitting this, but
-> it it appears you could be.
->
-> The fix is very simple, and you should be able to patch your own
-> code to check to see if it makes the problem go away.  If you
-> do, please report back whether you find it fixes the problem.
->
-> Tomorrow I'll see if I can trace the particulars of the problem
-> you are reporting to this issue.
->
->                                         -Alex
->
-> From 02f7c002c9af475df6b2a1b64066bcdaf53cb7dc Mon Sep 17 00:00:00 2001
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> Date: Wed, 6 Jun 2012 19:35:55 -0500
-> Subject: [PATCH] rbd: Clear ceph_msg->bio_iter for retransmitted message
->
-> The bug can cause NULL pointer dereference in write_partial_msg_pages
->
-> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
-> Reviewed-by: Alex Elder <elder@inktank.com>
-> (cherry picked from commit 43643528cce60ca184fe8197efa8e8da7c89a037)
-> ---
->  net/ceph/messenger.c |    4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index f0e34ff..d372b34 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -563,6 +563,10 @@ static void prepare_write_message(struct
-> ceph_connection *con)
->                 m->hdr.seq = cpu_to_le64(++con->out_seq);
->                 m->needs_out_seq = false;
->         }
-> +#ifdef CONFIG_BLOCK
-> +       else
-> +               m->bio_iter = NULL;
-> +#endif
->
->         dout("prepare_write_message %p seq %lld type %d len %d+%d+%d %d pgs\n",
->              m, con->out_seq, le16_to_cpu(m->hdr.type),
-> --
-> 1.7.9.5
->
->
->
->
->> Best Regards.
->> Chris.
->> On Tue, Sep 25, 2012 at 6:59 AM, Alex Elder <elder@inktank.com> wrote:
->>> On 09/24/2012 05:23 AM, Christian Huang wrote:
->>>> Hi,
->>>>     we met the following issue while testing ceph cluster HA.
->>>>     Appreciate if anyone can shed some light.
->>>>     could this be related to the configuration ? (ie, 2 OSD nodes only)
->>>
->>> It appears to me the kernel that was in use for the crash logs
->>> you provided was built from source.  If that is the case, are you
->>> able to provide me with the precise commit id so I am sure to
->>> be working with the right code?
->>>
->>> Here is a line that leads me to that conclusion:
->>>
->>> [  203.172114] Pid: 1901, comm: kworker/0:2 Not tainted 3.2.0-29-generic
->>> #46-Ubuntu Wistron Cloud Computing/P92TB2
->>>
->>> If you wish I would be happy to work with one of the other versions
->>> of the code, but would prefer to also have crash information that
->>> matches the source code I'm looking at.  Thank you.
->>>
->>>                                         -Alex
->>>
->>>
->>>>     Issue description:
->>>>     ceph rbd client will kernel panic if an OSD server loses it's
->>>> network connectivity.
->>>>     so far, we can reproduce it with certainty.
->>>>     we have tried with the following kernels
->>>>     a. Stock kernel from 12.04 (3.2 series)
->>>>         3.5 series, as suggested in a previous mail by Sage
->>>>     b. 3.5.0-15 from quantal repo,
->>>> git://kernel.ubuntu.com/ubuntu/ubuntu-quantal.git, Ubuntu-3.5.0-15.22
->>>> tag
->>>>     c. v3.5.4-quantal,
->>>> http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.5.4-quantal/
->>>>
->>>>     Environment:
->>>>     OS: Ubuntu 12.04 precise pangolin
->>>>     Ceph configuration:
->>>>         OSD nodes: 2 x 12 drives , 1 os drive, 11 are mapped to OSD
->>>> 0-10, 10GbE link
->>>>         Monitor nodes: 3 x KVM virtual machines on ubuntu host.
->>>>         test client: fresh install of Ubuntu 12.04.1
->>>>         Ceph version used: 0.48, 0.48.1, 0.48.2, 0.51
->>>>         all nodes have the same kernel version.
->>>>
->>>>     steps to reproduce:
->>>>     on the test client,
->>>>     1. load rbd modules
->>>>     2. create rbd device
->>>>     3. map rbd device
->>>>     4. use fio tool to create work load on the device, 8 threads is
->>>> used for workload
->>>>         we have also tried with iometer, 8 workers, 32k 50/50, same results.
->>>>
->>>>     on one of the OSD nodes,
->>>>     1. sudo ifconfig eth0 down #where eth0 is the primary interface
->>>> configured for ceph.
->>>>     2. within 30 seconds, the test client will panic.
->>>>
->>>>     this happens when there is IO activity on the RBD device, and one
->>>> of the OSD nodes loses connectivity.
->>>>
->>>>     The netconsole output is available available from the following
->>>> dropbox link,
->>>>     zip: goo.gl/LHytr
->>>>
->>>> Best Regards
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>
 >
