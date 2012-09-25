@@ -1,72 +1,70 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Hardware Requirements for RADOS Gateway Cluster
-Date: Mon, 24 Sep 2012 18:34:21 -0500
-Message-ID: <5060EDFD.1050908@inktank.com>
-References: <5060E5AE.10400@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: librados: failed to decode message of type 59 v1:
+ buffer::end_of_buffer
+Date: Mon, 24 Sep 2012 18:37:57 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209241836210.2213@cobra.newdream.net>
+References: <5060CD3F.7060101@brightbox.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:40764 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750778Ab2IXXeZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Sep 2012 19:34:25 -0400
-Received: by ieak13 with SMTP id k13so12454963iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Sep 2012 16:34:24 -0700 (PDT)
-In-Reply-To: <5060E5AE.10400@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44103 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751747Ab2IYBh6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Sep 2012 21:37:58 -0400
+In-Reply-To: <5060CD3F.7060101@brightbox.co.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brice Burgess <briceburg@gmail.com>
+To: John Leach <john@brightbox.co.uk>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Brice!
+Hi John,
 
-On 09/24/2012 05:58 PM, Brice Burgess wrote:
->I am planning the system architecture around a ceph cluster [my first!].
-> While resources for setting up the basic cluster (MON+MDS+OSD) are
-> readily available*, I haven't come across anything outlining production
-> recommendations for a RADOS Gateway Cluster. Specifically;
->
-> 1. Is it preferable to run the RADOS Gateway on a MDS machine [for
-> latency issues], or should the Gateway run on seperate hosts/VMs than
-> the ODS/MON/MDS servers?
->
+It looks like we aren't encoding the old format for the pool_stat_t 
+structure (which changed in v0.42).  Can you try with the patch from 
+wip-3212 applied?  You can get debs from the gitbuilders, see
 
-It's entirely possible to run the gateway on an OSD/MON/MDS.  I don't 
-think we've done any kind of extensive analysis of where the best place 
-to run one is.  My guess is that it will only matter in very specific cases.
+	http://ceph.com/docs/master/install/debian/
 
-> 2. I've seen reference that multiple RADOS Gateway servers can be setup
-> as a cluster "to scale". Is this possible? Is there an
-> example/documentation for this? Is it just 2 standalone gateways with a
-> load balancer in front?
->
+under development testing packages.
 
-Yes!  It's entirely possible to run multiple RGWs with a load balancer 
-in front.  I'm not sure how much documentation is out there for this 
-yet, but it's something that customers of ours have successfully 
-implemented.
+Thanks!
+sage
 
-> My assumption is to provision a dedicated machine for the RADOS Gateway.
-> I'd treat this machine as a "front end proxy/caching server" meaning it
-> would have a lot of RAM for varnish/nginx and a low latency, high
-> throughput network connection to the ODS/MDS machines as well as one to
-> the public network.
+http://tracker.newdream.net/issues/3212
 
-Sounds good to me.  Other people might chime in with more suggestions.
+On Mon, 24 Sep 2012, John Leach wrote:
 
->
-> Any thoughts and suggestions are welcome. Eventually I'd like to release
-> a whitepaper of this setup if we can hit the budget to actually
-> implement ;)
-
-Some things you'll want to keep in mind:
-
-You'll want to make sure that your testing (especially of small IO) is 
-done across many buckets.  Performance of a single bucket can be limited 
-by the OSD where it's log is stored (or optionally you can turn the log 
-off).  You'll also want to keep in mind that RGW will likely incur 
-larger performance overhead for small objects than large ones.
-
-Thanks,
-Mark
+> Hi,
+> 
+> I'm calling rados_ioctx_pool_stat and it's hanging.
+> 
+> logs show:
+> 
+> > 2012-09-24 21:30:08.411947 7f0041251700 failed to decode message of type 59 v1: buffer::end_of_buffer
+> > 2012-09-24 21:30:08.412286 7f0043255700 monclient: hunting for new mon
+> 
+> my local client is the Ubuntu Precise provided librados2 package
+> (0.41-1ubuntu2.1)
+> 
+> my cluster is running the unstable packages provided by Ceph
+> (0.51-1precise).
+> 
+> If I upgrade my client just up to the stable 0.48.1argonaut-1precise
+> package, it fixes the problem.
+> 
+> If the protocol changed, then I'd expect librados would let me know. Is
+> there some way to check this? rados_version returns the version of the
+> library, but I can't see how to get the version of the cluster (or quite
+> how I'd compare them in a meaningful way).
+> 
+> Thanks,
+> 
+> John.
+> --
+> UK multi-zone cloud: http://brightbox.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
