@@ -1,37 +1,70 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: CEPH RBD client kernel panic when OSD connection is lost on kernel
- 3.2, 3.5, 3.5.4
-Date: Tue, 25 Sep 2012 10:05:45 -0500
-Message-ID: <5061C849.5010400@inktank.com>
-References: <CAP5wSLcy90qhsTnNxM=t+_SB1kpfNvchrSqdAG91P6tCe0RPRA@mail.gmail.com> <5060E5B5.8040807@inktank.com> <CAP5wSLeuLhJxrqmiaz8-4SXo_Sfzs8xY23UMO2O7vivnBMNDBg@mail.gmail.com> <50612747.6090805@inktank.com> <CAP5wSLcVt5AqbNoe=snK_2gCscAion-=s9YuPQo_KeYNVCx+oQ@mail.gmail.com> <CAP5wSLdBMjyF=4mUWDKYpi8yfG8qOA5gFr8iZ9_3DtdKM8x_0w@mail.gmail.com> <CAFtEh-cp6K5VGp0qp_mOpofckb0OWEiZHpMjnbbuUUpx_b18+g@mail.gmail.com> <5061A01B.8040303@inktank.com> <CAP5wSLcvnAgwK8LPgqbDO3V2pQPZnU7iw4tz0X2QAhrfwttZvg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH v3] mds: Adjust mydir auth when starting MDS that was
+ stopped cleanly
+Date: Tue, 25 Sep 2012 08:15:09 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209250815060.16022@cobra.newdream.net>
+References: <1348551966-14718-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:37800 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753870Ab2IYPFs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 11:05:48 -0400
-Received: by ieak13 with SMTP id k13so14122603iea.19
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Sep 2012 08:05:47 -0700 (PDT)
-In-Reply-To: <CAP5wSLcvnAgwK8LPgqbDO3V2pQPZnU7iw4tz0X2QAhrfwttZvg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48849 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751552Ab2IYPPJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 11:15:09 -0400
+In-Reply-To: <1348551966-14718-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Huang <ythuang@gmail.com>
-Cc: Damien Churchill <damoxc@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 09/25/2012 09:38 AM, Christian Huang wrote:
-> Hi Alex,
->      just realized I made a mistake on the provided environment
-> information for the additional verification, it's Ubuntu 12.04, not
-> 12.10.
->      we use 12.04 with either stock kernel(3.2 series), or 3.5 from
-> ubuntu-quantal or 3.5/3.6 from kernel ppa.
+Applied, thanks!
+
+sage
+
+On Tue, 25 Sep 2012, Yan, Zheng wrote:
+
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 > 
-
-That's OK.  I'm going to reproduce it with stock 3.5.4 kernel,
-without anything really to do with anything Ubuntu might have
-done.  It should be just fine for my purposes.
-
-					-Alex
-
+> When starting a MDS that was stopped cleanly, we need manually
+> adjust mydir's auth. This is because MDS log is empty in this case,
+> mydir's auth can not be adjusted during log replay.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  src/mds/MDCache.cc | 1 +
+>  src/mds/MDS.cc     | 4 ++--
+>  2 files changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+> index da3affb..3784b14 100644
+> --- a/src/mds/MDCache.cc
+> +++ b/src/mds/MDCache.cc
+> @@ -565,6 +565,7 @@ void MDCache::open_root()
+>    }
+>    CDir *mydir = myin->get_or_open_dirfrag(this, frag_t());
+>    assert(mydir);
+> +  adjust_subtree_auth(mydir, mds->whoami);
+>  
+>    populate_mydir();
+>  }
+> diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
+> index d0aac30..8ad901a 100644
+> --- a/src/mds/MDS.cc
+> +++ b/src/mds/MDS.cc
+> @@ -1229,10 +1229,10 @@ void MDS::starting_done()
+>    assert(is_starting());
+>    request_state(MDSMap::STATE_ACTIVE);
+>  
+> +  mdcache->open_root();
+> +
+>    // start new segment
+>    mdlog->start_new_segment(0);
+> -
+> -  mdcache->open_root();
+>  }
+>  
+>  
+> -- 
+> 1.7.11.4
+> 
+> 
