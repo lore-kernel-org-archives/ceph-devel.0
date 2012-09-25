@@ -1,96 +1,148 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: hemant surale <hemant.surale@gmail.com>
 Subject: Re: How to use ruleset
-Date: Tue, 25 Sep 2012 11:56:58 +0200
-Message-ID: <50617FEA.9010700@widodh.nl>
-References: <CAGfy=6=6P1zA-0gkBqEowuuiP0qqCjnFpGCSM-R0xKBL13W7uQ@mail.gmail.com> <50573BF1.4010001@widodh.nl> <CAGfy=6mGaH_MP+3ROUqhLGYHikPUvFHZwR3H=9za6qmnn=ZZuA@mail.gmail.com>
+Date: Tue, 25 Sep 2012 15:49:02 +0530
+Message-ID: <CAGfy=6m2vGuDi4jARaat+rUR-aP2eDcuhNJyWCpWtAEbQGGLDA@mail.gmail.com>
+References: <CAGfy=6=6P1zA-0gkBqEowuuiP0qqCjnFpGCSM-R0xKBL13W7uQ@mail.gmail.com>
+	<50573BF1.4010001@widodh.nl>
+	<CAGfy=6mGaH_MP+3ROUqhLGYHikPUvFHZwR3H=9za6qmnn=ZZuA@mail.gmail.com>
+	<50617FEA.9010700@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42799 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754510Ab2IYJ5A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 05:57:00 -0400
-In-Reply-To: <CAGfy=6mGaH_MP+3ROUqhLGYHikPUvFHZwR3H=9za6qmnn=ZZuA@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:57033 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751771Ab2IYKTD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Sep 2012 06:19:03 -0400
+Received: by vcbfo13 with SMTP id fo13so7404202vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Sep 2012 03:19:03 -0700 (PDT)
+In-Reply-To: <50617FEA.9010700@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
+# begin crush map
 
 
-On 09/25/2012 11:32 AM, hemant surale wrote:
-> I have created to different types "host (osd0,osd1 in it) , ghost
-> (osd2 in it ) " and used two separate crushrules to use them.
->
->
+# devices
+device 0 device0
+device 1 device1
+device 2 device2
 
-Could you sent your crushmap? Attachment or pastebin?
+# types
+type 0 osd
+type 1 domain
+type 2 pool
+type 3 host
+type 4 ghost
 
-> so can i create two different pools utilizing two different
-> crush_ruleset for data placement . Right now I am using Ceph v 0.36
-> with it , when i do so it goes unresponsive.
->
->
+host hone {
+        id -2
+        alg straw
+        hash 0
+        item device0 weight 1.000
+        item device1 weight 1.000
+}
+ghost hsec {
+        id -3
+        alg straw
+        hash 0
+        item device2 weight 1.000
+}
+domain root {
+        id -1
+        alg straw
+        hash 0
+        item hone weight 1.000
+        item hsec weight 1.000
+}
 
-I still recommend upgrading to at least version 0.48.2
+# rules
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type osd
+        step emit
+}
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type osd
+        step emit
+}
+rule rbd {
+        ruleset 2
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type osd
+        step emit
+}
+rule forhone {
+        ruleset 3
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type host
+        step choose firstn 0 type osd
+        step emit
+}
+rule forhsecond {
+        ruleset 4
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type ghost
+        step choose firstn 0 type osd
+        step emit
+}
+# end crush map
 
-Wido
+i tried to create new pool with size= 2 & crush_ruleset= 3 . it works
+fine but when i create Object inside pool error is :
+root@third-virtual-machine:~# rados -p new create Obj1
+rados: crush/mapper.c:369: crush_choose: Assertion `!(item >= 0 ||
+(-1-item) >= map->max_buckets)' failed.
+*** Caught signal (Aborted) **
+ in thread 0xb6e4f6e0
+ ceph version 0.36 (commit:877cacbbdbb78d120b431cb762f57332d62ef0a6)
+ 1: rados() [0x808a9f8]
+ 2: [0xb7793400]
+ 3: [0xb7793424]
+ 4: (gsignal()+0x4f) [0xb6e7ec8f]
+ 5: (abort()+0x175) [0xb6e822b5]
+ 6: (__assert_fail()+0xf6) [0xb6e77826]
+ 7: (()+0x1caa6f) [0xb771ba6f]
+ 8: (crush_do_rule()+0x2ef) [0xb771bddf]
+ 9: (()+0x8ad29) [0xb75dbd29]
+ 10: (OSDMap::pg_to_acting_osds(pg_t, std::vector<int,
+std::allocator<int> >&)+0x15f) [0xb75f783f]
+ 11: (Objecter::recalc_op_target(Objecter::Op*)+0x1b9) [0xb75e02c9]
+ 12: (Objecter::op_submit(Objecter::Op*, Objecter::OSDSession*)+0xc27)
+[0xb75e72b7]
+ 13: (Objecter::create(object_t const&, object_locator_t const&,
+SnapContext const&, utime_t, int, int, Context*, Context*,
+eversion_t*, ObjectOperation*)+0x23d) [0xb75d6aed]
+ 14: (librados::RadosClient::create(librados::IoCtxImpl&, object_t
+const&, bool)+0x202) [0xb75c23a2]
+ 15: (librados::IoCtx::create(std::string const&, bool)+0x51) [0xb75c2521]
+ 16: (main()+0x4ba2) [0x8074512]
+ 17: (__libc_start_main()+0xf3) [0xb6e6a113]
+Aborted
 
->
-> Regards,
-> Hemant Surale.
->
->
->
-> On Mon, Sep 17, 2012 at 8:34 PM, Wido den Hollander <wido@widodh.nl> wrote:
->> On 09/17/2012 11:42 AM, hemant surale wrote:
->>>
->>> Hi Community,
->>>
->>>            I have read the documentation to know crush map as well as
->>> inserting new crushmap, But I have qn that even after writing own rule
->>> for data placement how we can apply it for data placement? in short
->>> how to utilize newly specified rule when new data insertion is
->>> executed.
->>>
->>
->> Every rule has a "ruleset" ID which is an integer, like:
->>
->> rule data {
->>          ruleset 0
->>          ...
->>          ...
->> }
->>
->> Every pool has an attribute called "crush_ruleset 0".
->>
->> So if you change the ruleset in the crushmap it will re-distribute all the
->> data according to the new rule. New data will be placed according to this
->> new ruleset.
->>
->> If you created a NEW ruleset you should create a new pool like this:
->>
->> $ rados mkpool mynewpool 0 4
->>
->> See --help for more information.
->>
->> This should however get you going.
->>
->> Wido
->>
->>>           Currently I am using "rados -p <poolname> put/get Objname
->>> filename" cmd to put/get data into ceph.
->>>
->>> Thanks for helping me out till now.
->>>
->>>
->>>
->>> Regards,
->>> Hemant Surale.
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
+I was able to put file onto osd0,osd1 specifically then suddenly i was
+modifying something and i am unable to recall what went wrong . now I
+am unable to create Objs ..
+
+
+-
+Hemant Surale.
