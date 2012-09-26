@@ -1,51 +1,116 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Max Message Size For AIO calls
-Date: Wed, 26 Sep 2012 15:38:31 -0700
-Message-ID: <CAPrxi5-iRoTfeOk0S9Bcfwc1cbkpE4Z+jwb0daz2Q5eeFdYNiw@mail.gmail.com>
-References: <CAEVWPAXWhGBJoYN==vp_2uzuPemuVkv1Z3_VsqnYO0K0rGb7Fg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ho to identify location of Primary Copy Of Obj ?
+Date: Wed, 26 Sep 2012 16:41:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209261640470.7200@cobra.newdream.net>
+References: <CAGfy=6mvjOUh8jV8EaSZXK=o-6+a5fdFTvNF6WrXcqmF4mwRog@mail.gmail.com> <50621552.2050900@inktank.com> <CAGfy=6=6r0htUQUcCHj-74-Xi+bDvPNyXjLaFcHt3QNNq-zfgg@mail.gmail.com> <alpine.DEB.2.00.1209260820440.17083@cobra.newdream.net>
+ <50637957.2070800@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:53902 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753166Ab2IZWib (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Sep 2012 18:38:31 -0400
-Received: by ieak13 with SMTP id k13so2872229iea.19
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Sep 2012 15:38:31 -0700 (PDT)
-In-Reply-To: <CAEVWPAXWhGBJoYN==vp_2uzuPemuVkv1Z3_VsqnYO0K0rGb7Fg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35609 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222Ab2IZXlG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Sep 2012 19:41:06 -0400
+In-Reply-To: <50637957.2070800@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ian Pye <ianpye@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan Mick <dan.mick@inktank.com>
+Cc: hemant surale <hemant.surale@gmail.com>, ceph-devel@vger.kernel.org
 
-Looks like this here is the relevant config option:
+On Wed, 26 Sep 2012, Dan Mick wrote:
+> Ah, yeah, that assumption would be a problem.
+> 
+> So, Hemant, does
+> 	ceph osd dump <poolname> <objectname>
 
-    osd_max_write_size which has a default value of 90 megabytes
-(adjusted below with the << 20) in my tree
+Ahem,
 
-In osd/OSD.cc:
+	ceph osd map <poolname> <objectname>
 
-    // too big?
-     if (g_conf->osd_max_write_size &&
-         m->get_data_len() > g_conf->osd_max_write_size << 20) {
-       // journal can't hold commit!
-       service.reply_op_error(op, -OSD_WRITETOOBIG);
-       return;
-  }
+:) sage
 
-- Noah
-
-On Wed, Sep 26, 2012 at 3:28 PM, Ian Pye <ianpye@gmail.com> wrote:
-> Hi,
->
-> I'm periodically getting librados aio_operate() calls to fail on me
-> and return a code of -90: Message too long. Does anyone know how long
-> is too long of a message here?
->
-> Thanks,
->
-> Ian
+> 
+> show you information that makes sense?
+> 
+> On 09/26/2012 08:21 AM, Sage Weil wrote:
+> > On Wed, 26 Sep 2012, hemant surale wrote:
+> > > Hi Dan ,
+> > >       I have set replication factor to 3 of pool 'newbyh' . Then when i
+> > > tried to execute cmds told by you I got that it reported like
+> > > 
+> > > ----------------------------------------------------
+> > > root@third-virtual-machine:~# osdmaptool --test-map-object Obj1 osdmap
+> > > osdmaptool: osdmap file 'osdmap'
+> > >   object 'Obj1' -> 0.c3c4 -> [0,1]
+> > > -----------------------------------------------------
+> > > 
+> > > I even checked manually the dirs at every node . it shows proper data
+> > > available within osd0,osd1 & osd2 . ( i hve 3 node cluster using VM
+> > > Ceph v0.36 )
+> > > 
+> > > So my questions is why in above execution it shows that Obj1 is at
+> > > [0,1] .. it should report all nodes like [0,1,2] .
+> > 
+> > The --test-map-object is currently somewhat useless because it assumes
+> > pool 0 ('data'), and your object is probably in a different pool.
+> > 
+> > sage
+> > 
+> > > 
+> > > 
+> > > 
+> > > -
+> > > Hemant Surale.
+> > > 
+> > > On Wed, Sep 26, 2012 at 2:04 AM, Dan Mick <dan.mick@inktank.com> wrote:
+> > > > Hemant:
+> > > > 
+> > > > Yes, you can.  Use ceph osd getmap -o <file> to get the OSD map, and
+> > > > then
+> > > > use osdmaptool --find-object-map <objectname> <file> to output the
+> > > > PG the object hashes to and the list of OSDs that PG maps to (primary
+> > > > first):
+> > > > 
+> > > > $ ceph osd getmap -o osdmap
+> > > > got osdmap epoch 59
+> > > > $ osdmaptool --test-map-object dmick.rbd osdmap
+> > > > osdmaptool: osdmap file 'osdmap'
+> > > >   object 'dmick.rbd' -> 0.69c8 -> [3,1]
+> > > > 
+> > > > shows dmick.rbd mapping to pg 0.69c8, which in turn maps to OSDs 3 and
+> > > > 1, 3
+> > > > being the primary.
+> > > > 
+> > > > 
+> > > > On 09/25/2012 02:30 AM, hemant surale wrote:
+> > > > > 
+> > > > > Hi Community,
+> > > > >             Is it possible to identify where exactly primary copy of
+> > > > > obj
+> > > > > is stored ? I am using crushmaps to use specific osds for data
+> > > > > placement but i want to knw the primary capoy location. Or I need to
+> > > > > replace pseudo random function by some deterministic function to guide
+> > > > > ceph to utilize specific osd?
+> > > > > 
+> > > > > 
+> > > > > Regards,
+> > > > > Hemant Surale.
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > > in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > > 
+> > > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
