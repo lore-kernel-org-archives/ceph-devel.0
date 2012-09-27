@@ -1,59 +1,51 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Slow ceph fs performance
-Date: Thu, 27 Sep 2012 11:04:45 -0700
-Message-ID: <CAPYLRziRQxAd_TZZER3XeRpBj+W1xgnYgxphaR+wkMX0C3GbXQ@mail.gmail.com>
-References: <50631E97.5050100@inktank.com>
-	<201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: [PATCH] FileJournal: correctly check return value of lseek in
+ write_fd
+Date: Thu, 27 Sep 2012 12:06:29 -0600
+Message-ID: <1348769189-140200-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:60951 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752903Ab2I0SEq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 14:04:46 -0400
-Received: by ieak13 with SMTP id k13so5187238iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 11:04:45 -0700 (PDT)
-In-Reply-To: <201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:37571 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752220Ab2I0SHI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 14:07:08 -0400
+Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 15908D2C695
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 12:07:00 -0600 (MDT)
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 12:06:54 -0600
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bryan@virginia.edu
-Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
-On Wed, Sep 26, 2012 at 1:54 PM, Bryan K. Wright
-<bkw1a@ayesha.phys.virginia.edu> wrote:
-> Hi Mark,
->
->         Thanks for your help.  Some answers to your questions
-> are below.
->
-> mark.nelson@inktank.com said:
->> On 09/26/2012 09:50 AM, Bryan K. Wright wrote:
->> Hi folks,
->> Hi Bryan!
->> >
->>       I'm seeing reasonable performance when I run rados
->> benchmarks, but really slow I/O when reading or writing
->> from a mounted ceph filesystem.  The rados benchmarks
->> show about 150 MB/s for both read and write, but when I
->> go to a client machine with a mounted ceph filesystem
->> and try to rsync a large (60 GB) directory tree onto
->> the ceph fs, I'm getting rates of only 2-5 MB/s.
->> Was the rados benchmark run from the same client machine that the  filesystem
->> is being mounted on?  Also, what object size did you use for  rados bench?
->> Does the directory tree have a lot of small files or a few  very large ones?
->
->         The rados benchmark was run on one of the OSD
-> machines.  Read and write results looked like this (the
-> objects size was just the default, which seems to be 4kB):
 
-Actually, that's 4MB. ;) Can you run
-# rados bench -p pbench 900 write -t 256 -b 4096
-and see what that gets? It'll run 256 simultaneous 4KB writes. (You
-can also vary the number of simultaneous writes and see if that
-impacts it.)
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/os/FileJournal.cc |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
 
-However, my suspicion is that you're limited by metadata throughput
-here. How large are your files? There might be some MDS or client
-tunables we can adjust, but rsync's workload is a known weak spot for
-CephFS.
--Greg
+diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+index d1c92dc..2254720 100644
+--- a/src/os/FileJournal.cc
++++ b/src/os/FileJournal.cc
+@@ -945,9 +945,10 @@ void FileJournal::align_bl(off64_t pos, bufferlist& bl)
+ int FileJournal::write_bl(off64_t& pos, bufferlist& bl)
+ {
+   align_bl(pos, bl);
++  int ret;
+ 
+-  int ret = ::lseek64(fd, pos, SEEK_SET);
+-  if (ret) {
++  off64_t spos = ::lseek64(fd, pos, SEEK_SET);
++  if (spos < 0) {
+     ret = -errno;
+     derr << "FileJournal::write_bl : lseek64 failed " << cpp_strerror(ret) << dendl;
+     return ret;
+-- 
+1.7.8.2
+
+
