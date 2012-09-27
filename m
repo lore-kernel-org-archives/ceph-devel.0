@@ -1,35 +1,37 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: How to create nova volumes inside rbd pool .
-Date: Thu, 27 Sep 2012 04:45:12 +0000 (UTC)
-Message-ID: <loom.20120927T064251-722@post.gmane.org>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: How to create nova volumes inside rbd pool .
+Date: Wed, 26 Sep 2012 22:10:33 -0700
+Message-ID: <5063DFC9.5030505@inktank.com>
+References: <loom.20120927T064251-722@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:50003 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751192Ab2I0EpX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 27 Sep 2012 00:45:23 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TH5yZ-0005cc-4u
-	for ceph-devel@vger.kernel.org; Thu, 27 Sep 2012 06:45:27 +0200
-Received: from ABTS-KK-dynamic-054.228.172.122.airtelbroadband.in ([ABTS-KK-dynamic-054.228.172.122.airtelbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 06:45:27 +0200
-Received: from ramu.freesystems by ABTS-KK-dynamic-054.228.172.122.airtelbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 06:45:27 +0200
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:46781 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752565Ab2I0FKi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 01:10:38 -0400
+Received: by padhz1 with SMTP id hz1so1018367pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Sep 2012 22:10:36 -0700 (PDT)
+In-Reply-To: <loom.20120927T064251-722@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ramu eppa <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+http://ceph.com/docs/master/rbd/rbd-openstack/
 
-  I want to create volumes inside rbd pool,please help me to create volumes
-inside rbd pool.
-
-Thanks,
-Ramu.
-
+On 09/26/2012 09:45 PM, ramu eppa wrote:
+> Hi all,
+>
+>    I want to create volumes inside rbd pool,please help me to create volumes
+> inside rbd pool.
+>
+> Thanks,
+> Ramu.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
