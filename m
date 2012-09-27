@@ -1,45 +1,59 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: How to create nova volumes inside rbd pool .
-Date: Thu, 27 Sep 2012 10:41:17 -0700
-Message-ID: <50648FBD.20108@inktank.com>
-References: <loom.20120927T064251-722@post.gmane.org> <5063DFC9.5030505@inktank.com> <loom.20120927T083015-790@post.gmane.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Slow ceph fs performance
+Date: Thu, 27 Sep 2012 11:04:45 -0700
+Message-ID: <CAPYLRziRQxAd_TZZER3XeRpBj+W1xgnYgxphaR+wkMX0C3GbXQ@mail.gmail.com>
+References: <50631E97.5050100@inktank.com>
+	<201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:41520 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752386Ab2I0RlU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 13:41:20 -0400
-Received: by pbbrr4 with SMTP id rr4so3922401pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 10:41:20 -0700 (PDT)
-In-Reply-To: <loom.20120927T083015-790@post.gmane.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:60951 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752903Ab2I0SEq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 14:04:46 -0400
+Received: by ieak13 with SMTP id k13so5187238iea.19
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 11:04:45 -0700 (PDT)
+In-Reply-To: <201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu eppa <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: bryan@virginia.edu
+Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
 
-The command you show below is not creating a pool; it's creating an rbd 
-image named testpool inside the RADOS pool named "nova".
+On Wed, Sep 26, 2012 at 1:54 PM, Bryan K. Wright
+<bkw1a@ayesha.phys.virginia.edu> wrote:
+> Hi Mark,
+>
+>         Thanks for your help.  Some answers to your questions
+> are below.
+>
+> mark.nelson@inktank.com said:
+>> On 09/26/2012 09:50 AM, Bryan K. Wright wrote:
+>> Hi folks,
+>> Hi Bryan!
+>> >
+>>       I'm seeing reasonable performance when I run rados
+>> benchmarks, but really slow I/O when reading or writing
+>> from a mounted ceph filesystem.  The rados benchmarks
+>> show about 150 MB/s for both read and write, but when I
+>> go to a client machine with a mounted ceph filesystem
+>> and try to rsync a large (60 GB) directory tree onto
+>> the ceph fs, I'm getting rates of only 2-5 MB/s.
+>> Was the rados benchmark run from the same client machine that the  filesystem
+>> is being mounted on?  Also, what object size did you use for  rados bench?
+>> Does the directory tree have a lot of small files or a few  very large ones?
+>
+>         The rados benchmark was run on one of the OSD
+> machines.  Read and write results looked like this (the
+> objects size was just the default, which seems to be 4kB):
 
-Creating and managing images inside nova is done with OpenStack 
-administration tools, typically, and not with the rbd command directly.
-Did you have questions about 
-http://ceph.com/docs/master/rbd/rbd-openstack/ ?
+Actually, that's 4MB. ;) Can you run
+# rados bench -p pbench 900 write -t 256 -b 4096
+and see what that gets? It'll run 256 simultaneous 4KB writes. (You
+can also vary the number of simultaneous writes and see if that
+impacts it.)
 
-
-On 09/26/2012 11:33 PM, ramu eppa wrote:
-> Hi Mick,
->
->    Iam creating nova pool using this command,
-> rbd --pool nova create --size 1024 testpool.It's creating pool fine,
-> but i want to create volume inside this pool(testpool).
->
-> Thanks,
-> Ramu.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+However, my suspicion is that you're limited by metadata throughput
+here. How large are your files? There might be some MDS or client
+tunables we can adjust, but rsync's workload is a known weak spot for
+CephFS.
+-Greg
