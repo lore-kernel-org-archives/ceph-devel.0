@@ -1,122 +1,64 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: RPMs
-Date: Thu, 27 Sep 2012 14:08:00 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209271405360.13352@cobra.newdream.net>
-References: <alpine.DEB.2.00.1209271344000.13352@cobra.newdream.net> <5064BE11.50909@widodh.nl> <CALk=J71ygxP80RcBJKsSEZBOmQcpWsXpcXFMi6t=GBUVfYqPwQ@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: [PATCH] PG: Do not discard op data too early
+Date: Thu, 27 Sep 2012 15:56:15 -0600
+Message-ID: <1348782975-7082-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1147126608-1348780080=:13352"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43620 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754952Ab2I0VIA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 17:08:00 -0400
-In-Reply-To: <CALk=J71ygxP80RcBJKsSEZBOmQcpWsXpcXFMi6t=GBUVfYqPwQ@mail.gmail.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:54885 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755434Ab2I0V47 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 17:56:59 -0400
+Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 1B052D2C734
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 15:56:57 -0600 (MDT)
+Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.20]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 15:56:36 -0600
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marino Pascual <mpascual@heartflow.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org, gary.lowell@inktank.com
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Under a sustained cephfs write load where the offered load is higher
+than the storage cluster write throughput, a backlog of replication ops
+that arrive via the cluster messenger builds up.  The client message
+policy throttler, which should be limiting the total write workload
+accepted by the storage cluster, is unable to prevent it, for any
+value of osd_client_message_size_cap, under such an overload condition.
 
---557981400-1147126608-1348780080=:13352
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+The root cause is that op data is released too early, in op_applied().
 
-On Thu, 27 Sep 2012, Marino Pascual wrote:
-> Add the EPEL repo and you can find it there.
-> su -c 'rpm -Uvhhttp://download.fedoraproject.org/pub/epel/6/i386/epel-r=
-elease-6-7.noarch.r
-> pm'
+If instead the op data is released at op deletion, then the limit
+imposed by the client policy throttler applies over the entire
+lifetime of the op, including commits of replication ops.  That
+makes the policy throttler an effective means for an OSD to
+protect itself from a sustained high offered load, because it can
+effectively limit the total, cluster-wide resources needed to process
+in-progress write ops.
 
-Gary, we should probably build these with --with-nss --without-cryptopp=20
-passed to configure, since libnss3 is in the base distribution and=20
-libcrypo++ is not.  That's what we're doing now for debian and ubuntu.
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/osd/ReplicatedPG.cc |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
 
-sage
+diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+index a64abda..80bec2a 100644
+--- a/src/osd/ReplicatedPG.cc
++++ b/src/osd/ReplicatedPG.cc
+@@ -3490,10 +3490,6 @@ void ReplicatedPG::op_applied(RepGather *repop)
+   dout(10) << "op_applied " << *repop << dendl;
+   if (repop->ctx->op)
+     repop->ctx->op->mark_event("op_applied");
+-
+-  // discard my reference to the buffer
+-  if (repop->ctx->op)
+-    repop->ctx->op->request->clear_data();
+   
+   repop->applying = false;
+   repop->applied = true;
+-- 
+1.7.8.2
 
->=20
-> On Thu, Sep 27, 2012 at 1:58 PM, Wido den Hollander <wido@widodh.nl> wr=
-ote:
->       On 09/27/2012 10:47 PM, Sage Weil wrote:
->             For v0.52 we built some RPMs for the first time.
->             =A0The release machinery
->             here is brand new (thanks, Gary!), so if you run
->             into problems (or don't!)
->             with the repos as they are currently set up, let us
->             know.
->=20
->=20
-> The link in the docs is dead: ceph.com/docs/master/install/rpm/
->=20
-> su -c ?rpm -Uvh
-> http://ceph.com/rpms/el6/x86_64/ceph-release-1-0.noarch.rpm?
->=20
-> The correct RPM URL is:
-> http://ceph.com/rpms/el6/x86_64/ceph-release-1-0.el6.noarch.rpm
->=20
-> Same goes for the FC17.
->=20
-> After fixing that I tried to install Ceph on CentOS 6.3 with:
->=20
-> $ yum install ceph
->=20
-> That resulted in:
->=20
-> --> Running transaction check
-> ---> Package ceph.x86_64 0:0.52-6.el6 will be installed
-> --> Processing Dependency: libcryptopp.so.6()(64bit) for package:
-> ceph-0.52-6.el6.x86_64
-> ---> Package libcephfs1.x86_64 0:0.52-6.el6 will be installed
-> --> Processing Dependency: libcryptopp.so.6()(64bit) for package:
-> libcephfs1-0.52-6.el6.x86_64
-> ---> Package librados2.x86_64 0:0.52-6.el6 will be installed
-> --> Processing Dependency: libcryptopp.so.6()(64bit) for package:
-> librados2-0.52-6.el6.x86_64
-> ---> Package librbd1.x86_64 0:0.52-6.el6 will be installed
-> --> Processing Dependency: libcryptopp.so.6()(64bit) for package:
-> librbd1-0.52-6.el6.x86_64
-> --> Finished Dependency Resolution
-> Error: Package: libcephfs1-0.52-6.el6.x86_64 (ceph)
-> =A0 =A0 =A0 =A0 =A0 =A0Requires: libcryptopp.so.6()(64bit)
-> Error: Package: ceph-0.52-6.el6.x86_64 (ceph)
-> =A0 =A0 =A0 =A0 =A0 =A0Requires: libcryptopp.so.6()(64bit)
-> Error: Package: librados2-0.52-6.el6.x86_64 (ceph)
-> =A0 =A0 =A0 =A0 =A0 =A0Requires: libcryptopp.so.6()(64bit)
-> Error: Package: librbd1-0.52-6.el6.x86_64 (ceph)
-> =A0 =A0 =A0 =A0 =A0 =A0Requires: libcryptopp.so.6()(64bit)
-> =A0You could try using --skip-broken to work around the problem
-> =A0You could try running: rpm -Va --nofiles --nodigest
->=20
-> This should be part of the cryptopp package I think? But this package
-> isn't available on my CentOS machine.
->=20
-> Any suggestions?
->=20
-> Wido
->=20
->       We started with CentOS6/RHEL6 and Fedora 17 for x86_64.
->       =A0Please let us
->       know what other distributions/architectures you are
->       interested in.
->=20
->       Thanks!
->       sage
->=20
->       --
->       To unsubscribe from this list: send the line "unsubscribe
->       ceph-devel" in
->       the body of a message to majordomo@vger.kernel.org
->       More majordomo info at
->       =A0http://vger.kernel.org/majordomo-info.html
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
->=20
---557981400-1147126608-1348780080=:13352--
+
