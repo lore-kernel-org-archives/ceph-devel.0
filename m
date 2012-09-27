@@ -1,99 +1,74 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Slow ceph fs performance
-Date: Thu, 27 Sep 2012 12:47:57 -0700
-Message-ID: <CAPYLRzhpGd4gjRrE2spzTnc5bSVaMB481Jn7bcR0V0aKcr-dBw@mail.gmail.com>
-References: <50631E97.5050100@inktank.com>
-	<201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu>
-	<CAPYLRziRQxAd_TZZER3XeRpBj+W1xgnYgxphaR+wkMX0C3GbXQ@mail.gmail.com>
-	<201209271847.q8RIlUO6031265@ayesha.phys.virginia.edu>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.52 released
+Date: Thu, 27 Sep 2012 13:07:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209271306120.13352@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:64213 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754082Ab2I0Tr5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 15:47:57 -0400
-Received: by ieak13 with SMTP id k13so5472899iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 12:47:57 -0700 (PDT)
-In-Reply-To: <201209271847.q8RIlUO6031265@ayesha.phys.virginia.edu>
+Received: from cobra.newdream.net ([66.33.216.30]:43056 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752320Ab2I0UHI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Sep 2012 16:07:08 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id B86EC81355
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 13:07:07 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 8A36880439
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Sep 2012 13:07:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Sep 27, 2012 at 11:47 AM, Bryan K. Wright
-<bkw1a@ayesha.phys.virginia.edu> wrote:
->
-> greg@inktank.com said:
->> >
->>         The rados benchmark was run on one of the OSD
->> machines.  Read and write results looked like this (the
->> objects size was just the default, which seems to be 4kB):
->> Actually, that's 4MB. ;)
->
->         Oops! My plea is that I was the victim of a
-> man page bug:
->
->        bench seconds mode [ -b objsize ] [ -t threads ]
->               Benchmark  for  seconds.  The  mode  can  be  write or =
-read. The
->               default object size is 4 KB, and the default number of =
-simulated
->               threads (parallel writes) is 16.
+After several weeks of testing v0.52 is ready! This is a big release for 
+RBD and radosgw users. Highlights include:
 
-Whoops! I'd fix it but it's obfuscated somewhat now, so:
-http://tracker.newdream.net/issues/3230
+ * librbd: fully functional and documented image cloning
+ * librbd: image (advisory) locking
+ * librbd: 'protect'/'unprotect' commands to prevent clone parent from 
+   being deleted
+ * librbd: 'flatten' command to sever clone parent relationship
+ * librbd: a few fixes to 'discard' support
+ * osd: several out of order reply bug fixes
+ * msgr: improved failure handling code
+ * auth: expanded authentication settings for greater flexibility
+ * mon: 'report' command for dumping detailed cluster status
+ * mon: throttle client messages (limit memory consumption)
+ * mon: more informative info about stuck PGs in 'health detail'
+ * osd, mon: use feature bits to lock out clients lacking CRUSH tunables 
+   when they are in use
+ * radosgw: support for swift manifest objects
+ * radosgw: support for multi-object deletes
+ * radosgw: improved garbage collection framework
+ * rados: bench command now cleans up after itself
+ * ceph.spec: misc packaging fixes
 
+The big news in this release is that the new RBD cloning functionality is 
+fully in place. This includes the ability to take a base image (snapshot) 
+and instantly 'clone' it to other images. The typical use case is cloning 
+a base OS install image for each VM, allowing you to immediately boot them 
+up without waiting for any data to copy. RBD also got advisory locking 
+support, which allows users to (cooperatively) control who is using each 
+image and avoid situations where multiple hosts write to the same image 
+and corrupt the file system. There is additional integration work on the 
+roadmap that will make this easier to use, but all of the pieces are in 
+place for users to starting taking advantage of it now.
 
->
->
->> Can you run # rados bench -p pbench 900 write -t 256
->> -b 4096 and see what that gets? It'll run 256 simultaneous 4KB write=
-s. (You
->> can also vary the number of simultaneous writes and see if that impa=
-cts it.)
->
->         Here's the new benchmark output:
->
->  Total time run:         900.880070
-> Total writes made:      537187
-> Write size:             4096
-> Bandwidth (MB/sec):     2.329
->
-> Stddev Bandwidth:       2.57691
-> Max bandwidth (MB/sec): 12.6055
-> Min bandwidth (MB/sec): 0
-> Average Latency:        0.429315
-> Stddev Latency:         0.891734
-> Max latency:            19.7647
-> Min latency:            0.016743
+This release also includes several improvements to the radosgw. On the 
+user-facing API side this includes support for Swift 'manifest' objects 
+(large objects uploaded in pieces) and support for multi-object delete. On 
+the administrative side, there is a new garbage collection framework that 
+makes the cleanup of deleted objects transparent, automatic, and 
+efficient. (Currently a radosgw-admin command run from something like cron 
+is necessary to clear out old data.)
 
-Hmm, that is significantly lower than I would have expected. Can you
-check and see if you can get that number higher by increasing (or
-decreasing) the number of in-flight ops? (-t param)
+On the release side, this is also the first release for which we are 
+building RPMs. Hooray! We're starting with just CentOS6/RHEL6 and Fedora 
+17 on x86_64, but will be adding additional distributions for v0.53, 
+including OpenSUSE and Fedora 18. If there is a particular RPM-based 
+distro that you'd like to see us build packages for, please let us know!
 
-Given your size distribution, it could just be that your RAID arrays
-aren't giving you the small random write throughput you expect.
-
-
->> However, my suspicion is that you're limited by metadata throughput =
-here. How
->> large are your files? There might be some MDS or client tunables we =
-can
->> adjust, but rsync's workload is a known weak spot for CephFS. -Greg
->
->         The file size is generally small.  Here's the distribution:
->
-> http://ayesha.phys.virginia.edu/~bryan/filesize.png
->
-> The mean is about 2.5 MB.
-
-So that chart is measuring in KB? Anyway, it might be metadata =97 you
-could see what the CPU usage on the MDS server looks like while
-running the rsync.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+You can get v0.52 from:
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball athttp://ceph.com/download/ceph-0.52.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
