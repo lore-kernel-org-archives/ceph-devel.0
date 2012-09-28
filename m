@@ -1,49 +1,55 @@
-From: mark seger <mjseger@gmail.com>
-Subject: Re: Slow ceph fs performance
-Date: Fri, 28 Sep 2012 12:22:10 +0000 (UTC)
-Message-ID: <loom.20120928T141701-295@post.gmane.org>
-References: <201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu> <5064E3D7.6080002@catalyst.net.nz> <5064E61E.2070800@catalyst.net.nz>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: convert to use le32_add_cpu()
+Date: Fri, 28 Sep 2012 08:12:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209280812400.10331@cobra.newdream.net>
+References: <CAPgLHd8VSUZnVac+QT5Uvu2STd9KsMCy-G5C5LX6ZpcwO7Lzgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:53033 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757860Ab2I1MZD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 28 Sep 2012 08:25:03 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1THZcu-00042k-6d
-	for ceph-devel@vger.kernel.org; Fri, 28 Sep 2012 14:25:04 +0200
-Received: from 68-112-253-178.dhcp.oxfr.ma.charter.com ([68.112.253.178])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Sep 2012 14:25:04 +0200
-Received: from mjseger by 68-112-253-178.dhcp.oxfr.ma.charter.com with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Sep 2012 14:25:04 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:49830 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758386Ab2I1PNF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 11:13:05 -0400
+In-Reply-To: <CAPgLHd8VSUZnVac+QT5Uvu2STd9KsMCy-G5C5LX6ZpcwO7Lzgw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wei Yongjun <weiyj.lk@gmail.com>
+Cc: yongjun_wei@trendmicro.com.cn, ceph-devel@vger.kernel.org
 
-I realize I'm a little late to this party but since collectl was mentioned 
-thought I'd jump in.  ;)
+Applied, thanks!
 
-Whenever I do any file system testing I also have a copy of collectl running in 
-another window.
-Just looking at total transfer times can end up taking you down 
-the wrong path.
-What is there are long stalls and very burst I/O?  could be a
-starved resource or network issue that has nothing to do with he disks at all.
+On Fri, 28 Sep 2012, Wei Yongjun wrote:
 
-As for iostat, while you're certainly welcome to use it and I based the collectl
-output display format on it, I'd highly recommend using iostat -x to see
-wait/service times as those can be key to seeing what's happening.
-
-Also, if you use collectl in stead with "-sD --home" you'll basically see the
-output in a top-like format, making it real easy to see what's happening.
-Further if you apply the right filter you can simply watch a single disk, line by
-line w/o any pesky headers in your way.
-
--mark
-
+> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> 
+> Convert cpu_to_le32(le32_to_cpu(E1) + E2) to use le32_add_cpu().
+> 
+> dpatch engine is used to auto generate this patch.
+> (https://github.com/weiyj/dpatch)
+> 
+> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> ---
+>  fs/ceph/caps.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 620daad..3251e9c 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1005,7 +1005,7 @@ static void __queue_cap_release(struct ceph_mds_session *session,
+>  
+>  	BUG_ON(msg->front.iov_len + sizeof(*item) > PAGE_CACHE_SIZE);
+>  	head = msg->front.iov_base;
+> -	head->num = cpu_to_le32(le32_to_cpu(head->num) + 1);
+> +	le32_add_cpu(&head->num, 1);
+>  	item = msg->front.iov_base + msg->front.iov_len;
+>  	item->ino = cpu_to_le64(ino);
+>  	item->cap_id = cpu_to_le64(cap_id);
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
