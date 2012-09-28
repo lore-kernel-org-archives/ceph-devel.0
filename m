@@ -1,29 +1,46 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: v0.52 released
-Date: Fri, 28 Sep 2012 08:20:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209280819100.10331@cobra.newdream.net>
-References: <alpine.DEB.2.00.1209271306120.13352@cobra.newdream.net> <506552C1.4020300@ledeuns.net>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: ceph: fix encoding of ino only (not relative) paths
+Date: Fri, 28 Sep 2012 18:46:28 +0300
+Message-ID: <20120928154628.GA19145@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49873 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758476Ab2I1PUJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 11:20:09 -0400
-In-Reply-To: <506552C1.4020300@ledeuns.net>
+Received: from rcsinet15.oracle.com ([148.87.113.117]:32009 "EHLO
+	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757969Ab2I1Pqi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 11:46:38 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Denis Fondras <ceph@ledeuns.net>
+To: sage@newdream.net
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, 28 Sep 2012, Denis Fondras wrote:
-> Hello all,
-> 
-> Is it possible/recommended to mix versions ? ie. OSD with 0.48 and MON with
-> 0.52 or some OSD with 0.48 and some with 0.52 ?
+Hello Sage Weil,
 
-Yes, that is supported.  We haven't done heavy-duty testing yet mixing 
-0.48 with 0.52+ and osd thrashing, but we will be shortly.
+This is a semi-automatic email about new static checker warnings.
 
-sage
+The patch 795858dbd253: "ceph: fix encoding of ino only (not 
+relative) paths" from Aug 15, 2011, leads to the following Smatch 
+complaint:
+
+fs/ceph/mds_client.c:1593 set_request_path_attr()
+	 error: we previously assumed 'rpath' could be null (see line 1590)
+
+fs/ceph/mds_client.c
+  1589			     *ppath);
+  1590		} else if (rpath || rino) {
+                           ^^^^^^^^^^^^^
+Check.
+
+  1591			*ino = rino;
+  1592			*ppath = rpath;
+  1593			*pathlen = strlen(rpath);
+                                   ^^^^^^^^^^^^^
+Dereference.
+
+  1594			dout(" path %.*s\n", *pathlen, rpath);
+  1595		}
+
+regards,
+dan carpenter
 
