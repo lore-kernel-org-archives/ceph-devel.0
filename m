@@ -1,47 +1,49 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: Re: v0.52 released
-Date: Fri, 28 Sep 2012 09:45:50 +0100
-Message-ID: <225281A5-AFB6-4A4F-9AA5-F73ACA236298@tchpc.tcd.ie>
-References: <sfid-H20120927-210714-+028.22-1@marduk.tchpc.tcd.ie> <alpine.DEB.2.00.1209271306120.13352@cobra.newdream.net>  (sfid-H20120927-210714-+028.22-1@marduk.tchpc.tcd.ie)
-Mime-Version: 1.0 (Apple Message framework v1278)
+From: mark seger <mjseger@gmail.com>
+Subject: Re: Slow ceph fs performance
+Date: Fri, 28 Sep 2012 12:22:10 +0000 (UTC)
+Message-ID: <loom.20120928T141701-295@post.gmane.org>
+References: <201209262054.q8QKsfwx007341@ayesha.phys.virginia.edu> <5064E3D7.6080002@catalyst.net.nz> <5064E61E.2070800@catalyst.net.nz>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:48895 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757233Ab2I1Ipz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 04:45:55 -0400
-In-Reply-To: <alpine.DEB.2.00.1209271306120.13352@cobra.newdream.net>  (sfid-H20120927-210714-+028.22-1@marduk.tchpc.tcd.ie)
+Received: from plane.gmane.org ([80.91.229.3]:53033 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757860Ab2I1MZD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 28 Sep 2012 08:25:03 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1THZcu-00042k-6d
+	for ceph-devel@vger.kernel.org; Fri, 28 Sep 2012 14:25:04 +0200
+Received: from 68-112-253-178.dhcp.oxfr.ma.charter.com ([68.112.253.178])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Sep 2012 14:25:04 +0200
+Received: from mjseger by 68-112-253-178.dhcp.oxfr.ma.charter.com with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Sep 2012 14:25:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Sage,
+I realize I'm a little late to this party but since collectl was mentioned 
+thought I'd jump in.  ;)
 
-On 27 Sep 2012, at 21:07, Sage Weil wrote:
+Whenever I do any file system testing I also have a copy of collectl running in 
+another window.
+Just looking at total transfer times can end up taking you down 
+the wrong path.
+What is there are long stalls and very burst I/O?  could be a
+starved resource or network issue that has nothing to do with he disks at all.
 
-> 
-> On the release side, this is also the first release for which we are 
-> building RPMs. Hooray! We're starting with just CentOS6/RHEL6 and Fedora 
-> 17 on x86_64, but will be adding additional distributions for v0.53, 
-> including OpenSUSE and Fedora 18. If there is a particular RPM-based 
-> distro that you'd like to see us build packages for, please let us know!
-> 
-> You can get v0.52 from:
-> * Git at git://github.com/ceph/ceph.git
-> * Tarball athttp://ceph.com/download/ceph-0.52.tar.gz
-> * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
-> * For RPMs, see http://ceph.com/docs/master/install/rpm
+As for iostat, while you're certainly welcome to use it and I based the collectl
+output display format on it, I'd highly recommend using iostat -x to see
+wait/service times as those can be key to seeing what's happening.
 
-Scientific Linux 6 is something that we use here at our site, it's binary compatible with RHEL6 and Centos6. Since there is a 'stable' series of releases and a series of 'testing and development' releases would it be better to setup a repo with only stable releases and a testing repo for all development builds (and nighty builds)? It would make it easier for anyone who wants to deploy ceph  in production to just point to a stable repo and not get a development builds. It would be similar to how epel might structure their repos with a stable and a testing repo.
+Also, if you use collectl in stead with "-sD --home" you'll basically see the
+output in a top-like format, making it real easy to see what's happening.
+Further if you apply the right filter you can simply watch a single disk, line by
+line w/o any pesky headers in your way.
 
-Regards,
-Jimmy Tang
-
---
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-Trinity Centre for High Performance Computing,
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/
+-mark
 
