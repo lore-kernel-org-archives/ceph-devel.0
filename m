@@ -1,51 +1,68 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: convert to use le32_add_cpu()
-Date: Fri, 28 Sep 2012 08:12:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1209280812400.10331@cobra.newdream.net>
-References: <CAPgLHd8VSUZnVac+QT5Uvu2STd9KsMCy-G5C5LX6ZpcwO7Lzgw@mail.gmail.com>
+Subject: Re: v0.52 released
+Date: Fri, 28 Sep 2012 08:16:00 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1209280813401.10331@cobra.newdream.net>
+References: <sfid-H20120927-210714-+028.22-1@marduk.tchpc.tcd.ie> <alpine.DEB.2.00.1209271306120.13352@cobra.newdream.net> (sfid-H20120927-210714-+028.22-1@marduk.tchpc.tcd.ie) <225281A5-AFB6-4A4F-9AA5-F73ACA236298@tchpc.tcd.ie>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49830 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49851 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758386Ab2I1PNF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 11:13:05 -0400
-In-Reply-To: <CAPgLHd8VSUZnVac+QT5Uvu2STd9KsMCy-G5C5LX6ZpcwO7Lzgw@mail.gmail.com>
+	with ESMTP id S1758416Ab2I1PQB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Sep 2012 11:16:01 -0400
+In-Reply-To: <225281A5-AFB6-4A4F-9AA5-F73ACA236298@tchpc.tcd.ie>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: yongjun_wei@trendmicro.com.cn, ceph-devel@vger.kernel.org
+To: Jimmy Tang <jtang@tchpc.tcd.ie>
+Cc: ceph-devel@vger.kernel.org
 
-Applied, thanks!
+Hi,
 
-On Fri, 28 Sep 2012, Wei Yongjun wrote:
+On Fri, 28 Sep 2012, Jimmy Tang wrote:
+> Hi Sage,
+> 
+> On 27 Sep 2012, at 21:07, Sage Weil wrote:
+> 
+> > 
+> > On the release side, this is also the first release for which we are 
+> > building RPMs. Hooray! We're starting with just CentOS6/RHEL6 and Fedora 
+> > 17 on x86_64, but will be adding additional distributions for v0.53, 
+> > including OpenSUSE and Fedora 18. If there is a particular RPM-based 
+> > distro that you'd like to see us build packages for, please let us know!
+> > 
+> > You can get v0.52 from:
+> > * Git at git://github.com/ceph/ceph.git
+> > * Tarball athttp://ceph.com/download/ceph-0.52.tar.gz
+> > * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+> > * For RPMs, see http://ceph.com/docs/master/install/rpm
+> 
+> Scientific Linux 6 is something that we use here at our site, it's binary compatible with RHEL6 and Centos6. Since there is a 'stable' series of releases and a series of 'testing and development' releases would it be better to setup a repo with only stable releases and a testing repo for all development builds (and nighty builds)? It would make it easier for anyone who wants to deploy ceph  in production to just point to a stable repo and not get a development builds. It would be similar to how epel might structure their repos with a stable and a testing repo.
 
-> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Ah, good point.  You can do that today with the debian repos, but we 
+lumped all the rpms into ceph.com/rpms.  Currently
+
+debian			symlink to debian-argonaut (latest stable)
+debian-argonaut		stable argonaut releases
+debian-testing		dev releases
+
+We can do the same with the rpms...
+
+rpm
+rpm-argonaut
+rpm-testing
+
+?
+sage
+
+
+> Regards,
+> Jimmy Tang
 > 
-> Convert cpu_to_le32(le32_to_cpu(E1) + E2) to use le32_add_cpu().
-> 
-> dpatch engine is used to auto generate this patch.
-> (https://github.com/weiyj/dpatch)
-> 
-> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
-> ---
->  fs/ceph/caps.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 620daad..3251e9c 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1005,7 +1005,7 @@ static void __queue_cap_release(struct ceph_mds_session *session,
->  
->  	BUG_ON(msg->front.iov_len + sizeof(*item) > PAGE_CACHE_SIZE);
->  	head = msg->front.iov_base;
-> -	head->num = cpu_to_le32(le32_to_cpu(head->num) + 1);
-> +	le32_add_cpu(&head->num, 1);
->  	item = msg->front.iov_base + msg->front.iov_len;
->  	item->ino = cpu_to_le64(ino);
->  	item->cap_id = cpu_to_le64(cap_id);
-> 
+> --
+> Senior Software Engineer, Digital Repository of Ireland (DRI)
+> Trinity Centre for High Performance Computing,
+> Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+> http://www.tchpc.tcd.ie/
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
