@@ -1,54 +1,84 @@
-From: Sergey Tsalkov <stsalkov@gmail.com>
-Subject: strange issues recovering from inconsistent state
-Date: Fri, 28 Sep 2012 22:12:33 -0700
-Message-ID: <CAJvS2pqSE6LicpDAz_DBYwHwWkS6F3uE78gn+dostmLhNNY7Lw@mail.gmail.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: Collection of strange lockups on 0.51
+Date: Mon, 1 Oct 2012 01:55:17 +0400
+Message-ID: <CABYiri8pCTjJu1-2LzBJtxQe9cHBMqa51MSAkvf8LTWpm_P+Tw@mail.gmail.com>
+References: <CABYiri8t9yXQ39WOW1+Rib5jxp8qUCUY8iSht=p2PSQZtn3ZEA@mail.gmail.com>
+ <CADvuQRFMaGpH9MdFHDDworDMEePsj=vn1A6vbE0b0G6+oS41Lg@mail.gmail.com> <CABYiri_ujogFa==21ty3eWhDGx7PMK-F4Rya0kJEF-RQTsBNQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:43833 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752383Ab2I2FMf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Sep 2012 01:12:35 -0400
-Received: by vbbff1 with SMTP id ff1so3886648vbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Sep 2012 22:12:34 -0700 (PDT)
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:46385 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751532Ab2I3Vzj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Sep 2012 17:55:39 -0400
+Received: by mail-wi0-f172.google.com with SMTP id hq12so1913917wib.1
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Sep 2012 14:55:38 -0700 (PDT)
+In-Reply-To: <CABYiri_ujogFa==21ty3eWhDGx7PMK-F4Rya0kJEF-RQTsBNQQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-So we're running a 3-machine cluster with ceph 0.52 on ubuntu precise.
-Our cluster has 2 machines with 5 osds each, and a third machine with
-a rados gateway. Each machine has a mon. The default crushmap is
-putting a copy of the data on each machine, so 2 copies total. All of
-our reads and writes are done over the S3 gateway.
+On Thu, Sep 13, 2012 at 1:43 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> On Thu, Sep 13, 2012 at 1:09 AM, Tommi Virtanen <tv@inktank.com> wrote:
+>> On Wed, Sep 12, 2012 at 10:33 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>>> Hi,
+>>> This is completely off-list, but I`m asking because only ceph trigger
+>>> such a bug :) .
+>>>
+>>> With 0.51, following happens: if I kill an osd, one or more neighbor
+>>> nodes may go to hanged state with cpu lockups, not related to
+>>> temperature or overall interrupt count or la and it happens randomly
+>>> over 16-node cluster. Almost sure that ceph triggerizing some hardware
+>>> bug, but I don`t quite sure of which origin. Also after a short time
+>>> after reset from such crash a new lockup may be created by any action.
+>>
+>> From the log, it looks like your ethernet driver is crapping out.
+>>
+>> [172517.057886] NETDEV WATCHDOG: eth0 (igb): transmit queue 7 timed out
+>> ...
+>> [172517.058622]  [<ffffffff812b2975>] ? netif_tx_lock+0x40/0x76
+>>
+>> etc.
+>>
+>> The later oopses are talking about paravirt_write_msr etc, which makes
+>> me thing you're using Xen? You probably don't want to run Ceph servers
+>> inside virtualization (for production).
+>
+> NOPE. Xen was my choice for almost five years, but right now I am
+> replaced it with kvm everywhere due to buggy 4.1 '-stable'. 4.0 has
+> same poor network performance as 3.x but can be really named stable.
+> All those backtraces comes from bare hardware.
+>
+> At the end you can see nice backtrace which comes out soon after end
+> of the boot sequence when I manually typed 'modprobe rbd', it may be
+> any other command assuming from experience. As soon as I don`t know
+> anything about long-lasting states in intel, especially of those which
+> will survive ipmi reset button, I think that first-sight complain
+> about igb may be not quite right. If there cards may save some of
+> runtime states to EEPROM and pull them back then I`m wrong.
 
-We were curious about how it handled inconsistent file states so we
-uploaded a text file, then went into the osd data
-(/var/lib/ceph/osd/ceph-9/...) and changed that file on disk on one of
-the two osds. The cluster didn't automatically discover any errors,
-still reported HEALTH_OK, and S3 happily returned the broken copy of
-the file.
+Short post mortem - EX3200/12.1R2.9 may begin to drop packets (seems
+to appear more likely on 0.51 traffic patterns, which is very strange
+for L2 switching) when a bunch of the 802.3ad pairs, sixteen in my
+case, exposed to extremely high load - database benchmark over 700+
+rbd-backed VMs and cluster rebalance at same time. It explains
+post-reboot lockups in igb driver and all types of lockups above. I
+would very appreciate any suggestions of switch models which do not
+expose such behavior in simultaneous conditions both off-list and in
+this thread.
 
-We then did "ceph osd repair 9" (which is cheating since we knew which
-osd we'd broken it on). It discovered the error but didn't fix it, and
-now "ceph health detail" was returning "pg 9.7 is
-active+clean+inconsistent, acting [9,4]". Additional repair attempts
-didn't help.
-
-We then restarted all of the osds. The cluster was now reporting
-HEALTH_OK again, and kept reporting that even after we re-ran the
-repair command. The repair command still detected the inconsistency,
-though:
-2012-09-28 21:46:58.068140 osd.9 [ERR] repair 9.7
-994c51ff/4712.1_functions_admin.php/head//9 on disk size (90965) does
-not match object info size (91183)
-
-We then tried using S3 to download the broken file again. Every time
-we tried, it sent us the broken copy of the file, and then the rados
-gateway crashed as soon as the send was done. I restarted the gateway,
-and was able to reproduce this.
-
-Just curious to know more about the recovery behavior. How is ceph
-designed to recover from inconsistent states?
-
-Thanks!
-Sergey
+>
+>>
+>> [172696.503900]  [<ffffffff8100d025>] ? paravirt_write_msr+0xb/0xe
+>> [172696.503942]  [<ffffffff810325f3>] ? leave_mm+0x3e/0x3e
+>>
+>> and *then* you get
+>>
+>> [172695.041709] sd 0:2:0:0: [sda] megasas: RESET cmd=2a retries=0
+>> [172695.041745] megasas: [ 0]waiting for 35 commands to complete
+>> [172696.045602] megaraid_sas: no pending cmds after reset
+>> [172696.045644] megasas: reset successful
+>>
+>> which just adds more awesomeness to the soup -- though I do wonder if
+>> this could be caused by the soft hang from earlier.
