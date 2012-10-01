@@ -1,375 +1,188 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Re: How to direct data inject to specific OSDs
-Date: Mon, 1 Oct 2012 23:17:46 +0530
-Message-ID: <CAGfy=6mYCCsSUQ_5OyXu2L3oXcJXALTTxrr402mpKCjKYZBPDA@mail.gmail.com>
-References: <CAGfy=6ktXBkVQkZ=Z9ODAmWm9cCVu=7nsGOeDE2CvNEdAGK75w@mail.gmail.com>
-	<CAPYLRziC_ah9=PAYccbjgu_kvBqGfw-fP64JJN_Dfn95OUhyxg@mail.gmail.com>
-Mime-Version: 1.0
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: Re: v0.48.2 argonaut update released
+Date: Mon, 1 Oct 2012 19:48:30 +0200
+Message-ID: <C5594A96-3A10-4F94-BCD6-874A2411A88B@filoo.de>
+References: <alpine.DEB.2.00.1209200948180.8980@cobra.newdream.net> <50696B2D.7020301@filoo.de> <alpine.DEB.2.00.1210010904240.25178@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 6.1 \(1498\))
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:55840 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751493Ab2JARrr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 13:47:47 -0400
-Received: by vbbff1 with SMTP id ff1so5635166vbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Oct 2012 10:47:46 -0700 (PDT)
-In-Reply-To: <CAPYLRziC_ah9=PAYccbjgu_kvBqGfw-fP64JJN_Dfn95OUhyxg@mail.gmail.com>
+Received: from mail-3.de-punkt.de ([93.190.64.33]:44069 "EHLO
+	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751374Ab2JARsc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 13:48:32 -0400
+In-Reply-To: <alpine.DEB.2.00.1210010904240.25178@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-It Still doesn't work , The cmd sequence is as follows :
-------------------------------------------------
-------------------------------------------------
-------------------------------------------------
-after modifying crushmap as told by I tried to create new pool to
-utilize new crushmap
-$rados mkpool new
-$ceph osd pool set new size 1
-$ceph osd pool set new crush_ruleset 3
+Well,
 
-then I tried to create 1 object inside pool "new" but then ceph went
-unresponsive.
-I did this experiment with ceph v0.36 It worked there ,But here even
-syntax is also changed a bit so unable to achieve what is desired.
+Am 01.10.2012 um 18:07 schrieb Sage Weil <sage@inktank.com>:
 
-Can you guide me further?
+> On Mon, 1 Oct 2012, Oliver Francke wrote:
+>> Hi *,
+>>=20
+>> with reference to the below mentioned
+>>=20
+>> "objecter: misc fixes for op reordering"
+>>=20
+>>=20
+>> I assumed it could have something to do with slow requests not being=
+ solved
+>> for too long. I just not saw it anymore in 0.51 in our testing-eviro=
+nment.
+>> But today we took one of our nodes into maintenance, and I see many =
+of:
+>>=20
+>> --- 8-<---
+>>=20
+>> 2012-10-01 11:58:46.766999 osd.10 [WRN] 38 slow requests, 1 included=
+ below;
+>> oldest blocked for > 1189.312605 secs
+>> 2012-10-01 11:58:46.767013 osd.10 [WRN] slow request 240.183032 seco=
+nds old,
+>> received at 2012-10-01 11:54:46.583860: osd_op(client.110046.0:21439=
+84
+>> rb.0.1adf5.6733efe2.00000000061a [write 208384~4096] 6.f511e801) v4 =
+currently
+>> delayed
+>> 2
+>>=20
+>> --- 8-< ---
+>>=20
+>> which is bad, as I assume, that some of the VM's are now stalled. An=
+ybody else
+>> experienced such things?
+>=20
+> You see this on v0.51?  For v0.52 we merged in a large series of mess=
+enger=20
+> fixes and cleanups that could very easily explain this.  Can you try=20
+> v0.52?
+>=20
 
--
-Hemant Surale.
+just checking=85 up to now no "slow req." is lasting for longer than 30=
+=85 seconds.
 
-On Mon, Oct 1, 2012 at 10:39 PM, Gregory Farnum <greg@inktank.com> wrot=
-e:
-> On Thu, Sep 27, 2012 at 3:52 AM, hemant surale <hemant.surale@gmail.c=
-om> wrote:
->> Sir,
->> I have upgraded my cluster to Ceph v0.48. and cluster is fine (excep=
+> The same series has not been merged into the argonaut stable series; =
+I'm=20
+> unsure yet whether that's a good idea (it's a lot of refactoring mixe=
+d in=20
+> with the fixes).  Perhaps after it has proven itself in v0.52 for lon=
+ger,=20
+> and/or if we get reports of msgr problems in argonaut deployments.
+
+I think most people are just happy campers these days=85 Not so destruc=
+tive as myself ;)
+
+>=20
+> sage
+>=20
+
+Oliver.
+
+>>=20
+>> Thnx n regards,
+>>=20
+>> Oliver.
+>>=20
+>> On 09/20/2012 06:52 PM, Sage Weil wrote:
+>>> Hi everyone,
+>>>=20
+>>> Another update to the stable "argonaut" series has been released.  =
+This
+>>> fixes a few important bugs in rbd and radosgw and includes a series=
+ of
+>>> changes to upstart and deployment related scripts that will allow t=
+he
+>>> upcoming 'ceph-deploy' tool to work with the argonaut release.
+>>>=20
+>>> Upgrading:
+>>>=20
+>>>  * The default search path for keyring files now includes
+>>>    /etc/ceph/ceph.$name.keyring. If such files are present on your
+>>>    cluster, be aware that by default they may now be used.
+>>>  * There are several changes to the upstart init files. These have =
+not
+>>>    been previously documented or recommended. Any existing users sh=
+ould
+>>>    review the changes before upgrading.
+>>>  * The ceph-disk-prepare and ceph-disk-active scripts have been upd=
+ated
+>>>    significantly. These have not been previously documented or
+>>>    recommended. Any existing users should review the changes before
+>>> upgrading.
+>>>=20
+>>> Notable changes include:
+>>>=20
+>>>  * mkcephfs: fix keyring generation for mds, osd when default paths=
+ are
+>>>    used
+>>>  * radosgw: fix bug causing occasional corruption of per-bucket sta=
+ts
+>>>  * radosgw: workaround to avoid previously corrupted stats from goi=
+ng
+>>>    negative
+>>>  * radosgw: fix bug in usage stats reporting on busy buckets
+>>>  * radosgw: fix Content-Range: header for objects bigger than 2 GB.
+>>>  * rbd: avoid leaving watch acting when command line tool errors ou=
 t
->> gceph not working) .
->>
->> How can I direct my data inject to specific osds ?
->> i tried to edit crushmap & tired to specify ruleset accordingly , Bu=
-t
->> its not working ( I did same for Ceph v0.36 it worked )
->>
->> --------------------------------------------------------------------=
----//crushmap-----------------------------------
->> # begin crush map
->>
->> # devices
->> device 0 osd.0
->> device 1 osd.1
->>
->> # types
->> type 0 osd
->> type 1 host
->> type 2 rack
->> type 3 row
->> type 4 room
->> type 5 datacenter
->> type 6 pool
->> type 7 ghost
->>
->> # buckets
->> host atish-virtual-machine {
->>         id -2           # do not change unnecessarily
->>         # weight 1.000
->>         alg straw
->>         hash 0  # rjenkins1
->>         item osd.0 weight 1.000
->> }
->> ghost bob-virtual-machine {
->>         id -4           # do not change unnecessarily
->>         # weight 1.000
->>         alg straw
->>         hash 0  # rjenkins1
->>         item osd.1 weight 1.000
->> }
->> rack unknownrack {
->>         id -3           # do not change unnecessarily
->>         # weight 2.000
->>         alg straw
->>         hash 0  # rjenkins1
->>         item atish-virtual-machine weight 1.000
->>         item bob-virtual-machine weight 1.000
->> }
->> pool default {
->>         id -1           # do not change unnecessarily
->>         # weight 2.000
->>         alg straw
->>         hash 0  # rjenkins1
->>         item unknownrack weight 2.000
->> }
->>
->> # rules
->> rule data {
->>         ruleset 0
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->> rule metadata {
->>         ruleset 1
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->> rule rbd {
->>         ruleset 2
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->> rule newbyh {
->>         ruleset 3
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type ghost
->>         step emit
->> }
->>
->>
->> # end crush map
->> ---------------------------------------------//EOF------------------=
--------------------------------------------------------
->> I've created new pool "new" set its replication factor to 1 & also s=
-et
->> crush_ruleset property to 3 .I was expecting ceph to select osd.1 i.=
-e.
->> bob-virtual-machine but some(Obj1,Obj2) Objects are placed into osd.=
-0
->> (atish-V-M) and some(Obj3) was placed in osd.1. Does my crushmap hav=
-e
->> errors ? Or I am missing the direction ?
->
-> To fix this specific error, you'll want to change it from
-> step take default
-> step chooseleaf firstn 0 type ghost
->
-> to
-> step take bob-virtual-machine
-> step chooseleaf firstn 0 type osd
->
-> But this isn't a good plan for doing data layout in general =97 it se=
-ems
-> like Ceph is not a fit for your needs if you need to specify that
-> specific data goes to specific OSDs.
-> -Greg
->
->>
->>
->> -
->> Hemant Surale
->>
->>
->>
->>
->>
->> On Thu, Sep 27, 2012 at 10:56 AM, hemant surale <hemant.surale@gmail=
-=2Ecom> wrote:
->>> Sure Sir !  :)
->>>
->>>
->>> On Thu, Sep 27, 2012 at 10:50 AM, Dan Mick <dan.mick@inktank.com> w=
-rote:
->>>> OK.  Let us know if osd map ends up working out for you.
->>>>
->>>>
->>>> On 09/26/2012 10:18 PM, hemant surale wrote:
->>>>>
->>>>> Sir,
->>>>>     I am now upgrading to latest version of ceph. I was using 0.3=
-6
->>>>> because it was running fine on 3 node cluster & i was really afra=
-id of
->>>>> problem could pop up , But learning is something that consists of
->>>>> problem solving . So np.
->>>>>
->>>>> -
->>>>> Hemant Surale.
->>>>>
->>>>> On Thu, Sep 27, 2012 at 10:38 AM, Dan Mick <dan.mick@inktank.com>=
- wrote:
->>>>>>
->>>>>> 0.36??  That is *very* old.  Is there a good reason not to upgra=
-de?
->>>>>>
->>>>>>
->>>>>> On 09/26/2012 07:31 PM, hemant surale wrote:
->>>>>>>
->>>>>>>
->>>>>>> Sir,
->>>>>>>      I am using Ceph v0.36 . May be thats the reason after exec=
-uting cmd
->>>>>>> told by you execution goes like this
->>>>>>>
->>>>>>>
->>>>>>> ---------------------------------------------
->>>>>>> root@third-virtual-machine:~# ceph osd map newbyh Obj1
->>>>>>> 2012-09-26 12:17:49.900514 mon <- [osd,map,newbyh,Obj1]
->>>>>>> 2012-09-26 12:17:49.900977 mon0 -> 'unknown command map' (-22)
->>>>>>> ----------------------------------------------
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> -
->>>>>>> Hemant Surale.
->>>>>>>
->>>>>>>
->>>>>>> On Thu, Sep 27, 2012 at 3:23 AM, Dan Mick <dan.mick@inktank.com=
-> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>> Ah, yeah, that assumption would be a problem.
->>>>>>>>
->>>>>>>> So, Hemant, does
->>>>>>>>           ceph osd dump <poolname> <objectname>
->>>>>>>>
->>>>>>>> show you information that makes sense?
->>>>>>>>
->>>>>>>>
->>>>>>>> On 09/26/2012 08:21 AM, Sage Weil wrote:
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> On Wed, 26 Sep 2012, hemant surale wrote:
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> Hi Dan ,
->>>>>>>>>>         I have set replication factor to 3 of pool 'newbyh' =
-=2E Then
->>>>>>>>>> when
->>>>>>>>>> i
->>>>>>>>>> tried to execute cmds told by you I got that it reported lik=
-e
->>>>>>>>>>
->>>>>>>>>> ----------------------------------------------------
->>>>>>>>>> root@third-virtual-machine:~# osdmaptool --test-map-object O=
-bj1
->>>>>>>>>> osdmap
->>>>>>>>>> osdmaptool: osdmap file 'osdmap'
->>>>>>>>>>     object 'Obj1' -> 0.c3c4 -> [0,1]
->>>>>>>>>> -----------------------------------------------------
->>>>>>>>>>
->>>>>>>>>> I even checked manually the dirs at every node . it shows pr=
-oper data
->>>>>>>>>> available within osd0,osd1 & osd2 . ( i hve 3 node cluster u=
-sing VM
->>>>>>>>>> Ceph v0.36 )
->>>>>>>>>>
->>>>>>>>>> So my questions is why in above execution it shows that Obj1=
- is at
->>>>>>>>>> [0,1] .. it should report all nodes like [0,1,2] .
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> The --test-map-object is currently somewhat useless because i=
-t assumes
->>>>>>>>> pool 0 ('data'), and your object is probably in a different p=
-ool.
->>>>>>>>>
->>>>>>>>> sage
->>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> -
->>>>>>>>>> Hemant Surale.
->>>>>>>>>>
->>>>>>>>>> On Wed, Sep 26, 2012 at 2:04 AM, Dan Mick <dan.mick@inktank.=
-com>
->>>>>>>>>> wrote:
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Hemant:
->>>>>>>>>>>
->>>>>>>>>>> Yes, you can.  Use ceph osd getmap -o <file> to get the OSD=
- map, and
->>>>>>>>>>> then
->>>>>>>>>>> use osdmaptool --find-object-map <objectname> <file> to out=
-put the
->>>>>>>>>>> PG the object hashes to and the list of OSDs that PG maps t=
-o
->>>>>>>>>>> (primary
->>>>>>>>>>> first):
->>>>>>>>>>>
->>>>>>>>>>> $ ceph osd getmap -o osdmap
->>>>>>>>>>> got osdmap epoch 59
->>>>>>>>>>> $ osdmaptool --test-map-object dmick.rbd osdmap
->>>>>>>>>>> osdmaptool: osdmap file 'osdmap'
->>>>>>>>>>>     object 'dmick.rbd' -> 0.69c8 -> [3,1]
->>>>>>>>>>>
->>>>>>>>>>> shows dmick.rbd mapping to pg 0.69c8, which in turn maps to=
- OSDs 3
->>>>>>>>>>> and
->>>>>>>>>>> 1, 3
->>>>>>>>>>> being the primary.
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> On 09/25/2012 02:30 AM, hemant surale wrote:
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> Hi Community,
->>>>>>>>>>>>               Is it possible to identify where exactly pri=
-mary copy
->>>>>>>>>>>> of
->>>>>>>>>>>> obj
->>>>>>>>>>>> is stored ? I am using crushmaps to use specific osds for =
-data
->>>>>>>>>>>> placement but i want to knw the primary capoy location. Or=
- I need
->>>>>>>>>>>> to
->>>>>>>>>>>> replace pseudo random function by some deterministic funct=
-ion to
->>>>>>>>>>>> guide
->>>>>>>>>>>> ceph to utilize specific osd?
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> Regards,
->>>>>>>>>>>> Hemant Surale.
->>>>>>>>>>>> --
->>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>>>> ceph-devel"
->>>>>>>>>>>> in
->>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-i=
-nfo.html
->>>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>> --
->>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ce=
-ph-devel"
->>>>>>>>>> in
->>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-inf=
-o.html
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>
->>>>>>
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>    (avoids 30s delay on subsequent operations)
+>>>  * rbd: friendlier use of pool/image options for import (old callin=
+g
+>>>    convention still works)
+>>>  * librbd: fix rare snapshot creation race (could lose a snap when
+>>>    creation is concurrent)
+>>>  * librbd: fix discard handling when spanning holes
+>>>  * librbd: fix memory leak on discard when caching is enabled
+>>>  * objecter: misc fixes for op reordering
+>>>  * objecter: fix for rare startup-time deadlock waiting for osdmap
+>>>  * ceph: fix usage
+>>>  * mon: reduce log noise about check_sub
+>>>  * ceph-disk-activate: misc fixes, improvements
+>>>  * ceph-disk-prepare: partition and format osd disks automatically
+>>>  * upstart: start everyone on a reboot
+>>>  * upstart: always update the osd crush location on start if specif=
+ied in
+>>>    the config
+>>>  * config: add /etc/ceph/ceph.$name.keyring to default keyring sear=
+ch path
+>>>  * ceph.spec: don't package crush headers
+>>>=20
+>>> You can get this release from the usual locations:
+>>>=20
+>>>  * Git at git://github.com/ceph/ceph.git
+>>>  * Tarball at http://ceph.newdream.net/download/ceph-0.48.2.tar.gz
+>>>  * For Debian/Ubuntu packages, see
+>>> http://ceph.newdream.net/docs/master/install/debian
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>>=20
+>> --=20
+>>=20
+>> Oliver Francke
+>>=20
+>> filoo GmbH
+>> Moltkestra?e 25a
+>> 33330 G?tersloh
+>> HRB4355 AG G?tersloh
+>>=20
+>> Gesch?ftsf?hrer: S.Grewing | J.Rehp?hler | C.Kunz
+>>=20
+>> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+>>=20
+>>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
