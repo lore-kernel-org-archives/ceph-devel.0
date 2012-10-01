@@ -1,159 +1,137 @@
-From: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
-Subject: Re: Slow ceph fs performance
-Date: Mon, 01 Oct 2012 11:41:18 -0400
-Message-ID: <201210011541.q91FfI4K017753@ayesha.phys.virginia.edu>
-References: <loom.20120928T141701-295@post.gmane.org>
-Reply-To: bryan@Virginia.EDU
+From: Sage Weil <sage@inktank.com>
+Subject: Re: v0.48.2 argonaut update released
+Date: Mon, 1 Oct 2012 09:07:49 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210010904240.25178@cobra.newdream.net>
+References: <alpine.DEB.2.00.1209200948180.8980@cobra.newdream.net> <50696B2D.7020301@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ayesha.phys.Virginia.EDU ([128.143.102.43]:59862 "EHLO
-	ayesha.phys.virginia.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752136Ab2JAPlT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 11:41:19 -0400
-Received: from ayesha.phys.virginia.edu (localhost [127.0.0.1])
-	by ayesha.phys.virginia.edu (8.14.4/8.14.4) with ESMTP id q91FfI4K017753
-	for <ceph-devel@vger.kernel.org>; Mon, 1 Oct 2012 11:41:18 -0400
-In-reply-to: Your message of "Fri, 28 Sep 2012 12:22:10 -0000."
-             <loom.20120928T141701-295@post.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:43793 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752591Ab2JAQHu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 12:07:50 -0400
+In-Reply-To: <50696B2D.7020301@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Oliver Francke <Oliver.Francke@filoo.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi again,
+On Mon, 1 Oct 2012, Oliver Francke wrote:
+> Hi *,
+> 
+> with reference to the below mentioned
+> 
+> "objecter: misc fixes for op reordering"
+> 
+> 
+> I assumed it could have something to do with slow requests not being solved
+> for too long. I just not saw it anymore in 0.51 in our testing-evironment.
+> But today we took one of our nodes into maintenance, and I see many of:
+> 
+> --- 8-<---
+> 
+> 2012-10-01 11:58:46.766999 osd.10 [WRN] 38 slow requests, 1 included below;
+> oldest blocked for > 1189.312605 secs
+> 2012-10-01 11:58:46.767013 osd.10 [WRN] slow request 240.183032 seconds old,
+> received at 2012-10-01 11:54:46.583860: osd_op(client.110046.0:2143984
+> rb.0.1adf5.6733efe2.00000000061a [write 208384~4096] 6.f511e801) v4 currently
+> delayed
+> 2
+> 
+> --- 8-< ---
+> 
+> which is bad, as I assume, that some of the VM's are now stalled. Anybody else
+> experienced such things?
 
-	I've fiddled around a lot with journal settings, so
-to make sure I'm comparing apples to apples, I went back and
-systematically re-ran the benchmark tests I've been running
-(and some more).  A long data dump follows, but the end result 
-is that it does look like something fishy is going on for small 
-file sizes.  For example, performance difference between 4MB 
-and 4KB files in the rados write benchmark is a factor of 25 or 
-more. Here are the details, with a recap of the configuration
-at the end.
+You see this on v0.51?  For v0.52 we merged in a large series of messenger 
+fixes and cleanups that could very easily explain this.  Can you try 
+v0.52?
 
-	I started out by remaking the underlying xfs filesystems
-on the OSD hosts, and then rerunning mkcephfs.  The journals
-are 120 GB SSDs.
+The same series has not been merged into the argonaut stable series; I'm 
+unsure yet whether that's a good idea (it's a lot of refactoring mixed in 
+with the fixes).  Perhaps after it has proven itself in v0.52 for longer, 
+and/or if we get reports of msgr problems in argonaut deployments.
 
-	First, the rsync tests again:
+sage
 
-* Rsync of ~60 GB directory tree (mostly small files) from ceph client 
-  to mounted cephfs goes at about 5.2 MB/s.
-
-* I then turned off ceph (service ceph -a stop) and did the same 
-  rsync between the same two hosts, onto the same RAID array on
-  one of the OSD hosts, but using ssh this time.   This time it
-  goes at about 37 MB/s.
-
-This implies to me that the slowdown is somewhere in ceph, not in
-the RAID array or the network connectivity.
-
-	I then remade the xfs filessytems again, re-ran mkcephfs,
-restarted ceph and did some rados benchmarks.
-
-* rados bench -p pbench 900 write -t 256 -b 4096
-Total time run:         900.184096
-Total writes made:      1052511
-Write size:             4096
-Bandwidth (MB/sec):     4.567 
-
-Stddev Bandwidth:       4.34241
-Max bandwidth (MB/sec): 23.1719
-Min bandwidth (MB/sec): 0
-Average Latency:        0.218949
-Stddev Latency:         0.566181
-Max latency:            9.92952
-Min latency:            0.001449
-
-
-* rados bench -p pbench 900 write -t 256 (default 4MB size)
-Total time run:         900.816140
-Total writes made:      25263
-Write size:             4194304
-Bandwidth (MB/sec):     112.178 
-
-Stddev Bandwidth:       27.1239
-Max bandwidth (MB/sec): 840
-Min bandwidth (MB/sec): 0
-Average Latency:        9.08281
-Stddev Latency:         0.505372
-Max latency:            9.31865
-Min latency:            0.818949
-
-	I repeated each of these benchmarks three times, but saw
-similar results each time (a factor of 25 or more in speed between
-small and large object sizes).
-
-	Next, I stopped ceph and took a look at local RAID
-performance as a function of file size using "iozone":
-
-http://ayesha.phys.virginia.edu/~bryan/iozone-write-local-raid.pdf
-
-Then I re-made the ceph filesystem and restarted ceph, and used
-iozone on the ceph client to look at the mounted ceph filesystem:
-
-http://ayesha.phys.virginia.edu/~bryan/iozone-write-cephfs.pdf
-
-I'm not sure how to interpret the iozone performance numbers,
-but the distribution certainly looks much less uniform across
-different file and chunk sizes for the mounted ceph filesystem.
-
-	Finally, I took a look at the results of bonnie++
-benchmarks for I/O directly to the RAID array, or to the
-mounted ceph filesystem.
-
-* Looking at RAID array from one of the OSD hosts:
-Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
-Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-RAID on OSD  23800M  1155  99 318264  26 132959  19  2884  99 293464  20 535.4  23
-Latency              7354us   30955us     129ms    8220us     119ms   62188us
-Version  1.96       ------Sequential Create------ --------Random Create--------
-RAID on OSD         -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16 17680  58 +++++ +++ 26994  78 24715  81 +++++ +++ 26597  78
-Latency               113us     105us     153us     109us      15us      94us
-
-* Looking at the mounted ceph filesystem from the ceph client:
-Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
-Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-cephfs, client  16G  1101  95 114623   8 45713   2  2665  98 133537   3 882.0  14
-Latency             44515us   37018us    6437ms   12747us     469ms   60004us
-Version  1.96       ------Sequential Create------ --------Random Create--------
-cephfs, client      -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   653   3 19886   9   601   3   746   3 +++++ +++   585   2
-Latency              1171ms    7467us     174ms     104ms      19us     228ms
-
-	This seems to show about a factor of 3 difference in speed between
-writing to the mounted ceph filesystem and writing directly to the RAID
-array.
-
-	While I was doing these, I kept an eye on the OSDs and MDSs
-with collectl and atop, but I didn't see anything that looked 
-like an obvious problem.  The MDSs didn't see very high CPU, I/O
-or memory usage, for example.
-
-	Finally, to recap the configuration:
-
-3 MDS hosts
-4 OSD hosts, each with a RAID array for object storage and an SSD journal
-xfs filesystems for the object stores
-gigabit network on the front end, and a separate back end gigabit network for the ceph hosts.
-64-bit CentOS 6.3 and ceph 0.48.2 everywhere
-ceph servers running stock CentOS 2.6.32-279.9.1 kernel.
-client running "elrepo" 3.5.4-1 kernel.
-
-						Bryan
-
--- 
-========================================================================
-Bryan Wright              |"If you take cranberries and stew them like 
-Physics Department        | applesauce, they taste much more like prunes
-University of Virginia    | than rhubarb does."  --  Groucho 
-Charlottesville, VA  22901|			
-(434) 924-7218            |         bryan@virginia.edu
-========================================================================
-
+> 
+> Thnx n regards,
+> 
+> Oliver.
+> 
+> On 09/20/2012 06:52 PM, Sage Weil wrote:
+> > Hi everyone,
+> > 
+> > Another update to the stable "argonaut" series has been released.  This
+> > fixes a few important bugs in rbd and radosgw and includes a series of
+> > changes to upstart and deployment related scripts that will allow the
+> > upcoming 'ceph-deploy' tool to work with the argonaut release.
+> > 
+> > Upgrading:
+> > 
+> >   * The default search path for keyring files now includes
+> >     /etc/ceph/ceph.$name.keyring. If such files are present on your
+> >     cluster, be aware that by default they may now be used.
+> >   * There are several changes to the upstart init files. These have not
+> >     been previously documented or recommended. Any existing users should
+> >     review the changes before upgrading.
+> >   * The ceph-disk-prepare and ceph-disk-active scripts have been updated
+> >     significantly. These have not been previously documented or
+> >     recommended. Any existing users should review the changes before
+> > upgrading.
+> > 
+> > Notable changes include:
+> > 
+> >   * mkcephfs: fix keyring generation for mds, osd when default paths are
+> >     used
+> >   * radosgw: fix bug causing occasional corruption of per-bucket stats
+> >   * radosgw: workaround to avoid previously corrupted stats from going
+> >     negative
+> >   * radosgw: fix bug in usage stats reporting on busy buckets
+> >   * radosgw: fix Content-Range: header for objects bigger than 2 GB.
+> >   * rbd: avoid leaving watch acting when command line tool errors out
+> >     (avoids 30s delay on subsequent operations)
+> >   * rbd: friendlier use of pool/image options for import (old calling
+> >     convention still works)
+> >   * librbd: fix rare snapshot creation race (could lose a snap when
+> >     creation is concurrent)
+> >   * librbd: fix discard handling when spanning holes
+> >   * librbd: fix memory leak on discard when caching is enabled
+> >   * objecter: misc fixes for op reordering
+> >   * objecter: fix for rare startup-time deadlock waiting for osdmap
+> >   * ceph: fix usage
+> >   * mon: reduce log noise about check_sub
+> >   * ceph-disk-activate: misc fixes, improvements
+> >   * ceph-disk-prepare: partition and format osd disks automatically
+> >   * upstart: start everyone on a reboot
+> >   * upstart: always update the osd crush location on start if specified in
+> >     the config
+> >   * config: add /etc/ceph/ceph.$name.keyring to default keyring search path
+> >   * ceph.spec: don't package crush headers
+> > 
+> > You can get this release from the usual locations:
+> > 
+> >   * Git at git://github.com/ceph/ceph.git
+> >   * Tarball at http://ceph.newdream.net/download/ceph-0.48.2.tar.gz
+> >   * For Debian/Ubuntu packages, see
+> > http://ceph.newdream.net/docs/master/install/debian
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> -- 
+> 
+> Oliver Francke
+> 
+> filoo GmbH
+> Moltkestra?e 25a
+> 33330 G?tersloh
+> HRB4355 AG G?tersloh
+> 
+> Gesch?ftsf?hrer: S.Grewing | J.Rehp?hler | C.Kunz
+> 
+> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+> 
+> 
