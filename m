@@ -1,137 +1,53 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: v0.48.2 argonaut update released
-Date: Mon, 1 Oct 2012 09:07:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210010904240.25178@cobra.newdream.net>
-References: <alpine.DEB.2.00.1209200948180.8980@cobra.newdream.net> <50696B2D.7020301@filoo.de>
+Subject: Re: Newbie questions
+Date: Mon, 1 Oct 2012 09:13:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210010908160.25178@cobra.newdream.net>
+References: <k4c2dj$s3i$1@ger.gmane.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43793 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43844 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752591Ab2JAQHu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 12:07:50 -0400
-In-Reply-To: <50696B2D.7020301@filoo.de>
+	with ESMTP id S1752826Ab2JAQNm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 12:13:42 -0400
+In-Reply-To: <k4c2dj$s3i$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
+To: Adam Nielsen <a.nielsen@shikadi.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Mon, 1 Oct 2012, Oliver Francke wrote:
-> Hi *,
+On Mon, 1 Oct 2012, Adam Nielsen wrote:
+> Hi all,
 > 
-> with reference to the below mentioned
+> I've been investigating cluster filesystems for a while now, and I have a few
+> questions about Ceph I hope you don't mind me asking here.  This is in the
+> context of using Ceph as a POSIX filesystem and alternative to something like
+> NFS.
 > 
-> "objecter: misc fixes for op reordering"
-> 
-> 
-> I assumed it could have something to do with slow requests not being solved
-> for too long. I just not saw it anymore in 0.51 in our testing-evironment.
-> But today we took one of our nodes into maintenance, and I see many of:
-> 
-> --- 8-<---
-> 
-> 2012-10-01 11:58:46.766999 osd.10 [WRN] 38 slow requests, 1 included below;
-> oldest blocked for > 1189.312605 secs
-> 2012-10-01 11:58:46.767013 osd.10 [WRN] slow request 240.183032 seconds old,
-> received at 2012-10-01 11:54:46.583860: osd_op(client.110046.0:2143984
-> rb.0.1adf5.6733efe2.00000000061a [write 208384~4096] 6.f511e801) v4 currently
-> delayed
-> 2
-> 
-> --- 8-< ---
-> 
-> which is bad, as I assume, that some of the VM's are now stalled. Anybody else
-> experienced such things?
+>   1. Is Ceph stable enough for "real" use yet?  I read that upgrading to v0.48
+> required a reformat, which I imagine would be a bit of an issue in a
+> production system.  Is this how upgrades are normally done?  Is anyone running
+> Ceph in a production environment with real data yet?
 
-You see this on v0.51?  For v0.52 we merged in a large series of messenger 
-fixes and cleanups that could very easily explain this.  Can you try 
-v0.52?
+The upgrade to v0.48 required a conversion the first time each ceph-osd 
+daemon was started with new code.  It was transparent to the user except 
+for the fact that the conversion was slow.  It is also atypical.
 
-The same series has not been merged into the argonaut stable series; I'm 
-unsure yet whether that's a good idea (it's a lot of refactoring mixed in 
-with the fixes).  Perhaps after it has proven itself in v0.52 for longer, 
-and/or if we get reports of msgr problems in argonaut deployments.
+The goal is for all future Ceph upgrades to be transparent and rolling 
+(i.e., upgrade one daemon/machine at a time while the cluster remains 
+completely available).  This is an absolute requirement for 
+upgrades/updates within a stable series (e.g., v0.48 -> v0.48.2), and a 
+high priority and probability between versions (argonaut -> bobtail, v0.51 
+-> v0.52, etc.).
+
+>   3. If I have multiple disks in a machine that I can dedicate to Ceph, is it
+> better to RAID them and present Ceph with a single filesystem, or do you get
+> better results by giving Ceph a filesystem on each disk and letting it look
+> after the striping and any faulty disks?
+
+There are arguments to be made for both configurations.  Currently we are 
+using (and generally recommending) one ceph-osd per disk.  I would 
+consider going the RAID route if you have limited RAM on the node or have 
+a high-end RAID array that you want to take full advantage of.
 
 sage
-
-> 
-> Thnx n regards,
-> 
-> Oliver.
-> 
-> On 09/20/2012 06:52 PM, Sage Weil wrote:
-> > Hi everyone,
-> > 
-> > Another update to the stable "argonaut" series has been released.  This
-> > fixes a few important bugs in rbd and radosgw and includes a series of
-> > changes to upstart and deployment related scripts that will allow the
-> > upcoming 'ceph-deploy' tool to work with the argonaut release.
-> > 
-> > Upgrading:
-> > 
-> >   * The default search path for keyring files now includes
-> >     /etc/ceph/ceph.$name.keyring. If such files are present on your
-> >     cluster, be aware that by default they may now be used.
-> >   * There are several changes to the upstart init files. These have not
-> >     been previously documented or recommended. Any existing users should
-> >     review the changes before upgrading.
-> >   * The ceph-disk-prepare and ceph-disk-active scripts have been updated
-> >     significantly. These have not been previously documented or
-> >     recommended. Any existing users should review the changes before
-> > upgrading.
-> > 
-> > Notable changes include:
-> > 
-> >   * mkcephfs: fix keyring generation for mds, osd when default paths are
-> >     used
-> >   * radosgw: fix bug causing occasional corruption of per-bucket stats
-> >   * radosgw: workaround to avoid previously corrupted stats from going
-> >     negative
-> >   * radosgw: fix bug in usage stats reporting on busy buckets
-> >   * radosgw: fix Content-Range: header for objects bigger than 2 GB.
-> >   * rbd: avoid leaving watch acting when command line tool errors out
-> >     (avoids 30s delay on subsequent operations)
-> >   * rbd: friendlier use of pool/image options for import (old calling
-> >     convention still works)
-> >   * librbd: fix rare snapshot creation race (could lose a snap when
-> >     creation is concurrent)
-> >   * librbd: fix discard handling when spanning holes
-> >   * librbd: fix memory leak on discard when caching is enabled
-> >   * objecter: misc fixes for op reordering
-> >   * objecter: fix for rare startup-time deadlock waiting for osdmap
-> >   * ceph: fix usage
-> >   * mon: reduce log noise about check_sub
-> >   * ceph-disk-activate: misc fixes, improvements
-> >   * ceph-disk-prepare: partition and format osd disks automatically
-> >   * upstart: start everyone on a reboot
-> >   * upstart: always update the osd crush location on start if specified in
-> >     the config
-> >   * config: add /etc/ceph/ceph.$name.keyring to default keyring search path
-> >   * ceph.spec: don't package crush headers
-> > 
-> > You can get this release from the usual locations:
-> > 
-> >   * Git at git://github.com/ceph/ceph.git
-> >   * Tarball at http://ceph.newdream.net/download/ceph-0.48.2.tar.gz
-> >   * For Debian/Ubuntu packages, see
-> > http://ceph.newdream.net/docs/master/install/debian
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> -- 
-> 
-> Oliver Francke
-> 
-> filoo GmbH
-> Moltkestra?e 25a
-> 33330 G?tersloh
-> HRB4355 AG G?tersloh
-> 
-> Gesch?ftsf?hrer: S.Grewing | J.Rehp?hler | C.Kunz
-> 
-> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-> 
-> 
