@@ -1,74 +1,64 @@
-From: Tim Serong <tserong@suse.com>
-Subject: CFP: Cloud Infrastructure, Distributed Storage and High Availability
- at LCA 2013
-Date: Mon, 01 Oct 2012 22:28:50 +1000
-Message-ID: <50698C82.2050408@suse.com>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: Newbie questions
+Date: Mon, 01 Oct 2012 22:30:43 +1000
+Message-ID: <k4c2dj$s3i$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:32831 "EHLO mx2.suse.de"
+Received: from plane.gmane.org ([80.91.229.3]:46760 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750929Ab2JAM27 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 1 Oct 2012 08:28:59 -0400
-Received: from relay1.suse.de (unknown [195.135.220.254])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by mx2.suse.de (Postfix) with ESMTP id D8A00A30ED
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Oct 2012 14:28:57 +0200 (CEST)
+	id S1750929Ab2JAMfH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Oct 2012 08:35:07 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TIfDE-0008WC-6S
+	for ceph-devel@vger.kernel.org; Mon, 01 Oct 2012 14:35:04 +0200
+Received: from 124-170-67-40.dyn.iinet.net.au ([124.170.67.40])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Oct 2012 14:35:04 +0200
+Received: from a.nielsen by 124-170-67-40.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Oct 2012 14:35:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I'm pleased to announce that we will be holding a one day Cloud
-Infrastructure, Distributed Storage and High Availability mini
-conference[1] on Monday 28 January 2013 as part of linux.conf.au 2013 in
-Canberra, Australia[2].
+Hi all,
 
-This miniconf is about building reliable infrastructure, from two-node
-HA failover pairs to multi-thousand-core cloud systems.  You might like
-to think of it as a sequel to the LCA 2012 High Availability and
-Distributed Storage miniconf[3].
+I've been investigating cluster filesystems for a while now, and I have a few 
+questions about Ceph I hope you don't mind me asking here.  This is in the 
+context of using Ceph as a POSIX filesystem and alternative to something like NFS.
 
-Do any of the following describe you?
+   1. Is Ceph stable enough for "real" use yet?  I read that upgrading to 
+v0.48 required a reformat, which I imagine would be a bit of an issue in a 
+production system.  Is this how upgrades are normally done?  Is anyone running 
+Ceph in a production environment with real data yet?
 
-* You're building cloud infrastructure for others to use
-  (openstack, cloudstack, eucalyptus, ...)
-* Your data needs to be reliably available everywhere
-  (ceph, glusterfs, drbd, ...)
-* Your system absolutely must be up all the time
-  (pacemaker, corosync, ...)
+   2. Why does the wiki say that you can run one or three monitor daemons, but 
+running two is worse than one?  Wouldn't running two be less work than running 
+three?
 
-If so, this is the miniconf for you!  Please consider submitting a
-presentation at:
+   3. If I have multiple disks in a machine that I can dedicate to Ceph, is it 
+better to RAID them and present Ceph with a single filesystem, or do you get 
+better results by giving Ceph a filesystem on each disk and letting it look 
+after the striping and any faulty disks?
 
-  http://tinyurl.com/cidsha-lca2013
+   4. How resilient is the system?  I can find a lot of information saying one 
+node can go away without any data loss, but does that mean losing a second 
+node will take everything down?  Can you configure it such that every node has 
+a complete copy of the cluster, so as long as any one node survives, all the 
+data is available?
 
-We're expecting most talk slots to be 25 minutes (including questions
-and changeover), but there will be openings for shorter lightning talks
-and maybe a couple of longer talks.  CFP closes on Sunday November 4,
-2012.  Notifications of acceptance will be emailed out after this date.
+   5. Given that the cluster filesystem contains files, which are then stored 
+as other files in a different filesystem, does this affect performance much? 
+I'm thinking of something like a git repository which accesses file metadata a 
+lot, and seems to suffer a bit if it's not running off a local disk.
 
-Note that there is also an OpenStack-specific miniconf[4] running on
-Tuesday 29 January.  We're hoping this will give us a pretty awesome
-two-day LCA 2013 CloudFest.  As a rough rule of thumb, more generic or
-infrastructure-related talks should go to Cloud, Distributed Storage &
-HA, while deeper OpenStack-specific talks should probably go to the
-OpenStack miniconf.  If in doubt, or if you have any other questions,
-please contact me directly at tserong@suse.com.
+Hopefully I'm not asking questions which are already covered in the 
+documentation - if so please point me in the right direction.
 
-Thanks!
+Many thanks,
+Adam.
 
-Tim
-
-[1] http://lca2013.linux.org.au/schedule/30073/view_talk
-[2] http://lca2013.linux.org.au/
-[3]
-http://lca2012.linux.org.au/wiki/index.php/Miniconfs/HighAvailabilityAndDistributedStorage
-(also videos at http://www.youtube.com/playlist?list=PLE70D0FFF98BC9579)
-[4] http://lca2013.linux.org.au/schedule/30100/view_talk?day=tuesday
---
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
