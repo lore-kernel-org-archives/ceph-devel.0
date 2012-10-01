@@ -1,143 +1,74 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: v0.48.2 argonaut update released
-Date: Mon, 01 Oct 2012 12:06:37 +0200
-Message-ID: <50696B2D.7020301@filoo.de>
-References: <alpine.DEB.2.00.1209200948180.8980@cobra.newdream.net>
+From: Tim Serong <tserong@suse.com>
+Subject: CFP: Cloud Infrastructure, Distributed Storage and High Availability
+ at LCA 2013
+Date: Mon, 01 Oct 2012 22:28:50 +1000
+Message-ID: <50698C82.2050408@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-7.de-punkt.de ([93.190.64.37]:42400 "EHLO
-	mail-7.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752457Ab2JAKGj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Oct 2012 06:06:39 -0400
-In-Reply-To: <alpine.DEB.2.00.1209200948180.8980@cobra.newdream.net>
+Received: from cantor2.suse.de ([195.135.220.15]:32831 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750929Ab2JAM27 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Oct 2012 08:28:59 -0400
+Received: from relay1.suse.de (unknown [195.135.220.254])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by mx2.suse.de (Postfix) with ESMTP id D8A00A30ED
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Oct 2012 14:28:57 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi *,
+I'm pleased to announce that we will be holding a one day Cloud
+Infrastructure, Distributed Storage and High Availability mini
+conference[1] on Monday 28 January 2013 as part of linux.conf.au 2013 in
+Canberra, Australia[2].
 
-with reference to the below mentioned
+This miniconf is about building reliable infrastructure, from two-node
+HA failover pairs to multi-thousand-core cloud systems.  You might like
+to think of it as a sequel to the LCA 2012 High Availability and
+Distributed Storage miniconf[3].
 
-"objecter: misc fixes for op reordering"
+Do any of the following describe you?
 
+* You're building cloud infrastructure for others to use
+  (openstack, cloudstack, eucalyptus, ...)
+* Your data needs to be reliably available everywhere
+  (ceph, glusterfs, drbd, ...)
+* Your system absolutely must be up all the time
+  (pacemaker, corosync, ...)
 
-I assumed it could have something to do with slow requests not being=20
-solved for too long. I just not saw it anymore in 0.51 in our=20
-testing-evironment.
-But today we took one of our nodes into maintenance, and I see many of:
+If so, this is the miniconf for you!  Please consider submitting a
+presentation at:
 
---- 8-<---
+  http://tinyurl.com/cidsha-lca2013
 
-2012-10-01 11:58:46.766999 osd.10 [WRN] 38 slow requests, 1 included=20
-below; oldest blocked for > 1189.312605 secs
-2012-10-01 11:58:46.767013 osd.10 [WRN] slow request 240.183032 seconds=
-=20
-old, received at 2012-10-01 11:54:46.583860:=20
-osd_op(client.110046.0:2143984 rb.0.1adf5.6733efe2.00000000061a [write=20
-208384~4096] 6.f511e801) v4 currently delayed
-2
+We're expecting most talk slots to be 25 minutes (including questions
+and changeover), but there will be openings for shorter lightning talks
+and maybe a couple of longer talks.  CFP closes on Sunday November 4,
+2012.  Notifications of acceptance will be emailed out after this date.
 
---- 8-< ---
+Note that there is also an OpenStack-specific miniconf[4] running on
+Tuesday 29 January.  We're hoping this will give us a pretty awesome
+two-day LCA 2013 CloudFest.  As a rough rule of thumb, more generic or
+infrastructure-related talks should go to Cloud, Distributed Storage &
+HA, while deeper OpenStack-specific talks should probably go to the
+OpenStack miniconf.  If in doubt, or if you have any other questions,
+please contact me directly at tserong@suse.com.
 
-which is bad, as I assume, that some of the VM's are now stalled.=20
-Anybody else experienced such things?
+Thanks!
 
-Thnx n regards,
+Tim
 
-Oliver.
-
-On 09/20/2012 06:52 PM, Sage Weil wrote:
-> Hi everyone,
->
-> Another update to the stable "argonaut" series has been released.  Th=
-is
-> fixes a few important bugs in rbd and radosgw and includes a series o=
-f
-> changes to upstart and deployment related scripts that will allow the
-> upcoming 'ceph-deploy' tool to work with the argonaut release.
->
-> Upgrading:
->
->   * The default search path for keyring files now includes
->     /etc/ceph/ceph.$name.keyring. If such files are present on your
->     cluster, be aware that by default they may now be used.
->   * There are several changes to the upstart init files. These have n=
-ot
->     been previously documented or recommended. Any existing users sho=
-uld
->     review the changes before upgrading.
->   * The ceph-disk-prepare and ceph-disk-active scripts have been upda=
-ted
->     significantly. These have not been previously documented or
->     recommended. Any existing users should review the changes before =
-upgrading.
->
-> Notable changes include:
->
->   * mkcephfs: fix keyring generation for mds, osd when default paths =
-are
->     used
->   * radosgw: fix bug causing occasional corruption of per-bucket stat=
-s
->   * radosgw: workaround to avoid previously corrupted stats from goin=
-g
->     negative
->   * radosgw: fix bug in usage stats reporting on busy buckets
->   * radosgw: fix Content-Range: header for objects bigger than 2 GB.
->   * rbd: avoid leaving watch acting when command line tool errors out
->     (avoids 30s delay on subsequent operations)
->   * rbd: friendlier use of pool/image options for import (old calling
->     convention still works)
->   * librbd: fix rare snapshot creation race (could lose a snap when
->     creation is concurrent)
->   * librbd: fix discard handling when spanning holes
->   * librbd: fix memory leak on discard when caching is enabled
->   * objecter: misc fixes for op reordering
->   * objecter: fix for rare startup-time deadlock waiting for osdmap
->   * ceph: fix usage
->   * mon: reduce log noise about check_sub
->   * ceph-disk-activate: misc fixes, improvements
->   * ceph-disk-prepare: partition and format osd disks automatically
->   * upstart: start everyone on a reboot
->   * upstart: always update the osd crush location on start if specifi=
-ed in
->     the config
->   * config: add /etc/ceph/ceph.$name.keyring to default keyring searc=
-h path
->   * ceph.spec: don't package crush headers
->
-> You can get this release from the usual locations:
->
->   * Git at git://github.com/ceph/ceph.git
->   * Tarball at http://ceph.newdream.net/download/ceph-0.48.2.tar.gz
->   * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/mas=
-ter/install/debian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---=20
-
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
+[1] http://lca2013.linux.org.au/schedule/30073/view_talk
+[2] http://lca2013.linux.org.au/
+[3]
+http://lca2012.linux.org.au/wiki/index.php/Miniconfs/HighAvailabilityAndDistributedStorage
+(also videos at http://www.youtube.com/playlist?list=PLE70D0FFF98BC9579)
+[4] http://lca2013.linux.org.au/schedule/30100/view_talk?day=tuesday
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
