@@ -1,48 +1,43 @@
-From: Mike Ryan <mike.ryan@inktank.com>
-Subject: Re: PG recovery reservation state chart
-Date: Tue, 2 Oct 2012 15:39:23 -0700
-Message-ID: <20121002223923.GH8206@splice>
-References: <20121002194858.GC8206@splice>
- <CADvuQRHUKEJzbySqqT-9ri=65wM3fh0Dk5wjSPJ1Uhn2+cY_+Q@mail.gmail.com>
- <20121002204249.GF8206@splice>
- <506B6417.9020009@inktank.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 12/12] mds: Avoid creating unnecessary snaprealm
+Date: Wed, 03 Oct 2012 07:45:44 +0800
+Message-ID: <506B7CA8.9030505@intel.com>
+References: <1349168152-13281-1-git-send-email-zheng.z.yan@intel.com> <1349168152-13281-12-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1210021129220.19966@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:33692 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753814Ab2JBWj1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Oct 2012 18:39:27 -0400
-Received: by pbbrr4 with SMTP id rr4so9213480pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 15:39:26 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <506B6417.9020009@inktank.com>
+Received: from mga09.intel.com ([134.134.136.24]:30892 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756730Ab2JBXp4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Oct 2012 19:45:56 -0400
+In-Reply-To: <alpine.DEB.2.00.1210021129220.19966@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-> It'd be good to update doc/dev/osd_internals with a description of the
-> reservations though, maybe expanding
-> doc/dev/osd_internals/backfill_reservation.
-
-Will do.
-
-> One other thing I'd like to see made explicit:
+On 10/03/2012 02:31 AM, Sage Weil wrote:
+> Hi Yan,
 > 
-> How does this handle upgrades? i.e., what will happen when some OSDs
-> have this reservation mechanism and some do not?
+> This whole series looks great!  Sticking it in wip-mds and running it 
+> through the fs qa suite before merging it.
+> 
+> How are you testing these?  If you haven't seen it yet, there is an 'mds 
+> thrash exports' option that will make MDSs random migrate subtrees to each 
+> other that is great for shaking out bugs.  That and periodic daemon 
+> restarts (one of the first things we need to do on the clustered mds front 
+> is to get daemon restarting integrated into teuthology).
+> 
 
-I will introduce a feature bit for recovery reservations.
+The patches are fixes for problems I encountered during playing MDS shutdown.
+I setup a 2 MDS cephfs and copied some data into it, deleted some directories
+whose authority is MDS.1, then shutdown MDS.1.
 
-If a replica lacks the mechanism then the primary "grants" itself a
-reservation from that replica. There will obviously be no need to
-release the reservation.
+Most patches in this series are obvious. The two snaprealm related patches are
+workaround for a bug: replica inode's snaprealm->open is not true. The bug triggers
+assertion in CInode::pop_projected_snaprealm() if snaprealm is involved in cross
+authority rename.
 
-If the primary lacks the mechanism, recovery proceeds as though none of
-the replicas have the mechanism (which is to say, exactly how it
-proceeds today).
-
-In either case, an OSD can become heavily loaded if too many recovery
-operations are occurring at the same time, but it's no worse than the
-current status quo.
+Regards
+Yan, Zheng
