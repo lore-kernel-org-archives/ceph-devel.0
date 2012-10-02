@@ -1,35 +1,52 @@
-From: Mike Ryan <mike.ryan@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
 Subject: Re: PG recovery reservation state chart
-Date: Tue, 2 Oct 2012 14:43:06 -0700
-Message-ID: <20121002214306.GG8206@splice>
-References: <20121002194858.GC8206@splice>
- <alpine.DEB.2.00.1210021434450.27524@cobra.newdream.net>
+Date: Tue, 02 Oct 2012 15:00:55 -0700
+Message-ID: <506B6417.9020009@inktank.com>
+References: <20121002194858.GC8206@splice> <CADvuQRHUKEJzbySqqT-9ri=65wM3fh0Dk5wjSPJ1Uhn2+cY_+Q@mail.gmail.com> <20121002204249.GF8206@splice>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:50816 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932356Ab2JBVnJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Oct 2012 17:43:09 -0400
-Received: by padhz1 with SMTP id hz1so5643645pad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 14:43:09 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1210021434450.27524@cobra.newdream.net>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:56419 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753585Ab2JBWA6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Oct 2012 18:00:58 -0400
+Received: by pbbrr4 with SMTP id rr4so9188010pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 15:00:57 -0700 (PDT)
+In-Reply-To: <20121002204249.GF8206@splice>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Mike Ryan <mike.ryan@inktank.com>
+Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
 
-> This all looks right to me.  I only have one concern: if, at some future 
-> point, we decide it's necessary or worthwhile to avoid non-backfill 
-> recovery due to targets begin full, does this approach preclude an elegant 
-> solution?
+On 10/02/2012 01:42 PM, Mike Ryan wrote:
+> On Tue, Oct 02, 2012 at 01:35:34PM -0700, Tommi Virtanen wrote:
+>> On Tue, Oct 2, 2012 at 12:48 PM, Mike Ryan <mike.ryan@inktank.com> wrote:
+>>> Tried sending this earlier but it seems the list doesn't like PNGs.
+>>> dotty or dot -Tpng will make short work of the .dot file I've attached.
+>>
+>> vger discards messages with attachments. It's old school mailing list
+>> software. It's also used by many old school communities, that consider
+>> this a valuable anti-spam tactic, so they're not interested in
+>> changing it.
+>
+> I figured as much. It would have been nice to receive a notification
+> that it was dropped rather than having it silently fall on the floor,
+> especially since a copy of the message is not sent to the sender upon
+> list acceptance. c'est la vie
+>
+>> Once this becomes less a design hypothetical and more a description of
+>> how the code works, please please please put the dot in doc/dev/
+>
+> This is unnecessary, as the doc scripts will automatically generate a
+> full peering state chart (of which this is just a sub state). Major
+> kudos to Sam Just for making that happen!
 
-I believe this encourages an elegant solution:
+It'd be good to update doc/dev/osd_internals with a description of the
+reservations though, maybe expanding 
+doc/dev/osd_internals/backfill_reservation.
 
-We add a new state if a remote reservation is rejected:
+One other thing I'd like to see made explicit:
 
-   WaitRemoteRecoveryReserved -> SleepALittle -> LocalReserving
-  
-In the new state we drop the remote reservations we acquired and wait
-until a timer goes off before transitioning back into LocalReserving.
+How does this handle upgrades? i.e., what will happen when some OSDs
+have this reservation mechanism and some do not?
