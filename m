@@ -1,69 +1,37 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: [ceph-commit] teuthology value error
-Date: Tue, 2 Oct 2012 10:06:58 -0700
-Message-ID: <CADvuQRF+8OQs2BGmKGe3k=OmZ91a8arD_fdZmLHZhzi1UmNq1g@mail.gmail.com>
-References: <CABpo6hJZPKt1p1g4yC+KviC4Wr6OKuffcNGyVL9UeoJe8K+TDA@mail.gmail.com>
- <CAPYLRzice5K7H1W6baizm0EK=J9nAZX4Hm5FcVETB8_ikyDp4Q@mail.gmail.com>
+From: ramu eppa <ramu.freesystems@gmail.com>
+Subject: Re: How to write data to rbd pool.
+Date: Tue, 2 Oct 2012 17:09:15 +0000 (UTC)
+Message-ID: <loom.20121002T190711-993@post.gmane.org>
+References: <loom.20121001T173732-275@post.gmane.org> <CADvuQRE9paXEHD+bEa_Xjbh9Ex5Dt9+E4R+WjYq=3JY=VPCrOg@mail.gmail.com> <loom.20121002T151242-374@post.gmane.org> <CADvuQRHPZOwANKdX8THLkGqes-hxWN9grXJyce8uvfu=+SrTEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:36742 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754570Ab2JBRHT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Oct 2012 13:07:19 -0400
-Received: by mail-qa0-f46.google.com with SMTP id c26so757069qad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 10:07:18 -0700 (PDT)
-In-Reply-To: <CAPYLRzice5K7H1W6baizm0EK=J9nAZX4Hm5FcVETB8_ikyDp4Q@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:50438 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754779Ab2JBRKX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Oct 2012 13:10:23 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TJ5z4-0004ci-MF
+	for ceph-devel@vger.kernel.org; Tue, 02 Oct 2012 19:10:14 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 19:10:14 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 19:10:14 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Lokesh Krishnappa <lokesh.professional.it@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, Oct 2, 2012 at 9:56 AM, Gregory Farnum <greg@inktank.com> wrote=
-:
->> File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/misc=
-=2Epy",
->> line 501, in read_config
->> ctx.teuthology_config.update(new)
->> ValueError: dictionary update sequence element #0 has length 1; 2 is
->> required
-> I haven't looked at teuthology much in a while, but the error is
-> complaining that you have a list of length 1 that requires length 2.
-> I'm pretty sure your problem is that you only have one machine
-> available, but the default Ceph task wants 2.
+Hi Tommi Virtanen,
 
-Actually, that error seems to be bubbling up from where it reads
-~/.teuthology.yaml -- it expects a file like this:
+   Actually we know the rbd full path,we write some data directly to volume.
+nova/volume1/<data>.
 
-lock_server: http://foo.example.com/locker/lock
-queue_host: bar.example.com
-queue_port: 1234
 
-Teuthology doesn't have much in the way of data format enforcement --
-it kind of assumes the target audience is programmers, so they can
-just dig in.
+Thanks,
+ramu.
 
-> Rather more importantly than that, teuthology is a piece of our
-> internal infrastructure. We make it available to others, but if you
-> plan to use it in your own testing you will need infrastructure of
-> your own to run it on =E2=80=94 we have a generic server farm, but al=
-so
-> "special" machines like a lock server, in addition to the client
-> actually running the test. You should not play with it casually.
-
-Hey, I resent that remark!
-
-We *want* outside users for teuthology. That would be awesome.
-
-That would probably also mean needing to split the current "tasks" out
-of the teuthology core, so that the core becomes a general-purpose
-multi-machine test runner.
-
-But you are correct in that there are a lot of assumptions about the
-environment in there. Tread carefully.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
