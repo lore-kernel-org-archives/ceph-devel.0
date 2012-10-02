@@ -1,49 +1,35 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 10/12] mds: Trim non auth subtree directory
-Date: Tue,  2 Oct 2012 16:55:50 +0800
-Message-ID: <1349168152-13281-10-git-send-email-zheng.z.yan@intel.com>
-References: <1349168152-13281-1-git-send-email-zheng.z.yan@intel.com>
+From: ramu eppa <ramu.freesystems@gmail.com>
+Subject: Re: How to write data to rbd pool.
+Date: Tue, 2 Oct 2012 13:13:29 +0000 (UTC)
+Message-ID: <loom.20121002T151242-374@post.gmane.org>
+References: <loom.20121001T173732-275@post.gmane.org> <CADvuQRE9paXEHD+bEa_Xjbh9Ex5Dt9+E4R+WjYq=3JY=VPCrOg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:51424 "EHLO mga03.intel.com"
+Received: from plane.gmane.org ([80.91.229.3]:60198 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754865Ab2JBI4T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 2 Oct 2012 04:56:19 -0400
-In-Reply-To: <1349168152-13281-1-git-send-email-zheng.z.yan@intel.com>
+	id S1753661Ab2JBNOY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Oct 2012 09:14:24 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TJ2IT-0000tl-0q
+	for ceph-devel@vger.kernel.org; Tue, 02 Oct 2012 15:14:01 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 15:14:01 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Oct 2012 15:14:01 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: ceph-devel@vger.kernel.org
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hi all,
 
-Trim non auth subtree directory if all its dentries were trimmed
-and it's not bound of auth subtree.
+  How to know the rbd volume path.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/MDCache.cc | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 1348b3e..397b991 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -5412,6 +5412,15 @@ bool MDCache::trim(int max)
-       ++i)
-     lru.lru_insert_mid(*i);
- 
-+  for (map<CDir*, set<CDir*> >::iterator p = subtrees.begin();
-+       p != subtrees.end();) {
-+    CDir *dir = p->first;
-+    p++;
-+    if (!dir->is_auth() && !dir->get_inode()->is_auth()) {
-+      if (dir->get_num_ref() == 1)  // subtree pin
-+	trim_dirfrag(dir, 0, expiremap);
-+    }
-+  }
-   // trim root?
-   if (max == 0 && root) {
-     list<CDir*> ls;
--- 
-1.7.11.4
+Thanks,
+Ramu.
 
