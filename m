@@ -1,39 +1,52 @@
-From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Subject: Re: [GIT PULL v5] java: add libcephfs Java bindings
-Date: Thu, 04 Oct 2012 04:23:09 +0000
-Message-ID: <1349324589.11633.158.camel@julia>
-References: <CAPrxi5-6JAWzUdsgdfHw=pG+6r5LN5i8X92DwxdejosY0xT0Dw@mail.gmail.com>
-	 <alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
-	 <CAPrxi5-_AYV0UUuABCM+LkSpRVOM63R5XPDmjz9HE3UxFBe7AA@mail.gmail.com>
-	 <CAPrxi59Per-OMrc83pVLAkUs3rU=+RF9bN_X5bb+K1zC+STUng@mail.gmail.com>
-	 <alpine.DEB.2.00.1210031238300.23173@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: mds cache size configuration option being ignored
+Date: Wed, 3 Oct 2012 16:15:44 -0700
+Message-ID: <CAPYLRzjhdsEqqfOV=pP2rZnegZRsjfaFr4LGFJooDkXqrA71Aw@mail.gmail.com>
+References: <CANLRBox7q8eJkJ8rKoyqrjdPLq7kjjqiMJx9MAdaSgCTtcmnog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.barcikacomp.hu ([94.248.160.10]:58314 "EHLO
-	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751124Ab2JDEbm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Oct 2012 00:31:42 -0400
-In-Reply-To: <alpine.DEB.2.00.1210031238300.23173@cobra.newdream.net>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:55674 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932583Ab2JCXPo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 19:15:44 -0400
+Received: by ieak13 with SMTP id k13so18544539iea.19
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 16:15:44 -0700 (PDT)
+In-Reply-To: <CANLRBox7q8eJkJ8rKoyqrjdPLq7kjjqiMJx9MAdaSgCTtcmnog@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Joe Buck <buck@soe.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Tren Blackburn <tren@eotnetworks.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, 2012-10-03 at 12:39 -0700, Sage Weil wrote:
-> On Wed, 3 Oct 2012, Noah Watkins wrote:
-> > I wanted to touch base on this Java bindings patch series to make sure
-> > this can become a solid foundation for the Hadoop shim clean-up. Were
-> > there any specific issues with this, other than not yet having a major
-> > consumer?
-> 
-> From my perspective it's ready.  I was hoping that Laszlo could look at 
-> the packaging bits before I merged, but then I lost track of it.
-> 
-> Laszlo, do you have a minute to take a look?
- I was too busy with IRL and stuff. But sounds interesting. Will check
-this in the afternoon and report back.
+On Wed, Oct 3, 2012 at 3:22 PM, Tren Blackburn <tren@eotnetworks.com> w=
+rote:
+> Hi List;
+>
+> I was advised to use the "mds cache size" option to limit the memory
+> that the mds process will take. I have it set to "32768". However it
+> the ceph-mds process is now at 50GB and still growing.
+>
+> fern ceph # ps wwaux | grep ceph-mds
+> root       895  4.3 26.6 53269304 52725820 ?   Ssl  Sep28 312:29
+> /usr/bin/ceph-mds -i fern --pid-file /var/run/ceph/mds.fern.pid -c
+> /etc/ceph/ceph.conf
+>
+> Have I specified the limit incorrectly? How far will it go?
 
-Laszlo/GCS
-
+Oof. That looks correct; it sounds like we have a leak or some other
+kind of bug. I believe you're on Gentoo; did you build with tcmalloc?
+If so, can you run "ceph -w" in one window and then "ceph mds tell 0
+heap stats" and send back the output?
+If you didn't build with tcmalloc, can you do so and try again? We
+have noticed fragmentation issues with the default memory allocator,
+which is why we switched (though I can't imagine it'd balloon that far
+=97=A0but tcmalloc will give us some better options to diagnose it). So=
+rry
+I didn't mention this before!
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
