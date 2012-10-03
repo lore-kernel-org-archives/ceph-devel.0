@@ -1,52 +1,101 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Collection of strange lockups on 0.51
-Date: Thu, 4 Oct 2012 01:33:38 +0400
-Message-ID: <CABYiri-ZkrZnbEzE9jZ_EBjVjxKtBEB9w4SZRmQ7s7SYQUGxgQ@mail.gmail.com>
-References: <CABYiri8t9yXQ39WOW1+Rib5jxp8qUCUY8iSht=p2PSQZtn3ZEA@mail.gmail.com>
- <CADvuQRFMaGpH9MdFHDDworDMEePsj=vn1A6vbE0b0G6+oS41Lg@mail.gmail.com>
- <CABYiri_ujogFa==21ty3eWhDGx7PMK-F4Rya0kJEF-RQTsBNQQ@mail.gmail.com>
- <CABYiri8pCTjJu1-2LzBJtxQe9cHBMqa51MSAkvf8LTWpm_P+Tw@mail.gmail.com> <CADvuQRHPF2Sehm-crtherpRvm3db4humUsqyJnL5x3X=dxGYhw@mail.gmail.com>
+From: Tren Blackburn <tren@eotnetworks.com>
+Subject: Re: mds cache size configuration option being ignored
+Date: Wed, 3 Oct 2012 16:23:00 -0700
+Message-ID: <CANLRBoxTasZcvo7s33ynoFmitk-ZZX10eYX-=k0db3bgcQOaAA@mail.gmail.com>
+References: <CANLRBox7q8eJkJ8rKoyqrjdPLq7kjjqiMJx9MAdaSgCTtcmnog@mail.gmail.com>
+	<CAPYLRzjhdsEqqfOV=pP2rZnegZRsjfaFr4LGFJooDkXqrA71Aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:64790 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754827Ab2JCVd7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 17:33:59 -0400
-Received: by weyt9 with SMTP id t9so4607257wey.19
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 14:33:58 -0700 (PDT)
-In-Reply-To: <CADvuQRHPF2Sehm-crtherpRvm3db4humUsqyJnL5x3X=dxGYhw@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:52859 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932350Ab2JCXXB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 19:23:01 -0400
+Received: by ieak13 with SMTP id k13so18556327iea.19
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 16:23:00 -0700 (PDT)
+In-Reply-To: <CAPYLRzjhdsEqqfOV=pP2rZnegZRsjfaFr4LGFJooDkXqrA71Aw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Oct 1, 2012 at 8:42 PM, Tommi Virtanen <tv@inktank.com> wrote:
-> On Sun, Sep 30, 2012 at 2:55 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> Short post mortem - EX3200/12.1R2.9 may begin to drop packets (seems
->> to appear more likely on 0.51 traffic patterns, which is very strange
->> for L2 switching) when a bunch of the 802.3ad pairs, sixteen in my
->> case, exposed to extremely high load - database benchmark over 700+
->> rbd-backed VMs and cluster rebalance at same time. It explains
->> post-reboot lockups in igb driver and all types of lockups above. I
->> would very appreciate any suggestions of switch models which do not
->> expose such behavior in simultaneous conditions both off-list and in
->> this thread.
+On Wed, Oct 3, 2012 at 4:15 PM, Gregory Farnum <greg@inktank.com> wrote=
+:
+> On Wed, Oct 3, 2012 at 3:22 PM, Tren Blackburn <tren@eotnetworks.com>=
+ wrote:
+>> Hi List;
+>>
+>> I was advised to use the "mds cache size" option to limit the memory
+>> that the mds process will take. I have it set to "32768". However it
+>> the ceph-mds process is now at 50GB and still growing.
+>>
+>> fern ceph # ps wwaux | grep ceph-mds
+>> root       895  4.3 26.6 53269304 52725820 ?   Ssl  Sep28 312:29
+>> /usr/bin/ceph-mds -i fern --pid-file /var/run/ceph/mds.fern.pid -c
+>> /etc/ceph/ceph.conf
+>>
+>> Have I specified the limit incorrectly? How far will it go?
 >
-> I don't see how a switch dropping packets would give an ethernet card
-> driver any excuse to crash, but I'm simultaneously happy to hear that
-> it doesn't seem like Ceph is at fault, and sorry for your troubles.
->
-> I don't have an up to date 1GbE card recommendation to share, but I
-> would recommend making sure you're using a recent Linux kernel.
+> Oof. That looks correct; it sounds like we have a leak or some other
+> kind of bug. I believe you're on Gentoo; did you build with tcmalloc?
+> If so, can you run "ceph -w" in one window and then "ceph mds tell 0
+> heap stats" and send back the output?
+> If you didn't build with tcmalloc, can you do so and try again? We
+> have noticed fragmentation issues with the default memory allocator,
+> which is why we switched (though I can't imagine it'd balloon that fa=
+r
+> =97 but tcmalloc will give us some better options to diagnose it). So=
+rry
+> I didn't mention this before!
 
-I have incorrectly formulated a reason - of course drops can not cause
-a lockup by themselves, but switch may create somehow a long-lasting
-`corrupt` state on the trunk ports which leads to such lockups at the
-ethernet card. Of course I`ll play with the driver versions and
-card|port settings, thanks for suggestion :)
+Hey Greg! Good recall, I am on Gentoo, and I did build with tcmalloc.
+Here is the information you requested:
 
-I`m still investigating the issue since it is a quite hard to repeat
-in the right time and hope I`m able to capture this state using
-tcpdump-like, e.g. s/w methods - if card driver locks on something, it
-may prevent to process problematic byte sequence at packet sniffer level.
+2012-10-03 16:20:43.979673 mds.0 [INF] mds.ferntcmalloc heap
+stats:------------------------------------------------
+2012-10-03 16:20:43.979676 mds.0 [INF] MALLOC:    53796808560 (51304.6
+MiB) Bytes in use by application
+2012-10-03 16:20:43.979679 mds.0 [INF] MALLOC: +       753664 (    0.7
+MiB) Bytes in page heap freelist
+2012-10-03 16:20:43.979681 mds.0 [INF] MALLOC: +     93299048 (   89.0
+MiB) Bytes in central cache freelist
+2012-10-03 16:20:43.979683 mds.0 [INF] MALLOC: +      6110720 (    5.8
+MiB) Bytes in transfer cache freelist
+2012-10-03 16:20:43.979685 mds.0 [INF] MALLOC: +     84547880 (   80.6
+MiB) Bytes in thread cache freelists
+2012-10-03 16:20:43.979686 mds.0 [INF] MALLOC: +     84606976 (   80.7
+MiB) Bytes in malloc metadata
+2012-10-03 16:20:43.979688 mds.0 [INF] MALLOC:   ------------
+2012-10-03 16:20:43.979690 mds.0 [INF] MALLOC: =3D  54066126848 (51561.=
+5
+MiB) Actual memory used (physical + swap)
+2012-10-03 16:20:43.979691 mds.0 [INF] MALLOC: +            0 (    0.0
+MiB) Bytes released to OS (aka unmapped)
+2012-10-03 16:20:43.979693 mds.0 [INF] MALLOC:   ------------
+2012-10-03 16:20:43.979694 mds.0 [INF] MALLOC: =3D  54066126848 (51561.=
+5
+MiB) Virtual address space used
+2012-10-03 16:20:43.979700 mds.0 [INF] MALLOC:
+2012-10-03 16:20:43.979702 mds.0 [INF] MALLOC:         609757
+    Spans in use
+2012-10-03 16:20:43.979703 mds.0 [INF] MALLOC:            395
+    Thread heaps in use
+2012-10-03 16:20:43.979705 mds.0 [INF] MALLOC:           8192
+    Tcmalloc page size
+2012-10-03 16:20:43.979710 mds.0 [INF]
+------------------------------------------------
+2012-10-03 16:20:43.979716 mds.0 [INF] Call ReleaseFreeMemory() to
+release freelist memory to the OS (via madvise()).
+2012-10-03 16:20:43.979718 mds.0 [INF] Bytes released to the
+
+It didn't print anything past the "Bytes released to the"...
+
+Let me know if you need anything else.
+
+t.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
