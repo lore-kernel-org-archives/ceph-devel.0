@@ -1,40 +1,42 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: Re: How to write data to rbd pool.
-Date: Wed, 3 Oct 2012 04:55:06 +0000 (UTC)
-Message-ID: <loom.20121003T065313-927@post.gmane.org>
-References: <loom.20121001T173732-275@post.gmane.org>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: crush: warn on do_rule failure
+Date: Wed, 3 Oct 2012 10:24:12 +0300
+Message-ID: <20121003072412.GA10383@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51461 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754366Ab2JCE4G (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Oct 2012 00:56:06 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TJGzs-0001Kx-I8
-	for ceph-devel@vger.kernel.org; Wed, 03 Oct 2012 06:55:48 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 06:55:48 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 06:55:48 +0200
+Received: from rcsinet15.oracle.com ([148.87.113.117]:38531 "EHLO
+	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756074Ab2JCHYU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 03:24:20 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: sage@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+Hello Sage Weil,
 
-   When map rbd to /dev it's giving error,
-"rbd map /dev/mypool/mytest "
+The patch 8b3932690084: "crush: warn on do_rule failure" from May 7,
+2012, leads to the following warning:
+net/ceph/osdmap.c:1117:8: warning: comparison of unsigned expression < 0 is always false [-Wtautological-compare]
 
-add failed: (22) Invalid argument
- 
-How to map rbd volume.Please help me.
+net/ceph/osdmap.c
+  1114          r = crush_do_rule(osdmap->crush, ruleno, pps, osds,
+  1115                            min_t(int, pool->v.size, *num),
+  1116                            osdmap->osd_weight);
+  1117          if (r < 0) {
+                    ^^^^^
+r is unsigned so it's never less than zero.  Also crush_do_rule() never
+returns negative numbers.
 
-Thanks,
-Ramu.
+  1118                  pr_err("error %d from crush rule: pool %d ruleset %d type %d"
+  1119                         " size %d\n", r, poolid, pool->v.crush_ruleset,
+  1120                         pool->v.type, pool->v.size);
+  1121                  return NULL;
+  1122          }
+  1123          *num = r;
+
+regards,
+dan carpenter
 
