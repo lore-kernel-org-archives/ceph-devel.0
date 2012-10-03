@@ -1,127 +1,77 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [ceph-commit] teuthology lock_server error
-Date: Wed, 3 Oct 2012 08:08:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210030808080.21194@cobra.newdream.net>
-References: <CABpo6hLzP1n8MSyi=bNmuJxeKb9yRd6oEnjSxYP3gJ_Nt0EVaQ@mail.gmail.com>
+Subject: Re: [PATCH] mds: Use stray dir as base inode for stray
+ reintegration
+Date: Wed, 3 Oct 2012 08:17:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210030811350.21194@cobra.newdream.net>
+References: <1349264412-31444-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-741150462-1349276930=:21194"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33983 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34041 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932361Ab2JCPIu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 11:08:50 -0400
-In-Reply-To: <CABpo6hLzP1n8MSyi=bNmuJxeKb9yRd6oEnjSxYP3gJ_Nt0EVaQ@mail.gmail.com>
+	with ESMTP id S932314Ab2JCPRF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 11:17:05 -0400
+In-Reply-To: <1349264412-31444-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lokesh Krishnappa <lokesh.professional.it@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-commit@lists.ceph.newdream.net, ceph-commit-ceph.newdream.net-confirm+6595873e5e2f1b9f5abaa524fb44a53e238a71e4@lists.ceph.newdream.net
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, 3 Oct 2012, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> Server::handle_client_rename() only skips common ancestor check
+> if source path's base inode is stray directory, but source path's
+> base inode is mdsdir in the stray reintegration case.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
---557981400-741150462-1349276930=:21194
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hmm, I think this is a problem because path_traverse() does not know how 
+to get started with a stray dir it doesn't already have.  It might make 
+more sense to use the full path here, and make the handle_client_rename() 
+check smarter.
 
-If you are not actually running the lock server (which you probably don't=
-=20
-need anyway), add
+I'm testing this:
 
-check-lcoks: false
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index b706b5a..0c3ff96 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -5066,7 +5066,8 @@ void Server::handle_client_rename(MDRequest *mdr)
+ 
+   // src+dest traces _must_ share a common ancestor for locking to prevent orphans
+   if (destpath.get_ino() != srcpath.get_ino() &&
+-      !MDS_INO_IS_STRAY(srcpath.get_ino())) {  // <-- mds 'rename' out of stray dir is ok!
++      !(req->get_source()->is_mds() &&
++       MDS_INO_IS_MDSDIR(srcpath.get_ino()))) {  // <-- mds 'rename' out of stray dir is ok!
+     // do traces share a dentry?
+     CDentry *common = 0;
+     for (unsigned i=0; i < srctrace.size(); i++) {
 
-to your yaml.  I think that will get you going...
 
+Thanks!
 sage
 
-On Wed, 3 Oct 2012, Lokesh Krishnappa wrote:
 
-> Hi all,
->=20
-> Am new to git and playing around git qa suite , trying to test rbd on l=
-ocal
-> machine .
-> and local test bed setup as ;
->=20
-> OS :=A0 Ubuntu 12.04LTS
-> teuthology version: 0.0.1
-> ceph : 0.48.1 arganaut
->=20
-> we are running server, and the client on locale in a single machine .
-> yaml file format :
-> roles:
-> - [mon.a, osd.0, osd.1]
->=20
-> targets:
-> =A0=A0 lokesh@lokesh: ssh-rsaAAAAB3NzaC1yc2EAAAADAQABAAABAQDmSb/VpYpdSQ=
-Lp4unsKUNV/DKV2f55M1QSXHu10Qvco33
-> rYopOF/l5+eYlINCHF1v/SA+bLOMT/4OHGkZR67TajAoXFpyolVSxZKRoJHLV2iJ+MrRiax=
-Shct
-> MYWpLOjc4iRA4BG3FTG5TTPKJweDj8dDdUIqZ9PuSpP5VuOriCpQkPWECL2hJqAYwnknK1U=
-hg3r
-> YV0XxL14Iep9KCZf2PcJNw3Eur6XKDAczu/sAUlOiLrBsQpFmOaPY5jFDaM3U7KpJvqiI4D=
-rq33
-> 1iMh9n3GuA+JvcTMKuT7CN36GswlvGuakTzaDoR66JaYYKkGzDl977K94XrAdQwa2NKLu1X=
-H
->=20
->=20
-> tasks:
-> - ceph:
-> - ceph-fuse:
-> - workunit:
-> =A0=A0=A0 clients:
-> =A0=A0=A0=A0=A0 client.0:
-> =A0=A0=A0=A0=A0=A0=A0 - rbd/test_cls_rbd.sh
-> #-interactive-on-error: true
->=20
-> and my .teutholgy.yaml file format is:
->=20
-> lock_server: http://lokesh/lock
-> queue_host: lokesh
-> queue_port: 4000
->=20
-> while am trying to execute test suite as:
-> lokesh@lokesh:~/Downloads/ceph-teuthology-78b7b02$
-> ./virtualenv/bin/teuthology rbd_cls_tests1.yaml
->=20
-> i met error as:
-> INFO:teuthology.run_tasks:Running task internal.save_config...
-> INFO:teuthology.task.internal:Saving configuration
-> INFO:teuthology.run_tasks:Running task internal.check_lock...
-> INFO:teuthology.task.internal:Checking locks...
-> INFO:teuthology.lock:GET request to 'http://lokesh/lock/lokesh@lokesh' =
-with
-> body 'None' failed with response code 404
-> ERROR:teuthology.run_tasks:Saw exception from tasks
-> Traceback (most recent call last):
-> =A0 File
-> "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/run_tasks.py=
-",
-> line 25, in run_tasks
-> =A0=A0=A0 manager =3D _run_one_task(taskname, ctx=3Dctx, config=3Dconfi=
-g)
-> =A0 File
-> "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/run_tasks.py=
-",
-> line 14, in _run_one_task
-> =A0=A0=A0 return fn(**kwargs)
-> =A0 File"/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/task=
-/internal.py
-> ", line 110, in check_lock
-> =A0=A0=A0 'could not read lock status for {name}'.format(name=3Dmachine=
-)
-> AssertionError: could not read lock status for lokesh@lokesh
->=20
-> i didnt get idea abt it . but the server is working fine.. any idea pls
-> reply.
->=20
->=20
->=20
-> With Regards,
->=20
-> Lokesh K
->=20
->=20
->=20
->=20
->=20
---557981400-741150462-1349276930=:21194--
+> ---
+>  src/mds/MDCache.cc | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+> index 8b02b8b..32c9e36 100644
+> --- a/src/mds/MDCache.cc
+> +++ b/src/mds/MDCache.cc
+> @@ -8288,8 +8288,7 @@ void MDCache::reintegrate_stray(CDentry *straydn, CDentry *rdn)
+>    dout(10) << "reintegrate_stray " << *straydn << " into " << *rdn << dendl;
+>    
+>    // rename it to another mds.
+> -  filepath src;
+> -  straydn->make_path(src);
+> +  filepath src(straydn->get_name(), straydn->get_dir()->get_inode()->ino());
+>    filepath dst;
+>    rdn->make_path(dst);
+>  
+> -- 
+> 1.7.11.4
+> 
+> 
