@@ -1,623 +1,76 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: mds stuck in clientreplay state after failover
-Date: Wed, 3 Oct 2012 17:43:44 -0700
-Message-ID: <CAPYLRzjpnyT5E9uAPf6O0GPLJxdY6L6vwa427vXomeQswZMF6A@mail.gmail.com>
-References: <CANLRBoxx0cvP38sajROLyB57TVJq00y13+zUYUnf1EVwF_gAmQ@mail.gmail.com>
-	<CAPYLRzixPAktdqqSFNhw5=SfrrM4CPE-ok-20y8_-=R1T7bWFQ@mail.gmail.com>
-	<CANLRBowOqC4MiD9=-Wc97tjzQT82JiPEOw+xOqFRQOCn_zRfcA@mail.gmail.com>
+From: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
+Subject: Re: Slow ceph fs performance
+Date: Thu, 04 Oct 2012 11:54:39 -0400
+Message-ID: <201210041554.q94FsdHG021382@ayesha.phys.virginia.edu>
+References: <alpine.DEB.2.00.1210040823250.23556@cobra.newdream.net>
+Reply-To: bryan@Virginia.EDU
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:61694 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964801Ab2JDAnp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Oct 2012 20:43:45 -0400
-Received: by iagy32 with SMTP id y32so1320171iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Oct 2012 17:43:45 -0700 (PDT)
-In-Reply-To: <CANLRBowOqC4MiD9=-Wc97tjzQT82JiPEOw+xOqFRQOCn_zRfcA@mail.gmail.com>
+Received: from ayesha.phys.Virginia.EDU ([128.143.102.43]:42954 "EHLO
+	ayesha.phys.virginia.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965618Ab2JDPyl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Oct 2012 11:54:41 -0400
+Received: from ayesha.phys.virginia.edu (localhost [127.0.0.1])
+	by ayesha.phys.virginia.edu (8.14.4/8.14.4) with ESMTP id q94FsdHG021382
+	for <ceph-devel@vger.kernel.org>; Thu, 4 Oct 2012 11:54:39 -0400
+In-reply-to: Your message of "Thu, 04 Oct 2012 08:24:32 PDT."
+             <alpine.DEB.2.00.1210040823250.23556@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tren Blackburn <tren@eotnetworks.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, Sep 25, 2012 at 4:55 PM, Tren Blackburn <tren@eotnetworks.com> =
-wrote:
-> On Tue, Sep 25, 2012 at 2:15 PM, Gregory Farnum <greg@inktank.com> wr=
-ote:
->> Hi Tren,
->> Sorry your last message got dropped =97 we've all been really busy!
->>
->
-> No worries! I know you guys are busy, and I appreciate any assistance
-> you're able to provide.
->
->> On Tue, Sep 25, 2012 at 10:22 AM, Tren Blackburn <tren@eotnetworks.c=
-om> wrote:
->> <snip>
->>
->>> All ceph servers are running ceph-0.51. Here is the output of ceph =
--s:
->>>
->>> ocr31-ire ~ # ceph -s
->>>    health HEALTH_OK
->>>    monmap e1: 3 mons at
->>> {fern=3D10.87.1.88:6789/0,ocr46=3D10.87.1.104:6789/0,sap=3D10.87.1.=
-87:6789/0},
->>> election epoch 92, quorum 0,1,2 fern,ocr46,sap
->>>    osdmap e60: 192 osds: 192 up, 192 in
->>>     pgmap v47728: 73728 pgs: 73728 active+clean; 290 GB data, 2794 =
-GB
->>> used, 283 TB / 286 TB avail
->>>    mdsmap e19: 1/1/1 up {0=3Dfern=3Dup:clientreplay}, 2 up:standby
->>
->> Okay, so all your OSDs are up and all your PGs are active+clean, whi=
-ch
->> means it's definitely a problem in the MDS....
->>
->>
->>> Here are the logs from sap, which was the mds master before it was
->>> told to respawn:
->>>
->>> 2012-09-25 04:45:32.588374 7f2a34a40700  0 mds.0.3 ms_handle_reset =
-on
->>> 10.87.1.100:6832/32257
->>> 2012-09-25 04:45:32.589064 7f2a34a40700  0 mds.0.3 ms_handle_connec=
-t
->>> on 10.87.1.100:6832/32257
->>> 2012-09-25 04:45:57.787416 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 04:55:21.718357 7f2a34a40700  0 mds.0.3 ms_handle_reset =
-on
->>> 10.87.1.89:6815/8101
->>> 2012-09-25 04:55:21.719044 7f2a34a40700  0 mds.0.3 ms_handle_connec=
-t
->>> on 10.87.1.89:6815/8101
->>> 2012-09-25 04:55:26.758359 7f2a34a40700  0 mds.0.3 ms_handle_reset =
-on
->>> 10.87.1.96:6800/6628
->>> 2012-09-25 04:55:26.759415 7f2a34a40700  0 mds.0.3 ms_handle_connec=
-t
->>> on 10.87.1.96:6800/6628
->>> 2012-09-25 05:13:16.367476 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:18:45.177585 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:19:44.911831 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:30:38.178449 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:37:26.597832 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:37:34.088781 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:38:37.548132 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:39:21.528884 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:39:57.791457 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:40:13.579926 7f2a34a40700  0 mds.0.3 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:41:07.598457 7f2a2f709700  0 -- 10.87.1.87:6801/27351=
- >>
->>> 10.87.1.89:0/30567 pipe(0x1db2fc0 sd=3D100 pgs=3D2 cs=3D1 l=3D0).fa=
-ult with
->>> nothing to send, going to standby
->>> 2012-09-25 05:41:07.603802 7f2a30517700  0 -- 10.87.1.87:6801/27351=
- >>
->>> 10.87.1.94:0/9358 pipe(0x1db2b40 sd=3D99 pgs=3D2 cs=3D1 l=3D0).faul=
-t with
->>> nothing to send, going to standby
->>> 2012-09-25 05:41:07.969148 7f2a34a40700  1 mds.-1.-1 handle_mds_map=
- i
->>> (10.87.1.87:6801/27351) dne in the mdsmap, respawning myself
->>> 2012-09-25 05:41:07.969154 7f2a34a40700  1 mds.-1.-1 respawn
->>> 2012-09-25 05:41:07.969155 7f2a34a40700  1 mds.-1.-1  e: '/usr/bin/=
-ceph-mds'
->>> 2012-09-25 05:41:07.969157 7f2a34a40700  1 mds.-1.-1  0: '/usr/bin/=
-ceph-mds'
->>> 2012-09-25 05:41:07.969159 7f2a34a40700  1 mds.-1.-1  1: '-i'
->>> 2012-09-25 05:41:07.969160 7f2a34a40700  1 mds.-1.-1  2: 'sap'
->>> 2012-09-25 05:41:07.969161 7f2a34a40700  1 mds.-1.-1  3: '--pid-fil=
-e'
->>> 2012-09-25 05:41:07.969162 7f2a34a40700  1 mds.-1.-1  4:
->>> '/var/run/ceph/mds.sap.pid'
->>> 2012-09-25 05:41:07.969163 7f2a34a40700  1 mds.-1.-1  5: '-c'
->>> 2012-09-25 05:41:07.969164 7f2a34a40700  1 mds.-1.-1  6: '/etc/ceph=
-/ceph.conf'
->>> 2012-09-25 05:41:07.969165 7f2a34a40700  1 mds.-1.-1  cwd /
->>> 2012-09-25 05:41:08.003262 7fae819af780  0 ceph version 0.51
->>> (commit:c03ca95d235c9a072dcd8a77ad5274a52e93ae30), process ceph-mds=
-,
->>> pid 1173
->>> 2012-09-25 05:41:08.005237 7fae7c9bd700  0 mds.-1.0 ms_handle_conne=
-ct
->>> on 10.87.1.88:6789/0
->>> 2012-09-25 05:41:08.802610 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:09.602141 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:23.772891 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:25.273745 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:27.994344 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:28.588681 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>> 2012-09-25 05:41:42.282588 7fae7c9bd700  1 mds.-1.0 handle_mds_map =
-standby
->>>
->>> Why did sap get marked as down in the mdsmap?
->>
->> That's hard to guess about the precise reasons without more logging
->> enabled, but notice all of the "handle_mds_beacon no longer laggy".
->> Those indicate that the monitors thought it was getting slow pretty
->> frequently, and then it was correcting them by saying "hey, I'm
->> alive!" and they accepted it. Eventually, it was laggy (didn't
->> heartbeat) for long enough that they killed it.
->
-> What settings control the heartbeat of the mds to mon communication?
-> Is it possible to increase them?
->
->>
->>
->>> Here is the mds logs from fern, the node that took over:
->>>
->>> 2012-09-25 05:41:09.482638 7f6a921c5700  1 mds.0.4 replay_done
->>> 2012-09-25 05:41:09.482652 7f6a921c5700  1 mds.0.4 making mds journ=
-al writeable
->>> 2012-09-25 05:41:09.483589 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.94:6800/19702
->>> 2012-09-25 05:41:09.483602 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.101:6818/7441
->>> 2012-09-25 05:41:09.483606 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.90:6812/13521
->>> 2012-09-25 05:41:09.483623 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.104:6825/30845
->>> 2012-09-25 05:41:09.602861 7f6a95ae2700  1 mds.0.4 handle_mds_map i=
- am
->>> now mds.0.4
->>> 2012-09-25 05:41:09.602865 7f6a95ae2700  1 mds.0.4 handle_mds_map
->>> state change up:replay --> up:reconnect
->>> 2012-09-25 05:41:09.602867 7f6a95ae2700  1 mds.0.4 reconnect_start
->>> 2012-09-25 05:41:09.602869 7f6a95ae2700  1 mds.0.4 reopen_log
->>> 2012-09-25 05:41:09.602879 7f6a95ae2700  1 mds.0.server
->>> reconnect_clients -- 2 sessions
->>> 2012-09-25 05:41:10.793524 7f6a95ae2700  0 log [DBG] : reconnect by
->>> client.4755 10.87.1.89:0/30567 after 1.190611
->>> 2012-09-25 05:41:10.793568 7f6a95ae2700  0 mds.0.server non-auth
->>> 10000000004 #10000000004, will pass off to authority
->>> 2012-09-25 05:41:10.793594 7f6a95ae2700  0 mds.0.server non-auth
->>> 10000000005 #10000000005, will pass off to authority
->>> 2012-09-25 05:41:10.793609 7f6a95ae2700  0 mds.0.server non-auth
->>> 10000000006 #10000000006, will pass off to authority
->>> 2012-09-25 05:41:10.793625 7f6a95ae2700  0 mds.0.server non-auth
->>> 100000000d7 #100000000d7, will pass off to authority
->>> 2012-09-25 05:41:10.793636 7f6a95ae2700  0 mds.0.server non-auth
->>> 100000000d8 #100000000d8, will pass off to authority
->>> 2012-09-25 05:41:10.793653 7f6a95ae2700  0 mds.0.server non-auth
->>> 100000000d9 #100000000d9, will pass off to authority
->>> 2012-09-25 05:41:10.793664 7f6a95ae2700  0 mds.0.server non-auth
->>> 100000000da #100000000da, will pass off to authority
->>> 2012-09-25 05:41:10.793675 7f6a95ae2700  0 mds.0.server non-auth
->>> 100000000db #100000000db, will pass off to authority
->>> ...
->>> Goes on for a few hundred thousand lines. It seems like there's a r=
-ace
->>> here somewhere as it made about 860,000 lines of this "server
->>> non-auth"
->>
->> This is definitely concerning =97 generally I think it could be okay=
-,
->> but since you only have one active MDS here, it should be the
->> authority for everything! This is what we're going to want to scope =
-in
->> on.
->>
->>
->>> ...
->>> 2012-09-25 05:41:19.474557 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a83 #100002b8a83, will pass off to authority
->>> 2012-09-25 05:41:19.474568 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a84 #100002b8a84, will pass off to authority
->>> 2012-09-25 05:41:19.474579 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a87 #100002b8a87, will pass off to authority
->>> 2012-09-25 05:41:19.474588 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a89 #100002b8a89, will pass off to authority
->>> 2012-09-25 05:41:19.474605 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a8a #100002b8a8a, will pass off to authority
->>> 2012-09-25 05:41:19.474626 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a8b #100002b8a8b, will pass off to authority
->>> 2012-09-25 05:41:19.474637 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a8c #100002b8a8c, will pass off to authority
->>> 2012-09-25 05:41:19.474652 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a8d #100002b8a8d, will pass off to authority
->>> 2012-09-25 05:41:19.474667 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a8f #100002b8a8f, will pass off to authority
->>> 2012-09-25 05:41:19.474689 7f6a95ae2700  0 mds.0.server non-auth
->>> 100002b8a96 #100002b8a96, will pass off to authority
->>> 2012-09-25 05:41:19.484342 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba853 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9240.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484361 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba854 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9251.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484367 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba855 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9350.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484378 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba856 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9352.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484382 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba857 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9354.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484387 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba858 #10000000002/ArchiveOutbound/111/1111968/20110701/38543=
-9430.tif
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484393 7f6a95ae2700  0 mds.0.server missing
->>> 100002ba859 #10000000002/ArchiveOutbound/111/1111968/20110701/.3854=
-39444.tif.RxChkh
->>> (mine), will load later
->>> 2012-09-25 05:41:19.484401 7f6a95ae2700  1 mds.0.4 reconnect_done
->>> 2012-09-25 05:41:23.835106 7f6a95ae2700  0 mds.0.4 handle_mds_beaco=
-n
->>> no longer laggy
->>> 2012-09-25 05:41:27.994961 7f6a95ae2700  1 mds.0.4 handle_mds_map i=
- am
->>> now mds.0.4
->>> 2012-09-25 05:41:27.994965 7f6a95ae2700  1 mds.0.4 handle_mds_map
->>> state change up:reconnect --> up:rejoin
->>> 2012-09-25 05:41:27.994968 7f6a95ae2700  1 mds.0.4 rejoin_joint_sta=
-rt
->>> 2012-09-25 05:41:28.424292 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.98:6827/21424
->>> 2012-09-25 05:41:28.441796 7f6a95ae2700  1 mds.0.4 rejoin_done
->>> 2012-09-25 05:41:28.589425 7f6a95ae2700  1 mds.0.4 handle_mds_map i=
- am
->>> now mds.0.4
->>> 2012-09-25 05:41:28.589428 7f6a95ae2700  1 mds.0.4 handle_mds_map
->>> state change up:rejoin --> up:clientreplay
->>> 2012-09-25 05:41:28.589430 7f6a95ae2700  1 mds.0.4 recovery_done --
->>> successful recovery!
->>> 2012-09-25 05:41:28.598110 7f6a95ae2700  1 mds.0.4 clientreplay_sta=
-rt
->>> 2012-09-25 05:41:28.613610 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.103:6833/9804
->>> 2012-09-25 05:41:28.615111 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.95:6818/8725
->>> 2012-09-25 05:41:28.616342 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.98:6812/20834
->>> 2012-09-25 05:41:28.618528 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.102:6809/21045
->>> 2012-09-25 05:41:28.619851 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.98:6821/21183
->>> 2012-09-25 05:41:28.622614 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.89:6809/7883
->>> 2012-09-25 05:56:07.824706 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.103:6818/9242
->>> 2012-09-25 05:56:07.824827 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.100:6816/31393
->>> 2012-09-25 05:56:07.825437 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.103:6818/9242
->>> 2012-09-25 05:56:07.834669 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.96:6809/6968
->>> 2012-09-25 05:56:07.835271 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.96:6809/6968
->>> 2012-09-25 05:56:08.094667 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.101:6824/7669
->>> 2012-09-25 05:56:08.095320 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.101:6824/7669
->>> 2012-09-25 05:56:08.104670 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.94:6803/19811
->>> 2012-09-25 05:56:08.105254 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.94:6803/19811
->>> 2012-09-25 05:56:08.464684 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.99:6815/4360
->>> 2012-09-25 05:56:08.465283 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.99:6815/4360
->>> 2012-09-25 05:56:08.554740 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.101:6830/7898
->>> 2012-09-25 05:56:08.554815 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.96:6827/7710
->>> 2012-09-25 05:56:08.555387 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.96:6827/7710
->>> 2012-09-25 05:56:08.555395 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.101:6830/7898
->>> 2012-09-25 05:56:08.564681 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.104:6816/30466
->>> 2012-09-25 05:56:08.564759 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.93:6833/28547
->>> 2012-09-25 05:56:08.565390 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.104:6816/30466
->>> 2012-09-25 05:56:08.565415 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.93:6833/28547
->>> 2012-09-25 05:56:08.574702 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.98:6830/21540
->>> 2012-09-25 05:56:08.574746 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.104:6804/29957
->>> 2012-09-25 05:56:08.575357 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.104:6804/29957
->>> 2012-09-25 05:56:08.575366 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.98:6830/21540
->>> 2012-09-25 05:56:08.584683 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.101:6806/6990
->>> 2012-09-25 05:56:08.585261 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.101:6806/6990
->>> 2012-09-25 05:56:08.594677 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.100:6828/31704
->>> 2012-09-25 05:56:08.654687 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.102:6833/21939
->>> 2012-09-25 05:56:08.655264 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.102:6833/21939
->>> 2012-09-25 05:56:08.694689 7f6a95ae2700  0 mds.0.4 ms_handle_reset =
-on
->>> 10.87.1.90:6833/14293
->>> 2012-09-25 05:56:08.695442 7f6a95ae2700  0 mds.0.4 ms_handle_connec=
-t
->>> on 10.87.1.90:6833/14293
->> <snip>
->> This is all fine =97 it's notifications about the messenger
->> disconnecting sessions (which it does automatically when they're idl=
-e
->> long enough) and then re-establishing them (which the MDS will ask i=
-t
->> to do for some types). It can be a problem indicator, but usually
->> isn't. At the frequency you're seeing (and with it being different
->> connections) I don't think there's any trouble here.
->
-> Okay good to know.
->
->>
->>> I enabled a higher level of debugging from ferns mds server:
->>>
->>> ceph mds tell 'fern' injectargs "--debug_mds 20"
->>>
->>> Here is what the mds logs show on fern:
->>>
->>> 2012-09-25 09:54:50.017750 7f6a95ae2700 -1 mds.0.4 applying
->>> configuration change: internal_safe_to_start_threads =3D 'true'
->>>
->>> 2012-09-25 09:54:52.770191 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16692 (currently up:clientreplay)
->>> 2012-09-25 09:54:52.770761 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16692 rtt 0.000562
->>> 2012-09-25 09:54:54.723205 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:54:54.723241 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:54:54.723244 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:54:54.723256 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:54:54.723262 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:54:45.380736)
->>> 2012-09-25 09:54:56.770279 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16693 (currently up:clientreplay)
->>> 2012-09-25 09:54:56.770782 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16693 rtt 0.000489
->>> 2012-09-25 09:54:59.723269 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:54:59.723304 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:54:59.723306 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:54:59.723312 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:54:59.723318 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:54:45.380736)
->>> 2012-09-25 09:55:00.770376 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16694 (currently up:clientreplay)
->>> 2012-09-25 09:55:00.770875 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16694 rtt 0.000491
->>> 2012-09-25 09:55:04.723314 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:55:04.723340 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:55:04.723344 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:55:04.723349 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:55:04.723355 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:54:45.380736)
->>> 2012-09-25 09:55:04.770462 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16695 (currently up:clientreplay)
->>> 2012-09-25 09:55:04.771033 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16695 rtt 0.000566
->>> 2012-09-25 09:55:05.381914 7f6a95ae2700 20 mds.0.server get_session
->>> have 0x3419d40 client.4755 10.87.1.89:0/30567 state open
->>> 2012-09-25 09:55:05.381922 7f6a95ae2700  3 mds.0.server
->>> handle_client_session client_session(request_renewcaps seq 3303) v1
->>> from client.4755
->>> 2012-09-25 09:55:06.426145 7f6a95ae2700 20 mds.0.server get_session
->>> have 0x302b680 client.4746 10.87.1.94:0/9358 state open
->>> 2012-09-25 09:55:06.426153 7f6a95ae2700  3 mds.0.server
->>> handle_client_session client_session(request_renewcaps seq 3304) v1
->>> from client.4746
->>> 2012-09-25 09:55:08.770543 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16696 (currently up:clientreplay)
->>> 2012-09-25 09:55:08.771030 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16696 rtt 0.000479
->>> 2012-09-25 09:55:09.723353 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:55:09.723372 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:55:09.723374 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:55:09.723379 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:55:09.723383 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:55:05.381926)
->>> 2012-09-25 09:55:12.770623 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16697 (currently up:clientreplay)
->>> 2012-09-25 09:55:12.771158 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16697 rtt 0.000529
->>> 2012-09-25 09:55:14.723412 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:55:14.723431 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:55:14.723433 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:55:14.723438 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:55:14.723442 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:55:05.381926)
->>> 2012-09-25 09:55:16.770700 7f6a941de700 10 mds.0.4 beacon_send
->>> up:clientreplay seq 16698 (currently up:clientreplay)
->>> 2012-09-25 09:55:16.771198 7f6a95ae2700 10 mds.0.4 handle_mds_beaco=
-n
->>> up:clientreplay seq 16698 rtt 0.000491
->>> 2012-09-25 09:55:19.723466 7f6a941de700 15 mds.0.bal get_load
->>> mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0>
->>> 2012-09-25 09:55:19.723485 7f6a941de700 10 mds.0.locker scatter_tic=
-k
->>> 2012-09-25 09:55:19.723487 7f6a941de700 10 mds.0.server
->>> find_idle_sessions.  laggy until 2012-09-25 05:41:23.835106
->>> 2012-09-25 09:55:19.723491 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567
->>> 2012-09-25 09:55:19.723496 7f6a941de700 20 mds.0.server laggiest
->>> active session is client.4755 10.87.1.89:0/30567 and sufficiently n=
-ew
->>> (2012-09-25 09:55:05.381926)
->>
->> So it's not asking to be moved out of clientreplay, which I'm pretty
->> sure is because it has a bunch of pending operations which it has
->> (above) tried to disclaim responsibility for. Nothing else to see
->> here.
->>
->>
->>> The mds is still in clientreplay. I have not attempted to restart t=
-he
->>> mds process yet as I wanted to leave it in this state so we can
->>> hopefully provide whatever information is needed to get this resolv=
-ed.
->>>
->>> Please let me know if there is any extra information I can provide
->>> that would be helpful.
->>
->> I can't off-hand think of how this could happen. Can you add the bel=
-ow
->> debugging to your MDS configuration files and then restart them all?
->> That should give us (lots and lots) more information about its state
->> on startup which it isn't outputting later on. Zip it up and put it
->> somewhere accessible, or get in touch with me on irc and I can get y=
-ou
->> a drop point.
->>
->> debug mds =3D 20
->> mds dump cache on map =3D true
->> mds dump cache after rejoin =3D true
->
-> To finish our conversation on IRC, I have the logs bzipped for fern,
-> the mds that was stuck in clientreplay.  I went through and added the
-> logging you requested, and restarted the rsync. Within minutes, fern
-> gave up mds to ocr46. The logs it made in about a 10 minute period
-> were 600+MB. They are accessible at:
->
-> https://www.dropbox.com/s/vr7csslcikami5l/mds.fern.log.25sept2012.bz2
->
-> I also think that the file system is borked. I had 2 nodes doing an
-> rsync into ceph. One of the two rsync's is complaining about files
-> having vanished on ceph, the destination, even though the files are
-> there and accessible. The other rsync is having no such problems. I
-> have stopped both rsyncs for now as the logs that the mds is creating
-> with the enhanced logging is too much and the mds process is eating
-> far too much cpu time.
->
-> Please let me know if I can provide any further information. I'm
-> probably going to be flattening this cluster since it seems that it's
-> corrupted anyhow. We need to get cephfs working for us, so anything w=
-e
-> can do to help you debug the problems we're having, please let me
-> know.
+Hi Sage,
 
-I actually did look at these last week, but I forgot to email you
-after hoping you'd show up in irc. ;)
-In brief:
-The logs you had already collected are sadly not sufficient to fully
-diagnose the problem, and logs from the daemons that are now working
-wouldn't help.
-There was nothing notable going on that should have caused the MDS to
-go laggy and be replaced, and it did appear to be sending out
-mds_beacons as it should have. Did you by any chance notice if the
-monitors were extremely loaded or seemed to be having any problems?
-Unfortunately that's all I can remember from my diagnosis, but I think
-it's the "high" points.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage@inktank.com said:
+> Can you also include 'ceph osd tree', 'ceph osd dump', and 'ceph pg dump'
+> output?  So we can make sure CRUSH is distributing things well? 
+
+Here they are:
+
+# ceph osd tree
+dumped osdmap tree epoch 24
+# id    weight  type name       up/down reweight
+-1      4       pool default
+-3      4               rack unknownrack
+-2      1                       host ceph-osd-1
+1       1                               osd.1   up      1
+-4      1                       host ceph-osd-2
+2       1                               osd.2   up      1
+-5      1                       host ceph-osd-3
+3       1                               osd.3   up      1
+-6      1                       host ceph-osd-4
+4       1                               osd.4   up      1
+
+# ceph osd dump
+dumped osdmap epoch 24
+epoch 24
+fsid 7e4e4302-4ced-439e-9786-49e6036dfda4
+created 2012-09-28 13:17:40.774580
+modifed 2012-09-28 16:56:02.864965
+flags 
+
+pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
+pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
+pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
+
+max_osd 5
+osd.1 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [10,15) 192.168.1.21:6800/3702 192.168.12.21:6800/3702 192.168.12.21:6801/3702 exists,up 4ad0b4cd-cbff-4693-b8f7-667148386cf3
+osd.2 up   in  weight 1 up_from 17 up_thru 21 down_at 16 last_clean_interval [8,15) 192.168.1.22:6800/3428 192.168.12.22:6800/3428 192.168.12.22:6801/3428 exists,up 6a829cc6-fc60-450a-ac1d-8e148b757e57
+osd.3 up   in  weight 1 up_from 21 up_thru 21 down_at 20 last_clean_interval [9,15) 192.168.1.23:6800/3436 192.168.12.23:6800/3436 192.168.12.23:6801/3436 exists,up 387cff7a-b857-434b-af66-0e08f56fd0f7
+osd.4 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [9,15) 192.168.1.24:6800/3486 192.168.12.24:6800/3486 192.168.12.24:6801/3486 exists,up fe8c4bf0-ff6f-41e9-91ac-d5826672f8b5
+
+# ceph pg dump
+See http://ayesha.phys.virginia.edu/~bryan/ceph-pg-dump.txt
+
+					Bryan
+
+-- 
+========================================================================
+Bryan Wright              |"If you take cranberries and stew them like 
+Physics Department        | applesauce, they taste much more like prunes
+University of Virginia    | than rhubarb does."  --  Groucho 
+Charlottesville, VA  22901|			
+(434) 924-7218            |         bryan@virginia.edu
+========================================================================
+
