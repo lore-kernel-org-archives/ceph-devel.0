@@ -2,18 +2,18 @@ From: Smart Weblications GmbH - Florian Wiessner
 	<f.wiessner@smart-weblications.de>
 Subject: Re: ceph-mon not starting - AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe
  error: (38) Function not implemented
-Date: Fri, 05 Oct 2012 17:56:15 +0200
-Message-ID: <506F031F.9050405@smart-weblications.de>
+Date: Fri, 05 Oct 2012 18:00:32 +0200
+Message-ID: <506F0420.8030204@smart-weblications.de>
 References: <506D9148.9040106@smart-weblications.de> <506ED188.5020905@smart-weblications.de> <506ED404.1000306@inktank.com> <alpine.DEB.2.00.1210050819320.6121@cobra.newdream.net>
 Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx01.smart-weblications.de ([188.65.144.36]:45961 "EHLO
-	mx01.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751225Ab2JEPzr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Oct 2012 11:55:47 -0400
+Received: from mx03.smart-weblications.de ([188.65.144.38]:58585 "EHLO
+	mx03.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752782Ab2JEQAC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Oct 2012 12:00:02 -0400
 In-Reply-To: <alpine.DEB.2.00.1210050819320.6121@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -64,20 +64,17 @@ in=20
 >   echo 1 > $mondata/monmap/slurping
 >   echo 1 > $mondata/logm/slurping
 >   echo 1 > $mondata/auth/slurping
->=20
+
+OK, this did fix it, now the 3 mons are running again.
+
 > and it will go through the recovery steps.  It would be helpful if yo=
 u=20
 > could tar up a copy of the mon directory first, though, along with an=
 y=20
 > log files on that host, so we can try to figure out what went wrong.
->=20
-
-unfortunatelly, i deleted the logs for the monitor, as i did not see an=
-ything
-special except this assertion...
 
 
-i'll send mon-directory directly to Sage with a seperate mail.
+Thank you very much.
 
 
 --=20
