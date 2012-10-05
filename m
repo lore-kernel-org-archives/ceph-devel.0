@@ -1,41 +1,361 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: [GIT PULL v5] java: add libcephfs Java bindings
-Date: Fri, 5 Oct 2012 05:13:00 -0700
-Message-ID: <CAPrxi58Cm98s0e1qZUBhsZBVgV2bSEb7cESxHF9Vk1_+QMg=tQ@mail.gmail.com>
-References: <CAPrxi5-6JAWzUdsgdfHw=pG+6r5LN5i8X92DwxdejosY0xT0Dw@mail.gmail.com>
-	<alpine.DEB.2.00.1209052051270.7974@cobra.newdream.net>
-	<CAPrxi5-_AYV0UUuABCM+LkSpRVOM63R5XPDmjz9HE3UxFBe7AA@mail.gmail.com>
-	<CAPrxi59Per-OMrc83pVLAkUs3rU=+RF9bN_X5bb+K1zC+STUng@mail.gmail.com>
-	<alpine.DEB.2.00.1210031238300.23173@cobra.newdream.net>
-	<506DF09B.20505@ubuntu.com>
-	<1349388042.11633.161.camel@julia>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: ceph-mon not starting - AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe
+ error: (38) Function not implemented
+Date: Fri, 05 Oct 2012 14:24:40 +0200
+Message-ID: <506ED188.5020905@smart-weblications.de>
+References: <506D9148.9040106@smart-weblications.de>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:38810 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932193Ab2JEMNC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Oct 2012 08:13:02 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so3541601iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Oct 2012 05:13:01 -0700 (PDT)
-In-Reply-To: <1349388042.11633.161.camel@julia>
+Received: from mx02.smart-weblications.de ([188.65.144.37]:60014 "EHLO
+	mx02.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932193Ab2JEMZX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Oct 2012 08:25:23 -0400
+Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
+	by mx02.smart-weblications.de (Postfix) with ESMTPA id 5AE88C3615E
+	for <ceph-devel@vger.kernel.org>; Fri,  5 Oct 2012 12:25:21 +0000 (UTC)
+Received: from [192.168.201.110] (unknown [192.168.201.110])
+	by office.smart-weblications.net (Postfix) with ESMTPA id 7FF7A11404D3
+	for <ceph-devel@vger.kernel.org>; Fri,  5 Oct 2012 14:25:20 +0200 (CEST)
+In-Reply-To: <506D9148.9040106@smart-weblications.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: James Page <james.page@ubuntu.com>, Sage Weil <sage@inktank.com>, Joe Buck <buck@soe.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 4, 2012 at 3:00 PM, Laszlo Boszormenyi (GCS) <gcs@debian.hu> wrote:
-> On Thu, 2012-10-04 at 21:24 +0100, James Page wrote:
->> On 03/10/12 20:39, Sage Weil wrote:
->> > Laszlo, do you have a minute to take a look?
->>
->> Laszlo - hope you don't mind me jumping in but Java packaging is
->> something I have quite a bit of experience with.
->  No problem, I second your overview.
-> Sage, Noah, do you make the necessary changes or James or me should do
-> it?
+Am 04.10.2012 15:38, schrieb Smart Weblications GmbH - Florian Wiessner=
+:
+> Hi,
+>=20
+>=20
+> i have a ceph cluster with 2 osds, 3 mons.. one of the monitors does =
+not start
+> anymore:
+>=20
+> 2012-10-04 13:36:29.501178 7f7e123f9780 -1 asok(0x14ac000)
+> AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe =
+error: (38)
+> Function not implemented
+> 2012-10-04 13:36:29.535018 7f7e123f9780  1 mon.2@-1(probing) e1 init =
+fsid
+> 5b59811a-d235-488f-9b9b-953db7e5028b
+> 2012-10-04 13:36:29.541171 7f7e123f9780 -1 mon/Paxos.cc: In function =
+'bool
+> Paxos::is_consistent()' thread 7f7e123f9780 time 2012-10-04 13:36:29.=
+536744
+> mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
+>=20
+>  ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373=
+ca6bba7c)
+>  1: /usr/bin/ceph-mon() [0x488a67]
+>  2: (Monitor::init()+0xc5a) [0x476f4a]
+>  3: (main()+0x2789) [0x45c3b9]
+>  4: (__libc_start_main()+0xfd) [0x7f7e10929c8d]
+>  5: /usr/bin/ceph-mon() [0x459a49]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to
+> interpret this.
+>=20
+> --- begin dump of recent events ---
+>    -20> 2012-10-04 13:36:29.443083 7f7e123f9780  5 asok(0x14ac000)
+> register_command perfcounters_dump hook 0x14a0010
+>    -19> 2012-10-04 13:36:29.443578 7f7e123f9780  5 asok(0x14ac000)
+> register_command 1 hook 0x14a0010
+>    -18> 2012-10-04 13:36:29.443600 7f7e123f9780  5 asok(0x14ac000)
+> register_command perf dump hook 0x14a0010
+>    -17> 2012-10-04 13:36:29.443627 7f7e123f9780  5 asok(0x14ac000)
+> register_command perfcounters_schema hook 0x14a0010
+>    -16> 2012-10-04 13:36:29.443637 7f7e123f9780  5 asok(0x14ac000)
+> register_command 2 hook 0x14a0010
+>    -15> 2012-10-04 13:36:29.443644 7f7e123f9780  5 asok(0x14ac000)
+> register_command perf schema hook 0x14a0010
+>    -14> 2012-10-04 13:36:29.443651 7f7e123f9780  5 asok(0x14ac000)
+> register_command config show hook 0x14a0010
+>    -13> 2012-10-04 13:36:29.443658 7f7e123f9780  5 asok(0x14ac000)
+> register_command config set hook 0x14a0010
+>    -12> 2012-10-04 13:36:29.443665 7f7e123f9780  5 asok(0x14ac000)
+> register_command log flush hook 0x14a0010
+>    -11> 2012-10-04 13:36:29.443671 7f7e123f9780  5 asok(0x14ac000)
+> register_command log dump hook 0x14a0010
+>    -10> 2012-10-04 13:36:29.443678 7f7e123f9780  5 asok(0x14ac000)
+> register_command log reopen hook 0x14a0010
+>     -9> 2012-10-04 13:36:29.453381 7f7e123f9780  1 store(/data/ceph_b=
+ackend/mon)
+> mount
+>     -8> 2012-10-04 13:36:29.454581 7f7e123f9780  0 ceph version 0.48.=
+1argonaut
+> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c), process ceph-mon, =
+pid 3643
+>     -7> 2012-10-04 13:36:29.455363 7f7e123f9780  1 -- 10.0.0.11:6789/=
+0
+> accepter.bind my_inst.addr is 10.0.0.11:6789/0 need_addr=3D0
+>     -6> 2012-10-04 13:36:29.469799 7f7e123f9780  1 finished global_in=
+it_daemonize
+>     -5> 2012-10-04 13:36:29.500601 7f7e123f9780  5 asok(0x14ac000) in=
+it
+> /var/run/ceph/ceph-mon.2.asok
+>     -4> 2012-10-04 13:36:29.501178 7f7e123f9780 -1 asok(0x14ac000)
+> AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe =
+error: (38)
+> Function not implemented
+>     -3> 2012-10-04 13:36:29.502014 7f7e123f9780  1 -- 10.0.0.11:6789/=
+0
+> messenger.start
+>     -2> 2012-10-04 13:36:29.502392 7f7e123f9780  1 -- 10.0.0.11:6789/=
+0
+> accepter.start
+>     -1> 2012-10-04 13:36:29.535018 7f7e123f9780  1 mon.2@-1(probing) =
+e1 init
+> fsid 5b59811a-d235-488f-9b9b-953db7e5028b
+>      0> 2012-10-04 13:36:29.541171 7f7e123f9780 -1 mon/Paxos.cc: In f=
+unction
+> 'bool Paxos::is_consistent()' thread 7f7e123f9780 time 2012-10-04 13:=
+36:29.536744
+> mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
+>=20
+>  ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373=
+ca6bba7c)
+>  1: /usr/bin/ceph-mon() [0x488a67]
+>  2: (Monitor::init()+0xc5a) [0x476f4a]
+>  3: (main()+0x2789) [0x45c3b9]
+>  4: (__libc_start_main()+0xfd) [0x7f7e10929c8d]
+>  5: /usr/bin/ceph-mon() [0x459a49]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to
+> interpret this.
+>=20
+> --- end dump of recent events ---
+> 2012-10-04 13:36:29.568387 7f7e123f9780 -1 *** Caught signal (Aborted=
+) **
+>  in thread 7f7e123f9780
+>=20
+>  ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373=
+ca6bba7c)
+>  1: /usr/bin/ceph-mon() [0x520c49]
+>  2: (()+0xeff0) [0x7f7e11a9aff0]
+>  3: (gsignal()+0x35) [0x7f7e1093d1b5]
+>  4: (abort()+0x180) [0x7f7e1093ffc0]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f7e111d1dc5]
+>  6: (()+0xcb166) [0x7f7e111d0166]
+>  7: (()+0xcb193) [0x7f7e111d0193]
+>  8: (()+0xcb28e) [0x7f7e111d028e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char con=
+st*)+0x793)
+> [0x574023]
+>  10: /usr/bin/ceph-mon() [0x488a67]
+>  11: (Monitor::init()+0xc5a) [0x476f4a]
+>  12: (main()+0x2789) [0x45c3b9]
+>  13: (__libc_start_main()+0xfd) [0x7f7e10929c8d]
+>  14: /usr/bin/ceph-mon() [0x459a49]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to
+> interpret this.
+>=20
+> --- begin dump of recent events ---
+>      0> 2012-10-04 13:36:29.568387 7f7e123f9780 -1 *** Caught signal =
+(Aborted) **
+>  in thread 7f7e123f9780
+>=20
+>  ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373=
+ca6bba7c)
+>  1: /usr/bin/ceph-mon() [0x520c49]
+>  2: (()+0xeff0) [0x7f7e11a9aff0]
+>  3: (gsignal()+0x35) [0x7f7e1093d1b5]
+>  4: (abort()+0x180) [0x7f7e1093ffc0]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f7e111d1dc5]
+>  6: (()+0xcb166) [0x7f7e111d0166]
+>  7: (()+0xcb193) [0x7f7e111d0193]
+>  8: (()+0xcb28e) [0x7f7e111d028e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char con=
+st*)+0x793)
+> [0x574023]
+>  10: /usr/bin/ceph-mon() [0x488a67]
+>  11: (Monitor::init()+0xc5a) [0x476f4a]
+>  12: (main()+0x2789) [0x45c3b9]
+>  13: (__libc_start_main()+0xfd) [0x7f7e10929c8d]
+>  14: /usr/bin/ceph-mon() [0x459a49]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to
+> interpret this.
+>=20
+> --- end dump of recent events ---
 
-Laszlo, I can take a run at these changes.
+I upgraded to 0.48.2 but the problem still exists and i don't know what=
+ to do
 
-Thanks,
-Noah
+
+2012-10-05 12:23:26.948925 7fc35f6d7780 -1 asok(0x2f5f000)
+AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe er=
+ror: (38)
+=46unction not implemented
+2012-10-05 12:23:26.993477 7fc35f6d7780  1 mon.2@-1(probing) e1 init fs=
+id
+5b59811a-d235-488f-9b9b-953db7e5028b
+2012-10-05 12:23:26.998289 7fc35f6d7780 -1 mon/Paxos.cc: In function 'b=
+ool
+Paxos::is_consistent()' thread 7fc35f6d7780 time 2012-10-05 12:23:26.99=
+6996
+mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
+
+ ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb=
+780bfe)
+ 1: /usr/bin/ceph-mon() [0x488827]
+ 2: (Monitor::init()+0xc6a) [0x4706da]
+ 3: (main()+0x2789) [0x45c3f9]
+ 4: (__libc_start_main()+0xfd) [0x7fc35dc07c8d]
+ 5: /usr/bin/ceph-mon() [0x459a89]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
+
+--- begin dump of recent events ---
+   -20> 2012-10-05 12:23:26.877130 7fc35f6d7780  5 asok(0x2f5f000)
+register_command perfcounters_dump hook 0x2f53010
+   -19> 2012-10-05 12:23:26.877277 7fc35f6d7780  5 asok(0x2f5f000)
+register_command 1 hook 0x2f53010
+   -18> 2012-10-05 12:23:26.877284 7fc35f6d7780  5 asok(0x2f5f000)
+register_command perf dump hook 0x2f53010
+   -17> 2012-10-05 12:23:26.877302 7fc35f6d7780  5 asok(0x2f5f000)
+register_command perfcounters_schema hook 0x2f53010
+   -16> 2012-10-05 12:23:26.877332 7fc35f6d7780  5 asok(0x2f5f000)
+register_command 2 hook 0x2f53010
+   -15> 2012-10-05 12:23:26.877339 7fc35f6d7780  5 asok(0x2f5f000)
+register_command perf schema hook 0x2f53010
+   -14> 2012-10-05 12:23:26.877347 7fc35f6d7780  5 asok(0x2f5f000)
+register_command config show hook 0x2f53010
+   -13> 2012-10-05 12:23:26.877354 7fc35f6d7780  5 asok(0x2f5f000)
+register_command config set hook 0x2f53010
+   -12> 2012-10-05 12:23:26.877361 7fc35f6d7780  5 asok(0x2f5f000)
+register_command log flush hook 0x2f53010
+   -11> 2012-10-05 12:23:26.877368 7fc35f6d7780  5 asok(0x2f5f000)
+register_command log dump hook 0x2f53010
+   -10> 2012-10-05 12:23:26.877374 7fc35f6d7780  5 asok(0x2f5f000)
+register_command log reopen hook 0x2f53010
+    -9> 2012-10-05 12:23:26.881211 7fc35f6d7780  1 store(/data/ceph_bac=
+kend/mon)
+mount
+    -8> 2012-10-05 12:23:26.881831 7fc35f6d7780  0 ceph version 0.48.2a=
+rgonaut
+(commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe), process ceph-mon, pi=
+d 16847
+    -7> 2012-10-05 12:23:26.894479 7fc35f6d7780  1 -- 91.204.168.11:678=
+9/0
+accepter.bind my_inst.addr is 91.204.168.11:6789/0 need_addr=3D0
+    -6> 2012-10-05 12:23:26.901263 7fc35f6d7780  1 finished global_init=
+_daemonize
+    -5> 2012-10-05 12:23:26.947786 7fc35f6d7780  5 asok(0x2f5f000) init
+/var/run/ceph/ceph-mon.2.asok
+    -4> 2012-10-05 12:23:26.948925 7fc35f6d7780 -1 asok(0x2f5f000)
+AdminSocketConfigObs::init: error: AdminSocket::create_shutdown_pipe er=
+ror: (38)
+=46unction not implemented
+    -3> 2012-10-05 12:23:26.949945 7fc35f6d7780  1 -- 91.204.168.11:678=
+9/0
+messenger.start
+    -2> 2012-10-05 12:23:26.950358 7fc35f6d7780  1 -- 91.204.168.11:678=
+9/0
+accepter.start
+    -1> 2012-10-05 12:23:26.993477 7fc35f6d7780  1 mon.2@-1(probing) e1=
+ init
+fsid 5b59811a-d235-488f-9b9b-953db7e5028b
+     0> 2012-10-05 12:23:26.998289 7fc35f6d7780 -1 mon/Paxos.cc: In fun=
+ction
+'bool Paxos::is_consistent()' thread 7fc35f6d7780 time 2012-10-05 12:23=
+:26.996996
+mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
+
+ ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb=
+780bfe)
+ 1: /usr/bin/ceph-mon() [0x488827]
+ 2: (Monitor::init()+0xc6a) [0x4706da]
+ 3: (main()+0x2789) [0x45c3f9]
+ 4: (__libc_start_main()+0xfd) [0x7fc35dc07c8d]
+ 5: /usr/bin/ceph-mon() [0x459a89]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
+
+--- end dump of recent events ---
+2012-10-05 12:23:27.019397 7fc35f6d7780 -1 *** Caught signal (Aborted) =
+**
+ in thread 7fc35f6d7780
+
+ ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb=
+780bfe)
+ 1: /usr/bin/ceph-mon() [0x520469]
+ 2: (()+0xeff0) [0x7fc35ed78ff0]
+ 3: (gsignal()+0x35) [0x7fc35dc1b1b5]
+ 4: (abort()+0x180) [0x7fc35dc1dfc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fc35e4afdc5]
+ 6: (()+0xcb166) [0x7fc35e4ae166]
+ 7: (()+0xcb193) [0x7fc35e4ae193]
+ 8: (()+0xcb28e) [0x7fc35e4ae28e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const=
+*)+0x793)
+[0x573843]
+ 10: /usr/bin/ceph-mon() [0x488827]
+ 11: (Monitor::init()+0xc6a) [0x4706da]
+ 12: (main()+0x2789) [0x45c3f9]
+ 13: (__libc_start_main()+0xfd) [0x7fc35dc07c8d]
+ 14: /usr/bin/ceph-mon() [0x459a89]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
+
+--- begin dump of recent events ---
+     0> 2012-10-05 12:23:27.019397 7fc35f6d7780 -1 *** Caught signal (A=
+borted) **
+ in thread 7fc35f6d7780
+
+ ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb=
+780bfe)
+ 1: /usr/bin/ceph-mon() [0x520469]
+ 2: (()+0xeff0) [0x7fc35ed78ff0]
+ 3: (gsignal()+0x35) [0x7fc35dc1b1b5]
+ 4: (abort()+0x180) [0x7fc35dc1dfc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fc35e4afdc5]
+ 6: (()+0xcb166) [0x7fc35e4ae166]
+ 7: (()+0xcb193) [0x7fc35e4ae193]
+ 8: (()+0xcb28e) [0x7fc35e4ae28e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const=
+*)+0x793)
+[0x573843]
+ 10: /usr/bin/ceph-mon() [0x488827]
+ 11: (Monitor::init()+0xc6a) [0x4706da]
+ 12: (main()+0x2789) [0x45c3f9]
+ 13: (__libc_start_main()+0xfd) [0x7fc35dc07c8d]
+ 14: /usr/bin/ceph-mon() [0x459a89]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
+
+--- end dump of recent events ---
+
+
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
