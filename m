@@ -1,41 +1,25 @@
-From: Mark Kampe <mark.kampe@inktank.com>
-Subject: Re: Newbie questions
-Date: Sat, 06 Oct 2012 08:31:32 -0700
-Message-ID: <itxvbcnv59ub7io20vp9jwxp.1349537492870@email.android.com>
+From: corn chips <maizechips@gmail.com>
+Subject: performance issues
+Date: Sat, 6 Oct 2012 18:49:41 +0200
+Message-ID: <CAEsGcVuZi3BAa-aKu-x_G7tDLPktOdRPK+RmEMZ=MwAdk-RePQ@mail.gmail.com>
+References: <CAEsGcVufqGYA3OMBUPnTBuXc0UxrrjJdFEr8kQXkLWbTcvd6Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:44906 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751497Ab2JFPbc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Oct 2012 11:31:32 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so785787dak.19
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Oct 2012 08:31:31 -0700 (PDT)
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:44630 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752669Ab2JFQuB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Oct 2012 12:50:01 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h16so2646188oag.19
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Oct 2012 09:50:01 -0700 (PDT)
+In-Reply-To: <CAEsGcVufqGYA3OMBUPnTBuXc0UxrrjJdFEr8kQXkLWbTcvd6Gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Adam Nielsen <a.nielsen@shikadi.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-ClRoZSBwcm9ibGVtIHlvdSBhcmUgZGVzY3JpYmluZyBpcyBjYWxsZWQgc3BsaXQtYnJhaW4uICBD
-ZXBoIGhhcyBhbiBvZGQgbnVtYmVyIG9mIG1vbml0b3JzIGFuZCBxdW9ydW0gaXMgcmVxdWlyZWQg
-YmVmb3JlIG9iamVjdHMgY2FuIGJlIHNlcnZlZC4gIFRoZSBwYXJ0aXRpb24gd2l0aCB0aGUgc21h
-bGxlciBudW1iZXIgb2YgbW9uaXRvcnMgd2lsbCB3YWl0IGhhcm1sZXNzbHkgdW50aWwgY29ubmVj
-dGl2aXR5IGlzIHJlZXN0YWJsaXNoZWQgLgoKQWRhbSBOaWVsc2VuIDxhLm5pZWxzZW5Ac2hpa2Fk
-aS5uZXQ+IHdyb3RlOgoKPlRoYW5rcyBib3RoIGZvciB5b3VyIGFuc3dlcnMgLSB2ZXJ5IGluZm9y
-bWF0aXZlLiAgSSB0aGluayBJIHdpbGwgc2V0IHVwIGEgdGVzdCAKPkNlcGggc3lzdGVtIG9uIG15
-IGhvbWUgc2VydmVycyB0byB0cnkgaXQgb3V0Lgo+Cj5JIGhhdmUgb25lIG1vcmUgcXVlc3Rpb246
-Cj4KPkNlcGggc2VlbXMgdG8gaGFuZGxlIGZhaWxlZCBub2RlcyB3ZWxsIGVub3VnaCwgYnV0IHdo
-YXQgYWJvdXQgZmFpbGVkIG5ldHdvcmsgCj5saW5rcz8gIFNheSB5b3UgaGF2ZSBhIGZldyBzeXN0
-ZW1zIGluIHR3byBsb2NhdGlvbnMsIGNvbm5lY3RlZCBieSBhIHNpbmdsZSAKPmxpbmsuICBJZiB0
-aGUgbGluayBmYWlscywgeW91IHdpbGwgaGF2ZSB0d28gaXNvbGF0ZWQgbmV0d29ya3MsIGVhY2gg
-b2Ygd2hpY2ggCj53aWxsIHRoaW5rIHRoZSBvdGhlciBoYXMgZmFpbGVkIGFuZCBwcmVzdW1hYmx5
-IHdpbGwgdHJ5IHRvIGdvIG9uIGFzIGJlc3QgaXQgCj5jYW4uICBXaGF0IGhhcHBlbnMgd2hlbiB0
-aGUgbGluayBjb21lcyBiYWNrIHVwIGFnYWluPyAgV2hhdCBpZiB0aGUgc2FtZSBmaWxlIAo+d2Fz
-IG1vZGlmaWVkIGJ5IGJvdGggaXNvbGF0ZWQgY2x1c3RlcnMgd2hlbiB0aGUgbGluayB3YXMgZG93
-bj8gIFdoYXQgdmVyc2lvbiAKPndpbGwgZW5kIHVwIGJhY2sgaW4gdGhlIGNsdXN0ZXI/Cj4KPlRo
-YW5rcyBhZ2FpbiwKPkFkYW0uCj4KPgo+LS0KPlRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+dGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPk1vcmUgbWFqb3Jkb21vIGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo=
+i promise you it was easier create a group a put a new topic on it (10
+sec) vs the mailing list (several minutes)...
+https://groups.google.com/forum/#!forum/ceph-devel ... not even sure
+if this message will make it (last attempt)
 
+corn
