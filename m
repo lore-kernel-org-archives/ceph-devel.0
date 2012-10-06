@@ -1,46 +1,41 @@
-From: Adam Nielsen <a.nielsen@shikadi.net>
+From: Mark Kampe <mark.kampe@inktank.com>
 Subject: Re: Newbie questions
-Date: Sun, 07 Oct 2012 01:05:59 +1000
-Message-ID: <k4phcq$7ep$1@ger.gmane.org>
-References: <k4c2dj$s3i$1@ger.gmane.org> <alpine.DEB.2.00.1210010908160.25178@cobra.newdream.net>
+Date: Sat, 06 Oct 2012 08:31:32 -0700
+Message-ID: <itxvbcnv59ub7io20vp9jwxp.1349537492870@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:60142 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751234Ab2JFPGT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 6 Oct 2012 11:06:19 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TKVxN-0000mz-Hm
-	for ceph-devel@vger.kernel.org; Sat, 06 Oct 2012 17:06:21 +0200
-Received: from 124-170-67-40.dyn.iinet.net.au ([124.170.67.40])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Oct 2012 17:06:21 +0200
-Received: from a.nielsen by 124-170-67-40.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Oct 2012 17:06:21 +0200
-In-Reply-To: <alpine.DEB.2.00.1210010908160.25178@cobra.newdream.net>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:44906 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751497Ab2JFPbc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Oct 2012 11:31:32 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so785787dak.19
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Oct 2012 08:31:31 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Adam Nielsen <a.nielsen@shikadi.net>
+Cc: ceph-devel@vger.kernel.org
 
-Thanks both for your answers - very informative.  I think I will set up a test 
-Ceph system on my home servers to try it out.
-
-I have one more question:
-
-Ceph seems to handle failed nodes well enough, but what about failed network 
-links?  Say you have a few systems in two locations, connected by a single 
-link.  If the link fails, you will have two isolated networks, each of which 
-will think the other has failed and presumably will try to go on as best it 
-can.  What happens when the link comes back up again?  What if the same file 
-was modified by both isolated clusters when the link was down?  What version 
-will end up back in the cluster?
-
-Thanks again,
-Adam.
-
+ClRoZSBwcm9ibGVtIHlvdSBhcmUgZGVzY3JpYmluZyBpcyBjYWxsZWQgc3BsaXQtYnJhaW4uICBD
+ZXBoIGhhcyBhbiBvZGQgbnVtYmVyIG9mIG1vbml0b3JzIGFuZCBxdW9ydW0gaXMgcmVxdWlyZWQg
+YmVmb3JlIG9iamVjdHMgY2FuIGJlIHNlcnZlZC4gIFRoZSBwYXJ0aXRpb24gd2l0aCB0aGUgc21h
+bGxlciBudW1iZXIgb2YgbW9uaXRvcnMgd2lsbCB3YWl0IGhhcm1sZXNzbHkgdW50aWwgY29ubmVj
+dGl2aXR5IGlzIHJlZXN0YWJsaXNoZWQgLgoKQWRhbSBOaWVsc2VuIDxhLm5pZWxzZW5Ac2hpa2Fk
+aS5uZXQ+IHdyb3RlOgoKPlRoYW5rcyBib3RoIGZvciB5b3VyIGFuc3dlcnMgLSB2ZXJ5IGluZm9y
+bWF0aXZlLiAgSSB0aGluayBJIHdpbGwgc2V0IHVwIGEgdGVzdCAKPkNlcGggc3lzdGVtIG9uIG15
+IGhvbWUgc2VydmVycyB0byB0cnkgaXQgb3V0Lgo+Cj5JIGhhdmUgb25lIG1vcmUgcXVlc3Rpb246
+Cj4KPkNlcGggc2VlbXMgdG8gaGFuZGxlIGZhaWxlZCBub2RlcyB3ZWxsIGVub3VnaCwgYnV0IHdo
+YXQgYWJvdXQgZmFpbGVkIG5ldHdvcmsgCj5saW5rcz8gIFNheSB5b3UgaGF2ZSBhIGZldyBzeXN0
+ZW1zIGluIHR3byBsb2NhdGlvbnMsIGNvbm5lY3RlZCBieSBhIHNpbmdsZSAKPmxpbmsuICBJZiB0
+aGUgbGluayBmYWlscywgeW91IHdpbGwgaGF2ZSB0d28gaXNvbGF0ZWQgbmV0d29ya3MsIGVhY2gg
+b2Ygd2hpY2ggCj53aWxsIHRoaW5rIHRoZSBvdGhlciBoYXMgZmFpbGVkIGFuZCBwcmVzdW1hYmx5
+IHdpbGwgdHJ5IHRvIGdvIG9uIGFzIGJlc3QgaXQgCj5jYW4uICBXaGF0IGhhcHBlbnMgd2hlbiB0
+aGUgbGluayBjb21lcyBiYWNrIHVwIGFnYWluPyAgV2hhdCBpZiB0aGUgc2FtZSBmaWxlIAo+d2Fz
+IG1vZGlmaWVkIGJ5IGJvdGggaXNvbGF0ZWQgY2x1c3RlcnMgd2hlbiB0aGUgbGluayB3YXMgZG93
+bj8gIFdoYXQgdmVyc2lvbiAKPndpbGwgZW5kIHVwIGJhY2sgaW4gdGhlIGNsdXN0ZXI/Cj4KPlRo
+YW5rcyBhZ2FpbiwKPkFkYW0uCj4KPgo+LS0KPlRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+dGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPk1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo=
 
