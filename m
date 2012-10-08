@@ -1,34 +1,28 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: How to write data to snapshot.
-Date: Sun, 7 Oct 2012 05:11:24 +0000 (UTC)
-Message-ID: <loom.20121007T070909-887@post.gmane.org>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: How to write data to snapshot.
+Date: Mon, 8 Oct 2012 10:30:24 -0700
+Message-ID: <CADvuQRHsA1peMugN4acw7o9SHDCtbP4wpXD_DXPsjZhCY7ZNfw@mail.gmail.com>
+References: <loom.20121007T070909-887@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:43835 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750823Ab2JGFLj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 7 Oct 2012 01:11:39 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TKj9R-00043e-LY
-	for ceph-devel@vger.kernel.org; Sun, 07 Oct 2012 07:11:41 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 07 Oct 2012 07:11:41 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 07 Oct 2012 07:11:41 +0200
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:38173 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753024Ab2JHRap (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Oct 2012 13:30:45 -0400
+Received: by mail-qa0-f46.google.com with SMTP id c26so2378785qad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Oct 2012 10:30:45 -0700 (PDT)
+In-Reply-To: <loom.20121007T070909-887@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ramu eppa <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
-  In rbd am creating snapshot and next time i copied data to that snapshot,
-it was not copying the data.Please help me to how to copy data to snapshot.
+On Sat, Oct 6, 2012 at 10:11 PM, ramu eppa <ramu.freesystems@gmail.com> wrote:
+> Hi,
+>   In rbd am creating snapshot and next time i copied data to that snapshot,
+> it was not copying the data.Please help me to how to copy data to snapshot.
 
-Thanks,
-Ramu.
-
+RBD snapshots are immutable by design. You can do a copy-on-write
+clone of a snapshot to a writable image (in the latest Ceph version),
+or just copy the contents into another image (in older Ceph versions).
