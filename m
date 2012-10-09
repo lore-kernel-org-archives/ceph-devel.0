@@ -1,41 +1,80 @@
-From: John Axel Eriksson <john@insane.se>
-Subject: Re: Deleting files from radosgw-bucket doesn't free up space in ceph?
-Date: Tue, 9 Oct 2012 21:00:20 +0200
-Message-ID: <CAMmJxtJVmYjX0cVOXZcORmigTj70VAHJosVZNp3MnodsfR9hTA@mail.gmail.com>
-References: <CAMmJxtK7iyONQ1EaKgSkRkTyf0Ou1Ja0HXCGFTa2146maC5d6g@mail.gmail.com>
-	<CAC-hyiEP4q_iP_2A+o7G88+pYAhRBNRhaD0Ob_m_e1j1sF1AvA@mail.gmail.com>
-	<CAMmJxt+2mtVhmxdS2UsXyosiMMH4UuDFQkJwqCzVJm7CF-pyqQ@mail.gmail.com>
-	<CAC-hyiECcp+MLZh=r5fitnNtEy7zZ=8FMTtiMAq3kaeTROxhwg@mail.gmail.com>
+From: "Dave (Bob)" <dave@bob-the-boat.me.uk>
+Subject: Ceph Bug #2563
+Date: Tue, 09 Oct 2012 20:43:03 +0100
+Message-ID: <50747E47.1010408@bob-the-boat.me.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45565 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756595Ab2JITAV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 15:00:21 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so5540411pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 12:00:21 -0700 (PDT)
-In-Reply-To: <CAC-hyiECcp+MLZh=r5fitnNtEy7zZ=8FMTtiMAq3kaeTROxhwg@mail.gmail.com>
+Received: from i01.ip.uk.com ([86.54.60.3]:50744 "EHLO i01.ip.uk.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751389Ab2JITnF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Oct 2012 15:43:05 -0400
+Received: from [194.164.232.154] (helo=[10.0.1.129])
+	by i01.ip.uk.com with esmtp (Exim 4.63)
+	(envelope-from <dave@bob-the-boat.me.uk>)
+	id 1TLfhn-0002Qr-N1
+	for ceph-devel@vger.kernel.org; Tue, 09 Oct 2012 20:43:03 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Thanks, seems to have done the trick. I simply didn't realize it was
-necessary and since we've done quite a bit of deleting these past
-two days I naturally looked at the numbers and they didn't add up.
+I have a problem with this leveldb corruption issue. My logs show the
+same failure as is shown in Ceph's redmine as bug #2563.
 
-On Tue, Oct 9, 2012 at 7:17 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> On Tue, Oct 9, 2012 at 10:07 AM, John Axel Eriksson <john@insane.se> wrote:
->> I'm running 0.48.1. Wow I had no idea that was the case. I guess
->> everything that's been deleted up until today can be removed
->> using "radosgw-admin temp remove --date=2012-10-09"... am I correct in
->> assuming this only removes "garbage" (e.g. deleted objects)
->> and not anything else (such as the stored data in a bucket)?
->>
-> It completes the final stage in removing objects (mostly for objects
-> with more than 512k in data), either when they were deleted explicitly
-> or overwritten. If you don't have any pending readers on large objects
-> that were removed then you can put today's date.
->
-> Yehuda
+I am using linux-3.6.0 (x86_64) and ceph-0.52.
+
+I am using btrfs on my 4 osd's. Each osd is using a partition on a disk drive,
+there are 4 disk drives, all on the same machine.
+
+Each of these osd partitions is the bulk of the disk. There are also
+partitions that provide for booting and a root filesystem from which
+linux runs.
+
+The mon and mds are running on the same machine.
+
+I have been tracking Ceph releases for about a year, this is my ceph
+test machine.
+
+Ceph clearly hammers the disk system; btrfs; and linux. Things have
+moved so far over the past six months, from a time when things would
+crash horribly in a short time to the point where it almost works.
+
+I have had a lot of trouble with the 'slow response' messages associated
+with the osd's, but linux-3.6.0 seems to have brought about improvements
+in btrfs that are noticeable. I am also tuning the
+'dirty_background_ratio' and I think that this will help.
+
+With my current configuration, I can leave ceph and my osds churning
+data for days on end, and the only errors that I get are the leveldb
+'std::__throw_length_error' pattern. The osd's go down and can't be
+brought back up.
+
+I have compiled the 'check.cc' program that I found following the bug
+#2563 links. I copy the omap directory from my broken osd (current or
+snaps) and run the check on it and get:
+
+terminate called after throwing an instance of 'std::length_error'
+
+In the past, I've had only one osd at a time go down in this way, and
+I've re-created a btrfs filesystem and allowed ceph to regenerate. Now I
+have been working with only 3 osds and two have gone down
+simultaneously. I've been amazed at ceph's ability to repair itself, but
+I think that this is not going to be recoverable.
+
+On the ceph redmine, it says:
+
+  * *Status* changed from /New/ to /Can't reproduce/
+
+I can reproduce this time and time again. From my perspective it looks
+like the final block to my being confident that all I have to do is
+optimise my hardware and configuration to make things faster.
+
+What can we do to fix this problem?
+
+Is there anything that I can do to recover my broken osd's without
+recreating them afresh and loosing the data?
+
+David Humphreys
+Datatone Ltd
+
