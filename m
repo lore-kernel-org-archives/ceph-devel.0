@@ -1,173 +1,87 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/4, v2] rbd: define rbd_dev_v2_refresh()
-Date: Tue, 09 Oct 2012 14:00:38 -0700
-Message-ID: <50749076.2070503@inktank.com>
+Subject: [PATCH 3/4] rbd: implement feature checks
+Date: Tue, 09 Oct 2012 14:01:00 -0700
+Message-ID: <5074908C.3010808@inktank.com>
 References: <50748FA5.4030508@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:52304 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752109Ab2JIVAo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 17:00:44 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so5661307pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 14:00:44 -0700 (PDT)
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:34485 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756508Ab2JIVBH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 17:01:07 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so5612010pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 14:01:07 -0700 (PDT)
 In-Reply-To: <50748FA5.4030508@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Define a new function rbd_dev_v2_refresh() to update/refresh the
-snapshot context for a format version 2 rbd image.  This function
-will update anything that is not fixed for the life of an rbd
-image--at the moment this is mainly the snapshot context and (for
-a base mapping) the size.
+Version 2 images have two sets of feature bit fields.  The first
+indicates features possibly used by the image.  The second indicates
+features that the client *must* support in order to use the image.
 
-Update rbd_refresh_header() so it selects which function to use
-based on the image format.
-
-Rename __rbd_refresh_header() to be rbd_dev_v1_refresh()
-to be consistent with the naming of its version 2 counterpart.
-Similarly rename rbd_refresh_header() to be rbd_dev_refresh().
-
-Unrelated--we use rbd_image_format_valid() here.  Delete the other
-use of it, which was primarily put in place to ensure that function
-was referenced at the time it was defined.
+When an image (or snapshot) is first examined, we need to make sure
+that the local implementation supports the image's required
+features.  If not, fail the probe for the image.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
-Changes in v2:
-     - also fetch size when refereshing image
-     - drop "snapc" from refresh function names
-  drivers/block/rbd.c |   55 
-+++++++++++++++++++++++++++++++++++++++++++--------
-  1 file changed, 47 insertions(+), 8 deletions(-)
+  drivers/block/rbd.c |   16 +++++++++++++++-
+  1 file changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d36e6d7..23f3beb 100644
+index 23f3beb..86ab032 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -268,7 +268,8 @@ static void rbd_put_dev(struct rbd_device *rbd_dev)
-  	put_device(&rbd_dev->dev);
-  }
+@@ -70,6 +70,14 @@
+  #define RBD_IMAGE_ID_LEN_MAX	64
+  #define RBD_OBJ_PREFIX_LEN_MAX	64
 
--static int rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver);
-+static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver);
-+static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver);
-
-  static int rbd_open(struct block_device *bdev, fmode_t mode)
-  {
-@@ -1304,7 +1305,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, 
-u8 opcode, void *data)
-  	dout("rbd_watch_cb %s notify_id=%llu opcode=%u\n",
-  		rbd_dev->header_name, (unsigned long long) notify_id,
-  		(unsigned int) opcode);
--	rc = rbd_refresh_header(rbd_dev, &hver);
-+	rc = rbd_dev_refresh(rbd_dev, &hver);
-  	if (rc)
-  		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
-  			   " update snaps: %d\n", rbd_dev->major, rc);
-@@ -1729,7 +1730,7 @@ static void rbd_update_size(struct rbd_device 
-*rbd_dev)
-  /*
-   * only read the first part of the ondisk header, without the snaps info
-   */
--static int __rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_v1_refresh(struct rbd_device *rbd_dev, u64 *hver)
-  {
-  	int ret;
-  	struct rbd_image_header h;
-@@ -1772,12 +1773,16 @@ static int __rbd_refresh_header(struct 
-rbd_device *rbd_dev, u64 *hver)
-  	return ret;
-  }
-
--static int rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver)
-  {
-  	int ret;
-
-+	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
-  	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--	ret = __rbd_refresh_header(rbd_dev, hver);
-+	if (rbd_dev->image_format == 1)
-+		ret = rbd_dev_v1_refresh(rbd_dev, hver);
-+	else
-+		ret = rbd_dev_v2_refresh(rbd_dev, hver);
-  	mutex_unlock(&ctl_mutex);
-
-  	return ret;
-@@ -1937,7 +1942,7 @@ static ssize_t rbd_image_refresh(struct device *dev,
-  	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-  	int ret;
-
--	ret = rbd_refresh_header(rbd_dev, NULL);
-+	ret = rbd_dev_refresh(rbd_dev, NULL);
-
-  	return ret < 0 ? ret : size;
-  }
-@@ -2401,6 +2406,41 @@ static char *rbd_dev_snap_info(struct rbd_device 
-*rbd_dev, u32 which,
-  	return ERR_PTR(-EINVAL);
-  }
-
-+static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver)
-+{
-+	int ret;
-+	__u8 obj_order;
-+	u64 image_size;
++/* Feature bits */
 +
-+	down_write(&rbd_dev->header_rwsem);
++#define RBD_FEATURE_LAYERING      1
 +
-+	/* Grab old values first, to see if they change */
++/* Features supported by this (client software) implementation. */
 +
-+	obj_order = rbd_dev->header.obj_order,
-+	image_size = rbd_dev->header.image_size;
-+	ret = rbd_dev_v2_image_size(rbd_dev);
-+	if (ret)
-+		goto out;
-+	rbd_assert(rbd_dev->header.obj_order == obj_order);
-+	if (image_size != rbd_dev->header.image_size)
-+		rbd_update_size(rbd_dev);
-+
-+	ret = rbd_dev_v2_snap_context(rbd_dev, hver);
-+	dout("rbd_dev_v2_snap_context returned %d\n", ret);
-+	if (ret)
-+		goto out;
-+	ret = rbd_dev_snaps_update(rbd_dev);
-+	dout("rbd_dev_snaps_update returned %d\n", ret);
-+	if (ret)
-+		goto out;
-+	ret = rbd_dev_snaps_register(rbd_dev);
-+	dout("rbd_dev_snaps_register returned %d\n", ret);
-+out:
-+	up_write(&rbd_dev->header_rwsem);
-+
-+	return 0;
-+}
++#define RBD_FEATURES_ALL          (0)
 +
   /*
-   * Scan the rbd device's current snapshot list and compare it to the
-   * newly-received snapshot context.  Remove any existing snapshots
-@@ -2563,7 +2603,7 @@ static int rbd_init_watch_dev(struct rbd_device 
-*rbd_dev)
-  	do {
-  		ret = rbd_req_sync_watch(rbd_dev);
-  		if (ret == -ERANGE) {
--			rc = rbd_refresh_header(rbd_dev, NULL);
-+			rc = rbd_dev_refresh(rbd_dev, NULL);
-  			if (rc < 0)
-  				return rc;
-  		}
-@@ -3044,7 +3084,6 @@ static ssize_t rbd_add(struct bus_type *bus,
-  	rc = rbd_dev_probe(rbd_dev);
-  	if (rc < 0)
-  		goto err_out_client;
--	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
+   * An RBD device name will be "rbd#", where the "rbd" comes from
+   * RBD_DRV_NAME above, and # is a unique integer identifier.
+@@ -2225,6 +2233,7 @@ static int _rbd_dev_v2_snap_features(struct 
+rbd_device *rbd_dev, u64 snap_id,
+  		__le64 features;
+  		__le64 incompat;
+  	} features_buf = { 0 };
++	u64 incompat;
+  	int ret;
 
-  	/* no need to lock here, as rbd_dev is not registered yet */
-  	rc = rbd_dev_snaps_update(rbd_dev);
+  	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
+@@ -2235,6 +2244,11 @@ static int _rbd_dev_v2_snap_features(struct 
+rbd_device *rbd_dev, u64 snap_id,
+  	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
+  	if (ret < 0)
+  		return ret;
++
++	incompat = le64_to_cpu(features_buf.incompat);
++	if (incompat & ~RBD_FEATURES_ALL)
++		return -ENOTSUPP;
++
+  	*snap_features = le64_to_cpu(features_buf.features);
+
+  	dout("  snap_id 0x%016llx features = 0x%016llx incompat = 0x%016llx\n",
+@@ -2976,7 +2990,7 @@ static int rbd_dev_v2_probe(struct rbd_device 
+*rbd_dev)
+  	if (ret < 0)
+  		goto out_err;
+
+-	/* Get the features for the image */
++	/* Get the and check features for the image */
+
+  	ret = rbd_dev_v2_features(rbd_dev);
+  	if (ret < 0)
 -- 
 1.7.9.5
 
