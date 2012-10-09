@@ -1,48 +1,26 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: activate v2 image support
-Date: Tue, 09 Oct 2012 14:01:22 -0700
-Message-ID: <507490A2.4000202@inktank.com>
-References: <50748FA5.4030508@inktank.com>
+Subject: [PATCH 0/2] libceph: workqueue changes
+Date: Tue, 09 Oct 2012 14:28:33 -0700
+Message-ID: <50749701.8010208@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:34485 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756508Ab2JIVB3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 17:01:29 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so5612010pad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 14:01:29 -0700 (PDT)
-In-Reply-To: <50748FA5.4030508@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:41979 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756816Ab2JIV2h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 17:28:37 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so5687617pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 14:28:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Now that v2 images support is fully implemented, have
-rbd_dev_v2_probe() return 0 to indicate a successful probe.
+These patches change the flags passed when creating the ceph
+messenger work queue.  They're done in two distinct steps
+so their separate effects can more easily be isolated.
 
-(Note that an image that implements layering will fail
-the probe early because of the feature chekc.)
+     [PATCH 1/2] libceph: mark ceph_msgr_wq reentrant
+     [PATCH 2/2] libceph: mark ceph_msgr_wq unbounded
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-  drivers/block/rbd.c |    2 +-
-  1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 86ab032..6052fff 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3013,7 +3013,7 @@ static int rbd_dev_v2_probe(struct rbd_device 
-*rbd_dev)
-  	dout("discovered version 2 image, header name is %s\n",
-  		rbd_dev->header_name);
-
--	return -ENOTSUPP;
-+	return 0;
-  out_err:
-  	kfree(rbd_dev->header_name);
-  	rbd_dev->header_name = NULL;
--- 
-1.7.9.5
-
+					-Alex
