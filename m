@@ -1,34 +1,46 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Deleting files from radosgw-bucket doesn't free up space in ceph?
-Date: Tue, 9 Oct 2012 10:17:05 -0700
-Message-ID: <CAC-hyiECcp+MLZh=r5fitnNtEy7zZ=8FMTtiMAq3kaeTROxhwg@mail.gmail.com>
-References: <CAMmJxtK7iyONQ1EaKgSkRkTyf0Ou1Ja0HXCGFTa2146maC5d6g@mail.gmail.com>
-	<CAC-hyiEP4q_iP_2A+o7G88+pYAhRBNRhaD0Ob_m_e1j1sF1AvA@mail.gmail.com>
-	<CAMmJxt+2mtVhmxdS2UsXyosiMMH4UuDFQkJwqCzVJm7CF-pyqQ@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: How to write data to snapshot.
+Date: Tue, 09 Oct 2012 10:37:55 -0700
+Message-ID: <507460F3.10906@inktank.com>
+References: <loom.20121007T070909-887@post.gmane.org> <CADvuQRHsA1peMugN4acw7o9SHDCtbP4wpXD_DXPsjZhCY7ZNfw@mail.gmail.com> <loom.20121009T085302-672@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:56156 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754630Ab2JIRRH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 13:17:07 -0400
-Received: by mail-bk0-f46.google.com with SMTP id jk13so2798052bkc.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 10:17:05 -0700 (PDT)
-In-Reply-To: <CAMmJxt+2mtVhmxdS2UsXyosiMMH4UuDFQkJwqCzVJm7CF-pyqQ@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:43439 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754998Ab2JIRh7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 13:37:59 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so5398447pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 10:37:58 -0700 (PDT)
+In-Reply-To: <loom.20121009T085302-672@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Axel Eriksson <john@insane.se>, ceph-devel@vger.kernel.org
+To: ramu eppa <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Oct 9, 2012 at 10:07 AM, John Axel Eriksson <john@insane.se> wrote:
-> I'm running 0.48.1. Wow I had no idea that was the case. I guess
-> everything that's been deleted up until today can be removed
-> using "radosgw-admin temp remove --date=2012-10-09"... am I correct in
-> assuming this only removes "garbage" (e.g. deleted objects)
-> and not anything else (such as the stored data in a bucket)?
+I'm not Tommi, but I'm not aware of a way to convert a snapshot into a 
+writable image.  You can make a copy-on-write clone of a snapshot, which 
+is writable, but the snapshot remains readonly.
+
+I don't know what the rest of your sentence means.
+
+Are you trying to accomplish something in particular?  Can you describe 
+that without suggesting a mechanism, and maybe we can help?
+
+On 10/08/2012 11:56 PM, ramu eppa wrote:
+> Hi Tommi ,
 >
-It completes the final stage in removing objects (mostly for objects
-with more than 512k in data), either when they were deleted explicitly
-or overwritten. If you don't have any pending readers on large objects
-that were removed then you can put today's date.
-
-Yehuda
+>      If we convert snapshot into writable(mutable),we will copy data to that
+> snapshot and getting data multiple times,is it possible.
+> This will works on ceph-0.48 or any other version.
+>
+> Thanks,
+> Ramu.
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
