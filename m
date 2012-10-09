@@ -1,34 +1,75 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/4] rbd: finish up basic format 2 support
-Date: Tue, 09 Oct 2012 13:57:09 -0700
-Message-ID: <50748FA5.4030508@inktank.com>
+Subject: [PATCH 1/4] rbd: define rbd_update_size()
+Date: Tue, 09 Oct 2012 14:00:36 -0700
+Message-ID: <50749074.5030603@inktank.com>
+References: <50748FA5.4030508@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:40371 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754096Ab2JIU5M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 16:57:12 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so5608193pad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 13:57:12 -0700 (PDT)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:52304 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752109Ab2JIVAj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 17:00:39 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so5661307pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 14:00:39 -0700 (PDT)
+In-Reply-To: <50748FA5.4030508@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This series includes updates for two patches posted previously.
+Encapsulate the code that handles the case where an image's size has
+been found to have changed.  This is done in anticipation of the
+next patch, which will make this common code for format 1 and 2
+images.
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+  drivers/block/rbd.c |   22 +++++++++++++---------
+  1 file changed, 13 insertions(+), 9 deletions(-)
 
-[PATCH 1/4] rbd: define rbd_update_size()
-     This is a simple addition so a bit of code used by both
-     format 1 and 2 can be common rather than duplicated.
-[PATCH 2/4, v2] rbd: define rbd_dev_v2_refresh()
-     Updated to fetch the image size in addition to the snapshot
-     context when refreshing.  The names of some functions no
-     longer contain "snapc" to reflect this.
-[PATCH 3/4] rbd: implement feature checks
-     This ensures that images requiring features not supported
-     by the local rbd client software are rejected.
-[PATCH 4/4] rbd: activate v2 image support
-     Same as before, and trivial.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index bb3d9be..d36e6d7 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1716,6 +1716,16 @@ static void __rbd_remove_all_snaps(struct 
+rbd_device *rbd_dev)
+  		__rbd_remove_snap_dev(snap);
+  }
+
++static void rbd_update_size(struct rbd_device *rbd_dev)
++{
++	sector_t size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
++
++	rbd_assert(rbd_dev->mapping.snap_id == CEPH_NOSNAP);
++	dout("setting size to %llu sectors", (unsigned long long) size);
++	rbd_dev->mapping.size = (u64) size;
++	set_capacity(rbd_dev->disk, size);
++}
++
+  /*
+   * only read the first part of the ondisk header, without the snaps info
+   */
+@@ -1731,15 +1741,9 @@ static int __rbd_refresh_header(struct rbd_device 
+*rbd_dev, u64 *hver)
+  	down_write(&rbd_dev->header_rwsem);
+
+  	/* resized? */
+-	if (rbd_dev->mapping.snap_id == CEPH_NOSNAP) {
+-		sector_t size = (sector_t) h.image_size / SECTOR_SIZE;
+-
+-		if (size != (sector_t) rbd_dev->mapping.size) {
+-			dout("setting size to %llu sectors",
+-				(unsigned long long) size);
+-			rbd_dev->mapping.size = (u64) size;
+-			set_capacity(rbd_dev->disk, size);
+-		}
++	if (rbd_dev->header.image_size != h.image_size) {
++		rbd_dev->header.image_size = h.image_size;
++		rbd_update_size(rbd_dev);
+  	}
+
+  	/* rbd_dev->header.object_prefix shouldn't change */
+-- 
+1.7.9.5
+
