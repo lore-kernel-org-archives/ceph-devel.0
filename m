@@ -1,34 +1,21 @@
-From: "james.horner" <james.horner@helpdesk.precedent.co.uk>
+From: Wido den Hollander <wido@widodh.nl>
 Subject: Re: Client Location
-Date: Tue, 9 Oct 2012 14:33:09 +0100 (BST)
-Message-ID: <252874720.450.1349789589740.JavaMail.root@corellia.pncl.co.uk>
-References: <507426F6.1030308@widodh.nl>
+Date: Tue, 09 Oct 2012 15:30:30 +0200
+Message-ID: <507426F6.1030308@widodh.nl>
+References: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from corellia.pncl.co.uk ([195.224.14.166]:38681 "EHLO
-	corellia.pncl.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755816Ab2JINdb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 09:33:31 -0400
-In-Reply-To: <507426F6.1030308@widodh.nl>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:35094 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755432Ab2JINa0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 09:30:26 -0400
+In-Reply-To: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org, James Horner <james.horner@precedent.co.uk>
-
-Hi Wido
-
-Thanks for the response and the advice. It a shame as otherwise ceph meets all our needs.
-
-James
-
------ Original Message -----
-From: "Wido den Hollander" <wido@widodh.nl>
-To: "James Horner" <james.horner@precedent.co.uk>
+To: James Horner <james.horner@precedent.co.uk>
 Cc: ceph-devel@vger.kernel.org
-Sent: Tuesday, October 9, 2012 2:30:30 PM
-Subject: Re: Client Location
 
 On 10/09/2012 03:14 PM, James Horner wrote:
 > Hi There
