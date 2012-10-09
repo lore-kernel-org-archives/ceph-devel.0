@@ -1,158 +1,57 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Client Location
-Date: Tue, 09 Oct 2012 15:30:30 +0200
-Message-ID: <507426F6.1030308@widodh.nl>
-References: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
+From: John Axel Eriksson <john@insane.se>
+Subject: Deleting files from radosgw-bucket doesn't free up space in ceph?
+Date: Tue, 9 Oct 2012 18:31:41 +0200
+Message-ID: <CAMmJxtK7iyONQ1EaKgSkRkTyf0Ou1Ja0HXCGFTa2146maC5d6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:35094 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755432Ab2JINa0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 09:30:26 -0400
-In-Reply-To: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:42796 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752496Ab2JIQbm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 12:31:42 -0400
+Received: by mail-vc0-f174.google.com with SMTP id fo13so6881898vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 09:31:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Horner <james.horner@precedent.co.uk>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 10/09/2012 03:14 PM, James Horner wrote:
-> Hi There
->
->
->
->
-> I have a simple test cluster spread across 2 datacenters setup as follows
->
-> DC1:
-> mon.w
-> mon.x
-> mds.w
-> mds.x
-> osd1
->
-> DC2:
-> mon.e
-> mds.e
-> osd2
->
-> Each DC has a hypervisor(Proxmox running qemu 1.1.1) which can connect to the cluster fine. I think I have the crush map setup to replicate between the datacenters but when I run a VM with a disk on the cluster the hv's connect to the OSD's in the other datacenter. Is there a way to tell qemu that it is DC1 or DC2 and to prefer those osd's?
->
+I'm worried that data deleted in radosgw wasn't actually deleted from
+disk/cluster.
 
-No, there is no such way. Ceph is designed to work on a local network 
-where it doesn't matter where the nodes are or how the client connects.
+Here's the output using df:
 
-You are not the first to ask this question. People having been thinking 
-about localizing data, but there have been no concrete plans.
+/dev/xvdf      1000G  779G  185G  81% /var/lib/ceph/osd/ceph-0
 
-(See note on crushmap below btw)
+Quite full that disk. Now for ceph -s I get
 
-> Thanks.
-> James
->
->
->
-> # begin crush map
->
-> # devices
-> device 0 osd.0
-> device 1 osd.1
->
-> # types
-> type 0 osd
-> type 1 host
-> type 2 rack
-> type 3 row
-> type 4 room
-> type 5 datacenter
-> type 6 pool
->
-> # buckets
-> host ceph-test-dc1-osd1 {
-> id -2 # do not change unnecessarily
-> # weight 1.000
-> alg straw
-> hash 0 # rjenkins1
-> item osd.0 weight 1.000
-> }
-> host ceph-test-dc2-osd1 {
-> id -4 # do not change unnecessarily
-> # weight 1.000
-> alg straw
-> hash 0 # rjenkins1
-> item osd.1 weight 1.000
-> }
-> rack dc1-rack1 {
-> id -3 # do not change unnecessarily
-> # weight 2.000
-> alg straw
-> hash 0 # rjenkins1
-> item ceph-test-dc1-osd1 weight 1.000
-> }
->
+health HEALTH_OK
+  <lines removed>
+    pgmap v256604: 2304 pgs: 2304 active+clean; 1103 GB data, 1547 GB
+used, 378 GB / 2000 GB avail
+  <lines removed>
 
-You don't need to specify a weight to the rack in this case, it will 
-take the accumulated weight of all the hosts it has in it.
+Still looks pretty full here.
 
-> rack dc2-rack1 {
-> id -5
-> alg straw
-> hash 0
-> item ceph-test-dc2-osd1 weight 1.000
-> }
->
-> datacenter dc1 {
-> id -6
-> alg straw
-> hash 0
-> item dc1-rack1 weight 1.000
-> }
->
-> datacenter dc2 {
-> id -7
-> alg straw
-> hash 0
-> item dc2-rack1 weight 1.000
-> }
->
-> pool proxmox {
-> id -1 # do not change unnecessarily
-> # weight 2.000
-> alg straw
-> hash 0 # rjenkins1
-> item dc1 weight 2.000
-> item dc2 weight 2.000
-> }
->
+And here's finally the output when checking the only bucket we have:
 
+{ "bucket": "<bucket-name-removed>",
+  "pool": ".rgw.buckets",
+  "id": "4122.1",
+  "marker": "4122.1",
+  "owner": "<owner-removed>",
+  "usage": { "rgw.main": { "size_kb": 247104513,
+          "size_kb_actual": 247345748,
+          "num_objects": 108889}}}
 
-Same goes here, the dc's get their weight by summing up the racks and hosts.
+This translates to around 236GB which is FAR from the around 770GB
+that df and ceph -s reports. The thing is - the only way we're storing
+data in ceph is through radosgw and the only bucket we have is the one
+shown above (yes a pretty simple deployment). How can the stats
+be so very different? Was data not actually deleted from disk? The
+deletion took place yesterday so the cluster has had some time to do
+any
+delayed deletion if that's how it's done.
 
-While in your case it doesn't matter that much, you should let crush do 
-the calculating when possible.
+Any ideas? Thanks!
 
-Wido
-
-> # rules
-> rule proxmox {
-> ruleset 0
-> type replicated
-> min_size 1
-> max_size 10
-> step take default
-> step chooseleaf firstn 0 type datacenter
->
-> step emit
-> }
->
->
-> # end crush map
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+John
