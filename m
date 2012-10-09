@@ -1,56 +1,41 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: chaos monkeys
-Date: Tue, 9 Oct 2012 11:40:29 -0700
-Message-ID: <CAPYLRzg3=v4B6RqXr4GcOd5LSdUwumaNTk7FcmknXS1eY-5pGQ@mail.gmail.com>
-References: <5074541B.4000504@inktank.com>
-	<CAPYLRzhqfbWcP0_oXDQmoGSmzPOEGO9DutPSRBS32kzPjuLoZw@mail.gmail.com>
-	<507457EB.4000802@inktank.com>
-	<CAPYLRzi5PWbPoq8L9DSiMq9wkgeLEER_ZFDg_b28sUbt20=3oA@mail.gmail.com>
-	<50746DC2.90609@inktank.com>
+From: John Axel Eriksson <john@insane.se>
+Subject: Re: Deleting files from radosgw-bucket doesn't free up space in ceph?
+Date: Tue, 9 Oct 2012 21:00:20 +0200
+Message-ID: <CAMmJxtJVmYjX0cVOXZcORmigTj70VAHJosVZNp3MnodsfR9hTA@mail.gmail.com>
+References: <CAMmJxtK7iyONQ1EaKgSkRkTyf0Ou1Ja0HXCGFTa2146maC5d6g@mail.gmail.com>
+	<CAC-hyiEP4q_iP_2A+o7G88+pYAhRBNRhaD0Ob_m_e1j1sF1AvA@mail.gmail.com>
+	<CAMmJxt+2mtVhmxdS2UsXyosiMMH4UuDFQkJwqCzVJm7CF-pyqQ@mail.gmail.com>
+	<CAC-hyiECcp+MLZh=r5fitnNtEy7zZ=8FMTtiMAq3kaeTROxhwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:35702 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754250Ab2JISka convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 14:40:30 -0400
-Received: by mail-la0-f46.google.com with SMTP id h6so3278082lag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 11:40:29 -0700 (PDT)
-In-Reply-To: <50746DC2.90609@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:45565 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756595Ab2JITAV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 15:00:21 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so5540411pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 12:00:21 -0700 (PDT)
+In-Reply-To: <CAC-hyiECcp+MLZh=r5fitnNtEy7zZ=8FMTtiMAq3kaeTROxhwg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sam Lang <sam.lang@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Oct 9, 2012 at 11:32 AM, Sam Lang <sam.lang@inktank.com> wrote:
-> Putting a delay on the sender would avoid the reordering of messages =
-that
-> have semantic meaning but allow delay-caused reordering to occur for =
-those
-> that have no semantic dependency.
+Thanks, seems to have done the trick. I simply didn't realize it was
+necessary and since we've done quite a bit of deleting these past
+two days I naturally looked at the numbers and they didn't add up.
+
+On Tue, Oct 9, 2012 at 7:17 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+> On Tue, Oct 9, 2012 at 10:07 AM, John Axel Eriksson <john@insane.se> wrote:
+>> I'm running 0.48.1. Wow I had no idea that was the case. I guess
+>> everything that's been deleted up until today can be removed
+>> using "radosgw-admin temp remove --date=2012-10-09"... am I correct in
+>> assuming this only removes "garbage" (e.g. deleted objects)
+>> and not anything else (such as the stored data in a bucket)?
+>>
+> It completes the final stage in removing objects (mostly for objects
+> with more than 512k in data), either when they were deleted explicitly
+> or overwritten. If you don't have any pending readers on large objects
+> that were removed then you can put today's date.
 >
-> You're right that reordering at the receiver won't work, but it would=
- be
-> nice to have more concrete examples.  The only example I can come up =
-with is
-> the unsafe/safe messages from mds to client.  Even in that case it lo=
-oks
-> like we handle it by throwing away the unsafe message.  What other ex=
-amples
-> exist?  Caps issue/revoke?
-
-in the OSDs then requests to the same object are all strictly ordered,
-and responses need to be ordered in the same way =97 everybody through
-the whole chain asserts out if that's not the case.
-
-I haven't thought it through on the MDS, but yeah, caps messages on
-the same inode (or inodes in a hierarchical relationship) all need to
-be ordered. Most of the rest of its messages I can come up with aren't
-going to have semantic meanings without the client already waiting, so
-it's got fewer problems than the OSDs do.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Yehuda
