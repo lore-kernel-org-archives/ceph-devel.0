@@ -1,57 +1,30 @@
-From: John Axel Eriksson <john@insane.se>
-Subject: Deleting files from radosgw-bucket doesn't free up space in ceph?
-Date: Tue, 9 Oct 2012 18:31:41 +0200
-Message-ID: <CAMmJxtK7iyONQ1EaKgSkRkTyf0Ou1Ja0HXCGFTa2146maC5d6g@mail.gmail.com>
+From: Mark Kampe <mark.kampe@inktank.com>
+Subject: Re: Client Location
+Date: Tue, 09 Oct 2012 09:43:28 -0700
+Message-ID: <50745430.6090607@inktank.com>
+References: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:42796 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752496Ab2JIQbm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 12:31:42 -0400
-Received: by mail-vc0-f174.google.com with SMTP id fo13so6881898vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 09:31:41 -0700 (PDT)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:65133 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751373Ab2JIQnf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Oct 2012 12:43:35 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so5390822pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Oct 2012 09:43:35 -0700 (PDT)
+In-Reply-To: <1467968321.440.1349788446710.JavaMail.root@corellia.pncl.co.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: James Horner <james.horner@precedent.co.uk>
+Cc: ceph-devel@vger.kernel.org
 
-I'm worried that data deleted in radosgw wasn't actually deleted from
-disk/cluster.
+I'm not a real engineer, so please forgive me if I misunderstand,
+but can't you create a separate rule for each data center (choosing
+first a local copy, and then remote copies), which should ensure
+that the primary is always local.  Each data center would then
+use a different pool, associated with the appropriate location-
+sensitive rule.
 
-Here's the output using df:
+Does this approach get you the desired locality preference?
 
-/dev/xvdf      1000G  779G  185G  81% /var/lib/ceph/osd/ceph-0
-
-Quite full that disk. Now for ceph -s I get
-
-health HEALTH_OK
-  <lines removed>
-    pgmap v256604: 2304 pgs: 2304 active+clean; 1103 GB data, 1547 GB
-used, 378 GB / 2000 GB avail
-  <lines removed>
-
-Still looks pretty full here.
-
-And here's finally the output when checking the only bucket we have:
-
-{ "bucket": "<bucket-name-removed>",
-  "pool": ".rgw.buckets",
-  "id": "4122.1",
-  "marker": "4122.1",
-  "owner": "<owner-removed>",
-  "usage": { "rgw.main": { "size_kb": 247104513,
-          "size_kb_actual": 247345748,
-          "num_objects": 108889}}}
-
-This translates to around 236GB which is FAR from the around 770GB
-that df and ceph -s reports. The thing is - the only way we're storing
-data in ceph is through radosgw and the only bucket we have is the one
-shown above (yes a pretty simple deployment). How can the stats
-be so very different? Was data not actually deleted from disk? The
-deletion took place yesterday so the cluster has had some time to do
-any
-delayed deletion if that's how it's done.
-
-Any ideas? Thanks!
-
-John
