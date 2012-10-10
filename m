@@ -1,54 +1,195 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Determining RBD storage utilization
-Date: Wed, 10 Oct 2012 13:37:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210101336460.19773@cobra.newdream.net>
-References: <CACkq2mr17KKvgE0tWTvfs0UqpwtBaEMo84Twfs+26duUmC62Mw@mail.gmail.com> <CAFtEh-fk1NHEOnmnG1aHpZhiNjApqyrsJOhrTrg9nWKxAiXG2Q@mail.gmail.com> <CAPYLRzja7=nnk4pp0=YGL4AhxVKdnM91U1W4GD5qcoORw+oKDg@mail.gmail.com>
+Subject: Re: Problem with "ceph osd create <uuid>"
+Date: Wed, 10 Oct 2012 14:19:29 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210101419100.22480@cobra.newdream.net>
+References: <CA+jddaOBZ2cm-R2uQnOCa_yMN+2DDOMAZMB6uNMo4XwFUfYouw@mail.gmail.com> <alpine.DEB.2.00.1210081133460.9864@cobra.newdream.net> <CA+jddaO_LdTi0Hm8LGdRRU33TJt2y7hE3qLaRwHUDwUrhVuRYQ@mail.gmail.com> <CA+jddaNdM+cMCaAoBpoK3S5FayviyMWdKLXL143Yzqk0jWqYQw@mail.gmail.com>
+ <alpine.DEB.2.00.1210081549150.9864@cobra.newdream.net> <CA+jddaOWAh8SanYQsWEzyWjGVUyy1CT5BUH6R3KP4wkPXG4paw@mail.gmail.com> <alpine.DEB.2.00.1210081716210.9864@cobra.newdream.net> <CAPud5_6kieK=Vu98_bhSOPRGshB3OSiPYN7CjJm-FA9yrkpnbQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39735 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40063 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757180Ab2JJUh3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 16:37:29 -0400
-In-Reply-To: <CAPYLRzja7=nnk4pp0=YGL4AhxVKdnM91U1W4GD5qcoORw+oKDg@mail.gmail.com>
+	with ESMTP id S1755538Ab2JJVTa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 17:19:30 -0400
+In-Reply-To: <CAPud5_6kieK=Vu98_bhSOPRGshB3OSiPYN7CjJm-FA9yrkpnbQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Damien Churchill <damoxc@gmail.com>, Travis Rhoden <trhoden@gmail.com>, ceph-devel@vger.kernel.org
+To: Nick Bartos <nick@pistoncloud.com>
+Cc: Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
 
-On Wed, 10 Oct 2012, Gregory Farnum wrote:
-> I don't know the ext4 internals at all, but filesystems tend to
-> require allocation tables of various sorts (for managing extents,
-> etc). 7.5GB out of 500GB seems a little large for that metadata, but
-> isn't ridiculously so...
+Wonderful, thanks!
 
-ext3/4 are particularly bad about this, with lots of space statically set 
-aside for inodes and allocation metadata.
+sage
 
-s
+On Wed, 10 Oct 2012, Nick Bartos wrote:
 
-
+> After applying the patch, we went through 65 successful cluster
+> reinstalls without encountering the error (previously it would happen
+> at least every 8-10 reinstalls).  Therefore it really looks like this
+> fixed the issue.  Thanks!
 > 
-> On Wed, Oct 10, 2012 at 10:28 AM, Damien Churchill <damoxc@gmail.com> wrote:
-> > On 10 October 2012 18:10, Travis Rhoden <trhoden@gmail.com> wrote:
-> >> Additionally, 500G - 7.5G != 467G (the number shown as Avail).  Why
-> >> the huge discrepancy?  I don't expect the numbers to add up exact due
-> >> to rounding from kB, MB, GB, etc, but they should be darn close, a la
+> 
+> On Mon, Oct 8, 2012 at 5:17 PM, Sage Weil <sage@inktank.com> wrote:
+> > Hi Mandell,
 > >
-> > ext4 keeps some reserved space, 5% by default, for when the disk is
-> > full so you are still able to use the filesystem and clean it up.
+> > I see the bug.  I pushed a fix to wip-mon-command-race,
+> > 5011485e5e3fc9952ea58cd668e6feefc98024bf, and I believe fixes it, but I
+> > wasn't able to easily reproduce it myself so I'm not 100% certain.  Can
+> > you give it a go?
 > >
-> > 500G * 0.05 = 25G
-> > 500G - (25G + 7.5G) = 467G
+> > Thanks!
+> > sage
 > >
-> > Can't tell you where the 7.5G comes from though!
+> >
+> > On Mon, 8 Oct 2012, Mandell Degerness wrote:
+> >
+> >> osd dump output:
+> >>
+> >> [root@node-172-20-0-14 ~]# ceph osd dump 2
+> >> dumped osdmap epoch 2
+> >> epoch 2
+> >> fsid d82665b6-3435-44b8-a89e-f7185f78d09d
+> >> created 2012-10-08 21:29:52.232400
+> >> modifed 2012-10-08 21:29:57.297479
+> >> flags
+> >>
+> >> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
+> >> 64 pgp_num 64 last_change 1 owner 0 crash_replay_interval 45
+> >> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins
+> >> pg_num 64 pgp_num 64 last_change 1 owner 0
+> >> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 64
+> >> pgp_num 64 last_change 1 owner 0
+> >>
+> >> max_osd 1
+> >> osd.0 down out weight 0 up_from 0 up_thru 0 down_at 0
+> >> last_clean_interval [0,0) :/0 :/0 :/0 exists,new
+> >> 564d7166-07b7-48cc-9b50-46ef7b260d5c
+> >>
+> >>
+> >> [root@node-172-20-0-14 ~]# ceph osd dump 3
+> >> dumped osdmap epoch 3
+> >> epoch 3
+> >> fsid d82665b6-3435-44b8-a89e-f7185f78d09d
+> >> created 2012-10-08 21:29:52.232400
+> >> modifed 2012-10-08 21:29:58.299491
+> >> flags
+> >>
+> >> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
+> >> 64 pgp_num 64 last_change 1 owner 0 crash_replay_interval 45
+> >> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins
+> >> pg_num 64 pgp_num 64 last_change 1 owner 0
+> >> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 64
+> >> pgp_num 64 last_change 1 owner 0
+> >>
+> >> max_osd 1
+> >> osd.0 up   in  weight 1 up_from 3 up_thru 0 down_at 0
+> >> last_clean_interval [0,0) 172.20.0.13:6800/1723 172.20.0.13:6801/1723
+> >> 172.20.0.13:6802/1723 exists,up 564d7166-07b7-48cc-9b50-46ef7b260d5c
+> >>
+> >>
+> >> [root@node-172-20-0-14 ~]# ceph osd dump 4
+> >> dumped osdmap epoch 4
+> >> epoch 4
+> >> fsid d82665b6-3435-44b8-a89e-f7185f78d09d
+> >> created 2012-10-08 21:29:52.232400
+> >> modifed 2012-10-08 21:29:59.304087
+> >> flags
+> >>
+> >> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
+> >> 64 pgp_num 64 last_change 1 owner 0 crash_replay_interval 45
+> >> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins
+> >> pg_num 64 pgp_num 64 last_change 1 owner 0
+> >> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 64
+> >> pgp_num 64 last_change 1 owner 0
+> >>
+> >> max_osd 3
+> >> osd.0 up   in  weight 1 up_from 3 up_thru 0 down_at 0
+> >> last_clean_interval [0,0) 172.20.0.13:6800/1723 172.20.0.13:6801/1723
+> >> 172.20.0.13:6802/1723 exists,up 564d7166-07b7-48cc-9b50-46ef7b260d5c
+> >> osd.1 down out weight 0 up_from 0 up_thru 0 down_at 0
+> >> last_clean_interval [0,0) :/0 :/0 :/0 exists,new
+> >> 3351a0f0-f6e8-430a-b7a4-ea613a3ddf35
+> >> osd.2 down out weight 0 up_from 0 up_thru 0 down_at 0
+> >> last_clean_interval [0,0) :/0 :/0 :/0 exists,new
+> >> 3f04cdbe-a468-42d3-a465-2487cc369d90
+> >>
+> >>
+> >>
+> >>
+> >> On Mon, Oct 8, 2012 at 3:49 PM, Sage Weil <sage@inktank.com> wrote:
+> >> > On Mon, 8 Oct 2012, Mandell Degerness wrote:
+> >> >> Sorry, I should have used the https link:
+> >> >>
+> >> >> https://gist.github.com/af546ece91be0ba268d3
+> >> >
+> >> > What do 'ceph osd dump 2', 'ceph osd dump 3', and 'ceph osd dump 4' say?
+> >> >
+> >> > thanks!
+> >> > sage
+> >> >
+> >> >>
+> >> >> On Mon, Oct 8, 2012 at 3:20 PM, Mandell Degerness
+> >> >> <mandell@pistoncloud.com> wrote:
+> >> >> > Here is the log I got when running with the options suggested by sage:
+> >> >> >
+> >> >> > git@gist.github.com:af546ece91be0ba268d3.git
+> >> >> >
+> >> >> > On Mon, Oct 8, 2012 at 11:34 AM, Sage Weil <sage@inktank.com> wrote:
+> >> >> >> Hi Mandell,
+> >> >> >>
+> >> >> >> On Mon, 8 Oct 2012, Mandell Degerness wrote:
+> >> >> >>> Hi list,
+> >> >> >>>
+> >> >> >>> I've run into a bit of a weird error and I'm hoping that you can tell
+> >> >> >>> me what is going wrong.  There seems to be a race condition in the way
+> >> >> >>> I am using "ceph osd create <uuid>" and actually creating the OSD's.
+> >> >> >>> The log from one of the servers is at:
+> >> >> >>>
+> >> >> >>> https://gist.github.com/528e347a5c0ffeb30abd
+> >> >> >>>
+> >> >> >>> The process I am trying to follow (for the OSDs) is:
+> >> >> >>>
+> >> >> >>> 1) Create XFS file system on disk.
+> >> >> >>> 2) Use FS UUID as source to get a new OSD id #.
+> >> >> >>> 'ceph', 'osd', 'create', '32895846-ca1c-4265-9ce7-9f2a42b41672'
+> >> >> >>> (Returns 2.)
+> >> >> >>> 3) Pass the UUID and OSD id to the create osd command
+> >> >> >>>
+> >> >> >>> ceph-osd -c /etc/ceph/ceph.conf --fsid
+> >> >> >>> e61c1b11-4a1c-47aa-868d-7b51b1e610d3 --osd-uuid
+> >> >> >>> 32895846-ca1c-4265-9ce7-9f2a42b41672 -i 2 --mkfs --osd-journal-size
+> >> >> >>> 8192
+> >> >> >>> 4) Start the OSD, as part of the start process, I verify that the
+> >> >> >>> whoami and osd fsid agree (in case this disk came from a previous
+> >> >> >>> cluster, somehow) - should be just a sanity check
+> >> >> >>> 'ceph', 'osd', 'create', '32895846-ca1c-4265-9ce7-9f2a42b41672'
+> >> >> >>> (Returns 1!)
+> >> >> >>>
+> >> >> >>> This is clearly a race condition because we have several cluster
+> >> >> >>> creations without this happening and then this happens about once
+> >> >> >>> every 8 times or so.  Thoughts?
+> >> >> >>
+> >> >> >> That definitely sounds like a race.  I'm not seeing it by inspection,
+> >> >> >> though, and wasn't able to reproduce.  Is it possible to capture a monitor
+> >> >> >> log (debug ms = 1, debug mon = 20) of this occurring and share that?
+> >> >> >>
+> >> >> >> Thanks!
+> >> >> >> sage
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >>
+> >> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
 > > --
 > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > > the body of a message to majordomo@vger.kernel.org
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
