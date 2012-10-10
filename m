@@ -1,71 +1,33 @@
-From: James Horner <james.horner@precedent.co.uk>
-Subject: Re: Client Location
-Date: Wed, 10 Oct 2012 10:16:04 +0100 (BST)
-Message-ID: <653431320.70.1349860564219.JavaMail.root@corellia.pncl.co.uk>
-References: <CAPYLRzgznZaZ+xVsY1Er2sYKbF7hfpfewGDPygiHQDSmxDPu6Q@mail.gmail.com>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Unable to build CEPH packages
+Date: Wed, 10 Oct 2012 15:04:35 +0530
+Message-ID: <CAGfy=6kaMcemE_8qdG9dhrwUWNyh+fEzQvvfgPWiMEPrYf9_Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from corellia.pncl.co.uk ([195.224.14.166]:45690 "EHLO
-	corellia.pncl.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752291Ab2JJJQ0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 05:16:26 -0400
-In-Reply-To: <CAPYLRzgznZaZ+xVsY1Er2sYKbF7hfpfewGDPygiHQDSmxDPu6Q@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:60880 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751040Ab2JJJeg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 05:34:36 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so139689vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Oct 2012 02:34:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: James Horner <james.horner@precedent.co.uk>, ceph-devel@vger.kernel.org, Mark Kampe <mark.kampe@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-Hi There
+Hi Folks ,
 
-The basic setup Im trying to get is a backend to a Hypervisor cluster, =
-so that auto-failover and live migration works. The mail thing is that =
-we have a number of datacenters with a gigabit interconnect that is not=
- always 100% reliable. In the event of a failure we want all the virtua=
-l machines to fail over to the remaining datacenters, so we need all th=
-e data in each location.
-The other issue is that within each datacenter we can use link aggregat=
-ion to increase the bandwidth between hypervisors and the ceph cluster =
-but between the datacenters we only have the gigabit so it become essen=
-tial to have the hyperviors looking at the storage in the same datacent=
-er.
-Another consideration is that the virtual machines might get migrated b=
-etween datacenters without any failure, and the main problem I see with=
- Mark suggests is that in this mode the migrated VM would still be conn=
-ecting to the OSD's in the remote datacenter.
+I was trying to build ceph from source code , To have stable setup for VMs .
 
-Tbh Im fairly new to ceph and I know im asking for everything and the k=
-itchen sink! Any thoughts would be very helpful though.
+While I was executing "yum install rpm-build rpmdevtools"  Error
+observed is "No package rpm-build is available  No package rpmdevtools
+is available "
 
-Thanks
-James
+All previous steps are working fine ,but error is observed while
+building ceph packages .
+http://ceph.com/docs/master/source/build-packages/
 
------ Original Message -----
-=46rom: "Gregory Farnum" <greg@inktank.com>
-To: "Mark Kampe" <mark.kampe@inktank.com>
-Cc: "James Horner" <james.horner@precedent.co.uk>, ceph-devel@vger.kern=
-el.org
-Sent: Tuesday, October 9, 2012 5:48:37 PM
-Subject: Re: Client Location
+Please help me out .
 
-On Tue, Oct 9, 2012 at 9:43 AM, Mark Kampe <mark.kampe@inktank.com> wro=
-te:
-> I'm not a real engineer, so please forgive me if I misunderstand,
-> but can't you create a separate rule for each data center (choosing
-> first a local copy, and then remote copies), which should ensure
-> that the primary is always local.  Each data center would then
-> use a different pool, associated with the appropriate location-
-> sensitive rule.
->
-> Does this approach get you the desired locality preference?
-
-This sounds right to me =E2=80=94 I think maybe there's a misunderstand=
-ing
-about how CRUSH works. What precisely are you after, James?
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks & Regards,
+Hemant Surale.
