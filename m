@@ -1,56 +1,58 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
-Subject: Re: [PATCH 0/4] rbd: finish up basic format 2 support
-Date: Wed, 10 Oct 2012 16:55:10 +0100
-Message-ID: <20121010165510.fc07422a.ctpm@ist.utl.pt>
-References: <50748FA5.4030508@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ignore O_SYNC for rbd cache
+Date: Wed, 10 Oct 2012 09:23:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210100919020.8499@cobra.newdream.net>
+References: <CABYiri87Kni9+XkS2JWymxocJF9bCYpPswYFiBkeEOk6CSeMQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.ist.utl.pt ([193.136.128.22]:41548 "EHLO smtp2.ist.utl.pt"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753450Ab2JJQCf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Oct 2012 12:02:35 -0400
-In-Reply-To: <50748FA5.4030508@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:37216 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753969Ab2JJQXg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 12:23:36 -0400
+In-Reply-To: <CABYiri87Kni9+XkS2JWymxocJF9bCYpPswYFiBkeEOk6CSeMQw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: elder@inktank.com
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Wed, 10 Oct 2012, Andrey Korolyov wrote:
+> Hi,
+> 
+> Recent tests on my test rack with 20G IB(iboip, 64k mtu, default
+> CUBIC, CFQ, LSI SAS 2108 w/ wb cache) interconnect shows a quite
+> fantastic performance - on both reads and writes Ceph completely
+> utilizing all disk bandwidth as high as 0.9 of theoretical limit of
+> sum of all bandwidths bearing in mind replication level. The only
+> thing that may bring down overall performance is a O_SYNC|O_DIRECT
+> writes which will be issued by almost every database server in the
+> default setup. Assuming that the database config may be untouchable
+> and somehow I can build very reliable hardware setup which `ll never
+> fail on power, should ceph have an option to ignore these flags? May
+> be there is another real-world cases for including such or I am very
+> wrong even thinking on fool client application in this way.
 
-On Tue, 09 Oct 2012 13:57:09 -0700 Alex Elder <elder@inktank.com> wrote=
-:
-> This series includes updates for two patches posted previously.
->=20
-> 					-Alex
+I certainly wouldn't recommend it, but there are probably use cases where 
+it makes sense (i.e., the data isn't as important as the performance).  
+Any such option would probably be called
 
- Greetings,
+ rbd async flush danger danger = true
 
- We're gearing up to test v0.52 (specifically the RBD stuff) on our
-cluster. After reading this series of posts about rbd format 2 patches
-I began wondering if we should start testing these patches as well or
-not. To put it simply, what I'd like to know is:
+and would trigger a flush but not wait for it, or perhaps
 
- Is it enough to use the 3.6 vanilla kernel client to take full
-advantage of the rbd changes in v0.52 (i.e. new RBD cloning features)?
+ rbd ignore flush danger danger = true
 
- Do we have any benefits from applying any of these patches on top of
-v3.6 and using "format 2", assuming that we stick to v0.52 on the
-server, or is this strictly v0.53 and beyond stuff?
+which would not honor flush at all. 
 
+This would jeopoardize the integrity of the file system living on the RBD 
+image; they rely on flush to order their commits, and playing fast and 
+loose with that can lead to any number of corruptions.  The only silver 
+lining is that in the not-so-distant future (3-4 years ago) this was 
+poorly supported by the block layer and file systems alike and ext3 didn't 
+crash and burn as quite often as you might have expected.
 
- I apologize if this is a dumb question, but by looking at the v0.52
-changelog, at doc/rbd/* and the list, it doesn't seem clear how this
-fits with v0.52.
+Anyway, not something I would recommend, certainly for a generic VM 
+platform.  Maybe if you have a sepcific performance-sensitive application 
+you can afford to let crash and burn...
 
- Thanks in advance
-
-Best regards
-
-Cl=C3=A1udio
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
