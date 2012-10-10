@@ -1,52 +1,66 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: Unable to build CEPH packages
-Date: Wed, 10 Oct 2012 10:03:08 -0700
-Message-ID: <3D0CC9E5-2798-4C0A-9134-1C6BDDDF6A63@inktank.com>
-References: <CAGfy=6kaMcemE_8qdG9dhrwUWNyh+fEzQvvfgPWiMEPrYf9_Og@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Determining RBD storage utilization
+Date: Wed, 10 Oct 2012 13:10:43 -0400
+Message-ID: <CACkq2mr17KKvgE0tWTvfs0UqpwtBaEMo84Twfs+26duUmC62Mw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:60719 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755615Ab2JJRDL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 13:03:11 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so813646pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Oct 2012 10:03:11 -0700 (PDT)
-In-Reply-To: <CAGfy=6kaMcemE_8qdG9dhrwUWNyh+fEzQvvfgPWiMEPrYf9_Og@mail.gmail.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:44424 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750882Ab2JJRLF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Oct 2012 13:11:05 -0400
+Received: by mail-qa0-f53.google.com with SMTP id s11so671725qaa.19
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Oct 2012 10:11:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Hemant -
+Hey folks,
 
-I'll be happy to help you with the problem.   The first things that would be helpful for me to know is what version of ceph you are trying to build, what distribution you are building on, and what your yum repositories are.  You can get the last piece of information with the "yum repolist" comand.
+I have two questions about determining how much storage has been used
+*inside* of an RBD.
+
+First, I'm confused by the output of df.  I've created, mapped, and
+mounted a 500GB RBD, and see the following:
+
+# df -h /srv/test
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/rbd44      500G  7.5G  467G   2% /srv/test
+
+# cd /srv/test
+# du -sh .
+20K	.
+
+
+Any ideas way a brand-new, no files added mount shows 7.5GB of used
+space?  Does this happen from the file system formatting (ext4 in this
+case)?
+Additionally, 500G - 7.5G != 467G (the number shown as Avail).  Why
+the huge discrepancy?  I don't expect the numbers to add up exact due
+to rounding from kB, MB, GB, etc, but they should be darn close, a la
+
+df -h /dev/sda1
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        15G  1.7G   13G  12% /
+
+
+Second question, is it possible to know how much storage has been used
+in the RBD without mounting it and running df or du?  For the same RBD
+as above, I see:
+
+# rbd info test
+rbd image 'test'':
+	size 500 GB in 128000 objects
+	order 22 (4096 KB objects)
+	block_name_prefix: rb.0.18f9.2d9c66c6
+	parent:  (pool -1)
+
+Is there perhaps a way to know the number of objects that have been
+'used'?  Then I could take that and multiply by the object size (4MB).
+
+I'm running 0.48.1argonaut on Ubuntu 12.04.
+RBD maps are also on Ubuntu 12.04, with the stock 3.2.0-29-generic kernel.
 
 Thanks,
-Gary
 
-
-On Oct 10, 2012, at 2:34 AM, hemant surale wrote:
-
-> Hi Folks ,
-> 
-> I was trying to build ceph from source code , To have stable setup for VMs .
-> 
-> While I was executing "yum install rpm-build rpmdevtools"  Error
-> observed is "No package rpm-build is available  No package rpmdevtools
-> is available "
-> 
-> All previous steps are working fine ,but error is observed while
-> building ceph packages .
-> http://ceph.com/docs/master/source/build-packages/
-> 
-> Please help me out .
-> 
-> Thanks & Regards,
-> Hemant Surale.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+ - Travis
