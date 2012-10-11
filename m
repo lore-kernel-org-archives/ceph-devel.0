@@ -1,35 +1,48 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: Determining RBD storage utilization
-Date: Thu, 11 Oct 2012 10:15:12 +0100
-Message-ID: <CAFtEh-eKUWyb42vhESfEJBdyQdExs6+PQb3Rc1KmdiEaGLK1SA@mail.gmail.com>
-References: <CACkq2mr17KKvgE0tWTvfs0UqpwtBaEMo84Twfs+26duUmC62Mw@mail.gmail.com>
-	<CAFtEh-fk1NHEOnmnG1aHpZhiNjApqyrsJOhrTrg9nWKxAiXG2Q@mail.gmail.com>
-	<CAPYLRzja7=nnk4pp0=YGL4AhxVKdnM91U1W4GD5qcoORw+oKDg@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: fix bug in rbd_dev_id_put()
+Date: Thu, 11 Oct 2012 08:34:22 -0700
+Message-ID: <5076E6FE.9070400@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:40561 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750739Ab2JKJPN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Oct 2012 05:15:13 -0400
-Received: by mail-wg0-f44.google.com with SMTP id dr13so1295961wgb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Oct 2012 02:15:12 -0700 (PDT)
-In-Reply-To: <CAPYLRzja7=nnk4pp0=YGL4AhxVKdnM91U1W4GD5qcoORw+oKDg@mail.gmail.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:61071 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754964Ab2JKPe0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Oct 2012 11:34:26 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so817474dak.19
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Oct 2012 08:34:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Travis Rhoden <trhoden@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 10 October 2012 18:55, Gregory Farnum <greg@inktank.com> wrote:
-> I don't know the ext4 internals at all, but filesystems tend to
-> require allocation tables of various sorts (for managing extents,
-> etc). 7.5GB out of 500GB seems a little large for that metadata, but
-> isn't ridiculously so...
->
+In rbd_dev_id_put(), there's a loop that's intended to determine
+the maximum device id in use.  But it isn't doing that at all,
+the effect of how it's written is to simply use the just-put id
+number, which ignores whole purpose of this function.
 
-Just for comparisons sake, Just formatted a spare 500G disk (-8GB swap
-partition at the start) as ext4:
+Fix the bug.
 
-$ df -h /dev/sdc2
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sdc2       451G  198M  428G   1% /mnt
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+  drivers/block/rbd.c |    4 ++--
+  1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index ca28036..cf5d109 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2642,8 +2642,8 @@ static void rbd_dev_id_put(struct rbd_device *rbd_dev)
+  		struct rbd_device *rbd_dev;
+
+  		rbd_dev = list_entry(tmp, struct rbd_device, node);
+-		if (rbd_id > max_id)
+-			max_id = rbd_id;
++		if (rbd_dev->dev_id > max_id)
++			max_id = rbd_dev->dev_id;
+  	}
+  	spin_unlock(&rbd_dev_list_lock);
+
+-- 
+1.7.9.5
+
