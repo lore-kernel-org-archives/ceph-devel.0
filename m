@@ -1,224 +1,98 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] rbd: move more stuff into mapping
-Date: Thu, 11 Oct 2012 08:43:44 -0700
-Message-ID: <5076E930.5090504@inktank.com>
-References: <5076E8CF.1060108@inktank.com>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: osd crash in ReplicatedPG::add_object_context_to_pg_stat(ReplicatedPG::ObjectContext*,
+ pg_stat_t*)
+Date: Fri, 12 Oct 2012 00:17:46 +0200
+Message-ID: <5077458A.7030108@univ-nantes.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:48079 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755474Ab2JKPnv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Oct 2012 11:43:51 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so1872641pad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Oct 2012 08:43:51 -0700 (PDT)
-In-Reply-To: <5076E8CF.1060108@inktank.com>
+Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:60359 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752632Ab2JKW2F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Oct 2012 18:28:05 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by smtp-tls.univ-nantes.fr (Postfix) with ESMTP id 86DEF4016E3
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Oct 2012 00:17:47 +0200 (CEST)
+Received: from smtp-tls.univ-nantes.fr ([127.0.0.1])
+	by localhost (smtptls1-cha.cpub.univ-nantes.fr [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id MAMrY1mDMOAw for <ceph-devel@vger.kernel.org>;
+	Fri, 12 Oct 2012 00:17:47 +0200 (CEST)
+Received: from [192.168.21.21] (familledupont.org [81.56.167.186])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp-tls.univ-nantes.fr (Postfix) with ESMTPSA id EB8B04016E0
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Oct 2012 00:17:46 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This moves a bunch of other fields out of the rbd device structure
-and into the mapping structure.
+Hello everybody.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-  drivers/block/rbd.c |   57 
-+++++++++++++++++++++++++++------------------------
-  1 file changed, 30 insertions(+), 27 deletions(-)
+I'm currently having problem with 1 of my OSD, crashing with  this trace :
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8189841..250446d 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -172,23 +172,22 @@ struct rbd_mapping {
+ceph version 0.52 (commit:e48859474c4944d4ff201ddc9f5fd400e8898173)
+  1: /usr/bin/ceph-osd() [0x737879]
+  2: (()+0xf030) [0x7f43f0af0030]
+  3: 
+(ReplicatedPG::add_object_context_to_pg_stat(ReplicatedPG::ObjectContext*, 
+pg_stat_t*)+0x292) [0x555262]
+  4: (ReplicatedPG::recover_backfill(int)+0x1c1a) [0x55c93a]
+  5: (ReplicatedPG::start_recovery_ops(int, PG::RecoveryCtx*)+0x26a) 
+[0x563c1a]
+  6: (OSD::do_recovery(PG*)+0x39d) [0x5d3c9d]
+  7: (OSD::RecoveryWQ::_process(PG*)+0xd) [0x6119fd]
+  8: (ThreadPool::worker()+0x82b) [0x7c176b]
+  9: (ThreadPool::WorkThread::entry()+0xd) [0x5f609d]
+  10: (()+0x6b50) [0x7f43f0ae7b50]
+  11: (clone()+0x6d) [0x7f43ef81b78d]
 
-  	int			dev_id;		/* blkdev unique id */
-  	struct list_head	id_list;
-+	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
-+
-+	int			major;		/* blkdev assigned major */
-+	spinlock_t		lock;		/* queue lock */
-+	struct gendisk		*disk;		/* blkdev's gendisk and rq */
-+
-+	struct rbd_options	rbd_opts;
-  };
+Restarting gives the same message after some seconds.
+I've been watching the bug tracker but I don't see something related.
 
-  /*
-   * a single device
-   */
-  struct rbd_device {
--	int			major;		/* blkdev assigned major */
--	struct gendisk		*disk;		/* blkdev's gendisk and rq */
--
-  	u32			image_format;	/* Either 1 or 2 */
--	struct rbd_options	rbd_opts;
-  	struct rbd_client	*rbd_client;
+Some informations : kernel is 3.6.1, with "standard" debian packages 
+from ceph.com
 
--	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
--
--	spinlock_t		lock;		/* queue lock */
--
-  	struct rbd_image_header	header;
-  	char			*image_id;
-  	size_t			image_id_len;
-@@ -452,7 +451,7 @@ static int parse_rbd_opts_token(char *c, void *private)
-  static int rbd_get_client(struct rbd_device *rbd_dev, const char 
-*mon_addr,
-  				size_t mon_addr_len, char *options)
-  {
--	struct rbd_options *rbd_opts = &rbd_dev->rbd_opts;
-+	struct rbd_options *rbd_opts = &rbd_dev->mapping.rbd_opts;
-  	struct ceph_options *ceph_opts;
-  	struct rbd_client *rbdc;
+My ceph cluster was running well and stable on 6 osd since june (3 
+datacenters, 2 with 2 nodes, 1 with 4 nodes, a replication of 2, and 
+adjusted weight to try to balance data evenly). Beginned with the 
+then-up-to-date version, then 0.48, 49,50,51... Data store is on XFS.
 
-@@ -672,7 +671,8 @@ static int rbd_dev_set_mapping(struct rbd_device 
-*rbd_dev, char *snap_name)
-  		rbd_dev->mapping.size = rbd_dev->header.image_size;
-  		rbd_dev->mapping.features = rbd_dev->header.features;
-  		rbd_dev->mapping.snap_exists = false;
--		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
-+		rbd_dev->mapping.read_only =
-+			rbd_dev->mapping.rbd_opts.read_only;
-  		ret = 0;
-  	} else {
-  		ret = snap_by_name(rbd_dev, snap_name);
-@@ -1293,7 +1293,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, 
-u8 opcode, void *data)
-  	rc = rbd_dev_refresh(rbd_dev, &hver);
-  	if (rc)
-  		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
--			   " update snaps: %d\n", rbd_dev->major, rc);
-+			   " update snaps: %d\n", rbd_dev->mapping.major, rc);
+I'm currently in the process of growing my ceph from 6 nodes to 12 
+nodes. 11 nodes are currently in ceph, for a 130 TB total. Declaring new 
+osd was OK, the data has moved "quite" ok (in fact I had some OSD crash 
+- not definitive, the osd restart ok-, maybe related to an error in my 
+new nodes network configuration that I discovered after. More on that 
+later, I can find the traces, but I'm not sure it's related)
 
-  	rbd_req_sync_notify_ack(rbd_dev, hver, notify_id);
-  }
-@@ -1573,7 +1573,7 @@ static int rbd_merge_bvec(struct request_queue *q, 
-struct bvec_merge_data *bmd,
+When ceph was finally stable again, with HEALTH_OK, I decided to 
+reweight the osd (that was tuesday). Operation went quite OK, but near 
+the end of operation (0,085% left), 1 of my OSD crashed, and won't start 
+again.
 
-  static void rbd_free_disk(struct rbd_device *rbd_dev)
-  {
--	struct gendisk *disk = rbd_dev->disk;
-+	struct gendisk *disk = rbd_dev->mapping.disk;
+More problematic, with this osd down, I have 1 incomplete PG :
 
-  	if (!disk)
-  		return;
-@@ -1697,7 +1697,7 @@ static void rbd_update_mapping_size(struct 
-rbd_device *rbd_dev)
-  	size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
-  	dout("setting size to %llu sectors", (unsigned long long) size);
-  	rbd_dev->mapping.size = (u64) size;
--	set_capacity(rbd_dev->disk, size);
-+	set_capacity(rbd_dev->mapping.disk, size);
-  }
+ceph -s
+    health HEALTH_WARN 86 pgs backfill; 231 pgs degraded; 4 pgs down; 15 
+pgs incomplete; 4 pgs peering; 134 pgs recovering; 19 pgs stuck 
+inactive; 455 pgs stuck unclean; recovery 2122878/23181946 degraded 
+(9.157%); 2321/11590973 unfound (0.020%); 1 near full osd(s)
+    monmap e1: 3 mons at 
+{chichibu=172.20.14.130:6789/0,glenesk=172.20.14.131:6789/0,karuizawa=172.20.14.133:6789/0}, 
+election epoch 20, quorum 0,1,2 chichibu,glenesk,karuizawa
+    osdmap e13184: 11 osds: 10 up, 10 in
+     pgmap v2399093: 1728 pgs: 165 active, 1270 active+clean, 8 
+active+recovering+degraded, 41 
+active+recovering+degraded+remapped+backfill, 4 down+peering, 137 
+active+degraded, 3 active+clean+scrubbing, 15 incomplete, 40 
+active+recovering, 45 active+recovering+degraded+backfill; 44119 GB 
+data, 84824 GB used, 37643 GB / 119 TB avail; 2122878/23181946 degraded 
+(9.157%); 2321/11590973 unfound (0.020%)
+    mdsmap e321: 1/1/1 up {0=karuizawa=up:active}, 2 up:standby
 
-  /*
-@@ -1772,13 +1772,14 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+how is it possible as I have a replication of 2  ?
 
-  	snprintf(disk->disk_name, sizeof(disk->disk_name), RBD_DRV_NAME "%d",
-  		 rbd_dev->mapping.dev_id);
--	disk->major = rbd_dev->major;
-+	disk->major = rbd_dev->mapping.major;
-  	disk->first_minor = 0;
-  	disk->fops = &rbd_bd_ops;
-  	disk->private_data = rbd_dev;
+Is it a known problem ?
 
-  	/* init rq */
--	q = blk_init_queue(rbd_rq_fn, &rbd_dev->lock);
-+	spin_lock_init(&rbd_dev->mapping.lock);
-+	q = blk_init_queue(rbd_rq_fn, &rbd_dev->mapping.lock);
-  	if (!q)
-  		goto out_disk;
-
-@@ -1797,9 +1798,10 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
-
-  	q->queuedata = rbd_dev;
-
--	rbd_dev->disk = disk;
-+	rbd_dev->mapping.disk = disk;
-
--	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
-+	set_capacity(rbd_dev->mapping.disk,
-+			rbd_dev->mapping.size / SECTOR_SIZE);
-
-  	return 0;
-  out_disk:
-@@ -1824,7 +1826,7 @@ static ssize_t rbd_size_show(struct device *dev,
-  	sector_t size;
-
-  	down_read(&rbd_dev->header_rwsem);
--	size = get_capacity(rbd_dev->disk);
-+	size = get_capacity(rbd_dev->mapping.disk);
-  	up_read(&rbd_dev->header_rwsem);
-
-  	return sprintf(buf, "%llu\n", (unsigned long long) size * SECTOR_SIZE);
-@@ -1848,7 +1850,7 @@ static ssize_t rbd_major_show(struct device *dev,
-  {
-  	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-
--	return sprintf(buf, "%d\n", rbd_dev->major);
-+	return sprintf(buf, "%d\n", rbd_dev->mapping.major);
-  }
-
-  static ssize_t rbd_client_id_show(struct device *dev,
-@@ -3034,7 +3036,6 @@ static ssize_t rbd_add(struct bus_type *bus,
-  		goto err_out_mem;
-
-  	/* static rbd_device initialization */
--	spin_lock_init(&rbd_dev->lock);
-  	INIT_LIST_HEAD(&rbd_dev->snaps);
-  	init_rwsem(&rbd_dev->header_rwsem);
-
-@@ -3076,14 +3077,15 @@ static ssize_t rbd_add(struct bus_type *bus,
-  	/* Fill in the device name, now that we have its id. */
-  	BUILD_BUG_ON(DEV_NAME_LEN
-  			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
--	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->mapping.dev_id);
-+	sprintf(rbd_dev->mapping.name, "%s%d",
-+			RBD_DRV_NAME, rbd_dev->mapping.dev_id);
-
-  	/* Get our block major device number. */
-
--	rc = register_blkdev(0, rbd_dev->name);
-+	rc = register_blkdev(0, rbd_dev->mapping.name);
-  	if (rc < 0)
-  		goto err_out_id;
--	rbd_dev->major = rc;
-+	rbd_dev->mapping.major = rc;
-
-  	/* Set up the blkdev mapping. */
-
-@@ -3112,9 +3114,10 @@ static ssize_t rbd_add(struct bus_type *bus,
-
-  	/* Everything's ready.  Announce the disk to the world. */
-
--	add_disk(rbd_dev->disk);
-+	add_disk(rbd_dev->mapping.disk);
-
--	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
-+	pr_info("%s: added with size 0x%llx\n",
-+		rbd_dev->mapping.disk->disk_name,
-  		(unsigned long long) rbd_dev->mapping.size);
-
-  	return count;
-@@ -3129,7 +3132,7 @@ err_out_bus:
-  err_out_disk:
-  	rbd_free_disk(rbd_dev);
-  err_out_blkdev:
--	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-+	unregister_blkdev(rbd_dev->mapping.major, rbd_dev->mapping.name);
-  err_out_id:
-  	rbd_dev_id_put(&rbd_dev->mapping);
-  err_out_header:
-@@ -3189,7 +3192,7 @@ static void rbd_dev_release(struct device *dev)
-
-  	/* clean up and free blkdev */
-  	rbd_free_disk(rbd_dev);
--	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-+	unregister_blkdev(rbd_dev->mapping.major, rbd_dev->mapping.name);
-
-  	/* release allocated disk header fields */
-  	rbd_header_free(&rbd_dev->header);
--- 
-1.7.9.5
+Cheers,
 
