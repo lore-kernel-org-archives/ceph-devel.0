@@ -1,42 +1,55 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: How to write data to snapshot.
-Date: Fri, 12 Oct 2012 16:29:53 -0700
-Message-ID: <5078A7F1.5090307@inktank.com>
-References: <loom.20121007T070909-887@post.gmane.org> <CADvuQRHsA1peMugN4acw7o9SHDCtbP4wpXD_DXPsjZhCY7ZNfw@mail.gmail.com> <loom.20121009T085302-672@post.gmane.org> <507460F3.10906@inktank.com> <loom.20121010T075344-838@post.gmane.org>
+From: Ricardo Auada <rauada@gmail.com>
+Subject: Cache, Backup and S3backer
+Date: Sat, 13 Oct 2012 03:25:06 +0000 (UTC)
+Message-ID: <loom.20121013T051644-437@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:39857 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752126Ab2JLX34 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Oct 2012 19:29:56 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so1550741dak.19
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Oct 2012 16:29:56 -0700 (PDT)
-In-Reply-To: <loom.20121010T075344-838@post.gmane.org>
+Received: from plane.gmane.org ([80.91.229.3]:40676 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751818Ab2JMDaC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Oct 2012 23:30:02 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TMsQO-00059i-LB
+	for ceph-devel@vger.kernel.org; Sat, 13 Oct 2012 05:30:05 +0200
+Received: from b1203e3e.virtua.com.br ([b1203e3e.virtua.com.br])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 13 Oct 2012 05:30:04 +0200
+Received: from rauada by b1203e3e.virtua.com.br with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 13 Oct 2012 05:30:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu eppa <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
+Hi, I=C2=B4m just starting to look at CEPH and some questions crossed m=
+y mind. I
+wonder if someone can help me with them:
 
+1- Does Ceph use any kind of cache to improve speed access to data in O=
+SD=C2=B4s ?
+2- Because Ceph is usually used for big amounts of data, how can we bac=
+kup /
+snapshot this data ? How fast can we recover this big backup ? Or we wo=
+uldn=C2=B4t
+need a backup at all, due to the redundance features ? Here I mean only=
+ disaster
+recover backup.
+3- I see Ceph has an S3 API. Also, we are studying some S3 filesystems =
+and
+S3backer seems to be a very nice one. What would be the differences in =
+using one
+or the other ?
 
-On 10/09/2012 10:58 PM, ramu eppa wrote:
-> Hi Dan Mick,
->    Thank u for reply,actually
-> 1.I want to create writable snapshot.
+Regards,
+--
+Ricardo Auada
 
-There is no such thing as a writable snapshot.
-
-> 2.In that snapshot I want to insert data.
-> 3.Is it possible to reuse snapshot.
-> 4.And for this what version of ceph can I use.
->
-> Thanks,
-> Ramu.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
