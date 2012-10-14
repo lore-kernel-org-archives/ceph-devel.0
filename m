@@ -1,48 +1,87 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Cache, Backup and S3backer
-Date: Sat, 13 Oct 2012 20:46:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210132041030.3424@cobra.newdream.net>
-References: <loom.20121013T051644-437@post.gmane.org>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: OSD::mkfs: couldn't mount FileStore: error -22
+Date: Sun, 14 Oct 2012 17:50:16 +1000
+Message-ID: <k5dqro$s4d$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38238 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987Ab2JNDqL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Oct 2012 23:46:11 -0400
-In-Reply-To: <loom.20121013T051644-437@post.gmane.org>
+Received: from plane.gmane.org ([80.91.229.3]:34493 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750924Ab2JNHui (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Oct 2012 03:50:38 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TNIy5-0005lp-H1
+	for ceph-devel@vger.kernel.org; Sun, 14 Oct 2012 09:50:37 +0200
+Received: from 124-170-67-40.dyn.iinet.net.au ([124.170.67.40])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 14 Oct 2012 09:50:37 +0200
+Received: from a.nielsen by 124-170-67-40.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 14 Oct 2012 09:50:37 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ricardo Auada <rauada@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Sat, 13 Oct 2012, Ricardo Auada wrote:
-> Hi, I?m just starting to look at CEPH and some questions crossed my mind. I
-> wonder if someone can help me with them:
-> 
-> 1- Does Ceph use any kind of cache to improve speed access to data in OSD?s ?
+Hi all,
 
-The ceph file system and RBD both have caches.  The low-level librados 
-does not, and radosgw (RESTful S3/Swift access) caches only certain 
-metadata, but not object data.  Caches can be easily layered on top of 
-these.
+I'm attempting to set up a Ceph cluster for testing, initially with only one 
+node so I can add others next.  I think I've followed the guides as closely as 
+I could, but now when running mkcephfs it fails and I can't find much about 
+the error through Google.
 
-> 2- Because Ceph is usually used for big amounts of data, how can we backup /
-> snapshot this data ? How fast can we recover this big backup ? Or we wouldn?t
-> need a backup at all, due to the redundance features ? Here I mean only disaster
-> recover backup.
+What am I doing wrong?  This is on Debian Squeeze with the stable repo from 
+ceph.com.
 
-This is a big question for any large storage system.  The goal is that for 
-most applications, there would be no backup, since Ceph is masking 
-individual component failure.  Ultimately this is a question for you, 
-based on the data you are storing and your level of trust.
+$ mkcephfs -a -c /etc/ceph/ceph.conf
+temp dir is /tmp/mkcephfs.FqyH7RCFY1
+preparing monmap in /tmp/mkcephfs.FqyH7RCFY1/monmap
+/usr/bin/monmaptool --create --clobber --add 0 192.168.0.6:6789 --print 
+/tmp/mkcephfs.FqyH7RCFY1/monmap
+/usr/bin/monmaptool: monmap file /tmp/mkcephfs.FqyH7RCFY1/monmap
+/usr/bin/monmaptool: generated fsid 77b0e551-b545-42df-957e-b99292539501
+epoch 0
+fsid 77b0e551-b545-42df-957e-b99292539501
+last_changed 2012-10-14 17:40:11.128447
+created 2012-10-14 17:40:11.128447
+0: 192.168.0.6:6789/0 mon.0
+/usr/bin/monmaptool: writing epoch 0 to /tmp/mkcephfs.FqyH7RCFY1/monmap (1 
+monitors)
+=== osd.0 ===
+  ** WARNING: 'filestore btrfs snap' is enabled (for safe transactions,
+              rollback), but btrfs does not support the SNAP_CREATE_V2 ioctl
+              (added in Linux 2.6.37).  Expect slow btrfs sync/commit
+              performance.
+2012-10-14 17:40:12.768973 b732b710 -1 filestore(/var/lib/ceph/osd/ceph-0) 
+mount initial op seq is 0; something is wrong
+2012-10-14 17:40:12.769238 b732b710 -1 OSD::mkfs: couldn't mount FileStore: 
+error -22
+2012-10-14 17:40:12.769522 b732b710 -1  ** ERROR: error creating empty object 
+store in /var/lib/ceph/osd/ceph-0: (22) Invalid argument
+failed: '/sbin/mkcephfs -d /tmp/mkcephfs.FqyH7RCFY1 --init-daemon osd.0'
 
-> 3- I see Ceph has an S3 API. Also, we are studying some S3 filesystems and
-> S3backer seems to be a very nice one. What would be the differences in using one
-> or the other ?
+$ cat /etc/ceph/ceph.conf
+[osd]
+         osd journal size = 10000
 
-If the goal is a file system, I would use RBD or the ceph fs directly, not 
-layer it on top of radosgw; you'll get a cleaner, simpler stack and better 
-performance.
+[mon.0]
+         host = node1
+         mon addr = 192.168.0.6:6789
+         mon data = /var/lib/ceph/osd/$cluster-$id/
 
-sage
+[osd.0]
+         host = node1
+
+[mds.0]
+         host = node1
+
+Any suggestions?  I tried commenting out "mon data" but it didn't make a 
+difference (and I need this in because the test machine's root filesystem is 
+on a 4GB CF card, so I need all non-OS data to be stored on the disks assigned 
+to Ceph.)
+
+Thanks,
+Adam.
+
