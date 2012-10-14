@@ -1,61 +1,64 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: libceph: error -2 building auth method x request
-Date: Mon, 15 Oct 2012 09:57:35 +1100
-Message-ID: <20121014225735.GA9509@onthe.net.au>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: Re: OSD::mkfs: couldn't mount FileStore: error -22
+Date: Mon, 15 Oct 2012 09:19:35 +1000
+Message-ID: <k5fha7$h3l$1@ger.gmane.org>
+References: <k5dqro$s4d$1@ger.gmane.org> <507B2E71.4040706@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:35140 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751181Ab2JNXHs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Oct 2012 19:07:48 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 09537612DE
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 09:57:37 +1100 (EST)
-Received: from smtp1.onthe.net.au ([127.0.0.1])
-	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id MKUxbvrCjjuY for <ceph-devel@vger.kernel.org>;
-	Mon, 15 Oct 2012 09:57:36 +1100 (EST)
-Received: from o1.office.otn.net.au (unknown [180.148.179.26])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 355BD60EC1
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 09:57:36 +1100 (EST)
-Received: from achates.office.onthe.net.au (achates.office.onthe.net.au [10.1.32.53])
-	by o1.office.otn.net.au (Postfix) with ESMTP id 5D22E2AB2BC
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 09:58:03 +1100 (EST)
-Content-Disposition: inline
+Received: from plane.gmane.org ([80.91.229.3]:40376 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751674Ab2JNXTw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Oct 2012 19:19:52 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TNXTP-0002yo-2Z
+	for ceph-devel@vger.kernel.org; Mon, 15 Oct 2012 01:19:55 +0200
+Received: from 124-170-67-40.dyn.iinet.net.au ([124.170.67.40])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 01:19:55 +0200
+Received: from a.nielsen by 124-170-67-40.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 01:19:55 +0200
+In-Reply-To: <507B2E71.4040706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-G'day,
+> The immediate cause of the problem is that the osd's "commit_op_seq" file is
+> reading back '0',
+> which is invalid; it's created with an initial value of 1.  Try removing the
+> osd data dir
+> (/var/lib/ceph/osd/ceph-0) completely and let it be recreated; perhaps
+> something got there somehow by mistake.
 
-In case anyone else might be getting the $subject error, and to
-make the issue visible to a google search...
+Well it looks like commit_op_seq was never created properly:
 
-When trying to map an rdb block device whilst using cephx
-authentication, if you get kernel messages like:
+$ ls /var/lib/ceph/osd/ceph-0/current/
+total 4.0K
+drwxr-xr-x 1 root root 26 Oct 14 17:40 .
+drwxrwx--- 1 root root 74 Oct 14 17:40 ..
+-rw-r--r-- 1 root root  0 Oct 14 17:40 commit_op_seq
 
-[79683.055935] libceph: client0 fsid c6618970-0ce0-4cb2-bc9a-dd5f29b62e24
-[79683.059286] libceph: error -2 building auth method x request
+But how do I delete it to start again?
 
-...ensure you have the appropriate encryption available in the
-kernel (built in or modules). I'm a bit unclear as to precisely
-what is required, but Josh Durgin's comment was:
+$ rm -rf current/
+rm: cannot remove `current': Directory not empty
+$ ls current/
+total 4.0K
+drwxr-xr-x 1 root root  0 Oct 15 09:16 .
+drwxrwx--- 1 root root 26 Oct 15 09:16 ..
 
-  The only path I'm seeing that could lead to that error is if
-  the kernel wasn't compiled with support for "cbc(aes)" with
-  the CRYPTO_ALG_ASYNC flag. I'd guess any of the CRYTPO_AES*
-  build options (with CRYPTO_BLKCIPHER2?) would be sufficient.
+This is on a brand new btrfs filesystem mounted in /var/lib/ceph/osd/ceph-0. 
+I created it with this:
 
-These modules were required to get my mapping working whilst
-using cephx:
+$ mkfs.btrfs -L data -s 4096 /dev/sda1
 
-  aes_x86_64
-  aes_generic
-  cbc
+Did I do something wrong?
 
-See also: http://tracker.newdream.net/issues/3285
+Thanks,
+Adam.
 
-Cheers,
 
-Chris.
