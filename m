@@ -1,50 +1,54 @@
-From: Adam Nielsen <a.nielsen@shikadi.net>
-Subject: Re: OSD::mkfs: couldn't mount FileStore: error -22
-Date: Mon, 15 Oct 2012 21:35:02 +1000
-Message-ID: <k5gsd6$e0b$1@ger.gmane.org>
-References: <k5dqro$s4d$1@ger.gmane.org> <507B2E71.4040706@inktank.com> <k5fha7$h3l$1@ger.gmane.org> <alpine.DEB.2.00.1210142044060.3424@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: zero return code in rbd_dev_image_id()
+Date: Mon, 15 Oct 2012 08:44:08 -0500
+Message-ID: <507C1328.2010107@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51365 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752006Ab2JOLfR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 15 Oct 2012 07:35:17 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TNix7-0004Y5-4W
-	for ceph-devel@vger.kernel.org; Mon, 15 Oct 2012 13:35:21 +0200
-Received: from 124-170-67-40.dyn.iinet.net.au ([124.170.67.40])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 13:35:21 +0200
-Received: from a.nielsen by 124-170-67-40.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 13:35:21 +0200
-In-Reply-To: <alpine.DEB.2.00.1210142044060.3424@cobra.newdream.net>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:36454 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753375Ab2JONoK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Oct 2012 09:44:10 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so7773979iea.19
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 06:44:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-> current/ is a btrfs subvolume.. 'btrfs sub delete current' will remove it.
+There is a call in rbd_dev_image_id() to rbd_req_sync_exec()
+to get the image id for an image.  Despite the "get_id" class
+method only returning 0 on success, I am getting back a positive
+value (I think the number of bytes returned with the call).
 
-Ah, that worked, thanks.  Unfortunately mkcephfs still fails with the same error.
+That may or may not be how rbd_req_sync_exec() is supposed to
+behave, but zeroing the return value if successful makes it moot
+and makes this path through the code work as desired.
 
-> The warning in the previous email suggets you're running a fairly old
-> kernel.. there is probably something handled incorrectly during the fs
-> init process.  Exactly which kernel are you running?
+Do the same in rbd_dev_v2_object_prefix().
 
-2.6.32 - apparently the latest in Debian stable.  I figured this was workable 
-since ceph.com offers packages for Debian stable.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
-> In any case, btrfs isn't going to work particularly well on something that
-> old; I suggest running something newer (3.5 or 3.6) or switching to XFS.
+Index: b/drivers/block/rbd.c
+===================================================================
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2207,6 +2207,7 @@ static int rbd_dev_v2_object_prefix(stru
+ 	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		goto out;
++	ret = 0;    /* rbd_req_sync_exec() can return positive */
 
-Ok fair enough.  I'll have to see how practical it is to get a more recent 
-kernel going, otherwise I'll go down the XFS route.
+ 	p = reply_buf;
+ 	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
+@@ -2900,6 +2901,7 @@ static int rbd_dev_image_id(struct rbd_d
+ 	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		goto out;
++	ret = 0;    /* rbd_req_sync_exec() can return positive */
 
-Thanks again,
-Adam.
-
-
+ 	p = response;
+ 	rbd_dev->image_id = ceph_extract_encoded_string(&p,
