@@ -1,39 +1,32 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: rbd command to display free space in a cluster ?
-Date: Mon, 15 Oct 2012 09:52:44 +0200 (CEST)
-Message-ID: <ec165b12-5d49-49d0-b5c9-cdb51bc2b442@mailpro>
-References: <38420316-19c7-4ec8-bb69-fbe9b3a67d18@mailpro>
+From: Alex Jiang <alex.jiang.zju@gmail.com>
+Subject: Two questions about client writes update to Ceph
+Date: Mon, 15 Oct 2012 16:46:19 +0800
+Message-ID: <CAGVY77cBnFzM9bA5hHkpO6hZycz=v9Jo4_ZDc0f6_w0yvazyVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:38010 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028Ab2JOIAW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Oct 2012 04:00:22 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id D962718024BFF
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 09:52:49 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id kYHrrLt5r65z for <ceph-devel@vger.kernel.org>;
-	Mon, 15 Oct 2012 09:52:44 +0200 (CEST)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id A38BC18024921
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 09:52:44 +0200 (CEST)
-In-Reply-To: <38420316-19c7-4ec8-bb69-fbe9b3a67d18@mailpro>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:58075 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751027Ab2JOIqU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Oct 2012 04:46:20 -0400
+Received: by mail-bk0-f46.google.com with SMTP id jk13so2290848bkc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 01:46:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi,all
+    I'm very interested in Ceph. Recently I deployed a Ceph cluster in
+lab environment, and it works very well. Now I am studying the
+principle of Ceph RBD. But I am confused about two questions.
+    1) When client writes update to Ceph RBD, it contacts with primary
+OSD directly. Then The primary OSD forwards the update to replicas. If
+the replicas are down and update is not committed to replicas disks,
+but the update has been committed to primary OSD disk, will Ceph
+rollbacks the transaction?
+    2) To ensure availability, do journals exist in client side to log
+I/O history? If true, are the journals durable in disks?
 
-I'm looking for a way to retrieve the free space from a rbd cluster with rbd command.
+  Regards,
 
-Any hint ?
-
-(something like ceph -w status, but without need to parse the result)
-
-Regards,
-
-Alexandre
+  Alex
