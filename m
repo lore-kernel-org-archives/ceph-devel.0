@@ -1,81 +1,71 @@
-From: Lokesh Krishnappa <lokesh.professional.it@gmail.com>
-Subject: Fwd: s3 UnboundLocalError
-Date: Tue, 16 Oct 2012 10:34:09 +0530
-Message-ID: <CABpo6h+hq0EnzG_vx5f7igNZr37uk_NvJvZr7_4hCe+_G5qt9Q@mail.gmail.com>
-References: <CABpo6hKK3Xyc0BhcUYRdP+OGtG6sc31YnGPc0cx+XTRM_WBY=w@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: rbd command to display free space in a cluster ?
+Date: Tue, 16 Oct 2012 15:57:51 +0200 (CEST)
+Message-ID: <80dc18a4-87a6-450d-b582-f1d09da6d373@mailpro>
+References: <alpine.DEB.2.00.1210150846030.3424@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:48578 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755683Ab2JPFEK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Oct 2012 01:04:10 -0400
-Received: by mail-oa0-f46.google.com with SMTP id h16so5802274oag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Oct 2012 22:04:09 -0700 (PDT)
-In-Reply-To: <CABpo6hKK3Xyc0BhcUYRdP+OGtG6sc31YnGPc0cx+XTRM_WBY=w@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:57495 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752388Ab2JPN6V convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Oct 2012 09:58:21 -0400
+In-Reply-To: <alpine.DEB.2.00.1210150846030.3424@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+Thanks Sage,
 
-am following, the below given link :
-https://github.com/ceph/s3-tests for my testing purpose ... and while
-am executing the command as:
+that's what I was looking for
 
-S3TEST_CONF=example.conf ./virtualenv/bin/nosetests
+Regards,
 
-getting results with 2error , which is as follows:
+Alexandre
 
- lokesh@lokesh:~/Downloads/ceph-teuthology-78b7b02$
-S3TEST_CONF=example.conf ./virtualenv/bin/nosetests
-................EES................................
-======================================================================
-ERROR: teuthology.orchestra.test.test_connection.test_connect
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/virtualenv/local/lib/python2.7/site-packages/nose/case.py",
-line 197, in runTest
-    self.test(*self.arg)
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/virtualenv/local/lib/python2.7/site-packages/fudge/__init__.py",
-line 168, in apply_clear_and_verify
-    method(*args, **kw)
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/test/test_connection.py",
-line 47, in test_connect
-    _SSHClient=sshclient,
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/connection.py",
-line 30, in connect
-    ssh.load_system_host_keys()
-UnboundLocalError: local variable 'ssh' referenced before assignment
 
-======================================================================
-ERROR: teuthology.orchestra.test.test_connection.test_connect_override_hostkeys
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/virtualenv/local/lib/python2.7/site-packages/nose/case.py",
-line 197, in runTest
-    self.test(*self.arg)
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/virtualenv/local/lib/python2.7/site-packages/fudge/__init__.py",
-line 168, in apply_clear_and_verify
-    method(*args, **kw)
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/test/test_connection.py",
-line 78, in test_connect_override_hostkeys
-    _create_key = create_key,
-  File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/connection.py",
-line 33, in connect
-    ssh.get_host_keys().add(
-UnboundLocalError: local variable 'ssh' referenced before assignment
+----- Mail original -----=20
 
-----------------------------------------------------------------------
-Ran 50 tests in 1.822s
+De: "Sage Weil" <sage@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Lundi 15 Octobre 2012 17:46:36=20
+Objet: Re: rbd command to display free space in a cluster ?=20
 
-FAILED (SKIP=1, errors=2)
+On Mon, 15 Oct 2012, Alexandre DERUMIER wrote:=20
+> Hi,=20
+>=20
+> I'm looking for a way to retrieve the free space from a rbd cluster w=
+ith rbd command.=20
+>=20
+> Any hint ?=20
+>=20
+> (something like ceph -w status, but without need to parse the result)=
+=20
 
-i thought it would be ssh login problem and tried to secure login, its
-working fine .
+rados df=20
 
-pls tel me where i made wrong . if idea! pls ...
+is the closest.=20
 
-with regards ,
+sage=20
 
-Lokesh K
+
+
+>=20
+> Regards,=20
+>=20
+> Alexandre=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
