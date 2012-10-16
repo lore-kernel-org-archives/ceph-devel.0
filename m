@@ -1,61 +1,64 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: s3 UnboundLocalError
-Date: Tue, 16 Oct 2012 09:45:55 -0700
-Message-ID: <CADvuQRGkDMr_unZfXt2NLtZj26G3OeGgaFid8EqQgqJ179xvRQ@mail.gmail.com>
-References: <CABpo6hKK3Xyc0BhcUYRdP+OGtG6sc31YnGPc0cx+XTRM_WBY=w@mail.gmail.com>
- <CABpo6h+hq0EnzG_vx5f7igNZr37uk_NvJvZr7_4hCe+_G5qt9Q@mail.gmail.com>
+From: James Page <james.page@ubuntu.com>
+Subject: Ubuntu R-Series plans for Ceph
+Date: Tue, 16 Oct 2012 18:14:50 +0100
+Message-ID: <507D960A.7040101@ubuntu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:34982 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754357Ab2JPQqQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Oct 2012 12:46:16 -0400
-Received: by mail-qc0-f174.google.com with SMTP id o22so1193810qcr.19
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Oct 2012 09:46:15 -0700 (PDT)
-In-Reply-To: <CABpo6h+hq0EnzG_vx5f7igNZr37uk_NvJvZr7_4hCe+_G5qt9Q@mail.gmail.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:47003 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753977Ab2JPROy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Oct 2012 13:14:54 -0400
+Received: from host212-140-203-55.range212-140.btcentralplus.com ([212.140.203.55] helo=[192.168.1.50])
+	by youngberry.canonical.com with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
+	(Exim 4.71)
+	(envelope-from <james.page@ubuntu.com>)
+	id 1TOAjE-0002NA-Eo
+	for ceph-devel@vger.kernel.org; Tue, 16 Oct 2012 17:14:52 +0000
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lokesh Krishnappa <lokesh.professional.it@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 15, 2012 at 10:04 PM, Lokesh Krishnappa
-<lokesh.professional.it@gmail.com> wrote:
-> am following, the below given link :
-> https://github.com/ceph/s3-tests for my testing purpose ... and while
-> am executing the command as:
->
-> S3TEST_CONF=example.conf ./virtualenv/bin/nosetests
->
-> getting results with 2error , which is as follows:
->
->  lokesh@lokesh:~/Downloads/ceph-teuthology-78b7b02$
-> S3TEST_CONF=example.conf ./virtualenv/bin/nosetests
-> ................EES................................
-> ======================================================================
-> ERROR: teuthology.orchestra.test.test_connection.test_connect
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-It seems like you are confusing s3-tests with teuthology? S3TEST_CONF
-is definitely about s3-tests, but the unit tests you are running, and
-the directory you are in, are about teuthology.
+Hi All
 
->   File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/test/test_connection.py",
-> line 47, in test_connect
->     _SSHClient=sshclient,
->   File "/home/lokesh/Downloads/ceph-teuthology-78b7b02/teuthology/orchestra/connection.py",
-> line 30, in connect
->     ssh.load_system_host_keys()
-> UnboundLocalError: local variable 'ssh' referenced before assignment
+I've started to put together a Launchpad Blueprint to act as a
+placeholder for discussion at the Ubuntu Developer Summit in a couple
+of weeks time.
 
-The error you are seeing seems only possible if someone were to change
-the unit test in question, or if the behavior of the fudge library has
-changed. I just confirmed that a virtualenv created from scratch, with
-fudge 1.0.3, behaves as expected.
+I'd be interested in feedback on what folks would like to see from
+Ceph on Ubuntu in 6 months time for Ubuntu 13.04.
 
-Did you edit the source?
+Let me know what you think and I'll collate ideas.
 
-> i thought it would be ssh login problem and tried to secure login, its
-> working fine .
+Cheers
 
-These are unit tests, they have nothing to do with the actual SSH
-service on your host.
+James
+
+[0] https://blueprints.launchpad.net/ubuntu/+spec/servercloud-r-ceph
+- -- 
+James Page
+Ubuntu Core Developer
+Debian Maintainer
+james.page@ubuntu.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://www.enigmail.net/
+
+iQIcBAEBCAAGBQJQfZYKAAoJEL/srsug59jDl9EP/i8gFCkiZpfoPF7pVGy1JYMZ
+Iy/dIIqnIEgedSq/bdWt9WKZ8vOn2vC/gE2cSTqylBKjH5w7UAtMFHlJWZAUM8tA
+HoiXIxXbmvv2rFm1qVfQhpKCiJ+RhSg5eOfhNz90UgDii1Xoc8aN+TsrvtZcgkqu
+ouJ/T+UbAIVocEO/6fbBOJXsVGFT8WIy4R3zlOTYe+Xrnprxx70ZkzeZ2f9+i2so
+Lmm48kPHjW8y+QVhr9gALY5I+WGU47yjv3WGsuCgNDfk8DJY15exmaCov172x0m6
+eZTp4DQMkBiUePABo/NZLZqEk1WC0wYQ3dJ9II4UUWyBkMas5gG6Pi0m2MSil8+m
+L0Voo0wJxfbvg7wrlL5dr4szcjfMVx+F1P7exeOnRAplNoueBNDTQaqItHe0L740
+MmXEwqrEuRMw8c8wbqWSUywJuEjBLzGhA9aHVrMUzrz0FjdoZhzSXFa2C3lK0Y0E
+DPaj69fenwz+1J25EP/GDpcXtjw1k/gskEcVNFnDEyyvI5BjbiqbhE1q/tezcZjs
+DT00NdJL4dIpu5BgP8XezOyideskZfNh6ExgMub48ObPje2YEn9OmRflRALmJyrW
+2ZLrgkqV0BTVGOrMU4IZa/xyNy5NpRf7uvr7hCVyLq0RopCPorbBJT+1wLaAXYx7
+FxRtGgTht76an1S1Sn3L
+=xvlU
+-----END PGP SIGNATURE-----
