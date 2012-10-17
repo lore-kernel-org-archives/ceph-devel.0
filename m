@@ -1,174 +1,214 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: v0.53 released
-Date: Wed, 17 Oct 2012 13:26:43 +0200
-Message-ID: <507E95F3.10508@filoo.de>
-References: <alpine.DEB.2.00.1210161647550.5342@cobra.newdream.net>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: Help...MDS Continuously Segfaulting
+Date: Wed, 17 Oct 2012 08:34:01 -0500
+Message-ID: <507EB3C9.1010004@inktank.com>
+References: <507BED3702000099000ECA13@collaborate.seakr.com> <CAPYLRzhJb8Z=yXofTVC+vBk3JHYx+CXM2iA12cQG3GzWSmdwdg@mail.gmail.com> <507BF6CA02000099000ECA32@collaborate.seakr.com> <CAPYLRzh4N=0h3iK5CvVD70vxrBiDOnt21OFO7Rz_9uK4WYrc5A@mail.gmail.com> <507BFAA102000099000ECA3B@collaborate.seakr.com> <CAPYLRzjW4MKaGrdXu29ZOkqEvF1Ps+ust98nb4wTr2pcRPLaiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-6.de-punkt.de ([93.190.64.36]:32809 "EHLO
-	mail-6.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753009Ab2JQL0q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Oct 2012 07:26:46 -0400
-In-Reply-To: <alpine.DEB.2.00.1210161647550.5342@cobra.newdream.net>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:37625 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756034Ab2JQNeF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Oct 2012 09:34:05 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so7121659pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Oct 2012 06:34:05 -0700 (PDT)
+In-Reply-To: <CAPYLRzjW4MKaGrdXu29ZOkqEvF1Ps+ust98nb4wTr2pcRPLaiw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Nick Couchman <Nick.Couchman@seakr.com>, ceph-devel@vger.kernel.org
 
-Hi Sage, *,
+On 10/16/2012 06:04 PM, Gregory Farnum wrote:
+> Okay, that's the right debugging but it wasn't quite as helpful on its
+> own as I expected. Can you get a core dump (you might already have
+> one, depending on system settings) of the crash and open it up with
+> gdb and get a full backtrace?
 
-after having some trouble with the journals - had to erase the partitio=
-n=20
-and redo a ceph... --mkjournal - I started my testing... Everything fin=
-e.
+You can also run the mds directly in gdb and avoid any core file ulimit 
+settings you have set:
 
---- 8-< ---
-2012-10-17 12:54:11.167782 7febab24a780  0 filestore(/data/osd0) mount:=
-=20
-enabling PARALLEL journal mode: btrfs, SNAP_CREATE_V2 detected and=20
-'filestore btrfs snap' mode is enabled
-2012-10-17 12:54:11.191723 7febab24a780  0 journal  kernel version is 3=
-=2E5.0
-2012-10-17 12:54:11.191907 7febab24a780  1 journal _open /dev/sdb1 fd=20
-27: 1073741824 bytes, block size 4096 bytes, directio =3D 1, aio =3D 1
-2012-10-17 12:54:11.201764 7febab24a780  0 journal  kernel version is 3=
-=2E5.0
-2012-10-17 12:54:11.201924 7febab24a780  1 journal _open /dev/sdb1 fd=20
-27: 1073741824 bytes, block size 4096 bytes, directio =3D 1, aio =3D 1
---- 8-< ---
+ > gdb --args ceph-mds -n mds.b -c /etc/ceph/ceph.conf -f
+...
+(gdb) run
 
-And the other minute I started my fairly destructive testing, 0.52 neve=
-r=20
-ever failed on that. And then a loop started with
---- 8-< ---
+Once you hit the segfault you can get the backtrace with:
 
-2012-10-17 12:59:15.403247 7feba5fed700  0 -- 10.0.0.11:6801/29042 >>=20
-10.0.0.12:6801/17706 pipe(0x55a2240 sd=3D34 :57922 pgs=3D3 cs=3D1 l=3D0=
-).fault,=20
-initiating reconnect
-2012-10-17 12:59:17.280143 7feb950cc700  0 -- 10.0.0.11:6801/29042 >>=20
-10.0.0.12:6804/17972 pipe(0x17f2240 sd=3D29 :49431 pgs=3D3 cs=3D1 l=3D0=
-).fault=20
-with nothing to send, going to standby
-2012-10-17 12:59:18.288902 7feb951cd700  0 -- 10.0.0.11:6801/29042 >>=20
-10.0.0.12:6801/17706 pipe(0x55a2240 sd=3D34 :37519 pgs=3D3 cs=3D2 l=3D0=
-).connect=20
-claims to be 0.0.0.0:6801/5738 not 10.0.0.12:6801/17706 - wrong node!
-2012-10-17 12:59:18.297663 7feb951cd700  0 -- 10.0.0.11:6801/29042 >>=20
-10.0.0.12:6801/17706 pipe(0x55a2240 sd=3D34 :34833 pgs=3D3 cs=3D2 l=3D0=
-).connect=20
-claims to be 0.0.0.0:6801/5738 not 10.0.0.12:6801/17706 - wrong node!
-2012-10-17 12:59:18.303215 7feb951cd700  0 -- 10.0.0.11:6801/29042 >>=20
-10.0.0.12:6801/17706 pipe(0x55a2240 sd=3D34 :35169 pgs=3D3 cs=3D2 l=3D0=
-).connect=20
-claims to be 0.0.0.0:6801/5738 not 10.0.0.12:6801/17706 - wrong node!
---- 8-< ---
+(gdb) bt
 
-leading to high CPU-load on node2 ( IP 10.0.0.11). The destructive part=
-=20
-happens on node3 ( IP 10.0.0.12).
-
-Procedure is as always just kill some OSDs and start over again...=20
-Happened now twice, so I would call it reproducable ;)
-
-Kind regards,
-
-Oliver.
+-sam
 
 
-On 10/17/2012 01:48 AM, Sage Weil wrote:
-> Another development release of Ceph is ready, v0.53. We are getting p=
-retty
-> close to what will be frozen for the next stable release (bobtail), s=
-o if
-> you would like a preview, give this one a go. Notable changes include=
-:
+> -Greg
 >
->   * librbd: image locking
->   * rbd: fix list command when more than 1024 (format 2) images
->   * osd: backfill reservation framework (to avoid flooding new osds w=
-ith
->     backfill data)
->   * osd, mon: honor new 'nobackfill' and 'norecover' osdmap flags
->   * osd: new 'deep scrub' will compare object content across replicas=
- (once
->     per week by default)
->   * osd: crush performance improvements
->   * osd: some performance improvements related to request queuing
->   * osd: capability syntax improvements, bug fixes
->   * osd: misc recovery fixes
->   * osd: fix memory leak on certain error paths
->   * osd: default journal size to 1 GB
->   * crush: default root of tree type is now 'root' instead of 'pool' =
-(to
->     avoid confusiong wrt rados pools)
->   * ceph-fuse: fix handling for .. in root directory
->   * librados: some locking fixes
->   * mon: some election bug fixes
->   * mon: some additional on-disk metadata to facilitate future mon ch=
-anges
->     (post-bobtail)
->   * mon: throttle osd flapping based on osd history (limits osdmap
->     "thrashing" on overloaded or unhappy clusters)
->   * mon: new 'osd crush create-or-move ...' command
->   * radosgw: fix copy-object vs attributes
->   * radosgw: fix bug in bucket stat updates
->   * mds: fix ino release on abort session close, relative getattr pat=
-h, mds
->     shutdown, other misc items
->   * upstart: stop jobs on shutdown
->   * common: thread pool sizes can now be adjusted at runtime
->   * build fixes for Fedora 18, CentOS/RHEL 6
->
-> The big items are locking support in RBD, and OSD improvements like d=
-eep
-> scrub (which verify object data across replicas) and backfill reserva=
-tions
-> (which limit load on expanding clusters). And a huge swath of bugfixe=
-s and
-> cleanups, many due to feeding the code through scan.coverity.com (the=
-y
-> offer free static code analysis for open source projects).
->
-> v0.54 is now frozen, and will include many deployment-related fixes
-> (including a new ceph-deploy tool to replace mkcephfs), more bugfixes=
- for
-> libcephfs, ceph-fuse, and the MDS, and the fruits of some performance=
- work
-> on the OSD.
->
-> You can get v0.53 from the usual locations:
->
->   * Git at git://github.com/ceph/ceph.git
->   * Tarball at http://ceph.com/download/ceph-0.53.tar.gz
->   * For Debian/Ubuntu packages, see http://ceph.com/docs/master/insta=
-ll/debian
->   * For RPMs, see http://ceph.com/docs/master/install/rpm
+> On Mon, Oct 15, 2012 at 10:59 AM, Nick Couchman <Nick.Couchman@seakr.com> wrote:
+>> Well, hopefully this is still okay...8.5MB bzip2d, 230MB unzipped.
+>>
+>> -Nick
+>>
+>>>>> On 2012/10/15 at 11:47, Gregory Farnum <greg@inktank.com> wrote:
+>>> Yeah, zip it and post * somebody's going to have to download it and
+>> do
+>>> fun things. :)
+>>> -Greg
+>>>
+>>> On Mon, Oct 15, 2012 at 10:43 AM, Nick Couchman
+>> <Nick.Couchman@seakr.com>
+>>> wrote:
+>>>> Anywhere in particular I should make it available?  It's a little
+>> over a
+>>> million lines of debug in the file - I can put it on a pastebin, if
+>> that
+>>> works, or perhaps zip it up and throw it somewhere?
+>>>>
+>>>> -Nick
+>>>>
+>>>>>>> On 2012/10/15 at 11:26, Gregory Farnum <greg@inktank.com> wrote:
+>>>>> Something in the MDS log is bad or is poking at a bug in the code.
+>> Can
+>>>>> you turn on MDS debugging and restart a daemon and put that log
+>>>>> somewhere accessible?
+>>>>> debug mds = 20
+>>>>> debug journaler = 20
+>>>>> debug ms = 1
+>>>>> -Greg
+>>>>>
+>>>>> On Mon, Oct 15, 2012 at 10:02 AM, Nick Couchman
+>> <Nick.Couchman@seakr.com>
+>>>>> wrote:
+>>>>>> Well, both of my MDSs seem to be down right now, and then
+>> continually
+>>>>> segfault (every time I try to start them) with the following:
+>>>>>>
+>>>>>> ceph-mdsmon-a:~ # ceph-mds -n mds.b -c /etc/ceph/ceph.conf -f
+>>>>>> starting mds.b at :/0
+>>>>>> *** Caught signal (Segmentation fault) **
+>>>>>>   in thread 7fbe0d61d700
+>>>>>>   ceph version 0.48.1argonaut
+>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>   1: ceph-mds() [0x7ef83a]
+>>>>>>   2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>   3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>   4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>   5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>   6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>   7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>> 2012-10-15 10:57:35.449161 7fbe0d61d700 -1 *** Caught signal
+>> (Segmentation
+>>>>> fault) **
+>>>>>>   in thread 7fbe0d61d700
+>>>>>>
+>>>>>>   ceph version 0.48.1argonaut
+>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>   1: ceph-mds() [0x7ef83a]
+>>>>>>   2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>   3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>   4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>   5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>   6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>   7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to
+>>>>> interpret this.
+>>>>>>
+>>>>>>       0> 2012-10-15 10:57:35.449161 7fbe0d61d700 -1 *** Caught
+>> signal
+>>>>> (Segmentation fault) **
+>>>>>>   in thread 7fbe0d61d700
+>>>>>>
+>>>>>>   ceph version 0.48.1argonaut
+>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>   1: ceph-mds() [0x7ef83a]
+>>>>>>   2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>   3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>   4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>   5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>   6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>   7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to
+>>>>> interpret this.
+>>>>>>
+>>>>>> Segmentation fault
+>>>>>>
+>>>>>> Anyone have any hints on recovering?  I'm running 0.48.1argonaut -
+>> I can
+>>>>> attempt to upgrade to 0.48.2 and see if that helps, but I figured
+>> if anyone
+>>>>> can offer any insight as to what to do to get the replay to run
+>> without
+>>>>> segfaulting?
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --------
+>>>>>> This e-mail may contain confidential and privileged material for
+>> the sole use
+>>>>> of the intended recipient.  If this email is not intended for you,
+>> or you
+>>> are
+>>>>> not responsible for the delivery of this message to the intended
+>> recipient,
+>>>>> please note that this message may contain SEAKR Engineering
+>> (SEAKR)
+>>>>> Privileged/Proprietary Information.  In such a case, you are
+>> strictly
+>>>>> prohibited from downloading, photocopying, distributing or
+>> otherwise using
+>>>>> this message, its contents or attachments in any way.  If you have
+>> received
+>>>>> this message in error, please notify us immediately by replying to
+>> this
+>>> e-mail
+>>>>> and delete the message from your mailbox.  Information contained in
+>> this
+>>>>> message that does not relate to the business of SEAKR is neither
+>> endorsed by
+>>>>> nor attributable to SEAKR.
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe
+>> ceph-devel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>>>
+>>>> --------
+>>>>
+>>>> This e-mail may contain confidential and privileged material for the
+>> sole use
+>>> of the intended recipient.  If this email is not intended for you, or
+>> you are
+>>> not responsible for the delivery of this message to the intended
+>> recipient,
+>>> please note that this message may contain SEAKR Engineering (SEAKR)
+>>> Privileged/Proprietary Information.  In such a case, you are strictly
+>>
+>>> prohibited from downloading, photocopying, distributing or otherwise
+>> using
+>>> this message, its contents or attachments in any way.  If you have
+>> received
+>>> this message in error, please notify us immediately by replying to
+>> this e-mail
+>>> and delete the message from your mailbox.  Information contained in
+>> this
+>>> message that does not relate to the business of SEAKR is neither
+>> endorsed by
+>>> nor attributable to SEAKR.
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --------
+>> This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-
---=20
-
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
