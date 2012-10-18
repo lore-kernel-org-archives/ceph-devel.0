@@ -1,33 +1,35 @@
-From: <Eric_YH_Chen@wiwynn.com>
-Subject: Re: rbd map error with new rbd format
-Date: Thu, 18 Oct 2012 08:01:04 +0000
-Message-ID: <60E83269D669544E8069A09CB69135EA02DF21@GDC-CLDMBX-P02.whq.wistron>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: Delivery Status Notification (Failure)
+Date: Thu, 18 Oct 2012 16:49:14 +0530
+Message-ID: <CAGfy=6n6WJOKvQTO1LfsnY+_SRdh714HmoPKGgTSpjhE06qZBQ@mail.gmail.com>
+References: <CAGfy=6=se6CXExQyyA7TrAjUVkGqRwGL=E1wqo4h4_6ORzS-MA@mail.gmail.com>
+	<f46d0438909985742c04cc3f658c@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw2.wistron.com ([220.128.89.22]:51139 "EHLO
-	TWNHUMSW2.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752731Ab2JRIGJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 04:06:09 -0400
-Received: from GDC-CLDCAS-P03.whq.wistron (unverified [10.37.38.64]) by TWNHUMSW2.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta781064a47c0a816701c90@TWNHUMSW2.wistron.com> for <ceph-devel@vger.kernel.org>;
- Thu, 18 Oct 2012 16:03:31 +0800
-Content-Language: zh-TW
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:50955 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755344Ab2JRLTO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 07:19:14 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so8589375vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 04:19:14 -0700 (PDT)
+In-Reply-To: <f46d0438909985742c04cc3f658c@google.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-Hi, Josh:
+I have executed all required steps to build Ceph from source but now
+when I execute "service Ceph start" it shows
 
-> Yeah, format 2 and layering support is in progress for kernel rbd,
-> but not ready yet. The userspace side is all ready in the master
-> branch, but it takes more time to implement in the kernel.
-> Btw, instead of --new-format you should use --format 2. It's in
-> the man page in the master branch.
+------------------------------
+---------//Error--------------------------------------------
+root@atish-virtual-machine:/ceph_data# service ceph start
+/etc/init.d/ceph: 37: .: Can't open /usr/lib/ceph/ceph_common.sh
+-------------------------------------------------------------------------------------------
 
-As you mentioned before, http://www.spinics.net/lists/ceph-devel/msg08857.html
-The kernel rbd is not ready at September, so we cannot map rbd to a device. 
-Would you mind to estimate when will be available? And which version of kernel? (3.5 or 3.6?)  
-Thanks!
+
+Please help me out .
+
+
+-
+Hemant Surale
