@@ -1,78 +1,305 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Braindump/announce: ceph-deploy
-Date: Thu, 18 Oct 2012 14:03:19 -0700
-Message-ID: <CADvuQRFDtotDE8wdf2iz0stArv_murGc-XwoLqE-L_XpzV3HgQ@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Help...MDS Continuously Segfaulting
+Date: Thu, 18 Oct 2012 15:55:08 -0700
+Message-ID: <CAPYLRzgEwEmieB=KtsqSsLF=-=i3wkqoVYecEuB4KcE3kkgHUg@mail.gmail.com>
+References: <507BED3702000099000ECA13@collaborate.seakr.com>
+	<CAPYLRzhJb8Z=yXofTVC+vBk3JHYx+CXM2iA12cQG3GzWSmdwdg@mail.gmail.com>
+	<507BF6CA02000099000ECA32@collaborate.seakr.com>
+	<CAPYLRzh4N=0h3iK5CvVD70vxrBiDOnt21OFO7Rz_9uK4WYrc5A@mail.gmail.com>
+	<507BFAA102000099000ECA3B@collaborate.seakr.com>
+	<CAPYLRzjW4MKaGrdXu29ZOkqEvF1Ps+ust98nb4wTr2pcRPLaiw@mail.gmail.com>
+	<507EB3C9.1010004@inktank.com>
+	<507E6F6E02000099000ECBBB@collaborate.seakr.com>
+	<507ED46A.3090806@inktank.com>
+	<507FD24202000099000ECD39@collaborate.seakr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:61067 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754157Ab2JRVDk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 17:03:40 -0400
-Received: by mail-qa0-f53.google.com with SMTP id s11so1636222qaa.19
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 14:03:40 -0700 (PDT)
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:45980 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751376Ab2JRWzK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 18:55:10 -0400
+Received: by mail-lb0-f174.google.com with SMTP id n3so6267645lbo.19
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 15:55:08 -0700 (PDT)
+In-Reply-To: <507FD24202000099000ECD39@collaborate.seakr.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: John Wilkins <john.wilkins@inktank.com>
+To: Nick Couchman <Nick.Couchman@seakr.com>
+Cc: Sam Lang <sam.lang@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi. We've been working on the Chef cookbook and Crowbar barclamp for
-Ceph for a while now. At the same time, Clint Byrum and James Page
-have been working on the Juju Charm, and I've seen at least two
-separate efforts for Puppet scripts.
+Okay, looked at this a little bit. Can you describe what was happening
+before you got into this failed-replay loop? (So, why was it in replay
+at all?) I see that the monitor marked it as laggy for some reason;
+was the cluster under load; did the monitors break; something else?
+I can see why it's failed here and I think I can do a simple code
+patch to work around it, but the root cause is something that happened
+while the MDS was still alive.
 
-All this time, I've repeatedly gotten one item of feedback, in a
-couple of different variations: "But we don't use <thing>." "Can I
-just use shell scripts?" etc.
+Basic technical content:
+The MDS journals all open client sessions. It brings them back into
+memory during replay, and then operates on them to do things like open
+new sessions or close ones that it turns out not to need. Your log
+contains two close events for the same client session, and it's
+causing a big freak out. This actually feels somewhat familiar; I'll
+talk about it with our team here and get back to you tomorrow
+sometime.
+-Greg
 
-So, I want to announce a tool just for that: deploying Ceph without a
-framework. It's called "ceph-deploy":
-
-  https://github.com/ceph/ceph-deploy
-
-ceph-deploy is a way to deploy Ceph relying on just SSH access to the
-servers, sudo, and some Python. It runs fully on your workstation,
-requiring no servers, databases, or anything like that. It is not a
-generic deployment system, it is only for Ceph.
-
-If you never wanted to install and learn Chef, Puppet or Juju, this is for you.
-
-If you set up and tear down Ceph clusters a lot, and want minimal
-extra bureaucracy, this is for you.
-
-It's still early days for ceph-deploy, so you might be able to break
-it, confuse it, or be confused by the quick README I put together.
-We'll work on integrating usage of ceph-deploy better into
-http://ceph.com/docs/ , and I expect the README will get shorter as
-things move out from it, but the core usage is there.
-
-Teaser: deploying the current development release of Ceph on three
-virtual machines named myhost{1,2,3}, with four data disks each, is
-this easy:
-
-ceph-deploy new myhost{1,2,3}
-# edit ceph.conf if you want
-ceph-deploy install --dev=v0.52 myhost{1,2,3}
-# the above is expanded by your shell to be ... myhost1 myhost2 myhost3
-ceph-deploy mon
-ceph-deploy osd myhost{1,2,3}:sd{b,c,d,e}
-
-You can keep track of ceph-deploy development by watching the above
-git repository on Github and looking at tickets prefixed
-"ceph-deploy:" on
-http://tracker.newdream.net/rb/master_backlogs/devops .
-
-
-
-Until http://tracker.newdream.net/issues/3347 is solved, you may need
-to adjust ~/.ssh/config to get SSH to use the right username when
-connecting to your servers, and even after that you need to have SSH
-working for the short hostnames and anything in ceph.conf variable
-mon_host (especially if you put IP addresses there). For example, on
-my Ubuntu Cloud Image vms, I do:
-
-Host myhost1
-     Hostname myhost1.and.stuff.example.com
-     User ubuntu
-
-etc.
+On Thu, Oct 18, 2012 at 8:56 AM, Nick Couchman <Nick.Couchman@seakr.com> wrote:
+> Hopefully this is what you're looking for...
+> (gdb) bt
+> #0  ESession::replay (this=0x7fffcc49a7c0, mds=0x127d5f0) at mds/journal.cc:828
+> #1  0x00000000006a2446 in MDLog::_replay_thread (this=0x1281390) at mds/MDLog.cc:580
+> #2  0x00000000004cf5ed in MDLog::ReplayThread::entry (this=<optimized out>) at mds/MDLog.h:86
+> #3  0x00007ffff764df05 in start_thread () from /lib64/libpthread.so.0
+> #4  0x00007ffff680d10d in clone () from /lib64/libc.so.6
+>
+>>>> On 2012/10/17 at 09:53, Sam Lang <sam.lang@inktank.com> wrote:
+>> On 10/17/2012 09:42 AM, Nick Couchman wrote:
+>>> Thanks...here's the backtrace:
+>>> (gdb) bt
+>>> #0  0x00000000004dcfea in ESession::replay(MDS*) ()
+>>> #1  0x00000000006a2446 in MDLog::_replay_thread() ()
+>>> #2  0x00000000004cf5ed in MDLog::ReplayThread::entry() ()
+>>> #3  0x00007ffff764df05 in start_thread () from /lib64/libpthread.so.0
+>>> #4  0x00007ffff680d10d in clone () from /lib64/libc.so.6
+>>
+>> Hi Nick,
+>>
+>> This doesn't have the debug symbols (line numbers in the source) we were
+>> hoping for.  Could you install the ceph-dpg package and rerun?  You will
+>> probably have to first uninstall the ceph package.
+>>
+>> Thanks,
+>> -sam
+>>
+>>>
+>>>>>> On 2012/10/17 at 07:34, Sam Lang <sam.lang@inktank.com> wrote:
+>>>> On 10/16/2012 06:04 PM, Gregory Farnum wrote:
+>>>>> Okay, that's the right debugging but it wasn't quite as helpful on its
+>>>>> own as I expected. Can you get a core dump (you might already have
+>>>>> one, depending on system settings) of the crash and open it up with
+>>>>> gdb and get a full backtrace?
+>>>>
+>>>> You can also run the mds directly in gdb and avoid any core file ulimit
+>>>> settings you have set:
+>>>>
+>>>>   > gdb --args ceph-mds -n mds.b -c /etc/ceph/ceph.conf -f
+>>>> ...
+>>>> (gdb) run
+>>>>
+>>>> Once you hit the segfault you can get the backtrace with:
+>>>>
+>>>> (gdb) bt
+>>>>
+>>>> -sam
+>>>>
+>>>>
+>>>>> -Greg
+>>>>>
+>>>>> On Mon, Oct 15, 2012 at 10:59 AM, Nick Couchman <Nick.Couchman@seakr.com>
+>>>> wrote:
+>>>>>> Well, hopefully this is still okay...8.5MB bzip2d, 230MB unzipped.
+>>>>>>
+>>>>>> -Nick
+>>>>>>
+>>>>>>>>> On 2012/10/15 at 11:47, Gregory Farnum <greg@inktank.com> wrote:
+>>>>>>> Yeah, zip it and post * somebody's going to have to download it and
+>>>>>> do
+>>>>>>> fun things. :)
+>>>>>>> -Greg
+>>>>>>>
+>>>>>>> On Mon, Oct 15, 2012 at 10:43 AM, Nick Couchman
+>>>>>> <Nick.Couchman@seakr.com>
+>>>>>>> wrote:
+>>>>>>>> Anywhere in particular I should make it available?  It's a little
+>>>>>> over a
+>>>>>>> million lines of debug in the file - I can put it on a pastebin, if
+>>>>>> that
+>>>>>>> works, or perhaps zip it up and throw it somewhere?
+>>>>>>>>
+>>>>>>>> -Nick
+>>>>>>>>
+>>>>>>>>>>> On 2012/10/15 at 11:26, Gregory Farnum <greg@inktank.com> wrote:
+>>>>>>>>> Something in the MDS log is bad or is poking at a bug in the code.
+>>>>>> Can
+>>>>>>>>> you turn on MDS debugging and restart a daemon and put that log
+>>>>>>>>> somewhere accessible?
+>>>>>>>>> debug mds = 20
+>>>>>>>>> debug journaler = 20
+>>>>>>>>> debug ms = 1
+>>>>>>>>> -Greg
+>>>>>>>>>
+>>>>>>>>> On Mon, Oct 15, 2012 at 10:02 AM, Nick Couchman
+>>>>>> <Nick.Couchman@seakr.com>
+>>>>>>>>> wrote:
+>>>>>>>>>> Well, both of my MDSs seem to be down right now, and then
+>>>>>> continually
+>>>>>>>>> segfault (every time I try to start them) with the following:
+>>>>>>>>>>
+>>>>>>>>>> ceph-mdsmon-a:~ # ceph-mds -n mds.b -c /etc/ceph/ceph.conf -f
+>>>>>>>>>> starting mds.b at :/0
+>>>>>>>>>> *** Caught signal (Segmentation fault) **
+>>>>>>>>>>    in thread 7fbe0d61d700
+>>>>>>>>>>    ceph version 0.48.1argonaut
+>>>>>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>>>>>    1: ceph-mds() [0x7ef83a]
+>>>>>>>>>>    2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>>>>>    3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>>>>>    4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>>>>>    5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>>>>>    6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>>>>>    7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>>>>>> 2012-10-15 10:57:35.449161 7fbe0d61d700 -1 *** Caught signal
+>>>>>> (Segmentation
+>>>>>>>>> fault) **
+>>>>>>>>>>    in thread 7fbe0d61d700
+>>>>>>>>>>
+>>>>>>>>>>    ceph version 0.48.1argonaut
+>>>>>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>>>>>    1: ceph-mds() [0x7ef83a]
+>>>>>>>>>>    2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>>>>>    3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>>>>>    4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>>>>>    5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>>>>>    6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>>>>>    7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>>>>>>    NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>> needed to
+>>>>>>>>> interpret this.
+>>>>>>>>>>
+>>>>>>>>>>        0> 2012-10-15 10:57:35.449161 7fbe0d61d700 -1 *** Caught
+>>>>>> signal
+>>>>>>>>> (Segmentation fault) **
+>>>>>>>>>>    in thread 7fbe0d61d700
+>>>>>>>>>>
+>>>>>>>>>>    ceph version 0.48.1argonaut
+>>>>>>>>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>>>>>>>>    1: ceph-mds() [0x7ef83a]
+>>>>>>>>>>    2: (()+0xfd00) [0x7fbe15a0cd00]
+>>>>>>>>>>    3: (ESession::replay(MDS*)+0x3ea) [0x4dcfea]
+>>>>>>>>>>    4: (MDLog::_replay_thread()+0x6b6) [0x6a2446]
+>>>>>>>>>>    5: (MDLog::ReplayThread::entry()+0xd) [0x4cf5ed]
+>>>>>>>>>>    6: (()+0x7f05) [0x7fbe15a04f05]
+>>>>>>>>>>    7: (clone()+0x6d) [0x7fbe14bc410d]
+>>>>>>>>>>    NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>> needed to
+>>>>>>>>> interpret this.
+>>>>>>>>>>
+>>>>>>>>>> Segmentation fault
+>>>>>>>>>>
+>>>>>>>>>> Anyone have any hints on recovering?  I'm running 0.48.1argonaut -
+>>>>>> I can
+>>>>>>>>> attempt to upgrade to 0.48.2 and see if that helps, but I figured
+>>>>>> if anyone
+>>>>>>>>> can offer any insight as to what to do to get the replay to run
+>>>>>> without
+>>>>>>>>> segfaulting?
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> --------
+>>>>>>>>>> This e-mail may contain confidential and privileged material for
+>>>>>> the sole use
+>>>>>>>>> of the intended recipient.  If this email is not intended for you,
+>>>>>> or you
+>>>>>>> are
+>>>>>>>>> not responsible for the delivery of this message to the intended
+>>>>>> recipient,
+>>>>>>>>> please note that this message may contain SEAKR Engineering
+>>>>>> (SEAKR)
+>>>>>>>>> Privileged/Proprietary Information.  In such a case, you are
+>>>>>> strictly
+>>>>>>>>> prohibited from downloading, photocopying, distributing or
+>>>>>> otherwise using
+>>>>>>>>> this message, its contents or attachments in any way.  If you have
+>>>>>> received
+>>>>>>>>> this message in error, please notify us immediately by replying to
+>>>>>> this
+>>>>>>> e-mail
+>>>>>>>>> and delete the message from your mailbox.  Information contained in
+>>>>>> this
+>>>>>>>>> message that does not relate to the business of SEAKR is neither
+>>>>>> endorsed by
+>>>>>>>>> nor attributable to SEAKR.
+>>>>>>>>>> --
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>>> ceph-devel" in
+>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>> More majordomo info at
+>>>>>> http://vger.kernel.org/majordomo-info.html
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> --------
+>>>>>>>>
+>>>>>>>> This e-mail may contain confidential and privileged material for the
+>>>>>> sole use
+>>>>>>> of the intended recipient.  If this email is not intended for you, or
+>>>>>> you are
+>>>>>>> not responsible for the delivery of this message to the intended
+>>>>>> recipient,
+>>>>>>> please note that this message may contain SEAKR Engineering (SEAKR)
+>>>>>>> Privileged/Proprietary Information.  In such a case, you are strictly
+>>>>>>
+>>>>>>> prohibited from downloading, photocopying, distributing or otherwise
+>>>>>> using
+>>>>>>> this message, its contents or attachments in any way.  If you have
+>>>>>> received
+>>>>>>> this message in error, please notify us immediately by replying to
+>>>>>> this e-mail
+>>>>>>> and delete the message from your mailbox.  Information contained in
+>>>>>> this
+>>>>>>> message that does not relate to the business of SEAKR is neither
+>>>>>> endorsed by
+>>>>>>> nor attributable to SEAKR.
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>>> in
+>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --------
+>>>>>> This e-mail may contain confidential and privileged material for the sole use
+>>>> of the intended recipient.  If this email is not intended for you, or you
+>> are
+>>>> not responsible for the delivery of this message to the intended recipient,
+>>>> please note that this message may contain SEAKR Engineering (SEAKR)
+>>>> Privileged/Proprietary Information.  In such a case, you are strictly
+>>>> prohibited from downloading, photocopying, distributing or otherwise using
+>>>> this message, its contents or attachments in any way.  If you have received
+>>>> this message in error, please notify us immediately by replying to this
+>> e-mail
+>>>> and delete the message from your mailbox.  Information contained in this
+>>>> message that does not relate to the business of SEAKR is neither endorsed by
+>>>> nor attributable to SEAKR.
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>
+>>>
+>>>
+>>> --------
+>>> This e-mail may contain confidential and privileged material for the sole use
+>> of the intended recipient.  If this email is not intended for you, or you are
+>> not responsible for the delivery of this message to the intended recipient,
+>> please note that this message may contain SEAKR Engineering (SEAKR)
+>> Privileged/Proprietary Information.  In such a case, you are strictly
+>> prohibited from downloading, photocopying, distributing or otherwise using
+>> this message, its contents or attachments in any way.  If you have received
+>> this message in error, please notify us immediately by replying to this e-mail
+>> and delete the message from your mailbox.  Information contained in this
+>> message that does not relate to the business of SEAKR is neither endorsed by
+>> nor attributable to SEAKR.
+>>>
+>
+>
+>
+> --------
+>
+> This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
