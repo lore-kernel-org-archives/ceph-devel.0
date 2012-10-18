@@ -1,46 +1,33 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Braindump: multiple clusters on the same hardware
-Date: Wed, 17 Oct 2012 17:10:14 -0700
-Message-ID: <CADvuQREqfhBMWtmQ95pEJrvmDeikdGq5cXujs4GJQgMYgYV_kA@mail.gmail.com>
-References: <CADvuQREhkrqxm1dMo3XXFpwhtCzC7SM7cK_7+r5HnACGbCnJLw@mail.gmail.com>
- <CAM2gkg5UK3uDB7Zqsn6hzX4_aFBz0JGBTeJfo3uFb4=9b9zy6g@mail.gmail.com>
+From: Christian Huang <ythuang@gmail.com>
+Subject: limit of maximum number of rbd devices that can be mapped
+Date: Thu, 18 Oct 2012 10:15:14 +0800
+Message-ID: <CAP5wSLc0fGo03Sh0mric3pb_yNkOY=0bEkMHR0Nmq2u8F0nJAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:61506 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752875Ab2JRAKf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Oct 2012 20:10:35 -0400
-Received: by mail-qc0-f174.google.com with SMTP id o22so2511475qcr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Oct 2012 17:10:35 -0700 (PDT)
-In-Reply-To: <CAM2gkg5UK3uDB7Zqsn6hzX4_aFBz0JGBTeJfo3uFb4=9b9zy6g@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:53419 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753541Ab2JRCPP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Oct 2012 22:15:15 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so12991972iea.19
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Oct 2012 19:15:14 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Wilkins <john.wilkins@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 17, 2012 at 3:59 PM, John Wilkins <john.wilkins@inktank.com> wrote:
-> Are there any issues related to ports or network conflicts?
+Hi,
+    what is the maximum number of rbd devices that can be mapped on a
+single host?
+    we recently did a test to mount a large number of rbd devices and
+hit a wall around 230
+    with the following message
 
-Yeah, two monitors belonging to different clusters on the same host
-are probably going to collide on the listening TCP port, if admin
-doesn't explicitly avoid that. I don't have an easy answer, apart from
-the old doctor joke of "don't do that, then". I think it comes down to
-being careful with your $cluster.confs. Exactly how is a good question
-for later ;)
+with 230 rbd devices already mapped, the next one yielded this.
+Console output
+wistor@wistor-002:~$ sudo rbd map test299
+add failed: (16) Device or resource busy
 
-> your notes and wrote the following for the Ceph configuration section. I'll
-> need to update cluster ops with --cluster=clustername usage too.
+dmesg
+[77962.346749] register_blkdev: failed to get major for rbd229
 
-Just about everything should take --cluster=, so you probably don't
-need to repeat it much, just explain it once in the section that talks
-about multiple clusters on the same hardware.
-
-> When creating default directories or files, you should also use the cluster
-> name at the appropriate places in the path. For example::
->
-> sudo mkdir /var/lib/ceph/osd/openstack-0
-> sudo mkdir /var/lib/ceph/mon/openstack-a
-
-Yeah except I want people to use ceph-deploy -- which will be the
-topic of the next braindump email, due to arrive tomorrow!
+Chris.
