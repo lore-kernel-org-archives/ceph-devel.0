@@ -1,36 +1,78 @@
 From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Braindump: multiple clusters on the same hardware
-Date: Thu, 18 Oct 2012 09:47:04 -0700
-Message-ID: <CADvuQRF-3ThfrLtDm5fxFBMxa=C1vei3iseMnpBPpw-_sz==Yg@mail.gmail.com>
-References: <sfid-H20121017-203541-+031.28-1@marduk.tchpc.tcd.ie>
- <CADvuQREhkrqxm1dMo3XXFpwhtCzC7SM7cK_7+r5HnACGbCnJLw@mail.gmail.com>
- <4F329E1D-EACC-497E-B9E4-445992BA4F35@tchpc.tcd.ie> <A91A18BC-9B52-45E6-953F-7A13B6716275@tchpc.tcd.ie>
+Subject: Braindump/announce: ceph-deploy
+Date: Thu, 18 Oct 2012 14:03:19 -0700
+Message-ID: <CADvuQRFDtotDE8wdf2iz0stArv_murGc-XwoLqE-L_XpzV3HgQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:47941 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756258Ab2JRQrZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 12:47:25 -0400
-Received: by mail-qc0-f174.google.com with SMTP id o22so2986979qcr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 09:47:24 -0700 (PDT)
-In-Reply-To: <A91A18BC-9B52-45E6-953F-7A13B6716275@tchpc.tcd.ie>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:61067 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754157Ab2JRVDk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 17:03:40 -0400
+Received: by mail-qa0-f53.google.com with SMTP id s11so1636222qaa.19
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 14:03:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jimmy Tang <jtang@tchpc.tcd.ie>
-Cc: ceph-devel@vger.kernel.org, John Wilkins <john.wilkins@inktank.com>
+To: ceph-devel@vger.kernel.org
+Cc: John Wilkins <john.wilkins@inktank.com>
 
-On Thu, Oct 18, 2012 at 7:40 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
-> What I actually meant to ask was, is it possible to copy objects or pools from one ceph cluster to another (for disaster recovery reasons) and if this feature is planned or even considered?
+Hi. We've been working on the Chef cookbook and Crowbar barclamp for
+Ceph for a while now. At the same time, Clint Byrum and James Page
+have been working on the Juju Charm, and I've seen at least two
+separate efforts for Puppet scripts.
 
-That's the "async replication for disaster recovery" feature that has
-been mentioned every now and then.
+All this time, I've repeatedly gotten one item of feedback, in a
+couple of different variations: "But we don't use <thing>." "Can I
+just use shell scripts?" etc.
 
-You could build it as "read from one cluster, write to another"
-yourself, the client libraries are perfectly able to talk to two
-clusters at once. Ceph itself doesn't have that feature currently, but
-might in the future. It's definitely on the roadmap, and asked for a
-lot.
+So, I want to announce a tool just for that: deploying Ceph without a
+framework. It's called "ceph-deploy":
 
-This has nothing to do with the "many clusters on the same hardware"
-feature this thread is about..
+  https://github.com/ceph/ceph-deploy
+
+ceph-deploy is a way to deploy Ceph relying on just SSH access to the
+servers, sudo, and some Python. It runs fully on your workstation,
+requiring no servers, databases, or anything like that. It is not a
+generic deployment system, it is only for Ceph.
+
+If you never wanted to install and learn Chef, Puppet or Juju, this is for you.
+
+If you set up and tear down Ceph clusters a lot, and want minimal
+extra bureaucracy, this is for you.
+
+It's still early days for ceph-deploy, so you might be able to break
+it, confuse it, or be confused by the quick README I put together.
+We'll work on integrating usage of ceph-deploy better into
+http://ceph.com/docs/ , and I expect the README will get shorter as
+things move out from it, but the core usage is there.
+
+Teaser: deploying the current development release of Ceph on three
+virtual machines named myhost{1,2,3}, with four data disks each, is
+this easy:
+
+ceph-deploy new myhost{1,2,3}
+# edit ceph.conf if you want
+ceph-deploy install --dev=v0.52 myhost{1,2,3}
+# the above is expanded by your shell to be ... myhost1 myhost2 myhost3
+ceph-deploy mon
+ceph-deploy osd myhost{1,2,3}:sd{b,c,d,e}
+
+You can keep track of ceph-deploy development by watching the above
+git repository on Github and looking at tickets prefixed
+"ceph-deploy:" on
+http://tracker.newdream.net/rb/master_backlogs/devops .
+
+
+
+Until http://tracker.newdream.net/issues/3347 is solved, you may need
+to adjust ~/.ssh/config to get SSH to use the right username when
+connecting to your servers, and even after that you need to have SSH
+working for the short hostnames and anything in ceph.conf variable
+mon_host (especially if you put IP addresses there). For example, on
+my Ubuntu Cloud Image vms, I do:
+
+Host myhost1
+     Hostname myhost1.and.stuff.example.com
+     User ubuntu
+
+etc.
