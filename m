@@ -1,35 +1,23 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Re: Delivery Status Notification (Failure)
-Date: Thu, 18 Oct 2012 16:49:14 +0530
-Message-ID: <CAGfy=6n6WJOKvQTO1LfsnY+_SRdh714HmoPKGgTSpjhE06qZBQ@mail.gmail.com>
-References: <CAGfy=6=se6CXExQyyA7TrAjUVkGqRwGL=E1wqo4h4_6ORzS-MA@mail.gmail.com>
-	<f46d0438909985742c04cc3f658c@google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: Braindump: multiple clusters on the same hardware
+Date: Thu, 18 Oct 2012 15:40:49 +0100
+Message-ID: <A91A18BC-9B52-45E6-953F-7A13B6716275@tchpc.tcd.ie>
+References: <sfid-H20121017-203541-+031.28-1@marduk.tchpc.tcd.ie> <CADvuQREhkrqxm1dMo3XXFpwhtCzC7SM7cK_7+r5HnACGbCnJLw@mail.gmail.com>  (sfid-H20121017-203541-+031.28-1@marduk.tchpc.tcd.ie) <4F329E1D-EACC-497E-B9E4-445992BA4F35@tchpc.tcd.ie>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:50955 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755344Ab2JRLTO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 07:19:14 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so8589375vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Oct 2012 04:19:14 -0700 (PDT)
-In-Reply-To: <f46d0438909985742c04cc3f658c@google.com>
+Received: from thammuz.tchpc.tcd.ie ([134.226.112.13]:37178 "EHLO
+	thammuz.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756321Ab2JROk7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Oct 2012 10:40:59 -0400
+In-Reply-To: <4F329E1D-EACC-497E-B9E4-445992BA4F35@tchpc.tcd.ie>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-I have executed all required steps to build Ceph from source but now
-when I execute "service Ceph start" it shows
-
-------------------------------
----------//Error--------------------------------------------
-root@atish-virtual-machine:/ceph_data# service ceph start
-/etc/init.d/ceph: 37: .: Can't open /usr/lib/ceph/ceph_common.sh
--------------------------------------------------------------------------------------------
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel@vger.kernel.org, John Wilkins <john.wilkins@inktank.com>
 
 
-Please help me out .
+What I actually meant to ask was, is it possible to copy objects or pools from one ceph cluster to another (for disaster recovery reasons) and if this feature is planned or even considered?
 
-
--
-Hemant Surale
+Jimmu.
