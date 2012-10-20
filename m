@@ -1,44 +1,45 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: rbd map error with new rbd format
-Date: Fri, 19 Oct 2012 16:52:42 -0700
-Message-ID: <5081E7CA.2080801@inktank.com>
-References: <60E83269D669544E8069A09CB69135EA02DF21@GDC-CLDMBX-P02.whq.wistron>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: Braindump: multiple clusters on the same hardware
+Date: Sat, 20 Oct 2012 10:53:46 +0100
+Message-ID: <2C82B5D8-5AB4-4FAB-9239-F2BE2FA2FD9E@tchpc.tcd.ie>
+References: <CADvuQREhkrqxm1dMo3XXFpwhtCzC7SM7cK_7+r5HnACGbCnJLw@mail.gmail.com> <4F329E1D-EACC-497E-B9E4-445992BA4F35@tchpc.tcd.ie> <A91A18BC-9B52-45E6-953F-7A13B6716275@tchpc.tcd.ie>  <sfid-H20121018-174727-+035.14-1@marduk.tchpc.tcd.ie> <CADvuQRF-3ThfrLtDm5fxFBMxa=C1vei3iseMnpBPpw-_sz==Yg@mail.gmail.com>  (sfid-H20121018-174727-+035.14-1@marduk.tchpc.tcd.ie)
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:62067 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757064Ab2JSXwq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Oct 2012 19:52:46 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so451358dak.19
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Oct 2012 16:52:45 -0700 (PDT)
-In-Reply-To: <60E83269D669544E8069A09CB69135EA02DF21@GDC-CLDMBX-P02.whq.wistron>
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:45885 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754579Ab2JTJxv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Oct 2012 05:53:51 -0400
+In-Reply-To: <CADvuQRF-3ThfrLtDm5fxFBMxa=C1vei3iseMnpBPpw-_sz==Yg@mail.gmail.com>  (sfid-H20121018-174727-+035.14-1@marduk.tchpc.tcd.ie)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel@vger.kernel.org, John Wilkins <john.wilkins@inktank.com>
 
-On 10/18/2012 01:01 AM, Eric_YH_Chen@wiwynn.com wrote:
-> Hi, Josh:
->
->> Yeah, format 2 and layering support is in progress for kernel rbd,
->> but not ready yet. The userspace side is all ready in the master
->> branch, but it takes more time to implement in the kernel.
->> Btw, instead of --new-format you should use --format 2. It's in
->> the man page in the master branch.
->
-> As you mentioned before, http://www.spinics.net/lists/ceph-devel/msg08857.html
-> The kernel rbd is not ready at September, so we cannot map rbd to a device.
-> Would you mind to estimate when will be available? And which version of kernel? (3.5 or 3.6?)
-> Thanks!
 
-At this point format 2 is understood by the kernel, and the
-infrastructure for opening parent images and the I/O path
-for clones is in progress. We estimate about 4-8 weeks for this,
-but you should check back then.
+On 18 Oct 2012, at 17:47, Tommi Virtanen wrote:
 
-Kernel 3.6 was already released, so this would probably go into 3.8 or
-3.9.
+> On Thu, Oct 18, 2012 at 7:40 AM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
+>> What I actually meant to ask was, is it possible to copy objects or pools from one ceph cluster to another (for disaster recovery reasons) and if this feature is planned or even considered?
+> 
+> That's the "async replication for disaster recovery" feature that has
+> been mentioned every now and then.
+> 
+> You could build it as "read from one cluster, write to another"
+> yourself, the client libraries are perfectly able to talk to two
+> clusters at once. Ceph itself doesn't have that feature currently, but
+> might in the future. It's definitely on the roadmap, and asked for a
+> lot.
+> 
 
-Josh
+that sounds promising that it is possible to do it. It's certainly a feature that would be highly desirable  for preservation and archival systems.
+
+> This has nothing to do with the "many clusters on the same hardware"
+> feature this thread is about..
+> 
+
+I figured that out after I had sent the email.
+
+
+Jimmy.
