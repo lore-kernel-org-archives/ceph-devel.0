@@ -1,227 +1,78 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Inject configuration change into cluster
-Date: Sun, 21 Oct 2012 21:33:16 +0200
-Message-ID: <CAOLwVUnZP2UKkLzR9rhfSFaHfEAOpZKyDrvNQ65N+af-VzJwmA@mail.gmail.com>
-References: <1FC69721-C852-4B56-ACE6-073137C5290D@portal.onet.pl>
- <5045B928.1050706@widodh.nl> <1BF27E0D85AE8C45A1BB84890DC4BFFB8A7C49@MXMBON05.grupa.onet>
- <5045CB80.50508@widodh.nl> <alpine.DEB.2.00.1209040832550.13403@cobra.newdream.net>
- <CAMwB3Tj-9UOG+ax_BtuizUjr-NdCdG5RVRmhr7ntdr6-Cmtdrg@mail.gmail.com>
- <alpine.DEB.2.00.1209050852250.8916@cobra.newdream.net> <58915F57-D1DA-4BBE-A205-A5063DDCD789@grupaonet.pl>
- <alpine.DEB.2.00.1209141211010.18057@cobra.newdream.net> <alpine.DEB.2.00.1209181417290.23570@cobra.newdream.net>
- <2A2CF63C-FE66-4DEA-BE50-08E448286FB4@grupaonet.pl> <CAOLwVUkShQXC+mntj1Q8yqUhmoLA6y+yBTVzsJLOi9rivwCGuA@mail.gmail.com>
- <272991F0-2842-4B27-BB5B-194A2EA8F5D5@widodh.nl> <CAOLwVUkpd1vPVur+4VWHiADSirhTxvEGCjaV+J5ZQE108TghPQ@mail.gmail.com>
- <CAC-hyiEDqbRe_yzyOkZkssgrzxQgZXjXtMaOaCBsFBTiTZFdNA@mail.gmail.com>
+From: Joe Buck <jbbuck@gmail.com>
+Subject: Proposed change to vstart.sh
+Date: Sun, 21 Oct 2012 14:31:58 -0700
+Message-ID: <508469CE.3000502@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed;
+ boundary="------------020804090403040406040401"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:36943 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754341Ab2JUTdi convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Oct 2012 15:33:38 -0400
-Received: by mail-la0-f46.google.com with SMTP id h6so1203306lag.19
-        for <ceph-devel@vger.kernel.org>; Sun, 21 Oct 2012 12:33:37 -0700 (PDT)
-In-Reply-To: <CAC-hyiEDqbRe_yzyOkZkssgrzxQgZXjXtMaOaCBsFBTiTZFdNA@mail.gmail.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:43788 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754574Ab2JUVb6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Oct 2012 17:31:58 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so1053716dak.19
+        for <ceph-devel@vger.kernel.org>; Sun, 21 Oct 2012 14:31:57 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, =?ISO-8859-2?Q?Skowron_S=B3awomir?= <slawomir.skowron@grupaonet.pl>, Sage Weil <sage@inktank.com>, =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks guys ;)
+This is a multi-part message in MIME format.
+--------------020804090403040406040401
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 
+It looks like vstart.sh does not work without authx enabled. Given that, 
+I'd propose to change the default to having cephx be enabled and then 
+use the -x flag to disable cephx.
 
-On Sun, Oct 21, 2012 at 8:51 PM, Yehuda Sadeh <yehuda@inktank.com> wrot=
-e:
-> ceph osd tell \* injectargs ..
->
-> On Sun, Oct 21, 2012 at 10:42 AM, S=C3=A9bastien Han <han.sebastien@g=
-mail.com> wrote:
->>
->> > You need to replace 0 with the OSD you want to 'tell' this to.
->> Yes I know...  Btw why should I want to tell something to a specific
->> OSD and not all of them? In this context, I want to apply the change=
-s
->> on every OSDs.
->>
->> > So you have to repeat this for each OSD.
->> That's what I was looking for :)
->>
->> Dank u!
->>
->> On Sun, Oct 21, 2012 at 7:28 PM, Wido den Hollander <wido@widodh.nl>=
- wrote:
->> >
->> >
->> >
->> >
->> > Op 21 okt. 2012 om 19:14 heeft S=C3=A9bastien Han <han.sebastien@g=
-mail.com> het volgende geschreven:
->> >
->> >> "ceph osd tell 0 injectargs" doesn't seem to propagate the change=
-s
->> >> across all the OSDs. Does this command need to be repeated N time=
-s?
->> >> (where N is our number of OSD)
->> >
->> > You need to replace 0 with the OSD you want to 'tell' this to.
->> >
->> > So you have to repeat this for each OSD.
->> >
->> > Wido
->> >
->> >
->> >> Thanks in advance!
->> >>
->> >> On Wed, Sep 19, 2012 at 7:00 AM, Skowron S=C5=82awomir
->> >> <slawomir.skowron@grupaonet.pl> wrote:
->> >>> Ok, thanks, i try this on INT, but on production, i will stay wi=
-th stable release, and wait for merge in next stable.
->> >>>
->> >>> Regards
->> >>>
->> >>> Slawomir Skowron
->> >>>
->> >>> Dnia 18 wrz 2012 o godz. 23:18 "Sage Weil" <sage@inktank.com> na=
-pisa=C5=82(a):
->> >>>
->> >>>> On Fri, 14 Sep 2012, Sage Weil wrote:
->> >>>>> Hi,
->> >>>>>
->> >>>>> <On Wed, 5 Sep 2012, Skowron S?awomir wrote:
->> >>>>>> Dnia 5 wrz 2012 o godz. 17:53 "Sage Weil" <sage@inktank.com> =
-napisa?(a):
->> >>>>>>
->> >>>>>>> On Wed, 5 Sep 2012, S?awomir Skowron wrote:
->> >>>>>>>> Ok, but in global case, when i use, a chef/puppet or any ot=
-her, i wish
->> >>>>>>>> to change configuration in ceph.conf, and reload daemon to =
-get new
->> >>>>>>>> configuration changes from ceph.conf, this feature would be=
- very
->> >>>>>>>> helpful in ceph administration.
->> >>>>>>>>
->> >>>>>>>> Inject is ok, for testing, or debuging.
->> >>>>>>>
->> >>>>>>> Opened http://tracker.newdream.net/issues/3086.  There is al=
-ready an issue
->> >>>>>>> open for reloading the config file,
->> >>>>>>> http://tracker.newdream.net/issues/2459.
->> >>>>>>
->> >>>>>> Thanks. This is what i mean.
->> >>>>>> Is this feature have a chance, to be implemented in next mont=
-hs ??
->> >>>>>
->> >>>>> I pushed a branch, wip-tp, that implements this.  Want to give=
- it a spin?
->> >>>>> Just inject the config option change (via the admin socket or =
-injectargs)
->> >>>>> and it'll resize the thread pool.
->> >>>>
->> >>>> This is merged into master and will be in v0.53.
->> >>>>
->> >>>> sage
->> >>>>
->> >>>>>
->> >>>>> sage
->> >>>>>
->> >>>>>>
->> >>>>>>> sage
->> >>>>>>>
->> >>>>>>>>
->> >>>>>>>> On Tue, Sep 4, 2012 at 5:34 PM, Sage Weil <sage@inktank.com=
-> wrote:
->> >>>>>>>>> On Tue, 4 Sep 2012, Wido den Hollander wrote:
->> >>>>>>>>>> On 09/04/2012 10:30 AM, Skowron S?awomir wrote:
->> >>>>>>>>>>> Ok, thanks.
->> >>>>>>>>>>>
->> >>>>>>>>>>> Number of workers used for recover, or numer of disk thr=
-eads.
->> >>>>>>>>>>
->> >>>>>>>>>> I think those can be changed while the OSD is running. Yo=
-u could always give
->> >>>>>>>>>> it a try.
->> >>>>>>>>>
->> >>>>>>>>> The thread pool sizes can't currently be adjusted, unfortu=
-nately.  It
->> >>>>>>>>> wouldn't be too difficult to change that...
->> >>>>>>>>>
->> >>>>>>>>> sage
->> >>>>>>>>>
->> >>>>>>>>>>
->> >>>>>>>>>> Wido
->> >>>>>>>>>>
->> >>>>>>>>>>> -----Original Message-----
->> >>>>>>>>>>> From: Wido den Hollander [mailto:wido@widodh.nl]
->> >>>>>>>>>>> Sent: Tuesday, September 04, 2012 10:18 AM
->> >>>>>>>>>>> To: Skowron S?awomir
->> >>>>>>>>>>> Cc: ceph-devel@vger.kernel.org
->> >>>>>>>>>>> Subject: Re: Inject configuration change into cluster
->> >>>>>>>>>>>
->> >>>>>>>>>>> On 09/04/2012 07:04 AM, Skowron S?awomir wrote:
->> >>>>>>>>>>>> Is there any way now, to inject new configuration chang=
-e, without
->> >>>>>>>>>>>> restarting daemons ??
->> >>>>>>>>>>>
->> >>>>>>>>>>> Yes, you can use the injectargs command.
->> >>>>>>>>>>>
->> >>>>>>>>>>> $ ceph osd tell 0 injectargs '--debug-osd 20'
->> >>>>>>>>>>>
->> >>>>>>>>>>> What do you want to change? Not everything can be change=
-d while the OSD is
->> >>>>>>>>>>> running.
->> >>>>>>>>>>>
->> >>>>>>>>>>> Wido
->> >>>>>>>>>>>
->> >>>>>>>>>>>> Regards
->> >>>>>>>>>>>>
->> >>>>>>>>>>>> Slawomir Skowron--
->> >>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscri=
-be ceph-devel"
->> >>>>>>>>>>>> in the body of a message to majordomo@vger.kernel.org M=
-ore majordomo
->> >>>>>>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
->> >>>>>>>>>>>
->> >>>>>>>>>>> N???????????????r??????y?????????b???X???????v???^???)?{=
-=2En???+?????????z???]z???{ay??? ?????,j ??????f?????????h?????????z???=
- ???w?????????
->> >>>>>>>>>>> ?????????j:+v?????????w???j???m???????????? ????????????=
-zZ+???????j"??????!tml=3D
->> >>>>>>>>>>
->> >>>>>>>>>> --
->> >>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe=
- ceph-devel" in
->> >>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->> >>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-=
-info.html
->> >>>>>>>>> --
->> >>>>>>>>> To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in
->> >>>>>>>>> the body of a message to majordomo@vger.kernel.org
->> >>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-i=
-nfo.html
->> >>>>>>>>
->> >>>>>>>>
->> >>>>>>>>
->> >>>>>>>> --
->> >>>>>>>> -----
->> >>>>>>>> Pozdrawiam
->> >>>>>>>>
->> >>>>>>>> S?awek "sZiBis" Skowron
->> >>>>> --
->> >>>>> To unsubscribe from this list: send the line "unsubscribe ceph=
--devel" in
->> >>>>> the body of a message to majordomo@vger.kernel.org
->> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.=
-html
->> >>>>>
->> >>>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Interestingly enough, the help output for vstart.sh already states that 
+the -x flag disables authx (which is not the case at present, but is 
+after this patch is applied).
+
+I've attached a patch to vstart that 1) changes the mention of authx to 
+cephx for consistency and 2) defaults vstart.sh to using cephx with the 
+-x flag now serving to disable cephx.
+
+Best,
+-Joe Buck
+
+--------------020804090403040406040401
+Content-Type: text/x-patch;
+ name="vstart.diff"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="vstart.diff"
+
+diff --git a/src/vstart.sh b/src/vstart.sh
+index 7aaad49..b23b83a 100755
+--- a/src/vstart.sh
++++ b/src/vstart.sh
+@@ -21,7 +21,7 @@ ip=""
+ nodaemon=0
+ smallmds=0
+ overwrite_conf=1
+-cephx=0
++cephx=1 #turn cephx on by default
+ 
+ MON_ADDR=""
+ 
+@@ -43,7 +43,7 @@ usage=$usage"\t--nodaemon: use ceph-run as wrapper for mon/osd/mds\n"
+ usage=$usage"\t--smallmds: limit mds cache size\n"
+ usage=$usage"\t-m ip:port\t\tspecify monitor address\n"
+ usage=$usage"\t-k keep old configuration files\n"
+-usage=$usage"\t-x disable authx\n"
++usage=$usage"\t-x disable cephx\n"
+ usage=$usage"\t-o config\t\t add extra config parameters to mds section\n"
+ 
+ usage_exit() {
+@@ -117,7 +117,7 @@ case $1 in
+ 	    shift
+ 	    ;;
+     -x )
+-	    cephx=1
++	    cephx=0
+ 	    ;;
+     -k )
+ 	    overwrite_conf=0
+
+--------------020804090403040406040401--
