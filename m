@@ -1,59 +1,101 @@
-From: <Eric_YH_Chen@wiwynn.com>
-Subject: RE: rbd map error with new rbd format
-Date: Mon, 22 Oct 2012 09:04:17 +0000
-Message-ID: <60E83269D669544E8069A09CB69135EA03B0A2@GDC-CLDMBX-P02.whq.wistron>
-References: <60E83269D669544E8069A09CB69135EA02DF21@GDC-CLDMBX-P02.whq.wistron>
+From: Yann ROBIN <yann.robin@youscribe.com>
+Subject: Osd load and timeout when recovering
+Date: Mon, 22 Oct 2012 10:27:29 +0000
+Message-ID: <367CC0B0FC02EE47BF7482398BD623C53F6582FE@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:56567 "EHLO
-	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750916Ab2JVJEW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 05:04:22 -0400
-Received: from GDC-CLDCAS-P02.whq.wistron (unverified [10.37.38.63]) by TWNHUMSW5.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta795d753d1c0a816731b8c@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
- Mon, 22 Oct 2012 17:04:15 +0800
-In-Reply-To: <60E83269D669544E8069A09CB69135EA02DF21@GDC-CLDMBX-P02.whq.wistron>
-Content-Language: zh-TW
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:42074
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751451Ab2JVK1e convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 22 Oct 2012 06:27:34 -0400
+Received: from mail71-co1 (localhost [127.0.0.1])	by mail71-co1-R.bigfish.com
+ (Postfix) with ESMTP id D6D63B400FC	for <ceph-devel@vger.kernel.org>; Mon, 22
+ Oct 2012 10:27:33 +0000 (UTC)
+Received: from CO1EHSMHS012.bigfish.com (unknown [10.243.78.248])	by
+ mail71-co1.bigfish.com (Postfix) with ESMTP id DCB3BB80055	for
+ <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 10:27:30 +0000 (UTC)
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi,
+
+We use ceph to store small file (lot of them) on different servers and =
+access it using rados gateway.
+Our data size is 380Go (very small). We have two host with 5 osd each.
+We use small config for ceph : 2Go RAM server with 5 x 2To Disk (one OS=
+D on each disk).
+This is a very cheap config that allow us to keep our storing cost unde=
+r control and it's enough to get the read performance we need.
+(We use this config with mogilefs to store 150To of data)
+
+This week-end we had an alert saying ceph was down.
+
+After looking at the osd, we saw a very high load on osd (450 of load),=
+ some were down.
+Ceph -s displayed that we were having down pg, peering+down pg, remappe=
+d pg. etc.
+
+So we started to see that when we were peering and stuff like that, the=
+ load was very high.
+OSD stop responding and we could see in the log message like :
+=46ileStore timeout and Abort Signal
+
+So basically the cluster was under load because we was recovering... bu=
+t because it was under load recovering could not complete.
+
+We change this params to get a longer timeout :
+filestore op thread suicide timeout =3D 360=20
+filestore op thread timeout =3D 180=20
+osd default notify timeout =3D 360
+
+The cluster was still under heavy load, osd was still timeouting (less =
+timeouting but still)
+
+So we test param to "throttle" the "recovery" process :
+filestore op threads =3D 6
+filestore queue max ops =3D 24
+osd recovery max active =3D 1
+
+Load was better, but still very high (30).=20
+
+We also try to put the journal in a tmpfs with zram.
+We set noout so it won't copy files to satisfy the replicate count beca=
+use osd were out.
+
+We then updated to kernel 3.5 to get last xfs optim.
+
+In the end nothing was working we were in the same infinite death loop =
+of recovering =3D> load =3D> timeout =3D> recovering.
+So we updated from ceph 0.48.2 to 0.53, load was better and recovery fi=
+nally worked.
+
+As we don't want to be in the position again (24h downtime), I have som=
+e questions on ceph/rados.
+
+1/ Even when we switch to ceph 0.53, the rados gateway was still not re=
+sponding, Log was displaying Initalization timeout.
+Is it normal that the "recovering" process kill the fact that we can re=
+ad data from ceph ?=20
+The data is here, it is just moving, why can't we access it ?
+
+2/ In case of very high load because ceph is moving data, is there a wa=
+y to tell ceph to go slowly ?
 
 
-> At this point format 2 is understood by the kernel, and the
-> infrastructure for opening parent images and the I/O path
-> for clones is in progress. We estimate about 4-8 weeks for this,
-> but you should check back then.
-> Kernel 3.6 was already released, so this would probably go into 3.8 or
-> 3.9.
+Thanks,
 
-Hi Josh:
-
-Please let me clarify some point. 
-If we want to map an RBD image to a kernel object, it may not ready until kernel 3.8 or 3.9.
-But if we want to running qemu with RBD, it is ready in kernel 3.6, since QEMU can access it via librbd directly.
-Do I correct? Thanks!
-
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Eric_YH_Chen@wiwynn.com
-Sent: Thursday, October 18, 2012 4:01 PM
-To: ceph-devel@vger.kernel.org
-Cc: Chris YT Huang/WYHQ/Wiwynn; Victor CY Chang/WYHQ/Wiwynn
-Subject: Re: rbd map error with new rbd format
-
-Hi, Josh:
-
-> Yeah, format 2 and layering support is in progress for kernel rbd, but 
-> not ready yet. The userspace side is all ready in the master branch, 
-> but it takes more time to implement in the kernel.
-> Btw, instead of --new-format you should use --format 2. It's in the 
-> man page in the master branch.
-
-As you mentioned before, http://www.spinics.net/lists/ceph-devel/msg08857.html
-The kernel rbd is not ready at September, so we cannot map rbd to a device. 
-Would you mind to estimate when will be available? And which version of kernel? (3.5 or 3.6?) Thanks!
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yann ROBIN
+Soci=E9t=E9 Publica
+www.YouScribe.com
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
