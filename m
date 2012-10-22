@@ -1,67 +1,114 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH 1/4] rbd: verify rbd image order value
-Date: Mon, 22 Oct 2012 15:43:55 -0700
-Message-ID: <5085CC2B.3060404@inktank.com>
-References: <5085791C.9010205@inktank.com> <5085798C.8010605@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: osd crash in ReplicatedPG::add_object_context_to_pg_stat(ReplicatedPG::ObjectContext*,
+ pg_stat_t*)
+Date: Mon, 22 Oct 2012 16:33:45 -0700
+Message-ID: <CA+4uBUapFKOV58givOkfNF5OPGuvvnx-bo=ZkZRcQcygcvChsA@mail.gmail.com>
+References: <5077458A.7030108@univ-nantes.fr>
+	<CA+4uBUYnu-fNPb4Dbod72yamynOGdzDMHT8ZXjn4-RcRPJ1D3Q@mail.gmail.com>
+	<50856854.6050505@univ-nantes.fr>
+	<50858509.7010709@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:35048 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932319Ab2JVWn7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 18:43:59 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2275566pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 15:43:58 -0700 (PDT)
-In-Reply-To: <5085798C.8010605@inktank.com>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:58970 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754827Ab2JVXdq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 19:33:46 -0400
+Received: by mail-wi0-f178.google.com with SMTP id hr7so3025550wib.1
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 16:33:45 -0700 (PDT)
+In-Reply-To: <50858509.7010709@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: "ceph-devel@vger.kernel.org >> ceph-devel" <ceph-devel@vger.kernel.org>
 
-Personally I find that sizeof(int) doesn't really help here, but 
-otherwise it's fine by me
+Yeah, I think I've seen that before, but not yet with logs.  filestore
+and osd logging would help greatly if it's reproducible.
 
-On 10/22/2012 09:51 AM, Alex Elder wrote:
-> This adds a verification that an rbd image's object order is
-> within the upper and lower bounds supported by this implementation.
+I've put it in as #3386.
+-Sam
+
+On Mon, Oct 22, 2012 at 10:40 AM, Yann Dupont
+<Yann.Dupont@univ-nantes.fr> wrote:
+> Le 22/10/2012 17:37, Yann Dupont a =E9crit :
 >
-> It must be at least 9 (SECTOR_SHIFT), because the Linux bio system
-> assumes that minimum granularity.
+>> Le 15/10/2012 21:57, Samuel Just a =E9crit :
+>>>
+>>> debug filestore =3D 20
+>>> debug osd =3D 20
+>>
+>> ok, just had a core
+>>
+>> you can grab it here :
+>> http://filex.univ-nantes.fr/get?k=3DxojcpgmGoN4pR1rpqf5
+>>
+>> now, I'll run with debug options
+>>
+>> cheers
+>>
+> Ok, I've collected a big log. I'll try to put it online later (I'm at=
+ home
+> right now)
+> Anyway, a quick gdb on the core show this with bt show this :
 >
-> It also must be less than 32 (at the moment anyway) because there
-> exist spots in the code that store the size of a "segment" (object
-> backing an rbd image) in a signed int variable, which can be 32 bits
-> including the sign.  We should be able to relax this limit once
-> we've verified the code uses 64-bit types where needed.
+> #0  0x00007f9aaace6efb in raise () from
+> /lib/x86_64-linux-gnu/libpthread.so.0
+> #1  0x0000000000737ca7 in reraise_fatal (signum=3D11) at
+> global/signal_handler.cc:58
+> #2  handle_fatal_signal (signum=3D11) at global/signal_handler.cc:104
+> #3  <signal handler called>
+> #4  std::_Rb_tree<snapid_t, std::pair<snapid_t const, interval_set<un=
+signed
+> long> >, std::_Select1st<std::pair<snapid_t const, interval_set<unsig=
+ned
+> long> > >, std::less<snapid_t>, std::allocator<std::pair<snapid_t con=
+st,
+> interval_set<unsigned long> > > >::_M_begin (this=3D0x8654000, obc=3D=
+0xe342000,
+> pgstat=3D0x7f9a8bf97c10) at /usr/include/c++/4.4/bits/stl_tree.h:488
+> #5  std::_Rb_tree<snapid_t, std::pair<snapid_t const, interval_set<un=
+signed
+> long> >, std::_Select1st<std::pair<snapid_t const, interval_set<unsig=
+ned
+> long> > >, std::less<snapid_t>, std::allocator<std::pair<snapid_t con=
+st,
+> interval_set<unsigned long> > > >::find (this=3D0x8654000, obc=3D0xe3=
+42000,
+> pgstat=3D0x7f9a8bf97c10) at /usr/include/c++/4.4/bits/stl_tree.h:1434
+> #6  std::map<snapid_t, interval_set<unsigned long>, std::less<snapid_=
+t>,
+> std::allocator<std::pair<snapid_t const, interval_set<unsigned long> =
+> >
+>>::count (this=3D0x8654000, obc=3D0xe342000,
+>     pgstat=3D0x7f9a8bf97c10) at /usr/include/c++/4.4/bits/stl_map.h:6=
+86
+> #7  ReplicatedPG::add_object_context_to_pg_stat (this=3D0x8654000,
+> obc=3D0xe342000, pgstat=3D0x7f9a8bf97c10) at osd/ReplicatedPG.cc:4145
+> #8  0x000000000055c93a in ReplicatedPG::recover_backfill (this=3D0x86=
+54000,
+> max=3D<value optimized out>) at osd/ReplicatedPG.cc:6381
+> #9  0x0000000000563c1a in ReplicatedPG::start_recovery_ops (this=3D0x=
+8654000,
+> max=3D1, prctx=3D<value optimized out>) at osd/ReplicatedPG.cc:5959
+> #10 0x00000000005d3c9d in OSD::do_recovery (this=3D0x30c9000, pg=3D0x=
+8654000) at
+> osd/OSD.cc:5121
+> #11 0x00000000006119fd in OSD::RecoveryWQ::_process(PG*) ()
+> #12 0x00000000007c176b in ThreadPool::worker (this=3D0x30c9568) at
+> common/WorkQueue.cc:54
+> #13 0x00000000005f609d in ThreadPool::WorkThread::entry() ()
+> #14 0x00007f9aaacdeb50 in start_thread () from
+> /lib/x86_64-linux-gnu/libpthread.so.0
+> #15 0x00007f9aa9a1278d in clone () from /lib/x86_64-linux-gnu/libc.so=
+=2E6
+> #16 0x0000000000000000 in ?? ()
 >
-> Note that the CLI tool already limits the order to the range 12-25.
+> does it helps you ?
 >
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   10 ++++++++++
->   1 file changed, 10 insertions(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index d032883..4734446 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -533,6 +533,16 @@ static bool rbd_dev_ondisk_valid(struct
-> rbd_image_header_ondisk *ondisk)
->   	if (memcmp(&ondisk->text, RBD_HEADER_TEXT, sizeof (RBD_HEADER_TEXT)))
->   		return false;
->
-> +	/* The bio layer requires at least sector-sized I/O */
-> +
-> +	if (ondisk->options.order < SECTOR_SHIFT)
-> +		return false;
-> +
-> +	/* If we use u64 in a few spots we may be able to loosen this */
-> +
-> +	if (ondisk->options.order > 8 * sizeof (int) - 1)
-> +		return false;
-> +
->   	/*
->   	 * The size of a snapshot header has to fit in a size_t, and
->   	 * that limits the number of snapshots.
->
+> Cheers,
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
