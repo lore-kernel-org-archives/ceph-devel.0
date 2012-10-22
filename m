@@ -1,95 +1,72 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: osd crash in ReplicatedPG::add_object_context_to_pg_stat(ReplicatedPG::ObjectContext*,
- pg_stat_t*)
-Date: Mon, 22 Oct 2012 19:40:25 +0200
-Message-ID: <50858509.7010709@univ-nantes.fr>
-References: <5077458A.7030108@univ-nantes.fr> <CA+4uBUYnu-fNPb4Dbod72yamynOGdzDMHT8ZXjn4-RcRPJ1D3Q@mail.gmail.com> <50856854.6050505@univ-nantes.fr>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: Proposed change to vstart.sh
+Date: Mon, 22 Oct 2012 12:54:23 -0500
+Message-ID: <5085884F.2060803@inktank.com>
+References: <508469CE.3000502@gmail.com> <alpine.DEB.2.00.1210211434320.26885@cobra.newdream.net> <508562A1.2040106@gmail.com> <50856F74.8020001@inktank.com> <508575C0.9080700@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:58993 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755633Ab2JVRk3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:40:29 -0400
-In-Reply-To: <50856854.6050505@univ-nantes.fr>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:52820 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755842Ab2JVRyX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:54:23 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2108193pad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 10:54:23 -0700 (PDT)
+In-Reply-To: <508575C0.9080700@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org >> ceph-devel" <ceph-devel@vger.kernel.org>
+To: Joe Buck <jbbuck@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Le 22/10/2012 17:37, Yann Dupont a =E9crit :
-> Le 15/10/2012 21:57, Samuel Just a =E9crit :
->> debug filestore =3D 20
->> debug osd =3D 20
-> ok, just had a core
+On 10/22/2012 11:35 AM, Joe Buck wrote:
+> Sam,
 >
-> you can grab it here :
-> http://filex.univ-nantes.fr/get?k=3DxojcpgmGoN4pR1rpqf5
+> Here's the last few lines printed when I start vstart.sh
 >
-> now, I'll run with debug options
+> ./vstart.sh: 397: ./vstart.sh: btrfs: not found
+> add osd0 7cf25a23-32dd-4b82-b9d4-d514eb857d02
+> 2012-10-22 09:31:46.788605 7ff87bb4e780 -1 unable to authenticate as
+> client.admin
+> 2012-10-22 09:31:46.790370 7ff87bb4e780 -1 ceph_tool_common_init failed.
 >
-> cheers
+> I'm invoking vstart.sh like so (my version has the patch I sent out this
+> morning applied):
+> ./vstart.sh -d -n -l -X
 >
-Ok, I've collected a big log. I'll try to put it online later (I'm at=20
-home right now)
-Anyway, a quick gdb on the core show this with bt show this :
+> The line in vstart.sh that seems to tank is:
+>
+> $SUDO $CEPH_ADM osd create $uuid
+>
 
-#0  0x00007f9aaace6efb in raise () from=20
-/lib/x86_64-linux-gnu/libpthread.so.0
-#1  0x0000000000737ca7 in reraise_fatal (signum=3D11) at=20
-global/signal_handler.cc:58
-#2  handle_fatal_signal (signum=3D11) at global/signal_handler.cc:104
-#3  <signal handler called>
-#4  std::_Rb_tree<snapid_t, std::pair<snapid_t const,=20
-interval_set<unsigned long> >, std::_Select1st<std::pair<snapid_t const=
-,=20
-interval_set<unsigned long> > >, std::less<snapid_t>,=20
-std::allocator<std::pair<snapid_t const, interval_set<unsigned long> > =
->=20
- >::_M_begin (this=3D0x8654000, obc=3D0xe342000, pgstat=3D0x7f9a8bf97c1=
-0) at=20
-/usr/include/c++/4.4/bits/stl_tree.h:488
-#5  std::_Rb_tree<snapid_t, std::pair<snapid_t const,=20
-interval_set<unsigned long> >, std::_Select1st<std::pair<snapid_t const=
-,=20
-interval_set<unsigned long> > >, std::less<snapid_t>,=20
-std::allocator<std::pair<snapid_t const, interval_set<unsigned long> > =
->=20
- >::find (this=3D0x8654000, obc=3D0xe342000, pgstat=3D0x7f9a8bf97c10) a=
-t=20
-/usr/include/c++/4.4/bits/stl_tree.h:1434
-#6  std::map<snapid_t, interval_set<unsigned long>, std::less<snapid_t>=
-,=20
-std::allocator<std::pair<snapid_t const, interval_set<unsigned long> > =
->=20
- >::count (this=3D0x8654000, obc=3D0xe342000,
-     pgstat=3D0x7f9a8bf97c10) at /usr/include/c++/4.4/bits/stl_map.h:68=
-6
-#7  ReplicatedPG::add_object_context_to_pg_stat (this=3D0x8654000,=20
-obc=3D0xe342000, pgstat=3D0x7f9a8bf97c10) at osd/ReplicatedPG.cc:4145
-#8  0x000000000055c93a in ReplicatedPG::recover_backfill=20
-(this=3D0x8654000, max=3D<value optimized out>) at osd/ReplicatedPG.cc:=
-6381
-#9  0x0000000000563c1a in ReplicatedPG::start_recovery_ops=20
-(this=3D0x8654000, max=3D1, prctx=3D<value optimized out>) at=20
-osd/ReplicatedPG.cc:5959
-#10 0x00000000005d3c9d in OSD::do_recovery (this=3D0x30c9000,=20
-pg=3D0x8654000) at osd/OSD.cc:5121
-#11 0x00000000006119fd in OSD::RecoveryWQ::_process(PG*) ()
-#12 0x00000000007c176b in ThreadPool::worker (this=3D0x30c9568) at=20
-common/WorkQueue.cc:54
-#13 0x00000000005f609d in ThreadPool::WorkThread::entry() ()
-#14 0x00007f9aaacdeb50 in start_thread () from=20
-/lib/x86_64-linux-gnu/libpthread.so.0
-#15 0x00007f9aa9a1278d in clone () from /lib/x86_64-linux-gnu/libc.so.6
-#16 0x0000000000000000 in ?? ()
+Do you have a keyring file in: /etc/ceph/keyring?
+-sam
 
-does it helps you ?
+> -Joe Buck
+>
+> On 10/22/2012 09:08 AM, Sam Lang wrote:
+>> On 10/22/2012 10:13 AM, Joe Buck wrote:
+>>> On 10/21/2012 02:35 PM, Sage Weil wrote:
+>>
+>>>> Also, we should fix the auth none usage at some point.  :)
+>>
+>> I made some changes a while back to fix the auth none problems with
+>> vstart
+>> (https://github.com/ceph/ceph/commit/0f7c516f3e1f37c5869f8fbff67f53ca0c90568c).
+>>  The -x help text inversion was a bug on my part.
+>>
+>> Joe what errors do you get with auth none?  I'm able to do vstart.sh
+>> -n -l (without the -x/-X changes) successfully.
+>>
+>> -sam
+>>
+>>>>
+>>>> sage
+>>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Cheers,
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
