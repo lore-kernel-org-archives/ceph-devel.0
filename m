@@ -1,64 +1,56 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH 1/2] rbd: zero return code in rbd_dev_image_id()
-Date: Mon, 22 Oct 2012 10:18:26 -0700
-Message-ID: <50857FE2.5060705@inktank.com>
-References: <508577B6.2020708@inktank.com> <508577F5.3020102@inktank.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: rbd export to stdout ?
+Date: Mon, 22 Oct 2012 19:18:21 +0200 (CEST)
+Message-ID: <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
+References: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:43167 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755783Ab2JVRSa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:18:30 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2085608pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 10:18:29 -0700 (PDT)
-In-Reply-To: <508577F5.3020102@inktank.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:53407 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755634Ab2JVRSu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:18:50 -0400
+In-Reply-To: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Dietmar Maurer <dietmar@proxmox.com>
+Cc: ceph-devel@vger.kernel.org, Wido den Hollander <wido@widodh.nl>
 
-I really feel like we ought to root-cause this before we patch the 
-kernel client.  Something isn't working the way we expect.
+>>I thought we should extend 'qemu-img', adding import/export there? Th=
+at=20
+>>way it would work for all qemu storage drivers?=20
 
-On 10/22/2012 09:44 AM, Alex Elder wrote:
-> There is a call in rbd_dev_image_id() to rbd_req_sync_exec()
-> to get the image id for an image.  Despite the "get_id" class
-> method only returning 0 on success, I am getting back a positive
-> value (I think the number of bytes returned with the call).
->
-> That may or may not be how rbd_req_sync_exec() is supposed to
-> behave, but zeroing the return value if successful makes it moot
-> and makes this path through the code work as desired.
->
-> Do the same in rbd_dev_v2_object_prefix().
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    2 ++
->   1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index cf5d109..65e9f1f 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2169,6 +2169,7 @@ static int rbd_dev_v2_object_prefix(struct
-> rbd_device *rbd_dev)
->   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
->   	if (ret < 0)
->   		goto out;
-> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
->
->   	p = reply_buf;
->   	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
-> @@ -2862,6 +2863,7 @@ static int rbd_dev_image_id(struct rbd_device
-> *rbd_dev)
->   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
->   	if (ret < 0)
->   		goto out;
-> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
->
->   	p = response;
->   	rbd_dev->image_id = ceph_extract_encoded_string(&p,
->
+seem to be already possible:
+
+http://ceph.com/wiki/QEMU-RBD
+
+"qemu-img convert -f qcow2 -O rbd /data/debian_lenny_amd64_small.qcow2 =
+rbd:data/lenny"
+
+
+
+----- Mail original -----=20
+
+De: "Dietmar Maurer" <dietmar@proxmox.com>=20
+=C3=80: "Wido den Hollander" <wido@widodh.nl>, "Alexandre DERUMIER" <ad=
+erumier@odiso.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Lundi 22 Octobre 2012 16:31:00=20
+Objet: RE: rbd export to stdout ?=20
+
+> Subject: Re: rbd export to stdout ?=20
+>=20
+> On 10/22/2012 12:41 PM, Alexandre DERUMIER wrote:=20
+> > Hi,=20
+> >=20
+> > I'm looking for use "rbd export " to stdout and not a file.=20
+
+I thought we should extend 'qemu-img', adding import/export there? That=
+=20
+way it would work for all qemu storage drivers?=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
