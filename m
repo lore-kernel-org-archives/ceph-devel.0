@@ -1,37 +1,46 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: rbd export to stdout ?
-Date: Mon, 22 Oct 2012 12:41:48 +0200 (CEST)
-Message-ID: <55e4fa31-f365-47ae-a846-d80036981124@mailpro>
-References: <44be67bb-921b-4115-a4ea-fb4980b17edd@mailpro>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: rbd export to stdout ?
+Date: Mon, 22 Oct 2012 13:58:40 +0200
+Message-ID: <508534F0.5080107@widodh.nl>
+References: <55e4fa31-f365-47ae-a846-d80036981124@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:41618 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751245Ab2JVKmS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 06:42:18 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id 25AA9180250F9
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 12:41:54 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id nmVx1v1s+Ysr for <ceph-devel@vger.kernel.org>;
-	Mon, 22 Oct 2012 12:41:48 +0200 (CEST)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id E60931802479B
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 12:41:48 +0200 (CEST)
-In-Reply-To: <44be67bb-921b-4115-a4ea-fb4980b17edd@mailpro>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:40566 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751375Ab2JVL6o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 07:58:44 -0400
+In-Reply-To: <55e4fa31-f365-47ae-a846-d80036981124@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On 10/22/2012 12:41 PM, Alexandre DERUMIER wrote:
+> Hi,
+>
+> I'm looking for use "rbd export " to stdout and not a file.
+>
+> Is it possible ? any hint ?
+>
 
-I'm looking for use "rbd export " to stdout and not a file.
+No, not at this moment. I tried a fifo, but that won't work due to 
+O_EXCL and O_CREATE the rbd command uses.
 
-Is it possible ? any hint ?
+I think it should be possible to export to stdout, but it will require 
+some code changes.
 
-Regards,
+I created a feature request for it: http://tracker.newdream.net/issues/3380
 
-Alexandre Derumier
+Wido
+
+> Regards,
+>
+> Alexandre Derumier
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
