@@ -1,68 +1,61 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
+From: Joe Buck <jbbuck@gmail.com>
 Subject: Re: Proposed change to vstart.sh
-Date: Mon, 22 Oct 2012 09:28:46 -0700
-Message-ID: <CAC-hyiHFiryTZYi_wC_BswcK49k_ek346o1qhu6NPZDTquPuQg@mail.gmail.com>
-References: <508469CE.3000502@gmail.com>
-	<alpine.DEB.2.00.1210211434320.26885@cobra.newdream.net>
-	<508562A1.2040106@gmail.com>
-	<50856F74.8020001@inktank.com>
-	<CAC-hyiFkOKxef+iJ2NidNL4_yPwu5jxaxvjC+z82_rGJdJJbmw@mail.gmail.com>
-	<50857206.1050702@inktank.com>
+Date: Mon, 22 Oct 2012 09:35:12 -0700
+Message-ID: <508575C0.9080700@gmail.com>
+References: <508469CE.3000502@gmail.com> <alpine.DEB.2.00.1210211434320.26885@cobra.newdream.net> <508562A1.2040106@gmail.com> <50856F74.8020001@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:46857 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751259Ab2JVQ2s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 12:28:48 -0400
-Received: by mail-bk0-f46.google.com with SMTP id jk13so1152084bkc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 09:28:46 -0700 (PDT)
-In-Reply-To: <50857206.1050702@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:61334 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750921Ab2JVQfO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 12:35:14 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so2123113pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 09:35:14 -0700 (PDT)
+In-Reply-To: <50856F74.8020001@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sam Lang <sam.lang@inktank.com>
-Cc: Joe Buck <jbbuck@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 22, 2012 at 9:19 AM, Sam Lang <sam.lang@inktank.com> wrote:
-> On 10/22/2012 11:14 AM, Yehuda Sadeh wrote:
+Sam,
+
+Here's the last few lines printed when I start vstart.sh
+
+./vstart.sh: 397: ./vstart.sh: btrfs: not found
+add osd0 7cf25a23-32dd-4b82-b9d4-d514eb857d02
+2012-10-22 09:31:46.788605 7ff87bb4e780 -1 unable to authenticate as 
+client.admin
+2012-10-22 09:31:46.790370 7ff87bb4e780 -1 ceph_tool_common_init failed.
+
+I'm invoking vstart.sh like so (my version has the patch I sent out this 
+morning applied):
+./vstart.sh -d -n -l -X
+
+The line in vstart.sh that seems to tank is:
+
+$SUDO $CEPH_ADM osd create $uuid
+
+-Joe Buck
+
+On 10/22/2012 09:08 AM, Sam Lang wrote:
+> On 10/22/2012 10:13 AM, Joe Buck wrote:
+>> On 10/21/2012 02:35 PM, Sage Weil wrote:
+>
+>>> Also, we should fix the auth none usage at some point.  :)
+>
+> I made some changes a while back to fix the auth none problems with 
+> vstart 
+> (https://github.com/ceph/ceph/commit/0f7c516f3e1f37c5869f8fbff67f53ca0c90568c). 
+>  The -x help text inversion was a bug on my part.
+>
+> Joe what errors do you get with auth none?  I'm able to do vstart.sh 
+> -n -l (without the -x/-X changes) successfully.
+>
+> -sam
+>
+>>>
+>>> sage
 >>
->> On Mon, Oct 22, 2012 at 9:08 AM, Sam Lang <sam.lang@inktank.com> wrote:
->>>
->>> On 10/22/2012 10:13 AM, Joe Buck wrote:
->>>>
->>>>
->>>> On 10/21/2012 02:35 PM, Sage Weil wrote:
->>>
->>>
->>>
->>>>> Also, we should fix the auth none usage at some point.  :)
->>>
->>>
->>>
->>> I made some changes a while back to fix the auth none problems with
->>> vstart
->>>
->>> (https://github.com/ceph/ceph/commit/0f7c516f3e1f37c5869f8fbff67f53ca0c90568c).
->>> The -x help text inversion was a bug on my part.
->>>
->>
->> By the way, I think those changes broke the use of CEPH_BIN env variable.
 >
->
-> I may not be using CEPH_BIN as intended then.  What is CEPH_BIN supposed to
-> point to?
->
-> I usually setup out-of-tree builds, and point CEPH_BIN at the src dir there:
->
-> <in ceph dir>
-> mkdir build
-> cd build
-> ../configure ...
-> make
-> CEPH_BIN=$PWD/src
-> ../src/vstart.sh ...
->
-CEPH_BIN should point at the built binaries. I usually set up out of
-tree builds also, and point CEPH_BIN at the make install target, which
-should also work. Maybe vstart.sh misuses it (e.g., looks at CEPH_BIN
-for some other dependency).
+
