@@ -1,67 +1,38 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd export to stdout ?
-Date: Mon, 22 Oct 2012 14:25:33 +0200 (CEST)
-Message-ID: <082fc1f4-4556-4c10-b9cc-4b8d3b0c7cbd@mailpro>
-References: <508534F0.5080107@widodh.nl>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 0/2] rbd: separating mapping info from rbd_device
+Date: Mon, 22 Oct 2012 08:07:10 -0500
+Message-ID: <508544FE.7060606@inktank.com>
+References: <5076E8CF.1060108@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:33986 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752087Ab2JVM0D convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 08:26:03 -0400
-In-Reply-To: <508534F0.5080107@widodh.nl>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:41212 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753057Ab2JVNHL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 09:07:11 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so3496805iea.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 06:07:11 -0700 (PDT)
+In-Reply-To: <5076E8CF.1060108@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-ok,=20
-thanks Wido.
+On 10/11/2012 10:42 AM, Alex Elder wrote:
+> The rbd device structure has up to now contained information about
+> the rbd image (and possibly snapshot id) that backs it as well as
+> the device interface it represents in Linux when it is mapped.  In
+> order to add layering support we're going to want to separate the
+> mapping information from the image information more clearly.  This
+> was begun recently but these two patches do the bulk of the movement
+> of the rest of the mapping-related fields.
+> 
+>                     -Alex
+> 
+> [PATCH 1/2] rbd: move dev_id and list links into mapping
+> [PATCH 2/2] rbd: move more stuff into mapping
 
-Regards,
+I'm retracting this series, I no longer think it's quite the
+right way to proceed.
 
-Alexandre
-
------ Mail original -----=20
-
-De: "Wido den Hollander" <wido@widodh.nl>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 22 Octobre 2012 13:58:40=20
-Objet: Re: rbd export to stdout ?=20
-
-On 10/22/2012 12:41 PM, Alexandre DERUMIER wrote:=20
-> Hi,=20
->=20
-> I'm looking for use "rbd export " to stdout and not a file.=20
->=20
-> Is it possible ? any hint ?=20
->=20
-
-No, not at this moment. I tried a fifo, but that won't work due to=20
-O_EXCL and O_CREATE the rbd command uses.=20
-
-I think it should be possible to export to stdout, but it will require=20
-some code changes.=20
-
-I created a feature request for it: http://tracker.newdream.net/issues/=
-3380=20
-
-Wido=20
-
-> Regards,=20
->=20
-> Alexandre Derumier=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					-Alex
