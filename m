@@ -1,88 +1,92 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: kill rbd_device->rbd_opts
-Date: Mon, 22 Oct 2012 11:51:49 -0500
-Message-ID: <508579A5.7070008@inktank.com>
-References: <5085791C.9010205@inktank.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: rbd export to stdout ?
+Date: Mon, 22 Oct 2012 18:53:59 +0200 (CEST)
+Message-ID: <0a35e9be-d94f-420c-bed8-4db9adaf7286@mailpro>
+References: <082fc1f4-4556-4c10-b9cc-4b8d3b0c7cbd@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:40328 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755015Ab2JVQvx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 12:51:53 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so3910449iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 09:51:52 -0700 (PDT)
-In-Reply-To: <5085791C.9010205@inktank.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:49889 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755416Ab2JVQy3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 12:54:29 -0400
+In-Reply-To: <082fc1f4-4556-4c10-b9cc-4b8d3b0c7cbd@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org
 
-The rbd_device structure has an embedded rbd_options structure.
-Such a structure is needed to work with the generic ceph argument
-parsing code, but there's no need to keep it around once argument
-parsing is done.
+note:
 
-Use a local variable to hold the rbd options used in parsing in
-rbd_get_client(), and just transfer its content (it's just a
-read_only flag) into the field in the rbd_mapping sub-structure
-that requires that information.
+import for stdin already work:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
+rbd import --size=3Dxxx - image < stdin
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4ccce4d..3c131ab 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -184,7 +184,6 @@ struct rbd_device {
- 	struct gendisk		*disk;		/* blkdev's gendisk and rq */
+from this patch
 
- 	u32			image_format;	/* Either 1 or 2 */
--	struct rbd_options	rbd_opts;
- 	struct rbd_client	*rbd_client;
+http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/6315
 
- 	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
-@@ -456,18 +455,24 @@ static int parse_rbd_opts_token(char *c, void
-*private)
- static int rbd_get_client(struct rbd_device *rbd_dev, const char *mon_addr,
- 				size_t mon_addr_len, char *options)
- {
--	struct rbd_options *rbd_opts = &rbd_dev->rbd_opts;
-+	struct rbd_options rbd_opts;
- 	struct ceph_options *ceph_opts;
- 	struct rbd_client *rbdc;
 
--	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
-+	/* Initialize all rbd options to the defaults */
-+
-+	rbd_opts.read_only = RBD_READ_ONLY_DEFAULT;
 
- 	ceph_opts = ceph_parse_options(options, mon_addr,
- 					mon_addr + mon_addr_len,
--					parse_rbd_opts_token, rbd_opts);
-+					parse_rbd_opts_token, &rbd_opts);
- 	if (IS_ERR(ceph_opts))
- 		return PTR_ERR(ceph_opts);
+----- Mail original -----=20
 
-+	/* Record the parsed rbd options */
-+
-+	rbd_dev->mapping.read_only = rbd_opts.read_only;
-+
- 	rbdc = rbd_client_find(ceph_opts);
- 	if (rbdc) {
- 		/* using an existing client */
-@@ -685,7 +690,6 @@ static int rbd_dev_set_mapping(struct rbd_device
-*rbd_dev, char *snap_name)
- 		rbd_dev->mapping.size = rbd_dev->header.image_size;
- 		rbd_dev->mapping.features = rbd_dev->header.features;
- 		rbd_dev->mapping.snap_exists = false;
--		rbd_dev->mapping.read_only = rbd_dev->rbd_opts.read_only;
- 		ret = 0;
- 	} else {
- 		ret = snap_by_name(rbd_dev, snap_name);
--- 
-1.7.9.5
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Wido den Hollander" <wido@widodh.nl>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Lundi 22 Octobre 2012 14:25:33=20
+Objet: Re: rbd export to stdout ?=20
 
+ok,=20
+thanks Wido.=20
+
+Regards,=20
+
+Alexandre=20
+
+----- Mail original -----=20
+
+De: "Wido den Hollander" <wido@widodh.nl>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Lundi 22 Octobre 2012 13:58:40=20
+Objet: Re: rbd export to stdout ?=20
+
+On 10/22/2012 12:41 PM, Alexandre DERUMIER wrote:=20
+> Hi,=20
+>=20
+> I'm looking for use "rbd export " to stdout and not a file.=20
+>=20
+> Is it possible ? any hint ?=20
+>=20
+
+No, not at this moment. I tried a fifo, but that won't work due to=20
+O_EXCL and O_CREATE the rbd command uses.=20
+
+I think it should be possible to export to stdout, but it will require=20
+some code changes.=20
+
+I created a feature request for it: http://tracker.newdream.net/issues/=
+3380=20
+
+Wido=20
+
+> Regards,=20
+>=20
+> Alexandre Derumier=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
