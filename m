@@ -1,56 +1,30 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd export to stdout ?
-Date: Mon, 22 Oct 2012 19:18:21 +0200 (CEST)
-Message-ID: <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
-References: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
+From: Lokesh Krishnappa <lokesh.professional.it@gmail.com>
+Subject: rados gw configuration documentation
+Date: Mon, 22 Oct 2012 22:55:17 +0530
+Message-ID: <CABpo6hJ2dTnVtSN8EUyFQzywge20=AsAW1tzxRujSkhhL3cMqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:53407 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755634Ab2JVRSu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:18:50 -0400
-In-Reply-To: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:33359 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755836Ab2JVRZR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Oct 2012 13:25:17 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h16so2674992oag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 10:25:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dietmar Maurer <dietmar@proxmox.com>
-Cc: ceph-devel@vger.kernel.org, Wido den Hollander <wido@widodh.nl>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
->>I thought we should extend 'qemu-img', adding import/export there? Th=
-at=20
->>way it would work for all qemu storage drivers?=20
+Hi,
 
-seem to be already possible:
+Am following link: http://ceph.com/docs/master/radosgw/config/ to
+configure for teuthology test cases .
+while configuration, i get freeze in session "create rgw.conf" and
+completed on second time.  i request to more clear doucmentation for
+creating rgw.conf with path and FastCgiExternalServer . its more
+helpful for fresh users.
 
-http://ceph.com/wiki/QEMU-RBD
+-- 
+With Regards,
 
-"qemu-img convert -f qcow2 -O rbd /data/debian_lenny_amd64_small.qcow2 =
-rbd:data/lenny"
-
-
-
------ Mail original -----=20
-
-De: "Dietmar Maurer" <dietmar@proxmox.com>=20
-=C3=80: "Wido den Hollander" <wido@widodh.nl>, "Alexandre DERUMIER" <ad=
-erumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 22 Octobre 2012 16:31:00=20
-Objet: RE: rbd export to stdout ?=20
-
-> Subject: Re: rbd export to stdout ?=20
->=20
-> On 10/22/2012 12:41 PM, Alexandre DERUMIER wrote:=20
-> > Hi,=20
-> >=20
-> > I'm looking for use "rbd export " to stdout and not a file.=20
-
-I thought we should extend 'qemu-img', adding import/export there? That=
-=20
-way it would work for all qemu storage drivers?=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Lokesh K
