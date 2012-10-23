@@ -1,29 +1,29 @@
-From: Dietmar Maurer <dietmar@proxmox.com>
-Subject: RE: rbd export to stdout ?
-Date: Tue, 23 Oct 2012 04:27:49 +0000
-Message-ID: <24E144B8C0207547AD09C467A8259F75576E97B5@lisa.maurer-it.com>
-References: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
- <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: Proposed change to vstart.sh
+Date: Mon, 22 Oct 2012 22:22:33 -0700
+Message-ID: <50862999.6060208@inktank.com>
+References: <508469CE.3000502@gmail.com> <alpine.DEB.2.00.1210211434320.26885@cobra.newdream.net> <508562A1.2040106@gmail.com> <50856F74.8020001@inktank.com> <508575C0.9080700@gmail.com> <alpine.DEB.2.00.1210220940020.31573@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.maurer-it.com ([213.129.239.114]:49964 "EHLO
-	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753031Ab2JWE1z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 00:27:55 -0400
-In-Reply-To: <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
-Content-Language: en-US
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:47017 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751954Ab2JWFWg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 01:22:36 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2483066pad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 22:22:36 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1210220940020.31573@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Wido den Hollander <wido@widodh.nl>
+To: Sage Weil <sage@inktank.com>
+Cc: Joe Buck <jbbuck@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiA+PkkgdGhvdWdodCB3ZSBzaG91bGQgZXh0ZW5kICdxZW11LWltZycsIGFkZGluZyBpbXBvcnQv
-ZXhwb3J0IHRoZXJlPw0KPiA+PlRoYXQgd2F5IGl0IHdvdWxkIHdvcmsgZm9yIGFsbCBxZW11IHN0
-b3JhZ2UgZHJpdmVycz8NCj4gDQo+IHNlZW0gdG8gYmUgYWxyZWFkeSBwb3NzaWJsZToNCj4gDQo+
-IGh0dHA6Ly9jZXBoLmNvbS93aWtpL1FFTVUtUkJEDQo+IA0KPiAicWVtdS1pbWcgY29udmVydCAt
-ZiBxY293MiAtTyByYmQNCj4gL2RhdGEvZGViaWFuX2xlbm55X2FtZDY0X3NtYWxsLnFjb3cyIHJi
-ZDpkYXRhL2xlbm55Ig0KDQpPaCAtICBJIG1pc3NlZCB0aGF0LiBUaGFua3MgZm9yIHRoZSBoaW50
-Lg0K
 
+> Possibly related: I just pushed a patch to master that enables cephx auth
+> by default.  For the -X case we need to put in ceph.conf:
+>
+> 	auth cluster required =
+> 	auth service required =
+
+This was not added, and thus vstart.sh -X is currently broken.
