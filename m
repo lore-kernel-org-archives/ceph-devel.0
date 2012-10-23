@@ -1,54 +1,64 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH] [trivial] fs: ceph: Fix typo in xattr.c
-Date: Tue, 23 Oct 2012 13:43:04 -0700
-Message-ID: <50870158.5010405@inktank.com>
-References: <1350921998-7661-1-git-send-email-standby24x7@gmail.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: running without cephx
+Date: Tue, 23 Oct 2012 21:51:11 +0100
+Message-ID: <5087033F.4050802@inktank.com>
+References: <5086FAC1.3030706@inktank.com> <CAC-hyiGDzPGMUjoRJH5A1eX1C_yia0LnT2r9JeJNSCSiE2o_4Q@mail.gmail.com> <CAC-hyiGq1hX_CdhgnMOnT-6D3g3PrPE5XXA+v_dKyqWhdM9AXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:42225 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933423Ab2JWUnJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 16:43:09 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so706337pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 13:43:08 -0700 (PDT)
-In-Reply-To: <1350921998-7661-1-git-send-email-standby24x7@gmail.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:64637 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933407Ab2JWUvS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 16:51:18 -0400
+Received: by mail-ee0-f46.google.com with SMTP id b15so1590158eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 13:51:16 -0700 (PDT)
+In-Reply-To: <CAC-hyiGq1hX_CdhgnMOnT-6D3g3PrPE5XXA+v_dKyqWhdM9AXA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Masanari Iida <standby24x7@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Dan Mick <dan.mick@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks!  Making sure this gets incorporated in our next update.
+On 10/23/2012 09:24 PM, Yehuda Sadeh wrote:
+> On Tue, Oct 23, 2012 at 1:22 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>> On Tue, Oct 23, 2012 at 1:14 PM, Dan Mick <dan.mick@inktank.com> wrote:
+>>> So, I've discovered that to make "no cephx" work, you need to explicitly set
+>>> "none" for the three options (thanks to Yehuda for the tip):
+>>>
+>>>         auth cluster required = none
+>>>         auth service required = none
+>>>         auth supported = none
+>>>
+>>> Since "blank" is not an error, but leads to a disagreement about
+>>> authentication that's fairly hard to diagnose, should we make it an error to
+>>> specify a blank entry for those items?
+>>>
+>> Maybe fix it so that blank entries would be equivalent to 'none'?
+>>
+>> Yehuda
+> 
+> That should do it:
+> 
+> diff --git a/src/auth/AuthMethodList.cc b/src/auth/AuthMethodList.cc
+> index e23ac40..53c8d66 100644
+> --- a/src/auth/AuthMethodList.cc
+> +++ b/src/auth/AuthMethodList.cc
+> @@ -35,6 +35,8 @@ AuthMethodList::AuthMethodList(CephContext *cct, string str)
+>        lderr(cct) << "WARNING: unknown auth protocol defined: " <<
+> *iter << dendl;
+>      }
+>    }
+> +  if (auth_supported.empty())
+> +    auth_supported.push_back(CEPH_AUTH_NONE);
+>  }
+> 
+>  bool AuthMethodList::is_supported_auth(int auth_type)
 
-On 10/22/2012 09:06 AM, Masanari Iida wrote:
-> Correct spelling typo in debug message
->
-> Signed-off-by: Masanari Iida <standby24x7@gmail.com>
-> ---
->   fs/ceph/xattr.c | 4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> index 2c2ae5b..f4b2c0e 100644
-> --- a/fs/ceph/xattr.c
-> +++ b/fs/ceph/xattr.c
-> @@ -813,7 +813,7 @@ retry:
->   		struct ceph_buffer *blob;
->
->   		spin_unlock(&ci->i_ceph_lock);
-> -		dout(" preaallocating new blob size=%d\n", required_blob_size);
-> +		dout(" preallocating new blob size=%d\n", required_blob_size);
->   		blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
->   		if (!blob)
->   			goto out;
-> @@ -909,7 +909,7 @@ retry:
->   		struct ceph_buffer *blob;
->
->   		spin_unlock(&ci->i_ceph_lock);
-> -		dout(" preaallocating new blob size=%d\n", required_blob_size);
-> +		dout(" preallocating new blob size=%d\n", required_blob_size);
->   		blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
->   		if (!blob)
->   			goto out;
->
+I, for one, believe that when it comes to configuration files, leaving
+blank values defaulting to something is not the best idea. I would
+rather have a blank value spitting out an error, as it gives room for
+someone leaving it blank assuming it will use 'none', as others may
+assume it will default to 'cephx'.
+
+  -Joao
+
