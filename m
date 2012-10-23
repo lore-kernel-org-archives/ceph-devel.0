@@ -1,46 +1,54 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: "dup inode" error messages on MDS restart
-Date: Tue, 23 Oct 2012 13:30:05 -0700
-Message-ID: <CAPYLRzhkDKw2Av7F55yP_-Cez=1TJ1FY-5uDE8q8WN8DHK5TLA@mail.gmail.com>
-References: <CADXA5U37_cXeLaYcCC4LM=o9YzqSr3994Jj0kS_XVS7D_1YFdg@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: [PATCH] [trivial] fs: ceph: Fix typo in xattr.c
+Date: Tue, 23 Oct 2012 13:43:04 -0700
+Message-ID: <50870158.5010405@inktank.com>
+References: <1350921998-7661-1-git-send-email-standby24x7@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:45373 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933884Ab2JWUaG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 16:30:06 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so630635lbo.19
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 13:30:05 -0700 (PDT)
-In-Reply-To: <CADXA5U37_cXeLaYcCC4LM=o9YzqSr3994Jj0kS_XVS7D_1YFdg@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42225 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933423Ab2JWUnJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 16:43:09 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so706337pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 13:43:08 -0700 (PDT)
+In-Reply-To: <1350921998-7661-1-git-send-email-standby24x7@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matthew Roy <imjustmatthew@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+To: Masanari Iida <standby24x7@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sat, Oct 20, 2012 at 6:42 AM, Matthew Roy <imjustmatthew@gmail.com> wrote:
-> I'm getting some error messages along the lines of:
->
-> 2012-10-20 09:35:09.038865 mds.0 [ERR] loaded dup inode 1000001d369
-> [2,head] v18402 at ~mds0/stray8/1000001d369, but inode
-> 1000001d369.head v18204 already exists at [valid file path]
-> 2012-10-20 09:35:09.300528 mds.0 [ERR] loaded dup inode 10000007d44
-> [2,head] v4493 at ~mds0/stray0/10000007d44, but inode 10000007d44.head
-> v2220 already exists at [valid file path]
-> 2012-10-20 09:35:09.382147 mds.0 [ERR] loaded dup inode 10000007d30
-> [2,head] v4462 at ~mds0/stray6/10000007d30, but inode 10000007d30.head
-> v2216 already exists at [valid file path]
->
-> during MDS restart (shortly after the MDS goes up:active). Any
-> thoughts on what to do about it?
+Thanks!  Making sure this gets incorporated in our next update.
 
-Sorry this got dropped...
-The warning message indicates that there are two copies of the inode
-in the system, and it's definitely a bug. I *think* I've seen this
-before in systems making heavy use of hard links and unlinking the
-inode from the original location.
-In any case, if you can reproduce with MDS debugging on, we might be
-able to pull something out of the log. But probably we can't do
-anything unless you can generate a log that has an inode going from
-okay to having this happen...
--Greg
+On 10/22/2012 09:06 AM, Masanari Iida wrote:
+> Correct spelling typo in debug message
+>
+> Signed-off-by: Masanari Iida <standby24x7@gmail.com>
+> ---
+>   fs/ceph/xattr.c | 4 ++--
+>   1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index 2c2ae5b..f4b2c0e 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -813,7 +813,7 @@ retry:
+>   		struct ceph_buffer *blob;
+>
+>   		spin_unlock(&ci->i_ceph_lock);
+> -		dout(" preaallocating new blob size=%d\n", required_blob_size);
+> +		dout(" preallocating new blob size=%d\n", required_blob_size);
+>   		blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
+>   		if (!blob)
+>   			goto out;
+> @@ -909,7 +909,7 @@ retry:
+>   		struct ceph_buffer *blob;
+>
+>   		spin_unlock(&ci->i_ceph_lock);
+> -		dout(" preaallocating new blob size=%d\n", required_blob_size);
+> +		dout(" preallocating new blob size=%d\n", required_blob_size);
+>   		blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
+>   		if (!blob)
+>   			goto out;
+>
