@@ -1,40 +1,29 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: some questions about rbd
-Date: Mon, 22 Oct 2012 21:21:13 -0700
-Message-ID: <50861B39.8010008@inktank.com>
-References: <CAB6Jr7QLS1=G0vPavT70knKUteDczF4yho1Bha_Tgsv1tsXusA@mail.gmail.com> <CAB6Jr7Q3NcJAFiENv5w=p+DVtZoPksWtQH+cgF4ysHAxMzn6ng@mail.gmail.com>
+From: Dietmar Maurer <dietmar@proxmox.com>
+Subject: RE: rbd export to stdout ?
+Date: Tue, 23 Oct 2012 04:27:49 +0000
+Message-ID: <24E144B8C0207547AD09C467A8259F75576E97B5@lisa.maurer-it.com>
+References: <24E144B8C0207547AD09C467A8259F75576E8022@lisa.maurer-it.com>
+ <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:46882 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754292Ab2JWEVT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 00:21:19 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2451854pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Oct 2012 21:21:18 -0700 (PDT)
-In-Reply-To: <CAB6Jr7Q3NcJAFiENv5w=p+DVtZoPksWtQH+cgF4ysHAxMzn6ng@mail.gmail.com>
+Received: from www.maurer-it.com ([213.129.239.114]:49964 "EHLO
+	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753031Ab2JWE1z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 00:27:55 -0400
+In-Reply-To: <385825fb-6c8d-4710-8a79-312e1caf4cb6@mailpro>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jie sun <0maidou0@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Wido den Hollander <wido@widodh.nl>
 
-
-
-On 10/22/2012 08:10 PM, jie sun wrote:
-> Hi,
->
-> I create a image and map it to a virtual machine,and then mkfs and mount it.
->
-> I want to remove the image from mon server forcely, but it says
-> "Removing image: 99% complete...failed.
->   delete error: image still has watchers
->   This means the image is still open or the client using it crashed.
-> Try again after closing/unmapping it or waiting 30s for the crashed
-> client to timeout."
->
-> I want to know is there any other way to remove it by force?
-
-Are you saying the vm still has the device open and is trying to use it?
-But even so, you want the image to be deleted?
+PiA+PkkgdGhvdWdodCB3ZSBzaG91bGQgZXh0ZW5kICdxZW11LWltZycsIGFkZGluZyBpbXBvcnQv
+ZXhwb3J0IHRoZXJlPw0KPiA+PlRoYXQgd2F5IGl0IHdvdWxkIHdvcmsgZm9yIGFsbCBxZW11IHN0
+b3JhZ2UgZHJpdmVycz8NCj4gDQo+IHNlZW0gdG8gYmUgYWxyZWFkeSBwb3NzaWJsZToNCj4gDQo+
+IGh0dHA6Ly9jZXBoLmNvbS93aWtpL1FFTVUtUkJEDQo+IA0KPiAicWVtdS1pbWcgY29udmVydCAt
+ZiBxY293MiAtTyByYmQNCj4gL2RhdGEvZGViaWFuX2xlbm55X2FtZDY0X3NtYWxsLnFjb3cyIHJi
+ZDpkYXRhL2xlbm55Ig0KDQpPaCAtICBJIG1pc3NlZCB0aGF0LiBUaGFua3MgZm9yIHRoZSBoaW50
+Lg0K
 
