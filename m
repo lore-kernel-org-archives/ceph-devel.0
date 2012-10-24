@@ -1,67 +1,51 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/2] rbd: zero return code in rbd_dev_image_id()
-Date: Wed, 24 Oct 2012 09:59:29 -0700
-Message-ID: <50881E71.8020200@inktank.com>
-References: <508577B6.2020708@inktank.com> <508577F5.3020102@inktank.com>
+Subject: Re: [PATCH 2/2] rbd: fix read-only option name
+Date: Wed, 24 Oct 2012 10:02:13 -0700
+Message-ID: <50881F15.6040207@inktank.com>
+References: <508577B6.2020708@inktank.com> <50857809.2010303@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:59628 "EHLO
+Received: from mail-da0-f46.google.com ([209.85.210.46]:48414 "EHLO
 	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758649Ab2JXQ7c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 12:59:32 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so334705dak.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 09:59:31 -0700 (PDT)
-In-Reply-To: <508577F5.3020102@inktank.com>
+	with ESMTP id S1756980Ab2JXRCP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 13:02:15 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so335762dak.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 10:02:15 -0700 (PDT)
+In-Reply-To: <50857809.2010303@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Now that we tracked down the cause of the positive return value to the
-client side the commit message could be updated.
-
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 10/22/2012 09:44 AM, Alex Elder wrote:
-> There is a call in rbd_dev_image_id() to rbd_req_sync_exec()
-> to get the image id for an image.  Despite the "get_id" class
-> method only returning 0 on success, I am getting back a positive
-> value (I think the number of bytes returned with the call).
+> The name of the "read-only" mapping option was inadvertently changed
+> in this commit:
 >
-> That may or may not be how rbd_req_sync_exec() is supposed to
-> behave, but zeroing the return value if successful makes it moot
-> and makes this path through the code work as desired.
+>      f84344f3 rbd: separate mapping info in rbd_dev
 >
-> Do the same in rbd_dev_v2_object_prefix().
+> Revert that hunk to return it to what it should be.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |    2 ++
->   1 file changed, 2 insertions(+)
+>   drivers/block/rbd.c |    2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index cf5d109..65e9f1f 100644
+> index 65e9f1f..d032883 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2169,6 +2169,7 @@ static int rbd_dev_v2_object_prefix(struct
-> rbd_device *rbd_dev)
->   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
->   	if (ret < 0)
->   		goto out;
-> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
->
->   	p = reply_buf;
->   	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
-> @@ -2862,6 +2863,7 @@ static int rbd_dev_image_id(struct rbd_device
-> *rbd_dev)
->   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
->   	if (ret < 0)
->   		goto out;
-> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
->
->   	p = response;
->   	rbd_dev->image_id = ceph_extract_encoded_string(&p,
+> @@ -397,7 +397,7 @@ enum {
+>   static match_table_t rbd_opts_tokens = {
+>   	/* int args above */
+>   	/* string args above */
+> -	{Opt_read_only, "mapping.read_only"},
+> +	{Opt_read_only, "read_only"},
+>   	{Opt_read_only, "ro"},		/* Alternate spelling */
+>   	{Opt_read_write, "read_write"},
+>   	{Opt_read_write, "rw"},		/* Alternate spelling */
 >
 
