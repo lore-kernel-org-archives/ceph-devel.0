@@ -1,45 +1,46 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [PATCH] libceph: avoid NULL kref_put when osd reset races with alloc_msg
-Date: Wed, 24 Oct 2012 16:20:29 -0700
-Message-ID: <1351120829-12219-1-git-send-email-sage@inktank.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: libcephfs ceph_shutdown()
+Date: Wed, 24 Oct 2012 16:32:14 -0700
+Message-ID: <CAPrxi5_Fa8U=z2cD4tRrYB34w0Y5crV7sSmo=aaCFLEg_oYGdw@mail.gmail.com>
+References: <alpine.DEB.2.00.1210241614190.13619@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53582 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751333Ab2JXXTk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 19:19:40 -0400
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:34378 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750894Ab2JXXcP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 19:32:15 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so1232852vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 16:32:15 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1210241614190.13619@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: Sage Weil <sage@inktank.com>
+Cc: noah.watkins@inktank.com, joe.buck@inktank.com, ceph-devel@vger.kernel.org
 
-The ceph_on_in_msg_alloc() method drops con->mutex while it allocates a
-message.  If that races with a timeout that resends a zillion messages and
-resets the connection, and the ->alloc_msg() method returns a NULL message,
-it will call ceph_msg_put(NULL) and BUG.
+On the Java, side being able to do an unmount to free resources, while
+still keeping the context, makes things more natural to both explain,
+and code. I'm sure this would be true for other language bindings as
+well.
 
-Fix by only calling put if msg is non-NULL.
++1
 
-Fixes http://tracker.newdream.net/issues/3142
 
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- net/ceph/messenger.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 66f6f56..1041114 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2742,7 +2742,8 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
- 		msg = con->ops->alloc_msg(con, hdr, skip);
- 		mutex_lock(&con->mutex);
- 		if (con->state != CON_STATE_OPEN) {
--			ceph_msg_put(msg);
-+			if (msg)
-+				ceph_msg_put(msg);
- 			return -EAGAIN;
- 		}
- 		con->in_msg = msg;
--- 
-1.7.9
-
+On Wed, Oct 24, 2012 at 4:17 PM, Sage Weil <sage@inktank.com> wrote:
+> I'm annoyed that ceph_shutdown() both unmounts and releases the resource,
+> but there is a separate _create() and _mount() method.  I wonder if it
+> makes sense to introduce ceph_umount() and ceph_release() and make
+> ceph_shutdown() call them (for compatibility).
+>
+> I thought librados was a bit cleaner, but it appears to be doing the same
+> thing.. meh.  (Also, the docs for _shutdown() incorrectly state that
+> shutdown isn't needed if rados_connect() fails.. but presumably the
+> resource still needs to be freed?)
+>
+> Is this worth fixing?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
