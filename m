@@ -1,30 +1,25 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
 Subject: Re: [PATCH 2/4] rbd: increase maximum snapshot name length
-Date: Wed, 24 Oct 2012 12:01:13 -0700
-Message-ID: <50883AF9.3080705@inktank.com>
+Date: Wed, 24 Oct 2012 14:05:08 -0700
+Message-ID: <50885804.7090304@inktank.com>
 References: <5085791C.9010205@inktank.com> <50857996.70502@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45664 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43623 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934308Ab2JXTBR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 15:01:17 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1417456pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 12:01:16 -0700 (PDT)
+	with ESMTP id S1758774Ab2JXVFM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 17:05:12 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so1487083pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 14:05:12 -0700 (PDT)
 In-Reply-To: <50857996.70502@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-This is a better limit than before. We still need to
-do some clean up of these limits across projects:
-
-http://www.tracker.newdream.net/issues/1701
-
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
 On 10/22/2012 09:51 AM, Alex Elder wrote:
 > Change RBD_MAX_SNAP_NAME_LEN to be based on NAME_MAX.  That is a
@@ -97,4 +92,3 @@ On 10/22/2012 09:51 AM, Alex Elder wrote:
 >
 >   out_err:
 >
-
