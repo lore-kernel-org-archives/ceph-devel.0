@@ -1,53 +1,67 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: fix bug in rbd_dev_id_put()
-Date: Wed, 24 Oct 2012 09:43:10 -0700
-Message-ID: <50881A9E.8070407@inktank.com>
-References: <5076E6FE.9070400@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: zero return code in rbd_dev_image_id()
+Date: Wed, 24 Oct 2012 09:59:29 -0700
+Message-ID: <50881E71.8020200@inktank.com>
+References: <508577B6.2020708@inktank.com> <508577F5.3020102@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:49838 "EHLO
+Received: from mail-da0-f46.google.com ([209.85.210.46]:59628 "EHLO
 	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757131Ab2JXQnN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 12:43:13 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so328247dak.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 09:43:13 -0700 (PDT)
-In-Reply-To: <5076E6FE.9070400@inktank.com>
+	with ESMTP id S1758649Ab2JXQ7c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 12:59:32 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so334705dak.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 09:59:31 -0700 (PDT)
+In-Reply-To: <508577F5.3020102@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+Now that we tracked down the cause of the positive return value to the
+client side the commit message could be updated.
+
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/11/2012 08:34 AM, Alex Elder wrote:
-> In rbd_dev_id_put(), there's a loop that's intended to determine
-> the maximum device id in use.  But it isn't doing that at all,
-> the effect of how it's written is to simply use the just-put id
-> number, which ignores whole purpose of this function.
+On 10/22/2012 09:44 AM, Alex Elder wrote:
+> There is a call in rbd_dev_image_id() to rbd_req_sync_exec()
+> to get the image id for an image.  Despite the "get_id" class
+> method only returning 0 on success, I am getting back a positive
+> value (I think the number of bytes returned with the call).
 >
-> Fix the bug.
+> That may or may not be how rbd_req_sync_exec() is supposed to
+> behave, but zeroing the return value if successful makes it moot
+> and makes this path through the code work as desired.
+>
+> Do the same in rbd_dev_v2_object_prefix().
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |    4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
+>   drivers/block/rbd.c |    2 ++
+>   1 file changed, 2 insertions(+)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index ca28036..cf5d109 100644
+> index cf5d109..65e9f1f 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2642,8 +2642,8 @@ static void rbd_dev_id_put(struct rbd_device
-> *rbd_dev)
->           struct rbd_device *rbd_dev;
+> @@ -2169,6 +2169,7 @@ static int rbd_dev_v2_object_prefix(struct
+> rbd_device *rbd_dev)
+>   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
+>   	if (ret < 0)
+>   		goto out;
+> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
 >
->           rbd_dev = list_entry(tmp, struct rbd_device, node);
-> -        if (rbd_id > max_id)
-> -            max_id = rbd_id;
-> +        if (rbd_dev->dev_id > max_id)
-> +            max_id = rbd_dev->dev_id;
->       }
->       spin_unlock(&rbd_dev_list_lock);
+>   	p = reply_buf;
+>   	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
+> @@ -2862,6 +2863,7 @@ static int rbd_dev_image_id(struct rbd_device
+> *rbd_dev)
+>   	dout("%s: rbd_req_sync_exec returned %d\n", __func__, ret);
+>   	if (ret < 0)
+>   		goto out;
+> +	ret = 0;    /* rbd_req_sync_exec() can return positive */
+>
+>   	p = response;
+>   	rbd_dev->image_id = ceph_extract_encoded_string(&p,
 >
 
