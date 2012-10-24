@@ -1,387 +1,104 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: simplify rbd_rq_fn()
-Date: Tue, 23 Oct 2012 21:53:41 -0500
-Message-ID: <50875835.3010206@inktank.com>
+From: jie sun <0maidou0@gmail.com>
+Subject: Re:
+Date: Wed, 24 Oct 2012 13:48:22 +0800
+Message-ID: <CAB6Jr7QbWZ7Xe+VZrPwC7rWcZ7_F6kLm=A+zq1NEAmcGvgky-A@mail.gmail.com>
+References: <CAB6Jr7RbMaxQpxV0_pUTwSwf51wuavmJ_Dnzdk4OVMZiHcMZKQ@mail.gmail.com>
+	<50868471.1070105@widodh.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:59043 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934265Ab2JXCxo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Oct 2012 22:53:44 -0400
-Received: by mail-ia0-f174.google.com with SMTP id y32so41665iag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 19:53:43 -0700 (PDT)
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:55719 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754644Ab2JXFsX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 01:48:23 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h16so126665oag.19
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Oct 2012 22:48:22 -0700 (PDT)
+In-Reply-To: <50868471.1070105@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Guangliang Zhao <gzhao@suse.com>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-When processing a request, rbd_rq_fn() makes clones of the bio's in
-the request's bio chain and submits the results to osd's to be
-satisfied.  If a request bio straddles the boundary between objects
-backing the rbd image, it must be represented by two cloned bio's,
-one for the first part (at the end of one object) and one for the
-second (at the beginning of the next object).
+My vm kernel version is "Linux ubuntu12 3.2.0-23-generic".
 
-This has been handled by a function bio_chain_clone(), which
-includes an interface only a mother could love, and which has
-been found to have other problems.
+"ceph-s" shows
+"  health HEALTH_OK
+   monmap e1: 1 mons at {a=10.100.211.146:6789/0}, election epoch 0, quorum 0 a
+   osdmap e152: 10 osds: 9 up, 9 in
+    pgmap v48479: 2112 pgs: 2112 active+clean; 23161 MB data, 46323 MB
+used, 2451 GB / 2514 GB avail
+   mdsmap e31: 1/1/1 up {0=a=up:active} "
 
-This patch defines two new fairly generic bio functions (one which
-replaces bio_chain_clone()) to help out the situation, and then
-revises rbd_rq_fn() to make use of them.
+In my vm, I do operations like:
+I install 4 debs on my vm, such as libnss3, libnspr4, librados2,
+librbd1. And then execute "modprobe rbd" so that I can map a image to
+my vm.
+Then "rbd create foo --size 10240 -m $monIP(my ceph mon IP)",
+         "rbd map foo -m $monIP" ------ Here a device /dev/rbd0 can be
+used as a local device
+         "mkfs -t ext4 /dev/rbd0"
+         "mount /dev/rbd0 /mnt(or some other directory)"
+After the operations above, I can use this device. But it oftern
+prompt some log like "libceph: osd9 10.100.211.68:6809 socket closed".
+I just want to mount a device to my vm, so I didn't install a ceph
+client. Is this proper to do so?
 
-First, bio_clone_range() clones a portion of a single bio, starting
-at a given offset within the bio and including only as many bytes
-as requested.  As a convenience, a request to clone the entire bio
-is passed directly to bio_clone().
+Thank  you for youer answer!
 
-Second, bio_chain_clone_range() performs a similar function,
-producing a chain of cloned bio's covering a sub-range of the
-source chain.  No bio_pair structures are used, and if successful
-the result will represent exactly the specified range.
 
-Using bio_chain_clone_range() makes bio_rq_fn() a little easier
-to understand, because it avoids the need to pass very much
-state information between consecutive calls.  By avoiding the need
-to track a bio_pair structure, it also eliminates the problem
-described here:  http://tracker.newdream.net/issues/2933
 
-Note that a block request (and therefore the complete length of
-a bio chain processed in rbd_rq_fn()) is an unsigned int, while
-the result of rbd_segment_length() is u64.  This change makes
-this range trunctation explicit, and trips a bug if the the
-segment boundary is too far off.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |  231
-+++++++++++++++++++++++++++++++++------------------
- 1 file changed, 152 insertions(+), 79 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3c131ab..f7fcc96 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -826,77 +826,144 @@ static void zero_bio_chain(struct bio *chain, int
-start_ofs)
- }
-
- /*
-- * bio_chain_clone - clone a chain of bios up to a certain length.
-- * might return a bio_pair that will need to be released.
-+ * Clone a portion of a bio, starting at the given byte offset
-+ * and continuing for the number of bytes indicated.
-  */
--static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
--				   struct bio_pair **bp,
--				   int len, gfp_t gfpmask)
--{
--	struct bio *old_chain = *old;
--	struct bio *new_chain = NULL;
--	struct bio *tail;
--	int total = 0;
--
--	if (*bp) {
--		bio_pair_release(*bp);
--		*bp = NULL;
--	}
-+static struct bio *bio_clone_range(struct bio *bio_src,
-+					unsigned int offset,
-+					unsigned int len,
-+					gfp_t gfpmask)
-+{
-+	struct bio_vec *bv;
-+	unsigned int resid;
-+	unsigned short idx;
-+	unsigned int voff;
-+	unsigned short end_idx;
-+	unsigned short vcnt;
-+	struct bio *bio;
-
--	while (old_chain && (total < len)) {
--		struct bio *tmp;
-+	/* Handle the easy case for the caller */
-
--		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
--		if (!tmp)
--			goto err_out;
--		gfpmask &= ~__GFP_WAIT;	/* can't wait after the first */
-+	if (!offset && len == bio_src->bi_size)
-+		return bio_clone(bio_src, gfpmask);
-
--		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
-+	if (WARN_ON_ONCE(!len))
-+		return NULL;
-+	if (WARN_ON_ONCE(len > bio_src->bi_size))
-+		return NULL;
-+	if (WARN_ON_ONCE(offset > bio_src->bi_size - len))
-+		return NULL;
-
--			/*
--			 * this split can only happen with a single paged bio,
--			 * split_bio will BUG_ON if this is not the case
--			 */
--			dout("bio_chain_clone split! total=%d remaining=%d"
--			     "bi_size=%u\n",
--			     total, len - total, old_chain->bi_size);
-+	/* Find first affected segment... */
-
--			/* split the bio. We'll release it either in the next
--			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
--				goto err_out;
-+	resid = offset;
-+	__bio_for_each_segment(bv, bio_src, idx, 0) {
-+		if (resid < bv->bv_len)
-+			break;
-+		resid -= bv->bv_len;
-+	}
-+	voff = resid;
-
--			__bio_clone(tmp, &bp->bio1);
-+	/* ...and the last affected segment */
-
--			*next = &bp->bio2;
--		} else {
--			__bio_clone(tmp, old_chain);
--			*next = old_chain->bi_next;
--		}
-+	resid += len;
-+	__bio_for_each_segment(bv, bio_src, end_idx, idx) {
-+		if (resid <= bv->bv_len)
-+			break;
-+		resid -= bv->bv_len;
-+	}
-+	vcnt = end_idx - idx + 1;
-+
-+	/* Build the clone */
-+
-+	bio = bio_alloc(gfpmask, (unsigned int) vcnt);
-+	if (!bio)
-+		return NULL;	/* ENOMEM */
-
--		tmp->bi_bdev = NULL;
--		tmp->bi_next = NULL;
--		if (new_chain)
--			tail->bi_next = tmp;
--		else
--			new_chain = tmp;
--		tail = tmp;
--		old_chain = old_chain->bi_next;
-+	bio->bi_bdev = bio_src->bi_bdev;
-+	bio->bi_sector = bio_src->bi_sector + (offset >> SECTOR_SHIFT);
-+	bio->bi_rw = bio_src->bi_rw;
-+	bio->bi_flags |= 1 << BIO_CLONED;
-
--		total += tmp->bi_size;
-+	/*
-+	 * Copy over our part of the bio_vec, then update the first
-+	 * and last (or only) entries.
-+	 */
-+	memcpy(&bio->bi_io_vec[0], &bio_src->bi_io_vec[idx],
-+			vcnt * sizeof (struct bio_vec));
-+	bio->bi_io_vec[0].bv_offset += voff;
-+	if (vcnt > 1) {
-+		bio->bi_io_vec[0].bv_len -= voff;
-+		bio->bi_io_vec[vcnt - 1].bv_len = resid;
-+	} else {
-+		bio->bi_io_vec[0].bv_len = len;
- 	}
-
--	rbd_assert(total == len);
-+	bio->bi_vcnt = vcnt;
-+	bio->bi_size = len;
-+	bio->bi_idx = 0;
-+
-+	return bio;
-+}
-+
-+/*
-+ * Clone a portion of a bio chain, starting at the given byte offset
-+ * into the first bio in the source chain and continuing for the
-+ * number of bytes indicated.  The result is another bio chain of
-+ * exactly the given length, or a null pointer on error.
-+ *
-+ * The bio_src and offset parameters are both in-out.  On entry they
-+ * refer to the first source bio and the offset into that bio where
-+ * the start of data to be cloned is located.
-+ *
-+ * On return, bio_src is updated to refer to the bio in the source
-+ * chain that contains first un-cloned byte, and *offset will
-+ * contain the offset of that byte within that bio.
-+ */
-+static struct bio *bio_chain_clone_range(struct bio **bio_src,
-+					unsigned int *offset,
-+					unsigned int len,
-+					gfp_t gfpmask)
-+{
-+	struct bio *bi = *bio_src;
-+	unsigned int off = *offset;
-+	struct bio *chain = NULL;
-+	struct bio **end;
-+
-+	/* Build up a chain of clone bios up to the limit */
-+
-+	if (!bi || off >= bi->bi_size || !len)
-+		return NULL;		/* Nothing to clone */
-
--	*old = old_chain;
-+	end = &chain;
-+	while (len) {
-+		unsigned int bi_size;
-+		struct bio *bio;
-+
-+		if (!bi)
-+			goto out_err;	/* EINVAL; ran out of bio's */
-+		bi_size = min_t(unsigned int, bi->bi_size - off, len);
-+		bio = bio_clone_range(bi, off, bi_size, gfpmask);
-+		if (!bio)
-+			goto out_err;	/* ENOMEM */
-+
-+		*end = bio;
-+		end = &bio->bi_next;
-+
-+		off += bi_size;
-+		if (off == bi->bi_size) {
-+			bi = bi->bi_next;
-+			off = 0;
-+		}
-+		len -= bi_size;
-+	}
-+	*bio_src = bi;
-+	*offset = off;
-
--	return new_chain;
-+	return chain;
-+out_err:
-+	bio_chain_put(chain);
-
--err_out:
--	dout("bio_chain_clone with err\n");
--	bio_chain_put(new_chain);
- 	return NULL;
- }
-
-@@ -1014,8 +1081,9 @@ static int rbd_do_request(struct request *rq,
- 		req_data->coll_index = coll_index;
- 	}
-
--	dout("rbd_do_request object_name=%s ofs=%llu len=%llu\n", object_name,
--		(unsigned long long) ofs, (unsigned long long) len);
-+	dout("rbd_do_request object_name=%s ofs=%llu len=%llu coll=%p[%d]\n",
-+		object_name, (unsigned long long) ofs,
-+		(unsigned long long) len, coll, coll_index);
-
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	req = ceph_osdc_alloc_request(osdc, flags, snapc, ops,
-@@ -1463,18 +1531,16 @@ static void rbd_rq_fn(struct request_queue *q)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	struct request *rq;
--	struct bio_pair *bp = NULL;
-
- 	while ((rq = blk_fetch_request(q))) {
- 		struct bio *bio;
--		struct bio *rq_bio, *next_bio = NULL;
- 		bool do_write;
- 		unsigned int size;
--		u64 op_size = 0;
- 		u64 ofs;
- 		int num_segs, cur_seg = 0;
- 		struct rbd_req_coll *coll;
- 		struct ceph_snap_context *snapc;
-+		unsigned int bio_offset;
-
- 		dout("fetched request\n");
-
-@@ -1486,10 +1552,6 @@ static void rbd_rq_fn(struct request_queue *q)
-
- 		/* deduce our operation (read, write) */
- 		do_write = (rq_data_dir(rq) == WRITE);
--
--		size = blk_rq_bytes(rq);
--		ofs = blk_rq_pos(rq) * SECTOR_SIZE;
--		rq_bio = rq->bio;
- 		if (do_write && rbd_dev->mapping.read_only) {
- 			__blk_end_request_all(rq, -EROFS);
- 			continue;
-@@ -1512,6 +1574,10 @@ static void rbd_rq_fn(struct request_queue *q)
-
- 		up_read(&rbd_dev->header_rwsem);
-
-+		size = blk_rq_bytes(rq);
-+		ofs = blk_rq_pos(rq) * SECTOR_SIZE;
-+		bio = rq->bio;
-+
- 		dout("%s 0x%x bytes at 0x%llx\n",
- 		     do_write ? "write" : "read",
- 		     size, (unsigned long long) blk_rq_pos(rq) * SECTOR_SIZE);
-@@ -1531,30 +1597,37 @@ static void rbd_rq_fn(struct request_queue *q)
- 			continue;
- 		}
-
-+		bio_offset = 0;
- 		do {
--			/* a bio clone to be passed down to OSD req */
-+			u64 limit = rbd_segment_length(rbd_dev, ofs, size);
-+			unsigned int chain_size;
-+			struct bio *bio_chain;
-+
-+			BUG_ON(limit > (u64) UINT_MAX);
-+			chain_size = (unsigned int) limit;
- 			dout("rq->bio->bi_vcnt=%hu\n", rq->bio->bi_vcnt);
--			op_size = rbd_segment_length(rbd_dev, ofs, size);
-+
- 			kref_get(&coll->kref);
--			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
--					      op_size, GFP_ATOMIC);
--			if (bio)
-+
-+			/* Pass a cloned bio chain via an osd request */
-+
-+			bio_chain = bio_chain_clone_range(&bio,
-+						&bio_offset, chain_size,
-+						GFP_ATOMIC);
-+			if (bio_chain)
- 				(void) rbd_do_op(rq, rbd_dev, snapc,
--						ofs, op_size,
--						bio, coll, cur_seg);
-+						ofs, chain_size,
-+						bio_chain, coll, cur_seg);
- 			else
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
--						       -ENOMEM, op_size);
--			size -= op_size;
--			ofs += op_size;
-+						       -ENOMEM, chain_size);
-+			size -= chain_size;
-+			ofs += chain_size;
-
- 			cur_seg++;
--			rq_bio = next_bio;
- 		} while (size > 0);
- 		kref_put(&coll->kref, rbd_coll_release);
-
--		if (bp)
--			bio_pair_release(bp);
- 		spin_lock_irq(q->queue_lock);
-
- 		ceph_put_snap_context(snapc);
-@@ -1564,7 +1637,7 @@ static void rbd_rq_fn(struct request_queue *q)
- /*
-  * a queue callback. Makes sure that we don't create a bio that spans
-across
-  * multiple osd objects. One exception would be with a single page bios,
-- * which we handle later at bio_chain_clone
-+ * which we handle later at bio_chain_clone_range()
-  */
- static int rbd_merge_bvec(struct request_queue *q, struct
-bvec_merge_data *bmd,
- 			  struct bio_vec *bvec)
--- 
-1.7.9.5
-
+2012/10/23 Wido den Hollander <wido@widodh.nl>:
+> On 10/23/2012 06:12 AM, jie sun wrote:
+>>
+>> Hi,
+>>
+>> I created and mounted a rbd for a virtual machine. And it can be used
+>> as a block device normally, but often prompt some log like below:
+>
+>
+> Could you provide us a bit more information?
+>
+> What kernel are you using?
+>
+> What does "ceph -s" show you?
+>
+> Are you running KVM virtual machines and connecting /dev/rbd0 as a device to
+> the virtual machine?
+>
+> Wido
+>
+>> "Oct 23 10:30:22 ubuntu12 kernel: [321506.941606] libceph: osd3
+>> 10.100.211.146:6810 socket closed
+>> Oct 23 10:30:59 ubuntu12 kernel: [321544.337856] libceph: osd9
+>> 10.100.211.68:6809 socket closed
+>> Oct 23 10:45:22 ubuntu12 kernel: [322407.233090] libceph: osd3
+>> 10.100.211.146:6810 socket closed
+>> Oct 23 10:45:59 ubuntu12 kernel: [322444.766796] libceph: osd9
+>> 10.100.211.68:6809 socket closed
+>> Oct 23 11:00:22 ubuntu12 kernel: [323307.529098] libceph: osd3
+>> 10.100.211.146:6810 socket closed
+>> Oct 23 11:01:00 ubuntu12 kernel: [323345.241679] libceph: osd9
+>> 10.100.211.68:6809 socket closed
+>> Oct 23 11:15:22 ubuntu12 kernel: [324207.821113] libceph: osd3
+>> 10.100.211.146:6810 socket closed
+>> Oct 23 11:16:00 ubuntu12 kernel: [324245.717747] libceph: osd9
+>> 10.100.211.68:6809 socket closed
+>> Oct 23 11:17:01 ubuntu12 CRON[10529]: (root) CMD (   cd / && run-parts
+>> --report /etc/cron.hourly)
+>> Oct 23 11:30:23 ubuntu12 kernel: [325108.117134] libceph: osd3
+>> 10.100.211.146:6810 socket closed"
+>>
+>> These log also can be found in "/var/log/syslog".
+>> I google something about this problem,but didn't understand what
+>> you've wrote in "http://tracker.newdream.net/issues/2260" exactly.
+>> How can I resolve this problem? My ceph version is 0.48.
+>> Should I change some files, or modify some content of some file?
+>>
+>> Thank you !
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
