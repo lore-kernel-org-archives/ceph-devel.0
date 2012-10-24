@@ -1,120 +1,70 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 3/3] rbd: consolidate rbd_do_op() calls
-Date: Wed, 24 Oct 2012 10:31:55 -0700
-Message-ID: <5088260B.7030308@inktank.com>
-References: <50762C54.40101@inktank.com> <50762CCB.5040007@inktank.com>
+Subject: Re: [PATCH 1/4] rbd: verify rbd image order value
+Date: Wed, 24 Oct 2012 11:02:13 -0700
+Message-ID: <50882D25.8010706@inktank.com>
+References: <5085791C.9010205@inktank.com> <5085798C.8010605@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:46408 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935257Ab2JXRb6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 13:31:58 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1365046pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 10:31:58 -0700 (PDT)
-In-Reply-To: <50762CCB.5040007@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:56219 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754218Ab2JXSCQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 14:02:16 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so531847pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 11:02:16 -0700 (PDT)
+In-Reply-To: <5085798C.8010605@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-This cleanup makes sense. We should probably check
-the return code now as well, as I note below.
+Might want to add some output so we can tell which error
+is being hit.
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/10/2012 07:19 PM, Alex Elder wrote:
-> The two calls to rbd_do_op() from rbd_rq_fn() differ only in the
-> value passed for the snapshot id and the snapshot context.
+On 10/22/2012 09:51 AM, Alex Elder wrote:
+> This adds a verification that an rbd image's object order is
+> within the upper and lower bounds supported by this implementation.
 >
-> For reads the snapshot always comes from the mapping, and for writes
-> the snapshot id is always CEPH_NOSNAP.
+> It must be at least 9 (SECTOR_SHIFT), because the Linux bio system
+> assumes that minimum granularity.
 >
-> The snapshot context is always null for reads.  For writes, the
-> snapshot context always comes from the rbd header, but it is
-> acquired under protection of header semaphore and could change
-> thereafter, so we can't simply use what's available inside
-> rbd_do_op().
+> It also must be less than 32 (at the moment anyway) because there
+> exist spots in the code that store the size of a "segment" (object
+> backing an rbd image) in a signed int variable, which can be 32 bits
+> including the sign.  We should be able to relax this limit once
+> we've verified the code uses 64-bit types where needed.
 >
-> Eliminate the snapid parameter from rbd_do_op(), and set it
-> based on the I/O direction inside that function instead.  Always
-> pass the snapshot context acquired in the caller, but reset it
-> to a null pointer inside rbd_do_op() if the operation is a read.
->
-> As a result, there is no difference in the read and write calls
-> to rbd_do_op() made in rbd_rq_fn(), so just call it unconditionally.
+> Note that the CLI tool already limits the order to the range 12-25.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   26 +++++++++-----------------
->   1 file changed, 9 insertions(+), 17 deletions(-)
+>   drivers/block/rbd.c |   10 ++++++++++
+>   1 file changed, 10 insertions(+)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 396af14..ca28036 100644
+> index d032883..4734446 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1163,7 +1163,6 @@ done:
->   static int rbd_do_op(struct request *rq,
->                struct rbd_device *rbd_dev,
->                struct ceph_snap_context *snapc,
-> -             u64 snapid,
->                u64 ofs, u64 len,
->                struct bio *bio,
->                struct rbd_req_coll *coll,
-> @@ -1177,6 +1176,7 @@ static int rbd_do_op(struct request *rq,
->       u32 payload_len;
->       int opcode;
->       int flags;
-> +    u64 snapid;
+> @@ -533,6 +533,16 @@ static bool rbd_dev_ondisk_valid(struct
+> rbd_image_header_ondisk *ondisk)
+>   	if (memcmp(&ondisk->text, RBD_HEADER_TEXT, sizeof (RBD_HEADER_TEXT)))
+>   		return false;
 >
->       seg_name = rbd_segment_name(rbd_dev, ofs);
->       if (!seg_name)
-> @@ -1187,10 +1187,13 @@ static int rbd_do_op(struct request *rq,
->       if (rq_data_dir(rq) == WRITE) {
->           opcode = CEPH_OSD_OP_WRITE;
->           flags = CEPH_OSD_FLAG_WRITE|CEPH_OSD_FLAG_ONDISK;
-> +        snapid = CEPH_NOSNAP;
->           payload_len = seg_len;
->       } else {
->           opcode = CEPH_OSD_OP_READ;
->           flags = CEPH_OSD_FLAG_READ;
-> +        snapc = NULL;
-> +        snapid = rbd_dev->mapping.snap_id;
->           payload_len = 0;
->       }
->
-> @@ -1518,24 +1521,13 @@ static void rbd_rq_fn(struct request_queue *q)
->               kref_get(&coll->kref);
->               bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
->                             op_size, GFP_ATOMIC);
-> -            if (!bio) {
-> +            if (bio)
-> +                (void) rbd_do_op(rq, rbd_dev, snapc,
-> +                        ofs, op_size,
-> +                        bio, coll, cur_seg);
-
-We could check the error code here pretty easily now.
-
-> +            else
->                   rbd_coll_end_req_index(rq, coll, cur_seg,
->                                  -ENOMEM, op_size);
-> -                goto next_seg;
-> -            }
-> -
-> -            /* init OSD command: write or read */
-> -            if (do_write)
-> -                (void) rbd_do_op(rq, rbd_dev,
-> -                        snapc, CEPH_NOSNAP,
-> -                        ofs, op_size, bio,
-> -                        coll, cur_seg);
-> -            else
-> -                (void) rbd_do_op(rq, rbd_dev,
-> -                        NULL, rbd_dev->mapping.snap_id,
-> -                        ofs, op_size, bio,
-> -                        coll, cur_seg);
-> -next_seg:
->               size -= op_size;
->               ofs += op_size;
+> +	/* The bio layer requires at least sector-sized I/O */
+> +
+> +	if (ondisk->options.order < SECTOR_SHIFT)
+> +		return false;
+> +
+> +	/* If we use u64 in a few spots we may be able to loosen this */
+> +
+> +	if (ondisk->options.order > 8 * sizeof (int) - 1)
+> +		return false;
+> +
+>   	/*
+>   	 * The size of a snapshot header has to fit in a size_t, and
+>   	 * that limits the number of snapshots.
 >
 
