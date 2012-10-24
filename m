@@ -1,94 +1,113 @@
 From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH 2/4] rbd: increase maximum snapshot name length
-Date: Wed, 24 Oct 2012 14:05:08 -0700
-Message-ID: <50885804.7090304@inktank.com>
-References: <5085791C.9010205@inktank.com> <50857996.70502@inktank.com>
+Subject: Re: [PATCH 3/4] rbd: simplify rbd_merge_bvec()
+Date: Wed, 24 Oct 2012 15:23:06 -0700
+Message-ID: <50886A4A.8080503@inktank.com>
+References: <5085791C.9010205@inktank.com> <5085799F.6090405@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:43623 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:59370 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758774Ab2JXVFM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 17:05:12 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1487083pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 14:05:12 -0700 (PDT)
-In-Reply-To: <50857996.70502@inktank.com>
+	with ESMTP id S1161227Ab2JXWXJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 18:23:09 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so1527529pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 15:23:08 -0700 (PDT)
+In-Reply-To: <5085799F.6090405@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+'segment' is better than 'chunk', but as these are RADOS objects, I 
+really prefer just "object" here to make that clear.  Maybe we can add
+a small block comment explaining the terminology just to make it 
+crystal-clear?
+
+rbd_object would be fine with me too.  The problem with "segment" is it 
+tends to make me think I'm missing a subdivision of the RADOS objects 
+that make up an rbd image that I didn't know about.
+
+Otherwise,
+
 Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
 On 10/22/2012 09:51 AM, Alex Elder wrote:
-> Change RBD_MAX_SNAP_NAME_LEN to be based on NAME_MAX.  That is a
-> practical limit for the length of a snapshot name (based on the
-> presence of a directory using the name under /sys/bus/rbd to
-> represent the snapshot).
+> The aim of this patch is to make what's going on rbd_merge_bvec() a
+> bit more obvious than it was before.  This was an issue when a
+> recent btrfs bug led us to question whether the merge function was
+> working correctly.
 >
-> The /sys entry is created by prefixing it with "snap_"; define that
-> prefix symbolically, and take its length into account in defining
-> the snapshot name length limit.
->
-> Enforce the limit in rbd_add_parse_args().  Also delete a dout()
-> call in that function that was not meant to be committed.
+> Use "seg" rather than "chunk" to indicate the units whose boundaries
+> we care about we call "segments."
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   16 +++++++++++-----
->   1 file changed, 11 insertions(+), 5 deletions(-)
+>   drivers/block/rbd.c |   51
+> +++++++++++++++++++++++++++++++++++----------------
+>   1 file changed, 35 insertions(+), 16 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4734446..4858d92 100644
+> index 4858d92..4ccce4d 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -61,7 +61,10 @@
->
->   #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
->
-> -#define RBD_MAX_SNAP_NAME_LEN	32
-> +#define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
-> +#define RBD_MAX_SNAP_NAME_LEN	\
-> +			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
-> +
->   #define RBD_MAX_SNAP_COUNT	510	/* allows max snapc to fit in 4KB */
->   #define RBD_MAX_OPT_LEN		1024
->
-> @@ -2063,7 +2066,7 @@ static int rbd_register_snap_dev(struct rbd_snap
-> *snap,
->   	dev->type = &rbd_snap_device_type;
->   	dev->parent = parent;
->   	dev->release = rbd_snap_dev_release;
-> -	dev_set_name(dev, "snap_%s", snap->name);
-> +	dev_set_name(dev, "%s%s", RBD_SNAP_DEV_NAME_PREFIX, snap->name);
->   	dout("%s: registering device for snapshot %s\n", __func__, snap->name);
->
->   	ret = device_register(dev);
-> @@ -2797,8 +2800,13 @@ static char *rbd_add_parse_args(struct rbd_device
-> *rbd_dev,
->   	if (!rbd_dev->image_name)
->   		goto out_err;
->
-> -	/* Snapshot name is optional */
-> +	/* Snapshot name is optional; default is to use "head" */
-> +
->   	len = next_token(&buf);
-> +	if (len > RBD_MAX_SNAP_NAME_LEN) {
-> +		err_ptr = ERR_PTR(-ENAMETOOLONG);
-> +		goto out_err;
-> +	}
->   	if (!len) {
->   		buf = RBD_SNAP_HEAD_NAME; /* No snapshot supplied */
->   		len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
-> @@ -2809,8 +2817,6 @@ static char *rbd_add_parse_args(struct rbd_device
-> *rbd_dev,
->   	memcpy(snap_name, buf, len);
->   	*(snap_name + len) = '\0';
->
-> -dout("    SNAP_NAME is <%s>, len is %zd\n", snap_name, len);
+> @@ -1566,22 +1566,41 @@ static int rbd_merge_bvec(struct request_queue
+> *q, struct bvec_merge_data *bmd,
+>   			  struct bio_vec *bvec)
+>   {
+>   	struct rbd_device *rbd_dev = q->queuedata;
+> -	unsigned int chunk_sectors;
+> -	sector_t sector;
+> -	unsigned int bio_sectors;
+> -	int max;
 > -
->   	return snap_name;
+> -	chunk_sectors = 1 << (rbd_dev->header.obj_order - SECTOR_SHIFT);
+> -	sector = bmd->bi_sector + get_start_sect(bmd->bi_bdev);
+> -	bio_sectors = bmd->bi_size >> SECTOR_SHIFT;
+> -
+> -	max =  (chunk_sectors - ((sector & (chunk_sectors - 1))
+> -				 + bio_sectors)) << SECTOR_SHIFT;
+> -	if (max < 0)
+> -		max = 0; /* bio_add cannot handle a negative return */
+> -	if (max <= bvec->bv_len && bio_sectors == 0)
+> -		return bvec->bv_len;
+> -	return max;
+> +	sector_t sector_offset;
+> +	sector_t sectors_per_seg;
+> +	sector_t seg_sector_offset;
+> +	int ret;
+> +
+> +	/*
+> +	 * Find how far into its rbd segment the partition-relative
+> +	 * bio start sector is to offset relative to the enclosing
+> +	 * device.
+> +	 */
+> +	sector_offset = get_start_sect(bmd->bi_bdev) + bmd->bi_sector;
+> +	sectors_per_seg = 1 << (rbd_dev->header.obj_order - SECTOR_SHIFT);
+> +	seg_sector_offset = sector_offset & (sectors_per_seg - 1);
+> +
+> +	/*
+> +	 * Compute the number of bytes from that offset to the end
+> +	 * of the segment.  Account for what's already used by the bio.
+> +	 */
+> +	ret = (int) (sectors_per_seg - seg_sector_offset) << SECTOR_SHIFT;
+> +	if (ret >= bmd->bi_size)
+> +		ret -= bmd->bi_size;
+> +	else
+> +		ret = 0;
+> +
+> +	/*
+> +	 * Don't send back more than was asked for.  And if the bio
+> +	 * was empty, let the whole thing through because:  "Note
+> +	 * that a block device *must* allow a single page to be
+> +	 * added to an empty bio."
+> +	 */
+> +	rbd_assert(bvec->bv_len <= PAGE_SIZE);
+> +	if (ret > (int) bvec->bv_len || !bmd->bi_size)
+> +		ret = (int) bvec->bv_len;
+> +
+> +	return ret;
+>   }
 >
->   out_err:
+>   static void rbd_free_disk(struct rbd_device *rbd_dev)
 >
