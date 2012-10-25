@@ -1,104 +1,113 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re:
-Date: Thu, 25 Oct 2012 08:38:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210250838070.25762@cobra.newdream.net>
-References: <CAB6Jr7RbMaxQpxV0_pUTwSwf51wuavmJ_Dnzdk4OVMZiHcMZKQ@mail.gmail.com> <50868471.1070105@widodh.nl> <CAB6Jr7QbWZ7Xe+VZrPwC7rWcZ7_F6kLm=A+zq1NEAmcGvgky-A@mail.gmail.com> <162E8EA1E858481C9CD55412C597577E@inktank.com>
- <CAB6Jr7SbbAE=yEVgg+UupTmavKfvFvGj8j7C9M0Ya2FocNmw9w@mail.gmail.com> <1A4C855A8DD647B0B2E8790CA2945D00@inktank.com> <50894E81.30403@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: RBD boot from volume weirdness in OpenStack
+Date: Thu, 25 Oct 2012 08:42:19 -0700
+Message-ID: <bdf1660d88c03cd19087407dd63ef973@hq.newdream.net>
+References: <CACkq2mryT7Nsqs3W5HJ-pTDHqyuDjn4_dqiDp3+zv9=Wd3TJZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59232 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759746Ab2JYPiw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 11:38:52 -0400
-In-Reply-To: <50894E81.30403@inktank.com>
+Received: from ps79606.dreamhost.com ([66.33.206.83]:47218 "EHLO
+	webmail.hq.newdream.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1759720Ab2JYPsD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 11:48:03 -0400
+In-Reply-To: <CACkq2mryT7Nsqs3W5HJ-pTDHqyuDjn4_dqiDp3+zv9=Wd3TJZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, jie sun <0maidou0@gmail.com>, ceph-devel@vger.kernel.org
+To: Travis Rhoden <trhoden@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 25 Oct 2012, Alex Elder wrote:
-> On 10/25/2012 07:15 AM, Gregory Farnum wrote:
-> > Sorry, I was unclear ? I meant I think[1] it was fixed in our linux
-> > branch, for future kernel releases. The messages you're seeing are
-> > just logging a perfectly normal event that's part of the Ceph
-> > protocol. -Greg [1]: I'd have to check to make sure. Sage, Alex, am I
-> > remembering that correctly?
+On 2012-10-25 08:22, Travis Rhoden wrote:
+> I've been trying to take advantage of the code additions made by Josh
+> Durgin to OpenStack Folsom for combining  boot-from-volume and Ceph
+> RBD.  First off, nice work Josh!  I'm hoping you folks can help me 
+> out
+> with something strange I am seeing.  The question may be more
+> OpenStack related than Ceph, though, but hear me out first.
+>
+> I created a new volume (to use for boot-from-volume) from an existing
+> image like so:
+>
+> #cinder create --display-name uec-test-vol --image-id
+> 699137a2-a864-4a87-98fa-1684d7677044 5
+>
+> This completes just fine.
+>
+> Later I try to boot from it, that fails.  Cutting to the chase, here 
+> is why:
+>
+> kvm: -drive
 > 
-> I see those too.  I think the socket (the other end?) closes after
-> a period of inactivity, but it does re-open and reconnect again
-> whenever necessary so that should really be fine.
+> file=rbd:nova-volume/volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b,if=none,id=drive-virtio-disk0,format=raw,cache=none:
+> error reading header from volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b
+> kvm: -drive
 > 
-> The messages have not gone away yet, I personally think they should.
-> They originate from here, in net/ceph/messenger.c:
-> 
->   static void ceph_fault(struct ceph_connection *con)
->           __releases(con->mutex)
->   {
->           pr_err("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
->                  ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg)
-> 
-> Perhaps this should become pr_info() or something.  Sage?
+> file=rbd:nova-volume/volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b,if=none,id=drive-virtio-disk0,format=raw,cache=none:
+> could not open disk image
+> rbd:nova-volume/volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b: No such
+> file or directory
+>
+> It's weird that creating the volume was successful, but that KVM 
+> can't
+> read it.  Poking around a bit more, it was clear why:
+>
+> # rbd -n client.novavolume --pool nova-volume ls
+> <returns nothing>
+>
+> # rbd -n client.novavolume ls
+> volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b
+>
+> Okay, the volume is the "rbd" pool!  That's really weird, though.
+> Here is the my nova.conf entries:
+> volume_driver=nova.volume.driver.RBDDriver
+> rbd_pool=nova-volume
+> rbd_user=novavolume
+>
+>
+> AND, here are the log entries from nova-volume.log (cleaned up a 
+> little):
+>
+> rbd create --pool nova-volume --size 5120
+> volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b
+> rbd rm --pool nova-volume volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b
+> rbd import --pool nova-volume /tmp/tmplQUwzt
+> volume-9f4e4b70-7fbb-4d81-b912-b1c6fcf86c8b
+>
+> I'm not sure why it goes create/delete/import, but regardless all of
+> that worked.  More importantly, all these commands used --pool
+> nova-volume.  So how the heck did that RBD end up in the "rbd" pool
+> instead of the "nova-volume" pool?  Any ideas?
+>
+> Before I hit "send", I figured I should at least test this myself.  
+> Watch this:
+>
+> #rbd create -n client.novavolume --pool nova-volume --size 1024 test
+> # rbd ls -n client.novavolume --pool nova-volume
+> test
+> # rbd export -n client.novavolume --pool nova-volume test /tmp/test
+> Exporting image: 100% complete...done.
+> # rbd rm -n client.novavolume --pool nova-volume test
+> Removing image: 100% complete...done.
+> # rbd import -n client.novavolume --pool nova-volume /tmp/test test
+> Importing image: 100% complete...done.
+> # rbd ls -n client.novavolume --pool nova-volume
+>
+> # rbd ls -n client.novavolume --pool rbd
+> test
+>
+>
+> So it seems that "rbd import" doesn't honor the --pool argument?
 
-Yeah, I think pr_info() is probably the right choice.  Do you know if that 
-hits the console by default, or just dmesg/kern.log?
+This was true in 0.48, but it should have been fixed in 0.48.2 (and 
+0.52).
+I'll add a note about this to the docs.
 
-sage
+> I am using 0.53 on the backend, but my client is 0.48.2.  I'll 
+> upgrade
+> that and see if that makes a different.
 
+The ceph-common package in particular should be 0.48.2 or >=0.52.
 
-> 
-> 					-Alex
-> 
-> > On Wednesday, October 24, 2012 at 11:45 PM, jie sun wrote:
-> > 
-> >> What is the version of the master branch ? I use the stable version
-> >> 0.48.2 Thank you! -SunJie
-> >> 
-> >> 2012/10/24 Gregory Farnum <greg@inktank.com>:
-> >>> On Tuesday, October 23, 2012 at 10:48 PM, jie sun wrote:
-> >>>> My vm kernel version is "Linux ubuntu12 3.2.0-23-generic".
-> >>>> 
-> >>>> "ceph-s" shows " health HEALTH_OK monmap e1: 1 mons at
-> >>>> {a=10.100.211.146:6789/0}, election epoch 0, quorum 0 a osdmap
-> >>>> e152: 10 osds: 9 up, 9 in pgmap v48479: 2112 pgs: 2112
-> >>>> active+clean; 23161 MB data, 46323 MB used, 2451 GB / 2514 GB
-> >>>> avail mdsmap e31: 1/1/1 up {0=a=up:active} "
-> >>>> 
-> >>>> In my vm, I do operations like: I install 4 debs on my vm, such
-> >>>> as libnss3, libnspr4, librados2, librbd1. And then execute
-> >>>> "modprobe rbd" so that I can map a image to my vm. Then "rbd
-> >>>> create foo --size 10240 -m $monIP(my ceph mon IP)", "rbd map
-> >>>> foo -m $monIP" ------ Here a device /dev/rbd0 can be used as a
-> >>>> local device "mkfs -t ext4 /dev/rbd0" "mount /dev/rbd0 /mnt(or
-> >>>> some other directory)" After the operations above, I can use
-> >>>> this device. But it oftern prompt some log like "libceph: osd9
-> >>>> 10.100.211.68:6809 socket closed". I just want to mount a
-> >>>> device to my vm, so I didn't install a ceph client. Is this
-> >>>> proper to do so?
-> >>> 
-> >>> 
-> >>> 
-> >>> You might consider using the native QEMU/libvirt instead; it
-> >>> offers some more advanced options. But if you're happy with it,
-> >>> this certainly works!
-> >>> 
-> >>> The "socket closed" messages are just noise; it's nothing to be
-> >>> concerned about (you'll notice they're happening every 15 minutes
-> >>> for each OSD; probably you aren't doing any disk accesses). I
-> >>> think these warnings actually got removed from our master branch
-> >>> a few days ago. -Greg
-> >> 
-> > 
-> > 
-> > 
-> > -- To unsubscribe from this list: send the line "unsubscribe
-> > ceph-devel" in the body of a message to majordomo@vger.kernel.org 
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>  - Travis
+
