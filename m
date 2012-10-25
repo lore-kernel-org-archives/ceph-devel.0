@@ -1,83 +1,62 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: libcephfs ceph_shutdown()
-Date: Thu, 25 Oct 2012 13:47:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210251346450.1224@cobra.newdream.net>
-References: <alpine.DEB.2.00.1210241614190.13619@cobra.newdream.net> <CAPrxi5_Fa8U=z2cD4tRrYB34w0Y5crV7sSmo=aaCFLEg_oYGdw@mail.gmail.com> <CAPrxi58LQUCWDjkyyTnFwN4hVD2isOijEVo=OcHb5K_JT_LjNQ@mail.gmail.com> <alpine.DEB.2.00.1210250922080.28745@cobra.newdream.net>
- <CAPrxi584cQj2PywaSJgmUXe_wvg+YX8naZBVEcQdfhmR0Eb+qQ@mail.gmail.com>
+From: Jonathan Proulx <jon@csail.mit.edu>
+Subject: reconfiguring existing hardware for ceph use
+Date: Thu, 25 Oct 2012 16:40:45 -0400
+Message-ID: <20121025204045.GF23127@csail.mit.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34411 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2992646Ab2JYUrV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 16:47:21 -0400
-In-Reply-To: <CAPrxi584cQj2PywaSJgmUXe_wvg+YX8naZBVEcQdfhmR0Eb+qQ@mail.gmail.com>
+Received: from outgoing.csail.mit.edu ([128.30.2.149]:46253 "EHLO
+	outgoing.csail.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760327Ab2JYUyb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 16:54:31 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: noah.watkins@inktank.com, joe.buck@inktank.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 25 Oct 2012, Noah Watkins wrote:
-> I pushed out wip-client-unmount for review please. One question: would
-> we want a new messenger nonce for remounts, as opposed to messenger
-> nonce per context?
+Hi All,
 
-This looks good to me.  The one change I'd make it to document 
-ceph_shutdown() as deprecated, and indicate that it is equivalent (modulo 
-error handling) to ceph_unmount() + ceph_release().
+I have 8 servers available to test ceph on which are a bit over
+powered/under-disked and I'm trying to develop a plan for how to lay
+out services and how to populate the available disk slots.
 
-sage
+The hardware is dual socket Intel E5640 chips (8 core total/ node) with 48G
+RAM, dual 10G ethernet but only four 3.5" SAS slots (with Fusion-MPT
+controller).
 
-> 
-> - Noah
-> 
-> On Thu, Oct 25, 2012 at 9:23 AM, Sage Weil <sage@inktank.com> wrote:
-> > On Thu, 25 Oct 2012, Noah Watkins wrote:
-> >> I was just take a look at this for libcephfs. Does it make sense to
-> >> have ceph_release free CephContext, and ceph_unmount with everything
-> >> else: client, messenger, and mon client?
-> >
-> > Yeah... _create and _release should create/release the ceph_mount_info and
-> > associated cct, and mount/unmount will set up and tear down the Client and
-> > friends.
-> >
-> > sage
-> >
-> >  >
-> >> - Noah
-> >>
-> >> On Wed, Oct 24, 2012 at 4:32 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> >> > On the Java, side being able to do an unmount to free resources, while
-> >> > still keeping the context, makes things more natural to both explain,
-> >> > and code. I'm sure this would be true for other language bindings as
-> >> > well.
-> >> >
-> >> > +1
-> >> >
-> >> >
-> >> > On Wed, Oct 24, 2012 at 4:17 PM, Sage Weil <sage@inktank.com> wrote:
-> >> >> I'm annoyed that ceph_shutdown() both unmounts and releases the resource,
-> >> >> but there is a separate _create() and _mount() method.  I wonder if it
-> >> >> makes sense to introduce ceph_umount() and ceph_release() and make
-> >> >> ceph_shutdown() call them (for compatibility).
-> >> >>
-> >> >> I thought librados was a bit cleaner, but it appears to be doing the same
-> >> >> thing.. meh.  (Also, the docs for _shutdown() incorrectly state that
-> >> >> shutdown isn't needed if rados_connect() fails.. but presumably the
-> >> >> resource still needs to be freed?)
-> >> >>
-> >> >> Is this worth fixing?
-> >> >>
-> >> >> sage
-> >> >> --
-> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Target application is primarily RBD as volume storage backend for
+openstack (folsom cinder), and possibly using as object store for
+glance.  I'd also like to test CephFS, but don't have a particular
+usecase in mind for it.
+
+The openstack cloud this would back end is used for reasearch
+computing by a variety of internal research groups and has wildly
+unpredictable work loads.  Volume storage use has not been
+particularly intensive to date so I don't have a particular
+performance point to hit. 
+
+Comparatively the current back end is a single cinder-volume server
+bpacing volumes on two software raid6 volumes each backed by 12 2T
+nearline SAS drives.  Another option we're evaluating is a Dell
+EqualLogic san with a mirrored pair of 16x1T drive raid6 units.
+
+My first though is to populate the test systesm with a single solid
+state drive (not sure size or type) to hold the operating system and
+journals and three 3T SAS drives of the OSD data filesystems.  Running
+3 osd on all nodes (one per data disk), with mon and mds only on the
+first 3. 
+
+My second though is to use 3T drives in all slots.  Take the os cut
+off the top of each (probably 16G each assmbled as software raid10 for
+32G or mirrored space) and run 4 osd per node on the remaining disk
+space using internal journals.
+
+Is either more sane than the other? Are both so crazy I should just use
+an os disk and three osd disks with internal journals? have any better
+suggestions?
+
+Thanks,
+-Jon
+
+
+
