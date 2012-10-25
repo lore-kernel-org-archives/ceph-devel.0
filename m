@@ -1,43 +1,56 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re:
-Date: Thu, 25 Oct 2012 17:15:55 -0500
-Message-ID: <5089BA1B.6000905@inktank.com>
-References: <CAB6Jr7RbMaxQpxV0_pUTwSwf51wuavmJ_Dnzdk4OVMZiHcMZKQ@mail.gmail.com> <50868471.1070105@widodh.nl> <CAB6Jr7QbWZ7Xe+VZrPwC7rWcZ7_F6kLm=A+zq1NEAmcGvgky-A@mail.gmail.com> <162E8EA1E858481C9CD55412C597577E@inktank.com> <CAB6Jr7SbbAE=yEVgg+UupTmavKfvFvGj8j7C9M0Ya2FocNmw9w@mail.gmail.com> <1A4C855A8DD647B0B2E8790CA2945D00@inktank.com> <50894E81.30403@inktank.com> <alpine.DEB.2.00.1210250838070.25762@cobra.newdream.net> <5089AEE7.2010302@inktank.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: [ceph-commit] HEALTH_WARN 192 pgs degraded
+Date: Fri, 26 Oct 2012 11:53:11 +1300
+Message-ID: <5089C2D7.7090307@catalyst.net.nz>
+References: <5087F3AE.8080601@gmail.com> <alpine.DEB.2.00.1210240839280.25958@cobra.newdream.net> <5088824A.4000700@catalyst.net.nz> <5088B8EE.7080109@inktank.com> <CAJCPpWJy=k2Sw6iRH-wPq85uWCY7yRA3yE6kBUYwfuQsm2Hz7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:54175 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750751Ab2JYWP6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 18:15:58 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so2941632iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Oct 2012 15:15:57 -0700 (PDT)
-In-Reply-To: <5089AEE7.2010302@inktank.com>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:37483 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750888Ab2JYWw5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 18:52:57 -0400
+In-Reply-To: <CAJCPpWJy=k2Sw6iRH-wPq85uWCY7yRA3yE6kBUYwfuQsm2Hz7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>, jie sun <0maidou0@gmail.com>, ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Dan Mick <dan.mick@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10/25/2012 04:28 PM, Dan Mick wrote:
-> 
->>>    static void ceph_fault(struct ceph_connection *con)
->>>            __releases(con->mutex)
->>>    {
->>>            pr_err("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
->>>                   ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg)
+On 25/10/12 17:55, Mark Nelson wrote:
+> On Wed, Oct 24, 2012 at 10:58 PM, Dan Mick <dan.mick@inktank.com> wrote:
+>
+>>   HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean; recovery 21/42
+>>> The other alternative is to just set the pool(s) replication size to 1,
+>>> if you are just wanting a single osd for (say) testing:
 >>>
->>> Perhaps this should become pr_info() or something.  Sage?
+>>> $ ceph osd pool set <your pool(s)> size 1
+>>>
+>>> I find it I need to restart ceph after doing the above, it then sorts
+>>> itself out to a nice healthy status!
+>>>
 >>
->> Yeah, I think pr_info() is probably the right choice.  Do you know if
->> that
->> hits the console by default, or just dmesg/kern.log?
-> 
-> pr_info is level 6, KERN_INFO; by default, /proc/sys/kernel/printk has
-> 4 4 1 7 in it, the first 4 of which means 4-and-lower go to console.  So
-> debug, info, notice messages all are options for "not console".
-> 
+>>
+> I was actually just talking to Greg and Sam about this earlier today.  If
+> you rely on ceph health as part of an automated process to determine
+> whether or not tests should start running, having degraded PGs due to some
+> of the pools expecting 2x replication (when there is 1 OSD) is annoying.
+> It will go away if whatever default pools are created get manually set to
+> 1x replication, but it's not something that is immediately obvious.  I
+> don't know that changing the defaults is necessarily the right answer.
+> Instead perhaps we just haven't done a good enough job of explaining what
+> pools get created, how they are used, and when/if they should be modified
+> in some way .  Maybe this belongs in a FAQ?
+>
 
-Excellent.  So pr_info() it is.  Dan you want to implement this?
 
-					-Alex
+
+Ah yes - you are quite right, it is *not* required to restart ceph to 
+make it sort out those stuck pages after changing the size. I believe at 
+some point (maybe < 0.50) it was and I had gotten into the habit!
+
++1 for adding a FAQ about the defaults pools and replication levels etc.
+
+Cheers
+
+Mark
