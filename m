@@ -1,72 +1,70 @@
-From: "Stephen Perkins" <perkins@netmass.com>
-Subject: Proper configuration of the SSDs in a storage brick
-Date: Thu, 25 Oct 2012 08:30:49 -0500
-Message-ID: <002401cdb2b4$f259c800$d70d5800$@netmass.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] libceph: avoid NULL kref_put when osd reset races with
+ alloc_msg
+Date: Thu, 25 Oct 2012 09:28:46 -0500
+Message-ID: <50894C9E.1090705@inktank.com>
+References: <1351120829-12219-1-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:61819
-	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759382Ab2JYNaz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 25 Oct 2012 09:30:55 -0400
-Content-Language: en-us
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:40397 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759595Ab2JYO2y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 10:28:54 -0400
+Received: by mail-ia0-f174.google.com with SMTP id y32so1325189iag.19
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Oct 2012 07:28:53 -0700 (PDT)
+In-Reply-To: <1351120829-12219-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+On 10/24/2012 06:20 PM, Sage Weil wrote:
+> The ceph_on_in_msg_alloc() method drops con->mutex while it allocates a
+> message.  If that races with a timeout that resends a zillion messages and
+> resets the connection, and the ->alloc_msg() method returns a NULL message,
+> it will call ceph_msg_put(NULL) and BUG.
 
-In looking at the design of a storage brick (just OSDs), I have found a dual
-power hardware solution that allows for 10 hot-swap drives and has a
-motherboard with 2 SATA III 6G ports (for the SSDs) and 8 SATA II 3G (for
-physical drives).  No RAID card. This seems a good match to me given my
-needs.  This system also supports 10G Ethernet via an add in card, so please
-assume that for the questions.  I'm also assuming 2TB or 3TB drives for the
-8 hot swap.  My workload is throughput intensive (writes mainly) and not IOP
-heavy.
+The fix is the right thing to do, but your explanation is wrong.
+If msg is null at that point, it's because con->ops->alloc_msg()
+failed, and has nothing to do with the mutex state.
 
-I have 2 questions and would love to hear from the group.
+So yes, the returned pointer should be checked for null before
+dropping a reference, but that's all there is to it...
 
-Question 1: What is the most appropriate configuration for the journal SSDs?
+Perhaps it's the zillion messages that are leading to the
+message allocation failure somehow.
 
-I'm not entirely sure what happens when you lose a journal drive.  If the
-whole brick goes offline (i.e. all OSDs stop communicating with ceph), does
-it make since to configure the SSDs into RAID1?
+> Fix by only calling put if msg is non-NULL.
+> 
+> Fixes http://tracker.newdream.net/issues/3142
 
-Alternatively, it seems that there is a performance benefit to having 2
-independent SSDs since you get potentially twice the journal rate.  If a
-journal drive goes offline. do you only have to recover half the brick?
+Is that the right bug number?
 
-If having 2 drives does not provide a performance benefit, it there a
-benefit other than RAID 1 for redundancy?
+> 
+> Signed-off-by: Sage Weil <sage@inktank.com>
 
+Please fix the explanation, but otherwise this looks good.
 
-Question 2:  How to handle the OS?
+Reviewed-by: Alex Elder <elder@inktank.com>
 
-I need to install an OS on each brick?   I'm guessing the SSDs are the
-device of choice. Not being entirely familiar with the journal drives:
-
-Should I create a separate drive partition for the OS?  
-
-Or. can the journals write to the same partition as the OS?  
-
-Should I dedicate one drive to the OS and one drive to the journal?
-
-RAID1 or independent?
-
-Use a mechanical drive?
-
-Alternately. the 10G NIC cards support remote iSCSI boot.  This allows both
-SSDs to be dedicated to journaling. Seems like more complexity. 
-
-I would appreciate hearing the thoughts of the group.
-
-Best regards,
-
-- Steve
-
-
+>  net/ceph/messenger.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
+> 
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 66f6f56..1041114 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -2742,7 +2742,8 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
+>  		msg = con->ops->alloc_msg(con, hdr, skip);
+>  		mutex_lock(&con->mutex);
+>  		if (con->state != CON_STATE_OPEN) {
+> -			ceph_msg_put(msg);
+> +			if (msg)
+> +				ceph_msg_put(msg);
+>  			return -EAGAIN;
+>  		}
+>  		con->in_msg = msg;
+> 
 
