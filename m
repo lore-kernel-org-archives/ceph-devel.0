@@ -1,62 +1,37 @@
-From: Jonathan Proulx <jon@csail.mit.edu>
-Subject: reconfiguring existing hardware for ceph use
-Date: Thu, 25 Oct 2012 16:40:45 -0400
-Message-ID: <20121025204045.GF23127@csail.mit.edu>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re:
+Date: Thu, 25 Oct 2012 14:28:07 -0700
+Message-ID: <5089AEE7.2010302@inktank.com>
+References: <CAB6Jr7RbMaxQpxV0_pUTwSwf51wuavmJ_Dnzdk4OVMZiHcMZKQ@mail.gmail.com> <50868471.1070105@widodh.nl> <CAB6Jr7QbWZ7Xe+VZrPwC7rWcZ7_F6kLm=A+zq1NEAmcGvgky-A@mail.gmail.com> <162E8EA1E858481C9CD55412C597577E@inktank.com> <CAB6Jr7SbbAE=yEVgg+UupTmavKfvFvGj8j7C9M0Ya2FocNmw9w@mail.gmail.com> <1A4C855A8DD647B0B2E8790CA2945D00@inktank.com> <50894E81.30403@inktank.com> <alpine.DEB.2.00.1210250838070.25762@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outgoing.csail.mit.edu ([128.30.2.149]:46253 "EHLO
-	outgoing.csail.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760327Ab2JYUyb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 16:54:31 -0400
-Content-Disposition: inline
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:35527 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750906Ab2JYV2L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 17:28:11 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so2301728pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Oct 2012 14:28:11 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1210250838070.25762@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Hi All,
-
-I have 8 servers available to test ceph on which are a bit over
-powered/under-disked and I'm trying to develop a plan for how to lay
-out services and how to populate the available disk slots.
-
-The hardware is dual socket Intel E5640 chips (8 core total/ node) with 48G
-RAM, dual 10G ethernet but only four 3.5" SAS slots (with Fusion-MPT
-controller).
-
-Target application is primarily RBD as volume storage backend for
-openstack (folsom cinder), and possibly using as object store for
-glance.  I'd also like to test CephFS, but don't have a particular
-usecase in mind for it.
-
-The openstack cloud this would back end is used for reasearch
-computing by a variety of internal research groups and has wildly
-unpredictable work loads.  Volume storage use has not been
-particularly intensive to date so I don't have a particular
-performance point to hit. 
-
-Comparatively the current back end is a single cinder-volume server
-bpacing volumes on two software raid6 volumes each backed by 12 2T
-nearline SAS drives.  Another option we're evaluating is a Dell
-EqualLogic san with a mirrored pair of 16x1T drive raid6 units.
-
-My first though is to populate the test systesm with a single solid
-state drive (not sure size or type) to hold the operating system and
-journals and three 3T SAS drives of the OSD data filesystems.  Running
-3 osd on all nodes (one per data disk), with mon and mds only on the
-first 3. 
-
-My second though is to use 3T drives in all slots.  Take the os cut
-off the top of each (probably 16G each assmbled as software raid10 for
-32G or mirrored space) and run 4 osd per node on the remaining disk
-space using internal journals.
-
-Is either more sane than the other? Are both so crazy I should just use
-an os disk and three osd disks with internal journals? have any better
-suggestions?
-
-Thanks,
--Jon
+To: Sage Weil <sage@inktank.com>
+Cc: Alex Elder <elder@inktank.com>, Gregory Farnum <greg@inktank.com>, jie sun <0maidou0@gmail.com>, ceph-devel@vger.kernel.org
 
 
+>>    static void ceph_fault(struct ceph_connection *con)
+>>            __releases(con->mutex)
+>>    {
+>>            pr_err("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
+>>                   ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg)
+>>
+>> Perhaps this should become pr_info() or something.  Sage?
+>
+> Yeah, I think pr_info() is probably the right choice.  Do you know if that
+> hits the console by default, or just dmesg/kern.log?
+
+pr_info is level 6, KERN_INFO; by default, /proc/sys/kernel/printk has
+4 4 1 7 in it, the first 4 of which means 4-and-lower go to console.  So
+debug, info, notice messages all are options for "not console".
 
