@@ -1,34 +1,53 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: Seeking review of a pull request in teuthology
-Date: Wed, 24 Oct 2012 21:01:25 -0700
-Message-ID: <5088B995.7030008@inktank.com>
-References: <508893F7.4070502@gmail.com>
+From: Roman Alekseev <rs.alekseev@gmail.com>
+Subject: Can't copy folder with data to ceph storage.
+Date: Thu, 25 Oct 2012 10:24:10 +0400
+Message-ID: <5088DB0A.4040704@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:47693 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750712Ab2JYEB2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 00:01:28 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so841339pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 21:01:28 -0700 (PDT)
-In-Reply-To: <508893F7.4070502@gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:64762 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754540Ab2JYGYO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Oct 2012 02:24:14 -0400
+Received: by mail-la0-f46.google.com with SMTP id h6so1016193lag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 23:24:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joe Buck <jbbuck@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-LGTM.  I might emphasize "user" rather than "owner", but that's clearly 
-a nit.   Also, does this now obviate the #TODO?
+Hi,
 
-On 10/24/2012 06:20 PM, Joe Buck wrote:
-> I submitted a pull request for teuthology/task/workunit.py that uses the
-> configured owner rather than using the hard-coded "ubuntu" username when
-> creating a scratch directory in /tmp.
->
-> -Joe Buck
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've  simple  installation of ceph on Debian server with the
+following configuration:
+************************
+[global]
+      debug ms = 0
+[osd]
+      osd journal size = 1000
+      filestore xattr use omap = true
+
+[mon.a]
+
+      host = serv1
+      mon addr = 192.168.0.10:6789
+
+[osd.0]
+       host = serv1
+
+[mds.a]
+      host = serv1
+************************
+
+So, I've mounted ceph storage on another server (mount -t ceph 
+192.168.0.10:6789:/ /mnt/mycephfs2/)
+and begun copying process (size of folder is 1.9Gb) , this process has 
+not been finished over 12 hours and I'm not able to kill this process at 
+all, only way  to do that restart server.  Kindly help me to find the 
+reason of this problem. Thanks.
+
+-- 
+Kind regards,
+
+R. Alekseev
+
