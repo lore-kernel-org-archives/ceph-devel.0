@@ -1,46 +1,72 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: libcephfs ceph_shutdown()
-Date: Wed, 24 Oct 2012 16:32:14 -0700
-Message-ID: <CAPrxi5_Fa8U=z2cD4tRrYB34w0Y5crV7sSmo=aaCFLEg_oYGdw@mail.gmail.com>
-References: <alpine.DEB.2.00.1210241614190.13619@cobra.newdream.net>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: [ceph-commit] HEALTH_WARN 192 pgs degraded
+Date: Thu, 25 Oct 2012 13:05:30 +1300
+Message-ID: <5088824A.4000700@catalyst.net.nz>
+References: <5087F3AE.8080601@gmail.com> <alpine.DEB.2.00.1210240839280.25958@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:34378 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750894Ab2JXXcP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 19:32:15 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so1232852vbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Oct 2012 16:32:15 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1210241614190.13619@cobra.newdream.net>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:48165 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932178Ab2JYAFR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Oct 2012 20:05:17 -0400
+In-Reply-To: <alpine.DEB.2.00.1210240839280.25958@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: noah.watkins@inktank.com, joe.buck@inktank.com, ceph-devel@vger.kernel.org
+Cc: Roman Alekseev <rs.alekseev@gmail.com>, ceph-devel@vger.kernel.org
 
-On the Java, side being able to do an unmount to free resources, while
-still keeping the context, makes things more natural to both explain,
-and code. I'm sure this would be true for other language bindings as
-well.
-
-+1
-
-
-On Wed, Oct 24, 2012 at 4:17 PM, Sage Weil <sage@inktank.com> wrote:
-> I'm annoyed that ceph_shutdown() both unmounts and releases the resource,
-> but there is a separate _create() and _mount() method.  I wonder if it
-> makes sense to introduce ceph_umount() and ceph_release() and make
-> ceph_shutdown() call them (for compatibility).
+On 25/10/12 04:40, Sage Weil wrote:
+> [moved to ceph-devel]
 >
-> I thought librados was a bit cleaner, but it appears to be doing the same
-> thing.. meh.  (Also, the docs for _shutdown() incorrectly state that
-> shutdown isn't needed if rados_connect() fails.. but presumably the
-> resource still needs to be freed?)
+> On Wed, 24 Oct 2012, Roman Alekseev wrote:
+>> Hi there,
+>>
+>>
+>> I've made simple fresh installation of ceph on Debian server with the
+>> following configuration:
+>> ************************
+>> [global]
+>>      debug ms = 0
+>> [osd]
+>>      osd journal size = 1000
+>>      filestore xattr use omap = true
+>>
+>> [mon.a]
+>>
+>>      host = serv1
+>>      mon addr = 192.168.0.10:6789
+>>
+>> [osd.0]
+>>       host = serv1
+>>
+>> [mds.a]
+>>      host = serv1
+>> ************************
+>>
+>> Seems everything is working fine but when I perform "ceph health" command I
+>> receive the next message:
+>> HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean; recovery 21/42 degraded
+>> (50.000%)
+> This is simply because you only have 1 osd but the default policy is 2x
+> replication.  As such, all PGs are 'degraded' because they are only
+> replicated once.
 >
-> Is this worth fixing?
+> If you add another OSD to your cluster the warning will go away.
 >
 > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+The other alternative is to just set the pool(s) replication size to 1, 
+if you are just wanting a single osd for (say) testing:
+
+$ ceph osd pool set <your pool(s)> size 1
+
+I find it I need to restart ceph after doing the above, it then sorts 
+itself out to a nice healthy status!
+
+Regards
+
+Mark
+
