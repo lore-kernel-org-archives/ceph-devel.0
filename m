@@ -1,55 +1,34 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Another pile of patches
-Date: Fri, 26 Oct 2012 17:42:43 -0500
-Message-ID: <508B11E3.3040108@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Tracking hadoop-common for file system shim versioning
+Date: Fri, 26 Oct 2012 15:42:55 -0700
+Message-ID: <CAPYLRziSw8WVK8=X557+M8ZJ+T9Dv2v1kyp_FXkQM=8XBmhwPA@mail.gmail.com>
+References: <CAPrxi584NjBoo1qA-2YpqMt9p+6g+SooeR0Y1fKetGN55Fchdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:63334 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753357Ab2JZWmq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 18:42:46 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so4469278iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 15:42:46 -0700 (PDT)
+Received: from mail-la0-f46.google.com ([209.85.215.46]:59000 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755513Ab2JZWm5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 18:42:57 -0400
+Received: by mail-la0-f46.google.com with SMTP id h6so2698898lag.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 15:42:56 -0700 (PDT)
+In-Reply-To: <CAPrxi584NjBoo1qA-2YpqMt9p+6g+SooeR0Y1fKetGN55Fchdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: Joe Buck <buck@soe.ucsc.edu>, Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm about to send out several series of patches.  They are in
-order--each series based on the previous, so I'm summarizing
-them here.
+On Fri, Oct 26, 2012 at 3:29 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
+> Development of the Hadoop shim layer is best done in the Apache Hadoop
+> Git repository, so we can track up-stream and build for all the
+> different versions that exist. Is keeping a clone in Inktank Github
+> something that is possible / desired?
 
-					-Alex
-
-[PATCH, resend] rbd: simplify rbd_rq_fn()
-   Resending this one
-
-[PATCH] rbd: remove snapshots on error in rbd_add()
-    Bug
-
-[PATCH] rbd: make pool_id a 64 bit value
-    Prepares for upcoming changes
-
-[PATCH 1/2] rbd: move snap info out of rbd_mapping struct
-[PATCH 2/2] rbd: rename snap_exists field
-    A few changes related to mapping structure (which I'm going
-    to be removing entirely soon)
-
-[PATCH 1/2] rbd: move ceph_parse_options() call up
-[PATCH 2/2] rbd: do all argument parsing in one place
-    Consolidate argument parsing
-
-[PATCH 1/8] rbd: get rid of snap_name_len
-[PATCH 2/8] rbd: remove options args from rbd_add_parse_args()
-[PATCH 3/8] rbd: remove snap_name arg from rbd_add_parse_args()
-[PATCH 4/8] rbd: pass and populate rbd_options structure
-[PATCH 5/8] rbd: have rbd_add_parse_args() return error
-[PATCH 6/8] rbd: define image specification structure
-[PATCH 7/8] rbd: add reference counting to rbd_spec
-[PATCH 8/8] rbd: fill rbd_spec in rbd_add_parse_args()
-    This a series that arranges for the argument parsing routine
-    for rbd_add() to do nothing more than parse arguments.  Right
-    now it's a mix of parsing and initialization, and this lays
-    some solid ground work for a cleaner implementation of the
-    upcoming layering features.
+Are we sure we want to maintain it in a fork of their repo? (I'm not
+saying we don't, just curious.) QFS recently published support for
+Hadoop and apparently they only need two JARs to support the things
+that everybody is running now. Either way, see
+http://mail-archives.apache.org/mod_mbox/hadoop-common-dev/201210.mbox/%3CCC946699.1C97B%25thilee@quantcast.com%3E
+and https://issues.apache.org/jira/browse/HADOOP-8885 for the
+discussion surrounding (not) sending that upstream and the
+distribution strategy they ended up with.
