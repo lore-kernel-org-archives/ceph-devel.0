@@ -1,178 +1,74 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Proper configuration of the SSDs in a storage brick
-Date: Fri, 26 Oct 2012 13:23:39 -0700
-Message-ID: <CAPYLRzh0__fCgwJBq+jCRbG7QFXJa_HJZLV0ivzyNzFe_NTwwA@mail.gmail.com>
-References: <002401cdb2b4$f259c800$d70d5800$@netmass.com>
-	<508A9657.3080006@widodh.nl>
-	<003901cdb384$a79ece70$f6dc6b50$@netmass.com>
+Subject: Re: Slow ceph fs performance
+Date: Fri, 26 Oct 2012 13:48:50 -0700
+Message-ID: <CAPYLRzh=xCNWeHyLVpcJH3Vzy1PeBCkaibXNSQO2L7_=g64Ufw@mail.gmail.com>
+References: <alpine.DEB.2.00.1210040823250.23556@cobra.newdream.net>
+	<201210041554.q94FsdHG021382@ayesha.phys.virginia.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:34001 "EHLO
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:35912 "EHLO
 	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966366Ab2JZUXk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 16:23:40 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so1923114lbo.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 13:23:39 -0700 (PDT)
-In-Reply-To: <003901cdb384$a79ece70$f6dc6b50$@netmass.com>
+	with ESMTP id S1752136Ab2JZUsw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 16:48:52 -0400
+Received: by mail-lb0-f174.google.com with SMTP id n3so1935188lbo.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 13:48:50 -0700 (PDT)
+In-Reply-To: <201210041554.q94FsdHG021382@ayesha.phys.virginia.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stephen Perkins <perkins@netmass.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: bryan@virginia.edu
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Oct 26, 2012 at 7:17 AM, Stephen Perkins <perkins@netmass.com> wrote:
-> Most excellent!  Many thanks for the clarification.  Questions:
+On Thu, Oct 4, 2012 at 8:54 AM, Bryan K. Wright
+<bkw1a@ayesha.phys.virginia.edu> wrote:
+> Hi Sage,
 >
->>  Something like RAID-1 would not, RAID-0 might do it. But I would split
-> the OSDs up over 2 SSDs.
+> sage@inktank.com said:
+>> Can you also include 'ceph osd tree', 'ceph osd dump', and 'ceph pg dump'
+>> output?  So we can make sure CRUSH is distributing things well?
 >
-> I could take a 256G SSD and then use 50% which gives me 128G:
->         16G for OS / SWAP (Assume 24GB RAM -> 2G per OSD plus 8G for
-> OS/Swap)
->         8 * 15G journal
+> Here they are:
 >
-> Q1:
->          Is a 15G journal large enough?
+> # ceph osd tree
+> dumped osdmap tree epoch 24
+> # id    weight  type name       up/down reweight
+> -1      4       pool default
+> -3      4               rack unknownrack
+> -2      1                       host ceph-osd-1
+> 1       1                               osd.1   up      1
+> -4      1                       host ceph-osd-2
+> 2       1                               osd.2   up      1
+> -5      1                       host ceph-osd-3
+> 3       1                               osd.3   up      1
+> -6      1                       host ceph-osd-4
+> 4       1                               osd.4   up      1
+>
+> # ceph osd dump
+> dumped osdmap epoch 24
+> epoch 24
+> fsid 7e4e4302-4ced-439e-9786-49e6036dfda4
+> created 2012-09-28 13:17:40.774580
+> modifed 2012-09-28 16:56:02.864965
+> flags
+>
+> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
+> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
+> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
+>
+> max_osd 5
+> osd.1 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [10,15) 192.168.1.21:6800/3702 192.168.12.21:6800/3702 192.168.12.21:6801/3702 exists,up 4ad0b4cd-cbff-4693-b8f7-667148386cf3
+> osd.2 up   in  weight 1 up_from 17 up_thru 21 down_at 16 last_clean_interval [8,15) 192.168.1.22:6800/3428 192.168.12.22:6800/3428 192.168.12.22:6801/3428 exists,up 6a829cc6-fc60-450a-ac1d-8e148b757e57
+> osd.3 up   in  weight 1 up_from 21 up_thru 21 down_at 20 last_clean_interval [9,15) 192.168.1.23:6800/3436 192.168.12.23:6800/3436 192.168.12.23:6801/3436 exists,up 387cff7a-b857-434b-af66-0e08f56fd0f7
+> osd.4 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [9,15) 192.168.1.24:6800/3486 192.168.12.24:6800/3486 192.168.12.24:6801/3486 exists,up fe8c4bf0-ff6f-41e9-91ac-d5826672f8b5
+>
+> # ceph pg dump
+> See http://ayesha.phys.virginia.edu/~bryan/ceph-pg-dump.txt
 
-Our rule of thumb is that your journal should be able to absorb all
-writes coming into the OSD for a period of 10-20 seconds. Given 10GbE
-and 8 OSDs, you're looking at ~125MB/s per OSD, so a 15GB journal
-should be good.
-
-
-> Q2:
->         Given an approximate max theoretical of 500-600 MB/s sustained
-> throughput of SSD
->          (I am throughput intensive) and 10G Ethernet... do I need 2 SSDs
-> for performance or
->          will one do?
->
-> (Given a theoretical mechanical drive throughput is (100->125 MB/s * 8) > a
-> single SSD).
-
-Sounds like you need 2 SSDs, then!
--Greg
-
->
-> -Steve
->
->
-> -----Original Message-----
-> From: Wido den Hollander [mailto:wido@widodh.nl]
-> Sent: Friday, October 26, 2012 8:56 AM
-> To: Stephen Perkins
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Proper configuration of the SSDs in a storage brick
->
-> On 10/25/2012 03:30 PM, Stephen Perkins wrote:
->> Hi all,
->>
->> In looking at the design of a storage brick (just OSDs), I have found
->> a dual power hardware solution that allows for 10 hot-swap drives and
->> has a motherboard with 2 SATA III 6G ports (for the SSDs) and 8 SATA
->> II 3G (for physical drives).  No RAID card. This seems a good match to
->> me given my needs.  This system also supports 10G Ethernet via an add
->> in card, so please assume that for the questions.  I'm also assuming
->> 2TB or 3TB drives for the
->> 8 hot swap.  My workload is throughput intensive (writes mainly) and
->> not IOP heavy.
->>
->> I have 2 questions and would love to hear from the group.
->>
->> Question 1: What is the most appropriate configuration for the journal
-> SSDs?
->>
->> I'm not entirely sure what happens when you lose a journal drive.  If
->> the whole brick goes offline (i.e. all OSDs stop communicating with
->> ceph), does it make since to configure the SSDs into RAID1?
->>
->
-> When you loose the journal these OSDs will commit suicide and in this case
-> you'd loose 8 OSDs.
->
-> Placing two SSDs in RAID-1 seems like overkill to me. I've been using
-> hundreds of Intel SSDs over the past 3 years and I've never see one (not
-> one!) die.
->
-> A SSD will die at some point due to extensive writes, but in RAID-1 they
-> would burn through those writes in a identical matter.
->
->> Alternatively, it seems that there is a performance benefit to having
->> 2 independent SSDs since you get potentially twice the journal rate.
->> If a journal drive goes offline. do you only have to recover half the
-> brick?
->>
->
-> If you place 4 OSDs on 1 SSD and the other 4 on the second SSD you'd indeed
-> only loose 4 OSDs.
->
->> If having 2 drives does not provide a performance benefit, it there a
->> benefit other than RAID 1 for redundancy?
->>
->
-> Something like RAID-1 would not, RAID-0 might do it. But I would split the
-> OSDs up over 2 SSDs.
->
->>
->> Question 2:  How to handle the OS?
->>
->> I need to install an OS on each brick?   I'm guessing the SSDs are the
->> device of choice. Not being entirely familiar with the journal drives:
->>
->> Should I create a separate drive partition for the OS?
->>
->> Or. can the journals write to the same partition as the OS?
->>
->> Should I dedicate one drive to the OS and one drive to the journal?
->>
->
-> I'd suggest using Intel SSDs and shrinking them in size using HPA, Host
-> Protected Area.
->
-> With that you can shrinkg a 180GB SSD to for example 60GB. By doing so the
-> SSD can perform better wear-leveling and it would maintain optimal
-> performance over time, it also extends the lifetime of the SSD. It has more
-> "spare cells".
->
-> Under Linux you can change this with "hdparm" and the -N option.
->
-> Using a separate partition for the journal and OS would be preferred.
-> Make sure to align the partition with the erase size of the SSD, otherwise
-> you could run into write amplification of the SSD.
->
-> You would end up with:
-> * OS partition
-> * Swap?
-> * Journal #1
-> * Journal #2
->
-> Depends on what you are going to use.
->
-> Wido
->
->> RAID1 or independent?
->>
->> Use a mechanical drive?
->>
->> Alternately. the 10G NIC cards support remote iSCSI boot.  This allows
->> both SSDs to be dedicated to journaling. Seems like more complexity.
->>
->> I would appreciate hearing the thoughts of the group.
->>
->> Best regards,
->>
->> - Steve
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Eeek, I was going through my email backlog and came across this thread
+again. Everything here does look good; the data distribution etc is
+pretty reasonable.
+If you're still testing, we can at least get a rough idea of the sorts
+of IO the OSD is doing by looking at the perfcounters out of the admin
+socket:
+ceph --admin-daemon /path/to/socket perf dump
+(I believe the default path is /var/run/ceph/ceph-osd.*.asok)
