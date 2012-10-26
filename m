@@ -1,74 +1,87 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Slow ceph fs performance
-Date: Fri, 26 Oct 2012 13:48:50 -0700
-Message-ID: <CAPYLRzh=xCNWeHyLVpcJH3Vzy1PeBCkaibXNSQO2L7_=g64Ufw@mail.gmail.com>
-References: <alpine.DEB.2.00.1210040823250.23556@cobra.newdream.net>
-	<201210041554.q94FsdHG021382@ayesha.phys.virginia.edu>
+Subject: Re: [PATCH] PG: Do not discard op data too early
+Date: Fri, 26 Oct 2012 13:52:00 -0700
+Message-ID: <CAPYLRzhkjf7E36E9BCcHoTvPggfE9FPJKp5+QAELgwRZ-9X-ig@mail.gmail.com>
+References: <1348782975-7082-1-git-send-email-jaschut@sandia.gov>
+	<CAPYLRzh_ngQt11Dv17YFJCj5pR3RJino6dbsw3HZ6WGAAhfu-w@mail.gmail.com>
+	<5064D1CA.4030206@sandia.gov>
+	<CAPYLRzgXNCOYqjbF8SyWOSwHU6kvLNJR6Wd8kgsJu6Z7YXWMYw@mail.gmail.com>
+	<5064D509.1070203@sandia.gov>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:35912 "EHLO
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:54208 "EHLO
 	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752136Ab2JZUsw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 16:48:52 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so1935188lbo.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 13:48:50 -0700 (PDT)
-In-Reply-To: <201210041554.q94FsdHG021382@ayesha.phys.virginia.edu>
+	with ESMTP id S1754212Ab2JZUwB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 16:52:01 -0400
+Received: by mail-lb0-f174.google.com with SMTP id n3so1936577lbo.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 13:52:00 -0700 (PDT)
+In-Reply-To: <5064D509.1070203@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bryan@virginia.edu
+To: Jim Schutt <jaschut@sandia.gov>, Sage Weil <sage@inktank.com>, Samuel Just <sam.just@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Oct 4, 2012 at 8:54 AM, Bryan K. Wright
-<bkw1a@ayesha.phys.virginia.edu> wrote:
-> Hi Sage,
->
-> sage@inktank.com said:
->> Can you also include 'ceph osd tree', 'ceph osd dump', and 'ceph pg dump'
->> output?  So we can make sure CRUSH is distributing things well?
->
-> Here they are:
->
-> # ceph osd tree
-> dumped osdmap tree epoch 24
-> # id    weight  type name       up/down reweight
-> -1      4       pool default
-> -3      4               rack unknownrack
-> -2      1                       host ceph-osd-1
-> 1       1                               osd.1   up      1
-> -4      1                       host ceph-osd-2
-> 2       1                               osd.2   up      1
-> -5      1                       host ceph-osd-3
-> 3       1                               osd.3   up      1
-> -6      1                       host ceph-osd-4
-> 4       1                               osd.4   up      1
->
-> # ceph osd dump
-> dumped osdmap epoch 24
-> epoch 24
-> fsid 7e4e4302-4ced-439e-9786-49e6036dfda4
-> created 2012-09-28 13:17:40.774580
-> modifed 2012-09-28 16:56:02.864965
-> flags
->
-> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
-> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 320 pgp_num 320 last_change 1 owner 0
->
-> max_osd 5
-> osd.1 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [10,15) 192.168.1.21:6800/3702 192.168.12.21:6800/3702 192.168.12.21:6801/3702 exists,up 4ad0b4cd-cbff-4693-b8f7-667148386cf3
-> osd.2 up   in  weight 1 up_from 17 up_thru 21 down_at 16 last_clean_interval [8,15) 192.168.1.22:6800/3428 192.168.12.22:6800/3428 192.168.12.22:6801/3428 exists,up 6a829cc6-fc60-450a-ac1d-8e148b757e57
-> osd.3 up   in  weight 1 up_from 21 up_thru 21 down_at 20 last_clean_interval [9,15) 192.168.1.23:6800/3436 192.168.12.23:6800/3436 192.168.12.23:6801/3436 exists,up 387cff7a-b857-434b-af66-0e08f56fd0f7
-> osd.4 up   in  weight 1 up_from 18 up_thru 21 down_at 17 last_clean_interval [9,15) 192.168.1.24:6800/3486 192.168.12.24:6800/3486 192.168.12.24:6801/3486 exists,up fe8c4bf0-ff6f-41e9-91ac-d5826672f8b5
->
-> # ceph pg dump
-> See http://ayesha.phys.virginia.edu/~bryan/ceph-pg-dump.txt
+Wanted to touch base on this patch again. If Sage and Sam agree that
+we don't want to play any tricks with memory accounting, we should
+pull this patch in. I'm pretty sure we want it for Bobtail!
+-Greg
 
-Eeek, I was going through my email backlog and came across this thread
-again. Everything here does look good; the data distribution etc is
-pretty reasonable.
-If you're still testing, we can at least get a rough idea of the sorts
-of IO the OSD is doing by looking at the perfcounters out of the admin
-socket:
-ceph --admin-daemon /path/to/socket perf dump
-(I believe the default path is /var/run/ceph/ceph-osd.*.asok)
+On Thu, Sep 27, 2012 at 3:36 PM, Jim Schutt <jaschut@sandia.gov> wrote:
+> On 09/27/2012 04:27 PM, Gregory Farnum wrote:
+>>
+>> On Thu, Sep 27, 2012 at 3:23 PM, Jim Schutt<jaschut@sandia.gov>  wrote:
+>>>
+>>> On 09/27/2012 04:07 PM, Gregory Farnum wrote:
+>>>>
+>>>>
+>>>> Have you tested that this does what you want? If it does, I think
+>>>> we'll want to implement this so that we actually release the memory,
+>>>> but continue accounting it.
+>>>
+>>>
+>>>
+>>> Yes.  I have diagnostic patches where I add an "advisory" option
+>>> to Throttle, and apply it in advisory mode to the cluster throttler.
+>>> In advisory mode Throttle counts bytes but never throttles.
+>>
+>>
+>> Can't you also do this if you just set up a throttler with a limit of 0?
+>> :)
+>
+>
+> Hmmm, I expect so.  I guess I just didn't think of doing it that way....
+>
+>
+>>
+>>>
+>>> When I run all the clients I can muster (222) against a relatively
+>>> small number of OSDs (48-96), with osd_client_message_size_cap set
+>>> to 10,000,000 bytes I see spikes of>  100,000,000 bytes tied up
+>>> in ops that came through the cluster messenger, and I see long
+>>> wait times (>  60 secs) on ops coming through the client throttler.
+>>>
+>>> With this patch applied, I can raise osd_client_message_size_cap
+>>> to 40,000,000 bytes, but I rarely see more than 80,000,000 bytes
+>>> tied up in ops that came through the cluster messenger.  Wait times
+>>> for ops coming through the client policy throttler are lower,
+>>> overall daemon memory usage is lower, but throughput is the same.
+>>>
+>>> Overall, with this patch applied, my storage cluster "feels" much
+>>> less brittle when overloaded.
+>>
+>>
+>> Okay, cool. Are you interested in reducing the memory usage a little
+>> more by deallocating the memory separately from accounting it?
+>>
+>>
+>
+> My testing doesn't indicate a need -- even keeping the memory
+> around until the op is done, my daemons use less memory overall
+> to get the same throughput.  So, unless some other load condition
+> indicates a need, I'd counsel simplicity.
+>
+> -- Jim
+>
+>
+>
