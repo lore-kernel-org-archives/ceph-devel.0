@@ -1,37 +1,97 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/8] rbd: have rbd_add_parse_args() only parse args
-Date: Fri, 26 Oct 2012 17:56:05 -0500
-Message-ID: <508B1505.20209@inktank.com>
-References: <508B11E3.3040108@inktank.com>
+Subject: [PATCH 1/8] rbd: get rid of snap_name_len
+Date: Fri, 26 Oct 2012 18:00:10 -0500
+Message-ID: <508B15FA.7040008@inktank.com>
+References: <508B11E3.3040108@inktank.com> <508B1505.20209@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:49629 "EHLO
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:62618 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934127Ab2JZW4M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 18:56:12 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so4479692iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 15:56:12 -0700 (PDT)
-In-Reply-To: <508B11E3.3040108@inktank.com>
+	with ESMTP id S934127Ab2JZXA0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 19:00:26 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so4483353iea.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 16:00:26 -0700 (PDT)
+In-Reply-To: <508B1505.20209@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-rbd_add_parse_args() parses options written to the "add" entry in
-/sys/bus/rbd/, but it does a mix of other things as well.  This
-series rearranges things such that the only thing that function
-does is parse arguments, and encode the information found into
-some data structures that are used later for configuration and
-setting up new mapped rbd images.
+The value returned in the "snap_name_len" argument to
+rbd_add_parse_args() is never actually used, so get rid of it.
 
-					-Alex
+The snap_name_len recorded in *rbd_dev_v2_snap_name() is not
+useful either, so get rid of that too.
 
-[PATCH 1/8] rbd: get rid of snap_name_len
-[PATCH 2/8] rbd: remove options args from rbd_add_parse_args()
-[PATCH 3/8] rbd: remove snap_name arg from rbd_add_parse_args()
-[PATCH 4/8] rbd: pass and populate rbd_options structure
-[PATCH 5/8] rbd: have rbd_add_parse_args() return error
-[PATCH 6/8] rbd: define image specification structure
-[PATCH 7/8] rbd: add reference counting to rbd_spec
-[PATCH 8/8] rbd: fill rbd_spec in rbd_add_parse_args()
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 4fe14ff..cae7423 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2408,7 +2408,6 @@ static char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+ 	int ret;
+ 	void *p;
+ 	void *end;
+-	size_t snap_name_len;
+ 	char *snap_name;
+
+ 	size = sizeof (__le32) + RBD_MAX_SNAP_NAME_LEN;
+@@ -2428,9 +2427,7 @@ static char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+
+ 	p = reply_buf;
+ 	end = (char *) reply_buf + size;
+-	snap_name_len = 0;
+-	snap_name = ceph_extract_encoded_string(&p, end, &snap_name_len,
+-				GFP_KERNEL);
++	snap_name = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+ 	if (IS_ERR(snap_name)) {
+ 		ret = PTR_ERR(snap_name);
+ 		goto out;
+@@ -2849,8 +2846,7 @@ static struct ceph_options
+*rbd_add_parse_args(struct rbd_device *rbd_dev,
+ 						const char *buf,
+ 						char *options,
+ 						size_t options_size,
+-						char **snap_name,
+-						size_t *snap_name_len)
++						char **snap_name)
+ {
+ 	size_t len;
+ 	const char *mon_addrs;
+@@ -2898,7 +2894,7 @@ static struct ceph_options
+*rbd_add_parse_args(struct rbd_device *rbd_dev,
+ 		goto out_err;
+ 	memcpy(*snap_name, buf, len);
+ 	*(*snap_name + len) = '\0';
+-	*snap_name_len = len;
++
+ 	/* Initialize all rbd options to the defaults */
+
+ 	rbd_opts.read_only = RBD_READ_ONLY_DEFAULT;
+@@ -3131,7 +3127,6 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 	char *options;
+ 	struct rbd_device *rbd_dev = NULL;
+ 	char *snap_name;
+-	size_t snap_name_len = 0;
+ 	struct ceph_options *ceph_opts;
+ 	struct ceph_osd_client *osdc;
+ 	int rc = -ENOMEM;
+@@ -3154,7 +3149,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+
+ 	/* parse add command */
+ 	ceph_opts = rbd_add_parse_args(rbd_dev, buf, options, count,
+-				&snap_name, &snap_name_len);
++				&snap_name);
+ 	if (IS_ERR(ceph_opts)) {
+ 		rc = PTR_ERR(ceph_opts);
+ 		goto err_out_mem;
+-- 
+1.7.9.5
+
