@@ -1,72 +1,42 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: make pool_id a 64 bit value
-Date: Fri, 26 Oct 2012 17:45:26 -0500
-Message-ID: <508B1286.4010906@inktank.com>
-References: <508B11E3.3040108@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Joe Buck <jbbuck@gmail.com>
+Subject: Re: Tracking hadoop-common for file system shim versioning
+Date: Fri, 26 Oct 2012 15:47:42 -0700
+Message-ID: <F94C248B-486F-4565-B712-1FAE21912B65@gmail.com>
+References: <CAPrxi584NjBoo1qA-2YpqMt9p+6g+SooeR0Y1fKetGN55Fchdg@mail.gmail.com> <CAPYLRziSw8WVK8=X557+M8ZJ+T9Dv2v1kyp_FXkQM=8XBmhwPA@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:54205 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932188Ab2JZWph (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 18:45:37 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so4471797iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 15:45:36 -0700 (PDT)
-In-Reply-To: <508B11E3.3040108@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48411 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966821Ab2JZWrr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 18:47:47 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so3062768pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 15:47:46 -0700 (PDT)
+In-Reply-To: <CAPYLRziSw8WVK8=X557+M8ZJ+T9Dv2v1kyp_FXkQM=8XBmhwPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-If a format 2 image has a parent, its pool id will be specified
-using a 64-bit value.  Change the pool id we save for an image to
-match that.
+Noah and I talked about this a bit and the idea was not to push our code upstream, but rather to host a fork locally so that we could decide when to rev the version(s) we build against rather than just pulling trunk from Hadoop's repo. We'd still be building the one or two .jar files that users would have to configure Hadoop to find, but we'd have a full version of Hadoop in our repo for consistency and what not. 
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+-Joe Buck
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 147c8df..2a523a1 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -197,7 +197,7 @@ struct rbd_device {
- 	size_t			image_name_len;
- 	char			*header_name;
- 	char			*pool_name;
--	int			pool_id;
-+	u64			pool_id;
+On Oct 26, 2012, at 3:42 PM, Gregory Farnum wrote:
 
- 	struct ceph_osd_event   *watch_event;
- 	struct ceph_osd_request *watch_request;
-@@ -1113,7 +1113,7 @@ static int rbd_do_request(struct request *rq,
- 	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
- 	layout->fl_stripe_count = cpu_to_le32(1);
- 	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
--	layout->fl_pg_pool = cpu_to_le32(rbd_dev->pool_id);
-+	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->pool_id);
- 	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
- 				   req, ops);
- 	rbd_assert(ret == 0);
-@@ -1982,7 +1982,7 @@ static ssize_t rbd_pool_id_show(struct device *dev,
- {
- 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-
--	return sprintf(buf, "%d\n", rbd_dev->pool_id);
-+	return sprintf(buf, "%llu\n", (unsigned long long) rbd_dev->pool_id);
- }
-
- static ssize_t rbd_name_show(struct device *dev,
-@@ -3170,7 +3170,7 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	rc = ceph_pg_poolid_by_name(osdc->osdmap, rbd_dev->pool_name);
- 	if (rc < 0)
- 		goto err_out_client;
--	rbd_dev->pool_id = rc;
-+	rbd_dev->pool_id = (u64) rc;
-
- 	rc = rbd_dev_probe(rbd_dev);
- 	if (rc < 0)
--- 
-1.7.9.5
+> On Fri, Oct 26, 2012 at 3:29 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
+>> Development of the Hadoop shim layer is best done in the Apache Hadoop
+>> Git repository, so we can track up-stream and build for all the
+>> different versions that exist. Is keeping a clone in Inktank Github
+>> something that is possible / desired?
+> 
+> Are we sure we want to maintain it in a fork of their repo? (I'm not
+> saying we don't, just curious.) QFS recently published support for
+> Hadoop and apparently they only need two JARs to support the things
+> that everybody is running now. Either way, see
+> http://mail-archives.apache.org/mod_mbox/hadoop-common-dev/201210.mbox/%3CCC946699.1C97B%25thilee@quantcast.com%3E
+> and https://issues.apache.org/jira/browse/HADOOP-8885 for the
+> discussion surrounding (not) sending that upstream and the
+> distribution strategy they ended up with.
 
