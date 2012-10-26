@@ -1,31 +1,67 @@
 From: Noah Watkins <jayhawk@cs.ucsc.edu>
 Subject: Re: Tracking hadoop-common for file system shim versioning
-Date: Fri, 26 Oct 2012 16:06:47 -0700
-Message-ID: <CAPrxi59cBZqW8Z=wS1R383WP+TYJrCHWkR19scKpoi9wj4rjeg@mail.gmail.com>
+Date: Fri, 26 Oct 2012 16:14:39 -0700
+Message-ID: <CAPrxi58uOsBMjfRr9-HLf-mYiNVeeGdpERdw9OBkfgb2Q1R-2g@mail.gmail.com>
 References: <CAPrxi584NjBoo1qA-2YpqMt9p+6g+SooeR0Y1fKetGN55Fchdg@mail.gmail.com>
 	<CAPYLRziSw8WVK8=X557+M8ZJ+T9Dv2v1kyp_FXkQM=8XBmhwPA@mail.gmail.com>
 	<F94C248B-486F-4565-B712-1FAE21912B65@gmail.com>
-	<alpine.DEB.2.00.1210261601180.26041@cobra.newdream.net>
+	<CAPYLRziOgDG0dPUs+fq903OxvNXOZT_-zfVgcYZi7_aKFv8+3g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:60049 "EHLO
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:62919 "EHLO
 	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934216Ab2JZXGt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 19:06:49 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so3672596vbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 16:06:47 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1210261601180.26041@cobra.newdream.net>
+	with ESMTP id S934204Ab2JZXOk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 19:14:40 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so3678053vbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Oct 2012 16:14:39 -0700 (PDT)
+In-Reply-To: <CAPYLRziOgDG0dPUs+fq903OxvNXOZT_-zfVgcYZi7_aKFv8+3g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Joe Buck <jbbuck@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Joe Buck <jbbuck@gmail.com>, Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Oct 26, 2012 at 4:03 PM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 26 Oct 2012, Joe Buck wrote:
->
-> This sounds like the right approach.
->
-> Which repo to fork?  https://github.com/apache/hadoop ?
+(Sorry bout the duplicate msg Greg)
 
-https://github.com/apache/hadoop-common
+Keeping the reference implementation in Hadoop proper seemed like the
+best idea when we would be tracking multiple versions of Hadoop.
+However, if those versions are Hadoop releases, then the same can
+probably be done easily with external code and Maven magic.
+
+The downside to hosting the Hadoop repository might be users who fork
+our clone and expect it to continually track upstream Hadoop. Sticking
+with point releases might be best?
+
+On Fri, Oct 26, 2012 at 4:00 PM, Gregory Farnum <greg@inktank.com> wrote:
+> If that's all we're interested in it seems like cloning their repo and
+> then checking out a specific version would be the right answer. ;)
+> I'm just a little concerned because we don't actually want to be
+> forking the Hadoop upstream and generally speaking a fork seems like
+> inviting accidental problems when all we want to do is look at a
+> single version of their upstream without actually importing it into
+> our tree. If there are other concerns I'm missing then they could
+> certainly be overriding, though!
+>
+> On Fri, Oct 26, 2012 at 3:47 PM, Joe Buck <jbbuck@gmail.com> wrote:
+>> Noah and I talked about this a bit and the idea was not to push our code upstream, but rather to host a fork locally so that we could decide when to rev the version(s) we build against rather than just pulling trunk from Hadoop's repo. We'd still be building the one or two .jar files that users would have to configure Hadoop to find, but we'd have a full version of Hadoop in our repo for consistency and what not.
+>>
+>> -Joe Buck
+>>
+>> On Oct 26, 2012, at 3:42 PM, Gregory Farnum wrote:
+>>
+>>> On Fri, Oct 26, 2012 at 3:29 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
+>>>> Development of the Hadoop shim layer is best done in the Apache Hadoop
+>>>> Git repository, so we can track up-stream and build for all the
+>>>> different versions that exist. Is keeping a clone in Inktank Github
+>>>> something that is possible / desired?
+>>>
+>>> Are we sure we want to maintain it in a fork of their repo? (I'm not
+>>> saying we don't, just curious.) QFS recently published support for
+>>> Hadoop and apparently they only need two JARs to support the things
+>>> that everybody is running now. Either way, see
+>>> http://mail-archives.apache.org/mod_mbox/hadoop-common-dev/201210.mbox/%3CCC946699.1C97B%25thilee@quantcast.com%3E
+>>> and https://issues.apache.org/jira/browse/HADOOP-8885 for the
+>>> discussion surrounding (not) sending that upstream and the
+>>> distribution strategy they ended up with.
+>>
