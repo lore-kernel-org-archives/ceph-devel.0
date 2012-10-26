@@ -1,7 +1,7 @@
 From: Raghunandhan <raghunandhan.g@iihtcloudsolutions.com>
 Subject: Re: [ceph-commit] Ceph Zfs
-Date: Fri, 26 Oct 2012 11:16:13 +0630
-Message-ID: <2a1583303809db2f73424d268d79e0ea@iihtcloudsolutions.com>
+Date: Fri, 26 Oct 2012 12:02:23 +0630
+Message-ID: <1e5cd344bedc185dd0cf7a930790bc6a@iihtcloudsolutions.com>
 References: <441865dbf9e127f0b85193c512878a76@iihtcloudsolutions.com>
  <alpine.DEB.2.00.1210250834010.25762@cobra.newdream.net>
 Mime-Version: 1.0
@@ -9,35 +9,23 @@ Content-Type: text/plain; charset=UTF-8;
  format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from oproxy7-pub.bluehost.com ([67.222.55.9]:49133 "HELO
-	oproxy7-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1755377Ab2JZEqO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 00:46:14 -0400
+Received: from oproxy11-pub.bluehost.com ([173.254.64.10]:59729 "HELO
+	oproxy11-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1750932Ab2JZFcY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Oct 2012 01:32:24 -0400
 In-Reply-To: <alpine.DEB.2.00.1210250834010.25762@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Also the open bug which is pending i have tried with it. Ceph-osd 
+starts up with zfs volume after the ceph service is up in sometime the 
+osd's stop working. I have been working around with releases from 
+ceph-0.30 till the latest 0.54 to check with zfs compatibility.
 
-Thanks for replying back, Once a zpool is created if i mount it on 
-/var/lib/ceph/osd/ceph-0 the cephfs doesnt recognize it as a superblock 
-and hence it fails, Im trying to build this on our cloud storage since 
-btrfs has not been stable nor they have come up with online dedup i have 
-no other choice for now to work with zfs ceph which makes sense.
-
-So what i exactly did was created a zpool store
-1 Then used the same store and made a block device from it using zfs 
-create
-2 Once the zfs create was successful i was able to format with ext4 
-using xattr
-3 On top of it was the ceph
-
-Following this process doesnt make sense because of multiple layer on 
-the storage and the ceph consumes a lot of RAM and cpu cycles which ends 
-up in kernel hung task. It would be great if there is a way i could 
-directly use the zfs pool with ceph and make it work.
+Kindly let me know if this can happen in any way it would become a 
+breakthrough in our storage design until btrfs becomes stable.
 
 ---
 Regards,
