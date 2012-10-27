@@ -1,7 +1,7 @@
 From: Raghunandhan <raghunandhan.g@iihtcloudsolutions.com>
 Subject: Re: [ceph-commit] Ceph Zfs
-Date: Sat, 27 Oct 2012 11:44:46 +0630
-Message-ID: <731607e6ab51c087aba7893a7e61ccee@iihtcloudsolutions.com>
+Date: Sat, 27 Oct 2012 12:20:46 +0630
+Message-ID: <90df19a3c42ca43a1bc6afff2697e026@iihtcloudsolutions.com>
 References: <441865dbf9e127f0b85193c512878a76@iihtcloudsolutions.com>
  <alpine.DEB.2.00.1210250834010.25762@cobra.newdream.net>
  <2a1583303809db2f73424d268d79e0ea@iihtcloudsolutions.com>
@@ -11,44 +11,74 @@ Content-Type: text/plain; charset=UTF-8;
  format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from oproxy8-pub.bluehost.com ([69.89.22.20]:55071 "HELO
-	oproxy8-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1750841Ab2J0FOs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Oct 2012 01:14:48 -0400
+Received: from oproxy11-pub.bluehost.com ([173.254.64.10]:40889 "HELO
+	oproxy11-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751538Ab2J0Fut (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Oct 2012 01:50:49 -0400
 In-Reply-To: <508AE6A9.3020104@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Dan Mick <dan.mick@inktank.com>
 Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
+ceph status when used with zfs filesystem osd dies.
 
-Hi Dan,
+# ceph -s
+    health HEALTH_WARN 407 pgs degraded; 169 pgs down; 169 pgs peering; 
+15 pgs recovering; 323 pgs stuck unclean; recovery 38/42 degraded 
+(90.476%); 19/21 unfound (90.476%); 1/2 in osds are down
+    monmap e1: 2 mons at {a=11.0.0.2:6789/0,b=11.0.0.3:6789/0}, election 
+epoch 4, quorum 0,1 a,b
+    osdmap e7: 2 osds: 1 up, 2 in
+     pgmap v10: 576 pgs: 15 active+recovering+degraded, 169 
+down+peering, 392 active+degraded; 8059 bytes data, 1004 MB used, 85683 
+MB / 86687 MB avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+    mdsmap e5: 1/1/1 up {0=a=up:active}, 1 up:standby
 
-Yes once a zpool is created there is a way we can use the zpool and 
-make a partition out of it using "zfs create -V". The newly created 
-partition will be available on fdisk. Later the same partition can be 
-formatted with ext4 and used with ceph-osd.
+Log file generated when 2 osd's where up and later it went down.
 
-I have also tried using a zfs filesystem in the zpool and mapped it 
-with osd. When i run mkcephfs i get "error creating empty object store 
-/osd.0: (22) invalid argument
+2012-10-27 11:14:07.152741 mon.0 11.0.0.2:6789/0 27 : [INF] osdmap e5: 
+2 osds: 2 up, 2 in
+2012-10-27 11:14:07.192719 mon.0 11.0.0.2:6789/0 28 : [INF] pgmap v6: 
+576 pgs: 576 creating; 0 bytes data, 0 KB used, 0 KB / 0 KB avail
+2012-10-27 11:14:12.007671 mon.0 11.0.0.2:6789/0 29 : [INF] pgmap v7: 
+576 pgs: 272 creating, 43 active, 253 active+clean, 8 active+recovering; 
+1243 bytes data, 1003 MB used, 85684 MB / 86687 MB avail; 9/18 degraded 
+(50.000%)
+2012-10-27 11:14:32.014302 mon.0 11.0.0.2:6789/0 30 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:37.033547 mon.0 11.0.0.2:6789/0 31 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:42.060678 mon.0 11.0.0.2:6789/0 32 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:42.060827 mon.0 11.0.0.2:6789/0 33 : [INF] osd.0 
+11.0.0.2:6801/24250 failed (3 reports from 1 peers after 30.046376 >= 
+grace 20.000000)
+2012-10-27 11:14:42.157536 mon.0 11.0.0.2:6789/0 34 : [INF] osdmap e6: 
+2 osds: 1 up, 2 in
 
-== osd.0 ===
-2012-10-27 10:40:33.939961 7f6e6165d780 -1 filestore(/osd.0) mkjournal 
-error creating journal on /osd.0/journal: (22) Invalid argument
-2012-10-27 10:40:33.939981 7f6e6165d780 -1 OSD::mkfs: FileStore::mkfs 
-failed with error -22
-2012-10-27 10:40:33.940036 7f6e6165d780 -1  ** ERROR: error creating 
-empty object store in /osd.0: (22) Invalid argument
-failed: '/sbin/mkcephfs -d /tmp/mkcephfs.3zqOx7Btvl --init-daemon 
-osd.0'
+2012-10-27 11:19:46.751562 mon.0 11.0.0.2:6789/0 40 : [INF] osd.0 out 
+(down for 304.604259)
+2012-10-27 11:19:46.785574 mon.0 11.0.0.2:6789/0 41 : [INF] osdmap e8: 
+2 osds: 1 up, 1 in
+2012-10-27 11:19:46.811588 mon.0 11.0.0.2:6789/0 42 : [INF] pgmap v12: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+2012-10-27 11:19:49.591172 mon.0 11.0.0.2:6789/0 43 : [INF] pgmap v13: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+2012-10-27 11:20:04.671337 mon.0 11.0.0.2:6789/0 44 : [INF] pgmap v14: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+
 
 ---
 Regards,
 Raghunandhan.G
-IIHT Cloud Solutions Pvt. Ltd.
-#15, 4th Floor, 'A' Wing, Sri Lakshmi Complex,
-St. Marks Road, Bangalore - 560 001, India
+
 
 On 27-10-2012 02:08, Dan Mick wrote:
 > On 10/25/2012 09:46 PM, Raghunandhan wrote:
