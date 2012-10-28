@@ -1,149 +1,253 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: osd_pool_default_size
-Date: Sun, 28 Oct 2012 01:24:05 +0200
-Message-ID: <CAOLwVUmJaKCEw4exEnRcKnF=TJjnLueFb5ctwQV=L8nWzgKS9g@mail.gmail.com>
-References: <CAOLwVUkvCQm-_UF=OsykCfw+CH7CPxBaXZrwDtH19M-T5EPrgg@mail.gmail.com>
- <508A92F0.7040007@widodh.nl> <CAOLwVUmR_WcXHeDZJp88eaeZt=TTbOCqk4h-kYNTZ2zrSuskgw@mail.gmail.com>
- <alpine.DEB.2.00.1210260915491.23524@cobra.newdream.net>
+From: Raghunandhan <raghunandhan.g@iihtcloudsolutions.com>
+Subject: Re: [ceph-commit] Ceph Zfs
+Date: Sun, 28 Oct 2012 11:49:49 +0630
+Message-ID: <438def0896879b5f296464ab6bd48c9a@iihtcloudsolutions.com>
+References: <441865dbf9e127f0b85193c512878a76@iihtcloudsolutions.com>
+ <alpine.DEB.2.00.1210250834010.25762@cobra.newdream.net>
+ <2a1583303809db2f73424d268d79e0ea@iihtcloudsolutions.com>
+ <508AE6A9.3020104@inktank.com>
+ <731607e6ab51c087aba7893a7e61ccee@iihtcloudsolutions.com>
+ <alpine.DEB.2.00.1210271014340.23037@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:37871 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751564Ab2J0XY0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Oct 2012 19:24:26 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so2343293lbo.19
-        for <ceph-devel@vger.kernel.org>; Sat, 27 Oct 2012 16:24:26 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1210260915491.23524@cobra.newdream.net>
+Received: from oproxy12-pub.bluehost.com ([50.87.16.10]:40549 "HELO
+	oproxy12-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1750882Ab2J1FTu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Oct 2012 01:19:50 -0400
+In-Reply-To: <alpine.DEB.2.00.1210271014340.23037@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, Dan Mick <dan.mick@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-omg I'm soooo stupid, we just said that monitors handle the pool
-creation and I knew that the [mon] has to be edited so I really don't
-know what happened into my mind to restart my OSDs... Anyway I just
-checked the mon socket and it works, so no bug here.
 
-Thanks again :)
-
-On Fri, Oct 26, 2012 at 6:18 PM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 26 Oct 2012, S?bastien Han wrote:
->> > It's the monitor who is preparing the new pool before creating it. I had a
->> > discussion regarding this with Greg some time ago, can't re-call if this was
->> > on IRC or the ml though.
+On 27-10-2012 23:45, Sage Weil wrote:
+> On Sat, 27 Oct 2012, Raghunandhan wrote:
+>> Hi Dan,
 >>
->> Well actually I think I was in the conversation and it was on IRC, but
->> I had completely forget about it. -_-
+>> Yes once a zpool is created there is a way we can use the zpool and 
+>> make a
+>> partition out of it using "zfs create -V". The newly created 
+>> partition will be
+>> available on fdisk. Later the same partition can be formatted with 
+>> ext4 and
+>> used with ceph-osd.
 >>
->> Thanks the clarification. It may sound weird but if the monitors
->> handles the pool creation, it makes sense.
+>> I have also tried using a zfs filesystem in the zpool and mapped it 
+>> with osd.
+>> When i run mkcephfs i get "error creating empty object store /osd.0: 
+>> (22)
+>> invalid argument
 >>
->> Now I'm surprised to see that the admin socket has a different value.
+>> == osd.0 ===
+>> 2012-10-27 10:40:33.939961 7f6e6165d780 -1 filestore(/osd.0) 
+>> mkjournal error
+>> creating journal on /osd.0/journal: (22) Invalid argument
+>> 2012-10-27 10:40:33.939981 7f6e6165d780 -1 OSD::mkfs: 
+>> FileStore::mkfs failed
+>> with error -22
+>> 2012-10-27 10:40:33.940036 7f6e6165d780 -1  ** ERROR: error creating 
+>> empty
+>> object store in /osd.0: (22) Invalid argument
+>> failed: '/sbin/mkcephfs -d /tmp/mkcephfs.3zqOx7Btvl --init-daemon 
+>> osd.0'
 >
-> The admin socket on the monitor?  Keep in mind that the actual creation is
-> coordinated by the lead monitor... 'ceph quorum_status' will tell you
-> who that is (the first one listed who is in the quorum).  *that's* the one
-> who's config value for 'osd pool default size' matters.
+> Can you generate a log with 'debug filestore = 20' of this happening 
+> so we
+> can see exactly which operation is failing with -EINVAL?  There is
+> probably some ioctl or syscall that is going awry.
 >
->> Moreover after changing the configuration and set the default size to
->> 2 and restarted every OSD. It looks like the cluster continue to
->> create a pool size of 3...
->
-> OSDs are not involved; no need to touch their config or restart them.
->
->> Could be a bug then, any idea?
->
-> If you can confirm that the monitor who did the creation created a pool of
-> a size different that its osd default pool size, then yes... but let's
-> confirm that!
->
-> In any case, it's no big deal to change it after the pool is created:
->
->         ceph osd pool set <poolname> size <num replicas>
->
+> Thanks!
 > sage
->
->
+
+Above issue was rectified with journal dio=false in ceph.conf
+
+ceph status when used with zfs filesystem OSD dies on one node but its 
+still up on other node.
+
+# ceph -s
+    health HEALTH_WARN 407 pgs degraded; 169 pgs down; 169 pgs peering; 
+15 pgs recovering; 323 pgs stuck unclean; recovery 38/42 degraded 
+(90.476%); 19/21 unfound (90.476%); 1/2 in osds are down
+    monmap e1: 2 mons at {a=11.0.0.2:6789/0,b=11.0.0.3:6789/0}, election 
+epoch 4, quorum 0,1 a,b
+    osdmap e7: 2 osds: 1 up, 2 in
+     pgmap v10: 576 pgs: 15 active+recovering+degraded, 169 
+down+peering, 392 active+degraded; 8059 bytes data, 1004 MB used, 85683 
+MB / 86687 MB avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+    mdsmap e5: 1/1/1 up {0=a=up:active}, 1 up:standby
+
+Log file generated when 2 osd's where up and later it went down.
+
+2012-10-27 11:14:07.152741 mon.0 11.0.0.2:6789/0 27 : [INF] osdmap e5: 
+2 osds: 2 up, 2 in
+2012-10-27 11:14:07.192719 mon.0 11.0.0.2:6789/0 28 : [INF] pgmap v6: 
+576 pgs: 576 creating; 0 bytes data, 0 KB used, 0 KB / 0 KB avail
+2012-10-27 11:14:12.007671 mon.0 11.0.0.2:6789/0 29 : [INF] pgmap v7: 
+576 pgs: 272 creating, 43 active, 253 active+clean, 8 active+recovering; 
+1243 bytes data, 1003 MB used, 85684 MB / 86687 MB avail; 9/18 degraded 
+(50.000%)
+2012-10-27 11:14:32.014302 mon.0 11.0.0.2:6789/0 30 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:37.033547 mon.0 11.0.0.2:6789/0 31 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:42.060678 mon.0 11.0.0.2:6789/0 32 : [DBG] osd.0 
+11.0.0.2:6801/24250 reported failed by osd.1 11.0.0.3:6801/8443
+2012-10-27 11:14:42.060827 mon.0 11.0.0.2:6789/0 33 : [INF] osd.0 
+11.0.0.2:6801/24250 failed (3 reports from 1 peers after 30.046376 >= 
+grace 20.000000)
+2012-10-27 11:14:42.157536 mon.0 11.0.0.2:6789/0 34 : [INF] osdmap e6: 
+2 osds: 1 up, 2 in
+
+osd.0 dies after a while:
+
+2012-10-27 11:19:46.751562 mon.0 11.0.0.2:6789/0 40 : [INF] osd.0 out 
+(down for 304.604259)
+2012-10-27 11:19:46.785574 mon.0 11.0.0.2:6789/0 41 : [INF] osdmap e8: 
+2 osds: 1 up, 1 in
+2012-10-27 11:19:46.811588 mon.0 11.0.0.2:6789/0 42 : [INF] pgmap v12: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+2012-10-27 11:19:49.591172 mon.0 11.0.0.2:6789/0 43 : [INF] pgmap v13: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+2012-10-27 11:20:04.671337 mon.0 11.0.0.2:6789/0 44 : [INF] pgmap v14: 
+576 pgs: 15 active+recovering+degraded, 169 down+peering, 392 
+active+degraded; 8059 bytes data, 1004 MB used, 85683 MB / 86687 MB 
+avail; 38/42 degraded (90.476%); 19/21 unfound (90.476%)
+
+status of osd.1 as of now:
+2012-10-28 10:48:54.022338 osd.1 11.0.0.3:6801/8443 396978 : [WRN] slow 
+request 84884.436995 seconds old, received at 2012-10-27 
+11:14:09.585282: osd_op(mds.0.1:28 200.00000001 [write 131~671] 
+1.6e5f474 RETRY) v4 currently delayed
+2012-10-28 10:48:54.022343 osd.1 11.0.0.3:6801/8443 396979 : [WRN] slow 
+request 84851.874118 seconds old, received at 2012-10-27 
+11:14:42.148159: osd_op(mds.0.1:29 200.00000000 [writefull 0~84] 
+1.844f3494 RETRY) v4 currently delayed
+2012-10-28 10:48:54.022346 osd.1 11.0.0.3:6801/8443 396980 : [WRN] slow 
+request 81939.241084 seconds old, received at 2012-10-27 
+12:03:14.781193: osd_op(mds.0.1:30 200.00000001 [write 802~183] 
+1.6e5f474) v4 currently delayed
+2012-10-28 10:48:54.022350 osd.1 11.0.0.3:6801/8443 396981 : [WRN] slow 
+request 81939.240915 seconds old, received at 2012-10-27 
+12:03:14.781362: osd_op(mds.0.1:31 200.00000000 [writefull 0~84] 
+1.844f3494) v4 currently delayed
+
+---
+Regards,
+Raghunandhan.G
+
 >>
->> On Fri, Oct 26, 2012 at 3:41 PM, Wido den Hollander <wido@widodh.nl> wrote:
->> > On 10/26/2012 10:17 AM, S?bastien Han wrote:
->> >>
->> >> Hi Cephers!
->> >>
->> >> Some question about this parameter:
->> >>
->> >> - Why does this parameter need to be in the [mon] section to work?
+>> ---
+>> Regards,
+>> Raghunandhan.G
+>> IIHT Cloud Solutions Pvt. Ltd.
+>> #15, 4th Floor, 'A' Wing, Sri Lakshmi Complex,
+>> St. Marks Road, Bangalore - 560 001, India
+>>
+>> On 27-10-2012 02:08, Dan Mick wrote:
+>> > On 10/25/2012 09:46 PM, Raghunandhan wrote:
+>> > > Hi Sage,
+>> > >
+>> > > Thanks for replying back, Once a zpool is created if i mount it 
+>> on
+>> > > /var/lib/ceph/osd/ceph-0 the cephfs doesnt recognize it as a 
+>> superblock
+>> > > and hence it fails,
 >> >
+>> > I assume you mean "once a zfs is created"?  One can't mount 
+>> zpools, can one?
 >> >
->> > It's the monitor who is preparing the new pool before creating it. I had a
->> > discussion regarding this with Greg some time ago, can't re-call if this was
->> > on IRC or the ml though.
+>> > > Im trying to build this on our cloud storage since
+>> > > btrfs has not been stable nor they have come up with online 
+>> dedup i have
+>> > > no other choice for now to work with zfs ceph which makes sense.
+>> > >
+>> > > So what i exactly did was created a zpool store
+>> > > 1 Then used the same store and made a block device from it using 
+>> zfs
+>> > > create
+>> > > 2 Once the zfs create was successful i was able to format with 
+>> ext4
+>> > > using xattr
+>> > > 3 On top of it was the ceph
+>> > >
+>> > > Following this process doesnt make sense because of multiple 
+>> layer on
+>> > > the storage and the ceph consumes a lot of RAM and cpu cycles 
+>> which ends
+>> > > up in kernel hung task. It would be great if there is a way i 
+>> could
+>> > > directly use the zfs pool with ceph and make it work.
 >> >
->> > It however contradicts what's in the docs:
->> > http://ceph.com/docs/master/config-cluster/osd-config-ref/
+>> > Have you actually tried making a zfs filesystem in the zpool, and
+>> > using that as backing store for the osd?
 >> >
->> > The docs seem to be wrong at this point:
->> >
->> > * src/mon/OSDMonitor.cc *
->> >
->> > int OSDMonitor::prepare_new_pool(string& name, uint64_t auid, int
->> > crush_rule,
->> >                                  unsigned pg_num, unsigned pgp_num)
->> > {
->> > ..
->> > ..
->> >   pending_inc.new_pools[pool].size = g_conf->osd_pool_default_size;
->> > ..
->> > ..
->> > }
->> >
->> > This is done by the monitor.
->> >
->> > There seems to be some reference for this in src/osd/OSDMap.cc, but that
->> > seems to be for initializing the cluster since it creates the data, metadata
->> > and rbd pool there.
->> >
->> > This was fixed in this commit:
->> > https://github.com/ceph/ceph/commit/1292436b8f88ce203bdba97278ce368b1dfa025f
->> >
->> > Seems to be because of this message on the ml last year:
->> > http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/2983
->> >
->> > So yes, it is odd that something prefixed with "osd" should go into the mon
->> > section.
->> >
->> > Wido
->> >
->> >> - In my ceph.conf I set a default size of 3:
->> >>
->> >> # rados mkpool lol
->> >> successfully created pool lol
->> >>
->> >> # ceph osd dump | grep lol
->> >> pool 31 'lol' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 8
->> >> pgp_num 8 last_change 430 owner 18446744073709551615
->> >>
->> >> Now if I retrieve the admin daemon I get,
->> >>
->> >> # ceph --admin-daemon /var/run/ceph/ceph-osd.0.asok config show | grep
->> >> 'osd_pool_default_size'
->> >> osd_pool_default_size = 2
->> >>
->> >> Why? Did I something wrong?
->> >>
->> >> Thanks :)
->> >>
->> >> Cheers!
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> > >
+>> > > ---
+>> > > Regards,
+>> > > Raghunandhan.G
+>> > > IIHT Cloud Solutions Pvt. Ltd.
+>> > > #15, 4th Floor, 'A' Wing, Sri Lakshmi Complex,
+>> > > St. Marks Road, Bangalore - 560 001, India
+>> > >
+>> > > On 25-10-2012 22:06, Sage Weil wrote:
+>> > > > [moved to ceph-devel]
+>> > > >
+>> > > > On Thu, 25 Oct 2012, Raghunandhan wrote:
+>> > > > > Hi All,
+>> > > > >
+>> > > > > I have been working around ceph quite a long and trying to 
+>> stitch zfs
+>> > > > > with
+>> > > > > ceph. I was able to do it to certain extent as follows:
+>> > > > > 1. zpool creation
+>> > > > > 2. set dedup
+>> > > > > 3. create a mountable volume of zfs (zfs create)
+>> > > > > 4. format the volume with ext4 and enabling xattr
+>> > > > > 5. mkcephfs on the volume
+>> > > > >
+>> > > > > This actually works and dedup is perfect. But i need to 
+>> avoid
+>> > > > > multiple layers
+>> > > > > on the storage since the performance is very slow and the 
+>> kernel
+>> > > > > timeout
+>> > > > > occurs often for a 8GB RAM. I want to test the performance 
+>> between
+>> > > > > btrfs and
+>> > > > > zfs. I want to avoid the above multiple layering on storage 
+>> and make
+>> > > > > the ceph
+>> > > > > cluster aware of zfs. Let me know if anyone has workaround 
+>> this.
+>> > > >
+>> > > > I'm not familiar enough with zfs to know what 'mountable 
+>> volume' means..
+>> > > > is that a block device/lun that you're putting ext4 on?  
+>> Probably the
+>> > > > best
+>> > > > results will come from creating a zfs *file system* (using the 
+>> ZPL or
+>> > > > whatever it is) and running ceph-osd on top of that.
+>> > > >
+>> > > > There is at least one open bug from someone having problems 
+>> there, but
+>> > > > we'd very much like to sort out the problem.
+>> > > >
+>> > > > sage
+>> > >
+>> > > --
+>> > > To unsubscribe from this list: send the line "unsubscribe 
+>> ceph-devel" in
+>> > > the body of a message to majordomo@vger.kernel.org
+>> > > More majordomo info at  
+>> http://vger.kernel.org/majordomo-info.html
 >>
 >>
