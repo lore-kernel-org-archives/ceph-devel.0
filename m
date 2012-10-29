@@ -1,145 +1,465 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/8] rbd: have rbd_add_parse_args() return error
-Date: Mon, 29 Oct 2012 14:28:19 -0700
-Message-ID: <508EF4F3.6050108@inktank.com>
-References: <508B11E3.3040108@inktank.com> <508B1505.20209@inktank.com> <508B1695.50201@inktank.com>
+Subject: Re: [PATCH 6/8] rbd: define image specification structure
+Date: Mon, 29 Oct 2012 15:13:51 -0700
+Message-ID: <508EFF9F.2010009@inktank.com>
+References: <508B11E3.3040108@inktank.com> <508B1505.20209@inktank.com> <508B16B8.1030706@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:43533 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761031Ab2J2V23 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 17:28:29 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so2617739dak.19
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 14:28:28 -0700 (PDT)
-In-Reply-To: <508B1695.50201@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:34374 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761247Ab2J2WOB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 18:14:01 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so4574677pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 15:14:00 -0700 (PDT)
+In-Reply-To: <508B16B8.1030706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+A couple notes below, but looks good.
+
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/26/2012 04:02 PM, Alex Elder wrote:
-> Change the interface to rbd_add_parse_args() so it returns an
-> error code rather than a pointer.  Return the ceph_options result
-> via a pointer whose address is passed as an argument.
+On 10/26/2012 04:03 PM, Alex Elder wrote:
+> Group the fields that uniquely specify an rbd image into a new
+> reference-counted rbd_spec structure.  This structure will be used
+> to describe the desired image when mapping an image, and when
+> probing parent images in layered rbd devices.  Replace the set of
+> fields in the rbd device structure with a pointer to a dynamically
+> allocated rbd_spec.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   37 ++++++++++++++++++++-----------------
->   1 file changed, 20 insertions(+), 17 deletions(-)
+>   drivers/block/rbd.c |  158
+> +++++++++++++++++++++++++++++----------------------
+>   1 file changed, 90 insertions(+), 68 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 392dded..388dd47 100644
+> index 388dd47..c39e238 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2841,30 +2841,31 @@ static inline char *dup_token(const char **buf,
-> size_t *lenp)
->    *
->    * Note: rbd_dev is assumed to have been initially zero-filled.
->    */
-> -static struct ceph_options *rbd_add_parse_args(struct rbd_device *rbd_dev,
-> -						const char *buf,
-> -						struct rbd_options **opts)
-> +static int rbd_add_parse_args(struct rbd_device *rbd_dev,
-> +				const char *buf,
-> +				struct ceph_options **ceph_opts,
-> +				struct rbd_options **opts)
+> @@ -112,6 +112,27 @@ struct rbd_image_header {
+>   	u64 obj_version;
+>   };
+>
+> +/*
+> + * An rbd image specification.
+> + *
+> + * The tuple (pool_id, image_id, snap_id) is sufficient to uniquely
+> + * identify an image.
+> + */
+
+This looks like it's meant to be immutable. If so, it'd be nice
+to have that in the comment.
+
+> +struct rbd_spec {
+> +	u64		pool_id;
+> +	char		*pool_name;
+> +
+> +	char		*image_id;
+> +	size_t		image_id_len;
+> +	char		*image_name;
+> +	size_t		image_name_len;
+
+I realize you're just rearranging things in this patch, but it's a bit
+odd that only image_id and image_name have corresponding lengths stored.
+Those fields don't seem necessary.
+
+> +
+> +	u64		snap_id;
+> +	char		*snap_name;
+> +
+> +	struct kref	kref;
+> +};
+> +
+>   struct rbd_options {
+>   	bool	read_only;
+>   };
+> @@ -189,16 +210,9 @@ struct rbd_device {
+>
+>   	struct rbd_image_header	header;
+>   	bool                    exists;
+> -	char			*image_id;
+> -	size_t			image_id_len;
+> -	char			*image_name;
+> -	size_t			image_name_len;
+> -	char			*header_name;
+> -	char			*pool_name;
+> -	u64			pool_id;
+> +	struct rbd_spec		*spec;
+>
+> -	char                    *snap_name;
+> -	u64                     snap_id;
+> +	char			*header_name;
+
+Are you planning to split out more stuff into a common
+struct rbd_image, like header_name, exists, etc?
+There's a bunch of stuff that's not specific to a particular rbd_device
+in here.
+
+>
+>   	struct ceph_osd_event   *watch_event;
+>   	struct ceph_osd_request *watch_request;
+> @@ -654,7 +668,7 @@ static int snap_by_name(struct rbd_device *rbd_dev,
+> const char *snap_name)
+>
+>   	list_for_each_entry(snap, &rbd_dev->snaps, node) {
+>   		if (!strcmp(snap_name, snap->name)) {
+> -			rbd_dev->snap_id = snap->id;
+> +			rbd_dev->spec->snap_id = snap->id;
+>   			rbd_dev->mapping.size = snap->size;
+>   			rbd_dev->mapping.features = snap->features;
+>
+> @@ -669,14 +683,14 @@ static int rbd_dev_set_mapping(struct rbd_device
+> *rbd_dev)
 >   {
->   	size_t len;
->   	const char *mon_addrs;
->   	size_t mon_addrs_size;
->   	char *options;
-> -	struct ceph_options *err_ptr = ERR_PTR(-EINVAL);
-> -	struct ceph_options *ceph_opts;
->   	struct rbd_options *rbd_opts = NULL;
-> +	int ret;
+>   	int ret;
 >
->   	/* The first four tokens are required */
->
->   	len = next_token(&buf);
->   	if (!len)
-> -		return err_ptr;	/* Missing monitor address(es) */
-> +		return -EINVAL;	/* Missing monitor address(es) */
->   	mon_addrs = buf;
->   	mon_addrs_size = len + 1;
->   	buf += len;
->
-> +	ret = -EINVAL;
->   	options = dup_token(&buf, NULL);
->   	if (!options)
-> -		goto out_mem;
-> +		return -ENOMEM;
->   	if (!*options)
->   		goto out_err;	/* Missing options */
->
-> @@ -2889,7 +2890,7 @@ static struct ceph_options
-> *rbd_add_parse_args(struct rbd_device *rbd_dev,
->   		buf = RBD_SNAP_HEAD_NAME; /* No snapshot supplied */
->   		len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
->   	} else if (len > RBD_MAX_SNAP_NAME_LEN) {
-> -		err_ptr = ERR_PTR(-ENAMETOOLONG);
-> +		ret = -ENAMETOOLONG;
->   		goto out_err;
+> -	if (!memcmp(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+> +	if (!memcmp(rbd_dev->spec->snap_name, RBD_SNAP_HEAD_NAME,
+>   		    sizeof (RBD_SNAP_HEAD_NAME))) {
+> -		rbd_dev->snap_id = CEPH_NOSNAP;
+> +		rbd_dev->spec->snap_id = CEPH_NOSNAP;
+>   		rbd_dev->mapping.size = rbd_dev->header.image_size;
+>   		rbd_dev->mapping.features = rbd_dev->header.features;
+>   		ret = 0;
+>   	} else {
+> -		ret = snap_by_name(rbd_dev, rbd_dev->snap_name);
+> +		ret = snap_by_name(rbd_dev, rbd_dev->spec->snap_name);
+>   		if (ret < 0)
+>   			goto done;
+>   		rbd_dev->mapping.read_only = true;
+> @@ -1096,7 +1110,7 @@ static int rbd_do_request(struct request *rq,
+>   	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+>   	layout->fl_stripe_count = cpu_to_le32(1);
+>   	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+> -	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->pool_id);
+> +	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->spec->pool_id);
+>   	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
+>   				   req, ops);
+>   	rbd_assert(ret == 0);
+> @@ -1261,7 +1275,7 @@ static int rbd_do_op(struct request *rq,
+>   		opcode = CEPH_OSD_OP_READ;
+>   		flags = CEPH_OSD_FLAG_READ;
+>   		snapc = NULL;
+> -		snapid = rbd_dev->snap_id;
+> +		snapid = rbd_dev->spec->snap_id;
+>   		payload_len = 0;
 >   	}
->   	rbd_dev->snap_name = kmalloc(len + 1, GFP_KERNEL);
-> @@ -2906,15 +2907,19 @@ static struct ceph_options
-> *rbd_add_parse_args(struct rbd_device *rbd_dev,
 >
->   	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+> @@ -1545,7 +1559,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>   		down_read(&rbd_dev->header_rwsem);
 >
-> -	ceph_opts = ceph_parse_options(options, mon_addrs,
-> +	*ceph_opts = ceph_parse_options(options, mon_addrs,
->   					mon_addrs + mon_addrs_size - 1,
->   					parse_rbd_opts_token, rbd_opts);
->   	kfree(options);
-> +	if (IS_ERR(*ceph_opts)) {
-> +		ret = PTR_ERR(*ceph_opts);
-> +		goto out_err;
-> +	}
->   	*opts = rbd_opts;
+>   		if (!rbd_dev->exists) {
+> -			rbd_assert(rbd_dev->snap_id != CEPH_NOSNAP);
+> +			rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
+>   			up_read(&rbd_dev->header_rwsem);
+>   			dout("request for non-existent snapshot");
+>   			spin_lock_irq(q->queue_lock);
+> @@ -1726,13 +1740,13 @@ rbd_dev_v1_header_read(struct rbd_device
+> *rbd_dev, u64 *version)
+>   			ret = -ENXIO;
+>   			pr_warning("short header read for image %s"
+>   					" (want %zd got %d)\n",
+> -				rbd_dev->image_name, size, ret);
+> +				rbd_dev->spec->image_name, size, ret);
+>   			goto out_err;
+>   		}
+>   		if (!rbd_dev_ondisk_valid(ondisk)) {
+>   			ret = -ENXIO;
+>   			pr_warning("invalid header for image %s\n",
+> -				rbd_dev->image_name);
+> +				rbd_dev->spec->image_name);
+>   			goto out_err;
+>   		}
 >
-> -	return ceph_opts;
-> +	return 0;
->   out_mem:
-> -	err_ptr = ERR_PTR(-ENOMEM);
-> +	ret = -ENOMEM;
->   out_err:
->   	kfree(rbd_dev->image_name);
->   	rbd_dev->image_name = NULL;
-> @@ -2923,7 +2928,7 @@ out_err:
->   	rbd_dev->pool_name = NULL;
->   	kfree(options);
+> @@ -1783,7 +1797,7 @@ static void rbd_update_mapping_size(struct
+> rbd_device *rbd_dev)
+>   {
+>   	sector_t size;
 >
-> -	return err_ptr;
-> +	return ret;
+> -	if (rbd_dev->snap_id != CEPH_NOSNAP)
+> +	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
+>   		return;
+>
+>   	size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
+> @@ -1957,7 +1971,7 @@ static ssize_t rbd_pool_show(struct device *dev,
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	return sprintf(buf, "%s\n", rbd_dev->pool_name);
+> +	return sprintf(buf, "%s\n", rbd_dev->spec->pool_name);
+>   }
+>
+>   static ssize_t rbd_pool_id_show(struct device *dev,
+> @@ -1965,7 +1979,8 @@ static ssize_t rbd_pool_id_show(struct device *dev,
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	return sprintf(buf, "%llu\n", (unsigned long long) rbd_dev->pool_id);
+> +	return sprintf(buf, "%llu\n",
+> +		(unsigned long long) rbd_dev->spec->pool_id);
+>   }
+>
+>   static ssize_t rbd_name_show(struct device *dev,
+> @@ -1973,7 +1988,7 @@ static ssize_t rbd_name_show(struct device *dev,
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	return sprintf(buf, "%s\n", rbd_dev->image_name);
+> +	return sprintf(buf, "%s\n", rbd_dev->spec->image_name);
+>   }
+>
+>   static ssize_t rbd_image_id_show(struct device *dev,
+> @@ -1981,7 +1996,7 @@ static ssize_t rbd_image_id_show(struct device *dev,
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	return sprintf(buf, "%s\n", rbd_dev->image_id);
+> +	return sprintf(buf, "%s\n", rbd_dev->spec->image_id);
 >   }
 >
 >   /*
-> @@ -3131,7 +3136,7 @@ static ssize_t rbd_add(struct bus_type *bus,
->   		       size_t count)
+> @@ -1994,7 +2009,7 @@ static ssize_t rbd_snap_show(struct device *dev,
 >   {
->   	struct rbd_device *rbd_dev = NULL;
-> -	struct ceph_options *ceph_opts;
-> +	struct ceph_options *ceph_opts = NULL;
->   	struct rbd_options *rbd_opts = NULL;
->   	struct ceph_osd_client *osdc;
->   	int rc = -ENOMEM;
-> @@ -3150,11 +3155,9 @@ static ssize_t rbd_add(struct bus_type *bus,
->   	init_rwsem(&rbd_dev->header_rwsem);
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
 >
->   	/* parse add command */
-> -	ceph_opts = rbd_add_parse_args(rbd_dev, buf, &rbd_opts);
-> -	if (IS_ERR(ceph_opts)) {
-> -		rc = PTR_ERR(ceph_opts);
-> +	rc = rbd_add_parse_args(rbd_dev, buf, &ceph_opts, &rbd_opts);
-> +	if (rc < 0)
->   		goto err_out_mem;
-> -	}
->   	rbd_dev->mapping.read_only = rbd_opts->read_only;
+> -	return sprintf(buf, "%s\n", rbd_dev->snap_name);
+> +	return sprintf(buf, "%s\n", rbd_dev->spec->snap_name);
+>   }
 >
->   	rc = rbd_get_client(rbd_dev, ceph_opts);
+>   static ssize_t rbd_image_refresh(struct device *dev,
+> @@ -2547,11 +2562,12 @@ static int rbd_dev_snaps_update(struct
+> rbd_device *rbd_dev)
+>
+>   			/* Existing snapshot not in the new snap context */
+>
+> -			if (rbd_dev->snap_id == snap->id)
+> +			if (rbd_dev->spec->snap_id == snap->id)
+>   				rbd_dev->exists = false;
+>   			__rbd_remove_snap_dev(snap);
+>   			dout("%ssnap id %llu has been removed\n",
+> -				rbd_dev->snap_id == snap->id ?  "mapped " : "",
+> +				rbd_dev->spec->snap_id == snap->id ?
+> +							"mapped " : "",
+>   				(unsigned long long) snap->id);
+>
+>   			/* Done with this list entry; advance */
+> @@ -2869,16 +2885,17 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   	if (!*options)
+>   		goto out_err;	/* Missing options */
+>
+> -	rbd_dev->pool_name = dup_token(&buf, NULL);
+> -	if (!rbd_dev->pool_name)
+> +	rbd_dev->spec->pool_name = dup_token(&buf, NULL);
+> +	if (!rbd_dev->spec->pool_name)
+>   		goto out_mem;
+> -	if (!*rbd_dev->pool_name)
+> +	if (!*rbd_dev->spec->pool_name)
+>   		goto out_err;	/* Missing pool name */
+>
+> -	rbd_dev->image_name = dup_token(&buf, &rbd_dev->image_name_len);
+> -	if (!rbd_dev->image_name)
+> +	rbd_dev->spec->image_name =
+> +		dup_token(&buf, &rbd_dev->spec->image_name_len);
+> +	if (!rbd_dev->spec->image_name)
+>   		goto out_mem;
+> -	if (!*rbd_dev->image_name)
+> +	if (!*rbd_dev->spec->image_name)
+>   		goto out_err;	/* Missing image name */
+>
+>   	/*
+> @@ -2893,11 +2910,11 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   		ret = -ENAMETOOLONG;
+>   		goto out_err;
+>   	}
+> -	rbd_dev->snap_name = kmalloc(len + 1, GFP_KERNEL);
+> -	if (!rbd_dev->snap_name)
+> +	rbd_dev->spec->snap_name = kmalloc(len + 1, GFP_KERNEL);
+> +	if (!rbd_dev->spec->snap_name)
+>   		goto out_mem;
+> -	memcpy(rbd_dev->snap_name, buf, len);
+> -	*(rbd_dev->snap_name + len) = '\0';
+> +	memcpy(rbd_dev->spec->snap_name, buf, len);
+> +	*(rbd_dev->spec->snap_name + len) = '\0';
+>
+>   	/* Initialize all rbd options to the defaults */
+>
+> @@ -2921,11 +2938,11 @@ static int rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   out_mem:
+>   	ret = -ENOMEM;
+>   out_err:
+> -	kfree(rbd_dev->image_name);
+> -	rbd_dev->image_name = NULL;
+> -	rbd_dev->image_name_len = 0;
+> -	kfree(rbd_dev->pool_name);
+> -	rbd_dev->pool_name = NULL;
+> +	kfree(rbd_dev->spec->image_name);
+> +	rbd_dev->spec->image_name = NULL;
+> +	rbd_dev->spec->image_name_len = 0;
+> +	kfree(rbd_dev->spec->pool_name);
+> +	rbd_dev->spec->pool_name = NULL;
+>   	kfree(options);
+>
+>   	return ret;
+> @@ -2957,11 +2974,11 @@ static int rbd_dev_image_id(struct rbd_device
+> *rbd_dev)
+>   	 * First, see if the format 2 image id file exists, and if
+>   	 * so, get the image's persistent id from it.
+>   	 */
+> -	size = sizeof (RBD_ID_PREFIX) + rbd_dev->image_name_len;
+> +	size = sizeof (RBD_ID_PREFIX) + rbd_dev->spec->image_name_len;
+>   	object_name = kmalloc(size, GFP_NOIO);
+>   	if (!object_name)
+>   		return -ENOMEM;
+> -	sprintf(object_name, "%s%s", RBD_ID_PREFIX, rbd_dev->image_name);
+> +	sprintf(object_name, "%s%s", RBD_ID_PREFIX, rbd_dev->spec->image_name);
+>   	dout("rbd id object name is %s\n", object_name);
+>
+>   	/* Response will be an encoded string, which includes a length */
+> @@ -2984,15 +3001,15 @@ static int rbd_dev_image_id(struct rbd_device
+> *rbd_dev)
+>   	ret = 0;    /* rbd_req_sync_exec() can return positive */
+>
+>   	p = response;
+> -	rbd_dev->image_id = ceph_extract_encoded_string(&p,
+> +	rbd_dev->spec->image_id = ceph_extract_encoded_string(&p,
+>   						p + RBD_IMAGE_ID_LEN_MAX,
+> -						&rbd_dev->image_id_len,
+> +						&rbd_dev->spec->image_id_len,
+>   						GFP_NOIO);
+> -	if (IS_ERR(rbd_dev->image_id)) {
+> -		ret = PTR_ERR(rbd_dev->image_id);
+> -		rbd_dev->image_id = NULL;
+> +	if (IS_ERR(rbd_dev->spec->image_id)) {
+> +		ret = PTR_ERR(rbd_dev->spec->image_id);
+> +		rbd_dev->spec->image_id = NULL;
+>   	} else {
+> -		dout("image_id is %s\n", rbd_dev->image_id);
+> +		dout("image_id is %s\n", rbd_dev->spec->image_id);
+>   	}
+>   out:
+>   	kfree(response);
+> @@ -3008,20 +3025,21 @@ static int rbd_dev_v1_probe(struct rbd_device
+> *rbd_dev)
+>
+>   	/* Version 1 images have no id; empty string is used */
+>
+> -	rbd_dev->image_id = kstrdup("", GFP_KERNEL);
+> -	if (!rbd_dev->image_id)
+> +	rbd_dev->spec->image_id = kstrdup("", GFP_KERNEL);
+> +	if (!rbd_dev->spec->image_id)
+>   		return -ENOMEM;
+> -	rbd_dev->image_id_len = 0;
+> +	rbd_dev->spec->image_id_len = 0;
+>
+>   	/* Record the header object name for this rbd image. */
+>
+> -	size = rbd_dev->image_name_len + sizeof (RBD_SUFFIX);
+> +	size = rbd_dev->spec->image_name_len + sizeof (RBD_SUFFIX);
+>   	rbd_dev->header_name = kmalloc(size, GFP_KERNEL);
+>   	if (!rbd_dev->header_name) {
+>   		ret = -ENOMEM;
+>   		goto out_err;
+>   	}
+> -	sprintf(rbd_dev->header_name, "%s%s", rbd_dev->image_name, RBD_SUFFIX);
+> +	sprintf(rbd_dev->header_name, "%s%s",
+> +		rbd_dev->spec->image_name, RBD_SUFFIX);
+>
+>   	/* Populate rbd image metadata */
+>
+> @@ -3038,8 +3056,8 @@ static int rbd_dev_v1_probe(struct rbd_device
+> *rbd_dev)
+>   out_err:
+>   	kfree(rbd_dev->header_name);
+>   	rbd_dev->header_name = NULL;
+> -	kfree(rbd_dev->image_id);
+> -	rbd_dev->image_id = NULL;
+> +	kfree(rbd_dev->spec->image_id);
+> +	rbd_dev->spec->image_id = NULL;
+>
+>   	return ret;
+>   }
+> @@ -3054,12 +3072,12 @@ static int rbd_dev_v2_probe(struct rbd_device
+> *rbd_dev)
+>   	 * Image id was filled in by the caller.  Record the header
+>   	 * object name for this rbd image.
+>   	 */
+> -	size = sizeof (RBD_HEADER_PREFIX) + rbd_dev->image_id_len;
+> +	size = sizeof (RBD_HEADER_PREFIX) + rbd_dev->spec->image_id_len;
+>   	rbd_dev->header_name = kmalloc(size, GFP_KERNEL);
+>   	if (!rbd_dev->header_name)
+>   		return -ENOMEM;
+>   	sprintf(rbd_dev->header_name, "%s%s",
+> -			RBD_HEADER_PREFIX, rbd_dev->image_id);
+> +			RBD_HEADER_PREFIX, rbd_dev->spec->image_id);
+>
+>   	/* Get the size and object order for the image */
+>
+> @@ -3147,6 +3165,9 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
+>   	if (!rbd_dev)
+>   		return -ENOMEM;
+> +	rbd_dev->spec = kzalloc(sizeof (*rbd_dev->spec), GFP_KERNEL);
+> +	if (!rbd_dev->spec)
+> +		goto err_out_mem;
+>
+>   	/* static rbd_device initialization */
+>   	spin_lock_init(&rbd_dev->lock);
+> @@ -3167,10 +3188,10 @@ static ssize_t rbd_add(struct bus_type *bus,
+>
+>   	/* pick the pool */
+>   	osdc = &rbd_dev->rbd_client->client->osdc;
+> -	rc = ceph_pg_poolid_by_name(osdc->osdmap, rbd_dev->pool_name);
+> +	rc = ceph_pg_poolid_by_name(osdc->osdmap, rbd_dev->spec->pool_name);
+>   	if (rc < 0)
+>   		goto err_out_client;
+> -	rbd_dev->pool_id = (u64) rc;
+> +	rbd_dev->spec->pool_id = (u64) rc;
+>
+>   	rc = rbd_dev_probe(rbd_dev);
+>   	if (rc < 0)
+> @@ -3257,15 +3278,16 @@ err_out_probe:
+>   err_out_client:
+>   	kfree(rbd_dev->header_name);
+>   	rbd_put_client(rbd_dev);
+> -	kfree(rbd_dev->image_id);
+> +	kfree(rbd_dev->spec->image_id);
+>   err_out_args:
+>   	if (ceph_opts)
+>   		ceph_destroy_options(ceph_opts);
+> -	kfree(rbd_dev->snap_name);
+> -	kfree(rbd_dev->image_name);
+> -	kfree(rbd_dev->pool_name);
+> +	kfree(rbd_dev->spec->snap_name);
+> +	kfree(rbd_dev->spec->image_name);
+> +	kfree(rbd_dev->spec->pool_name);
+>   	kfree(rbd_opts);
+>   err_out_mem:
+> +	kfree(rbd_dev->spec);
+>   	kfree(rbd_dev);
+>
+>   	dout("Error adding device %s\n", buf);
+> @@ -3314,11 +3336,11 @@ static void rbd_dev_release(struct device *dev)
+>   	rbd_header_free(&rbd_dev->header);
+>
+>   	/* done with the id, and with the rbd_dev */
+> -	kfree(rbd_dev->snap_name);
+> -	kfree(rbd_dev->image_id);
+> +	kfree(rbd_dev->spec->snap_name);
+> +	kfree(rbd_dev->spec->image_id);
+>   	kfree(rbd_dev->header_name);
+> -	kfree(rbd_dev->pool_name);
+> -	kfree(rbd_dev->image_name);
+> +	kfree(rbd_dev->spec->pool_name);
+> +	kfree(rbd_dev->spec->image_name);
+>   	rbd_dev_id_put(rbd_dev);
+>   	kfree(rbd_dev);
 >
 
