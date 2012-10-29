@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: make pool_id a 64 bit value
-Date: Mon, 29 Oct 2012 13:40:43 -0700
-Message-ID: <508EE9CB.1000307@inktank.com>
-References: <508B11E3.3040108@inktank.com> <508B1286.4010906@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: move snap info out of rbd_mapping struct
+Date: Mon, 29 Oct 2012 13:43:21 -0700
+Message-ID: <508EEA69.9080001@inktank.com>
+References: <508B11E3.3040108@inktank.com> <508B1327.3090008@inktank.com> <508B13E7.30401@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:62547 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760799Ab2J2Uky (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 16:40:54 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so3693708pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 13:40:54 -0700 (PDT)
-In-Reply-To: <508B1286.4010906@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:60566 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757812Ab2J2Unb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 16:43:31 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so4527285pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 13:43:31 -0700 (PDT)
+In-Reply-To: <508B13E7.30401@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,55 +21,141 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/26/2012 03:45 PM, Alex Elder wrote:
-> If a format 2 image has a parent, its pool id will be specified
-> using a 64-bit value.  Change the pool id we save for an image to
-> match that.
+On 10/26/2012 03:51 PM, Alex Elder wrote:
+> Moving the snap_id and snap_name fields into the separate
+> rbd_mapping structure was misguided.  (And in time, perhaps
+> we'll do away with that structure altogether...)
+>
+> Move these fields back into struct rbd_device.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |    8 ++++----
->   1 file changed, 4 insertions(+), 4 deletions(-)
+>   drivers/block/rbd.c |   28 ++++++++++++++--------------
+>   1 file changed, 14 insertions(+), 14 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 147c8df..2a523a1 100644
+> index 2a523a1..05525b2 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -197,7 +197,7 @@ struct rbd_device {
->   	size_t			image_name_len;
->   	char			*header_name;
->   	char			*pool_name;
-> -	int			pool_id;
-> +	u64			pool_id;
+> @@ -166,8 +166,6 @@ struct rbd_snap {
+>   };
 >
+>   struct rbd_mapping {
+> -	char                    *snap_name;
+> -	u64                     snap_id;
+>   	u64                     size;
+>   	u64                     features;
+>   	bool                    snap_exists;
+> @@ -199,6 +197,9 @@ struct rbd_device {
+>   	char			*pool_name;
+>   	u64			pool_id;
+>
+> +	char                    *snap_name;
+> +	u64                     snap_id;
+> +
 >   	struct ceph_osd_event   *watch_event;
 >   	struct ceph_osd_request *watch_request;
-> @@ -1113,7 +1113,7 @@ static int rbd_do_request(struct request *rq,
->   	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
->   	layout->fl_stripe_count = cpu_to_le32(1);
->   	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> -	layout->fl_pg_pool = cpu_to_le32(rbd_dev->pool_id);
-> +	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->pool_id);
->   	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
->   				   req, ops);
->   	rbd_assert(ret == 0);
-> @@ -1982,7 +1982,7 @@ static ssize_t rbd_pool_id_show(struct device *dev,
+>
+> @@ -669,7 +670,7 @@ static int snap_by_name(struct rbd_device *rbd_dev,
+> const char *snap_name)
+>
+>   	list_for_each_entry(snap, &rbd_dev->snaps, node) {
+>   		if (!strcmp(snap_name, snap->name)) {
+> -			rbd_dev->mapping.snap_id = snap->id;
+> +			rbd_dev->snap_id = snap->id;
+>   			rbd_dev->mapping.size = snap->size;
+>   			rbd_dev->mapping.features = snap->features;
+>
+> @@ -686,7 +687,7 @@ static int rbd_dev_set_mapping(struct rbd_device
+> *rbd_dev, char *snap_name)
+>
+>   	if (!memcmp(snap_name, RBD_SNAP_HEAD_NAME,
+>   		    sizeof (RBD_SNAP_HEAD_NAME))) {
+> -		rbd_dev->mapping.snap_id = CEPH_NOSNAP;
+> +		rbd_dev->snap_id = CEPH_NOSNAP;
+>   		rbd_dev->mapping.size = rbd_dev->header.image_size;
+>   		rbd_dev->mapping.features = rbd_dev->header.features;
+>   		rbd_dev->mapping.snap_exists = false;
+> @@ -698,7 +699,7 @@ static int rbd_dev_set_mapping(struct rbd_device
+> *rbd_dev, char *snap_name)
+>   		rbd_dev->mapping.snap_exists = true;
+>   		rbd_dev->mapping.read_only = true;
+>   	}
+> -	rbd_dev->mapping.snap_name = snap_name;
+> +	rbd_dev->snap_name = snap_name;
+>   done:
+>   	return ret;
+>   }
+> @@ -1278,7 +1279,7 @@ static int rbd_do_op(struct request *rq,
+>   		opcode = CEPH_OSD_OP_READ;
+>   		flags = CEPH_OSD_FLAG_READ;
+>   		snapc = NULL;
+> -		snapid = rbd_dev->mapping.snap_id;
+> +		snapid = rbd_dev->snap_id;
+>   		payload_len = 0;
+>   	}
+>
+> @@ -1561,7 +1562,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>
+>   		down_read(&rbd_dev->header_rwsem);
+>
+> -		if (rbd_dev->mapping.snap_id != CEPH_NOSNAP &&
+> +		if (rbd_dev->snap_id != CEPH_NOSNAP &&
+>   				!rbd_dev->mapping.snap_exists) {
+>   			up_read(&rbd_dev->header_rwsem);
+>   			dout("request for non-existent snapshot");
+> @@ -1800,7 +1801,7 @@ static void rbd_update_mapping_size(struct
+> rbd_device *rbd_dev)
+>   {
+>   	sector_t size;
+>
+> -	if (rbd_dev->mapping.snap_id != CEPH_NOSNAP)
+> +	if (rbd_dev->snap_id != CEPH_NOSNAP)
+>   		return;
+>
+>   	size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
+> @@ -2011,7 +2012,7 @@ static ssize_t rbd_snap_show(struct device *dev,
 >   {
 >   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
 >
-> -	return sprintf(buf, "%d\n", rbd_dev->pool_id);
-> +	return sprintf(buf, "%llu\n", (unsigned long long) rbd_dev->pool_id);
+> -	return sprintf(buf, "%s\n", rbd_dev->mapping.snap_name);
+> +	return sprintf(buf, "%s\n", rbd_dev->snap_name);
 >   }
 >
->   static ssize_t rbd_name_show(struct device *dev,
-> @@ -3170,7 +3170,7 @@ static ssize_t rbd_add(struct bus_type *bus,
->   	rc = ceph_pg_poolid_by_name(osdc->osdmap, rbd_dev->pool_name);
->   	if (rc < 0)
->   		goto err_out_client;
-> -	rbd_dev->pool_id = rc;
-> +	rbd_dev->pool_id = (u64) rc;
+>   static ssize_t rbd_image_refresh(struct device *dev,
+> @@ -2567,12 +2568,11 @@ static int rbd_dev_snaps_update(struct
+> rbd_device *rbd_dev)
 >
->   	rc = rbd_dev_probe(rbd_dev);
->   	if (rc < 0)
+>   			/* Existing snapshot not in the new snap context */
+>
+> -			if (rbd_dev->mapping.snap_id == snap->id)
+> +			if (rbd_dev->snap_id == snap->id)
+>   				rbd_dev->mapping.snap_exists = false;
+>   			__rbd_remove_snap_dev(snap);
+>   			dout("%ssnap id %llu has been removed\n",
+> -				rbd_dev->mapping.snap_id == snap->id ?
+> -								"mapped " : "",
+> +				rbd_dev->snap_id == snap->id ?  "mapped " : "",
+>   				(unsigned long long) snap->id);
+>
+>   			/* Done with this list entry; advance */
+> @@ -3256,7 +3256,7 @@ err_out_client:
+>   	rbd_put_client(rbd_dev);
+>   	kfree(rbd_dev->image_id);
+>   err_out_args:
+> -	kfree(rbd_dev->mapping.snap_name);
+> +	kfree(rbd_dev->snap_name);
+>   	kfree(rbd_dev->image_name);
+>   	kfree(rbd_dev->pool_name);
+>   err_out_mem:
+> @@ -3309,7 +3309,7 @@ static void rbd_dev_release(struct device *dev)
+>   	rbd_header_free(&rbd_dev->header);
+>
+>   	/* done with the id, and with the rbd_dev */
+> -	kfree(rbd_dev->mapping.snap_name);
+> +	kfree(rbd_dev->snap_name);
+>   	kfree(rbd_dev->image_id);
+>   	kfree(rbd_dev->header_name);
+>   	kfree(rbd_dev->pool_name);
 >
 
