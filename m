@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/2] rbd: do all argument parsing in one place
-Date: Mon, 29 Oct 2012 14:13:05 -0700
-Message-ID: <508EF161.2000808@inktank.com>
-References: <508B11E3.3040108@inktank.com> <508B142D.7080907@inktank.com> <508B14F8.6080905@inktank.com>
+Subject: Re: [PATCH 1/8] rbd: get rid of snap_name_len
+Date: Mon, 29 Oct 2012 14:14:28 -0700
+Message-ID: <508EF1B4.8080107@inktank.com>
+References: <508B11E3.3040108@inktank.com> <508B1505.20209@inktank.com> <508B15FA.7040008@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55663 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760480Ab2J2VNO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 17:13:14 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so4543574pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 14:13:14 -0700 (PDT)
-In-Reply-To: <508B14F8.6080905@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33767 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760972Ab2J2VOj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Oct 2012 17:14:39 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so3712671pad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 14:14:39 -0700 (PDT)
+In-Reply-To: <508B15FA.7040008@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,159 +21,80 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/26/2012 03:55 PM, Alex Elder wrote:
-> This patch makes rbd_add_parse_args() be the single place all
-> argument parsing occurs for an image map request:
->      - Move the ceph_parse_options() call into that function
->      - Use local variables rather than parameters to hold the list
->        of monitor addresses supplied
->      - Rather than returning it, pass the snapshot name (and its
->        length) back via parameters
->      - Have the function return a ceph_options structure pointer
+On 10/26/2012 04:00 PM, Alex Elder wrote:
+> The value returned in the "snap_name_len" argument to
+> rbd_add_parse_args() is never actually used, so get rid of it.
+>
+> The snap_name_len recorded in *rbd_dev_v2_snap_name() is not
+> useful either, so get rid of that too.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   77
-> +++++++++++++++++++++++++--------------------------
->   1 file changed, 37 insertions(+), 40 deletions(-)
+>   drivers/block/rbd.c |   13 ++++---------
+>   1 file changed, 4 insertions(+), 9 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 6e36c63..4fe14ff 100644
+> index 4fe14ff..cae7423 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2845,24 +2845,27 @@ static inline char *dup_token(const char **buf,
-> size_t *lenp)
->    *
->    * Note: rbd_dev is assumed to have been initially zero-filled.
->    */
-> -static char *rbd_add_parse_args(struct rbd_device *rbd_dev,
-> -				const char *buf,
-> -				const char **mon_addrs,
-> -				size_t *mon_addrs_size,
-> -				char *options,
-> -				size_t options_size)
-> +static struct ceph_options *rbd_add_parse_args(struct rbd_device *rbd_dev,
-> +						const char *buf,
-> +						char *options,
-> +						size_t options_size,
-> +						char **snap_name,
-> +						size_t *snap_name_len)
+> @@ -2408,7 +2408,6 @@ static char *rbd_dev_v2_snap_name(struct
+> rbd_device *rbd_dev, u32 which)
+>   	int ret;
+>   	void *p;
+>   	void *end;
+> -	size_t snap_name_len;
+>   	char *snap_name;
+>
+>   	size = sizeof (__le32) + RBD_MAX_SNAP_NAME_LEN;
+> @@ -2428,9 +2427,7 @@ static char *rbd_dev_v2_snap_name(struct
+> rbd_device *rbd_dev, u32 which)
+>
+>   	p = reply_buf;
+>   	end = (char *) reply_buf + size;
+> -	snap_name_len = 0;
+> -	snap_name = ceph_extract_encoded_string(&p, end, &snap_name_len,
+> -				GFP_KERNEL);
+> +	snap_name = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+>   	if (IS_ERR(snap_name)) {
+>   		ret = PTR_ERR(snap_name);
+>   		goto out;
+> @@ -2849,8 +2846,7 @@ static struct ceph_options
+> *rbd_add_parse_args(struct rbd_device *rbd_dev,
+>   						const char *buf,
+>   						char *options,
+>   						size_t options_size,
+> -						char **snap_name,
+> -						size_t *snap_name_len)
+> +						char **snap_name)
 >   {
 >   	size_t len;
-> -	char *err_ptr = ERR_PTR(-EINVAL);
-> -	char *snap_name;
-> +	const char *mon_addrs;
-> +	size_t mon_addrs_size;
-> +	struct rbd_options rbd_opts;
-> +	struct ceph_options *ceph_opts;
-> +	struct ceph_options *err_ptr = ERR_PTR(-EINVAL);
->
->   	/* The first four tokens are required */
->
->   	len = next_token(&buf);
->   	if (!len)
->   		return err_ptr;
-> -	*mon_addrs_size = len + 1;
-> -	*mon_addrs = buf;
-> +	mon_addrs_size = len + 1;
-> +	mon_addrs = buf;
->
->   	buf += len;
->
-> @@ -2890,14 +2893,27 @@ static char *rbd_add_parse_args(struct
-> rbd_device *rbd_dev,
->   		buf = RBD_SNAP_HEAD_NAME; /* No snapshot supplied */
->   		len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
->   	}
-> -	snap_name = kmalloc(len + 1, GFP_KERNEL);
-> -	if (!snap_name)
-> +	*snap_name = kmalloc(len + 1, GFP_KERNEL);
-> +	if (!*snap_name)
+>   	const char *mon_addrs;
+> @@ -2898,7 +2894,7 @@ static struct ceph_options
+> *rbd_add_parse_args(struct rbd_device *rbd_dev,
 >   		goto out_err;
-> -	memcpy(snap_name, buf, len);
-> -	*(snap_name + len) = '\0';
-> +	memcpy(*snap_name, buf, len);
-> +	*(*snap_name + len) = '\0';
-> +	*snap_name_len = len;
-> +	/* Initialize all rbd options to the defaults */
+>   	memcpy(*snap_name, buf, len);
+>   	*(*snap_name + len) = '\0';
+> -	*snap_name_len = len;
+> +
+>   	/* Initialize all rbd options to the defaults */
 >
-> -	return snap_name;
-> +	rbd_opts.read_only = RBD_READ_ONLY_DEFAULT;
->
-> +	ceph_opts = ceph_parse_options(options, mon_addrs,
-> +					mon_addrs + mon_addrs_size - 1,
-> +					parse_rbd_opts_token, &rbd_opts);
-> +
-> +	/* Record the parsed rbd options */
-> +
-> +	if (!IS_ERR(ceph_opts)) {
-> +		rbd_dev->mapping.read_only = rbd_opts.read_only;
-> +	}
-> +
-> +	return ceph_opts;
->   out_err:
->   	kfree(rbd_dev->image_name);
->   	rbd_dev->image_name = NULL;
-> @@ -3114,10 +3130,8 @@ static ssize_t rbd_add(struct bus_type *bus,
->   {
+>   	rbd_opts.read_only = RBD_READ_ONLY_DEFAULT;
+> @@ -3131,7 +3127,6 @@ static ssize_t rbd_add(struct bus_type *bus,
 >   	char *options;
 >   	struct rbd_device *rbd_dev = NULL;
-> -	const char *mon_addrs = NULL;
-> -	size_t mon_addrs_size = 0;
 >   	char *snap_name;
-> -	struct rbd_options rbd_opts;
-> +	size_t snap_name_len = 0;
+> -	size_t snap_name_len = 0;
 >   	struct ceph_options *ceph_opts;
 >   	struct ceph_osd_client *osdc;
 >   	int rc = -ENOMEM;
-> @@ -3139,32 +3153,16 @@ static ssize_t rbd_add(struct bus_type *bus,
->   	init_rwsem(&rbd_dev->header_rwsem);
+> @@ -3154,7 +3149,7 @@ static ssize_t rbd_add(struct bus_type *bus,
 >
 >   	/* parse add command */
-> -	snap_name = rbd_add_parse_args(rbd_dev, buf,
-> -				&mon_addrs, &mon_addrs_size, options, count);
-> -	if (IS_ERR(snap_name)) {
-> -		rc = PTR_ERR(snap_name);
-> -		goto err_out_mem;
-> -	}
-> -
-> -	/* Initialize all rbd options to the defaults */
-> -
-> -	rbd_opts.read_only = RBD_READ_ONLY_DEFAULT;
-> -
-> -	ceph_opts = ceph_parse_options(options, mon_addrs,
-> -					mon_addrs + mon_addrs_size - 1,
-> -					parse_rbd_opts_token, &rbd_opts);
-> +	ceph_opts = rbd_add_parse_args(rbd_dev, buf, options, count,
-> +				&snap_name, &snap_name_len);
+>   	ceph_opts = rbd_add_parse_args(rbd_dev, buf, options, count,
+> -				&snap_name, &snap_name_len);
+> +				&snap_name);
 >   	if (IS_ERR(ceph_opts)) {
 >   		rc = PTR_ERR(ceph_opts);
-> -		goto err_out_args;
-> +		goto err_out_mem;
->   	}
->
-> -	/* Record the parsed rbd options */
-> -
-> -	rbd_dev->mapping.read_only = rbd_opts.read_only;
-> -
->   	rc = rbd_get_client(rbd_dev, ceph_opts);
->   	if (rc < 0)
-> -		goto err_out_opts;
-> +		goto err_out_args;
->   	ceph_opts = NULL;	/* ceph_opts now owned by rbd_dev client */
->
->   	/* pick the pool */
-> @@ -3257,10 +3255,9 @@ err_out_client:
->   	kfree(rbd_dev->header_name);
->   	rbd_put_client(rbd_dev);
->   	kfree(rbd_dev->image_id);
-> -err_out_opts:
-> +err_out_args:
->   	if (ceph_opts)
->   		ceph_destroy_options(ceph_opts);
-> -err_out_args:
->   	kfree(rbd_dev->snap_name);
->   	kfree(rbd_dev->image_name);
->   	kfree(rbd_dev->pool_name);
+>   		goto err_out_mem;
 >
 
