@@ -1,35 +1,29 @@
-From: <Eric_YH_Chen@wiwynn.com>
-Subject: Limitaion of CephFS
-Date: Tue, 30 Oct 2012 09:45:17 +0000
-Message-ID: <60E83269D669544E8069A09CB69135EA03DC5E@GDC-CLDMBX-P02.whq.wistron>
+From: =?ISO-8859-2?Q?Maciej_Ga=B3kiewicz?=
+	<maciejgalkiewicz@ragnarson.com>
+Subject: Re: Ceph performance
+Date: Tue, 30 Oct 2012 10:54:22 +0100
+Message-ID: <CAGqxmDPfmX1-j5H+sJwAgJD1_1jPVsJfmPW1Bet+UuHAv1BKZg@mail.gmail.com>
+References: <508E8C1C.4020605@gmail.com>
+	<508ED184.50203@inktank.com>
+	<508F8F8D.7010107@gmail.com>
+	<CAPYLRzhfv08vS0CNEHP2d6+M1FpwNDgtU28DTYn9vjFmLnP9XA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:49949 "EHLO
-	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757055Ab2J3JpU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 05:45:20 -0400
-Received: from GDC-CLDCAS-P03.whq.wistron (unverified [10.37.38.64]) by TWNHUMSW5.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta7bf2fa8bfc0a816731574@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
- Tue, 30 Oct 2012 17:45:10 +0800
-Content-Language: zh-TW
+Received: from mail-we0-f174.google.com ([74.125.82.174]:55818 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756713Ab2J3JyX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 05:54:23 -0400
+Received: by mail-we0-f174.google.com with SMTP id t9so34475wey.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 02:54:22 -0700 (PDT)
+In-Reply-To: <CAPYLRzhfv08vS0CNEHP2d6+M1FpwNDgtU28DTYn9vjFmLnP9XA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Roman Alekseev <rs.alekseev@gmail.com>, Sam Lang <sam.lang@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi all:
+I have been experiencing the same problem. Tell us more about your
+disks. Are they shared with OS and/or mds, journal? Paste ceph.conf.
 
-I have some question about the limitation of CephFS. 
-Would you please help to answer these questions? Thanks!
-
-1. Max file size
-2. Max number of files
-3. Max filename length
-4. filename character set, ex: any byte, except null, "/"
-5. max pathname length
-
-And one question about RBD
-1. max RBD size
-
-
+regards
+Maciej Galkiewicz
