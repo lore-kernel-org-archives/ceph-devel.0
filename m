@@ -1,37 +1,129 @@
 From: Alex Elder <elder@inktank.com>
-Subject: rbd: wrap up of initialization rework
-Date: Tue, 30 Oct 2012 16:11:01 -0500
-Message-ID: <50904265.2050603@inktank.com>
+Subject: [PATCH 1/4] rbd: don't pass rbd_dev to rbd_get_client()
+Date: Tue, 30 Oct 2012 16:14:07 -0500
+Message-ID: <5090431F.5000203@inktank.com>
+References: <50904265.2050603@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:38230 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934561Ab2J3VLF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:11:05 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so1110383iea.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:11:03 -0700 (PDT)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:52430 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934564Ab2J3VOL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:14:11 -0400
+Received: by mail-ia0-f174.google.com with SMTP id y32so527378iag.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:14:10 -0700 (PDT)
+In-Reply-To: <50904265.2050603@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-These four patches sort of finish out this bunch of patches
-that have been reworking how rbd initialization of devices
-is done.  With this foundation in place, probing for
-parents of layered device fits in fairly neatly.
+The only reason rbd_dev is passed to rbd_get_client() is so its
+rbd_client field can get assigned.  Instead, just return the
+rbd_client pointer as a result and have the caller do the
+assignment.
 
-[PATCH 1/4] rbd: don't pass rbd_dev to rbd_get_client()
-    This makes getting a reference to a client not depend
-    on a particular rbd_dev.
-[PATCH 2/4] rbd: consolidate rbd_dev init in rbd_add()
-    This just moves some code around to make the next patch
-    simpler.
-[PATCH 3/4] rbd: define rbd_dev_{create,destroy}() helpers
-    These helpers isolate some initialization and make
-    cleanup in error paths easier.
-[PATCH 4/4] rbd: encapsulate last part of probe
-    This moves a big hunk of code into its own function,
-    leaving rbd_add() much shorter and easier to follow.
+Change rbd_put_client() so it takes an rbd_client structure,
+so follows the more typical symmetry with rbd_get_client().
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   33 +++++++++++++++------------------
+ 1 file changed, 15 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index be85d92..a528d4c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -467,23 +467,17 @@ static int parse_rbd_opts_token(char *c, void
+*private)
+  * Get a ceph client with specific addr and configuration, if one does
+  * not exist create it.
+  */
+-static int rbd_get_client(struct rbd_device *rbd_dev,
+-				struct ceph_options *ceph_opts)
++static struct rbd_client *rbd_get_client(struct ceph_options *ceph_opts)
+ {
+ 	struct rbd_client *rbdc;
+
+ 	rbdc = rbd_client_find(ceph_opts);
+-	if (rbdc) {
+-		/* using an existing client */
++	if (rbdc)	/* using an existing client */
+ 		ceph_destroy_options(ceph_opts);
+-	} else {
++	else
+ 		rbdc = rbd_client_create(ceph_opts);
+-		if (IS_ERR(rbdc))
+-			return PTR_ERR(rbdc);
+-	}
+-	rbd_dev->rbd_client = rbdc;
+
+-	return 0;
++	return rbdc;
+ }
+
+ /*
+@@ -508,10 +502,9 @@ static void rbd_client_release(struct kref *kref)
+  * Drop reference to ceph client node. If it's not referenced anymore,
+release
+  * it.
+  */
+-static void rbd_put_client(struct rbd_device *rbd_dev)
++static void rbd_put_client(struct rbd_client *rbdc)
+ {
+-	kref_put(&rbd_dev->rbd_client->kref, rbd_client_release);
+-	rbd_dev->rbd_client = NULL;
++	kref_put(&rbdc->kref, rbd_client_release);
+ }
+
+ /*
+@@ -3232,6 +3225,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 	struct ceph_options *ceph_opts = NULL;
+ 	struct rbd_options *rbd_opts = NULL;
+ 	struct rbd_spec *spec = NULL;
++	struct rbd_client *rbdc;
+ 	struct ceph_osd_client *osdc;
+ 	int rc = -ENOMEM;
+
+@@ -3255,13 +3249,16 @@ static ssize_t rbd_add(struct bus_type *bus,
+
+ 	rbd_dev->mapping.read_only = rbd_opts->read_only;
+
+-	rc = rbd_get_client(rbd_dev, ceph_opts);
+-	if (rc < 0)
++	rbdc = rbd_get_client(ceph_opts);
++	if (IS_ERR(rbdc)) {
++		rc = PTR_ERR(rbdc);
+ 		goto err_out_args;
++	}
++	rbd_dev->rbd_client = rbdc;
+ 	ceph_opts = NULL;	/* ceph_opts now owned by rbd_dev client */
+
+ 	/* pick the pool */
+-	osdc = &rbd_dev->rbd_client->client->osdc;
++	osdc = &rbdc->client->osdc;
+ 	rc = ceph_pg_poolid_by_name(osdc->osdmap, spec->pool_name);
+ 	if (rc < 0)
+ 		goto err_out_client;
+@@ -3353,7 +3350,7 @@ err_out_probe:
+ 	rbd_header_free(&rbd_dev->header);
+ err_out_client:
+ 	kfree(rbd_dev->header_name);
+-	rbd_put_client(rbd_dev);
++	rbd_put_client(rbdc);
+ err_out_args:
+ 	if (ceph_opts)
+ 		ceph_destroy_options(ceph_opts);
+@@ -3398,7 +3395,7 @@ static void rbd_dev_release(struct device *dev)
+ 	if (rbd_dev->watch_event)
+ 		rbd_req_sync_unwatch(rbd_dev);
+
+-	rbd_put_client(rbd_dev);
++	rbd_put_client(rbd_dev->rbd_client);
+
+ 	/* clean up and free blkdev */
+ 	rbd_free_disk(rbd_dev);
+-- 
+1.7.9.5
+
