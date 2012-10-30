@@ -1,36 +1,103 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: production ready?
-Date: Tue, 30 Oct 2012 14:21:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210301419480.13553@cobra.newdream.net>
-References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com> <508EE540.5060303@inktank.com> <CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com> <CAPYLRzgtKU06uUoWW9QoJS_X7mvpFdkav+TqFn1vZh6MFtGSjw@mail.gmail.com>
- <CAJH6TXjV2vGynH+tPQE7XSY5tCVsQTtD8+omiMTOZ9KzhE052g@mail.gmail.com> <CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com> <CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com> <CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com>
- <CAJH6TXjE=nQscexL34fQ7RA0sDVc4+QB_O1r39UUAJ5_q87+OQ@mail.gmail.com> <CAMm-wcJox33ZvdfQMT-UN75g5tmGjkbLzPvcbJNmC0-jD1rKVw@mail.gmail.com> <CAJH6TXg=DpmE8O24TPtQwPL3MsEaqqdxBsnhS1zAFmjgRbUYrQ@mail.gmail.com> <50904154.7080004@inktank.com>
- <CAJH6TXhLWzgLS_RK5GNpsNpbzF=QiaEV8-3CwmvG2ZHEWdekQg@mail.gmail.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: Different geoms for an rbd block device
+Date: Wed, 31 Oct 2012 00:41:26 +0300
+Message-ID: <CABYiri8KcpMt=+1WHWvxkDuMF1=f-=oB7oJDNDhVgaAZF_PF7Q@mail.gmail.com>
+References: <CABYiri_v2mP61oHOM0G9ndSOKn=i7fPGHir9pSCXg-2z_5s0RA@mail.gmail.com>
+ <509041A4.8070508@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51246 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934577Ab2J3VVL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:21:11 -0400
-In-Reply-To: <CAJH6TXhLWzgLS_RK5GNpsNpbzF=QiaEV8-3CwmvG2ZHEWdekQg@mail.gmail.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:38870 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934733Ab2J3Vls (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:41:48 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h16so777307oag.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:41:47 -0700 (PDT)
+In-Reply-To: <509041A4.8070508@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Dan Mick <dan.mick@inktank.com>, =?ISO-2022-JP?Q?=1B$BjOE=5F=1B=28J?= <yuandong1222@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 30 Oct 2012, Gandalf Corvotempesta wrote:
-> 2012/10/30 Dan Mick <dan.mick@inktank.com>:
-> > Generally that's considered OK.  ceph-mon doesn't use very much disk or CPU
-> > or network bandwidth.
-> 
-> In this case, should I reserve some space to ceph-mon (a partition or
-> a dedicated disk) or ceph-mon is able to 'share' the osd disk space
-> automatically (for example using a directory)?
+On Wed, Oct 31, 2012 at 1:07 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 10/28/2012 03:02 AM, Andrey Korolyov wrote:
+>>
+>> Hi,
+>>
+>> Should following behavior considered to be normal?
+>>
+>> $ rbd map test-rack0/debiantest --user qemukvm --secret qemukvm.key
+>> $ fdisk /dev/rbd1
+>>
+>> Command (m for help): p
+>>
+>> Disk /dev/rbd1: 671 MB, 671088640 bytes
+>> 255 heads, 63 sectors/track, 81 cylinders, total 1310720 sectors
+>> Units = sectors of 1 * 512 = 512 bytes
+>> Sector size (logical/physical): 512 bytes / 512 bytes
+>> I/O size (minimum/optimal): 4194304 bytes / 4194304 bytes
+>> Disk identifier: 0x00056f14
+>>
+>>       Device Boot      Start         End      Blocks   Id  System
+>> /dev/rbd1p1            2048       63487       30720   82  Linux swap /
+>> Solaris
+>> Partition 1 does not start on physical sector boundary.
+>> /dev/rbd1p2           63488     1292287      614400   83  Linux
+>> Partition 2 does not start on physical sector boundary.
+>>
+>> Meanwhile, in the guest vm over same image:
+>>
+>> fdisk /dev/vda
+>>
+>> Command (m for help): p
+>>
+>> Disk /dev/vda: 671 MB, 671088640 bytes
+>> 16 heads, 63 sectors/track, 1300 cylinders, total 1310720 sectors
+>
+>
+> I'm guessing the reported number of cylinders is the issue?
+> You can control that with a qemu option. I think
+>
+> -drive ...cyls=81
+>
+> will do it. You can also set the min/opt i/o sizes via
+> qemu device properties min_io_size and opt_io_size in
+> the same way you can adjust discard granularity:
+>
+> http://ceph.com/docs/master/rbd/qemu-rbd/#enabling-discard-trim
+>
+> Unfortunately min_io_size is a uint16 in qemu, so it won't
+> be able to store 4194304.
+>
+>
+>> Units = sectors of 1 * 512 = 512 bytes
+>> Sector size (logical/physical): 512 bytes / 512 bytes
+>> I/O size (minimum/optimal): 512 bytes / 512 bytes
+>> Disk identifier: 0x00056f14
+>>
+>>     Device Boot      Start         End      Blocks   Id  System
+>> /dev/vda1            2048       63487       30720   82  Linux swap /
+>> Solaris
+>> /dev/vda2           63488     1292287      614400   83  Linux
+>>
+>> The real pain starts when I try to repartition disk from after 'rbd
+>> map' using its geometry - it simply broke partition layout, for
+>> example, first block offset moves from 2048b to 8192. Of course I can
+>> specify geometry by hand, but before that I may need to start vm at
+>> least once or do something else which will print me out actual layout.
+>>
+>> Thanks!
+>
+>
+> Setting the geometry at qemu boot time should work, and is a bit easier.
+> qemu actually has code to try to guess disk geometry from a partition
+> table, but perhaps it doesn't support the format you're using.
+>
+> Josh
 
-A common pattern is to give it a directory on the OS/boot volume.  This 
-can be a dedicated disk (lots of space for logs) or something carved out 
-of another disk (more space for ceph data, but can interfere with ceph-osd 
-performance).
-
-sage
+So preferable geometry is one provided by kernel client, right? Is
+there any advantages of using large blocks for I/O with discard(ofc,
+not right now, I`ll wait for virtio bus support :) )?  At first sight,
+TCP transfers should not differ by resulting speed on typical
+workloads, but only on exotic ones - like delayed commit on the guest
+FS + intensive writes.
