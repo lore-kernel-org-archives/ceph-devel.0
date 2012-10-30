@@ -1,28 +1,30 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: production ready?
-Date: Tue, 30 Oct 2012 12:35:32 +0100
-Message-ID: <CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com>
-References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com>
-	<508EE540.5060303@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH, resend] rbd: simplify rbd_rq_fn()
+Date: Tue, 30 Oct 2012 07:01:26 -0500
+Message-ID: <508FC196.30702@inktank.com>
+References: <508B11E3.3040108@inktank.com> <508B1242.1090808@inktank.com> <508EE73E.4090101@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:50018 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932770Ab2J3Lfd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 07:35:33 -0400
-Received: by mail-ee0-f46.google.com with SMTP id b15so91900eek.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 04:35:32 -0700 (PDT)
-In-Reply-To: <508EE540.5060303@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:53559 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752015Ab2J3MB3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 08:01:29 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so208299iea.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 05:01:28 -0700 (PDT)
+In-Reply-To: <508EE73E.4090101@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-2012/10/29 Dan Mick <dan.mick@inktank.com>:
-> There are sites using them in production now.
+On 10/29/2012 03:29 PM, Josh Durgin wrote:
+> This is much easier to read now. It might be useful
+> to add messages for the different failure cases in
+> bio_chain_clone_range later.
 
-Any docs about infrastructure size, topology, performance and so on?
+I've added this to my growing list of cleanup tasks.
 
-I'm evaluating many distribuited system and I would like to have some
-feedbacks/usecase)
+> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
