@@ -1,160 +1,194 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Fwd: Delivery Status Notification (Failure)
-Date: Tue, 30 Oct 2012 14:32:17 +0530
-Message-ID: <CAGfy=6=CjbJCE981zT=oZOGXpMuKBadXD0hxR8yuCRbfKskz9g@mail.gmail.com>
-References: <CAGfy=6=se6CXExQyyA7TrAjUVkGqRwGL=E1wqo4h4_6ORzS-MA@mail.gmail.com>
-	<f46d0438909985742c04cc3f658c@google.com>
-	<CAGfy=6n6WJOKvQTO1LfsnY+_SRdh714HmoPKGgTSpjhE06qZBQ@mail.gmail.com>
-	<CAGfy=6mwAD6A4Z3GXzmMwJnu7W0uPan1m1FYAnRuna9a3rDG=A@mail.gmail.com>
-	<508EE4E4.7060802@inktank.com>
-	<CAGfy=6nj9v14JHa1KX4ffYnNCKoXB-dHNeAUqMqZRAE0+oFhnA@mail.gmail.com>
-	<DBD4A33F-98A2-452B-A854-4DD6D846E0A0@inktank.com>
-	<CAGfy=6kNDhdPQB4WdYN2adZHxAJtXfySfch3-_PjHSGBWknmKg@mail.gmail.com>
-	<CAGfy=6mesQn=wGQiXgKDwKd3zjYWNtYdn+xY=StSKgDqiNa9NA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Ceph performance
+Date: Tue, 30 Oct 2012 10:10:21 +0100
+Message-ID: <CAPYLRzhfv08vS0CNEHP2d6+M1FpwNDgtU28DTYn9vjFmLnP9XA@mail.gmail.com>
+References: <508E8C1C.4020605@gmail.com>
+	<508ED184.50203@inktank.com>
+	<508F8F8D.7010107@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:51928 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab2J3JCS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 05:02:18 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so25710vbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 02:02:17 -0700 (PDT)
-In-Reply-To: <CAGfy=6mesQn=wGQiXgKDwKd3zjYWNtYdn+xY=StSKgDqiNa9NA@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:33326 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751903Ab2J3JKW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 05:10:22 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so38924iea.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 02:10:21 -0700 (PDT)
+In-Reply-To: <508F8F8D.7010107@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Roman Alekseev <rs.alekseev@gmail.com>
+Cc: Sam Lang <sam.lang@inktank.com>, ceph-devel@vger.kernel.org
 
----------- Forwarded message ----------
-From: hemant surale <hemant.surale@gmail.com>
-Date: Tue, Oct 30, 2012 at 2:28 PM
-Subject: Re: Delivery Status Notification (Failure)
-To: Dan Mick <dan.mick@inktank.com>
-
-
-Sir,
-  Now "mkcephfs" is working fine but even after that when i tried to
-execute "service ceph start " following error is observed
-
-
-------------------------------------------------------------------------------------------------------------------------------------
-root@atish-virtual-machine:/usr/local/bin# service ceph start
-=== mon.alpha ===
-Starting Ceph mon.alpha on atish-virtual-machine...
-bash: /usr/bin/ceph-mon: Is a directory
-failed: ' /usr/bin/ceph-mon -i alpha --pid-file
-/var/run/ceph/mon.alpha.pid -c /etc/ceph/ceph.conf '
--------------------------------------------------------------------------------------------------------------------------------------
-
-
-Thanks & Regards,
-Hemant Surale.
-
-
-On Tue, Oct 30, 2012 at 11:33 AM, hemant surale <hemant.surale@gmail.com> wrote:
-> -------------------//ceph.conf-----------------------------------------------------------------
->
-> [global]
->         auth supported = none
->
-> [mon]
->        # mon data = /ceph_data/mon.$id
->
-> [mds]
->
-> [osd]
->         #osd data = /ceph_data/osd.$id
->         #osd journal = /ceph_data/osd.$id.journal
->         osd journal size = 1000
->         filestore xattr use omap = true
->
-> [mon.alpha]
->         host = atish-virtual-machine
->         mon addr = 10.72.148.248:6789
->
-> [osd.0]
->         host = atish-virtual-machine
->         host addr = 10.72.148.248:6789
->
->
-> [mds.alpha]
->         host = atish-virtual-machine
->         host addr = 10.72.148.248:6789
-> ----------------------------------------------------------------------------------------------------------------------------------------------------
->
->
-> -
-> Hemant Surale
->
-> On Tue, Oct 30, 2012 at 11:31 AM, Dan Mick <dan.mick@inktank.com> wrote:
->> This is totally different from not finding ceph-common.sh.
->>
->> Please show your ceph.conf.
+On Tue, Oct 30, 2012 at 9:27 AM, Roman Alekseev <rs.alekseev@gmail.com>=
+ wrote:
+> On 29.10.2012 22:57, Sam Lang wrote:
 >>
 >>
->> On Oct 29, 2012, at 9:11 PM, hemant surale <hemant.surale@gmail.com> wrote:
+>> Hi Roman,
 >>
->>> After performing all required steps for building I simply executed
->>> "mkcephfs -a -c /etc/ceph/ceph/ceph/conf -k ceph.keyring" then it
->>> showed Error:
+>> Is this with the ceph fuse client or the ceph kernel module?
+>>
+>> Its not surprising that the local file system (/home) is so much fas=
+ter
+>> than a mounted ceph volume, especially the first time the directory =
+tree is
+>> traversed (metadata results are cached at the client to improve
+>> performance).  Try running the same find command on the ceph volume =
+and see
+>> if the cached results at the client improve performance at all.
+>>
+>> In order to understand what the performance of ceph should be capabl=
+e of
+>> doing with your deployment for this specific workload, you should ru=
+n iperf
+>> between two nodes to get an idea of your latency limits.
+>>
+>> Also, I noticed that the real timings you listed for ceph and /home =
+are
+>> offset by exactly 17 minutes (user and sys are identical).  Was that=
+ a
+>> copy/paste error, by chance?
+>>
+>> -sam
+>>
+>> On 10/29/2012 09:01 AM, Roman Alekseev wrote:
 >>>
->>> ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+>>> Hi,
 >>>
->>> temp dir is /tmp/mkcephfs.V45sNNmgk8
->>> preparing monmap in /tmp/mkcephfs.V45sNNmgk8/monmap
->>> /usr/local/bin/monmaptool --create --clobber --add alpha
->>> 10.72.148.248:6789 --print /tmp/mkcephfs.V45sNNmgk8/monmap
->>> /usr/local/bin/monmaptool: monmap file /tmp/mkcephfs.V45sNNmgk8/monmap
->>> /usr/local/bin/monmaptool: generated fsid d30d3dbf-232f-46cf-9e64-ed31f9083a0b
->>> epoch 0
->>> fsid d30d3dbf-232f-46cf-9e64-ed31f9083a0b
->>> last_changed 2012-10-30 09:38:44.916885
->>> created 2012-10-30 09:38:44.916885
->>> 0: 10.72.148.248:6789/0 mon.alpha
->>> /usr/local/bin/monmaptool: writing epoch 0 to
->>> /tmp/mkcephfs.V45sNNmgk8/monmap (1 monitors)
->>> === osd.0 ===
->>> 2012-10-30 09:38:45.008029 b6fa5740 -1
->>> filestore(/var/lib/ceph/osd/ceph-0) limited size xattrs -- enable
->>> filestore_xattr_use_omap
->>> 2012-10-30 09:38:45.008044 b6fa5740 -1 OSD::mkfs: couldn't mount
->>> FileStore: error -95
->>> 2012-10-30 09:38:45.008069 b6fa5740 -1  ** ERROR: error creating empty
->>> object store in /var/lib/ceph/osd/ceph-0: (95) Operation not supported
->>> failed: '/usr/local/sbin/mkcephfs -d /tmp/mkcephfs.V45sNNmgk8
->>> --init-daemon osd.0'
->>> ----------------------------------------------------------------------------------------------------------------------------------------------------------
->>> And According to my knowledge Till mkcephfs doesn't work fine
->>> "service Ceph start" wont work. Can you please guide me about steps
->>> required after successfully executing build instructions given at
->>> official site.
+>>> Kindly guide me how to improve performance on the cluster which con=
+sist
+>>> of 5 dedicated servers:
 >>>
+>>> - ceph.conf: http://pastebin.com/hT3qEhUF
+>>> - file system on all drives is ext4
+>>> - mount options "user_xattr"
+>>> - each server has :
+>>> CPU:Intel=AE Xeon=AE Processor E5335(8M Cache, 2.00 GHz, 1333 MHz F=
+SB) x2
+>>> MEM: 4Gb DDR2
+>>> - 1Gb network
 >>>
->>> Thanks & Regards,
->>> Hemant Surale.
+>>> Simple test:
 >>>
+>>> mounted as ceph
+>>> root@client1:/mnt/mycephfs# time find . | wc -l
+>>> 83932
 >>>
+>>> real    17m55.399s
+>>> user    0m0.152s
+>>> sys    0m1.528s
 >>>
->>> On Tue, Oct 30, 2012 at 1:49 AM, Dan Mick <dan.mick@inktank.com> wrote:
->>>> Last time you asked this, I responded (on 18 Oct):
->>>>
->>>> So, clearly something went wrong with the installation step, and this file
->>>> was not created.  How did you install after building?
->>>>
->>>>
->>>> On 10/29/2012 02:27 AM, hemant surale wrote:
->>>>>
->>>>> Hi Folks ,
->>>>>
->>>>> I have executed all required steps to build Ceph from source but now
->>>>> when I execute "service Ceph start" it shows
->>>>>
->>>>>
->>>>> ---------------------------------------//Error--------------------------------------------
->>>>> root@atish-virtual-machine:/ceph_data# service ceph start
->>>>> /etc/init.d/ceph: 37: .: Can't open /usr/lib/ceph/ceph_common.sh
->>>>>
->>>>> -------------------------------------------------------------------------------------------
->>>>>
->>>>>
->>>>> Please help me out .
+>>> on 1 HDD:
+>>>
+>>> root@client1:/home# time find . | wc -l
+>>> 83932
+>>>
+>>> real    0m55.399s
+>>> user    0m0.152s
+>>> sys    0m1.528s
+>>>
+>>> Please help me to find out the issue. Thanks.
+>>>
+>>
+> Hi Sam,
+>
+>     I use the Ceph fs only as kernel module, because we need to get i=
+ts
+> powerful performance but as I can see it is slower then distributed f=
+ile
+> system based on fuse, for example, MooseFS performed the same test fo=
+r 3
+> min.
+> Here is the result iperf test beetwen client and osd server:
+> root@asrv151:~# iperf -c client -i 1
+> ------------------------------------------------------------
+> Client connecting to clientIP, TCP port 5001
+> TCP window size: 96.1 KByte (default)
+> ------------------------------------------------------------
+> [  3] local osd_server port 50106 connected with clientIP port 5001
+> [ ID] Interval       Transfer     Bandwidth
+> [  3]  0.0- 1.0 sec    112 MBytes    941 Mbits/sec
+> [  3]  1.0- 2.0 sec    110 MBytes    924 Mbits/sec
+> [  3]  2.0- 3.0 sec    108 MBytes    905 Mbits/sec
+> [  3]  3.0- 4.0 sec    109 MBytes    917 Mbits/sec
+> [  3]  4.0- 5.0 sec    110 MBytes    926 Mbits/sec
+> [  3]  5.0- 6.0 sec    109 MBytes    915 Mbits/sec
+> [  3]  6.0- 7.0 sec    110 MBytes    926 Mbits/sec
+> [  3]  7.0- 8.0 sec    108 MBytes    908 Mbits/sec
+> [  3]  8.0- 9.0 sec    107 MBytes    897 Mbits/sec
+> [  3]  9.0-10.0 sec    106 MBytes    886 Mbits/sec
+> [  3]  0.0-10.0 sec  1.06 GBytes    914 Mbits/sec
+>
+> ceph -w results:
+>
+>  health HEALTH_OK
+>    monmap e3: 3 mons at {a=3Dmon.a:6789/0,b=3Dmon.b:6789/0,c=3Dmon.c:=
+6789/0},
+> election epoch 10, quorum 0,1,2 a,b,c
+>    osdmap e132: 5 osds: 5 up, 5 in
+>     pgmap v11720: 384 pgs: 384 active+clean; 1880 MB data, 10679 MB u=
+sed,
+> 5185 GB / 5473 GB avail
+>    mdsmap e4: 1/1/1 up {0=3Da=3Dup:active}
+>
+> 2012-10-30 12:23:09.830677 osd.2 [WRN] slow request 30.135787 seconds=
+ old,
+> received at 2012-10-30 12:22:39.694780: osd_op(mds.0.1:309216
+> 10000017163.00000000 [setxattr path (69),setxattr parent (196),tmappu=
+t
+> 0~596] 1.724c80f7) v4 currently waiting for sub ops
+> 2012-10-30 12:23:10.109637 mon.0 [INF] pgmap v11720: 384 pgs: 384
+> active+clean; 1880 MB data, 10679 MB used, 5185 GB / 5473 GB avail
+> 2012-10-30 12:23:12.918038 mon.0 [INF] pgmap v11721: 384 pgs: 384
+> active+clean; 1880 MB data, 10680 MB used, 5185 GB / 5473 GB avail
+> 2012-10-30 12:23:13.977044 mon.0 [INF] pgmap v11722: 384 pgs: 384
+> active+clean; 1880 MB data, 10681 MB used, 5185 GB / 5473 GB avail
+> 2012-10-30 12:23:10.587391 osd.3 [WRN] 6 slow requests, 6 included be=
+low;
+> oldest blocked for > 30.808352 secs
+> 2012-10-30 12:23:10.587398 osd.3 [WRN] slow request 30.808352 seconds=
+ old,
+> received at 2012-10-30 12:22:39.778971: osd_op(mds.0.1:308701 200.000=
+002e5
+> [write 976010~5402] 1.adbeb1a) v4 currently waiting for sub ops
+> 2012-10-30 12:23:10.587403 osd.3 [WRN] slow request 30.796417 seconds=
+ old,
+> received at 2012-10-30 12:22:39.790906: osd_op(mds.0.1:308702 200.000=
+002e5
+> [write 981412~6019] 1.adbeb1a) v4 currently waiting for sub ops
+> 2012-10-30 12:23:10.587408 osd.3 [WRN] slow request 30.796347 seconds=
+ old,
+> received at 2012-10-30 12:22:39.790976: osd_op(mds.0.1:308703 200.000=
+002e5
+> [write 987431~61892] 1.adbeb1a) v4 currently waiting for sub ops
+> 2012-10-30 12:23:10.587413 osd.3 [WRN] slow request 30.530228 seconds=
+ old,
+> received at 2012-10-30 12:22:40.057095: osd_op(mds.0.1:308704 200.000=
+002e5
+> [write 1049323~6630] 1.adbeb1a) v4 currently waiting for sub ops
+> 2012-10-30 12:23:10.587417 osd.3 [WRN] slow request 30.530027 seconds=
+ old,
+> received at 2012-10-30 12:22:40.057296: osd_op(mds.0.1:308705 200.000=
+002e5
+> [write 1055953~20679] 1.adbeb1a) v4 currently waiting for sub ops
+>
+>
+> At the same time I'm copy data to ceph mounted storage.
+>
+> I dunno what can I do to resolve this problem :(
+> Any advices will be greatly appreciated.
+
+Is it the same client copying data into cephfs or a different one?
+I see here that you have several slow requests; it looks like maybe
+you're overloading your disks. That could impact metadata lookups if
+the MDS doesn't have everything cached; have you tried running this
+test without data ingest? (Obviously we'd like it to be faster even
+so, but if it's disk contention there's not a lot we can do.)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
