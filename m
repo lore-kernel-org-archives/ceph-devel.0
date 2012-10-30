@@ -1,77 +1,69 @@
-From: Roman Alekseev <rs.alekseev@gmail.com>
-Subject: Re: Monitor issue
-Date: Tue, 30 Oct 2012 10:06:13 +0400
-Message-ID: <508F6E55.4020101@gmail.com>
-References: <508E9742.8040303@gmail.com> <508E99BC.6050807@widodh.nl>
+From: Joe Buck <jbbuck@gmail.com>
+Subject: Re: Setup for building Java unit tests
+Date: Mon, 29 Oct 2012 23:29:26 -0700
+Message-ID: <508F73C6.2040700@gmail.com>
+References: <CAPrxi5_jSv9Z-S-RNjF0mrFjgEnXuGt79=+JZx11G0PL=oaJcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:62827 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750720Ab2J3GGR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 02:06:17 -0400
-Received: by mail-la0-f46.google.com with SMTP id h6so4359838lag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 23:06:15 -0700 (PDT)
-In-Reply-To: <508E99BC.6050807@widodh.nl>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:65280 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753408Ab2J3G3c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 02:29:32 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so4828494pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Oct 2012 23:29:32 -0700 (PDT)
+In-Reply-To: <CAPrxi5_jSv9Z-S-RNjF0mrFjgEnXuGt79=+JZx11G0PL=oaJcA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: Joe Buck <buck@soe.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 29.10.2012 18:59, Wido den Hollander wrote:
+On 10/29/2012 05:22 PM, Noah Watkins wrote:
+> This is my proposal for handling Java unit test compilation:
 >
+> 1. Go with Joe's suggestion to backport the unit tests to the oldest
+> version of JUnit shipping with the latest Ubuntu and Fedora.
 >
-> On 10/29/2012 03:48 PM, Roman Alekseev wrote:
->> Hello,
->>
->> I have 3 monitors on different nodes and when 'mon.a' was stopped whole
->> cluster stopped work too.
->> My conf: http://pastebin.com/hT3qEhUF
->>
->> Could someone explain how to fix such kind of failure?
+> 2. Use --with-debug to enable unit test building:
 >
-> Could you explain a bit more about the setup?
+>   --enable-cephfs-java: no change
+>   --with-debug --enable-cephfs-java: builds Java tests
 >
-> Which version are you running?
+> 3. configure.ac tests for JUnit dependency in the --with-debug case
+> using (a) the common distribution paths (b) the CLASSPATH environment
+> variable. Stash location in an autoconf variable for Makefile.am to
+> use.
 >
-> What do you mean with failure? Is the ceph -s command still working?
+> Running the tests from teuthology:
 >
-> How sure are you that you didn't catch a bug that killed all three 
-> monitors? Are those processes actually up and running?
+> The two dependencies are JUnit (above approach) and a test runner.
+> Currently that runner is an Ant build script. Installing that script
+> for a --with-debug build in a place like /usr/share/.. is an option,
+> but seems like overkill just to get the teuthology tests going.
 >
-> Did you check the logs of the monitors?
+> How about instead we either 1) write a simple runner (few lines of
+> java code) and include it in the test jar, or 2) stash a minimal
+> Ant-based runner in the teuthology setup script that creates the Ant
+> script at run time. Something like:
 >
-> Could you let us know?
->
-> Thanks!
->
-> Wido
+> cat << EOF > build.xml
+> <target name="test>
+>     blah blah
+> </target>
+> EOF
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To backfill a conversation Noah and I had offline: it turns out that 
+JUnit has a command line taskrunner, so we do not need to ship the 
+build.xml around nor worry about rolling our own.
+If we follow the steps Noah laid out (he's going to help me modify 
+configure to find the JUnit jar) then a workunit can execute the tests 
+in teuthology via command line invocations (I have this working in my 
+branch now, save the smarter configuration/build (item #2 above)).
+We still need to backport the test code to use the older library but 
+that's just a bit of time.
 
-Hi Wido,
-
-I'm running ceph version 0.48.1argonaut.
-The "ceph -s" command doesn't work until I start that monitor again. 
-Under failure I mean that ceph commands (such as ceph -s , -w, ceph mon 
-dump etc) don't respond. I've re-added all three mons and found the 
-following situations:
-
-Situation A:
-1) mon.a is disabled:
-health HEALTH_WARN 1 mons down, quorum 1,2 b,c (cluster works)
-2) mon.b is disabled:
-health HEALTH_WARN 1 mons down, quorum 0,1 a,c (cluster works)
-3) mon.c is disabled:
-health HEALTH_WARN 1 mons down, quorum 0,2 a,b (cluster works)
-
-Situation B:
-If 2 mons are disabled all cluster stop working.
-So cluster works only when 2 monitors are running.
-
-Is it correct ?
-
--- 
-Kind regards,
-
-R. Alekseev
-
+-Joe Buck
