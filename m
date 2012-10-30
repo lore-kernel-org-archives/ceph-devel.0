@@ -1,43 +1,89 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: production ready?
-Date: Tue, 30 Oct 2012 14:06:28 -0700
-Message-ID: <50904154.7080004@inktank.com>
-References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com> <508EE540.5060303@inktank.com> <CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com> <CAPYLRzgtKU06uUoWW9QoJS_X7mvpFdkav+TqFn1vZh6MFtGSjw@mail.gmail.com> <CAJH6TXjV2vGynH+tPQE7XSY5tCVsQTtD8+omiMTOZ9KzhE052g@mail.gmail.com> <CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com> <CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com> <CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com> <CAJH6TXjE=nQscexL34fQ7RA0sDVc4+QB_O1r39UUAJ5_q87+OQ@mail.gmail.com> <CAMm-wcJox33ZvdfQMT-UN75g5tmGjkbLzPvcbJNmC0-jD1rKVw@mail.gmail.com> <CAJH6TXg=DpmE8O24TPtQwPL3MsEaqqdxBsnhS1zAFmjgRbUYrQ@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Different geoms for an rbd block device
+Date: Tue, 30 Oct 2012 14:07:48 -0700
+Message-ID: <509041A4.8070508@inktank.com>
+References: <CABYiri_v2mP61oHOM0G9ndSOKn=i7fPGHir9pSCXg-2z_5s0RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:64811 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934562Ab2J3VGb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:06:31 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so440191pad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:06:31 -0700 (PDT)
-In-Reply-To: <CAJH6TXg=DpmE8O24TPtQwPL3MsEaqqdxBsnhS1zAFmjgRbUYrQ@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43599 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934561Ab2J3VH7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:07:59 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so452955pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:07:58 -0700 (PDT)
+In-Reply-To: <CABYiri_v2mP61oHOM0G9ndSOKn=i7fPGHir9pSCXg-2z_5s0RA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On 10/28/2012 03:02 AM, Andrey Korolyov wrote:
+> Hi,
+>
+> Should following behavior considered to be normal?
+>
+> $ rbd map test-rack0/debiantest --user qemukvm --secret qemukvm.key
+> $ fdisk /dev/rbd1
+>
+> Command (m for help): p
+>
+> Disk /dev/rbd1: 671 MB, 671088640 bytes
+> 255 heads, 63 sectors/track, 81 cylinders, total 1310720 sectors
+> Units = sectors of 1 * 512 = 512 bytes
+> Sector size (logical/physical): 512 bytes / 512 bytes
+> I/O size (minimum/optimal): 4194304 bytes / 4194304 bytes
+> Disk identifier: 0x00056f14
+>
+>       Device Boot      Start         End      Blocks   Id  System
+> /dev/rbd1p1            2048       63487       30720   82  Linux swap / Solaris
+> Partition 1 does not start on physical sector boundary.
+> /dev/rbd1p2           63488     1292287      614400   83  Linux
+> Partition 2 does not start on physical sector boundary.
+>
+> Meanwhile, in the guest vm over same image:
+>
+> fdisk /dev/vda
+>
+> Command (m for help): p
+>
+> Disk /dev/vda: 671 MB, 671088640 bytes
+> 16 heads, 63 sectors/track, 1300 cylinders, total 1310720 sectors
 
+I'm guessing the reported number of cylinders is the issue?
+You can control that with a qemu option. I think
 
-On 10/30/2012 07:59 AM, Gandalf Corvotempesta wrote:
-> 2012/10/30 =E8=A2=81=E5=86=AC <yuandong1222@gmail.com>:
->> Yes, but network (and many other isssues) must be considered.
->
-> Obviously
->
->> 3 is suggested.
->
-> Any contraindication running mon in the same OSD server?
->
+-drive ...cyls=81
 
-Generally that's considered OK.  ceph-mon doesn't use very much disk or=
-=20
-CPU or network bandwidth.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+will do it. You can also set the min/opt i/o sizes via
+qemu device properties min_io_size and opt_io_size in
+the same way you can adjust discard granularity:
+
+http://ceph.com/docs/master/rbd/qemu-rbd/#enabling-discard-trim
+
+Unfortunately min_io_size is a uint16 in qemu, so it won't
+be able to store 4194304.
+
+> Units = sectors of 1 * 512 = 512 bytes
+> Sector size (logical/physical): 512 bytes / 512 bytes
+> I/O size (minimum/optimal): 512 bytes / 512 bytes
+> Disk identifier: 0x00056f14
+>
+>     Device Boot      Start         End      Blocks   Id  System
+> /dev/vda1            2048       63487       30720   82  Linux swap / Solaris
+> /dev/vda2           63488     1292287      614400   83  Linux
+>
+> The real pain starts when I try to repartition disk from after 'rbd
+> map' using its geometry - it simply broke partition layout, for
+> example, first block offset moves from 2048b to 8192. Of course I can
+> specify geometry by hand, but before that I may need to start vm at
+> least once or do something else which will print me out actual layout.
+>
+> Thanks!
+
+Setting the geometry at qemu boot time should work, and is a bit easier.
+qemu actually has code to try to guess disk geometry from a partition
+table, but perhaps it doesn't support the format you're using.
+
+Josh
