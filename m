@@ -1,7 +1,7 @@
-From: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
 Subject: Re: production ready?
-Date: Tue, 30 Oct 2012 22:17:02 +0800
-Message-ID: <CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com>
+Date: Tue, 30 Oct 2012 15:31:11 +0100
+Message-ID: <CAJH6TXjE=nQscexL34fQ7RA0sDVc4+QB_O1r39UUAJ5_q87+OQ@mail.gmail.com>
 References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com>
 	<508EE540.5060303@inktank.com>
 	<CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com>
@@ -9,92 +9,43 @@ References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com>
 	<CAJH6TXjV2vGynH+tPQE7XSY5tCVsQTtD8+omiMTOZ9KzhE052g@mail.gmail.com>
 	<CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com>
 	<CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com>
+	<CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:39973 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752548Ab2J3ORD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 10:17:03 -0400
-Received: by mail-qc0-f174.google.com with SMTP id o22so178923qcr.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 07:17:02 -0700 (PDT)
-In-Reply-To: <CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:43853 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752523Ab2J3ObM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 10:31:12 -0400
+Received: by mail-ee0-f46.google.com with SMTP id b15so189691eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 07:31:11 -0700 (PDT)
+In-Reply-To: <CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+To: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
 Cc: Gregory Farnum <greg@inktank.com>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
 
-> Nothing prevents me to offer a service directly based on RADOS API, i=
-f
-> S3 compatibility is not needed, right ?
+2012/10/30 =E8=A2=81=E5=86=AC <yuandong1222@gmail.com>:
+> RGW and libRBD are not the same pool,  you can`t access aRBD volume w=
+ith
+> RGW. The RADOS treats the RBD volume as just a large object.
 
-Correct, That is librados.
-
-
-> What I don't understand is how can I access a single file from RGW. I=
-f
-> LibRBD and RGW are 'gateway' to a RADOS store, i'll have access to a
-> block device, not to a single file.
-> Should I create a filesystem on the block device before using that wi=
-th
-> RGW?
-
-RGW and libRBD are not the same pool,  you can`t access aRBD volume wit=
-h
-RGW. The RADOS treats the RBD volume as just a large object.
-
-On 30 October 2012 21:57, Gandalf Corvotempesta
-<gandalf.corvotempesta@gmail.com> wrote:
->
-> 2012/10/30 Gregory Farnum <greg@inktank.com>:
-> > Not exactly. RADOS is natively a (powerful) object store. RGW takes=
- S3
-> > and Swift REST requests and translates them into RADOS requests,
-> > stored in a "custom" format. RBD is a client-side library which tak=
-es
-> > a logical block device and stripes it over RADOS objects (by defaul=
-t,
-> > the first 4MB is one object, the second 4MB are another object, etc=
-).
-> > Make sense?
->
-> So, a ceph cluster is made from multiple OSDs.
-> these OSDs are combined by RADOS that is an object store that will
-> stripe over multiple OSDs
->
-> This store can be accessed by RGW (for S3 and Swift api compatibility=
-,
-> in needed) or directly by a server as a block device with librbd
->
-> This should be the architecture:
->
-> OSD -> RADOS -> RGW/LibRBD -> Customer/Server
->
-> Nothing prevents me to offer a service directly based on RADOS API, i=
-f
-> S3 compatibility is not needed, right ?
->
-> What I don't understand is how can I access a single file from RGW. I=
-f
-> LibRBD and RGW are 'gateway' to a RADOS store, i'll have access to a
-> block device, not to a single file.
-> Should I create a filesystem on the block device before using that wi=
-th
-> RGW?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ok, I think to have understood. RADOS store only object on an existent
+filesystem (this is why I have to create a FS to use RADOS/Ceph).
+Now, if that object is accessed by RGW, that object will be a single
+file stored on the FS but if I'm accessing
+with RBD, RBD is masking a very large object, stored on FS, as it is a
+single block device.
+In this case, can a single block device (for example a huge virtual
+machine image) be striped across many OSDs to archieve better
+performance in reading?
+an image striped across 3 disks, should get 3*IOPS when reading
 
 
-
-
---
-=E8=A2=81=E5=86=AC
-Email:yuandong1222@gmail.com
-QQ:10200230
+Another question: in a standard RGW/RBD infrastructure (no CephFS), I
+have to configure only "mon" and "osd" nodes, right?
+How many monitor nodes is suggested?
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
