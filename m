@@ -1,64 +1,51 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
 Subject: Re: production ready?
-Date: Tue, 30 Oct 2012 14:45:41 +0100
-Message-ID: <CAPYLRzh3AV41CnY5VMPAtuggZxr6NidDrYF0ODYL6H64vEBVeQ@mail.gmail.com>
+Date: Tue, 30 Oct 2012 14:57:18 +0100
+Message-ID: <CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com>
 References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com>
 	<508EE540.5060303@inktank.com>
 	<CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com>
 	<CAPYLRzgtKU06uUoWW9QoJS_X7mvpFdkav+TqFn1vZh6MFtGSjw@mail.gmail.com>
 	<CAJH6TXjV2vGynH+tPQE7XSY5tCVsQTtD8+omiMTOZ9KzhE052g@mail.gmail.com>
-	<508FD83F.9020308@profihost.ag>
+	<CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:42792 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752826Ab2J3Npm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 09:45:42 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so365042iea.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 06:45:42 -0700 (PDT)
-In-Reply-To: <508FD83F.9020308@profihost.ag>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:45261 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753004Ab2J3N5T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 09:57:19 -0400
+Received: by mail-ee0-f46.google.com with SMTP id b15so168988eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 06:57:18 -0700 (PDT)
+In-Reply-To: <CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+To: Gregory Farnum <greg@inktank.com>
 Cc: Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
 
-On Tue, Oct 30, 2012 at 2:38 PM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
-> Am 30.10.2012 14:36, schrieb Gandalf Corvotempesta:
->
->> 2012/10/30 Gregory Farnum <greg@inktank.com>:
->>>
->>> Not a lot of people are publicly discussing their sizes on things l=
-ike
->>> that, unfortunately. I believe DreamHost is still the most open. Th=
-ey
->>> have an (RGW-based) object storage service which is backed by ~800
->>> OSDs and are currently beta-testing a compute service using RBD, wh=
-ich
->>> you can see described here:
->>> http://www.youtube.com/watch?v=3Dl_8Y988fO44&feature=3Dplcp
->
->
-> But there's still the problem of slow random write IOP/s. At least i =
-haven't
-> seen any good benchmarks.
+2012/10/30 Gregory Farnum <greg@inktank.com>:
+> Not exactly. RADOS is natively a (powerful) object store. RGW takes S3
+> and Swift REST requests and translates them into RADOS requests,
+> stored in a "custom" format. RBD is a client-side library which takes
+> a logical block device and stripes it over RADOS objects (by default,
+> the first 4MB is one object, the second 4MB are another object, etc).
+> Make sense?
 
-It's not magic =97 I haven't done extensive testing but I believe peopl=
-e
-see aggregate IOPs of about what you can calculate:
-(number of storage disks * IOPS per disks) / (replication level)
-The journaling bumps that up a little bit for bursts, of course;
-similarly if you're doing it on a brand new RBD image it can be a bit
-slower since you need to create all the objects as well as write data
-to them. You need to architect your storage system to match your
-requirements. If you want to run write-heavy databases on RBD, there
-are people doing that. They're using SSDs and are very pleased with
-its performance. *shrug*
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So, a ceph cluster is made from multiple OSDs.
+these OSDs are combined by RADOS that is an object store that will
+stripe over multiple OSDs
+
+This store can be accessed by RGW (for S3 and Swift api compatibility,
+in needed) or directly by a server as a block device with librbd
+
+This should be the architecture:
+
+OSD -> RADOS -> RGW/LibRBD -> Customer/Server
+
+Nothing prevents me to offer a service directly based on RADOS API, if
+S3 compatibility is not needed, right ?
+
+What I don't understand is how can I access a single file from RGW. If
+LibRBD and RGW are 'gateway' to a RADOS store, i'll have access to a
+block device, not to a single file.
+Should I create a filesystem on the block device before using that with RGW?
