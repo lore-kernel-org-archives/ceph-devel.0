@@ -1,222 +1,38 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: encapsulate last part of probe
-Date: Tue, 30 Oct 2012 16:14:43 -0500
-Message-ID: <50904343.2020007@inktank.com>
-References: <50904265.2050603@inktank.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: production ready?
+Date: Tue, 30 Oct 2012 22:17:45 +0100
+Message-ID: <CAJH6TXhLWzgLS_RK5GNpsNpbzF=QiaEV8-3CwmvG2ZHEWdekQg@mail.gmail.com>
+References: <CAJH6TXiaknfB4yCgepkChqSse8Yo2wqtAzwA4RXUEbq=Yc7EbA@mail.gmail.com>
+	<508EE540.5060303@inktank.com>
+	<CAJH6TXiqD3UGdnK-_ArUj_iYYb5nCPX6U-T9qZhBbqHWzY70xA@mail.gmail.com>
+	<CAPYLRzgtKU06uUoWW9QoJS_X7mvpFdkav+TqFn1vZh6MFtGSjw@mail.gmail.com>
+	<CAJH6TXjV2vGynH+tPQE7XSY5tCVsQTtD8+omiMTOZ9KzhE052g@mail.gmail.com>
+	<CAPYLRzgEKJJG62UnJQPi-fzQOm4_jHCkWx=hgKvy5q7i6EZD4g@mail.gmail.com>
+	<CAJH6TXiLpvN4cD829P8njm6z9YkQXtpKWpYoFWsCAHQO1N+Dow@mail.gmail.com>
+	<CAMm-wcJTfubebF=W+GCHdHM9kvZ6b9pGWpMv-Ri0-Pn7XQ-SeQ@mail.gmail.com>
+	<CAJH6TXjE=nQscexL34fQ7RA0sDVc4+QB_O1r39UUAJ5_q87+OQ@mail.gmail.com>
+	<CAMm-wcJox33ZvdfQMT-UN75g5tmGjkbLzPvcbJNmC0-jD1rKVw@mail.gmail.com>
+	<CAJH6TXg=DpmE8O24TPtQwPL3MsEaqqdxBsnhS1zAFmjgRbUYrQ@mail.gmail.com>
+	<50904154.7080004@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:52430 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934577Ab2J3VOq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:14:46 -0400
-Received: by mail-ia0-f174.google.com with SMTP id y32so527378iag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:14:46 -0700 (PDT)
-In-Reply-To: <50904265.2050603@inktank.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:35375 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934532Ab2J3VRq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Oct 2012 17:17:46 -0400
+Received: by mail-ee0-f46.google.com with SMTP id b15so408695eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Oct 2012 14:17:45 -0700 (PDT)
+In-Reply-To: <50904154.7080004@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Dan Mick <dan.mick@inktank.com>
+Cc: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
-Group the activities that now take place after an rbd_dev_probe()
-call into a single function, and move the call to that function
-into rbd_dev_probe() itself.
+2012/10/30 Dan Mick <dan.mick@inktank.com>:
+> Generally that's considered OK.  ceph-mon doesn't use very much disk or CPU
+> or network bandwidth.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |  161
-+++++++++++++++++++++++++++------------------------
- 1 file changed, 86 insertions(+), 75 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a8ad8f8..8d26c0f 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3221,6 +3221,84 @@ out_err:
- 	return ret;
- }
-
-+static int rbd_dev_probe_finish(struct rbd_device *rbd_dev)
-+{
-+	int ret;
-+
-+	/* no need to lock here, as rbd_dev is not registered yet */
-+	ret = rbd_dev_snaps_update(rbd_dev);
-+	if (ret)
-+		return ret;
-+
-+	ret = rbd_dev_set_mapping(rbd_dev);
-+	if (ret)
-+		goto err_out_snaps;
-+
-+	/* generate unique id: find highest unique id, add one */
-+	rbd_dev_id_get(rbd_dev);
-+
-+	/* Fill in the device name, now that we have its id. */
-+	BUILD_BUG_ON(DEV_NAME_LEN
-+			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
-+	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
-+
-+	/* Get our block major device number. */
-+
-+	ret = register_blkdev(0, rbd_dev->name);
-+	if (ret < 0)
-+		goto err_out_id;
-+	rbd_dev->major = ret;
-+
-+	/* Set up the blkdev mapping. */
-+
-+	ret = rbd_init_disk(rbd_dev);
-+	if (ret)
-+		goto err_out_blkdev;
-+
-+	ret = rbd_bus_add_dev(rbd_dev);
-+	if (ret)
-+		goto err_out_disk;
-+
-+	/*
-+	 * At this point cleanup in the event of an error is the job
-+	 * of the sysfs code (initiated by rbd_bus_del_dev()).
-+	 */
-+	down_write(&rbd_dev->header_rwsem);
-+	ret = rbd_dev_snaps_register(rbd_dev);
-+	up_write(&rbd_dev->header_rwsem);
-+	if (ret)
-+		goto err_out_bus;
-+
-+	ret = rbd_init_watch_dev(rbd_dev);
-+	if (ret)
-+		goto err_out_bus;
-+
-+	/* Everything's ready.  Announce the disk to the world. */
-+
-+	add_disk(rbd_dev->disk);
-+
-+	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
-+		(unsigned long long) rbd_dev->mapping.size);
-+
-+	return ret;
-+err_out_bus:
-+	/* this will also clean up rest of rbd_dev stuff */
-+
-+	rbd_bus_del_dev(rbd_dev);
-+
-+	return ret;
-+err_out_disk:
-+	rbd_free_disk(rbd_dev);
-+err_out_blkdev:
-+	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-+err_out_id:
-+	rbd_dev_id_put(rbd_dev);
-+err_out_snaps:
-+	rbd_remove_all_snaps(rbd_dev);
-+
-+	return ret;
-+}
-+
- /*
-  * Probe for the existence of the header object for the given rbd
-  * device.  For format 2 images this includes determining the image
-@@ -3240,9 +3318,16 @@ static int rbd_dev_probe(struct rbd_device *rbd_dev)
- 		ret = rbd_dev_v1_probe(rbd_dev);
- 	else
- 		ret = rbd_dev_v2_probe(rbd_dev);
--	if (ret)
-+	if (ret) {
- 		dout("probe failed, returning %d\n", ret);
-
-+		return ret;
-+	}
-+
-+	ret = rbd_dev_probe_finish(rbd_dev);
-+	if (ret)
-+		rbd_header_free(&rbd_dev->header);
-+
- 	return ret;
- }
-
-@@ -3294,81 +3379,7 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	if (rc < 0)
- 		goto err_out_rbd_dev;
-
--	/* no need to lock here, as rbd_dev is not registered yet */
--	rc = rbd_dev_snaps_update(rbd_dev);
--	if (rc)
--		goto err_out_probe;
--
--	rc = rbd_dev_set_mapping(rbd_dev);
--	if (rc)
--		goto err_out_snaps;
--
--	/* generate unique id: find highest unique id, add one */
--	rbd_dev_id_get(rbd_dev);
--
--	/* Fill in the device name, now that we have its id. */
--	BUILD_BUG_ON(DEV_NAME_LEN
--			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
--	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
--
--	/* Get our block major device number. */
--
--	rc = register_blkdev(0, rbd_dev->name);
--	if (rc < 0)
--		goto err_out_id;
--	rbd_dev->major = rc;
--
--	/* Set up the blkdev mapping. */
--
--	rc = rbd_init_disk(rbd_dev);
--	if (rc)
--		goto err_out_blkdev;
--
--	rc = rbd_bus_add_dev(rbd_dev);
--	if (rc)
--		goto err_out_disk;
--
--	/*
--	 * At this point cleanup in the event of an error is the job
--	 * of the sysfs code (initiated by rbd_bus_del_dev()).
--	 */
--
--	down_write(&rbd_dev->header_rwsem);
--	rc = rbd_dev_snaps_register(rbd_dev);
--	up_write(&rbd_dev->header_rwsem);
--	if (rc)
--		goto err_out_bus;
--
--	rc = rbd_init_watch_dev(rbd_dev);
--	if (rc)
--		goto err_out_bus;
--
--	/* Everything's ready.  Announce the disk to the world. */
--
--	add_disk(rbd_dev->disk);
--
--	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
--		(unsigned long long) rbd_dev->mapping.size);
--
- 	return count;
--
--err_out_bus:
--	/* this will also clean up rest of rbd_dev stuff */
--
--	rbd_bus_del_dev(rbd_dev);
--
--	return rc;
--
--err_out_disk:
--	rbd_free_disk(rbd_dev);
--err_out_blkdev:
--	unregister_blkdev(rbd_dev->major, rbd_dev->name);
--err_out_id:
--	rbd_dev_id_put(rbd_dev);
--err_out_snaps:
--	rbd_remove_all_snaps(rbd_dev);
--err_out_probe:
--	rbd_header_free(&rbd_dev->header);
- err_out_rbd_dev:
- 	rbd_dev_destroy(rbd_dev);
- err_out_client:
--- 
-1.7.9.5
-
+In this case, should I reserve some space to ceph-mon (a partition or
+a dedicated disk) or ceph-mon is able to 'share' the osd disk space
+automatically (for example using a directory)?
