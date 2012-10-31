@@ -1,42 +1,34 @@
-From: Tren Blackburn <tren@eotnetworks.com>
-Subject: Re: Ceph journal
-Date: Wed, 31 Oct 2012 14:24:55 -0700
-Message-ID: <CANLRBoyLHrLP_hg6DSbESk=JhfHa5rzHiyLHcAotUokRe--xVA@mail.gmail.com>
-References: <CAJH6TXgdkq8ZMUpZYaTActMQ9wS76u7F=OUSvWnt9bS-crJwZQ@mail.gmail.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: bobtail timing
+Date: Wed, 31 Oct 2012 14:35:09 -0700
+Message-ID: <CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:45405 "EHLO
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:46069 "EHLO
 	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933351Ab2JaVY4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 17:24:56 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so2035833vbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 14:24:55 -0700 (PDT)
-In-Reply-To: <CAJH6TXgdkq8ZMUpZYaTActMQ9wS76u7F=OUSvWnt9bS-crJwZQ@mail.gmail.com>
+	with ESMTP id S1422837Ab2JaVfK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 17:35:10 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so2045454vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 14:35:09 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Oct 31, 2012 at 2:18 PM, Gandalf Corvotempesta
-<gandalf.corvotempesta@gmail.com> wrote:
-> In a multi replica cluster (for example, replica = 3) is safe to set
-> journal on a tmpfs?
-> As fa as I understood with journal enabled all writes are wrote on
-> journal and then to disk in a second time.
-> If node hangs when datas are still on journal (and journal is not on a
-> permanent disk), some data lost could happens.
+Which branch is the freeze taken against? master?
+
+On Wed, Oct 31, 2012 at 1:46 PM, Sage Weil <sage@inktank.com> wrote:
+> I would like to freeze v0.55, the "bobtail" stable release, at the end of
+> next week.  If there is any functionality you are working on that should
+> be included, we need to get it into master (preferably well) before that.
+> There will be several weeks of testing in the 'next' branch after that
+> (probaly 3 weeks) before it is released.
 >
-> In a multi replica environment, other nodes should be able to write
-> the same datas to disk, right? I this case, using a journal on a tmpfs
-> should be safe enough.
-
-Unless you're using btrfs which writes to the journal and osd fs
-concurrently, if you lose the journal device (such as due to a
-reboot), you've lost the osd device, requiring it to be remade and
-re-added.
-
-This is what I understand at least. If I'm wrong one of the devs will
-strike me down I'm sure ;)
-
-t.
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
