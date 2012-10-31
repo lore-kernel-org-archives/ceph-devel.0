@@ -1,260 +1,96 @@
-From: Marcus Sorensen <shadowsor@gmail.com>
-Subject: Re: slow fio random read benchmark, need help
-Date: Wed, 31 Oct 2012 13:50:36 -0600
-Message-ID: <CALFpzo6LY-gboLa_-qvXh74Or31mbM5Amug+yF_G1VCyB8_Xfg@mail.gmail.com>
-References: <CALFpzo4m_jQfmmwPPeX7hdv3YmcZ3Ozm8S4NtZTwi6KmJaY7MQ@mail.gmail.com>
-	<8be796b6-f1c1-43ed-abe8-ec06b62c7e84@mailpro>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: active MDS and disk write cache
+Date: Wed, 31 Oct 2012 15:01:30 -0500
+Message-ID: <5091839A.9060305@inktank.com>
+References: <50915991.3030906@genome.wustl.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:37071 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760381Ab2JaTuj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 15:50:39 -0400
-Received: by mail-wg0-f42.google.com with SMTP id fm10so2810462wgb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 12:50:37 -0700 (PDT)
-In-Reply-To: <8be796b6-f1c1-43ed-abe8-ec06b62c7e84@mailpro>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:53846 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757035Ab2JaUBe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 16:01:34 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so1202633pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 13:01:33 -0700 (PDT)
+In-Reply-To: <50915991.3030906@genome.wustl.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Matt Weil <mweil@genome.wustl.edu>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Come to think of it that 15k iops I mentioned was on 10G ethernet with
-NFS. I have tried infiniband with ipoib and tcp, it's similar to 10G
-ethernet.
+On 10/31/2012 12:02 PM, Matt Weil wrote:
+> I have a system with a bunch or ram that I want to remain the active MDS
+> but still have a backup.
+>
+> This config doesn't seem to be working.  I can make linuscs92 the active
+> by stopping and starting the mds on linuscs95. It would be nice for
+> linuscs92 to be the active from the start.
+>
+> [mds.linuscs95]
+>      host = linuscs95
+>      mds standby replay = true
+>      mds standby for name = linuscs92
 
-You will need to get creative. What you're asking for really is to
-have local latencies with remote storage. Just off of the top of my
-head you may look into some way to do local caching on SSD for your
-RBD volume, like bcache or flashcache.
+Hi Matt,
 
-Depending on your application, it may actually be a bonus that no
-single server (or handful of servers) can crush your storage's
-performance. if you only have one or two clients anyway then that may
-not be much consolation, but if you're going to have dozens or more
-then there's not much benefit to having one take all performance at
-the expense of everyone, except for perhaps in bursts.
+Can you post your ceph config?  Once you startup your ceph cluster, you 
+see that linuscs92 is the standby and linuscs95 is the active?  How are 
+you starting your cluster?
 
-At any rate, 5000 iops is not as good as a new SSD, but far better
-than a normal disk. Is there some specific application requirement, or
-is it just that you are feeling like you want the full performance
-from the VM?
+>
+> Also about disk write cache.
+>
+> If the Data center, servers and storage units are backed by redundant
+> power sources, Batteries and a generator.  Is the concern for data loss
+> less?
 
-On Wed, Oct 31, 2012 at 12:56 PM, Alexandre DERUMIER
-<aderumier@odiso.com> wrote:
-> Yes, I think you are right, round trip with mon must cut by half the =
-performance.
+Yes, if you have that setup you can enable the disk cache and be 
+reasonably assured that a power failure of a single component won't 
+cause a loss of data.
+
 >
-> I have just done test with 2 parallel fio bench, from 2 differents ho=
-st,
-> I get 2 x 5000 iops
+> Any one turn disk write cache on and see a great improvement?
+
+This is dependent on your hardware.  If you have raid controllers with 
+battery backed cache, enabling/disabling the disk caches probably won't 
+make much of a difference to performance.  Rather than speculate though, 
+I would encourage you to benchmark it using Jens Axboe's fio benchmark:
+
+cat > write.fio -<<EOF
+[randwrite]
+rw=randw
+size=128m
+direct=1
+[write]
+rw=write
+size=1024m
+direct=1
+EOF
+
+# enable cache
+hdparm -W 1 /dev/sdX
+
+# test with cache
+fio write.fio
+
+# disable cache
+hdparm -W 0 /dev/sdX
+
+# test without cache
+fio write.fio
+
+compare the output of the two fio benchmarks.  Don't forget to return 
+the disk cache to its previously enabled/disabled state!
+
+-sam
+
 >
-> so it must be related to network latency.
+> Thanks
 >
-> I have also done tests with --numjob 1000, it doesn't help, same resu=
-lts.
->
->
-> Do you have an idea how I can have more io from 1 host ?
-> Doing lacp with multiple links ?
->
-> I think that 10gigabit latency is almost same, i'm not sure it will i=
-mprove iops too much
-> Maybe InfiniBand can help?
->
-> ----- Mail original -----
->
-> De: "Marcus Sorensen" <shadowsor@gmail.com>
-> =C0: "Alexandre DERUMIER" <aderumier@odiso.com>
-> Cc: "Sage Weil" <sage@inktank.com>, "ceph-devel" <ceph-devel@vger.ker=
-nel.org>
-> Envoy=E9: Mercredi 31 Octobre 2012 18:38:46
-> Objet: Re: slow fio random read benchmark, need help
->
-> Yes, I was going to say that the most I've ever seen out of gigabit i=
-s
-> about 15k iops, with parallel tests and NFS (or iSCSI). Multipathing
-> may not really parallelize the io for you. It can send an io down one
-> path, then move to the next path and send the next io without
-> necessarily waiting for the previous one to respond, but it only
-> shaves a slight amount from your latency under some scenarios as
-> opposed to sending down all paths simultaneously. I have seen it help
-> with high latency links.
->
-> I don't remember the Ceph design that well, but with distributed
-> storage systems you're going to pay a penalty. If you can do 10-15k
-> with one TCP round trip, you'll get half that with the round trip to
-> talk to the metadata server to find your blocks and then to fetch
-> them. Like I said, that might not be exactly what Ceph does, but
-> you're going to have more traffic than just a straight single attache=
-d
-> NFS or iscsi server.
->
-> On Wed, Oct 31, 2012 at 11:27 AM, Alexandre DERUMIER
-> <aderumier@odiso.com> wrote:
->> Thanks Marcus,
->>
->> indeed gigabit ethernet.
->>
->> note that my iscsi results (40k)was with multipath, so multiple giga=
-bit links.
->>
->> I have also done tests with a netapp array, with nfs, single link, I=
-'m around 13000 iops
->>
->> I will do more tests with multiples vms, from differents hosts, and =
-with --numjobs.
->>
->> I'll keep you in touch,
->>
->> Thanks for help,
->>
->> Regards,
->>
->> Alexandre
->>
->>
->> ----- Mail original -----
->>
->> De: "Marcus Sorensen" <shadowsor@gmail.com>
->> =C0: "Alexandre DERUMIER" <aderumier@odiso.com>
->> Cc: "Sage Weil" <sage@inktank.com>, "ceph-devel" <ceph-devel@vger.ke=
-rnel.org>
->> Envoy=E9: Mercredi 31 Octobre 2012 18:08:11
->> Objet: Re: slow fio random read benchmark, need help
->>
->> 5000 is actually really good, if you ask me. Assuming everything is
->> connected via gigabit. If you get 40k iops locally, you add the
->> latency of tcp, as well as that of the ceph services and VM layer, a=
-nd
->> that's what you get. On my network I get about a .1ms round trip on
->> gigabit over the same switch, which by definition can only do 10,000
->> iops. Then if you have storage on the other end capable of 40k iops,
->> you add the latencies together (.1ms + .025ms) and you're at 8k iops=
-=2E
->> Then add the small latency of the application servicing the io (NFS,
->> Ceph, etc), and the latency introduced by your VM layer, and 5k soun=
-ds
->> about right.
->>
->> The good news is that you probably aren't taxing the storage, you ca=
-n
->> likely do many simultaneous tests from several VMs and get the same
->> results.
->>
->> You can try adding --numjobs to your fio to parallelize the specific
->> test you're doing, or launching a second VM and doing the same test =
-at
->> the same time. This would be a good indicator if it's latency.
->>
->> On Wed, Oct 31, 2012 at 10:29 AM, Alexandre DERUMIER
->> <aderumier@odiso.com> wrote:
->>>>>Have you tried increasing the iodepth?
->>> Yes, I have try with 100 and 200, same results.
->>>
->>> I have also try directly from the host, with /dev/rbd1, and I have =
-same result.
->>> I have also try with 3 differents hosts, with differents cpus model=
-s.
->>>
->>> (note: I can reach around 40.000 iops with same fio config on a zfs=
- iscsi array)
->>>
->>> My test ceph cluster nodes cpus are old (xeon E5420), but they are =
-around 10% usage, so I think it's ok.
->>>
->>>
->>> Do you have an idea if I can trace something ?
->>>
->>> Thanks,
->>>
->>> Alexandre
->>>
->>> ----- Mail original -----
->>>
->>> De: "Sage Weil" <sage@inktank.com>
->>> =C0: "Alexandre DERUMIER" <aderumier@odiso.com>
->>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
->>> Envoy=E9: Mercredi 31 Octobre 2012 16:57:05
->>> Objet: Re: slow fio random read benchmark, need help
->>>
->>> On Wed, 31 Oct 2012, Alexandre DERUMIER wrote:
->>>> Hello,
->>>>
->>>> I'm doing some tests with fio from a qemu 1.2 guest (virtio disk,c=
-ache=3Dnone), randread, with 4K block size on a small size of 1G (so it=
- can be handle by the buffer cache on ceph cluster)
->>>>
->>>>
->>>> fio --filename=3D/dev/vdb -rw=3Drandread --bs=3D4K --size=3D1000M =
---iodepth=3D40 --group_reporting --name=3Dfile1 --ioengine=3Dlibaio --d=
-irect=3D1
->>>>
->>>>
->>>> I can't get more than 5000 iops.
->>>
->>> Have you tried increasing the iodepth?
->>>
->>> sage
->>>
->>>>
->>>>
->>>> RBD cluster is :
->>>> ---------------
->>>> 3 nodes,with each node :
->>>> -6 x osd 15k drives (xfs), journal on tmpfs, 1 mon
->>>> -cpu: 2x 4 cores intel xeon E5420@2.5GHZ
->>>> rbd 0.53
->>>>
->>>> ceph.conf
->>>>
->>>> journal dio =3D false
->>>> filestore fiemap =3D false
->>>> filestore flusher =3D false
->>>> osd op threads =3D 24
->>>> osd disk threads =3D 24
->>>> filestore op threads =3D 6
->>>>
->>>> kvm host is : 4 x 12 cores opteron
->>>> ------------
->>>>
->>>>
->>>> During the bench:
->>>>
->>>> on ceph nodes:
->>>> - cpu is around 10% used
->>>> - iostat show no disks activity on osds. (so I think that the 1G f=
-ile is handle in the linux buffer)
->>>>
->>>>
->>>> on kvm host:
->>>>
->>>> -cpu is around 20% used
->>>>
->>>>
->>>> I really don't see where is the bottleneck....
->>>>
->>>> Any Ideas, hints ?
->>>>
->>>>
->>>> Regards,
->>>>
->>>> Alexandre
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Matt
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
