@@ -1,40 +1,56 @@
 From: Ryan Nicholson <Ryan.Nicholson@kcrg.com>
-Subject: Rados Performance help needed...
-Date: Wed, 31 Oct 2012 22:50:13 +0000
-Message-ID: <F5955DC568F9AF4DB00BE0F7E950BE0C3490D064@BLUPRD0411MB438.namprd04.prod.outlook.com>
+Subject: RE: Rados Performance help needed...
+Date: Wed, 31 Oct 2012 22:55:14 +0000
+Message-ID: <F5955DC568F9AF4DB00BE0F7E950BE0C3490D07F@BLUPRD0411MB438.namprd04.prod.outlook.com>
+References: <F5955DC568F9AF4DB00BE0F7E950BE0C3490D064@BLUPRD0411MB438.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:18862
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759020Ab2JaWuS convert rfc822-to-8bit
+Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:21121
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759362Ab2JaWzS convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 31 Oct 2012 18:50:18 -0400
-Received: from mail183-ch1 (localhost [127.0.0.1])	by
- mail183-ch1-R.bigfish.com (Postfix) with ESMTP id 8FD323203AB	for
- <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 22:50:17 +0000 (UTC)
-Received: from CH1EHSMHS039.bigfish.com (snatpool2.int.messaging.microsoft.com
- [10.43.68.230])	by mail183-ch1.bigfish.com (Postfix) with ESMTP id
- D40904C006A	for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 22:50:14 +0000
- (UTC)
+	Wed, 31 Oct 2012 18:55:18 -0400
+Received: from mail64-va3 (localhost [127.0.0.1])	by mail64-va3-R.bigfish.com
+ (Postfix) with ESMTP id D866E460190	for <ceph-devel@vger.kernel.org>; Wed, 31
+ Oct 2012 22:55:16 +0000 (UTC)
+Received: from VA3EHSMHS016.bigfish.com (unknown [10.7.14.252])	by
+ mail64-va3.bigfish.com (Postfix) with ESMTP id C57DC3A0076	for
+ <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 22:55:14 +0000 (UTC)
+In-Reply-To: <F5955DC568F9AF4DB00BE0F7E950BE0C3490D064@BLUPRD0411MB438.namprd04.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ryan Nicholson <Ryan.Nicholson@kcrg.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Correction:
+
+Missed a carriage return when I copy/pasted at first, sorry...
+
+Ryan
+
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Ryan Nicholson
+Sent: Wednesday, October 31, 2012 5:50 PM
+To: ceph-devel@vger.kernel.org
+Subject: Rados Performance help needed...
 
 Guys:
 I have some tuning questions. I'm not getting the write speeds I'm expe=
 cting, and am open to suggestions.
 I using Rados, on Ceph 0.48.0. I have 12 OSD's split up (using crush/ra=
 dos pools) into 2 pools this way:
-4 Servers=20
+4 OSD Servers
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 - Dell 2850's, 12GB ram
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 - 64-bit CentOS 6.2
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 - 2 SCSI osd's each
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 - 1 eSATA osd each
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 - Each server is connecte=
-d to lan using 2GB/s bond
+d to lan using 2GB/s bond=20
+3 Separate Monitor Servers as well
+		- Dell 1850's, 8 GB ram
 SCSI pool:
 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 8 OSD's of 146GB a piece,=
  each made of a pair of Ultra-320 disks in a stripe.
@@ -91,15 +107,13 @@ Any help would be appreciated! Thanks!
 Ryan nicholson
 
 Here's the top fo my OSD map: (SCSI is the fast SCSI pool, data is the =
-LaCie Pool)
-pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 76=
-8 pgp_num 768 last_change 1 owner 0 crash_replay_interval 45
-pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_nu=
-m 768 pgp_num 768 last_change 1 owner 0
-pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 768=
- pgp_num 768 last_change 1 owner 0
-pool 3 'SCSI' rep size 2 crush_ruleset 3 object_hash rjenkins pg_num 10=
-24 pgp_num 1024 last_change 12 owner 0
+LaCie Pool) pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenki=
+ns pg_num 768 pgp_num 768 last_change 1 owner 0 crash_replay_interval 4=
+5 pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_=
+num 768 pgp_num 768 last_change 1 owner 0 pool 2 'rbd' rep size 2 crush=
+_ruleset 2 object_hash rjenkins pg_num 768 pgp_num 768 last_change 1 ow=
+ner 0 pool 3 'SCSI' rep size 2 crush_ruleset 3 object_hash rjenkins pg_=
+num 1024 pgp_num 1024 last_change 12 owner 0
 ---------------ceph.conf---------------
 ; Ceph Cluster SCSI-System Configuration - Ryan Nicholson 10-28-2012 Su=
 nPM
@@ -133,15 +147,14 @@ nPM
 ;=A0=A0=A0=A0=A0=A0 keyring =3D /ceph/security/keyring.$name
 
 [mds.a]
-=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc1.storage.broadcast.kcrg
-;=A0=A0=A0=A0=A0=A0 debug mds =3D 1
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc1.storage.broadcast.kcrg ;=A0=A0=
+=A0=A0=A0=A0 debug mds =3D 1
 
 [mds.b]
-=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc2.storage.broadcast.kcrg
-;=A0=A0=A0=A0=A0=A0 debug mds =3D 1
-[mds.c]
-=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc3.storage.broadcast.kcrg
-;=A0=A0=A0=A0=A0=A0 debug mds =3D 1
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc2.storage.broadcast.kcrg ;=A0=A0=
+=A0=A0=A0=A0 debug mds =3D 1 [mds.c]
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph-mdc3.storage.broadcast.kcrg ;=A0=A0=
+=A0=A0=A0=A0 debug mds =3D 1
 
 [osd]
 =A0=A0=A0=A0=A0=A0=A0 osd journal size =3D 0
@@ -193,7 +206,7 @@ nPM
 
 
 
-Ryan Nicholson|Engineer=20
+Ryan Nicholson|Engineer
 KCRG-TV9 | Digital Television
 =A0319.361.5102
 =A0501 Second Ave SE
@@ -201,6 +214,13 @@ KCRG-TV9 | Digital Television
 =A0ryan.nicholson@kcrg.com
 
 
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 --
