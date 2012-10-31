@@ -1,50 +1,53 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: bobtail timing
-Date: Wed, 31 Oct 2012 14:38:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1210311436230.20646@cobra.newdream.net>
-References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net> <CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com>
+From: Stefan Kleijkers <stefan@kleijkers.nl>
+Subject: Re: Ceph journal
+Date: Wed, 31 Oct 2012 22:32:17 +0100
+Message-ID: <509198E1.1040402@kleijkers.nl>
+References: <CAJH6TXgdkq8ZMUpZYaTActMQ9wS76u7F=OUSvWnt9bS-crJwZQ@mail.gmail.com> <CANLRBoyLHrLP_hg6DSbESk=JhfHa5rzHiyLHcAotUokRe--xVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33837 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756386Ab2JaVi3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 17:38:29 -0400
-In-Reply-To: <CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com>
+Received: from mail-out118.unilogicnetworks.net ([62.133.206.118]:48763 "EHLO
+	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1760746Ab2JaVwl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 31 Oct 2012 17:52:41 -0400
+In-Reply-To: <CANLRBoyLHrLP_hg6DSbESk=JhfHa5rzHiyLHcAotUokRe--xVA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel@vger.kernel.org
+To: Tren Blackburn <tren@eotnetworks.com>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, ceph-devel@vger.kernel.org
 
-On Wed, 31 Oct 2012, Noah Watkins wrote:
-> Which branch is the freeze taken against? master?
+Hello,
 
-Right.  Basically, every 3-4 weeks:
+On 10/31/2012 10:24 PM, Tren Blackburn wrote:
+> On Wed, Oct 31, 2012 at 2:18 PM, Gandalf Corvotempesta
+> <gandalf.corvotempesta@gmail.com> wrote:
+>> In a multi replica cluster (for example, replica = 3) is safe to set
+>> journal on a tmpfs?
+>> As fa as I understood with journal enabled all writes are wrote on
+>> journal and then to disk in a second time.
+>> If node hangs when datas are still on journal (and journal is not on a
+>> permanent disk), some data lost could happens.
+>>
+>> In a multi replica environment, other nodes should be able to write
+>> the same datas to disk, right? I this case, using a journal on a tmpfs
+>> should be safe enough.
+> Unless you're using btrfs which writes to the journal and osd fs
+> concurrently, if you lose the journal device (such as due to a
+> reboot), you've lost the osd device, requiring it to be remade and
+> re-added.
+>
+> This is what I understand at least. If I'm wrong one of the devs will
+> strike me down I'm sure ;)
 
- - next is tagged as v0.XX
-   - and is merged back into master
- - next branch is reset to current master
- - testing branch is reset to just-tagged v0.XX
+There's an option to recreate the journal, so you don't lose the OSD. 
+Ofcourse you lose the data in the journal.
+It's possible to have the journal on a tmpfs device, ofcourse it's not 
+100% safe, in case you lose the three nodes with the replica's you can 
+lose data. But then again if you have more replica's the change of 
+losing them all gets smaller. It's a trade between speed, reliability 
+and space.
 
-sage
+Stefan
 
-
-> 
-> On Wed, Oct 31, 2012 at 1:46 PM, Sage Weil <sage@inktank.com> wrote:
-> > I would like to freeze v0.55, the "bobtail" stable release, at the end of
-> > next week.  If there is any functionality you are working on that should
-> > be included, we need to get it into master (preferably well) before that.
-> > There will be several weeks of testing in the 'next' branch after that
-> > (probaly 3 weeks) before it is released.
-> >
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
