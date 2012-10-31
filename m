@@ -1,225 +1,55 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 4/4] rbd: encapsulate last part of probe
-Date: Wed, 31 Oct 2012 14:01:01 -0700
-Message-ID: <5091918D.90900@inktank.com>
-References: <50904265.2050603@inktank.com> <50904343.2020007@inktank.com>
+Subject: Re: [PATCH 1/6] rbd: skip getting image id if known
+Date: Wed, 31 Oct 2012 14:05:40 -0700
+Message-ID: <509192A4.5080702@inktank.com>
+References: <509081C4.3050402@inktank.com> <50908390.5020607@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:63122 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:60546 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760591Ab2JaVBO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 17:01:14 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1248592pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 14:01:13 -0700 (PDT)
-In-Reply-To: <50904343.2020007@inktank.com>
+	with ESMTP id S1760679Ab2JaVFx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 17:05:53 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so1250628pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 14:05:52 -0700 (PDT)
+In-Reply-To: <50908390.5020607@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 10/30/2012 02:14 PM, Alex Elder wrote:
-> Group the activities that now take place after an rbd_dev_probe()
-> call into a single function, and move the call to that function
-> into rbd_dev_probe() itself.
+On 10/30/2012 06:49 PM, Alex Elder wrote:
+> We will know the image id for format 2 parent images, but won't
+> initially know its image name.  Avoid making the query for an image
+> id in rbd_dev_image_id() if it's already known.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |  161
-> +++++++++++++++++++++++++++------------------------
->   1 file changed, 86 insertions(+), 75 deletions(-)
+>   drivers/block/rbd.c |    8 ++++++++
+>   1 file changed, 8 insertions(+)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index a8ad8f8..8d26c0f 100644
+> index 8d26c0f..a852133 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -3221,6 +3221,84 @@ out_err:
->   	return ret;
->   }
+> @@ -3068,6 +3068,14 @@ static int rbd_dev_image_id(struct rbd_device
+> *rbd_dev)
+>   	void *p;
 >
-> +static int rbd_dev_probe_finish(struct rbd_device *rbd_dev)
-> +{
-> +	int ret;
-> +
-> +	/* no need to lock here, as rbd_dev is not registered yet */
-> +	ret = rbd_dev_snaps_update(rbd_dev);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = rbd_dev_set_mapping(rbd_dev);
-> +	if (ret)
-> +		goto err_out_snaps;
-> +
-> +	/* generate unique id: find highest unique id, add one */
-> +	rbd_dev_id_get(rbd_dev);
-> +
-> +	/* Fill in the device name, now that we have its id. */
-> +	BUILD_BUG_ON(DEV_NAME_LEN
-> +			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
-> +	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
-> +
-> +	/* Get our block major device number. */
-> +
-> +	ret = register_blkdev(0, rbd_dev->name);
-> +	if (ret < 0)
-> +		goto err_out_id;
-> +	rbd_dev->major = ret;
-> +
-> +	/* Set up the blkdev mapping. */
-> +
-> +	ret = rbd_init_disk(rbd_dev);
-> +	if (ret)
-> +		goto err_out_blkdev;
-> +
-> +	ret = rbd_bus_add_dev(rbd_dev);
-> +	if (ret)
-> +		goto err_out_disk;
+>   	/*
+> +	 * When probing a parent image, the image id is already
+> +	 * known (and the image name likely is not).  There's no
+> +	 * need to fetch the image id again in this case.
+> +	 */
+> +	if (rbd_dev->spec->image_id)
+> +		return 0;
 > +
 > +	/*
-> +	 * At this point cleanup in the event of an error is the job
-> +	 * of the sysfs code (initiated by rbd_bus_del_dev()).
-> +	 */
-> +	down_write(&rbd_dev->header_rwsem);
-> +	ret = rbd_dev_snaps_register(rbd_dev);
-> +	up_write(&rbd_dev->header_rwsem);
-> +	if (ret)
-> +		goto err_out_bus;
-> +
-> +	ret = rbd_init_watch_dev(rbd_dev);
-> +	if (ret)
-> +		goto err_out_bus;
-> +
-> +	/* Everything's ready.  Announce the disk to the world. */
-> +
-> +	add_disk(rbd_dev->disk);
-> +
-> +	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
-> +		(unsigned long long) rbd_dev->mapping.size);
-> +
-> +	return ret;
-> +err_out_bus:
-> +	/* this will also clean up rest of rbd_dev stuff */
-> +
-> +	rbd_bus_del_dev(rbd_dev);
-> +
-> +	return ret;
-> +err_out_disk:
-> +	rbd_free_disk(rbd_dev);
-> +err_out_blkdev:
-> +	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-> +err_out_id:
-> +	rbd_dev_id_put(rbd_dev);
-> +err_out_snaps:
-> +	rbd_remove_all_snaps(rbd_dev);
-> +
-> +	return ret;
-> +}
-> +
->   /*
->    * Probe for the existence of the header object for the given rbd
->    * device.  For format 2 images this includes determining the image
-> @@ -3240,9 +3318,16 @@ static int rbd_dev_probe(struct rbd_device *rbd_dev)
->   		ret = rbd_dev_v1_probe(rbd_dev);
->   	else
->   		ret = rbd_dev_v2_probe(rbd_dev);
-> -	if (ret)
-> +	if (ret) {
->   		dout("probe failed, returning %d\n", ret);
->
-> +		return ret;
-> +	}
-> +
-> +	ret = rbd_dev_probe_finish(rbd_dev);
-> +	if (ret)
-> +		rbd_header_free(&rbd_dev->header);
-> +
->   	return ret;
->   }
->
-> @@ -3294,81 +3379,7 @@ static ssize_t rbd_add(struct bus_type *bus,
->   	if (rc < 0)
->   		goto err_out_rbd_dev;
->
-> -	/* no need to lock here, as rbd_dev is not registered yet */
-> -	rc = rbd_dev_snaps_update(rbd_dev);
-> -	if (rc)
-> -		goto err_out_probe;
-> -
-> -	rc = rbd_dev_set_mapping(rbd_dev);
-> -	if (rc)
-> -		goto err_out_snaps;
-> -
-> -	/* generate unique id: find highest unique id, add one */
-> -	rbd_dev_id_get(rbd_dev);
-> -
-> -	/* Fill in the device name, now that we have its id. */
-> -	BUILD_BUG_ON(DEV_NAME_LEN
-> -			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
-> -	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
-> -
-> -	/* Get our block major device number. */
-> -
-> -	rc = register_blkdev(0, rbd_dev->name);
-> -	if (rc < 0)
-> -		goto err_out_id;
-> -	rbd_dev->major = rc;
-> -
-> -	/* Set up the blkdev mapping. */
-> -
-> -	rc = rbd_init_disk(rbd_dev);
-> -	if (rc)
-> -		goto err_out_blkdev;
-> -
-> -	rc = rbd_bus_add_dev(rbd_dev);
-> -	if (rc)
-> -		goto err_out_disk;
-> -
-> -	/*
-> -	 * At this point cleanup in the event of an error is the job
-> -	 * of the sysfs code (initiated by rbd_bus_del_dev()).
-> -	 */
-> -
-> -	down_write(&rbd_dev->header_rwsem);
-> -	rc = rbd_dev_snaps_register(rbd_dev);
-> -	up_write(&rbd_dev->header_rwsem);
-> -	if (rc)
-> -		goto err_out_bus;
-> -
-> -	rc = rbd_init_watch_dev(rbd_dev);
-> -	if (rc)
-> -		goto err_out_bus;
-> -
-> -	/* Everything's ready.  Announce the disk to the world. */
-> -
-> -	add_disk(rbd_dev->disk);
-> -
-> -	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
-> -		(unsigned long long) rbd_dev->mapping.size);
-> -
->   	return count;
-> -
-> -err_out_bus:
-> -	/* this will also clean up rest of rbd_dev stuff */
-> -
-> -	rbd_bus_del_dev(rbd_dev);
-> -
-> -	return rc;
-> -
-> -err_out_disk:
-> -	rbd_free_disk(rbd_dev);
-> -err_out_blkdev:
-> -	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-> -err_out_id:
-> -	rbd_dev_id_put(rbd_dev);
-> -err_out_snaps:
-> -	rbd_remove_all_snaps(rbd_dev);
-> -err_out_probe:
-> -	rbd_header_free(&rbd_dev->header);
->   err_out_rbd_dev:
->   	rbd_dev_destroy(rbd_dev);
->   err_out_client:
+>   	 * First, see if the format 2 image id file exists, and if
+>   	 * so, get the image's persistent id from it.
+>   	 */
 >
 
