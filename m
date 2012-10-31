@@ -1,96 +1,123 @@
-From: Sam Lang <sam.lang@inktank.com>
+From: Matt Weil <mweil@genome.wustl.edu>
 Subject: Re: active MDS and disk write cache
-Date: Wed, 31 Oct 2012 15:01:30 -0500
-Message-ID: <5091839A.9060305@inktank.com>
-References: <50915991.3030906@genome.wustl.edu>
+Date: Wed, 31 Oct 2012 15:07:01 -0500
+Message-ID: <509184E5.1000705@genome.wustl.edu>
+References: <50915991.3030906@genome.wustl.edu> <5091839A.9060305@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:53846 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757035Ab2JaUBe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 16:01:34 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so1202633pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 13:01:33 -0700 (PDT)
-In-Reply-To: <50915991.3030906@genome.wustl.edu>
+Received: from gscsmtp.wustl.edu ([128.252.233.26]:51843 "HELO
+	gscsmtp.wustl.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1759728Ab2JaUHD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 16:07:03 -0400
+In-Reply-To: <5091839A.9060305@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Weil <mweil@genome.wustl.edu>
+To: Sam Lang <sam.lang@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10/31/2012 12:02 PM, Matt Weil wrote:
-> I have a system with a bunch or ram that I want to remain the active MDS
-> but still have a backup.
->
-> This config doesn't seem to be working.  I can make linuscs92 the active
-> by stopping and starting the mds on linuscs95. It would be nice for
-> linuscs92 to be the active from the start.
->
-> [mds.linuscs95]
->      host = linuscs95
->      mds standby replay = true
->      mds standby for name = linuscs92
-
-Hi Matt,
-
-Can you post your ceph config?  Once you startup your ceph cluster, you 
-see that linuscs92 is the standby and linuscs95 is the active?  How are 
-you starting your cluster?
 
 >
-> Also about disk write cache.
+> Hi Matt,
 >
-> If the Data center, servers and storage units are backed by redundant
-> power sources, Batteries and a generator.  Is the concern for data loss
-> less?
-
-Yes, if you have that setup you can enable the disk cache and be 
-reasonably assured that a power failure of a single component won't 
-cause a loss of data.
-
+> Can you post your ceph config?  Once you startup your ceph cluster, you
+> see that linuscs92 is the standby and linuscs95 is the active?  How are
+> you starting your cluster?
 >
-> Any one turn disk write cache on and see a great improvement?
+service ceph -a start
 
-This is dependent on your hardware.  If you have raid controllers with 
-battery backed cache, enabling/disabling the disk caches probably won't 
-make much of a difference to performance.  Rather than speculate though, 
-I would encourage you to benchmark it using Jens Axboe's fio benchmark:
+and yes linuscs95 comes out as active.
 
-cat > write.fio -<<EOF
-[randwrite]
-rw=randw
-size=128m
-direct=1
-[write]
-rw=write
-size=1024m
-direct=1
-EOF
 
-# enable cache
-hdparm -W 1 /dev/sdX
+[global]
+	; enable secure authentication
+;	auth supported = cephx
+;	log_to_syslog = true
+;	keyring = /etc/ceph/keyring.bin
+	; monitors
+	;  You need at least one.  You need at least three if you want to
+	;  tolerate any node failures.  Always create an odd number.
+	journal dio = true
+	osd op threads = 24
+	osd disk threads = 24
+	filestore op threads = 6
+	filestore queue max ops = 24
 
-# test with cache
-fio write.fio
+	osd client message size cap = 14000000
+	ms dispatch throttle bytes =  17500000
 
-# disable cache
-hdparm -W 0 /dev/sdX
+[mon]
+	mon data = /vol/disk2/data/mon$id
+	; some minimal logging (just message traffic) to aid debugging
+;	debug ms = 1
 
-# test without cache
-fio write.fio
+[mon.0]
+	host = linuscs92
+	mon addr = 10.0.30.10:6789
 
-compare the output of the two fio benchmarks.  Don't forget to return 
-the disk cache to its previously enabled/disabled state!
+#[mon.1]
+#	host = linuscs93
+#	mon addr = 10.0.30.11:6789
 
--sam
+[mon.1]
+	host = linuscs95
+	mon addr = 10.0.30.13:6789
 
->
-> Thanks
->
-> Matt
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	; mds
+	;  You need at least one.  Define two to get a standby.
+
+[mds]
+	; where the mds keeps its secret encryption keys
+;	keyring = /etc/ceph/keyring.$name
+
+[mds.linuscs92]
+	host = linuscs92
+
+[mds.linuscs95]
+	host = linuscs95
+	mds standby replay = true
+	mds standby for name = linuscs92
+
+#[mds.linuscs94]
+#    host = linuscs94
+
+	; osd
+	;  You need at least one.  Two if you want data to be replicated.
+	;  Define as many as you like.
+
+[osd]
+	osd journal size = 1024
+;	keyring = /etc/ceph/keyring.$name
+
+[osd.0]
+	host = linuscs92
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+
+[osd.1]
+	host = linuscs93
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+	
+[osd.2]
+	host = linuscs94
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+	
+[osd.3]
+	host = linuscs95
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+	
+[osd.4]
+	host = linuscs96
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+
+[osd.5]
+	host = linuscs97
+	osd data = /vol/disk2/data/osd$id
+	osd journal = /vol/disk1/data/osd$id/journal
+
 
