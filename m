@@ -1,85 +1,306 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
-Subject: Re: bobtail timing
-Date: Thu, 1 Nov 2012 04:14:11 +0000
-Message-ID: <20121101041411.7982294a8fcb09f7057c33a9@ist.utl.pt>
-References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net>
-	<CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com>
-	<alpine.DEB.2.00.1210311436230.20646@cobra.newdream.net>
-	<20121101031246.fcc80a63e2506af3fcaa9dda@ist.utl.pt>
-	<alpine.DEB.2.00.1210312014510.8302@cobra.newdream.net>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: slow fio random read benchmark, need help
+Date: Thu, 01 Nov 2012 06:11:35 +0100 (CET)
+Message-ID: <9f76dbba-7559-4ba0-a207-370445df3e03@mailpro>
+References: <CALFpzo6LY-gboLa_-qvXh74Or31mbM5Amug+yF_G1VCyB8_Xfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.ist.utl.pt ([193.136.128.22]:58828 "EHLO smtp2.ist.utl.pt"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750928Ab2KAEOQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 1 Nov 2012 00:14:16 -0400
-In-Reply-To: <alpine.DEB.2.00.1210312014510.8302@cobra.newdream.net>
+Received: from mailpro.odiso.net ([89.248.209.98]:60440 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750972Ab2KAFMH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 01:12:07 -0400
+In-Reply-To: <CALFpzo6LY-gboLa_-qvXh74Or31mbM5Amug+yF_G1VCyB8_Xfg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Marcus Sorensen <shadowsor@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+>>Come to think of it that 15k iops I mentioned was on 10G ethernet wit=
+h
+>>NFS. I have tried infiniband with ipoib and tcp, it's similar to 10G
+>>ethernet.
+
+I have see new arista 10GBe switch with latency around 1microsecond, th=
+at seem pretty good to do the job.
 
 
-On Wed, 31 Oct 2012 20:17:49 -0700 (PDT) Sage Weil <sage@inktank.com> w=
-rote:
-> On Thu, 1 Nov 2012, Cl?udio Martins wrote:
-> > On Wed, 31 Oct 2012 14:38:28 -0700 (PDT) Sage Weil <sage@inktank.co=
-m> wrote:
-> > > On Wed, 31 Oct 2012, Noah Watkins wrote:
-> > > > Which branch is the freeze taken against? master?
-> > >=20
-> > > Right.  Basically, every 3-4 weeks:
-> > >=20
-> > >  - next is tagged as v0.XX
-> > >    - and is merged back into master
-> > >  - next branch is reset to current master
-> > >  - testing branch is reset to just-tagged v0.XX
-> > >=20
-> >=20
-> >  Hmm, interesting. But doesn't that mean that when the real v0.XX i=
+
+>>You will need to get creative. What you're asking for really is to
+>>have local latencies with remote storage. Just off of the top of my
+>>head you may look into some way to do local caching on SSD for your
+>>RBD volume, like bcache or flashcache.
+I have already thinked about it. (But I would like to use qemu-rbd if p=
+ossible)
+
+
+>>At any rate, 5000 iops is not as good as a new SSD, but far better
+>>than a normal disk. Is there some specific application requirement, o=
+r
+>>is it just that you are feeling like you want the full performance
+>>from the VM?
+
+I have some customers with some huge databases (too big to be handle in=
+ the bufer), require a lot of ios. (around 10K).
+
+I have redone tests with 4 guest in parallel, I get 4 x 5000iops, so it=
+ seem to scale ! (and cpu is very low on the ceph cluster).
+
+
+So I'll try some tricks, like raid over multiple rbd devices, maybe it'=
+ll help.
+
+Thanks again for the help Marcus, I was not aware of these latencies pr=
+oblems.
+
+Regards,
+
+Alexandre
+
+
+----- Mail original -----
+
+De: "Marcus Sorensen" <shadowsor@gmail.com>
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+Cc: "Sage Weil" <sage@inktank.com>, "ceph-devel" <ceph-devel@vger.kerne=
+l.org>
+Envoy=C3=A9: Mercredi 31 Octobre 2012 20:50:36
+Objet: Re: slow fio random read benchmark, need help
+
+Come to think of it that 15k iops I mentioned was on 10G ethernet with
+NFS. I have tried infiniband with ipoib and tcp, it's similar to 10G
+ethernet.
+
+You will need to get creative. What you're asking for really is to
+have local latencies with remote storage. Just off of the top of my
+head you may look into some way to do local caching on SSD for your
+RBD volume, like bcache or flashcache.
+
+Depending on your application, it may actually be a bonus that no
+single server (or handful of servers) can crush your storage's
+performance. if you only have one or two clients anyway then that may
+not be much consolation, but if you're going to have dozens or more
+then there's not much benefit to having one take all performance at
+the expense of everyone, except for perhaps in bursts.
+
+At any rate, 5000 iops is not as good as a new SSD, but far better
+than a normal disk. Is there some specific application requirement, or
+is it just that you are feeling like you want the full performance
+from the VM?
+
+On Wed, Oct 31, 2012 at 12:56 PM, Alexandre DERUMIER
+<aderumier@odiso.com> wrote:
+> Yes, I think you are right, round trip with mon must cut by half the =
+performance.
+>
+> I have just done test with 2 parallel fio bench, from 2 differents ho=
+st,=20
+> I get 2 x 5000 iops
+>
+> so it must be related to network latency.
+>
+> I have also done tests with --numjob 1000, it doesn't help, same resu=
+lts.
+>
+>
+> Do you have an idea how I can have more io from 1 host ?
+> Doing lacp with multiple links ?
+>
+> I think that 10gigabit latency is almost same, i'm not sure it will i=
+mprove iops too much
+> Maybe InfiniBand can help?
+>
+> ----- Mail original -----
+>
+> De: "Marcus Sorensen" <shadowsor@gmail.com>
+> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+> Cc: "Sage Weil" <sage@inktank.com>, "ceph-devel" <ceph-devel@vger.ker=
+nel.org>
+> Envoy=C3=A9: Mercredi 31 Octobre 2012 18:38:46
+> Objet: Re: slow fio random read benchmark, need help
+>
+> Yes, I was going to say that the most I've ever seen out of gigabit i=
 s
-> > later officially _released_, its top commit might not be the commit
-> > that was tagged as v0.XX? Assuming that issues are found after the
-> > testing branch is reset to v0.XX, fixes would go on top of v0.XX, r=
-ight?
-> >=20
-> >  Am I missing something, or people checking out a v0.XX with git mi=
-ght
-> > not be getting the real v0.XX that was released as tarballs?
->=20
-> The releases and tarballs contain *exactly* the content that is tagge=
-d=20
-> v0.X.  The branches may accumulate additional fixes after that, which=
-=20
-> will later be tagged with a v0.X.Y point release.  Since we've starte=
-d=20
-> maintaing a stable release, we haven't done point releases for=20
-> the development 'testing' releases, although if there are important b=
-ugs=20
-> we may need to do so in the future.
->=20
-> The 'stable' branch tracks the last stable release (currently argonau=
-t)=20
-> and is where bug fixes accumulate until the next release.  For exampl=
-e,=20
-> stable current contains v0.48.2 and several additional commits (mostl=
-y=20
-> backports of proviioning scripts to support the ceph-deploy tool that=
-=20
-> we're working on).
->=20
-
- Ok, it makes perfect sense now. I wasn't realising that the tarball is
-released as soon as the branch is tagged, sorry about that.
-
-Thanks for the clarification.
-
-Best regards
-
-Cl=C3=A1udio
-
+> about 15k iops, with parallel tests and NFS (or iSCSI). Multipathing
+> may not really parallelize the io for you. It can send an io down one
+> path, then move to the next path and send the next io without
+> necessarily waiting for the previous one to respond, but it only
+> shaves a slight amount from your latency under some scenarios as
+> opposed to sending down all paths simultaneously. I have seen it help
+> with high latency links.
+>
+> I don't remember the Ceph design that well, but with distributed
+> storage systems you're going to pay a penalty. If you can do 10-15k
+> with one TCP round trip, you'll get half that with the round trip to
+> talk to the metadata server to find your blocks and then to fetch
+> them. Like I said, that might not be exactly what Ceph does, but
+> you're going to have more traffic than just a straight single attache=
+d
+> NFS or iscsi server.
+>
+> On Wed, Oct 31, 2012 at 11:27 AM, Alexandre DERUMIER
+> <aderumier@odiso.com> wrote:
+>> Thanks Marcus,
+>>
+>> indeed gigabit ethernet.
+>>
+>> note that my iscsi results (40k)was with multipath, so multiple giga=
+bit links.
+>>
+>> I have also done tests with a netapp array, with nfs, single link, I=
+'m around 13000 iops
+>>
+>> I will do more tests with multiples vms, from differents hosts, and =
+with --numjobs.
+>>
+>> I'll keep you in touch,
+>>
+>> Thanks for help,
+>>
+>> Regards,
+>>
+>> Alexandre
+>>
+>>
+>> ----- Mail original -----
+>>
+>> De: "Marcus Sorensen" <shadowsor@gmail.com>
+>> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+>> Cc: "Sage Weil" <sage@inktank.com>, "ceph-devel" <ceph-devel@vger.ke=
+rnel.org>
+>> Envoy=C3=A9: Mercredi 31 Octobre 2012 18:08:11
+>> Objet: Re: slow fio random read benchmark, need help
+>>
+>> 5000 is actually really good, if you ask me. Assuming everything is
+>> connected via gigabit. If you get 40k iops locally, you add the
+>> latency of tcp, as well as that of the ceph services and VM layer, a=
+nd
+>> that's what you get. On my network I get about a .1ms round trip on
+>> gigabit over the same switch, which by definition can only do 10,000
+>> iops. Then if you have storage on the other end capable of 40k iops,
+>> you add the latencies together (.1ms + .025ms) and you're at 8k iops=
+=2E
+>> Then add the small latency of the application servicing the io (NFS,
+>> Ceph, etc), and the latency introduced by your VM layer, and 5k soun=
+ds
+>> about right.
+>>
+>> The good news is that you probably aren't taxing the storage, you ca=
+n
+>> likely do many simultaneous tests from several VMs and get the same
+>> results.
+>>
+>> You can try adding --numjobs to your fio to parallelize the specific
+>> test you're doing, or launching a second VM and doing the same test =
+at
+>> the same time. This would be a good indicator if it's latency.
+>>
+>> On Wed, Oct 31, 2012 at 10:29 AM, Alexandre DERUMIER
+>> <aderumier@odiso.com> wrote:
+>>>>>Have you tried increasing the iodepth?
+>>> Yes, I have try with 100 and 200, same results.
+>>>
+>>> I have also try directly from the host, with /dev/rbd1, and I have =
+same result.
+>>> I have also try with 3 differents hosts, with differents cpus model=
+s.
+>>>
+>>> (note: I can reach around 40.000 iops with same fio config on a zfs=
+ iscsi array)
+>>>
+>>> My test ceph cluster nodes cpus are old (xeon E5420), but they are =
+around 10% usage, so I think it's ok.
+>>>
+>>>
+>>> Do you have an idea if I can trace something ?
+>>>
+>>> Thanks,
+>>>
+>>> Alexandre
+>>>
+>>> ----- Mail original -----
+>>>
+>>> De: "Sage Weil" <sage@inktank.com>
+>>> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+>>> Envoy=C3=A9: Mercredi 31 Octobre 2012 16:57:05
+>>> Objet: Re: slow fio random read benchmark, need help
+>>>
+>>> On Wed, 31 Oct 2012, Alexandre DERUMIER wrote:
+>>>> Hello,
+>>>>
+>>>> I'm doing some tests with fio from a qemu 1.2 guest (virtio disk,c=
+ache=3Dnone), randread, with 4K block size on a small size of 1G (so it=
+ can be handle by the buffer cache on ceph cluster)
+>>>>
+>>>>
+>>>> fio --filename=3D/dev/vdb -rw=3Drandread --bs=3D4K --size=3D1000M =
+--iodepth=3D40 --group_reporting --name=3Dfile1 --ioengine=3Dlibaio --d=
+irect=3D1
+>>>>
+>>>>
+>>>> I can't get more than 5000 iops.
+>>>
+>>> Have you tried increasing the iodepth?
+>>>
+>>> sage
+>>>
+>>>>
+>>>>
+>>>> RBD cluster is :
+>>>> ---------------
+>>>> 3 nodes,with each node :
+>>>> -6 x osd 15k drives (xfs), journal on tmpfs, 1 mon
+>>>> -cpu: 2x 4 cores intel xeon E5420@2.5GHZ
+>>>> rbd 0.53
+>>>>
+>>>> ceph.conf
+>>>>
+>>>> journal dio =3D false
+>>>> filestore fiemap =3D false
+>>>> filestore flusher =3D false
+>>>> osd op threads =3D 24
+>>>> osd disk threads =3D 24
+>>>> filestore op threads =3D 6
+>>>>
+>>>> kvm host is : 4 x 12 cores opteron
+>>>> ------------
+>>>>
+>>>>
+>>>> During the bench:
+>>>>
+>>>> on ceph nodes:
+>>>> - cpu is around 10% used
+>>>> - iostat show no disks activity on osds. (so I think that the 1G f=
+ile is handle in the linux buffer)
+>>>>
+>>>>
+>>>> on kvm host:
+>>>>
+>>>> -cpu is around 20% used
+>>>>
+>>>>
+>>>> I really don't see where is the bottleneck....
+>>>>
+>>>> Any Ideas, hints ?
+>>>>
+>>>>
+>>>> Regards,
+>>>>
+>>>> Alexandre
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
