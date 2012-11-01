@@ -1,41 +1,66 @@
-From: Boaz Harrosh <bharrosh@panasas.com>
-Subject: Re: [PATCH 3/3] fs: Fix remaining filesystems to wait for stable
- page writeback
-Date: Thu, 1 Nov 2012 15:23:54 -0700
-Message-ID: <5092F67A.2060203@panasas.com>
-References: <20121101075805.16153.64714.stgit@blackbox.djwong.org> <20121101075829.16153.92036.stgit@blackbox.djwong.org> <5092C2CE.7070209@panasas.com> <20121101162254.03dbbd9a@tlielax.poochiereds.net>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: Cephfs losing files and corrupting others
+Date: Thu, 01 Nov 2012 17:32:00 -0500
+Message-ID: <5092F860.7040708@inktank.com>
+References: <CAD84eiF1dcE5buvTyFctXTSvB4bgEYXtpxwX7yJWiOEASmNvJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20121101162254.03dbbd9a@tlielax.poochiereds.net>
-Sender: owner-linux-mm@kvack.org
-To: Jeff Layton <jlayton@samba.org>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:40681 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762214Ab2KAWcG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 18:32:06 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2029296pad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 15:32:05 -0700 (PDT)
+In-Reply-To: <CAD84eiF1dcE5buvTyFctXTSvB4bgEYXtpxwX7yJWiOEASmNvJA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nathan Howell <nathan.d.howell@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/01/2012 01:22 PM, Jeff Layton wrote:
-> Hmm...I don't know...
-> 
-> I've never been crazy about using the page lock for this, but in the
-> absence of a better way to guarantee stable pages, it was what I ended
-> up with at the time. cifs_writepages will hold the page lock until
-> kernel_sendmsg returns. At that point the TCP layer will have copied
-> off the page data so it's safe to release it.
-> 
-> With this change though, we're going to end up blocking until the
-> writeback flag clears, right? And I think that will happen when the
-> reply comes in? So, we'll end up blocking for much longer than is
-> really necessary in page_mkwrite with this change.
-> 
+On Thu 01 Nov 2012 11:22:59 AM CDT, Nathan Howell wrote:
+> We have a small (3 node) Ceph cluster that occasionally has issues. It
+> loses files and directories, truncates them or fills the contents with
+> NULL bytes. So far we haven't been able to build a repro case but it
+> seems to happen when bulk loading data into the cluster, a process
+> that is run each evening by a cron job. We've gone about a month
+> without any issues but had it happen again yesterday during a larger
+> bulk load.  The data is backed up outside of ceph and can be reloaded
+> but finding the corrupt files takes quite a while.
+>
+> Has anyone heard of similar issues before? Should I try upgrading to
+> 0.48.2 or a newer kernel?
 
-Hmm OK, that is a very good point. In that case it is just a simple
-nack on Darrick's hunk to cifs. cifs is fine and should not be touched
+Hi Nathan,
 
-Boaz
+Do the writes succeed?  I.e. the programs creating the files don't get 
+errors back?  Are you seeing any problems with the ceph mds or osd 
+processes crashing?  Can you describe your I/O workload during these 
+bulk loads?  How many files, how much data, multiple clients writing, 
+etc.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+As far as I know, there haven't been any fixes to 0.48.2 to resolve 
+problems like yours.  You might try the ceph fuse client to see if you 
+get the same behavior.  If not, then at least we have narrowed down the 
+problem to the ceph kernel client.
+
+Thanks,
+-sam
+
+>
+> ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+> Linux _ 3.4.4-gentoo #2 SMP Sun Jul 1 18:28:16 UTC 2012 x86_64
+> Intel(R) Xeon(R) CPU E31240 @ 3.30GHz GenuineIntel GNU/Linux
+>
+> I'm using the kernel provided cephfs, mounted with these options:
+> 10.0.2.2:6789:/ on /ceph type ceph (rw,noatime,nodiratime)
+>
+> thanks,
+> -n
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
