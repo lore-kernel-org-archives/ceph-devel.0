@@ -1,37 +1,41 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: Ceph journal
-Date: Thu, 1 Nov 2012 22:33:23 +0100
-Message-ID: <CAJH6TXjp+eR1N7ZqAV6eZhLLDO58sx9cJVkqRYw7V43ZqBdBSA@mail.gmail.com>
-References: <CAJH6TXgdkq8ZMUpZYaTActMQ9wS76u7F=OUSvWnt9bS-crJwZQ@mail.gmail.com>
-	<CANLRBoyLHrLP_hg6DSbESk=JhfHa5rzHiyLHcAotUokRe--xVA@mail.gmail.com>
-	<CAJH6TXjGP5QqOWchRTwUQ-EigCU9qAORA87JrZ6bhG5J4im=-A@mail.gmail.com>
-	<5091A06E.20407@kleijkers.nl>
-	<CAJH6TXhwOxtT8XLWYMYiDQ=uFUtkv6CziR7vAFqSovZ_n1JORg@mail.gmail.com>
-	<5092E93E.7060302@inktank.com>
+From: Boaz Harrosh <bharrosh@panasas.com>
+Subject: Re: [PATCH 3/3] fs: Fix remaining filesystems to wait for stable
+ page writeback
+Date: Thu, 1 Nov 2012 15:23:54 -0700
+Message-ID: <5092F67A.2060203@panasas.com>
+References: <20121101075805.16153.64714.stgit@blackbox.djwong.org> <20121101075829.16153.92036.stgit@blackbox.djwong.org> <5092C2CE.7070209@panasas.com> <20121101162254.03dbbd9a@tlielax.poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:33469 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759887Ab2KAVdY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 17:33:24 -0400
-Received: by mail-ea0-f174.google.com with SMTP id c13so1148959eaa.19
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 14:33:23 -0700 (PDT)
-In-Reply-To: <5092E93E.7060302@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Stefan Kleijkers <stefan@kleijkers.nl>, Tren Blackburn <tren@eotnetworks.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20121101162254.03dbbd9a@tlielax.poochiereds.net>
+Sender: owner-linux-mm@kvack.org
+To: Jeff Layton <jlayton@samba.org>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
+List-Id: ceph-devel.vger.kernel.org
 
-2012/11/1 Mark Nelson <mark.nelson@inktank.com>:
-> It will do that for a while, based on how you've tweaked the flush intervals
-> and various journal settings to determine how much data ceph will allow to
-> hang out in the journal while still accepting new requests.
+On 11/01/2012 01:22 PM, Jeff Layton wrote:
+> Hmm...I don't know...
+> 
+> I've never been crazy about using the page lock for this, but in the
+> absence of a better way to guarantee stable pages, it was what I ended
+> up with at the time. cifs_writepages will hold the page lock until
+> kernel_sendmsg returns. At that point the TCP layer will have copied
+> off the page data so it's safe to release it.
+> 
+> With this change though, we're going to end up blocking until the
+> writeback flag clears, right? And I think that will happen when the
+> reply comes in? So, we'll end up blocking for much longer than is
+> really necessary in page_mkwrite with this change.
+> 
 
-Ceph is not able to write to both journal and disks simultaneously?
-For example, by using SSD for operating system and journal, we will be
-able to have not least than 100GB of journal that is a large amount of
-data wrote at SSD speed.
+Hmm OK, that is a very good point. In that case it is just a simple
+nack on Darrick's hunk to cifs. cifs is fine and should not be touched
 
-When ceph has to flush this data to disks, will stop to write more
-data to journal?
+Boaz
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
