@@ -1,134 +1,41 @@
-From: Jeff Layton <jlayton@samba.org>
-Subject: Re: [PATCH 3/3] fs: Fix remaining filesystems to wait for stable
- page writeback
-Date: Thu, 1 Nov 2012 16:22:54 -0400
-Message-ID: <20121101162254.03dbbd9a@tlielax.poochiereds.net>
-References: <20121101075805.16153.64714.stgit@blackbox.djwong.org>
-	<20121101075829.16153.92036.stgit@blackbox.djwong.org>
-	<5092C2CE.7070209@panasas.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: Ceph journal
+Date: Thu, 1 Nov 2012 22:18:29 +0100
+Message-ID: <CAJH6TXhwOxtT8XLWYMYiDQ=uFUtkv6CziR7vAFqSovZ_n1JORg@mail.gmail.com>
+References: <CAJH6TXgdkq8ZMUpZYaTActMQ9wS76u7F=OUSvWnt9bS-crJwZQ@mail.gmail.com>
+	<CANLRBoyLHrLP_hg6DSbESk=JhfHa5rzHiyLHcAotUokRe--xVA@mail.gmail.com>
+	<CAJH6TXjGP5QqOWchRTwUQ-EigCU9qAORA87JrZ6bhG5J4im=-A@mail.gmail.com>
+	<5091A06E.20407@kleijkers.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <5092C2CE.7070209@panasas.com>
-Sender: owner-linux-mm@kvack.org
-To: Boaz Harrosh <bharrosh@panasas.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:49109 "EHLO
+	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751975Ab2KAVSa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 17:18:30 -0400
+Received: by mail-ea0-f174.google.com with SMTP id c13so1144647eaa.19
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 14:18:29 -0700 (PDT)
+In-Reply-To: <5091A06E.20407@kleijkers.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Kleijkers <stefan@kleijkers.nl>
+Cc: Tren Blackburn <tren@eotnetworks.com>, ceph-devel@vger.kernel.org
 
-On Thu, 1 Nov 2012 11:43:26 -0700
-Boaz Harrosh <bharrosh@panasas.com> wrote:
+2012/10/31 Stefan Kleijkers <stefan@kleijkers.nl>:
+> As far as I know, this is correct. You get a ACK (on the write) back after
+> it landed on ALL three journals (or/and osds in case of BTRFS in parallel
+> mode). So If you lose one node, you still have it in two more nodes and they
+> will commit it to disk. After recovering the missing node/osd it will get
+> the data from one of the other nodes. So you won't lose any data.
 
-> On 11/01/2012 12:58 AM, Darrick J. Wong wrote:
-> > Fix up the filesystems that provide their own ->page_mkwrite handlers to
-> > provide stable page writes if necessary.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  fs/9p/vfs_file.c |    1 +
-> >  fs/afs/write.c   |    4 ++--
-> >  fs/ceph/addr.c   |    1 +
-> >  fs/cifs/file.c   |    1 +
-> >  fs/ocfs2/mmap.c  |    1 +
-> >  fs/ubifs/file.c  |    4 ++--
-> >  6 files changed, 8 insertions(+), 4 deletions(-)
-> > 
-> > 
-> > diff --git a/fs/9p/vfs_file.c b/fs/9p/vfs_file.c
-> > index c2483e9..aa253f0 100644
-> > --- a/fs/9p/vfs_file.c
-> > +++ b/fs/9p/vfs_file.c
-> > @@ -620,6 +620,7 @@ v9fs_vm_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
-> >  	lock_page(page);
-> >  	if (page->mapping != inode->i_mapping)
-> >  		goto out_unlock;
-> > +	wait_on_stable_page_write(page);
-> >  
-> 
-> Good god thanks, yes please ;-)
-> 
-> >  	return VM_FAULT_LOCKED;
-> >  out_unlock:
-> > diff --git a/fs/afs/write.c b/fs/afs/write.c
-> > index 9aa52d9..39eb2a4 100644
-> > --- a/fs/afs/write.c
-> > +++ b/fs/afs/write.c
-> > @@ -758,7 +758,7 @@ int afs_page_mkwrite(struct vm_area_struct *vma, struct page *page)
-> 
-> afs, is it not a network filesystem? which means that it has it's own emulated none-block-device
-> BDI, registered internally. So if you do need stable pages someone should call
-> bdi_require_stable_pages()
-> 
-> But again since it is a network filesystem I don't see how it is needed, and/or it might be
-> taken care of already.
-> 
-> >  #ifdef CONFIG_AFS_FSCACHE
-> >  	fscache_wait_on_page_write(vnode->cache, page);
-> >  #endif
-> > -
-> > +	wait_on_stable_page_write(page);
-> >  	_leave(" = 0");
-> > -	return 0;
-> > +	return VM_FAULT_LOCKED;
-> >  }
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> 
-> CEPH for sure has it's own "emulated none-block-device BDI". This one is also
-> a pure networking filesystem.
-> 
-> And it already does what it needs to do with wait_on_writeback().
-> 
-> So i do not think you should touch CEPH
-> 
-> > index 6690269..e9734bf 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -1208,6 +1208,7 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
-> >  		set_page_dirty(page);
-> >  		up_read(&mdsc->snap_rwsem);
-> >  		ret = VM_FAULT_LOCKED;
-> > +		wait_on_stable_page_write(page);
-> >  	} else {
-> >  		if (ret == -ENOMEM)
-> >  			ret = VM_FAULT_OOM;
-> > diff --git a/fs/cifs/file.c b/fs/cifs/file.c
-> 
-> Cifs also self-BDI network filesystem, but
-> 
-> > index edb25b4..a8770bf 100644
-> > --- a/fs/cifs/file.c
-> > +++ b/fs/cifs/file.c
-> > @@ -2997,6 +2997,7 @@ cifs_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
-> >  	struct page *page = vmf->page;
-> >  
-> >  	lock_page(page);
-> 
-> It waits by locking the page, that's cifs naive way of waiting for writeback
-> 
-> > +	wait_on_stable_page_write(page);
-> 
-> Instead it could do better and not override page_mkwrite at all, and all it needs
-> to do is call bdi_require_stable_pages() at it's own registered BDI
-> 
+In this case I can suppose that ceph writing speed is relative to the
+journal's writing speed and never to ODS disks.
 
-Hmm...I don't know...
+Let's assume a journal size of 150GB, capable to write at 200MB/s in a
+2gbit/s network (lacp between two gigabit ports), no replica between
+OSDs and very very slow SATA disk (5400 RPM, for example, much slower
+than jurnal). Just a single osd.
+Ceph will write at 200MB/s, and in background it will flush journals
+to disk, right?
 
-I've never been crazy about using the page lock for this, but in the
-absence of a better way to guarantee stable pages, it was what I ended
-up with at the time. cifs_writepages will hold the page lock until
-kernel_sendmsg returns. At that point the TCP layer will have copied
-off the page data so it's safe to release it.
-
-With this change though, we're going to end up blocking until the
-writeback flag clears, right? And I think that will happen when the
-reply comes in? So, we'll end up blocking for much longer than is
-really necessary in page_mkwrite with this change.
-
--- 
-Jeff Layton <jlayton@samba.org>
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+I can assume that journal is a buffer and RBD will write only to it.
