@@ -1,38 +1,43 @@
-From: Nathan Howell <nathan.d.howell@gmail.com>
-Subject: Cephfs losing files and corrupting others
-Date: Thu, 1 Nov 2012 09:22:59 -0700
-Message-ID: <CAD84eiF1dcE5buvTyFctXTSvB4bgEYXtpxwX7yJWiOEASmNvJA@mail.gmail.com>
+From: Marcus Sorensen <shadowsor@gmail.com>
+Subject: Re: slow fio random read benchmark, need help
+Date: Thu, 1 Nov 2012 10:28:50 -0600
+Message-ID: <CALFpzo7+vGuPN-sF2WZR1E2HKvGScQAyjx1nuCZ4GGnoMFbxgw@mail.gmail.com>
+References: <CALFpzo70gX3RiZSO7+Szij9nRnLKruRvLiihFcmFugWPF9pGtA@mail.gmail.com>
+	<0cc4e4a7-5f71-4579-8265-f97dc5cba341@mailpro>
+	<24E144B8C0207547AD09C467A8259F7557707A07@lisa.maurer-it.com>
+	<CAPYLRzi3i8C-uRyRKMgCxSag6ReANg+X5keSA43XGqbusrrRLQ@mail.gmail.com>
+	<CALFpzo7dMm2EUGh2-Tzx33+PFh=BqB342wE2mh_4dgmWAggsQA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:61154 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933996Ab2KAQXA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 12:23:00 -0400
-Received: by mail-ob0-f174.google.com with SMTP id uo13so2708599obb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 09:22:59 -0700 (PDT)
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:50968 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762027Ab2KAQ2w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 12:28:52 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h16so2734074oag.19
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 09:28:51 -0700 (PDT)
+In-Reply-To: <CALFpzo7dMm2EUGh2-Tzx33+PFh=BqB342wE2mh_4dgmWAggsQA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Dietmar Maurer <dietmar@proxmox.com>, Josh Durgin <josh.durgin@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-We have a small (3 node) Ceph cluster that occasionally has issues. It
-loses files and directories, truncates them or fills the contents with
-NULL bytes. So far we haven't been able to build a repro case but it
-seems to happen when bulk loading data into the cluster, a process
-that is run each evening by a cron job. We've gone about a month
-without any issues but had it happen again yesterday during a larger
-bulk load.  The data is backed up outside of ceph and can be reloaded
-but finding the corrupt files takes quite a while.
+Actually that didn't illustrate my point very well, since you see
+individual requests being sent to the driver without waiting for
+individual completion, but if you look at the full output you can see
+that once the queue is full, you're at the mercy of waiting for
+individual IOs to complete before sending new ones. Sometimes it's one
+at a time, sometimes you get 3-4 completed and can insert a few at
+once. I think this is countered by the fact that there's roundtrip
+network latency in sending the request and in receiving the result.
 
-Has anyone heard of similar issues before? Should I try upgrading to
-0.48.2 or a newer kernel?
-
-ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
-Linux _ 3.4.4-gentoo #2 SMP Sun Jul 1 18:28:16 UTC 2012 x86_64
-Intel(R) Xeon(R) CPU E31240 @ 3.30GHz GenuineIntel GNU/Linux
-
-I'm using the kernel provided cephfs, mounted with these options:
-10.0.2.2:6789:/ on /ceph type ceph (rw,noatime,nodiratime)
-
-thanks,
--n
+For the record, I'm not saying that it's the entire reason why the
+performance is lower (obviously since iscsi is better), I'm just
+saying that when you're talking about high iops, adding 100us (best
+case gigabit) to each request and response is significant. If an io
+takes 25us locally (for example an SSD can do 40k iops or more at a
+queue depth of 1), and you share that storage over gigabit, you just
+increased the latency by an order of magnitude, and as seen there is
+only so much simultaneous io going on when the queue depth is raised.
+Add to that that multipathing isn't doing parallel but interleaving,
+and extra traffic for distributed storage.
