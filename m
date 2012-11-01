@@ -1,204 +1,53 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 6/6] rbd: probe the parent of an image if present
-Date: Wed, 31 Oct 2012 19:07:16 -0700
-Message-ID: <5091D954.70708@inktank.com>
-References: <509081C4.3050402@inktank.com> <509083D0.1060003@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Gary Lowell <gary.lowell@inktank.com>
+Subject: Re: new build dep on master
+Date: Wed, 31 Oct 2012 19:53:45 -0700
+Message-ID: <FF5B0412-DBC3-4208-949A-FA1A20348F34@inktank.com>
+References: <alpine.DEB.2.00.1210310903220.11223@cobra.newdream.net> <852DC463-3E96-472A-B5CC-A803D15CB453@inktank.com> <5091A738.2060109@inktank.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:53309 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752732Ab2KACH3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 22:07:29 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so1377349pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 19:07:28 -0700 (PDT)
-In-Reply-To: <509083D0.1060003@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:52623 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752767Ab2KACxt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 22:53:49 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr4so1411925pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 19:53:49 -0700 (PDT)
+In-Reply-To: <5091A738.2060109@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan Mick <dan.mick@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-This all makes sense, but it reminds me of another issue we'll need to
-address:
+Looks like Sam fixed that this morning.
 
-http://www.tracker.newdream.net/issues/2533
+Cheers,
+Gary
 
-We don't need to watch the header of a parent snapshot, since it's
-immutable and guaranteed not to be deleted out from under us.
-This avoids the bug referenced above. So I guess rbd_dev_probe{_finish}
-can take a parameter telling them whether to watch the header or not.
+On Oct 31, 2012, at 3:33 PM, Dan Mick wrote:
 
-We should check whether multiple mapped rbds (without layering) hit
-this issue as well, and if so, default to not sharing the ceph_client
-until the bug is fixed.
-
-On 10/30/2012 06:50 PM, Alex Elder wrote:
-> Call the probe function for the parent device.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   79
-> +++++++++++++++++++++++++++++++++++++++++++++++++--
->   1 file changed, 76 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 04062c1..8ef13f72 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -222,6 +222,7 @@ struct rbd_device {
->
->   	struct rbd_spec		*parent_spec;
->   	u64			parent_overlap;
-> +	struct rbd_device	*parent;
->
->   	/* protects updating the header */
->   	struct rw_semaphore     header_rwsem;
-> @@ -255,6 +256,7 @@ static ssize_t rbd_add(struct bus_type *bus, const
-> char *buf,
->   		       size_t count);
->   static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
->   			  size_t count);
-> +static int rbd_dev_probe(struct rbd_device *rbd_dev);
->
->   static struct bus_attribute rbd_bus_attrs[] = {
->   	__ATTR(add, S_IWUSR, NULL, rbd_add),
-> @@ -378,6 +380,13 @@ out_opt:
->   	return ERR_PTR(ret);
->   }
->
-> +static struct rbd_client *__rbd_get_client(struct rbd_client *rbdc)
-> +{
-> +	kref_get(&rbdc->kref);
-> +
-> +	return rbdc;
-> +}
-> +
->   /*
->    * Find a ceph client with specific addr and configuration.  If
->    * found, bump its reference count.
-> @@ -393,7 +402,8 @@ static struct rbd_client *rbd_client_find(struct
-> ceph_options *ceph_opts)
->   	spin_lock(&rbd_client_list_lock);
->   	list_for_each_entry(client_node, &rbd_client_list, node) {
->   		if (!ceph_compare_options(ceph_opts, client_node->client)) {
-> -			kref_get(&client_node->kref);
-> +			__rbd_get_client(client_node);
-> +
->   			found = true;
->   			break;
->   		}
-> @@ -3311,6 +3321,11 @@ static int rbd_dev_image_id(struct rbd_device
-> *rbd_dev)
->   	void *response;
->   	void *p;
->
-> +	/* If we already have it we don't need to look it up */
-> +
-> +	if (rbd_dev->spec->image_id)
-> +		return 0;
-> +
->   	/*
->   	 * When probing a parent image, the image id is already
->   	 * known (and the image name likely is not).  There's no
-> @@ -3492,6 +3507,9 @@ out_err:
->
->   static int rbd_dev_probe_finish(struct rbd_device *rbd_dev)
->   {
-> +	struct rbd_device *parent = NULL;
-> +	struct rbd_spec *parent_spec = NULL;
-> +	struct rbd_client *rbdc = NULL;
->   	int ret;
->
->   	/* no need to lock here, as rbd_dev is not registered yet */
-> @@ -3536,6 +3554,31 @@ static int rbd_dev_probe_finish(struct rbd_device
-> *rbd_dev)
->   	 * At this point cleanup in the event of an error is the job
->   	 * of the sysfs code (initiated by rbd_bus_del_dev()).
->   	 */
-> +	/* Probe the parent if there is one */
-> +
-> +	if (rbd_dev->parent_spec) {
-> +		/*
-> +		 * We need to pass a reference to the client and the
-> +		 * parent spec when creating the parent rbd_dev.
-> +		 * Images related by parent/child relationships
-> +		 * always share both.
-> +		 */
-> +		parent_spec = rbd_spec_get(rbd_dev->parent_spec);
-> +		rbdc = __rbd_get_client(rbd_dev->rbd_client);
-> +
-> +		parent = rbd_dev_create(rbdc, parent_spec);
-> +		if (!parent) {
-> +			ret = -ENOMEM;
-> +			goto err_out_spec;
-> +		}
-> +		rbdc = NULL;		/* parent now owns reference */
-> +		parent_spec = NULL;	/* parent now owns reference */
-> +		ret = rbd_dev_probe(parent);
-> +		if (ret < 0)
-> +			goto err_out_parent;
-> +		rbd_dev->parent = parent;
-> +	}
-> +
->   	down_write(&rbd_dev->header_rwsem);
->   	ret = rbd_dev_snaps_register(rbd_dev);
->   	up_write(&rbd_dev->header_rwsem);
-> @@ -3554,6 +3597,12 @@ static int rbd_dev_probe_finish(struct rbd_device
-> *rbd_dev)
->   		(unsigned long long) rbd_dev->mapping.size);
->
->   	return ret;
-> +
-> +err_out_parent:
-> +	rbd_dev_destroy(parent);
-> +err_out_spec:
-> +	rbd_spec_put(parent_spec);
-> +	rbd_put_client(rbdc);
->   err_out_bus:
->   	/* this will also clean up rest of rbd_dev stuff */
->
-> @@ -3717,6 +3766,12 @@ static void rbd_dev_release(struct device *dev)
->   	module_put(THIS_MODULE);
->   }
->
-> +static void __rbd_remove(struct rbd_device *rbd_dev)
-> +{
-> +	rbd_remove_all_snaps(rbd_dev);
-> +	rbd_bus_del_dev(rbd_dev);
-> +}
-> +
->   static ssize_t rbd_remove(struct bus_type *bus,
->   			  const char *buf,
->   			  size_t count)
-> @@ -3743,8 +3798,26 @@ static ssize_t rbd_remove(struct bus_type *bus,
->   		goto done;
->   	}
->
-> -	rbd_remove_all_snaps(rbd_dev);
-> -	rbd_bus_del_dev(rbd_dev);
-> +	while (rbd_dev->parent_spec) {
-> +		struct rbd_device *first = rbd_dev;
-> +		struct rbd_device *second = first->parent;
-> +		struct rbd_device *third;
-> +
-> +		/*
-> +		 * Follow to the parent with no grandparent and
-> +		 * remove it.
-> +		 */
-> +		while (second && (third = second->parent)) {
-> +			first = second;
-> +			second = third;
-> +		}
-> +		__rbd_remove(second);
-> +		rbd_spec_put(first->parent_spec);
-> +		first->parent_spec = NULL;
-> +		first->parent_overlap = 0;
-> +		first->parent = NULL;
-> +	}
-> +	__rbd_remove(rbd_dev);
->
->   done:
->   	mutex_unlock(&ctl_mutex);
->
+> Gary, were you also going to update README?  (I know, it's imperfect, but...)
+> 
+> 
+> On 10/31/2012 10:25 AM, Gary Lowell wrote:
+>> Hi Sage -
+>> 
+>> Sam may have the build machines updated.  I'll double check that, and take care of any packaging changes.
+>> 
+>> Cheers,
+>> Gary
+>> 
+>> On Oct 31, 2012, at 9:03 AM, Sage Weil wrote:
+>> 
+>>> apt-get install libboost-program-options-dev
+>>> 
+>>> on debian-based distros; not sure what the rpm equivalent is yet.
+>>> 
+>>> sage
+>> 
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
 
