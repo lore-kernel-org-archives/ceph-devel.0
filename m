@@ -1,90 +1,52 @@
-From: Boaz Harrosh <bharrosh@panasas.com>
-Subject: Re: [PATCH 1/3] bdi: Track users that require stable page writes
-Date: Thu, 1 Nov 2012 15:56:34 -0700
-Message-ID: <5092FE22.30906@panasas.com>
-References: <20121101075805.16153.64714.stgit@blackbox.djwong.org> <20121101075813.16153.94581.stgit@blackbox.djwong.org> <5092BDA2.6090001@panasas.com> <20121101185756.GI19591@blackbox.djwong.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Cephfs losing files and corrupting others
+Date: Fri, 2 Nov 2012 00:02:56 +0100
+Message-ID: <CAPYLRzjR_Z8mOG8ePwTUpJ4aSV1yENabZ3DtK8QWJ207OpBSyQ@mail.gmail.com>
+References: <CAD84eiF1dcE5buvTyFctXTSvB4bgEYXtpxwX7yJWiOEASmNvJA@mail.gmail.com>
+	<5092F860.7040708@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20121101185756.GI19591@blackbox.djwong.org>
-Sender: owner-linux-mm@kvack.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:64621 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S2992576Ab2KAXC5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 19:02:57 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so4297138iea.19
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 16:02:56 -0700 (PDT)
+In-Reply-To: <5092F860.7040708@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nathan Howell <nathan.d.howell@gmail.com>, Sam Lang <sam.lang@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/01/2012 11:57 AM, Darrick J. Wong wrote:
-> On Thu, Nov 01, 2012 at 11:21:22AM -0700, Boaz Harrosh wrote:
->> On 11/01/2012 12:58 AM, Darrick J. Wong wrote:
->>> This creates a per-backing-device counter that tracks the number of users which
->>> require pages to be held immutable during writeout.  Eventually it will be used
->>> to waive wait_for_page_writeback() if nobody requires stable pages.
->>>
+On Thu, Nov 1, 2012 at 11:32 PM, Sam Lang <sam.lang@inktank.com> wrote:
+> On Thu 01 Nov 2012 11:22:59 AM CDT, Nathan Howell wrote:
 >>
->> There is two things I do not like:
->> 1. Please remind me why we need the users counter?
->>    If the device needs it, it will always be needed. The below 
->>    queue_unrequire_stable_pages call at blk_integrity_unregister
->>    only happens at device destruction time, no?
+>> We have a small (3 node) Ceph cluster that occasionally has issues. It
+>> loses files and directories, truncates them or fills the contents with
+>> NULL bytes. So far we haven't been able to build a repro case but it
+>> seems to happen when bulk loading data into the cluster, a process
+>> that is run each evening by a cron job. We've gone about a month
+>> without any issues but had it happen again yesterday during a larger
+>> bulk load.  The data is backed up outside of ceph and can be reloaded
+>> but finding the corrupt files takes quite a while.
 >>
->>    It was also said that maybe individual filesystems would need
->>    stable pages where other FSs using the same BDI do not. But
->>    since the FS is at the driving seat in any case, it can just
->>    do wait_for_writeback() regardless and can care less about
->>    the bdi flag and the other FSs. Actually all those FSs already
->>    do this this, and do not need any help. So this reason is
->>    mute.
-> 
-> The counter exists so that a filesystem can forcibly enable stable page writes
-> even if the underlying device doesn't require it, because the generic fs/mm
-> waiting only happens if stable_pages_required=1.  The idea here was to allow a
-> filesystem that needs stable page writes for its own purposes (i.e. data block
-> checksumming) to be able to enforce the requirement even if the disk doesn't
-> care (or doesn't exist).
-> 
+>> Has anyone heard of similar issues before? Should I try upgrading to
+>> 0.48.2 or a newer kernel?
+>
+>
+> Hi Nathan,
+>
+> Do the writes succeed?  I.e. the programs creating the files don't get
+> errors back?  Are you seeing any problems with the ceph mds or osd processes
+> crashing?  Can you describe your I/O workload during these bulk loads?  How
+> many files, how much data, multiple clients writing, etc.
+>
+> As far as I know, there haven't been any fixes to 0.48.2 to resolve problems
+> like yours.  You might try the ceph fuse client to see if you get the same
+> behavior.  If not, then at least we have narrowed down the problem to the
+> ceph kernel client.
 
-But the filesystem does not need BDI flag to do that, It can just call
-wait_on_page_writeback() directly and or any other waiting like cifs does,
-and this way will not affect any other partitions of the same BDI. So this flag
-is never needed by the FS, it is always to service the device.
-
-> But maybe there are no such filesystems?
-> 
-
-Exactly, all the FSs that do care, already take care of it.
-
-> <shrug> I don't really like the idea that you can dirty a page during writeout,
-> which means that the disk could write the before page, the after page, or some
-> weird mix of the two, and all you get is a promise that the after page will get
-> rewritten if the power doesn't go out.  Not to mention that it could happen
-> again. :)
-> 
-
-I guess that's life. But what is the difference between a modification of a page
-that comes 1 nanosecond before the end_write_back, and another one that came
-1 nano after end_write_back. To the disk it looks like the same load pattern.
-
-I do have in mind a way that we can minimize these redirty-while-writeback by 90% but
-I don't care enough (And am not paid) to fix it, so the contention is currently worse
-then what it could be.
-
->> 2. I hate the atomic_read for every mkwrite. I think we can do
->>    better, since as you noted it can never be turned off, only
->>    on, at init time. And because of 1. above it is not dynamic.
->>    I think I like your previous simple bool better.
-> 
-> I doubt the counter would change much; I could probably change it to something
-> less heavyweight if it's really a problem.
-> 
-
-I hope you are convinced that a counter is not needed, and a simple bool like
-before is enough
-
-Thanks
-Boaz
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Are you using hard links, by any chance? Do you have one or many MDS
+systems? What filesystem are you using on your OSDs?
+-Greg
