@@ -1,229 +1,204 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/6] rbd: get additional info in parent spec
-Date: Wed, 31 Oct 2012 18:49:00 -0700
-Message-ID: <5091D50C.1030400@inktank.com>
-References: <509081C4.3050402@inktank.com> <509083C4.409@inktank.com>
+Subject: Re: [PATCH 6/6] rbd: probe the parent of an image if present
+Date: Wed, 31 Oct 2012 19:07:16 -0700
+Message-ID: <5091D954.70708@inktank.com>
+References: <509081C4.3050402@inktank.com> <509083D0.1060003@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:45406 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754763Ab2KABtO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 21:49:14 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so915725dak.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 18:49:14 -0700 (PDT)
-In-Reply-To: <509083C4.409@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:53309 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752732Ab2KACH3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 22:07:29 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so1377349pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 19:07:28 -0700 (PDT)
+In-Reply-To: <509083D0.1060003@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I know you've got a queue of these already, but here's another:
-rbd_dev_probe_update_spec() could definitely use some warnings
-to distinguish its error cases.
+This all makes sense, but it reminds me of another issue we'll need to
+address:
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+http://www.tracker.newdream.net/issues/2533
 
-On 10/30/2012 06:49 PM, Alex Elder wrote:
-> When a layered rbd image has a parent, that parent is identified
-> only by its pool id, image id, and snapshot id.  Images that have
-> been mapped also record *names* for those three id's.
->
-> Add code to look up these names for parent images so they match
-> mapped images more closely.  Skip doing this for an image if it
-> already has its pool name defined (this will be the case for images
-> mapped by the user).
->
-> It is possible that an the name of a parent image can't be
-> determined, even if the image id is valid.  If this occurs it
-> does not preclude correct operation, so don't treat this as
-> an error.
->
-> On the other hand, defined pools will always have both an id and a
-> name.   And any snapshot of an image identified as a parent for a
-> clone image will exist, and will have a name (if not it indicates
-> some other internal error).  So treat failure to get these bits
-> of information as errors.
+We don't need to watch the header of a parent snapshot, since it's
+immutable and guaranteed not to be deleted out from under us.
+This avoids the bug referenced above. So I guess rbd_dev_probe{_finish}
+can take a parameter telling them whether to watch the header or not.
+
+We should check whether multiple mapped rbds (without layering) hit
+this issue as well, and if so, default to not sharing the ceph_client
+until the bug is fixed.
+
+On 10/30/2012 06:50 PM, Alex Elder wrote:
+> Call the probe function for the parent device.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |  131
-> +++++++++++++++++++++++++++++++++++++++++++++++++++
->   1 file changed, 131 insertions(+)
+>   drivers/block/rbd.c |   79
+> +++++++++++++++++++++++++++++++++++++++++++++++++--
+>   1 file changed, 76 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index bce1fcf..04062c1 100644
+> index 04062c1..8ef13f72 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -70,7 +70,10 @@
+> @@ -222,6 +222,7 @@ struct rbd_device {
 >
->   #define RBD_SNAP_HEAD_NAME	"-"
+>   	struct rbd_spec		*parent_spec;
+>   	u64			parent_overlap;
+> +	struct rbd_device	*parent;
 >
-> +/* This allows a single page to hold an image name sent by OSD */
-> +#define RBD_IMAGE_NAME_LEN_MAX	(PAGE_SIZE - sizeof (__le32) - 1)
->   #define RBD_IMAGE_ID_LEN_MAX	64
-> +
->   #define RBD_OBJ_PREFIX_LEN_MAX	64
+>   	/* protects updating the header */
+>   	struct rw_semaphore     header_rwsem;
+> @@ -255,6 +256,7 @@ static ssize_t rbd_add(struct bus_type *bus, const
+> char *buf,
+>   		       size_t count);
+>   static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
+>   			  size_t count);
+> +static int rbd_dev_probe(struct rbd_device *rbd_dev);
 >
->   /* Feature bits */
-> @@ -658,6 +661,20 @@ out_err:
->   	return -ENOMEM;
+>   static struct bus_attribute rbd_bus_attrs[] = {
+>   	__ATTR(add, S_IWUSR, NULL, rbd_add),
+> @@ -378,6 +380,13 @@ out_opt:
+>   	return ERR_PTR(ret);
 >   }
 >
-> +static const char *rbd_snap_name(struct rbd_device *rbd_dev, u64 snap_id)
+> +static struct rbd_client *__rbd_get_client(struct rbd_client *rbdc)
 > +{
-> +	struct rbd_snap *snap;
+> +	kref_get(&rbdc->kref);
 > +
-> +	if (snap_id == CEPH_NOSNAP)
-> +		return RBD_SNAP_HEAD_NAME;
-> +
-> +	list_for_each_entry(snap, &rbd_dev->snaps, node)
-> +		if (snap_id == snap->id)
-> +			return snap->name;
-> +
-> +	return NULL;
+> +	return rbdc;
 > +}
 > +
->   static int snap_by_name(struct rbd_device *rbd_dev, const char *snap_name)
->   {
->
-> @@ -2499,6 +2516,7 @@ static int rbd_dev_v2_parent_info(struct
-> rbd_device *rbd_dev)
->   		goto out_err;
->   	}
->   	parent_spec->image_id = image_id;
-> +	parent_spec->image_id_len = len;
->   	ceph_decode_64_safe(&p, end, parent_spec->snap_id, out_err);
->   	ceph_decode_64_safe(&p, end, overlap, out_err);
->
-> @@ -2514,6 +2532,115 @@ out_err:
->   	return ret;
->   }
->
-> +static char *rbd_dev_image_name(struct rbd_device *rbd_dev)
-> +{
-> +	size_t image_id_size;
-> +	char *image_id;
-> +	void *p;
-> +	void *end;
-> +	size_t size;
-> +	void *reply_buf = NULL;
-> +	size_t len = 0;
-> +	char *image_name = NULL;
-> +	int ret;
+>   /*
+>    * Find a ceph client with specific addr and configuration.  If
+>    * found, bump its reference count.
+> @@ -393,7 +402,8 @@ static struct rbd_client *rbd_client_find(struct
+> ceph_options *ceph_opts)
+>   	spin_lock(&rbd_client_list_lock);
+>   	list_for_each_entry(client_node, &rbd_client_list, node) {
+>   		if (!ceph_compare_options(ceph_opts, client_node->client)) {
+> -			kref_get(&client_node->kref);
+> +			__rbd_get_client(client_node);
 > +
-> +	rbd_assert(!rbd_dev->spec->image_name);
-> +
-> +	image_id_size = sizeof (__le32) + rbd_dev->spec->image_id_len;
-> +	image_id = kmalloc(image_id_size, GFP_KERNEL);
-> +	if (!image_id)
-> +		return NULL;
-> +
-> +	p = image_id;
-> +	end = (char *) image_id + image_id_size;
-> +	ceph_encode_string(&p, end, rbd_dev->spec->image_id,
-> +				(u32) rbd_dev->spec->image_id_len);
-> +
-> +	size = sizeof (__le32) + RBD_IMAGE_NAME_LEN_MAX;
-> +	reply_buf = kmalloc(size, GFP_KERNEL);
-> +	if (!reply_buf)
-> +		goto out;
-> +
-> +	ret = rbd_req_sync_exec(rbd_dev, RBD_DIRECTORY,
-> +				"rbd", "dir_get_name",
-> +				image_id, image_id_size,
-> +				(char *) reply_buf, size,
-> +				CEPH_OSD_FLAG_READ, NULL);
-> +	if (ret < 0)
-> +		goto out;
-> +	p = reply_buf;
-> +	end = (char *) reply_buf + size;
-> +	image_name = ceph_extract_encoded_string(&p, end, &len, GFP_KERNEL);
-> +	if (image_name)
-> +		dout("%s: name is %s len is %zd\n", __func__, image_name, len);
-> +out:
-> +	kfree(reply_buf);
-> +	kfree(image_id);
-> +
-> +	return image_name;
-> +}
-> +
-> +/*
-> + * When a parent image gets probed, we only have the pool, image,
-> + * and snapshot ids but not the names of any of them.  This call
-> + * is made later to fill in those names.  It has to be done after
-> + * rbd_dev_snaps_update() has completed because some of the
-> + * information (in particular, snapshot name) is not available
-> + * until then.
-> + */
-> +static int rbd_dev_probe_update_spec(struct rbd_device *rbd_dev)
-> +{
-> +	struct ceph_osd_client *osdc;
-> +	const char *name;
-> +	void *reply_buf = NULL;
-> +	int ret;
-> +
-> +	if (rbd_dev->spec->pool_name)
-> +		return 0;	/* Already have the names */
-> +
-> +	/* Look up the pool name */
-> +
-> +	osdc = &rbd_dev->rbd_client->client->osdc;
-> +	name = ceph_pg_pool_name_by_id(osdc->osdmap, rbd_dev->spec->pool_id);
-> +	if (!name)
-> +		return -EIO;	/* pool id too large (>= 2^31) */
-> +
-> +	rbd_dev->spec->pool_name = kstrdup(name, GFP_KERNEL);
-> +	if (!rbd_dev->spec->pool_name)
-> +		return -ENOMEM;
-> +
-> +	/* Fetch the image name; tolerate failure here */
-> +
-> +	name = rbd_dev_image_name(rbd_dev);
-> +	if (name) {
-> +		rbd_dev->spec->image_name_len = strlen(name);
-> +		rbd_dev->spec->image_name = (char *) name;
-> +	} else {
-> +		pr_warning(RBD_DRV_NAME "%d "
-> +			"unable to get image name for image id %s\n",
-> +			rbd_dev->major, rbd_dev->spec->image_id);
-> +	}
-> +
-> +	/* Look up the snapshot name. */
-> +
-> +	name = rbd_snap_name(rbd_dev, rbd_dev->spec->snap_id);
-> +	if (!name) {
-> +		ret = -EIO;
-> +		goto out_err;
-> +	}
-> +	rbd_dev->spec->snap_name = kstrdup(name, GFP_KERNEL);
-> +	if(!rbd_dev->spec->snap_name)
-> +		goto out_err;
-> +
-> +	return 0;
-> +out_err:
-> +	kfree(reply_buf);
-> +	kfree(rbd_dev->spec->pool_name);
-> +	rbd_dev->spec->pool_name = NULL;
-> +
-> +	return ret;
-> +}
-> +
->   static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev, u64 *ver)
->   {
->   	size_t size;
-> @@ -3372,6 +3499,10 @@ static int rbd_dev_probe_finish(struct rbd_device
+>   			found = true;
+>   			break;
+>   		}
+> @@ -3311,6 +3321,11 @@ static int rbd_dev_image_id(struct rbd_device
 > *rbd_dev)
->   	if (ret)
->   		return ret;
+>   	void *response;
+>   	void *p;
 >
-> +	ret = rbd_dev_probe_update_spec(rbd_dev);
-> +	if (ret)
-> +		goto err_out_snaps;
+> +	/* If we already have it we don't need to look it up */
 > +
->   	ret = rbd_dev_set_mapping(rbd_dev);
->   	if (ret)
->   		goto err_out_snaps;
+> +	if (rbd_dev->spec->image_id)
+> +		return 0;
+> +
+>   	/*
+>   	 * When probing a parent image, the image id is already
+>   	 * known (and the image name likely is not).  There's no
+> @@ -3492,6 +3507,9 @@ out_err:
+>
+>   static int rbd_dev_probe_finish(struct rbd_device *rbd_dev)
+>   {
+> +	struct rbd_device *parent = NULL;
+> +	struct rbd_spec *parent_spec = NULL;
+> +	struct rbd_client *rbdc = NULL;
+>   	int ret;
+>
+>   	/* no need to lock here, as rbd_dev is not registered yet */
+> @@ -3536,6 +3554,31 @@ static int rbd_dev_probe_finish(struct rbd_device
+> *rbd_dev)
+>   	 * At this point cleanup in the event of an error is the job
+>   	 * of the sysfs code (initiated by rbd_bus_del_dev()).
+>   	 */
+> +	/* Probe the parent if there is one */
+> +
+> +	if (rbd_dev->parent_spec) {
+> +		/*
+> +		 * We need to pass a reference to the client and the
+> +		 * parent spec when creating the parent rbd_dev.
+> +		 * Images related by parent/child relationships
+> +		 * always share both.
+> +		 */
+> +		parent_spec = rbd_spec_get(rbd_dev->parent_spec);
+> +		rbdc = __rbd_get_client(rbd_dev->rbd_client);
+> +
+> +		parent = rbd_dev_create(rbdc, parent_spec);
+> +		if (!parent) {
+> +			ret = -ENOMEM;
+> +			goto err_out_spec;
+> +		}
+> +		rbdc = NULL;		/* parent now owns reference */
+> +		parent_spec = NULL;	/* parent now owns reference */
+> +		ret = rbd_dev_probe(parent);
+> +		if (ret < 0)
+> +			goto err_out_parent;
+> +		rbd_dev->parent = parent;
+> +	}
+> +
+>   	down_write(&rbd_dev->header_rwsem);
+>   	ret = rbd_dev_snaps_register(rbd_dev);
+>   	up_write(&rbd_dev->header_rwsem);
+> @@ -3554,6 +3597,12 @@ static int rbd_dev_probe_finish(struct rbd_device
+> *rbd_dev)
+>   		(unsigned long long) rbd_dev->mapping.size);
+>
+>   	return ret;
+> +
+> +err_out_parent:
+> +	rbd_dev_destroy(parent);
+> +err_out_spec:
+> +	rbd_spec_put(parent_spec);
+> +	rbd_put_client(rbdc);
+>   err_out_bus:
+>   	/* this will also clean up rest of rbd_dev stuff */
+>
+> @@ -3717,6 +3766,12 @@ static void rbd_dev_release(struct device *dev)
+>   	module_put(THIS_MODULE);
+>   }
+>
+> +static void __rbd_remove(struct rbd_device *rbd_dev)
+> +{
+> +	rbd_remove_all_snaps(rbd_dev);
+> +	rbd_bus_del_dev(rbd_dev);
+> +}
+> +
+>   static ssize_t rbd_remove(struct bus_type *bus,
+>   			  const char *buf,
+>   			  size_t count)
+> @@ -3743,8 +3798,26 @@ static ssize_t rbd_remove(struct bus_type *bus,
+>   		goto done;
+>   	}
+>
+> -	rbd_remove_all_snaps(rbd_dev);
+> -	rbd_bus_del_dev(rbd_dev);
+> +	while (rbd_dev->parent_spec) {
+> +		struct rbd_device *first = rbd_dev;
+> +		struct rbd_device *second = first->parent;
+> +		struct rbd_device *third;
+> +
+> +		/*
+> +		 * Follow to the parent with no grandparent and
+> +		 * remove it.
+> +		 */
+> +		while (second && (third = second->parent)) {
+> +			first = second;
+> +			second = third;
+> +		}
+> +		__rbd_remove(second);
+> +		rbd_spec_put(first->parent_spec);
+> +		first->parent_spec = NULL;
+> +		first->parent_overlap = 0;
+> +		first->parent = NULL;
+> +	}
+> +	__rbd_remove(rbd_dev);
+>
+>   done:
+>   	mutex_unlock(&ctl_mutex);
 >
 
