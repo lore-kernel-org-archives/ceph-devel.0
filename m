@@ -1,72 +1,134 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: Need CRYPTO_CXXFLAGS with latest master?
-Date: Thu, 1 Nov 2012 12:05:30 -0700
-Message-ID: <916A1FB2-9626-4422-ABA3-1F14D5DD309F@inktank.com>
-References: <CAPrxi59wW8EgQerDbY4E=i7RYMQy-Tb24AaSeEXJZhVehX0=1w@mail.gmail.com> <CAPrxi59u69dhunXv1PcwTeQJBvNKZ1X2JSYcsVr-sULFJ3ZzAA@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:35296 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754054Ab2KATFe convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 15:05:34 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1928976pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 12:05:34 -0700 (PDT)
-In-Reply-To: <CAPrxi59u69dhunXv1PcwTeQJBvNKZ1X2JSYcsVr-sULFJ3ZzAA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+From: Jeff Layton <jlayton@samba.org>
+Subject: Re: [PATCH 3/3] fs: Fix remaining filesystems to wait for stable
+ page writeback
+Date: Thu, 1 Nov 2012 16:22:54 -0400
+Message-ID: <20121101162254.03dbbd9a@tlielax.poochiereds.net>
+References: <20121101075805.16153.64714.stgit@blackbox.djwong.org>
+	<20121101075829.16153.92036.stgit@blackbox.djwong.org>
+	<5092C2CE.7070209@panasas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <5092C2CE.7070209@panasas.com>
+Sender: owner-linux-mm@kvack.org
+To: Boaz Harrosh <bharrosh@panasas.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Noah -
+On Thu, 1 Nov 2012 11:43:26 -0700
+Boaz Harrosh <bharrosh@panasas.com> wrote:
 
-What platform are you building on, and are you building with nss or  cryptopp ?
-
-Thanks,
-Gary
-
-On Oct 31, 2012, at 8:22 PM, Noah Watkins wrote:
-
-> Whoops, here is the original error:
+> On 11/01/2012 12:58 AM, Darrick J. Wong wrote:
+> > Fix up the filesystems that provide their own ->page_mkwrite handlers to
+> > provide stable page writes if necessary.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  fs/9p/vfs_file.c |    1 +
+> >  fs/afs/write.c   |    4 ++--
+> >  fs/ceph/addr.c   |    1 +
+> >  fs/cifs/file.c   |    1 +
+> >  fs/ocfs2/mmap.c  |    1 +
+> >  fs/ubifs/file.c  |    4 ++--
+> >  6 files changed, 8 insertions(+), 4 deletions(-)
+> > 
+> > 
+> > diff --git a/fs/9p/vfs_file.c b/fs/9p/vfs_file.c
+> > index c2483e9..aa253f0 100644
+> > --- a/fs/9p/vfs_file.c
+> > +++ b/fs/9p/vfs_file.c
+> > @@ -620,6 +620,7 @@ v9fs_vm_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> >  	lock_page(page);
+> >  	if (page->mapping != inode->i_mapping)
+> >  		goto out_unlock;
+> > +	wait_on_stable_page_write(page);
+> >  
 > 
->  CXX    test_idempotent_sequence.o
-> In file included from ./os/LFNIndex.h:27:0,
->                 from ./os/HashIndex.h:20,
->                 from ./os/IndexManager.h:26,
->                 from ./os/ObjectMap.h:18,
->                 from ./os/ObjectStore.h:22,
->                 from ./os/FileStore.h:32,
->                 from test/filestore/test_idempotent_sequence.cc:22:
-> ./common/ceph_crypto.h:44:22: fatal error: pk11pub.h: No such file or directory
-> compilation terminated.
->  CXX    DeterministicOpSequence.o
-> In file included from ./os/LFNIndex.h:27:0,
->                 from ./os/HashIndex.h:20,
->                 from ./os/IndexManager.h:26,
->                 from ./os/ObjectMap.h:18,
->                 from ./os/ObjectStore.h:22,
->                 from ./os/FileStore.h:32,
->                 from test/filestore/DeterministicOpSequence.cc:21:
-> ./common/ceph_crypto.h:44:22: fatal error: pk11pub.h: No such file or directory
-> compilation terminated.
+> Good god thanks, yes please ;-)
 > 
+> >  	return VM_FAULT_LOCKED;
+> >  out_unlock:
+> > diff --git a/fs/afs/write.c b/fs/afs/write.c
+> > index 9aa52d9..39eb2a4 100644
+> > --- a/fs/afs/write.c
+> > +++ b/fs/afs/write.c
+> > @@ -758,7 +758,7 @@ int afs_page_mkwrite(struct vm_area_struct *vma, struct page *page)
 > 
-> On Wed, Oct 31, 2012 at 6:27 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
->> Pushed changes to Makefile.am in branch:
->> 
->>   wip-make-crypto-flags
->> 
->> Several changes to Makefile.am that add CRYPTO_CXXFLAGS to various
->> test targets. I needed these to build after updating to master this
->> afternoon.
->> 
->> Not sure if there is something else going on in my environment..
->> 
->> Thanks,
->> Noah
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> afs, is it not a network filesystem? which means that it has it's own emulated none-block-device
+> BDI, registered internally. So if you do need stable pages someone should call
+> bdi_require_stable_pages()
+> 
+> But again since it is a network filesystem I don't see how it is needed, and/or it might be
+> taken care of already.
+> 
+> >  #ifdef CONFIG_AFS_FSCACHE
+> >  	fscache_wait_on_page_write(vnode->cache, page);
+> >  #endif
+> > -
+> > +	wait_on_stable_page_write(page);
+> >  	_leave(" = 0");
+> > -	return 0;
+> > +	return VM_FAULT_LOCKED;
+> >  }
+> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> 
+> CEPH for sure has it's own "emulated none-block-device BDI". This one is also
+> a pure networking filesystem.
+> 
+> And it already does what it needs to do with wait_on_writeback().
+> 
+> So i do not think you should touch CEPH
+> 
+> > index 6690269..e9734bf 100644
+> > --- a/fs/ceph/addr.c
+> > +++ b/fs/ceph/addr.c
+> > @@ -1208,6 +1208,7 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> >  		set_page_dirty(page);
+> >  		up_read(&mdsc->snap_rwsem);
+> >  		ret = VM_FAULT_LOCKED;
+> > +		wait_on_stable_page_write(page);
+> >  	} else {
+> >  		if (ret == -ENOMEM)
+> >  			ret = VM_FAULT_OOM;
+> > diff --git a/fs/cifs/file.c b/fs/cifs/file.c
+> 
+> Cifs also self-BDI network filesystem, but
+> 
+> > index edb25b4..a8770bf 100644
+> > --- a/fs/cifs/file.c
+> > +++ b/fs/cifs/file.c
+> > @@ -2997,6 +2997,7 @@ cifs_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> >  	struct page *page = vmf->page;
+> >  
+> >  	lock_page(page);
+> 
+> It waits by locking the page, that's cifs naive way of waiting for writeback
+> 
+> > +	wait_on_stable_page_write(page);
+> 
+> Instead it could do better and not override page_mkwrite at all, and all it needs
+> to do is call bdi_require_stable_pages() at it's own registered BDI
+> 
 
+Hmm...I don't know...
+
+I've never been crazy about using the page lock for this, but in the
+absence of a better way to guarantee stable pages, it was what I ended
+up with at the time. cifs_writepages will hold the page lock until
+kernel_sendmsg returns. At that point the TCP layer will have copied
+off the page data so it's safe to release it.
+
+With this change though, we're going to end up blocking until the
+writeback flag clears, right? And I think that will happen when the
+reply comes in? So, we'll end up blocking for much longer than is
+really necessary in page_mkwrite with this change.
+
+-- 
+Jeff Layton <jlayton@samba.org>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
