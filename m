@@ -1,80 +1,155 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Assertion failure in ceph_readlink()
-Date: Thu, 01 Nov 2012 15:38:03 -0700
-Message-ID: <5092F9CB.7020501@cs.ucsc.edu>
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 3/3] fs: Fix remaining filesystems to wait for stable
+ page writeback
+Date: Thu, 1 Nov 2012 15:47:30 -0700
+Message-ID: <20121101224730.GJ19591@blackbox.djwong.org>
+References: <20121101075805.16153.64714.stgit@blackbox.djwong.org>
+ <20121101075829.16153.92036.stgit@blackbox.djwong.org>
+ <5092C2CE.7070209@panasas.com>
+ <20121101162254.03dbbd9a@tlielax.poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:55864 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932676Ab2KAWiG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Nov 2012 18:38:06 -0400
-Received: by mail-da0-f46.google.com with SMTP id n41so1365914dak.19
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 15:38:06 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20121101162254.03dbbd9a@tlielax.poochiereds.net>
+Sender: owner-linux-mm@kvack.org
+To: Jeff Layton <jlayton@samba.org>
+Cc: Boaz Harrosh <bharrosh@panasas.com>, axboe@kernel.dk, lucho@ionkov.net, tytso@mit.edu, sage@inktank.com, ericvh@gmail.com, mfasheh@suse.com, dedekind1@gmail.com, adrian.hunter@intel.com, dhowells@redhat.com, sfrench@samba.org, jlbec@evilplan.org, rminnich@sandia.gov, linux-cifs@vger.kernel.org, jack@suse.cz, martin.petersen@oracle.com, neilb@suse.de, david@fromorbit.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, ocfs2-devel@oss.oracle.com
+List-Id: ceph-devel.vger.kernel.org
 
-I'm getting the following assertion failure when running a test that creates a symlink and then tries to read it using ceph_readlink().
+On Thu, Nov 01, 2012 at 04:22:54PM -0400, Jeff Layton wrote:
+> On Thu, 1 Nov 2012 11:43:26 -0700
+> Boaz Harrosh <bharrosh@panasas.com> wrote:
+> 
+> > On 11/01/2012 12:58 AM, Darrick J. Wong wrote:
+> > > Fix up the filesystems that provide their own ->page_mkwrite handlers to
+> > > provide stable page writes if necessary.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  fs/9p/vfs_file.c |    1 +
+> > >  fs/afs/write.c   |    4 ++--
+> > >  fs/ceph/addr.c   |    1 +
+> > >  fs/cifs/file.c   |    1 +
+> > >  fs/ocfs2/mmap.c  |    1 +
+> > >  fs/ubifs/file.c  |    4 ++--
+> > >  6 files changed, 8 insertions(+), 4 deletions(-)
+> > > 
+> > > 
+> > > diff --git a/fs/9p/vfs_file.c b/fs/9p/vfs_file.c
+> > > index c2483e9..aa253f0 100644
+> > > --- a/fs/9p/vfs_file.c
+> > > +++ b/fs/9p/vfs_file.c
+> > > @@ -620,6 +620,7 @@ v9fs_vm_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> > >  	lock_page(page);
+> > >  	if (page->mapping != inode->i_mapping)
+> > >  		goto out_unlock;
+> > > +	wait_on_stable_page_write(page);
+> > >  
+> > 
+> > Good god thanks, yes please ;-)
+> > 
+> > >  	return VM_FAULT_LOCKED;
+> > >  out_unlock:
+> > > diff --git a/fs/afs/write.c b/fs/afs/write.c
+> > > index 9aa52d9..39eb2a4 100644
+> > > --- a/fs/afs/write.c
+> > > +++ b/fs/afs/write.c
+> > > @@ -758,7 +758,7 @@ int afs_page_mkwrite(struct vm_area_struct *vma, struct page *page)
+> > 
+> > afs, is it not a network filesystem? which means that it has it's own emulated none-block-device
+> > BDI, registered internally. So if you do need stable pages someone should call
+> > bdi_require_stable_pages()
+> > 
+> > But again since it is a network filesystem I don't see how it is needed, and/or it might be
+> > taken care of already.
+> > 
+> > >  #ifdef CONFIG_AFS_FSCACHE
+> > >  	fscache_wait_on_page_write(vnode->cache, page);
+> > >  #endif
+> > > -
+> > > +	wait_on_stable_page_write(page);
+> > >  	_leave(" = 0");
+> > > -	return 0;
+> > > +	return VM_FAULT_LOCKED;
+> > >  }
+> > > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > 
+> > CEPH for sure has it's own "emulated none-block-device BDI". This one is also
+> > a pure networking filesystem.
+> > 
+> > And it already does what it needs to do with wait_on_writeback().
+> > 
+> > So i do not think you should touch CEPH
+> > 
+> > > index 6690269..e9734bf 100644
+> > > --- a/fs/ceph/addr.c
+> > > +++ b/fs/ceph/addr.c
+> > > @@ -1208,6 +1208,7 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> > >  		set_page_dirty(page);
+> > >  		up_read(&mdsc->snap_rwsem);
+> > >  		ret = VM_FAULT_LOCKED;
+> > > +		wait_on_stable_page_write(page);
+> > >  	} else {
+> > >  		if (ret == -ENOMEM)
+> > >  			ret = VM_FAULT_OOM;
+> > > diff --git a/fs/cifs/file.c b/fs/cifs/file.c
+> > 
+> > Cifs also self-BDI network filesystem, but
+> > 
+> > > index edb25b4..a8770bf 100644
+> > > --- a/fs/cifs/file.c
+> > > +++ b/fs/cifs/file.c
+> > > @@ -2997,6 +2997,7 @@ cifs_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> > >  	struct page *page = vmf->page;
+> > >  
+> > >  	lock_page(page);
+> > 
+> > It waits by locking the page, that's cifs naive way of waiting for writeback
+> > 
+> > > +	wait_on_stable_page_write(page);
+> > 
+> > Instead it could do better and not override page_mkwrite at all, and all it needs
+> > to do is call bdi_require_stable_pages() at it's own registered BDI
+> > 
+> 
+> Hmm...I don't know...
+> 
+> I've never been crazy about using the page lock for this, but in the
+> absence of a better way to guarantee stable pages, it was what I ended
+> up with at the time. cifs_writepages will hold the page lock until
+> kernel_sendmsg returns. At that point the TCP layer will have copied
+> off the page data so it's safe to release it.
+> 
+> With this change though, we're going to end up blocking until the
+> writeback flag clears, right? And I think that will happen when the
+> reply comes in? So, we'll end up blocking for much longer than is
+> really necessary in page_mkwrite with this change.
 
-This is the failure, and the test is shown below (and is in wip-java-symlinks). Also note that if the test below is altered to use relative paths for both symlink parameters, that readlink() returns an error that the path is not a symlink, despite the S_ISLNK test passing.
+That's a very good point to make-- network FSes can stop the stable-waiting
+after the request is sent.  Can I interest you in a new page flag (PG_stable)
+that indicates when a page has to be held for stable write?  Along with a
+modification to wait_on_stable_page_write that uses the new PG_stable flag
+instead of just writeback?  Then, you can clear PG_stable right after the
+sendmsg() and release the page for further activity without having to overload
+the page lock.
 
-Thanks, Noah
+I wrote a patch that does exactly that as part of my work to defer the
+integrity checksumming until the last possible instant.  However, I haven't
+gotten that part to work yet, so I left the PG_stable patch out of this
+submission.  On the other hand, it sounds like you could use it.
 
-(master)kyoto:src $ ./test_libcephfs
-Running main() from gtest_main.cc
-[==========] Running 19 tests from 1 test case.
-[----------] Global test environment set-up.
-[----------] 19 tests from LibCephFS
-[ RUN      ] LibCephFS.Readlink_absolute
-./include/filepath.h: In function 'void filepath::append(const filepath&)' thread 7ffec07dc780 time 2012-11-01 15:31:28.256797
-./include/filepath.h: 180: FAILED assert(a.pure_relative())
- ceph version 0.53-583-gdfc57c4 (dfc57c4fa50b84cd4bdc29a266b955455d0e9d5b)
- 1: (Client::path_walk(filepath const&, Inode**, bool)+0xb4f) [0x7ffebf746a6f]
- 2: (Client::readlink(char const*, char*, long)+0xf9) [0x7ffebf748ae9]
- 3: (LibCephFS_Readlink_absolute_Test::TestBody()+0x9f1) [0x4233d1]
- 4: (testing::Test::Run()+0xaa) [0x4407aa]
- 5: (testing::internal::TestInfoImpl::Run()+0x100) [0x4408b0]
- 6: (testing::TestCase::Run()+0xbd) [0x44097d]
- 7: (testing::internal::UnitTestImpl::RunAllTests()+0x217) [0x440be7]
- 8: (main()+0x35) [0x4194b5]
- 9: (__libc_start_main()+0xed) [0x7ffebed5d76d]
- 10: /home/nwatkins/projects/ceph/ceph/src/.libs/lt-test_libcephfs() [0x419511]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-terminate called after throwing an instance of 'ceph::FailedAssertion'
-Aborted (core dumped)
+--D
+> 
+> -- 
+> Jeff Layton <jlayton@samba.org>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-ext4" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
----
-
-TEST(LibCephFS, Readlink_absolute) {
-  struct ceph_mount_info *cmount;
-  ASSERT_EQ(ceph_create(&cmount, NULL), 0);
-  ASSERT_EQ(ceph_conf_read_file(cmount, NULL), 0);
-  ASSERT_EQ(ceph_mount(cmount, NULL), 0);
-
-  /* make source */
-  char oldpath[256];
-  sprintf(oldpath, "/test_readlinkabs_%d", getpid());
-  int fd = ceph_open(cmount, oldpath, O_CREAT|O_RDWR, 0666);
-  ASSERT_GT(fd, 0);
-  ceph_close(cmount, fd);
-
-  /* make target */
-  char newpath[256];
-  sprintf(newpath, "/test_readlinkabs_sym_%d", getpid());
-  ASSERT_EQ(ceph_symlink(cmount, oldpath, newpath), 0);
-
-  /* size of link */
-  struct stat stat;
-  ASSERT_EQ(ceph_lstat(cmount, newpath, &stat), 0);
-  ASSERT_TRUE(S_ISLNK(stat.st_mode));
-
-  char linkname[256];
-  ASSERT_GT((int)sizeof(linkname), stat.st_size);
-  memset(linkname, 0, sizeof(linkname));
-
-  ceph_readlink(cmount, newpath, linkname, stat.st_size + 1);
-
-  ceph_shutdown(cmount);
-}
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
