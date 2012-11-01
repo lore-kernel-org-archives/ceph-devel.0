@@ -1,29 +1,22 @@
-From: Mike Ryan <mike.ryan@inktank.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: bobtail timing
-Date: Wed, 31 Oct 2012 20:17:28 -0700
-Message-ID: <20121101031728.GF19642@splice>
-References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net>
- <CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com>
- <alpine.DEB.2.00.1210311436230.20646@cobra.newdream.net>
- <20121101031246.fcc80a63e2506af3fcaa9dda@ist.utl.pt>
+Date: Wed, 31 Oct 2012 20:17:49 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210312014510.8302@cobra.newdream.net>
+References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net> <CAPrxi59Mcsm4zeJLL=WXQy9qyiBQ=JC6htOi9KN4Wmx7T8RnBQ@mail.gmail.com> <alpine.DEB.2.00.1210311436230.20646@cobra.newdream.net> <20121101031246.fcc80a63e2506af3fcaa9dda@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:41951 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757186Ab2KADRc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 23:17:32 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so1413157pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Oct 2012 20:17:32 -0700 (PDT)
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:36321 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757186Ab2KADRu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Oct 2012 23:17:50 -0400
 In-Reply-To: <20121101031246.fcc80a63e2506af3fcaa9dda@ist.utl.pt>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Cl??udio Martins <ctpm@ist.utl.pt>
+To: =?ISO-8859-15?Q?Cl=E1udio_Martins?= <ctpm@ist.utl.pt>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Nov 01, 2012 at 03:12:46AM +0000, Cl??udio Martins wrote:
-> 
+On Thu, 1 Nov 2012, Cl?udio Martins wrote:
 > On Wed, 31 Oct 2012 14:38:28 -0700 (PDT) Sage Weil <sage@inktank.com> wrote:
 > > On Wed, 31 Oct 2012, Noah Watkins wrote:
 > > > Which branch is the freeze taken against? master?
@@ -44,5 +37,18 @@ On Thu, Nov 01, 2012 at 03:12:46AM +0000, Cl??udio Martins wrote:
 >  Am I missing something, or people checking out a v0.XX with git might
 > not be getting the real v0.XX that was released as tarballs?
 
-The tarball is released as soon as it's tagged. The tag never changes
-once it's tagged. Therefore tag v0.XX == tarball v0.XX.
+The releases and tarballs contain *exactly* the content that is tagged 
+v0.X.  The branches may accumulate additional fixes after that, which 
+will later be tagged with a v0.X.Y point release.  Since we've started 
+maintaing a stable release, we haven't done point releases for 
+the development 'testing' releases, although if there are important bugs 
+we may need to do so in the future.
+
+The 'stable' branch tracks the last stable release (currently argonaut) 
+and is where bug fixes accumulate until the next release.  For example, 
+stable current contains v0.48.2 and several additional commits (mostly 
+backports of proviioning scripts to support the ceph-deploy tool that 
+we're working on).
+
+sage
+
