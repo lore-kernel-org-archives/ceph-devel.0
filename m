@@ -1,85 +1,83 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: Need CRYPTO_CXXFLAGS with latest master?
-Date: Thu, 1 Nov 2012 21:53:24 -0700
-Message-ID: <602A8C77-7214-42C9-BB4E-378C4EB6576C@inktank.com>
-References: <CAPrxi59wW8EgQerDbY4E=i7RYMQy-Tb24AaSeEXJZhVehX0=1w@mail.gmail.com> <CAPrxi59u69dhunXv1PcwTeQJBvNKZ1X2JSYcsVr-sULFJ3ZzAA@mail.gmail.com> <916A1FB2-9626-4422-ABA3-1F14D5DD309F@inktank.com> <CAPrxi589jMkEN8y7PfVJkCmaJOGeE8t9B714iqEdp6WTWhaL3A@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Fwd: Unable to Start Ceph service
+Date: Fri, 2 Nov 2012 12:29:51 +0530
+Message-ID: <CAGfy=6n7vM6KTdJQNjtqV0QUyiWrKf5Mai6HC_4-4vWfYEiVpQ@mail.gmail.com>
+References: <CAGfy=6m7yJwVzVuFCZrHqe8tvcnYvkU7w7rieZuo4s7duQV5gw@mail.gmail.com>
+	<5091A7BE.2050106@inktank.com>
+	<CAGfy=6ni5fybh_zXK1L4HFBeNiYrr-sir_NVJuUk9SgURt=YBw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:36708 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751147Ab2KBEx2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 00:53:28 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2212011pad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 21:53:27 -0700 (PDT)
-In-Reply-To: <CAPrxi589jMkEN8y7PfVJkCmaJOGeE8t9B714iqEdp6WTWhaL3A@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:36223 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752345Ab2KBG7w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 02:59:52 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so3514430vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Nov 2012 23:59:51 -0700 (PDT)
+In-Reply-To: <CAGfy=6ni5fybh_zXK1L4HFBeNiYrr-sir_NVJuUk9SgURt=YBw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Dan Mick <dan.mick@inktank.com>
 
-Let me know if you see the problem again.  It's probably something in the autotools dependencies resolution.
+---------- Forwarded message ----------
+From: hemant surale <hemant.surale@gmail.com>
+Date: Fri, Nov 2, 2012 at 12:10 PM
+Subject: Re: Unable to Start Ceph service
+To: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org"
+<ceph-devel@vger.kernel.org>
 
-Cheers,
-Gary
 
 
-On Nov 1, 2012, at 8:54 PM, Noah Watkins wrote:
+ Initially I installed ceph directly by following 5minute guide from
+official site , So before building ceph from source code I installed
+ceph as well as removed it using "sudo apt-get remove ceph" ,But It
+seems that some directories left undeleted.
 
-> I guess I'm going to have to retract this problem, as I can't
-> reproduce it today. No clue what happened :)
-> 
-> On Thu, Nov 1, 2012 at 12:05 PM, Gary Lowell <gary.lowell@inktank.com> wrote:
->> Hi Noah -
->> 
->> What platform are you building on, and are you building with nss or  cryptopp ?
->> 
->> Thanks,
->> Gary
->> 
->> On Oct 31, 2012, at 8:22 PM, Noah Watkins wrote:
->> 
->>> Whoops, here is the original error:
->>> 
->>> CXX    test_idempotent_sequence.o
->>> In file included from ./os/LFNIndex.h:27:0,
->>>                from ./os/HashIndex.h:20,
->>>                from ./os/IndexManager.h:26,
->>>                from ./os/ObjectMap.h:18,
->>>                from ./os/ObjectStore.h:22,
->>>                from ./os/FileStore.h:32,
->>>                from test/filestore/test_idempotent_sequence.cc:22:
->>> ./common/ceph_crypto.h:44:22: fatal error: pk11pub.h: No such file or directory
->>> compilation terminated.
->>> CXX    DeterministicOpSequence.o
->>> In file included from ./os/LFNIndex.h:27:0,
->>>                from ./os/HashIndex.h:20,
->>>                from ./os/IndexManager.h:26,
->>>                from ./os/ObjectMap.h:18,
->>>                from ./os/ObjectStore.h:22,
->>>                from ./os/FileStore.h:32,
->>>                from test/filestore/DeterministicOpSequence.cc:21:
->>> ./common/ceph_crypto.h:44:22: fatal error: pk11pub.h: No such file or directory
->>> compilation terminated.
->>> 
->>> 
->>> On Wed, Oct 31, 2012 at 6:27 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
->>>> Pushed changes to Makefile.am in branch:
->>>> 
->>>>  wip-make-crypto-flags
->>>> 
->>>> Several changes to Makefile.am that add CRYPTO_CXXFLAGS to various
->>>> test targets. I needed these to build after updating to master this
->>>> afternoon.
->>>> 
->>>> Not sure if there is something else going on in my environment..
->>>> 
->>>> Thanks,
->>>> Noah
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
+Now I tried to Build ceph again on fresh VM and again I have some
+issues to resolve .
 
+As proceeding to building step when I came across "make" cmd following
+error is observed
+---------------------------------------------------------//Error---------------------------------------------------------------------
+  CXX    MDS.o
+g++: internal compiler error: Killed (program cc1plus)
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See <file:///usr/share/doc/gcc-4.6/README.Bugs> for instructions.
+make[3]: *** [MDS.o] Error 4
+make[3]: Leaving directory `/home/hemant/ceph/ceph/src'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/home/hemant/ceph/ceph/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/home/hemant/ceph/ceph/src'
+make: *** [all-recursive] Error 1
+---------------------------_---------------------------_---------------------------_---------------------------
+
+
+- Hemant Surale
+
+
+On Thu, Nov 1, 2012 at 4:05 AM, Dan Mick <dan.mick@inktank.com> wrote:
+>
+> I've had a long private thread with Hemant, and I believe he's past this problem (in case anyone scans archives looking for open questions).
+> Hemant, it would be best to keep the thread on ceph-devel; you get more people looking and answering.
+>
+> It's a mystery, still, how /usr/bin/ceph-osd ended up being a directory.
+>
+>
+> On 10/30/2012 05:59 AM, hemant surale wrote:
+>>
+>> Hi All,
+>>     I am building ceph from sourcecode availavle from site. I executeed
+>> all steps for building it , executed "mkcephfs" as well the only
+>> problem is as shown below.
+>>
+>>
+>> ------------------------------------------------------------------------------------------------------------
+>> root@atish-virtual-machine:~/ceph# service ceph start
+>> === mon.alpha ===
+>> Starting Ceph mon.alpha on atish-virtual-machine...
+>> bash: /usr/bin/ceph-mon: Is a directory
+>> failed: ' /usr/bin/ceph-mon -i alpha --pid-file
+>> /var/run/ceph/mon.alpha.pid -c /etc/ceph/ceph.conf '
+>> -----------------------------------------------------------------------------------------------------------------------
