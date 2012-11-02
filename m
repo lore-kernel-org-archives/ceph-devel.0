@@ -1,31 +1,33 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Assertion failure in ceph_readlink()
-Date: Fri, 2 Nov 2012 07:54:08 -0700
-Message-ID: <CAPrxi58x2Vqz+kJYdHjU6n+=j+Z+pFU2SqGouvA8VozzN5dt5g@mail.gmail.com>
-References: <5092F9CB.7020501@cs.ucsc.edu>
-	<5093022E.3040604@inktank.com>
-	<CAPrxi595hE+TWXA=9FTg=3aKhEqR+-yuYQYcNFk=u4oi2mL5hA@mail.gmail.com>
-	<509321F6.9060200@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: RGW: Pools .rgw .rgw.control .users.uid .users.email .users
+Date: Fri, 2 Nov 2012 16:20:48 +0100
+Message-ID: <CAF6-1L48MVb724sP6=msrd2ry2T38Psu+d+FnuqnTW0cFekSgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:62385 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751187Ab2KBOyK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 10:54:10 -0400
-Received: by mail-vc0-f174.google.com with SMTP id fk26so3813027vcb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Nov 2012 07:54:08 -0700 (PDT)
-In-Reply-To: <509321F6.9060200@inktank.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:54324 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753591Ab2KBPUt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 11:20:49 -0400
+Received: by mail-ob0-f174.google.com with SMTP id uo13so3703229obb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Nov 2012 08:20:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sam Lang <sam.lang@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Nov 1, 2012 at 6:29 PM, Sam Lang <sam.lang@inktank.com> wrote:
-> On 11/01/2012 06:22 PM, Noah Watkins wrote:
->
-> I discovered a few more bugs in path_walk() for the symlink case while
-> debugging your problem.  I've pushed fixes and a test case to
-> wip-fix-symlinks.
+Hi,
 
-Thanks! These are not giving me any problems.
+I've just started RGW and it created some pools automatically :
+.rgw .rgw.control .users.uid .users.email .users
+
+But when looking at them, they used PG_NUM=8 which is a bit low.
+Now, I noticed it and created .rgw.buckets myself with an appropriate
+PG_NUM, I assume it will work or is there some special setup done by
+rgw beside just creating the pool ?
+
+Also, I assume those pools will actually be pretty small and so I can
+just leave them with PG_NUM=8 without much issue ?
+
+Cheers,
+
+    Sylvain
