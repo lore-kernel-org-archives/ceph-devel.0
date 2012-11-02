@@ -1,120 +1,54 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
- flexible
-Date: Fri, 2 Nov 2012 04:13:39 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1211020405010.19983@cobra.newdream.net>
-References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net> <502530C9.7030008@bisect.de> <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net> <alpine.DEB.2.00.1208161448060.26904@cobra.newdream.net>
- <CADvuQRGBEva_8OB--M2JxMBoCXQ3i5GJkaJ-QvP-SoVqv7xDzw@mail.gmail.com> <alpine.DEB.2.00.1208161635290.26904@cobra.newdream.net> <5093993C.6000902@bisect.de>
+Subject: Re: limit of maximum number of rbd devices that can be mapped
+Date: Fri, 2 Nov 2012 04:22:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1211020416410.19983@cobra.newdream.net>
+References: <CAP5wSLc0fGo03Sh0mric3pb_yNkOY=0bEkMHR0Nmq2u8F0nJAw@mail.gmail.com> <507F66F1.4000509@inktank.com> <5093A78D.4060409@bisect.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50010 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50073 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762691Ab2KBLNk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 07:13:40 -0400
-In-Reply-To: <5093993C.6000902@bisect.de>
+	with ESMTP id S1751515Ab2KBLWP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 07:22:15 -0400
+In-Reply-To: <5093A78D.4060409@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Danny Al-Gaaf <danny@bisect.de>
-Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@inktank.com>, Christian Huang <ythuang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 On Fri, 2 Nov 2012, Danny Al-Gaaf wrote:
-> Hi Sage,
+> Am 18.10.2012 04:18, schrieb Alex Elder:
+> > On 10/17/2012 09:15 PM, Christian Huang wrote:
+> >> Hi,
+> >>     what is the maximum number of rbd devices that can be mapped on a
+> >> single host?
+> >>     we recently did a test to mount a large number of rbd devices and
+> >> hit a wall around 230
+> >>     with the following message
+> > 
+> > That sounds about right.  We were just discussing this earlier
+> > this week.  It's limited at the moment by the number of major
+> > device numbers available on the system, and I think you found
+> > that limit.  We would obviously like to have a solution for
+> > this but we've only just started considering options.
 > 
-> sorry for the late reply, was absent some weeks and busy with other issues.
+> Any news on this? We have seen the same issues here.
 > 
-> Am 17.08.2012 01:40, schrieb Sage Weil:
-> > On Thu, 16 Aug 2012, Tommi Virtanen wrote:
-> >> On Thu, Aug 16, 2012 at 3:32 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> As for the new options, I suggest:
-> >>>
-> >>>  * osd fs type
-> >>>  * osd fs devs   (will work for mkcephfs, not for new stuff)
-> >>>  * osd fs path
-> >>>  * osd fs options
-> >>
-> >> What does osd_fs_path mean, and how is it different from the osd_data dir?
-> > 
-> > The idea was that you might wand the fs mounted somewhere other that 
-> > osd_data.  I'm not sure it's useful; we may as well drop that...
-> > 
-> >> I'm expecting to need both mkfs-time options (btrfs metadata block
-> >> size etc) and mount-time options (noatime etc).
-> >>
-> >> It would be nice if there was a way to set the options for all
-> >> fstypes, and then just toggle which one is used (by default). That
-> >> avoids bugs like trying to mkfs/mount btrfs with xfs-specific options,
-> >> and vice versa.
-> >>
-> >> I'm not sure how well our config system will handle dynamic variable
-> >> names -- ceph-authtool was fine with me just putting data in
-> >> osd_crush_location, and we don't need to access these variables from
-> >> C++, so it should be fine. If you really wanted to, you could probably
-> >> cram the them into a single variable, with ad hoc structured data in
-> >> the string value, but that's ugly.. Or just hardcode the list of
-> >> possible filesystems, and then it's not dynamic variable names
-> >> anymore.
-> > 
-> > Yeah, ceph-conf will happily take anything.  The C++ code has to do 
-> > slightly more work to get arbitrary config fields, but that's not an 
-> > issue.
-> > 
-> >> So I'm dreaming of something like:
-> >>
-> >> [osd]
-> >> # what mount options will be passed when an osd data disk is using
-> >> # one of these filesystems; these are passed to mount -o
-> >> osd mount options btrfs = herp,foo=bar
-> >> osd mount options xfs = noatime,derp
-> >>
-> >> # what mkfs options are used when creating new osd data disk
-> >> # filesystems
-> >> osd mkfs options btrfs = --hur
-> >> osd mkfs options xfs = --dur
-> >>
-> >> # what fstype to use by default when mkfs'ing; mounting will detect
-> >> # what's there (with blkid) and work with anything
-> >> osd mkfs type = btrfs
+> IMO the RBD code should to something similar to some other block drivers:
 > 
-> I will prepare a patch with these for the current mkcephfs and init-ceph
-> incl. aliases for the old keys and cmdline options where possible.
+> 1) reserve a major block number for RBD in general (or use the number
+> returned from the register_blkdev call, if there is no number we can
+> reserve in general for RBD, see [1])
+> 
+> 2) Use this major number for all RBDs on this machine and handle each
+> new RBD via different minor numbers.
+> 
+> If we can agree on this I would take a look into it and send a patch.
 
-We ended up using slightly different option names for ceph-disk-prpare.  
-Let's make them match!  They are:
+We should probably do what SCSI does, where the minor for each device 
+jumps by 16 to leave room for partitions.
 
- osd fs type = <fstype>
- osd fs mkfs arguments <fstype> = ...
- osd fs mount options <fstype> = ...
-
-fstype would be ext4, xfs, btrfs.
-
-Sorry, I lost track of this thread as well... :)
+There was a thread on this a couple of weeks ago that mmy slow internet is 
+preventing me from finding... :)
 
 sage
-
-
-> 
-> >> # this may go away with "mkcephfs 2.0", and it will have to get more
-> >> # complex if we provide something for journals too, etc, because you
-> >> # may want to pair specific data disks to specific journals (DH has
-> >> # this need).. haven't had time to think it through, which is why i'm
-> >> # leaning toward "and here's a hook where you run something on the
-> >> # host that calls ceph-disk-prepare etc on all the disks you want",
-> >> # and using uuids to match journals to data disks -- this work has
-> >> # not yet started)
-> >> osd fs devs = /dev/sdb /dev/sdc
-> > 
-> > This all looks good to me.  What do you think, Danny?
-> 
-> This part (osd fs devs) is for a new mkcepfs.2.0 if I understand you
-> correctly. Sounds okay for me atm. (Tommi: Are there any new information
-> on this? Did you already start to work on this?)
-> 
-> Danny
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
