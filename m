@@ -1,106 +1,123 @@
-From: John Axel Eriksson <john@insane.se>
-Subject: Re: RGW in Bobtail
-Date: Fri, 2 Nov 2012 10:08:39 +0100
-Message-ID: <CAMmJxtJ3+C_i389NhnJ-mvUFrvQAr0ZPd2PnnsC7XyQLpy5a2A@mail.gmail.com>
-References: <CAC-hyiG5hCVBx-_-S7ViK4FrKro+rJ+-mtKS=p0Kw_k0RvJHnw@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: RBD trim / unmap support?
+Date: Fri, 02 Nov 2012 10:08:48 +0100
+Message-ID: <50938DA0.6090205@profihost.ag>
+References: <509306CC.5080307@profihost.ag> <5093078C.4020404@inktank.com> <50938233.9090902@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:36463 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753802Ab2KBJIk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 05:08:40 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so3579532vbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Nov 2012 02:08:40 -0700 (PDT)
-In-Reply-To: <CAC-hyiG5hCVBx-_-S7ViK4FrKro+rJ+-mtKS=p0Kw_k0RvJHnw@mail.gmail.com>
+Received: from mail.profihost.ag ([85.158.179.208]:51422 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753802Ab2KBJI6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 05:08:58 -0400
+In-Reply-To: <50938233.9090902@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Oct 30, 2012 at 6:36 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> We've been quite busy in the last few months, and the next ceph long
-> term is right around the corner so here's a list of some of the new
-> features rgw is getting:
->
->  - Garbage collection
->
-> This removes the requirement of running a periodic cleanup process to
-> purge stale data, as rgw now handles it by itself. It also takes care
-> of a possible race that was possible with the old method (if not used
-> correctly) where still-in-use objects could be removed.
+Hi Jost,
 
-Sounds great - I was bitten by this once.
+i tried scsi-hd with discard_granularity=512 the UNMAP / Trim itself 
+works fine the space is freed at ceph but at the VM i'm getting:
+[   75.076895] sd 2:0:0:4: [sdc]
+[   75.078353] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.079377] sd 2:0:0:4: [sdc]
+[   75.080410] Sense Key : Aborted Command [current]
+[   75.081446] sd 2:0:0:4: [sdc]
+[   75.082459] Add. Sense: I/O process terminated
+[   75.083466] sd 2:0:0:4: [sdc] CDB:
+[   75.084473] Write same(16): 93 08 00 00 00 00 00 00 00 00 00 7f ff ff 
+00 00
+[   75.085535] end_request: I/O error, dev sdc, sector 0
+[   75.086567] sd 2:0:0:4: [sdc]
+[   75.087569] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.088605] sd 2:0:0:4: [sdc]
+[   75.089610] Sense Key : Aborted Command [current]
+[   75.090630] sd 2:0:0:4: [sdc]
+[   75.091631] Add. Sense: I/O process terminated
+[   75.092621] sd 2:0:0:4: [sdc] CDB:
+[   75.093579] Write same(16): 93 08 00 00 00 00 00 7f ff ff 00 7f ff ff 
+00 00
+[   75.094581] end_request: I/O error, dev sdc, sector 8388607
+[   75.095558] sd 2:0:0:4: [sdc]
+[   75.096561] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.097553] sd 2:0:0:4: [sdc]
+[   75.098520] Sense Key : Aborted Command [current]
+[   75.099484] sd 2:0:0:4: [sdc]
+[   75.100471] Add. Sense: I/O process terminated
+[   75.101439] sd 2:0:0:4: [sdc] CDB:
+[   75.102432] Write same(16): 93 08 00 00 00 00 00 ff ff fe 00 7f ff ff 
+00 00
+[   75.103464] end_request: I/O error, dev sdc, sector 16777214
+[   75.104503] sd 2:0:0:4: [sdc]
+[   75.105507] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.106514] sd 2:0:0:4: [sdc]
+[   75.107525] Sense Key : Aborted Command [current]
+[   75.108545] sd 2:0:0:4: [sdc]
+[   75.109525] Add. Sense: I/O process terminated
+[   75.110487] sd 2:0:0:4: [sdc] CDB:
+[   75.111418] Write same(16): 93 08 00 00 00 00 01 7f ff fd 00 7f ff ff 
+00 00
+[   75.112419] end_request: I/O error, dev sdc, sector 25165821
+[   75.238627] sd 2:0:0:4: [sdc]
+[   75.239946] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.241197] sd 2:0:0:4: [sdc]
+[   75.242097] Sense Key : Aborted Command [current]
+[   75.242627] sd 2:0:0:4: [sdc]
+[   75.242627] Add. Sense: I/O process terminated
+[   75.242627] sd 2:0:0:4: [sdc] CDB:
+[   75.242627] Write same(16): 93 08 00 00 00 00 01 ff ff fc 00 7f ff ff 
+00 00
+[   75.242627] end_request: I/O error, dev sdc, sector 33554428
+[   75.447311] sd 2:0:0:4: [sdc]
+[   75.448505] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.449392] sd 2:0:0:4: [sdc]
+[   75.450262] Sense Key : Aborted Command [current]
+[   75.451134] sd 2:0:0:4: [sdc]
+[   75.451312] Add. Sense: I/O process terminated
+[   75.451312] sd 2:0:0:4: [sdc] CDB:
+[   75.451312] Write same(16): 93 08 00 00 00 00 02 7f ff fb 00 7f ff ff 
+00 00
+[   75.451312] end_request: I/O error, dev sdc, sector 41943035
+[   75.476364] sd 2:0:0:4: [sdc]
+[   75.477252] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.478135] sd 2:0:0:4: [sdc]
+[   75.479004] Sense Key : Aborted Command [current]
+[   75.479891] sd 2:0:0:4: [sdc]
+[   75.480358] Add. Sense: I/O process terminated
+[   75.480358] sd 2:0:0:4: [sdc] CDB:
+[   75.480358] Write same(16): 93 08 00 00 00 00 02 ff ff fa 00 7f ff ff 
+00 00
+[   75.480358] end_request: I/O error, dev sdc, sector 50331642
+[   75.496374] sd 2:0:0:4: [sdc]
+[   75.497202] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+[   75.498077] sd 2:0:0:4: [sdc]
+[   75.498948] Sense Key : Aborted Command [current]
+[   75.499818] sd 2:0:0:4: [sdc]
+[   75.500374] Add. Sense: I/O process terminated
+[   75.500374] sd 2:0:0:4: [sdc] CDB:
+[   75.500374] Write same(16): 93 08 00 00 00 00 03 7f ff f9 00 7f ff ff 
+00 00
+[   75.500374] end_request: I/O error, dev sdc, sector 58720249
 
->
->  - New usage statistics
->
-> The new usage statistics are powerful, though lightweight. They reduce
-> the load on the cluster, and they provide indexed user usage
-> information. It is possible to request a specific user's activity
-> record within a specific timeframe. Note that the records granularity
-> are now 1 hour.
->
->  - RESTful API for usage
->
-> As a first go in doing a RESTful management API, we've created an API
-> to access and purge the users' usage data. As part of this work, we've
-> added the possibility to turn on and off specific APIs (s3, swift,
-> management).
->
->  - POST object
->
-> A long standing missing feature was the ability to upload an object
-> through http POST, which makes it possible to create web forms that
-> upload objects. It is compatible with the S3 POST object operation.
+Stefan
 
-This would be really useful to us.
-
+Am 02.11.2012 09:20, schrieb Stefan Priebe - Profihost AG:
+> Am 02.11.2012 00:36, schrieb Josh Durgin:
+>> On 11/01/2012 04:33 PM, Stefan Priebe wrote:
+>>> Hello list,
+>>>
+>>> does rbd support trim / unmap? Or is it planned to support it?
+>>>
+>>> Greets,
+>>> Stefan
+>>
+>> librbd (and thus qemu) support it. The rbd kernel module does not yet.
+>> See http://ceph.com/docs/master/rbd/qemu-rbd/#enabling-discard-trim
 >
->  - Vanity host names (through DNS CNAME)
+> Thanks! Is there any recommanded value for discard_granularity? With
+> fstrim and iscsi i use 128kb.
 >
-> With this feature, it is possible for the users to have their own
-> domain appear as serving objects. A user would set a DNS CNAME record
-> in their domain that would point at their bucket, and for any request
-> coming in to that host name, rgw will serve the correct bucket.
->
->  - Striping for all objects
->
-> In order to make sure the load is spread uniformly across the cluster,
-> all objects will be striped.
->
->  - Extend APIs
->
-> Swift manifest object, S3 multi objects delete, etc.
->
->  - Keystone
->
-> This is not completely implemented yet, but it is likely that it will
-> make it to Bobtail. We'll make it so that Swift authentication (and
-> user management) will be able to go through Keystone.
->
->
-> There was also a lot of internal cleanup that was done, as we prepared
-> for the future. Some notable features that we have been thinking of
-> and may make it for the nearer future post Bobtail:
->  - complete management API: everything that is controllable via
-> radosgw-admin will also be handled through a RESTful api
->  - support for multiple "domains": a domain is the collection of users
-> and their buckets (what is currently a single rgw instance)
->  - libradosgw: a library to control rgw objects and management
->  - multiple ceph clusters support
->  - object caching
->  - dedup
->  - alternative frontend (e.g., use embedded http server)
-
-This sounds awesome - we had trouble with the fact that it was fcgi.
-It works just fine for us at this point but an http
-frontend would be most welcome.
-
-
->
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Stefan
