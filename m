@@ -1,34 +1,22 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Reduce bandwidth for remapping/backfill/recover?
-Date: Sat, 3 Nov 2012 12:19:11 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1211031217500.25450@cobra.newdream.net>
-References: <EDED730E-CCE5-4A07-AF1E-2D90E0686218@filoo.de>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Handle bad file descriptors with EBADF
+Date: Sat, 3 Nov 2012 14:56:57 -0700
+Message-ID: <CAPrxi5-9xAaUnJp5dhyvGpZ4rZ0cM=F6TcvtdBNi53EhSzU_NA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35705 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752478Ab2KCTTM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 15:19:12 -0400
-In-Reply-To: <EDED730E-CCE5-4A07-AF1E-2D90E0686218@filoo.de>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:38480 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751135Ab2KCV46 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 17:56:58 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so4828430vbb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 03 Nov 2012 14:56:57 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Oliver,
+The libcephfs interface asserts valid file descriptors, so clients are
+forced to manage this or risk crashes. Pushed to wip-bad-fd is changes
+that handle this case by returning -EBADF. Review welcome :)
 
-On Sat, 3 Nov 2012, Oliver Francke wrote:
-> Hi *
-> 
-> anybody out there, who can help with an idea for reducing bandwidth when incorporating 2 new nodes into a cluster?
-> I know of "osd recovery max active = X" ( 5 default), but with 4 OSD's per node, there is enough possibility to saturate our backnet ( 1Gig at the moment).
-> Any other way to not disturb users too much?
-
-This is something the current development releases do on their own.  This 
-week we'll also be merging code that (in general) balances recovery work 
-with client work, which should improve things significantly.  Stay tuned!
-
-Until then, 'osd recovery max active' is the knob of choice.
-
-sage
+- Noah
