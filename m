@@ -1,38 +1,31 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: python-ceph
-Date: Sat, 3 Nov 2012 11:59:09 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1211031158120.25450@cobra.newdream.net>
-References: <CACkq2momtqxBZ+XCz_j_kiJsbn_8epU=vovn8-RfAob-d5d-wA@mail.gmail.com>
+Subject: Re: include/ and -I
+Date: Sat, 3 Nov 2012 12:01:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1211031200530.25450@cobra.newdream.net>
+References: <509437D1.9080105@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35537 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35566 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753724Ab2KCS7K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 14:59:10 -0400
-In-Reply-To: <CACkq2momtqxBZ+XCz_j_kiJsbn_8epU=vovn8-RfAob-d5d-wA@mail.gmail.com>
+	with ESMTP id S1750973Ab2KCTB2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 15:01:28 -0400
+In-Reply-To: <509437D1.9080105@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
+To: Dan Mick <dan.mick@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 2 Nov 2012, Travis Rhoden wrote:
-> Hi folks,
+On Fri, 2 Nov 2012, Dan Mick wrote:
+> I was somewhat surprised to note that we don't build with -I include, so that
+> files that userland programs would find with relative-to-/usr/include paths
+> have to be modified for building in the tree.
 > 
-> Are there any plans to release python-ceph to pypi?  It would be nice
-> to see it packaged up in distutils/egg format and added to pypi, that
-> way other python packages can list it as a dependency.
+> Was this conscious, or does anyone else think it would be smoother to
+> -I include/ so that outside-the-tree and inside-the-tree #includes are more
+> similar?
 
-This is definitely something we want to work.
+This was not deliberate.  However, we should be careful that our include/ 
+files don't mask ones in /usr/include (e.g., types.h).
 
-> I know there is currently a python-ceph package in Debian, but that
-> doesn't allow me to list it as a dependency in a setup.py file and
-> have it installed in a virtualenv, for example.  Right now I have to
-> copy rbd.py into my virtualenv.
-> 
-> Curious to know if this is something you would consider.  Perhaps it
-> is something I could help with.
-
-That would be great!
-
-sage
+sage> 
