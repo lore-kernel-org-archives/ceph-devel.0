@@ -1,39 +1,114 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: Hold caps_list_lock when adjusting caps_{use,total}_count
-Date: Sat,  3 Nov 2012 10:32:37 +0800
-Message-ID: <1351909957-15243-1-git-send-email-zheng.z.yan@intel.com>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: Unable to Start Ceph service
+Date: Sat, 3 Nov 2012 09:45:19 +0530
+Message-ID: <CAGfy=6=pW1VuhTvM0p70aXjN-m0Lu3JsDPRFTb1n7bfYxSwHKQ@mail.gmail.com>
+References: <CAGfy=6m7yJwVzVuFCZrHqe8tvcnYvkU7w7rieZuo4s7duQV5gw@mail.gmail.com>
+	<5091A7BE.2050106@inktank.com>
+	<CAGfy=6ni5fybh_zXK1L4HFBeNiYrr-sir_NVJuUk9SgURt=YBw@mail.gmail.com>
+	<CAGfy=6n7vM6KTdJQNjtqV0QUyiWrKf5Mai6HC_4-4vWfYEiVpQ@mail.gmail.com>
+	<CAMzNCsB848NEhQEmcOb9Vob29MUkxdupcGGo8sYA58jZbWuPZw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:45937 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752156Ab2KCCcl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 2 Nov 2012 22:32:41 -0400
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:46744 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750902Ab2KCEPV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 00:15:21 -0400
+Received: by mail-vb0-f46.google.com with SMTP id ff1so4433761vbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Nov 2012 21:15:19 -0700 (PDT)
+In-Reply-To: <CAMzNCsB848NEhQEmcOb9Vob29MUkxdupcGGo8sYA58jZbWuPZw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Tyler Brekke <tyler.brekke@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+The G++ internal compilation error was observed due to insufficient
+RAM. So I increased it then everything is running fine.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/caps.c | 2 ++
- 1 file changed, 2 insertions(+)
+One more doubt regarding GIt Cloned Dir and Tarball setup.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index c633d1d..8072aef 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -236,8 +236,10 @@ static struct ceph_cap *get_cap(struct ceph_mds_client *mdsc,
- 	if (!ctx) {
- 		cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
- 		if (cap) {
-+			spin_lock(&mdsc->caps_list_lock);
- 			mdsc->caps_use_count++;
- 			mdsc->caps_total_count++;
-+			spin_unlock(&mdsc->caps_list_lock);
- 		}
- 		return cap;
- 	}
--- 
-1.7.11.7
+While building ceph from source code (tarball file) . I extract them
+into some folder and perform
+"./autogen.sh
+./configure
+make
+sudo make install " .
+ What more should I do in order to have ceph service running on that machine?
+ Does It necessary to clone the git dir & then build .deb packages ,
+even after I installed ceph from tarball ?
 
+
+-
+Hemant Surale.
+
+
+On Sat, Nov 3, 2012 at 12:10 AM, Tyler Brekke <tyler.brekke@inktank.com> wrote:
+> Can you check dmesg? It looks like you ran out of memory on your VM
+> while building.
+>
+> On Thu, Nov 1, 2012 at 11:59 PM, hemant surale <hemant.surale@gmail.com> wrote:
+>> ---------- Forwarded message ----------
+>> From: hemant surale <hemant.surale@gmail.com>
+>> Date: Fri, Nov 2, 2012 at 12:10 PM
+>> Subject: Re: Unable to Start Ceph service
+>> To: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org"
+>> <ceph-devel@vger.kernel.org>
+>>
+>>
+>>
+>>  Initially I installed ceph directly by following 5minute guide from
+>> official site , So before building ceph from source code I installed
+>> ceph as well as removed it using "sudo apt-get remove ceph" ,But It
+>> seems that some directories left undeleted.
+>>
+>> Now I tried to Build ceph again on fresh VM and again I have some
+>> issues to resolve .
+>>
+>> As proceeding to building step when I came across "make" cmd following
+>> error is observed
+>> ---------------------------------------------------------//Error---------------------------------------------------------------------
+>>   CXX    MDS.o
+>> g++: internal compiler error: Killed (program cc1plus)
+>> Please submit a full bug report,
+>> with preprocessed source if appropriate.
+>> See <file:///usr/share/doc/gcc-4.6/README.Bugs> for instructions.
+>> make[3]: *** [MDS.o] Error 4
+>> make[3]: Leaving directory `/home/hemant/ceph/ceph/src'
+>> make[2]: *** [all-recursive] Error 1
+>> make[2]: Leaving directory `/home/hemant/ceph/ceph/src'
+>> make[1]: *** [all] Error 2
+>> make[1]: Leaving directory `/home/hemant/ceph/ceph/src'
+>> make: *** [all-recursive] Error 1
+>> ---------------------------_---------------------------_---------------------------_---------------------------
+>>
+>>
+>> - Hemant Surale
+>>
+>>
+>> On Thu, Nov 1, 2012 at 4:05 AM, Dan Mick <dan.mick@inktank.com> wrote:
+>>>
+>>> I've had a long private thread with Hemant, and I believe he's past this problem (in case anyone scans archives looking for open questions).
+>>> Hemant, it would be best to keep the thread on ceph-devel; you get more people looking and answering.
+>>>
+>>> It's a mystery, still, how /usr/bin/ceph-osd ended up being a directory.
+>>>
+>>>
+>>> On 10/30/2012 05:59 AM, hemant surale wrote:
+>>>>
+>>>> Hi All,
+>>>>     I am building ceph from sourcecode availavle from site. I executeed
+>>>> all steps for building it , executed "mkcephfs" as well the only
+>>>> problem is as shown below.
+>>>>
+>>>>
+>>>> ------------------------------------------------------------------------------------------------------------
+>>>> root@atish-virtual-machine:~/ceph# service ceph start
+>>>> === mon.alpha ===
+>>>> Starting Ceph mon.alpha on atish-virtual-machine...
+>>>> bash: /usr/bin/ceph-mon: Is a directory
+>>>> failed: ' /usr/bin/ceph-mon -i alpha --pid-file
+>>>> /var/run/ceph/mon.alpha.pid -c /etc/ceph/ceph.conf '
+>>>> -----------------------------------------------------------------------------------------------------------------------
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
