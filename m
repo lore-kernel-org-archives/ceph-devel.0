@@ -1,33 +1,39 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Need CRYPTO_CXXFLAGS with latest master?
-Date: Fri, 2 Nov 2012 19:21:52 -0700
-Message-ID: <CAPrxi5_MTtcNnKd13YtzFCAgapi1s=f=wBA7u1G-_8a=Eii=rg@mail.gmail.com>
-References: <CAPrxi59wW8EgQerDbY4E=i7RYMQy-Tb24AaSeEXJZhVehX0=1w@mail.gmail.com>
-	<CAPrxi59u69dhunXv1PcwTeQJBvNKZ1X2JSYcsVr-sULFJ3ZzAA@mail.gmail.com>
-	<591CE14B-3A97-41C0-B04A-01EBE0CEE3D4@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: Hold caps_list_lock when adjusting caps_{use,total}_count
+Date: Sat,  3 Nov 2012 10:32:37 +0800
+Message-ID: <1351909957-15243-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:55116 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751856Ab2KCCVx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Nov 2012 22:21:53 -0400
-Received: by mail-vc0-f174.google.com with SMTP id fk26so4335736vcb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Nov 2012 19:21:53 -0700 (PDT)
-In-Reply-To: <591CE14B-3A97-41C0-B04A-01EBE0CEE3D4@inktank.com>
+Received: from mga03.intel.com ([143.182.124.21]:45937 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752156Ab2KCCcl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 2 Nov 2012 22:32:41 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gary Lowell <gary.lowell@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: sage@inktank.com, ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Fri, Nov 2, 2012 at 6:04 PM, Gary Lowell <gary.lowell@inktank.com> wrote:
-> Looks like the complaints come from a small number of newish programs that are compiled only when the --with-debug flag is given.  When building against cryptpp (--with-cryptpp) the pk11 headers are found implicitly and  when building agains libnss (--with-nss) they are not.
->
-> So we probably need the changes in your wip-make-crypto-flags branch.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Ahh that makes sense. Now I can reproduce it. The branch is up at
-wip-crypto-flags. Seems like we should have ./configure blow up too if
-it can't find this stuff?
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-- Noah
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index c633d1d..8072aef 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -236,8 +236,10 @@ static struct ceph_cap *get_cap(struct ceph_mds_client *mdsc,
+ 	if (!ctx) {
+ 		cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
+ 		if (cap) {
++			spin_lock(&mdsc->caps_list_lock);
+ 			mdsc->caps_use_count++;
+ 			mdsc->caps_total_count++;
++			spin_unlock(&mdsc->caps_list_lock);
+ 		}
+ 		return cap;
+ 	}
+-- 
+1.7.11.7
+
