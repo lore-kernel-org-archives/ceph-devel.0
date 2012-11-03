@@ -1,43 +1,54 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: BUG: problem when removing / creating rbd image (format v2)
-Date: Sat, 03 Nov 2012 17:32:19 +0100
-Message-ID: <50954713.4060100@profihost.ag>
-References: <5094F19E.7010401@profihost.ag> <fdab665c0c79278012d1e8642a584a86@hq.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph-fuse on os x
+Date: Sat, 3 Nov 2012 17:34:36 +0100
+Message-ID: <CAPYLRzjxq3-NPXsHy=dSAp=VP2MXAcDMVg+pjaK7oARO6p-zgQ@mail.gmail.com>
+References: <sfid-H20121030-161342-+023.00-1@marduk.tchpc.tcd.ie>
+	<alpine.DEB.2.00.1210300912250.13553@cobra.newdream.net>
+	<69920515-C310-44EB-8891-5AE452D2FA83@tchpc.tcd.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:60401 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756721Ab2KCQcP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 12:32:15 -0400
-In-Reply-To: <fdab665c0c79278012d1e8642a584a86@hq.newdream.net>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:39310 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757182Ab2KCQeh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Nov 2012 12:34:37 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so6322989iea.19
+        for <ceph-devel@vger.kernel.org>; Sat, 03 Nov 2012 09:34:37 -0700 (PDT)
+In-Reply-To: <69920515-C310-44EB-8891-5AE452D2FA83@tchpc.tcd.ie>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org, alexandre DERUMIER <aderumier@odiso.com>
+To: Jimmy Tang <jtang@tchpc.tcd.ie>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 03.11.2012 17:18, schrieb Josh Durgin:
-> On 2012-11-03 03:27, Stefan Priebe wrote:
->> Hello list,
->>
->> [systemI: ~]# rbd -p kvmstor rm vm-113-disk-1
->> 2012-11-03 11:25:43.520833 7fb191d71760 -1 librbd::ImageCtx: error
->> finding header: (2) No such file or directory
->> Removing image: 0% complete...failed.
->> rbd: delete error: (2) No such file or directory
->> 2012-11-03 11:25:43.531708 7fb191d71760 -1 librbd: error removing img
->> from new-style directory: (2) No such file or directory
->>
->> [systemI: ~]# rbd create -p kvmstor --format 2 --size 32000
->> --stripe-count 4 --stripe-unit 1048576 -s 4194304 kvm-113-disk-1
->> rbd: create error: (17) File exists
->> 2012-11-03 11:25:41.017364 7fae8b832760 -1 librbd: rbd image
->> kvm-113-disk-1 already exists
+On Fri, Nov 2, 2012 at 5:35 PM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
 >
->    ^ this k wasn't in your other commands. Is this a copy-paste error
-> or a typo?
+> On 30 Oct 2012, at 16:13, Sage Weil wrote:
+>
+>> It is probably a relatively straighforward porting job (fixing up
+>> #includes, etc.) to get ceph-fuse working under OS X with macfuse or
+>> osxfuse or whatever the latest and greatest is.
+>>
+>> Any Mac users out there interested?
+>>
+>
+> I would be interested both the client and server side being ported, I=
+ started looking at the dependancies needed but I can't dedicate much t=
+ime to it myself. Just from a workflow point of view for some use cases=
+ having a native OSX client or a fuse client on OSX would be nice.
 
-*ARGH* Sorry it was a typo and i didn't recognized it.
-
-Stefan
+The server side isn't very likely (or at least is unlikely to be
+useful) =97 I haven't looked into it myself but from what I hear HFS+
+just ignores stuff like fsync().
+All that said, I'd love it if the entire system would build on OS X;
+I'd like to experiment with developing in XCode. I spent a little time
+on it at one point but it was a pretty big mess trying to get all the
+dependencies over. Now that I think about it, just trying to get
+ceph-fuse building would probably be a better way to start since it
+won't have so many of the package dependencies.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
