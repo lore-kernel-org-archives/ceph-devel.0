@@ -1,361 +1,380 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor performance
-Date: Sun, 04 Nov 2012 07:52:12 -0600
-Message-ID: <5096730C.5050507@inktank.com>
-References: <CAFjNkqRPC7MDm86LBYCD+reXePNjWzZBPz7yPn9pv553TYHPjA@mail.gmail.com> <CAPYLRzipAsNdEO6BKrSofPjmWp9F0dL_iH18VaC054TeA=9EBg@mail.gmail.com> <CAFjNkqRNv73+n4hUedBjmEmX4OvXHxhbvm51xDx8qJauoQPQ=w@mail.gmail.com> <CAPYLRzihkyz+nURHNjKnVBfq10bghWQUpKVVq6cih8ZAqxKi2g@mail.gmail.com> <CAFjNkqSjaNUyRdPJhgTKxtTF3UPNRtBVmLPKd+Odu0_zQLOaiA@mail.gmail.com> <CAPYLRziTowYWiromOKMc9z0vzv7sf_W3QrHfL3UMV5rzrCYy9g@mail.gmail.com> <CAFjNkqSAAVo0LCjtdg=OenQND-V+R0v--_ys6bp7RjMCKFK8vQ@mail.gmail.com> <CAFjNkqR+cttZRhc5zmff5p+=42hMzMOvp_YXxBtUkWs-hdG32g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH V2 2/2] ceph: Fix i_size update race
+Date: Sun, 4 Nov 2012 06:01:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211040554140.30792@cobra.newdream.net>
+References: <1351905581-14374-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1211040122420.26143@cobra.newdream.net> <CAAM7YAnutVLrmxhPhRrywSUjooCu6sE8_MDv=BUbirFBQH3eKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:57280 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753779Ab2KDNwO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Nov 2012 08:52:14 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so6852192iea.19
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Nov 2012 05:52:13 -0800 (PST)
-In-Reply-To: <CAFjNkqR+cttZRhc5zmff5p+=42hMzMOvp_YXxBtUkWs-hdG32g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:42658 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752376Ab2KDOBW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Nov 2012 09:01:22 -0500
+In-Reply-To: <CAAM7YAnutVLrmxhPhRrywSUjooCu6sE8_MDv=BUbirFBQH3eKQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Aleksey Samarin <nrg3tik@gmail.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mike Ryan <mike.ryan@inktank.com>
+To: "Yan, Zheng" <zheng.z.yan@linux.intel.com>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
 
-On 11/04/2012 07:18 AM, Aleksey Samarin wrote:
-> Well, i create ceph cluster with 2 osd ( 1 osd per node),  2 mon, 2 m=
-ds.
-> here is what I did:
->   ceph osd pool create bench
->   ceph osd tell \* bench
->   rados -p bench bench 30 write --no-cleanup
-> output:
->
->   Maintaining 16 concurrent writes of 4194304 bytes for at least 30 s=
-econds.
->   Object prefix: benchmark_data_host01_11635
->     sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   a=
-vg lat
->       0       0         0         0         0         0         -    =
-     0
->       1      16        16         0         0         0         -    =
-     0
->       2      16        37        21   41.9911        42  0.139005   1=
-=2E08941
->       3      16        53        37   49.3243        64  0.754114   1=
-=2E09392
->       4      16        75        59   58.9893        88  0.284647  0.=
-914221
->       5      16        89        73   58.3896        56  0.072228  0.=
-881008
->       6      16        95        79   52.6575        24   1.56959  0.=
-961477
->       7      16       111        95   54.2764        64  0.046105   1=
-=2E08791
->       8      16       128       112   55.9906        68  0.035714   1=
-=2E04594
->       9      16       150       134   59.5457        88  0.046298   1=
-=2E04415
->      10      16       166       150   59.9901        64  0.048635  0.=
-986384
->      11      16       176       160   58.1723        40  0.727784  0.=
-988408
->      12      16       206       190   63.3231       120   0.28869  0.=
-946624
->      13      16       225       209   64.2976        76   1.34472  0.=
-919464
->      14      16       263       247   70.5605       152  0.070926   0=
-=2E90046
->      15      16       295       279   74.3887       128  0.041517  0.=
-830466
->      16      16       315       299   74.7388        80  0.296037  0.=
-841527
->      17      16       333       317   74.5772        72  0.286097  0.=
-849558
->      18      16       340       324   71.9891        28  0.295084   0=
-=2E83922
->      19      16       343       327   68.8317        12   1.46948  0.=
-845797
-> 2012-11-04 17:14:52.090941min lat: 0.035714 max lat: 2.64841 avg lat:=
- 0.861539
->     sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   a=
-vg lat
->      20      16       378       362    72.389       140  0.566232  0.=
-861539
->      21      16       400       384   73.1313        88  0.038835  0.=
-857785
->      22      16       404       388   70.5344        16  0.801216  0.=
-857002
->      23      16       413       397   69.0327        36  0.062256   0=
-=2E86376
->      24      16       428       412   68.6543        60  0.042583   0=
-=2E89389
->      25      16       450       434   69.4277        88  0.383877  0.=
-905833
->      26      16       472       456   70.1415        88  0.269878  0.=
-898023
->      27      16       472       456   67.5437         0         -  0.=
-898023
->      28      16       512       496   70.8448        80  0.056798  0.=
-891163
->      29      16       530       514   70.8843        72   1.20653  0.=
-898112
->      30      16       542       526   70.1212        48  0.744383  0.=
-890733
->   Total time run:         30.174151
-> Total writes made:      543
-> Write size:             4194304
-> Bandwidth (MB/sec):     71.982
->
-> Stddev Bandwidth:       38.318
-> Max bandwidth (MB/sec): 152
-> Min bandwidth (MB/sec): 0
-> Average Latency:        0.889026
-> Stddev Latency:         0.677425
-> Max latency:            2.94467
-> Min latency:            0.035714
->
+On Sun, 4 Nov 2012, Yan, Zheng wrote:
+> On Sun, Nov 4, 2012 at 7:29 PM, Sage Weil <sage@inktank.com> wrote:
+> > Hi Yan,
+> >
+> > On Sat, 3 Nov 2012, Yan, Zheng wrote:
+> >
+> >> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> >>
+> >> ceph_aio_write() has an optimization that marks cap EPH_CAP_FILE_WR
+> >> dirty before data is copied to page cache and inode size is updated.
+> >> If sceph_check_caps() flushes the dirty cap before the inode size is
+> >> updated, MDS can miss the new inode size. The fix is move
+> >> ceph_{get,put}_cap_refs() into ceph_write_{begin,end}() and call
+> >> __ceph_mark_dirty_caps() after inode size is updated.
+> >>
+> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> >
+> > Hmm, I'm a little worried at the get/put caps sequence inside of
+> > write_begin/end since that happens on every page... do you think it's
+> > something to worry about?
+> >
+> > The Fw revocation kludge was something we hit in practice.  It looks like
+> > balance_dirty_pages*() happens outside of the write_begin/_end calls in
+> > generic_perform_write(), so that's a win.
+> >
+> > Comments below:
+> >
+> >> ---
+> >> Changes since v1
+> >>  - Fix a cap leak when ceph_write_begin fail to get page
+> >>
+> >>  fs/ceph/addr.c | 51 +++++++++++++++++++++++++++++++++++++++----
+> >>  fs/ceph/file.c | 69 +++++++++++++++++++++++-----------------------------------
+> >>  2 files changed, 74 insertions(+), 46 deletions(-)
+> >>
+> >> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> >> index 22b6e45..21a0718 100644
+> >> --- a/fs/ceph/addr.c
+> >> +++ b/fs/ceph/addr.c
+> >> @@ -1078,23 +1078,51 @@ static int ceph_write_begin(struct file *file, struct address_space *mapping,
+> >>                           struct page **pagep, void **fsdata)
+> >>  {
+> >>       struct inode *inode = file->f_dentry->d_inode;
+> >> +     struct ceph_inode_info *ci = ceph_inode(inode);
+> >> +     struct ceph_file_info *fi = file->private_data;
+> >>       struct page *page;
+> >>       pgoff_t index = pos >> PAGE_CACHE_SHIFT;
+> >> -     int r;
+> >> +     int r, want, got = 0;
+> >> +
+> >> +     if (fi->fmode & CEPH_FILE_MODE_LAZY)
+> >> +             want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
+> >> +     else
+> >> +             want = CEPH_CAP_FILE_BUFFER;
+> >> +
+> >> +     dout("write_begin %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+> >> +          inode, ceph_vinop(inode), pos, len, inode->i_size);
+> >> +     r = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, pos+len);
+> >> +     if (r < 0)
+> >> +             return r;
+> >> +     dout("write_begin %p %llx.%llx %llu~%u  got cap refs on %s\n",
+> >> +          inode, ceph_vinop(inode), pos, len, ceph_cap_string(got));
+> >> +     if (!(got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO))) {
+> >> +             ceph_put_cap_refs(ci, got);
+> >> +             return -EAGAIN;
+> >> +     }
+> >>
+> >>       do {
+> >>               /* get a page */
+> >>               page = grab_cache_page_write_begin(mapping, index, 0);
+> >> -             if (!page)
+> >> -                     return -ENOMEM;
+> >> -             *pagep = page;
+> >> +             if (!page) {
+> >> +                     r = -ENOMEM;
+> >> +                     break;
+> >> +             }
+> >>
+> >>               dout("write_begin file %p inode %p page %p %d~%d\n", file,
+> >>                    inode, page, (int)pos, (int)len);
+> >>
+> >>               r = ceph_update_writeable_page(file, pos, len, page);
+> >> +             if (r)
+> >> +                     page_cache_release(page);
+> >>       } while (r == -EAGAIN);
+> >>
+> >> +     if (r) {
+> >> +             ceph_put_cap_refs(ci, got);
+> >> +     } else {
+> >> +             *pagep = page;
+> >> +             *(int *)fsdata = got;
+> >> +     }
+> >>       return r;
+> >>  }
+> >>
+> >> @@ -1108,10 +1136,12 @@ static int ceph_write_end(struct file *file, struct address_space *mapping,
+> >>                         struct page *page, void *fsdata)
+> >>  {
+> >>       struct inode *inode = file->f_dentry->d_inode;
+> >> +     struct ceph_inode_info *ci = ceph_inode(inode);
+> >>       struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+> >>       struct ceph_mds_client *mdsc = fsc->mdsc;
+> >>       unsigned from = pos & (PAGE_CACHE_SIZE - 1);
+> >>       int check_cap = 0;
+> >> +     int got = (unsigned long)fsdata;
+> >>
+> >>       dout("write_end file %p inode %p page %p %d~%d (%d)\n", file,
+> >>            inode, page, (int)pos, (int)copied, (int)len);
+> >> @@ -1134,6 +1164,19 @@ static int ceph_write_end(struct file *file, struct address_space *mapping,
+> >>       up_read(&mdsc->snap_rwsem);
+> >>       page_cache_release(page);
+> >>
+> >> +     if (copied > 0) {
+> >> +             int dirty;
+> >> +             spin_lock(&ci->i_ceph_lock);
+> >> +             dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
+> >> +             spin_unlock(&ci->i_ceph_lock);
+> >> +             if (dirty)
+> >> +                     __mark_inode_dirty(inode, dirty);
+> >> +     }
+> >> +
+> >> +     dout("write_end %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+> >> +          inode, ceph_vinop(inode), pos, len, ceph_cap_string(got));
+> >> +     ceph_put_cap_refs(ci, got);
+> >> +
+> >>       if (check_cap)
+> >>               ceph_check_caps(ceph_inode(inode), CHECK_CAPS_AUTHONLY, NULL);
+> >>
+> >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> >> index 5840d2a..266f6e0 100644
+> >> --- a/fs/ceph/file.c
+> >> +++ b/fs/ceph/file.c
+> >> @@ -712,63 +712,49 @@ static ssize_t ceph_aio_write(struct kiocb *iocb, const struct iovec *iov,
+> >>       struct ceph_osd_client *osdc =
+> >>               &ceph_sb_to_client(inode->i_sb)->client->osdc;
+> >>       loff_t endoff = pos + iov->iov_len;
+> >> -     int want, got = 0;
+> >> -     int ret, err;
+> >> +     int got = 0;
+> >> +     int ret, err, written;
+> >>
+> >>       if (ceph_snap(inode) != CEPH_NOSNAP)
+> >>               return -EROFS;
+> >>
+> >>  retry_snap:
+> >> +     written = 0;
+> >>       if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL))
+> >>               return -ENOSPC;
+> >>       __ceph_do_pending_vmtruncate(inode);
+> >> -     dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+> >> -          inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >> -          inode->i_size);
+> >> -     if (fi->fmode & CEPH_FILE_MODE_LAZY)
+> >> -             want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
+> >> -     else
+> >> -             want = CEPH_CAP_FILE_BUFFER;
+> >> -     ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
+> >> -     if (ret < 0)
+> >> -             goto out_put;
+> >> -
+> >> -     dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+> >> -          inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >> -          ceph_cap_string(got));
+> >> -
+> >> -     if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+> >
+> > This check seems to have been dropped... I think we want
+> >
+> This was moved into write_begin
+> 
+> >> -         (iocb->ki_filp->f_flags & O_DIRECT) ||
+> >> -         (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
+> >> -         (fi->flags & CEPH_F_SYNC)) {
+> >> -             ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+> >> -                     &iocb->ki_pos);
+> >> -     } else {
+> >> -             /*
+> >> -              * buffered write; drop Fw early to avoid slow
+> >> -              * revocation if we get stuck on balance_dirty_pages
+> >> -              */
+> >> -             int dirty;
+> >> -
+> >> -             spin_lock(&ci->i_ceph_lock);
+> >> -             dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
+> >> -             spin_unlock(&ci->i_ceph_lock);
+> >> -             ceph_put_cap_refs(ci, got);
+> >>
+> >> +     if (!(iocb->ki_filp->f_flags & O_DIRECT) &&
+> >> +         !(inode->i_sb->s_flags & MS_SYNCHRONOUS) &&
+> >> +         !(fi->flags & CEPH_F_SYNC)) {
+> >>               ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
+> >> +             if (ret >= 0)
+> >> +                     written = ret;
+> >> +
+> >>               if ((ret >= 0 || ret == -EIOCBQUEUED) &&
+> >>                   ((file->f_flags & O_SYNC) || IS_SYNC(file->f_mapping->host)
+> >>                    || ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_NEARFULL))) {
+> >> -                     err = vfs_fsync_range(file, pos, pos + ret - 1, 1);
+> >> +                     err = vfs_fsync_range(file, pos, pos + written - 1, 1);
+> >>                       if (err < 0)
+> >>                               ret = err;
+> >>               }
+> >> -
+> >> -             if (dirty)
+> >> -                     __mark_inode_dirty(inode, dirty);
+> >> -             goto out;
+> >> +             if ((ret < 0 && ret != -EAGAIN) || pos + written >= endoff)
+> >> +                     goto out;
+> >
+> > This check makes me nervous.  The *only* time we want to jump to the sync
+> > path is when we get -EAGAIN, right?  I'd rather see that branch explicitly
+> > taken immediately after generic_file_aio_write().  I'm not sure when we'd
+> > do a short write in generic_file_aio_write(), but I'm pretty sure we don't
+> > want to fall back to a sync write in that case...
+> >
+> Short write happens when we fail to get 'Fb' cap for all pages. Why shouldn't
+> we fall back to sync write, I think some user programs assume short write
+> never happen unless ENOSPC. If generic_file_aio_write return and its return
+> value shows there was a short write, I think the dirty pages have already been
+> flushed to OSD because ceph_get_caps waits revoking 'Fb' cap to completed.
+> So I think fall back to sync write is safe.
 
-Much better for 1 disk per node!  I suspect that lack of syncfs is=20
-hurting you, or perhaps some other issue with writes to lots of disks a=
-t=20
-the same time.
+Oh right, I see.
 
+Thinking about it more, this whole thing makes me nervous.  If we go down 
+this road, at the very least we need to make sure we loop back to the 
+buffered path if the ceph_get_caps() in ceph_aio_write() races and gets 
+BUFFER|LAZYIO after all.
 
->
-> 2012/11/4 Aleksey Samarin <nrg3tik@gmail.com>:
->> Ok!
->> Well, I'll take these tests and write about the results.
->>
->> btw,
->> disks are the same, as some may be faster than others?
->>
->> 2012/11/4 Gregory Farnum <greg@inktank.com>:
->>> That's only nine =97 where are the other three? If you have three s=
-low
->>> disks that could definitely cause the troubles you're seeing.
->>>
->>> Also, what Mark said about sync versus syncfs.
->>>
->>> On Sun, Nov 4, 2012 at 1:26 PM, Aleksey Samarin <nrg3tik@gmail.com>=
- wrote:
->>>> It`s ok!
->>>>
->>>> Output:
->>>>
->>>> 2012-11-04 16:19:23.195891 osd.0 [INF] bench: wrote 1024 MB in blo=
-cks
->>>> of 4096 KB in 11.441035 sec at 91650 KB/sec
->>>> 2012-11-04 16:19:24.981631 osd.1 [INF] bench: wrote 1024 MB in blo=
-cks
->>>> of 4096 KB in 13.225048 sec at 79287 KB/sec
->>>> 2012-11-04 16:19:25.672896 osd.2 [INF] bench: wrote 1024 MB in blo=
-cks
->>>> of 4096 KB in 13.917157 sec at 75344 KB/sec
->>>> 2012-11-04 16:19:28.058517 osd.21 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 16.453375 sec at 63730 KB/sec
->>>> 2012-11-04 16:19:28.715552 osd.22 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 17.108887 sec at 61288 KB/sec
->>>> 2012-11-04 16:19:23.440054 osd.23 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 11.834639 sec at 88602 KB/sec
->>>> 2012-11-04 16:19:24.023650 osd.24 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 12.418276 sec at 84438 KB/sec
->>>> 2012-11-04 16:19:24.617514 osd.25 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 13.011955 sec at 80585 KB/sec
->>>> 2012-11-04 16:19:25.148613 osd.26 [INF] bench: wrote 1024 MB in bl=
-ocks
->>>> of 4096 KB in 13.541710 sec at 77433 KB/sec
->>>>
->>>> All the best.
->>>>
->>>> 2012/11/4 Gregory Farnum <greg@inktank.com>:
->>>>> [Sorry for the blank email; I missed!]
->>>>> On Sun, Nov 4, 2012 at 1:04 PM, Aleksey Samarin <nrg3tik@gmail.co=
-m> wrote:
->>>>>> Hi!
->>>>>> This command? ceph tell osd \* bench
->>>>>> Output:  tell target 'osd' not a valid entity name
->>>>>
->>>>> I guess it's "ceph osd tell \* bench". Try that one. :)
->>>>>
->>>>>> Well, i did pool by command ceph osd pool create bench2 120
->>>>>> This output of rados -p bench2 bench 30 write --no-cleanup
->>>>>>
->>>>>> rados -p bench2 bench 30 write --no-cleanup
->>>>>>
->>>>>>   Maintaining 16 concurrent writes of 4194304 bytes for at least=
- 30 seconds.
->>>>>>   Object prefix: benchmark_data_host01_5827
->>>>>>     sec Cur ops   started  finished  avg MB/s  cur MB/s  last la=
-t   avg lat
->>>>>>       0       0         0         0         0         0         =
--         0
->>>>>>       1      16        29        13   51.9885        52  0.48926=
-8  0.186749
->>>>>>       2      16        52        36   71.9866        92   1.8722=
-6  0.711888
->>>>>>       3      16        57        41    54.657        20  0.08969=
-7  0.697821
->>>>>>       4      16        60        44   43.9923        12   1.6186=
-8  0.765361
->>>>>>       5      16        60        44   35.1941         0         =
--  0.765361
->>>>>>       6      16        60        44   29.3285         0         =
--  0.765361
->>>>>>       7      16        60        44   25.1388         0         =
--  0.765361
->>>>>>       8      16        61        45   22.4964         1   5.8964=
-3  0.879384
->>>>>>       9      16        62        46   20.4412         4    6.023=
-4  0.991211
->>>>>>      10      16        62        46   18.3971         0         =
--  0.991211
->>>>>>      11      16        63        47   17.0883         2   8.7974=
-9    1.1573
->>>>>>      12      16        63        47   15.6643         0         =
--    1.1573
->>>>>>      13      16        63        47   14.4593         0         =
--    1.1573
->>>>>>      14      16        63        47   13.4266         0         =
--    1.1573
->>>>>>      15      16        63        47   12.5315         0         =
--    1.1573
->>>>>>      16      16        63        47   11.7483         0         =
--    1.1573
->>>>>>      17      16        63        47   11.0572         0         =
--    1.1573
->>>>>>      18      16        63        47   10.4429         0         =
--    1.1573
->>>>>>      19      16        63        47   9.89331         0         =
--    1.1573
->>>>>> 2012-11-04 15:58:15.473733min lat: 0.036475 max lat: 8.79749 avg=
- lat: 1.1573
->>>>>>     sec Cur ops   started  finished  avg MB/s  cur MB/s  last la=
-t   avg lat
->>>>>>      20      16        63        47   9.39865         0         =
--    1.1573
->>>>>>      21      16        63        47   8.95105         0         =
--    1.1573
->>>>>>      22      16        63        47   8.54419         0         =
--    1.1573
->>>>>>      23      16        63        47   8.17271         0         =
--    1.1573
->>>>>>      24      16        63        47   7.83218         0         =
--    1.1573
->>>>>>      25      16        63        47    7.5189         0         =
--    1.1573
->>>>>>      26      16        63        47   7.22972         0         =
--    1.1573
->>>>>>      27      16        81        65   9.62824       4.5  0.07645=
-6    4.9428
->>>>>>      28      16       118       102   14.5693       148  0.42727=
-3   4.34095
->>>>>>      29      16       119       103   14.2049         4   1.5789=
-7   4.31414
->>>>>>      30      16       132       116   15.4645        52   2.2542=
-4   4.01492
->>>>>>      31      16       133       117   15.0946         4  0.97465=
-2   3.98893
->>>>>>      32      16       133       117   14.6229         0         =
--   3.98893
->>>>>>   Total time run:         32.575351
->>>>>> Total writes made:      133
->>>>>> Write size:             4194304
->>>>>> Bandwidth (MB/sec):     16.331
->>>>>>
->>>>>> Stddev Bandwidth:       31.8794
->>>>>> Max bandwidth (MB/sec): 148
->>>>>> Min bandwidth (MB/sec): 0
->>>>>> Average Latency:        3.91583
->>>>>> Stddev Latency:         7.42821
->>>>>> Max latency:            25.24
->>>>>> Min latency:            0.036475
->>>>>>
->>>>>> Im think problem not in pg. This output of ceph pg dump  >
->>>>>> http://pastebin.com/BqLsyMBC
->>>>>
->>>>> Well, that did improve it a bit; but yes, I think there's somethi=
-ng
->>>>> else going on. Just wanted to verify. :)
->>>>>
->>>>>>
->>>>>> I have still no idea.
->>>>>>
->>>>>> All the best. Alex
->>>>>>
->>>>>>
->>>>>>
->>>>>> 2012/11/4 Gregory Farnum <greg@inktank.com>:
->>>>>>> On Sun, Nov 4, 2012 at 10:58 AM, Aleksey Samarin <nrg3tik@gmail=
-=2Ecom> wrote:
->>>>>>>> Hi all
->>>>>>>>
->>>>>>>> Im planning use ceph for cloud storage.
->>>>>>>> My test setup is 2 servers connected via infiniband 40Gb, 6x2T=
-b disks per node.
->>>>>>>> Centos 6.2
->>>>>>>> Ceph 0.52 from http://ceph.com/rpms/el6/x86_64
->>>>>>>> This is my config http://pastebin.com/Pzxafnsm
->>>>>>>> journal on tmpfs
->>>>>>>> well, im create bench pool and test it:
->>>>>>>> ceph osd pool create bench
->>>>>>>> rados -p bench bench 30 write
->>>>>>>>
->>>>>>>>   Total time run:         43.258228
->>>>>>>>   Total writes made:      151
->>>>>>>>   Write size:             4194304
->>>>>>>>   Bandwidth (MB/sec):     13.963
->>>>>>>>   Stddev Bandwidth:       26.307
->>>>>>>>   Max bandwidth (MB/sec): 128
->>>>>>>>   Min bandwidth (MB/sec): 0
->>>>>>>>   Average Latency:        4.48605
->>>>>>>>   Stddev Latency:         8.17709
->>>>>>>>   Max latency:            29.7957
->>>>>>>>   Min latency:            0.039435
->>>>>>>>
->>>>>>>> when i do rados -p bench bench 30 seq
->>>>>>>>   Total time run:        20.626935
->>>>>>>>   Total reads made:     275
->>>>>>>>   Read size:            4194304
->>>>>>>>   Bandwidth (MB/sec):    53.328
->>>>>>>>   Average Latency:       1.19754
->>>>>>>>   Max latency:           7.0215
->>>>>>>>   Min latency:           0.011647
->>>>>>>>
->>>>>>>> I tested the single drive via dd if=3D/dev/zero of=3D/mnt/hdd2=
-/testfile
->>>>>>>> bs=3D1024k count=3D20000
->>>>>>>> result:  158 MB/sec
->>>>>>>>
->>>>>>>> Anyone can tell me why such a weak performance? Maybe I missed=
- something?
->>>>>>>
->>>>>>> Can you run "ceph tell osd \* bench" and report the results? (I=
-t'll go
->>>>>>> to the "central log" which you can keep an eye on if you run "c=
-eph -w"
->>>>>>> in another terminal.)
->>>>>>> I think you also didn't create your bench pool correctly; it pr=
-obably
->>>>>>> only has 8 PGs which is not going to perform very well with you=
-r disk
->>>>>>> count. Try "ceph pool create bench2 120" and run the benchmark =
-against
->>>>>>> that pool. The extra number at the end tells it to create 120
->>>>>>> placement groups.
->>>>>>> -Greg
+But... this approach means that writes can get torn, which isn't very 
+POSIXy.  Admittedly, we already cheat when writes cross object boundaries, 
+but this would allow simple memory pressure to tear writes too.  The root 
+of this problem seems to be the proactive dropping of Fw to avoid holding 
+a cap reference when we block on balance_dirty_pages_ratelimited().  
+Maybe we should just live with that, or try to address the blocking issue 
+directly.  In an ideal world it seems like there should be a way to 
+reserve some dirty page space in ceph_aio_write() and not have the 
+subsequent write_begin/end calls make their own balance_...() calls.  Do 
+you think that's practical?
+
+sage
+
+> 
+> >>       }
+> >>
+> >> +     dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+> >> +          inode, ceph_vinop(inode), pos + written,
+> >> +          (unsigned)iov->iov_len - written, inode->i_size);
+> >> +     ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, 0, &got, endoff);
+> >> +     if (ret < 0)
+> >> +             goto out_put;
+> >
+> > We don't want to put if the get failed.
+> >
+> > An incremental patch is below.
+> >
+> >> +
+> >> +     dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+> >> +          inode, ceph_vinop(inode), pos + written,
+> >> +          (unsigned)iov->iov_len - written, ceph_cap_string(got));
+> >> +
+> >> +     ret = ceph_sync_write(file, iov->iov_base + written,
+> >> +                           iov->iov_len - written, &iocb->ki_pos);
+> >>       if (ret >= 0) {
+> >>               int dirty;
+> >>               spin_lock(&ci->i_ceph_lock);
+> >> @@ -780,10 +766,9 @@ retry_snap:
+> >>
+> >>  out_put:
+> >>       dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+> >> -          inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >> -          ceph_cap_string(got));
+> >> +          inode, ceph_vinop(inode), pos + written,
+> >> +          (unsigned)iov->iov_len - written, ceph_cap_string(got));
+> >>       ceph_put_cap_refs(ci, got);
+> >> -
+> >>  out:
+> >>       if (ret == -EOLDSNAPC) {
+> >>               dout("aio_write %p %llx.%llx %llu~%u got EOLDSNAPC, retrying\n",
+> >> --
+> >> 1.7.11.7
+> >
+> > How does the below look to you?
+> >
+> looks OK. but If you still think we don't want to fall back to sync
+> write, the variable
+> ?written' is unnecessary.
+> 
+> > There are a few test programs in ceph.git/qa/workunits/direct_io that try
+> > to verify the O_DIRECT and sync io paths work.  Have you tested those?
+> > I'll queue this up on our qa cluster shortly.
+> 
+> No,  I only tested "can't get Fb cap" case.
+> 
+> Regards
+> Yan, Zheng
+> 
+> >
+> > Thanks!
+> > sage
+> >
+> >
+> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > index 266f6e0..2a94102 100644
+> > --- a/fs/ceph/file.c
+> > +++ b/fs/ceph/file.c
+> > @@ -724,10 +724,16 @@ retry_snap:
+> >                 return -ENOSPC;
+> >         __ceph_do_pending_vmtruncate(inode);
+> >
+> > +       /*
+> > +        * try to do a buffered write.  if we don't have sufficient
+> > +        * caps, we'll get -EAGAIN from generic_file_aio_write.
+> > +        */
+> >         if (!(iocb->ki_filp->f_flags & O_DIRECT) &&
+> >             !(inode->i_sb->s_flags & MS_SYNCHRONOUS) &&
+> >             !(fi->flags & CEPH_F_SYNC)) {
+> >                 ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
+> > +               if (ret == -EAGAIN)
+> > +                       goto sync_write;
+> >                 if (ret >= 0)
+> >                         written = ret;
+> >
+> > @@ -738,16 +744,16 @@ retry_snap:
+> >                         if (err < 0)
+> >                                 ret = err;
+> >                 }
+> > -               if ((ret < 0 && ret != -EAGAIN) || pos + written >= endoff)
+> > -                       goto out;
+> > +               goto out;
+> >         }
+> >
+> > +sync_write:
+> >         dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+> >              inode, ceph_vinop(inode), pos + written,
+> >              (unsigned)iov->iov_len - written, inode->i_size);
+> >         ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, 0, &got, endoff);
+> >         if (ret < 0)
+> > -               goto out_put;
+> > +               goto out;
+> >
+> >         dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+> >              inode, ceph_vinop(inode), pos + written,
+> > @@ -763,8 +769,6 @@ retry_snap:
+> >                 if (dirty)
+> >                         __mark_inode_dirty(inode, dirty);
+> >         }
+> > -
+> > -out_put:
+> >         dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+> >              inode, ceph_vinop(inode), pos + written,
+> >              (unsigned)iov->iov_len - written, ceph_cap_string(got));
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
