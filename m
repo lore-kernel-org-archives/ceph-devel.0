@@ -1,48 +1,35 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: use striping feature
-Date: Mon, 05 Nov 2012 11:38:49 -0800
-Message-ID: <509815C9.5090106@inktank.com>
-References: <5097AAF7.8080709@profihost.ag>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: BUG: kvm crashing in void librbd::AioCompletion::complete_request
+Date: Mon, 05 Nov 2012 21:14:23 +0100
+Message-ID: <50981E1F.1040408@profihost.ag>
+References: <50967583.8000109@profihost.ag> <alpine.DEB.2.00.1211040604530.30792@cobra.newdream.net> <509676B9.1040505@profihost.ag> <alpine.DEB.2.00.1211040611470.30792@cobra.newdream.net> <50981480.4050300@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:39142 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751180Ab2KETjJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 14:39:09 -0500
-Received: by mail-pb0-f46.google.com with SMTP id rr4so4150640pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Nov 2012 11:39:09 -0800 (PST)
-In-Reply-To: <5097AAF7.8080709@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:37775 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753259Ab2KEUO1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 15:14:27 -0500
+In-Reply-To: <50981480.4050300@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/05/2012 04:03 AM, Stefan Priebe - Profihost AG wrote:
-> Hello list,
+Am 05.11.2012 20:33, schrieb Stefan Priebe:
+> Am 04.11.2012 15:12, schrieb Sage Weil:
+>> On Sun, 4 Nov 2012, Stefan Priebe wrote:
+>>> Can i merge wip-rbd-read into master?
+>>
+>> Yeah.  I'm going to do a bit more testing first before I do it, but it
+>> should apply cleanly.  Hopefully later today.
 >
-> is the following syntax to use the new rbd v2 striping feature correct?
+> Thanks - seems to be fixed with wip-rbd-read but i have a memory leak now.
 >
-> rbd create -p kvmstor --format 2 --size 32000 --stripe-count 8
-> --stripe-unit 131072 -s 1048576 $imagename
->
-> Idea is to have 8 stripes per 1MB object size. Or are there any other
-> recommondations regarding striping?
+> kvm process raises and raises and raises which each new test around 5GB
+> of memory. Should i write a new mail?
 
-The stripe count is actually how many objects to stripe over before
-repeating back to the first one. It's the number of objects in an
-'object set' in the diagram at the bottom of:
+Works fine with vanilla origin/master. So it must be in wip-rbd-read.
 
-http://ceph.com/docs/master/dev/file-striping/
-
-I don't think we've done enough benchmarks to know what the best
-settings are, but generally having large (like 4MB) objects
-and smaller stripe units will at least help small sequential I/O.
-
-> I'm a bit confused cause rbd info shows stripe-count as bytes?
-
-It's not actually bytes. Sage just fixed that output in the master
-branch.
-
-Josh
+Stefan
