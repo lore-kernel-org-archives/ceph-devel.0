@@ -1,74 +1,53 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: Ubuntu R-Series plans for Ceph
-Date: Mon, 05 Nov 2012 09:33:16 +0000
-Message-ID: <509787DC.1060709@ubuntu.com>
-References: <507D960A.7040101@ubuntu.com> <5096E3FA.7040209@widodh.nl>
+From: Pascal de Bruijn <pascal@unilogicnetworks.net>
+Subject: RADOS extensions directory
+Date: Mon, 05 Nov 2012 10:30:20 +0100
+Message-ID: <5097872C.8030803@unilogicnetworks.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:40982 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750876Ab2KEJdT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 04:33:19 -0500
-In-Reply-To: <5096E3FA.7040209@widodh.nl>
+Received: from mail-out118.unilogicnetworks.net ([62.133.206.118]:49404 "EHLO
+	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753877Ab2KEKEE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 05:04:04 -0500
+Received: from corp-mail.unilogicnetworks.net (corp-mail.unilogicnetworks.net [62.133.206.96])
+	by mail.unilogicnetworks.net (Postfix) with ESMTP id A86A64A028
+	for <ceph-devel@vger.kernel.org>; Mon,  5 Nov 2012 10:30:20 +0100 (CET)
+Received: from [10.0.11.124] (unilogic.cust.unilogicnetworks.net [62.133.193.10])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	(Authenticated sender: pascal)
+	by corp-mail.unilogicnetworks.net (Postfix) with ESMTPSA id 696FD4BE0F
+	for <ceph-devel@vger.kernel.org>; Mon,  5 Nov 2012 10:30:08 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hi,
 
-Hi Wido
+In light of #cephday I noticed something that struck me as odd. The 
+presenation listed the following as the RADOS extensions directory (if I 
+recall correctly):
 
-On 04/11/12 21:54, Wido den Hollander wrote:
->> I've started to put together a Launchpad Blueprint to act as a 
->> placeholder for discussion at the Ubuntu Developer Summit in a
->> couple of weeks time.
->> 
->> I'd be interested in feedback on what folks would like to see
->> from Ceph on Ubuntu in 6 months time for Ubuntu 13.04.
->> 
->> Let me know what you think and I'll collate ideas.
-> 
-> Are there plans to build libvirt with RBD support? RBD storage
-> pool support was added in libvirt 0.9.14 and it would be useful if
-> libvirt was build with this storage backend support.
-> 
-> I can't seem to add this to the blueprint myself, so that's why
-> I'm asking here.
+/var/lib/rados/*.so
 
-Sounds sensible and a nice addition to the rbd support already baked
-into qemu-kvm.
+However, it's very atypical to have shared libraries in /var. As far as 
+I know /var/lib is typically used for persistent (non-executable) 
+storage (think dpkg for example).
 
-I'll raise it on the blueprint and talk to the libvirt maintainers in
-Ubuntu about getting it enabled.
+So I'm guessing /usr/lib/rados/*.so would probably be a more suitable 
+home for the RADOS extensions.
 
-Cheers
+While this isn't the most important thing in the world, I guess it makes 
+sense to change this now as it's not a commonly used feature yet (read 
+there are no third party packages depending on this location yet).
 
-James
+In addition when submitting the code for inclusion into Debian/Fedora, I 
+wouldn't be surprised if they had similar "objections".
 
-- -- 
-James Page
-Ubuntu Core Developer
-Debian Maintainer
-james.page@ubuntu.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://www.enigmail.net/
+At #cephday I briefly spoke to Wido about this, if I recall correctly he 
+confirmed this was sortof a known issue. If that's correct please view 
+this e-mail just as a reminder or something.
 
-iQIcBAEBCAAGBQJQl4fcAAoJEL/srsug59jDov0P/jUdO0s30ONbFOINx+9f9S/r
-1S0syIxmoL9Ul+jd2GIRQLvt2pM/lEJJpgQoLI8u3n0poS0D7gDPkhvq2GXXlMCl
-F8jAf7ehruduDOiZhvWPZvhBhKyOmQ7lmSvHA3PovwJsCAbgA2mZKacFBEicRxM6
-vx0CeCEP34G3vcSf5Fre3MMsYk0+w4mrhput9Bg4zy3X93VwuTQUJjTcXUVVGR+H
-24ZYP10YTVz6LUrNKng1CZiVGV9S9su/klVHzCu4fOD87yGB0wq5p2m4BGN9m3c/
-VG1rY4xdjLlHZbdSEIiltpVwqtLMYjJwxuXGZoXi0a/WmvtNXpajsXCdSbJxoz1P
-mHhMd1QIDyouL7w/QjvPGmaGI2rzOEbhcsX8DaeWfDihA6fkL0Eue1vR2PCvUamp
-74yQiOH2dqFmJ1MRaUTX6EmcecqNMHYXH4VDZulb+DG/VkjylAFS+l45WWYlyvEh
-ni46hCxt0U06xSHRm81/L2CXlHCnU5q1nbKJghzfm9UzuLzZZF79H68DGCZeb+64
-VI4wy1+4B74MWVsCmaAFlDp95R2BRPpJ1NEee70hFhrtFzCdt7/7Vag7KOZKyXaT
-BRHJehInFk6LpxlOLEJmENaH5tExFd8OQIvJu9u7a2pEMhUUYOUd9wOvK8GIcEOM
-VYXSCTQihrjHdATr5CXD
-=JoFJ
------END PGP SIGNATURE-----
+Regards,
+Pascal de Bruijn
