@@ -1,143 +1,59 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/2] mds: Don't acquire replica object's versionlock
-Date: Mon, 5 Nov 2012 10:52:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211051048520.30301@cobra.newdream.net>
-References: <1351760618-19874-1-git-send-email-zheng.z.yan@intel.com> <1351760618-19874-2-git-send-email-zheng.z.yan@intel.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: explicitly specifying pgnum on pool creation
+Date: Mon, 05 Nov 2012 10:55:31 -0800
+Message-ID: <50980BA3.20709@inktank.com>
+References: <alpine.DEB.2.00.1211040338400.30792@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53843 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932107Ab2KESwN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 13:52:13 -0500
-In-Reply-To: <1351760618-19874-2-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:37099 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932107Ab2KESzu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 13:55:50 -0500
+Received: by mail-pb0-f46.google.com with SMTP id rr4so4124624pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Nov 2012 10:55:50 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211040338400.30792@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 1 Nov 2012, Yan, Zheng wrote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> Both CInode and CDentry's versionlocks are of type LocalLock.
-> Acquiring LocalLock in replica object is useless and problematic.
-> For example, if two requests try acquiring a replica object's
-> versionlock, the first request succeeds, the second request
-> is added to wait queue. Later when the first request finishes,
-> MDCache::request_drop_foreign_locks() finds the lock's parent is
-> non-auth, it skips waking requests in the wait queue. So the
-> second request hangs.
+On 11/04/2012 03:42 AM, Sage Weil wrote:
+> The wip-explicit-pgnum changes the 'ceph osd pool create <name> <pgnum>'
+> command to require the pg_num value instead of defaulting to 8.  This
+> would make it harder for users to get this wrong.
 
-I don't remmeber the details, but the iversion locking on replicas came up 
-while testing renaming and export thrashing.  i.e., running with
+I like this. It'd be great if we could add a pgnum argument to
+'rados mkpool' and the corresponding librados pool_create* functions
+too.
 
-	mds thrash exports = 1
+> On the other hand, it probably also breaks some scripts for deploying
+> OpenStack that create volume and image pools.  :/
 
-and doing some rename workload (fsstress maybe?).  
+If those scripts are creating pools with 8 pgs, they're going to
+create problems anyway. I don't mind breaking them as long as it's well
+documented (i.e. release notes and docs on 'ceph osd pool create'
+should mention the change).
 
-Maybe the fix is just to wake the requests in the queue?
+> Ideas?
+>
+> The original idea was that the monitor would automagically notice when a
+> small pgnum pool gets lots of objects and trigger a split.  Even if we
+> don't do that, pretty soon now you'll be able to explicitly increase
+> pg_num.  I still think it might be a good idea to require it up-front,
+> though.
 
-s
+Until split is implemented and well-tested, I think it makes sense to
+require it up-front. It's easy to relax that requirement later if we
+want to make it more automatic.
 
+> An alternative would be to default to a larger number (say, num_osds <<
+> 2).  My concern there is that it makes it easy to create lots of pgs for
+> pools that may be small, and it's still not large enough to get good
+> performance for the "create pool, run rados bench" crowd.
 
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  src/mds/Locker.cc |  6 ++++++
->  src/mds/Server.cc | 25 ++++++++++---------------
->  3 files changed, 17 insertions(+), 16 deletions(-)
-> 
-> diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-> index e033bbe..6474743 100644
-> --- a/src/mds/Locker.cc
-> +++ b/src/mds/Locker.cc
-> @@ -196,6 +196,7 @@ bool Locker::acquire_locks(MDRequest *mdr,
->      // augment xlock with a versionlock?
->      if ((*p)->get_type() == CEPH_LOCK_DN) {
->        CDentry *dn = (CDentry*)(*p)->get_parent();
-> +      assert(dn->is_auth());
->  
->        if (xlocks.count(&dn->versionlock))
->  	continue;  // we're xlocking the versionlock too; don't wrlock it!
-> @@ -213,6 +214,8 @@ bool Locker::acquire_locks(MDRequest *mdr,
->      if ((*p)->get_type() > CEPH_LOCK_IVERSION) {
->        // inode version lock?
->        CInode *in = (CInode*)(*p)->get_parent();
-> +      if (!in->is_auth())
-> +	continue;
->        if (mdr->is_master()) {
->  	// master.  wrlock versionlock so we can pipeline inode updates to journal.
->  	wrlocks.insert(&in->versionlock);
-> @@ -3899,6 +3902,7 @@ void Locker::local_wrlock_grab(LocalLock *lock, Mutation *mut)
->    dout(7) << "local_wrlock_grab  on " << *lock
->  	  << " on " << *lock->get_parent() << dendl;  
->    
-> +  assert(lock->get_parent()->is_auth());
->    assert(lock->can_wrlock());
->    assert(!mut->wrlocks.count(lock));
->    lock->get_wrlock(mut->get_client());
-> @@ -3911,6 +3915,7 @@ bool Locker::local_wrlock_start(LocalLock *lock, MDRequest *mut)
->    dout(7) << "local_wrlock_start  on " << *lock
->  	  << " on " << *lock->get_parent() << dendl;  
->    
-> +  assert(lock->get_parent()->is_auth());
->    if (lock->can_wrlock()) {
->      assert(!mut->wrlocks.count(lock));
->      lock->get_wrlock(mut->get_client());
-> @@ -3942,6 +3947,7 @@ bool Locker::local_xlock_start(LocalLock *lock, MDRequest *mut)
->    dout(7) << "local_xlock_start  on " << *lock
->  	  << " on " << *lock->get_parent() << dendl;  
->    
-> +  assert(lock->get_parent()->is_auth());
->    if (!lock->can_xlock_local()) {
->      lock->add_waiter(SimpleLock::WAIT_WR|SimpleLock::WAIT_STABLE, new C_MDS_RetryRequest(mdcache, mut));
->      return false;
-> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> index 4642a13..45c890a 100644
-> --- a/src/mds/Server.cc
-> +++ b/src/mds/Server.cc
-> @@ -5204,25 +5204,20 @@ void Server::handle_client_rename(MDRequest *mdr)
->      wrlocks.insert(&straydn->get_dir()->inode->nestlock);
->    }
->  
-> -  // xlock versionlock on srci if remote?
-> -  //  this ensures it gets safely remotely auth_pinned, avoiding deadlock;
-> -  //  strictly speaking, having the slave node freeze the inode is 
-> -  //  otherwise sufficient for avoiding conflicts with inode locks, etc.
-> -  if (!srcdn->is_auth() && srcdnl->is_primary())  // xlock versionlock on srci if there are any witnesses
-> -    xlocks.insert(&srci->versionlock);
-> -
->    // xlock versionlock on dentries if there are witnesses.
->    //  replicas can't see projected dentry linkages, and will get
->    //  confused if we try to pipeline things.
->    if (!witnesses.empty()) {
-> -    if (srcdn->is_projected())
-> -      xlocks.insert(&srcdn->versionlock);
-> -    if (destdn->is_projected())
-> -      xlocks.insert(&destdn->versionlock);
-> -    // also take rdlock on all ancestor dentries for destdn.  this ensures that the
-> -    // destdn can be traversed to by the witnesses.
-> -    for (int i=0; i<(int)desttrace.size(); i++) 
-> -      xlocks.insert(&desttrace[i]->versionlock);
-> +    // take xlock on all projected dentries for srcdn and destdn.  this ensures
-> +    // that the srcdn and destdn can be traversed to by the witnesses.
-> +    for (int i= 0; i<(int)srctrace.size(); i++) {
-> +      if (srctrace[i]->is_auth() && srctrace[i]->is_projected())
-> +	  xlocks.insert(&srctrace[i]->versionlock);
-> +    }
-> +    for (int i=0; i<(int)desttrace.size(); i++) {
-> +      if (desttrace[i]->is_auth() && desttrace[i]->is_projected())
-> +	  xlocks.insert(&desttrace[i]->versionlock);
-> +    }
->    }
->  
->    // we need to update srci's ctime.  xlock its least contended lock to do that...
-> -- 
-> 1.7.11.7
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+It would also be easy to create too few pgs, and then add a bunch of
+osds later.
+
+Josh
