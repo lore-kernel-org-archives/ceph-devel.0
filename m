@@ -1,73 +1,48 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: explicitly specifying pgnum on pool creation
-Date: Mon, 5 Nov 2012 11:35:48 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211051134540.30301@cobra.newdream.net>
-References: <alpine.DEB.2.00.1211040338400.30792@cobra.newdream.net> <50980BA3.20709@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: use striping feature
+Date: Mon, 05 Nov 2012 11:38:49 -0800
+Message-ID: <509815C9.5090106@inktank.com>
+References: <5097AAF7.8080709@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54402 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750776Ab2KETft (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 14:35:49 -0500
-In-Reply-To: <50980BA3.20709@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:39142 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751180Ab2KETjJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 14:39:09 -0500
+Received: by mail-pb0-f46.google.com with SMTP id rr4so4150640pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Nov 2012 11:39:09 -0800 (PST)
+In-Reply-To: <5097AAF7.8080709@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 5 Nov 2012, Josh Durgin wrote:
-> On 11/04/2012 03:42 AM, Sage Weil wrote:
-> > The wip-explicit-pgnum changes the 'ceph osd pool create <name> <pgnum>'
-> > command to require the pg_num value instead of defaulting to 8.  This
-> > would make it harder for users to get this wrong.
-> 
-> I like this. It'd be great if we could add a pgnum argument to
-> 'rados mkpool' and the corresponding librados pool_create* functions
-> too.
+On 11/05/2012 04:03 AM, Stefan Priebe - Profihost AG wrote:
+> Hello list,
+>
+> is the following syntax to use the new rbd v2 striping feature correct?
+>
+> rbd create -p kvmstor --format 2 --size 32000 --stripe-count 8
+> --stripe-unit 131072 -s 1048576 $imagename
+>
+> Idea is to have 8 stripes per 1MB object size. Or are there any other
+> recommondations regarding striping?
 
-I'm tempted to remove those commands from teh rados tool.  I think we need 
-to keep them in the librados api, tho, so maybe that's not helpful.
+The stripe count is actually how many objects to stripe over before
+repeating back to the first one. It's the number of objects in an
+'object set' in the diagram at the bottom of:
 
-Anyway, yeah, definitely!
+http://ceph.com/docs/master/dev/file-striping/
 
-> > On the other hand, it probably also breaks some scripts for deploying
-> > OpenStack that create volume and image pools.  :/
-> 
-> If those scripts are creating pools with 8 pgs, they're going to
-> create problems anyway. I don't mind breaking them as long as it's well
-> documented (i.e. release notes and docs on 'ceph osd pool create'
-> should mention the change).
+I don't think we've done enough benchmarks to know what the best
+settings are, but generally having large (like 4MB) objects
+and smaller stripe units will at least help small sequential I/O.
 
-Ok.  Let's try to do this this week for bobtail!
+> I'm a bit confused cause rbd info shows stripe-count as bytes?
 
-sage
+It's not actually bytes. Sage just fixed that output in the master
+branch.
 
-> 
-> > Ideas?
-> > 
-> > The original idea was that the monitor would automagically notice when a
-> > small pgnum pool gets lots of objects and trigger a split.  Even if we
-> > don't do that, pretty soon now you'll be able to explicitly increase
-> > pg_num.  I still think it might be a good idea to require it up-front,
-> > though.
-> 
-> Until split is implemented and well-tested, I think it makes sense to
-> require it up-front. It's easy to relax that requirement later if we
-> want to make it more automatic.
-> 
-> > An alternative would be to default to a larger number (say, num_osds <<
-> > 2).  My concern there is that it makes it easy to create lots of pgs for
-> > pools that may be small, and it's still not large enough to get good
-> > performance for the "create pool, run rados bench" crowd.
-> 
-> It would also be easy to create too few pgs, and then add a bunch of
-> osds later.
-> 
-> Josh
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Josh
