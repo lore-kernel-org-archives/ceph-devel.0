@@ -1,28 +1,47 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: UBUNTU kernel version and ceph 0.51 compatibility
-Date: Mon, 5 Nov 2012 10:25:08 +0530
-Message-ID: <CAGfy=6nbGBRL+-1H3zqQD-dSjenE5e3-EJnyB7pX3AumwxwYag@mail.gmail.com>
+From: Andrew Thrift <andyonfire@gmail.com>
+Subject: Large numbers of OSD per node
+Date: Mon, 05 Nov 2012 20:14:51 +1300
+Message-ID: <5097676B.5020200@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:40367 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752928Ab2KEEzI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Nov 2012 23:55:08 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so5513444vbb.19
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Nov 2012 20:55:08 -0800 (PST)
+Received: from cps.hostingdirect.co.nz ([210.79.48.6]:41192 "EHLO
+	cps.hd.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751060Ab2KEHfL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 5 Nov 2012 02:35:11 -0500
+Received: from 222.47.255.123.static.snap.net.nz ([123.255.47.222] helo=[192.168.69.11])
+	by cps.hd.net.nz with esmtpsa (TLSv1:AES256-SHA:256)
+	(Exim 4.77)
+	(envelope-from <andyonfire@gmail.com>)
+	id 1TVGtb-0004GJ-D1
+	for ceph-devel@vger.kernel.org; Mon, 05 Nov 2012 20:14:57 +1300
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Community,
-    I want to know that is there any compatibility chart between
-UBUNTU kernel version & ceph v 0.51 ?
-    Or does anyone know best suite kernel version of UBUNTU with ceph v0.51.
-    Till now I was working with UBUNTU 12.04 kernel 3.2.0 . But want
-to know that is it ok if I move to UBUNTU kernel v 3.6.2. + ceph
-v0.51.
+Hi,
+
+We are evaluating CEPH for deployment.
+
+I was wondering if there are any current "best practices" around the 
+number of OSD's per node ?
 
 
-Thanks & Regards,
-Hemant Surale.
+e.g. We are looking at deploying 3 nodes, each with 72x SAS disks, and 
+2x 10gigabit Ethernet bonded.
+
+Would this best be configured as 72 OSD's per node.
+
+Or would we be better to using raid5 to have 18 OSD's per node ?
+
+
+
+
+Regards,
+
+
+
+
+
+Andrew
