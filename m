@@ -1,40 +1,37 @@
 From: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Subject: Re: chaning pg_num / pgp_num after adding more osds
-Date: Tue, 06 Nov 2012 12:07:58 +0100
-Message-ID: <5098EF8E.3060709@unilogicnetworks.net>
-References: <5097C9DD.3030600@profihost.ag> <50984F82.3010706@inktank.com> <5098BCFF.6050004@profihost.ag> <alpine.DEB.2.00.1211060251380.12495@cobra.newdream.net>
+Subject: Re: Large numbers of OSD per node
+Date: Tue, 06 Nov 2012 12:05:14 +0100
+Message-ID: <5098EEEA.405@unilogicnetworks.net>
+References: <5097676B.5020200@gmail.com> <50979CA3.3060005@widodh.nl> <5097B4E5.8070706@inktank.com> <5098706A.9040506@gmail.com> <5098D3E8.9000503@widodh.nl> <CAJH6TXhscSv9-JpzP=+ZE421ojGh4NtgycNt929QVNXNwCmzMQ@mail.gmail.com> <5098DC78.1040303@widodh.nl> <CAJH6TXi4r1d+c16fH0CQk1mDbd2zjdpzFqf1--mKCGo+nnySbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out118.unilogicnetworks.net ([62.133.206.118]:59971 "EHLO
+Received: from mail-out118.unilogicnetworks.net ([62.133.206.118]:50030 "EHLO
 	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751372Ab2KFLh0 (ORCPT
+	by vger.kernel.org with ESMTP id S1751328Ab2KFLh0 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 06:37:26 -0500
-In-Reply-To: <alpine.DEB.2.00.1211060251380.12495@cobra.newdream.net>
+In-Reply-To: <CAJH6TXi4r1d+c16fH0CQk1mDbd2zjdpzFqf1--mKCGo+nnySbw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Wido den Hollander <wido@widodh.nl>, Andrew Thrift <andyonfire@gmail.com>, ceph-devel@vger.kernel.org, mark.nelson@inktank.com
 
-On 11/06/2012 11:59 AM, Sage Weil wrote:
+On 11/06/2012 11:24 AM, Gandalf Corvotempesta wrote:
+> 2012/11/6 Wido den Hollander <wido@widodh.nl>:
+>> The setup described on that page has 90 nodes, so one node failing is a
+>> little over 1% of the cluster which fails.
+> I think i'm missing something.
+> In case of a failure, they will always have to resync 36 TB of data,
+> no matter if they have 90 servers.
+> Each server is 36TB, so every times they  need to resync the whole server.
 >
->> When i have one pool with 800 pgs and i add 20 new OSDs how does a new pool
->> help? I mean the old pools will stay with 800 pgs.
-> It make the distribution of existing data less coarse, but as the size of
-> teh PGs for the new pool increases things will tend to level out.
->
-> My suggestion is to overshoot the PG count a little bit (not too much!),
-> maybe ~200 pgs per osd.  If things get too unbalanced after a significant
-> expansion you can put new data is new pools, or make fine-grainted
-> adjustments in the CRUSH map.
->
-> I suspect that this will be sufficient for just about everyone until the
-> splitting functionality is in place... hopefully in 1-2 dev releases after
-> bobtail.
->
-Maybe I missed something but do you mean about 100-200 PG's per pool per 
-OSD or 100-200 PG's per OSD? Because when you create new pools, the PG's 
-per OSD increases a lot.
+Well you have to keep in mind that when a node fails the PG's that 
+resided on that node have to be redistributed over all the other nodes. 
+So you begin moving about 1% of the data between all the remaining 
+nodes/osds (coming from an OSD that has the remaining replica of the pg 
+to the new OSD that will get a replica). So you move from and to all the 
+remaining osd's and that will give you a lot of bandwidth and therefor 
+fast recorvery to a consistent state.
 
 Stefan
