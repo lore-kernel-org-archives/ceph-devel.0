@@ -1,7 +1,7 @@
 From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
 Subject: Re: Large numbers of OSD per node
-Date: Tue, 6 Nov 2012 11:20:45 +0100
-Message-ID: <CAJH6TXjSwz-7pJcYWtjureXY_rTNZ6JB+SAfZmye6L6=mxQAxw@mail.gmail.com>
+Date: Tue, 6 Nov 2012 11:24:07 +0100
+Message-ID: <CAJH6TXi4r1d+c16fH0CQk1mDbd2zjdpzFqf1--mKCGo+nnySbw@mail.gmail.com>
 References: <5097676B.5020200@gmail.com>
 	<50979CA3.3060005@widodh.nl>
 	<5097B4E5.8070706@inktank.com>
@@ -12,12 +12,12 @@ References: <5097676B.5020200@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:55455 "EHLO
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:55555 "EHLO
 	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab2KFKUs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 05:20:48 -0500
-Received: by mail-ea0-f174.google.com with SMTP id c13so101816eaa.19
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Nov 2012 02:20:46 -0800 (PST)
+	with ESMTP id S1750988Ab2KFKYI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 05:24:08 -0500
+Received: by mail-ea0-f174.google.com with SMTP id c13so103078eaa.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Nov 2012 02:24:07 -0800 (PST)
 In-Reply-To: <5098DC78.1040303@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -25,19 +25,10 @@ To: Wido den Hollander <wido@widodh.nl>
 Cc: Andrew Thrift <andyonfire@gmail.com>, ceph-devel@vger.kernel.org, mark.nelson@inktank.com
 
 2012/11/6 Wido den Hollander <wido@widodh.nl>:
-> It works for them. There is no journaling though, but this setup is only
-> being used for the RADOS Gateway, not for RBD.
->
-> You might want to insert a couple of SSDs in there to do journaling for you.
-
-Yes, I'll add 2 SSD on each server, probably in RAID1, because i'll
-also install the OS on it.
-
-> But the rule also applies here. When you use 3 of these machines, when
-> loosing one, you will lose 33% of your cluster.
->
 > The setup described on that page has 90 nodes, so one node failing is a
 > little over 1% of the cluster which fails.
 
-Actually I'll start with 2 or 3  3TB disks for each node and I'll have
-3 nodes as testbed and 5 as production.
+I think i'm missing something.
+In case of a failure, they will always have to resync 36 TB of data,
+no matter if they have 90 servers.
+Each server is 36TB, so every times they  need to resync the whole server.
