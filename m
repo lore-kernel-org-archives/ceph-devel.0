@@ -1,120 +1,81 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: RBD trim / unmap support?
-Date: Tue, 06 Nov 2012 23:45:21 +0100
-Message-ID: <50999301.3040108@profihost.ag>
-References: <509306CC.5080307@profihost.ag> <5093078C.4020404@inktank.com> <50938233.9090902@profihost.ag> <50938DA0.6090205@profihost.ag> <5093F1F6.5040502@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: Ubuntu 12.04.1 + xfs + syncfs is still not our friend
+Date: Tue, 06 Nov 2012 15:18:42 -0800
+Message-ID: <50999AD2.8030507@inktank.com>
+References: <50993755.8060800@filoo.de> <50993B61.3090500@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:45325 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751561Ab2KFWpW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 17:45:22 -0500
-In-Reply-To: <5093F1F6.5040502@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:50376 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752619Ab2KFXSq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 18:18:46 -0500
+Received: by mail-pb0-f46.google.com with SMTP id rr4so749859pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Nov 2012 15:18:46 -0800 (PST)
+In-Reply-To: <50993B61.3090500@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Oliver Francke <Oliver.Francke@filoo.de>
+Cc: ceph-devel@vger.kernel.org
 
-Am 02.11.2012 17:16, schrieb Josh Durgin:
-> On 11/02/2012 02:08 AM, Stefan Priebe - Profihost AG wrote:
->> Hi Jost,
+Resolution: installing the packages built for precise, rather than 
+squeeze, got versions that use syncfs.
+
+On 11/06/2012 08:31 AM, Oliver Francke wrote:
+> In answer to myself,
+>
+> On 11/06/2012 05:14 PM, Oliver Francke wrote:
+>> Hi *,
 >>
->> i tried scsi-hd with discard_granularity=512 the UNMAP / Trim itself
->> works fine the space is freed at ceph but at the VM i'm getting:
->> [   75.076895] sd 2:0:0:4: [sdc]
->> [   75.078353] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.079377] sd 2:0:0:4: [sdc]
->> [   75.080410] Sense Key : Aborted Command [current]
->> [   75.081446] sd 2:0:0:4: [sdc]
->> [   75.082459] Add. Sense: I/O process terminated
->> [   75.083466] sd 2:0:0:4: [sdc] CDB:
->> [   75.084473] Write same(16): 93 08 00 00 00 00 00 00 00 00 00 7f ff ff
->> 00 00
->> [   75.085535] end_request: I/O error, dev sdc, sector 0
->> [   75.086567] sd 2:0:0:4: [sdc]
->> [   75.087569] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.088605] sd 2:0:0:4: [sdc]
->> [   75.089610] Sense Key : Aborted Command [current]
->> [   75.090630] sd 2:0:0:4: [sdc]
->> [   75.091631] Add. Sense: I/O process terminated
->> [   75.092621] sd 2:0:0:4: [sdc] CDB:
->> [   75.093579] Write same(16): 93 08 00 00 00 00 00 7f ff ff 00 7f ff ff
->> 00 00
->> [   75.094581] end_request: I/O error, dev sdc, sector 8388607
->> [   75.095558] sd 2:0:0:4: [sdc]
->> [   75.096561] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.097553] sd 2:0:0:4: [sdc]
->> [   75.098520] Sense Key : Aborted Command [current]
->> [   75.099484] sd 2:0:0:4: [sdc]
->> [   75.100471] Add. Sense: I/O process terminated
->> [   75.101439] sd 2:0:0:4: [sdc] CDB:
->> [   75.102432] Write same(16): 93 08 00 00 00 00 00 ff ff fe 00 7f ff ff
->> 00 00
->> [   75.103464] end_request: I/O error, dev sdc, sector 16777214
->> [   75.104503] sd 2:0:0:4: [sdc]
->> [   75.105507] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.106514] sd 2:0:0:4: [sdc]
->> [   75.107525] Sense Key : Aborted Command [current]
->> [   75.108545] sd 2:0:0:4: [sdc]
->> [   75.109525] Add. Sense: I/O process terminated
->> [   75.110487] sd 2:0:0:4: [sdc] CDB:
->> [   75.111418] Write same(16): 93 08 00 00 00 00 01 7f ff fd 00 7f ff ff
->> 00 00
->> [   75.112419] end_request: I/O error, dev sdc, sector 25165821
->> [   75.238627] sd 2:0:0:4: [sdc]
->> [   75.239946] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.241197] sd 2:0:0:4: [sdc]
->> [   75.242097] Sense Key : Aborted Command [current]
->> [   75.242627] sd 2:0:0:4: [sdc]
->> [   75.242627] Add. Sense: I/O process terminated
->> [   75.242627] sd 2:0:0:4: [sdc] CDB:
->> [   75.242627] Write same(16): 93 08 00 00 00 00 01 ff ff fc 00 7f ff ff
->> 00 00
->> [   75.242627] end_request: I/O error, dev sdc, sector 33554428
->> [   75.447311] sd 2:0:0:4: [sdc]
->> [   75.448505] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.449392] sd 2:0:0:4: [sdc]
->> [   75.450262] Sense Key : Aborted Command [current]
->> [   75.451134] sd 2:0:0:4: [sdc]
->> [   75.451312] Add. Sense: I/O process terminated
->> [   75.451312] sd 2:0:0:4: [sdc] CDB:
->> [   75.451312] Write same(16): 93 08 00 00 00 00 02 7f ff fb 00 7f ff ff
->> 00 00
->> [   75.451312] end_request: I/O error, dev sdc, sector 41943035
->> [   75.476364] sd 2:0:0:4: [sdc]
->> [   75.477252] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.478135] sd 2:0:0:4: [sdc]
->> [   75.479004] Sense Key : Aborted Command [current]
->> [   75.479891] sd 2:0:0:4: [sdc]
->> [   75.480358] Add. Sense: I/O process terminated
->> [   75.480358] sd 2:0:0:4: [sdc] CDB:
->> [   75.480358] Write same(16): 93 08 00 00 00 00 02 ff ff fa 00 7f ff ff
->> 00 00
->> [   75.480358] end_request: I/O error, dev sdc, sector 50331642
->> [   75.496374] sd 2:0:0:4: [sdc]
->> [   75.497202] Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> [   75.498077] sd 2:0:0:4: [sdc]
->> [   75.498948] Sense Key : Aborted Command [current]
->> [   75.499818] sd 2:0:0:4: [sdc]
->> [   75.500374] Add. Sense: I/O process terminated
->> [   75.500374] sd 2:0:0:4: [sdc] CDB:
->> [   75.500374] Write same(16): 93 08 00 00 00 00 03 7f ff f9 00 7f ff ff
->> 00 00
->> [   75.500374] end_request: I/O error, dev sdc, sector 58720249
+>> anybody out there who's in Ubuntu 12.04.1/ in connection with libc +
+>> xfs + syncfs?
 >
-> Could you add 'debug ms = 1', 'debug rbd = 20', and 'log file =
-> /tmp/librbd.log' to the [client] section of your ceph.conf?
+> ii  libc6                            2.15-0ubuntu10.3
 >
-> That log should tell us where the error is happening.
-
-Paolo from Redhat / qemu means:
-
-"
-The discard request is failing.  Please check why with a breakpoint on
-rbd_aio_discard_wrapper or scsi_handle_rw_error for example.
-"
-
-Greets,
-Stefan
+> but:
+> apt-cache show...
+> .
+> .
+> Provides: glibc-2.13-1
+> .
+> .
+>
+> playing with numbers, I think. But make clear, why syncfs-call is not in
+> :-\
+>
+> ... search continues...
+>
+>>
+>> We bit the bullet and reinstalled two new nodes from debian to precise
+>> in favour of possible performance increase?!
+>>
+>> *sigh*, still getting:
+>>
+>> 2012-11-06 17:05:51.863921 7f5cc52e3780  0 filestore(/data/osd6-3)
+>> mount syncfs(2) syscall not support by glibc
+>> 2012-11-06 17:05:51.863925 7f5cc52e3780  0 filestore(/data/osd6-3)
+>> mount no syncfs(2), must use sync(2).
+>>
+>> as a show-stopper.
+>>
+>> That's with 3.2.* and 3.6.6 kernel. Should be new enough. And
+>> ceph-0.48.2 ( eu.ceph.com mirror was installing 0.48.1.. though *ops*
+>> ;) )
+>>
+>> But both should be capable of this system-call?!
+>>
+>> We've been so very near... but now clueless, please sched some light
+>> in 8-)
+>>
+>> ( I hope this is not a very obvious human RTFM error ;) )
+>>
+>> And so I'm writing, should one enable directio + aio, as we're having
+>> the journals on a SSD-partition?
+>>
+>> Kind regards,
+>>
+>> Oliver.
+>>
+>
+>
