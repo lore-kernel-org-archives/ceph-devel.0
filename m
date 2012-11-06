@@ -1,40 +1,41 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: recommanded cache setting for rbd image
-Date: Tue, 06 Nov 2012 08:34:15 +0100
-Message-ID: <5098BD77.1050202@profihost.ag>
-References: <5097D2DD.2000006@profihost.ag> <50985257.3040304@inktank.com>
+Subject: Re: What would a good OSD node hardware configuration look like?
+Date: Tue, 06 Nov 2012 08:36:06 +0100
+Message-ID: <5098BDE6.3050801@profihost.ag>
+References: <5097F3BD.2000904@conversis.de> <50985677.6090708@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:39190 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:44903 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752495Ab2KFHeS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 02:34:18 -0500
-In-Reply-To: <50985257.3040304@inktank.com>
+	with ESMTP id S1752681Ab2KFHgJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 02:36:09 -0500
+In-Reply-To: <50985677.6090708@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Dennis Jacobfeuerborn <dennisml@conversis.de>, ceph-devel@vger.kernel.org
 
-Am 06.11.2012 00:57, schrieb Josh Durgin:
-> On 11/05/2012 06:53 AM, Stefan Priebe - Profihost AG wrote:
->> Hello list,
->>
->> right now i'm testing rbd block devices with kvm using Default cache (no
->> cache).
->>
->> Is there any recommanded value for RBD? (i don't wanna loose data)
+Am 06.11.2012 01:14, schrieb Josh Durgin:
+> On 11/05/2012 09:13 AM, Dennis Jacobfeuerborn wrote:
+>> Hi,
+>> I'm thinking about building a ceph cluster and I'm wondering what a good
+>> configuration would look like for 4-8 (and maybe more) 2HU 8-disk or 3HU
+>> 16-disk systems.
+>> Would it make sense to make each disk an individual OSD or should I
+>> perhaps
+>> create several raid-0 and create OSDs from those?
 >
-> It acts like a well-behaved disk cache (i.e. it respects
-> flushes/barriers from the guest), so it's no more likely to cause data
-> loss than a local hard disk in the event of an unexpected shutdown.
->
-> I recommend running it in writeback mode (the default when rbd cache =
-> true). The best cache size will depend on your workload and hardware.
+> This mainly depends on your ratio of disks to cpu/ram. Generally we
+> recommend 1GB ram and 1Ghz per OSD. If you've got enough cpu/ram,
+> running 1 OSD/disk is pretty common. It makes recovering from a
+> single disk failure faster.
 
-Thanks i'll check how this influence my disks and storage.
+Just i node while using SSDs i've seen osd processes using up to two 3.6 
+Ghz cores. So under heavy load and disks and network with enough speed 1 
+ghz might be even too low. Right now i'm calculating with 1 3.6Ghz Core 
+per OSD when using 10GBE and SSDs.
 
-Thanks!
-
+Greets,
 Stefan
