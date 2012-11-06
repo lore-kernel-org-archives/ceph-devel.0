@@ -1,54 +1,82 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: python-ceph
-Date: Mon, 5 Nov 2012 21:22:35 -0500
-Message-ID: <CACkq2mo7HoB49voxVs-NehA9YC3xARa42Zay5qmYeDm4wF1LYw@mail.gmail.com>
-References: <CACkq2momtqxBZ+XCz_j_kiJsbn_8epU=vovn8-RfAob-d5d-wA@mail.gmail.com>
- <alpine.DEB.2.00.1211031158120.25450@cobra.newdream.net>
+From: Dennis Jacobfeuerborn <dennisml@conversis.de>
+Subject: Re: What would a good OSD node hardware configuration look like?
+Date: Tue, 06 Nov 2012 03:49:29 +0100
+Message-ID: <50987AB9.9030905@conversis.de>
+References: <5097F3BD.2000904@conversis.de> <50985677.6090708@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:61371 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933504Ab2KFCW4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 21:22:56 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so6619276vbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Nov 2012 18:22:56 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211031158120.25450@cobra.newdream.net>
+Received: from mail4.conversis.de ([213.203.219.181]:48583 "EHLO
+	mail4.conversis.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933504Ab2KFCta (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Nov 2012 21:49:30 -0500
+In-Reply-To: <50985677.6090708@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sat, Nov 3, 2012 at 2:59 PM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 2 Nov 2012, Travis Rhoden wrote:
->> Hi folks,
->>
->> Are there any plans to release python-ceph to pypi?  It would be nice
->> to see it packaged up in distutils/egg format and added to pypi, that
->> way other python packages can list it as a dependency.
->
-> This is definitely something we want to work.
+On 11/06/2012 01:14 AM, Josh Durgin wrote:
+> On 11/05/2012 09:13 AM, Dennis Jacobfeuerborn wrote:
+>> Hi,
+>> I'm thinking about building a ceph cluster and I'm wondering what a good
+>> configuration would look like for 4-8 (and maybe more) 2HU 8-disk or 3HU
+>> 16-disk systems.
+>> Would it make sense to make each disk an individual OSD or should I perhaps
+>> create several raid-0 and create OSDs from those?
+> 
+> This mainly depends on your ratio of disks to cpu/ram. Generally we
+> recommend 1GB ram and 1Ghz per OSD. If you've got enough cpu/ram,
+> running 1 OSD/disk is pretty common. It makes recovering from a
+> single disk failure faster.
 
-Glad to hear it!
->
->> I know there is currently a python-ceph package in Debian, but that
->> doesn't allow me to list it as a dependency in a setup.py file and
->> have it installed in a virtualenv, for example.  Right now I have to
->> copy rbd.py into my virtualenv.
->>
->> Curious to know if this is something you would consider.  Perhaps it
->> is something I could help with.
->
-> That would be great!
+So basically a 2Ghz quad-core CPU and 8GB RAM would be sufficient for 8 OSDs?
 
-I'll see what I can work on...  It's going to be a couple of weeks
-before I could give it a good look. I'm under the gun right now to
-finish some projects (they involve Ceph!) that we will be demo'ing at
-SC'12.  Which is, as you know, 1 week away!  Speaking of SC'12, I'd
-love to hear about any plans that InkTank has for that conference.
-I've heard you will be there (and you have a booth).  One way or
-another, I plan to swing by and meet whoever I can.  Feel free
-(anyone) to email me off list if you are going to be in Salt Lake City
-at SC'12 next week.
->
-> sage
+>> Also what is the best setup for the journal? If I understand it correctly
+>> then each OSD needs its own journal and that should be a separate disk but
+>> that would be quite wasteful it seems. Would it make sense to put in two
+>> small SSD disks in a raid-1 configuration and create a filesystem for each
+>> OSD journal on it?
+> 
+> This is certainly possible. It's a bit less overhead if you give each
+> osd it's own partition of the ssd(s) instead of going through another
+> filesystem.
+> 
+> I suspect it would be better to not use raid-1, since these ssds will be
+> receiving all the data the osds write as well. If they're in raid-1 instead
+> of being used independently, their lifetimes might be much
+> shorter.
+
+My primary concern here is fault tolerance. What happens when the journal
+disk dies? Can ceph cope with that and write directly to the OSDs or would
+that mean that with a single shared disk for all OSDs a failure would mean
+the entire system is effectively offline for ceph?
+
+>> How does the number of OSDs/Nodes affect the performance of say a single dd
+>> operation? Will blocks be distributed over the cluster and written/read in
+>> parallel or does the number only improve concurrency rather than benefit
+>> single threaded workloads?
+> 
+> In cephfs and rbd, objects are distributed over the cluster, but the
+> OSDs/node ratio doesn't really affect the performance. It's more
+> dependent on the workload and striping policy. For example, with
+> a small stripe size, small sequential writes will benefit from more
+> osds, but the number per node isn't particularly important.
+
+By OSDs/Nodes I really meant "OSDs or nodes" and not the ratio. What I'm
+trying to understand is if a) the number of nodes plays a significant role
+when it comes to performance (e.g. a 4 node cluster with large disks vs. a
+16 node cluster with smaller disks) and b) how much of an impact the number
+of OSDs has on the cluster e.g. an 8 node cluster with each node being a
+single OSD (with all disks as raid-0) vs. an 8 node cluster with say 64
+OSDs (each node with 8 disks as individual OSDs).
+
+What I'm trying to find is a good baseline hardware configuration that
+works well with the algorithms and assumptions made by cephs design i.e. if
+cepth works better with many smaller OSDs rather than a few larger ones
+then that would obviously influence the overall design of the box.
+
+Regards,
+  Dennis
+
