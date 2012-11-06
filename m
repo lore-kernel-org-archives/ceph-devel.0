@@ -1,40 +1,73 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: Large numbers of OSD per node
-Date: Tue, 6 Nov 2012 13:51:30 +0100
-Message-ID: <CAJH6TXhw7RbbD-dRcJWhKW45QBW7wh-xZ5Or449Gg=c_+RVNSA@mail.gmail.com>
-References: <5097676B.5020200@gmail.com>
-	<50979CA3.3060005@widodh.nl>
-	<5097B4E5.8070706@inktank.com>
-	<5098706A.9040506@gmail.com>
-	<5098D3E8.9000503@widodh.nl>
-	<CAJH6TXhscSv9-JpzP=+ZE421ojGh4NtgycNt929QVNXNwCmzMQ@mail.gmail.com>
-	<5098DC78.1040303@widodh.nl>
-	<CAJH6TXi4r1d+c16fH0CQk1mDbd2zjdpzFqf1--mKCGo+nnySbw@mail.gmail.com>
-	<5098EEEA.405@unilogicnetworks.net>
-	<CAJH6TXgHs7BVAwrkE0tRvxAq_LgFuHJ0PGb085ErQ=N8FSKoKw@mail.gmail.com>
-	<5098F9AF.7070905@unilogicnetworks.net>
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: Ubuntu 12.04.1 + xfs + syncfs is still not our friend
+Date: Tue, 06 Nov 2012 17:14:13 +0100
+Message-ID: <50993755.8060800@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:51173 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751343Ab2KFMvb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 07:51:31 -0500
-Received: by mail-ea0-f174.google.com with SMTP id c13so156154eaa.19
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Nov 2012 04:51:30 -0800 (PST)
-In-Reply-To: <5098F9AF.7070905@unilogicnetworks.net>
+Received: from mail-6.de-punkt.de ([93.190.64.36]:40751 "EHLO
+	mail-6.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751851Ab2KFQOR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 11:14:17 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Cc: Wido den Hollander <wido@widodh.nl>, Andrew Thrift <andyonfire@gmail.com>, ceph-devel@vger.kernel.org, mark.nelson@inktank.com
+To: ceph-devel@vger.kernel.org
 
-2012/11/6 Stefan Kleijkers <stefan@unilogicnetworks.net>:
-> True, but it's a huge difference if you have to redistribute the 36T between
-> 2 remaining nodes or between 89 remaining nodes. And with such a few nodes
-> you hit probably a couple of other bottlenecks like CPU power per node,
-> networking bandwidth per node, etc... I have noticed this the hard way with
-> 3 nodes and 24 disks/osds per node.
+Hi *,
 
-Ok, now it's clear.
-In a 90 nodes cluster, 36TB will move 400GB for each node while in a
-10 nodes cluster, the same 36TB will move 3.6TB for each node.
+anybody out there who's in Ubuntu 12.04.1/ in connection with libc + xf=
+s=20
++ syncfs?
+
+We bit the bullet and reinstalled two new nodes from debian to precise=20
+in favour of possible performance increase?!
+
+*sigh*, still getting:
+
+2012-11-06 17:05:51.863921 7f5cc52e3780  0 filestore(/data/osd6-3) moun=
+t=20
+syncfs(2) syscall not support by glibc
+2012-11-06 17:05:51.863925 7f5cc52e3780  0 filestore(/data/osd6-3) moun=
+t=20
+no syncfs(2), must use sync(2).
+
+as a show-stopper.
+
+That's with 3.2.* and 3.6.6 kernel. Should be new enough. And=20
+ceph-0.48.2 ( eu.ceph.com mirror was installing 0.48.1.. though *ops* ;=
+) )
+
+But both should be capable of this system-call?!
+
+We've been so very near... but now clueless, please sched some light in=
+ 8-)
+
+( I hope this is not a very obvious human RTFM error ;) )
+
+And so I'm writing, should one enable directio + aio, as we're having=20
+the journals on a SSD-partition?
+
+Kind regards,
+
+Oliver.
+
+--=20
+
+Oliver Francke
+
+filoo GmbH
+Moltkestra=DFe 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
+
+Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
+
+=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
