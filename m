@@ -1,39 +1,30 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Fs to use?
-Date: Tue, 06 Nov 2012 10:26:18 +0100
-Message-ID: <5098D7BA.3080900@widodh.nl>
-References: <44586A02-C7FB-423A-9CF4-5470FE417581@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: BUG: kvm crashing in void librbd::AioCompletion::complete_request
+Date: Tue, 06 Nov 2012 10:28:25 +0100
+Message-ID: <5098D839.2040704@profihost.ag>
+References: <3de2d3a8-8e11-4a68-9198-7f25bbf8fd49@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:40775 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750706Ab2KFJ0U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 04:26:20 -0500
-In-Reply-To: <44586A02-C7FB-423A-9CF4-5470FE417581@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:44695 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750785Ab2KFJ23 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 04:28:29 -0500
+In-Reply-To: <3de2d3a8-8e11-4a68-9198-7f25bbf8fd49@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
 
-
-
-On 06-11-12 07:54, Stefan Priebe - Profihost AG wrote:
-> Hello list,
+Am 06.11.2012 10:07, schrieb Alexandre DERUMIER:
+>>> Most mem get used while doing a lot of small reads.
 >
-> is there any recommendation regarding fs? I mean btrfs is still experimental would you still use it with ceph in production? Do I need big metadata with btrfs? (seems to make btrfs slow)
+> I see same problem with my test and wip-rbd-read.
 >
+> I got also strange fio results, from 5k to 100K iops (increase and increase in time during the bench).
 
-XFS seems to be the recommendation right now. Although in the long term 
-goal you want btrfs due to the checksumming you might be best off with 
-XFS at the moment.
+Update to latest wip-rbd-read frmo yesterday. Sage fixed the bug but 
+didn't report back.
 
-Wido
-
-> Greets
-> Stefan--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Stefan
