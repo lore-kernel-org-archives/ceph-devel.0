@@ -1,30 +1,39 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: BUG: kvm crashing in void librbd::AioCompletion::complete_request
-Date: Tue, 06 Nov 2012 10:28:25 +0100
-Message-ID: <5098D839.2040704@profihost.ag>
-References: <3de2d3a8-8e11-4a68-9198-7f25bbf8fd49@mailpro>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: Large numbers of OSD per node
+Date: Tue, 6 Nov 2012 10:36:32 +0100
+Message-ID: <CAJH6TXhscSv9-JpzP=+ZE421ojGh4NtgycNt929QVNXNwCmzMQ@mail.gmail.com>
+References: <5097676B.5020200@gmail.com>
+	<50979CA3.3060005@widodh.nl>
+	<5097B4E5.8070706@inktank.com>
+	<5098706A.9040506@gmail.com>
+	<5098D3E8.9000503@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:44695 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750785Ab2KFJ23 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 04:28:29 -0500
-In-Reply-To: <3de2d3a8-8e11-4a68-9198-7f25bbf8fd49@mailpro>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:53899 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750727Ab2KFJgd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Nov 2012 04:36:33 -0500
+Received: by mail-ee0-f46.google.com with SMTP id b15so119106eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Nov 2012 01:36:32 -0800 (PST)
+In-Reply-To: <5098D3E8.9000503@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Andrew Thrift <andyonfire@gmail.com>, ceph-devel@vger.kernel.org, mark.nelson@inktank.com
 
-Am 06.11.2012 10:07, schrieb Alexandre DERUMIER:
->>> Most mem get used while doing a lot of small reads.
+2012/11/6 Wido den Hollander <wido@widodh.nl>:
+> You shouldn't only think about a complete failure solution. The distributed
+> architecture of Ceph also gives you the freedom to take out a node whenever
+> you want to do maintenance or just don't trust the node and you want to
+> investigate.
 >
-> I see same problem with my test and wip-rbd-read.
->
-> I got also strange fio results, from 5k to 100K iops (increase and increase in time during the bench).
+> The scenario is still the same. Use smaller nodes so taking out one node
+> (for what reason) doesn't impact your cluster that much.
 
-Update to latest wip-rbd-read frmo yesterday. Sage fixed the bug but 
-didn't report back.
+Here:
+http://ceph.com/docs/master/install/hardware-recommendations/
+is wrote that a production cluster has been made with many R515 with
+12 disks of 3TB each. This give us 36TB of storage.
 
-Stefan
+is this configuration considered good ? I'm planning to have the same server.
