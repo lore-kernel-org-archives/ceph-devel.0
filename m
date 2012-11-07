@@ -1,43 +1,50 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Unexpected behavior by ceph 0.48.2argonaut.
-Date: Wed, 7 Nov 2012 19:04:40 +0530
-Message-ID: <CAGfy=6m3HPYwMRvRki0ZswpswuDVso1-W7i18jGtnoHb4a0HKA@mail.gmail.com>
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Subject: unexpected problem with radosgw fcgi
+Date: Wed, 7 Nov 2012 15:16:44 +0100
+Message-ID: <CAMwB3TiJUmnr6H2QVancmDxSuF1M9KmWW0rTwxJxvLWk80WUyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:34566 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750761Ab2KGNel (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 08:34:41 -0500
-Received: by mail-vc0-f174.google.com with SMTP id fk26so1503452vcb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 05:34:40 -0800 (PST)
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:49534 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752314Ab2KGOQo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 09:16:44 -0500
+Received: by mail-qc0-f174.google.com with SMTP id o22so1043584qcr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 06:16:44 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I am not sure about my judgments but please help me out understanding
-the result of following experiment carried out : -
+I have realize that requests from fastcgi in nginx from radosgw returni=
+ng:
 
+HTTP/1.1 200, not a HTTP/1.1 200 OK
 
-Experiment  : (3 node cluster,  all have ceph v.0.48.2agonaut( after
-building ceph from src code) + UBUNTU 12.04 + kernel 3.2.0 )
-----------------------------------------------------------------------------------------------------------------------------------------------------------
-            VM1 ( mon.0+ osd.0 +mds.0 )  VM2 (mon.1 + osd.1 + mds.1)  VM3(mon.2)
-             - Cluster is up and HEALTH_OK
-             - Replication factor is 2. (by default all pools have
-replication factor set to 2)
-             - After mounting "mount.ceph mon_addr:port :/ ~/cephfs "
-, I created file inside mounted Dir "cephfs" .
-             - And able to see data on both OSD i.e. VM1(osd.0) and on
-VM2(osd.1)  as well as file is accessible .
-             - Then VM2 is made down & VM2 absence is verified with ceph -s  .
-             - Even after VM1(osd.0 mds.0 mon.0) + VM3 (mon.2)  was
-live , I am unable to access the file .
-             - I tried to remount the data on different Dir with
-mount.ceph currently_live_mons:/ /home/hemant/xyz
-             - Even after that I was unable to access the file stored
-on cluster.
-----------------------------------------------------------------------------------------------------------------------------------------------------------
+Any other cgi that i run, for example php via fastcgi return this like
+RFC says, with OK.
 
--
-Hemant Surale.
+Is someone experience this problem ??
+
+I see in code:
+
+=2E/src/rgw/rgw_rest.cc line 36
+
+const static struct rgw_html_errors RGW_HTML_ERRORS[] =3D {
+    { 0, 200, "" },
+=2E...
+
+What if i change this into:
+
+{ 0, 200, "OK" },
+
+--
+-----
+Regards
+
+S=C5=82awek Skowron
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
