@@ -1,26 +1,42 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: syncfs slower than without syncfs
-Date: Wed, 07 Nov 2012 17:26:00 +0100
-Message-ID: <509A8B98.5000707@profihost.ag>
-References: <509A2CE6.1010100@profihost.ag> <509A62A6.5070104@profihost.ag> <509A7860.6020805@inktank.com>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: SSD journal suggestion
+Date: Wed, 7 Nov 2012 11:35:42 -0500
+Message-ID: <8F1EF04A-96C0-402F-9DE2-3891514BD04F@ornl.gov>
+References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com>
+ <alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net>
+ <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
+ <509A77CA.5030206@inktank.com>
+ <670668A8-4126-4EF8-B27B-7B00C8824F05@ornl.gov>
+ <509A8A32.9020701@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:36586 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750832Ab2KGQ0E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 11:26:04 -0500
-In-Reply-To: <509A7860.6020805@inktank.com>
+Received: from mta01.ornl.gov ([128.219.14.70]:62484 "EHLO mta01.ornl.gov"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751346Ab2KGQfo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 11:35:44 -0500
+In-Reply-To: <509A8A32.9020701@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 07.11.2012 16:04, schrieb Mark Nelson:
-> Whew, glad you found the problem Stefan!  I was starting to wonder what
-> was going on. :)  Do you mind filling a bug about the control dependencies?
+On Nov 7, 2012, at 11:20 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
 
-Sure where should i fill it in?
+>>>  Right now I'm doing 3 journals per SSD, but topping out at about
+>>> 1.2-1.4GB/s from the client perspective for the node with 15+ drives and
+>>> 5 SSDs.  It's possible newer versions of the code and tuning may
+>>> increase that.
+>> 
+>> What interconnect is this? 10G Ethernet is 1.25 GB/s line rate and I would expect your Sockets and Ceph overhead to eat into that. Or is it dual 10G Ethernet?
+> 
+> This is 8 concurrent instances of rados bench running on localhost. 
+> Ceph is configured with 1x replication.  1.2-1.4GB/s is the aggregate 
+> throughput of all of the rados bench instances.
 
-Stefan
+Ok, all local with no communication. Given this level of local performance, what does that translate into when talking over the network?
+
+Scott
+
