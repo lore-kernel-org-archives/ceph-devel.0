@@ -1,50 +1,47 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: unexpected problem with radosgw fcgi
-Date: Wed, 7 Nov 2012 15:16:44 +0100
-Message-ID: <CAMwB3TiJUmnr6H2QVancmDxSuF1M9KmWW0rTwxJxvLWk80WUyA@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: SSD journal suggestion
+Date: Wed, 07 Nov 2012 09:01:30 -0600
+Message-ID: <509A77CA.5030206@inktank.com>
+References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com> <alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net> <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:49534 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752314Ab2KGOQo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 09:16:44 -0500
-Received: by mail-qc0-f174.google.com with SMTP id o22so1043584qcr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 06:16:44 -0800 (PST)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:44897 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754309Ab2KGPB1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 10:01:27 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so2458404iea.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 07:01:27 -0800 (PST)
+In-Reply-To: <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-I have realize that requests from fastcgi in nginx from radosgw returni=
-ng:
+On 11/07/2012 06:28 AM, Gandalf Corvotempesta wrote:
+> 2012/11/7 Sage Weil <sage@inktank.com>:
+>> On Wed, 7 Nov 2012, Gandalf Corvotempesta wrote:
+>>> I'm evaluating some SSD drives as journal.
+>>> Samsung 840 Pro seems to be the fastest in sequential reads and write.
+>
+> The 840 Pro seems to reach 485MB/s in sequential write:
+> http://www.storagereview.com/samsung_ssd_840_pro_review
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-HTTP/1.1 200, not a HTTP/1.1 200 OK
+I'm using Intel 510s in a test node and can do about 450MB/s per drive. 
+  Right now I'm doing 3 journals per SSD, but topping out at about 
+1.2-1.4GB/s from the client perspective for the node with 15+ drives and 
+5 SSDs.  It's possible newer versions of the code and tuning may 
+increase that.
 
-Any other cgi that i run, for example php via fastcgi return this like
-RFC says, with OK.
+TV pointed me at the new Intel DC S3700 which looks like a very 
+interesting option (the 100GB model for $240).
 
-Is someone experience this problem ??
+http://www.anandtech.com/show/6432/the-intel-ssd-dc-s3700-intels-3rd-generation-controller-analyzed
 
-I see in code:
-
-=2E/src/rgw/rgw_rest.cc line 36
-
-const static struct rgw_html_errors RGW_HTML_ERRORS[] =3D {
-    { 0, 200, "" },
-=2E...
-
-What if i change this into:
-
-{ 0, 200, "OK" },
-
---
------
-Regards
-
-S=C5=82awek Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mark
