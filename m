@@ -1,46 +1,42 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: What would a good OSD node hardware configuration look like?
-Date: Wed, 7 Nov 2012 09:29:14 +0100
-Message-ID: <CAJH6TXg9z0QYQSgwkh-O8QsY_oZXPy_ckR_iDnTs2vfr_xjmzA@mail.gmail.com>
-References: <5097F3BD.2000904@conversis.de>
-	<50985677.6090708@inktank.com>
-	<50987AB9.9030905@conversis.de>
-	<50996548.1030602@inktank.com>
-	<5099BAEB.3060905@conversis.de>
-	<509A0F35.2000801@widodh.nl>
-	<CAJH6TXgRUUZ5h9gB_Zi-31aMj0r00HCjZ8jRZZCGd8_LSXaBqw@mail.gmail.com>
-	<509A1A27.9090303@widodh.nl>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: syncfs slower than without syncfs
+Date: Wed, 07 Nov 2012 10:41:58 +0100
+Message-ID: <509A2CE6.1010100@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:60975 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751762Ab2KGI3P (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 03:29:15 -0500
-Received: by mail-ee0-f46.google.com with SMTP id b15so739609eek.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 00:29:14 -0800 (PST)
-In-Reply-To: <509A1A27.9090303@widodh.nl>
+Received: from mail.profihost.ag ([85.158.179.208]:33567 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751938Ab2KGJmG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 04:42:06 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2012/11/7 Wido den Hollander <wido@widodh.nl>:
-> True. You might want to use a small internal USB stick like those from
-> Transcend for installing your OS. They are available in 4GB and 8GB.
->
-> Let syslog handle your logging to an external device and you have almost no
-> write I/O on that thing.
+Hello list,
 
-Ok, but in this case instead of a RAID between 2 SSD will be better to
-use one SSD for journal and one SATA disks for OS.
+syncfs is much slower than without syncfs to me.
 
-DELL R515 has 12 front disks and 2 internal 2.5'' disks. I'm planning
-to use these internal disks as journal and OS and the external disks
-as OSD.
+If i compile latest ceph master with wip-rbd-read:
 
-> Still, I think that in the distributed nature it shouldn't matter if you
-> loose a node. If loosing a node is a to big impact to your cluster, go with
-> smaller nodes.
+with syncfs:
+rand 4K:
+   write: io=1133MB, bw=12853KB/s, iops=3213, runt= 90277msec
+   read : io=1239MB, bw=14046KB/s, iops=3511, runt= 90325msec
+seq 4M:
+   write: io=37560MB, bw=423874KB/s, iops=103, runt= 90738msec
+   read : io=103852MB, bw=1151MB/s, iops=287, runt= 90237msec
 
-This is true.
+without syncfs:
+rand 4K:
+   write: io=3733MB, bw=42459KB/s, iops=10614, runt= 90039msec
+   read : io=6018MB, bw=68446KB/s, iops=17111, runt= 90038msec
+seq 4M:
+   write: io=51204MB, bw=577328KB/s, iops=140, runt= 90820msec
+   read : io=150320MB, bw=1666MB/s, iops=416, runt= 90228msec
+
+I thought syncfs should boost the performance.
+
+Greets,
+Stefan
