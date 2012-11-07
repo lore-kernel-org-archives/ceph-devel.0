@@ -1,41 +1,35 @@
-From: Martin Mailand <martin@tuxadero.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
 Subject: Re: SSD journal suggestion
-Date: Wed, 07 Nov 2012 22:11:38 +0100
-Message-ID: <509ACE8A.5090708@tuxadero.com>
-References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com> <alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net> <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com> <509A77CA.5030206@inktank.com> <670668A8-4126-4EF8-B27B-7B00C8824F05@ornl.gov> <509A8A32.9020701@inktank.com> <8F1EF04A-96C0-402F-9DE2-3891514BD04F@ornl.gov> <509A8F4F.7090404@inktank.com>
-Reply-To: martin@tuxadero.com
+Date: Wed, 7 Nov 2012 22:14:27 +0100
+Message-ID: <CAJH6TXifJmKc-g-FaijgwwGh_yVAQ+5ebGO_Du7C43u+_rZ49g@mail.gmail.com>
+References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com>
+	<alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net>
+	<CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
+	<509A77CA.5030206@inktank.com>
+	<670668A8-4126-4EF8-B27B-7B00C8824F05@ornl.gov>
+	<509A8A32.9020701@inktank.com>
+	<8F1EF04A-96C0-402F-9DE2-3891514BD04F@ornl.gov>
+	<509A8F4F.7090404@inktank.com>
+	<509ACE8A.5090708@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:43163 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752093Ab2KGVLv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 16:11:51 -0500
-In-Reply-To: <509A8F4F.7090404@inktank.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:51944 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752497Ab2KGVO2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 16:14:28 -0500
+Received: by mail-ee0-f46.google.com with SMTP id b15so1178545eek.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 13:14:27 -0800 (PST)
+In-Reply-To: <509ACE8A.5090708@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: martin@tuxadero.com
+Cc: Mark Nelson <mark.nelson@inktank.com>, "Atchley, Scott" <atchleyes@ornl.gov>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+2012/11/7 Martin Mailand <martin@tuxadero.com>:
+> I have 16 SAS disk on a LSI 9266-8i and 4 Intel 520 SSD on a HBA, the node
+> has dual 10G Ethernet. The clients are 4 nodes with dual 10GeB, as test I
+> use rados bench on each client. The aggregated write speed is around 1,6GB/s
+> with single replication.
 
-I have 16 SAS disk on a LSI 9266-8i and 4 Intel 520 SSD on a HBA, the 
-node has dual 10G Ethernet. The clients are 4 nodes with dual 10GeB, as 
-test I use rados bench on each client. The aggregated write speed is 
-around 1,6GB/s with single replication.
-
-In the first configuration, I had the SSDs on the raidcontroller as 
-well, but then I saturated the PCIe 2.0 x8 interface of the 
-raidcontroller, therefore I use a second controller for the SSDs.
-
-
--martin
-
-
-Am 07.11.2012 17:41, schrieb Mark Nelson:
-> Well, local, but still over tcp.  Right now I'm focusing on pushing the
-> osds/filestores as far as I can, and after that I'm going to setup a
-> bonded 10GbE network to see what kind of messenger bottlenecks I run
-> into.  Sadly the testing is going slower than I would like.
-
+Just for curiosity, which switches do you have?
