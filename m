@@ -1,60 +1,31 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: less cores more iops / speed
-Date: Thu, 08 Nov 2012 10:02:23 +0100
-Message-ID: <509B751F.8000900@profihost.ag>
-References: <97ae038a-a5ae-4df4-acf6-c87cb80020aa@mailpro>
+Subject: clock syncronisation
+Date: Thu, 08 Nov 2012 10:04:21 +0100
+Message-ID: <509B7595.1010809@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:41964 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:35360 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753421Ab2KHJCb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 04:02:31 -0500
-In-Reply-To: <97ae038a-a5ae-4df4-acf6-c87cb80020aa@mailpro>
+	with ESMTP id S1755217Ab2KHJE3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 04:04:29 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 08.11.2012 09:58, schrieb Alexandre DERUMIER:
->>> What do you mean by that? I'm talking about the KVM guest not about=
- the
->>> ceph nodes.
->
-> Do you have tried to compare virtio-blk and virtio-scsi ?
-How to change? Right now i'm using the PVE defaults =3D> scsi-hd.
+Hello list,
 
-> Do you have tried directly from the host with the rbd kernel module ?
-No don't know how to use ;-)
+is there any prefered way to use clock syncronisation?
+
+I've tried running openntpd and ntpd on all servers but i'm still getting:
+2012-11-08 09:55:38.255928 mon.0 [WRN] message from mon.2 was stamped 
+0.063136s in the future, clocks not synchronized
+2012-11-08 09:55:39.328639 mon.0 [WRN] message from mon.2 was stamped 
+0.063285s in the future, clocks not synchronized
+2012-11-08 09:55:39.328833 mon.0 [WRN] message from mon.2 was stamped 
+0.063301s in the future, clocks not synchronized
+2012-11-08 09:55:40.819975 mon.0 [WRN] message from mon.2 was stamped 
+0.063360s in the future, clocks not synchronized
 
 Stefan
-
-
-> ----- Mail original -----
->
-> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>
-> =C3=80: "Mark Nelson" <mark.nelson@inktank.com>
-> Cc: "Joao Eduardo Luis" <joao.luis@inktank.com>, ceph-devel@vger.kern=
-el.org
-> Envoy=C3=A9: Jeudi 8 Novembre 2012 09:45:17
-> Objet: Re: less cores more iops / speed
->
-> Am 08.11.2012 01:59, schrieb Mark Nelson:
->> There's also the context switching overhead. It'd be interesting to
->> know how much the writer processes were shifting around on cores.
-> What do you mean by that? I'm talking about the KVM guest not about t=
-he
-> ceph nodes.
->
->> Stefan, what tool were you using to do writes?
-> as always: fio ;-)
->
-> Stefan
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
