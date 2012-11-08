@@ -1,156 +1,180 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/3] rbd: standardize rbd_request variable names
-Date: Thu, 08 Nov 2012 08:08:23 -0600
-Message-ID: <509BBCD7.9070608@inktank.com>
+Subject: [PATCH 2/3] rbd: standardize ceph_osd_request variable names
+Date: Thu, 08 Nov 2012 08:08:29 -0600
+Message-ID: <509BBCDD.80309@inktank.com>
 References: <509BBC83.1020203@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:63741 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752014Ab2KHOIX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 09:08:23 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so4178788iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 06:08:22 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:45580 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755644Ab2KHOId (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 09:08:33 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y32so1925977iag.19
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 06:08:32 -0800 (PST)
 In-Reply-To: <509BBC83.1020203@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-There are two names used for items of rbd_request structure type:
-"req" and "req_data".  The former name is also used to represent
-items of pointers to struct ceph_osd_request.
+There are spots where a ceph_osds_request pointer variable is given
+the name "req".  Since we're dealing with (at least) three types of
+requests (block layer, rbd, and osd), I find this slightly
+distracting.
 
-Change all variables that have these names so they are instead
-called "rbd_req" consistently.
+Change such instances to use "osd_req" consistently to make the
+abstraction represented a little more obvious.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   50
-++++++++++++++++++++++++++------------------------
- 1 file changed, 26 insertions(+), 24 deletions(-)
+ drivers/block/rbd.c |   60
+++++++++++++++++++++++++++-------------------------
+ 1 file changed, 31 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 5de49a1..9d8b406 100644
+index 9d8b406..caff180 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1090,10 +1090,12 @@ static void rbd_coll_end_req_index(struct
-request *rq,
- 	spin_unlock_irq(q->queue_lock);
- }
-
--static void rbd_coll_end_req(struct rbd_request *req,
-+static void rbd_coll_end_req(struct rbd_request *rbd_req,
- 			     int ret, u64 len)
+@@ -1113,12 +1113,12 @@ static int rbd_do_request(struct request *rq,
+ 			  struct ceph_osd_req_op *ops,
+ 			  struct rbd_req_coll *coll,
+ 			  int coll_index,
+-			  void (*rbd_cb)(struct ceph_osd_request *req,
+-					 struct ceph_msg *msg),
++			  void (*rbd_cb)(struct ceph_osd_request *,
++					 struct ceph_msg *),
+ 			  struct ceph_osd_request **linger_req,
+ 			  u64 *ver)
  {
--	rbd_coll_end_req_index(req->rq, req->coll, req->coll_index, ret, len);
-+	rbd_coll_end_req_index(rbd_req->rq,
-+				rbd_req->coll, rbd_req->coll_index,
-+				ret, len);
- }
-
- /*
-@@ -1121,12 +1123,12 @@ static int rbd_do_request(struct request *rq,
+-	struct ceph_osd_request *req;
++	struct ceph_osd_request *osd_req;
+ 	struct ceph_file_layout *layout;
  	int ret;
  	u64 bno;
- 	struct timespec mtime = CURRENT_TIME;
--	struct rbd_request *req_data;
-+	struct rbd_request *rbd_req;
- 	struct ceph_osd_request_head *reqhead;
- 	struct ceph_osd_client *osdc;
+@@ -1145,67 +1145,68 @@ static int rbd_do_request(struct request *rq,
+ 		(unsigned long long) len, coll, coll_index);
 
--	req_data = kzalloc(sizeof(*req_data), GFP_NOIO);
--	if (!req_data) {
-+	rbd_req = kzalloc(sizeof(*rbd_req), GFP_NOIO);
-+	if (!rbd_req) {
- 		if (coll)
- 			rbd_coll_end_req_index(rq, coll, coll_index,
- 					       -ENOMEM, len);
-@@ -1134,8 +1136,8 @@ static int rbd_do_request(struct request *rq,
+ 	osdc = &rbd_dev->rbd_client->client->osdc;
+-	req = ceph_osdc_alloc_request(osdc, flags, snapc, ops,
++	osd_req = ceph_osdc_alloc_request(osdc, flags, snapc, ops,
+ 					false, GFP_NOIO, pages, bio);
+-	if (!req) {
++	if (!osd_req) {
+ 		ret = -ENOMEM;
+ 		goto done_pages;
  	}
 
- 	if (coll) {
--		req_data->coll = coll;
--		req_data->coll_index = coll_index;
-+		rbd_req->coll = coll;
-+		rbd_req->coll_index = coll_index;
- 	}
+-	req->r_callback = rbd_cb;
++	osd_req->r_callback = rbd_cb;
 
- 	dout("rbd_do_request object_name=%s ofs=%llu len=%llu coll=%p[%d]\n",
-@@ -1152,12 +1154,12 @@ static int rbd_do_request(struct request *rq,
+ 	rbd_req->rq = rq;
+ 	rbd_req->bio = bio;
+ 	rbd_req->pages = pages;
+ 	rbd_req->len = len;
 
- 	req->r_callback = rbd_cb;
+-	req->r_priv = rbd_req;
++	osd_req->r_priv = rbd_req;
 
--	req_data->rq = rq;
--	req_data->bio = bio;
--	req_data->pages = pages;
--	req_data->len = len;
-+	rbd_req->rq = rq;
-+	rbd_req->bio = bio;
-+	rbd_req->pages = pages;
-+	rbd_req->len = len;
-
--	req->r_priv = req_data;
-+	req->r_priv = rbd_req;
-
- 	reqhead = req->r_request->front.iov_base;
+-	reqhead = req->r_request->front.iov_base;
++	reqhead = osd_req->r_request->front.iov_base;
  	reqhead->snapid = cpu_to_le64(CEPH_NOSNAP);
-@@ -1202,11 +1204,11 @@ static int rbd_do_request(struct request *rq,
+
+-	strncpy(req->r_oid, object_name, sizeof(req->r_oid));
+-	req->r_oid_len = strlen(req->r_oid);
++	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
++	osd_req->r_oid_len = strlen(osd_req->r_oid);
+
+-	layout = &req->r_file_layout;
++	layout = &osd_req->r_file_layout;
+ 	memset(layout, 0, sizeof(*layout));
+ 	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+ 	layout->fl_stripe_count = cpu_to_le32(1);
+ 	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+ 	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->spec->pool_id);
+ 	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
+-				   req, ops);
++				   osd_req, ops);
+ 	rbd_assert(ret == 0);
+
+-	ceph_osdc_build_request(req, ofs, &len,
++	ceph_osdc_build_request(osd_req, ofs, &len,
+ 				ops,
+ 				snapc,
+ 				&mtime,
+-				req->r_oid, req->r_oid_len);
++				osd_req->r_oid, osd_req->r_oid_len);
+
+ 	if (linger_req) {
+-		ceph_osdc_set_request_linger(osdc, req);
+-		*linger_req = req;
++		ceph_osdc_set_request_linger(osdc, osd_req);
++		*linger_req = osd_req;
+ 	}
+
+-	ret = ceph_osdc_start_request(osdc, req, false);
++	ret = ceph_osdc_start_request(osdc, osd_req, false);
+ 	if (ret < 0)
+ 		goto done_err;
+
+ 	if (!rbd_cb) {
+-		ret = ceph_osdc_wait_request(osdc, req);
++		u64 version;
++
++		ret = ceph_osdc_wait_request(osdc, osd_req);
++		version = le64_to_cpu(osd_req->r_reassert_version.version);
+ 		if (ver)
+-			*ver = le64_to_cpu(req->r_reassert_version.version);
+-		dout("reassert_ver=%llu\n",
+-			(unsigned long long)
+-				le64_to_cpu(req->r_reassert_version.version));
+-		ceph_osdc_put_request(req);
++			*ver = version;
++		dout("reassert_ver=%llu\n", (unsigned long long) version);
++		ceph_osdc_put_request(osd_req);
+ 	}
  	return ret;
 
  done_err:
--	bio_chain_put(req_data->bio);
-+	bio_chain_put(rbd_req->bio);
- 	ceph_osdc_put_request(req);
+ 	bio_chain_put(rbd_req->bio);
+-	ceph_osdc_put_request(req);
++	ceph_osdc_put_request(osd_req);
  done_pages:
--	rbd_coll_end_req(req_data, ret, len);
--	kfree(req_data);
-+	rbd_coll_end_req(rbd_req, ret, len);
-+	kfree(rbd_req);
- 	return ret;
- }
-
-@@ -1215,7 +1217,7 @@ done_pages:
+ 	rbd_coll_end_req(rbd_req, ret, len);
+ 	kfree(rbd_req);
+@@ -1215,9 +1216,9 @@ done_pages:
+ /*
+  * Ceph osd op callback
   */
- static void rbd_req_cb(struct ceph_osd_request *req, struct ceph_msg *msg)
+-static void rbd_req_cb(struct ceph_osd_request *req, struct ceph_msg *msg)
++static void rbd_req_cb(struct ceph_osd_request *osd_req, struct
+ceph_msg *msg)
  {
--	struct rbd_request *req_data = req->r_priv;
-+	struct rbd_request *rbd_req = req->r_priv;
+-	struct rbd_request *rbd_req = req->r_priv;
++	struct rbd_request *rbd_req = osd_req->r_priv;
  	struct ceph_osd_reply_head *replyhead;
  	struct ceph_osd_op *op;
  	__s32 rc;
-@@ -1234,20 +1236,20 @@ static void rbd_req_cb(struct ceph_osd_request
+@@ -1248,13 +1249,14 @@ static void rbd_req_cb(struct ceph_osd_request
 *req, struct ceph_msg *msg)
- 		(unsigned long long) bytes, read_op, (int) rc);
+ 	if (rbd_req->bio)
+ 		bio_chain_put(rbd_req->bio);
 
- 	if (rc == -ENOENT && read_op) {
--		zero_bio_chain(req_data->bio, 0);
-+		zero_bio_chain(rbd_req->bio, 0);
- 		rc = 0;
--	} else if (rc == 0 && read_op && bytes < req_data->len) {
--		zero_bio_chain(req_data->bio, bytes);
--		bytes = req_data->len;
-+	} else if (rc == 0 && read_op && bytes < rbd_req->len) {
-+		zero_bio_chain(rbd_req->bio, bytes);
-+		bytes = rbd_req->len;
- 	}
-
--	rbd_coll_end_req(req_data, rc, bytes);
-+	rbd_coll_end_req(rbd_req, rc, bytes);
-
--	if (req_data->bio)
--		bio_chain_put(req_data->bio);
-+	if (rbd_req->bio)
-+		bio_chain_put(rbd_req->bio);
-
- 	ceph_osdc_put_request(req);
--	kfree(req_data);
-+	kfree(rbd_req);
+-	ceph_osdc_put_request(req);
++	ceph_osdc_put_request(osd_req);
+ 	kfree(rbd_req);
  }
 
- static void rbd_simple_req_cb(struct ceph_osd_request *req, struct
+-static void rbd_simple_req_cb(struct ceph_osd_request *req, struct
 ceph_msg *msg)
++static void rbd_simple_req_cb(struct ceph_osd_request *osd_req,
++				struct ceph_msg *msg)
+ {
+-	ceph_osdc_put_request(req);
++	ceph_osdc_put_request(osd_req);
+ }
+
+ /*
 -- 
 1.7.9.5
 
