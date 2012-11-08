@@ -1,37 +1,41 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: less cores more iops / speed
-Date: Thu, 08 Nov 2012 16:14:32 +0100
-Message-ID: <509BCC58.3070003@profihost.ag>
-References: <509ADA6A.9000807@profihost.ag> <509AF625.8040207@inktank.com> <509B03EA.9050701@inktank.com> <509B711D.3070206@profihost.ag> <509BB156.5080404@inktank.com>
+Subject: Re: extreme ceph-osd cpu load for rand. 4k write
+Date: Thu, 08 Nov 2012 16:45:15 +0100
+Message-ID: <509BD38B.8090200@profihost.ag>
+References: <509AC772.5010606@profihost.ag> <509BC878.3090804@profihost.ag> <alpine.DEB.2.00.1211080658560.11845@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:51858 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:56137 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751930Ab2KHPOl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 10:14:41 -0500
-In-Reply-To: <509BB156.5080404@inktank.com>
+	with ESMTP id S1751464Ab2KHPpY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 10:45:24 -0500
+In-Reply-To: <alpine.DEB.2.00.1211080658560.11845@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 08.11.2012 14:19, schrieb Mark Nelson:
-> On 11/08/2012 02:45 AM, Stefan Priebe - Profihost AG wrote:
->> Am 08.11.2012 01:59, schrieb Mark Nelson:
->>> There's also the context switching overhead.  It'd be interesting to
->>> know how much the writer processes were shifting around on cores.
->> What do you mean by that? I'm talking about the KVM guest not about the
->> ceph nodes.
+Am 08.11.2012 16:01, schrieb Sage Weil:
+> On Thu, 8 Nov 2012, Stefan Priebe - Profihost AG wrote:
+>> Is there any way to find out why a ceph-osd process takes around 10 times more
+>> load on rand 4k writes than on 4k reads?
 >
-> in this case, is fio bouncing around between cores?
+> Something like perf or oprofile is probably your best bet.  perf can be
+> tedious to deploy, depending on where your kernel is coming from.
+> oprofile seems to be deprecated, although I've had good results with it in
+> the past.
 
-Thanks you're correct. If i bind fio to two cores on a 8 core VM it runs 
-with 16.000 iops.
+I've recorded 10s with perf - it is now a 300MB perf.data file. Sadly 
+i've no idea what todo with it next.
 
-So it is a problem of KVM which let's the processes jump between cores a 
-lot.
+>   would love to see where the CPU is spending most of it's time.  This is
+> on current master?
+Yes
 
-Greets,
+>  I expect there are still some low-hanging fruit that
+> can bring CPU utilization down (or even boost iops).
+Would be great to find them.
+
 Stefan
