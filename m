@@ -1,71 +1,53 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: less cores more iops / speed
-Date: Wed, 07 Nov 2012 18:59:48 -0600
-Message-ID: <509B0404.5010500@inktank.com>
-References: <509ADA6A.9000807@profihost.ag> <509AF625.8040207@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Unexpected behavior by ceph 0.48.2argonaut.
+Date: Wed, 07 Nov 2012 18:32:43 -0800
+Message-ID: <509B19CB.7010300@inktank.com>
+References: <CAGfy=6m3HPYwMRvRki0ZswpswuDVso1-W7i18jGtnoHb4a0HKA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:51785 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754519Ab2KHA7s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 19:59:48 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y32so1559318iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 16:59:48 -0800 (PST)
-In-Reply-To: <509AF625.8040207@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:45611 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752549Ab2KHCdG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 21:33:06 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so1615951pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 18:33:05 -0800 (PST)
+In-Reply-To: <CAGfy=6m3HPYwMRvRki0ZswpswuDVso1-W7i18jGtnoHb4a0HKA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao.luis@inktank.com>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: hemant surale <hemant.surale@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/07/2012 06:00 PM, Joao Eduardo Luis wrote:
-> On 11/07/2012 10:02 PM, Stefan Priebe wrote:
->> Hello again,
->>
->> I've noticed something really interesting.
->>
->> I get 5000 iops / VM for rand. 4k writes while assigning 4 cores on a
->> 2.5 Ghz Xeon.
->>
->> When i move this VM to another kvm host with 3.6Ghz i get 8000 iops
->> (still 8 cores) when i then LOWER the assigned cores from 8 to 4 i get
->> 14.500 iops. If i assign only 2 cores i get 16.000 iops...
->>
->> Why does less kvm cores mean more speed?
+On 11/07/2012 05:34 AM, hemant surale wrote:
+> I am not sure about my judgments but please help me out understanding
+> the result of following experiment carried out : -
 >
-> Totally going on a limb here, but might be related to the cache maybe?
-> When you have more cores your threads may bounce around the cores and
-> invalidate cache entries as they go by; will less cores you might end up
-> with some sort of twisted, forced cpu affinity that allows you to take
-> advantage of caching.
+>
+> Experiment  : (3 node cluster,  all have ceph v.0.48.2agonaut( after
+> building ceph from src code) + UBUNTU 12.04 + kernel 3.2.0 )
+> ----------------------------------------------------------------------------------------------------------------------------------------------------------
+>              VM1 ( mon.0+ osd.0 +mds.0 )  VM2 (mon.1 + osd.1 + mds.1)  VM3(mon.2)
+>               - Cluster is up and HEALTH_OK
+>               - Replication factor is 2. (by default all pools have
+> replication factor set to 2)
+>               - After mounting "mount.ceph mon_addr:port :/ ~/cephfs "
+> , I created file inside mounted Dir "cephfs" .
+>               - And able to see data on both OSD i.e. VM1(osd.0) and on
+> VM2(osd.1)  as well as file is accessible .
+>               - Then VM2 is made down & VM2 absence is verified with ceph -s  .
+>               - Even after VM1(osd.0 mds.0 mon.0) + VM3 (mon.2)  was
+> live , I am unable to access the file .
 
-There's also the context switching overhead.  It'd be interesting to 
-know how much the writer processes were shifting around on cores. 
-Stefan, what tool were you using to do writes?
+Was the cluster showing all pgs active+degraded after this, or did
+some stay inactive?
 
+>               - I tried to remount the data on different Dir with
+> mount.ceph currently_live_mons:/ /home/hemant/xyz
+>               - Even after that I was unable to access the file stored
+> on cluster.
+> ----------------------------------------------------------------------------------------------------------------------------------------------------------
 >
-> But I don't know, really. I would be amazed if what I just wrote had an
-> ounce of truth, and would be completely astonished if that was the cause
-> for such a sudden increase on iops.
-
-Yeah, it's seems pretty surprising that there would be any significant 
-effect at this level of performance.
-
->
->    -Joao
->
->>
->> Greets,
->> Stefan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> -
+> Hemant Surale.
 
