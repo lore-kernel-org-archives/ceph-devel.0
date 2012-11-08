@@ -1,62 +1,81 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: unexpected problem with radosgw fcgi
-Date: Thu, 8 Nov 2012 13:48:19 -0800
-Message-ID: <CAC-hyiG27TiUAi5suRiOveRyecBZvFaHYaCAgoYfb4KQFRZYXA@mail.gmail.com>
-References: <CAMwB3TiJUmnr6H2QVancmDxSuF1M9KmWW0rTwxJxvLWk80WUyA@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: extreme ceph-osd cpu load for rand. 4k write
+Date: Thu, 08 Nov 2012 13:50:49 -0800
+Message-ID: <509C2939.5000201@inktank.com>
+References: <509AC772.5010606@profihost.ag> <509BC878.3090804@profihost.ag> <alpine.DEB.2.00.1211080658560.11845@cobra.newdream.net> <509BD38B.8090200@profihost.ag> <509BD87F.1010107@inktank.com> <509C23A7.9010109@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:46479 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757171Ab2KHVsV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 16:48:21 -0500
-Received: by mail-bk0-f46.google.com with SMTP id jk13so1403170bkc.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 13:48:20 -0800 (PST)
-In-Reply-To: <CAMwB3TiJUmnr6H2QVancmDxSuF1M9KmWW0rTwxJxvLWk80WUyA@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:37927 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757138Ab2KHVvN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 16:51:13 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2291671pad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 13:51:12 -0800 (PST)
+In-Reply-To: <509C23A7.9010109@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 7, 2012 at 6:16 AM, S=C5=82awomir Skowron <szibis@gmail.com=
-> wrote:
-> I have realize that requests from fastcgi in nginx from radosgw retur=
-ning:
+On 11/08/2012 01:27 PM, Stefan Priebe wrote:
+> Am 08.11.2012 17:06, schrieb Mark Nelson:
+>> On 11/08/2012 09:45 AM, Stefan Priebe - Profihost AG wrote:
+>>> Am 08.11.2012 16:01, schrieb Sage Weil:
+>>>> On Thu, 8 Nov 2012, Stefan Priebe - Profihost AG wrote:
+>>>>> Is there any way to find out why a ceph-osd process takes around 10
+>>>>> times more
+>>>>> load on rand 4k writes than on 4k reads?
+>>>>
+>>>> Something like perf or oprofile is probably your best bet.  perf can be
+>>>> tedious to deploy, depending on where your kernel is coming from.
+>>>> oprofile seems to be deprecated, although I've had good results with
+>>>> it in
+>>>> the past.
+>>>
+>>> I've recorded 10s with perf - it is now a 300MB perf.data file. Sadly
+>>> i've no idea what todo with it next.
+>>
+>> Pour yourself a stiff drink! (haha!)
+>>
+>> Try just doing a "perf report" in the directory where you've got the
+>> data file.  Here's a nice tutorial:
+>>
+>> https://perf.wiki.kernel.org/index.php/Tutorial
+>>
+>> Also, if you see missing symbols you might benefit by chowning the file
+>> to root and running perf report as root.  If you still see missing
+>> symbols, you may want to just give up and try sysprof.
 >
-> HTTP/1.1 200, not a HTTP/1.1 200 OK
+> I've now used google perftools / google CPU profiler. It was the only
+> tool who worked out of the box ;-)
 >
-> Any other cgi that i run, for example php via fastcgi return this lik=
-e
-> RFC says, with OK.
->
-> Is someone experience this problem ??
+> Attached is a PDF with a profiled ceph-osd process while 4k random write.
 
-I have seen a similar issue in the past with nginx. It doesn't happen
-with apache. My guess is that it's either something with the way nginx
-is configured, or some difference in the fastcgi module
-implementation.
+It looks like a not insignificant portion of time is spent in the
+logging infrastructure. Could you add this to the osds' configuration
+to prevent any debug log gathering (it's logged/gathered):
 
->
-> I see in code:
->
-> ./src/rgw/rgw_rest.cc line 36
->
-> const static struct rgw_html_errors RGW_HTML_ERRORS[] =3D {
->     { 0, 200, "" },
-> ....
->
-> What if i change this into:
->
-> { 0, 200, "OK" },
+debug lockdep = 0/0
+debug context = 0/0
+debug crush = 0/0
+debug buffer = 0/0
+debug timer = 0/0
+debug journaler = 0/0
+debug osd = 0/0
+debug optracker = 0/0
+debug objclass = 0/0
+debug filestore = 0/0
+debug journal = 0/0
+debug ms = 0/0
+debug monc = 0/0
+debug tp = 0/0
+debug auth = 0/0
+debug finisher = 0/0
+debug heartbeatmap = 0/0
+debug perfcounter = 0/0
+debug asok = 0/0
+debug throttle = 0/0
 
-The third field there specifies the error code embedded in the
-returned XML with S3, so it wouldn't fix anything.
-
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Josh
