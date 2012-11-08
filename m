@@ -1,76 +1,111 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: problems creating new ceph cluster when using journal on block
- device
-Date: Thu, 08 Nov 2012 11:41:02 -0600
-Message-ID: <509BEEAE.3000805@inktank.com>
-References: <CACkq2mozdJackj__AB_ZJnN5KR9mdqN_LRG8RPu0hN1qh_8e_g@mail.gmail.com> <509B6883.4010406@widodh.nl> <509B6C2E.2050708@catalyst.net.nz> <CACkq2mr=dmHX+Z6fTMUvct78pa9RWeGid5vHK1vNw1_S-NWgDw@mail.gmail.com> <CACkq2mqtRq_s6=UxrF1ADaFuf2tETDB2GSdXCPdi4mG7Ei9wow@mail.gmail.com> <CACkq2mqkFEeivwRnrKURkfTiMFjq0jqN8ED8A+BxdJoQaBG1DQ@mail.gmail.com>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: SSD journal suggestion
+Date: Thu, 8 Nov 2012 13:03:37 -0500
+Message-ID: <2D05ED38-D47A-4892-81AD-5FE0C5FF3253@ornl.gov>
+References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com>
+ <alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net>
+ <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
+ <509A77CA.5030206@inktank.com>
+ <670668A8-4126-4EF8-B27B-7B00C8824F05@ornl.gov>
+ <509A8A32.9020701@inktank.com>
+ <8F1EF04A-96C0-402F-9DE2-3891514BD04F@ornl.gov>
+ <509A8F4F.7090404@inktank.com> <509ACE8A.5090708@tuxadero.com>
+ <CAJH6TXifJmKc-g-FaijgwwGh_yVAQ+5ebGO_Du7C43u+_rZ49g@mail.gmail.com>
+ <509AD42A.9060108@tuxadero.com>
+ <CAJH6TXhGU2BdSgHmxm9g=xPxZnOYCN-9t8iPGEQ5TJF372Z0mw@mail.gmail.com>
+ <509AE330.7070808@tuxadero.com>
+ <CAJH6TXjqMc3mOU7LLPW2oPp+jTC_V_r=JtRU2bGEmtH4vdb3ag@mail.gmail.com>
+ <509AEAF4.30309@inktank.com>
+ <CAJH6TXgoHTNKhfRTsZ4pSZs4Qk32e-ctr1-6NkBQ=BDiVSBM+g@mail.gmail.com>
+ <FB2218CC-8F8F-480A-A5E5-DEF933100612@ornl.gov>
+ <509BC407.4030406@inktank.com>
+ <FB2859AE-F86A-4C4A-8EF5-5878CD8ABDC7@ornl.gov>
+ <B2FEDEA2-4A94-4878-B8B9-839E14CD1C9D@ornl.gov>
+ <CABYiri_iHP2aGdXrCSdiXzhHN96Dge4UJeiDnUC1GSgBA3Fm5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:61085 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753501Ab2KHRk6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 12:40:58 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so4577021iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 09:40:57 -0800 (PST)
-In-Reply-To: <CACkq2mqkFEeivwRnrKURkfTiMFjq0jqN8ED8A+BxdJoQaBG1DQ@mail.gmail.com>
+Received: from mta02.ornl.gov ([128.219.14.62]:25336 "EHLO mta02.ornl.gov"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756500Ab2KHSDn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 13:03:43 -0500
+In-Reply-To: <CABYiri_iHP2aGdXrCSdiXzhHN96Dge4UJeiDnUC1GSgBA3Fm5w@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, "martin@tuxadero.com" <martin@tuxadero.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/08/2012 11:36 AM, Travis Rhoden wrote:
-> Solved!
->
-> I stumbled into the solution while switching from block device to a
-> file.  I was being bit by running mkcephfs multiple times -- it wasn't
-> really failing on the journal, it was failing because the OSD data
-> disk had been initialized before.  I couldn't see that until I used a
-> file for the journal and then I see log output like:
+On Nov 8, 2012, at 11:19 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
 
-Yeah, that was a change that landed a couple of months ago.  It's really 
-important now to blow away the old data (I just reformat) if you want a 
-totally clean ceph deployment rather than just running mkcephfs.
+> On Thu, Nov 8, 2012 at 7:02 PM, Atchley, Scott <atchleyes@ornl.gov> wrote:
+>> On Nov 8, 2012, at 10:00 AM, Scott Atchley <atchleyes@ornl.gov> wrote:
+>> 
+>>> On Nov 8, 2012, at 9:39 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
+>>> 
+>>>> On 11/08/2012 07:55 AM, Atchley, Scott wrote:
+>>>>> On Nov 8, 2012, at 3:22 AM, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com> wrote:
+>>>>> 
+>>>>>> 2012/11/8 Mark Nelson <mark.nelson@inktank.com>:
+>>>>>>> I haven't done much with IPoIB (just RDMA), but my understanding is that it
+>>>>>>> tends to top out at like 15Gb/s.  Some others on this mailing list can
+>>>>>>> probably speak more authoritatively.  Even with RDMA you are going to top
+>>>>>>> out at around 3.1-3.2GB/s.
+>>>>>> 
+>>>>>> 15Gb/s is still faster than 10Gbe
+>>>>>> But this speed limit seems to be kernel-related and should be the same
+>>>>>> even in a 10Gbe environment, or not?
+>>>>> 
+>>>>> We have a test cluster with Mellanox QDR HCAs (i.e. NICs). When using Verbs (the native IB API), I see ~27 Gb/s between two hosts. When running Sockets over these devices using IPoIB, I see 13-22 Gb/s depending on whether I use interrupt affinity and process binding.
+>>>>> 
+>>>>> For our Ceph testing, we will set the affinity of two of the mlx4 interrupt handlers to cores 0 and 1 and we will not using process binding. For single stream Netperf, we do use process binding and bind it to the same core (i.e. 0) and we see ~22 Gb/s. For multiple, concurrent Netperf runs, we do not use process binding but we still see ~22 Gb/s.
+>>>> 
+>>>> Scott, this is very interesting!  Does setting the interrupt affinity
+>>>> make the biggest difference then when you have concurrent netperf
+>>>> processes going?  For some reason I thought that setting interrupt
+>>>> affinity wasn't even guaranteed in linux any more, but this is just some
+>>>> half-remembered recollection from a year or two ago.
+>>> 
+>>> We are using RHEL6 with a 3.5.1 kernel. I tested single stream Netperf with and without affinity:
+>>> 
+>>> Default (irqbalance running)   12.8 Gb/s
+>>> IRQ balance off                13.0 Gb/s
+>>> Set IRQ affinity to socket 0   17.3 Gb/s   # using the Mellanox script
+>>> 
+>>> When I set the affinity to cores 0-1 _and_ I bind Netperf to core 0, I get ~22 Gb/s for a single stream.
+>> 
+> 
+> Did you tried Mellanox-baked modules for 2.6.32 before that?
 
->
-> === osd.0 ===
-> 2012-11-08 16:41:37.677620 7ffc3cfcd780 -1 provided osd id 0 != superblock's -1
-> 2012-11-08 16:41:37.678726 7ffc3cfcd780 -1  ** ERROR: error creating
-> empty object store in /var/lib/ceph/osd/ceph-0: (22) Invalid argument
->
-> I unmounted the OSD's that had been touched before, reformatted them,
-> and then remounted.  I setup ceph.conf to use block devices for the
-> journals, and then everything proceeded normally.
->
-> So the final relevant bits from my ceph.conf file look like:
->
-> [osd]
->          osd journal size = 0
->          journal dio = true
->          journal aio = true
->
-> [osd.0]
->          host = ceph1
->          osd journal = /dev/sda5
->
-> [osd.1]
->          host = ceph1
->          osd journal = /dev/sda6
-> ...
->
-> Thanks,
->
->   - Travis
->
-> On Thu, Nov 8, 2012 at 10:08 AM, Travis Rhoden <trhoden@gmail.com> wrote:
->> One more thing -- Google search says this is harmless -- I see quite a
->> few of these in syslog:
->>
->> hdparm: sending ioctl 2285 to a partition!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+That came with RHEL6? No.
+
+Scott
+
+> 
+>> Note, I used hwloc to determine which socket was closer to the mlx4 device on our dual socket machines. On these nodes, hwloc reported that both sockets were equally close, but a colleague has machines where one socket is closer than the other. In that case, bind to the closer socket (or to cores within the closer socket).
+>> 
+>>> 
+>>>>> We used all of the Mellanox tuning recommendations for IPoIB available in their tuning pdf:
+>>>>> 
+>>>>> http://www.mellanox.com/related-docs/prod_software/Performance_Tuning_Guide_for_Mellanox_Network_Adapters.pdf
+>>>>> 
+>>>>> We looked at their interrupt affinity setting scripts and then wrote our own.
+>>>>> 
+>>>>> Our testing is with IPoIB in "connected" mode, not "datagram" mode. Connected mode is less scalable, but currently I only get ~3 Gb/s with datagram mode. Mellanox claims that we should get identical performance with both modes and we are looking into it.
+>>>>> 
+>>>>> We are getting a new test cluster with FDR HCAs and I will look into those as well.
+>>>> 
+>>>> Nice!  At some point I'll probably try to justify getting some FDR cards
+>>>> in house.  I'd definitely like to hear how FDR ends up working for you.
+>>> 
+>>> I'll post the numbers when I get access after they are set up.
+>>> 
+>>> Scott
+>>> 
+>> 
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
