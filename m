@@ -1,18 +1,18 @@
 From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: less cores more iops / speed
-Date: Wed, 07 Nov 2012 18:59:22 -0600
-Message-ID: <509B03EA.9050701@inktank.com>
+Date: Wed, 07 Nov 2012 18:59:48 -0600
+Message-ID: <509B0404.5010500@inktank.com>
 References: <509ADA6A.9000807@profihost.ag> <509AF625.8040207@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:60503 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754075Ab2KHA7T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 19:59:19 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so3418464iea.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 16:59:18 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:51785 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754519Ab2KHA7s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 19:59:48 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y32so1559318iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 16:59:48 -0800 (PST)
 In-Reply-To: <509AF625.8040207@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
