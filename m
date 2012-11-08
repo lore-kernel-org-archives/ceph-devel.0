@@ -1,31 +1,36 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: syncfs slower than without syncfs
-Date: Wed, 07 Nov 2012 19:09:17 -0800
-Message-ID: <509B225D.2060609@inktank.com>
-References: <509A2CE6.1010100@profihost.ag> <509A62A6.5070104@profihost.ag> <509A7860.6020805@inktank.com> <509A8B98.5000707@profihost.ag>
+From: Dietmar Maurer <dietmar@proxmox.com>
+Subject: RE: less cores more iops / speed
+Date: Thu, 8 Nov 2012 05:42:04 +0000
+Message-ID: <24E144B8C0207547AD09C467A8259F75577ED836@lisa.maurer-it.com>
+References: <509ADA6A.9000807@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48778 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751137Ab2KHDJj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Nov 2012 22:09:39 -0500
-Received: by mail-pb0-f46.google.com with SMTP id rr4so1689388pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Nov 2012 19:09:39 -0800 (PST)
-In-Reply-To: <509A8B98.5000707@profihost.ag>
+Received: from www.maurer-it.com ([213.129.239.114]:55557 "EHLO
+	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751217Ab2KHFmI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 00:42:08 -0500
+In-Reply-To: <509ADA6A.9000807@profihost.ag>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/07/2012 08:26 AM, Stefan Priebe wrote:
-> Am 07.11.2012 16:04, schrieb Mark Nelson:
->> Whew, glad you found the problem Stefan!  I was starting to wonder what
->> was going on. :)  Do you mind filling a bug about the control
->> dependencies?
->
-> Sure where should i fill it in?
+> I've noticed something really interesting.
+> 
+> I get 5000 iops / VM for rand. 4k writes while assigning 4 cores on a
+> 2.5 Ghz Xeon.
+> 
+> When i move this VM to another kvm host with 3.6Ghz i get 8000 iops (still 8
+> cores) when i then LOWER the assigned cores from 8 to 4 i get
+> 14.500 iops. If i assign only 2 cores i get 16.000 iops...
+> 
+> Why does less kvm cores mean more speed?
 
-http://www.tracker.newdream.net/projects/ceph/issues/new
+There is a serious bug in the kvm vhost code. Do you use virtio-net with vhost?
+
+see: http://lists.nongnu.org/archive/html/qemu-devel/2012-11/msg00579.html
+
+Please test using the e1000 driver instead.
 
