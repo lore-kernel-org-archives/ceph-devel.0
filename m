@@ -1,50 +1,54 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: clock syncronisation
-Date: Thu, 08 Nov 2012 13:20:44 +0100
-Message-ID: <509BA39C.2080508@profihost.ag>
-References: <509B7595.1010809@profihost.ag> <509B9ED8.6010907@widodh.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/2] mds: Don't expire log segment before it's fully flushed
+Date: Thu,  8 Nov 2012 20:54:14 +0800
+Message-ID: <1352379255-5621-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:33663 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755406Ab2KHMUx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 07:20:53 -0500
-In-Reply-To: <509B9ED8.6010907@widodh.nl>
+Received: from mga14.intel.com ([143.182.124.37]:2159 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755497Ab2KHMyW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 Nov 2012 07:54:22 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage@inktank.com, ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Am 08.11.2012 13:00, schrieb Wido den Hollander:
->
->
-> On 08-11-12 10:04, Stefan Priebe - Profihost AG wrote:
->> Hello list,
->>
->> is there any prefered way to use clock syncronisation?
->>
->> I've tried running openntpd and ntpd on all servers but i'm still
->> getting:
->> 2012-11-08 09:55:38.255928 mon.0 [WRN] message from mon.2 was stamped
->> 0.063136s in the future, clocks not synchronized
->> 2012-11-08 09:55:39.328639 mon.0 [WRN] message from mon.2 was stamped
->> 0.063285s in the future, clocks not synchronized
->> 2012-11-08 09:55:39.328833 mon.0 [WRN] message from mon.2 was stamped
->> 0.063301s in the future, clocks not synchronized
->> 2012-11-08 09:55:40.819975 mon.0 [WRN] message from mon.2 was stamped
->> 0.063360s in the future, clocks not synchronized
->>
->
-> What NTP server are you using? Network latency might cause the clocks
-> not to be synchronised.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-pool.ntp.org
+Expiring log segment before it's fully flushed may cause various
+issues during log replay.
 
-But i've now switched to debian chrony instead of ntp and that seems to 
-work fine.
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/leveldb      | 2 +-
+ src/mds/MDLog.cc | 8 +++++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
-Haven't seen any messages again.
+diff --git a/src/mds/MDLog.cc b/src/mds/MDLog.cc
+index cac5615..b02c181 100644
+--- a/src/mds/MDLog.cc
++++ b/src/mds/MDLog.cc
+@@ -330,6 +330,11 @@ void MDLog::trim(int m)
+     assert(ls);
+     p++;
+     
++    if (ls->end > journaler->get_write_safe_pos()) {
++      dout(5) << "trim segment " << ls->offset << ", not fully flushed yet, safe "
++	      << journaler->get_write_safe_pos() << " < end " << ls->end << dendl;
++      break;
++    }
+     if (expiring_segments.count(ls)) {
+       dout(5) << "trim already expiring segment " << ls->offset << ", " << ls->num_events << " events" << dendl;
+     } else if (expired_segments.count(ls)) {
+@@ -412,9 +417,6 @@ void MDLog::_expired(LogSegment *ls)
+ 
+   if (!capped && ls == get_current_segment()) {
+     dout(5) << "_expired not expiring " << ls->offset << ", last one and !capped" << dendl;
+-  } else if (ls->end > journaler->get_write_safe_pos()) {
+-    dout(5) << "_expired not expiring " << ls->offset << ", not fully flushed yet, safe "
+-	    << journaler->get_write_safe_pos() << " < end " << ls->end << dendl;
+   } else {
+     // expired.
+     expired_segments.insert(ls);
+-- 
+1.7.11.7
 
-Stefan
