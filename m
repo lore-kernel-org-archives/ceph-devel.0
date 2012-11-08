@@ -1,95 +1,103 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: SSD journal suggestion
-Date: Thu, 8 Nov 2012 19:19:02 +0300
-Message-ID: <CABYiri_iHP2aGdXrCSdiXzhHN96Dge4UJeiDnUC1GSgBA3Fm5w@mail.gmail.com>
-References: <CAJH6TXhecExbQKa-tO+VCFwH7k3oFVvdqZ3h=n5E4VoZfXe27w@mail.gmail.com>
- <alpine.DEB.2.00.1211070416530.23920@cobra.newdream.net> <CAJH6TXgrn2FVkYH=Tb67KnHJO-MWO0tKu8uNFUby=ZY-ibvLaw@mail.gmail.com>
- <509A77CA.5030206@inktank.com> <670668A8-4126-4EF8-B27B-7B00C8824F05@ornl.gov>
- <509A8A32.9020701@inktank.com> <8F1EF04A-96C0-402F-9DE2-3891514BD04F@ornl.gov>
- <509A8F4F.7090404@inktank.com> <509ACE8A.5090708@tuxadero.com>
- <CAJH6TXifJmKc-g-FaijgwwGh_yVAQ+5ebGO_Du7C43u+_rZ49g@mail.gmail.com>
- <509AD42A.9060108@tuxadero.com> <CAJH6TXhGU2BdSgHmxm9g=xPxZnOYCN-9t8iPGEQ5TJF372Z0mw@mail.gmail.com>
- <509AE330.7070808@tuxadero.com> <CAJH6TXjqMc3mOU7LLPW2oPp+jTC_V_r=JtRU2bGEmtH4vdb3ag@mail.gmail.com>
- <509AEAF4.30309@inktank.com> <CAJH6TXgoHTNKhfRTsZ4pSZs4Qk32e-ctr1-6NkBQ=BDiVSBM+g@mail.gmail.com>
- <FB2218CC-8F8F-480A-A5E5-DEF933100612@ornl.gov> <509BC407.4030406@inktank.com>
- <FB2859AE-F86A-4C4A-8EF5-5878CD8ABDC7@ornl.gov> <B2FEDEA2-4A94-4878-B8B9-839E14CD1C9D@ornl.gov>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: some snapshot problems
+Date: Thu, 8 Nov 2012 09:30:55 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211050139280.14104@cobra.newdream.net>
+References: <CABFZihudrA640nD9N60b8w0ccQvmaduGmceBf2uHrpLbShtjig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-543502450-1352108370=:14104"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:61340 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756236Ab2KHQTY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 11:19:24 -0500
-Received: by mail-oa0-f46.google.com with SMTP id h16so3020212oag.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 08:19:23 -0800 (PST)
-In-Reply-To: <B2FEDEA2-4A94-4878-B8B9-839E14CD1C9D@ornl.gov>
+Received: from cobra.newdream.net ([66.33.216.30]:59107 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751274Ab2KHRa4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 12:30:56 -0500
+In-Reply-To: <CABFZihudrA640nD9N60b8w0ccQvmaduGmceBf2uHrpLbShtjig@mail.gmail.com>
+Content-ID: <alpine.DEB.2.00.1211080738480.15418@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Atchley, Scott" <atchleyes@ornl.gov>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, "martin@tuxadero.com" <martin@tuxadero.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: liu yaqi <liuyaqiyaqi@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Nov 8, 2012 at 7:02 PM, Atchley, Scott <atchleyes@ornl.gov> wrote:
-> On Nov 8, 2012, at 10:00 AM, Scott Atchley <atchleyes@ornl.gov> wrote:
->
->> On Nov 8, 2012, at 9:39 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
->>
->>> On 11/08/2012 07:55 AM, Atchley, Scott wrote:
->>>> On Nov 8, 2012, at 3:22 AM, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com> wrote:
->>>>
->>>>> 2012/11/8 Mark Nelson <mark.nelson@inktank.com>:
->>>>>> I haven't done much with IPoIB (just RDMA), but my understanding is that it
->>>>>> tends to top out at like 15Gb/s.  Some others on this mailing list can
->>>>>> probably speak more authoritatively.  Even with RDMA you are going to top
->>>>>> out at around 3.1-3.2GB/s.
->>>>>
->>>>> 15Gb/s is still faster than 10Gbe
->>>>> But this speed limit seems to be kernel-related and should be the same
->>>>> even in a 10Gbe environment, or not?
->>>>
->>>> We have a test cluster with Mellanox QDR HCAs (i.e. NICs). When using Verbs (the native IB API), I see ~27 Gb/s between two hosts. When running Sockets over these devices using IPoIB, I see 13-22 Gb/s depending on whether I use interrupt affinity and process binding.
->>>>
->>>> For our Ceph testing, we will set the affinity of two of the mlx4 interrupt handlers to cores 0 and 1 and we will not using process binding. For single stream Netperf, we do use process binding and bind it to the same core (i.e. 0) and we see ~22 Gb/s. For multiple, concurrent Netperf runs, we do not use process binding but we still see ~22 Gb/s.
->>>
->>> Scott, this is very interesting!  Does setting the interrupt affinity
->>> make the biggest difference then when you have concurrent netperf
->>> processes going?  For some reason I thought that setting interrupt
->>> affinity wasn't even guaranteed in linux any more, but this is just some
->>> half-remembered recollection from a year or two ago.
->>
->> We are using RHEL6 with a 3.5.1 kernel. I tested single stream Netperf with and without affinity:
->>
->> Default (irqbalance running)   12.8 Gb/s
->> IRQ balance off                13.0 Gb/s
->> Set IRQ affinity to socket 0   17.3 Gb/s   # using the Mellanox script
->>
->> When I set the affinity to cores 0-1 _and_ I bind Netperf to core 0, I get ~22 Gb/s for a single stream.
->
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Did you tried Mellanox-baked modules for 2.6.32 before that?
+--557981400-543502450-1352108370=:14104
+Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-15
+Content-ID: <alpine.DEB.2.00.1211080738481.15418@cobra.newdream.net>
+Content-Transfer-Encoding: quoted-printable
 
-> Note, I used hwloc to determine which socket was closer to the mlx4 device on our dual socket machines. On these nodes, hwloc reported that both sockets were equally close, but a colleague has machines where one socket is closer than the other. In that case, bind to the closer socket (or to cores within the closer socket).
->
->>
->>>> We used all of the Mellanox tuning recommendations for IPoIB available in their tuning pdf:
->>>>
->>>> http://www.mellanox.com/related-docs/prod_software/Performance_Tuning_Guide_for_Mellanox_Network_Adapters.pdf
->>>>
->>>> We looked at their interrupt affinity setting scripts and then wrote our own.
->>>>
->>>> Our testing is with IPoIB in "connected" mode, not "datagram" mode. Connected mode is less scalable, but currently I only get ~3 Gb/s with datagram mode. Mellanox claims that we should get identical performance with both modes and we are looking into it.
->>>>
->>>> We are getting a new test cluster with FDR HCAs and I will look into those as well.
->>>
->>> Nice!  At some point I'll probably try to justify getting some FDR cards
->>> in house.  I'd definitely like to hear how FDR ends up working for you.
->>
->> I'll post the numbers when I get access after they are set up.
->>
->> Scott
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Liu,
+
+Sorry for the late reply; I have had a very busy week.  :)
+
+On Thu, 1 Nov 2012, liu yaqi wrote:
+> Dear Mr.Weil
+>=20
+> I am a student of Institute of Computing Technology, Chinese Academy of
+> Sciences, and I am learning the realization of snapshot in ceph system.
+> There are sometings that puzzle me, and I want to ask you some question=
+s.
+> First question, there is a command "ceph osd cluster_snap {name}", but =
+i
+> cannot found the complete realization process, and I want to ask is the
+> snapshot for the whole cluster has been=A0 realized?
+
+The idea was to have a low-level cluster-wide snapshot that could be used=
+=20
+for recovery if ceph itself went haywire and corrupted itself.  The idea=20
+would be for the OSDs to create btrfs-level snapshots of their data.  It=20
+was never completely implemented, though, and the OSD bits have mostly=20
+been removed.  In particular, we never made a way for the monitor state t=
+o=20
+be checkpointed, which would be necessary for the whole scheme to work=20
+properly.
+
+> Second question, there
+> seems to be snapshots for pools and images. I want to ask what does poo=
+l and
+> image mean? Is an image means an osd?
+
+Lots of different snapshots:
+
+ - librados lets you do 'selfmanaged snaps' in its API, which let an=20
+   application control which snapshots apply to which objects.=20
+ - you can create a 'pool' snapshot on an entire librados pool.  this=20
+   cannot be used at the same time as rbd, fs, or the above 'selfmanaged'=
+=20
+   snaps.
+ - rbd let's you snapshot block device images (by usuing the librados=20
+   selfmanaged snap API).
+ - the ceph file system let's you snapshot any subdirectory (again=20
+   utilizing the underlying RADOS functionality).
+
+> Third question, in the "mds" folder,
+> there are files like "snapserver" "MClientSnap" and so on, is there fil=
+es
+> are used to snapshot the metadata only?=20
+
+Yes.
+
+> Does they have some relationship
+> with the pool or image snapshots?=A0
+
+Not really.
+
+> The last question, is there snapshots
+> for a file path in the ceph? Or, the snapshots must be done on metadata=
+ and
+> data=A0 separately?
+
+For the file system, you create a snapshot on a directory and it affects=20
+all files in that directory and beneath it, including the data in those=20
+files.
+
+Hope that helps!
+sage
+
+> If you would kind enough to help me on the above questions, I will be
+> grateful. And I am looking forward to your reply.
+>=20
+> With best wishes for you.
+>=20
+> Yours, YaqiLiu
+>=20
+--557981400-543502450-1352108370=:14104--
