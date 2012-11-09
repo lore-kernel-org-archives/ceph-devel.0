@@ -1,25 +1,25 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
 Subject: Re: rbd volume upgrades
-Date: Fri, 9 Nov 2012 20:06:38 +0100
-Message-ID: <CAPYLRzjK9=rqDsOmdj7oVRPwdaPisswMjEpK=twMap=tQb39RA@mail.gmail.com>
+Date: Fri, 9 Nov 2012 11:08:52 -0800
+Message-ID: <CAC-hyiEx3DatO+-5GEP7DiiZZEOgyYYFfNKhW1ebSpYmo464Tw@mail.gmail.com>
 References: <CAPYLRziMQAR3tiN7syxBMTiiJ-xRVGYCK1MUYHrii5-UHMCnGA@mail.gmail.com>
 	<509D53BD.6020706@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:52083 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab2KITGi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 14:06:38 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so6405488iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 11:06:38 -0800 (PST)
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:64901 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751689Ab2KITIx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 14:08:53 -0500
+Received: by mail-bk0-f46.google.com with SMTP id jk13so1782893bkc.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 11:08:52 -0800 (PST)
 In-Reply-To: <509D53BD.6020706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 9, 2012 at 8:04 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+On Fri, Nov 9, 2012 at 11:04 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
 > On 11/09/2012 11:01 AM, Gregory Farnum wrote:
 >>
 >> I was asked today if there's a way to upgrade RBD volumes from v1 to
@@ -37,6 +37,7 @@ On Fri, Nov 9, 2012 at 8:04 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
 > different names for objects, so providing an 'upgrade' path would still
 > require copying all the data around.
 >
-> Josh
+Couldn't we just set a flag in the header specifying the object naming
+version, which would then only require updating the header?
 
-Works For Me! :)
+Yehuda
