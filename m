@@ -1,33 +1,28 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: OSD hardware suggestion
-Date: Fri, 9 Nov 2012 14:11:17 +0100
-Message-ID: <CAJH6TXha_jTHocYATAHY_EYqo5zCT1rwtg9jxv6XkAg6mwPH-w@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Ceph Performance Part 2
+Date: Fri, 09 Nov 2012 07:22:37 -0600
+Message-ID: <509D039D.7040200@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:39926 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751472Ab2KINLT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 08:11:19 -0500
-Received: by mail-ea0-f174.google.com with SMTP id c13so1464227eaa.19
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 05:11:17 -0800 (PST)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:51968 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751880Ab2KINWb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 08:22:31 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so5836336iea.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 05:22:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Based on your experience, will the following configuration be ok for a
-production cluster?
- - R515 12 disks + 2 internal disks
+Hi Guys,
 
-I'll start with 2x or 4x 2TB SATA disks in each R515. One OSD for each
-disk, 3 servers.
-Each R515 will have one internal SSD to be used as journal (single,
-huge, filesystem) shared by all OSDs and one SATA 10k RPM (probably WD
-Raptor) to be used as operating system and mons storage.
+The second instalment of our investigation into Ceph performance is 
+live!  This time we are looking at write performance on the same set of 
+controllers as in the first article, but using 8 spinning disks and 
+putting both the data and SSDs on those drives.  Hope you enjoy!
 
-On each R515 i'll put OSDs and one mon node.
+http://t.co/exwXJOVV
 
-Actually, i'll use only RBD and RGW, so no need for MDS. When CephFS
-will be stable, i'll put MDS on each node.
-
-Any suggestion/advice ?
+Mark
