@@ -1,40 +1,34 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: [PATCH] vstart: allow minimum pool size of one
-Date: Thu, 8 Nov 2012 20:21:00 -0800
-Message-ID: <CAPrxi583At7RnDfpF7nfXtmRn1gf1mB8MW8BrSvP8TNqy0ZhCA@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: less cores more iops / speed
+Date: Fri, 09 Nov 2012 09:43:40 +0100
+Message-ID: <509CC23C.6060104@profihost.ag>
+References: <021c4865-424b-41bd-b81d-62b6771dabc3@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:52550 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751439Ab2KIEVB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 23:21:01 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so3505786vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 20:21:00 -0800 (PST)
+Received: from mail.profihost.ag ([85.158.179.208]:55599 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751133Ab2KIInv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 03:43:51 -0500
+In-Reply-To: <021c4865-424b-41bd-b81d-62b6771dabc3@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Sam Lang <sam.lang@inktank.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Joao Eduardo Luis <joao.luis@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>, "pve-devel@pve.proxmox.com" <pve-devel@pve.proxmox.com>
 
-I needed this patch after some simple 1 OSD vstart environments
-refused to allow clients to connect.
 
---
+Am 08.11.2012 16:53, schrieb Alexandre DERUMIER:
+>>> So it is a problem of KVM which let's the processes jump between cores a
+>>> lot.
+>
+> maybe numad from redhat can help ?
+> http://fedoraproject.org/wiki/Features/numad
+>
+> It's try to keep process on same numa node and I think it's also doing some dynamic pinning.
 
-    A minimum pool size of 2 was introduced by 13486857cf. This sets the
-    minimum to one so that basic vstart environments work.
+numad doesn't help but libvirt seems to support pinning of kvm 
+instances. Maybe pve should support pinning too?
 
-    Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
-
-diff --git a/src/vstart.sh b/src/vstart.sh
-index 4565efa..bdf02f3 100755
---- a/src/vstart.sh
-+++ b/src/vstart.sh
-@@ -290,6 +290,7 @@ if [ "$start_mon" -eq 1 ]; then
- [global]
-         osd pg bits = 3
-         osd pgp bits = 5  ; (invalid, but ceph should cope!)
-+        osd pool default min size = 1
- EOF
-                        [ "$cephx" -eq 1 ] && cat<<EOF >> $conf
-         auth supported = cephx
+Greets
+Stefan
