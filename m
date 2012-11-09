@@ -1,105 +1,54 @@
-From: Ben Poliakoff <benp@reed.edu>
-Subject: Re: cephx auth issue
-Date: Fri, 9 Nov 2012 10:08:03 -0800
-Message-ID: <20121109180802.GD19901@garage.reed.edu>
-References: <CACkq2mp21AdjQCpEzynbVht81Y-xzD0UXT16zt_EBEcy3ND92Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="2/5bycvrmDh4d1IB"
+From: Gary Lowell <gary.lowell@inktank.com>
+Subject: Re: can't build the last master git (`configure.ac' or `configure.in' is required)
+Date: Fri, 9 Nov 2012 10:16:02 -0800
+Message-ID: <5B5432DF-6EED-4B56-B3DB-B84C70461562@inktank.com>
+References: <7a0da62a-8758-47ad-b101-c6848a9d4a5e@mailpro>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from suede.reed.edu ([134.10.2.45]:60632 "EHLO suede.reed.edu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752060Ab2KISOo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Nov 2012 13:14:44 -0500
-Content-Disposition: inline
-In-Reply-To: <CACkq2mp21AdjQCpEzynbVht81Y-xzD0UXT16zt_EBEcy3ND92Q@mail.gmail.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:34053 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752060Ab2KISQH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 13:16:07 -0500
+Received: by mail-da0-f46.google.com with SMTP id n41so1768337dak.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 10:16:06 -0800 (PST)
+In-Reply-To: <7a0da62a-8758-47ad-b101-c6848a9d4a5e@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Just tried a fresh checkout and build and didn't see the issue.   There may have been commits between your issue and my test this morning. 
 
---2/5bycvrmDh4d1IB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On possible problem might be that your third command reads "module" instead of "submodule".   I assume that's a typo, but if not that would explain configure.ac being missing from leveldb or libs3 subdirectories.
 
-* Travis Rhoden <trhoden@gmail.com> [20121109 09:55]:
-> I'm not sure what I've done wrong here:
->=20
-> Things are okay as client.admin:
->=20
-> # rbd -p images --id admin ls
-> test
->=20
-> But not as client.images:
->=20
-> # rbd -p images --id images ls
-> error: (1) Operation not permitted
->=20
-> The privs/caps seem okay in ceph auth:
->=20
-> # ceph auth list
-> <snip>
-> client.admin
-> 	key: <snip>
-> 	caps: [mds] allow
-> 	caps: [mon] allow *
-> 	caps: [osd] allow *
-> client.images
-> 	key: <snip>
-> 	caps: [mon] allow r
-> 	caps: [osd] allow rwx pool=3Dimages
-> client.volumes
-> 	key: <snip>
-> 	caps: [mon] allow r
-> 	caps: [osd] allow rwx pool=3Dvolumes, allow rx pool=3Dimages
->=20
+Cheers,
+Gary
 
-I had a very similar problem after I upgraded my test cluster from
-argonaut to 0.53.  For me it was a "caps" parsing issue involving the
-'=3D' character (which has been fixed in 0.54.  A nice person on IRC
-helped me out.  Updating the caps from something like this:
+On Nov 9, 2012, at 2:53 AM, Alexandre DERUMIER wrote:
 
-> 	caps: [osd] allow rwx pool=3Dvolumes, allow rx pool=3Dimages
+> Hi,I need help to build last master git,
+> I was building fine before,
+> 
+> #git clone git://ceph.newdream.net/git/ceph.git
+> #git submodule init
+> #git module update
+> #dpkg-buildpackage
+> 
+> ...
+> autoreconf: running: /usr/bin/autoconf --force
+> autoreconf: running: /usr/bin/autoheader --force
+> autoreconf: running: automake --add-missing --copy --force-missing
+> autoreconf: Leaving directory `.'
+> autoreconf: `configure.ac' or `configure.in' is required
+> make: *** [configure-stamp] Error 1
+> dpkg-buildpackage: error: debian/rules build gave error exit status 2
+> 
+> 
+> Any ideas ?
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-To this:
-
-  	caps: [osd] allow rwx pool volumes, allow rx pool images
-
-=2E..fixed the issue for me.
-
-Apparently in 0.54 parsing of '=3D' in a caps line will work properly
-again.
-
-Ben
-
---=20
-________________________________________________________________________
-pub   4096R/318B6A97 2009-05-11 Ben Poliakoff <benp@reed.edu>
- Primary key fingerprint: 3F23 EBC8 B73E 92B7 0A67  705A 8219 DCF0 318B 6A97
-
---2/5bycvrmDh4d1IB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iQIVAwUBUJ1GfYIZ3PAxi2qXAQhiehAAjAoLcof0hhngUfB7qZy24xOczIVOkysm
-Hm6XnavM9rYKwoW2wBv76dJ2JFLC1JVcG4ujjIi6XAHYb9SpwcuNeHynAKgNxl2k
-kk4Qf1vXRQ5lvPxxOJKNgT+liC8lw7mB2U3wlIO3njng1c/9T8Qx96ocmGXU0TB6
-6jeboQOo6mdGxHzWPZTq2BjesS8rhajgpKgNvgwll5qaHcXNudg0LZ79raW5fj6g
-O8YpCmHcyqIM4hRHqeeBl56lfLmpjFybQqp32sfPdo78TLUZuBEhYJbtgKfpnnid
-WcS4FafTiU2UB51XWwwbLTG+YQibpCDXfiEoeidyxh2is66mhdzan99xy4E+DqWs
-4A/GVeHiQO7fPXTSlUyeB8CyE6OEsKyszDMoh+LpEPnLBHDZO66PB96IHVPnvdPh
-pPhQJ3X5sIxKk295pnIpqaoT/ICvjh1ebEV0KrLQ9D4pTRoZT+TECdpHP7QhofzW
-0IxP8quC2Jk0x1+HsutDjw5v9VvP1b4rbYvxTVuvoTQUIwWliFoBCmRG9sftkZqT
-tvXyxBoLLJq0GXYmor0SF1sdpl/TAmfLAE7oYUIYzWpfFlH7REVFBTNcUY3wwaqW
-oNa0IO9ZIZc+lZhr010TV+lTbndWg20EmJ4YZasZ9q7u1WOxNC8USfcu8PtxxMz5
-8R6GccASMvc=
-=+vPS
------END PGP SIGNATURE-----
-
---2/5bycvrmDh4d1IB--
