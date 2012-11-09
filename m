@@ -1,47 +1,33 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: can't build the last master git (`configure.ac' or `configure.in' is required)
-Date: Fri, 09 Nov 2012 11:53:51 +0100 (CET)
-Message-ID: <7a0da62a-8758-47ad-b101-c6848a9d4a5e@mailpro>
-References: <3388b731-bdbb-448e-89c4-d9d3661ea774@mailpro>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: OSD hardware suggestion
+Date: Fri, 9 Nov 2012 14:11:17 +0100
+Message-ID: <CAJH6TXha_jTHocYATAHY_EYqo5zCT1rwtg9jxv6XkAg6mwPH-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:46373 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752104Ab2KIKyV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 05:54:21 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id AF4591803686B
-	for <ceph-devel@vger.kernel.org>; Fri,  9 Nov 2012 11:53:56 +0100 (CET)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id NmvymA7SDwec for <ceph-devel@vger.kernel.org>;
-	Fri,  9 Nov 2012 11:53:51 +0100 (CET)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id 327D818027946
-	for <ceph-devel@vger.kernel.org>; Fri,  9 Nov 2012 11:53:51 +0100 (CET)
-In-Reply-To: <3388b731-bdbb-448e-89c4-d9d3661ea774@mailpro>
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:39926 "EHLO
+	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751472Ab2KINLT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 08:11:19 -0500
+Received: by mail-ea0-f174.google.com with SMTP id c13so1464227eaa.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 05:11:17 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,I need help to build last master git,
-I was building fine before,
+Based on your experience, will the following configuration be ok for a
+production cluster?
+ - R515 12 disks + 2 internal disks
 
-#git clone git://ceph.newdream.net/git/ceph.git
-#git submodule init
-#git module update
-#dpkg-buildpackage
+I'll start with 2x or 4x 2TB SATA disks in each R515. One OSD for each
+disk, 3 servers.
+Each R515 will have one internal SSD to be used as journal (single,
+huge, filesystem) shared by all OSDs and one SATA 10k RPM (probably WD
+Raptor) to be used as operating system and mons storage.
 
-...
-autoreconf: running: /usr/bin/autoconf --force
-autoreconf: running: /usr/bin/autoheader --force
-autoreconf: running: automake --add-missing --copy --force-missing
-autoreconf: Leaving directory `.'
-autoreconf: `configure.ac' or `configure.in' is required
-make: *** [configure-stamp] Error 1
-dpkg-buildpackage: error: debian/rules build gave error exit status 2
+On each R515 i'll put OSDs and one mon node.
 
+Actually, i'll use only RBD and RGW, so no need for MDS. When CephFS
+will be stable, i'll put MDS on each node.
 
-Any ideas ?
+Any suggestion/advice ?
