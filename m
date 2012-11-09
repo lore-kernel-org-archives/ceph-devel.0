@@ -1,58 +1,40 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: bobtail timing
-Date: Thu, 8 Nov 2012 19:23:48 -0800
-Message-ID: <CA+4uBUYim-aqhoP64tNqxKXui8ms+TEB_eJUaZv8ro8E4v=ekw@mail.gmail.com>
-References: <alpine.DEB.2.00.1210311341580.20646@cobra.newdream.net>
-	<CAC-hyiE5NABU4gyf22D3csbu+xnLB54dqaqyVTVr1GRsG-DXRg@mail.gmail.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: [PATCH] vstart: allow minimum pool size of one
+Date: Thu, 8 Nov 2012 20:21:00 -0800
+Message-ID: <CAPrxi583At7RnDfpF7nfXtmRn1gf1mB8MW8BrSvP8TNqy0ZhCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:41518 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757436Ab2KIDXt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 22:23:49 -0500
-Received: by mail-vc0-f174.google.com with SMTP id fk26so3390511vcb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 19:23:48 -0800 (PST)
-In-Reply-To: <CAC-hyiE5NABU4gyf22D3csbu+xnLB54dqaqyVTVr1GRsG-DXRg@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:52550 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751439Ab2KIEVB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Nov 2012 23:21:01 -0500
+Received: by mail-vb0-f46.google.com with SMTP id ff1so3505786vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Nov 2012 20:21:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sam Lang <sam.lang@inktank.com>
 
-I've got wip_recovery_qos and wip_persist_missing that should go into bobtail.
+I needed this patch after some simple 1 OSD vstart environments
+refused to allow clients to connect.
 
-wip_recovery_qos passed regression (mostly, failures due to fsx, a bug
-fixed in master, and timeouts waiting for machines), and is waiting on
-review.
+--
 
-wip_persist_missing has a teuthology test I'll push tomorrow
-(wip_divergent_priors).  The second commit in wip_persist_missing I
-think still needs review (formerly wip_divergent_entries).
--Sam
+    A minimum pool size of 2 was introduced by 13486857cf. This sets the
+    minimum to one so that basic vstart environments work.
 
-On Thu, Nov 8, 2012 at 5:30 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> On Wed, Oct 31, 2012 at 1:46 PM, Sage Weil <sage@inktank.com> wrote:
->> I would like to freeze v0.55, the "bobtail" stable release, at the end of
->> next week.  If there is any functionality you are working on that should
->> be included, we need to get it into master (preferably well) before that.
->> There will be several weeks of testing in the 'next' branch after that
->> (probaly 3 weeks) before it is released.
->
-> I merged (against current master) and pushed all the pending rgw stuff
-> to wip-rgw-integration. This includes:
->
-> wip-post-cleaned
-> wip-stripe
-> wip-keystone
-> wip-3452
-> wip-3453
-> wip-swift-token
->
-> All that stuff needs to go into bobtail, but still waiting for review.
-> The bottom 3 are trivial.
->
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
+
+diff --git a/src/vstart.sh b/src/vstart.sh
+index 4565efa..bdf02f3 100755
+--- a/src/vstart.sh
++++ b/src/vstart.sh
+@@ -290,6 +290,7 @@ if [ "$start_mon" -eq 1 ]; then
+ [global]
+         osd pg bits = 3
+         osd pgp bits = 5  ; (invalid, but ceph should cope!)
++        osd pool default min size = 1
+ EOF
+                        [ "$cephx" -eq 1 ] && cat<<EOF >> $conf
+         auth supported = cephx
