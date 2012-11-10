@@ -1,99 +1,57 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: kill rbd_req_sync_op() snapc and snapid parameters
-Date: Fri, 09 Nov 2012 21:44:26 -0600
-Message-ID: <509DCD9A.8030904@inktank.com>
-References: <509DCCE6.5060009@inktank.com>
+Subject: [PATCH] rbd: don't bother setting snapid in rbd_do_request()
+Date: Fri, 09 Nov 2012 21:54:33 -0600
+Message-ID: <509DCFF9.7040801@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:57136 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751409Ab2KJDo0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 22:44:26 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so6904726iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 19:44:26 -0800 (PST)
-In-Reply-To: <509DCCE6.5060009@inktank.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:58787 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751719Ab2KJDyb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Nov 2012 22:54:31 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y32so3216943iag.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Nov 2012 19:54:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The snapc and snapid parameters to rbd_req_sync_op() always take
-the values NULL and CEPH_NOSNAP, respectively.  So just get rid
-of them and use those values where needed.
+For some reason, the snapid field of the osd request header is
+explicitly set to CEPH_NOSNAP in rbd_do_request().  Just a few lines
+later--with no code that would access this field in between--a call
+is made to ceph_calc_raw_layout() passing the snapid provided to
+rbd_do_request(), which encodes the snapid value it is provided into
+that field instead.
+
+In other words, there is no need to fill in CEPH_NOSNAP, and doing
+so suggests it might be necessary.  Don't do that any more.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   17 +++++------------
- 1 file changed, 5 insertions(+), 12 deletions(-)
+ drivers/block/rbd.c |    4 ----
+ 1 file changed, 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 958f4a8..b3d25c3 100644
+index b3d25c3..cd51216 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1259,8 +1259,6 @@ static void rbd_simple_req_cb(struct
-ceph_osd_request *osd_req,
-  * Do a synchronous ceph osd operation
-  */
- static int rbd_req_sync_op(struct rbd_device *rbd_dev,
--			   struct ceph_snap_context *snapc,
--			   u64 snapid,
- 			   int flags,
- 			   struct ceph_osd_req_op *ops,
- 			   const char *object_name,
-@@ -1280,7 +1278,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
+@@ -1134,7 +1134,6 @@ static int rbd_do_request(struct request *rq,
+ 	u64 bno;
+ 	struct timespec mtime = CURRENT_TIME;
+ 	struct rbd_request *rbd_req;
+-	struct ceph_osd_request_head *reqhead;
+ 	struct ceph_osd_client *osdc;
 
--	ret = rbd_do_request(NULL, rbd_dev, snapc, snapid,
-+	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
- 			  object_name, ofs, inbound_size, NULL,
- 			  pages, num_pages,
- 			  flags,
-@@ -1382,9 +1380,7 @@ static int rbd_req_sync_read(struct rbd_device
-*rbd_dev,
- 	if (!ops)
- 		return -ENOMEM;
+ 	rbd_req = kzalloc(sizeof(*rbd_req), GFP_NOIO);
+@@ -1167,9 +1166,6 @@ static int rbd_do_request(struct request *rq,
 
--	ret = rbd_req_sync_op(rbd_dev, NULL,
--			       CEPH_NOSNAP,
--			       CEPH_OSD_FLAG_READ,
-+	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ,
- 			       ops, object_name, ofs, len, buf, NULL, ver);
- 	rbd_destroy_ops(ops);
+ 	osd_req->r_priv = rbd_req;
 
-@@ -1463,8 +1459,7 @@ static int rbd_req_sync_watch(struct rbd_device
-*rbd_dev)
- 	ops[0].watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
- 	ops[0].watch.flag = 1;
-
--	ret = rbd_req_sync_op(rbd_dev, NULL,
--			      CEPH_NOSNAP,
-+	ret = rbd_req_sync_op(rbd_dev,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
- 			      rbd_dev->header_name,
-@@ -1501,8 +1496,7 @@ static int rbd_req_sync_unwatch(struct rbd_device
-*rbd_dev)
- 	ops[0].watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
- 	ops[0].watch.flag = 0;
-
--	ret = rbd_req_sync_op(rbd_dev, NULL,
--			      CEPH_NOSNAP,
-+	ret = rbd_req_sync_op(rbd_dev,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
- 			      rbd_dev->header_name,
-@@ -1555,8 +1549,7 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 	ops[0].cls.indata = outbound;
- 	ops[0].cls.indata_len = outbound_size;
-
--	ret = rbd_req_sync_op(rbd_dev, NULL,
--			       CEPH_NOSNAP, CEPH_OSD_FLAG_READ, ops,
-+	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, ops,
- 			       object_name, 0, inbound_size, inbound,
- 			       NULL, ver);
+-	reqhead = osd_req->r_request->front.iov_base;
+-	reqhead->snapid = cpu_to_le64(CEPH_NOSNAP);
+-
+ 	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
+ 	osd_req->r_oid_len = strlen(osd_req->r_oid);
 
 -- 
 1.7.9.5
