@@ -1,42 +1,29 @@
-From: Cyril Roelandt <tipecaml@gmail.com>
-Subject: [PATCH 3/3] ceph: fix dentry reference leak in ceph_encode_fh().
-Date: Sun, 11 Nov 2012 21:49:31 +0100
-Message-ID: <1352666971-13551-4-git-send-email-tipecaml@gmail.com>
-References: <1352666971-13551-1-git-send-email-tipecaml@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1352666971-13551-1-git-send-email-tipecaml@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, Cyril Roelandt <tipecaml@gmail.com>, sage@inktank.com, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: Disabling journal
+Date: Sun, 11 Nov 2012 22:33:50 +0100
+Message-ID: <50A019BE.9030002@profihost.ag>
+References: <F905E0C9-46B6-4DD7-A57D-072CD4ADDFEE@profihost.ag> <alpine.DEB.2.00.1211110722100.28418@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.profihost.ag ([85.158.179.208]:42349 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751708Ab2KKVdv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Nov 2012 16:33:51 -0500
+In-Reply-To: <alpine.DEB.2.00.1211110722100.28418@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-dput() was not called in the error path.
+Hi Sage,
 
-Signed-off-by: Cyril Roelandt <tipecaml@gmail.com>
----
- fs/ceph/export.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+> With btrfs, yes, although this isn't something we have tested in a while.
+I'm not using btrfs as long as the devs claim it is not ready for prod.
 
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index 9349bb3..ca3ab3f 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -56,13 +56,15 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
- 	struct ceph_nfs_confh *cfh = (void *)rawfh;
- 	int connected_handle_length = sizeof(*cfh)/4;
- 	int handle_length = sizeof(*fh)/4;
--	struct dentry *dentry = d_find_alias(inode);
-+	struct dentry *dentry;
- 	struct dentry *parent;
- 
- 	/* don't re-export snaps */
- 	if (ceph_snap(inode) != CEPH_NOSNAP)
- 		return -EINVAL;
- 
-+	dentry = d_find_alias(inode);
-+
- 	/* if we found an alias, generate a connectable fh */
- 	if (*max_len >= connected_handle_length && dentry) {
- 		dout("encode_fh %p connectable\n", dentry);
--- 
-1.7.10.4
+> You'd need to play with 'filestore min sync interval' and 'filestore max
+> sync interval' to basically pick your latency range.
+Any suggestions? Right now i've 500MB tmpfs journal per SSD.
+
+Stefan
