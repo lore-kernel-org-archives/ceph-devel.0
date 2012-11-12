@@ -1,91 +1,40 @@
-From: Nick Bartos <nick@pistoncloud.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Mon, 12 Nov 2012 14:19:22 -0800
-Message-ID: <CAPud5_4fcXZJqnds3A2nX2-jR9Nn_GBObX+Rgxf-Sou8jx5j8w@mail.gmail.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
-	<509C5FA6.7010600@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: changed rbd cp behavior in 0.53
+Date: Mon, 12 Nov 2012 14:47:38 -0800
+Message-ID: <50A17C8A.9020007@inktank.com>
+References: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:50938 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752632Ab2KLWTW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 17:19:22 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so9820834iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Nov 2012 14:19:22 -0800 (PST)
-In-Reply-To: <509C5FA6.7010600@inktank.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:42404 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753258Ab2KLWrl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 17:47:41 -0500
+Received: by mail-da0-f46.google.com with SMTP id n41so2933664dak.19
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Nov 2012 14:47:39 -0800 (PST)
+In-Reply-To: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-After removing 8-libceph-protect-ceph_con_open-with-mutex.patch, it
-seems we no longer have this hang.
+On 11/12/2012 08:30 AM, Andrey Korolyov wrote:
+> Hi,
+>
+> For this version, rbd cp assumes that destination pool is the same as
+> source, not 'rbd', if pool in the destination path is omitted.
+>
+> rbd cp install/img testimg
+> rbd ls install
+> img testimg
+>
+>
+> Is this change permanent?
+>
+> Thanks!
 
-On Thu, Nov 8, 2012 at 5:43 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 11/08/2012 02:10 PM, Mandell Degerness wrote:
->>
->> We are seeing a somewhat random, but frequent hang on our systems
->> during startup.  The hang happens at the point where an "rbd map
->> <rbdvol>" command is run.
->>
->> I've attached the ceph logs from the cluster.  The map command happens
->> at Nov  8 18:41:09 on server 172.18.0.15.  The process which hung can
->> be seen in the log as 172.18.0.15:0/1143980479.
->>
->> It appears as if the TCP socket is opened to the OSD, but then times
->> out 15 minutes later, the process gets data when the socket is closed
->> on the client server and it retries.
->>
->> Please help.
->>
->> We are using ceph version 0.48.2argonaut
->> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe).
->>
->> We are using a 3.5.7 kernel with the following list of patches applied:
->>
->> 1-libceph-encapsulate-out-message-data-setup.patch
->> 2-libceph-dont-mark-footer-complete-before-it-is.patch
->> 3-libceph-move-init-of-bio_iter.patch
->> 4-libceph-dont-use-bio_iter-as-a-flag.patch
->> 5-libceph-resubmit-linger-ops-when-pg-mapping-changes.patch
->> 6-libceph-re-initialize-bio_iter-on-start-of-message-receive.patch
->> 7-ceph-close-old-con-before-reopening-on-mds-reconnect.patch
->> 8-libceph-protect-ceph_con_open-with-mutex.patch
->> 9-libceph-reset-connection-retry-on-successfully-negotiation.patch
->> 10-rbd-only-reset-capacity-when-pointing-to-head.patch
->> 11-rbd-set-image-size-when-header-is-updated.patch
->> 12-libceph-fix-crypto-key-null-deref-memory-leak.patch
->> 13-ceph-tolerate-and-warn-on-extraneous-dentry-from-mds.patch
->> 14-ceph-avoid-divide-by-zero-in-__validate_layout.patch
->> 15-rbd-drop-dev-reference-on-error-in-rbd_open.patch
->> 16-ceph-Fix-oops-when-handling-mdsmap-that-decreases-max_mds.patch
->> 17-libceph-check-for-invalid-mapping.patch
->> 18-ceph-propagate-layout-error-on-osd-request-creation.patch
->> 19-rbd-BUG-on-invalid-layout.patch
->> 20-ceph-return-EIO-on-invalid-layout-on-GET_DATALOC-ioctl.patch
->> 21-ceph-avoid-32-bit-page-index-overflow.patch
->> 23-ceph-fix-dentry-reference-leak-in-encode_fh.patch
->>
->> Any suggestions?
->
->
-> The log shows your monitors don't have time sychronized enough among
-> them to make much progress (including authenticating new connections).
-> That's probably the real issue. 0.2s is pretty large clock drift.
->
->
->> One thought is that the following patch (which we could not apply) is
->> what is required:
->>
->> 22-rbd-reset-BACKOFF-if-unable-to-re-queue.patch
->
->
-> This is certainly useful too, but I don't think it's the cause of
-> the delay in this case.
->
-> Josh
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is a regression. The previous behavior will be restored for 0.54.
+I added http://tracker.newdream.net/issues/3478 to track it.
+
+Josh
