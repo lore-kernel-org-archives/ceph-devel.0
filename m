@@ -1,47 +1,36 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: improve speed with auth supported=none
-Date: Mon, 12 Nov 2012 19:26:27 +0100
-Message-ID: <CAOLwVU=2BNvOs1SUqVrXS9Wajng5zk0mebnK3cZnZFO=rzrGbw@mail.gmail.com>
-References: <50A117B9.4060804@profihost.ag>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: [BUG] ceph-mon crashes
+Date: Mon, 12 Nov 2012 19:30:48 +0100
+Message-ID: <50A14058.4070905@profihost.ag>
+References: <50A01DCB.9010001@profihost.ag> <50A024B2.3080502@inktank.com> <50A02542.1000602@profihost.ag> <50A03412.1030206@inktank.com> <21B8A3CE-BC02-44AF-ABB5-45C9C74F9380@profihost.ag> <50A10EB1.4040802@inktank.com> <50A1114A.5070200@profihost.ag> <50A12C67.50702@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:40104 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751657Ab2KLS0t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 13:26:49 -0500
-Received: by mail-lb0-f174.google.com with SMTP id n3so4884227lbo.19
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Nov 2012 10:26:48 -0800 (PST)
-In-Reply-To: <50A117B9.4060804@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:41999 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751979Ab2KLSar (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 13:30:47 -0500
+In-Reply-To: <50A12C67.50702@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+To: Joao Eduardo Luis <joao.luis@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I guess you can refer to that link on the list:
-http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/9776
+Hi Joao,
 
-btw do you get 5000 iop/s on the rbd kernel or on a vm disk?
+Am 12.11.2012 18:05, schrieb Joao Eduardo Luis:
+> Can you please confirm me that sometime between you issuing the out
+> command and mon.b failing, you had yet another monitor (maybe mon.a)
+> that was the leader but for some reason it was down by the time that
+> mon.b failed?
+>
+> If so, could you provide the log for that monitor as well, given this
+> log doesn't have some infos I'm looking for?
+Not sure but here are the logs of the other two mons:
+https://www.dropbox.com/s/jztsedvj1b2kjje/ceph-mon.a.log.1.gz
 
-cheers.
+https://www.dropbox.com/s/62jkfbbbgvs5o25/ceph-mon.c.log.1.gz
 
-
-On Mon, Nov 12, 2012 at 4:37 PM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
-> Hello list,
->
-> i'm still trying to improve ceph speed. Disable logging on host and rbd
-> client gives me additional 5000 iop/s which is great.
->
-> But i also wanted to try disabling authentication using:
-> auth supported=none
->
-> How does this work? Do i just have to place this line under global section
-> in ceph.conf?
->
-> Greets,
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Stefan
