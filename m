@@ -1,111 +1,86 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Mon, 12 Nov 2012 15:16:34 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211121514200.26823@cobra.newdream.net>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <509C5FA6.7010600@inktank.com> <CAPud5_4fcXZJqnds3A2nX2-jR9Nn_GBObX+Rgxf-Sou8jx5j8w@mail.gmail.com>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: ceph osd crush set command under 0.53
+Date: Mon, 12 Nov 2012 16:08:59 -0800
+Message-ID: <CA+jddaPtzT0OenHxOGa1ZxTsAtzkeSxX=wbicdB07S97pyP5Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40562 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753457Ab2KLXQf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 18:16:35 -0500
-In-Reply-To: <CAPud5_4fcXZJqnds3A2nX2-jR9Nn_GBObX+Rgxf-Sou8jx5j8w@mail.gmail.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:62505 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752297Ab2KMAJB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Nov 2012 19:09:01 -0500
+Received: by mail-wg0-f44.google.com with SMTP id dr13so4546990wgb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Nov 2012 16:09:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, eng@pistoncloud.com
 
-On Mon, 12 Nov 2012, Nick Bartos wrote:
-> After removing 8-libceph-protect-ceph_con_open-with-mutex.patch, it
-> seems we no longer have this hang.
+Did the syntax and behavior of the "ceph osd crush set ..." command
+change between 0.48 and 0.53?
 
-Hmm, that's a bit disconcerting.  Did this series come from our old 3.5 
-stable series?  I recently prepared a new one that backports *all* of the 
-fixes from 3.6 to 3.5 (and 3.4); see wip-3.5 in ceph-client.git.  I would 
-be curious if you see problems with that.
+When trying out ceph 0.53, I get the following in my log when trying
+to add the first OSD to a new cluster (similar behavior for osds 2 and
+3).  It appears that the ceph osd crush command fails, but still marks
+the OSDs as up and in:
 
-So far, with these fixes in place, we have not seen any unexplained kernel 
-crashes in this code.
-
-I take it you're going back to a 3.5 kernel because you weren't able to 
-get rid of the sync problem with 3.6?
-
-sage
-
-
-
-> 
-> On Thu, Nov 8, 2012 at 5:43 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> > On 11/08/2012 02:10 PM, Mandell Degerness wrote:
-> >>
-> >> We are seeing a somewhat random, but frequent hang on our systems
-> >> during startup.  The hang happens at the point where an "rbd map
-> >> <rbdvol>" command is run.
-> >>
-> >> I've attached the ceph logs from the cluster.  The map command happens
-> >> at Nov  8 18:41:09 on server 172.18.0.15.  The process which hung can
-> >> be seen in the log as 172.18.0.15:0/1143980479.
-> >>
-> >> It appears as if the TCP socket is opened to the OSD, but then times
-> >> out 15 minutes later, the process gets data when the socket is closed
-> >> on the client server and it retries.
-> >>
-> >> Please help.
-> >>
-> >> We are using ceph version 0.48.2argonaut
-> >> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe).
-> >>
-> >> We are using a 3.5.7 kernel with the following list of patches applied:
-> >>
-> >> 1-libceph-encapsulate-out-message-data-setup.patch
-> >> 2-libceph-dont-mark-footer-complete-before-it-is.patch
-> >> 3-libceph-move-init-of-bio_iter.patch
-> >> 4-libceph-dont-use-bio_iter-as-a-flag.patch
-> >> 5-libceph-resubmit-linger-ops-when-pg-mapping-changes.patch
-> >> 6-libceph-re-initialize-bio_iter-on-start-of-message-receive.patch
-> >> 7-ceph-close-old-con-before-reopening-on-mds-reconnect.patch
-> >> 8-libceph-protect-ceph_con_open-with-mutex.patch
-> >> 9-libceph-reset-connection-retry-on-successfully-negotiation.patch
-> >> 10-rbd-only-reset-capacity-when-pointing-to-head.patch
-> >> 11-rbd-set-image-size-when-header-is-updated.patch
-> >> 12-libceph-fix-crypto-key-null-deref-memory-leak.patch
-> >> 13-ceph-tolerate-and-warn-on-extraneous-dentry-from-mds.patch
-> >> 14-ceph-avoid-divide-by-zero-in-__validate_layout.patch
-> >> 15-rbd-drop-dev-reference-on-error-in-rbd_open.patch
-> >> 16-ceph-Fix-oops-when-handling-mdsmap-that-decreases-max_mds.patch
-> >> 17-libceph-check-for-invalid-mapping.patch
-> >> 18-ceph-propagate-layout-error-on-osd-request-creation.patch
-> >> 19-rbd-BUG-on-invalid-layout.patch
-> >> 20-ceph-return-EIO-on-invalid-layout-on-GET_DATALOC-ioctl.patch
-> >> 21-ceph-avoid-32-bit-page-index-overflow.patch
-> >> 23-ceph-fix-dentry-reference-leak-in-encode_fh.patch
-> >>
-> >> Any suggestions?
-> >
-> >
-> > The log shows your monitors don't have time sychronized enough among
-> > them to make much progress (including authenticating new connections).
-> > That's probably the real issue. 0.2s is pretty large clock drift.
-> >
-> >
-> >> One thought is that the following patch (which we could not apply) is
-> >> what is required:
-> >>
-> >> 22-rbd-reset-BACKOFF-if-unable-to-re-queue.patch
-> >
-> >
-> > This is certainly useful too, but I don't think it's the cause of
-> > the delay in this case.
-> >
-> > Josh
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Nov 12 23:19:05 node-172-20-0-13/172.20.0.13 [2012-11-12 23:19:05.759]
+908/MainThread savage/INFO: execute(['ceph', 'osd', 'crush', 'set',
+'0', 'osd.0', '1.0', 'host=172.20.0.13', 'rack=0', 'pool=default'])
+Nov 12 23:19:05 node-172-20-0-14/172.20.0.14 ceph-mon: 2012-11-12
+23:19:05.804080 7ffd761fe700  0 mon.1@1(peon) e1 handle_command
+mon_command(osd crush set 0 osd.0 1.0 host=172.20.0.13 rack=0
+pool=default v 0) v1
+Nov 12 23:19:05 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:05.772215 7fad40911700  0 mon.0@0(leader) e1 handle_command
+mon_command(osd crush set 0 osd.0 1.0 host=172.20.0.13 rack=0
+pool=default v 0) v1
+Nov 12 23:19:05 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:05.772248 7fad40911700  0 mon.0@0(leader).osd e2 adding/updating
+crush item id 0 name 'osd.0' weight 1 at location
+{host=172.20.0.13,pool=default,rack=0}
+Nov 12 23:19:05 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:05.772323 7fad40911700  1 error: didn't find anywhere to add
+item 0 in {host=172.20.0.13,pool=default,rack=0}
+Nov 12 23:19:05 node-172-20-0-13/172.20.0.13 [2012-11-12 23:19:05.783]
+908/MainThread savage/CRITICAL: Logging uncaught exception Traceback
+(most recent call last):   File "/usr/bin/sv-fred.py", line 9, in
+<module>     load_entry_point('savage==9999.2101.118c3ebc8c0843f87e82eb047de043c8a70086bd',
+'console_scripts', 'sv-fred.py')()   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+811, in main   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+798, in run   File
+"/usr/lib64/python2.6/site-packages/savage/utils/nfa.py", line 291, in
+step   File "/usr/lib64/python2.6/site-packages/savage/utils/nfa.py",
+line 252, in step   File
+"/usr/lib64/python2.6/site-packages/savage/utils/nfa.py", line 231, in
+_newstate   File
+"/usr/lib64/python2.6/site-packages/savage/utils/nfa.py", line 219, in
+_newstate   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+563, in action_firstboot_full   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+768, in handle_message   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+750, in start_phase   File
+"/usr/lib64/python2.6/site-packages/savage/services/fred.py", line
+164, in start   File
+"/usr/lib64/python2.6/site-packages/savage/utils/__init__.py", line
+275, in _wrap   File
+"/usr/lib64/python2.6/site-packages/savage/command/commands/ceph.py",
+line 50, in crush_myself   File
+"/usr/lib64/python2.6/site-packages/savage/utils/__init__.py", line
+244, in execute   File
+"/usr/lib64/python2.6/site-packages/savage/utils/__init__.py", line
+130, in collect_subprocess ExecutionError: Command failed: ceph osd
+crush set 0 osd.0 1.0 host=172.20.0.13 rack=0 pool=default
+return_code: 1 stdout: (22) Invalid argument stderr:
+Nov 12 23:19:06 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:06.491514 7fad40911700  1 mon.0@0(leader).osd e3 e3: 3 osds: 1
+up, 1 in
+Nov 12 23:19:06 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:06.494461 7fad40911700  0 log [INF] : osdmap e3: 3 osds: 1 up, 1
+in
+Nov 12 23:19:06 node-172-20-0-13/172.20.0.13 ceph-mon: 2012-11-12
+23:19:06.494463 mon.0 172.20.0.13:6789/0 16 : [INF] osdmap e3: 3 osds:
+1 up, 1 in
