@@ -1,46 +1,59 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: improve speed with auth supported=none
-Date: Tue, 13 Nov 2012 09:06:55 +0100
-Message-ID: <50A1FF9F.7010705@profihost.ag>
-References: <50A117B9.4060804@profihost.ag> <CAOLwVU=2BNvOs1SUqVrXS9Wajng5zk0mebnK3cZnZFO=rzrGbw@mail.gmail.com> <50A170BF.5030402@profihost.ag> <50A1F9F8.4030808@inktank.com> <50A1FC4D.8010000@profihost.ag> <50A1FF21.2020700@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: optmize librbd for iops
+Date: Tue, 13 Nov 2012 00:20:21 -0800
+Message-ID: <50A202C5.1070104@inktank.com>
+References: <50A0FE96.9030708@profihost.ag> <50A1FC14.3010007@inktank.com> <50A1FCD7.7090303@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:42670 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754290Ab2KMIG5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Nov 2012 03:06:57 -0500
-In-Reply-To: <50A1FF21.2020700@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:52909 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752126Ab2KMIUY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Nov 2012 03:20:24 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so4886101pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Nov 2012 00:20:24 -0800 (PST)
+In-Reply-To: <50A1FCD7.7090303@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 13.11.2012 09:04, schrieb Josh Durgin:
-> On 11/12/2012 11:52 PM, Stefan Priebe wrote:
->> Am 13.11.2012 08:42, schrieb Josh Durgin:
->>> On 11/12/2012 01:57 PM, Stefan Priebe wrote:
->>>> Thanks,
->>>>
->>>> this gives another burst for iops. I'm now at 23.000 iops ;-) So for
->>>> random 4k iops ceph auth and especially the logging is a lot of
->>>> overhead.
+On 11/12/2012 11:55 PM, Stefan Priebe wrote:
+> Am 13.11.2012 08:51, schrieb Josh Durgin:
+>> On 11/12/2012 05:50 AM, Stefan Priebe - Profihost AG wrote:
+>>> Hello list,
 >>>
->>> How much difference did disabling auth make vs only disabling logging?
+>>> are there any plans to optimize librbd for iops? Right now i'm able to
+>>> get 50.000 iop/s via iscsi and 100.000 iop/s using multipathing with
+>>> iscsi.
+>>>
+>>> With librbd i'm stuck to around 18.000iops. As this scales with more
+>>> hosts but not with more disks in a vm. It must be limited by rbd
+>>> implementation in kvm / librbd.
 >>
->> disable debug logging: 3000 iops
->> disable auth logging: 2000 iops
+>> It'd be interesting to see which layers are most limiting in this
+>> case - qemu/kvm, librados, or librbd.
 >>
->> Is anybody in the ceph team also interested in a call graph of kvm when
->> VM is doing random 4k write io?
->
-> I'm interested, although I'm not sure how easy it'll be to find
-> bottlenecks from it. It's worth a shot.
+>> How does rados bench with 4k writes and then 4k reads with many
+>> concurrent IOs do?
+> Right now i'm using qemu-kvm with librbd and fio inside guest. How does
+> the rados bench work?
 
-*arg* kvm process segfaults when i use google perf tools to create / 
-record one.
+rados bench uses librados aio, keeping several operations in flight.
+IO size is the same as object size for it.
 
-Any software suggestion?
+You can do a 4k write benchmark that doesn't delete the objects it
+writes, with 32 IOs in flight for 300 seconds:
 
-Stefan
+rados -p data bench 300 write -b 4096 -t 32 --no-cleanup
+
+Then a read benchmark (only sequential is implemented, but with 4k
+objects it's similar to random if you flush the osd's page cache before
+running it):
+
+rados -p data bench 300 seq -b 4096 -t 32
+
+You can divide the avg throughput by IO size to get IOPS.
+
+Josh
