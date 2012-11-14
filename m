@@ -1,34 +1,79 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: problem with ceph and btrfs patch: set journal_info in async trans
- commit worker
-Date: Wed, 14 Nov 2012 14:42:07 +0100
-Message-ID: <50A39FAF.50602@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: endless flying slow requests
+Date: Wed, 14 Nov 2012 06:59:41 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211140656590.6512@cobra.newdream.net>
+References: <50A3607A.6050209@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Josef Bacik <jbacik@fusionio.com>, miaox@cn.fujitsu.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:59075 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932574Ab2KNO7m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 09:59:42 -0500
+In-Reply-To: <50A3607A.6050209@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello list,
+Hi Stefan,
 
-i wanted to try out ceph with latest vanilla kernel 3.7-rc5. I was 
-seeing a massive performance degration. I see around 22x 
-btrfs-endio-write processes every 10-20 seconds and they run a long time 
-while consuming a massive amount of CPU.
+I would be nice to confirm that no clients are waiting on replies for 
+these requests; currently we suspect that the OSD request tracking is the 
+buggy part.  If you query the OSD admin socket you should be able to dump 
+requests and see the client IP, and then query the client.  
 
-So my performance of 23.000 iops drops to an up and down of 23.000 iops 
-to 0 - avg is now 2500 iops instead of 23.000.
+Is it librbd?  In that case you likely need to change the config so that 
+it is listening on an admin socket ('admin socket = path').
 
-Git bisect shows me commit: e209db7ace281ca347b1ac699bf1fb222eac03fe 
-"Btrfs: set journal_info in async trans commit worker" as the 
-problematic patch.
+Thanks!
+sage
 
-When i revert this one everything is fine again.
 
-Is this known?
+On Wed, 14 Nov 2012, Stefan Priebe - Profihost AG wrote:
 
-Greets,
-Stefan
+> Hello list,
+> 
+> i see this several times. Endless flying slow requests. And they never stop
+> until i restart the mentioned osd.
+> 
+> 2012-11-14 10:11:57.513395 osd.24 [WRN] 1 slow requests, 1 included below;
+> oldest blocked for > 31789.858457 secs
+> 2012-11-14 10:11:57.513399 osd.24 [WRN] slow request 31789.858457 seconds old,
+> received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> currently delayed
+> 2012-11-14 10:11:58.513584 osd.24 [WRN] 1 slow requests, 1 included below;
+> oldest blocked for > 31790.858646 secs
+> 2012-11-14 10:11:58.513586 osd.24 [WRN] slow request 31790.858646 seconds old,
+> received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> currently delayed
+> 2012-11-14 10:11:59.513766 osd.24 [WRN] 1 slow requests, 1 included below;
+> oldest blocked for > 31791.858827 secs
+> 2012-11-14 10:11:59.513768 osd.24 [WRN] slow request 31791.858827 seconds old,
+> received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> currently delayed
+> 2012-11-14 10:12:00.513909 osd.24 [WRN] 1 slow requests, 1 included below;
+> oldest blocked for > 31792.858971 secs
+> 2012-11-14 10:12:00.513916 osd.24 [WRN] slow request 31792.858971 seconds old,
+> received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> currently delayed
+> 2012-11-14 10:12:01.514061 osd.24 [WRN] 1 slow requests, 1 included below;
+> oldest blocked for > 31793.859124 secs
+> 2012-11-14 10:12:01.514063 osd.24 [WRN] slow request 31793.859124 seconds old,
+> received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> currently delayed
+> 
+> When i now restart osd 24 they go away and everything is fine again.
+> 
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
