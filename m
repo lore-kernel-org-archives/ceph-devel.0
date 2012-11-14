@@ -1,31 +1,55 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: keystone and libnss
-Date: Tue, 13 Nov 2012 19:37:16 -0800
-Message-ID: <CAC-hyiE1oMB7EE0iD2_QoGgAjZO+z6T90Q5c6Zww=Nud+p5NVg@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: endless flying slow requests
+Date: Wed, 14 Nov 2012 10:12:26 +0100
+Message-ID: <50A3607A.6050209@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:55753 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932457Ab2KNDhR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Nov 2012 22:37:17 -0500
-Received: by mail-vc0-f174.google.com with SMTP id fk26so8164491vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Nov 2012 19:37:16 -0800 (PST)
+Received: from mail.profihost.ag ([85.158.179.208]:47474 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754446Ab2KNJMd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 04:12:33 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-One issue to keep in mind with Keystone is that it requires nss to
-work efficiently. With nss both presigned (pki) tokens and token
-revocation work. Without it, the following happens:
+Hello list,
 
- - we go to the keystone server for every non-cached token, even if
-it's presigned
- - when we fail to decode the revocation list we clear the tokens cache
+i see this several times. Endless flying slow requests. And they never 
+stop until i restart the mentioned osd.
 
-So essentially it affects performance. Not sure whether it's that big
-of a deal, as there's still the cache window, but we should keep it in
-mind.
+2012-11-14 10:11:57.513395 osd.24 [WRN] 1 slow requests, 1 included 
+below; oldest blocked for > 31789.858457 secs
+2012-11-14 10:11:57.513399 osd.24 [WRN] slow request 31789.858457 
+seconds old, received at 2012-11-14 01:22:07.654922: 
+osd_op(client.30286.0:6719 rbd_data.75c55bf2fdd7.0000000000001399 [write 
+282624~4096] 3.3f6d2373) v4 currently delayed
+2012-11-14 10:11:58.513584 osd.24 [WRN] 1 slow requests, 1 included 
+below; oldest blocked for > 31790.858646 secs
+2012-11-14 10:11:58.513586 osd.24 [WRN] slow request 31790.858646 
+seconds old, received at 2012-11-14 01:22:07.654922: 
+osd_op(client.30286.0:6719 rbd_data.75c55bf2fdd7.0000000000001399 [write 
+282624~4096] 3.3f6d2373) v4 currently delayed
+2012-11-14 10:11:59.513766 osd.24 [WRN] 1 slow requests, 1 included 
+below; oldest blocked for > 31791.858827 secs
+2012-11-14 10:11:59.513768 osd.24 [WRN] slow request 31791.858827 
+seconds old, received at 2012-11-14 01:22:07.654922: 
+osd_op(client.30286.0:6719 rbd_data.75c55bf2fdd7.0000000000001399 [write 
+282624~4096] 3.3f6d2373) v4 currently delayed
+2012-11-14 10:12:00.513909 osd.24 [WRN] 1 slow requests, 1 included 
+below; oldest blocked for > 31792.858971 secs
+2012-11-14 10:12:00.513916 osd.24 [WRN] slow request 31792.858971 
+seconds old, received at 2012-11-14 01:22:07.654922: 
+osd_op(client.30286.0:6719 rbd_data.75c55bf2fdd7.0000000000001399 [write 
+282624~4096] 3.3f6d2373) v4 currently delayed
+2012-11-14 10:12:01.514061 osd.24 [WRN] 1 slow requests, 1 included 
+below; oldest blocked for > 31793.859124 secs
+2012-11-14 10:12:01.514063 osd.24 [WRN] slow request 31793.859124 
+seconds old, received at 2012-11-14 01:22:07.654922: 
+osd_op(client.30286.0:6719 rbd_data.75c55bf2fdd7.0000000000001399 [write 
+282624~4096] 3.3f6d2373) v4 currently delayed
 
-Yehuda
+When i now restart osd 24 they go away and everything is fine again.
+
+Stefan
