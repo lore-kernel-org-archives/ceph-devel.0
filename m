@@ -1,51 +1,31 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.54 released
-Date: Tue, 13 Nov 2012 17:15:41 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211131714410.25991@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: keystone and libnss
+Date: Tue, 13 Nov 2012 19:37:16 -0800
+Message-ID: <CAC-hyiE1oMB7EE0iD2_QoGgAjZO+z6T90Q5c6Zww=Nud+p5NVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53550 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932077Ab2KNBPl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Nov 2012 20:15:41 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 4089C8004F
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Nov 2012 17:15:41 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 1B27D8004F
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Nov 2012 17:15:41 -0800 (PST)
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:55753 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932457Ab2KNDhR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Nov 2012 22:37:17 -0500
+Received: by mail-vc0-f174.google.com with SMTP id fk26so8164491vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Nov 2012 19:37:16 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>
 
-The v0.54 development release is ready! This will be the last development 
-release before v0.55 "bobtail," our next long-term stable release, is 
-ready. Notable changes this time around include:
+One issue to keep in mind with Keystone is that it requires nss to
+work efficiently. With nss both presigned (pki) tokens and token
+revocation work. Without it, the following happens:
 
- * osd: use entire device if journal is a block device
- * osd: new caps structure (see below)
- * osd: backfill target reservations (improve performance during recovery)
- * ceph-fuse: many fixes (including memory leaks, hangs)
- * radosgw: REST API for managing usage stats
- * radosgw: many small fixes, cleanups (coverity)
- * mds: misc fixes for multi-mds clusters
- * rbd: ls -l
- * ceph-disk-prepare: support for external journals, default mount/mkfs 
-   options, etc.
- * ceph-debugpack: miscimprovements
+ - we go to the keystone server for every non-cached token, even if
+it's presigned
+ - when we fail to decode the revocation list we clear the tokens cache
 
-There isn't anything especially exciting here; most of the big stuff is 
-landing in v0.55, which will become bobtail. Most of our effort over the 
-next few weeks will be on make sure that v0.55 bobtail is rock solid and 
-performs well.
+So essentially it affects performance. Not sure whether it's that big
+of a deal, as there's still the cache window, but we should keep it in
+mind.
 
-Note that the syntax for the OSD capabilities have changed slightly. If 
-you use non-default capabilities, please refer to the full release notes.
-
-You can get v0.54 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball athttp://ceph.com/download/ceph-0.54.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+Yehuda
