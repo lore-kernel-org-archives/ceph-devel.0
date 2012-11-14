@@ -1,46 +1,43 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
+From: Tren Blackburn <tren@eotnetworks.com>
 Subject: Re: Small feature request for v0.55 release
-Date: Wed, 14 Nov 2012 16:40:40 -0700
-Message-ID: <2C7727ED-B154-4C3F-871C-58E47ED907D6@tchpc.tcd.ie>
-References: <CAPud5_4pT3OPeVC=e2cFwpdiYXsx96TuAfYiCDJbWJek+hw_Xg@mail.gmail.com>  <sfid-H20121114-231457-+037.12-1@marduk.tchpc.tcd.ie> <alpine.DEB.2.00.1211141513040.26823@cobra.newdream.net>  (sfid-H20121114-231457-+037.12-1@marduk.tchpc.tcd.ie)
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Date: Wed, 14 Nov 2012 15:44:57 -0800
+Message-ID: <CANLRBozXfYw6q1xFh-A_X0tccBVp+PwEX+KG86vYwqjAE83nZQ@mail.gmail.com>
+References: <CAPud5_4pT3OPeVC=e2cFwpdiYXsx96TuAfYiCDJbWJek+hw_Xg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:36533 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933195Ab2KNXkr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 18:40:47 -0500
-In-Reply-To: <alpine.DEB.2.00.1211141513040.26823@cobra.newdream.net>  (sfid-H20121114-231457-+037.12-1@marduk.tchpc.tcd.ie)
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:55052 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754480Ab2KNXo6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 18:44:58 -0500
+Received: by mail-vc0-f174.google.com with SMTP id fk26so1083909vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 15:44:57 -0800 (PST)
+In-Reply-To: <CAPud5_4pT3OPeVC=e2cFwpdiYXsx96TuAfYiCDJbWJek+hw_Xg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Nick Bartos <nick@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: Nick Bartos <nick@pistoncloud.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Wed, Nov 14, 2012 at 1:53 PM, Nick Bartos <nick@pistoncloud.com> wrote:
+> I see that v0.55 will be the next stable release.  Would it be
+> possible to use standard tarball naming conventions for this release?
+>
+> If I download http://ceph.com/download/ceph-0.48.2.tar.bz2, the top
+> level directory is actually ceph-0.48.2argonaut, not ceph-0.48.2 as
+> expected.  Downloading
+> http://ceph.com/download/ceph-0.48.2argonaut.tar.bz2 yields a slightly
+> more expected result, but still isn't the typical *ix style of
+> name-version.tar.  This is very annoying in some build systems, which
+> have that assumption.  I've actually been extracting the tarballs,
+> renaming the top level directory, then recompressing them.
+>
+> It would be great if we didn't have to do that with the next release,
+> e.g. extracting http://ceph.com/download/ceph-0.55.tar.bz2 would yield
+> a top level directory of ceph-0.55.
 
-On 14 Nov 2012, at 16:14, Sage Weil wrote:
++1
 
->=20
-> Appending the codename to the version string is something we did with=
-=20
-> argonaut (0.48argonaut) just to make it obvious to users which stable=
-=20
-> version they are on.
->=20
-> How do people feel about that?  Is it worthwhile?  Useless?  Ugly?
->=20
-> We can certainly skip it for 0.55 bobtail=85
+I'm glad to see I'm not the only one doing this. Gentoo's ebuild
+system doesn't respond kindly to this either.
 
-Just throwing in some thoughts, but how about a scheme like ${name}-sta=
-ble-${version}.tar.bz2 and have the corresponding directory structure i=
-nside and just ditch code names in the tar ball filename? It doesn't lo=
-ok as nice with out a codename, but it makes it absolutely clear to new=
- users that it is a stable release.
-
-Jimmy
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+t.
