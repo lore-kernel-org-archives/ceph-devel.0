@@ -1,56 +1,47 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: changed rbd cp behavior in 0.53
-Date: Thu, 15 Nov 2012 09:43:47 +0300
-Message-ID: <CABYiri8UzN==BkdyrAXdGORkJedNQR82WHBn8ZPCB-izt54HOA@mail.gmail.com>
-References: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com>
- <50A17C8A.9020007@inktank.com> <50A43DA0.6030307@inktank.com>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: OSD crash on 0.48.2argonaut
+Date: Thu, 15 Nov 2012 07:31:02 +0000
+Message-ID: <60E83269D669544E8069A09CB69135EA0CEC66@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:44289 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753452Ab2KOGoK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 01:44:10 -0500
-Received: by mail-ob0-f174.google.com with SMTP id wc20so1355317obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 22:44:09 -0800 (PST)
-In-Reply-To: <50A43DA0.6030307@inktank.com>
+Received: from twnhumsw2.wistron.com ([220.128.89.22]:62122 "EHLO
+	TWNHUMSW2.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S2992728Ab2KOHbG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 02:31:06 -0500
+Received: from GDC-CLDCAS-P03.whq.wistron (unverified [10.37.38.64]) by TWNHUMSW2.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta8111aa26cc0a816701828@TWNHUMSW2.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Thu, 15 Nov 2012 15:31:03 +0800
+Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Nov 15, 2012 at 4:56 AM, Dan Mick <dan.mick@inktank.com> wrote:
->
->
-> On 11/12/2012 02:47 PM, Josh Durgin wrote:
->>
->> On 11/12/2012 08:30 AM, Andrey Korolyov wrote:
->>>
->>> Hi,
->>>
->>> For this version, rbd cp assumes that destination pool is the same as
->>> source, not 'rbd', if pool in the destination path is omitted.
->>>
->>> rbd cp install/img testimg
->>> rbd ls install
->>> img testimg
->>>
->>>
->>> Is this change permanent?
->>>
->>> Thanks!
->>
->>
->> This is a regression. The previous behavior will be restored for 0.54.
->> I added http://tracker.newdream.net/issues/3478 to track it.
->
->
-> Actually, on detailed examination, it looks like this has been the behavior
-> for a long time; I think the wiser course would be not to change this
-> defaulting.  One could argue the value of such defaulting, but it's also
-> true that you can specify the source and destination pools explicitly.
->
-> Andrey, any strong objection to leaving this the way it is?
+Dear All:
 
-I`m not complaining -  this behavior seems more logical in the first
-place and of course I use full path even doing something by hand.
+I met this issue on one of osd node. Is this a known issue? Thanks!
+
+ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
+ 1: /usr/bin/ceph-osd() [0x6edaba]
+ 2: (()+0xfcb0) [0x7f08b112dcb0]
+ 3: (gsignal()+0x35) [0x7f08afd09445]
+ 4: (abort()+0x17b) [0x7f08afd0cbab]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f08b065769d]
+ 6: (()+0xb5846) [0x7f08b0655846]
+ 7: (()+0xb5873) [0x7f08b0655873]
+ 8: (()+0xb596e) [0x7f08b065596e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x1de) [0x7a82fe]
+ 10: (ReplicatedPG::eval_repop(ReplicatedPG::RepGather*)+0x693) [0x530f83]
+ 11: (ReplicatedPG::repop_ack(ReplicatedPG::RepGather*, int, int, int, eversion_t)+0x159) [0x531ac9]
+ 12: (ReplicatedPG::sub_op_modify_reply(std::tr1::shared_ptr<OpRequest>)+0x15c) [0x53251c]
+ 13: (ReplicatedPG::do_sub_op_reply(std::tr1::shared_ptr<OpRequest>)+0x81) [0x54d241]
+ 14: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x1e3) [0x600883]
+ 15: (OSD::dequeue_op(PG*)+0x238) [0x5bfaf8]
+ 16: (ThreadPool::worker()+0x4d5) [0x79f835]
+ 17: (ThreadPool::WorkThread::entry()+0xd) [0x5d87cd]
+ 18: (()+0x7e9a) [0x7f08b1125e9a]
+ 19: (clone()+0x6d) [0x7f08afdc54bd]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+
+
