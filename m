@@ -1,55 +1,115 @@
-From: Tren Blackburn <tren@eotnetworks.com>
-Subject: Re: Small feature request for v0.55 release
-Date: Wed, 14 Nov 2012 15:47:38 -0800
-Message-ID: <CANLRBoxdcO8YLp69Lg7uhAWF+xffqPjdDGUVuOx_Wq4XV6g-1w@mail.gmail.com>
-References: <CAPud5_4pT3OPeVC=e2cFwpdiYXsx96TuAfYiCDJbWJek+hw_Xg@mail.gmail.com>
-	<sfid-H20121114-231457-+037.12-1@marduk.tchpc.tcd.ie>
-	<alpine.DEB.2.00.1211141513040.26823@cobra.newdream.net>
-	<2C7727ED-B154-4C3F-871C-58E47ED907D6@tchpc.tcd.ie>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
+ flexible
+Date: Wed, 14 Nov 2012 16:12:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211141611340.26823@cobra.newdream.net>
+References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net> <502530C9.7030008@bisect.de> <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net> <alpine.DEB.2.00.1208161448060.26904@cobra.newdream.net>
+ <CADvuQRGBEva_8OB--M2JxMBoCXQ3i5GJkaJ-QvP-SoVqv7xDzw@mail.gmail.com> <alpine.DEB.2.00.1208161635290.26904@cobra.newdream.net> <5093993C.6000902@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:62479 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754480Ab2KNXrj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 18:47:39 -0500
-Received: by mail-vc0-f174.google.com with SMTP id fk26so1086088vcb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 15:47:38 -0800 (PST)
-In-Reply-To: <2C7727ED-B154-4C3F-871C-58E47ED907D6@tchpc.tcd.ie>
+Received: from cobra.newdream.net ([66.33.216.30]:37166 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933190Ab2KOAMV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 19:12:21 -0500
+In-Reply-To: <5093993C.6000902@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jimmy Tang <jtang@tchpc.tcd.ie>
-Cc: Sage Weil <sage@inktank.com>, Nick Bartos <nick@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: Danny Al-Gaaf <danny@bisect.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Nov 14, 2012 at 3:40 PM, Jimmy Tang <jtang@tchpc.tcd.ie> wrote:
->
-> On 14 Nov 2012, at 16:14, Sage Weil wrote:
->
->>
->> Appending the codename to the version string is something we did wit=
-h
->> argonaut (0.48argonaut) just to make it obvious to users which stabl=
-e
->> version they are on.
->>
->> How do people feel about that?  Is it worthwhile?  Useless?  Ugly?
->>
->> We can certainly skip it for 0.55 bobtail=85
->
-> Just throwing in some thoughts, but how about a scheme like ${name}-s=
-table-${version}.tar.bz2 and have the corresponding directory structure=
- inside and just ditch code names in the tar ball filename? It doesn't =
-look as nice with out a codename, but it makes it absolutely clear to n=
-ew users that it is a stable release.
->
-Personally, I'd prefer standard naming of ${name}-${version}.tar.bz2.
-You make it clear on your site which version is the LTS release, and
-which are the developer releases.
+Hi Danny,
 
-t.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Have you had a chance to work on this?  I'd like to include this 
+in bobtail.  If you don't have time we can go ahead an implement it, but 
+I'd like avoid duplicating effort.
+
+Thanks!
+sage
+
+
+On Fri, 2 Nov 2012, Danny Al-Gaaf wrote:
+> Hi Sage,
+> 
+> sorry for the late reply, was absent some weeks and busy with other issues.
+> 
+> Am 17.08.2012 01:40, schrieb Sage Weil:
+> > On Thu, 16 Aug 2012, Tommi Virtanen wrote:
+> >> On Thu, Aug 16, 2012 at 3:32 PM, Sage Weil <sage@inktank.com> wrote:
+> >>> As for the new options, I suggest:
+> >>>
+> >>>  * osd fs type
+> >>>  * osd fs devs   (will work for mkcephfs, not for new stuff)
+> >>>  * osd fs path
+> >>>  * osd fs options
+> >>
+> >> What does osd_fs_path mean, and how is it different from the osd_data dir?
+> > 
+> > The idea was that you might wand the fs mounted somewhere other that 
+> > osd_data.  I'm not sure it's useful; we may as well drop that...
+> > 
+> >> I'm expecting to need both mkfs-time options (btrfs metadata block
+> >> size etc) and mount-time options (noatime etc).
+> >>
+> >> It would be nice if there was a way to set the options for all
+> >> fstypes, and then just toggle which one is used (by default). That
+> >> avoids bugs like trying to mkfs/mount btrfs with xfs-specific options,
+> >> and vice versa.
+> >>
+> >> I'm not sure how well our config system will handle dynamic variable
+> >> names -- ceph-authtool was fine with me just putting data in
+> >> osd_crush_location, and we don't need to access these variables from
+> >> C++, so it should be fine. If you really wanted to, you could probably
+> >> cram the them into a single variable, with ad hoc structured data in
+> >> the string value, but that's ugly.. Or just hardcode the list of
+> >> possible filesystems, and then it's not dynamic variable names
+> >> anymore.
+> > 
+> > Yeah, ceph-conf will happily take anything.  The C++ code has to do 
+> > slightly more work to get arbitrary config fields, but that's not an 
+> > issue.
+> > 
+> >> So I'm dreaming of something like:
+> >>
+> >> [osd]
+> >> # what mount options will be passed when an osd data disk is using
+> >> # one of these filesystems; these are passed to mount -o
+> >> osd mount options btrfs = herp,foo=bar
+> >> osd mount options xfs = noatime,derp
+> >>
+> >> # what mkfs options are used when creating new osd data disk
+> >> # filesystems
+> >> osd mkfs options btrfs = --hur
+> >> osd mkfs options xfs = --dur
+> >>
+> >> # what fstype to use by default when mkfs'ing; mounting will detect
+> >> # what's there (with blkid) and work with anything
+> >> osd mkfs type = btrfs
+> 
+> I will prepare a patch with these for the current mkcephfs and init-ceph
+> incl. aliases for the old keys and cmdline options where possible.
+> 
+> >> # this may go away with "mkcephfs 2.0", and it will have to get more
+> >> # complex if we provide something for journals too, etc, because you
+> >> # may want to pair specific data disks to specific journals (DH has
+> >> # this need).. haven't had time to think it through, which is why i'm
+> >> # leaning toward "and here's a hook where you run something on the
+> >> # host that calls ceph-disk-prepare etc on all the disks you want",
+> >> # and using uuids to match journals to data disks -- this work has
+> >> # not yet started)
+> >> osd fs devs = /dev/sdb /dev/sdc
+> > 
+> > This all looks good to me.  What do you think, Danny?
+> 
+> This part (osd fs devs) is for a new mkcepfs.2.0 if I understand you
+> correctly. Sounds okay for me atm. (Tommi: Are there any new information
+> on this? Did you already start to work on this?)
+> 
+> Danny
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
