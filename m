@@ -1,115 +1,49 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
- flexible
-Date: Wed, 14 Nov 2012 16:12:21 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211141611340.26823@cobra.newdream.net>
-References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net> <502530C9.7030008@bisect.de> <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net> <alpine.DEB.2.00.1208161448060.26904@cobra.newdream.net>
- <CADvuQRGBEva_8OB--M2JxMBoCXQ3i5GJkaJ-QvP-SoVqv7xDzw@mail.gmail.com> <alpine.DEB.2.00.1208161635290.26904@cobra.newdream.net> <5093993C.6000902@bisect.de>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: changed rbd cp behavior in 0.53
+Date: Wed, 14 Nov 2012 16:56:00 -0800
+Message-ID: <50A43DA0.6030307@inktank.com>
+References: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com> <50A17C8A.9020007@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37166 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933190Ab2KOAMV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 19:12:21 -0500
-In-Reply-To: <5093993C.6000902@bisect.de>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:56472 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932299Ab2KOA4E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 19:56:04 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so698486pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 16:56:03 -0800 (PST)
+In-Reply-To: <50A17C8A.9020007@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny@bisect.de>
-Cc: ceph-devel@vger.kernel.org
-
-Hi Danny,
-
-Have you had a chance to work on this?  I'd like to include this 
-in bobtail.  If you don't have time we can go ahead an implement it, but 
-I'd like avoid duplicating effort.
-
-Thanks!
-sage
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Andrey Korolyov <andrey@xdel.ru>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On Fri, 2 Nov 2012, Danny Al-Gaaf wrote:
-> Hi Sage,
-> 
-> sorry for the late reply, was absent some weeks and busy with other issues.
-> 
-> Am 17.08.2012 01:40, schrieb Sage Weil:
-> > On Thu, 16 Aug 2012, Tommi Virtanen wrote:
-> >> On Thu, Aug 16, 2012 at 3:32 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> As for the new options, I suggest:
-> >>>
-> >>>  * osd fs type
-> >>>  * osd fs devs   (will work for mkcephfs, not for new stuff)
-> >>>  * osd fs path
-> >>>  * osd fs options
-> >>
-> >> What does osd_fs_path mean, and how is it different from the osd_data dir?
-> > 
-> > The idea was that you might wand the fs mounted somewhere other that 
-> > osd_data.  I'm not sure it's useful; we may as well drop that...
-> > 
-> >> I'm expecting to need both mkfs-time options (btrfs metadata block
-> >> size etc) and mount-time options (noatime etc).
-> >>
-> >> It would be nice if there was a way to set the options for all
-> >> fstypes, and then just toggle which one is used (by default). That
-> >> avoids bugs like trying to mkfs/mount btrfs with xfs-specific options,
-> >> and vice versa.
-> >>
-> >> I'm not sure how well our config system will handle dynamic variable
-> >> names -- ceph-authtool was fine with me just putting data in
-> >> osd_crush_location, and we don't need to access these variables from
-> >> C++, so it should be fine. If you really wanted to, you could probably
-> >> cram the them into a single variable, with ad hoc structured data in
-> >> the string value, but that's ugly.. Or just hardcode the list of
-> >> possible filesystems, and then it's not dynamic variable names
-> >> anymore.
-> > 
-> > Yeah, ceph-conf will happily take anything.  The C++ code has to do 
-> > slightly more work to get arbitrary config fields, but that's not an 
-> > issue.
-> > 
-> >> So I'm dreaming of something like:
-> >>
-> >> [osd]
-> >> # what mount options will be passed when an osd data disk is using
-> >> # one of these filesystems; these are passed to mount -o
-> >> osd mount options btrfs = herp,foo=bar
-> >> osd mount options xfs = noatime,derp
-> >>
-> >> # what mkfs options are used when creating new osd data disk
-> >> # filesystems
-> >> osd mkfs options btrfs = --hur
-> >> osd mkfs options xfs = --dur
-> >>
-> >> # what fstype to use by default when mkfs'ing; mounting will detect
-> >> # what's there (with blkid) and work with anything
-> >> osd mkfs type = btrfs
-> 
-> I will prepare a patch with these for the current mkcephfs and init-ceph
-> incl. aliases for the old keys and cmdline options where possible.
-> 
-> >> # this may go away with "mkcephfs 2.0", and it will have to get more
-> >> # complex if we provide something for journals too, etc, because you
-> >> # may want to pair specific data disks to specific journals (DH has
-> >> # this need).. haven't had time to think it through, which is why i'm
-> >> # leaning toward "and here's a hook where you run something on the
-> >> # host that calls ceph-disk-prepare etc on all the disks you want",
-> >> # and using uuids to match journals to data disks -- this work has
-> >> # not yet started)
-> >> osd fs devs = /dev/sdb /dev/sdc
-> > 
-> > This all looks good to me.  What do you think, Danny?
-> 
-> This part (osd fs devs) is for a new mkcepfs.2.0 if I understand you
-> correctly. Sounds okay for me atm. (Tommi: Are there any new information
-> on this? Did you already start to work on this?)
-> 
-> Danny
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+On 11/12/2012 02:47 PM, Josh Durgin wrote:
+> On 11/12/2012 08:30 AM, Andrey Korolyov wrote:
+>> Hi,
+>>
+>> For this version, rbd cp assumes that destination pool is the same as
+>> source, not 'rbd', if pool in the destination path is omitted.
+>>
+>> rbd cp install/img testimg
+>> rbd ls install
+>> img testimg
+>>
+>>
+>> Is this change permanent?
+>>
+>> Thanks!
+>
+> This is a regression. The previous behavior will be restored for 0.54.
+> I added http://tracker.newdream.net/issues/3478 to track it.
+
+Actually, on detailed examination, it looks like this has been the 
+behavior for a long time; I think the wiser course would be not to 
+change this defaulting.  One could argue the value of such defaulting, 
+but it's also true that you can specify the source and destination pools 
+explicitly.
+
+Andrey, any strong objection to leaving this the way it is?
