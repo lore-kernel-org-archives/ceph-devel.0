@@ -1,64 +1,63 @@
-From: Miao Xie <miaox@cn.fujitsu.com>
-Subject: Re: problem with ceph and btrfs patch: set journal_info in async
- trans commit worker
-Date: Thu, 15 Nov 2012 13:18:14 +0800
-Message-ID: <50A47B16.6040308@cn.fujitsu.com>
-References: <50A39FAF.50602@profihost.ag>
-Reply-To: miaox@cn.fujitsu.com
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: Small feature request for v0.55 release
+Date: Wed, 14 Nov 2012 22:02:15 -0800
+Message-ID: <CAPud5_4zEfwdaE2ZS-obfMfWbLgK+RjEi_rUdAQ7XijGN=iwKw@mail.gmail.com>
+References: <CAPud5_4pT3OPeVC=e2cFwpdiYXsx96TuAfYiCDJbWJek+hw_Xg@mail.gmail.com>
+	<sfid-H20121114-231457-+037.12-1@marduk.tchpc.tcd.ie>
+	<alpine.DEB.2.00.1211141513040.26823@cobra.newdream.net>
+	<2C7727ED-B154-4C3F-871C-58E47ED907D6@tchpc.tcd.ie>
+	<CANLRBoxdcO8YLp69Lg7uhAWF+xffqPjdDGUVuOx_Wq4XV6g-1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:37821 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1750784Ab2KOFSC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 15 Nov 2012 00:18:02 -0500
-In-Reply-To: <50A39FAF.50602@profihost.ag>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:33119 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751105Ab2KOGCQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 01:02:16 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so822471iay.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 22:02:16 -0800 (PST)
+In-Reply-To: <CANLRBoxdcO8YLp69Lg7uhAWF+xffqPjdDGUVuOx_Wq4XV6g-1w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Josef Bacik <jbacik@fusionio.com>
+To: Tren Blackburn <tren@eotnetworks.com>
+Cc: Jimmy Tang <jtang@tchpc.tcd.ie>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi, Stefan
+My personal preference would be for ${name}-${version}.tar.bz2 as
+well, but 2nd place would be ${name}-stable-${version}.tar.bz2.
 
-On wed, 14 Nov 2012 14:42:07 +0100, Stefan Priebe - Profihost AG wrote:
-> Hello list,
-> 
-> i wanted to try out ceph with latest vanilla kernel 3.7-rc5. I was seeing a massive performance degration. I see around 22x btrfs-endio-write processes every 10-20 seconds and they run a long time while consuming a massive amount of CPU.
-> 
-> So my performance of 23.000 iops drops to an up and down of 23.000 iops to 0 - avg is now 2500 iops instead of 23.000.
-> 
-> Git bisect shows me commit: e209db7ace281ca347b1ac699bf1fb222eac03fe "Btrfs: set journal_info in async trans commit worker" as the problematic patch.
-> 
-> When i revert this one everything is fine again.
-> 
-> Is this known?
 
-Could you try the following patch?
-
-http://marc.info/?l=linux-btrfs&m=135175512030453&w=2
-
-I think the patch
-
-  Btrfs: set journal_info in async trans commit worker
-
-is not the real reason that caused the regression.
-
-I guess it is caused by the bug of the reservation. When we join the
-same transaction handle more than 2 times, the pointer of the reservation
-in the transaction handle would be lost, and the statistical data in the
-reservation would be corrupted. And then we would trigger the space flush,
-which may block your tasks.
-
-Thanks
-Miao
-
-> 
-> Greets,
-> Stefan
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+On Wed, Nov 14, 2012 at 3:47 PM, Tren Blackburn <tren@eotnetworks.com> =
+wrote:
+> On Wed, Nov 14, 2012 at 3:40 PM, Jimmy Tang <jtang@tchpc.tcd.ie> wrot=
+e:
+>>
+>> On 14 Nov 2012, at 16:14, Sage Weil wrote:
+>>
+>>>
+>>> Appending the codename to the version string is something we did wi=
+th
+>>> argonaut (0.48argonaut) just to make it obvious to users which stab=
+le
+>>> version they are on.
+>>>
+>>> How do people feel about that?  Is it worthwhile?  Useless?  Ugly?
+>>>
+>>> We can certainly skip it for 0.55 bobtail=85
+>>
+>> Just throwing in some thoughts, but how about a scheme like ${name}-=
+stable-${version}.tar.bz2 and have the corresponding directory structur=
+e inside and just ditch code names in the tar ball filename? It doesn't=
+ look as nice with out a codename, but it makes it absolutely clear to =
+new users that it is a stable release.
+>>
+> Personally, I'd prefer standard naming of ${name}-${version}.tar.bz2.
+> You make it clear on your site which version is the LTS release, and
+> which are the developer releases.
+>
+> t.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
