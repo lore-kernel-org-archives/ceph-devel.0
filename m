@@ -1,57 +1,110 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: ceph-osd cpu usage
-Date: Thu, 15 Nov 2012 13:19:52 +0100
-Message-ID: <50A4DDE8.8040506@profihost.ag>
-References: <7840e3d1-17b2-4618-ae1f-ff3dbdff71f6@mailpro>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: endless flying slow requests
+Date: Thu, 15 Nov 2012 06:58:23 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211150657110.4011@cobra.newdream.net>
+References: <50A3607A.6050209@profihost.ag> <alpine.DEB.2.00.1211140656590.6512@cobra.newdream.net> <50A4A351.8020506@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:53761 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1767606Ab2KOMUB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 07:20:01 -0500
-In-Reply-To: <7840e3d1-17b2-4618-ae1f-ff3dbdff71f6@mailpro>
+Received: from cobra.newdream.net ([66.33.216.30]:43424 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1768119Ab2KOO6Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 09:58:24 -0500
+In-Reply-To: <50A4A351.8020506@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 15.11.2012 12:18, schrieb Alexandre DERUMIER:
-> cpu usage is same for read and write  ?
+On Thu, 15 Nov 2012, Stefan Priebe - Profihost AG wrote:
+> Am 14.11.2012 15:59, schrieb Sage Weil:
+> > Hi Stefan,
+> > 
+> > I would be nice to confirm that no clients are waiting on replies for
+> > these requests; currently we suspect that the OSD request tracking is the
+> > buggy part.  If you query the OSD admin socket you should be able to dump
+> > requests and see the client IP, and then query the client.
+> > 
+> > Is it librbd?  In that case you likely need to change the config so that
+> > it is listening on an admin socket ('admin socket = path').
+> 
+> Yes it is. So i have to specify admin socket at the KVM host?
 
-no for read it is just around 25%. And i get "full" (limited by rbd /=20
-librbd) 23.000 iops per vm.
+Right.  IIRC the disk line is a ; (or \;) separated list of key/value 
+pairs.
 
+> How do i query the admin socket for requests?
 
-> ----- Mail original -----
->
-> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>
-> =C3=80: ceph-devel@vger.kernel.org
-> Envoy=C3=A9: Jeudi 15 Novembre 2012 11:56:37
-> Objet: ceph-osd cpu usage
->
-> Hello list,
->
-> my main problem right now is that ceph does not scale for me (more vm=
-s
-> using rbd). It does not scale as the ceph-osd is using all my CPU cor=
-e
-> all the time (8 cores) with just 4 SSDs. The SSDs are far away from
-> being loaded.
->
-> What is the best way to find out what the ceph-osd process is doing a=
-ll
-> the time?
->
-> A gperf graph is attached.
->
-> Greets,
+ceph --admin-daemon /path/to/socket help
+ceph --admin-daemon /path/to/socket objecter_dump     (i think)
+
+sage
+
+> 
 > Stefan
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> > On Wed, 14 Nov 2012, Stefan Priebe - Profihost AG wrote:
+> > 
+> > > Hello list,
+> > > 
+> > > i see this several times. Endless flying slow requests. And they never
+> > > stop
+> > > until i restart the mentioned osd.
+> > > 
+> > > 2012-11-14 10:11:57.513395 osd.24 [WRN] 1 slow requests, 1 included below;
+> > > oldest blocked for > 31789.858457 secs
+> > > 2012-11-14 10:11:57.513399 osd.24 [WRN] slow request 31789.858457 seconds
+> > > old,
+> > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> > > currently delayed
+> > > 2012-11-14 10:11:58.513584 osd.24 [WRN] 1 slow requests, 1 included below;
+> > > oldest blocked for > 31790.858646 secs
+> > > 2012-11-14 10:11:58.513586 osd.24 [WRN] slow request 31790.858646 seconds
+> > > old,
+> > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> > > currently delayed
+> > > 2012-11-14 10:11:59.513766 osd.24 [WRN] 1 slow requests, 1 included below;
+> > > oldest blocked for > 31791.858827 secs
+> > > 2012-11-14 10:11:59.513768 osd.24 [WRN] slow request 31791.858827 seconds
+> > > old,
+> > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> > > currently delayed
+> > > 2012-11-14 10:12:00.513909 osd.24 [WRN] 1 slow requests, 1 included below;
+> > > oldest blocked for > 31792.858971 secs
+> > > 2012-11-14 10:12:00.513916 osd.24 [WRN] slow request 31792.858971 seconds
+> > > old,
+> > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> > > currently delayed
+> > > 2012-11-14 10:12:01.514061 osd.24 [WRN] 1 slow requests, 1 included below;
+> > > oldest blocked for > 31793.859124 secs
+> > > 2012-11-14 10:12:01.514063 osd.24 [WRN] slow request 31793.859124 seconds
+> > > old,
+> > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+> > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+> > > currently delayed
+> > > 
+> > > When i now restart osd 24 they go away and everything is fine again.
+> > > 
+> > > Stefan
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
