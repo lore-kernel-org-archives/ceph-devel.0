@@ -1,68 +1,64 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Authorization issues in the 0.54
-Date: Wed, 14 Nov 2012 17:12:00 -0800
-Message-ID: <CAC-hyiHwyXO3TEbpvktouf5iGcbb2wnu1dL2q+SH8DVaEmdtgw@mail.gmail.com>
-References: <CABYiri8E8Swk0798BR-yimm+Bk1TeoHVMrXZxeEwvvgLCuEOyw@mail.gmail.com>
+From: Miao Xie <miaox@cn.fujitsu.com>
+Subject: Re: problem with ceph and btrfs patch: set journal_info in async
+ trans commit worker
+Date: Thu, 15 Nov 2012 13:18:14 +0800
+Message-ID: <50A47B16.6040308@cn.fujitsu.com>
+References: <50A39FAF.50602@profihost.ag>
+Reply-To: miaox@cn.fujitsu.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:46703 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964820Ab2KOBMB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 20:12:01 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so1169956vbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 17:12:01 -0800 (PST)
-In-Reply-To: <CABYiri8E8Swk0798BR-yimm+Bk1TeoHVMrXZxeEwvvgLCuEOyw@mail.gmail.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:37821 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1750784Ab2KOFSC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 15 Nov 2012 00:18:02 -0500
+In-Reply-To: <50A39FAF.50602@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Josef Bacik <jbacik@fusionio.com>
 
-On Wed, Nov 14, 2012 at 4:20 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
-> Hi,
-> In the 0.54 cephx is probably broken somehow:
->
-> $ ceph auth add client.qemukvm osd 'allow *' mon 'allow *' mds 'allow
-> *' -i qemukvm.key
-> 2012-11-14 15:51:23.153910 7ff06441f780 -1 read 65 bytes from qemukvm.key
-> added key for client.qemukvm
->
-> $ ceph auth list
-> ...
-> client.admin
->         key: [xxxxxx]
->         caps: [mds] allow *
+Hi, Stefan
 
-Note that for mds you just specify 'allow' and not 'allow *'. It
-shouldn't affect the stuff that you're testing though.
+On wed, 14 Nov 2012 14:42:07 +0100, Stefan Priebe - Profihost AG wrote:
+> Hello list,
+> 
+> i wanted to try out ceph with latest vanilla kernel 3.7-rc5. I was seeing a massive performance degration. I see around 22x btrfs-endio-write processes every 10-20 seconds and they run a long time while consuming a massive amount of CPU.
+> 
+> So my performance of 23.000 iops drops to an up and down of 23.000 iops to 0 - avg is now 2500 iops instead of 23.000.
+> 
+> Git bisect shows me commit: e209db7ace281ca347b1ac699bf1fb222eac03fe "Btrfs: set journal_info in async trans commit worker" as the problematic patch.
+> 
+> When i revert this one everything is fine again.
+> 
+> Is this known?
 
->         caps: [mon] allow *
->         caps: [osd] allow *
-> client.qemukvm
->         key: [yyyyyy]
->         caps: [mds] allow *
->         caps: [mon] allow *
->         caps: [osd] allow *
-> ...
-> $ virsh secret-set-value --secret uuid --base64 yyyyyy
-> set username in the VM` xml...
-> $ virsh start testvm
-> kvm: -drive file=rbd:rbd/vm0:id=qemukvm:key=yyyyyy:auth_supported=cephx\;none:mon_host=192.168.10.125\:6789\;192.168.10.127\:6789\;192.168.10.129\:6789,if=none,id=drive-virtio-disk0,format=raw:
-> could not open disk image
-> rbd:rbd/vm0:id=qemukvm:key=yyyyyy:auth_supported=cephx\;none:mon_host=192.168.10.125\:6789\;192.168.10.127\:6789\;192.168.10.129\:6789:
-> Operation not permitted
-> $ virsh secret-set-value --secret uuid --base64 xxxxxx
-> set username again to admin for the VM` disk
-> $ virsh start testvm
-> Finally, vm started successfully.
->
-> All rbd commands issued from cli works okay with the appropriate
-> credentials, qemu binary was linked with same librbd as running one.
-> Does anyone have a suggestion?
+Could you try the following patch?
 
-There wasn't any change that I'm aware of that should make that
-happening. Can you reproduce it with 'debug ms = 1' and 'debug auth =
-20'?
+http://marc.info/?l=linux-btrfs&m=135175512030453&w=2
 
-Thanks,
-Yehuda
+I think the patch
+
+  Btrfs: set journal_info in async trans commit worker
+
+is not the real reason that caused the regression.
+
+I guess it is caused by the bug of the reservation. When we join the
+same transaction handle more than 2 times, the pointer of the reservation
+in the transaction handle would be lost, and the statistical data in the
+reservation would be corrupted. And then we would trigger the space flush,
+which may block your tasks.
+
+Thanks
+Miao
+
+> 
+> Greets,
+> Stefan
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
