@@ -1,49 +1,68 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: changed rbd cp behavior in 0.53
-Date: Wed, 14 Nov 2012 16:56:00 -0800
-Message-ID: <50A43DA0.6030307@inktank.com>
-References: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com> <50A17C8A.9020007@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Authorization issues in the 0.54
+Date: Wed, 14 Nov 2012 17:12:00 -0800
+Message-ID: <CAC-hyiHwyXO3TEbpvktouf5iGcbb2wnu1dL2q+SH8DVaEmdtgw@mail.gmail.com>
+References: <CABYiri8E8Swk0798BR-yimm+Bk1TeoHVMrXZxeEwvvgLCuEOyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:56472 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932299Ab2KOA4E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 19:56:04 -0500
-Received: by mail-pa0-f46.google.com with SMTP id hz1so698486pad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 16:56:03 -0800 (PST)
-In-Reply-To: <50A17C8A.9020007@inktank.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:46703 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964820Ab2KOBMB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Nov 2012 20:12:01 -0500
+Received: by mail-vb0-f46.google.com with SMTP id ff1so1169956vbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Nov 2012 17:12:01 -0800 (PST)
+In-Reply-To: <CABYiri8E8Swk0798BR-yimm+Bk1TeoHVMrXZxeEwvvgLCuEOyw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Andrey Korolyov <andrey@xdel.ru>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 11/12/2012 02:47 PM, Josh Durgin wrote:
-> On 11/12/2012 08:30 AM, Andrey Korolyov wrote:
->> Hi,
->>
->> For this version, rbd cp assumes that destination pool is the same as
->> source, not 'rbd', if pool in the destination path is omitted.
->>
->> rbd cp install/img testimg
->> rbd ls install
->> img testimg
->>
->>
->> Is this change permanent?
->>
->> Thanks!
+On Wed, Nov 14, 2012 at 4:20 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> Hi,
+> In the 0.54 cephx is probably broken somehow:
 >
-> This is a regression. The previous behavior will be restored for 0.54.
-> I added http://tracker.newdream.net/issues/3478 to track it.
+> $ ceph auth add client.qemukvm osd 'allow *' mon 'allow *' mds 'allow
+> *' -i qemukvm.key
+> 2012-11-14 15:51:23.153910 7ff06441f780 -1 read 65 bytes from qemukvm.key
+> added key for client.qemukvm
+>
+> $ ceph auth list
+> ...
+> client.admin
+>         key: [xxxxxx]
+>         caps: [mds] allow *
 
-Actually, on detailed examination, it looks like this has been the 
-behavior for a long time; I think the wiser course would be not to 
-change this defaulting.  One could argue the value of such defaulting, 
-but it's also true that you can specify the source and destination pools 
-explicitly.
+Note that for mds you just specify 'allow' and not 'allow *'. It
+shouldn't affect the stuff that you're testing though.
 
-Andrey, any strong objection to leaving this the way it is?
+>         caps: [mon] allow *
+>         caps: [osd] allow *
+> client.qemukvm
+>         key: [yyyyyy]
+>         caps: [mds] allow *
+>         caps: [mon] allow *
+>         caps: [osd] allow *
+> ...
+> $ virsh secret-set-value --secret uuid --base64 yyyyyy
+> set username in the VM` xml...
+> $ virsh start testvm
+> kvm: -drive file=rbd:rbd/vm0:id=qemukvm:key=yyyyyy:auth_supported=cephx\;none:mon_host=192.168.10.125\:6789\;192.168.10.127\:6789\;192.168.10.129\:6789,if=none,id=drive-virtio-disk0,format=raw:
+> could not open disk image
+> rbd:rbd/vm0:id=qemukvm:key=yyyyyy:auth_supported=cephx\;none:mon_host=192.168.10.125\:6789\;192.168.10.127\:6789\;192.168.10.129\:6789:
+> Operation not permitted
+> $ virsh secret-set-value --secret uuid --base64 xxxxxx
+> set username again to admin for the VM` disk
+> $ virsh start testvm
+> Finally, vm started successfully.
+>
+> All rbd commands issued from cli works okay with the appropriate
+> credentials, qemu binary was linked with same librbd as running one.
+> Does anyone have a suggestion?
+
+There wasn't any change that I'm aware of that should make that
+happening. Can you reproduce it with 'debug ms = 1' and 'debug auth =
+20'?
+
+Thanks,
+Yehuda
