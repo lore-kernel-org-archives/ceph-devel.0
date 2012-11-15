@@ -1,42 +1,40 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: new process: cherry-picking to stable releases
-Date: Thu, 15 Nov 2012 12:37:07 -0600
-Message-ID: <50A53653.40204@inktank.com>
-References: <alpine.DEB.2.00.1211150926180.26823@cobra.newdream.net>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: master <=> next
+Date: Thu, 15 Nov 2012 20:17:03 +0100
+Message-ID: <50A53FAF.3020306@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:61629 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1768466Ab2KOShL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 13:37:11 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so2507704iea.19
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 10:37:10 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211150926180.26823@cobra.newdream.net>
+Received: from mail.profihost.ag ([85.158.179.208]:45259 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1768721Ab2KOTQ7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 14:16:59 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/15/2012 11:30 AM, Sage Weil wrote:
-> If you are *ever* cherry-picking something to an older stable branch, 
-> please use 
-> 
->  git cherry-pick -x <sha1>
-> 
-> That will append a '(cherry-picked from ....)' message to the bottom of 
-> the commit, allowing us to always find the original commit that we are 
-> duplicating.
-> 
-> This implies that we are always committing to the master/next branch 
-> *first*, and then cherry-picking to stable.  As a general rule, a fix 
-> should always be 'upstream' first in the new branches before it is 
-> backported to something older.  The exception is fix that is unique to the 
-> stable branch, for example because the new code has changed.
+Hello list,
 
-It also implies--or to be useful requires--that anything committed
-to master is pretty much permanent (and never rebased).  The master
-branch should be considered append-only.
+maybe i do not understand the difference between master and next but is 
+it correct that the following commits are in next but NOT in master?
 
-					-Alex
+b40387d msg/Pipe: fix leak of Authorizer
+0fb23cf Merge remote-tracking branch 'gh/wip-3477' into next
+12c2b7f msg/DispatchQueue: release throttle on messages when dropping an id
+5f214b2 PrioritizedQueue: allow remove_by_class to return removed items
+98b93b5 librbd: use delete[] properly
+4a7a81b objecter: fix leak of out_handlers
+ef4e4c8 mon: calculate failed_since relative to message receive time
+9267d8a rgw: update post policy parser
+f6cb078 mon: set default port when binding to random local ip
+dfeb8de Merge remote-tracking branch 'gh/wip-asok' into next
+ce28455 rgw: relax date format check
+4a34965 client: register admin socket commands without lock held
+4db9442 objecter: separate locked and unlocked init/shutdown
+9c31d09 mon: kick failures when we lose leadership
+e43f9d7 mon: process failures when osds go down
+763d348 mon: ignore failure messages if already pending a failure
+
+Greets,
+Stefan
