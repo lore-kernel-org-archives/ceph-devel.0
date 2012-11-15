@@ -1,55 +1,124 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: OSD crash on 0.48.2argonaut
-Date: Thu, 15 Nov 2012 00:01:29 -0800
-Message-ID: <50A4A159.7070300@inktank.com>
-References: <60E83269D669544E8069A09CB69135EA0CEC66@GDC-CLDMBX-P02.whq.wistron>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: improve speed with auth supported=none
+Date: Thu, 15 Nov 2012 09:07:48 +0100
+Message-ID: <50A4A2D4.2030003@profihost.ag>
+References: <50A117B9.4060804@profihost.ag> <CAOLwVU=2BNvOs1SUqVrXS9Wajng5zk0mebnK3cZnZFO=rzrGbw@mail.gmail.com> <50A170BF.5030402@profihost.ag> <50A1F9F8.4030808@inktank.com> <50A1FC4D.8010000@profihost.ag> <50A39B9D.4080304@astranetwork.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:51088 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2992679Ab2KOIBf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 03:01:35 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so979542pbc.19
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 00:01:35 -0800 (PST)
-In-Reply-To: <60E83269D669544E8069A09CB69135EA0CEC66@GDC-CLDMBX-P02.whq.wistron>
+Received: from mail.profihost.ag ([85.158.179.208]:57827 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S2992722Ab2KOIH4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 03:07:56 -0500
+In-Reply-To: <50A39B9D.4080304@astranetwork.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
-Cc: ceph-devel@vger.kernel.org
+To: Soporte <soporte@astranetwork.net>
+Cc: "ce >> \"ceph-devel@vger.kernel.org\"" <ceph-devel@vger.kernel.org>
 
-On 11/14/2012 11:31 PM, Eric_YH_Chen@wiwynn.com wrote:
-> Dear All:
+Am 14.11.2012 14:24, schrieb Soporte:
+> El 13/11/2012 04:52 a.m., Stefan Priebe escribi=F3:
+>> Am 13.11.2012 08:42, schrieb Josh Durgin:
+>>> On 11/12/2012 01:57 PM, Stefan Priebe wrote:
+>>>> Thanks,
+>>>>
+>>>> this gives another burst for iops. I'm now at 23.000 iops ;-) So f=
+or
+>>>> random 4k iops ceph auth and especially the logging is a lot of
+>>>> overhead.
+>>>
+>>> How much difference did disabling auth make vs only disabling loggi=
+ng?
+>>
+>> disable debug logging: 3000 iops
+>> disable auth logging: 2000 iops
+>>
+>> Is anybody in the ceph team also interested in a call graph of kvm
+>> when VM is doing random 4k write io?
+
+> Hi.
 >
-> I met this issue on one of osd node. Is this a known issue? Thanks!
->
-> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
->   1: /usr/bin/ceph-osd() [0x6edaba]
->   2: (()+0xfcb0) [0x7f08b112dcb0]
->   3: (gsignal()+0x35) [0x7f08afd09445]
->   4: (abort()+0x17b) [0x7f08afd0cbab]
->   5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f08b065769d]
->   6: (()+0xb5846) [0x7f08b0655846]
->   7: (()+0xb5873) [0x7f08b0655873]
->   8: (()+0xb596e) [0x7f08b065596e]
->   9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x1de) [0x7a82fe]
->   10: (ReplicatedPG::eval_repop(ReplicatedPG::RepGather*)+0x693) [0x530f83]
->   11: (ReplicatedPG::repop_ack(ReplicatedPG::RepGather*, int, int, int, eversion_t)+0x159) [0x531ac9]
->   12: (ReplicatedPG::sub_op_modify_reply(std::tr1::shared_ptr<OpRequest>)+0x15c) [0x53251c]
->   13: (ReplicatedPG::do_sub_op_reply(std::tr1::shared_ptr<OpRequest>)+0x81) [0x54d241]
->   14: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x1e3) [0x600883]
->   15: (OSD::dequeue_op(PG*)+0x238) [0x5bfaf8]
->   16: (ThreadPool::worker()+0x4d5) [0x79f835]
->   17: (ThreadPool::WorkThread::entry()+0xd) [0x5d87cd]
->   18: (()+0x7e9a) [0x7f08b1125e9a]
->   19: (clone()+0x6d) [0x7f08afdc54bd]
->   NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+> How disable debug and auth loggin in ceph.conf?
 
-The log of the crashed osd should show which assert actually failed.
-It could be this bug, but I can't tell without knowing which
-assert was triggered:
+I have right now putted this stuff in all section - this is def.=20
+overkill but i didn't know where to put which of them:
+[global]
+         auth cluster required =3D none
+         auth service required =3D none
+         auth supported =3D none
+         auth client required =3D none
 
-http://tracker.newdream.net/issues/2956
+         debug lockdep =3D 0/0
+         debug context =3D 0/0
+         debug crush =3D 0/0
+         debug buffer =3D 0/0
+         debug timer =3D 0/0
+         debug journaler =3D 0/0
+         debug osd =3D 0/0
+         debug optracker =3D 0/0
+         debug objclass =3D 0/0
+         debug filestore =3D 0/0
+         debug journal =3D 0/0
+         debug ms =3D 0/0
+         debug monc =3D 0/0
+         debug tp =3D 0/0
+         debug auth =3D 0/0
+         debug finisher =3D 0/0
+         debug heartbeatmap =3D 0/0
+         debug perfcounter =3D 0/0
+         debug asok =3D 0/0
+         debug throttle =3D 0/0
 
-Josh
+[mon]
+         debug lockdep =3D 0/0
+         debug context =3D 0/0
+         debug crush =3D 0/0
+         debug buffer =3D 0/0
+         debug timer =3D 0/0
+         debug journaler =3D 0/0
+         debug osd =3D 0/0
+         debug optracker =3D 0/0
+         debug objclass =3D 0/0
+         debug filestore =3D 0/0
+         debug journal =3D 0/0
+         debug ms =3D 0/0
+         debug monc =3D 0/0
+         debug tp =3D 0/0
+         debug auth =3D 0/0
+         debug finisher =3D 0/0
+         debug heartbeatmap =3D 0/0
+         debug perfcounter =3D 0/0
+         debug asok =3D 0/0
+         debug throttle =3D 0/0
+
+[osd]
+         debug lockdep =3D 0/0
+         debug context =3D 0/0
+         debug crush =3D 0/0
+         debug buffer =3D 0/0
+         debug timer =3D 0/0
+         debug journaler =3D 0/0
+         debug osd =3D 0/0
+         debug optracker =3D 0/0
+         debug objclass =3D 0/0
+         debug filestore =3D 0/0
+         debug journal =3D 0/0
+         debug ms =3D 0/0
+         debug monc =3D 0/0
+         debug tp =3D 0/0
+         debug auth =3D 0/0
+         debug finisher =3D 0/0
+         debug heartbeatmap =3D 0/0
+         debug perfcounter =3D 0/0
+         debug asok =3D 0/0
+         debug throttle =3D 0/0
+
+
+Stefan
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
