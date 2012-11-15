@@ -1,35 +1,39 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph-osd cpu usage
-Date: Thu, 15 Nov 2012 08:52:40 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211150852300.22766@cobra.newdream.net>
-References: <7840e3d1-17b2-4618-ae1f-ff3dbdff71f6@mailpro> <50A4DDE8.8040506@profihost.ag> <50A50640.1040103@inktank.com> <50A513A1.90101@profihost.ag>
+Subject: new process: cherry-picking to stable releases
+Date: Thu, 15 Nov 2012 09:30:04 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211150926180.26823@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44481 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44941 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1768484Ab2KOQwk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 11:52:40 -0500
-In-Reply-To: <50A513A1.90101@profihost.ag>
+	with ESMTP id S1756798Ab2KORaF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 12:30:05 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 281F581340
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 09:30:05 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id F286881340
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 09:30:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 15 Nov 2012, Stefan Priebe wrote:
-> Am 15.11.2012 16:12, schrieb Mark Nelson:
-> > Out of curiosity, does it help much if you disable crc32c calculations?
-> > Use the "nocrc" option in your ceph.conf file.  I've had my eye on
-> > crcutil as an alternative to how we do crc32c now.
-> > 
-> > http://code.google.com/p/crcutil/
-> 
-> Will try that how and where to i set the nocrc option?
-> 
-> Is it
-> [global]
-> nocrc = true
+If you are *ever* cherry-picking something to an older stable branch, 
+please use 
 
-ms nocrc = true
+ git cherry-pick -x <sha1>
 
+That will append a '(cherry-picked from ....)' message to the bottom of 
+the commit, allowing us to always find the original commit that we are 
+duplicating.
+
+This implies that we are always committing to the master/next branch 
+*first*, and then cherry-picking to stable.  As a general rule, a fix 
+should always be 'upstream' first in the new branches before it is 
+backported to something older.  The exception is fix that is unique to the 
+stable branch, for example because the new code has changed.
+
+Thanks!
 sage
+
