@@ -1,115 +1,119 @@
-From: Mark Kampe <mark.kampe@inktank.com>
-Subject: Re: RBD fio Performance concerns
-Date: Fri, 16 Nov 2012 14:59:26 -0800
-Message-ID: <50A6C54E.9010805@inktank.com>
-References: <50A537EA.5090409@inktank.com> <CAOLwVUmQa4C_vs_Mbi3b2LeO=wx8_EMVWX5Pyu0y-JnG8nyz+Q@mail.gmail.com>
+From: Drunkard Zhang <gongfan193@gmail.com>
+Subject: Re: osd not in tree
+Date: Sat, 17 Nov 2012 07:56:30 +0800
+Message-ID: <CAJiejCRddL_-u32uBxD8vuNXJxc4=36+aneW_L4wAa0OO6atOQ@mail.gmail.com>
+References: <CAJiejCR3CocWucemBR1++dAohOASLSidnwCc9G=2cREFuTTXXQ@mail.gmail.com>
+ <50A5EE14.6070108@inktank.com> <CAJiejCSiz54N8mzLB1SQyOr9ObsQ4aE4=ZaUahpkd3cOw4X+qA@mail.gmail.com>
+ <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:47405 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753729Ab2KPW71 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 17:59:27 -0500
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2164680pad.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 14:59:27 -0800 (PST)
-In-Reply-To: <CAOLwVUmQa4C_vs_Mbi3b2LeO=wx8_EMVWX5Pyu0y-JnG8nyz+Q@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:48651 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753750Ab2KPX4u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 18:56:50 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so4459947iea.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 15:56:50 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-On 11/15/2012 12:23 PM, S=E9bastien Han wrote:
-
-> First of all, I would like to thank you for this well explained,
-> structured and clear answer. I guess I got better IOPS thanks to the =
-10K disks.
-
-10K RPM would bring your per-drive throughput (for 4K random writes)
-up to 142 IOPS and your aggregate cluster throughput up to 1700.
-This would predict a corresponding RADOSbench throughput somewhere
-above 425 (how much better depending on write aggregation and cylinder=20
-affinity).  Your RADOSbench 708 now seems even more reasonable.
-
-> To be really honest I wasn't so concerned about the RADOS benchmarks
-> but more about the RBD fio benchmarks and the amont of IOPS that come=
-s
-> out of it, which I found =E0 bit to low.
-
-Sticking with 4K random writes, it looks to me like you were running
-fio with libaio (which means direct, no buffer cache).  Because it
-is direct, every I/O operation is really happening and the best
-sustained throughput you should expect from this cluster is
-the aggregate raw fio 4K write throughput (1700 IOPS) divided
-by two copies =3D 850 random 4K writes per second.  If I read the
-output correctly you got 763 or about 90% of back-of-envelope.
-
-BUT, there are some footnotes (there always are with performance)
-
-If you had been doing buffered I/O you would have seen a lot more
-(up front) benefit from page caching ... but you wouldn't have been
-measuring real (and hence sustainable) I/O throughput ... which is
-ultimately limited by the heads on those twelve disk drives, where
-all of those writes ultimately wind up.  It is easy to be fast
-if you aren't really doing the writes :-)
-
-I would have expected write aggregation and cylinder affinity to
-have eliminated some seeks and improved rotational latency resulting
-in better than theoretical random write throughput.  Against those
-expectations 763/850 IOPS is not so impressive.  But, it looks to
-me like you were running fio in a 1G file with 100 parallel requests.
-The default RBD stripe width is 4M.  This means that those 100
-parallel requests were being spread across 256 (1G/4M) objects.
-People in the know tell me that writes to a single object are
-serialized, which means that many of those (potentially) parallel
-writes were to the same object, and hence serialized.  This would
-increase the average request time for the colliding operations,
-and reduce the aggregate throughput correspondingly.  Use a
-bigger file (or a narrower stripe) and this will get better.
-
-Thus, getting 763 random 4K write IOPs out of those 12 drives
-still sounds about right to me.
-
-
-> On 15 nov. 2012, at 19:43, Mark Kampe <mark.kampe@inktank.com> wrote:
+2012/11/17 Sage Weil <sage@inktank.com>:
+> On Fri, 16 Nov 2012, Drunkard Zhang wrote:
+>> 2012/11/16 Josh Durgin <josh.durgin@inktank.com>:
+>> > On 11/15/2012 11:21 PM, Drunkard Zhang wrote:
+>> >>
+>> >> I installed mon x1, mds x1 and osd x11 in one host, then add some osd
+>> >> from other hosts, But they are not in osd tree, also not usable, how
+>> >> can I fix this?
+>> >>
+>> >> The crush command I used:
+>> >> ceph osd crush set 11 osd.11 3 pool=data datacenter=dh-1L, room=room1,
+>> >> row=02, rack=05, host=squid87-log13
+>> >
+>> >
+>> > Remove the commas in that command and it'll work. I fixed the docs for
+>> > this.
+>> >
+>> > Josh
+>>
+>> Got no luck. osd.11.log said nothing useful. Do I have to edit
+>> crushmap manually? If so, how should I define host's 'id' value, I
+>> cannot find docs from ceph.com/docs since yesterday, where's that
+>> gone?
+>>
+>> squid87-log13 ~ # ceph osd crush set 11 osd.11 3 pool=data
+>> datacenter=dh-1L room=room1 row=02 rack=05 host=squid87-log13
 >
->> Dear Sebastien,
->>
->> Ross Turn forwarded me your e-mail.  You sent a great deal
->> of information, but it was not immediately obvious to me
->> what your specific concern was.
->>
->> You have 4 servers, 3 OSDs per, 2 copy, and you measured a
->> radosbench (4K object creation) throughput of 2.9MB/s
->> (or 708 IOPS).  I infer that you were disappointed by
->> this number, but it looks right to me.
->>
->> Assuming typical 7200 RPM drives, I would guess that each
->> of them would deliver a sustained direct 4K random write
->> performance in the general neighborhood of:
->>     4ms seek (short seeks with write-settle-downs)
->>     4ms latency (1/2 rotation)
->>     0ms write (4K/144MB/s ~ 30us)
->>     -----
->>     8ms or about 125 IOPS
->>
->> Your twelve drives should therefore have a sustainable
->> aggregate direct 4K random write throughput of 1500 IOPS.
->>
->> Each 4K object create involves four writes (two copies,
->> each getting one data write and one data update).  Thus
->> I would expect a (crude) 4K create rate of 375 IOPS (1500/4).
->>
->> You are getting almost twice the expected raw IOPS ...
->> and we should expect that a large number of parallel
->> operations would realize some write/seek aggregation
->> benefits ... so these numbers look right to me.
->>
->> Is this the number you were concerned about, or have I
->> misunderstood?
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> You're specifying 'pool=data', but:
+>
+>> updated item id 11 name 'osd.11' weight 3 at location
+>> {datacenter=dh-1L,host=squid87-log13,pool=data,rack=05,room=room1,row=02}
+>> to crush map
+>> squid87-log13 ~ # ceph osd tree
+>> dumped osdmap tree epoch 467
+>> # id weight type name up/down reweight
+>> -1 36 pool default
+>> -3 36 rack unknownrack
+>> -2 36 host log3
+>
+> the existing hierarchy has pool=default.  Change it to default above and
+> you'll be okay.  You may want to restructure the existing hosts as well so
+> they 'live' in the tree structure.
+>
+Still no luck. I'm using 0.51, not update yet. Set host=log3 make
+osd.{11..14} usable, so I'm thinking I have to create the
+host=squid87-log13 first, how could I create the host, modify
+crushmap?
+
+log3 ~ # for i in {11..14}; do ceph osd crush set $i osd.$i 3
+pool=default datacenter=dh-1L room=room1 row=02 rack=rack0205
+host=squid87-log13; done
+updated item id 11 name 'osd.11' weight 3 at location
+{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+to crush map
+updated item id 12 name 'osd.12' weight 3 at location
+{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+to crush map
+updated item id 13 name 'osd.13' weight 3 at location
+{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+to crush map
+updated item id 14 name 'osd.14' weight 3 at location
+{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+to crush map
+log3 ~ # ceph osd tree
+dumped osdmap tree epoch 559
+# id weight type name up/down reweight
+-1 33 pool default
+-3 33 rack rack0205
+-2 33 host log3
+0 3 osd.0 up 3
+1 3 osd.1 up 3
+2 3 osd.2 up 3
+3 3 osd.3 up 3
+4 3 osd.4 up 3
+5 3 osd.5 up 3
+6 3 osd.6 up 3
+7 3 osd.7 up 3
+8 3 osd.8 up 3
+9 3 osd.9 up 3
+10 3 osd.10 up 3
+
+11 0 osd.11 up 3
+12 0 osd.12 up 3
+13 0 osd.13 up 3
+14 0 osd.14 up 3
+
+> (This confusion is exactly why it's switched 'root=default' in the new
+> releases.)
+>
+Yes, weird.
+log3 ~ # ceph osd dump | grep ^pool
+pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
+320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
+pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins
+pg_num 320 pgp_num 320 last_change 6 owner 0
+pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num
+320 pgp_num 320 last_change 1 owner 0
