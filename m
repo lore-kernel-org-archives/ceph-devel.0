@@ -1,77 +1,74 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: do not allow remove of mounted-on image
-Date: Fri, 16 Nov 2012 09:43:17 -0600
-Message-ID: <50A65F15.6080807@inktank.com>
+Subject: [PATCH] rbd: get rid of rbd_{get,put}_dev()
+Date: Fri, 16 Nov 2012 09:43:32 -0600
+Message-ID: <50A65F24.7000002@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:34985 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752432Ab2KPPnV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 10:43:21 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so1751018iay.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 07:43:21 -0800 (PST)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:35445 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752432Ab2KPPnf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 10:43:35 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so3763320iea.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 07:43:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-There is no check in rbd_remove() to see if anybody holds ope the
-image being removed.  That's not cool.
+The functions rbd_get_dev() and rbd_put_dev() are trivial wrappers
+that add no values, and their existence suggests they may do more
+than what they do.
 
-Add a simple open count that goes up and down with opens and closes
-(releases) of the device, and don't allow an rbd image to be removed
-if the count is non-zero.  Both functions are protected by the
-bd_mutex so there's no need for any other concurrency protection.
+Get rid of them.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |    9 +++++++++
- 1 file changed, 9 insertions(+)
+ drivers/block/rbd.c |   14 ++------------
+ 1 file changed, 2 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index fba0822..9d9a2f3 100644
+index 9d9a2f3..f4b5a64 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -255,6 +255,7 @@ struct rbd_device {
+@@ -337,16 +337,6 @@ void rbd_warn(struct rbd_device *rbd_dev, const
+char *fmt, ...)
+ #  define rbd_assert(expr)	((void) 0)
+ #endif /* !RBD_DEBUG */
 
- 	/* sysfs related */
- 	struct device		dev;
-+	unsigned long		open_count;
- };
+-static struct device *rbd_get_dev(struct rbd_device *rbd_dev)
+-{
+-	return get_device(&rbd_dev->dev);
+-}
+-
+-static void rbd_put_dev(struct rbd_device *rbd_dev)
+-{
+-	put_device(&rbd_dev->dev);
+-}
+-
+ static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver);
+ static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver);
 
- static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-@@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
+@@ -357,7 +347,7 @@ static int rbd_open(struct block_device *bdev,
 fmode_t mode)
+ 	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
+ 		return -EROFS;
 
- 	rbd_get_dev(rbd_dev);
+-	rbd_get_dev(rbd_dev);
++	(void) get_device(&rbd_dev->dev);
  	set_device_ro(bdev, rbd_dev->mapping.read_only);
-+	rbd_dev->open_count++;
+ 	rbd_dev->open_count++;
+
+@@ -370,7 +360,7 @@ static int rbd_release(struct gendisk *disk, fmode_t
+mode)
+
+ 	rbd_assert(rbd_dev->open_count > 0);
+ 	rbd_dev->open_count--;
+-	rbd_put_dev(rbd_dev);
++	put_device(&rbd_dev->dev);
 
  	return 0;
  }
-@@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
-mode)
- {
- 	struct rbd_device *rbd_dev = disk->private_data;
-
-+	rbd_assert(rbd_dev->open_count > 0);
-+	rbd_dev->open_count--;
- 	rbd_put_dev(rbd_dev);
-
- 	return 0;
-@@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
- 		goto done;
- 	}
-
-+	if (rbd_dev->open_count) {
-+		ret = -EBUSY;
-+		goto done;
-+	}
-+
- 	rbd_remove_all_snaps(rbd_dev);
- 	rbd_bus_del_dev(rbd_dev);
-
 -- 
 1.7.9.5
 
