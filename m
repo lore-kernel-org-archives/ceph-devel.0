@@ -1,312 +1,82 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Fri, 16 Nov 2012 14:23:01 -0800
-Message-ID: <CAPYLRzg++w8sH1vP_nMEw2tfaKgbLHHJdbJ4Sg_qBM-J_-oJrQ@mail.gmail.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
-	<509C5FA6.7010600@inktank.com>
-	<CAPud5_4fcXZJqnds3A2nX2-jR9Nn_GBObX+Rgxf-Sou8jx5j8w@mail.gmail.com>
-	<alpine.DEB.2.00.1211121514200.26823@cobra.newdream.net>
-	<CAPud5_7+O3mJkQcBQntnx7qmgBMTM+EYL_RUVbh+wmPmG2vz4Q@mail.gmail.com>
-	<alpine.DEB.2.00.1211151623260.26514@cobra.newdream.net>
-	<CAPud5_5Pre+QRQqFQThE=+YL5auiY6omzriGxv2tTO0Dthv7+Q@mail.gmail.com>
-	<alpine.DEB.2.00.1211161111150.26514@cobra.newdream.net>
-	<CAPud5_6KOGLwBuZGz+GG3sSsA0jbq-T-LADAer_j6+pUbgKVvQ@mail.gmail.com>
-	<alpine.DEB.2.00.1211161412090.26514@cobra.newdream.net>
-	<CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] rbd: do not allow remove of mounted-on image
+Date: Fri, 16 Nov 2012 14:27:03 -0800
+Message-ID: <50A6BDB7.8080001@inktank.com>
+References: <50A65F15.6080807@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:47200 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753715Ab2KPWXC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 17:23:02 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so4366071iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 14:23:02 -0800 (PST)
-In-Reply-To: <CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:54066 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752824Ab2KPW1h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 17:27:37 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so2225691pbc.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 14:27:37 -0800 (PST)
+In-Reply-To: <50A65F15.6080807@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Sage Weil <sage@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-To be clear, the monitor cluster needs to be within this clock drift =97
-the rest of the Ceph cluster can be off by as much as you care to.
-
-(Well, there's also a limit imposed by cephx authorization which can
-keep nodes out of the cluster, but that drift allowance is measured in
-units of hours.)
--Greg
-
-On Fri, Nov 16, 2012 at 2:16 PM, Nick Bartos <nick@pistoncloud.com> wro=
-te:
-> Should I be lowering the clock drift allowed, or the lease interval t=
-o
-> help reproduce it?
+On 11/16/2012 07:43 AM, Alex Elder wrote:
+> There is no check in rbd_remove() to see if anybody holds ope the
+> image being removed.  That's not cool.
 >
-> On Fri, Nov 16, 2012 at 2:13 PM, Sage Weil <sage@inktank.com> wrote:
->> You can safely set the clock drift allowed as high as 500ms.  The re=
-al
->> limitation is that it needs to be well under the lease interval, whi=
-ch is
->> currently 5 seconds by default.
->>
->> You might be able to reproduce more easily by lowering the threshold=
-=2E..
->>
->> sage
->>
->>
->> On Fri, 16 Nov 2012, Nick Bartos wrote:
->>
->>> How far off do the clocks need to be before there is a problem?  It
->>> would seem to be hard to ensure a very large cluster has all of it'=
-s
->>> nodes synchronized within 50ms (which seems to be the default for "=
-mon
->>> clock drift allowed").  Does the mon clock drift allowed parameter
->>> change anything other than the log messages?  Are there any other
->>> tuning options that may help, assuming that this is the issue and i=
-t's
->>> not feasible to get the clocks more than 500ms in sync between all
->>> nodes?
->>>
->>> I'm trying to get a good way of reproducing this and get a trace on
->>> the ceph processes to see what they're waiting on.  I'll let you kn=
-ow
->>> when I have more info.
->>>
->>>
->>> On Fri, Nov 16, 2012 at 11:16 AM, Sage Weil <sage@inktank.com> wrot=
-e:
->>> > I just realized I was mixing up this thread with the other deadlo=
-ck
->>> > thread.
->>> >
->>> > On Fri, 16 Nov 2012, Nick Bartos wrote:
->>> >> Turns out we're having the 'rbd map' hang on startup again, afte=
-r we
->>> >> started using the wip-3.5 patch set.  How critical is the
->>> >> libceph_protect_ceph_con_open_with_mutex commit?  That's the one=
- I
->>> >> removed before which seemed to get rid of the problem (although =
-I'm
->>> >> not completely sure if it completely got rid of it, at least see=
-med to
->>> >> happen much less often).
->>> >>
->>> >> It seems like we only started having this issue after we started
->>> >> patching the 3.5 ceph client (we started patching to try and get=
- rid
->>> >> of a kernel oops, which the patches seem to have fixed).
->>> >
->>> > Right.  That patch fixes a real bug.  It also seems pretty unlike=
-ly that
->>> > this patch is related to the startup hang.  The original log show=
-ed clock
->>> > drift on the monitor that could very easily cause this sort of ha=
-ng.  Can
->>> > you confirm that that isn't the case with this recent instance of=
- the
->>> > problem?  And/or attach a log?
->>> >
->>> > Thanks-
->>> > sage
->>> >
->>> >
->>> >>
->>> >>
->>> >> On Thu, Nov 15, 2012 at 4:25 PM, Sage Weil <sage@inktank.com> wr=
-ote:
->>> >> > On Thu, 15 Nov 2012, Nick Bartos wrote:
->>> >> >> Sorry I guess this e-mail got missed.  I believe those patche=
-s came
->>> >> >> from the ceph/linux-3.5.5-ceph branch.  I'm now using the wip=
--3.5
->>> >> >> branch patches, which seem to all be fine.  We'll stick with =
-3.5 and
->>> >> >> this backport for now until we can figure out what's wrong wi=
-th 3.6.
->>> >> >>
->>> >> >> I typically ignore the wip branches just due to the naming wh=
-en I'm
->>> >> >> looking for updates.  Where should I typically look for updat=
-es that
->>> >> >> aren't in released kernels?  Also, is there anything else in =
-the wip*
->>> >> >> branches that you think we may find particularly useful?
->>> >> >
->>> >> > You were looking in the right place.  The problem was we weren=
-'t super
->>> >> > organized with our stable patches, and changed our minds about=
- what to
->>> >> > send upstream.  These are 'wip' in the sense that they were in=
- preparation
->>> >> > for going upstream.  The goal is to push them to the mainline =
-stable
->>> >> > kernels and ideally not keep them in our tree at all.
->>> >> >
->>> >> > wip-3.5 is an oddity because the mainline stable kernel is EOL=
-'d, but
->>> >> > we're keeping it so that ubuntu can pick it up for quantal.
->>> >> >
->>> >> > I'll make sure these are more clearly marked as stable.
->>> >> >
->>> >> > sage
->>> >> >
->>> >> >
->>> >> >>
->>> >> >>
->>> >> >> On Mon, Nov 12, 2012 at 3:16 PM, Sage Weil <sage@inktank.com>=
- wrote:
->>> >> >> > On Mon, 12 Nov 2012, Nick Bartos wrote:
->>> >> >> >> After removing 8-libceph-protect-ceph_con_open-with-mutex.=
-patch, it
->>> >> >> >> seems we no longer have this hang.
->>> >> >> >
->>> >> >> > Hmm, that's a bit disconcerting.  Did this series come from=
- our old 3.5
->>> >> >> > stable series?  I recently prepared a new one that backport=
-s *all* of the
->>> >> >> > fixes from 3.6 to 3.5 (and 3.4); see wip-3.5 in ceph-client=
-=2Egit.  I would
->>> >> >> > be curious if you see problems with that.
->>> >> >> >
->>> >> >> > So far, with these fixes in place, we have not seen any une=
-xplained kernel
->>> >> >> > crashes in this code.
->>> >> >> >
->>> >> >> > I take it you're going back to a 3.5 kernel because you wer=
-en't able to
->>> >> >> > get rid of the sync problem with 3.6?
->>> >> >> >
->>> >> >> > sage
->>> >> >> >
->>> >> >> >
->>> >> >> >
->>> >> >> >>
->>> >> >> >> On Thu, Nov 8, 2012 at 5:43 PM, Josh Durgin <josh.durgin@i=
-nktank.com> wrote:
->>> >> >> >> > On 11/08/2012 02:10 PM, Mandell Degerness wrote:
->>> >> >> >> >>
->>> >> >> >> >> We are seeing a somewhat random, but frequent hang on o=
-ur systems
->>> >> >> >> >> during startup.  The hang happens at the point where an=
- "rbd map
->>> >> >> >> >> <rbdvol>" command is run.
->>> >> >> >> >>
->>> >> >> >> >> I've attached the ceph logs from the cluster.  The map =
-command happens
->>> >> >> >> >> at Nov  8 18:41:09 on server 172.18.0.15.  The process =
-which hung can
->>> >> >> >> >> be seen in the log as 172.18.0.15:0/1143980479.
->>> >> >> >> >>
->>> >> >> >> >> It appears as if the TCP socket is opened to the OSD, b=
-ut then times
->>> >> >> >> >> out 15 minutes later, the process gets data when the so=
-cket is closed
->>> >> >> >> >> on the client server and it retries.
->>> >> >> >> >>
->>> >> >> >> >> Please help.
->>> >> >> >> >>
->>> >> >> >> >> We are using ceph version 0.48.2argonaut
->>> >> >> >> >> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe).
->>> >> >> >> >>
->>> >> >> >> >> We are using a 3.5.7 kernel with the following list of =
-patches applied:
->>> >> >> >> >>
->>> >> >> >> >> 1-libceph-encapsulate-out-message-data-setup.patch
->>> >> >> >> >> 2-libceph-dont-mark-footer-complete-before-it-is.patch
->>> >> >> >> >> 3-libceph-move-init-of-bio_iter.patch
->>> >> >> >> >> 4-libceph-dont-use-bio_iter-as-a-flag.patch
->>> >> >> >> >> 5-libceph-resubmit-linger-ops-when-pg-mapping-changes.p=
-atch
->>> >> >> >> >> 6-libceph-re-initialize-bio_iter-on-start-of-message-re=
-ceive.patch
->>> >> >> >> >> 7-ceph-close-old-con-before-reopening-on-mds-reconnect.=
-patch
->>> >> >> >> >> 8-libceph-protect-ceph_con_open-with-mutex.patch
->>> >> >> >> >> 9-libceph-reset-connection-retry-on-successfully-negoti=
-ation.patch
->>> >> >> >> >> 10-rbd-only-reset-capacity-when-pointing-to-head.patch
->>> >> >> >> >> 11-rbd-set-image-size-when-header-is-updated.patch
->>> >> >> >> >> 12-libceph-fix-crypto-key-null-deref-memory-leak.patch
->>> >> >> >> >> 13-ceph-tolerate-and-warn-on-extraneous-dentry-from-mds=
-=2Epatch
->>> >> >> >> >> 14-ceph-avoid-divide-by-zero-in-__validate_layout.patch
->>> >> >> >> >> 15-rbd-drop-dev-reference-on-error-in-rbd_open.patch
->>> >> >> >> >> 16-ceph-Fix-oops-when-handling-mdsmap-that-decreases-ma=
-x_mds.patch
->>> >> >> >> >> 17-libceph-check-for-invalid-mapping.patch
->>> >> >> >> >> 18-ceph-propagate-layout-error-on-osd-request-creation.=
-patch
->>> >> >> >> >> 19-rbd-BUG-on-invalid-layout.patch
->>> >> >> >> >> 20-ceph-return-EIO-on-invalid-layout-on-GET_DATALOC-ioc=
-tl.patch
->>> >> >> >> >> 21-ceph-avoid-32-bit-page-index-overflow.patch
->>> >> >> >> >> 23-ceph-fix-dentry-reference-leak-in-encode_fh.patch
->>> >> >> >> >>
->>> >> >> >> >> Any suggestions?
->>> >> >> >> >
->>> >> >> >> >
->>> >> >> >> > The log shows your monitors don't have time sychronized =
-enough among
->>> >> >> >> > them to make much progress (including authenticating new=
- connections).
->>> >> >> >> > That's probably the real issue. 0.2s is pretty large clo=
-ck drift.
->>> >> >> >> >
->>> >> >> >> >
->>> >> >> >> >> One thought is that the following patch (which we could=
- not apply) is
->>> >> >> >> >> what is required:
->>> >> >> >> >>
->>> >> >> >> >> 22-rbd-reset-BACKOFF-if-unable-to-re-queue.patch
->>> >> >> >> >
->>> >> >> >> >
->>> >> >> >> > This is certainly useful too, but I don't think it's the=
- cause of
->>> >> >> >> > the delay in this case.
->>> >> >> >> >
->>> >> >> >> > Josh
->>> >> >> >> > --
->>> >> >> >> > To unsubscribe from this list: send the line "unsubscrib=
-e ceph-devel" in
->>> >> >> >> > the body of a message to majordomo@vger.kernel.org
->>> >> >> >> > More majordomo info at  http://vger.kernel.org/majordomo=
--info.html
->>> >> >> >> --
->>> >> >> >> To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in
->>> >> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-i=
-nfo.html
->>> >> >> >>
->>> >> >> >>
->>> >> >> --
->>> >> >> To unsubscribe from this list: send the line "unsubscribe cep=
-h-devel" in
->>> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info=
-=2Ehtml
->>> >> >>
->>> >> >>
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel" in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
-ml
->>> >>
->>> >>
->>>
->>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Add a simple open count that goes up and down with opens and closes
+> (releases) of the device, and don't allow an rbd image to be removed
+> if the count is non-zero.  Both functions are protected by the
+> bd_mutex so there's no need for any other concurrency protection.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |    9 +++++++++
+>   1 file changed, 9 insertions(+)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index fba0822..9d9a2f3 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -255,6 +255,7 @@ struct rbd_device {
+>
+>   	/* sysfs related */
+>   	struct device		dev;
+> +	unsigned long		open_count;
+>   };
+>
+>   static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
+> @@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
+> fmode_t mode)
+>
+>   	rbd_get_dev(rbd_dev);
+>   	set_device_ro(bdev, rbd_dev->mapping.read_only);
+> +	rbd_dev->open_count++;
+>
+>   	return 0;
+>   }
+> @@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
+> mode)
+>   {
+>   	struct rbd_device *rbd_dev = disk->private_data;
+>
+> +	rbd_assert(rbd_dev->open_count > 0);
+> +	rbd_dev->open_count--;
+>   	rbd_put_dev(rbd_dev);
+>
+>   	return 0;
+> @@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
+>   		goto done;
+>   	}
+>
+> +	if (rbd_dev->open_count) {
+> +		ret = -EBUSY;
+> +		goto done;
+> +	}
+> +
+
+Is this protected by bd_mutex?
+
+>   	rbd_remove_all_snaps(rbd_dev);
+>   	rbd_bus_del_dev(rbd_dev);
+>
+
