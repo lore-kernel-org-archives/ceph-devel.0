@@ -1,86 +1,128 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: changed rbd cp behavior in 0.53
-Date: Fri, 16 Nov 2012 03:00:37 +0300
-Message-ID: <CABYiri96Ce=va70JZFvX4bBsaDdE++mV282i2tOVXWRhx12Swg@mail.gmail.com>
-References: <CABYiri8Hm2EjLsffgSp3aANPwVQ2FPYWx5q01Wkq7sk1Smp41w@mail.gmail.com>
- <50A17C8A.9020007@inktank.com> <50A43DA0.6030307@inktank.com>
- <CABYiri8UzN==BkdyrAXdGORkJedNQR82WHBn8ZPCB-izt54HOA@mail.gmail.com> <CAEP-4J8KFzUydCPs-neZaWn09GkrcMsJp1=8YO0+rQROVUOJhg@mail.gmail.com>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: rbd map command hangs for 15 minutes during system start up
+Date: Thu, 15 Nov 2012 16:21:18 -0800
+Message-ID: <CAPud5_7+O3mJkQcBQntnx7qmgBMTM+EYL_RUVbh+wmPmG2vz4Q@mail.gmail.com>
+References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
+	<509C5FA6.7010600@inktank.com>
+	<CAPud5_4fcXZJqnds3A2nX2-jR9Nn_GBObX+Rgxf-Sou8jx5j8w@mail.gmail.com>
+	<alpine.DEB.2.00.1211121514200.26823@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:36629 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750800Ab2KPAA7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 19:00:59 -0500
-Received: by mail-ob0-f174.google.com with SMTP id wc20so2284951obb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 16:00:59 -0800 (PST)
-In-Reply-To: <CAEP-4J8KFzUydCPs-neZaWn09GkrcMsJp1=8YO0+rQROVUOJhg@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:42490 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750804Ab2KPAVT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Nov 2012 19:21:19 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so2864736iea.19
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Nov 2012 16:21:18 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211121514200.26823@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Deb Barba <deb.barba@inktank.com>
-Cc: Dan Mick <dan.mick@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
 
-On Thu, Nov 15, 2012 at 8:43 PM, Deb Barba <deb.barba@inktank.com> wrote:
-> This is not common UNIX/posix behavior.
->
-> if you just give the source a file name, it should assume "." (current
-> directory) as it's location, not whatever path you started from.
->
-> I would expect most UNIX users would be losing a lot of files if they try to
-> copy from path x/y/z, and just provide a new name.  that would indicate they
-> wanted it stashed in ".".  Not cloned in path x/y/z  .
->
-> I am concerned this would confuse most users out in the field.
->
-> Thanks,
-> Deborah Barba
+Sorry I guess this e-mail got missed.  I believe those patches came
+from the ceph/linux-3.5.5-ceph branch.  I'm now using the wip-3.5
+branch patches, which seem to all be fine.  We'll stick with 3.5 and
+this backport for now until we can figure out what's wrong with 3.6.
 
-Speaking of standards, rbd layout is more closely to /dev layout, or,
-at least iSCSI targets, when not specifying full path or use some
-predefined default prefix make no sense at all.
+I typically ignore the wip branches just due to the naming when I'm
+looking for updates.  Where should I typically look for updates that
+aren't in released kernels?  Also, is there anything else in the wip*
+branches that you think we may find particularly useful?
 
+
+On Mon, Nov 12, 2012 at 3:16 PM, Sage Weil <sage@inktank.com> wrote:
+> On Mon, 12 Nov 2012, Nick Bartos wrote:
+>> After removing 8-libceph-protect-ceph_con_open-with-mutex.patch, it
+>> seems we no longer have this hang.
 >
-> On Wed, Nov 14, 2012 at 10:43 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> Hmm, that's a bit disconcerting.  Did this series come from our old 3.5
+> stable series?  I recently prepared a new one that backports *all* of the
+> fixes from 3.6 to 3.5 (and 3.4); see wip-3.5 in ceph-client.git.  I would
+> be curious if you see problems with that.
+>
+> So far, with these fixes in place, we have not seen any unexplained kernel
+> crashes in this code.
+>
+> I take it you're going back to a 3.5 kernel because you weren't able to
+> get rid of the sync problem with 3.6?
+>
+> sage
+>
+>
+>
 >>
->> On Thu, Nov 15, 2012 at 4:56 AM, Dan Mick <dan.mick@inktank.com> wrote:
->> >
->> >
->> > On 11/12/2012 02:47 PM, Josh Durgin wrote:
+>> On Thu, Nov 8, 2012 at 5:43 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+>> > On 11/08/2012 02:10 PM, Mandell Degerness wrote:
 >> >>
->> >> On 11/12/2012 08:30 AM, Andrey Korolyov wrote:
->> >>>
->> >>> Hi,
->> >>>
->> >>> For this version, rbd cp assumes that destination pool is the same as
->> >>> source, not 'rbd', if pool in the destination path is omitted.
->> >>>
->> >>> rbd cp install/img testimg
->> >>> rbd ls install
->> >>> img testimg
->> >>>
->> >>>
->> >>> Is this change permanent?
->> >>>
->> >>> Thanks!
+>> >> We are seeing a somewhat random, but frequent hang on our systems
+>> >> during startup.  The hang happens at the point where an "rbd map
+>> >> <rbdvol>" command is run.
 >> >>
+>> >> I've attached the ceph logs from the cluster.  The map command happens
+>> >> at Nov  8 18:41:09 on server 172.18.0.15.  The process which hung can
+>> >> be seen in the log as 172.18.0.15:0/1143980479.
 >> >>
->> >> This is a regression. The previous behavior will be restored for 0.54.
->> >> I added http://tracker.newdream.net/issues/3478 to track it.
+>> >> It appears as if the TCP socket is opened to the OSD, but then times
+>> >> out 15 minutes later, the process gets data when the socket is closed
+>> >> on the client server and it retries.
+>> >>
+>> >> Please help.
+>> >>
+>> >> We are using ceph version 0.48.2argonaut
+>> >> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe).
+>> >>
+>> >> We are using a 3.5.7 kernel with the following list of patches applied:
+>> >>
+>> >> 1-libceph-encapsulate-out-message-data-setup.patch
+>> >> 2-libceph-dont-mark-footer-complete-before-it-is.patch
+>> >> 3-libceph-move-init-of-bio_iter.patch
+>> >> 4-libceph-dont-use-bio_iter-as-a-flag.patch
+>> >> 5-libceph-resubmit-linger-ops-when-pg-mapping-changes.patch
+>> >> 6-libceph-re-initialize-bio_iter-on-start-of-message-receive.patch
+>> >> 7-ceph-close-old-con-before-reopening-on-mds-reconnect.patch
+>> >> 8-libceph-protect-ceph_con_open-with-mutex.patch
+>> >> 9-libceph-reset-connection-retry-on-successfully-negotiation.patch
+>> >> 10-rbd-only-reset-capacity-when-pointing-to-head.patch
+>> >> 11-rbd-set-image-size-when-header-is-updated.patch
+>> >> 12-libceph-fix-crypto-key-null-deref-memory-leak.patch
+>> >> 13-ceph-tolerate-and-warn-on-extraneous-dentry-from-mds.patch
+>> >> 14-ceph-avoid-divide-by-zero-in-__validate_layout.patch
+>> >> 15-rbd-drop-dev-reference-on-error-in-rbd_open.patch
+>> >> 16-ceph-Fix-oops-when-handling-mdsmap-that-decreases-max_mds.patch
+>> >> 17-libceph-check-for-invalid-mapping.patch
+>> >> 18-ceph-propagate-layout-error-on-osd-request-creation.patch
+>> >> 19-rbd-BUG-on-invalid-layout.patch
+>> >> 20-ceph-return-EIO-on-invalid-layout-on-GET_DATALOC-ioctl.patch
+>> >> 21-ceph-avoid-32-bit-page-index-overflow.patch
+>> >> 23-ceph-fix-dentry-reference-leak-in-encode_fh.patch
+>> >>
+>> >> Any suggestions?
 >> >
 >> >
->> > Actually, on detailed examination, it looks like this has been the
->> > behavior
->> > for a long time; I think the wiser course would be not to change this
->> > defaulting.  One could argue the value of such defaulting, but it's also
->> > true that you can specify the source and destination pools explicitly.
+>> > The log shows your monitors don't have time sychronized enough among
+>> > them to make much progress (including authenticating new connections).
+>> > That's probably the real issue. 0.2s is pretty large clock drift.
 >> >
->> > Andrey, any strong objection to leaving this the way it is?
->>
->> I`m not complaining -  this behavior seems more logical in the first
->> place and of course I use full path even doing something by hand.
+>> >
+>> >> One thought is that the following patch (which we could not apply) is
+>> >> what is required:
+>> >>
+>> >> 22-rbd-reset-BACKOFF-if-unable-to-re-queue.patch
+>> >
+>> >
+>> > This is certainly useful too, but I don't think it's the cause of
+>> > the delay in this case.
+>> >
+>> > Josh
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+>>
+>>
