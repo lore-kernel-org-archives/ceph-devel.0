@@ -1,75 +1,100 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: rbd tool changed format? (breaks compatibility)
-Date: Fri, 16 Nov 2012 09:14:52 -0800
-Message-ID: <50A6748C.7040303@inktank.com>
-References: <50A64F6A.8010505@grnet.gr>
+From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
+Subject: OSD and MON memory usage
+Date: Fri, 16 Nov 2012 17:24:01 +0000
+Message-ID: <20121116172401.ef3e5e52.ctpm@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:63663 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752184Ab2KPRPA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 12:15:00 -0500
-Received: by mail-pa0-f46.google.com with SMTP id hz1so1989994pad.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 09:14:59 -0800 (PST)
-In-Reply-To: <50A64F6A.8010505@grnet.gr>
+Received: from smtp2.ist.utl.pt ([193.136.128.22]:42519 "EHLO smtp2.ist.utl.pt"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752978Ab2KPRYF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 16 Nov 2012 12:24:05 -0500
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by smtp2.ist.utl.pt (Postfix) with ESMTP id 7DCAB7000487
+	for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 17:24:02 +0000 (WET)
+Received: from smtp2.ist.utl.pt ([127.0.0.1])
+	by localhost (smtp2.ist.utl.pt [127.0.0.1]) (amavisd-new, port 10025)
+	with LMTP id tFo8qPzbdN0Z for <ceph-devel@vger.kernel.org>;
+	Fri, 16 Nov 2012 17:24:02 +0000 (WET)
+Received: from mail2.ist.utl.pt (mail.ist.utl.pt [IPv6:2001:690:2100:1::8])
+	by smtp2.ist.utl.pt (Postfix) with ESMTP id 2A9CD700048E
+	for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 17:24:02 +0000 (WET)
+Received: from coyote.ist.utl.pt (coyote.ist.utl.pt [193.136.132.235])
+	(Authenticated sender: ist146506)
+	by mail2.ist.utl.pt (Postfix) with ESMTPSA id 229AA200A8C7
+	for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 17:24:02 +0000 (WET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Constantinos Venetsanopoulos <cven@grnet.gr>
-Cc: ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
+To: ceph-devel@vger.kernel.org
 
-On 11/16/2012 06:36 AM, Constantinos Venetsanopoulos wrote:
-> Hello ceph team,
->
-> As you may already know, our team in GRNET is building a complete open
-> source cloud platform called Synnefo [1], which already powers our
-> production public cloud service ~okeanos [2].
->
-> Synnefo is using Google Ganeti for the low level VM management part [3].
-> As of Jan 2012, we have merged to upstream Ganeti support for VM disks
-> on RADOS [4].
->
-> Today we received some feedback, that other people trying to run Ganeti
-> with RADOS get an error because probably the output of the 'rbd
-> showmapped' command has changed.
->
-> I'd like to ask if indeed the output format of the rbd tool has changed.
-> More specifically:
->
-> 1. Does the 'rbd showmapped' command still returns just the headers if
-> no device is mapped?
 
-No
+ Hi,
 
-> 2. Has the separator between the 'rbd showmapped' columns changed
-> from \t to ""?
+ We're testing ceph using a recent build from the 'next' branch (commit
+b40387d) and we've run into some interesting problems related to memory
+usage.
 
-Yes, this is in the release notes for 0.54 
-(http://ceph.com/docs/master/release-notes/#v0-54).
+ The setup consists of 64 OSDs (4 boxes, each with 16 disks, most of
+them 2TB, some 1.5TB, XFS filesystems, Debian Wheezy). After the
+initial mkcephfs, a 'ceph -s' reports 12480 pgs total.
 
-> I don't have the latest rbd tool setup (but rather
-> ceph-common=0.48.1argonaut-1~bpo60+1), so I can't test it right now,
-> but I see this commit:
->
-> https://github.com/ceph/ceph/commit/bed55369a96c2651f513b8c9b1a7bb92fb87550a
+ For generating some load we used
 
-Yeah, that's the commit that changed it.
+rados -p rbd bench 28000 write -t 25
 
-> How stable can we consider rbd tool's output format?
-> This is something we want to run in production environment. Using the
-> tool rather than the library makes things much simpler.
+and left it running overnight.
 
-Generally it won't change much, but I don't think it should be
-considered entirely unchanging. We'll add it to the release notes when
-the output does change. We'll probably switch other commands to use
-TextTable too, with the same results as with showmapped and lock list.
-We could send a message to the mailing list when the output changes as
-well, so you can prepare for a future release.
+ After several hours most of the OSDs had eaten up around 1GB or more
+of memory each, which caused trashing on the servers (12GB of RAM
+per box), and eventually the OOM killer was invoked, killing many OSDs
+and even the SSH daemons. This seems to have caused a domino effect,
+and in the morning only around 18 of the OSD were still up.
 
-Perhaps we should add a --format json|plain option so you don't have to
-rely on particular formatting, you just parse the json. This would
-match existing usage by many 'ceph ...' commands, and be easier
-for scripts to use in general.
+ After a hard reboot of the boxes that were unresponsive, we are now in
+a situation in which there is simply not enough memory for the cluster
+to recover. That is, after restarting the OSDs, in 2 to 3 minutes we
+have many of them using 1~1.5GB of RAM and the trashing starts all over
+again, the OOM killer comes in and things go downhill again. Efectively
+the cluster is not able to recover no matter how many times we restart
+the daemons.
 
-Josh
+ We're not using any non-default options in the OSD section of the
+config. file. We checked that there is free space for logging on the
+system partitions.
+
+ While I know that 12GB per machine can be hardly called to much RAM,
+the question I put forward is: is it reasonable for a OSD to consume so
+much memory in normal usage, or even recovery situations, when there is
+just around ~200 PGs per OSD and only around ~3TB of objects created by
+rados bench?
+
+ Is there a rule of thumb to estimate the amount of memory consumed as
+a function of PG count, object count and perhaps the number of PGs
+trying to recover in a given instant? One of my concerns here is also
+to understand if memory consumption during recovery is bounded and
+deterministic at all, or if we're simply hitting a severe memory leak
+in the OSDs.
+
+ As for the monitor daemon on this cluster (running on a dedicated
+machine), it is currently using 3.2GB of memory, and it got to that
+point again in a matter of minutes after being restarted. Would it be
+good if we tested with the changes from the wip-mon-leaks-fix branch?
+
+ We would appreciate any advice on the best way to understand if the
+OSDs are leaking memory or not.
+
+ We will gladly provide any config or debug info that you might be
+interested in, or run any tests.
+
+ Thanks in advance
+
+Best regards
+
+Cl=C3=A1udio
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
