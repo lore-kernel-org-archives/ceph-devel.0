@@ -1,119 +1,131 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: osd not in tree
-Date: Sat, 17 Nov 2012 07:56:30 +0800
-Message-ID: <CAJiejCRddL_-u32uBxD8vuNXJxc4=36+aneW_L4wAa0OO6atOQ@mail.gmail.com>
-References: <CAJiejCR3CocWucemBR1++dAohOASLSidnwCc9G=2cREFuTTXXQ@mail.gmail.com>
- <50A5EE14.6070108@inktank.com> <CAJiejCSiz54N8mzLB1SQyOr9ObsQ4aE4=ZaUahpkd3cOw4X+qA@mail.gmail.com>
- <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net>
+Date: Fri, 16 Nov 2012 15:58:25 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211161558040.26514@cobra.newdream.net>
+References: <CAJiejCR3CocWucemBR1++dAohOASLSidnwCc9G=2cREFuTTXXQ@mail.gmail.com> <50A5EE14.6070108@inktank.com> <CAJiejCSiz54N8mzLB1SQyOr9ObsQ4aE4=ZaUahpkd3cOw4X+qA@mail.gmail.com> <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net>
+ <CAJiejCRddL_-u32uBxD8vuNXJxc4=36+aneW_L4wAa0OO6atOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:48651 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753750Ab2KPX4u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 18:56:50 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so4459947iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 15:56:50 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:36235 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753173Ab2KPX60 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 18:58:26 -0500
+In-Reply-To: <CAJiejCRddL_-u32uBxD8vuNXJxc4=36+aneW_L4wAa0OO6atOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Drunkard Zhang <gongfan193@gmail.com>
 Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-2012/11/17 Sage Weil <sage@inktank.com>:
-> On Fri, 16 Nov 2012, Drunkard Zhang wrote:
->> 2012/11/16 Josh Durgin <josh.durgin@inktank.com>:
->> > On 11/15/2012 11:21 PM, Drunkard Zhang wrote:
->> >>
->> >> I installed mon x1, mds x1 and osd x11 in one host, then add some osd
->> >> from other hosts, But they are not in osd tree, also not usable, how
->> >> can I fix this?
->> >>
->> >> The crush command I used:
->> >> ceph osd crush set 11 osd.11 3 pool=data datacenter=dh-1L, room=room1,
->> >> row=02, rack=05, host=squid87-log13
->> >
->> >
->> > Remove the commas in that command and it'll work. I fixed the docs for
->> > this.
->> >
->> > Josh
->>
->> Got no luck. osd.11.log said nothing useful. Do I have to edit
->> crushmap manually? If so, how should I define host's 'id' value, I
->> cannot find docs from ceph.com/docs since yesterday, where's that
->> gone?
->>
->> squid87-log13 ~ # ceph osd crush set 11 osd.11 3 pool=data
->> datacenter=dh-1L room=room1 row=02 rack=05 host=squid87-log13
->
-> You're specifying 'pool=data', but:
->
->> updated item id 11 name 'osd.11' weight 3 at location
->> {datacenter=dh-1L,host=squid87-log13,pool=data,rack=05,room=room1,row=02}
->> to crush map
->> squid87-log13 ~ # ceph osd tree
->> dumped osdmap tree epoch 467
->> # id weight type name up/down reweight
->> -1 36 pool default
->> -3 36 rack unknownrack
->> -2 36 host log3
->
-> the existing hierarchy has pool=default.  Change it to default above and
-> you'll be okay.  You may want to restructure the existing hosts as well so
-> they 'live' in the tree structure.
->
-Still no luck. I'm using 0.51, not update yet. Set host=log3 make
-osd.{11..14} usable, so I'm thinking I have to create the
-host=squid87-log13 first, how could I create the host, modify
-crushmap?
+On Sat, 17 Nov 2012, Drunkard Zhang wrote:
+> 2012/11/17 Sage Weil <sage@inktank.com>:
+> > On Fri, 16 Nov 2012, Drunkard Zhang wrote:
+> >> 2012/11/16 Josh Durgin <josh.durgin@inktank.com>:
+> >> > On 11/15/2012 11:21 PM, Drunkard Zhang wrote:
+> >> >>
+> >> >> I installed mon x1, mds x1 and osd x11 in one host, then add some osd
+> >> >> from other hosts, But they are not in osd tree, also not usable, how
+> >> >> can I fix this?
+> >> >>
+> >> >> The crush command I used:
+> >> >> ceph osd crush set 11 osd.11 3 pool=data datacenter=dh-1L, room=room1,
+> >> >> row=02, rack=05, host=squid87-log13
+> >> >
+> >> >
+> >> > Remove the commas in that command and it'll work. I fixed the docs for
+> >> > this.
+> >> >
+> >> > Josh
+> >>
+> >> Got no luck. osd.11.log said nothing useful. Do I have to edit
+> >> crushmap manually? If so, how should I define host's 'id' value, I
+> >> cannot find docs from ceph.com/docs since yesterday, where's that
+> >> gone?
+> >>
+> >> squid87-log13 ~ # ceph osd crush set 11 osd.11 3 pool=data
+> >> datacenter=dh-1L room=room1 row=02 rack=05 host=squid87-log13
+> >
+> > You're specifying 'pool=data', but:
+> >
+> >> updated item id 11 name 'osd.11' weight 3 at location
+> >> {datacenter=dh-1L,host=squid87-log13,pool=data,rack=05,room=room1,row=02}
+> >> to crush map
+> >> squid87-log13 ~ # ceph osd tree
+> >> dumped osdmap tree epoch 467
+> >> # id weight type name up/down reweight
+> >> -1 36 pool default
+> >> -3 36 rack unknownrack
+> >> -2 36 host log3
+> >
+> > the existing hierarchy has pool=default.  Change it to default above and
+> > you'll be okay.  You may want to restructure the existing hosts as well so
+> > they 'live' in the tree structure.
+> >
+> Still no luck. I'm using 0.51, not update yet. Set host=log3 make
+> osd.{11..14} usable, so I'm thinking I have to create the
+> host=squid87-log13 first, how could I create the host, modify
+> crushmap?
+> 
+> log3 ~ # for i in {11..14}; do ceph osd crush set $i osd.$i 3
+> pool=default datacenter=dh-1L room=room1 row=02 rack=rack0205
+> host=squid87-log13; done
+> updated item id 11 name 'osd.11' weight 3 at location
+> {datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+> to crush map
+> updated item id 12 name 'osd.12' weight 3 at location
+> {datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+> to crush map
+> updated item id 13 name 'osd.13' weight 3 at location
+> {datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+> to crush map
+> updated item id 14 name 'osd.14' weight 3 at location
+> {datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
+> to crush map
+> log3 ~ # ceph osd tree
+> dumped osdmap tree epoch 559
+> # id weight type name up/down reweight
+> -1 33 pool default
+> -3 33 rack rack0205
+> -2 33 host log3
+> 0 3 osd.0 up 3
+> 1 3 osd.1 up 3
+> 2 3 osd.2 up 3
+> 3 3 osd.3 up 3
+> 4 3 osd.4 up 3
+> 5 3 osd.5 up 3
+> 6 3 osd.6 up 3
+> 7 3 osd.7 up 3
+> 8 3 osd.8 up 3
+> 9 3 osd.9 up 3
+> 10 3 osd.10 up 3
+> 
+> 11 0 osd.11 up 3
+> 12 0 osd.12 up 3
+> 13 0 osd.13 up 3
+> 14 0 osd.14 up 3
 
-log3 ~ # for i in {11..14}; do ceph osd crush set $i osd.$i 3
-pool=default datacenter=dh-1L room=room1 row=02 rack=rack0205
-host=squid87-log13; done
-updated item id 11 name 'osd.11' weight 3 at location
-{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
-to crush map
-updated item id 12 name 'osd.12' weight 3 at location
-{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
-to crush map
-updated item id 13 name 'osd.13' weight 3 at location
-{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
-to crush map
-updated item id 14 name 'osd.14' weight 3 at location
-{datacenter=dh-1L,host=squid87-log13,pool=default,rack=rack0205,room=room1,row=02}
-to crush map
-log3 ~ # ceph osd tree
-dumped osdmap tree epoch 559
-# id weight type name up/down reweight
--1 33 pool default
--3 33 rack rack0205
--2 33 host log3
-0 3 osd.0 up 3
-1 3 osd.1 up 3
-2 3 osd.2 up 3
-3 3 osd.3 up 3
-4 3 osd.4 up 3
-5 3 osd.5 up 3
-6 3 osd.6 up 3
-7 3 osd.7 up 3
-8 3 osd.8 up 3
-9 3 osd.9 up 3
-10 3 osd.10 up 3
+Can you do 
 
-11 0 osd.11 up 3
-12 0 osd.12 up 3
-13 0 osd.13 up 3
-14 0 osd.14 up 3
+ ceph osd getcrushmap -o /tmp/foo
+ crushtool -d /tmp/foo
 
-> (This confusion is exactly why it's switched 'root=default' in the new
-> releases.)
->
-Yes, weird.
-log3 ~ # ceph osd dump | grep ^pool
-pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
-320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
-pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins
-pg_num 320 pgp_num 320 last_change 6 owner 0
-pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num
-320 pgp_num 320 last_change 1 owner 0
+and attach the output?
+
+Thanks!
+sage
+
+
+> 
+> > (This confusion is exactly why it's switched 'root=default' in the new
+> > releases.)
+> >
+> Yes, weird.
+> log3 ~ # ceph osd dump | grep ^pool
+> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
+> 320 pgp_num 320 last_change 1 owner 0 crash_replay_interval 45
+> pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins
+> pg_num 320 pgp_num 320 last_change 6 owner 0
+> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num
+> 320 pgp_num 320 last_change 1 owner 0
+> 
+> 
