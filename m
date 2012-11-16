@@ -1,59 +1,77 @@
-From: Constantinos Venetsanopoulos <cven@grnet.gr>
-Subject: rbd tool changed format? (breaks compatibility)
-Date: Fri, 16 Nov 2012 16:36:26 +0200
-Message-ID: <50A64F6A.8010505@grnet.gr>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: do not allow remove of mounted-on image
+Date: Fri, 16 Nov 2012 09:43:17 -0600
+Message-ID: <50A65F15.6080807@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:15445 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751666Ab2KPOvk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Nov 2012 09:51:40 -0500
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:34985 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752432Ab2KPPnV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 10:43:21 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so1751018iay.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 07:43:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: synnefo-devel@googlegroups.com
 
-Hello ceph team,
+There is no check in rbd_remove() to see if anybody holds ope the
+image being removed.  That's not cool.
 
-As you may already know, our team in GRNET is building a complete open
-source cloud platform called Synnefo [1], which already powers our
-production public cloud service ~okeanos [2].
+Add a simple open count that goes up and down with opens and closes
+(releases) of the device, and don't allow an rbd image to be removed
+if the count is non-zero.  Both functions are protected by the
+bd_mutex so there's no need for any other concurrency protection.
 
-Synnefo is using Google Ganeti for the low level VM management part [3].
-As of Jan 2012, we have merged to upstream Ganeti support for VM disks
-on RADOS [4].
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Today we received some feedback, that other people trying to run Ganeti
-with RADOS get an error because probably the output of the 'rbd
-showmapped' command has changed.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index fba0822..9d9a2f3 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -255,6 +255,7 @@ struct rbd_device {
 
-I'd like to ask if indeed the output format of the rbd tool has changed.
-More specifically:
+ 	/* sysfs related */
+ 	struct device		dev;
++	unsigned long		open_count;
+ };
 
-1. Does the 'rbd showmapped' command still returns just the headers if
-no device is mapped?
-2. Has the separator between the 'rbd showmapped' columns changed
-from \t to ""?
+ static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
+@@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
+fmode_t mode)
 
-I don't have the latest rbd tool setup (but rather
-ceph-common=0.48.1argonaut-1~bpo60+1), so I can't test it right now,
-but I see this commit:
+ 	rbd_get_dev(rbd_dev);
+ 	set_device_ro(bdev, rbd_dev->mapping.read_only);
++	rbd_dev->open_count++;
 
-https://github.com/ceph/ceph/commit/bed55369a96c2651f513b8c9b1a7bb92fb87550a
+ 	return 0;
+ }
+@@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
+mode)
+ {
+ 	struct rbd_device *rbd_dev = disk->private_data;
 
-How stable can we consider rbd tool's output format?
-This is something we want to run in production environment. Using the
-tool rather than the library makes things much simpler.
++	rbd_assert(rbd_dev->open_count > 0);
++	rbd_dev->open_count--;
+ 	rbd_put_dev(rbd_dev);
 
+ 	return 0;
+@@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
+ 		goto done;
+ 	}
 
-Kind Regards,
-Constantinos Venetsanopoulos
++	if (rbd_dev->open_count) {
++		ret = -EBUSY;
++		goto done;
++	}
++
+ 	rbd_remove_all_snaps(rbd_dev);
+ 	rbd_bus_del_dev(rbd_dev);
 
-[1] http://synnefo.org
-[2] http://okeanos.io
-[3] http://code.google.com/p/ganeti/
-[4] 
-http://git.ganeti.org/?p=ganeti.git;a=commit;h=7181fba0662246b5f02764a5b3b0d500f6934dd0
+-- 
+1.7.9.5
+
