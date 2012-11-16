@@ -1,35 +1,59 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: ceph-osd cpu usage
-Date: Fri, 16 Nov 2012 10:11:36 +0100
-Message-ID: <50A60348.5080604@profihost.ag>
-References: <f23bc508-a0c1-445d-a2bd-062898847507@mailpro>
+From: Constantinos Venetsanopoulos <cven@grnet.gr>
+Subject: rbd tool changed format? (breaks compatibility)
+Date: Fri, 16 Nov 2012 16:36:26 +0200
+Message-ID: <50A64F6A.8010505@grnet.gr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:51653 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751217Ab2KPJLq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 04:11:46 -0500
-In-Reply-To: <f23bc508-a0c1-445d-a2bd-062898847507@mailpro>
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:15445 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751666Ab2KPOvk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 16 Nov 2012 09:51:40 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com
 
-Am 16.11.2012 09:41, schrieb Alexandre DERUMIER:
->>> Any other ideas how to reduce ceph-osd while doing randwrite?
->>>
->>> Randread gives me with 3 VMs: 60.000 iops
->>> Randwrite gives me with 3 VMs: 25.000 iops
->
-> Great to see that read scale !
-Yes that works fine.
+Hello ceph team,
+
+As you may already know, our team in GRNET is building a complete open
+source cloud platform called Synnefo [1], which already powers our
+production public cloud service ~okeanos [2].
+
+Synnefo is using Google Ganeti for the low level VM management part [3].
+As of Jan 2012, we have merged to upstream Ganeti support for VM disks
+on RADOS [4].
+
+Today we received some feedback, that other people trying to run Ganeti
+with RADOS get an error because probably the output of the 'rbd
+showmapped' command has changed.
+
+I'd like to ask if indeed the output format of the rbd tool has changed.
+More specifically:
+
+1. Does the 'rbd showmapped' command still returns just the headers if
+no device is mapped?
+2. Has the separator between the 'rbd showmapped' columns changed
+from \t to ""?
+
+I don't have the latest rbd tool setup (but rather
+ceph-common=0.48.1argonaut-1~bpo60+1), so I can't test it right now,
+but I see this commit:
+
+https://github.com/ceph/ceph/commit/bed55369a96c2651f513b8c9b1a7bb92fb87550a
+
+How stable can we consider rbd tool's output format?
+This is something we want to run in production environment. Using the
+tool rather than the library makes things much simpler.
 
 
-> For randwrite, what is the bottleneck now with filestore xattr use omap = true ?
-Oh no the result was still with default fsetxattr. Filestore xattr use 
-omap added another 20% load an resultet in much lower iops. Seems i 
-wasn't clear enough about that.
+Kind Regards,
+Constantinos Venetsanopoulos
 
-Stefan
+[1] http://synnefo.org
+[2] http://okeanos.io
+[3] http://code.google.com/p/ganeti/
+[4] 
+http://git.ganeti.org/?p=ganeti.git;a=commit;h=7181fba0662246b5f02764a5b3b0d500f6934dd0
