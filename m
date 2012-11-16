@@ -1,82 +1,115 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: do not allow remove of mounted-on image
-Date: Fri, 16 Nov 2012 14:27:03 -0800
-Message-ID: <50A6BDB7.8080001@inktank.com>
-References: <50A65F15.6080807@inktank.com>
+From: Mark Kampe <mark.kampe@inktank.com>
+Subject: Re: RBD fio Performance concerns
+Date: Fri, 16 Nov 2012 14:59:26 -0800
+Message-ID: <50A6C54E.9010805@inktank.com>
+References: <50A537EA.5090409@inktank.com> <CAOLwVUmQa4C_vs_Mbi3b2LeO=wx8_EMVWX5Pyu0y-JnG8nyz+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:54066 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752824Ab2KPW1h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 17:27:37 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so2225691pbc.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 14:27:37 -0800 (PST)
-In-Reply-To: <50A65F15.6080807@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:47405 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753729Ab2KPW71 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Nov 2012 17:59:27 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2164680pad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 14:59:27 -0800 (PST)
+In-Reply-To: <CAOLwVUmQa4C_vs_Mbi3b2LeO=wx8_EMVWX5Pyu0y-JnG8nyz+Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/16/2012 07:43 AM, Alex Elder wrote:
-> There is no check in rbd_remove() to see if anybody holds ope the
-> image being removed.  That's not cool.
->
-> Add a simple open count that goes up and down with opens and closes
-> (releases) of the device, and don't allow an rbd image to be removed
-> if the count is non-zero.  Both functions are protected by the
-> bd_mutex so there's no need for any other concurrency protection.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    9 +++++++++
->   1 file changed, 9 insertions(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fba0822..9d9a2f3 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -255,6 +255,7 @@ struct rbd_device {
->
->   	/* sysfs related */
->   	struct device		dev;
-> +	unsigned long		open_count;
->   };
->
->   static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-> @@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
-> fmode_t mode)
->
->   	rbd_get_dev(rbd_dev);
->   	set_device_ro(bdev, rbd_dev->mapping.read_only);
-> +	rbd_dev->open_count++;
->
->   	return 0;
->   }
-> @@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
-> mode)
->   {
->   	struct rbd_device *rbd_dev = disk->private_data;
->
-> +	rbd_assert(rbd_dev->open_count > 0);
-> +	rbd_dev->open_count--;
->   	rbd_put_dev(rbd_dev);
->
->   	return 0;
-> @@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
->   		goto done;
->   	}
->
-> +	if (rbd_dev->open_count) {
-> +		ret = -EBUSY;
-> +		goto done;
-> +	}
-> +
+On 11/15/2012 12:23 PM, S=E9bastien Han wrote:
 
-Is this protected by bd_mutex?
+> First of all, I would like to thank you for this well explained,
+> structured and clear answer. I guess I got better IOPS thanks to the =
+10K disks.
 
->   	rbd_remove_all_snaps(rbd_dev);
->   	rbd_bus_del_dev(rbd_dev);
+10K RPM would bring your per-drive throughput (for 4K random writes)
+up to 142 IOPS and your aggregate cluster throughput up to 1700.
+This would predict a corresponding RADOSbench throughput somewhere
+above 425 (how much better depending on write aggregation and cylinder=20
+affinity).  Your RADOSbench 708 now seems even more reasonable.
+
+> To be really honest I wasn't so concerned about the RADOS benchmarks
+> but more about the RBD fio benchmarks and the amont of IOPS that come=
+s
+> out of it, which I found =E0 bit to low.
+
+Sticking with 4K random writes, it looks to me like you were running
+fio with libaio (which means direct, no buffer cache).  Because it
+is direct, every I/O operation is really happening and the best
+sustained throughput you should expect from this cluster is
+the aggregate raw fio 4K write throughput (1700 IOPS) divided
+by two copies =3D 850 random 4K writes per second.  If I read the
+output correctly you got 763 or about 90% of back-of-envelope.
+
+BUT, there are some footnotes (there always are with performance)
+
+If you had been doing buffered I/O you would have seen a lot more
+(up front) benefit from page caching ... but you wouldn't have been
+measuring real (and hence sustainable) I/O throughput ... which is
+ultimately limited by the heads on those twelve disk drives, where
+all of those writes ultimately wind up.  It is easy to be fast
+if you aren't really doing the writes :-)
+
+I would have expected write aggregation and cylinder affinity to
+have eliminated some seeks and improved rotational latency resulting
+in better than theoretical random write throughput.  Against those
+expectations 763/850 IOPS is not so impressive.  But, it looks to
+me like you were running fio in a 1G file with 100 parallel requests.
+The default RBD stripe width is 4M.  This means that those 100
+parallel requests were being spread across 256 (1G/4M) objects.
+People in the know tell me that writes to a single object are
+serialized, which means that many of those (potentially) parallel
+writes were to the same object, and hence serialized.  This would
+increase the average request time for the colliding operations,
+and reduce the aggregate throughput correspondingly.  Use a
+bigger file (or a narrower stripe) and this will get better.
+
+Thus, getting 763 random 4K write IOPs out of those 12 drives
+still sounds about right to me.
+
+
+> On 15 nov. 2012, at 19:43, Mark Kampe <mark.kampe@inktank.com> wrote:
 >
-
+>> Dear Sebastien,
+>>
+>> Ross Turn forwarded me your e-mail.  You sent a great deal
+>> of information, but it was not immediately obvious to me
+>> what your specific concern was.
+>>
+>> You have 4 servers, 3 OSDs per, 2 copy, and you measured a
+>> radosbench (4K object creation) throughput of 2.9MB/s
+>> (or 708 IOPS).  I infer that you were disappointed by
+>> this number, but it looks right to me.
+>>
+>> Assuming typical 7200 RPM drives, I would guess that each
+>> of them would deliver a sustained direct 4K random write
+>> performance in the general neighborhood of:
+>>     4ms seek (short seeks with write-settle-downs)
+>>     4ms latency (1/2 rotation)
+>>     0ms write (4K/144MB/s ~ 30us)
+>>     -----
+>>     8ms or about 125 IOPS
+>>
+>> Your twelve drives should therefore have a sustainable
+>> aggregate direct 4K random write throughput of 1500 IOPS.
+>>
+>> Each 4K object create involves four writes (two copies,
+>> each getting one data write and one data update).  Thus
+>> I would expect a (crude) 4K create rate of 375 IOPS (1500/4).
+>>
+>> You are getting almost twice the expected raw IOPS ...
+>> and we should expect that a large number of parallel
+>> operations would realize some write/seek aggregation
+>> benefits ... so these numbers look right to me.
+>>
+>> Is this the number you were concerned about, or have I
+>> misunderstood?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
