@@ -1,47 +1,47 @@
-From: Chen Baozi <baozich@gmail.com>
-Subject: Fail to build the latest ceph tree on Fedora 17
-Date: Sat, 17 Nov 2012 19:29:00 +0800
-Message-ID: <20121117112900.GA23992@cbz-workstation>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: libcephfs create file with layout and replication
+Date: Sat, 17 Nov 2012 12:13:56 -0800
+Message-ID: <CAPrxi5-eQ=unNbUMO5b_dJpFERySAuWD9GXratMEo9XGPpkrkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:34110 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750948Ab2KQL3H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 06:29:07 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so2483795pbc.19
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 03:29:07 -0800 (PST)
-Content-Disposition: inline
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:59353 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752125Ab2KQUN5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 15:13:57 -0500
+Received: by mail-vb0-f46.google.com with SMTP id ff1so3960332vbb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 12:13:56 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>
 
-Hi, everyone.
+The Hadoop VFS layer assumes that block size and replication can be
+set on a per-file basis, which is important to users for file
+layout/workload optimizations.
 
-I was tring to build the latest ceph tree on my fedora 17 box.
-However, there is an error message when linking radosgw as following:
+The libcephfs interface doesn't make this entirely easy. Here is one
+approach, but it isn't thread safe as the default values are global
+variables in the client.
 
-  CXXLD  radosgw
-  /usr/bin/ld: radosgw-rgw_resolve.o: undefined reference to symbol
-  '__res_nquery@@GLIBC_2.2.5'
-  /usr/bin/ld: note: '__res_nquery@@GLIBC_2.2.5' is defined in DSO
-  /lib64/libresolv.so.2 so try adding it to the linker command line
-  /lib64/libresolv.so.2: could not read symbols: Invalid operation
-  collect2: error: ld returned 1 exit status
-  make[3]: *** [radosgw] Error 1
-  make[3]: Leaving directory `/home/cbz/src/ceph/src'
-  make[2]: *** [all-recursive] Error 1
-  make[2]: Leaving directory `/home/cbz/src/ceph/src'
-  make[1]: *** [all] Error 2
-  make[1]: Leaving directory `/home/cbz/src/ceph/src'
-  make: *** [all-recursive] Error 1
+  orig_obj_size = ceph_get_default_object_size() //save
+  set_default_object_size(new size)
+  open(path, O_CREAT)
+  set_default_object_size(new size) //reset
 
-I've also tried build the version 0.53 which is checked out from
-fedora's pkg repo. And it can pass the building process without this
-error.
+Something more convenient might be:
 
-Any suggestion?
+  ceph_open_layout(path, flags, mode, layout, replication)
 
-Yours,
+where layout and replication are used with O_CREAT | O_EXCL, or and
+interface for setting these values explicitly on newly created files:
 
-        Chen Baozi
+  ceph_open(path, O_CREAT|O_EXCL)
+  ceph_set_layout(path, layout, replication)
+
+where ceph_set_layout would succeed ostensibly on zero-length files.
+
+Any thoughts on how to handle this?
+
+Thanks,
+Noah
