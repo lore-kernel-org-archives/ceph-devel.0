@@ -1,50 +1,71 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Fail to build the latest ceph tree on Fedora 17
-Date: Sat, 17 Nov 2012 13:20:51 -0800
-Message-ID: <CAC-hyiH31rfvnzNZnWusCTXBGLsA4o2WeCDnAwMv=v8A9ELLfA@mail.gmail.com>
-References: <20121117112900.GA23992@cbz-workstation>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: libcephfs create file with layout and replication
+Date: Sat, 17 Nov 2012 13:35:08 -0800
+Message-ID: <50A8030C.2010003@inktank.com>
+References: <CAPrxi5-eQ=unNbUMO5b_dJpFERySAuWD9GXratMEo9XGPpkrkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:63333 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752186Ab2KQVUw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 16:20:52 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so5210228iea.19
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 13:20:51 -0800 (PST)
-In-Reply-To: <20121117112900.GA23992@cbz-workstation>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:58813 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752097Ab2KQVfP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 16:35:15 -0500
+Received: by mail-da0-f46.google.com with SMTP id p5so183364dak.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 13:35:15 -0800 (PST)
+In-Reply-To: <CAPrxi5-eQ=unNbUMO5b_dJpFERySAuWD9GXratMEo9XGPpkrkA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chen Baozi <baozich@gmail.com>, Gary Lowell <gary.lowell@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On Sat, Nov 17, 2012 at 3:29 AM, Chen Baozi <baozich@gmail.com> wrote:
-> Hi, everyone.
+On 11/17/2012 12:13 PM, Noah Watkins wrote:
+> The Hadoop VFS layer assumes that block size and replication can be
+> set on a per-file basis, which is important to users for file
+> layout/workload optimizations.
 >
-> I was tring to build the latest ceph tree on my fedora 17 box.
-> However, there is an error message when linking radosgw as following:
+> The libcephfs interface doesn't make this entirely easy. Here is one
+> approach, but it isn't thread safe as the default values are global
+> variables in the client.
 >
->   CXXLD  radosgw
->   /usr/bin/ld: radosgw-rgw_resolve.o: undefined reference to symbol
->   '__res_nquery@@GLIBC_2.2.5'
->   /usr/bin/ld: note: '__res_nquery@@GLIBC_2.2.5' is defined in DSO
->   /lib64/libresolv.so.2 so try adding it to the linker command line
->   /lib64/libresolv.so.2: could not read symbols: Invalid operation
->   collect2: error: ld returned 1 exit status
->   make[3]: *** [radosgw] Error 1
->   make[3]: Leaving directory `/home/cbz/src/ceph/src'
->   make[2]: *** [all-recursive] Error 1
->   make[2]: Leaving directory `/home/cbz/src/ceph/src'
->   make[1]: *** [all] Error 2
->   make[1]: Leaving directory `/home/cbz/src/ceph/src'
->   make: *** [all-recursive] Error 1
+>    orig_obj_size = ceph_get_default_object_size() //save
+>    set_default_object_size(new size)
+>    open(path, O_CREAT)
+>    set_default_object_size(new size) //reset
 >
-> I've also tried build the version 0.53 which is checked out from
-> fedora's pkg repo. And it can pass the building process without this
-> error.
+> Something more convenient might be:
 >
-> Any suggestion?
+>    ceph_open_layout(path, flags, mode, layout, replication)
 
-Linking with libresolv failed. Garry, any idea?
+I think this makes the most sense, since changing the layout of a
+file after it's been created can't happen, and this interface
+makes that the most clear. It also avoids maintaining extra state
+in libcephfs between calls.
 
-Yehuda
+Since replication count is a per-pool setting, I think the hadoop
+bindings would have to translate from a vfs request to a pool
+with the requested replication level. So something like this,
+where layout is a struct containing stripe unit, stripe count,
+and object size (the subset of struct ceph_file_layout related to
+objects that's useful currently):
+
+     ceph_open_layout(path, flags, mode, layout, pool_name)
+
+BTW, for anyone interested, there's a nice description of
+the layout parameters here:
+
+http://ceph.com/docs/master/dev/file-striping/
+
+> where layout and replication are used with O_CREAT | O_EXCL, or and
+> interface for setting these values explicitly on newly created files:
+>
+>    ceph_open(path, O_CREAT|O_EXCL)
+>    ceph_set_layout(path, layout, replication)
+>
+> where ceph_set_layout would succeed ostensibly on zero-length files.
+>
+> Any thoughts on how to handle this?
+>
+> Thanks,
+> Noah
+
