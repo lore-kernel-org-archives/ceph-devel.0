@@ -1,94 +1,93 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: osd not in tree
-Date: Sat, 17 Nov 2012 13:10:20 +0800
-Message-ID: <CAJiejCSrWsXcN9aUhVyKUA_ctaXidBaqr1H42uXHjezMmH_Svw@mail.gmail.com>
-References: <CAJiejCR3CocWucemBR1++dAohOASLSidnwCc9G=2cREFuTTXXQ@mail.gmail.com>
- <50A5EE14.6070108@inktank.com> <CAJiejCSiz54N8mzLB1SQyOr9ObsQ4aE4=ZaUahpkd3cOw4X+qA@mail.gmail.com>
- <alpine.DEB.2.00.1211160852400.30220@cobra.newdream.net> <CAJiejCRddL_-u32uBxD8vuNXJxc4=36+aneW_L4wAa0OO6atOQ@mail.gmail.com>
- <alpine.DEB.2.00.1211161558040.26514@cobra.newdream.net> <CAJiejCRFD0+qMwVWXX5rSKAU9-8d6LZf545g9Vi88Vyb=uaRoA@mail.gmail.com>
- <alpine.DEB.2.00.1211161654480.26514@cobra.newdream.net> <CAJiejCTDh9FkKm65sjy6xy6nVr1A6m0wys2_JMkA6GV8p__qig@mail.gmail.com>
- <alpine.DEB.2.00.1211162053570.31628@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: do not allow remove of mounted-on image
+Date: Fri, 16 Nov 2012 23:22:39 -0600
+Message-ID: <50A71F1F.3050708@inktank.com>
+References: <50A65F15.6080807@inktank.com> <50A6BDB7.8080001@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:64255 "EHLO
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:35681 "EHLO
 	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751071Ab2KQFKm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 00:10:42 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so2188372iay.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 21:10:42 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211162053570.31628@cobra.newdream.net>
+	with ESMTP id S1751071Ab2KQFWn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 00:22:43 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so2191554iay.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 21:22:42 -0800 (PST)
+In-Reply-To: <50A6BDB7.8080001@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-2012/11/17 Sage Weil <sage@inktank.com>:
-> On Sat, 17 Nov 2012, Drunkard Zhang wrote:
->> 2012/11/17 Sage Weil <sage@inktank.com>:
->> > Hi,
->> >
->> > Okay, it looks something in the past added the host entry but for some
->> > reason didn't give it a parent.  Did you previously modify the crush map
->> > by hand, or did you only manipulate it via the 'ceph osd crush ...'
->> > commands?
->> >
->> > Unfortuantely the fix is manually edit it.
->> >
->> > ceph osd getcrushmap -o /tmp/foo
->> > crushtool -d /tmp/foo -o /tmp/foo.txt
->> > edit foo.txt.  remove the host bucket (squid87-log13) and all of it's
->> > children.
->> > crushtool -c /tmp/foo.txt -o /tmp/foo.new
->> > cpeh osd setcrushmap -i /tmp/foo.new
->> >
->> > and then you can re-run those 'ceph osd crush set ...' commands and you'll
->> > be back in business.
->> >
->> Great, it works. now I remember I was trying to add host by hand while
->> 'ceph osd crush set ...' failed (maybe command is wrong).
+On 11/16/2012 04:27 PM, Josh Durgin wrote:
+> On 11/16/2012 07:43 AM, Alex Elder wrote:
+>> There is no check in rbd_remove() to see if anybody holds ope the
+>> image being removed.  That's not cool.
 >>
->> Another problem: is there any chance to change 'rack'? Or how to
->> create a new rack? If I have to create a new rack first, I made
->> mistake, or maybe buggy again.
+>> Add a simple open count that goes up and down with opens and closes
+>> (releases) of the device, and don't allow an rbd image to be removed
+>> if the count is non-zero.  Both functions are protected by the
+>> bd_mutex so there's no need for any other concurrency protection.
 >>
->> Before change rack:
->> log3 ~ # ceph osd tree
->> dumped osdmap tree epoch 611
->> # id weight type name up/down reweight
->> -1 45 pool default
->> -3 45 rack rack0205
->> -2 33 host log3
->> 0 3 osd.0 up 3
->> 1 3 osd.1 up 3
->> 2 3 osd.2 up 3
->> 3 3 osd.3 up 3
->> 4 3 osd.4 up 3
->> 5 3 osd.5 up 3
->> 6 3 osd.6 up 3
->> 7 3 osd.7 up 3
->> 8 3 osd.8 up 3
->> 9 3 osd.9 up 3
->> 10 3 osd.10 up 3
->> -4 12 host squid87-log13
->> 11 3 osd.11 up 3
->> 12 3 osd.12 up 3
->> 13 3 osd.13 up 3
->> 14 3 osd.14 up 3
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c |    9 +++++++++
+>>   1 file changed, 9 insertions(+)
 >>
->> Looks reasonable, but log3 miss set rack, I wanna change rack=rack0205
->> to rack=rack0206),  reset use this command, but not works:
->> for i in {0..10}; do ceph osd crush set $i osd.$i 3 pool=data
->> datacenter=dh-1L room=room1 row=02 rack=rack0206 host=log3; done
->
-> 'ceph osd crush set ...' will only move the device itself; it won't move
-> any of its parents.  If you want to move a non-leaf item in the tree, use
-> 'ceph osd crush move <name> <location ...>'.  Something like
->
->  ceph osd crush move squid87-log13 rack=0206 pool=default
->  ceph osd crush move log3 rack=0206 pool=default
->
-> sage
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index fba0822..9d9a2f3 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -255,6 +255,7 @@ struct rbd_device {
+>>
+>>       /* sysfs related */
+>>       struct device        dev;
+>> +    unsigned long        open_count;
+>>   };
+>>
+>>   static DEFINE_MUTEX(ctl_mutex);      /* Serialize
+>> open/close/setup/teardown */
+>> @@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
+>> fmode_t mode)
+>>
+>>       rbd_get_dev(rbd_dev);
+>>       set_device_ro(bdev, rbd_dev->mapping.read_only);
+>> +    rbd_dev->open_count++;
+>>
+>>       return 0;
+>>   }
+>> @@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
+>> mode)
+>>   {
+>>       struct rbd_device *rbd_dev = disk->private_data;
+>>
+>> +    rbd_assert(rbd_dev->open_count > 0);
+>> +    rbd_dev->open_count--;
+>>       rbd_put_dev(rbd_dev);
+>>
+>>       return 0;
+>> @@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
+>>           goto done;
+>>       }
+>>
+>> +    if (rbd_dev->open_count) {
+>> +        ret = -EBUSY;
+>> +        goto done;
+>> +    }
+>> +
+> 
+> Is this protected by bd_mutex?
+
+No it's not, and that's a very good point.
+
+I'll have to look at that over the weekend.
+Thanks.
+
+					-Alex
 
 
-Thank you a lot. I'll keep digging :-)
+>>       rbd_remove_all_snaps(rbd_dev);
+>>       rbd_bus_del_dev(rbd_dev);
+>>
+> 
+
