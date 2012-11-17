@@ -1,93 +1,47 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] rbd: do not allow remove of mounted-on image
-Date: Fri, 16 Nov 2012 23:22:39 -0600
-Message-ID: <50A71F1F.3050708@inktank.com>
-References: <50A65F15.6080807@inktank.com> <50A6BDB7.8080001@inktank.com>
+From: Chen Baozi <baozich@gmail.com>
+Subject: Fail to build the latest ceph tree on Fedora 17
+Date: Sat, 17 Nov 2012 19:29:00 +0800
+Message-ID: <20121117112900.GA23992@cbz-workstation>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:35681 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751071Ab2KQFWn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 00:22:43 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so2191554iay.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Nov 2012 21:22:42 -0800 (PST)
-In-Reply-To: <50A6BDB7.8080001@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:34110 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750948Ab2KQL3H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 06:29:07 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so2483795pbc.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 03:29:07 -0800 (PST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/16/2012 04:27 PM, Josh Durgin wrote:
-> On 11/16/2012 07:43 AM, Alex Elder wrote:
->> There is no check in rbd_remove() to see if anybody holds ope the
->> image being removed.  That's not cool.
->>
->> Add a simple open count that goes up and down with opens and closes
->> (releases) of the device, and don't allow an rbd image to be removed
->> if the count is non-zero.  Both functions are protected by the
->> bd_mutex so there's no need for any other concurrency protection.
->>
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>   drivers/block/rbd.c |    9 +++++++++
->>   1 file changed, 9 insertions(+)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index fba0822..9d9a2f3 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -255,6 +255,7 @@ struct rbd_device {
->>
->>       /* sysfs related */
->>       struct device        dev;
->> +    unsigned long        open_count;
->>   };
->>
->>   static DEFINE_MUTEX(ctl_mutex);      /* Serialize
->> open/close/setup/teardown */
->> @@ -358,6 +359,7 @@ static int rbd_open(struct block_device *bdev,
->> fmode_t mode)
->>
->>       rbd_get_dev(rbd_dev);
->>       set_device_ro(bdev, rbd_dev->mapping.read_only);
->> +    rbd_dev->open_count++;
->>
->>       return 0;
->>   }
->> @@ -366,6 +368,8 @@ static int rbd_release(struct gendisk *disk, fmode_t
->> mode)
->>   {
->>       struct rbd_device *rbd_dev = disk->private_data;
->>
->> +    rbd_assert(rbd_dev->open_count > 0);
->> +    rbd_dev->open_count--;
->>       rbd_put_dev(rbd_dev);
->>
->>       return 0;
->> @@ -3764,6 +3768,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
->>           goto done;
->>       }
->>
->> +    if (rbd_dev->open_count) {
->> +        ret = -EBUSY;
->> +        goto done;
->> +    }
->> +
-> 
-> Is this protected by bd_mutex?
+Hi, everyone.
 
-No it's not, and that's a very good point.
+I was tring to build the latest ceph tree on my fedora 17 box.
+However, there is an error message when linking radosgw as following:
 
-I'll have to look at that over the weekend.
-Thanks.
+  CXXLD  radosgw
+  /usr/bin/ld: radosgw-rgw_resolve.o: undefined reference to symbol
+  '__res_nquery@@GLIBC_2.2.5'
+  /usr/bin/ld: note: '__res_nquery@@GLIBC_2.2.5' is defined in DSO
+  /lib64/libresolv.so.2 so try adding it to the linker command line
+  /lib64/libresolv.so.2: could not read symbols: Invalid operation
+  collect2: error: ld returned 1 exit status
+  make[3]: *** [radosgw] Error 1
+  make[3]: Leaving directory `/home/cbz/src/ceph/src'
+  make[2]: *** [all-recursive] Error 1
+  make[2]: Leaving directory `/home/cbz/src/ceph/src'
+  make[1]: *** [all] Error 2
+  make[1]: Leaving directory `/home/cbz/src/ceph/src'
+  make: *** [all-recursive] Error 1
 
-					-Alex
+I've also tried build the version 0.53 which is checked out from
+fedora's pkg repo. And it can pass the building process without this
+error.
 
+Any suggestion?
 
->>       rbd_remove_all_snaps(rbd_dev);
->>       rbd_bus_del_dev(rbd_dev);
->>
-> 
+Yours,
 
+        Chen Baozi
