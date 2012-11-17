@@ -1,46 +1,70 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: [BUG] rbd discard should return OK even if rbd file does not exist
-Date: Sat, 17 Nov 2012 23:19:17 +0100
-Message-ID: <50A80D65.7070901@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: libcephfs create file with layout and replication
+Date: Sat, 17 Nov 2012 15:23:32 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211171520280.31628@cobra.newdream.net>
+References: <CAPrxi5-eQ=unNbUMO5b_dJpFERySAuWD9GXratMEo9XGPpkrkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:54726 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752234Ab2KQWTM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 17:19:12 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:45502 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752255Ab2KQXXc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 18:23:32 -0500
+In-Reply-To: <CAPrxi5-eQ=unNbUMO5b_dJpFERySAuWD9GXratMEo9XGPpkrkA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello list,
+On Sat, 17 Nov 2012, Noah Watkins wrote:
+> The Hadoop VFS layer assumes that block size and replication can be
+> set on a per-file basis, which is important to users for file
+> layout/workload optimizations.
+> 
+> The libcephfs interface doesn't make this entirely easy. Here is one
+> approach, but it isn't thread safe as the default values are global
+> variables in the client.
+> 
+>   orig_obj_size = ceph_get_default_object_size() //save
+>   set_default_object_size(new size)
+>   open(path, O_CREAT)
+>   set_default_object_size(new size) //reset
+> 
+> Something more convenient might be:
+> 
+>   ceph_open_layout(path, flags, mode, layout, replication)
+> 
+> where layout and replication are used with O_CREAT | O_EXCL, or and
+> interface for setting these values explicitly on newly created files:
+> 
+>   ceph_open(path, O_CREAT|O_EXCL)
+>   ceph_set_layout(path, layout, replication)
 
-right now librbd returns an error if i issue a discard for a sector / 
-byterange where ceph does not have any file as i had never written to 
-this section.
+This is basically what we have now... at least that's how things work for 
+the kernel client.  We should make sure there is a clean way via libcephfs 
+to do that.
 
-This is not correct. It should return 0 / OK in this case.
+The client/mds protocol also allows you to specify the layout on file 
+creation.  This is better since it has one less round trip to the MDS.  
+Let's just create a new open call with those additional arguments.
 
-Stefan
+FWIW, the striping parameters are object size, stripe unit, stripe count, 
+and data pool.
 
-Examplelog:
-2012-11-02 21:06:17.649922 7f745f7fe700 20 librbd::AioRequest: WRITE_FLAT
-2012-11-02 21:06:17.649924 7f745f7fe700 20 librbd::AioCompletion: 
-AioCompletion::complete_request() this=0x7f72cc05bd20 
-complete_cb=0x7f747021d4b0
-2012-11-02 21:06:17.649924 7f747015c780  1 -- 10.10.0.2:0/2028325 --> 
-10.10.0.18:6803/9687 -- osd_op(client.26862.0:3073 
-rb.0.1044.359ed6c7.000000000bde [delete] 3.bd84636 snapc 2=[]) v4 -- ?+0 
-0x7f72d81c69b0 con 0x7f74600dbf50
-2012-11-02 21:06:17.649934 7f747015c780 20 librbd:  oid 
-rb.0.1044.359ed6c7.000000000bdf 0~4194304 from [4156556288,4194304]
-2012-11-02 21:06:17.649972 7f7465a6e700  1 -- 10.10.0.2:0/2028325 <== 
-osd.1202 10.10.0.18:6806/9821 143 ==== osd_op_reply(1652 
-rb.0.1044.359ed6c7.000000000652 [delete] ondisk = -2 (No such file or 
-directory)) v4 ==== 130+0+0 (2964367729 0 0) 0x7f72dc0f0090 con 
-0x7f74600e4350
-2012-11-02 21:06:17.649994 7f745f7fe700 20 librbd::AioRequest: write 
-0x7f74600feab0 should_complete: r = -2
+sage
 
 
+
+> 
+> where ceph_set_layout would succeed ostensibly on zero-length files.
+> 
+> Any thoughts on how to handle this?
+> 
+> Thanks,
+> Noah
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
