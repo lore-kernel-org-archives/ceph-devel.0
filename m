@@ -1,74 +1,53 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: [BUG] rbd discard should return OK even if rbd file does not exist
-Date: Sun, 18 Nov 2012 07:33:45 +0100
-Message-ID: <33537FCC-3FF3-46EF-A75D-3C158D6EB079@profihost.ag>
-References: <50A80D65.7070901@profihost.ag> <50A84A26.20902@inktank.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Chen Baozi <baozich@gmail.com>
+Subject: [PATCH] rgw: add -lresolv flags to Makefile.am
+Date: Sun, 18 Nov 2012 14:34:21 +0800
+Message-ID: <1353220461-6436-1-git-send-email-baozich@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:33680 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750979Ab2KRGdt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Nov 2012 01:33:49 -0500
-In-Reply-To: <50A84A26.20902@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42806 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751419Ab2KRGgC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Nov 2012 01:36:02 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so2788078pbc.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 22:36:02 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Chen Baozi <baozich@gmail.com>
 
-Hi Josh,
+radosgw depends on libresolv since since the commit 951c6be. So we need to
+add -lresolve flags, or it cannot link right library.
 
-Am 18.11.2012 um 03:38 schrieb Josh Durgin <josh.durgin@inktank.com>:
+Signed-off-by: Chen Baozi <baozich@gmail.com>
+---
+ configure.ac    | 1 +
+ src/Makefile.am | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
-> On 11/17/2012 02:19 PM, Stefan Priebe wrote:
->> Hello list,
->> 
->> right now librbd returns an error if i issue a discard for a sector /
->> byterange where ceph does not have any file as i had never written to
->> this section.
-> 
-> Thanks for bringing this up again. I haven't had time to dig deeper
-> into it yet, but I definitely want to fix this for bobtail.
-> 
->> This is not correct. It should return 0 / OK in this case.
->> 
->> Stefan
->> 
->> Examplelog:
->> 2012-11-02 21:06:17.649922 7f745f7fe700 20 librbd::AioRequest: WRITE_FLAT
->> 2012-11-02 21:06:17.649924 7f745f7fe700 20 librbd::AioCompletion:
->> AioCompletion::complete_request() this=0x7f72cc05bd20
->> complete_cb=0x7f747021d4b0
->> 2012-11-02 21:06:17.649924 7f747015c780  1 -- 10.10.0.2:0/2028325 -->
->> 10.10.0.18:6803/9687 -- osd_op(client.26862.0:3073
->> rb.0.1044.359ed6c7.000000000bde [delete] 3.bd84636 snapc 2=[]) v4 -- ?+0
->> 0x7f72d81c69b0 con 0x7f74600dbf50
->> 2012-11-02 21:06:17.649934 7f747015c780 20 librbd:  oid
->> rb.0.1044.359ed6c7.000000000bdf 0~4194304 from [4156556288,4194304]
->> 2012-11-02 21:06:17.649972 7f7465a6e700  1 -- 10.10.0.2:0/2028325 <==
->> osd.1202 10.10.0.18:6806/9821 143 ==== osd_op_reply(1652
->> rb.0.1044.359ed6c7.000000000652 [delete] ondisk = -2 (No such file or
->> directory)) v4 ==== 130+0+0 (2964367729 0 0) 0x7f72dc0f0090 con
->> 0x7f74600e4350
->> 2012-11-02 21:06:17.649994 7f745f7fe700 20 librbd::AioRequest: write
->> 0x7f74600feab0 should_complete: r = -2
-> 
-> This last line isn't printing what's actually being returned to the
-> application. It's still in librbd's internal processing, and will be
-> converted to 0 for the application.
-> 
-> Could you try with the master or next branches? After the
-> 'should_complete' line, there should be a line like:
-> 
-> <date> <time> <thread_id> 20 librbd::AioCompletion: AioCompletion::finalize() rval 0 ...
+diff --git a/configure.ac b/configure.ac
+index aa10143..d978565 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -80,6 +80,7 @@ AC_CHECK_CC_FLAG([-Wignored-qualifiers], [WARN_IGNORED_QUALIFIERS])
+ ACX_PTHREAD
+ AC_CHECK_LIB([uuid], [uuid_parse], [true], AC_MSG_FAILURE([libuuid not found]))
+ AC_CHECK_LIB([m], [pow], [true], AC_MSG_FAILURE([libm not found]))
++AC_CHECK_LIB([resolv], [__res_nquery], [true], AC_MSG_FAILURE([libresolv not found]))
+ if test x"$linux" = x"yes"; then
+ 	AC_CHECK_LIB([keyutils], [add_key], [true], AC_MSG_FAILURE([libkeyutils not found]))
+ fi
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 8b5e63d..16a7ed3 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -366,7 +366,7 @@ radosgw_SOURCES = \
+         rgw/rgw_swift.cc \
+ 	rgw/rgw_swift_auth.cc \
+ 	rgw/rgw_main.cc
+-radosgw_LDADD = $(my_radosgw_ldadd) -lfcgi
++radosgw_LDADD = $(my_radosgw_ldadd) -lfcgi -lresolv
+ radosgw_CXXFLAGS = ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS}
+ bin_PROGRAMS += radosgw
+ 
+-- 
+1.7.11.7
 
-No there's no such line. Maybe that's the problem and -2 is returned and not converted.
-
-Stefan
-
-> That 'rval 0' shows the actual return value the application (qemu in
-> this case) will see.
-> 
-> Josh
