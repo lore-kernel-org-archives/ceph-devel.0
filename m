@@ -1,69 +1,55 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [BUG] rbd discard should return OK even if rbd file does not
- exist
-Date: Sat, 17 Nov 2012 18:38:30 -0800
-Message-ID: <50A84A26.20902@inktank.com>
-References: <50A80D65.7070901@profihost.ag>
+From: Chen Baozi <baozich@gmail.com>
+Subject: Re: Fail to build the latest ceph tree on Fedora 17
+Date: Sun, 18 Nov 2012 11:55:49 +0800
+Message-ID: <20121118035549.GA22651@cbz-workstation>
+References: <20121117112900.GA23992@cbz-workstation>
+ <CAC-hyiH31rfvnzNZnWusCTXBGLsA4o2WeCDnAwMv=v8A9ELLfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:65236 "EHLO
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:37566 "EHLO
 	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752351Ab2KRCic (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 21:38:32 -0500
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2655379pad.19
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 18:38:32 -0800 (PST)
-In-Reply-To: <50A80D65.7070901@profihost.ag>
+	with ESMTP id S1752562Ab2KRDz6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Nov 2012 22:55:58 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2673757pad.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Nov 2012 19:55:57 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CAC-hyiH31rfvnzNZnWusCTXBGLsA4o2WeCDnAwMv=v8A9ELLfA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Gary Lowell <gary.lowell@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/17/2012 02:19 PM, Stefan Priebe wrote:
-> Hello list,
->
-> right now librbd returns an error if i issue a discard for a sector /
-> byterange where ceph does not have any file as i had never written to
-> this section.
-
-Thanks for bringing this up again. I haven't had time to dig deeper
-into it yet, but I definitely want to fix this for bobtail.
-
-> This is not correct. It should return 0 / OK in this case.
->
-> Stefan
->
-> Examplelog:
-> 2012-11-02 21:06:17.649922 7f745f7fe700 20 librbd::AioRequest: WRITE_FLAT
-> 2012-11-02 21:06:17.649924 7f745f7fe700 20 librbd::AioCompletion:
-> AioCompletion::complete_request() this=0x7f72cc05bd20
-> complete_cb=0x7f747021d4b0
-> 2012-11-02 21:06:17.649924 7f747015c780  1 -- 10.10.0.2:0/2028325 -->
-> 10.10.0.18:6803/9687 -- osd_op(client.26862.0:3073
-> rb.0.1044.359ed6c7.000000000bde [delete] 3.bd84636 snapc 2=[]) v4 -- ?+0
-> 0x7f72d81c69b0 con 0x7f74600dbf50
-> 2012-11-02 21:06:17.649934 7f747015c780 20 librbd:  oid
-> rb.0.1044.359ed6c7.000000000bdf 0~4194304 from [4156556288,4194304]
-> 2012-11-02 21:06:17.649972 7f7465a6e700  1 -- 10.10.0.2:0/2028325 <==
-> osd.1202 10.10.0.18:6806/9821 143 ==== osd_op_reply(1652
-> rb.0.1044.359ed6c7.000000000652 [delete] ondisk = -2 (No such file or
-> directory)) v4 ==== 130+0+0 (2964367729 0 0) 0x7f72dc0f0090 con
-> 0x7f74600e4350
-> 2012-11-02 21:06:17.649994 7f745f7fe700 20 librbd::AioRequest: write
-> 0x7f74600feab0 should_complete: r = -2
-
-This last line isn't printing what's actually being returned to the
-application. It's still in librbd's internal processing, and will be
-converted to 0 for the application.
-
-Could you try with the master or next branches? After the
-'should_complete' line, there should be a line like:
-
-<date> <time> <thread_id> 20 librbd::AioCompletion: 
-AioCompletion::finalize() rval 0 ...
-
-That 'rval 0' shows the actual return value the application (qemu in
-this case) will see.
-
-Josh
+On Sat, Nov 17, 2012 at 01:20:51PM -0800, Yehuda Sadeh wrote:
+> On Sat, Nov 17, 2012 at 3:29 AM, Chen Baozi <baozich@gmail.com> wrote:
+> > Hi, everyone.
+> >
+> > I was tring to build the latest ceph tree on my fedora 17 box.
+> > However, there is an error message when linking radosgw as following:
+> >
+> >   CXXLD  radosgw
+> >   /usr/bin/ld: radosgw-rgw_resolve.o: undefined reference to symbol
+> >   '__res_nquery@@GLIBC_2.2.5'
+> >   /usr/bin/ld: note: '__res_nquery@@GLIBC_2.2.5' is defined in DSO
+> >   /lib64/libresolv.so.2 so try adding it to the linker command line
+> >   /lib64/libresolv.so.2: could not read symbols: Invalid operation
+> >   collect2: error: ld returned 1 exit status
+> >   make[3]: *** [radosgw] Error 1
+> >   make[3]: Leaving directory `/home/cbz/src/ceph/src'
+> >   make[2]: *** [all-recursive] Error 1
+> >   make[2]: Leaving directory `/home/cbz/src/ceph/src'
+> >   make[1]: *** [all] Error 2
+> >   make[1]: Leaving directory `/home/cbz/src/ceph/src'
+> >   make: *** [all-recursive] Error 1
+> >
+> > I've also tried build the version 0.53 which is checked out from
+> > fedora's pkg repo. And it can pass the building process without this
+> > error.
+> >
+> > Any suggestion?
+> 
+> Linking with libresolv failed. Garry, any idea?
+I've tried to add "LIBS=-lresolv" when doing "./configure". And it works.
+I'm trying to fix it from the configure.ac now. 
+> 
+> Yehuda
