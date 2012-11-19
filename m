@@ -1,37 +1,42 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: librbd discard bug problems -> i got it
-Date: Tue, 20 Nov 2012 00:16:33 +0100
-Message-ID: <50AABDD1.5050802@profihost.ag>
-References: <50AAA25F.9040908@profihost.ag> <50AAB4D6.3030304@inktank.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: OSD and MON memory usage
+Date: Mon, 19 Nov 2012 23:20:15 +0000
+Message-ID: <50AABEAF.5020703@inktank.com>
+References: <20121116172401.ef3e5e52.ctpm@ist.utl.pt> <CAPYLRzj95YK92KUwMnZF5W7oRJOx4kaaSL0siZ27Vt_x7d-Tzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:58905 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753264Ab2KSXQf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 18:16:35 -0500
-In-Reply-To: <50AAB4D6.3030304@inktank.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:53564 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752886Ab2KSXUd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 18:20:33 -0500
+Received: by mail-wg0-f44.google.com with SMTP id dr13so3161051wgb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 15:20:32 -0800 (PST)
+In-Reply-To: <CAPYLRzj95YK92KUwMnZF5W7oRJOx4kaaSL0siZ27Vt_x7d-Tzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: =?ISO-8859-1?Q?Cl=E1udio_Martins?= <ctpm@ist.utl.pt>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-mhm qemu rbd block driver. Get's always these errors back. As 
-rbd_aio_bh_cb is directly called from librbd the problem must be there. 
-Strangely i can't find where rbd_aio_bh_cb get's called with -512.
+On 11/19/2012 11:15 PM, Gregory Farnum wrote:
+> Can you restart your monitor, then run "ceph heap start_profiler", and
+> then once the memory has gone way up run "ceph heap dump"? You should
+> find some files in the same directory as your monitor log files that
+> you can analyze using tcmalloc's tools (see
+> http://ceph.com/wiki/Memory_Profiling for some info), or send them our
+> way for analysis.
+> This will go easier if you also have Ceph's debug symbol packages installed. :)
 
-ANy further ideas?
+The wiki has been somewhat officially deprecated and is now redirecting
+to the docs. That page can still be accessed through
 
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -512 Error: 0
-rbd_aio_bh_cb got error back. Code: -1006628352 Error: 0
+http://ceph.com/deprecated/Memory_Profiling
 
-Stefan
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
