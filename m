@@ -1,53 +1,50 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Removed directory is back in the Ceph FS
-Date: Mon, 19 Nov 2012 15:25:41 -0800
-Message-ID: <CAPYLRzgi4uQHYX9W4o+_EQvrw4KyU57Siq2XtU+GgNRAFLgPRw@mail.gmail.com>
-References: <CAOGW2pyKcL=vs7p2i3yDNCC1Vxoh6cx053vECVCm=Twt7H4M5A@mail.gmail.com>
-	<CAOGW2pzG466Q3p-EXwx6_jxOjazPa3yxO8H6UtDDaLxVgu7rbg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: librbd discard bug problems -> i got it
+Date: Mon, 19 Nov 2012 15:33:05 -0800
+Message-ID: <50AAC1B1.9070701@inktank.com>
+References: <50AAA25F.9040908@profihost.ag> <50AAB4D6.3030304@inktank.com> <50AABDD1.5050802@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:60201 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753158Ab2KSXZl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 18:25:41 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so7709673iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 15:25:41 -0800 (PST)
-In-Reply-To: <CAOGW2pzG466Q3p-EXwx6_jxOjazPa3yxO8H6UtDDaLxVgu7rbg@mail.gmail.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:40305 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752137Ab2KSXdn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 18:33:43 -0500
+Received: by mail-da0-f46.google.com with SMTP id p5so959160dak.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 15:33:43 -0800 (PST)
+In-Reply-To: <50AABDD1.5050802@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Franck Marchand <fmarchand@agaetis.fr>
+To: Stefan Priebe <s.priebe@profihost.ag>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 13, 2012 at 3:23 AM, Franck Marchand <fmarchand@agaetis.fr> wrote:
-> Hi,
+On 11/19/2012 03:16 PM, Stefan Priebe wrote:
+> mhm qemu rbd block driver. Get's always these errors back. As
+> rbd_aio_bh_cb is directly called from librbd the problem must be there.
+> Strangely i can't find where rbd_aio_bh_cb get's called with -512.
 >
-> I have a weird pb. I remove a folder using a mounted fs partition. I
-> did it and it worked well.
+> ANy further ideas?
 
-What client are you using? How did you delete it? (rm -rf, etc?) Are
-you using multiple clients or one, and did you check it on a different
-client?
+Two ideas:
 
-> I checked later to see if I had all my folders in ceph fs ... : the
-> folder I removed was back and I can't remove it ! Here is the error
-> message I got :
+1) Is rbd_finish_aiocb getting this same return value?
+
+2) Perhaps it's an issue with the return value wrapping around with
+very large discards. Adding some logging of the return values of each
+rados operation in AioCompletion::complete_request() might give us a
+clue. These large negative return values are suspicious.
+
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -512 Error: 0
+> rbd_aio_bh_cb got error back. Code: -1006628352 Error: 0
 >
-> rm -rf 2012-11-10/
-> rm cannot remove `2012-11-10': Directory not empty
->
-> This folder is empty ...
-> So anybody had the same pb ? Am I doing something wrong ?
+> Stefan
 
-This sounds like a known but undiagnosed problem with the MDS
-"rstats". The part where your client reported success is a new
-wrinkle, though.
--Greg
-
-
->
-> Thx
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
