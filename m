@@ -1,40 +1,37 @@
 From: "Dave Humphreys (Datatone)" <dave@datatone.co.uk>
-Subject: Can't start ceph mon
-Date: Mon, 19 Nov 2012 16:08:56 -0500
-Message-ID: <3649717.axTEZpMgMX@vault01>
+Subject: Cannot Start Ceph Mon
+Date: Mon, 19 Nov 2012 16:13:22 -0500
+Message-ID: <451141276.iIKpGsKZdm@vault01>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from i01.ip.uk.com ([86.54.60.3]:58123 "EHLO i01.ip.uk.com"
+Received: from i01.ip.uk.com ([86.54.60.3]:58126 "EHLO i01.ip.uk.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750821Ab2KSVI4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 19 Nov 2012 16:08:56 -0500
+	id S1750821Ab2KSVNW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 Nov 2012 16:13:22 -0500
 Received: from [194.164.232.154] (helo=vault01.localnet)
 	by i01.ip.uk.com with esmtp (Exim 4.63)
 	(envelope-from <dave@datatone.co.uk>)
-	id 1TaYMD-0000BZ-Fd
-	for ceph-devel@vger.kernel.org; Mon, 19 Nov 2012 20:54:28 +0000
+	id 1TaYeb-0000CL-8j
+	for ceph-devel@vger.kernel.org; Mon, 19 Nov 2012 21:13:19 +0000
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+(Apologies if this is seen to be a repeat posting: I think that the last attempt fell into the void).
 
-I have a problem in which I can't start my ceph monitor. The log is shown below.
+I can't start my ceph monitor. The log is below.
 
-The log shows version 0.54. I was running 0.52 when the problem arose, and I moved to the latest in case the newer version fixed the problem.
+Though this shows version 0.54, the problem arose whilst using 0.52. Something may have become corrupted when the disk space ran out due to an immense ceph mon log.
 
-The original failure happened a week or so ago, and could have been as a result of running out of disk space when the ceph monitor log became huge.
+Is there anything I can do to recover the situation?
 
-What should I do to recover the situation?
-
-
+Regards,
 David
 
 
-
-
-
+bash-4.1# cat /var/log/ceph/mon.vault01.log 
 2012-11-19 20:38:51.598468 7fc13fdc6780  0 ceph version 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150), process ceph-mon, pid 21012
 2012-11-19 20:38:51.598482 7fc13fdc6780  1 store(/ceph/mon.vault01) mount
 2012-11-19 20:38:51.598527 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 21
