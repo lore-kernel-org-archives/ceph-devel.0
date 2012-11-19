@@ -1,175 +1,241 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: RBD fio Performance concerns
-Date: Mon, 19 Nov 2012 19:03:40 +0100
-Message-ID: <CAOLwVUmJGZNaZsySsw8eQmLy1ZCha+AAGCp-5i42=mr0aKHMyA@mail.gmail.com>
-References: <CAOLwVUknn4hH20P+iRbrqeNTQbFxcVFqWo=ZUM5-RQTNgqyWSQ@mail.gmail.com>
- <d4bdfae3-9a87-4815-994f-cfc20be355a7@mailpro> <CAOLwVU=ed5fdg96Nk7gvvJqdK5vpnweZ7zJTGYVWcYikqY_j1Q@mail.gmail.com>
- <50AA6457.1060809@inktank.com>
+Date: Mon, 19 Nov 2012 20:11:40 +0100 (CET)
+Message-ID: <3210b770-431e-44ed-8d86-4610de89dd92@mailpro>
+References: <CAOLwVUmJGZNaZsySsw8eQmLy1ZCha+AAGCp-5i42=mr0aKHMyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:62843 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752909Ab2KSSED (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 13:04:03 -0500
-Received: by mail-la0-f46.google.com with SMTP id p5so1310249lag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 10:04:01 -0800 (PST)
-In-Reply-To: <50AA6457.1060809@inktank.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:51158 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754247Ab2KSTMM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 14:12:12 -0500
+In-Reply-To: <CAOLwVUmJGZNaZsySsw8eQmLy1ZCha+AAGCp-5i42=mr0aKHMyA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kampe <mark.kampe@inktank.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?utf-8?Q?S=C3=A9bastien?= Han <han.sebastien@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>
 
-@Sage, thanks for the info :)
-@Mark:
+>>@Alexandre: is it the same for you? or do you always get more IOPS wi=
+th seq?
 
-> If you want to do sequential I/O, you should do it buffered
-> (so that the writes can be aggregated) or with a 4M block size
-> (very efficient and avoiding object serialization).
+rand read 4K : 6000 iops
+seq read 4K : 3500 iops
+seq read 4M : 31iops (1gigabit client bandwith limit)
 
-The original benchmark has been performed with 4M block size. And as
-you can see I still get more IOPS with rand than seq... I just tried
-with 4M without direct I/O, still the same. I can print fio results if
-it's needed.
-
-> We do direct writes for benchmarking, not because it is a reasonable
-> way to do I/O, but because it bypasses the buffer cache and enables
-> us to directly measure cluster I/O throughput (which is what we are
-> trying to optimize).  Applications should usually do buffered I/O,
-> to get the (very significant) benefits of caching and write aggregation.
-
-I know why I use direct I/O. It's synthetic benchmarks, it's far away
-from a real life scenario and how common applications works. I just
-try to see the maximum I/O throughput that I can get from my RBD. All
-my applications use buffered I/O.
-
-@Alexandre: is it the same for you? or do you always get more IOPS with seq?
-
-Thanks to all of you..
+rand write 4k: 6000iops  (tmpfs journal)
+seq write 4k: 1600iops
+seq write 4M : 31iops (1gigabit client bandwith limit)
 
 
-On Mon, Nov 19, 2012 at 5:54 PM, Mark Kampe <mark.kampe@inktank.com> wrote:
-> Recall:
->    1. RBD volumes are striped (4M wide) across RADOS objects
->    2. distinct writes to a single RADOS object are serialized
->
-> Your sequential 4K writes are direct, depth=256, so there are
-> (at all times) 256 writes queued to the same object.  All of
-> your writes are waiting through a very long line, which is adding
-> horrendous latency.
->
-> If you want to do sequential I/O, you should do it buffered
-> (so that the writes can be aggregated) or with a 4M block size
-> (very efficient and avoiding object serialization).
->
-> We do direct writes for benchmarking, not because it is a reasonable
-> way to do I/O, but because it bypasses the buffer cache and enables
-> us to directly measure cluster I/O throughput (which is what we are
-> trying to optimize).  Applications should usually do buffered I/O,
-> to get the (very significant) benefits of caching and write aggregation.
->
->
->> That's correct for some of the benchmarks. However even with 4K for
->> seq, I still get less IOPS. See below my last fio:
->>
->> # fio rbd-bench.fio
->> seq-read: (g=0): rw=read, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=256
->> rand-read: (g=1): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio,
->> iodepth=256
->> seq-write: (g=2): rw=write, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=256
->> rand-write: (g=3): rw=randwrite, bs=4K-4K/4K-4K, ioengine=libaio,
->> iodepth=256
->> fio 1.59
->> Starting 4 processes
->> Jobs: 1 (f=1): [___w] [57.6% done] [0K/405K /s] [0 /99  iops] [eta
->> 02m:59s]
->> seq-read: (groupid=0, jobs=1): err= 0: pid=15096
->>    read : io=801892KB, bw=13353KB/s, iops=3338 , runt= 60053msec
->>      slat (usec): min=8 , max=45921 , avg=296.69, stdev=1584.90
->>      clat (msec): min=18 , max=133 , avg=76.37, stdev=16.63
->>       lat (msec): min=18 , max=133 , avg=76.67, stdev=16.62
->>      bw (KB/s) : min=    0, max=14406, per=31.89%, avg=4258.24,
->> stdev=6239.06
->>    cpu          : usr=0.87%, sys=5.57%, ctx=165281, majf=0, minf=279
->>    IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%,
->> >=64=100.0%
->>       submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.0%
->>       complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.1%
->>       issued r/w/d: total=200473/0/0, short=0/0/0
->>
->>       lat (msec): 20=0.01%, 50=9.46%, 100=90.45%, 250=0.10%
->> rand-read: (groupid=1, jobs=1): err= 0: pid=16846
->>    read : io=6376.4MB, bw=108814KB/s, iops=27203 , runt= 60005msec
->>      slat (usec): min=8 , max=12723 , avg=33.54, stdev=59.87
->>      clat (usec): min=4642 , max=55760 , avg=9374.10, stdev=970.40
->>       lat (usec): min=4671 , max=55788 , avg=9408.00, stdev=971.21
->>      bw (KB/s) : min=105496, max=109136, per=100.00%, avg=108815.48,
->> stdev=648.62
->>    cpu          : usr=8.26%, sys=49.11%, ctx=1486259, majf=0, minf=278
->>    IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%,
->> >=64=100.0%
->>       submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.0%
->>       complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.1%
->>       issued r/w/d: total=1632349/0/0, short=0/0/0
->>
->>       lat (msec): 10=83.39%, 20=16.56%, 50=0.04%, 100=0.01%
->> seq-write: (groupid=2, jobs=1): err= 0: pid=18653
->>    write: io=44684KB, bw=753502 B/s, iops=183 , runt= 60725msec
->>      slat (usec): min=8 , max=1246.8K, avg=5402.76, stdev=40024.97
->>      clat (msec): min=25 , max=4868 , avg=1384.22, stdev=470.19
->>       lat (msec): min=25 , max=4868 , avg=1389.62, stdev=470.17
->>      bw (KB/s) : min=    7, max= 2165, per=104.03%, avg=764.65,
->> stdev=353.97
->>    cpu          : usr=0.05%, sys=0.35%, ctx=5478, majf=0, minf=21
->>    IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.3%,
->> >=64=99.4%
->>       submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.0%
->>       complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.1%
->>       issued r/w/d: total=0/11171/0, short=0/0/0
->>
->>       lat (msec): 50=0.21%, 100=0.44%, 250=0.97%, 500=1.49%, 750=4.60%
->>       lat (msec): 1000=12.73%, 2000=66.36%, >=2000=13.20%
->> rand-write: (groupid=3, jobs=1): err= 0: pid=20446
->>    write: io=208588KB, bw=3429.5KB/s, iops=857 , runt= 60822msec
->>      slat (usec): min=10 , max=1693.9K, avg=1148.15, stdev=15210.37
->>      clat (msec): min=22 , max=5639 , avg=297.37, stdev=430.27
->>       lat (msec): min=22 , max=5639 , avg=298.52, stdev=430.84
->>      bw (KB/s) : min=    0, max= 7728, per=31.44%, avg=1078.21,
->> stdev=2000.45
->>    cpu          : usr=0.34%, sys=1.61%, ctx=37183, majf=0, minf=19
->>    IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%,
->> >=64=99.9%
->>       submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.0%
->>       complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%,
->> >=64=0.1%
->>       issued r/w/d: total=0/52147/0, short=0/0/0
->>
->>       lat (msec): 50=2.82%, 100=25.63%, 250=46.12%, 500=10.36%, 750=5.10%
->>       lat (msec): 1000=2.91%, 2000=5.75%, >=2000=1.33%
->>
->> Run status group 0 (all jobs):
->>     READ: io=801892KB, aggrb=13353KB/s, minb=13673KB/s, maxb=13673KB/s,
->> mint=60053msec, maxt=60053msec
->>
->> Run status group 1 (all jobs):
->>     READ: io=6376.4MB, aggrb=108814KB/s, minb=111425KB/s,
->> maxb=111425KB/s, mint=60005msec, maxt=60005msec
->>
->> Run status group 2 (all jobs):
->>    WRITE: io=44684KB, aggrb=735KB/s, minb=753KB/s, maxb=753KB/s,
->> mint=60725msec, maxt=60725msec
->>
->> Run status group 3 (all jobs):
->>    WRITE: io=208588KB, aggrb=3429KB/s, minb=3511KB/s, maxb=3511KB/s,
->> mint=60822msec, maxt=60822msec
->>
->> Disk stats (read/write):
->>    rbd1: ios=1832984/63270, merge=0/0, ticks=16374236/17012132,
->> in_queue=33434120, util=99.79%
+I really don't understand why I can't get more rand read iops with 4K b=
+lock ...
+
+I try with high end cpu for client, it doesn't change nothing.
+But test cluster use  old 8 cores E5420  @ 2.50GHZ (But cpu is around 1=
+5% on cluster during read bench)
+
+
+----- Mail original -----=20
+
+De: "S=C3=A9bastien Han" <han.sebastien@gmail.com>=20
+=C3=80: "Mark Kampe" <mark.kampe@inktank.com>=20
+Cc: "Alexandre DERUMIER" <aderumier@odiso.com>, "ceph-devel" <ceph-deve=
+l@vger.kernel.org>=20
+Envoy=C3=A9: Lundi 19 Novembre 2012 19:03:40=20
+Objet: Re: RBD fio Performance concerns=20
+
+@Sage, thanks for the info :)=20
+@Mark:=20
+
+> If you want to do sequential I/O, you should do it buffered=20
+> (so that the writes can be aggregated) or with a 4M block size=20
+> (very efficient and avoiding object serialization).=20
+
+The original benchmark has been performed with 4M block size. And as=20
+you can see I still get more IOPS with rand than seq... I just tried=20
+with 4M without direct I/O, still the same. I can print fio results if=20
+it's needed.=20
+
+> We do direct writes for benchmarking, not because it is a reasonable=20
+> way to do I/O, but because it bypasses the buffer cache and enables=20
+> us to directly measure cluster I/O throughput (which is what we are=20
+> trying to optimize). Applications should usually do buffered I/O,=20
+> to get the (very significant) benefits of caching and write aggregati=
+on.=20
+
+I know why I use direct I/O. It's synthetic benchmarks, it's far away=20
+from a real life scenario and how common applications works. I just=20
+try to see the maximum I/O throughput that I can get from my RBD. All=20
+my applications use buffered I/O.=20
+
+@Alexandre: is it the same for you? or do you always get more IOPS with=
+ seq?=20
+
+Thanks to all of you..=20
+
+
+On Mon, Nov 19, 2012 at 5:54 PM, Mark Kampe <mark.kampe@inktank.com> wr=
+ote:=20
+> Recall:=20
+> 1. RBD volumes are striped (4M wide) across RADOS objects=20
+> 2. distinct writes to a single RADOS object are serialized=20
+>=20
+> Your sequential 4K writes are direct, depth=3D256, so there are=20
+> (at all times) 256 writes queued to the same object. All of=20
+> your writes are waiting through a very long line, which is adding=20
+> horrendous latency.=20
+>=20
+> If you want to do sequential I/O, you should do it buffered=20
+> (so that the writes can be aggregated) or with a 4M block size=20
+> (very efficient and avoiding object serialization).=20
+>=20
+> We do direct writes for benchmarking, not because it is a reasonable=20
+> way to do I/O, but because it bypasses the buffer cache and enables=20
+> us to directly measure cluster I/O throughput (which is what we are=20
+> trying to optimize). Applications should usually do buffered I/O,=20
+> to get the (very significant) benefits of caching and write aggregati=
+on.=20
+>=20
+>=20
+>> That's correct for some of the benchmarks. However even with 4K for=20
+>> seq, I still get less IOPS. See below my last fio:=20
+>>=20
+>> # fio rbd-bench.fio=20
+>> seq-read: (g=3D0): rw=3Dread, bs=3D4K-4K/4K-4K, ioengine=3Dlibaio, i=
+odepth=3D256=20
+>> rand-read: (g=3D1): rw=3Drandread, bs=3D4K-4K/4K-4K, ioengine=3Dliba=
+io,=20
+>> iodepth=3D256=20
+>> seq-write: (g=3D2): rw=3Dwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlibaio,=
+ iodepth=3D256=20
+>> rand-write: (g=3D3): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dli=
+baio,=20
+>> iodepth=3D256=20
+>> fio 1.59=20
+>> Starting 4 processes=20
+>> Jobs: 1 (f=3D1): [___w] [57.6% done] [0K/405K /s] [0 /99 iops] [eta=20
+>> 02m:59s]=20
+>> seq-read: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D15096=20
+>> read : io=3D801892KB, bw=3D13353KB/s, iops=3D3338 , runt=3D 60053mse=
+c=20
+>> slat (usec): min=3D8 , max=3D45921 , avg=3D296.69, stdev=3D1584.90=20
+>> clat (msec): min=3D18 , max=3D133 , avg=3D76.37, stdev=3D16.63=20
+>> lat (msec): min=3D18 , max=3D133 , avg=3D76.67, stdev=3D16.62=20
+>> bw (KB/s) : min=3D 0, max=3D14406, per=3D31.89%, avg=3D4258.24,=20
+>> stdev=3D6239.06=20
+>> cpu : usr=3D0.87%, sys=3D5.57%, ctx=3D165281, majf=3D0, minf=3D279=20
+>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+0.1%,=20
+>> >=3D64=3D100.0%=20
+>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.0%=20
+>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.1%=20
+>> issued r/w/d: total=3D200473/0/0, short=3D0/0/0=20
+>>=20
+>> lat (msec): 20=3D0.01%, 50=3D9.46%, 100=3D90.45%, 250=3D0.10%=20
+>> rand-read: (groupid=3D1, jobs=3D1): err=3D 0: pid=3D16846=20
+>> read : io=3D6376.4MB, bw=3D108814KB/s, iops=3D27203 , runt=3D 60005m=
+sec=20
+>> slat (usec): min=3D8 , max=3D12723 , avg=3D33.54, stdev=3D59.87=20
+>> clat (usec): min=3D4642 , max=3D55760 , avg=3D9374.10, stdev=3D970.4=
+0=20
+>> lat (usec): min=3D4671 , max=3D55788 , avg=3D9408.00, stdev=3D971.21=
+=20
+>> bw (KB/s) : min=3D105496, max=3D109136, per=3D100.00%, avg=3D108815.=
+48,=20
+>> stdev=3D648.62=20
+>> cpu : usr=3D8.26%, sys=3D49.11%, ctx=3D1486259, majf=3D0, minf=3D278=
+=20
+>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+0.1%,=20
+>> >=3D64=3D100.0%=20
+>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.0%=20
+>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.1%=20
+>> issued r/w/d: total=3D1632349/0/0, short=3D0/0/0=20
+>>=20
+>> lat (msec): 10=3D83.39%, 20=3D16.56%, 50=3D0.04%, 100=3D0.01%=20
+>> seq-write: (groupid=3D2, jobs=3D1): err=3D 0: pid=3D18653=20
+>> write: io=3D44684KB, bw=3D753502 B/s, iops=3D183 , runt=3D 60725msec=
+=20
+>> slat (usec): min=3D8 , max=3D1246.8K, avg=3D5402.76, stdev=3D40024.9=
+7=20
+>> clat (msec): min=3D25 , max=3D4868 , avg=3D1384.22, stdev=3D470.19=20
+>> lat (msec): min=3D25 , max=3D4868 , avg=3D1389.62, stdev=3D470.17=20
+>> bw (KB/s) : min=3D 7, max=3D 2165, per=3D104.03%, avg=3D764.65,=20
+>> stdev=3D353.97=20
+>> cpu : usr=3D0.05%, sys=3D0.35%, ctx=3D5478, majf=3D0, minf=3D21=20
+>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+0.3%,=20
+>> >=3D64=3D99.4%=20
+>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.0%=20
+>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.1%=20
+>> issued r/w/d: total=3D0/11171/0, short=3D0/0/0=20
+>>=20
+>> lat (msec): 50=3D0.21%, 100=3D0.44%, 250=3D0.97%, 500=3D1.49%, 750=3D=
+4.60%=20
+>> lat (msec): 1000=3D12.73%, 2000=3D66.36%, >=3D2000=3D13.20%=20
+>> rand-write: (groupid=3D3, jobs=3D1): err=3D 0: pid=3D20446=20
+>> write: io=3D208588KB, bw=3D3429.5KB/s, iops=3D857 , runt=3D 60822mse=
+c=20
+>> slat (usec): min=3D10 , max=3D1693.9K, avg=3D1148.15, stdev=3D15210.=
+37=20
+>> clat (msec): min=3D22 , max=3D5639 , avg=3D297.37, stdev=3D430.27=20
+>> lat (msec): min=3D22 , max=3D5639 , avg=3D298.52, stdev=3D430.84=20
+>> bw (KB/s) : min=3D 0, max=3D 7728, per=3D31.44%, avg=3D1078.21,=20
+>> stdev=3D2000.45=20
+>> cpu : usr=3D0.34%, sys=3D1.61%, ctx=3D37183, majf=3D0, minf=3D19=20
+>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+0.1%,=20
+>> >=3D64=3D99.9%=20
+>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.0%=20
+>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,=20
+>> >=3D64=3D0.1%=20
+>> issued r/w/d: total=3D0/52147/0, short=3D0/0/0=20
+>>=20
+>> lat (msec): 50=3D2.82%, 100=3D25.63%, 250=3D46.12%, 500=3D10.36%, 75=
+0=3D5.10%=20
+>> lat (msec): 1000=3D2.91%, 2000=3D5.75%, >=3D2000=3D1.33%=20
+>>=20
+>> Run status group 0 (all jobs):=20
+>> READ: io=3D801892KB, aggrb=3D13353KB/s, minb=3D13673KB/s, maxb=3D136=
+73KB/s,=20
+>> mint=3D60053msec, maxt=3D60053msec=20
+>>=20
+>> Run status group 1 (all jobs):=20
+>> READ: io=3D6376.4MB, aggrb=3D108814KB/s, minb=3D111425KB/s,=20
+>> maxb=3D111425KB/s, mint=3D60005msec, maxt=3D60005msec=20
+>>=20
+>> Run status group 2 (all jobs):=20
+>> WRITE: io=3D44684KB, aggrb=3D735KB/s, minb=3D753KB/s, maxb=3D753KB/s=
+,=20
+>> mint=3D60725msec, maxt=3D60725msec=20
+>>=20
+>> Run status group 3 (all jobs):=20
+>> WRITE: io=3D208588KB, aggrb=3D3429KB/s, minb=3D3511KB/s, maxb=3D3511=
+KB/s,=20
+>> mint=3D60822msec, maxt=3D60822msec=20
+>>=20
+>> Disk stats (read/write):=20
+>> rbd1: ios=3D1832984/63270, merge=3D0/0, ticks=3D16374236/17012132,=20
+>> in_queue=3D33434120, util=3D99.79%=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
