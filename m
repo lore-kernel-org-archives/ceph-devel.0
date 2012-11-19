@@ -1,75 +1,81 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: [BUG] rbd discard should return OK even if rbd file does not
- exist
-Date: Sun, 18 Nov 2012 21:44:13 +0100
-Message-ID: <50A9489D.9080504@profihost.ag>
-References: <50A80D65.7070901@profihost.ag> <50A84A26.20902@inktank.com>
+From: liu yaqi <liuyaqiyaqi@gmail.com>
+Subject: some snapshot problems
+Date: Mon, 19 Nov 2012 09:13:27 +0800
+Message-ID: <CABFZihu6ejRzLfDa_hqw=5iNG4c1dQjtgxu9cgU+J93DANjghw@mail.gmail.com>
+References: <CABFZihudrA640nD9N60b8w0ccQvmaduGmceBf2uHrpLbShtjig@mail.gmail.com>
+	<alpine.DEB.2.00.1211050139280.14104@cobra.newdream.net>
+	<CABFZihtEgUMPeBROQVCjMFHaw0-u7k7dfk=O+32EUcV-BaJpLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:42170 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752411Ab2KRUoR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Nov 2012 15:44:17 -0500
-In-Reply-To: <50A84A26.20902@inktank.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:37523 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752722Ab2KSBN2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Nov 2012 20:13:28 -0500
+Received: by mail-qa0-f53.google.com with SMTP id k31so2903381qat.19
+        for <ceph-devel@vger.kernel.org>; Sun, 18 Nov 2012 17:13:27 -0800 (PST)
+In-Reply-To: <CABFZihtEgUMPeBROQVCjMFHaw0-u7k7dfk=O+32EUcV-BaJpLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-mhm ok the finalize is only called if building is false and there are no 
-pending requests. But the discard issued is a bunch of 1000 requests or 
-so. So the finalize is only called in the end. And it seems this is too 
-late for qemu block driver.
+---------- Forwarded message ----------
+=46rom: liu yaqi <liuyaqiyaqi@gmail.com>
+Date: 2012/11/12
+Subject: Re: some snapshot problems
+To: Sage Weil <sage@inktank.com>
+=B3=AD=CB=CD=A3=BA ceph-devel@vger.kernel.org, ctpm@ist.utl.pt, josh.du=
+rgin@inktank.com
 
-Greets,
-Stefan
-Am 18.11.2012 03:38, schrieb Josh Durgin:
-> On 11/17/2012 02:19 PM, Stefan Priebe wrote:
->> Hello list,
->>
->> right now librbd returns an error if i issue a discard for a sector /
->> byterange where ceph does not have any file as i had never written to
->> this section.
+
+
+
+2012/11/9 Sage Weil <sage@inktank.com>
 >
-> Thanks for bringing this up again. I haven't had time to dig deeper
-> into it yet, but I definitely want to fix this for bobtail.
+> Lots of different snapshots:
 >
->> This is not correct. It should return 0 / OK in this case.
->>
->> Stefan
->>
->> Examplelog:
->> 2012-11-02 21:06:17.649922 7f745f7fe700 20 librbd::AioRequest: WRITE_FLAT
->> 2012-11-02 21:06:17.649924 7f745f7fe700 20 librbd::AioCompletion:
->> AioCompletion::complete_request() this=0x7f72cc05bd20
->> complete_cb=0x7f747021d4b0
->> 2012-11-02 21:06:17.649924 7f747015c780  1 -- 10.10.0.2:0/2028325 -->
->> 10.10.0.18:6803/9687 -- osd_op(client.26862.0:3073
->> rb.0.1044.359ed6c7.000000000bde [delete] 3.bd84636 snapc 2=[]) v4 -- ?+0
->> 0x7f72d81c69b0 con 0x7f74600dbf50
->> 2012-11-02 21:06:17.649934 7f747015c780 20 librbd:  oid
->> rb.0.1044.359ed6c7.000000000bdf 0~4194304 from [4156556288,4194304]
->> 2012-11-02 21:06:17.649972 7f7465a6e700  1 -- 10.10.0.2:0/2028325 <==
->> osd.1202 10.10.0.18:6806/9821 143 ==== osd_op_reply(1652
->> rb.0.1044.359ed6c7.000000000652 [delete] ondisk = -2 (No such file or
->> directory)) v4 ==== 130+0+0 (2964367729 0 0) 0x7f72dc0f0090 con
->> 0x7f74600e4350
->> 2012-11-02 21:06:17.649994 7f745f7fe700 20 librbd::AioRequest: write
->> 0x7f74600feab0 should_complete: r = -2
->
-> This last line isn't printing what's actually being returned to the
-> application. It's still in librbd's internal processing, and will be
-> converted to 0 for the application.
->
-> Could you try with the master or next branches? After the
-> 'should_complete' line, there should be a line like:
->
-> <date> <time> <thread_id> 20 librbd::AioCompletion:
-> AioCompletion::finalize() rval 0 ...
->
-> That 'rval 0' shows the actual return value the application (qemu in
-> this case) will see.
->
-> Josh
+>  - librados lets you do 'selfmanaged snaps' in its API, which let an
+>    application control which snapshots apply to which objects.
+>  - you can create a 'pool' snapshot on an entire librados pool.  this
+>    cannot be used at the same time as rbd, fs, or the above 'selfmana=
+ged'
+>    snaps.
+>  - rbd let's you snapshot block device images (by usuing the librados
+>    selfmanaged snap API).
+>  - the ceph file system let's you snapshot any subdirectory (again
+>    utilizing the underlying RADOS functionality).
+
+
+I am confused about the concept of "pool" and "image". Is one pool a
+set of placement groups? When I snap an image, does it mean a snapshot
+of one disk?
+
+I think snapshot is used to preserve the state of directory at one
+time, and I wander if there will be a situation that I preserve the
+data of the directory, but does not preserve the metadata of the
+directory=A1=AA=A1=AAmaybe because metadata and data not in the same po=
+ol, would
+this happen?
+
+When snap directory, I trace the code in mds, there is snapinfo added
+to inode, but where and when to create the content of the snap? What
+is the data sturcture of the snap content? When client set inode
+attribute, if snapid=3D=3DNOSNAP, return, does this mean if the inode h=
+as
+been snapped, it can not be changed? So, snap not using the
+copy-on-write method(create snap, then change the content of snapfile
+when set inode attribute or write the file)? If not copy-on-write,
+what's the snap workflow for directory?
+
+There are multi metadata nodes, one directory may  spread over multi
+servers, one server has one part of the dir, how ceph resolves this
+problem? This also cause clock problem.
+
+Thanks
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
