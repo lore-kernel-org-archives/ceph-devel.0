@@ -1,68 +1,59 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: librbd discard bug problems -> i got it
-Date: Mon, 19 Nov 2012 14:48:53 -0800
-Message-ID: <50AAB755.7060805@inktank.com>
-References: <50AAA25F.9040908@profihost.ag> <50AAB4D6.3030304@inktank.com> <50AAB682.7070506@profihost.ag>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: deprecating mkcephfs (the arrival of light-weight deployment tools)
+Date: Mon, 19 Nov 2012 14:53:14 -0800
+Message-ID: <CAPYLRziNKP9GC=ciwcuvtZcWr7uqF5k42cCSOokaxT-fj+MRow@mail.gmail.com>
+References: <CAJiejCTWvtn6yS+_9h07t4KWqRHPqT-Oe23KtXmnvf7ZZbsAAw@mail.gmail.com>
+	<CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com>
+	<1353363220.47659.YahooMailNeo@web121906.mail.ne1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:49429 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752690Ab2KSWtb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 17:49:31 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so776825pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 14:49:30 -0800 (PST)
-In-Reply-To: <50AAB682.7070506@profihost.ag>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:53511 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751252Ab2KSWxO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 17:53:14 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so7670474iea.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 14:53:14 -0800 (PST)
+In-Reply-To: <1353363220.47659.YahooMailNeo@web121906.mail.ne1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
+To: Isaac Otsiabah <zmoo76b@yahoo.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/19/2012 02:45 PM, Stefan Priebe wrote:
-> Hi Josh,
+On Mon, Nov 19, 2012 at 2:13 PM, Isaac Otsiabah <zmoo76b@yahoo.com> wrote:
 >
-> how can i log in AioRequest.h?
+> I am trying to understand ceph deployment direction because from this link http://ceph.com/docs/master/rados/deployment/
+> it
+>  is mentioned that mkcephfs is dreprecated. It also has the statement
+> below which mentions light-weight deployment scripts to help you
+> evaluate Ceph.
 >
-> I need to add some debugging into:
->      void complete(int r)
->      {
->        if (should_complete(r)) {
->          if (m_hide_enoent && r == -ENOENT)
->            r = 0;
->          m_completion->complete(r);
->          delete this;
->        }
->      }
+>
+> "We provide light-weight deployment scripts to help you evaluate Ceph. For
+> professional deployment, you should consider professional deployment systems
+> such as Juju, Puppet, Chef or Crowbar."
+>
+> I  think there is a need to have native ceph deployment tools that aren't dependent upon any third party deployment tools. So my question is this
+>
+>     1. when will the light-weight deployment scripts be
+> available and which ceph version will they be released into?
 
-Move the implementation of the method out of the header and into
-AioRequest.cc. Then you can use ldout like in the rest of that file.
+Check out ceph-deploy, available at
+https://github.com/ceph/ceph-deploy. It works against development
+releases now, and I believe also against argonaut v0.48.2.
 
-Josh
+>     2. Now, going forward, when will mkcephfs not work anymore (what ceph version)?
 
-> Am 19.11.2012 23:38, schrieb Josh Durgin:
->> On 11/19/2012 01:19 PM, Stefan Priebe wrote:
->>> Hello Josh,
->>>
->>> after digging three days around i got it.
->>
->> That's great!
->>
->>> The problem is in aio_discard in internal.cc. The i/o fails when AioZero
->>> or AioTruncate is used.
->>
->> Interesting, I wouldn't have expected the bug to be there. Is
->> it failing with a different error code, or just taking too long
->> so the guest kernel tries to cancel it?
->>
->>> It works fine with AioRemove. It seems to depend on overlapping.
->>> Hopefully i'm able to provide a patch this nicht.
->>
->> Looking forward to it!
->>
->> Josh
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It will continue to work at least as well as it has throughout
+Bobtail. (In fact, we're hoping to get a few more patches in that make
+it slightly less painful.) However, as anybody who's tried long-term
+use of a Ceph cluster deployed with mkcephfs will tell you, it's just
+not much fun. This is why we're developing the new ceph-deploy system,
+which supports things like adding new daemons, building the system in
+multiple, re-runnable steps, etc.
 
+Our messaging has been somewhat inconsistent because there are all
+these problems with mkcephfs, but ceph-deploy hasn't been well-tested
+yet either. Look for us to start pushing people more strongly in the
+coming months once we've validated it.
+-Greg
