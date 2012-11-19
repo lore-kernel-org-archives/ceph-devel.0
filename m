@@ -1,67 +1,89 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: deprecating mkcephfs (the arrival of light-weight deployment
- tools)
-Date: Mon, 19 Nov 2012 14:54:52 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211191443450.1082@cobra.newdream.net>
-References: <CAJiejCTWvtn6yS+_9h07t4KWqRHPqT-Oe23KtXmnvf7ZZbsAAw@mail.gmail.com> <CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com> <1353363220.47659.YahooMailNeo@web121906.mail.ne1.yahoo.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: some snapshot problems
+Date: Mon, 19 Nov 2012 14:59:19 -0800
+Message-ID: <CAPYLRzg9-mh8cfXdPRx73JPsCVW07QmY1drYwm3W0Gz7qY2vsw@mail.gmail.com>
+References: <CABFZihudrA640nD9N60b8w0ccQvmaduGmceBf2uHrpLbShtjig@mail.gmail.com>
+	<alpine.DEB.2.00.1211050139280.14104@cobra.newdream.net>
+	<CABFZihvH6Cs0YD_Rbn1goUz5q1P0EUEvnN0poq1YKvw4Lm-wAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1182699872-1353365692=:1082"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36421 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752446Ab2KSWyx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 17:54:53 -0500
-In-Reply-To: <1353363220.47659.YahooMailNeo@web121906.mail.ne1.yahoo.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:58490 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752473Ab2KSW7U convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 17:59:20 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so3783531iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 14:59:19 -0800 (PST)
+In-Reply-To: <CABFZihvH6Cs0YD_Rbn1goUz5q1P0EUEvnN0poq1YKvw4Lm-wAw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Isaac Otsiabah <zmoo76b@yahoo.com>
+To: liu yaqi <liuyaqiyaqi@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Sun, Nov 11, 2012 at 11:02 PM, liu yaqi <liuyaqiyaqi@gmail.com> wrot=
+e:
+> 2012/11/9 Sage Weil <sage@inktank.com>
+>
+>> Lots of different snapshots:
+>>
+>>  - librados lets you do 'selfmanaged snaps' in its API, which let an
+>>    application control which snapshots apply to which objects.
+>>  - you can create a 'pool' snapshot on an entire librados pool.  thi=
+s
+>>    cannot be used at the same time as rbd, fs, or the above 'selfman=
+aged'
+>>    snaps.
+>>  - rbd let's you snapshot block device images (by usuing the librado=
+s
+>>    selfmanaged snap API).
+>>  - the ceph file system let's you snapshot any subdirectory (again
+>>    utilizing the underlying RADOS functionality).
+>
+> I am confused about the concept of "pool" and "image". Is one pool a
+> set of placement groups? When I snap an image, does it mean a snapsho=
+t
+> of one disk?
 
---557981400-1182699872-1353365692=:1082
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
+A pool is a logical namespace into which you place objects. Placement
+groups are shards of a pool.
+Snapping an image makes use of the self-managed snapshot
+infrastructure, and takes a snapshot of one RBD volume (so yes, if
+that's what you meant by a snapshot of one disk).
 
-On Mon, 19 Nov 2012, Isaac Otsiabah wrote:
->=20
-> I am trying to understand ceph deployment direction because from this l=
-ink http://ceph.com/docs/master/rados/deployment/
-> it
->  is mentioned that mkcephfs is dreprecated. It also has the statement=20
-> below which mentions light-weight deployment scripts to help you=20
-> evaluate Ceph.
->=20
->=20
-> "We provide light-weight deployment scripts to help you evaluate Ceph. =
-For
-> professional deployment, you should consider professional deployment sy=
-stems
-> such as Juju, Puppet, Chef or Crowbar."
->=20
-> I=A0 think there is a need to have native ceph deployment tools that ar=
-en't dependent upon any third party deployment tools. So my question is t=
-his
-> =A0=A0=A0=20
-> =A0=A0=A0 1. when will the light-weight deployment scripts be=20
-> available and which ceph version will they be released into?
+> I think snapshot is used to preserve the state of directory at one
+> time, and I wander if there will be a situation that I preserve the
+> data of the directory, but does not preserve the metadata of the
+> directory=97=97maybe because metadata and data not in the same pool, =
+would
+> this happen?
 
-http://github.com/ceph/ceph-deploy is available for initial testing, but=20
-far from ready for widespread use.  mkcephfs is still the preferred=20
-installation path.
+The Ceph filesystem builds a bit more on top of the RADOS snapshots =97
+metadata and data are almost never in the same pool, and the metadata
+snapshots don't use RADOS snapshots anyway.
 
-I'll make sure the 'deprecated' notation is removed until a real=20
-alternative is ready.
+> When snap directory, I trace the code in mds, there is snapinfo added
+> to inode, but where and when to create the content of the snap? What
+> is the data sturcture of the snap content? When client set inode
+> attribute, if snapid=3D=3DNOSNAP, return, does this mean if the inode=
+ has
+> been snapped, it can not be changed? So, snap not using the
+> copy-on-write method(create snap, then change the content of snapfile
+> when set inode attribute or write the file)? If not copy-on-write,
+> what's the snap workflow for directory?
 
-> =A0=A0=A0 2. Now, going forward, when will mkcephfs not work anymore (w=
-hat=20
-> ceph version)?
+You want to look into the code surrounding SnapRealms to see how the
+metadata for snapshots is managed.
 
-It will be maintained at least through cuttlefish (the next stable=20
-release), though probably longer, so that there is plenty of overlap with=
-=20
-whatever tool will follow.
+> There are multi metadata nodes, one directory may  spread over multi
+> servers, one server has one part of the dir, how ceph resolves this
+> problem? This also cause clock problem.
 
-sage
---557981400-1182699872-1353365692=:1082--
+It's not easy, but again, look at how the SnapRealms are dealt with.
+The MDSes will do synchronous notifications to each other.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
