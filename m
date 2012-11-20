@@ -1,48 +1,76 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/6] rbd: consolidate request operation creation
-Date: Tue, 20 Nov 2012 13:52:42 -0600
-Message-ID: <50ABDF8A.4080206@inktank.com>
+Subject: [PATCH 1/6] rbd: don't assign extent info in rbd_do_request()
+Date: Tue, 20 Nov 2012 13:54:57 -0600
+Message-ID: <50ABE011.2090604@inktank.com>
+References: <50ABDF8A.4080206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:39615 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752091Ab2KTTwr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 14:52:47 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so4502529iay.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 11:52:46 -0800 (PST)
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:47014 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751858Ab2KTTza (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 14:55:30 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so9199379iea.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 11:55:30 -0800 (PST)
+In-Reply-To: <50ABDF8A.4080206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm working on getting data structures for every rbd image request
-initialized in one place, and similarly getting all osd object
-requests for rbd images initialized at once at well. This series
-addresses an issue I bumped into while trying to do this, and
-then goes a little further to implement the centralized op
-initialization.
+In rbd_do_request() there's a sort of last-minute assignment of the
+extent offset and length and payload length for read and write
+operations.  Move those assignments into the caller (in those spots
+that might initiate read or write operations)
 
-For read or write osd operations, their offset and length fields
-as well as the operation's payload length field are assigned
-fairly late, as the osd request is getting built up in
-rbd_do_request().  This is sort of strange; all of the other
-request types get all their fields assigned right after
-their osd op structure gets created.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
-This series moves those late assignments for read and write
-ops earlier, ultimately into the existing "create op" function.
-It then creates a new function that fully initializes the
-op with provided arguments for all op types.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 223a401..37b39c1 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1158,13 +1158,6 @@ static int rbd_do_request(struct request *rq,
+ 	osd_req->r_oid_len = strlen(osd_req->r_oid);
 
-We end up with a single function that fully initializes
-osd ops of any type, as desired.
+ 	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
+-
+-	if (op->op == CEPH_OSD_OP_READ || op->op == CEPH_OSD_OP_WRITE) {
+-		op->extent.offset = ofs;
+-		op->extent.length = len;
+-		if (op->op == CEPH_OSD_OP_WRITE)
+-			op->payload_len = len;
+-	}
+ 	osd_req->r_num_pages = calc_pages_for(ofs, len);
+ 	osd_req->r_page_alignment = ofs & ~PAGE_MASK;
 
-					-Alex
+@@ -1269,6 +1262,13 @@ static int rbd_req_sync_op(struct rbd_device
+*rbd_dev,
+ 	if (IS_ERR(pages))
+ 		return PTR_ERR(pages);
 
-[PATCH 1/6] rbd: don't assign extent info in rbd_do_request()
-[PATCH 2/6] rbd: don't assign extent info in rbd_req_sync_op()
-[PATCH 3/6] rbd: initialize off and len in rbd_create_rw_op()
-[PATCH 4/6] rbd: define generalized osd request op routines
-[PATCH 5/6] rbd: move call osd op setup into rbd_osd_req_op_create()
-[PATCH 6/6] rbd: move remaining osd op setup into rbd_osd_req_op_create()
++	if (op->op == CEPH_OSD_OP_READ || op->op == CEPH_OSD_OP_WRITE) {
++		op->extent.offset = ofs;
++		op->extent.length = inbound_size;
++		if (op->op == CEPH_OSD_OP_WRITE)
++			op->payload_len = inbound_size;
++	}
++
+ 	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
+ 			  object_name, ofs, inbound_size, NULL,
+ 			  pages, num_pages,
+@@ -1332,6 +1332,9 @@ static int rbd_do_op(struct request *rq,
+ 	op = rbd_create_rw_op(opcode, payload_len);
+ 	if (!op)
+ 		goto done;
++	op->extent.offset = seg_ofs;
++	op->extent.length = seg_len;
++	op->payload_len = payload_len;
+
+ 	/* we've taken care of segment sizes earlier when we
+ 	   cloned the bios. We should never have a segment
+-- 
+1.7.9.5
+
