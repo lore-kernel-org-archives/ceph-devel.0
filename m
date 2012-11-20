@@ -1,106 +1,233 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Files lost after mds rebuild
-Date: Tue, 20 Nov 2012 09:58:27 +0800
-Message-ID: <CAJiejCSRwOV12098uGGVOg9J38oYNSwYeHcqb7DKEtycL6m10Q@mail.gmail.com>
-References: <CAJiejCTWvtn6yS+_9h07t4KWqRHPqT-Oe23KtXmnvf7ZZbsAAw@mail.gmail.com>
- <CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Can't start ceph mon
+Date: Mon, 19 Nov 2012 18:22:12 -0800
+Message-ID: <CAPYLRzgUpHzK-P50ESTDPH-Cc4_meiEtVxJSXax7h41mXZk9ow@mail.gmail.com>
+References: <3649717.axTEZpMgMX@vault01>
+	<CAPYLRzhh+KNs-4N9dBsf_0dVtoH2WGj37_N64+rjOo_kjpN=cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:45495 "EHLO
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:45960 "EHLO
 	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752034Ab2KTB6r convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 20:58:47 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so3878819iay.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 17:58:47 -0800 (PST)
-In-Reply-To: <CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com>
+	with ESMTP id S1753120Ab2KTCWN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Nov 2012 21:22:13 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so3891167iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Nov 2012 18:22:12 -0800 (PST)
+In-Reply-To: <CAPYLRzhh+KNs-4N9dBsf_0dVtoH2WGj37_N64+rjOo_kjpN=cw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: "Dave Humphreys (Datatone)" <dave@datatone.co.uk>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2012/11/20 Gregory Farnum <greg@inktank.com>:
-> On Mon, Nov 19, 2012 at 7:55 AM, Drunkard Zhang <gongfan193@gmail.com=
-> wrote:
->> I created a ceph cluster for test, here's mistake I made:
->> Add a second mds: mds.ab, executed 'ceph mds set_max_mds 2', then
->> removed the mds just added;
->> Then 'ceph mds set_max_mds 1', the first mds.aa crashed, and became =
-laggy.
->> As I can't repair mds.aa, so did 'ceph mds newfs metadata data
->> --yes-i-really-mean-it';
->
-> So this command is a mkfs sort of thing. It's deleted all the
-> "allocation tables" and filesystem metadata in favor of new, empty
-> ones. You should not run "--yes-i-really-mean-it" commands if you
-> don't know exactly what the command is doing and why you're using it.
->
->> mds.aa was back, but 1TB data was in cluster lost, but disk space
->> still used, by 'ceps -s'.
+Also, if you still have it, could you zip up your monitor data
+directory and put it somewhere accessible to us? (I can provide you a
+drop point if necessary.) We'd like to look at the file layouts a bit
+since we thought we were properly handling ENOSPC-style issues.
+-Greg
+
+On Mon, Nov 19, 2012 at 1:45 PM, Gregory Farnum <greg@inktank.com> wrote:
+> On Mon, Nov 19, 2012 at 1:08 PM, Dave Humphreys (Datatone)
+> <dave@datatone.co.uk> wrote:
 >>
->> Is there any chance I can get my data back? If can't, how can I
->> retrieve back the disk space.
+>> I have a problem in which I can't start my ceph monitor. The log is shown below.
+>>
+>> The log shows version 0.54. I was running 0.52 when the problem arose, and I moved to the latest in case the newer version fixed the problem.
+>>
+>> The original failure happened a week or so ago, and could have been as a result of running out of disk space when the ceph monitor log became huge.
 >
-> There's not currently a great way to get that data back. With
-> sufficient energy it could be re-constructed by looking through all
-> the RADOS objects and putting something together.
-> To retrieve the disk space, you'll want to delete the "data" and
-> "metadata" RADOS pools. This will of course *eliminate* the data you
-> have in your new filesystem, so grab that out first if there's
-> anything there you care about. Then create the pools and run the newf=
-s
-> command again.
-> Also, you've got the syntax wrong on that newfs command. You should b=
-e
-> using pool IDs:
-> "ceph mds newfs 1 0 --yes-i-really-mean-it"
-> (Though these IDs may change after re-creating the pools.)
+> That is almost certainly the case, although I thought we were handling
+> this issue better now.
+>
+>> What should I do to recover the situation?
+>
+> Do you have other monitors in working order? The easiest way to handle
+> it if that's the case is just to remove this monitor from the cluster
+> and add it back in as a new monitor with a fresh store. If not we can
+> look into reconstructing it.
 > -Greg
 >
-Thanks, I got you.
-
->
->> Now it looks like:
->> log3 ~ # ceph -s
->>    health HEALTH_OK
->>    monmap e1: 1 mons at {log3=3D10.205.119.2:6789/0}, election epoch=
- 0,
->> quorum 0 log3
->>    osdmap e1555: 28 osds: 20 up, 20 in
->>     pgmap v56518: 960 pgs: 960 active+clean; 1134 GB data, 2306 GB
->> used, 51353 GB / 55890 GB avail
->>    mdsmap e703: 1/1/1 up {0=3Daa=3Dup:active}, 1 up:standby
 >>
->> log3 ~ # df | grep osd |sort
->> /dev/sdb1       2.8T  124G  2.5T   5% /ceph/osd.0
->> /dev/sdc1       2.8T  104G  2.6T   4% /ceph/osd.1
->> /dev/sdd1       2.8T   84G  2.6T   4% /ceph/osd.2
->> /dev/sde1       2.8T  117G  2.6T   5% /ceph/osd.3
->> /dev/sdf1       2.8T  105G  2.6T   4% /ceph/osd.4
->> /dev/sdg1       2.8T   84G  2.6T   4% /ceph/osd.5
->> /dev/sdh1       2.8T  140G  2.5T   6% /ceph/osd.6
->> /dev/sdi1       2.8T  134G  2.5T   5% /ceph/osd.8
->> /dev/sdj1       2.8T  112G  2.6T   5% /ceph/osd.7
->> /dev/sdk1       2.8T  159G  2.5T   6% /ceph/osd.9
->> /dev/sdl1       2.8T  126G  2.5T   5% /ceph/osd.10
 >>
->> osd on another host didn't show.
+>> David
+>>
+>>
+>>
+>>
+>>
+>> 2012-11-19 20:38:51.598468 7fc13fdc6780  0 ceph version 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150), process ceph-mon, pid 21012
+>> 2012-11-19 20:38:51.598482 7fc13fdc6780  1 store(/ceph/mon.vault01) mount
+>> 2012-11-19 20:38:51.598527 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 21
+>> 2012-11-19 20:38:51.598542 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl magic = 21 bytes
+>> 2012-11-19 20:38:51.598562 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 75
+>> 2012-11-19 20:38:51.598567 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl feature_set = 75 bytes
+>> 2012-11-19 20:38:51.598582 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 205
+>> 2012-11-19 20:38:51.598586 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl monmap/latest = 205 bytes
+>> 2012-11-19 20:38:51.598809 7fc13fdc6780  1 -- 10.0.1.1:6789/0 learned my addr 10.0.1.1:6789/0
+>> 2012-11-19 20:38:51.598818 7fc13fdc6780  1 accepter.accepter.bind my_inst.addr is 10.0.1.1:6789/0 need_addr=0
+>> 2012-11-19 20:38:51.599498 7fc13fdc6780  1 -- 10.0.1.1:6789/0 messenger.start
+>> 2012-11-19 20:38:51.599508 7fc13fdc6780  1 accepter.accepter.start
+>> 2012-11-19 20:38:51.599610 7fc13fdc6780  1 mon.vault01@-1(probing) e1 init fsid 4d7d8d20-338c-4bdc-9918-9bcf04f9a832
+>> 2012-11-19 20:38:51.599674 7fc13cdbe700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c6c0 sd=14 :6789 pgs=0 cs=0 l=0).accept sd=14
+>> 2012-11-19 20:38:51.599678 7fc141eff700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c240 sd=9 :6789 pgs=0 cs=0 l=0).accept sd=9
+>> 2012-11-19 20:38:51.599718 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 37
+>> 2012-11-19 20:38:51.599723 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl cluster_uuid = 37 bytes
+>> 2012-11-19 20:38:51.599718 7fc13ccbd700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c480 sd=19 :6789 pgs=0 cs=0 l=0).accept sd=19
+>> 2012-11-19 20:38:51.599729 7fc13fdc6780 10 mon.vault01@-1(probing) e1 check_fsid cluster_uuid contains '4d7d8d20-338c-4bdc-9918-9bcf04f9a832'
+>> 2012-11-19 20:38:51.599739 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 75
+>> 2012-11-19 20:38:51.599745 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl feature_set = 75 bytes
+>> 2012-11-19 20:38:51.599751 7fc13fdc6780 10 mon.vault01@-1(probing) e1 features compat={},rocompat={},incompat={1=initial feature set (~v.18)}
+>> 2012-11-19 20:38:51.599759 7fc13fdc6780 15 store(/ceph/mon.vault01) exists_bl joined
+>> 2012-11-19 20:38:51.599769 7fc13fdc6780 10 mon.vault01@-1(probing) e1 has_ever_joined = 1
+>> 2012-11-19 20:38:51.599794 7fc13fdc6780 15 store(/ceph/mon.vault01) get_int pgmap/last_committed = 133333
+>> 2012-11-19 20:38:51.599801 7fc13fdc6780 15 store(/ceph/mon.vault01) get_int pgmap/first_committed = 132833
+>> 2012-11-19 20:38:51.599810 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 239840
+>> 2012-11-19 20:38:51.599928 7fc13cbbc700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213cd80 sd=20 :6789 pgs=0 cs=0 l=0).accept sd=20
+>> 2012-11-19 20:38:51.599950 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl pgmap/latest = 239840 bytes
+>> --- begin dump of recent events ---2012-11-19 20:38:51.600509 7fc13fdc6780 -1
+>> *** Caught signal (Aborted) **
+>>  in thread 7fc13fdc6780
+>>
+>>  ceph version 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150)
+>>  1: ceph-mon() [0x53adf8]
+>>  2: (()+0xfe90) [0x7fc141830e90]
+>>  3: (gsignal()+0x3e) [0x7fc140016dae]
+>>  4: (abort()+0x17b) [0x7fc14001825b]
+>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc141af300d]
+>>  6: (()+0xb31b6) [0x7fc141af11b6]
+>>  7: (()+0xb31e3) [0x7fc141af11e3]
+>>  8: (()+0xb32de) [0x7fc141af12de]
+>>  9: ceph-mon() [0x5ecb9f]
+>>  10: (Paxos::get_stashed(ceph::buffer::list&)+0x1ed) [0x49e28d]
+>>  11: (Paxos::init()+0x109) [0x49e609]
+>>  12: (Monitor::init()+0x36a) [0x485a4a]
+>>  13: (main()+0x1289) [0x46d909]
+>>  14: (__libc_start_main()+0xed) [0x7fc14000364d]
+>>  15: ceph-mon() [0x46fa09]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>
+>>    -55> 2012-11-19 20:38:51.596694 7fc13fdc6780  5 asok(0x213d000) register_command perfcounters_dump hook 0x2131050
+>>    -55> 2012-11-19 20:38:51.596720 7fc13fdc6780  5 asok(0x213d000) register_command 1 hook 0x2131050
+>>    -54> 2012-11-19 20:38:51.596725 7fc13fdc6780  5 asok(0x213d000) register_command perf dump hook 0x2131050
+>>    -53> 2012-11-19 20:38:51.596735 7fc13fdc6780  5 asok(0x213d000) register_command perfcounters_schema hook 0x2131050
+>>    -52> 2012-11-19 20:38:51.596740 7fc13fdc6780  5 asok(0x213d000) register_command 2 hook 0x2131050
+>>    -51> 2012-11-19 20:38:51.596745 7fc13fdc6780  5 asok(0x213d000) register_command perf schema hook 0x2131050
+>>    -50> 2012-11-19 20:38:51.596752 7fc13fdc6780  5 asok(0x213d000) register_command config show hook 0x2131050
+>>    -49> 2012-11-19 20:38:51.596756 7fc13fdc6780  5 asok(0x213d000) register_command config set hook 0x2131050
+>>    -48> 2012-11-19 20:38:51.596761 7fc13fdc6780  5 asok(0x213d000) register_command log flush hook 0x2131050
+>>    -47> 2012-11-19 20:38:51.596765 7fc13fdc6780  5 asok(0x213d000) register_command log dump hook 0x2131050
+>>    -46> 2012-11-19 20:38:51.596770 7fc13fdc6780  5 asok(0x213d000) register_command log reopen hook 0x2131050
+>>    -45> 2012-11-19 20:38:51.598468 7fc13fdc6780  0 ceph version 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150), process ceph-mon, pid 21012
+>>    -44> 2012-11-19 20:38:51.598482 7fc13fdc6780  1 store(/ceph/mon.vault01) mount
+>>    -43> 2012-11-19 20:38:51.598527 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 21
+>>    -42> 2012-11-19 20:38:51.598542 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl magic = 21 bytes
+>>    -41> 2012-11-19 20:38:51.598562 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 75
+>>    -40> 2012-11-19 20:38:51.598567 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl feature_set = 75 bytes
+>>    -39> 2012-11-19 20:38:51.598582 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 205
+>>    -38> 2012-11-19 20:38:51.598586 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl monmap/latest = 205 bytes
+>>    -37> 2012-11-19 20:38:51.598809 7fc13fdc6780  1 -- 10.0.1.1:6789/0 learned my addr 10.0.1.1:6789/0
+>>    -36> 2012-11-19 20:38:51.598818 7fc13fdc6780  1 accepter.accepter.bind my_inst.addr is 10.0.1.1:6789/0 need_addr=0
+>>    -35> 2012-11-19 20:38:51.599219 7fc13fdc6780  1 finished global_init_daemonize
+>>    -34> 2012-11-19 20:38:51.599350 7fc13fdc6780  5 asok(0x213d000) init /var/run/ceph/ceph-mon.vault01.asok
+>>    -33> 2012-11-19 20:38:51.599371 7fc13fdc6780  5 asok(0x213d000) bind_and_listen /var/run/ceph/ceph-mon.vault01.asok
+>>    -32> 2012-11-19 20:38:51.599438 7fc13fdc6780  5 asok(0x213d000) register_command 0 hook 0x2130030
+>>    -31> 2012-11-19 20:38:51.599444 7fc13fdc6780  5 asok(0x213d000) register_command version hook 0x2130030
+>>    -30> 2012-11-19 20:38:51.599451 7fc13fdc6780  5 asok(0x213d000) register_command git_version hook 0x2130030
+>>    -29> 2012-11-19 20:38:51.599456 7fc13fdc6780  5 asok(0x213d000) register_command help hook 0x2131040
+>>    -28> 2012-11-19 20:38:51.599472 7fc13edc2700  5 asok(0x213d000) entry start
+>>    -27> 2012-11-19 20:38:51.599498 7fc13fdc6780  1 -- 10.0.1.1:6789/0 messenger.start
+>>    -26> 2012-11-19 20:38:51.599508 7fc13fdc6780  1 accepter.accepter.start
+>>    -25> 2012-11-19 20:38:51.599610 7fc13fdc6780  1 mon.vault01@-1(probing) e1 init fsid 4d7d8d20-338c-4bdc-9918-9bcf04f9a832
+>>    -24> 2012-11-19 20:38:51.599674 7fc13cdbe700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c6c0 sd=14 :6789 pgs=0 cs=0 l=0).accept sd=14
+>>    -23> 2012-11-19 20:38:51.599678 7fc141eff700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c240 sd=9 :6789 pgs=0 cs=0 l=0).accept sd=9
+>>    -22> 2012-11-19 20:38:51.599718 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 37
+>>    -21> 2012-11-19 20:38:51.599723 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl cluster_uuid = 37 bytes
+>>    -20> 2012-11-19 20:38:51.599718 7fc13ccbd700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213c480 sd=19 :6789 pgs=0 cs=0 l=0).accept sd=19
+>>    -19> 2012-11-19 20:38:51.599729 7fc13fdc6780 10 mon.vault01@-1(probing) e1 check_fsid cluster_uuid contains '4d7d8d20-338c-4bdc-9918-9bcf04f9a832'
+>>    -18> 2012-11-19 20:38:51.599739 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 75
+>>    -17> 2012-11-19 20:38:51.599745 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl feature_set = 75 bytes
+>>    -16> 2012-11-19 20:38:51.599751 7fc13fdc6780 10 mon.vault01@-1(probing) e1 features compat={},rocompat={},incompat={1=initial feature set (~v.18)}
+>>    -15> 2012-11-19 20:38:51.599759 7fc13fdc6780 15 store(/ceph/mon.vault01) exists_bl joined
+>>    -14> 2012-11-19 20:38:51.599769 7fc13fdc6780 10 mon.vault01@-1(probing) e1 has_ever_joined = 1
+>>    -13> 2012-11-19 20:38:51.599794 7fc13fdc6780 15 store(/ceph/mon.vault01) get_int pgmap/last_committed = 133333
+>>    -12> 2012-11-19 20:38:51.599795 7fc13cdbe700  5 throttle(mon_daemon_bytes 0x7fffae473da0) get 56 (0 -> 56)
+>>    -11> 2012-11-19 20:38:51.599801 7fc13fdc6780 15 store(/ceph/mon.vault01) get_int pgmap/first_committed = 132833
+>>    -10> 2012-11-19 20:38:51.599805 7fc13cdbe700  5 throttle(msgr_dispatch_throttler-mon 0x2153488) get 56 (0 -> 56)
+>>     -9> 2012-11-19 20:38:51.599810 7fc13fdc6780 20 store(/ceph/mon.vault01) reading at off 0 of 239840
+>>     -8> 2012-11-19 20:38:51.599904 7fc141eff700  5 throttle(mon_daemon_bytes 0x7fffae473da0) get 56 (56 -> 112)
+>>     -7> 2012-11-19 20:38:51.599910 7fc141eff700  5 throttle(msgr_dispatch_throttler-mon 0x2153488) get 56 (56 -> 112)
+>>     -6> 2012-11-19 20:38:51.599916 7fc13ccbd700  5 throttle(mon_daemon_bytes 0x7fffae473da0) get 62 (112 -> 174)
+>>     -5> 2012-11-19 20:38:51.599929 7fc13ccbd700  5 throttle(msgr_dispatch_throttler-mon 0x2153488) get 62 (112 -> 174)
+>>     -4> 2012-11-19 20:38:51.599928 7fc13cbbc700  1 -- 10.0.1.1:6789/0 >> :/0 pipe(0x213cd80 sd=20 :6789 pgs=0 cs=0 l=0).accept sd=20
+>>     -3> 2012-11-19 20:38:51.599950 7fc13fdc6780 15 store(/ceph/mon.vault01) get_bl pgmap/latest = 239840 bytes
+>>     -2> 2012-11-19 20:38:51.600027 7fc13cbbc700  5 throttle(mon_daemon_bytes 0x7fffae473da0) get 56 (174 -> 230)
+>>     -1> 2012-11-19 20:38:51.600033 7fc13cbbc700  5 throttle(msgr_dispatch_throttler-mon 0x2153488) get 56 (174 -> 230)
+>>      0> 2012-11-19 20:38:51.600509 7fc13fdc6780 -1 *** Caught signal (Aborted) **
+>>  in thread 7fc13fdc6780
+>>
+>>  ceph version 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150)
+>>  1: ceph-mon() [0x53adf8]
+>>  2: (()+0xfe90) [0x7fc141830e90]
+>>  3: (gsignal()+0x3e) [0x7fc140016dae]
+>>  4: (abort()+0x17b) [0x7fc14001825b]
+>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc141af300d]
+>>  6: (()+0xb31b6) [0x7fc141af11b6]
+>>  7: (()+0xb31e3) [0x7fc141af11e3]
+>>  8: (()+0xb32de) [0x7fc141af12de]
+>>  9: ceph-mon() [0x5ecb9f]
+>>  10: (Paxos::get_stashed(ceph::buffer::list&)+0x1ed) [0x49e28d]
+>>  11: (Paxos::init()+0x109) [0x49e609]
+>>  12: (Monitor::init()+0x36a) [0x485a4a]
+>>  13: (main()+0x1289) [0x46d909]
+>>  14: (__libc_start_main()+0xed) [0x7fc14000364d]
+>>  15: ceph-mon() [0x46fa09]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>
+>> --- logging levels ---
+>>    0/ 5 none
+>>    0/ 5 lockdep
+>>    0/ 5 context
+>>    1/ 5 crush
+>>    1/ 5 mds
+>>    1/ 5 mds_balancer
+>>    1/ 5 mds_locker
+>>    1/ 5 mds_log
+>>    1/ 5 mds_log_expire
+>>    1/ 5 mds_migrator
+>>    0/ 0 buffer
+>>    0/ 5 timer
+>>    0/ 5 filer
+>>    0/ 0 objecter
+>>    0/ 5 rados
+>>    0/ 5 rbd
+>>    0/ 5 journaler
+>>    0/ 5 objectcacher
+>>    0/ 5 client
+>>    0/ 5 osd
+>>    0/ 5 optracker
+>>    0/ 5 objclass
+>>    1/ 5 filestore
+>>    1/ 5 journal
+>>    1/ 1 ms
+>>   20/20 mon
+>>    0/ 5 monc
+>>   20/20 paxos
+>>    0/ 5 tp
+>>   20/20 auth
+>>    1/ 5 finisher
+>>    1/ 5 heartbeatmap
+>>    1/ 5 perfcounter
+>>    1/ 5 rgw
+>>    1/ 5 hadoop
+>>    1/ 5 asok
+>>    1/ 5 throttle
+>>   -2/-2 (syslog threshold)
+>>   -1/-1 (stderr threshold)
+>>   max_recent     10000
+>>   max_new      1000000
+>>   log_file /var/log/ceph/mon.vault01.log
+>> --- end dump of recent events ---
+>>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---
-=E5=BC=A0=E7=BB=8D=E6=96=87
-gongfan193@gmail.com
-zhangsw@gwbnsh.net.cn
-18601633785
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
