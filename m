@@ -1,54 +1,41 @@
-From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: [PATCH] use int64_t for return values from rbd instead
-	of int
-Date: Tue, 20 Nov 2012 13:44:55 +0100
-Message-ID: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: librbd discard bug problems -> i REALLY got it
+Date: Tue, 20 Nov 2012 13:46:27 +0100
+Message-ID: <50AB7BA3.1060906@profihost.ag>
+References: <50AAA25F.9040908@profihost.ag> <50AAB4D6.3030304@inktank.com> <50AABDD1.5050802@profihost.ag> <50AAC1B1.9070701@inktank.com> <50AAC3CB.9090309@profihost.ag> <50AAC51C.1090904@inktank.com> <50AAC835.908@profihost.ag> <50AACE9D.8080905@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
-List-Unsubscribe: <http://pve.proxmox.com/cgi-bin/mailman/options/pve-devel>,
-	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://pve.proxmox.com/pipermail/pve-devel>
-List-Post: <mailto:pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
-List-Help: <mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=help>
-List-Subscribe: <http://pve.proxmox.com/cgi-bin/mailman/listinfo/pve-devel>,
-	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=subscribe>
-Sender: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
-Errors-To: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
-To: qemu-devel-qX2TKyscuCcdnm+yROfE0A@public.gmane.org
-Cc: pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org, josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.profihost.ag ([85.158.179.208]:58850 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753182Ab2KTMqb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 07:46:31 -0500
+In-Reply-To: <50AACE9D.8080905@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-rbd / rados tends to return pretty often length of writes
-or discarded blocks. These values might be bigger than int.
+Hi Josh,
 
-Signed-off-by: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
----
- block/rbd.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+the problem was again in the qemu rbd driver.
 
-diff --git a/block/rbd.c b/block/rbd.c
-index f57d0c6..6bf9c2e 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -69,7 +69,7 @@ typedef enum {
- typedef struct RBDAIOCB {
-     BlockDriverAIOCB common;
-     QEMUBH *bh;
--    int ret;
-+    int64_t ret;
-     QEMUIOVector *qiov;
-     char *bounce;
-     RBDAIOCmd cmd;
-@@ -87,7 +87,7 @@ typedef struct RADOSCB {
-     int done;
-     int64_t size;
-     char *buf;
--    int ret;
-+    int64_t ret;
- } RADOSCB;
- 
- #define RBD_FD_READ 0
--- 
-1.7.10.4
+It was using int for several return values instead of int_64. I send 2nd 
+patch to the qemu list and ceph devel.
+
+Could you please care that BOTH patches the one from yesterday AND today 
+get into qemu?
+
+Greets,
+Stefan
+Am 20.11.2012 01:28, schrieb Josh Durgin:
+> On 11/19/2012 04:00 PM, Stefan Priebe wrote:
+>> Hi Josh,
+>>
+>> i don't get it. Every debug line i print is a prositive fine value. BUt
+>> rbd_aio_bh_cb get's called with these values. As you can see that are
+>> not much values i copied all values < 0 from log for discarding a whole
+>> 30GB device.
+>
+> Could you post the patch of the debug prints you added and the log?
