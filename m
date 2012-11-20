@@ -1,49 +1,43 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Can't start ceph mon
-Date: Tue, 20 Nov 2012 10:26:06 -0800
-Message-ID: <CAPYLRzg_X2ipWLQeOkLE=hJ-_r9W-eS4=SWdQO525R58PpJxtg@mail.gmail.com>
-References: <50ABC929.3000107@bob-the-boat.me.uk>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: [Qemu-devel] [PATCH] use int64_t for return values from rbd instead
+ of int
+Date: Tue, 20 Nov 2012 20:16:35 +0100
+Message-ID: <50ABD713.3050300@profihost.ag>
+References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag> <20121120162922.GA8665@stefanha-thinkpad.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:44265 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751613Ab2KTS0G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 13:26:06 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so9049728iea.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 10:26:06 -0800 (PST)
-In-Reply-To: <50ABC929.3000107@bob-the-boat.me.uk>
+Received: from mail.profihost.ag ([85.158.179.208]:45871 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751582Ab2KTTQw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 14:16:52 -0500
+In-Reply-To: <20121120162922.GA8665@stefanha-thinkpad.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dave (Bob)" <dave@bob-the-boat.me.uk>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Hajnoczi <stefanha@gmail.com>
+Cc: qemu-devel@nongnu.org, pbonzini@redhat.com, ceph-devel@vger.kernel.org, pve-devel@pve.proxmox.com, josh.durgin@inktank.com
 
-On Tue, Nov 20, 2012 at 10:17 AM, Dave (Bob) <dave@bob-the-boat.me.uk> wrote:
->>Do you have other monitors in working order? The easiest way to handle
->>it if that's the case is just to remove this monitor from the cluster
->>and add it back in as a new monitor with a fresh store. If not we can
->>look into reconstructing it.
->>-Greg
->
->
->>Also, if you still have it, could you zip up your monitor data
->>directory and put it somewhere accessible to us? (I can provide you a
->>drop point if necessary.) We'd like to look at the file layouts a bit
->>since we thought we were properly handling ENOSPC-style issues.
->>-Greg
->
-> Greg,
->
-> Thanks. I was running only one monitor, so I will need to try to reconstruct things.
->
-> If you tell me exactly what to pack up and where to send it, I'll be only too pleased to receive your help...
->
-> David
+Hi Stefan,
 
-The monitor has a data directory somewhere on your filesystem. It's
-configurable but by default is at /var/lib/ceph/mon/. If you can send
-me the contents of that we ought to be able to 1) figure out how this
-actually happened, and 2) turn it into something that works properly.
-:)
-Any logs you have (default: /var/log/ceph/mon*) would also be helpful.
--Greg
+Am 20.11.2012 17:29, schrieb Stefan Hajnoczi:
+> On Tue, Nov 20, 2012 at 01:44:55PM +0100, Stefan Priebe wrote:
+>> rbd / rados tends to return pretty often length of writes
+>> or discarded blocks. These values might be bigger than int.
+>>
+>> Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
+>> ---
+>>   block/rbd.c |    4 ++--
+>>   1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> Looks good but I want to check whether this fixes an bug you've hit?
+> Please indicate details of the bug and how to reproduce it in the commit
+> message.
+
+you get various I/O errors in client. As negative return values indicate 
+I/O errors. When now a big positive value is returned by librbd 
+block/rbd tries to store this one in acb->ret which is an int. Then it 
+wraps around and is negative. After that block/rbd thinks this is an I/O 
+error and report this to the guest.
+
+Stefan
