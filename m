@@ -1,31 +1,47 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: does still not recommended place rbd device on nodes, where osd
- daemon located?
-Date: Tue, 20 Nov 2012 08:50:20 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211200849080.7369@cobra.newdream.net>
-References: <CAHULbCmY6j3GbRFs_fyO1VP5_-BG5Cg1H_Kvfg1nN3jMMpyvHA@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: librbd discard bug problems -> i REALLY got it
+Date: Tue, 20 Nov 2012 09:09:34 -0800
+Message-ID: <50ABB94E.2010003@inktank.com>
+References: <50AAA25F.9040908@profihost.ag> <50AAB4D6.3030304@inktank.com> <50AABDD1.5050802@profihost.ag> <50AAC1B1.9070701@inktank.com> <50AAC3CB.9090309@profihost.ag> <50AAC51C.1090904@inktank.com> <50AAC835.908@profihost.ag> <50AACE9D.8080905@inktank.com> <50AB7BA3.1060906@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45572 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752787Ab2KTQuV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 11:50:21 -0500
-In-Reply-To: <CAHULbCmY6j3GbRFs_fyO1VP5_-BG5Cg1H_Kvfg1nN3jMMpyvHA@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33185 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753688Ab2KTRJk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 12:09:40 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so1396144pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 09:09:40 -0800 (PST)
+In-Reply-To: <50AB7BA3.1060906@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ruslan usifov <ruslan.usifov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 20 Nov 2012, ruslan usifov wrote:
-> Hello
-> 
-> Now i can't find link where i read this info (this was old ceph wiki)
-> but there was written that rbd on osd can prevent hung. Does this
-> situation actual for present days?
+On 11/20/2012 04:46 AM, Stefan Priebe - Profihost AG wrote:
+> Hi Josh,
+>
+> the problem was again in the qemu rbd driver.
+>
+> It was using int for several return values instead of int_64. I send 2nd
+> patch to the qemu list and ceph devel.
+>
+> Could you please care that BOTH patches the one from yesterday AND today
+> get into qemu?
 
-This is still the case when using the kernel RBD or cephfs drivers.
+Great! I'll look at these later today.
 
-Workarounds include using librbd+qemu, or kernel RBD from within a VM. 
+> Greets,
+> Stefan
+> Am 20.11.2012 01:28, schrieb Josh Durgin:
+>> On 11/19/2012 04:00 PM, Stefan Priebe wrote:
+>>> Hi Josh,
+>>>
+>>> i don't get it. Every debug line i print is a prositive fine value. BUt
+>>> rbd_aio_bh_cb get's called with these values. As you can see that are
+>>> not much values i copied all values < 0 from log for discarding a whole
+>>> 30GB device.
+>>
+>> Could you post the patch of the debug prints you added and the log?
 
-sage
