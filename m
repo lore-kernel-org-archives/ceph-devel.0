@@ -1,157 +1,34 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: 'zombie snapshot' problem
-Date: Wed, 21 Nov 2012 15:50:00 +0300
-Message-ID: <CABYiri-cnNmP_Y0bdhvp8O8v-9kJyAWK9vcHgb_zwPP7ZAAuXQ@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: RBD Backup
+Date: Wed, 21 Nov 2012 14:37:58 +0100
+Message-ID: <50ACD936.8060907@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=e89a8fb2017a17b6f404cf00cb99
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:57312 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752161Ab2KUMuY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 07:50:24 -0500
-Received: by mail-ob0-f174.google.com with SMTP id wc20so6984145obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Nov 2012 04:50:21 -0800 (PST)
+Received: from mail.profihost.ag ([85.158.179.208]:49084 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752977Ab2KUNiH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 08:38:07 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---e89a8fb2017a17b6f404cf00cb99
-Content-Type: text/plain; charset=UTF-8
+Hello list,
 
-Hi,
+is there a recommanded way to backup rbd images / disks?
 
-Somehow I have managed to produce unkillable snapshot, which does not
-allow to remove itself or parent image:
+Or is it just
+rbd snap create BACKUP
+rbd export BACKUP
+rbd snap rm BACKUP
 
-$ rbd snap purge dev-rack0/vm2
-Removing all snapshots: 100% complete...done.
-$ rbd rm dev-rack0/vm2
-2012-11-21 16:31:24.184626 7f7e0d172780 -1 librbd: image has snapshots
-- not removing
-Removing image: 0% complete...failed.
-rbd: image has snapshots - these must be deleted with 'rbd snap purge'
-before the image can be removed.
-$ rbd snap ls dev-rack0/vm2
-SNAPID NAME                               SIZE
-   188 vm2.snap-yxf 16384 MB
-$ rbd info dev-rack0/vm2
-rbd image 'vm2':
-        size 16384 MB in 4096 objects
-        order 22 (4096 KB objects)
-        block_name_prefix: rbd_data.1fa164c960874
-        format: 2
-        features: layering
-$ rbd snap rm --snap vm2.snap-yxf dev-rack0/vm2
-rbd: failed to remove snapshot: (2) No such file or directory
-$ rbd snap create --snap vm2.snap-yxf dev-rack0/vm2
-rbd: failed to create snapshot: (17) File exists
-$ rbd snap rollback --snap vm2.snap-yxf dev-rack0/vm2
-Rolling back to snapshot: 100% complete...done.
-$ rbd snap protect --snap vm2.snap-yxf dev-rack0/vm2
-$ rbd snap unprotect --snap vm2.snap-yxf dev-rack0/vm2
+Is the snap needed at all? Or is an export save? Is there a way to make 
+sure the image is consistent?
 
+Is it possible to use the BACKUP file as a loop device or something else 
+so that i'm able to mount the partitions from the backup file?
 
-Meanwhile, ``rbd ls -l dev-rack0''  segfaulting with an attached log.
-Is there any reliable way to kill problematic snap?
+Thanks!
 
---e89a8fb2017a17b6f404cf00cb99
-Content-Type: application/x-gzip; name="log-crash.txt.gz"
-Content-Disposition: attachment; filename="log-crash.txt.gz"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_h9sg3bs20
-
-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
---e89a8fb2017a17b6f404cf00cb99--
+Greets Stefan
