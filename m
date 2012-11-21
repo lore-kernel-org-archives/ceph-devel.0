@@ -1,56 +1,69 @@
-From: Stefan Hajnoczi <stefanha@gmail.com>
-Subject: Re: [Qemu-devel] [PATCH] use int64_t for return values from rbd
- instead of int
-Date: Wed, 21 Nov 2012 09:43:09 +0100
-Message-ID: <20121121084309.GA17466@stefanha-thinkpad.redhat.com>
-References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
- <20121120162922.GA8665@stefanha-thinkpad.redhat.com>
- <50ABD713.3050300@profihost.ag>
- <CAJSP0QXcjaRdeQ55GSPtSqam+WHUGPAz4+ohajTCMR8f+4oKrQ@mail.gmail.com>
- <50AC8704.2020407@profihost.ag>
- <20121121082616.GB13504@stefanha-thinkpad.redhat.com>
- <50AC91C4.4070900@profihost.ag>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: [Openstack] Ceph + Nova
+Date: Wed, 21 Nov 2012 10:03:48 +0100
+Message-ID: <CAOLwVU=114PncjQ_DNUrfVfRaP=9q02vTMtBwxuuA1VhWjcfiw@mail.gmail.com>
+References: <CAGXO4kxPoxbJkZw57npn79e6TD5VByyXinh5vd8_JSSKb29MVw@mail.gmail.com>
+ <CAGXO4kz-SZPHZp5aAFk4P4FFvK36qxNNX7D0wXtnqMLX3WCsKw@mail.gmail.com>
+ <CAGXO4kwdNMuB4FRC2fgg2kHeo_zrGP66iLgCg2QaygqYOLS9cA@mail.gmail.com>
+ <CACxfpGec2drEvAK+83cG1TEVQwMOg1P-7emU2zp9iX7VKORybg@mail.gmail.com>
+ <CAGXO4kye1z8ymvdu=m+c8AwgEk6TU87S2iLoiJQYJLwrWrn8gA@mail.gmail.com>
+ <CAGXO4kwDtmD5Jr_gGDocB8C-e90MHCONCnTAM5Lqp2nVgSKMnw@mail.gmail.com> <CAGXO4kywgFO1yEzSU56HBD2_GN856JwFshYc7+5com3t0cnfcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:34091 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751698Ab2KUInM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 03:43:12 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so2700643eaa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Nov 2012 00:43:11 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <50AC91C4.4070900@profihost.ag>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:43046 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751876Ab2KUJEK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 04:04:10 -0500
+Received: by mail-la0-f46.google.com with SMTP id p5so2630491lag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Nov 2012 01:04:08 -0800 (PST)
+In-Reply-To: <CAGXO4kywgFO1yEzSU56HBD2_GN856JwFshYc7+5com3t0cnfcA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: qemu-devel <qemu-devel@nongnu.org>, Paolo Bonzini <pbonzini@redhat.com>, ceph-devel@vger.kernel.org, pve-devel@pve.proxmox.com, josh.durgin@inktank.com
+To: =?ISO-8859-1?Q?JuanFra_Rodr=EDguez_Cardoso?= <juanfra.rodriguez.cardoso@gmail.com>
+Cc: Openstack <openstack@lists.launchpad.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 21, 2012 at 09:33:08AM +0100, Stefan Priebe - Profihost AG wrote:
-> Am 21.11.2012 09:26, schrieb Stefan Hajnoczi:
-> >On Wed, Nov 21, 2012 at 08:47:16AM +0100, Stefan Priebe - Profihost AG wrote:
-> >>Am 21.11.2012 07:41, schrieb Stefan Hajnoczi:
-> >QEMU is currently in hard freeze and only critical patches should go in.
-> >Providing steps to reproduce the bug helps me decide that this patch
-> >should still be merged for QEMU 1.3-rc1.
-> >
-> >Anyway, the patch is straightforward, I have applied it to my block tree
-> >and it will be in QEMU 1.3-rc1:
-> >https://github.com/stefanha/qemu/commits/block
-> 
-> Thanks!
-> 
-> The steps to reproduce are:
-> mkfs.xfs -f a whole device bigger than int in bytes. mkfs.xfs sends
-> a discard. Important is that you use scsi-hd and set
-> discard_granularity=512. Otherwise rbd disabled discard support.
+Hi,
 
-Excellent, thanks!  I will add it to the commit description.
+I don't think it's the best place to ask your question since it's not
+directly related to OpenStack but more about Ceph. I just put in c/c
+the ceph ML. Anyway, CephFS is not ready yet for production but I
+heard that some people use it. People from Inktank (the company behind
+Ceph) don't recommend it, AFAIR they expect something more production
+ready for Q2 2013. You can use it (I did, for testing purpose) but
+it's at your own risk.
+Beside of this RBD and RADOS are robust and stable now, so you can go
+with the Cinder and Glance integration without any problems.
 
-> Might you have a look at my other rbd fix too? It fixes a race
-> between task cancellation and writes. The same race was fixed in
-> iscsi this summer.
+Cheers!
 
-Yes.
-
-Stefan
+On Wed, Nov 21, 2012 at 9:37 AM, JuanFra Rodr=EDguez Cardoso
+<juanfra.rodriguez.cardoso@gmail.com> wrote:
+> Hi everyone:
+>
+> I'd like to know your opinion as nova experts:
+>
+> Would you recommend CephFS as shared storage in /var/lib/nova/instanc=
+es?
+> Another option it would be use GlusterFS or MooseFS for
+> /var/lib/nova/instances directory and Ceph RBD for Glance and Nova vo=
+lumes,
+> don't you think?
+>
+> Thanks for your attention.
+>
+> Best regards,
+> JuanFra
+>
+> _______________________________________________
+> Mailing list: https://launchpad.net/~openstack
+> Post to     : openstack@lists.launchpad.net
+> Unsubscribe : https://launchpad.net/~openstack
+> More help   : https://help.launchpad.net/ListHelp
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
