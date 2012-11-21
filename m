@@ -1,58 +1,102 @@
-From: Stefan Hajnoczi <stefanha@gmail.com>
-Subject: Re: [Qemu-devel] [PATCH] use int64_t for return values from rbd
- instead of int
-Date: Wed, 21 Nov 2012 07:41:48 +0100
-Message-ID: <CAJSP0QXcjaRdeQ55GSPtSqam+WHUGPAz4+ohajTCMR8f+4oKrQ@mail.gmail.com>
-References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
-	<20121120162922.GA8665@stefanha-thinkpad.redhat.com>
-	<50ABD713.3050300@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: OSD daemon changes port no
+Date: Tue, 20 Nov 2012 23:03:40 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net>
+References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com> <alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net> <CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com> <alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
+ <CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:35310 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750824Ab2KUGlu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 01:41:50 -0500
-Received: by mail-lb0-f174.google.com with SMTP id gi11so2446817lbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 22:41:49 -0800 (PST)
-In-Reply-To: <50ABD713.3050300@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:54452 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752797Ab2KUHDk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 02:03:40 -0500
+In-Reply-To: <CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: qemu-devel <qemu-devel@nongnu.org>, Paolo Bonzini <pbonzini@redhat.com>, ceph-devel@vger.kernel.org, pve-devel@pve.proxmox.com, josh.durgin@inktank.com
+To: hemant surale <hemant.surale@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Nov 20, 2012 at 8:16 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
-> Hi Stefan,
->
-> Am 20.11.2012 17:29, schrieb Stefan Hajnoczi:
->
->> On Tue, Nov 20, 2012 at 01:44:55PM +0100, Stefan Priebe wrote:
->>>
->>> rbd / rados tends to return pretty often length of writes
->>> or discarded blocks. These values might be bigger than int.
->>>
->>> Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
->>> ---
->>>   block/rbd.c |    4 ++--
->>>   1 file changed, 2 insertions(+), 2 deletions(-)
->>
->>
->> Looks good but I want to check whether this fixes an bug you've hit?
->> Please indicate details of the bug and how to reproduce it in the commit
->> message.
->
->
-> you get various I/O errors in client. As negative return values indicate I/O
-> errors. When now a big positive value is returned by librbd block/rbd tries
-> to store this one in acb->ret which is an int. Then it wraps around and is
-> negative. After that block/rbd thinks this is an I/O error and report this
-> to the guest.
+On Wed, 21 Nov 2012, hemant surale wrote:
+> Its a little confusing question I believe .
+> 
+> Actually there are two files X & Y.  When I am reading X from its
+> primary .I want to make sure simultaneous writing of Y should go to
+> any other OSD except primary OSD for X (from where my current read is
+> getting served ) .
 
-It's still not clear whether this is a bug that you can reproduce.
-After all, the ret value would have to be >2^31 which is a 2+ GB
-request!
+Oh I see.  Generally speaking, the only way to guarantee separation is to 
+put them in different pools and distribute the pools across different sets 
+of OSDs.  Otherwise, it's all (pseudo)random and you never know.  Usually, 
+they will be different, particularly as the cluster size increases, but 
+sometimes they will be the same.
 
-I'm asking if this is a critical bug fix that needs to go into QEMU
-1.3-rc1 because of a real-world issue?
+sage
 
-Stefan
+
+> 
+> 
+> -
+> Hemant Sural.e
+> 
+> On Wed, Nov 21, 2012 at 11:50 AM, Sage Weil <sage@inktank.com> wrote:
+> > On Wed, 21 Nov 2012, hemant surale wrote:
+> >> >>    and one more thing how can it be possible to read from one osd and
+> >> >> then simultaneous write to direct on other osd with less/no traffic?
+> >> >
+> >> > I'm not sure I understand the question...
+> >>
+> >> Scenario :
+> >>        I have written file X.txt on some osd which is primary for filr
+> >> X.txt ( direct write operation using rados cmd) .
+> >>        Now while read on file X.txt is in progress, Can I make sure
+> >> the simultaneous write request must be directed to other osd using
+> >> crushmaps/other way?
+> >
+> > Nope.  The object location is based on the name.  Reads and writes go to
+> > the same location so that a single OSD can serialize request.  That means,
+> > for example, that a read that follows a write returns the just-written
+> > data.
+> >
+> > sage
+> >
+> >
+> >> Goal of task :
+> >>        Trying to avoid read - write clashes as much as possible to
+> >> achieve faster operations (I/O) . Although CRUSH selects osd for data
+> >> placement based on pseudo random function.  is it possible ?
+> >>
+> >>
+> >>
+> >> -
+> >> Hemant Surale.
+> >>
+> >>
+> >>
+> >> On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
+> >> > On Tue, 20 Nov 2012, hemant surale wrote:
+> >> >> Hi Community,
+> >> >>    I have question about port number used by ceph-osd daemon . I
+> >> >> observed traffic (inter -osd communication while data ingest happened)
+> >> >> on port 6802 and then after some time when I ingested second file
+> >> >> after some delay port no 6804 was used . Is there any specific reason
+> >> >> to change port no here?
+> >> >
+> >> > The ports are dynamic.  Daemons bind to a random (6800-6900) port on
+> >> > startup and communicate on that.  They discover each other via the
+> >> > addresses published in the osdmap when the daemon starts.
+> >> >
+> >> >>    and one more thing how can it be possible to read from one osd and
+> >> >> then simultaneous write to direct on other osd with less/no traffic?
+> >> >
+> >> > I'm not sure I understand the question...
+> >> >
+> >> > sage
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
+> 
