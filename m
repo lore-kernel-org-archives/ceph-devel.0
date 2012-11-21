@@ -1,112 +1,64 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Files lost after mds rebuild
-Date: Wed, 21 Nov 2012 12:28:03 +0800
-Message-ID: <CAJiejCQbbX1p=KpxA_HKT7KhrgOScOBS56Ru-2YWPcsPoZdm4A@mail.gmail.com>
-References: <CAJiejCTWvtn6yS+_9h07t4KWqRHPqT-Oe23KtXmnvf7ZZbsAAw@mail.gmail.com>
- <CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com>
- <CAJiejCQt2xVBMzY9q6viYLkXYNrDcmHZP=rcWj+GK+qsYu=XuQ@mail.gmail.com> <CAPYLRzhF2hpkqVLk9RQZwffzJz4DhsmwA30PBxOxNJi+HSkf3w@mail.gmail.com>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: OSD daemon changes port no
+Date: Wed, 21 Nov 2012 11:05:15 +0530
+Message-ID: <CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
+References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
+	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:51324 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753006Ab2KUE2Y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Nov 2012 23:28:24 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so9793418iea.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 20:28:23 -0800 (PST)
-In-Reply-To: <CAPYLRzhF2hpkqVLk9RQZwffzJz4DhsmwA30PBxOxNJi+HSkf3w@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:58535 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750879Ab2KUFfQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 00:35:16 -0500
+Received: by mail-vc0-f174.google.com with SMTP id m18so3223390vcm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Nov 2012 21:35:15 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-'
-
-2012/11/21 Gregory Farnum <greg@inktank.com>:
-> On Tue, Nov 20, 2012 at 1:25 AM, Drunkard Zhang <gongfan193@gmail.com> wrote:
->> 2012/11/20 Gregory Farnum <greg@inktank.com>:
->>> On Mon, Nov 19, 2012 at 7:55 AM, Drunkard Zhang <gongfan193@gmail.com> wrote:
->>>> I created a ceph cluster for test, here's mistake I made:
->>>> Add a second mds: mds.ab, executed 'ceph mds set_max_mds 2', then
->>>> removed the mds just added;
->>>> Then 'ceph mds set_max_mds 1', the first mds.aa crashed, and became laggy.
->>>> As I can't repair mds.aa, so did 'ceph mds newfs metadata data
->>>> --yes-i-really-mean-it';
->>>
->>> So this command is a mkfs sort of thing. It's deleted all the
->>> "allocation tables" and filesystem metadata in favor of new, empty
->>> ones. You should not run "--yes-i-really-mean-it" commands if you
->>> don't know exactly what the command is doing and why you're using it.
->>>
->>>> mds.aa was back, but 1TB data was in cluster lost, but disk space
->>>> still used, by 'ceps -s'.
->>>>
->>>> Is there any chance I can get my data back? If can't, how can I
->>>> retrieve back the disk space.
->>>
->>> There's not currently a great way to get that data back. With
->>> sufficient energy it could be re-constructed by looking through all
->>> the RADOS objects and putting something together.
->>> To retrieve the disk space, you'll want to delete the "data" and
->>> "metadata" RADOS pools. This will of course *eliminate* the data you
->>> have in your new filesystem, so grab that out first if there's
->>> anything there you care about. Then create the pools and run the newfs
->>> command again.
->>> Also, you've got the syntax wrong on that newfs command. You should be
->>> using pool IDs:
->>> "ceph mds newfs 1 0 --yes-i-really-mean-it"
->>> (Though these IDs may change after re-creating the pools.)
->>> -Greg
->>
->> I followed your instructions, but didn't success, 'ceph mds newfs 1 0
->> --yes-i-really-mean-it' changed nothing, do I have to delete all pools
->> I created first? why is this way? Confused.
+>>    and one more thing how can it be possible to read from one osd and
+>> then simultaneous write to direct on other osd with less/no traffic?
 >
-> If you look below at your pools, you no longer have pool IDs 0 and 1.
-> They were the old "data" and "metadata" pools that you just deleted.
-> You will need to create new pools for the filesystem and use their
-> IDs.
+> I'm not sure I understand the question...
+
+Scenario :
+       I have written file X.txt on some osd which is primary for filr
+X.txt ( direct write operation using rados cmd) .
+       Now while read on file X.txt is in progress, Can I make sure
+the simultaneous write request must be directed to other osd using
+crushmaps/other way?
+
+Goal of task :
+       Trying to avoid read - write clashes as much as possible to
+achieve faster operations (I/O) . Although CRUSH selects osd for data
+placement based on pseudo random function.  is it possible ?
+
+
+
+-
+Hemant Surale.
+
+
+
+On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
+> On Tue, 20 Nov 2012, hemant surale wrote:
+>> Hi Community,
+>>    I have question about port number used by ceph-osd daemon . I
+>> observed traffic (inter -osd communication while data ingest happened)
+>> on port 6802 and then after some time when I ingested second file
+>> after some delay port no 6804 was used . Is there any specific reason
+>> to change port no here?
 >
-I did it, but didn't successed:
-log3 ~ # ceph mds newfs 1 0 --yes-i-really-mean-it
-new fs with metadata pool 1 and data pool 0
-log3 ~ # ceph osd dump | grep ^pool
-pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num
-320 pgp_num 320 last_change 1 owner 0
-pool 3 'netflow' rep size 2 crush_ruleset 0 object_hash rjenkins
-pg_num 8 pgp_num 8 last_change 1556 owner 0
-pool 4 'audit' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
-8 pgp_num 8 last_change 1558 owner 0
-pool 5 'dns-trend' rep size 2 crush_ruleset 0 object_hash rjenkins
-pg_num 8 pgp_num 8 last_change 1561 owner 0
-
-do I have to delete all pool [345] before recreate mds?
-
->> While testing, I found that the default pool is parent of all pools I
->> created later, right? So, delete the default 'data' pool also deleted
->> data belongs to other pools, is this true?
+> The ports are dynamic.  Daemons bind to a random (6800-6900) port on
+> startup and communicate on that.  They discover each other via the
+> addresses published in the osdmap when the daemon starts.
 >
-> No, absolutely not. There is no relationship between different RADOS
-> pools. If you've been using the cephfs tool to place some filesystem
-> data in different pools then your configuration is a little more
-> complicated (have you done that?), but deleting one pool is never
-> going to remove data from the others.
-> -Greg
+>>    and one more thing how can it be possible to read from one osd and
+>> then simultaneous write to direct on other osd with less/no traffic?
 >
-I think that should be a bug. Here's the story I did:
-I created one directory 'audit' in running ceph filesystem, and put
-some data into the directory (about 100GB) before these commands:
-ceph osd pool create audit
-ceph mds add_data_pool 4
-cephfs /mnt/temp/audit/ set_layout -p 4
-
-log3 ~ # ceph osd dump | grep audit
-pool 4 'audit' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
-8 pgp_num 8 last_change 1558 owner 0
-
-at this time, all data in audit still usable, after 'ceph osd pool
-delete data', the disk space recycled (forgot to test if the data
-still usable), only 200MB used, from 'ceph -s'. So, here's what I'm
-thinking, the data stored before pool created won't follow the pool,
-it still follows the default pool 'data', is this a bug, or intended
-behavior?
+> I'm not sure I understand the question...
+>
+> sage
