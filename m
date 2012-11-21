@@ -1,98 +1,61 @@
-From: Nick Bartos <nick@pistoncloud.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Wed, 21 Nov 2012 09:02:36 -0800
-Message-ID: <CAPud5_6fCfOkXviFB6rz9YvWYBkwNzf699Z1_TW3_v4nCoaUQA@mail.gmail.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
-	<alpine.DEB.2.00.1211121514200.26823@cobra.newdream.net>
-	<CAPud5_7+O3mJkQcBQntnx7qmgBMTM+EYL_RUVbh+wmPmG2vz4Q@mail.gmail.com>
-	<alpine.DEB.2.00.1211151623260.26514@cobra.newdream.net>
-	<CAPud5_5Pre+QRQqFQThE=+YL5auiY6omzriGxv2tTO0Dthv7+Q@mail.gmail.com>
-	<alpine.DEB.2.00.1211161111150.26514@cobra.newdream.net>
-	<CAPud5_6KOGLwBuZGz+GG3sSsA0jbq-T-LADAer_j6+pUbgKVvQ@mail.gmail.com>
-	<alpine.DEB.2.00.1211161412090.26514@cobra.newdream.net>
-	<CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com>
-	<alpine.DEB.2.00.1211161421350.26514@cobra.newdream.net>
-	<CAPud5_7GXtKn4G4GW+DWA7iFZHub8=hMWxnYfko=u9x+bKgQ6A@mail.gmail.com>
-	<CAPYLRzj=i-cvOQJdUTbGtkjjAr6H4ohwbGe3Qnm1nYPwAjjLJA@mail.gmail.com>
-	<CAPud5_6vGTpPVDATu6U_X5urkXpM5vhDXg3E5MbPu-07MTGuxQ@mail.gmail.com>
-	<CAPud5_4hSU9j5+6EL2VWDuZW0xfFNLCo-_KvDcWDkm9H2pd21w@mail.gmail.com>
-	<alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net>
+From: Stefan Weil <sw@weilnetz.de>
+Subject: Re: [PATCH] use int64_t for return values from rbd
+ instead of int
+Date: Wed, 21 Nov 2012 18:03:42 +0100
+Message-ID: <50AD096E.9080002@weilnetz.de>
+References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:33459 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750958Ab2KURCi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Nov 2012 12:02:38 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k11so578448iea.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Nov 2012 09:02:37 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
+In-Reply-To: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Stefan Hajnoczi <stefanha@gmail.com>, qemu-devel@nongnu.org, pve-devel@pve.proxmox.com, josh.durgin@inktank.com, pbonzini@redhat.com, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-It's really looking like it's the
-libceph_resubmit_linger_ops_when_pg_mapping_changes commit.  When
-patches 1-50 (listed below) are applied to 3.5.7, the hang is present.
- So far I have gone through 4 successful installs with no hang with
-only 1-49 applied.  I'm still leaving my test run to make sure it's
-not a fluke, but since previously it hangs within the first couple of
-builds, it really looks like this is where the problem originated.
-
-1-libceph_eliminate_connection_state_DEAD.patch
-2-libceph_kill_bad_proto_ceph_connection_op.patch
-3-libceph_rename_socket_callbacks.patch
-4-libceph_rename_kvec_reset_and_kvec_add_functions.patch
-5-libceph_embed_ceph_messenger_structure_in_ceph_client.patch
-6-libceph_start_separating_connection_flags_from_state.patch
-7-libceph_start_tracking_connection_socket_state.patch
-8-libceph_provide_osd_number_when_creating_osd.patch
-9-libceph_set_CLOSED_state_bit_in_con_init.patch
-10-libceph_embed_ceph_connection_structure_in_mon_client.patch
-11-libceph_drop_connection_refcounting_for_mon_client.patch
-12-libceph_init_monitor_connection_when_opening.patch
-13-libceph_fully_initialize_connection_in_con_init.patch
-14-libceph_tweak_ceph_alloc_msg.patch
-15-libceph_have_messages_point_to_their_connection.patch
-16-libceph_have_messages_take_a_connection_reference.patch
-17-libceph_make_ceph_con_revoke_a_msg_operation.patch
-18-libceph_make_ceph_con_revoke_message_a_msg_op.patch
-19-libceph_fix_overflow_in___decode_pool_names.patch
-20-libceph_fix_overflow_in_osdmap_decode.patch
-21-libceph_fix_overflow_in_osdmap_apply_incremental.patch
-22-libceph_transition_socket_state_prior_to_actual_connect.patch
-23-libceph_fix_NULL_dereference_in_reset_connection.patch
-24-libceph_use_con_get_put_methods.patch
-25-libceph_drop_ceph_con_get_put_helpers_and_nref_member.patch
-26-libceph_encapsulate_out_message_data_setup.patch
-27-libceph_encapsulate_advancing_msg_page.patch
-28-libceph_don_t_mark_footer_complete_before_it_is.patch
-29-libceph_move_init_bio__functions_up.patch
-30-libceph_move_init_of_bio_iter.patch
-31-libceph_don_t_use_bio_iter_as_a_flag.patch
-32-libceph_SOCK_CLOSED_is_a_flag_not_a_state.patch
-33-libceph_don_t_change_socket_state_on_sock_event.patch
-34-libceph_just_set_SOCK_CLOSED_when_state_changes.patch
-35-libceph_don_t_touch_con_state_in_con_close_socket.patch
-36-libceph_clear_CONNECTING_in_ceph_con_close.patch
-37-libceph_clear_NEGOTIATING_when_done.patch
-38-libceph_define_and_use_an_explicit_CONNECTED_state.patch
-39-libceph_separate_banner_and_connect_writes.patch
-40-libceph_distinguish_two_phases_of_connect_sequence.patch
-41-libceph_small_changes_to_messenger.c.patch
-42-libceph_add_some_fine_ASCII_art.patch
-43-libceph_set_peer_name_on_con_open_not_init.patch
-44-libceph_initialize_mon_client_con_only_once.patch
-45-libceph_allow_sock_transition_from_CONNECTING_to_CLOSED.patch
-46-libceph_initialize_msgpool_message_types.patch
-47-libceph_prevent_the_race_of_incoming_work_during_teardown.patch
-48-libceph_report_socket_read_write_error_message.patch
-49-libceph_fix_mutex_coverage_for_ceph_con_close.patch
-50-libceph_resubmit_linger_ops_when_pg_mapping_changes.patch
-
-
-On Wed, Nov 21, 2012 at 8:50 AM, Sage Weil <sage@inktank.com> wrote:
-> Thanks for hunting this down.  I'm very curious what the culprit is...
+Am 20.11.2012 13:44, schrieb Stefan Priebe:
+> rbd / rados tends to return pretty often length of writes
+> or discarded blocks. These values might be bigger than int.
 >
-> sage
+> Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
+> ---
+>   block/rbd.c |    4 ++--
+>   1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/block/rbd.c b/block/rbd.c
+> index f57d0c6..6bf9c2e 100644
+> --- a/block/rbd.c
+> +++ b/block/rbd.c
+> @@ -69,7 +69,7 @@ typedef enum {
+>   typedef struct RBDAIOCB {
+>       BlockDriverAIOCB common;
+>       QEMUBH *bh;
+> -    int ret;
+> +    int64_t ret;
+>       QEMUIOVector *qiov;
+>       char *bounce;
+>       RBDAIOCmd cmd;
+> @@ -87,7 +87,7 @@ typedef struct RADOSCB {
+>       int done;
+>       int64_t size;
+>       char *buf;
+> -    int ret;
+> +    int64_t ret;
+>   } RADOSCB;
+>   
+>   #define RBD_FD_READ 0
+
+
+Why do you use int64_t instead of off_t?
+If the value is related to file sizes, off_t would be a good choice.
+
+Stefan W.
