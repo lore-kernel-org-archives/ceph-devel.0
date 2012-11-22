@@ -1,64 +1,53 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: [PATCH] overflow of int ret: use ssize_t for ret
-Date: Thu, 22 Nov 2012 10:07:55 +0100
-Message-ID: <1353575275-1343-1-git-send-email-s.priebe@profihost.ag>
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-To: qemu-devel@nongnu.org
-Cc: peter.maydell@linaro.org, Stefan Priebe <s.priebe@profihost.ag>, stefanha@gmail.com, sw@weilnetz.de, josh.durgin@inktank.com, ceph-devel@vger.kernel.org
+From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Subject: Re: [Qemu-devel] [PATCH] use int64_t for return values
+ from rbd instead of int
+Date: Thu, 22 Nov 2012 10:08:24 +0100
+Message-ID: <50ADEB88.2090100@profihost.ag>
+References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
+	<50AD096E.9080002@weilnetz.de>
+	<CAFEAcA-cAx88UZRQjHT7uk_oj8P+tXBJ+hb9v0N1Wym8FUMkHQ@mail.gmail.com>
+	<50ADE115.4060707@profihost.ag>
+	<CAFEAcA86AomWmobTObpw80rMNWM30JzAKqHZXWxmB48+GU3VYQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
+In-Reply-To: <CAFEAcA86AomWmobTObpw80rMNWM30JzAKqHZXWxmB48+GU3VYQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://pve.proxmox.com/cgi-bin/mailman/options/pve-devel>,
+	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://pve.proxmox.com/pipermail/pve-devel>
+List-Post: <mailto:pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
+List-Help: <mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=help>
+List-Subscribe: <http://pve.proxmox.com/cgi-bin/mailman/listinfo/pve-devel>,
+	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=subscribe>
+Sender: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
+Errors-To: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
+To: Peter Maydell <peter.maydell-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Stefan Hajnoczi <stefanha-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Stefan Weil <sw-QDXxdeohBKYb1SvskN2V4Q@public.gmane.org>, qemu-devel-qX2TKyscuCcdnm+yROfE0A@public.gmane.org, pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-When acb->cmd is WRITE or DISCARD block/rbd stores rcb->size into acb->ret
+Hello,
 
-Look here:
-   if (acb->cmd == RBD_AIO_WRITE ||
-        acb->cmd == RBD_AIO_DISCARD) {
-        if (r < 0) {
-            acb->ret = r;
-            acb->error = 1;
-        } else if (!acb->error) {
-            acb->ret = rcb->size;
-        }
+i send a new patch using ssize_t. (Subject [PATCH] overflow of int ret: 
+use ssize_t for ret)
 
-right now acb->ret is just an int and we might get an overflow if size is too big.
-For discards rcb->size holds the size of the discard - this might be some TB if you
-discard a whole device.
+Stefan
 
-The steps to reproduce are:
-mkfs.xfs -f a whole device bigger than int in bytes. mkfs.xfs sends a discard. Important is that you use scsi-hd and set discard_granularity=512. Otherwise rbd disabled discard support.
----
- block/rbd.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/block/rbd.c b/block/rbd.c
-index 5a0f79f..0384c6c 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -69,7 +69,7 @@ typedef enum {
- typedef struct RBDAIOCB {
-     BlockDriverAIOCB common;
-     QEMUBH *bh;
--    int ret;
-+    ssize_t ret;
-     QEMUIOVector *qiov;
-     char *bounce;
-     RBDAIOCmd cmd;
-@@ -86,7 +86,7 @@ typedef struct RADOSCB {
-     int done;
-     int64_t size;
-     char *buf;
--    int ret;
-+    ssize_t ret;
- } RADOSCB;
- 
- #define RBD_FD_READ 0
--- 
-1.7.10.4
+Am 22.11.2012 09:40, schrieb Peter Maydell:
+> On 22 November 2012 08:23, Stefan Priebe - Profihost AG
+> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
+>> Am 21.11.2012 23:32, schrieb Peter Maydell:
+>>> Looking at the librbd API (which is what the size and ret
+>>> values come from), it uses size_t and ssize_t for these.
+>>> So I think probably ssize_t is the right type for ret
+>>> (and size) in our structs here.
+>>
+>>
+>> This sounds reasonable but does ssize_t support negative values? For error
+>> values.
+>
+> Yes, the first 's' in ssize_t means 'signed' and is the
+> difference between it and size_t.
+>
+> -- PMM
+>
