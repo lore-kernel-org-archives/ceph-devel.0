@@ -1,120 +1,103 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Wed, 21 Nov 2012 20:47:16 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <alpine.DEB.2.00.1211161111150.26514@cobra.newdream.net> <CAPud5_6KOGLwBuZGz+GG3sSsA0jbq-T-LADAer_j6+pUbgKVvQ@mail.gmail.com> <alpine.DEB.2.00.1211161412090.26514@cobra.newdream.net>
- <CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com> <alpine.DEB.2.00.1211161421350.26514@cobra.newdream.net> <CAPud5_7GXtKn4G4GW+DWA7iFZHub8=hMWxnYfko=u9x+bKgQ6A@mail.gmail.com> <CAPYLRzj=i-cvOQJdUTbGtkjjAr6H4ohwbGe3Qnm1nYPwAjjLJA@mail.gmail.com>
- <CAPud5_6vGTpPVDATu6U_X5urkXpM5vhDXg3E5MbPu-07MTGuxQ@mail.gmail.com> <CAPud5_4hSU9j5+6EL2VWDuZW0xfFNLCo-_KvDcWDkm9H2pd21w@mail.gmail.com> <alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net> <CAPud5_6fCfOkXviFB6rz9YvWYBkwNzf699Z1_TW3_v4nCoaUQA@mail.gmail.com>
- <CAPud5_7jXmz9Bz9hAcQKG769wvuCn2eWkV-wc_qEZ7kPdsZf1Q@mail.gmail.com> <CAPud5_7P_Z-+14kyGZGxLCUY4SfTWnW3kTOpMh3OYBWgWCt_1w@mail.gmail.com>
+Subject: Re: [PATCH] mds: fix CDir::_commit_partial() bug
+Date: Thu, 22 Nov 2012 07:33:36 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211220733000.9963@cobra.newdream.net>
+References: <1353570527-10834-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44353 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44351 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753162Ab2KVTbK (ORCPT
+	with ESMTP id S1753947Ab2KVTbK (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 14:31:10 -0500
-In-Reply-To: <CAPud5_7P_Z-+14kyGZGxLCUY4SfTWnW3kTOpMh3OYBWgWCt_1w@mail.gmail.com>
+In-Reply-To: <1353570527-10834-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: elder@inktank.com, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, 21 Nov 2012, Nick Bartos wrote:
-> FYI the build which included all 3.5 backports except patch #50 is
-> still going strong after 21 builds.
+On Thu, 22 Nov 2012, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> When a null dentry is encountered, CDir::_commit_partial() adds
+> a OSD_TMAP_RM command to delete the dentry. But if the dentry is
+> new, the osd will not find the dentry when handling the command
+> and the tmap update operation will fail totally.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
-Okay, that one at least makes some sense.  I've opened
+This could explain all manner of corruptions and problems we've seen!  
+Great catch.
 
-	http://tracker.newdream.net/issues/3519
-
-How easy is this to reproduce?  If it is something you can trigger with 
-debugging enabled ('echo module libceph +p > 
-/sys/kernel/debug/dynamic_debug/control') that would help tremendously.
-
-I'm guessing that during this startup time the OSDs are still in the 
-process of starting?
-
-Alex, I bet that a test that does a lot of map/unmap stuff in a loop while 
-thrashing OSDs could hit this.
-
-Thanks!
 sage
 
 
+> ---
+>  src/mds/CDir.cc | 17 +++++++++--------
+>  src/mds/CDir.h  |  2 +-
+>  2 files changed, 10 insertions(+), 9 deletions(-)
 > 
-> On Wed, Nov 21, 2012 at 9:34 AM, Nick Bartos <nick@pistoncloud.com> wrote:
-> > With 8 successful installs already done, I'm reasonably confident that
-> > it's patch #50.  I'm making another build which applies all patches
-> > from the 3.5 backport branch, excluding that specific one.  I'll let
-> > you know if that turns up any unexpected failures.
-> >
-> > What will the potential fall out be for removing that specific patch?
-> >
-> >
-> > On Wed, Nov 21, 2012 at 9:02 AM, Nick Bartos <nick@pistoncloud.com> wrote:
-> >> It's really looking like it's the
-> >> libceph_resubmit_linger_ops_when_pg_mapping_changes commit.  When
-> >> patches 1-50 (listed below) are applied to 3.5.7, the hang is present.
-> >>  So far I have gone through 4 successful installs with no hang with
-> >> only 1-49 applied.  I'm still leaving my test run to make sure it's
-> >> not a fluke, but since previously it hangs within the first couple of
-> >> builds, it really looks like this is where the problem originated.
-> >>
-> >> 1-libceph_eliminate_connection_state_DEAD.patch
-> >> 2-libceph_kill_bad_proto_ceph_connection_op.patch
-> >> 3-libceph_rename_socket_callbacks.patch
-> >> 4-libceph_rename_kvec_reset_and_kvec_add_functions.patch
-> >> 5-libceph_embed_ceph_messenger_structure_in_ceph_client.patch
-> >> 6-libceph_start_separating_connection_flags_from_state.patch
-> >> 7-libceph_start_tracking_connection_socket_state.patch
-> >> 8-libceph_provide_osd_number_when_creating_osd.patch
-> >> 9-libceph_set_CLOSED_state_bit_in_con_init.patch
-> >> 10-libceph_embed_ceph_connection_structure_in_mon_client.patch
-> >> 11-libceph_drop_connection_refcounting_for_mon_client.patch
-> >> 12-libceph_init_monitor_connection_when_opening.patch
-> >> 13-libceph_fully_initialize_connection_in_con_init.patch
-> >> 14-libceph_tweak_ceph_alloc_msg.patch
-> >> 15-libceph_have_messages_point_to_their_connection.patch
-> >> 16-libceph_have_messages_take_a_connection_reference.patch
-> >> 17-libceph_make_ceph_con_revoke_a_msg_operation.patch
-> >> 18-libceph_make_ceph_con_revoke_message_a_msg_op.patch
-> >> 19-libceph_fix_overflow_in___decode_pool_names.patch
-> >> 20-libceph_fix_overflow_in_osdmap_decode.patch
-> >> 21-libceph_fix_overflow_in_osdmap_apply_incremental.patch
-> >> 22-libceph_transition_socket_state_prior_to_actual_connect.patch
-> >> 23-libceph_fix_NULL_dereference_in_reset_connection.patch
-> >> 24-libceph_use_con_get_put_methods.patch
-> >> 25-libceph_drop_ceph_con_get_put_helpers_and_nref_member.patch
-> >> 26-libceph_encapsulate_out_message_data_setup.patch
-> >> 27-libceph_encapsulate_advancing_msg_page.patch
-> >> 28-libceph_don_t_mark_footer_complete_before_it_is.patch
-> >> 29-libceph_move_init_bio__functions_up.patch
-> >> 30-libceph_move_init_of_bio_iter.patch
-> >> 31-libceph_don_t_use_bio_iter_as_a_flag.patch
-> >> 32-libceph_SOCK_CLOSED_is_a_flag_not_a_state.patch
-> >> 33-libceph_don_t_change_socket_state_on_sock_event.patch
-> >> 34-libceph_just_set_SOCK_CLOSED_when_state_changes.patch
-> >> 35-libceph_don_t_touch_con_state_in_con_close_socket.patch
-> >> 36-libceph_clear_CONNECTING_in_ceph_con_close.patch
-> >> 37-libceph_clear_NEGOTIATING_when_done.patch
-> >> 38-libceph_define_and_use_an_explicit_CONNECTED_state.patch
-> >> 39-libceph_separate_banner_and_connect_writes.patch
-> >> 40-libceph_distinguish_two_phases_of_connect_sequence.patch
-> >> 41-libceph_small_changes_to_messenger.c.patch
-> >> 42-libceph_add_some_fine_ASCII_art.patch
-> >> 43-libceph_set_peer_name_on_con_open_not_init.patch
-> >> 44-libceph_initialize_mon_client_con_only_once.patch
-> >> 45-libceph_allow_sock_transition_from_CONNECTING_to_CLOSED.patch
-> >> 46-libceph_initialize_msgpool_message_types.patch
-> >> 47-libceph_prevent_the_race_of_incoming_work_during_teardown.patch
-> >> 48-libceph_report_socket_read_write_error_message.patch
-> >> 49-libceph_fix_mutex_coverage_for_ceph_con_close.patch
-> >> 50-libceph_resubmit_linger_ops_when_pg_mapping_changes.patch
-> >>
-> >>
-> >> On Wed, Nov 21, 2012 at 8:50 AM, Sage Weil <sage@inktank.com> wrote:
-> >>> Thanks for hunting this down.  I'm very curious what the culprit is...
-> >>>
-> >>> sage
+> diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+> index c5220ed..4896f01 100644
+> --- a/src/mds/CDir.cc
+> +++ b/src/mds/CDir.cc
+> @@ -1696,7 +1696,7 @@ class C_Dir_Committed : public Context {
+>  public:
+>    C_Dir_Committed(CDir *d, version_t v, version_t lrv) : dir(d), version(v), last_renamed_version(lrv) { }
+>    void finish(int r) {
+> -    dir->_committed(version, last_renamed_version);
+> +    dir->_committed(version, last_renamed_version, r);
+>    }
+>  };
+>  
+> @@ -1801,14 +1801,14 @@ CDir::map_t::iterator CDir::_commit_partial(ObjectOperation& m,
+>      if (!dn->is_dirty())
+>        continue;  // skip clean dentries
+>  
+> -    if (dn->get_linkage()->is_null()) {
+> -      dout(10) << " rm " << dn->name << " " << *dn << dendl;
+> -      finalbl.append(CEPH_OSD_TMAP_RM);
+> -      dn->key().encode(finalbl);
+> -    } else {
+> +    if (!dn->get_linkage()->is_null()) {
+>        dout(10) << " set " << dn->name << " " << *dn << dendl;
+>        finalbl.append(CEPH_OSD_TMAP_SET);
+>        _encode_dentry(dn, finalbl, snaps);
+> +    } else if (!dn->is_new()) {
+> +      dout(10) << " rm " << dn->name << " " << *dn << dendl;
+> +      finalbl.append(CEPH_OSD_TMAP_RM);
+> +      dn->key().encode(finalbl);
+>      }
+>    }
+>  
+> @@ -1997,10 +1997,11 @@ void CDir::_commit(version_t want)
+>   *
+>   * @param v version i just committed
+>   */
+> -void CDir::_committed(version_t v, version_t lrv)
+> +void CDir::_committed(version_t v, version_t lrv, int ret)
+>  {
+> -  dout(10) << "_committed v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
+> +  dout(10) << "_committed ret " << ret << " v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
+>    assert(is_auth());
+> +  assert(ret == 0);
+>  
+>    bool stray = inode->is_stray();
+>  
+> diff --git a/src/mds/CDir.h b/src/mds/CDir.h
+> index 2222418..274e38b 100644
+> --- a/src/mds/CDir.h
+> +++ b/src/mds/CDir.h
+> @@ -487,7 +487,7 @@ private:
+>                         unsigned max_write_size=-1,
+>                         map_t::iterator last_committed_dn=map_t::iterator());
+>    void _encode_dentry(CDentry *dn, bufferlist& bl, const set<snapid_t> *snaps);
+> -  void _committed(version_t v, version_t last_renamed_version);
+> +  void _committed(version_t v, version_t last_renamed_version, int ret);
+>    void wait_for_commit(Context *c, version_t v=0);
+>  
+>    // -- dirtyness --
+> -- 
+> 1.7.11.7
 > 
 > 
