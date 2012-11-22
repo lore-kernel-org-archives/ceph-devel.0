@@ -1,45 +1,57 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: RBD fio Performance concerns
-Date: Thu, 22 Nov 2012 16:54:16 +0100
-Message-ID: <015F5CFF-41D7-40B6-85CF-129D8FB23D94@profihost.ag>
-References: <50AE44B9.7070804@profihost.ag> <824b8945-bd67-489d-9791-30804ef90d81@mailpro> <CAOLwVUm0QU07sHFrm-aWY709Dcm3d1V0uEbfmCrO+PB1ps93gw@mail.gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=utf-8
+Date: Thu, 22 Nov 2012 14:14:46 +0100
+Message-ID: <50AE2546.9050902@profihost.ag>
+References: <CAOLwVUmJGZNaZsySsw8eQmLy1ZCha+AAGCp-5i42=mr0aKHMyA@mail.gmail.com> <3210b770-431e-44ed-8d86-4610de89dd92@mailpro> <CAOLwVUn5EAC4QaWgU+TkodcJea7ayKUANUpfzWUG+cTBunao5g@mail.gmail.com> <50ACF8C8.7020908@inktank.com> <50AD02AC.60802@inktank.com> <50ADFC23.2030208@profihost.ag> <CAOLwVUmp7wrfead8qX2BZPbyeN_JY_XBN+wkEWmbY6q1-5u0fw@mail.gmail.com> <50AE1107.5060606@profihost.ag> <CAOLwVU=VpDPg6iuZM=UFy5bcDm-Rm_dVRkeZrAu-DoFXp9cDKw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:49426 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:48636 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755377Ab2KVSlB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:41:01 -0500
-In-Reply-To: <CAOLwVUm0QU07sHFrm-aWY709Dcm3d1V0uEbfmCrO+PB1ps93gw@mail.gmail.com>
+	with ESMTP id S1754662Ab2KVSlg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:41:36 -0500
+In-Reply-To: <CAOLwVU=VpDPg6iuZM=UFy5bcDm-Rm_dVRkeZrAu-DoFXp9cDKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?S=C3=A9bastien_Han?= <han.sebastien@gmail.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, Mark Nelson <mark.nelson@inktank.com>
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>
 
-I thought the Client would then write to the 2nd is this wrong?
+Am 22.11.2012 13:50, schrieb S=E9bastien Han:
+>> journal is running on tmpfs to me but that changes nothing.
+>
+> I don't think it works then. According to the doc: Enables using
+> libaio for asynchronous writes to the journal. Requires journal dio
+> set to true.
 
+Ah might be but as the SSDs are pretty fast i don't know which device t=
+o=20
+use as journal except tmpfs.
+
+And RAMDISK devices are too expensive.
+
+Greets,
 Stefan
 
-Am 22.11.2012 um 16:49 schrieb S=C3=A9bastien Han <han.sebastien@gmail.=
-com>:
-
->>> But who cares? it's also on the 2nd node. or even on the 3rd if you=
- have
->>> replicas 3.
->=20
-> Yes but you could also suffer a crash while writing the first replica=
-=2E
-> If the journal is in tmpfs, there is nothing to replay.
->=20
->=20
->=20
-> On Thu, Nov 22, 2012 at 4:35 PM, Alexandre DERUMIER <aderumier@odiso.=
-com> wrote:
->>=20
->>>> But who cares? it's also on the 2nd node. or even on the 3rd if yo=
-u have
->>>> replicas 3.
+> On Thu, Nov 22, 2012 at 12:48 PM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> Am 22.11.2012 11:49, schrieb S=E9bastien Han:
+>>
+>>> @Alexandre: cool!
+>>>
+>>> @ Stefan: Full SSD cluster and 10G switches?
+>>
+>> Yes
+>>
+>>
+>>> Couple of weeks ago I saw
+>>> that you use journal aio, did you notice performance improvement wi=
+th it?
+>>
+>> journal is running on tmpfs to me but that changes nothing.
+>>
+>> Stefan
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
