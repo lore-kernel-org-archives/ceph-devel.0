@@ -1,44 +1,41 @@
-From: Stefan Weil <sw@weilnetz.de>
-Subject: Re: [Qemu-devel] [PATCH] overflow of int ret: use ssize_t for ret
-Date: Thu, 22 Nov 2012 20:37:26 +0100
-Message-ID: <50AE7EF6.2020704@weilnetz.de>
-References: <1353575275-1343-1-git-send-email-s.priebe@profihost.ag> <50AE5590.5010804@suse.de> <50AE786C.30702@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: how to create snapshots
+Date: Thu, 22 Nov 2012 11:42:44 +0100
+Message-ID: <50AE01A4.8000505@profihost.ag>
+References: <50ACE037.5010806@profihost.ag> <50ACE536.8040809@widodh.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from v220110690675601.yourvserver.net ([78.47.199.172]:42807 "EHLO
-	v220110690675601.yourvserver.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754083Ab2KVTha (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Nov 2012 14:37:30 -0500
-In-Reply-To: <50AE786C.30702@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:45395 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755982Ab2KVTmy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 14:42:54 -0500
+In-Reply-To: <50ACE536.8040809@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: =?ISO-8859-15?Q?Andreas_F=E4rber?= <afaerber@suse.de>, peter.maydell@linaro.org, qemu-devel@nongnu.org, stefanha@gmail.com, josh.durgin@inktank.com, ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 22.11.2012 20:09, schrieb Stefan Priebe - Profihost AG:
-> Hi Andreas,
+Hi,
+
+Am 21.11.2012 15:29, schrieb Wido den Hollander:
+> Use:
 >
-> thanks for your comment. Do i have to resend this patch?
+> $ rbd -p kvmpool1 snap create --image vm-113-disk-1 BACKUP
 >
-> -- 
-> Greets,
-> Stefan
+> "rbd -h" also tells:
 >
+> <image-name>, <snap-name> are [pool/]name[@snap], or you may specify
+> individual pieces of names with -p/--pool, --image, and/or --snap.
+>
+> Never tried it, but you might be able to use:
+>
+> $ rbd -p kvmpool1 snap create vm-113-disk-1@BACKUP
 
+This does not work but:
+rbd snap create kvmpool1/vm-113-disk-1@BACKUP
 
-Hi Stefan,
+works fine. Thanks!
 
-I'm afraid yes, you'll have to resend the patch.
-
-Signed-off-by is a must, see http://wiki.qemu.org/Contribute/SubmitAPatch
-
-When you resend the patch, you can fix the minor issues (subject)as well.
-
-Regards
-
-StefanW.
-
-
+Stefan
