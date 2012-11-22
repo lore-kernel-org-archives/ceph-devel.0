@@ -1,176 +1,70 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: OSD daemon changes port no
-Date: Thu, 22 Nov 2012 07:31:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211220730560.9963@cobra.newdream.net>
-References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com> <alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net> <CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com> <alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
- <CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com> <alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net> <CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com> <alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
- <CAGfy=6kUHn7Sjp4dBBR1SFVv67X9R2CpWCOZ6NmMtkR2dVmkKQ@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: RBD Backup
+Date: Thu, 22 Nov 2012 21:13:33 +0800
+Message-ID: <50AE24FD.8090103@widodh.nl>
+References: <50ACD936.8060907@profihost.ag> <50ACDB85.4020006@widodh.nl> <50AE0535.8080904@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43964 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754101Ab2KVSgI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:36:08 -0500
-In-Reply-To: <CAGfy=6kUHn7Sjp4dBBR1SFVv67X9R2CpWCOZ6NmMtkR2dVmkKQ@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52308 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754373Ab2KVSiC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:38:02 -0500
+In-Reply-To: <50AE0535.8080904@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 22 Nov 2012, hemant surale wrote:
-> Sir,
-> 
-> Thanks for the direction . Here I was using "mount.ceph  monaddr:ip:/
-> /home/hemant/mntpoint " cmd . Is it possible to do achieve same effect
-> with "mount.ceph" of what you suggested with "cephfs". (cephfs
-> /mnt/ceph/foo --pool <poolid>)
-> 
-> But I see that cephfs is able to set which osd to use , the object
-> size . So can you throw more light on this.
 
-Mount can mount/bind a subdirectory into you namespace, but it doesn't 
-change the layout policies used by the MDS; that's what cephfs does.
 
-sage
+On 11/22/2012 06:57 PM, Stefan Priebe - Profihost AG wrote:
+> Hi,
+>
+> Am 21.11.2012 14:47, schrieb Wido den Hollander:
+>> The snapshot isn't consistent since it has no way of telling the VM to
+>> flush it's buffers.
+>>
+>> To make it consistent you have to run "sync" (In the VM) just prior to
+>> creating the snapshot.
+>
+> Mhm but between executing sync and executing snap is again time to store
+> data.
+>
 
-> 
-> 
-> Thanks & Regards,
-> Hemant Surale.
-> 
-> On Wed, Nov 21, 2012 at 8:59 PM, Sage Weil <sage@inktank.com> wrote:
-> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
-> >> > put them in different pools and distribute the pools across different sets
-> >> > of OSDs.
-> >>
-> >> yeah that was correct approach but i found problem doing so from
-> >> abstract level i.e. when I put file inside mounted dir
-> >> "/home/hemant/cephfs " ( mounted using "mount.ceph" cmd ) . At that
-> >> time anyways ceph is going to use default pool data to store files (
-> >> here files were striped into different objects and then sent to
-> >> appropriate osd ) .
-> >>    So how to tell ceph to use different pools in this case ?
-> >>
-> >> Goal : separate read and write operations , where read will be done
-> >> from one group of OSD and write is done to other group of OSD.
-> >
-> > First create the other pool,
-> >
-> >  ceph osd pool create <name>
-> >
-> > and then adjust the CRUSH rule to distributed to a different set of OSDs
-> > for that pool.
-> >
-> > To allow cephfs use it,
-> >
-> >  ceph mds add_data_pool <poolid>
-> >
-> > and then:
-> >
-> >  cephfs /mnt/ceph/foo --pool <poolid>
-> >
-> > will set the policy on the directory such that new files beneath that
-> > point will be stored in a different pool.
-> >
-> > Hope that helps!
-> > sage
-> >
-> >
-> >>
-> >>
-> >>
-> >>
-> >> -
-> >> Hemant Surale.
-> >>
-> >>
-> >> On Wed, Nov 21, 2012 at 12:33 PM, Sage Weil <sage@inktank.com> wrote:
-> >> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >> >> Its a little confusing question I believe .
-> >> >>
-> >> >> Actually there are two files X & Y.  When I am reading X from its
-> >> >> primary .I want to make sure simultaneous writing of Y should go to
-> >> >> any other OSD except primary OSD for X (from where my current read is
-> >> >> getting served ) .
-> >> >
-> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
-> >> > put them in different pools and distribute the pools across different sets
-> >> > of OSDs.  Otherwise, it's all (pseudo)random and you never know.  Usually,
-> >> > they will be different, particularly as the cluster size increases, but
-> >> > sometimes they will be the same.
-> >> >
-> >> > sage
-> >> >
-> >> >
-> >> >>
-> >> >>
-> >> >> -
-> >> >> Hemant Sural.e
-> >> >>
-> >> >> On Wed, Nov 21, 2012 at 11:50 AM, Sage Weil <sage@inktank.com> wrote:
-> >> >> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >> >> >> >>    and one more thing how can it be possible to read from one osd and
-> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
-> >> >> >> >
-> >> >> >> > I'm not sure I understand the question...
-> >> >> >>
-> >> >> >> Scenario :
-> >> >> >>        I have written file X.txt on some osd which is primary for filr
-> >> >> >> X.txt ( direct write operation using rados cmd) .
-> >> >> >>        Now while read on file X.txt is in progress, Can I make sure
-> >> >> >> the simultaneous write request must be directed to other osd using
-> >> >> >> crushmaps/other way?
-> >> >> >
-> >> >> > Nope.  The object location is based on the name.  Reads and writes go to
-> >> >> > the same location so that a single OSD can serialize request.  That means,
-> >> >> > for example, that a read that follows a write returns the just-written
-> >> >> > data.
-> >> >> >
-> >> >> > sage
-> >> >> >
-> >> >> >
-> >> >> >> Goal of task :
-> >> >> >>        Trying to avoid read - write clashes as much as possible to
-> >> >> >> achieve faster operations (I/O) . Although CRUSH selects osd for data
-> >> >> >> placement based on pseudo random function.  is it possible ?
-> >> >> >>
-> >> >> >>
-> >> >> >>
-> >> >> >> -
-> >> >> >> Hemant Surale.
-> >> >> >>
-> >> >> >>
-> >> >> >>
-> >> >> >> On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
-> >> >> >> > On Tue, 20 Nov 2012, hemant surale wrote:
-> >> >> >> >> Hi Community,
-> >> >> >> >>    I have question about port number used by ceph-osd daemon . I
-> >> >> >> >> observed traffic (inter -osd communication while data ingest happened)
-> >> >> >> >> on port 6802 and then after some time when I ingested second file
-> >> >> >> >> after some delay port no 6804 was used . Is there any specific reason
-> >> >> >> >> to change port no here?
-> >> >> >> >
-> >> >> >> > The ports are dynamic.  Daemons bind to a random (6800-6900) port on
-> >> >> >> > startup and communicate on that.  They discover each other via the
-> >> >> >> > addresses published in the osdmap when the daemon starts.
-> >> >> >> >
-> >> >> >> >>    and one more thing how can it be possible to read from one osd and
-> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
-> >> >> >> >
-> >> >> >> > I'm not sure I understand the question...
-> >> >> >> >
-> >> >> >> > sage
-> >> >> >> --
-> >> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> >> >>
-> >> >> >>
-> >> >>
-> >> >>
-> >>
-> >>
-> 
-> 
+True. That is always a problem with snapshots. I always regard data 
+written to disk in the last 30 seconds as being in the "danger zone".
+
+When you use libvirt and QCOW2 as a backing store for your virtual 
+machine you can also snapshot with libvirt. It will not only snapshot 
+the disk, but it will also store the memory contents from the virtual 
+machine so you have a consistent state of the virtual machine.
+
+This has a drawback however, since when you give the VM 16GB of memory, 
+you have to store 16GB of data.
+
+Right now this doesn't work yet with RBD, but there is a feature request 
+in the tracker. I can't seem to find it right now.
+
+What you could do is:
+
+$ ssh root@virtual-machine "sync"
+$ rbd snap create vm-disk@snap1
+$ rbd export --snap snap1 vm-disk /mnt/backup/vm-disk_snap1.img
+
+This way you have a pretty consistent snapshot.
+
+Wido
+
+>> rbd export --snap BACKUP image1 /mnt/backup/image1.img
+>> losetup /mnt/backup/image1.img
+>>
+>> kpartx -a /dev/loop0
+>>
+>> Now you will have the partitions from the RBD image available in
+>> /dev/mapper/loop0pX
+> Works fine!
+>
+> Greets,
+> Stefan
