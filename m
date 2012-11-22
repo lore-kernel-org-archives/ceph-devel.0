@@ -1,148 +1,60 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: RBD fio Performance concerns
-Date: Thu, 22 Nov 2012 16:35:18 +0100 (CET)
-Message-ID: <824b8945-bd67-489d-9791-30804ef90d81@mailpro>
-References: <50AE44B9.7070804@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Problem with SGID and new inode
+Date: Thu, 22 Nov 2012 13:57:23 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211221356350.9963@cobra.newdream.net>
+References: <CAHcbcZcM1r93ybgSEC4fiCvF8FSm=XVsRp7fLmp9FzdxDjTSHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:39074 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755174Ab2KVSkg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:40:36 -0500
-In-Reply-To: <50AE44B9.7070804@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:45222 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754955Ab2KVV5Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 16:57:24 -0500
+In-Reply-To: <CAHcbcZcM1r93ybgSEC4fiCvF8FSm=XVsRp7fLmp9FzdxDjTSHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, =?utf-8?Q?S=C3=A9bastien?= Han <han.sebastien@gmail.com>, Mark Nelson <mark.nelson@inktank.com>
+To: Giorgos Kappes <geokapp@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
->>But who cares? it's also on the 2nd node. or even on the 3rd if you h=
-ave=20
->>replicas 3.=20
-Yes, but rebuilding a dead node use cpu and ios. (but it should be benc=
-hed too, to see the impact on the production)
+On Thu, 22 Nov 2012, Giorgos Kappes wrote:
+> ??,
+> 
+> I was looking at the source code of the ceph MDS and in particular at
+> the function
+> CInode* Server::prepare_new_inode(...) in the mds/Server.cc file which
+> creates a new inode.
+> At lines 1739-1747 the code checks if the parent directory has the
+> set-group-ID bit set. If
+> this bit is set and the new inode refers to a directory then the new
+> inode should also have
+> the set-group-ID bit set. However, as I understand, at line 1744 the
+> set-group-ID bit is set
+> at the local variable [mode |= S_ISGID] and not on the inode.
+> Shouldn't this line be
+> [in->inode.mode |= S_ISGID;]?
+> 
+> To illustrate the above problem I tried to create a new directory
+> inside a directory that has
+> the set-group-ID bit set:
+> 
+> root@client-admin:/mnt/admin# mkdir mydir
+> root@client-admin:/mnt/admin# chmod +s mydir
+> root@client-admin:/mnt/admin# ls -l
+> total 1
+> drwsr-sr-x 1 root root  0 Nov 22  2012 mydir
+> -rw-r--r-- 1 root root 13 Oct 19 08:05 myfile.txt
+> root@client-admin:/mnt/admin# cd mydir
+> root@client-admin:/mnt/admin/mydir# mkdir newdir
+> root@client-admin:/mnt/admin/mydir# ls -l
+> total 1
+> drwxr-xr-x 1 root root 0 Nov 22  2012 newdir
+> 
+> Finally, I would like to note that I am using Ceph 0.48.2 but the
+> above problem also seems
+> to exist in the v0.54 development release.
 
+Thanks, this is indeed a bug.  I pushed a fix to the next branch, commit 
+1c715a11f70788d987c16aa67ce2b6f32c04a673.
 
-
------ Mail original -----=20
-
-De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Mark Kampe" <mark.kampe=
-@inktank.com>, "S=C3=A9bastien Han" <han.sebastien@gmail.com>, "Mark Ne=
-lson" <mark.nelson@inktank.com>=20
-Envoy=C3=A9: Jeudi 22 Novembre 2012 16:28:57=20
-Objet: Re: RBD fio Performance concerns=20
-
-Am 22.11.2012 16:26, schrieb Alexandre DERUMIER:=20
->>> Haven't tested that. But does this makes sense? I mean data goes to=
- Disk=20
->>> journal - same disk then has to copy the Data from part A to part B=
-=2E=20
->>>=20
->>> Why is this an advantage?=20
->=20
-> Well, if you are cpu limited, I don't think you can use all 8*35000io=
-ps by node.=20
-> So, maybe a benchmark can tell us if the difference is really big.=20
->=20
-> Using tmpfs and ups can be ok, but if you have a kernel panic or hard=
-ware problem, you'll lost your journal.=20
-
-But who cares? it's also on the 2nd node. or even on the 3rd if you hav=
-e=20
-replicas 3.=20
-
-Stefan=20
-
-
-> ----- Mail original -----=20
->=20
-> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-> =C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
-> Cc: "Alexandre DERUMIER" <aderumier@odiso.com>, "ceph-devel" <ceph-de=
-vel@vger.kernel.org>, "Mark Kampe" <mark.kampe@inktank.com>, "S=C3=A9ba=
-stien Han" <han.sebastien@gmail.com>=20
-> Envoy=C3=A9: Jeudi 22 Novembre 2012 16:01:56=20
-> Objet: Re: RBD fio Performance concerns=20
->=20
-> Am 22.11.2012 15:46, schrieb Mark Nelson:=20
->> I haven't played a whole lot with SSD only OSDs yet (other than noti=
-ng=20
->> last summer that iop performance wasn't as high as I wanted it). Is =
-a=20
->> second partition on the SSD for the journal not an option for you?=20
->=20
-> Haven't tested that. But does this makes sense? I mean data goes to D=
-isk=20
-> journal - same disk then has to copy the Data from part A to part B.=20
->=20
-> Why is this an advantage?=20
->=20
-> Stefan=20
->=20
->> Mark=20
->>=20
->> On 11/22/2012 08:42 AM, Stefan Priebe - Profihost AG wrote:=20
->>> Am 22.11.2012 15:37, schrieb Mark Nelson:=20
->>>> I don't think we recommend tmpfs at all for anything other than pl=
-aying=20
->>>> around. :)=20
->>>=20
->>> I discussed this with somebody frmo inktank. Had to search the=20
->>> mailinglist. It might be OK if you're working with enough replicas =
-and=20
->>> UPS.=20
->>>=20
->>> I see no other option while working with SSDs - the only Option wou=
-ld be=20
->>> to be able to deaktivate the journal at all. But ceph does not supp=
-ort=20
->>> this.=20
->>>=20
->>> Stefan=20
->>>=20
->>>> On 11/22/2012 08:22 AM, Stefan Priebe - Profihost AG wrote:=20
->>>>> Hi,=20
->>>>>=20
->>>>> can someone from inktank comment this? Might be using /dev/ram0 w=
-ith an=20
->>>>> fs on it be better than tmpfs as we can use dio?=20
->>>>>=20
->>>>> Greets,=20
->>>>> Stefan=20
->>>>>=20
->>>>>> ----- Mail original -----=20
->>>>>>=20
->>>>>> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
->>>>>> =C3=80: "S=C3=A9bastien Han" <han.sebastien@gmail.com>=20
->>>>>> Cc: "Mark Nelson" <mark.nelson@inktank.com>, "Alexandre DERUMIER=
-"=20
->>>>>> <aderumier@odiso.com>, "ceph-devel" <ceph-devel@vger.kernel.org>=
-,=20
->>>>>> "Mark Kampe" <mark.kampe@inktank.com>=20
->>>>>> Envoy=C3=A9: Jeudi 22 Novembre 2012 14:29:03=20
->>>>>> Objet: Re: RBD fio Performance concerns=20
->>>>>>=20
->>>>>> Am 22.11.2012 14:22, schrieb S=C3=A9bastien Han:=20
->>>>>>> And RAMDISK devices are too expensive.=20
->>>>>>>=20
->>>>>>> It would make sense in your infra, but yes they are really expe=
-nsive.=20
->>>>>>=20
->>>>>> We need something like tmpfs - running in local memory but suppo=
-rt=20
->>>>>> dio.=20
->>>>>>=20
->>>>>> Stefan=20
->>>>>>=20
->>>>=20
->>>>=20
->>=20
->>=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
