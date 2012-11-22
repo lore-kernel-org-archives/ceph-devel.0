@@ -1,57 +1,90 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Hangup during scrubbing - possible solutions
-Date: Thu, 22 Nov 2012 12:35:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211221234020.9963@cobra.newdream.net>
-References: <CABYiri-YGDCCzVD2kcJeZQy4ggWBDt0cC8TrHQxTp4tOeabQew@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] mds: fix CDir::_commit_partial() bug
+Date: Thu, 22 Nov 2012 15:48:47 +0800
+Message-ID: <1353570527-10834-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44782 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755542Ab2KVUf2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 15:35:28 -0500
-In-Reply-To: <CABYiri-YGDCCzVD2kcJeZQy4ggWBDt0cC8TrHQxTp4tOeabQew@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:26772 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756556Ab2KVTON (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Nov 2012 14:14:13 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Thu, 22 Nov 2012, Andrey Korolyov wrote:
-> Hi,
-> 
-> In the recent versions Ceph introduces some unexpected behavior for
-> the permanent connections (VM or kernel clients) - after crash
-> recovery, I/O will hang on the next planned scrub on the following
-> scenario:
-> 
-> - launch a bunch of clients doing non-intensive writes,
-> - lose one or more osd, mark them down, wait for recovery completion,
-> - do a slow scrub, e.g. scrubbing one osd per 5m, inside bash script,
-> or wait for ceph to do the same,
-> - observe a raising number of pgs stuck in the active+clean+scrubbing
-> state (they took a master role from ones which was on killed osd and
-> almost surely they are being written in time of crash),
-> - some time later, clients will hang hardly and ceph log introduce
-> stuck(old) I/O requests.
-> 
-> The only one way to return clients back without losing their I/O state
-> is per-osd restart, which also will help to get rid of
-> active+clean+scrubbing pgs.
-> 
-> First of all, I`ll be happy to help to solve this problem by providing
-> logs.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-If you can reproduce this behavior with 'debug osd = 20' and 'debug ms = 
-1' logging on the OSD, that would be wonderful!
+When a null dentry is encountered, CDir::_commit_partial() adds
+a OSD_TMAP_RM command to delete the dentry. But if the dentry is
+new, the osd will not find the dentry when handling the command
+and the tmap update operation will fail totally.
 
-> Second question is not directly related to this problem, but I
-> have thought on for a long time - is there a planned features to
-> control scrub process more precisely, e.g. pg scrub rate or scheduled
-> scrub, instead of current set of timeouts which of course not very
-> predictable on when to run?
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/CDir.cc | 17 +++++++++--------
+ src/mds/CDir.h  |  2 +-
+ 2 files changed, 10 insertions(+), 9 deletions(-)
 
-Not yet.  I would be interested in hearing what kind of control/config 
-options/whatever you (and others) would like to see!
+diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+index c5220ed..4896f01 100644
+--- a/src/mds/CDir.cc
++++ b/src/mds/CDir.cc
+@@ -1696,7 +1696,7 @@ class C_Dir_Committed : public Context {
+ public:
+   C_Dir_Committed(CDir *d, version_t v, version_t lrv) : dir(d), version(v), last_renamed_version(lrv) { }
+   void finish(int r) {
+-    dir->_committed(version, last_renamed_version);
++    dir->_committed(version, last_renamed_version, r);
+   }
+ };
+ 
+@@ -1801,14 +1801,14 @@ CDir::map_t::iterator CDir::_commit_partial(ObjectOperation& m,
+     if (!dn->is_dirty())
+       continue;  // skip clean dentries
+ 
+-    if (dn->get_linkage()->is_null()) {
+-      dout(10) << " rm " << dn->name << " " << *dn << dendl;
+-      finalbl.append(CEPH_OSD_TMAP_RM);
+-      dn->key().encode(finalbl);
+-    } else {
++    if (!dn->get_linkage()->is_null()) {
+       dout(10) << " set " << dn->name << " " << *dn << dendl;
+       finalbl.append(CEPH_OSD_TMAP_SET);
+       _encode_dentry(dn, finalbl, snaps);
++    } else if (!dn->is_new()) {
++      dout(10) << " rm " << dn->name << " " << *dn << dendl;
++      finalbl.append(CEPH_OSD_TMAP_RM);
++      dn->key().encode(finalbl);
+     }
+   }
+ 
+@@ -1997,10 +1997,11 @@ void CDir::_commit(version_t want)
+  *
+  * @param v version i just committed
+  */
+-void CDir::_committed(version_t v, version_t lrv)
++void CDir::_committed(version_t v, version_t lrv, int ret)
+ {
+-  dout(10) << "_committed v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
++  dout(10) << "_committed ret " << ret << " v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
+   assert(is_auth());
++  assert(ret == 0);
+ 
+   bool stray = inode->is_stray();
+ 
+diff --git a/src/mds/CDir.h b/src/mds/CDir.h
+index 2222418..274e38b 100644
+--- a/src/mds/CDir.h
++++ b/src/mds/CDir.h
+@@ -487,7 +487,7 @@ private:
+                        unsigned max_write_size=-1,
+                        map_t::iterator last_committed_dn=map_t::iterator());
+   void _encode_dentry(CDentry *dn, bufferlist& bl, const set<snapid_t> *snaps);
+-  void _committed(version_t v, version_t last_renamed_version);
++  void _committed(version_t v, version_t last_renamed_version, int ret);
+   void wait_for_commit(Context *c, version_t v=0);
+ 
+   // -- dirtyness --
+-- 
+1.7.11.7
 
-Thanks-
-sage
