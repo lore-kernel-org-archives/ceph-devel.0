@@ -1,47 +1,57 @@
-From: Joe Perches <joe@perches.com>
-Subject: [TRIVIAL PATCH] bdi_register: Add __printf verification, fix arg
- mismatch
-Date: Thu, 22 Nov 2012 11:49:29 -0800
-Message-ID: <1353613769.10902.8.camel@joe-AO722>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Hangup during scrubbing - possible solutions
+Date: Thu, 22 Nov 2012 12:35:27 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211221234020.9963@cobra.newdream.net>
+References: <CABYiri-YGDCCzVD2kcJeZQy4ggWBDt0cC8TrHQxTp4tOeabQew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:44782 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755542Ab2KVUf2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 15:35:28 -0500
+In-Reply-To: <CABYiri-YGDCCzVD2kcJeZQy4ggWBDt0cC8TrHQxTp4tOeabQew@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-__printf is useful to verify format and arguments.
+On Thu, 22 Nov 2012, Andrey Korolyov wrote:
+> Hi,
+> 
+> In the recent versions Ceph introduces some unexpected behavior for
+> the permanent connections (VM or kernel clients) - after crash
+> recovery, I/O will hang on the next planned scrub on the following
+> scenario:
+> 
+> - launch a bunch of clients doing non-intensive writes,
+> - lose one or more osd, mark them down, wait for recovery completion,
+> - do a slow scrub, e.g. scrubbing one osd per 5m, inside bash script,
+> or wait for ceph to do the same,
+> - observe a raising number of pgs stuck in the active+clean+scrubbing
+> state (they took a master role from ones which was on killed osd and
+> almost surely they are being written in time of crash),
+> - some time later, clients will hang hardly and ceph log introduce
+> stuck(old) I/O requests.
+> 
+> The only one way to return clients back without losing their I/O state
+> is per-osd restart, which also will help to get rid of
+> active+clean+scrubbing pgs.
+> 
+> First of all, I`ll be happy to help to solve this problem by providing
+> logs.
 
-Signed-off-by: Joe Perches <joe@perches.com>
----
- fs/ceph/super.c             |    2 +-
- include/linux/backing-dev.h |    1 +
- 2 files changed, 2 insertions(+), 1 deletions(-)
+If you can reproduce this behavior with 'debug osd = 20' and 'debug ms = 
+1' logging on the OSD, that would be wonderful!
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 2eb43f2..e7dbb5c 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -849,7 +849,7 @@ static int ceph_register_bdi(struct super_block *sb,
- 		fsc->backing_dev_info.ra_pages =
- 			default_backing_dev_info.ra_pages;
- 
--	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%d",
-+	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
- 			   atomic_long_inc_return(&bdi_seq));
- 	if (!err)
- 		sb->s_bdi = &fsc->backing_dev_info;
-diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
-index 2a9a9ab..12731a1 100644
---- a/include/linux/backing-dev.h
-+++ b/include/linux/backing-dev.h
-@@ -114,6 +114,7 @@ struct backing_dev_info {
- int bdi_init(struct backing_dev_info *bdi);
- void bdi_destroy(struct backing_dev_info *bdi);
- 
-+__printf(3, 4)
- int bdi_register(struct backing_dev_info *bdi, struct device *parent,
- 		const char *fmt, ...);
- int bdi_register_dev(struct backing_dev_info *bdi, dev_t dev);
+> Second question is not directly related to this problem, but I
+> have thought on for a long time - is there a planned features to
+> control scrub process more precisely, e.g. pg scrub rate or scheduled
+> scrub, instead of current set of timeouts which of course not very
+> predictable on when to run?
+
+Not yet.  I would be interested in hearing what kind of control/config 
+options/whatever you (and others) would like to see!
+
+Thanks-
+sage
