@@ -1,70 +1,47 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: RBD Backup
-Date: Thu, 22 Nov 2012 21:13:33 +0800
-Message-ID: <50AE24FD.8090103@widodh.nl>
-References: <50ACD936.8060907@profihost.ag> <50ACDB85.4020006@widodh.nl> <50AE0535.8080904@profihost.ag>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: RBD fio Performance concerns
+Date: Thu, 22 Nov 2012 16:54:16 +0100
+Message-ID: <015F5CFF-41D7-40B6-85CF-129D8FB23D94@profihost.ag>
+References: <50AE44B9.7070804@profihost.ag> <824b8945-bd67-489d-9791-30804ef90d81@mailpro> <CAOLwVUm0QU07sHFrm-aWY709Dcm3d1V0uEbfmCrO+PB1ps93gw@mail.gmail.com>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52308 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754373Ab2KVSiC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:38:02 -0500
-In-Reply-To: <50AE0535.8080904@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:49426 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755377Ab2KVSlB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:41:01 -0500
+In-Reply-To: <CAOLwVUm0QU07sHFrm-aWY709Dcm3d1V0uEbfmCrO+PB1ps93gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?utf-8?Q?S=C3=A9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, Mark Nelson <mark.nelson@inktank.com>
 
+I thought the Client would then write to the 2nd is this wrong?
 
+Stefan
 
-On 11/22/2012 06:57 PM, Stefan Priebe - Profihost AG wrote:
-> Hi,
->
-> Am 21.11.2012 14:47, schrieb Wido den Hollander:
->> The snapshot isn't consistent since it has no way of telling the VM to
->> flush it's buffers.
->>
->> To make it consistent you have to run "sync" (In the VM) just prior to
->> creating the snapshot.
->
-> Mhm but between executing sync and executing snap is again time to store
-> data.
->
+Am 22.11.2012 um 16:49 schrieb S=C3=A9bastien Han <han.sebastien@gmail.=
+com>:
 
-True. That is always a problem with snapshots. I always regard data 
-written to disk in the last 30 seconds as being in the "danger zone".
-
-When you use libvirt and QCOW2 as a backing store for your virtual 
-machine you can also snapshot with libvirt. It will not only snapshot 
-the disk, but it will also store the memory contents from the virtual 
-machine so you have a consistent state of the virtual machine.
-
-This has a drawback however, since when you give the VM 16GB of memory, 
-you have to store 16GB of data.
-
-Right now this doesn't work yet with RBD, but there is a feature request 
-in the tracker. I can't seem to find it right now.
-
-What you could do is:
-
-$ ssh root@virtual-machine "sync"
-$ rbd snap create vm-disk@snap1
-$ rbd export --snap snap1 vm-disk /mnt/backup/vm-disk_snap1.img
-
-This way you have a pretty consistent snapshot.
-
-Wido
-
->> rbd export --snap BACKUP image1 /mnt/backup/image1.img
->> losetup /mnt/backup/image1.img
->>
->> kpartx -a /dev/loop0
->>
->> Now you will have the partitions from the RBD image available in
->> /dev/mapper/loop0pX
-> Works fine!
->
-> Greets,
-> Stefan
+>>> But who cares? it's also on the 2nd node. or even on the 3rd if you=
+ have
+>>> replicas 3.
+>=20
+> Yes but you could also suffer a crash while writing the first replica=
+=2E
+> If the journal is in tmpfs, there is nothing to replay.
+>=20
+>=20
+>=20
+> On Thu, Nov 22, 2012 at 4:35 PM, Alexandre DERUMIER <aderumier@odiso.=
+com> wrote:
+>>=20
+>>>> But who cares? it's also on the 2nd node. or even on the 3rd if yo=
+u have
+>>>> replicas 3.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
