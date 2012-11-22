@@ -1,39 +1,32 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: incremental rbd export / sparse files?
-Date: Thu, 22 Nov 2012 13:59:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211221357480.9963@cobra.newdream.net>
-References: <50AE062E.5020301@profihost.ag>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: RBD fio Performance concerns
+Date: Thu, 22 Nov 2012 16:49:48 +0100
+Message-ID: <CAOLwVUm0QU07sHFrm-aWY709Dcm3d1V0uEbfmCrO+PB1ps93gw@mail.gmail.com>
+References: <50AE44B9.7070804@profihost.ag> <824b8945-bd67-489d-9791-30804ef90d81@mailpro>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45243 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755054Ab2KVV7N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 16:59:13 -0500
-In-Reply-To: <50AE062E.5020301@profihost.ag>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:41745 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753238Ab2KVScy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 13:32:54 -0500
+Received: by mail-la0-f46.google.com with SMTP id p5so3840599lag.19
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Nov 2012 10:32:52 -0800 (PST)
+In-Reply-To: <824b8945-bd67-489d-9791-30804ef90d81@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, Mark Nelson <mark.nelson@inktank.com>
 
-On Thu, 22 Nov 2012, Stefan Priebe - Profihost AG wrote:
-> Hello list,
-> 
-> right now a rbd export exports exactly the size of the disk even if there is
-> KNOWN free space. Is this inteded to change?
-> 
-> Might it be possible to export just differences between snapshots and merge
-> them later?
+>>But who cares? it's also on the 2nd node. or even on the 3rd if you have
+>>replicas 3.
 
-We were just talking about this the other day.
+Yes but you could also suffer a crash while writing the first replica.
+If the journal is in tmpfs, there is nothing to replay.
 
-Step 1 is to create a mechanism to output a list of block ranges that 
-have/have not changed between snapshots.
 
-Step 2 is to export the incremental changes.  The hangup there is figuring 
-out a generic and portable file format to represent those incremental 
-changes; we'd rather not invent something ourselves that is ceph-specific.
-Suggestions welcome!
 
-sage
-
+On Thu, Nov 22, 2012 at 4:35 PM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
+>
+> >>But who cares? it's also on the 2nd node. or even on the 3rd if you have
+> >>replicas 3.
