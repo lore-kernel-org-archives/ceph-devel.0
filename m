@@ -1,74 +1,47 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: 'zombie snapshot' problem
-Date: Wed, 21 Nov 2012 14:05:03 -0800
-Message-ID: <50AD500F.5040800@inktank.com>
-References: <CABYiri-cnNmP_Y0bdhvp8O8v-9kJyAWK9vcHgb_zwPP7ZAAuXQ@mail.gmail.com>
+From: Joe Perches <joe@perches.com>
+Subject: [TRIVIAL PATCH] bdi_register: Add __printf verification, fix arg
+ mismatch
+Date: Thu, 22 Nov 2012 11:49:29 -0800
+Message-ID: <1353613769.10902.8.camel@joe-AO722>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:51509 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755517Ab2KVT0N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 14:26:13 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so6047320pbc.19
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Nov 2012 11:26:12 -0800 (PST)
-In-Reply-To: <CABYiri-cnNmP_Y0bdhvp8O8v-9kJyAWK9vcHgb_zwPP7ZAAuXQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 11/21/2012 04:50 AM, Andrey Korolyov wrote:
-> Hi,
->
-> Somehow I have managed to produce unkillable snapshot, which does not
-> allow to remove itself or parent image:
->
-> $ rbd snap purge dev-rack0/vm2
-> Removing all snapshots: 100% complete...done.
+__printf is useful to verify format and arguments.
 
-I see one bug with 'snap purge' ignoring the return code when removing
-snaps. I just fixed this in the next branch. It's probably getting the
-same error as 'rbd snap rm' below.
+Signed-off-by: Joe Perches <joe@perches.com>
+---
+ fs/ceph/super.c             |    2 +-
+ include/linux/backing-dev.h |    1 +
+ 2 files changed, 2 insertions(+), 1 deletions(-)
 
-Could you post the output of:
-
-     rbd snap purge dev-rack0/vm2 --debug-ms 1 --debug-rbd 20
-
-> $ rbd rm dev-rack0/vm2
-> 2012-11-21 16:31:24.184626 7f7e0d172780 -1 librbd: image has snapshots
-> - not removing
-> Removing image: 0% complete...failed.
-> rbd: image has snapshots - these must be deleted with 'rbd snap purge'
-> before the image can be removed.
-> $ rbd snap ls dev-rack0/vm2
-> SNAPID NAME                               SIZE
->     188 vm2.snap-yxf 16384 MB
-> $ rbd info dev-rack0/vm2
-> rbd image 'vm2':
->          size 16384 MB in 4096 objects
->          order 22 (4096 KB objects)
->          block_name_prefix: rbd_data.1fa164c960874
->          format: 2
->          features: layering
-> $ rbd snap rm --snap vm2.snap-yxf dev-rack0/vm2
-> rbd: failed to remove snapshot: (2) No such file or directory
-> $ rbd snap create --snap vm2.snap-yxf dev-rack0/vm2
-> rbd: failed to create snapshot: (17) File exists
-> $ rbd snap rollback --snap vm2.snap-yxf dev-rack0/vm2
-> Rolling back to snapshot: 100% complete...done.
-> $ rbd snap protect --snap vm2.snap-yxf dev-rack0/vm2
-> $ rbd snap unprotect --snap vm2.snap-yxf dev-rack0/vm2
->
->
-> Meanwhile, ``rbd ls -l dev-rack0''  segfaulting with an attached log.
-> Is there any reliable way to kill problematic snap?
-
- From this log it looks like vm2 used to be a clone, and the snapshot
-vm2.snap-yxf was taken before it was flattened. Later, the parent of
-vm2.snap-yxf was deleted. Is this correct?
-
-It was a bug in 0.53 that protected snapshots could be deleted.
-
-Josh
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 2eb43f2..e7dbb5c 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -849,7 +849,7 @@ static int ceph_register_bdi(struct super_block *sb,
+ 		fsc->backing_dev_info.ra_pages =
+ 			default_backing_dev_info.ra_pages;
+ 
+-	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%d",
++	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
+ 			   atomic_long_inc_return(&bdi_seq));
+ 	if (!err)
+ 		sb->s_bdi = &fsc->backing_dev_info;
+diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
+index 2a9a9ab..12731a1 100644
+--- a/include/linux/backing-dev.h
++++ b/include/linux/backing-dev.h
+@@ -114,6 +114,7 @@ struct backing_dev_info {
+ int bdi_init(struct backing_dev_info *bdi);
+ void bdi_destroy(struct backing_dev_info *bdi);
+ 
++__printf(3, 4)
+ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
+ 		const char *fmt, ...);
+ int bdi_register_dev(struct backing_dev_info *bdi, dev_t dev);
