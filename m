@@ -1,53 +1,114 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: [Qemu-devel] [PATCH] use int64_t for return values
- from rbd instead of int
-Date: Thu, 22 Nov 2012 10:08:24 +0100
-Message-ID: <50ADEB88.2090100@profihost.ag>
-References: <1353415495-30561-1-git-send-email-s.priebe@profihost.ag>
-	<50AD096E.9080002@weilnetz.de>
-	<CAFEAcA-cAx88UZRQjHT7uk_oj8P+tXBJ+hb9v0N1Wym8FUMkHQ@mail.gmail.com>
-	<50ADE115.4060707@profihost.ag>
-	<CAFEAcA86AomWmobTObpw80rMNWM30JzAKqHZXWxmB48+GU3VYQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
-In-Reply-To: <CAFEAcA86AomWmobTObpw80rMNWM30JzAKqHZXWxmB48+GU3VYQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://pve.proxmox.com/cgi-bin/mailman/options/pve-devel>,
-	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://pve.proxmox.com/pipermail/pve-devel>
-List-Post: <mailto:pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org>
-List-Help: <mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=help>
-List-Subscribe: <http://pve.proxmox.com/cgi-bin/mailman/listinfo/pve-devel>,
-	<mailto:pve-devel-request-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org?subject=subscribe>
-Sender: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
-Errors-To: pve-devel-bounces-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org
-To: Peter Maydell <peter.maydell-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stefan Hajnoczi <stefanha-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Stefan Weil <sw-QDXxdeohBKYb1SvskN2V4Q@public.gmane.org>, qemu-devel-qX2TKyscuCcdnm+yROfE0A@public.gmane.org, pve-devel-KmHT29P9Uc/4CZzEM2C48g@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: [PATCH] rbd block driver fix race between aio
+	completition and aio cancel
+Date: Thu, 22 Nov 2012 11:00:19 +0100
+Message-ID: <1353578419-5481-1-git-send-email-s.priebe@profihost.ag>
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+To: qemu-devel@nongnu.org
+Cc: stefanha@gmail.com, ceph-devel@vger.kernel.org, pbonzini@redhat.com, Stefan Priebe <s.priebe@profihost.ag>, josh.durgin@inktank.com
 List-Id: ceph-devel.vger.kernel.org
 
-Hello,
+This one fixes a race which qemu had also in iscsi block driver
+between cancellation and io completition.
 
-i send a new patch using ssize_t. (Subject [PATCH] overflow of int ret: 
-use ssize_t for ret)
+qemu_rbd_aio_cancel was not synchronously waiting for the end of
+the command.
 
-Stefan
+To archieve this it introduces a new status flag which uses
+-EINPROGRESS.
 
-Am 22.11.2012 09:40, schrieb Peter Maydell:
-> On 22 November 2012 08:23, Stefan Priebe - Profihost AG
-> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->> Am 21.11.2012 23:32, schrieb Peter Maydell:
->>> Looking at the librbd API (which is what the size and ret
->>> values come from), it uses size_t and ssize_t for these.
->>> So I think probably ssize_t is the right type for ret
->>> (and size) in our structs here.
->>
->>
->> This sounds reasonable but does ssize_t support negative values? For error
->> values.
->
-> Yes, the first 's' in ssize_t means 'signed' and is the
-> difference between it and size_t.
->
-> -- PMM
->
+Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
+---
+ block/rbd.c |   23 ++++++++++++++---------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/block/rbd.c b/block/rbd.c
+index 0384c6c..783c3d7 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -77,6 +77,7 @@ typedef struct RBDAIOCB {
+     int error;
+     struct BDRVRBDState *s;
+     int cancelled;
++    int status;
+ } RBDAIOCB;
+ 
+ typedef struct RADOSCB {
+@@ -376,12 +377,6 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+     RBDAIOCB *acb = rcb->acb;
+     int64_t r;
+ 
+-    if (acb->cancelled) {
+-        qemu_vfree(acb->bounce);
+-        qemu_aio_release(acb);
+-        goto done;
+-    }
+-
+     r = rcb->ret;
+ 
+     if (acb->cmd == RBD_AIO_WRITE ||
+@@ -406,10 +401,11 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+             acb->ret = r;
+         }
+     }
++    acb->status = 0;
++
+     /* Note that acb->bh can be NULL in case where the aio was cancelled */
+     acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
+     qemu_bh_schedule(acb->bh);
+-done:
+     g_free(rcb);
+ }
+ 
+@@ -574,6 +570,12 @@ static void qemu_rbd_aio_cancel(BlockDriverAIOCB *blockacb)
+ {
+     RBDAIOCB *acb = (RBDAIOCB *) blockacb;
+     acb->cancelled = 1;
++
++    while (acb->status == -EINPROGRESS) {
++        qemu_aio_wait();
++    }
++
++    qemu_aio_release(acb);
+ }
+ 
+ static AIOPool rbd_aio_pool = {
+@@ -646,7 +648,8 @@ static void rbd_aio_bh_cb(void *opaque)
+     qemu_bh_delete(acb->bh);
+     acb->bh = NULL;
+ 
+-    qemu_aio_release(acb);
++    if (!acb->cancelled)
++        qemu_aio_release(acb);
+ }
+ 
+ static int rbd_aio_discard_wrapper(rbd_image_t image,
+@@ -691,6 +694,7 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
+     acb->s = s;
+     acb->cancelled = 0;
+     acb->bh = NULL;
++    acb->status = -EINPROGRESS;
+ 
+     if (cmd == RBD_AIO_WRITE) {
+         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
+@@ -737,7 +741,8 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
+ failed:
+     g_free(rcb);
+     s->qemu_aio_count--;
+-    qemu_aio_release(acb);
++    if (!acb->cancelled)
++        qemu_aio_release(acb);
+     return NULL;
+ }
+ 
+-- 
+1.7.10.4
