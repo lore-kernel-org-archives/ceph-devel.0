@@ -1,137 +1,99 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH V2] mds: fix CDir::_commit_partial() bug
-Date: Fri, 23 Nov 2012 00:52:45 +0800
-Message-ID: <1353603165-1724-1-git-send-email-zheng.z.yan@intel.com>
+From: ruslan usifov <ruslan.usifov@gmail.com>
+Subject: Fwd: does still not recommended place rbd device on nodes, where osd
+ daemon located?
+Date: Thu, 22 Nov 2012 20:32:23 +0400
+Message-ID: <CAHULbCmz-xmQrcfE6gzCO7Y61qkcz0fHosU-TXqUL1ALf0JhkQ@mail.gmail.com>
+References: <CAHULbCmY6j3GbRFs_fyO1VP5_-BG5Cg1H_Kvfg1nN3jMMpyvHA@mail.gmail.com>
+	<alpine.DEB.2.00.1211200849080.7369@cobra.newdream.net>
+	<CAHULbC=Hk0ADhKB-GT-LCrHnzdGOyPTEJTxOp4=+bHVBdVQuCw@mail.gmail.com>
+	<CAPYLRzg9DiKTY24w4DSY2t4ATk=VxNC0GHSM32_s9U7SAqi+yA@mail.gmail.com>
+	<CAHULbCmMvBWq7xpZ1faTieROUpHSBBnNKcr6x3VC5sDkLodjrQ@mail.gmail.com>
+	<50AD399A.2010203@inktank.com>
+	<CAHULbC=crXP5=L3hXvmY9zFgF1KnR06-1opwbVvyiFHLykh5tg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:28741 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756728Ab2KVTUB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Nov 2012 14:20:01 -0500
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:58809 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752541Ab2KVTU7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 14:20:59 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so6045325pbc.19
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Nov 2012 11:20:59 -0800 (PST)
+In-Reply-To: <CAHULbC=crXP5=L3hXvmY9zFgF1KnR06-1opwbVvyiFHLykh5tg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hello
 
-When a null dentry is encountered, CDir::_commit_partial() adds
-a OSD_TMAP_RM command to delete the dentry. But if the dentry is
-new, the osd will not find the dentry when handling the command
-and the tmap update operation will fail totally.
+Thank for your attention, and  sorry for my bad english!
 
-This patch also makes sure dentries are properly marked as new
-when preparing new dentries and exporting dentries.
+In my draft architecture, i want use same hardware for osd and rbd
+devices. In other words, i have 5 nodes this 5TB software raid on each
+Disk space. I want build on this nodes, ceph cluster. All 5 nodes will
+be run OSD and, on the same 5 node i will start 3 mons for QUORUM.
+Also on the same 5 nodes i will start cluster stack (pacemaker +
+corocync) with follow configuration
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/CDentry.h  |  2 ++
- src/mds/CDir.cc    | 11 ++++++++---
- src/mds/CDir.h     |  2 +-
- src/mds/MDCache.cc |  9 ++++++---
- src/mds/Server.cc  |  3 +++
- 5 files changed, 20 insertions(+), 7 deletions(-)
+node ceph-precie-64-01
+node ceph-precie-64-02
+node ceph-precie-64-03
+node ceph-precie-64-04
+node ceph-precie-64-05
+primitive samba_fs ocf:heartbeat:Filesystem \
+        params device="-U cb4d3dda-92e9-4bd8-9fbc-
+2940c096e8ec" directory="/mnt" fstype="ext4"
+primitive samba_rbd ocf:ceph:rbd \
+        params name="samba"
+group samba samba_rbd samba_fs
+property $id="cib-bootstrap-options" \
+        dc-version="1.1.6-9971ebba4494012a93c03b40a2c58ec0eb60f50c" \
+        cluster-infrastructure="openais" \
+        expected-quorum-votes="3" \
+        stonith-enabled="false" \
+        no-quorum-policy="stop" \
+        last-lrm-refresh="1352806660"
 
-diff --git a/src/mds/CDentry.h b/src/mds/CDentry.h
-index 480e562..5755c55 100644
---- a/src/mds/CDentry.h
-+++ b/src/mds/CDentry.h
-@@ -347,6 +347,8 @@ public:
-     // twiddle
-     state = 0;
-     state_set(CDentry::STATE_AUTH);
-+    if (nstate & STATE_NEW)
-+      mark_new();
-     if (nstate & STATE_DIRTY)
-       _mark_dirty(ls);
-     if (!replica_map.empty())
-diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
-index c5220ed..411d864 100644
---- a/src/mds/CDir.cc
-+++ b/src/mds/CDir.cc
-@@ -1696,7 +1696,7 @@ class C_Dir_Committed : public Context {
- public:
-   C_Dir_Committed(CDir *d, version_t v, version_t lrv) : dir(d), version(v), last_renamed_version(lrv) { }
-   void finish(int r) {
--    dir->_committed(version, last_renamed_version);
-+    dir->_committed(version, last_renamed_version, r);
-   }
- };
- 
-@@ -1802,6 +1802,10 @@ CDir::map_t::iterator CDir::_commit_partial(ObjectOperation& m,
-       continue;  // skip clean dentries
- 
-     if (dn->get_linkage()->is_null()) {
-+      if (dn->is_new()) {
-+	dn->mark_clean();
-+	continue;
-+      }
-       dout(10) << " rm " << dn->name << " " << *dn << dendl;
-       finalbl.append(CEPH_OSD_TMAP_RM);
-       dn->key().encode(finalbl);
-@@ -1997,10 +2001,11 @@ void CDir::_commit(version_t want)
-  *
-  * @param v version i just committed
-  */
--void CDir::_committed(version_t v, version_t lrv)
-+void CDir::_committed(version_t v, version_t lrv, int ret)
- {
--  dout(10) << "_committed v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
-+  dout(10) << "_committed ret " << ret << " v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
-   assert(is_auth());
-+  assert(ret == 0);
- 
-   bool stray = inode->is_stray();
- 
-diff --git a/src/mds/CDir.h b/src/mds/CDir.h
-index 2222418..274e38b 100644
---- a/src/mds/CDir.h
-+++ b/src/mds/CDir.h
-@@ -487,7 +487,7 @@ private:
-                        unsigned max_write_size=-1,
-                        map_t::iterator last_committed_dn=map_t::iterator());
-   void _encode_dentry(CDentry *dn, bufferlist& bl, const set<snapid_t> *snaps);
--  void _committed(version_t v, version_t last_renamed_version);
-+  void _committed(version_t v, version_t last_renamed_version, int ret);
-   void wait_for_commit(Context *c, version_t v=0);
- 
-   // -- dirtyness --
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index f8b1c8f..e69a49f 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -657,12 +657,15 @@ CDentry *MDCache::get_or_create_stray_dentry(CInode *in)
-   CDir *straydir = strayi->get_dirfrag(fg);
-   assert(straydir);
-   CDentry *straydn = straydir->lookup(straydname);
--  if (!straydn) {
-+
-+  if (!straydn)
-     straydn = straydir->add_null_dentry(straydname);
--    straydn->mark_new();
--  } else 
-+  else
-     assert(straydn->get_projected_linkage()->is_null());
- 
-+  if (!straydn->is_dirty())
-+    straydn->mark_new();
-+
-   return straydn;
- }
- 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index ec0d5d5..228fede 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -1685,6 +1685,9 @@ CDentry* Server::prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dn
-       }
-     }
- 
-+    if (!dn->is_dirty())
-+      dn->mark_new();
-+
-     return dn;
-   }
- 
--- 
-1.7.11.7
 
+So rbd block device can be fault tolerant. In my case, use separate
+machine for rbd not appropriated :-( (use multiple machines only for
+rbd fault tollerant is too much cost )
+
+2012/11/22 Dan Mick <dan.mick@inktank.com>:
+> Still not certain I'm understanding *just* what you mean, but I'll point out
+> that you can set up a cluster with rbd images, mount them from a separate
+> non-virtualized host with kernel rbd, and expand those images and take
+> advantage of the newly-available space on the separate host, just as though
+> you were expanding a RAID device.  Maybe that fits your use case, Ruslan?
+>
+>
+> On 11/21/2012 12:05 PM, ruslan usifov wrote:
+>>
+>> Yes i mean exactly this. it's a great pity :-( Maybe present some ceph
+>> equivalent that solve my problem?
+>>
+>> 2012/11/21 Gregory Farnum <greg@inktank.com>:
+>>>
+>>> On Wed, Nov 21, 2012 at 4:33 AM, ruslan usifov <ruslan.usifov@gmail.com>
+>>> wrote:
+>>>>
+>>>> So, not possible use ceph as scalable block device without
+>>>> visualization?
+>>>
+>>>
+>>> I'm not sure I understand, but if you're trying to take a bunch of
+>>> compute nodes and glue their disks together, no, that's not a
+>>> supported use case at this time. There are a number of deadlock issues
+>>> caused by this sort of loopback; it's the same reason you shouldn't
+>>> mount NFS on the server host.
+>>> We may in the future manage to release an rbd-fuse client that you can
+>>> use to do this with a little less pain, but it's not ready at this
+>>> point.
+>>> -Greg
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
