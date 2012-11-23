@@ -1,62 +1,65 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd import from stdin
-Date: Fri, 23 Nov 2012 11:25:16 +0100 (CET)
-Message-ID: <9a1238da-8eb3-4080-b331-26890d51b9aa@mailpro>
-References: <50AF4CAF.2090402@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: RBD fio Performance concerns
+Date: Fri, 23 Nov 2012 11:31:15 +0100
+Message-ID: <50AF5073.8070006@profihost.ag>
+References: <CAOLwVUmJGZNaZsySsw8eQmLy1ZCha+AAGCp-5i42=mr0aKHMyA@mail.gmail.com> <3210b770-431e-44ed-8d86-4610de89dd92@mailpro> <CAOLwVUn5EAC4QaWgU+TkodcJea7ayKUANUpfzWUG+cTBunao5g@mail.gmail.com> <50ACF8C8.7020908@inktank.com> <50AD02AC.60802@inktank.com> <50ADFC23.2030208@profihost.ag> <CAOLwVUmp7wrfead8qX2BZPbyeN_JY_XBN+wkEWmbY6q1-5u0fw@mail.gmail.com> <50AE1107.5060606@profihost.ag> <CAOLwVU=VpDPg6iuZM=UFy5bcDm-Rm_dVRkeZrAu-DoFXp9cDKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:45946 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161128Ab2KWKZr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 05:25:47 -0500
-In-Reply-To: <50AF4CAF.2090402@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:39365 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161144Ab2KWKbZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 05:31:25 -0500
+In-Reply-To: <CAOLwVU=VpDPg6iuZM=UFy5bcDm-Rm_dVRkeZrAu-DoFXp9cDKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>
 
+Hi,
 
-import for stdin already work like this:
+when i switch the journal to the OSD Disk seperate partiton on each dis=
+k=20
+(/dev/sdX1 for journal 1GB and /dev/sdX2 for OSD) i go down from 23.000=
+=20
+iops to 200 iops random 4k.
 
-rbd import --size=3Dxxx - image < stdin
-
-from this patch
-
-http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/6315
-
-
-(so I think you just need to specify --size)
-
-
-
------ Mail original -----=20
-
-De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-=C3=80: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Vendredi 23 Novembre 2012 11:15:11=20
-Objet: rbd import from stdin=20
-
-Hello,=20
-
-i was looking at the wip-rbd-export-stdout branch which also allows to=20
-import from stdin.=20
-
-But it doesn't seem to work:=20
-
-gzip -d -c vm-101-disk-1.img.gz | rbd import - kvmpool1/vm-101-disk-1=20
-rbd: unable to get size of file/block device: (25) Inappropriate ioctl=20
-for device=20
-rbd: import failed: (25) Inappropriate ioctl for device=20
-
-Greets,=20
-Stefan=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+Greets,
+Stefan
+Am 22.11.2012 13:50, schrieb S=E9bastien Han:
+>> journal is running on tmpfs to me but that changes nothing.
+>
+> I don't think it works then. According to the doc: Enables using
+> libaio for asynchronous writes to the journal. Requires journal dio
+> set to true.
+>
+>
+> On Thu, Nov 22, 2012 at 12:48 PM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> Am 22.11.2012 11:49, schrieb S=E9bastien Han:
+>>
+>>> @Alexandre: cool!
+>>>
+>>> @ Stefan: Full SSD cluster and 10G switches?
+>>
+>> Yes
+>>
+>>
+>>> Couple of weeks ago I saw
+>>> that you use journal aio, did you notice performance improvement wi=
+th it?
+>>
+>> journal is running on tmpfs to me but that changes nothing.
+>>
+>> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
