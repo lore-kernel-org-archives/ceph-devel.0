@@ -1,95 +1,75 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd import from stdin
-Date: Fri, 23 Nov 2012 15:15:30 +0100 (CET)
-Message-ID: <4a5bbe34-b808-497a-ac9e-696ac7c9aeb7@mailpro>
-References: <50AF832E.9050402@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: [PATCH] overflow of int ret: use ssize_t for ret
+Date: Fri, 23 Nov 2012 15:38:17 +0100
+Message-ID: <50AF8A59.6060205@profihost.ag>
+References: <1353575275-1343-1-git-send-email-s.priebe@profihost.ag> <CAJSP0QUhb4J6GQjuJ3OU2cgiFo+t25ERZhibMkYVLW0RuFeamA@mail.gmail.com> <CAFEAcA-JSXVHf2Ax=ren8emCMhf2=F0+V+7_crav1OiiZn2aOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:56916 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752299Ab2KWOQB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 09:16:01 -0500
-In-Reply-To: <50AF832E.9050402@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:48423 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750934Ab2KWOi1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 09:38:27 -0500
+In-Reply-To: <CAFEAcA-JSXVHf2Ax=ren8emCMhf2=F0+V+7_crav1OiiZn2aOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org
+To: Peter Maydell <peter.maydell@linaro.org>
+Cc: Stefan Hajnoczi <stefanha@gmail.com>, qemu-devel <qemu-devel@nongnu.org>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Stefan Weil <sw@weilnetz.de>
 
-the target rbd volume must not exist.=20
+Hi,
 
+i'm not a ceph or inktank guy. I can't made any decision on what to 
+change. At least right now you'll see failing I/O's in your guest, when 
+you discard whole disks.
 
------ Mail original -----=20
+I could fix this for me with int64 and with ssize_t. So if i should 
+resend another patch i need a concrete advise how to patch.
 
-De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Vendredi 23 Novembre 2012 15:07:42=20
-Objet: Re: rbd import from stdin=20
+Thanks!
 
-Hi,=20
+Greets,
+Stefan
 
-even with size it does not work:=20
-
-Am 23.11.2012 11:43, schrieb Stefan Priebe - Profihost AG:=20
-> ah so right now the size parameter is needed. But i don't know the si=
-ze=20
-> ;-) file is gzip compressed ;-)=20
-
-gzip -d -c vm-101-disk-1.img.gz | rbd import --size=3D42945478656 -=20
-kvmpool1/vm-101-disk-1=20
-rbd: image creation failed=20
-2012-11-23 15:05:49.300363 7f5a599cc760 -1 librbd: rbd image=20
-vm-101-disk-1 already existsrbd: import failed:=20
-(17) File exists=20
-
-Greets,=20
-Stefan=20
-
-> Stefan=20
-> Am 23.11.2012 11:25, schrieb Alexandre DERUMIER:=20
->>=20
->> import for stdin already work like this:=20
->>=20
->> rbd import --size=3Dxxx - image < stdin=20
->>=20
->> from this patch=20
->>=20
->> http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/6315=20
->>=20
->>=20
->> (so I think you just need to specify --size)=20
->>=20
->>=20
->>=20
->> ----- Mail original -----=20
->>=20
->> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
->> =C3=80: ceph-devel@vger.kernel.org=20
->> Envoy=C3=A9: Vendredi 23 Novembre 2012 11:15:11=20
->> Objet: rbd import from stdin=20
->>=20
->> Hello,=20
->>=20
->> i was looking at the wip-rbd-export-stdout branch which also allows =
-to=20
->> import from stdin.=20
->>=20
->> But it doesn't seem to work:=20
->>=20
->> gzip -d -c vm-101-disk-1.img.gz | rbd import - kvmpool1/vm-101-disk-=
-1=20
->> rbd: unable to get size of file/block device: (25) Inappropriate ioc=
-tl=20
->> for device=20
->> rbd: import failed: (25) Inappropriate ioctl for device=20
->>=20
->> Greets,=20
->> Stefan=20
->>=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Am 23.11.2012 15:15, schrieb Peter Maydell:
+> On 23 November 2012 14:11, Stefan Hajnoczi <stefanha@gmail.com> wrote:
+>> On Thu, Nov 22, 2012 at 10:07 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+>>> diff --git a/block/rbd.c b/block/rbd.c
+>>> index 5a0f79f..0384c6c 100644
+>>> --- a/block/rbd.c
+>>> +++ b/block/rbd.c
+>>> @@ -69,7 +69,7 @@ typedef enum {
+>>>   typedef struct RBDAIOCB {
+>>>       BlockDriverAIOCB common;
+>>>       QEMUBH *bh;
+>>> -    int ret;
+>>> +    ssize_t ret;
+>>>       QEMUIOVector *qiov;
+>>>       char *bounce;
+>>>       RBDAIOCmd cmd;
+>>> @@ -86,7 +86,7 @@ typedef struct RADOSCB {
+>>>       int done;
+>>>       int64_t size;
+>>>       char *buf;
+>>> -    int ret;
+>>> +    ssize_t ret;
+>>>   } RADOSCB;
+>>>
+>>>   #define RBD_FD_READ 0
+>>
+>> I preferred your previous patch:
+>>
+>> ssize_t on 32-bit hosts has sizeof(ssize_t) == 4.  In
+>> qemu_rbd_complete_aio() we may assign acb->ret = rcb->size.  Here the
+>> size field is int64_t, so ssize_t ret would truncate the value.
+>
+> The rcb size field should be a size_t: it is used for calling
+> rbd_aio_write and rbd_aio_read so if we've overflowed 32 bits
+> then we've already got a problem there.
+>
+> -- PMM
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
