@@ -1,136 +1,137 @@
-From: Sebastien HAN <han.sebastien@gmail.com>
-Subject: Re: New Project with Ceph
-Date: Fri, 23 Nov 2012 18:53:25 +0100
-Message-ID: <89FBB32B-22B7-4769-93D4-5721631AE0D5@gmail.com>
+From: "Holcombe, Christopher" <cholcomb@cscinfo.com>
+Subject: RE: New Project with Ceph
+Date: Fri, 23 Nov 2012 18:06:25 +0000
+Message-ID: <C4049E4484F13747B672D64B9C12C31328D93332@PWMAILM01.cscinfo.com>
 References: <C4049E4484F13747B672D64B9C12C31328D93097@PWMAILM01.cscinfo.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+ <89FBB32B-22B7-4769-93D4-5721631AE0D5@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:59879 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421Ab2KWRxe convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 12:53:34 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so3657274eaa.19
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Nov 2012 09:53:32 -0800 (PST)
-In-Reply-To: <C4049E4484F13747B672D64B9C12C31328D93097@PWMAILM01.cscinfo.com>
+Received: from mx1.cscinfo.com ([165.160.9.57]:47561 "EHLO mx1.cscinfo.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751559Ab2KWSG1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 23 Nov 2012 13:06:27 -0500
+In-Reply-To: <89FBB32B-22B7-4769-93D4-5721631AE0D5@gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Holcombe, Christopher" <cholcomb@cscinfo.com>
+To: Sebastien HAN <han.sebastien@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-Your project seems nice, nothing really new in term of integration but =
-quite promissing. I also think it's good idea that people start to spea=
-k about their project, you can get input from the community.=20
-
-It's fairly easy to make an RBD device surviving a reboot. I assume tha=
-t your iSCSI export will be handle by at least 2 machines for HA purpos=
-e. Thus you will use Pacemaker, there is already =C3=A0 RA for that and=
- it's part of the ceph package as well ;-). If a server crash the devic=
-e is re-mappped on the other server and can possibily failback when fir=
-st node comes back online. On top of the stack you could use the RA for=
- Lio and even do multi-pathing.=20
-
-In term of RBD size, if you can use smaller devices. Thank to this you =
-will get more IOPS operations. Since RBD devices are stripped over obje=
-cts. My benchmarks (and I'm not the only one) showed me that multiple R=
-BD scale better.=20
-
-I wish you the best for your project. ;-)
-
-Cheers!=20
-
-On 23 nov. 2012, at 18:31, "Holcombe, Christopher" <cholcomb@cscinfo.co=
-m> wrote:
-
-> Hi Everyone,
->=20
-> First email here to the developer Ceph mailing list.  Some of you may=
- know me from the irc channel under the handle 'noob2' .  I hang out th=
-ere every once in a while to ask questions and share knowledge. Last we=
-ek I discussed a project I am working on in the irc channel.  Scuttlemo=
-nkey suggested I send an email off to this list with the possibility of=
- a guest entry on the Ceph blog!  Let me describe what I am trying to a=
-ccomplish:
->=20
-> Background : VMware Storage using Ceph.  After discovering Ceph I tho=
-ught of several uses for it.  Storage is really expensive for enterpris=
-e customers and it doesn't need to be.  Going back to first principles =
-results in the conclusion that storage hardware is very cheap now.  Abo=
-ut 5% to 10% what enterprise customers are paying.  With that in mind I=
- realized there is great room for improvement.  Most of the storage we =
-use is carried over a brocade fibre network and I think Ceph is perfect=
- for this task.  What is needed is a proxy to merge the rados back end =
-to the fibre network.  I used LIO on a previous project and had a theor=
-y that I could use it to meet our storage needs with Ceph.  At some poi=
-nt in the future we will direct mount rbd over the network but we are n=
-ot ready for that yet.
->=20
-> Design: Ceph already did most of the heavy lifting for me.  Triple re=
-plication, self-healing, interaction through the kernel as a block devi=
-ce and ability to scale easily with commodity servers.  My production C=
-eph cluster which I'm still in the process of getting quotes for will b=
-e HP DL180G6 servers.   Each of these will house 12 3TB data drives con=
-nected to a HP410 1GB flash backed write controller.  In building some =
-previous clusters I learned that spending a little extra on the raid co=
-ntroller is usually worth it.  Our network contains 2 48 port gigabit s=
-witches in each rack for redundancy.  My plan is to use a 4 port gigabi=
-t network card and split the replication traffic off from the client tr=
-affic.  I plan on setting up 2 802.3ad aggregated links.  That should g=
-ive the server about 2x 1.9Gb/s of bandwidth.  We are currently short o=
-n 10Gb network ports but from what I'm seeing in testing the HP raid ca=
-rds can't handle enough data to make it worth it.  If that changes afte=
-r tuning I can always upgrade.  We are an HP shop so my hands are a lit=
-tle tied.  Next is the proxy machines.  I'm going to reuse 2 older HP d=
-l380 G5 servers that we took out of service.  One will be part of the A=
- fabric for the fibre and the other will be on the B fabric.  This is n=
-eeded for redundancy so the fibre initiator can fail back and forth sho=
-uld it need to.  I plan on creating rbd blocks of 1TB each on the Ceph =
-cluster, mounting it on both of the proxy machines and exporting using =
-LIO.  LIO has both block mode which can export any block device the ker=
-nel knows about or file mode which can export a file as a block device.=
-  My testing has shown that VMware can mount this storage, vmotion vm's=
- onto it and use it like any other SAN storage.  The only challenge I h=
-ave at this point is getting the rbd devices to survive a reboot on the=
- proxy machines.  I also will have to train the other admins on how to =
-use it.  It is certainly more complicated than SAN storage we are used =
-to but that shouldn't stop me.  I can build a web interface on top of t=
-his using django.  If I can achieve these without too much difficulty t=
-han Ceph is truly an enterprise storage replacement.
-> That's my project at a high level.  Ceph has many uses but I'm findin=
-g this use the most interesting at the moment.  When it is all finished=
- it should save us over 90% on storage costs going forward.  If anyone =
-knows how I could go about getting Ubuntu to save rbd mappings after a =
-reboot that would be really helpful.  Thank you guys for your hard work=
-!
->=20
->=20
-> Chris Holcombe
-> Unix Administrator
-> Corporation Service Company
-> cholcomb@cscinfo.com
-> 302-636-8667
->=20
->=20
-> ________________________________
->=20
-> NOTICE: This e-mail and any attachments is intended only for use by t=
-he addressee(s) named herein and may contain legally privileged, propri=
-etary or confidential information. If you are not the intended recipien=
-t of this e-mail, you are hereby notified that any dissemination, distr=
-ibution or copying of this email, and any attachments thereto, is stric=
-tly prohibited. If you receive this email in error please immediately n=
-otify me via reply email or at (800) 927-9800 and permanently delete th=
-e original copy and any copy of any e-mail, and any printout.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgU2ViYXN0aWVuLA0KDQpZZXMgTElPIGtub3dzIGFib3V0IG11bHRpcGF0aGluZyBhbmQgc2hv
+dWxkbid0IGhhdmUgYSBwcm9ibGVtIHdpdGggMiBtYWNoaW5lcy4gICBJJ20gZ29pbmcgdG8gdGVz
+dCB0aGUgaGVjayBvdXQgb2YgaXQganVzdCB0byBiZSBzYWZlISAgU28gUGFjZW1ha2VyIGlzIHdo
+YXQgSSBzaG91bGQgcmVzZWFyY2ggbmV4dCB0byByZW1vdW50IHJiZCdzIGFmdGVyIGEgcmVib290
+IG9yIGEgcHJveHkgY3Jhc2ggeW91J3JlIHNheWluZz8gIEkgaGF2ZW4ndCBkb25lIGFueXRoaW5n
+IHdpdGggUGFjZW1ha2VyIHNvIHRoYXQgd291bGQgYmUgbmV3IHRlcnJpdG9yeSBmb3IgbWUuICAN
+Cg0KSSBkaWRuJ3Qga25vdyBhYm91dCBSQkQgZGV2aWNlcyBzY2FsaW5nIGJldHRlciBhdCBzbWFs
+bCBzaXplcy4gIFRoYW5rcyBmb3IgdGhlIHRpcCEgIEkgdGhpbmsgb3VyIGdyb3VwIHdvdWxkIGhh
+dmUgbm8gcHJvYmxlbSB3aXRoIHNtYWxsZXIgZGV2aXNlcyBvZiAyNTBHQiBvciA1MDBHQi4gIEFy
+ZSB5b3UgdGFsa2luZyBtdWNoIHNtYWxsZXIgdGhhbiB0aGF0IGZvciBpb3BzPyAgDQoNClRoYW5r
+cyENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNlYmFzdGllbiBIQU4gW21h
+aWx0bzpoYW4uc2ViYXN0aWVuQGdtYWlsLmNvbV0gDQpTZW50OiBGcmlkYXksIE5vdmVtYmVyIDIz
+LCAyMDEyIDEyOjUzIFBNDQpUbzogSG9sY29tYmUsIENocmlzdG9waGVyDQpDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBOZXcgUHJvamVjdCB3aXRoIENlcGgNCg0K
+SGksDQoNCllvdXIgcHJvamVjdCBzZWVtcyBuaWNlLCBub3RoaW5nIHJlYWxseSBuZXcgaW4gdGVy
+bSBvZiBpbnRlZ3JhdGlvbiBidXQgcXVpdGUgcHJvbWlzc2luZy4gSSBhbHNvIHRoaW5rIGl0J3Mg
+Z29vZCBpZGVhIHRoYXQgcGVvcGxlIHN0YXJ0IHRvIHNwZWFrIGFib3V0IHRoZWlyIHByb2plY3Qs
+IHlvdSBjYW4gZ2V0IGlucHV0IGZyb20gdGhlIGNvbW11bml0eS4gDQoNCkl0J3MgZmFpcmx5IGVh
+c3kgdG8gbWFrZSBhbiBSQkQgZGV2aWNlIHN1cnZpdmluZyBhIHJlYm9vdC4gSSBhc3N1bWUgdGhh
+dCB5b3VyIGlTQ1NJIGV4cG9ydCB3aWxsIGJlIGhhbmRsZSBieSBhdCBsZWFzdCAyIG1hY2hpbmVz
+IGZvciBIQSBwdXJwb3NlLiBUaHVzIHlvdSB3aWxsIHVzZSBQYWNlbWFrZXIsIHRoZXJlIGlzIGFs
+cmVhZHkgw6AgUkEgZm9yIHRoYXQgYW5kIGl0J3MgcGFydCBvZiB0aGUgY2VwaCBwYWNrYWdlIGFz
+IHdlbGwgOy0pLiBJZiBhIHNlcnZlciBjcmFzaCB0aGUgZGV2aWNlIGlzIHJlLW1hcHBwZWQgb24g
+dGhlIG90aGVyIHNlcnZlciBhbmQgY2FuIHBvc3NpYmlseSBmYWlsYmFjayB3aGVuIGZpcnN0IG5v
+ZGUgY29tZXMgYmFjayBvbmxpbmUuIE9uIHRvcCBvZiB0aGUgc3RhY2sgeW91IGNvdWxkIHVzZSB0
+aGUgUkEgZm9yIExpbyBhbmQgZXZlbiBkbyBtdWx0aS1wYXRoaW5nLiANCg0KSW4gdGVybSBvZiBS
+QkQgc2l6ZSwgaWYgeW91IGNhbiB1c2Ugc21hbGxlciBkZXZpY2VzLiBUaGFuayB0byB0aGlzIHlv
+dSB3aWxsIGdldCBtb3JlIElPUFMgb3BlcmF0aW9ucy4gU2luY2UgUkJEIGRldmljZXMgYXJlIHN0
+cmlwcGVkIG92ZXIgb2JqZWN0cy4gTXkgYmVuY2htYXJrcyAoYW5kIEknbSBub3QgdGhlIG9ubHkg
+b25lKSBzaG93ZWQgbWUgdGhhdCBtdWx0aXBsZSBSQkQgc2NhbGUgYmV0dGVyLiANCg0KSSB3aXNo
+IHlvdSB0aGUgYmVzdCBmb3IgeW91ciBwcm9qZWN0LiA7LSkNCg0KQ2hlZXJzISANCg0KT24gMjMg
+bm92LiAyMDEyLCBhdCAxODozMSwgIkhvbGNvbWJlLCBDaHJpc3RvcGhlciIgPGNob2xjb21iQGNz
+Y2luZm8uY29tPiB3cm90ZToNCg0KPiBIaSBFdmVyeW9uZSwNCj4gDQo+IEZpcnN0IGVtYWlsIGhl
+cmUgdG8gdGhlIGRldmVsb3BlciBDZXBoIG1haWxpbmcgbGlzdC4gIFNvbWUgb2YgeW91IG1heSBr
+bm93IG1lIGZyb20gdGhlIGlyYyBjaGFubmVsIHVuZGVyIHRoZSBoYW5kbGUgJ25vb2IyJyAuICBJ
+IGhhbmcgb3V0IHRoZXJlIGV2ZXJ5IG9uY2UgaW4gYSB3aGlsZSB0byBhc2sgcXVlc3Rpb25zIGFu
+ZCBzaGFyZSBrbm93bGVkZ2UuIExhc3Qgd2VlayBJIGRpc2N1c3NlZCBhIHByb2plY3QgSSBhbSB3
+b3JraW5nIG9uIGluIHRoZSBpcmMgY2hhbm5lbC4gIFNjdXR0bGVtb25rZXkgc3VnZ2VzdGVkIEkg
+c2VuZCBhbiBlbWFpbCBvZmYgdG8gdGhpcyBsaXN0IHdpdGggdGhlIHBvc3NpYmlsaXR5IG9mIGEg
+Z3Vlc3QgZW50cnkgb24gdGhlIENlcGggYmxvZyEgIExldCBtZSBkZXNjcmliZSB3aGF0IEkgYW0g
+dHJ5aW5nIHRvIGFjY29tcGxpc2g6DQo+IA0KPiBCYWNrZ3JvdW5kIDogVk13YXJlIFN0b3JhZ2Ug
+dXNpbmcgQ2VwaC4gIEFmdGVyIGRpc2NvdmVyaW5nIENlcGggSSB0aG91Z2h0IG9mIHNldmVyYWwg
+dXNlcyBmb3IgaXQuICBTdG9yYWdlIGlzIHJlYWxseSBleHBlbnNpdmUgZm9yIGVudGVycHJpc2Ug
+Y3VzdG9tZXJzIGFuZCBpdCBkb2Vzbid0IG5lZWQgdG8gYmUuICBHb2luZyBiYWNrIHRvIGZpcnN0
+IHByaW5jaXBsZXMgcmVzdWx0cyBpbiB0aGUgY29uY2x1c2lvbiB0aGF0IHN0b3JhZ2UgaGFyZHdh
+cmUgaXMgdmVyeSBjaGVhcCBub3cuICBBYm91dCA1JSB0byAxMCUgd2hhdCBlbnRlcnByaXNlIGN1
+c3RvbWVycyBhcmUgcGF5aW5nLiAgV2l0aCB0aGF0IGluIG1pbmQgSSByZWFsaXplZCB0aGVyZSBp
+cyBncmVhdCByb29tIGZvciBpbXByb3ZlbWVudC4gIE1vc3Qgb2YgdGhlIHN0b3JhZ2Ugd2UgdXNl
+IGlzIGNhcnJpZWQgb3ZlciBhIGJyb2NhZGUgZmlicmUgbmV0d29yayBhbmQgSSB0aGluayBDZXBo
+IGlzIHBlcmZlY3QgZm9yIHRoaXMgdGFzay4gIFdoYXQgaXMgbmVlZGVkIGlzIGEgcHJveHkgdG8g
+bWVyZ2UgdGhlIHJhZG9zIGJhY2sgZW5kIHRvIHRoZSBmaWJyZSBuZXR3b3JrLiAgSSB1c2VkIExJ
+TyBvbiBhIHByZXZpb3VzIHByb2plY3QgYW5kIGhhZCBhIHRoZW9yeSB0aGF0IEkgY291bGQgdXNl
+IGl0IHRvIG1lZXQgb3VyIHN0b3JhZ2UgbmVlZHMgd2l0aCBDZXBoLiAgQXQgc29tZSBwb2ludCBp
+biB0aGUgZnV0dXJlIHdlIHdpbGwgZGlyZWN0IG1vdW50IHJiZCBvdmVyIHRoZSBuZXR3b3JrIGJ1
+dCB3ZSBhcmUgbm90IHJlYWR5IGZvciB0aGF0IHlldC4NCj4gDQo+IERlc2lnbjogQ2VwaCBhbHJl
+YWR5IGRpZCBtb3N0IG9mIHRoZSBoZWF2eSBsaWZ0aW5nIGZvciBtZS4gIFRyaXBsZSByZXBsaWNh
+dGlvbiwgc2VsZi1oZWFsaW5nLCBpbnRlcmFjdGlvbiB0aHJvdWdoIHRoZSBrZXJuZWwgYXMgYSBi
+bG9jayBkZXZpY2UgYW5kIGFiaWxpdHkgdG8gc2NhbGUgZWFzaWx5IHdpdGggY29tbW9kaXR5IHNl
+cnZlcnMuICBNeSBwcm9kdWN0aW9uIENlcGggY2x1c3RlciB3aGljaCBJJ20gc3RpbGwgaW4gdGhl
+IHByb2Nlc3Mgb2YgZ2V0dGluZyBxdW90ZXMgZm9yIHdpbGwgYmUgSFAgREwxODBHNiBzZXJ2ZXJz
+LiAgIEVhY2ggb2YgdGhlc2Ugd2lsbCBob3VzZSAxMiAzVEIgZGF0YSBkcml2ZXMgY29ubmVjdGVk
+IHRvIGEgSFA0MTAgMUdCIGZsYXNoIGJhY2tlZCB3cml0ZSBjb250cm9sbGVyLiAgSW4gYnVpbGRp
+bmcgc29tZSBwcmV2aW91cyBjbHVzdGVycyBJIGxlYXJuZWQgdGhhdCBzcGVuZGluZyBhIGxpdHRs
+ZSBleHRyYSBvbiB0aGUgcmFpZCBjb250cm9sbGVyIGlzIHVzdWFsbHkgd29ydGggaXQuICBPdXIg
+bmV0d29yayBjb250YWlucyAyIDQ4IHBvcnQgZ2lnYWJpdCBzd2l0Y2hlcyBpbiBlYWNoIHJhY2sg
+Zm9yIHJlZHVuZGFuY3kuICBNeSBwbGFuIGlzIHRvIHVzZSBhIDQgcG9ydCBnaWdhYml0IG5ldHdv
+cmsgY2FyZCBhbmQgc3BsaXQgdGhlIHJlcGxpY2F0aW9uIHRyYWZmaWMgb2ZmIGZyb20gdGhlIGNs
+aWVudCB0cmFmZmljLiAgSSBwbGFuIG9uIHNldHRpbmcgdXAgMiA4MDIuM2FkIGFnZ3JlZ2F0ZWQg
+bGlua3MuICBUaGF0IHNob3VsZCBnaXZlIHRoZSBzZXJ2ZXIgYWJvdXQgMnggMS45R2IvcyBvZiBi
+YW5kd2lkdGguICBXZSBhcmUgY3VycmVudGx5IHNob3J0IG9uIDEwR2IgbmV0d29yayBwb3J0cyBi
+dXQgZnJvbSB3aGF0IEknbSBzZWVpbmcgaW4gdGVzdGluZyB0aGUgSFAgcmFpZCBjYXJkcyBjYW4n
+dCBoYW5kbGUgZW5vdWdoIGRhdGEgdG8gbWFrZSBpdCB3b3J0aCBpdC4gIElmIHRoYXQgY2hhbmdl
+cyBhZnRlciB0dW5pbmcgSSBjYW4gYWx3YXlzIHVwZ3JhZGUuICBXZSBhcmUgYW4gSFAgc2hvcCBz
+byBteSBoYW5kcyBhcmUgYSBsaXR0bGUgdGllZC4gIE5leHQgaXMgdGhlIHByb3h5IG1hY2hpbmVz
+LiAgSSdtIGdvaW5nIHRvIHJldXNlIDIgb2xkZXIgSFAgZGwzODAgRzUgc2VydmVycyB0aGF0IHdl
+IHRvb2sgb3V0IG9mIHNlcnZpY2UuICBPbmUgd2lsbCBiZSBwYXJ0IG9mIHRoZSBBIGZhYnJpYyBm
+b3IgdGhlIGZpYnJlIGFuZCB0aGUgb3RoZXIgd2lsbCBiZSBvbiB0aGUgQiBmYWJyaWMuICBUaGlz
+IGlzIG5lZWRlZCBmb3IgcmVkdW5kYW5jeSBzbyB0aGUgZmlicmUgaW5pdGlhdG9yIGNhbiBmYWls
+IGJhY2sgYW5kIGZvcnRoIHNob3VsZCBpdCBuZWVkIHRvLiAgSSBwbGFuIG9uIGNyZWF0aW5nIHJi
+ZCBibG9ja3Mgb2YgMVRCIGVhY2ggb24gdGhlIENlcGggY2x1c3RlciwgbW91bnRpbmcgaXQgb24g
+Ym90aCBvZiB0aGUgcHJveHkgbWFjaGluZXMgYW5kIGV4cG9ydGluZyB1c2luZyBMSU8uICBMSU8g
+aGFzIGJvdGggYmxvY2sgbW9kZSB3aGljaCBjYW4gZXhwb3J0IGFueSBibG9jayBkZXZpY2UgdGhl
+IGtlcm5lbCBrbm93cyBhYm91dCBvciBmaWxlIG1vZGUgd2hpY2ggY2FuIGV4cG9ydCBhIGZpbGUg
+YXMgYSBibG9jayBkZXZpY2UuICBNeSB0ZXN0aW5nIGhhcyBzaG93biB0aGF0IFZNd2FyZSBjYW4g
+bW91bnQgdGhpcyBzdG9yYWdlLCB2bW90aW9uIHZtJ3Mgb250byBpdCBhbmQgdXNlIGl0IGxpa2Ug
+YW55IG90aGVyIFNBTiBzdG9yYWdlLiAgVGhlIG9ubHkgY2hhbGxlbmdlIEkgaGF2ZSBhdCB0aGlz
+IHBvaW50IGlzIGdldHRpbmcgdGhlIHJiZCBkZXZpY2VzIHRvIHN1cnZpdmUgYSByZWJvb3Qgb24g
+dGhlIHByb3h5IG1hY2hpbmVzLiAgSSBhbHNvIHdpbGwgaGF2ZSB0byB0cmFpbiB0aGUgb3RoZXIg
+YWRtaW5zIG9uIGhvdyB0byB1c2UgaXQuICBJdCBpcyBjZXJ0YWlubHkgbW9yZSBjb21wbGljYXRl
+ZCB0aGFuIFNBTiBzdG9yYWdlIHdlIGFyZSB1c2VkIHRvIGJ1dCB0aGF0IHNob3VsZG4ndCBzdG9w
+IG1lLiAgSSBjYW4gYnVpbGQgYSB3ZWIgaW50ZXJmYWNlIG9uIHRvcCBvZiB0aGlzIHVzaW5nIGRq
+YW5nby4gIElmIEkgY2FuIGFjaGlldmUgdGhlc2Ugd2l0aG91dCB0b28gbXVjaCBkaWZmaWN1bHR5
+IHRoYW4gQ2VwaCBpcyB0cnVseSBhbiBlbnRlcnByaXNlIHN0b3JhZ2UgcmVwbGFjZW1lbnQuDQo+
+IFRoYXQncyBteSBwcm9qZWN0IGF0IGEgaGlnaCBsZXZlbC4gIENlcGggaGFzIG1hbnkgdXNlcyBi
+dXQgSSdtIGZpbmRpbmcgdGhpcyB1c2UgdGhlIG1vc3QgaW50ZXJlc3RpbmcgYXQgdGhlIG1vbWVu
+dC4gIFdoZW4gaXQgaXMgYWxsIGZpbmlzaGVkIGl0IHNob3VsZCBzYXZlIHVzIG92ZXIgOTAlIG9u
+IHN0b3JhZ2UgY29zdHMgZ29pbmcgZm9yd2FyZC4gIElmIGFueW9uZSBrbm93cyBob3cgSSBjb3Vs
+ZCBnbyBhYm91dCBnZXR0aW5nIFVidW50dSB0byBzYXZlIHJiZCBtYXBwaW5ncyBhZnRlciBhIHJl
+Ym9vdCB0aGF0IHdvdWxkIGJlIHJlYWxseSBoZWxwZnVsLiAgVGhhbmsgeW91IGd1eXMgZm9yIHlv
+dXIgaGFyZCB3b3JrIQ0KPiANCj4gDQo+IENocmlzIEhvbGNvbWJlDQo+IFVuaXggQWRtaW5pc3Ry
+YXRvcg0KPiBDb3Jwb3JhdGlvbiBTZXJ2aWNlIENvbXBhbnkNCj4gY2hvbGNvbWJAY3NjaW5mby5j
+b20NCj4gMzAyLTYzNi04NjY3DQo+IA0KPiANCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18NCj4gDQo+IE5PVElDRTogVGhpcyBlLW1haWwgYW5kIGFueSBhdHRhY2htZW50cyBpcyBp
+bnRlbmRlZCBvbmx5IGZvciB1c2UgYnkgdGhlIGFkZHJlc3NlZShzKSBuYW1lZCBoZXJlaW4gYW5k
+IG1heSBjb250YWluIGxlZ2FsbHkgcHJpdmlsZWdlZCwgcHJvcHJpZXRhcnkgb3IgY29uZmlkZW50
+aWFsIGluZm9ybWF0aW9uLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50IG9m
+IHRoaXMgZS1tYWlsLCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IGFueSBkaXNzZW1pbmF0
+aW9uLCBkaXN0cmlidXRpb24gb3IgY29weWluZyBvZiB0aGlzIGVtYWlsLCBhbmQgYW55IGF0dGFj
+aG1lbnRzIHRoZXJldG8sIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRo
+aXMgZW1haWwgaW4gZXJyb3IgcGxlYXNlIGltbWVkaWF0ZWx5IG5vdGlmeSBtZSB2aWEgcmVwbHkg
+ZW1haWwgb3IgYXQgKDgwMCkgOTI3LTk4MDAgYW5kIHBlcm1hbmVudGx5IGRlbGV0ZSB0aGUgb3Jp
+Z2luYWwgY29weSBhbmQgYW55IGNvcHkgb2YgYW55IGUtbWFpbCwgYW5kIGFueSBwcmludG91dC4N
+Cj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDov
+L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
