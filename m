@@ -1,85 +1,56 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: rbd import from stdin
-Date: Fri, 23 Nov 2012 15:07:42 +0100
-Message-ID: <50AF832E.9050402@profihost.ag>
-References: <9a1238da-8eb3-4080-b331-26890d51b9aa@mailpro> <50AF535D.5080602@profihost.ag>
+From: Stefan Hajnoczi <stefanha@gmail.com>
+Subject: Re: [PATCH] overflow of int ret: use ssize_t for ret
+Date: Fri, 23 Nov 2012 15:11:27 +0100
+Message-ID: <CAJSP0QUhb4J6GQjuJ3OU2cgiFo+t25ERZhibMkYVLW0RuFeamA@mail.gmail.com>
+References: <1353575275-1343-1-git-send-email-s.priebe@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:55531 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751706Ab2KWOHw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 09:07:52 -0500
-In-Reply-To: <50AF535D.5080602@profihost.ag>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:52890 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754536Ab2KWOL3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 09:11:29 -0500
+Received: by mail-lb0-f174.google.com with SMTP id gi11so4237143lbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Nov 2012 06:11:27 -0800 (PST)
+In-Reply-To: <1353575275-1343-1-git-send-email-s.priebe@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: qemu-devel <qemu-devel@nongnu.org>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Stefan Weil <sw@weilnetz.de>, Peter Maydell <peter.maydell@linaro.org>
 
-Hi,
+On Thu, Nov 22, 2012 at 10:07 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+> diff --git a/block/rbd.c b/block/rbd.c
+> index 5a0f79f..0384c6c 100644
+> --- a/block/rbd.c
+> +++ b/block/rbd.c
+> @@ -69,7 +69,7 @@ typedef enum {
+>  typedef struct RBDAIOCB {
+>      BlockDriverAIOCB common;
+>      QEMUBH *bh;
+> -    int ret;
+> +    ssize_t ret;
+>      QEMUIOVector *qiov;
+>      char *bounce;
+>      RBDAIOCmd cmd;
+> @@ -86,7 +86,7 @@ typedef struct RADOSCB {
+>      int done;
+>      int64_t size;
+>      char *buf;
+> -    int ret;
+> +    ssize_t ret;
+>  } RADOSCB;
+>
+>  #define RBD_FD_READ 0
 
-even with size it does not work:
+I preferred your previous patch:
 
-Am 23.11.2012 11:43, schrieb Stefan Priebe - Profihost AG:
-> ah so right now the size parameter is needed. But i don't know the si=
-ze
-> ;-) file is gzip compressed ;-)
+ssize_t on 32-bit hosts has sizeof(ssize_t) == 4.  In
+qemu_rbd_complete_aio() we may assign acb->ret = rcb->size.  Here the
+size field is int64_t, so ssize_t ret would truncate the value.
 
-gzip -d -c vm-101-disk-1.img.gz | rbd import --size=3D42945478656 -=20
-kvmpool1/vm-101-disk-1
-rbd: image creation failed
-2012-11-23 15:05:49.300363 7f5a599cc760 -1 librbd: rbd image=20
-vm-101-disk-1 already existsrbd: import failed:
-(17) File exists
+But BlockDriverCompetionFunc only takes an int argument so we're back
+to square one.
 
-Greets,
+The types are busted and changing the type of ret won't fix that :(.
+
 Stefan
-
-> Stefan
-> Am 23.11.2012 11:25, schrieb Alexandre DERUMIER:
->>
->> import for stdin already work like this:
->>
->> rbd import --size=3Dxxx - image < stdin
->>
->> from this patch
->>
->> http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/6315
->>
->>
->> (so I think you just need to specify --size)
->>
->>
->>
->> ----- Mail original -----
->>
->> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>
->> =C3=80: ceph-devel@vger.kernel.org
->> Envoy=C3=A9: Vendredi 23 Novembre 2012 11:15:11
->> Objet: rbd import from stdin
->>
->> Hello,
->>
->> i was looking at the wip-rbd-export-stdout branch which also allows =
-to
->> import from stdin.
->>
->> But it doesn't seem to work:
->>
->> gzip -d -c vm-101-disk-1.img.gz | rbd import - kvmpool1/vm-101-disk-=
-1
->> rbd: unable to get size of file/block device: (25) Inappropriate ioc=
-tl
->> for device
->> rbd: import failed: (25) Inappropriate ioctl for device
->>
->> Greets,
->> Stefan
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
