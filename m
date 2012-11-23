@@ -1,52 +1,65 @@
-From: Martin Gerhard Loschwitz <martin.loschwitz@hastexo.com>
-Subject: Debian/Ubuntu packages for ceph-deploy
-Date: Fri, 23 Nov 2012 01:29:35 +0100
-Message-ID: <50AEC36F.9050807@hastexo.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: [Discussion] Enhancement for CRUSH rules
+Date: Fri, 23 Nov 2012 03:38:50 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5C7BD1@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:49399 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753083Ab2KWA3k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 19:29:40 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so3394274eaa.19
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Nov 2012 16:29:38 -0800 (PST)
+Received: from mga09.intel.com ([134.134.136.24]:35862 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754507Ab2KWDiy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Nov 2012 22:38:54 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi folks,
+Hi list,
+=A0=A0=A0=A0 I am thinking about the possibility to add some primitive =
+in CRUSH to meet the following user stories:
+A. "Same host", "Same rack"
+	To balance between availability and performance ,one may like such a r=
+ule: 3 Replicas, Replica 1 and Replica 2 should in the same rack while =
+Replica 3 reside in another rack.This is common because a typical d	epl=
+oyment in datacenter usually has much fewer uplink bandwidth than backb=
+one bandwidth.
 
-I figured it might be a cool thing to have packages of ceph-deploy for
-Debian and Ubuntu 12.04; I took the time and created them (along with
-packages of python-pushy, which ceph-deploy needs but which was not
-present in the Debian archive and thus in the Ubuntu archive either).
+More aggressive guys may even want same host, since the most common fai=
+lure is disk failure. And we have several disk (also means several OSDs=
+) reside in the same physical machine. If we can place Replica 1 & 2 on=
+ the same host but replica 3 in somewhere else.It will not only reduce =
+replication traffic but also saving a lot of time & bandwidth when disk=
+ failure happened and a recovery take place.
+B."local"
+	 Although we cannot mount RBD volumes to where a OSD running at, but Q=
+EMU canbe used. This scenarios is really common in cloud computing. We =
+have a large amount of compute-nodes, just plug in some disks 	and make=
+ the machines reused for Ceph cluster. To reduce network traffic and la=
+tency , if it is possible to have some placement-group-maybe 3 PG for a=
+ compute-node. Define the rules like: primary copy of the PG 	should (i=
+f possible) reside in localhost, the second replica should go different=
+ places
+=09
+	By doing this , a significant amount of network bandwidth & a RTT can =
+be saved. What's more ,since read always go to primary, it will benefit=
+ a lot from such mechanism.
 
-They are available from http://people.debian.org/~madkiss/ceph-deploy/
+It looks to me that A is simpler but B seems much complex. Hoping for i=
+nputs.
 
-I did upload python-pushy to the official Debian unstable repository
-already, but I didn't do so just yet with ceph-deploy. Also, I don't
-want to step on somebody's toes - if there were secret plans to start
-ceph-deploy packaging anyway, I'm more than happy to hand over what
-I have got to the responsible person.
-
-Any feedback is highly appreciated (esp. with regards to the question
-if it's already okay to upload ceph-deploy).
-
-Best regards
-Martin G. Loschwitz
-
--- 
-Martin Gerhard Loschwitz
-Chief Brand Officer, Principal Consultant
-hastexo Professional Services
-
-CONFIDENTIALITY NOTICE: This e-mail and/or the accompanying documents
-are privileged and confidential under applicable law. The person who
-receives this message and who is not the addressee, one of his employees
-or an agent entitled to hand it over to the addressee, is informed that
-he may not use, disclose or reproduce the contents thereof. Should you
-have received this e-mail (or any copy thereof) in error, please let us
-know by telephone or e-mail without delay and delete the message from
-your system. Thank you.
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 Xiao=
+xi
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
