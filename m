@@ -1,69 +1,77 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: RBD fio Performance concerns
-Date: Fri, 23 Nov 2012 07:18:16 -0600
-Message-ID: <50AF7798.9060303@inktank.com>
-References: <3ed000f5-38d6-45dd-917e-5e29c5b7ff1a@mailpro>
+Date: Fri, 23 Nov 2012 14:24:26 +0100
+Message-ID: <50AF790A.5070806@profihost.ag>
+References: <3ed000f5-38d6-45dd-917e-5e29c5b7ff1a@mailpro> <50AF7798.9060303@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:63652 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750838Ab2KWNSP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 08:18:15 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k11so3325684iea.19
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Nov 2012 05:18:15 -0800 (PST)
-In-Reply-To: <3ed000f5-38d6-45dd-917e-5e29c5b7ff1a@mailpro>
+Received: from mail.profihost.ag ([85.158.179.208]:41037 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751457Ab2KWNYh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 08:24:37 -0500
+In-Reply-To: <50AF7798.9060303@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, =?UTF-8?B?U8OpYmFzdGllbiBIYW4=?= <han.sebastien@gmail.com>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Mark Kampe <mark.kampe@inktank.com>, =?UTF-8?B?U8OpYmFzdGllbiBIYW4=?= <han.sebastien@gmail.com>
 
-Agreed with Alexandre, try putting the journal on a raw partition.=20
-That's pretty insane!  What controller are you using again?
+Am 23.11.2012 14:18, schrieb Mark Nelson:
+> Agreed with Alexandre, try putting the journal on a raw partition.
+> That's pretty insane!  What controller are you using again?
 
-Mark
+Makes no difference. No Controller. Just using the SATA 3.0 onboard=20
+Ports for each SSD.
 
-On 11/23/2012 05:03 AM, Alexandre DERUMIER wrote:
-> so correcly aligned...
->
-> Maybe try to use journal directly on the full partition, without xfs =
-?
->
->
-> ----- Mail original -----
->
-> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>
-> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
-> Cc: "Mark Nelson" <mark.nelson@inktank.com>, "ceph-devel" <ceph-devel=
-@vger.kernel.org>, "Mark Kampe" <mark.kampe@inktank.com>, "S=C3=A9basti=
-en Han" <han.sebastien@gmail.com>
-> Envoy=C3=A9: Vendredi 23 Novembre 2012 11:49:10
-> Objet: Re: RBD fio Performance concerns
->
-> Am 23.11.2012 11:47, schrieb Alexandre DERUMIER:
->>>> when i switch the journal to the OSD Disk seperate partiton on eac=
-h disk
->>>> (/dev/sdX1 for journal 1GB and /dev/sdX2 for OSD) i go down from 2=
-3.000
->>>> iops to 200 iops random 4k.
->> O_o , that's seem crazy...
->> Are you sure that your partitions are correctly aligned ? (starting =
-first partition at sector 2048 is best for ssd)
->
-> Model: ATA INTEL SSDSC2CW24 (scsi)
-> Disk /dev/sdb: 468862128s
-> Sector size (logical/physical): 512B/512B
-> Partition Table: gpt
->
-> Number Start End Size File system Name Flags
-> 1 2048s 2342911s 2340864s xfs pri
-> 2 2342912s 468860927s 466518016s xfs pri
->
-> Stefan
->
+fio directly on SSD gives me 45.000 rand 4k write iops and 270Mb/s seq=20
+write speed. So that's ok.
 
+Stefan
+
+> Mark
+>
+> On 11/23/2012 05:03 AM, Alexandre DERUMIER wrote:
+>> so correcly aligned...
+>>
+>> Maybe try to use journal directly on the full partition, without xfs=
+ ?
+>>
+>>
+>> ----- Mail original -----
+>>
+>> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>
+>> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+>> Cc: "Mark Nelson" <mark.nelson@inktank.com>, "ceph-devel"
+>> <ceph-devel@vger.kernel.org>, "Mark Kampe" <mark.kampe@inktank.com>,
+>> "S=C3=A9bastien Han" <han.sebastien@gmail.com>
+>> Envoy=C3=A9: Vendredi 23 Novembre 2012 11:49:10
+>> Objet: Re: RBD fio Performance concerns
+>>
+>> Am 23.11.2012 11:47, schrieb Alexandre DERUMIER:
+>>>>> when i switch the journal to the OSD Disk seperate partiton on ea=
+ch
+>>>>> disk
+>>>>> (/dev/sdX1 for journal 1GB and /dev/sdX2 for OSD) i go down from
+>>>>> 23.000
+>>>>> iops to 200 iops random 4k.
+>>> O_o , that's seem crazy...
+>>> Are you sure that your partitions are correctly aligned ? (starting
+>>> first partition at sector 2048 is best for ssd)
+>>
+>> Model: ATA INTEL SSDSC2CW24 (scsi)
+>> Disk /dev/sdb: 468862128s
+>> Sector size (logical/physical): 512B/512B
+>> Partition Table: gpt
+>>
+>> Number Start End Size File system Name Flags
+>> 1 2048s 2342911s 2340864s xfs pri
+>> 2 2342912s 468860927s 466518016s xfs pri
+>>
+>> Stefan
+>>
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
