@@ -1,72 +1,41 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: tiering of storage pools in ceph in general
-Date: Sat, 24 Nov 2012 08:42:21 -0800
-Message-ID: <D5EC0B0F4FD94E2BBF64CF5F2B1F2A50@inktank.com>
-References: <5DC113BE-8B3F-44C1-8585-612CDE601856@tchpc.tcd.ie>
+Subject: Re: Very bad behavior when
+Date: Sat, 24 Nov 2012 08:45:54 -0800
+Message-ID: <D988AE88A2484A23AA62CF8112AA9B7A@inktank.com>
+References: <CAF6-1L5WSukXaDfy64wxUuuHDdhZ3G3AW_=fkjiVLzbm_g-rng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:46200 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751823Ab2KXQmZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Nov 2012 11:42:25 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so4115332pad.19
-        for <ceph-devel@vger.kernel.org>; Sat, 24 Nov 2012 08:42:24 -0800 (PST)
-In-Reply-To: <5DC113BE-8B3F-44C1-8585-612CDE601856@tchpc.tcd.ie>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:34760 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751854Ab2KXQp4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Nov 2012 11:45:56 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so7098899pbc.19
+        for <ceph-devel@vger.kernel.org>; Sat, 24 Nov 2012 08:45:56 -0800 (PST)
+In-Reply-To: <CAF6-1L5WSukXaDfy64wxUuuHDdhZ3G3AW_=fkjiVLzbm_g-rng@mail.gmail.com>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jimmy Tang <jtang@tchpc.tcd.ie>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thursday, November 22, 2012 at 4:33 AM, Jimmy Tang wrote:
-> Hi All,
-> =20
-> Is it possible at this point in time to setup some form of tiering of=
- storage pools in ceph by modifying the crush map? For example I want t=
-o have my most recently used data on a small set of nodes that have SSD=
-'s and over time migrate data from the SSD's to some bulk spinning disk=
- using a LRU policy?
-There's no way to have Ceph do this automatically at this time. Tiering=
- in this fashion traditionally requires the sort of centralized metadat=
-a that Ceph and RADOS are designed to avoid, and while interest in it i=
-s heating up we haven't yet come up with a new solution. ;)
+On Thursday, November 22, 2012 at 5:26 AM, Sylvain Munaut wrote:
+> Hi,
+> 
+> I know that ceph has time synced servers has a requirements, but I
+> think a sane failure mode like a message in the logs instead of
+> incontrollably growing memory usage would be a good idea.
+> 
+> I had the NTP process die on me tonight on an OSD (for unknown reason
+> so far ...) and the clock went 3000s out of sync and the OSD memory
+> just kept growing, and also the master mon memory.
+> (which has the nice effect of having the master mon being OOM killed,
+> then one of the backup takes the master role and grows as well and
+> gets killed and so on and so forth until there is no quorum anymore).
+> 
 
-If your system allows you to do this manually, though =E2=80=94 yes. Yo=
-u can create multiple (non-overlapping, presumably) trees within your C=
-RUSH map, one of which would be an "SSD" storage group and one of which=
- would be a "normal" storage group. Then create a CRUSH rule which draw=
-s from the SSD group and a rule which draws from the normal group, crea=
-te a pool using each of those, and write to whichever one at the approp=
-riate time.
-Alternatively, you could also place all the primaries on SSD storage bu=
-t the replicas on regular drives =E2=80=94 this won't speed up your wri=
-tes much but will mean SSD-speed reads. :)
+
+In addition to Sam's question about version, are you using cephx?
 -Greg
- =20
-> =20
-> Regards,
-> Jimmy Tang
-> =20
-> --
-> Senior Software Engineer, Digital Repository of Ireland (DRI)
-> Trinity Centre for High Performance Computing,
-> Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-> http://www.tchpc.tcd.ie/ | jtang@tchpc.tcd.ie (mailto:jtang@tchpc.tcd=
-=2Eie)
-> =20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@=
-vger.kernel.org)
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
