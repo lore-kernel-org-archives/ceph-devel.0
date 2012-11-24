@@ -1,492 +1,195 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v2] make mkcephfs and init-ceph osd filesystem handling
- more flexible
-Date: Sat, 24 Nov 2012 09:22:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211240921290.23552@cobra.newdream.net>
-References: <1353691870-19354-1-git-send-email-danny.al-gaaf@bisect.de>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH V2] mds: fix CDir::_commit_partial() bug
+Date: Sun, 25 Nov 2012 01:45:52 +0800
+Message-ID: <50B107D0.5070009@intel.com>
+References: <1353603165-1724-1-git-send-email-zheng.z.yan@intel.com> <50B0AA02.4050502@intel.com> <alpine.DEB.2.00.1211240813050.23552@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33569 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751830Ab2KXRW2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Nov 2012 12:22:28 -0500
-In-Reply-To: <1353691870-19354-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from mga11.intel.com ([192.55.52.93]:35969 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751864Ab2KXRqQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 24 Nov 2012 12:46:16 -0500
+In-Reply-To: <alpine.DEB.2.00.1211240813050.23552@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Thanks, Danny!
+On 11/25/2012 12:21 AM, Sage Weil wrote:
+> On Sat, 24 Nov 2012, Yan, Zheng wrote:
+>> Hi, Sage
+>>
+>> I found this fix is still not enough because we don't know if a dentry has been
+>> successfully deleted from the directory fragment after MDS restart. There are several
+>> options to fix this, which one do you like?
+>>
+>> 1. Make OSD ignore the TMAP_RM commands if it can't the find items.
+> 
+> This is certainly the simplest.  Since TMAP is effectively deprecated and 
+> everyone should be using the omap stuff anyway, it gets my vote.
+> 
+> Speaking of, we should transition the MDS to use the omap operations soon 
+> as well, since TMAP is horribly inefficient for large directories.  Also, 
+> the rmkey method in that case does not have this problem.
 
-sage
+I can do this, it should be easy.
+
+> 
+> Let's ignore enoent on TMAP_RM for bobtail, and transition to omap in the 
+> next release... do you want to test the patch that drops the !key_exists 
+> check?
+
+I will modify the code and test it. but I think it is hiding bugs ;)
+
+Another issue of tmap is that we may get different results when comparing two dentry_key_t
+and their string representation. So the dentries in tmap can be out of order, setkey method
+may add duplicated dentry and rmkey method may fail to find existing dentry. Since tmap is
+so buggy, let's switch the MDS to use the omap ASAP.
+
+Regards
+Yan, Zheng
 
 
-On Fri, 23 Nov 2012, Danny Al-Gaaf wrote:
+> 
+> Thanks!
+> sage
+> 
+>  
+>> 2. Add a new item deletion command for tmap, the new command doesn't make whole tmap
+>>    update operation fail if it can't the item. When committing directory fragments,
+>>    use the new command for null dentries that were added by MDS log replay.
+>>
+>> 3. When committing a directory fragment, Re-fetch it if it contains dirty+null dentries
+>>    that were added by MDS log replay. Find already deleted items and mark corresponding
+>>    dentries as new.
+>>
+>> Regards
+>> Yan, Zheng
+>>
+>> On 11/23/2012 12:52 AM, Yan, Zheng wrote:
+>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>>
+>>> When a null dentry is encountered, CDir::_commit_partial() adds
+>>> a OSD_TMAP_RM command to delete the dentry. But if the dentry is
+>>> new, the osd will not find the dentry when handling the command
+>>> and the tmap update operation will fail totally.
+>>>
+>>> This patch also makes sure dentries are properly marked as new
+>>> when preparing new dentries and exporting dentries.
+>>>
+>>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>>> ---
+>>>  src/mds/CDentry.h  |  2 ++
+>>>  src/mds/CDir.cc    | 11 ++++++++---
+>>>  src/mds/CDir.h     |  2 +-
+>>>  src/mds/MDCache.cc |  9 ++++++---
+>>>  src/mds/Server.cc  |  3 +++
+>>>  5 files changed, 20 insertions(+), 7 deletions(-)
+>>>
+>>> diff --git a/src/mds/CDentry.h b/src/mds/CDentry.h
+>>> index 480e562..5755c55 100644
+>>> --- a/src/mds/CDentry.h
+>>> +++ b/src/mds/CDentry.h
+>>> @@ -347,6 +347,8 @@ public:
+>>>      // twiddle
+>>>      state = 0;
+>>>      state_set(CDentry::STATE_AUTH);
+>>> +    if (nstate & STATE_NEW)
+>>> +      mark_new();
+>>>      if (nstate & STATE_DIRTY)
+>>>        _mark_dirty(ls);
+>>>      if (!replica_map.empty())
+>>> diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+>>> index c5220ed..411d864 100644
+>>> --- a/src/mds/CDir.cc
+>>> +++ b/src/mds/CDir.cc
+>>> @@ -1696,7 +1696,7 @@ class C_Dir_Committed : public Context {
+>>>  public:
+>>>    C_Dir_Committed(CDir *d, version_t v, version_t lrv) : dir(d), version(v), last_renamed_version(lrv) { }
+>>>    void finish(int r) {
+>>> -    dir->_committed(version, last_renamed_version);
+>>> +    dir->_committed(version, last_renamed_version, r);
+>>>    }
+>>>  };
+>>>  
+>>> @@ -1802,6 +1802,10 @@ CDir::map_t::iterator CDir::_commit_partial(ObjectOperation& m,
+>>>        continue;  // skip clean dentries
+>>>  
+>>>      if (dn->get_linkage()->is_null()) {
+>>> +      if (dn->is_new()) {
+>>> +	dn->mark_clean();
+>>> +	continue;
+>>> +      }
+>>>        dout(10) << " rm " << dn->name << " " << *dn << dendl;
+>>>        finalbl.append(CEPH_OSD_TMAP_RM);
+>>>        dn->key().encode(finalbl);
+>>> @@ -1997,10 +2001,11 @@ void CDir::_commit(version_t want)
+>>>   *
+>>>   * @param v version i just committed
+>>>   */
+>>> -void CDir::_committed(version_t v, version_t lrv)
+>>> +void CDir::_committed(version_t v, version_t lrv, int ret)
+>>>  {
+>>> -  dout(10) << "_committed v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
+>>> +  dout(10) << "_committed ret " << ret << " v " << v << " (last renamed " << lrv << ") on " << *this << dendl;
+>>>    assert(is_auth());
+>>> +  assert(ret == 0);
+>>>  
+>>>    bool stray = inode->is_stray();
+>>>  
+>>> diff --git a/src/mds/CDir.h b/src/mds/CDir.h
+>>> index 2222418..274e38b 100644
+>>> --- a/src/mds/CDir.h
+>>> +++ b/src/mds/CDir.h
+>>> @@ -487,7 +487,7 @@ private:
+>>>                         unsigned max_write_size=-1,
+>>>                         map_t::iterator last_committed_dn=map_t::iterator());
+>>>    void _encode_dentry(CDentry *dn, bufferlist& bl, const set<snapid_t> *snaps);
+>>> -  void _committed(version_t v, version_t last_renamed_version);
+>>> +  void _committed(version_t v, version_t last_renamed_version, int ret);
+>>>    void wait_for_commit(Context *c, version_t v=0);
+>>>  
+>>>    // -- dirtyness --
+>>> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+>>> index f8b1c8f..e69a49f 100644
+>>> --- a/src/mds/MDCache.cc
+>>> +++ b/src/mds/MDCache.cc
+>>> @@ -657,12 +657,15 @@ CDentry *MDCache::get_or_create_stray_dentry(CInode *in)
+>>>    CDir *straydir = strayi->get_dirfrag(fg);
+>>>    assert(straydir);
+>>>    CDentry *straydn = straydir->lookup(straydname);
+>>> -  if (!straydn) {
+>>> +
+>>> +  if (!straydn)
+>>>      straydn = straydir->add_null_dentry(straydname);
+>>> -    straydn->mark_new();
+>>> -  } else 
+>>> +  else
+>>>      assert(straydn->get_projected_linkage()->is_null());
+>>>  
+>>> +  if (!straydn->is_dirty())
+>>> +    straydn->mark_new();
+>>> +
+>>>    return straydn;
+>>>  }
+>>>  
+>>> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+>>> index ec0d5d5..228fede 100644
+>>> --- a/src/mds/Server.cc
+>>> +++ b/src/mds/Server.cc
+>>> @@ -1685,6 +1685,9 @@ CDentry* Server::prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dn
+>>>        }
+>>>      }
+>>>  
+>>> +    if (!dn->is_dirty())
+>>> +      dn->mark_new();
+>>> +
+>>>      return dn;
+>>>    }
+>>>  
+>>>
+>>
+>>
 
-> Remove btrfs specific keys and replace them by more generic
-> keys to be able to replace btrfs with e.g. xfs or ext4 easily.
-> 
-> Add new key to define the osd fs type: 'osd mkfs type', which can
-> get defined in the [osd] section for all OSDs.
-> 
-> Replaced config keys:
-> - 'btrfs devs' -> 'devs'
-> - 'btrfs path' -> 'fs path'
-> - 'btrfs options' -> 'osd mount options $fstype'
-> 
-> New config key:
-> - 'osd mkfs options $fstype': file system specific options for mkfs
-> - 'osd mkfs type': to define the filesystem for mkfs and also mount
-> 
-> Replaced in mkcephfs: --mkbtrfs with --mkfs
-> 
-> Replaced in init-ceph:
-> - --btrfs with --fsmount
-> - --nobtrfs with --nofsmount
-> - --btrfsumount with --fsumount
-> 
-> NOTE: old options from mkcephfs and init-ceph will still work, but
->       get may removed in the future from the scripts.
-> 
-> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-> ---
->  doc/man/8/mkcephfs.rst                      | 19 +++----
->  man/mkcephfs.8                              | 15 +++---
->  src/ceph.conf.twoosds                       |  7 +--
->  src/init-ceph.in                            | 78 ++++++++++++++++++++-------
->  src/mkcephfs.in                             | 82 ++++++++++++++++++++---------
->  src/sample.ceph.conf                        | 24 +++++----
->  src/test/cli/osdmaptool/ceph.conf.withracks |  4 +-
->  7 files changed, 150 insertions(+), 79 deletions(-)
-> 
-> diff --git a/doc/man/8/mkcephfs.rst b/doc/man/8/mkcephfs.rst
-> index 5d0c995..05dee95 100644
-> --- a/doc/man/8/mkcephfs.rst
-> +++ b/doc/man/8/mkcephfs.rst
-> @@ -7,7 +7,7 @@
->  Synopsis
->  ========
->  
-> -| **mkcephfs** -c *ceph.conf* [ --mkbtrfs ] [ -a, --all-hosts [ -k
-> +| **mkcephfs** -c *ceph.conf* [ --mkfs ] [ -a, --all-hosts [ -k
->    */path/to/admin.keyring* ] ]
->  
->  
-> @@ -70,20 +70,15 @@ Options
->     default is ``/etc/ceph/keyring`` (or whatever is specified in the
->     config file).
->  
-> -.. option:: --mkbtrfs
-> +.. option:: --mkfs
->  
-> -   Create and mount the any btrfs file systems specified in the
-> -   ceph.conf for OSD data storage using mkfs.btrfs. The "btrfs devs"
-> -   and (if it differs from "osd data") "btrfs path" options must be
-> -   defined.
-> +   Create and mount the any file systems specified in the
-> +   ceph.conf for OSD data storage using mkfs. The "devs" and (if it
-> +   differs from "osd data") "fs path" options must be defined.
->  
->     **NOTE** Btrfs is still considered experimental.  This option
-> -   can ease some configuration pain, but is the use of btrfs is not
-> -   required when ``osd data`` directories are mounted manually by the
-> -   adminstrator.
-> -
-> -   **NOTE** This option is deprecated and will be removed in a future
-> -   release.
-> +   can ease some configuration pain, but is not required when
-> +   ``osd data`` directories are mounted manually by the adminstrator.
->  
->  .. option:: --no-copy-conf
->  
-> diff --git a/man/mkcephfs.8 b/man/mkcephfs.8
-> index f0ab80d..26276b7 100644
-> --- a/man/mkcephfs.8
-> +++ b/man/mkcephfs.8
-> @@ -32,7 +32,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
->  .
->  .SH SYNOPSIS
->  .nf
-> -\fBmkcephfs\fP \-c \fIceph.conf\fP [ \-\-mkbtrfs ] [ \-a, \-\-all\-hosts [ \-k
-> +\fBmkcephfs\fP \-c \fIceph.conf\fP [ \-\-mkfs ] [ \-a, \-\-all\-hosts [ \-k
->  \fI/path/to/admin.keyring\fP ] ]
->  .fi
->  .sp
-> @@ -111,19 +111,16 @@ config file).
->  .UNINDENT
->  .INDENT 0.0
->  .TP
-> -.B \-\-mkbtrfs
-> -Create and mount the any btrfs file systems specified in the
-> -ceph.conf for OSD data storage using mkfs.btrfs. The "btrfs devs"
-> -and (if it differs from "osd data") "btrfs path" options must be
-> +.B \-\-mkfs
-> +Create and mount any file systems specified in the
-> +ceph.conf for OSD data storage using mkfs.*. The "devs"
-> +and (if it differs from "osd data") "fs path" options must be
->  defined.
->  .sp
->  \fBNOTE\fP Btrfs is still considered experimental.  This option
-> -can ease some configuration pain, but is the use of btrfs is not
-> +can ease some configuration pain, but the use of this option is not
->  required when \fBosd data\fP directories are mounted manually by the
->  adminstrator.
-> -.sp
-> -\fBNOTE\fP This option is deprecated and will be removed in a future
-> -release.
->  .UNINDENT
->  .INDENT 0.0
->  .TP
-> diff --git a/src/ceph.conf.twoosds b/src/ceph.conf.twoosds
-> index c0cfc68..3417cf6 100644
-> --- a/src/ceph.conf.twoosds
-> +++ b/src/ceph.conf.twoosds
-> @@ -67,16 +67,17 @@
->  	debug journal = 20
->  	log dir = /data/cosd$id
->  	osd data = /mnt/osd$id
-> -	btrfs options = "flushoncommit,usertrans"
->  ;	user = root
->  
->  ;	osd journal = /mnt/osd$id/journal
->  ;	osd journal size = 1000
->  	osd journal = "/dev/disk/by-path/pci-0000:05:02.0-scsi-6:0:0:0"
-> +        osd mkfs type = btrfs
-> +	osd mount options btrfs = "flushoncommit,usertrans"
->  ;	filestore max sync interval = 1
->  
-> -	btrfs devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0"
-> -;	btrfs devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0 \
-> +	devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0"
-> +;	devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0 \
->  ;	      	   /dev/disk/by-path/pci-0000:05:01.0-scsi-3:0:0:0 \
->  ;		   /dev/disk/by-path/pci-0000:05:01.0-scsi-4:0:0:0 \
->  ;		   /dev/disk/by-path/pci-0000:05:01.0-scsi-5:0:0:0 \
-> diff --git a/src/init-ceph.in b/src/init-ceph.in
-> index 31aeb28..2bafa99 100644
-> --- a/src/init-ceph.in
-> +++ b/src/init-ceph.in
-> @@ -100,8 +100,8 @@ docrun=
->  allhosts=0
->  debug=0
->  monaddr=
-> -dobtrfs=1
-> -dobtrfsumount=0
-> +dofsmount=1
-> +dofsumount=0
->  verbose=0
->  
->  while echo $1 | grep -q '^-'; do     # FIXME: why not '^-'?
-> @@ -130,14 +130,14 @@ case $1 in
->  	    shift
->  	    MON_ADDR=$1
->  	    ;;
-> -    --btrfs)
-> -	    dobtrfs=1
-> +    --btrfs | --fsmount)
-> +	    dofsmount=1
->  	    ;;
-> -    --nobtrfs)
-> -	    dobtrfs=0
-> +    --nobtrfs | --nofsmount)
-> +	    dofsmount=0
->  	    ;;
-> -    --btrfsumount)
-> -	    dobtrfsumount=1
-> +    --btrfsumount | --fsumount)
-> +	    dofsumount=1
->  	    ;;
->      --conf | -c)
->  	    [ -z "$2" ] && usage_exit
-> @@ -222,9 +222,18 @@ for name in $what; do
->  
->      if echo $name | grep -q ^osd; then
->  	get_conf osd_data "" "osd data"
-> -	get_conf btrfs_path "$osd_data" "btrfs path"  # mount point defaults so osd data
-> -	get_conf btrfs_devs "" "btrfs devs"
-> -	first_dev=`echo $btrfs_devs | cut '-d ' -f 1`
-> +	get_conf fs_path "$osd_data" "fs path"  # mount point defaults so osd data
-> +        get_conf fs_devs "" "devs"
-> +	if [ -z "$fs_devs" ]; then
-> +	    # try to fallback to old keys
-> +	    get_conf tmp_btrfs_devs "" "btrfs devs"
-> +	    if [ -n "$tmp_btrfs_devs" ]; then
-> +		fs_devs="$tmp_btrfs_devs"
-> +	    else
-> +		echo No osd devs defined!
-> +	    fi
-> +	fi
-> +        first_dev=`echo $fs_devs | cut '-d ' -f 1`
->      fi
->  
->      # do lockfile, if RH
-> @@ -262,13 +271,44 @@ for name in $what; do
->  
->  	    cmd="$wrap $cmd $runmode"
->  	    
-> -	    if [ $dobtrfs -eq 1 ] && [ -n "$btrfs_devs" ]; then
-> +	    if [ $dofsmount -eq 1 ] && [ -n "$fs_devs" ]; then
->  		get_conf pre_mount "true" "pre mount command"
-> -		get_conf btrfs_opt "noatime" "btrfs options"
-> -		[ -n "$btrfs_opt" ] && btrfs_opt="-o $btrfs_opt"
-> +		get_conf fs_type "" "osd mkfs type"
-> +
-> +		if [ -z "$fs_type" ]; then
-> +		    # try to fallback to to old keys
-> +		    get_conf tmp_devs "" "btrfs devs"
-> +		    if [ -n "$tmp_devs" ]; then
-> +			fs_type = "btrfs"
-> +		    else
-> +		        echo No filesystem type defined!
-> +		        exit 0
-> +                    fi
-> +		fi
-> +
-> +		get_conf fs_opt "" "osd mount options $fs_type"
-> +		if [ -z "$fs_opt" ]; then
-> +		    if [ "$fs_type" = "btrfs" ]; then
-> +		        #try to fallback to old keys
-> +			get_conf fs_opt "" "btrfs options"
-> +		    fi
-> +
-> +		    if [ -z "$fs_opt" ]; then
-> +		        #fallback to use at least noatime
-> +		        fs_opt="rw,noatime"
-> +		    fi
-> +		fi
-> +
-> +		[ -n "$fs_opt" ] && fs_opt="-o $fs_opt"
->  		[ -n "$pre_mount" ] && do_cmd "$pre_mount"
-> -		echo Mounting Btrfs on $host:$btrfs_path
-> -		do_root_cmd "modprobe btrfs ; btrfs device scan || btrfsctl -a ; egrep -q '^[^ ]+ $btrfs_path' /proc/mounts || mount -t btrfs $btrfs_opt $first_dev $btrfs_path"
-> +
-> +		if [ "$fs_type" == "btrfs" ]; then
-> +		    echo Mounting Btrfs on $host:$fs_path
-> +		    do_root_cmd "modprobe btrfs ; btrfs device scan || btrfsctl -a ; egrep -q '^[^ ]+ $fs_path' /proc/mounts || mount -t btrfs $fs_opt $first_dev $fs_path"
-> +		else
-> +		    echo Mounting $fs_type on $host:$fs_path
-> +		    do_root_cmd "modprobe $fs_type ; egrep -q '^[^ ]+ $fs_path' /proc/mounts || mount -t $fs_type $fs_opt $first_dev $fs_path"
-> +		fi
->  	    fi
->  	    echo Starting Ceph $name on $host...
->  	    mkdir -p $RUN_DIR
-> @@ -289,9 +329,9 @@ for name in $what; do
->  	    stop_daemon $name ceph-$type $pid_file
->  	    [ -n "$post_stop" ] && do_cmd "$post_stop"
->  	    [ -n "$lockfile" ] && [ "$?" -eq 0 ] && rm -f $lockfile
-> -	    if [ $dobtrfsumount -eq 1 ] && [ -n "$btrfs_devs" ]; then
-> -		echo Unmounting Btrfs on $host:$btrfs_path
-> -		do_root_cmd "umount $btrfs_path || true"
-> +	    if [ $dofsumount -eq 1 ] && [ -n "$fs_devs" ]; then
-> +		echo Unmounting OSD volume on $host:$fs_path
-> +		do_root_cmd "umount $fs_path || true"
->  	    fi
->  	    ;;
->  
-> diff --git a/src/mkcephfs.in b/src/mkcephfs.in
-> index aae616c..1cb135e 100644
-> --- a/src/mkcephfs.in
-> +++ b/src/mkcephfs.in
-> @@ -60,7 +60,7 @@ else
->  fi
->  
->  usage_exit() {
-> -    echo "usage: $0 -a -c ceph.conf [-k adminkeyring] [--mkbtrfs]"
-> +    echo "usage: $0 -a -c ceph.conf [-k adminkeyring] [--mkfs]"
->      echo "   to generate a new ceph cluster on all nodes; for advanced usage see man page"
->      echo "   ** be careful, this WILL clobber old data; check your ceph.conf carefully **"
->      exit
-> @@ -70,7 +70,7 @@ usage_exit() {
->  
->  
->  allhosts=0
-> -mkbtrfs=0
-> +mkfs=0
->  preparemonmap=0
->  prepareosdfs=""
->  initdaemon=""
-> @@ -130,8 +130,8 @@ case $1 in
->  	    preparemon=1
->              manual_action=1
->  	    ;;
-> -    --mkbtrfs)
-> -	    mkbtrfs=1
-> +    --mkbtrfs | --mkfs)
-> +	    mkfs=1
->  	    ;;
->      --no-copy-conf)
->  	    nocopyconf=1
-> @@ -307,21 +307,48 @@ if [ -n "$prepareosdfs" ]; then
->  
->      get_conf osd_data "/var/lib/ceph/osd/ceph-$id" "osd data"
->      get_conf osd_journal "$osd_data/journal" "osd journal"
-> -    get_conf btrfs_path "$osd_data" "btrfs path"  # mount point defaults so osd data
-> -    get_conf btrfs_devs "" "btrfs devs"
-> -
-> -    if [ -z "$btrfs_devs" ]; then
-> -	echo "no btrfs devs defined for $name"
-> -	exit 0
-> +    get_conf fs_path "$osd_data" "fs path"  # mount point defaults so osd data
-> +    get_conf fs_devs "" "devs"
-> +    get_conf fs_type "" "osd mkfs type"
-> +
-> +    if [ -z "$fs_devs" ]; then
-> +	# try to fallback to old keys
-> +        get_conf tmp_btrfs_devs "" "btrfs devs"
-> +        if [ -n "$tmp_btrfs_devs" ]; then
-> +            fs_devs="$tmp_btrfs_devs"
-> +        else
-> +            echo "no devs defined for $name"
-> +            exit 0
-> +        fi
-> +    fi
-> +    if [ -z "$fs_type" ]; then
-> +        # try to fallback to to old keys
-> +        get_conf tmp_devs "" "btrfs devs"
-> +        if [ -n "$tmp_devs" ]; then
-> +            fs_type = "btrfs"
-> +        else
-> +            echo No filesystem type defined!
-> +            exit 0
-> +        fi
->      fi
->  
-> -    first_dev=`echo $btrfs_devs | cut '-d ' -f 1`
-> -    get_conf btrfs_opt "noatime" "btrfs options"
-> -    [ -n "$btrfs_opt" ] && btrfs_opt="-o $btrfs_opt"
-> +    first_dev=`echo $fs_devs | cut '-d ' -f 1`
-> +    get_conf fs_opt "" "osd mount options $fs_type"
-> +    if [ -z "$fs_opt" ]; then
-> +        if [ "$fs_type" = "btrfs" ]; then
-> +            #try to fallback to old keys
-> +            get_conf fs_opt "" "btrfs options"
-> +        fi
-> +        if [ -z "$fs_opt" ]; then
-> +            #fallback to use at least rw,noatime
-> +            fs_opt="rw,noatime"
-> +        fi
-> +    fi
-> +    [ -n "$fs_opt" ] && fs_opt="-o $fs_opt"
->      get_conf osd_user "root" "user"
->      
-> -    if [ -n "$osd_journal" ] && echo "$btrfs_devs" | grep -q -w "$osd_journal" ; then
-> -	echo "ERROR: osd journal device ($osd_journal) also used by btrfs devs ($btrfs_devs)"
-> +    if [ -n "$osd_journal" ] && echo "fs_devs" | grep -q -w "$osd_journal" ; then
-> +        echo "ERROR: osd journal device ($osd_journal) also used by devs ($fs_devs)"
->  	exit 1
->      fi
->      
-> @@ -331,19 +358,22 @@ if [ -n "$prepareosdfs" ]; then
->  	test -d $osd_journal || mkdir -p `dirname $osd_journal`
->      fi
->  
-> -    umount $btrfs_path || true
-> -    for f in $btrfs_devs ; do
-> +    umount $fs_path || true
-> +    for f in $fs_devs ; do
->  	umount $f || true
->      done
->  
-> -    modprobe btrfs || true
-> -    mkfs.btrfs $btrfs_devs
-> -    btrfs device scan || btrfsctl -a
-> -    sync   # seems to fix problems for some people...
-> -    mount -t btrfs $btrfs_opt $first_dev $btrfs_path
-> -    chown $osd_user $btrfs_path
-> -    chmod +w $btrfs_path
-> -    
-> +    get_conf mkfs_opt "" "osd mkfs options $fs_type"
-> +    if [ "$fs_type" == "xfs" ] && [ -z "$mkfs_opt" ]; then
-> +        echo Xfs filesystem found add missing -f mkfs option!
-> +	mkfs_opt="-f"
-> +    fi
-> +    modprobe $fs_type || true
-> +    mkfs.$fs_type $mkfs_opt $fs_devs
-> +    mount -t $fs_type $fs_opt $first_dev $fs_path
-> +    chown $osd_user $fs_path
-> +    chmod +w $fs_path
-> +
->      exit 0
->  fi
->  
-> @@ -460,7 +490,7 @@ if [ $allhosts -eq 1 ]; then
->  	    fi
->  	fi
->  	
-> -	if [ $mkbtrfs -eq 1 ] && [ "$type" = "osd" ]; then
-> +	if [ $mkfs -eq 1 ] && [ "$type" = "osd" ]; then
->  	    do_root_cmd "$0 -d $rdir --prepare-osdfs $name"
->  	fi
->  
-> diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
-> index 88f7f02..dd121f2 100644
-> --- a/src/sample.ceph.conf
-> +++ b/src/sample.ceph.conf
-> @@ -131,27 +131,33 @@
->  	;debug filestore = 20
->  	;debug journal = 20
->  
-> +        ; The filesystem used on the volumes
-> +        osd mkfs type = btrfs
-> +        ; If you want to specify some other mount options, you can do so.
-> +        ; for other filesystems use 'osd mount options $fstype'
-> +	osd mount options btrfs = rw,noatime
-> +	; The options used to format the filesystem via mkfs.$fstype
-> +        ; for other filesystems use 'osd mkfs options $fstype'
-> +	; osd mkfs options btrfs =
-> +
-> +
->  [osd.0]
->  	host = delta
->  
-> -	; if 'btrfs devs' is not specified, you're responsible for
-> +	; if 'devs' is not specified, you're responsible for
->  	; setting up the 'osd data' dir.  if it is not btrfs, things
->  	; will behave up until you try to recover from a crash (which
->  	; usually fine for basic testing).
-> -	btrfs devs = /dev/sdx
-> -
-> -        ; If you want to specify some other mount options, you can do so.
-> -        ; The default values are rw,noatime
-> -        ;btrfs options = rw,noatime
-> +	devs = /dev/sdx
->  
->  [osd.1]
->  	host = epsilon
-> -	btrfs devs = /dev/sdy
-> +	devs = /dev/sdy
->  
->  [osd.2]
->  	host = zeta
-> -	btrfs devs = /dev/sdx
-> +	devs = /dev/sdx
->  
->  [osd.3]
->  	host = eta
-> -	btrfs devs = /dev/sdy
-> +	devs = /dev/sdy
-> diff --git a/src/test/cli/osdmaptool/ceph.conf.withracks b/src/test/cli/osdmaptool/ceph.conf.withracks
-> index 1e14411..09399e9 100644
-> --- a/src/test/cli/osdmaptool/ceph.conf.withracks
-> +++ b/src/test/cli/osdmaptool/ceph.conf.withracks
-> @@ -42,7 +42,9 @@
->    keyring = /mnt/osd.$id/keyring
->    osd data = /mnt/osd.$id
->    osd journal = /dev/disk/by-label/osd.$id.journal
-> -  btrfs devs = /dev/disk/by-label/osd.$id.data
-> +  osd mkfs type = btrfs
-> +  osd mount options btrfs = rw,noatime
-> +  devs = /dev/disk/by-label/osd.$id.data
->  ; temp sage
->    debug osd = 20
->    debug ms = 1
-> -- 
-> 1.8.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
