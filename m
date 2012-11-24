@@ -1,42 +1,41 @@
 From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: [Qemu-devel] [PATCH] rbd block driver fix race between aio completition
- and aio cancel
-Date: Sat, 24 Nov 2012 21:21:46 +0100
-Message-ID: <50B12C5A.5010804@profihost.ag>
-References: <1353578419-5481-1-git-send-email-s.priebe@profihost.ag> <CAAu8pHti5JOzMcAK1P_3HrtxfpQgmeJA84CMRBAO9BF7-X2TEQ@mail.gmail.com>
+Subject: Re: syncfs via syscall doesn not work
+Date: Sat, 24 Nov 2012 21:24:33 +0100
+Message-ID: <50B12D01.3030308@profihost.ag>
+References: <50AF31AB.1050402@profihost.ag> <alpine.DEB.2.00.1211231907330.23552@cobra.newdream.net> <7D302B0D-898C-45F6-A60A-A43DB78C7479@profihost.ag> <alpine.DEB.2.00.1211240859340.23552@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:39062 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:35389 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752212Ab2KXUVq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Nov 2012 15:21:46 -0500
-In-Reply-To: <CAAu8pHti5JOzMcAK1P_3HrtxfpQgmeJA84CMRBAO9BF7-X2TEQ@mail.gmail.com>
+	with ESMTP id S1752231Ab2KXUYc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Nov 2012 15:24:32 -0500
+In-Reply-To: <alpine.DEB.2.00.1211240859340.23552@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blue Swirl <blauwirbel@gmail.com>
-Cc: qemu-devel@nongnu.org, stefanha@gmail.com, ceph-devel@vger.kernel.org, pbonzini@redhat.com, josh.durgin@inktank.com
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 24.11.2012 20:54, schrieb Blue Swirl:
-> On Thu, Nov 22, 2012 at 10:00 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
->> This one fixes a race which qemu had also in iscsi block driver
->> between cancellation and io completition.
->>
->> qemu_rbd_aio_cancel was not synchronously waiting for the end of
->> the command.
->>
->> To archieve this it introduces a new status flag which uses
->> -EINPROGRESS.
->>
->> Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
-...
->>
->> -    qemu_aio_release(acb);
->> +    if (!acb->cancelled)
+Am 24.11.2012 18:16, schrieb Sage Weil:
+> On Sat, 24 Nov 2012, Stefan Priebe - Profihost AG wrote:
+>> At the machine compiling? Yes!
 >
-> Missing braces, please read CODING_STYLE.
+> Hmm, I just tested on my wonky wheezy machine (glibc 2.13, 3.2) and
+> system(SYS_syncfs, ..) works for me.  But the #define is in libc6-dev:
 
-Will fix this if the rest is OK. Waiting for Stefan and Paolo.
+But that means your glibc supports it. Then we don't need the syscall at 
+all.
 
+To me it's only present in the kernel headers (linux-libc-dev) like this:
+
+[pb64: ~]# grep -r syncfs /usr/include
+/usr/include/asm/unistd_64.h:#define __NR_syncfs 
+      306
+/usr/include/asm/unistd_64.h:__SYSCALL(__NR_syncfs, sys_syncfs)
+/usr/include/asm/unistd_32.h:#define __NR_syncfs             344
+/usr/include/asm-generic/unistd.h:#define __NR_syncfs 267
+/usr/include/asm-generic/unistd.h:__SYSCALL(__NR_syncfs, sys_syncfs)
+
+Greets,
 Stefan
