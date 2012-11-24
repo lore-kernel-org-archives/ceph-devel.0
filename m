@@ -1,51 +1,78 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: Very bad behavior when
-Date: Fri, 23 Nov 2012 18:11:25 -0800
-Message-ID: <CA+4uBUbXY2dBc=w-5an9cZ+26SHcQLHgXXpF55R6R_xX+2LHXg@mail.gmail.com>
-References: <CAF6-1L5WSukXaDfy64wxUuuHDdhZ3G3AW_=fkjiVLzbm_g-rng@mail.gmail.com>
-	<CA+4uBUbm36k0vF-+gvcBkCXCaUYOwggE1e=Vdd+3GigSgYk=AQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: syncfs via syscall doesn not work
+Date: Fri, 23 Nov 2012 19:07:58 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211231907330.23552@cobra.newdream.net>
+References: <50AF31AB.1050402@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:64249 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756788Ab2KXCL0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 21:11:26 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so4137308vbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Nov 2012 18:11:25 -0800 (PST)
-In-Reply-To: <CA+4uBUbm36k0vF-+gvcBkCXCaUYOwggE1e=Vdd+3GigSgYk=AQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:56899 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753082Ab2KXDH6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Nov 2012 22:07:58 -0500
+In-Reply-To: <50AF31AB.1050402@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sam.just@inktank.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sylvain Munaut <s.munaut@whatever-company.com>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-That is indeed poor behavior.  What version are you running?
--Sam
+On Fri, 23 Nov 2012, Stefan Priebe - Profihost AG wrote:
+> Hello list,
+> 
+> i've seen that next branch caontains the "Try using syscall() for syncfs if
+> not supported directly by glibc" patch. But this does not work for me.
+> 
+> I've tested this on a Debian Squeeze box with default glibc and a 3.6.7
+> Kernel.
+> 
+> The OSD gives me the following output:
+> 2012-11-23 08:55:54.650182 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount
+> FIEMAP ioctl is supported and appears to work
+> 2012-11-23 08:55:54.650190 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount
+> FIEMAP ioctl is disabled via 'filestore fiemap' config option
+> 2012-11-23 08:55:54.650355 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount did
+> NOT detect btrfs
+> 2012-11-23 08:55:54.650358 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount
+> syncfs(2) syscall not support by glibc
+> 2012-11-23 08:55:54.650361 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount no
+> syncfs(2), must use sync(2).
+> 2012-11-23 08:55:54.650362 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount
+> WARNING: multiple ceph-osd daemons on the same host will be slow
+> 2012-11-23 08:55:54.650391 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount
+> found snaps <>
+> 2012-11-23 08:55:54.652413 7f7bc7c1f780  0 filestore(/ceph/osd.11/) mount:
+> enabling WRITEAHEAD journal mode: btrfs not detected
 
-On Nov 23, 2012 6:06 PM, "Samuel Just" <sam.just@inktank.com> wrote:
->
-> That is indeed bad behavior.  What version are you running?
-> -Sam
->
-> On Nov 22, 2012 1:18 PM, "Sylvain Munaut" <s.munaut@whatever-company.com> wrote:
->>
->> Hi,
->>
->> I know that ceph has time synced servers has a requirements, but I
->> think a sane failure mode like a message in the logs instead of
->> incontrollably growing memory usage would be a good idea.
->>
->> I had the NTP process die on me tonight on an OSD (for unknown reason
->> so far ...) and the clock went 3000s out of sync and the OSD memory
->> just kept growing, and also the master mon memory.
->> (which has the nice effect of having the master mon being OOM killed,
->> then one of the backup takes the master role and grows as well and
->> gets killed and so on and so forth until there is no quorum anymore).
->>
->> Cheers,
->>
->>      Sylvain
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Is SYS_syncfs defined anywhere in /usr/include?  Is the kernel headers 
+package installed?
+
+sage
+
+
+> 
+> When i build ceph against a patched glibc i get:
+> 
+> 2012-11-23 09:19:39.339597 7fee3e497780  0 ceph version 0.54-676-g9d366a0
+> (9d366a0706a58b1612dd95831533c5a02b87f5fc), process ceph-osd, pid 9165
+> starting osd.11 at :/0 osd_data /ceph/osd.11/ /ceph/journal/osd.11.journal
+> 2012-11-23 09:19:39.347924 7fee3e497780  0 filestore(/ceph/osd.11/) mount
+> FIEMAP ioctl is supported and appears to work
+> 2012-11-23 09:19:39.347932 7fee3e497780  0 filestore(/ceph/osd.11/) mount
+> FIEMAP ioctl is disabled via 'filestore fiemap' config option
+> 2012-11-23 09:19:39.348111 7fee3e497780  0 filestore(/ceph/osd.11/) mount did
+> NOT detect btrfs
+> 2012-11-23 09:19:39.349415 7fee3e497780  0 filestore(/ceph/osd.11/) mount
+> syncfs(2) syscall fully supported (by glibc and kernel)
+> 2012-11-23 09:19:39.349461 7fee3e497780  0 filestore(/ceph/osd.11/) mount
+> found snaps <>
+> 2012-11-23 09:19:39.350661 7fee3e497780  0 filestore(/ceph/osd.11/) mount:
+> enabling WRITEAHEAD journal mode: btrfs not detected
+> 
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
