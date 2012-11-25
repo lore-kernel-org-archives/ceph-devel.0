@@ -1,50 +1,78 @@
-From: Roald van Loon <roaldvanloon@gmail.com>
-Subject: Hi + question
-Date: Sun, 25 Nov 2012 20:02:10 +0100
-Message-ID: <CAN04cT5E3YCojDFGYa2xKMbUEbf2dvNnFdr322dCCaxcb-LPSA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Redundancy when mount with multiple mon IP
+Date: Sun, 25 Nov 2012 11:05:20 -0800
+Message-ID: <2BD5E9EBA7FF44309750F6D4D4B6403C@inktank.com>
+References: <CAJiejCRq2wcRVivDpXDGcQ4t5r=3ZM8-ywVh0EiuPdS+nuDqRg@mail.gmail.com>
+ <alpine.DEB.2.00.1211250826370.23552@cobra.newdream.net>
+ <CAJiejCT-BvsgnwB_HYp31DFqjwdaCWsWfhCSQOgrwLNfO37emA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:51960 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753277Ab2KYTCL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Nov 2012 14:02:11 -0500
-Received: by mail-vc0-f174.google.com with SMTP id m18so6950358vcm.19
-        for <ceph-devel@vger.kernel.org>; Sun, 25 Nov 2012 11:02:10 -0800 (PST)
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:60363 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753277Ab2KYTFW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Nov 2012 14:05:22 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so4515008pad.19
+        for <ceph-devel@vger.kernel.org>; Sun, 25 Nov 2012 11:05:22 -0800 (PST)
+In-Reply-To: <CAJiejCT-BvsgnwB_HYp31DFqjwdaCWsWfhCSQOgrwLNfO37emA@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Drunkard Zhang <gongfan193@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-Hi list,
+On Sunday, November 25, 2012 at 9:30 AM, Drunkard Zhang wrote:
+> 2012/11/26 Sage Weil <sage@inktank.com (mailto:sage@inktank.com)>:
+> > On Sun, 25 Nov 2012, Drunkard Zhang wrote:
+> > > I'm using ceph-0.51. I setup 3 monitors. then mount with 3 mon IP=
+ at
+> > > another host with either kernel mode or fuse, neither give me
+> > > redundancy.
+> > > =20
+> > > Here's commands I used at client (IP: 10.0.0.2) side;
+> > > mount -t ceph log3,log21,squid86-log12:/ /mnt/bc
+> > > ceph-fuse -m log3,log21,squid86-log12 /mnt/bc
+> > > =20
+> > > When mounted, read/write is OK, then add a iptables rule at log3 =
+to
+> > > REJECT/DROP packets from client 10.0.0.2, operation at client stu=
+ck
+> > > due to IO problem.
+> > > =20
+> > > Related stuck processes on client look like this:
+> > > log1 ~ # ps auwx |g bc
+> > > root 1325 0.0 0.0 120100 3536 pts/0 Sl 23:10 0:00
+> > > ceph-fuse -m log3,log21,squid86-log12 /mnt/bc
+> > > root 1404 0.0 0.0 16192 700 pts/0 S 23:10 0:00 ls
+> > > --color=3Dauto /mnt/bc
+> > =20
+> > =20
+> > =20
+> > Can you repeat teh test with '--debug-monc 20 --debug-ms 1 --log-fi=
+le /tmp/foo'
+> > on the command line and attach the resulting log?
+> > =20
+> > Thanks!
+> > sage
+> =20
+> =20
+> Thanks for the hint, I think the problem found, I rejected the client
+> at mon.log3 which also acts as mds, and it's up and active, another
+> mds is up and standby. So the client cannot connect to mds server? Is
+> it possible to get more than one mds up and active simultaneously, an=
+d
+> let client know that?
 
-I'm looking into ceph, and I must say I'm really delightful to see a
-decent integrated object/file storage system being developed as an
-open source project.
+The active MDS servers partition the namespace between them =E2=80=94 c=
+lients need to be able to communicate with them all. You can configure =
+which MDS is active (at start-up) if you like; unfortunately the best r=
+eference is still in the wiki: http://ceph.com/deprecated/Standby-repla=
+y_modes
+-Greg
 
-I'm a C (+ sometimes python developer) and currently looking for a
-nice project to maybe invest some of my evening hours in. Did some
-kernel hacking in the past (nothing upstream though, was mostly
-specific for the employer's environment), worked at a 3000+ nodes
-website company (most of them being photo/video storage nodes and most
-others being db nodes), and I remember looking at your project some
-years back. Happy to see it actually evolved quite nicely. My
-compliments to the devs!
-
-Like I said I'm toying away with ceph since an hour or two, and one of
-the things I noticed was that setting up my test env and getting to
-know ceph wasn't all that easy to do (gentoo btw). Things like ceph -h
-not showing the setcrushmap option, the 'ceph osd crush set' only
-returning '(22) Invalid argument' etc etc... So, I decided to take a
-real good look at the sources - any dev's number one source for
-documentation :-) There I... well.. kind of got lost. Cpp files,
-devops tools (python tools, shell scripts, perl scripts), fooclass,
-barclass ofcourse, valgrind supps, ... all in ~/src :-)
-
-So I was curious if I was the only one finding this a bit confusing.
-If not, I was wondering if you have some clean-up subproject running
-somewhere. Might be a nice way for me to really familiarize myself
-with the code base.
-
-Let me know,
-
-Roald
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
