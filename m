@@ -1,27 +1,27 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
+From: Sam Lang <sam.lang@inktank.com>
 Subject: Re: bobtail release candidates
-Date: Mon, 26 Nov 2012 13:59:20 +0000
-Message-ID: <50B375B8.6080100@inktank.com>
+Date: Mon, 26 Nov 2012 08:26:23 -0600
+Message-ID: <50B37C0F.60605@inktank.com>
 References: <alpine.DEB.2.00.1211250953400.23552@cobra.newdream.net> <50B372DF.3090001@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:58157 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752391Ab2KZN7a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 08:59:30 -0500
-Received: by mail-la0-f46.google.com with SMTP id p5so5799733lag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 05:59:25 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:59466 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755029Ab2KZO03 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 09:26:29 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so8029118iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 06:26:27 -0800 (PST)
 In-Reply-To: <50B372DF.3090001@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@widodh.nl>
 Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On 11/26/2012 01:47 PM, Wido den Hollander wrote:
+On 11/26/2012 07:47 AM, Wido den Hollander wrote:
 > Hi,
-> 
+>
 > On 11/26/2012 01:57 AM, Sage Weil wrote:
 >> Hi all,
 >>
@@ -41,17 +41,17 @@ On 11/26/2012 01:47 PM, Wido den Hollander wrote:
 >>
 >> Any testing and early feedback is greatly appreciated.
 >>
-> 
+>
 > I found another issue which I'm not sure about.
-> 
+>
 > I did the upgrade from 0.48.2 to 0.54 by simply running apt-get upgrade.
-> 
+>
 > The mon restarted fine, but when trying to connect I get:
-> 
+>
 > "-1 unable to authenticate as client.admin"
-> 
+>
 > I ran with debug ms/auth = 20 and I got:
-> 
+>
 > 2012-11-26 14:41:13.039615 7fed35bc7780  1 -- :/0 messenger.start
 > 2012-11-26 14:41:13.039878 7fed35bc7780 10 -- :/29176 ready :/29176
 > 2012-11-26 14:41:13.039905 7fed32a70700 10 -- :/29176 reaper_entry start
@@ -177,26 +177,57 @@ On 11/26/2012 01:47 PM, Wido den Hollander wrote:
 > calling dispatch on 0x7fed14001660
 > 2012-11-26 14:41:13.046904 7fed35bc7780 10 -- 192.168.6.250:0/29176
 > shutdown 192.168.6
-> 
+>
 > It seems to read /etc/ceph/ceph.keyring, but then it can't connect?
-> 
+>
 > 192.168.6.250:6789/0 pipe(0x1361670 sd=3 :41567 pgs=5 cs=1 l=1).reader
 > got message 1 0x7fed14001660 auth_reply(proto 0 -95 Operation not
 > supported) v1
-> 
+>
 > Not sure what that means?
-> 
+>
 > My ceph.conf is minimal as possible, there is not even an [global]
 > section and my mon section only lists one monitor, no other options.
-> 
+>
 > I tried to keep everything to its defaults to keep the setup simple.
-> 
+>
 > Suggestions?
-> 
+>
+
+Hi Wido,
+
+The defaults for auth parameters changed in bobtail.  With no settings 
+in your config, you probably weren't using auth, but after the upgrade, 
+the defaults became cephx.
+
+I think you can fix it by disabling auth (which is what you had in 0.48):
+
+[global]
+auth cluster required = none
+auth service required = none
+
+
+Here's the commit where the options changed:
+
+https://github.com/ceph/ceph/commit/66bda162e1acad34d37fa97e3a91e277df174f42
+
+-sam
+
 > Wido
+>
+>
+>
+>
+>
+>> Thanks!
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Hey Wido,
-
-Can you point me to someplace with the monitor's log?
-
-  -Joao
