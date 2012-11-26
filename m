@@ -1,44 +1,61 @@
-From: Sage Weil <sage@inktank.com>
-Subject: stable ceph kernels
-Date: Mon, 26 Nov 2012 14:55:39 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211261446020.3409@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Can't start ceph mon
+Date: Mon, 26 Nov 2012 15:04:32 -0800
+Message-ID: <CAPYLRzjf1_7QJJStTbUzrL_XdP4+7_uMQq=mURxQARmpJLysbg@mail.gmail.com>
+References: <50ABC929.3000107@bob-the-boat.me.uk>
+	<CAPYLRzg_X2ipWLQeOkLE=hJ-_r9W-eS4=SWdQO525R58PpJxtg@mail.gmail.com>
+	<50ABD056.5040103@bob-the-boat.me.uk>
+	<CAPYLRzg5EpfKqg3XNYGeWm9stNLXzpMenOdm+p6j1PafRNeNBg@mail.gmail.com>
+	<50ABD284.1060309@bob-the-boat.me.uk>
+	<CAPYLRzgGrBaL7Ny7-e7QxhTASXUFtPapGWZ2xUm7cTPhhTKbuQ@mail.gmail.com>
+	<50ABD518.3030900@bob-the-boat.me.uk>
+	<0F20B62A6EC54AD7A6845CB7BD2714B2@inktank.com>
+	<50AF32E9.2060809@bob-the-boat.me.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed; boundary=bcaec517a9b2d2ab8904cf6df45f
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53343 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932222Ab2KZWzk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 17:55:40 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id B384480060
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 14:55:39 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 8CA4080060
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 14:55:39 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:46246 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755876Ab2KZXEf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 18:04:35 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so8499622iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 15:04:34 -0800 (PST)
+In-Reply-To: <50AF32E9.2060809@bob-the-boat.me.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Dave (Bob)" <dave@bob-the-boat.me.uk>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Quick update:
+--bcaec517a9b2d2ab8904cf6df45f
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-The latest set of fixes for known bugs in the ceph fs and rbd kernel 
-clients are now present in the stable 3.6.7 and 3.4.20 stable kernels 
-(available via kernel.org).
+On Fri, Nov 23, 2012 at 12:25 AM, Dave (Bob) <dave@bob-the-boat.me.uk> wrot=
+e:
+> Greg,
+>
+> Is there any news on this?
+>
+> David
 
-The 3.5.y series is being maintained by Canonical for another year or so 
-(it's used for 12.10 quantal), and bugfixes have been queued there as 
-well, but have not yet been released.
+Hurray, there is! Your "latest" stashed version of the PGMap got
+corrupted; knowing that helped me to track down a bug =97 we weren't
+checking the return value of an fsync! Fixes to prevent this situation
+in the future are coming shortly; in the mean time I managed to create
+a replacement PGMap for you that *should* make things right in the
+world again. Note that it's just blank, so some of your statistics
+reporting will be wonky for a little while (but all the data is
+replaceable and will be filled in gradually by the OSDs).
+Take the attached "new_latest" file and replace the file at
+"mon.vault01/pgmap/latest" with it, then restart your monitor and
+everything should be good! Let me know if it's not.
+-Greg
 
-Moving forward, we intend to send all future fixes to 3.4 and later stable 
-kernels.  Suse has done some backporting work for kernel RBD to older 
-kernels, but we don't have a formal maintenance plan there yet.
+--bcaec517a9b2d2ab8904cf6df45f
+Content-Type: application/octet-stream; name=new_latest
+Content-Disposition: attachment; filename=new_latest
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ha07dkh80
 
-Note that aside from the issue Nick reported last week (rbd map hang), 
-there aren't any known stability problems with the kernel rbd driver.  Or 
-cephfs, for that matter; known bugs there are related to clustered mds and 
-corner cases we haven't yet prioritized.  If you are seeing problems with 
-the kernel ceph client with these version, it is news to us; please let us 
-know!
-
-Thanks-
-sage
+BAQgAAAACNUAAgAAAAAAAAAAAAAAAD8AAAAAAAAAMzNzP5qZWT8=
+--bcaec517a9b2d2ab8904cf6df45f--
