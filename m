@@ -1,288 +1,120 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 Subject: Re: [PATCH] mds: sort dentries when committing dir fragment
-Date: Mon, 26 Nov 2012 10:19:02 +0800
-Message-ID: <50B2D196.8010509@intel.com>
-References: <1353845850-14187-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1211251430290.23552@cobra.newdream.net>
+Date: Mon, 26 Nov 2012 16:54:32 +0800
+Message-ID: <50B32E48.50403@intel.com>
+References: <1353845850-14187-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1211251430290.23552@cobra.newdream.net> <50B2D196.8010509@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:12027 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:65058 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753124Ab2KZCTG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 25 Nov 2012 21:19:06 -0500
-In-Reply-To: <alpine.DEB.2.00.1211251430290.23552@cobra.newdream.net>
+	id S1754058Ab2KZIyg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 26 Nov 2012 03:54:36 -0500
+In-Reply-To: <50B2D196.8010509@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 11/26/2012 06:32 AM, Sage Weil wrote:
-> I pushed an alternative approach to wip-tmap.
+On 11/26/2012 10:19 AM, Yan, Zheng wrote:
+> On 11/26/2012 06:32 AM, Sage Weil wrote:
+>> I pushed an alternative approach to wip-tmap.
+>>
+>> This sorting is an artifact of tmap's crummy implementation, and the mds 
+>> workaround will need to get reverted when we switch to omap.  Instead, fix 
+>> tmap so that it will tolerate unsorted keys.  (Also, drop the ENOENT on rm 
+>> on missing key.)
+>>
+>> Eventually we can deprecate and remove tmap entirely...
+>>
+>> What do you think?
 > 
-> This sorting is an artifact of tmap's crummy implementation, and the mds 
-> workaround will need to get reverted when we switch to omap.  Instead, fix 
-> tmap so that it will tolerate unsorted keys.  (Also, drop the ENOENT on rm 
-> on missing key.)
-> 
-> Eventually we can deprecate and remove tmap entirely...
-> 
-> What do you think?
+> This approach is cleaner than mine. But I think your fix isn't enough because
+> MDS may provide tmap contains misordered items to the TMAPPUT method. Misordered
+> items will confuse future TMAPUP. This fix is either sorting items when handling
+> TMAPPUT or searching forward for any potential misordered items when TMAP_SET
+> wants to add a new item or TMAP_RM fails to find an item.
+>
 
-This approach is cleaner than mine. But I think your fix isn't enough because
-MDS may provide tmap contains misordered items to the TMAPPUT method. Misordered
-items will confuse future TMAPUP. This fix is either sorting items when handling
-TMAPPUT or searching forward for any potential misordered items when TMAP_SET
-wants to add a new item or TMAP_RM fails to find an item.
+how about the patch attached below
 
-Regards
-Yan, Zheng
+-----
+From e3c4fb68dc6c7592b7f53ab7a98b561167b567df Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Mon, 26 Nov 2012 12:28:30 +0800
+Subject: [PATCH] osd: check misordered items in TMAP
 
-> sage
-> 
-> 
-> On Sun, 25 Nov 2012, Yan, Zheng wrote:
-> 
->> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>
->> Currently ceph mds uses tmap to store dir fragments. Dentry_key_t's
->> string representation is used as key for the tmap. When writing or
->> updating a tmap, the OSDs expect the keys to be provided in ascending
->> order. Current code encodes dentries by the order of dentry_key_t(s)
->> when committing dir fragment. The problem here is that we may get
->> different results when comparing dentry_key_t(s) and their string
->> representations. So the MDS may send data/commands sorted in the
->> wrong order to the OSDs. It confuses the OSDs and causes corruption.
->>
->> Comparing dentry_key_t(s) and their string representations gives
->> different results only when name string in one dentry_key_t is prefix
->> of name string in another dentry_key_t. So the fix is checking the
->> special case and re-sorting dentries that are in the wrong order.
->>
->> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->> ---
->>  src/mds/CDir.cc    | 154 ++++++++++++++++++++++++++++++++++++++++++-----------
->>  src/mds/mdstypes.h |  16 +++---
->>  2 files changed, 130 insertions(+), 40 deletions(-)
->>
->> diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
->> index 2b4f7c7..e724e61 100644
->> --- a/src/mds/CDir.cc
->> +++ b/src/mds/CDir.cc
->> @@ -1720,24 +1720,65 @@ CDir::map_t::iterator CDir::_commit_full(ObjectOperation& m, const set<snapid_t>
->>    ::encode(fnode, header);
->>    max_write_size -= header.length();
->>  
->> +  /*
->> +   * We may get different results when comparing dentry_key_t(s) and their
->> +   * string representations. It happens only when name string in one dentry_key_t
->> +   * is prefix of name string in another dentry_key_t. Tmap uses dentry_key_t's
->> +   * string representation as key. When writing or updating a tmap, the osd
->> +   * expects the keys to be provided in ascending order. So we need re-sort
->> +   * the dentries here.
->> +   */
->> +  map<string, CDentry*> pending_items;
->> +
->>    map_t::iterator p = items.begin();
->> -  while (p != items.end() && bl.length() < max_write_size) {
->> -    CDentry *dn = p->second;
->> -    p++;
->> -    
->> -    if (dn->linkage.is_null()) 
->> -      continue;  // skip negative entries
->> +  while ((p != items.end() || pending_items.size()) && bl.length() < max_write_size) {
->> +    if (p != items.end()) {
->> +      CDentry *dn = p->second;
->> +      p++;
->>  
->> -    if (snaps && dn->last != CEPH_NOSNAP &&
->> -	try_trim_snap_dentry(dn, *snaps))
->> -      continue;
->> -    
->> -    n++;
->> +      if (dn->linkage.is_null())
->> +	continue;  // skip negative entries
->> +
->> +      if (snaps && dn->last != CEPH_NOSNAP &&
->> +	  try_trim_snap_dentry(dn, *snaps))
->> +	continue;
->> +
->> +      n++;
->> +
->> +      if (pending_items.empty()) {
->> +	int len = 0;
->> +	if (p != items.end())
->> +	  len = min(dn->name.length(), p->second->name.length());
->> +	if (p == items.end() || dn->name.compare(0, len, p->second->name, 0, len) < 0) {
->> +	  _encode_dentry(dn, bl, snaps);
->> +	} else {
->> +	  pending_items[dn->key().str()] = dn;
->> +	}
->> +	continue;
->> +      }
->> +
->> +      pending_items[dn->key().str()] = dn;
->> +      if (p != items.end()) {
->> +	string& last_pending = pending_items.rbegin()->second->name;
->> +	int len = min(last_pending.length(), p->second->name.length());
->> +	if (last_pending.compare(0, len, p->second->name, 0, len) >= 0)
->> +	  continue;
->> +      }
->> +    }
->> +
->> +    for (map<string, CDentry*>::iterator it = pending_items.begin();
->> +	 it != pending_items.end(); it++) {
->> +      CDentry *dn = it->second;
->> +      _encode_dentry(dn, bl, snaps);
->> +    }
->>  
->> -    _encode_dentry(dn, bl, snaps);
->> +    if (bl.length() > max_write_size)
->> +      break;
->> +
->> +    pending_items.clear();
->>    }
->>  
->> -  if (p != items.end()) {
->> +  if (p != items.end() || pending_items.size()) {
->>      assert(bl.length() > max_write_size);
->>      return _commit_partial(m, snaps, max_write_size);
->>    }
->> @@ -1790,31 +1831,82 @@ CDir::map_t::iterator CDir::_commit_partial(ObjectOperation& m,
->>    if(last_committed_dn != map_t::iterator())
->>      p = last_committed_dn;
->>  
->> -  while (p != items.end() && finalbl.length() < max_write_size) {
->> -    CDentry *dn = p->second;
->> -    ++p;
->> -    
->> -    if (snaps && dn->last != CEPH_NOSNAP &&
->> -	try_trim_snap_dentry(dn, *snaps))
->> -      continue;
->> +  // see comments in _commit_full()
->> +  map_t::iterator next_dn = p;
->> +  map<string, CDentry*> pending_items;
->>  
->> -    if (!dn->is_dirty())
->> -      continue;  // skip clean dentries
->> +  while ((p != items.end() || pending_items.size()) && finalbl.length() < max_write_size) {
->> +    if (p != items.end()) {
->> +      CDentry *dn = p->second;
->> +      ++p;
->>  
->> -    if (dn->get_linkage()->is_null()) {
->> -      dout(10) << " rm " << dn->name << " " << *dn << dendl;
->> -      finalbl.append(CEPH_OSD_TMAP_RM);
->> -      dn->key().encode(finalbl);
->> -    } else {
->> -      dout(10) << " set " << dn->name << " " << *dn << dendl;
->> -      finalbl.append(CEPH_OSD_TMAP_SET);
->> -      _encode_dentry(dn, finalbl, snaps);
->> +      if (snaps && dn->last != CEPH_NOSNAP &&
->> +	  try_trim_snap_dentry(dn, *snaps))
->> +	continue;
->> +
->> +      if (!dn->is_dirty())
->> +	continue;  // skip clean dentries
->> +
->> +      if (pending_items.empty()) {
->> +	int len = 0;
->> +	if (p != items.end())
->> +	  len = min(dn->name.length(), p->second->name.length());
->> +	if (p == items.end() || dn->name.compare(0, len, p->second->name, 0, len) < 0) {
->> +	  if (dn->get_linkage()->is_null()) {
->> +	    dout(10) << " rm " << dn->name << " " << *dn << dendl;
->> +	    finalbl.append(CEPH_OSD_TMAP_RM);
->> +	    dn->key().encode(finalbl);
->> +	  } else {
->> +	    dout(10) << " set " << dn->name << " " << *dn << dendl;
->> +	    finalbl.append(CEPH_OSD_TMAP_SET);
->> +	    _encode_dentry(dn, finalbl, snaps);
->> +	  }
->> +	  next_dn = p;
->> +	} else {
->> +	  pending_items[dn->key().str()] = dn;
->> +	}
->> +	continue;
->> +      }
->> +
->> +      pending_items[dn->key().str()] = dn;
->> +      if (p != items.end()) {
->> +	string& last_pending = pending_items.rbegin()->second->name;
->> +	int len = min(last_pending.length(), p->second->name.length());
->> +	if (last_pending.compare(0, len, p->second->name, 0, len) >= 0)
->> +	  continue;
->> +      }
->> +    }
->> +
->> +    bufferlist bl;
->> +    for (map<string, CDentry*>::iterator it = pending_items.begin();
->> +	 it != pending_items.end(); it++) {
->> +      CDentry *dn = it->second;
->> +      if (dn->get_linkage()->is_null()) {
->> +	dout(10) << " rm " << dn->name << " " << *dn << dendl;
->> +	bl.append(CEPH_OSD_TMAP_RM);
->> +	dn->key().encode(bl);
->> +      } else {
->> +	dout(10) << " set " << dn->name << " " << *dn << dendl;
->> +	bl.append(CEPH_OSD_TMAP_SET);
->> +	_encode_dentry(dn, bl, snaps);
->> +      }
->>      }
->> +
->> +    if (bl.length() + finalbl.length() > max_write_size)
->> +      break;
->> +
->> +    pending_items.clear();
->> +
->> +    finalbl.claim_append(bl);
->> +    next_dn = p;
->>    }
->>  
->> +  if (p == items.end() && pending_items.empty())
->> +    next_dn = p;
->> +
->>    // update the trivialmap at the osd
->>    m.tmap_update(finalbl);
->> -  return p;
->> +  return next_dn;
->>  }
->>  
->>  void CDir::_encode_dentry(CDentry *dn, bufferlist& bl,
->> diff --git a/src/mds/mdstypes.h b/src/mds/mdstypes.h
->> index 22e754e..9c329a1 100644
->> --- a/src/mds/mdstypes.h
->> +++ b/src/mds/mdstypes.h
->> @@ -662,20 +662,18 @@ struct dentry_key_t {
->>    // encode into something that can be decoded as a string.
->>    // name_ (head) or name_%x (!head)
->>    void encode(bufferlist& bl) const {
->> -    __u32 l = strlen(name) + 1;
->> +    ::encode(str(), bl);
->> +  }
->> +  string str() const {
->> +    string str = name;
->>      char b[20];
->>      if (snapid != CEPH_NOSNAP) {
->>        uint64_t val(snapid);
->> -      snprintf(b, sizeof(b), "%" PRIx64, val);
->> -      l += strlen(b);
->> +      snprintf(b, sizeof(b), "_%" PRIx64, val);
->>      } else {
->> -      snprintf(b, sizeof(b), "%s", "head");
->> -      l += 4;
->> +      snprintf(b, sizeof(b), "_%s", "head");
->>      }
->> -    ::encode(l, bl);
->> -    bl.append(name, strlen(name));
->> -    bl.append("_", 1);
->> -    bl.append(b);
->> +    return str + b;
->>    }
->>    static void decode_helper(bufferlist::iterator& bl, string& nm, snapid_t& sn) {
->>      string foo;
->> -- 
->> 1.7.11.7
->>
->>
+There is a bug in the MDS that causes misordered items in TMAPs
+that store dir fragments. Misordered items confuse TMAP updates.
+
+Fix this by adding code to do_tmapup() to check if there are
+misordered items that may affect the correctness of TMAP update.
+Fall back to use do_tmapup_slow if misordered items are found.
+
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/osd/ReplicatedPG.cc | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+index 48cba10..71f5363 100644
+--- a/src/osd/ReplicatedPG.cc
++++ b/src/osd/ReplicatedPG.cc
+@@ -1803,8 +1803,17 @@ int ReplicatedPG::do_tmapup(OpContext *ctx, bufferlist::iterator& bp, OSDOp& osd
+ 	  nkeys--;
+ 	}
+ 	if (!ip.end()) {
++	  string last_key = nextkey;
++
+ 	  ::decode(nextkey, ip);
+ 	  ::decode(nextval, ip);
++
++	  if (nextkey <= last_key) {
++	    dout(0) << "tmapup warning: key '" << key << "' < previous key '" << last_key
++		    << "', falling back to an inefficient (unsorted) update" << dendl;
++	    bp = orig_bp;
++	    return do_tmapup_slow(ctx, bp, osd_op, newop.outdata);
++	  }
+ 	} else {
+ 	  have_next = false;
+ 	}
+@@ -1848,6 +1857,35 @@ int ReplicatedPG::do_tmapup(OpContext *ctx, bufferlist::iterator& bp, OSDOp& osd
+       ::encode(nextkey, newkeydata);
+       ::encode(nextval, newkeydata);
+       dout(20) << "  keep " << nextkey << " " << nextval.length() << dendl;
++
++      /*
++       * TMAPs for storing dir fragments may contain misordered items.
++       * Only items corresponding to dentries that have the same name
++       * prefix can be out of order.
++       */
++      size_t lastlen = nextkey.find_last_of('_');
++      if (lastlen > 0 && lastlen != string::npos) {
++	string last_key = nextkey;
++	bufferlist::iterator tmp_ip = ip;
++	while (!tmp_ip.end()) {
++	  ::decode(nextkey, tmp_ip);
++	  ::decode(nextval, tmp_ip);
++
++	  if (nextkey <= last_key) {
++	    dout(0) << "tmapup warning: key '" << nextkey << "' < previous key '" << last_key
++		    << "', falling back to an inefficient (unsorted) update" << dendl;
++	    bp = orig_bp;
++	    return do_tmapup_slow(ctx, bp, osd_op, newop.outdata);
++	  }
++
++	  size_t len = nextkey.find_last_of('_');
++	  if (len == 0 || len == string::npos)
++	    break;
++	  len = min(len, lastlen);
++	  if (last_key.compare(0, len, nextkey, 0, len) < 0)
++	    break;
++	}
++      }
+     }
+     if (!ip.end()) {
+       bufferlist rest;
+-- 
+1.7.11.7
 
