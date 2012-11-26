@@ -1,61 +1,82 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Can't start ceph mon
-Date: Mon, 26 Nov 2012 15:04:32 -0800
-Message-ID: <CAPYLRzjf1_7QJJStTbUzrL_XdP4+7_uMQq=mURxQARmpJLysbg@mail.gmail.com>
-References: <50ABC929.3000107@bob-the-boat.me.uk>
-	<CAPYLRzg_X2ipWLQeOkLE=hJ-_r9W-eS4=SWdQO525R58PpJxtg@mail.gmail.com>
-	<50ABD056.5040103@bob-the-boat.me.uk>
-	<CAPYLRzg5EpfKqg3XNYGeWm9stNLXzpMenOdm+p6j1PafRNeNBg@mail.gmail.com>
-	<50ABD284.1060309@bob-the-boat.me.uk>
-	<CAPYLRzgGrBaL7Ny7-e7QxhTASXUFtPapGWZ2xUm7cTPhhTKbuQ@mail.gmail.com>
-	<50ABD518.3030900@bob-the-boat.me.uk>
-	<0F20B62A6EC54AD7A6845CB7BD2714B2@inktank.com>
-	<50AF32E9.2060809@bob-the-boat.me.uk>
+Subject: Re: Statistics / Nagios
+Date: Mon, 26 Nov 2012 15:46:09 -0800
+Message-ID: <CAPYLRzjYuyUQeMgNWFr12LE79jg+KMMUQuBk05kHvxzpCfjG-g@mail.gmail.com>
+References: <50B262F2.4090205@profihost.ag>
+	<9536A23884D44002B4C59911713210DF@inktank.com>
+	<50B2723D.5020904@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec517a9b2d2ab8904cf6df45f
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:46246 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755876Ab2KZXEf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 18:04:35 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so8499622iay.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 15:04:34 -0800 (PST)
-In-Reply-To: <50AF32E9.2060809@bob-the-boat.me.uk>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:40161 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754842Ab2KZXqJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 18:46:09 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k11so7308688iea.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 15:46:09 -0800 (PST)
+In-Reply-To: <50B2723D.5020904@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dave (Bob)" <dave@bob-the-boat.me.uk>
+To: Stefan Priebe <s.priebe@profihost.ag>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---bcaec517a9b2d2ab8904cf6df45f
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, Nov 23, 2012 at 12:25 AM, Dave (Bob) <dave@bob-the-boat.me.uk> wrot=
-e:
-> Greg,
+On Sun, Nov 25, 2012 at 11:32 AM, Stefan Priebe <s.priebe@profihost.ag>=
+ wrote:
+> Hi Greg,
 >
-> Is there any news on this?
+> Am 25.11.2012 20:08, schrieb Gregory Farnum:
 >
-> David
+>> On Sunday, November 25, 2012 at 10:26 AM, Stefan Priebe wrote:
+>>>
+>>> Hello list,
+>>>
+>>> are there any useful statistics for ceph? ceph -s shows just the st=
+atus
+>>> but i would like to record something which gives me an idea about t=
+he
+>>> ceph load or usage.
+>>
+>>
+>> Each daemon has an admin socket which you can use to extract
+>> "perfcounters" (performance counters). It's not well-documented at a=
+ll right
+>> now, unfortunately.
+>> "ceph --admin-daemon /path/to/admin/socket help"
+>> "ceph --admin-daemon /path/to/admin/socket perfcounters_dump"
+>>
+>> "ceph --admin-daemon /path/to/admin/socket perfcounters_schema"
+>>
+>> should get you started.
+>> http://ceph.com/docs/master/radosgw/troubleshooting has some example=
+s of
+>> troubleshooting the gateway with them.
+>
+>
+> thanks! I don't use radosgw. Just ceph-mon and ceph-osd with rbd bloc=
+k
+> devices.
+>
+> So i have to query each OSD on their own?
 
-Hurray, there is! Your "latest" stashed version of the PGMap got
-corrupted; knowing that helped me to track down a bug =97 we weren't
-checking the return value of an fsync! Fixes to prevent this situation
-in the future are coming shortly; in the mean time I managed to create
-a replacement PGMap for you that *should* make things right in the
-world again. Note that it's just blank, so some of your statistics
-reporting will be wonky for a little while (but all the data is
-replaceable and will be filled in gradually by the OSDs).
-Take the attached "new_latest" file and replace the file at
-"mon.vault01/pgmap/latest" with it, then restart your monitor and
-everything should be good! Let me know if it's not.
+That's how it stands at present, yep.
+
+> Right now i have
+> [global]
+>   admin socket=3D/var/run/ceph.sock
+>
+> but that gives:
+> # ceph --admin-daemon /var/run/ceph.sock perfcounters_schema
+> {}
+
+Hrm, I'm getting a full schema out of it when I test locally. I
+suspect that maybe you're trying to query the admin tool's socket when
+you do that =97 everybody, including the client tools, will export one
+if it's set for them. Try using the $name metavariable as part of the
+path.
 -Greg
-
---bcaec517a9b2d2ab8904cf6df45f
-Content-Type: application/octet-stream; name=new_latest
-Content-Disposition: attachment; filename=new_latest
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_ha07dkh80
-
-BAQgAAAACNUAAgAAAAAAAAAAAAAAAD8AAAAAAAAAMzNzP5qZWT8=
---bcaec517a9b2d2ab8904cf6df45f--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
