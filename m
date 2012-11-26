@@ -1,120 +1,187 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH] mds: sort dentries when committing dir fragment
-Date: Mon, 26 Nov 2012 16:54:32 +0800
-Message-ID: <50B32E48.50403@intel.com>
-References: <1353845850-14187-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1211251430290.23552@cobra.newdream.net> <50B2D196.8010509@intel.com>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: OSD daemon changes port no
+Date: Mon, 26 Nov 2012 16:09:44 +0530
+Message-ID: <CAGfy=6kAkXrdYwL-Ui-Xd2Qsqaf8hcUbWGY94QOFfaRA1AmUrA@mail.gmail.com>
+References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
+	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
+	<CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
+	<alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
+	<CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
+	<alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net>
+	<CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com>
+	<alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:65058 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754058Ab2KZIyg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 26 Nov 2012 03:54:36 -0500
-In-Reply-To: <50B2D196.8010509@intel.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:61621 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754927Ab2KZKjq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 05:39:46 -0500
+Received: by mail-vb0-f46.google.com with SMTP id ff1so5442978vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 02:39:45 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On 11/26/2012 10:19 AM, Yan, Zheng wrote:
-> On 11/26/2012 06:32 AM, Sage Weil wrote:
->> I pushed an alternative approach to wip-tmap.
+While I was using "cephfs" following error is observed -
+------------------------------------------------------------------------------------------------
+root@hemantsec-virtual-machine:~# cephfs /mnt/ceph/a --pool 3
+invalid command
+usage: cephfs path command [options]*
+Commands:
+   show_layout    -- view the layout information on a file or dir
+   set_layout     -- set the layout on an empty file,
+                     or the default layout on a directory
+   show_location  -- view the location information on a file
+Options:
+   Useful for setting layouts:
+   --stripe_unit, -u:  set the size of each stripe
+   --stripe_count, -c: set the number of objects to stripe across
+   --object_size, -s:  set the size of the objects to stripe across
+   --pool, -p:         set the pool to use
+
+   Useful for getting location data:
+   --offset, -l:       the offset to retrieve location data for
+
+------------------------------------------------------------------------------------------------
+It may be silly question but unable to figure it out.
+
+:(
+
+
+
+
+On Wed, Nov 21, 2012 at 8:59 PM, Sage Weil <sage@inktank.com> wrote:
+> On Wed, 21 Nov 2012, hemant surale wrote:
+>> > Oh I see.  Generally speaking, the only way to guarantee separation is to
+>> > put them in different pools and distribute the pools across different sets
+>> > of OSDs.
 >>
->> This sorting is an artifact of tmap's crummy implementation, and the mds 
->> workaround will need to get reverted when we switch to omap.  Instead, fix 
->> tmap so that it will tolerate unsorted keys.  (Also, drop the ENOENT on rm 
->> on missing key.)
+>> yeah that was correct approach but i found problem doing so from
+>> abstract level i.e. when I put file inside mounted dir
+>> "/home/hemant/cephfs " ( mounted using "mount.ceph" cmd ) . At that
+>> time anyways ceph is going to use default pool data to store files (
+>> here files were striped into different objects and then sent to
+>> appropriate osd ) .
+>>    So how to tell ceph to use different pools in this case ?
 >>
->> Eventually we can deprecate and remove tmap entirely...
->>
->> What do you think?
-> 
-> This approach is cleaner than mine. But I think your fix isn't enough because
-> MDS may provide tmap contains misordered items to the TMAPPUT method. Misordered
-> items will confuse future TMAPUP. This fix is either sorting items when handling
-> TMAPPUT or searching forward for any potential misordered items when TMAP_SET
-> wants to add a new item or TMAP_RM fails to find an item.
+>> Goal : separate read and write operations , where read will be done
+>> from one group of OSD and write is done to other group of OSD.
 >
-
-how about the patch attached below
-
------
-From e3c4fb68dc6c7592b7f53ab7a98b561167b567df Mon Sep 17 00:00:00 2001
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Date: Mon, 26 Nov 2012 12:28:30 +0800
-Subject: [PATCH] osd: check misordered items in TMAP
-
-There is a bug in the MDS that causes misordered items in TMAPs
-that store dir fragments. Misordered items confuse TMAP updates.
-
-Fix this by adding code to do_tmapup() to check if there are
-misordered items that may affect the correctness of TMAP update.
-Fall back to use do_tmapup_slow if misordered items are found.
-
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/osd/ReplicatedPG.cc | 38 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 38 insertions(+)
-
-diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-index 48cba10..71f5363 100644
---- a/src/osd/ReplicatedPG.cc
-+++ b/src/osd/ReplicatedPG.cc
-@@ -1803,8 +1803,17 @@ int ReplicatedPG::do_tmapup(OpContext *ctx, bufferlist::iterator& bp, OSDOp& osd
- 	  nkeys--;
- 	}
- 	if (!ip.end()) {
-+	  string last_key = nextkey;
-+
- 	  ::decode(nextkey, ip);
- 	  ::decode(nextval, ip);
-+
-+	  if (nextkey <= last_key) {
-+	    dout(0) << "tmapup warning: key '" << key << "' < previous key '" << last_key
-+		    << "', falling back to an inefficient (unsorted) update" << dendl;
-+	    bp = orig_bp;
-+	    return do_tmapup_slow(ctx, bp, osd_op, newop.outdata);
-+	  }
- 	} else {
- 	  have_next = false;
- 	}
-@@ -1848,6 +1857,35 @@ int ReplicatedPG::do_tmapup(OpContext *ctx, bufferlist::iterator& bp, OSDOp& osd
-       ::encode(nextkey, newkeydata);
-       ::encode(nextval, newkeydata);
-       dout(20) << "  keep " << nextkey << " " << nextval.length() << dendl;
-+
-+      /*
-+       * TMAPs for storing dir fragments may contain misordered items.
-+       * Only items corresponding to dentries that have the same name
-+       * prefix can be out of order.
-+       */
-+      size_t lastlen = nextkey.find_last_of('_');
-+      if (lastlen > 0 && lastlen != string::npos) {
-+	string last_key = nextkey;
-+	bufferlist::iterator tmp_ip = ip;
-+	while (!tmp_ip.end()) {
-+	  ::decode(nextkey, tmp_ip);
-+	  ::decode(nextval, tmp_ip);
-+
-+	  if (nextkey <= last_key) {
-+	    dout(0) << "tmapup warning: key '" << nextkey << "' < previous key '" << last_key
-+		    << "', falling back to an inefficient (unsorted) update" << dendl;
-+	    bp = orig_bp;
-+	    return do_tmapup_slow(ctx, bp, osd_op, newop.outdata);
-+	  }
-+
-+	  size_t len = nextkey.find_last_of('_');
-+	  if (len == 0 || len == string::npos)
-+	    break;
-+	  len = min(len, lastlen);
-+	  if (last_key.compare(0, len, nextkey, 0, len) < 0)
-+	    break;
-+	}
-+      }
-     }
-     if (!ip.end()) {
-       bufferlist rest;
--- 
-1.7.11.7
-
+> First create the other pool,
+>
+>  ceph osd pool create <name>
+>
+> and then adjust the CRUSH rule to distributed to a different set of OSDs
+> for that pool.
+>
+> To allow cephfs use it,
+>
+>  ceph mds add_data_pool <poolid>
+>
+> and then:
+>
+>  cephfs /mnt/ceph/foo --pool <poolid>
+>
+> will set the policy on the directory such that new files beneath that
+> point will be stored in a different pool.
+>
+> Hope that helps!
+> sage
+>
+>
+>>
+>>
+>>
+>>
+>> -
+>> Hemant Surale.
+>>
+>>
+>> On Wed, Nov 21, 2012 at 12:33 PM, Sage Weil <sage@inktank.com> wrote:
+>> > On Wed, 21 Nov 2012, hemant surale wrote:
+>> >> Its a little confusing question I believe .
+>> >>
+>> >> Actually there are two files X & Y.  When I am reading X from its
+>> >> primary .I want to make sure simultaneous writing of Y should go to
+>> >> any other OSD except primary OSD for X (from where my current read is
+>> >> getting served ) .
+>> >
+>> > Oh I see.  Generally speaking, the only way to guarantee separation is to
+>> > put them in different pools and distribute the pools across different sets
+>> > of OSDs.  Otherwise, it's all (pseudo)random and you never know.  Usually,
+>> > they will be different, particularly as the cluster size increases, but
+>> > sometimes they will be the same.
+>> >
+>> > sage
+>> >
+>> >
+>> >>
+>> >>
+>> >> -
+>> >> Hemant Sural.e
+>> >>
+>> >> On Wed, Nov 21, 2012 at 11:50 AM, Sage Weil <sage@inktank.com> wrote:
+>> >> > On Wed, 21 Nov 2012, hemant surale wrote:
+>> >> >> >>    and one more thing how can it be possible to read from one osd and
+>> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
+>> >> >> >
+>> >> >> > I'm not sure I understand the question...
+>> >> >>
+>> >> >> Scenario :
+>> >> >>        I have written file X.txt on some osd which is primary for filr
+>> >> >> X.txt ( direct write operation using rados cmd) .
+>> >> >>        Now while read on file X.txt is in progress, Can I make sure
+>> >> >> the simultaneous write request must be directed to other osd using
+>> >> >> crushmaps/other way?
+>> >> >
+>> >> > Nope.  The object location is based on the name.  Reads and writes go to
+>> >> > the same location so that a single OSD can serialize request.  That means,
+>> >> > for example, that a read that follows a write returns the just-written
+>> >> > data.
+>> >> >
+>> >> > sage
+>> >> >
+>> >> >
+>> >> >> Goal of task :
+>> >> >>        Trying to avoid read - write clashes as much as possible to
+>> >> >> achieve faster operations (I/O) . Although CRUSH selects osd for data
+>> >> >> placement based on pseudo random function.  is it possible ?
+>> >> >>
+>> >> >>
+>> >> >>
+>> >> >> -
+>> >> >> Hemant Surale.
+>> >> >>
+>> >> >>
+>> >> >>
+>> >> >> On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
+>> >> >> > On Tue, 20 Nov 2012, hemant surale wrote:
+>> >> >> >> Hi Community,
+>> >> >> >>    I have question about port number used by ceph-osd daemon . I
+>> >> >> >> observed traffic (inter -osd communication while data ingest happened)
+>> >> >> >> on port 6802 and then after some time when I ingested second file
+>> >> >> >> after some delay port no 6804 was used . Is there any specific reason
+>> >> >> >> to change port no here?
+>> >> >> >
+>> >> >> > The ports are dynamic.  Daemons bind to a random (6800-6900) port on
+>> >> >> > startup and communicate on that.  They discover each other via the
+>> >> >> > addresses published in the osdmap when the daemon starts.
+>> >> >> >
+>> >> >> >>    and one more thing how can it be possible to read from one osd and
+>> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
+>> >> >> >
+>> >> >> > I'm not sure I understand the question...
+>> >> >> >
+>> >> >> > sage
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >> >>
+>> >> >>
+>> >>
+>> >>
+>>
+>>
