@@ -1,98 +1,87 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: chooseleaf_descend_once
-Date: Tue, 27 Nov 2012 11:28:50 -0700
-Message-ID: <50B50662.2040002@sandia.gov>
-References: <50B4255B.10509@inktank.com>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: Hadoop and Ceph client/mds view of modification time
+Date: Tue, 27 Nov 2012 13:05:45 -0600
+Message-ID: <50B50F09.1000302@inktank.com>
+References: <CAPrxi5-pcHrxKsteGioaQ3haMOj0V3im1bXRL_TW28SD6R=qZw@mail.gmail.com> <50B4EE31.5020908@inktank.com> <alpine.DEB.2.00.1211270857370.30109@cobra.newdream.net> <D8FEE2D6-D5EF-41AB-83E6-11518DBB6B38@inktank.com> <alpine.DEB.2.00.1211271000040.32061@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:44872 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756439Ab2K0S3M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Nov 2012 13:29:12 -0500
-In-Reply-To: <50B4255B.10509@inktank.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:38821 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753234Ab2K0TFt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Nov 2012 14:05:49 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so9214201iay.19
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Nov 2012 11:05:49 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211271000040.32061@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: caleb miles <caleb.miles@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: David Zafman <david.zafman@inktank.com>, Noah Watkins <jayhawk@cs.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>
 
-Hi Caleb,
+On 11/27/2012 12:01 PM, Sage Weil wrote:
+> On Tue, 27 Nov 2012, David Zafman wrote:
+>>
+>> On Nov 27, 2012, at 9:03 AM, Sage Weil <sage@inktank.com> wrote:
+>>
+>>> On Tue, 27 Nov 2012, Sam Lang wrote:
+>>>
+>>>> 3. When a client acquires the cap for a file, have the mds provide its current
+>>>> time as well.  As the client updates the mtime, it uses the timestamp provided
+>>>> by the mds and the time since the cap was acquired.
+>>>> Except for the skew caused by the message latency, this approach allows the
+>>>> mtime to be based off the mds time, so it will be consistent across clients
+>>>> and the mds.  It does however, allow a client to set an mtime to the future
+>>>> (based off of its local time), which might be undesirable, but that is more
+>>>> like how  NFS behaves.  Message latency probably won't be much of an issue
+>>>> either, as the granularity of mtime is a second. Also, the client can set its
+>>>> cap acquired timestamp to the time at which the cap was requested, ensuring
+>>>> that the relative increment includes the round trip latency so that the mtime
+>>>> will always be set further ahead. Of course, this approach would be a lot more
+>>>> intrusive to implement. :-)
+>>>
+>>> Yeah, I'm less excited about this one.
+>>>
+>>> I think that giving consistent behavior from a single client despite clock
+>>> skew is a good goal.  That will make things like pjd's test behave
+>>> consistently, for example.
+>>>
+>>
+>> My suggestion is that a client writing to a file will try to use it's
+>> local clock unless it would cause the mtime to go backward.  In that
+>> case it will simply perform the minimum mtime advance possible (1
+>> second?).  This handles the case in which one client created a file
+>> using his clock (per previous suggested change), then another client
+>> writes with a clock that is behind.
 
-On 11/26/2012 07:28 PM, caleb miles wrote:
-> Hello all,
->
-> Here's what I've done to try and validate the new chooseleaf_descend_once tunable first described in commit f1a53c5e80a48557e63db9c52b83f39391bc69b8 in the wip-crush branch of ceph.git.
->
-> First I set the new tunable to it's legacy value, disabled,
->
-> tunable choose_local_tries 0
-> tunable choose_local_fallback_tries 0
-> tunable choose_total_tries 50
-> tunable chooseleaf_descend_once 0
->
-> The map contains one thousand osd devices contained in one hundred hosts with the following data rule
->
-> rule data {
-> ruleset 0
-> type replicated
-> min_size 1
-> max_size 10
-> step take default
-> step chooseleaf firstn 0 type host
-> step emit
-> }
->
-> I then simulate the creation of one million placement groups using the crushtool
->
-> $ crushtool -i hundred.map --test --min-x 0 --max-x 999999 --num-rep 3 --output-csv --weight 120 0.0 --weight 121 0.0 --weight 122 0.0 --weight 123 0.0 --weight 124 0.0 --weight 125 0.0 --weight 125 0.0 --weight 150 0.0 --weight 151 0.0 --weight 152 0.0 --weight 153 0.0 --weight 154 0.0 --weight 155 0.0 --weight 156 0.0 --weight 180 0.0 --weight 181 0.0 --weight 182 0.0 --weight 183 0.0 --weight 184 0.0 --weight 185 0.0 --weight 186 0.0
->
-> with the majority of devices in three hosts marked out. Then in (I)Python
->
-> import scipy.stats as s
-> import matplotlib.mlab as m
->
-> data = m.csv2rec("data-device_utilization.csv")
-> s.chisquare(data['number_of_objects_stored'], data['number_of_objects_expected'])
->
-> which will output
->
-> (122939.76474477499, 0.0)
->
-> so that the chi squared value is 122939.795 and the p value is, rounded to, 0.0 and the observed placement distribution statistically differs from a uniform distribution. Repeating with the new tunable set to
->
-> tunable chooseleaf_descend_once 1
->
-> I obtain the following result
->
-> (998.97643161876761, 0.32151775131589833)
->
-> so that the chi squared value is 998.976 and the p value is 0.32 and the observed placement distribution is statistically identical to the uniform distribution at the five and ten percent confidence levels, higher as well of course. The p value is the probability of obtaining a chi squared value more extreme than the statistic observed. Basically, from my rudimentary understanding of probability theory, that if you obtain a p value p < P then reject the null hypothesis, in our case that the observed placement distribution is drawn from the uniform distribution, at the P confidence level.
->
+We can choose to not decrement at the client, but because mtime is a 
+time_t (seconds since epoch), we can't increment by 1 for each write. 
+1000 writes each taking 0.01s would move the mtime 990 seconds into the 
+future.
 
-Cool.  Thanks for doing these tests.
-
-Is there any point to doing a third test, with
-
-tunable chooseleaf_descend_once 0
-
-and no devices marked out, but in all other respects
-the same as the above two tests?
-
-I would expect the results for that case and the last
-case you tested to be essentially identical in the degree
-of uniformity, but is it worth verifying?
-
--- Jim
-
-> Caleb
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
 >
->
+> That's a possibility (if it's 1ms or 1ns, at least :). We need to verify
+> what POSIX says about that, though: if you utimes(2) an mtime into the
+> future, what happens on write(2)?
 
+According to http://pubs.opengroup.org/onlinepubs/009695399/, writes 
+only require an update to mtime, it doesn't specify what the update 
+should be:
+
+"Upon successful completion, where nbyte is greater than 0, write() 
+shall mark for update the st_ctime and st_mtime fields of the file, and 
+if the file is a regular file, the S_ISUID and S_ISGID bits of the file 
+mode may be cleared."
+
+In NFS, the server sets the mtime.  Its relatively common to see 
+"Warning: file 'foo' has modification time in the future" if you're 
+compiling on nfs and your client and nfs server clocks are skewed.  So 
+allowing the mtime to be set in the near future would at least follow 
+the principle of least surprise for most folks.
+
+-sam
+
+>
+> sage
+>
 
