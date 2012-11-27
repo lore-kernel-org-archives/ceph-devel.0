@@ -1,82 +1,35 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Statistics / Nagios
-Date: Mon, 26 Nov 2012 15:46:09 -0800
-Message-ID: <CAPYLRzjYuyUQeMgNWFr12LE79jg+KMMUQuBk05kHvxzpCfjG-g@mail.gmail.com>
-References: <50B262F2.4090205@profihost.ag>
-	<9536A23884D44002B4C59911713210DF@inktank.com>
-	<50B2723D.5020904@profihost.ag>
+From: brady <brady@lamphost.com>
+Subject: Character limit for rbd block device
+Date: Mon, 26 Nov 2012 16:10:02 -0800
+Message-ID: <50B404DA.50805@lamphost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:40161 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754842Ab2KZXqJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 18:46:09 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k11so7308688iea.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 15:46:09 -0800 (PST)
-In-Reply-To: <50B2723D.5020904@profihost.ag>
+Received: from tux2.lamphost.net ([69.43.195.67]:40570 "EHLO tux2.lamphost.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755180Ab2K0AjZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 26 Nov 2012 19:39:25 -0500
+Received: from rrcs-64-183-4-86.west.biz.rr.com ([64.183.4.86]:57792 helo=[192.168.1.17])
+	by tux2.lamphost.net with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
+	(Exim 4.71)
+	(envelope-from <brady@lamphost.com>)
+	id 1Td8o1-000448-9y
+	for ceph-devel@vger.kernel.org; Mon, 26 Nov 2012 16:13:41 -0800
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Sun, Nov 25, 2012 at 11:32 AM, Stefan Priebe <s.priebe@profihost.ag>=
- wrote:
-> Hi Greg,
->
-> Am 25.11.2012 20:08, schrieb Gregory Farnum:
->
->> On Sunday, November 25, 2012 at 10:26 AM, Stefan Priebe wrote:
->>>
->>> Hello list,
->>>
->>> are there any useful statistics for ceph? ceph -s shows just the st=
-atus
->>> but i would like to record something which gives me an idea about t=
-he
->>> ceph load or usage.
->>
->>
->> Each daemon has an admin socket which you can use to extract
->> "perfcounters" (performance counters). It's not well-documented at a=
-ll right
->> now, unfortunately.
->> "ceph --admin-daemon /path/to/admin/socket help"
->> "ceph --admin-daemon /path/to/admin/socket perfcounters_dump"
->>
->> "ceph --admin-daemon /path/to/admin/socket perfcounters_schema"
->>
->> should get you started.
->> http://ceph.com/docs/master/radosgw/troubleshooting has some example=
-s of
->> troubleshooting the gateway with them.
->
->
-> thanks! I don't use radosgw. Just ceph-mon and ceph-osd with rbd bloc=
-k
-> devices.
->
-> So i have to query each OSD on their own?
+Hello,
+     I have a general question. Is there a specific character limit for 
+rbd block devices? In attempting to map a block device with a name that 
+is 36 characters or more, I am getting the following error:
 
-That's how it stands at present, yep.
+rbd map (36+ character name) --user admin --secret /etc/ceph/keyring.key
+add failed: (2) No such file or directory
 
-> Right now i have
-> [global]
->   admin socket=3D/var/run/ceph.sock
->
-> but that gives:
-> # ceph --admin-daemon /var/run/ceph.sock perfcounters_schema
-> {}
+     When using the same command to map a device with 35 characters or 
+less, the device is mapped as expected. Any insight into this issue 
+would be greatly appreciated.
 
-Hrm, I'm getting a full schema out of it when I test locally. I
-suspect that maybe you're trying to query the admin tool's socket when
-you do that =97 everybody, including the client tools, will export one
-if it's set for them. Try using the $name metavariable as part of the
-path.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Brady
