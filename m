@@ -1,69 +1,119 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [TRIVIAL PATCH] bdi_register: Add __printf verification, fix
- arg mismatch
-Date: Mon, 26 Nov 2012 21:05:28 -0600
-Message-ID: <50B42DF8.8010407@inktank.com>
-References: <1353613769.10902.8.camel@joe-AO722>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
+Date: Tue, 27 Nov 2012 10:16:47 +0100
+Message-ID: <50B484FF.9070500@profihost.ag>
+References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:40260 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755400Ab2K0DFd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 22:05:33 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so8636089iay.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 19:05:30 -0800 (PST)
-In-Reply-To: <1353613769.10902.8.camel@joe-AO722>
+Received: from mail.profihost.ag ([85.158.179.208]:37090 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758478Ab2K0JQw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Nov 2012 04:16:52 -0500
+In-Reply-To: <50B3CA6F.6000000@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joe Perches <joe@perches.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Dan Mick <dan.mick@inktank.com>
+Cc: Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/22/2012 01:49 PM, Joe Perches wrote:
-> __printf is useful to verify format and arguments.
-> 
-> Signed-off-by: Joe Perches <joe@perches.com>
+Am 26.11.2012 21:00, schrieb Dan Mick:
+> It writes zeros; there's no way for it to know how many zeros are
+> coming.  It could make a half-hearted attempt depending on its buffer
+> size and the amount of data the source is willing to buffer.
+Yes OK that's correct. Maybe the buffer should be the size of a rados 
+object / stripe size? So a whole stripe containing zeros could be ignored?
 
-Looks good.  I can take this into the ceph tree.  Thanks.
+> As for fstrim: on the rbd image?....sure, if it's a filesystem, it ought
+> to work (modulo some bugs I've heard about with 32-bit vs. 64-bit
+> offsets in qemu... :) )
+it works fine with my patches i send to qemu. But right now they're no 
+upstream an nobody of the qemu people answers anymore. So right now i'll 
+keep my patches and be lucky others can't use RBD and fstrim. So maybe 
+inktank should push this a bit more to the qemu people.
 
-Reviewed-by: Alex Elder <elder@inktank.com>
+Stefan
 
-> ---
->  fs/ceph/super.c             |    2 +-
->  include/linux/backing-dev.h |    1 +
->  2 files changed, 2 insertions(+), 1 deletions(-)
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 2eb43f2..e7dbb5c 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -849,7 +849,7 @@ static int ceph_register_bdi(struct super_block *sb,
->  		fsc->backing_dev_info.ra_pages =
->  			default_backing_dev_info.ra_pages;
->  
-> -	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%d",
-> +	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
->  			   atomic_long_inc_return(&bdi_seq));
->  	if (!err)
->  		sb->s_bdi = &fsc->backing_dev_info;
-> diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
-> index 2a9a9ab..12731a1 100644
-> --- a/include/linux/backing-dev.h
-> +++ b/include/linux/backing-dev.h
-> @@ -114,6 +114,7 @@ struct backing_dev_info {
->  int bdi_init(struct backing_dev_info *bdi);
->  void bdi_destroy(struct backing_dev_info *bdi);
->  
-> +__printf(3, 4)
->  int bdi_register(struct backing_dev_info *bdi, struct device *parent,
->  		const char *fmt, ...);
->  int bdi_register_dev(struct backing_dev_info *bdi, dev_t dev);
-> 
-> 
+> On 11/26/2012 11:35 AM, Stefan Priebe - Profihost AG wrote:
+>> Hi,
+>>
+>> Export isn't a problem. But import should handle this correctly. Or
+>> does it  write zeros to the object file
+>>
+>> But even if it write zeros to the file shouldn't a fstrim fix this?
+>>
+>> Stefan
+>>
+>> Am 26.11.2012 um 18:34 schrieb Dan Mick <dan.mick@inktank.com>:
+>>
+>>> Yes, it's broken too (there's an issue open on it). I have some test
+>>> code done over the weekend
+>>> and will be pushing it after review.
+>>>
+>>> Be aware that import/export to stdin/stdout are limited in that they
+>>> cannot preserve sparseness
+>>> of the image, but they should both be working soon at least.
+>>>
+>>> On Mon, Nov 26, 2012 at 5:35 AM, Stefan Priebe - Profihost AG
+>>> <s.priebe@profihost.ag> wrote:
+>>>> Am 26.11.2012 14:29, schrieb Oliver Francke:
+>>>>>
+>>>>> Well...
+>>>>
+>>>>
+>>>> makes no difference:
+>>>> gzip -dc vm-101-disk-1.img.gz | rbd import --format=2 --size=40960 -
+>>>> kvmpool1/vm-101-disk-1
+>>>>
+>>>> rbd: error reading file: (29) Illegal seek
+>>>> Importing image: 0% complete...failed.
+>>>> rbd: import failed: (29) Illegal seek
+>>>>
+>>>> I think the problem is that ceph seeks in File when it get's zeros (not
+>>>> filled content). But seeking doesn't work on stdin. It has to read from
+>>>> stdin until there are no more zeros.
+>>>>
+>>>> Stefan
+>>>>
+>>>>
+>>>>> On 11/26/2012 02:20 PM, Stefan Priebe - Profihost AG wrote:
+>>>>>>
+>>>>>> Hello list,
+>>>>>>
+>>>>>> i know branch wip-rbd-export-stdout is work in progress but it is
+>>>>>> more
+>>>>>> than useful ;-)
+>>>>>>
+>>>>>> When i try to import an image i get:
+>>>>>>
+>>>>>> # gzip -dc vm-101-disk-1.img.gz | rbd import --format=2
+>>>>>> --size=42949672960 - kvmpool1/vm-101-disk-1
+>>>>>> rbd: error reading file: (29) Illegal seek
+>>>>>> Importing image: 0% complete...failed.
+>>>>>> rbd: import failed: (29) Illegal seek
+>>>>>>
+>>>>>> Anything i've tried wrong?
+>>>>>
+>>>>>
+>>>>> I would assume, that size is already in MiB? Seems to be a slightly
+>>>>> too
+>>>>> big value... Not tried myself, though...
+>>>>>
+>>>>> Oliver.
+>>>>>
+>>>>>>
+>>>>>> Greets,
+>>>>>> Stefan
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>>> ceph-devel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
