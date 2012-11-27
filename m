@@ -1,39 +1,74 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
-Date: Tue, 27 Nov 2012 14:50:17 -0800
-Message-ID: <50B543A9.1080901@inktank.com>
-References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag>
+From: Xing Lin <xinglin@cs.utah.edu>
+Subject: questions with rbd sequential read throughputs inside kvm/qemu VMs
+Date: Tue, 27 Nov 2012 16:36:46 -0700
+Message-ID: <50B54E8E.8040205@cs.utah.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:55908 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753746Ab2K0WuU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Nov 2012 17:50:20 -0500
-Received: by mail-da0-f46.google.com with SMTP id p5so4451256dak.19
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Nov 2012 14:50:20 -0800 (PST)
-In-Reply-To: <50B484FF.9070500@profihost.ag>
+Received: from rio.cs.utah.edu ([155.98.64.241]:54148 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751951Ab2K0XqD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Nov 2012 18:46:03 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id 3A42B6500B9
+	for <ceph-devel@vger.kernel.org>; Tue, 27 Nov 2012 16:36:47 -0700 (MST)
+Received: from mail-svr1.cs.utah.edu ([127.0.0.1])
+	by localhost (mail-svr1.cs.utah.edu [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id eWDxgYg3nSF2 for <ceph-devel@vger.kernel.org>;
+	Tue, 27 Nov 2012 16:36:46 -0700 (MST)
+Received: from [155.99.177.51] (155-99-177-51.uconnect.utah.edu [155.99.177.51])
+	by smtps.cs.utah.edu (Postfix) with ESMTPSA id D800565009E
+	for <ceph-devel@vger.kernel.org>; Tue, 27 Nov 2012 16:36:46 -0700 (MST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Dan Mick <dan.mick@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 11/27/2012 01:16 AM, Stefan Priebe - Profihost AG wrote:
-> Am 26.11.2012 21:00, schrieb Dan Mick:
->> As for fstrim: on the rbd image?....sure, if it's a filesystem, it ought
->> to work (modulo some bugs I've heard about with 32-bit vs. 64-bit
->> offsets in qemu... :) )
-> it works fine with my patches i send to qemu. But right now they're no
-> upstream an nobody of the qemu people answers anymore. So right now i'll
-> keep my patches and be lucky others can't use RBD and fstrim. So maybe
-> inktank should push this a bit more to the qemu people.
+Hi,
 
-If you could send another version with PATCHv3 instead of PATCH in the
-subject, and a description of the changes since the last version between
-the --- and the diffstat, the qemu folks would probably appreciate it.
+I am interested to use rbd block devices inside kvm/qemu VMs. I set up a 
+tiny ceph cluster using one server machines and used 6 SCSI disks for 
+storing data. At the client machine, the sequential read throughput 
+seems to be reasonable (~60 MB/s) when I run fio against rbd block 
+devices mounted outside of VMs. The read throughput does not seem to be 
+reasonable when I use rbd block devices as block devices inside kvm/qemu 
+VMs: it jumps to be as high as 200 MB/s. 'tcpdump' shows read requests 
+do reach the ceph server. What makes things confusing is the 'iotop' 
+does not show any I/O for sequential reads while 'top' shows 'ceph-osd' 
+is utilizing CPU at 100%.
 
-scripts/checkpatch.pl in qemu.git will warn you about style issues like
-the conditionals without braces.
+This is the section for the rbd disk in VM's xml file.
+--------------------------------------------------------
+     <disk type='network' device='disk'>
+       <driver name='qemu' type='raw'/>
+       <source protocol='rbd' name='rbd/image3'>
+         <host name='node-0' port='6789'/>
+       </source>
+       <target dev='vda' bus='virtio'/>
+       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' 
+function='0x0'/>
+     </disk>
+--------------------------------------------------------
 
-Josh
+This is the fio job file I used to measure throughputs.
+------------------------------
+[global]
+rw=read
+bs=4m
+thread=0
+time_based=1
+runtime=300
+invalidate=1
+
+direct=1
+sync=1
+ioengine=sync
+
+[sr-vda]
+filename=${DEV}
+---------------------------------
+
+Does anyone have some suggestions or hints for me to try? Thank you very 
+much!
+
+Xing
