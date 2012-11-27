@@ -1,47 +1,90 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Character limit for rbd block device
-Date: Mon, 26 Nov 2012 16:52:37 -0800
-Message-ID: <50B40ED5.7050307@inktank.com>
-References: <50B404DA.50805@lamphost.com>
+From: caleb miles <caleb.miles@inktank.com>
+Subject: chooseleaf_descend_once
+Date: Mon, 26 Nov 2012 21:28:43 -0500
+Message-ID: <50B4255B.10509@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:57259 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757670Ab2K0AxZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 19:53:25 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so8445097pbc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 16:53:25 -0800 (PST)
-In-Reply-To: <50B404DA.50805@lamphost.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:58136 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757614Ab2K0C3C (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Nov 2012 21:29:02 -0500
+Received: by mail-qa0-f46.google.com with SMTP id c11so3427988qad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Nov 2012 18:29:02 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: brady <brady@lamphost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 11/26/2012 04:10 PM, brady wrote:
-> Hello,
->      I have a general question. Is there a specific character limit for
-> rbd block devices? In attempting to map a block device with a name that
-> is 36 characters or more, I am getting the following error:
->
-> rbd map (36+ character name) --user admin --secret /etc/ceph/keyring.key
-> add failed: (2) No such file or directory
->
->      When using the same command to map a device with 35 characters or
-> less, the device is mapped as expected. Any insight into this issue
-> would be greatly appreciated.
->
-> -Brady
+Hello all,
 
-Which kernel version are you using?
+Here's what I've done to try and validate the new 
+chooseleaf_descend_once tunable first described in commit 
+f1a53c5e80a48557e63db9c52b83f39391bc69b8 in the wip-crush branch of 
+ceph.git.
 
-A year ago there was a 40-char limit on objects names in the kernel's
-libceph module, hence the failure at 36 char rbd image names (36 char
-name + ".rbd" is the format 1 header object name).
+First I set the new tunable to it's legacy value, disabled,
 
-This was extended to a 96-char limit in linux 3.2. There's no real limit
-in userspace still (http://tracker.newdream.net/issues/1701).
+tunable choose_local_tries 0
+tunable choose_local_fallback_tries 0
+tunable choose_total_tries 50
+tunable chooseleaf_descend_once 0
 
-Josh
+The map contains one thousand osd devices contained in one hundred hosts 
+with the following data rule
 
+rule data {
+ruleset 0
+type replicated
+min_size 1
+max_size 10
+step take default
+step chooseleaf firstn 0 type host
+step emit
+}
+
+I then simulate the creation of one million placement groups using the 
+crushtool
+
+$ crushtool -i hundred.map --test --min-x 0 --max-x 999999 --num-rep 3 
+--output-csv --weight 120 0.0 --weight 121 0.0 --weight 122 0.0 --weight 
+123 0.0 --weight 124 0.0 --weight 125 0.0 --weight 125 0.0 --weight 150 
+0.0 --weight 151 0.0 --weight 152 0.0 --weight 153 0.0 --weight 154 0.0 
+--weight 155 0.0 --weight 156 0.0 --weight 180 0.0 --weight 181 0.0 
+--weight 182 0.0 --weight 183 0.0 --weight 184 0.0 --weight 185 0.0 
+--weight 186 0.0
+
+with the majority of devices in three hosts marked out. Then in (I)Python
+
+import scipy.stats as s
+import matplotlib.mlab as m
+
+data = m.csv2rec("data-device_utilization.csv")
+s.chisquare(data['number_of_objects_stored'], 
+data['number_of_objects_expected'])
+
+which will output
+
+(122939.76474477499, 0.0)
+
+so that the chi squared value is 122939.795 and the p value is, rounded 
+to, 0.0 and the observed placement distribution statistically differs 
+from a uniform distribution. Repeating with the new tunable set to
+
+tunable chooseleaf_descend_once 1
+
+I obtain the following result
+
+(998.97643161876761, 0.32151775131589833)
+
+so that the chi squared value is 998.976 and the p value is 0.32 and the 
+observed placement distribution is statistically identical to the 
+uniform distribution at the five and ten percent confidence levels, 
+higher as well of course. The p value is the probability of obtaining a 
+chi squared value more extreme than the statistic observed. Basically, 
+from my rudimentary understanding of probability theory, that if you 
+obtain a p value p < P then reject the null hypothesis, in our case that 
+the observed placement distribution is drawn from the uniform 
+distribution, at the P confidence level.
+
+Caleb
