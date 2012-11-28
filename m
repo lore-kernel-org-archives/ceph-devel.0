@@ -1,53 +1,39 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 07/30] client/Client.cc: remove twice included headers
-Date: Wed, 28 Nov 2012 13:57:15 +0100
-Message-ID: <1354107458-30941-8-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 04/30] ceph_mon.cc: remove twice included sys/stat.h
+Date: Wed, 28 Nov 2012 13:57:12 +0100
+Message-ID: <1354107458-30941-5-git-send-email-danny.al-gaaf@bisect.de>
 References: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34470 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34443 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754787Ab2K1M5m (ORCPT
+	by vger.kernel.org with ESMTP id S1754530Ab2K1M5l (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 Nov 2012 07:57:42 -0500
+	Wed, 28 Nov 2012 07:57:41 -0500
 In-Reply-To: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, Danny Al-Gaaf <dalgaaf@suse.de>
 
-Fix includes: remove twice included common/config.h". Remove include
-of sys/param.h in special __FreeBSD__ section, since this file is
-included in general anyway
+Fix includes: remove twice included sys/stat.h
 
 Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- src/client/Client.cc | 6 ------
- 1 file changed, 6 deletions(-)
+ src/ceph_mon.cc | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/src/client/Client.cc b/src/client/Client.cc
-index 35cba96..b808f20 100644
---- a/src/client/Client.cc
-+++ b/src/client/Client.cc
-@@ -25,10 +25,6 @@
+diff --git a/src/ceph_mon.cc b/src/ceph_mon.cc
+index da4529f..f82be18 100644
+--- a/src/ceph_mon.cc
++++ b/src/ceph_mon.cc
+@@ -16,7 +16,6 @@
+ #include <sys/stat.h>
+ #include <fcntl.h>
  
- #include <sys/statvfs.h>
- 
--#if defined(__FreeBSD__)
--#include <sys/param.h>
--#endif
--
+-#include <sys/stat.h>
  #include <iostream>
+ #include <string>
  using namespace std;
- 
-@@ -67,8 +63,6 @@ using namespace std;
- #include "common/admin_socket.h"
- #include "common/errno.h"
- 
--#include "common/config.h"
--
- #define dout_subsys ceph_subsys_client
- 
- #include "include/lru.h"
 -- 
 1.8.0
 
