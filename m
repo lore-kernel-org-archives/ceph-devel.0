@@ -1,95 +1,72 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 00/30] cleanup includes
-Date: Wed, 28 Nov 2012 11:43:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211281143380.1605@cobra.newdream.net>
-References: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: OSD and MON memory usage
+Date: Wed, 28 Nov 2012 13:00:17 -0800
+Message-ID: <CA+4uBUYv49DmX0EC5QovOtpgR5=TFM1xK4LPjp0M-8bM9B_0iA@mail.gmail.com>
+References: <20121116172401.ef3e5e52.ctpm@ist.utl.pt>
+	<50AFA848.4050109@inktank.com>
+	<20121127172350.b6d21634.ctpm@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49180 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754757Ab2K1Tnp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Nov 2012 14:43:45 -0500
-In-Reply-To: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:52229 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754344Ab2K1VAS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Nov 2012 16:00:18 -0500
+Received: by mail-vc0-f174.google.com with SMTP id m18so10627673vcm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Nov 2012 13:00:17 -0800 (PST)
+In-Reply-To: <20121127172350.b6d21634.ctpm@ist.utl.pt>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>
+To: =?ISO-8859-1?Q?Cl=E1udio_Martins?= <ctpm@ist.utl.pt>
+Cc: Joao Eduardo Luis <joao.luis@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Merged, thanks!
+What replication level are you using?
+-Sam
 
-sage
-
-On Wed, 28 Nov 2012, Danny Al-Gaaf wrote:
-
-> This patch series removes several twice included header files
-> from the source files.
-> 
-> Danny Al-Gaaf (30):
->   fusetrace_ll.cc: remove twice included sys/time.h
->   ceph_fuse.cc: remove twice included sys/stat.h
->   ceph_mds.cc: remove twice included sys/stat.h
->   ceph_mon.cc: remove twice included sys/stat.h
->   ceph_osd.cc: remove twice included sys/stat.h
->   ceph_syn.cc: remove twice included sys/stat.h
->   client/Client.cc: remove twice included headers
->   client/MetaRequest.cc: remove twice included client/Dentry.h
->   client/SyntheticClient.cc: remove twice included headers
->   common/pipe.c: remove twice included unistd.h
->   crushtool.cc: remove twice included sys/stat.h
->   monmaptool.cc: remove twice included sys/stat.h
->   include/buffer.h: remove twice included stdio.h
->   librados/RadosClient.cc: remove twice included sys/stat.h
->   mds/Dumper.h: remove twice included msg/Messenger.h
->   mds/Migrator.cc: remove twice included Migrator.h
->   mds/Resetter.h: remove twice included msg/Messenger.h
->   mds/journal.cc: remove twice included common/config.h
->   messages/MClientRequest.h: remove twice included sys/types.h
->   mon/Monitor.cc: remove twice included osd/OSDMap.h
->   mount/canonicalize.c: remove twice included string.h
->   os/DBObjectMap.cc: remove twice included headers
->   os/DBObjectMap.h: remove twice included <string>
->   os/IndexManager.cc: remove twice included FlatIndex.h
->   osd/OSD.h: remove twice included OpRequest.h
->   osdmaptool.cc: remove twice included sys/stat.h
->   rados.cc: remove twice included headers
->   remove twice included linux/types.h
->   rgw/rgw_rest.cc: remove twice included rgw_formats.h
->   tools/common.cc: remove twice included headers
-> 
->  fusetrace/fusetrace_ll.cc             | 1 -
->  qa/workunits/direct_io/test_sync_io.c | 1 -
->  src/ceph_fuse.cc                      | 1 -
->  src/ceph_mds.cc                       | 1 -
->  src/ceph_mon.cc                       | 1 -
->  src/ceph_osd.cc                       | 1 -
->  src/ceph_syn.cc                       | 1 -
->  src/client/Client.cc                  | 6 ------
->  src/client/MetaRequest.cc             | 1 -
->  src/client/SyntheticClient.cc         | 2 --
->  src/common/pipe.c                     | 1 -
->  src/crushtool.cc                      | 2 --
->  src/include/buffer.h                  | 1 -
->  src/librados/RadosClient.cc           | 1 -
->  src/mds/Dumper.h                      | 1 -
->  src/mds/Migrator.cc                   | 1 -
->  src/mds/Resetter.h                    | 1 -
->  src/mds/journal.cc                    | 3 ---
->  src/messages/MClientRequest.h         | 1 -
->  src/mon/Monitor.cc                    | 2 --
->  src/monmaptool.cc                     | 1 -
->  src/mount/canonicalize.c              | 1 -
->  src/os/DBObjectMap.cc                 | 2 --
->  src/os/DBObjectMap.h                  | 1 -
->  src/os/IndexManager.cc                | 1 -
->  src/osd/OSD.h                         | 1 -
->  src/osdmaptool.cc                     | 1 -
->  src/rados.cc                          | 4 ----
->  src/rgw/rgw_rest.cc                   | 2 --
->  src/tools/common.cc                   | 2 --
->  30 files changed, 46 deletions(-)
-> 
-> -- 
-> 1.8.0
-> 
-> 
+On Tue, Nov 27, 2012 at 9:23 AM, Cl=E1udio Martins <ctpm@ist.utl.pt> wr=
+ote:
+>
+> On Fri, 23 Nov 2012 16:46:00 +0000 Joao Eduardo Luis <joao.luis@inkta=
+nk.com> wrote:
+>> On 11/16/2012 05:24 PM, Cl=E1udio Martins wrote:
+>> >  As for the monitor daemon on this cluster (running on a dedicated
+>> > machine), it is currently using 3.2GB of memory, and it got to tha=
+t
+>> > point again in a matter of minutes after being restarted. Would it=
+ be
+>> > good if we tested with the changes from the wip-mon-leaks-fix bran=
+ch?
+>>
+>> Following up on this, wip-mon-leaks-fix was merged into master a cou=
+ple
+>> of days ago. If you have the chance to check if that fixes your memo=
+ry
+>> consumption issues on the monitor, it would be much appreciated!
+>>
+>
+>  Hi Jo=E3o,
+>
+>  I've had a chance to test it and it does indeed seem to make a big
+> difference on mon memory usage.
+>
+>  As for the OSD memory usage issue, it's still looking really bad. I'=
+m
+> preparing to do more testing and send more info about this, but a lot
+> of unrelated stuff crept up this week and things are going slowly on
+> this front. I hope to talk more about this before the weekend.
+>
+> Thanks!
+>
+> Cl=E1udio
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
