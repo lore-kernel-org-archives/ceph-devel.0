@@ -1,47 +1,39 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 30/30] tools/common.cc: remove twice included headers
-Date: Wed, 28 Nov 2012 13:57:38 +0100
-Message-ID: <1354107458-30941-31-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 24/30] os/IndexManager.cc: remove twice included FlatIndex.h
+Date: Wed, 28 Nov 2012 13:57:32 +0100
+Message-ID: <1354107458-30941-25-git-send-email-danny.al-gaaf@bisect.de>
 References: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34643 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34697 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754901Ab2K1NAp (ORCPT
+	by vger.kernel.org with ESMTP id S1754791Ab2K1NB1 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 Nov 2012 08:00:45 -0500
+	Wed, 28 Nov 2012 08:01:27 -0500
 In-Reply-To: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, Danny Al-Gaaf <dalgaaf@suse.de>
 
-Cleanup includes: Remove twice included  sys/stat.h and  osd/OSDMap.h.
+Fix includes: remove twice included FlatIndex.h
 
 Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- src/tools/common.cc | 2 --
- 1 file changed, 2 deletions(-)
+ src/os/IndexManager.cc | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/src/tools/common.cc b/src/tools/common.cc
-index c500568..9a454f7 100644
---- a/src/tools/common.cc
-+++ b/src/tools/common.cc
-@@ -23,7 +23,6 @@ using namespace std;
+diff --git a/src/os/IndexManager.cc b/src/os/IndexManager.cc
+index 2165036..85281c4 100644
+--- a/src/os/IndexManager.cc
++++ b/src/os/IndexManager.cc
+@@ -30,7 +30,6 @@
+ #include "IndexManager.h"
+ #include "FlatIndex.h"
+ #include "HashIndex.h"
+-#include "FlatIndex.h"
+ #include "CollectionIndex.h"
  
- #include <memory>
- #include <sys/types.h>
--#include <sys/stat.h>
- #include <fcntl.h>
- 
- extern "C" {
-@@ -81,7 +80,6 @@ float tick_interval = 3.0;
- 
- // observe (push)
- #include "mon/PGMap.h"
--#include "osd/OSDMap.h"
- #include "mds/MDSMap.h"
- #include "common/LogEntry.h"
- 
+ #include "chain_xattr.h"
 -- 
 1.8.0
 
