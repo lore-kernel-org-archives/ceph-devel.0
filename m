@@ -1,40 +1,41 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 20/30] mon/Monitor.cc: remove twice included osd/OSDMap.h
-Date: Wed, 28 Nov 2012 13:57:28 +0100
-Message-ID: <1354107458-30941-21-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 18/30] mds/journal.cc: remove twice included common/config.h
+Date: Wed, 28 Nov 2012 13:57:26 +0100
+Message-ID: <1354107458-30941-19-git-send-email-danny.al-gaaf@bisect.de>
 References: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34830 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:34827 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932080Ab2K1NEU (ORCPT
+	by vger.kernel.org with ESMTP id S1755129Ab2K1NET (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 Nov 2012 08:04:20 -0500
+	Wed, 28 Nov 2012 08:04:19 -0500
 In-Reply-To: <1354107458-30941-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, Danny Al-Gaaf <dalgaaf@suse.de>
 
-Fix includes: remove twice included osd/OSDMap.h
+Fix includes: remove twice included common/config.h
 
 Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- src/mon/Monitor.cc | 2 --
- 1 file changed, 2 deletions(-)
+ src/mds/journal.cc | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-index 79f2577..b819fce 100644
---- a/src/mon/Monitor.cc
-+++ b/src/mon/Monitor.cc
-@@ -65,8 +65,6 @@
- #include "LogMonitor.h"
- #include "AuthMonitor.h"
+diff --git a/src/mds/journal.cc b/src/mds/journal.cc
+index 04b1a92..46adbf2 100644
+--- a/src/mds/journal.cc
++++ b/src/mds/journal.cc
+@@ -51,9 +51,6 @@
  
--#include "osd/OSDMap.h"
+ #include "Locker.h"
+ 
 -
- #include "auth/AuthMethodList.h"
- #include "auth/KeyRing.h"
- 
+-#include "common/config.h"
+-
+ #define dout_subsys ceph_subsys_mds
+ #undef DOUT_COND
+ #define DOUT_COND(cct, l) (l<=cct->_conf->debug_mds || l <= cct->_conf->debug_mds_log \
 -- 
 1.8.0
 
