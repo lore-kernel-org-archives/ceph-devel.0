@@ -1,119 +1,37 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: [PATCHv3] rbd block driver fix race between aio completition and aio cancel
-Date: Thu, 29 Nov 2012 11:25:40 +0100
-Message-ID: <1354184740-23902-1-git-send-email-s.priebe@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
+Date: Thu, 29 Nov 2012 11:26:27 +0100
+Message-ID: <50B73853.5050000@profihost.ag>
+References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag> <50B543A9.1080901@inktank.com> <50B5C6C9.1020303@profihost.ag> <50B65D4D.7020804@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from packetbuilder64bit.de-nserver.de ([85.158.179.228]:38677 "EHLO
-	packetbuilder64bit.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751634Ab2K2KZq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Nov 2012 05:25:46 -0500
+Received: from mail.profihost.ag ([85.158.179.208]:45983 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751872Ab2K2K0f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 05:26:35 -0500
+In-Reply-To: <50B65D4D.7020804@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: qemu-devel@nongnu.org
-Cc: stefanha@gmail.com, josh.durgin@inktank.com, ceph-devel@vger.kernel.org, pbonzini@redhat.com, Stefan Priebe <s.priebe@profihost.ag>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Dan Mick <dan.mick@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This one fixes a race which qemu had also in iscsi block driver
-between cancellation and io completition.
+Hi Josh,
 
-qemu_rbd_aio_cancel was not synchronously waiting for the end of
-the command.
+Am 28.11.2012 19:51, schrieb Josh Durgin:
 
-To archieve this it introduces a new status flag which uses
--EINPROGRESS.
+>> No idea how to archieve this with git send-email ;-( But still more
+>> important is also the patch for discards...
+>
+> Use git format-patch, edit the patch file (it includes the basic
+> headers already), then send it with git send-email.
 
-Changes since last PATCH:
-- fixed missing braces
-- added vfree for bounce
+done / fixed
 
-Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
----
- block/rbd.c |   27 ++++++++++++++++++---------
- 1 file changed, 18 insertions(+), 9 deletions(-)
+> Your return value type change was already merged into master of
+> qemu.git as 08448d5195aeff49bf25fb62b4a6218f079f5284.
 
-diff --git a/block/rbd.c b/block/rbd.c
-index 0aaacaf..917c64c 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -77,6 +77,7 @@ typedef struct RBDAIOCB {
-     int error;
-     struct BDRVRBDState *s;
-     int cancelled;
-+    int status;
- } RBDAIOCB;
- 
- typedef struct RADOSCB {
-@@ -376,12 +377,6 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
-     RBDAIOCB *acb = rcb->acb;
-     int64_t r;
- 
--    if (acb->cancelled) {
--        qemu_vfree(acb->bounce);
--        qemu_aio_release(acb);
--        goto done;
--    }
--
-     r = rcb->ret;
- 
-     if (acb->cmd == RBD_AIO_WRITE ||
-@@ -406,10 +401,11 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
-             acb->ret = r;
-         }
-     }
-+    acb->status = 0;
-+
-     /* Note that acb->bh can be NULL in case where the aio was cancelled */
-     acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
-     qemu_bh_schedule(acb->bh);
--done:
-     g_free(rcb);
- }
- 
-@@ -568,6 +564,13 @@ static void qemu_rbd_aio_cancel(BlockDriverAIOCB *blockacb)
- {
-     RBDAIOCB *acb = (RBDAIOCB *) blockacb;
-     acb->cancelled = 1;
-+
-+    while (acb->status == -EINPROGRESS) {
-+        qemu_aio_wait();
-+    }
-+
-+    qemu_vfree(acb->bounce);
-+    qemu_aio_release(acb);
- }
- 
- static const AIOCBInfo rbd_aiocb_info = {
-@@ -640,7 +643,9 @@ static void rbd_aio_bh_cb(void *opaque)
-     qemu_bh_delete(acb->bh);
-     acb->bh = NULL;
- 
--    qemu_aio_release(acb);
-+    if (!acb->cancelled) {
-+        qemu_aio_release(acb);
-+    }
- }
- 
- static int rbd_aio_discard_wrapper(rbd_image_t image,
-@@ -685,6 +690,7 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
-     acb->s = s;
-     acb->cancelled = 0;
-     acb->bh = NULL;
-+    acb->status = -EINPROGRESS;
- 
-     if (cmd == RBD_AIO_WRITE) {
-         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
-@@ -731,7 +737,10 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
- failed:
-     g_free(rcb);
-     s->qemu_aio_count--;
--    qemu_aio_release(acb);
-+    if (!acb->cancelled) {
-+        qemu_vfree(acb->bounce);
-+        qemu_aio_release(acb);
-+    }
-     return NULL;
- }
- 
--- 
-1.7.10.4
+Oh thanks i didn't get a reply that it is applied.
 
+Stefan
