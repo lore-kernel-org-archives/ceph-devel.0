@@ -1,37 +1,80 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
-Date: Thu, 29 Nov 2012 11:26:27 +0100
-Message-ID: <50B73853.5050000@profihost.ag>
-References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag> <50B543A9.1080901@inktank.com> <50B5C6C9.1020303@profihost.ag> <50B65D4D.7020804@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: RBD: periodic cephx issue ? "CephxAuthorizeHandler::verify_authorizer isvalid=0"
+Date: Thu, 29 Nov 2012 12:00:43 +0100
+Message-ID: <CAF6-1L7sBWbEUNma4QLm1DgSJbJLdpXOPzzuJzs_uhZP7ivJHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:45983 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751872Ab2K2K0f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 05:26:35 -0500
-In-Reply-To: <50B65D4D.7020804@inktank.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:60312 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752071Ab2K2LAo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 06:00:44 -0500
+Received: by mail-oa0-f46.google.com with SMTP id h16so14334706oag.19
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Nov 2012 03:00:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Dan Mick <dan.mick@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Josh,
+Hi,
 
-Am 28.11.2012 19:51, schrieb Josh Durgin:
+I'm using RBD to store VM image and they're accessed through the
+kernel client (xen vms).
 
->> No idea how to archieve this with git send-email ;-( But still more
->> important is also the patch for discards...
->
-> Use git format-patch, edit the patch file (it includes the basic
-> headers already), then send it with git send-email.
 
-done / fixed
+In the client dmesg log, I see periodically :
 
-> Your return value type change was already merged into master of
-> qemu.git as 08448d5195aeff49bf25fb62b4a6218f079f5284.
+Nov 29 10:46:48 b53-04 kernel: [160055.012206] libceph: osd8
+10.208.2.213:6806 socket closed
+Nov 29 10:46:48 b53-04 kernel: [160055.013635] libceph: osd8
+10.208.2.213:6806 socket error on read
 
-Oh thanks i didn't get a reply that it is applied.
 
-Stefan
+And in the matching osd log I find :
+
+2012-11-29 10:46:48.130673 7f6018127700  0 -- 192.168.2.213:6806/944
+>> 192.168.2.28:0/869804615 pipe(0xcf80600 sd=46 pgs=0 cs=0
+l=0).accept peer addr is really 192.168.2.28:0/869804615 (socket is
+192.168.2.28:40567/0)
+2012-11-29 10:46:48.130902 7f6018127700  0 auth: could not find secret_id=0
+2012-11-29 10:46:48.130912 7f6018127700  0 cephx: verify_authorizer
+could not get service secret for service osd secret_id=0
+2012-11-29 10:46:48.130915 7f6018127700  1
+CephxAuthorizeHandler::verify_authorizer isvalid=0
+2012-11-29 10:46:48.130917 7f6018127700  0 -- 192.168.2.213:6806/944
+>> 192.168.2.28:0/869804615 pipe(0xcf80600 sd=46 pgs=0 cs=0
+l=1).accept bad authorizer
+2012-11-29 10:46:48.131132 7f6018127700  0 auth: could not find secret_id=0
+2012-11-29 10:46:48.131146 7f6018127700  0 cephx: verify_authorizer
+could not get service secret for service osd secret_id=0
+2012-11-29 10:46:48.131151 7f6018127700  1
+CephxAuthorizeHandler::verify_authorizer isvalid=0
+2012-11-29 10:46:48.131154 7f6018127700  0 -- 192.168.2.213:6806/944
+>> 192.168.2.28:0/869804615 pipe(0xcf80600 sd=46 pgs=0 cs=0
+l=1).accept bad authorizer
+2012-11-29 10:46:48.824180 7f6018127700  0 -- 192.168.2.213:6806/944
+>> 192.168.2.28:0/869804615 pipe(0xaf5de00 sd=46 pgs=0 cs=0
+l=0).accept peer addr is really 192.168.2.28:0/869804615 (socket is
+192.168.2.28:40568/0)
+2012-11-29 10:46:48.824585 7f6018127700  1
+CephxAuthorizeHandler::verify_authorizer isvalid=1
+2012-11-29 10:46:48.825013 7f601f484700  0 osd.8 951 pg[3.514( v
+950'1138 (223'137,950'1138] n=15 ec=10 les/c 941/948 916/916/916)
+[8,7] r=0 lpr=916 mlcod 950'1137 active+clean] watch:
+ctx->obc=0xb72e340 cookie=2 oi.version=1109 ctx->at_version=951'1139
+2012-11-29 10:46:48.825024 7f601f484700  0 osd.8 951 pg[3.514( v
+950'1138 (223'137,950'1138] n=15 ec=10 les/c 941/948 916/916/916)
+[8,7] r=0 lpr=916 mlcod 950'1137 active+clean] watch:
+oi.user_version=755
+
+
+Note that this doesn't seem to pose any operational issue (i.e. it
+works ... when it retries it eventually connects).
+
+My configuration: The client currently runs on a debian wheezy and use
+a custom built 3.6.8 kernel that contains all the latest ceph rbd
+patch AFAIK but the problem was also showing up with earlier kernel
+versions. The cluster is a 0.48.2 running on Ubuntu 12.04 LTS.
+
+Cheers,
+
+    Sylvain
