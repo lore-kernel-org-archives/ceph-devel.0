@@ -1,42 +1,60 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: parsing in the ceph osd subsystem
-Date: Thu, 29 Nov 2012 16:49:29 +0000
-Message-ID: <50B79219.8020403@inktank.com>
-References: <CABYiri8PnWR=LNPuR1bqpuPGp55diHYPsAhdUtd7dNC9=UJTRQ@mail.gmail.com> <alpine.DEB.2.00.1211290833290.30450@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: don't reference req after put
+Date: Thu, 29 Nov 2012 08:55:53 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1211290855440.30450@cobra.newdream.net>
+References: <50B77378.1040202@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:60092 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751013Ab2K2Qtg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 11:49:36 -0500
-Received: by mail-bk0-f46.google.com with SMTP id q16so6381277bkw.19
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Nov 2012 08:49:35 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211290833290.30450@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:59371 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751334Ab2K2Qzy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 11:55:54 -0500
+In-Reply-To: <50B77378.1040202@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Andrey Korolyov <andrey@xdel.ru>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/29/2012 04:34 PM, Sage Weil wrote:
-> On Thu, 29 Nov 2012, Andrey Korolyov wrote:
->> $ ceph osd down -
->> osd.0 is already down
->> $ ceph osd down ---
->> osd.0 is already down
->>
->> the same for ``+'', ``/'', ``%'' and so - I think that for osd subsys
->> ceph cli should explicitly work only with positive integers plus zero,
->> refusing all other input.
+Reviewed-by: Sage Weil <sage@inktank.com>
+
+On Thu, 29 Nov 2012, Alex Elder wrote:
+
+> In __unregister_request(), there is a call to list_del_init()
+> referencing a request that was the subject of a call to
+> ceph_osdc_put_request() on the previous line.  This is not
+> safe, because the request structure could have been freed
+> by the time we reach the list_del_init().
 > 
-> which branch is this?  this parsing is cleaned u pin the latest 
-> next/master.
-
-I confirm this is fixed, but while making sure noticed that 'ceph osd
-create <garbage>' will create an osd nonetheless. Just added a fix for
-this to wip-mon-osd-create-fix that will make sure that if the uuid
-argument is specified, then -EINVAL is returned in case the uuid is invalid.
-
-  -Joao
-
+> Fix this by reversing the order of these lines.
+> 
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>  net/ceph/osd_client.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 9b6f0e4..d1177ec 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -797,9 +797,9 @@ static void __unregister_request(struct
+> ceph_osd_client *osdc,
+>  			req->r_osd = NULL;
+>  	}
+> 
+> +	list_del_init(&req->r_req_lru_item);
+>  	ceph_osdc_put_request(req);
+> 
+> -	list_del_init(&req->r_req_lru_item);
+>  	if (osdc->num_requests == 0) {
+>  		dout(" no requests, canceling timeout\n");
+>  		__cancel_osd_timeout(osdc);
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
