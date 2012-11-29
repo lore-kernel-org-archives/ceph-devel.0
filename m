@@ -1,248 +1,119 @@
-From: hemant surale <hemant.surale@gmail.com>
-Subject: Fwd: OSD daemon changes port no
-Date: Thu, 29 Nov 2012 15:45:53 +0530
-Message-ID: <CAGfy=6mDnVDTSNFD5R-iXz1cPAty1FmXa7fX6K1kA9UqAWJvCg@mail.gmail.com>
-References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
-	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
-	<CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
-	<alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
-	<CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
-	<alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net>
-	<CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com>
-	<alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
-	<CAGfy=6kAkXrdYwL-Ui-Xd2Qsqaf8hcUbWGY94QOFfaRA1AmUrA@mail.gmail.com>
-	<alpine.DEB.2.00.1211260826190.23552@cobra.newdream.net>
-	<CAGfy=6mOnv90GighPr=nTWapJU_4wjo-z9nHh_ji6VvvrUeMHg@mail.gmail.com>
-	<alpine.DEB.2.00.1211270851320.30109@cobra.newdream.net>
-	<CAGfy=6mNa02BE6vsRssx6qURxCy9TtnXShxaS0PMPcepnuARvQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: [PATCHv3] rbd block driver fix race between aio completition and aio cancel
+Date: Thu, 29 Nov 2012 11:25:40 +0100
+Message-ID: <1354184740-23902-1-git-send-email-s.priebe@profihost.ag>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:35781 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753522Ab2K2KPy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 05:15:54 -0500
-Received: by mail-vb0-f46.google.com with SMTP id ff1so9054185vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Nov 2012 02:15:53 -0800 (PST)
-In-Reply-To: <CAGfy=6mNa02BE6vsRssx6qURxCy9TtnXShxaS0PMPcepnuARvQ@mail.gmail.com>
+Received: from packetbuilder64bit.de-nserver.de ([85.158.179.228]:38677 "EHLO
+	packetbuilder64bit.de-nserver.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751634Ab2K2KZq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 Nov 2012 05:25:46 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: qemu-devel@nongnu.org
+Cc: stefanha@gmail.com, josh.durgin@inktank.com, ceph-devel@vger.kernel.org, pbonzini@redhat.com, Stefan Priebe <s.priebe@profihost.ag>
 
->> does 'ceph mds dump' list pool 3 in teh data_pools line?
+This one fixes a race which qemu had also in iscsi block driver
+between cancellation and io completition.
 
-Yes. It lists the desired poolids I wanted to put data in.
+qemu_rbd_aio_cancel was not synchronously waiting for the end of
+the command.
 
+To archieve this it introduces a new status flag which uses
+-EINPROGRESS.
 
----------- Forwarded message ----------
-From: hemant surale <hemant.surale@gmail.com>
-Date: Thu, Nov 29, 2012 at 2:59 PM
-Subject: Re: OSD daemon changes port no
-To: Sage Weil <sage@inktank.com>
+Changes since last PATCH:
+- fixed missing braces
+- added vfree for bounce
 
+Signed-off-by: Stefan Priebe <s.priebe@profihost.ag>
+---
+ block/rbd.c |   27 ++++++++++++++++++---------
+ 1 file changed, 18 insertions(+), 9 deletions(-)
 
-I used a little different version of "cephfs" as "cephfs
-/home/hemant/a set_layout --pool 3 -c 1 -u  4194304 -s  4194304"
- and "cephfs /home/hemant/b set_layout --pool 5 -c 1 -u  4194304 -s  4194304".
-
-
-Now cmd didnt showed any error but When I put data to dir "a" & "b"
-ideally it should go to different pool but its not working as of now.
-Whatever I am doing is it possible (to use 2 dir pointing to 2
-different pools for data placement) ?
-
-
-
+diff --git a/block/rbd.c b/block/rbd.c
+index 0aaacaf..917c64c 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -77,6 +77,7 @@ typedef struct RBDAIOCB {
+     int error;
+     struct BDRVRBDState *s;
+     int cancelled;
++    int status;
+ } RBDAIOCB;
+ 
+ typedef struct RADOSCB {
+@@ -376,12 +377,6 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+     RBDAIOCB *acb = rcb->acb;
+     int64_t r;
+ 
+-    if (acb->cancelled) {
+-        qemu_vfree(acb->bounce);
+-        qemu_aio_release(acb);
+-        goto done;
+-    }
 -
-Hemant Surale.
+     r = rcb->ret;
+ 
+     if (acb->cmd == RBD_AIO_WRITE ||
+@@ -406,10 +401,11 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+             acb->ret = r;
+         }
+     }
++    acb->status = 0;
++
+     /* Note that acb->bh can be NULL in case where the aio was cancelled */
+     acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
+     qemu_bh_schedule(acb->bh);
+-done:
+     g_free(rcb);
+ }
+ 
+@@ -568,6 +564,13 @@ static void qemu_rbd_aio_cancel(BlockDriverAIOCB *blockacb)
+ {
+     RBDAIOCB *acb = (RBDAIOCB *) blockacb;
+     acb->cancelled = 1;
++
++    while (acb->status == -EINPROGRESS) {
++        qemu_aio_wait();
++    }
++
++    qemu_vfree(acb->bounce);
++    qemu_aio_release(acb);
+ }
+ 
+ static const AIOCBInfo rbd_aiocb_info = {
+@@ -640,7 +643,9 @@ static void rbd_aio_bh_cb(void *opaque)
+     qemu_bh_delete(acb->bh);
+     acb->bh = NULL;
+ 
+-    qemu_aio_release(acb);
++    if (!acb->cancelled) {
++        qemu_aio_release(acb);
++    }
+ }
+ 
+ static int rbd_aio_discard_wrapper(rbd_image_t image,
+@@ -685,6 +690,7 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
+     acb->s = s;
+     acb->cancelled = 0;
+     acb->bh = NULL;
++    acb->status = -EINPROGRESS;
+ 
+     if (cmd == RBD_AIO_WRITE) {
+         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
+@@ -731,7 +737,10 @@ static BlockDriverAIOCB *rbd_start_aio(BlockDriverState *bs,
+ failed:
+     g_free(rcb);
+     s->qemu_aio_count--;
+-    qemu_aio_release(acb);
++    if (!acb->cancelled) {
++        qemu_vfree(acb->bounce);
++        qemu_aio_release(acb);
++    }
+     return NULL;
+ }
+ 
+-- 
+1.7.10.4
 
-On Tue, Nov 27, 2012 at 10:21 PM, Sage Weil <sage@inktank.com> wrote:
-> On Tue, 27 Nov 2012, hemant surale wrote:
->> I did "mkdir a " "chmod 777 a" . So dir "a" is /home/hemant/a" .
->> then I used "mount.ceph 10.72.148.245:/ /ho
->>
->> root@hemantsec-virtual-machine:/home/hemant# cephfs /home/hemant/a
->> set_layout --pool 3
->> Error setting layout: Invalid argument
->
-> does 'ceph mds dump' list pool 3 in teh data_pools line?
->
-> sage
->
->>
->> On Mon, Nov 26, 2012 at 9:56 PM, Sage Weil <sage@inktank.com> wrote:
->> > On Mon, 26 Nov 2012, hemant surale wrote:
->> >> While I was using "cephfs" following error is observed -
->> >> ------------------------------------------------------------------------------------------------
->> >> root@hemantsec-virtual-machine:~# cephfs /mnt/ceph/a --pool 3
->> >> invalid command
->> >
->> > Try
->> >
->> >  cephfs /mnt/ceph/a set_layout --pool 3
->> >
->> > (set_layout is the command)
->> >
->> > sage
->> >
->> >> usage: cephfs path command [options]*
->> >> Commands:
->> >>    show_layout    -- view the layout information on a file or dir
->> >>    set_layout     -- set the layout on an empty file,
->> >>                      or the default layout on a directory
->> >>    show_location  -- view the location information on a file
->> >> Options:
->> >>    Useful for setting layouts:
->> >>    --stripe_unit, -u:  set the size of each stripe
->> >>    --stripe_count, -c: set the number of objects to stripe across
->> >>    --object_size, -s:  set the size of the objects to stripe across
->> >>    --pool, -p:         set the pool to use
->> >>
->> >>    Useful for getting location data:
->> >>    --offset, -l:       the offset to retrieve location data for
->> >>
->> >> ------------------------------------------------------------------------------------------------
->> >> It may be silly question but unable to figure it out.
->> >>
->> >> :(
->> >>
->> >>
->> >>
->> >>
->> >> On Wed, Nov 21, 2012 at 8:59 PM, Sage Weil <sage@inktank.com> wrote:
->> >> > On Wed, 21 Nov 2012, hemant surale wrote:
->> >> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
->> >> >> > put them in different pools and distribute the pools across different sets
->> >> >> > of OSDs.
->> >> >>
->> >> >> yeah that was correct approach but i found problem doing so from
->> >> >> abstract level i.e. when I put file inside mounted dir
->> >> >> "/home/hemant/cephfs " ( mounted using "mount.ceph" cmd ) . At that
->> >> >> time anyways ceph is going to use default pool data to store files (
->> >> >> here files were striped into different objects and then sent to
->> >> >> appropriate osd ) .
->> >> >>    So how to tell ceph to use different pools in this case ?
->> >> >>
->> >> >> Goal : separate read and write operations , where read will be done
->> >> >> from one group of OSD and write is done to other group of OSD.
->> >> >
->> >> > First create the other pool,
->> >> >
->> >> >  ceph osd pool create <name>
->> >> >
->> >> > and then adjust the CRUSH rule to distributed to a different set of OSDs
->> >> > for that pool.
->> >> >
->> >> > To allow cephfs use it,
->> >> >
->> >> >  ceph mds add_data_pool <poolid>
->> >> >
->> >> > and then:
->> >> >
->> >> >  cephfs /mnt/ceph/foo --pool <poolid>
->> >> >
->> >> > will set the policy on the directory such that new files beneath that
->> >> > point will be stored in a different pool.
->> >> >
->> >> > Hope that helps!
->> >> > sage
->> >> >
->> >> >
->> >> >>
->> >> >>
->> >> >>
->> >> >>
->> >> >> -
->> >> >> Hemant Surale.
->> >> >>
->> >> >>
->> >> >> On Wed, Nov 21, 2012 at 12:33 PM, Sage Weil <sage@inktank.com> wrote:
->> >> >> > On Wed, 21 Nov 2012, hemant surale wrote:
->> >> >> >> Its a little confusing question I believe .
->> >> >> >>
->> >> >> >> Actually there are two files X & Y.  When I am reading X from its
->> >> >> >> primary .I want to make sure simultaneous writing of Y should go to
->> >> >> >> any other OSD except primary OSD for X (from where my current read is
->> >> >> >> getting served ) .
->> >> >> >
->> >> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
->> >> >> > put them in different pools and distribute the pools across different sets
->> >> >> > of OSDs.  Otherwise, it's all (pseudo)random and you never know.  Usually,
->> >> >> > they will be different, particularly as the cluster size increases, but
->> >> >> > sometimes they will be the same.
->> >> >> >
->> >> >> > sage
->> >> >> >
->> >> >> >
->> >> >> >>
->> >> >> >>
->> >> >> >> -
->> >> >> >> Hemant Sural.e
->> >> >> >>
->> >> >> >> On Wed, Nov 21, 2012 at 11:50 AM, Sage Weil <sage@inktank.com> wrote:
->> >> >> >> > On Wed, 21 Nov 2012, hemant surale wrote:
->> >> >> >> >> >>    and one more thing how can it be possible to read from one osd and
->> >> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
->> >> >> >> >> >
->> >> >> >> >> > I'm not sure I understand the question...
->> >> >> >> >>
->> >> >> >> >> Scenario :
->> >> >> >> >>        I have written file X.txt on some osd which is primary for filr
->> >> >> >> >> X.txt ( direct write operation using rados cmd) .
->> >> >> >> >>        Now while read on file X.txt is in progress, Can I make sure
->> >> >> >> >> the simultaneous write request must be directed to other osd using
->> >> >> >> >> crushmaps/other way?
->> >> >> >> >
->> >> >> >> > Nope.  The object location is based on the name.  Reads and writes go to
->> >> >> >> > the same location so that a single OSD can serialize request.  That means,
->> >> >> >> > for example, that a read that follows a write returns the just-written
->> >> >> >> > data.
->> >> >> >> >
->> >> >> >> > sage
->> >> >> >> >
->> >> >> >> >
->> >> >> >> >> Goal of task :
->> >> >> >> >>        Trying to avoid read - write clashes as much as possible to
->> >> >> >> >> achieve faster operations (I/O) . Although CRUSH selects osd for data
->> >> >> >> >> placement based on pseudo random function.  is it possible ?
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >> >> -
->> >> >> >> >> Hemant Surale.
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >> >> On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
->> >> >> >> >> > On Tue, 20 Nov 2012, hemant surale wrote:
->> >> >> >> >> >> Hi Community,
->> >> >> >> >> >>    I have question about port number used by ceph-osd daemon . I
->> >> >> >> >> >> observed traffic (inter -osd communication while data ingest happened)
->> >> >> >> >> >> on port 6802 and then after some time when I ingested second file
->> >> >> >> >> >> after some delay port no 6804 was used . Is there any specific reason
->> >> >> >> >> >> to change port no here?
->> >> >> >> >> >
->> >> >> >> >> > The ports are dynamic.  Daemons bind to a random (6800-6900) port on
->> >> >> >> >> > startup and communicate on that.  They discover each other via the
->> >> >> >> >> > addresses published in the osdmap when the daemon starts.
->> >> >> >> >> >
->> >> >> >> >> >>    and one more thing how can it be possible to read from one osd and
->> >> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
->> >> >> >> >> >
->> >> >> >> >> > I'm not sure I understand the question...
->> >> >> >> >> >
->> >> >> >> >> > sage
->> >> >> >> >> --
->> >> >> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> >> >> >> the body of a message to majordomo@vger.kernel.org
->> >> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >>
->> >> >> >>
->> >> >>
->> >> >>
->> >>
->> >>
->>
->>
