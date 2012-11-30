@@ -1,60 +1,52 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: What is the new command to add osd to the crushmap to enable
- it to receive data
-Date: Fri, 30 Nov 2012 01:54:30 +0000
-Message-ID: <50B811D6.5000004@inktank.com>
-References: <CABYiri8PnWR=LNPuR1bqpuPGp55diHYPsAhdUtd7dNC9=UJTRQ@mail.gmail.com> <alpine.DEB.2.00.1211290833290.30450@cobra.newdream.net> <CABYiri_QS0C1gxygOEW58J7+BQyzjt5X8KJA3Hh8XPGWhnHtRA@mail.gmail.com> <50B80600.1000304@inktank.com> <1354237947.86472.YahooMailNeo@web121901.mail.ne1.yahoo.com> <1354238575.90788.YahooMailNeo@web121904.mail.ne1.yahoo.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/5] mds: fix journaling issue regarding rstat accounting
+Date: Fri, 30 Nov 2012 10:36:50 +0800
+Message-ID: <1354243014-21072-2-git-send-email-zheng.z.yan@intel.com>
+References: <1354243014-21072-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:33615 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755715Ab2K3Byh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 20:54:37 -0500
-Received: by mail-we0-f174.google.com with SMTP id d7so5172425wer.19
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Nov 2012 17:54:36 -0800 (PST)
-In-Reply-To: <1354238575.90788.YahooMailNeo@web121904.mail.ne1.yahoo.com>
+Received: from mga02.intel.com ([134.134.136.20]:8401 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753523Ab2K3ChA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 Nov 2012 21:37:00 -0500
+In-Reply-To: <1354243014-21072-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Isaac Otsiabah <zmoo76b@yahoo.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On 11/30/2012 01:22 AM, Isaac Otsiabah wrote:
-> This command below which adds a new to the crushmap to enable it to r=
-eceive data has changed and does not work anymore.
->=20
->=20
-> ceph osd crush set {id} {name}
->=20
->=20
-> Please, what is the new command to add a new osd to the crushmap to e=
-nable it to receive data?
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-You must specify a weight and a location. For instance,
+Rename operation can call predirty_journal_parents() twice. So
+directory fragment's rstat can be modified twice. But only the
+first modification is journaled because EMetaBlob::add_dir() does
+not update existing dirlump.
 
-  ceph osd crush set 0 osd.0 1.0 root=3Ddefault
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/events/EMetaBlob.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Also, you can check up on the docs for more infos.
+diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
+index 9c281e9..116b704 100644
+--- a/src/mds/events/EMetaBlob.h
++++ b/src/mds/events/EMetaBlob.h
+@@ -635,12 +635,12 @@ private:
+ 		   dirty, complete, isnew);
+   }
+   dirlump& add_dir(dirfrag_t df, fnode_t *pf, version_t pv, bool dirty, bool complete=false, bool isnew=false) {
+-    if (lump_map.count(df) == 0) {
++    if (lump_map.count(df) == 0)
+       lump_order.push_back(df);
+-      lump_map[df].fnode = *pf;
+-      lump_map[df].fnode.version = pv;
+-    }
++
+     dirlump& l = lump_map[df];
++    l.fnode = *pf;
++    l.fnode.version = pv;
+     if (complete) l.mark_complete();
+     if (dirty) l.mark_dirty();
+     if (isnew) l.mark_new();
+-- 
+1.7.11.7
 
-=46rom the docs at [1]:
-
-Add the OSD to the CRUSH map so that it can begin receiving data. You
-may also decompile the CRUSH map, add the OSD to the device list, add
-the host as a bucket (if it=92s not already in the CRUSH map), add the
-device as an item in the host, assign it a weight, recompile it and set
-it. See Add/Move an OSD for details.
-
-ceph osd crush set {id} {name} {weight} pool=3D{pool-name}
-[{bucket-type}=3D{bucket-name} ...]
-
-
-[1] http://ceph.com/docs/master/rados/operations/add-or-rm-osds/
-
-
-  -Joao
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
