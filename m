@@ -1,35 +1,54 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: [PATCHv4] rbd block driver fix race between aio
- completition and aio cancel
-Date: Thu, 29 Nov 2012 22:38:51 +0100
-Message-ID: <50B7D5EB.5030105@profihost.ag>
-References: <249699163.16251603.1354202609373.JavaMail.root@redhat.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: parsing in the ceph osd subsystem
+Date: Fri, 30 Nov 2012 01:04:00 +0000
+Message-ID: <50B80600.1000304@inktank.com>
+References: <CABYiri8PnWR=LNPuR1bqpuPGp55diHYPsAhdUtd7dNC9=UJTRQ@mail.gmail.com> <alpine.DEB.2.00.1211290833290.30450@cobra.newdream.net> <CABYiri_QS0C1gxygOEW58J7+BQyzjt5X8KJA3Hh8XPGWhnHtRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-In-Reply-To: <249699163.16251603.1354202609373.JavaMail.root@redhat.com>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-To: Paolo Bonzini <pbonzini@redhat.com>
-Cc: stefanha@gmail.com, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, josh durgin <josh.durgin@inktank.com>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:39897 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751303Ab2K3BEI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Nov 2012 20:04:08 -0500
+Received: by mail-we0-f174.google.com with SMTP id d7so5164507wer.19
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Nov 2012 17:04:06 -0800 (PST)
+In-Reply-To: <CABYiri_QS0C1gxygOEW58J7+BQyzjt5X8KJA3Hh8XPGWhnHtRA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Paolo,
+On 11/29/2012 07:01 PM, Andrey Korolyov wrote:
+> On Thu, Nov 29, 2012 at 8:34 PM, Sage Weil <sage@inktank.com> wrote:
+>> On Thu, 29 Nov 2012, Andrey Korolyov wrote:
+>>> $ ceph osd down -
+>>> osd.0 is already down
+>>> $ ceph osd down ---
+>>> osd.0 is already down
+>>>
+>>> the same for ``+'', ``/'', ``%'' and so - I think that for osd subsys
+>>> ceph cli should explicitly work only with positive integers plus zero,
+>>> refusing all other input.
+>>
+>> which branch is this?  this parsing is cleaned u pin the latest
+>> next/master.
+>>
+>>
+> 
+> It was produced by 0.54-tag. I have built
+> dd3a24a647d0b0f1153cf1b102ed1f51d51be2f2 today and problem has
+> gone(except parsing ``-0'' as 0 and 00000/0000001 as 0 and 1
+> correspondingly).
 
-Am 29.11.2012 16:23, schrieb Paolo Bonzini:
->> +    qemu_vfree(acb->bounce);
->
-> This vfree is not needed, since the BH will run and do the free.
+A fix for the signed parameter has been pushed to next. However, after
+consideration, when it comes to the '0+\d' parameters, that kind of
+input was considered valid; Greg put it best on IRC, and I quote:
 
-new patch v5 sent.
+<gregaf> joao: not sure we want to prevent "01" from parsing as 1, I
+suspect some people with large clusters will find that useful so they
+can conflate the name and ID while keeping everything three digits
 
-Greets,
-Stefan
+Hope this makes sense to you.
+
+  -Joao
