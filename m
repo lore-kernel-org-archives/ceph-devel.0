@@ -1,438 +1,203 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: OSD daemon changes port no
-Date: Fri, 30 Nov 2012 08:34:20 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
-References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com> <alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net> <CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com> <alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
- <CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com> <alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net> <CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com> <alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
- <CAGfy=6kAkXrdYwL-Ui-Xd2Qsqaf8hcUbWGY94QOFfaRA1AmUrA@mail.gmail.com> <alpine.DEB.2.00.1211260826190.23552@cobra.newdream.net> <CAGfy=6mOnv90GighPr=nTWapJU_4wjo-z9nHh_ji6VvvrUeMHg@mail.gmail.com> <alpine.DEB.2.00.1211270851320.30109@cobra.newdream.net>
- <CAGfy=6mNa02BE6vsRssx6qURxCy9TtnXShxaS0PMPcepnuARvQ@mail.gmail.com> <CAGfy=6mDnVDTSNFD5R-iXz1cPAty1FmXa7fX6K1kA9UqAWJvCg@mail.gmail.com> <CAGfy=6kNPEiUSByW7Bo6CMgttXdZSdYR5ESajXWxEW30+qyhPw@mail.gmail.com>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: rbd map command hangs for 15 minutes during system start up
+Date: Fri, 30 Nov 2012 10:49:33 -0800
+Message-ID: <CAPud5_6-+UGRTgzumGAvjGUPUBj5-XkHKo-RGCkXrNusFuABDw@mail.gmail.com>
+References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
+	<alpine.DEB.2.00.1211161412090.26514@cobra.newdream.net>
+	<CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com>
+	<alpine.DEB.2.00.1211161421350.26514@cobra.newdream.net>
+	<CAPud5_7GXtKn4G4GW+DWA7iFZHub8=hMWxnYfko=u9x+bKgQ6A@mail.gmail.com>
+	<CAPYLRzj=i-cvOQJdUTbGtkjjAr6H4ohwbGe3Qnm1nYPwAjjLJA@mail.gmail.com>
+	<CAPud5_6vGTpPVDATu6U_X5urkXpM5vhDXg3E5MbPu-07MTGuxQ@mail.gmail.com>
+	<CAPud5_4hSU9j5+6EL2VWDuZW0xfFNLCo-_KvDcWDkm9H2pd21w@mail.gmail.com>
+	<alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net>
+	<CAPud5_6fCfOkXviFB6rz9YvWYBkwNzf699Z1_TW3_v4nCoaUQA@mail.gmail.com>
+	<CAPud5_7jXmz9Bz9hAcQKG769wvuCn2eWkV-wc_qEZ7kPdsZf1Q@mail.gmail.com>
+	<CAPud5_7P_Z-+14kyGZGxLCUY4SfTWnW3kTOpMh3OYBWgWCt_1w@mail.gmail.com>
+	<alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net>
+	<CAPud5_4S6-K33f4qLR+-cMm5NLn35H3aXo_LVSenwBM2sxgELg@mail.gmail.com>
+	<CAPud5_7EckkvSth8+YeGvEph1GxjTqovXhG6gVWKUX-3K9cLjQ@mail.gmail.com>
+	<50B7C788.6040404@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42997 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758620Ab2K3QeV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Nov 2012 11:34:21 -0500
-In-Reply-To: <CAGfy=6kNPEiUSByW7Bo6CMgttXdZSdYR5ESajXWxEW30+qyhPw@mail.gmail.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:54303 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031674Ab2K3Stf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Nov 2012 13:49:35 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so599593iay.19
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Nov 2012 10:49:35 -0800 (PST)
+In-Reply-To: <50B7C788.6040404@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-What kernel version and mds version are you running?  I did
+My initial tests using a 3.5.7 kernel with the 55 patches from
+wip-nick are going well.  So far I've gone through 8 installs without
+an incident, I'll leave it run for a bit longer to see if it crops up
+again.
 
-# ceph osd pool create foo 12
-# ceph osd pool create bar 12
-# ceph mds add_data_pool 3
-# ceph mds add_data_pool 4
+Can I get a branch with these patches integrated into all of the
+backported patches to 3.5.x?  I'd like to get this into our main
+testing branch, which is currently running 3.5.7 with the patches from
+wip-3.5 excluding the
+libceph_resubmit_linger_ops_when_pg_mapping_changes patch.
 
-and from a kernel mount
-
-# mkdir foo
-# mkdir bar
-# cephfs foo set_layout --pool 3
-# cephfs bar set_layout --pool 4
-# cephfs foo show_layout
-layout.data_pool:     3
-layout.object_size:   4194304
-layout.stripe_unit:   4194304
-layout.stripe_count:  1
-# cephfs bar show_layout 
-layout.data_pool:     4
-layout.object_size:   4194304
-layout.stripe_unit:   4194304
-layout.stripe_count:  1
-
-This much you can test without playing with the crush map, btw.
-
-Maybe there is some crazy bug when the set_layouts are pipelined?  Try 
-with out using & ?
-
-sage
+Note that we had a case of a rbd map hang with our main testing
+branch, but I don't have a script that can reproduce that yet.  It was
+after the cluster was all up and working, and we were  doing a rolling
+reboot (cycling through each node).
 
 
-On Fri, 30 Nov 2012, hemant surale wrote:
-
-> Hi Sage,Community ,
->    I am unable to use 2 directories to direct data to 2 different
-> pools. I did following expt.
-> 
-> Created 2 pool "host" & "ghost" to seperate data placement .
-> --------------------------------------------------//crushmap file
-> -------------------------------------------------------
-> # begin crush map
-> 
-> # devices
-> device 0 osd.0
-> device 1 osd.1
-> device 2 osd.2
-> device 3 osd.3
-> 
-> # types
-> type 0 osd
-> type 1 host
-> type 2 rack
-> type 3 row
-> type 4 room
-> type 5 datacenter
-> type 6 pool
-> type 7 ghost
-> 
-> # buckets
-> host hemantone-mirror-virtual-machine {
->         id -6           # do not change unnecessarily
->         # weight 1.000
->         alg straw
->         hash 0  # rjenkins1
->         item osd.2 weight 1.000
-> }
-> host hemantone-virtual-machine {
->         id -7           # do not change unnecessarily
->         # weight 1.000
->         alg straw
->         hash 0  # rjenkins1
->         item osd.1 weight 1.000
-> }
-> rack one {
->         id -2           # do not change unnecessarily
->         # weight 2.000
->         alg straw
->         hash 0  # rjenkins1
->         item hemantone-mirror-virtual-machine weight 1.000
->         item hemantone-virtual-machine weight 1.000
-> }
-> ghost hemant-virtual-machine {
->         id -4           # do not change unnecessarily
->         # weight 1.000
->         alg straw
->         hash 0  # rjenkins1
->         item osd.0 weight 1.000
-> }
-> ghost hemant-mirror-virtual-machine {
->         id -5           # do not change unnecessarily
->         # weight 1.000
->         alg straw
->         hash 0  # rjenkins1
->         item osd.3 weight 1.000
-> }
-> rack two {
->         id -3           # do not change unnecessarily
->         # weight 2.000
->         alg straw
->         hash 0  # rjenkins1
->         item hemant-virtual-machine weight 1.000
->         item hemant-mirror-virtual-machine weight 1.000
-> }
-> pool default {
->         id -1           # do not change unnecessarily
->         # weight 4.000
->         alg straw
->         hash 0  # rjenkins1
->         item one weight 2.000
->         item two weight 2.000
-> }
-> 
-> # rules
-> rule data {
->         ruleset 0
->         type replicated
->         min_size 1
->         max_size 10
->         step take default
->         step take one
->         step chooseleaf firstn 0 type host
->         step emit
-> }
-> rule metadata {
->         ruleset 1
->         type replicated
->         min_size 1
->         max_size 10
->         step take default
->         step take one
->         step chooseleaf firstn 0 type host
->         step emit
-> }
-> rule rbd {
->         ruleset 2
->         type replicated
->         min_size 1
->         max_size 10
->         step take default
->         step take one
->         step chooseleaf firstn 0 type host
->         step emit
-> }
-> rule forhost {
->         ruleset 3
->         type replicated
->         min_size 1
->         max_size 10
->         step take default
->         step take one
->         step chooseleaf firstn 0 type host
->         step emit
-> }
-> rule forghost {
->         ruleset 4
->         type replicated
->         min_size 1
->         max_size 10
->         step take default
->         step take two
->         step chooseleaf firstn 0 type ghost
->         step emit
-> }
-> 
-> # end crush map
-> ------------------------------------------------------------------------------------------------------------------------
-> 1) set replication factor to 2. and crushrule accordingly . ( "host"
-> got crush_ruleset = 3 & "ghost" pool got  crush_ruleset = 4).
-> 2) Now I mounted data to dir.  using "mount.ceph 10.72.148.245:6789:/
-> /home/hemant/x"   & "mount.ceph 10.72.148.245:6789:/ /home/hemant/y"
-> 3) then "mds add_data_pool 5"  & "mds add_data_pool 6"  ( here pool id
-> are host = 5, ghost = 6)
-> 4) "cephfs /home/hemant/x set_layout --pool 5 -c 1 -u 4194304 -s
-> 4194304"  & "cephfs /home/hemant/y set_layout --pool 6 -c 1 -u 4194304
-> -s 4194304"
-> 
-> PROBLEM:
->  $ cephfs /home/hemant/x show_layout
-> layout.data_pool:     6
-> layout.object_size:   4194304
-> layout.stripe_unit:   4194304
-> layout.stripe_count:  1
-> cephfs /home/hemant/y show_layout
-> layout.data_pool:     6
-> layout.object_size:   4194304
-> layout.stripe_unit:   4194304
-> layout.stripe_count:  1
-> 
-> Both dir are using same pool to place data even after I specified to
-> use separate using "cephfs" cmd.
-> Please help me figure this out.
-> 
-> -
-> Hemant Surale.
-> 
-> 
-> On Thu, Nov 29, 2012 at 3:45 PM, hemant surale <hemant.surale@gmail.com> wrote:
-> >>> does 'ceph mds dump' list pool 3 in teh data_pools line?
-> >
-> > Yes. It lists the desired poolids I wanted to put data in.
-> >
-> >
-> > ---------- Forwarded message ----------
-> > From: hemant surale <hemant.surale@gmail.com>
-> > Date: Thu, Nov 29, 2012 at 2:59 PM
-> > Subject: Re: OSD daemon changes port no
-> > To: Sage Weil <sage@inktank.com>
-> >
-> >
-> > I used a little different version of "cephfs" as "cephfs
-> > /home/hemant/a set_layout --pool 3 -c 1 -u  4194304 -s  4194304"
-> >  and "cephfs /home/hemant/b set_layout --pool 5 -c 1 -u  4194304 -s  4194304".
-> >
-> >
-> > Now cmd didnt showed any error but When I put data to dir "a" & "b"
-> > ideally it should go to different pool but its not working as of now.
-> > Whatever I am doing is it possible (to use 2 dir pointing to 2
-> > different pools for data placement) ?
-> >
-> >
-> >
-> > -
-> > Hemant Surale.
-> >
-> > On Tue, Nov 27, 2012 at 10:21 PM, Sage Weil <sage@inktank.com> wrote:
-> >> On Tue, 27 Nov 2012, hemant surale wrote:
-> >>> I did "mkdir a " "chmod 777 a" . So dir "a" is /home/hemant/a" .
-> >>> then I used "mount.ceph 10.72.148.245:/ /ho
-> >>>
-> >>> root@hemantsec-virtual-machine:/home/hemant# cephfs /home/hemant/a
-> >>> set_layout --pool 3
-> >>> Error setting layout: Invalid argument
-> >>
-> >> does 'ceph mds dump' list pool 3 in teh data_pools line?
-> >>
-> >> sage
-> >>
-> >>>
-> >>> On Mon, Nov 26, 2012 at 9:56 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> > On Mon, 26 Nov 2012, hemant surale wrote:
-> >>> >> While I was using "cephfs" following error is observed -
-> >>> >> ------------------------------------------------------------------------------------------------
-> >>> >> root@hemantsec-virtual-machine:~# cephfs /mnt/ceph/a --pool 3
-> >>> >> invalid command
-> >>> >
-> >>> > Try
-> >>> >
-> >>> >  cephfs /mnt/ceph/a set_layout --pool 3
-> >>> >
-> >>> > (set_layout is the command)
-> >>> >
-> >>> > sage
-> >>> >
-> >>> >> usage: cephfs path command [options]*
-> >>> >> Commands:
-> >>> >>    show_layout    -- view the layout information on a file or dir
-> >>> >>    set_layout     -- set the layout on an empty file,
-> >>> >>                      or the default layout on a directory
-> >>> >>    show_location  -- view the location information on a file
-> >>> >> Options:
-> >>> >>    Useful for setting layouts:
-> >>> >>    --stripe_unit, -u:  set the size of each stripe
-> >>> >>    --stripe_count, -c: set the number of objects to stripe across
-> >>> >>    --object_size, -s:  set the size of the objects to stripe across
-> >>> >>    --pool, -p:         set the pool to use
-> >>> >>
-> >>> >>    Useful for getting location data:
-> >>> >>    --offset, -l:       the offset to retrieve location data for
-> >>> >>
-> >>> >> ------------------------------------------------------------------------------------------------
-> >>> >> It may be silly question but unable to figure it out.
-> >>> >>
-> >>> >> :(
-> >>> >>
-> >>> >>
-> >>> >>
-> >>> >>
-> >>> >> On Wed, Nov 21, 2012 at 8:59 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> >> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >>> >> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
-> >>> >> >> > put them in different pools and distribute the pools across different sets
-> >>> >> >> > of OSDs.
-> >>> >> >>
-> >>> >> >> yeah that was correct approach but i found problem doing so from
-> >>> >> >> abstract level i.e. when I put file inside mounted dir
-> >>> >> >> "/home/hemant/cephfs " ( mounted using "mount.ceph" cmd ) . At that
-> >>> >> >> time anyways ceph is going to use default pool data to store files (
-> >>> >> >> here files were striped into different objects and then sent to
-> >>> >> >> appropriate osd ) .
-> >>> >> >>    So how to tell ceph to use different pools in this case ?
-> >>> >> >>
-> >>> >> >> Goal : separate read and write operations , where read will be done
-> >>> >> >> from one group of OSD and write is done to other group of OSD.
-> >>> >> >
-> >>> >> > First create the other pool,
-> >>> >> >
-> >>> >> >  ceph osd pool create <name>
-> >>> >> >
-> >>> >> > and then adjust the CRUSH rule to distributed to a different set of OSDs
-> >>> >> > for that pool.
-> >>> >> >
-> >>> >> > To allow cephfs use it,
-> >>> >> >
-> >>> >> >  ceph mds add_data_pool <poolid>
-> >>> >> >
-> >>> >> > and then:
-> >>> >> >
-> >>> >> >  cephfs /mnt/ceph/foo --pool <poolid>
-> >>> >> >
-> >>> >> > will set the policy on the directory such that new files beneath that
-> >>> >> > point will be stored in a different pool.
-> >>> >> >
-> >>> >> > Hope that helps!
-> >>> >> > sage
-> >>> >> >
-> >>> >> >
-> >>> >> >>
-> >>> >> >>
-> >>> >> >>
-> >>> >> >>
-> >>> >> >> -
-> >>> >> >> Hemant Surale.
-> >>> >> >>
-> >>> >> >>
-> >>> >> >> On Wed, Nov 21, 2012 at 12:33 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> >> >> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >>> >> >> >> Its a little confusing question I believe .
-> >>> >> >> >>
-> >>> >> >> >> Actually there are two files X & Y.  When I am reading X from its
-> >>> >> >> >> primary .I want to make sure simultaneous writing of Y should go to
-> >>> >> >> >> any other OSD except primary OSD for X (from where my current read is
-> >>> >> >> >> getting served ) .
-> >>> >> >> >
-> >>> >> >> > Oh I see.  Generally speaking, the only way to guarantee separation is to
-> >>> >> >> > put them in different pools and distribute the pools across different sets
-> >>> >> >> > of OSDs.  Otherwise, it's all (pseudo)random and you never know.  Usually,
-> >>> >> >> > they will be different, particularly as the cluster size increases, but
-> >>> >> >> > sometimes they will be the same.
-> >>> >> >> >
-> >>> >> >> > sage
-> >>> >> >> >
-> >>> >> >> >
-> >>> >> >> >>
-> >>> >> >> >>
-> >>> >> >> >> -
-> >>> >> >> >> Hemant Sural.e
-> >>> >> >> >>
-> >>> >> >> >> On Wed, Nov 21, 2012 at 11:50 AM, Sage Weil <sage@inktank.com> wrote:
-> >>> >> >> >> > On Wed, 21 Nov 2012, hemant surale wrote:
-> >>> >> >> >> >> >>    and one more thing how can it be possible to read from one osd and
-> >>> >> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
-> >>> >> >> >> >> >
-> >>> >> >> >> >> > I'm not sure I understand the question...
-> >>> >> >> >> >>
-> >>> >> >> >> >> Scenario :
-> >>> >> >> >> >>        I have written file X.txt on some osd which is primary for filr
-> >>> >> >> >> >> X.txt ( direct write operation using rados cmd) .
-> >>> >> >> >> >>        Now while read on file X.txt is in progress, Can I make sure
-> >>> >> >> >> >> the simultaneous write request must be directed to other osd using
-> >>> >> >> >> >> crushmaps/other way?
-> >>> >> >> >> >
-> >>> >> >> >> > Nope.  The object location is based on the name.  Reads and writes go to
-> >>> >> >> >> > the same location so that a single OSD can serialize request.  That means,
-> >>> >> >> >> > for example, that a read that follows a write returns the just-written
-> >>> >> >> >> > data.
-> >>> >> >> >> >
-> >>> >> >> >> > sage
-> >>> >> >> >> >
-> >>> >> >> >> >
-> >>> >> >> >> >> Goal of task :
-> >>> >> >> >> >>        Trying to avoid read - write clashes as much as possible to
-> >>> >> >> >> >> achieve faster operations (I/O) . Although CRUSH selects osd for data
-> >>> >> >> >> >> placement based on pseudo random function.  is it possible ?
-> >>> >> >> >> >>
-> >>> >> >> >> >>
-> >>> >> >> >> >>
-> >>> >> >> >> >> -
-> >>> >> >> >> >> Hemant Surale.
-> >>> >> >> >> >>
-> >>> >> >> >> >>
-> >>> >> >> >> >>
-> >>> >> >> >> >> On Tue, Nov 20, 2012 at 10:15 PM, Sage Weil <sage@inktank.com> wrote:
-> >>> >> >> >> >> > On Tue, 20 Nov 2012, hemant surale wrote:
-> >>> >> >> >> >> >> Hi Community,
-> >>> >> >> >> >> >>    I have question about port number used by ceph-osd daemon . I
-> >>> >> >> >> >> >> observed traffic (inter -osd communication while data ingest happened)
-> >>> >> >> >> >> >> on port 6802 and then after some time when I ingested second file
-> >>> >> >> >> >> >> after some delay port no 6804 was used . Is there any specific reason
-> >>> >> >> >> >> >> to change port no here?
-> >>> >> >> >> >> >
-> >>> >> >> >> >> > The ports are dynamic.  Daemons bind to a random (6800-6900) port on
-> >>> >> >> >> >> > startup and communicate on that.  They discover each other via the
-> >>> >> >> >> >> > addresses published in the osdmap when the daemon starts.
-> >>> >> >> >> >> >
-> >>> >> >> >> >> >>    and one more thing how can it be possible to read from one osd and
-> >>> >> >> >> >> >> then simultaneous write to direct on other osd with less/no traffic?
-> >>> >> >> >> >> >
-> >>> >> >> >> >> > I'm not sure I understand the question...
-> >>> >> >> >> >> >
-> >>> >> >> >> >> > sage
-> >>> >> >> >> >> --
-> >>> >> >> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> >> >> >> >> the body of a message to majordomo@vger.kernel.org
-> >>> >> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>> >> >> >> >>
-> >>> >> >> >> >>
-> >>> >> >> >>
-> >>> >> >> >>
-> >>> >> >>
-> >>> >> >>
-> >>> >>
-> >>> >>
-> >>>
-> >>>
-> 
-> 
+On Thu, Nov 29, 2012 at 12:37 PM, Alex Elder <elder@inktank.com> wrote:
+> On 11/22/2012 12:04 PM, Nick Bartos wrote:
+>> Here are the ceph log messages (including the libceph kernel debug
+>> stuff you asked for) from a node boot with the rbd command hung for a
+>> couple of minutes:
+>
+> Nick, I have put together a branch that includes two fixes
+> that might be helpful.  I don't expect these fixes will
+> necessarily *fix* what you're seeing, but one of them
+> pulls a big hunk of processing out of the picture and
+> might help eliminate some potential causes.  I had to
+> pull in several other patches as prerequisites in order
+> to get those fixes to apply cleanly.
+>
+> Would you be able to give it a try, and let us know what
+> results you get?  The branch contains:
+> - Linux 3.5.5
+> - Plus the first 49 patches you listed
+> - Plus four patches, which are prerequisites...
+>     libceph: define ceph_extract_encoded_string()
+>     rbd: define some new format constants
+>     rbd: define rbd_dev_image_id()
+>     rbd: kill create_snap sysfs entry
+> - ...for these two bug fixes:
+>     libceph: remove 'osdtimeout' option
+>     ceph: don't reference req after put
+>
+> The branch is available in the ceph-client git repository
+> under the name "wip-nick" and has commit id dd9323aa.
+>     https://github.com/ceph/ceph-client/tree/wip-nick
+>
+>> https://raw.github.com/gist/4132395/7cb5f0150179b012429c6e57749120dd88616cce/gistfile1.txt
+>
+> This full debug output is very helpful.  Please supply
+> that again as well.
+>
+> Thanks.
+>
+>                                         -Alex
+>
+>> On Wed, Nov 21, 2012 at 9:49 PM, Nick Bartos <nick@pistoncloud.com> wrote:
+>>> It's very easy to reproduce now with my automated install script, the
+>>> most I've seen it succeed with that patch is 2 in a row, and hanging
+>>> on the 3rd, although it hangs on most builds.  So it shouldn't take
+>>> much to get it to do it again.  I'll try and get to that tomorrow,
+>>> when I'm a bit more rested and my brain is working better.
+>>>
+>>> Yes during this the OSDs are probably all syncing up.  All the osd and
+>>> mon daemons have started by the time the rdb commands are ran, though.
+>>>
+>>> On Wed, Nov 21, 2012 at 8:47 PM, Sage Weil <sage@inktank.com> wrote:
+>>>> On Wed, 21 Nov 2012, Nick Bartos wrote:
+>>>>> FYI the build which included all 3.5 backports except patch #50 is
+>>>>> still going strong after 21 builds.
+>>>>
+>>>> Okay, that one at least makes some sense.  I've opened
+>>>>
+>>>>         http://tracker.newdream.net/issues/3519
+>>>>
+>>>> How easy is this to reproduce?  If it is something you can trigger with
+>>>> debugging enabled ('echo module libceph +p >
+>>>> /sys/kernel/debug/dynamic_debug/control') that would help tremendously.
+>>>>
+>>>> I'm guessing that during this startup time the OSDs are still in the
+>>>> process of starting?
+>>>>
+>>>> Alex, I bet that a test that does a lot of map/unmap stuff in a loop while
+>>>> thrashing OSDs could hit this.
+>>>>
+>>>> Thanks!
+>>>> sage
+>>>>
+>>>>
+>>>>>
+>>>>> On Wed, Nov 21, 2012 at 9:34 AM, Nick Bartos <nick@pistoncloud.com> wrote:
+>>>>>> With 8 successful installs already done, I'm reasonably confident that
+>>>>>> it's patch #50.  I'm making another build which applies all patches
+>>>>>> from the 3.5 backport branch, excluding that specific one.  I'll let
+>>>>>> you know if that turns up any unexpected failures.
+>>>>>>
+>>>>>> What will the potential fall out be for removing that specific patch?
+>>>>>>
+>>>>>>
+>>>>>> On Wed, Nov 21, 2012 at 9:02 AM, Nick Bartos <nick@pistoncloud.com> wrote:
+>>>>>>> It's really looking like it's the
+>>>>>>> libceph_resubmit_linger_ops_when_pg_mapping_changes commit.  When
+>>>>>>> patches 1-50 (listed below) are applied to 3.5.7, the hang is present.
+>>>>>>>  So far I have gone through 4 successful installs with no hang with
+>>>>>>> only 1-49 applied.  I'm still leaving my test run to make sure it's
+>>>>>>> not a fluke, but since previously it hangs within the first couple of
+>>>>>>> builds, it really looks like this is where the problem originated.
+>>>>>>>
+>>>>>>> 1-libceph_eliminate_connection_state_DEAD.patch
+>>>>>>> 2-libceph_kill_bad_proto_ceph_connection_op.patch
+>>>>>>> 3-libceph_rename_socket_callbacks.patch
+>>>>>>> 4-libceph_rename_kvec_reset_and_kvec_add_functions.patch
+>>>>>>> 5-libceph_embed_ceph_messenger_structure_in_ceph_client.patch
+>>>>>>> 6-libceph_start_separating_connection_flags_from_state.patch
+>>>>>>> 7-libceph_start_tracking_connection_socket_state.patch
+>>>>>>> 8-libceph_provide_osd_number_when_creating_osd.patch
+>>>>>>> 9-libceph_set_CLOSED_state_bit_in_con_init.patch
+>>>>>>> 10-libceph_embed_ceph_connection_structure_in_mon_client.patch
+>>>>>>> 11-libceph_drop_connection_refcounting_for_mon_client.patch
+>>>>>>> 12-libceph_init_monitor_connection_when_opening.patch
+>>>>>>> 13-libceph_fully_initialize_connection_in_con_init.patch
+>>>>>>> 14-libceph_tweak_ceph_alloc_msg.patch
+>>>>>>> 15-libceph_have_messages_point_to_their_connection.patch
+>>>>>>> 16-libceph_have_messages_take_a_connection_reference.patch
+>>>>>>> 17-libceph_make_ceph_con_revoke_a_msg_operation.patch
+>>>>>>> 18-libceph_make_ceph_con_revoke_message_a_msg_op.patch
+>>>>>>> 19-libceph_fix_overflow_in___decode_pool_names.patch
+>>>>>>> 20-libceph_fix_overflow_in_osdmap_decode.patch
+>>>>>>> 21-libceph_fix_overflow_in_osdmap_apply_incremental.patch
+>>>>>>> 22-libceph_transition_socket_state_prior_to_actual_connect.patch
+>>>>>>> 23-libceph_fix_NULL_dereference_in_reset_connection.patch
+>>>>>>> 24-libceph_use_con_get_put_methods.patch
+>>>>>>> 25-libceph_drop_ceph_con_get_put_helpers_and_nref_member.patch
+>>>>>>> 26-libceph_encapsulate_out_message_data_setup.patch
+>>>>>>> 27-libceph_encapsulate_advancing_msg_page.patch
+>>>>>>> 28-libceph_don_t_mark_footer_complete_before_it_is.patch
+>>>>>>> 29-libceph_move_init_bio__functions_up.patch
+>>>>>>> 30-libceph_move_init_of_bio_iter.patch
+>>>>>>> 31-libceph_don_t_use_bio_iter_as_a_flag.patch
+>>>>>>> 32-libceph_SOCK_CLOSED_is_a_flag_not_a_state.patch
+>>>>>>> 33-libceph_don_t_change_socket_state_on_sock_event.patch
+>>>>>>> 34-libceph_just_set_SOCK_CLOSED_when_state_changes.patch
+>>>>>>> 35-libceph_don_t_touch_con_state_in_con_close_socket.patch
+>>>>>>> 36-libceph_clear_CONNECTING_in_ceph_con_close.patch
+>>>>>>> 37-libceph_clear_NEGOTIATING_when_done.patch
+>>>>>>> 38-libceph_define_and_use_an_explicit_CONNECTED_state.patch
+>>>>>>> 39-libceph_separate_banner_and_connect_writes.patch
+>>>>>>> 40-libceph_distinguish_two_phases_of_connect_sequence.patch
+>>>>>>> 41-libceph_small_changes_to_messenger.c.patch
+>>>>>>> 42-libceph_add_some_fine_ASCII_art.patch
+>>>>>>> 43-libceph_set_peer_name_on_con_open_not_init.patch
+>>>>>>> 44-libceph_initialize_mon_client_con_only_once.patch
+>>>>>>> 45-libceph_allow_sock_transition_from_CONNECTING_to_CLOSED.patch
+>>>>>>> 46-libceph_initialize_msgpool_message_types.patch
+>>>>>>> 47-libceph_prevent_the_race_of_incoming_work_during_teardown.patch
+>>>>>>> 48-libceph_report_socket_read_write_error_message.patch
+>>>>>>> 49-libceph_fix_mutex_coverage_for_ceph_con_close.patch
+>>>>>>> 50-libceph_resubmit_linger_ops_when_pg_mapping_changes.patch
+>>>>>>>
+>>>>>>>
+>>>>>>> On Wed, Nov 21, 2012 at 8:50 AM, Sage Weil <sage@inktank.com> wrote:
+>>>>>>>> Thanks for hunting this down.  I'm very curious what the culprit is...
+>>>>>>>>
+>>>>>>>> sage
+>>>>>
+>>>>>
+>
