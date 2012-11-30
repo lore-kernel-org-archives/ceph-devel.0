@@ -1,14 +1,12 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 3/5] mds: alllow handle_client_readdir() fetching freezing dir.
-Date: Fri, 30 Nov 2012 10:36:52 +0800
-Message-ID: <1354243014-21072-4-git-send-email-zheng.z.yan@intel.com>
-References: <1354243014-21072-1-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: re-calculate truncate_size for strip object
+Date: Fri, 30 Nov 2012 13:54:05 +0800
+Message-ID: <1354254845-24621-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:8401 "EHLO mga02.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:60510 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755237Ab2K3ChC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Nov 2012 21:37:02 -0500
-In-Reply-To: <1354243014-21072-1-git-send-email-zheng.z.yan@intel.com>
+	id S1751167Ab2K3FyI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 30 Nov 2012 00:54:08 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, sage@inktank.com
@@ -16,34 +14,34 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-At that point, the request already auth pins some objects.
-So CDir::fetch() should ignore can_auth_pin check.
+Otherwise osd may truncate the object to larger size.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Server.cc | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ net/ceph/osd_client.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 59d7d3c..2c59f25 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -2741,9 +2741,14 @@ void Server::handle_client_readdir(MDRequest *mdr)
-   assert(dir->is_auth());
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index ccbdfbb..f8b0e56 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -76,8 +76,16 @@ int ceph_calc_raw_layout(struct ceph_osd_client *osdc,
+ 		     orig_len - *plen, off, *plen);
  
-   if (!dir->is_complete()) {
-+    if (dir->is_frozen()) {
-+      dout(7) << "dir is frozen " << *dir << dendl;
-+      dir->add_waiter(CDir::WAIT_UNFREEZE, new C_MDS_RetryRequest(mdcache, mdr));
-+      return;
-+    }
-     // fetch
-     dout(10) << " incomplete dir contents for readdir on " << *dir << ", fetching" << dendl;
--    dir->fetch(new C_MDS_RetryRequest(mdcache, mdr));
-+    dir->fetch(new C_MDS_RetryRequest(mdcache, mdr), true);
-     return;
-   }
- 
+ 	if (op_has_extent(op->op)) {
++		u32 osize = le32_to_cpu(layout->fl_object_size);
+ 		op->extent.offset = objoff;
+ 		op->extent.length = objlen;
++		if (op->extent.truncate_size <= off - objoff) {
++			op->extent.truncate_size = 0;
++		} else {
++			op->extent.truncate_size -= off - objoff;
++			if (op->extent.truncate_size > osize)
++				op->extent.truncate_size = osize;
++		}
+ 	}
+ 	req->r_num_pages = calc_pages_for(off, *plen);
+ 	req->r_page_alignment = off & ~PAGE_MASK;
 -- 
 1.7.11.7
 
