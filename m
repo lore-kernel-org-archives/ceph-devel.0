@@ -1,217 +1,135 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Fri, 30 Nov 2012 11:31:48 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1211301131040.12789@cobra.newdream.net>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <CAPud5_7GXtKn4G4GW+DWA7iFZHub8=hMWxnYfko=u9x+bKgQ6A@mail.gmail.com> <CAPYLRzj=i-cvOQJdUTbGtkjjAr6H4ohwbGe3Qnm1nYPwAjjLJA@mail.gmail.com> <CAPud5_6vGTpPVDATu6U_X5urkXpM5vhDXg3E5MbPu-07MTGuxQ@mail.gmail.com>
- <CAPud5_4hSU9j5+6EL2VWDuZW0xfFNLCo-_KvDcWDkm9H2pd21w@mail.gmail.com> <alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net> <CAPud5_6fCfOkXviFB6rz9YvWYBkwNzf699Z1_TW3_v4nCoaUQA@mail.gmail.com> <CAPud5_7jXmz9Bz9hAcQKG769wvuCn2eWkV-wc_qEZ7kPdsZf1Q@mail.gmail.com>
- <CAPud5_7P_Z-+14kyGZGxLCUY4SfTWnW3kTOpMh3OYBWgWCt_1w@mail.gmail.com> <alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net> <CAPud5_4S6-K33f4qLR+-cMm5NLn35H3aXo_LVSenwBM2sxgELg@mail.gmail.com> <CAPud5_7EckkvSth8+YeGvEph1GxjTqovXhG6gVWKUX-3K9cLjQ@mail.gmail.com>
- <50B7C788.6040404@inktank.com> <CAPud5_6-+UGRTgzumGAvjGUPUBj5-XkHKo-RGCkXrNusFuABDw@mail.gmail.com> <50B904B6.4070400@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: Hangup during scrubbing - possible solutions
+Date: Fri, 30 Nov 2012 14:04:59 -0800
+Message-ID: <CA+4uBUa3ux9HTyW8_jGkvazGrxzy_f=O22J=EE_+NQnj9Qa9RA@mail.gmail.com>
+References: <CABYiri-YGDCCzVD2kcJeZQy4ggWBDt0cC8TrHQxTp4tOeabQew@mail.gmail.com>
+	<alpine.DEB.2.00.1211221234020.9963@cobra.newdream.net>
+	<CABYiri8f3t8ULVWA5SG2tsgO7syaBrR55si2fyKXj8mC--UumQ@mail.gmail.com>
+	<CA+4uBUYpwJOwcEeKLREVc-GA-uvXKvLqDFKLwqjCyqD=LO5fYQ@mail.gmail.com>
+	<CABYiri_icx0wVCFuq=v0E2yU0qucr-80nU7byB1_+33PG3mNCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45196 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1769392Ab2K3Tbt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Nov 2012 14:31:49 -0500
-In-Reply-To: <50B904B6.4070400@inktank.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:53318 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754634Ab2K3WMU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Nov 2012 17:12:20 -0500
+Received: by mail-vc0-f174.google.com with SMTP id d16so154540vcd.19
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Nov 2012 14:12:19 -0800 (PST)
+In-Reply-To: <CABYiri_icx0wVCFuq=v0E2yU0qucr-80nU7byB1_+33PG3mNCg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Nick Bartos <nick@pistoncloud.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 30 Nov 2012, Alex Elder wrote:
-> On 11/30/2012 12:49 PM, Nick Bartos wrote:
-> > My initial tests using a 3.5.7 kernel with the 55 patches from
-> > wip-nick are going well.  So far I've gone through 8 installs without
-> > an incident, I'll leave it run for a bit longer to see if it crops up
-> > again.
-> 
-> This is great news!  Now I wonder which of the two fixes took
-> care of the problem...
-> 
-> > Can I get a branch with these patches integrated into all of the
-> > backported patches to 3.5.x?  I'd like to get this into our main
-> > testing branch, which is currently running 3.5.7 with the patches from
-> > wip-3.5 excluding the
-> > libceph_resubmit_linger_ops_when_pg_mapping_changes patch.
-> 
-> I will put together a new branch that includes the remainder
-> of those patches for you shortly.
-> 
-> > Note that we had a case of a rbd map hang with our main testing
-> > branch, but I don't have a script that can reproduce that yet.  It was
-> > after the cluster was all up and working, and we were  doing a rolling
-> > reboot (cycling through each node).
-> 
-> If you are able to reproduce this please let us know.
+Hah!  Thanks for the log, it's our handling of active_pushes.  I'll
+have a patch shortly.
 
-It sounds to me like it might be the same problem.  If we're lucky, those 
-2 patches will resolve this as well.
+Thanks!
+-Sam
 
-(says the optimist!)
-sage
-
-
-> 
-> 					-Alex
-> 
-> > 
-> > 
-> > On Thu, Nov 29, 2012 at 12:37 PM, Alex Elder <elder@inktank.com> wrote:
-> >> On 11/22/2012 12:04 PM, Nick Bartos wrote:
-> >>> Here are the ceph log messages (including the libceph kernel debug
-> >>> stuff you asked for) from a node boot with the rbd command hung for a
-> >>> couple of minutes:
-> >>
-> >> Nick, I have put together a branch that includes two fixes
-> >> that might be helpful.  I don't expect these fixes will
-> >> necessarily *fix* what you're seeing, but one of them
-> >> pulls a big hunk of processing out of the picture and
-> >> might help eliminate some potential causes.  I had to
-> >> pull in several other patches as prerequisites in order
-> >> to get those fixes to apply cleanly.
-> >>
-> >> Would you be able to give it a try, and let us know what
-> >> results you get?  The branch contains:
-> >> - Linux 3.5.5
-> >> - Plus the first 49 patches you listed
-> >> - Plus four patches, which are prerequisites...
-> >>     libceph: define ceph_extract_encoded_string()
-> >>     rbd: define some new format constants
-> >>     rbd: define rbd_dev_image_id()
-> >>     rbd: kill create_snap sysfs entry
-> >> - ...for these two bug fixes:
-> >>     libceph: remove 'osdtimeout' option
-> >>     ceph: don't reference req after put
-> >>
-> >> The branch is available in the ceph-client git repository
-> >> under the name "wip-nick" and has commit id dd9323aa.
-> >>     https://github.com/ceph/ceph-client/tree/wip-nick
-> >>
-> >>> https://raw.github.com/gist/4132395/7cb5f0150179b012429c6e57749120dd88616cce/gistfile1.txt
-> >>
-> >> This full debug output is very helpful.  Please supply
-> >> that again as well.
-> >>
-> >> Thanks.
-> >>
-> >>                                         -Alex
-> >>
-> >>> On Wed, Nov 21, 2012 at 9:49 PM, Nick Bartos <nick@pistoncloud.com> wrote:
-> >>>> It's very easy to reproduce now with my automated install script, the
-> >>>> most I've seen it succeed with that patch is 2 in a row, and hanging
-> >>>> on the 3rd, although it hangs on most builds.  So it shouldn't take
-> >>>> much to get it to do it again.  I'll try and get to that tomorrow,
-> >>>> when I'm a bit more rested and my brain is working better.
-> >>>>
-> >>>> Yes during this the OSDs are probably all syncing up.  All the osd and
-> >>>> mon daemons have started by the time the rdb commands are ran, though.
-> >>>>
-> >>>> On Wed, Nov 21, 2012 at 8:47 PM, Sage Weil <sage@inktank.com> wrote:
-> >>>>> On Wed, 21 Nov 2012, Nick Bartos wrote:
-> >>>>>> FYI the build which included all 3.5 backports except patch #50 is
-> >>>>>> still going strong after 21 builds.
-> >>>>>
-> >>>>> Okay, that one at least makes some sense.  I've opened
-> >>>>>
-> >>>>>         http://tracker.newdream.net/issues/3519
-> >>>>>
-> >>>>> How easy is this to reproduce?  If it is something you can trigger with
-> >>>>> debugging enabled ('echo module libceph +p >
-> >>>>> /sys/kernel/debug/dynamic_debug/control') that would help tremendously.
-> >>>>>
-> >>>>> I'm guessing that during this startup time the OSDs are still in the
-> >>>>> process of starting?
-> >>>>>
-> >>>>> Alex, I bet that a test that does a lot of map/unmap stuff in a loop while
-> >>>>> thrashing OSDs could hit this.
-> >>>>>
-> >>>>> Thanks!
-> >>>>> sage
-> >>>>>
-> >>>>>
-> >>>>>>
-> >>>>>> On Wed, Nov 21, 2012 at 9:34 AM, Nick Bartos <nick@pistoncloud.com> wrote:
-> >>>>>>> With 8 successful installs already done, I'm reasonably confident that
-> >>>>>>> it's patch #50.  I'm making another build which applies all patches
-> >>>>>>> from the 3.5 backport branch, excluding that specific one.  I'll let
-> >>>>>>> you know if that turns up any unexpected failures.
-> >>>>>>>
-> >>>>>>> What will the potential fall out be for removing that specific patch?
-> >>>>>>>
-> >>>>>>>
-> >>>>>>> On Wed, Nov 21, 2012 at 9:02 AM, Nick Bartos <nick@pistoncloud.com> wrote:
-> >>>>>>>> It's really looking like it's the
-> >>>>>>>> libceph_resubmit_linger_ops_when_pg_mapping_changes commit.  When
-> >>>>>>>> patches 1-50 (listed below) are applied to 3.5.7, the hang is present.
-> >>>>>>>>  So far I have gone through 4 successful installs with no hang with
-> >>>>>>>> only 1-49 applied.  I'm still leaving my test run to make sure it's
-> >>>>>>>> not a fluke, but since previously it hangs within the first couple of
-> >>>>>>>> builds, it really looks like this is where the problem originated.
-> >>>>>>>>
-> >>>>>>>> 1-libceph_eliminate_connection_state_DEAD.patch
-> >>>>>>>> 2-libceph_kill_bad_proto_ceph_connection_op.patch
-> >>>>>>>> 3-libceph_rename_socket_callbacks.patch
-> >>>>>>>> 4-libceph_rename_kvec_reset_and_kvec_add_functions.patch
-> >>>>>>>> 5-libceph_embed_ceph_messenger_structure_in_ceph_client.patch
-> >>>>>>>> 6-libceph_start_separating_connection_flags_from_state.patch
-> >>>>>>>> 7-libceph_start_tracking_connection_socket_state.patch
-> >>>>>>>> 8-libceph_provide_osd_number_when_creating_osd.patch
-> >>>>>>>> 9-libceph_set_CLOSED_state_bit_in_con_init.patch
-> >>>>>>>> 10-libceph_embed_ceph_connection_structure_in_mon_client.patch
-> >>>>>>>> 11-libceph_drop_connection_refcounting_for_mon_client.patch
-> >>>>>>>> 12-libceph_init_monitor_connection_when_opening.patch
-> >>>>>>>> 13-libceph_fully_initialize_connection_in_con_init.patch
-> >>>>>>>> 14-libceph_tweak_ceph_alloc_msg.patch
-> >>>>>>>> 15-libceph_have_messages_point_to_their_connection.patch
-> >>>>>>>> 16-libceph_have_messages_take_a_connection_reference.patch
-> >>>>>>>> 17-libceph_make_ceph_con_revoke_a_msg_operation.patch
-> >>>>>>>> 18-libceph_make_ceph_con_revoke_message_a_msg_op.patch
-> >>>>>>>> 19-libceph_fix_overflow_in___decode_pool_names.patch
-> >>>>>>>> 20-libceph_fix_overflow_in_osdmap_decode.patch
-> >>>>>>>> 21-libceph_fix_overflow_in_osdmap_apply_incremental.patch
-> >>>>>>>> 22-libceph_transition_socket_state_prior_to_actual_connect.patch
-> >>>>>>>> 23-libceph_fix_NULL_dereference_in_reset_connection.patch
-> >>>>>>>> 24-libceph_use_con_get_put_methods.patch
-> >>>>>>>> 25-libceph_drop_ceph_con_get_put_helpers_and_nref_member.patch
-> >>>>>>>> 26-libceph_encapsulate_out_message_data_setup.patch
-> >>>>>>>> 27-libceph_encapsulate_advancing_msg_page.patch
-> >>>>>>>> 28-libceph_don_t_mark_footer_complete_before_it_is.patch
-> >>>>>>>> 29-libceph_move_init_bio__functions_up.patch
-> >>>>>>>> 30-libceph_move_init_of_bio_iter.patch
-> >>>>>>>> 31-libceph_don_t_use_bio_iter_as_a_flag.patch
-> >>>>>>>> 32-libceph_SOCK_CLOSED_is_a_flag_not_a_state.patch
-> >>>>>>>> 33-libceph_don_t_change_socket_state_on_sock_event.patch
-> >>>>>>>> 34-libceph_just_set_SOCK_CLOSED_when_state_changes.patch
-> >>>>>>>> 35-libceph_don_t_touch_con_state_in_con_close_socket.patch
-> >>>>>>>> 36-libceph_clear_CONNECTING_in_ceph_con_close.patch
-> >>>>>>>> 37-libceph_clear_NEGOTIATING_when_done.patch
-> >>>>>>>> 38-libceph_define_and_use_an_explicit_CONNECTED_state.patch
-> >>>>>>>> 39-libceph_separate_banner_and_connect_writes.patch
-> >>>>>>>> 40-libceph_distinguish_two_phases_of_connect_sequence.patch
-> >>>>>>>> 41-libceph_small_changes_to_messenger.c.patch
-> >>>>>>>> 42-libceph_add_some_fine_ASCII_art.patch
-> >>>>>>>> 43-libceph_set_peer_name_on_con_open_not_init.patch
-> >>>>>>>> 44-libceph_initialize_mon_client_con_only_once.patch
-> >>>>>>>> 45-libceph_allow_sock_transition_from_CONNECTING_to_CLOSED.patch
-> >>>>>>>> 46-libceph_initialize_msgpool_message_types.patch
-> >>>>>>>> 47-libceph_prevent_the_race_of_incoming_work_during_teardown.patch
-> >>>>>>>> 48-libceph_report_socket_read_write_error_message.patch
-> >>>>>>>> 49-libceph_fix_mutex_coverage_for_ceph_con_close.patch
-> >>>>>>>> 50-libceph_resubmit_linger_ops_when_pg_mapping_changes.patch
-> >>>>>>>>
-> >>>>>>>>
-> >>>>>>>> On Wed, Nov 21, 2012 at 8:50 AM, Sage Weil <sage@inktank.com> wrote:
-> >>>>>>>>> Thanks for hunting this down.  I'm very curious what the culprit is...
-> >>>>>>>>>
-> >>>>>>>>> sage
-> >>>>>>
-> >>>>>>
-> >>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Fri, Nov 30, 2012 at 4:14 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> http://xdel.ru/downloads/ceph-log/ceph-scrub-stuck.log.gz
+> http://xdel.ru/downloads/ceph-log/cluster-w.log.gz
+>
+> Here, please.
+>
+> I have initiated a deep-scrub of osd.1 which was lead to forever-stuck
+> I/O requests in a short time(scrub `ll do the same). Second log may be
+> useful for proper timestamps, as seeks on the original may took a long
+> time. Osd processes on the specific node was restarted twice - at the
+> beginning to be sure all config options were applied and at the end to
+> do same plus to get rid of stuck requests.
+>
+>
+> On Wed, Nov 28, 2012 at 5:35 AM, Samuel Just <sam.just@inktank.com> wrote:
+>> If you can reproduce it again, what we really need are the osd logs
+>> from the acting set of a pg stuck in scrub with
+>> debug osd = 20
+>> debug ms = 1
+>> debug filestore = 20.
+>>
+>> Thanks,
+>> -Sam
+>>
+>> On Sun, Nov 25, 2012 at 2:08 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>>> On Fri, Nov 23, 2012 at 12:35 AM, Sage Weil <sage@inktank.com> wrote:
+>>>> On Thu, 22 Nov 2012, Andrey Korolyov wrote:
+>>>>> Hi,
+>>>>>
+>>>>> In the recent versions Ceph introduces some unexpected behavior for
+>>>>> the permanent connections (VM or kernel clients) - after crash
+>>>>> recovery, I/O will hang on the next planned scrub on the following
+>>>>> scenario:
+>>>>>
+>>>>> - launch a bunch of clients doing non-intensive writes,
+>>>>> - lose one or more osd, mark them down, wait for recovery completion,
+>>>>> - do a slow scrub, e.g. scrubbing one osd per 5m, inside bash script,
+>>>>> or wait for ceph to do the same,
+>>>>> - observe a raising number of pgs stuck in the active+clean+scrubbing
+>>>>> state (they took a master role from ones which was on killed osd and
+>>>>> almost surely they are being written in time of crash),
+>>>>> - some time later, clients will hang hardly and ceph log introduce
+>>>>> stuck(old) I/O requests.
+>>>>>
+>>>>> The only one way to return clients back without losing their I/O state
+>>>>> is per-osd restart, which also will help to get rid of
+>>>>> active+clean+scrubbing pgs.
+>>>>>
+>>>>> First of all, I`ll be happy to help to solve this problem by providing
+>>>>> logs.
+>>>>
+>>>> If you can reproduce this behavior with 'debug osd = 20' and 'debug ms =
+>>>> 1' logging on the OSD, that would be wonderful!
+>>>>
+>>>
+>>> I have tested slightly different recovery flow, please see below.
+>>> Since there is no real harm, like frozen I/O, placement groups also
+>>> was stuck forever on the active+clean+scrubbing state, until I
+>>> restarted all osds (end of the log):
+>>>
+>>> http://xdel.ru/downloads/ceph-log/recover-clients-later-than-osd.txt.gz
+>>>
+>>> - start the healthy cluster
+>>> - start persistent clients
+>>> - add an another host with pair of OSDs, let them be in the data placement
+>>> - wait for data to rearrange
+>>> - [22:06 timestamp] mark OSDs out or simply kill them and wait(since I
+>>> have an 1/2 hour delay on readjust in such case, I did ``ceph osd
+>>> out'' manually)
+>>> - watch for data to rearrange again
+>>> - [22:51 timestamp] when it ends, start a manual rescrub, with
+>>> non-zero active+clean+scrubbing-state placement groups at the end of
+>>> process which `ll stay in this state forever until something happens
+>>>
+>>> After that, I can restart osds one per one, if I want to get rid of
+>>> scrubbing states immediately and then do deep-scrub(if I don`t, those
+>>> states will return at next ceph self-scrubbing) or do per-osd
+>>> deep-scrub, if I have a lot of time. The case I have described in the
+>>> previous message took place when I remove osd from data placement
+>>> which existed on the moment when client(s) have started and indeed it
+>>> is more harmful than current one(frozen I/O leads to hanging entire
+>>> guest, for example). Since testing those flow took a lot of time, I`ll
+>>> send logs related to this case tomorrow.
+>>>
+>>>>> Second question is not directly related to this problem, but I
+>>>>> have thought on for a long time - is there a planned features to
+>>>>> control scrub process more precisely, e.g. pg scrub rate or scheduled
+>>>>> scrub, instead of current set of timeouts which of course not very
+>>>>> predictable on when to run?
+>>>>
+>>>> Not yet.  I would be interested in hearing what kind of control/config
+>>>> options/whatever you (and others) would like to see!
+>>>
+>>> Of course it will be awesome to have any determined scheduler or at
+>>> least an option to disable automated scrubbing, since it is not very
+>>> determined in time and deep-scrub eating a lot of I/O if command
+>>> issued against entire OSD. Rate limiting is not in the first place, at
+>>> least it may be recreated in external script, but for those who prefer
+>>> to leave control to Ceph, it may be very useful.
+>>>
+>>> Thanks!
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
