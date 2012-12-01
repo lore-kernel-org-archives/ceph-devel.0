@@ -1,36 +1,24 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
-Date: Sat, 01 Dec 2012 21:23:34 +0100
-Message-ID: <50BA6746.4010609@profihost.ag>
-References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: wip-msgr-delay-queue
+Date: Sat, 1 Dec 2012 12:51:22 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212011249450.9862@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:50880 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752297Ab2LAUX1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 15:23:27 -0500
-In-Reply-To: <50B484FF.9070500@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:56231 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752793Ab2LAUvW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 15:51:22 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: greg@inktank.com
 
-Hi Dan,
+Is ready to merge, after a final look.  There is one additional patch that 
+handles the connection fault and reconnect cases that hasn't been reviewed 
+yet.  Passed the rados suite, although when we add it to the night suite 
+we'll want lower probabilities because most of the runs took hours to 
+complete with the artificial delays.
 
-Am 27.11.2012 10:16, schrieb Stefan Priebe - Profihost AG:
-> Am 26.11.2012 21:00, schrieb Dan Mick:
->> It writes zeros; there's no way for it to know how many zeros are
->> coming.  It could make a half-hearted attempt depending on its buffer
->> size and the amount of data the source is willing to buffer.
-
-Yes but why not skip at leas if the WHOLE BUFFER is zero and then use 
-the buffer size = stripe size?
-
-Right now a 40GB image which has just 3GB used rest is zeros due to 
-using fstrim before doing the export takes a long time to import. We 
-could speed this up a lot if we would skip parts with only zeros.
-
-Greets,
-Stefab
+Thanks!
+sage
