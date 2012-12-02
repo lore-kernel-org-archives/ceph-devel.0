@@ -1,67 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH V2] mds: fix CDir::_commit_partial() bug
-Date: Sat, 1 Dec 2012 12:56:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212011252430.9862@cobra.newdream.net>
-References: <1353603165-1724-1-git-send-email-zheng.z.yan@intel.com> <50BA0CF4.60203@intel.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
+Date: Sat, 01 Dec 2012 16:27:29 -0800
+Message-ID: <50BAA071.70300@inktank.com>
+References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag> <50B62580.2030301@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56251 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752674Ab2LAU4o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 15:56:44 -0500
-In-Reply-To: <50BA0CF4.60203@intel.com>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:58674 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753809Ab2LBA1t (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 19:27:49 -0500
+Received: by mail-da0-f46.google.com with SMTP id p5so772676dak.19
+        for <ceph-devel@vger.kernel.org>; Sat, 01 Dec 2012 16:27:48 -0800 (PST)
+In-Reply-To: <50B62580.2030301@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, 1 Dec 2012, Yan, Zheng wrote:
-> Hi Sage,
-> 
-> This patch is buggy, please drop it from wip-mds.
+On 11/28/2012 6:53 AM, Stefan Priebe - Profihost AG wrote:
+> Hi Dan,
+>
+> thanks for your update / new import-export branch.
+>
+> The import seems to work now. What i'm wondering is that it is really 
+> slow.
+>
+> I see around 10% CPU Usage on importing host (host where rbd import is 
+> started) and just 4MB every 2s raising Data on ceph. This means 40GB 
+> took around 5-6 hours.
+>
+> Night this be due to he size update? 4MB every 2s looks like the 
+> stripe size.
 
-Done.
- 
-> On 11/23/2012 12:52 AM, Yan, Zheng wrote:
-> > From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> > 
-> > When a null dentry is encountered, CDir::_commit_partial() adds
-> > a OSD_TMAP_RM command to delete the dentry. But if the dentry is
-> > new, the osd will not find the dentry when handling the command
-> > and the tmap update operation will fail totally.
-> > 
-> > This patch also makes sure dentries are properly marked as new
-> > when preparing new dentries and exporting dentries.
-> > 
-> > Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> > ---
-> SNIP
-> > diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> > index ec0d5d5..228fede 100644
-> > --- a/src/mds/Server.cc
-> > +++ b/src/mds/Server.cc
-> > @@ -1685,6 +1685,9 @@ CDentry* Server::prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dn
-> >        }
-> >      }
-> >  
-> > +    if (!dn->is_dirty())
-> > +      dn->mark_new();
-> > +
-> This should be something like 'else if (!dn->is_dirty())'. This issue
-> has been fixed on the osd side, this patch is no longer needed.
+I did change the resize to double each time to help with that before
+pushing to master, but that still seems awfully slow.  You should 
+definitely use the
+version in the mainline, though; it's better in several ways.
 
-Yeah.  It would still be nice to avoid including those ops in the osd 
-request, as an optimization, but that can happen later.
+Are these particularly sparse images?  I'm testing a "preserve 
+sparseness" tweak that should help
+a lot if so (and save space in the cluster, obviously).
 
-Repushed wip-mds, and scheduled the fs suite to run against it.  That 
-only covers single mds configurations still, but as long as there aren't 
-regressions there I'm happy relying on your testing for now.
-
-Real Soon Now we need to flesh out that suite to include clustered mds 
-tests, export thrashing, and build a mds_thrasher teuthology task that 
-restarts, adds, and stops mds's to exercise the failure paths.  Eventually 
-we'll want to hook that into the failure injection sites in Migration.cc 
-as well so we deliberatel exercise each failure point...
-
-sage
