@@ -1,215 +1,231 @@
-From: Nick Bartos <nick@pistoncloud.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Sat, 1 Dec 2012 21:34:52 -0800
-Message-ID: <CAPud5_4avt1ohkdg3s_pcwoF+4AfuAYDP3qJUqL84nFnmh2GjA@mail.gmail.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
-	<CAPud5_6tszm59Xc2q+2eCf4oLZfQ1dJd4zdrXOd=_ZqG95=hLg@mail.gmail.com>
-	<alpine.DEB.2.00.1211161421350.26514@cobra.newdream.net>
-	<CAPud5_7GXtKn4G4GW+DWA7iFZHub8=hMWxnYfko=u9x+bKgQ6A@mail.gmail.com>
-	<CAPYLRzj=i-cvOQJdUTbGtkjjAr6H4ohwbGe3Qnm1nYPwAjjLJA@mail.gmail.com>
-	<CAPud5_6vGTpPVDATu6U_X5urkXpM5vhDXg3E5MbPu-07MTGuxQ@mail.gmail.com>
-	<CAPud5_4hSU9j5+6EL2VWDuZW0xfFNLCo-_KvDcWDkm9H2pd21w@mail.gmail.com>
-	<alpine.DEB.2.00.1211210849060.1082@cobra.newdream.net>
-	<CAPud5_6fCfOkXviFB6rz9YvWYBkwNzf699Z1_TW3_v4nCoaUQA@mail.gmail.com>
-	<CAPud5_7jXmz9Bz9hAcQKG769wvuCn2eWkV-wc_qEZ7kPdsZf1Q@mail.gmail.com>
-	<CAPud5_7P_Z-+14kyGZGxLCUY4SfTWnW3kTOpMh3OYBWgWCt_1w@mail.gmail.com>
-	<alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net>
-	<CAPud5_4S6-K33f4qLR+-cMm5NLn35H3aXo_LVSenwBM2sxgELg@mail.gmail.com>
-	<CAPud5_7EckkvSth8+YeGvEph1GxjTqovXhG6gVWKUX-3K9cLjQ@mail.gmail.com>
-	<50B7C788.6040404@inktank.com>
-	<50B93FCA.2060801@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: endless flying slow requests
+Date: Sun, 2 Dec 2012 14:02:00 -0800
+Message-ID: <CA+4uBUap0H3BuHcEDOLdw4Scf58G6PnaZCxvLAs=SBeY5tM6_A@mail.gmail.com>
+References: <50A3607A.6050209@profihost.ag>
+	<alpine.DEB.2.00.1211140656590.6512@cobra.newdream.net>
+	<50A4A351.8020506@profihost.ag>
+	<alpine.DEB.2.00.1211150657110.4011@cobra.newdream.net>
+	<alpine.DEB.2.00.1211271751290.23594@cobra.newdream.net>
+	<CABYiri9M86SHr6yY+2FtXEWbp7-bK6+TJs6DJC7QJyi7GRGOLA@mail.gmail.com>
+	<CA+4uBUYsCyfwXQahgEPsUFt9K9XADbe5x981iY-k-RRECwrM4Q@mail.gmail.com>
+	<CA+4uBUZK2wS29M0TTroQFvQDrgCfd+WBm=xTRjWDtUeAqjRKJQ@mail.gmail.com>
+	<CABYiri85PFnWdrBVh2mY_ujsxdSyqsoTKHET++okTVqfaJeLxA@mail.gmail.com>
+	<CA+4uBUbcvj7xJ98ojfZpBOxL-2qet0Jep987DmyBAdZWaJ0Q2g@mail.gmail.com>
+	<alpine.DEB.2.00.1212011915570.24631@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:37561 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750875Ab2LBFex (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Dec 2012 00:34:53 -0500
-Received: by mail-ie0-f174.google.com with SMTP id c11so2686656ieb.19
-        for <ceph-devel@vger.kernel.org>; Sat, 01 Dec 2012 21:34:53 -0800 (PST)
-In-Reply-To: <50B93FCA.2060801@inktank.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:59134 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752465Ab2LBWCC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Dec 2012 17:02:02 -0500
+Received: by mail-vb0-f46.google.com with SMTP id b13so1039690vby.19
+        for <ceph-devel@vger.kernel.org>; Sun, 02 Dec 2012 14:02:01 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212011915570.24631@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Andrey Korolyov <andrey@xdel.ru>, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Unfortunately the hangs happen with the new set of patches.  Here's
-some debug info:
+Looks good, pushed.
+-Sam
 
-https://gist.github.com/raw/4187123/90194ce172130244a9c1c968ed185eee7282d809/gistfile1.txt
-
-
-On Fri, Nov 30, 2012 at 3:22 PM, Alex Elder <elder@inktank.com> wrote:
-> On 11/29/2012 02:37 PM, Alex Elder wrote:
->> On 11/22/2012 12:04 PM, Nick Bartos wrote:
->>> Here are the ceph log messages (including the libceph kernel debug
->>> stuff you asked for) from a node boot with the rbd command hung for a
->>> couple of minutes:
+On Sat, Dec 1, 2012 at 7:18 PM, Sage Weil <sage@inktank.com> wrote:
+> I pushed another fix that plugs a leak when requests race with peering
+> that fixed the 'slow request' for osd_sub_op messages for me.  It's in
+> wip-osd-leak.
 >
-> I'm sorry, but I did something stupid...
+> Sam, when you get a chance, can you take a look and push it to next if it
+> looks okay?
 >
-> Yes, the branch I gave you includes these fixes.  However
-> it does *not* include the commit that was giving you trouble
-> to begin with.
->
-> So...
->
-> I have updated that same branch (wip-nick) to contain:
-> - Linux 3.5.5
-> - Plus the first *50* (not 49) patches you listed
-> - Plus the ones I added before.
->
-> The new commit id for that branch begins with be3198d6.
->
-> I'm really sorry for this mistake.  Please try this new
-> branch and report back what you find.
->
->                                         -Alex
+> Thanks!
+> sage
 >
 >
->> Nick, I have put together a branch that includes two fixes
->> that might be helpful.  I don't expect these fixes will
->> necessarily *fix* what you're seeing, but one of them
->> pulls a big hunk of processing out of the picture and
->> might help eliminate some potential causes.  I had to
->> pull in several other patches as prerequisites in order
->> to get those fixes to apply cleanly.
+> On Fri, 30 Nov 2012, Samuel Just wrote:
+>
+>> I've pushed a fix to next, 49f32cee647c5bd09f36ba7c9fd4f481a697b9d7.
+>> Let me know if the problem persists with this patch.
+>> -Sam
 >>
->> Would you be able to give it a try, and let us know what
->> results you get?  The branch contains:
->> - Linux 3.5.5
->> - Plus the first 49 patches you listed
->> - Plus four patches, which are prerequisites...
->>     libceph: define ceph_extract_encoded_string()
->>     rbd: define some new format constants
->>     rbd: define rbd_dev_image_id()
->>     rbd: kill create_snap sysfs entry
->> - ...for these two bug fixes:
->>     libceph: remove 'osdtimeout' option
->>     ceph: don't reference req after put
+>> On Wed, Nov 28, 2012 at 2:04 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>> > On Thu, Nov 29, 2012 at 1:12 AM, Samuel Just <sam.just@inktank.com> wrote:
+>> >> Also, these clusters aren't mixed argonaut and next, are they?  (Not
+>> >> that that shouldn't work, but it would be a useful data point.)
+>> >> -Sam
+>> >>
+>> >> On Wed, Nov 28, 2012 at 1:11 PM, Samuel Just <sam.just@inktank.com> wrote:
+>> >>> Did you observe hung io along with that error?  Both sub_op_commit and
+>> >>> sub_op_applied have happened, so the sub_op_reply should have been
+>> >>> sent back to the primary.  This looks more like a leak.  If you also
+>> >>> observed hung io, then it's possible that the problem is occurring
+>> >>> between the sub_op_applied event and the response.
+>> >>> -Sam
+>> >>>
+>> >
+>> > It is relatively easy to check if one of client VMs has locked one or
+>> > more cores to iowait or just hangs, so yes, these ops are related to
+>> > real commit operations and they are hanged.
+>> > I`m using all-new 0.54 cluster, without mixing of course. Does
+>> > everyone who hit that bug readjusted cluster before bug shows
+>> > itself(say, in a day-long distance)?
+>> >
+>> >>> On Tue, Nov 27, 2012 at 11:47 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>> >>>> On Wed, Nov 28, 2012 at 5:51 AM, Sage Weil <sage@inktank.com> wrote:
+>> >>>>> Hi Stefan,
+>> >>>>>
+>> >>>>> On Thu, 15 Nov 2012, Sage Weil wrote:
+>> >>>>>> On Thu, 15 Nov 2012, Stefan Priebe - Profihost AG wrote:
+>> >>>>>> > Am 14.11.2012 15:59, schrieb Sage Weil:
+>> >>>>>> > > Hi Stefan,
+>> >>>>>> > >
+>> >>>>>> > > I would be nice to confirm that no clients are waiting on replies for
+>> >>>>>> > > these requests; currently we suspect that the OSD request tracking is the
+>> >>>>>> > > buggy part.  If you query the OSD admin socket you should be able to dump
+>> >>>>>> > > requests and see the client IP, and then query the client.
+>> >>>>>> > >
+>> >>>>>> > > Is it librbd?  In that case you likely need to change the config so that
+>> >>>>>> > > it is listening on an admin socket ('admin socket = path').
+>> >>>>>> >
+>> >>>>>> > Yes it is. So i have to specify admin socket at the KVM host?
+>> >>>>>>
+>> >>>>>> Right.  IIRC the disk line is a ; (or \;) separated list of key/value
+>> >>>>>> pairs.
+>> >>>>>>
+>> >>>>>> > How do i query the admin socket for requests?
+>> >>>>>>
+>> >>>>>> ceph --admin-daemon /path/to/socket help
+>> >>>>>> ceph --admin-daemon /path/to/socket objecter_dump     (i think)
+>> >>>>>
+>> >>>>> Were you able to reproduce this?
+>> >>>>>
+>> >>>>> Thanks!
+>> >>>>> sage
+>> >>>>
+>> >>>> Meanwhile, I did. :)
+>> >>>> Such requests will always be created if you have restarted or marked
+>> >>>> an osd out and then back in and scrub didn`t happen in the meantime
+>> >>>> (after such operation and before request arrival).
+>> >>>> What is more interesting, the hangup happens not exactly at the time
+>> >>>> of operation, but tens of minutes later.
+>> >>>>
+>> >>>>         { "description": "osd_sub_op(client.1292013.0:45422 4.731
+>> >>>> a384cf31\/rbd_data.1415fb1075f187.00000000000000a7\/head\/\/4 [] v
+>> >>>> 16444'21693 snapset=0=[]:[] snapc=0=[])",
+>> >>>>           "received_at": "2012-11-28 03:54:43.094151",
+>> >>>>           "age": "27812.942680",
+>> >>>>           "duration": "2.676641",
+>> >>>>           "flag_point": "started",
+>> >>>>           "events": [
+>> >>>>                 { "time": "2012-11-28 03:54:43.094222",
+>> >>>>                   "event": "waiting_for_osdmap"},
+>> >>>>                 { "time": "2012-11-28 03:54:43.386890",
+>> >>>>                   "event": "reached_pg"},
+>> >>>>                 { "time": "2012-11-28 03:54:43.386894",
+>> >>>>                   "event": "started"},
+>> >>>>                 { "time": "2012-11-28 03:54:43.386973",
+>> >>>>                   "event": "commit_queued_for_journal_write"},
+>> >>>>                 { "time": "2012-11-28 03:54:45.360049",
+>> >>>>                   "event": "write_thread_in_journal_buffer"},
+>> >>>>                 { "time": "2012-11-28 03:54:45.586183",
+>> >>>>                   "event": "journaled_completion_queued"},
+>> >>>>                 { "time": "2012-11-28 03:54:45.586262",
+>> >>>>                   "event": "sub_op_commit"},
+>> >>>>                 { "time": "2012-11-28 03:54:45.770792",
+>> >>>>                   "event": "sub_op_applied"}]}]}
+>> >>>>
+>> >>>>
+>> >>>>>
+>> >>>>>
+>> >>>>>>
+>> >>>>>> sage
+>> >>>>>>
+>> >>>>>> >
+>> >>>>>> > Stefan
+>> >>>>>> >
+>> >>>>>> >
+>> >>>>>> > > On Wed, 14 Nov 2012, Stefan Priebe - Profihost AG wrote:
+>> >>>>>> > >
+>> >>>>>> > > > Hello list,
+>> >>>>>> > > >
+>> >>>>>> > > > i see this several times. Endless flying slow requests. And they never
+>> >>>>>> > > > stop
+>> >>>>>> > > > until i restart the mentioned osd.
+>> >>>>>> > > >
+>> >>>>>> > > > 2012-11-14 10:11:57.513395 osd.24 [WRN] 1 slow requests, 1 included below;
+>> >>>>>> > > > oldest blocked for > 31789.858457 secs
+>> >>>>>> > > > 2012-11-14 10:11:57.513399 osd.24 [WRN] slow request 31789.858457 seconds
+>> >>>>>> > > > old,
+>> >>>>>> > > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+>> >>>>>> > > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+>> >>>>>> > > > currently delayed
+>> >>>>>> > > > 2012-11-14 10:11:58.513584 osd.24 [WRN] 1 slow requests, 1 included below;
+>> >>>>>> > > > oldest blocked for > 31790.858646 secs
+>> >>>>>> > > > 2012-11-14 10:11:58.513586 osd.24 [WRN] slow request 31790.858646 seconds
+>> >>>>>> > > > old,
+>> >>>>>> > > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+>> >>>>>> > > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+>> >>>>>> > > > currently delayed
+>> >>>>>> > > > 2012-11-14 10:11:59.513766 osd.24 [WRN] 1 slow requests, 1 included below;
+>> >>>>>> > > > oldest blocked for > 31791.858827 secs
+>> >>>>>> > > > 2012-11-14 10:11:59.513768 osd.24 [WRN] slow request 31791.858827 seconds
+>> >>>>>> > > > old,
+>> >>>>>> > > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+>> >>>>>> > > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+>> >>>>>> > > > currently delayed
+>> >>>>>> > > > 2012-11-14 10:12:00.513909 osd.24 [WRN] 1 slow requests, 1 included below;
+>> >>>>>> > > > oldest blocked for > 31792.858971 secs
+>> >>>>>> > > > 2012-11-14 10:12:00.513916 osd.24 [WRN] slow request 31792.858971 seconds
+>> >>>>>> > > > old,
+>> >>>>>> > > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+>> >>>>>> > > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+>> >>>>>> > > > currently delayed
+>> >>>>>> > > > 2012-11-14 10:12:01.514061 osd.24 [WRN] 1 slow requests, 1 included below;
+>> >>>>>> > > > oldest blocked for > 31793.859124 secs
+>> >>>>>> > > > 2012-11-14 10:12:01.514063 osd.24 [WRN] slow request 31793.859124 seconds
+>> >>>>>> > > > old,
+>> >>>>>> > > > received at 2012-11-14 01:22:07.654922: osd_op(client.30286.0:6719
+>> >>>>>> > > > rbd_data.75c55bf2fdd7.0000000000001399 [write 282624~4096] 3.3f6d2373) v4
+>> >>>>>> > > > currently delayed
+>> >>>>>> > > >
+>> >>>>>> > > > When i now restart osd 24 they go away and everything is fine again.
+>> >>>>>> > > >
+>> >>>>>> > > > Stefan
+>> >>>>>> > > > --
+>> >>>>>> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>>> > > > the body of a message to majordomo@vger.kernel.org
+>> >>>>>> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>>>> > > >
+>> >>>>>> > > >
+>> >>>>>> > > --
+>> >>>>>> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>>> > > the body of a message to majordomo@vger.kernel.org
+>> >>>>>> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>>>> > >
+>> >>>>>> > --
+>> >>>>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>>> > the body of a message to majordomo@vger.kernel.org
+>> >>>>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>>>> >
+>> >>>>>> >
+>> >>>>>> --
+>> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>>>>
+>> >>>>>>
+>> >>>>> --
+>> >>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>> --
+>> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>> the body of a message to majordomo@vger.kernel.org
+>> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->> The branch is available in the ceph-client git repository
->> under the name "wip-nick" and has commit id dd9323aa.
->>     https://github.com/ceph/ceph-client/tree/wip-nick
 >>
->>> https://raw.github.com/gist/4132395/7cb5f0150179b012429c6e57749120dd88616cce/gistfile1.txt
->>
->> This full debug output is very helpful.  Please supply
->> that again as well.
->>
->> Thanks.
->>
->>                                       -Alex
->>
->>> On Wed, Nov 21, 2012 at 9:49 PM, Nick Bartos <nick@pistoncloud.com> wrote:
->>>> It's very easy to reproduce now with my automated install script, the
->>>> most I've seen it succeed with that patch is 2 in a row, and hanging
->>>> on the 3rd, although it hangs on most builds.  So it shouldn't take
->>>> much to get it to do it again.  I'll try and get to that tomorrow,
->>>> when I'm a bit more rested and my brain is working better.
->>>>
->>>> Yes during this the OSDs are probably all syncing up.  All the osd and
->>>> mon daemons have started by the time the rdb commands are ran, though.
->>>>
->>>> On Wed, Nov 21, 2012 at 8:47 PM, Sage Weil <sage@inktank.com> wrote:
->>>>> On Wed, 21 Nov 2012, Nick Bartos wrote:
->>>>>> FYI the build which included all 3.5 backports except patch #50 is
->>>>>> still going strong after 21 builds.
->>>>>
->>>>> Okay, that one at least makes some sense.  I've opened
->>>>>
->>>>>         http://tracker.newdream.net/issues/3519
->>>>>
->>>>> How easy is this to reproduce?  If it is something you can trigger with
->>>>> debugging enabled ('echo module libceph +p >
->>>>> /sys/kernel/debug/dynamic_debug/control') that would help tremendously.
->>>>>
->>>>> I'm guessing that during this startup time the OSDs are still in the
->>>>> process of starting?
->>>>>
->>>>> Alex, I bet that a test that does a lot of map/unmap stuff in a loop while
->>>>> thrashing OSDs could hit this.
->>>>>
->>>>> Thanks!
->>>>> sage
->>>>>
->>>>>
->>>>>>
->>>>>> On Wed, Nov 21, 2012 at 9:34 AM, Nick Bartos <nick@pistoncloud.com> wrote:
->>>>>>> With 8 successful installs already done, I'm reasonably confident that
->>>>>>> it's patch #50.  I'm making another build which applies all patches
->>>>>>> from the 3.5 backport branch, excluding that specific one.  I'll let
->>>>>>> you know if that turns up any unexpected failures.
->>>>>>>
->>>>>>> What will the potential fall out be for removing that specific patch?
->>>>>>>
->>>>>>>
->>>>>>> On Wed, Nov 21, 2012 at 9:02 AM, Nick Bartos <nick@pistoncloud.com> wrote:
->>>>>>>> It's really looking like it's the
->>>>>>>> libceph_resubmit_linger_ops_when_pg_mapping_changes commit.  When
->>>>>>>> patches 1-50 (listed below) are applied to 3.5.7, the hang is present.
->>>>>>>>  So far I have gone through 4 successful installs with no hang with
->>>>>>>> only 1-49 applied.  I'm still leaving my test run to make sure it's
->>>>>>>> not a fluke, but since previously it hangs within the first couple of
->>>>>>>> builds, it really looks like this is where the problem originated.
->>>>>>>>
->>>>>>>> 1-libceph_eliminate_connection_state_DEAD.patch
->>>>>>>> 2-libceph_kill_bad_proto_ceph_connection_op.patch
->>>>>>>> 3-libceph_rename_socket_callbacks.patch
->>>>>>>> 4-libceph_rename_kvec_reset_and_kvec_add_functions.patch
->>>>>>>> 5-libceph_embed_ceph_messenger_structure_in_ceph_client.patch
->>>>>>>> 6-libceph_start_separating_connection_flags_from_state.patch
->>>>>>>> 7-libceph_start_tracking_connection_socket_state.patch
->>>>>>>> 8-libceph_provide_osd_number_when_creating_osd.patch
->>>>>>>> 9-libceph_set_CLOSED_state_bit_in_con_init.patch
->>>>>>>> 10-libceph_embed_ceph_connection_structure_in_mon_client.patch
->>>>>>>> 11-libceph_drop_connection_refcounting_for_mon_client.patch
->>>>>>>> 12-libceph_init_monitor_connection_when_opening.patch
->>>>>>>> 13-libceph_fully_initialize_connection_in_con_init.patch
->>>>>>>> 14-libceph_tweak_ceph_alloc_msg.patch
->>>>>>>> 15-libceph_have_messages_point_to_their_connection.patch
->>>>>>>> 16-libceph_have_messages_take_a_connection_reference.patch
->>>>>>>> 17-libceph_make_ceph_con_revoke_a_msg_operation.patch
->>>>>>>> 18-libceph_make_ceph_con_revoke_message_a_msg_op.patch
->>>>>>>> 19-libceph_fix_overflow_in___decode_pool_names.patch
->>>>>>>> 20-libceph_fix_overflow_in_osdmap_decode.patch
->>>>>>>> 21-libceph_fix_overflow_in_osdmap_apply_incremental.patch
->>>>>>>> 22-libceph_transition_socket_state_prior_to_actual_connect.patch
->>>>>>>> 23-libceph_fix_NULL_dereference_in_reset_connection.patch
->>>>>>>> 24-libceph_use_con_get_put_methods.patch
->>>>>>>> 25-libceph_drop_ceph_con_get_put_helpers_and_nref_member.patch
->>>>>>>> 26-libceph_encapsulate_out_message_data_setup.patch
->>>>>>>> 27-libceph_encapsulate_advancing_msg_page.patch
->>>>>>>> 28-libceph_don_t_mark_footer_complete_before_it_is.patch
->>>>>>>> 29-libceph_move_init_bio__functions_up.patch
->>>>>>>> 30-libceph_move_init_of_bio_iter.patch
->>>>>>>> 31-libceph_don_t_use_bio_iter_as_a_flag.patch
->>>>>>>> 32-libceph_SOCK_CLOSED_is_a_flag_not_a_state.patch
->>>>>>>> 33-libceph_don_t_change_socket_state_on_sock_event.patch
->>>>>>>> 34-libceph_just_set_SOCK_CLOSED_when_state_changes.patch
->>>>>>>> 35-libceph_don_t_touch_con_state_in_con_close_socket.patch
->>>>>>>> 36-libceph_clear_CONNECTING_in_ceph_con_close.patch
->>>>>>>> 37-libceph_clear_NEGOTIATING_when_done.patch
->>>>>>>> 38-libceph_define_and_use_an_explicit_CONNECTED_state.patch
->>>>>>>> 39-libceph_separate_banner_and_connect_writes.patch
->>>>>>>> 40-libceph_distinguish_two_phases_of_connect_sequence.patch
->>>>>>>> 41-libceph_small_changes_to_messenger.c.patch
->>>>>>>> 42-libceph_add_some_fine_ASCII_art.patch
->>>>>>>> 43-libceph_set_peer_name_on_con_open_not_init.patch
->>>>>>>> 44-libceph_initialize_mon_client_con_only_once.patch
->>>>>>>> 45-libceph_allow_sock_transition_from_CONNECTING_to_CLOSED.patch
->>>>>>>> 46-libceph_initialize_msgpool_message_types.patch
->>>>>>>> 47-libceph_prevent_the_race_of_incoming_work_during_teardown.patch
->>>>>>>> 48-libceph_report_socket_read_write_error_message.patch
->>>>>>>> 49-libceph_fix_mutex_coverage_for_ceph_con_close.patch
->>>>>>>> 50-libceph_resubmit_linger_ops_when_pg_mapping_changes.patch
->>>>>>>>
->>>>>>>>
->>>>>>>> On Wed, Nov 21, 2012 at 8:50 AM, Sage Weil <sage@inktank.com> wrote:
->>>>>>>>> Thanks for hunting this down.  I'm very curious what the culprit is...
->>>>>>>>>
->>>>>>>>> sage
->>>>>>
->>>>>>
->>
->
