@@ -1,45 +1,42 @@
 From: Dan Mick <dan.mick@inktank.com>
 Subject: Re: rbd STDIN import does not work / wip-rbd-export-stdout
-Date: Sat, 01 Dec 2012 16:27:29 -0800
-Message-ID: <50BAA071.70300@inktank.com>
-References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag> <50B62580.2030301@profihost.ag>
+Date: Sat, 01 Dec 2012 16:28:14 -0800
+Message-ID: <50BAA09E.9070506@inktank.com>
+References: <50B36C9F.80107@profihost.ag> <50B36ED1.1020108@filoo.de> <50B37027.5000701@profihost.ag> <CAHybQB3qhoAXwhyDz16-D6EOidcPYg4p=hRwc7ag_tAq_Z_edA@mail.gmail.com> <2EC6C33E-4909-4AE5-B8C0-5D7A5856EA57@profihost.ag> <50B3CA6F.6000000@inktank.com> <50B484FF.9070500@profihost.ag> <50BA6746.4010609@profihost.ag>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:58674 "EHLO
+Received: from mail-da0-f46.google.com ([209.85.210.46]:37203 "EHLO
 	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753809Ab2LBA1t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 19:27:49 -0500
-Received: by mail-da0-f46.google.com with SMTP id p5so772676dak.19
-        for <ceph-devel@vger.kernel.org>; Sat, 01 Dec 2012 16:27:48 -0800 (PST)
-In-Reply-To: <50B62580.2030301@profihost.ag>
+	with ESMTP id S1753532Ab2LBA2b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Dec 2012 19:28:31 -0500
+Received: by mail-da0-f46.google.com with SMTP id p5so772804dak.19
+        for <ceph-devel@vger.kernel.org>; Sat, 01 Dec 2012 16:28:31 -0800 (PST)
+In-Reply-To: <50BA6746.4010609@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/28/2012 6:53 AM, Stefan Priebe - Profihost AG wrote:
+On 12/1/2012 12:23 PM, Stefan Priebe wrote:
 > Hi Dan,
 >
-> thanks for your update / new import-export branch.
+> Am 27.11.2012 10:16, schrieb Stefan Priebe - Profihost AG:
+>> Am 26.11.2012 21:00, schrieb Dan Mick:
+>>> It writes zeros; there's no way for it to know how many zeros are
+>>> coming.  It could make a half-hearted attempt depending on its buffer
+>>> size and the amount of data the source is willing to buffer.
 >
-> The import seems to work now. What i'm wondering is that it is really 
-> slow.
+> Yes but why not skip at leas if the WHOLE BUFFER is zero and then use 
+> the buffer size = stripe size?
 >
-> I see around 10% CPU Usage on importing host (host where rbd import is 
-> started) and just 4MB every 2s raising Data on ceph. This means 40GB 
-> took around 5-6 hours.
->
-> Night this be due to he size update? 4MB every 2s looks like the 
-> stripe size.
+> Right now a 40GB image which has just 3GB used rest is zeros due to 
+> using fstrim before doing the export takes a long time to import. We 
+> could speed this up a lot if we would skip parts with only zeros.
 
-I did change the resize to double each time to help with that before
-pushing to master, but that still seems awfully slow.  You should 
-definitely use the
-version in the mainline, though; it's better in several ways.
+Great minds!  I'm actually working on that now; as you say it's not hard.
 
-Are these particularly sparse images?  I'm testing a "preserve 
-sparseness" tweak that should help
-a lot if so (and save space in the cluster, obviously).
+> Greets,
+> Stefab
 
