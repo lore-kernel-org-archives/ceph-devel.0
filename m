@@ -1,47 +1,82 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: VM Corruption on 0.54 when 'client cache = false'
-Date: Sun, 2 Dec 2012 21:01:23 -0800
-Message-ID: <CAC-hyiEiPuxgprRu3bvzu2aJH84byJM99am1ftZo1Tq_PdqDcQ@mail.gmail.com>
-References: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
+From: Payal <payalsharma7@yahoo.com>
+Subject: java-rados =?utf-8?b?fA==?= Error while running test case
+Date: Mon, 3 Dec 2012 08:43:18 +0000 (UTC)
+Message-ID: <loom.20121203T092236-630@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:40659 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750710Ab2LCFBY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 00:01:24 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so1886257iay.19
-        for <ceph-devel@vger.kernel.org>; Sun, 02 Dec 2012 21:01:23 -0800 (PST)
-In-Reply-To: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
+Received: from plane.gmane.org ([80.91.229.3]:54952 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751130Ab2LCIt4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 3 Dec 2012 03:49:56 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TfRj2-0006V2-Hv
+	for ceph-devel@vger.kernel.org; Mon, 03 Dec 2012 09:50:05 +0100
+Received: from NSG-Static-094.122.71.182.airtel.in ([NSG-Static-094.122.71.182.airtel.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 09:50:04 +0100
+Received: from payalsharma7 by NSG-Static-094.122.71.182.airtel.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 09:50:04 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matthew Anderson <matthewa@base3.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Sun, Dec 2, 2012 at 6:18 PM, Matthew Anderson <matthewa@base3.com.au> wrote:
-> Hi All,
->
-> I've run into a corruption bug when the RBD client cache is set to false under QEMU-KVM. With the cache on everything is fine but write speeds drop considerably, 4KB sequential goes from 5.1MB/s to 1.8MB/s no matter what size the cache is or if writethrough is used. With the cache off I am usually able to boot the virtual machine once after copying a template to RBD using qemu-img. If I shut the VM down completely and boot it up again the virtual machine no longer sees it's partitions correctly and boots into restore mode where it can't fix itself. The test VM I was using was Windows Server 2012 Standard and Ceph is setup as a single node.
->
-> Ceph version is 0.54 (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150)
->
-> Host setup is -
-> Dual Intel 5620, 48GB
-> 4x 480GB SSD attached via the onboard SATA.
-> Each OSD was setup with a 1GB journal partition and the rest of the space as BTRFS
-> 40GB Infiniband + 2x 1GBe
-> Scientific Linux 6.3 running mainline Kernel 3.6.7 from Elrepo
-> QEMU-KVM userspace 1.2.0 compiled from source
->
-> I was able to find a reference to a previous bug which was resolved by setting "filestore fiemap threshold = 0" and "filestore fiemap = false" but this didn't have any effect on the issue. I have also tried the latest GIT version (as of 3 days a go) and the issue appeared to be there still but I didn't test enough to say conclusively that the bug is the exact same.
->
-> Is anyone able to suggest anything that may help? If you need more information just let me know.
->
+Hi,
 
-Not that it matters, as you've set 'filestore fiemap  = false', but
-'filestore fiemap threshold = 0' won't turn off the use of fiemap, but
-instead will try to use it with every sparse read (unless 'filestore
-fiemap' has been set to false).
+I am working on a sample app to test the object storage and connectivity with
+the CEPH cluster(basically an app that talk directly to the Ceph object store).
+Initially the aim is to keep 1 CEPH cluster on 1 VM and try the object
+operations through 2nd VM. We won't be using RADOS Gateway, CEPH FS  and Block
+devices. 
 
-Yehuda
+Environment : 2 Virtual machines
+Both- carries: Ubuntu 12.04 and Java 7.
+A)  On 1st VM I have installed CEPH Cluster and its showing Health OK for
+cluster( all default settings as of now)
+
+B) On 2nd VM, I have placed the code (java to c native)
+"https://github.com/noahdesu/java-rados"
+  On this 2nd VM I ve also added the stable release packages  and installed
+packages mentioned in "http://ceph.com/docs/master/install/debian/"
+
+The build for the code has been successful. Both the files "dist/librados.jar"
+and "dist/libjavarados.a" are placed in dist folder as expected. Also the host
+name and IP address of the 1st VM machine has been given in the ceph.conf file
+placed in 2nd VM machine.
+      But on running the test  "$ant test" from 2nd VM, I am getting the below
+mentioned error. The instructions mentioned under README of the java-rados link
+have been followed but I am not clear with the statement : "If Ceph/RADOS is
+installed under standard system paths", also to which packages/jar the custom
+CEPH/Rados for the include and lib refers to ?:
+
+Error :
+Testsuite: ClusterStatsTest
+Tests run: 1, Failures: 0, Errors: 2, Time elapsed: 0.052 sec
+
+Testcase: test_ClusterStats took 0.025 sec
+    Caused an ERROR
+no javarados in java.library.path
+java.lang.UnsatisfiedLinkError: no javarados in java.library.path
+    at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1860)
+    at java.lang.Runtime.loadLibrary0(Runtime.java:845)
+    at java.lang.System.loadLibrary(System.java:1084)
+    at net.newdream.ceph.rados.Cluster.<clinit>(Unknown Source)
+    at ClusterStatsTest.setup(Unknown Source)
+
+    Caused an ERROR
+null
+java.lang.NullPointerException
+    at ClusterStatsTest.destroy(Unknown Source)
+
+
+Let me know if you need more information on this.
+
+Thanks in advance.
+
+
+
+
