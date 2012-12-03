@@ -1,82 +1,44 @@
-From: Payal <payalsharma7@yahoo.com>
-Subject: java-rados =?utf-8?b?fA==?= Error while running test case
-Date: Mon, 3 Dec 2012 08:43:18 +0000 (UTC)
-Message-ID: <loom.20121203T092236-630@post.gmane.org>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: OSD daemon changes port no
+Date: Mon, 3 Dec 2012 10:20:12 +0100
+Message-ID: <CAF6-1L4+0CwzW=to5DWe_q3bEk6eD3hMSLeekN2hZ5fhHTZ2=g@mail.gmail.com>
+References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
+	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
+	<CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
+	<alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
+	<CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
+	<alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net>
+	<CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com>
+	<alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
+	<CAGfy=6kAkXrdYwL-Ui-Xd2Qsqaf8hcUbWGY94QOFfaRA1AmUrA@mail.gmail.com>
+	<alpine.DEB.2.00.1211260826190.23552@cobra.newdream.net>
+	<CAGfy=6mOnv90GighPr=nTWapJU_4wjo-z9nHh_ji6VvvrUeMHg@mail.gmail.com>
+	<alpine.DEB.2.00.1211270851320.30109@cobra.newdream.net>
+	<CAGfy=6mNa02BE6vsRssx6qURxCy9TtnXShxaS0PMPcepnuARvQ@mail.gmail.com>
+	<CAGfy=6mDnVDTSNFD5R-iXz1cPAty1FmXa7fX6K1kA9UqAWJvCg@mail.gmail.com>
+	<CAGfy=6kNPEiUSByW7Bo6CMgttXdZSdYR5ESajXWxEW30+qyhPw@mail.gmail.com>
+	<alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:54952 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751130Ab2LCIt4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Dec 2012 03:49:56 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TfRj2-0006V2-Hv
-	for ceph-devel@vger.kernel.org; Mon, 03 Dec 2012 09:50:05 +0100
-Received: from NSG-Static-094.122.71.182.airtel.in ([NSG-Static-094.122.71.182.airtel.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 09:50:04 +0100
-Received: from payalsharma7 by NSG-Static-094.122.71.182.airtel.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 09:50:04 +0100
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:63155 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751658Ab2LCJUN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 04:20:13 -0500
+Received: by mail-oa0-f46.google.com with SMTP id h16so2410011oag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 01:20:13 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: hemant surale <hemant.surale@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+> # cephfs foo set_layout --pool 3
 
-I am working on a sample app to test the object storage and connectivity with
-the CEPH cluster(basically an app that talk directly to the Ceph object store).
-Initially the aim is to keep 1 CEPH cluster on 1 VM and try the object
-operations through 2nd VM. We won't be using RADOS Gateway, CEPH FS  and Block
-devices. 
+From early tests I seem to remember that just setting the pool using
+set_layout wasn't accepted by the tool, I had to reset all the layout
+parameters in the command.
 
-Environment : 2 Virtual machines
-Both- carries: Ubuntu 12.04 and Java 7.
-A)  On 1st VM I have installed CEPH Cluster and its showing Health OK for
-cluster( all default settings as of now)
+Cheers,
 
-B) On 2nd VM, I have placed the code (java to c native)
-"https://github.com/noahdesu/java-rados"
-  On this 2nd VM I ve also added the stable release packages  and installed
-packages mentioned in "http://ceph.com/docs/master/install/debian/"
-
-The build for the code has been successful. Both the files "dist/librados.jar"
-and "dist/libjavarados.a" are placed in dist folder as expected. Also the host
-name and IP address of the 1st VM machine has been given in the ceph.conf file
-placed in 2nd VM machine.
-      But on running the test  "$ant test" from 2nd VM, I am getting the below
-mentioned error. The instructions mentioned under README of the java-rados link
-have been followed but I am not clear with the statement : "If Ceph/RADOS is
-installed under standard system paths", also to which packages/jar the custom
-CEPH/Rados for the include and lib refers to ?:
-
-Error :
-Testsuite: ClusterStatsTest
-Tests run: 1, Failures: 0, Errors: 2, Time elapsed: 0.052 sec
-
-Testcase: test_ClusterStats took 0.025 sec
-    Caused an ERROR
-no javarados in java.library.path
-java.lang.UnsatisfiedLinkError: no javarados in java.library.path
-    at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1860)
-    at java.lang.Runtime.loadLibrary0(Runtime.java:845)
-    at java.lang.System.loadLibrary(System.java:1084)
-    at net.newdream.ceph.rados.Cluster.<clinit>(Unknown Source)
-    at ClusterStatsTest.setup(Unknown Source)
-
-    Caused an ERROR
-null
-java.lang.NullPointerException
-    at ClusterStatsTest.destroy(Unknown Source)
-
-
-Let me know if you need more information on this.
-
-Thanks in advance.
-
-
-
-
+    Sylvain
