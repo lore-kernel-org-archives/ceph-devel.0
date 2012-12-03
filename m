@@ -1,44 +1,52 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: OSD daemon changes port no
-Date: Mon, 3 Dec 2012 10:20:12 +0100
-Message-ID: <CAF6-1L4+0CwzW=to5DWe_q3bEk6eD3hMSLeekN2hZ5fhHTZ2=g@mail.gmail.com>
-References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
-	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
-	<CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
-	<alpine.DEB.2.00.1211202217320.1082@cobra.newdream.net>
-	<CAGfy=6=7xGcuaDnB72Lp9mey_esU015wCyiTZKPHwEFw=pEuyQ@mail.gmail.com>
-	<alpine.DEB.2.00.1211202302390.1082@cobra.newdream.net>
-	<CAGfy=6mL5UAeO9EM7VD4BbRRYy2eC8C1HLMu3vvyizYD43NiGw@mail.gmail.com>
-	<alpine.DEB.2.00.1211210726110.1082@cobra.newdream.net>
-	<CAGfy=6kAkXrdYwL-Ui-Xd2Qsqaf8hcUbWGY94QOFfaRA1AmUrA@mail.gmail.com>
-	<alpine.DEB.2.00.1211260826190.23552@cobra.newdream.net>
-	<CAGfy=6mOnv90GighPr=nTWapJU_4wjo-z9nHh_ji6VvvrUeMHg@mail.gmail.com>
-	<alpine.DEB.2.00.1211270851320.30109@cobra.newdream.net>
-	<CAGfy=6mNa02BE6vsRssx6qURxCy9TtnXShxaS0PMPcepnuARvQ@mail.gmail.com>
-	<CAGfy=6mDnVDTSNFD5R-iXz1cPAty1FmXa7fX6K1kA9UqAWJvCg@mail.gmail.com>
-	<CAGfy=6kNPEiUSByW7Bo6CMgttXdZSdYR5ESajXWxEW30+qyhPw@mail.gmail.com>
-	<alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: New configuration / command line handling
+Date: Mon, 3 Dec 2012 10:57:29 +0100
+Message-ID: <CAN04cT6XTzaqQuLyQUUWY34F9ZQ1xoLwK3uJt5+SS-Ui+MCUCg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:63155 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751658Ab2LCJUN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 04:20:13 -0500
-Received: by mail-oa0-f46.google.com with SMTP id h16so2410011oag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 01:20:13 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:48673 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754528Ab2LCJ5a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 04:57:30 -0500
+Received: by mail-vb0-f46.google.com with SMTP id b13so1387057vby.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 01:57:29 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: hemant surale <hemant.surale@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-> # cephfs foo set_layout --pool 3
+Hi list, ceph devs,
 
-From early tests I seem to remember that just setting the pool using
-set_layout wasn't accepted by the tool, I had to reset all the layout
-parameters in the command.
+I've been doing some toying with Ceph lately in my spare time and one
+of the things I'm doing is trying to refactor some of the
+configuration handling / argument parsing. I had some trouble finding
+specific runtime options and configuration settings, so I thought this
+was a good way to get to know the code somewhat better :-) Because
+boost was already used in some places, and some tests also used
+boost::program_options, I've created a new config framework based on
+this. This framework allows for more advanced configuration files in
+the future, beter command line handling, and reduces the amount of
+code in argument parsing somewhat. I also created a different observer
+system, where different parts of the code base can subscribe to
+changes in specific parameters and get notified on changes.
 
-Cheers,
+To allow somewhat of a smoother transition and backwards
+compatibility, I've made the new configuration class inherit from the
+one one (md_config_t) and switched all references (like g_conf) to the
+new class. There were also some small changes in files with references
+directly to md_config_t, like pidfile_write. Global_init and
+common_init were duplicated such that it 'injects' the new
+configuration class in the ceph_context object. Most config entries
+are read directly from the md_config_t class (e.g. g_conf->pid_file),
+so it will take some more changes to allow my configuration framework
+to function properly.
 
-    Sylvain
+Of course it's an extremely long long long way from ready, but maybe
+you're interested. Maybe you think this is not needed at all... I'd
+love to have some feedback on it either way.
+
+Anyway, let me know if you want to check it out and I'll push my
+branch to github for you to pull.
+
+
+- Roald
