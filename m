@@ -1,52 +1,92 @@
-From: Roald van Loon <roaldvanloon@gmail.com>
-Subject: New configuration / command line handling
-Date: Mon, 3 Dec 2012 10:57:29 +0100
-Message-ID: <CAN04cT6XTzaqQuLyQUUWY34F9ZQ1xoLwK3uJt5+SS-Ui+MCUCg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: VM Corruption on 0.54 when 'client cache
+ =?UTF-8?Q?=3D=20false=27?=
+Date: Mon, 03 Dec 2012 02:00:51 -0800
+Message-ID: <9cae09be7789e62ef6520f467a223e5b@hq.newdream.net>
+References: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:48673 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754528Ab2LCJ5a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 04:57:30 -0500
-Received: by mail-vb0-f46.google.com with SMTP id b13so1387057vby.19
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 01:57:29 -0800 (PST)
+Received: from ps79606.dreamhost.com ([66.33.206.83]:54746 "EHLO
+	webmail.hq.newdream.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751291Ab2LCKAv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 05:00:51 -0500
+In-Reply-To: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Matthew Anderson <matthewa@base3.com.au>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-Hi list, ceph devs,
+On 2012-12-02 18:18, Matthew Anderson wrote:
+> Hi All,
+>
+> I've run into a corruption bug when the RBD client cache is set to
+> false under QEMU-KVM. With the cache on everything is fine but write
+> speeds drop considerably, 4KB sequential goes from 5.1MB/s to 1.8MB/s
+> no matter what size the cache is or if writethrough is used. With the
+> cache off I am usually able to boot the virtual machine once after
+> copying a template to RBD using qemu-img. If I shut the VM down
+> completely and boot it up again the virtual machine no longer sees
+> it's partitions correctly and boots into restore mode where it can't
+> fix itself. The test VM I was using was Windows Server 2012 Standard
+> and Ceph is setup as a single node.
 
-I've been doing some toying with Ceph lately in my spare time and one
-of the things I'm doing is trying to refactor some of the
-configuration handling / argument parsing. I had some trouble finding
-specific runtime options and configuration settings, so I thought this
-was a good way to get to know the code somewhat better :-) Because
-boost was already used in some places, and some tests also used
-boost::program_options, I've created a new config framework based on
-this. This framework allows for more advanced configuration files in
-the future, beter command line handling, and reduces the amount of
-code in argument parsing somewhat. I also created a different observer
-system, where different parts of the code base can subscribe to
-changes in specific parameters and get notified on changes.
+That disabling caching improves write speed sounds like something 
+strange
+is going on. What's the full QEMU/KVM command line and ceph.conf used
+when running the VM?
 
-To allow somewhat of a smoother transition and backwards
-compatibility, I've made the new configuration class inherit from the
-one one (md_config_t) and switched all references (like g_conf) to the
-new class. There were also some small changes in files with references
-directly to md_config_t, like pidfile_write. Global_init and
-common_init were duplicated such that it 'injects' the new
-configuration class in the ceph_context object. Most config entries
-are read directly from the md_config_t class (e.g. g_conf->pid_file),
-so it will take some more changes to allow my configuration framework
-to function properly.
+The corruption issue is more serious, and not something I've seen
+reported before. Does it occur only with Windows Server 2012 VMs, or
+does it happen with a Linux VM as well? More specific debugging
+suggestions are below.
 
-Of course it's an extremely long long long way from ready, but maybe
-you're interested. Maybe you think this is not needed at all... I'd
-love to have some feedback on it either way.
+> Ceph version is 0.54 
+> (commit:60b84b095b1009a305d4d6a5b16f88571cbd3150)
+>
+> Host setup is -
+> Dual Intel 5620, 48GB
+> 4x 480GB SSD attached via the onboard SATA.
+> Each OSD was setup with a 1GB journal partition and the rest of the
+> space as BTRFS
+> 40GB Infiniband + 2x 1GBe
+> Scientific Linux 6.3 running mainline Kernel 3.6.7 from Elrepo
+> QEMU-KVM userspace 1.2.0 compiled from source
+>
+> I was able to find a reference to a previous bug which was resolved
+> by setting "filestore fiemap threshold = 0" and "filestore fiemap =
+> false" but this didn't have any effect on the issue. I have also 
+> tried
+> the latest GIT version (as of 3 days a go) and the issue appeared to
+> be there still but I didn't test enough to say conclusively that the
+> bug is the exact same.
 
-Anyway, let me know if you want to check it out and I'll push my
-branch to github for you to pull.
+fiemap is off by default since we discovered that issue, so this is a
+different bug.
 
+> Is anyone able to suggest anything that may help? If you need more
+> information just let me know.
 
-- Roald
+Since the guest can't find its partitions, could you try exporting
+the image to a file (rbd export pool/image filename), and then run
+gdisk -l on the file? Doing this before booting, and then again after
+the corruption occurs and the VM is shut down might help determine the 
+nature
+of the corruption, and which parts of the image are corrupted.
+If you run the VM with 'debug ms = 1', 'debug objectcacher = 20', 
+'debug librbd = 20',
+and  'log file = /path/to/file/writeable/by/qemu' in the [client] 
+section of ceph.conf,
+we might be able to see what's happening to the problematic parts of 
+the image.
+If the logs are long, you can attach them to a bug report referring to 
+this email at
+http://tracker.newdream.net.
+
+Another thing to try is running 'ceph osd deep-scrub', which will check
+for consistency of objects across OSDs, and report problems in 'ceph 
+-s'.
+
+Josh
