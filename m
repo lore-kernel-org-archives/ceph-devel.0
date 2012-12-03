@@ -1,7 +1,7 @@
 From: hemant surale <hemant.surale@gmail.com>
 Subject: Re: OSD daemon changes port no
-Date: Mon, 3 Dec 2012 16:30:46 +0530
-Message-ID: <CAGfy=6nxXXE+Rpa69E5McnGoaaS2k8SuXO_b0q_Omc6JSuZtMA@mail.gmail.com>
+Date: Mon, 3 Dec 2012 16:31:32 +0530
+Message-ID: <CAGfy=6nFTN1mRku+x2jR9q1q3X3Wi_hVKEdjs7Qbo9Lt7EeORQ@mail.gmail.com>
 References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
 	<alpine.DEB.2.00.1211200844240.7369@cobra.newdream.net>
 	<CAGfy=6k3xh_dKJRNiNL_ecKOOXnGWaQT5i2K0Gpz9wW0=C7mWg@mail.gmail.com>
@@ -19,34 +19,39 @@ References: <CAGfy=6kVyt-a+j8mKYqXYVErRWEUK8ko1ydJuBxY5dr849OD0A@mail.gmail.com>
 	<CAGfy=6kNPEiUSByW7Bo6CMgttXdZSdYR5ESajXWxEW30+qyhPw@mail.gmail.com>
 	<alpine.DEB.2.00.1211300831310.3173@cobra.newdream.net>
 	<CAF6-1L4+0CwzW=to5DWe_q3bEk6eD3hMSLeekN2hZ5fhHTZ2=g@mail.gmail.com>
+	<CAGfy=6nxXXE+Rpa69E5McnGoaaS2k8SuXO_b0q_Omc6JSuZtMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:44536 "EHLO
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:36726 "EHLO
 	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752140Ab2LCLAs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 06:00:48 -0500
-Received: by mail-vb0-f46.google.com with SMTP id b13so1433274vby.19
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 03:00:47 -0800 (PST)
-In-Reply-To: <CAF6-1L4+0CwzW=to5DWe_q3bEk6eD3hMSLeekN2hZ5fhHTZ2=g@mail.gmail.com>
+	with ESMTP id S1754183Ab2LCLBd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 06:01:33 -0500
+Received: by mail-vb0-f46.google.com with SMTP id b13so1433904vby.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 03:01:32 -0800 (PST)
+In-Reply-To: <CAGfy=6nxXXE+Rpa69E5McnGoaaS2k8SuXO_b0q_Omc6JSuZtMA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Yeah. Here I also used "cephfs foomount --pool 3 -c 1 -u 4194304 -s
-4194304 " instead of "cephfs foomount --pool 3 "
+Yeah. Here I also used "cephfs foomount set_layout --pool 3 -c 1 -u 4194304 -s
+4194304 " instead of "cephfs foomount set_layout --pool 3 "
 
-
-
-On Mon, Dec 3, 2012 at 2:50 PM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
->> # cephfs foo set_layout --pool 3
+On Mon, Dec 3, 2012 at 4:30 PM, hemant surale <hemant.surale@gmail.com> wrote:
+> Yeah. Here I also used "cephfs foomount --pool 3 -c 1 -u 4194304 -s
+> 4194304 " instead of "cephfs foomount --pool 3 "
 >
-> From early tests I seem to remember that just setting the pool using
-> set_layout wasn't accepted by the tool, I had to reset all the layout
-> parameters in the command.
 >
-> Cheers,
 >
->     Sylvain
+> On Mon, Dec 3, 2012 at 2:50 PM, Sylvain Munaut
+> <s.munaut@whatever-company.com> wrote:
+>>> # cephfs foo set_layout --pool 3
+>>
+>> From early tests I seem to remember that just setting the pool using
+>> set_layout wasn't accepted by the tool, I had to reset all the layout
+>> parameters in the command.
+>>
+>> Cheers,
+>>
+>>     Sylvain
