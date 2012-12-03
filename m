@@ -1,75 +1,58 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Roald van Loon <roaldvanloon@gmail.com>
 Subject: Re: New configuration / command line handling
-Date: Mon, 03 Dec 2012 13:51:37 -0800
-Message-ID: <50BD1EE9.909@inktank.com>
+Date: Mon, 3 Dec 2012 23:46:04 +0100
+Message-ID: <CAN04cT5UgSipUOG9Ch=nXOwh-AGvmhtFzHOKDamuN6zxBtg9iQ@mail.gmail.com>
 References: <CAN04cT6XTzaqQuLyQUUWY34F9ZQ1xoLwK3uJt5+SS-Ui+MCUCg@mail.gmail.com>
+	<50BD1EE9.909@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:59301 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750874Ab2LCVvs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 16:51:48 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so2224546pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 13:51:48 -0800 (PST)
-In-Reply-To: <CAN04cT6XTzaqQuLyQUUWY34F9ZQ1xoLwK3uJt5+SS-Ui+MCUCg@mail.gmail.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:36464 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751236Ab2LCWqE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 17:46:04 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so2612591iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 14:46:04 -0800 (PST)
+In-Reply-To: <50BD1EE9.909@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 12/03/2012 01:57 AM, Roald van Loon wrote:
-> Hi list, ceph devs,
+On Mon, Dec 3, 2012 at 10:51 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> It looks like you've got a good start on integrating it into the main
+> ceph infrastructure. Skimming over it, the general structure makes sense
+> to me. One part that might be a bit tricky is making the new parsing
+> backwards compatible with the old parsing.
 >
-> I've been doing some toying with Ceph lately in my spare time and one
-> of the things I'm doing is trying to refactor some of the
-> configuration handling / argument parsing. I had some trouble finding
-> specific runtime options and configuration settings, so I thought this
-> was a good way to get to know the code somewhat better :-) Because
-> boost was already used in some places, and some tests also used
-> boost::program_options, I've created a new config framework based on
-> this. This framework allows for more advanced configuration files in
-> the future, beter command line handling, and reduces the amount of
-> code in argument parsing somewhat. I also created a different observer
-> system, where different parts of the code base can subscribe to
-> changes in specific parameters and get notified on changes.
+> 1) For config options in general, '-', '_', and ' ' are all equivalent.
+> 2) In ceph's config file format, we treat ';' as a comment in addition to
+> '#'.
+>
+> I'm not sure how difficult those are to handle with the built-in
+> boost::program_options parsers.
 
-Awesome! We've needed better command line parsing and usage for a while.
-It looks like boost::program_options does a lot of nice things there.
+Well, there is another (maybe larger) problem; metavalues. Boost::po
+can't handle them. That's why I am implementing the raw config file
+parsing separately (partly using boost::property_tree actually), load
+all options in a tree hierarchy (for example [osd.1] -> [osd] ->
+[global]) and then do metavalue lookups top-down with static regexps.
+Then, I have a parsed and complete set in the top of the tree (osd.1
+in this case) which I can feed to boost::po to be parsed. Still have
+to work out some of the details though, but I think this is generally
+a nice way of config parsing. I'll see if I can find the time this
+week to implement it if you're interested.
 
-> To allow somewhat of a smoother transition and backwards
-> compatibility, I've made the new configuration class inherit from the
-> one one (md_config_t) and switched all references (like g_conf) to the
-> new class. There were also some small changes in files with references
-> directly to md_config_t, like pidfile_write. Global_init and
-> common_init were duplicated such that it 'injects' the new
-> configuration class in the ceph_context object. Most config entries
-> are read directly from the md_config_t class (e.g. g_conf->pid_file),
-> so it will take some more changes to allow my configuration framework
-> to function properly.
+> Converting some of the individual command line tools that use
+> subcommands might be a little cumbersome too, but I think they'll
+> be better off once it's done.
 
-This seems like a nice way to allow it to be used gradually by more
-and more tools.
+My biggest concern is that most code directly accesses members of
+md_config_t by means of g_conf->foo. It's very difficult to port that
+to the new class without actually loading all of the available config
+options as class members - something I'm personally not a big fan of.
+I haven't had the time to think of a nice solution, yet (something
+like getter/setter methods maybe, or macros?). If you have any
+thoughts about this I'd very much like to hear them.
 
-> Of course it's an extremely long long long way from ready, but maybe
-> you're interested. Maybe you think this is not needed at all... I'd
-> love to have some feedback on it either way.
-
-It looks like you've got a good start on integrating it into the main
-ceph infrastructure. Skimming over it, the general structure makes sense
-to me. One part that might be a bit tricky is making the new parsing
-backwards compatible with the old parsing.
-
-1) For config options in general, '-', '_', and ' ' are all equivalent.
-2) In ceph's config file format, we treat ';' as a comment in addition 
-to '#'.
-
-I'm not sure how difficult those are to handle with the built-in
-boost::program_options parsers.
-
-Converting some of the individual command line tools that use
-subcommands might be a little cumbersome too, but I think they'll
-be better off once it's done.
-
-Josh
+- Roald
