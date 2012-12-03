@@ -1,285 +1,406 @@
-From: "Blackwell, Edward" <eblack04@harris.com>
-Subject: RE: Remote Ceph Install
-Date: Mon, 3 Dec 2012 21:14:48 +0000
-Message-ID: <A2F373745D229246AD96986D5DDC5D3B4F97A66D@MLBMXUS22.cs.myharris.net>
-References: <A2F373745D229246AD96986D5DDC5D3B4F970796@MLBMXUS22.cs.myharris.net>
- <50AAFD43.7000203@inktank.com>
- <A2F373745D229246AD96986D5DDC5D3B4F97A5C1@MLBMXUS22.cs.myharris.net>
- <50BD0D67.7070803@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: Remote Ceph Install
+Date: Mon, 03 Dec 2012 13:22:48 -0800
+Message-ID: <50BD1828.40503@inktank.com>
+References: <A2F373745D229246AD96986D5DDC5D3B4F970796@MLBMXUS22.cs.myharris.net> <50AAFD43.7000203@inktank.com> <A2F373745D229246AD96986D5DDC5D3B4F97A5C1@MLBMXUS22.cs.myharris.net> <50BD0D67.7070803@inktank.com> <A2F373745D229246AD96986D5DDC5D3B4F97A66D@MLBMXUS22.cs.myharris.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mlbefw2.ngenready.com ([192.52.233.80]:61395 "EHLO
-	mlbefw2.harris.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751034Ab2LCVOx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 16:14:53 -0500
-In-Reply-To: <50BD0D67.7070803@inktank.com>
-Content-Language: en-US
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:35156 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751211Ab2LCVWw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Dec 2012 16:22:52 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so2296397pbc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Dec 2012 13:22:52 -0800 (PST)
+In-Reply-To: <A2F373745D229246AD96986D5DDC5D3B4F97A66D@MLBMXUS22.cs.myharris.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
+To: "Blackwell, Edward" <eblack04@harris.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgRGFuLA0KDQpJbiB0aGUgdmVyc2lvbiBvZiB0aGUgQ2VwaCBpbnN0YWxsYXRpb24gaW5zdHJ1
-Y3Rpb25zIEkgd2FzIGdpdmVuLCBJIGRvbid0IGhhdmUgYSAiY2VwaC1kZXBsb3kgZ2F0aGVya2V5
-cyIgc3RlcC4gIElzIHRoZXJlIGEgbmV3ZXIgdmVyc2lvbiwgb3IgY2FuIHlvdSBicmllZmx5IGRl
-c2NyaWJlIHRoZSB1c2Ugb2YgdGhpcyBjb21tYW5kPw0KDQpUaGFua3MsDQoNClRvZGQNCg0KVG9k
-ZCBCbGFja3dlbGwgDQpIQVJSSVMgQ29ycG9yYXRpb24gDQogIDMyMS05ODQtNjkxMSANCu+DiCA5
-NTQtODE3LTM2NjIgDQogIGVibGFjazA0QGhhcnJpcy5jb20gDQoNCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IERhbiBNaWNrIFttYWlsdG86ZGFuLm1pY2tAaW5rdGFuay5jb21d
-IA0KU2VudDogTW9uZGF5LCBEZWNlbWJlciAwMywgMjAxMiAzOjM3IFBNDQpUbzogQmxhY2t3ZWxs
-LCBFZHdhcmQNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFJl
-bW90ZSBDZXBoIEluc3RhbGwNCg0KDQoNCk9uIDEyLzAzLzIwMTIgMTA6NTMgQU0sIEJsYWNrd2Vs
-bCwgRWR3YXJkIHdyb3RlOg0KPiBIaSBEYW4sDQo+DQo+IFRoYW5rcyBmb3IgdGhlIHdlbGNvbWUg
-YW5kIHRoZSBhZHZpY2UuICBUaGVyZSBpbmRlZWQgd2FzIGEgcHJvYmxlbSB3aXRoIHRoZSBob3N0
-IG5hbWUgYW5kIGNhcGl0YWxpemF0aW9uIGFzIHlvdSBkZXNjcmliZWQsIGJ1dCBvbmNlIEkgY29y
-cmVjdGVkIHRoYXQsIGEgbmV3IGlzc3VlIGJlZ2FuIHRvIG9jY3VyIHdoZW4gSSByYW4gdGhlICJj
-ZXBoLWRlcGxveSBtb24iIGNvbW1hbmQuICBUaGUgY29tbWFuZCBhcHBlYXJzIHRvIHJ1biBzdWNj
-ZXNzZnVsbHkgKG5vIG91dHB1dCBmcm9tIHRoZSBjb21tYW5kIGlzIGdlbmVyYXRlZCksIGJ1dCB3
-aGVuIEkgY2hlY2sgdGhlIHN0YXR1cyBvbiBvbmUgb2YgdGhlIHNlcnZlcnMgaW4gdGhlIGNsdXN0
-ZXIgKGNlcGgwNCBhbmQgRUxTQ0VQSDAxKSBhcyByZWNvbW1lbmRlZCBieSB0aGUgZGlyZWN0aW9u
-cywgSSBnZXQgdGhlIGZvbGxvd2luZzoNCj4NCj4gcm9vdEBjZXBoY2xpZW50MDE6fi9teS1hZG1p
-bi1zYW5kYm94IyBjZXBoLWRlcGxveSBtb24NCj4gcm9vdEBjZXBoY2xpZW50MDE6fi9teS1hZG1p
-bi1zYW5kYm94IyBzc2ggY2VwaDA0IGNlcGggLXMNCj4gMjAxMi0xMi0wMyAxMzoyNjozMC4wMzE4
-NTQgN2ZjMzUzZDYwNzgwIC0xIGF1dGg6IGZhaWxlZCB0byBvcGVuIGtleXJpbmcgZnJvbSAvZXRj
-L2NlcGgvY2VwaC5jbGllbnQuYWRtaW4ua2V5cmluZywvZXRjL2NlcGgvY2VwaC5rZXlyaW5nLC9l
-dGMvY2VwaC9rZXlyaW5nLC9ldGMvY2VwaC9rZXlyaW5nLmJpbg0KPiAyMDEyLTEyLTAzIDEzOjI2
-OjMwLjAzMTk2MyA3ZmMzNTNkNjA3ODAgLTEgbW9uY2xpZW50KGh1bnRpbmcpOiBmYWlsZWQgdG8g
-b3BlbiBrZXlyaW5nOiAoMikgTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0KPiAyMDEyLTEyLTAz
-IDEzOjI2OjMwLjAzMjA0MiA3ZmMzNTNkNjA3ODAgLTEgY2VwaF90b29sX2NvbW1vbl9pbml0IGZh
-aWxlZC4NCj4gcm9vdEBjZXBoY2xpZW50MDE6fi9teS1hZG1pbi1zYW5kYm94Iw0KDQpZZWFoLCBs
-b29rcyBsaWtlIHRoZSBrZXlzIGRpZG4ndCBnZXQgZGlzdHJpYnV0ZWQgY29ycmVjdGx5LiAgRGlk
-IHlvdSBkbyANCnRoZSBjZXBoLWRlcGxveSBnYXRoZXJrZXlzIHN0ZXA/DQoNCj4NCj4gQmVoaW5k
-IHRoZSBzY2VuZXMsIGlzIHRoZSAiY2VwaC1kZXBsb3kgbW9uIiBjb21tYW5kIGV4ZWN1dGluZyB0
-aGUgbWtjZXBoZnMgY29tbWFuZCwgd2hpY2ggY3JlYXRlcyB0aGUga2V5cmluZyBmaWxlPyAgSWYg
-c28sIGNvdWxkIHRoYXQgY29tbWFuZCBiZSBmYWlsaW5nIHNvbWVob3csIGFuZCBoZW5jZSB0aGUg
-c3RhdHVzIGNvbW1hbmQgaXMgbm90IGFibGUgdG8gcmV0dXJuIHRoZSBzdGF0dXMgb2YgdGhlIENl
-cGggaW5zdGFsbGF0aW9uPw0KPg0KPiBJIGV2ZW4gdHJpZWQgZXhlY3V0aW5nIHRoZSAiY2VwaC1k
-ZXBsb3kgbW9uIiBjb21tYW5kIHVzaW5nIHRoZSAtdiBvcHRpb24sIGFuZCBnb3QgdGhlIGZvbGxv
-d2luZywgc28gaXQgc2VlbXMgdG8gYmUgd29ya2luZyBjb3JyZWN0bHk6DQo+DQo+IHJvb3RAY2Vw
-aGNsaWVudDAxOn4vbXktYWRtaW4tc2FuZGJveCMgY2VwaC1kZXBsb3kgLXYgbW9uDQo+IERFQlVH
-OmNlcGhfZGVwbG95Lm1vbjpEZXBsb3lpbmcgbW9uLCBjbHVzdGVyIGNlcGggaG9zdHMgY2VwaDA0
-IEVMU0NFUEgwMQ0KPiBERUJVRzpjZXBoX2RlcGxveS5tb246RGVwbG95aW5nIG1vbiB0byBjZXBo
-MDQNCj4gREVCVUc6Y2VwaF9kZXBsb3kubW9uOkRlcGxveWluZyBtb24gdG8gRUxTQ0VQSDAxDQo+
-IHJvb3RAY2VwaGNsaWVudDAxOn4vbXktYWRtaW4tc2FuZGJveCMNCj4NCj4gSSdtIGF0IGEgbG9z
-cyBhcyB0byB3aGF0IHRvIGNoZWNrIG9yIHdoYXQgZG8gbmV4dCB0byBnZXQgcGFzdCB0aGlzIHNp
-dHVhdGlvbi4gIEFueSBoZWxwIHdvdWxkIGJlIGdyZWF0bHkgYXBwcmVjaWF0ZWQuDQo+DQo+IFRo
-YW5rcywNCj4NCj4gVG9kZA0KPg0KPiBUb2RkIEJsYWNrd2VsbA0KPiBIQVJSSVMgQ29ycG9yYXRp
-b24NCj4gICAgMzIxLTk4NC02OTExDQo+IO+DiCA5NTQtODE3LTM2NjINCj4gICAgZWJsYWNrMDRA
-aGFycmlzLmNvbQ0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgRGFuIE1pY2sNCj4gU2VudDogTW9uZGF5LCBOb3Zl
-bWJlciAxOSwgMjAxMiAxMDo0NyBQTQ0KPiBUbzogQmxhY2t3ZWxsLCBFZHdhcmQNCj4gQ2M6IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBSZW1vdGUgQ2VwaCBJbnN0
-YWxsDQo+DQo+DQo+DQo+IE9uIDExLzE5LzIwMTIgMTE6NDIgQU0sIEJsYWNrd2VsbCwgRWR3YXJk
-IHdyb3RlOg0KPj4gSGksDQo+PiBJIHdvcmsgZm9yIEhhcnJpcyBDb3Jwb3JhdGlvbiwgYW5kIHdl
-IGFyZSBpbnZlc3RpZ2F0aW5nIENlcGggYXMgYSBwb3RlbnRpYWwgc29sdXRpb24gdG8gYSBzdG9y
-YWdlIHByb2JsZW0gdGhhdCBvbmUgb2Ygb3VyIGdvdmVybm1lbnQgY3VzdG9tZXJzIGlzIGN1cnJl
-bnRseSBoYXZpbmcuICBJJ3ZlIGFscmVhZHkgY3JlYXRlZCBhIHR3by1ub2RlIGNsdXN0ZXIgb24g
-YSBjb3VwbGUgb2YgVk1zIHdpdGggYW5vdGhlciBWTSBhY3RpbmcgYXMgYW4gYWRtaW5pc3RyYXRp
-dmUgY2xpZW50LiAgVGhlIGNsdXN0ZXIgd2FzIGNyZWF0ZWQgdXNpbmcgc29tZSBpbnN0YWxsYXRp
-b24gaW5zdHJ1Y3Rpb25zIHN1cHBsaWVkIHRvIHVzIHZpYSBJbmt0YW5rLCBhbmQgdGhyb3VnaCB0
-aGUgdXNlIG9mIHRoZSBjZXBoLWRlcGxveSBzY3JpcHQuICBBc2lkZSBmcm9tIGEgY291cGxlIG9m
-IHF1aXJreSBkaXNjcmVwYW5jaWVzIGJldHdlZW4gdGhlIGluc3RhbGxhdGlvbiBpbnN0cnVjdGlv
-bnMgYW5kIG15IGVudmlyb25tZW50LCBldmVyeXRoaW5nIHdlbnQgd2VsbC4gIE15IGlzc3VlIGhh
-cyBjcm9wcGVkIHVwIG9uIHRoZSBzZWNvbmQgY2x1c3RlciBJJ20gdHJ5aW5nIHRvIGNyZWF0ZSwg
-d2hpY2ggaXMgdXNpbmcgYSBWTSBhbmQgYSBub24tVk0gc2VydmVyIGZvciB0aGUgbm9kZXMgaW4g
-dGhlIGNsdXN0ZXIuICBFdmVudHVhbGx5LCBib3RoIG5vZGVzIGluIHRoaXMgY2x1c3RlciB3aWxs
-IGJlIG5vbi1WTXMsIGJ1dCB3ZSdyZSBzdGlsbCB3YWl0aW5nIG9uIHRoZSBoYXJkd2FyZSBmb3Ig
-dGhlIHNlY29uZCBub2RlLCBzbyBJJ20gdXNpbmcgYSBWTSBpbiB0aGUgbWVhbnRpbWUganVzdCB0
-byBnZXQgdGhpcyBzZWNvbmQgY2x1c3RlciB1cCBhbmQgZ29pbmcuICBPZiBjb3Vyc2UsIHRoZSBh
-ZG1pbmlzdHJhdGl2ZSBjbGllbnQgbm9kZSBpcyBzdGlsbCBhIFZNLg0KPg0KPiBIaSBFZC4gIFdl
-bGNvbWUuDQo+DQo+PiBUaGUgcHJvYmxlbSB0aGF0IEknbSBoYXZpbmcgd2l0aCB0aGlzIHNlY29u
-ZCBjbHVzdGVyIGNvbmNlcm5zIHRoZSBub24tVk0gc2VydmVyIChlbHNjZXBoMDEgZm9yIHRoZSBz
-YWtlIG9mIHRoZSBjb21tYW5kcyBtZW50aW9uZWQgZnJvbSBoZXJlIG9uIG91dCkuICBJbiBwYXJ0
-aWN1bGFyLCB0aGUgaXNzdWUgY3JvcHMgdXAgd2l0aCB0aGUgY2VwaC1kZXBsb3kgaW5zdGFsbCBl
-bHNjZXBoMDEgY29tbWFuZCBJJ20gZXhlY3V0aW5nIG9uIG15IGNsaWVudCBWTSAoY2VwaGNsaWVu
-dDAxKSB0byBpbnN0YWxsIENlcGggb24gdGhlIG5vbi1WTSBzZXJ2ZXIuIFRoZSBpbnN0YWxsYXRp
-b24gZG9lc24ndCBhcHBlYXIgdG8gYmUgd29ya2luZyBhcyB0aGUgY29tbWFuZCBkb2VzIG5vdCBy
-ZXR1cm4gdGhlIE9LIG1lc3NhZ2UgdGhhdCBpdCBzaG91bGQgd2hlbiBpdCBjb21wbGV0ZXMgc3Vj
-Y2Vzc2Z1bGx5LiAgSSd2ZSB0cmllZCB1c2luZyB0aGUgdmVyYm9zZSBvcHRpb24gb24gdGhlIGNv
-bW1hbmQgdG8gc2VlIGlmIHRoYXQgc2hlZHMgYW55IGxpZ2h0IG9uIHRoZSBzdWJqZWN0LCBidXQg
-YWxhcywgaXQgZG9lcyBub3Q6DQo+Pg0KPj4NCj4+IHJvb3RAY2VwaGNsaWVudDAxOn4vbXktYWRt
-aW4tc2FuZGJveCMgY2VwaC1kZXBsb3kgLXYgaW5zdGFsbCBlbHNjZXBoMDENCj4+IERFQlVHOmNl
-cGhfZGVwbG95Lmluc3RhbGw6SW5zdGFsbGluZyBzdGFibGUgdmVyc2lvbiBhcmdvbmF1dCBvbiBj
-bHVzdGVyIGNlcGggaG9zdHMgZWxzY2VwaDAxDQo+PiBERUJVRzpjZXBoX2RlcGxveS5pbnN0YWxs
-OkRldGVjdGluZyBwbGF0Zm9ybSBmb3IgaG9zdCBlbHNjZXBoMDEgLi4uDQo+PiBERUJVRzpjZXBo
-X2RlcGxveS5pbnN0YWxsOkluc3RhbGxpbmcgZm9yIFVidW50dSAxMi4wNCBvbiBob3N0IGVsc2Nl
-cGgwMSAuLi4NCj4+IHJvb3RAY2VwaGNsaWVudDAxOn4vbXktYWRtaW4tc2FuZGJveCMNCj4+DQo+
-Pg0KPj4gV291bGQgeW91IGhhcHBlbiB0byBoYXZlIGEgYnJlYWtkb3duIG9mIHRoZSBjb21tYW5k
-cyBiZWluZyBleGVjdXRlZCBieSB0aGUgY2VwaC1kZXBsb3kgc2NyaXB0IGJlaGluZCB0aGUgc2Nl
-bmVzIHNvIEkgY2FuIG1heWJlIGV4ZWN1dGUgdGhlbSBvbmUtYnktb25lIHRvIHNlZSB3aGVyZSB0
-aGUgZXJyb3IgaXM/ICBJIGhhdmUgY29uZmlybWVkIHRoYXQgaXQgbG9va3MgbGlrZSB0aGUgaW5z
-dGFsbGF0aW9uIG9mIHRoZSBzb2Z0d2FyZSBoYXMgc3VjY2VlZGVkIGFzIEkgZGlkIGEgd2hpY2gg
-Y2VwaCBjb21tYW5kIG9uIGVsc2NlcGgwMSwgYW5kIGl0IHJlcG9ydGVkIGJhY2sgL3Vzci9iaW4v
-Y2VwaC4gIEFsc28sIC9ldGMvY2VwaC9jZXBoLmNvbmYgaXMgdGhlcmUsIGFuZCBpdCBtYXRjaGVz
-IHRoZSBmaWxlIGNyZWF0ZWQgYnkgdGhlIGNlcGgtZGVwbG95IG5ldyAuLi4gY29tbWFuZCBvbiB0
-aGUgY2xpZW50LiAgRG9lcyB0aGUgaW5zdGFsbCBjb21tYW5kIGRvIGEgbWtjZXBoZnMgYmVoaW5k
-IHRoZSBzY2VuZXM/ICBUaGUgcmVhc29uIEkgYXNrIGlzIHRoYXQgd2hlbiBJIGRvIHRoZSBjZXBo
-LWRlcGxveSBtb24gY29tbWFuZCBmcm9tIHRoZSBjbGllbnQsIHdoaWNoIGlzIHRoZSBuZXh0IGNv
-bW1hbmQgbGlzdGVkIGluIHRoZSBpbnN0cnVjdGlvbnMgdG8gZG8sIEkgZ2V0IHRoaXMgb3V0cHV0
-Og0KPg0KPiBCYXNpY2FsbHkgaW5zdGFsbCBqdXN0IHJ1bnMgdGhlIGFwcHJvcHJpYXRlIGRlYmlh
-biBwYWNrYWdlIGNvbW1hbmRzIHRvDQo+IGdldCB0aGUgcmVxdWVzdGVkIHJlbGVhc2Ugb2YgQ2Vw
-aCBpbnN0YWxsZWQgb24gdGhlIHRhcmdldCBob3N0IChpbiB0aGlzDQo+IGNhc2UsIGRlZmF1bHRp
-bmcgdG8gYXJnb25hdXQpLiAgVGhlIGNvbW1hbmQgbm9ybWFsbHkgZG9lc24ndCBpc3N1ZSBhbnkN
-Cj4gb3V0cHV0Lg0KPg0KPj4gcm9vdEBjZXBoY2xpZW50MDE6fi9teS1hZG1pbi1zYW5kYm94IyBj
-ZXBoLWRlcGxveSBtb24NCj4+IGNyZWF0aW5nIC92YXIvbGliL2NlcGgvdG1wL2NlcGgtRUxTQ0VQ
-SDAxLm1vbi5rZXlyaW5nDQo+DQo+IFRoaXMgbG9va3MgbGlrZSB0aGVyZSBtYXkgYmUgY29uZnVz
-aW9uIGFib3V0IGNhc2UgaW4gdGhlIGhvc3RuYW1lLiAgV2hhdA0KPiBkb2VzICJob3N0bmFtZSIg
-b24gZWxzY2VwaDAxIHJlcG9ydD8gIElmIGl0J3MgRUxTQ0VQSDAxLCB0aGF0J3MgcHJvYmFibHkN
-Cj4gdGhlIHByb2JsZW07IHRoZSBwYXRobmFtZXMgZXRjLiBhcmUgYWxsIGNhc2Utc2Vuc2l0aXZl
-Lg0KPiBDb3VsZCBiZSB0aGF0IC9ldGMvaG9zdHMgaGFzIHRoZSB3cm9uZyBjYXNlLCBvciBib3Ro
-IGNhc2VzLCBvZiB0aGUNCj4gaG9zdG5hbWUgaW4gaXQ/DQo+DQo+PiAyMDEyLTExLTE1IDExOjM1
-OjM4Ljk1NDI2MSA3ZjdhNmMyNzQ3ODAgLTEgYXNvaygweDI2MGIwMDApIEFkbWluU29ja2V0Q29u
-ZmlnT2JzOjppbml0OiBmYWlsZWQ6IEFkbWluU29ja2V0OjpiaW5kX2FuZF9saXN0ZW46IGZhaWxl
-ZCB0byBiaW5kIHRoZSBVTklYIGRvbWFpbiBzb2NrZXQgdG8gJy92YXIvcnVuL2NlcGgvY2VwaC1t
-b24uRUxTQ0VQSDAxLmFzb2snOiAoMikgTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0KPj4gVHJh
-Y2ViYWNrIChtb3N0IHJlY2VudCBjYWxsIGxhc3QpOg0KPj4gICAgIEZpbGUgIi91c3IvbG9jYWwv
-YmluL2NlcGgtZGVwbG95IiwgbGluZSA5LCBpbiA8bW9kdWxlPg0KPj4gICAgICAgbG9hZF9lbnRy
-eV9wb2ludCgnY2VwaC1kZXBsb3k9PTAuMC4xJywgJ2NvbnNvbGVfc2NyaXB0cycsICdjZXBoLWRl
-cGxveScpKCkNCj4+ICAgICBGaWxlICIvcm9vdC9jZXBoLWRlcGxveS9jZXBoX2RlcGxveS9jbGku
-cHkiLCBsaW5lIDgwLCBpbiBtYWluDQo+PiBhZGRlZCBlbnRpdHkgbW9uLiBhdXRoIGF1dGgoYXVp
-ZCA9IDE4NDQ2NzQ0MDczNzA5NTUxNjE1IGtleT1BUUJXRGo1UUFQNkxIaEFBc2tWQm5Va1lISjdl
-WVJFbUtvNXFLQT09IHdpdGggMCBjYXBzKQ0KPj4gICAgICAgcmV0dXJuIGFyZ3MuZnVuYyhhcmdz
-KQ0KPj4gbW9uL01vbk1hcC5oOiBJbiBmdW5jdGlvbiAndm9pZCBNb25NYXA6OmFkZChjb25zdCBz
-dHJpbmcmLCBjb25zdCBlbnRpdHlfYWRkcl90JiknIHRocmVhZCA3ZjdhNmMyNzQ3ODAgdGltZSAy
-MDEyLTExLTE1IDExOjM1OjM4Ljk1NTAyNA0KPj4gbW9uL01vbk1hcC5oOiA5NzogRkFJTEVEIGFz
-c2VydChhZGRyX25hbWUuY291bnQoYWRkcikgPT0gMCkNCj4+IGNlcGggdmVyc2lvbiAwLjQ4LjJh
-cmdvbmF1dCAoY29tbWl0OjNlMDJiMmZhZDg4YzJhOTVkOWMwYzg2ODc4ZjEwZDFiZWI3ODBiZmUp
-DQo+PiAxOiAoTW9uTWFwOjpidWlsZF9mcm9tX2hvc3RfbGlzdChzdGQ6OnN0cmluZywgc3RkOjpz
-dHJpbmcpKzB4NzM4KSBbMHg1OTg4YjhdDQo+PiAyOiAoTW9uTWFwOjpidWlsZF9pbml0aWFsKENl
-cGhDb250ZXh0Kiwgc3RkOjpvc3RyZWFtJikrMHgxMTMpIFsweDU5YmQ1M10NCj4+IDM6IChtYWlu
-KCkrMHgxMmJiKSBbMHg0NWZmYWJdDQo+PiA0OiAoX19saWJjX3N0YXJ0X21haW4oKSsweGVkKSBb
-MHg3ZjdhNmE2ZDc3NmRdDQo+PiA1OiBjZXBoLW1vbigpIFsweDQ2MmExOV0NCj4+IE5PVEU6IGEg
-Y29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlz
-IG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4+IDIwMTItMTEtMTUgMTE6MzU6MzguOTU1OTI0
-IDdmN2E2YzI3NDc4MCAtMSBtb24vTW9uTWFwLmg6IEluIGZ1bmN0aW9uICd2b2lkIE1vbk1hcDo6
-YWRkKGNvbnN0IHN0cmluZyYsIGNvbnN0IGVudGl0eV9hZGRyX3QmKScgdGhyZWFkIDdmN2E2YzI3
-NDc4MCB0aW1lIDIwMTItMTEtMTUgMTE6MzU6MzguOTU1MDI0DQo+PiBtb24vTW9uTWFwLmg6IDk3
-OiBGQUlMRUQgYXNzZXJ0KGFkZHJfbmFtZS5jb3VudChhZGRyKSA9PSAwKQ0KPj4NCj4+IGNlcGgg
-dmVyc2lvbiAwLjQ4LjJhcmdvbmF1dCAoY29tbWl0OjNlMDJiMmZhZDg4YzJhOTVkOWMwYzg2ODc4
-ZjEwZDFiZWI3ODBiZmUpDQo+PiAxOiAoTW9uTWFwOjpidWlsZF9mcm9tX2hvc3RfbGlzdChzdGQ6
-OnN0cmluZywgc3RkOjpzdHJpbmcpKzB4NzM4KSBbMHg1OTg4YjhdDQo+PiAyOiAoTW9uTWFwOjpi
-dWlsZF9pbml0aWFsKENlcGhDb250ZXh0Kiwgc3RkOjpvc3RyZWFtJikrMHgxMTMpIFsweDU5YmQ1
-M10NCj4+IDM6IChtYWluKCkrMHgxMmJiKSBbMHg0NWZmYWJdDQo+PiA0OiAoX19saWJjX3N0YXJ0
-X21haW4oKSsweGVkKSBbMHg3ZjdhNmE2ZDc3NmRdDQo+PiA1OiBjZXBoLW1vbigpIFsweDQ2MmEx
-OV0NCj4+IE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8
-ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4+DQo+PiAgICAgICAt
-MT4gMjAxMi0xMS0xNSAxMTozNTozOC45NTQyNjEgN2Y3YTZjMjc0NzgwIC0xIGFzb2soMHgyNjBi
-MDAwKSBBZG1pblNvY2tldENvbmZpZ09iczo6aW5pdDogZmFpbGVkOiBBZG1pblNvY2tldDo6Ymlu
-ZF9hbmRfbGlzdGVuOiBmYWlsZWQgdG8gYmluZCB0aGUgVU5JWCBkb21haW4gc29ja2V0IHRvICcv
-dmFyL3J1bi9jZXBoL2NlcGgtbW9uLkVMU0NFUEgwMS5hc29rJzogKDIpIE5vIHN1Y2ggZmlsZSBv
-ciBkaXJlY3RvcnkNCj4+ICAgICAgICAwPiAyMDEyLTExLTE1IDExOjM1OjM4Ljk1NTkyNCA3Zjdh
-NmMyNzQ3ODAgLTEgbW9uL01vbk1hcC5oOiBJbiBmdW5jdGlvbiAndm9pZCBNb25NYXA6OmFkZChj
-b25zdCBzdHJpbmcmLCBjb25zdCBlbnRpdHlfYWRkcl90JiknIHRocmVhZCA3ZjdhNmMyNzQ3ODAg
-dGltZSAyMDEyLTExLTE1IDExOjM1OjM4Ljk1NTAyNA0KPj4gbW9uL01vbk1hcC5oOiA5NzogRkFJ
-TEVEIGFzc2VydChhZGRyX25hbWUuY291bnQoYWRkcikgPT0gMCkNCj4+DQo+PiBjZXBoIHZlcnNp
-b24gMC40OC4yYXJnb25hdXQgKGNvbW1pdDozZTAyYjJmYWQ4OGMyYTk1ZDljMGM4Njg3OGYxMGQx
-YmViNzgwYmZlKQ0KPj4gMTogKE1vbk1hcDo6YnVpbGRfZnJvbV9ob3N0X2xpc3Qoc3RkOjpzdHJp
-bmcsIHN0ZDo6c3RyaW5nKSsweDczOCkgWzB4NTk4OGI4XQ0KPj4gMjogKE1vbk1hcDo6YnVpbGRf
-aW5pdGlhbChDZXBoQ29udGV4dCosIHN0ZDo6b3N0cmVhbSYpKzB4MTEzKSBbMHg1OWJkNTNdDQo+
-PiAzOiAobWFpbigpKzB4MTJiYikgWzB4NDVmZmFiXQ0KPj4gNDogKF9fbGliY19zdGFydF9tYWlu
-KCkrMHhlZCkgWzB4N2Y3YTZhNmQ3NzZkXQ0KPj4gNTogY2VwaC1tb24oKSBbMHg0NjJhMTldDQo+
-PiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1
-dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQo+Pg0KPj4gdGVybWluYXRlIGNh
-bGxlZCBhZnRlciB0aHJvd2luZyBhbiBpbnN0YW5jZSBvZiAnY2VwaDo6RmFpbGVkQXNzZXJ0aW9u
-Jw0KPj4gKioqIENhdWdodCBzaWduYWwgKEFib3J0ZWQpICoqDQo+PiBpbiB0aHJlYWQgN2Y3YTZj
-Mjc0NzgwDQo+PiBjZXBoIHZlcnNpb24gMC40OC4yYXJnb25hdXQgKGNvbW1pdDozZTAyYjJmYWQ4
-OGMyYTk1ZDljMGM4Njg3OGYxMGQxYmViNzgwYmZlKQ0KPj4gMTogY2VwaC1tb24oKSBbMHg1MjU2
-OWFdDQo+PiAyOiAoKCkrMHhmY2IwKSBbMHg3ZjdhNmI5MTBjYjBdDQo+PiAzOiAoZ3NpZ25hbCgp
-KzB4MzUpIFsweDdmN2E2YTZlYzQyNV0NCj4+IDQ6IChhYm9ydCgpKzB4MTdiKSBbMHg3ZjdhNmE2
-ZWZiOGJdDQo+PiA1OiAoX19nbnVfY3h4OjpfX3ZlcmJvc2VfdGVybWluYXRlX2hhbmRsZXIoKSsw
-eDExZCkgWzB4N2Y3YTZiMDNlNjlkXQ0KPj4gNjogKCgpKzB4YjU4NDYpIFsweDdmN2E2YjAzYzg0
-Nl0NCj4+IDc6ICgoKSsweGI1ODczKSBbMHg3ZjdhNmIwM2M4NzNdDQo+PiA4OiAoKCkrMHhiNTk2
-ZSkgWzB4N2Y3YTZiMDNjOTZlXQ0KPj4gOTogKGNlcGg6Ol9fY2VwaF9hc3NlcnRfZmFpbChjaGFy
-IGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhciBjb25zdCopKzB4MWRlKSBbMHg1ZGViOWVd
-DQo+PiAxMDogKE1vbk1hcDo6YnVpbGRfZnJvbV9ob3N0X2xpc3Qoc3RkOjpzdHJpbmcsIHN0ZDo6
-c3RyaW5nKSsweDczOCkgWzB4NTk4OGI4XQ0KPj4gMTE6IChNb25NYXA6OmJ1aWxkX2luaXRpYWwo
-Q2VwaENvbnRleHQqLCBzdGQ6Om9zdHJlYW0mKSsweDExMykgWzB4NTliZDUzXQ0KPj4gMTI6ICht
-YWluKCkrMHgxMmJiKSBbMHg0NWZmYWJdDQo+PiAxMzogKF9fbGliY19zdGFydF9tYWluKCkrMHhl
-ZCkgWzB4N2Y3YTZhNmQ3NzZkXQ0KPj4gMTQ6IGNlcGgtbW9uKCkgWzB4NDYyYTE5XQ0KPj4gMjAx
-Mi0xMS0xNSAxMTozNTozOC45NTc3MjMgN2Y3YTZjMjc0NzgwIC0xICoqKiBDYXVnaHQgc2lnbmFs
-IChBYm9ydGVkKSAqKg0KPj4gaW4gdGhyZWFkIDdmN2E2YzI3NDc4MA0KPj4NCj4+IGNlcGggdmVy
-c2lvbiAwLjQ4LjJhcmdvbmF1dCAoY29tbWl0OjNlMDJiMmZhZDg4YzJhOTVkOWMwYzg2ODc4ZjEw
-ZDFiZWI3ODBiZmUpDQo+PiAxOiBjZXBoLW1vbigpIFsweDUyNTY5YV0NCj4+IDI6ICgoKSsweGZj
-YjApIFsweDdmN2E2YjkxMGNiMF0NCj4+IDM6IChnc2lnbmFsKCkrMHgzNSkgWzB4N2Y3YTZhNmVj
-NDI1XQ0KPj4gNDogKGFib3J0KCkrMHgxN2IpIFsweDdmN2E2YTZlZmI4Yl0NCj4+IDU6IChfX2du
-dV9jeHg6Ol9fdmVyYm9zZV90ZXJtaW5hdGVfaGFuZGxlcigpKzB4MTFkKSBbMHg3ZjdhNmIwM2U2
-OWRdDQo+PiA2OiAoKCkrMHhiNTg0NikgWzB4N2Y3YTZiMDNjODQ2XQ0KPj4gNzogKCgpKzB4YjU4
-NzMpIFsweDdmN2E2YjAzYzg3M10NCj4+IDg6ICgoKSsweGI1OTZlKSBbMHg3ZjdhNmIwM2M5NmVd
-DQo+PiA5OiAoY2VwaDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNvbnN0
-KiwgaW50LCBjaGFyIGNvbnN0KikrMHgxZGUpIFsweDVkZWI5ZV0NCj4+IDEwOiAoTW9uTWFwOjpi
-dWlsZF9mcm9tX2hvc3RfbGlzdChzdGQ6OnN0cmluZywgc3RkOjpzdHJpbmcpKzB4NzM4KSBbMHg1
-OTg4YjhdDQo+PiAxMTogKE1vbk1hcDo6YnVpbGRfaW5pdGlhbChDZXBoQ29udGV4dCosIHN0ZDo6
-b3N0cmVhbSYpKzB4MTEzKSBbMHg1OWJkNTNdDQo+PiAxMjogKG1haW4oKSsweDEyYmIpIFsweDQ1
-ZmZhYl0NCj4+IDEzOiAoX19saWJjX3N0YXJ0X21haW4oKSsweGVkKSBbMHg3ZjdhNmE2ZDc3NmRd
-DQo+PiAxNDogY2VwaC1tb24oKSBbMHg0NjJhMTldDQo+PiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4
-ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50
-ZXJwcmV0IHRoaXMuDQo+Pg0KPj4gICAgICAgIDA+IDIwMTItMTEtMTUgMTE6MzU6MzguOTU3NzIz
-IDdmN2E2YzI3NDc4MCAtMSAqKiogQ2F1Z2h0IHNpZ25hbCAoQWJvcnRlZCkgKioNCj4+IGluIHRo
-cmVhZCA3ZjdhNmMyNzQ3ODANCj4+DQo+PiBjZXBoIHZlcnNpb24gMC40OC4yYXJnb25hdXQgKGNv
-bW1pdDozZTAyYjJmYWQ4OGMyYTk1ZDljMGM4Njg3OGYxMGQxYmViNzgwYmZlKQ0KPj4gMTogY2Vw
-aC1tb24oKSBbMHg1MjU2OWFdDQo+PiAyOiAoKCkrMHhmY2IwKSBbMHg3ZjdhNmI5MTBjYjBdDQo+
-PiAzOiAoZ3NpZ25hbCgpKzB4MzUpIFsweDdmN2E2YTZlYzQyNV0NCj4+IDQ6IChhYm9ydCgpKzB4
-MTdiKSBbMHg3ZjdhNmE2ZWZiOGJdDQo+PiA1OiAoX19nbnVfY3h4OjpfX3ZlcmJvc2VfdGVybWlu
-YXRlX2hhbmRsZXIoKSsweDExZCkgWzB4N2Y3YTZiMDNlNjlkXQ0KPj4gNjogKCgpKzB4YjU4NDYp
-IFsweDdmN2E2YjAzYzg0Nl0NCj4+IDc6ICgoKSsweGI1ODczKSBbMHg3ZjdhNmIwM2M4NzNdDQo+
-PiA4OiAoKCkrMHhiNTk2ZSkgWzB4N2Y3YTZiMDNjOTZlXQ0KPj4gOTogKGNlcGg6Ol9fY2VwaF9h
-c3NlcnRfZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhciBjb25zdCopKzB4
-MWRlKSBbMHg1ZGViOWVdDQo+PiAxMDogKE1vbk1hcDo6YnVpbGRfZnJvbV9ob3N0X2xpc3Qoc3Rk
-OjpzdHJpbmcsIHN0ZDo6c3RyaW5nKSsweDczOCkgWzB4NTk4OGI4XQ0KPj4gMTE6IChNb25NYXA6
-OmJ1aWxkX2luaXRpYWwoQ2VwaENvbnRleHQqLCBzdGQ6Om9zdHJlYW0mKSsweDExMykgWzB4NTli
-ZDUzXQ0KPj4gMTI6IChtYWluKCkrMHgxMmJiKSBbMHg0NWZmYWJdDQo+PiAxMzogKF9fbGliY19z
-dGFydF9tYWluKCkrMHhlZCkgWzB4N2Y3YTZhNmQ3NzZkXQ0KPj4gMTQ6IGNlcGgtbW9uKCkgWzB4
-NDYyYTE5XQ0KPj4gTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRhYmxlLCBvciBgb2JqZHVtcCAt
-cmRTIDxleGVjdXRhYmxlPmAgaXMgbmVlZGVkIHRvIGludGVycHJldCB0aGlzLg0KPj4NCj4+ICAg
-ICBGaWxlICIvcm9vdC9jZXBoLWRlcGxveS9jZXBoX2RlcGxveS9tb24ucHkiLCBsaW5lIDEyNSwg
-aW4gbW9uDQo+PiAgICAgICBnZXRfbW9uaXRvcl9zZWNyZXQ9Z2V0X21vbml0b3Jfc2VjcmV0LA0K
-Pj4gICAgIEZpbGUgIi9yb290L2NlcGgtZGVwbG95L3ZpcnR1YWxlbnYvbG9jYWwvbGliL3B5dGhv
-bjIuNy9zaXRlLXBhY2thZ2VzL3B1c2h5LTAuNS4xLXB5Mi43LmVnZy9wdXNoeS9wcm90b2NvbC9w
-cm94eS5weSIsIGxpbmUgMjU1LCBpbiA8bGFtYmRhPg0KPj4gICAgICAgKGNvbm4ub3BlcmF0b3Io
-dHlwZV8sIHNlbGYsIGFyZ3MsIGt3YXJncykpDQo+PiAgICAgRmlsZSAiL3Jvb3QvY2VwaC1kZXBs
-b3kvdmlydHVhbGVudi9sb2NhbC9saWIvcHl0aG9uMi43L3NpdGUtcGFja2FnZXMvcHVzaHktMC41
-LjEtcHkyLjcuZWdnL3B1c2h5L3Byb3RvY29sL2Nvbm5lY3Rpb24ucHkiLCBsaW5lIDY2LCBpbiBv
-cGVyYXRvcg0KPj4gICAgICAgcmV0dXJuIHNlbGYuc2VuZF9yZXF1ZXN0KHR5cGVfLCAob2JqZWN0
-LCBhcmdzLCBrd2FyZ3MpKQ0KPj4gICAgIEZpbGUgIi9yb290L2NlcGgtZGVwbG95L3ZpcnR1YWxl
-bnYvbG9jYWwvbGliL3B5dGhvbjIuNy9zaXRlLXBhY2thZ2VzL3B1c2h5LTAuNS4xLXB5Mi43LmVn
-Zy9wdXNoeS9wcm90b2NvbC9iYXNlY29ubmVjdGlvbi5weSIsIGxpbmUgMzIzLCBpbiBzZW5kX3Jl
-cXVlc3QNCj4+ICAgICAgIHJldHVybiBzZWxmLl9faGFuZGxlKG0pDQo+PiAgICAgRmlsZSAiL3Jv
-b3QvY2VwaC1kZXBsb3kvdmlydHVhbGVudi9sb2NhbC9saWIvcHl0aG9uMi43L3NpdGUtcGFja2Fn
-ZXMvcHVzaHktMC41LjEtcHkyLjcuZWdnL3B1c2h5L3Byb3RvY29sL2Jhc2Vjb25uZWN0aW9uLnB5
-IiwgbGluZSA2MzksIGluIF9faGFuZGxlDQo+PiAgICAgICByYWlzZSBlDQo+PiBwdXNoeS5wcm90
-b2NvbC5wcm94eS5FeGNlcHRpb25Qcm94eTogQ29tbWFuZCAnWydjZXBoLW1vbicsICctLWNsdXN0
-ZXInLCAnY2VwaCcsICctLW1rZnMnLCAnLWknLCAnRUxTQ0VQSDAxJywgJy0ta2V5cmluZycsICcv
-dmFyL2xpYi9jZXBoL3RtcC9jZXBoLUVMU0NFUEgwMS5tb24ua2V5cmluZyddJyByZXR1cm5lZCBu
-b24temVybyBleGl0IHN0YXR1cyAtNg0KPj4NCj4+DQo+PiBXaGljaCBzZWVtcyB0byBpbmRpY2F0
-ZSB0aGF0IHRoZSBjcmVhdGlvbiBvZiB0aGUgYWRtaW4gc29ja2V0IG9uIHRoZSBlbHNjZXBoMDEg
-c2VydmVyIGRpZG4ndCB3b3JrLiAgSSd2ZSB2ZXJpZmllZCB0aGF0IHRoZSAvdmFyL3J1bi9jZXBo
-L2NlcGgtbW9uLkVMU0NFUEgwMS5hc29rIGZpbGUgZG9lcyBub3QgZXhpc3Qgb24gdGhlIGVsc2Nl
-cGgwMSBzZXJ2ZXIuICBBbnkgaGVscCBvbiB0aGlzIGlzc3VlIHdvdWxkIGJlIGdyZWF0bHkgYXBw
-cmVjaWF0ZWQuDQo+Pg0KPj4gT24gYSBzaWRlIG5vdGUsIEkgdGhpbmsgdGhlIGNlcGgtZGVwbG95
-IGNvbW1hbmQncyB2ZXJib3NlIHNldHRpbmcgbWlnaHQgYmUgYSBsaXR0bGUgbW9yZSBoZWxwZnVs
-IGlmIGl0IGlzIGEgbGl0dGxlIG1vcmUgY2xlYXIgb24gdGhlIGNvbW1hbmRzIHRoYXQgYXJlIGJl
-aW5nIGV4ZWN1dGVkIGZvciB0aGUgaW5zdGFsbGF0aW9uIG9mIHRoZSBzb2Z0d2FyZSBvbiB0aGUg
-cmVtb3RlIHNlcnZlciwgYW5kIHRoZWlyIHJlc3VsdHMuICBBbHNvLCBpdCBtaWdodCBiZSBhIGdv
-b2QgaWRlYSB0byBhbHRlciB0aGUgZXhpdCBzdGF0dXMgb2YgdGhlIGNlcGgtZGVwbG95IGNvbW1h
-bmQgd2hlbiBhbiBlcnJvciBvY2N1cnMgdG8gYSBudW1iZXIgdGhhdCBjYW4gYmUgbG9va2VkIHVw
-IGluIGEgbWFwIHdoaWNoIGluZGljYXRlcyB3aGF0IHdlbnQgd3JvbmcuICBUaGlzIHdheSBldmVu
-IHRoZSBub24tdmVyYm9zZSB1c2Ugb2YgdGhlIGNvbW1hbmQgY291bGQgc3RpbGwgYmUgaGVscGZ1
-bCBpbiBmaWd1cmluZyBvdXQgd2hhdCB3ZW50IHdyb25nIGlmIHNvbWV0aGluZyBkaWQgZ28gd3Jv
-bmcuICBSaWdodCBub3csIGNlcGgtZGVwbG95IHJldHVybnMgMCBmb3IgbXkgZmFpbGVkIGluc3Rh
-bGxhdGlvbi4gIEl0J2QgYmUgcmVhbGx5IGNvb2wgaWYgaXQgcmV0dXJuZWQgc29tZXRoaW5nIGxp
-a2UgMTQsIHdoaWNoIGNvdWxkIGJlIHRyYWNlZCBiYWNrIHRvIHNvbWV0aGluZyBsaWtlLCBta2Nl
-cGhmcyBmYWlsZWQgb24gdGhlIHJlbW90ZSBzZXJ2ZXIuICBJdCdzIGp1c3QgYSB0aG91Z2h0Lg0K
-Pj4NCj4+IFRoYW5rcywNCj4+DQo+PiBUb2RkDQo+Pg0KPj4gVG9kZCBCbGFja3dlbGwNCj4+IEhB
-UlJJUyBDb3Jwb3JhdGlvbg0KPj4gV29yazogMzIxLTk4NC02OTExDQo+PiBDZWxsOiA5NTQtODE3
-LTM2NjINCj4+IGVibGFjazA0QGhhcnJpcy5jb20NCj4+DQo+Pg0KPj4NCj4+DQo+PiAtLQ0KPj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4N
-Cj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4g
-TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo+DQo=
+I'm reading README.rst in the ceph-deploy sources, and I've executed th=
+e=20
+command, but didn't really analyze what it did when I did; I just=20
+assumed from that doc that it would be necessary.  It's possible your=20
+instructions obviate the need for that step, but I'd have to look at th=
+e=20
+instructions you were given, I guess...
+
+
+On 12/03/2012 01:14 PM, Blackwell, Edward wrote:
+> Hi Dan,
+>
+> In the version of the Ceph installation instructions I was given, I d=
+on't have a "ceph-deploy gatherkeys" step.  Is there a newer version, o=
+r can you briefly describe the use of this command?
+>
+> Thanks,
+>
+> Todd
+>
+> Todd Blackwell
+> HARRIS Corporation
+>    321-984-6911
+> =EF=83=88 954-817-3662
+>    eblack04@harris.com
+>
+>
+> -----Original Message-----
+> From: Dan Mick [mailto:dan.mick@inktank.com]
+> Sent: Monday, December 03, 2012 3:37 PM
+> To: Blackwell, Edward
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Remote Ceph Install
+>
+>
+>
+> On 12/03/2012 10:53 AM, Blackwell, Edward wrote:
+>> Hi Dan,
+>>
+>> Thanks for the welcome and the advice.  There indeed was a problem w=
+ith the host name and capitalization as you described, but once I corre=
+cted that, a new issue began to occur when I ran the "ceph-deploy mon" =
+command.  The command appears to run successfully (no output from the c=
+ommand is generated), but when I check the status on one of the servers=
+ in the cluster (ceph04 and ELSCEPH01) as recommended by the directions=
+, I get the following:
+>>
+>> root@cephclient01:~/my-admin-sandbox# ceph-deploy mon
+>> root@cephclient01:~/my-admin-sandbox# ssh ceph04 ceph -s
+>> 2012-12-03 13:26:30.031854 7fc353d60780 -1 auth: failed to open keyr=
+ing from /etc/ceph/ceph.client.admin.keyring,/etc/ceph/ceph.keyring,/et=
+c/ceph/keyring,/etc/ceph/keyring.bin
+>> 2012-12-03 13:26:30.031963 7fc353d60780 -1 monclient(hunting): faile=
+d to open keyring: (2) No such file or directory
+>> 2012-12-03 13:26:30.032042 7fc353d60780 -1 ceph_tool_common_init fai=
+led.
+>> root@cephclient01:~/my-admin-sandbox#
+>
+> Yeah, looks like the keys didn't get distributed correctly.  Did you =
+do
+> the ceph-deploy gatherkeys step?
+>
+>>
+>> Behind the scenes, is the "ceph-deploy mon" command executing the mk=
+cephfs command, which creates the keyring file?  If so, could that comm=
+and be failing somehow, and hence the status command is not able to ret=
+urn the status of the Ceph installation?
+>>
+>> I even tried executing the "ceph-deploy mon" command using the -v op=
+tion, and got the following, so it seems to be working correctly:
+>>
+>> root@cephclient01:~/my-admin-sandbox# ceph-deploy -v mon
+>> DEBUG:ceph_deploy.mon:Deploying mon, cluster ceph hosts ceph04 ELSCE=
+PH01
+>> DEBUG:ceph_deploy.mon:Deploying mon to ceph04
+>> DEBUG:ceph_deploy.mon:Deploying mon to ELSCEPH01
+>> root@cephclient01:~/my-admin-sandbox#
+>>
+>> I'm at a loss as to what to check or what do next to get past this s=
+ituation.  Any help would be greatly appreciated.
+>>
+>> Thanks,
+>>
+>> Todd
+>>
+>> Todd Blackwell
+>> HARRIS Corporation
+>>     321-984-6911
+>> =EF=83=88 954-817-3662
+>>     eblack04@harris.com
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger=
+=2Ekernel.org] On Behalf Of Dan Mick
+>> Sent: Monday, November 19, 2012 10:47 PM
+>> To: Blackwell, Edward
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: Remote Ceph Install
+>>
+>>
+>>
+>> On 11/19/2012 11:42 AM, Blackwell, Edward wrote:
+>>> Hi,
+>>> I work for Harris Corporation, and we are investigating Ceph as a p=
+otential solution to a storage problem that one of our government custo=
+mers is currently having.  I've already created a two-node cluster on a=
+ couple of VMs with another VM acting as an administrative client.  The=
+ cluster was created using some installation instructions supplied to u=
+s via Inktank, and through the use of the ceph-deploy script.  Aside fr=
+om a couple of quirky discrepancies between the installation instructio=
+ns and my environment, everything went well.  My issue has cropped up o=
+n the second cluster I'm trying to create, which is using a VM and a no=
+n-VM server for the nodes in the cluster.  Eventually, both nodes in th=
+is cluster will be non-VMs, but we're still waiting on the hardware for=
+ the second node, so I'm using a VM in the meantime just to get this se=
+cond cluster up and going.  Of course, the administrative client node i=
+s still a VM.
+>>
+>> Hi Ed.  Welcome.
+>>
+>>> The problem that I'm having with this second cluster concerns the n=
+on-VM server (elsceph01 for the sake of the commands mentioned from her=
+e on out).  In particular, the issue crops up with the ceph-deploy inst=
+all elsceph01 command I'm executing on my client VM (cephclient01) to i=
+nstall Ceph on the non-VM server. The installation doesn't appear to be=
+ working as the command does not return the OK message that it should w=
+hen it completes successfully.  I've tried using the verbose option on =
+the command to see if that sheds any light on the subject, but alas, it=
+ does not:
+>>>
+>>>
+>>> root@cephclient01:~/my-admin-sandbox# ceph-deploy -v install elscep=
+h01
+>>> DEBUG:ceph_deploy.install:Installing stable version argonaut on clu=
+ster ceph hosts elsceph01
+>>> DEBUG:ceph_deploy.install:Detecting platform for host elsceph01 ...
+>>> DEBUG:ceph_deploy.install:Installing for Ubuntu 12.04 on host elsce=
+ph01 ...
+>>> root@cephclient01:~/my-admin-sandbox#
+>>>
+>>>
+>>> Would you happen to have a breakdown of the commands being executed=
+ by the ceph-deploy script behind the scenes so I can maybe execute the=
+m one-by-one to see where the error is?  I have confirmed that it looks=
+ like the installation of the software has succeeded as I did a which c=
+eph command on elsceph01, and it reported back /usr/bin/ceph.  Also, /e=
+tc/ceph/ceph.conf is there, and it matches the file created by the ceph=
+-deploy new ... command on the client.  Does the install command do a m=
+kcephfs behind the scenes?  The reason I ask is that when I do the ceph=
+-deploy mon command from the client, which is the next command listed i=
+n the instructions to do, I get this output:
+>>
+>> Basically install just runs the appropriate debian package commands =
+to
+>> get the requested release of Ceph installed on the target host (in t=
+his
+>> case, defaulting to argonaut).  The command normally doesn't issue a=
+ny
+>> output.
+>>
+>>> root@cephclient01:~/my-admin-sandbox# ceph-deploy mon
+>>> creating /var/lib/ceph/tmp/ceph-ELSCEPH01.mon.keyring
+>>
+>> This looks like there may be confusion about case in the hostname.  =
+What
+>> does "hostname" on elsceph01 report?  If it's ELSCEPH01, that's prob=
+ably
+>> the problem; the pathnames etc. are all case-sensitive.
+>> Could be that /etc/hosts has the wrong case, or both cases, of the
+>> hostname in it?
+>>
+>>> 2012-11-15 11:35:38.954261 7f7a6c274780 -1 asok(0x260b000) AdminSoc=
+ketConfigObs::init: failed: AdminSocket::bind_and_listen: failed to bin=
+d the UNIX domain socket to '/var/run/ceph/ceph-mon.ELSCEPH01.asok': (2=
+) No such file or directory
+>>> Traceback (most recent call last):
+>>>      File "/usr/local/bin/ceph-deploy", line 9, in <module>
+>>>        load_entry_point('ceph-deploy=3D=3D0.0.1', 'console_scripts'=
+, 'ceph-deploy')()
+>>>      File "/root/ceph-deploy/ceph_deploy/cli.py", line 80, in main
+>>> added entity mon. auth auth(auid =3D 18446744073709551615 key=3DAQB=
+WDj5QAP6LHhAAskVBnUkYHJ7eYREmKo5qKA=3D=3D with 0 caps)
+>>>        return args.func(args)
+>>> mon/MonMap.h: In function 'void MonMap::add(const string&, const en=
+tity_addr_t&)' thread 7f7a6c274780 time 2012-11-15 11:35:38.955024
+>>> mon/MonMap.h: 97: FAILED assert(addr_name.count(addr) =3D=3D 0)
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: (MonMap::build_from_host_list(std::string, std::string)+0x738) [=
+0x5988b8]
+>>> 2: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x59=
+bd53]
+>>> 3: (main()+0x12bb) [0x45ffab]
+>>> 4: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 5: ceph-mon() [0x462a19]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>> 2012-11-15 11:35:38.955924 7f7a6c274780 -1 mon/MonMap.h: In functio=
+n 'void MonMap::add(const string&, const entity_addr_t&)' thread 7f7a6c=
+274780 time 2012-11-15 11:35:38.955024
+>>> mon/MonMap.h: 97: FAILED assert(addr_name.count(addr) =3D=3D 0)
+>>>
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: (MonMap::build_from_host_list(std::string, std::string)+0x738) [=
+0x5988b8]
+>>> 2: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x59=
+bd53]
+>>> 3: (main()+0x12bb) [0x45ffab]
+>>> 4: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 5: ceph-mon() [0x462a19]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>>
+>>>        -1> 2012-11-15 11:35:38.954261 7f7a6c274780 -1 asok(0x260b00=
+0) AdminSocketConfigObs::init: failed: AdminSocket::bind_and_listen: fa=
+iled to bind the UNIX domain socket to '/var/run/ceph/ceph-mon.ELSCEPH0=
+1.asok': (2) No such file or directory
+>>>         0> 2012-11-15 11:35:38.955924 7f7a6c274780 -1 mon/MonMap.h:=
+ In function 'void MonMap::add(const string&, const entity_addr_t&)' th=
+read 7f7a6c274780 time 2012-11-15 11:35:38.955024
+>>> mon/MonMap.h: 97: FAILED assert(addr_name.count(addr) =3D=3D 0)
+>>>
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: (MonMap::build_from_host_list(std::string, std::string)+0x738) [=
+0x5988b8]
+>>> 2: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x59=
+bd53]
+>>> 3: (main()+0x12bb) [0x45ffab]
+>>> 4: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 5: ceph-mon() [0x462a19]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>>
+>>> terminate called after throwing an instance of 'ceph::FailedAsserti=
+on'
+>>> *** Caught signal (Aborted) **
+>>> in thread 7f7a6c274780
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: ceph-mon() [0x52569a]
+>>> 2: (()+0xfcb0) [0x7f7a6b910cb0]
+>>> 3: (gsignal()+0x35) [0x7f7a6a6ec425]
+>>> 4: (abort()+0x17b) [0x7f7a6a6efb8b]
+>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f7a6b03e69d=
+]
+>>> 6: (()+0xb5846) [0x7f7a6b03c846]
+>>> 7: (()+0xb5873) [0x7f7a6b03c873]
+>>> 8: (()+0xb596e) [0x7f7a6b03c96e]
+>>> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char co=
+nst*)+0x1de) [0x5deb9e]
+>>> 10: (MonMap::build_from_host_list(std::string, std::string)+0x738) =
+[0x5988b8]
+>>> 11: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x5=
+9bd53]
+>>> 12: (main()+0x12bb) [0x45ffab]
+>>> 13: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 14: ceph-mon() [0x462a19]
+>>> 2012-11-15 11:35:38.957723 7f7a6c274780 -1 *** Caught signal (Abort=
+ed) **
+>>> in thread 7f7a6c274780
+>>>
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: ceph-mon() [0x52569a]
+>>> 2: (()+0xfcb0) [0x7f7a6b910cb0]
+>>> 3: (gsignal()+0x35) [0x7f7a6a6ec425]
+>>> 4: (abort()+0x17b) [0x7f7a6a6efb8b]
+>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f7a6b03e69d=
+]
+>>> 6: (()+0xb5846) [0x7f7a6b03c846]
+>>> 7: (()+0xb5873) [0x7f7a6b03c873]
+>>> 8: (()+0xb596e) [0x7f7a6b03c96e]
+>>> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char co=
+nst*)+0x1de) [0x5deb9e]
+>>> 10: (MonMap::build_from_host_list(std::string, std::string)+0x738) =
+[0x5988b8]
+>>> 11: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x5=
+9bd53]
+>>> 12: (main()+0x12bb) [0x45ffab]
+>>> 13: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 14: ceph-mon() [0x462a19]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>>
+>>>         0> 2012-11-15 11:35:38.957723 7f7a6c274780 -1 *** Caught si=
+gnal (Aborted) **
+>>> in thread 7f7a6c274780
+>>>
+>>> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1=
+beb780bfe)
+>>> 1: ceph-mon() [0x52569a]
+>>> 2: (()+0xfcb0) [0x7f7a6b910cb0]
+>>> 3: (gsignal()+0x35) [0x7f7a6a6ec425]
+>>> 4: (abort()+0x17b) [0x7f7a6a6efb8b]
+>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f7a6b03e69d=
+]
+>>> 6: (()+0xb5846) [0x7f7a6b03c846]
+>>> 7: (()+0xb5873) [0x7f7a6b03c873]
+>>> 8: (()+0xb596e) [0x7f7a6b03c96e]
+>>> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char co=
+nst*)+0x1de) [0x5deb9e]
+>>> 10: (MonMap::build_from_host_list(std::string, std::string)+0x738) =
+[0x5988b8]
+>>> 11: (MonMap::build_initial(CephContext*, std::ostream&)+0x113) [0x5=
+9bd53]
+>>> 12: (main()+0x12bb) [0x45ffab]
+>>> 13: (__libc_start_main()+0xed) [0x7f7a6a6d776d]
+>>> 14: ceph-mon() [0x462a19]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>>
+>>>      File "/root/ceph-deploy/ceph_deploy/mon.py", line 125, in mon
+>>>        get_monitor_secret=3Dget_monitor_secret,
+>>>      File "/root/ceph-deploy/virtualenv/local/lib/python2.7/site-pa=
+ckages/pushy-0.5.1-py2.7.egg/pushy/protocol/proxy.py", line 255, in <la=
+mbda>
+>>>        (conn.operator(type_, self, args, kwargs))
+>>>      File "/root/ceph-deploy/virtualenv/local/lib/python2.7/site-pa=
+ckages/pushy-0.5.1-py2.7.egg/pushy/protocol/connection.py", line 66, in=
+ operator
+>>>        return self.send_request(type_, (object, args, kwargs))
+>>>      File "/root/ceph-deploy/virtualenv/local/lib/python2.7/site-pa=
+ckages/pushy-0.5.1-py2.7.egg/pushy/protocol/baseconnection.py", line 32=
+3, in send_request
+>>>        return self.__handle(m)
+>>>      File "/root/ceph-deploy/virtualenv/local/lib/python2.7/site-pa=
+ckages/pushy-0.5.1-py2.7.egg/pushy/protocol/baseconnection.py", line 63=
+9, in __handle
+>>>        raise e
+>>> pushy.protocol.proxy.ExceptionProxy: Command '['ceph-mon', '--clust=
+er', 'ceph', '--mkfs', '-i', 'ELSCEPH01', '--keyring', '/var/lib/ceph/t=
+mp/ceph-ELSCEPH01.mon.keyring']' returned non-zero exit status -6
+>>>
+>>>
+>>> Which seems to indicate that the creation of the admin socket on th=
+e elsceph01 server didn't work.  I've verified that the /var/run/ceph/c=
+eph-mon.ELSCEPH01.asok file does not exist on the elsceph01 server.  An=
+y help on this issue would be greatly appreciated.
+>>>
+>>> On a side note, I think the ceph-deploy command's verbose setting m=
+ight be a little more helpful if it is a little more clear on the comma=
+nds that are being executed for the installation of the software on the=
+ remote server, and their results.  Also, it might be a good idea to al=
+ter the exit status of the ceph-deploy command when an error occurs to =
+a number that can be looked up in a map which indicates what went wrong=
+=2E  This way even the non-verbose use of the command could still be he=
+lpful in figuring out what went wrong if something did go wrong.  Right=
+ now, ceph-deploy returns 0 for my failed installation.  It'd be really=
+ cool if it returned something like 14, which could be traced back to s=
+omething like, mkcephfs failed on the remote server.  It's just a thoug=
+ht.
+>>>
+>>> Thanks,
+>>>
+>>> Todd
+>>>
+>>> Todd Blackwell
+>>> HARRIS Corporation
+>>> Work: 321-984-6911
+>>> Cell: 954-817-3662
+>>> eblack04@harris.com
+>>>
+>>>
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
