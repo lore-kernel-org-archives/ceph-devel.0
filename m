@@ -1,45 +1,76 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: next branch: logrotate and invoke-rc.d
-Date: Tue, 4 Dec 2012 05:26:59 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212040526110.6542@cobra.newdream.net>
-References: <50BDAF4C.3090806@profihost.ag>
+Subject: v0.55 released
+Date: Tue, 4 Dec 2012 06:06:06 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212040604480.6542@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52865 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:53073 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752423Ab2LDN07 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 08:26:59 -0500
-In-Reply-To: <50BDAF4C.3090806@profihost.ag>
+	with ESMTP id S1753589Ab2LDOGG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 09:06:06 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 6CD0E80446
+	for <ceph-devel@vger.kernel.org>; Tue,  4 Dec 2012 06:06:06 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 5020880446
+	for <ceph-devel@vger.kernel.org>; Tue,  4 Dec 2012 06:06:06 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, 4 Dec 2012, Stefan Priebe - Profihost AG wrote:
-> Hello list,
-> 
-> since a few days can't remember which revision. It seems something in
-> logrotate was changed.
-> 
-> I'm getting the following daily cron output:
-> 
-> Subject: Cron <root@cloud1-ceph1> test -x /usr/sbin/anacron || ( cd / &&
-> run-parts --report /etc/cron.daily )
-> 
-> /etc/cron.daily/logrotate:
-> /usr/sbin/invoke-rc.d
+We had originally planned to make v0.55 a long-term stable release, but a 
+lot of last-minute changes and fixes went into this cycle, so we are going 
+to wait another cycle and make v0.56 bobtail.  A lot of work went into 
+v0.55, however. If you aren't running argonaut (v0.48.*), please give 
+v0.55 a try and help us make sure it is rock solid!
 
-Pushed a fix to next.  Thanks!
+** WARNING: The default authentication behavior changed. Please read below 
+   before upgrading or your cluster may not start.
 
-sage
+Notable changes since v0.54 include:
 
-> 
-> Greets,
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+ * auth: enable cephx by default
+ * librbd: fine-grained striping feature
+ * librbd: improved caching (of object non-existence)
+ * rbd: import from stdin, export to stdout
+ * osd: optional 'min' pg size
+ * osd: recovery reservations
+ * osd: client vs recovery io priotitization
+ * osd: use syncfs(2) even when glibc is old
+ * crush: fixed retry behavior with chooseleaf via tunable
+ * radosgw: POST support
+ * radosgw: stripe large (non-multipart) objects
+ * radosgw: openstack keystone integration
+ * radosgw: vanity bucket dns names
+ * mon: improved ENOSPC, fs error checking
+ * libcephfs: java wrapper
+ * ceph-fuse/libcephfs: many misc fixes, admin socket debugging
+ * mds: misc fixes
+ * mon, radosgw, ceph-fuse: fixed memory leaks!
+ * mkcephfs: support for formatting xfs, ext4 (as well as btrfs)
+ * upstart: ceph, ceph-osd meta-jobs
+ * many many bug fixes
+
+The biggest item to watch out for with this release is that cephx 
+authentication is now on by default. That means that if you don't already 
+explicitly enable or disable authentication in your ceph.conf, upgrading 
+will prevent your cluster from starting. You need to either disable 
+authentication explicitly, or enable it before upgrading.
+
+There is a lot of new stuff here, including performance work on the OSD, 
+new features in radosgw, and stability improvements all around. Lots of 
+memory leaks were fixed (monitor, radosgw, OSD, ceph-fuse), many bugs were 
+squashed. Please give this release a try; we'd love to get as much testing 
+as possible before the next release v0.56 becomes a long-term stable 
+version.
+
+You can get v0.55 from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.55.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
+
+
+
