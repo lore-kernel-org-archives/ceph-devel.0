@@ -1,31 +1,26 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: next branch: logrotate and invoke-rc.d
-Date: Tue, 04 Dec 2012 09:07:40 +0100
-Message-ID: <50BDAF4C.3090806@profihost.ag>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 0/2] fixes for undeletable empty directory
+Date: Tue,  4 Dec 2012 16:09:46 +0800
+Message-ID: <1354608588-25840-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:48972 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751005Ab2LDIHp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 03:07:45 -0500
+Received: from mga11.intel.com ([192.55.52.93]:5684 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750833Ab2LDIJv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Dec 2012 03:09:51 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Hello list,
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-since a few days can't remember which revision. It seems something in 
-logrotate was changed.
+These two patches fix MDS restart issues that may corrupt the fragstat accounting
+and cause undeletable empty directory. These two patches, together with the patch
+"mds: fix journaling issue regarding rstat accounting", have passed overnight
+"fsstress + restart MDS every 120s" test. No undeletable directory was found.
 
-I'm getting the following daily cron output:
+These patches are also in:
+  git://github.com/ukernel/ceph.git wip-mds
 
-Subject: Cron <root@cloud1-ceph1> test -x /usr/sbin/anacron || ( cd / && 
-run-parts --report /etc/cron.daily )
-
-/etc/cron.daily/logrotate:
-/usr/sbin/invoke-rc.d
-
-Greets,
-Stefan
+Regards
+Yan, Zheng
