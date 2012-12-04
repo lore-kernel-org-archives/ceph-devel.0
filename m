@@ -1,49 +1,71 @@
-From: David Clarke <davidc@catalyst.net.nz>
-Subject: Re: Best practice with 0.48.2 to take a node into maintenance
-Date: Wed, 05 Dec 2012 10:31:03 +1300
-Message-ID: <50BE6B97.1050808@catalyst.net.nz>
-References: <0F892E7E-CF04-49A2-9ABA-5EAF25E6D645@filoo.de> <50BCFA2F.9070603@inktank.com> <50BD0243.2050109@de-punkt.de> <50BD0E16.8090901@catalyst.net.nz> <50BD10A1.5020904@smart-weblications.de> <50BD12CB.3030506@catalyst.net.nz> <50BDD1D7.3030904@de-punkt.de>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Removed directory is back in the Ceph FS
+Date: Tue, 4 Dec 2012 13:40:32 -0800
+Message-ID: <CAPYLRzgRegP3Bxb1a7BVm-amYuEpSTfp7WkG6yC_4UrAdS6Pig@mail.gmail.com>
+References: <CAOGW2pyKcL=vs7p2i3yDNCC1Vxoh6cx053vECVCm=Twt7H4M5A@mail.gmail.com>
+	<CAOGW2pzG466Q3p-EXwx6_jxOjazPa3yxO8H6UtDDaLxVgu7rbg@mail.gmail.com>
+	<CAPYLRzgi4uQHYX9W4o+_EQvrw4KyU57Siq2XtU+GgNRAFLgPRw@mail.gmail.com>
+	<CAOGW2pzvo4Vm3twRHgbBzs_-RKtJ5s6g7n9_pUXzDUjJn2MaWA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:44117 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751945Ab2LDVbI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 16:31:08 -0500
-In-Reply-To: <50BDD1D7.3030904@de-punkt.de>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:37535 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752157Ab2LDVkd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 16:40:33 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so3449285iay.19
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Dec 2012 13:40:32 -0800 (PST)
+In-Reply-To: <CAOGW2pzvo4Vm3twRHgbBzs_-RKtJ5s6g7n9_pUXzDUjJn2MaWA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christopher Kunz <chrislist@de-punkt.de>
+To: Franck Marchand <fmarchand@agaetis.fr>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+Can you try and reproduce this again using v0.55? There are a number
+of (community!) patches in there that could have fixed this issue.
+-Greg
 
-On 04/12/12 23:35, Christopher Kunz wrote:
-> Hey,
->> That has to be old information - we're using it in anger on 64 bit x86 machines, from both
->> Intel and AMD.  I have no idea about ARM etc, however.
-> just to make absolutely sure: Are you using kexec "in anger" to switch Ceph nodes to new
-> kernels? I'm very doubtful that the approach will work seamlessly with Ceph, as it is rather
-> picky regarding kernel state...
-
-The normal shutdown cycle is activated, and Ceph on that node is stopped.  However, at the end of
-the rc.6 scripts is one to, instead of rebooting, exec a new kernel and then progress as normal
-through the boot process, and Ceph started again.
-
-Haven't encountered any major issues thus far.
-
-
-- -- 
-David Clarke
-Systems Architect
-Catalyst IT
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlC+a5cACgkQRgFDJLQLJc2SOwCeKCc9aV1z09acvA3vOIMjHpJ1
-F5wAn32idJCPe4WNcu0smSNzUSZv634F
-=JBvD
------END PGP SIGNATURE-----
+On Tue, Nov 20, 2012 at 2:14 AM, Franck Marchand <fmarchand@agaetis.fr> wrote:
+> Hi Gregory !
+>
+> Thx to have a look on this.
+>
+> I mounted the ceph fs from multiple clients. I did a rm -rf myfolder
+> from a client.
+> I use the ceph-fs-common (0.48-2argonaut) to mount my ceph fs.
+>
+> Franck
+>
+> 2012/11/20 Gregory Farnum <greg@inktank.com>:
+>> On Tue, Nov 13, 2012 at 3:23 AM, Franck Marchand <fmarchand@agaetis.fr> wrote:
+>>> Hi,
+>>>
+>>> I have a weird pb. I remove a folder using a mounted fs partition. I
+>>> did it and it worked well.
+>>
+>> What client are you using? How did you delete it? (rm -rf, etc?) Are
+>> you using multiple clients or one, and did you check it on a different
+>> client?
+>>
+>>> I checked later to see if I had all my folders in ceph fs ... : the
+>>> folder I removed was back and I can't remove it ! Here is the error
+>>> message I got :
+>>>
+>>> rm -rf 2012-11-10/
+>>> rm cannot remove `2012-11-10': Directory not empty
+>>>
+>>> This folder is empty ...
+>>> So anybody had the same pb ? Am I doing something wrong ?
+>>
+>> This sounds like a known but undiagnosed problem with the MDS
+>> "rstats". The part where your client reported success is a new
+>> wrinkle, though.
+>> -Greg
+>>
+>>
+>>>
+>>> Thx
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
