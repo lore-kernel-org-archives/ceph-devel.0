@@ -1,60 +1,49 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Very bad behavior when
-Date: Tue, 4 Dec 2012 12:54:57 -0800
-Message-ID: <CAPYLRzgLSgfRgC_LtRktp2wqrRwoQqZDgEF86tG-oMvAMqTiLQ@mail.gmail.com>
-References: <CAF6-1L5WSukXaDfy64wxUuuHDdhZ3G3AW_=fkjiVLzbm_g-rng@mail.gmail.com>
-	<D988AE88A2484A23AA62CF8112AA9B7A@inktank.com>
-	<CAF6-1L5WZaqVNpcnuSMQJC0-KMB8xgzJA_O21gG=+EhULFdsQg@mail.gmail.com>
-	<CAPYLRzh0Fu5DjjAh1RuYY70iM=pfqekCp9qOoJSRCWgoQ+XnZQ@mail.gmail.com>
-	<CAF6-1L4rh8Bw9cPGEXY=j8_Wv9-bmjp3uhE8KUR9LBsNYu+P2w@mail.gmail.com>
+From: David Clarke <davidc@catalyst.net.nz>
+Subject: Re: Best practice with 0.48.2 to take a node into maintenance
+Date: Wed, 05 Dec 2012 10:31:03 +1300
+Message-ID: <50BE6B97.1050808@catalyst.net.nz>
+References: <0F892E7E-CF04-49A2-9ABA-5EAF25E6D645@filoo.de> <50BCFA2F.9070603@inktank.com> <50BD0243.2050109@de-punkt.de> <50BD0E16.8090901@catalyst.net.nz> <50BD10A1.5020904@smart-weblications.de> <50BD12CB.3030506@catalyst.net.nz> <50BDD1D7.3030904@de-punkt.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:38050 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751751Ab2LDUy7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 15:54:59 -0500
-Received: by mail-ie0-f179.google.com with SMTP id k14so6586980iea.10
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Dec 2012 12:54:57 -0800 (PST)
-In-Reply-To: <CAF6-1L4rh8Bw9cPGEXY=j8_Wv9-bmjp3uhE8KUR9LBsNYu+P2w@mail.gmail.com>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:44117 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751945Ab2LDVbI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 16:31:08 -0500
+In-Reply-To: <50BDD1D7.3030904@de-punkt.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Christopher Kunz <chrislist@de-punkt.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 4, 2012 at 12:46 PM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
-> Hi,
->
->> Sorry to let this drop for so long, but is this something you've seen
->> happen before/again or otherwise reproduced? I'm not entirely sure how
->> to best test for it (other than just jerking the time around), and
->> while I can come up with scenarios where the OSD leaks memory, I've
->> got nothing for how that happens to the monitors. We've also fixed a
->> number of leaks recently that could account for part of the problem.
->
-> It happenned very reliably at each attempt to restart the OSD and
-> stopped right when I fixed the clock.
-> Just take a working cluster, take an osd out, let it rebalance, set
-> the clock of one of the OSD 50 min too fast, and restart the OSD.
->
-> I had it occur twice with the same clock sync problems. (once in a
-> test cluster with just 2 osd IIRC and once in the prod cluster).
->
-> I don't get it anymore because I patched the underlying problem that
-> was causing the clock to jump forward 50 min.
->
-> If you can't reproduce it locally, I can try to reproduce it again on
-> the test cluster tomorrow.
->
-> My best guess was that somehow the messages had a timestamp and it
-> refused to process message too much in the future and maybe just
-> queued them while waiting (but 50 min worth of message is a lot of
-> memory). But that's really a wild guess :p
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-No, there's no mechanism for anything like that. I suspect it's a bug
-with trying to obtain not-yet-existent cephx keys, but unfortunately I
-don't think anybody has the bandwidth to deal with it right now. I've
-created a bug, feel free to update if there's anything else important:
-http://tracker.newdream.net/issues/3569
--Greg
+On 04/12/12 23:35, Christopher Kunz wrote:
+> Hey,
+>> That has to be old information - we're using it in anger on 64 bit x86 machines, from both
+>> Intel and AMD.  I have no idea about ARM etc, however.
+> just to make absolutely sure: Are you using kexec "in anger" to switch Ceph nodes to new
+> kernels? I'm very doubtful that the approach will work seamlessly with Ceph, as it is rather
+> picky regarding kernel state...
+
+The normal shutdown cycle is activated, and Ceph on that node is stopped.  However, at the end of
+the rc.6 scripts is one to, instead of rebooting, exec a new kernel and then progress as normal
+through the boot process, and Ceph started again.
+
+Haven't encountered any major issues thus far.
+
+
+- -- 
+David Clarke
+Systems Architect
+Catalyst IT
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlC+a5cACgkQRgFDJLQLJc2SOwCeKCc9aV1z09acvA3vOIMjHpJ1
+F5wAn32idJCPe4WNcu0smSNzUSZv634F
+=JBvD
+-----END PGP SIGNATURE-----
