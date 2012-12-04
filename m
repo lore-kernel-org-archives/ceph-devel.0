@@ -1,87 +1,75 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: osd recovery extremely slow with current master
-Date: Tue, 4 Dec 2012 14:27:30 -0800
-Message-ID: <CAPYLRzj3SQJx-0sMbaVKGCxK_dYb8eu-exZdFGuq=-QXd0xM5A@mail.gmail.com>
-References: <50A2AE92.1010205@profihost.ag>
-	<CAPYLRzgqPZWZAMjJD_WrCx8m+HB6i1LKeLLNRZHmbgLnTJ6W+Q@mail.gmail.com>
-	<50AF3F09.8020902@profihost.ag>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: Removed directory is back in the Ceph FS
+Date: Tue, 04 Dec 2012 23:37:35 +0100
+Message-ID: <50BE7B2F.8020404@smart-weblications.de>
+References: <CAOGW2pyKcL=vs7p2i3yDNCC1Vxoh6cx053vECVCm=Twt7H4M5A@mail.gmail.com> <CAOGW2pzG466Q3p-EXwx6_jxOjazPa3yxO8H6UtDDaLxVgu7rbg@mail.gmail.com>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:47934 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751836Ab2LDW1a convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 17:27:30 -0500
-Received: by mail-ie0-f180.google.com with SMTP id c10so8936250ieb.39
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Dec 2012 14:27:30 -0800 (PST)
-In-Reply-To: <50AF3F09.8020902@profihost.ag>
+Received: from mx04.smart-weblications.de ([188.65.144.39]:42331 "EHLO
+	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751807Ab2LDWiF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 17:38:05 -0500
+In-Reply-To: <CAOGW2pzG466Q3p-EXwx6_jxOjazPa3yxO8H6UtDDaLxVgu7rbg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Franck Marchand <fmarchand@agaetis.fr>
+Cc: ceph-devel@vger.kernel.org
 
-Yeah, I checked with Sam and you probably want to increase the "osd
-max backfill" option to make it go faster in the future =97 this option
-limits the number of PGs an OSD will be sending or receiving a
-backfill for. The default is currently set to 5, and should probably
-be much higher.
--Greg
+Am 13.11.2012 12:23, schrieb Franck Marchand:
+> Hi,
+>=20
+> I have a weird pb. I remove a folder using a mounted fs partition. I
+> did it and it worked well.
+> I checked later to see if I had all my folders in ceph fs ... : the
+> folder I removed was back and I can't remove it ! Here is the error
+> message I got :
+>=20
+> rm -rf 2012-11-10/
+> rm cannot remove `2012-11-10': Directory not empty
+>=20
+> This folder is empty ...
+> So anybody had the same pb ? Am I doing something wrong ?
+>=20
 
-On Fri, Nov 23, 2012 at 1:16 AM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
-> It is with current next from today right now.
->
-> It just prints this line:
-> 2012-11-23 10:15:29.927754 mon.0 [INF] pgmap v89614: 7632 pgs: 5956
-> active+clean, 446 active+remapped+wait_backfill, 540
-> active+degraded+wait_backfill, 690 active+degraded+remapped+wait_back=
-fill; 0
-> bytes data, 2827 MB used, 4461 GB / 4464 GB avail; 1/3 degraded (33.3=
-33%)
->
-> And there is no I/O or CPU load on any machine. And it tooks hours to
-> recover with 0 bytes data (deleted all images before trying this agai=
-n).
->
-> Greets,
-> Stefan
->
-> Am 20.11.2012 00:21, schrieb Gregory Farnum:
->
->> Which version was this on? There was some fairly significant work to
->> recovery done to introduce a reservation scheme and some other stuff
->> that might need some different defaults.
->> -Greg
->>
->> On Tue, Nov 13, 2012 at 12:33 PM, Stefan Priebe <s.priebe@profihost.=
-ag>
->> wrote:
->>>
->>> Hi list,
->>>
->>> osd recovery seems to be really slow with current master.
->>>
->>> I see only 1-8 active+recovering out of 1200. Even there's no load =
-on
->>> ceph
->>> cluster.
->>>
->>> Greets,
->>> Stefan
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+I had the same problem when i tried to untar a kernel-tree on cephfs, a=
+fter
+deleting it with rm -r linux the rm process seemed to work, but the fol=
+der was
+still there with some (~20) subfolders all empty but cannot be removed =
+with
+error message "directory not empty". My setup was 4 osds, 4 mons, 4 mds
+configured, one running.
+
+However, i currently have no hardware left to test or debug this right =
+now.
+
+
+
+
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
