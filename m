@@ -1,65 +1,35 @@
-From: Matthew Anderson <matthewa@base3.com.au>
-Subject: RE: VM Corruption on 0.54 when 'client cache = false'
-Date: Wed, 5 Dec 2012 13:51:15 +0000
-Message-ID: <38A500831D3DE24B90BD200D6C8701351BAE4F38@Exchange2010-2.corit.local>
-References: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
- <9cae09be7789e62ef6520f467a223e5b@hq.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: OSD crashed today in os/JournalingObjectStore.cc
+Date: Wed, 5 Dec 2012 06:41:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212050639480.17270@cobra.newdream.net>
+References: <50BF1A43.4060605@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.base3.com.au ([27.106.198.3]:35580 "EHLO mail.base3.com.au"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753327Ab2LENv2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 5 Dec 2012 08:51:28 -0500
-In-Reply-To: <9cae09be7789e62ef6520f467a223e5b@hq.newdream.net>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:36411 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754109Ab2LEOlC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Dec 2012 09:41:02 -0500
+In-Reply-To: <50BF1A43.4060605@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Josh Durgin' <josh.durgin@inktank.com>
-Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIGZvciBnZXR0aW5nIGJhY2sgdG8gbWUgSm9zaC4gDQoNCkkndmUgdXBkYXRlZCB0byB0
-aGUgbmV3IDAuNTUgcmVsZWFzZSBhbmQgSSBoYXZlbid0IGJlZW4gYWJsZSB0byByZXByb2R1Y2Ug
-dGhlIHByb2JsZW0uIEkgaGF2ZSB0aGUgZmVlbGluZyBJIG1heSBiZSB0byBibGFtZSBmb3IgdGhl
-IHByb2JsZW0gYXMgd2hlbiBJIHVwZGF0ZWQgdG8gMC41NSBxZW11LWltZyBzZWdmYXVsdGVkIHdp
-dGggYSBsaWJyYmQgZXJyb3IgYmVjYXVzZSB0aGVyZSB3YXMgYW4gb2xkIHZlcnNpb24gb2YgdGhl
-IGxpYnJiZCBsaWJyYXJ5IGluIGFub3RoZXIgcGF0aCAod2hpY2ggSSB0aGluayB3YXMgZnJvbSAw
-LjU0KS4gT25jZSBJIGNsZWFuZWQgZXZlcnl0aGluZyB1cCBpdCB3b3JrZWQgZmluZS4gIA0KDQrC
-oE9uZSB0aGluZyBJIGRpZG4ndCBub3RpY2UgYWJvdXQgdGhlIDAuNTUgcmVsZWFzZSBpcyB0aGF0
-ICdjZXBoIG9zZCBjcmVhdGUnIG5vIGxvbmdlciBhY2NlcHRzIGFyZ3VtZW50cyBhbmQgZ2l2ZXMg
-JygyMikgSW52YWxpZCBhcmd1bWVudCcgaWYgeW91IHRyeSB0byBzcGVjaWZ5IGFuIE9TRCBudW1i
-ZXIuIFJ1bm5pbmcgdGhlIGNvbW1hbmQgd2l0aG91dCBhbiBhcmd1bWVudCBjb3JyZWN0bHkgY3Jl
-YXRlcyBhbiBPU0Qgd2l0aCB0aGUgbmV4dCBmcmVlIG9zZCBudW1iZXIuIEkgd2Fzbid0IHN1cmUg
-aWYgdGhpcyB3YXMgYSBidWcgb3IgdGhhdCB0aGUgY29tbWFuZCBoYXMgY2hhbmdlZCBmb3IgMC41
-NSsgYW5kIHRoZSBkb2N1bWVudGF0aW9uIGhhc24ndCBiZWVuIHVwZGF0ZWQgeWV0IChBZGQvUmVt
-b3ZlIE9TRCdzIHBhZ2UgaW4gdGhlIHdpa2kgcmVmZXJuY2VzIHRoZSBjb21tYW5kIHdpdGggYXJn
-dW1lbnRzKS4NCg0KVGhhbmtzIGFnYWluDQotTWF0dA0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBKb3NoIER1cmdpbiBbbWFpbHRvOmpvc2guZHVyZ2luQGlua3RhbmsuY29t
-XSANClNlbnQ6IE1vbmRheSwgMyBEZWNlbWJlciAyMDEyIDY6MDEgUE0NClRvOiBNYXR0aGV3IEFu
-ZGVyc29uDQpDYzogJ2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0KU3ViamVjdDogUmU6IFZN
-IENvcnJ1cHRpb24gb24gMC41NCB3aGVuICdjbGllbnQgY2FjaGUgPSBmYWxzZScNCg0KVGhhdCBk
-aXNhYmxpbmcgY2FjaGluZyBpbXByb3ZlcyB3cml0ZSBzcGVlZCBzb3VuZHMgbGlrZSBzb21ldGhp
-bmcgc3RyYW5nZSBpcyBnb2luZyBvbi4gV2hhdCdzIHRoZSBmdWxsIFFFTVUvS1ZNIGNvbW1hbmQg
-bGluZSBhbmQgY2VwaC5jb25mIHVzZWQgd2hlbiBydW5uaW5nIHRoZSBWTT8NCg0KVGhlIGNvcnJ1
-cHRpb24gaXNzdWUgaXMgbW9yZSBzZXJpb3VzLCBhbmQgbm90IHNvbWV0aGluZyBJJ3ZlIHNlZW4g
-cmVwb3J0ZWQgYmVmb3JlLiBEb2VzIGl0IG9jY3VyIG9ubHkgd2l0aCBXaW5kb3dzIFNlcnZlciAy
-MDEyIFZNcywgb3IgZG9lcyBpdCBoYXBwZW4gd2l0aCBhIExpbnV4IFZNIGFzIHdlbGw/IE1vcmUg
-c3BlY2lmaWMgZGVidWdnaW5nIHN1Z2dlc3Rpb25zIGFyZSBiZWxvdy4NCg0KZmllbWFwIGlzIG9m
-ZiBieSBkZWZhdWx0IHNpbmNlIHdlIGRpc2NvdmVyZWQgdGhhdCBpc3N1ZSwgc28gdGhpcyBpcyBh
-IGRpZmZlcmVudCBidWcuDQoNClNpbmNlIHRoZSBndWVzdCBjYW4ndCBmaW5kIGl0cyBwYXJ0aXRp
-b25zLCBjb3VsZCB5b3UgdHJ5IGV4cG9ydGluZyB0aGUgaW1hZ2UgdG8gYSBmaWxlIChyYmQgZXhw
-b3J0IHBvb2wvaW1hZ2UgZmlsZW5hbWUpLCBhbmQgdGhlbiBydW4gZ2Rpc2sgLWwgb24gdGhlIGZp
-bGU/IERvaW5nIHRoaXMgYmVmb3JlIGJvb3RpbmcsIGFuZCB0aGVuIGFnYWluIGFmdGVyIHRoZSBj
-b3JydXB0aW9uIG9jY3VycyBhbmQgdGhlIFZNIGlzIHNodXQgZG93biBtaWdodCBoZWxwIGRldGVy
-bWluZSB0aGUgbmF0dXJlIG9mIHRoZSBjb3JydXB0aW9uLCBhbmQgd2hpY2ggcGFydHMgb2YgdGhl
-IGltYWdlIGFyZSBjb3JydXB0ZWQuDQpJZiB5b3UgcnVuIHRoZSBWTSB3aXRoICdkZWJ1ZyBtcyA9
-IDEnLCAnZGVidWcgb2JqZWN0Y2FjaGVyID0gMjAnLCAnZGVidWcgbGlicmJkID0gMjAnLCBhbmQg
-ICdsb2cgZmlsZSA9IC9wYXRoL3RvL2ZpbGUvd3JpdGVhYmxlL2J5L3FlbXUnIGluIHRoZSBbY2xp
-ZW50XSBzZWN0aW9uIG9mIGNlcGguY29uZiwgd2UgbWlnaHQgYmUgYWJsZSB0byBzZWUgd2hhdCdz
-IGhhcHBlbmluZyB0byB0aGUgcHJvYmxlbWF0aWMgcGFydHMgb2YgdGhlIGltYWdlLg0KSWYgdGhl
-IGxvZ3MgYXJlIGxvbmcsIHlvdSBjYW4gYXR0YWNoIHRoZW0gdG8gYSBidWcgcmVwb3J0IHJlZmVy
-cmluZyB0byB0aGlzIGVtYWlsIGF0IGh0dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC4NCg0KQW5v
-dGhlciB0aGluZyB0byB0cnkgaXMgcnVubmluZyAnY2VwaCBvc2QgZGVlcC1zY3J1YicsIHdoaWNo
-IHdpbGwgY2hlY2sgZm9yIGNvbnNpc3RlbmN5IG9mIG9iamVjdHMgYWNyb3NzIE9TRHMsIGFuZCBy
-ZXBvcnQgcHJvYmxlbXMgaW4gJ2NlcGggLXMnLg0KDQpKb3NoDQo=
+On Wed, 5 Dec 2012, Stefan Priebe - Profihost AG wrote:
+> Hello list,
+> 
+> i updated to latest next from today and then after 20 minutes an OSD was
+> crashing in os/JournalingObjectStore.cc.
+> 
+> Attached is the log.
+
+Hmm, this is perplexing.  It might just be a bad assert, but I can't see 
+how it could happen.  Any chance you can reproduce with
+
+	debug journal = 0/10
+
+in the [osd] section?  That will give us a dump if it fails the assert.
+
+Thanks!
+s
