@@ -1,72 +1,86 @@
-From: James Page <james.page@ubuntu.com>
+From: Dan Mick <dan.mick@inktank.com>
 Subject: Re: 0.55 init script Issue?
-Date: Wed, 05 Dec 2012 18:04:40 +0000
-Message-ID: <50BF8CB8.5060708@ubuntu.com>
+Date: Wed, 05 Dec 2012 11:41:08 -0800
+Message-ID: <50BFA354.7040308@inktank.com>
 References: <50BF7314.2020809@gammacode.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:34244 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751587Ab2LESEo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Dec 2012 13:04:44 -0500
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:36818 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753176Ab2LETlL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Dec 2012 14:41:11 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so3831595pad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Dec 2012 11:41:11 -0800 (PST)
 In-Reply-To: <50BF7314.2020809@gammacode.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mike Dawson <mdawson@gammacode.com>
 Cc: ceph-devel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+The story as best I know it is that we're trying to transition to and 
+use upstart where possible, but that the upstart config does not (yet?) 
+try to do what the init.d config did.  That is, it doesn't support 
+options to the one script, but rather separates daemons into separate 
+services, and does not reach out to remote machines to start daemons, etc.
 
-Hi Mike
+The intent is that init.d/ceph is left for non-Upstart distros, AFAICT.
 
-On 05/12/12 16:15, Mike Dawson wrote:
-> After upgrading from 0.54 to 0.55, the command "service ceph
-> start" fails. But "/etc/init.d/ceph start" works. This is the case
-> for start. stop, etc. Here is an example:
-> 
-> root@node2:~# /etc/init.d/ceph stop === mon.a === Stopping Ceph
-> mon.a on node2...kill 2505...done === osd.0 === Stopping Ceph osd.0
-> on node2...kill 5042...done === osd.1 === Stopping Ceph osd.1 on
-> node2...kill 5116...done === osd.17 === Stopping Ceph osd.17 on
-> node2...kill 5275...done
-> 
-> 
-> root@node2:~# service ceph start start: Job is already running:
-> ceph
-> 
-> root@node2:~# /etc/init.d/ceph start === mon.a ===
+Tv had some design notes here:
 
-I'd not noticed this either but it looks like there is both an upstart
-configuration called 'ceph' (service ceph start) and an init script
-called ceph (/etc/init.d/ceph start); this does not sound right to me
-and I can't see what the ceph upstart configuration is actually doing
-other than generating an event (which nothing is listening to).
+http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg09314.html
 
-The packages should ship one or the other IMHO.
+We need better documentation/rationale here at least.
 
-- -- 
-James Page
-Ubuntu Core Developer
-Debian Maintainer
-james.page@ubuntu.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
 
-iQIcBAEBCAAGBQJQv4y3AAoJEL/srsug59jDlnYP/AwOyWOSaScKFGiOnZHp7zpq
-3QyKC4AGzIN7IH33kMJecu0diFaeJrlfZ/U6yv4jduVeUOpVf7ZUwma3d5WGOkg5
-B1e5uTBYMabdZdZ2XnHRfChrDueMo4+Y+DinETeB8diL8xzP9vitCaAJxpavT5UQ
-qKhO5ZwGSL9zWhtsN5QKc/qYv0ZbonUivMxKm+Imzgc6uuka7Z0JR+ETr9VJml4D
-LOBM3dZKzF4ryPqpfeSGbI8W566qHm9MSIvBEcNNxUys+qjDMd/kLoP+SwYblD0H
-sjDohj1xdnRIDf4y5FUh50HHl9Dy8NjGnA9X8bwDspiykNgU4kc2d6wHHpKMPMzA
-6IywpifEZ9dD65Gbbqep8qQiXsjQDY/2V+c1RFDHripRg3AaXuPnZIxPGw7RevTJ
-MMnYABVTT1jhfdpC0pzeIgdd5v55/1r30H4YyMV59pTIeuje6e+og2wXrhgky41N
-fQl6tAY93cBV9/E5AjKtic/KpsYLSSU3BV/ivfUgHEb/UavX+wzGeBmZimrjSTZ0
-8DUlpeJ9jBT5I+A6Y6u29HqKZFJuZo4AP8CXoRfhJrMfmn5Apu4zoB78raozKow9
-JEERlL8SREXHIAREWbHO8Yk/RFkK9idpmQIh0/9FG0Ri76/Vyn1ayk44p7nzjTlZ
-thcHGhvxsPEPFI+FWehI
-=Lqnr
------END PGP SIGNATURE-----
+
+On 12/05/2012 08:15 AM, Mike Dawson wrote:
+> All,
+>
+> After upgrading from 0.54 to 0.55, the command "service ceph start"
+> fails. But "/etc/init.d/ceph start" works. This is the case for start.
+> stop, etc. Here is an example:
+>
+> root@node2:~# /etc/init.d/ceph stop
+> === mon.a ===
+> Stopping Ceph mon.a on node2...kill 2505...done
+> === osd.0 ===
+> Stopping Ceph osd.0 on node2...kill 5042...done
+> === osd.1 ===
+> Stopping Ceph osd.1 on node2...kill 5116...done
+> === osd.17 ===
+> Stopping Ceph osd.17 on node2...kill 5275...done
+>
+>
+> root@node2:~# service ceph start
+> start: Job is already running: ceph
+>
+>
+> root@node2:~# /etc/init.d/ceph start
+> === mon.a ===
+> Starting Ceph mon.a on node2...
+> starting mon.a rank 0 at 172.16.1.2:6789/0 mon_data
+> /var/lib/ceph/mon/ceph-a fsid 4951e786-945e-47b6-b1b1-4043b6cc3b55
+> === osd.0 ===
+> Starting Ceph osd.0 on node2...
+> starting osd.0 at :/0 osd_data /var/lib/ceph/osd/ceph-0 /dev/sda6
+> === osd.1 ===
+> Starting Ceph osd.1 on node2...
+> starting osd.1 at :/0 osd_data /var/lib/ceph/osd/ceph-1 /dev/sda7
+> === osd.17 ===
+> Starting Ceph osd.17 on node2...
+> starting osd.17 at :/0 osd_data /var/lib/ceph/osd/ceph-17 /dev/sda8
+>
+>
+> This is Ubuntu 12.10 with packages from debian-testing. One other user
+> on IRC confirmed the same behavior. Is this a known issue?
+>
+>
+> Thanks,
+> Mike Dawson
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
