@@ -1,75 +1,66 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: New configuration / command line handling
-Date: Tue, 04 Dec 2012 19:04:25 -0800
-Message-ID: <50BEB9B9.3080005@inktank.com>
-References: <CAN04cT6XTzaqQuLyQUUWY34F9ZQ1xoLwK3uJt5+SS-Ui+MCUCg@mail.gmail.com> <50BD1EE9.909@inktank.com> <CAN04cT5UgSipUOG9Ch=nXOwh-AGvmhtFzHOKDamuN6zxBtg9iQ@mail.gmail.com>
+From: Amon Ott <ao@m-privacy.de>
+Subject: Re: [PATCH 0/2] fixes for undeletable empty directory
+Date: Wed, 05 Dec 2012 09:43:43 +0100
+Message-ID: <50BF093F.4060709@m-privacy.de>
+References: <1354608588-25840-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:47386 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752483Ab2LEDEj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Dec 2012 22:04:39 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so3229392pad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Dec 2012 19:04:37 -0800 (PST)
-In-Reply-To: <CAN04cT5UgSipUOG9Ch=nXOwh-AGvmhtFzHOKDamuN6zxBtg9iQ@mail.gmail.com>
+Received: from www.m-privacy.de ([85.214.237.71]:34205 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751666Ab2LEInx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 Dec 2012 03:43:53 -0500
+In-Reply-To: <1354608588-25840-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 12/03/2012 02:46 PM, Roald van Loon wrote:
-> On Mon, Dec 3, 2012 at 10:51 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> It looks like you've got a good start on integrating it into the main
->> ceph infrastructure. Skimming over it, the general structure makes sense
->> to me. One part that might be a bit tricky is making the new parsing
->> backwards compatible with the old parsing.
->>
->> 1) For config options in general, '-', '_', and ' ' are all equivalent.
->> 2) In ceph's config file format, we treat ';' as a comment in addition to
->> '#'.
->>
->> I'm not sure how difficult those are to handle with the built-in
->> boost::program_options parsers.
->
-> Well, there is another (maybe larger) problem; metavalues. Boost::po
-> can't handle them. That's why I am implementing the raw config file
-> parsing separately (partly using boost::property_tree actually), load
-> all options in a tree hierarchy (for example [osd.1] -> [osd] ->
-> [global]) and then do metavalue lookups top-down with static regexps.
-> Then, I have a parsed and complete set in the top of the tree (osd.1
-> in this case) which I can feed to boost::po to be parsed. Still have
-> to work out some of the details though, but I think this is generally
-> a nice way of config parsing. I'll see if I can find the time this
-> week to implement it if you're interested.
+Am 04.12.2012 09:09, schrieb Yan, Zheng:
+> These two patches fix MDS restart issues that may corrupt the fragsta=
+t accounting
+> and cause undeletable empty directory. These two patches, together wi=
+th the patch
+> "mds: fix journaling issue regarding rstat accounting", have passed o=
+vernight
+> "fsstress + restart MDS every 120s" test. No undeletable directory wa=
+s found.
+>=20
+> These patches are also in:
+>   git://github.com/ukernel/ceph.git wip-mds
 
-I think this makes sense. I guess the alternative is expanding the
-metavalues after boost::po breaks them down, but I don't see any
-big advantages either way.
+Thank you very much for working on MDS issues, your work gave me some
+hope that our very long standing crashes at MDS failover could be fixed
+soon.
 
->> Converting some of the individual command line tools that use
->> subcommands might be a little cumbersome too, but I think they'll
->> be better off once it's done.
->
-> My biggest concern is that most code directly accesses members of
-> md_config_t by means of g_conf->foo. It's very difficult to port that
-> to the new class without actually loading all of the available config
-> options as class members - something I'm personally not a big fan of.
-> I haven't had the time to think of a nice solution, yet (something
-> like getter/setter methods maybe, or macros?). If you have any
-> thoughts about this I'd very much like to hear them.
+Right now, we have our four node test cluster running with 0.55 and you=
+r
+latest patches. Hopefully, today's stress test will work fine.
 
-I'm not sure this is the best solution, but we have a small number of
-types of config values. We could have a getter for each type (like
-md_config_t::get_val(), but nicer to use in C++ and asserting that
-the configuration option is valid and of the appropriate type), i.e.:
+One question: with your latest patches, is a multiple MDS setup stable
+in your tests? So far, we only tried with max mds =3D 1. As our work lo=
+ad
+writes many small files, some load sharing for MDS would be nice to
+have. I would be willing to help with tests and reports, if needed.
 
-     uint64_t get_uint64_t(const std::string &name);
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 99296856
+10179 Berlin             http://www.m-privacy.de
 
-This could work for internal users (i.e. anyone using g_conf->foo right
-now). The library users (e.g. rados_conf_get()) would still want an
-interface like md_config_t::get_val() that returns an error if the
-option doesn't exist.
+Amtsgericht Charlottenburg, HRB 84946
 
-Josh
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
