@@ -1,197 +1,65 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: A couple of OSD-crashes after serious network trouble
-Date: Wed, 05 Dec 2012 12:15:23 +0100
-Message-ID: <50BF2CCB.3000302@filoo.de>
+From: Matthew Anderson <matthewa@base3.com.au>
+Subject: RE: VM Corruption on 0.54 when 'client cache = false'
+Date: Wed, 5 Dec 2012 13:51:15 +0000
+Message-ID: <38A500831D3DE24B90BD200D6C8701351BAE4F38@Exchange2010-2.corit.local>
+References: <38A500831D3DE24B90BD200D6C8701351BAE2396@Exchange2010-2.corit.local>
+ <9cae09be7789e62ef6520f467a223e5b@hq.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-5.de-punkt.de ([93.190.64.35]:44373 "EHLO
-	mail-5.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752813Ab2LELP1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Dec 2012 06:15:27 -0500
+Received: from mail.base3.com.au ([27.106.198.3]:35580 "EHLO mail.base3.com.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753327Ab2LENv2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 Dec 2012 08:51:28 -0500
+In-Reply-To: <9cae09be7789e62ef6520f467a223e5b@hq.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: 'Josh Durgin' <josh.durgin@inktank.com>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-Hi *,
-
-around midnight yesterday we faced some layer-2 network problems. OSD's=
-=20
-started to lose heartbeats and so on. Slow requests... you name it.
-So, after all OSD's doing their work, we had in sum around 6 of them=20
-crashed, 2 had to be restarted after first start. Should be 8 crashes i=
-n=20
-total.
-
-Typical output:
-
-
-=3D=3D=3D 8-< =3D=3D=3D
---- begin dump of recent events ---
-    -10> 2012-12-04 23:35:26.623091 7f1db7895700  5=20
-filestore(/data/osd6-1) _do_op 0x21035870 seq 111010292 osr(65.72=20
-0x9e13570)/0x9e13570 start
-     -9> 2012-12-04 23:35:26.623995 7f1db7895700  5=20
-filestore(/data/osd6-1) _do_op 0x21035500 seq 111010294 osr(10.3=20
-0x5b5c170)/0x5b5c170 start
-     -8> 2012-12-04 23:35:26.624013 7f1db6893700  5 --OSD::tracker--=20
-reqid: client.290626.0:798537, seq: 151093878, time: 2012-12-04=20
-23:35:26.624012, event: sub_op_applied, request:=20
-osd_sub_op(client.290626.0:798537 65.72=20
-c9612472/rb.0.2d5e5.39bd39.000000000652/head//65 [] v 8084'770407=20
-snapset=3D0=3D[]:[] snapc=3D0=3D[]) v7
-     -7> 2012-12-04 23:35:26.624047 7f1db8096700  5=20
-filestore(/data/osd6-1) _do_op 0x21035c80 seq 111010293 osr(65.72=20
-0x9e13570)/0x9e13570 start
-     -6> 2012-12-04 23:35:26.624119 7f1db6893700  5 --OSD::tracker--=20
-reqid: client.290626.0:798537, seq: 151093878, time: 2012-12-04=20
-23:35:26.624119, event: done, request: osd_sub_op(client.290626.0:79853=
-7=20
-65.72 c9612472/rb.0.2d5e5.39bd39.000000000652/head//65 [] v 8084'770407=
-=20
-snapset=3D0=3D[]:[] snapc=3D0=3D[]) v7
-     -5> 2012-12-04 23:35:26.624953 7f1db6893700  5 --OSD::tracker--=20
-reqid: client.290626.0:798549, seq: 151093879, time: 2012-12-04=20
-23:35:26.624953, event: sub_op_applied, request:=20
-osd_sub_op(client.290626.0:798549 65.72=20
-c9612472/rb.0.2d5e5.39bd39.000000000652/head//65 [] v 8084'770408=20
-snapset=3D0=3D[]:[] snapc=3D0=3D[]) v7
-     -4> 2012-12-04 23:35:26.625017 7f1db6893700  5 --OSD::tracker--=20
-reqid: client.290626.0:798549, seq: 151093879, time: 2012-12-04=20
-23:35:26.625017, event: done, request: osd_sub_op(client.290626.0:79854=
-9=20
-65.72 c9612472/rb.0.2d5e5.39bd39.000000000652/head//65 [] v 8084'770408=
-=20
-snapset=3D0=3D[]:[] snapc=3D0=3D[]) v7
-     -3> 2012-12-04 23:35:26.626220 7f1db7895700  5=20
-filestore(/data/osd6-1) _do_op 0x21035f00 seq 111010296 osr(6.7=20
-0x5ca4570)/0x5ca4570 start
-     -2> 2012-12-04 23:35:26.626218 7f1db8096700  5=20
-filestore(/data/osd6-1) _do_op 0x21035e10 seq 111010295 osr(10.3=20
-0x5b5c170)/0x5b5c170 start
-     -1> 2012-12-04 23:35:26.652283 7f1daed81700  5=20
-throttle(msgr_dispatch_throttler-cluster 0x2791560) get 1049621 (0 ->=20
-1049621)
-      0> 2012-12-04 23:35:26.654669 7f1db1f89700 -1 *** Caught signal=20
-(Aborted) **
-  in thread 7f1db1f89700
-
-  ceph version 0.48.2argonaut=20
-(commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
-  1: /usr/bin/ceph-osd() [0x6edaba]
-  2: (()+0xfcb0) [0x7f1dc34c7cb0]
-  3: (gsignal()+0x35) [0x7f1dc208e425]
-  4: (abort()+0x17b) [0x7f1dc2091b8b]
-  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f1dc29e769d]
-  6: (()+0xb5846) [0x7f1dc29e5846]
-  7: (()+0xb5873) [0x7f1dc29e5873]
-  8: (()+0xb596e) [0x7f1dc29e596e]
-  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char=20
-const*)+0x1de) [0x7a82fe]
-  10: (ReplicatedPG::recover_got(hobject_t, eversion_t)+0x4ae) [0x52b5e=
-e]
-  11: (ReplicatedPG::submit_push_complete(ObjectRecoveryInfo&,=20
-ObjectStore::Transaction*)+0x470) [0x52ddd0]
-  12:=20
-(ReplicatedPG::handle_pull_response(std::tr1::shared_ptr<OpRequest>)+0x=
-4d4)=20
-[0x54b124]
-  13: (ReplicatedPG::sub_op_push(std::tr1::shared_ptr<OpRequest>)+0x98)=
-=20
-[0x54bef8]
-  14: (ReplicatedPG::do_sub_op(std::tr1::shared_ptr<OpRequest>)+0x3f7)=20
-[0x54c3a7]
-  15: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x9f) [0x60073f]
-  16: (OSD::dequeue_op(PG*)+0x238) [0x5bfaf8]
-  17: (ThreadPool::worker()+0x4d5) [0x79f835]
-  18: (ThreadPool::WorkThread::entry()+0xd) [0x5d87cd]
-  19: (()+0x7e9a) [0x7f1dc34bfe9a]
-  20: (clone()+0x6d) [0x7f1dc214bcbd]
-  NOTE: a copy of the executable, or `objdump -rdS <executable>` is=20
-needed to interpret this.
-
---- end dump of recent events ---
-
-=3D=3D=3D 8-< =3D=3D=3D
-
-A - not very scientific, but useful - aggregation of all OSD-outputs as=
-=20
-follows. My hope is, that someone says:
-"Uhm, OK, tha's fixed in ..." ;)
-
-( count of occurences and corresponding string)
-
-=3D=3D=3D 8-< =3D=3D=3D
-
-       4 (boost::statechart::simple_state<PG::RecoveryState::Stray,
-       4=20
-(boost::statechart::state_machine<PG::RecoveryState::RecoveryMachine,
-      18 (ceph::__ceph_assert_fail(char
-      36 (clone()+0x6d)
-      18 (gsignal()+0x35)
-      16 (OSD::dequeue_op(PG*)+0x238)
-      16 (OSD::dequeue_op(PG*)+0x39a)
-       4 (OSD::_dispatch(Message*)+0x173)
-       4 (OSD::dispatch_op(std::tr1::shared_ptr<OpRequest>)+0x11b)
-       4 (OSD::handle_pg_log(std::tr1::shared_ptr<OpRequest>)+0x666)
-       4 (OSD::ms_dispatch(Message*)+0x184)
-      16 (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x9f)
-      16 (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0xab)
-       4 (PG::merge_log(ObjectStore::Transaction&,
-       4 (PG::RecoveryState::handle_log(int,
-       4 (PG::RecoveryState::Stray::react(PG::RecoveryState::MLogRec
-      16 (ReplicatedPG::do_sub_op(std::tr1::shared_ptr<OpRequest>)+0x32=
-e)
-      16 (ReplicatedPG::do_sub_op(std::tr1::shared_ptr<OpRequest>)+0x3f=
-7)
-      12=20
-(ReplicatedPG::handle_pull_response(std::tr1::shared_ptr<OpRequest>)+0x=
-4d4)
-      16=20
-(ReplicatedPG::handle_pull_response(std::tr1::shared_ptr<OpRequest>)+0x=
-b24)
-       4 (ReplicatedPG::handle_push(std::tr1::shared_ptr<OpRequest>)+0x=
-263)
-      32 (ReplicatedPG::recover_got(hobject_t,
-      32 (ReplicatedPG::submit_push_complete(ObjectRecoveryInfo&,
-      12 (ReplicatedPG::sub_op_push(std::tr1::shared_ptr<OpRequest>)+0x=
-98)
-      16 (ReplicatedPG::sub_op_push(std::tr1::shared_ptr<OpRequest>)+0x=
-a2)
-       4 (ReplicatedPG::sub_op_push(std::tr1::shared_ptr<OpRequest>)+0x=
-f3)
-       4 (SimpleMessenger::dispatch_entry()+0x15)
-       4 (SimpleMessenger::DispatchQueue::entry()+0x5e9)
-       4 (SimpleMessenger::DispatchThread::entry()+0xd)
-      16 (ThreadPool::worker()+0x4d5)
-      16 (ThreadPool::worker()+0x76f)
-      32 (ThreadPool::WorkThread::entry()+0xd)
-
-=3D=3D=3D 8-< =3D=3D=3D
-
-Everything has cleared up so far, so that's some good news ;)
-
-Comments welcome,
-
-Oliver.
-
---=20
-
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIGZvciBnZXR0aW5nIGJhY2sgdG8gbWUgSm9zaC4gDQoNCkkndmUgdXBkYXRlZCB0byB0
+aGUgbmV3IDAuNTUgcmVsZWFzZSBhbmQgSSBoYXZlbid0IGJlZW4gYWJsZSB0byByZXByb2R1Y2Ug
+dGhlIHByb2JsZW0uIEkgaGF2ZSB0aGUgZmVlbGluZyBJIG1heSBiZSB0byBibGFtZSBmb3IgdGhl
+IHByb2JsZW0gYXMgd2hlbiBJIHVwZGF0ZWQgdG8gMC41NSBxZW11LWltZyBzZWdmYXVsdGVkIHdp
+dGggYSBsaWJyYmQgZXJyb3IgYmVjYXVzZSB0aGVyZSB3YXMgYW4gb2xkIHZlcnNpb24gb2YgdGhl
+IGxpYnJiZCBsaWJyYXJ5IGluIGFub3RoZXIgcGF0aCAod2hpY2ggSSB0aGluayB3YXMgZnJvbSAw
+LjU0KS4gT25jZSBJIGNsZWFuZWQgZXZlcnl0aGluZyB1cCBpdCB3b3JrZWQgZmluZS4gIA0KDQrC
+oE9uZSB0aGluZyBJIGRpZG4ndCBub3RpY2UgYWJvdXQgdGhlIDAuNTUgcmVsZWFzZSBpcyB0aGF0
+ICdjZXBoIG9zZCBjcmVhdGUnIG5vIGxvbmdlciBhY2NlcHRzIGFyZ3VtZW50cyBhbmQgZ2l2ZXMg
+JygyMikgSW52YWxpZCBhcmd1bWVudCcgaWYgeW91IHRyeSB0byBzcGVjaWZ5IGFuIE9TRCBudW1i
+ZXIuIFJ1bm5pbmcgdGhlIGNvbW1hbmQgd2l0aG91dCBhbiBhcmd1bWVudCBjb3JyZWN0bHkgY3Jl
+YXRlcyBhbiBPU0Qgd2l0aCB0aGUgbmV4dCBmcmVlIG9zZCBudW1iZXIuIEkgd2Fzbid0IHN1cmUg
+aWYgdGhpcyB3YXMgYSBidWcgb3IgdGhhdCB0aGUgY29tbWFuZCBoYXMgY2hhbmdlZCBmb3IgMC41
+NSsgYW5kIHRoZSBkb2N1bWVudGF0aW9uIGhhc24ndCBiZWVuIHVwZGF0ZWQgeWV0IChBZGQvUmVt
+b3ZlIE9TRCdzIHBhZ2UgaW4gdGhlIHdpa2kgcmVmZXJuY2VzIHRoZSBjb21tYW5kIHdpdGggYXJn
+dW1lbnRzKS4NCg0KVGhhbmtzIGFnYWluDQotTWF0dA0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQpGcm9tOiBKb3NoIER1cmdpbiBbbWFpbHRvOmpvc2guZHVyZ2luQGlua3RhbmsuY29t
+XSANClNlbnQ6IE1vbmRheSwgMyBEZWNlbWJlciAyMDEyIDY6MDEgUE0NClRvOiBNYXR0aGV3IEFu
+ZGVyc29uDQpDYzogJ2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0KU3ViamVjdDogUmU6IFZN
+IENvcnJ1cHRpb24gb24gMC41NCB3aGVuICdjbGllbnQgY2FjaGUgPSBmYWxzZScNCg0KVGhhdCBk
+aXNhYmxpbmcgY2FjaGluZyBpbXByb3ZlcyB3cml0ZSBzcGVlZCBzb3VuZHMgbGlrZSBzb21ldGhp
+bmcgc3RyYW5nZSBpcyBnb2luZyBvbi4gV2hhdCdzIHRoZSBmdWxsIFFFTVUvS1ZNIGNvbW1hbmQg
+bGluZSBhbmQgY2VwaC5jb25mIHVzZWQgd2hlbiBydW5uaW5nIHRoZSBWTT8NCg0KVGhlIGNvcnJ1
+cHRpb24gaXNzdWUgaXMgbW9yZSBzZXJpb3VzLCBhbmQgbm90IHNvbWV0aGluZyBJJ3ZlIHNlZW4g
+cmVwb3J0ZWQgYmVmb3JlLiBEb2VzIGl0IG9jY3VyIG9ubHkgd2l0aCBXaW5kb3dzIFNlcnZlciAy
+MDEyIFZNcywgb3IgZG9lcyBpdCBoYXBwZW4gd2l0aCBhIExpbnV4IFZNIGFzIHdlbGw/IE1vcmUg
+c3BlY2lmaWMgZGVidWdnaW5nIHN1Z2dlc3Rpb25zIGFyZSBiZWxvdy4NCg0KZmllbWFwIGlzIG9m
+ZiBieSBkZWZhdWx0IHNpbmNlIHdlIGRpc2NvdmVyZWQgdGhhdCBpc3N1ZSwgc28gdGhpcyBpcyBh
+IGRpZmZlcmVudCBidWcuDQoNClNpbmNlIHRoZSBndWVzdCBjYW4ndCBmaW5kIGl0cyBwYXJ0aXRp
+b25zLCBjb3VsZCB5b3UgdHJ5IGV4cG9ydGluZyB0aGUgaW1hZ2UgdG8gYSBmaWxlIChyYmQgZXhw
+b3J0IHBvb2wvaW1hZ2UgZmlsZW5hbWUpLCBhbmQgdGhlbiBydW4gZ2Rpc2sgLWwgb24gdGhlIGZp
+bGU/IERvaW5nIHRoaXMgYmVmb3JlIGJvb3RpbmcsIGFuZCB0aGVuIGFnYWluIGFmdGVyIHRoZSBj
+b3JydXB0aW9uIG9jY3VycyBhbmQgdGhlIFZNIGlzIHNodXQgZG93biBtaWdodCBoZWxwIGRldGVy
+bWluZSB0aGUgbmF0dXJlIG9mIHRoZSBjb3JydXB0aW9uLCBhbmQgd2hpY2ggcGFydHMgb2YgdGhl
+IGltYWdlIGFyZSBjb3JydXB0ZWQuDQpJZiB5b3UgcnVuIHRoZSBWTSB3aXRoICdkZWJ1ZyBtcyA9
+IDEnLCAnZGVidWcgb2JqZWN0Y2FjaGVyID0gMjAnLCAnZGVidWcgbGlicmJkID0gMjAnLCBhbmQg
+ICdsb2cgZmlsZSA9IC9wYXRoL3RvL2ZpbGUvd3JpdGVhYmxlL2J5L3FlbXUnIGluIHRoZSBbY2xp
+ZW50XSBzZWN0aW9uIG9mIGNlcGguY29uZiwgd2UgbWlnaHQgYmUgYWJsZSB0byBzZWUgd2hhdCdz
+IGhhcHBlbmluZyB0byB0aGUgcHJvYmxlbWF0aWMgcGFydHMgb2YgdGhlIGltYWdlLg0KSWYgdGhl
+IGxvZ3MgYXJlIGxvbmcsIHlvdSBjYW4gYXR0YWNoIHRoZW0gdG8gYSBidWcgcmVwb3J0IHJlZmVy
+cmluZyB0byB0aGlzIGVtYWlsIGF0IGh0dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC4NCg0KQW5v
+dGhlciB0aGluZyB0byB0cnkgaXMgcnVubmluZyAnY2VwaCBvc2QgZGVlcC1zY3J1YicsIHdoaWNo
+IHdpbGwgY2hlY2sgZm9yIGNvbnNpc3RlbmN5IG9mIG9iamVjdHMgYWNyb3NzIE9TRHMsIGFuZCBy
+ZXBvcnQgcHJvYmxlbXMgaW4gJ2NlcGggLXMnLg0KDQpKb3NoDQo=
