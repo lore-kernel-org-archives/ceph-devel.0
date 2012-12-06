@@ -1,44 +1,53 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: OSD crashed today in os/JournalingObjectStore.cc
-Date: Thu, 06 Dec 2012 15:47:51 +0100
-Message-ID: <50C0B017.7020003@profihost.ag>
-References: <50BF1A43.4060605@profihost.ag> <alpine.DEB.2.00.1212050639480.17270@cobra.newdream.net> <BC8B71E3-1BE1-49ED-B578-34A0CBACAB98@profihost.ag> <alpine.DEB.2.00.1212051534530.14332@cobra.newdream.net> <50C0677B.4090400@profihost.ag> <alpine.DEB.2.00.1212060615100.13653@cobra.newdream.net>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 0/2] fixes for undeletable empty directory
+Date: Thu, 06 Dec 2012 23:09:11 +0800
+Message-ID: <50C0B517.303@intel.com>
+References: <1354608588-25840-1-git-send-email-zheng.z.yan@intel.com> <50BF093F.4060709@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:45628 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423553Ab2LFOr7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 09:47:59 -0500
-In-Reply-To: <alpine.DEB.2.00.1212060615100.13653@cobra.newdream.net>
+Received: from mga11.intel.com ([192.55.52.93]:62153 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754489Ab2LFPJg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 6 Dec 2012 10:09:36 -0500
+In-Reply-To: <50BF093F.4060709@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Amon Ott <ao@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hello,
-
-as it were crashing pretty often i had a few minutes where only 9 of 20 
-OSDs were still alive i reverted back to 
-3ace9a7c66c79847d215f4bd38f40ca8b07bab8e
-
-Which works fine ;-)
-
-Stefan
-
-Am 06.12.2012 15:43, schrieb Sage Weil:
-> On Thu, 6 Dec 2012, Stefan Priebe - Profihost AG wrote:
->> Hi,
+On 12/05/2012 04:43 PM, Amon Ott wrote:
+> Am 04.12.2012 09:09, schrieb Yan, Zheng:
+>> These two patches fix MDS restart issues that may corrupt the fragstat accounting
+>> and cause undeletable empty directory. These two patches, together with the patch
+>> "mds: fix journaling issue regarding rstat accounting", have passed overnight
+>> "fsstress + restart MDS every 120s" test. No undeletable directory was found.
 >>
->> here a new dump / crash:
->> https://www.dropbox.com/s/1qhg0dd0fv17q10/ceph-osd.54.log.gz
->
-> Awesome, thanks!  I see the bug now.  Working out a fix.
->
-> In the meantime, you can revert 85574a36226611ccf0fb7591fd275a2bdcca2bad
-> and 528108485be7912069087822e5b7a1a2f1dd515e.
->
-> sage
+>> These patches are also in:
+>>   git://github.com/ukernel/ceph.git wip-mds
+> 
+> Thank you very much for working on MDS issues, your work gave me some
+> hope that our very long standing crashes at MDS failover could be fixed
+> soon.
+Hi,
 
-Stefan
+Sorry for the delay
+
+> 
+> Right now, we have our four node test cluster running with 0.55 and your
+> latest patches. Hopefully, today's stress test will work fine.
+> 
+> One question: with your latest patches, is a multiple MDS setup stable
+> in your tests? So far, we only tried with max mds = 1. As our work load
+> writes many small files, some load sharing for MDS would be nice to
+> have. I would be willing to help with tests and reports, if needed.
+> 
+No, multiple MDS setup is still unstable.
+
+Regards
+Yan, Zheng
+
+> Amon Ott
+> 
+
