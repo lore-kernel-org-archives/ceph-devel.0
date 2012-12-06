@@ -1,46 +1,48 @@
-From: Gary Lowell <gary.lowell@inktank.com>
+From: Dino Yancey <dino2gnt@gmail.com>
 Subject: Re: 0.55 in Ceph EL6 repo?
-Date: Thu, 6 Dec 2012 11:32:49 -0800
-Message-ID: <2B458EA4-7BB6-4956-8C3B-F536876AD668@inktank.com>
+Date: Thu, 6 Dec 2012 14:39:53 -0600
+Message-ID: <CA+GnOzRYEPzb9SH202NCEBfQyPLyJRkUJOqrvkBpr3c4N6LGNQ@mail.gmail.com>
 References: <CA+GnOzQ0ccjmqOEVXJet0mOZgB4dmpV7-zSYqDUab4it=On=_Q@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+	<2B458EA4-7BB6-4956-8C3B-F536876AD668@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:50583 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946946Ab2LFTcx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 14:32:53 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so4666738pad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Dec 2012 11:32:52 -0800 (PST)
-In-Reply-To: <CA+GnOzQ0ccjmqOEVXJet0mOZgB4dmpV7-zSYqDUab4it=On=_Q@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:52696 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751347Ab2LFUjx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 15:39:53 -0500
+Received: by mail-vc0-f174.google.com with SMTP id d16so6431983vcd.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Dec 2012 12:39:53 -0800 (PST)
+In-Reply-To: <2B458EA4-7BB6-4956-8C3B-F536876AD668@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dino Yancey <dino2gnt@gmail.com>
+To: Gary Lowell <gary.lowell@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Dino -
+Ah, okay.
 
-The rpms are out there at:  http://www.ceph.com/rpm-testing/el6/x86_64/.   What sort of problem are you having ?
+I did not realize that there was more than one location. It might be
+handy for the ceph-release RPM package (as mentioned at
+http://ceph.com/docs/master/install/rpm/ ) to configure a ceph-testing
+repository to provide easy access to the rpm-testing packages as well,
+e.g.
 
-Thanks,
-Gary
+[root@hmon001 ~]# cat /etc/yum.repos.d/ceph.repo
+[ceph]
+name=Ceph
+baseurl=http://ceph.com/rpms/el6/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CEPH
 
-On Dec 6, 2012, at 8:35 AM, Dino Yancey wrote:
+[ceph-testing]
+name=Ceph-Testing
+baseurl=http://ceph.com/rpm-testing/el6/$basearch
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CEPH
+[root@hmon001 ~]#
 
-> Hi,
-> 
-> The EL6 RPM repository on ceph.com does not appear to have been
-> updated for 0.55.  Any idea when those will be available?  It makes my
-> life easier than compiling from a git clone.
-> 
-> Thanks!
-> 
-> --
-> ______________________________
-> Dino Yancey
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Just a thought.
 
+Dino
