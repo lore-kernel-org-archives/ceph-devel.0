@@ -1,76 +1,94 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: OSD crashed today in os/JournalingObjectStore.cc
-Date: Thu, 06 Dec 2012 10:38:03 +0100
-Message-ID: <50C0677B.4090400@profihost.ag>
-References: <50BF1A43.4060605@profihost.ag> <alpine.DEB.2.00.1212050639480.17270@cobra.newdream.net> <BC8B71E3-1BE1-49ED-B578-34A0CBACAB98@profihost.ag> <alpine.DEB.2.00.1212051534530.14332@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: 0.55 init script Issue?
+Date: Thu, 6 Dec 2012 05:28:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212060527470.13653@cobra.newdream.net>
+References: <50BF7314.2020809@gammacode.com> <50BFA354.7040308@inktank.com> <50BFABE5.1020904@ubuntu.com> <CAPYLRzjme=UxScsKDXdKPAWJyfxB1hNQGRJWT7QyJk+ET3dFHQ@mail.gmail.com> <alpine.DEB.2.00.1212051610560.16078@cobra.newdream.net>
+ <20121206013449.GH6375@blade.matthewvia.info>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:33201 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932232Ab2LFJiM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 04:38:12 -0500
-In-Reply-To: <alpine.DEB.2.00.1212051534530.14332@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:49171 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754993Ab2LFN22 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 08:28:28 -0500
+In-Reply-To: <20121206013449.GH6375@blade.matthewvia.info>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matthew Via <via@matthewvia.info>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Wed, 5 Dec 2012, Matthew Via wrote:
+> On the subject of init script problems, for the 0.55 Ceph release on EL6, 
+> the init script has what looks like a typo on line 280, and in 
+> /sbin/mkcephfs on line 328:
+>   fs_type = "btrfs"
+> 
+> As far as I know, shell variable assignments must have not have a space
+> between variable and the = -- the init script and mkcephfs will not run
+> as is.  It'd be nice to have this fixed in .55.1 if released.
 
-here a new dump / crash:
-https://www.dropbox.com/s/1qhg0dd0fv17q10/ceph-osd.54.log.gz
+Definitely, thanks!  This is pushed to the testing branch.  We should be 
+able to build a 0.55.1 tomorrow.
 
-Stefan
+Thanks!
+sage
 
-Am 06.12.2012 00:36, schrieb Sage Weil:
-> On Wed, 5 Dec 2012, Stefan Priebe - Profihost AG wrote:
->> There was a dump in the attached log.
->
-> The stack trace is there, but with 'debug journal = 0/20' in your conf it
-> will also dump all of the journal logging activity leading up to that
-> point.  Can you reproduce with that enabled?  That should tell me why op <
-> commited_seq.
->
-> Thanks!
-> sage
->
->
->>
->> Stefan
->>
->> Am 05.12.2012 um 15:41 schrieb Sage Weil <sage@inktank.com>:
->>
->>> On Wed, 5 Dec 2012, Stefan Priebe - Profihost AG wrote:
->>>> Hello list,
->>>>
->>>> i updated to latest next from today and then after 20 minutes an OSD was
->>>> crashing in os/JournalingObjectStore.cc.
->>>>
->>>> Attached is the log.
->>>
->>> Hmm, this is perplexing.  It might just be a bad assert, but I can't see
->>> how it could happen.  Any chance you can reproduce with
->>>
->>>     debug journal = 0/10
->>>
->>> in the [osd] section?  That will give us a dump if it fails the assert.
->>>
->>> Thanks!
->>> s
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+
+> 
+> Thanks, Matthew
+> 
+> On 16:11 Wed 05 Dec     , Sage Weil wrote:
+> > On Wed, 5 Dec 2012, Gregory Farnum wrote:
+> > > On Wed, Dec 5, 2012 at 12:17 PM, James Page <james.page@ubuntu.com> wrote:
+> > > > -----BEGIN PGP SIGNED MESSAGE-----
+> > > > Hash: SHA256
+> > > >
+> > > > On 05/12/12 19:41, Dan Mick wrote:
+> > > >> The story as best I know it is that we're trying to transition to
+> > > >> and use upstart where possible, but that the upstart config does
+> > > >> not (yet?) try to do what the init.d config did.  That is, it
+> > > >> doesn't support options to the one script, but rather separates
+> > > >> daemons into separate services, and does not reach out to remote
+> > > >> machines to start daemons, etc.
+> > > >>
+> > > >> The intent is that init.d/ceph is left for non-Upstart distros,
+> > > >> AFAICT.
+> > > >>
+> > > >> Tv had some design notes here:
+> > > >>
+> > > >> http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg09314.html
+> > > >>
+> > > >>  We need better documentation/rationale here at least.
+> > > >
+> > > > Maybe it might be better if the ceph init script and the ceph upstart
+> > > > configuration did not namespace clash; how about shifting the name of
+> > > > the ceph upstart configuration to ceph-all?
+> > > 
+> > > Yeah, this or something very similar is definitely the correct
+> > > solution. Sage recently added the "ceph" upstart job, and we didn't
+> > > put it through sufficient verification prior to release in order to
+> > > notice this issue. Users who aren't using upstart (I expect that's all
+> > > of them) should just delete the job after running the package install.
+> > > We'll certainly sort this out prior to the next release; I'm not sure
+> > > if we want to roll a v0.55.1 right away or not.
+> > 
+> > Let's push it to the testing branch, but make sure any other fixes are 
+> > there before rolling a .1.. maybe tomorrow?
+> > 
+> > Thanks!
+> > sage
+> > 
+> > 
+> > > -Greg
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
