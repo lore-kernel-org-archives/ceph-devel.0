@@ -1,48 +1,92 @@
-From: Dino Yancey <dino2gnt@gmail.com>
-Subject: Re: 0.55 in Ceph EL6 repo?
-Date: Thu, 6 Dec 2012 14:39:53 -0600
-Message-ID: <CA+GnOzRYEPzb9SH202NCEBfQyPLyJRkUJOqrvkBpr3c4N6LGNQ@mail.gmail.com>
-References: <CA+GnOzQ0ccjmqOEVXJet0mOZgB4dmpV7-zSYqDUab4it=On=_Q@mail.gmail.com>
-	<2B458EA4-7BB6-4956-8C3B-F536876AD668@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: OSD crashed today in os/JournalingObjectStore.cc
+Date: Thu, 6 Dec 2012 16:38:51 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212061634520.22833@cobra.newdream.net>
+References: <50BF1A43.4060605@profihost.ag> <alpine.DEB.2.00.1212050639480.17270@cobra.newdream.net> <BC8B71E3-1BE1-49ED-B578-34A0CBACAB98@profihost.ag> <alpine.DEB.2.00.1212051534530.14332@cobra.newdream.net> <50C0677B.4090400@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:52696 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751347Ab2LFUjx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 15:39:53 -0500
-Received: by mail-vc0-f174.google.com with SMTP id d16so6431983vcd.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Dec 2012 12:39:53 -0800 (PST)
-In-Reply-To: <2B458EA4-7BB6-4956-8C3B-F536876AD668@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55814 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932244Ab2LGAiw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Dec 2012 19:38:52 -0500
+In-Reply-To: <50C0677B.4090400@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gary Lowell <gary.lowell@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ah, okay.
+Hi Stefan,
 
-I did not realize that there was more than one location. It might be
-handy for the ceph-release RPM package (as mentioned at
-http://ceph.com/docs/master/install/rpm/ ) to configure a ceph-testing
-repository to provide easy access to the rpm-testing packages as well,
-e.g.
+I've pushed a few patches to wip-filestore2 that simplify and fix this 
+code.  Can you give it a go?
 
-[root@hmon001 ~]# cat /etc/yum.repos.d/ceph.repo
-[ceph]
-name=Ceph
-baseurl=http://ceph.com/rpms/el6/$basearch
-enabled=1
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CEPH
+Thanks!
+sage
 
-[ceph-testing]
-name=Ceph-Testing
-baseurl=http://ceph.com/rpm-testing/el6/$basearch
-enabled=0
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CEPH
-[root@hmon001 ~]#
 
-Just a thought.
-
-Dino
+On Thu, 6 Dec 2012, Stefan Priebe - Profihost AG wrote:
+> Hi,
+> 
+> here a new dump / crash:
+> https://www.dropbox.com/s/1qhg0dd0fv17q10/ceph-osd.54.log.gz
+> 
+> Stefan
+> 
+> Am 06.12.2012 00:36, schrieb Sage Weil:
+> > On Wed, 5 Dec 2012, Stefan Priebe - Profihost AG wrote:
+> > > There was a dump in the attached log.
+> > 
+> > The stack trace is there, but with 'debug journal = 0/20' in your conf it
+> > will also dump all of the journal logging activity leading up to that
+> > point.  Can you reproduce with that enabled?  That should tell me why op <
+> > commited_seq.
+> > 
+> > Thanks!
+> > sage
+> > 
+> > 
+> > > 
+> > > Stefan
+> > > 
+> > > Am 05.12.2012 um 15:41 schrieb Sage Weil <sage@inktank.com>:
+> > > 
+> > > > On Wed, 5 Dec 2012, Stefan Priebe - Profihost AG wrote:
+> > > > > Hello list,
+> > > > > 
+> > > > > i updated to latest next from today and then after 20 minutes an OSD
+> > > > > was
+> > > > > crashing in os/JournalingObjectStore.cc.
+> > > > > 
+> > > > > Attached is the log.
+> > > > 
+> > > > Hmm, this is perplexing.  It might just be a bad assert, but I can't see
+> > > > how it could happen.  Any chance you can reproduce with
+> > > > 
+> > > >     debug journal = 0/10
+> > > > 
+> > > > in the [osd] section?  That will give us a dump if it fails the assert.
+> > > > 
+> > > > Thanks!
+> > > > s
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
