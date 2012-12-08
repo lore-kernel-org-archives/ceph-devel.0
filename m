@@ -1,71 +1,101 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Errors attaching RBD image to a running VM
-Date: Fri, 07 Dec 2012 14:50:08 -0800
-Message-ID: <50C272A0.9020506@inktank.com>
-References: <20121207212247.GA12635@staff.dca.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Files lost after mds rebuild
+Date: Fri, 7 Dec 2012 16:51:39 -0800
+Message-ID: <CAPYLRzg2fpnFAZt29LXgRUcDjMaMRcpE36KY-zVLiY29K6kXVA@mail.gmail.com>
+References: <CAJiejCTWvtn6yS+_9h07t4KWqRHPqT-Oe23KtXmnvf7ZZbsAAw@mail.gmail.com>
+	<CAPYLRzikTGx=c+qJazxL=6amBj-GYT6fm9-noKmDGcABnAUUjw@mail.gmail.com>
+	<CAJiejCQt2xVBMzY9q6viYLkXYNrDcmHZP=rcWj+GK+qsYu=XuQ@mail.gmail.com>
+	<CAPYLRzhF2hpkqVLk9RQZwffzJz4DhsmwA30PBxOxNJi+HSkf3w@mail.gmail.com>
+	<CAJiejCQbbX1p=KpxA_HKT7KhrgOScOBS56Ru-2YWPcsPoZdm4A@mail.gmail.com>
+	<CAPYLRzhpb0cM=fQGizOAS-hLX5P36GkRFjX7ytG9_isaKyC4og@mail.gmail.com>
+	<CAJiejCQ6xemm0hKX5Z2uMFJwvOvptnQsTK7hDTMDc5CU3i-Jpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:46674 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754238Ab2LGWuZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Dec 2012 17:50:25 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so663600pbc.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Dec 2012 14:50:24 -0800 (PST)
-In-Reply-To: <20121207212247.GA12635@staff.dca.net>
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:53382 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755881Ab2LHAvk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Dec 2012 19:51:40 -0500
+Received: by mail-ie0-f172.google.com with SMTP id c13so3124071ieb.31
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Dec 2012 16:51:39 -0800 (PST)
+In-Reply-To: <CAJiejCQ6xemm0hKX5Z2uMFJwvOvptnQsTK7hDTMDc5CU3i-Jpw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Michael Morgan <mmorgan@dca.net>
-Cc: ceph-devel@vger.kernel.org
+To: Drunkard Zhang <gongfan193@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/07/2012 01:22 PM, Michael Morgan wrote:
-> Hello,
+On Wed, Nov 21, 2012 at 11:23 PM, Drunkard Zhang <gongfan193@gmail.com>=
+ wrote:
 >
->   I've been building an OpenStack cluster using Ceph as the storage backend.
-> Currently running SL 6.3, OpenStack Folsom packages from EPEL, Libvirt 0.9.10,
-> QEMU 1.2.1 built from an epel-testing SRPM for RBD support, and Ceph 0.54. I
-> can boot off of an image without problems but attaching to a running instance
-> fails. Tracking back from Horizon and Cinder I see Libvirt generating the
-> errors:
+> 2012/11/22 Gregory Farnum <greg@inktank.com>:
+> > On Tue, Nov 20, 2012 at 8:28 PM, Drunkard Zhang <gongfan193@gmail.c=
+om> wrote:
+> >> 2012/11/21 Gregory Farnum <greg@inktank.com>:
+> >>> No, absolutely not. There is no relationship between different RA=
+DOS
+> >>> pools. If you've been using the cephfs tool to place some filesys=
+tem
+> >>> data in different pools then your configuration is a little more
+> >>> complicated (have you done that?), but deleting one pool is never
+> >>> going to remove data from the others.
+> >>> -Greg
+> >>>
+> >> I think that should be a bug. Here's the story I did:
+> >> I created one directory 'audit' in running ceph filesystem, and pu=
+t
+> >> some data into the directory (about 100GB) before these commands:
+> >> ceph osd pool create audit
+> >> ceph mds add_data_pool 4
+> >> cephfs /mnt/temp/audit/ set_layout -p 4
+> >>
+> >> log3 ~ # ceph osd dump | grep audit
+> >> pool 4 'audit' rep size 2 crush_ruleset 0 object_hash rjenkins pg_=
+num
+> >> 8 pgp_num 8 last_change 1558 owner 0
+> >>
+> >> at this time, all data in audit still usable, after 'ceph osd pool
+> >> delete data', the disk space recycled (forgot to test if the data
+> >> still usable), only 200MB used, from 'ceph -s'. So, here's what I'=
+m
+> >> thinking, the data stored before pool created won't follow the poo=
+l,
+> >> it still follows the default pool 'data', is this a bug, or intend=
+ed
+> >> behavior?
+> >
+> > Oh, I see. Data is not moved when you set directory layouts; it onl=
+y
+> > impacts files created after that point. This is intended behavior =97
+> > Ceph would need to copy the data around anyway in order to make it
+> > follow the pool. There's no sense in hiding that from the user,
+> > especially given the complexity involved in doing so safely =97
+> > especially when there are many use cases where you want the files i=
+n
+> > different pools.
+> > -Greg
 >
-> 2012-12-07 20:03:20.657+0000: 19803: error : qemuMonitorJSONCheckError:338 : internal error unable to execute QEMU command 'device_add': Property 'virtio-blk-pci.drive' can't find value 'drive-virtio-disk1'
-> 2012-12-07 20:03:20.664+0000: 19803: error : qemuMonitorTextDriveDel:2895 : operation failed: deleting file=rbd:volumes/volume-6c82e5d3-e697-43a8-8194-1f7df932ceb8:id=volumes:key=AQCicbZQ8Oo2IBAALganQv+zY/jjECc9fHUBBA==:auth_supported=cephx none,if=none,id=drive-virtio-disk1,format=raw,cache=none drive failed: drive_del: extraneous characters at the end of line
->
->   I can reproduce the error with virsh attach-device and the following XML:
->
-> <disk type='network' device='disk'>
->    <driver name='qemu' type='raw' cache='none'/>
->    <auth username='volumes'>
->      <secret type='ceph' uuid='93fb3d32-7e2d-691d-db94-4c1cf21bed02'/>
->    </auth>
->    <source protocol="rbd" name="volumes/volume-6c82e5d3-e697-43a8-8194-1f7df932ceb8"/>
->    <target bus='virtio' dev='vdb'/>
-> </disk>
->
->   I realize this is probably more of a Libvirt/QEMU problem but the only
-> reference I could find to an error like this was a post here from last year:
->
-> http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/4713
->
->   In that thread the problem disappeared after multiple version changes without
-> any clear source for the resolution. Has anyone seen this type of error before?
+> Got you, but how can I know which pools a file lives in? Is there any=
+ commands?
 
-Yes, this is fixed in libvirt 0.9.12. There were a couple issues with
-properly escaping JSON and using a space instead of a semicolon with
-qemu's command parsing.
+You can get this information with the cephfs program if you're using
+the kernel client. There's not yet a way to get it out of ceph-fuse,
+although we will be implementing it as virtual xattrs in the
+not-too-distant future.
 
-There are a couple more rbd-related bug fixes in later versions of
-libvirt, but you wouldn't hit those problems using OpenStack.
 
->   I can certainly move along to other lists if appropriate but figured I'd start
-> here since it's the only place I saw such an issue pop up. It also gives me an
-> opportunity to say how awesome Ceph seems. The level of support I've seen on
-> this list is pretty amazing and I hope to increase our use of Ceph in the
-> future.
+> About data and pools relationship, I thought that objects is hooked t=
+o
+> a pool, when the pool changed, just unhook this and hook to another,
+> seems I was wrong.
 
-Thanks :). I actually prefer ceph-related stuff coming to this list,
-since it's easier to keep track of and gets more attention from people
-more familiar with ceph, rather than just libvirt, qemu, etc.
-
-Josh
+Indeed that's incorrect. Pools are a logical namespace; when you
+delete the pool you are also deleting everything else in it. Doing
+otherwise is totally infeasible with Ceph since they also represent
+placement policies.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
