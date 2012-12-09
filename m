@@ -1,46 +1,51 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: [ceph-commit] [ceph/ceph] e6a154: osx: compile on OSX
-Date: Sun, 9 Dec 2012 10:22:37 -0800
-Message-ID: <CA+Hcz5-z4=aYGaTb3tU28B0Qanb=a+iR+yq_RKqc9EVsJZ-GAQ@mail.gmail.com>
-References: <50c4cd4dabe04_4126fc8af02216d@sh2.rs.github.com.mail>
-	<4685D39E3A8A4352B08C753D91FC4A5A@inktank.com>
+From: Jonathan Proulx <jon@jonproulx.com>
+Subject: Why cephx rather then kerberos?
+Date: Sun, 9 Dec 2012 15:03:52 -0500
+Message-ID: <CABZB-sig_O-s1cXZ5k4QMu5DZBgTUERg+HLGoe24AwLvwtxbJA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:54765 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756823Ab2LISWj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Dec 2012 13:22:39 -0500
-Received: by mail-la0-f46.google.com with SMTP id p5so1408875lag.19
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Dec 2012 10:22:37 -0800 (PST)
-In-Reply-To: <4685D39E3A8A4352B08C753D91FC4A5A@inktank.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:51230 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751607Ab2LIUDw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Dec 2012 15:03:52 -0500
+Received: by mail-ob0-f174.google.com with SMTP id ta14so1769914obb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Dec 2012 12:03:52 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Sun, Dec 9, 2012 at 10:05 AM, Gregory Farnum <greg@inktank.com> wrote:
-> Oooh, very nice! Do you have a list of the dependencies that you actually needed to install?
+Hi All,
 
-I can put that together. They were boost, gperf, fuse4x, cryptopp. I
-think that might have been it.
+the docs continuously describe cephx as Kerberos-like, curious why
+Kereros isn't used instead.
 
-> Apart from breaking this up into smaller patches, we'll also want to reformat some of it. Rather than sticking an #if APPLE on top of every spin lock, we should have utility functions that do this for us. ;)
+Developing new security protocols is almost always a bad idea from a
+security perspective.  I haven't looked deeply into cephx to see how
+much is novel (and likely to contain novel bugs) ans how much is reuse
+of well worn crypto.  So this is just a first impression concern.
 
-Definitely. OSX has spinlock implementations for user space, but it's
-going to take some reading. For example, spinlocks in Ceph are
-initialized for shared memory, rather than the default private. It
-isn't clear from documentation what the semantics are of OSX
-spinlocks, nor is it clear if the shared memory attribute is needed.
+More importantly to me I already have a Kerberos infrastructure all my
+users have principals all my hosts have keytabs and I would really
+like to reuse that for securing data access rather than managing yet
+another a separate set of credentials.
 
-> Also, we should be able to find libatomic_ops for OS X (its parent project works under OS X), and we can use that to construct a spin lock if we think it'll be useful. I'm not too sure how effective its muteness are at spinlock-y workloads.
+The only reason I can see documented is "Unlike Kerberos, each monitor
+can authenticate users and distribute keys, so there is no single
+point of failure or bottleneck when using chepx."  Kerberos using
+multiple KDCs  needn't have a single point of failure, and "each
+monitor" probably means 3-5 systems in practice which is a typical
+scale for production Kerberos deployments.  Now it's true with
+Kerberos if the admin server goes down I can't add new principals
+(users) or perform other administrative functions, but authentication
+continues and users (human and daemon) don't really care.
 
-This patch set uses the OSX atomic inc/dec ops, rather than spinlocks.
+Am I missing something? Any plans to either add Kerberos as an
+authentication method or provide a pluggable authentication scheme?
 
-Another fun fact:
+I'm fairly excited about all things Ceph from a design and direction
+perspective, but this piece (IMO) is the one thing that is just
+painfully close but not quite right.
 
-msg/Pipe.cc and common/pipe.c are compiled into libcommon_la-Pipe.o
-and libcommon_la-pipe.o, but HFS+ is case-insensitive by default.
-Result is duplicate symbols. That took a while to figure out :P
-
--Noah
+Thanks,
+-Jon
