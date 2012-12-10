@@ -1,60 +1,62 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: on disk encryption
-Date: Mon, 10 Dec 2012 07:53:18 -0800
-Message-ID: <6EACA8977B8949FE9A17B74B37772B4A@inktank.com>
-References: <alpine.DEB.2.00.1209150428490.16190@cobra.newdream.net>
- <CANT6BaObaeTF9giuTi-f=2gjW4BUVHyZxRSvETNhunqAta=6FA@mail.gmail.com>
- <50C5A894.8020507@ubuntu.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: [ceph-commit] [ceph/ceph] e6a154: osx: compile on OSX
+Date: Mon, 10 Dec 2012 16:52:36 +0000
+Message-ID: <C29C365E-91F0-46D8-8559-99BF78E0B098@tchpc.tcd.ie>
+References: <50c4cd4dabe04_4126fc8af02216d@sh2.rs.github.com.mail> <4685D39E3A8A4352B08C753D91FC4A5A@inktank.com>  <sfid-H20121209-182244-+035.50-1@marduk.tchpc.tcd.ie> <CA+Hcz5-z4=aYGaTb3tU28B0Qanb=a+iR+yq_RKqc9EVsJZ-GAQ@mail.gmail.com>  (sfid-H20121209-182244-+035.50-1@marduk.tchpc.tcd.ie)
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:33796 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752173Ab2LJPxX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 10:53:23 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so2124430pad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 07:53:23 -0800 (PST)
-In-Reply-To: <50C5A894.8020507@ubuntu.com>
-Content-Disposition: inline
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:36346 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751093Ab2LJQwl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 11:52:41 -0500
+In-Reply-To: <CA+Hcz5-z4=aYGaTb3tU28B0Qanb=a+iR+yq_RKqc9EVsJZ-GAQ@mail.gmail.com>  (sfid-H20121209-182244-+035.50-1@marduk.tchpc.tcd.ie)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>, Peter Reiher <reiher@inktank.com>
-Cc: Dustin Kirkland <dustin.kirkland@gazzang.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-
-On Monday, December 10, 2012 at 1:17 AM, James Page wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
-> =20
-> On 19/09/12 02:53, Dustin Kirkland wrote:
-> > > > Looking forward, another option might be to implement
-> > > > encryption inside btrfs (placeholder fields are there in the
-> > > > disk format, introduced along with the compression code way
-> > > > back when). This would let ceph-osd handle more of the key
-> > > > handling internally and do something like, say, only encrypt
-> > > > the current/ and snap_*/ subdirectories.
-> > > > =20
-> > > > Other ideas? Thoughts?
-> > > > =20
-> > > > sage
-> > I love the idea of btrfs supporting encryption natively much like
-> > it does compression. It may be some time before that happens, so
-> > in the meantime, I'd love to see Ceph support dm-crypt and/or
-> > eCryptfs beneath.
-> =20
-> =20
-> =20
-> Has this discussion progressed into any sort of implementation yet?
-> It sounds like this is going to be a key feature for users who want
-> top-to-bottom encryption of data right down to the block level.
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
 
-Peter is working on this now =E2=80=94 I'll let him discuss the details=
-=2E :)
--Greg
+On 9 Dec 2012, at 18:22, Noah Watkins wrote:
+
+> On Sun, Dec 9, 2012 at 10:05 AM, Gregory Farnum <greg@inktank.com> wrote:
+>> Oooh, very nice! Do you have a list of the dependencies that you actually needed to install?
+> 
+> I can put that together. They were boost, gperf, fuse4x, cryptopp. I
+> think that might have been it.
+> 
+
+Is libaio really needed to build ceph-fuse? I use macports on my system and the last time I tried to make a change set to let ceph/ceph-fuse build on my laptop failed as I didn't have libaio, though I could just write a port for it.
+
+>> Apart from breaking this up into smaller patches, we'll also want to reformat some of it. Rather than sticking an #if APPLE on top of every spin lock, we should have utility functions that do this for us. ;)
+> 
+> Definitely. OSX has spinlock implementations for user space, but it's
+> going to take some reading. For example, spinlocks in Ceph are
+> initialized for shared memory, rather than the default private. It
+> isn't clear from documentation what the semantics are of OSX
+> spinlocks, nor is it clear if the shared memory attribute is needed.
+> 
+>> Also, we should be able to find libatomic_ops for OS X (its parent project works under OS X), and we can use that to construct a spin lock if we think it'll be useful. I'm not too sure how effective its muteness are at spinlock-y workloads.
+> 
+> This patch set uses the OSX atomic inc/dec ops, rather than spinlocks.
+> 
+> Another fun fact:
+> 
+> msg/Pipe.cc and common/pipe.c are compiled into libcommon_la-Pipe.o
+> and libcommon_la-pipe.o, but HFS+ is case-insensitive by default.
+> Result is duplicate symbols. That took a while to figure out :P
+> 
+
+good catch, that might explain why my last look at ceph on osx failed so miserably.
+
+
+Jimmy.
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Senior Software Engineer, Digital Repository of Ireland (DRI)
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/ | jtang@tchpc.tcd.ie
+Tel: +353-1-896-3847
+
