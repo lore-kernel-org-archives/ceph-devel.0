@@ -1,99 +1,38 @@
-From: Sam Lang <sam.lang@inktank.com>
-Subject: Re: [ceph-commit] [ceph/ceph] e6a154: osx: compile on OSX
-Date: Mon, 10 Dec 2012 07:11:44 -1000
-Message-ID: <50C617D0.30005@inktank.com>
-References: <50c4cd4dabe04_4126fc8af02216d@sh2.rs.github.com.mail> <4685D39E3A8A4352B08C753D91FC4A5A@inktank.com> <sfid-H20121209-182244-+035.50-1@marduk.tchpc.tcd.ie> <CA+Hcz5-z4=aYGaTb3tU28B0Qanb=a+iR+yq_RKqc9EVsJZ-GAQ@mail.gmail.com> (sfid-H20121209-182244-+035.50-1@marduk.tchpc.tcd.ie) <C29C365E-91F0-46D8-8559-99BF78E0B098@tchpc.tcd.ie> <alpine.DEB.2.00.1212100901110.17288@cobra.newdream.net>
+From: Alexandre =?utf-8?Q?Maumen=C3=A9?= <alexandre@enovance.com>
+Subject: (unknown)
+Date: Mon, 10 Dec 2012 18:30:08 +0100 (CET)
+Message-ID: <94097d43-9745-4f2b-9534-491f6096bf63@mail-1.enovance.com>
+References: <19392198-aa95-4c84-ac5c-ef496bb3cedc@mail-1.enovance.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:37714 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751867Ab2LJRLt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 12:11:49 -0500
-Received: by mail-ie0-f172.google.com with SMTP id c13so10255300ieb.31
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 09:11:49 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212100901110.17288@cobra.newdream.net>
+Received: from mxi1.enovance.com ([94.143.114.217]:31677 "EHLO
+	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751093Ab2LJRaK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 12:30:10 -0500
+Received: from Satellite-1.enovance.com (94-143-112-83.enovance.net [94.143.112.83])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by mxi1.enovance.com (Postfix) with ESMTP id 3158E38008
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 18:30:09 +0100 (CET)
+Received: from zimbra.enovance.com (zimbra.enovance.com [10.142.4.4])
+	by Satellite-1.enovance.com (Postfix) with ESMTP id 97BC01B80E6
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 18:30:08 +0100 (CET)
+Received: from localhost (mail-1 [127.0.0.1])
+	by zimbra.enovance.com (Postfix) with ESMTP id 91AB03700DE
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 18:30:08 +0100 (CET)
+Received: from zimbra.enovance.com ([127.0.0.1])
+	by localhost (zimbra.enovance.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id KvGnDruRRCZR for <ceph-devel@vger.kernel.org>;
+	Mon, 10 Dec 2012 18:30:08 +0100 (CET)
+Received: from zimbra.enovance.com (mail.enovance.com [10.142.4.4])
+	by zimbra.enovance.com (Postfix) with ESMTP id 78446370063
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 18:30:08 +0100 (CET)
+Subject: 
+In-Reply-To: <19392198-aa95-4c84-ac5c-ef496bb3cedc@mail-1.enovance.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Jimmy Tang <jtang@tchpc.tcd.ie>, Noah Watkins <noah.watkins@inktank.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 12/10/2012 07:01 AM, Sage Weil wrote:
-> On Mon, 10 Dec 2012, Jimmy Tang wrote:
->>
->> On 9 Dec 2012, at 18:22, Noah Watkins wrote:
->>
->>> On Sun, Dec 9, 2012 at 10:05 AM, Gregory Farnum <greg@inktank.com> wrote:
->>>> Oooh, very nice! Do you have a list of the dependencies that you actually needed to install?
->>>
->>> I can put that together. They were boost, gperf, fuse4x, cryptopp. I
->>> think that might have been it.
->>>
->>
->> Is libaio really needed to build ceph-fuse? I use macports on my system
->> and the last time I tried to make a change set to let ceph/ceph-fuse
->> build on my laptop failed as I didn't have libaio, though I could just
->> write a port for it.
->
-> libaio is only used by ceph-osd.  Not needed by fuse.
-
-An alternative on OSX could be aio-lite: 
-https://trac.mcs.anl.gov/projects/aio-lite
-
-It might perform better on linux as well because of the request 
-serialization there, although that library was implemented a few years 
-ago, and the linux implementation may have improved significantly since 
-then.  It also wouldn't be hard to do something similar with ceph thread 
-structures instead of depending on an external library like this one.
-
--sam
-
->
-> sage
->
->
->>
->>>> Apart from breaking this up into smaller patches, we'll also want to reformat some of it. Rather than sticking an #if APPLE on top of every spin lock, we should have utility functions that do this for us. ;)
->>>
->>> Definitely. OSX has spinlock implementations for user space, but it's
->>> going to take some reading. For example, spinlocks in Ceph are
->>> initialized for shared memory, rather than the default private. It
->>> isn't clear from documentation what the semantics are of OSX
->>> spinlocks, nor is it clear if the shared memory attribute is needed.
->>>
->>>> Also, we should be able to find libatomic_ops for OS X (its parent project works under OS X), and we can use that to construct a spin lock if we think it'll be useful. I'm not too sure how effective its muteness are at spinlock-y workloads.
->>>
->>> This patch set uses the OSX atomic inc/dec ops, rather than spinlocks.
->>>
->>> Another fun fact:
->>>
->>> msg/Pipe.cc and common/pipe.c are compiled into libcommon_la-Pipe.o
->>> and libcommon_la-pipe.o, but HFS+ is case-insensitive by default.
->>> Result is duplicate symbols. That took a while to figure out :P
->>>
->>
->> good catch, that might explain why my last look at ceph on osx failed so miserably.
->>
->>
->> Jimmy.
->>
->> --
->> Senior Software Engineer, Digital Repository of Ireland (DRI)
->> Trinity Centre for High Performance Computing,
->> Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
->> http://www.tchpc.tcd.ie/ | jtang@tchpc.tcd.ie
->> Tel: +353-1-896-3847
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+subscribe ceph-devel
