@@ -1,49 +1,86 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: remove linger unconditionally
-Date: Sun, 09 Dec 2012 18:37:16 -0600
-Message-ID: <50C52EBC.9070701@inktank.com>
+Subject: [PATCH] libceph: reformat __reset_osd()
+Date: Sun, 09 Dec 2012 18:37:47 -0600
+Message-ID: <50C52EDB.9010905@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:35835 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751443Ab2LJAhT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Dec 2012 19:37:19 -0500
-Received: by mail-ie0-f181.google.com with SMTP id 16so6950184iea.26
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Dec 2012 16:37:18 -0800 (PST)
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:65480 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752668Ab2LJAhu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Dec 2012 19:37:50 -0500
+Received: by mail-ie0-f179.google.com with SMTP id k14so6614263iea.10
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Dec 2012 16:37:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-In __unregister_linger_request(), the request is being removed
-from the osd client's req_linger list only when the request
-has a non-null osd pointer.  It should be done whether or not
-the request currently has an osd.
-
-This is most likely a non-issue because I believe the request
-will always have an osd when this function is called.
+Reformat __reset_osd() into three distinct blocks of code
+handling the three return cases.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/osd_client.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ net/ceph/osd_client.c |   33 +++++++++++++++++++--------------
+ 1 file changed, 19 insertions(+), 14 deletions(-)
 
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index c018e52..218a97f 100644
+index 218a97f..fb5a0bd 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -833,8 +833,8 @@ static void __unregister_linger_request(struct
-ceph_osd_client *osdc,
- 					struct ceph_osd_request *req)
+@@ -665,31 +665,36 @@ static void remove_old_osds(struct ceph_osd_client
+*osdc)
+  */
+ static int __reset_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
  {
- 	dout("__unregister_linger_request %p\n", req);
-+	list_del_init(&req->r_linger_item);
- 	if (req->r_osd) {
--		list_del_init(&req->r_linger_item);
- 		list_del_init(&req->r_linger_osd);
+-	struct ceph_osd_request *req;
+-	int ret = 0;
++	struct ceph_entity_addr *peer_addr;
 
- 		if (list_empty(&req->r_osd->o_requests) &&
+ 	dout("__reset_osd %p osd%d\n", osd, osd->o_osd);
+ 	if (list_empty(&osd->o_requests) &&
+ 	    list_empty(&osd->o_linger_requests)) {
+ 		__remove_osd(osdc, osd);
+-		ret = -ENODEV;
+-	} else if (memcmp(&osdc->osdmap->osd_addr[osd->o_osd],
+-			  &osd->o_con.peer_addr,
+-			  sizeof(osd->o_con.peer_addr)) == 0 &&
+-		   !ceph_con_opened(&osd->o_con)) {
++
++		return -ENODEV;
++	}
++
++	peer_addr = &osdc->osdmap->osd_addr[osd->o_osd];
++	if (!memcmp(peer_addr, &osd->o_con.peer_addr, sizeof (*peer_addr)) &&
++			!ceph_con_opened(&osd->o_con)) {
++		struct ceph_osd_request *req;
++
+ 		dout(" osd addr hasn't changed and connection never opened,"
+ 		     " letting msgr retry");
+ 		/* touch each r_stamp for handle_timeout()'s benfit */
+ 		list_for_each_entry(req, &osd->o_requests, r_osd_item)
+ 			req->r_stamp = jiffies;
+-		ret = -EAGAIN;
+-	} else {
+-		ceph_con_close(&osd->o_con);
+-		ceph_con_open(&osd->o_con, CEPH_ENTITY_TYPE_OSD, osd->o_osd,
+-			      &osdc->osdmap->osd_addr[osd->o_osd]);
+-		osd->o_incarnation++;
++
++		return -EAGAIN;
+ 	}
+-	return ret;
++
++	ceph_con_close(&osd->o_con);
++	ceph_con_open(&osd->o_con, CEPH_ENTITY_TYPE_OSD, osd->o_osd,
++		      &osdc->osdmap->osd_addr[osd->o_osd]);
++	osd->o_incarnation++;
++
++	return 0;
+ }
+
+ static void __insert_osd(struct ceph_osd_client *osdc, struct ceph_osd
+*new)
 -- 
 1.7.9.5
 
