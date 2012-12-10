@@ -1,57 +1,32 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Segmentation fault on rbd client ceph version 0.48.2argonaut
-Date: Mon, 10 Dec 2012 14:52:19 -0800
-Message-ID: <50C667A3.4040407@inktank.com>
-References: <CAD+Ap5bAgNczG_JusPYSXJYD9ScjUtxRD6k5xXZuG-2E0dkYcg@mail.gmail.com>
+From: Michael Morgan <mmorgan@dca.net>
+Subject: Re: Errors attaching RBD image to a running VM
+Date: Mon, 10 Dec 2012 18:29:35 -0500
+Message-ID: <20121210232935.GD22300@staff.dca.net>
+References: <20121207212247.GA12635@staff.dca.net> <50C272A0.9020506@inktank.com> <20121210204850.GC22300@staff.dca.net> <50C6504D.8090307@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:34370 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751595Ab2LJWwj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 17:52:39 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so2225903pbc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 14:52:39 -0800 (PST)
-In-Reply-To: <CAD+Ap5bAgNczG_JusPYSXJYD9ScjUtxRD6k5xXZuG-2E0dkYcg@mail.gmail.com>
+Received: from staff.dca.net ([207.245.84.197]:36088 "EHLO staff.dca.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750826Ab2LJX3f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 10 Dec 2012 18:29:35 -0500
+Content-Disposition: inline
+In-Reply-To: <50C6504D.8090307@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladislav Gorbunov <vadikgo@gmail.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 12/10/2012 01:54 PM, Vladislav Gorbunov wrote:
-> but access to iscsi/seodo1 and iscsi/siri1 fail on every rbd client
-> hosts. Data completely inaccessible.
->
-> root@bender:~# rbd info iscsi/seodo1
-> *** Caught signal (Segmentation fault) **
->   in thread 7fb8c93f5780
->   ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
->   1: rbd() [0x41dfea]
->   2: (()+0xfcb0) [0x7fb8c796fcb0]
->   3: (()+0x16244d) [0x7fb8c6ae444d]
->   4: (librbd::read_header_bl(librados::IoCtx&, std::string const&,
-> ceph::buffer::list&, unsigned long*)+0xf9) [0x7fb8c8fadb99]
->   5: (librbd::read_header(librados::IoCtx&, std::string const&,
-> rbd_obj_header_ondisk*, unsigned long*)+0x82) [0x7fb8c8fadda2]
->   6: (librbd::ictx_refresh(librbd::ImageCtx*)+0x90b) [0x7fb8c8fb05eb]
->   7: (librbd::open_image(librbd::ImageCtx*)+0x1b5) [0x7fb8c8fb1165]
->   8: (librbd::RBD::open(librados::IoCtx&, librbd::Image&, char const*,
-> char const*)+0x5f) [0x7fb8c8fb16af]
->   9: (main()+0x73c) [0x41721c]
->   10: (__libc_start_main()+0xed) [0x7fb8c69a376d]
->   11: rbd() [0x41a0c9]
-> 2012-12-11 09:33:14.264755 7fb8c93f5780 -1 *** Caught signal
-> (Segmentation fault) **
->   in thread 7fb8c93f5780
+On Mon, Dec 10, 2012 at 01:12:45PM -0800, Josh Durgin wrote:
+> 
+> There was a regression in 1.0.0 with attaching non-files, such as RBD.
+> This is fixed by f0e72b2f5c675f927d04545dc5095f9e5998f171, which you
+> could cherry-pick onto 1.0.0.
+> 
+> If you'd rather just use a released version, 0.10.2 should be fine.
+> 
 
-It sounds like the header object (which rbd uses to determine the
-prefix for data object names) is corrupted or otherwise inaccessible.
+Libvirt 0.10.2 appears to have fixed my problems. Booting from RBD works as
+well as attaching/detaching multiple additional volumes. Thanks so much Josh!
 
-Could you save the header object to a file ('rados -p iscsi get 
-seodo1.rbd') and put that file somewhere accessible?
-
-Did anything happen to your cluster before this header became
-unreadable? Any disk problems, or osds crashing?
-
-Josh
+-Mike
