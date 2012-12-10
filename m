@@ -1,54 +1,92 @@
-From: Sage Weil <sage@inktank.com>
-Subject: mounting fuse from fstab
-Date: Mon, 10 Dec 2012 12:33:18 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212101229540.28411@cobra.newdream.net>
+From: Geoffrey Hartz <hartz.geoffrey@gmail.com>
+Subject: Re: OSDs don't actually delete files when two CephFS (or more) are in use
+Date: Mon, 10 Dec 2012 21:34:26 +0100
+Message-ID: <CAPU8t+oXgiAtHWjEXQ+8ODK1Hs=0Nep5V5rMm2k0DTsLSziq_g@mail.gmail.com>
+References: <CAPU8t+pEuX2sP-gRqmCxGw-etrviOt1N7_18gv4=rDj+K6pkTA@mail.gmail.com>
+	<50C644DD.8060707@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38593 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751402Ab2LJUdT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 15:33:19 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id A9947800BA
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 12:33:18 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7CB85800BA
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 12:33:18 -0800 (PST)
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:47963 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751564Ab2LJUe2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 15:34:28 -0500
+Received: by mail-wi0-f174.google.com with SMTP id hm9so1754188wib.1
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 12:34:26 -0800 (PST)
+In-Reply-To: <50C644DD.8060707@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sam Lang <sam.lang@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-We put together a simple helper script for mounting ceph-fuse via fstab 
-(below).  Some of man pages indicate that the # syntax is deprecated, 
-however, and it's not clear to me that whatever replaces it (mount.fuse) 
-will let us accomplish the same thing (pass something along the mount, 
-control command line options).  Also, it's unclear *when* it was 
-deprecated; if we want this to work on, say, RHEL, the replacement 
-might not be there.
+Hi.
 
-Anybody know if doing something like the below is a bad idea?
+I wait about more than 15 minutes. I was doing some benchmark when I
+noticed that the space never go back to normal..
 
-Thanks!
-sage
+How can I disable this behavior? It's on Ceph side?
 
----
+With one client, OSD are cleaned after few seconds, this sounds normal
 
-#!/bin/sh
-#
-# Helper to mount ceph-fuse from /etc/fstab.  To use, add an entry
-# like:
-#
-# # DEVICE                     PATH         TYPE   OPTIONS
-# /sbin/ceph-fuse-mount#admin  /mnt/ceph    ceph   defaults   0 0
-#
-# where 'admin' can be replaced with the client id to use when
-# authenticating (if it is not client.admin).  This will also control
-# which section of ceph.conf will be applied to the ceph-fuse process.
+2012/12/10 Sam Lang <sam.lang@inktank.com>:
+> On 12/10/2012 08:29 AM, Geoffrey Hartz wrote:
+>>
+>> Hi!
+>>
+>> I'm new to Ceph and I have a strange behavior with CephFS
+>>
+>> Config is :
+>>
+>> Ubuntu 12.04
+>> Kernel 3.6.9
+>> Ceph V0.55
+>>
+>> 2 OSD, 1 mon, 1 MDS, all on same host
+>> 2 clients, separate Hosts
+>>
+>> Ceph.conf:
+>>
+>> http://paste.ubuntu.com/1423712/
+>>
+>> To mount the share I use : sudo ceph-fuse -m 192.168.80.139:6789 /mnt
+>>
+>> When I create a file on one client, the other see the file, can be
+>> downloaded etc.
+>>
+>> But when I delete the file, both clients don't see the file anymore
+>> BUT the file is still there on OSD (using space disk).
+>
+>
+> Removing a file removes the directory entry (as you've seen), but the inode
+> itself doesn't get removed until all references to it are dropped.  The
+> clients may cache the capability for those inodes for a period of time, so
+> you're not seeing the references drop until they get evicted from the cache.
+> Unmounting ensures that they get evicted from the client caches, so all
+> references go to zero.
+>
+> Also, removal of the underlying objects is done lazily, so you may not see
+> the space get freed up right away.
+>
+> -sam
+>
+>>
+>> When I umount from BOTH clients, OSD are update and file is actually
+>> delete (same behavior with mount -t ceph)
+>>
+>> I'm missing something?
+>>
+>> Thanks!
+>>
+>> --
+>> Geoffrey HARTZ
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 
-set -e
-id="$1"
-shift
-exec ceph-fuse -i $id $@
 
 
+-- 
+Geoffrey HARTZ
