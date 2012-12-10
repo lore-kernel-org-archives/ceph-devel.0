@@ -1,63 +1,92 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/4] libceph: avoid using freed osd in __kick_osd_requests()
-Date: Sun, 09 Dec 2012 18:35:39 -0600
-Message-ID: <50C52E5B.2060805@inktank.com>
-References: <50C52DE5.9070602@inktank.com>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: 0.55 init script Issue?
+Date: Mon, 10 Dec 2012 09:13:49 +0000
+Message-ID: <50C5A7CD.9010303@ubuntu.com>
+References: <50BF7314.2020809@gammacode.com> <50BFA354.7040308@inktank.com> <50BFABE5.1020904@ubuntu.com> <CAPYLRzjme=UxScsKDXdKPAWJyfxB1hNQGRJWT7QyJk+ET3dFHQ@mail.gmail.com> <alpine.DEB.2.00.1212051610560.16078@cobra.newdream.net> <alpine.DEB.2.00.1212060534110.13653@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:34613 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752966Ab2LJAnK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Dec 2012 19:43:10 -0500
-Received: by mail-ie0-f171.google.com with SMTP id 17so8195296iea.16
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Dec 2012 16:43:09 -0800 (PST)
-In-Reply-To: <50C52DE5.9070602@inktank.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:51489 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752662Ab2LJJNz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 04:13:55 -0500
+In-Reply-To: <alpine.DEB.2.00.1212060534110.13653@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, Dan Mick <dan.mick@inktank.com>, Mike Dawson <mdawson@gammacode.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-If an osd has no requests and no linger requests, __reset_osd()
-will just remove it with a call to __remove_osd().  That drops
-a reference to the osd, and therefore the osd may have been free
-by the time __reset_osd() returns.  That function offers no
-indication this may have occurred, and as a result the osd will
-continue to be used even when it's no longer valid.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Change__reset_osd() so it returns an error (ENODEV) when it
-deletes the osd being reset.  And change __kick_osd_requests() so it
-returns immediately (before referencing osd again) if __reset_osd()
-returns *any* error.
+On 06/12/12 13:35, Sage Weil wrote:
+>>> Yeah, this or something very similar is definitely the correct
+>>>>> solution. Sage recently added the "ceph" upstart job, and
+>>>>> we didn't put it through sufficient verification prior to
+>>>>> release in order to notice this issue. Users who aren't
+>>>>> using upstart (I expect that's all of them) should just
+>>>>> delete the job after running the package install. We'll
+>>>>> certainly sort this out prior to the next release; I'm not
+>>>>> sure if we want to roll a v0.55.1 right away or not.
+>>> 
+>>> Let's push it to the testing branch, but make sure any other
+>>> fixes are there before rolling a .1.. maybe tomorrow?
+> I've pushed this to the testing branch.  If someone wants to verify
+> the packages built at
+> 
+> http://gitbuilder.ceph.com/ceph-deb-precise-x86_64-basic/ref/testing/
+>
+>  are fixed, that would be fabulous!
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- net/ceph/osd_client.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+I think the radosgw init script and upstart configuration are going to
+conflict in a similar way to the ceph one.
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index d1177ec..79a071b 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -507,7 +507,7 @@ static void __kick_osd_requests(struct
-ceph_osd_client *osdc,
+I've been working on integrating the upstart configurations into the
+Ubuntu distro packaging of ceph; it is possible to install multiple
+upstart configurations into single binary packages using dh_installinit:
 
- 	dout("__kick_osd_requests osd%d\n", osd->o_osd);
- 	err = __reset_osd(osdc, osd);
--	if (err == -EAGAIN)
-+	if (err)
- 		return;
+    dh_installinit --no-start
+    # Install upstart configurations using dh_installinit
+    for conf in `ls -1 src/upstart/ceph-*.conf | grep -v mds`; do \
+        name=`basename $$conf | cut -d . -f 1`; \
+        cp $$conf debian/ceph.$$name.upstart; \
+        dh_installinit -pceph --upstart-only --no-start --name=$$name; \
+    done
+    for conf in `ls -1 src/upstart/ceph-mds*.conf`; do \
+        name=`basename $$conf | cut -d . -f 1`; \
+        cp $$conf debian/ceph-mds.$$name.upstart; \
+        dh_installinit -pceph-mds --upstart-only --no-start
+- --name=$$name; \
+    done
+    for conf in `ls -1 src/upstart/radosgw*.conf`; do \
+        name=`basename $$conf | cut -d . -f 1`; \
+        cp $$conf debian/radosgw.$$name.upstart; \
+        dh_installinit -pradosgw --upstart-only --no-start
+- --name=$$name; \
+    done
 
- 	list_for_each_entry(req, &osd->o_requests, r_osd_item) {
-@@ -671,6 +671,7 @@ static int __reset_osd(struct ceph_osd_client *osdc,
-struct ceph_osd *osd)
- 	if (list_empty(&osd->o_requests) &&
- 	    list_empty(&osd->o_linger_requests)) {
- 		__remove_osd(osdc, osd);
-+		ret = -ENODEV;
- 	} else if (memcmp(&osdc->osdmap->osd_addr[osd->o_osd],
- 			  &osd->o_con.peer_addr,
- 			  sizeof(osd->o_con.peer_addr)) == 0 &&
--- 
-1.7.9.5
 
+- -- 
+James Page
+Ubuntu Core Developer
+Debian Maintainer
+james.page@ubuntu.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iQIcBAEBCAAGBQJQxafNAAoJEL/srsug59jDGloP/0NK8RAFLLGcwHBOGqPSiOSr
+e61NAus6zM0gRHdY0GxPLLzh8XfcoJtpiOdJE2PeC0YbNX7SRLnlHBc3uh3nRv0+
+LF5RfzN0MASpk5miCVIpZCNhRVbg+tte1k3tEbZEgwsFavmhXdXzL7bwaKDKVuRp
+Y8/XENu6qF2tSt1A1P5ABOqetjrZi78Z6bNSBS20N2PIZHAXwdb2MdFPKO600n2w
+jVPjXh/nfCuPpmehE+ZVP/1y/7jLvtgYTIppg8bHNG0X4TI6aarHh3fiypti+UNu
+y/fQvx48ktkCtaF7nfoIx+Kr1qWO9xcuHYZy/35a9woJIyBWGTHS4yT/UYG202gM
+JjelhXu0BM4WrmTf9bdFo2iK55MNtKOEPOAjmy4FZbVtBc1iUNtyBOJGDSv5Ls+0
+uwDImZbg1W8VqtnioQRrhNUelgV3SLYoWfzOjAsHMoS25/WsLwvnRm8XExD2223l
+SQOfcwXjTDldRRc04wohr2Rc1/vuTEFGt94cLVf67UutEDgN4T8LK2Za+RV/D6/e
+GmrofhClKQUIeHm3WaD3P2oJJZIG+MOeNG0+Y1JB4aOgL+ZUtuLTQo3xa8fhvhDA
+mRcYrCvUwS+k70OcSh2GTpt9y+1mnk+qAB4JR3SclTVOUUh4i9KtYa+1F5+8NWwU
+DsfC6VS1vdgPnBEcKw0d
+=5jkr
+-----END PGP SIGNATURE-----
