@@ -1,51 +1,93 @@
-From: Geoffrey Hartz <hartz.geoffrey@gmail.com>
-Subject: OSDs don't actually delete files when two CephFS (or more) are in use
-Date: Mon, 10 Dec 2012 19:29:44 +0100
-Message-ID: <CAPU8t+pEuX2sP-gRqmCxGw-etrviOt1N7_18gv4=rDj+K6pkTA@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Why cephx rather then kerberos?
+Date: Mon, 10 Dec 2012 10:57:55 -0800
+Message-ID: <CAC-hyiEWwBahOEuuvfWyCy216A=0muLPCHWt7DCXMw6B+=STwQ@mail.gmail.com>
+References: <CABZB-sig_O-s1cXZ5k4QMu5DZBgTUERg+HLGoe24AwLvwtxbJA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:64633 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751338Ab2LJS3p (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 13:29:45 -0500
-Received: by mail-oa0-f46.google.com with SMTP id h16so2728458oag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 10:29:44 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:47145 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751006Ab2LJS5z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 13:57:55 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so4574515iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 10:57:55 -0800 (PST)
+In-Reply-To: <CABZB-sig_O-s1cXZ5k4QMu5DZBgTUERg+HLGoe24AwLvwtxbJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jonathan Proulx <jon@jonproulx.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi!
+On Sun, Dec 9, 2012 at 12:03 PM, Jonathan Proulx <jon@jonproulx.com> wrote:
+> Hi All,
+>
+> the docs continuously describe cephx as Kerberos-like, curious why
+> Kereros isn't used instead.
+>
+> Developing new security protocols is almost always a bad idea from a
+> security perspective.  I haven't looked deeply into cephx to see how
+> much is novel (and likely to contain novel bugs) ans how much is reuse
+> of well worn crypto.  So this is just a first impression concern.
+>
+> More importantly to me I already have a Kerberos infrastructure all my
+> users have principals all my hosts have keytabs and I would really
+> like to reuse that for securing data access rather than managing yet
+> another a separate set of credentials.
+>
+> The only reason I can see documented is "Unlike Kerberos, each monitor
+> can authenticate users and distribute keys, so there is no single
+> point of failure or bottleneck when using chepx."  Kerberos using
+> multiple KDCs  needn't have a single point of failure, and "each
+> monitor" probably means 3-5 systems in practice which is a typical
+> scale for production Kerberos deployments.  Now it's true with
+> Kerberos if the admin server goes down I can't add new principals
+> (users) or perform other administrative functions, but authentication
+> continues and users (human and daemon) don't really care.
+>
+> Am I missing something? Any plans to either add Kerberos as an
+> authentication method or provide a pluggable authentication scheme?
+>
+> I'm fairly excited about all things Ceph from a design and direction
+> perspective, but this piece (IMO) is the one thing that is just
+> painfully close but not quite right.
+>
 
-I'm new to Ceph and I have a strange behavior with CephFS
+The ceph auth scheme is somewhat extensible, and the code is modular
+and has been written with alternative implementations in mind.
+Originally we considered doing kerberos from the start, but there were
+a few issues that made us having develop cephx. Note that cephx is
+basically kerberos tailored into ceph.
 
-Config is :
+1. Single point of failure
 
-Ubuntu 12.04
-Kernel 3.6.9
-Ceph V0.55
+You mentioned it, though you pointed that it might not be the case
+with Kerberos (OTOH, you pointed at the admin server as a single point
+of failure -- with a lesser impact).
 
-2 OSD, 1 mon, 1 MDS, all on same host
-2 clients, separate Hosts
+2. Service tied to a single machine
 
-Ceph.conf:
+In Kerberos, services are tied to usually a single machine, usually
+defined by one or more IP addresses. This means that the tickets
+information holds the IP address of the destination and is not
+flexible enough to work well in a dynamic environment such as ceph. We
+wanted to avoid requiring the clients obtaining a ticket for every
+entity it contacted, as this wouldn't have scaled well.
 
-http://paste.ubuntu.com/1423712/
+3. Simplify configuration
 
-To mount the share I use : sudo ceph-fuse -m 192.168.80.139:6789 /mnt
+While it wasn't a design goal, we preferred (at the time), to lower
+the installation bar, which would have required installing and setting
+up kerberos.
 
-When I create a file on one client, the other see the file, can be
-downloaded etc.
+I've probably forgotten a point or two, Sage might remember more. I
+think that the time to develop a kerberos solution looked
+significantly longer at the time due to (1) and (2), and given that we
+needed to implement the client side for both the userspace client and
+for the linux kernel side.
 
-But when I delete the file, both clients don't see the file anymore
-BUT the file is still there on OSD (using space disk).
+That been said, we had kerberos in mind when we developed the ceph
+authentication scheme. We'd certainly be happy if a kerberos solution
+could be integrated in the future. Thinking about it, that might be a
+nice project for someone that wants to start diving into ceph.
 
-When I umount from BOTH clients, OSD are update and file is actually
-delete (same behavior with mount -t ceph)
-
-I'm missing something?
-
-Thanks!
-
---
-Geoffrey HARTZ
+Yehuda
