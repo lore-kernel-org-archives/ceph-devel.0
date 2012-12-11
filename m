@@ -1,81 +1,86 @@
-From: Vladislav Gorbunov <vadikgo@gmail.com>
-Subject: Re: Segmentation fault on rbd client ceph version 0.48.2argonaut
-Date: Tue, 11 Dec 2012 11:37:47 +1200
-Message-ID: <CAD+Ap5YYGvEFhPh=MQD6uVuCOTd+ukc0Z5oq-wmuafvyo45xuw@mail.gmail.com>
-References: <CAD+Ap5bAgNczG_JusPYSXJYD9ScjUtxRD6k5xXZuG-2E0dkYcg@mail.gmail.com>
-	<50C667A3.4040407@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: mounting fuse from fstab
+Date: Mon, 10 Dec 2012 16:33:26 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212101622580.17288@cobra.newdream.net>
+References: <alpine.DEB.2.00.1212101229540.28411@cobra.newdream.net> <50C65ABE.5010102@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:63564 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750826Ab2LJXht (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 18:37:49 -0500
-Received: by mail-lb0-f174.google.com with SMTP id gi11so2413033lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Dec 2012 15:37:48 -0800 (PST)
-In-Reply-To: <50C667A3.4040407@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41372 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751395Ab2LKAd1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Dec 2012 19:33:27 -0500
+In-Reply-To: <50C65ABE.5010102@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Sam Lang <sam.lang@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Look like the header object on broken images is empty.
+On Mon, 10 Dec 2012, Sam Lang wrote:
+> On 12/10/2012 10:33 AM, Sage Weil wrote:
+> > We put together a simple helper script for mounting ceph-fuse via fstab
+> > (below).  Some of man pages indicate that the # syntax is deprecated,
+> > however, and it's not clear to me that whatever replaces it (mount.fuse)
+> > will let us accomplish the same thing (pass something along the mount,
+> > control command line options).  Also, it's unclear *when* it was
+> > deprecated; if we want this to work on, say, RHEL, the replacement
+> > might not be there.
+> 
+> Would the fuse options fsname and subtype be more portable?
 
-root@bender:~# rados -p iscsi stat seodo1.rbd
-iscsi/seodo1.rbd mtime 1354795057, size 0
+Looking at the subtype stuff a bit more, I finally understand.. if you set 
+type to fuse.ceph, it will run /sbin/mount.fuse.ceph with the usual 
+arguments (which include the device name).
 
-root@bender:~# rados -p iscsi stat siri.rbd
-iscsi/siri.rbd mtime 1355151093, size 0
+...and it appears that that support is present in RHEL6, which is probably 
+the oldest thing we care about.  I think that's a better route.  Something 
+like:
 
-On accessible image header size not empty:
-root@bender:~# rados -p iscsi stat siri1.rbd
-iscsi/siri1.rbd mtime 1355174156, size 112
+ id=user,foo=bar	/foo	fuse.ceph	defaults	0 0
 
-and header can't saved:
-root@bender:~# rados -p iscsi get seodo1.rbd seodo1.header
-2012-12-11 11:34:06.044164 7fe732f52780  0 wrote 0 byte payload to seodo1.header
+where the key/value pairs are passed by /sbin/mount.fuse.ceph to ceph-fuse 
+on the command line?
 
-Before this header became unreadable new osd server added and cluster
-was rebalanced. One of the mon server (mon.0) crushed, and i restart
-them.
+sage
 
-2012/12/11 Josh Durgin <josh.durgin@inktank.com>:
-> On 12/10/2012 01:54 PM, Vladislav Gorbunov wrote:
->>
->> but access to iscsi/seodo1 and iscsi/siri1 fail on every rbd client
->> hosts. Data completely inaccessible.
->>
->> root@bender:~# rbd info iscsi/seodo1
->> *** Caught signal (Segmentation fault) **
->>   in thread 7fb8c93f5780
->>   ceph version 0.48.2argonaut
->> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
->>   1: rbd() [0x41dfea]
->>   2: (()+0xfcb0) [0x7fb8c796fcb0]
->>   3: (()+0x16244d) [0x7fb8c6ae444d]
->>   4: (librbd::read_header_bl(librados::IoCtx&, std::string const&,
->> ceph::buffer::list&, unsigned long*)+0xf9) [0x7fb8c8fadb99]
->>   5: (librbd::read_header(librados::IoCtx&, std::string const&,
->> rbd_obj_header_ondisk*, unsigned long*)+0x82) [0x7fb8c8fadda2]
->>   6: (librbd::ictx_refresh(librbd::ImageCtx*)+0x90b) [0x7fb8c8fb05eb]
->>   7: (librbd::open_image(librbd::ImageCtx*)+0x1b5) [0x7fb8c8fb1165]
->>   8: (librbd::RBD::open(librados::IoCtx&, librbd::Image&, char const*,
->> char const*)+0x5f) [0x7fb8c8fb16af]
->>   9: (main()+0x73c) [0x41721c]
->>   10: (__libc_start_main()+0xed) [0x7fb8c69a376d]
->>   11: rbd() [0x41a0c9]
->> 2012-12-11 09:33:14.264755 7fb8c93f5780 -1 *** Caught signal
->> (Segmentation fault) **
->>   in thread 7fb8c93f5780
->
->
-> It sounds like the header object (which rbd uses to determine the
-> prefix for data object names) is corrupted or otherwise inaccessible.
->
-> Could you save the header object to a file ('rados -p iscsi get seodo1.rbd')
-> and put that file somewhere accessible?
->
-> Did anything happen to your cluster before this header became
-> unreadable? Any disk problems, or osds crashing?
->
-> Josh
+
+> -sam
+> 
+> > 
+> > Anybody know if doing something like the below is a bad idea?
+> > 
+> > Thanks!
+> > sage
+> > 
+> > ---
+> > 
+> > #!/bin/sh
+> > #
+> > # Helper to mount ceph-fuse from /etc/fstab.  To use, add an entry
+> > # like:
+> > #
+> > # # DEVICE                     PATH         TYPE   OPTIONS
+> > # /sbin/ceph-fuse-mount#admin  /mnt/ceph    ceph   defaults   0 0
+> > #
+> > # where 'admin' can be replaced with the client id to use when
+> > # authenticating (if it is not client.admin).  This will also control
+> > # which section of ceph.conf will be applied to the ceph-fuse process.
+> > 
+> > set -e
+> > id="$1"
+> > shift
+> > exec ceph-fuse -i $id $@
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
