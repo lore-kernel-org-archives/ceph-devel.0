@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 14/14] mds: compare sessionmap version before replaying imported sessions
-Date: Tue, 11 Dec 2012 16:31:00 +0800
-Message-ID: <1355214660-26354-15-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 05/14] mds: set want_base_dir to false for MDCache::discover_ino()
+Date: Tue, 11 Dec 2012 16:30:51 +0800
+Message-ID: <1355214660-26354-6-git-send-email-zheng.z.yan@intel.com>
 References: <1355214660-26354-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:16602 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:65284 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752562Ab2LKIbS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Dec 2012 03:31:18 -0500
+	id S1751821Ab2LKIbJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 Dec 2012 03:31:09 -0500
 In-Reply-To: <1355214660-26354-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,109 +16,88 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Otherwise we may wrongly increase mds->sessionmap.version, which
-will confuse future journal replays that involving sessionmap.
+When frozen inode is encountered, MDCache::handle_discover() sends
+reply immediately if the reply message is not empty. When handling
+"discover ino" requests, the reply message always contains the base
+directory fragment. But requestor already has the base directory
+fragment, the only effect of the reply message is wake the requestor
+and make it send same "discover ino" request again. So the requestor
+keeps sending "discover ino" requests but can't make any progress.
+
+The fix is set want_base_dir to false for MDCache::discover_ino().
+After set want_base_dir to false, also need update the code that
+handles "discover ino" error.
+
+This patch also remove unused error handling code for flag_error_dn
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Server.cc        |  2 ++
- src/mds/events/EUpdate.h |  8 ++++++--
- src/mds/journal.cc       | 24 +++++++++++++++++-------
- 3 files changed, 25 insertions(+), 9 deletions(-)
+ src/mds/MDCache.cc | 38 +++++++++++++-------------------------
+ 1 file changed, 13 insertions(+), 25 deletions(-)
 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 60d3793..2b0f22f 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -5441,6 +5441,8 @@ void Server::handle_client_rename(MDRequest *mdr)
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 7733d0d..893b651 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -8547,7 +8547,7 @@ void MDCache::discover_ino(CDir *base,
+     d.ino = base->ino();
+     d.frag = base->get_frag();
+     d.want_ino = want_ino;
+-    d.want_base_dir = true;
++    d.want_base_dir = false;
+     d.want_xlocked = want_xlocked;
+     _send_discover(d);
    }
-   
-   _rename_prepare(mdr, &le->metablob, &le->client_map, srcdn, destdn, straydn);
-+  if (le->client_map.length())
-+    le->cmapv = mds->sessionmap.projected;
- 
-   // -- commit locally --
-   C_MDS_rename_finish *fin = new C_MDS_rename_finish(mds, mdr, srcdn, destdn, straydn);
-diff --git a/src/mds/events/EUpdate.h b/src/mds/events/EUpdate.h
-index 6ce18fe..a302a5a 100644
---- a/src/mds/events/EUpdate.h
-+++ b/src/mds/events/EUpdate.h
-@@ -23,13 +23,14 @@ public:
-   EMetaBlob metablob;
-   string type;
-   bufferlist client_map;
-+  version_t cmapv;
-   metareqid_t reqid;
-   bool had_slaves;
- 
-   EUpdate() : LogEvent(EVENT_UPDATE) { }
-   EUpdate(MDLog *mdlog, const char *s) : 
-     LogEvent(EVENT_UPDATE), metablob(mdlog),
--    type(s), had_slaves(false) { }
-+    type(s), cmapv(0), had_slaves(false) { }
-   
-   void print(ostream& out) {
-     if (type.length())
-@@ -38,12 +39,13 @@ public:
+@@ -8890,6 +8890,18 @@ void MDCache::handle_discover_reply(MDiscoverReply *m)
+     }
    }
  
-   void encode(bufferlist &bl) const {
--    __u8 struct_v = 2;
-+    __u8 struct_v = 3;
-     ::encode(struct_v, bl);
-     ::encode(stamp, bl);
-     ::encode(type, bl);
-     ::encode(metablob, bl);
-     ::encode(client_map, bl);
-+    ::encode(cmapv, bl);
-     ::encode(reqid, bl);
-     ::encode(had_slaves, bl);
-   } 
-@@ -55,6 +57,8 @@ public:
-     ::decode(type, bl);
-     ::decode(metablob, bl);
-     ::decode(client_map, bl);
-+    if (struct_v >= 3)
-+      ::decode(cmapv, bl);
-     ::decode(reqid, bl);
-     ::decode(had_slaves, bl);
-   }
-diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-index 46adbf2..b25096c 100644
---- a/src/mds/journal.cc
-+++ b/src/mds/journal.cc
-@@ -996,14 +996,24 @@ void EUpdate::replay(MDS *mds)
-     mds->mdcache->add_uncommitted_master(reqid, _segment, slaves);
-   }
-   
--  // open client sessions?
--  map<client_t,entity_inst_t> cm;
--  map<client_t, uint64_t> seqm;
-   if (client_map.length()) {
--    bufferlist::iterator blp = client_map.begin();
--    ::decode(cm, blp);
--    mds->server->prepare_force_open_sessions(cm, seqm);
--    mds->server->finish_force_open_sessions(cm, seqm);
-+    if (mds->sessionmap.version >= cmapv) {
-+      dout(10) << "EUpdate.replay sessionmap v " << cmapv
-+	       << " <= table " << mds->sessionmap.version << dendl;
-+    } else {
-+      dout(10) << "EUpdate.replay sessionmap " << mds->sessionmap.version
-+	       << " < " << cmapv << dendl;
-+      // open client sessions?
-+      map<client_t,entity_inst_t> cm;
-+      map<client_t, uint64_t> seqm;
-+      bufferlist::iterator blp = client_map.begin();
-+      ::decode(cm, blp);
-+      mds->server->prepare_force_open_sessions(cm, seqm);
-+      mds->server->finish_force_open_sessions(cm, seqm);
++  // discover ino error
++  if (p.end() && m->is_flag_error_ino()) {
++    assert(cur->is_dir());
++    CDir *dir = cur->get_dirfrag(m->get_base_dir_frag());
++    if (dir) {
++      dout(7) << " flag_error on ino " << m->get_wanted_ino()
++	      << ", triggering ino" << dendl;
++      dir->take_ino_waiting(m->get_wanted_ino(), error);
++    } else
++      assert(0);
++  }
 +
-+      assert(mds->sessionmap.version = cmapv);
-+      mds->sessionmap.projected = mds->sessionmap.version;
-+    }
-   }
- }
+   // discover may start with an inode
+   if (!p.end() && next == MDiscoverReply::INODE) {
+     cur = add_replica_inode(p, NULL, finished);
+@@ -8925,30 +8937,6 @@ void MDCache::handle_discover_reply(MDiscoverReply *m)
+ 	curdir = cur->get_dirfrag(m->get_base_dir_frag());
+     }
  
+-    // dentry error?
+-    if (p.end() && (m->is_flag_error_dn() || m->is_flag_error_ino())) {
+-      // error!
+-      assert(cur->is_dir());
+-      if (curdir) {
+-	if (m->get_error_dentry().length()) {
+-	  dout(7) << " flag_error on dentry " << m->get_error_dentry()
+-		  << ", triggering dentry" << dendl;
+-	  curdir->take_dentry_waiting(m->get_error_dentry(), 
+-				      m->get_wanted_snapid(), m->get_wanted_snapid(), error);
+-	} else {
+-	  dout(7) << " flag_error on ino " << m->get_wanted_ino()
+-		  << ", triggering ino" << dendl;
+-	  curdir->take_ino_waiting(m->get_wanted_ino(), error);
+-	}
+-      } else {
+-	dout(7) << " flag_error on dentry " << m->get_error_dentry() 
+-		<< ", triggering dir?" << dendl;
+-	cur->take_waiting(CInode::WAIT_DIR, error);
+-      }
+-      break;
+-    }
+-    assert(curdir);
+-
+     if (p.end())
+       break;
+     
 -- 
 1.7.11.7
 
