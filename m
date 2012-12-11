@@ -1,50 +1,70 @@
-From: Bryant Ng <bryantng@gmail.com>
-Subject: Crush and Monitor questions
-Date: Tue, 11 Dec 2012 12:23:54 -0800
-Message-ID: <ka84oo$sa3$1@ger.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Gary Lowell <gary.lowell@inktank.com>
+Subject: Re: Debian packaging question
+Date: Tue, 11 Dec 2012 15:00:08 -0800
+Message-ID: <7A33695B-249B-4638-94BF-BC3BD283216B@inktank.com>
+References: <B29C14E0-EFB2-4F4C-A1CA-481CB3F7AC39@inktank.com> <50C6C5E5.6010107@widodh.nl> <0D99561D-3A0B-4766-9770-8A90E37B7A24@inktank.com> <50C705A9.1030603@ubuntu.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:41766 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753176Ab2LKUY5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Dec 2012 15:24:57 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1TiWNz-0005No-QH
-	for ceph-devel@vger.kernel.org; Tue, 11 Dec 2012 21:25:03 +0100
-Received: from 50-76-54-11-ip-static.hfc.comcastbusiness.net ([50.76.54.11])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Dec 2012 21:25:03 +0100
-Received: from bryantng by 50-76-54-11-ip-static.hfc.comcastbusiness.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Dec 2012 21:25:03 +0100
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33849 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753496Ab2LKXAM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Dec 2012 18:00:12 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so25493pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Dec 2012 15:00:12 -0800 (PST)
+In-Reply-To: <50C705A9.1030603@ubuntu.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: James Page <james.page@ubuntu.com>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
 
-I'm pretty new to Ceph and am just learning about it.
+On Dec 11, 2012, at 2:06 AM, James Page wrote:
 
-Where are the CRUSH maps stored in Ceph? In the documentation I see you 
-use the 'crushtool' to compile and decompile the crush map.  I 
-understand that if a single monitor comes online, it can talk to the 
-other existing monitors to get the cluster map but how does it work on 
-initial startup?  Or if the entire Ceph clusters goes down b/c of power 
-failure or something.
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+> 
+> On 11/12/12 06:32, Gary Lowell wrote:
+>>>> 
+>>>> I assume you are building with "dpkg-buildpackage" ?
+>>>> 
+>>>> The manpage shows:
+>>>> 
+>>>> "-B     Specifies a binary-only build, limited to architecture
+>>>> dependent packages.  Passed to dpkg-genchanges."
+>>>> 
+>>>> "-A     Specifies a binary-only build, limited to architecture
+>>>> independent packages. Passed to dpkg-genchanges."
+>>>> 
+>>>> So on the i386 and amd64 machines you'd run with -B and sync
+>>>> them to ceph.com
+>>>> 
+>>>> On one of the machines you'd also run with -A which should
+>>>> produce the architecture independent packages like
+>>>> libcephfs-java.
+>>>> 
+>>>> That's the theory, I haven't tested it :)
+>>>> 
+>>>> Wido
+>> Thanks Wido.  We're using pbuilder, but it looks like it has
+>> similar options, or can pass an option string to dpkg_buildpackage.
+>> I'll do some testing.
+> 
+> "--binary-arch" will limit a pbuilder build to the target binary
+> architecture only; I would recommend you use this with the amd64 build
+> and build the arch: all packages out of the i386 build; this is what
+> happens in the official Ubuntu builders.
+> 
 
-What is the recommended hardware configuration for monitors?  In the 
-Hardware Recommendation page it says "A monitor requires approximately 
-10GB of storage space per daemon instance."  per daemon instance is 
-talking about the monitor daemon, not the osd daemons?
+Hi James,
 
-Also further down on that page, it list some hardware examples where it 
-mentions a ligher configuration for monitors.  I am assuming that is the 
-Dell PE R510 which contains 8 x 2 TB drives.  Why does the monitor need 
-so much space if it's "10GB of storage space per daemon instance".
+I thought this was going to be the easy solution, but on running a quick test, we are already calling pbuilder with the --binary-arch option and it its building the java package anyway.    It looks like there is a deeper issue in that we building the java package in the default target.  It looks like for this to work, we need to move the java library build to it's own target in the Makefile, and build that target from the binary-indep target in the debian rules file.   Does this sound like I'm on the right track ?
 
--Bryant
+Thanks,
+Gary
+
+
+
+ It looks like for this to work, we need to have architecture specific and independent targets in both the debian rules file and the Makefiles.
 
