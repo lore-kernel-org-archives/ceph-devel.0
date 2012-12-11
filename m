@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 06/14] mds: fix error hanlding in MDCache::handle_discover_reply()
-Date: Tue, 11 Dec 2012 16:30:52 +0800
-Message-ID: <1355214660-26354-7-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 08/14] mds: re-issue caps after importing caps
+Date: Tue, 11 Dec 2012 16:30:54 +0800
+Message-ID: <1355214660-26354-9-git-send-email-zheng.z.yan@intel.com>
 References: <1355214660-26354-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:16602 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752108Ab2LKIbL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Dec 2012 03:31:11 -0500
+	id S1752519Ab2LKIbM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 Dec 2012 03:31:12 -0500
 In-Reply-To: <1355214660-26354-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,98 +16,103 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The error hanlding code in MDCache::handle_discover_reply() has two
-main issues. MDCache::handle_discover_reply() does not wake waiters
-if dir_auth_hint in reply message is equal to itself's nodeid. This
-can happen if discover race with subtree importing. Another issue is
-that it checks the existence of cached directory fragment to decide
-if it should take waiter from inode or from directory fragment. The
-check is unreliable because subtree importing can add directory
-fragments to the cache.
+The imported caps may prevent unstable locks from entering stable
+states. So we should call Locker::eval_gather() with parameter
+"first" set to true after caps are imported.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc | 54 ++++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 36 insertions(+), 18 deletions(-)
+ src/mds/Locker.cc   | 16 ++++++++--------
+ src/mds/Locker.h    |  6 +++---
+ src/mds/Migrator.cc |  3 ++-
+ 3 files changed, 13 insertions(+), 12 deletions(-)
 
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 893b651..eb18eeb 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -8957,9 +8957,7 @@ void MDCache::handle_discover_reply(MDiscoverReply *m)
-   if (m->is_flag_error_dir() && !cur->is_dir()) {
-     // not a dir.
-     cur->take_waiting(CInode::WAIT_DIR, error);
--  } else if (m->is_flag_error_dir() ||
--	     (m->get_dir_auth_hint() != CDIR_AUTH_UNKNOWN &&
--	      m->get_dir_auth_hint() != mds->get_nodeid())) {
-+  } else if (m->is_flag_error_dir() || m->get_dir_auth_hint() != CDIR_AUTH_UNKNOWN) {
-     int who = m->get_dir_auth_hint();
-     if (who == mds->get_nodeid()) who = -1;
-     if (who >= 0)
-@@ -8971,27 +8969,47 @@ void MDCache::handle_discover_reply(MDiscoverReply *m)
-       frag_t fg = cur->pick_dirfrag(m->get_error_dentry());
-       CDir *dir = cur->get_dirfrag(fg);
-       filepath relpath(m->get_error_dentry(), 0);
-+
-+      if (cur->is_waiter_for(CInode::WAIT_DIR)) {
-+	if (cur->is_auth() || dir)
-+	  cur->take_waiting(CInode::WAIT_DIR, finished);
-+	else
-+	  discover_path(cur, m->get_wanted_snapid(), relpath, 0, m->get_wanted_xlocked(), who);
-+      } else
-+	  dout(7) << " doing nothing, nobody is waiting for dir" << dendl;
-+
-       if (dir) {
- 	// don't actaully need the hint, now
--	if (dir->lookup(m->get_error_dentry()) == 0 &&
--	    dir->is_waiting_for_dentry(m->get_error_dentry().c_str(), m->get_wanted_snapid())) 
--	  discover_path(dir, m->get_wanted_snapid(), relpath, 0, m->get_wanted_xlocked()); 
--	else 
--	  dout(7) << " doing nothing, have dir but nobody is waiting on dentry " 
-+	if (dir->is_waiting_for_dentry(m->get_error_dentry().c_str(), m->get_wanted_snapid())) {
-+	  if (dir->is_auth() || dir->lookup(m->get_error_dentry()))
-+	    dir->take_dentry_waiting(m->get_error_dentry(), m->get_wanted_snapid(),
-+				     m->get_wanted_snapid(), finished);
-+	  else
-+	    discover_path(dir, m->get_wanted_snapid(), relpath, 0, m->get_wanted_xlocked());
-+	} else
-+	  dout(7) << " doing nothing, have dir but nobody is waiting on dentry "
- 		  << m->get_error_dentry() << dendl;
--      } else {
--	if (cur->is_waiter_for(CInode::WAIT_DIR)) 
--	  discover_path(cur, m->get_wanted_snapid(), relpath, 0, m->get_wanted_xlocked(), who);
--	else
--	  dout(7) << " doing nothing, nobody is waiting for dir" << dendl;
-       }
-     } else {
--      // wanted just the dir
-+      // wanted dir or ino
-       frag_t fg = m->get_base_dir_frag();
--      if (cur->get_dirfrag(fg) == 0 && cur->is_waiter_for(CInode::WAIT_DIR))
--	discover_dir_frag(cur, fg, 0, who);
--      else
--	dout(7) << " doing nothing, nobody is waiting for dir" << dendl;	  
-+      CDir *dir = cur->get_dirfrag(fg);
-+
-+      if (cur->is_waiter_for(CInode::WAIT_DIR)) {
-+	if (cur->is_auth() || dir)
-+	  cur->take_waiting(CInode::WAIT_DIR, finished);
-+	else
-+	  discover_dir_frag(cur, fg, 0, who);
-+      } else
-+	dout(7) << " doing nothing, nobody is waiting for dir" << dendl;
-+
-+      if (dir && m->get_wanted_ino() && dir->is_waiting_for_ino(m->get_wanted_ino())) {
-+	if (dir->is_auth() || get_inode(m->get_wanted_ino()))
-+	  dir->take_ino_waiting(m->get_wanted_ino(), finished);
-+	else
-+	  discover_ino(dir, m->get_wanted_ino(), 0, m->get_wanted_xlocked());
-+      } else
-+	dout(7) << " doing nothing, nobody is waiting for ino" << dendl;
-     }
-   }
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index a8ec19f..860577f 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -769,7 +769,7 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, list<C
  
+ }
+ 
+-bool Locker::eval(CInode *in, int mask)
++bool Locker::eval(CInode *in, int mask, bool caps_imported)
+ {
+   bool need_issue = false;
+   
+@@ -790,19 +790,19 @@ bool Locker::eval(CInode *in, int mask)
+ 
+  retry:
+   if (mask & CEPH_LOCK_IFILE)
+-    eval_any(&in->filelock, &need_issue);
++    eval_any(&in->filelock, &need_issue, caps_imported);
+   if (mask & CEPH_LOCK_IAUTH)
+-    eval_any(&in->authlock, &need_issue);
++    eval_any(&in->authlock, &need_issue, caps_imported);
+   if (mask & CEPH_LOCK_ILINK)
+-    eval_any(&in->linklock, &need_issue);
++    eval_any(&in->linklock, &need_issue,caps_imported);
+   if (mask & CEPH_LOCK_IXATTR)
+-    eval_any(&in->xattrlock, &need_issue);
++    eval_any(&in->xattrlock, &need_issue, caps_imported);
+   if (mask & CEPH_LOCK_INEST)
+-    eval_any(&in->nestlock, &need_issue);
++    eval_any(&in->nestlock, &need_issue, caps_imported);
+   if (mask & CEPH_LOCK_IFLOCK)
+-    eval_any(&in->flocklock, &need_issue);
++    eval_any(&in->flocklock, &need_issue, caps_imported);
+   if (mask & CEPH_LOCK_IPOLICY)
+-    eval_any(&in->policylock, &need_issue);
++    eval_any(&in->policylock, &need_issue, caps_imported);
+ 
+   // drop loner?
+   if (in->is_auth() && in->is_head() && in->get_wanted_loner() != in->get_loner()) {
+diff --git a/src/mds/Locker.h b/src/mds/Locker.h
+index b3b9919..04a5252 100644
+--- a/src/mds/Locker.h
++++ b/src/mds/Locker.h
+@@ -99,9 +99,9 @@ public:
+ 
+   void eval_gather(SimpleLock *lock, bool first=false, bool *need_issue=0, list<Context*> *pfinishers=0);
+   void eval(SimpleLock *lock, bool *need_issue);
+-  void eval_any(SimpleLock *lock, bool *need_issue) {
++  void eval_any(SimpleLock *lock, bool *need_issue, bool first=false) {
+     if (!lock->is_stable())
+-      eval_gather(lock, false, need_issue);
++      eval_gather(lock, first, need_issue);
+     else if (lock->get_parent()->is_auth())
+       eval(lock, need_issue);
+   }
+@@ -122,7 +122,7 @@ public:
+ 
+   void eval_cap_gather(CInode *in, set<CInode*> *issue_set=0);
+ 
+-  bool eval(CInode *in, int mask);
++  bool eval(CInode *in, int mask, bool caps_imported=false);
+   void try_eval(MDSCacheObject *p, int mask);
+   void try_eval(SimpleLock *lock, bool *pneed_issue);
+ 
+diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
+index cc045b4..c157279 100644
+--- a/src/mds/Migrator.cc
++++ b/src/mds/Migrator.cc
+@@ -2230,7 +2230,7 @@ void Migrator::import_finish(CDir *dir)
+        p != cap_imports.end();
+        p++)
+     if (p->first->is_auth())
+-      mds->locker->eval(p->first, CEPH_CAP_LOCKS);
++      mds->locker->eval(p->first, CEPH_CAP_LOCKS, true);
+ 
+   // send pending import_maps?
+   mds->mdcache->maybe_send_pending_resolves();
+@@ -2614,6 +2614,7 @@ void Migrator::logged_import_caps(CInode *in,
+ 
+   assert(cap_imports.count(in));
+   finish_import_inode_caps(in, from, cap_imports[in]);  
++  mds->locker->eval(in, CEPH_CAP_LOCKS, true);
+ 
+   mds->send_message_mds(new MExportCapsAck(in->ino()), from);
+ }
 -- 
 1.7.11.7
 
