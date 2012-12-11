@@ -1,50 +1,38 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: [PATCH] fix build of unittest_formatter
-Date: Tue, 11 Dec 2012 13:08:26 +0100
-Message-ID: <50C7223A.3000607@bisect.de>
-References: <1354115148-5549-1-git-send-email-danny.al-gaaf@bisect.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Subject: [PATCH] include/atomic.h: add stdlib.h for size_t
+Date: Tue, 11 Dec 2012 14:05:08 +0100
+Message-ID: <1355231108-18168-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:39920 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:42894 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751418Ab2LKMIe (ORCPT
+	by vger.kernel.org with ESMTP id S1752972Ab2LKNFN (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Dec 2012 07:08:34 -0500
-In-Reply-To: <1354115148-5549-1-git-send-email-danny.al-gaaf@bisect.de>
+	Tue, 11 Dec 2012 08:05:13 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-Hi,
+Include missing stdlib.h needed for size_t.
 
-did you have a chance to take a look at this patch?
+Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+---
+ src/include/atomic.h | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Danny
-
-Am 28.11.2012 16:05, schrieb Danny Al-Gaaf:
-> Add CRYPTO_CXXFLAGS to unittest_formatter_CXXFLAGS to find pk11pub.h to
-> be included in src/common/ceph_crypto.h.
-> 
-> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-> ---
->  src/Makefile.am | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/src/Makefile.am b/src/Makefile.am
-> index be851d6..2f6f486 100644
-> --- a/src/Makefile.am
-> +++ b/src/Makefile.am
-> @@ -764,7 +764,7 @@ check_PROGRAMS += unittest_heartbeatmap
->  unittest_formatter_SOURCES = test/formatter.cc rgw/rgw_formats.cc
->  unittest_formatter_LDFLAGS = $(PTHREAD_CFLAGS) ${AM_LDFLAGS}
->  unittest_formatter_LDADD = ${UNITTEST_LDADD} $(LIBGLOBAL_LDA)
-> -unittest_formatter_CXXFLAGS = ${AM_CXXFLAGS} ${UNITTEST_CXXFLAGS}
-> +unittest_formatter_CXXFLAGS = ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS} ${UNITTEST_CXXFLAGS}
->  check_PROGRAMS += unittest_formatter
->  
->  unittest_libcephfs_config_SOURCES = test/libcephfs_config.cc
-> 
+diff --git a/src/include/atomic.h b/src/include/atomic.h
+index 0c22b26..3ecbd28 100644
+--- a/src/include/atomic.h
++++ b/src/include/atomic.h
+@@ -20,6 +20,8 @@
+ # include "acconfig.h"
+ #endif
+ 
++#include <stdlib.h>
++
+ #ifndef NO_ATOMIC_OPS
+ 
+ // libatomic_ops implementation
+-- 
+1.8.0.1
 
