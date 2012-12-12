@@ -1,65 +1,134 @@
-From: Sam Lang <sam.lang@inktank.com>
-Subject: lockdeps
-Date: Tue, 11 Dec 2012 16:25:43 -1000
-Message-ID: <50C7EB27.2050704@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Segmentation fault on rbd client ceph version 0.48.2argonaut
+Date: Tue, 11 Dec 2012 23:32:54 -0800
+Message-ID: <50C83326.1040200@inktank.com>
+References: <CAD+Ap5bAgNczG_JusPYSXJYD9ScjUtxRD6k5xXZuG-2E0dkYcg@mail.gmail.com> <50C667A3.4040407@inktank.com> <CAD+Ap5YYGvEFhPh=MQD6uVuCOTd+ukc0Z5oq-wmuafvyo45xuw@mail.gmail.com> <CAD+Ap5Y1aM6HD8bqBNruoGJ6XqByVwpdDHnRPBjV_uVc9Rjtyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:38881 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754329Ab2LLDbw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Dec 2012 22:31:52 -0500
-Received: by mail-pb0-f44.google.com with SMTP id uo1so147309pbc.31
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Dec 2012 19:31:52 -0800 (PST)
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:58317 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750880Ab2LLHdC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 02:33:02 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so333252pad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Dec 2012 23:33:01 -0800 (PST)
+In-Reply-To: <CAD+Ap5Y1aM6HD8bqBNruoGJ6XqByVwpdDHnRPBjV_uVc9Rjtyw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Vladislav Gorbunov <vadikgo@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
+On 12/11/2012 01:44 AM, Vladislav Gorbunov wrote:
+> I found a hardware error in the osd server the day before:
+> Dec 10 05:40:20 zstore kernel: EDAC MC1: 1 CE error on
+> CPU#1Channel#0_DIMM#0 (channel:0 slot:0 page:0x0 offset:0x0 grain:8
+> syndrome:0x0)
 
-I've been puzzling over a failure in teuthology where lockdeps were 
-enabled and reported a lock cycle.  The output of the found cycle is 
-below.  I think the issue is actually erroneous, as it reports a found 
-cycle, but the two dependencies that cause the cycle occur in separate 
-threads.  Its correctly detecting a possible deadlock due to out of 
-order locking (thread1: a -> b, thread2: b -> a), but in this case I 
-don't think the deadlock is possible, because the two threads never run 
-at the same time.
+=46aulty memory could certainly cause problems like this.
+If your /sys/devices/system/edac/mc/mc1/ue_count shows uncorrectable
+errors, I'd be suspicious of anything on the host.
 
-My proposed fixes are in wip-lockdep-fixes.  It resolves the issue of 
-stomping on thread ids by using gettid() instead of pthread_self(), and 
-ensures that the cycle happens within the same thread.  It also allows 
-the g_lockdep field to be set to 3, which will detect (and only warn) on 
-possible deadlock cases across threads.
+> =D0=A1ould it affect the replication process?
+> 2012-12-11 00:15:17.705096 7f22b27f4700  0 log [ERR] : 4.6 osd.0: soi=
+d
+> fe0ab176/seodo1.rbd/head//4 size 0 !=3D known size 112
+> 2012-12-11 00:15:17.705100 7f22b27f4700  0 log [ERR] : 4.6 scrub 0
+> missing, 1 inconsistent objects
+> 2012-12-11 00:15:17.706169 7f22b27f4700  0 log [ERR] : scrub 4.6
+> fe0ab176/seodo1.rbd/head//4 on disk size (112) does not match object
+> info size (0)
+> 2012-12-11 00:15:17.706452 7f22b27f4700  0 log [ERR] : 4.6 scrub 1 er=
+rors
+> 2012-12-11 00:21:58.214974 7f23a5ffb700  0 log [ERR] : 3.5 scrub stat
+> mismatch, got 21841/21839 objects, 199/199 clones,
+> 90932097984/90932097760 bytes.
+> 2012-12-11 00:21:58.214993 7f23a5ffb700  0 log [ERR] : 3.5 scrub 1 er=
+rors
 
--sam
+Scrub is showing one object with a detected size difference. If your=20
+memory on one node is faulty, it could have caused other corruption not
+detected by regular scrub, which just compares inter-osd metadata. If
+you stop the osds on the faulty node, ceph may be able to re-replicate
+the correct objects. Of course, if the memory was faulty, errors could
+have been introduced into the objects before they were replicated.
 
-------------------------------------
-existing dependency Client::client_lock (10) -> SimpleMessenger::lock 
-(4) at:
-  ceph version 0.55-217-g331c250 (331c25046ecd99ec10c5835e8e674ca819e6168a)
-  1: (Client::init()+0xbbd) [0x7f0303a9d83d]
-  2: (ceph_mount_info::mount(std::string const&)+0x191) [0x7f0303a772b1]
-  3: (ceph_mount()+0x76) [0x7f0303a75bc6]
-  4: (LibCephFS_Open_empty_component_Test::TestBody()+0x4e1) [0x432cc1]
-  5: (testing::Test::Run()+0xaa) [0x46089a]
-  6: (testing::internal::TestInfoImpl::Run()+0x100) [0x4609a0]
-  7: (testing::TestCase::Run()+0xbd) [0x460a6d]
-  8: (testing::internal::UnitTestImpl::RunAllTests()+0x217) [0x460cd7]
-  9: (main()+0x35) [0x41c4d5]
-  10: (__libc_start_main()+0xed) [0x7f030309176d]
-  11: test_libcephfs() [0x41c531]
+Josh
 
-2012-12-10 19:31:30.231305 7f02c8ff9700  0 new dependency 
-SimpleMessenger::lock (4) -> Client::client_lock (10) creates a cycle at
-  ceph version 0.55-217-g331c250 (331c25046ecd99ec10c5835e8e674ca819e6168a)
-  1: (ObjectCacher::FlusherThread::entry()+0x15) [0x7f0303d98005]
-  2: (Thread::_entry_func(void*)+0x12) [0x7f0303c908d2]
-  3: (()+0x7e9a) [0x7f0304a32e9a]
-  4: (clone()+0x6d) [0x7f03031624bd]
+> 2012/12/11 Vladislav Gorbunov <vadikgo@gmail.com>:
+>> Look like the header object on broken images is empty.
+>>
+>> root@bender:~# rados -p iscsi stat seodo1.rbd
+>> iscsi/seodo1.rbd mtime 1354795057, size 0
+>>
+>> root@bender:~# rados -p iscsi stat siri.rbd
+>> iscsi/siri.rbd mtime 1355151093, size 0
+>>
+>> On accessible image header size not empty:
+>> root@bender:~# rados -p iscsi stat siri1.rbd
+>> iscsi/siri1.rbd mtime 1355174156, size 112
+>>
+>> and header can't saved:
+>> root@bender:~# rados -p iscsi get seodo1.rbd seodo1.header
+>> 2012-12-11 11:34:06.044164 7fe732f52780  0 wrote 0 byte payload to s=
+eodo1.header
+>>
+>> Before this header became unreadable new osd server added and cluste=
+r
+>> was rebalanced. One of the mon server (mon.0) crushed, and i restart
+>> them.
+>>
+>> 2012/12/11 Josh Durgin <josh.durgin@inktank.com>:
+>>> On 12/10/2012 01:54 PM, Vladislav Gorbunov wrote:
+>>>>
+>>>> but access to iscsi/seodo1 and iscsi/siri1 fail on every rbd clien=
+t
+>>>> hosts. Data completely inaccessible.
+>>>>
+>>>> root@bender:~# rbd info iscsi/seodo1
+>>>> *** Caught signal (Segmentation fault) **
+>>>>    in thread 7fb8c93f5780
+>>>>    ceph version 0.48.2argonaut
+>>>> (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
+>>>>    1: rbd() [0x41dfea]
+>>>>    2: (()+0xfcb0) [0x7fb8c796fcb0]
+>>>>    3: (()+0x16244d) [0x7fb8c6ae444d]
+>>>>    4: (librbd::read_header_bl(librados::IoCtx&, std::string const&=
+,
+>>>> ceph::buffer::list&, unsigned long*)+0xf9) [0x7fb8c8fadb99]
+>>>>    5: (librbd::read_header(librados::IoCtx&, std::string const&,
+>>>> rbd_obj_header_ondisk*, unsigned long*)+0x82) [0x7fb8c8fadda2]
+>>>>    6: (librbd::ictx_refresh(librbd::ImageCtx*)+0x90b) [0x7fb8c8fb0=
+5eb]
+>>>>    7: (librbd::open_image(librbd::ImageCtx*)+0x1b5) [0x7fb8c8fb116=
+5]
+>>>>    8: (librbd::RBD::open(librados::IoCtx&, librbd::Image&, char co=
+nst*,
+>>>> char const*)+0x5f) [0x7fb8c8fb16af]
+>>>>    9: (main()+0x73c) [0x41721c]
+>>>>    10: (__libc_start_main()+0xed) [0x7fb8c69a376d]
+>>>>    11: rbd() [0x41a0c9]
+>>>> 2012-12-11 09:33:14.264755 7fb8c93f5780 -1 *** Caught signal
+>>>> (Segmentation fault) **
+>>>>    in thread 7fb8c93f5780
+>>>
+>>>
+>>> It sounds like the header object (which rbd uses to determine the
+>>> prefix for data object names) is corrupted or otherwise inaccessibl=
+e.
+>>>
+>>> Could you save the header object to a file ('rados -p iscsi get seo=
+do1.rbd')
+>>> and put that file somewhere accessible?
+>>>
+>>> Did anything happen to your cluster before this header became
+>>> unreadable? Any disk problems, or osds crashing?
+>>>
+>>> Josh
 
-2012-12-10 19:31:30.231332 7f02c8ff9700  0 btw, i am holding these locks:
-2012-12-10 19:31:30.231334 7f02c8ff9700  0   SimpleMessenger::lock (4)
-2012-12-10 19:31:30.231335 7f02c8ff9700  0
-
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
