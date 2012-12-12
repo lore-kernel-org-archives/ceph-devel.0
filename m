@@ -1,89 +1,134 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Debian packaging question
-Date: Wed, 12 Dec 2012 07:44:30 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212120742140.8754@cobra.newdream.net>
-References: <B29C14E0-EFB2-4F4C-A1CA-481CB3F7AC39@inktank.com> <50C6C5E5.6010107@widodh.nl> <0D99561D-3A0B-4766-9770-8A90E37B7A24@inktank.com> <50C705A9.1030603@ubuntu.com> <7A33695B-249B-4638-94BF-BC3BD283216B@inktank.com> <50C864A8.1010707@ubuntu.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Updated Patch Backlog
+Date: Wed, 12 Dec 2012 10:06:49 -0600
+Message-ID: <50C8AB99.7030004@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34666 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753531Ab2LLPod (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 10:44:33 -0500
-In-Reply-To: <50C864A8.1010707@ubuntu.com>
+Received: from mail-ia0-f180.google.com ([209.85.210.180]:49772 "EHLO
+	mail-ia0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754212Ab2LLQGv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 11:06:51 -0500
+Received: by mail-ia0-f180.google.com with SMTP id t4so996673iag.11
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 08:06:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>
-Cc: Gary Lowell <gary.lowell@inktank.com>, Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 12 Dec 2012, James Page wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
-> 
-> On 11/12/12 23:00, Gary Lowell wrote:
-> > On Dec 11, 2012, at 2:06 AM, James Page wrote:
-> > 
-> >>> -----BEGIN PGP SIGNED MESSAGE----- Hash: SHA256
-> >>> 
-> >>> On 11/12/12 06:32, Gary Lowell wrote:
-> >>>>>>>>> 
-> >>>>>>>>> I assume you are building with "dpkg-buildpackage"
-> >>>>>>>>> ?
-> >>>>>>>>> 
-> >>>>>>>>> The manpage shows:
-> >>>>>>>>> 
-> >>>>>>>>> "-B     Specifies a binary-only build, limited to
-> >>>>>>>>> architecture dependent packages.  Passed to
-> >>>>>>>>> dpkg-genchanges."
-> >>>>>>>>> 
-> >>>>>>>>> "-A     Specifies a binary-only build, limited to
-> >>>>>>>>> architecture independent packages. Passed to
-> >>>>>>>>> dpkg-genchanges."
-> >>>>>>>>> 
-> >>>>>>>>> So on the i386 and amd64 machines you'd run with -B
-> >>>>>>>>> and sync them to ceph.com
-> >>>>>>>>> 
-> >>>>>>>>> On one of the machines you'd also run with -A which
-> >>>>>>>>> should produce the architecture independent
-> >>>>>>>>> packages like libcephfs-java.
-> >>>>>>>>> 
-> >>>>>>>>> That's the theory, I haven't tested it :)
-> >>>>>>>>> 
-> >>>>>>>>> Wido
-> >>>>> Thanks Wido.  We're using pbuilder, but it looks like it
-> >>>>> has similar options, or can pass an option string to
-> >>>>> dpkg_buildpackage. I'll do some testing.
-> >>> 
-> >>> "--binary-arch" will limit a pbuilder build to the target
-> >>> binary architecture only; I would recommend you use this with
-> >>> the amd64 build and build the arch: all packages out of the
-> >>> i386 build; this is what happens in the official Ubuntu
-> >>> builders.
-> >>> 
-> > Hi James,
-> > 
-> > I thought this was going to be the easy solution, but on running a
-> > quick test, we are already calling pbuilder with the --binary-arch
-> > option and it its building the java package anyway.    It looks
-> > like there is a deeper issue in that we building the java package
-> > in the default target.  It looks like for this to work, we need to
-> > move the java library build to it's own target in the Makefile, and
-> > build that target from the binary-indep target in the debian rules
-> > file.   Does this sound like I'm on the right track ?
-> 
-> Gah - this will bite when I do the next upload to Ubuntu as well then;
->  Can I suggest that we rework debian/rules for debhelper >= 7 and use
-> overrides rather than the current 'old style' rules which define all
-> tasks?  I was toying with doing this anyway (and have it working
-> locally) - it does cut out some of the content from d/rules and makes
-> it a bit more *magic*
-> 
-> Thoughts?  I'm happy to raise a pull request for this.
+Below is a list of the patches I've posted in the last
+six weeks or so.  Most of them are still in need of a
+review.
 
-Yes, please!  In the meantime, does build-indep sound like a valid 
-workaround?  (This hiccup has been delaying some simple fixes in 0.55.1, 
-but unless there is a quick fix I think we'll just release it without the 
-java bindings for now to get those fixes out to people.)
+I'll say what I said last time, there's not a lot of
+magic in here, and if you can read C code you can offer
+a review and I would love to hear from you.
 
-Thanks-
-sage
+If you think it looks correct, say so by responding
+to the patch message (to the list) and provide your
+"Reviewed-by" tag, which looks like:
+
+    Reviewed-by: My Name <myname@mydomain.com>
+
+And of course if you think there's something wrong, or
+room for improvement, please say that too.
+
+Thanks.
+
+					-Alex
+
+[PATCH 1/5] rbd: document rbd_spec structure
+[PATCH 2/5] rbd: kill rbd_spec->image_name_len
+[PATCH 3/5] rbd: kill rbd_spec->image_id_len
+[PATCH 4/5] rbd: don't use ENOTSUPP
+[PATCH 5/5] rbd: use kmemdup()
+
+[PATCH] ceph: define ceph_encode_8_safe()
+
+[PATCH] rbd: fix ceph_pg_poolid_by_name()
+
+[PATCH 1/4] rbd: define and use rbd_warn()
+[PATCH 2/4] rbd: add warning messages for missing arguments
+[PATCH 3/4] rbd: add a warning in bio_chain_clone_range()
+[PATCH 4/4] rbd: add warnings to rbd_dev_probe_update_spec()
+
+[PATCH 1/3] rbd: standardize rbd_request variable names
+[PATCH 2/3] rbd: standardize ceph_osd_request variable names
+[PATCH 3/3] rbd: be picky about osd request status type
+
+[PATCH 1/2] rbd: encapsulate handling for a single request
+[PATCH 2/2] rbd: a little more cleanup of rbd_rq_fn()
+
+[PATCH] rbd: end request on error in rbd_do_request() caller
+
+[PATCH 8/5] rbd: fix reference leak in rbd_do_op()
+[PATCH 9/5] rbd: only get snap context for write requests
+
+[PATCH] rbd: separate layout init
+
+[PATCH 1/4] rbd: drop oid parameters from
+[PATCH 2/4] rbd: drop snapid parameter from rbd_req_sync_read()
+[PATCH 3/4] rbd: drop flags parameter from rbd_req_sync_exec()
+[PATCH 4/4] rbd: kill rbd_req_sync_op() snapc and snapid
+
+[PATCH] rbd: don't bother setting snapid in rbd_do_request()
+
+[PATCH] rbd: get rid of RBD_MAX_SEG_NAME_LEN
+
+---  above were backlog as of 11/9/12; below are new since then
+
+[PATCH 1/2] libceph: always allow trail in osd request
+[PATCH 2/2] libceph: kill op_needs_trail()
+
+[PATCH 1/4] libceph: pass length to ceph_osdc_build_request()
+[PATCH 2/4] libceph: pass length to ceph_calc_file_object_mapping()
+[PATCH 3/4] libceph: drop snapid in ceph_calc_raw_layout()
+[PATCH 4/4] libceph: drop osdc from ceph_calc_raw_layout()
+
+[PATCH 1/2] libceph: don't set flags in ceph_osdc_alloc_request()
+[PATCH 2/2] libceph: don't set pages or bio in ceph_osdc_alloc_request()
+
+[PATCH 1/4] rbd: pass num_op with ops array
+[PATCH 2/4] libceph: pass num_op with ops
+[PATCH 3/4] rbd: there is really only one op
+[PATCH 4/4] rbd: assume single op in a request
+
+[PATCH] rbd: kill ceph_osd_req_op->flags
+
+[PATCH] rbd: combine rbd sync watch/unwatch functions
+
+[PATCH 1/4] rbd: pull in ceph_calc_raw_layout()
+[PATCH 2/4] rbd: open code rbd_calc_raw_layout()
+[PATCH 3/4] rbd: don't bother calculating file mapping
+[PATCH 4/4] rbd: use a common layout for each device
+
+[PATCH] rbd: get rid of rbd_{get,put}_dev()
+    (reviewed)
+
+[PATCH, v2] rbd: do not allow remove of mounted-on image
+
+[PATCH 1/6] rbd: don't assign extent info in rbd_do_request()
+[PATCH 2/6] rbd: don't assign extent info in rbd_req_sync_op()
+[PATCH 3/6] rbd: initialize off and len in rbd_create_rw_op()
+[PATCH 4/6] rbd: define generalized osd request op routines
+[PATCH 5/6] rbd: move call osd op setup into rbd_osd_req_op_create()
+[PATCH 6/6] rbd: move remaining osd op setup into rbd_osd_req_op_create()
+
+[PATCH] rbd: assign watch request more directly
+
+[PATCH] ceph: don't reference req after put
+    (reviewed)
+
+[PATCH 1/2] rbd: don't leak rbd_req on synchronous requests
+    (reviewed)
+[PATCH 2/2] rbd: don't leak rbd_req for rbd_req_sync_notify_ack()
+    (reviewed)
+
+[PATCH 1/4] libceph: avoid using freed osd in __kick_osd_requests()
+[PATCH 2/4] libceph: register request before unregister linger
+[PATCH 3/4] libceph: socket can close in any connection state
+[PATCH 4/4] libceph: init osd->o_node in create_osd()
+
+[PATCH] rbd: remove linger unconditionally
+
+[PATCH] libceph: reformat __reset_osd()
