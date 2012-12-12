@@ -1,47 +1,80 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: misdirected client messages
-Date: Wed, 12 Dec 2012 20:42:33 +0300
-Message-ID: <CABYiri_OH5+Cu5nAnS9KHOT3Xw=fjD6HPfZ8k=ko=_8vgED2cA@mail.gmail.com>
+From: Bryant Ng <bryantng@gmail.com>
+Subject: Re: Crush and Monitor questions
+Date: Wed, 12 Dec 2012 11:02:02 -0800
+Message-ID: <kaakb9$ql5$1@ger.gmane.org>
+References: <ka84oo$sa3$1@ger.gmane.org> <50C8C0E1.6060909@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:57138 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754366Ab2LLRmy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 12:42:54 -0500
-Received: by mail-oa0-f46.google.com with SMTP id h16so1037872oag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 09:42:54 -0800 (PST)
+Received: from plane.gmane.org ([80.91.229.3]:50347 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753949Ab2LLTCP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Dec 2012 14:02:15 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TirZa-0003dn-7j
+	for ceph-devel@vger.kernel.org; Wed, 12 Dec 2012 20:02:26 +0100
+Received: from 50-76-54-11-ip-static.hfc.comcastbusiness.net ([50.76.54.11])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 20:02:26 +0100
+Received: from bryantng by 50-76-54-11-ip-static.hfc.comcastbusiness.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 20:02:26 +0100
+In-Reply-To: <50C8C0E1.6060909@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+I guess my question was where is the crushmap (and osdmap) persisted on 
+the monitor node?
 
-Today during planned kernel upgrade one of osds (which I have not
-touched yet), started to claim about ``misdirected client'':
+If the entire cluster goes down, I assume the monitor is reading the 
+crushmap from some persistent file stored on disk or a db?  Is that why 
+the minimum recommended storage for monitors is 10GB?  Is the crushmap 
+and osdmap stored in those 10GB?
 
-2012-12-12 21:22:59.107648 osd.20 [WRN] client.2774043
-10.5.0.33:0/1013711 misdirected client.2774043.0:114 pg 5.ad140d42 to
-osd.20 in e23834, client e23834 pg 5.542 features 67108863 (remained
-the same except timestamp for at least ten minutes and then
-disappeared)
+-Bryant
+
+Joao Eduardo Luis wrote:
+> Hello Bryant,
+>
+> On 12/11/2012 08:23 PM, Bryant Ng wrote:
+>> Hi,
+>>
+>> I'm pretty new to Ceph and am just learning about it.
+>>
+>> Where are the CRUSH maps stored in Ceph? In the documentation I see you
+>> use the 'crushtool' to compile and decompile the crush map.
+>
+> The crushmap is kept alongside with the osdmap, and shared by the monitors.
+>
+>> I understand that if a single monitor comes online, it can talk to the
+>> other existing monitors to get the cluster map but how does it work on
+>> initial startup?  Or if the entire Ceph clusters goes down b/c of power
+>> failure or something.
+>
+> If you add a new monitor to an existing cluster, it will synchronize
+> with the existing monitors and will obtain all their infos, including
+> the crushmap. Updates to the crushmap will also be shared among the
+> monitors in the quorum.
+>
+> If you are starting up fresh, you will have to either add your custom
+> crushmap to the monitors (using the ceph tool), or stick with the
+> default crushmap (which only defines something along the lines of a
+> 'default' root, a 'defaultrack' rack and a 'localhost' host).
+>
+> If the entire cluster goes down... well, if the monitors are not up they
+> won't be able to share the crushmap. When they are brought back up, then
+> they will pick up where they left. But I'm not sure if I understand what
+> your question is.
+>
+>    -Joao
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
-Last two of three nodes have been rebooted to this time and primary
-still not rebooted yet, osd.20 not rebooted too to this moment:
-
-5.542   124     0       0       0       511705106       142753  142753
- active+clean    2012-12-12 17:07:05.761509      23834'1022923
-23409'2958324 [7,11,5]        [7,11,5]        23452'839524
-2012-12-08 21:08:42.076364      23452'839524    2012-12-08
-21:08:42.076365
-
-
-As I can see by looking to bugtracker, those message shouldn`t appear,
-at least in recent versions. I`m using nondefault TCP congestion algo,
-so it is clearly not a result of TCP mistuning between kernel
-versions. I`m running 0.55 gf9d090e and kernel was upgraded inside 3.6
-branch. Unfortunately message disappeared too soon before I point it
-and change logging level on all involved OSD daemons. Since there is
-absolutely no harm, may I ask on suggestions on repeating / raising
-probability of this bug and do an appropriate logging?
