@@ -1,105 +1,88 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: Debian packaging question
-Date: Wed, 12 Dec 2012 11:04:08 +0000
-Message-ID: <50C864A8.1010707@ubuntu.com>
-References: <B29C14E0-EFB2-4F4C-A1CA-481CB3F7AC39@inktank.com> <50C6C5E5.6010107@widodh.nl> <0D99561D-3A0B-4766-9770-8A90E37B7A24@inktank.com> <50C705A9.1030603@ubuntu.com> <7A33695B-249B-4638-94BF-BC3BD283216B@inktank.com>
+From: =?ISO-8859-2?Q?Maciej_Ga=B3kiewicz?=
+	<maciejgalkiewicz@ragnarson.com>
+Subject: Problem with cephx in 0.55
+Date: Wed, 12 Dec 2012 15:19:22 +0100
+Message-ID: <CAGqxmDNyHLCKSc8z-F+XPJJG2xyYjBdgPaeM5TmZ1SM6BntfGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:37288 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752650Ab2LLLEL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 06:04:11 -0500
-In-Reply-To: <7A33695B-249B-4638-94BF-BC3BD283216B@inktank.com>
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:57072 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753560Ab2LLOTX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 09:19:23 -0500
+Received: by mail-wg0-f46.google.com with SMTP id dr13so294188wgb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 06:19:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gary Lowell <gary.lowell@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hello
 
-On 11/12/12 23:00, Gary Lowell wrote:
-> On Dec 11, 2012, at 2:06 AM, James Page wrote:
-> 
->>> -----BEGIN PGP SIGNED MESSAGE----- Hash: SHA256
->>> 
->>> On 11/12/12 06:32, Gary Lowell wrote:
->>>>>>>>> 
->>>>>>>>> I assume you are building with "dpkg-buildpackage"
->>>>>>>>> ?
->>>>>>>>> 
->>>>>>>>> The manpage shows:
->>>>>>>>> 
->>>>>>>>> "-B     Specifies a binary-only build, limited to
->>>>>>>>> architecture dependent packages.  Passed to
->>>>>>>>> dpkg-genchanges."
->>>>>>>>> 
->>>>>>>>> "-A     Specifies a binary-only build, limited to
->>>>>>>>> architecture independent packages. Passed to
->>>>>>>>> dpkg-genchanges."
->>>>>>>>> 
->>>>>>>>> So on the i386 and amd64 machines you'd run with -B
->>>>>>>>> and sync them to ceph.com
->>>>>>>>> 
->>>>>>>>> On one of the machines you'd also run with -A which
->>>>>>>>> should produce the architecture independent
->>>>>>>>> packages like libcephfs-java.
->>>>>>>>> 
->>>>>>>>> That's the theory, I haven't tested it :)
->>>>>>>>> 
->>>>>>>>> Wido
->>>>> Thanks Wido.  We're using pbuilder, but it looks like it
->>>>> has similar options, or can pass an option string to
->>>>> dpkg_buildpackage. I'll do some testing.
->>> 
->>> "--binary-arch" will limit a pbuilder build to the target
->>> binary architecture only; I would recommend you use this with
->>> the amd64 build and build the arch: all packages out of the
->>> i386 build; this is what happens in the official Ubuntu
->>> builders.
->>> 
-> Hi James,
-> 
-> I thought this was going to be the easy solution, but on running a
-> quick test, we are already calling pbuilder with the --binary-arch
-> option and it its building the java package anyway.    It looks
-> like there is a deeper issue in that we building the java package
-> in the default target.  It looks like for this to work, we need to
-> move the java library build to it's own target in the Makefile, and
-> build that target from the binary-indep target in the debian rules
-> file.   Does this sound like I'm on the right track ?
+I can't map rbd volume after upgrading to 0.55 from 0.53.
 
-Gah - this will bite when I do the next upload to Ubuntu as well then;
- Can I suggest that we rework debian/rules for debhelper >= 7 and use
-overrides rather than the current 'old style' rules which define all
-tasks?  I was toying with doing this anyway (and have it working
-locally) - it does cut out some of the content from d/rules and makes
-it a bit more *magic*
+ceph.conf:
+[global]
+  auth cluster required =3D cephx
+  auth service required =3D cephx
+  auth client required =3D cephx
+  keyring =3D /srv/ceph/keyring.admin
 
-Thoughts?  I'm happy to raise a pull request for this.
+[mon]
+  mon data =3D /srv/ceph/mon
+  mon clock drift allowed =3D 0.5
 
-- -- 
-James Page
-Ubuntu Core Developer
-Debian Maintainer
-james.page@ubuntu.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
+[mon.cc]
+  host =3D cc
+  mon addr =3D 10.255.128.1:6789
 
-iQIcBAEBCAAGBQJQyGSnAAoJEL/srsug59jDkCUP/jq71IWWEnh8kMNhJgIBkjay
-x6NLdTgmaLySC2MUgMFoa4XPwPF2YmtH2oLf8dNDvHPB7yijeOblhjIzjmCAg7Ui
-EHE6IKS5IaDGTfyOnskdjUESZkH7BlqLul+vx7hHm2ucEiJcUcv4Zey0RpgHApTq
-UqSKJUBG7z54y9Lf5cPGCnr4ox2d3I5+RKLCLrwSpht8VPC3R3yCFzOe2ZSKCKna
-NQ5PeNbSgiwsdI+DmcgPdc7ztbJ6DA8MGHL2CPUr50xDDh/rC7uU2ag9qq7TEYh3
-AQf5UoauJtmGxtG//U0RgNG7LEwSXn87qeY5bGaOVXiQ4gVKzaZLKW1M3CU97g/R
-TXwm3jLaNn0hF3x/lbJcGhT0yggrsgOCHjO23PYLarOzg0I81FcubZydujJDbHUK
-52dD+Hb4OHyNQCxg0YUsI5PzASPoiRzbMny1cGEEgR+ypdy+Phezfc2aaYx29x0P
-RqKyw36T8kuDjLWaQVoiQPi3A05K/AX3G0Mn4zCBqPMKQnzYhSj7uezh6fzY6uxd
-oh8q7yCgSBI/5LzvjIssqUZ3bXG7fSZYO5Yz8+7lNHkb0gIhDMH1HTKnHlvxW/Tg
-YyaXX1o1TFdc/SNDulqRYaDe2juzud7oTmiH30/FcFHUfqkTnnFTzv7OL8n+07YN
-RPhPOAE7CeWHDkbJl4D4
-=f4FX
------END PGP SIGNATURE-----
+[mds]
+  debug mds =3D 1
+  keyring =3D /srv/ceph/ceph-stage2/keyring.$name
+
+[mds.cc]
+  host =3D cc
+
+[osd]
+  osd data =3D /srv/ceph/ceph-data/$name
+  osd journal =3D /srv/ceph/ceph-journal/$name.journal
+  osd journal size =3D 10000
+  osd scrub load threshold =3D 4
+  keyring =3D /srv/ceph/ceph-stage2/keyring.$name
+  debug osd =3D 1
+
+[osd.1]
+  host =3D n3cc
+[osd.0]
+  host =3D cc
+
+# ceph auth list
+=2E..
+client.test
+        key: AQAaAshQ6NakBRAAHbOaK7DvO9NIKDwTV5REMw=3D=3D
+        caps: [mon] allow r
+        caps: [osd] allow rwx pool=3Dwinnie-test
+
+# cat secret
+AQAaAshQ6NakBRAAHbOaK7DvO9NIKDwTV5REMw=3D=3D
+root@i-10-255-0-23[staging]:/tmp# rbd map test -p winnie-test --id
+test --secret secret
+rbd: add failed: (1) Operation not permitted
+
+from mon's log:
+2012-12-12 15:15:19.429889 7fe0a3097700  0 -- 10.255.128.1:6789/0 >>
+10.255.0.23:0/3731757836 pipe(0x1ce4240 sd=3D23 :6789 pgs=3D0 cs=3D0
+l=3D0).accept peer addr is really 10.255.0.23:0/3731757836 (socket is
+10.255.0.23:56533/0)
+
+If I use admin key or use "caps: [osd] allow rwx" instead of "caps:
+[osd] allow rwx pool=3Dwinnie-test" it works fine.
+
+--
+regards
+Maciej Ga=C5=82kiewicz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
