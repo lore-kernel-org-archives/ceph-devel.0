@@ -1,93 +1,56 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: Crush and Monitor questions
-Date: Wed, 12 Dec 2012 19:32:54 +0000
-Message-ID: <50C8DBE6.4020506@inktank.com>
-References: <ka84oo$sa3$1@ger.gmane.org> <50C8C0E1.6060909@inktank.com> <kaakb9$ql5$1@ger.gmane.org>
+From: Michael Morgan <mmorgan@dca.net>
+Subject: Re: Problem with cephx in 0.55
+Date: Wed, 12 Dec 2012 15:13:53 -0500
+Message-ID: <20121212201353.GB24346@staff.dca.net>
+References: <CAGqxmDNyHLCKSc8z-F+XPJJG2xyYjBdgPaeM5TmZ1SM6BntfGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:33190 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754849Ab2LLTdN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 14:33:13 -0500
-Received: by mail-bk0-f46.google.com with SMTP id q16so605593bkw.19
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 11:33:12 -0800 (PST)
-In-Reply-To: <kaakb9$ql5$1@ger.gmane.org>
+Received: from staff.dca.net ([207.245.84.197]:41818 "EHLO staff.dca.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754645Ab2LLUNy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Dec 2012 15:13:54 -0500
+Content-Disposition: inline
+In-Reply-To: <CAGqxmDNyHLCKSc8z-F+XPJJG2xyYjBdgPaeM5TmZ1SM6BntfGA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bryant Ng <bryantng@gmail.com>
+To: Maciej =?utf-8?Q?Ga=C5=82kiewicz?= <maciejgalkiewicz@ragnarson.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 12/12/2012 07:02 PM, Bryant Ng wrote:
-> I guess my question was where is the crushmap (and osdmap) persisted on
-> the monitor node?
->
-> If the entire cluster goes down, I assume the monitor is reading the
-> crushmap from some persistent file stored on disk or a db?  Is that why
-> the minimum recommended storage for monitors is 10GB?  Is the crushmap
-> and osdmap stored in those 10GB?
->
-> -Bryant
->
+On Wed, Dec 12, 2012 at 03:19:22PM +0100, Maciej Ga=C5=82kiewicz wrote:
+> Hello
+>=20
+> I can't map rbd volume after upgrading to 0.55 from 0.53.
+>=20
+> # ceph auth list
+> ...
+> client.test
+>         key: AQAaAshQ6NakBRAAHbOaK7DvO9NIKDwTV5REMw=3D=3D
+>         caps: [mon] allow r
+>         caps: [osd] allow rwx pool=3Dwinnie-test
+>=20
+>=20
+> If I use admin key or use "caps: [osd] allow rwx" instead of "caps:
+> [osd] allow rwx pool=3Dwinnie-test" it works fine.
+>=20
 
-The monitor maintains a 'store'. This is why you have to 'ceph-mon 
---mkfs' before you can run the monitor.
+Hi,
 
-The monitor store needs to room to grow, given that the monitor will 
-store pretty much every update to the osdmap, monmap, crushmap, keyring,...
+ Try removing the "=3D" from the osd cap, ie.
 
-Some of this info will also be pruned regularly though, but it's advised 
-to keep enough space around.
+client.test
+        key: AQAaAshQ6NakBRAAHbOaK7DvO9NIKDwTV5REMw=3D=3D
+        caps: [mon] allow r
+        caps: [osd] allow rwx pool winnie-test
 
-Hope this clarifies things.
+ I believe that changed after 0.53. I know my 0.54 cluster only works w=
+ith
+"allow rwx pool name". Good luck!
 
-   -Joao
-
-> Joao Eduardo Luis wrote:
->> Hello Bryant,
->>
->> On 12/11/2012 08:23 PM, Bryant Ng wrote:
->>> Hi,
->>>
->>> I'm pretty new to Ceph and am just learning about it.
->>>
->>> Where are the CRUSH maps stored in Ceph? In the documentation I see you
->>> use the 'crushtool' to compile and decompile the crush map.
->>
->> The crushmap is kept alongside with the osdmap, and shared by the
->> monitors.
->>
->>> I understand that if a single monitor comes online, it can talk to the
->>> other existing monitors to get the cluster map but how does it work on
->>> initial startup?  Or if the entire Ceph clusters goes down b/c of power
->>> failure or something.
->>
->> If you add a new monitor to an existing cluster, it will synchronize
->> with the existing monitors and will obtain all their infos, including
->> the crushmap. Updates to the crushmap will also be shared among the
->> monitors in the quorum.
->>
->> If you are starting up fresh, you will have to either add your custom
->> crushmap to the monitors (using the ceph tool), or stick with the
->> default crushmap (which only defines something along the lines of a
->> 'default' root, a 'defaultrack' rack and a 'localhost' host).
->>
->> If the entire cluster goes down... well, if the monitors are not up they
->> won't be able to share the crushmap. When they are brought back up, then
->> they will pick up where they left. But I'm not sure if I understand what
->> your question is.
->>
->>    -Joao
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-Mike
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
