@@ -1,34 +1,42 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
+From: Gregory Farnum <greg@inktank.com>
 Subject: Re: ceph osd create XX
-Date: Wed, 12 Dec 2012 22:38:01 +0100
-Message-ID: <50C8F939.6080400@profihost.ag>
-References: <50C8F7AC.9070600@profihost.ag> <CAPYLRzjntgh+CHXbtoRvLHhvjo1wqT9F16vshsiBhLcYebUB-Q@mail.gmail.com>
+Date: Wed, 12 Dec 2012 13:41:17 -0800
+Message-ID: <CAPYLRzjvZWx4T4T9OHPwaY_4cuOuZW2pgPDpwVR-1Afvi=-LeA@mail.gmail.com>
+References: <50C8F7AC.9070600@profihost.ag>
+	<CAPYLRzjntgh+CHXbtoRvLHhvjo1wqT9F16vshsiBhLcYebUB-Q@mail.gmail.com>
+	<50C8F939.6080400@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:55116 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755059Ab2LLViB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 16:38:01 -0500
-In-Reply-To: <CAPYLRzjntgh+CHXbtoRvLHhvjo1wqT9F16vshsiBhLcYebUB-Q@mail.gmail.com>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:62078 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755010Ab2LLVlS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Dec 2012 16:41:18 -0500
+Received: by mail-ie0-f177.google.com with SMTP id k13so2942830iea.8
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Dec 2012 13:41:17 -0800 (PST)
+In-Reply-To: <50C8F939.6080400@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-HI Greg,
+Yeah; 61 is not a valid UUID and you can't specify anything else on that line.
 
-sorry just a copy & paste error.
-
-[cloud1-ceph1: ~]# ceph osd create 61
-(22) Invalid argument
-
-> Read those two lines again. Very slowly. :)
+On Wed, Dec 12, 2012 at 1:38 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+> HI Greg,
 >
-> The correct syntax is
-> ceph osd create <uuid>
+> sorry just a copy & paste error.
 >
-> The uuid is optional, but you don't specify IDs; it gives you an ID back.
-
-Stefan
+> [cloud1-ceph1: ~]# ceph osd create 61
+> (22) Invalid argument
+>
+>
+>> Read those two lines again. Very slowly. :)
+>>
+>> The correct syntax is
+>> ceph osd create <uuid>
+>>
+>> The uuid is optional, but you don't specify IDs; it gives you an ID back.
+>
+>
+> Stefan
