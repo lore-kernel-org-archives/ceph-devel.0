@@ -1,63 +1,78 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/9] libceph: avoid using freed osd in __kick_osd_requests()
-Date: Thu, 13 Dec 2012 11:01:42 -0600
-Message-ID: <50CA09F6.9080606@inktank.com>
+Subject: [PATCH 4/9] rbd: get rid of RBD_MAX_SEG_NAME_LEN
+Date: Thu, 13 Dec 2012 11:01:55 -0600
+Message-ID: <50CA0A03.1010900@inktank.com>
 References: <50CA0915.1090801@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:65258 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753702Ab2LMRBp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Dec 2012 12:01:45 -0500
-Received: by mail-ie0-f174.google.com with SMTP id c11so4281511ieb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Dec 2012 09:01:45 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:33414 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753702Ab2LMRB7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Dec 2012 12:01:59 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so2163421iay.19
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Dec 2012 09:01:58 -0800 (PST)
 In-Reply-To: <50CA0915.1090801@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-If an osd has no requests and no linger requests, __reset_osd()
-will just remove it with a call to __remove_osd().  That drops
-a reference to the osd, and therefore the osd may have been free
-by the time __reset_osd() returns.  That function offers no
-indication this may have occurred, and as a result the osd will
-continue to be used even when it's no longer valid.
+RBD_MAX_SEG_NAME_LEN represents the maximum length of an rbd object
+name (i.e., one of the objects providing storage backing an rbd
+image).
 
-Change__reset_osd() so it returns an error (ENODEV) when it
-deletes the osd being reset.  And change __kick_osd_requests() so it
-returns immediately (before referencing osd again) if __reset_osd()
-returns *any* error.
+Another symbol, MAX_OBJ_NAME_SIZE, is used in the osd client code to
+define the maximum length of any object name in an osd request.
+
+Right now they disagree, with RBD_MAX_SEG_NAME_LEN being too big.
+
+There's no real benefit at this point to defining the rbd object
+name length limit separate from any other object name, so just
+get rid of RBD_MAX_SEG_NAME_LEN and use MAX_OBJ_NAME_SIZE in its
+place.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/osd_client.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/block/rbd.c       |    6 +++---
+ drivers/block/rbd_types.h |    2 --
+ 2 files changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index ac7be72..60c74c1 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -581,7 +581,7 @@ static void __kick_osd_requests(struct
-ceph_osd_client *osdc,
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c7bf961..ce26b749 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -740,13 +740,13 @@ static char *rbd_segment_name(struct rbd_device
+*rbd_dev, u64 offset)
+ 	u64 segment;
+ 	int ret;
 
- 	dout("__kick_osd_requests osd%d\n", osd->o_osd);
- 	err = __reset_osd(osdc, osd);
--	if (err == -EAGAIN)
-+	if (err)
- 		return;
+-	name = kmalloc(RBD_MAX_SEG_NAME_LEN + 1, GFP_NOIO);
++	name = kmalloc(MAX_OBJ_NAME_SIZE + 1, GFP_NOIO);
+ 	if (!name)
+ 		return NULL;
+ 	segment = offset >> rbd_dev->header.obj_order;
+-	ret = snprintf(name, RBD_MAX_SEG_NAME_LEN, "%s.%012llx",
++	ret = snprintf(name, MAX_OBJ_NAME_SIZE + 1, "%s.%012llx",
+ 			rbd_dev->header.object_prefix, segment);
+-	if (ret < 0 || ret >= RBD_MAX_SEG_NAME_LEN) {
++	if (ret < 0 || ret > MAX_OBJ_NAME_SIZE) {
+ 		pr_err("error formatting segment name for #%llu (%d)\n",
+ 			segment, ret);
+ 		kfree(name);
+diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
+index cbe77fa..49d77cb 100644
+--- a/drivers/block/rbd_types.h
++++ b/drivers/block/rbd_types.h
+@@ -46,8 +46,6 @@
+ #define RBD_MIN_OBJ_ORDER       16
+ #define RBD_MAX_OBJ_ORDER       30
 
- 	list_for_each_entry(req, &osd->o_requests, r_osd_item) {
-@@ -745,6 +745,7 @@ static int __reset_osd(struct ceph_osd_client *osdc,
-struct ceph_osd *osd)
- 	if (list_empty(&osd->o_requests) &&
- 	    list_empty(&osd->o_linger_requests)) {
- 		__remove_osd(osdc, osd);
-+		ret = -ENODEV;
- 	} else if (memcmp(&osdc->osdmap->osd_addr[osd->o_osd],
- 			  &osd->o_con.peer_addr,
- 			  sizeof(osd->o_con.peer_addr)) == 0 &&
+-#define RBD_MAX_SEG_NAME_LEN	128
+-
+ #define RBD_COMP_NONE		0
+ #define RBD_CRYPT_NONE		0
+
 -- 
 1.7.9.5
 
