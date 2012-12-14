@@ -1,206 +1,164 @@
-From: Giannakos Filippos <philipgian@grnet.gr>
-Subject: Re: [PATCH] implement librados aio_stat
-Date: Fri, 14 Dec 2012 14:19:46 +0200
-Message-ID: <50CB1962.9080302@grnet.gr>
-References: <1355483921-15654-1-git-send-email-philipgian@grnet.gr>
+From: "Lachfeld, Jutta" <jutta.lachfeld@ts.fujitsu.com>
+Subject: RE: Usage of CEPH FS versa HDFS for Hadoop: TeraSort benchmark
+ performance comparison issue
+Date: Fri, 14 Dec 2012 15:09:35 +0100
+Message-ID: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D9087B4B7@ABGEX70E.FSC.NET>
+References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D9087AF1B@ABGEX70E.FSC.NET>
+	<alpine.DEB.2.00.1212130923140.28618@cobra.newdream.net>
+	<CAPYLRzj0=s117ahDOKRfm409Rusp4e7fQpvgjOWDJNrB9GUaog@mail.gmail.com>
+	<F1501D1A-2C22-45FF-A4F4-3B1CD367B1BD@gmail.com>
+	<CAPYLRzgJGB1944vjcWAnvAZmC3S5RhGvz3Ao4PuW-NVChJoKEA@mail.gmail.com>
+ <CAPrxi59NpNrCfcW+NpHGAwuz+47T0nn2cpZCUjy3b7Lt-eDW5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:40360 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753436Ab2LNMUH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 14 Dec 2012 07:20:07 -0500
-In-Reply-To: <1355483921-15654-1-git-send-email-philipgian@grnet.gr>
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:63046 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754367Ab2LNOJi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Dec 2012 09:09:38 -0500
+In-Reply-To: <CAPrxi59NpNrCfcW+NpHGAwuz+47T0nn2cpZCUjy3b7Lt-eDW5g@mail.gmail.com>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: synnefo-devel@googlegroups.com
+To: Noah Watkins <jayhawk@cs.ucsc.edu>, Gregory Farnum <greg@inktank.com>
+Cc: Cameron Bahar <cbahar@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Noah Watkins <noah.watkins@inktank.com>, Joe Buck <joe.buck@inktank.com>
 
-Hi team,
-
-I forgot to include a description (also cc-ing correctly the 
-synnefo-devel list).
-
-I am a member of the Synnefo team, where we are experimenting with RADOS 
-as a storage backend to host blocks for our volume block storage named 
-"archipelago".
-
-In this patch I implement aio stat and also export this functionality to 
-the C API.
-
-On 12/14/2012 01:18 PM, Filippos Giannakos wrote:
-> ---
->   src/include/rados/librados.h   |   14 ++++++++++++++
->   src/include/rados/librados.hpp |   15 +++++++++++++-
->   src/librados/IoCtxImpl.cc      |   42 ++++++++++++++++++++++++++++++++++++++++
->   src/librados/IoCtxImpl.h       |    9 +++++++++
->   src/librados/librados.cc       |   10 ++++++++++
->   5 files changed, 89 insertions(+), 1 deletion(-)
->
-> diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
-> index 44d6f71..7f4b5c0 100644
-> --- a/src/include/rados/librados.h
-> +++ b/src/include/rados/librados.h
-> @@ -1444,6 +1444,20 @@ int rados_aio_read(rados_ioctx_t io, const char *oid,
->    */
->   int rados_aio_flush(rados_ioctx_t io);
->
-> +
-> +/**
-> + * Asynchronously get object stats (size/mtime)
-> + *
-> + * @param io ioctx
-> + * @param o object name
-> + * @param psize where to store object size
-> + * @param pmtime where to store modification time
-> + * @returns 0 on success, negative error code on failure
-> + */
-> +int rados_aio_stat(rados_ioctx_t io, const char *o,
-> +		   rados_completion_t completion,
-> +		   uint64_t *psize, time_t *pmtime);
-> +
->   /** @} Asynchronous I/O */
->
->   /**
-> diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hpp
-> index e50acdb..96bfc15 100644
-> --- a/src/include/rados/librados.hpp
-> +++ b/src/include/rados/librados.hpp
-> @@ -473,9 +473,22 @@ namespace librados
->        * other than CEPH_NOSNAP
->        */
->       int aio_remove(const std::string&  oid, AioCompletion *c);
-> -
-> +
->       int aio_flush();
->
-> +    /**
-> +     * Asynchronously get object stats (size/mtime)
-> +     *
-> +     * @param io ioctx
-> +     * @param o object name
-> +     * @param psize where to store object size
-> +     * @param pmtime where to store modification time
-> +     * @returns 0 on success, negative error code on failure
-> +     */
-> +    int rados_aio_stat(rados_ioctx_t io, const char *o,
-> +		       rados_completion_t completion,
-> +		       uint64_t *psize, time_t *pmtime);
-> +
->       int aio_exec(const std::string&  oid, AioCompletion *c, const char *cls, const char *method,
->   	         bufferlist&  inbl, bufferlist *outbl);
->
-> diff --git a/src/librados/IoCtxImpl.cc b/src/librados/IoCtxImpl.cc
-> index 01b4a94..50aab1e 100644
-> --- a/src/librados/IoCtxImpl.cc
-> +++ b/src/librados/IoCtxImpl.cc
-> @@ -851,6 +851,21 @@ int librados::IoCtxImpl::aio_remove(const object_t&oid, AioCompletionImpl *c)
->     return 0;
->   }
->
-> +
-> +int librados::IoCtxImpl::aio_stat(const object_t&  oid, AioCompletionImpl *c,
-> +		                  uint64_t *psize, time_t *pmtime)
-> +{
-> +  c->io = this;
-> +  C_aio_stat_Ack *onack = new C_aio_stat_Ack(c, pmtime);
-> +
-> +  Mutex::Locker l(*lock);
-> +  objecter->stat(oid, oloc,
-> +		 snap_seq, psize,&onack->mtime, 0,
-> +		 onack,&c->objver);
-> +
-> +  return 0;
-> +}
-> +
->   int librados::IoCtxImpl::remove(const object_t&  oid)
->   {
->     utime_t ut = ceph_clock_now(client->cct);
-> @@ -1562,6 +1577,33 @@ void librados::IoCtxImpl::C_aio_Ack::finish(int r)
->     c->put_unlock();
->   }
->
-> +///////////////////////////// C_aio_stat_Ack ////////////////////////////
-> +
-> +librados::IoCtxImpl::C_aio_stat_Ack::C_aio_stat_Ack(AioCompletionImpl *_c,
-> +						    time_t *pm)
-> +   : c(_c), pmtime(pm)
-> +{
-> +  c->get();
-> +}
-> +
-> +void librados::IoCtxImpl::C_aio_stat_Ack::finish(int r)
-> +{
-> +  c->lock.Lock();
-> +  c->rval = r;
-> +  c->ack = true;
-> +  c->cond.Signal();
-> +
-> +  if (r>= 0&&  pmtime) {
-> +    *pmtime = mtime.sec();
-> +  }
-> +
-> +  if (c->callback_complete) {
-> +    c->io->client->finisher.queue(new C_AioComplete(c));
-> +  }
-> +
-> +  c->put_unlock();
-> +}
-> +
->   /////////////////////// C_aio_sparse_read_Ack //////////////////////////
->
->   librados::IoCtxImpl::C_aio_sparse_read_Ack::C_aio_sparse_read_Ack(AioCompletionImpl *_c,
-> diff --git a/src/librados/IoCtxImpl.h b/src/librados/IoCtxImpl.h
-> index feea0e8..55b07ee 100644
-> --- a/src/librados/IoCtxImpl.h
-> +++ b/src/librados/IoCtxImpl.h
-> @@ -144,6 +144,14 @@ struct librados::IoCtxImpl {
->       C_aio_Ack(AioCompletionImpl *_c);
->       void finish(int r);
->     };
-> +
-> +  struct C_aio_stat_Ack : public Context {
-> +    librados::AioCompletionImpl *c;
-> +    time_t *pmtime;
-> +    utime_t mtime;
-> +    C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
-> +    void finish(int r);
-> +  };
->
->     struct C_aio_sparse_read_Ack : public Context {
->       AioCompletionImpl *c;
-> @@ -177,6 +185,7 @@ struct librados::IoCtxImpl {
->     int aio_remove(const object_t&oid, AioCompletionImpl *c);
->     int aio_exec(const object_t&  oid, AioCompletionImpl *c, const char *cls,
->   	       const char *method, bufferlist&  inbl, bufferlist *outbl);
-> +  int aio_stat(const object_t&  oid, AioCompletionImpl *c, uint64_t *psize, time_t *pmtime);
->
->     int pool_change_auid(unsigned long long auid);
->     int pool_change_auid_async(unsigned long long auid, PoolAsyncCompletionImpl *c);
-> diff --git a/src/librados/librados.cc b/src/librados/librados.cc
-> index 274119c..af36b38 100644
-> --- a/src/librados/librados.cc
-> +++ b/src/librados/librados.cc
-> @@ -2167,6 +2167,16 @@ extern "C" int rados_aio_flush(rados_ioctx_t io)
->     return 0;
->   }
->
-> +extern "C" int rados_aio_stat(rados_ioctx_t io, const char *o,
-> +			      rados_completion_t completion,
-> +			      uint64_t *psize, time_t *pmtime)
-> +{
-> +  librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-> +  object_t oid(o);
-> +  return ctx->aio_stat(oid, (librados::AioCompletionImpl*)completion,
-> +		       psize, pmtime);
-> +}
-> +
->   struct C_WatchCB : public librados::WatchCtx {
->     rados_watchcb_t wcb;
->     void *arg;
-> --
-> 1.7.10.4
->
-
+SGkgTm9haCwgR3JlZ29yeSBhbmQgU2FnZSwNCg0KZmlyc3Qgb2YgYWxsLCB0aGFua3MgZm9yIHlv
+dXIgcXVpY2sgcmVwbGllcy4gSGVyZSBhcmUgc29tZSBhbnN3ZXJzIHRvIHlvdXIgcXVlc3Rpb25z
+Lg0KDQpHcmVnb3J5LCBJIGhhdmUgZ290IHRoZSBvdXRwdXQgb2YgImNlcGggLXMiIGJlZm9yZSBh
+bmQgYWZ0ZXIgdGhpcyBzcGVjaWZpYyBUZXJhU29ydCBydW4sIGFuZCB0byBtZSBpdCBsb29rcyBv
+azsgYWxsIDMwIG9zZHMgYXJlICJ1cCI6DQoNCiAgIGhlYWx0aCBIRUFMVEhfT0sNCiAgIG1vbm1h
+cCBlMTogMSBtb25zIGF0IHswPTE5Mi4xNjguMTExLjE4OjY3ODkvMH0sIGVsZWN0aW9uIGVwb2No
+IDAsIHF1b3J1bSAwIDANCiAgIG9zZG1hcCBlMjI6IDMwIG9zZHM6IDMwIHVwLCAzMCBpbg0KICAg
+IHBnbWFwIHYxMzY4ODogNTc2MCBwZ3M6IDU3NjAgYWN0aXZlK2NsZWFuOyAxODYyIEdCIGRhdGEs
+IDE4NjggR0IgdXNlZCwgNjE0MiBHQiAvIDgzNjYgR0IgYXZhaWwNCiAgIG1kc21hcCBlNDogMS8x
+LzEgdXAgezA9MD11cDphY3RpdmV9DQoNCiAgIGhlYWx0aCBIRUFMVEhfT0sNCiAgIG1vbm1hcCBl
+MTogMSBtb25zIGF0IHswPTE5Mi4xNjguMTExLjE4OjY3ODkvMH0sIGVsZWN0aW9uIGVwb2NoIDAs
+IHF1b3J1bSAwIDANCiAgIG9zZG1hcCBlMjI6IDMwIG9zZHM6IDMwIHVwLCAzMCBpbg0KICAgIHBn
+bWFwIHYxOTY1NzogNTc2MCBwZ3M6IDU3NjAgYWN0aXZlK2NsZWFuOyAxODYyIEdCIGRhdGEsIDE4
+NjggR0IgdXNlZCwgNjE0MiBHQiAvIDgzNjYgR0IgYXZhaWwNCiAgIG1kc21hcCBlNDogMS8xLzEg
+dXAgezA9MD11cDphY3RpdmV9DQoNCkkgZG8gbm90IGhhdmUgdGhlIGZ1bGwgb3V0cHV0IG9mICJj
+ZXBoIHBnIGR1bXAiIGZvciB0aGF0IHNwZWNpZmljIFRlcmFTb3J0IHJ1biwgYnV0IGhlcmUgaXMg
+YSB0eXBpY2FsIG91dHB1dCBhZnRlciBhdXRvbWF0aWNhbGx5IHByZXBhcmluZyBDRVBIIGZvciBh
+IGJlbmNobWFyayBydW4NCiAocmVtb3ZlZCBhbG1vc3QgYWxsIGxpbmVzIGluIHRoZSBsb25nIHBn
+X3N0YXQgdGFibGUgaG9waW5nIHRoYXQgeW91IGRvIG5vdCBuZWVkIHRoZW0pOg0KDQpkdW1wZWQg
+YWxsIGluIGZvcm1hdCBwbGFpbg0KdmVyc2lvbiA0MDMNCmxhc3Rfb3NkbWFwX2Vwb2NoIDIyDQps
+YXN0X3BnX3NjYW4gMQ0KZnVsbF9yYXRpbyAwLjk1DQpuZWFyZnVsbF9yYXRpbyAwLjg1DQpwZ19z
+dGF0IG9iamVjdHMgbWlwICAgICBkZWdyICAgIHVuZiAgICAgYnl0ZXMgICBsb2cgICAgIGRpc2ts
+b2cgc3RhdGUgICBzdGF0ZV9zdGFtcCAgICAgdiAgICAgICByZXBvcnRlZCAgICAgICAgdXAgICAg
+ICBhY3RpbmcgIGxhc3Rfc2NydWIgICAgICBzY3J1Yl9zdGFtcA0KMi4zMTQgICAwICAgICAgIDAg
+ICAgICAgMCAgICAgICAwICAgICAgIDAgICAgICAgMCAgICAgICAwICAgICAgIGFjdGl2ZStjbGVh
+biAgICAyMDEyLTEyLTE0IDA4OjMxOjI0LjUyNDE1MiAgICAgIDAnMCAgICAgMTEnMTcgICBbMjMs
+N10gIFsyMyw3XSAgMCcwICAgICAyMDEyLTEyLTE0IDA4OjMxOjI0LjUyNDA5Ng0KMC4zMTYgICAw
+ICAgICAgIDAgICAgICAgMCAgICAgICAwICAgICAgIDAgICAgICAgMCAgICAgICAwICAgICAgIGFj
+dGl2ZStjbGVhbiAgICAyMDEyLTEyLTE0IDA4OjI1OjEyLjc4MDY0MyAgICAgIDAnMCAgICAgMTEn
+MTkgICBbMjNdICAgIFsyM10gICAgMCcwICAgICAyMDEyLTEyLTE0IDA4OjI0OjA4LjM5NDkzMA0K
+MS4zMTcgICAwICAgICAgIDAgICAgICAgMCAgICAgICAwICAgICAgIDAgICAgICAgMCAgICAgICAw
+ICAgICAgIGFjdGl2ZStjbGVhbiAgICAyMDEyLTEyLTE0IDA4OjI3OjU2LjQwMDk5NyAgICAgIDAn
+MCAgICAgMycxNyAgICBbMTEsMTddIFsxMSwxN10gMCcwICAgICAyMDEyLTEyLTE0IDA4OjI3OjU2
+LjQwMDk1Mw0KWy4uLl0NCnBvb2wgMCAgMSAgICAgICAwICAgICAgIDAgICAgICAgMCAgICAgICA0
+ICAgICAgIDEzNiAgICAgMTM2DQpwb29sIDEgIDIxICAgICAgMCAgICAgICAwICAgICAgIDAgICAg
+ICAgMjM3NDUgICA1NTE4ICAgIDU1MTgNCnBvb2wgMiAgMCAgICAgICAwICAgICAgIDAgICAgICAg
+MCAgICAgICAwICAgICAgIDAgICAgICAgMA0KIHN1bSAgICAyMiAgICAgIDAgICAgICAgMCAgICAg
+ICAwICAgICAgIDIzNzQ5ICAgNTY1NCAgICA1NjU0DQpvc2RzdGF0IGtidXNlZCAga2JhdmFpbCBr
+YiAgICAgIGhiIGluICAgaGIgb3V0DQowICAgICAgIDI3MjQgICAgMjc5ODA4NTg4ICAgICAgIDI5
+MjQyMDYwOCAgICAgICBbMyw0LDUsNiw3LDgsOSwxMCwxMSwxMiwxMywxNCwxNSwxNiwxNywxOCwx
+OSwyMCwyMSwyMiwyMywyNCwyNSwyNiwyNywyOCwyOV0gICAgIFtdDQoxICAgICAgIDI4OTIgICAg
+Mjc5ODA4NTg4ICAgICAgIDI5MjQyMDYwOCAgICAgICBbMyw0LDUsNiw4LDksMTEsMTIsMTMsMTQs
+MTUsMTYsMTcsMTgsMjAsMjIsMjQsMjUsMjYsMjcsMjhdICAgICAgW10NCjIgICAgICAgMjg0NCAg
+ICAyNzk4MDg1ODggICAgICAgMjkyNDIwNjA4ICAgICAgIFszLDQsNSw2LDcsOCw5LDEwLDExLDEy
+LDEzLDE1LDE2LDE3LDE4LDE5LDIwLDIyLDIzLDI0LDI1LDI2LDI3LDI5XSAgICAgIFtdDQozICAg
+ICAgIDI3MTYgICAgMjc5ODA4NTg4ICAgICAgIDI5MjQyMDYwOCAgICAgICBbMCwxLDIsNiw3LDgs
+OSwxMCwxMSwxMiwxMywxNCwxNSwxNiwxNywxOSwyMCwyMiwyMywyNCwyNSwyNiwyNywyOCwyOV0g
+ICBbXQ0KNCAgICAgICAyNTU2ICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzEs
+Miw3LDgsOSwxMiwxMywxNCwxNSwxNiwxNywxOCwxOSwyMCwyMSwyMiwyNCwyNSwyNiwyNywyOCwy
+OV0gIFtdDQo1ICAgICAgIDI4NTYgICAgMjc5ODA4NTg0ICAgICAgIDI5MjQyMDYwOCAgICAgICBb
+MCwyLDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjQs
+MjUsMjYsMjgsMjldICBbXQ0KNiAgICAgICAyODQwICAgIDI3OTgwODU4NCAgICAgICAyOTI0MjA2
+MDggICAgICAgWzAsMSwyLDMsNCw1LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAs
+MjIsMjQsMjUsMjYsMjcsMjgsMjldICAgW10NCjcgICAgICAgMjYwNCAgICAyNzk4MDg1ODggICAg
+ICAgMjkyNDIwNjA4ICAgICAgIFsxLDIsMyw0LDUsOSwxMCwxMSwxMiwxMywxNSwxNywxOCwxOSwy
+MCwyMSwyMywyNCwyNSwyNiwyNywyOCwyOV0gICAgICAgIFtdDQo4ICAgICAgIDI1NjQgICAgMjc5
+ODA4NTg4ICAgICAgIDI5MjQyMDYwOCAgICAgICBbMSwyLDMsNCw1LDksMTAsMTEsMTIsMTQsMTYs
+MTcsMTgsMTksMjAsMjEsMjIsMjMsMjQsMjUsMjcsMjgsMjldICAgICAgICBbXQ0KOSAgICAgICAy
+ODA0ICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzEsMiwzLDQsNSw2LDgsMTIs
+MTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjQsMjYsMjcsMjldIFtdDQoxMCAgICAg
+IDI1NTYgICAgMjc5ODA4NTg4ICAgICAgIDI5MjQyMDYwOCAgICAgICBbMCwxLDIsNCw1LDYsNyw4
+LDEyLDEzLDE0LDE1LDE2LDE3LDE5LDIwLDIxLDIyLDIzLDI0LDI1LDI2LDI3LDI4XSAgICAgICBb
+XQ0KMTEgICAgICAzMDg0ICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzAsMSwy
+LDMsNCw1LDYsNyw4LDEyLDE0LDE1LDE2LDE3LDE4LDE5LDIwLDIxLDIyLDIzLDI0LDI1LDI2LDI3
+LDI4LDI5XSAgW10NCjEyICAgICAgMjU3MiAgICAyNzk4MDg1ODggICAgICAgMjkyNDIwNjA4ICAg
+ICAgIFswLDEsMiwzLDQsNSw3LDgsMTAsMTEsMTUsMTYsMTgsMjAsMjEsMjIsMjMsMjQsMjcsMjgs
+MjldICAgICAgICBbXQ0KMTMgICAgICAyOTEyICAgIDI3OTgwODU2MCAgICAgICAyOTI0MjA2MDgg
+ICAgICAgWzAsMSwyLDMsNSw2LDcsOCw5LDEwLDExLDE1LDE2LDE3LDE4LDE5LDIwLDIxLDIyLDIz
+LDI0LDI1LDI2LDI3LDI4LDI5XSAgW10NCjE0ICAgICAgMjk5MiAgICAyNzk4MDg1ODQgICAgICAg
+MjkyNDIwNjA4ICAgICAgIFsxLDIsMyw0LDUsNiw3LDgsOSwxMCwxMSwxNSwxNiwxNywxOCwxOSwy
+MCwyMSwyMiwyMywyNCwyNSwyNiwyNywyOCwyOV0gIFtdDQoxNSAgICAgIDI2NTIgICAgMjc5ODA4
+NTg4ICAgICAgIDI5MjQyMDYwOCAgICAgICBbMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEsMTMsMTQs
+MTksMjAsMjEsMjIsMjMsMjUsMjYsMjcsMjgsMjldICAgW10NCjE2ICAgICAgMzAyOCAgICAyNzk4
+MDg1ODggICAgICAgMjkyNDIwNjA4ICAgICAgIFswLDEsMiwzLDUsNiw3LDgsOSwxMCwxMSwxMiwx
+NCwxOCwyMCwyMSwyMiwyNCwyNSwyNiwyNywyOCwyOV0gICBbXQ0KMTcgICAgICAyNzcyICAgIDI3
+OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzAsMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEs
+MTIsMTMsMTQsMTgsMTksMjEsMjIsMjMsMjQsMjUsMjYsMjcsMjgsMjldICAgW10NCjE4ICAgICAg
+MjgwNCAgICAyNzk4MDg1ODggICAgICAgMjkyNDIwNjA4ICAgICAgIFswLDEsMiwzLDUsNiw4LDks
+MTAsMTEsMTIsMTQsMTUsMTYsMTcsMjEsMjIsMjMsMjQsMjUsMjYsMjcsMjldICBbXQ0KMTkgICAg
+ICAyNjIwICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzAsMSwyLDMsNCw1LDYs
+Nyw4LDEwLDExLDEyLDEzLDE0LDE1LDE2LDE3LDIxLDIyLDIzLDI1LDI2LDI3LDI4LDI5XSAgICAg
+W10NCjIwICAgICAgMjk1NiAgICAyNzk4MDg1ODggICAgICAgMjkyNDIwNjA4ICAgICAgIFswLDEs
+MiwzLDQsNSw2LDcsOCw5LDEwLDExLDEyLDEzLDE0LDE1LDE2LDE3LDIxLDIyLDIzLDI0LDI1LDI3
+LDI5XSAgICAgIFtdDQoyMSAgICAgIDI4NzYgICAgMjc5ODA4NTg4ICAgICAgIDI5MjQyMDYwOCAg
+ICAgICBbMCwxLDIsMyw0LDUsNiw4LDksMTAsMTIsMTMsMTUsMTYsMTcsMTgsMTksMjAsMjQsMjUs
+MjYsMjcsMjldICAgW10NCjIyICAgICAgMzA0NCAgICAyNzk4MDg1ODggICAgICAgMjkyNDIwNjA4
+ICAgICAgIFsxLDIsNCw1LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAs
+MjQsMjUsMjYsMjcsMjgsMjldICAgIFtdDQoyMyAgICAgIDI3NTIgICAgMjc5ODA4NTg0ICAgICAg
+IDI5MjQyMDYwOCAgICAgICBbMCwxLDIsMyw0LDUsNiw3LDgsOSwxMCwxMSwxMiwxMywxNCwxNSwx
+NiwxNywxOCwxOSwyMCwyNCwyNSwyNywyOCwyOV0gICBbXQ0KMjQgICAgICAyOTQ4ICAgIDI3OTgw
+ODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzAsMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEsMTIs
+MTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjcsMjgsMjldICAgICAgICBbXQ0KMjUg
+ICAgICAzMDY4ICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzAsMSwyLDMsNCw1
+LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjcsMjgs
+MjldICAgICAgICBbXQ0KMjYgICAgICAyNTQwICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDgg
+ICAgICAgWzAsMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTks
+MjAsMjEsMjIsMjMsMjcsMjhdICAgW10NCjI3ICAgICAgMzAxMiAgICAyNzk4MDg1ODggICAgICAg
+MjkyNDIwNjA4ICAgICAgIFswLDEsMiwzLDQsNSw2LDcsOCw5LDEwLDExLDEzLDE0LDE1LDE2LDE3
+LDE5LDIwLDIxLDIyLDIzLDI0LDI1LDI2XSAgICAgIFtdDQoyOCAgICAgIDI4MDAgICAgMjc5ODA4
+NTYwICAgICAgIDI5MjQyMDYwOCAgICAgICBbMCwxLDIsMyw0LDUsNiw3LDgsOSwxMCwxMSwxMiwx
+MywxNCwxNSwxNiwxNywxOCwxOSwyMCwyMSwyMywyNCwyNSwyNl0gICBbXQ0KMjkgICAgICAzMDUy
+ICAgIDI3OTgwODU4OCAgICAgICAyOTI0MjA2MDggICAgICAgWzEsMiwzLDQsNSw3LDgsOSwxMCwx
+MSwxMiwxMywxNCwxNiwxNywxOCwxOSwyMCwyMSwyMiwyMywyNCwyNSwyNl0gICAgICAgW10NCiBz
+dW0gICAgODQ0NDAgICA4Mzk0MjU3NTY4ICAgICAgODc3MjYxODI0MA0KDQpEb2VzIHRoaXMgaW5m
+b3JtYXRpb24gaGVscD8gSXMgaXQgcmVhbGx5IDY0TUI/IFRoYXQgaXMgd2hhdCBJIGhhZCBhc3N1
+bWVkLg0KDQpBcyBJIGFtIHJlbGF0aXZlbHkgbmV3IHRvIENFUEgsIEkgbmVlZCBzb21lIHRpbWUg
+dG8gZGlnZXN0IGFuZCB1bmRlcnN0YW5kIGFsbCB5b3VyIGFuc3dlcnMuDQoNClJlZ2FyZHMsDQpK
+dXR0YS4NCg0KanV0dGEubGFjaGZlbGRAdHMuZnVqaXRzdS5jb20sIEZ1aml0c3UgVGVjaG5vbG9n
+eSBTb2x1dGlvbnMgUEJHIFBERyBFUyZTIFNXRSBTT0wgNCwgIkluZnJhc3RydWN0dXJlIFNvbHV0
+aW9ucyIsIE1jaEQgNUIsIFRlbC4gLi40OS04OS0zMjIyLTI3MDUsIENvbXBhbnkgRGV0YWlsczog
+aHR0cDovL2RlLnRzLmZ1aml0c3UuY29tL2ltcHJpbnQNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCkZyb206IE5vYWggV2F0a2lucyBbbWFpbHRvOmpheWhhd2tAY3MudWNzYy5lZHVdIA0K
+U2VudDogVGh1cnNkYXksIERlY2VtYmVyIDEzLCAyMDEyIDk6MzMgUE0NClRvOiBHcmVnb3J5IEZh
+cm51bQ0KQ2M6IENhbWVyb24gQmFoYXI7IFNhZ2UgV2VpbDsgTGFjaGZlbGQsIEp1dHRhOyBjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZzsgTm9haCBXYXRraW5zOyBKb2UgQnVjaw0KU3ViamVjdDog
+UmU6IFVzYWdlIG9mIENFUEggRlMgdmVyc2EgSERGUyBmb3IgSGFkb29wOiBUZXJhU29ydCBiZW5j
+aG1hcmsgcGVyZm9ybWFuY2UgY29tcGFyaXNvbiBpc3N1ZQ0KDQpUaGUgYmluZGluZ3MgdXNlIHRo
+ZSBkZWZhdWx0IEhhZG9vcCBzZXR0aW5ncyAoZS5nLiA2NCBvciAxMjggTUINCmNodW5rcykgd2hl
+biBjcmVhdGluZyBuZXcgZmlsZXMuIFRoZSBjaHVuayBzaXplIGNhbiBhbHNvIGJlIHNwZWNpZmll
+ZCBvbiBhIHBlci1maWxlIGJhc2lzIHVzaW5nIHRoZSBzYW1lIGludGVyZmFjZSBhcyBIYWRvb3Au
+IEFkZGl0aW9uYWxseSwgd2hpbGUgSGFkb29wIGRvZXNuJ3QgcHJvdmlkZSBhbiBpbnRlcmZhY2Ug
+dG8gY29uZmlndXJhdGlvbiBwYXJhbWV0ZXJzIGJleW9uZCBjaHVuayBzaXplLCB3ZSB3aWxsIGFs
+c28gbGV0IHVzZXJzIGZ1bGx5IGNvbmZpZ3VyZSBmb3IgYW55IENlcGggc3RyaXBpbmcgc3RyYXRl
+Z3kuIGh0dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rlci9kZXYvZmlsZS1zdHJpcGluZy8NCg0KLU5v
+YWgNCg0KT24gVGh1LCBEZWMgMTMsIDIwMTIgYXQgMTI6MjcgUE0sIEdyZWdvcnkgRmFybnVtIDxn
+cmVnQGlua3RhbmsuY29tPiB3cm90ZToNCj4gT24gVGh1LCBEZWMgMTMsIDIwMTIgYXQgMTI6MjMg
+UE0sIENhbWVyb24gQmFoYXIgPGNiYWhhckBnbWFpbC5jb20+IHdyb3RlOg0KPj4gSXMgdGhlIGNo
+dW5rIHNpemUgdHVuYWJsZSBpbiBBIENlcGggY2x1c3Rlci4gSSBkb24ndCBtZWFuIGR5bmFtaWMs
+IGJ1dCBldmVuIHN0YXRpY2FsbHkgY29uZmlndXJhYmxlIHdoZW4gYSBjbHVzdGVyIGlzIGZpcnN0
+IGluc3RhbGxlZD8NCj4NCj4gWWVhaC4gWW91IGNhbiBzZXQgY2h1bmsgc2l6ZSBvbiBhIHBlci1m
+aWxlIGJhc2lzOyB5b3UganVzdCBjYW4ndCANCj4gY2hhbmdlIGl0IG9uY2UgdGhlIGZpbGUgaGFz
+IGFueSBkYXRhIHdyaXR0ZW4gdG8gaXQuDQo+IEluIHRoZSBjb250ZXh0IG9mIEhhZG9vcCB0aGUg
+cXVlc3Rpb24gaXMganVzdCBpZiB0aGUgYmluZGluZ3MgYXJlIA0KPiBjb25maWd1cmVkIGNvcnJl
+Y3RseSB0byBkbyBzbyBhdXRvbWF0aWNhbGx5Lg0KPiAtR3JlZw0KPiAtLQ0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwNCg==
