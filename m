@@ -1,16 +1,17 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/9] rbd: do not allow remove of mounted-on image
-Date: Fri, 14 Dec 2012 17:19:25 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212141719190.14354@cobra.newdream.net>
-References: <50CA0915.1090801@inktank.com> <50CA09D4.9070902@inktank.com>
+Subject: Re: [PATCH 3/9] libceph: avoid using freed osd in
+ __kick_osd_requests()
+Date: Fri, 14 Dec 2012 17:23:22 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212141723160.14354@cobra.newdream.net>
+References: <50CA0915.1090801@inktank.com> <50CA09F6.9080606@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40447 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40498 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932151Ab2LOBTZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Dec 2012 20:19:25 -0500
-In-Reply-To: <50CA09D4.9070902@inktank.com>
+	with ESMTP id S932266Ab2LOBXX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Dec 2012 20:23:23 -0500
+In-Reply-To: <50CA09F6.9080606@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -20,72 +21,46 @@ Reviewed-by: Sage Weil <sage@inktank.com>
 
 On Thu, 13 Dec 2012, Alex Elder wrote:
 
-> There is no check in rbd_remove() to see if anybody holds open the
-> image being removed.  That's not cool.
+> If an osd has no requests and no linger requests, __reset_osd()
+> will just remove it with a call to __remove_osd().  That drops
+> a reference to the osd, and therefore the osd may have been free
+> by the time __reset_osd() returns.  That function offers no
+> indication this may have occurred, and as a result the osd will
+> continue to be used even when it's no longer valid.
 > 
-> Add a simple open count that goes up and down with opens and closes
-> (releases) of the device, and don't allow an rbd image to be removed
-> if the count is non-zero.
-> 
-> Protect the updates of the open count value with ctl_mutex to ensure
-> the underlying rbd device doesn't get removed while concurrently
-> being opened.
+> Change__reset_osd() so it returns an error (ENODEV) when it
+> deletes the osd being reset.  And change __kick_osd_requests() so it
+> returns immediately (before referencing osd again) if __reset_osd()
+> returns *any* error.
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  drivers/block/rbd.c |   13 +++++++++++++
->  1 file changed, 13 insertions(+)
+>  net/ceph/osd_client.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 842caf4..c7bf961 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -235,6 +235,7 @@ struct rbd_device {
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index ac7be72..60c74c1 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -581,7 +581,7 @@ static void __kick_osd_requests(struct
+> ceph_osd_client *osdc,
 > 
->  	/* sysfs related */
->  	struct device		dev;
-> +	unsigned long		open_count;
->  };
+>  	dout("__kick_osd_requests osd%d\n", osd->o_osd);
+>  	err = __reset_osd(osdc, osd);
+> -	if (err == -EAGAIN)
+> +	if (err)
+>  		return;
 > 
->  static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-> @@ -309,8 +310,11 @@ static int rbd_open(struct block_device *bdev,
-> fmode_t mode)
->  	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
->  		return -EROFS;
-> 
-> +	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
->  	rbd_get_dev(rbd_dev);
->  	set_device_ro(bdev, rbd_dev->mapping.read_only);
-> +	rbd_dev->open_count++;
-> +	mutex_unlock(&ctl_mutex);
-> 
->  	return 0;
->  }
-> @@ -319,7 +323,11 @@ static int rbd_release(struct gendisk *disk,
-> fmode_t mode)
->  {
->  	struct rbd_device *rbd_dev = disk->private_data;
-> 
-> +	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-> +	rbd_assert(rbd_dev->open_count > 0);
-> +	rbd_dev->open_count--;
->  	rbd_put_dev(rbd_dev);
-> +	mutex_unlock(&ctl_mutex);
-> 
->  	return 0;
->  }
-> @@ -3745,6 +3753,11 @@ static ssize_t rbd_remove(struct bus_type *bus,
->  		goto done;
->  	}
-> 
-> +	if (rbd_dev->open_count) {
-> +		ret = -EBUSY;
-> +		goto done;
-> +	}
-> +
->  	rbd_remove_all_snaps(rbd_dev);
->  	rbd_bus_del_dev(rbd_dev);
-> 
+>  	list_for_each_entry(req, &osd->o_requests, r_osd_item) {
+> @@ -745,6 +745,7 @@ static int __reset_osd(struct ceph_osd_client *osdc,
+> struct ceph_osd *osd)
+>  	if (list_empty(&osd->o_requests) &&
+>  	    list_empty(&osd->o_linger_requests)) {
+>  		__remove_osd(osdc, osd);
+> +		ret = -ENODEV;
+>  	} else if (memcmp(&osdc->osdmap->osd_addr[osd->o_osd],
+>  			  &osd->o_con.peer_addr,
+>  			  sizeof(osd->o_con.peer_addr)) == 0 &&
 > -- 
 > 1.7.9.5
 > 
