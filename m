@@ -1,72 +1,119 @@
 From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Slow requests
-Date: Mon, 17 Dec 2012 01:05:12 +0300
-Message-ID: <CABYiri_f4Xa4aKoKG9=3L9W-cj9+25TZerTg622AOkMPaQfymQ@mail.gmail.com>
-References: <50CDD3DB.7000501@mermaidconsulting.dk>
+Subject: Striped images and cluster misbehavior
+Date: Mon, 17 Dec 2012 01:36:20 +0300
+Message-ID: <CABYiri-uqJ3sJt-pnV24EG60T6PGL7K+QvhSwE-=OnEG1R6W_A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:44783 "EHLO
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:41742 "EHLO
 	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751365Ab2LPWFd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Dec 2012 17:05:33 -0500
-Received: by mail-oa0-f46.google.com with SMTP id h16so5300923oag.19
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Dec 2012 14:05:32 -0800 (PST)
-In-Reply-To: <50CDD3DB.7000501@mermaidconsulting.dk>
+	with ESMTP id S1750983Ab2LPWgm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Dec 2012 17:36:42 -0500
+Received: by mail-oa0-f46.google.com with SMTP id h16so5313955oag.19
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Dec 2012 14:36:41 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Jens_Kristian_S=C3=B8gaard?= <jens@mermaidconsulting.dk>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Dec 16, 2012 at 5:59 PM, Jens Kristian S=C3=B8gaard
-<jens@mermaidconsulting.dk> wrote:
-> Hi,
->
-> My log is filling up with warnings about a single slow request that h=
-as been
-> around for a very long time:
->
-> osd.1 10.0.0.2:6800/900 162926 : [WRN] 1 slow requests, 1 included be=
-low;
-> oldest blocked for > 84446.312051 secs
->
-> osd.1 10.0.0.2:6800/900 162927 : [WRN] slow request 84446.312051 seco=
-nds
-> old, received at 2012-12-15 15:27:56.891437:
-> osd_sub_op(client.4528.0:19602219 0.fe
-> 3807b5fe/rb.0.11b7.4a933baa.00000008629e/head//0 [] v 53'185888
-> snapset=3D0=3D[]:[] snapc=3D0=3D[]) v7 currently started
->
->
-> How can I identify the cause of this and how can I cancel this reques=
-t?
->
-> I'm running Ceph on Fedora 17 using the latest RPMs available from ce=
-ph.com
-> (0.52-6).
->
->
-> Thanks in advance,
+Hi,
 
-Hi Jens,
+After recent switch do default  ``--stripe-count 1'' on image upload I
+have observed some strange thing - single import or deletion of the
+striped image may temporarily turn off entire cluster, literally(see
+log below).
+Of course next issued osd map fix the situation, but all in-flight
+operations experiencing a short freeze. This issue appears randomly in
+some import or delete operation, have not seen any other types causing
+this. Even if a nature of this bug laying completely in the client-osd
+interaction, may be ceph should develop a some foolproof actions even
+if complaining client have admin privileges? Almost for sure this
+should be reproduced within teuthology with rwx rights both on osds
+and mons at the client. And as I can see there is no problem on both
+physical and protocol layer for dedicated cluster interface on client
+machine.
 
-Please take a look to this thread:
-http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/10843
-
-Seems that you`ll need newer rpms to get rid of this.
-
-> --
-> Jens Kristian S=C3=B8gaard, Mermaid Consulting ApS,
-> jens@mermaidconsulting.dk,
-> http://www.mermaidconsulting.com/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2012-12-17 02:17:03.691079 mon.0 [INF] pgmap v2403268: 15552 pgs:
+15552 active+clean; 931 GB data, 2927 GB used, 26720 GB / 29647 GB
+avail
+2012-12-17 02:17:04.693344 mon.0 [INF] pgmap v2403269: 15552 pgs:
+15552 active+clean; 931 GB data, 2927 GB used, 26720 GB / 29647 GB
+avail
+2012-12-17 02:17:05.695742 mon.0 [INF] pgmap v2403270: 15552 pgs:
+15552 active+clean; 931 GB data, 2927 GB used, 26720 GB / 29647 GB
+avail
+2012-12-17 02:17:05.991900 mon.0 [INF] osd.0 10.5.0.10:6800/4907
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.991859 >=
+grace 20.000000)
+2012-12-17 02:17:05.992017 mon.0 [INF] osd.1 10.5.0.11:6800/5011
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.991995 >=
+grace 20.000000)
+2012-12-17 02:17:05.992139 mon.0 [INF] osd.2 10.5.0.12:6803/5226
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992110 >=
+grace 20.000000)
+2012-12-17 02:17:05.992240 mon.0 [INF] osd.3 10.5.0.13:6803/6054
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992224 >=
+grace 20.000000)
+2012-12-17 02:17:05.992330 mon.0 [INF] osd.4 10.5.0.14:6803/5792
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992317 >=
+grace 20.000000)
+2012-12-17 02:17:05.992420 mon.0 [INF] osd.5 10.5.0.15:6803/5564
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992405 >=
+grace 20.000000)
+2012-12-17 02:17:05.992515 mon.0 [INF] osd.7 10.5.0.17:6803/5902
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992501 >=
+grace 20.000000)
+2012-12-17 02:17:05.992607 mon.0 [INF] osd.8 10.5.0.10:6803/5338
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992591 >=
+grace 20.000000)
+2012-12-17 02:17:05.992702 mon.0 [INF] osd.10 10.5.0.12:6800/5040
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992686 >=
+grace 20.000000)
+2012-12-17 02:17:05.992793 mon.0 [INF] osd.11 10.5.0.13:6800/5748
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992778 >=
+grace 20.000000)
+2012-12-17 02:17:05.992891 mon.0 [INF] osd.12 10.5.0.14:6800/5459
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992875 >=
+grace 20.000000)
+2012-12-17 02:17:05.992980 mon.0 [INF] osd.13 10.5.0.15:6800/5235
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.992966 >=
+grace 20.000000)
+2012-12-17 02:17:05.993081 mon.0 [INF] osd.16 10.5.0.30:6800/5585
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993065 >=
+grace 20.000000)
+2012-12-17 02:17:05.993184 mon.0 [INF] osd.17 10.5.0.31:6800/5578
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993169 >=
+grace 20.000000)
+2012-12-17 02:17:05.993274 mon.0 [INF] osd.18 10.5.0.32:6800/5097
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993260 >=
+grace 20.000000)
+2012-12-17 02:17:05.993367 mon.0 [INF] osd.19 10.5.0.33:6800/5109
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993352 >=
+grace 20.000000)
+2012-12-17 02:17:05.993464 mon.0 [INF] osd.20 10.5.0.34:6800/5125
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993448 >=
+grace 20.000000)
+2012-12-17 02:17:05.993554 mon.0 [INF] osd.21 10.5.0.35:6800/5183
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993538 >=
+grace 20.000000)
+2012-12-17 02:17:05.993644 mon.0 [INF] osd.22 10.5.0.36:6800/5202
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993628 >=
+grace 20.000000)
+2012-12-17 02:17:05.993740 mon.0 [INF] osd.23 10.5.0.37:6800/5252
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993725 >=
+grace 20.000000)
+2012-12-17 02:17:05.993831 mon.0 [INF] osd.24 10.5.0.30:6803/5758
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993816 >=
+grace 20.000000)
+2012-12-17 02:17:05.993924 mon.0 [INF] osd.25 10.5.0.31:6803/5748
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.993908 >=
+grace 20.000000)
+2012-12-17 02:17:05.994018 mon.0 [INF] osd.26 10.5.0.32:6803/5275
+failed (3 reports from 1 peers after 2012-12-17 02:17:29.994002 >=
+grace 20.000000)
+2012-12-17 02:17:06.105315 mon.0 [INF] osdmap e24204: 32 osds: 4 up, 32 in
+2012-12-17 02:17:06.051291 osd.6 [WRN] 1 slow requests, 1 included
+below; oldest blocked for > 30.947080 secs
+2012-12-17 02:17:06.051299 osd.6 [WRN] slow request 30.947080 seconds
+old, received at 2012-12-17 02:16:35.042711:
+osd_op(client.2804602.0:20660 rbd_data.2a8fb612200854.00000000000000ec
+[write 1572864~278528] 6.b45f4c88) v4 currently waiting for sub ops
