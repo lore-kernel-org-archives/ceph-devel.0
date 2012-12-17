@@ -1,74 +1,154 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 5/9] libceph: init osd->o_node in create_osd()
-Date: Mon, 17 Dec 2012 08:17:55 -0600
-Message-ID: <50CF2993.8050809@inktank.com>
-References: <50CA0915.1090801@inktank.com> <50CA0A0F.5070101@inktank.com> <alpine.DEB.2.00.1212141727390.14354@cobra.newdream.net>
+Subject: Re: [PATCH 8/9] rbd: fix ceph_pg_poolid_by_name()
+Date: Mon, 17 Dec 2012 08:36:35 -0600
+Message-ID: <50CF2DF3.1050909@inktank.com>
+References: <50CA0915.1090801@inktank.com> <50CA0A3E.7040501@inktank.com> <alpine.DEB.2.00.1212142116220.23307@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:63501 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752557Ab2LQORy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 09:17:54 -0500
-Received: by mail-ie0-f174.google.com with SMTP id c11so9324871ieb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 06:17:54 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212141727390.14354@cobra.newdream.net>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:60238 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752665Ab2LQOgf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 09:36:35 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so5531465iay.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 06:36:35 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212142116220.23307@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 12/14/2012 07:43 PM, Sage Weil wrote:
-> We should drop this one, I think.  See upstream commit 
-> 4c199a93a2d36b277a9fd209a0f2793f8460a215.  When we added the similar call 
-> on teh request tree it caused some noise in linux-next and then got 
-> removed.
+On 12/14/2012 11:17 PM, Sage Weil wrote:
+> Most of the code uses int64_t/__s64 for the pool id, although in a few 
+> cases we screwed up and limited it to 32 bits.  In reality, that's way 
+> overkill anyway; we could have left it at 32 bits to begin with.
 
-Well, we need to initialize it.  In particular, there is a call
-to RB_EMPTY_NODE() in __unregister_request() which assumes that
-if a node is not in the tree, it has been initialized as it is
-in RB_CLEAR_NODE().  Even if that's not a normal path (and even
-if no current code path allows that condition), if we're using
-RB_EMPTY_NODE() we need to be sure any node we'll pass is properly
-set up or it's broken code.
+The differing types representing the same abstraction are precisely
+the point of making this change.  What really needs to happen is we
+need to fix *that*; that is, decide whether a pool id is 32 or 64
+bits, signed or not, and then make sure it's that and only that
+throughout the code.
 
-So it's fine with me if we use RB_CLEAR_NODE() instead.  Or, we
-could stop using RB_EMPTY_NODE() (but that's more work to verify).
+In the mean time, this change is defensive, making sure there's
+no uncertainty in what we're dealing with within rbd.  The code
+will guarantee some future change won't inadvertently let a
+wrong-sized pool id attempt to sneak through an interface
+unnoticed.  It may seem like overkill but this kind of bug is
+really hard to track down, and it's better to simply preclude
+it from happening.
 
-The same goes for the event passed to __remove_event(), but that
-should be fixed in a separate patch.
+> My first instinct would be to change the return type to long long or s64 
+> and avoid the use magic #defines...
 
-Please let me know what you think.
+I absolutely like using base types (like long long).  But where
+those types are used to represent a true abstraction (like a
+snapshot id, or a pool id), it is the one place I think the use
+of typedefs and "magic #defines" is actually a real help because
+it makes explicit you're working with something more than an (e.g.)
+an int.  A typedef makes obviously to the reader that it's restricted
+a bit (so, for example, it isn't meaningful to do math on it).
+And symbolic constants make it a lot easier to search through
+code for special situations like this.
+
+This stuff is all sort of philosophical rather than technical.
+The code before works, and the code as I've changed it works.
+
+Anybody else have thoughts?
 
 					-Alex
-
-> sage
+> 
 > 
 > On Thu, 13 Dec 2012, Alex Elder wrote:
 > 
->> It turns out to be harmless but the red-black node o_node in the
->> ceph osd structure is not initialized in create_osd().  Add a
->> call to rb_init_node() initialize it.
+>> Currently ceph_pg_poolid_by_name() returns an int, which is used to
+>> encode a ceph pool id.  This could be a problem because a pool id
+>> (at least in some cases) is a 64-bit value.  We have a defined pool
+>> id value that represents "no pool," and that's a very sensible
+>> return value here.
+>>
+>> This patch changes ceph_pg_poolid_by_name() to return a 64-bit
+>> pool id value, or CEPH_NOPOOL if the named pool is not found.
+>>
+>> The patch also gratuitously renames the function, separating "pool"
+>> from "id" in the name by an underscore.
 >>
 >> Signed-off-by: Alex Elder <elder@inktank.com>
 >> ---
->>  net/ceph/osd_client.c |    1 +
->>  1 file changed, 1 insertion(+)
+>>  drivers/block/rbd.c         |    6 +++---
+>>  include/linux/ceph/osdmap.h |    2 +-
+>>  net/ceph/osdmap.c           |   14 ++++++++------
+>>  3 files changed, 12 insertions(+), 10 deletions(-)
 >>
->> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> index 60c74c1..470816c 100644
->> --- a/net/ceph/osd_client.c
->> +++ b/net/ceph/osd_client.c
->> @@ -642,6 +642,7 @@ static struct ceph_osd *create_osd(struct
->> ceph_osd_client *osdc, int onum)
->>  	atomic_set(&osd->o_ref, 1);
->>  	osd->o_osdc = osdc;
->>  	osd->o_osd = onum;
->> +	rb_init_node(&osd->o_node);
->>  	INIT_LIST_HEAD(&osd->o_requests);
->>  	INIT_LIST_HEAD(&osd->o_linger_requests);
->>  	INIT_LIST_HEAD(&osd->o_osd_lru);
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 4daa400..706824b 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -3642,11 +3642,11 @@ static ssize_t rbd_add(struct bus_type *bus,
+>>  	ceph_opts = NULL;	/* rbd_dev client now owns this */
+>>
+>>  	/* pick the pool */
+>> +	rc = -ENOENT;
+>>  	osdc = &rbdc->client->osdc;
+>> -	rc = ceph_pg_poolid_by_name(osdc->osdmap, spec->pool_name);
+>> -	if (rc < 0)
+>> +	spec->pool_id = ceph_pg_pool_id_by_name(osdc->osdmap, spec->pool_name);
+>> +	if (spec->pool_id == CEPH_NOPOOL)
+>>  		goto err_out_client;
+>> -	spec->pool_id = (u64) rc;
+>>
+>>  	rbd_dev = rbd_dev_create(rbdc, spec);
+>>  	if (!rbd_dev)
+>> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+>> index 5ea57ba..c841396 100644
+>> --- a/include/linux/ceph/osdmap.h
+>> +++ b/include/linux/ceph/osdmap.h
+>> @@ -124,6 +124,6 @@ extern int ceph_calc_pg_primary(struct ceph_osdmap
+>> *osdmap,
+>>  				struct ceph_pg pgid);
+>>
+>>  extern const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64
+>> id);
+>> -extern int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char
+>> *name);
+>> +extern __u64 ceph_pg_pool_id_by_name(struct ceph_osdmap *map, const
+>> char *name);
+>>
+>>  #endif
+>> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+>> index de73214..27e904e 100644
+>> --- a/net/ceph/osdmap.c
+>> +++ b/net/ceph/osdmap.c
+>> @@ -485,19 +485,21 @@ const char *ceph_pg_pool_name_by_id(struct
+>> ceph_osdmap *map, u64 id)
+>>  }
+>>  EXPORT_SYMBOL(ceph_pg_pool_name_by_id);
+>>
+>> -int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char *name)
+>> +__u64 ceph_pg_pool_id_by_name(struct ceph_osdmap *map, const char *name)
+>>  {
+>>  	struct rb_node *rbp;
+>>
+>>  	for (rbp = rb_first(&map->pg_pools); rbp; rbp = rb_next(rbp)) {
+>> -		struct ceph_pg_pool_info *pi =
+>> -			rb_entry(rbp, struct ceph_pg_pool_info, node);
+>> +		struct ceph_pg_pool_info *pi;
+>> +
+>> +		pi = rb_entry(rbp, struct ceph_pg_pool_info, node);
+>>  		if (pi->name && strcmp(pi->name, name) == 0)
+>> -			return pi->id;
+>> +			return (__u64) pi->id;
+>>  	}
+>> -	return -ENOENT;
+>> +
+>> +	return CEPH_NOPOOL;
+>>  }
+>> -EXPORT_SYMBOL(ceph_pg_poolid_by_name);
+>> +EXPORT_SYMBOL(ceph_pg_pool_id_by_name);
+>>
+>>  static void __remove_pg_pool(struct rb_root *root, struct
+>> ceph_pg_pool_info *pi)
+>>  {
 >> -- 
 >> 1.7.9.5
 >>
