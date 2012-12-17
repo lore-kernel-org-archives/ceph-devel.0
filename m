@@ -1,72 +1,89 @@
-From: Dino Yancey <dino2gnt@gmail.com>
-Subject: Re: Slow requests
-Date: Mon, 17 Dec 2012 08:37:26 -0600
-Message-ID: <CA+GnOzQnYaxy79JHfBJwU-iA6ZkO=mnS-J_JA=_WzxCHsbm-LQ@mail.gmail.com>
-References: <50CDD3DB.7000501@mermaidconsulting.dk>
-	<C4049E4484F13747B672D64B9C12C31328DADAC9@PWMAILM01.cscinfo.com>
-	<alpine.DEB.2.00.1212161454110.18820@cobra.newdream.net>
-	<50CE5517.3010700@mermaidconsulting.dk>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: litte bug in initscripts
+Date: Mon, 17 Dec 2012 08:34:25 -0800
+Message-ID: <50CF4991.5010304@inktank.com>
+References: <50CAD151.5080306@rocknob.de> <50CAD957.9010401@rocknob.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:62513 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752607Ab2LQOh1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 09:37:27 -0500
-Received: by mail-vc0-f174.google.com with SMTP id d16so7192571vcd.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 06:37:26 -0800 (PST)
-In-Reply-To: <50CE5517.3010700@mermaidconsulting.dk>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42691 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753811Ab2LQQe2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 11:34:28 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so4128475pbc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 08:34:27 -0800 (PST)
+In-Reply-To: <50CAD957.9010401@rocknob.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: norbi <norbi@rocknob.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Jens,
+On 12/13/2012 11:46 PM, norbi wrote:
+> hm...
+>
+> now the MOD and MON doesn't start...
+>
+> the problems seems the configuration differences in ceph.conf
+>
+> http://ceph.com/docs/master/rados/configuration/ceph-conf/#the-ceph-conf-file
+>
+>
+> or its a failure in the documentation?
 
-Seems that the RPM packager likes to keep the latest and greatest
-versions in http://ceph.com/rpm-testing/ but this path isn't defined
-in the ceph yum repository.
+It's a type in the docs, which is now fixed.
+It should be host = {hostname} for all sections.
 
-Dino
+Josh
 
-On Sun, Dec 16, 2012 at 5:11 PM, Jens Kristian S=F8gaard
-<jens@mermaidconsulting.dk> wrote:
-> Hi Sage,
+> [osd.0]
+>          hostname = {hostname}
 >
+> [mon.a]
+>          host = hostName
+>          mon addr = 150.140.130.120:6789
 >
->> v0.52 is also quite old.  This was resolved in v0.55, I believe.  Wh=
-ere
->> are you looking for the RPMs?  v0.55 should be there...
+> if i change "host = hostName" to "hostname = hostName" under "[mon.a]" i
+> dont have to patch "ceph_common.sh"
 >
->
-> The homepage said to look in:
->
->   http://ceph.com/rpms/fc17/x86_64/
->
-> The newest there is 0.52-6.fc17.x86_64.
->
-> I also looked at the EL6 folder, but the newest there is also 0.52-6.
->
+> On 14.12.2012 08:12, norbi wrote:
+>> Hi Ceph-List,
+>>
+>> i have found a little bug in "ceph_common.sh"
+>> "/usr/local/bin/ceph-conf --help" show the right option to get a
+>> hostname from the ceph.conf. in my case, the ceph init-script doesnt
+>> stop/start the OSDs
+>>
+>> FLAGS
+>>    --name name                     Set type.id
+>>
+>> or the example
+>>
+>> EXAMPLES
+>> $ ceph-conf --name mon.0 -c /etc/ceph/ceph.conf 'mon addr'
+>>
+>>
+>> Patchfile
+>>
+>> --- src/ceph_common.sh.old      2012-12-14 08:09:09.792952462 +0100
+>> +++ src/ceph_common.sh.new      2012-12-14 08:09:28.927956891 +0100
+>> @@ -33,7 +33,7 @@ verify_conf() {
+>>
+>>   check_host() {
+>>       # what host is this daemon assigned to?
+>> -    host=`$CCONF -c $conf -n $type.$id host`
+>> +    host=`$CCONF -c $conf --name $type.$id hostname`
+>>       if [ "$host" = "localhost" ]; then
+>>        echo "$0: use a proper short hostname (hostname -s), not
+>> 'localhost', in $conf section $type.$id; skipping entry"
+>>        return 1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> Jens Kristian S=F8gaard, Mermaid Consulting ApS,
->
-> jens@mermaidconsulting.dk,
-> http://www.mermaidconsulting.com/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-
---=20
-______________________________
-Dino Yancey
-2GNT.com Admin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
