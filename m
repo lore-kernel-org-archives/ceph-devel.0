@@ -1,161 +1,72 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 8/9] rbd: fix ceph_pg_poolid_by_name()
-Date: Mon, 17 Dec 2012 08:36:35 -0600
-Message-ID: <50CF2DF3.1050909@inktank.com>
-References: <50CA0915.1090801@inktank.com> <50CA0A3E.7040501@inktank.com> <alpine.DEB.2.00.1212142116220.23307@cobra.newdream.net>
+From: Dino Yancey <dino2gnt@gmail.com>
+Subject: Re: Slow requests
+Date: Mon, 17 Dec 2012 08:37:26 -0600
+Message-ID: <CA+GnOzQnYaxy79JHfBJwU-iA6ZkO=mnS-J_JA=_WzxCHsbm-LQ@mail.gmail.com>
+References: <50CDD3DB.7000501@mermaidconsulting.dk>
+	<C4049E4484F13747B672D64B9C12C31328DADAC9@PWMAILM01.cscinfo.com>
+	<alpine.DEB.2.00.1212161454110.18820@cobra.newdream.net>
+	<50CE5517.3010700@mermaidconsulting.dk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:60238 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752665Ab2LQOgf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 09:36:35 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so5531465iay.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 06:36:35 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212142116220.23307@cobra.newdream.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:62513 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752607Ab2LQOh1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 09:37:27 -0500
+Received: by mail-vc0-f174.google.com with SMTP id d16so7192571vcd.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 06:37:26 -0800 (PST)
+In-Reply-To: <50CE5517.3010700@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/14/2012 11:17 PM, Sage Weil wrote:
-> Most of the code uses int64_t/__s64 for the pool id, although in a few 
-> cases we screwed up and limited it to 32 bits.  In reality, that's way 
-> overkill anyway; we could have left it at 32 bits to begin with.
+Hi Jens,
 
-The differing types representing the same abstraction are precisely
-the point of making this change.  What really needs to happen is we
-need to fix *that*; that is, decide whether a pool id is 32 or 64
-bits, signed or not, and then make sure it's that and only that
-throughout the code.
+Seems that the RPM packager likes to keep the latest and greatest
+versions in http://ceph.com/rpm-testing/ but this path isn't defined
+in the ceph yum repository.
 
-In the mean time, this change is defensive, making sure there's
-no uncertainty in what we're dealing with within rbd.  The code
-will guarantee some future change won't inadvertently let a
-wrong-sized pool id attempt to sneak through an interface
-unnoticed.  It may seem like overkill but this kind of bug is
-really hard to track down, and it's better to simply preclude
-it from happening.
+Dino
 
-> My first instinct would be to change the return type to long long or s64 
-> and avoid the use magic #defines...
+On Sun, Dec 16, 2012 at 5:11 PM, Jens Kristian S=F8gaard
+<jens@mermaidconsulting.dk> wrote:
+> Hi Sage,
+>
+>
+>> v0.52 is also quite old.  This was resolved in v0.55, I believe.  Wh=
+ere
+>> are you looking for the RPMs?  v0.55 should be there...
+>
+>
+> The homepage said to look in:
+>
+>   http://ceph.com/rpms/fc17/x86_64/
+>
+> The newest there is 0.52-6.fc17.x86_64.
+>
+> I also looked at the EL6 folder, but the newest there is also 0.52-6.
+>
+> --
+> Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+>
+> jens@mermaidconsulting.dk,
+> http://www.mermaidconsulting.com/
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I absolutely like using base types (like long long).  But where
-those types are used to represent a true abstraction (like a
-snapshot id, or a pool id), it is the one place I think the use
-of typedefs and "magic #defines" is actually a real help because
-it makes explicit you're working with something more than an (e.g.)
-an int.  A typedef makes obviously to the reader that it's restricted
-a bit (so, for example, it isn't meaningful to do math on it).
-And symbolic constants make it a lot easier to search through
-code for special situations like this.
 
-This stuff is all sort of philosophical rather than technical.
-The code before works, and the code as I've changed it works.
 
-Anybody else have thoughts?
-
-					-Alex
-> 
-> 
-> On Thu, 13 Dec 2012, Alex Elder wrote:
-> 
->> Currently ceph_pg_poolid_by_name() returns an int, which is used to
->> encode a ceph pool id.  This could be a problem because a pool id
->> (at least in some cases) is a 64-bit value.  We have a defined pool
->> id value that represents "no pool," and that's a very sensible
->> return value here.
->>
->> This patch changes ceph_pg_poolid_by_name() to return a 64-bit
->> pool id value, or CEPH_NOPOOL if the named pool is not found.
->>
->> The patch also gratuitously renames the function, separating "pool"
->> from "id" in the name by an underscore.
->>
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>  drivers/block/rbd.c         |    6 +++---
->>  include/linux/ceph/osdmap.h |    2 +-
->>  net/ceph/osdmap.c           |   14 ++++++++------
->>  3 files changed, 12 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 4daa400..706824b 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -3642,11 +3642,11 @@ static ssize_t rbd_add(struct bus_type *bus,
->>  	ceph_opts = NULL;	/* rbd_dev client now owns this */
->>
->>  	/* pick the pool */
->> +	rc = -ENOENT;
->>  	osdc = &rbdc->client->osdc;
->> -	rc = ceph_pg_poolid_by_name(osdc->osdmap, spec->pool_name);
->> -	if (rc < 0)
->> +	spec->pool_id = ceph_pg_pool_id_by_name(osdc->osdmap, spec->pool_name);
->> +	if (spec->pool_id == CEPH_NOPOOL)
->>  		goto err_out_client;
->> -	spec->pool_id = (u64) rc;
->>
->>  	rbd_dev = rbd_dev_create(rbdc, spec);
->>  	if (!rbd_dev)
->> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
->> index 5ea57ba..c841396 100644
->> --- a/include/linux/ceph/osdmap.h
->> +++ b/include/linux/ceph/osdmap.h
->> @@ -124,6 +124,6 @@ extern int ceph_calc_pg_primary(struct ceph_osdmap
->> *osdmap,
->>  				struct ceph_pg pgid);
->>
->>  extern const char *ceph_pg_pool_name_by_id(struct ceph_osdmap *map, u64
->> id);
->> -extern int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char
->> *name);
->> +extern __u64 ceph_pg_pool_id_by_name(struct ceph_osdmap *map, const
->> char *name);
->>
->>  #endif
->> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
->> index de73214..27e904e 100644
->> --- a/net/ceph/osdmap.c
->> +++ b/net/ceph/osdmap.c
->> @@ -485,19 +485,21 @@ const char *ceph_pg_pool_name_by_id(struct
->> ceph_osdmap *map, u64 id)
->>  }
->>  EXPORT_SYMBOL(ceph_pg_pool_name_by_id);
->>
->> -int ceph_pg_poolid_by_name(struct ceph_osdmap *map, const char *name)
->> +__u64 ceph_pg_pool_id_by_name(struct ceph_osdmap *map, const char *name)
->>  {
->>  	struct rb_node *rbp;
->>
->>  	for (rbp = rb_first(&map->pg_pools); rbp; rbp = rb_next(rbp)) {
->> -		struct ceph_pg_pool_info *pi =
->> -			rb_entry(rbp, struct ceph_pg_pool_info, node);
->> +		struct ceph_pg_pool_info *pi;
->> +
->> +		pi = rb_entry(rbp, struct ceph_pg_pool_info, node);
->>  		if (pi->name && strcmp(pi->name, name) == 0)
->> -			return pi->id;
->> +			return (__u64) pi->id;
->>  	}
->> -	return -ENOENT;
->> +
->> +	return CEPH_NOPOOL;
->>  }
->> -EXPORT_SYMBOL(ceph_pg_poolid_by_name);
->> +EXPORT_SYMBOL(ceph_pg_pool_id_by_name);
->>
->>  static void __remove_pg_pool(struct rb_root *root, struct
->> ceph_pg_pool_info *pi)
->>  {
->> -- 
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-
+--=20
+______________________________
+Dino Yancey
+2GNT.com Admin
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
