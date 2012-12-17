@@ -1,35 +1,53 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: ceph on nilfs2?
-Date: Mon, 17 Dec 2012 09:37:23 -0800
-Message-ID: <CAC-hyiFws6ZBL9L2AmZ8bYCBS0qCZX0smUOsyQGEL-EMWn_1Lw@mail.gmail.com>
-References: <alpine.DEB.2.00.1212131643480.2817@cobra.newdream.net>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: OSD memory leaks?
+Date: Mon, 17 Dec 2012 10:12:05 -0800
+Message-ID: <CA+4uBUY6Vf0HU71bL8z-3QhbsSSv+LRXFyfAiHHoNAzMw=5dLw@mail.gmail.com>
+References: <CAOLwVUmJb0y39dg3zTv=c4iPSkjLBhG3L7L4=L7Ms96iP-SiWw@mail.gmail.com>
+	<CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:42839 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753160Ab2LQRhY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 12:37:24 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so5780063iay.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 09:37:24 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212131643480.2817@cobra.newdream.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:52454 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752384Ab2LQSMH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 13:12:07 -0500
+Received: by mail-vc0-f174.google.com with SMTP id d16so7566889vcd.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 10:12:06 -0800 (PST)
+In-Reply-To: <CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 13, 2012 at 4:47 PM, Sage Weil <sage@inktank.com> wrote:
-> nilfs2 has a 'continuous snapshotting' architecture that the ceph-osd can
-> take advantage of for making fully-consistent checkpoints of state for
-> recovering from a crash.  If these checkpoints are efficient enough, in
-> fact, you may even get away with not having a journal file/device at all.
-> Provided ceph can trigger snapshot creation when it wants to, can roll
-> back to a previous snapshot on startup, and gets the basic features it
-> needs out of the fs (mainly xattrs), this might be something worth looking
-> at, if someone is looking for a project!
->
-> http://www.nilfs.org
->
+Are you having network hiccups?  There was a bug noticed recently that
+could cause a memory leak if nodes are being marked up and down.
+-Sam
 
-That reminds me of the filestore abstraction project we should start.
-Yehuda
+On Mon, Dec 17, 2012 at 12:28 AM, S=E9bastien Han <han.sebastien@gmail.=
+com> wrote:
+> Hi guys,
+>
+> Today looking at my graphs I noticed that one over 4 ceph nodes used =
+a
+> lot of memory. It keeps growing and growing.
+> See the graph attached to this mail.
+> I run 0.48.2 on Ubuntu 12.04.
+>
+> The other nodes also grow, but slowly than the first one.
+>
+> I'm not quite sure about the information that I have to provide. So
+> let me know. The only thing I can say is that the load haven't
+> increase that much this week. It seems to be consuming and not giving
+> back the memory.
+>
+> Thank you in advance.
+>
+> --
+> Regards,
+> S=E9bastien Han.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
