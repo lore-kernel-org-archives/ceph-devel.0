@@ -1,27 +1,49 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/3] libceph: use RB_EMPTY_NODE() in the osd client
-Date: Mon, 17 Dec 2012 12:31:29 -0600
-Message-ID: <50CF6501.5070707@inktank.com>
+Subject: [PATCH,v2 1/3] libceph: init osd->o_node in create_osd()
+Date: Mon, 17 Dec 2012 12:33:10 -0600
+Message-ID: <50CF6566.3010603@inktank.com>
+References: <50CF6501.5070707@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:49877 "EHLO
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:50989 "EHLO
 	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752559Ab2LQSb1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 13:31:27 -0500
-Received: by mail-ie0-f174.google.com with SMTP id c11so9803601ieb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 10:31:27 -0800 (PST)
+	with ESMTP id S1752950Ab2LQSdJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 13:33:09 -0500
+Received: by mail-ie0-f174.google.com with SMTP id c11so9806971ieb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 10:33:08 -0800 (PST)
+In-Reply-To: <50CF6501.5070707@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The first one of these is an update based on a previous post.
-The other two are new, but basically address the same issue
-in two other spots in the osd client code.
+The red-black node node in the ceph osd structure is not initialized
+in create_osd().  Because this node can be the subject of a
+RB_EMPTY_NODE() call later on, we should ensure the node is
+initialized properly for that.  Add a call to RB_CLEAR_NODE()
+initialize it.
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: use RB_CLEAR_NODE() instead of rb_init_node()
 
-[PATCH 1/3] libceph: init osd->o_node in create_osd()
-[PATCH 2/3] libceph: init event->node in ceph_osdc_create_event()
-[PATCH 3/3] libceph: don't use rb_init_node() in
+ net/ceph/osd_client.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 32bd696..a6dc6ac 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -642,6 +642,7 @@ static struct ceph_osd *create_osd(struct
+ceph_osd_client *osdc, int onum)
+ 	atomic_set(&osd->o_ref, 1);
+ 	osd->o_osdc = osdc;
+ 	osd->o_osd = onum;
++	RB_CLEAR_NODE(&osd->o_node);
+ 	INIT_LIST_HEAD(&osd->o_requests);
+ 	INIT_LIST_HEAD(&osd->o_linger_requests);
+ 	INIT_LIST_HEAD(&osd->o_osd_lru);
+-- 
+1.7.9.5
+
