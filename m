@@ -1,97 +1,41 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: OSD memory leaks?
-Date: Mon, 17 Dec 2012 14:55:14 -0800
-Message-ID: <CA+4uBUZyeGAHH9Ntws2tCKud66H758qyCPWVG-aZnB2gcZjpJg@mail.gmail.com>
-References: <CAOLwVUmJb0y39dg3zTv=c4iPSkjLBhG3L7L4=L7Ms96iP-SiWw@mail.gmail.com>
-	<CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
-	<CA+4uBUY6Vf0HU71bL8z-3QhbsSSv+LRXFyfAiHHoNAzMw=5dLw@mail.gmail.com>
-	<CAOLwVUn5VbH1P=0wu-Oxb1bSKpaQfC6uQ5012wvPc7bvz606JA@mail.gmail.com>
-	<CAOLwVU=_Tz6Swirzk6AWwREdmG8qQUiQt=wd1OyNiPVSF1bqng@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: kernel rbd format=2
+Date: Tue, 18 Dec 2012 11:10:54 +1100
+Message-ID: <20121218001054.GA17186@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:62717 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752491Ab2LQWzP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 17:55:15 -0500
-Received: by mail-vc0-f174.google.com with SMTP id d16so8062306vcd.19
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 14:55:14 -0800 (PST)
-In-Reply-To: <CAOLwVU=_Tz6Swirzk6AWwREdmG8qQUiQt=wd1OyNiPVSF1bqng@mail.gmail.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:41352 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752839Ab2LRASW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 19:18:22 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id D5A9C60E3C
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:10:56 +1100 (EST)
+Received: from smtp1.onthe.net.au ([127.0.0.1])
+	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id XJOX1VbYGQ4Z for <ceph-devel@vger.kernel.org>;
+	Tue, 18 Dec 2012 11:10:55 +1100 (EST)
+Received: from o1.office.otn.net.au (unknown [180.148.179.26])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id EC09460F4E
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:10:54 +1100 (EST)
+Received: from achates.office.onthe.net.au (achates.office.onthe.net.au [10.1.32.53])
+	by o1.office.otn.net.au (Postfix) with ESMTP id 4F3EA2AB682
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:11:04 +1100 (EST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-What is the workload like?
--Sam
+Hi,
 
-On Mon, Dec 17, 2012 at 2:41 PM, S=E9bastien Han <han.sebastien@gmail.c=
-om> wrote:
-> Hi,
->
-> No, I don't see nothing abnormal in the network stats. I don't see
-> anything in the logs... :(
-> The weird thing is that one node over 4 seems to take way more memory
-> than the others...
->
-> --
-> Regards,
-> S=E9bastien Han.
->
->
-> On Mon, Dec 17, 2012 at 11:31 PM, S=E9bastien Han <han.sebastien@gmai=
-l.com> wrote:
->>
->> Hi,
->>
->> No, I don't see nothing abnormal in the network stats. I don't see a=
-nything in the logs... :(
->> The weird thing is that one node over 4 seems to take way more memor=
-y than the others...
->>
->> --
->> Regards,
->> S=E9bastien Han.
->>
->>
->>
->> On Mon, Dec 17, 2012 at 7:12 PM, Samuel Just <sam.just@inktank.com> =
-wrote:
->>>
->>> Are you having network hiccups?  There was a bug noticed recently t=
-hat
->>> could cause a memory leak if nodes are being marked up and down.
->>> -Sam
->>>
->>> On Mon, Dec 17, 2012 at 12:28 AM, S=E9bastien Han <han.sebastien@gm=
-ail.com> wrote:
->>> > Hi guys,
->>> >
->>> > Today looking at my graphs I noticed that one over 4 ceph nodes u=
-sed a
->>> > lot of memory. It keeps growing and growing.
->>> > See the graph attached to this mail.
->>> > I run 0.48.2 on Ubuntu 12.04.
->>> >
->>> > The other nodes also grow, but slowly than the first one.
->>> >
->>> > I'm not quite sure about the information that I have to provide. =
-So
->>> > let me know. The only thing I can say is that the load haven't
->>> > increase that much this week. It seems to be consuming and not gi=
-ving
->>> > back the memory.
->>> >
->>> > Thank you in advance.
->>> >
->>> > --
->>> > Regards,
->>> > S=E9bastien Han.
->>
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Format 2 images (and attendant layering support) are not yet
+supported by the kernel rbd client, according to:
+
+http://ceph.com/docs/master/rbd/rbd-snapshot/#layering
+
+When might this support be available?
+
+Cheers,
+
+Chris
