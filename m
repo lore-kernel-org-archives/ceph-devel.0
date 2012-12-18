@@ -1,58 +1,118 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Tue, 18 Dec 2012 10:09:03 -0600
-Message-ID: <50D0951F.6050106@inktank.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net> <CAPud5_4S6-K33f4qLR+-cMm5NLn35H3aXo_LVSenwBM2sxgELg@mail.gmail.com> <CAPud5_7EckkvSth8+YeGvEph1GxjTqovXhG6gVWKUX-3K9cLjQ@mail.gmail.com> <50B7C788.6040404@inktank.com> <50B93FCA.2060801@inktank.com> <CAPud5_4avt1ohkdg3s_pcwoF+4AfuAYDP3qJUqL84nFnmh2GjA@mail.gmail.com> <50BC2DE6.6050307@inktank.com> <50C65AE5.2050704@inktank.com> <CAPud5_7OPrpg1Q_UTw2PskG+o=+H82xgJHacmGT+bVOZkf466A@mail.gmail.com> <50C774FD.9030107@inktank.com> <50C78D09.5050403@inktank.com> <CAPud5_697TJpxU_fCe+FzmgeuTxWx61My5p+FJN_2B1fpn_G3Q@mail.gmail.com> <CAPud5_6q0gQD0ajpKZdvnaaMBvapQ59fkOA7ANVhPo0dMGJ+Sw@mail.gmail.com> <50CB57E2.10703@inktank.com> <CAPud5_7FF=AXMzd4N9kLb4DGQJgp0Csi
- d7_LV3RKYbiTdB+09g@mail.gmail.com> <50CB69E5.7080001@inktank.com> <CAPud5_5PuF0kMzaWVb84_zB6XyZ4QexUsmqoCTdp8vsFNDE=LA@mail.gmail.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: OSD memory leaks?
+Date: Tue, 18 Dec 2012 18:21:56 +0100
+Message-ID: <CAOLwVUkVhoM6U4z1iBPYFucdaq4AtV69_YReh2UaE_Jkocm4xQ@mail.gmail.com>
+References: <CAOLwVUmJb0y39dg3zTv=c4iPSkjLBhG3L7L4=L7Ms96iP-SiWw@mail.gmail.com>
+ <CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
+ <CA+4uBUY6Vf0HU71bL8z-3QhbsSSv+LRXFyfAiHHoNAzMw=5dLw@mail.gmail.com>
+ <CAOLwVUn5VbH1P=0wu-Oxb1bSKpaQfC6uQ5012wvPc7bvz606JA@mail.gmail.com>
+ <CAOLwVU=_Tz6Swirzk6AWwREdmG8qQUiQt=wd1OyNiPVSF1bqng@mail.gmail.com> <CA+4uBUZyeGAHH9Ntws2tCKud66H758qyCPWVG-aZnB2gcZjpJg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:45971 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755081Ab2LRQJD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 11:09:03 -0500
-Received: by mail-ie0-f177.google.com with SMTP id k13so1132158iea.8
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 08:09:02 -0800 (PST)
-In-Reply-To: <CAPud5_5PuF0kMzaWVb84_zB6XyZ4QexUsmqoCTdp8vsFNDE=LA@mail.gmail.com>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:51469 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754609Ab2LRRWS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 12:22:18 -0500
+Received: by mail-la0-f43.google.com with SMTP id z14so775153lag.2
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 09:22:16 -0800 (PST)
+In-Reply-To: <CA+4uBUZyeGAHH9Ntws2tCKud66H758qyCPWVG-aZnB2gcZjpJg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 12/17/2012 11:12 AM, Nick Bartos wrote:
-> Here's a log with the rbd debugging enabled:
-> 
-> https://gist.github.com/raw/4319962/d9690fd92c169198efc5eecabf275ef1808929d2/rbd-hang-test-1355763470.log
-> 
-> On Fri, Dec 14, 2012 at 10:03 AM, Alex Elder <elder@inktank.com> wrote:
->> On 12/14/2012 10:53 AM, Nick Bartos wrote:
->>> Yes I was only enabling debugging for libceph.  I'm adding debugging
->>> for rbd as well.  I'll do a repro later today when a test cluster
->>> opens up.
->>
->> Excellent, thank you.   -Alex
+Nothing terrific...
 
-I looked through these debugging messages.  Looking only at the
-rbd debugging, what I see seems to indicate that rbd is idle at
-the point the "hang" seems to start.  This suggests that the hang
-is not due to rbd itself, but rather whatever it is that might
-be responsible for using the rbd image once it has been mapped.
+Kernel logs from my clients are full of "libceph: osd4
+172.20.11.32:6801 socket closed"
 
-Is that possible?  I don't know what process you have that is
-mapping the rbd image, and what is supposed to be the next thing
-it does.  (I realize this may not make a lot of sense, given
-a patch in rdb seems to have caused the hang to begin occurring.)
+I saw this somewhere on the tracker.
 
-Also note that the debugging information available (i.e., the
-lines in the code that can output debugging information) may
-well be incomplete.  So if you don't find anything it may be
-necessary to provide you with another update which might include
-more debugging.
+Does this harm?
 
-Anyway, could you provide a little more context about what
-is going on sort of *around* rbd when activity seems to stop?
+Thanks.
 
-Thanks a lot.
+--
+Regards,
+S=E9bastien Han.
 
-					-Alex
+
+
+On Mon, Dec 17, 2012 at 11:55 PM, Samuel Just <sam.just@inktank.com> wr=
+ote:
+>
+> What is the workload like?
+> -Sam
+>
+> On Mon, Dec 17, 2012 at 2:41 PM, S=E9bastien Han <han.sebastien@gmail=
+=2Ecom> wrote:
+> > Hi,
+> >
+> > No, I don't see nothing abnormal in the network stats. I don't see
+> > anything in the logs... :(
+> > The weird thing is that one node over 4 seems to take way more memo=
+ry
+> > than the others...
+> >
+> > --
+> > Regards,
+> > S=E9bastien Han.
+> >
+> >
+> > On Mon, Dec 17, 2012 at 11:31 PM, S=E9bastien Han <han.sebastien@gm=
+ail.com> wrote:
+> >>
+> >> Hi,
+> >>
+> >> No, I don't see nothing abnormal in the network stats. I don't see=
+ anything in the logs... :(
+> >> The weird thing is that one node over 4 seems to take way more mem=
+ory than the others...
+> >>
+> >> --
+> >> Regards,
+> >> S=E9bastien Han.
+> >>
+> >>
+> >>
+> >> On Mon, Dec 17, 2012 at 7:12 PM, Samuel Just <sam.just@inktank.com=
+> wrote:
+> >>>
+> >>> Are you having network hiccups?  There was a bug noticed recently=
+ that
+> >>> could cause a memory leak if nodes are being marked up and down.
+> >>> -Sam
+> >>>
+> >>> On Mon, Dec 17, 2012 at 12:28 AM, S=E9bastien Han <han.sebastien@=
+gmail.com> wrote:
+> >>> > Hi guys,
+> >>> >
+> >>> > Today looking at my graphs I noticed that one over 4 ceph nodes=
+ used a
+> >>> > lot of memory. It keeps growing and growing.
+> >>> > See the graph attached to this mail.
+> >>> > I run 0.48.2 on Ubuntu 12.04.
+> >>> >
+> >>> > The other nodes also grow, but slowly than the first one.
+> >>> >
+> >>> > I'm not quite sure about the information that I have to provide=
+=2E So
+> >>> > let me know. The only thing I can say is that the load haven't
+> >>> > increase that much this week. It seems to be consuming and not =
+giving
+> >>> > back the memory.
+> >>> >
+> >>> > Thank you in advance.
+> >>> >
+> >>> > --
+> >>> > Regards,
+> >>> > S=E9bastien Han.
+> >>
+> >>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
