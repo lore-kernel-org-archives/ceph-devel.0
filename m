@@ -1,41 +1,53 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: kernel rbd format=2
-Date: Tue, 18 Dec 2012 11:10:54 +1100
-Message-ID: <20121218001054.GA17186@onthe.net.au>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: OSDMonitor: don't allow creation of pools with > 65535 pgs
+Date: Tue, 18 Dec 2012 00:14:59 +0000
+Message-ID: <50CFB583.3070305@inktank.com>
+References: <50CB488E.3090005@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:41352 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752839Ab2LRASW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 19:18:22 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id D5A9C60E3C
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:10:56 +1100 (EST)
-Received: from smtp1.onthe.net.au ([127.0.0.1])
-	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id XJOX1VbYGQ4Z for <ceph-devel@vger.kernel.org>;
-	Tue, 18 Dec 2012 11:10:55 +1100 (EST)
-Received: from o1.office.otn.net.au (unknown [180.148.179.26])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id EC09460F4E
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:10:54 +1100 (EST)
-Received: from achates.office.onthe.net.au (achates.office.onthe.net.au [10.1.32.53])
-	by o1.office.otn.net.au (Postfix) with ESMTP id 4F3EA2AB682
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 11:11:04 +1100 (EST)
-Content-Disposition: inline
+Received: from mail-we0-f175.google.com ([74.125.82.175]:47175 "EHLO
+	mail-we0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752768Ab2LRAUk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Dec 2012 19:20:40 -0500
+Received: by mail-we0-f175.google.com with SMTP id z53so4459wey.20
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Dec 2012 16:20:39 -0800 (PST)
+In-Reply-To: <50CB488E.3090005@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Greg Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On 12/14/2012 03:41 PM, Jim Schutt wrote:
+> Hi,
+>
+> I'm looking at commit e3ed28eb2 in the next branch,
+> and I have a question.
+>
+> Shouldn't the limit be pg_num > 65536, because
+> PGs are numbered 0 thru pg_num-1?
+>
+> If not, what am I missing?
+>
+> FWIW, up through yesterday I've been using the next branch and this:
+>
+>    ceph osd pool set data pg_num 65536 --allow-experimental-feature
+>    ceph osd pool set metadata pg_num 65536 --allow-experimental-feature
+>    ceph osd pool set data pgp_num 65536 --allow-experimental-feature
+>    ceph osd pool set metadata pgp_num 65536 --allow-experimental-feature
+>
+> using cephfs clients, and have seen no trouble with
+> misdirected ops, etc.
+>
+> -- Jim
+>
 
-Format 2 images (and attendant layering support) are not yet
-supported by the kernel rbd client, according to:
+Jim,
 
-http://ceph.com/docs/master/rbd/rbd-snapshot/#layering
+A new patch went into next that increases the default maximum pg_num to 
+65536, and also adds an option ('mon max pool pg num') that will allow 
+this value to be adjusted.
 
-When might this support be available?
 
-Cheers,
-
-Chris
+   -Joao
