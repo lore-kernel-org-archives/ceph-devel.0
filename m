@@ -1,43 +1,60 @@
 From: Yann ROBIN <yann.robin@youscribe.com>
-Subject: Recovery stuck and radosgateway not initializing
-Date: Tue, 18 Dec 2012 10:51:21 +0000
-Message-ID: <367CC0B0FC02EE47BF7482398BD623C54E087A4A@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+Subject: RE: Recovery stuck and radosgateway not initializing
+Date: Tue, 18 Dec 2012 14:08:01 +0000
+Message-ID: <367CC0B0FC02EE47BF7482398BD623C54E089B3E@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+References: <367CC0B0FC02EE47BF7482398BD623C54E087A4A@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_002_367CC0B0FC02EE47BF7482398BD623C54E087A4ADB3PRD0311MB416_"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:37357
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754078Ab2LRKva (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Dec 2012 05:51:30 -0500
-Received: from mail206-va3 (localhost [127.0.0.1])	by
- mail206-va3-R.bigfish.com (Postfix) with ESMTP id 51B75CE0136	for
- <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 10:51:29 +0000 (UTC)
-Received: from VA3EHSMHS016.bigfish.com (unknown [10.7.14.239])	by
- mail206-va3.bigfish.com (Postfix) with ESMTP id 122FF4800A0	for
- <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 10:51:27 +0000 (UTC)
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:37349
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754979Ab2LROIH convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Dec 2012 09:08:07 -0500
+Received: from mail6-ch1 (localhost [127.0.0.1])	by mail6-ch1-R.bigfish.com
+ (Postfix) with ESMTP id 32B322A00C3	for <ceph-devel@vger.kernel.org>; Tue, 18
+ Dec 2012 14:08:06 +0000 (UTC)
+Received: from CH1EHSMHS037.bigfish.com (snatpool1.int.messaging.microsoft.com
+ [10.43.68.254])	by mail6-ch1.bigfish.com (Postfix) with ESMTP id BAABA40006C
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 14:08:02 +0000 (UTC)
+In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E087A4A@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---_002_367CC0B0FC02EE47BF7482398BD623C54E087A4ADB3PRD0311MB416_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Our configuration : 6 OSDs, 3 Mon.
+Journal is on INTEL SSDSA2CW120G3 disk and Data is on Hitachi HUS724040=
+ALE640 disk.
+
+When OSD does recovery IO is high, and at some point the OSD is killed.
+We set max active recovery to 1 and set filestore op thread suicide tim=
+eout to 360.
+
+What should I do in that case ?
+
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Yann ROBIN
+Sent: mardi 18 d=E9cembre 2012 11:51
+To: ceph-devel@vger.kernel.org
+Subject: Recovery stuck and radosgateway not initializing
 
 Hi,
 
-We're using ceph v0.55, and last night we loste one node of our cluster.
-When it came back, ceph start recovering but since then the radosgateway co=
-uld not connect to the cluster.
-The rados gateway timeout on initializtion (somewhere in the radosclient co=
-nnect).
+We're using ceph v0.55, and last night we loste one node of our cluster=
+=2E
+When it came back, ceph start recovering but since then the radosgatewa=
+y could not connect to the cluster.
+The rados gateway timeout on initializtion (somewhere in the radosclien=
+t connect).
 
-The other problem (and I think it's related) is that the recovery isn't wor=
-king. Osd gets OSD Op thread timeout and sometimes some of the OSD crash (s=
-ee stacktrace attached).
-So it seems that our OSD aren't up long enough for the recovery to proceed.
+The other problem (and I think it's related) is that the recovery isn't=
+ working. Osd gets OSD Op thread timeout and sometimes some of the OSD =
+crash (see stacktrace attached).
+So it seems that our OSD aren't up long enough for the recovery to proc=
+eed.
 
 Any would be appreciated.
 
@@ -47,117 +64,8 @@ Thanks,
 Yann
 
 
---_002_367CC0B0FC02EE47BF7482398BD623C54E087A4ADB3PRD0311MB416_
-Content-Type: application/octet-stream; name="ceph.log"
-Content-Description: ceph.log
-Content-Disposition: attachment; filename="ceph.log"; size=5887;
-	creation-date="Tue, 18 Dec 2012 10:46:53 GMT";
-	modification-date="Tue, 18 Dec 2012 10:47:02 GMT"
-Content-Transfer-Encoding: base64
-
-LTg0NjY1PiAyMDEyLTEyLTE4IDExOjMyOjMzLjM2NTY1NiA3ZjgwMDU2ZGQ3MDAgMTAgLTg0NjY0
-PiAyMDEyLTEyLTE4IDExOjMyOjMzLjM2NTY4OCA3ZjgwMDU2ZGQ3MDAgMjAgLS0gMTcyLjIwLjIu
-MTE6NjgwNS84NDQgPj4gMTcyLjIwLjEuMTI6NjgwMS85NzA4IHBpcGUoMHg0MWQ5OGZjMCBzZD0z
-NCA6NjgwNSBwZ3M9NjggY3M9MSBsPTApLndyaXRlcjogc3RhdGUgPSBvcGVuIHBvbGljeS5zZXJ2
-ZXI9MC0tIDE3Mi4yMC4yLjExOjY4MDUvODQ0ID4+IDE3Mi4yMC4xLjEyOjY4MDEvOTcwOCBwaXBl
-KDB4NDFkOThmYzAgc2Q9MzQgOjY4MDUgcGdzPTY4IGNzPTEgbD0wKS53cml0ZXIgc2VuZGluZyAx
-MzUwIDB4Njk2ZTM4ODAKLTg0NjYzPiAyMDEyLTEyLTE4IDExOjMyOjMzLjM2NTczMCA3ZjgwMDU2
-ZGQ3MDAgMjAgLS0gMTcyLjIwLjIuMTE6NjgwNS84NDQgPj4gMTcyLjIwLjEuMTI6NjgwMS85NzA4
-IHBpcGUoMHg0MWQ5OGZjMCBzZD0zNCA6NjgwNSBwZ3M9NjggY3M9MSBsPTApLndyaXRlX21lc3Nh
-Z2UgMHg2OTZlMzg4MAotODQ2NjI+IDIwMTItMTItMTggMTE6MzI6MzMuMzY1NTA2IDdmODAwNTZk
-ZDcwMCAyMCAtLSAxNzIuMjAuMi4xMTo2ODA1Lzg0NCA+PiAxNzIuMjAuMS4xMjo2ODAxLzk3MDgg
-cGlwZSgweDQxZDk4ZmMwIHNkPTM0IDo2ODA1IHBncz02OCBjcz0xIGw9MCkud3JpdGVfbWVzc2Fn
-ZSAweDY5NmUyYzQwCgotODQ2NjE+IDIwMTItMTItMTggMTE6MzI6MzMuMzY1NTgxIDdmODAwNTZk
-ZDcwMCAyMCAtODQ2NjA+IDIwMTItMTItMTggMTE6MzI6MzMuMzY1NjU2IDdmODAwNTZkZDcwMCAx
-MCAtLSAxNzIuMjAuMi4xMTo2ODA1Lzg0NCA+PiAxNzIuMjAuMS4xMjo2ODAxLzk3MDggcGlwZSgw
-eDQxZDk4ZmMwIHNkPTM0IDo2ODA1IHBncz02OCBjcz0xIGw9MCkud3JpdGVyIGVuY29kaW5nIDEz
-NDkgMHg2OTZlMzM0MCBwZ19pbmZvKDEgcGdzIGUxODcwOjEwLjg2MSkgdjMtLSAxNzIuMjAuMi4x
-MTo2ODA1Lzg0NCA+PiAxNzIuMjAuMS4xMjo2ODAxLzk3MDggcGlwZSgweDQxZDk4ZmMwIHNkPTM0
-IDo2ODA1IHBncz02OCBjcz0xIGw9MCkud3JpdGVyOiBzdGF0ZSA9IG9wZW4gcG9saWN5LnNlcnZl
-cj0wCgotLS0gbG9nZ2luZyBsZXZlbHMgLS0tLS0tIGxvZ2dpbmcgbGV2ZWxzIC0tLQoKICAgMC8g
-NSBub25lICAgMC8gNSBub25lCgogICAwLyAxIGxvY2tkZXAgICAwLyAxIGxvY2tkZXAKCiAgIDAv
-IDEgY29udGV4dCAgIDAvIDEgY29udGV4dAoKICAgMS8gMSBjcnVzaCAgIDEvIDEgY3J1c2gKCiAg
-IDEvIDUgbWRzICAgMS8gNSBtZHMKCiAgIDEvIDUgbWRzX2JhbGFuY2VyICAgMS8gNSBtZHNfYmFs
-YW5jZXIKCiAgIDEvIDUgbWRzX2xvY2tlciAgIDEvIDUgbWRzX2xvY2tlcgoKICAgMS8gNSBtZHNf
-bG9nICAgMS8gNSBtZHNfbG9nCgogICAxLyA1IG1kc19sb2dfZXhwaXJlICAgMS8gNSBtZHNfbG9n
-X2V4cGlyZQoKICAgMS8gNSBtZHNfbWlncmF0b3IgICAxLyA1IG1kc19taWdyYXRvcgoKICAgMC8g
-MSBidWZmZXIgICAwLyAxIGJ1ZmZlcgoKICAgMC8gMSB0aW1lciAgIDAvIDEgdGltZXIKCiAgIDAv
-IDEgZmlsZXIgICAwLyAxIGZpbGVyCgogICAwLyAxIHN0cmlwZXIgICAwLyAxIHN0cmlwZXIKCiAg
-IDAvIDEgb2JqZWN0ZXIgICAwLyAxIG9iamVjdGVyCgogICAwLyA1IHJhZG9zICAgMC8gNSByYWRv
-cwoKICAgMC8gNSByYmQgICAwLyA1IHJiZAoKICAgMC8gNSBqb3VybmFsZXIgICAwLyA1IGpvdXJu
-YWxlcgoKICAgMC8gNSBvYmplY3RjYWNoZXIgICAwLyA1IG9iamVjdGNhY2hlcgoKICAgMC8gNSBj
-bGllbnQgICAwLyA1IGNsaWVudAoKICAgMC8gNSBvc2QgICAwLyA1IG9zZAoKICAgMC8gNSBvcHRy
-YWNrZXIgICAwLyA1IG9wdHJhY2tlcgoKICAgMC8gNSBvYmpjbGFzcyAgIDAvIDUgb2JqY2xhc3MK
-CiAgIDEvIDMgZmlsZXN0b3JlICAgMS8gMyBmaWxlc3RvcmUKCiAgIDEvIDMgam91cm5hbCAgIDEv
-IDMgam91cm5hbAoKICAyMC8yMCBtcyAgMjAvMjAgbXMKCiAgIDEvIDUgbW9uICAgMS8gNSBtb24K
-CiAgIDAvMTAgbW9uYyAgIDAvMTAgbW9uYwoKICAgMC8gNSBwYXhvcyAgIDAvIDUgcGF4b3MKCiAg
-IDAvIDUgdHAgICAwLyA1IHRwCgogICAxLyA1IGF1dGggICAxLyA1IGF1dGgKCiAgIDEvIDUgY3J5
-cHRvICAgMS8gNSBjcnlwdG8KCiAgIDEvIDEgZmluaXNoZXIgICAxLyAxIGZpbmlzaGVyCgogICAx
-LyA1IGhlYXJ0YmVhdG1hcCAgIDEvIDUgaGVhcnRiZWF0bWFwCgogICAxLyA1IHBlcmZjb3VudGVy
-ICAgMS8gNSBwZXJmY291bnRlcgoKICAgMS8gNSByZ3cgICAxLyA1IHJndwoKICAgMS8gNSBoYWRv
-b3AgICAxLyA1IGhhZG9vcAoKICAgMS8gNSBqYXZhY2xpZW50ICAgMS8gNSBqYXZhY2xpZW50Cgog
-ICAxLyA1IGFzb2sgICAxLyA1IGFzb2sKCiAgIDEvIDEgdGhyb3R0bGUgICAxLyAxIHRocm90dGxl
-CgogIC0yLy0yIChzeXNsb2cgdGhyZXNob2xkKSAgLTIvLTIgKHN5c2xvZyB0aHJlc2hvbGQpCgog
-IC0xLy0xIChzdGRlcnIgdGhyZXNob2xkKSAgLTEvLTEgKHN0ZGVyciB0aHJlc2hvbGQpCgogIG1h
-eF9yZWNlbnQgICAgMTAwMDAwICBtYXhfcmVjZW50ICAgIDEwMDAwMAoKICBtYXhfbmV3ICAgICAg
-ICAgMTAwMCAgbWF4X25ldyAgICAgICAgIDEwMDAKCiAgbG9nX2ZpbGUgL3Zhci9sb2cvY2VwaC9j
-ZXBoLW9zZC40LmxvZyAgbG9nX2ZpbGUgL3Zhci9sb2cvY2VwaC9jZXBoLW9zZC40LmxvZwoKLS0t
-IGVuZCBkdW1wIG9mIHJlY2VudCBldmVudHMgLS0tLS0tIGVuZCBkdW1wIG9mIHJlY2VudCBldmVu
-dHMgLS0tCgoyMDEyLTEyLTE4IDExOjM0OjAwLjAwMDg4NyA3ZjgwMTA4ZjU3MDAgLTEgKioqIENh
-dWdodCBzaWduYWwgKFNlZ21lbnRhdGlvbiBmYXVsdCkgKioKIGluIHRocmVhZCA3ZjgwMTA4ZjU3
-MDAKCiBjZXBoIHZlcnNpb24gMC41NSAoNjkwZjgxNzU2MDZlZGYzN2EzMTc3YzI3YTM5NDljNzhm
-ZDM3MDk5ZikKIDE6IC91c3IvYmluL2NlcGgtb3NkKCkgWzB4ODI2MDQwXQogMjogKCgpKzB4ZmNi
-MCkgWzB4N2Y4MDFhNzBmY2IwXQogMzogKGNlcGg6OmxvZzo6TG9nOjpkdW1wX3JlY2VudCgpKzB4
-MmQwKSBbMHg4NDRkYTBdCiA0OiAoY2VwaDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3Qq
-LCBjaGFyIGNvbnN0KiwgaW50LCBjaGFyIGNvbnN0KikrMHg0MWYpIFsweDhjYzBiZl0KIDU6IChG
-aWxlU3RvcmU6Omxmbl91bmxpbmsoY29sbF90LCBob2JqZWN0X3QgY29uc3QmLCBTZXF1ZW5jZXJQ
-b3NpdGlvbiBjb25zdCYpKzB4MTllKSBbMHg3YWRlNGVdCiA2OiAoRmlsZVN0b3JlOjpfcmVtb3Zl
-KGNvbGxfdCwgaG9iamVjdF90IGNvbnN0JiwgU2VxdWVuY2VyUG9zaXRpb24gY29uc3QmKSsweDgw
-KSBbMHg3YWUwMDBdCiA3OiAoRmlsZVN0b3JlOjpfZG9fdHJhbnNhY3Rpb24oT2JqZWN0U3RvcmU6
-OlRyYW5zYWN0aW9uJiwgdW5zaWduZWQgbG9uZywgaW50KSsweDFmNGEpIFsweDdjMjQyYV0KIDg6
-IChGaWxlU3RvcmU6OmRvX3RyYW5zYWN0aW9ucyhzdGQ6Omxpc3Q8T2JqZWN0U3RvcmU6OlRyYW5z
-YWN0aW9uKiwgc3RkOjphbGxvY2F0b3I8T2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uKj4gPiYsIHVu
-c2lnbmVkIGxvbmcpKzB4NGMpIFsweDdjNDE5Y10KIDk6IChGaWxlU3RvcmU6Ol9kb19vcChGaWxl
-U3RvcmU6Ok9wU2VxdWVuY2VyKikrMHg5NSkgWzB4NzlhMmE1XQogMTA6IChUaHJlYWRQb29sOjp3
-b3JrZXIoVGhyZWFkUG9vbDo6V29ya1RocmVhZCopKzB4OTVjKSBbMHg4YzJlOGNdCiAxMTogKFRo
-cmVhZFBvb2w6OldvcmtUaHJlYWQ6OmVudHJ5KCkrMHgxMCkgWzB4OGMzZTAwXQogMTI6ICgoKSsw
-eDdlOWEpIFsweDdmODAxYTcwN2U5YV0KIDEzOiAoY2xvbmUoKSsweDZkKSBbMHg3ZjgwMTkxODRj
-YmRdCiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4
-ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuCgotLS0gYmVnaW4gZHVtcCBv
-ZiByZWNlbnQgZXZlbnRzIC0tLQotODQ2NjA+IDIwMTItMTItMTggMTE6MzQ6MDAuMDAwODg3IDdm
-ODAxMDhmNTcwMCAtMSAqKiogQ2F1Z2h0IHNpZ25hbCAoU2VnbWVudGF0aW9uIGZhdWx0KSAqKgog
-aW4gdGhyZWFkIDdmODAxMDhmNTcwMAoKIGNlcGggdmVyc2lvbiAwLjU1ICg2OTBmODE3NTYwNmVk
-ZjM3YTMxNzdjMjdhMzk0OWM3OGZkMzcwOTlmKQogMTogL3Vzci9iaW4vY2VwaC1vc2QoKSBbMHg4
-MjYwNDBdCiAyOiAoKCkrMHhmY2IwKSBbMHg3ZjgwMWE3MGZjYjBdCiAzOiAoY2VwaDo6bG9nOjpM
-b2c6OmR1bXBfcmVjZW50KCkrMHgyZDApIFsweDg0NGRhMF0KIDQ6IChjZXBoOjpfX2NlcGhfYXNz
-ZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3QqKSsweDQx
-ZikgWzB4OGNjMGJmXQogNTogKEZpbGVTdG9yZTo6bGZuX3VubGluayhjb2xsX3QsIGhvYmplY3Rf
-dCBjb25zdCYsIFNlcXVlbmNlclBvc2l0aW9uIGNvbnN0JikrMHgxOWUpIFsweDdhZGU0ZV0KIDY6
-IChGaWxlU3RvcmU6Ol9yZW1vdmUoY29sbF90LCBob2JqZWN0X3QgY29uc3QmLCBTZXF1ZW5jZXJQ
-b3NpdGlvbiBjb25zdCYpKzB4ODApIFsweDdhZTAwMF0KIDc6IChGaWxlU3RvcmU6Ol9kb190cmFu
-c2FjdGlvbihPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24mLCB1bnNpZ25lZCBsb25nLCBpbnQpKzB4
-MWY0YSkgWzB4N2MyNDJhXQogODogKEZpbGVTdG9yZTo6ZG9fdHJhbnNhY3Rpb25zKHN0ZDo6bGlz
-dDxPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24qLCBzdGQ6OmFsbG9jYXRvcjxPYmplY3RTdG9yZTo6
-VHJhbnNhY3Rpb24qPiA+JiwgdW5zaWduZWQgbG9uZykrMHg0YykgWzB4N2M0MTljXQogOTogKEZp
-bGVTdG9yZTo6X2RvX29wKEZpbGVTdG9yZTo6T3BTZXF1ZW5jZXIqKSsweDk1KSBbMHg3OWEyYTVd
-CiAxMDogKFRocmVhZFBvb2w6OndvcmtlcihUaHJlYWRQb29sOjpXb3JrVGhyZWFkKikrMHg5NWMp
-IFsweDhjMmU4Y10KIDExOiAoVGhyZWFkUG9vbDo6V29ya1RocmVhZDo6ZW50cnkoKSsweDEwKSBb
-MHg4YzNlMDBdCiAxMjogKCgpKzB4N2U5YSkgWzB4N2Y4MDFhNzA3ZTlhXQogMTM6IChjbG9uZSgp
-KzB4NmQpIFsweDdmODAxOTE4NGNiZF0KIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwg
-b3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhp
-cy4KCi0tLSBsb2dnaW5nIGxldmVscyAtLS0KICAgMC8gNSBub25lCiAgIDAvIDEgbG9ja2RlcAog
-ICAwLyAxIGNvbnRleHQKICAgMS8gMSBjcnVzaAogICAxLyA1IG1kcwogICAxLyA1IG1kc19iYWxh
-bmNlcgogICAxLyA1IG1kc19sb2NrZXIKICAgMS8gNSBtZHNfbG9nCiAgIDEvIDUgbWRzX2xvZ19l
-eHBpcmUKICAgMS8gNSBtZHNfbWlncmF0b3IKICAgMC8gMSBidWZmZXIKICAgMC8gMSB0aW1lcgog
-ICAwLyAxIGZpbGVyCiAgIDAvIDEgc3RyaXBlcgogICAwLyAxIG9iamVjdGVyCiAgIDAvIDUgcmFk
-b3MKICAgMC8gNSByYmQKICAgMC8gNSBqb3VybmFsZXIKICAgMC8gNSBvYmplY3RjYWNoZXIKICAg
-MC8gNSBjbGllbnQKICAgMC8gNSBvc2QKICAgMC8gNSBvcHRyYWNrZXIKICAgMC8gNSBvYmpjbGFz
-cwogICAxLyAzIGZpbGVzdG9yZQogICAxLyAzIGpvdXJuYWwKICAyMC8yMCBtcwogICAxLyA1IG1v
-bgogICAwLzEwIG1vbmMKICAgMC8gNSBwYXhvcwogICAwLyA1IHRwCiAgIDEvIDUgYXV0aAogICAx
-LyA1IGNyeXB0bwogICAxLyAxIGZpbmlzaGVyCiAgIDEvIDUgaGVhcnRiZWF0bWFwCiAgIDEvIDUg
-cGVyZmNvdW50ZXIKICAgMS8gNSByZ3cKICAgMS8gNSBoYWRvb3AKICAgMS8gNSBqYXZhY2xpZW50
-CiAgIDEvIDUgYXNvawogICAxLyAxIHRocm90dGxlCiAgLTIvLTIgKHN5c2xvZyB0aHJlc2hvbGQp
-CiAgLTEvLTEgKHN0ZGVyciB0aHJlc2hvbGQpCiAgbWF4X3JlY2VudCAgICAxMDAwMDAKICBtYXhf
-bmV3ICAgICAgICAgMTAwMA==
-
---_002_367CC0B0FC02EE47BF7482398BD623C54E087A4ADB3PRD0311MB416_--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
