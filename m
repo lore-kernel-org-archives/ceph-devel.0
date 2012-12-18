@@ -1,97 +1,48 @@
-From: Nick Bartos <nick@pistoncloud.com>
-Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Tue, 18 Dec 2012 10:05:53 -0800
-Message-ID: <CAPud5_5DnafqOZ1y3NHXY9Ryj_wSeKz+mvWbXqWFD1yjgbNgtw@mail.gmail.com>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com>
-	<alpine.DEB.2.00.1211212041240.9963@cobra.newdream.net>
-	<CAPud5_4S6-K33f4qLR+-cMm5NLn35H3aXo_LVSenwBM2sxgELg@mail.gmail.com>
-	<CAPud5_7EckkvSth8+YeGvEph1GxjTqovXhG6gVWKUX-3K9cLjQ@mail.gmail.com>
-	<50B7C788.6040404@inktank.com>
-	<50B93FCA.2060801@inktank.com>
-	<CAPud5_4avt1ohkdg3s_pcwoF+4AfuAYDP3qJUqL84nFnmh2GjA@mail.gmail.com>
-	<50BC2DE6.6050307@inktank.com>
-	<50C65AE5.2050704@inktank.com>
-	<CAPud5_7OPrpg1Q_UTw2PskG+o=+H82xgJHacmGT+bVOZkf466A@mail.gmail.com>
-	<50C774FD.9030107@inktank.com>
-	<50C78D09.5050403@inktank.com>
-	<CAPud5_697TJpxU_fCe+FzmgeuTxWx61My5p+FJN_2B1fpn_G3Q@mail.gmail.com>
-	<CAPud5_6q0gQD0ajpKZdvnaaMBvapQ59fkOA7ANVhPo0dMGJ+Sw@mail.gmail.com>
-	<50CB57E2.10703@inktank.com>
-	<CAPud5_7FF=AXMzd4N9kLb4DGQJgp0Csid7_LV3RKYbiTdB+09g@mail.gmail.com>
-	<50CB69E5.7080001@inktank.com>
-	<CAPud5_5PuF0kMzaWVb84_zB6XyZ4QexUsmqoCTdp8vsFNDE=LA@mail.gmail.com>
-	<50D0951F.6050106@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: Rados consistency model
+Date: Tue, 18 Dec 2012 14:22:30 -0800
+Message-ID: <CA+4uBUYSTksNfFHHGC_4AjWs-_RB45bHiSt2GizO3TgbXTtw=A@mail.gmail.com>
+References: <kapapl$ud5$1@ger.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:61274 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750858Ab2LRSFy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 13:05:54 -0500
-Received: by mail-ie0-f171.google.com with SMTP id 17so1356447iea.16
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 10:05:54 -0800 (PST)
-In-Reply-To: <50D0951F.6050106@inktank.com>
+Received: from mail-ee0-f52.google.com ([74.125.83.52]:44542 "EHLO
+	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751357Ab2LRWqA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 17:46:00 -0500
+Received: by mail-ee0-f52.google.com with SMTP id d17so657102eek.11
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 14:45:59 -0800 (PST)
+In-Reply-To: <kapapl$ud5$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Rutger ter Borg <rutger@terborg.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I've added the output of "ps -ef" in addition to triggering a trace
-when a hang is detected.  Not much is generally running at that point,
-but you can have a look:
+You can expect read-after-write on any object.  That is, once the
+write is complete, any subsequent reader will see the result.
+-Sam
 
-https://gist.github.com/raw/4330223/2f131ee312ee43cb3d8c307a9bf2f454a7edfe57/rbd-hang-1355851498.txt
-
-Is it possible that there is some sort of deadlock going on?  We are
-doing the rbd maps (and subsequent filesystem mounts) on the same
-systems which are running the ceph-osd and ceph-mon processes.  To get
-around the 'sync' deadlock problem, we are using a patch from Sage
-which ignores system wide sync's on filesystems mounted with the
-'mand' option (and we mount the underlying osd filesystems with
-'mand').  However I am wondering if there is potential for other types
-of deadlocks in this environment.
-
-Also, we recently saw an rbd hang in a much older version, running
-kernel 3.5.3 with only the sync hack patch, along side ceph 0.48.1.
-It's possible that this issue was around for some time, just the
-recent patches made it happen more often (and thus more reproducible)
-for us.
-
-
-On Tue, Dec 18, 2012 at 8:09 AM, Alex Elder <elder@inktank.com> wrote:
-> On 12/17/2012 11:12 AM, Nick Bartos wrote:
->> Here's a log with the rbd debugging enabled:
->>
->> https://gist.github.com/raw/4319962/d9690fd92c169198efc5eecabf275ef1808929d2/rbd-hang-test-1355763470.log
->>
->> On Fri, Dec 14, 2012 at 10:03 AM, Alex Elder <elder@inktank.com> wrote:
->>> On 12/14/2012 10:53 AM, Nick Bartos wrote:
->>>> Yes I was only enabling debugging for libceph.  I'm adding debugging
->>>> for rbd as well.  I'll do a repro later today when a test cluster
->>>> opens up.
->>>
->>> Excellent, thank you.   -Alex
+On Tue, Dec 18, 2012 at 12:51 AM, Rutger ter Borg <rutger@terborg.net> wrote:
 >
-> I looked through these debugging messages.  Looking only at the
-> rbd debugging, what I see seems to indicate that rbd is idle at
-> the point the "hang" seems to start.  This suggests that the hang
-> is not due to rbd itself, but rather whatever it is that might
-> be responsible for using the rbd image once it has been mapped.
+> Dear list,
 >
-> Is that possible?  I don't know what process you have that is
-> mapping the rbd image, and what is supposed to be the next thing
-> it does.  (I realize this may not make a lot of sense, given
-> a patch in rdb seems to have caused the hang to begin occurring.)
+> I have a question regarding concurrency guarantees of Rados. Suppose I have
+> two nodes, say A and B, both running a process, and both using the same
+> rados storage pool, maybe connected through different OSDs. Suppose node A
+> updates an object in the storage pool, and after completion immediately
+> notifies B (through its own messaging layer) that that specific object has
+> been updated. Then, can I assume that, if B re-reads that object, it will
+> always get the updated one? If not, what would be the recommended way of
+> notifying B?
 >
-> Also note that the debugging information available (i.e., the
-> lines in the code that can output debugging information) may
-> well be incomplete.  So if you don't find anything it may be
-> necessary to provide you with another update which might include
-> more debugging.
+> IOW, what kind of consistency model should I assume?
 >
-> Anyway, could you provide a little more context about what
-> is going on sort of *around* rbd when activity seems to stop?
+> Thanks,
 >
-> Thanks a lot.
+> Rutger
 >
->                                         -Alex
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
