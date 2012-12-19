@@ -1,236 +1,124 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] implement librados aio_stat
-Date: Wed, 19 Dec 2012 07:53:46 -0800
-Message-ID: <50D1E30A.4060901@inktank.com>
-References: <1355483921-15654-1-git-send-email-philipgian@grnet.gr> <CAC-hyiEpvBnGTLQ-2mVx3v6fi3Ku_Tf1fVRyrmGPwQW4afxb=g@mail.gmail.com> <50D18530.7090805@grnet.gr> <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net>
+From: Drunkard Zhang <gongfan193@gmail.com>
+Subject: Re: Empty directory size greater than zero and can't remove
+Date: Thu, 20 Dec 2012 00:31:07 +0800
+Message-ID: <CAJiejCTF5VYobnng-65dm9QPmJ4Dn=VHSOqk67dTqyR=xOjC0Q@mail.gmail.com>
+References: <CAJiejCRi8QOfQB5Y0rN5vQz-xiTeA1SKdku=8Xa_+3CZAjysLA@mail.gmail.com>
+ <CAJiejCQWQK2RKvMJ-08WW+3Y+23oaghFYTWQ+u7-37grF+Liug@mail.gmail.com>
+ <50D122AD.4070609@catalyst.net.nz> <CAJiejCTTHVOXHK71Quw4SfXHL7R2NXJDV-S+JdZ0ZVWbLQqOwQ@mail.gmail.com>
+ <50D138FD.3090502@catalyst.net.nz> <alpine.DEB.2.00.1212181949370.7294@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f48.google.com ([209.85.160.48]:34336 "EHLO
-	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754724Ab2LSQCI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 11:02:08 -0500
-Received: by mail-pb0-f48.google.com with SMTP id rq13so1308178pbb.35
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 08:02:07 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:34196 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750810Ab2LSQb3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 11:31:29 -0500
+Received: by mail-qa0-f50.google.com with SMTP id cr7so1698704qab.16
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 08:31:28 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212181949370.7294@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: Filippos Giannakos <philipgian@grnet.gr>, Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
+Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, maillist-linux <ceph-devel@vger.kernel.org>
 
-On 12/19/2012 07:43 AM, Sage Weil wrote:
-> On Wed, 19 Dec 2012, Filippos Giannakos wrote:
->> OK. About the LIBRADOS_VER_MINOR, do you want me to bump it and submit a
->> new patch?
->
-> Yes, please.  Also, one other thing: can you add a functional test to
-> ceph.git/src/test/librados/aio.cc so that all of the the regular testing
-> and test suites will exercise the new code?
-
-Also the C++ version can just be aio_stat rather than rados_aio_stat.
-It's already in the librados namespace.
-
-Josh
-
-> Thanks!
-> sage
->
->
+2012/12/19 Sage Weil <sage@inktank.com>:
+> On Wed, 19 Dec 2012, Mark Kirkwood wrote:
+>> On 19/12/12 15:56, Drunkard Zhang wrote:
+>> > 2012/12/19 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
+>> > > On 19/12/12 14:44, Drunkard Zhang wrote:
+>> > > > 2012/12/16 Drunkard Zhang <gongfan193@gmail.com>:
+>> > > > > I couldn't rm files in ceph, which was backuped files of one osd. It
+>> > > > > reports direcory not empty, but there's nothing under that directory,
+>> > > > > just the directory itself held some spaces. How could I shoot down the
+>> > > > > problem ?
+>> > > > >
+>> > > > > log30 /mnt/bc # ls -aR osd.28/
+>> > > > > osd.28/:
+>> > > > > .  ..  osd.28
+>> > > > >
+>> > > > > osd.28/osd.28:
+>> > > > > .  ..  current
+>> > > > >
+>> > > > > osd.28/osd.28/current:
+>> > > > > .  ..  0.537_head
+>> > > > >
+>> > > > > osd.28/osd.28/current/0.537_head:
+>> > > > > .  ..
+>> > > > > log30 /mnt/bc # ls -lhd osd.28/osd.28/current/0.537_head
+>> > > > > drwxr-xr-x 1 root root 119M Dec 14 19:22
+>> > > > > osd.28/osd.28/current/0.537_head
+>> > > > > log30 /mnt/bc #
+>> > > > > log30 /mnt/bc # rm -rf osd.28/
+>> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
+>> > > > > empty
+>> > > > > log30 /mnt/bc # rm -rf osd.28/osd.28/current/0.537_head
+>> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
+>> > > > > empty
+>> > > > >
+>> > > > > The cluster seems health:
+>> > > > > log3 ~ # ceph -s
+>> > > > >      health HEALTH_OK
+>> > > > >      monmap e1: 3 mons at
+>> > > > >
+>> > > > > {log21=10.205.118.21:6789/0,log3=10.205.119.2:6789/0,squid86-log12=150.164.100.218:6789/0},
+>> > > > > election epoch 640, quorum 0,1,2 log21,log3,squid86-log12
+>> > > > >      osdmap e1864: 45 osds: 45 up, 45 in
+>> > > > >       pgmap v163907: 9224 pgs: 9224 active+clean; 3168 GB data, 9565
+>> > > > > GB
+>> > > > > used, 111 TB / 120 TB avail
+>> > > > >      mdsmap e134: 1/1/1 up {0=log14=up:active}, 1 up:standby
+>> > > > >
+>> > > > After mds restart, I got this error message:
+>> > > > 2012-12-19 09:16:24.837045 mds.0 [ERR] unmatched fragstat size on
+>> > > > single dirfrag 100000006c7, inode has f(v6 m2012-11-24 23:18:34.947266
+>> > > > 1773=1773+0), dirfrag has f(v6 m2012-12-17 12:43:52.203358
+>> > > > 2038=2038+0)
+>> > > >
+>> > > > How can I fix this?
+>> > > >
+>> > > Is it a btrfs filesystem? If so will have sub volumes hiding in there you
+>> > > need to remove 1st.
+>> > Thanks for reply, osds all lives on xfs filesystem.
 >>
->> Best regards,
->> Filippos
->>
->> On 12/15/2012 09:49 AM, Yehuda Sadeh wrote:
->>> Went through it briefly, looks fine, though I'd like to go over it
->>> some more before picking this up. Note that LIBRADOS_VER_MINOR needs
->>> to be bumped up too.
->>>
->>> Thanks,
->>> Yehuda
->>>
->>> On Fri, Dec 14, 2012 at 3:18 AM, Filippos Giannakos<philipgian@grnet.gr>
->>> wrote:
->>>> ---
->>>>    src/include/rados/librados.h   |   14 ++++++++++++++
->>>>    src/include/rados/librados.hpp |   15 +++++++++++++-
->>>>    src/librados/IoCtxImpl.cc      |   42
->>>> ++++++++++++++++++++++++++++++++++++++++
->>>>    src/librados/IoCtxImpl.h       |    9 +++++++++
->>>>    src/librados/librados.cc       |   10 ++++++++++
->>>>    5 files changed, 89 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
->>>> index 44d6f71..7f4b5c0 100644
->>>> --- a/src/include/rados/librados.h
->>>> +++ b/src/include/rados/librados.h
->>>> @@ -1444,6 +1444,20 @@ int rados_aio_read(rados_ioctx_t io, const char
->>>> *oid,
->>>>     */
->>>>    int rados_aio_flush(rados_ioctx_t io);
->>>>
->>>> +
->>>> +/**
->>>> + * Asynchronously get object stats (size/mtime)
->>>> + *
->>>> + * @param io ioctx
->>>> + * @param o object name
->>>> + * @param psize where to store object size
->>>> + * @param pmtime where to store modification time
->>>> + * @returns 0 on success, negative error code on failure
->>>> + */
->>>> +int rados_aio_stat(rados_ioctx_t io, const char *o,
->>>> +                  rados_completion_t completion,
->>>> +                  uint64_t *psize, time_t *pmtime);
->>>> +
->>>>    /** @} Asynchronous I/O */
->>>>
->>>>    /**
->>>> diff --git a/src/include/rados/librados.hpp
->>>> b/src/include/rados/librados.hpp
->>>> index e50acdb..96bfc15 100644
->>>> --- a/src/include/rados/librados.hpp
->>>> +++ b/src/include/rados/librados.hpp
->>>> @@ -473,9 +473,22 @@ namespace librados
->>>>         * other than CEPH_NOSNAP
->>>>         */
->>>>        int aio_remove(const std::string&  oid, AioCompletion *c);
->>>> -
->>>> +
->>>>        int aio_flush();
->>>>
->>>> +    /**
->>>> +     * Asynchronously get object stats (size/mtime)
->>>> +     *
->>>> +     * @param io ioctx
->>>> +     * @param o object name
->>>> +     * @param psize where to store object size
->>>> +     * @param pmtime where to store modification time
->>>> +     * @returns 0 on success, negative error code on failure
->>>> +     */
->>>> +    int rados_aio_stat(rados_ioctx_t io, const char *o,
->>>> +                      rados_completion_t completion,
->>>> +                      uint64_t *psize, time_t *pmtime);
->>>> +
->>>>        int aio_exec(const std::string&  oid, AioCompletion *c, const char
->>>> *cls, const char *method,
->>>>                    bufferlist&  inbl, bufferlist *outbl);
->>>>
->>>> diff --git a/src/librados/IoCtxImpl.cc b/src/librados/IoCtxImpl.cc
->>>> index 01b4a94..50aab1e 100644
->>>> --- a/src/librados/IoCtxImpl.cc
->>>> +++ b/src/librados/IoCtxImpl.cc
->>>> @@ -851,6 +851,21 @@ int librados::IoCtxImpl::aio_remove(const
->>>> object_t&oid, AioCompletionImpl *c)
->>>>      return 0;
->>>>    }
->>>>
->>>> +
->>>> +int librados::IoCtxImpl::aio_stat(const object_t&  oid, AioCompletionImpl
->>>> *c,
->>>> +                                 uint64_t *psize, time_t *pmtime)
->>>> +{
->>>> +  c->io = this;
->>>> +  C_aio_stat_Ack *onack = new C_aio_stat_Ack(c, pmtime);
->>>> +
->>>> +  Mutex::Locker l(*lock);
->>>> +  objecter->stat(oid, oloc,
->>>> +                snap_seq, psize,&onack->mtime, 0,
->>>> +                onack,&c->objver);
->>>> +
->>>> +  return 0;
->>>> +}
->>>> +
->>>>    int librados::IoCtxImpl::remove(const object_t&  oid)
->>>>    {
->>>>      utime_t ut = ceph_clock_now(client->cct);
->>>> @@ -1562,6 +1577,33 @@ void librados::IoCtxImpl::C_aio_Ack::finish(int r)
->>>>      c->put_unlock();
->>>>    }
->>>>
->>>> +///////////////////////////// C_aio_stat_Ack ////////////////////////////
->>>> +
->>>> +librados::IoCtxImpl::C_aio_stat_Ack::C_aio_stat_Ack(AioCompletionImpl
->>>> *_c,
->>>> +                                                   time_t *pm)
->>>> +   : c(_c), pmtime(pm)
->>>> +{
->>>> +  c->get();
->>>> +}
->>>> +
->>>> +void librados::IoCtxImpl::C_aio_stat_Ack::finish(int r)
->>>> +{
->>>> +  c->lock.Lock();
->>>> +  c->rval = r;
->>>> +  c->ack = true;
->>>> +  c->cond.Signal();
->>>> +
->>>> +  if (r>= 0&&  pmtime) {
->>>> +    *pmtime = mtime.sec();
->>>> +  }
->>>> +
->>>> +  if (c->callback_complete) {
->>>> +    c->io->client->finisher.queue(new C_AioComplete(c));
->>>> +  }
->>>> +
->>>> +  c->put_unlock();
->>>> +}
->>>> +
->>>>    /////////////////////// C_aio_sparse_read_Ack //////////////////////////
->>>>
->>>>    librados::IoCtxImpl::C_aio_sparse_read_Ack::C_aio_sparse_read_Ack(AioCompletionImpl
->>>> *_c,
->>>> diff --git a/src/librados/IoCtxImpl.h b/src/librados/IoCtxImpl.h
->>>> index feea0e8..55b07ee 100644
->>>> --- a/src/librados/IoCtxImpl.h
->>>> +++ b/src/librados/IoCtxImpl.h
->>>> @@ -144,6 +144,14 @@ struct librados::IoCtxImpl {
->>>>        C_aio_Ack(AioCompletionImpl *_c);
->>>>        void finish(int r);
->>>>      };
->>>> +
->>>> +  struct C_aio_stat_Ack : public Context {
->>>> +    librados::AioCompletionImpl *c;
->>>> +    time_t *pmtime;
->>>> +    utime_t mtime;
->>>> +    C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
->>>> +    void finish(int r);
->>>> +  };
->>>>
->>>>      struct C_aio_sparse_read_Ack : public Context {
->>>>        AioCompletionImpl *c;
->>>> @@ -177,6 +185,7 @@ struct librados::IoCtxImpl {
->>>>      int aio_remove(const object_t&oid, AioCompletionImpl *c);
->>>>      int aio_exec(const object_t&  oid, AioCompletionImpl *c, const char
->>>> *cls,
->>>>                  const char *method, bufferlist&  inbl, bufferlist *outbl);
->>>> +  int aio_stat(const object_t&  oid, AioCompletionImpl *c, uint64_t
->>>> *psize, time_t *pmtime);
->>>>
->>>>      int pool_change_auid(unsigned long long auid);
->>>>      int pool_change_auid_async(unsigned long long auid,
->>>> PoolAsyncCompletionImpl *c);
->>>> diff --git a/src/librados/librados.cc b/src/librados/librados.cc
->>>> index 274119c..af36b38 100644
->>>> --- a/src/librados/librados.cc
->>>> +++ b/src/librados/librados.cc
->>>> @@ -2167,6 +2167,16 @@ extern "C" int rados_aio_flush(rados_ioctx_t io)
->>>>      return 0;
->>>>    }
->>>>
->>>> +extern "C" int rados_aio_stat(rados_ioctx_t io, const char *o,
->>>> +                             rados_completion_t completion,
->>>> +                             uint64_t *psize, time_t *pmtime)
->>>> +{
->>>> +  librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
->>>> +  object_t oid(o);
->>>> +  return ctx->aio_stat(oid, (librados::AioCompletionImpl*)completion,
->>>> +                      psize, pmtime);
->>>> +}
->>>> +
->>>>    struct C_WatchCB : public librados::WatchCtx {
->>>>      rados_watchcb_t wcb;
->>>>      void *arg;
->>>> --
->>>> 1.7.10.4
+>> Ah, right - might be worth showing us output of 'ls -la' in the dir concerned.
+>> In particular the link counts might be wrong (indicating fs corruption,
+>> probably fixable with xfs_repair).
+>
+Sorry for late response, but I was involved  in another stuck problem,
+turns out it's firewall rules lost :(
 
+Here's ls of this directory recursively:
+log1 /mnt/bc # ls -laR osd.28/
+osd.28/:
+total 0
+drwxr-xr-x 1 root root     124379978 Dec 13 23:04 .
+drwxr-xr-x 1 root root 7251593161780 Dec 19 01:05 ..
+drwxr-xr-x 1 root root     124379978 Dec 14 19:24 osd.28
+
+osd.28/osd.28:
+total 0
+drwxr-xr-x 1 root root 124379978 Dec 14 19:24 .
+drwxr-xr-x 1 root root 124379978 Dec 13 23:04 ..
+drwxr-xr-x 1 root root 124379978 Dec 14 19:24 current
+
+osd.28/osd.28/current:
+total 0
+drwxr-xr-x 1 root root 124379978 Dec 14 19:24 .
+drwxr-xr-x 1 root root 124379978 Dec 14 19:24 ..
+drwxr-xr-x 1 root root 124379978 Dec 16 12:40 0.537_head
+
+osd.28/osd.28/current/0.537_head:
+total 0
+drwxr-xr-x 1 root root 124379978 Dec 16 12:40 .
+drwxr-xr-x 1 root root 124379978 Dec 14 19:24 ..
+log1 /mnt/bc #
+
+> This is a problem in the MDS, not the fs underneath the OSDs.  There was
+> at least one bug that was corrupting the 'rstats' recursive info that
+> could lead to this that has been fixed recently.
+>
+> The MDS is actually repairing this as it goes, unless you specify the 'mds
+> verify scatter = true' option, in which case it will assert and kill
+> itself.
+>
+So, I can fix this problem by set this option? 'mds verify scatter = true'
