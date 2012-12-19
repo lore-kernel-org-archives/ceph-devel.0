@@ -1,173 +1,212 @@
-From: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
-Subject: ceph stability
-Date: Wed, 19 Dec 2012 15:03:08 +0600
-Message-ID: <CAD5ewrosrMWD3jxznaMhab=VTL4VzQ7savVk42KDe374VSSzbA@mail.gmail.com>
+From: Filippos Giannakos <philipgian@grnet.gr>
+Subject: Re: [PATCH] implement librados aio_stat
+Date: Wed, 19 Dec 2012 11:13:20 +0200
+Message-ID: <50D18530.7090805@grnet.gr>
+References: <1355483921-15654-1-git-send-email-philipgian@grnet.gr> <CAC-hyiEpvBnGTLQ-2mVx3v6fi3Ku_Tf1fVRyrmGPwQW4afxb=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:41534 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752892Ab2LSJDJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 04:03:09 -0500
-Received: by mail-qa0-f44.google.com with SMTP id z4so4076038qan.10
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 01:03:08 -0800 (PST)
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:24182 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750809Ab2LSJN3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 Dec 2012 04:13:29 -0500
+In-Reply-To: <CAC-hyiEpvBnGTLQ-2mVx3v6fi3Ku_Tf1fVRyrmGPwQW4afxb=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
 
-Hello,
+OK. About the LIBRADOS_VER_MINOR, do you want me to bump it and submit a
+new patch?
 
-I have 2 issues with ceph stability and looking for help to resolve them.
-My setup is pretty simple - 3 debian 32bit stable systems each running
-osd, mon and mds.
-the conf is the following:
---------------------
-[global]
-    auth cluster required = none
-    auth service required = none
-    auth client required = none
+Best regards,
+Filippos
 
-[osd]
-    osd journal size = 1000
-    filestore xattr use omap = true
+On 12/15/2012 09:49 AM, Yehuda Sadeh wrote:
+> Went through it briefly, looks fine, though I'd like to go over it
+> some more before picking this up. Note that LIBRADOS_VER_MINOR needs
+> to be bumped up too.
+>
+> Thanks,
+> Yehuda
+>
+> On Fri, Dec 14, 2012 at 3:18 AM, Filippos Giannakos<philipgian@grnet.gr>  wrote:
+>> ---
+>>   src/include/rados/librados.h   |   14 ++++++++++++++
+>>   src/include/rados/librados.hpp |   15 +++++++++++++-
+>>   src/librados/IoCtxImpl.cc      |   42 ++++++++++++++++++++++++++++++++++++++++
+>>   src/librados/IoCtxImpl.h       |    9 +++++++++
+>>   src/librados/librados.cc       |   10 ++++++++++
+>>   5 files changed, 89 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
+>> index 44d6f71..7f4b5c0 100644
+>> --- a/src/include/rados/librados.h
+>> +++ b/src/include/rados/librados.h
+>> @@ -1444,6 +1444,20 @@ int rados_aio_read(rados_ioctx_t io, const char *oid,
+>>    */
+>>   int rados_aio_flush(rados_ioctx_t io);
+>>
+>> +
+>> +/**
+>> + * Asynchronously get object stats (size/mtime)
+>> + *
+>> + * @param io ioctx
+>> + * @param o object name
+>> + * @param psize where to store object size
+>> + * @param pmtime where to store modification time
+>> + * @returns 0 on success, negative error code on failure
+>> + */
+>> +int rados_aio_stat(rados_ioctx_t io, const char *o,
+>> +                  rados_completion_t completion,
+>> +                  uint64_t *psize, time_t *pmtime);
+>> +
+>>   /** @} Asynchronous I/O */
+>>
+>>   /**
+>> diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hpp
+>> index e50acdb..96bfc15 100644
+>> --- a/src/include/rados/librados.hpp
+>> +++ b/src/include/rados/librados.hpp
+>> @@ -473,9 +473,22 @@ namespace librados
+>>        * other than CEPH_NOSNAP
+>>        */
+>>       int aio_remove(const std::string&  oid, AioCompletion *c);
+>> -
+>> +
+>>       int aio_flush();
+>>
+>> +    /**
+>> +     * Asynchronously get object stats (size/mtime)
+>> +     *
+>> +     * @param io ioctx
+>> +     * @param o object name
+>> +     * @param psize where to store object size
+>> +     * @param pmtime where to store modification time
+>> +     * @returns 0 on success, negative error code on failure
+>> +     */
+>> +    int rados_aio_stat(rados_ioctx_t io, const char *o,
+>> +                      rados_completion_t completion,
+>> +                      uint64_t *psize, time_t *pmtime);
+>> +
+>>       int aio_exec(const std::string&  oid, AioCompletion *c, const char *cls, const char *method,
+>>                   bufferlist&  inbl, bufferlist *outbl);
+>>
+>> diff --git a/src/librados/IoCtxImpl.cc b/src/librados/IoCtxImpl.cc
+>> index 01b4a94..50aab1e 100644
+>> --- a/src/librados/IoCtxImpl.cc
+>> +++ b/src/librados/IoCtxImpl.cc
+>> @@ -851,6 +851,21 @@ int librados::IoCtxImpl::aio_remove(const object_t&oid, AioCompletionImpl *c)
+>>     return 0;
+>>   }
+>>
+>> +
+>> +int librados::IoCtxImpl::aio_stat(const object_t&  oid, AioCompletionImpl *c,
+>> +                                 uint64_t *psize, time_t *pmtime)
+>> +{
+>> +  c->io = this;
+>> +  C_aio_stat_Ack *onack = new C_aio_stat_Ack(c, pmtime);
+>> +
+>> +  Mutex::Locker l(*lock);
+>> +  objecter->stat(oid, oloc,
+>> +                snap_seq, psize,&onack->mtime, 0,
+>> +                onack,&c->objver);
+>> +
+>> +  return 0;
+>> +}
+>> +
+>>   int librados::IoCtxImpl::remove(const object_t&  oid)
+>>   {
+>>     utime_t ut = ceph_clock_now(client->cct);
+>> @@ -1562,6 +1577,33 @@ void librados::IoCtxImpl::C_aio_Ack::finish(int r)
+>>     c->put_unlock();
+>>   }
+>>
+>> +///////////////////////////// C_aio_stat_Ack ////////////////////////////
+>> +
+>> +librados::IoCtxImpl::C_aio_stat_Ack::C_aio_stat_Ack(AioCompletionImpl *_c,
+>> +                                                   time_t *pm)
+>> +   : c(_c), pmtime(pm)
+>> +{
+>> +  c->get();
+>> +}
+>> +
+>> +void librados::IoCtxImpl::C_aio_stat_Ack::finish(int r)
+>> +{
+>> +  c->lock.Lock();
+>> +  c->rval = r;
+>> +  c->ack = true;
+>> +  c->cond.Signal();
+>> +
+>> +  if (r>= 0&&  pmtime) {
+>> +    *pmtime = mtime.sec();
+>> +  }
+>> +
+>> +  if (c->callback_complete) {
+>> +    c->io->client->finisher.queue(new C_AioComplete(c));
+>> +  }
+>> +
+>> +  c->put_unlock();
+>> +}
+>> +
+>>   /////////////////////// C_aio_sparse_read_Ack //////////////////////////
+>>
+>>   librados::IoCtxImpl::C_aio_sparse_read_Ack::C_aio_sparse_read_Ack(AioCompletionImpl *_c,
+>> diff --git a/src/librados/IoCtxImpl.h b/src/librados/IoCtxImpl.h
+>> index feea0e8..55b07ee 100644
+>> --- a/src/librados/IoCtxImpl.h
+>> +++ b/src/librados/IoCtxImpl.h
+>> @@ -144,6 +144,14 @@ struct librados::IoCtxImpl {
+>>       C_aio_Ack(AioCompletionImpl *_c);
+>>       void finish(int r);
+>>     };
+>> +
+>> +  struct C_aio_stat_Ack : public Context {
+>> +    librados::AioCompletionImpl *c;
+>> +    time_t *pmtime;
+>> +    utime_t mtime;
+>> +    C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
+>> +    void finish(int r);
+>> +  };
+>>
+>>     struct C_aio_sparse_read_Ack : public Context {
+>>       AioCompletionImpl *c;
+>> @@ -177,6 +185,7 @@ struct librados::IoCtxImpl {
+>>     int aio_remove(const object_t&oid, AioCompletionImpl *c);
+>>     int aio_exec(const object_t&  oid, AioCompletionImpl *c, const char *cls,
+>>                 const char *method, bufferlist&  inbl, bufferlist *outbl);
+>> +  int aio_stat(const object_t&  oid, AioCompletionImpl *c, uint64_t *psize, time_t *pmtime);
+>>
+>>     int pool_change_auid(unsigned long long auid);
+>>     int pool_change_auid_async(unsigned long long auid, PoolAsyncCompletionImpl *c);
+>> diff --git a/src/librados/librados.cc b/src/librados/librados.cc
+>> index 274119c..af36b38 100644
+>> --- a/src/librados/librados.cc
+>> +++ b/src/librados/librados.cc
+>> @@ -2167,6 +2167,16 @@ extern "C" int rados_aio_flush(rados_ioctx_t io)
+>>     return 0;
+>>   }
+>>
+>> +extern "C" int rados_aio_stat(rados_ioctx_t io, const char *o,
+>> +                             rados_completion_t completion,
+>> +                             uint64_t *psize, time_t *pmtime)
+>> +{
+>> +  librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
+>> +  object_t oid(o);
+>> +  return ctx->aio_stat(oid, (librados::AioCompletionImpl*)completion,
+>> +                      psize, pmtime);
+>> +}
+>> +
+>>   struct C_WatchCB : public librados::WatchCtx {
+>>     rados_watchcb_t wcb;
+>>     void *arg;
+>> --
+>> 1.7.10.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-[mon.a]
-    host = ceph-node01
-    mon addr = 192.168.7.11:6789
-
-[mon.b]
-    host = ceph-node02
-    mon addr = 192.168.7.12:6789
-
-[mon.c]
-        host = ceph-node03
-        mon addr = 192.168.7.13:6789
-
-[mds.a]
-        host = ceph-node01
-
-[mds.b]
-        host = ceph-node02
-
-[mds.c]
-        host = ceph-node03
-
-[osd.0]
-    host = ceph-node01
-
-[osd.1]
-    host = ceph-node02
-
-[osd.2]
-    host = ceph-node03
---------------------
-ceph -s is:
-   health HEALTH_OK
-   monmap e4: 3 mons at
-{a=192.168.7.11:6789/0,b=192.168.7.12:6789/0,c=192.168.7.13:6789/0},
-election epoch 118, quorum 0,1,2 a,b,c
-   osdmap e197: 3 osds: 3 up, 3 in
-    pgmap v43305: 384 pgs: 384 active+clean; 72351 MB data, 144 GB
-used, 105 GB / 249 GB avail
-   mdsmap e4439: 1/1/1 up {0=a=up:active}, 2 up:standby
---------------------
-
-My first problem - I am getting spurious mon's deaths, which usually
-looks like this:
-
---- begin dump of recent events ---
-     0> 2012-12-19 10:35:58.912119 b41eab70 -1 *** Caught signal (Aborted) **
- in thread b41eab70
-
- ceph version 0.55.1 (8e25c8d984f9258644389a18997ec6bdef8e056b)
- 1: /usr/bin/ceph-mon() [0x8183a11]
- 2: [0xb7714400]
- 3: (gsignal()+0x47) [0xb7337577]
- 4: (abort()+0x182) [0xb733a962]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x14f) [0xb755653f]
- 6: (()+0xbd405) [0xb7554405]
- 7: (()+0xbd442) [0xb7554442]
- 8: (()+0xbd581) [0xb7554581]
- 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x80f) [0x824cabf]
- 10: /usr/bin/ceph-mon() [0x80e3c1d]
- 11: (MDSMonitor::tick()+0x1e3b) [0x811ea0b]
- 12: (MDSMonitor::on_active()+0x1d) [0x81188dd]
- 13: (PaxosService::_active()+0x212) [0x80e4b02]
- 14: (Context::complete(int)+0x19) [0x80c4cf9]
- 15: (finish_contexts(CephContext*, std::list<Context*,
-std::allocator<Context*> >&, int)+0x13f) [0x80d208f]
- 16: (Monitor::recovered_leader(int)+0x3ac) [0x80ac5ac]
- 17: (Paxos::handle_last(MMonPaxos*)+0xb02) [0x80e0572]
- 18: (Paxos::dispatch(PaxosServiceMessage*)+0x2c4) [0x80e0e94]
- 19: (Monitor::_ms_dispatch(Message*)+0x1181) [0x80c3b11]
- 20: (Monitor::ms_dispatch(Message*)+0x31) [0x80d5021]
- 21: (DispatchQueue::entry()+0x337) [0x82afa47]
- 22: (DispatchQueue::DispatchThread::entry()+0x20) [0x823eec0]
- 23: (Thread::_entry_func(void*)+0x11) [0x824be41]
- 24: (()+0x57b0) [0xb75ef7b0]
- 25: (clone()+0x5e) [0xb73d8cde]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
---- logging levels ---
-   0/ 5 none
-   0/ 1 lockdep
-   0/ 1 context
-   1/ 1 crush
-   1/ 5 mds
-   1/ 5 mds_balancer
-   1/ 5 mds_locker
-   1/ 5 mds_log
-   1/ 5 mds_log_expire
-   1/ 5 mds_migrator
-   0/ 1 buffer
-   0/ 1 timer
-   0/ 1 filer
-   0/ 1 striper
-   0/ 1 objecter
-   0/ 5 rados
-   0/ 5 rbd
-   0/ 5 journaler
-   0/ 5 objectcacher
-   0/ 5 client
-   0/ 5 osd
-   0/ 5 optracker
-   0/ 5 objclass
-   1/ 3 filestore
-   1/ 3 journal
-   0/ 5 ms
-   1/ 5 mon
-   0/10 monc
-   0/ 5 paxos
-   0/ 5 tp
-   1/ 5 auth
-   1/ 5 crypto
-   1/ 1 finisher
-   1/ 5 heartbeatmap
-   1/ 5 perfcounter
-   1/ 5 rgw
-   1/ 5 hadoop
-   1/ 5 javaclient
-   1/ 5 asok
-   1/ 1 throttle
-  -2/-2 (syslog threshold)
-  -1/-1 (stderr threshold)
-  max_recent    100000
-  max_new         1000
-  log_file /var/log/ceph/ceph-mon.a.log
---- end dump of recent events ---
-
-the binaries are coming from ceph.com debian-testing repo.
-
-My second problem - I have 2 systems which mount ceph. Whenever I
-mount ceph on any other system it usually mounts but get stuck on
-stat* operations (i.e. simple ls -al will hang with read( from the
-ceph-mounted directory for ages). This kind of client stuck also
-affects two working clients. they also start to stuck on the stat*
-even after shutdown of the third client. so usually umount/mount or
-even reboot for existing clients solves the issue)
-
-
---
-...WBR, Roman Hlynovskiy
