@@ -1,127 +1,238 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: OSD memory leaks?
-Date: Wed, 19 Dec 2012 17:37:16 +0100
-Message-ID: <CAOLwVUm+8mZCrx9b_Ywna2AOjCM_eLaZnHSp04hnqTQ2ti-iAw@mail.gmail.com>
-References: <CAOLwVUmJb0y39dg3zTv=c4iPSkjLBhG3L7L4=L7Ms96iP-SiWw@mail.gmail.com>
- <CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
- <CA+4uBUY6Vf0HU71bL8z-3QhbsSSv+LRXFyfAiHHoNAzMw=5dLw@mail.gmail.com>
- <CAOLwVUn5VbH1P=0wu-Oxb1bSKpaQfC6uQ5012wvPc7bvz606JA@mail.gmail.com>
- <CAOLwVU=_Tz6Swirzk6AWwREdmG8qQUiQt=wd1OyNiPVSF1bqng@mail.gmail.com>
- <CA+4uBUZyeGAHH9Ntws2tCKud66H758qyCPWVG-aZnB2gcZjpJg@mail.gmail.com> <CAOLwVUkVhoM6U4z1iBPYFucdaq4AtV69_YReh2UaE_Jkocm4xQ@mail.gmail.com>
+From: Tibet Himalkaya <himalkaya@hotmail.com>
+Subject: ceph -s loops/hangs! ubuntu raring ceph bug?
+Date: Wed, 19 Dec 2012 16:48:12 +0000 (UTC)
+Message-ID: <loom.20121219T172747-957@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f175.google.com ([209.85.217.175]:46276 "EHLO
-	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810Ab2LSQhi convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 11:37:38 -0500
-Received: by mail-lb0-f175.google.com with SMTP id gg13so2076509lbb.20
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 08:37:36 -0800 (PST)
-In-Reply-To: <CAOLwVUkVhoM6U4z1iBPYFucdaq4AtV69_YReh2UaE_Jkocm4xQ@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:55017 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754356Ab2LSQy5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 Dec 2012 11:54:57 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1TlMvB-0002C0-4u
+	for ceph-devel@vger.kernel.org; Wed, 19 Dec 2012 17:55:05 +0100
+Received: from ext.fw.pop-hh.net ([212.79.49.139])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 17:55:05 +0100
+Received: from himalkaya by ext.fw.pop-hh.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 17:55:05 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-No more suggestions? :(
---
-Regards,
-S=E9bastien Han.
+Hello CephTeam,Community
+I m doing just my first steps with ceph.
+I have upgraded my 3 test system to ubuntu/raring and run mkcephfs below is 
+output,ceph.conf and ceph -s output...any help would be appreciated.
+Thanks
+Tibet
+----------------------
+root@host1:/var/lib/ceph# mkcephfs -a -c /etc/ceph/ceph.conf --mkbtrfs
+temp dir is /tmp/mkcephfs.TWKgOA0wXY
+preparing monmap in /tmp/mkcephfs.TWKgOA0wXY/monmap
+/usr/bin/monmaptool --create --clobber --add a 10.255.255.1:6789 
+--add b 10.255.255.2:6789 --add c 10.255.255.3:6789 --print 
+/tmp/mkcephfs.TWKgOA0wXY/monmap
+/usr/bin/monmaptool: monmap file /tmp/mkcephfs.TWKgOA0wXY/monmap
+/usr/bin/monmaptool: generated fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+epoch 0
+fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+last_changed 2012-12-19 17:09:16.156323
+created 2012-12-19 17:09:16.156323
+0: 10.255.255.1:6789/0 mon.a
+1: 10.255.255.2:6789/0 mon.b
+2: 10.255.255.3:6789/0 mon.c
+/usr/bin/monmaptool: writing epoch 0 to /tmp/mkcephfs.TWKgOA0wXY/monmap 
+(3 monitors)
+=== osd.0 ===
+no devs defined for osd.0
+2012-12-19 17:09:16.437947 7f53401237c0 -1 journal check: ondisk 
+fsid dafd4de1-3e82-4607-b124-63f8010a6a43 doesn't match expected 
+68b54f67-46d6-4eff-bb0b-ac5ceb9c62d9, invalid (someone else's?) journal
+2012-12-19 17:09:16.779841 7f53401237c0 -1 filestore(/var/lib/ceph/osd/ceph-0)
+ could not find 23c2fcde/osd_superblock/0//-1 in index: 
+(2) No such file or directory
+2012-12-19 17:09:17.004905 7f53401237c0 -1 created object store 
+/var/lib/ceph/osd/ceph-0 journal /tmpfs/osd.0.journal for osd.0 fsid 
+29ac4f55-e174-4544-999e-b0cf2eeecda6
+2012-12-19 17:09:17.004961 7f53401237c0 -1 auth: error reading file: 
+/var/lib/ceph/osd/ceph-0/keyring: can't open /var/lib/ceph/osd/ceph-0/keyring:
+ (2) No such file or directory
+2012-12-19 17:09:17.005045 7f53401237c0 -1 created new key in keyring 
+/var/lib/ceph/osd/ceph-0/keyring
+=== osd.1 ===
+pushing conf and monmap to host2:/tmp/mkfs.ceph.45272
+no devs defined for osd.1
+2012-12-19 17:09:19.544529 7f1f158837c0 -1 journal check: ondisk 
+fsid 31f1b4ed-8cc8-493a-a62e-5d705736cc60 doesn't match expected 
+bebd309d-e726-47d2-9ba7-324589b82a55, invalid (someone else's?) journal
+2012-12-19 17:09:19.853172 7f1f158837c0 -1 filestore(/var/lib/ceph/osd/ceph-1) 
+could not find 23c2fcde/osd_superblock/0//-1 in index: 
+(2) No such file or directory
+2012-12-19 17:09:20.094822 7f1f158837c0 -1 created object store 
+/var/lib/ceph/osd/ceph-1 journal /tmpfs/osd.1.journal for osd.1 fsid 
+29ac4f55-e174-4544-999e-b0cf2eeecda6
+2012-12-19 17:09:20.094871 7f1f158837c0 -1 auth: error reading 
+file: /var/lib/ceph/osd/ceph-1/keyring: can't open 
+/var/lib/ceph/osd/ceph-1/keyring: (2) No such file or directory
+2012-12-19 17:09:20.094951 7f1f158837c0 -1 created new key in 
+keyring /var/lib/ceph/osd/ceph-1/keyring
+collecting osd.1 key
+=== osd.2 ===
+pushing conf and monmap to host3:/tmp/mkfs.ceph.45272
+no devs defined for osd.2
+2012-12-19 17:09:23.370067 7f1e3fe5c7c0 -1 journal check: ondisk 
+fsid fa149ab5-3ec7-4a23-abc5-ef8ac61aca9b doesn't match expected 
+b059d5b8-19cc-4921-bc37-e6e54fa508cb, invalid (someone else's?) journal
+2012-12-19 17:09:23.686918 7f1e3fe5c7c0 -1 filestore(/var/lib/ceph/osd/ceph-2) 
+could not find 23c2fcde/osd_superblock/0//-1 in index: 
+(2) No such file or directory
+2012-12-19 17:09:23.878634 7f1e3fe5c7c0 -1 created object store 
+/var/lib/ceph/osd/ceph-2 journal /tmpfs/osd.2.journal for osd.2 
+fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+2012-12-19 17:09:23.878684 7f1e3fe5c7c0 -1 auth: error reading 
+file: /var/lib/ceph/osd/ceph-2/keyring: can't open 
+/var/lib/ceph/osd/ceph-2/keyring: (2) No such file or directory
+2012-12-19 17:09:23.878765 7f1e3fe5c7c0 -1 created new key in 
+keyring /var/lib/ceph/osd/ceph-2/keyring
+collecting osd.2 key
+=== mds.a ===
+creating private key for mds.a keyring /var/lib/ceph/mds/ceph-a/keyring
+creating /var/lib/ceph/mds/ceph-a/keyring
+=== mds.b ===
+pushing conf and monmap to host2:/tmp/mkfs.ceph.45272
+creating private key for mds.b keyring /var/lib/ceph/mds/ceph-b/keyring
+creating /var/lib/ceph/mds/ceph-b/keyring
+collecting mds.b key
+=== mds.c ===
+pushing conf and monmap to host3:/tmp/mkfs.ceph.45272
+creating private key for mds.c keyring /var/lib/ceph/mds/ceph-c/keyring
+creating /var/lib/ceph/mds/ceph-c/keyring
+collecting mds.c key
+Building generic osdmap from /tmp/mkcephfs.TWKgOA0wXY/conf
+/usr/bin/osdmaptool: osdmap file '/tmp/mkcephfs.TWKgOA0wXY/osdmap'
+/usr/bin/osdmaptool: writing epoch 1 to /tmp/mkcephfs.TWKgOA0wXY/osdmap
+Generating admin key at /tmp/mkcephfs.TWKgOA0wXY/keyring.admin
+creating /tmp/mkcephfs.TWKgOA0wXY/keyring.admin
+Building initial monitor keyring
+added entity mds.a auth auth(auid = 18446744073709551615 
+key=AQC05tFQ4MiXKBAAs0puNKyZwKKRqpMloWwnIA== with 0 caps)
+added entity mds.b auth auth(auid = 18446744073709551615 
+key=AQC25tFQAPB9IxAAMQAOPah3ehsLENKnGn/keA== with 0 caps)
+added entity mds.c auth auth(auid = 18446744073709551615 
+key=AQC55tFQWC2jDhAAZJsDqe3m69c43wKF+2Xztw== with 0 caps)
+added entity osd.0 auth auth(auid = 18446744073709551615 
+key=AQCt5tFQWMpLABAA6QOTvUx06ZmM+9sconRTvw== with 0 caps)
+added entity osd.1 auth auth(auid = 18446744073709551615 
+key=AQCw5tFQYLGnBRAAQ5YuQ16gn0OEw6g2eL6yCQ== with 0 caps)
+added entity osd.2 auth auth(auid = 18446744073709551615 
+key=AQCz5tFQ6LpfNBAAWZ4rWZLLiIryBt5cjhmynw== with 0 caps)
+=== mon.a ===
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-a for mon.a
+=== mon.b ===
+pushing everything to host2
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-b for mon.b
+=== mon.c ===
+pushing everything to host3
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-c for mon.c
+placing client.admin keyring in /etc/ceph/keyring
+-----------------------
+[global]
+        auth supported = none
+        auth cluster required = none
+        auth service required = none
+        auth client required = none
+        public network = 10.0.1.171/24
+        cluster network = 10.255.255.1/24
+        debug ms = 1
 
 
-On Tue, Dec 18, 2012 at 6:21 PM, S=E9bastien Han <han.sebastien@gmail.c=
-om> wrote:
-> Nothing terrific...
->
-> Kernel logs from my clients are full of "libceph: osd4
-> 172.20.11.32:6801 socket closed"
->
-> I saw this somewhere on the tracker.
->
-> Does this harm?
->
-> Thanks.
->
-> --
-> Regards,
-> S=E9bastien Han.
->
->
->
-> On Mon, Dec 17, 2012 at 11:55 PM, Samuel Just <sam.just@inktank.com> =
-wrote:
->>
->> What is the workload like?
->> -Sam
->>
->> On Mon, Dec 17, 2012 at 2:41 PM, S=E9bastien Han <han.sebastien@gmai=
-l.com> wrote:
->> > Hi,
->> >
->> > No, I don't see nothing abnormal in the network stats. I don't see
->> > anything in the logs... :(
->> > The weird thing is that one node over 4 seems to take way more mem=
-ory
->> > than the others...
->> >
->> > --
->> > Regards,
->> > S=E9bastien Han.
->> >
->> >
->> > On Mon, Dec 17, 2012 at 11:31 PM, S=E9bastien Han <han.sebastien@g=
-mail.com> wrote:
->> >>
->> >> Hi,
->> >>
->> >> No, I don't see nothing abnormal in the network stats. I don't se=
-e anything in the logs... :(
->> >> The weird thing is that one node over 4 seems to take way more me=
-mory than the others...
->> >>
->> >> --
->> >> Regards,
->> >> S=E9bastien Han.
->> >>
->> >>
->> >>
->> >> On Mon, Dec 17, 2012 at 7:12 PM, Samuel Just <sam.just@inktank.co=
-m> wrote:
->> >>>
->> >>> Are you having network hiccups?  There was a bug noticed recentl=
-y that
->> >>> could cause a memory leak if nodes are being marked up and down.
->> >>> -Sam
->> >>>
->> >>> On Mon, Dec 17, 2012 at 12:28 AM, S=E9bastien Han <han.sebastien=
-@gmail.com> wrote:
->> >>> > Hi guys,
->> >>> >
->> >>> > Today looking at my graphs I noticed that one over 4 ceph node=
-s used a
->> >>> > lot of memory. It keeps growing and growing.
->> >>> > See the graph attached to this mail.
->> >>> > I run 0.48.2 on Ubuntu 12.04.
->> >>> >
->> >>> > The other nodes also grow, but slowly than the first one.
->> >>> >
->> >>> > I'm not quite sure about the information that I have to provid=
-e. So
->> >>> > let me know. The only thing I can say is that the load haven't
->> >>> > increase that much this week. It seems to be consuming and not=
- giving
->> >>> > back the memory.
->> >>> >
->> >>> > Thank you in advance.
->> >>> >
->> >>> > --
->> >>> > Regards,
->> >>> > S=E9bastien Han.
->> >>
->> >>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[osd]
+        journal dio = false
+        osd journal size = 2000
+        osd journal = /tmpfs/osd.$id.journal
+        filestore fiemap = false
+        debug osd = 20
+        debug filestore = 20
+        debug journal = 20
+        debug monc = 20
+
+[mon]
+        debug mon = 20
+        debug paxos = 20
+        debug auth = 20
+
+[mon.a]
+        host = host1
+        mon addr = 10.255.255.1:6789
+
+[mon.b]
+        host = host2
+        mon addr = 10.255.255.2:6789
+
+[mon.c]
+        host = host3
+        mon addr = 10.255.255.3:6789
+
+[osd.0]
+        host = host1
+        public addr = 10.0.1.171
+        cluster addr = 10.255.255.1
+
+[osd.1]
+        host = host2
+        public addr = 10.0.1.172
+        cluster addr = 10.255.255.2
+
+[osd.2]
+        host = host3
+        public addr = 10.0.1.173
+        cluster addr = 10.255.255.3
+
+[mds]
+        debug mds = 20
+        debug mds balancer = 20
+        debug mds log = 20
+        debug mds migrator = 20
+
+[mds.a]
+        host = host1
+        public addr = 10.0.1.171
+        cluster addr = 10.255.255.1
+
+[mds.b]
+        host = host2
+        public addr = 10.0.1.172
+        cluster addr = 10.255.255.2
+
+[mds.c]
+        host = host3
+        public addr = 10.0.1.173
+        cluster addr = 10.255.255.3
+
+[client]
+        rbd cache = true
+
+-----------------------
+root@host1:/var/lib/ceph# ceph -s
+2012-12-19 17:25:55.381735 7f0ab4250780  1 -- :/0 messenger.start
+2012-12-19 17:25:55.382437 7f0ab4250780  1 -- :/52134 --> 10.255.255.2:6789/0 
+-- auth(proto 0 30 bytes epoch 0) v1 
+-- ?+0 0x7f0ab5d28a  50 con 0x7f0ab5d28610 2012-12-19 17:25:55.382836 
+7f0ab424e700  1 
+-- 10.255.255.1:0/52134 learned my addr 10.255.255.1:0/52134
+2012-12-19 17:25:58.382411 7f0aaf2cd700  1 
+-- 10.255.255.1:0/52134 mark_down 0x7f0ab5d28610 -- 0x7f0ab5d283d0
+2012-12-19 17:25:58.382525 7f0aaf2cd700  1 
+-- 10.255.255.1:0/52134 --> 10.255.255.3:6789/0 -- auth(proto 0 30 bytes 
+epoch 0) v1 -- ?+0   0x7f0aa4001330 con 0x7f0aa4000e40
+2012-12-19 17:26:01.382653 7f0aaf2cd700  1 -- 10.255.255.1:0/52134 mark_down 
+0x7f0aa4000e40 -- 0x7f0aa4000c00
+
+
+
