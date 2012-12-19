@@ -1,124 +1,127 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Empty directory size greater than zero and can't remove
-Date: Thu, 20 Dec 2012 00:31:07 +0800
-Message-ID: <CAJiejCTF5VYobnng-65dm9QPmJ4Dn=VHSOqk67dTqyR=xOjC0Q@mail.gmail.com>
-References: <CAJiejCRi8QOfQB5Y0rN5vQz-xiTeA1SKdku=8Xa_+3CZAjysLA@mail.gmail.com>
- <CAJiejCQWQK2RKvMJ-08WW+3Y+23oaghFYTWQ+u7-37grF+Liug@mail.gmail.com>
- <50D122AD.4070609@catalyst.net.nz> <CAJiejCTTHVOXHK71Quw4SfXHL7R2NXJDV-S+JdZ0ZVWbLQqOwQ@mail.gmail.com>
- <50D138FD.3090502@catalyst.net.nz> <alpine.DEB.2.00.1212181949370.7294@cobra.newdream.net>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: OSD memory leaks?
+Date: Wed, 19 Dec 2012 17:37:16 +0100
+Message-ID: <CAOLwVUm+8mZCrx9b_Ywna2AOjCM_eLaZnHSp04hnqTQ2ti-iAw@mail.gmail.com>
+References: <CAOLwVUmJb0y39dg3zTv=c4iPSkjLBhG3L7L4=L7Ms96iP-SiWw@mail.gmail.com>
+ <CAOLwVUnRqj+u7Vn2De+zAfvXLpYhj=tNggGZZdOH+m_xj2SMCQ@mail.gmail.com>
+ <CA+4uBUY6Vf0HU71bL8z-3QhbsSSv+LRXFyfAiHHoNAzMw=5dLw@mail.gmail.com>
+ <CAOLwVUn5VbH1P=0wu-Oxb1bSKpaQfC6uQ5012wvPc7bvz606JA@mail.gmail.com>
+ <CAOLwVU=_Tz6Swirzk6AWwREdmG8qQUiQt=wd1OyNiPVSF1bqng@mail.gmail.com>
+ <CA+4uBUZyeGAHH9Ntws2tCKud66H758qyCPWVG-aZnB2gcZjpJg@mail.gmail.com> <CAOLwVUkVhoM6U4z1iBPYFucdaq4AtV69_YReh2UaE_Jkocm4xQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:34196 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810Ab2LSQb3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 11:31:29 -0500
-Received: by mail-qa0-f50.google.com with SMTP id cr7so1698704qab.16
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 08:31:28 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1212181949370.7294@cobra.newdream.net>
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:46276 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750810Ab2LSQhi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 11:37:38 -0500
+Received: by mail-lb0-f175.google.com with SMTP id gg13so2076509lbb.20
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 08:37:36 -0800 (PST)
+In-Reply-To: <CAOLwVUkVhoM6U4z1iBPYFucdaq4AtV69_YReh2UaE_Jkocm4xQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, maillist-linux <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2012/12/19 Sage Weil <sage@inktank.com>:
-> On Wed, 19 Dec 2012, Mark Kirkwood wrote:
->> On 19/12/12 15:56, Drunkard Zhang wrote:
->> > 2012/12/19 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
->> > > On 19/12/12 14:44, Drunkard Zhang wrote:
->> > > > 2012/12/16 Drunkard Zhang <gongfan193@gmail.com>:
->> > > > > I couldn't rm files in ceph, which was backuped files of one osd. It
->> > > > > reports direcory not empty, but there's nothing under that directory,
->> > > > > just the directory itself held some spaces. How could I shoot down the
->> > > > > problem ?
->> > > > >
->> > > > > log30 /mnt/bc # ls -aR osd.28/
->> > > > > osd.28/:
->> > > > > .  ..  osd.28
->> > > > >
->> > > > > osd.28/osd.28:
->> > > > > .  ..  current
->> > > > >
->> > > > > osd.28/osd.28/current:
->> > > > > .  ..  0.537_head
->> > > > >
->> > > > > osd.28/osd.28/current/0.537_head:
->> > > > > .  ..
->> > > > > log30 /mnt/bc # ls -lhd osd.28/osd.28/current/0.537_head
->> > > > > drwxr-xr-x 1 root root 119M Dec 14 19:22
->> > > > > osd.28/osd.28/current/0.537_head
->> > > > > log30 /mnt/bc #
->> > > > > log30 /mnt/bc # rm -rf osd.28/
->> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
->> > > > > empty
->> > > > > log30 /mnt/bc # rm -rf osd.28/osd.28/current/0.537_head
->> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
->> > > > > empty
->> > > > >
->> > > > > The cluster seems health:
->> > > > > log3 ~ # ceph -s
->> > > > >      health HEALTH_OK
->> > > > >      monmap e1: 3 mons at
->> > > > >
->> > > > > {log21=10.205.118.21:6789/0,log3=10.205.119.2:6789/0,squid86-log12=150.164.100.218:6789/0},
->> > > > > election epoch 640, quorum 0,1,2 log21,log3,squid86-log12
->> > > > >      osdmap e1864: 45 osds: 45 up, 45 in
->> > > > >       pgmap v163907: 9224 pgs: 9224 active+clean; 3168 GB data, 9565
->> > > > > GB
->> > > > > used, 111 TB / 120 TB avail
->> > > > >      mdsmap e134: 1/1/1 up {0=log14=up:active}, 1 up:standby
->> > > > >
->> > > > After mds restart, I got this error message:
->> > > > 2012-12-19 09:16:24.837045 mds.0 [ERR] unmatched fragstat size on
->> > > > single dirfrag 100000006c7, inode has f(v6 m2012-11-24 23:18:34.947266
->> > > > 1773=1773+0), dirfrag has f(v6 m2012-12-17 12:43:52.203358
->> > > > 2038=2038+0)
->> > > >
->> > > > How can I fix this?
->> > > >
->> > > Is it a btrfs filesystem? If so will have sub volumes hiding in there you
->> > > need to remove 1st.
->> > Thanks for reply, osds all lives on xfs filesystem.
+No more suggestions? :(
+--
+Regards,
+S=E9bastien Han.
+
+
+On Tue, Dec 18, 2012 at 6:21 PM, S=E9bastien Han <han.sebastien@gmail.c=
+om> wrote:
+> Nothing terrific...
+>
+> Kernel logs from my clients are full of "libceph: osd4
+> 172.20.11.32:6801 socket closed"
+>
+> I saw this somewhere on the tracker.
+>
+> Does this harm?
+>
+> Thanks.
+>
+> --
+> Regards,
+> S=E9bastien Han.
+>
+>
+>
+> On Mon, Dec 17, 2012 at 11:55 PM, Samuel Just <sam.just@inktank.com> =
+wrote:
 >>
->> Ah, right - might be worth showing us output of 'ls -la' in the dir concerned.
->> In particular the link counts might be wrong (indicating fs corruption,
->> probably fixable with xfs_repair).
->
-Sorry for late response, but I was involved  in another stuck problem,
-turns out it's firewall rules lost :(
-
-Here's ls of this directory recursively:
-log1 /mnt/bc # ls -laR osd.28/
-osd.28/:
-total 0
-drwxr-xr-x 1 root root     124379978 Dec 13 23:04 .
-drwxr-xr-x 1 root root 7251593161780 Dec 19 01:05 ..
-drwxr-xr-x 1 root root     124379978 Dec 14 19:24 osd.28
-
-osd.28/osd.28:
-total 0
-drwxr-xr-x 1 root root 124379978 Dec 14 19:24 .
-drwxr-xr-x 1 root root 124379978 Dec 13 23:04 ..
-drwxr-xr-x 1 root root 124379978 Dec 14 19:24 current
-
-osd.28/osd.28/current:
-total 0
-drwxr-xr-x 1 root root 124379978 Dec 14 19:24 .
-drwxr-xr-x 1 root root 124379978 Dec 14 19:24 ..
-drwxr-xr-x 1 root root 124379978 Dec 16 12:40 0.537_head
-
-osd.28/osd.28/current/0.537_head:
-total 0
-drwxr-xr-x 1 root root 124379978 Dec 16 12:40 .
-drwxr-xr-x 1 root root 124379978 Dec 14 19:24 ..
-log1 /mnt/bc #
-
-> This is a problem in the MDS, not the fs underneath the OSDs.  There was
-> at least one bug that was corrupting the 'rstats' recursive info that
-> could lead to this that has been fixed recently.
->
-> The MDS is actually repairing this as it goes, unless you specify the 'mds
-> verify scatter = true' option, in which case it will assert and kill
-> itself.
->
-So, I can fix this problem by set this option? 'mds verify scatter = true'
+>> What is the workload like?
+>> -Sam
+>>
+>> On Mon, Dec 17, 2012 at 2:41 PM, S=E9bastien Han <han.sebastien@gmai=
+l.com> wrote:
+>> > Hi,
+>> >
+>> > No, I don't see nothing abnormal in the network stats. I don't see
+>> > anything in the logs... :(
+>> > The weird thing is that one node over 4 seems to take way more mem=
+ory
+>> > than the others...
+>> >
+>> > --
+>> > Regards,
+>> > S=E9bastien Han.
+>> >
+>> >
+>> > On Mon, Dec 17, 2012 at 11:31 PM, S=E9bastien Han <han.sebastien@g=
+mail.com> wrote:
+>> >>
+>> >> Hi,
+>> >>
+>> >> No, I don't see nothing abnormal in the network stats. I don't se=
+e anything in the logs... :(
+>> >> The weird thing is that one node over 4 seems to take way more me=
+mory than the others...
+>> >>
+>> >> --
+>> >> Regards,
+>> >> S=E9bastien Han.
+>> >>
+>> >>
+>> >>
+>> >> On Mon, Dec 17, 2012 at 7:12 PM, Samuel Just <sam.just@inktank.co=
+m> wrote:
+>> >>>
+>> >>> Are you having network hiccups?  There was a bug noticed recentl=
+y that
+>> >>> could cause a memory leak if nodes are being marked up and down.
+>> >>> -Sam
+>> >>>
+>> >>> On Mon, Dec 17, 2012 at 12:28 AM, S=E9bastien Han <han.sebastien=
+@gmail.com> wrote:
+>> >>> > Hi guys,
+>> >>> >
+>> >>> > Today looking at my graphs I noticed that one over 4 ceph node=
+s used a
+>> >>> > lot of memory. It keeps growing and growing.
+>> >>> > See the graph attached to this mail.
+>> >>> > I run 0.48.2 on Ubuntu 12.04.
+>> >>> >
+>> >>> > The other nodes also grow, but slowly than the first one.
+>> >>> >
+>> >>> > I'm not quite sure about the information that I have to provid=
+e. So
+>> >>> > let me know. The only thing I can say is that the load haven't
+>> >>> > increase that much this week. It seems to be consuming and not=
+ giving
+>> >>> > back the memory.
+>> >>> >
+>> >>> > Thank you in advance.
+>> >>> >
+>> >>> > --
+>> >>> > Regards,
+>> >>> > S=E9bastien Han.
+>> >>
+>> >>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
