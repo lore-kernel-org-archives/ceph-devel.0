@@ -1,92 +1,93 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Crash whilst detecting mime-type in radosgw/0.55.1
-Date: Wed, 19 Dec 2012 15:10:28 +0000
-Message-ID: <50D1D8E4.8000808@ubuntu.com>
+From: Yann ROBIN <yann.robin@youscribe.com>
+Subject: RE: Recovery stuck and radosgateway not initializing
+Date: Wed, 19 Dec 2012 15:12:41 +0000
+Message-ID: <367CC0B0FC02EE47BF7482398BD623C54E08A233@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+References: <367CC0B0FC02EE47BF7482398BD623C54E087A4A@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+ <367CC0B0FC02EE47BF7482398BD623C54E089B3E@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:43869 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752714Ab2LSPKc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 10:10:32 -0500
-Received: from host212-140-201-242.range212-140.btcentralplus.com ([212.140.201.242] helo=[192.168.1.50])
-	by youngberry.canonical.com with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
-	(Exim 4.71)
-	(envelope-from <james.page@ubuntu.com>)
-	id 1TlLHy-0000bq-OL
-	for ceph-devel@vger.kernel.org; Wed, 19 Dec 2012 15:10:30 +0000
+Received: from co9ehsobe002.messaging.microsoft.com ([207.46.163.25]:23488
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750996Ab2LSPMw convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 Dec 2012 10:12:52 -0500
+Received: from mail188-co9 (localhost [127.0.0.1])	by
+ mail188-co9-R.bigfish.com (Postfix) with ESMTP id 62A5F36017D	for
+ <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 15:12:51 +0000 (UTC)
+Received: from CO9EHSMHS013.bigfish.com (unknown [10.236.132.240])	by
+ mail188-co9.bigfish.com (Postfix) with ESMTP id D1084AE004B	for
+ <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 15:12:48 +0000 (UTC)
+In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E089B3E@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+We had a bunch of disk who failed. That's why ceph was having trouble k=
+eeping OSD up.
+And we found that during recovery the rados gateway failed to initializ=
+e. The init_watch function timeout.
+As it is only used when cache is activated, we disable cache (rgw cache=
+ enable false) and the radosgateway started :) !
 
-Hi
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Yann ROBIN
+Sent: mardi 18 d=E9cembre 2012 15:08
+To: ceph-devel@vger.kernel.org
+Subject: RE: Recovery stuck and radosgateway not initializing
 
-I'm seeing a couple of issues with Ceph 0.55.1 on Ubuntu raring
-(current development release) whilst testing the keystone integration
-with radosgw.
+Our configuration : 6 OSDs, 3 Mon.
+Journal is on INTEL SSDSA2CW120G3 disk and Data is on Hitachi HUS724040=
+ALE640 disk.
 
-1) Crash in RADOS Gateway when Content-Type not specified in Upload
+When OSD does recovery IO is high, and at some point the OSD is killed.
+We set max active recovery to 1 and set filestore op thread suicide tim=
+eout to 360.
 
-https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/1092137
+What should I do in that case ?
 
-RADOS Gateway crashes when trying to match the mime type with the
-extension of the file being uploaded - full backtrace here:
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Yann ROBIN
+Sent: mardi 18 d=E9cembre 2012 11:51
+To: ceph-devel@vger.kernel.org
+Subject: Recovery stuck and radosgateway not initializing
 
-http://paste.ubuntu.com/1450073/
+Hi,
 
-If the file has no extension then all is good!
+We're using ceph v0.55, and last night we loste one node of our cluster=
+=2E
+When it came back, ceph start recovering but since then the radosgatewa=
+y could not connect to the cluster.
+The rados gateway timeout on initializtion (somewhere in the radosclien=
+t connect).
 
-I'm uploading using the python-swiftclient package using the following
-command:
+The other problem (and I think it's related) is that the recovery isn't=
+ working. Osd gets OSD Op thread timeout and sometimes some of the OSD =
+crash (see stacktrace attached).
+So it seems that our OSD aren't up long enough for the recovery to proc=
+eed.
 
-   swift upload test quantal-server-cloudimg-amd64-disk1.img
+Any would be appreciated.
 
-for example.
+Thanks,
 
-   swift upload test quantal-server-cloudimg-amd64-disk1
+--=20
+Yann
 
-works OK.
 
-2) swift list returns no output
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I was expecting a list of the buckets I had just created - but instead
-I get zip; I can stat the buckets OK individually but the top level
-list returns nothing - am I missing something?
 
-Other than those two things the integration with Keystone was pretty
-easy to get up and running and will feature in the next version of the
-Ceph RADOS Gateway charm for Juju (see 1) - nice work!
-
-Cheers
-
-James
-
-[1] http://jujucharms.com/charms/precise/ceph-radosgw
-
-- -- 
-James Page
-Ubuntu Core Developer
-Debian Maintainer
-james.page@ubuntu.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iQIcBAEBCAAGBQJQ0djkAAoJEL/srsug59jDrlUP/AgssXzjxG7HMmlW4c0Js0DS
-tBWMsJBZJuiVYwO/+KLNotg9lNPHWqsMeloZ/AeWen6Q2p5R3Qy4/NBtFHF6wb4S
-MWgkD3Euy/JDnt/ak7FqCTVkTuIxT4oOjegAeAkMLA9v6N6HBBIN2KIj8ymtB91C
-8RbgEVyqMyF78DVVZlrvfhaeOBc6HIhssbFWnMRxMjSlxY9mPhhSB420KvBl5GY9
-Kkcw7zTSnid8b6oOkSZiKqawCWJp62N/8G9Tb4X35nmtRppXvhA2Wquh7DteDMhN
-b9MulZ95RukOfog1mBGFbyTLbh9XG3FON4q3+KzUwH8oRUttgx0HnxViSz47UwMg
-pbCDmCCJtu+d5zpxUdYpcLFotwEBQR9zhVy4cMtykXz4ScYyKuoJ7aoEQ4ZsNscZ
-Iy6ACHD8EGm8N9CqfFcTX0nsKMZQmUpcRydy7Y+k2/m+WQMk0egi91womz7HA6lP
-7u8JoAlu3L2zX7i9PKjy+R+/8oP60NpMgFPyi5cmISOgDrAjlFFZXEEgQ49X+HF/
-JjH8i3fgdk2ua7zuj/a4T9zRknzd2N1eBHjeWsYFeWkUPSkWLuD2s8eRueNOY8Z8
-/IK8Y3sNIMGpdzY+G0Gv/UXmNL7hNtKD4nQg3w40PMl47p0XAsqNlOwPYFu9c/AC
-UltxNFRl5pvp+o9EJ7AB
-=99E2
------END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
