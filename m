@@ -1,90 +1,173 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Empty directory size greater than zero and can't remove
-Date: Tue, 18 Dec 2012 19:51:47 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212181949370.7294@cobra.newdream.net>
-References: <CAJiejCRi8QOfQB5Y0rN5vQz-xiTeA1SKdku=8Xa_+3CZAjysLA@mail.gmail.com> <CAJiejCQWQK2RKvMJ-08WW+3Y+23oaghFYTWQ+u7-37grF+Liug@mail.gmail.com> <50D122AD.4070609@catalyst.net.nz> <CAJiejCTTHVOXHK71Quw4SfXHL7R2NXJDV-S+JdZ0ZVWbLQqOwQ@mail.gmail.com>
- <50D138FD.3090502@catalyst.net.nz>
+From: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
+Subject: ceph stability
+Date: Wed, 19 Dec 2012 15:03:08 +0600
+Message-ID: <CAD5ewrosrMWD3jxznaMhab=VTL4VzQ7savVk42KDe374VSSzbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60416 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367Ab2LSDvs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 22:51:48 -0500
-In-Reply-To: <50D138FD.3090502@catalyst.net.nz>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:41534 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752892Ab2LSJDJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 04:03:09 -0500
+Received: by mail-qa0-f44.google.com with SMTP id z4so4076038qan.10
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 01:03:08 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: Drunkard Zhang <gongfan193@gmail.com>, maillist-linux <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, 19 Dec 2012, Mark Kirkwood wrote:
-> On 19/12/12 15:56, Drunkard Zhang wrote:
-> > 2012/12/19 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
-> > > On 19/12/12 14:44, Drunkard Zhang wrote:
-> > > > 2012/12/16 Drunkard Zhang <gongfan193@gmail.com>:
-> > > > > I couldn't rm files in ceph, which was backuped files of one osd. It
-> > > > > reports direcory not empty, but there's nothing under that directory,
-> > > > > just the directory itself held some spaces. How could I shoot down the
-> > > > > problem ?
-> > > > > 
-> > > > > log30 /mnt/bc # ls -aR osd.28/
-> > > > > osd.28/:
-> > > > > .  ..  osd.28
-> > > > > 
-> > > > > osd.28/osd.28:
-> > > > > .  ..  current
-> > > > > 
-> > > > > osd.28/osd.28/current:
-> > > > > .  ..  0.537_head
-> > > > > 
-> > > > > osd.28/osd.28/current/0.537_head:
-> > > > > .  ..
-> > > > > log30 /mnt/bc # ls -lhd osd.28/osd.28/current/0.537_head
-> > > > > drwxr-xr-x 1 root root 119M Dec 14 19:22
-> > > > > osd.28/osd.28/current/0.537_head
-> > > > > log30 /mnt/bc #
-> > > > > log30 /mnt/bc # rm -rf osd.28/
-> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
-> > > > > empty
-> > > > > log30 /mnt/bc # rm -rf osd.28/osd.28/current/0.537_head
-> > > > > rm: cannot remove ?osd.28/osd.28/current/0.537_head?: Directory not
-> > > > > empty
-> > > > > 
-> > > > > The cluster seems health:
-> > > > > log3 ~ # ceph -s
-> > > > >      health HEALTH_OK
-> > > > >      monmap e1: 3 mons at
-> > > > > 
-> > > > > {log21=10.205.118.21:6789/0,log3=10.205.119.2:6789/0,squid86-log12=150.164.100.218:6789/0},
-> > > > > election epoch 640, quorum 0,1,2 log21,log3,squid86-log12
-> > > > >      osdmap e1864: 45 osds: 45 up, 45 in
-> > > > >       pgmap v163907: 9224 pgs: 9224 active+clean; 3168 GB data, 9565
-> > > > > GB
-> > > > > used, 111 TB / 120 TB avail
-> > > > >      mdsmap e134: 1/1/1 up {0=log14=up:active}, 1 up:standby
-> > > > > 
-> > > > After mds restart, I got this error message:
-> > > > 2012-12-19 09:16:24.837045 mds.0 [ERR] unmatched fragstat size on
-> > > > single dirfrag 100000006c7, inode has f(v6 m2012-11-24 23:18:34.947266
-> > > > 1773=1773+0), dirfrag has f(v6 m2012-12-17 12:43:52.203358
-> > > > 2038=2038+0)
-> > > > 
-> > > > How can I fix this?
-> > > > 
-> > > Is it a btrfs filesystem? If so will have sub volumes hiding in there you
-> > > need to remove 1st.
-> > Thanks for reply, osds all lives on xfs filesystem.
-> 
-> Ah, right - might be worth showing us output of 'ls -la' in the dir concerned.
-> In particular the link counts might be wrong (indicating fs corruption,
-> probably fixable with xfs_repair).
+Hello,
 
-This is a problem in the MDS, not the fs underneath the OSDs.  There was 
-at least one bug that was corrupting the 'rstats' recursive info that 
-could lead to this that has been fixed recently.
+I have 2 issues with ceph stability and looking for help to resolve them.
+My setup is pretty simple - 3 debian 32bit stable systems each running
+osd, mon and mds.
+the conf is the following:
+--------------------
+[global]
+    auth cluster required = none
+    auth service required = none
+    auth client required = none
 
-The MDS is actually repairing this as it goes, unless you specify the 'mds 
-verify scatter = true' option, in which case it will assert and kill 
-itself.
+[osd]
+    osd journal size = 1000
+    filestore xattr use omap = true
 
-sage
+[mon.a]
+    host = ceph-node01
+    mon addr = 192.168.7.11:6789
+
+[mon.b]
+    host = ceph-node02
+    mon addr = 192.168.7.12:6789
+
+[mon.c]
+        host = ceph-node03
+        mon addr = 192.168.7.13:6789
+
+[mds.a]
+        host = ceph-node01
+
+[mds.b]
+        host = ceph-node02
+
+[mds.c]
+        host = ceph-node03
+
+[osd.0]
+    host = ceph-node01
+
+[osd.1]
+    host = ceph-node02
+
+[osd.2]
+    host = ceph-node03
+--------------------
+ceph -s is:
+   health HEALTH_OK
+   monmap e4: 3 mons at
+{a=192.168.7.11:6789/0,b=192.168.7.12:6789/0,c=192.168.7.13:6789/0},
+election epoch 118, quorum 0,1,2 a,b,c
+   osdmap e197: 3 osds: 3 up, 3 in
+    pgmap v43305: 384 pgs: 384 active+clean; 72351 MB data, 144 GB
+used, 105 GB / 249 GB avail
+   mdsmap e4439: 1/1/1 up {0=a=up:active}, 2 up:standby
+--------------------
+
+My first problem - I am getting spurious mon's deaths, which usually
+looks like this:
+
+--- begin dump of recent events ---
+     0> 2012-12-19 10:35:58.912119 b41eab70 -1 *** Caught signal (Aborted) **
+ in thread b41eab70
+
+ ceph version 0.55.1 (8e25c8d984f9258644389a18997ec6bdef8e056b)
+ 1: /usr/bin/ceph-mon() [0x8183a11]
+ 2: [0xb7714400]
+ 3: (gsignal()+0x47) [0xb7337577]
+ 4: (abort()+0x182) [0xb733a962]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x14f) [0xb755653f]
+ 6: (()+0xbd405) [0xb7554405]
+ 7: (()+0xbd442) [0xb7554442]
+ 8: (()+0xbd581) [0xb7554581]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x80f) [0x824cabf]
+ 10: /usr/bin/ceph-mon() [0x80e3c1d]
+ 11: (MDSMonitor::tick()+0x1e3b) [0x811ea0b]
+ 12: (MDSMonitor::on_active()+0x1d) [0x81188dd]
+ 13: (PaxosService::_active()+0x212) [0x80e4b02]
+ 14: (Context::complete(int)+0x19) [0x80c4cf9]
+ 15: (finish_contexts(CephContext*, std::list<Context*,
+std::allocator<Context*> >&, int)+0x13f) [0x80d208f]
+ 16: (Monitor::recovered_leader(int)+0x3ac) [0x80ac5ac]
+ 17: (Paxos::handle_last(MMonPaxos*)+0xb02) [0x80e0572]
+ 18: (Paxos::dispatch(PaxosServiceMessage*)+0x2c4) [0x80e0e94]
+ 19: (Monitor::_ms_dispatch(Message*)+0x1181) [0x80c3b11]
+ 20: (Monitor::ms_dispatch(Message*)+0x31) [0x80d5021]
+ 21: (DispatchQueue::entry()+0x337) [0x82afa47]
+ 22: (DispatchQueue::DispatchThread::entry()+0x20) [0x823eec0]
+ 23: (Thread::_entry_func(void*)+0x11) [0x824be41]
+ 24: (()+0x57b0) [0xb75ef7b0]
+ 25: (clone()+0x5e) [0xb73d8cde]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   1/ 5 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 5 ms
+   1/ 5 mon
+   0/10 monc
+   0/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/ 5 hadoop
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+  -2/-2 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent    100000
+  max_new         1000
+  log_file /var/log/ceph/ceph-mon.a.log
+--- end dump of recent events ---
+
+the binaries are coming from ceph.com debian-testing repo.
+
+My second problem - I have 2 systems which mount ceph. Whenever I
+mount ceph on any other system it usually mounts but get stuck on
+stat* operations (i.e. simple ls -al will hang with read( from the
+ceph-mounted directory for ages). This kind of client stuck also
+affects two working clients. they also start to stuck on the stat*
+even after shutdown of the third client. so usually umount/mount or
+even reboot for existing clients solves the issue)
+
+
+--
+...WBR, Roman Hlynovskiy
