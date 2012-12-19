@@ -1,92 +1,113 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Empty directory size greater than zero and can't remove
-Date: Wed, 19 Dec 2012 10:56:56 +0800
-Message-ID: <CAJiejCTTHVOXHK71Quw4SfXHL7R2NXJDV-S+JdZ0ZVWbLQqOwQ@mail.gmail.com>
-References: <CAJiejCRi8QOfQB5Y0rN5vQz-xiTeA1SKdku=8Xa_+3CZAjysLA@mail.gmail.com>
- <CAJiejCQWQK2RKvMJ-08WW+3Y+23oaghFYTWQ+u7-37grF+Liug@mail.gmail.com> <50D122AD.4070609@catalyst.net.nz>
+From: Michael Chapman <michael.chapman@anu.edu.au>
+Subject: mon not marking dead osds down and slow streaming write performance
+Date: Wed, 19 Dec 2012 14:02:07 +1100
+Message-ID: <CABf87Xk54Q-SP2258MsXDVKAo2TgjOw8xds2f9W=XxmgdSRFTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:55127 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751544Ab2LSC5R convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 21:57:17 -0500
-Received: by mail-qa0-f41.google.com with SMTP id o19so3864174qap.7
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 18:57:16 -0800 (PST)
-In-Reply-To: <50D122AD.4070609@catalyst.net.nz>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:36456 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752924Ab2LSDCI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Dec 2012 22:02:08 -0500
+Received: by mail-qc0-f179.google.com with SMTP id b14so797098qcs.24
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Dec 2012 19:02:07 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: maillist-linux <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-2012/12/19 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
-> On 19/12/12 14:44, Drunkard Zhang wrote:
->>
->> 2012/12/16 Drunkard Zhang <gongfan193@gmail.com>:
->>>
->>> I couldn't rm files in ceph, which was backuped files of one osd. I=
-t
->>> reports direcory not empty, but there's nothing under that director=
-y,
->>> just the directory itself held some spaces. How could I shoot down =
-the
->>> problem ?
->>>
->>> log30 /mnt/bc # ls -aR osd.28/
->>> osd.28/:
->>> .  ..  osd.28
->>>
->>> osd.28/osd.28:
->>> .  ..  current
->>>
->>> osd.28/osd.28/current:
->>> .  ..  0.537_head
->>>
->>> osd.28/osd.28/current/0.537_head:
->>> .  ..
->>> log30 /mnt/bc # ls -lhd osd.28/osd.28/current/0.537_head
->>> drwxr-xr-x 1 root root 119M Dec 14 19:22 osd.28/osd.28/current/0.53=
-7_head
->>> log30 /mnt/bc #
->>> log30 /mnt/bc # rm -rf osd.28/
->>> rm: cannot remove =E2=80=98osd.28/osd.28/current/0.537_head=E2=80=99=
-: Directory not empty
->>> log30 /mnt/bc # rm -rf osd.28/osd.28/current/0.537_head
->>> rm: cannot remove =E2=80=98osd.28/osd.28/current/0.537_head=E2=80=99=
-: Directory not empty
->>>
->>> The cluster seems health:
->>> log3 ~ # ceph -s
->>>     health HEALTH_OK
->>>     monmap e1: 3 mons at
->>>
->>> {log21=3D10.205.118.21:6789/0,log3=3D10.205.119.2:6789/0,squid86-lo=
-g12=3D150.164.100.218:6789/0},
->>> election epoch 640, quorum 0,1,2 log21,log3,squid86-log12
->>>     osdmap e1864: 45 osds: 45 up, 45 in
->>>      pgmap v163907: 9224 pgs: 9224 active+clean; 3168 GB data, 9565=
- GB
->>> used, 111 TB / 120 TB avail
->>>     mdsmap e134: 1/1/1 up {0=3Dlog14=3Dup:active}, 1 up:standby
->>>
->> After mds restart, I got this error message:
->> 2012-12-19 09:16:24.837045 mds.0 [ERR] unmatched fragstat size on
->> single dirfrag 100000006c7, inode has f(v6 m2012-11-24 23:18:34.9472=
-66
->> 1773=3D1773+0), dirfrag has f(v6 m2012-12-17 12:43:52.203358
->> 2038=3D2038+0)
->>
->> How can I fix this?
->>
->
-> Is it a btrfs filesystem? If so will have sub volumes hiding in there=
- you
-> need to remove 1st.
+Hi all,
 
-Thanks for reply, osds all lives on xfs filesystem.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I apologise if this list is only for dev issues and not for operators,
+I didn't see a more general list on the ceph website.
+
+I have 5 OSD processes per host, and an FC uplink port failure caused
+kernel panics in two hosts - 0404 and 0401. The mon log looks like
+this:
+
+2012-12-19 13:30:38.634865 7f9a0f167700 10 mon.3@0(leader).osd e2184
+preprocess_query osd_failure(osd.404 172.22.4.4:6812/12835 for 8832
+e2184 v2184) v3 from osd.602 172.22.4.6:6806/5152
+2012-12-19 13:30:38.634875 7f9a0f167700  5 mon.3@0(leader).osd e2184
+can_mark_down current up_ratio 0.298429 < min 0.3, will not mark
+osd.404 down
+2012-12-19 13:30:38.634880 7f9a0f167700  5 mon.3@0(leader).osd e2184 preprocess_
+
+The cluster appears healthy
+
+root@os-0405:~# ceph -s
+   health HEALTH_OK
+   monmap e3: 1 mons at {3=172.22.4.5:6789/0}, election epoch 1, quorum 0 3
+   osdmap e2184: 191 osds: 57 up, 57 in
+    pgmap v205386: 121952 pgs: 121951 active+clean, 1
+active+clean+scrubbing; 4437 MB data, 49497 MB used, 103 TB / 103 TB
+avail
+   mdsmap e1: 0/0/1 up
+
+root@os-0405:~# ceph osd tree
+
+# id    weight  type name       up/down reweight
+-1      30      pool default
+-3      30              rack unknownrack
+-2      6                       host os-0401
+100     1                               osd.100 up      1
+101     1                               osd.101 up      1
+102     1                               osd.102 up      1
+103     1                               osd.103 up      1
+104     1                               osd.104 up      1
+112     1                               osd.112 up      1
+-4      6                       host os-0402
+200     1                               osd.200 up      1
+201     1                               osd.201 up      1
+202     1                               osd.202 up      1
+203     1                               osd.203 up      1
+204     1                               osd.204 up      1
+212     1                               osd.212 up      1
+-5      6                       host os-0403
+300     1                               osd.300 up      1
+301     1                               osd.301 up      1
+302     1                               osd.302 up      1
+303     1                               osd.303 up      1
+304     1                               osd.304 up      1
+312     1                               osd.312 up      1
+-6      6                       host os-0404
+400     1                               osd.400 up      1
+401     1                               osd.401 up      1
+402     1                               osd.402 up      1
+403     1                               osd.403 up      1
+404     1                               osd.404 up      1
+412     1                               osd.412 up      1
+-7      0                       host os-0405
+-8      6                       host os-0406
+600     1                               osd.600 up      1
+601     1                               osd.601 up      1
+602     1                               osd.602 up      1
+603     1                               osd.603 up      1
+604     1                               osd.604 up      1
+612     1                               osd.612 up      1
+
+but os-0404 has no osd processes running anymore.
+
+root@os-0404:~# ps aux | grep ceph
+root      4964  0.0  0.0   9628   920 pts/1    S+   13:31   0:00 grep
+--color=auto ceph
+
+and even if it did, it can't access the luns in order to mount the xfs
+filesystems with all the osd data.
+
+What is preventing the mon from marking the osds on 0404 down?
+
+A second issue I have been having is that my reads+writes are very
+bursty, going from 8MB/s to 200MB/s when doing a dd from a physical
+client over 10GbE. It seems to be waiting on the mon most of the time,
+and iostat shows long io wait times for the disk the mon is using. I
+can also see it writing ~40MB/s constantly to disk in iotop, though I
+don't know if this is random or sequential. I see a lot of waiting for
+sub ops which I thought might be a result of the io wait.
+
+Is that a normal amount of activity for a mon process? Should I be
+running the mon processes off more than just a single sata disk to
+keep up with ~30 OSD processes?
+
+Thanks for your time.
+
+ - Michael Chapman
