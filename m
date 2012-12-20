@@ -1,110 +1,204 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: which Linux kernel version corresponds to 0.48argonaut?
-Date: Thu, 20 Dec 2012 11:54:02 -0700
-Message-ID: <50D35ECA.4040602@cs.utah.edu>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Filippos Giannakos <philipgian@grnet.gr>
+Subject: [PATCH 1/2] Implement librados aio_stat
+Date: Thu, 20 Dec 2012 22:05:10 +0200
+Message-ID: <1356033911-14027-2-git-send-email-philipgian@grnet.gr>
+References: <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net>
+ <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:48583 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751898Ab2LTSyE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Dec 2012 13:54:04 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id D3F506500C9
-	for <ceph-devel@vger.kernel.org>; Thu, 20 Dec 2012 11:54:02 -0700 (MST)
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:3187 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751675Ab2LTUF4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Dec 2012 15:05:56 -0500
+In-Reply-To: <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Xing Lin <xinglin@cs.utah.edu>
+To: ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com, philipgian@grnet.gr
 
-Hi,
+Implement aio stat and also export this functionality to the C API.
+---
+ src/include/rados/librados.h   |   16 ++++++++++++++-
+ src/include/rados/librados.hpp |    4 +++-
+ src/librados/IoCtxImpl.cc      |   42 ++++++++++++++++++++++++++++++++++++++++
+ src/librados/IoCtxImpl.h       |    9 +++++++++
+ src/librados/librados.cc       |   18 +++++++++++++++++
+ 5 files changed, 87 insertions(+), 2 deletions(-)
 
-I was trying to add a simple replica placement algorithm in Ceph. This 
-algorithm simply returns r_th item in a bucket for the r_th replica. I 
-have made that change in Ceph source code (including files such as 
-crush.h, crush.c, mapper.c, ...) and I can run Ceph monitor and osd 
-daemons. However, I am not able to map rbd block devices at client 
-machines. 'rbd map image0' reported "input/output error" and 'dmesg' at 
-the client machine showed message like "libceph: handle_map corrupt 
-msg". I believe that is because I have not ported my changes to Ceph 
-client side programs and it does not recognize the new placement 
-algorithm. I probably need to recompile the rbd block device driver. 
-When I was trying to replace Ceph related files in Linux with my own 
-version, I noticed that files in Linux-3.2.16 are different from these 
-included in Ceph source code. For example, the following is the diff of 
-crush.h in Linux-3.2.16 and 0.48argonaut. So, my question is that is 
-there any version of Linux that contains the exact Ceph files as 
-included in 0.48argonaut? Thanks.
-
--------------------
-  $ diff -uNrp ceph-0.48argonaut/src/crush/crush.h 
-linux-3.2.16/include/linux/crush/crush.h
---- ceph-0.48argonaut/src/crush/crush.h    2012-06-26 11:56:36.000000000 
--0600
-+++ linux-3.2.16/include/linux/crush/crush.h    2012-04-22 
-16:31:32.000000000 -0600
-@@ -1,12 +1,7 @@
-  #ifndef CEPH_CRUSH_CRUSH_H
-  #define CEPH_CRUSH_CRUSH_H
-
--#if defined(__linux__)
-  #include <linux/types.h>
--#elif defined(__FreeBSD__)
--#include <sys/types.h>
--#include "include/inttypes.h"
--#endif
-
-  /*
-   * CRUSH is a pseudo-random data distribution algorithm that
-@@ -156,24 +151,25 @@ struct crush_map {
-      struct crush_bucket **buckets;
-      struct crush_rule **rules;
-
-+    /*
-+     * Parent pointers to identify the parent bucket a device or
-+     * bucket in the hierarchy.  If an item appears more than
-+     * once, this is the _last_ time it appeared (where buckets
-+     * are processed in bucket id order, from -1 on down to
-+     * -max_buckets.
-+     */
-+    __u32 *bucket_parents;
-+    __u32 *device_parents;
+diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
+index 44d6f71..b2df767 100644
+--- a/src/include/rados/librados.h
++++ b/src/include/rados/librados.h
+@@ -23,7 +23,7 @@ extern "C" {
+ #endif
+ 
+ #define LIBRADOS_VER_MAJOR 0
+-#define LIBRADOS_VER_MINOR 48
++#define LIBRADOS_VER_MINOR 49
+ #define LIBRADOS_VER_EXTRA 0
+ 
+ #define LIBRADOS_VERSION(maj, min, extra) ((maj << 16) + (min << 8) + extra)
+@@ -1444,6 +1444,20 @@ int rados_aio_read(rados_ioctx_t io, const char *oid,
+  */
+ int rados_aio_flush(rados_ioctx_t io);
+ 
 +
-      __s32 max_buckets;
-      __u32 max_rules;
-      __s32 max_devices;
--
--    /* choose local retries before re-descent */
--    __u32 choose_local_tries;
--    /* choose local attempts using a fallback permutation before
--     * re-descent */
--    __u32 choose_local_fallback_tries;
--    /* choose attempts before giving up */
--    __u32 choose_total_tries;
--
--    __u32 *choose_tries;
-  };
++/**
++ * Asynchronously get object stats (size/mtime)
++ *
++ * @param io ioctx
++ * @param o object name
++ * @param psize where to store object size
++ * @param pmtime where to store modification time
++ * @returns 0 on success, negative error code on failure
++ */
++int rados_aio_stat(rados_ioctx_t io, const char *o, 
++		   rados_completion_t completion,
++		   uint64_t *psize, time_t *pmtime);
++
+ /** @} Asynchronous I/O */
+ 
+ /**
+diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hpp
+index 3df4c86..b30b18f 100644
+--- a/src/include/rados/librados.hpp
++++ b/src/include/rados/librados.hpp
+@@ -478,9 +478,11 @@ namespace librados
+      * other than CEPH_NOSNAP
+      */
+     int aio_remove(const std::string& oid, AioCompletion *c);
+-    
++
+     int aio_flush();
+ 
++    int aio_stat(const std::string& oid, AioCompletion *c, uint64_t *psize, time_t *pmtime);
++
+     int aio_exec(const std::string& oid, AioCompletion *c, const char *cls, const char *method,
+ 	         bufferlist& inbl, bufferlist *outbl);
+ 
+diff --git a/src/librados/IoCtxImpl.cc b/src/librados/IoCtxImpl.cc
+index 934a101..808a30e 100644
+--- a/src/librados/IoCtxImpl.cc
++++ b/src/librados/IoCtxImpl.cc
+@@ -851,6 +851,21 @@ int librados::IoCtxImpl::aio_remove(const object_t &oid, AioCompletionImpl *c)
+   return 0;
+ }
+ 
++
++int librados::IoCtxImpl::aio_stat(const object_t& oid, AioCompletionImpl *c,
++		                  uint64_t *psize, time_t *pmtime)
++{
++  c->io = this;
++  C_aio_stat_Ack *onack = new C_aio_stat_Ack(c, pmtime);
++
++  Mutex::Locker l(*lock);
++  objecter->stat(oid, oloc,
++		 snap_seq, psize, &onack->mtime, 0,
++		 onack, &c->objver);
++
++  return 0;
++}
++
+ int librados::IoCtxImpl::remove(const object_t& oid)
+ {
+   utime_t ut = ceph_clock_now(client->cct);
+@@ -1564,6 +1579,33 @@ void librados::IoCtxImpl::C_aio_Ack::finish(int r)
+   c->put_unlock();
+ }
+ 
++///////////////////////////// C_aio_stat_Ack ////////////////////////////
++
++librados::IoCtxImpl::C_aio_stat_Ack::C_aio_stat_Ack(AioCompletionImpl *_c,
++						    time_t *pm)
++   : c(_c), pmtime(pm)
++{
++  c->get();
++}
++
++void librados::IoCtxImpl::C_aio_stat_Ack::finish(int r)
++{
++  c->lock.Lock();
++  c->rval = r;
++  c->ack = true;
++  c->cond.Signal();
++
++  if (r >= 0 && pmtime) {
++    *pmtime = mtime.sec();
++  }
++
++  if (c->callback_complete) {
++    c->io->client->finisher.queue(new C_AioComplete(c));
++  }
++
++  c->put_unlock();
++}
++
+ /////////////////////// C_aio_sparse_read_Ack //////////////////////////
+ 
+ librados::IoCtxImpl::C_aio_sparse_read_Ack::C_aio_sparse_read_Ack(AioCompletionImpl *_c,
+diff --git a/src/librados/IoCtxImpl.h b/src/librados/IoCtxImpl.h
+index feea0e8..55b07ee 100644
+--- a/src/librados/IoCtxImpl.h
++++ b/src/librados/IoCtxImpl.h
+@@ -144,6 +144,14 @@ struct librados::IoCtxImpl {
+     C_aio_Ack(AioCompletionImpl *_c);
+     void finish(int r);
+   };
++  
++  struct C_aio_stat_Ack : public Context {
++    librados::AioCompletionImpl *c;
++    time_t *pmtime;
++    utime_t mtime;
++    C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
++    void finish(int r);
++  };
+ 
+   struct C_aio_sparse_read_Ack : public Context {
+     AioCompletionImpl *c;
+@@ -177,6 +185,7 @@ struct librados::IoCtxImpl {
+   int aio_remove(const object_t &oid, AioCompletionImpl *c);
+   int aio_exec(const object_t& oid, AioCompletionImpl *c, const char *cls,
+ 	       const char *method, bufferlist& inbl, bufferlist *outbl);
++  int aio_stat(const object_t& oid, AioCompletionImpl *c, uint64_t *psize, time_t *pmtime);
+ 
+   int pool_change_auid(unsigned long long auid);
+   int pool_change_auid_async(unsigned long long auid, PoolAsyncCompletionImpl *c);
+diff --git a/src/librados/librados.cc b/src/librados/librados.cc
+index c31b82a..c3756cd 100644
+--- a/src/librados/librados.cc
++++ b/src/librados/librados.cc
+@@ -978,6 +978,14 @@ int librados::IoCtx::aio_flush()
+   return 0;
+ }
+ 
++int librados::IoCtx::aio_stat(const std::string& oid, librados::AioCompletion *c,
++		              uint64_t *psize, time_t *pmtime)
++{
++  object_t obj(oid);
++  return io_ctx_impl->aio_stat(oid, c->pc, psize, pmtime);
++}
++
++
+ int librados::IoCtx::watch(const string& oid, uint64_t ver, uint64_t *cookie,
+ 			   librados::WatchCtx *ctx)
+ {
+@@ -2173,6 +2181,16 @@ extern "C" int rados_aio_flush(rados_ioctx_t io)
+   return 0;
+ }
+ 
++extern "C" int rados_aio_stat(rados_ioctx_t io, const char *o, 
++			      rados_completion_t completion,
++			      uint64_t *psize, time_t *pmtime)
++{
++  librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
++  object_t oid(o);
++  return ctx->aio_stat(oid, (librados::AioCompletionImpl*)completion, 
++		       psize, pmtime);
++}
++
+ struct C_WatchCB : public librados::WatchCtx {
+   rados_watchcb_t wcb;
+   void *arg;
+-- 
+1.7.10.4
 
-
-  /* crush.c */
--extern int crush_get_bucket_item_weight(const struct crush_bucket *b, 
-int pos);
-+extern int crush_get_bucket_item_weight(struct crush_bucket *b, int pos);
-+extern void crush_calc_parents(struct crush_map *map);
-  extern void crush_destroy_bucket_uniform(struct crush_bucket_uniform *b);
-  extern void crush_destroy_bucket_list(struct crush_bucket_list *b);
-  extern void crush_destroy_bucket_tree(struct crush_bucket_tree *b);
-@@ -181,9 +177,4 @@ extern void crush_destroy_bucket_straw(s
-  extern void crush_destroy_bucket(struct crush_bucket *b);
-  extern void crush_destroy(struct crush_map *map);
-
--static inline int crush_calc_tree_node(int i)
--{
--    return ((i+1) << 1)-1;
--}
--
-  #endif
-
-----
-Xing
