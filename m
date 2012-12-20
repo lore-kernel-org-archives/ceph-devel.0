@@ -1,204 +1,227 @@
 From: Filippos Giannakos <philipgian@grnet.gr>
-Subject: [PATCH 1/2] Implement librados aio_stat
-Date: Thu, 20 Dec 2012 22:05:10 +0200
-Message-ID: <1356033911-14027-2-git-send-email-philipgian@grnet.gr>
+Subject: [PATCH 2/2] Add librados aio stat tests
+Date: Thu, 20 Dec 2012 22:05:11 +0200
+Message-ID: <1356033911-14027-3-git-send-email-philipgian@grnet.gr>
 References: <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net>
  <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:3187 "EHLO
 	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751675Ab2LTUF4 (ORCPT
+	by vger.kernel.org with ESMTP id S1751851Ab2LTUF6 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 20 Dec 2012 15:05:56 -0500
+	Thu, 20 Dec 2012 15:05:58 -0500
 In-Reply-To: <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: synnefo-devel@googlegroups.com, philipgian@grnet.gr
 
-Implement aio stat and also export this functionality to the C API.
+Implement simple write-stat test, and a write-stat-remove-stat test cycle.
 ---
- src/include/rados/librados.h   |   16 ++++++++++++++-
- src/include/rados/librados.hpp |    4 +++-
- src/librados/IoCtxImpl.cc      |   42 ++++++++++++++++++++++++++++++++++++++++
- src/librados/IoCtxImpl.h       |    9 +++++++++
- src/librados/librados.cc       |   18 +++++++++++++++++
- 5 files changed, 87 insertions(+), 2 deletions(-)
+ src/include/rados/librados.h |    2 +-
+ src/test/librados/aio.cc     |  176 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 177 insertions(+), 1 deletion(-)
 
 diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
-index 44d6f71..b2df767 100644
+index b2df767..d40d9b5 100644
 --- a/src/include/rados/librados.h
 +++ b/src/include/rados/librados.h
-@@ -23,7 +23,7 @@ extern "C" {
- #endif
- 
- #define LIBRADOS_VER_MAJOR 0
--#define LIBRADOS_VER_MINOR 48
-+#define LIBRADOS_VER_MINOR 49
- #define LIBRADOS_VER_EXTRA 0
- 
- #define LIBRADOS_VERSION(maj, min, extra) ((maj << 16) + (min << 8) + extra)
-@@ -1444,6 +1444,20 @@ int rados_aio_read(rados_ioctx_t io, const char *oid,
+@@ -1454,7 +1454,7 @@ int rados_aio_flush(rados_ioctx_t io);
+  * @param pmtime where to store modification time
+  * @returns 0 on success, negative error code on failure
   */
- int rados_aio_flush(rados_ioctx_t io);
+-int rados_aio_stat(rados_ioctx_t io, const char *o, 
++int rados_aio_stat(rados_ioctx_t io, const char *o,
+ 		   rados_completion_t completion,
+ 		   uint64_t *psize, time_t *pmtime);
  
-+
-+/**
-+ * Asynchronously get object stats (size/mtime)
-+ *
-+ * @param io ioctx
-+ * @param o object name
-+ * @param psize where to store object size
-+ * @param pmtime where to store modification time
-+ * @returns 0 on success, negative error code on failure
-+ */
-+int rados_aio_stat(rados_ioctx_t io, const char *o, 
-+		   rados_completion_t completion,
-+		   uint64_t *psize, time_t *pmtime);
-+
- /** @} Asynchronous I/O */
- 
- /**
-diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hpp
-index 3df4c86..b30b18f 100644
---- a/src/include/rados/librados.hpp
-+++ b/src/include/rados/librados.hpp
-@@ -478,9 +478,11 @@ namespace librados
-      * other than CEPH_NOSNAP
-      */
-     int aio_remove(const std::string& oid, AioCompletion *c);
--    
-+
-     int aio_flush();
- 
-+    int aio_stat(const std::string& oid, AioCompletion *c, uint64_t *psize, time_t *pmtime);
-+
-     int aio_exec(const std::string& oid, AioCompletion *c, const char *cls, const char *method,
- 	         bufferlist& inbl, bufferlist *outbl);
- 
-diff --git a/src/librados/IoCtxImpl.cc b/src/librados/IoCtxImpl.cc
-index 934a101..808a30e 100644
---- a/src/librados/IoCtxImpl.cc
-+++ b/src/librados/IoCtxImpl.cc
-@@ -851,6 +851,21 @@ int librados::IoCtxImpl::aio_remove(const object_t &oid, AioCompletionImpl *c)
-   return 0;
+diff --git a/src/test/librados/aio.cc b/src/test/librados/aio.cc
+index 4983fee..33b5942 100644
+--- a/src/test/librados/aio.cc
++++ b/src/test/librados/aio.cc
+@@ -762,6 +762,182 @@ TEST(LibRadosAio, RoundTripWriteFullPP) {
+   delete my_completion3;
  }
  
 +
-+int librados::IoCtxImpl::aio_stat(const object_t& oid, AioCompletionImpl *c,
-+		                  uint64_t *psize, time_t *pmtime)
-+{
-+  c->io = this;
-+  C_aio_stat_Ack *onack = new C_aio_stat_Ack(c, pmtime);
-+
-+  Mutex::Locker l(*lock);
-+  objecter->stat(oid, oloc,
-+		 snap_seq, psize, &onack->mtime, 0,
-+		 onack, &c->objver);
-+
-+  return 0;
++TEST(LibRadosAio, SimpleStat) {
++  AioTestData test_data;
++  rados_completion_t my_completion;
++  ASSERT_EQ("", test_data.init());
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion));
++  char buf[128];
++  memset(buf, 0xcc, sizeof(buf));
++  ASSERT_EQ(0, rados_aio_write(test_data.m_ioctx, "foo",
++			       my_completion, buf, sizeof(buf), 0));
++  {
++    TestAlarm alarm;
++    sem_wait(&test_data.m_sem);
++    sem_wait(&test_data.m_sem);
++  }
++  uint64_t psize;
++  time_t pmtime;
++  rados_completion_t my_completion2;
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion2));
++  ASSERT_EQ(0, rados_aio_stat(test_data.m_ioctx, "foo",
++			      my_completion2, &psize, &pmtime));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, rados_aio_wait_for_complete(my_completion2));
++  }
++  ASSERT_EQ(sizeof(buf), psize);
++  rados_aio_release(my_completion);
++  rados_aio_release(my_completion2);
 +}
 +
- int librados::IoCtxImpl::remove(const object_t& oid)
- {
-   utime_t ut = ceph_clock_now(client->cct);
-@@ -1564,6 +1579,33 @@ void librados::IoCtxImpl::C_aio_Ack::finish(int r)
-   c->put_unlock();
- }
- 
-+///////////////////////////// C_aio_stat_Ack ////////////////////////////
-+
-+librados::IoCtxImpl::C_aio_stat_Ack::C_aio_stat_Ack(AioCompletionImpl *_c,
-+						    time_t *pm)
-+   : c(_c), pmtime(pm)
-+{
-+  c->get();
++TEST(LibRadosAio, SimpleStatPP) {
++  AioTestDataPP test_data;
++  ASSERT_EQ("", test_data.init());
++  AioCompletion *my_completion = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  AioCompletion *my_completion_null = NULL;
++  ASSERT_NE(my_completion, my_completion_null);
++  char buf[128];
++  memset(buf, 0xcc, sizeof(buf));
++  bufferlist bl1;
++  bl1.append(buf, sizeof(buf));
++  ASSERT_EQ(0, test_data.m_ioctx.aio_write("foo", my_completion,
++					   bl1, sizeof(buf), 0));
++  {
++    TestAlarm alarm;
++    sem_wait(&test_data.m_sem);
++    sem_wait(&test_data.m_sem);
++  }
++  uint64_t psize;
++  time_t pmtime;
++  AioCompletion *my_completion2 = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  ASSERT_NE(my_completion2, my_completion_null);
++  ASSERT_EQ(0, test_data.m_ioctx.aio_stat("foo", my_completion2,
++			  		&psize, &pmtime));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, my_completion2->wait_for_complete());
++  }
++  ASSERT_EQ(sizeof(buf), psize);
++  delete my_completion;
++  delete my_completion2;
 +}
 +
-+void librados::IoCtxImpl::C_aio_stat_Ack::finish(int r)
-+{
-+  c->lock.Lock();
-+  c->rval = r;
-+  c->ack = true;
-+  c->cond.Signal();
++TEST(LibRadosAio, StatRemove) {
++  AioTestData test_data;
++  rados_completion_t my_completion;
++  ASSERT_EQ("", test_data.init());
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion));
++  char buf[128];
++  memset(buf, 0xcc, sizeof(buf));
++  ASSERT_EQ(0, rados_aio_write(test_data.m_ioctx, "foo",
++			       my_completion, buf, sizeof(buf), 0));
++  {
++    TestAlarm alarm;
++    sem_wait(&test_data.m_sem);
++    sem_wait(&test_data.m_sem);
++  }
++  uint64_t psize;
++  time_t pmtime;
++  rados_completion_t my_completion2;
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion2));
++  ASSERT_EQ(0, rados_aio_stat(test_data.m_ioctx, "foo",
++			      my_completion2, &psize, &pmtime));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, rados_aio_wait_for_complete(my_completion2));
++  }
++  ASSERT_EQ(sizeof(buf), psize);
++  rados_completion_t my_completion3;
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion3));
++  ASSERT_EQ(0, rados_aio_remove(test_data.m_ioctx, "foo", my_completion3));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, rados_aio_wait_for_complete(my_completion3));
++  }
++  uint64_t psize2;
++  time_t pmtime2;
++  rados_completion_t my_completion4;
++  ASSERT_EQ(0, rados_aio_create_completion((void*)&test_data,
++	      set_completion_complete, set_completion_safe, &my_completion4));
++  ASSERT_EQ(0, rados_aio_stat(test_data.m_ioctx, "foo",
++			      my_completion4, &psize2, &pmtime2));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, rados_aio_wait_for_complete(my_completion4));
++  }
++  ASSERT_EQ(-ENOENT, rados_aio_get_return_value(my_completion4));
++  rados_aio_release(my_completion);
++  rados_aio_release(my_completion2);
++  rados_aio_release(my_completion3);
++  rados_aio_release(my_completion4);
++}
 +
-+  if (r >= 0 && pmtime) {
-+    *pmtime = mtime.sec();
++TEST(LibRadosAio, StatRemovePP) {
++  AioTestDataPP test_data;
++  ASSERT_EQ("", test_data.init());
++  AioCompletion *my_completion = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  AioCompletion *my_completion_null = NULL;
++  ASSERT_NE(my_completion, my_completion_null);
++  char buf[128];
++  memset(buf, 0xcc, sizeof(buf));
++  bufferlist bl1;
++  bl1.append(buf, sizeof(buf));
++  ASSERT_EQ(0, test_data.m_ioctx.aio_write("foo", my_completion,
++					   bl1, sizeof(buf), 0));
++  {
++    TestAlarm alarm;
++    sem_wait(&test_data.m_sem);
++    sem_wait(&test_data.m_sem);
++  }
++  uint64_t psize;
++  time_t pmtime;
++  AioCompletion *my_completion2 = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  ASSERT_NE(my_completion2, my_completion_null);
++  ASSERT_EQ(0, test_data.m_ioctx.aio_stat("foo", my_completion2,
++			  		&psize, &pmtime));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, my_completion2->wait_for_complete());
++  }
++  ASSERT_EQ(sizeof(buf), psize);
++  uint64_t psize2;
++  time_t pmtime2;
++  AioCompletion *my_completion3 = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  ASSERT_NE(my_completion3, my_completion_null);
++  ASSERT_EQ(0, test_data.m_ioctx.aio_remove("foo", my_completion3));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, my_completion3->wait_for_complete());
 +  }
 +
-+  if (c->callback_complete) {
-+    c->io->client->finisher.queue(new C_AioComplete(c));
++  AioCompletion *my_completion4 = test_data.m_cluster.aio_create_completion(
++	  (void*)&test_data, set_completion_complete, set_completion_safe);
++  ASSERT_NE(my_completion4, my_completion_null);
++  ASSERT_EQ(0, test_data.m_ioctx.aio_stat("foo", my_completion4,
++			  		&psize2, &pmtime2));
++  {
++    TestAlarm alarm;
++    ASSERT_EQ(0, my_completion4->wait_for_complete());
 +  }
-+
-+  c->put_unlock();
++  ASSERT_EQ(-ENOENT, my_completion4->get_return_value());
++  delete my_completion;
++  delete my_completion2;
++  delete my_completion3;
++  delete my_completion4;
 +}
 +
- /////////////////////// C_aio_sparse_read_Ack //////////////////////////
- 
- librados::IoCtxImpl::C_aio_sparse_read_Ack::C_aio_sparse_read_Ack(AioCompletionImpl *_c,
-diff --git a/src/librados/IoCtxImpl.h b/src/librados/IoCtxImpl.h
-index feea0e8..55b07ee 100644
---- a/src/librados/IoCtxImpl.h
-+++ b/src/librados/IoCtxImpl.h
-@@ -144,6 +144,14 @@ struct librados::IoCtxImpl {
-     C_aio_Ack(AioCompletionImpl *_c);
-     void finish(int r);
-   };
-+  
-+  struct C_aio_stat_Ack : public Context {
-+    librados::AioCompletionImpl *c;
-+    time_t *pmtime;
-+    utime_t mtime;
-+    C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
-+    void finish(int r);
-+  };
- 
-   struct C_aio_sparse_read_Ack : public Context {
-     AioCompletionImpl *c;
-@@ -177,6 +185,7 @@ struct librados::IoCtxImpl {
-   int aio_remove(const object_t &oid, AioCompletionImpl *c);
-   int aio_exec(const object_t& oid, AioCompletionImpl *c, const char *cls,
- 	       const char *method, bufferlist& inbl, bufferlist *outbl);
-+  int aio_stat(const object_t& oid, AioCompletionImpl *c, uint64_t *psize, time_t *pmtime);
- 
-   int pool_change_auid(unsigned long long auid);
-   int pool_change_auid_async(unsigned long long auid, PoolAsyncCompletionImpl *c);
-diff --git a/src/librados/librados.cc b/src/librados/librados.cc
-index c31b82a..c3756cd 100644
---- a/src/librados/librados.cc
-+++ b/src/librados/librados.cc
-@@ -978,6 +978,14 @@ int librados::IoCtx::aio_flush()
-   return 0;
- }
- 
-+int librados::IoCtx::aio_stat(const std::string& oid, librados::AioCompletion *c,
-+		              uint64_t *psize, time_t *pmtime)
-+{
-+  object_t obj(oid);
-+  return io_ctx_impl->aio_stat(oid, c->pc, psize, pmtime);
-+}
-+
-+
- int librados::IoCtx::watch(const string& oid, uint64_t ver, uint64_t *cookie,
- 			   librados::WatchCtx *ctx)
- {
-@@ -2173,6 +2181,16 @@ extern "C" int rados_aio_flush(rados_ioctx_t io)
-   return 0;
- }
- 
-+extern "C" int rados_aio_stat(rados_ioctx_t io, const char *o, 
-+			      rados_completion_t completion,
-+			      uint64_t *psize, time_t *pmtime)
-+{
-+  librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-+  object_t oid(o);
-+  return ctx->aio_stat(oid, (librados::AioCompletionImpl*)completion, 
-+		       psize, pmtime);
-+}
-+
- struct C_WatchCB : public librados::WatchCtx {
-   rados_watchcb_t wcb;
-   void *arg;
+ using std::string;
+ using std::map;
+ using std::set;
 -- 
 1.7.10.4
 
