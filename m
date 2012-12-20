@@ -1,53 +1,754 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: OSD's slow down to a crawl
-Date: Thu, 20 Dec 2012 09:28:03 -0600
-Message-ID: <50D32E83.70209@inktank.com>
+From: Matthew Anderson <matthewa@base3.com.au>
+Subject: RE: OSD's slow down to a crawl
+Date: Thu, 20 Dec 2012 15:51:01 +0000
+Message-ID: <38A500831D3DE24B90BD200D6C8701351BB15375@Exchange2010-2.corit.local>
 References: <38A500831D3DE24B90BD200D6C8701351BB15324@Exchange2010-2.corit.local>
+ <50D32E83.70209@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:43929 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751228Ab2LTP2F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Dec 2012 10:28:05 -0500
-Received: by mail-ie0-f176.google.com with SMTP id 13so4730374iea.7
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Dec 2012 07:28:04 -0800 (PST)
-In-Reply-To: <38A500831D3DE24B90BD200D6C8701351BB15324@Exchange2010-2.corit.local>
+Received: from mail.base3.com.au ([27.106.198.3]:59438 "EHLO mail.base3.com.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751324Ab2LTPvF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Dec 2012 10:51:05 -0500
+In-Reply-To: <50D32E83.70209@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matthew Anderson <matthewa@base3.com.au>
+To: 'Mark Nelson' <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/20/2012 09:16 AM, Matthew Anderson wrote:
-> Hi All,
->
-> I've run into an issue where OSD's slow right down to the point that they no longer appear to be processing write IO and everything grinds to a halt. Once they've stopped performing IO they can be brought back to life by restarting them where they continue on for a while before they slow down again and eventually everything stops again. I'm at a total loss to explain the issue because everything appears to be working correctly yet something is clearly very wrong. Running 'ceph -w' reports everything as clean+active and there are never any slow requests logged.
->
-> The problem appears to be more pronounced on the newer 3.7 kernel but happened on previous versions in the same fashion. Weird things like OSD's never completing recovery until they are restarted was also happening occasionally. The cluster would be stuck on a certain percentage degraded and restarting the OSD 3-4 times would eventually see it heal itself with the degraded percentage dropping a little each time. I'm testing with both the kernel CephFS client and QEMU 1.3.0 accessing an RBD, both slow down to a stop in the same manner.
->
-> Kernel 3.7.0 mainline (also occurs on 3.7.1 and 3.6.8)
-> Ceph version 0.55.1-300-g08c6424 (08c64249eb8cd7922de5c398a9426538918db77c) 	(also occurs on 0.55 and 0.55.1)
-> Total of 3 hosts. Two of them with 4 OSD's on an SSD each. The other with 24x 2TB SATA drives. Each host is running a monitor. I have setup two pools in the CRUSHMAP, one for SATA and one for SSD. Both pools have the same problem.
->
-> OSD config:
-> [osd.24]
->          host = KVM04
->          osd data = /srv/ceph/osd/$name
->          btrfs devs = /dev/sda2
->          btrfs options = rw,noatime,ssd
->          osd journal = /dev/sda1
->
-> The log below is when the OSD has stopped processing IO and was then shutdown cleanly. The QEMU guest was partially responsive but the benchmark had frozen waiting for IO to complete.
->
-> If I can do anymore debugging to help diagnose the problem please let me know.
+Hi Mark,
+
+Thanks for the quick reply. The log was 380MB in total so I just posted=
+ last 200 lines hoping that a trained eye might be able to spot somethi=
+ng. I'm happy to put the file up on a web server if anyone wants to rev=
+iew it in full.
+
+It doesn't appear to be memory or CPU related. In it's hung state (both=
+ read and write are not responding at the moment, I have a VM hung tryi=
+ng to shutdown and an rbd stuck exporting ) all of the OSD's sit around=
+ 0.3% CPU usage, ~300MB of ram and no IO wait. The server has roughly 4=
+0GB RAM free and is easily 90% idle. Iotop shows no IO coming from any =
+of the Ceph-OSD's.=20
+
+The admin socket showed no ops in flight but the performance dump, perh=
+istoric ops and config are below. I did notice that the age of some of =
+the ops was quite high considering things were actively trying to write=
+ to the cluster.
+# ceph --admin-daemon ./ceph-osd.24.asok perf dump
+
+{"filestore":{"journal_queue_max_ops":500,"journal_queue_ops":0,"journa=
+l_ops":20868,"journal_queue_max_bytes":104857600,"journal_queue_bytes":=
+0,"journal_bytes":1710397238,"journal_latency":{"avgcount":20868,"sum":=
+185.268022000},"journal_wr":13354,"journal_wr_bytes":{"avgcount":13354,=
+"sum":1770647552},"op_queue_max_ops":500,"op_queue_ops":0,"ops":20868,"=
+op_queue_max_bytes":104857600,"op_queue_bytes":0,"bytes":1710232583,"ap=
+ply_latency":{"avgcount":20868,"sum":508.896737000},"committing":0,"com=
+mitcycle":339,"commitcycle_interval":{"avgcount":339,"sum":1708.2847250=
+00},"commitcycle_latency":{"avgcount":339,"sum":13.241850000},"journal_=
+full":0},"mutex-FileJournal::completions_lock":{"wait":{"avgcount":0,"s=
+um":0.000000000}},"mutex-FileJournal::finisher_lock":{"wait":{"avgcount=
+":0,"sum":0.000000000}},"mutex-FileJournal::write_lock":{"wait":{"avgco=
+unt":0,"sum":0.000000000}},"mutex-FileJournal::writeq_lock":{"wait":{"a=
+vgcount":0,"sum":0.000000000}},"mutex-JOS::ApplyManager::apply_lock":{"=
+wait":{"avgcount":0,"sum":0.000000000}},"mutex-JOS::ApplyManager::com_l=
+ock":{"wait":{"avgcount":0,"sum":0.000000000}},"mutex-JOS::SubmitManage=
+r::lock":{"wait":{"avgcount":0,"sum":0.000000000}},"osd":{"opq":0,"op_w=
+ip":0,"op":31753,"op_in_bytes":797806224,"op_out_bytes":1728414048,"op_=
+latency":{"avgcount":31753,"sum":82.183373000},"op_r":24945,"op_r_out_b=
+ytes":1728414048,"op_r_latency":{"avgcount":24945,"sum":16.833689000},"=
+op_w":6808,"op_w_in_bytes":797806224,"op_w_rlat":{"avgcount":6808,"sum"=
+:38.223006000},"op_w_latency":{"avgcount":6808,"sum":65.349684000},"op_=
+rw":0,"op_rw_in_bytes":0,"op_rw_out_bytes":0,"op_rw_rlat":{"avgcount":0=
+,"sum":0.000000000},"op_rw_latency":{"avgcount":0,"sum":0.000000000},"s=
+ubop":5700,"subop_in_bytes":813224156,"subop_latency":{"avgcount":5700,=
+"sum":26.877085000},"subop_w":0,"subop_w_in_bytes":813224156,"subop_w_l=
+atency":{"avgcount":5700,"sum":26.877085000},"subop_pull":0,"subop_pull=
+_latency":{"avgcount":0,"sum":0.000000000},"subop_push":0,"subop_push_i=
+n_bytes":0,"subop_push_latency":{"avgcount":0,"sum":0.000000000},"pull"=
+:0,"push":0,"push_out_bytes":0,"push_in":0,"push_in_bytes":0,"recovery_=
+ops":0,"loadavg":359,"buffer_bytes":0,"numpg":2486,"numpg_primary":1214=
+,"numpg_replica":1272,"numpg_stray":0,"heartbeat_to_peers":4,"heartbeat=
+_from_peers":0,"map_messages":44,"map_message_epochs":184,"map_message_=
+epoch_dups":174},"throttle-filestore_bytes":{"val":0,"max":104857600,"g=
+et":0,"get_sum":0,"get_or_fail_fail":0,"get_or_fail_success":0,"take":2=
+0868,"take_sum":1710397238,"put":13354,"put_sum":1710397238,"wait":{"av=
+gcount":0,"sum":0.000000000}},"throttle-filestore_ops":{"val":0,"max":5=
+00,"get":0,"get_sum":0,"get_or_fail_fail":0,"get_or_fail_success":0,"ta=
+ke":20868,"take_sum":20868,"put":13354,"put_sum":20868,"wait":{"avgcoun=
+t":0,"sum":0.000000000}},"throttle-msgr_dispatch_throttler-client":{"va=
+l":0,"max":104857600,"get":31657,"get_sum":795546573,"get_or_fail_fail"=
+:0,"get_or_fail_success":0,"take":0,"take_sum":0,"put":31657,"put_sum":=
+795546573,"wait":{"avgcount":0,"sum":0.000000000}},"throttle-msgr_dispa=
+tch_throttler-cluster":{"val":0,"max":104857600,"get":18913,"get_sum":8=
+28011293,"get_or_fail_fail":0,"get_or_fail_success":0,"take":0,"take_su=
+m":0,"put":18913,"put_sum":828011293,"wait":{"avgcount":0,"sum":0.00000=
+0000}},"throttle-msgr_dispatch_throttler-hbclient":{"val":0,"max":10485=
+7600,"get":4260,"get_sum":200220,"get_or_fail_fail":0,"get_or_fail_succ=
+ess":0,"take":0,"take_sum":0,"put":4260,"put_sum":200220,"wait":{"avgco=
+unt":0,"sum":0.000000000}},"throttle-msgr_dispatch_throttler-hbserver":=
+{"val":0,"max":104857600,"get":4236,"get_sum":199092,"get_or_fail_fail"=
+:0,"get_or_fail_success":0,"take":0,"take_sum":0,"put":4236,"put_sum":1=
+99092,"wait":{"avgcount":0,"sum":0.000000000}},"throttle-osd_client_byt=
+es":{"val":0,"max":524288000,"get":31308,"get_sum":795353720,"get_or_fa=
+il_fail":0,"get_or_fail_success":0,"take":0,"take_sum":0,"put":37671,"p=
+ut_sum":795353720,"wait":{"avgcount":0,"sum":0.000000000}}}
+
+# ceph --admin-daemon ./ceph-osd.24.asok dump_historic_ops
+
+       { "description": "osd_op(client.7636.0:101498 rb.0.122c.6b8b4567=
+=2E000000000357 [write 3600384~4096] 6.42463fe3)",
+          "received_at": "2012-12-20 23:34:42.012131",
+          "age": "75.428051",
+          "duration": "0.009988",
+          "flag_point": "waiting for sub ops",
+          "client_info": { "client": "client.7636",
+              "tid": 101498},
+          "events": [
+                { "time": "2012-12-20 23:34:42.012317",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:34:42.012425",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:34:42.012678",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:42.012720",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:42.012815",
+                  "event": "sub_op_sent"},
+                { "time": "2012-12-20 23:34:42.012958",
+                  "event": "commit_queued_for_journal_write"},
+                { "time": "2012-12-20 23:34:42.013033",
+                  "event": "write_thread_in_journal_buffer"},
+                { "time": "2012-12-20 23:34:42.013745",
+                  "event": "journaled_completion_queued"},
+                { "time": "2012-12-20 23:34:42.013803",
+                  "event": "op_commit"},
+                { "time": "2012-12-20 23:34:42.017414",
+                  "event": "sub_op_commit_rec"},
+                { "time": "2012-12-20 23:34:42.022066",
+                  "event": "op_applied"},
+                { "time": "2012-12-20 23:34:42.022119",
+                  "event": "done"}]},
+        { "description": "osd_sub_op_reply(client.7636.0:101498 6.1fe3 =
+42463fe3\/rb.0.122c.6b8b4567.000000000357\/head\/\/6 [] ondisk, result =
+=3D 0)",
+          "received_at": "2012-12-20 23:34:42.017048",
+          "age": "75.423134",
+          "duration": "0.000411",
+          "flag_point": "started",
+          "events": [
+                { "time": "2012-12-20 23:34:42.017218",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:34:42.017363",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:34:42.017401",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:42.017459",
+                  "event": "done"}]},
+        { "description": "osd_op(client.7636.0:101502 rb.0.122c.6b8b456=
+7.000000000064 [write 1512448~61440] 6.a241e34d)",
+          "received_at": "2012-12-20 23:34:49.851021",
+          "age": "67.589161",
+          "duration": "0.007114",
+          "flag_point": "waiting for sub ops",
+          "client_info": { "client": "client.7636",
+              "tid": 101502},
+          "events": [
+                { "time": "2012-12-20 23:34:49.851276",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:34:49.851429",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:34:49.851616",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:49.851648",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:49.851712",
+                  "event": "sub_op_sent"},
+                { "time": "2012-12-20 23:34:49.851770",
+                  "event": "commit_queued_for_journal_write"},
+                { "time": "2012-12-20 23:34:49.851915",
+                  "event": "write_thread_in_journal_buffer"},
+                { "time": "2012-12-20 23:34:49.853956",
+                  "event": "journaled_completion_queued"},
+                { "time": "2012-12-20 23:34:49.853992",
+                  "event": "op_commit"},
+                { "time": "2012-12-20 23:34:49.857016",
+                  "event": "sub_op_commit_rec"},
+                { "time": "2012-12-20 23:34:49.858077",
+                  "event": "op_applied"},
+                { "time": "2012-12-20 23:34:49.858135",
+                  "event": "done"}]},
+        { "description": "osd_sub_op_reply(client.7636.0:101502 6.234d =
+a241e34d\/rb.0.122c.6b8b4567.000000000064\/head\/\/6 [] ondisk, result =
+=3D 0)",
+          "received_at": "2012-12-20 23:34:49.856762",
+          "age": "67.583420",
+          "duration": "0.000308",
+          "flag_point": "started",
+          "events": [
+                { "time": "2012-12-20 23:34:49.856869",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:34:49.856969",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:34:49.857001",
+                  "event": "started"},
+                { "time": "2012-12-20 23:34:49.857070",
+                  "event": "done"}]},
+        { "description": "osd_op(client.7636.0:101504 rb.0.122c.6b8b456=
+7.00000000012c [write 1658880~2048] 6.92d2c38c)",
+          "received_at": "2012-12-20 23:35:34.351518",
+          "age": "23.088664",
+          "duration": "0.009430",
+          "flag_point": "waiting for sub ops",
+          "client_info": { "client": "client.7636",
+              "tid": 101504},
+          "events": [
+                { "time": "2012-12-20 23:35:34.351714",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:35:34.351811",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:35:34.352030",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:34.352071",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:34.352146",
+                  "event": "sub_op_sent"},
+                { "time": "2012-12-20 23:35:34.352213",
+                  "event": "commit_queued_for_journal_write"},
+                { "time": "2012-12-20 23:35:34.352287",
+                  "event": "write_thread_in_journal_buffer"},
+                { "time": "2012-12-20 23:35:34.355390",
+                  "event": "journaled_completion_queued"},
+                { "time": "2012-12-20 23:35:34.355475",
+                  "event": "op_commit"},
+                { "time": "2012-12-20 23:35:34.356661",
+                  "event": "sub_op_commit_rec"},
+                { "time": "2012-12-20 23:35:34.360894",
+                  "event": "op_applied"},
+                { "time": "2012-12-20 23:35:34.360948",
+                  "event": "done"}]},
+        { "description": "osd_sub_op_reply(client.7636.0:101504 6.38c 9=
+2d2c38c\/rb.0.122c.6b8b4567.00000000012c\/head\/\/6 [] ondisk, result =3D=
+ 0)",
+          "received_at": "2012-12-20 23:35:34.356286",
+          "age": "23.083896",
+          "duration": "0.000421",
+          "flag_point": "started",
+          "events": [
+                { "time": "2012-12-20 23:35:34.356489",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:35:34.356598",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:35:34.356640",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:34.356707",
+                  "event": "done"}]},
+        { "description": "osd_op(client.7636.0:101512 rb.0.122c.6b8b456=
+7.000000000357 [write 3731456~4096] 6.42463fe3)",
+          "received_at": "2012-12-20 23:35:42.133103",
+          "age": "15.307079",
+          "duration": "0.008357",
+          "flag_point": "waiting for sub ops",
+          "client_info": { "client": "client.7636",
+              "tid": 101512},
+          "events": [
+                { "time": "2012-12-20 23:35:42.133315",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:35:42.133427",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:35:42.133684",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:42.133723",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:42.133796",
+                  "event": "sub_op_sent"},
+                { "time": "2012-12-20 23:35:42.133908",
+                  "event": "commit_queued_for_journal_write"},
+                { "time": "2012-12-20 23:35:42.133995",
+                  "event": "write_thread_in_journal_buffer"},
+                { "time": "2012-12-20 23:35:42.136965",
+                  "event": "journaled_completion_queued"},
+                { "time": "2012-12-20 23:35:42.137025",
+                  "event": "op_commit"},
+                { "time": "2012-12-20 23:35:42.138456",
+                  "event": "sub_op_commit_rec"},
+                { "time": "2012-12-20 23:35:42.141408",
+                  "event": "op_applied"},
+                { "time": "2012-12-20 23:35:42.141460",
+                  "event": "done"}]},
+        { "description": "osd_sub_op_reply(client.7636.0:101512 6.1fe3 =
+42463fe3\/rb.0.122c.6b8b4567.000000000357\/head\/\/6 [] ondisk, result =
+=3D 0)",
+          "received_at": "2012-12-20 23:35:42.138087",
+          "age": "15.302095",
+          "duration": "0.000410",
+          "flag_point": "started",
+          "events": [
+                { "time": "2012-12-20 23:35:42.138248",
+                  "event": "waiting_for_osdmap"},
+                { "time": "2012-12-20 23:35:42.138363",
+                  "event": "reached_pg"},
+                { "time": "2012-12-20 23:35:42.138443",
+                  "event": "started"},
+                { "time": "2012-12-20 23:35:42.138497",
+                  "event": "done"}]}]}
+
+=A0=A0=A0# ceph --admin-daemon ./ceph-osd.24.asok config show
+{ "name": "osd.24",
+  "cluster": "ceph",
+  "none": "0\/5",
+  "lockdep": "0\/1",
+  "context": "0\/1",
+  "crush": "1\/1",
+  "mds": "1\/5",
+  "mds_balancer": "1\/5",
+  "mds_locker": "1\/5",
+  "mds_log": "1\/5",
+  "mds_log_expire": "1\/5",
+  "mds_migrator": "1\/5",
+  "buffer": "0\/1",
+  "timer": "0\/1",
+  "filer": "0\/1",
+  "striper": "0\/1",
+  "objecter": "0\/1",
+  "rados": "0\/5",
+  "rbd": "0\/5",
+  "journaler": "0\/5",
+  "objectcacher": "0\/5",
+  "client": "0\/5",
+  "osd": "0\/5",
+  "optracker": "0\/5",
+  "objclass": "0\/5",
+  "filestore": "1\/3",
+  "journal": "1\/3",
+  "ms": "0\/5",
+  "mon": "1\/5",
+  "monc": "0\/10",
+  "paxos": "0\/5",
+  "tp": "0\/5",
+  "auth": "1\/5",
+  "crypto": "1\/5",
+  "finisher": "1\/1",
+  "heartbeatmap": "1\/5",
+  "perfcounter": "1\/5",
+  "rgw": "1\/5",
+  "hadoop": "1\/5",
+  "javaclient": "1\/5",
+  "asok": "1\/5",
+  "throttle": "1\/1",
+  "host": "KVM04",
+  "fsid": "00000000-0000-0000-0000-000000000000",
+  "public_addr": ":\/0",
+  "cluster_addr": ":\/0",
+  "public_network": "",
+  "cluster_network": "",
+  "num_client": "1",
+  "monmap": "",
+  "mon_host": "",
+  "lockdep": "false",
+  "admin_socket": "\/var\/run\/ceph\/ceph-osd.24.asok",
+  "daemonize": "true",
+  "pid_file": "\/var\/run\/ceph\/osd.24.pid",
+  "chdir": "\/",
+  "max_open_files": "0",
+  "fatal_signal_handlers": "true",
+  "log_file": "\/var\/log\/ceph\/osd.24.log",
+  "log_max_new": "1000",
+  "log_max_recent": "100000",
+  "log_to_stderr": "false",
+  "err_to_stderr": "true",
+  "log_to_syslog": "false",
+  "err_to_syslog": "false",
+  "log_flush_on_exit": "true",
+  "clog_to_monitors": "true",
+  "clog_to_syslog": "false",
+  "mon_cluster_log_to_syslog": "false",
+  "mon_cluster_log_file": "\/var\/log\/ceph\/ceph.log",
+  "key": "",
+  "keyfile": "",
+  "keyring": "\/srv\/ceph\/osd\/osd.24\/keyring",
+  "heartbeat_interval": "5",
+  "heartbeat_file": "",
+  "perf": "true",
+  "ms_tcp_nodelay": "true",
+  "ms_initial_backoff": "0.2",
+  "ms_max_backoff": "15",
+  "ms_nocrc": "false",
+  "ms_die_on_bad_msg": "false",
+  "ms_dispatch_throttle_bytes": "104857600",
+  "ms_bind_ipv6": "false",
+  "ms_bind_port_min": "6800",
+  "ms_bind_port_max": "7100",
+  "ms_rwthread_stack_bytes": "1048576",
+  "ms_tcp_read_timeout": "900",
+  "ms_inject_socket_failures": "0",
+  "ms_inject_delay_type": "",
+  "ms_inject_delay_max": "1",
+  "ms_inject_delay_probability": "0",
+  "mon_data": "\/var\/lib\/ceph\/mon\/ceph-24",
+  "mon_initial_members": "",
+  "mon_sync_fs_threshold": "5",
+  "mon_tick_interval": "5",
+  "mon_subscribe_interval": "300",
+  "mon_osd_laggy_halflife": "3600",
+  "mon_osd_laggy_weight": "0.3",
+  "mon_osd_adjust_heartbeat_grace": "true",
+  "mon_osd_adjust_down_out_interval": "true",
+  "mon_osd_auto_mark_in": "false",
+  "mon_osd_auto_mark_auto_out_in": "true",
+  "mon_osd_auto_mark_new_in": "true",
+  "mon_osd_down_out_interval": "300",
+  "mon_osd_min_up_ratio": "0.3",
+  "mon_osd_min_in_ratio": "0.3",
+  "mon_lease": "5",
+  "mon_lease_renew_interval": "3",
+  "mon_lease_ack_timeout": "10",
+  "mon_clock_drift_allowed": "0.05",
+  "mon_clock_drift_warn_backoff": "5",
+  "mon_accept_timeout": "10",
+  "mon_pg_create_interval": "30",
+  "mon_pg_stuck_threshold": "300",
+  "mon_osd_full_ratio": "0.95",
+  "mon_osd_nearfull_ratio": "0.85",
+  "mon_globalid_prealloc": "100",
+  "mon_osd_report_timeout": "900",
+  "mon_force_standby_active": "true",
+  "mon_min_osdmap_epochs": "500",
+  "mon_max_pgmap_epochs": "500",
+  "mon_max_log_epochs": "500",
+  "mon_max_osd": "10000",
+  "mon_probe_timeout": "2",
+  "mon_slurp_timeout": "10",
+  "mon_slurp_bytes": "262144",
+  "mon_client_bytes": "104857600",
+  "mon_daemon_bytes": "419430400",
+  "mon_max_log_entries_per_event": "4096",
+  "paxos_max_join_drift": "10",
+  "paxos_propose_interval": "1",
+  "paxos_min_wait": "0.05",
+  "clock_offset": "0",
+  "auth_cluster_required": "none",
+  "auth_service_required": "none",
+  "auth_client_required": "none",
+  "auth_supported": "none",
+  "cephx_require_signatures": "false",
+  "cephx_sign_messages": "true",
+  "auth_mon_ticket_ttl": "43200",
+  "auth_service_ticket_ttl": "3600",
+  "mon_client_hunt_interval": "3",
+  "mon_client_ping_interval": "10",
+  "mon_client_max_log_entries_per_message": "1000",
+  "mon_max_pool_pg_num": "65536",
+  "client_cache_size": "16384",
+  "client_cache_mid": "0.75",
+  "client_use_random_mds": "false",
+  "client_mount_timeout": "30",
+  "client_tick_interval": "1",
+  "client_trace": "",
+  "client_readahead_min": "131072",
+  "client_readahead_max_bytes": "0",
+  "client_readahead_max_periods": "4",
+  "client_snapdir": ".snap",
+  "client_mountpoint": "\/",
+  "client_notify_timeout": "10",
+  "client_caps_release_delay": "5",
+  "client_oc": "true",
+  "client_oc_size": "209715200",
+  "client_oc_max_dirty": "104857600",
+  "client_oc_target_dirty": "8388608",
+  "client_oc_max_dirty_age": "5",
+  "client_oc_max_objects": "1000",
+  "client_debug_force_sync_read": "false",
+  "client_debug_inject_tick_delay": "0",
+  "fuse_use_invalidate_cb": "false",
+  "fuse_big_writes": "true",
+  "fuse_debug": "false",
+  "objecter_tick_interval": "5",
+  "objecter_timeout": "10",
+  "objecter_inflight_op_bytes": "104857600",
+  "objecter_inflight_ops": "1024",
+  "journaler_allow_split_entries": "true",
+  "journaler_write_head_interval": "15",
+  "journaler_prefetch_periods": "10",
+  "journaler_prezero_periods": "5",
+  "journaler_batch_interval": "0.001",
+  "journaler_batch_max": "0",
+  "mds_data": "\/var\/lib\/ceph\/mds\/ceph-24",
+  "mds_max_file_size": "1099511627776",
+  "mds_cache_size": "100000",
+  "mds_cache_mid": "0.7",
+  "mds_mem_max": "1048576",
+  "mds_dir_commit_ratio": "0.5",
+  "mds_dir_max_commit_size": "90",
+  "mds_decay_halflife": "5",
+  "mds_beacon_interval": "4",
+  "mds_beacon_grace": "15",
+  "mds_blacklist_interval": "1440",
+  "mds_session_timeout": "60",
+  "mds_session_autoclose": "300",
+  "mds_reconnect_timeout": "45",
+  "mds_tick_interval": "5",
+  "mds_dirstat_min_interval": "1",
+  "mds_scatter_nudge_interval": "5",
+  "mds_client_prealloc_inos": "1000",
+  "mds_early_reply": "true",
+  "mds_use_tmap": "true",
+  "mds_default_dir_hash": "2",
+  "mds_log": "true",
+  "mds_log_skip_corrupt_events": "false",
+  "mds_log_max_events": "-1",
+  "mds_log_max_segments": "30",
+  "mds_log_max_expiring": "20",
+  "mds_bal_sample_interval": "3",
+  "mds_bal_replicate_threshold": "8000",
+  "mds_bal_unreplicate_threshold": "0",
+  "mds_bal_frag": "false",
+  "mds_bal_split_size": "10000",
+  "mds_bal_split_rd": "25000",
+  "mds_bal_split_wr": "10000",
+  "mds_bal_split_bits": "3",
+  "mds_bal_merge_size": "50",
+  "mds_bal_merge_rd": "1000",
+  "mds_bal_merge_wr": "1000",
+  "mds_bal_interval": "10",
+  "mds_bal_fragment_interval": "5",
+  "mds_bal_idle_threshold": "0",
+  "mds_bal_max": "-1",
+  "mds_bal_max_until": "-1",
+  "mds_bal_mode": "0",
+  "mds_bal_min_rebalance": "0.1",
+  "mds_bal_min_start": "0.2",
+  "mds_bal_need_min": "0.8",
+  "mds_bal_need_max": "1.2",
+  "mds_bal_midchunk": "0.3",
+  "mds_bal_minchunk": "0.001",
+  "mds_bal_target_removal_min": "5",
+  "mds_bal_target_removal_max": "10",
+  "mds_replay_interval": "1",
+  "mds_shutdown_check": "0",
+  "mds_thrash_exports": "0",
+  "mds_thrash_fragments": "0",
+  "mds_dump_cache_on_map": "false",
+  "mds_dump_cache_after_rejoin": "false",
+  "mds_verify_scatter": "false",
+  "mds_debug_scatterstat": "false",
+  "mds_debug_frag": "false",
+  "mds_debug_auth_pins": "false",
+  "mds_debug_subtrees": "false",
+  "mds_kill_mdstable_at": "0",
+  "mds_kill_export_at": "0",
+  "mds_kill_import_at": "0",
+  "mds_kill_link_at": "0",
+  "mds_kill_rename_at": "0",
+  "mds_wipe_sessions": "false",
+  "mds_wipe_ino_prealloc": "false",
+  "mds_skip_ino": "0",
+  "max_mds": "1",
+  "mds_standby_for_name": "",
+  "mds_standby_for_rank": "-1",
+  "mds_standby_replay": "false",
+  "osd_auto_upgrade_tmap": "true",
+  "osd_tmapput_sets_uses_tmap": "false",
+  "osd_max_backfills": "10",
+  "osd_backfill_full_ratio": "0.85",
+  "osd_backfill_retry_interval": "10",
+  "osd_uuid": "00000000-0000-0000-0000-000000000000",
+  "osd_data": "\/srv\/ceph\/osd\/osd.24",
+  "osd_journal": "\/dev\/sda3",
+  "osd_journal_size": "5120",
+  "osd_max_write_size": "90",
+  "osd_max_pgls": "1024",
+  "osd_client_message_size_cap": "524288000",
+  "osd_pg_bits": "6",
+  "osd_pgp_bits": "6",
+  "osd_min_rep": "1",
+  "osd_max_rep": "10",
+  "osd_pool_default_crush_rule": "0",
+  "osd_pool_default_size": "2",
+  "osd_pool_default_min_size": "0",
+  "osd_pool_default_pg_num": "8",
+  "osd_pool_default_pgp_num": "8",
+  "osd_map_dedup": "true",
+  "osd_map_cache_size": "500",
+  "osd_map_message_max": "100",
+  "osd_op_threads": "2",
+  "osd_disk_threads": "1",
+  "osd_recovery_threads": "1",
+  "osd_recover_clone_overlap": "true",
+  "osd_backfill_scan_min": "64",
+  "osd_backfill_scan_max": "512",
+  "osd_op_thread_timeout": "30",
+  "osd_recovery_thread_timeout": "30",
+  "osd_snap_trim_thread_timeout": "3600",
+  "osd_scrub_thread_timeout": "60",
+  "osd_scrub_finalize_thread_timeout": "600",
+  "osd_remove_thread_timeout": "3600",
+  "osd_command_thread_timeout": "600",
+  "osd_age": "0.8",
+  "osd_age_time": "0",
+  "osd_heartbeat_addr": ":\/0",
+  "osd_heartbeat_interval": "6",
+  "osd_heartbeat_grace": "20",
+  "osd_mon_heartbeat_interval": "30",
+  "osd_mon_report_interval_max": "120",
+  "osd_mon_report_interval_min": "5",
+  "osd_mon_ack_timeout": "30",
+  "osd_min_down_reporters": "1",
+  "osd_min_down_reports": "3",
+  "osd_default_data_pool_replay_window": "45",
+  "osd_preserve_trimmed_log": "false",
+  "osd_auto_mark_unfound_lost": "false",
+  "osd_recovery_delay_start": "0",
+  "osd_recovery_max_active": "50",
+  "osd_recovery_max_chunk": "8388608",
+  "osd_recovery_forget_lost_objects": "false",
+  "osd_max_scrubs": "1",
+  "osd_scrub_load_threshold": "0.5",
+  "osd_scrub_min_interval": "300",
+  "osd_scrub_max_interval": "86400",
+  "osd_deep_scrub_interval": "604800",
+  "osd_deep_scrub_stride": "524288",
+  "osd_auto_weight": "false",
+  "osd_class_dir": "\/usr\/local\/lib\/rados-classes",
+  "osd_check_for_log_corruption": "false",
+  "osd_use_stale_snap": "false",
+  "osd_rollback_to_cluster_snap": "",
+  "osd_default_notify_timeout": "30",
+  "osd_kill_backfill_at": "0",
+  "osd_min_pg_log_entries": "1000",
+  "osd_op_complaint_time": "30",
+  "osd_command_max_records": "256",
+  "osd_op_log_threshold": "5",
+  "osd_verify_sparse_read_holes": "false",
+  "osd_debug_drop_ping_probability": "0",
+  "osd_debug_drop_ping_duration": "0",
+  "osd_debug_drop_pg_create_probability": "0",
+  "osd_debug_drop_pg_create_duration": "1",
+  "osd_debug_drop_op_probability": "0",
+  "osd_op_history_size": "20",
+  "osd_op_history_duration": "600",
+  "osd_target_transaction_size": "300",
+  "osd_client_op_priority": "63",
+  "osd_recovery_op_priority": "10",
+  "filestore": "false",
+  "filestore_index_retry_probability": "0",
+  "filestore_debug_omap_check": "false",
+  "filestore_xattr_use_omap": "false",
+  "filestore_max_inline_xattr_size": "512",
+  "filestore_max_inline_xattrs": "2",
+  "filestore_max_sync_interval": "5",
+  "filestore_min_sync_interval": "0.01",
+  "filestore_btrfs_snap": "true",
+  "filestore_btrfs_clone_range": "true",
+  "filestore_fsync_flushes_journal_data": "false",
+  "filestore_fiemap": "false",
+  "filestore_flusher": "true",
+  "filestore_flusher_max_fds": "512",
+  "filestore_flush_min": "65536",
+  "filestore_sync_flush": "false",
+  "filestore_journal_parallel": "false",
+  "filestore_journal_writeahead": "false",
+  "filestore_journal_trailing": "false",
+  "filestore_queue_max_ops": "500",
+  "filestore_queue_max_bytes": "104857600",
+  "filestore_queue_committing_max_ops": "500",
+  "filestore_queue_committing_max_bytes": "104857600",
+  "filestore_op_threads": "2",
+  "filestore_op_thread_timeout": "60",
+  "filestore_op_thread_suicide_timeout": "180",
+  "filestore_commit_timeout": "600",
+  "filestore_fiemap_threshold": "4096",
+  "filestore_merge_threshold": "10",
+  "filestore_split_multiple": "2",
+  "filestore_update_to": "1000",
+  "filestore_blackhole": "false",
+  "filestore_dump_file": "",
+  "filestore_kill_at": "0",
+  "filestore_fail_eio": "true",
+  "journal_dio": "true",
+  "journal_aio": "false",
+  "journal_block_align": "true",
+  "journal_max_write_bytes": "10485760",
+  "journal_max_write_entries": "100",
+  "journal_queue_max_ops": "500",
+  "journal_queue_max_bytes": "104857600",
+  "journal_align_min_size": "65536",
+  "journal_replay_from": "0",
+  "journal_zero_on_create": "false",
+  "rbd_cache": "false",
+  "rbd_cache_size": "33554432",
+  "rbd_cache_max_dirty": "25165824",
+  "rbd_cache_target_dirty": "16777216",
+  "rbd_cache_max_dirty_age": "1",
+  "nss_db_path": "",
+  "rgw_data": "\/var\/lib\/ceph\/radosgw\/ceph-24",
+  "rgw_enable_apis": "s3, swift, swift_auth, admin",
+  "rgw_cache_enabled": "true",
+  "rgw_cache_lru_size": "10000",
+  "rgw_socket_path": "",
+  "rgw_dns_name": "",
+  "rgw_swift_url": "",
+  "rgw_swift_url_prefix": "swift",
+  "rgw_swift_auth_url": "",
+  "rgw_swift_auth_entry": "auth",
+  "rgw_keystone_url": "",
+  "rgw_keystone_admin_token": "",
+  "rgw_keystone_accepted_roles": "Member, admin",
+  "rgw_keystone_token_cache_size": "10000",
+  "rgw_keystone_revocation_interval": "900",
+  "rgw_admin_entry": "admin",
+  "rgw_enforce_swift_acls": "true",
+  "rgw_swift_token_expiration": "86400",
+  "rgw_print_continue": "true",
+  "rgw_remote_addr_param": "REMOTE_ADDR",
+  "rgw_op_thread_timeout": "600",
+  "rgw_op_thread_suicide_timeout": "0",
+  "rgw_thread_pool_size": "100",
+  "rgw_num_control_oids": "8",
+  "rgw_cluster_root_pool": ".rgw.root",
+  "rgw_log_nonexistent_bucket": "false",
+  "rgw_log_object_name": "%Y-%m-%d-%H-%i-%n",
+  "rgw_log_object_name_utc": "false",
+  "rgw_usage_max_shards": "32",
+  "rgw_usage_max_user_shards": "1",
+  "rgw_enable_ops_log": "true",
+  "rgw_enable_usage_log": "true",
+  "rgw_ops_log_rados": "true",
+  "rgw_ops_log_socket_path": "",
+  "rgw_ops_log_data_backlog": "5242880",
+  "rgw_usage_log_flush_threshold": "1024",
+  "rgw_usage_log_tick_interval": "30",
+  "rgw_intent_log_object_name": "%Y-%m-%d-%i-%n",
+  "rgw_intent_log_object_name_utc": "false",
+  "rgw_init_timeout": "30",
+  "rgw_mime_types_file": "\/etc\/mime.types",
+  "rgw_gc_max_objs": "32",
+  "rgw_gc_obj_min_wait": "7200",
+  "rgw_gc_processor_max_time": "3600",
+  "rgw_gc_processor_period": "3600",
+  "rgw_s3_success_create_obj_status": "0",
+  "rgw_resolve_cname": "false",
+  "rgw_obj_stripe_size": "4194304",
+  "rgw_extended_http_attrs": "",
+  "mutex_perf_counter": "false",
+  "internal_safe_to_start_threads": "true"}
+
+
+-----Original Message-----
+=46rom: Mark Nelson [mailto:mark.nelson@inktank.com]=20
+Sent: Thursday, 20 December 2012 11:28 PM
+To: Matthew Anderson
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: OSD's slow down to a crawl
 
 Hi Matt,
 
-Yeah, your log is looking pretty sparse!  I imagine Sam will have a lot 
-of questions for you.  Out of curiosity have you looked at any 
-io/cpu/memory stats when things slow down?  sysprof may come in handy if 
-it looks like it's CPU related.  Also, check out the OSD admin socket. 
+Yeah, your log is looking pretty sparse!  I imagine Sam will have a lot=
+ of questions for you.  Out of curiosity have you looked at any io/cpu/=
+memory stats when things slow down?  sysprof may come in handy if it lo=
+oks like it's CPU related.  Also, check out the OSD admin socket.=20
 Sebastien Han made a nice little blog entry describing it:
 
 http://www.sebastien-han.fr/blog/2012/08/14/ceph-admin-socket/
@@ -55,219 +756,8 @@ http://www.sebastien-han.fr/blog/2012/08/14/ceph-admin-socket/
 You can get a lot of information about the current state of things.
 
 Mark
-
->
-> Thanks
-> -Matt
-> -------------------------------------
->
-> 2012-12-20 22:18:06.809863 7fb9e4ff9700 20 journal write_thread_entry aio throttle: aio num 0 bytes 0 ... exp 0 min_new 1 ... pending 5748
-> 2012-12-20 22:18:06.809871 7fb9e4ff9700 10 journal room 960479231 max_size 960495616 pos 543215616 header.start 543203328 top 4096
-> 2012-12-20 22:18:06.809877 7fb9e4ff9700 10 journal check_for_full at 543215616 : 8192 < 960479231
-> 2012-12-20 22:18:06.809880 7fb9e4ff9700 15 journal prepare_single_write 1 will write 543215616 : seq 2087065 len 5748 -> 8192 (head 40 pre_pad 0 ebl 5748 post_pad 2364 tail 40) (ebl alignment -1)
-> 2012-12-20 22:18:06.809891 7fb9d57fa700 10 journal op_apply_start 2087065 open_ops 0 -> 1
-> 2012-12-20 22:18:06.809897 7fb9d57fa700  5 filestore(/srv/ceph/osd/osd.24) _do_op 0x7fb9b4376570 seq 2087065 osr(6.1fe3 0x21a4f50)/0x21a4f50 start
-> 2012-12-20 22:18:06.809901 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) _do_transaction on 0x7fb9b4f5db40
-> 2012-12-20 22:18:06.809915 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) write meta/a4c1c2a3/pglog_6.1fe3/0//-1 147735~147
-> 2012-12-20 22:18:06.809947 7fb9e4ff9700 20 journal prepare_multi_write queue_pos now 543223808
-> 2012-12-20 22:18:06.809953 7fb9e4ff9700 15 journal do_aio_write writing 543215616~8192
-> 2012-12-20 22:18:06.809975 7fb9e4ff9700 20 journal write_aio_bl 543215616~8192 seq 2087065
-> 2012-12-20 22:18:06.809981 7fb9e4ff9700 20 journal write_aio_bl .. 543215616~8192 in 1
-> 2012-12-20 22:18:06.810051 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) write meta/a4c1c2a3/pglog_6.1fe3/0//-1 147735~147 = 147
-> 2012-12-20 22:18:06.810065 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) collection_setattr /srv/ceph/osd/osd.24/current/6.1fe3_head 'ondisklog' len 34
-> 2012-12-20 22:18:06.810068 7fb9e4ff9700  5 journal put_throttle finished 1 ops and 5748 bytes, now 0 ops and 0 bytes
-> 2012-12-20 22:18:06.810077 7fb9e4ff9700 20 journal write_thread_entry going to sleep
-> 2012-12-20 22:18:06.810103 7fb9d7fff700 20 journal write_finish_thread_entry waiting for aio(s)
-> 2012-12-20 22:18:06.810149 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) collection_setattr /srv/ceph/osd/osd.24/current/6.1fe3_head 'ondisklog' len 34 = 34
-> 2012-12-20 22:18:06.810159 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) collection_setattr /srv/ceph/osd/osd.24/current/6.1fe3_head 'info' len 5
-> 2012-12-20 22:18:06.810191 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) collection_setattr /srv/ceph/osd/osd.24/current/6.1fe3_head 'info' len 5 = 5
-> 2012-12-20 22:18:06.810198 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) truncate meta/8dfefeef/pginfo_6.1fe3/0//-1 size 0
-> 2012-12-20 22:18:06.810307 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) truncate meta/8dfefeef/pginfo_6.1fe3/0//-1 size 0 = 0
-> 2012-12-20 22:18:06.810317 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) write meta/8dfefeef/pginfo_6.1fe3/0//-1 0~504
-> 2012-12-20 22:18:06.810386 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) write meta/8dfefeef/pginfo_6.1fe3/0//-1 0~504 = 504
-> 2012-12-20 22:18:06.810394 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) _do_transaction on 0x7fb9b4f5dab8
-> 2012-12-20 22:18:06.810399 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) write 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 3522560~4096
-> 2012-12-20 22:18:06.810451 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) write 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 3522560~4096 = 4096
-> 2012-12-20 22:18:06.810497 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) setattrs 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6
-> 2012-12-20 22:18:06.810576 7fb9d7fff700 10 journal write_finish_thread_entry aio 543215616~8192 done
-> 2012-12-20 22:18:06.810588 7fb9d7fff700 20 journal check_aio_completion
-> 2012-12-20 22:18:06.810590 7fb9d7fff700 20 journal check_aio_completion completed seq 2087065 543215616~8192
-> 2012-12-20 22:18:06.810594 7fb9d7fff700 20 journal check_aio_completion queueing finishers through seq 2087065
-> 2012-12-20 22:18:06.810596 7fb9d7fff700 10 journal queue_completions_thru seq 2087065 queueing seq 2087065 0x7fb9b4f70ac0 lat 0.000761
-> 2012-12-20 22:18:06.810631 7fb9d7fff700 20 journal write_finish_thread_entry sleeping
-> 2012-12-20 22:18:06.810695 7fb9d5ffb700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 luod=3473'23688 lcod 3473'23688 mlcod 3473'23687 active+clean] op_commit repgather(0x7fb9b47d1050 applying 3473'23689 rep_tid=72 wfack=24,31 wfdisk=24,31 op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4)
-> 2012-12-20 22:18:06.810720 7fb9d5ffb700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] eval_repop repgather(0x7fb9b47d1050 applying 3473'23689 rep_tid=72 wfack=31 wfdisk=31 op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4) wants=ad
-> 2012-12-20 22:18:06.810992 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) setattrs 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 = 230
-> 2012-12-20 22:18:06.811053 7fb9d57fa700 15 filestore(/srv/ceph/osd/osd.24) setattrs 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6
-> 2012-12-20 22:18:06.811083 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) setattrs 6.1fe3_head/42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 = 31
-> 2012-12-20 22:18:06.811093 7fb9d57fa700 10 journal op_apply_finish 2087065 open_ops 1 -> 0, max_applied_seq 2087064 -> 2087065
-> 2012-12-20 22:18:06.811096 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) _do_op 0x7fb9b4376570 seq 2087065 r = 0, finisher 0x7fb9b5022bb0 0x7fb9b483ce10
-> 2012-12-20 22:18:06.811100 7fb9d57fa700 10 filestore(/srv/ceph/osd/osd.24) _finish_op 0x7fb9b4376570 seq 2087065 osr(6.1fe3 0x21a4f50)/0x21a4f50
-> 2012-12-20 22:18:06.811136 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] op_applied repgather(0x7fb9b47d1050 applying 3473'23689 rep_tid=72 wfack=31 wfdisk=31 op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4)
-> 2012-12-20 22:18:06.811205 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] op_applied mode was rmw(wr=1)
-> 2012-12-20 22:18:06.811218 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] op_applied mode now idle(wr=0 WAKE) (finish_write)
-> 2012-12-20 22:18:06.811229 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] put_object_context 0x7fb9b5248020 42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 1 -> 0
-> 2012-12-20 22:18:06.811241 7fb9c37fe700 15 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean]  requeue_ops
-> 2012-12-20 22:18:06.811251 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] put_snapset_context rb.0.122c.6b8b4567.000000000357 1 -> 0
-> 2012-12-20 22:18:06.811267 7fb9c37fe700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] eval_repop repgather(0x7fb9b47d1050 applied 3473'23689 rep_tid=72 wfack=31 wfdisk=31 op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4) wants=ad
-> 2012-12-20 22:18:06.813738 7fb9c0ff9700 20 osd.24 3473 _dispatch 0x7fb9600008f0 osd_sub_op_reply(client.7636.0:100075 6.1fe3 42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 [] ondisk, result = 0) v1
-> 2012-12-20 22:18:06.813850 7fb9c0ff9700 15 osd.24 3473 require_same_or_newer_map 3473 (i am 3473) 0x7fb9600008f0
-> 2012-12-20 22:18:06.813856 7fb9c0ff9700 20 osd.24 3473 _share_map_incoming osd.31 172.16.0.12:6820/2871 3473
-> 2012-12-20 22:18:06.813865 7fb9c0ff9700 15 osd.24 3473 enqueue_op 0x7fb968055650 osd_sub_op_reply(client.7636.0:100075 6.1fe3 42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 [] ondisk,
-> result= 0) v1
-> 2012-12-20 22:18:06.813934 7fb9bd7f2700 10 osd.24 3473 dequeue_op 0x7fb968055650 osd_sub_op_reply(client.7636.0:100075 6.1fe3 42463fe3/rb.0.122c.6b8b4567.000000000357/head//6 [] ondisk, result = 0) v1 pg pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean]
-> 2012-12-20 22:18:06.814005 7fb9bd7f2700  7 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] repop_ack rep_tid 72 op osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4 result 0 ack_type 4 from osd.31
-> 2012-12-20 22:18:06.814037 7fb9bd7f2700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] eval_repop repgather(0x7fb9b47d1050 applied 3473'23689 rep_tid=72 wfack= wfdisk= op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4) wants=ad
-> 2012-12-20 22:18:06.814057 7fb9bd7f2700 15 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] log_op_stats osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4 inb 4239 outb 0 rlat 0.000000 lat 0.005594
-> 2012-12-20 22:18:06.814075 7fb9bd7f2700 15 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean] update_stats 3465'46631
-> 2012-12-20 22:18:06.814088 7fb9bd7f2700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23687 active+clean]  sending commit on repgather(0x7fb9b47d1050 applied 3473'23689 rep_tid=72 wfack= wfdisk= op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4) 0x7fb9b4605310
-> 2012-12-20 22:18:06.814122 7fb9bd7f2700 10 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23688 active+clean]  removing repgather(0x7fb9b47d1050 applied 3473'23689 rep_tid=72 wfack= wfdisk= op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4)
-> 2012-12-20 22:18:06.814147 7fb9bd7f2700 20 osd.24 pg_epoch: 3473 pg[6.1fe3( v 3473'23689 (3247'22688,3473'23689] local-les=3472 n=12 ec=656 les/c 3472/3473 3465/3465/3465) [24,31] r=0 lpr=3465 mlcod 3473'23688 active+clean]    q front is repgather(0x7fb9b47d1050 applied 3473'23689 rep_tid=72 wfack= wfdisk= op=osd_op(client.7636.0:100075 rb.0.122c.6b8b4567.000000000357 [write 3522560~4096] 6.42463fe3) v4)
-> 2012-12-20 22:18:06.814204 7fb9bd7f2700 10 osd.24 3473 dequeue_op 0x7fb968055650 finish
-> 2012-12-20 22:18:07.030914 7fb9be7f4700 10 monclient: tick
-> 2012-12-20 22:18:07.030929 7fb9be7f4700 10 monclient: _check_auth_rotating renewing rotating keys (they expired before 2012-12-20 22:17:37.030927)
-> 2012-12-20 22:18:07.030952 7fb9be7f4700 10 monclient: renew subs? (now: 2012-12-20 22:18:07.030952; renew after: 2012-12-20 22:18:33.322998) -- no
-> 2012-12-20 22:18:07.172960 7fb9bafed700 20 osd.24 3473 update_osd_stat osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:07.172979 7fb9bafed700  5 osd.24 3473 heartbeat: osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:07.173647 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:07.173675 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:07.173785 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:07.173875 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:07.479259 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:07.479311 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.36 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:07.479326 7fb9e6ffd700  7 osd.24 3473 do_mon_report
-> 2012-12-20 22:18:07.479329 7fb9e6ffd700 10 osd.24 3473 send_alive up_thru currently 3465 want 3465
-> 2012-12-20 22:18:07.479331 7fb9e6ffd700 20 osd.24 3473 send_pg_stats
-> 2012-12-20 22:18:07.479334 7fb9e6ffd700 10 osd.24 3473 send_pg_stats - 2 pgs updated
-> 2012-12-20 22:18:07.479343 7fb9e6ffd700 10 monclient: _send_mon_message to mon.KVM03 at 172.16.0.12:6789/0
-> 2012-12-20 22:18:07.774794 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:07.809251 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry woke after 5.000117
-> 2012-12-20 22:18:07.809274 7fb9e57fa700 10 journal commit_start max_applied_seq 2087065, open_ops 0
-> 2012-12-20 22:18:07.809278 7fb9e57fa700 10 journal commit_start blocked, all open_ops have completed
-> 2012-12-20 22:18:07.809279 7fb9e57fa700 10 journal commit_start committing 2087065, still blocked
-> 2012-12-20 22:18:07.809282 7fb9e57fa700 10 journal commit_start
-> 2012-12-20 22:18:07.809291 7fb9e57fa700 15 filestore(/srv/ceph/osd/osd.24) sync_entry committing 2087065 sync_epoch 19
-> 2012-12-20 22:18:07.809339 7fb9e57fa700 10 filestore(/srv/ceph/osd/osd.24) taking async snap 'snap_2087065'
-> 2012-12-20 22:18:07.817045 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) async snap create 'snap_2087065' transid 96549
-> 2012-12-20 22:18:07.817060 7fb9e57fa700 10 journal commit_started committing 2087065, unblocking
-> 2012-12-20 22:18:07.817069 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24)  waiting for transid 96549 to complete
-> 2012-12-20 22:18:07.836752 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24)  done waiting for transid 96549 to complete
-> 2012-12-20 22:18:07.836767 7fb9e57fa700 10 filestore(/srv/ceph/osd/osd.24) sync_entry commit took 0.027482, interval was 5.027633
-> 2012-12-20 22:18:07.836775 7fb9e57fa700 10 journal commit_finish thru 2087065
-> 2012-12-20 22:18:07.836778 7fb9e57fa700  5 journal committed_thru 2087065 (last_committed_seq 2087063)
-> 2012-12-20 22:18:07.836781 7fb9e57fa700 10 journal header: block_size 4096 alignment 4096 max_size 960495616
-> 2012-12-20 22:18:07.836783 7fb9e57fa700 10 journal header: start 543223808
-> 2012-12-20 22:18:07.836784 7fb9e57fa700 10 journal  write_pos 543223808
-> 2012-12-20 22:18:07.836788 7fb9e57fa700 10 journal committed_thru done
-> 2012-12-20 22:18:07.836793 7fb9e57fa700 10 filestore(/srv/ceph/osd/osd.24) removing snap 'snap_2087061'
-> 2012-12-20 22:18:07.836958 7fb9e57fa700 15 filestore(/srv/ceph/osd/osd.24) sync_entry committed to op_seq 2087065
-> 2012-12-20 22:18:07.836972 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry waiting for max_interval 5.000000
-> 2012-12-20 22:18:07.855890 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:08.221094 7fb9c1ffb700 20 osd.24 3473 _dispatch 0x7fb990002de0 pg_stats_ack(2 pgs tid 18) v1
-> 2012-12-20 22:18:08.221105 7fb9c1ffb700 10 osd.24 3473 handle_pg_stats_ack
-> 2012-12-20 22:18:08.479450 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:08.479499 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.36 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:09.479581 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:09.479633 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.36 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:10.479743 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:10.479808 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.36 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:11.273304 7fb9bafed700 20 osd.24 3473 update_osd_stat osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:11.273324 7fb9bafed700  5 osd.24 3473 heartbeat: osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:11.274018 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:11.274081 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:11.274101 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:11.274249 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:11.275112 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:11.356141 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:11.479927 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:11.479976 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.36 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:12.182095 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:12.373677 7fb9bafed700 20 osd.24 3473 update_osd_stat osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:12.373694 7fb9bafed700  5 osd.24 3473 heartbeat: osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:12.374496 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:12.374523 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:12.374541 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:12.374564 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:12.480076 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:12.480125 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.09 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:12.480140 7fb9e6ffd700  7 osd.24 3473 do_mon_report
-> 2012-12-20 22:18:12.480142 7fb9e6ffd700 10 osd.24 3473 send_alive up_thru currently 3465 want 3465
-> 2012-12-20 22:18:12.480146 7fb9e6ffd700 20 osd.24 3473 send_pg_stats
-> 2012-12-20 22:18:12.701202 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:12.837067 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry woke after 5.000094
-> 2012-12-20 22:18:12.837089 7fb9e57fa700 10 journal commit_start max_applied_seq 2087065, open_ops 0
-> 2012-12-20 22:18:12.837093 7fb9e57fa700 10 journal commit_start blocked, all open_ops have completed
-> 2012-12-20 22:18:12.837095 7fb9e57fa700 10 journal commit_start nothing to do
-> 2012-12-20 22:18:12.837100 7fb9e57fa700 10 journal commit_start
-> 2012-12-20 22:18:12.837117 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry waiting for max_interval 5.000000
-> 2012-12-20 22:18:13.480239 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:13.480289 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.09 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:14.073917 7fb9bafed700 20 osd.24 3473 update_osd_stat osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:14.073935 7fb9bafed700  5 osd.24 3473 heartbeat: osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:14.074840 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:14.074868 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:14.074886 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:14.074903 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:14.480386 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:14.480443 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.09 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:15.480571 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:15.480632 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.09 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:16.282625 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:16.480714 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:16.480763 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 6.09 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:16.801391 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:17.031056 7fb9be7f4700 10 monclient: tick
-> 2012-12-20 22:18:17.031082 7fb9be7f4700 10 monclient: _check_auth_rotating renewing rotating keys (they expired before 2012-12-20 22:17:47.031080)
-> 2012-12-20 22:18:17.031124 7fb9be7f4700 10 monclient: renew subs? (now: 2012-12-20 22:18:17.031124; renew after: 2012-12-20 22:18:33.322998) -- no
-> 2012-12-20 22:18:17.175266 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:17.256256 7fb9bf7f6700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:17.480898 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:17.480952 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 5.84 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:17.480969 7fb9e6ffd700  7 osd.24 3473 do_mon_report
-> 2012-12-20 22:18:17.480972 7fb9e6ffd700 10 osd.24 3473 send_alive up_thru currently 3465 want 3465
-> 2012-12-20 22:18:17.480975 7fb9e6ffd700 20 osd.24 3473 send_pg_stats
-> 2012-12-20 22:18:17.837232 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry woke after 5.000116
-> 2012-12-20 22:18:17.837254 7fb9e57fa700 10 journal commit_start max_applied_seq 2087065, open_ops 0
-> 2012-12-20 22:18:17.837258 7fb9e57fa700 10 journal commit_start blocked, all open_ops have completed
-> 2012-12-20 22:18:17.837260 7fb9e57fa700 10 journal commit_start nothing to do
-> 2012-12-20 22:18:17.837262 7fb9e57fa700 10 journal commit_start
-> 2012-12-20 22:18:17.837271 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry waiting for max_interval 5.000000
-> 2012-12-20 22:18:18.481073 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:18.481133 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 5.84 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:19.481247 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:19.481308 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 5.84 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:19.974219 7fb9bafed700 20 osd.24 3473 update_osd_stat osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:19.974238 7fb9bafed700  5 osd.24 3473 heartbeat: osd_stat(21111 MB used, 393 GB avail, 431 GB total, peers [28,29,30,31]/[])
-> 2012-12-20 22:18:19.974899 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a002f010 already has epoch 3473
-> 2012-12-20 22:18:19.975070 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a00334d0 already has epoch 3473
-> 2012-12-20 22:18:19.975116 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9a0033fc0 already has epoch 3473
-> 2012-12-20 22:18:19.975207 7fb9bfff7700 20 osd.24 3473 _share_map_outgoing 0x7fb9b400d440 already has epoch 3473
-> 2012-12-20 22:18:20.481425 7fb9e6ffd700  5 osd.24 3473 tick
-> 2012-12-20 22:18:20.481487 7fb9e6ffd700 20 osd.24 3473 scrub_should_schedule loadavg 5.84 >= max 0.5 = no, load too high
-> 2012-12-20 22:18:21.016361 7fb9e77fe700 -1 osd.24 3473 *** Got signal Terminated ***
-> 2012-12-20 22:18:21.016458 7fb9e77fe700 -1 osd.24 3473  pausing thread pools
-> 2012-12-20 22:18:21.016462 7fb9e77fe700 -1 osd.24 3473  flushing io
-> 2012-12-20 22:18:21.016464 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) sync_and_flush
-> 2012-12-20 22:18:21.016467 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) _flush_op_queue draining op tp
-> 2012-12-20 22:18:21.016471 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) _flush_op_queue waiting for apply finisher
-> 2012-12-20 22:18:21.016481 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) start_sync
-> 2012-12-20 22:18:21.016483 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) sync waiting
-> 2012-12-20 22:18:21.016523 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry woke after 3.179252
-> 2012-12-20 22:18:21.016540 7fb9e57fa700 10 journal commit_start max_applied_seq 2087065, open_ops 0
-> 2012-12-20 22:18:21.016543 7fb9e57fa700 10 journal commit_start blocked, all open_ops have completed
-> 2012-12-20 22:18:21.016545 7fb9e57fa700 10 journal commit_start nothing to do
-> 2012-12-20 22:18:21.016548 7fb9e57fa700 10 journal commit_start
-> 2012-12-20 22:18:21.016563 7fb9e57fa700 20 filestore(/srv/ceph/osd/osd.24) sync_entry waiting for max_interval 5.000000
-> 2012-12-20 22:18:21.016563 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) sync done
-> 2012-12-20 22:18:21.016570 7fb9e77fe700 10 filestore(/srv/ceph/osd/osd.24) sync_and_flush done
-> 2012-12-20 22:18:21.016572 7fb9e77fe700 -1 osd.24 3473  removing pid file
-> 2012-12-20 22:18:21.016665 7fb9e77fe700 -1 osd.24 3473  exit
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
