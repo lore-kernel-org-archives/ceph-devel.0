@@ -1,167 +1,264 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: rbd kernel module crashes with different kernels
-Date: Wed, 19 Dec 2012 18:16:04 -0600
-Message-ID: <50D258C4.1050200@inktank.com>
-References: <CAE63xUPhEy96cDSjhzk+DiRQ_bijNG3Pquj_1BW2NRqbjMp9dQ@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: ceph -s loops/hangs! ubuntu raring ceph bug?
+Date: Wed, 19 Dec 2012 18:08:58 -0800
+Message-ID: <50D2733A.3040308@inktank.com>
+References: <loom.20121219T172747-957@post.gmane.org> <50D1FC95.3090705@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:61167 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751594Ab2LTAQI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 19:16:08 -0500
-Received: by mail-ia0-f171.google.com with SMTP id k27so2329648iad.16
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 16:16:07 -0800 (PST)
-In-Reply-To: <CAE63xUPhEy96cDSjhzk+DiRQ_bijNG3Pquj_1BW2NRqbjMp9dQ@mail.gmail.com>
+Received: from mail-da0-f45.google.com ([209.85.210.45]:56205 "EHLO
+	mail-da0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752161Ab2LTCkU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Dec 2012 21:40:20 -0500
+Received: by mail-da0-f45.google.com with SMTP id w4so1237372dam.4
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Dec 2012 18:40:19 -0800 (PST)
+In-Reply-To: <50D1FC95.3090705@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ugis <ugis22@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Joao Eduardo Luis <joao.luis@inktank.com>
+Cc: Tibet Himalkaya <himalkaya@hotmail.com>, ceph-devel@vger.kernel.org
 
-On 12/19/2012 05:17 PM, Ugis wrote:
-> Hi all,
-> 
-> I have been struggling to map ceph rbd images for last week, but
-> constantly get kernel crashes.
-> 
-> What has been done:
-> Previously we had v0.48 set up as test cluster(4 hosts, 5 osds, 3
-> mons, 3 mds, custom crushmap) on Ubuntu 12.04 and client Ubuntu
-> Precise for mapping rbd+iscsi export, can't remember exact kernel
-> version when crashes appeared. At some point it was no longer possible
-> to map rbd images - on command "rbd map..." machine just crashed with
-> lots of dumped info on screen. Same rbd map commands that worked
-> before started to crash kernel at some point.
+On 12/19/2012 9:42 AM, Joao Eduardo Luis wrote:
+> On 12/19/2012 04:48 PM, Tibet Himalkaya wrote:
+>> Hello CephTeam,Community
+>> I m doing just my first steps with ceph.
+>> I have upgraded my 3 test system to ubuntu/raring and run mkcephfs 
+>> below is
+>> output,ceph.conf and ceph -s output...any help would be appreciated.
+>> Thanks
+>> Tibet
+>
+> Have you started your monitors?
 
-We'll want to get some of this detail to try to understand
-exactly what's going on.
+What he said.  I've done this several times myself: mkcephfs does not 
+actually start the daemons.
+/etc/init.d/ceph -a start.
 
-> I red some advices on list to use kernels 3.4.20. or 3.6.7. as those
-> should have all known rbd module bugs fixed. I used one of those(I
-> believe 3.6.7.) and managed to map rbd images again for couple of
-> days. Then I discovered slow disk I/O on one host and removed OSD from
-> it and moved that OSD to other new host(following doc.). For time of
-> doing this rbd images were mapped. As I was busy moving osd I didn't
-> notice moment when client crashed again, but I think that was some
-> time after cluster had already recovered from degraded state after
-> adding new osd.
-
-OK.  This is good to know.
-
-> After this point I could not map rbd images from client no more - on
-> command "rbd map..." system just crashed. Reboots after crash did not
-> help.
-> I installed fresh Ubuntu Precise+3.6.7. kernel on spare box, crushes
-> remained, then set up VM with Ubuntu Precise + tried kernels mentioned
-> below and still got 100% crashes on "rbd map..." command.
-
-> Well, those are blurry memories of problem history, but during last
-> days I tried to solve problem by updating all possible components - it
-> did not help neither unfortunately.
-> 
-> What I have tried:
-> I completely removed demo cluster data(dd over osd data partitions,
-> journal partitions, rm for rest files, purged+upgraded ceph packages
-> to ceph version 0.55.1(8e25c8d984f9258644389a18997ec6bdef8e056b)) as
-> update was planned anyway. So ceph is now 0.55.1 on Ubuntu 12.04+xfs
-> for osds.
-> Then I compiled kernels 3.4.20, 3.4.24, 3.6.7, 3.7.1 for client and
-> tried to map rbd image - constant crash with all versions.
-
-Let's try to narrow down the scope to just one version.  Let's
-go with the 3.7.1 kernel you're using.  Is it the stock version
-of that code, with commit id cc8605070a?
-
-> Interesting part about map command itself - as I installed new rbd
-> client box and  VM  I copy/pasted "rbd map.." commands that worked at
-> very beginning to these machines.
-
-Are the crashes you are seeing happening in the VM guest,
-or in the host, or both?  Here too I'd like to work with
-just one environment, to avoid confusion.  Whichever is
-easiest for you works fine for me.
-
-> Command was "rbd map fileserver/testimage  -k /etc/ceph/ceph.keyring",
-> but this command still crashes kernel even now when there is no rbd
-> "testimage"(I recreated pool "fileserver").
-> Crash happens on command "rbd map notexistantpool/testimage  -k
-> /etc/ceph/ceph.keyring" as well. Could that be some issue with
-> backward compatibility as mapping like this was done on versions ago.
-> 
-> Then I decided to try different mapping syntax. Some intro+results:
-> # rados lspools
-> data
-> metadata
-> rbd
-> fileserver
-> 
-> # rbd ls -l
-> NAME             SIZE PARENT FMT PROT LOCK
-> testimage1_10G 10000M          1
-> 
-> # rbd ls -l --pool fileserver
-> rbd: pool fileserver doesn't contain rbd images
-
-Normally the pool name is "rbd" for rbd images.
-Unless you specified something different you can
-just use "rbd", or don't specify it.  I.e.:
-
-    # rbd ls -l
-or
-    # rbd ls -l --pool rbd
-
-> well, I do not understand what in doc
-> (http://ceph.com/docs/master/rbd/rbd-ko/) is meant by "myimage" so I
-> am ommiting that part, but in no way kernel should crash if wrongly
-> passed command has been given.
-> Excerpt from doc:
-> sudo rbd map foo --pool rbd myimage --id admin --keyring /path/to/keyring
-> sudo rbd map foo --pool rbd myimage --id admin --keyfile /path/to/file
-> 
-> My commands:
-> "rbd map testimage1_10G --pool rbd --id admin --keyring
-> /etc/ceph/ceph.keyring" -> crash
-> "rbd map testimage1_10G --pool rbd --id admin --keyfile
-> /tmp/secret"(only key extracted from keyring and writen to
-> /tmp/secret) -> crash
-> 
-> As crashes happen in client side and are immediate - I have no logs
-> about it. I can post screenshots from console when crash happens, but
-> they all are almost the same, containing strings:
-> "Stack: ...
-> Call Trace:...
-
-This is the stuff I want to see.  A screenshot, if readable,
-would be just fine, but if you can extract the information
-in text form it would be best.
-
-Also, if you can provide information about your configuration,
-how many osd's, etc.  (or your ceph.conf file).
-
-> Fixing recursive fault but reboot is needed!"
-> 
-> Also, when VM crashes - virtualization still shows high CPU
-> load(probably some loop?)
-> I tried default and custom CRUSH maps, but crashes are the same.
-> 
-> If anyone could advice how to get out of this magic compile
-> kernel->"rbd map.."->crash cycle - I would be happy :)
-> Probaby someone can reproduce crashes with similar commands? If I can
-> send any additional valuable info to track down the problem - please
-> let me know what is needed.
-> 
-> BR,
-> Ugis
-
-With a little more information it'll be easier to try to
-explain what's going wrong.  We'll hopefully get you going
-again and with any luck also be sure nobody has similar problems.
-
-					-Alex
-
+>
+> If so, what version are you using and what does the monitor logs say?
+>
+>   -Joao
+>
+>> ----------------------
+>> root@host1:/var/lib/ceph# mkcephfs -a -c /etc/ceph/ceph.conf --mkbtrfs
+>> temp dir is /tmp/mkcephfs.TWKgOA0wXY
+>> preparing monmap in /tmp/mkcephfs.TWKgOA0wXY/monmap
+>> /usr/bin/monmaptool --create --clobber --add a 10.255.255.1:6789
+>> --add b 10.255.255.2:6789 --add c 10.255.255.3:6789 --print
+>> /tmp/mkcephfs.TWKgOA0wXY/monmap
+>> /usr/bin/monmaptool: monmap file /tmp/mkcephfs.TWKgOA0wXY/monmap
+>> /usr/bin/monmaptool: generated fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+>> epoch 0
+>> fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+>> last_changed 2012-12-19 17:09:16.156323
+>> created 2012-12-19 17:09:16.156323
+>> 0: 10.255.255.1:6789/0 mon.a
+>> 1: 10.255.255.2:6789/0 mon.b
+>> 2: 10.255.255.3:6789/0 mon.c
+>> /usr/bin/monmaptool: writing epoch 0 to /tmp/mkcephfs.TWKgOA0wXY/monmap
+>> (3 monitors)
+>> === osd.0 ===
+>> no devs defined for osd.0
+>> 2012-12-19 17:09:16.437947 7f53401237c0 -1 journal check: ondisk
+>> fsid dafd4de1-3e82-4607-b124-63f8010a6a43 doesn't match expected
+>> 68b54f67-46d6-4eff-bb0b-ac5ceb9c62d9, invalid (someone else's?) journal
+>> 2012-12-19 17:09:16.779841 7f53401237c0 -1 
+>> filestore(/var/lib/ceph/osd/ceph-0)
+>>   could not find 23c2fcde/osd_superblock/0//-1 in index:
+>> (2) No such file or directory
+>> 2012-12-19 17:09:17.004905 7f53401237c0 -1 created object store
+>> /var/lib/ceph/osd/ceph-0 journal /tmpfs/osd.0.journal for osd.0 fsid
+>> 29ac4f55-e174-4544-999e-b0cf2eeecda6
+>> 2012-12-19 17:09:17.004961 7f53401237c0 -1 auth: error reading file:
+>> /var/lib/ceph/osd/ceph-0/keyring: can't open 
+>> /var/lib/ceph/osd/ceph-0/keyring:
+>>   (2) No such file or directory
+>> 2012-12-19 17:09:17.005045 7f53401237c0 -1 created new key in keyring
+>> /var/lib/ceph/osd/ceph-0/keyring
+>> === osd.1 ===
+>> pushing conf and monmap to host2:/tmp/mkfs.ceph.45272
+>> no devs defined for osd.1
+>> 2012-12-19 17:09:19.544529 7f1f158837c0 -1 journal check: ondisk
+>> fsid 31f1b4ed-8cc8-493a-a62e-5d705736cc60 doesn't match expected
+>> bebd309d-e726-47d2-9ba7-324589b82a55, invalid (someone else's?) journal
+>> 2012-12-19 17:09:19.853172 7f1f158837c0 -1 
+>> filestore(/var/lib/ceph/osd/ceph-1)
+>> could not find 23c2fcde/osd_superblock/0//-1 in index:
+>> (2) No such file or directory
+>> 2012-12-19 17:09:20.094822 7f1f158837c0 -1 created object store
+>> /var/lib/ceph/osd/ceph-1 journal /tmpfs/osd.1.journal for osd.1 fsid
+>> 29ac4f55-e174-4544-999e-b0cf2eeecda6
+>> 2012-12-19 17:09:20.094871 7f1f158837c0 -1 auth: error reading
+>> file: /var/lib/ceph/osd/ceph-1/keyring: can't open
+>> /var/lib/ceph/osd/ceph-1/keyring: (2) No such file or directory
+>> 2012-12-19 17:09:20.094951 7f1f158837c0 -1 created new key in
+>> keyring /var/lib/ceph/osd/ceph-1/keyring
+>> collecting osd.1 key
+>> === osd.2 ===
+>> pushing conf and monmap to host3:/tmp/mkfs.ceph.45272
+>> no devs defined for osd.2
+>> 2012-12-19 17:09:23.370067 7f1e3fe5c7c0 -1 journal check: ondisk
+>> fsid fa149ab5-3ec7-4a23-abc5-ef8ac61aca9b doesn't match expected
+>> b059d5b8-19cc-4921-bc37-e6e54fa508cb, invalid (someone else's?) journal
+>> 2012-12-19 17:09:23.686918 7f1e3fe5c7c0 -1 
+>> filestore(/var/lib/ceph/osd/ceph-2)
+>> could not find 23c2fcde/osd_superblock/0//-1 in index:
+>> (2) No such file or directory
+>> 2012-12-19 17:09:23.878634 7f1e3fe5c7c0 -1 created object store
+>> /var/lib/ceph/osd/ceph-2 journal /tmpfs/osd.2.journal for osd.2
+>> fsid 29ac4f55-e174-4544-999e-b0cf2eeecda6
+>> 2012-12-19 17:09:23.878684 7f1e3fe5c7c0 -1 auth: error reading
+>> file: /var/lib/ceph/osd/ceph-2/keyring: can't open
+>> /var/lib/ceph/osd/ceph-2/keyring: (2) No such file or directory
+>> 2012-12-19 17:09:23.878765 7f1e3fe5c7c0 -1 created new key in
+>> keyring /var/lib/ceph/osd/ceph-2/keyring
+>> collecting osd.2 key
+>> === mds.a ===
+>> creating private key for mds.a keyring /var/lib/ceph/mds/ceph-a/keyring
+>> creating /var/lib/ceph/mds/ceph-a/keyring
+>> === mds.b ===
+>> pushing conf and monmap to host2:/tmp/mkfs.ceph.45272
+>> creating private key for mds.b keyring /var/lib/ceph/mds/ceph-b/keyring
+>> creating /var/lib/ceph/mds/ceph-b/keyring
+>> collecting mds.b key
+>> === mds.c ===
+>> pushing conf and monmap to host3:/tmp/mkfs.ceph.45272
+>> creating private key for mds.c keyring /var/lib/ceph/mds/ceph-c/keyring
+>> creating /var/lib/ceph/mds/ceph-c/keyring
+>> collecting mds.c key
+>> Building generic osdmap from /tmp/mkcephfs.TWKgOA0wXY/conf
+>> /usr/bin/osdmaptool: osdmap file '/tmp/mkcephfs.TWKgOA0wXY/osdmap'
+>> /usr/bin/osdmaptool: writing epoch 1 to /tmp/mkcephfs.TWKgOA0wXY/osdmap
+>> Generating admin key at /tmp/mkcephfs.TWKgOA0wXY/keyring.admin
+>> creating /tmp/mkcephfs.TWKgOA0wXY/keyring.admin
+>> Building initial monitor keyring
+>> added entity mds.a auth auth(auid = 18446744073709551615
+>> key=AQC05tFQ4MiXKBAAs0puNKyZwKKRqpMloWwnIA== with 0 caps)
+>> added entity mds.b auth auth(auid = 18446744073709551615
+>> key=AQC25tFQAPB9IxAAMQAOPah3ehsLENKnGn/keA== with 0 caps)
+>> added entity mds.c auth auth(auid = 18446744073709551615
+>> key=AQC55tFQWC2jDhAAZJsDqe3m69c43wKF+2Xztw== with 0 caps)
+>> added entity osd.0 auth auth(auid = 18446744073709551615
+>> key=AQCt5tFQWMpLABAA6QOTvUx06ZmM+9sconRTvw== with 0 caps)
+>> added entity osd.1 auth auth(auid = 18446744073709551615
+>> key=AQCw5tFQYLGnBRAAQ5YuQ16gn0OEw6g2eL6yCQ== with 0 caps)
+>> added entity osd.2 auth auth(auid = 18446744073709551615
+>> key=AQCz5tFQ6LpfNBAAWZ4rWZLLiIryBt5cjhmynw== with 0 caps)
+>> === mon.a ===
+>> /usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-a for mon.a
+>> === mon.b ===
+>> pushing everything to host2
+>> /usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-b for mon.b
+>> === mon.c ===
+>> pushing everything to host3
+>> /usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-c for mon.c
+>> placing client.admin keyring in /etc/ceph/keyring
+>> -----------------------
+>> [global]
+>>          auth supported = none
+>>          auth cluster required = none
+>>          auth service required = none
+>>          auth client required = none
+>>          public network = 10.0.1.171/24
+>>          cluster network = 10.255.255.1/24
+>>          debug ms = 1
+>>
+>>
+>> [osd]
+>>          journal dio = false
+>>          osd journal size = 2000
+>>          osd journal = /tmpfs/osd.$id.journal
+>>          filestore fiemap = false
+>>          debug osd = 20
+>>          debug filestore = 20
+>>          debug journal = 20
+>>          debug monc = 20
+>>
+>> [mon]
+>>          debug mon = 20
+>>          debug paxos = 20
+>>          debug auth = 20
+>>
+>> [mon.a]
+>>          host = host1
+>>          mon addr = 10.255.255.1:6789
+>>
+>> [mon.b]
+>>          host = host2
+>>          mon addr = 10.255.255.2:6789
+>>
+>> [mon.c]
+>>          host = host3
+>>          mon addr = 10.255.255.3:6789
+>>
+>> [osd.0]
+>>          host = host1
+>>          public addr = 10.0.1.171
+>>          cluster addr = 10.255.255.1
+>>
+>> [osd.1]
+>>          host = host2
+>>          public addr = 10.0.1.172
+>>          cluster addr = 10.255.255.2
+>>
+>> [osd.2]
+>>          host = host3
+>>          public addr = 10.0.1.173
+>>          cluster addr = 10.255.255.3
+>>
+>> [mds]
+>>          debug mds = 20
+>>          debug mds balancer = 20
+>>          debug mds log = 20
+>>          debug mds migrator = 20
+>>
+>> [mds.a]
+>>          host = host1
+>>          public addr = 10.0.1.171
+>>          cluster addr = 10.255.255.1
+>>
+>> [mds.b]
+>>          host = host2
+>>          public addr = 10.0.1.172
+>>          cluster addr = 10.255.255.2
+>>
+>> [mds.c]
+>>          host = host3
+>>          public addr = 10.0.1.173
+>>          cluster addr = 10.255.255.3
+>>
+>> [client]
+>>          rbd cache = true
+>>
+>> -----------------------
+>> root@host1:/var/lib/ceph# ceph -s
+>> 2012-12-19 17:25:55.381735 7f0ab4250780  1 -- :/0 messenger.start
+>> 2012-12-19 17:25:55.382437 7f0ab4250780  1 -- :/52134 --> 
+>> 10.255.255.2:6789/0
+>> -- auth(proto 0 30 bytes epoch 0) v1
+>> -- ?+0 0x7f0ab5d28a  50 con 0x7f0ab5d28610 2012-12-19 17:25:55.382836
+>> 7f0ab424e700  1
+>> -- 10.255.255.1:0/52134 learned my addr 10.255.255.1:0/52134
+>> 2012-12-19 17:25:58.382411 7f0aaf2cd700  1
+>> -- 10.255.255.1:0/52134 mark_down 0x7f0ab5d28610 -- 0x7f0ab5d283d0
+>> 2012-12-19 17:25:58.382525 7f0aaf2cd700  1
+>> -- 10.255.255.1:0/52134 --> 10.255.255.3:6789/0 -- auth(proto 0 30 bytes
+>> epoch 0) v1 -- ?+0   0x7f0aa4001330 con 0x7f0aa4000e40
+>> 2012-12-19 17:26:01.382653 7f0aaf2cd700  1 -- 10.255.255.1:0/52134 
+>> mark_down
+>> 0x7f0aa4000e40 -- 0x7f0aa4000c00
+>>
+>>
+>>
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>
+> -- 
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 
