@@ -1,73 +1,90 @@
-From: Amon Ott <ao@m-privacy.de>
-Subject: Re: ceph stability
-Date: Fri, 21 Dec 2012 11:07:55 +0100
-Message-ID: <50D434FB.4020909@m-privacy.de>
-References: <CAD5ewrosrMWD3jxznaMhab=VTL4VzQ7savVk42KDe374VSSzbA@mail.gmail.com> <50D1C09E.9000504@inktank.com> <CAD5ewrryqXEDv_HDGK8RettDmi7LwH_eEOCNCx_1jduj61_=cA@mail.gmail.com> <50D3213A.2080401@inktank.com>
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: Re: reference to global_context.h in dout.h
+Date: Fri, 21 Dec 2012 12:01:42 +0100
+Message-ID: <CAN04cT71j-01w_aG-_OYUA5ycGkruHG4PuTSytGyZepixsf6tw@mail.gmail.com>
+References: <CAN04cT7m4umbZ_bBszWR0Q4STyjmgv5Lx4HBy=-QgZPVZAj=FQ@mail.gmail.com>
+	<6C8FBDB1-C946-438E-A902-83658BEE33BE@inktank.com>
+	<alpine.DEB.2.00.1212201043170.16508@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.237.71]:47389 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751429Ab2LUKIF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 21 Dec 2012 05:08:05 -0500
-In-Reply-To: <50D3213A.2080401@inktank.com>
+Received: from mail-vb0-f48.google.com ([209.85.212.48]:53291 "EHLO
+	mail-vb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751367Ab2LULHE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Dec 2012 06:07:04 -0500
+Received: by mail-vb0-f48.google.com with SMTP id fc21so4854625vbb.7
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Dec 2012 03:07:03 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212201043170.16508@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 20.12.2012 15:31, schrieb Mark Nelson:
-> On 12/20/2012 01:08 AM, Roman Hlynovskiy wrote:
->> Hello Mark,
+I see.
+
+I always thought it was already fully seperated because of the comment
+in common/debug.h, saying "Global version of the stuff in
+common/dout.h" (although I don't understand why that file is in
+common).
+
+Are there by any chance some docs on how this "ideal world" was
+originally designed, so I can help with some of it? It's really
+bugging me and stopping me from other things I'm toying with (e.g. the
+config thingie), because librados.so won't link.
+
+Thanks!
+
+Roald
+
+
+On Thu, Dec 20, 2012 at 7:44 PM, Sage Weil <sage@inktank.com> wrote:
+> On Thu, 20 Dec 2012, Dan Mick wrote:
+>> dout/err and ldout/err rely on CeohContext being available. It's
+>> possible the includes should be separated; i'd have to look more closely
+>> to have a real judgment.  But the macros really do need a cct to work at
+>> all.
+>
+> Right.
+>
+> In an ideal world, things that link in g_ceph_context would have a
+> separate #include and other code wouldn't see the declaration, but we
+> didn't get that far when this was cleaned up a while back.  Instead, you
+> get a linker error if you, say, do dout(...) instead of ldout(...) in
+> something that doesn't link the globals.
+>
+> sage
+>
+>
+>  >
+>> On Dec 20, 2012, at 6:52 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
 >>
->> for multi-mds solutions do you refer to multi-active arch or 1 activ=
-e
->> and many standby arch?
->=20
-> That's a good question!  I know we don't really recommend multi-activ=
-e
-> right now for production use.  Not sure what our current recommendati=
-ons
-> are for multi-standby.  As far as I know it's considered to be more
-> stable.  I'm sure Greg or Sage can chime in with a more accurate
-> assessment.
-
-We have been testing a lot with multi-standby, because a single MDS doe=
-s
-not make a lot of sense in a cluster. Maybe the clue is to have only on=
-e
-standby, making SPOF a DPOF?
-
-Up to 0.55 with some of Yan's fixes, Ceph has been too instable wheneve=
-r
-it came to MDS failover. As long as the same MDS has been kept active,
-it was quite stable.
-
-We are really hoping for 0.56 with the additional MDS fixes and also
-fixed kernel 3.8 code. We have been waiting to replace our existing
-cluster fs with CephFS for at least one and a half years, but it has
-never been stable enough in our setup with standby MDS and takeover, le=
-t
-alone multi-active. We do not want to risk a complete cluster failure.
-
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 99296856
-10179 Berlin             http://www.m-privacy.de
-
-Amtsgericht Charlottenburg, HRB 84946
-
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> > Hi ceph devs,
+>> >
+>> > I was wondering. In common/dout.h is an #include of
+>> > global/ceph_context.h, but it is not used there (I stumbled upon it
+>> > because while playing around in the codebase, I noticed librados would
+>> > not link because of an undefined reference to g_ceph_context). I have
+>> > no idea why this include is in dout.h, but it seems that a lot of
+>> > different sources fail to compile (because g_ceph_context definition
+>> > is missing) when I remove the include from dout.h.
+>> >
+>> > So it seems like it's used as some sort of forward include (because
+>> > dout.h is almost always included through include/Context.h) to make
+>> > sure g_ceph_context is defined in most places.
+>> >
+>> > What is the rationale of having this here? Isn't it better to try to
+>> > split global and common as much as possible?
+>> >
+>> > Ciao,
+>> >
+>> > Roald
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
