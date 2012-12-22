@@ -1,52 +1,62 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Bobtail vs Argonaut Performance Preview
-Date: Sat, 22 Dec 2012 07:36:41 -0600
-Message-ID: <50D5B769.4090104@inktank.com>
-References: <CAP8Oy=J6kazDvT6woLZZ3v+XVrzhKbHgO1wgyoTU8OCKq2qDEg@mail.gmail.com> <20121222083200.GA1977@infradead.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: mon not marking dead osds down and slow streaming write
+ performance
+Date: Sat, 22 Dec 2012 07:56:10 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212220752450.32156@cobra.newdream.net>
+References: <CABf87Xk54Q-SP2258MsXDVKAo2TgjOw8xds2f9W=XxmgdSRFTA@mail.gmail.com> <alpine.DEB.2.00.1212201046050.16508@cobra.newdream.net> <CABf87XmB9qgusXdSgfPD9qnDtMuCyFtWk_tyX8h8=fSZGs6=Ag@mail.gmail.com> <alpine.DEB.2.00.1212201633590.16508@cobra.newdream.net>
+ <CABf87X=qV1uVRi8=N1tjh7gbXpb=Uk07hqwyXOR2SAFHtE-jfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:38888 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751091Ab2LVNgq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 22 Dec 2012 08:36:46 -0500
-Received: by mail-ie0-f181.google.com with SMTP id 16so7359505iea.26
-        for <ceph-devel@vger.kernel.org>; Sat, 22 Dec 2012 05:36:45 -0800 (PST)
-In-Reply-To: <20121222083200.GA1977@infradead.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46571 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751486Ab2LVP4L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 22 Dec 2012 10:56:11 -0500
+In-Reply-To: <CABf87X=qV1uVRi8=N1tjh7gbXpb=Uk07hqwyXOR2SAFHtE-jfA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Michael Chapman <michael.chapman@anu.edu.au>
+Cc: ceph-devel@vger.kernel.org
 
-On 12/22/2012 02:32 AM, Christoph Hellwig wrote:
-> On Thu, Dec 20, 2012 at 11:08:19AM -0500, Patrick McGarry wrote:
->> Hey All,
->>
->> Inktank's Mark Nelson just posted a great performance preview of
->> Bobtail with comparison to Argonaut.  Feel free to check it out:
->>
->> http://ow.ly/gg87B
->
-> What's the problem with using a proper link instead of these idiotic
-> shortening services?
+On Sat, 22 Dec 2012, Michael Chapman wrote:
+> On Fri, Dec 21, 2012 at 11:37 AM, Sage Weil <sage@inktank.com> wrote:
+> > On Fri, 21 Dec 2012, Michael Chapman wrote:
+> >> I'll remove them properly. Thanks for your help. Do you have any
+> >> suggestions on the second (mon IO) issue I'm seeing?
+> >
+> > Whoops, missed it:
+> >
+> >> >> A second issue I have been having is that my reads+writes are very
+> >> >> bursty, going from 8MB/s to 200MB/s when doing a dd from a physical
+> >> >> client over 10GbE. It seems to be waiting on the mon most of the time,
+> >> >> and iostat shows long io wait times for the disk the mon is using. I
+> >> >> can also see it writing ~40MB/s constantly to disk in iotop, though I
+> >> >> don't know if this is random or sequential. I see a lot of waiting for
+> >> >> sub ops which I thought might be a result of the io wait.
+> >> >>
+> >> >> Is that a normal amount of activity for a mon process? Should I be
+> >> >> running the mon processes off more than just a single sata disk to
+> >> >> keep up with ~30 OSD processes?
+> >
+> > Is the ceph-mon daemon running on its own disk (or /), separate from the
+> > osds?  My first guess is that this is could be a sync(2) issue.
+> 
+> It's on /
+> Is that going to be bad? My first thought was that maybe too much
+> logging was bringing it down but there's very little iops in the log
+> directory during use.
 
-I think it's just the twitter world leaking out into other mediums. 
-Some times it's slightly bewildering to me that in this day and age so 
-much conversation seems to happen on a medium that only allows 140 
-characters at a time.  That's apparently the world we live in though.  :)
+/ should be fine, as long as the ceph-osd's are on their own disk.  My 
+next guess is that there might be a lot of logging going on, but I guess 
+that's not it either.
 
-Btw Christoph, thank you for taking the time to read my article.  If 
-I've done anything dumb or suboptimal regarding xfs, please do let me 
-know.  Soon I will be doing parametric sweeps over ceph parameter spaces 
-to see how performance varies on different hardware configurations.  I 
-want to make sure the tests are setup as optimally as possible.
+Long iowait on / isn't necessarily bad.  The mon is doing an fsync on 
+every write, which is not going to be very fast.  There aren't too many 
+writes, though.
 
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+The bursty write behavior may be unrelated to the mons.  Just to be sure, 
+you could mark the osds on the ceph-mon nodes 'out' (ceph osd out 1 2 3 
+...) so that they are not being used and see if the burstiness is still 
+there...
 
-Mark
+sage
