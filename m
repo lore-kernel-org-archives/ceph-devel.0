@@ -1,63 +1,124 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: automatic repair of inconsistent pg?
-Date: Mon, 24 Dec 2012 22:54:49 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net>
-References: <50D908FA.7010907@profihost.ag>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: [PATCH V3 3/8] use vfs __set_page_dirty interface instead of doing it inside filesystem
+Date: Wed, 26 Dec 2012 01:24:21 +0800
+Message-ID: <1356456261-14579-1-git-send-email-handai.szj@taobao.com>
+References: <1356455919-14445-1-git-send-email-handai.szj@taobao.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42830 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751295Ab2LYGyu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Dec 2012 01:54:50 -0500
-In-Reply-To: <50D908FA.7010907@profihost.ag>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:58208 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753921Ab2LYRYx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Dec 2012 12:24:53 -0500
+In-Reply-To: <1356455919-14445-1-git-send-email-handai.szj@taobao.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: linux-kernel@vger.kernel.org, cgroups@vger.kernel.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+Cc: sage@newdream.net, dchinner@redhat.com, mhocko@suse.cz, akpm@linux-foundation.org, kamezawa.hiroyu@jp.fujitsu.com, gthelen@google.com, fengguang.wu@intel.com, glommer@parallels.com, Sha Zhengju <handai.szj@taobao.com>
 
-On Tue, 25 Dec 2012, Stefan Priebe wrote:
-> Hello list,
-> 
-> today i got the following ceph status output:
-> 2012-12-25 02:57:00.632945 mon.0 [INF] pgmap v1394388: 7632 pgs: 7631
-> active+clean, 1 active+clean+inconsistent; 151 GB data, 307 GB used, 5028 GB /
-> 5336 GB avail
-> 
-> 
-> i then grepped the inconsistent pg by:
-> # ceph pg dump - | grep inconsistent
-> 3.ccf   10      0       0       0       41037824        155930  155930
-> active+clean+inconsistent       2012-12-25 01:51:35.318459 6243'2107
-> 6190'9847       [14,42] [14,42] 6243'2107       2012-12-25 01:51:35.318436
-> 6007'2074       2012-12-23 01:51:24.386366
-> 
-> and initiated a repair:
-> #  ceph pg repair 3.ccf
-> instructing pg 3.ccf on osd.14 to repair
-> 
-> The log output then was:
-> 2012-12-25 02:56:59.056382 osd.14 [ERR] 3.ccf osd.42 missing
-> 1c602ccf/rbd_data.4904d6b8b4567.0000000000000b84/head//3
-> 2012-12-25 02:56:59.056385 osd.14 [ERR] 3.ccf osd.42 missing
-> ceb55ccf/rbd_data.48cc66b8b4567.0000000000001538/head//3
-> 2012-12-25 02:56:59.097989 osd.14 [ERR] 3.ccf osd.42 missing
-> dba6bccf/rbd_data.4797d6b8b4567.00000000000015ad/head//3
-> 2012-12-25 02:56:59.097991 osd.14 [ERR] 3.ccf osd.42 missing
-> a4deccf/rbd_data.45f956b8b4567.00000000000003d5/head//3
-> 2012-12-25 02:56:59.098022 osd.14 [ERR] 3.ccf repair 4 missing, 0 inconsistent
-> objects
-> 2012-12-25 02:56:59.098046 osd.14 [ERR] 3.ccf repair 4 errors, 4 fixed
-> 
-> Why doesn't ceph repair this automatically? Ho could this happen at all?
+From: Sha Zhengju <handai.szj@taobao.com>
 
-We just made some fixes to repair in next (it was broken sometime between 
-~0.53 and 0.55).  The latest next should repair it.  In general we don't 
-repair automatically lest we inadvertantly propagate bad data or paper 
-over a bug.
+Following we will treat SetPageDirty and dirty page accounting as an integrated
+operation. Filesystems had better use vfs interface directly to avoid those details.
 
-As for the original source of the missing objects... I'm not sure.  There 
-were some fixed races related to backfill that could lead to an object 
-being missed, but Sam would know more about how likely that actually is.
+Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+Acked-by: Sage Weil <sage@inktank.com>
+---
+ fs/buffer.c                 |    3 ++-
+ fs/ceph/addr.c              |   20 ++------------------
+ include/linux/buffer_head.h |    2 ++
+ 3 files changed, 6 insertions(+), 19 deletions(-)
 
-sage
+diff --git a/fs/buffer.c b/fs/buffer.c
+index 3b032b9..762168a 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -609,7 +609,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
+  * If warn is true, then emit a warning if the page is not uptodate and has
+  * not been truncated.
+  */
+-static int __set_page_dirty(struct page *page,
++int __set_page_dirty(struct page *page,
+ 		struct address_space *mapping, int warn)
+ {
+ 	if (unlikely(!mapping))
+@@ -630,6 +630,7 @@ static int __set_page_dirty(struct page *page,
+ 
+ 	return 1;
+ }
++EXPORT_SYMBOL(__set_page_dirty);
+ 
+ /*
+  * Add a page to the dirty page list.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6690269..f2779b8 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -5,6 +5,7 @@
+ #include <linux/mm.h>
+ #include <linux/pagemap.h>
+ #include <linux/writeback.h>	/* generic_writepages */
++#include <linux/buffer_head.h>
+ #include <linux/slab.h>
+ #include <linux/pagevec.h>
+ #include <linux/task_io_accounting_ops.h>
+@@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
+ 	int undo = 0;
+ 	struct ceph_snap_context *snapc;
+ 
+-	if (unlikely(!mapping))
+-		return !TestSetPageDirty(page);
+-
+-	if (TestSetPageDirty(page)) {
+-		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+-		     mapping->host, page, page->index);
++	if (!__set_page_dirty(page, mapping, 1))
+ 		return 0;
+-	}
+ 
+ 	inode = mapping->host;
+ 	ci = ceph_inode(inode);
+@@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+ 	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+ 		/*
+ 		 * Reference snap context in page->private.  Also set
+ 		 * PagePrivate so that we get invalidatepage callback.
+@@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
+ 		undo = 1;
+ 	}
+ 
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+ 	if (undo)
+ 		/* whoops, we failed to dirty the page */
+ 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+-
+ 	BUG_ON(!PageDirty(page));
+ 	return 1;
+ }
+diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
+index 458f497..0a331a8 100644
+--- a/include/linux/buffer_head.h
++++ b/include/linux/buffer_head.h
+@@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
+ }
+ 
+ extern int __set_page_dirty_buffers(struct page *page);
++extern int __set_page_dirty(struct page *page,
++		struct address_space *mapping, int warn);
+ 
+ #else /* CONFIG_BLOCK */
+ 
+-- 
+1.7.9.5
+
