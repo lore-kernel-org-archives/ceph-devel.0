@@ -1,51 +1,64 @@
-From: Sage Weil <sage@inktank.com>
+From: Alex Elder <elder@inktank.com>
 Subject: Re: rbd map command hangs for 15 minutes during system start up
-Date: Thu, 27 Dec 2012 10:43:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212271042500.22449@cobra.newdream.net>
-References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <50C774FD.9030107@inktank.com> <50C78D09.5050403@inktank.com> <CAPud5_697TJpxU_fCe+FzmgeuTxWx61My5p+FJN_2B1fpn_G3Q@mail.gmail.com> <CAPud5_6q0gQD0ajpKZdvnaaMBvapQ59fkOA7ANVhPo0dMGJ+Sw@mail.gmail.com>
- <50CB57E2.10703@inktank.com> <CAPud5_7FF=AXMzd4N9kLb4DGQJgp0Csid7_LV3RKYbiTdB+09g@mail.gmail.com> <50CB69E5.7080001@inktank.com> <CAPud5_5PuF0kMzaWVb84_zB6XyZ4QexUsmqoCTdp8vsFNDE=LA@mail.gmail.com> <50D0951F.6050106@inktank.com>
- <CAPud5_5DnafqOZ1y3NHXY9Ryj_wSeKz+mvWbXqWFD1yjgbNgtw@mail.gmail.com> <50D230E4.6060805@inktank.com> <50D242C3.3070409@inktank.com> <CAPud5_6b=8m7jrrG-6TAyXjGj8dL1yrsNaeUTTp8NC7HpNMeeQ@mail.gmail.com> <50D38A4B.9070307@inktank.com>
- <CAPud5_68Q8mgKqCxkKugkJ_Ws=PiZJThq0TGf0hKNkS4wL04Dg@mail.gmail.com> <50DB6DD7.3050308@inktank.com> <CAPud5_7XhgA9+=+KxZxzXgWg7ijmu0Z+sXA2=xu7g2V9FjZ0zA@mail.gmail.com>
+Date: Thu, 27 Dec 2012 13:41:49 -0600
+Message-ID: <50DCA47D.2030300@inktank.com>
+References: <CA+jddaMAx8OKd8-uHaj-eDx8PJwZB=ew7PkkSAy8Y3Uwm5S85g@mail.gmail.com> <50C774FD.9030107@inktank.com> <50C78D09.5050403@inktank.com> <CAPud5_697TJpxU_fCe+FzmgeuTxWx61My5p+FJN_2B1fpn_G3Q@mail.gmail.com> <CAPud5_6q0gQD0ajpKZdvnaaMBvapQ59fkOA7ANVhPo0dMGJ+Sw@mail.gmail.com> <50CB57E2.10703@inktank.com> <CAPud5_7FF=AXMzd4N9kLb4DGQJgp0Csid7_LV3RKYbiTdB+09g@mail.gmail.com> <50CB69E5.7080001@inktank.com> <CAPud5_5PuF0kMzaWVb84_zB6XyZ4QexUsmqoCTdp8vsFNDE=LA@mail.gmail.com> <50D0951F.6050106@inktank.com> <CAPud5_5DnafqOZ1y3NHXY9Ryj_wSeKz+mvWbXqWFD1yjgbNgtw@mail.gmail.com> <50D230E4.6060805@inktank.com> <50D242C3.3070409@inktank.com> <CAPud5_6b=8m7jrrG-6TAyXjGj8dL1yrsNaeUTTp8NC7HpNMeeQ@mail.gmail.com> <50D38A4B.9070307@inktank.com> <CAPud5_68Q8mgKqCxkKugkJ_Ws=PiZJThq0TGf0hKNkS4wL04Dg@mail.g
+ mail.com> <50DB6DD7.3050308@inktank.com> <CAPud5_7XhgA9+=+KxZxzXgWg7ijmu0Z+sXA2=xu7g2V9FjZ0zA@mail.gmail.com> <alpine.DEB.2.00.1212271042500.22449@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41206 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751913Ab2L0Sno (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 13:43:44 -0500
-In-Reply-To: <CAPud5_7XhgA9+=+KxZxzXgWg7ijmu0Z+sXA2=xu7g2V9FjZ0zA@mail.gmail.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:39115 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752797Ab2L0Tlx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 14:41:53 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so8123395iay.5
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Dec 2012 11:41:53 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212271042500.22449@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Alex Elder <elder@inktank.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Nick Bartos <nick@pistoncloud.com>, Gregory Farnum <greg@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 27 Dec 2012, Nick Bartos wrote:
-> I have some exciting news.  After 215 test runs, no hung processes
-> were detected.  I think we may actually have it this time.  Thanks for
-> all your hard work!
+On 12/27/2012 12:43 PM, Sage Weil wrote:
+> On Thu, 27 Dec 2012, Nick Bartos wrote:
+>> I have some exciting news.  After 215 test runs, no hung processes
+>> were detected.  I think we may actually have it this time.  Thanks for
+>> all your hard work!
 
-Sweet!  I think it was the new branch naming scheme that did it.
+This is great news Nick, and I really appreciate your help testing so
+we could get rid of this ugly thing.
 
-sage
+> Sweet!  I think it was the new branch naming scheme that did it.
+
+Obviously.
+
+I'm going to blow away all the wip-nick-new* branches.
+
+					-Alex
 
 > 
-> -Nick
+> sage
 > 
-> On Wed, Dec 26, 2012 at 1:36 PM, Alex Elder <elder@inktank.com> wrote:
-> > On 12/26/2012 11:45 AM, Nick Bartos wrote:
-> >> Here's a log with a hang on the updated branch:
-> >>
-> >> https://gist.github.com/raw/4381750/772476e1bae1e6366347a223f34aa6c440b92765/rdb-hang-1356543132.log
-> >
-> > OK, new naming scheme.  Please try:  wip-nick-1
-> >
-> > I added another simple fix, but then collapsed three commits
-> > into one, and added one more (somewhat unrelated).
-> >
-> > I've done simple testing with this and will subject it to
-> > more rigorous testing shortly.  I wanted to make it available
-> > to you quickly though.
-> >
-> >                                         -Alex
-> 
-> 
+>>
+>> -Nick
+>>
+>> On Wed, Dec 26, 2012 at 1:36 PM, Alex Elder <elder@inktank.com> wrote:
+>>> On 12/26/2012 11:45 AM, Nick Bartos wrote:
+>>>> Here's a log with a hang on the updated branch:
+>>>>
+>>>> https://gist.github.com/raw/4381750/772476e1bae1e6366347a223f34aa6c440b92765/rdb-hang-1356543132.log
+>>>
+>>> OK, new naming scheme.  Please try:  wip-nick-1
+>>>
+>>> I added another simple fix, but then collapsed three commits
+>>> into one, and added one more (somewhat unrelated).
+>>>
+>>> I've done simple testing with this and will subject it to
+>>> more rigorous testing shortly.  I wanted to make it available
+>>> to you quickly though.
+>>>
+>>>                                         -Alex
+>>
+>>
+
