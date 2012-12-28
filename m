@@ -1,136 +1,80 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/3] libceph: move linger requests sooner in
- kick_requests()
-Date: Thu, 27 Dec 2012 16:54:52 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212271654310.22449@cobra.newdream.net>
-References: <50DCD544.8000602@inktank.com> <50DCD706.9030601@inktank.com>
+Subject: Re: [PATCH 2/3] libceph: always reset osds when kicking
+Date: Thu, 27 Dec 2012 16:55:12 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212271655020.22449@cobra.newdream.net>
+References: <50DCD544.8000602@inktank.com> <50DCD70B.9020008@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44518 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44538 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752637Ab2L1Ayx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 19:54:53 -0500
-In-Reply-To: <50DCD706.9030601@inktank.com>
+	with ESMTP id S1752637Ab2L1AzM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 19:55:12 -0500
+In-Reply-To: <50DCD70B.9020008@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 On Thu, 27 Dec 2012, Alex Elder wrote:
-> The kick_requests() function is called by ceph_osdc_handle_map()
-> when an osd map change has been indicated.  Its purpose is to
-> re-queue any request whose target osd is different from what it
-> was when it was originally sent.
+> When ceph_osdc_handle_map() is called to process a new osd map,
+> kick_requests() is called to ensure all affected requests are
+> updated if necessary to reflect changes in the osd map.  This
+> happens in two cases:  whenever an incremental map update is
+> processed; and when a full map update (or the last one if there is
+> more than one) gets processed.
 > 
-> It is structured as two loops, one for incomplete but registered
-> requests, and a second for handling completed linger requests.
-> As a special case, in the first loop if a request marked to linger
-> has not yet completed, it is moved from the request list to the
-> linger list.  This is as a quick and dirty way to have the second
-> loop handle sending the request along with all the other linger
-> requests.
+> In the former case, the kick_requests() call is followed immediately
+> by a call to reset_changed_osds() to ensure any connections to osds
+> affected by the map change are reset.  But for full map updates
+> this isn't done.
 > 
-> Because of the way it's done now, however, this quick and dirty
-> solution can result in these incomplete linger requests never
-> getting re-sent as desired.  The problem lies in the fact that
-> the second loop only arranges for a linger request to be sent
-> if it appears its target osd has changed.  This is the proper
-> handling for *completed* linger requests (it avoids issuing
-> the same linger request twice to the same osd).
+> Both cases should be doint this osd reset.
 > 
-> But although the linger requests added to the list in the first loop
-> may have been sent, they have not yet completed, so they need to be
-> re-sent regardless of whether their target osd has changed.
-> 
-> The first required fix is we need to avoid calling __map_request()
-> on any incomplete linger request.  Otherwise the subsequent
-> __map_request() call in the second loop will find the target osd
-> has not changed and will therefore not re-send the request.
-> 
-> Second, we need to be sure that a sent but incomplete linger request
-> gets re-sent.  If the target osd is the same with the new osd map as
-> it was when the request was originally sent, this won't happen.
-> This can be fixed through careful handling when we move these
-> requests from the request list to the linger list, by unregistering
-> the request *before* it is registered as a linger request.  This
-> works because a side-effect of unregistering the request is to make
-> the request's r_osd pointer be NULL, and *that* will ensure the
-> second loop actually re-sends the linger request.
-> 
-> Processing of such a request is done at that point, so continue with
-> the next one once it's been moved.
+> Rather than duplicating the reset_changed_osds() call, move it into
+> the end of kick_requests().
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->  net/ceph/osd_client.c |   31 ++++++++++++++++++++-----------
->  1 file changed, 20 insertions(+), 11 deletions(-)
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 780caf6..616c6cf 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1284,6 +1284,25 @@ static void kick_requests(struct ceph_osd_client
-> *osdc, int force_resend)
->  	for (p = rb_first(&osdc->requests); p; ) {
->  		req = rb_entry(p, struct ceph_osd_request, r_node);
->  		p = rb_next(p);
-> +
-> +		/*
-> +		 * For linger requests that have not yet been
-> +		 * registered, move them to the linger list; they'll
-> +		 * be sent to the osd in the loop below.  Unregister
-> +		 * the request before re-registering it as a linger
-> +		 * request to ensure the __map_request() below
-> +		 * will decide it needs to be sent.
-> +		 */
-> +		if (req->r_linger && list_empty(&req->r_linger_item)) {
-> +			dout("%p tid %llu restart on osd%d\n",
-> +			     req, req->r_tid,
-> +			     req->r_osd ? req->r_osd->o_osd : -1);
-> +			__unregister_request(osdc, req);
-> +			__register_linger_request(osdc, req);
-> +
-
-Drop the newline?
 
 Reviewed-by: Sage Weil <sage@inktank.com>
 
-
-> +			continue;
-> +		}
-> +
->  		err = __map_request(osdc, req, force_resend);
->  		if (err < 0)
->  			continue;  /* error */
-> @@ -1298,17 +1317,6 @@ static void kick_requests(struct ceph_osd_client
+> ---
+>  net/ceph/osd_client.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 616c6cf..0be8f0d 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1270,7 +1270,7 @@ static void reset_changed_osds(struct
+> ceph_osd_client *osdc)
+>   * Requeue requests whose mapping to an OSD has changed.  If requests
+> map to
+>   * no osd, request a new map.
+>   *
+> - * Caller should hold map_sem for read and request_mutex.
+> + * Caller should hold map_sem for read.
+>   */
+>  static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+>  {
+> @@ -1346,6 +1346,7 @@ static void kick_requests(struct ceph_osd_client
 > *osdc, int force_resend)
->  				req->r_flags |= CEPH_OSD_FLAG_RETRY;
->  			}
->  		}
-> -		if (req->r_linger && list_empty(&req->r_linger_item)) {
-> -			/*
-> -			 * register as a linger so that we will
-> -			 * re-submit below and get a new tid
-> -			 */
-> -			dout("%p tid %llu restart on osd%d\n",
-> -			     req, req->r_tid,
-> -			     req->r_osd ? req->r_osd->o_osd : -1);
-> -			__register_linger_request(osdc, req);
-> -			__unregister_request(osdc, req);
-> -		}
+>  		dout("%d requests for down osds, need new map\n", needmap);
+>  		ceph_monc_request_next_osdmap(&osdc->client->monc);
 >  	}
+> +	reset_changed_osds(osdc);
+>  }
 > 
->  	list_for_each_entry_safe(req, nreq, &osdc->req_linger,
-> @@ -1316,6 +1324,7 @@ static void kick_requests(struct ceph_osd_client
-> *osdc, int force_resend)
->  		dout("linger req=%p req->r_osd=%p\n", req, req->r_osd);
 > 
->  		err = __map_request(osdc, req, force_resend);
-> +		dout("__map_request returned %d\n", err);
->  		if (err == 0)
->  			continue;  /* no change and no osd was specified */
->  		if (err < 0)
+> @@ -1402,7 +1403,6 @@ void ceph_osdc_handle_map(struct ceph_osd_client
+> *osdc, struct ceph_msg *msg)
+>  				osdc->osdmap = newmap;
+>  			}
+>  			kick_requests(osdc, 0);
+> -			reset_changed_osds(osdc);
+>  		} else {
+>  			dout("ignoring incremental map %u len %d\n",
+>  			     epoch, maplen);
 > -- 
 > 1.7.9.5
 > 
