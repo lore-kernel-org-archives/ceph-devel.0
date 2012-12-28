@@ -1,102 +1,41 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/3] libceph: WARN, don't BUG on unexpected connection states
-Date: Thu, 27 Dec 2012 17:17:52 -0600
-Message-ID: <50DCD720.4070909@inktank.com>
-References: <50DCD544.8000602@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@inktank.com>
+Subject: [PATCH] libceph: fix protocol feature mismatch failure path
+Date: Thu, 27 Dec 2012 16:07:20 -0800
+Message-ID: <1356653240-23146-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:50237 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752040Ab2L0XRz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 18:17:55 -0500
-Received: by mail-ia0-f171.google.com with SMTP id k27so8382359iad.2
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Dec 2012 15:17:54 -0800 (PST)
-In-Reply-To: <50DCD544.8000602@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44063 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750944Ab2L0X7N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 18:59:13 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>
 
-A number of assertions in the ceph messenger are implemented with
-BUG_ON(), killing the system if connection's state doesn't match
-what's expected.  At this point our state model is (evidently) not
-well understood enough for these assertions to trigger a BUG().
-Convert all BUG_ON(con->state...) calls to be WARN_ON(con->state...)
-so we learn about these issues without killing the machine.
+We should not set con->state to CLOSED here; that happens in ceph_fault()
+in the caller, where it first asserts that the state is not yet CLOSED.
+Avoids a BUG when the features don't match.
 
-We now recognize that a connection fault can occur due to a socket
-closure at any time, regardless of the state of the connection.  So
-there is really nothing we can assert about the state of the
-connection at that point so eliminate that assertion.
-
-Reported-by: Ugis <ugis22@gmail.com>
-Tested-by: Ugis <ugis22@gmail.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
+Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- net/ceph/messenger.c |   13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+ net/ceph/messenger.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 4d111fd..075b9fd 100644
+index 4d111fd..24a5c86 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -561,7 +561,7 @@ void ceph_con_open(struct ceph_connection *con,
- 	mutex_lock(&con->mutex);
- 	dout("con_open %p %s\n", con, ceph_pr_addr(&addr->in_addr));
-
--	BUG_ON(con->state != CON_STATE_CLOSED);
-+	WARN_ON(con->state != CON_STATE_CLOSED);
- 	con->state = CON_STATE_PREOPEN;
-
- 	con->peer_name.type = (__u8) entity_type;
-@@ -1509,7 +1509,7 @@ static int process_banner(struct ceph_connection *con)
+@@ -1508,9 +1508,9 @@ static int process_banner(struct ceph_connection *con)
+ 
  static void fail_protocol(struct ceph_connection *con)
  {
++	dout("fail_protocol %p\n", con);
  	reset_connection(con);
--	BUG_ON(con->state != CON_STATE_NEGOTIATING);
-+	WARN_ON(con->state != CON_STATE_NEGOTIATING);
- 	con->state = CON_STATE_CLOSED;
+ 	BUG_ON(con->state != CON_STATE_NEGOTIATING);
+-	con->state = CON_STATE_CLOSED;
  }
-
-@@ -1635,7 +1635,7 @@ static int process_connect(struct ceph_connection
-*con)
- 			return -1;
- 		}
-
--		BUG_ON(con->state != CON_STATE_NEGOTIATING);
-+		WARN_ON(con->state != CON_STATE_NEGOTIATING);
- 		con->state = CON_STATE_OPEN;
-
- 		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
-@@ -2132,7 +2132,6 @@ more:
- 		if (ret < 0)
- 			goto out;
-
--		BUG_ON(con->state != CON_STATE_CONNECTING);
- 		con->state = CON_STATE_NEGOTIATING;
-
- 		/*
-@@ -2160,7 +2159,7 @@ more:
- 		goto more;
- 	}
-
--	BUG_ON(con->state != CON_STATE_OPEN);
-+	WARN_ON(con->state != CON_STATE_OPEN);
-
- 	if (con->in_base_pos < 0) {
- 		/*
-@@ -2382,10 +2381,6 @@ static void ceph_fault(struct ceph_connection *con)
- 	dout("fault %p state %lu to peer %s\n",
- 	     con, con->state, ceph_pr_addr(&con->peer_addr.in_addr));
-
--	BUG_ON(con->state != CON_STATE_CONNECTING &&
--	       con->state != CON_STATE_NEGOTIATING &&
--	       con->state != CON_STATE_OPEN);
--
- 	con_close_socket(con);
-
- 	if (test_bit(CON_FLAG_LOSSYTX, &con->flags)) {
+ 
+ static int process_connect(struct ceph_connection *con)
 -- 
-1.7.9.5
+1.7.9
 
