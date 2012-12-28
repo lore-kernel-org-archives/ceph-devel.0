@@ -1,76 +1,26 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: fix protocol feature mismatch failure path
-Date: Thu, 27 Dec 2012 16:33:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212271632530.22449@cobra.newdream.net>
-References: <1356653240-23146-1-git-send-email-sage@inktank.com> <50DCE810.2030405@inktank.com>
+From: Kamezawa Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: Re: [PATCH V3 3/8] use vfs __set_page_dirty interface instead of
+ doing it inside filesystem
+Date: Fri, 28 Dec 2012 09:41:44 +0900
+Message-ID: <50DCEAC8.7000600@jp.fujitsu.com>
+References: <1356455919-14445-1-git-send-email-handai.szj@taobao.com> <1356456261-14579-1-git-send-email-handai.szj@taobao.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44382 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752695Ab2L1Adc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 19:33:32 -0500
-In-Reply-To: <50DCE810.2030405@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1356456261-14579-1-git-send-email-handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, dchinner-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mhocko-AlSwsSmVLrQ@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, glommer-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 27 Dec 2012, Alex Elder wrote:
-> On 12/27/2012 06:07 PM, Sage Weil wrote:
-> > We should not set con->state to CLOSED here; that happens in ceph_fault()
-> > in the caller, where it first asserts that the state is not yet CLOSED.
+(2012/12/26 2:24), Sha Zhengju wrote:
+> From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
 > 
-> I'm not seeing the code path you're talking about.
-> Do you mean in the LOSSYTX case?
+> Following we will treat SetPageDirty and dirty page accounting as an integrated
+> operation. Filesystems had better use vfs interface directly to avoid those details.
+> 
+> Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+> Acked-by: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 
-It's when the feature bits don't match.  It calls this, sets CLOSED< and 
-then returns -1 and con_work() calls ceph_fault().
-
-> 
-> (I don't doubt you're right, I'm just trying to follow
-> along at home.)
-> 
-> > Avoids a BUG when the features don't match.
-> 
-> Is this related to the crashes reported here?
->     http://tracker.newdream.net/issues/3657
-> 
-> > Signed-off-by: Sage Weil <sage@inktank.com>
-> > ---
-> >  net/ceph/messenger.c |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> > 
-> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> > index 4d111fd..24a5c86 100644
-> > --- a/net/ceph/messenger.c
-> > +++ b/net/ceph/messenger.c
-> > @@ -1508,9 +1508,9 @@ static int process_banner(struct ceph_connection *con)
-> >  
-> >  static void fail_protocol(struct ceph_connection *con)
-> >  {
-> > +	dout("fail_protocol %p\n", con);
-> >  	reset_connection(con);
-> >  	BUG_ON(con->state != CON_STATE_NEGOTIATING);
-> 
-> Since fail_protocol becomes essentially a trivial wrapper
-> for reset_connection(), I think it should just go away
-> and call reset_connection() directly.  The assertion that
-> it's in NEGOTIATING state is not very useful at the moment;
-> fail_protocol() is only called from process_connect(),
-> and that's only called from try_read when the state
-> is NEGOTIATING.
-
-Good point.  I'll clean that up!
-
-
-> 
-> 					-Alex
-> 
-> > -	con->state = CON_STATE_CLOSED;
-> >  }
-> >  
-> >  static int process_connect(struct ceph_connection *con)
-> > 
-> 
-> 
+Acked-by: KAMEZAWA Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
