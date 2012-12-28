@@ -1,26 +1,142 @@
-From: Kamezawa Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Subject: Re: [PATCH V3 3/8] use vfs __set_page_dirty interface instead of
- doing it inside filesystem
-Date: Fri, 28 Dec 2012 09:41:44 +0900
-Message-ID: <50DCEAC8.7000600@jp.fujitsu.com>
-References: <1356455919-14445-1-git-send-email-handai.szj@taobao.com> <1356456261-14579-1-git-send-email-handai.szj@taobao.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 1/3] libceph: move linger requests sooner in
+ kick_requests()
+Date: Thu, 27 Dec 2012 16:54:52 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212271654310.22449@cobra.newdream.net>
+References: <50DCD544.8000602@inktank.com> <50DCD706.9030601@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
-Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1356456261-14579-1-git-send-email-handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
-Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, dchinner-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mhocko-AlSwsSmVLrQ@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, glommer-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:44518 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752637Ab2L1Ayx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Dec 2012 19:54:53 -0500
+In-Reply-To: <50DCD706.9030601@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-(2012/12/26 2:24), Sha Zhengju wrote:
-> From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+On Thu, 27 Dec 2012, Alex Elder wrote:
+> The kick_requests() function is called by ceph_osdc_handle_map()
+> when an osd map change has been indicated.  Its purpose is to
+> re-queue any request whose target osd is different from what it
+> was when it was originally sent.
 > 
-> Following we will treat SetPageDirty and dirty page accounting as an integrated
-> operation. Filesystems had better use vfs interface directly to avoid those details.
+> It is structured as two loops, one for incomplete but registered
+> requests, and a second for handling completed linger requests.
+> As a special case, in the first loop if a request marked to linger
+> has not yet completed, it is moved from the request list to the
+> linger list.  This is as a quick and dirty way to have the second
+> loop handle sending the request along with all the other linger
+> requests.
 > 
-> Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
-> Acked-by: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+> Because of the way it's done now, however, this quick and dirty
+> solution can result in these incomplete linger requests never
+> getting re-sent as desired.  The problem lies in the fact that
+> the second loop only arranges for a linger request to be sent
+> if it appears its target osd has changed.  This is the proper
+> handling for *completed* linger requests (it avoids issuing
+> the same linger request twice to the same osd).
+> 
+> But although the linger requests added to the list in the first loop
+> may have been sent, they have not yet completed, so they need to be
+> re-sent regardless of whether their target osd has changed.
+> 
+> The first required fix is we need to avoid calling __map_request()
+> on any incomplete linger request.  Otherwise the subsequent
+> __map_request() call in the second loop will find the target osd
+> has not changed and will therefore not re-send the request.
+> 
+> Second, we need to be sure that a sent but incomplete linger request
+> gets re-sent.  If the target osd is the same with the new osd map as
+> it was when the request was originally sent, this won't happen.
+> This can be fixed through careful handling when we move these
+> requests from the request list to the linger list, by unregistering
+> the request *before* it is registered as a linger request.  This
+> works because a side-effect of unregistering the request is to make
+> the request's r_osd pointer be NULL, and *that* will ensure the
+> second loop actually re-sends the linger request.
+> 
+> Processing of such a request is done at that point, so continue with
+> the next one once it's been moved.
+> 
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>  net/ceph/osd_client.c |   31 ++++++++++++++++++++-----------
+>  1 file changed, 20 insertions(+), 11 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 780caf6..616c6cf 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1284,6 +1284,25 @@ static void kick_requests(struct ceph_osd_client
+> *osdc, int force_resend)
+>  	for (p = rb_first(&osdc->requests); p; ) {
+>  		req = rb_entry(p, struct ceph_osd_request, r_node);
+>  		p = rb_next(p);
+> +
+> +		/*
+> +		 * For linger requests that have not yet been
+> +		 * registered, move them to the linger list; they'll
+> +		 * be sent to the osd in the loop below.  Unregister
+> +		 * the request before re-registering it as a linger
+> +		 * request to ensure the __map_request() below
+> +		 * will decide it needs to be sent.
+> +		 */
+> +		if (req->r_linger && list_empty(&req->r_linger_item)) {
+> +			dout("%p tid %llu restart on osd%d\n",
+> +			     req, req->r_tid,
+> +			     req->r_osd ? req->r_osd->o_osd : -1);
+> +			__unregister_request(osdc, req);
+> +			__register_linger_request(osdc, req);
+> +
 
-Acked-by: KAMEZAWA Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Drop the newline?
+
+Reviewed-by: Sage Weil <sage@inktank.com>
+
+
+> +			continue;
+> +		}
+> +
+>  		err = __map_request(osdc, req, force_resend);
+>  		if (err < 0)
+>  			continue;  /* error */
+> @@ -1298,17 +1317,6 @@ static void kick_requests(struct ceph_osd_client
+> *osdc, int force_resend)
+>  				req->r_flags |= CEPH_OSD_FLAG_RETRY;
+>  			}
+>  		}
+> -		if (req->r_linger && list_empty(&req->r_linger_item)) {
+> -			/*
+> -			 * register as a linger so that we will
+> -			 * re-submit below and get a new tid
+> -			 */
+> -			dout("%p tid %llu restart on osd%d\n",
+> -			     req, req->r_tid,
+> -			     req->r_osd ? req->r_osd->o_osd : -1);
+> -			__register_linger_request(osdc, req);
+> -			__unregister_request(osdc, req);
+> -		}
+>  	}
+> 
+>  	list_for_each_entry_safe(req, nreq, &osdc->req_linger,
+> @@ -1316,6 +1324,7 @@ static void kick_requests(struct ceph_osd_client
+> *osdc, int force_resend)
+>  		dout("linger req=%p req->r_osd=%p\n", req, req->r_osd);
+> 
+>  		err = __map_request(osdc, req, force_resend);
+> +		dout("__map_request returned %d\n", err);
+>  		if (err == 0)
+>  			continue;  /* no change and no osd was specified */
+>  		if (err < 0)
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
