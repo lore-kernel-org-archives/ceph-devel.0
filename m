@@ -1,129 +1,76 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
-Subject: Improving responsiveness of KVM guests on Ceph storage
-Date: Sun, 30 Dec 2012 18:05:33 +0100
-Message-ID: <50E0745D.8050306@mermaidconsulting.dk>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: automatic repair of inconsistent pg?
+Date: Sun, 30 Dec 2012 10:22:32 -0800
+Message-ID: <CA+4uBUa=pPUyq677DXAvUgJAPfi4yr6MK4LySZ70yo9G=cORGg@mail.gmail.com>
+References: <50D908FA.7010907@profihost.ag>
+	<alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx06.stofanet.dk ([212.10.10.58]:49885 "EHLO mx06.stofanet.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753957Ab2L3RFg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 30 Dec 2012 12:05:36 -0500
+Received: from mail-vb0-f50.google.com ([209.85.212.50]:58148 "EHLO
+	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754708Ab2L3SWd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Dec 2012 13:22:33 -0500
+Received: by mail-vb0-f50.google.com with SMTP id ft2so621328vbb.9
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Dec 2012 10:22:33 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi guys,
+This is somewhat more likely to have been a bug in the replication
+logic (there were a few fixed between 0.53 and 0.55).  Had there been
+any recent osd failures?
+-Sam
 
-I'm testing Ceph as storage for KVM virtual machine images and found an=
-=20
-inconvenience that I am hoping it is possible to find the cause of.
-
-I'm running a single KVM Linux guest on top of Ceph storage. In that=20
-guest I run rsync to download files from the internet. When rsync is=20
-running, the guest will seemingly stall and run very slowly.
-
-=46or example if I log in via SSH to the guest and use the command prom=
-pt,=20
-nothing will happen for a long period (30+ seconds), then it processes =
-a=20
-few typed characters, and then it blocks for another long period of=20
-time, then process a bit more, etc.
-
-I was hoping to be able to tweak the system so that it runs more like=20
-when using conventional storage - i.e. perhaps the rsync won't be super=
-=20
-fast, but the machine will be equally responsive all the time.
-
-I'm hoping that you can provide some hints on how to best benchmark or=20
-test the system to find the cause of this?
-
-The ceph OSDs periodically logs thse two messages, that I do not fully=20
-understand:
-
-12-12-30 17:07:12.894920 7fc8f3242700  1 heartbeat_map is_healthy=20
-'OSD::op_tp thread 0x7fc8cbfff700' had timed out after 30
-2012-12-30 17:07:13.599126 7fc8cbfff700  1 heartbeat_map reset_timeout=20
-'OSD::op_tp thread 0x7fc8cbfff700' had timed out after 30
-
-Is this to be expected when the system is in use, or does it indicate=20
-that something is wrong?
-
-Ceph also logs messages such as this:
-
-2012-12-30 17:07:36.932272 osd.0 10.0.0.1:6800/9157 286340 : [WRN] slow=
-=20
-request 30.751940 seconds old, received at 2012-12-30 17:07:06.180236:=20
-osd_op(client.4705.0:16074961 rb.0.11b7.4a933baa.0000000c188f [write=20
-532480~4096] 0.f2a63fe) v4 currently waiting for sub ops
-
-
-My setup:
-
-3 servers running Fedora 17 with Ceph 0.55.1 from RPM.
-Each server runs one osd and one mon. One of the servers also runs an m=
-ds.
-Backing file system is btrfs stored on a md-raid . Journal is stored on=
-=20
-the same SATA disks as the rests of the data.
-Each server has 3 bonded gigabit/sec NICs.
-
-One server running Fedora 16 with qemu-kvm.
-Has gigabit/sec NIC connected to the same network as the Ceph servers,=20
-and a gigabit/sec NIC connected to the Internet.
-Disk is mounted with:
-
--drive format=3Drbd,file=3Drbd:data/image1:rbd_cache=3D1,if=3Dvirtio
-
-
-iostat on the KVM guest gives:
-
-avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-            0,00    0,00    0,00  100,00    0,00    0,00
-
-Device:         rrqm/s   wrqm/s     r/s     w/s   rsec/s   wsec/s=20
-avgrq-sz avgqu-sz   await  svctm  %util
-vda               0,00     1,40    0,10    0,30     0,80    13,60=20
-36,00     1,66 2679,25 2499,75  99,99
-
-
-Top on the KVM host shows 90% CPU idle and 0.0% I/O waiting.
-
-iostat on a OSD gives:
-avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-            0,13    0,00    1,50   15,79    0,00   82,58
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s=20
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda             240,70   441,20   33,00   42,70  1122,40  1961,80=20
-81,48    14,45  164,42  319,14   44,85   6,63  50,22
-sdb             299,10   393,10   33,90   38,40  1363,60  1720,60=20
-85,32    13,55  171,32  316,21   43,41   6,55  47,39
-sdc             268,50   441,60   28,80   45,40  1191,60  1977,00=20
-85,41    19,08  159,39  345,98   41,02   6,56  48,69
-sdd             255,50   445,50   30,20   45,00  1150,40  1975,80=20
-83,14    18,18  155,97  338,90   33,20   6,95  52,23
-md0               0,00     0,00    1,20  132,70     4,80  4086,40=20
-61,11     0,00    0,00    0,00    0,00   0,00   0,00
-
-
-The figures are similar on all three OSDs.
-
-I am thinking that one possible cause could be that the journal is=20
-stored on the same disks as the rest of the data, but I don't know how=20
-to benchmark if this is actually the case (?)
-
-Thanks for any help or advice, you can offer!
-
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Dec 24, 2012 at 10:54 PM, Sage Weil <sage@inktank.com> wrote:
+> On Tue, 25 Dec 2012, Stefan Priebe wrote:
+>> Hello list,
+>>
+>> today i got the following ceph status output:
+>> 2012-12-25 02:57:00.632945 mon.0 [INF] pgmap v1394388: 7632 pgs: 7631
+>> active+clean, 1 active+clean+inconsistent; 151 GB data, 307 GB used, 5028 GB /
+>> 5336 GB avail
+>>
+>>
+>> i then grepped the inconsistent pg by:
+>> # ceph pg dump - | grep inconsistent
+>> 3.ccf   10      0       0       0       41037824        155930  155930
+>> active+clean+inconsistent       2012-12-25 01:51:35.318459 6243'2107
+>> 6190'9847       [14,42] [14,42] 6243'2107       2012-12-25 01:51:35.318436
+>> 6007'2074       2012-12-23 01:51:24.386366
+>>
+>> and initiated a repair:
+>> #  ceph pg repair 3.ccf
+>> instructing pg 3.ccf on osd.14 to repair
+>>
+>> The log output then was:
+>> 2012-12-25 02:56:59.056382 osd.14 [ERR] 3.ccf osd.42 missing
+>> 1c602ccf/rbd_data.4904d6b8b4567.0000000000000b84/head//3
+>> 2012-12-25 02:56:59.056385 osd.14 [ERR] 3.ccf osd.42 missing
+>> ceb55ccf/rbd_data.48cc66b8b4567.0000000000001538/head//3
+>> 2012-12-25 02:56:59.097989 osd.14 [ERR] 3.ccf osd.42 missing
+>> dba6bccf/rbd_data.4797d6b8b4567.00000000000015ad/head//3
+>> 2012-12-25 02:56:59.097991 osd.14 [ERR] 3.ccf osd.42 missing
+>> a4deccf/rbd_data.45f956b8b4567.00000000000003d5/head//3
+>> 2012-12-25 02:56:59.098022 osd.14 [ERR] 3.ccf repair 4 missing, 0 inconsistent
+>> objects
+>> 2012-12-25 02:56:59.098046 osd.14 [ERR] 3.ccf repair 4 errors, 4 fixed
+>>
+>> Why doesn't ceph repair this automatically? Ho could this happen at all?
+>
+> We just made some fixes to repair in next (it was broken sometime between
+> ~0.53 and 0.55).  The latest next should repair it.  In general we don't
+> repair automatically lest we inadvertantly propagate bad data or paper
+> over a bug.
+>
+> As for the original source of the missing objects... I'm not sure.  There
+> were some fixed races related to backfill that could lead to an object
+> being missed, but Sam would know more about how likely that actually is.
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
