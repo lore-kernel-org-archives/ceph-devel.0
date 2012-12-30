@@ -1,63 +1,72 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Striped images and cluster misbehavior
-Date: Mon, 31 Dec 2012 00:16:23 +0300
-Message-ID: <CABYiri8_B=YbcoYBo+R5J8b6r5-go1_QTzAMd7bqO8CW-fDU3g@mail.gmail.com>
-References: <CABYiri-uqJ3sJt-pnV24EG60T6PGL7K+QvhSwE-=OnEG1R6W_A@mail.gmail.com>
- <CABYiri_5ww+RBdXM0CVEU9+WcHveXdQEJ6ymcp_-K9hgO_o=QQ@mail.gmail.com>
- <CABYiri96WTFLy9usyy_3LNzUxSWC7pBrhUgit2gp5bCziw7pkQ@mail.gmail.com> <CA+4uBUYfvhZcApiOOebQ360q-JWsAdfWshOFLQXKu7aqFe+0-g@mail.gmail.com>
+From: Miles Fidelman <mfidelman@meetinghouse.net>
+Subject: ceph for small cluster?
+Date: Sun, 30 Dec 2012 16:38:31 -0500
+Message-ID: <50E0B457.70200@meetinghouse.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f53.google.com ([209.85.219.53]:41284 "EHLO
-	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754996Ab2L3VQq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Dec 2012 16:16:46 -0500
-Received: by mail-oa0-f53.google.com with SMTP id j6so11025979oag.40
-        for <ceph-devel@vger.kernel.org>; Sun, 30 Dec 2012 13:16:45 -0800 (PST)
-In-Reply-To: <CA+4uBUYfvhZcApiOOebQ360q-JWsAdfWshOFLQXKu7aqFe+0-g@mail.gmail.com>
+Received: from server1.neighborhoods.net ([207.154.13.48]:35537 "EHLO
+	server1.neighborhoods.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755049Ab2L3Vp1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Dec 2012 16:45:27 -0500
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by server1.neighborhoods.net (Postfix) with ESMTP id 4502CCC0DE
+	for <ceph-devel@vger.kernel.org>; Sun, 30 Dec 2012 16:38:33 -0500 (EST)
+Received: from server1.neighborhoods.net ([127.0.0.1])
+	by localhost (server1.neighborhoods.net [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id 1Erb8XIRnTmA for <ceph-devel@vger.kernel.org>;
+	Sun, 30 Dec 2012 16:38:32 -0500 (EST)
+Received: from new-host-2.home (pool-71-184-234-147.bstnma.fios.verizon.net [71.184.234.147])
+	by server1.neighborhoods.net (Postfix) with ESMTPSA id D95FCCC0DD
+	for <ceph-devel@vger.kernel.org>; Sun, 30 Dec 2012 16:38:31 -0500 (EST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Dec 30, 2012 at 10:56 PM, Samuel Just <sam.just@inktank.com> wrote:
-> Sorry for the delay.  A quick look at the log doesn't show anything
-> obvious... Can you elaborate on how you caused the hang?
-> -Sam
->
+Hi Folks,
 
-I am sorry for all this noise, the issue almost for sure has been
-triggered by some bug in the Infiniband switch firmware because
-per-port reset was able to solve ``wrong mark'' problem - at least, it
-haven`t showed up yet for a week. The problem took almost two days
-until resolution - all possible connectivity tests displayed no
-overtimes or drops which can cause wrong marks. Finally, I have
-started playing with TCP settings and found that ipv4.tcp_low_latency
-raising possibility of ``wrong mark'' event several times when enabled
-- so area of all possible causes quickly collapsed to the media-only
-problem and I fixed problem soon.
+I'm wondering how ceph would work in a small cluster that supports a mix 
+of engineering and modest production (email, lists, web server for 
+several small communities).
 
-> On Wed, Dec 19, 2012 at 3:53 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> Please take a look at the log below, this is slightly different bug -
->> both osd processes on the node was stuck eating all available cpu
->> until I killed them. This can be reproduced by doing parallel export
->> of different from same client IP using both ``rbd export'' or API
->> calls - after a couple of wrong ``downs'' osd.19 and osd.27 finally
->> stuck. What is more interesting, 10.5.0.33 holds most hungry set of
->> virtual machines, eating constantly four of twenty-four HT cores, and
->> this node fails almost always, Underlying fs is an XFS, ceph version
->> gf9d090e. With high possibility my previous reports are about side
->> effects of this problem.
->>
->> http://xdel.ru/downloads/ceph-log/osd-19_and_27_stuck.log.gz
->>
->> and timings for the monmap, logs are from different hosts, so they may
->> have a time shift of tens of milliseconds:
->>
->> http://xdel.ru/downloads/ceph-log/timings-crash-osd_19_and_27.txt
->>
->> Thanks!
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Specifically, we have a rack with 4 medium-horsepower servers, each with 
+4 disk drives, running Xen (debian dom0 and domUs) - all linked together 
+w/ 4 gigE ethernets.
+
+Currently, 2 of the servers are running a high-availability 
+configuration, using DRBD to mirror specific volumes, and pacemaker for 
+failover.
+
+For a while, I've been looking for a way to replace DRBD with something 
+that would mirror across more than 2 servers - so that we could migrate 
+VMs arbitrarily - and that will work without splitting up compute vs. 
+storage nodes (for the short term, at least, we're stuck with rack space 
+and server limitations).
+
+The thing that looks closest to filling the bill is Sheepdog (at least 
+architecturally) - but it only provides a KVM interface. GlusterFS, 
+xTreemFS, and Ceph keep coming up as possibles - with ceph's rbd 
+interface looking like the easiest to integrate.
+
+Which leads me to two questions:
+
+- On a theoretical level, does using ceph as a storage pool for this 
+kind of small cluster make any sense (notably, I'd see running an OSD, a 
+MDS, a MON, and client DomUs on each of the 4 nodes, using LVM to pool 
+all the storage and it seems like folks recommend XFS as a production 
+filesystem)
+
+- On a practical level, has anybody tried building this kind of small 
+cluster, and if so, what kind of results have you had?
+
+Comments and suggestions please!
+
+Thank you very much,
+
+Miles Fidelman
+
+-- 
+In theory, there is no difference between theory and practice.
+In practice, there is.   .... Yogi Berra
+
