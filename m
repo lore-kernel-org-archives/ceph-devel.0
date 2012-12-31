@@ -1,117 +1,89 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Improving responsiveness of KVM guests on Ceph storage
-Date: Mon, 31 Dec 2012 11:19:10 +0300
-Message-ID: <CABYiri8OFSpNMuHuNAzTLwkzG3kqE9bt1f=Lz8TO0dDZ18ivTQ@mail.gmail.com>
-References: <50E0745D.8050306@mermaidconsulting.dk> <CABYiri9A4LxEgjrGHRVfn_WSLR9_ztHKN_+GJBh7KButwa68JA@mail.gmail.com>
- <50E0CA52.9020909@mermaidconsulting.dk>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: ceph for small cluster?
+Date: Mon, 31 Dec 2012 10:10:37 +0100
+Message-ID: <50E1568D.6060707@widodh.nl>
+References: <50E0B457.70200@meetinghouse.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:52602 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751961Ab2LaITg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 03:19:36 -0500
-Received: by mail-oa0-f41.google.com with SMTP id k14so11656293oag.0
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 00:19:33 -0800 (PST)
-In-Reply-To: <50E0CA52.9020909@mermaidconsulting.dk>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49430 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750928Ab2LaJKk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 04:10:40 -0500
+In-Reply-To: <50E0B457.70200@meetinghouse.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Jens_Kristian_S=C3=B8gaard?= <jens@mermaidconsulting.dk>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Miles Fidelman <mfidelman@meetinghouse.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 31, 2012 at 3:12 AM, Jens Kristian S=C3=B8gaard
-<jens@mermaidconsulting.dk> wrote:
-> Hi Andrey,
->
-> Thanks for your reply!
->
->
->> You may try do play with SCHED_RT, I have found it hard to use for
->> myself, but you can achieve your goal by adding small RT slices via
->> ``cpu'' cgroup to vcpu/emulator threads, it dramatically increases
->> overall VM` responsibility.
->
->
-> I'm not quite sure I understand your suggestion.
->
-> Do you mean that you set the process priority to real-time on each qe=
-mu-kvm
-> process, and then use cgroups cpu.rt_runtime_us / cpu.rt_period_us to
-> restrict the amount of CPU time those processes can receive?
->
-> I'm not sure how that would apply here, as I have only one qemu-kvm p=
-rocess
-> and it is not non-responsive because of the lack of allocated CPU tim=
-e
-> slices - but rather because some I/Os take a long time to complete, a=
-nd
-> other I/Os apparently have to wait for those to complete.
->
-Yep, I meant the same. Of course it`ll not help with only one VM, RT
-may help in more concurrent cases :)
->
->> threads. Of course, some Ceph tuning like writeback cache and large
->> journal may help you too, I`m speaking primarily of VM` performance =
-by
->
->
-> I have been considering the journal as something where I could improv=
-e
-> performance by tweaking the setup. I have set aside 10 GB of space fo=
-r the
-> journal, but I'm not sure if this is too little - or if the size real=
-ly
-> doesn't matter that much when it is on the same mdraid as the data it=
-self.
->
-> Is there a tool that can tell me how much of my journal space that is
-> actually actively being used?
->
-> I.e. I'm looking for something that could tell me, if increasing the =
-size of
-> the journal or placing it on a seperate (SSD) disk could solve my pro=
-blem.
+Hi,
 
-As I understood right, you have md device holding both journal and
-filestore? What type of raid you have here? Of course you`ll need a
-separate device (for experimental purposes, fast disk may be enough)
-for the journal, and if you set any type of redundant storage under
-filestore partition, you may also change it to simple RAID0, or even
-separate disks, and create one osd over every disk(you should see to
-the journal device` throughput which must be equal to sum of speeds of
-all filestore devices, so for commodity-type SSD it sums to two
-100MB/s disks, for example). I have ``pure'' disk setup in my dev
-environment built on quite old desktop-class machines and one rsync
-process may hang VM for short time, despite of using dedicated SATA
-disk for journal.
+On 12/30/2012 10:38 PM, Miles Fidelman wrote:
+> Hi Folks,
 >
-> How do I change the size of the writeback cache when using qemu-kvm l=
-ike I
-> do?
+> I'm wondering how ceph would work in a small cluster that supports a mix
+> of engineering and modest production (email, lists, web server for
+> several small communities).
 >
-> Does setting rbd cache size in ceph.conf have any effect on qemu-kvm,=
- where
-> the drive is defined as:
+> Specifically, we have a rack with 4 medium-horsepower servers, each with
+> 4 disk drives, running Xen (debian dom0 and domUs) - all linked together
+> w/ 4 gigE ethernets.
 >
->   format=3Drbd,file=3Drbd:data/image1:rbd_cache=3D1,if=3Dvirtio
+> Currently, 2 of the servers are running a high-availability
+> configuration, using DRBD to mirror specific volumes, and pacemaker for
+> failover.
 >
-What size of cache_size/max_dirty you have inside ceph.conf and which
-qemu version you use? Default values good enough to prevent pushing
-I/O spikes down to the physical storage, but for long I/O-intensive
-tasks increasing cache may help OS to align writes more smoothly. Also
-you don`t need to set rbd_cache explicitly in the disk config using
-qemu 1.2 and younger releases, for older ones
-http://lists.gnu.org/archive/html/qemu-devel/2012-05/msg02500.html
-should be applied.
+> For a while, I've been looking for a way to replace DRBD with something
+> that would mirror across more than 2 servers - so that we could migrate
+> VMs arbitrarily - and that will work without splitting up compute vs.
+> storage nodes (for the short term, at least, we're stuck with rack space
+> and server limitations).
+>
+> The thing that looks closest to filling the bill is Sheepdog (at least
+> architecturally) - but it only provides a KVM interface. GlusterFS,
+> xTreemFS, and Ceph keep coming up as possibles - with ceph's rbd
+> interface looking like the easiest to integrate.
+>
+> Which leads me to two questions:
+>
+> - On a theoretical level, does using ceph as a storage pool for this
+> kind of small cluster make any sense (notably, I'd see running an OSD, a
+> MDS, a MON, and client DomUs on each of the 4 nodes, using LVM to pool
+> all the storage and it seems like folks recommend XFS as a production
+> filesystem)
+>
 
+Yes, that could work. But you have to keep in mind that OSDs can spike 
+in both CPU and memory when they have to do recovery work for a failed 
+node/OSD.
+
+Also, with RBD you don't need an MDS. As a last note, you should always 
+have an odd number of monitors. So run a monitor on 3 of the 4 machines.
+
+The monitors work by a voting principle where they need a majority. An 
+odd number is best in that situation.
+
+> - On a practical level, has anybody tried building this kind of small
+> cluster, and if so, what kind of results have you had?
 >
-> --
-> Jens Kristian S=C3=B8gaard, Mermaid Consulting ApS,
-> jens@mermaidconsulting.dk,
-> http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+I build some small Ceph cluster with sometimes just 3 nodes. It works, 
+but you have to keep in mind that when one node in a 4 node cluster 
+fails you will loose 25% of the capacity.
+
+This will lead to a heavy recovery within the Ceph cluster which will 
+but a lot of pressure on that Gbit links and the CPUs and memory of the 
+nodes.
+
+With RBD you might want to consider adding an SSD for the journaling of 
+the OSDs, that will give you a pretty nice performance boost.
+
+Wido
+
+> Comments and suggestions please!
+>
+> Thank you very much,
+>
+> Miles Fidelman
+>
