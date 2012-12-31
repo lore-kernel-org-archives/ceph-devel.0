@@ -1,131 +1,79 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: automatic repair of inconsistent pg?
-Date: Mon, 31 Dec 2012 11:21:14 -0800
-Message-ID: <CA+4uBUbXoDrYg_JHGq1=ioO6KyrZ1RUaAUWUoSNNkJAAT6Ki6Q@mail.gmail.com>
-References: <50D908FA.7010907@profihost.ag>
-	<alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net>
-	<CA+4uBUbDVC0pKEfGfHmEuaVvZsoHWyZrxoE+vrFSddgWLGeELQ@mail.gmail.com>
-	<50E095C4.4090502@profihost.ag>
-	<CA+4uBUb81Gv-4vjKTd8UvV7V8Ep7PG3roug30+0e9hHksTc35g@mail.gmail.com>
-	<50E17E0B.805@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: Patch Backlog
+Date: Mon, 31 Dec 2012 16:52:36 -0600
+Message-ID: <50E21734.305@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:40265 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751643Ab2LaTVP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 14:21:15 -0500
-Received: by mail-vc0-f170.google.com with SMTP id fl11so13140450vcb.15
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 11:21:14 -0800 (PST)
-In-Reply-To: <50E17E0B.805@profihost.ag>
+Received: from mail-ia0-f171.google.com ([209.85.210.171]:58614 "EHLO
+	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751903Ab2LaWwg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 17:52:36 -0500
+Received: by mail-ia0-f171.google.com with SMTP id k27so10870729iad.16
+        for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 14:52:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The ceph-osd relies on fs barriers for correctness.  You will want to
-remove the nobarrier option to prevent future corruption.
--Sam
+The following patches are currently committed to the
+ceph-client/testing branch but have not been reviewed.
+(Well, two have; I marked them with "***" below.)
 
-On Mon, Dec 31, 2012 at 3:59 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
-> Am 31.12.2012 02:10, schrieb Samuel Just:
->
->> Are you using xfs?  If so, what mount options?
->
->
-> Yes,
-> noatime,nodiratime,nobarrier,logbufs=8,logbsize=256k
->
-> Stefan
->
->>
->> On Dec 30, 2012 1:28 PM, "Stefan Priebe" <s.priebe@profihost.ag
->> <mailto:s.priebe@profihost.ag>> wrote:
->>  >
->>  > Am 30.12.2012 19:17, schrieb Samuel Just:
->>  >>
->>  >> This is somewhat more likely to have been a bug in the replication
->> logic
->>  >> (there were a few fixed between 0.53 and 0.55).  Had there been any
->>  >> recent osd failures?
->>  >
->>  > Yes i was stressing CEPH with failures (power, link, disk, ...).
->>  >
->>  > Stefan
->>  >
->>  >> On Dec 24, 2012 10:55 PM, "Sage Weil" <sage@inktank.com
->> <mailto:sage@inktank.com>
->>  >> <mailto:sage@inktank.com <mailto:sage@inktank.com>>> wrote:
->>  >>
->>  >>     On Tue, 25 Dec 2012, Stefan Priebe wrote:
->>  >>      > Hello list,
->>  >>      >
->>  >>      > today i got the following ceph status output:
->>  >>      > 2012-12-25 02:57:00.632945 mon.0 [INF] pgmap v1394388: 7632
->> pgs: 7631
->>  >>      > active+clean, 1 active+clean+inconsistent; 151 GB data, 307 GB
->>  >>     used, 5028 GB /
->>  >>      > 5336 GB avail
->>  >>      >
->>  >>      >
->>  >>      > i then grepped the inconsistent pg by:
->>  >>      > # ceph pg dump - | grep inconsistent
->>  >>      > 3.ccf   10      0       0       0       41037824        155930
->>  >>       155930
->>  >>      > active+clean+inconsistent       2012-12-25 01:51:35.318459
->> 6243'2107
->>  >>      > 6190'9847       [14,42] [14,42] 6243'2107       2012-12-25
->>  >>     01:51:35.318436
->>  >>      > 6007'2074       2012-12-23 01:51:24.386366
->>  >>      >
->>  >>      > and initiated a repair:
->>  >>      > #  ceph pg repair 3.ccf
->>  >>      > instructing pg 3.ccf on osd.14 to repair
->>  >>      >
->>  >>      > The log output then was:
->>  >>      > 2012-12-25 02:56:59.056382 osd.14 [ERR] 3.ccf osd.42 missing
->>  >>      > 1c602ccf/rbd_data.4904d6b8b4567.0000000000000b84/head//3
->>  >>      > 2012-12-25 02:56:59.056385 osd.14 [ERR] 3.ccf osd.42 missing
->>  >>      > ceb55ccf/rbd_data.48cc66b8b4567.0000000000001538/head//3
->>  >>      > 2012-12-25 02:56:59.097989 osd.14 [ERR] 3.ccf osd.42 missing
->>  >>      > dba6bccf/rbd_data.4797d6b8b4567.00000000000015ad/head//3
->>  >>      > 2012-12-25 02:56:59.097991 osd.14 [ERR] 3.ccf osd.42 missing
->>  >>      > a4deccf/rbd_data.45f956b8b4567.00000000000003d5/head//3
->>  >>      > 2012-12-25 02:56:59.098022 osd.14 [ERR] 3.ccf repair 4 missing,
->> 0
->>  >>     inconsistent
->>  >>      > objects
->>  >>      > 2012-12-25 02:56:59.098046 osd.14 [ERR] 3.ccf repair 4 errors,
->> 4
->>  >>     fixed
->>  >>      >
->>  >>      > Why doesn't ceph repair this automatically? Ho could this
->> happen
->>  >>     at all?
->>  >>
->>  >>     We just made some fixes to repair in next (it was broken sometime
->>  >>     between
->>  >>     ~0.53 and 0.55).  The latest next should repair it.  In general
->> we don't
->>  >>     repair automatically lest we inadvertantly propagate bad data or
->> paper
->>  >>     over a bug.
->>  >>
->>  >>     As for the original source of the missing objects... I'm not sure.
->>  >>       There
->>  >>     were some fixed races related to backfill that could lead to an
->> object
->>  >>     being missed, but Sam would know more about how likely that
->> actually is.
->>  >>
->>  >>     sage
->>  >>     --
->>  >>     To unsubscribe from this list: send the line "unsubscribe
->> ceph-devel" in
->>  >>     the body of a message to majordomo@vger.kernel.org
->> <mailto:majordomo@vger.kernel.org>
->>  >>     <mailto:majordomo@vger.kernel.org
->>
->> <mailto:majordomo@vger.kernel.org>>
->>  >>     More majordomo info at http://vger.kernel.org/majordomo-info.html
->>  >>
+I'll repost them all for another chance at a review
+in the next day or so.  (I've run out of time today.)
+
+					-Alex
+
+32ee823 libceph: reformat __reset_osd()
+d00ab56 rbd: document rbd_spec structure
+1c1e221 rbd: kill rbd_spec->image_name_len
+17b40bd rbd: kill rbd_spec->image_id_len
+643a911 rbd: use kmemdup()
+966c4c4 ceph: define ceph_encode_8_safe()
+bbafb1d rbd: define and use rbd_warn()
+f84f83a rbd: add warning messages for missing arguments
+151a20c rbd: add a warning in bio_chain_clone_range()
+99485bd rbd: add warnings to rbd_dev_probe_update_spec()
+2ce4745 rbd: standardize rbd_request variable names
+307a8f2 rbd: standardize ceph_osd_request variable names
+d129c15 rbd: be picky about osd request status type
+5d8e059 rbd: encapsulate handling for a single request
+1e64364 rbd: a little more cleanup of rbd_rq_fn()
+f9ae366 rbd: end request on error in rbd_do_request() caller
+001e8e7 rbd: make exists flag atomic
+33fe3e0 rbd: only get snap context for write requests
+ee6c009 rbd: separate layout init
+f6e659a rbd: drop oid parameters from ceph_osdc_build_request()
+e9eb323 rbd: drop snapid parameter from rbd_req_sync_read()
+3b6f66e rbd: drop flags parameter from rbd_req_sync_exec()
+e1546ee rbd: kill rbd_req_sync_op() snapc and snapid parameters
+c09cade rbd: don't bother setting snapid in rbd_do_request()
+04cbdda libceph: always allow trail in osd request
+3dd703f libceph: kill op_needs_trail()
+3a01434 libceph: pass length to ceph_osdc_build_request()
+bd0d3cb libceph: pass length to ceph_calc_file_object_mapping()
+aae30e3 libceph: drop snapid in ceph_calc_raw_layout()
+dbeaa7d libceph: drop osdc from ceph_calc_raw_layout()
+1c660b9 libceph: don't set flags in ceph_osdc_alloc_request()
+826675c libceph: don't set pages or bio in ceph_osdc_alloc_request()
+a38369d rbd: pass num_op with ops array
+e224979 libceph: pass num_op with ops
+da30c3e rbd: there is really only one op
+88ef43e rbd: assume single op in a request
+54d67dd rbd: kill ceph_osd_req_op->flags
+66f5967 rbd: pull in ceph_calc_raw_layout()
+8adec78 rbd: open code rbd_calc_raw_layout()
+20ce1ab rbd: don't bother calculating file mapping
+c5b060d rbd: use a common layout for each device
+8d9dabc rbd: combine rbd sync watch/unwatch functions
+adb8a03 rbd: don't leak rbd_req on synchronous requests
+d9827c2 rbd: don't leak rbd_req for rbd_req_sync_notify_ack()
+d14c4ca rbd: don't assign extent info in rbd_do_request()
+2ab08c4 rbd: don't assign extent info in rbd_req_sync_op()
+fa41784 rbd: initialize off and len in rbd_create_rw_op()
+94aa0b9 rbd: define generalized osd request op routines
+deb0db2 rbd: move call osd op setup into rbd_osd_req_op_create()
+e00478f rbd: move remaining osd op setup into rbd_osd_req_op_create()
+7872443 rbd: assign watch request more directly
+
