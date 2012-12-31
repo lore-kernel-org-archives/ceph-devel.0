@@ -1,92 +1,113 @@
-From: =?UTF-8?B?SmVucyBLcmlzdGlhbiBTw7hnYWFyZA==?=
-	<jens@mermaidconsulting.dk>
-Subject: Re: Improving responsiveness of KVM guests on Ceph storage
-Date: Mon, 31 Dec 2012 11:58:19 +0100
-Message-ID: <50E16FCB.7050604@mermaidconsulting.dk>
-References: <50E0745D.8050306@mermaidconsulting.dk> <CABYiri9A4LxEgjrGHRVfn_WSLR9_ztHKN_+GJBh7KButwa68JA@mail.gmail.com> <50E0CA52.9020909@mermaidconsulting.dk> <CABYiri8OFSpNMuHuNAzTLwkzG3kqE9bt1f=Lz8TO0dDZ18ivTQ@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: automatic repair of inconsistent pg?
+Date: Mon, 31 Dec 2012 12:59:07 +0100
+Message-ID: <50E17E0B.805@profihost.ag>
+References: <50D908FA.7010907@profihost.ag> <alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net> <CA+4uBUbDVC0pKEfGfHmEuaVvZsoHWyZrxoE+vrFSddgWLGeELQ@mail.gmail.com> <50E095C4.4090502@profihost.ag> <CA+4uBUb81Gv-4vjKTd8UvV7V8Ep7PG3roug30+0e9hHksTc35g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx04.stofanet.dk ([212.10.10.14]:46725 "EHLO mx04.stofanet.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751159Ab2LaK6V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 31 Dec 2012 05:58:21 -0500
-In-Reply-To: <CABYiri8OFSpNMuHuNAzTLwkzG3kqE9bt1f=Lz8TO0dDZ18ivTQ@mail.gmail.com>
+Received: from mail.profihost.ag ([85.158.179.208]:59707 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750750Ab2LaL7I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 06:59:08 -0500
+In-Reply-To: <CA+4uBUb81Gv-4vjKTd8UvV7V8Ep7PG3roug30+0e9hHksTc35g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-Hi Andrey,
+Am 31.12.2012 02:10, schrieb Samuel Just:
+> Are you using xfs?  If so, what mount options?
 
-> As I understood right, you have md device holding both journal and
-> filestore? What type of raid you have here?
+Yes,
+noatime,nodiratime,nobarrier,logbufs=8,logbsize=256k
 
-Yes, same md device holding both journal and filestore. It is a raid5.
+Stefan
 
-> Of course you`ll need a
-> separate device (for experimental purposes, fast disk may be enough)
-> for the journal
-
-Is there a way to tell if the journal is the bottleneck without actuall=
-y=20
-  adding such an extra device?
-
-> filestore partition, you may also change it to simple RAID0, or even
-> separate disks, and create one osd over every disk(you should see to
-
-I have only 3 OSDs with 4 disks each. I was afraid that it would be too=
-=20
-brittle as a RAID0, and if I created seperate OSDs for each disk, it=20
-would stall the file system due to recovery if a server crashes.
-
-> What size of cache_size/max_dirty you have inside ceph.conf
-
-I haven't set them explicitly, so I imagine the cache_size is 32 MB and=
-=20
-the max_dirty is 24 MB.
-
- > and which
-> qemu version you use?
-
-Using the default 0.15 version in Fedora 16.
-
-> tasks increasing cache may help OS to align writes more smoothly. Als=
-o
-> you don`t need to set rbd_cache explicitly in the disk config using
-> qemu 1.2 and younger releases, for older ones
-> http://lists.gnu.org/archive/html/qemu-devel/2012-05/msg02500.html
-> should be applied.
-
-I read somewhere that I needed to enable it specifically for older=20
-qemu-kvm versions, which I did like this:
-
-   format=3Drbd,file=3Drbd:data/image1:rbd_cache=3D1,if=3Dvirtio
-
-However now I read in the docs for qemu-rbd that it needs to be set lik=
-e=20
-this:
-
-   format=3Draw,file=3Drbd:data/squeeze:rbd_cache=3Dtrue,cache=3Dwriteb=
-ack
-
-I'm not sure if 1 and true are interpreted the same way?
-
-I'll try using "true" and see if I get any noticable changes in behavio=
-ur.
-
-The link you sent me seems to indicate that I need to compile my own=20
-version of qemu-kvm to be able to test this?
-
-
---=20
-Jens Kristian S=C3=B8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> On Dec 30, 2012 1:28 PM, "Stefan Priebe" <s.priebe@profihost.ag
+> <mailto:s.priebe@profihost.ag>> wrote:
+>  >
+>  > Am 30.12.2012 19:17, schrieb Samuel Just:
+>  >>
+>  >> This is somewhat more likely to have been a bug in the replication logic
+>  >> (there were a few fixed between 0.53 and 0.55).  Had there been any
+>  >> recent osd failures?
+>  >
+>  > Yes i was stressing CEPH with failures (power, link, disk, ...).
+>  >
+>  > Stefan
+>  >
+>  >> On Dec 24, 2012 10:55 PM, "Sage Weil" <sage@inktank.com
+> <mailto:sage@inktank.com>
+>  >> <mailto:sage@inktank.com <mailto:sage@inktank.com>>> wrote:
+>  >>
+>  >>     On Tue, 25 Dec 2012, Stefan Priebe wrote:
+>  >>      > Hello list,
+>  >>      >
+>  >>      > today i got the following ceph status output:
+>  >>      > 2012-12-25 02:57:00.632945 mon.0 [INF] pgmap v1394388: 7632
+> pgs: 7631
+>  >>      > active+clean, 1 active+clean+inconsistent; 151 GB data, 307 GB
+>  >>     used, 5028 GB /
+>  >>      > 5336 GB avail
+>  >>      >
+>  >>      >
+>  >>      > i then grepped the inconsistent pg by:
+>  >>      > # ceph pg dump - | grep inconsistent
+>  >>      > 3.ccf   10      0       0       0       41037824        155930
+>  >>       155930
+>  >>      > active+clean+inconsistent       2012-12-25 01:51:35.318459
+> 6243'2107
+>  >>      > 6190'9847       [14,42] [14,42] 6243'2107       2012-12-25
+>  >>     01:51:35.318436
+>  >>      > 6007'2074       2012-12-23 01:51:24.386366
+>  >>      >
+>  >>      > and initiated a repair:
+>  >>      > #  ceph pg repair 3.ccf
+>  >>      > instructing pg 3.ccf on osd.14 to repair
+>  >>      >
+>  >>      > The log output then was:
+>  >>      > 2012-12-25 02:56:59.056382 osd.14 [ERR] 3.ccf osd.42 missing
+>  >>      > 1c602ccf/rbd_data.4904d6b8b4567.0000000000000b84/head//3
+>  >>      > 2012-12-25 02:56:59.056385 osd.14 [ERR] 3.ccf osd.42 missing
+>  >>      > ceb55ccf/rbd_data.48cc66b8b4567.0000000000001538/head//3
+>  >>      > 2012-12-25 02:56:59.097989 osd.14 [ERR] 3.ccf osd.42 missing
+>  >>      > dba6bccf/rbd_data.4797d6b8b4567.00000000000015ad/head//3
+>  >>      > 2012-12-25 02:56:59.097991 osd.14 [ERR] 3.ccf osd.42 missing
+>  >>      > a4deccf/rbd_data.45f956b8b4567.00000000000003d5/head//3
+>  >>      > 2012-12-25 02:56:59.098022 osd.14 [ERR] 3.ccf repair 4 missing, 0
+>  >>     inconsistent
+>  >>      > objects
+>  >>      > 2012-12-25 02:56:59.098046 osd.14 [ERR] 3.ccf repair 4 errors, 4
+>  >>     fixed
+>  >>      >
+>  >>      > Why doesn't ceph repair this automatically? Ho could this happen
+>  >>     at all?
+>  >>
+>  >>     We just made some fixes to repair in next (it was broken sometime
+>  >>     between
+>  >>     ~0.53 and 0.55).  The latest next should repair it.  In general
+> we don't
+>  >>     repair automatically lest we inadvertantly propagate bad data or
+> paper
+>  >>     over a bug.
+>  >>
+>  >>     As for the original source of the missing objects... I'm not sure.
+>  >>       There
+>  >>     were some fixed races related to backfill that could lead to an
+> object
+>  >>     being missed, but Sam would know more about how likely that
+> actually is.
+>  >>
+>  >>     sage
+>  >>     --
+>  >>     To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in
+>  >>     the body of a message to majordomo@vger.kernel.org
+> <mailto:majordomo@vger.kernel.org>
+>  >>     <mailto:majordomo@vger.kernel.org
+> <mailto:majordomo@vger.kernel.org>>
+>  >>     More majordomo info at http://vger.kernel.org/majordomo-info.html
+>  >>
