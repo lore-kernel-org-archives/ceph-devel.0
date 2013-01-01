@@ -1,81 +1,75 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.56 released
-Date: Mon, 31 Dec 2012 22:02:01 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: 0.55 crashed during upgrade to bobtail
+Date: Tue, 1 Jan 2013 20:49:58 +0300
+Message-ID: <CABYiri_pJynyL2DSRqErkAYp0H0sDmwg0HCAYfB84JUZ2dfczw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed; boundary=f46d0447a05d5b0d0304d23dc398
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39024 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751947Ab3AAGCD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 01:02:03 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 11275803BC
-	for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 22:02:02 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id E0733803BC
-	for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 22:02:01 -0800 (PST)
+Received: from mail-ob0-f177.google.com ([209.85.214.177]:52168 "EHLO
+	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752391Ab3AARuW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 12:50:22 -0500
+Received: by mail-ob0-f177.google.com with SMTP id uo13so12118578obb.22
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Jan 2013 09:50:19 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-We're bringing in the new year with a new release, v0.56, which will form 
-the basis of the next stable series "bobtail." There is little in the way 
-of new functionality since v0.55, as we've been focusing primarily on 
-stability, performance, and upgradability from the previous argonaut 
-stable series (v0.48.x). If you are a current argonaut user, you can 
-either upgrade now, or watch the Inktank blog for the bobtail announcement 
-after some additional testing has been completed. If you are a v0.55 or 
-v0.55.1 user, we recommend upgrading now.
+--f46d0447a05d5b0d0304d23dc398
+Content-Type: text/plain; charset=UTF-8
 
-Notable changes since v0.55 include:
+Hi,
 
- * librbd: fixes for read-only pools for image cloning
- * osd: fix for mixing argonaut and post-v0.54 OSDs
- * osd: some recovery tuning
- * osd: fix for several scrub, recovery, and watch/notify races/bugs
- * osd: fix pool_stat_t backwawrd compatibility with pre-v0.41 clients
- * osd: experimental split support
- * mkcephfs: misc fixes for fs initialization, mounting
- * radosgw: usage and op logs off by default
- * radosgw: keystone authentication off by default
- * upstart: only enabled with 'upstart' file exists in daemon data 
-   directory
- * mount.fuse.ceph: allow mounting of ceph-fuse via /etc/fstab
- * config: always complain about config parsing errors
- * mon: fixed memory leaks, misc bugs
- * mds: many misc fixes
+All osds in the dev cluster died shortly after upgrade (packet-only,
+i.e. binary upgrade, even without restart running processes), please
+see attached file.
 
-Notable changes since v0.48.2 ("argonaut"):
+Was: 0.55.1-356-g850d1d5
+Upgraded to: 0.56 tag
 
- * auth: authentication is now on by default; see release notes!
- * osd: improved threading, small io performance
- * osd: deep scrubbing (verify object data)
- * osd: chunky scrubs (more efficient)
- * osd: improved performance during recovery
- * librbd: cloning support
- * librbd: fine-grained striping support
- * librbd: better caching
- * radosgw: improved Swift and S3 API coverage (POST, multi-object delete, 
-   striping)
- * radosgw: OpenStack Keystone integration
- * radosgw: efficient usage stats aggregation (for billing)
- * crush: improvements in distribution (still off by default; see CRUSH 
-   tunables)
- * ceph-fuse, mds: general stability improvements
- * release RPMs for OpenSUSE, SLES, Fedora, RHEL, CentOS
- * tons and bug fixes and small improvements across the board
+The only one difference is a version of the gcc corresponding
+libstdc++ - 4.6 on the buildhost and 4.7 on the cluster. Of course I
+may do a rollback and problem will eliminate with high probability,
+but seems there should be some fix. Also I have something simular in
+the the testing env days ago -  packet upgrade inside 0.55 killed all
+_windows_ guests_ and one of tens of linux guests running above rbd.
+Unfortunately I have no debug sessions at this moment and I have only
+tail of the log from qemu:
 
-If you are upgrading from v0.55, there are no special upgrade 
-instructions. If you are upgrading from an older version, please read the 
-release notes. Authentication is now enabled by default, and if you do not 
-adjust your ceph.conf accordingly before upgrading the system will not 
-come up by itself.
+terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
+  what():  buffer::end_of_buffer
 
-You can get this release from the usual locations:
+I`m blaming ldconfig action from librbd because nothing else `ll cause
+such case of destroy on the running processes - may be I`m wrong.
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.56.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+thanks!
 
+WBR, Andrey
+
+--f46d0447a05d5b0d0304d23dc398
+Content-Type: application/x-gzip; name="crashes-2013-01-01.tgz"
+Content-Disposition: attachment; filename="crashes-2013-01-01.tgz"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hbfbzx220
+
+H4sIAHYh41AAA+1Yy47iRhRlzVfciEV6NI1db9sonVE0m2wiZRFly5TLZbAGXKjKdPdkkW9PGTwt
+P4BJJgxRKz5qMPjU49a5Vb6nUVa6tXZzgjCdI+z/wsm1gTwizusrjjg6fMeMHa4NJpigCAmCOKcT
+HwpGdAL86pGcwN5V0gJMnjO92Wh7oZ227hYB3RZqmH8cVM/VNeeoEyyO+T6Vfxph3ss/Q5hMAF0z
+iHP4n+f/t3XhYG1cBZnRDkpTwVo+algpNWeBgKL0+nhhsnuQZQamWmsL1ZPxrVwwnT5JWxblagHv
+jbX7XaUzcGtp/WVTpFbaT/7qqgWgZwTfPfgLzwWPmOBC+RejeOo7aniSDla61FbWI6Sf4EO4dzZM
+izJUereeG5fBvAAE8/muyOZ5sdEQPkob2v2xRehbBCjwJMwVhLpSx9v1W6BM+X0w/dWalZVbqLTd
+FuVhoqeiWoMrVqXcgLiHn1Jj/e1gOkNQR1w/tnIhdRoplkap1wLevYO7N9MZ/swfETOFo6TmU+kK
+tSyMg7vKK/uAnusRsjzG2L+9AVnBYWVFqTb7TIfq7duQBZFfaeXCl87BesE4m84INAP6/FjtY79b
+Ll3qB40Tdg/NBBhLybFG97BcFuVSre3q4Qezq4pt8Ydfo9lXP9bUY1Utd9Ju+9z5mJpJFzGdziiA
+17bWfflki0rDnRc1PznWamNSuQmb5oFSC8GnM9ZRVNIojpOspSjv8yJJRIsXQ17RFh8N+FTrFh/3
+MpbjjMuaX/6yzAq3M07X6sqHIAhepPV5RRn5W1nzWvlz4BNHaDSdJQB/tu+/7AaR5zGnF1L1zybj
+VPjNiOB3/2wqTPmzMR8XC+XPazPhYB8os936c3xcpbQrd/zkyfrDYfK6iSlDmflTsnRGfdRVnUSG
+66lwV+UYYYHa54K0+HrXE647PO3zAnd41udj3uF5L8s5wUmbF/3+CYnbfNTZBYdChNt83O8fdeNL
+LvMEDeLvrJ/09ItUJHibH+jHZDt+MtBP08747PL6CB/Epzr9B/qJTn5J9AV+oF83fyTp50+SNk8H
++nXXR/Fg/LTDk8vrp3TAow4/2H/d9dH+/lMpaj/F6EC/bv7pQL+IdfiBfr31J8P4W/xX1P8T/o/c
+2P8RjkXj/zD3DY7+j4/+7xa4rYHDlw0c/hYGLpIx48m/MXCRjGKur2rgBM/Ji83IkUaUvR4D5xWl
+mJ03cEf+vIH7zJ8zcA0/GrhvauCOKqcsP2PgjrueZOcM3KE/7xtA1u/P8zMGruFFxwC0DFzDx93x
+o178fQMYt/hmq3T4YQEl7edCy8A18zN50sBdrQD/xzhR/+mN67+/SV7qPyXoUP/R+PvPTfCVRTXz
+/2DjJO0U1feyrH8+kkpp52Crt8a7B/88kllm6zt1Kc2okFjHGY9f4VkZMWLEiBEjRowYMWLEiBEj
+Rox4jfgLaU9YBgAoAAA=
+--f46d0447a05d5b0d0304d23dc398--
