@@ -1,75 +1,132 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: 0.55 crashed during upgrade to bobtail
-Date: Tue, 1 Jan 2013 20:49:58 +0300
-Message-ID: <CABYiri_pJynyL2DSRqErkAYp0H0sDmwg0HCAYfB84JUZ2dfczw@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: automatic repair of inconsistent pg?
+Date: Tue, 01 Jan 2013 21:12:37 +0100
+Message-ID: <50E34335.3030902@profihost.ag>
+References: <50D908FA.7010907@profihost.ag> <alpine.DEB.2.00.1212242252040.32156@cobra.newdream.net> <CA+4uBUbDVC0pKEfGfHmEuaVvZsoHWyZrxoE+vrFSddgWLGeELQ@mail.gmail.com> <50E095C4.4090502@profihost.ag> <CA+4uBUb81Gv-4vjKTd8UvV7V8Ep7PG3roug30+0e9hHksTc35g@mail.gmail.com> <50E17E0B.805@profihost.ag> <CA+4uBUbXoDrYg_JHGq1=ioO6KyrZ1RUaAUWUoSNNkJAAT6Ki6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=f46d0447a05d5b0d0304d23dc398
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:52168 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752391Ab3AARuW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 12:50:22 -0500
-Received: by mail-ob0-f177.google.com with SMTP id uo13so12118578obb.22
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Jan 2013 09:50:19 -0800 (PST)
+Received: from mail.profihost.ag ([85.158.179.208]:49457 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751317Ab3AAUMg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 15:12:36 -0500
+In-Reply-To: <CA+4uBUbXoDrYg_JHGq1=ioO6KyrZ1RUaAUWUoSNNkJAAT6Ki6Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
---f46d0447a05d5b0d0304d23dc398
-Content-Type: text/plain; charset=UTF-8
-
-Hi,
-
-All osds in the dev cluster died shortly after upgrade (packet-only,
-i.e. binary upgrade, even without restart running processes), please
-see attached file.
-
-Was: 0.55.1-356-g850d1d5
-Upgraded to: 0.56 tag
-
-The only one difference is a version of the gcc corresponding
-libstdc++ - 4.6 on the buildhost and 4.7 on the cluster. Of course I
-may do a rollback and problem will eliminate with high probability,
-but seems there should be some fix. Also I have something simular in
-the the testing env days ago -  packet upgrade inside 0.55 killed all
-_windows_ guests_ and one of tens of linux guests running above rbd.
-Unfortunately I have no debug sessions at this moment and I have only
-tail of the log from qemu:
-
-terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
-  what():  buffer::end_of_buffer
-
-I`m blaming ldconfig action from librbd because nothing else `ll cause
-such case of destroy on the running processes - may be I`m wrong.
-
-thanks!
-
-WBR, Andrey
-
---f46d0447a05d5b0d0304d23dc398
-Content-Type: application/x-gzip; name="crashes-2013-01-01.tgz"
-Content-Disposition: attachment; filename="crashes-2013-01-01.tgz"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hbfbzx220
-
-H4sIAHYh41AAA+1Yy47iRhRlzVfciEV6NI1db9sonVE0m2wiZRFly5TLZbAGXKjKdPdkkW9PGTwt
-P4BJJgxRKz5qMPjU49a5Vb6nUVa6tXZzgjCdI+z/wsm1gTwizusrjjg6fMeMHa4NJpigCAmCOKcT
-HwpGdAL86pGcwN5V0gJMnjO92Wh7oZ227hYB3RZqmH8cVM/VNeeoEyyO+T6Vfxph3ss/Q5hMAF0z
-iHP4n+f/t3XhYG1cBZnRDkpTwVo+algpNWeBgKL0+nhhsnuQZQamWmsL1ZPxrVwwnT5JWxblagHv
-jbX7XaUzcGtp/WVTpFbaT/7qqgWgZwTfPfgLzwWPmOBC+RejeOo7aniSDla61FbWI6Sf4EO4dzZM
-izJUereeG5fBvAAE8/muyOZ5sdEQPkob2v2xRehbBCjwJMwVhLpSx9v1W6BM+X0w/dWalZVbqLTd
-FuVhoqeiWoMrVqXcgLiHn1Jj/e1gOkNQR1w/tnIhdRoplkap1wLevYO7N9MZ/swfETOFo6TmU+kK
-tSyMg7vKK/uAnusRsjzG2L+9AVnBYWVFqTb7TIfq7duQBZFfaeXCl87BesE4m84INAP6/FjtY79b
-Ll3qB40Tdg/NBBhLybFG97BcFuVSre3q4Qezq4pt8Ydfo9lXP9bUY1Utd9Ju+9z5mJpJFzGdziiA
-17bWfflki0rDnRc1PznWamNSuQmb5oFSC8GnM9ZRVNIojpOspSjv8yJJRIsXQ17RFh8N+FTrFh/3
-MpbjjMuaX/6yzAq3M07X6sqHIAhepPV5RRn5W1nzWvlz4BNHaDSdJQB/tu+/7AaR5zGnF1L1zybj
-VPjNiOB3/2wqTPmzMR8XC+XPazPhYB8os936c3xcpbQrd/zkyfrDYfK6iSlDmflTsnRGfdRVnUSG
-66lwV+UYYYHa54K0+HrXE647PO3zAnd41udj3uF5L8s5wUmbF/3+CYnbfNTZBYdChNt83O8fdeNL
-LvMEDeLvrJ/09ItUJHibH+jHZDt+MtBP08747PL6CB/Epzr9B/qJTn5J9AV+oF83fyTp50+SNk8H
-+nXXR/Fg/LTDk8vrp3TAow4/2H/d9dH+/lMpaj/F6EC/bv7pQL+IdfiBfr31J8P4W/xX1P8T/o/c
-2P8RjkXj/zD3DY7+j4/+7xa4rYHDlw0c/hYGLpIx48m/MXCRjGKur2rgBM/Ji83IkUaUvR4D5xWl
-mJ03cEf+vIH7zJ8zcA0/GrhvauCOKqcsP2PgjrueZOcM3KE/7xtA1u/P8zMGruFFxwC0DFzDx93x
-o178fQMYt/hmq3T4YQEl7edCy8A18zN50sBdrQD/xzhR/+mN67+/SV7qPyXoUP/R+PvPTfCVRTXz
-/2DjJO0U1feyrH8+kkpp52Crt8a7B/88kllm6zt1Kc2okFjHGY9f4VkZMWLEiBEjRowYMWLEiBEj
-Rox4jfgLaU9YBgAoAAA=
---f46d0447a05d5b0d0304d23dc398--
+OK thanks! Will change that.
+Am 31.12.2012 20:21, schrieb Samuel Just:
+> The ceph-osd relies on fs barriers for correctness.  You will want to
+> remove the nobarrier option to prevent future corruption.
+> -Sam
+>
+> On Mon, Dec 31, 2012 at 3:59 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+>> Am 31.12.2012 02:10, schrieb Samuel Just:
+>>
+>>> Are you using xfs?  If so, what mount options?
+>>
+>>
+>> Yes,
+>> noatime,nodiratime,nobarrier,logbufs=8,logbsize=256k
+>>
+>> Stefan
+>>
+>>>
+>>> On Dec 30, 2012 1:28 PM, "Stefan Priebe" <s.priebe@profihost.ag
+>>> <mailto:s.priebe@profihost.ag>> wrote:
+>>>   >
+>>>   > Am 30.12.2012 19:17, schrieb Samuel Just:
+>>>   >>
+>>>   >> This is somewhat more likely to have been a bug in the replication
+>>> logic
+>>>   >> (there were a few fixed between 0.53 and 0.55).  Had there been any
+>>>   >> recent osd failures?
+>>>   >
+>>>   > Yes i was stressing CEPH with failures (power, link, disk, ...).
+>>>   >
+>>>   > Stefan
+>>>   >
+>>>   >> On Dec 24, 2012 10:55 PM, "Sage Weil" <sage@inktank.com
+>>> <mailto:sage@inktank.com>
+>>>   >> <mailto:sage@inktank.com <mailto:sage@inktank.com>>> wrote:
+>>>   >>
+>>>   >>     On Tue, 25 Dec 2012, Stefan Priebe wrote:
+>>>   >>      > Hello list,
+>>>   >>      >
+>>>   >>      > today i got the following ceph status output:
+>>>   >>      > 2012-12-25 02:57:00.632945 mon.0 [INF] pgmap v1394388: 7632
+>>> pgs: 7631
+>>>   >>      > active+clean, 1 active+clean+inconsistent; 151 GB data, 307 GB
+>>>   >>     used, 5028 GB /
+>>>   >>      > 5336 GB avail
+>>>   >>      >
+>>>   >>      >
+>>>   >>      > i then grepped the inconsistent pg by:
+>>>   >>      > # ceph pg dump - | grep inconsistent
+>>>   >>      > 3.ccf   10      0       0       0       41037824        155930
+>>>   >>       155930
+>>>   >>      > active+clean+inconsistent       2012-12-25 01:51:35.318459
+>>> 6243'2107
+>>>   >>      > 6190'9847       [14,42] [14,42] 6243'2107       2012-12-25
+>>>   >>     01:51:35.318436
+>>>   >>      > 6007'2074       2012-12-23 01:51:24.386366
+>>>   >>      >
+>>>   >>      > and initiated a repair:
+>>>   >>      > #  ceph pg repair 3.ccf
+>>>   >>      > instructing pg 3.ccf on osd.14 to repair
+>>>   >>      >
+>>>   >>      > The log output then was:
+>>>   >>      > 2012-12-25 02:56:59.056382 osd.14 [ERR] 3.ccf osd.42 missing
+>>>   >>      > 1c602ccf/rbd_data.4904d6b8b4567.0000000000000b84/head//3
+>>>   >>      > 2012-12-25 02:56:59.056385 osd.14 [ERR] 3.ccf osd.42 missing
+>>>   >>      > ceb55ccf/rbd_data.48cc66b8b4567.0000000000001538/head//3
+>>>   >>      > 2012-12-25 02:56:59.097989 osd.14 [ERR] 3.ccf osd.42 missing
+>>>   >>      > dba6bccf/rbd_data.4797d6b8b4567.00000000000015ad/head//3
+>>>   >>      > 2012-12-25 02:56:59.097991 osd.14 [ERR] 3.ccf osd.42 missing
+>>>   >>      > a4deccf/rbd_data.45f956b8b4567.00000000000003d5/head//3
+>>>   >>      > 2012-12-25 02:56:59.098022 osd.14 [ERR] 3.ccf repair 4 missing,
+>>> 0
+>>>   >>     inconsistent
+>>>   >>      > objects
+>>>   >>      > 2012-12-25 02:56:59.098046 osd.14 [ERR] 3.ccf repair 4 errors,
+>>> 4
+>>>   >>     fixed
+>>>   >>      >
+>>>   >>      > Why doesn't ceph repair this automatically? Ho could this
+>>> happen
+>>>   >>     at all?
+>>>   >>
+>>>   >>     We just made some fixes to repair in next (it was broken sometime
+>>>   >>     between
+>>>   >>     ~0.53 and 0.55).  The latest next should repair it.  In general
+>>> we don't
+>>>   >>     repair automatically lest we inadvertantly propagate bad data or
+>>> paper
+>>>   >>     over a bug.
+>>>   >>
+>>>   >>     As for the original source of the missing objects... I'm not sure.
+>>>   >>       There
+>>>   >>     were some fixed races related to backfill that could lead to an
+>>> object
+>>>   >>     being missed, but Sam would know more about how likely that
+>>> actually is.
+>>>   >>
+>>>   >>     sage
+>>>   >>     --
+>>>   >>     To unsubscribe from this list: send the line "unsubscribe
+>>> ceph-devel" in
+>>>   >>     the body of a message to majordomo@vger.kernel.org
+>>> <mailto:majordomo@vger.kernel.org>
+>>>   >>     <mailto:majordomo@vger.kernel.org
+>>>
+>>> <mailto:majordomo@vger.kernel.org>>
+>>>   >>     More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>   >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
