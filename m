@@ -1,44 +1,81 @@
-From: Matthew Roy <imjustmatthew@gmail.com>
-Subject: Re: ceph for small cluster?
-Date: Mon, 31 Dec 2012 19:13:11 -0500
-Message-ID: <CADXA5U0sGE9tyNKjbESS3_uxuYDrfUxE4rKg9UxC5TLkLcAAvg@mail.gmail.com>
-References: <50E0B457.70200@meetinghouse.net>
-	<CADXA5U1ATB+1baCfBSHmzozRe3m-HhLxHQr3be1-dASgABPQYw@mail.gmail.com>
-	<50E19DC5.303@meetinghouse.net>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.56 released
+Date: Mon, 31 Dec 2012 22:02:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f52.google.com ([209.85.210.52]:53950 "EHLO
-	mail-da0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750774Ab3AAANM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Dec 2012 19:13:12 -0500
-Received: by mail-da0-f52.google.com with SMTP id f10so5885217dak.11
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 16:13:11 -0800 (PST)
-In-Reply-To: <50E19DC5.303@meetinghouse.net>
+Received: from cobra.newdream.net ([66.33.216.30]:39024 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751947Ab3AAGCD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 01:02:03 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 11275803BC
+	for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 22:02:02 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E0733803BC
+	for <ceph-devel@vger.kernel.org>; Mon, 31 Dec 2012 22:02:01 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Miles Fidelman <mfidelman@meetinghouse.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Dec 31, 2012 at 9:14 AM, Miles Fidelman
-<mfidelman@meetinghouse.net> wrote:
->
->
-> Which raises another question: how are you combining drives within each OSD (raid, lvm, ?).
->
+We're bringing in the new year with a new release, v0.56, which will form 
+the basis of the next stable series "bobtail." There is little in the way 
+of new functionality since v0.55, as we've been focusing primarily on 
+stability, performance, and upgradability from the previous argonaut 
+stable series (v0.48.x). If you are a current argonaut user, you can 
+either upgrade now, or watch the Inktank blog for the bobtail announcement 
+after some additional testing has been completed. If you are a v0.55 or 
+v0.55.1 user, we recommend upgrading now.
 
-I'm not combining them, just running an OSD per data disk. On this
-cluster it's 2 disks for each of the 3 nodes.  I ended up that way
-only because I added the second disk to each node after getting
-started. There was an inktank blog post not too long ago about the
-performance of RAID'ed disks on OSDs that might provide quantitative
-justification for which route to go.
+Notable changes since v0.55 include:
 
-Like Wido suggests, I also use a shared SSD for journal on each node.
-The journal's not really about speeding recovery from failed
-OSDs/disks, it's about being able to ACK writes faster and still
-retain integrity when Bad Things happen. If you're RAIDing with a
-battery-backed cache I think you can run without a journal, but I
-don't know the details on that.
+ * librbd: fixes for read-only pools for image cloning
+ * osd: fix for mixing argonaut and post-v0.54 OSDs
+ * osd: some recovery tuning
+ * osd: fix for several scrub, recovery, and watch/notify races/bugs
+ * osd: fix pool_stat_t backwawrd compatibility with pre-v0.41 clients
+ * osd: experimental split support
+ * mkcephfs: misc fixes for fs initialization, mounting
+ * radosgw: usage and op logs off by default
+ * radosgw: keystone authentication off by default
+ * upstart: only enabled with 'upstart' file exists in daemon data 
+   directory
+ * mount.fuse.ceph: allow mounting of ceph-fuse via /etc/fstab
+ * config: always complain about config parsing errors
+ * mon: fixed memory leaks, misc bugs
+ * mds: many misc fixes
 
-Matthew
+Notable changes since v0.48.2 ("argonaut"):
+
+ * auth: authentication is now on by default; see release notes!
+ * osd: improved threading, small io performance
+ * osd: deep scrubbing (verify object data)
+ * osd: chunky scrubs (more efficient)
+ * osd: improved performance during recovery
+ * librbd: cloning support
+ * librbd: fine-grained striping support
+ * librbd: better caching
+ * radosgw: improved Swift and S3 API coverage (POST, multi-object delete, 
+   striping)
+ * radosgw: OpenStack Keystone integration
+ * radosgw: efficient usage stats aggregation (for billing)
+ * crush: improvements in distribution (still off by default; see CRUSH 
+   tunables)
+ * ceph-fuse, mds: general stability improvements
+ * release RPMs for OpenSUSE, SLES, Fedora, RHEL, CentOS
+ * tons and bug fixes and small improvements across the board
+
+If you are upgrading from v0.55, there are no special upgrade 
+instructions. If you are upgrading from an older version, please read the 
+release notes. Authentication is now enabled by default, and if you do not 
+adjust your ceph.conf accordingly before upgrading the system will not 
+come up by itself.
+
+You can get this release from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.56.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
+
