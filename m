@@ -1,54 +1,111 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Very intensive I/O under mon process
-Date: Wed, 2 Jan 2013 08:35:19 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301020833180.11884@cobra.newdream.net>
-References: <CABYiri_tx5+sSw3mZrVmtey6P6UcaRq_n4TxukzixUVm458u4g@mail.gmail.com> <50E45997.9060205@inktank.com> <CABYiri9bUsO4S2SKU2rmt4V0oCxL6pw4JmKhZm-dNS_bJR2OOQ@mail.gmail.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: Ceph logging level
+Date: Wed, 2 Jan 2013 17:57:14 +0100
+Message-ID: <CAOLwVUndvK3iXKSmW+yWVSZZJWYBDrMuLj1rhVmSfTsQ9Xo0xg@mail.gmail.com>
+References: <CAOLwVU=sxV3U81b3j-r-2=sEruFkOryhv46toPeRgT1Pqj19Xw@mail.gmail.com>
+ <alpine.DEB.2.00.1301020824230.11884@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54226 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752903Ab3ABQfU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:35:20 -0500
-In-Reply-To: <CABYiri9bUsO4S2SKU2rmt4V0oCxL6pw4JmKhZm-dNS_bJR2OOQ@mail.gmail.com>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:40479 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752647Ab3ABQ5g convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:57:36 -0500
+Received: by mail-la0-f50.google.com with SMTP id fs13so6431868lab.37
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Jan 2013 08:57:34 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1301020824230.11884@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 2 Jan 2013, Andrey Korolyov wrote:
-> On Wed, Jan 2, 2013 at 8:00 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
-> > On 01/02/2013 03:40 PM, Andrey Korolyov wrote:
-> >>
-> >> I have just observed that ceph-mon process, at least bobtail one, has
-> >> an extremely high density of writes - times above _overall_ cluster
-> >> amount of writes, measured by qemu driver(and they are very close to
-> >> be fair). For example, test cluster of 32 osds have 7.5 MByte/s of
-> >> writes on each mon node having overall amount about 1.5 Mbyte/s and
-> >> dev- with only three osds has values is about 1Mbyte/s with
-> >> accumulated real write bandwidth of tens of kilobytes per second.
-> >>
-> >> I`m afraid if this is normal, I may hit a limit of spinning storage
-> >> increasing test cluster, say, twenty times up of number of osd and
-> >> related ``idle'' write bandwidth.
-> >
-> >
-> > High debugging levels (specially 'debug ms', 'debug mon' or 'debug paxos')
-> > should significantly increase IO on the monitors. Might that be the case?
-> 
-> Nope, all debug levels, including mons are set to 0/0. I also see that
-> the ``no-client'' cluster shows a very small amount of such writes
-> under mon, 10-20kByte/s, and one idle client (writing couple of bytes
-> without O_SYNC) raise this value times up to ~200kB/s and so on, so
-> may be I`m wrong before and writes correlate with amount of clients
-> too(six clients plus three control nodes accessing via API in the
-> context of previous message for both environments).
+Hi Sage,
 
-The mon is writing out state updates at regular intervals, mostly PG stat 
-(object and byte counts) updates--what you see from 'ceph pg dump'.  You 
-should see IO go up to some ceiling as more IO is applied to the cluster 
-and then level off.  The frequency of these writes, and thus the total IO 
-rate, can be controlled via the 'paxos propose interval' knob (default is 
-1 or 2 seconds).
+Thanks for your answer.
 
-sage
+> LOG_USER is currently hard-coded.  It would be pretty easy to make th=
+is
+> configurable... LOG_DAEMON may also be a better default choice.
+
+LOG_DAEMON will be a better choice and even better using a different
+facility to isolate ceph logs from other services that log into
+LOG_DAEMON. Using LOCAL0, LOCAL1 and so on for example.
+
+> We can just add a min log level configurable.
+
+Please :-)
+
+New config options like:
+
+* log_facility
+* log_level
+
+will be a good starting point I guess.
+
+Thanks!
+--
+Regards,
+S=E9bastien Han.
+
+
+On Wed, Jan 2, 2013 at 5:28 PM, Sage Weil <sage@inktank.com> wrote:
+> On Wed, 2 Jan 2013, S?bastien Han wrote:
+>> Hi all,
+>>
+>> I've been struggling with Ceph logging.
+>>
+>> As far as I saw we can log to syslog but we can't specify any
+>> facility. So my question is: which facility does ceph use by default=
+?
+>
+> LOG_USER is currently hard-coded.  It would be pretty easy to make th=
+is
+> configurable... LOG_DAEMON may also be a better default choice.
+>
+>> Second thing is, I'm sick of all those "log [INF]" messages from the
+>> ceph-mon, like:
+>>
+>> Jan  2 13:27:07 ceph02 ceph-mon: 2013-01-02 13:27:07.749511
+>> 7f227b2fa700  0 log [INF] : pgmap v74529: 80 pgs: 80 active+clean;
+>> 9753 MB data, 17012 MB used, 383 GB / 399 GB avail
+>>
+>> Is there a way to disable them? Which level is that? INFO? DEBUG?
+>>
+>> Ideally I'd like to disable all INFO logs, I only want to see ERROR =
+logs.
+>
+> Not currently.  This would be very simple to add.  See mon/LogMonitor=
+=2Ecc:
+>
+>       if (g_conf->mon_cluster_log_to_syslog) {
+>         syslog(clog_type_to_syslog_prio(le.type) | LOG_USER, "%s", s.=
+c_str());
+>       }
+>
+> We can just add a min log level configurable.
+>
+> Opened #3704.
+>
+> sage
+>
+>
+>
+>>
+>> Thanks you in advance :-)
+>>
+>> --
+>> Regards,
+>> S?bastien Han.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
