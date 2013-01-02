@@ -1,111 +1,139 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Ceph logging level
-Date: Wed, 2 Jan 2013 17:57:14 +0100
-Message-ID: <CAOLwVUndvK3iXKSmW+yWVSZZJWYBDrMuLj1rhVmSfTsQ9Xo0xg@mail.gmail.com>
-References: <CAOLwVU=sxV3U81b3j-r-2=sEruFkOryhv46toPeRgT1Pqj19Xw@mail.gmail.com>
- <alpine.DEB.2.00.1301020824230.11884@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: v0.56 released
+Date: Wed, 2 Jan 2013 09:35:46 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301020935270.13956@cobra.newdream.net>
+References: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net> <50E39A4E.1060700@conversis.de> <50E39B68.40800@inktank.com> <CAOLwVUnYP1HTfimBf2PKBW5TA7gSuKRhsB1u6YPwUQGs633mvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:40479 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752647Ab3ABQ5g convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:57:36 -0500
-Received: by mail-la0-f50.google.com with SMTP id fs13so6431868lab.37
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Jan 2013 08:57:34 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301020824230.11884@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:56216 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752694Ab3ABRfr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 12:35:47 -0500
+In-Reply-To: <CAOLwVUnYP1HTfimBf2PKBW5TA7gSuKRhsB1u6YPwUQGs633mvg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Dennis Jacobfeuerborn <dennisml@conversis.de>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+On Wed, 2 Jan 2013, S?bastien Han wrote:
+> It looks the same for Debian packages, 0.56.1 is on testing branch.
+> 
+> http://ceph.com/debian-testing/dists/precise/main/binary-amd64/Packages
+> 
+> If someone can fix this, thanks in advance ;-)
 
-Thanks for your answer.
+The repo has 0.56-1, which is correct... maybe you just misread the 
+version?
 
-> LOG_USER is currently hard-coded.  It would be pretty easy to make th=
-is
-> configurable... LOG_DAEMON may also be a better default choice.
-
-LOG_DAEMON will be a better choice and even better using a different
-facility to isolate ceph logs from other services that log into
-LOG_DAEMON. Using LOCAL0, LOCAL1 and so on for example.
-
-> We can just add a min log level configurable.
-
-Please :-)
-
-New config options like:
-
-* log_facility
-* log_level
-
-will be a good starting point I guess.
-
-Thanks!
---
-Regards,
-S=E9bastien Han.
+sage
 
 
-On Wed, Jan 2, 2013 at 5:28 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 2 Jan 2013, S?bastien Han wrote:
->> Hi all,
->>
->> I've been struggling with Ceph logging.
->>
->> As far as I saw we can log to syslog but we can't specify any
->> facility. So my question is: which facility does ceph use by default=
-?
->
-> LOG_USER is currently hard-coded.  It would be pretty easy to make th=
-is
-> configurable... LOG_DAEMON may also be a better default choice.
->
->> Second thing is, I'm sick of all those "log [INF]" messages from the
->> ceph-mon, like:
->>
->> Jan  2 13:27:07 ceph02 ceph-mon: 2013-01-02 13:27:07.749511
->> 7f227b2fa700  0 log [INF] : pgmap v74529: 80 pgs: 80 active+clean;
->> 9753 MB data, 17012 MB used, 383 GB / 399 GB avail
->>
->> Is there a way to disable them? Which level is that? INFO? DEBUG?
->>
->> Ideally I'd like to disable all INFO logs, I only want to see ERROR =
-logs.
->
-> Not currently.  This would be very simple to add.  See mon/LogMonitor=
-=2Ecc:
->
->       if (g_conf->mon_cluster_log_to_syslog) {
->         syslog(clog_type_to_syslog_prio(le.type) | LOG_USER, "%s", s.=
-c_str());
->       }
->
-> We can just add a min log level configurable.
->
-> Opened #3704.
->
-> sage
->
->
->
->>
->> Thanks you in advance :-)
->>
->> --
->> Regards,
->> S?bastien Han.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> Regards,
+> S?bastien Han.
+> 
+> 
+> On Wed, Jan 2, 2013 at 3:28 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> > Doh!  Sorry about that.  It looks like they are still in rpm-testing:
+> >
+> > http://www.ceph.com/rpm-testing/el6/x86_64/
+> >
+> > I imagine Gary will have them in the non-testing repo some time tomorrow.
+> >
+> > Mark
+> >
+> >
+> > On 01/01/2013 08:24 PM, Dennis Jacobfeuerborn wrote:
+> >>
+> >> Hi,
+> >> apparently the RPM link points to version 0.52. Where can the RPMs for
+> >> 0.56
+> >> be found?
+> >>
+> >> Regards,
+> >>    Dennis
+> >>
+> >> On 01/01/2013 07:02 AM, Sage Weil wrote:
+> >>>
+> >>> We're bringing in the new year with a new release, v0.56, which will form
+> >>> the basis of the next stable series "bobtail." There is little in the way
+> >>> of new functionality since v0.55, as we've been focusing primarily on
+> >>> stability, performance, and upgradability from the previous argonaut
+> >>> stable series (v0.48.x). If you are a current argonaut user, you can
+> >>> either upgrade now, or watch the Inktank blog for the bobtail
+> >>> announcement
+> >>> after some additional testing has been completed. If you are a v0.55 or
+> >>> v0.55.1 user, we recommend upgrading now.
+> >>>
+> >>> Notable changes since v0.55 include:
+> >>>
+> >>>   * librbd: fixes for read-only pools for image cloning
+> >>>   * osd: fix for mixing argonaut and post-v0.54 OSDs
+> >>>   * osd: some recovery tuning
+> >>>   * osd: fix for several scrub, recovery, and watch/notify races/bugs
+> >>>   * osd: fix pool_stat_t backwawrd compatibility with pre-v0.41 clients
+> >>>   * osd: experimental split support
+> >>>   * mkcephfs: misc fixes for fs initialization, mounting
+> >>>   * radosgw: usage and op logs off by default
+> >>>   * radosgw: keystone authentication off by default
+> >>>   * upstart: only enabled with 'upstart' file exists in daemon data
+> >>>     directory
+> >>>   * mount.fuse.ceph: allow mounting of ceph-fuse via /etc/fstab
+> >>>   * config: always complain about config parsing errors
+> >>>   * mon: fixed memory leaks, misc bugs
+> >>>   * mds: many misc fixes
+> >>>
+> >>> Notable changes since v0.48.2 ("argonaut"):
+> >>>
+> >>>   * auth: authentication is now on by default; see release notes!
+> >>>   * osd: improved threading, small io performance
+> >>>   * osd: deep scrubbing (verify object data)
+> >>>   * osd: chunky scrubs (more efficient)
+> >>>   * osd: improved performance during recovery
+> >>>   * librbd: cloning support
+> >>>   * librbd: fine-grained striping support
+> >>>   * librbd: better caching
+> >>>   * radosgw: improved Swift and S3 API coverage (POST, multi-object
+> >>> delete,
+> >>>     striping)
+> >>>   * radosgw: OpenStack Keystone integration
+> >>>   * radosgw: efficient usage stats aggregation (for billing)
+> >>>   * crush: improvements in distribution (still off by default; see CRUSH
+> >>>     tunables)
+> >>>   * ceph-fuse, mds: general stability improvements
+> >>>   * release RPMs for OpenSUSE, SLES, Fedora, RHEL, CentOS
+> >>>   * tons and bug fixes and small improvements across the board
+> >>>
+> >>> If you are upgrading from v0.55, there are no special upgrade
+> >>> instructions. If you are upgrading from an older version, please read the
+> >>> release notes. Authentication is now enabled by default, and if you do
+> >>> not
+> >>> adjust your ceph.conf accordingly before upgrading the system will not
+> >>> come up by itself.
+> >>>
+> >>> You can get this release from the usual locations:
+> >>>
+> >>>   * Git at git://github.com/ceph/ceph.git
+> >>>   * Tarball at http://ceph.com/download/ceph-0.56.tar.gz
+> >>>   * For Debian/Ubuntu packages, see
+> >>> http://ceph.com/docs/master/install/debian
+> >>>   * For RPMs, see http://ceph.com/docs/master/install/rpm
+> >>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
