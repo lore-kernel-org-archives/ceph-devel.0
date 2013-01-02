@@ -1,62 +1,93 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: 0.55 crashed during upgrade to bobtail
-Date: Tue, 1 Jan 2013 23:55:13 +0300
-Message-ID: <CABYiri9vtqcEaKo1OA=wQgPL-B6AMf-7NdV2+H6NfY34dZ-cSQ@mail.gmail.com>
-References: <CABYiri_pJynyL2DSRqErkAYp0H0sDmwg0HCAYfB84JUZ2dfczw@mail.gmail.com>
- <CABYiri-4uo03O8tGfd_mtRF5gXAHv63QRonHPqYHkXhPipYY=A@mail.gmail.com>
+From: Dennis Jacobfeuerborn <dennisml@conversis.de>
+Subject: Re: v0.56 released
+Date: Wed, 02 Jan 2013 03:24:14 +0100
+Message-ID: <50E39A4E.1060700@conversis.de>
+References: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:55089 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752440Ab3AAUzf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 15:55:35 -0500
-Received: by mail-oa0-f51.google.com with SMTP id n12so12473159oag.38
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Jan 2013 12:55:34 -0800 (PST)
-In-Reply-To: <CABYiri-4uo03O8tGfd_mtRF5gXAHv63QRonHPqYHkXhPipYY=A@mail.gmail.com>
+Received: from mail4.conversis.de ([213.203.219.181]:49688 "EHLO
+	mail4.conversis.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752415Ab3ABCYR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jan 2013 21:24:17 -0500
+In-Reply-To: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Jan 2, 2013 at 12:16 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
-> On Tue, Jan 1, 2013 at 9:49 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> Hi,
->>
->> All osds in the dev cluster died shortly after upgrade (packet-only,
->> i.e. binary upgrade, even without restart running processes), please
->> see attached file.
->>
->> Was: 0.55.1-356-g850d1d5
->> Upgraded to: 0.56 tag
->>
->> The only one difference is a version of the gcc corresponding
->> libstdc++ - 4.6 on the buildhost and 4.7 on the cluster. Of course I
->> may do a rollback and problem will eliminate with high probability,
->> but seems there should be some fix. Also I have something simular in
->> the the testing env days ago -  packet upgrade inside 0.55 killed all
->> _windows_ guests_ and one of tens of linux guests running above rbd.
->> Unfortunately I have no debug sessions at this moment and I have only
->> tail of the log from qemu:
->>
->> terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
->>   what():  buffer::end_of_buffer
->>
->> I`m blaming ldconfig action from librbd because nothing else `ll cause
->> such case of destroy on the running processes - may be I`m wrong.
->>
->> thanks!
->>
->> WBR, Andrey
->
-> Sorry, I`m not able to reproduce crash after rollback and traces was
-> uncomplete due to lack of disk space on specified core location, so
-> please don`t mind it.
+Hi,
+apparently the RPM link points to version 0.52. Where can the RPMs for 0.56
+be found?
 
-Ahem, finally it seems that osd process stumbling on something on the
-fs, because my other environments also was able to reproduce crash
-once, but reproducing is not possible since new osd process started
-over existing filestore(offline version rollback and another try to
-online upgrade doing fine). And backtrace in first message is
-complete, at least 1 and 2, despite of lack of space first time - I
-have received a couple of coredumps which trace looks exactly the same
-as 2.
+Regards,
+  Dennis
+
+On 01/01/2013 07:02 AM, Sage Weil wrote:
+> We're bringing in the new year with a new release, v0.56, which will form 
+> the basis of the next stable series "bobtail." There is little in the way 
+> of new functionality since v0.55, as we've been focusing primarily on 
+> stability, performance, and upgradability from the previous argonaut 
+> stable series (v0.48.x). If you are a current argonaut user, you can 
+> either upgrade now, or watch the Inktank blog for the bobtail announcement 
+> after some additional testing has been completed. If you are a v0.55 or 
+> v0.55.1 user, we recommend upgrading now.
+> 
+> Notable changes since v0.55 include:
+> 
+>  * librbd: fixes for read-only pools for image cloning
+>  * osd: fix for mixing argonaut and post-v0.54 OSDs
+>  * osd: some recovery tuning
+>  * osd: fix for several scrub, recovery, and watch/notify races/bugs
+>  * osd: fix pool_stat_t backwawrd compatibility with pre-v0.41 clients
+>  * osd: experimental split support
+>  * mkcephfs: misc fixes for fs initialization, mounting
+>  * radosgw: usage and op logs off by default
+>  * radosgw: keystone authentication off by default
+>  * upstart: only enabled with 'upstart' file exists in daemon data 
+>    directory
+>  * mount.fuse.ceph: allow mounting of ceph-fuse via /etc/fstab
+>  * config: always complain about config parsing errors
+>  * mon: fixed memory leaks, misc bugs
+>  * mds: many misc fixes
+> 
+> Notable changes since v0.48.2 ("argonaut"):
+> 
+>  * auth: authentication is now on by default; see release notes!
+>  * osd: improved threading, small io performance
+>  * osd: deep scrubbing (verify object data)
+>  * osd: chunky scrubs (more efficient)
+>  * osd: improved performance during recovery
+>  * librbd: cloning support
+>  * librbd: fine-grained striping support
+>  * librbd: better caching
+>  * radosgw: improved Swift and S3 API coverage (POST, multi-object delete, 
+>    striping)
+>  * radosgw: OpenStack Keystone integration
+>  * radosgw: efficient usage stats aggregation (for billing)
+>  * crush: improvements in distribution (still off by default; see CRUSH 
+>    tunables)
+>  * ceph-fuse, mds: general stability improvements
+>  * release RPMs for OpenSUSE, SLES, Fedora, RHEL, CentOS
+>  * tons and bug fixes and small improvements across the board
+> 
+> If you are upgrading from v0.55, there are no special upgrade 
+> instructions. If you are upgrading from an older version, please read the 
+> release notes. Authentication is now enabled by default, and if you do not 
+> adjust your ceph.conf accordingly before upgrading the system will not 
+> come up by itself.
+> 
+> You can get this release from the usual locations:
+> 
+>  * Git at git://github.com/ceph/ceph.git
+>  * Tarball at http://ceph.com/download/ceph-0.56.tar.gz
+>  * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+>  * For RPMs, see http://ceph.com/docs/master/install/rpm
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
