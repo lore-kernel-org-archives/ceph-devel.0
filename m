@@ -1,66 +1,47 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Ceph logging level
-Date: Wed, 2 Jan 2013 08:28:38 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301020824230.11884@cobra.newdream.net>
-References: <CAOLwVU=sxV3U81b3j-r-2=sEruFkOryhv46toPeRgT1Pqj19Xw@mail.gmail.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: Very intensive I/O under mon process
+Date: Wed, 2 Jan 2013 19:31:01 +0300
+Message-ID: <CABYiri9bUsO4S2SKU2rmt4V0oCxL6pw4JmKhZm-dNS_bJR2OOQ@mail.gmail.com>
+References: <CABYiri_tx5+sSw3mZrVmtey6P6UcaRq_n4TxukzixUVm458u4g@mail.gmail.com>
+ <50E45997.9060205@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54154 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752788Ab3ABQ2j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:28:39 -0500
-In-Reply-To: <CAOLwVU=sxV3U81b3j-r-2=sEruFkOryhv46toPeRgT1Pqj19Xw@mail.gmail.com>
+Received: from mail-oa0-f45.google.com ([209.85.219.45]:38387 "EHLO
+	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752783Ab3ABQbW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:31:22 -0500
+Received: by mail-oa0-f45.google.com with SMTP id i18so13268363oag.18
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Jan 2013 08:31:22 -0800 (PST)
+In-Reply-To: <50E45997.9060205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+To: Joao Eduardo Luis <joao.luis@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 2 Jan 2013, S?bastien Han wrote:
-> Hi all,
-> 
-> I've been struggling with Ceph logging.
-> 
-> As far as I saw we can log to syslog but we can't specify any
-> facility. So my question is: which facility does ceph use by default?
+On Wed, Jan 2, 2013 at 8:00 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
+> On 01/02/2013 03:40 PM, Andrey Korolyov wrote:
+>>
+>> I have just observed that ceph-mon process, at least bobtail one, has
+>> an extremely high density of writes - times above _overall_ cluster
+>> amount of writes, measured by qemu driver(and they are very close to
+>> be fair). For example, test cluster of 32 osds have 7.5 MByte/s of
+>> writes on each mon node having overall amount about 1.5 Mbyte/s and
+>> dev- with only three osds has values is about 1Mbyte/s with
+>> accumulated real write bandwidth of tens of kilobytes per second.
+>>
+>> I`m afraid if this is normal, I may hit a limit of spinning storage
+>> increasing test cluster, say, twenty times up of number of osd and
+>> related ``idle'' write bandwidth.
+>
+>
+> High debugging levels (specially 'debug ms', 'debug mon' or 'debug paxos')
+> should significantly increase IO on the monitors. Might that be the case?
 
-LOG_USER is currently hard-coded.  It would be pretty easy to make this 
-configurable... LOG_DAEMON may also be a better default choice.  
-
-> Second thing is, I'm sick of all those "log [INF]" messages from the
-> ceph-mon, like:
-> 
-> Jan  2 13:27:07 ceph02 ceph-mon: 2013-01-02 13:27:07.749511
-> 7f227b2fa700  0 log [INF] : pgmap v74529: 80 pgs: 80 active+clean;
-> 9753 MB data, 17012 MB used, 383 GB / 399 GB avail
-> 
-> Is there a way to disable them? Which level is that? INFO? DEBUG?
-> 
-> Ideally I'd like to disable all INFO logs, I only want to see ERROR logs.
-
-Not currently.  This would be very simple to add.  See mon/LogMonitor.cc:
-
-      if (g_conf->mon_cluster_log_to_syslog) {
-	syslog(clog_type_to_syslog_prio(le.type) | LOG_USER, "%s", s.c_str());
-      }
-
-We can just add a min log level configurable.
-
-Opened #3704.
-
-sage
-
-
-
-> 
-> Thanks you in advance :-)
-> 
-> --
-> Regards,
-> S?bastien Han.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Nope, all debug levels, including mons are set to 0/0. I also see that
+the ``no-client'' cluster shows a very small amount of such writes
+under mon, 10-20kByte/s, and one idle client (writing couple of bytes
+without O_SYNC) raise this value times up to ~200kB/s and so on, so
+may be I`m wrong before and writes correlate with amount of clients
+too(six clients plus three control nodes accessing via API in the
+context of previous message for both environments).
