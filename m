@@ -1,42 +1,37 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph fixes for 3.8-rc2
-Date: Wed, 2 Jan 2013 11:29:46 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301021127210.6371@cobra.newdream.net>
+From: Dennis Jacobfeuerborn <dennisml@conversis.de>
+Subject: Re: v0.56 released
+Date: Wed, 02 Jan 2013 21:27:00 +0100
+Message-ID: <50E49814.9000904@conversis.de>
+References: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net> <50E39A4E.1060700@conversis.de> <50E39B68.40800@inktank.com> <CAOLwVUnYP1HTfimBf2PKBW5TA7gSuKRhsB1u6YPwUQGs633mvg@mail.gmail.com> <alpine.DEB.2.00.1301020935270.13956@cobra.newdream.net> <CAOLwVU=3W-QQ2tsdCGU4zq2OUiiTv7tFE20z20k2dgXQL7WknQ@mail.gmail.com> <alpine.DEB.2.00.1301021010310.13956@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59891 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752404Ab3ABT3r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 14:29:47 -0500
+Received: from mail4.conversis.de ([213.203.219.181]:33878 "EHLO
+	mail4.conversis.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752678Ab3ABU1D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 15:27:03 -0500
+In-Reply-To: <alpine.DEB.2.00.1301021010310.13956@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On 01/02/2013 07:11 PM, Sage Weil wrote:
+> On Wed, 2 Jan 2013, S?bastien Han wrote:
+>> Debian-testing shows the version 0.56-1, maybe I misunderstood but I
+>> thought that 0.56-1 bobtail was the new version of the stable branch.
+>> So I was expecting to see it here
+>> http://ceph.com/debian/dists/precise/main/binary-amd64/Packages
+>>
+>> Correct me if I'm wrong :)
+> 
+> It will be soon, but we're doing some additional validation before calling 
+> it bobtail.  We may also move the URLs around a bit... more on that soon!
 
-Please pull these Ceph fixes from
+What happens if you find a problem that needs a small update? Will the
+bobtail version be bumped to v0.57?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Regards,
+  Dennis
 
-Two of Alex's patches deal with a race when reseting server connections 
-for open RBD images, one demotes some non-fatal BUGs to WARNs, and my 
-patch fixes a protocol feature bit failure path.
-
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Alex Elder (3):
-      libceph: move linger requests sooner in kick_requests()
-      libceph: always reset osds when kicking
-      libceph: WARN, don't BUG on unexpected connection states
-
-Sage Weil (1):
-      libceph: fix protocol feature mismatch failure path
-
- net/ceph/messenger.c  |   23 ++++++++---------------
- net/ceph/osd_client.c |   34 +++++++++++++++++++++-------------
- 2 files changed, 29 insertions(+), 28 deletions(-)
