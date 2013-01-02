@@ -1,57 +1,54 @@
-From: Dennis Jacobfeuerborn <dennisml@conversis.de>
-Subject: Re: status monitoring options for ceph cluster
-Date: Wed, 02 Jan 2013 17:34:36 +0100
-Message-ID: <50E4619C.6070300@conversis.de>
-References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com> <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Very intensive I/O under mon process
+Date: Wed, 2 Jan 2013 08:35:19 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301020833180.11884@cobra.newdream.net>
+References: <CABYiri_tx5+sSw3mZrVmtey6P6UcaRq_n4TxukzixUVm458u4g@mail.gmail.com> <50E45997.9060205@inktank.com> <CABYiri9bUsO4S2SKU2rmt4V0oCxL6pw4JmKhZm-dNS_bJR2OOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail4.conversis.de ([213.203.219.181]:45921 "EHLO
-	mail4.conversis.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752939Ab3ABQei (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:34:38 -0500
-In-Reply-To: <50E45909.4080907@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54226 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752903Ab3ABQfU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 11:35:20 -0500
+In-Reply-To: <CABYiri9bUsO4S2SKU2rmt4V0oCxL6pw4JmKhZm-dNS_bJR2OOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao.luis@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, Ugis <ugis22@gmail.com>, ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Joao Eduardo Luis <joao.luis@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 01/02/2013 04:58 PM, Joao Eduardo Luis wrote:
-> On 01/02/2013 03:08 PM, Wido den Hollander wrote:
->> On 01/02/2013 04:05 PM, Ugis wrote:
->>> Hi all,
->>>
->>> I am planning to set up monitoring of ceph cluster relying on output
->>> of commands:
->>>
->>> #ceph health
->>> #ceph -s
->>>
->>> The need is to retrieve certain values, for example %degraded;
->>> proportion "X GB / Y GB avail" to calculate available space%. I plan
->>> to graph those values via zabbix and set up triggers for certain
->>> tresholds.
->>> May be somebody already has written shell parser for getting values
->>> from output of these commands?
->>>
->>> Probably this ir wider question - what is the intended approach for
->>> ceph cluster monitoring? What do you guys use?
->>
->> You might want to take a look at: http://tracker.newdream.net/issues/685
->>
->> In version 0.35 a json output was added. I've never tried it before, but
->> you might want to look at that.
+On Wed, 2 Jan 2013, Andrey Korolyov wrote:
+> On Wed, Jan 2, 2013 at 8:00 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
+> > On 01/02/2013 03:40 PM, Andrey Korolyov wrote:
+> >>
+> >> I have just observed that ceph-mon process, at least bobtail one, has
+> >> an extremely high density of writes - times above _overall_ cluster
+> >> amount of writes, measured by qemu driver(and they are very close to
+> >> be fair). For example, test cluster of 32 osds have 7.5 MByte/s of
+> >> writes on each mon node having overall amount about 1.5 Mbyte/s and
+> >> dev- with only three osds has values is about 1Mbyte/s with
+> >> accumulated real write bandwidth of tens of kilobytes per second.
+> >>
+> >> I`m afraid if this is normal, I may hit a limit of spinning storage
+> >> increasing test cluster, say, twenty times up of number of osd and
+> >> related ``idle'' write bandwidth.
+> >
+> >
+> > High debugging levels (specially 'debug ms', 'debug mon' or 'debug paxos')
+> > should significantly increase IO on the monitors. Might that be the case?
 > 
-> Currently, the only command that will output useful json for this kind of
-> thing is 'ceph report'. I am finishing up on a patch to add json output
-> capabilities to 'ceph health' and 'ceph status' though, but wasn't aiming
-> at doing it with such level of detail -- basically, just output the same
-> info as their plain counterparts, but using json instead.
+> Nope, all debug levels, including mons are set to 0/0. I also see that
+> the ``no-client'' cluster shows a very small amount of such writes
+> under mon, 10-20kByte/s, and one idle client (writing couple of bytes
+> without O_SYNC) raise this value times up to ~200kB/s and so on, so
+> may be I`m wrong before and writes correlate with amount of clients
+> too(six clients plus three control nodes accessing via API in the
+> context of previous message for both environments).
 
-I'm interested in this topic as well. What is also needed is a way to query
-the state of the individual daemons on each machine in the cluster.
+The mon is writing out state updates at regular intervals, mostly PG stat 
+(object and byte counts) updates--what you see from 'ceph pg dump'.  You 
+should see IO go up to some ceiling as more IO is applied to the cluster 
+and then level off.  The frequency of these writes, and thus the total IO 
+rate, can be controlled via the 'paxos propose interval' knob (default is 
+1 or 2 seconds).
 
-Regards,
-  Dennis
-
+sage
