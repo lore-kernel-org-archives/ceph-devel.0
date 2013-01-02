@@ -1,32 +1,37 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: EU mirror issues
-Date: Wed, 02 Jan 2013 15:01:57 +0100
-Message-ID: <50E43DD5.7070602@widodh.nl>
+From: Ugis <ugis22@gmail.com>
+Subject: status monitoring options for ceph cluster
+Date: Wed, 2 Jan 2013 17:05:32 +0200
+Message-ID: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:53999 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752677Ab3ABOCA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 09:02:00 -0500
-Received: from [IPv6:2a00:f10:113:0:6443:a162:2aa1:7d9d] (unknown [IPv6:2a00:f10:113:0:6443:a162:2aa1:7d9d])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 818AE4341D
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Jan 2013 15:01:58 +0100 (CET)
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:33590 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753036Ab3ABPFd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 10:05:33 -0500
+Received: by mail-ie0-f171.google.com with SMTP id 17so16871469iea.16
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Jan 2013 07:05:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
 Hi all,
 
-I just noticed that the sync process for eu.ceph.com didn't work properly.
+I am planning to set up monitoring of ceph cluster relying on output
+of commands:
 
-The problem seems to be a faulty rsync script on my side which caused 
-the "debian" directory not to be synced properly.
+#ceph health
+#ceph -s
 
-I corrected the issue, but it has to re-sync again now, that will take 
-some time.
+The need is to retrieve certain values, for example %degraded;
+proportion "X GB / Y GB avail" to calculate available space%. I plan
+to graph those values via zabbix and set up triggers for certain
+tresholds.
+May be somebody already has written shell parser for getting values
+from output of these commands?
 
-The mirror should be working properly again within a few hours.
+Probably this ir wider question - what is the intended approach for
+ceph cluster monitoring? What do you guys use?
 
-Wido
+BR,
+Ugis
