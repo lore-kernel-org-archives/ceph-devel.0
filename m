@@ -1,85 +1,49 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST] rbd: separate layout init
-Date: Thu, 03 Jan 2013 16:55:05 -0600
-Message-ID: <50E60C49.3020207@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: David Zafman <david.zafman@inktank.com>
+Subject: Re: [PATCH REPOST 0/4] rbd: four minor patches
+Date: Thu, 3 Jan 2013 14:55:01 -0800
+Message-ID: <FAF7B66B-0B8C-402D-8F6C-C220AF85D795@inktank.com>
+References: <50E5D641.2010405@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:65436 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754084Ab3ACWzI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 17:55:08 -0500
-Received: by mail-ie0-f175.google.com with SMTP id qd14so18586662ieb.20
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 14:55:07 -0800 (PST)
+Received: from mail-gh0-f181.google.com ([209.85.160.181]:43352 "EHLO
+	mail-gh0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753604Ab3ACXBE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 18:01:04 -0500
+Received: by mail-gh0-f181.google.com with SMTP id y8so1891169ghb.40
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 15:01:03 -0800 (PST)
+In-Reply-To: <50E5D641.2010405@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Pull a block of code that initializes the layout structure in an osd
-request into its own function so it can be reused.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   23 ++++++++++++++---------
- 1 file changed, 14 insertions(+), 9 deletions(-)
+I reviewed these.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index fd6a708..8e030d1 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -54,6 +54,7 @@
+Reviewed-by: David Zafman <david.zafman@inktank.com>
 
- /* It might be useful to have this defined elsewhere too */
+David Zafman
+Senior Developer
+david.zafman@inktank.com
 
-+#define	U32_MAX	((u32) (~0U))
- #define	U64_MAX	((u64) (~0ULL))
 
- #define RBD_DRV_NAME "rbd"
-@@ -1096,6 +1097,16 @@ static void rbd_coll_end_req(struct rbd_request
-*rbd_req,
- 				ret, len);
- }
 
-+static void rbd_layout_init(struct ceph_file_layout *layout, u64 pool_id)
-+{
-+	memset(layout, 0, sizeof (*layout));
-+	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-+	layout->fl_stripe_count = cpu_to_le32(1);
-+	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-+	rbd_assert(pool_id <= (u64) U32_MAX);
-+	layout->fl_pg_pool = cpu_to_le32((u32) pool_id);
-+}
-+
- /*
-  * Send ceph osd request
-  */
-@@ -1117,7 +1128,6 @@ static int rbd_do_request(struct request *rq,
- 			  u64 *ver)
- {
- 	struct ceph_osd_request *osd_req;
--	struct ceph_file_layout *layout;
- 	int ret;
- 	u64 bno;
- 	struct timespec mtime = CURRENT_TIME;
-@@ -1161,14 +1171,9 @@ static int rbd_do_request(struct request *rq,
- 	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
- 	osd_req->r_oid_len = strlen(osd_req->r_oid);
+On Jan 3, 2013, at 11:04 AM, Alex Elder <elder@inktank.com> wrote:
 
--	layout = &osd_req->r_file_layout;
--	memset(layout, 0, sizeof(*layout));
--	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
--	layout->fl_stripe_count = cpu_to_le32(1);
--	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
--	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->spec->pool_id);
--	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
--				   osd_req, ops);
-+	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
-+	ret = ceph_calc_raw_layout(osdc, &osd_req->r_file_layout,
-+				snapid, ofs, &len, &bno, osd_req, ops);
- 	rbd_assert(ret == 0);
-
- 	ceph_osdc_build_request(osd_req, ofs, &len,
--- 
-1.7.9.5
+> I'm re-posting my patch backlog, in chunks that may or may not
+> match how they got posted before.  This series contains some
+> pretty fairly straightforward changes.
+> 
+> 					-Alex
+> 
+> [PATCH REPOST 1/4] rbd: document rbd_spec structure
+> [PATCH REPOST 2/4] rbd: kill rbd_spec->image_name_len
+> [PATCH REPOST 3/4] rbd: kill rbd_spec->image_id_len
+> [PATCH REPOST 4/4] rbd: use kmemdup()
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
