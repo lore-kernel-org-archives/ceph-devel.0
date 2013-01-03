@@ -1,143 +1,25 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST] rbd: be picky about osd request status type
-Date: Thu, 03 Jan 2013 16:40:48 -0600
-Message-ID: <50E608F0.3010501@inktank.com>
+Subject: [PATCH REPOST 0/2] rbd: simplify rbd_rq_fn()
+Date: Thu, 03 Jan 2013 16:42:23 -0600
+Message-ID: <50E6094F.9080101@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:64681 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754396Ab3ACWkv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 17:40:51 -0500
-Received: by mail-ie0-f177.google.com with SMTP id k13so18400642iea.8
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 14:40:50 -0800 (PST)
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:60886 "EHLO
+	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754022Ab3ACWm0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 17:42:26 -0500
+Received: by mail-ia0-f169.google.com with SMTP id u20so6858318iag.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 14:42:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The result field in a ceph osd reply header is a signed 32-bit type,
-but rbd code often casually uses int to represent it.
+This series pulls the core processing out of rbd_rq_fn(),
+then simplifies the result a little further.
 
-The following changes the types of variables that handle this result
-value to be "s32" instead of "int" to be completely explicit about
-it.  Only at the point we pass that result to __blk_end_request()
-does the type get converted to the plain old int defined for that
-interface.
+					-Alex
 
-There is almost certainly no binary impact of this change, but I
-prefer to show the exact size and signedness of the value since we
-know it.
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   23 ++++++++++++-----------
- 1 file changed, 12 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 85131de..8b79a5b 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -171,7 +171,7 @@ struct rbd_client {
-  */
- struct rbd_req_status {
- 	int done;
--	int rc;
-+	s32 rc;
- 	u64 bytes;
- };
-
-@@ -1053,13 +1053,13 @@ static void rbd_destroy_ops(struct
-ceph_osd_req_op *ops)
- static void rbd_coll_end_req_index(struct request *rq,
- 				   struct rbd_req_coll *coll,
- 				   int index,
--				   int ret, u64 len)
-+				   s32 ret, u64 len)
- {
- 	struct request_queue *q;
- 	int min, max, i;
-
- 	dout("rbd_coll_end_req_index %p index %d ret %d len %llu\n",
--	     coll, index, ret, (unsigned long long) len);
-+	     coll, index, (int) ret, (unsigned long long) len);
-
- 	if (!rq)
- 		return;
-@@ -1080,7 +1080,7 @@ static void rbd_coll_end_req_index(struct request *rq,
- 		max++;
-
- 	for (i = min; i<max; i++) {
--		__blk_end_request(rq, coll->status[i].rc,
-+		__blk_end_request(rq, (int) coll->status[i].rc,
- 				  coll->status[i].bytes);
- 		coll->num_done++;
- 		kref_put(&coll->kref, rbd_coll_release);
-@@ -1089,7 +1089,7 @@ static void rbd_coll_end_req_index(struct request *rq,
- }
-
- static void rbd_coll_end_req(struct rbd_request *rbd_req,
--			     int ret, u64 len)
-+			     s32 ret, u64 len)
- {
- 	rbd_coll_end_req_index(rbd_req->rq,
- 				rbd_req->coll, rbd_req->coll_index,
-@@ -1129,7 +1129,7 @@ static int rbd_do_request(struct request *rq,
- 	if (!rbd_req) {
- 		if (coll)
- 			rbd_coll_end_req_index(rq, coll, coll_index,
--					       -ENOMEM, len);
-+					       (s32) -ENOMEM, len);
- 		return -ENOMEM;
- 	}
-
-@@ -1206,7 +1206,7 @@ done_err:
- 	bio_chain_put(rbd_req->bio);
- 	ceph_osdc_put_request(osd_req);
- done_pages:
--	rbd_coll_end_req(rbd_req, ret, len);
-+	rbd_coll_end_req(rbd_req, (s32) ret, len);
- 	kfree(rbd_req);
- 	return ret;
- }
-@@ -1219,7 +1219,7 @@ static void rbd_req_cb(struct ceph_osd_request
-*osd_req, struct ceph_msg *msg)
- 	struct rbd_request *rbd_req = osd_req->r_priv;
- 	struct ceph_osd_reply_head *replyhead;
- 	struct ceph_osd_op *op;
--	__s32 rc;
-+	s32 rc;
- 	u64 bytes;
- 	int read_op;
-
-@@ -1227,14 +1227,14 @@ static void rbd_req_cb(struct ceph_osd_request
-*osd_req, struct ceph_msg *msg)
- 	replyhead = msg->front.iov_base;
- 	WARN_ON(le32_to_cpu(replyhead->num_ops) == 0);
- 	op = (void *)(replyhead + 1);
--	rc = le32_to_cpu(replyhead->result);
-+	rc = (s32) le32_to_cpu(replyhead->result);
- 	bytes = le64_to_cpu(op->extent.length);
- 	read_op = (le16_to_cpu(op->op) == CEPH_OSD_OP_READ);
-
- 	dout("rbd_req_cb bytes=%llu readop=%d rc=%d\n",
- 		(unsigned long long) bytes, read_op, (int) rc);
-
--	if (rc == -ENOENT && read_op) {
-+	if (rc == (s32) -ENOENT && read_op) {
- 		zero_bio_chain(rbd_req->bio, 0);
- 		rc = 0;
- 	} else if (rc == 0 && read_op && bytes < rbd_req->len) {
-@@ -1679,7 +1679,8 @@ static void rbd_rq_fn(struct request_queue *q)
- 						bio_chain, coll, cur_seg);
- 			else
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
--						       -ENOMEM, chain_size);
-+						       (s32) -ENOMEM,
-+						       chain_size);
- 			size -= chain_size;
- 			ofs += chain_size;
-
--- 
-1.7.9.5
-
+[PATCH REPOST 1/2] rbd: encapsulate handling for a single request
+[PATCH REPOST 2/2] rbd: a little more cleanup of rbd_rq_fn()
