@@ -1,119 +1,100 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: status monitoring options for ceph cluster
-Date: Thu, 3 Jan 2013 08:51:02 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301030849080.5264@cobra.newdream.net>
-References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com> <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com> <50E4619C.6070300@conversis.de> <50E4BC90.4030407@inktank.com> <50E4BD4B.2040005@inktank.com>
- <50E55CDE.1030104@widodh.nl>
+Subject: Re: "hit suicide timeout" message after upgrade to 0.56
+Date: Thu, 3 Jan 2013 08:52:14 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301030851150.5264@cobra.newdream.net>
+References: <50E578F5.8070805@widodh.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46770 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46779 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753595Ab3ACQvD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 11:51:03 -0500
-In-Reply-To: <50E55CDE.1030104@widodh.nl>
+	with ESMTP id S1753566Ab3ACQwO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 11:52:14 -0500
+In-Reply-To: <50E578F5.8070805@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@widodh.nl>
-Cc: Dan Mick <dan.mick@inktank.com>, Dennis Jacobfeuerborn <dennisml@conversis.de>, Joao Eduardo Luis <joao.luis@inktank.com>, Ugis <ugis22@gmail.com>, ceph-devel@vger.kernel.org
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Wido,
 
 On Thu, 3 Jan 2013, Wido den Hollander wrote:
-> On 01/03/2013 12:05 AM, Dan Mick wrote:
-> > (and of course it makes sense to build those on libraries that could
-> > serve other access methods)
+> Hi,
 > 
-> I'd prefer a library :-) This way you can build your own binaries, bindings
-> for languages like Python, PHP and Java.
+> I updated my 10 node 40 OSD cluster from 0.48 to 0.56 yesterday evening and
+> found out this morning that I had 23 OSDs still up and in.
 > 
-> The binaries could just link against the library and output information in any
-> way we want for Zabbix, Nagios, Icinga, etc.
+> Investigating some logs I found these messages:
 
-A library is coming very soon, and shortly after that a REST interface 
-that wraps it.
-
-Dennis, Ugis:
-
-More generally, the 'ceph report' command will give you a JSON dump of 
-theh current cluster status.  You can get less detail from 'ceph health 
-[detail]', which will also have a JSON option shortly.
-
-You may also be interested in the admin socket, which lets you query 
-individaul running daemons (instead of the monitor):
-
- ceph --admin-daemon /var/run/ceph/ceph-osd.123.asok help
+This sounds quite a bit #3714.  You might give wip-3714 a try...
 
 sage
 
+
+> 
+> *********************************************************************
+>     -8> 2013-01-02 21:13:40.528936 7f9eb177a700  1 heartbeat_map is_healthy
+> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
+>     -7> 2013-01-02 21:13:40.528985 7f9eb177a700  1 heartbeat_map is_healthy
+> 'OSD::op_tp thread 0x7f9ea375e700' had timed out after 30
+>     -6> 2013-01-02 21:13:41.311088 7f9eaff77700 10 monclient:
+> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
+>     -5> 2013-01-02 21:13:45.047220 7f9e92282700  0 --
+> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:0/2882 >>
+> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6805/2373 pipe(0x9d7ad80 sd=135 :0
+> pgs=0 cs=0 l=1).fault
+>     -4> 2013-01-02 21:13:45.049225 7f9e962c2700  0 --
+> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:6801/2882 >>
+> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6804/2373 pipe(0x9d99000 sd=104 :44363
+> pgs=99 cs=1 l=0).fault with nothing to send, going to standby
+>     -3> 2013-01-02 21:13:45.529075 7f9eb177a700  1 heartbeat_map is_healthy
+> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
+>     -2> 2013-01-02 21:13:45.529115 7f9eb177a700  1 heartbeat_map is_healthy
+> 'OSD::op_tp thread 0x7f9ea2f5d700' had suicide timed out after 300
+>     -1> 2013-01-02 21:13:45.531952 7f9eb177a700 -1 common/HeartbeatMap.cc: In
+> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const
+> char*, time_t)' thread 7f9eb177a700 time 2013-01-02 21:13:45.529176
+> common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
+> 
+>  ceph version 0.56 (1a32f0a0b42f169a7b55ed48ec3208f6d4edc1e8)
+>  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+> long)+0x107) [0x796877]
+>  2: (ceph::HeartbeatMap::is_healthy()+0x87) [0x797207]
+>  3: (ceph::HeartbeatMap::check_touch_file()+0x23) [0x797453]
+>  4: (CephContextServiceThread::entry()+0x55) [0x8338d5]
+>  5: (()+0x7e9a) [0x7f9eb4571e9a]
+>  6: (clone()+0x6d) [0x7f9eb2ff5cbd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+> interpret this.
+> 
+>      0> 2013-01-02 21:13:46.314478 7f9eaff77700 10 monclient:
+> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
+> *********************************************************************
+> 
+> Reading these messages I'm trying to figure out why those messages came along.
+> 
+> Am I understanding this correctly that the heartbeat updates didn't come along
+> in time and the OSDs committed suicide?
+> 
+> I read the code in common/HeartbeatMap.cc and it seems like that.
+> 
+> During the restart of the cluster the Atom CPUs were very busy, so could it be
+> that the CPUs were just to busy and the OSDs weren't responding to heartbeats
+> in time?
+> 
+> In total 16 of the 17 crashed OSDs are down with these log messages.
+> 
+> I'm now starting the 16 crashed OSDs one by one and that seems to go just
+> fine.
+> 
+> I've set "osd recovery max active = 1" to prevent overloading the CPUs to much
+> since I know Atoms are not that powerful. I'm just still trying to get it all
+> working on them :)
+> 
+> Am I right this is probably a lack of CPU power during the heavy recovery
+> which causes them to not respond to heartbeat updates in time?
 > 
 > Wido
-> 
-> > 
-> > On 01/02/2013 03:02 PM, Dan Mick wrote:
-> > > There are plans being discussed for RESTful interfaces for configuration
-> > > and monitoring; no timetable yet but it's definitely on our radar, and
-> > > we'll discuss design etc. here when it starts happening; anyone wanting
-> > > to participate is of course welcome.
-> > > 
-> > > On 01/02/2013 08:34 AM, Dennis Jacobfeuerborn wrote:
-> > > > On 01/02/2013 04:58 PM, Joao Eduardo Luis wrote:
-> > > > > On 01/02/2013 03:08 PM, Wido den Hollander wrote:
-> > > > > > On 01/02/2013 04:05 PM, Ugis wrote:
-> > > > > > > Hi all,
-> > > > > > > 
-> > > > > > > I am planning to set up monitoring of ceph cluster relying on
-> > > > > > > output
-> > > > > > > of commands:
-> > > > > > > 
-> > > > > > > #ceph health
-> > > > > > > #ceph -s
-> > > > > > > 
-> > > > > > > The need is to retrieve certain values, for example %degraded;
-> > > > > > > proportion "X GB / Y GB avail" to calculate available space%. I
-> > > > > > > plan
-> > > > > > > to graph those values via zabbix and set up triggers for certain
-> > > > > > > tresholds.
-> > > > > > > May be somebody already has written shell parser for getting
-> > > > > > > values
-> > > > > > > from output of these commands?
-> > > > > > > 
-> > > > > > > Probably this ir wider question - what is the intended approach
-> > > > > > > for
-> > > > > > > ceph cluster monitoring? What do you guys use?
-> > > > > > 
-> > > > > > You might want to take a look at:
-> > > > > > http://tracker.newdream.net/issues/685
-> > > > > > 
-> > > > > > In version 0.35 a json output was added. I've never tried it before,
-> > > > > > but
-> > > > > > you might want to look at that.
-> > > > > 
-> > > > > Currently, the only command that will output useful json for this
-> > > > > kind of
-> > > > > thing is 'ceph report'. I am finishing up on a patch to add json
-> > > > > output
-> > > > > capabilities to 'ceph health' and 'ceph status' though, but wasn't
-> > > > > aiming
-> > > > > at doing it with such level of detail -- basically, just output the
-> > > > > same
-> > > > > info as their plain counterparts, but using json instead.
-> > > > 
-> > > > I'm interested in this topic as well. What is also needed is a way to
-> > > > query
-> > > > the state of the individual daemons on each machine in the cluster.
-> > > > 
-> > > > Regards,
-> > > >    Dennis
-> > > > 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
