@@ -1,66 +1,122 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: radosgw segfault in 0.56
-Date: Thu, 3 Jan 2013 16:54:09 +0100
-Message-ID: <CAF6-1L5mV+nRt0yFu1CCZKH7rXiZPfxDYLi-ukmYWTSokQQbdQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: status monitoring options for ceph cluster
+Date: Thu, 3 Jan 2013 08:51:02 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301030849080.5264@cobra.newdream.net>
+References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com> <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com> <50E4619C.6070300@conversis.de> <50E4BC90.4030407@inktank.com> <50E4BD4B.2040005@inktank.com>
+ <50E55CDE.1030104@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f181.google.com ([209.85.214.181]:59100 "EHLO
-	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753261Ab3ACPyK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 10:54:10 -0500
-Received: by mail-ob0-f181.google.com with SMTP id oi10so13593498obb.40
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 07:54:09 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:46770 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753595Ab3ACQvD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 11:51:03 -0500
+In-Reply-To: <50E55CDE.1030104@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Dan Mick <dan.mick@inktank.com>, Dennis Jacobfeuerborn <dennisml@conversis.de>, Joao Eduardo Luis <joao.luis@inktank.com>, Ugis <ugis22@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+On Thu, 3 Jan 2013, Wido den Hollander wrote:
+> On 01/03/2013 12:05 AM, Dan Mick wrote:
+> > (and of course it makes sense to build those on libraries that could
+> > serve other access methods)
+> 
+> I'd prefer a library :-) This way you can build your own binaries, bindings
+> for languages like Python, PHP and Java.
+> 
+> The binaries could just link against the library and output information in any
+> way we want for Zabbix, Nagios, Icinga, etc.
 
+A library is coming very soon, and shortly after that a REST interface 
+that wraps it.
 
-I've just updated a test cluster to 0.56 and I'm getting a segfault
-when doing requests on radosgw :
+Dennis, Ugis:
 
-root@ceph /var/log/ceph # /usr/bin/radosgw -n client.radosgw.gateway -f
-*** Caught signal (Segmentation fault) **
- in thread 7fee095f8700
- ceph version 0.56 (1a32f0a0b42f169a7b55ed48ec3208f6d4edc1e8)
- 1: /usr/bin/radosgw() [0x4783da]
- 2: (()+0xfcb0) [0x7fee1a112cb0]
- 3: (()+0x89101) [0x7fee18d87101]
- 4: (RGWREST::preprocess(req_state*, RGWClientIO*)+0x36) [0x44c456]
- 5: (RGWREST::get_handler(RGWRados*, req_state*, RGWClientIO*,
-int*)+0x3f) [0x44d70f]
- 6: (RGWProcess::handle_request(RGWRequest*)+0x18b) [0x4730bb]
- 7: (RGWProcess::RGWWQ::_process(RGWRequest*)+0x36) [0x474f66]
- 8: (ThreadPool::worker(ThreadPool::WorkThread*)+0x4bc) [0x4908fc]
- 9: (ThreadPool::WorkThread::entry()+0x10) [0x492710]
- 10: (()+0x7e9a) [0x7fee1a10ae9a]
- 11: (clone()+0x6d) [0x7fee18df1cbd]
-2013-01-03 16:48:23.937807 7fee095f8700 -1 *** Caught signal
-(Segmentation fault) **
- in thread 7fee095f8700
+More generally, the 'ceph report' command will give you a JSON dump of 
+theh current cluster status.  You can get less detail from 'ceph health 
+[detail]', which will also have a JSON option shortly.
 
+You may also be interested in the admin socket, which lets you query 
+individaul running daemons (instead of the monitor):
 
-Anyone seeing something similar to this ?
+ ceph --admin-daemon /var/run/ceph/ceph-osd.123.asok help
 
+sage
 
-It's a bit more complete with gdb :
-
-#0  0x00007ffff4f27101 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
-#1  0x000000000044c456 in RGWREST::preprocess(req_state*, RGWClientIO*) ()
-#2  0x000000000044d70f in RGWREST::get_handler(RGWRados*, req_state*,
-RGWClientIO*, int*) ()
-#3  0x00000000004730bb in RGWProcess::handle_request(RGWRequest*) ()
-#4  0x0000000000474f66 in RGWProcess::RGWWQ::_process(RGWRequest*) ()
-#5  0x00000000004908fc in ThreadPool::worker(ThreadPool::WorkThread*) ()
-#6  0x0000000000492710 in ThreadPool::WorkThread::entry() ()
-#7  0x00007ffff62aae9a in start_thread () from
-/lib/x86_64-linux-gnu/libpthread.so.0
-#8  0x00007ffff4f91cbd in clone () from /lib/x86_64-linux-gnu/libc.so.6
-#9  0x0000000000000000 in ?? ()
-
-
-Cheers,
-
-    Sylvain
+> 
+> Wido
+> 
+> > 
+> > On 01/02/2013 03:02 PM, Dan Mick wrote:
+> > > There are plans being discussed for RESTful interfaces for configuration
+> > > and monitoring; no timetable yet but it's definitely on our radar, and
+> > > we'll discuss design etc. here when it starts happening; anyone wanting
+> > > to participate is of course welcome.
+> > > 
+> > > On 01/02/2013 08:34 AM, Dennis Jacobfeuerborn wrote:
+> > > > On 01/02/2013 04:58 PM, Joao Eduardo Luis wrote:
+> > > > > On 01/02/2013 03:08 PM, Wido den Hollander wrote:
+> > > > > > On 01/02/2013 04:05 PM, Ugis wrote:
+> > > > > > > Hi all,
+> > > > > > > 
+> > > > > > > I am planning to set up monitoring of ceph cluster relying on
+> > > > > > > output
+> > > > > > > of commands:
+> > > > > > > 
+> > > > > > > #ceph health
+> > > > > > > #ceph -s
+> > > > > > > 
+> > > > > > > The need is to retrieve certain values, for example %degraded;
+> > > > > > > proportion "X GB / Y GB avail" to calculate available space%. I
+> > > > > > > plan
+> > > > > > > to graph those values via zabbix and set up triggers for certain
+> > > > > > > tresholds.
+> > > > > > > May be somebody already has written shell parser for getting
+> > > > > > > values
+> > > > > > > from output of these commands?
+> > > > > > > 
+> > > > > > > Probably this ir wider question - what is the intended approach
+> > > > > > > for
+> > > > > > > ceph cluster monitoring? What do you guys use?
+> > > > > > 
+> > > > > > You might want to take a look at:
+> > > > > > http://tracker.newdream.net/issues/685
+> > > > > > 
+> > > > > > In version 0.35 a json output was added. I've never tried it before,
+> > > > > > but
+> > > > > > you might want to look at that.
+> > > > > 
+> > > > > Currently, the only command that will output useful json for this
+> > > > > kind of
+> > > > > thing is 'ceph report'. I am finishing up on a patch to add json
+> > > > > output
+> > > > > capabilities to 'ceph health' and 'ceph status' though, but wasn't
+> > > > > aiming
+> > > > > at doing it with such level of detail -- basically, just output the
+> > > > > same
+> > > > > info as their plain counterparts, but using json instead.
+> > > > 
+> > > > I'm interested in this topic as well. What is also needed is a way to
+> > > > query
+> > > > the state of the individual daemons on each machine in the cluster.
+> > > > 
+> > > > Regards,
+> > > >    Dennis
+> > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
