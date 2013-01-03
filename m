@@ -1,112 +1,98 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 2/4] rbd: kill rbd_spec->image_name_len
-Date: Thu, 03 Jan 2013 13:06:06 -0600
-Message-ID: <50E5D69E.8010609@inktank.com>
+Subject: [PATCH REPOST 3/4] rbd: kill rbd_spec->image_id_len
+Date: Thu, 03 Jan 2013 13:06:25 -0600
+Message-ID: <50E5D6B1.50008@inktank.com>
 References: <50E5D641.2010405@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:43429 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753707Ab3ACTGI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 14:06:08 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so12855341iay.5
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 11:06:08 -0800 (PST)
+Received: from mail-ie0-f178.google.com ([209.85.223.178]:59051 "EHLO
+	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753707Ab3ACTG2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 14:06:28 -0500
+Received: by mail-ie0-f178.google.com with SMTP id c12so19056955ieb.9
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 11:06:27 -0800 (PST)
 In-Reply-To: <50E5D641.2010405@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-There may have been a benefit to hanging on to the length of an
-image name before, but there is really none now.  The only time it's
-used is when probing for rbd images, so we can just compute the
-length then.
+There is no real benefit to keeping the length of an image id, so
+get rid of it.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   19 ++++++++-----------
- 1 file changed, 8 insertions(+), 11 deletions(-)
+ drivers/block/rbd.c |   11 +++--------
+ 1 file changed, 3 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 128978c..a002984 100644
+index a002984..e01dbb1 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -147,7 +147,6 @@ struct rbd_spec {
+@@ -145,7 +145,6 @@ struct rbd_spec {
+ 	char		*pool_name;
+
  	char		*image_id;
- 	size_t		image_id_len;
+-	size_t		image_id_len;
  	char		*image_name;
--	size_t		image_name_len;
 
  	u64		snap_id;
- 	char		*snap_name;
-@@ -2563,15 +2562,15 @@ static char *rbd_dev_image_name(struct
+@@ -2492,7 +2491,6 @@ static int rbd_dev_v2_parent_info(struct
 rbd_device *rbd_dev)
+ 	void *end;
+ 	char *image_id;
+ 	u64 overlap;
+-	size_t len = 0;
+ 	int ret;
 
- 	rbd_assert(!rbd_dev->spec->image_name);
-
--	image_id_size = sizeof (__le32) + rbd_dev->spec->image_id_len;
-+	len = strlen(rbd_dev->spec->image_id);
-+	image_id_size = sizeof (__le32) + len;
- 	image_id = kmalloc(image_id_size, GFP_KERNEL);
- 	if (!image_id)
- 		return NULL;
-
- 	p = image_id;
- 	end = (char *) image_id + image_id_size;
--	ceph_encode_string(&p, end, rbd_dev->spec->image_id,
--				(u32) rbd_dev->spec->image_id_len);
-+	ceph_encode_string(&p, end, rbd_dev->spec->image_id, (u32) len);
-
- 	size = sizeof (__le32) + RBD_IMAGE_NAME_LEN_MAX;
- 	reply_buf = kmalloc(size, GFP_KERNEL);
-@@ -2631,14 +2630,12 @@ static int rbd_dev_probe_update_spec(struct
+ 	parent_spec = rbd_spec_alloc();
+@@ -2526,13 +2524,12 @@ static int rbd_dev_v2_parent_info(struct
 rbd_device *rbd_dev)
- 	/* Fetch the image name; tolerate failure here */
+ 	if (parent_spec->pool_id == CEPH_NOPOOL)
+ 		goto out;	/* No parent?  No problem. */
 
- 	name = rbd_dev_image_name(rbd_dev);
--	if (name) {
--		rbd_dev->spec->image_name_len = strlen(name);
-+	if (name)
- 		rbd_dev->spec->image_name = (char *) name;
--	} else {
-+	else
- 		pr_warning(RBD_DRV_NAME "%d "
- 			"unable to get image name for image id %s\n",
- 			rbd_dev->major, rbd_dev->spec->image_id);
--	}
+-	image_id = ceph_extract_encoded_string(&p, end, &len, GFP_KERNEL);
++	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+ 	if (IS_ERR(image_id)) {
+ 		ret = PTR_ERR(image_id);
+ 		goto out_err;
+ 	}
+ 	parent_spec->image_id = image_id;
+-	parent_spec->image_id_len = len;
+ 	ceph_decode_64_safe(&p, end, parent_spec->snap_id, out_err);
+ 	ceph_decode_64_safe(&p, end, overlap, out_err);
 
- 	/* Look up the snapshot name. */
-
-@@ -3252,7 +3249,7 @@ static int rbd_add_parse_args(const char *buf,
- 	if (!*spec->pool_name)
- 		goto out_err;	/* Missing pool name */
-
--	spec->image_name = dup_token(&buf, &spec->image_name_len);
-+	spec->image_name = dup_token(&buf, NULL);
- 	if (!spec->image_name)
- 		goto out_mem;
- 	if (!*spec->image_name)
-@@ -3342,7 +3339,7 @@ static int rbd_dev_image_id(struct rbd_device
+@@ -3368,8 +3365,7 @@ static int rbd_dev_image_id(struct rbd_device
 *rbd_dev)
- 	 * First, see if the format 2 image id file exists, and if
- 	 * so, get the image's persistent id from it.
- 	 */
--	size = sizeof (RBD_ID_PREFIX) + rbd_dev->spec->image_name_len;
-+	size = sizeof (RBD_ID_PREFIX) + strlen(rbd_dev->spec->image_name);
- 	object_name = kmalloc(size, GFP_NOIO);
- 	if (!object_name)
+ 	p = response;
+ 	rbd_dev->spec->image_id = ceph_extract_encoded_string(&p,
+ 						p + RBD_IMAGE_ID_LEN_MAX,
+-						&rbd_dev->spec->image_id_len,
+-						GFP_NOIO);
++						NULL, GFP_NOIO);
+ 	if (IS_ERR(rbd_dev->spec->image_id)) {
+ 		ret = PTR_ERR(rbd_dev->spec->image_id);
+ 		rbd_dev->spec->image_id = NULL;
+@@ -3393,7 +3389,6 @@ static int rbd_dev_v1_probe(struct rbd_device
+*rbd_dev)
+ 	rbd_dev->spec->image_id = kstrdup("", GFP_KERNEL);
+ 	if (!rbd_dev->spec->image_id)
  		return -ENOMEM;
-@@ -3400,7 +3397,7 @@ static int rbd_dev_v1_probe(struct rbd_device
-*rbd_dev)
+-	rbd_dev->spec->image_id_len = 0;
 
  	/* Record the header object name for this rbd image. */
 
--	size = rbd_dev->spec->image_name_len + sizeof (RBD_SUFFIX);
-+	size = strlen(rbd_dev->spec->image_name) + sizeof (RBD_SUFFIX);
+@@ -3443,7 +3438,7 @@ static int rbd_dev_v2_probe(struct rbd_device
+*rbd_dev)
+ 	 * Image id was filled in by the caller.  Record the header
+ 	 * object name for this rbd image.
+ 	 */
+-	size = sizeof (RBD_HEADER_PREFIX) + rbd_dev->spec->image_id_len;
++	size = sizeof (RBD_HEADER_PREFIX) + strlen(rbd_dev->spec->image_id);
  	rbd_dev->header_name = kmalloc(size, GFP_KERNEL);
- 	if (!rbd_dev->header_name) {
- 		ret = -ENOMEM;
+ 	if (!rbd_dev->header_name)
+ 		return -ENOMEM;
 -- 
 1.7.9.5
 
