@@ -1,66 +1,112 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 1/4] rbd: document rbd_spec structure
-Date: Thu, 03 Jan 2013 13:05:47 -0600
-Message-ID: <50E5D68B.9030107@inktank.com>
+Subject: [PATCH REPOST 2/4] rbd: kill rbd_spec->image_name_len
+Date: Thu, 03 Jan 2013 13:06:06 -0600
+Message-ID: <50E5D69E.8010609@inktank.com>
 References: <50E5D641.2010405@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:34732 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753707Ab3ACTFv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 14:05:51 -0500
-Received: by mail-ie0-f179.google.com with SMTP id k14so18566108iea.38
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 11:05:49 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:43429 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753707Ab3ACTGI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 14:06:08 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so12855341iay.5
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 11:06:08 -0800 (PST)
 In-Reply-To: <50E5D641.2010405@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I promised Josh I would document whether there were any restrictions
-needed for accessing fields of an rbd_spec structure.  This adds a
-big block of comments that documents the structure and how it is
-used--including the fact that we don't attempt to synchronize access
-to it.
+There may have been a benefit to hanging on to the length of an
+image name before, but there is really none now.  The only time it's
+used is when probing for rbd images, so we can just compute the
+length then.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   21 ++++++++++++++++++++-
- 1 file changed, 20 insertions(+), 1 deletion(-)
+ drivers/block/rbd.c |   19 ++++++++-----------
+ 1 file changed, 8 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 89576a0..128978c 100644
+index 128978c..a002984 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -119,7 +119,26 @@ struct rbd_image_header {
-  * An rbd image specification.
-  *
-  * The tuple (pool_id, image_id, snap_id) is sufficient to uniquely
-- * identify an image.
-+ * identify an image.  Each rbd_dev structure includes a pointer to
-+ * an rbd_spec structure that encapsulates this identity.
-+ *
-+ * Each of the id's in an rbd_spec has an associated name.  For a
-+ * user-mapped image, the names are supplied and the id's associated
-+ * with them are looked up.  For a layered image, a parent image is
-+ * defined by the tuple, and the names are looked up.
-+ *
-+ * An rbd_dev structure contains a parent_spec pointer which is
-+ * non-null if the image it represents is a child in a layered
-+ * image.  This pointer will refer to the rbd_spec structure used
-+ * by the parent rbd_dev for its own identity (i.e., the structure
-+ * is shared between the parent and child).
-+ *
-+ * Since these structures are populated once, during the discovery
-+ * phase of image construction, they are effectively immutable so
-+ * we make no effort to synchronize access to them.
-+ *
-+ * Note that code herein does not assume the image name is known (it
-+ * could be a null pointer).
-  */
- struct rbd_spec {
- 	u64		pool_id;
+@@ -147,7 +147,6 @@ struct rbd_spec {
+ 	char		*image_id;
+ 	size_t		image_id_len;
+ 	char		*image_name;
+-	size_t		image_name_len;
+
+ 	u64		snap_id;
+ 	char		*snap_name;
+@@ -2563,15 +2562,15 @@ static char *rbd_dev_image_name(struct
+rbd_device *rbd_dev)
+
+ 	rbd_assert(!rbd_dev->spec->image_name);
+
+-	image_id_size = sizeof (__le32) + rbd_dev->spec->image_id_len;
++	len = strlen(rbd_dev->spec->image_id);
++	image_id_size = sizeof (__le32) + len;
+ 	image_id = kmalloc(image_id_size, GFP_KERNEL);
+ 	if (!image_id)
+ 		return NULL;
+
+ 	p = image_id;
+ 	end = (char *) image_id + image_id_size;
+-	ceph_encode_string(&p, end, rbd_dev->spec->image_id,
+-				(u32) rbd_dev->spec->image_id_len);
++	ceph_encode_string(&p, end, rbd_dev->spec->image_id, (u32) len);
+
+ 	size = sizeof (__le32) + RBD_IMAGE_NAME_LEN_MAX;
+ 	reply_buf = kmalloc(size, GFP_KERNEL);
+@@ -2631,14 +2630,12 @@ static int rbd_dev_probe_update_spec(struct
+rbd_device *rbd_dev)
+ 	/* Fetch the image name; tolerate failure here */
+
+ 	name = rbd_dev_image_name(rbd_dev);
+-	if (name) {
+-		rbd_dev->spec->image_name_len = strlen(name);
++	if (name)
+ 		rbd_dev->spec->image_name = (char *) name;
+-	} else {
++	else
+ 		pr_warning(RBD_DRV_NAME "%d "
+ 			"unable to get image name for image id %s\n",
+ 			rbd_dev->major, rbd_dev->spec->image_id);
+-	}
+
+ 	/* Look up the snapshot name. */
+
+@@ -3252,7 +3249,7 @@ static int rbd_add_parse_args(const char *buf,
+ 	if (!*spec->pool_name)
+ 		goto out_err;	/* Missing pool name */
+
+-	spec->image_name = dup_token(&buf, &spec->image_name_len);
++	spec->image_name = dup_token(&buf, NULL);
+ 	if (!spec->image_name)
+ 		goto out_mem;
+ 	if (!*spec->image_name)
+@@ -3342,7 +3339,7 @@ static int rbd_dev_image_id(struct rbd_device
+*rbd_dev)
+ 	 * First, see if the format 2 image id file exists, and if
+ 	 * so, get the image's persistent id from it.
+ 	 */
+-	size = sizeof (RBD_ID_PREFIX) + rbd_dev->spec->image_name_len;
++	size = sizeof (RBD_ID_PREFIX) + strlen(rbd_dev->spec->image_name);
+ 	object_name = kmalloc(size, GFP_NOIO);
+ 	if (!object_name)
+ 		return -ENOMEM;
+@@ -3400,7 +3397,7 @@ static int rbd_dev_v1_probe(struct rbd_device
+*rbd_dev)
+
+ 	/* Record the header object name for this rbd image. */
+
+-	size = rbd_dev->spec->image_name_len + sizeof (RBD_SUFFIX);
++	size = strlen(rbd_dev->spec->image_name) + sizeof (RBD_SUFFIX);
+ 	rbd_dev->header_name = kmalloc(size, GFP_KERNEL);
+ 	if (!rbd_dev->header_name) {
+ 		ret = -ENOMEM;
 -- 
 1.7.9.5
 
