@@ -1,49 +1,158 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: [PATCH REPOST 0/4] rbd: four minor patches
-Date: Thu, 3 Jan 2013 14:55:01 -0800
-Message-ID: <FAF7B66B-0B8C-402D-8F6C-C220AF85D795@inktank.com>
-References: <50E5D641.2010405@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
-Content-Type: text/plain; charset=iso-8859-1
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: [PATCH REPOST 1/2] rbd: standardize rbd_request variable names
+Date: Thu, 03 Jan 2013 15:06:21 -0800
+Message-ID: <50E60EED.8010402@inktank.com>
+References: <50E60842.2040204@inktank.com> <50E6087E.7000709@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f181.google.com ([209.85.160.181]:43352 "EHLO
-	mail-gh0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753604Ab3ACXBE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 18:01:04 -0500
-Received: by mail-gh0-f181.google.com with SMTP id y8so1891169ghb.40
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 15:01:03 -0800 (PST)
-In-Reply-To: <50E5D641.2010405@inktank.com>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:32962 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753898Ab3ACXGZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 18:06:25 -0500
+Received: by mail-pa0-f48.google.com with SMTP id fa1so8898503pad.35
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 15:06:24 -0800 (PST)
+In-Reply-To: <50E6087E.7000709@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
-I reviewed these.
-
-Reviewed-by: David Zafman <david.zafman@inktank.com>
-
-David Zafman
-Senior Developer
-david.zafman@inktank.com
-
-
-
-On Jan 3, 2013, at 11:04 AM, Alex Elder <elder@inktank.com> wrote:
-
-> I'm re-posting my patch backlog, in chunks that may or may not
-> match how they got posted before.  This series contains some
-> pretty fairly straightforward changes.
-> 
-> 					-Alex
-> 
-> [PATCH REPOST 1/4] rbd: document rbd_spec structure
-> [PATCH REPOST 2/4] rbd: kill rbd_spec->image_name_len
-> [PATCH REPOST 3/4] rbd: kill rbd_spec->image_id_len
-> [PATCH REPOST 4/4] rbd: use kmemdup()
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+On 01/03/2013 02:38 PM, Alex Elder wrote:
+> There are two names used for items of rbd_request structure type:
+> "req" and "req_data".  The former name is also used to represent
+> items of pointers to struct ceph_osd_request.
+>
+> Change all variables that have these names so they are instead
+> called "rbd_req" consistently.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   50
+> ++++++++++++++++++++++++++------------------------
+>   1 file changed, 26 insertions(+), 24 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 530a121..0091fa4 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1088,10 +1088,12 @@ static void rbd_coll_end_req_index(struct
+> request *rq,
+>   	spin_unlock_irq(q->queue_lock);
+>   }
+>
+> -static void rbd_coll_end_req(struct rbd_request *req,
+> +static void rbd_coll_end_req(struct rbd_request *rbd_req,
+>   			     int ret, u64 len)
+>   {
+> -	rbd_coll_end_req_index(req->rq, req->coll, req->coll_index, ret, len);
+> +	rbd_coll_end_req_index(rbd_req->rq,
+> +				rbd_req->coll, rbd_req->coll_index,
+> +				ret, len);
+>   }
+>
+>   /*
+> @@ -1119,12 +1121,12 @@ static int rbd_do_request(struct request *rq,
+>   	int ret;
+>   	u64 bno;
+>   	struct timespec mtime = CURRENT_TIME;
+> -	struct rbd_request *req_data;
+> +	struct rbd_request *rbd_req;
+>   	struct ceph_osd_request_head *reqhead;
+>   	struct ceph_osd_client *osdc;
+>
+> -	req_data = kzalloc(sizeof(*req_data), GFP_NOIO);
+> -	if (!req_data) {
+> +	rbd_req = kzalloc(sizeof(*rbd_req), GFP_NOIO);
+> +	if (!rbd_req) {
+>   		if (coll)
+>   			rbd_coll_end_req_index(rq, coll, coll_index,
+>   					       -ENOMEM, len);
+> @@ -1132,8 +1134,8 @@ static int rbd_do_request(struct request *rq,
+>   	}
+>
+>   	if (coll) {
+> -		req_data->coll = coll;
+> -		req_data->coll_index = coll_index;
+> +		rbd_req->coll = coll;
+> +		rbd_req->coll_index = coll_index;
+>   	}
+>
+>   	dout("rbd_do_request object_name=%s ofs=%llu len=%llu coll=%p[%d]\n",
+> @@ -1150,12 +1152,12 @@ static int rbd_do_request(struct request *rq,
+>
+>   	req->r_callback = rbd_cb;
+>
+> -	req_data->rq = rq;
+> -	req_data->bio = bio;
+> -	req_data->pages = pages;
+> -	req_data->len = len;
+> +	rbd_req->rq = rq;
+> +	rbd_req->bio = bio;
+> +	rbd_req->pages = pages;
+> +	rbd_req->len = len;
+>
+> -	req->r_priv = req_data;
+> +	req->r_priv = rbd_req;
+>
+>   	reqhead = req->r_request->front.iov_base;
+>   	reqhead->snapid = cpu_to_le64(CEPH_NOSNAP);
+> @@ -1200,11 +1202,11 @@ static int rbd_do_request(struct request *rq,
+>   	return ret;
+>
+>   done_err:
+> -	bio_chain_put(req_data->bio);
+> +	bio_chain_put(rbd_req->bio);
+>   	ceph_osdc_put_request(req);
+>   done_pages:
+> -	rbd_coll_end_req(req_data, ret, len);
+> -	kfree(req_data);
+> +	rbd_coll_end_req(rbd_req, ret, len);
+> +	kfree(rbd_req);
+>   	return ret;
+>   }
+>
+> @@ -1213,7 +1215,7 @@ done_pages:
+>    */
+>   static void rbd_req_cb(struct ceph_osd_request *req, struct ceph_msg *msg)
+>   {
+> -	struct rbd_request *req_data = req->r_priv;
+> +	struct rbd_request *rbd_req = req->r_priv;
+>   	struct ceph_osd_reply_head *replyhead;
+>   	struct ceph_osd_op *op;
+>   	__s32 rc;
+> @@ -1232,20 +1234,20 @@ static void rbd_req_cb(struct ceph_osd_request
+> *req, struct ceph_msg *msg)
+>   		(unsigned long long) bytes, read_op, (int) rc);
+>
+>   	if (rc == -ENOENT && read_op) {
+> -		zero_bio_chain(req_data->bio, 0);
+> +		zero_bio_chain(rbd_req->bio, 0);
+>   		rc = 0;
+> -	} else if (rc == 0 && read_op && bytes < req_data->len) {
+> -		zero_bio_chain(req_data->bio, bytes);
+> -		bytes = req_data->len;
+> +	} else if (rc == 0 && read_op && bytes < rbd_req->len) {
+> +		zero_bio_chain(rbd_req->bio, bytes);
+> +		bytes = rbd_req->len;
+>   	}
+>
+> -	rbd_coll_end_req(req_data, rc, bytes);
+> +	rbd_coll_end_req(rbd_req, rc, bytes);
+>
+> -	if (req_data->bio)
+> -		bio_chain_put(req_data->bio);
+> +	if (rbd_req->bio)
+> +		bio_chain_put(rbd_req->bio);
+>
+>   	ceph_osdc_put_request(req);
+> -	kfree(req_data);
+> +	kfree(rbd_req);
+>   }
+>
+>   static void rbd_simple_req_cb(struct ceph_osd_request *req, struct
+> ceph_msg *msg)
+>
