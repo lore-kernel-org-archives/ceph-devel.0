@@ -1,79 +1,84 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: status monitoring options for ceph cluster
-Date: Wed, 02 Jan 2013 15:05:47 -0800
-Message-ID: <50E4BD4B.2040005@inktank.com>
-References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com> <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com> <50E4619C.6070300@conversis.de> <50E4BC90.4030407@inktank.com>
+From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+Subject: RE: status monitoring options for ceph cluster
+Date: Thu, 3 Jan 2013 00:00:23 +0000
+Message-ID: <11AE4444941C6D4F9AEEADD1668595642A9F1189@MB1-COY.ad.mach.net.au>
+References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com>
+ <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com>
+ <50E4619C.6070300@conversis.de> <50E4BC90.4030407@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f50.google.com ([209.85.210.50]:52539 "EHLO
-	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752206Ab3ABXFu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 18:05:50 -0500
-Received: by mail-da0-f50.google.com with SMTP id h15so6691160dan.9
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Jan 2013 15:05:50 -0800 (PST)
+Received: from mf11.mach.net.au ([115.165.169.211]:37037 "EHLO
+	mf11.mach.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753000Ab3ACAKb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 19:10:31 -0500
 In-Reply-To: <50E4BC90.4030407@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dennis Jacobfeuerborn <dennisml@conversis.de>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, Wido den Hollander <wido@widodh.nl>, Ugis <ugis22@gmail.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Joao Eduardo Luis <joao.luis@inktank.com>, Wido den Hollander <wido@widodh.nl>, Ugis <ugis22@gmail.com>, Dan Mick <dan.mick@inktank.com>, Dennis Jacobfeuerborn <dennisml@conversis.de>
 
-(and of course it makes sense to build those on libraries that could
-serve other access methods)
-
-On 01/02/2013 03:02 PM, Dan Mick wrote:
-> There are plans being discussed for RESTful interfaces for configuration
-> and monitoring; no timetable yet but it's definitely on our radar, and
-> we'll discuss design etc. here when it starts happening; anyone wanting
-> to participate is of course welcome.
->
-> On 01/02/2013 08:34 AM, Dennis Jacobfeuerborn wrote:
->> On 01/02/2013 04:58 PM, Joao Eduardo Luis wrote:
->>> On 01/02/2013 03:08 PM, Wido den Hollander wrote:
->>>> On 01/02/2013 04:05 PM, Ugis wrote:
->>>>> Hi all,
->>>>>
->>>>> I am planning to set up monitoring of ceph cluster relying on output
->>>>> of commands:
->>>>>
->>>>> #ceph health
->>>>> #ceph -s
->>>>>
->>>>> The need is to retrieve certain values, for example %degraded;
->>>>> proportion "X GB / Y GB avail" to calculate available space%. I plan
->>>>> to graph those values via zabbix and set up triggers for certain
->>>>> tresholds.
->>>>> May be somebody already has written shell parser for getting values
->>>>> from output of these commands?
->>>>>
->>>>> Probably this ir wider question - what is the intended approach for
->>>>> ceph cluster monitoring? What do you guys use?
->>>>
->>>> You might want to take a look at:
->>>> http://tracker.newdream.net/issues/685
->>>>
->>>> In version 0.35 a json output was added. I've never tried it before,
->>>> but
->>>> you might want to look at that.
->>>
->>> Currently, the only command that will output useful json for this
->>> kind of
->>> thing is 'ceph report'. I am finishing up on a patch to add json output
->>> capabilities to 'ceph health' and 'ceph status' though, but wasn't
->>> aiming
->>> at doing it with such level of detail -- basically, just output the same
->>> info as their plain counterparts, but using json instead.
->>
->> I'm interested in this topic as well. What is also needed is a way to
->> query
->> the state of the individual daemons on each machine in the cluster.
->>
->> Regards,
->>    Dennis
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+SGFwcHkgbmV3IHllYXIgYWxsDQoNCk92ZXIgdGhlIHBhc3QgeWVhciwgb3VyIGNvbXBhbnkgaGFz
+IHdyaXR0ZW4gYW4gZXh0ZW5zaXZlIGd1aWRlIG9uIGhvdyB3ZSBtb25pdG9yIGNlcGggdXNpbmcg
+WmFiYml4Lg0KDQpJIHdvdWxkIHJhdGhlciBjb250cmlidXRlIGl0IGFzIGEgSE9XVE8gb3IgR3Vp
+ZGUgaW50byB0aGUgQ2VwaCB3aWtpLCByYXRoZXIgdGhhbiBqdXN0IHRoaXMgZW1haWwgdGhyZWFk
+LiBJdCBpcyB3cml0dGVuIGluIHdpa2kgZm9ybWF0LCBhbmQgZW1haWwgd291bGQgbG9zZSB0aGF0
+IGZvcm1hdHRpbmcuDQoNCkhvcGVmdWxseSBpdCB3aWxsIGJlbmVmaXQgb3RoZXJzLCBhbmQgSSBj
+YW4gY29udGludWUgdG8gbWFpbnRhaW4gaXQgYW5kIHVwZGF0ZSBpdCBieSBpbmNvcnBvcmF0aW5n
+IGFkdmljZSBmcm9tIG90aGVycyBhcyB0aW1lIGdvZXMgYnkuDQoNCkkgc2VlIHRoaXMgaW50cm8g
+QmxvZyBwb3N0IHRvIG1vbml0b3Jpbmc6DQpodHRwOi8vY2VwaC5jb20vY29tbXVuaXR5L21vbml0
+b3JpbmctYS1jZXBoLWNsdXN0ZXIvDQoNClRoYXQgd291bGQgYmUgYSBnb29kIGludHJvLCBhbmQg
+d2hhdCBJIGFtIHByb3Bvc2luZyB3b3VsZCBiZSBhIGZvbGxvdy1vbiAiYWR2YW5jZWQiIGd1aWRl
+Lg0KDQpTaG91bGQgaXQgZ28gdG8gdGhlIENlcGggQmxvZz8gT3IgZWxzZXdoZXJlPw0KDQpJZiBz
+b21lYm9keSBjYW4gcGxlYXNlIGFkdmlzZSBob3cgdGhpcyBjb250cmlidXRpb24gY2FuIGJlIG1h
+ZGUsIHRoYW5rcyENCg0KUGF1bA0KDQoNCj09DQpQYXVsIFBldHRpZ3JldyANCnc6IGh0dHA6Ly9t
+YWNoLmNvbS5hdS8NCk9mZmljZXMgJiBEYXRhIENlbnRyZXM6IE5vb3NhIHwgQnJpc2JhbmUgfCBD
+b29yb3kgfCBVU0ENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2
+ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
+cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBEYW4gTWljaw0KU2VudDogVGh1cnNkYXksIDMgSmFudWFy
+eSAyMDEzIDk6MDMgQU0NClRvOiBEZW5uaXMgSmFjb2JmZXVlcmJvcm4NCkNjOiBKb2FvIEVkdWFy
+ZG8gTHVpczsgV2lkbyBkZW4gSG9sbGFuZGVyOyBVZ2lzOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
+Lm9yZw0KU3ViamVjdDogUmU6IHN0YXR1cyBtb25pdG9yaW5nIG9wdGlvbnMgZm9yIGNlcGggY2x1
+c3Rlcg0KDQpUaGVyZSBhcmUgcGxhbnMgYmVpbmcgZGlzY3Vzc2VkIGZvciBSRVNUZnVsIGludGVy
+ZmFjZXMgZm9yIGNvbmZpZ3VyYXRpb24gYW5kIG1vbml0b3Jpbmc7IG5vIHRpbWV0YWJsZSB5ZXQg
+YnV0IGl0J3MgZGVmaW5pdGVseSBvbiBvdXIgcmFkYXIsIGFuZCB3ZSdsbCBkaXNjdXNzIGRlc2ln
+biBldGMuIGhlcmUgd2hlbiBpdCBzdGFydHMgaGFwcGVuaW5nOyBhbnlvbmUgd2FudGluZyB0byBw
+YXJ0aWNpcGF0ZSBpcyBvZiBjb3Vyc2Ugd2VsY29tZS4NCg0KT24gMDEvMDIvMjAxMyAwODozNCBB
+TSwgRGVubmlzIEphY29iZmV1ZXJib3JuIHdyb3RlOg0KPiBPbiAwMS8wMi8yMDEzIDA0OjU4IFBN
+LCBKb2FvIEVkdWFyZG8gTHVpcyB3cm90ZToNCj4+IE9uIDAxLzAyLzIwMTMgMDM6MDggUE0sIFdp
+ZG8gZGVuIEhvbGxhbmRlciB3cm90ZToNCj4+PiBPbiAwMS8wMi8yMDEzIDA0OjA1IFBNLCBVZ2lz
+IHdyb3RlOg0KPj4+PiBIaSBhbGwsDQo+Pj4+DQo+Pj4+IEkgYW0gcGxhbm5pbmcgdG8gc2V0IHVw
+IG1vbml0b3Jpbmcgb2YgY2VwaCBjbHVzdGVyIHJlbHlpbmcgb24gDQo+Pj4+IG91dHB1dCBvZiBj
+b21tYW5kczoNCj4+Pj4NCj4+Pj4gI2NlcGggaGVhbHRoDQo+Pj4+ICNjZXBoIC1zDQo+Pj4+DQo+
+Pj4+IFRoZSBuZWVkIGlzIHRvIHJldHJpZXZlIGNlcnRhaW4gdmFsdWVzLCBmb3IgZXhhbXBsZSAl
+ZGVncmFkZWQ7IA0KPj4+PiBwcm9wb3J0aW9uICJYIEdCIC8gWSBHQiBhdmFpbCIgdG8gY2FsY3Vs
+YXRlIGF2YWlsYWJsZSBzcGFjZSUuIEkgDQo+Pj4+IHBsYW4gdG8gZ3JhcGggdGhvc2UgdmFsdWVz
+IHZpYSB6YWJiaXggYW5kIHNldCB1cCB0cmlnZ2VycyBmb3IgDQo+Pj4+IGNlcnRhaW4gdHJlc2hv
+bGRzLg0KPj4+PiBNYXkgYmUgc29tZWJvZHkgYWxyZWFkeSBoYXMgd3JpdHRlbiBzaGVsbCBwYXJz
+ZXIgZm9yIGdldHRpbmcgdmFsdWVzIA0KPj4+PiBmcm9tIG91dHB1dCBvZiB0aGVzZSBjb21tYW5k
+cz8NCj4+Pj4NCj4+Pj4gUHJvYmFibHkgdGhpcyBpciB3aWRlciBxdWVzdGlvbiAtIHdoYXQgaXMg
+dGhlIGludGVuZGVkIGFwcHJvYWNoIGZvciANCj4+Pj4gY2VwaCBjbHVzdGVyIG1vbml0b3Jpbmc/
+IFdoYXQgZG8geW91IGd1eXMgdXNlPw0KPj4+DQo+Pj4gWW91IG1pZ2h0IHdhbnQgdG8gdGFrZSBh
+IGxvb2sgYXQ6IA0KPj4+IGh0dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC9pc3N1ZXMvNjg1DQo+
+Pj4NCj4+PiBJbiB2ZXJzaW9uIDAuMzUgYSBqc29uIG91dHB1dCB3YXMgYWRkZWQuIEkndmUgbmV2
+ZXIgdHJpZWQgaXQgYmVmb3JlLCANCj4+PiBidXQgeW91IG1pZ2h0IHdhbnQgdG8gbG9vayBhdCB0
+aGF0Lg0KPj4NCj4+IEN1cnJlbnRseSwgdGhlIG9ubHkgY29tbWFuZCB0aGF0IHdpbGwgb3V0cHV0
+IHVzZWZ1bCBqc29uIGZvciB0aGlzIA0KPj4ga2luZCBvZiB0aGluZyBpcyAnY2VwaCByZXBvcnQn
+LiBJIGFtIGZpbmlzaGluZyB1cCBvbiBhIHBhdGNoIHRvIGFkZCANCj4+IGpzb24gb3V0cHV0IGNh
+cGFiaWxpdGllcyB0byAnY2VwaCBoZWFsdGgnIGFuZCAnY2VwaCBzdGF0dXMnIHRob3VnaCwgDQo+
+PiBidXQgd2Fzbid0IGFpbWluZyBhdCBkb2luZyBpdCB3aXRoIHN1Y2ggbGV2ZWwgb2YgZGV0YWls
+IC0tIGJhc2ljYWxseSwgDQo+PiBqdXN0IG91dHB1dCB0aGUgc2FtZSBpbmZvIGFzIHRoZWlyIHBs
+YWluIGNvdW50ZXJwYXJ0cywgYnV0IHVzaW5nIGpzb24gaW5zdGVhZC4NCj4NCj4gSSdtIGludGVy
+ZXN0ZWQgaW4gdGhpcyB0b3BpYyBhcyB3ZWxsLiBXaGF0IGlzIGFsc28gbmVlZGVkIGlzIGEgd2F5
+IHRvIA0KPiBxdWVyeSB0aGUgc3RhdGUgb2YgdGhlIGluZGl2aWR1YWwgZGFlbW9ucyBvbiBlYWNo
+IG1hY2hpbmUgaW4gdGhlIGNsdXN0ZXIuDQo+DQo+IFJlZ2FyZHMsDQo+ICAgIERlbm5pcw0KPg0K
+PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCi0tDQpUbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIg
+aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
+ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo=
