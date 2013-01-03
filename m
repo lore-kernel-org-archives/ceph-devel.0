@@ -1,84 +1,53 @@
-From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
-Subject: RE: status monitoring options for ceph cluster
-Date: Thu, 3 Jan 2013 00:00:23 +0000
-Message-ID: <11AE4444941C6D4F9AEEADD1668595642A9F1189@MB1-COY.ad.mach.net.au>
-References: <CAE63xUOt5dpKPnYXN-nbJHPhPdAW2yH3ERDkwE7QO3TaVLFg4Q@mail.gmail.com>
- <50E44D79.6070809@widodh.nl> <50E45909.4080907@inktank.com>
- <50E4619C.6070300@conversis.de> <50E4BC90.4030407@inktank.com>
+From: Dennis Jacobfeuerborn <dennisml@conversis.de>
+Subject: Re: v0.56 released
+Date: Thu, 03 Jan 2013 05:00:03 +0100
+Message-ID: <50E50243.6060301@conversis.de>
+References: <alpine.DEB.2.00.1212311721310.1906@cobra.newdream.net> <50E39A4E.1060700@conversis.de> <50E39B68.40800@inktank.com> <CAOLwVUnYP1HTfimBf2PKBW5TA7gSuKRhsB1u6YPwUQGs633mvg@mail.gmail.com> <alpine.DEB.2.00.1301020935270.13956@cobra.newdream.net> <CAOLwVU=3W-QQ2tsdCGU4zq2OUiiTv7tFE20z20k2dgXQL7WknQ@mail.gmail.com> <alpine.DEB.2.00.1301021010310.13956@cobra.newdream.net> <50E49814.9000904@conversis.de> <alpine.DEB.2.00.1301021245410.13956@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mf11.mach.net.au ([115.165.169.211]:37037 "EHLO
-	mf11.mach.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753000Ab3ACAKb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 19:10:31 -0500
-In-Reply-To: <50E4BC90.4030407@inktank.com>
-Content-Language: en-US
+Received: from mail4.conversis.de ([213.203.219.181]:53789 "EHLO
+	mail4.conversis.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753163Ab3ACEAG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jan 2013 23:00:06 -0500
+In-Reply-To: <alpine.DEB.2.00.1301021245410.13956@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, Wido den Hollander <wido@widodh.nl>, Ugis <ugis22@gmail.com>, Dan Mick <dan.mick@inktank.com>, Dennis Jacobfeuerborn <dennisml@conversis.de>
+To: Sage Weil <sage@inktank.com>
+Cc: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGFwcHkgbmV3IHllYXIgYWxsDQoNCk92ZXIgdGhlIHBhc3QgeWVhciwgb3VyIGNvbXBhbnkgaGFz
-IHdyaXR0ZW4gYW4gZXh0ZW5zaXZlIGd1aWRlIG9uIGhvdyB3ZSBtb25pdG9yIGNlcGggdXNpbmcg
-WmFiYml4Lg0KDQpJIHdvdWxkIHJhdGhlciBjb250cmlidXRlIGl0IGFzIGEgSE9XVE8gb3IgR3Vp
-ZGUgaW50byB0aGUgQ2VwaCB3aWtpLCByYXRoZXIgdGhhbiBqdXN0IHRoaXMgZW1haWwgdGhyZWFk
-LiBJdCBpcyB3cml0dGVuIGluIHdpa2kgZm9ybWF0LCBhbmQgZW1haWwgd291bGQgbG9zZSB0aGF0
-IGZvcm1hdHRpbmcuDQoNCkhvcGVmdWxseSBpdCB3aWxsIGJlbmVmaXQgb3RoZXJzLCBhbmQgSSBj
-YW4gY29udGludWUgdG8gbWFpbnRhaW4gaXQgYW5kIHVwZGF0ZSBpdCBieSBpbmNvcnBvcmF0aW5n
-IGFkdmljZSBmcm9tIG90aGVycyBhcyB0aW1lIGdvZXMgYnkuDQoNCkkgc2VlIHRoaXMgaW50cm8g
-QmxvZyBwb3N0IHRvIG1vbml0b3Jpbmc6DQpodHRwOi8vY2VwaC5jb20vY29tbXVuaXR5L21vbml0
-b3JpbmctYS1jZXBoLWNsdXN0ZXIvDQoNClRoYXQgd291bGQgYmUgYSBnb29kIGludHJvLCBhbmQg
-d2hhdCBJIGFtIHByb3Bvc2luZyB3b3VsZCBiZSBhIGZvbGxvdy1vbiAiYWR2YW5jZWQiIGd1aWRl
-Lg0KDQpTaG91bGQgaXQgZ28gdG8gdGhlIENlcGggQmxvZz8gT3IgZWxzZXdoZXJlPw0KDQpJZiBz
-b21lYm9keSBjYW4gcGxlYXNlIGFkdmlzZSBob3cgdGhpcyBjb250cmlidXRpb24gY2FuIGJlIG1h
-ZGUsIHRoYW5rcyENCg0KUGF1bA0KDQoNCj09DQpQYXVsIFBldHRpZ3JldyANCnc6IGh0dHA6Ly9t
-YWNoLmNvbS5hdS8NCk9mZmljZXMgJiBEYXRhIENlbnRyZXM6IE5vb3NhIHwgQnJpc2JhbmUgfCBD
-b29yb3kgfCBVU0ENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBEYW4gTWljaw0KU2VudDogVGh1cnNkYXksIDMgSmFudWFy
-eSAyMDEzIDk6MDMgQU0NClRvOiBEZW5uaXMgSmFjb2JmZXVlcmJvcm4NCkNjOiBKb2FvIEVkdWFy
-ZG8gTHVpczsgV2lkbyBkZW4gSG9sbGFuZGVyOyBVZ2lzOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZw0KU3ViamVjdDogUmU6IHN0YXR1cyBtb25pdG9yaW5nIG9wdGlvbnMgZm9yIGNlcGggY2x1
-c3Rlcg0KDQpUaGVyZSBhcmUgcGxhbnMgYmVpbmcgZGlzY3Vzc2VkIGZvciBSRVNUZnVsIGludGVy
-ZmFjZXMgZm9yIGNvbmZpZ3VyYXRpb24gYW5kIG1vbml0b3Jpbmc7IG5vIHRpbWV0YWJsZSB5ZXQg
-YnV0IGl0J3MgZGVmaW5pdGVseSBvbiBvdXIgcmFkYXIsIGFuZCB3ZSdsbCBkaXNjdXNzIGRlc2ln
-biBldGMuIGhlcmUgd2hlbiBpdCBzdGFydHMgaGFwcGVuaW5nOyBhbnlvbmUgd2FudGluZyB0byBw
-YXJ0aWNpcGF0ZSBpcyBvZiBjb3Vyc2Ugd2VsY29tZS4NCg0KT24gMDEvMDIvMjAxMyAwODozNCBB
-TSwgRGVubmlzIEphY29iZmV1ZXJib3JuIHdyb3RlOg0KPiBPbiAwMS8wMi8yMDEzIDA0OjU4IFBN
-LCBKb2FvIEVkdWFyZG8gTHVpcyB3cm90ZToNCj4+IE9uIDAxLzAyLzIwMTMgMDM6MDggUE0sIFdp
-ZG8gZGVuIEhvbGxhbmRlciB3cm90ZToNCj4+PiBPbiAwMS8wMi8yMDEzIDA0OjA1IFBNLCBVZ2lz
-IHdyb3RlOg0KPj4+PiBIaSBhbGwsDQo+Pj4+DQo+Pj4+IEkgYW0gcGxhbm5pbmcgdG8gc2V0IHVw
-IG1vbml0b3Jpbmcgb2YgY2VwaCBjbHVzdGVyIHJlbHlpbmcgb24gDQo+Pj4+IG91dHB1dCBvZiBj
-b21tYW5kczoNCj4+Pj4NCj4+Pj4gI2NlcGggaGVhbHRoDQo+Pj4+ICNjZXBoIC1zDQo+Pj4+DQo+
-Pj4+IFRoZSBuZWVkIGlzIHRvIHJldHJpZXZlIGNlcnRhaW4gdmFsdWVzLCBmb3IgZXhhbXBsZSAl
-ZGVncmFkZWQ7IA0KPj4+PiBwcm9wb3J0aW9uICJYIEdCIC8gWSBHQiBhdmFpbCIgdG8gY2FsY3Vs
-YXRlIGF2YWlsYWJsZSBzcGFjZSUuIEkgDQo+Pj4+IHBsYW4gdG8gZ3JhcGggdGhvc2UgdmFsdWVz
-IHZpYSB6YWJiaXggYW5kIHNldCB1cCB0cmlnZ2VycyBmb3IgDQo+Pj4+IGNlcnRhaW4gdHJlc2hv
-bGRzLg0KPj4+PiBNYXkgYmUgc29tZWJvZHkgYWxyZWFkeSBoYXMgd3JpdHRlbiBzaGVsbCBwYXJz
-ZXIgZm9yIGdldHRpbmcgdmFsdWVzIA0KPj4+PiBmcm9tIG91dHB1dCBvZiB0aGVzZSBjb21tYW5k
-cz8NCj4+Pj4NCj4+Pj4gUHJvYmFibHkgdGhpcyBpciB3aWRlciBxdWVzdGlvbiAtIHdoYXQgaXMg
-dGhlIGludGVuZGVkIGFwcHJvYWNoIGZvciANCj4+Pj4gY2VwaCBjbHVzdGVyIG1vbml0b3Jpbmc/
-IFdoYXQgZG8geW91IGd1eXMgdXNlPw0KPj4+DQo+Pj4gWW91IG1pZ2h0IHdhbnQgdG8gdGFrZSBh
-IGxvb2sgYXQ6IA0KPj4+IGh0dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC9pc3N1ZXMvNjg1DQo+
-Pj4NCj4+PiBJbiB2ZXJzaW9uIDAuMzUgYSBqc29uIG91dHB1dCB3YXMgYWRkZWQuIEkndmUgbmV2
-ZXIgdHJpZWQgaXQgYmVmb3JlLCANCj4+PiBidXQgeW91IG1pZ2h0IHdhbnQgdG8gbG9vayBhdCB0
-aGF0Lg0KPj4NCj4+IEN1cnJlbnRseSwgdGhlIG9ubHkgY29tbWFuZCB0aGF0IHdpbGwgb3V0cHV0
-IHVzZWZ1bCBqc29uIGZvciB0aGlzIA0KPj4ga2luZCBvZiB0aGluZyBpcyAnY2VwaCByZXBvcnQn
-LiBJIGFtIGZpbmlzaGluZyB1cCBvbiBhIHBhdGNoIHRvIGFkZCANCj4+IGpzb24gb3V0cHV0IGNh
-cGFiaWxpdGllcyB0byAnY2VwaCBoZWFsdGgnIGFuZCAnY2VwaCBzdGF0dXMnIHRob3VnaCwgDQo+
-PiBidXQgd2Fzbid0IGFpbWluZyBhdCBkb2luZyBpdCB3aXRoIHN1Y2ggbGV2ZWwgb2YgZGV0YWls
-IC0tIGJhc2ljYWxseSwgDQo+PiBqdXN0IG91dHB1dCB0aGUgc2FtZSBpbmZvIGFzIHRoZWlyIHBs
-YWluIGNvdW50ZXJwYXJ0cywgYnV0IHVzaW5nIGpzb24gaW5zdGVhZC4NCj4NCj4gSSdtIGludGVy
-ZXN0ZWQgaW4gdGhpcyB0b3BpYyBhcyB3ZWxsLiBXaGF0IGlzIGFsc28gbmVlZGVkIGlzIGEgd2F5
-IHRvIA0KPiBxdWVyeSB0aGUgc3RhdGUgb2YgdGhlIGluZGl2aWR1YWwgZGFlbW9ucyBvbiBlYWNo
-IG1hY2hpbmUgaW4gdGhlIGNsdXN0ZXIuDQo+DQo+IFJlZ2FyZHMsDQo+ICAgIERlbm5pcw0KPg0K
-PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
-cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
-dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCi0tDQpUbyB1bnN1YnNjcmli
-ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIg
-aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo=
+On 01/02/2013 09:46 PM, Sage Weil wrote:
+> On Wed, 2 Jan 2013, Dennis Jacobfeuerborn wrote:
+>> On 01/02/2013 07:11 PM, Sage Weil wrote:
+>>> On Wed, 2 Jan 2013, S?bastien Han wrote:
+>>>> Debian-testing shows the version 0.56-1, maybe I misunderstood but I
+>>>> thought that 0.56-1 bobtail was the new version of the stable branch.
+>>>> So I was expecting to see it here
+>>>> http://ceph.com/debian/dists/precise/main/binary-amd64/Packages
+>>>>
+>>>> Correct me if I'm wrong :)
+>>>
+>>> It will be soon, but we're doing some additional validation before calling 
+>>> it bobtail.  We may also move the URLs around a bit... more on that soon!
+>>
+>> What happens if you find a problem that needs a small update? Will the
+>> bobtail version be bumped to v0.57?
+> 
+> v0.56.1, v0.56.2, etc., will follow in this series and bugs are found and 
+> backported.
+
+That sound like an odd and potentially confusing versioning policy because
+v0.56 now is apparently a sort-of-stable-but-not-really version. I think if
+would be better to either go with something like v0.56rc1 until the release
+is actually declared stable or as some other projects do it use something
+like v0.55.99 as a pre-release version. That way you know if someone refers
+to v0.56 they actually mean the stable release.
+Right now if you find a problem and have to release v0.56.1 as bobtail then
+every time someone refers to v0.56 you have to ask them if they mean
+pre-bobtail v0.56 or post-bobtail v0.56. This kind of ambiguity should be
+avoided if possible.
+
+Regards,
+  Dennis
+
