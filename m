@@ -1,37 +1,30 @@
-From: Filippos Giannakos <philipgian@grnet.gr>
-Subject: Re: [PATCH 0/2] Librados aio stat
-Date: Fri, 04 Jan 2013 15:01:43 +0200
-Message-ID: <50E6D2B7.2080609@grnet.gr>
-References: <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net> <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH REPOST 0/6] libceph: parameter cleanup
+Date: Fri, 04 Jan 2013 08:31:30 -0600
+Message-ID: <50E6E7C2.2020604@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:12003 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753729Ab3ADNCS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 08:02:18 -0500
-In-Reply-To: <1356033911-14027-1-git-send-email-philipgian@grnet.gr>
+Received: from mail-ia0-f176.google.com ([209.85.210.176]:60070 "EHLO
+	mail-ia0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754613Ab3ADObc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 09:31:32 -0500
+Received: by mail-ia0-f176.google.com with SMTP id y26so13700497iab.35
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 06:31:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: synnefo-devel@googlegroups.com, Filippos Giannakos <philipgian@grnet.gr>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Team,
+This series mostly cleans up parameters used by functions
+in libceph, in the osd client code.
 
-Is there any progress or any comments regarding the librados aio stat
-patch ?
+					-Alex
 
-Best regards
-
-On 12/20/2012 10:05 PM, Filippos Giannakos wrote:
-> Hi Team,
->
-> Here is the patch with the changes, plus the tests you requested.
->
-> Best regards,
-> Filippos
-
-
--- 
-Filippos.
+[PATCH REPOST 1/6] libceph: pass length to ceph_osdc_build_request()
+[PATCH REPOST 2/6] libceph: pass length to ceph_calc_file_object_mapping()
+[PATCH REPOST 3/6] libceph: drop snapid in ceph_calc_raw_layout()
+[PATCH REPOST 4/6] libceph: drop osdc from ceph_calc_raw_layout()
+[PATCH REPOST 5/6] libceph: don't set flags in ceph_osdc_alloc_request()
+[PATCH REPOST 6/6] libceph: don't set pages or bio in
+ceph_osdc_alloc_request()
