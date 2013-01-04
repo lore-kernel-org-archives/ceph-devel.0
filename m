@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 1/6] ceph: re-calculate truncate_size for strip object
-Date: Fri,  4 Jan 2013 19:34:16 +0800
-Message-ID: <1357299261-20591-2-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 3/6] ceph: allow revoking duplicated caps issued by non-auth MDS
+Date: Fri,  4 Jan 2013 19:34:18 +0800
+Message-ID: <1357299261-20591-4-git-send-email-zheng.z.yan@intel.com>
 References: <1357299261-20591-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga02.intel.com ([134.134.136.20]:48663 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753870Ab3ADLe1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Jan 2013 06:34:27 -0500
+	id S1754479Ab3ADLeb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Jan 2013 06:34:31 -0500
 In-Reply-To: <1357299261-20591-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,34 +16,58 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Otherwise osd may truncate the object to larger size.
+Allow revoking duplicated caps issued by non-auth MDS if these caps
+are also issued by auth MDS.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- net/ceph/osd_client.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ fs/ceph/caps.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index eb9a444..267f183 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -76,8 +76,16 @@ int ceph_calc_raw_layout(struct ceph_osd_client *osdc,
- 		     orig_len - *plen, off, *plen);
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index a9fe2d5..c90b245 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1468,7 +1468,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags,
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct inode *inode = &ci->vfs_inode;
+ 	struct ceph_cap *cap;
+-	int file_wanted, used;
++	int file_wanted, used, cap_used;
+ 	int took_snap_rwsem = 0;             /* true if mdsc->snap_rwsem held */
+ 	int issued, implemented, want, retain, revoking, flushing = 0;
+ 	int mds = -1;   /* keep track of how far we've gone through i_caps list
+@@ -1577,6 +1577,10 @@ retry_locked:
+ 		     ceph_cap_string(cap->implemented),
+ 		     ceph_cap_string(revoking));
  
- 	if (op_has_extent(op->op)) {
-+		u32 osize = le32_to_cpu(layout->fl_object_size);
- 		op->extent.offset = objoff;
- 		op->extent.length = objlen;
-+		if (op->extent.truncate_size <= off - objoff) {
-+			op->extent.truncate_size = 0;
-+		} else {
-+			op->extent.truncate_size -= off - objoff;
-+			if (op->extent.truncate_size > osize)
-+				op->extent.truncate_size = osize;
-+		}
++		cap_used = used;
++		if (ci->i_auth_cap && cap != ci->i_auth_cap)
++			cap_used &= ~ci->i_auth_cap->issued;
++
+ 		if (cap == ci->i_auth_cap &&
+ 		    (cap->issued & CEPH_CAP_FILE_WR)) {
+ 			/* request larger max_size from MDS? */
+@@ -1601,7 +1605,7 @@ retry_locked:
+ 		}
+ 
+ 		/* completed revocation? going down and there are no caps? */
+-		if (revoking && (revoking & used) == 0) {
++		if (revoking && (revoking & cap_used) == 0) {
+ 			dout("completed revocation of %s\n",
+ 			     ceph_cap_string(cap->implemented & ~cap->issued));
+ 			goto ack;
+@@ -1678,8 +1682,8 @@ ack:
+ 		sent++;
+ 
+ 		/* __send_cap drops i_ceph_lock */
+-		delayed += __send_cap(mdsc, cap, CEPH_CAP_OP_UPDATE, used, want,
+-				      retain, flushing, NULL);
++		delayed += __send_cap(mdsc, cap, CEPH_CAP_OP_UPDATE, cap_used,
++				      want, retain, flushing, NULL);
+ 		goto retry; /* retake i_ceph_lock and restart our cap scan. */
  	}
- 	req->r_num_pages = calc_pages_for(off, *plen);
- 	req->r_page_alignment = off & ~PAGE_MASK;
+ 
 -- 
 1.7.11.7
 
