@@ -1,40 +1,51 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 5/6] configure.ac: remove AC_PROG_RANLIB
-Date: Fri,  4 Jan 2013 18:51:30 +0100
-Message-ID: <1357321891-20202-6-git-send-email-danny.al-gaaf@bisect.de>
-References: <1357321891-20202-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 0/2] Librados aio stat
+Date: Fri, 4 Jan 2013 10:00:18 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301040959510.6109@cobra.newdream.net>
+References: <alpine.DEB.2.00.1212190741470.13122@cobra.newdream.net> <1356033911-14027-1-git-send-email-philipgian@grnet.gr> <50E6D2B7.2080609@grnet.gr>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:54162 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754436Ab3ADRve (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 12:51:34 -0500
-In-Reply-To: <1357321891-20202-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from cobra.newdream.net ([66.33.216.30]:33660 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755311Ab3ADSAT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 13:00:19 -0500
+In-Reply-To: <50E6D2B7.2080609@grnet.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
+To: Filippos Giannakos <philipgian@grnet.gr>
+Cc: ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
 
-Remove already comment out AC_PROG_RANLIB to get rid of warning:
+Sorry, I missed this second set of patches when they came through over the 
+break.  We'll try to get them merged into master shortly.
 
-libtoolize: `AC_PROG_RANLIB' is rendered obsolete by `LT_INIT'
+Thanks!
+sage
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- configure.ac | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/configure.ac b/configure.ac
-index 07bfaa9..15430dd 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -51,7 +51,6 @@ AM_CONDITIONAL(FREEBSD, test x"$freebsd" = x"yes")
- # Checks for programs.
- AC_PROG_CXX
- #AC_PROG_CC
--#AC_PROG_RANLIB
- AC_PROG_MAKE_SET
- AC_PROG_LIBTOOL
- 
--- 
-1.8.0.2
+On Fri, 4 Jan 2013, Filippos Giannakos wrote:
 
+> Hi Team,
+> 
+> Is there any progress or any comments regarding the librados aio stat
+> patch ?
+> 
+> Best regards
+> 
+> On 12/20/2012 10:05 PM, Filippos Giannakos wrote:
+> > Hi Team,
+> > 
+> > Here is the patch with the changes, plus the tests you requested.
+> > 
+> > Best regards,
+> > Filippos
+> 
+> 
+> -- 
+> Filippos.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
