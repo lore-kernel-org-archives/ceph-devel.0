@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 18/29] mds: fix rename inode exportor check
-Date: Fri,  4 Jan 2013 17:02:09 +0800
-Message-ID: <1357290140-17044-19-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 15/29] mds: remove unnecessary is_xlocked check
+Date: Fri,  4 Jan 2013 17:02:06 +0800
+Message-ID: <1357290140-17044-16-git-send-email-zheng.z.yan@intel.com>
 References: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:28255 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753454Ab3ADJCr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Jan 2013 04:02:47 -0500
+	id S1753845Ab3ADJCn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Jan 2013 04:02:43 -0500
 In-Reply-To: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,60 +16,102 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Use "srcdn->is_auth() && destdnl->is_primary()" to check if the MDS is
-inode exportor of rename operation is not reliable, This is because
-OP_FINISH slave request may race with subtree import. The fix is use
-a variable in MDRequest to indicate if the MDS is inode exportor.
+Locker::foo_eval() is always called for stable locks, so no need to
+check if the lock is xlocked.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Mutation.h | 4 ++--
- src/mds/Server.cc  | 3 ++-
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ src/mds/Locker.cc | 21 ++++-----------------
+ 1 file changed, 4 insertions(+), 17 deletions(-)
 
-diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
-index bf59dba..d0d3eca 100644
---- a/src/mds/Mutation.h
-+++ b/src/mds/Mutation.h
-@@ -213,7 +213,7 @@ struct MDRequest : public Mutation {
-     bufferlist inode_import;
-     version_t inode_import_v;
-     CInode* destdn_was_remote_inode;
--    bool was_link_merge;
-+    bool was_inode_exportor;
-     int prepared_inode_exporter; // has asked auth of srci to mark srci as ambiguous auth
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index e826321..ee2d4cc 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -3291,7 +3291,6 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
  
-     map<client_t,entity_inst_t> imported_client_map;
-@@ -233,7 +233,7 @@ struct MDRequest : public Mutation {
- 
-     More() : 
-       src_reanchor_atid(0), dst_reanchor_atid(0), inode_import_v(0),
--      destdn_was_remote_inode(0), was_link_merge(false),
-+      destdn_was_remote_inode(0), was_inode_exportor(false),
-       prepared_inode_exporter(-1), flock_was_waiting(false),
-       stid(0),
-       slave_commit(0) { }
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 6097552..c5793e5 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -6261,6 +6261,7 @@ void Server::_logged_slave_rename(MDRequest *mdr,
- 
-     // remove mdr auth pin
-     mdr->auth_unpin(srcdnl->get_inode());
-+    mdr->more()->was_inode_exportor = true;
+   // stable -> sync?
+   else if (lock->get_state() != LOCK_SYNC &&
+-	   !lock->is_xlocked() &&
+ 	   !lock->is_wrlocked() &&
+ 	   ((!(wanted & CEPH_CAP_GEXCL) && !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
+ 	    (lock->get_state() == LOCK_EXCL && in && in->get_target_loner() < 0))) {
+@@ -3334,8 +3333,6 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
+     int gather = 0;
+     if (lock->is_wrlocked())
+       gather++;
+-    if (lock->is_xlocked())
+-      gather++;
      
-     dout(10) << " exported srci " << *srcdnl->get_inode() << dendl;
+     if (lock->get_parent()->is_replicated() && old_state == LOCK_MIX) {
+       send_lock_message(lock, LOCK_AC_SYNC);
+@@ -3412,9 +3409,7 @@ void Locker::simple_excl(SimpleLock *lock, bool *need_issue)
+     gather++;
+   if (lock->is_wrlocked())
+     gather++;
+-  if (lock->is_xlocked())
+-    gather++;
+-  
++
+   if (lock->get_parent()->is_replicated() && 
+       lock->get_state() != LOCK_LOCK_EXCL &&
+       lock->get_state() != LOCK_XSYN_EXCL) {
+@@ -3695,7 +3690,6 @@ void Locker::scatter_eval(ScatterLock *lock, bool *need_issue)
    }
-@@ -6299,7 +6300,7 @@ void Server::_commit_slave_rename(MDRequest *mdr, int r,
+   
+   if (!lock->is_rdlocked() &&
+-      !lock->is_xlocked() &&
+       lock->get_state() != LOCK_MIX &&
+       lock->get_scatter_wanted()) {
+     dout(10) << "scatter_eval scatter_wanted, bump to mix " << *lock
+@@ -3706,8 +3700,7 @@ void Locker::scatter_eval(ScatterLock *lock, bool *need_issue)
  
-     // unfreeze+singleauth inode
-     //  hmm, do i really need to delay this?
--    if (srcdn->is_auth() && destdnl->is_primary()) {
-+    if (mdr->more()->was_inode_exportor) {
+   if (lock->get_type() == CEPH_LOCK_INEST) {
+     // in general, we want to keep INEST writable at all times.
+-    if (!lock->is_rdlocked() &&
+-	!lock->is_xlocked()) {
++    if (!lock->is_rdlocked()) {
+       if (lock->get_parent()->is_replicated()) {
+ 	if (lock->get_state() != LOCK_MIX)
+ 	  scatter_mix(lock, need_issue);
+@@ -3723,7 +3716,6 @@ void Locker::scatter_eval(ScatterLock *lock, bool *need_issue)
+   if (!in->has_subtree_root_dirfrag() || in->is_base()) {
+     // i _should_ be sync.
+     if (!lock->is_wrlocked() &&
+-	!lock->is_xlocked() &&
+ 	lock->get_state() != LOCK_SYNC) {
+       dout(10) << "scatter_eval no wrlocks|xlocks, not subtree root inode, syncing" << dendl;
+       simple_sync(lock, need_issue);
+@@ -3909,8 +3901,6 @@ void Locker::scatter_tempsync(ScatterLock *lock, bool *need_issue)
+   int gather = 0;
+   if (lock->is_wrlocked())
+     gather++;
+-  if (lock->is_xlocked())
+-    gather++;
  
-       CInode *in = destdnl->get_inode();
+   if (lock->get_cap_shift() &&
+       in->is_head() &&
+@@ -4044,8 +4034,7 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
+   assert(lock->get_parent()->is_auth());
+   assert(lock->is_stable());
  
+-  if (lock->is_xlocked() || 
+-      lock->get_parent()->is_freezing_or_frozen())
++  if (lock->get_parent()->is_freezing_or_frozen())
+     return;
+ 
+   // excl -> *?
+@@ -4297,9 +4286,7 @@ void Locker::file_xsyn(SimpleLock *lock, bool *need_issue)
+   int gather = 0;
+   if (lock->is_wrlocked())
+     gather++;
+-  if (lock->is_xlocked())
+-    gather++;
+-  
++
+   if (in->is_head() &&
+       in->issued_caps_need_gather(lock)) {
+     if (need_issue)
 -- 
 1.7.11.7
 
