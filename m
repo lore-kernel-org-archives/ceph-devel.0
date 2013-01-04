@@ -1,118 +1,61 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH REPOST 1/4] rbd: define and use rbd_warn()
-Date: Thu, 03 Jan 2013 17:11:34 -0800
-Message-ID: <50E62C46.1060901@inktank.com>
-References: <50E5D7A9.6040101@inktank.com> <50E5D7E7.40609@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 02/29] mds: fix Locker::simple_eval()
+Date: Fri,  4 Jan 2013 17:01:53 +0800
+Message-ID: <1357290140-17044-3-git-send-email-zheng.z.yan@intel.com>
+References: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:32980 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754652Ab3ADBLh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 20:11:37 -0500
-Received: by mail-pb0-f43.google.com with SMTP id um15so8859593pbc.16
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 17:11:37 -0800 (PST)
-In-Reply-To: <50E5D7E7.40609@inktank.com>
+Received: from mga01.intel.com ([192.55.52.88]:51114 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750738Ab3ADJC1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Jan 2013 04:02:27 -0500
+In-Reply-To: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Nifty.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Reviewed-by: Dan Mick <dan.mick@inktank.com>
+Locker::simple_eval() checks if the loner wants CEPH_CAP_GEXCL to
+decide if it should change the lock to EXCL state, but it checks
+if CEPH_CAP_GEXCL is issued to the loner to decide if it should
+change the lock to SYNC state. So if the loner wants CEPH_CAP_GEXCL,
+but doesn't have CEPH_CAP_GEXCL, Locker::simple_eval() will keep
+switching the lock state.
 
-On 01/03/2013 11:11 AM, Alex Elder wrote:
-> Define a new function rbd_warn() that produces a boilerplate warning
-> message, identifying in the resulting message the affected rbd
-> device in the best way available.  Use it in a few places that now
-> use pr_warning().
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   43 +++++++++++++++++++++++++++++++++----------
->   1 file changed, 33 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index d97611e..635b81d 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -294,6 +294,33 @@ static struct device rbd_root_dev = {
->   	.release =      rbd_root_dev_release,
->   };
->
-> +static __printf(2, 3)
-> +void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
-> +{
-> +	struct va_format vaf;
-> +	va_list args;
-> +
-> +	va_start(args, fmt);
-> +	vaf.fmt = fmt;
-> +	vaf.va = &args;
-> +
-> +	if (!rbd_dev)
-> +		printk(KERN_WARNING "%s: %pV\n", RBD_DRV_NAME, &vaf);
-> +	else if (rbd_dev->disk)
-> +		printk(KERN_WARNING "%s: %s: %pV\n",
-> +			RBD_DRV_NAME, rbd_dev->disk->disk_name, &vaf);
-> +	else if (rbd_dev->spec && rbd_dev->spec->image_name)
-> +		printk(KERN_WARNING "%s: image %s: %pV\n",
-> +			RBD_DRV_NAME, rbd_dev->spec->image_name, &vaf);
-> +	else if (rbd_dev->spec && rbd_dev->spec->image_id)
-> +		printk(KERN_WARNING "%s: id %s: %pV\n",
-> +			RBD_DRV_NAME, rbd_dev->spec->image_id, &vaf);
-> +	else	/* punt */
-> +		printk(KERN_WARNING "%s: rbd_dev %p: %pV\n",
-> +			RBD_DRV_NAME, rbd_dev, &vaf);
-> +	va_end(args);
-> +}
-> +
->   #ifdef RBD_DEBUG
->   #define rbd_assert(expr)						\
->   		if (unlikely(!(expr))) {				\
-> @@ -1403,8 +1430,8 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-> u8 opcode, void *data)
->   		(unsigned int) opcode);
->   	rc = rbd_dev_refresh(rbd_dev, &hver);
->   	if (rc)
-> -		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
-> -			   " update snaps: %d\n", rbd_dev->major, rc);
-> +		rbd_warn(rbd_dev, "got notification but failed to "
-> +			   " update snaps: %d\n", rc);
->
->   	rbd_req_sync_notify_ack(rbd_dev, hver, notify_id);
->   }
-> @@ -1767,15 +1794,13 @@ rbd_dev_v1_header_read(struct rbd_device
-> *rbd_dev, u64 *version)
->   			goto out_err;
->   		if (WARN_ON((size_t) ret < size)) {
->   			ret = -ENXIO;
-> -			pr_warning("short header read for image %s"
-> -					" (want %zd got %d)\n",
-> -				rbd_dev->spec->image_name, size, ret);
-> +			rbd_warn(rbd_dev, "short header read (want %zd got %d)",
-> +				size, ret);
->   			goto out_err;
->   		}
->   		if (!rbd_dev_ondisk_valid(ondisk)) {
->   			ret = -ENXIO;
-> -			pr_warning("invalid header for image %s\n",
-> -				rbd_dev->spec->image_name);
-> +			rbd_warn(rbd_dev, "invalid header");
->   			goto out_err;
->   		}
->
-> @@ -2630,9 +2655,7 @@ static int rbd_dev_probe_update_spec(struct
-> rbd_device *rbd_dev)
->   	if (name)
->   		rbd_dev->spec->image_name = (char *) name;
->   	else
-> -		pr_warning(RBD_DRV_NAME "%d "
-> -			"unable to get image name for image id %s\n",
-> -			rbd_dev->major, rbd_dev->spec->image_id);
-> +		rbd_warn(rbd_dev, "unable to get image name");
->
->   	/* Look up the snapshot name. */
->
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/Locker.cc | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index c8cd236..98eaba8 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -3250,11 +3250,10 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
+     return;
+ 
+   CInode *in = 0;
+-  int wanted = 0, issued = 0;
++  int wanted = 0;
+   if (lock->get_type() != CEPH_LOCK_DN) {
+     in = (CInode*)lock->get_parent();
+-    wanted = in->get_caps_wanted(NULL, NULL, lock->get_cap_shift());
+-    issued = in->get_caps_issued(NULL, NULL, NULL, lock->get_cap_shift());
++    in->get_caps_wanted(&wanted, NULL, lock->get_cap_shift());
+   }
+   
+   // -> excl?
+@@ -3270,8 +3269,7 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
+   else if (lock->get_state() != LOCK_SYNC &&
+ 	   !lock->is_xlocked() &&
+ 	   !lock->is_wrlocked() &&
+-	   ((!(issued & CEPH_CAP_GEXCL) &&
+-	     !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
++	   ((!(wanted & CEPH_CAP_GEXCL) && !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
+ 	    (lock->get_state() == LOCK_EXCL && in && in->get_target_loner() < 0))) {
+     dout(7) << "simple_eval stable, syncing " << *lock 
+ 	    << " on " << *lock->get_parent() << dendl;
+-- 
+1.7.11.7
+
