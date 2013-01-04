@@ -1,150 +1,137 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 3/6] rbd: initialize off and len in rbd_create_rw_op()
-Date: Fri, 04 Jan 2013 09:06:31 -0600
-Message-ID: <50E6EFF7.5000303@inktank.com>
+Subject: [PATCH REPOST 4/6] rbd: define generalized osd request op routines
+Date: Fri, 04 Jan 2013 09:06:45 -0600
+Message-ID: <50E6F005.10909@inktank.com>
 References: <50E6EF5F.9080200@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:46176 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754854Ab3ADPGc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 10:06:32 -0500
-Received: by mail-ie0-f182.google.com with SMTP id s9so19925159iec.27
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 07:06:32 -0800 (PST)
+Received: from mail-ia0-f180.google.com ([209.85.210.180]:37364 "EHLO
+	mail-ia0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754854Ab3ADPGr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 10:06:47 -0500
+Received: by mail-ia0-f180.google.com with SMTP id t4so14092396iag.11
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 07:06:47 -0800 (PST)
 In-Reply-To: <50E6EF5F.9080200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Move the initialization of a read or write operation's offset,
-length, and payload length fields into rbd_create_rw_op().
+Create a baseline function to encapsulate the creation of osd
+requests, along with a matching function to destroy them.  For now
+this just duplicates what rbd_create_rw_op() does for read and write
+operations, but the next patches will expand on this.
 
-This will actually get removed in the next patch, but it finishes
-the consolidation of setting these fields at osd op creation time.
+Since rbd_create_rw_op() is no longer used for read or write
+requests, the special handling in that function for those types can
+be removed.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   36 ++++++++++++++++--------------------
- 1 file changed, 16 insertions(+), 20 deletions(-)
+ drivers/block/rbd.c |   52
++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 40 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 49e500f..685d049 100644
+index 685d049..6fa6ba7 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1025,19 +1025,23 @@ out_err:
- 	return NULL;
- }
-
--static struct ceph_osd_req_op *rbd_create_rw_op(int opcode, u32
-payload_len)
-+static struct ceph_osd_req_op *rbd_create_rw_op(int opcode, u64 ofs,
-u64 len)
- {
- 	struct ceph_osd_req_op *op;
-
- 	op = kzalloc(sizeof (*op), GFP_NOIO);
- 	if (!op)
+@@ -1034,14 +1034,6 @@ static struct ceph_osd_req_op
+*rbd_create_rw_op(int opcode, u64 ofs, u64 len)
  		return NULL;
--	/*
--	 * op extent offset and length will be set later on
--	 * after ceph_calc_file_object_mapping().
--	 */
-+
+
  	op->op = opcode;
--	op->payload_len = payload_len;
-+	if (opcode == CEPH_OSD_OP_READ || opcode == CEPH_OSD_OP_WRITE) {
-+		op->extent.offset = ofs;
-+		op->extent.length = len;
-+		if (opcode == CEPH_OSD_OP_WRITE) {
-+			rbd_assert(len <= (u64) U32_MAX);
-+			op->payload_len = len;
-+		}
-+	}
+-	if (opcode == CEPH_OSD_OP_READ || opcode == CEPH_OSD_OP_WRITE) {
+-		op->extent.offset = ofs;
+-		op->extent.length = len;
+-		if (opcode == CEPH_OSD_OP_WRITE) {
+-			rbd_assert(len <= (u64) U32_MAX);
+-			op->payload_len = len;
+-		}
+-	}
 
  	return op;
  }
-@@ -1297,7 +1301,6 @@ static int rbd_do_op(struct request *rq,
- 	u64 seg_len;
- 	int ret;
- 	struct ceph_osd_req_op *op;
--	u32 payload_len;
- 	int opcode;
- 	int flags;
- 	u64 snapid;
-@@ -1312,22 +1315,17 @@ static int rbd_do_op(struct request *rq,
- 		opcode = CEPH_OSD_OP_WRITE;
- 		flags = CEPH_OSD_FLAG_WRITE|CEPH_OSD_FLAG_ONDISK;
- 		snapid = CEPH_NOSNAP;
--		payload_len = seg_len;
- 	} else {
- 		opcode = CEPH_OSD_OP_READ;
- 		flags = CEPH_OSD_FLAG_READ;
- 		rbd_assert(!snapc);
- 		snapid = rbd_dev->spec->snap_id;
--		payload_len = 0;
+@@ -1051,6 +1043,42 @@ static void rbd_destroy_op(struct ceph_osd_req_op
+*op)
+ 	kfree(op);
+ }
+
++struct ceph_osd_req_op *rbd_osd_req_op_create(u16 opcode, ...)
++{
++	struct ceph_osd_req_op *op;
++	va_list args;
++
++	op = kzalloc(sizeof (*op), GFP_NOIO);
++	if (!op)
++		return NULL;
++	op->op = opcode;
++	va_start(args, opcode);
++	switch (opcode) {
++	case CEPH_OSD_OP_READ:
++	case CEPH_OSD_OP_WRITE:
++		/* rbd_osd_req_op_create(READ, offset, length) */
++		/* rbd_osd_req_op_create(WRITE, offset, length) */
++		op->extent.offset = va_arg(args, u64);
++		op->extent.length = va_arg(args, u64);
++		if (opcode == CEPH_OSD_OP_WRITE)
++			op->payload_len = op->extent.length;
++		break;
++	default:
++		rbd_warn(NULL, "unsupported opcode %hu\n", opcode);
++		kfree(op);
++		op = NULL;
++		break;
++	}
++	va_end(args);
++
++	return op;
++}
++
++static void rbd_osd_req_op_destroy(struct ceph_osd_req_op *op)
++{
++	kfree(op);
++}
++
+ static void rbd_coll_end_req_index(struct request *rq,
+ 				   struct rbd_req_coll *coll,
+ 				   int index,
+@@ -1323,7 +1351,7 @@ static int rbd_do_op(struct request *rq,
  	}
 
  	ret = -ENOMEM;
--	op = rbd_create_rw_op(opcode, payload_len);
-+	op = rbd_create_rw_op(opcode, seg_ofs, seg_len);
+-	op = rbd_create_rw_op(opcode, seg_ofs, seg_len);
++	op = rbd_osd_req_op_create(opcode, seg_ofs, seg_len);
  	if (!op)
  		goto done;
--	op->extent.offset = seg_ofs;
--	op->extent.length = seg_len;
--	op->payload_len = payload_len;
 
- 	/* we've taken care of segment sizes earlier when we
- 	   cloned the bios. We should never have a segment
-@@ -1363,12 +1361,9 @@ static int rbd_req_sync_read(struct rbd_device
+@@ -1343,7 +1371,7 @@ static int rbd_do_op(struct request *rq,
+ 	if (ret < 0)
+ 		rbd_coll_end_req_index(rq, coll, coll_index,
+ 					(s32) ret, seg_len);
+-	rbd_destroy_op(op);
++	rbd_osd_req_op_destroy(op);
+ done:
+ 	kfree(seg_name);
+ 	return ret;
+@@ -1361,13 +1389,13 @@ static int rbd_req_sync_read(struct rbd_device
 *rbd_dev,
  	struct ceph_osd_req_op *op;
  	int ret;
 
--	op = rbd_create_rw_op(CEPH_OSD_OP_READ, 0);
-+	op = rbd_create_rw_op(CEPH_OSD_OP_READ, ofs, len);
+-	op = rbd_create_rw_op(CEPH_OSD_OP_READ, ofs, len);
++	op = rbd_osd_req_op_create(CEPH_OSD_OP_READ, ofs, len);
  	if (!op)
  		return -ENOMEM;
--	op->extent.offset = ofs;
--	op->extent.length = len;
--	op->payload_len = 0;
 
  	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ,
  			       op, object_name, ofs, len, buf, NULL, ver);
-@@ -1387,7 +1382,7 @@ static int rbd_req_sync_notify_ack(struct
-rbd_device *rbd_dev,
- 	struct ceph_osd_req_op *op;
- 	int ret;
+-	rbd_destroy_op(op);
++	rbd_osd_req_op_destroy(op);
 
--	op = rbd_create_rw_op(CEPH_OSD_OP_NOTIFY_ACK, 0);
-+	op = rbd_create_rw_op(CEPH_OSD_OP_NOTIFY_ACK, 0, 0);
- 	if (!op)
- 		return -ENOMEM;
-
-@@ -1438,7 +1433,7 @@ static int rbd_req_sync_watch(struct rbd_device
-*rbd_dev, int start)
- 	__le64 version = 0;
- 	int ret;
-
--	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
-+	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0, 0);
- 	if (!op)
- 		return -ENOMEM;
-
-@@ -1501,9 +1496,10 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 	 * operation.
- 	 */
- 	payload_size = class_name_len + method_name_len + outbound_size;
--	op = rbd_create_rw_op(CEPH_OSD_OP_CALL, payload_size);
-+	op = rbd_create_rw_op(CEPH_OSD_OP_CALL, 0, 0);
- 	if (!op)
- 		return -ENOMEM;
-+	op->payload_len = payload_size;
-
- 	op->cls.class_name = class_name;
- 	op->cls.class_len = (__u8) class_name_len;
+ 	return ret;
+ }
 -- 
 1.7.9.5
 
