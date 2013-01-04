@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 01/29] mds: don't renew revoking lease
-Date: Fri,  4 Jan 2013 17:01:52 +0800
-Message-ID: <1357290140-17044-2-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 03/29] mds: don't trigger assertion when discover races with rename
+Date: Fri,  4 Jan 2013 17:01:54 +0800
+Message-ID: <1357290140-17044-4-git-send-email-zheng.z.yan@intel.com>
 References: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:51114 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752091Ab3ADJC0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Jan 2013 04:02:26 -0500
+	id S1752605Ab3ADJC3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Jan 2013 04:02:29 -0500
 In-Reply-To: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,51 +16,69 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-MDS may receives lease renew request while lease is being revoked,
-just ignore the renew request.
+Discover reply that adds replica dentry and inode can race with rename
+if slave request for rename sends discover and waits, but waked up by
+reply for different discover.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Locker.cc | 26 ++++++++++++++------------
- 1 file changed, 14 insertions(+), 12 deletions(-)
+ src/mds/CDentry.cc | 17 ++++++-----------
+ src/mds/MDCache.cc |  5 ++---
+ 2 files changed, 8 insertions(+), 14 deletions(-)
 
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 76708ec..c8cd236 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -2914,18 +2914,20 @@ void Locker::handle_client_lease(MClientLease *m)
+diff --git a/src/mds/CDentry.cc b/src/mds/CDentry.cc
+index 7dd88ac..5ff6e61 100644
+--- a/src/mds/CDentry.cc
++++ b/src/mds/CDentry.cc
+@@ -439,23 +439,18 @@ void CDentry::decode_replica(bufferlist::iterator& p, bool is_new)
  
-   case CEPH_MDS_LEASE_RENEW:
-     {
--      dout(7) << "handle_client_lease client." << client
--	      << " renew on " << *dn << dendl;
--      int pool = 1;   // fixme.. do something smart!
--      m->h.duration_ms = (int)(1000 * mdcache->client_lease_durations[pool]);
--      m->h.seq = ++l->seq;
--      m->clear_payload();
--      
--      utime_t now = ceph_clock_now(g_ceph_context);
--      now += mdcache->client_lease_durations[pool];
--      mdcache->touch_client_lease(l, pool, now);
--      
--      mds->send_message_client_counted(m, m->get_connection());
-+      dout(7) << "handle_client_lease client." << client << " renew on " << *dn
-+	      << (!dn->lock.can_lease(client)?", revoking lease":"") << dendl;
-+      if (dn->lock.can_lease(client)) {
-+	int pool = 1;   // fixme.. do something smart!
-+	m->h.duration_ms = (int)(1000 * mdcache->client_lease_durations[pool]);
-+	m->h.seq = ++l->seq;
-+	m->clear_payload();
+   inodeno_t rino;
+   unsigned char rdtype;
++  __s32 ls;
+   ::decode(rino, p);
+   ::decode(rdtype, p);
+-  if (rino) {
+-    if (linkage.is_null())
+-      dir->link_remote_inode(this, rino, rdtype);
+-    else
+-      assert(linkage.is_remote() && linkage.remote_ino == rino);
+-  }
+-  
+-  __s32 ls;
+   ::decode(ls, p);
+-  if (is_new)
 +
-+	utime_t now = ceph_clock_now(g_ceph_context);
-+	now += mdcache->client_lease_durations[pool];
-+	mdcache->touch_client_lease(l, pool, now);
-+
-+	mds->send_message_client_counted(m, m->get_connection());
-+      }
-     }
-     break;
++  if (is_new) {
++    if (rino)
++      dir->link_remote_inode(this, rino, rdtype);
+     lock.set_state(ls);
++  }
+ }
  
+-
+-
+ // ----------------------------
+ // locking
+ 
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 0a88714..5014b5d 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -9150,12 +9150,11 @@ CInode *MDCache::add_replica_inode(bufferlist::iterator& p, CDentry *dn, list<Co
+   } else {
+     in->decode_replica(p, false);
+     dout(10) << "add_replica_inode had " << *in << dendl;
+-    assert(!dn || dn->get_linkage()->get_inode() == in);
+   }
+ 
+   if (dn) {
+-    assert(dn->get_linkage()->is_primary());
+-    assert(dn->get_linkage()->get_inode() == in);
++    if (!dn->get_linkage()->is_primary() || dn->get_linkage()->get_inode() != in)
++      dout(10) << "add_replica_inode different linkage in dentry " << *dn << dendl;
+     
+     dn->get_dir()->take_ino_waiting(in->ino(), finished);
+   }
 -- 
 1.7.11.7
 
