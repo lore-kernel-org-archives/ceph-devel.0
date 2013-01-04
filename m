@@ -1,62 +1,150 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 2/6] rbd: don't assign extent info in rbd_req_sync_op()
-Date: Fri, 04 Jan 2013 09:06:11 -0600
-Message-ID: <50E6EFE3.1040103@inktank.com>
+Subject: [PATCH REPOST 3/6] rbd: initialize off and len in rbd_create_rw_op()
+Date: Fri, 04 Jan 2013 09:06:31 -0600
+Message-ID: <50E6EFF7.5000303@inktank.com>
 References: <50E6EF5F.9080200@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:34089 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754818Ab3ADPGO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 10:06:14 -0500
-Received: by mail-ie0-f173.google.com with SMTP id e13so19717643iej.4
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 07:06:14 -0800 (PST)
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:46176 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754854Ab3ADPGc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 10:06:32 -0500
+Received: by mail-ie0-f182.google.com with SMTP id s9so19925159iec.27
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 07:06:32 -0800 (PST)
 In-Reply-To: <50E6EF5F.9080200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Move the assignment of the extent offset and length and payload
-length out of rbd_req_sync_op() and into its caller in the one spot
-where a read (and note--no write) operation might be initiated.
+Move the initialization of a read or write operation's offset,
+length, and payload length fields into rbd_create_rw_op().
+
+This will actually get removed in the next patch, but it finishes
+the consolidation of setting these fields at osd op creation time.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   10 +++-------
- 1 file changed, 3 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c |   36 ++++++++++++++++--------------------
+ 1 file changed, 16 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4ce9981..49e500f 100644
+index 49e500f..685d049 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1262,13 +1262,6 @@ static int rbd_req_sync_op(struct rbd_device
-*rbd_dev,
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
+@@ -1025,19 +1025,23 @@ out_err:
+ 	return NULL;
+ }
 
--	if (op->op == CEPH_OSD_OP_READ || op->op == CEPH_OSD_OP_WRITE) {
--		op->extent.offset = ofs;
--		op->extent.length = inbound_size;
--		if (op->op == CEPH_OSD_OP_WRITE)
--			op->payload_len = inbound_size;
--	}
--
- 	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
- 			  object_name, ofs, inbound_size, NULL,
- 			  pages, num_pages,
-@@ -1373,6 +1366,9 @@ static int rbd_req_sync_read(struct rbd_device
+-static struct ceph_osd_req_op *rbd_create_rw_op(int opcode, u32
+payload_len)
++static struct ceph_osd_req_op *rbd_create_rw_op(int opcode, u64 ofs,
+u64 len)
+ {
+ 	struct ceph_osd_req_op *op;
+
+ 	op = kzalloc(sizeof (*op), GFP_NOIO);
+ 	if (!op)
+ 		return NULL;
+-	/*
+-	 * op extent offset and length will be set later on
+-	 * after ceph_calc_file_object_mapping().
+-	 */
++
+ 	op->op = opcode;
+-	op->payload_len = payload_len;
++	if (opcode == CEPH_OSD_OP_READ || opcode == CEPH_OSD_OP_WRITE) {
++		op->extent.offset = ofs;
++		op->extent.length = len;
++		if (opcode == CEPH_OSD_OP_WRITE) {
++			rbd_assert(len <= (u64) U32_MAX);
++			op->payload_len = len;
++		}
++	}
+
+ 	return op;
+ }
+@@ -1297,7 +1301,6 @@ static int rbd_do_op(struct request *rq,
+ 	u64 seg_len;
+ 	int ret;
+ 	struct ceph_osd_req_op *op;
+-	u32 payload_len;
+ 	int opcode;
+ 	int flags;
+ 	u64 snapid;
+@@ -1312,22 +1315,17 @@ static int rbd_do_op(struct request *rq,
+ 		opcode = CEPH_OSD_OP_WRITE;
+ 		flags = CEPH_OSD_FLAG_WRITE|CEPH_OSD_FLAG_ONDISK;
+ 		snapid = CEPH_NOSNAP;
+-		payload_len = seg_len;
+ 	} else {
+ 		opcode = CEPH_OSD_OP_READ;
+ 		flags = CEPH_OSD_FLAG_READ;
+ 		rbd_assert(!snapc);
+ 		snapid = rbd_dev->spec->snap_id;
+-		payload_len = 0;
+ 	}
+
+ 	ret = -ENOMEM;
+-	op = rbd_create_rw_op(opcode, payload_len);
++	op = rbd_create_rw_op(opcode, seg_ofs, seg_len);
+ 	if (!op)
+ 		goto done;
+-	op->extent.offset = seg_ofs;
+-	op->extent.length = seg_len;
+-	op->payload_len = payload_len;
+
+ 	/* we've taken care of segment sizes earlier when we
+ 	   cloned the bios. We should never have a segment
+@@ -1363,12 +1361,9 @@ static int rbd_req_sync_read(struct rbd_device
 *rbd_dev,
- 	op = rbd_create_rw_op(CEPH_OSD_OP_READ, 0);
+ 	struct ceph_osd_req_op *op;
+ 	int ret;
+
+-	op = rbd_create_rw_op(CEPH_OSD_OP_READ, 0);
++	op = rbd_create_rw_op(CEPH_OSD_OP_READ, ofs, len);
  	if (!op)
  		return -ENOMEM;
-+	op->extent.offset = ofs;
-+	op->extent.length = len;
-+	op->payload_len = 0;
+-	op->extent.offset = ofs;
+-	op->extent.length = len;
+-	op->payload_len = 0;
 
  	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ,
  			       op, object_name, ofs, len, buf, NULL, ver);
+@@ -1387,7 +1382,7 @@ static int rbd_req_sync_notify_ack(struct
+rbd_device *rbd_dev,
+ 	struct ceph_osd_req_op *op;
+ 	int ret;
+
+-	op = rbd_create_rw_op(CEPH_OSD_OP_NOTIFY_ACK, 0);
++	op = rbd_create_rw_op(CEPH_OSD_OP_NOTIFY_ACK, 0, 0);
+ 	if (!op)
+ 		return -ENOMEM;
+
+@@ -1438,7 +1433,7 @@ static int rbd_req_sync_watch(struct rbd_device
+*rbd_dev, int start)
+ 	__le64 version = 0;
+ 	int ret;
+
+-	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
++	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0, 0);
+ 	if (!op)
+ 		return -ENOMEM;
+
+@@ -1501,9 +1496,10 @@ static int rbd_req_sync_exec(struct rbd_device
+*rbd_dev,
+ 	 * operation.
+ 	 */
+ 	payload_size = class_name_len + method_name_len + outbound_size;
+-	op = rbd_create_rw_op(CEPH_OSD_OP_CALL, payload_size);
++	op = rbd_create_rw_op(CEPH_OSD_OP_CALL, 0, 0);
+ 	if (!op)
+ 		return -ENOMEM;
++	op->payload_len = payload_size;
+
+ 	op->cls.class_name = class_name;
+ 	op->cls.class_len = (__u8) class_name_len;
 -- 
 1.7.9.5
 
