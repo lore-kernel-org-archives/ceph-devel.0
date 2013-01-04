@@ -1,92 +1,88 @@
 From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH REPOST] rbd: separate layout init
-Date: Thu, 03 Jan 2013 16:51:08 -0800
-Message-ID: <50E6277C.3060207@inktank.com>
-References: <50E60C49.3020207@inktank.com>
+Subject: Re: [PATCH REPOST 2/4] rbd: add warning messages for missing arguments
+Date: Thu, 03 Jan 2013 17:10:40 -0800
+Message-ID: <50E62C10.1010608@inktank.com>
+References: <50E5D7A9.6040101@inktank.com> <50E5D7FB.9040906@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f52.google.com ([209.85.210.52]:60754 "EHLO
-	mail-da0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754161Ab3ADAvL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 19:51:11 -0500
-Received: by mail-da0-f52.google.com with SMTP id f10so7206523dak.25
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 16:51:11 -0800 (PST)
-In-Reply-To: <50E60C49.3020207@inktank.com>
+Received: from mail-da0-f54.google.com ([209.85.210.54]:48565 "EHLO
+	mail-da0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753901Ab3ADBKo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 20:10:44 -0500
+Received: by mail-da0-f54.google.com with SMTP id n2so7285410dad.41
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 17:10:43 -0800 (PST)
+In-Reply-To: <50E5D7FB.9040906@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-...and implementing a bit of new safety about pool_id.
+Do you want to include in the message some kind of indication which 
+operation/function is involved?  (this is definitely better, but even 
+better might be to add "rbd add" or "rbd_add_parse_args" to the msgs)
 
-Reviewed-by: Dan Mick <dan.mick@inktank.com>
-
-
-On 01/03/2013 02:55 PM, Alex Elder wrote:
-> Pull a block of code that initializes the layout structure in an osd
-> request into its own function so it can be reused.
+On 01/03/2013 11:11 AM, Alex Elder wrote:
+> Tell the user (via dmesg) what was wrong with the arguments provided
+> via /sys/bus/rbd/add.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   23 ++++++++++++++---------
->   1 file changed, 14 insertions(+), 9 deletions(-)
+>   drivers/block/rbd.c |   24 ++++++++++++++++--------
+>   1 file changed, 16 insertions(+), 8 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fd6a708..8e030d1 100644
+> index 635b81d..31da8c5 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -54,6 +54,7 @@
+> @@ -3244,8 +3244,10 @@ static int rbd_add_parse_args(const char *buf,
+>   	/* The first four tokens are required */
 >
->   /* It might be useful to have this defined elsewhere too */
+>   	len = next_token(&buf);
+> -	if (!len)
+> -		return -EINVAL;	/* Missing monitor address(es) */
+> +	if (!len) {
+> +		rbd_warn(NULL, "no monitor address(es) provided");
+> +		return -EINVAL;
+> +	}
+>   	mon_addrs = buf;
+>   	mon_addrs_size = len + 1;
+>   	buf += len;
+> @@ -3254,8 +3256,10 @@ static int rbd_add_parse_args(const char *buf,
+>   	options = dup_token(&buf, NULL);
+>   	if (!options)
+>   		return -ENOMEM;
+> -	if (!*options)
+> -		goto out_err;	/* Missing options */
+> +	if (!*options) {
+> +		rbd_warn(NULL, "no options provided");
+> +		goto out_err;
+> +	}
 >
-> +#define	U32_MAX	((u32) (~0U))
->   #define	U64_MAX	((u64) (~0ULL))
+>   	spec = rbd_spec_alloc();
+>   	if (!spec)
+> @@ -3264,14 +3268,18 @@ static int rbd_add_parse_args(const char *buf,
+>   	spec->pool_name = dup_token(&buf, NULL);
+>   	if (!spec->pool_name)
+>   		goto out_mem;
+> -	if (!*spec->pool_name)
+> -		goto out_err;	/* Missing pool name */
+> +	if (!*spec->pool_name) {
+> +		rbd_warn(NULL, "no pool name provided");
+> +		goto out_err;
+> +	}
 >
->   #define RBD_DRV_NAME "rbd"
-> @@ -1096,6 +1097,16 @@ static void rbd_coll_end_req(struct rbd_request
-> *rbd_req,
->   				ret, len);
->   }
+>   	spec->image_name = dup_token(&buf, NULL);
+>   	if (!spec->image_name)
+>   		goto out_mem;
+> -	if (!*spec->image_name)
+> -		goto out_err;	/* Missing image name */
+> +	if (!*spec->image_name) {
+> +		rbd_warn(NULL, "no image name provided");
+> +		goto out_err;
+> +	}
 >
-> +static void rbd_layout_init(struct ceph_file_layout *layout, u64 pool_id)
-> +{
-> +	memset(layout, 0, sizeof (*layout));
-> +	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> +	layout->fl_stripe_count = cpu_to_le32(1);
-> +	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> +	rbd_assert(pool_id <= (u64) U32_MAX);
-> +	layout->fl_pg_pool = cpu_to_le32((u32) pool_id);
-> +}
-> +
->   /*
->    * Send ceph osd request
->    */
-> @@ -1117,7 +1128,6 @@ static int rbd_do_request(struct request *rq,
->   			  u64 *ver)
->   {
->   	struct ceph_osd_request *osd_req;
-> -	struct ceph_file_layout *layout;
->   	int ret;
->   	u64 bno;
->   	struct timespec mtime = CURRENT_TIME;
-> @@ -1161,14 +1171,9 @@ static int rbd_do_request(struct request *rq,
->   	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
->   	osd_req->r_oid_len = strlen(osd_req->r_oid);
->
-> -	layout = &osd_req->r_file_layout;
-> -	memset(layout, 0, sizeof(*layout));
-> -	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> -	layout->fl_stripe_count = cpu_to_le32(1);
-> -	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> -	layout->fl_pg_pool = cpu_to_le32((int) rbd_dev->spec->pool_id);
-> -	ret = ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
-> -				   osd_req, ops);
-> +	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
-> +	ret = ceph_calc_raw_layout(osdc, &osd_req->r_file_layout,
-> +				snapid, ofs, &len, &bno, osd_req, ops);
->   	rbd_assert(ret == 0);
->
->   	ceph_osdc_build_request(osd_req, ofs, &len,
+>   	/*
+>   	 * Snapshot name is optional; default is to use "-"
 >
