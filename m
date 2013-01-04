@@ -1,321 +1,159 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 3/4] rbd: there is really only one op
-Date: Fri, 04 Jan 2013 08:45:39 -0600
-Message-ID: <50E6EB13.5040405@inktank.com>
+Subject: [PATCH REPOST 4/4] rbd: assume single op in a request
+Date: Fri, 04 Jan 2013 08:45:54 -0600
+Message-ID: <50E6EB22.1010605@inktank.com>
 References: <50E6EA94.1040001@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:49803 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754781Ab3ADOpl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 09:45:41 -0500
-Received: by mail-ie0-f181.google.com with SMTP id 16so19864512iea.12
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 06:45:40 -0800 (PST)
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:34711 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754765Ab3ADOp4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 09:45:56 -0500
+Received: by mail-ie0-f177.google.com with SMTP id k13so19173124iea.8
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 06:45:55 -0800 (PST)
 In-Reply-To: <50E6EA94.1040001@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Throughout the rbd code there are spots where it appears we can
-handle an osd request containing more than one osd request op.
+We now know that every of rbd_req_sync_op() passes an array of
+exactly one operation, as evidenced by all callers passing 1 as its
+num_op argument.  So get rid of that argument, assuming a single op.
 
-But that is only the way it appears.  In fact, currently only one
-operation at a time can be supported, and supporting more than
-one will require much more than fleshing out the support that's
-there now.
-
-This patch changes names to make it perfectly clear that anywhere
-we're dealing with a block of ops, we're in fact dealing with
-exactly one of them.  We'll be able to simplify some things as
-a result.
-
-When multiple op support is implemented, we can update things again
-accordingly.
+Similarly, we now know that all callers of rbd_do_request() pass 1
+as the num_op value, so that parameter can be eliminated as well.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |  118
-++++++++++++++++++++++++---------------------------
- 1 file changed, 56 insertions(+), 62 deletions(-)
+ drivers/block/rbd.c |   28 +++++++++++++---------------
+ 1 file changed, 13 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 0e6cc67..d3472db 100644
+index d3472db..a57d6e9 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1023,32 +1023,26 @@ out_err:
- 	return NULL;
- }
+@@ -1113,8 +1113,7 @@ static int rbd_do_request(struct request *rq,
+ 			  struct page **pages,
+ 			  int num_pages,
+ 			  int flags,
+-			  unsigned int num_op,
+-			  struct ceph_osd_req_op *ops,
++			  struct ceph_osd_req_op *op,
+ 			  struct rbd_req_coll *coll,
+ 			  int coll_index,
+ 			  void (*rbd_cb)(struct ceph_osd_request *,
+@@ -1143,7 +1142,7 @@ static int rbd_do_request(struct request *rq,
+ 		(unsigned long long) len, coll, coll_index);
 
--/*
-- * helpers for osd request op vectors.
-- */
--static struct ceph_osd_req_op *rbd_create_rw_ops(int num_op,
--					int opcode, u32 payload_len)
-+static struct ceph_osd_req_op *rbd_create_rw_op(int opcode, u32
-payload_len)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
+ 	osdc = &rbd_dev->rbd_client->client->osdc;
+-	osd_req = ceph_osdc_alloc_request(osdc, snapc, num_op, false, GFP_NOIO);
++	osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_NOIO);
+ 	if (!osd_req) {
+ 		ret = -ENOMEM;
+ 		goto done_pages;
+@@ -1169,10 +1168,10 @@ static int rbd_do_request(struct request *rq,
 
--	ops = kzalloc(num_op * sizeof (*ops), GFP_NOIO);
--	if (!ops)
-+	op = kzalloc(sizeof (*op), GFP_NOIO);
-+	if (!op)
- 		return NULL;
--
--	ops[0].op = opcode;
--
- 	/*
- 	 * op extent offset and length will be set later on
- 	 * in calc_raw_layout()
- 	 */
--	ops[0].payload_len = payload_len;
-+	op->op = opcode;
-+	op->payload_len = payload_len;
+ 	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
+ 	ret = ceph_calc_raw_layout(&osd_req->r_file_layout,
+-				ofs, &len, &bno, osd_req, ops);
++				ofs, &len, &bno, osd_req, op);
+ 	rbd_assert(ret == 0);
 
--	return ops;
-+	return op;
- }
+-	ceph_osdc_build_request(osd_req, ofs, len, num_op, ops,
++	ceph_osdc_build_request(osd_req, ofs, len, 1, op,
+ 				snapc, snapid, &mtime);
 
--static void rbd_destroy_ops(struct ceph_osd_req_op *ops)
-+static void rbd_destroy_op(struct ceph_osd_req_op *op)
- {
--	kfree(ops);
-+	kfree(op);
- }
+ 	if (linger_req) {
+@@ -1255,8 +1254,7 @@ static void rbd_simple_req_cb(struct
+ceph_osd_request *osd_req,
+  */
+ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+ 			   int flags,
+-			   unsigned int num_op,
+-			   struct ceph_osd_req_op *ops,
++			   struct ceph_osd_req_op *op,
+ 			   const char *object_name,
+ 			   u64 ofs, u64 inbound_size,
+ 			   char *inbound,
+@@ -1267,7 +1265,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+ 	struct page **pages;
+ 	int num_pages;
 
- static void rbd_coll_end_req_index(struct request *rq,
-@@ -1314,7 +1308,7 @@ static int rbd_do_op(struct request *rq,
- 	u64 seg_ofs;
- 	u64 seg_len;
- 	int ret;
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	u32 payload_len;
- 	int opcode;
- 	int flags;
-@@ -1340,8 +1334,8 @@ static int rbd_do_op(struct request *rq,
- 	}
+-	rbd_assert(ops != NULL);
++	rbd_assert(op != NULL);
 
- 	ret = -ENOMEM;
--	ops = rbd_create_rw_ops(1, opcode, payload_len);
--	if (!ops)
-+	op = rbd_create_rw_op(opcode, payload_len);
-+	if (!op)
- 		goto done;
-
- 	/* we've taken care of segment sizes earlier when we
-@@ -1354,13 +1348,13 @@ static int rbd_do_op(struct request *rq,
+ 	num_pages = calc_pages_for(ofs, inbound_size);
+ 	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
+@@ -1278,7 +1276,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+ 			  object_name, ofs, inbound_size, NULL,
+ 			  pages, num_pages,
+ 			  flags,
+-			  num_op, ops,
++			  op,
+ 			  NULL, 0,
+ 			  NULL,
+ 			  linger_req, ver);
+@@ -1348,7 +1346,7 @@ static int rbd_do_op(struct request *rq,
  			     bio,
  			     NULL, 0,
  			     flags,
--			     1, ops,
-+			     1, op,
+-			     1, op,
++			     op,
  			     coll, coll_index,
  			     rbd_req_cb, 0, NULL);
  	if (ret < 0)
- 		rbd_coll_end_req_index(rq, coll, coll_index,
- 					(s32) ret, seg_len);
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
- done:
- 	kfree(seg_name);
- 	return ret;
-@@ -1375,16 +1369,16 @@ static int rbd_req_sync_read(struct rbd_device
+@@ -1377,7 +1375,7 @@ static int rbd_req_sync_read(struct rbd_device
 *rbd_dev,
- 			  char *buf,
- 			  u64 *ver)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	int ret;
-
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_READ, 0);
--	if (!ops)
-+	op = rbd_create_rw_op(CEPH_OSD_OP_READ, 0);
-+	if (!op)
  		return -ENOMEM;
 
  	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ,
--			       1, ops, object_name, ofs, len, buf, NULL, ver);
--	rbd_destroy_ops(ops);
-+			       1, op, object_name, ofs, len, buf, NULL, ver);
-+	rbd_destroy_op(op);
+-			       1, op, object_name, ofs, len, buf, NULL, ver);
++			       op, object_name, ofs, len, buf, NULL, ver);
+ 	rbd_destroy_op(op);
 
  	return ret;
- }
-@@ -1396,26 +1390,26 @@ static int rbd_req_sync_notify_ack(struct
+@@ -1405,7 +1403,7 @@ static int rbd_req_sync_notify_ack(struct
 rbd_device *rbd_dev,
- 				   u64 ver,
- 				   u64 notify_id)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	int ret;
-
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY_ACK, 0);
--	if (!ops)
-+	op = rbd_create_rw_op(CEPH_OSD_OP_NOTIFY_ACK, 0);
-+	if (!op)
- 		return -ENOMEM;
-
--	ops[0].watch.ver = cpu_to_le64(ver);
--	ops[0].watch.cookie = notify_id;
--	ops[0].watch.flag = 0;
-+	op->watch.ver = cpu_to_le64(ver);
-+	op->watch.cookie = notify_id;
-+	op->watch.flag = 0;
-
- 	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
  			  rbd_dev->header_name, 0, 0, NULL,
  			  NULL, 0,
  			  CEPH_OSD_FLAG_READ,
--			  1, ops,
-+			  1, op,
+-			  1, op,
++			  op,
  			  NULL, 0,
  			  rbd_simple_req_cb, 0, NULL);
 
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
- 	return ret;
- }
-
-@@ -1444,12 +1438,12 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
-  */
- static int rbd_req_sync_watch(struct rbd_device *rbd_dev)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	int ret;
-
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_WATCH, 0);
--	if (!ops)
-+	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
-+	if (!op)
- 		return -ENOMEM;
-
- 	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0,
-@@ -1457,13 +1451,13 @@ static int rbd_req_sync_watch(struct rbd_device
+@@ -1457,7 +1455,7 @@ static int rbd_req_sync_watch(struct rbd_device
 *rbd_dev)
- 	if (ret < 0)
- 		goto fail;
-
--	ops[0].watch.ver = cpu_to_le64(rbd_dev->header.obj_version);
--	ops[0].watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
--	ops[0].watch.flag = 1;
-+	op->watch.ver = cpu_to_le64(rbd_dev->header.obj_version);
-+	op->watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
-+	op->watch.flag = 1;
 
  	ret = rbd_req_sync_op(rbd_dev,
  			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
--			      1, ops,
-+			      1, op,
+-			      1, op,
++			      op,
  			      rbd_dev->header_name,
  			      0, 0, NULL,
  			      &rbd_dev->watch_request, NULL);
-@@ -1471,14 +1465,14 @@ static int rbd_req_sync_watch(struct rbd_device
+@@ -1494,7 +1492,7 @@ static int rbd_req_sync_unwatch(struct rbd_device
 *rbd_dev)
- 	if (ret < 0)
- 		goto fail_event;
-
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
- 	return 0;
-
- fail_event:
- 	ceph_osdc_cancel_event(rbd_dev->watch_event);
- 	rbd_dev->watch_event = NULL;
- fail:
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
- 	return ret;
- }
-
-@@ -1487,25 +1481,25 @@ fail:
-  */
- static int rbd_req_sync_unwatch(struct rbd_device *rbd_dev)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	int ret;
-
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_WATCH, 0);
--	if (!ops)
-+	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
-+	if (!op)
- 		return -ENOMEM;
-
--	ops[0].watch.ver = 0;
--	ops[0].watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
--	ops[0].watch.flag = 0;
-+	op->watch.ver = 0;
-+	op->watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
-+	op->watch.flag = 0;
 
  	ret = rbd_req_sync_op(rbd_dev,
  			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
--			      1, ops,
-+			      1, op,
+-			      1, op,
++			      op,
  			      rbd_dev->header_name,
  			      0, 0, NULL, NULL, NULL);
 
-
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
- 	ceph_osdc_cancel_event(rbd_dev->watch_event);
- 	rbd_dev->watch_event = NULL;
- 	return ret;
-@@ -1524,7 +1518,7 @@ static int rbd_req_sync_exec(struct rbd_device
+@@ -1545,7 +1543,7 @@ static int rbd_req_sync_exec(struct rbd_device
 *rbd_dev,
- 			     size_t inbound_size,
- 			     u64 *ver)
- {
--	struct ceph_osd_req_op *ops;
-+	struct ceph_osd_req_op *op;
- 	int class_name_len = strlen(class_name);
- 	int method_name_len = strlen(method_name);
- 	int payload_size;
-@@ -1539,23 +1533,23 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 	 * operation.
- 	 */
- 	payload_size = class_name_len + method_name_len + outbound_size;
--	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_CALL, payload_size);
--	if (!ops)
-+	op = rbd_create_rw_op(CEPH_OSD_OP_CALL, payload_size);
-+	if (!op)
- 		return -ENOMEM;
+ 	op->cls.indata = outbound;
+ 	op->cls.indata_len = outbound_size;
 
--	ops[0].cls.class_name = class_name;
--	ops[0].cls.class_len = (__u8) class_name_len;
--	ops[0].cls.method_name = method_name;
--	ops[0].cls.method_len = (__u8) method_name_len;
--	ops[0].cls.argc = 0;
--	ops[0].cls.indata = outbound;
--	ops[0].cls.indata_len = outbound_size;
-+	op->cls.class_name = class_name;
-+	op->cls.class_len = (__u8) class_name_len;
-+	op->cls.method_name = method_name;
-+	op->cls.method_len = (__u8) method_name_len;
-+	op->cls.argc = 0;
-+	op->cls.indata = outbound;
-+	op->cls.indata_len = outbound_size;
-
--	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, 1, ops,
-+	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, 1, op,
+-	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, 1, op,
++	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, op,
  			       object_name, 0, inbound_size, inbound,
  			       NULL, ver);
 
--	rbd_destroy_ops(ops);
-+	rbd_destroy_op(op);
-
- 	dout("cls_exec returned %d\n", ret);
- 	return ret;
 -- 
 1.7.9.5
 
