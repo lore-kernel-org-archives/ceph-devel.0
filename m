@@ -1,12 +1,12 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 12/29] mds: fix on-going two phrase commits tracking
-Date: Fri,  4 Jan 2013 17:02:03 +0800
-Message-ID: <1357290140-17044-13-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 13/29] mds: indroduce DROPLOCKS slave request
+Date: Fri,  4 Jan 2013 17:02:04 +0800
+Message-ID: <1357290140-17044-14-git-send-email-zheng.z.yan@intel.com>
 References: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:50946 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:17477 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753677Ab3ADJCl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	id S1753697Ab3ADJCl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
 	Fri, 4 Jan 2013 04:02:41 -0500
 In-Reply-To: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -16,66 +16,117 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The slaves for two phrase commit should be mdr->more()->witnessed
-instead of mdr->more()->slaves. mdr->more()->slaves includes MDS
-for remote auth pin and lock
+In some rare case, Locker::acquire_locks() drops all acquired locks
+in order to auth pin new objects. But Locker::drop_locks only drops
+explicitly acquired remote locks, does not drop objects' version
+locks that were implicitly acquired on remote MDS. These leftover
+locks break locking order when re-acquiring _locks and may cause
+dead lock.
+
+The fix is indroduce DROPLOCKS slave request which drops all acquired
+lock on remote MDS.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Server.cc | 18 +++++++++---------
- 1 file changed, 9 insertions(+), 9 deletions(-)
+ src/mds/Locker.cc               | 30 +++++++++++++++++++++++++++---
+ src/mds/Server.cc               |  6 ++++++
+ src/messages/MMDSSlaveRequest.h |  4 ++++
+ 3 files changed, 37 insertions(+), 3 deletions(-)
 
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index 98eaba8..dec0a94 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -483,16 +483,31 @@ void Locker::_drop_rdlocks(Mutation *mut, set<CInode*> *pneed_issue)
+ 
+ void Locker::_drop_non_rdlocks(Mutation *mut, set<CInode*> *pneed_issue)
+ {
++  set<int> slaves;
++
+   while (!mut->xlocks.empty()) {
++    SimpleLock *lock = *mut->xlocks.begin();
++    MDSCacheObject *p = lock->get_parent();
++    if (!p->is_auth()) {
++      assert(lock->get_sm()->can_remote_xlock);
++      slaves.insert(p->authority().first);
++      lock->put_xlock();
++      mut->locks.erase(lock);
++      mut->xlocks.erase(lock);
++      continue;
++    }
+     bool ni = false;
+-    MDSCacheObject *p = (*mut->xlocks.begin())->get_parent();
+-    xlock_finish(*mut->xlocks.begin(), mut, &ni);
++    xlock_finish(lock, mut, &ni);
+     if (ni)
+       pneed_issue->insert((CInode*)p);
+   }
++
+   while (!mut->remote_wrlocks.empty()) {
+-    remote_wrlock_finish(mut->remote_wrlocks.begin()->first, mut->remote_wrlocks.begin()->second, mut);
++    slaves.insert(mut->remote_wrlocks.begin()->second);
++    mut->locks.erase(mut->remote_wrlocks.begin()->first);
++    mut->remote_wrlocks.erase(mut->remote_wrlocks.begin());
+   }
++
+   while (!mut->wrlocks.empty()) {
+     bool ni = false;
+     MDSCacheObject *p = (*mut->wrlocks.begin())->get_parent();
+@@ -500,6 +515,15 @@ void Locker::_drop_non_rdlocks(Mutation *mut, set<CInode*> *pneed_issue)
+     if (ni)
+       pneed_issue->insert((CInode*)p);
+   }
++
++  for (set<int>::iterator p = slaves.begin(); p != slaves.end(); p++) {
++    if (mds->mdsmap->get_state(*p) >= MDSMap::STATE_REJOIN) {
++      dout(10) << "_drop_non_rdlocks dropping remote locks on mds." << *p << dendl;
++      MMDSSlaveRequest *slavereq = new MMDSSlaveRequest(mut->reqid, mut->attempt,
++							MMDSSlaveRequest::OP_DROPLOCKS);
++      mds->send_message_mds(slavereq, *p);
++    }
++  }
+ }
+ 
+ void Locker::cancel_locking(Mutation *mut, set<CInode*> *pneed_issue)
 diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index e17f826..6700eda 100644
+index 6700eda..6097552 100644
 --- a/src/mds/Server.cc
 +++ b/src/mds/Server.cc
-@@ -4076,11 +4076,11 @@ void Server::_link_remote(MDRequest *mdr, bool inc, CDentry *dn, CInode *targeti
-   EUpdate *le = new EUpdate(mdlog, inc ? "link_remote":"unlink_remote");
-   mdlog->start_entry(le);
-   le->metablob.add_client_req(mdr->reqid, mdr->client_request->get_oldest_client_tid());
--  if (!mdr->more()->slaves.empty()) {
--    dout(20) << " noting uncommitted_slaves " << mdr->more()->slaves << dendl;
-+  if (!mdr->more()->witnessed.empty()) {
-+    dout(20) << " noting uncommitted_slaves " << mdr->more()->witnessed << dendl;
-     le->reqid = mdr->reqid;
-     le->had_slaves = true;
--    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->slaves);
-+    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->witnessed);
-   }
+@@ -1455,6 +1455,12 @@ void Server::dispatch_slave_request(MDRequest *mdr)
+     }
+     break;
  
-   if (inc) {
-@@ -4655,11 +4655,11 @@ void Server::_unlink_local(MDRequest *mdr, CDentry *dn, CDentry *straydn)
-   EUpdate *le = new EUpdate(mdlog, "unlink_local");
-   mdlog->start_entry(le);
-   le->metablob.add_client_req(mdr->reqid, mdr->client_request->get_oldest_client_tid());
--  if (!mdr->more()->slaves.empty()) {
--    dout(20) << " noting uncommitted_slaves " << mdr->more()->slaves << dendl;
-+  if (!mdr->more()->witnessed.empty()) {
-+    dout(20) << " noting uncommitted_slaves " << mdr->more()->witnessed << dendl;
-     le->reqid = mdr->reqid;
-     le->had_slaves = true;
--    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->slaves);
-+    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->witnessed);
-   }
++  case MMDSSlaveRequest::OP_DROPLOCKS:
++    mds->locker->drop_locks(mdr);
++    mdr->slave_request->put();
++    mdr->slave_request = 0;
++    break;
++
+   case MMDSSlaveRequest::OP_AUTHPIN:
+     handle_slave_auth_pin(mdr);
+     break;
+diff --git a/src/messages/MMDSSlaveRequest.h b/src/messages/MMDSSlaveRequest.h
+index 03ec582..35af81d 100644
+--- a/src/messages/MMDSSlaveRequest.h
++++ b/src/messages/MMDSSlaveRequest.h
+@@ -41,6 +41,8 @@ class MMDSSlaveRequest : public Message {
+   static const int OP_RMDIRPREP = 10;
+   static const int OP_RMDIRPREPACK = -10;
  
-   if (straydn) {
-@@ -5493,13 +5493,13 @@ void Server::handle_client_rename(MDRequest *mdr)
-   EUpdate *le = new EUpdate(mdlog, "rename");
-   mdlog->start_entry(le);
-   le->metablob.add_client_req(mdr->reqid, mdr->client_request->get_oldest_client_tid());
--  if (!mdr->more()->slaves.empty()) {
--    dout(20) << " noting uncommitted_slaves " << mdr->more()->slaves << dendl;
-+  if (!mdr->more()->witnessed.empty()) {
-+    dout(20) << " noting uncommitted_slaves " << mdr->more()->witnessed << dendl;
-     
-     le->reqid = mdr->reqid;
-     le->had_slaves = true;
-     
--    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->slaves);
-+    mds->mdcache->add_uncommitted_master(mdr->reqid, mdr->ls, mdr->more()->witnessed);
-   }
-   
-   _rename_prepare(mdr, &le->metablob, &le->client_map, srcdn, destdn, straydn);
++  static const int OP_DROPLOCKS	= 11;
++
+   static const int OP_FINISH = 17;  
+   static const int OP_COMMITTED = -18;  
+ 
+@@ -73,6 +75,8 @@ class MMDSSlaveRequest : public Message {
+     case OP_RMDIRPREP: return "rmdir_prep";
+     case OP_RMDIRPREPACK: return "rmdir_prep_ack";
+ 
++    case OP_DROPLOCKS: return "drop_locks";
++
+     case OP_ABORT: return "abort";
+       //case OP_COMMIT: return "commit";
+ 
 -- 
 1.7.11.7
 
