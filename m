@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 02/29] mds: fix Locker::simple_eval()
-Date: Fri,  4 Jan 2013 17:01:53 +0800
-Message-ID: <1357290140-17044-3-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 01/29] mds: don't renew revoking lease
+Date: Fri,  4 Jan 2013 17:01:52 +0800
+Message-ID: <1357290140-17044-2-git-send-email-zheng.z.yan@intel.com>
 References: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:51114 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750738Ab3ADJC1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Jan 2013 04:02:27 -0500
+	id S1752091Ab3ADJC0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Jan 2013 04:02:26 -0500
 In-Reply-To: <1357290140-17044-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,46 +16,51 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Locker::simple_eval() checks if the loner wants CEPH_CAP_GEXCL to
-decide if it should change the lock to EXCL state, but it checks
-if CEPH_CAP_GEXCL is issued to the loner to decide if it should
-change the lock to SYNC state. So if the loner wants CEPH_CAP_GEXCL,
-but doesn't have CEPH_CAP_GEXCL, Locker::simple_eval() will keep
-switching the lock state.
+MDS may receives lease renew request while lease is being revoked,
+just ignore the renew request.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Locker.cc | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ src/mds/Locker.cc | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
 
 diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index c8cd236..98eaba8 100644
+index 76708ec..c8cd236 100644
 --- a/src/mds/Locker.cc
 +++ b/src/mds/Locker.cc
-@@ -3250,11 +3250,10 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
-     return;
+@@ -2914,18 +2914,20 @@ void Locker::handle_client_lease(MClientLease *m)
  
-   CInode *in = 0;
--  int wanted = 0, issued = 0;
-+  int wanted = 0;
-   if (lock->get_type() != CEPH_LOCK_DN) {
-     in = (CInode*)lock->get_parent();
--    wanted = in->get_caps_wanted(NULL, NULL, lock->get_cap_shift());
--    issued = in->get_caps_issued(NULL, NULL, NULL, lock->get_cap_shift());
-+    in->get_caps_wanted(&wanted, NULL, lock->get_cap_shift());
-   }
-   
-   // -> excl?
-@@ -3270,8 +3269,7 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
-   else if (lock->get_state() != LOCK_SYNC &&
- 	   !lock->is_xlocked() &&
- 	   !lock->is_wrlocked() &&
--	   ((!(issued & CEPH_CAP_GEXCL) &&
--	     !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
-+	   ((!(wanted & CEPH_CAP_GEXCL) && !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
- 	    (lock->get_state() == LOCK_EXCL && in && in->get_target_loner() < 0))) {
-     dout(7) << "simple_eval stable, syncing " << *lock 
- 	    << " on " << *lock->get_parent() << dendl;
+   case CEPH_MDS_LEASE_RENEW:
+     {
+-      dout(7) << "handle_client_lease client." << client
+-	      << " renew on " << *dn << dendl;
+-      int pool = 1;   // fixme.. do something smart!
+-      m->h.duration_ms = (int)(1000 * mdcache->client_lease_durations[pool]);
+-      m->h.seq = ++l->seq;
+-      m->clear_payload();
+-      
+-      utime_t now = ceph_clock_now(g_ceph_context);
+-      now += mdcache->client_lease_durations[pool];
+-      mdcache->touch_client_lease(l, pool, now);
+-      
+-      mds->send_message_client_counted(m, m->get_connection());
++      dout(7) << "handle_client_lease client." << client << " renew on " << *dn
++	      << (!dn->lock.can_lease(client)?", revoking lease":"") << dendl;
++      if (dn->lock.can_lease(client)) {
++	int pool = 1;   // fixme.. do something smart!
++	m->h.duration_ms = (int)(1000 * mdcache->client_lease_durations[pool]);
++	m->h.seq = ++l->seq;
++	m->clear_payload();
++
++	utime_t now = ceph_clock_now(g_ceph_context);
++	now += mdcache->client_lease_durations[pool];
++	mdcache->touch_client_lease(l, pool, now);
++
++	mds->send_message_client_counted(m, m->get_connection());
++      }
+     }
+     break;
+ 
 -- 
 1.7.11.7
 
