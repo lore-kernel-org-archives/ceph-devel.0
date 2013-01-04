@@ -1,106 +1,120 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH REPOST 3/3] rbd: don't bother calculating file mapping
-Date: Fri, 04 Jan 2013 08:53:54 -0600
-Message-ID: <50E6ED02.5070009@inktank.com>
-References: <50E6EC84.2060304@inktank.com>
+Subject: [PATCH REPOST] rbd: use a common layout for each device
+Date: Fri, 04 Jan 2013 08:54:33 -0600
+Message-ID: <50E6ED29.3060108@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:41884 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754763Ab3ADOx4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 09:53:56 -0500
-Received: by mail-ie0-f176.google.com with SMTP id 13so19495575iea.7
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 06:53:56 -0800 (PST)
-In-Reply-To: <50E6EC84.2060304@inktank.com>
+Received: from mail-ia0-f177.google.com ([209.85.210.177]:51181 "EHLO
+	mail-ia0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754763Ab3ADOye (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Jan 2013 09:54:34 -0500
+Received: by mail-ia0-f177.google.com with SMTP id u21so13800962ial.22
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Jan 2013 06:54:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-When rbd_do_request() has a request to process it initializes a ceph
-file layout structure and uses it to compute offsets and limits for
-the range of the request using ceph_calc_file_object_mapping().
+Each osd message includes a layout structure, and for rbd it is
+always the same (at least for osd's in a given pool).
 
-The layout used is fixed, and is based on RBD_MAX_OBJ_ORDER (30).
-It sets the layout's object size and stripe unit to be 1 GB (2^30),
-and sets the stripe count to be 1.
+Initialize a layout structure when an rbd_dev gets created and just
+copy that into osd requests for the rbd image.
 
-The job of ceph_calc_file_object_mapping() is to determine which
-of a sequence of objects will contain data covered by range, and
-within that object, at what offset the range starts.  It also
-truncates the length of the range at the end of the selected object
-if necessary.
-
-This is needed for ceph fs, but for rbd it really serves no purpose.
-It does its own blocking of images into objects, echo of which is
-(1 << obj_order) in size, and as a result it ignores the "bno"
-value returned by ceph_calc_file_object_mapping().  In addition,
-by the point a request has reached this function, it is already
-destined for a single rbd object, and its length will not exceed
-that object's extent.  Because of this, and because the mapping will
-result in blocking up the range using an integer multiple of the
-image's object order, ceph_calc_file_object_mapping() will never
-change the offset or length values defined by the request.
-
-In other words, this call is a big no-op for rbd data requests.
-
-There is one exception.  We read the header object using this
-function, and in that case we will not have already limited the
-request size.  However, the header is a single object (not a file or
-rbd image), and should not be broken into pieces anyway.  So in fact
-we should *not* be calling ceph_calc_file_object_mapping() when
-operating on the header object.
-
-So...
-
-Don't call ceph_calc_file_object_mapping() in rbd_do_request(),
-because useless for image data and incorrect to do sofor the image
-header.
+Replace an assertion that was done when initializing the layout
+structures with code that catches and handles anything that would
+trigger the assertion as soon as it is identified.  This precludes
+that (bad) condition from ever occurring.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   18 ++++--------------
- 1 file changed, 4 insertions(+), 14 deletions(-)
+ drivers/block/rbd.c |   34 +++++++++++++++++++++++-----------
+ 1 file changed, 23 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e6db737..072608e 100644
+index 072608e..7c35608 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1123,9 +1123,6 @@ static int rbd_do_request(struct request *rq,
- {
- 	struct ceph_osd_request *osd_req;
- 	int ret;
--	u64 bno;
--	u64 obj_off = 0;
--	u64 obj_len = 0;
- 	struct timespec mtime = CURRENT_TIME;
- 	struct rbd_request *rbd_req;
- 	struct ceph_osd_client *osdc;
-@@ -1169,19 +1166,12 @@ static int rbd_do_request(struct request *rq,
+@@ -235,6 +235,8 @@ struct rbd_device {
+
+ 	char			*header_name;
+
++	struct ceph_file_layout	layout;
++
+ 	struct ceph_osd_event   *watch_event;
+ 	struct ceph_osd_request *watch_request;
+
+@@ -1091,16 +1093,6 @@ static void rbd_coll_end_req(struct rbd_request
+*rbd_req,
+ 				ret, len);
+ }
+
+-static void rbd_layout_init(struct ceph_file_layout *layout, u64 pool_id)
+-{
+-	memset(layout, 0, sizeof (*layout));
+-	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+-	layout->fl_stripe_count = cpu_to_le32(1);
+-	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+-	rbd_assert(pool_id <= (u64) U32_MAX);
+-	layout->fl_pg_pool = cpu_to_le32((u32) pool_id);
+-}
+-
+ /*
+  * Send ceph osd request
+  */
+@@ -1165,7 +1157,7 @@ static int rbd_do_request(struct request *rq,
+ 	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
  	osd_req->r_oid_len = strlen(osd_req->r_oid);
 
- 	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
--	ret = ceph_calc_file_object_mapping(&osd_req->r_file_layout, ofs, len,
--						&bno, &obj_off, &obj_len);
--	rbd_assert(ret == 0);
--	if (obj_len < len) {
--		dout(" skipping last %llu, final file extent %llu~%llu\n",
--		     len - obj_len, ofs, obj_len);
--		len = obj_len;
--	}
-+
+-	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
++	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
+
  	if (op->op == CEPH_OSD_OP_READ || op->op == CEPH_OSD_OP_WRITE) {
--		op->extent.offset = obj_off;
--		op->extent.length = obj_len;
-+		op->extent.offset = ofs;
-+		op->extent.length = len;
- 		if (op->op == CEPH_OSD_OP_WRITE)
--			op->payload_len = obj_len;
-+			op->payload_len = len;
- 	}
- 	osd_req->r_num_pages = calc_pages_for(ofs, len);
- 	osd_req->r_page_alignment = ofs & ~PAGE_MASK;
+ 		op->extent.offset = ofs;
+@@ -2295,6 +2287,13 @@ struct rbd_device *rbd_dev_create(struct
+rbd_client *rbdc,
+ 	rbd_dev->spec = spec;
+ 	rbd_dev->rbd_client = rbdc;
+
++	/* Initialize the layout used for all rbd requests */
++
++	rbd_dev->layout.fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
++	rbd_dev->layout.fl_stripe_count = cpu_to_le32(1);
++	rbd_dev->layout.fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
++	rbd_dev->layout.fl_pg_pool = cpu_to_le32((u32) spec->pool_id);
++
+ 	return rbd_dev;
+ }
+
+@@ -2549,6 +2548,12 @@ static int rbd_dev_v2_parent_info(struct
+rbd_device *rbd_dev)
+ 	if (parent_spec->pool_id == CEPH_NOPOOL)
+ 		goto out;	/* No parent?  No problem. */
+
++	/* The ceph file layout needs to fit pool id in 32 bits */
++
++	ret = -EIO;
++	if (WARN_ON(parent_spec->pool_id > (u64) U32_MAX))
++		goto out;
++
+ 	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+ 	if (IS_ERR(image_id)) {
+ 		ret = PTR_ERR(image_id);
+@@ -3678,6 +3683,13 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 		goto err_out_client;
+ 	spec->pool_id = (u64) rc;
+
++	/* The ceph file layout needs to fit pool id in 32 bits */
++
++	if (WARN_ON(spec->pool_id > (u64) U32_MAX)) {
++		rc = -EIO;
++		goto err_out_client;
++	}
++
+ 	rbd_dev = rbd_dev_create(rbdc, spec);
+ 	if (!rbd_dev)
+ 		goto err_out_client;
 -- 
 1.7.9.5
 
