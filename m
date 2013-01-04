@@ -1,88 +1,118 @@
 From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH REPOST 2/4] rbd: add warning messages for missing arguments
-Date: Thu, 03 Jan 2013 17:10:40 -0800
-Message-ID: <50E62C10.1010608@inktank.com>
-References: <50E5D7A9.6040101@inktank.com> <50E5D7FB.9040906@inktank.com>
+Subject: Re: [PATCH REPOST 1/4] rbd: define and use rbd_warn()
+Date: Thu, 03 Jan 2013 17:11:34 -0800
+Message-ID: <50E62C46.1060901@inktank.com>
+References: <50E5D7A9.6040101@inktank.com> <50E5D7E7.40609@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f54.google.com ([209.85.210.54]:48565 "EHLO
-	mail-da0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753901Ab3ADBKo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 20:10:44 -0500
-Received: by mail-da0-f54.google.com with SMTP id n2so7285410dad.41
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 17:10:43 -0800 (PST)
-In-Reply-To: <50E5D7FB.9040906@inktank.com>
+Received: from mail-pb0-f43.google.com ([209.85.160.43]:32980 "EHLO
+	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754652Ab3ADBLh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jan 2013 20:11:37 -0500
+Received: by mail-pb0-f43.google.com with SMTP id um15so8859593pbc.16
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jan 2013 17:11:37 -0800 (PST)
+In-Reply-To: <50E5D7E7.40609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Do you want to include in the message some kind of indication which 
-operation/function is involved?  (this is definitely better, but even 
-better might be to add "rbd add" or "rbd_add_parse_args" to the msgs)
+Nifty.
+
+Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
 On 01/03/2013 11:11 AM, Alex Elder wrote:
-> Tell the user (via dmesg) what was wrong with the arguments provided
-> via /sys/bus/rbd/add.
+> Define a new function rbd_warn() that produces a boilerplate warning
+> message, identifying in the resulting message the affected rbd
+> device in the best way available.  Use it in a few places that now
+> use pr_warning().
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   24 ++++++++++++++++--------
->   1 file changed, 16 insertions(+), 8 deletions(-)
+>   drivers/block/rbd.c |   43 +++++++++++++++++++++++++++++++++----------
+>   1 file changed, 33 insertions(+), 10 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 635b81d..31da8c5 100644
+> index d97611e..635b81d 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -3244,8 +3244,10 @@ static int rbd_add_parse_args(const char *buf,
->   	/* The first four tokens are required */
+> @@ -294,6 +294,33 @@ static struct device rbd_root_dev = {
+>   	.release =      rbd_root_dev_release,
+>   };
 >
->   	len = next_token(&buf);
-> -	if (!len)
-> -		return -EINVAL;	/* Missing monitor address(es) */
-> +	if (!len) {
-> +		rbd_warn(NULL, "no monitor address(es) provided");
-> +		return -EINVAL;
-> +	}
->   	mon_addrs = buf;
->   	mon_addrs_size = len + 1;
->   	buf += len;
-> @@ -3254,8 +3256,10 @@ static int rbd_add_parse_args(const char *buf,
->   	options = dup_token(&buf, NULL);
->   	if (!options)
->   		return -ENOMEM;
-> -	if (!*options)
-> -		goto out_err;	/* Missing options */
-> +	if (!*options) {
-> +		rbd_warn(NULL, "no options provided");
-> +		goto out_err;
-> +	}
+> +static __printf(2, 3)
+> +void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
+> +{
+> +	struct va_format vaf;
+> +	va_list args;
+> +
+> +	va_start(args, fmt);
+> +	vaf.fmt = fmt;
+> +	vaf.va = &args;
+> +
+> +	if (!rbd_dev)
+> +		printk(KERN_WARNING "%s: %pV\n", RBD_DRV_NAME, &vaf);
+> +	else if (rbd_dev->disk)
+> +		printk(KERN_WARNING "%s: %s: %pV\n",
+> +			RBD_DRV_NAME, rbd_dev->disk->disk_name, &vaf);
+> +	else if (rbd_dev->spec && rbd_dev->spec->image_name)
+> +		printk(KERN_WARNING "%s: image %s: %pV\n",
+> +			RBD_DRV_NAME, rbd_dev->spec->image_name, &vaf);
+> +	else if (rbd_dev->spec && rbd_dev->spec->image_id)
+> +		printk(KERN_WARNING "%s: id %s: %pV\n",
+> +			RBD_DRV_NAME, rbd_dev->spec->image_id, &vaf);
+> +	else	/* punt */
+> +		printk(KERN_WARNING "%s: rbd_dev %p: %pV\n",
+> +			RBD_DRV_NAME, rbd_dev, &vaf);
+> +	va_end(args);
+> +}
+> +
+>   #ifdef RBD_DEBUG
+>   #define rbd_assert(expr)						\
+>   		if (unlikely(!(expr))) {				\
+> @@ -1403,8 +1430,8 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
+> u8 opcode, void *data)
+>   		(unsigned int) opcode);
+>   	rc = rbd_dev_refresh(rbd_dev, &hver);
+>   	if (rc)
+> -		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
+> -			   " update snaps: %d\n", rbd_dev->major, rc);
+> +		rbd_warn(rbd_dev, "got notification but failed to "
+> +			   " update snaps: %d\n", rc);
 >
->   	spec = rbd_spec_alloc();
->   	if (!spec)
-> @@ -3264,14 +3268,18 @@ static int rbd_add_parse_args(const char *buf,
->   	spec->pool_name = dup_token(&buf, NULL);
->   	if (!spec->pool_name)
->   		goto out_mem;
-> -	if (!*spec->pool_name)
-> -		goto out_err;	/* Missing pool name */
-> +	if (!*spec->pool_name) {
-> +		rbd_warn(NULL, "no pool name provided");
-> +		goto out_err;
-> +	}
+>   	rbd_req_sync_notify_ack(rbd_dev, hver, notify_id);
+>   }
+> @@ -1767,15 +1794,13 @@ rbd_dev_v1_header_read(struct rbd_device
+> *rbd_dev, u64 *version)
+>   			goto out_err;
+>   		if (WARN_ON((size_t) ret < size)) {
+>   			ret = -ENXIO;
+> -			pr_warning("short header read for image %s"
+> -					" (want %zd got %d)\n",
+> -				rbd_dev->spec->image_name, size, ret);
+> +			rbd_warn(rbd_dev, "short header read (want %zd got %d)",
+> +				size, ret);
+>   			goto out_err;
+>   		}
+>   		if (!rbd_dev_ondisk_valid(ondisk)) {
+>   			ret = -ENXIO;
+> -			pr_warning("invalid header for image %s\n",
+> -				rbd_dev->spec->image_name);
+> +			rbd_warn(rbd_dev, "invalid header");
+>   			goto out_err;
+>   		}
 >
->   	spec->image_name = dup_token(&buf, NULL);
->   	if (!spec->image_name)
->   		goto out_mem;
-> -	if (!*spec->image_name)
-> -		goto out_err;	/* Missing image name */
-> +	if (!*spec->image_name) {
-> +		rbd_warn(NULL, "no image name provided");
-> +		goto out_err;
-> +	}
+> @@ -2630,9 +2655,7 @@ static int rbd_dev_probe_update_spec(struct
+> rbd_device *rbd_dev)
+>   	if (name)
+>   		rbd_dev->spec->image_name = (char *) name;
+>   	else
+> -		pr_warning(RBD_DRV_NAME "%d "
+> -			"unable to get image name for image id %s\n",
+> -			rbd_dev->major, rbd_dev->spec->image_id);
+> +		rbd_warn(rbd_dev, "unable to get image name");
 >
->   	/*
->   	 * Snapshot name is optional; default is to use "-"
+>   	/* Look up the snapshot name. */
 >
