@@ -1,126 +1,163 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: ceph stays degraded after crushmap rearrangement
-Date: Sat, 05 Jan 2013 19:15:02 +0100
-Message-ID: <50E86DA6.4040900@profihost.ag>
-References: <50E85799.4060607@profihost.ag> <50E85CC9.9080503@profihost.ag> <alpine.DEB.2.00.1301050905170.15430@cobra.newdream.net> <50E85EB1.8060803@profihost.ag> <50E86008.30000@profihost.ag> <alpine.DEB.2.00.1301050939570.15430@cobra.newdream.net> <50E86708.6070909@profihost.ag> <alpine.DEB.2.00.1301050955150.15430@cobra.newdream.net> <50E86B57.4090708@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH REPOST] rbd: be picky about osd request status type
+Date: Sat, 05 Jan 2013 12:33:45 -0600
+Message-ID: <50E87209.4020402@inktank.com>
+References: <50E608F0.3010501@inktank.com> <50E7B4F5.7010800@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:41669 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755817Ab3AESO5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Jan 2013 13:14:57 -0500
-In-Reply-To: <50E86B57.4090708@profihost.ag>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:51539 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755817Ab3AESdp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Jan 2013 13:33:45 -0500
+Received: by mail-ia0-f174.google.com with SMTP id y25so14602149iay.5
+        for <ceph-devel@vger.kernel.org>; Sat, 05 Jan 2013 10:33:45 -0800 (PST)
+In-Reply-To: <50E7B4F5.7010800@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Dan Mick <dan.mick@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On 01/04/2013 11:07 PM, Dan Mick wrote:
+> I personally dislike "spaces after cast", but I haven't checked the
+> kernel style guide.  Otherwise:
+> 
+> Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
-ok will go back to tag v0.56.
+I think I'm probably in violation of the kernel style
+guide too.
 
-With testing it now looks again like this:
+In fact, I just checked, and the indent(1) options for the
+kernel specify that there should be no space after a cast.
 
-    health HEALTH_WARN 5 pgs backfill; 9 pgs backfilling; 3433 pgs 
-peering; 5111 pgs stale; 20 pgs stuck inactive; 34 pgs stuck unclean; 
-recovery 129/79284 degraded (0.163%)
-    monmap e1: 3 mons at 
-{a=10.255.0.100:6789/0,b=10.255.0.101:6789/0,c=10.255.0.102:6789/0}, 
-election epoch 2018, quorum 0,1,2 a,b,c
-    osdmap e9518: 24 osds: 24 up, 24 in
-     pgmap v2214634: 7632 pgs: 25 stale+active, 4160 stale+active+clean, 
-5 stale+active+remapped+wait_backfill, 2521 peering, 911 stale+peering, 
-9 stale+active+remapped+backfilling, 1 stale+remapped+peering; 152 GB 
-data, 318 GB used, 5017 GB / 5336 GB avail; 129/79284 degraded (0.163%)
-    mdsmap e1: 0/0/1 up
+I'll fix that, and will try hard to adjust my habits...
 
-With v0.56 it was recovering successfully instead of going stale...
-
-Stefan
-
-Am 05.01.2013 19:05, schrieb Stefan Priebe:
-> Hi,
->
-> Am 05.01.2013 18:56, schrieb Sage Weil:
->>> But my rbd images are gone ?!
->>>
->>> [1202: ~]# rbd -p kvmpool1 ls
->>> [1202: ~]#
+					-Alex
+> 
+> On 01/03/2013 02:40 PM, Alex Elder wrote:
+>> The result field in a ceph osd reply header is a signed 32-bit type,
+>> but rbd code often casually uses int to represent it.
 >>
->> Oh.. I think this is related to the librados/librbd compatibility issue I
->> mentioned yesterday.  Please make sure the clients (librados, librbd) are
->> also running the latest testing branch.
->
-> ah OK  - thanks that's it - ceph has now also recovered completely with
-> old crushmap.
->
-> OK now back to my original problem.
->
-> i wanted to change from this:
-> -----------------------------------------
-> ...
->
-> rack D2-switchA {
->          id -100         # do not change unnecessarily
->          # weight 12.000
->          alg straw
->          hash 0  # rjenkins1
->          item server1263 weight 4.000
->          item server1264 weight 4.000
->          item server1265 weight 4.000
-> }
-> rack D2-switchB {
->          id -101         # do not change unnecessarily
->          # weight 12.000
->          alg straw
->          hash 0  # rjenkins1
->          item server1266 weight 4.000
->          item server1267 weight 4.000
->          item server1268 weight 4.000
-> }
-> root root {
->          id -10000               # do not change unnecessarily
->          # weight 24.000
->          alg straw
->          hash 0  # rjenkins1
->          item D2-switchA weight 12.000
->          item D2-switchB weight 12.000
-> }
->
-> ...
-> -----------------------------------------
->
-> to this one:
->
-> -----------------------------------------
-> ...
->
-> rack D2 {
->          id -100         # do not change unnecessarily
->          # weight 24.000
->          alg straw
->          hash 0  # rjenkins1
->          item cloud1-1263 weight 4.000
->          item cloud1-1264 weight 4.000
->          item cloud1-1265 weight 4.000
->          item cloud1-1266 weight 4.000
->          item cloud1-1267 weight 4.000
->          item cloud1-1268 weight 4.000
-> }
-> root root {
->          id -10000               # do not change unnecessarily
->          # weight 24.000
->          alg straw
->          hash 0  # rjenkins1
->          item D2 weight 24.000
-> }
->
-> ...
-> -----------------------------------------
->
-> This was where all problems started. Is this wrong? / not possible?
->
-> Greets,
-> Stefan
+>> The following changes the types of variables that handle this result
+>> value to be "s32" instead of "int" to be completely explicit about
+>> it.  Only at the point we pass that result to __blk_end_request()
+>> does the type get converted to the plain old int defined for that
+>> interface.
+>>
+>> There is almost certainly no binary impact of this change, but I
+>> prefer to show the exact size and signedness of the value since we
+>> know it.
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c |   23 ++++++++++++-----------
+>>   1 file changed, 12 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 85131de..8b79a5b 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -171,7 +171,7 @@ struct rbd_client {
+>>    */
+>>   struct rbd_req_status {
+>>       int done;
+>> -    int rc;
+>> +    s32 rc;
+>>       u64 bytes;
+>>   };
+>>
+>> @@ -1053,13 +1053,13 @@ static void rbd_destroy_ops(struct
+>> ceph_osd_req_op *ops)
+>>   static void rbd_coll_end_req_index(struct request *rq,
+>>                      struct rbd_req_coll *coll,
+>>                      int index,
+>> -                   int ret, u64 len)
+>> +                   s32 ret, u64 len)
+>>   {
+>>       struct request_queue *q;
+>>       int min, max, i;
+>>
+>>       dout("rbd_coll_end_req_index %p index %d ret %d len %llu\n",
+>> -         coll, index, ret, (unsigned long long) len);
+>> +         coll, index, (int) ret, (unsigned long long) len);
+>>
+>>       if (!rq)
+>>           return;
+>> @@ -1080,7 +1080,7 @@ static void rbd_coll_end_req_index(struct
+>> request *rq,
+>>           max++;
+>>
+>>       for (i = min; i<max; i++) {
+>> -        __blk_end_request(rq, coll->status[i].rc,
+>> +        __blk_end_request(rq, (int) coll->status[i].rc,
+>>                     coll->status[i].bytes);
+>>           coll->num_done++;
+>>           kref_put(&coll->kref, rbd_coll_release);
+>> @@ -1089,7 +1089,7 @@ static void rbd_coll_end_req_index(struct
+>> request *rq,
+>>   }
+>>
+>>   static void rbd_coll_end_req(struct rbd_request *rbd_req,
+>> -                 int ret, u64 len)
+>> +                 s32 ret, u64 len)
+>>   {
+>>       rbd_coll_end_req_index(rbd_req->rq,
+>>                   rbd_req->coll, rbd_req->coll_index,
+>> @@ -1129,7 +1129,7 @@ static int rbd_do_request(struct request *rq,
+>>       if (!rbd_req) {
+>>           if (coll)
+>>               rbd_coll_end_req_index(rq, coll, coll_index,
+>> -                           -ENOMEM, len);
+>> +                           (s32) -ENOMEM, len);
+>>           return -ENOMEM;
+>>       }
+>>
+>> @@ -1206,7 +1206,7 @@ done_err:
+>>       bio_chain_put(rbd_req->bio);
+>>       ceph_osdc_put_request(osd_req);
+>>   done_pages:
+>> -    rbd_coll_end_req(rbd_req, ret, len);
+>> +    rbd_coll_end_req(rbd_req, (s32) ret, len);
+>>       kfree(rbd_req);
+>>       return ret;
+>>   }
+>> @@ -1219,7 +1219,7 @@ static void rbd_req_cb(struct ceph_osd_request
+>> *osd_req, struct ceph_msg *msg)
+>>       struct rbd_request *rbd_req = osd_req->r_priv;
+>>       struct ceph_osd_reply_head *replyhead;
+>>       struct ceph_osd_op *op;
+>> -    __s32 rc;
+>> +    s32 rc;
+>>       u64 bytes;
+>>       int read_op;
+>>
+>> @@ -1227,14 +1227,14 @@ static void rbd_req_cb(struct ceph_osd_request
+>> *osd_req, struct ceph_msg *msg)
+>>       replyhead = msg->front.iov_base;
+>>       WARN_ON(le32_to_cpu(replyhead->num_ops) == 0);
+>>       op = (void *)(replyhead + 1);
+>> -    rc = le32_to_cpu(replyhead->result);
+>> +    rc = (s32) le32_to_cpu(replyhead->result);
+>>       bytes = le64_to_cpu(op->extent.length);
+>>       read_op = (le16_to_cpu(op->op) == CEPH_OSD_OP_READ);
+>>
+>>       dout("rbd_req_cb bytes=%llu readop=%d rc=%d\n",
+>>           (unsigned long long) bytes, read_op, (int) rc);
+>>
+>> -    if (rc == -ENOENT && read_op) {
+>> +    if (rc == (s32) -ENOENT && read_op) {
+>>           zero_bio_chain(rbd_req->bio, 0);
+>>           rc = 0;
+>>       } else if (rc == 0 && read_op && bytes < rbd_req->len) {
+>> @@ -1679,7 +1679,8 @@ static void rbd_rq_fn(struct request_queue *q)
+>>                           bio_chain, coll, cur_seg);
+>>               else
+>>                   rbd_coll_end_req_index(rq, coll, cur_seg,
+>> -                               -ENOMEM, chain_size);
+>> +                               (s32) -ENOMEM,
+>> +                               chain_size);
+>>               size -= chain_size;
+>>               ofs += chain_size;
+>>
+
