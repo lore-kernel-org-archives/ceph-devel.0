@@ -1,206 +1,58 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: ceph caps (Ganesha + Ceph pnfs)
-Date: Sat, 5 Jan 2013 12:29:47 -0500 (EST)
-Message-ID: <1424966577.14.1357406987759.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <alpine.DEB.2.00.1301050829030.15430@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph stays degraded after crushmap rearrangement
+Date: Sat, 5 Jan 2013 09:40:22 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301050939570.15430@cobra.newdream.net>
+References: <50E85799.4060607@profihost.ag> <50E85CC9.9080503@profihost.ag> <alpine.DEB.2.00.1301050905170.15430@cobra.newdream.net> <50E85EB1.8060803@profihost.ag> <50E86008.30000@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:1918 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755802Ab3AER3w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 5 Jan 2013 12:29:52 -0500
-In-Reply-To: <alpine.DEB.2.00.1301050829030.15430@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:45504 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755812Ab3AERkX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Jan 2013 12:40:23 -0500
+In-Reply-To: <50E86008.30000@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi SAge,
------ "Sage Weil" <sage@inktank.com> wrote:
+On Sat, 5 Jan 2013, Stefan Priebe wrote:
+> Hi,
+> Am 05.01.2013 18:11, schrieb Stefan Priebe:
+> > Hi,
+> > 
+> > i just stopped EVERYTHING and have now started ALL osds again. It seems
+> > to recover now. But here is the output.
+> Just an illusion. Still hangs.
 
-> Hi Matt,
-> 
-> I have a few higher-level questions first to make sure I understand
-> what 
-> you're targetting.
-> 
-> It sounds like the DS agents/targets are also using the libcephfs 
-> interfaces to do IO... is that right?  Does that mean you're using the
-> 
-> 'file' driver, and the DS pNFS requests are directed at files?  If
-> that is 
-> the case, the 'lazy' option for IO may be closer to what you want
-> here.
+Can you turn up logging, or attach with gdb, so we can see what they are 
+doing with all that CPU?
 
-We're using those interfaces currently, with currently small changes.  IIUC,
-IO_LAZY or some specialization of it might be correct for some usage, but not
-all, depending on desired semantics?
+s
+
 
 > 
-> More generally, if you are not tied to using an existing client layout
+> # ceph -s
+>    health HEALTH_WARN 934 pgs degraded; 23 pgs down; 1887 pgs peering; 1330
+> pgs stale; 670 pgs stuck inactive; 882 pgs stuck stale; 7632 pgs stuck
+> unclean; recovery 4811/79122 degraded (6.080%)
+>    monmap e1: 3 mons at
+> {a=10.255.0.100:6789/0,b=10.255.0.101:6789/0,c=10.255.0.102:6789/0}, election
+> epoch 1996, quorum 0,1,2 a,b,c
+>    osdmap e8393: 24 osds: 24 up, 24 in
+>     pgmap v2212487: 7632 pgs: 475 peering, 4013 active+remapped, 18
+> down+peering, 490 active+degraded, 798 stale+active+remapped, 1
+> active+replay+degraded, 1305 remapped+peering, 84 stale+remapped+peering, 5
+> stale+down+remapped+peering, 364 stale+active+degraded+remapped, 79
+> stale+active+replay+degraded+remapped; 152 GB data, 314 GB used, 5021 GB /
+> 5336 GB avail; 4811/79122 degraded (6.080%)
+>    mdsmap e1: 0/0/1 up
 > 
-> type, I still struggle to understand but it means to 'commit' an
-> layout in 
-> a Ceph context.  From the (ceph) client perspective, the layout of a 
-> file's data is fixed: it is a sequence of objects like $inode.$block. 
-> 
-> Which servers you talk to to store those may change over time, but
-> that is 
-> a matter of efficiency (contacting the optimal DS) and not correctness
-> 
-> (the DS could write directly to the appropriate rados objects via 
-> either libcephfs or librados).
-
-We currently use Ceph file layout, yes, and relative to our integration with Ceph, it's felt
-like a good fit so far.
-
-Sadly, LAYOUT is now a piece of pNFS terminology, and I meant committing -that-.
-Basically, the LAYOUT is a kind of abstract object that has operations GET, RETURN, RECALL,
-COMMIT.  The current spec defines just a kind of layout that describes how to do
-parallel access on a file.  A pnfs layout structure has a few subtypes which, somewhat
-messily, are quite different, but a typical implementation would only do one.  We do
-the 'files' layout described in RFC 5661.  You get a pnfs layout on a specific inode in a 
-file system, on a range of the file.  Currently, the Linux client in the files layout style will
-only deal correctly with a layout on the whole file, but that's slated to be fixed, so
-think of it as being on a range of the file.  The layout then carries sufficient info on
-the real location of data in the range so as to map regular subranges of the original range
-to one (sometimes more) "devices"--another abstraction--which basically can be looked up
-to resolve a mapping to a DS.
-
-So yes, we defer to Ceph to decide where blocks are or will be placed.  But presume further there
-is a DS instance anywhere there is a Ceph OSD instance.  Call this DS -the- DS associated with
-$inode.$block. Today, the prototype basically uses libcephfs to perform i/o through an MDS, and
-librados when performing i/o at a DS.  (In fact, since libcephfs necessarily uses librados, we're
-using the lower level path but both MDS and DS are library clients of libcephs).
-
-Having said this, a key design goal of the DS is to take advantage of the 1-1 relationship of DS to
-OSD, so at the level of caps/coordination, when the pNFS MDS issues a layout, what we intend is that
-the mapping of $inode.$block is stable for the duration of the layout (until returned/recalled), and
-hence client and DS may both safely rely on this.  Plus, of course, other Ceph clients see a sane view
-of the affected objects at any point in this process.
-
-Matt
-
-> 
-> Maybe just describing what exactly is contained in the layout would
-> help 
-> me understand the context.
-> 
-> Thanks!
-> sage
-> 
-> 
-> 
-> On Fri, 4 Jan 2013, Matt W. Benjamin wrote:
-> > Hi Ceph folks,
-> > 
-> > Summarizing from Ceph IRC discussion by request, I'm one of the 
-> > developers of a pNFS (parallel nfs) implementation that is built
-> atop 
-> > the Ceph system.
-> > 
-> > I'm working on code that wants to use the Ceph caps system to
-> control 
-> > and sequence i/o operations and file metadata, for example, so that
-> 
-> > ordinary Ceph clients see a coherent view of the objects being
-> exported 
-> > via pNFS.
-> > 
-> > The basic pNFS model (sorry for those who know all this, RFC 5661,
-> etc) 
-> > is to extend NFSv4 with a distributed/parallel access model.  To do
-> 
-> > parallel access in pNFS, the NFS client gets a `layout` from an NFS
-> 
-> > metadata (MDS) server.  A layout is a recallable object, a bit like
-> an 
-> > oplock/delegation/DCE token, see spec, it basically presents a list
-> of 
-> > subordinate data servers (DSes) on which to read and/or write
-> regions of 
-> > a specific file.
-> > 
-> > Ok, so in our implementation, we would typically expect to have a DS
-> 
-> > server collocated with each Ceph OSD.  When an NFS client has a
-> layout 
-> > on a given inode, its i/o requests will be performed "directly" by
-> the 
-> > appropriate OSD.  When an MDS is asked to issue a layout on a file,
-> it 
-> > should hold a cap or caps which ensure the layout will not conflict
-> with 
-> > other Ceph clients and ensure the MDS will be notified when it must
-> 
-> > recall the layout later if other clients attempt conflicting
-> operations.  
-> > In turn, involved DS servers need the correct caps to read and/or
-> write 
-> > the data, plus, they need to update file metadata periodically. 
-> (This 
-> > can be upon a final commit of the client's layout, or inline with a
-> 
-> > write operation, if the client specifies the write be 'sync'
-> stability.)
-> > 
-> > The current set of behaviors we're modeling are:
-> > 
-> > a) allow MDS to hold a Ceph caps, tracking issued pNFS layouts, such
-> 
-> > that it will be able to handle events which should trigger layout 
-> > recalls at its pNFS clients (e.g., on conflicts)--currently we it
-> holds 
-> > CEPH_CAP_FILE_WR|CEPH_CAP_FILE_RD
-> > 
-> > b) on a given DS, we currently get CEPH_CAP_FILE_WR|CEPH_CAP_FILE_RD
-> 
-> > caps when asked to perform i/o on behalf of a valid layout--but we
-> need 
-> > to update metadata (size, mtime) and my question in IRC was cross 
-> > checking these capabilities as correct to send an update message
-> > 
-> > In the current pass I'm trying to clean up/refine the model 
-> > implementation, leaving some room for adjustment.
-> > 
-> > Thanks!
-> > 
-> > Matt
-> > 
-> > -- 
-> > Matt Benjamin
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> > 
-> > http://linuxbox.com
-> > 
-> > tel. 734-761-4689
-> > fax. 734-769-8938
-> > cel. 734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
+> Greets,
+> Stefan
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel. 734-761-4689
-fax. 734-769-8938
-cel. 734-216-5309
+> 
+> 
