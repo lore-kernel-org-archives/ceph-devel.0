@@ -1,55 +1,47 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 5/6] ceph: check mds_wanted for imported cap
-Date: Sun, 06 Jan 2013 16:54:52 +0800
-Message-ID: <50E93BDC.6050104@intel.com>
-References: <1357299261-20591-1-git-send-email-zheng.z.yan@intel.com> <1357299261-20591-6-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1301052216330.15430@cobra.newdream.net>
+From: Drunkard Zhang <gongfan193@gmail.com>
+Subject: Re: Filesystem size inconsistance problem
+Date: Sun, 6 Jan 2013 17:06:29 +0800
+Message-ID: <CAJiejCSOFZiFFryQi4KcaFi+iTuEDZ2nDdcvhwo91Zp8haQhJg@mail.gmail.com>
+References: <CAJiejCTmQYy7DpY-p27oseEAbbeNiFcxonL2pZGTofnwz1D79A@mail.gmail.com>
+ <alpine.DEB.2.00.1301052230260.15430@cobra.newdream.net> <CAJiejCQ60+n_EgFe9CCpe9tBtLT-Q188OFP2tc36sEoZ_hr_MA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:23925 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751600Ab3AFIyz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 6 Jan 2013 03:54:55 -0500
-In-Reply-To: <alpine.DEB.2.00.1301052216330.15430@cobra.newdream.net>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:59646 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751591Ab3AFJGu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Jan 2013 04:06:50 -0500
+Received: by mail-qc0-f172.google.com with SMTP id b25so10595120qca.17
+        for <ceph-devel@vger.kernel.org>; Sun, 06 Jan 2013 01:06:49 -0800 (PST)
+In-Reply-To: <CAJiejCQ60+n_EgFe9CCpe9tBtLT-Q188OFP2tc36sEoZ_hr_MA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: maillist-linux <ceph-devel@vger.kernel.org>
 
-how about below patch, also updated git://github.com/ukernel/ceph-client.git wip-ceph
+2013/1/6 Drunkard Zhang <gongfan193@gmail.com>:
+> 2013/1/6 Sage Weil <sage@inktank.com>:
+>> On Sun, 6 Jan 2013, Drunkard Zhang wrote:
+>>> Some times ago, I did ceph upgrade offline, then ethernet bonding
+>>> while ceph online, and also I removed some OSDs, the cluster
+>>> experienced big movements, after sometime it calms down finally. When
+>>> I verify the consistance, I found that the filesystem size by 'ceph
+>>> -s'(true size) and mounted size is different. What's the problem?
+>>>
+>>> It's still usable, and the used percent is right too, but the wrong
+>>> size displayed looks really uncomfortable !!!
+>>
+>> What OS and kernel are you running?  In order to get big numbers to come
+>> out of statfs, we report a huge block size, and some combinations of the
+>> system utilies, glibc, or something else result in bad output.  I don't
+>> think we've ever fully tracked it down... :(
+>>
+> All nodes are based on Gentoo, and up-to-date.
+>
+> # emerge --info
+> Portage 2.1.11.31 (default/linux/amd64/10.0, gcc-4.6.3, glibc-2.15-r3,
+> 3.7.1-gentoo x86_64)
+> =================================================================
+> System uname: Linux-3.7.1-gentoo-x86_64-Intel-R-_Xeon-R-_CPU_E5620_@_2.40GHz-with-gentoo-2.1
 
-Reagrds
-Yan, Zheng
----
-From 6fdcf8d71239dac7b26f50623ee5986f39552b4a Mon Sep 17 00:00:00 2001
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Date: Fri, 4 Jan 2013 15:30:10 +0800
-Subject: [PATCH 5/5] ceph: check mds_wanted for imported cap
-
-The MDS may have incorrect wanted caps after importing caps. So the
-client should check the value mds has and send cap update if necessary.
-
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/caps.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 40b5bbe..1e1e020 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2429,7 +2429,9 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
- 		dout("mds wanted %s -> %s\n",
- 		     ceph_cap_string(le32_to_cpu(grant->wanted)),
- 		     ceph_cap_string(wanted));
--		grant->wanted = cpu_to_le32(wanted);
-+		/* imported cap may not have correct mds_wanted */
-+		if (le32_to_cpu(grant->op) == CEPH_CAP_OP_IMPORT)
-+			check_caps = 1;
- 	}
- 
- 	cap->seq = seq;
--- 
-1.7.11.7
-
+Sorry, I lost the ceph version, it's ceph-0.55.1.
