@@ -1,89 +1,94 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: Re: which Linux kernel version corresponds to 0.48argonaut?
-Date: Sun, 06 Jan 2013 00:06:02 -0700
-Message-ID: <50E9225A.2050801@cs.utah.edu>
-References: <50D35ECA.4040602@cs.utah.edu> <50D3BD69.8010305@cs.utah.edu> <CAPYLRzhi2h_YDP7zdobMQepGA8ntQOqQgY+rP4AKvjvH3=-+WA@mail.gmail.com> <alpine.DEB.2.00.1301041633340.6109@cobra.newdream.net> <50E8D99F.3090008@cs.utah.edu> <50E8E8D1.6010000@catalyst.net.nz> <50E8EAAB.9030501@cs.utah.edu> <alpine.DEB.2.00.1301052045070.15430@cobra.newdream.net>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 6/6] ceph: don't acquire i_mutex ceph_vmtruncate_work
+Date: Sun, 06 Jan 2013 15:54:20 +0800
+Message-ID: <50E92DAC.5070805@intel.com>
+References: <1357299261-20591-1-git-send-email-zheng.z.yan@intel.com> <1357299261-20591-7-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1301052156400.15430@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rio.cs.utah.edu ([155.98.64.241]:35740 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751043Ab3AFHGG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Jan 2013 02:06:06 -0500
-In-Reply-To: <alpine.DEB.2.00.1301052045070.15430@cobra.newdream.net>
+Received: from mga11.intel.com ([192.55.52.93]:6162 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750996Ab3AFHyh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 6 Jan 2013 02:54:37 -0500
+In-Reply-To: <alpine.DEB.2.00.1301052156400.15430@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-It works now. The old version of .so files in /usr/lib are linked, 
-instead of new version of these files which are installed at 
-/usr/local/lib. Thanks, Sage.
+On 01/06/2013 02:00 PM, Sage Weil wrote:
+> On Fri, 4 Jan 2013, Yan, Zheng wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>
+>> In commit 22cddde104, ceph_get_caps() was moved into ceph_write_begin().
+>> So ceph_get_caps() can be called while i_mutex is locked. If there is
+>> pending vmtruncate, ceph_get_caps() will wait for it to complete, but
+>> ceph_vmtruncate_work() is blocked by the locked i_mutex.
+> 
+> Hmm... :/
+> 
+>> There are several places that call __ceph_do_pending_vmtruncate()
+>> without holding the i_mutex, I think it's OK to not acquire the i_mutex
+>> in ceph_vmtruncate_work()
+> 
+> The intention was that that function woudl only be called under i_mutex.  
+> I did a quick look through the callers and that appears to be the case 
+> (for things llseek and setattr, the vfs should be taking i_mutex).
 
-Xing
+both ceph_aio_read() and ceph_aio_write() call __ceph_do_pending_vmtruncate()
+without holding the i_mutex
 
-On 01/05/2013 09:46 PM, Sage Weil wrote:
-> Hi,
->
-> The rbd binary is dynamically linking to librbd1.so and librados2.so
-> (usually in /usr/lib).  You need to make sure that the .so's you compiled
-> are the ones it links to to get your code to run.
->
+> 
+> IIRC, this is to serialize the page cache truncation with truncate 
+> operations; this work can only be sanely done under i_mutex, so we defer 
+> it to the work queue or next person who takes i_mutex and cares about the 
+> mapping and i_size being consistent.
+> 
+> What was the deadlock you observed?
+
+generic_file_aio_write() locks the i_mutex, then indirectly calls ceph_get_caps()
+through ceph_write_begin(). ceph_get_caps() wait for pending vmtruncate to complete,
+but the work queue is blocked by the i_mutex.
+
+Regards
+Yan, Zheng
+
+> 
 > sage
->
->
-> On Sat, 5 Jan 2013, Xing Lin wrote:
->
->> Hi Mark,
+> 
+> 
 >>
->> Thanks for your reply. I do not think I am running the packaged version. The
->> output shows it is my version (0.48.2argonaut.fast at commit 000...).
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> ---
+>>  fs/ceph/inode.c | 4 +---
+>>  1 file changed, 1 insertion(+), 3 deletions(-)
 >>
->> root@client:/users/utos# rbd -v
->> ceph version 0.48.2argonaut.fast
->> (commit:000000000000000000000000000000000000000000000)
->> root@client:/users/utos# /usr/bin/rbd -v
->> ceph version 0.48.2argonaut (commit:3e02b2fad88c2a95d9c0c86878f10d1beb780bfe)
->> root@client:/users/utos# /usr/local/bin/rbd -v
->> ceph version 0.48.2argonaut.fast
->> (commit:000000000000000000000000000000000000000000000)
->>
->> Xing
->>
->> On 01/05/2013 08:00 PM, Mark Kirkwood wrote:
->>> I'd hazard a guess that you are still (accidentally) running the packaged
->>> binary - the packaged version installs in /usr/bin (etc) but your source
->>> build will probably be in /usr/local/bin. I've been through this myself and
->>> purged the packaged version before building and installing from source (just
->>> to be sure).
->>>
->>> Cheers
->>>
->>> Mark
->>>
->>> On 06/01/13 14:55, Xing Lin wrote:
->>>
->>>> After changing the client-side code, I can map/unmap rbd block devices
->>>> at client machines. However, I am not able to list rbd block devices. At
->>>> the client machine, I first installed 0.48.2argonaut package for Ubuntu
->>>> then I compiled and installed my own version according to instructions
->>>> on this page ( http://ceph.com/docs/master/install/building-ceph/). The
->>>> client failed to recognize the fifth bucket algorithm I added. I
->>>> searched "unsupported bucket algorithm" in the ceph code base and that
->>>> text only appeared in the src/crush/CrushWrapper.cc. I checked
->>>> decode_crush_bucket() and it should be able to recognize the fifth
->>>> algorithm. Even after I changed the error message (added print of
->>>> "[XXX]" and values for two bucket algorithm macros), it still prints the
->>>> same error message. So, it seems that my new version of CrushWrapper.cc
->>>> is not used during compilation to create the final rbd binary. Would you
->>>> please tell me where the problem is and how I can fix it? Thank you very
->>>> much.
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+>> index 81613bc..c895c7f 100644
+>> --- a/fs/ceph/inode.c
+>> +++ b/fs/ceph/inode.c
+>> @@ -1420,7 +1420,7 @@ out:
+>>  
+>>  
+>>  /*
+>> - * called by trunc_wq; take i_mutex ourselves
+>> + * called by trunc_wq;
+>>   *
+>>   * We also truncate in a separate thread as well.
+>>   */
+>> @@ -1431,9 +1431,7 @@ static void ceph_vmtruncate_work(struct work_struct *work)
+>>  	struct inode *inode = &ci->vfs_inode;
+>>  
+>>  	dout("vmtruncate_work %p\n", inode);
+>> -	mutex_lock(&inode->i_mutex);
+>>  	__ceph_do_pending_vmtruncate(inode);
+>> -	mutex_unlock(&inode->i_mutex);
+>>  	iput(inode);
+>>  }
+>>  
+>> -- 
+>> 1.7.11.7
 >>
 >>
 
