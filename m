@@ -1,44 +1,60 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: radosgw segfault in 0.56
-Date: Mon, 7 Jan 2013 17:06:01 +0200
-Message-ID: <CAC-hyiGiOvSy8y3nxi73rsMkO__omfKwLMJSvG5a=OWqooBEOg@mail.gmail.com>
-References: <CAF6-1L5mV+nRt0yFu1CCZKH7rXiZPfxDYLi-ukmYWTSokQQbdQ@mail.gmail.com>
-	<CAPHxCcQe3ghwv_QPoVp=9jtCoprYcWFUprhxKzhg4eOmTzKeRA@mail.gmail.com>
-	<CAF6-1L4eYaVD5_MMdgX+pOOBzq1aZ==S9E9zO+HXrG-SDqnerw@mail.gmail.com>
-	<CAF6-1L6ojT6LciLN3x8wTPXJ7gxGvpYucPdM7jY6gP728P-j=w@mail.gmail.com>
+From: Denis Fondras <ceph@ledeuns.net>
+Subject: Re: Is Ceph recovery able to handle massive crash
+Date: Mon, 07 Jan 2013 18:25:44 +0100
+Message-ID: <50EB0518.9050304@ledeuns.net>
+References: <50E81A3D.5070100@ledeuns.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:41528 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752924Ab3AGPNW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jan 2013 10:13:22 -0500
-Received: by mail-ie0-f169.google.com with SMTP id c14so24111751ieb.28
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Jan 2013 07:13:21 -0800 (PST)
-In-Reply-To: <CAF6-1L6ojT6LciLN3x8wTPXJ7gxGvpYucPdM7jY6gP728P-j=w@mail.gmail.com>
+Received: from bmenez.pck.nerim.net ([213.41.245.173]:38024 "EHLO
+	mail.ledeuns.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751104Ab3AGRZl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jan 2013 12:25:41 -0500
+Received: from [IPv6:2a01:728:103:1::21] (unknown [IPv6:2a01:728:103:1::21])
+	by mail.ledeuns.net (Postfix) with ESMTPSA id 7E54D93275
+	for <ceph-devel@vger.kernel.org>; Mon,  7 Jan 2013 18:25:37 +0100 (CET)
+In-Reply-To: <50E81A3D.5070100@ledeuns.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 7, 2013 at 1:04 PM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
-> Ok, I tracked this down ...
->
-> I'm using lighttpd as a FastCGI front end and it doesn't set
-> SCRIPT_URI environment.
->
->
-> So the line 1123 in rgw/rgw_rest.cc :
->
-> s->script_uri = s->env->get("SCRIPT_URI");
->
-> Tries to assign NULL to s->script_uri  which crashes with the
-> particularly unhelpful stack trace I pasted above ...
+Hello all,
 
-Yeah, it's missing a guard here. Strange, I remember fixing this and
-others, but I can't find any trace of that. I think setting it to
-empty string is ok, though we may want to explore other fixes
-(configurable?) -- it affects the Location field in S3 POST response.
+> I'm using Ceph 0.55.1 on a Debian Wheezy (1 mon, 1 mds et 3 osd over
+> btrfs) and every once in a while, an OSD process crashes (almost never
+> the same osd crashes).
+> This time I had 2 osd crash in a row and so I only had one replicate. I
+> could bring the 2 crashed osd up and it started to recover.
+> Unfortunately, the "source" osd crashed while recovering and now I have
+> a some lost PGs.
+>
+> If I happen to bring the primary OSD up again, can I imagine the lost PG
+> will be recovered too ?
+>
 
-Yehuda
+Ok, so it seems I can't bring back to life my primary OSD :-(
+
+---8<---------------
+health HEALTH_WARN 72 pgs incomplete; 72 pgs stuck inactive; 72 pgs 
+stuck unclean
+monmap e1: 1 mons at {a=192.168.0.132:6789/0}, election epoch 1, quorum 0 a
+osdmap e1130: 3 osds: 2 up, 2 in
+  pgmap v1567492: 624 pgs: 552 active+clean, 72 incomplete; 1633 GB 
+data, 4766 GB used, 3297 GB / 8383 GB avail
+  mdsmap e127: 1/1/1 up {0=a=up:active}
+
+2013-01-07 18:11:10.852673 mon.0 [INF] pgmap v1567492: 624 pgs: 552 
+active+clean, 72 incomplete; 1633 GB data, 4766 GB used, 3297 GB / 8383 
+GB avail
+---8<---------------
+
+When I "rbd list", I can see all my images.
+When I do "rbd map", I can map only a few of them and when I mount the 
+devices, none can mount (the mount process hangs and I cannot even ^C 
+the process).
+
+Is there something I can try ?
+
+Thank you in advance,
+Denis
