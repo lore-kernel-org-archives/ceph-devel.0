@@ -1,32 +1,34 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 5/6] ceph: check mds_wanted for imported cap
-Date: Mon, 07 Jan 2013 13:39:48 +0800
-Message-ID: <50EA5FA4.2090203@intel.com>
-References: <1357299261-20591-1-git-send-email-zheng.z.yan@intel.com> <1357299261-20591-6-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1301052216330.15430@cobra.newdream.net> <50E93BDC.6050104@intel.com> <alpine.DEB.2.00.1301062110260.15430@cobra.newdream.net>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: radosgw segfault in 0.56
+Date: Mon, 7 Jan 2013 09:53:15 +0100
+Message-ID: <CAF6-1L4eYaVD5_MMdgX+pOOBzq1aZ==S9E9zO+HXrG-SDqnerw@mail.gmail.com>
+References: <CAF6-1L5mV+nRt0yFu1CCZKH7rXiZPfxDYLi-ukmYWTSokQQbdQ@mail.gmail.com>
+	<CAPHxCcQe3ghwv_QPoVp=9jtCoprYcWFUprhxKzhg4eOmTzKeRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:11682 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750949Ab3AGFjv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Jan 2013 00:39:51 -0500
-In-Reply-To: <alpine.DEB.2.00.1301062110260.15430@cobra.newdream.net>
+Received: from mail-oa0-f48.google.com ([209.85.219.48]:51790 "EHLO
+	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753647Ab3AGIxR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jan 2013 03:53:17 -0500
+Received: by mail-oa0-f48.google.com with SMTP id h2so17066639oag.7
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Jan 2013 00:53:16 -0800 (PST)
+In-Reply-To: <CAPHxCcQe3ghwv_QPoVp=9jtCoprYcWFUprhxKzhg4eOmTzKeRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Lorieri <lorieri@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 01/07/2013 01:11 PM, Sage Weil wrote:
-> On Sun, 6 Jan 2013, Yan, Zheng wrote:
->> how about below patch, also updated git://github.com/ukernel/ceph-client.git wip-ceph
-> 
-> The branch looks good.  Once Alex sorts out testing-next tomorrow we can 
-> pull these in.  If you don't mind adding the Reviewed-by tags, that'd be 
-> helpful, otherwise I'll do it tomorrow.
-> 
-done.
+Hi,
 
-Regards
-Yan, Zheng
+> happened to me using ubuntu packages.
+> usually when you upgrade a package it calls all its dependencies, for
+> ceph you have to update one by one.
+> did you try that ?
 
+All ceph packages are up to date. Same happens with a custom compiled
+radosgw from git
+
+Cheers,
+
+    Sylvain
