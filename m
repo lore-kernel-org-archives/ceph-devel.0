@@ -1,68 +1,80 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Is Ceph recovery able to handle massive crash
-Date: Tue, 08 Jan 2013 14:36:48 +0100
-Message-ID: <50EC20F0.1060502@widodh.nl>
-References: <50E81A3D.5070100@ledeuns.net> <50EB0518.9050304@ledeuns.net> <E4EA8440A5CF4E519F57FE3D9C26CAE4@inktank.com> <50EBDC5E.3090207@ledeuns.net> <50EC17A6.1080707@ledeuns.net> <50EC1AC2.2060001@widodh.nl>
+From: Yann ROBIN <yann.robin@youscribe.com>
+Subject: RE: Rados gateway init timeout with cache
+Date: Tue, 8 Jan 2013 13:41:38 +0000
+Message-ID: <367CC0B0FC02EE47BF7482398BD623C54E0E3701@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+References: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:50065 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754754Ab3AHNgv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 08:36:51 -0500
-In-Reply-To: <50EC1AC2.2060001@widodh.nl>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:33853
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755318Ab3AHNlp convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 8 Jan 2013 08:41:45 -0500
+Received: from mail120-db3 (localhost [127.0.0.1])	by
+ mail120-db3-R.bigfish.com (Postfix) with ESMTP id E04EB2402B8	for
+ <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 13:41:43 +0000 (UTC)
+Received: from DB3EHSMHS001.bigfish.com (unknown [10.3.81.237])	by
+ mail120-db3.bigfish.com (Postfix) with ESMTP id 6A8E61200CF	for
+ <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 13:41:41 +0000 (UTC)
+In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Denis Fondras <ceph@ledeuns.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/08/2013 02:10 PM, Wido den Hollander wrote:
-> On 01/08/2013 01:57 PM, Denis Fondras wrote:
->> Hello,
->>
->> I'm wondering if I can get every "rb.0.8e10.3e2219d7.*" from the OSD
->> drive and cat them together and get back a usable raw volume from which
->> I could get back my data ?
->>
->
-> Yes, that is doable. The problem only is that RBD is sparse. So you'd
-> have to fill up the empty spaces with 4MB of zeroes.
->
-> But yes, it's doable if you gather all the objects and will the rest up
-> with zeroes.
->
->> Everything seems to be there but I don't know the order of the rbd
->> objects. Are the last bytes of the file name the offset of the block ?
->>
->
-> There was a quick perl command for this to generate all the suffixes,
-> but I can't seem to find it right now.
->
+Notify and gc objects where unfound, we marked them as lost and now the=
+ rados start.
+But this means that if some notify object are not fully available, the =
+radosgateway stop responding.
 
-You could do something like this to generate all the blocks you should 
-need, the non-existing ones you should fill them with nothing, aka 4MB 
-of nothing.
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Yann ROBIN
+Sent: mardi 8 janvier 2013 12:13
+To: ceph-devel@vger.kernel.org
+Subject: Rados gateway init timeout with cache
 
-perl -e 'while ($s < (SIZE_IN_MB / 4)) { printf "BLOCK_PREFIX.%012x\n", 
-$s; $s++}'
+Hi,
 
-Size is the block-device in MB en BLOCK_PREFIX can be something like 
-"rb.0.1016.238e1f29"
+We recently experienced issue with the backplane of our server, resulti=
+ng in loosing half of our osd.
+During that period the rados gateway failed initializing (timeout).
+We found that the gateway was hanging in the init_watch function.
 
-Wido
+We recreate our OSDs and we still have this issue, but pg are not all i=
+n an active+clean state :
+=A0=A0 health HEALTH_WARN 1 pgs degraded; 1 pgs recovering; 2 pgs recov=
+ery_wait; 3 pgs stuck unclean; recovery 7/10140464 degraded (0.000%); 3=
+/5070232 unfound (0.000%); noout flag(s) set
+=A0=A0 monmap e2: 3 mons at {ceph-mon-1=3D172.20.1.13:6789/0,ceph-mon-2=
+=3D172.20.2.13:6789/0,ceph-mon-3=3D172.17.9.20:6789/0}, election epoch =
+256, quorum 0,1,2 ceph-mon-1,ceph-mon-2,ceph-mon-3
+=A0=A0 osdmap e4439: 6 osds: 6 up, 6 in
+=A0=A0=A0 pgmap v2531184: 11024 pgs: 11019 active+clean, 2 active+recov=
+ery_wait, 1 active+recovering+degraded+remapped, 2 active+clean+scrubbi=
+ng+deep; 1291 GB data, 2612 GB used, 19645 GB / 22257 GB avail; 7/10140=
+464 degraded (0.000%); 3/5070232 unfound (0.000%)
+=A0=A0 mdsmap e1: 0/0/1 up
 
-> Wido
->
->> Regards,
->> Denis
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Should we open an ticket for this init issue with rados gateway ?
+Version is 0.56.1 upgraded from 0.55.
 
+--=20
+Yann ROBIN
+YouScribe
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
