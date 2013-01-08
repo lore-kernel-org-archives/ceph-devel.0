@@ -1,47 +1,68 @@
-From: "Moore, Shawn M" <smmoore@catawba.edu>
-Subject: RE: Is Ceph recovery able to handle massive crash
-Date: Tue, 8 Jan 2013 13:51:14 +0000
-Message-ID: <AEBA0243790A484AA72D5CDF477159BC1CEB016A@SN2PRD0106MB178.prod.exchangelabs.com>
-References: <50E81A3D.5070100@ledeuns.net> <50EB0518.9050304@ledeuns.net>
- <E4EA8440A5CF4E519F57FE3D9C26CAE4@inktank.com>
- <50EBDC5E.3090207@ledeuns.net> <50EC17A6.1080707@ledeuns.net>
+From: Dino Yancey <dino2gnt@gmail.com>
+Subject: Re: Windows port
+Date: Tue, 8 Jan 2013 08:00:00 -0600
+Message-ID: <CA+GnOzR29oKSXWpuS8dffsXJWChzMvTCFQ+dutmAm+zsuVkBgQ@mail.gmail.com>
+References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com>
+	<CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:54927
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755794Ab3AHNvW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 08:51:22 -0500
-In-Reply-To: <50EC17A6.1080707@ledeuns.net>
-Content-Language: en-US
+Received: from mail-ie0-f175.google.com ([209.85.223.175]:61605 "EHLO
+	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755794Ab3AHOAC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 09:00:02 -0500
+Received: by mail-ie0-f175.google.com with SMTP id qd14so485639ieb.6
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 06:00:01 -0800 (PST)
+In-Reply-To: <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Denis Fondras <ceph@ledeuns.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Cesar Mello <cmello@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SWYgeW91IGtub3cgdGhlIHByZWZpeCAod2hpY2ggaXMgc2VlbXMgeW91IGRvKSBhbmQgdGhlIG9y
-aWdpbmFsIHNpemUgb2YgdGhlIHJiZCB5b3Ugc2hvdWxkIGJlIGFibGUgdG8gdXNlIG15IHV0aWxp
-dHkuDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9zbW1vb3JlL2NlcGgvYmxvYi9tYXN0ZXIvcmJkX3Jl
-c3RvcmUuc2gNCg0KWW91IHdpbGwgbmVlZCBhbGwgdGhlIHJhZG9zIGZpbGVzIGluIHRoZSBjdXJy
-ZW50IHdvcmtpbmcgZGlyZWN0b3J5IHlvdSBleGVjdXRlIHRoZSBzY3JpcHQgZnJvbS4gIFdlIGhh
-dmUgdXNlZCBpdCBtYW55IHRpbWVzIHNvIGZhciBhbmQgd29ya3MgZm9yIHVzLiAgSSBoYXZlIG5v
-dCBoYWQgYW55IG91dHNpZGUgZmVlZGJhY2sgb24gaXQncyB1c2FnZS4gIEJ1dCBpZiB5b3UgYXJl
-IHRydWx5IG1pc3NpbmcgYW55IGZpbGVzLCBpdCB3aWxsIHNlZWsgb3ZlciB0aGVtIGFuZCB5b3Vy
-IHJiZCBtaWdodCBiZSBjb3JydXB0LiAgTGlrZXdpc2UgaWYgYSBmaWxlIGl0c2VsZiBpcyBkYW1h
-Z2VkLCBpdCB3aWxsIHdyaXRlIHdoYXQgaXMgaW4gdGhhdCBmaWxlIHRvIHRoZSByZWJ1aWxkLg0K
-DQpIVEgsDQpTaGF3bg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgRGVuaXMgRm9uZHJhcw0KU2VudDogVHVlc2RheSwg
-SmFudWFyeSAwOCwgMjAxMyA3OjU3IEFNDQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
-ClN1YmplY3Q6IFJlOiBJcyBDZXBoIHJlY292ZXJ5IGFibGUgdG8gaGFuZGxlIG1hc3NpdmUgY3Jh
-c2gNCg0KSGVsbG8sDQoNCkknbSB3b25kZXJpbmcgaWYgSSBjYW4gZ2V0IGV2ZXJ5ICJyYi4wLjhl
-MTAuM2UyMjE5ZDcuKiIgZnJvbSB0aGUgT1NEIA0KZHJpdmUgYW5kIGNhdCB0aGVtIHRvZ2V0aGVy
-IGFuZCBnZXQgYmFjayBhIHVzYWJsZSByYXcgdm9sdW1lIGZyb20gd2hpY2ggDQpJIGNvdWxkIGdl
-dCBiYWNrIG15IGRhdGEgPw0KDQpFdmVyeXRoaW5nIHNlZW1zIHRvIGJlIHRoZXJlIGJ1dCBJIGRv
-bid0IGtub3cgdGhlIG9yZGVyIG9mIHRoZSByYmQgDQpvYmplY3RzLiBBcmUgdGhlIGxhc3QgYnl0
-ZXMgb2YgdGhlIGZpbGUgbmFtZSB0aGUgb2Zmc2V0IG9mIHRoZSBibG9jayA/DQoNClJlZ2FyZHMs
-DQpEZW5pcw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
-ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92
-Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQo=
+Hi,
 
+I am also curious if a Windows port, specifically the client-side, is
+on the roadmap.
+
+Dino
+
+On Mon, Jan 7, 2013 at 11:36 PM, Cesar Mello <cmello@gmail.com> wrote:
+> Hi,
+>
+> I have been playing with ceph and reading the docs/thesis the last
+> couple of nights just to learn something during my vacation. I was not
+> expecting to find such an awesome and state of the art project.
+> Congratulations for the great work!
+>
+> Please I would like to know if a Windows port is imagined for the
+> future or if that is a dead-end. By Windows port I mean an abstraction
+> layer for hardware/sockets/threading/etc and building with Visual C++
+> 2012 Express. And then have this state of the art object storage
+> cluster running on Windows nodes too.
+>
+> Thank you a lot for the attention!
+>
+> Best regards
+> Mello
+>
+>
+> On Sat, Jan 5, 2013 at 1:20 AM, Cesar Mello <cmello@gmail.com> wrote:
+>> Hi,
+>>
+>> Is there interest in a Windows port?
+>>
+>> Thank you for the attention.
+>>
+>> Best regards
+>> Cesar
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+______________________________
+Dino Yancey
+2GNT.com Admin
