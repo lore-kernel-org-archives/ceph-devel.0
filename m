@@ -1,50 +1,126 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSD Crashed when runing "rbd list"
-Date: Tue, 8 Jan 2013 09:12:25 -0800
-Message-ID: <CAPYLRzgsAtwd8Fca9MvM9kaCqNRu-e3yzBCBY_PZXjq6hB1pZg@mail.gmail.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5D2A50@SHSMSX102.ccr.corp.intel.com>
+Subject: Re: recoverying from 95% full osd
+Date: Tue, 8 Jan 2013 09:20:17 -0800
+Message-ID: <CAPYLRzjv2tjndJCAgCqj8uBcGdC4vCiU1hd3oG2MdqLA7fW3Yg@mail.gmail.com>
+References: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:40405 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756598Ab3AHRM0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 12:12:26 -0500
-Received: by mail-qc0-f171.google.com with SMTP id d1so866989qca.30
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 09:12:25 -0800 (PST)
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5D2A50@SHSMSX102.ccr.corp.intel.com>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:62860 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756529Ab3AHRUS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 12:20:18 -0500
+Received: by mail-qc0-f177.google.com with SMTP id u28so863467qcs.22
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 09:20:17 -0800 (PST)
+In-Reply-To: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 8, 2013 at 7:51 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
-> Hi List,
->       Every time I ran "rbd list" after creating a lot of rbd volumes (more than 100s), certain OSDs will die,osd.65 die first and then osd.35 (osd.65,that's the fifth disk on the sixth host) will die.
->   Is it a bug for 0.55? My ceph version is 0.55-1 with 3.7 kernel.
->         I would like to upgrade to 0.56-1 but there is no package for 3.7 kernel(raring)
+On Tue, Jan 8, 2013 at 2:42 AM, Roman Hlynovskiy
+<roman.hlynovskiy@gmail.com> wrote:
+> Hello,
 >
->    Log of osd.35 attached.Key messages are below:
+> I am running ceph v0.56 and at the moment trying to recover ceph which
+> got completely stuck after 1 osd got filled by 95%. Looks like the
+> distribution algorithm is not perfect since all 3 OSD's I user are
+> 256Gb each, however one of them got filled faster than others:
 >
-> 1 -- 192.101.11.203:6843/19960 mark_down 192.101.11.206:6861/3735 -- 0x7f331867a000
->    -38> 2013-01-08 23:37:37.751473 7f3302fc0700 -1 ./messages/MOSDOp.h: In function 'bool MOSDOp::check_rmw(int)' thread 7f3302fc0700 time 2013-01-08 23:37:37.748254
-> ./messages/MOSDOp.h: 57: FAILED assert(rmw_flags)
+> osd-1:
+> Filesystem            Size  Used Avail Use% Mounted on
+> /dev/mapper/vg00-osd  252G  173G   80G  69% /var/lib/ceph/osd/ceph-0
 >
->  ceph version 0.55.1 (8e25c8d984f9258644389a18997ec6bdef8e056b)
->  1: (()+0x22f765) [0x7f3310831765]
->  2: (MOSDOpReply::claim_op_out_data(std::vector<OSDOp, std::allocator<OSDOp> >&)+0) [0x7f3310897850]
->  3: (OSD::handle_op(std::tr1::shared_ptr<OpRequest>)+0x441) [0x7f33108f19c1]
->  4: (OSD::dispatch_op(std::tr1::shared_ptr<OpRequest>)+0x83) [0x7f33108fd8c3]
->  5: (OSD::do_waiters()+0x104) [0x7f33108fdc64]
->  6: (OSD::ms_dispatch(Message*)+0x317) [0x7f33109027e7]
->  7: (DispatchQueue::entry()+0x353) [0x7f3310b6b743]
->  8: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f3310ac7dad]
->  9: (()+0x7f9f) [0x7f330ffc5f9f]
->  10: (clone()+0x6d) [0x7f330e2800cd]
+> osd-2:
+> Filesystem            Size  Used Avail Use% Mounted on
+> /dev/mapper/vg00-osd  252G  203G   50G  81% /var/lib/ceph/osd/ceph-1
 >
->    Thanks for the help.
+> osd-3:
+> Filesystem            Size  Used Avail Use% Mounted on
+> /dev/mapper/vg00-osd  252G  240G   13G  96% /var/lib/ceph/osd/ceph-2
+>
+>
+> by the moment mds is showing the following behaviour:
+> 2013-01-08 16:25:47.006354 b4a73b70  0 mds.0.objecter  FULL, paused
+> modify 0x9ba63c0 tid 23448
+> 2013-01-08 16:26:47.005211 b4a73b70  0 mds.0.objecter  FULL, paused
+> modify 0xca86c30 tid 23449
+>
+> so, it does not respond to any mount requests
+>
+> I've played around with all types of commands like:
+> ceph mon tell \* injectargs '--mon-osd-full-ratio 98'
+> ceph mon tell \* injectargs '--mon-osd-full-ratio 0.98'
+>
+> and
+>
+> 'mon osd full ratio = 0.98' in mon configuration for each mon
+>
+> however
+>
+> chef@ceph-node03:/var/log/ceph$ ceph health detail
+> HEALTH_ERR 1 full osd(s)
+> osd.2 is full at 95%
+>
+> mds still believes 95% is the threshold, so no responses to mount requests.
+>
+> chef@ceph-node03:/var/log/ceph$ rados -p data bench 10 write
+>  Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
+>  Object prefix: benchmark_data_ceph-node03_3903
+> 2013-01-08 16:33:02.363206 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa467ff0 tid 1
+> 2013-01-08 16:33:02.363618 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa468780 tid 2
+> 2013-01-08 16:33:02.363741 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa468f88 tid 3
+> 2013-01-08 16:33:02.364056 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa469348 tid 4
+> 2013-01-08 16:33:02.364171 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa469708 tid 5
+> 2013-01-08 16:33:02.365024 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa469ac8 tid 6
+> 2013-01-08 16:33:02.365187 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46a2d0 tid 7
+> 2013-01-08 16:33:02.365296 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46a690 tid 8
+> 2013-01-08 16:33:02.365402 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46aa50 tid 9
+> 2013-01-08 16:33:02.365508 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46ae10 tid 10
+> 2013-01-08 16:33:02.365635 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46b1d0 tid 11
+> 2013-01-08 16:33:02.365742 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46b590 tid 12
+> 2013-01-08 16:33:02.365868 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46b950 tid 13
+> 2013-01-08 16:33:02.365975 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46bd10 tid 14
+> 2013-01-08 16:33:02.366096 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46c0d0 tid 15
+> 2013-01-08 16:33:02.366203 b6be3710  0 client.9958.objecter  FULL,
+> paused modify 0xa46c490 tid 16
+>    sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
+>      0      16        16         0         0         0         -         0
+>      1      16        16         0         0         0         -         0
+>      2      16        16         0         0         0         -         0
+>
+> rados doesn't work.
+>
+> chef@ceph-node03:/var/log/ceph$ ceph osd reweight-by-utilization
+> no change: average_util: 0.812678, overload_util: 0.975214. overloaded
+> osds: (none)
+>
+> this one also.
+>
+>
+> is there any chance to recover ceph?
 
-Sounds like you've got a v0.56 binary talking to v0.55 daemons. An
-upgrade to v0.56.1 should fix it. See
-http://tracker.newdream.net/issues/3715
+"ceph pg set_full_ratio 0.98"
+
+However, as Mark mentioned, you want to figure out why one OSD is so
+much fuller than the others first. Even in a small cluster I don't
+think you should be able to see that kind of variance. Simply setting
+the full ratio to 98% and then continuing to run could cause bigger
+problems if that OSD continues to get a disproportionate share of the
+writes and fills up its disk.
 -Greg
