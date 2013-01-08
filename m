@@ -1,80 +1,47 @@
-From: Yann ROBIN <yann.robin@youscribe.com>
-Subject: RE: Rados gateway init timeout with cache
-Date: Tue, 8 Jan 2013 13:41:38 +0000
-Message-ID: <367CC0B0FC02EE47BF7482398BD623C54E0E3701@DB3PRD0311MB416.eurprd03.prod.outlook.com>
-References: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+From: "Moore, Shawn M" <smmoore@catawba.edu>
+Subject: RE: Is Ceph recovery able to handle massive crash
+Date: Tue, 8 Jan 2013 13:51:14 +0000
+Message-ID: <AEBA0243790A484AA72D5CDF477159BC1CEB016A@SN2PRD0106MB178.prod.exchangelabs.com>
+References: <50E81A3D.5070100@ledeuns.net> <50EB0518.9050304@ledeuns.net>
+ <E4EA8440A5CF4E519F57FE3D9C26CAE4@inktank.com>
+ <50EBDC5E.3090207@ledeuns.net> <50EC17A6.1080707@ledeuns.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:33853
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755318Ab3AHNlp convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Jan 2013 08:41:45 -0500
-Received: from mail120-db3 (localhost [127.0.0.1])	by
- mail120-db3-R.bigfish.com (Postfix) with ESMTP id E04EB2402B8	for
- <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 13:41:43 +0000 (UTC)
-Received: from DB3EHSMHS001.bigfish.com (unknown [10.3.81.237])	by
- mail120-db3.bigfish.com (Postfix) with ESMTP id 6A8E61200CF	for
- <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 13:41:41 +0000 (UTC)
-In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:54927
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755794Ab3AHNvW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 08:51:22 -0500
+In-Reply-To: <50EC17A6.1080707@ledeuns.net>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Denis Fondras <ceph@ledeuns.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Notify and gc objects where unfound, we marked them as lost and now the=
- rados start.
-But this means that if some notify object are not fully available, the =
-radosgateway stop responding.
+SWYgeW91IGtub3cgdGhlIHByZWZpeCAod2hpY2ggaXMgc2VlbXMgeW91IGRvKSBhbmQgdGhlIG9y
+aWdpbmFsIHNpemUgb2YgdGhlIHJiZCB5b3Ugc2hvdWxkIGJlIGFibGUgdG8gdXNlIG15IHV0aWxp
+dHkuDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9zbW1vb3JlL2NlcGgvYmxvYi9tYXN0ZXIvcmJkX3Jl
+c3RvcmUuc2gNCg0KWW91IHdpbGwgbmVlZCBhbGwgdGhlIHJhZG9zIGZpbGVzIGluIHRoZSBjdXJy
+ZW50IHdvcmtpbmcgZGlyZWN0b3J5IHlvdSBleGVjdXRlIHRoZSBzY3JpcHQgZnJvbS4gIFdlIGhh
+dmUgdXNlZCBpdCBtYW55IHRpbWVzIHNvIGZhciBhbmQgd29ya3MgZm9yIHVzLiAgSSBoYXZlIG5v
+dCBoYWQgYW55IG91dHNpZGUgZmVlZGJhY2sgb24gaXQncyB1c2FnZS4gIEJ1dCBpZiB5b3UgYXJl
+IHRydWx5IG1pc3NpbmcgYW55IGZpbGVzLCBpdCB3aWxsIHNlZWsgb3ZlciB0aGVtIGFuZCB5b3Vy
+IHJiZCBtaWdodCBiZSBjb3JydXB0LiAgTGlrZXdpc2UgaWYgYSBmaWxlIGl0c2VsZiBpcyBkYW1h
+Z2VkLCBpdCB3aWxsIHdyaXRlIHdoYXQgaXMgaW4gdGhhdCBmaWxlIHRvIHRoZSByZWJ1aWxkLg0K
+DQpIVEgsDQpTaGF3bg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgRGVuaXMgRm9uZHJhcw0KU2VudDogVHVlc2RheSwg
+SmFudWFyeSAwOCwgMjAxMyA3OjU3IEFNDQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+ClN1YmplY3Q6IFJlOiBJcyBDZXBoIHJlY292ZXJ5IGFibGUgdG8gaGFuZGxlIG1hc3NpdmUgY3Jh
+c2gNCg0KSGVsbG8sDQoNCkknbSB3b25kZXJpbmcgaWYgSSBjYW4gZ2V0IGV2ZXJ5ICJyYi4wLjhl
+MTAuM2UyMjE5ZDcuKiIgZnJvbSB0aGUgT1NEIA0KZHJpdmUgYW5kIGNhdCB0aGVtIHRvZ2V0aGVy
+IGFuZCBnZXQgYmFjayBhIHVzYWJsZSByYXcgdm9sdW1lIGZyb20gd2hpY2ggDQpJIGNvdWxkIGdl
+dCBiYWNrIG15IGRhdGEgPw0KDQpFdmVyeXRoaW5nIHNlZW1zIHRvIGJlIHRoZXJlIGJ1dCBJIGRv
+bid0IGtub3cgdGhlIG9yZGVyIG9mIHRoZSByYmQgDQpvYmplY3RzLiBBcmUgdGhlIGxhc3QgYnl0
+ZXMgb2YgdGhlIGZpbGUgbmFtZSB0aGUgb2Zmc2V0IG9mIHRoZSBibG9jayA/DQoNClJlZ2FyZHMs
+DQpEZW5pcw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
+ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
+am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92
+Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQo=
 
------Original Message-----
-=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Yann ROBIN
-Sent: mardi 8 janvier 2013 12:13
-To: ceph-devel@vger.kernel.org
-Subject: Rados gateway init timeout with cache
-
-Hi,
-
-We recently experienced issue with the backplane of our server, resulti=
-ng in loosing half of our osd.
-During that period the rados gateway failed initializing (timeout).
-We found that the gateway was hanging in the init_watch function.
-
-We recreate our OSDs and we still have this issue, but pg are not all i=
-n an active+clean state :
-=A0=A0 health HEALTH_WARN 1 pgs degraded; 1 pgs recovering; 2 pgs recov=
-ery_wait; 3 pgs stuck unclean; recovery 7/10140464 degraded (0.000%); 3=
-/5070232 unfound (0.000%); noout flag(s) set
-=A0=A0 monmap e2: 3 mons at {ceph-mon-1=3D172.20.1.13:6789/0,ceph-mon-2=
-=3D172.20.2.13:6789/0,ceph-mon-3=3D172.17.9.20:6789/0}, election epoch =
-256, quorum 0,1,2 ceph-mon-1,ceph-mon-2,ceph-mon-3
-=A0=A0 osdmap e4439: 6 osds: 6 up, 6 in
-=A0=A0=A0 pgmap v2531184: 11024 pgs: 11019 active+clean, 2 active+recov=
-ery_wait, 1 active+recovering+degraded+remapped, 2 active+clean+scrubbi=
-ng+deep; 1291 GB data, 2612 GB used, 19645 GB / 22257 GB avail; 7/10140=
-464 degraded (0.000%); 3/5070232 unfound (0.000%)
-=A0=A0 mdsmap e1: 0/0/1 up
-
-Should we open an ticket for this init issue with rados gateway ?
-Version is 0.56.1 upgraded from 0.55.
-
---=20
-Yann ROBIN
-YouScribe
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
