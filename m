@@ -1,88 +1,57 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: Windows port
-Date: Tue, 08 Jan 2013 10:25:20 -0700
-Message-ID: <50EBF41002000099000F0D9A@collaborate.seakr.com>
-References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com>
- <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com>
- <CA+GnOzR29oKSXWpuS8dffsXJWChzMvTCFQ+dutmAm+zsuVkBgQ@mail.gmail.com>
- <CAPYLRziODEGsrvs4hFJ0SfnYPafRhE_SFTAyjJgCqWt-0t9Hdw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: branches
+Date: Tue, 8 Jan 2013 10:39:47 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301081038580.30467@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:36975 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756485Ab3AHRvr (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Tue, 8 Jan 2013 12:51:47 -0500
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id r08Gl9U0021693
-	for <ceph-devel@vger.kernel.org>; Tue, 8 Jan 2013 09:47:10 -0700
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 9A6B144D80
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 10:25:25 -0700 (MST)
-In-Reply-To: <CAPYLRziODEGsrvs4hFJ0SfnYPafRhE_SFTAyjJgCqWt-0t9Hdw@mail.gmail.com>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:52721 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757033Ab3AHSjr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 13:39:47 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 5EFDB80068
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 10:39:47 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 388CD80068
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 10:39:47 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dino Yancey <dino2gnt@gmail.com>, Gregory Farnum <greg@inktank.com>
-Cc: Cesar Mello <cmello@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Pj4+IE9uIDIwMTMvMDEvMDggYXQgMTA6MDgsIEdyZWdvcnkgRmFybnVtIDxncmVnQGlua3Rhbmsu
-Y29tPiB3cm90ZTogCj4gT24gTW9uLCBKYW4gNywgMjAxMyBhdCA5OjM2IFBNLCBDZXNhciBNZWxs
-byA8Y21lbGxvQGdtYWlsLmNvbT4Kd3JvdGU6Cj4+IEhpLAo+Pgo+PiBJIGhhdmUgYmVlbiBwbGF5
-aW5nIHdpdGggY2VwaCBhbmQgcmVhZGluZyB0aGUgZG9jcy90aGVzaXMgdGhlIGxhc3QKPj4gY291
-cGxlIG9mIG5pZ2h0cyBqdXN0IHRvIGxlYXJuIHNvbWV0aGluZyBkdXJpbmcgbXkgdmFjYXRpb24u
-IEkgd2FzCm5vdAo+PiBleHBlY3RpbmcgdG8gZmluZCBzdWNoIGFuIGF3ZXNvbWUgYW5kIHN0YXRl
-IG9mIHRoZSBhcnQgcHJvamVjdC4KPj4gQ29uZ3JhdHVsYXRpb25zIGZvciB0aGUgZ3JlYXQgd29y
-ayEKPj4KPj4gUGxlYXNlIEkgd291bGQgbGlrZSB0byBrbm93IGlmIGEgV2luZG93cyBwb3J0IGlz
-IGltYWdpbmVkIGZvciB0aGUKPj4gZnV0dXJlIG9yIGlmIHRoYXQgaXMgYSBkZWFkLWVuZC4gQnkg
-V2luZG93cyBwb3J0IEkgbWVhbiBhbgphYnN0cmFjdGlvbgo+PiBsYXllciBmb3IgaGFyZHdhcmUv
-c29ja2V0cy90aHJlYWRpbmcvZXRjIGFuZCBidWlsZGluZyB3aXRoIFZpc3VhbApDKysKPj4gMjAx
-MiBFeHByZXNzLiBBbmQgdGhlbiBoYXZlIHRoaXMgc3RhdGUgb2YgdGhlIGFydCBvYmplY3Qgc3Rv
-cmFnZQo+PiBjbHVzdGVyIHJ1bm5pbmcgb24gV2luZG93cyBub2RlcyB0b28uCj4gCj4gVGhpcyBp
-cyBub3Qgc3VwZXItbGlrZWx5IChhbHRob3VnaCBpdCdzIG5vdCBpbXBvc3NpYmxlIGVpdGhlciku
-Cj4gSW5rdGFuayBpcyBhIGxvbmcgd2F5IGZyb20gZG9pbmcgdGhlIG5lY2Vzc2FyeSBkZXZlbG9w
-bWVudCBmb3IgdGhpcwoqCj4gd2UgZG9uJ3QgaGF2ZSBhbnkgV2luZG93cyBkZXZlbG9wZXJzIG9u
-IHN0YWZmLiBFeHRlcm5hbCBjb250cmlidXRvcnMKPiB3aG8gYXJlIGludGVyZXN0ZWQgaW4gZG9p
-bmcgdGhlIHdvcmsgdGhlbXNlbHZlcyB3b3VsZCBjZXJ0YWlubHkgZ2V0Cj4gc29tZSBzdXBwb3J0
-IGluIGRvaW5nIHNvLCBidXQgSSBjYW4ndCBldmVuIGJlZ2luIHRvIGVzdGltYXRlIHRoZQpzaXpl
-Cj4gb2YgdGhlIHByb2plY3QgdGhhdCB3b3VsZCBiZSByZXF1aXJlZC4gV291bGQgYSBzaW1wbGUg
-YWJzdHJhY3Rpb24KPiBsYXllciBiZSBhYmxlIHRvIHByb3ZpZGUgdGhlIHJpZ2h0IGludGVyZmFj
-ZSB3aXRoIGFueXRoaW5nCmFwcHJvYWNoaW5nCj4gYWNjZXB0YWJsZSBwZXJmb3JtYW5jZT8gSSBy
-ZWFsbHkgZG9uJ3Qga25vdy4KPiAKPiAKCkkgdGhpbmsgdGhpcyBhbHNvIGRlcGVuZHMgb24gdGhl
-IHNjb3BlIG9mIHRoZSBlZmZvcnQgLSB3aGF0IHBvcnRpb25zIG9mCmNlcGggYXJlIHBvcnRlZCB0
-byBXaW5kb3dzLiAgSSBoYXZlIHRvIGNvbmZlc3MgdGhhdCBJIGRvIG5vdCBzZWUgYSBsb3QKb2Yg
-dmFsdWUgaW4gcG9ydGluZyB0aGUgT1NELCBNRFMsIGFuZCBNT04gZGFlbW9ucyB0byBXaW5kb3dz
-LiAgVGhpcyBqdXN0CmRvZXNuJ3QgbWFrZSBhIGxvdCBvZiBzZW5zZSAtIGlmIHlvdSdyZSBzZXR0
-aW5nIGFzaWRlIG1hY2hpbmVzCnNwZWNpZmljYWxseSBmb3IgYSBkaXN0cmlidXRlZCBmaWxlc3lz
-dGVtLCB3aHkgbm90IGp1c3QgcnVuIExpbnV4PyAgVGhlCnBpZWNlIHRoYXQgSSBjYW4gc2VlIGJl
-aW5nIHVzZWZ1bCBpbiBhIFdpbmRvd3MgcG9ydCBpcyBhY3R1YWxseSBqdXN0IHRoZQpmaWxlc3lz
-dGVtIGNsaWVudC4gIEkgaGF2ZSBjYXNlcyB3aGVyZSBpdCB3b3VsZCBhY3R1YWxseSBiZSByZWFs
-bHksCnJlYWxseSBuaWNlIHRvIGJlIGFibGUgdG8gbW91bnQgbXkgY2VwaCBmaWxlc3lzdGVtIG5h
-dGl2ZWx5IG9uCldpbmRvd3MtYmFzZWQgbWFjaGluZXMuICBJIHRoaW5rIHRoaXMgdHlwZSBvZiBl
-ZmZvcnQgaXMgbXVjaCBtb3JlCm1hbmFnZWFibGUgKHdhcm5pbmc6IHRoYXQncyB0aGUgaWdub3Jh
-bnQgb3BpbmlvbiBvZiBhbiBJVCBtYW5hZ2VyLCBub3QgYQpza2lsbGVkIGRldmVsb3BlciA7LSkg
-LSBpdCBzZWVtcyB0aGF0IHBvcnRpbmcgdGhlIEZVU0UgQ2VwaCBjbGllbnQgb3Zlcgp0byBzb21l
-dGhpbmcgbGlrZSBEb2thbiAodXNlciBtb2RlIGZpbGVzeXN0ZW0gb24gV2luZG93cywgRlVTRQps
-b29rLWFsaWtlKSBtaWdodCBiZSBhIGZlYXNpYmxlIHRhc2suICBJIGRvIHVuZGVyc3RhbmQgdGhh
-dCBJbmtUYW5rIGlzCm1vcmUgaW50ZXJlc3RlZCBpbiBidWlsZGluZyBvdXQgdGhlIGV4aXN0aW5n
-IHN5c3RlbSBvbiB0aGUgZXhpc3RpbmcKcGxhdGZvcm1zLCBidXQgQ2VzYXIsIERpbm8sIGlmIHlv
-dSdyZSBpbnRlcmVzdGVkIGluIGEgV2luZG93cyBwb3J0IG9mCnRoZSBjZXBoIGNsaWVudCwgcG9y
-dGluZyB0aGUgRlVTRSBjbGllbnQgb3ZlciB0byBEb2thbiBtaWdodCBiZSBhIGdvb2QKcGxhY2Ug
-dG8gc3RhcnQuCgotTmljawoKCi0tLS0tLS0tDQpUaGlzIGUtbWFpbCBtYXkgY29udGFpbiBjb25m
-aWRlbnRpYWwgYW5kIHByaXZpbGVnZWQgbWF0ZXJpYWwgZm9yIHRoZSBzb2xlIHVzZSBvZiB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50LiAgSWYgdGhpcyBlbWFpbCBpcyBub3QgaW50ZW5kZWQgZm9yIHlv
-dSwgb3IgeW91IGFyZSBub3QgcmVzcG9uc2libGUgZm9yIHRoZSBkZWxpdmVyeSBvZiB0aGlzIG1l
-c3NhZ2UgdG8gdGhlIGludGVuZGVkIHJlY2lwaWVudCwgcGxlYXNlIG5vdGUgdGhhdCB0aGlzIG1l
-c3NhZ2UgbWF5IGNvbnRhaW4gU0VBS1IgRW5naW5lZXJpbmcgKFNFQUtSKSBQcml2aWxlZ2VkL1By
-b3ByaWV0YXJ5IEluZm9ybWF0aW9uLiAgSW4gc3VjaCBhIGNhc2UsIHlvdSBhcmUgc3RyaWN0bHkg
-cHJvaGliaXRlZCBmcm9tIGRvd25sb2FkaW5nLCBwaG90b2NvcHlpbmcsIGRpc3RyaWJ1dGluZyBv
-ciBvdGhlcndpc2UgdXNpbmcgdGhpcyBtZXNzYWdlLCBpdHMgY29udGVudHMgb3IgYXR0YWNobWVu
-dHMgaW4gYW55IHdheS4gIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJv
-ciwgcGxlYXNlIG5vdGlmeSB1cyBpbW1lZGlhdGVseSBieSByZXBseWluZyB0byB0aGlzIGUtbWFp
-bCBhbmQgZGVsZXRlIHRoZSBtZXNzYWdlIGZyb20geW91ciBtYWlsYm94LiAgSW5mb3JtYXRpb24g
-Y29udGFpbmVkIGluIHRoaXMgbWVzc2FnZSB0aGF0IGRvZXMgbm90IHJlbGF0ZSB0byB0aGUgYnVz
-aW5lc3Mgb2YgU0VBS1IgaXMgbmVpdGhlciBlbmRvcnNlZCBieSBub3IgYXR0cmlidXRhYmxlIHRv
-IFNFQUtSLgo=
+I'd like to adjust the branches we're maintaining in ceph.git.  Currently:
+
+master
+ - active development
+next
+ - frozen for next release
+ - bug fixes only
+ - regularly merged back into master
+testing
+ - last development release
+ - cherry-pick -x'd critical fixes
+ - packages at ceph.com/debian-testing, /rpm-testing
+stable
+ - argonaut long-term backport series
+ - cherry-pick -x'd critical fixes
+ - packages at ceph.com/debian-argonaut, /debian
+
+The stable is ambiguous, and testing is a confusing name.  Instead, I 
+propose:
+
+master  -- same
+next    -- same
+last
+ - last release (instead of 'testing')
+ - packages at /debian-testing and /debian-last, /rpm-testing, /rpm-last
+bobtail
+ - bobtail backport series 0.56.x
+ - packages at /debian-bobtail (and /debian, until cuttlefish), 
+   /rpm-bobtail, /rpm
+argonaut
+ - argonaut backport series 0.48.x
+ - packages at /debian-argonaut
+
+We'll need to update the parallel branches in teuthology.git, 
+ceph-qa-suite.git, and s3-tests.git to match.
+
