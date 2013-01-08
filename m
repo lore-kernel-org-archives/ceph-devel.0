@@ -1,47 +1,64 @@
-From: Cesar Mello <cmello@gmail.com>
-Subject: Re: Windows port
-Date: Tue, 8 Jan 2013 03:36:06 -0200
-Message-ID: <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com>
-References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: v0.56.1 released
+Date: Mon, 7 Jan 2013 21:37:16 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301072136210.29855@cobra.newdream.net>
+References: <alpine.DEB.2.00.1301072052180.20676@cobra.newdream.net> <50EBAB58.4090407@conversis.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:51997 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750740Ab3AHFgI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 00:36:08 -0500
-Received: by mail-la0-f48.google.com with SMTP id ej20so42523lab.7
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Jan 2013 21:36:06 -0800 (PST)
-In-Reply-To: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46056 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750752Ab3AHFhQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 00:37:16 -0500
+In-Reply-To: <50EBAB58.4090407@conversis.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Dennis Jacobfeuerborn <dennisml@conversis.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Tue, 8 Jan 2013, Dennis Jacobfeuerborn wrote:
+> FYI I just updated from 0.56 to 0.56.1 using the RPMs for CentOS 6 (osd and
+> mon only) and everything went perfectly fine. Thanks!
 
-I have been playing with ceph and reading the docs/thesis the last
-couple of nights just to learn something during my vacation. I was not
-expecting to find such an awesome and state of the art project.
-Congratulations for the great work!
+Great!
 
-Please I would like to know if a Windows port is imagined for the
-future or if that is a dead-end. By Windows port I mean an abstraction
-layer for hardware/sockets/threading/etc and building with Visual C++
-2012 Express. And then have this state of the art object storage
-cluster running on Windows nodes too.
+Make sure the client-side libraries (librbd, librados) are not v0.56 or 
+you will likely have problems.  Upgrade to v0.56.1 and avoid v0.56.
 
-Thank you a lot for the attention!
+Thanks!
+sage
 
-Best regards
-Mello
-
-
-On Sat, Jan 5, 2013 at 1:20 AM, Cesar Mello <cmello@gmail.com> wrote:
-> Hi,
->
-> Is there interest in a Windows port?
->
-> Thank you for the attention.
->
-> Best regards
-> Cesar
+> 
+> Regards,
+>   Dennis
+> 
+> On 01/08/2013 05:53 AM, Sage Weil wrote:
+> > We found a few critical problems with v0.56, and fixed a few outstanding 
+> > problems. v0.56.1 is ready, and we're pretty pleased with it!
+> > 
+> > There are two critical fixes in this update: a fix for possible data loss 
+> > or corruption if power is lost, and a protocol compatibility problem that 
+> > was introduced in v0.56 (between v0.56 and any other version of ceph).
+> > 
+> >  * osd: fix commit sequence for XFS, ext4 (or any other non-btrfs) to 
+> >    prevent data loss on power cycle or kernel panic
+> >  * osd: fix compatibility for CALL operation
+> >  * osd: process old osdmaps prior to joining cluster (fixes slow startup)
+> >  * osd: fix a couple of recovery-related crashes
+> >  * osd: fix large io requests when journal is in (non-default) aio mode
+> >  * log: fix possible deadlock in logging code
+> > 
+> > This release will kick off the bobtail backport series, and will get a 
+> > shiny new URL for it's home.
+> > 
+> >  * Git at git://github.com/ceph/ceph.git
+> >  * Tarball at http://ceph.com/download/ceph-0.56.1.tar.gz
+> >  * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+> >  * For RPMs, see http://ceph.com/docs/master/install/rpm
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> 
