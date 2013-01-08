@@ -1,131 +1,72 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: recoverying from 95% full osd
-Date: Tue, 08 Jan 2013 10:16:11 -0600
-Message-ID: <50EC464B.4090607@inktank.com>
-References: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Rados gateway init timeout with cache
+Date: Tue, 8 Jan 2013 09:02:50 -0800
+Message-ID: <CAPYLRzhwWYA2_DZYgtRhKKEvATNY_4ATY1KwrV-LERocxAwjhQ@mail.gmail.com>
+References: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+	<367CC0B0FC02EE47BF7482398BD623C54E0E3701@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f170.google.com ([209.85.210.170]:65030 "EHLO
-	mail-ia0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756643Ab3AHQWN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 11:22:13 -0500
-Received: by mail-ia0-f170.google.com with SMTP id i1so497912iaa.15
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 08:22:13 -0800 (PST)
-In-Reply-To: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:33186 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756343Ab3AHRCv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 12:02:51 -0500
+Received: by mail-qc0-f172.google.com with SMTP id b25so859042qca.3
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 09:02:50 -0800 (PST)
+In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E0E3701@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yann ROBIN <yann.robin@youscribe.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/08/2013 04:42 AM, Roman Hlynovskiy wrote:
-> Hello,
->
-> I am running ceph v0.56 and at the moment trying to recover ceph which
-> got completely stuck after 1 osd got filled by 95%. Looks like the
-> distribution algorithm is not perfect since all 3 OSD's I user are
-> 256Gb each, however one of them got filled faster than others:
->
-> osd-1:
-> Filesystem            Size  Used Avail Use% Mounted on
-> /dev/mapper/vg00-osd  252G  173G   80G  69% /var/lib/ceph/osd/ceph-0
->
-> osd-2:
-> Filesystem            Size  Used Avail Use% Mounted on
-> /dev/mapper/vg00-osd  252G  203G   50G  81% /var/lib/ceph/osd/ceph-1
->
-> osd-3:
-> Filesystem            Size  Used Avail Use% Mounted on
-> /dev/mapper/vg00-osd  252G  240G   13G  96% /var/lib/ceph/osd/ceph-2
->
->
-> by the moment mds is showing the following behaviour:
-> 2013-01-08 16:25:47.006354 b4a73b70  0 mds.0.objecter  FULL, paused
-> modify 0x9ba63c0 tid 23448
-> 2013-01-08 16:26:47.005211 b4a73b70  0 mds.0.objecter  FULL, paused
-> modify 0xca86c30 tid 23449
->
-> so, it does not respond to any mount requests
->
-> I've played around with all types of commands like:
-> ceph mon tell \* injectargs '--mon-osd-full-ratio 98'
-> ceph mon tell \* injectargs '--mon-osd-full-ratio 0.98'
->
-> and
->
-> 'mon osd full ratio = 0.98' in mon configuration for each mon
->
-> however
->
-> chef@ceph-node03:/var/log/ceph$ ceph health detail
-> HEALTH_ERR 1 full osd(s)
-> osd.2 is full at 95%
->
-> mds still believes 95% is the threshold, so no responses to mount requests.
->
-> chef@ceph-node03:/var/log/ceph$ rados -p data bench 10 write
->   Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
->   Object prefix: benchmark_data_ceph-node03_3903
-> 2013-01-08 16:33:02.363206 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa467ff0 tid 1
-> 2013-01-08 16:33:02.363618 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa468780 tid 2
-> 2013-01-08 16:33:02.363741 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa468f88 tid 3
-> 2013-01-08 16:33:02.364056 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa469348 tid 4
-> 2013-01-08 16:33:02.364171 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa469708 tid 5
-> 2013-01-08 16:33:02.365024 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa469ac8 tid 6
-> 2013-01-08 16:33:02.365187 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46a2d0 tid 7
-> 2013-01-08 16:33:02.365296 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46a690 tid 8
-> 2013-01-08 16:33:02.365402 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46aa50 tid 9
-> 2013-01-08 16:33:02.365508 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46ae10 tid 10
-> 2013-01-08 16:33:02.365635 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46b1d0 tid 11
-> 2013-01-08 16:33:02.365742 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46b590 tid 12
-> 2013-01-08 16:33:02.365868 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46b950 tid 13
-> 2013-01-08 16:33:02.365975 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46bd10 tid 14
-> 2013-01-08 16:33:02.366096 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46c0d0 tid 15
-> 2013-01-08 16:33:02.366203 b6be3710  0 client.9958.objecter  FULL,
-> paused modify 0xa46c490 tid 16
->     sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
->       0      16        16         0         0         0         -         0
->       1      16        16         0         0         0         -         0
->       2      16        16         0         0         0         -         0
->
-> rados doesn't work.
->
-> chef@ceph-node03:/var/log/ceph$ ceph osd reweight-by-utilization
-> no change: average_util: 0.812678, overload_util: 0.975214. overloaded
-> osds: (none)
->
-> this one also.
->
->
-> is there any chance to recover ceph?
+To clarify, you lost the data on half of your OSDs? And it sounds like
+they weren't in separate CRUSH failure domains?
 
-Hi,
+Given that, yep, you've lost some data. :(
 
-There may be other ways to fix it, but one method might be to simply add 
-another OSD so the data gets redistributed.  I wouldn't continue to 
-modify osd full ratio up.  I think Sam's said in the past it can make a 
-minor problem into a very big problem if you fill an OSD all the way. 
-Another option that may (or may not) work as a temporary solution is to 
-change the osd weights.
+On Tue, Jan 8, 2013 at 5:41 AM, Yann ROBIN <yann.robin@youscribe.com> wrote:
+> Notify and gc objects where unfound, we marked them as lost and now the rados start.
+> But this means that if some notify object are not fully available, the radosgateway stop responding.
 
-Having said that, I'm curious to know how many PGs you have?  Do you 
-have a custom crush map?  That distribution is pretty skewed!
+Yes, that's the case. I'm not sure there's a way around it that makes
+much sense and satisfies the necessary guarantees, though.
+-Greg
 
-Thanks,
-Mark
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Yann ROBIN
+> Sent: mardi 8 janvier 2013 12:13
+> To: ceph-devel@vger.kernel.org
+> Subject: Rados gateway init timeout with cache
+>
+> Hi,
+>
+> We recently experienced issue with the backplane of our server, resulting in loosing half of our osd.
+> During that period the rados gateway failed initializing (timeout).
+> We found that the gateway was hanging in the init_watch function.
+>
+> We recreate our OSDs and we still have this issue, but pg are not all in an active+clean state :
+>    health HEALTH_WARN 1 pgs degraded; 1 pgs recovering; 2 pgs recovery_wait; 3 pgs stuck unclean; recovery 7/10140464 degraded (0.000%); 3/5070232 unfound (0.000%); noout flag(s) set
+>    monmap e2: 3 mons at {ceph-mon-1=172.20.1.13:6789/0,ceph-mon-2=172.20.2.13:6789/0,ceph-mon-3=172.17.9.20:6789/0}, election epoch 256, quorum 0,1,2 ceph-mon-1,ceph-mon-2,ceph-mon-3
+>    osdmap e4439: 6 osds: 6 up, 6 in
+>     pgmap v2531184: 11024 pgs: 11019 active+clean, 2 active+recovery_wait, 1 active+recovering+degraded+remapped, 2 active+clean+scrubbing+deep; 1291 GB data, 2612 GB used, 19645 GB / 22257 GB avail; 7/10140464 degraded (0.000%); 3/5070232 unfound (0.000%)
+>    mdsmap e1: 0/0/1 up
+>
+> Should we open an ticket for this init issue with rados gateway ?
+> Version is 0.56.1 upgraded from 0.55.
+>
+> --
+> Yann ROBIN
+> YouScribe
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
