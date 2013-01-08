@@ -1,120 +1,131 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Rados gateway init timeout with cache
-Date: Tue, 8 Jan 2013 13:34:35 -0800
-Message-ID: <CAPYLRziC7iGq+R9v7tX8zNqj0ikx59Oe9KvzW-f6OQP5vohY5g@mail.gmail.com>
-References: <367CC0B0FC02EE47BF7482398BD623C54E0E3624@DB3PRD0311MB416.eurprd03.prod.outlook.com>
-	<367CC0B0FC02EE47BF7482398BD623C54E0E3701@DB3PRD0311MB416.eurprd03.prod.outlook.com>
-	<CAPYLRzhwWYA2_DZYgtRhKKEvATNY_4ATY1KwrV-LERocxAwjhQ@mail.gmail.com>
-	<367CC0B0FC02EE47BF7482398BD623C54E0E3AA2@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: "hit suicide timeout" message after upgrade to 0.56
+Date: Tue, 8 Jan 2013 13:36:03 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301081334490.10771@cobra.newdream.net>
+References: <50E578F5.8070805@widodh.nl> <alpine.DEB.2.00.1301030851150.5264@cobra.newdream.net> <CAPYLRzgcyXtQds1YgKfAXxDAX0eSvDn0fecSzsbT+rgKb91Jyg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:64315 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753754Ab3AHVeg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 16:34:36 -0500
-Received: by mail-qa0-f44.google.com with SMTP id z4so143919qan.17
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 13:34:35 -0800 (PST)
-In-Reply-To: <367CC0B0FC02EE47BF7482398BD623C54E0E3AA2@DB3PRD0311MB416.eurprd03.prod.outlook.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54802 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753026Ab3AHVgE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 16:36:04 -0500
+In-Reply-To: <CAPYLRzgcyXtQds1YgKfAXxDAX0eSvDn0fecSzsbT+rgKb91Jyg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann ROBIN <yann.robin@youscribe.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 8, 2013 at 1:11 PM, Yann ROBIN <yann.robin@youscribe.com> w=
-rote:
-> We lost data in notify and gc. What bother me is that the rados gatew=
-ay can start if we desactivate the cache.
-> I think the availability of the cache objects shouldn't take down the=
- rados gateway. The option should be more a "I want the cache if availa=
-ble".
+On Tue, 8 Jan 2013, Gregory Farnum wrote:
+> I'm confused. Isn't the HeartbeatMap all about local thread
+> heartbeating (so, not pings with other OSDs)? I would assume the
+> upgrade and restart just caused a bunch of work and the CPUs got
+> overloaded.
 
-But what if some of the instances can access the objects and others
-can't? Then you've got daemons caching data and the others aren't
-notifying them. This pretty much needs to be a manual switch, as far
-as I can imagine it working. Unless somebody else has ideas on
-improving it?
--Greg
+It is.  In #3714's case, the OSD was down for a long time, and when it 
+started a huge number of maps were queued up for the PGs and then the OSD 
+activated (and booted, marked itself up).  The worker threads then had to 
+calculate a huge number of prior_intervals (by loading old osdmaps and 
+calculating mappings) and timed out.
+
+sage
 
 
->
-> -----Message d'origine-----
-> De : Gregory Farnum [mailto:greg@inktank.com]
-> Envoy=E9 : mardi 8 janvier 2013 18:03
-> =C0 : Yann ROBIN
-> Cc : ceph-devel@vger.kernel.org
-> Objet : Re: Rados gateway init timeout with cache
->
-> To clarify, you lost the data on half of your OSDs? And it sounds lik=
-e they weren't in separate CRUSH failure domains?
->
-> Given that, yep, you've lost some data. :(
->
-> On Tue, Jan 8, 2013 at 5:41 AM, Yann ROBIN <yann.robin@youscribe.com>=
- wrote:
->> Notify and gc objects where unfound, we marked them as lost and now =
-the rados start.
->> But this means that if some notify object are not fully available, t=
-he radosgateway stop responding.
->
-> Yes, that's the case. I'm not sure there's a way around it that makes=
- much sense and satisfies the necessary guarantees, though.
 > -Greg
->
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Yann ROBIN
->> Sent: mardi 8 janvier 2013 12:13
->> To: ceph-devel@vger.kernel.org
->> Subject: Rados gateway init timeout with cache
->>
->> Hi,
->>
->> We recently experienced issue with the backplane of our server, resu=
-lting in loosing half of our osd.
->> During that period the rados gateway failed initializing (timeout).
->> We found that the gateway was hanging in the init_watch function.
->>
->> We recreate our OSDs and we still have this issue, but pg are not al=
-l in an active+clean state :
->>    health HEALTH_WARN 1 pgs degraded; 1 pgs recovering; 2 pgs recove=
-ry_wait; 3 pgs stuck unclean; recovery 7/10140464 degraded (0.000%); 3/=
-5070232 unfound (0.000%); noout flag(s) set
->>    monmap e2: 3 mons at {ceph-mon-1=3D172.20.1.13:6789/0,ceph-mon-2=3D=
-172.20.2.13:6789/0,ceph-mon-3=3D172.17.9.20:6789/0}, election epoch 256=
-, quorum 0,1,2 ceph-mon-1,ceph-mon-2,ceph-mon-3
->>    osdmap e4439: 6 osds: 6 up, 6 in
->>     pgmap v2531184: 11024 pgs: 11019 active+clean, 2 active+recovery=
-_wait, 1 active+recovering+degraded+remapped, 2 active+clean+scrubbing+=
-deep; 1291 GB data, 2612 GB used, 19645 GB / 22257 GB avail; 7/10140464=
- degraded (0.000%); 3/5070232 unfound (0.000%)
->>    mdsmap e1: 0/0/1 up
->>
->> Should we open an ticket for this init issue with rados gateway ?
->> Version is 0.56.1 upgraded from 0.55.
->>
->> --
->> Yann ROBIN
->> YouScribe
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> On Thu, Jan 3, 2013 at 8:52 AM, Sage Weil <sage@inktank.com> wrote:
+> > Hi Wido,
+> >
+> > On Thu, 3 Jan 2013, Wido den Hollander wrote:
+> >> Hi,
+> >>
+> >> I updated my 10 node 40 OSD cluster from 0.48 to 0.56 yesterday evening and
+> >> found out this morning that I had 23 OSDs still up and in.
+> >>
+> >> Investigating some logs I found these messages:
+> >
+> > This sounds quite a bit #3714.  You might give wip-3714 a try...
+> >
+> > sage
+> >
+> >
+> >>
+> >> *********************************************************************
+> >>     -8> 2013-01-02 21:13:40.528936 7f9eb177a700  1 heartbeat_map is_healthy
+> >> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
+> >>     -7> 2013-01-02 21:13:40.528985 7f9eb177a700  1 heartbeat_map is_healthy
+> >> 'OSD::op_tp thread 0x7f9ea375e700' had timed out after 30
+> >>     -6> 2013-01-02 21:13:41.311088 7f9eaff77700 10 monclient:
+> >> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
+> >>     -5> 2013-01-02 21:13:45.047220 7f9e92282700  0 --
+> >> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:0/2882 >>
+> >> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6805/2373 pipe(0x9d7ad80 sd=135 :0
+> >> pgs=0 cs=0 l=1).fault
+> >>     -4> 2013-01-02 21:13:45.049225 7f9e962c2700  0 --
+> >> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:6801/2882 >>
+> >> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6804/2373 pipe(0x9d99000 sd=104 :44363
+> >> pgs=99 cs=1 l=0).fault with nothing to send, going to standby
+> >>     -3> 2013-01-02 21:13:45.529075 7f9eb177a700  1 heartbeat_map is_healthy
+> >> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
+> >>     -2> 2013-01-02 21:13:45.529115 7f9eb177a700  1 heartbeat_map is_healthy
+> >> 'OSD::op_tp thread 0x7f9ea2f5d700' had suicide timed out after 300
+> >>     -1> 2013-01-02 21:13:45.531952 7f9eb177a700 -1 common/HeartbeatMap.cc: In
+> >> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const
+> >> char*, time_t)' thread 7f9eb177a700 time 2013-01-02 21:13:45.529176
+> >> common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
+> >>
+> >>  ceph version 0.56 (1a32f0a0b42f169a7b55ed48ec3208f6d4edc1e8)
+> >>  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+> >> long)+0x107) [0x796877]
+> >>  2: (ceph::HeartbeatMap::is_healthy()+0x87) [0x797207]
+> >>  3: (ceph::HeartbeatMap::check_touch_file()+0x23) [0x797453]
+> >>  4: (CephContextServiceThread::entry()+0x55) [0x8338d5]
+> >>  5: (()+0x7e9a) [0x7f9eb4571e9a]
+> >>  6: (clone()+0x6d) [0x7f9eb2ff5cbd]
+> >>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+> >> interpret this.
+> >>
+> >>      0> 2013-01-02 21:13:46.314478 7f9eaff77700 10 monclient:
+> >> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
+> >> *********************************************************************
+> >>
+> >> Reading these messages I'm trying to figure out why those messages came along.
+> >>
+> >> Am I understanding this correctly that the heartbeat updates didn't come along
+> >> in time and the OSDs committed suicide?
+> >>
+> >> I read the code in common/HeartbeatMap.cc and it seems like that.
+> >>
+> >> During the restart of the cluster the Atom CPUs were very busy, so could it be
+> >> that the CPUs were just to busy and the OSDs weren't responding to heartbeats
+> >> in time?
+> >>
+> >> In total 16 of the 17 crashed OSDs are down with these log messages.
+> >>
+> >> I'm now starting the 16 crashed OSDs one by one and that seems to go just
+> >> fine.
+> >>
+> >> I've set "osd recovery max active = 1" to prevent overloading the CPUs to much
+> >> since I know Atoms are not that powerful. I'm just still trying to get it all
+> >> working on them :)
+> >>
+> >> Am I right this is probably a lack of CPU power during the heavy recovery
+> >> which causes them to not respond to heartbeat updates in time?
+> >>
+> >> Wido
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
