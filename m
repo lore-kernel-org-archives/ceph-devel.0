@@ -1,117 +1,88 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: "hit suicide timeout" message after upgrade to 0.56
-Date: Tue, 8 Jan 2013 09:35:48 -0800
-Message-ID: <CAPYLRzgcyXtQds1YgKfAXxDAX0eSvDn0fecSzsbT+rgKb91Jyg@mail.gmail.com>
-References: <50E578F5.8070805@widodh.nl>
-	<alpine.DEB.2.00.1301030851150.5264@cobra.newdream.net>
+From: "Nick Couchman" <Nick.Couchman@seakr.com>
+Subject: Re: Windows port
+Date: Tue, 08 Jan 2013 10:25:20 -0700
+Message-ID: <50EBF41002000099000F0D9A@collaborate.seakr.com>
+References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com>
+ <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com>
+ <CA+GnOzR29oKSXWpuS8dffsXJWChzMvTCFQ+dutmAm+zsuVkBgQ@mail.gmail.com>
+ <CAPYLRziODEGsrvs4hFJ0SfnYPafRhE_SFTAyjJgCqWt-0t9Hdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:34093 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756346Ab3AHRft (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jan 2013 12:35:49 -0500
-Received: by mail-qc0-f180.google.com with SMTP id v28so905102qcm.11
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jan 2013 09:35:48 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301030851150.5264@cobra.newdream.net>
+Received: from mx1.seakr.com ([64.2.143.10]:36975 "EHLO mx1.seakr.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756485Ab3AHRvr (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
+	Tue, 8 Jan 2013 12:51:47 -0500
+Received: from mx-inside.seakr.com ([192.168.100.31])
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id r08Gl9U0021693
+	for <ceph-devel@vger.kernel.org>; Tue, 8 Jan 2013 09:47:10 -0700
+Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
+	by mx-inside.seakr.com (Postfix) with ESMTP id 9A6B144D80
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Jan 2013 10:25:25 -0700 (MST)
+In-Reply-To: <CAPYLRziODEGsrvs4hFJ0SfnYPafRhE_SFTAyjJgCqWt-0t9Hdw@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dino Yancey <dino2gnt@gmail.com>, Gregory Farnum <greg@inktank.com>
+Cc: Cesar Mello <cmello@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm confused. Isn't the HeartbeatMap all about local thread
-heartbeating (so, not pings with other OSDs)? I would assume the
-upgrade and restart just caused a bunch of work and the CPUs got
-overloaded.
--Greg
-
-On Thu, Jan 3, 2013 at 8:52 AM, Sage Weil <sage@inktank.com> wrote:
-> Hi Wido,
->
-> On Thu, 3 Jan 2013, Wido den Hollander wrote:
->> Hi,
->>
->> I updated my 10 node 40 OSD cluster from 0.48 to 0.56 yesterday evening and
->> found out this morning that I had 23 OSDs still up and in.
->>
->> Investigating some logs I found these messages:
->
-> This sounds quite a bit #3714.  You might give wip-3714 a try...
->
-> sage
->
->
->>
->> *********************************************************************
->>     -8> 2013-01-02 21:13:40.528936 7f9eb177a700  1 heartbeat_map is_healthy
->> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
->>     -7> 2013-01-02 21:13:40.528985 7f9eb177a700  1 heartbeat_map is_healthy
->> 'OSD::op_tp thread 0x7f9ea375e700' had timed out after 30
->>     -6> 2013-01-02 21:13:41.311088 7f9eaff77700 10 monclient:
->> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
->>     -5> 2013-01-02 21:13:45.047220 7f9e92282700  0 --
->> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:0/2882 >>
->> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6805/2373 pipe(0x9d7ad80 sd=135 :0
->> pgs=0 cs=0 l=1).fault
->>     -4> 2013-01-02 21:13:45.049225 7f9e962c2700  0 --
->> [2a00:f10:11b:cef0:225:90ff:fe32:cf64]:6801/2882 >>
->> [2a00:f10:11b:cef0:225:90ff:fe33:49fe]:6804/2373 pipe(0x9d99000 sd=104 :44363
->> pgs=99 cs=1 l=0).fault with nothing to send, going to standby
->>     -3> 2013-01-02 21:13:45.529075 7f9eb177a700  1 heartbeat_map is_healthy
->> 'OSD::op_tp thread 0x7f9ea2f5d700' had timed out after 30
->>     -2> 2013-01-02 21:13:45.529115 7f9eb177a700  1 heartbeat_map is_healthy
->> 'OSD::op_tp thread 0x7f9ea2f5d700' had suicide timed out after 300
->>     -1> 2013-01-02 21:13:45.531952 7f9eb177a700 -1 common/HeartbeatMap.cc: In
->> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const
->> char*, time_t)' thread 7f9eb177a700 time 2013-01-02 21:13:45.529176
->> common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
->>
->>  ceph version 0.56 (1a32f0a0b42f169a7b55ed48ec3208f6d4edc1e8)
->>  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
->> long)+0x107) [0x796877]
->>  2: (ceph::HeartbeatMap::is_healthy()+0x87) [0x797207]
->>  3: (ceph::HeartbeatMap::check_touch_file()+0x23) [0x797453]
->>  4: (CephContextServiceThread::entry()+0x55) [0x8338d5]
->>  5: (()+0x7e9a) [0x7f9eb4571e9a]
->>  6: (clone()+0x6d) [0x7f9eb2ff5cbd]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
->> interpret this.
->>
->>      0> 2013-01-02 21:13:46.314478 7f9eaff77700 10 monclient:
->> _send_mon_message to mon.pri at [2a00:f10:11b:cef0:230:48ff:fed3:b086]:6789/0
->> *********************************************************************
->>
->> Reading these messages I'm trying to figure out why those messages came along.
->>
->> Am I understanding this correctly that the heartbeat updates didn't come along
->> in time and the OSDs committed suicide?
->>
->> I read the code in common/HeartbeatMap.cc and it seems like that.
->>
->> During the restart of the cluster the Atom CPUs were very busy, so could it be
->> that the CPUs were just to busy and the OSDs weren't responding to heartbeats
->> in time?
->>
->> In total 16 of the 17 crashed OSDs are down with these log messages.
->>
->> I'm now starting the 16 crashed OSDs one by one and that seems to go just
->> fine.
->>
->> I've set "osd recovery max active = 1" to prevent overloading the CPUs to much
->> since I know Atoms are not that powerful. I'm just still trying to get it all
->> working on them :)
->>
->> Am I right this is probably a lack of CPU power during the heavy recovery
->> which causes them to not respond to heartbeat updates in time?
->>
->> Wido
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Pj4+IE9uIDIwMTMvMDEvMDggYXQgMTA6MDgsIEdyZWdvcnkgRmFybnVtIDxncmVnQGlua3Rhbmsu
+Y29tPiB3cm90ZTogCj4gT24gTW9uLCBKYW4gNywgMjAxMyBhdCA5OjM2IFBNLCBDZXNhciBNZWxs
+byA8Y21lbGxvQGdtYWlsLmNvbT4Kd3JvdGU6Cj4+IEhpLAo+Pgo+PiBJIGhhdmUgYmVlbiBwbGF5
+aW5nIHdpdGggY2VwaCBhbmQgcmVhZGluZyB0aGUgZG9jcy90aGVzaXMgdGhlIGxhc3QKPj4gY291
+cGxlIG9mIG5pZ2h0cyBqdXN0IHRvIGxlYXJuIHNvbWV0aGluZyBkdXJpbmcgbXkgdmFjYXRpb24u
+IEkgd2FzCm5vdAo+PiBleHBlY3RpbmcgdG8gZmluZCBzdWNoIGFuIGF3ZXNvbWUgYW5kIHN0YXRl
+IG9mIHRoZSBhcnQgcHJvamVjdC4KPj4gQ29uZ3JhdHVsYXRpb25zIGZvciB0aGUgZ3JlYXQgd29y
+ayEKPj4KPj4gUGxlYXNlIEkgd291bGQgbGlrZSB0byBrbm93IGlmIGEgV2luZG93cyBwb3J0IGlz
+IGltYWdpbmVkIGZvciB0aGUKPj4gZnV0dXJlIG9yIGlmIHRoYXQgaXMgYSBkZWFkLWVuZC4gQnkg
+V2luZG93cyBwb3J0IEkgbWVhbiBhbgphYnN0cmFjdGlvbgo+PiBsYXllciBmb3IgaGFyZHdhcmUv
+c29ja2V0cy90aHJlYWRpbmcvZXRjIGFuZCBidWlsZGluZyB3aXRoIFZpc3VhbApDKysKPj4gMjAx
+MiBFeHByZXNzLiBBbmQgdGhlbiBoYXZlIHRoaXMgc3RhdGUgb2YgdGhlIGFydCBvYmplY3Qgc3Rv
+cmFnZQo+PiBjbHVzdGVyIHJ1bm5pbmcgb24gV2luZG93cyBub2RlcyB0b28uCj4gCj4gVGhpcyBp
+cyBub3Qgc3VwZXItbGlrZWx5IChhbHRob3VnaCBpdCdzIG5vdCBpbXBvc3NpYmxlIGVpdGhlciku
+Cj4gSW5rdGFuayBpcyBhIGxvbmcgd2F5IGZyb20gZG9pbmcgdGhlIG5lY2Vzc2FyeSBkZXZlbG9w
+bWVudCBmb3IgdGhpcwoqCj4gd2UgZG9uJ3QgaGF2ZSBhbnkgV2luZG93cyBkZXZlbG9wZXJzIG9u
+IHN0YWZmLiBFeHRlcm5hbCBjb250cmlidXRvcnMKPiB3aG8gYXJlIGludGVyZXN0ZWQgaW4gZG9p
+bmcgdGhlIHdvcmsgdGhlbXNlbHZlcyB3b3VsZCBjZXJ0YWlubHkgZ2V0Cj4gc29tZSBzdXBwb3J0
+IGluIGRvaW5nIHNvLCBidXQgSSBjYW4ndCBldmVuIGJlZ2luIHRvIGVzdGltYXRlIHRoZQpzaXpl
+Cj4gb2YgdGhlIHByb2plY3QgdGhhdCB3b3VsZCBiZSByZXF1aXJlZC4gV291bGQgYSBzaW1wbGUg
+YWJzdHJhY3Rpb24KPiBsYXllciBiZSBhYmxlIHRvIHByb3ZpZGUgdGhlIHJpZ2h0IGludGVyZmFj
+ZSB3aXRoIGFueXRoaW5nCmFwcHJvYWNoaW5nCj4gYWNjZXB0YWJsZSBwZXJmb3JtYW5jZT8gSSBy
+ZWFsbHkgZG9uJ3Qga25vdy4KPiAKPiAKCkkgdGhpbmsgdGhpcyBhbHNvIGRlcGVuZHMgb24gdGhl
+IHNjb3BlIG9mIHRoZSBlZmZvcnQgLSB3aGF0IHBvcnRpb25zIG9mCmNlcGggYXJlIHBvcnRlZCB0
+byBXaW5kb3dzLiAgSSBoYXZlIHRvIGNvbmZlc3MgdGhhdCBJIGRvIG5vdCBzZWUgYSBsb3QKb2Yg
+dmFsdWUgaW4gcG9ydGluZyB0aGUgT1NELCBNRFMsIGFuZCBNT04gZGFlbW9ucyB0byBXaW5kb3dz
+LiAgVGhpcyBqdXN0CmRvZXNuJ3QgbWFrZSBhIGxvdCBvZiBzZW5zZSAtIGlmIHlvdSdyZSBzZXR0
+aW5nIGFzaWRlIG1hY2hpbmVzCnNwZWNpZmljYWxseSBmb3IgYSBkaXN0cmlidXRlZCBmaWxlc3lz
+dGVtLCB3aHkgbm90IGp1c3QgcnVuIExpbnV4PyAgVGhlCnBpZWNlIHRoYXQgSSBjYW4gc2VlIGJl
+aW5nIHVzZWZ1bCBpbiBhIFdpbmRvd3MgcG9ydCBpcyBhY3R1YWxseSBqdXN0IHRoZQpmaWxlc3lz
+dGVtIGNsaWVudC4gIEkgaGF2ZSBjYXNlcyB3aGVyZSBpdCB3b3VsZCBhY3R1YWxseSBiZSByZWFs
+bHksCnJlYWxseSBuaWNlIHRvIGJlIGFibGUgdG8gbW91bnQgbXkgY2VwaCBmaWxlc3lzdGVtIG5h
+dGl2ZWx5IG9uCldpbmRvd3MtYmFzZWQgbWFjaGluZXMuICBJIHRoaW5rIHRoaXMgdHlwZSBvZiBl
+ZmZvcnQgaXMgbXVjaCBtb3JlCm1hbmFnZWFibGUgKHdhcm5pbmc6IHRoYXQncyB0aGUgaWdub3Jh
+bnQgb3BpbmlvbiBvZiBhbiBJVCBtYW5hZ2VyLCBub3QgYQpza2lsbGVkIGRldmVsb3BlciA7LSkg
+LSBpdCBzZWVtcyB0aGF0IHBvcnRpbmcgdGhlIEZVU0UgQ2VwaCBjbGllbnQgb3Zlcgp0byBzb21l
+dGhpbmcgbGlrZSBEb2thbiAodXNlciBtb2RlIGZpbGVzeXN0ZW0gb24gV2luZG93cywgRlVTRQps
+b29rLWFsaWtlKSBtaWdodCBiZSBhIGZlYXNpYmxlIHRhc2suICBJIGRvIHVuZGVyc3RhbmQgdGhh
+dCBJbmtUYW5rIGlzCm1vcmUgaW50ZXJlc3RlZCBpbiBidWlsZGluZyBvdXQgdGhlIGV4aXN0aW5n
+IHN5c3RlbSBvbiB0aGUgZXhpc3RpbmcKcGxhdGZvcm1zLCBidXQgQ2VzYXIsIERpbm8sIGlmIHlv
+dSdyZSBpbnRlcmVzdGVkIGluIGEgV2luZG93cyBwb3J0IG9mCnRoZSBjZXBoIGNsaWVudCwgcG9y
+dGluZyB0aGUgRlVTRSBjbGllbnQgb3ZlciB0byBEb2thbiBtaWdodCBiZSBhIGdvb2QKcGxhY2Ug
+dG8gc3RhcnQuCgotTmljawoKCi0tLS0tLS0tDQpUaGlzIGUtbWFpbCBtYXkgY29udGFpbiBjb25m
+aWRlbnRpYWwgYW5kIHByaXZpbGVnZWQgbWF0ZXJpYWwgZm9yIHRoZSBzb2xlIHVzZSBvZiB0aGUg
+aW50ZW5kZWQgcmVjaXBpZW50LiAgSWYgdGhpcyBlbWFpbCBpcyBub3QgaW50ZW5kZWQgZm9yIHlv
+dSwgb3IgeW91IGFyZSBub3QgcmVzcG9uc2libGUgZm9yIHRoZSBkZWxpdmVyeSBvZiB0aGlzIG1l
+c3NhZ2UgdG8gdGhlIGludGVuZGVkIHJlY2lwaWVudCwgcGxlYXNlIG5vdGUgdGhhdCB0aGlzIG1l
+c3NhZ2UgbWF5IGNvbnRhaW4gU0VBS1IgRW5naW5lZXJpbmcgKFNFQUtSKSBQcml2aWxlZ2VkL1By
+b3ByaWV0YXJ5IEluZm9ybWF0aW9uLiAgSW4gc3VjaCBhIGNhc2UsIHlvdSBhcmUgc3RyaWN0bHkg
+cHJvaGliaXRlZCBmcm9tIGRvd25sb2FkaW5nLCBwaG90b2NvcHlpbmcsIGRpc3RyaWJ1dGluZyBv
+ciBvdGhlcndpc2UgdXNpbmcgdGhpcyBtZXNzYWdlLCBpdHMgY29udGVudHMgb3IgYXR0YWNobWVu
+dHMgaW4gYW55IHdheS4gIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJv
+ciwgcGxlYXNlIG5vdGlmeSB1cyBpbW1lZGlhdGVseSBieSByZXBseWluZyB0byB0aGlzIGUtbWFp
+bCBhbmQgZGVsZXRlIHRoZSBtZXNzYWdlIGZyb20geW91ciBtYWlsYm94LiAgSW5mb3JtYXRpb24g
+Y29udGFpbmVkIGluIHRoaXMgbWVzc2FnZSB0aGF0IGRvZXMgbm90IHJlbGF0ZSB0byB0aGUgYnVz
+aW5lc3Mgb2YgU0VBS1IgaXMgbmVpdGhlciBlbmRvcnNlZCBieSBub3IgYXR0cmlidXRhYmxlIHRv
+IFNFQUtSLgo=
