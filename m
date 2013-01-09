@@ -1,460 +1,102 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Crushmap Design Question
-Date: Wed, 09 Jan 2013 09:59:33 +0100
-Message-ID: <50ED3175.8010304@widodh.nl>
-References: <AEBA0243790A484AA72D5CDF477159BC1CEB087D@SN2PRD0106MB178.prod.exchangelabs.com> <6F3FA899187F0043BA1827A69DA2F7CC5D2C29@SHSMSX102.ccr.corp.intel.com>
+From: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
+Subject: Re: recoverying from 95% full osd
+Date: Wed, 9 Jan 2013 15:47:28 +0600
+Message-ID: <CAD5ewrr7tiVTR3zna_iKqzg-GfwmERey1g4dn92yMA6fQNaaYw@mail.gmail.com>
+References: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com>
+	<CAPYLRzjv2tjndJCAgCqj8uBcGdC4vCiU1hd3oG2MdqLA7fW3Yg@mail.gmail.com>
+	<CAD5ewrrKB0kxMDq2Hg-XStQUdVhjtgTWvmb3OoZTzHcZ3wpUrQ@mail.gmail.com>
+	<alpine.DEB.2.00.1301082251590.2227@cobra.newdream.net>
+	<778D42BCC03C4BB589117CE6FB62B5D6@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:37754 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757387Ab3AII7h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 03:59:37 -0500
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5D2C29@SHSMSX102.ccr.corp.intel.com>
+Received: from mail-vc0-f176.google.com ([209.85.220.176]:34985 "EHLO
+	mail-vc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757380Ab3AIJr3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 04:47:29 -0500
+Received: by mail-vc0-f176.google.com with SMTP id fo13so1332367vcb.35
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 01:47:29 -0800 (PST)
+In-Reply-To: <778D42BCC03C4BB589117CE6FB62B5D6@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "Moore, Shawn M" <smmoore@catawba.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+>> How many pgs do you have? ('ceph osd dump | grep ^pool').
+>
+> I believe this is it. 384 PGs, but three pools of which only one (or maybe a second one, sort of) is in use. Automatically setting the right PG counts is coming some day, but until then being able to set up pools of the right size is a big gotcha. :(
+> Depending on how mutable the data is, recreate with larger PG counts on the pools in use. Otherwise we can do something more detailed.
+> -Greg
 
-On 01/09/2013 01:53 AM, Chen, Xiaoxi wrote:
-> Hi=A3=AC
-> 	Setting rep size to 3 only make the data triple-replication, that me=
-ans when you "fail" all OSDs in 2 out of 3 DCs, the data still accessab=
-le.
-> 	But Monitor is another story, for monitor clusters with 2N+1 nodes, =
-it require at least N+1 nodes alive, and indeed this is why you Ceph fa=
-iled.
-> 	It looks to me this discipline make it hard to design a proper deplo=
-yment which is robust in DC outage. But hoping for inputs from communit=
-y,how to make Monitor cluster reliable.
->=20
+hm... what would be recommended PG size per pool ?
 
-=46rom what I understand he didn't kill the second mon, still leaving 2
-out of 3 mons running.
+chef@cephgw:~$ ceph osd lspools
+0 data,1 metadata,2 rbd,
+chef@cephgw:~$ ceph osd pool get data pg_num
+PG_NUM: 128
+chef@cephgw:~$ ceph osd pool get metadata pg_num
+PG_NUM: 128
+chef@cephgw:~$ ceph osd pool get rbd pg_num
+PG_NUM: 128
 
-Could you check if your PGs are actually mapped to OSDs spread out over
-the 3 DCs?
+according to the http://ceph.com/docs/master/rados/operations/placement-groups/
 
-"ceph pg dump" should tell you to which OSDs the PGs are mapped.
+                (OSDs * 100)
+Total PGs = ------------
+                   Replicas
 
-I've never tried before, but you don't have equal weights for the
-datacenters, I don't know how that effects the situation.
+I have 3 OSDs and 2 replicas for each object, which gives recommended PG = 150
 
-Wido
+will it make much difference to set 150 instead of 128 or I should
+base on different values?
 
-> 																												Xiaoxi
->=20
->=20
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Moore, Shawn M
-> Sent: 2013=C4=EA1=D4=C29=C8=D5 4:21
-> To: ceph-devel@vger.kernel.org
-> Subject: Crushmap Design Question
->=20
-> I have been testing ceph for a little over a month now.  Our design g=
-oal is to have 3 datacenters in different buildings all tied together o=
-ver 10GbE.  Currently there are 10 servers each serving 1 osd in 2 of t=
-he datacenters.  In the third is one large server with 16 SAS disks ser=
-ving 8 osds.  Eventually we will add one more identical large server in=
-to the third datacenter.  I have told ceph to keep 3 copies and tried t=
-o do the crushmap in such a way that as long as a majority of mon's can=
- stay up, we could run off of one datacenter's worth of osds.   So in m=
-y testing, it doesn't work out quite this way...
->=20
-> Everything is currently ceph version 0.56.1 (e4a541624df62ef353e75439=
-1cbbb707f54b16f7)
->=20
-> I will put hopefully relevant files at the end of this email.
->=20
-> When all 28 osds are up, I get:
-> 2013-01-08 13:56:07.435914 mon.0 [INF] pgmap v2712076: 7104 pgs: 7104=
- active+clean; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail
->=20
-> When I fail a datacenter (including 1 of 3 mon's) I eventually get:
-> 2013-01-08 13:58:54.020477 mon.0 [INF] pgmap v2712139: 7104 pgs: 7104=
- active+degraded; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail=
-; 16362/49086 degraded (33.333%)
->=20
-> At this point everything is still ok.  But when I fail the 2nd datace=
-nter (still leaving 2 out of 3 mons running) I get:
-> 2013-01-08 14:01:25.600056 mon.0 [INF] pgmap v2712189: 7104 pgs: 7104=
- incomplete; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail
->=20
-> Most VM's quit working and "rbd ls" works, but not a single line from=
- "rados -p rbd ls" works and the command hangs.  Now after a while (you=
- can see from timestamps) I end up at and stays this way:
-> 2013-01-08 14:40:54.030370 mon.0 [INF] pgmap v2713794: 7104 pgs: 213 =
-active, 117 active+remapped, 3660 incomplete, 3108 active+degraded+rema=
-pped, 6 remapped+incomplete; 60264 MB data, 65701 MB used, 4604 GB / 47=
-68 GB avail; 7696/49086 degraded (15.679%)
->=20
-> I'm hoping I've done something wrong, so please advise.  Below are my=
- configs.  If you need something more to help, just ask.
->=20
-> Normal output with all datacenters up.
-> # ceph osd tree
-> # id	weight	type name	up/down	reweight
-> -1	80	root default
-> -3	36		datacenter hok
-> -2	1			host blade151
-> 0	1				osd.0	up	1=09
-> -4	1			host blade152
-> 1	1				osd.1	up	1=09
-> -15	1			host blade153
-> 2	1				osd.2	up	1=09
-> -17	1			host blade154
-> 3	1				osd.3	up	1=09
-> -18	1			host blade155
-> 4	1				osd.4	up	1=09
-> -19	1			host blade159
-> 5	1				osd.5	up	1=09
-> -20	1			host blade160
-> 6	1				osd.6	up	1=09
-> -21	1			host blade161
-> 7	1				osd.7	up	1=09
-> -22	1			host blade162
-> 8	1				osd.8	up	1=09
-> -23	1			host blade163
-> 9	1				osd.9	up	1=09
-> -24	36		datacenter csc
-> -5	1			host admbc0-01
-> 10	1				osd.10	up	1=09
-> -6	1			host admbc0-02
-> 11	1				osd.11	up	1=09
-> -7	1			host admbc0-03
-> 12	1				osd.12	up	1=09
-> -8	1			host admbc0-04
-> 13	1				osd.13	up	1=09
-> -9	1			host admbc0-05
-> 14	1				osd.14	up	1=09
-> -10	1			host admbc0-06
-> 15	1				osd.15	up	1=09
-> -11	1			host admbc0-09
-> 16	1				osd.16	up	1=09
-> -12	1			host admbc0-10
-> 17	1				osd.17	up	1=09
-> -13	1			host admbc0-11
-> 18	1				osd.18	up	1=09
-> -14	1			host admbc0-12
-> 19	1				osd.19	up	1=09
-> -25	8		datacenter adm
-> -16	8			host admdisk0
-> 20	1				osd.20	up	1=09
-> 21	1				osd.21	up	1=09
-> 22	1				osd.22	up	1=09
-> 23	1				osd.23	up	1=09
-> 24	1				osd.24	up	1=09
-> 25	1				osd.25	up	1=09
-> 26	1				osd.26	up	1=09
-> 27	1				osd.27	up	1
->=20
->=20
->=20
-> Showing copes set to 3.
-> # ceph osd dump | grep " size "
-> pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num =
-2368 pgp_num 2368 last_change 63 owner 0 crash_replay_interval 45 pool =
-1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins pg_num 236=
-8 pgp_num 2368 last_change 65 owner 0 pool 2 'rbd' rep size 3 crush_rul=
-eset 2 object_hash rjenkins pg_num 2368 pgp_num 2368 last_change 6061 o=
-wner 0
->=20
->=20
->=20
->=20
-> Crushmap
-> # begin crush map
->=20
-> # devices
-> device 0 osd.0
-> device 1 osd.1
-> device 2 osd.2
-> device 3 osd.3
-> device 4 osd.4
-> device 5 osd.5
-> device 6 osd.6
-> device 7 osd.7
-> device 8 osd.8
-> device 9 osd.9
-> device 10 osd.10
-> device 11 osd.11
-> device 12 osd.12
-> device 13 osd.13
-> device 14 osd.14
-> device 15 osd.15
-> device 16 osd.16
-> device 17 osd.17
-> device 18 osd.18
-> device 19 osd.19
-> device 20 osd.20
-> device 21 osd.21
-> device 22 osd.22
-> device 23 osd.23
-> device 24 osd.24
-> device 25 osd.25
-> device 26 osd.26
-> device 27 osd.27
->=20
-> # types
-> type 0 osd
-> type 1 host
-> type 2 rack
-> type 3 row
-> type 4 room
-> type 5 datacenter
-> type 6 root
->=20
-> # buckets
-> host blade151 {
-> 	id -2		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.0 weight 1.000
-> }
-> host blade152 {
-> 	id -4		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.1 weight 1.000
-> }
-> host blade153 {
-> 	id -15		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.2 weight 1.000
-> }
-> host blade154 {
-> 	id -17		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.3 weight 1.000
-> }
-> host blade155 {
-> 	id -18		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.4 weight 1.000
-> }
-> host blade159 {
-> 	id -19		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.5 weight 1.000
-> }
-> host blade160 {
-> 	id -20		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.6 weight 1.000
-> }
-> host blade161 {
-> 	id -21		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.7 weight 1.000
-> }
-> host blade162 {
-> 	id -22		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.8 weight 1.000
-> }
-> host blade163 {
-> 	id -23		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.9 weight 1.000
-> }
-> datacenter hok {
-> 	id -3		# do not change unnecessarily
-> 	# weight 10.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item blade151 weight 1.000
-> 	item blade152 weight 1.000
-> 	item blade153 weight 1.000
-> 	item blade154 weight 1.000
-> 	item blade155 weight 1.000
-> 	item blade159 weight 1.000
-> 	item blade160 weight 1.000
-> 	item blade161 weight 1.000
-> 	item blade162 weight 1.000
-> 	item blade163 weight 1.000
-> }
-> host admbc0-01 {
-> 	id -5		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.10 weight 1.000
-> }
-> host admbc0-02 {
-> 	id -6		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.11 weight 1.000
-> }
-> host admbc0-03 {
-> 	id -7		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.12 weight 1.000
-> }
-> host admbc0-04 {
-> 	id -8		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.13 weight 1.000
-> }
-> host admbc0-05 {
-> 	id -9		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.14 weight 1.000
-> }
-> host admbc0-06 {
-> 	id -10		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.15 weight 1.000
-> }
-> host admbc0-09 {
-> 	id -11		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.16 weight 1.000
-> }
-> host admbc0-10 {
-> 	id -12		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.17 weight 1.000
-> }
-> host admbc0-11 {
-> 	id -13		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.18 weight 1.000
-> }
-> host admbc0-12 {
-> 	id -14		# do not change unnecessarily
-> 	# weight 1.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.19 weight 1.000
-> }
-> datacenter csc {
-> 	id -24		# do not change unnecessarily
-> 	# weight 10.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item admbc0-01 weight 1.000
-> 	item admbc0-02 weight 1.000
-> 	item admbc0-03 weight 1.000
-> 	item admbc0-04 weight 1.000
-> 	item admbc0-05 weight 1.000
-> 	item admbc0-06 weight 1.000
-> 	item admbc0-09 weight 1.000
-> 	item admbc0-10 weight 1.000
-> 	item admbc0-11 weight 1.000
-> 	item admbc0-12 weight 1.000
-> }
-> host admdisk0 {
-> 	id -16		# do not change unnecessarily
-> 	# weight 8.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item osd.20 weight 1.000
-> 	item osd.21 weight 1.000
-> 	item osd.22 weight 1.000
-> 	item osd.23 weight 1.000
-> 	item osd.24 weight 1.000
-> 	item osd.25 weight 1.000
-> 	item osd.26 weight 1.000
-> 	item osd.27 weight 1.000
-> }
-> datacenter adm {
-> 	id -25		# do not change unnecessarily
-> 	# weight 8.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item admdisk0 weight 8.000
-> }
-> root default {
-> 	id -1		# do not change unnecessarily
-> 	# weight 80.000
-> 	alg straw
-> 	hash 0	# rjenkins1
-> 	item hok weight 36.000
-> 	item csc weight 36.000
-> 	item adm weight 8.000
-> }
->=20
-> # rules
-> rule data {
-> 	ruleset 0
-> 	type replicated
-> 	min_size 1
-> 	max_size 10
-> 	step take default
-> 	step chooseleaf firstn 0 type datacenter
-> 	step emit
-> }
-> rule metadata {
-> 	ruleset 1
-> 	type replicated
-> 	min_size 1
-> 	max_size 10
-> 	step take default
-> 	step chooseleaf firstn 0 type datacenter
-> 	step emit
-> }
-> rule rbd {
-> 	ruleset 2
-> 	type replicated
-> 	min_size 1
-> 	max_size 10
-> 	step take default
-> 	step chooseleaf firstn 0 type datacenter
-> 	step emit
-> }
->=20
-> # end crush map
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in the body of a message to majordomo@vger.kernel.org More majordomo i=
-nfo at  http://vger.kernel.org/majordomo-info.html
-> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=81=7F)=DE=BA=
-{.n=81=7F+=89=B7=9Cz=98]z=F7=A5=8A{ay=81=7F=1D=CA=87=DA=99=81=7F,j=07=AD=
-=A2f=A3=A2=B7h=9A=8B=E0z=81=7F=1E=AEw=A5=A2=81=7F=0C=A2=B7=A6j:+v=89=A8=
-=8Aw=E8j=D8m=B6=9F=81=7F=81=7F=07=AB=91=EA=E7zZ+=83=F9=9A=8E=8A=DD=A2j"=
-=9D=FA!tml=3D
->=20
+btw, just one more off-topic question:
+
+chef@ceph-node03:~$ ceph pg dump| egrep -v '^(0\.|1\.|2\.)'| column -t
+dumped             all        in         format     plain
+version            113906
+last_osdmap_epoch  323
+last_pg_scan       1
+full_ratio         0.95
+nearfull_ratio     0.85
+pg_stat            objects    mip        degr       unf    bytes
+  log           disklog   state     state_stamp  v  reported  up
+acting  last_scrub  scrub_stamp  last_deep_scrub  deep_scrub_stamp
+pool               0          74748      0          0      0
+  286157692336  17668034  17668034
+pool               1          618        0          0      0
+  131846062     6414518   6414518
+pool               2          0          0          0      0
+  0             0         0
+sum                75366      0          0          0
+286289538398  24082552      24082552
+osdstat            kbused     kbavail    kb         hb     in
+  hb            out
+0                  157999220  106227596  264226816  [1,2]  []
+1                  185604948  78621868   264226816  [0,2]  []
+2                  219475396  44751420   264226816  [0,1]  []
+sum                563079564  229600884  792680448
+
+pool 0 (data) is used for data storage
+pool 1 (metadata) is used for metadata storage
+
+what is pool 2 (rbd) for? looks like it's absolutely empty.
+
+
+>
+>>
+>> You might also adjust the crush tunables, see
+>>
+>> http://ceph.com/docs/master/rados/operations/crush-map/?highlight=tunable#tunables
+>>
+>> sage
+>>
+
+Thanks for the link, Sage I set tunable values according to the doc.
+Btw, online document is missing magical param for crushmap which
+allows those scary_tunables )
+
+
+
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+...WBR, Roman Hlynovskiy
