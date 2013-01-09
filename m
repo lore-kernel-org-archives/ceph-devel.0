@@ -1,64 +1,69 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: Crushmap Design Question
-Date: Wed, 09 Jan 2013 15:00:47 +0000
-Message-ID: <50ED861F.3040703@inktank.com>
-References: <AEBA0243790A484AA72D5CDF477159BC1CEB087D@SN2PRD0106MB178.prod.exchangelabs.com> <6F3FA899187F0043BA1827A69DA2F7CC5D2C29@SHSMSX102.ccr.corp.intel.com> <50ED3175.8010304@widodh.nl>
+From: "Lachfeld, Jutta" <jutta.lachfeld@ts.fujitsu.com>
+Subject: RE: Usage of CEPH FS versa HDFS for Hadoop: TeraSort benchmark
+ performance comparison issue
+Date: Wed, 9 Jan 2013 16:11:51 +0100
+Message-ID: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F3363@ABGEX70E.FSC.NET>
+References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D9087AF1B@ABGEX70E.FSC.NET>
+	<alpine.DEB.2.00.1212130923140.28618@cobra.newdream.net>
+	<CAPYLRzj0=s117ahDOKRfm409Rusp4e7fQpvgjOWDJNrB9GUaog@mail.gmail.com>
+	<F1501D1A-2C22-45FF-A4F4-3B1CD367B1BD@gmail.com>
+	<CAPYLRzgJGB1944vjcWAnvAZmC3S5RhGvz3Ao4PuW-NVChJoKEA@mail.gmail.com>
+ <CAPrxi59NpNrCfcW+NpHGAwuz+47T0nn2cpZCUjy3b7Lt-eDW5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:39347 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757976Ab3AIPAx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 10:00:53 -0500
-Received: by mail-la0-f46.google.com with SMTP id fq13so1970389lab.19
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 07:00:51 -0800 (PST)
-In-Reply-To: <50ED3175.8010304@widodh.nl>
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:16144 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757739Ab3AIPLy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 10:11:54 -0500
+In-Reply-To: <CAPrxi59NpNrCfcW+NpHGAwuz+47T0nn2cpZCUjy3b7Lt-eDW5g@mail.gmail.com>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "Moore, Shawn M" <smmoore@catawba.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>, Gregory Farnum <greg@inktank.com>
+Cc: Cameron Bahar <cbahar@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Noah Watkins <noah.watkins@inktank.com>, Joe Buck <joe.buck@inktank.com>
 
-On 01/09/2013 08:59 AM, Wido den Hollander wrote:
-> Hi,
->=20
-> On 01/09/2013 01:53 AM, Chen, Xiaoxi wrote:
->> Hi=A3=AC
->> 	Setting rep size to 3 only make the data triple-replication, that m=
-eans when you "fail" all OSDs in 2 out of 3 DCs, the data still accessa=
-ble.
->> 	But Monitor is another story, for monitor clusters with 2N+1 nodes,=
- it require at least N+1 nodes alive, and indeed this is why you Ceph f=
-ailed.
->> 	It looks to me this discipline make it hard to design a proper depl=
-oyment which is robust in DC outage. But hoping for inputs from communi=
-ty,how to make Monitor cluster reliable.
->>
->=20
->  From what I understand he didn't kill the second mon, still leaving =
-2
-> out of 3 mons running.
-
-Indeed. A good hint that this is the case is this bit of Shawn's messag=
-e:
-
->> When I fail a datacenter (including 1 of 3 mon's) I eventually get:
->> 2013-01-08 13:58:54.020477 mon.0 [INF] pgmap v2712139: 7104 pgs: 710=
-4 active+degraded; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avai=
-l; 16362/49086 degraded (33.333%)
->>
->> At this point everything is still ok.  But when I fail the 2nd datac=
-enter (still leaving 2 out of 3 mons running) I get:
->> 2013-01-08 14:01:25.600056 mon.0 [INF] pgmap v2712189: 7104 pgs: 710=
-4 incomplete; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail
-
-If you still manage to get these messages, it means your monitors are
-still handling and answering requests, and that only happens when you
-have a quorum :)
-
-  -Joao
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTm9haCwNCg0KdGhlIGN1cnJlbnQgY29udGVudCBvZiB0aGUgd2ViIHBhZ2UgaHR0cDovL2Nl
+cGguY29tL2RvY3MvbWFzdGVyL2NlcGhmcy9oYWRvb3Agc2hvd3MgYSBjb25maWd1cmF0aW9uIHBh
+cmFtZXRlciBjZXBoLm9iamVjdC5zaXplLg0KSXMgaXQgdGhlIENFUEggZXF1aXZhbGVudCAgdG8g
+dGhlICJIREZTIGJsb2NrIHNpemUiIHBhcmFtZXRlciB3aGljaCBJIGhhdmUgYmVlbiBsb29raW5n
+IGZvcj8NCg0KRG9lcyB0aGUgcGFyYW1ldGVyIGNlcGgub2JqZWN0LnNpemUgYXBwbHkgdG8gdmVy
+c2lvbiAwLjU2LjE/DQoNCkkgd291bGQgYmUgaW50ZXJlc3RlZCBpbiBzZXR0aW5nIHRoaXMgcGFy
+YW1ldGVyIHRvIHZhbHVlcyBoaWdoZXIgdGhhbiA2NE1CLCBlLmcuIDI1Nk1CIG9yIDUxMk1CIHNp
+bWlsYXIgdG8gdGhlIHZhbHVlcyBJIGhhdmUgdXNlZCBmb3IgSERGUyBmb3IgaW5jcmVhc2luZyB0
+aGUgcGVyZm9ybWFuY2Ugb2YgdGhlIFRlcmFTb3J0IGJlbmNobWFyay4gV291bGQgdGhlc2UgdmFs
+dWVzIGJlIGFsbG93ZWQgYW5kIHdvdWxkIHRoZXkgYXQgYWxsIG1ha2Ugc2Vuc2UgZm9yIHRoZSBt
+ZWNoYW5pc21zIHVzZWQgaW4gQ0VQSD8NCg0KUmVnYXJkcywNCkp1dHRhLg0KDQotDQpqdXR0YS5s
+YWNoZmVsZEB0cy5mdWppdHN1LmNvbSwgRnVqaXRzdSBUZWNobm9sb2d5IFNvbHV0aW9ucyBQQkcg
+UERHIEVTJlMgU1dFIFNPTCA0LCAiSW5mcmFzdHJ1Y3R1cmUgU29sdXRpb25zIiwgTWNoRCA1Qiwg
+VGVsLiAuLjQ5LTg5LTMyMjItMjcwNSwgQ29tcGFueSBEZXRhaWxzOiBodHRwOi8vZGUudHMuZnVq
+aXRzdS5jb20vaW1wcmludA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206
+IE5vYWggV2F0a2lucyBbbWFpbHRvOmpheWhhd2tAY3MudWNzYy5lZHVdDQo+IFNlbnQ6IFRodXJz
+ZGF5LCBEZWNlbWJlciAxMywgMjAxMiA5OjMzIFBNDQo+IFRvOiBHcmVnb3J5IEZhcm51bQ0KPiBD
+YzogQ2FtZXJvbiBCYWhhcjsgU2FnZSBXZWlsOyBMYWNoZmVsZCwgSnV0dGE7IGNlcGgtZGV2ZWxA
+dmdlci5rZXJuZWwub3JnOyBOb2FoDQo+IFdhdGtpbnM7IEpvZSBCdWNrDQo+IFN1YmplY3Q6IFJl
+OiBVc2FnZSBvZiBDRVBIIEZTIHZlcnNhIEhERlMgZm9yIEhhZG9vcDogVGVyYVNvcnQgYmVuY2ht
+YXJrDQo+IHBlcmZvcm1hbmNlIGNvbXBhcmlzb24gaXNzdWUNCj4gDQo+IFRoZSBiaW5kaW5ncyB1
+c2UgdGhlIGRlZmF1bHQgSGFkb29wIHNldHRpbmdzIChlLmcuIDY0IG9yIDEyOCBNQg0KPiBjaHVu
+a3MpIHdoZW4gY3JlYXRpbmcgbmV3IGZpbGVzLiBUaGUgY2h1bmsgc2l6ZSBjYW4gYWxzbyBiZSBz
+cGVjaWZpZWQgb24gYSBwZXItZmlsZSBiYXNpcw0KPiB1c2luZyB0aGUgc2FtZSBpbnRlcmZhY2Ug
+YXMgSGFkb29wLiBBZGRpdGlvbmFsbHksIHdoaWxlIEhhZG9vcCBkb2Vzbid0IHByb3ZpZGUgYW4N
+Cj4gaW50ZXJmYWNlIHRvIGNvbmZpZ3VyYXRpb24gcGFyYW1ldGVycyBiZXlvbmQgY2h1bmsgc2l6
+ZSwgd2Ugd2lsbCBhbHNvIGxldCB1c2VycyBmdWxseQ0KPiBjb25maWd1cmUgZm9yIGFueSBDZXBo
+IHN0cmlwaW5nIHN0cmF0ZWd5LiBodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvZGV2L2ZpbGUt
+c3RyaXBpbmcvDQo+IA0KPiAtTm9haA0KPiANCj4gT24gVGh1LCBEZWMgMTMsIDIwMTIgYXQgMTI6
+MjcgUE0sIEdyZWdvcnkgRmFybnVtIDxncmVnQGlua3RhbmsuY29tPiB3cm90ZToNCj4gPiBPbiBU
+aHUsIERlYyAxMywgMjAxMiBhdCAxMjoyMyBQTSwgQ2FtZXJvbiBCYWhhciA8Y2JhaGFyQGdtYWls
+LmNvbT4gd3JvdGU6DQo+ID4+IElzIHRoZSBjaHVuayBzaXplIHR1bmFibGUgaW4gQSBDZXBoIGNs
+dXN0ZXIuIEkgZG9uJ3QgbWVhbiBkeW5hbWljLCBidXQgZXZlbiBzdGF0aWNhbGx5DQo+IGNvbmZp
+Z3VyYWJsZSB3aGVuIGEgY2x1c3RlciBpcyBmaXJzdCBpbnN0YWxsZWQ/DQo+ID4NCj4gPiBZZWFo
+LiBZb3UgY2FuIHNldCBjaHVuayBzaXplIG9uIGEgcGVyLWZpbGUgYmFzaXM7IHlvdSBqdXN0IGNh
+bid0DQo+ID4gY2hhbmdlIGl0IG9uY2UgdGhlIGZpbGUgaGFzIGFueSBkYXRhIHdyaXR0ZW4gdG8g
+aXQuDQo+ID4gSW4gdGhlIGNvbnRleHQgb2YgSGFkb29wIHRoZSBxdWVzdGlvbiBpcyBqdXN0IGlm
+IHRoZSBiaW5kaW5ncyBhcmUNCj4gPiBjb25maWd1cmVkIGNvcnJlY3RseSB0byBkbyBzbyBhdXRv
+bWF0aWNhbGx5Lg0KPiA+IC1HcmVnDQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
+aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPiBpbiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
+am9yZG9tbw0KPiA+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbA0K
