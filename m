@@ -1,67 +1,100 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: [PATCH] configure.ac: check for org.junit.rules.ExternalResource
-Date: Wed, 9 Jan 2013 13:54:03 -0800
-Message-ID: <CAPrxi58_D4PVhMAtABfKiRrXKZv0p4OUSfc+MuVkha0ndWPWxA@mail.gmail.com>
-References: <1357767316-27868-1-git-send-email-danny.al-gaaf@bisect.de>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: OSD memory leaks?
+Date: Wed, 9 Jan 2013 23:12:12 +0100
+Message-ID: <CAOLwVUmrCXk2qRkBd3G3rB85+=K_y0rc9y6QWEGqKjdwJyUTww@mail.gmail.com>
+References: <CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com>
+ <2054641.97.1357767776178.JavaMail.dspano@it1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f51.google.com ([209.85.212.51]:41461 "EHLO
-	mail-vb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932962Ab3AIVyF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 16:54:05 -0500
-Received: by mail-vb0-f51.google.com with SMTP id fq11so2028647vbb.24
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 13:54:03 -0800 (PST)
-In-Reply-To: <1357767316-27868-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:52213 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757948Ab3AIWMf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 17:12:35 -0500
+Received: by mail-lb0-f181.google.com with SMTP id ge1so1431587lbb.26
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 14:12:34 -0800 (PST)
+In-Reply-To: <2054641.97.1357767776178.JavaMail.dspano@it1>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
+To: Dave Spano <dspano@optogenics.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-I haven't tested this yet, but I like it. I think several of these
-macros can be used to simplify a bit more of the Java config bit. I
-also just saw the ax_jni_include_dir macro in the autoconf archive and
-it looks like that can help clean-up too.
+Dave, I share you my little script for now if you want it:
 
-On Wed, Jan 9, 2013 at 1:35 PM, Danny Al-Gaaf <danny.al-gaaf@bisect.de> wrote:
-> The attached patch depends on the set of 6 patches I send some days ago.
-> See: http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/11793
+#!/bin/bash
+
+for i in $(ps aux | grep [c]eph-osd | awk '{print $4}')
+do
+        MEM_INTEGER=3D$(echo $i | cut -d '.' -f1)
+        OSD=3D$(ps aux | grep [c]eph-osd | grep "$i " | awk '{print $13=
+}')
+        if [[ $MEM_INTEGER -ge 25 ]];then
+service ceph restart osd.$OSD >> /dev/null
+                if [ $? -eq 0 ]; then
+logger -t ceph-memory-usage "The OSD number $OSD has been restarted
+since it was using $i % of the memory"
+                else
+                        logger -t ceph-memory-usage "ERROR while
+restarting the OSD daemon"
+                fi
+        else
+                logger -t ceph-memory-usage "The OSD number $OSD is
+only using $i % of the memory, doing nothing"
+        fi
+logger -t ceph-memory-usage "Waiting 60 seconds before testing the next=
+ OSD..."
+sleep 60
+done
+
+logger -t ceph-memory-usage "Ceph state after memory check operation
+is: $(ceph health)"
+
+Crons run with 10 min interval everyday for each storage node ;-).
+
+Waiting for some Inktank guys now :-).
+--
+Regards,
+S=E9bastien Han.
+
+
+On Wed, Jan 9, 2013 at 10:42 PM, Dave Spano <dspano@optogenics.com> wro=
+te:
+> That's very good to know. I'll be restarting ceph-osd right now! Than=
+ks for the heads up!
 >
-> Danny Al-Gaaf (1):
->   configure.ac: check for org.junit.rules.ExternalResource
+> Dave Spano
+> Optogenics
+> Systems Administrator
 >
->  autogen.sh                |   2 +-
->  configure.ac              |  29 ++++++-------
->  m4/ac_check_class.m4      | 108 ++++++++++++++++++++++++++++++++++++++++++++++
->  m4/ac_check_classpath.m4  |  24 +++++++++++
->  m4/ac_check_rqrd_class.m4 |  26 +++++++++++
->  m4/ac_java_options.m4     |  33 ++++++++++++++
->  m4/ac_prog_jar.m4         |  39 +++++++++++++++++
->  m4/ac_prog_java.m4        |  83 +++++++++++++++++++++++++++++++++++
->  m4/ac_prog_java_works.m4  |  98 +++++++++++++++++++++++++++++++++++++++++
->  m4/ac_prog_javac.m4       |  45 +++++++++++++++++++
->  m4/ac_prog_javac_works.m4 |  36 ++++++++++++++++
->  m4/ac_prog_javah.m4       |  28 ++++++++++++
->  m4/ac_try_compile_java.m4 |  40 +++++++++++++++++
->  m4/ac_try_run_javac.m4    |  41 ++++++++++++++++++
->  14 files changed, 615 insertions(+), 17 deletions(-)
->  create mode 100644 m4/ac_check_class.m4
->  create mode 100644 m4/ac_check_classpath.m4
->  create mode 100644 m4/ac_check_rqrd_class.m4
->  create mode 100644 m4/ac_java_options.m4
->  create mode 100644 m4/ac_prog_jar.m4
->  create mode 100644 m4/ac_prog_java.m4
->  create mode 100644 m4/ac_prog_java_works.m4
->  create mode 100644 m4/ac_prog_javac.m4
->  create mode 100644 m4/ac_prog_javac_works.m4
->  create mode 100644 m4/ac_prog_javah.m4
->  create mode 100644 m4/ac_try_compile_java.m4
->  create mode 100644 m4/ac_try_run_javac.m4
+>
+>
+> ----- Original Message -----
+>
+> From: "S=E9bastien Han" <han.sebastien@gmail.com>
+> To: "Dave Spano" <dspano@optogenics.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Samuel Just" <sam.jus=
+t@inktank.com>
+> Sent: Wednesday, January 9, 2013 11:35:13 AM
+> Subject: Re: OSD memory leaks?
+>
+> If you wait too long, the system will trigger OOM killer :D, I alread=
+y
+> experienced that unfortunately...
+>
+> Sam?
+>
+> On Wed, Jan 9, 2013 at 5:10 PM, Dave Spano <dspano@optogenics.com> wr=
+ote:
+>> OOM killer
+>
+>
 >
 > --
-> 1.8.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Regards,
+> S=E9bastien Han.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
