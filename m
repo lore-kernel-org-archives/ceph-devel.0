@@ -1,42 +1,44 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH] osd/ReplicatedPG.cc: fix errors in _scrub()
-Date: Wed,  9 Jan 2013 22:22:47 +0100
-Message-ID: <1357766567-26286-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Mark Kampe <mark.kampe@inktank.com>
+Subject: Re: geo replication
+Date: Wed, 09 Jan 2013 13:32:03 -0800
+Message-ID: <50EDE1D3.3080803@inktank.com>
+References: <CAJH6TXjnUTdjwi-dW6kV-2WEf58-B=gx1ubnep30x_0Td5JHTw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:50745 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933371Ab3AIVWu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 16:22:50 -0500
+Received: from mail-pb0-f49.google.com ([209.85.160.49]:34779 "EHLO
+	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933329Ab3AIVcE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 16:32:04 -0500
+Received: by mail-pb0-f49.google.com with SMTP id un15so1191800pbc.22
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 13:32:04 -0800 (PST)
+In-Reply-To: <CAJH6TXjnUTdjwi-dW6kV-2WEf58-B=gx1ubnep30x_0Td5JHTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Samuel Just <sam.just@inktank.com>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Fix build error introduced with 5b12b514b047a8a46cc5549bd94b398289b9b5f6:
+Right now, your only option is synchronous replication, which
+happens at the speed of the slowest OSD ... so unless your
+WAN links are fast and fat, it comes at non-negligible
+performance penalty.
 
-osd/ReplicatedPG.cc: In member function 'virtual void ReplicatedPG::_scrub(ScrubMap&)':
-osd/ReplicatedPG.cc:7116:4: error: 'errors' was not declared in this scope
+We will soon be sending out a proposal for an asynchronous
+replication mechanism with eventual consistency for the
+RADOS Gateway ... but that is a somewhat simpler problem
+(immutable objects, good change lists, and a WAN friendly
+protocol).
 
-Increment scrubber.errors instead of errors.
+Asynchronous RADOS replication is definitely on our list,
+but more complex and farther out.
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- src/osd/ReplicatedPG.cc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-index e8a68fe..1645041 100644
---- a/src/osd/ReplicatedPG.cc
-+++ b/src/osd/ReplicatedPG.cc
-@@ -7113,7 +7113,7 @@ void ReplicatedPG::_scrub(ScrubMap& scrubmap)
-       if (head == hobject_t()) {
- 	osd->clog.error() << mode << " " << info.pgid << " " << soid
- 			  << " found clone without head";
--	++errors;
-+	++scrubber.errors;
- 	continue;
-       }
- 
--- 
-1.8.1
-
+On 01/09/2013 01:19 PM, Gandalf Corvotempesta wrote:
+> probably this was already asked before but i'm unable to find any answer.
+> Is possible to replicate a cluster geografically?
+>
+> GlusterFS does this with rsync (i think called automatically on every
+> file write), does cheph do something similiar?
+>
+> I don't think that using multiple geographically distributed OSD with
+> 10-15ms of latency will be good
