@@ -1,45 +1,37 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Windows port
-Date: Wed, 9 Jan 2013 09:04:03 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301090859230.6155@cobra.newdream.net>
-References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com> <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com> <CA+GnOzR29oKSXWpuS8dffsXJWChzMvTCFQ+dutmAm+zsuVkBgQ@mail.gmail.com>
- <CAPUexz_5CMm6sMXcMYCXJXgcBxemLOKaymtF0EgpoGvdg72PmQ@mail.gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: OSD memory leaks?
+Date: Wed, 9 Jan 2013 19:09:36 +0100
+Message-ID: <CAF6-1L4WOGHNU=qLOuOWktsDirc-nO2ZM0+nQL9vxF2KKuWVqg@mail.gmail.com>
+References: <CAOLwVUk-pf22gXFD+8A8FGgtE4mWfz3r8minKQ6vP6q_ftYRdQ@mail.gmail.com>
+	<8366806.170.1357747859058.JavaMail.dspano@it1>
+	<CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38605 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932220Ab3AIRED (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 12:04:03 -0500
-In-Reply-To: <CAPUexz_5CMm6sMXcMYCXJXgcBxemLOKaymtF0EgpoGvdg72PmQ@mail.gmail.com>
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:50620 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932364Ab3AISJh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 13:09:37 -0500
+Received: by mail-ob0-f172.google.com with SMTP id za17so2517034obc.3
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jan 2013 10:09:37 -0800 (PST)
+In-Reply-To: <CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian@hastexo.com>
-Cc: Dino Yancey <dino2gnt@gmail.com>, Cesar Mello <cmello@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Dave Spano <dspano@optogenics.com>, ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-On Wed, 9 Jan 2013, Florian Haas wrote:
-> On Tue, Jan 8, 2013 at 3:00 PM, Dino Yancey <dino2gnt@gmail.com> wrote:
-> > Hi,
-> >
-> > I am also curious if a Windows port, specifically the client-side, is
-> > on the roadmap.
-> 
-> This is somewhat OT from the original post, but if all you're
-> interested is using RBD block storage from Windows, you can already do
-> that by going through an iSCSI or FC head node. Proof-of-concept
-> configuration outlined here:
-> 
-> http://www.hastexo.com/resources/hints-and-kinks/turning-ceph-rbd-images-san-storage-devices
-> 
-> Not sure if this helps, but just thought I'd mention it.
+Just fyi, I also have growing memory on OSD, and I have the same logs:
 
-There is also a patch for Samba that glues libcephfs into Samba's VFS 
-layer.  This will let you reexport CephFS via CIFS.  These patches are 
-currently living at
+"libceph: osd4 172.20.11.32:6801 socket closed" in the RBD clients
 
-	https://github.com/ceph/samba/commits/ceph-v3-6-test
 
-If anybody is interested in playing with these, have at it!  Inktank 
-doesn't have resources to focus on it right now.
+I traced that problem and correlated it to some cephx issue in the OSD
+some time ago in this thread
 
-sage
+http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg10634.html
+
+but the thread kind of died without a solution ...
+
+Cheers,
+
+   Sylvain
