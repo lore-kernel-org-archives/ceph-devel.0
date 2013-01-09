@@ -1,44 +1,45 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Are there significant performance enhancements in 0.56.x to be
- expected soon or planned in the near future?
-Date: Wed, 9 Jan 2013 08:58:22 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301090857000.6155@cobra.newdream.net>
-References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F31C3@ABGEX70E.FSC.NET> <50ED7290.9010409@conversis.de>
+Subject: Re: Windows port
+Date: Wed, 9 Jan 2013 09:04:03 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301090859230.6155@cobra.newdream.net>
+References: <CAJVE5RWjv9ZVpTX5rxB1dL7bDSCtqkfr-Ac5m0hEnprANpwu0Q@mail.gmail.com> <CAJVE5RV-JZzK7Ofe9q2whcxp1eHquE_A2YELof8TAzBVjcsfgQ@mail.gmail.com> <CA+GnOzR29oKSXWpuS8dffsXJWChzMvTCFQ+dutmAm+zsuVkBgQ@mail.gmail.com>
+ <CAPUexz_5CMm6sMXcMYCXJXgcBxemLOKaymtF0EgpoGvdg72PmQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38494 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:38605 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932263Ab3AIQ6X (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 11:58:23 -0500
-In-Reply-To: <50ED7290.9010409@conversis.de>
+	with ESMTP id S932220Ab3AIRED (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 12:04:03 -0500
+In-Reply-To: <CAPUexz_5CMm6sMXcMYCXJXgcBxemLOKaymtF0EgpoGvdg72PmQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dennis Jacobfeuerborn <dennisml@conversis.de>
-Cc: "Lachfeld, Jutta" <jutta.lachfeld@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Florian Haas <florian@hastexo.com>
+Cc: Dino Yancey <dino2gnt@gmail.com>, Cesar Mello <cmello@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 9 Jan 2013, Dennis Jacobfeuerborn wrote:
-> On 01/09/2013 01:51 PM, Lachfeld, Jutta wrote:
-> > Hi all,
-> > 
-> > in expectation of better performance, we are just switching from CEPH version 0.48 to 0.56.1
-> > for comparisons between Hadoop with HDFS and Hadoop with CEPH FS.
-> > 
-> > We are now wondering whether there are currently any development activities 
-> > concerning further significant performance enhancements, 
-> > or whether further significant performance enhancements are already planned for the near future.
-> > 
-> > I would now be loath to start benchmarking with 0.56.1 and then, a month or so later, detect that there have been significant performance enhancements in CEPH in the meantime.
+On Wed, 9 Jan 2013, Florian Haas wrote:
+> On Tue, Jan 8, 2013 at 3:00 PM, Dino Yancey <dino2gnt@gmail.com> wrote:
+> > Hi,
+> >
+> > I am also curious if a Windows port, specifically the client-side, is
+> > on the roadmap.
 > 
-> There shouldn't be any major changes since v0.56.x is a stable release and
-> as such should only receive bug-/securityfixes and non-risky improvements.
-> Any changes that would result in a significant change in performance would
-> probably be too disruptive for a stable release series.
+> This is somewhat OT from the original post, but if all you're
+> interested is using RBD block storage from Windows, you can already do
+> that by going through an iSCSI or FC head node. Proof-of-concept
+> configuration outlined here:
+> 
+> http://www.hastexo.com/resources/hints-and-kinks/turning-ceph-rbd-images-san-storage-devices
+> 
+> Not sure if this helps, but just thought I'd mention it.
 
-That is generally true.  One exception is that there may be some simple 
-changes that can decrease the impact of data migration on performance.  
-There are some changes we made for a customer that seem to make a big 
-difference and will be making it into the main tree (and hopefully 
-bobtail, and possibly even argonaut) shortly.
+There is also a patch for Samba that glues libcephfs into Samba's VFS 
+layer.  This will let you reexport CephFS via CIFS.  These patches are 
+currently living at
+
+	https://github.com/ceph/samba/commits/ceph-v3-6-test
+
+If anybody is interested in playing with these, have at it!  Inktank 
+doesn't have resources to focus on it right now.
 
 sage
