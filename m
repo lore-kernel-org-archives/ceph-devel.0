@@ -1,55 +1,44 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Christopher Kunz <chrislist@de-punkt.de>
 Subject: Re: Are there significant performance enhancements in 0.56.x to be
  expected soon or planned in the near future?
-Date: Wed, 09 Jan 2013 14:11:59 +0100
-Message-ID: <50ED6C9F.5030107@widodh.nl>
-References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F31C3@ABGEX70E.FSC.NET>
+Date: Wed, 09 Jan 2013 14:30:35 +0100
+Message-ID: <50ED70FB.8020902@de-punkt.de>
+References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F31C3@ABGEX70E.FSC.NET> <50ED6C9F.5030107@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:53088 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757766Ab3AINMC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 08:12:02 -0500
-In-Reply-To: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F31C3@ABGEX70E.FSC.NET>
+Received: from mail-10.de-punkt.de ([93.190.68.161]:48345 "EHLO
+	mail-10.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757846Ab3AINak (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 08:30:40 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail-10.de-punkt.de (Postfix) with ESMTP id D8BDA3A32F
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Jan 2013 14:30:37 +0100 (CET)
+Received: from mail-10.de-punkt.de ([127.0.0.1])
+	by localhost (mail-10.de-punkt.de [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id w6aUU7fdtOOi for <ceph-devel@vger.kernel.org>;
+	Wed,  9 Jan 2013 14:30:37 +0100 (CET)
+Received: from Christophers-MacBook-Pro.local (p4FFFEC0C.dip.t-dialin.net [79.255.236.12])
+	(Authenticated sender: chris@de-punkt.de)
+	by mail-10.de-punkt.de (Postfix) with ESMTPSA id 747EB3A32D
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Jan 2013 14:30:36 +0100 (CET)
+In-Reply-To: <50ED6C9F.5030107@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Lachfeld, Jutta" <jutta.lachfeld@ts.fujitsu.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/09/2013 01:51 PM, Lachfeld, Jutta wrote:
-> Hi all,
->
-> in expectation of better performance, we are just switching from CEPH version 0.48 to 0.56.1
-> for comparisons between Hadoop with HDFS and Hadoop with CEPH FS.
->
-> We are now wondering whether there are currently any development activities
-> concerning further significant performance enhancements,
-> or whether further significant performance enhancements are already planned for the near future.
->
+Hi,
+> 
+> Yes, 0.56(.1) has a significant performance increase compared to 0.48
+> 
+That is not exactly the OP's question, though. If I understand
+correctly, she is concerned about ongoing performance improvements
+within the "bobtail" branch, i.e. between 0.56.1 and 0.56.X (with X>1).
 
-Yes, 0.56(.1) has a significant performance increase compared to 0.48
+Jutta, what kind of use case do you have in mind, i.e. how complex are
+your benchmarking scenarios?
 
-Two blogposts which might be interesting to read:
-* http://ceph.com/dev-notes/whats-new-in-the-land-of-osd/
-* http://ceph.com/uncategorized/argonaut-vs-bobtail-performance-preview/
+Regards,
 
-I'm not running with HDFS, but I see a good performance increase with 
-Virtual Machines running on RBD.
-
-Wido
-
-> I would now be loath to start benchmarking with 0.56.1 and then, a month or so later, detect that there have been significant performance enhancements in CEPH in the meantime.
->
-> Regards,
-> Jutta.
->
-> -
-> jutta.lachfeld@ts.fujitsu.com, Fujitsu Technology Solutions PBG PDG ES&S SWE SOL 4, "Infrastructure Solutions", MchD 5B, Tel. ..49-89-3222-2705, Company Details: http://de.ts.fujitsu.com/imprint
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+--ck
