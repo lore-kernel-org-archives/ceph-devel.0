@@ -1,56 +1,65 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Crushmap Design Question
-Date: Thu, 10 Jan 2013 13:34:20 -0800
-Message-ID: <CAPYLRziRWbtuZy=dQaZyJ9UckLzZWFUq1YQmmYN0td=t3JxCtA@mail.gmail.com>
-References: <AEBA0243790A484AA72D5CDF477159BC1CEB087D@SN2PRD0106MB178.prod.exchangelabs.com>
+Subject: Re: Usage of CEPH FS versa HDFS for Hadoop: TeraSort benchmark
+ performance comparison issue
+Date: Thu, 10 Jan 2013 13:42:05 -0800
+Message-ID: <CAPYLRzhWPOXjodsVr7h=SzrmoUsYSbd+mGisJQAUbnTNd8h9+A@mail.gmail.com>
+References: <BED8C7CC7F6E5A4C9001AF4A075FC3B46D9087AF1B@ABGEX70E.FSC.NET>
+	<alpine.DEB.2.00.1212130923140.28618@cobra.newdream.net>
+	<CAPYLRzj0=s117ahDOKRfm409Rusp4e7fQpvgjOWDJNrB9GUaog@mail.gmail.com>
+	<F1501D1A-2C22-45FF-A4F4-3B1CD367B1BD@gmail.com>
+	<CAPYLRzgJGB1944vjcWAnvAZmC3S5RhGvz3Ao4PuW-NVChJoKEA@mail.gmail.com>
+	<CAPrxi59NpNrCfcW+NpHGAwuz+47T0nn2cpZCUjy3b7Lt-eDW5g@mail.gmail.com>
+	<BED8C7CC7F6E5A4C9001AF4A075FC3B46D927F3363@ABGEX70E.FSC.NET>
+	<CA+Hcz5-mj0pa7caSp+kRh0LNrdbUaKXqwe8aXLL0HOX_bZ+6fg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:61000 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754452Ab3AJVeW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 16:34:22 -0500
-Received: by mail-qa0-f48.google.com with SMTP id l8so982484qaq.7
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 13:34:21 -0800 (PST)
-In-Reply-To: <AEBA0243790A484AA72D5CDF477159BC1CEB087D@SN2PRD0106MB178.prod.exchangelabs.com>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:52684 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753660Ab3AJVmG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 16:42:06 -0500
+Received: by mail-qc0-f171.google.com with SMTP id d1so701380qca.16
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 13:42:05 -0800 (PST)
+In-Reply-To: <CA+Hcz5-mj0pa7caSp+kRh0LNrdbUaKXqwe8aXLL0HOX_bZ+6fg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Moore, Shawn M" <smmoore@catawba.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: "Lachfeld, Jutta" <jutta.lachfeld@ts.fujitsu.com>, Noah Watkins <jayhawk@cs.ucsc.edu>, Cameron Bahar <cbahar@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Joe Buck <joe.buck@inktank.com>
 
-On Tue, Jan 8, 2013 at 12:20 PM, Moore, Shawn M <smmoore@catawba.edu> wrote:
-> I have been testing ceph for a little over a month now.  Our design goal is to have 3 datacenters in different buildings all tied together over 10GbE.  Currently there are 10 servers each serving 1 osd in 2 of the datacenters.  In the third is one large server with 16 SAS disks serving 8 osds.  Eventually we will add one more identical large server into the third datacenter.  I have told ceph to keep 3 copies and tried to do the crushmap in such a way that as long as a majority of mon's can stay up, we could run off of one datacenter's worth of osds.   So in my testing, it doesn't work out quite this way...
+On Wed, Jan 9, 2013 at 8:00 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
+> Hi Jutta,
 >
-> Everything is currently ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+> On Wed, Jan 9, 2013 at 7:11 AM, Lachfeld, Jutta
+> <jutta.lachfeld@ts.fujitsu.com> wrote:
+>>
+>> the current content of the web page http://ceph.com/docs/master/cephfs/hadoop shows a configuration parameter ceph.object.size.
+>> Is it the CEPH equivalent  to the "HDFS block size" parameter which I have been looking for?
 >
-> I will put hopefully relevant files at the end of this email.
+> Yes. By specifying ceph.object.size, the Hadoop will use a default
+> Ceph file layout with stripe unit = object size, and stripe count = 1.
+> This is effectively the same meaning as dfs.block.size for HDFS.
 >
-> When all 28 osds are up, I get:
-> 2013-01-08 13:56:07.435914 mon.0 [INF] pgmap v2712076: 7104 pgs: 7104 active+clean; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail
+>> Does the parameter ceph.object.size apply to version 0.56.1?
 >
-> When I fail a datacenter (including 1 of 3 mon's) I eventually get:
-> 2013-01-08 13:58:54.020477 mon.0 [INF] pgmap v2712139: 7104 pgs: 7104 active+degraded; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail; 16362/49086 degraded (33.333%)
+> The Ceph/Hadoop file system plugin is being developed here:
 >
-> At this point everything is still ok.  But when I fail the 2nd datacenter (still leaving 2 out of 3 mons running) I get:
-> 2013-01-08 14:01:25.600056 mon.0 [INF] pgmap v2712189: 7104 pgs: 7104 incomplete; 60264 MB data, 137 GB used, 13570 GB / 14146 GB avail
+>   git://github.com/ceph/hadoop-common cephfs/branch-1.0
 >
-> Most VM's quit working and "rbd ls" works, but not a single line from "rados -p rbd ls" works and the command hangs.  Now after a while (you can see from timestamps) I end up at and stays this way:
-> 2013-01-08 14:40:54.030370 mon.0 [INF] pgmap v2713794: 7104 pgs: 213 active, 117 active+remapped, 3660 incomplete, 3108 active+degraded+remapped, 6 remapped+incomplete; 60264 MB data, 65701 MB used, 4604 GB / 4768 GB avail; 7696/49086 degraded (15.679%)
+> There is an old version of the Hadoop plugin in the Ceph tree which
+> will be removed shortly. Regarding the versions, development is taking
+> place in cephfs/branch-1.0 and in ceph.git master. We don't yet have a
+> system in place for dealing with compatibility across versions because
+> the code is in heavy development.
 
-This took me a bit to work out as well, but you've run afoul of a new
-post-argonaut feature intended to prevent people from writing with
-insufficient durability. Pools now have a "min size" and PGs in that
-pool won't go active if they don't have that many OSDs to write on.
-The clue here is the "incomplete" state. You can change it with "ceph
-osd pool foo set min_size 1", where "foo" is the name of the pool
-whose min_size you wish to change (and this command sets the min size
-to 1, obviously). The default for new pools is controlled by the "osd
-pool default min size" config value (which you should put in the
-global section). By default it'll be half of your default pool size.
+If you are using the old version in the Ceph tree, you should be
+setting fs.ceph.blockSize rather than ceph.object.size. :)
 
-So in your case your pools have a default size of 3, and the min size
-is (3/2 = 1.5 rounded up), and the OSDs are refusing to go active
-because of the dramatically reduced redundancy. You can set the min
-size down though and they will go active.
+
+>> I would be interested in setting this parameter to values higher than 64MB, e.g. 256MB or 512MB similar to the values I have used for HDFS for increasing the performance of the TeraSort benchmark. Would these values be allowed and would they at all make sense for the mechanisms used in CEPH?
+>
+> I can't think of any reason why a large size would cause concern, but
+> maybe someone else can chime in?
+
+Yep, totally fine.
 -Greg
