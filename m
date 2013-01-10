@@ -1,42 +1,143 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Ceph version 0.56.1, data loss on power failure
-Date: Thu, 10 Jan 2013 14:12:06 -0800
-Message-ID: <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
-References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
-	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
-	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: code coverage and teuthology
+Date: Fri, 11 Jan 2013 00:07:48 +0100
+Message-ID: <50EF49C4.1020909@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigA68BA330705A6F85323A8FA8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:52793 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751203Ab3AJWMH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 17:12:07 -0500
-Received: by mail-qa0-f53.google.com with SMTP id a19so1014044qad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 14:12:06 -0800 (PST)
-In-Reply-To: <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:60991 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751336Ab3AJXOt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 18:14:49 -0500
+Received: from [10.8.2.6] (unknown [10.8.0.22])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 6379D26397
+	for <ceph-devel@vger.kernel.org>; Fri, 11 Jan 2013 00:07:49 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcin Szukala <szukala.marcin@gmail.com>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 10, 2013 at 8:56 AM, Marcin Szukala
-<szukala.marcin@gmail.com> wrote:
-> Hi,
->
-> Scenario is correct but the last line. I can mount the image, but the
-> data that was written to the image before power failure is lost.
->
-> Currently the ceph cluster is not healthy, but i dont think its
-> related because I had this issue before the cluster itsef had issues
-> (about that I will write in different post not to mix topics).
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigA68BA330705A6F85323A8FA8
+Content-Type: multipart/mixed;
+ boundary="------------030208050309090502060309"
 
-This sounds like one of two possibilities:
-1) You aren't actually committing data to RADOS very often and so when
-the power fails you lose several minutes of writes. How much data are
-you losing, how's it generated, and is whatever you're doing running
-any kind of fsync or sync? And what filesystem are you using?
-2) Your cluster is actually not accepting writes and so RBD never
-manages to do a write but you aren't doing much and so you don't
-notice. What's the output of ceph -s?
--Greg
+This is a multi-part message in MIME format.
+--------------030208050309090502060309
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+I successfully run teuthology with the proposed 3node_rgw.yaml [1] and ch=
+anging the flavor from basic to gcov [2]. I hoped to use cov-init.sh ( ht=
+tps://github.com/ceph/teuthology/blob/master/coverage/cov-init.sh ) and t=
+hen coverage.sh but I can't figure out how to make it work.
+
+Hints would be most appreciated ;-)
+
+[1] 3node_rgw.yaml
+
+check-locks: false
+interactive-on-error: true
+overrides:
+  ceph:
+    branch: master
+    fs: xfs
+roles:
+- - mon.a
+  - mon.c
+  - osd.0
+- - mon.b
+  - mds.a
+  - osd.1
+- - client.0
+tasks:
+- ceph: null
+- rgw:
+  - client.0
+- interactive:
+
+targets:
+(snip)
+
+[2] http://gitbuilder.ceph.com/ceph-tarball-precise-x86_64-gcov/
+
+diff --git a/teuthology/task/ceph.py b/teuthology/task/ceph.py
+index b62bc1d..99d4f18 100644
+--- a/teuthology/task/ceph.py
++++ b/teuthology/task/ceph.py
+@@ -1027,7 +1027,7 @@ def task(ctx, config):
+     dist =3D 'precise'
+     format =3D 'tarball'
+     arch =3D 'x86_64'
+-    flavor =3D 'basic'
++    flavor =3D 'gcov'
+
+     # First element: controlled by user (or not there, by default):
+     # used to choose the right distribution, e.g. "oneiric".
+diff --git a/teuthology/task/kernel.py b/teuthology/task/kernel.py
+index 5c34433..54eaebb 100644
+--- a/teuthology/task/kernel.py
++++ b/teuthology/task/kernel.py
+@@ -183,7 +183,7 @@ def download_deb(ctx, config):
+                 package=3D'kernel',
+                 sha1=3Dsrc,
+                 format=3D'deb',
+-                flavor=3D'basic',
++                flavor=3D'gcov',
+                 arch=3D'x86_64',
+                 dist=3D'precise',
+                 )
+@@ -408,7 +408,7 @@ def task(ctx, config):
+                 branch=3Drole_config.get('branch'),
+                 tag=3Drole_config.get('tag'),
+                 sha1=3Drole_config.get('sha1'),
+-                flavor=3D'basic',
++                flavor=3D'gcov',
+                 format=3D'deb',
+                 dist=3D'precise',
+                 arch=3D'x86_64',
+
+
+--------------030208050309090502060309
+Content-Type: text/x-vcard; charset=utf-8;
+ name="loic.vcf"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: attachment;
+ filename="loic.vcf"
+
+begin:vcard
+fn:Loic Dachary
+n:Dachary;Loic
+org:Artisan Logiciel Libre
+adr:;;12 bd Magenta;Paris;;75010;France
+email;internet:loic@dachary.org
+title:Senior Developer
+tel;work:+33 4 84 25 08 05
+tel;home:+33 9 51 18 43 38
+tel;cell:+33 6 64 03 29 07
+note:Born 131414404 before EPOCH.
+url:http://dachary.org/
+version:2.1
+end:vcard
+
+
+--------------030208050309090502060309--
+
+--------------enigA68BA330705A6F85323A8FA8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlDvScQACgkQ8dLMyEl6F22T9ACgutUdihJ5aLpwXAAkIj3JSF2a
+LmAAoKYBYISksRX5VuMAUxMiEFq1V8k7
+=HUKd
+-----END PGP SIGNATURE-----
+
+--------------enigA68BA330705A6F85323A8FA8--
