@@ -1,327 +1,118 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: OSD crash, ceph version 0.56.1
-Date: Wed, 9 Jan 2013 16:38:19 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301091637220.8832@cobra.newdream.net>
-References: <CAEVWPAW+DmYW1dvTaOkjK7UZwzP2hZsjBC6kC1gV9fwyb3QJPQ@mail.gmail.com>
+Subject: Re: ceph caps (Ganesha + Ceph pnfs)
+Date: Wed, 9 Jan 2013 17:47:46 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301091740240.1788@cobra.newdream.net>
+References: <546032248.22.1357665108393.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44108 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44728 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932224Ab3AJAiU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 19:38:20 -0500
-In-Reply-To: <CAEVWPAW+DmYW1dvTaOkjK7UZwzP2hZsjBC6kC1gV9fwyb3QJPQ@mail.gmail.com>
+	with ESMTP id S932621Ab3AJBrq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jan 2013 20:47:46 -0500
+In-Reply-To: <546032248.22.1357665108393.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ian Pye <ianpye@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Matt W. Benjamin" <matt@linuxbox.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>
 
-On Wed, 9 Jan 2013, Ian Pye wrote:
-> Hi,
+On Tue, 8 Jan 2013, Matt W. Benjamin wrote:
+> Hi Sage,
 > 
-> Every time I try an bring up an OSD, it crashes and I get the
-> following: "error (121) Remote I/O error not handled on operation 20"
+> ----- "Sage Weil" <sage@inktank.com> wrote:
+> > Your prevoius question made it sound like the DS was interacting with
+> > 
+> > libcephfs and dealing with (some) MDS capabilities.  Is that right?
+> > 
+> > I wonder if a much simpler approach would be to make a different fh 
+> > format or type, and just cram the inode and ceph object/block number 
+> > in there.  Then the DS can just go direct to rados and avoid 
+> > interacting with the fs at all.  There are some additional semantics 
+> > surrounding the truncate metadata, but if we're lucky that can fit 
+> > inside the fh, and the DS servers could really just act like object 
+> > targets--no libcephfs or MDS interaction at all.
+> 
+> The current architecture gets the inode and block information to the DS 
+> reliably already without change to the Ceph fh--decoding steering 
+> information happens at the MDS, rather than the DS.  It is important to 
+> us to ensure that the total steering information be "finite and 
+> manageable," though, since we need it to travel with the pNFS layout to 
+> the NFS client.
 
-This error code (EREMOTEIO) is not used by Ceph.  What fs are you using?  
-Which kernel version?  Anything else unusual happen with your hardware 
-recently that might have wreaked havoc on your underlying fs?
+As a practical matter, that means your DS is actually doing an 
+open/lookupo on the fh?  My general concern is that that'll kill 
+performance...
+
+> It is definitely the goal for the DS to go direct to rados.  I think the 
+> outstanding issue may be limited to getting the MDS view of metadata 
+> up-to-date after an extending or truncating i/o completes (at least in 
+> the immediate term).
+
+...but now I see the issue with committing the layout on the DS vs the 
+MDS.
+
+> You may well be thinking, "sheesh, the client is doing out-of-band i/o, 
+> why doesn't it send the LAYOUTCOMMIT operation to the MDS to update the 
+> metadata."  The unsatisfactory answer is that currently (due to our use 
+> of the "files" layout type) clients can insist that the DS do the 
+> commit.  The Linux kernel client does so for writes below a size 
+> threshold.
+> 
+> For the longer term, an option is shaping up that would allow us to use 
+> the objects layout (RFC 5664), which always commits layouts. 
+
+Meaning, the client always commit the layout via the MDS after writing 
+data to the objects?
+
+> This 
+> discussion seems to be adding to the argument in support of switching, 
+> frankly.  My intuition is that it's preferable to let the DS jump layers 
+> to commit, though, even if we want to elide such commits in future (not 
+> just for expediency, but because the flexibility to do it seems like a 
+> win for the Ceph architecture).
+
+Maybe.. but if the DS's don't have open sessions with the MDS, they'd have 
+to open them.  Even if they did, they'd need to get caps on the inode 
+before the could flush new size/mtime metadata.  Unless we add a new 
+operation to behave similar to how we normally do with cap flushes: if 
+make the size at least X and mtime at least Y.
+
+For small files, that seems like a win.  For large files, you don't want 
+to send a request like that to the MDS for every object/block if you can 
+do it onces from the pnfs client -> mds.
+
+Am I understanding correctly that doing a single commit from the client 
+(with the final file size) is what the object layout allows?
 
 sage
 
-
-
-> The cluster is new and only has a little bit of data on it. Any ideas
-> what is going on? Does Remote I/O mean a network error? Full log
-> below:
 > 
->    -9> 2013-01-10 00:00:20.182237 7f2ddde8f910  0
-> filestore(/mnt/dist_j/ceph)  error (121) Remote I/O error not handled
-> on operation 20 (12.0.0, or op 0, counting from 0)
->     -8> 2013-01-10 00:00:20.182275 7f2ddde8f910  0
-> filestore(/mnt/dist_j/ceph) unexpected error code
->     -7> 2013-01-10 00:00:20.182285 7f2ddde8f910  0
-> filestore(/mnt/dist_j/ceph)  transaction dump:
-> { "ops": [
->         { "op_num": 0,
->           "op_name": "mkcoll",
->           "collection": "0.2c0_head"},
->         { "op_num": 1,
->           "op_name": "collection_setattr",
->           "collection": "0.2c0_head",
->           "name": "info",
->           "length": 5},
->         { "op_num": 2,
->           "op_name": "truncate",
->           "collection": "meta",
->           "oid": "a04c46e9\/pginfo_0.2c0\/0\/\/-1",
->           "offset": 0},
->         { "op_num": 3,
->           "op_name": "write",
->           "collection": "meta",
->           "oid": "a04c46e9\/pginfo_0.2c0\/0\/\/-1",
->           "length": 531,
->           "offset": 0,
->           "bufferlist length": 531},
->         { "op_num": 4,
->           "op_name": "remove",
->           "collection": "meta",
->           "oid": "1f9ede85\/pglog_0.2c0\/0\/\/-1"},
->         { "op_num": 5,
->           "op_name": "write",
->           "collection": "meta",
->           "oid": "1f9ede85\/pglog_0.2c0\/0\/\/-1",
->           "length": 0,
->           "offset": 0,
->           "bufferlist length": 0},
->         { "op_num": 6,
->           "op_name": "collection_setattr",
->           "collection": "0.2c0_head",
->           "name": "ondisklog",
->           "length": 34},
->         { "op_num": 7,
->           "op_name": "nop"}]}
->     -6> 2013-01-10 00:00:20.183085 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -5> 2013-01-10 00:00:20.183108 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5b15600 con 0x34629a0
->     -4> 2013-01-10 00:00:20.183772 7f2dd6680910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -3> 2013-01-10 00:00:20.183797 7f2dd6680910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5f75600 con 0x34629a0
->     -2> 2013-01-10 00:00:20.184315 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -1> 2013-01-10 00:00:20.184338 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5b15400 con 0x34629a0
->      0> 2013-01-10 00:00:20.184755 7f2ddde8f910 -1 os/FileStore.cc: In
-> function 'unsigned int
-> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)'
-> thread 7f2ddde8f910 time 2013-01-10 00:00:20.182422
-> os/FileStore.cc: 2681: FAILED assert(0 == "unexpected error")
+> > 
+> > Either way, to your first (original question), yes, we should expose a 
+> > way via libcephfs to take a reference on the capability that isn't 
+> > released until the layout is committed.  That should be pretty 
+> > straightforward to do, I think.
 > 
->  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->  1: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
-> long, int)+0x90a) [0x73e14a]
->  2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x4c)
-> [0x7455dc]
->  3: (FileStore::_do_op(FileStore::OpSequencer*)+0xab) [0x72428b]
->  4: (ThreadPool::worker(ThreadPool::WorkThread*)+0x82b) [0x894feb]
->  5: (ThreadPool::WorkThread::entry()+0x10) [0x8977d0]
->  6: /lib/libpthread.so.0 [0x7f2de6d087aa]
->  7: (clone()+0x6d) [0x7f2de518159d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
+> Excellent.
 > 
-> --- logging levels ---
->    0/ 5 none
->    0/ 1 lockdep
->    0/ 1 context
->    1/ 1 crush
->    1/ 5 mds
->    1/ 5 mds_balancer
->    1/ 5 mds_locker
->    1/ 5 mds_log
->    1/ 5 mds_log_expire
->    1/ 5 mds_migrator
->    0/ 1 buffer
->    0/ 1 timer
->    0/ 1 filer
->    0/ 1 striper
->    0/ 1 objecter
->    0/ 5 rados
->    0/ 5 rbd
->    0/ 5 journaler
->    0/ 5 objectcacher
->    0/ 5 client
->    0/ 5 osd
->    0/ 5 optracker
->    0/ 5 objclass
->    1/ 3 filestore
->    1/ 3 journal
->    0/ 5 ms
->    1/ 5 mon
->    0/10 monc
->    0/ 5 paxos
->    0/ 5 tp
->    1/ 5 auth
->    1/ 5 crypto
->    1/ 1 finisher
->    1/ 5 heartbeatmap
->    1/ 5 perfcounter
->    1/ 5 rgw
->    1/ 5 hadoop
->    1/ 5 javaclient
->    1/ 5 asok
->    1/ 1 throttle
->   -2/-2 (syslog threshold)
->   -1/-1 (stderr threshold)
->   max_recent    100000
->   max_new         1000
->   log_file /var/log/ceph/ceph-osd.9.log
-> --- end dump of recent events ---
-> 2013-01-10 00:00:20.227763 7f2ddde8f910 -1 *** Caught signal (Aborted) **
->  in thread 7f2ddde8f910
+> > 
+> > Hopefully my understanding is getting closer!
+> > 
+> > :) sage
+> > 
 > 
->  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->  1: /cf/ceph/bin/ceph-osd [0x7a5309]
->  2: /lib/libpthread.so.0 [0x7f2de6d10a60]
->  3: (gsignal()+0x35) [0x7f2de50e7f05]
->  4: (abort()+0x180) [0x7f2de50ead10]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f2de596ed45]
->  6: /usr/lib/libstdc++.so.6 [0x7f2de596d176]
->  7: /usr/lib/libstdc++.so.6 [0x7f2de596d1a3]
->  8: /usr/lib/libstdc++.so.6 [0x7f2de596d29e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x7c9) [0x898029]
->  10: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
-> long, int)+0x90a) [0x73e14a]
->  11: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x4c)
-> [0x7455dc]
->  12: (FileStore::_do_op(FileStore::OpSequencer*)+0xab) [0x72428b]
->  13: (ThreadPool::worker(ThreadPool::WorkThread*)+0x82b) [0x894feb]
->  14: (ThreadPool::WorkThread::entry()+0x10) [0x8977d0]
->  15: /lib/libpthread.so.0 [0x7f2de6d087aa]
->  16: (clone()+0x6d) [0x7f2de518159d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
+> Indeed, thanks
 > 
-> --- begin dump of recent events ---
->    -17> 2013-01-10 00:00:20.184913 7f2dd6680910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->    -16> 2013-01-10 00:00:20.184936 7f2dd6680910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5f75400 con 0x34629a0
->    -15> 2013-01-10 00:00:20.185444 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->    -14> 2013-01-10 00:00:20.185461 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5b15200 con 0x34629a0
->    -13> 2013-01-10 00:00:20.186028 7f2dd6680910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->    -12> 2013-01-10 00:00:20.186049 7f2dd6680910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5f75200 con 0x34629a0
->    -11> 2013-01-10 00:00:20.186585 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->    -10> 2013-01-10 00:00:20.186596 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5b15000 con 0x34629a0
->     -9> 2013-01-10 00:00:20.186956 7f2dd6680910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -8> 2013-01-10 00:00:20.186973 7f2dd6680910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x5f75000 con 0x34629a0
->     -7> 2013-01-10 00:00:20.187288 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -6> 2013-01-10 00:00:20.187298 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x387ce00 con 0x34629a0
->     -5> 2013-01-10 00:00:20.187671 7f2dd6680910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -4> 2013-01-10 00:00:20.187688 7f2dd6680910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x393ae00 con 0x34629a0
->     -3> 2013-01-10 00:00:20.187946 7f2dd5e7f910 10 monclient:
-> _send_mon_message to mon.a at 108.162.209.120:6789/0
->     -2> 2013-01-10 00:00:20.187957 7f2dd5e7f910  1 --
-> 108.162.209.120:6834/6359 --> 108.162.209.120:6789/0 -- osd_pgtemp(e22
-> {0.110=[8,9],0.147=[3,9],0.155=[1,9],0.171=[0,9],0.194=[3,9],0.1ad=[10,9],0.1c2=[1,9],0.1cb=[7,9],0.1df=[6,9],0.1e8=[7,9],0.1e9=[11,9],0.1f1=[7,9]}
-> v22) v1 -- ?+0 0x387cc00 con 0x34629a0
->     -1> 2013-01-10 00:00:20.200448 7f2dcfb4d910  1 --
-> 108.162.209.120:6836/6359 >> :/0 pipe(0x38616c0 sd=49 :6836 pgs=0 cs=0
-> l=0).accept sd=49 108.162.209.120:13844/0
->      0> 2013-01-10 00:00:20.227763 7f2ddde8f910 -1 *** Caught signal
-> (Aborted) **
->  in thread 7f2ddde8f910
+> -- 
+> Matt Benjamin
+> The Linux Box
+> 206 South Fifth Ave. Suite 150
+> Ann Arbor, MI  48104
 > 
->  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->  1: /cf/ceph/bin/ceph-osd [0x7a5309]
->  2: /lib/libpthread.so.0 [0x7f2de6d10a60]
->  3: (gsignal()+0x35) [0x7f2de50e7f05]
->  4: (abort()+0x180) [0x7f2de50ead10]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f2de596ed45]
->  6: /usr/lib/libstdc++.so.6 [0x7f2de596d176]
->  7: /usr/lib/libstdc++.so.6 [0x7f2de596d1a3]
->  8: /usr/lib/libstdc++.so.6 [0x7f2de596d29e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x7c9) [0x898029]
->  10: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
-> long, int)+0x90a) [0x73e14a]
->  11: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x4c)
-> [0x7455dc]
->  12: (FileStore::_do_op(FileStore::OpSequencer*)+0xab) [0x72428b]
->  13: (ThreadPool::worker(ThreadPool::WorkThread*)+0x82b) [0x894feb]
->  14: (ThreadPool::WorkThread::entry()+0x10) [0x8977d0]
->  15: /lib/libpthread.so.0 [0x7f2de6d087aa]
->  16: (clone()+0x6d) [0x7f2de518159d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
+> http://linuxbox.com
 > 
-> --- logging levels ---
->    0/ 5 none
->    0/ 1 lockdep
->    0/ 1 context
->    1/ 1 crush
->    1/ 5 mds
->    1/ 5 mds_balancer
->    1/ 5 mds_locker
->    1/ 5 mds_log
->    1/ 5 mds_log_expire
->    1/ 5 mds_migrator
->    0/ 1 buffer
->    0/ 1 timer
->    0/ 1 filer
->    0/ 1 striper
->    0/ 1 objecter
->    0/ 5 rados
->    0/ 5 rbd
->    0/ 5 journaler
->    0/ 5 objectcacher
->    0/ 5 client
->    0/ 5 osd
->    0/ 5 optracker
->    0/ 5 objclass
->    1/ 3 filestore
->    1/ 3 journal
->    0/ 5 ms
->    1/ 5 mon
->    0/10 monc
->    0/ 5 paxos
->    0/ 5 tp
->    1/ 5 auth
->    1/ 5 crypto
->    1/ 1 finisher
->    1/ 5 heartbeatmap
->    1/ 5 perfcounter
->    1/ 5 rgw
->    1/ 5 hadoop
->    1/ 5 javaclient
->    1/ 5 asok
->    1/ 1 throttle
->   -2/-2 (syslog threshold)
->   -1/-1 (stderr threshold)
->   max_recent    100000
->   max_new         1000
->   log_file /var/log/ceph/ceph-osd.9.log
-> --- end dump of recent events ---
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> tel. 734-761-4689
+> fax. 734-769-8938
+> cel. 734-216-5309
 > 
 > 
