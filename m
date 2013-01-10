@@ -1,34 +1,42 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: geo replication
-Date: Thu, 10 Jan 2013 13:52:24 -0800
-Message-ID: <CAPYLRzg19ZokeCVLEi9UdzLKTP4eOqJKfHBSPhi36fSK+d08eg@mail.gmail.com>
-References: <CAJH6TXjnUTdjwi-dW6kV-2WEf58-B=gx1ubnep30x_0Td5JHTw@mail.gmail.com>
-	<50EDE1D3.3080803@inktank.com>
-	<CAJH6TXjBdr3oEZOF4pV9Eo0pR_OcwQ8eGXFjDqwZpbZF+8uNVw@mail.gmail.com>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Thu, 10 Jan 2013 14:12:06 -0800
+Message-ID: <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
+	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
+	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:33235 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753456Ab3AJVwZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 16:52:25 -0500
-Received: by mail-qa0-f42.google.com with SMTP id hg5so2085531qab.8
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 13:52:24 -0800 (PST)
-In-Reply-To: <CAJH6TXjBdr3oEZOF4pV9Eo0pR_OcwQ8eGXFjDqwZpbZF+8uNVw@mail.gmail.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:52793 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751203Ab3AJWMH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 17:12:07 -0500
+Received: by mail-qa0-f53.google.com with SMTP id a19so1014044qad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 14:12:06 -0800 (PST)
+In-Reply-To: <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Mark Kampe <mark.kampe@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Marcin Szukala <szukala.marcin@gmail.com>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 9, 2013 at 1:33 PM, Gandalf Corvotempesta
-<gandalf.corvotempesta@gmail.com> wrote:
-> 2013/1/9 Mark Kampe <mark.kampe@inktank.com>:
->> Asynchronous RADOS replication is definitely on our list,
->> but more complex and farther out.
+On Thu, Jan 10, 2013 at 8:56 AM, Marcin Szukala
+<szukala.marcin@gmail.com> wrote:
+> Hi,
 >
-> Do you have any ETA?
-> 1 month?  6 months ? 1 year?
+> Scenario is correct but the last line. I can mount the image, but the
+> data that was written to the image before power failure is lost.
+>
+> Currently the ceph cluster is not healthy, but i dont think its
+> related because I had this issue before the cluster itsef had issues
+> (about that I will write in different post not to mix topics).
 
-No, but definitely closer to 1 year than either of the other options
-at this point.
+This sounds like one of two possibilities:
+1) You aren't actually committing data to RADOS very often and so when
+the power fails you lose several minutes of writes. How much data are
+you losing, how's it generated, and is whatever you're doing running
+any kind of fsync or sync? And what filesystem are you using?
+2) Your cluster is actually not accepting writes and so RBD never
+manages to do a write but you aren't doing much and so you don't
+notice. What's the output of ceph -s?
 -Greg
