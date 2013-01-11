@@ -1,75 +1,89 @@
-From: Marcin Szukala <szukala.marcin@gmail.com>
-Subject: Re: Ceph version 0.56.1, data loss on power failure
-Date: Fri, 11 Jan 2013 12:07:44 +0100
-Message-ID: <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
-References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
-	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
-	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
-	<CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+From: James Page <james.page@canonical.com>
+Subject: Re: v0.48.3 argonaut update released
+Date: Fri, 11 Jan 2013 11:36:36 +0000
+Message-ID: <50EFF944.3070400@canonical.com>
+References: <alpine.DEB.2.00.1301081927450.32282@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:61385 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754972Ab3AKLHp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 06:07:45 -0500
-Received: by mail-lb0-f179.google.com with SMTP id gm13so1224349lbb.38
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Jan 2013 03:07:44 -0800 (PST)
-In-Reply-To: <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:41263 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753169Ab3AKLgj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 06:36:39 -0500
+In-Reply-To: <alpine.DEB.2.00.1301081927450.32282@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-2013/1/10 Gregory Farnum <greg@inktank.com>:
-> On Thu, Jan 10, 2013 at 8:56 AM, Marcin Szukala
-> <szukala.marcin@gmail.com> wrote:
->> Hi,
->>
->> Scenario is correct but the last line. I can mount the image, but the
->> data that was written to the image before power failure is lost.
->>
->> Currently the ceph cluster is not healthy, but i dont think its
->> related because I had this issue before the cluster itsef had issues
->> (about that I will write in different post not to mix topics).
->
-> This sounds like one of two possibilities:
-> 1) You aren't actually committing data to RADOS very often and so when
-> the power fails you lose several minutes of writes. How much data are
-> you losing, how's it generated, and is whatever you're doing running
-> any kind of fsync or sync? And what filesystem are you using?
-> 2) Your cluster is actually not accepting writes and so RBD never
-> manages to do a write but you aren't doing much and so you don't
-> notice. What's the output of ceph -s?
-> -Greg
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Hi,
+Hi Sage
 
-Today I have created new ceph cluster from scratch.
-root@ceph-1:~# ceph -s
-   health HEALTH_OK
-   monmap e1: 3 mons at
-{a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
-election epoch 4, quorum 0,1,2 a,b,d
-   osdmap e65: 56 osds: 56 up, 56 in
-    pgmap v3892: 13744 pgs: 13744 active+clean; 73060 MB data, 147 GB
-used, 51983 GB / 52131 GB avail
-   mdsmap e1: 0/0/1 up
+On 09/01/13 03:30, Sage Weil wrote:
+> After several months, we have an important update for the argonaut
+> v0.48.x series. This release contains a critical fix that can
+> prevent data loss or corruption in a power loss or kernel panic
+> situation. There are also several fixes for the OSDs and for the
+> radosgw. We recommend all v0.48.x users upgrade.
+[...]
 
-The issue persisst.
-I`am losing all of data on the image. On the mounted image I have 5
-logical volumes.
+As argonaut is the version shipped in Ubuntu 12.10 and for the Cloud
+Archive for precise I'm going to apply for Micro Release Exception
+(see [0]) for ceph so that we can push minor point release updates in
+a little easier via the Ubuntu SRU process.
 
-root@compute-9:~# mount
-(snip)
-/dev/mapper/compute--9-nova on /var/lib/nova type xfs (rw)
-/dev/mapper/compute--9-tmp on /tmp type xfs (rw)
-/dev/mapper/compute--9-libvirt on /etc/libvirt type xfs (rw)
-/dev/mapper/compute--9-log on /var/log type xfs (rw)
-/dev/mapper/compute--9-openvswitch on /var/lib/openvswitch type xfs (rw)
+I need to document how the following requirements are fulfilled:
 
-So I have directories with little to none data writes and with a lot
-of writes (logs). No fsync or sync. Filesystem is xfs.
+1) upstream supports micro-version updates to stable releases
 
-Regards,
-Marcin
+This should be OK _ but more detail on how bugs are selected for the
+point releases would be helpful.
+
+2) upstream has a sufficiently high level of regression testing for
+their stable releases
+
+Details of what regression testing of stable release is done by the
+ceph project would be great.
+
+3) regression tests are always run on the update before it is released
+(e.g. by being enabled in the package's build)
+
+We don't run unit tests during package build; but we do regular smoke
+testing of ceph in the Ubuntu Openstack CI lab; I'm going to extend
+this so we can do regression testing of Ceph for SRU's going forwards
+- - this is how we validate Openstack SRU's so should be acceptable.
+
+Help documenting 1 & 2 would be much appreciated!
+
+Cheers
+
+James
+
+
+[0] https://wiki.ubuntu.com/StableReleaseUpdates/MicroReleaseExceptions
+- -- 
+James Page
+Technical Lead
+Ubuntu Server Team
+james.page@canonical.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iQIcBAEBCAAGBQJQ7/lEAAoJEL/srsug59jDmUcP/Ayz4WSaqb3YArKUqLNil11Z
+d1o9bVrEajXhhde5fKjAHTHosxl0sQ3nOWyoJU3zLNkK1BoBaXnxz0/7JyKHDPny
+cFmSqqHDmiIuAp+Ka0fwWuk2XQ5RxFMHnpS/+9E5SOtciafRwuMruTK/825s0oFP
+si053/0cxyKnemw0SuwQ+9ejcK/+6IW80O4C2V2n8NV9ZuBRflnHpX4n2XJIfPkW
+D9iUzfCxRBdOrMCuJ2hG8MGBR/CaeQRsLoJb60ztYE+V+awkOgIWGf0jAXk+/YOn
+d62+Tw86rqpFEIwjWZbktfbH9+PM1PZF7RteC8aKLzbcqJizLwHOKqlaqZpOnoyt
+U2SBgI7OyOYmFB4dtwxo+xM8LQY5RvjAPUyXRcaU2LQ2O0Vkfr07mkVuxRGrEYtA
+XGsne6VUnBAf4GNMiSoRYmpKdi+rHBNjvepaO0/1U5a1FEqSv9koAQwRjVikwV0W
+SoDXjP3RZ8/EH/fQEdKTsnfZpe1A80w5wfXrzwKW3RX54BG0s5/XdYYBqilOGnZy
+F6rt9Z1cWUg22CMPwHG7tfSToAAuV8wqrPB6u21w1zOM+2e4XJqV4ib7NE3fDywZ
+yvdKu2RsiIvp2Cv8G/MDy2qsRX2NIhUMAnY2hVGx0t7JZMsown1ioMC/BTNWnM0C
+R2wSULYnSVqdYtgJbEZb
+=6r9q
+-----END PGP SIGNATURE-----
