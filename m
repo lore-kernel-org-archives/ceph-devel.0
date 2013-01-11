@@ -1,89 +1,65 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Yasuhiro Ohara <yasu@soe.ucsc.edu>
 Subject: Re: Question about configuration
-Date: Thu, 10 Jan 2013 16:55:00 -0800
-Message-ID: <CAPYLRzhrPaRpPwJ=m5G51-KpY_jev2fn_gXaXEC6OdcAEDXfcA@mail.gmail.com>
-References: <20130110.163912.203671451.yasu@soe.ucsc.edu>
-	<CAPYLRzhZr81ko3QgC1oGXs_12-C6z-EVmuf3k47Ej3j8P_T0AA@mail.gmail.com>
+Date: Thu, 10 Jan 2013 16:56:48 -0800 (PST)
+Message-ID: <20130110.165648.150027913.yasu@soe.ucsc.edu>
+References: <CAPYLRzhZr81ko3QgC1oGXs_12-C6z-EVmuf3k47Ej3j8P_T0AA@mail.gmail.com>
 	<20130110.165145.102237146.yasu@soe.ucsc.edu>
+	<CAPYLRzhrPaRpPwJ=m5G51-KpY_jev2fn_gXaXEC6OdcAEDXfcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:60322 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753156Ab3AKAzB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 19:55:01 -0500
-Received: by mail-qc0-f180.google.com with SMTP id v28so782456qcm.25
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 16:55:01 -0800 (PST)
-In-Reply-To: <20130110.165145.102237146.yasu@soe.ucsc.edu>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:35479 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752193Ab3AKA4v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 19:56:51 -0500
+Received: by mail-pb0-f48.google.com with SMTP id rq13so626005pbb.7
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 16:56:51 -0800 (PST)
+In-Reply-To: <CAPYLRzhrPaRpPwJ=m5G51-KpY_jev2fn_gXaXEC6OdcAEDXfcA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yasuhiro Ohara <yasu@soe.ucsc.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: greg@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jan 10, 2013 at 4:51 PM, Yasuhiro Ohara <yasu@soe.ucsc.edu> wro=
-te:
->
-> Hi, Greg,
->
-> When I went through the Ceph document, I could find the description
-> about /etc/init.d only, so it is still the easiest for me.
-> Is there documentation on other (upstart?) system or do I need to
-> learn those system ? Or just letting me know how to install the
-> resource file (for Ceph in upstart) might work for me.
-
-There isn't really any documentation right now and if you started off
-with sysvinit it's probably easiest to continue that way. It will work
-with that system too; it's just that if you run "sudo service ceph -a
-start" then it's going to go and turn on all the daemons listed in its
-local ceph.conf.
--Greg
-
->
-> Thanks.
->
-> regards,
-> Yasu
->
-> From: Gregory Farnum <greg@inktank.com>
-> Subject: Re: Question about configuration
-> Date: Thu, 10 Jan 2013 16:43:59 -0800
-> Message-ID: <CAPYLRzhZr81ko3QgC1oGXs_12-C6z-EVmuf3k47Ej3j8P_T0AA@mail=
-=2Egmail.com>
->
->> On Thu, Jan 10, 2013 at 4:39 PM, Yasuhiro Ohara <yasu@soe.ucsc.edu> =
-wrote:
->>>
->>> Hi,
->>>
->>> What will happen when constructing a cluster of 10 host,
->>> but the hosts are gradually removed from the cluster
->>> one by one (in each step waiting Ceph status to become healthy),
->>> and reaches eventually to, say, 3 hosts ?
->>>
->>> In other words, is there any problem with having 10 osd configurati=
-on
->>> in the ceph.conf, but actually only 3 is up (the 7 are down and out=
-) ?
->>
->> If you're not using the /etc/init.d ceph script to start up everythi=
-ng
->> with the -a option, this will work just fine.
->>
->>>
->>> I assume that if the size of the replication is 3, we can turn off
->>> 2 osds at each time, and Ceph can recover itself to the healthy sta=
-te.
->>> Is it the case ?
->>
->> Yeah, that should work fine. You might consider just marking OSDs
->> "out" two at a time and not actually killing them until the cluster
->> has become quiescent again, though =97 that way they can participate=
- as
->> a source for recovery.
->> -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQpHb3QgaXQuIFRoYW5rcyAhDQoNCnJlZ2FyZHMsDQpZYXN1DQoNCkZyb206IEdyZWdvcnkgRmFy
+bnVtIDxncmVnQGlua3RhbmsuY29tPg0KU3ViamVjdDogUmU6IFF1ZXN0aW9uIGFib3V0IGNvbmZp
+Z3VyYXRpb24NCkRhdGU6IFRodSwgMTAgSmFuIDIwMTMgMTY6NTU6MDAgLTA4MDANCk1lc3NhZ2Ut
+SUQ6IDxDQVBZTFJ6aHJQYVJwUHdKPW01RzUxLUtwWV9qZXYyZm5fZ1hhWEVDNk9kY0FFRFhmY0FA
+bWFpbC5nbWFpbC5jb20+DQoNCj4gT24gVGh1LCBKYW4gMTAsIDIwMTMgYXQgNDo1MSBQTSwgWWFz
+dWhpcm8gT2hhcmEgPHlhc3VAc29lLnVjc2MuZWR1PiB3cm90ZToNCj4+DQo+PiBIaSwgR3JlZywN
+Cj4+DQo+PiBXaGVuIEkgd2VudCB0aHJvdWdoIHRoZSBDZXBoIGRvY3VtZW50LCBJIGNvdWxkIGZp
+bmQgdGhlIGRlc2NyaXB0aW9uDQo+PiBhYm91dCAvZXRjL2luaXQuZCBvbmx5LCBzbyBpdCBpcyBz
+dGlsbCB0aGUgZWFzaWVzdCBmb3IgbWUuDQo+PiBJcyB0aGVyZSBkb2N1bWVudGF0aW9uIG9uIG90
+aGVyICh1cHN0YXJ0Pykgc3lzdGVtIG9yIGRvIEkgbmVlZCB0bw0KPj4gbGVhcm4gdGhvc2Ugc3lz
+dGVtID8gT3IganVzdCBsZXR0aW5nIG1lIGtub3cgaG93IHRvIGluc3RhbGwgdGhlDQo+PiByZXNv
+dXJjZSBmaWxlIChmb3IgQ2VwaCBpbiB1cHN0YXJ0KSBtaWdodCB3b3JrIGZvciBtZS4NCj4gDQo+
+IFRoZXJlIGlzbid0IHJlYWxseSBhbnkgZG9jdW1lbnRhdGlvbiByaWdodCBub3cgYW5kIGlmIHlv
+dSBzdGFydGVkIG9mZg0KPiB3aXRoIHN5c3Zpbml0IGl0J3MgcHJvYmFibHkgZWFzaWVzdCB0byBj
+b250aW51ZSB0aGF0IHdheS4gSXQgd2lsbCB3b3JrDQo+IHdpdGggdGhhdCBzeXN0ZW0gdG9vOyBp
+dCdzIGp1c3QgdGhhdCBpZiB5b3UgcnVuICJzdWRvIHNlcnZpY2UgY2VwaCAtYQ0KPiBzdGFydCIg
+dGhlbiBpdCdzIGdvaW5nIHRvIGdvIGFuZCB0dXJuIG9uIGFsbCB0aGUgZGFlbW9ucyBsaXN0ZWQg
+aW4gaXRzDQo+IGxvY2FsIGNlcGguY29uZi4NCj4gLUdyZWcNCj4gDQo+Pg0KPj4gVGhhbmtzLg0K
+Pj4NCj4+IHJlZ2FyZHMsDQo+PiBZYXN1DQo+Pg0KPj4gRnJvbTogR3JlZ29yeSBGYXJudW0gPGdy
+ZWdAaW5rdGFuay5jb20+DQo+PiBTdWJqZWN0OiBSZTogUXVlc3Rpb24gYWJvdXQgY29uZmlndXJh
+dGlvbg0KPj4gRGF0ZTogVGh1LCAxMCBKYW4gMjAxMyAxNjo0Mzo1OSAtMDgwMA0KPj4gTWVzc2Fn
+ZS1JRDogPENBUFlMUnpoWnI4MWtvM1FnQzFvR1hzXzEyLUM2ei1FVm11ZjNrNDdFajNqOFBfVDBB
+QUBtYWlsLmdtYWlsLmNvbT4NCj4+DQo+Pj4gT24gVGh1LCBKYW4gMTAsIDIwMTMgYXQgNDozOSBQ
+TSwgWWFzdWhpcm8gT2hhcmEgPHlhc3VAc29lLnVjc2MuZWR1PiB3cm90ZToNCj4+Pj4NCj4+Pj4g
+SGksDQo+Pj4+DQo+Pj4+IFdoYXQgd2lsbCBoYXBwZW4gd2hlbiBjb25zdHJ1Y3RpbmcgYSBjbHVz
+dGVyIG9mIDEwIGhvc3QsDQo+Pj4+IGJ1dCB0aGUgaG9zdHMgYXJlIGdyYWR1YWxseSByZW1vdmVk
+IGZyb20gdGhlIGNsdXN0ZXINCj4+Pj4gb25lIGJ5IG9uZSAoaW4gZWFjaCBzdGVwIHdhaXRpbmcg
+Q2VwaCBzdGF0dXMgdG8gYmVjb21lIGhlYWx0aHkpLA0KPj4+PiBhbmQgcmVhY2hlcyBldmVudHVh
+bGx5IHRvLCBzYXksIDMgaG9zdHMgPw0KPj4+Pg0KPj4+PiBJbiBvdGhlciB3b3JkcywgaXMgdGhl
+cmUgYW55IHByb2JsZW0gd2l0aCBoYXZpbmcgMTAgb3NkIGNvbmZpZ3VyYXRpb24NCj4+Pj4gaW4g
+dGhlIGNlcGguY29uZiwgYnV0IGFjdHVhbGx5IG9ubHkgMyBpcyB1cCAodGhlIDcgYXJlIGRvd24g
+YW5kIG91dCkgPw0KPj4+DQo+Pj4gSWYgeW91J3JlIG5vdCB1c2luZyB0aGUgL2V0Yy9pbml0LmQg
+Y2VwaCBzY3JpcHQgdG8gc3RhcnQgdXAgZXZlcnl0aGluZw0KPj4+IHdpdGggdGhlIC1hIG9wdGlv
+biwgdGhpcyB3aWxsIHdvcmsganVzdCBmaW5lLg0KPj4+DQo+Pj4+DQo+Pj4+IEkgYXNzdW1lIHRo
+YXQgaWYgdGhlIHNpemUgb2YgdGhlIHJlcGxpY2F0aW9uIGlzIDMsIHdlIGNhbiB0dXJuIG9mZg0K
+Pj4+PiAyIG9zZHMgYXQgZWFjaCB0aW1lLCBhbmQgQ2VwaCBjYW4gcmVjb3ZlciBpdHNlbGYgdG8g
+dGhlIGhlYWx0aHkgc3RhdGUuDQo+Pj4+IElzIGl0IHRoZSBjYXNlID8NCj4+Pg0KPj4+IFllYWgs
+IHRoYXQgc2hvdWxkIHdvcmsgZmluZS4gWW91IG1pZ2h0IGNvbnNpZGVyIGp1c3QgbWFya2luZyBP
+U0RzDQo+Pj4gIm91dCIgdHdvIGF0IGEgdGltZSBhbmQgbm90IGFjdHVhbGx5IGtpbGxpbmcgdGhl
+bSB1bnRpbCB0aGUgY2x1c3Rlcg0KPj4+IGhhcyBiZWNvbWUgcXVpZXNjZW50IGFnYWluLCB0aG91
+Z2gg4oCUIHRoYXQgd2F5IHRoZXkgY2FuIHBhcnRpY2lwYXRlIGFzDQo+Pj4gYSBzb3VyY2UgZm9y
+IHJlY292ZXJ5Lg0KPj4+IC1HcmVnDQo=
