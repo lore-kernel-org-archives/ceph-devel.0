@@ -1,65 +1,20 @@
-From: Yasuhiro Ohara <yasu@soe.ucsc.edu>
-Subject: Re: Question about configuration
-Date: Thu, 10 Jan 2013 16:56:48 -0800 (PST)
-Message-ID: <20130110.165648.150027913.yasu@soe.ucsc.edu>
-References: <CAPYLRzhZr81ko3QgC1oGXs_12-C6z-EVmuf3k47Ej3j8P_T0AA@mail.gmail.com>
-	<20130110.165145.102237146.yasu@soe.ucsc.edu>
-	<CAPYLRzhrPaRpPwJ=m5G51-KpY_jev2fn_gXaXEC6OdcAEDXfcA@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: REVIEW REQUEST: wip-rbd-helpercmds
+Date: Thu, 10 Jan 2013 19:03:12 -0800
+Message-ID: <50EF80F0.7070707@inktank.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f48.google.com ([209.85.160.48]:35479 "EHLO
-	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752193Ab3AKA4v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 19:56:51 -0500
-Received: by mail-pb0-f48.google.com with SMTP id rq13so626005pbb.7
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 16:56:51 -0800 (PST)
-In-Reply-To: <CAPYLRzhrPaRpPwJ=m5G51-KpY_jev2fn_gXaXEC6OdcAEDXfcA@mail.gmail.com>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:48865 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751800Ab3AKDDP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jan 2013 22:03:15 -0500
+Received: by mail-pb0-f45.google.com with SMTP id mc8so675794pbc.4
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 19:03:15 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: greg@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-DQpHb3QgaXQuIFRoYW5rcyAhDQoNCnJlZ2FyZHMsDQpZYXN1DQoNCkZyb206IEdyZWdvcnkgRmFy
-bnVtIDxncmVnQGlua3RhbmsuY29tPg0KU3ViamVjdDogUmU6IFF1ZXN0aW9uIGFib3V0IGNvbmZp
-Z3VyYXRpb24NCkRhdGU6IFRodSwgMTAgSmFuIDIwMTMgMTY6NTU6MDAgLTA4MDANCk1lc3NhZ2Ut
-SUQ6IDxDQVBZTFJ6aHJQYVJwUHdKPW01RzUxLUtwWV9qZXYyZm5fZ1hhWEVDNk9kY0FFRFhmY0FA
-bWFpbC5nbWFpbC5jb20+DQoNCj4gT24gVGh1LCBKYW4gMTAsIDIwMTMgYXQgNDo1MSBQTSwgWWFz
-dWhpcm8gT2hhcmEgPHlhc3VAc29lLnVjc2MuZWR1PiB3cm90ZToNCj4+DQo+PiBIaSwgR3JlZywN
-Cj4+DQo+PiBXaGVuIEkgd2VudCB0aHJvdWdoIHRoZSBDZXBoIGRvY3VtZW50LCBJIGNvdWxkIGZp
-bmQgdGhlIGRlc2NyaXB0aW9uDQo+PiBhYm91dCAvZXRjL2luaXQuZCBvbmx5LCBzbyBpdCBpcyBz
-dGlsbCB0aGUgZWFzaWVzdCBmb3IgbWUuDQo+PiBJcyB0aGVyZSBkb2N1bWVudGF0aW9uIG9uIG90
-aGVyICh1cHN0YXJ0Pykgc3lzdGVtIG9yIGRvIEkgbmVlZCB0bw0KPj4gbGVhcm4gdGhvc2Ugc3lz
-dGVtID8gT3IganVzdCBsZXR0aW5nIG1lIGtub3cgaG93IHRvIGluc3RhbGwgdGhlDQo+PiByZXNv
-dXJjZSBmaWxlIChmb3IgQ2VwaCBpbiB1cHN0YXJ0KSBtaWdodCB3b3JrIGZvciBtZS4NCj4gDQo+
-IFRoZXJlIGlzbid0IHJlYWxseSBhbnkgZG9jdW1lbnRhdGlvbiByaWdodCBub3cgYW5kIGlmIHlv
-dSBzdGFydGVkIG9mZg0KPiB3aXRoIHN5c3Zpbml0IGl0J3MgcHJvYmFibHkgZWFzaWVzdCB0byBj
-b250aW51ZSB0aGF0IHdheS4gSXQgd2lsbCB3b3JrDQo+IHdpdGggdGhhdCBzeXN0ZW0gdG9vOyBp
-dCdzIGp1c3QgdGhhdCBpZiB5b3UgcnVuICJzdWRvIHNlcnZpY2UgY2VwaCAtYQ0KPiBzdGFydCIg
-dGhlbiBpdCdzIGdvaW5nIHRvIGdvIGFuZCB0dXJuIG9uIGFsbCB0aGUgZGFlbW9ucyBsaXN0ZWQg
-aW4gaXRzDQo+IGxvY2FsIGNlcGguY29uZi4NCj4gLUdyZWcNCj4gDQo+Pg0KPj4gVGhhbmtzLg0K
-Pj4NCj4+IHJlZ2FyZHMsDQo+PiBZYXN1DQo+Pg0KPj4gRnJvbTogR3JlZ29yeSBGYXJudW0gPGdy
-ZWdAaW5rdGFuay5jb20+DQo+PiBTdWJqZWN0OiBSZTogUXVlc3Rpb24gYWJvdXQgY29uZmlndXJh
-dGlvbg0KPj4gRGF0ZTogVGh1LCAxMCBKYW4gMjAxMyAxNjo0Mzo1OSAtMDgwMA0KPj4gTWVzc2Fn
-ZS1JRDogPENBUFlMUnpoWnI4MWtvM1FnQzFvR1hzXzEyLUM2ei1FVm11ZjNrNDdFajNqOFBfVDBB
-QUBtYWlsLmdtYWlsLmNvbT4NCj4+DQo+Pj4gT24gVGh1LCBKYW4gMTAsIDIwMTMgYXQgNDozOSBQ
-TSwgWWFzdWhpcm8gT2hhcmEgPHlhc3VAc29lLnVjc2MuZWR1PiB3cm90ZToNCj4+Pj4NCj4+Pj4g
-SGksDQo+Pj4+DQo+Pj4+IFdoYXQgd2lsbCBoYXBwZW4gd2hlbiBjb25zdHJ1Y3RpbmcgYSBjbHVz
-dGVyIG9mIDEwIGhvc3QsDQo+Pj4+IGJ1dCB0aGUgaG9zdHMgYXJlIGdyYWR1YWxseSByZW1vdmVk
-IGZyb20gdGhlIGNsdXN0ZXINCj4+Pj4gb25lIGJ5IG9uZSAoaW4gZWFjaCBzdGVwIHdhaXRpbmcg
-Q2VwaCBzdGF0dXMgdG8gYmVjb21lIGhlYWx0aHkpLA0KPj4+PiBhbmQgcmVhY2hlcyBldmVudHVh
-bGx5IHRvLCBzYXksIDMgaG9zdHMgPw0KPj4+Pg0KPj4+PiBJbiBvdGhlciB3b3JkcywgaXMgdGhl
-cmUgYW55IHByb2JsZW0gd2l0aCBoYXZpbmcgMTAgb3NkIGNvbmZpZ3VyYXRpb24NCj4+Pj4gaW4g
-dGhlIGNlcGguY29uZiwgYnV0IGFjdHVhbGx5IG9ubHkgMyBpcyB1cCAodGhlIDcgYXJlIGRvd24g
-YW5kIG91dCkgPw0KPj4+DQo+Pj4gSWYgeW91J3JlIG5vdCB1c2luZyB0aGUgL2V0Yy9pbml0LmQg
-Y2VwaCBzY3JpcHQgdG8gc3RhcnQgdXAgZXZlcnl0aGluZw0KPj4+IHdpdGggdGhlIC1hIG9wdGlv
-biwgdGhpcyB3aWxsIHdvcmsganVzdCBmaW5lLg0KPj4+DQo+Pj4+DQo+Pj4+IEkgYXNzdW1lIHRo
-YXQgaWYgdGhlIHNpemUgb2YgdGhlIHJlcGxpY2F0aW9uIGlzIDMsIHdlIGNhbiB0dXJuIG9mZg0K
-Pj4+PiAyIG9zZHMgYXQgZWFjaCB0aW1lLCBhbmQgQ2VwaCBjYW4gcmVjb3ZlciBpdHNlbGYgdG8g
-dGhlIGhlYWx0aHkgc3RhdGUuDQo+Pj4+IElzIGl0IHRoZSBjYXNlID8NCj4+Pg0KPj4+IFllYWgs
-IHRoYXQgc2hvdWxkIHdvcmsgZmluZS4gWW91IG1pZ2h0IGNvbnNpZGVyIGp1c3QgbWFya2luZyBP
-U0RzDQo+Pj4gIm91dCIgdHdvIGF0IGEgdGltZSBhbmQgbm90IGFjdHVhbGx5IGtpbGxpbmcgdGhl
-bSB1bnRpbCB0aGUgY2x1c3Rlcg0KPj4+IGhhcyBiZWNvbWUgcXVpZXNjZW50IGFnYWluLCB0aG91
-Z2gg4oCUIHRoYXQgd2F5IHRoZXkgY2FuIHBhcnRpY2lwYXRlIGFzDQo+Pj4gYSBzb3VyY2UgZm9y
-IHJlY292ZXJ5Lg0KPj4+IC1HcmVnDQo=
+A couple of very simple commits to rbd to help with krbd map/unmap requests.
+
