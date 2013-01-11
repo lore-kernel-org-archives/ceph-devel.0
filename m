@@ -1,52 +1,83 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSD memory leaks?
-Date: Fri, 11 Jan 2013 10:13:22 -0800
-Message-ID: <CAPYLRzjx24oOEpjcvKa2ELJYb6QAxTegVatysMAobbP-h1v8Xg@mail.gmail.com>
-References: <CAOLwVUk-pf22gXFD+8A8FGgtE4mWfz3r8minKQ6vP6q_ftYRdQ@mail.gmail.com>
-	<8366806.170.1357747859058.JavaMail.dspano@it1>
-	<CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com>
-	<CAF6-1L4WOGHNU=qLOuOWktsDirc-nO2ZM0+nQL9vxF2KKuWVqg@mail.gmail.com>
-	<CAPYLRziCObXZaOcqA8CDfheJTYce1w3m5754+0Dz-ToYJYKuDg@mail.gmail.com>
-	<CAOLwVUkA5G+RyzembvZnv2gA5h-E+kNR_me_Hgoisjk0dmSWSg@mail.gmail.com>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Fri, 11 Jan 2013 11:34:31 -0800
+Message-ID: <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
+	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
+	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
+	<CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+	<CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:58479 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755004Ab3AKSNX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 13:13:23 -0500
-Received: by mail-qc0-f182.google.com with SMTP id k19so1273841qcs.41
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Jan 2013 10:13:23 -0800 (PST)
-In-Reply-To: <CAOLwVUkA5G+RyzembvZnv2gA5h-E+kNR_me_Hgoisjk0dmSWSg@mail.gmail.com>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:45223 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753970Ab3AKTed (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 14:34:33 -0500
+Received: by mail-qa0-f47.google.com with SMTP id a19so97695qad.20
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Jan 2013 11:34:32 -0800 (PST)
+In-Reply-To: <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, Dave Spano <dspano@optogenics.com>, ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+To: Marcin Szukala <szukala.marcin@gmail.com>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 11, 2013 at 6:57 AM, S=E9bastien Han <han.sebastien@gmail.c=
-om> wrote:
->> Is osd.1 using the heap profiler as well? Keep in mind that active u=
-se
->> of the memory profiler will itself cause memory usage to increase =97
->> this sounds a bit like that to me since it's staying stable at a lar=
-ge
->> but finite portion of total memory.
+On Fri, Jan 11, 2013 at 3:07 AM, Marcin Szukala
+<szukala.marcin@gmail.com> wrote:
+> 2013/1/10 Gregory Farnum <greg@inktank.com>:
+>> On Thu, Jan 10, 2013 at 8:56 AM, Marcin Szukala
+>> <szukala.marcin@gmail.com> wrote:
+>>> Hi,
+>>>
+>>> Scenario is correct but the last line. I can mount the image, but the
+>>> data that was written to the image before power failure is lost.
+>>>
+>>> Currently the ceph cluster is not healthy, but i dont think its
+>>> related because I had this issue before the cluster itsef had issues
+>>> (about that I will write in different post not to mix topics).
+>>
+>> This sounds like one of two possibilities:
+>> 1) You aren't actually committing data to RADOS very often and so when
+>> the power fails you lose several minutes of writes. How much data are
+>> you losing, how's it generated, and is whatever you're doing running
+>> any kind of fsync or sync? And what filesystem are you using?
+>> 2) Your cluster is actually not accepting writes and so RBD never
+>> manages to do a write but you aren't doing much and so you don't
+>> notice. What's the output of ceph -s?
+>> -Greg
 >
-> Well, the memory consumption was already high before the profiler was
-> started. So yes with the memory profiler enable an OSD might consume
-> more memory but this doesn't cause the memory leaks.
+> Hi,
+>
+> Today I have created new ceph cluster from scratch.
+> root@ceph-1:~# ceph -s
+>    health HEALTH_OK
+>    monmap e1: 3 mons at
+> {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
+> election epoch 4, quorum 0,1,2 a,b,d
+>    osdmap e65: 56 osds: 56 up, 56 in
+>     pgmap v3892: 13744 pgs: 13744 active+clean; 73060 MB data, 147 GB
+> used, 51983 GB / 52131 GB avail
+>    mdsmap e1: 0/0/1 up
+>
+> The issue persisst.
+> I`am losing all of data on the image.
 
-My concern is that maybe you saw a leak but when you restarted with
-the memory profiling you lost whatever conditions caused it.
-
-> Any ideas? Nothing to say about my scrumbing theory?
-I like it, but Sam indicates that without some heap dumps which
-capture the actual leak then scrub is too large to effectively code
-review for leaks. :(
+So you mean you mount the image, format it with 5 XFS filesystems as
+below, run it for a while, and then the power on the system fails.
+Then you turn the system back on, attach the image, and it has no
+filesystems on it at all? Or the filesystems remain and can be mounted
+but they have no data?
 -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+> On the mounted image I have 5 logical volumes.
+>
+> root@compute-9:~# mount
+> (snip)
+> /dev/mapper/compute--9-nova on /var/lib/nova type xfs (rw)
+> /dev/mapper/compute--9-tmp on /tmp type xfs (rw)
+> /dev/mapper/compute--9-libvirt on /etc/libvirt type xfs (rw)
+> /dev/mapper/compute--9-log on /var/log type xfs (rw)
+> /dev/mapper/compute--9-openvswitch on /var/lib/openvswitch type xfs (rw)
+>
+> So I have directories with little to none data writes and with a lot
+> of writes (logs). No fsync or sync. Filesystem is xfs.
