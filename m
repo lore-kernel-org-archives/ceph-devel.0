@@ -1,25 +1,75 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: REVIEW REQUEST: wip-rbd-helpercmds
-Date: Thu, 10 Jan 2013 22:55:51 -0800
-Message-ID: <50EFB777.2020305@inktank.com>
-References: <50EF80F0.7070707@inktank.com>
+From: Marcin Szukala <szukala.marcin@gmail.com>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Fri, 11 Jan 2013 12:07:44 +0100
+Message-ID: <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
+	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
+	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
+	<CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f53.google.com ([209.85.210.53]:38833 "EHLO
-	mail-da0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753524Ab3AKGz5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 01:55:57 -0500
-Received: by mail-da0-f53.google.com with SMTP id x6so631358dac.40
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jan 2013 22:55:56 -0800 (PST)
-In-Reply-To: <50EF80F0.7070707@inktank.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:61385 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754972Ab3AKLHp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jan 2013 06:07:45 -0500
+Received: by mail-lb0-f179.google.com with SMTP id gm13so1224349lbb.38
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Jan 2013 03:07:44 -0800 (PST)
+In-Reply-To: <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 1/10/2013 7:03 PM, Dan Mick wrote:
-> A couple of very simple commits to rbd to help with krbd map/unmap 
-> requests.
+2013/1/10 Gregory Farnum <greg@inktank.com>:
+> On Thu, Jan 10, 2013 at 8:56 AM, Marcin Szukala
+> <szukala.marcin@gmail.com> wrote:
+>> Hi,
+>>
+>> Scenario is correct but the last line. I can mount the image, but the
+>> data that was written to the image before power failure is lost.
+>>
+>> Currently the ceph cluster is not healthy, but i dont think its
+>> related because I had this issue before the cluster itsef had issues
+>> (about that I will write in different post not to mix topics).
 >
-thank you Mr. Elder.
+> This sounds like one of two possibilities:
+> 1) You aren't actually committing data to RADOS very often and so when
+> the power fails you lose several minutes of writes. How much data are
+> you losing, how's it generated, and is whatever you're doing running
+> any kind of fsync or sync? And what filesystem are you using?
+> 2) Your cluster is actually not accepting writes and so RBD never
+> manages to do a write but you aren't doing much and so you don't
+> notice. What's the output of ceph -s?
+> -Greg
+
+Hi,
+
+Today I have created new ceph cluster from scratch.
+root@ceph-1:~# ceph -s
+   health HEALTH_OK
+   monmap e1: 3 mons at
+{a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
+election epoch 4, quorum 0,1,2 a,b,d
+   osdmap e65: 56 osds: 56 up, 56 in
+    pgmap v3892: 13744 pgs: 13744 active+clean; 73060 MB data, 147 GB
+used, 51983 GB / 52131 GB avail
+   mdsmap e1: 0/0/1 up
+
+The issue persisst.
+I`am losing all of data on the image. On the mounted image I have 5
+logical volumes.
+
+root@compute-9:~# mount
+(snip)
+/dev/mapper/compute--9-nova on /var/lib/nova type xfs (rw)
+/dev/mapper/compute--9-tmp on /tmp type xfs (rw)
+/dev/mapper/compute--9-libvirt on /etc/libvirt type xfs (rw)
+/dev/mapper/compute--9-log on /var/log type xfs (rw)
+/dev/mapper/compute--9-openvswitch on /var/lib/openvswitch type xfs (rw)
+
+So I have directories with little to none data writes and with a lot
+of writes (logs). No fsync or sync. Filesystem is xfs.
+
+Regards,
+Marcin
