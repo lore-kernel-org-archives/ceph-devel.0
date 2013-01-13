@@ -1,99 +1,36 @@
-From: =?iso-8859-1?Q?Harald_R=F6=DFler?= <Harald.Roessler@btd.de>
-Subject: Re: rbd kernel driver on the osd server
-Date: Sun, 13 Jan 2013 19:46:15 +0100
-Message-ID: <20130113184615.GG27442@hro-mlt-02.local>
-References: <20130113160840.GF27442@hro-mlt-02.local>
- <50F2F632.6060402@widodh.nl>
+From: Xing Lin <xinglin@cs.utah.edu>
+Subject: [debug help]: get dprintk() outputs in src/crush/mapper.c or net/crush/mapper.c
+Date: Sun, 13 Jan 2013 12:15:58 -0700
+Message-ID: <50F307EE.5020507@cs.utah.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from odm-dns-01.odmedia.net ([87.238.139.200]:33156 "EHLO
-	odm-dns-01.odmedia.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755190Ab3AMSqS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Jan 2013 13:46:18 -0500
-In-Reply-To: <50F2F632.6060402@widodh.nl>
+Received: from rio.cs.utah.edu ([155.98.64.241]:37967 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755748Ab3AMTQA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Jan 2013 14:16:00 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id F232A6500C5
+	for <ceph-devel@vger.kernel.org>; Sun, 13 Jan 2013 12:15:59 -0700 (MST)
+Received: from mail-svr1.cs.utah.edu ([127.0.0.1])
+	by localhost (mail-svr1.cs.utah.edu [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id cyNJ3Zu1qmyd for <ceph-devel@vger.kernel.org>;
+	Sun, 13 Jan 2013 12:15:59 -0700 (MST)
+Received: from [192.168.1.6] (155-97-235-236.usahousing.utah.edu [155.97.235.236])
+	by smtps.cs.utah.edu (Postfix) with ESMTPSA id 81F9A6500C3
+	for <ceph-devel@vger.kernel.org>; Sun, 13 Jan 2013 12:15:59 -0700 (MST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
->    Hi,
->=20
->    On 01/13/2013 05:08 PM, Harald R=F6=DFler wrote:
->    > Hi,
->    >
->    > couple of month ago I read about a limitation to run an RBD kern=
-el
->    driver on the osd server. Is this limitation still valid? The reas=
-on in
->    Ubuntu and Debian there is no support for the RBD devices in QEMU.=
- At the
->    moment, in our setup  the KVM's are running on the OSD servers.
->    >
->=20
->    I don't think so, but somebody might correct me here.
+Hi,
 
-I am the same opinion, but I was not sure, I found this information on =
-some websites including in the "old" CEPH wiki and in the CEPH IRC logs=
-=2E=20
+There are many dprintk() statements in the file mapper.c. How can we get 
+to see outputs from these statements? I would like to see these, to get 
+a better understanding about how these functions work together and then 
+enhance my added algorithm. Besides, adding a printf() statement in the 
+crush_do_rule() or my simple bucket_directmap_choose() does not give me 
+any output. Thanks.
 
-
->=20
->    The OSDs nowadays use syncfs which leads them to only syncing thei=
-r
->    filesystem instead of ALL the filesystems on that host.
->=20
->    It might however be that Qemu calls sync() instead of syncfs() whi=
-ch
->    still causes everything to be synced, which can lead to problems I=
- guess.
-
-Thank you for this information, If I got it right, use the kernel drive=
-r on the host system I can expect more performance than via QEMU. I wil=
-l test it on our development system.
-
->=20
->    Regarding your reason for doing this, RBD is supported in Ubuntu's=
- Qemu.
->=20
->    Under Ubuntu precise it already works:
->    http://packages.ubuntu.com/precise/qemu-kvm
->=20
->    The problem is that the shipped version of Ceph is 0.41, which mig=
-ht be
->    too old.
->=20
->    I've been following the Blueprint for Ubuntu 13.04 and that will h=
-ave
->    all the Ceph stuff (Qemu and libvirt) you want with version 0.56.1
-
-I will keep this in mind. Thanks!!
-
->=20
->    I'd look into that.
->=20
->    Wido
->=20
->    > Best Regards
->    > Harald Roessler
->    > --
->    > To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel" in
->    > the body of a message to majordomo@vger.kernel.org
->    > More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
-ml
->    >
->    --
->    To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->    the body of a message to majordomo@vger.kernel.org
->    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-Best Regards
-Harald Roessler
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Xing
