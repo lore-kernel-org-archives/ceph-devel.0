@@ -1,41 +1,25 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: [PATCH] configure.ac: check for org.junit.rules.ExternalResource
-Date: Sat, 12 Jan 2013 22:59:06 +0100
-Message-ID: <50F1DCAA.8020802@bisect.de>
-References: <1357767316-27868-1-git-send-email-danny.al-gaaf@bisect.de> <CAPrxi58_D4PVhMAtABfKiRrXKZv0p4OUSfc+MuVkha0ndWPWxA@mail.gmail.com> <BB8FDF50-D01D-4B4A-A201-8AEA43FFFA2D@inktank.com> <50EE73F3.6050705@bisect.de> <3EC7678C-6C3D-4E59-A5ED-FC9B2DC28C08@inktank.com>
-Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+From: =?iso-8859-1?Q?Harald_R=F6=DFler?= <Harald.Roessler@btd.de>
+Subject: rbd kernel driver on the osd server
+Date: Sun, 13 Jan 2013 17:08:40 +0100
+Message-ID: <20130113160840.GF27442@hro-mlt-02.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:43721 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754284Ab3ALV7L (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Jan 2013 16:59:11 -0500
-In-Reply-To: <3EC7678C-6C3D-4E59-A5ED-FC9B2DC28C08@inktank.com>
+Received: from odm-dns-01.odmedia.net ([87.238.139.200]:32984 "EHLO
+	odm-dns-01.odmedia.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755094Ab3AMQSY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Jan 2013 11:18:24 -0500
+Received: from odm-mucoffice-03.odmedia.net (odm-mucoffice-02.odmedia.net [87.238.138.120])
+	by odm-dns-01.odmedia.net (Postfix) with ESMTP id 5233B7FA5
+	for <ceph-devel@vger.kernel.org>; Sun, 13 Jan 2013 17:08:43 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Gary Lowell <gary.lowell@inktank.com>, Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 11.01.2013 06:13, schrieb Gary Lowell:
-[...]
-> Thanks Danny.  Installing sharutils solved that minor issue.  We now
-> get though the build just fine on opensuse 12, but sles 11sp2 gives
-> more warnings (pasted below).  Should we be using a newer version of
-> autoconf  on sles?  I've tried moving AC_CANONICAL_TARGET earlier in
-> the file, but that causes some other issues with the new java
-> macros.
-> 
-> Thanks, Gary
+Hi,
 
-I'll take a look at it, I guess it's a problem in configure.ac.
+couple of month ago I read about a limitation to run an RBD kernel driver on the osd server. Is this limitation still valid? The reason in Ubuntu and Debian there is no support for the RBD devices in QEMU. At the moment, in our setup  the KVM's are running on the OSD servers.
 
-I see the same warnings in our build system at SUSE for SLES (see: e.g.
-logs at
-https://build.opensuse.org/project/monitor?project=home%3Adalgaaf%3Abranches%3Afilesystems),
-but the package builds just fine for openSUSE, SLES, Fedora, RHEL and
-CentOS there.
-
-Danny
+Best Regards
+Harald Roessler
