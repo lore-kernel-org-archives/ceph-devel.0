@@ -1,48 +1,48 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: OSD nodes with >=8 spinners, SSD-backed journals, and their
- performance impact
-Date: Mon, 14 Jan 2013 13:17:07 +0100
-Message-ID: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/2] mds: fix end check in Server::handle_client_readdir()
+Date: Mon, 14 Jan 2013 20:28:13 +0800
+Message-ID: <1358166493-21891-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f172.google.com ([209.85.210.172]:47174 "EHLO
-	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756170Ab3ANMRK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 07:17:10 -0500
-Received: by mail-ia0-f172.google.com with SMTP id u8so3461569iag.17
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 04:17:09 -0800 (PST)
+Received: from mga14.intel.com ([143.182.124.37]:37986 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755533Ab3ANM2T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Jan 2013 07:28:19 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Hi everyone,
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-we ran into an interesting performance issue on Friday that we were
-able to troubleshoot with some help from Greg and Sam (thanks guys),
-and in the process realized that there's little guidance around for
-how to optimize performance in OSD nodes with lots of spinning disks
-(and hence, hosting a relatively large number of OSDs). In that type
-of hardware configuration, the usual mantra of "put your OSD journals
-on an SSD" doesn't always hold up. So we wrote up some
-recommendations, and I'd ask everyone interested to critique this or
-provide feedback:
+commit 1174dd3188 (don't retry readdir request after issuing caps)
+introduced an bug that wrongly marks 'end' in the the readdir reply.
+The code that touches existing dentries re-uses an iterator, and the
+iterator is used for checking if readdir is end.
 
-http://www.hastexo.com/resources/hints-and-kinks/solid-state-drives-and-ceph-osd-journals
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/Server.cc | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-It's probably easiest to comment directly on that page, but if you
-prefer instead to just respond in this thread, that's perfectly fine
-too.
-
-For some background of the discussion, please refer to the LogBot log
-from #ceph:
-http://irclogs.ceph.widodh.nl/index.php?date=2013-01-12
-
-Hope this is useful.
-
-Cheers,
-Florian
-
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index eb0682e..328d025 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2895,11 +2895,9 @@ void Server::handle_client_readdir(MDRequest *mdr)
+ 	continue;
+       } else {
+ 	// touch everything i _do_ have
+-	for (it = dir->begin(); 
+-	     it != dir->end(); 
+-	     it++) 
+-	  if (!it->second->get_linkage()->is_null())
+-	    mdcache->lru.lru_touch(it->second);
++	for (CDir::map_t::iterator p = dir->begin(); p != dir->end(); p++)
++	  if (!p->second->get_linkage()->is_null())
++	    mdcache->lru.lru_touch(p->second);
+ 
+ 	// already issued caps and leases, reply immediately.
+ 	if (dnbl.length() > 0) {
 -- 
-Helpful information? Let us know!
-http://www.hastexo.com/shoutbox
+1.7.11.7
+
