@@ -1,88 +1,66 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] rbd: prevent open for image being removed
-Date: Mon, 14 Jan 2013 12:51:03 -0600
-Message-ID: <50F45397.2030905@inktank.com>
-References: <50F4535A.6030601@inktank.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their performance
+ impact
+Date: Mon, 14 Jan 2013 21:17:27 +0100
+Message-ID: <50F467D7.6040706@hastexo.com>
+References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com> <50F40C4B.6000301@inktank.com> <CAPUexz9X5rZGG6epWPj1qEUcM_ZNyEbDWizUVCGkqY=4btvQqA@mail.gmail.com> <CAPYLRzivOA41NUa4-M1f_NZ71e2GetHnxB9pZ_CQtj3hxo33FA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:50605 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757289Ab3ANSvG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 13:51:06 -0500
-Received: by mail-ie0-f176.google.com with SMTP id 13so5464704iea.7
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 10:51:05 -0800 (PST)
-In-Reply-To: <50F4535A.6030601@inktank.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:51528 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757535Ab3ANURc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 15:17:32 -0500
+Received: by mail-ee0-f46.google.com with SMTP id e49so2143024eek.19
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 12:17:31 -0800 (PST)
+In-Reply-To: <CAPYLRzivOA41NUa4-M1f_NZ71e2GetHnxB9pZ_CQtj3hxo33FA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-An open request for a mapped rbd image can arrive while removal of
-that mapping is underway.  The control mutex and an open count is
-protect a mapped device that's in use from being removed.  But it
-is possible for the removal of the mapping to reach the point of no
-return *after* a racing open has concluded it is OK to proceed.  The
-result of this is not good.
+On 01/14/2013 06:34 PM, Gregory Farnum wrote:
+> On Mon, Jan 14, 2013 at 6:09 AM, Florian Haas <florian@hastexo.com> wrote:
+>> Hi Mark,
+>>
+>> thanks for the comments.
+>>
+>> On Mon, Jan 14, 2013 at 2:46 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
+>>> Hi Florian,
+>>>
+>>> Couple of comments:
+>>>
+>>> "OSDs use a write-ahead mode for local operations: a write hits the journal
+>>> first, and from there is then being copied into the backing filestore."
+>>>
+>>> It's probably important to mention that this is true by default only for
+>>> non-btrfs file systems.  See:
+>>>
+>>> http://ceph.com/wiki/OSD_journal
+>>
+>> I am well aware of that, but I've yet to find a customer (or user)
+>> that's actually willing to entrust a production cluster with several
+>> hundred terabytes of data to btrfs. :) Besides, the whole post is
+>> about whether or not to use dedicated SSD block devices for OSD
+>> journals, and if you're tossing everything into btrfs you've already
+>> made the decision to use in-filestore journals.
+> 
+> That is absolutely not the case. btrfs works just fine with an
+> external journal on SSD or whatever else; what made you think
+> otherwise?
 
-Define and use a flag to indicate a mapping is getting removed to
-avoid this problem.
+A misunderstanding on my part. Also, I was overly broad in my comment.
+What I really meant to say was that if I'm using a btrfs filestore, and
+a separate dedicated block device for the journal, then the journaling
+mode is write-ahead and not parallel.
 
-This addresses http://tracker.newdream.net/issues/3427
+Which was a wrong assumption on my part, as an external journal combined
+with a btrfs filestore seems to support parallel journaling mode just
+fine. For some reason I had supposed the journal had to be in the same
+btrfs as the filestore for this to work.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+Sorry for the confusion.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 9eb1631..760f7f7 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -264,6 +264,7 @@ struct rbd_device {
-
- enum rbd_dev_flags {
- 	rbd_dev_flag_exists,	/* mapped snapshot has not been deleted */
-+	rbd_dev_flag_removing,	/* this mapping is being removed */
- };
-
- static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-@@ -351,17 +352,22 @@ static int rbd_dev_v2_refresh(struct rbd_device
-*rbd_dev, u64 *hver);
- static int rbd_open(struct block_device *bdev, fmode_t mode)
- {
- 	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-+	int ret = 0;
-
- 	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
- 		return -EROFS;
-
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--	(void) get_device(&rbd_dev->dev);
--	set_device_ro(bdev, rbd_dev->mapping.read_only);
--	rbd_dev->open_count++;
-+	if (!test_bit(rbd_dev_flag_removing, &rbd_dev->flags)) {
-+		(void) get_device(&rbd_dev->dev);
-+		set_device_ro(bdev, rbd_dev->mapping.read_only);
-+		rbd_dev->open_count++;
-+	} else {
-+		ret = -ENOENT;
-+	}
- 	mutex_unlock(&ctl_mutex);
-
--	return 0;
-+	return ret;
- }
-
- static int rbd_release(struct gendisk *disk, fmode_t mode)
-@@ -3796,6 +3802,7 @@ static ssize_t rbd_remove(struct bus_type *bus,
- 		ret = -EBUSY;
- 		goto done;
- 	}
-+	set_bit(rbd_dev_flag_removing, &rbd_dev->flags);
-
- 	rbd_remove_all_snaps(rbd_dev);
- 	rbd_bus_del_dev(rbd_dev);
--- 
-1.7.9.5
-
+Cheers,
+Florian
