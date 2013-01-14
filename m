@@ -1,66 +1,101 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their performance
- impact
-Date: Mon, 14 Jan 2013 21:17:27 +0100
-Message-ID: <50F467D7.6040706@hastexo.com>
-References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com> <50F40C4B.6000301@inktank.com> <CAPUexz9X5rZGG6epWPj1qEUcM_ZNyEbDWizUVCGkqY=4btvQqA@mail.gmail.com> <CAPYLRzivOA41NUa4-M1f_NZ71e2GetHnxB9pZ_CQtj3hxo33FA@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: define flags field, use it for exists flag
+Date: Mon, 14 Jan 2013 12:32:00 -0800
+Message-ID: <50F46B40.9010907@inktank.com>
+References: <50F4535A.6030601@inktank.com> <50F4538B.4010106@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:51528 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757535Ab3ANURc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 15:17:32 -0500
-Received: by mail-ee0-f46.google.com with SMTP id e49so2143024eek.19
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 12:17:31 -0800 (PST)
-In-Reply-To: <CAPYLRzivOA41NUa4-M1f_NZ71e2GetHnxB9pZ_CQtj3hxo33FA@mail.gmail.com>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:54281 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756959Ab3ANUcF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 15:32:05 -0500
+Received: by mail-pa0-f48.google.com with SMTP id fa1so2430163pad.35
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 12:32:04 -0800 (PST)
+In-Reply-To: <50F4538B.4010106@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/14/2013 06:34 PM, Gregory Farnum wrote:
-> On Mon, Jan 14, 2013 at 6:09 AM, Florian Haas <florian@hastexo.com> wrote:
->> Hi Mark,
->>
->> thanks for the comments.
->>
->> On Mon, Jan 14, 2013 at 2:46 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
->>> Hi Florian,
->>>
->>> Couple of comments:
->>>
->>> "OSDs use a write-ahead mode for local operations: a write hits the journal
->>> first, and from there is then being copied into the backing filestore."
->>>
->>> It's probably important to mention that this is true by default only for
->>> non-btrfs file systems.  See:
->>>
->>> http://ceph.com/wiki/OSD_journal
->>
->> I am well aware of that, but I've yet to find a customer (or user)
->> that's actually willing to entrust a production cluster with several
->> hundred terabytes of data to btrfs. :) Besides, the whole post is
->> about whether or not to use dedicated SSD block devices for OSD
->> journals, and if you're tossing everything into btrfs you've already
->> made the decision to use in-filestore journals.
-> 
-> That is absolutely not the case. btrfs works just fine with an
-> external journal on SSD or whatever else; what made you think
-> otherwise?
+I see that set_bit is atomic, but I don't see that test_bit is.  Am I 
+missing a subtlety?
 
-A misunderstanding on my part. Also, I was overly broad in my comment.
-What I really meant to say was that if I'm using a btrfs filestore, and
-a separate dedicated block device for the journal, then the journaling
-mode is write-ahead and not parallel.
-
-Which was a wrong assumption on my part, as an external journal combined
-with a btrfs filestore seems to support parallel journaling mode just
-fine. For some reason I had supposed the journal had to be in the same
-btrfs as the filestore for this to work.
-
-Sorry for the confusion.
-
-Cheers,
-Florian
+On 01/14/2013 10:50 AM, Alex Elder wrote:
+> Define a new rbd device flags field, manipulated using atomic bit
+> operations.  Replace the use of the current "exists" flag with a
+> bit in this new "flags" field.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   17 ++++++++++++-----
+>   1 file changed, 12 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 02002b1..9eb1631 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -232,7 +232,7 @@ struct rbd_device {
+>   	spinlock_t		lock;		/* queue lock */
+>
+>   	struct rbd_image_header	header;
+> -	atomic_t		exists;
+> +	unsigned long		flags;
+>   	struct rbd_spec		*spec;
+>
+>   	char			*header_name;
+> @@ -260,6 +260,12 @@ struct rbd_device {
+>   	unsigned long		open_count;
+>   };
+>
+> +/* Flag bits for rbd_dev->flags */
+> +
+> +enum rbd_dev_flags {
+> +	rbd_dev_flag_exists,	/* mapped snapshot has not been deleted */
+> +};
+> +
+>   static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
+>
+>   static LIST_HEAD(rbd_dev_list);    /* devices */
+> @@ -756,7 +762,8 @@ static int rbd_dev_set_mapping(struct rbd_device
+> *rbd_dev)
+>   			goto done;
+>   		rbd_dev->mapping.read_only = true;
+>   	}
+> -	atomic_set(&rbd_dev->exists, 1);
+> +	set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
+> +
+>   done:
+>   	return ret;
+>   }
+> @@ -1654,7 +1661,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>   			snapc = ceph_get_snap_context(rbd_dev->header.snapc);
+>   			up_read(&rbd_dev->header_rwsem);
+>   			rbd_assert(snapc != NULL);
+> -		} else if (!atomic_read(&rbd_dev->exists)) {
+> +		} else if (!test_bit(rbd_dev_flag_exists, &rbd_dev->flags)) {
+>   			rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
+>   			dout("request for non-existent snapshot");
+>   			result = -ENXIO;
+> @@ -2270,7 +2277,7 @@ struct rbd_device *rbd_dev_create(struct
+> rbd_client *rbdc,
+>   		return NULL;
+>
+>   	spin_lock_init(&rbd_dev->lock);
+> -	atomic_set(&rbd_dev->exists, 0);
+> +	rbd_dev->flags = 0;
+>   	INIT_LIST_HEAD(&rbd_dev->node);
+>   	INIT_LIST_HEAD(&rbd_dev->snaps);
+>   	init_rwsem(&rbd_dev->header_rwsem);
+> @@ -2902,7 +2909,7 @@ static int rbd_dev_snaps_update(struct rbd_device
+> *rbd_dev)
+>   			/* Existing snapshot not in the new snap context */
+>
+>   			if (rbd_dev->spec->snap_id == snap->id)
+> -				atomic_set(&rbd_dev->exists, 0);
+> +				set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
+>   			rbd_remove_snap_dev(snap);
+>   			dout("%ssnap id %llu has been removed\n",
+>   				rbd_dev->spec->snap_id == snap->id ?
+>
