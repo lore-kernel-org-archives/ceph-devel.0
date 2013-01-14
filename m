@@ -1,110 +1,66 @@
-From: Stratos Psomadakis <psomas@grnet.gr>
-Subject: Re: [PATCH v2] rbd: Support plain/json/xml output formatting
-Date: Mon, 14 Jan 2013 15:19:20 +0200
-Message-ID: <50F405D8.4000200@grnet.gr>
-References: <50CF559E.9040504@inktank.com> <1355919440-24357-1-git-send-email-psomas@grnet.gr> <50E76AAD.1040808@inktank.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their
+ performance impact
+Date: Mon, 14 Jan 2013 14:41:56 +0100
+Message-ID: <CAPUexz8c4rOB3C=K8E8yWQudQbXh1o5h1f4AATX0OLfv2sMWMQ@mail.gmail.com>
+References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com>
+	<B1D1B77B-F5D7-4048-9C07-CDC9EEB3F224@netspot.com.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2DJTBQWLBANWGXVQGAJKD"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:48269 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755903Ab3ANNTa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Jan 2013 08:19:30 -0500
-In-Reply-To: <50E76AAD.1040808@inktank.com>
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:60609 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751288Ab3ANNl5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 08:41:57 -0500
+Received: by mail-ia0-f182.google.com with SMTP id x2so3542022iad.41
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 05:41:56 -0800 (PST)
+In-Reply-To: <B1D1B77B-F5D7-4048-9C07-CDC9EEB3F224@netspot.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
+To: Tom Lanyon <tom@netspot.com.au>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2DJTBQWLBANWGXVQGAJKD
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Tom,
 
-On 01/05/2013 01:50 AM, Josh Durgin wrote:
-> On 12/19/2012 04:17 AM, Stratos Psomadakis wrote:
->> This patch renames the --format option to --image-format, for
->> specyfing the RBD
->> image format, and uses --format to specify the output formating (to be=
-
->> consistent with the other ceph tools). To avoid breaking backwards
->> compatibility
->> with existing scripts, rbd will still accept --format [1|2] for the
->> image
->> format, but will print a warning message, noting its use is deprecated=
-=2E
+On Mon, Jan 14, 2013 at 2:28 PM, Tom Lanyon <tom@netspot.com.au> wrote:
+> On 14/01/2013, at 10:47 PM, Florian Haas <florian@hastexo.com> wrote:
+> <snip>
+>> http://www.hastexo.com/resources/hints-and-kinks/solid-state-drives-and-ceph-osd-journals
 >>
->> The rbd subcommands that support the new --format option are : ls,
->> info, snap
->> list, children, showmapped, lock list.
->>
->> Signed-off-by: Stratos Psomadakis <psomas@grnet.gr>
->> ---
->> Hi,
->>
->> this is the updated version of the patch. I renamed --format option to=
-
->>   --image-format, and used --format to specify the output formatting,
->> as you
->> suggested.
->>
->> I also implemented some basic error checking on the --format input,
->> and modified
->> the rbd subcommands you mentioned, to support plain/json/xml output
->> formatting.
->> Although, I'm not sure if the json and xml output of those commands
->> is what
->> you'd want.
->>
->> The style issues should also be resolved now.
->>
->> Let me know what you think.
+>> It's probably easiest to comment directly on that page, but if you
+>> prefer instead to just respond in this thread, that's perfectly fine
+>> too.
+> <snip>
 >
-> There were still some style issues (missing braces, long lines, and
-> spaces instead of tabs), but I squashed fixes to those into the
-> wip-rbd-formatted-output branch.
 >
-> I changed the output a bit to uses ints, arrays, etc. where it
-> seemed appropriate. The tests aren't quite done yet, but does
-> this new json output look good to you?
+> Hi Florian,
 >
-> Josh
+> Thanks for putting this together.
 
-Hi,
+Pleasure!
 
-Sorry for the delay. Thanks for resolving the style issues and cleaning
-this up.
+> A couple of minor questions/comments:
+>
+> * One of the conclusions is to use the SSDs (assuming 2) un-RAIDed, but the article doesn't actually explain why using them in a RAID-1 is a poor idea.
 
-Wrt the json output, I think it's fine as it is now.
+Added paragraph starting with "putting your journal SSDs in a RAID set
+looks like a good idea at first", does that explain the situation
+better?
 
-Just a minor comment. The --pretty-format option doesn't seem to be
-documented (in either rbd --help or rbd man page). Other than that, I
-don't see any other issues.
+> * Should the end of this sentence:
+>         "Another option is to use, say, one partition on each of your SSD in a RAID for the operating system installation, and then chop up the rest of your SSDs an non-RAIDed Ceph OSDs."
+>
+> ...instead read:
+>
+>         "Another option is to use, say, one partition on each of your SSD in a RAID for the operating system installation, and then chop up the rest of your SSDs an non-RAIDed Ceph **OSD journals**." ?
 
-Thanks,
-Stratos
+Sure. Fixed.
 
---=20
-Stratos Psomadakis
-<psomas@grnet.gr>
+Btw: coming to LCA? If you are, please find me and say hello. :)
 
+Cheers,
+Florian
 
-
-------enig2DJTBQWLBANWGXVQGAJKD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlD0Bd4ACgkQid1lVeNDMmCUAwCdHUXfS2ejrjACDfJjDm9rkqaf
-66MAmwe8XB0AvmPRNLyC08Nr02IWJTpC
-=Uuhu
------END PGP SIGNATURE-----
-
-------enig2DJTBQWLBANWGXVQGAJKD--
+-- 
+Helpful information? Let us know!
+http://www.hastexo.com/shoutbox
