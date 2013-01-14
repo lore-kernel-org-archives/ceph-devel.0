@@ -1,55 +1,96 @@
-From: =?ISO-8859-15?Q?Simon_Frerichs_=7C=A0Fremaks_GmbH?=
-	<frerichs@fremaks.de>
-Subject: Another rbd compatibility issue between 0.48.2argonaut-2 and 0.56.1
- ?
-Date: Mon, 14 Jan 2013 08:16:55 +0100
-Message-ID: <50F3B0E7.3090809@fremaks.de>
+From: =?ISO-8859-1?Q?Alexis_G=DCNST_HORN?=
+	<alexis.gunsthorn@outscale.com>
+Subject: CephFS issue
+Date: Mon, 14 Jan 2013 08:51:57 +0100
+Message-ID: <CAEqYNSYaMvprh580HNosaQe7ahMmT-iB9irMsgA87tE2fwtCTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.fremaks.net ([46.19.89.69]:36423 "EHLO mail.fremaks.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755244Ab3ANHXm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Jan 2013 02:23:42 -0500
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.fremaks.net (Postfix) with ESMTP id B46F83A00C
-	for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 08:16:54 +0100 (CET)
-Received: from mail.fremaks.net ([127.0.0.1])
-	by localhost (mail.fremaks.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id 5w1xm51j50QN for <ceph-devel@vger.kernel.org>;
-	Mon, 14 Jan 2013 08:16:54 +0100 (CET)
-Received: from bump.local (unknown [46.19.88.242])
-	by mail.fremaks.net (Postfix) with ESMTPSA id 625B139F3B
-	for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 08:16:54 +0100 (CET)
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:34777 "HELO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752905Ab3ANHwA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Jan 2013 02:52:00 -0500
+Received: by mail-ia0-f199.google.com with SMTP id u20so11949553iag.6
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Jan 2013 23:51:57 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+Hello,
 
-we've updated ceph on one node from argonaut to 0.56.1.
-The osds are working fine but i see the following error:
+I've a 0.56.1 Ceph cluster up and running. RBD is working fine, but
+i've some troubles with CephFS.
 
-rbd info kvm1395
-rbd: error opening image kvm1395: (5) Input/output error
-2013-01-14 06:09:10.162206 7efff3aed760 -1 librbd: Error getting lock
-info: (5) Input/output error
+Here is my config :
 
-rbd --version
-ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+- only 2 OSD nodes, with 10 disks each + SSD for journal.
+- OSDs hosts are gigabit (public) + gigabit (private)
+- one client which is 10 gigabit
 
-Switching rbd back to argonaut fixes this error.
+The client mount a cephFS : /mnt/cephfs.
 
-Any hints?
-=20
+OK. working.
 
---=20
-Mit freundlichen Gr=FC=DFen
-Simon Frerichs
+Then, i ran this little script on the client :
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+#!/bin/sh
+cd /mnt/cephfs
+
+function process {
+  for a in {0..9} {a..f}; do
+echo "Create disk $a ($1 G)";
+truncate -s $(($1*1024*1024*1024)) $a;
+echo "Format disk $a ($1 G)";
+mke2fs -jF $a;
+  done
+}
+
+process 150
+process 340
+process 420
+process 840
+process 1680
+
+
+At the beginning, it works well. Then quickly, the Ceph cluster become
+instable. A lot of warning appears :
+
+2013-01-14 07:20:47.276215 osd.8 [WRN] slow request 32.023561 seconds
+old, received at 2013-01-14 07:20:15.252598:
+osd_op(client.4119.1:72303 10000000019.00013cc0 [write 0~8192
+[1@-1],startsync 0~0] 0.1ddb4dfd RETRY snapc 1=[]) currently delayed
+
+
+On the OSD itself, i have these messages :
+
+2013-01-11 15:46:18.511465 7f9d8c4f5700  0 -- 172.17.243.40:6800/16010
+>> 172.17.243.40:6818/16648 pipe(0x7f9d28001320 sd=31 :6800 pgs=10
+cs=1 l=0).fault with nothing to send, going to standby
+2013-01-11 16:06:18.570870 7f9d8c6f7700  0 -- 172.17.243.40:6800/16010
+>> 172.17.243.39:6805/13385 pipe(0x7f9d28000e10 sd=30 :6800 pgs=8 cs=1
+l=0).fault with nothing to send, going to standby
+
+then
+
+2013-01-11 16:13:27.691045 7f9d6e1e1700  0 -- 172.17.243.40:6800/16010
+>> 172.17.243.39:6807/13483 pipe(0x7f9d28003690 sd=60 :6800 pgs=0 cs=0
+l=0).accept connect_seq 2 vs existing 1 state standby
+
+then
+
+2013-01-11 16:15:31.548441 7f9d78ff9700  0 --
+172.17.243.140:6800/16010 submit_message osd_op_reply(15037
+10000000009.00001c20 [write 8192~2097152] ondisk = 0) v4 remote,
+172.17.243.180:0/232969487, failed lossy con, dropping message
+0x7f9d70130d40
+
+At the end, the client mountpoint become unresponsive, and the only
+way is to force reboot.
+
+
+Do you have any idea ?
+Thanks a lot,
+
+Alexis
