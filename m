@@ -1,134 +1,139 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their
- performance impact
-Date: Mon, 14 Jan 2013 15:09:49 +0100
-Message-ID: <CAPUexz9X5rZGG6epWPj1qEUcM_ZNyEbDWizUVCGkqY=4btvQqA@mail.gmail.com>
-References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com>
-	<50F40C4B.6000301@inktank.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Seperate metadata disk for OSD
+Date: Mon, 14 Jan 2013 15:19:55 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5D3CBC@SHSMSX102.ccr.corp.intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC5D36A6@SHSMSX102.ccr.corp.intel.com>
+ <CAAM7YA=h2tWx_NyiDm32jNxq=oQXQfAD5HN0tc0vQz1-srp-aA@mail.gmail.com>
+ <50F166CC.40009@inktank.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC5D36D2@SHSMSX102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1301120852140.22766@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:54494 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756394Ab3ANOJt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jan 2013 09:09:49 -0500
-Received: by mail-ia0-f179.google.com with SMTP id i9so3308482iad.24
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 06:09:49 -0800 (PST)
-In-Reply-To: <50F40C4B.6000301@inktank.com>
+Received: from mga01.intel.com ([192.55.52.88]:23580 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756457Ab3ANPT6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Jan 2013 10:19:58 -0500
+In-Reply-To: <alpine.DEB.2.00.1301120852140.22766@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, "Yan, Zheng " <yanzheng@21cn.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Mark,
-
-thanks for the comments.
-
-On Mon, Jan 14, 2013 at 2:46 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
-> Hi Florian,
->
-> Couple of comments:
->
-> "OSDs use a write-ahead mode for local operations: a write hits the journal
-> first, and from there is then being copied into the backing filestore."
->
-> It's probably important to mention that this is true by default only for
-> non-btrfs file systems.  See:
->
-> http://ceph.com/wiki/OSD_journal
-
-I am well aware of that, but I've yet to find a customer (or user)
-that's actually willing to entrust a production cluster with several
-hundred terabytes of data to btrfs. :) Besides, the whole post is
-about whether or not to use dedicated SSD block devices for OSD
-journals, and if you're tossing everything into btrfs you've already
-made the decision to use in-filestore journals.
-
-> "Thus, for best cluster performance it is crucial that the journal is fast,
-> whereas the filestore can be comparatively slow."
->
-> This is a bit misleading.  Having a faster journal is helpful when there are
-> short bursts of traffic.  So long as the journal doesn't fill up and there
-> are periods of inactivity for the data to get flushed, having slow filestore
-> disk may be ok.  With lots of traffic, reality eventually catches up with
-> you and you've gotta get all of that data flushed out to the backing file
-> system.
-
-I agree that the wording is non-optimal. What I meant was to equate
-"fast" with SSDs, and "comparatively slow" with spinners. And to
-combine spinners with SSDs is one of the most interesting points about
-Ceph in terms of cost effectiveness. Pretty much every other storage
-technology would require you to either go all-SSD or to look into
-rather sophisticated HSM in order to achieve similar performance at a
-comparable scale.
-
-Suggestions for better wording?
-
-> Have you ever seen ceph performance bouncing around with periods of really
-> high throughput followed by periods of really low (or no!) throughput?
-> That's usually the result of having a very fast journal paired with a slow
-> data disk.  The journal writes out data very quickly, hits it's max ops or
-> max bytes limit, then writes are stalled for a period while data in the
-> journal gets flushed out to the data disk.
-
-Sure, essentially the equivalent, on a different level, of an NFS
-server with lots of RAM and a high vm.dirty_ratio suddenly doing a
-massive writeout.
-
-> Another thing to remember is that writes to the journal happen without
-> causing a lot of seeks.  Ceph doesn't have to do metadata or dentry
-> lookups/writes to write data to the journal.  Because of this, it's been my
-> experience that journals are primarily throughput bound rather than being
-> random IOPS bound.  Just putting the journals on any old SSD isn't enough,
-> you need to choose ones that get really high throughput like the Intel
-> S3700s or other high performance models.
-
-Yup.
-
-> "By and large, try to go for a relatively small number of OSDs per node,
-> ideally not more than 8. This combined with SSD journals is likely to give
-> you the best overall performance."
->
-> The advice that I usually give people is that if performance is a big
-> concern, try to match filestore disk and journal performance is nearly
-> matched.  In my test setup, I use 1 intel 520 SSD to host 3 journals for
-> 7200rpm enterprise SATA disks.  A 1:4 ratio or even 1:6 ratio may also work
-> fine depending on various factors.  So far the limits I've hit with very
-> minimal tuning seem to be around 15 spinning disks and 5 SSDs for around
-> 1.4GB/s (2.8GB/s including journal writes) to one node.
-
-Yes, I realize that there's no hard number here. I could also have put
-"ideally not more than 6". The point I was trying to make is that
-people need to get off their thinking of what an ideal storage box is,
-and that more disks per host isn't necessarily better. We had a user
-in #ceph last week thinking that an OSD node with 36 spinners was a
-stellar idea. It probably isn't.
-
-> "If you do go with OSD nodes with a very high number of disks, consider
-> dropping the idea of an SSD-based journal. Yes, in this kind of setup you
-> might actually do better with journals on the spinners."
->
-> If your SSD(s) is/are slow you very well may be better off with putting the
-> journals on the same spinning disks as the OSD data.  It's all a giant
-> balancing act between write throughput, read throughput, and capacity.
-
-And people generally prefer simple heuristics (a.k.a. rules of thumb)
-over giant balancing acts. So I think if we tell them something like,
-
-Got more that 8 spinners?
-* No? Toss your journals on SSDs,
-* Yes? At least consider not to.
-
-... then I am hoping that will lead more people on the right path,
-than when we tell them:
-
-* Here's two dozen performance graphs, a pivot table, and a crystal ball.
-
-I am obviously jesting and exaggerating, but you get my point. :)
-
-Cheers,
-Florian
-
--- 
-Helpful information? Let us know!
-http://www.hastexo.com/shoutbox
+SGkgU2FnZSwNCiAgICBUaGFua3MgZm9yIHlvdXIgbWFpbH4NCglXb3VsZCB5b3UgaGF2ZSBhIHRp
+bWV0YWJsZSBhYm91dCB3aGVuIHN1Y2ggaW1wcm92ZW1lbnQgY2FuIGJlIHJlYWR5P0l0J3MgY3Jp
+dGljYWwgZm9yIG5vbi1idHJmcyBmaWxlc3lzdGVtLg0KCUkgYW0gdGhpbmtpbmcgYWJvdXQgaW50
+cm9kdWNpbmcgZmxhc2hjYWNoZSBpbnRvIG15IGNvbmZpZ3VyYXRpb24gdG8gY2FjaGUgc3VjaCBt
+ZXRhIHdyaXRlLCBzaW5jZSBmbGFzaGNhY2hlIHdvcmtpbmcgdW5kZXIgdGhlIGZpbGVzeXN0ZW0s
+IEkgc3VwcG9zZSBpdCB3aWxsIG5vdCBicmVhayB0aGUgYXNzdW1wdGlvbiBpbnNpZGUgQ2VwaC4g
+SSB3aWxsIHRyeSBpdCBvbiB0b21vcnJvdyBhbmQgY29tZSBiYWNrIHdpdGggeW91IH4NCglUaGFu
+a3MgYWdhaW4gZm9yIHRoZSBoZWxwcyENCgkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCVhpYW94aQ0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2Fn
+ZUBpbmt0YW5rLmNvbV0gDQpTZW50OiAyMDEzxOox1MIxM8jVIDA6NTcNClRvOiBDaGVuLCBYaWFv
+eGkNCkNjOiBNYXJrIE5lbHNvbjsgWWFuLCBaaGVuZyA7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQpTdWJqZWN0OiBSRTogU2VwZXJhdGUgbWV0YWRhdGEgZGlzayBmb3IgT1NEDQoNCk9uIFNh
+dCwgMTIgSmFuIDIwMTMsIENoZW4sIFhpYW94aSB3cm90ZToNCj4gSGkgWmhlbmc/DQo+IAlJIGhh
+dmUgcHV0IFhGUyBsb2cgdG8gYSBzZXBhcmF0ZSBkaXNrLCBpbmRlZWQgaXQgcHJvdmlkZSBzb21l
+IHBlcmZvcm1hbmNlIGdhaW4gYnV0IG5vdCB0aGF0IHNpZ25pZmljYW50Lg0KPiAJQ2VwaCdzIG1l
+dGFkYXRhIGlzIHNvbWVob3cgc2VwYXJhdGUoaXQncyBzb21lIGZpbGVzIHJlc2lkZSBpbiBPU0Qn
+cyBkaXNrKSwgdGhlcmVmb3JlLGl0IGNhbm5vdCBiZSBoZWxwZWQgYnkgbmVpdGhlciBYRlMgam91
+cm5hbCBsb2cgbm9yIE9TRCdzIGpvdXJuYWwuVGhhdCdzIHdoeSBJIGFtIHRyeWluZyB0byBwdXQg
+Y2VwaCdzIG1ldGFkYXRhKC9kYXRhL29zZC54L21ldGEgZm9sZGVyICkgdG8gYSBzZXBhcmF0ZSBT
+U0QgZGlzay4NCj4gVG8gTmVsc29uLA0KPiAJSSBkaWQgdGhlIGV4cGVyaW1lbnQgd2l0aCBqdXN0
+IDEgY2xpZW50LCBpZiB1c2luZyBtb3JlIGNsaWVudHMsIHRoZSBnYWluIHdpbGwgbm90IGJlIHRo
+YXQgbXVjaC4NCj4gCUl0IGxvb2tzIHRvIG1lIHRoYXQgYSBzaW5nbGUgd3JpdGUgZnJvbSBjbGll
+bnQgc2lkZSBiZWNvbWUgMyB3cml0ZXMgdG8gZGlzayBpcyBzb21laG93IGEgYmlnIG92ZXJoZWFk
+IGZvciBpbi1wbGFjZS11cGRhdGUgZmlsZXN5c3RlbSBzdWNoIGxpa2UgWEZTIHNpbmNlIGl0IGlu
+dHJvZHVjZSBtb3JlIHNlZWtzLk91dC1vZi1wbGFjZS11cGRhdGUgZmlsZXN5c3RlbSB3aWxsIG5v
+dCBzdWZmZXIgYSBsb3QgZm9yIHN1Y2ggcGF0dGVybixJIGRpZG4/dCBmaW5kIHRoaXMgcHJvYmxl
+bSB3aGVuIEkgdXNpbmcgQlRSRlMgYXMgYmFja2VuZCBmaWxlc3lzdGVtLiBCdXQgZm9yQlRSRlMs
+IGZyYWdtZW50YXRpb24gaXMgYW5vdGhlciBwZXJmb3JtYW5jZSBraWxsZXIsIGZvciBhIHNpbmds
+ZSBSQkQgdm9sdW1lLCBpZiB5b3UgZGlkIGEgbG90IG9mIHJhbmRvbSB3cml0ZSBvbiBpdCwgdGhl
+IHNlcXVlbnRpYWwgcmVhZCBwZXJmb3JtYW5jZSB3aWxsIGRyb3AgdG8gMzAlIG9mIGEgbmV3IFJC
+RCB2b2x1bWUuIFRoaXMgbWFrZSBCVFJGUyB1bnVzYWJsZSBpbiBwcm9kdWN0aW9uLg0KPiAJU2Vw
+YXJhdGUgQ2VwaCBtZXRhIHNlZW1zIHF1aXRlIGVhc3kgdG8gbWUgKCBJIGp1c3QgbW91bnQgYSBw
+YXJ0aXRpb24gdG8gL2RhdGEvb3NkLlgvbWV0YSksIGlzIGl0IHJpZ2h0ICA/IGlzIHRoZXJlIGFu
+eSBwb3RlbnRpYWwgcHJvYmxlbSBpbiBpdD8gDQoNClVuZm9ydHVuYXRlbHksIHllcy4gIFRoZSBj
+ZXBoIGpvdXJuYWwgYW5kIGZzIHN5bmMgYXJlIGNhcmVmdWxseSB0aW1lZC4gIA0KVGhlIGNlcGgt
+b3NkIGFzc3VtZXMgdGhhdCBzeW5jZnMoMikgb24gdGhlICRvc2RfZGF0YS9jdXJyZW50L2NvbW1p
+dF9vcF9zZXEgZmlsZSB3aWxsIHN5bmMgZXZlcnl0aGluZywgYnV0IGlmIG1ldGEvIGlzIGFub3Ro
+ZXIgZnMgdGhhdCBpc250IHRydWUuICBBdCB0aGUgZXZlcnkgbGVhc3QsIHRoZSBjb2RlIG5lZWRz
+IHRvIGJlIG1vZGlmaWVkIHRvIHN5bmMgdGhhdCBhcyB3ZWxsLg0KDQpUaGF0IHNhaWQsIHRoZXJl
+IGlzIGEgbG90IG9mIGltcHJvdmVtZW50IHRoYXQgY2FuIGJlIGhhZCBoZXJlLiAgVGhlIHRocmVl
+IHRoaW5ncyB3ZSB3cml0ZSBhcmU6DQoNCiB0aGUgcGcgbG9nDQogdGhlIHBnIGluZm8sIHNwcmVh
+ZCBhY3Jvc3MgdGhlIHBnIGRpciB4YXR0ciBhbmQgdGhhdCBwZ2luZm8gZmlsZSAgdGhlIGFjdHVh
+bCBpbw0KDQpUaGUgcGcgbG9nIGNvdWxkIGdvIGluIGxldmVsZGIsIHdoaWNoIHdvdWxkIHRyYW5z
+bGF0ZSB0aG9zZSB3cml0ZXMgaW50byBhIHNpbmdsZSBzZXF1ZW50aWFsIHN0cmVhbSBhY3Jvc3Mg
+dGhlIGVudGlyZSBPU0QuICBBbmQgdGhlIFBHIGluZm8gc2VwYXJhdGUgYmV0d2VlbiB0aGUgeGF0
+dHIgYW5kIHRoZSBmaWxlIGlzIGZhciBmcm9tIG9wdGltYWw6IG1vc3Qgb2YgdGhhdCBkYXRhIGRv
+ZXNuJ3QgYWN0dWFsbHkgY2hhbmdlIG9uIGVhY2ggd3JpdGUuICBXaGF0IGxpdHRsZSBkb2VzIGlz
+IHZlcnkgc21hbGwsIGFuZCBjb3VsZCBiZSBtb3ZlZCBpbnRvIHRoZSB4YXR0ciwgYXZvaWRpbmcg
+dG91Y2hpbmcgdGhlIGZpbGUgKHdoaWNoIG1lYW5zIGFuIGlub2RlICsgZGF0YSBibG9jayB3cml0
+ZSkgYXQgYWxsLg0KDQpXZSBuZWVkIHRvIGxvb2sgYSBiaXQgbW9yZSBjbG9zZWx5IHRvIHNlZSBo
+b3cgZGlmZmljdWx0IHRoYXQgd2lsbCByZWFsbHkgYmUgdG8gaW1wbGVtZW50LCBidXQgSSB0aGlu
+ayBpdCBpcyBwcm9taXNpbmchDQoNCnNhZ2UNCg0KDQo+IA0KPiAJCQkJCQkJCQkJCQkJCQkJCQkJ
+CQkJCQkJCQkJCQlYaWFveGkNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+TWFyayBOZWxzb24gW21haWx0bzptYXJrLm5lbHNvbkBpbmt0YW5rLmNvbV0NCj4gU2VudDogMjAx
+Mz8xPzEyPyAyMTozNg0KPiBUbzogWWFuLCBaaGVuZw0KPiBDYzogQ2hlbiwgWGlhb3hpOyBjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogU2VwZXJhdGUgbWV0YWRhdGEg
+ZGlzayBmb3IgT1NEDQo+IA0KPiBIaSBYaWFveGkgYW5kIFpoZW5nLA0KPiANCj4gV2UndmUgcGxh
+eWVkIHdpdGggYm90aCBvZiB0aGVzZSBzb21lIGludGVybmFsbHksIGJ1dCBub3QgZm9yIGEgcHJv
+ZHVjdGlvbiBkZXBsb3ltZW50LiBNb3N0bHkganVzdCBmb3IgZGlhZ25vc2luZyBwZXJmb3JtYW5j
+ZSBwcm9ibGVtcy4gDQo+ICAgSXQncyBiZWVuIGEgd2hpbGUgc2luY2UgSSBsYXN0IHBsYXllZCB3
+aXRoIHRoaXMsIGJ1dCBJIGhhZG4ndCBzZWVuIGEgd2hvbGUgbG90IG9mIHBlcmZvcm1hbmNlIGlt
+cHJvdmVtZW50cyBhdCB0aGUgdGltZS4gIFRoYXQgbWF5IGhhdmUgYmVlbiBkdWUgdG8gdGhlIGhh
+cmR3YXJlIGluIHVzZSwgb3IgcGVyaGFwcyBvdGhlciBwYXJ0cyBvZiBDZXBoIGhhdmUgaW1wcm92
+ZWQgdG8gdGhlIHBvaW50IHdoZXJlIHRoaXMgbWF0dGVycyBub3chDQo+IA0KPiBPbiBhIHNpZGUg
+bm90ZSwgQnRyZnMgYWxzbyBoYWQgYSBnb29nbGUgc3VtbWVyIG9mIGNvZGUgcHJvamVjdCB0byBs
+ZXQgeW91IHB1dCBtZXRhZGF0YSBvbiBhbiBleHRlcm5hbCBkZXZpY2UuICBPcmlnaW5hbGx5IEkg
+dGhpbmsgdGhhdCB3YXMgc3VwcG9zZWQgdG8gbWFrZSBpdCBpbnRvIDMuNywgYnV0IGFtIG5vdCBz
+dXJlIGlmIHRoYXQgaGFwcGVuZWQuDQo+IA0KPiBNYXJrDQo+IA0KPiBPbiAwMS8xMi8yMDEzIDA2
+OjIxIEFNLCBZYW4sIFpoZW5nIHdyb3RlOg0KPiA+IE9uIFNhdCwgSmFuIDEyLCAyMDEzIGF0IDI6
+NTcgUE0sIENoZW4sIFhpYW94aSA8eGlhb3hpLmNoZW5AaW50ZWwuY29tPiB3cm90ZToNCj4gPj4N
+Cj4gPj4gSGkgbGlzdCwNCj4gPj4gICAgICAgICAgRm9yIGEgcmJkIHdyaXRlIHJlcXVlc3QsIENl
+cGggbmVlZCB0byBkbyAzIHdyaXRlczoNCj4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41Mzk5Njcg
+N2Y1MmY1MTZjNzAwIDEwIGZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpIA0KPiA+Pl9kb190cmFuc2Fj
+dGlvbiBvbiAweDMyN2Q3OTANCj4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41Mzk5NzkgN2Y1MmY1
+MTZjNzAwIDE1IGZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpIA0KPiA+PndyaXRlIG1ldGEvNTE2Yjgw
+MWMvcGdsb2dfMi4xYS8wLy8tMSAzNjAxNX4xNDcNCj4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41
+NDAwMTYgN2Y1MmY1MTZjNzAwIDE1IGZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpDQo+ID4+cGF0aDog
+L2RhdGEvb3NkLjIxL2N1cnJlbnQvbWV0YS9ESVJfQy9wZ2xvZ1x1Mi4xYV9fMF81MTZCODAxQ19f
+bm9uZQ0KPiA+PiAyMDEzLTAxLTEwIDEzOjEwOjE1LjU0MDE2NCA3ZjUyZjUxNmM3MDAgMTUgZmls
+ZXN0b3JlKC9kYXRhL29zZC4yMSkgDQo+ID4+d3JpdGUgbWV0YS8yOGQyZjRhOC9wZ2luZm9fMi4x
+YS8wLy8tMSAwfjQ5Ng0KPiA+PiAyMDEzLTAxLTEwIDEzOjEwOjE1LjU0MDE4OSA3ZjUyZjUxNmM3
+MDAgMTUgZmlsZXN0b3JlKC9kYXRhL29zZC4yMSkNCj4gPj5wYXRoOiAvZGF0YS9vc2QuMjEvY3Vy
+cmVudC9tZXRhL0RJUl84L3BnaW5mb1x1Mi4xYV9fMF8yOEQyRjRBOF9fbm9uZQ0KPiA+PiAyMDEz
+LTAxLTEwIDEzOjEwOjE1LjU0MDIxNyA3ZjUyZjUxNmM3MDAgMTAgZmlsZXN0b3JlKC9kYXRhL29z
+ZC4yMSkgDQo+ID4+X2RvX3RyYW5zYWN0aW9uIG9uIDB4MzI3ZDcwOA0KPiA+PiAyMDEzLTAxLTEw
+IDEzOjEwOjE1LjU0MDIyMiA3ZjUyZjUxNmM3MDAgMTUgZmlsZXN0b3JlKC9kYXRhL29zZC4yMSkg
+DQo+ID4+d3JpdGUgMi4xYV9oZWFkLzhhYmYzNDFhL3JiLjAuMTA2ZS42YjhiNDU2Ny4wMDAwMDAw
+MDAyZDMvaGVhZC8vMg0KPiA+PjMyMjc2NDh+NTI0Mjg4DQo+ID4+IDIwMTMtMDEtMTAgMTM6MTA6
+MTUuNTQwMjQ1IDdmNTJmNTE2YzcwMCAxNSBmaWxlc3RvcmUoL2RhdGEvb3NkLjIxKQ0KPiA+PnBh
+dGg6IA0KPiA+Pi9kYXRhL29zZC4yMS9jdXJyZW50LzIuMWFfaGVhZC9yYi4wLjEwNmUuNmI4YjQ1
+NjcuMDAwMDAwMDAwMmQzX19oZWFkDQo+ID4+XzgNCj4gPj5BQkYzNDFBX18yDQo+ID4+bA0KPiA+
+PiAgICAgICAgICBJZiB1c2luZyBYRlMgYXMgYmFja2VuZCBmaWxlIHN5c3RlbSBhbmQgcnVubmlu
+ZyB4ZnMgb24gdG9wIG9mIHRyYWRpdGlvbmFsIHNhdGEgZGlzaywgaXQgd2lsbCBpbnRyb2R1Y2Ug
+YSBsb3Qgb2Ygc2Vla3MgYW5kIHRoZXJlZm9yZSByZWR1Y2UgYmFuZHdpZHRoLCBhIGJsa3RyYWNl
+IGlzIGF2YWlsYWJsZSBoZXJlIDooIGh0dHA6Ly93dzMuc2luYWltZy5jbi9tdzY5MC82ZTFhZWU0
+N2p3MWUwcXNieGJ2ZGRqLmpwZykgdG8gZGVtb25zdHJhdGUgdGhpcyBpc3N1ZS4oIHNpbmdsZSBj
+bGllbnQgcnVubmluZyBkZCBvbiB0b3Agb2YgYSBuZXcgUkJEIHZvbHVtZXMpLg0KPiA+PiAgICAg
+ICAgICBUaGVuIEkgdHJpZWQgdG8gbW92ZSAvb3NkLlgvY3VycmVudC9tZXRhIHRvIGEgc2VwYXJh
+dGUgZGlzaywgdGhlIGJhbmR3aWR0aCBib29zdGVkLihsb29rIGJsa3RyYWNlIGF0IGh0dHA6Ly93
+dzQuc2luYWltZy5jbi9tdzY5MC82ZTFhZWU0N2p3MWUwcXNhZHoxYmlqLmpwZykuDQo+ID4+ICAg
+ICAgICAgIEkgaGF2ZW4ndCB0ZXN0IG90aGVyIGFjY2VzcyBwYXR0ZXJuIG9yIHNvbWV0aGluZyBl
+bHNlLCBidXQgaXQgbG9va3MgdG8gbWUgdGhhdCBtb3Zpbmcgc3VjaCBtZXRhIHRvIGEgc2VwYXJh
+dGUgZGlzayAoc3NkIG9yIHNhdGEgd2l0aCBidHJmcykgd2lsbCBiZW5lZml0IGNlcGggd3JpdGUg
+cGVyZm9ybWFuY2UsIGlzIGl0IHRydWU/IFdpbGwgY2VwaCBpbnRyb2R1Y2UgdGhpcyBmZWF0dXJl
+IGluIHRoZSBmdXR1cmU/ICBJcyB0aGVyZSBhbnkgcG90ZW50aWFsIHByb2JsZW0gZm9yIHN1Y2gg
+aGFjaz8NCj4gPj4NCj4gPg0KPiA+IERpZCB5b3UgdHJ5IHB1dHRpbmcgWEZTIG1ldGFkYXRhIGxv
+ZyBhIHNlcGFyYXRlIGFuZCBmYXN0IGRldmljZSANCj4gPiAobWtmcy54ZnMgLWwgbG9nZGV2PS9k
+ZXYvc2RieCxzaXplPTEwMDAwYikuIEkgdGhpbmsgaXQgd2lsbCBib29zdCANCj4gPiBwZXJmb3Jt
+YW5jZSB0b28uDQo+ID4NCj4gPiBSZWdhcmRzDQo+ID4gWWFuLCBaaGVuZw0KPiA+IC0tDQo+ID4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiIA0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiA+IGluZm8gYXQgIGh0dHA6Ly92Z2Vy
+Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+DQo+IA0KPiBOPz8/P3k/Pz8/Yj8/
+Pz8/dj8/Pz8/ey5uPz8/Pz8/ej8/YXk/Pz8/Pz8/P2ogPz8/Zj8/Pz8/Pz8/Pz8/Pz8/Pz86K3Y/
+Pz8/Pz8/PyA/P3paKz8/Pz8/PyI/IT8NCg==
