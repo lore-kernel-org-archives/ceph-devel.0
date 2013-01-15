@@ -1,48 +1,65 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH] configure.ac: check for org.junit.rules.ExternalResource
-Date: Tue, 15 Jan 2013 09:36:22 -0800
-Message-ID: <CAPYLRzjacUuMBw_jy7oRZhKSkmtnwkncgQZdzrQ26gf2Z9f_vQ@mail.gmail.com>
-References: <1357767316-27868-1-git-send-email-danny.al-gaaf@bisect.de>
-	<CAPrxi58_D4PVhMAtABfKiRrXKZv0p4OUSfc+MuVkha0ndWPWxA@mail.gmail.com>
-	<BB8FDF50-D01D-4B4A-A201-8AEA43FFFA2D@inktank.com>
-	<50EE73F3.6050705@bisect.de>
-	<3EC7678C-6C3D-4E59-A5ED-FC9B2DC28C08@inktank.com>
-	<CAPrxi58uyBNJTvHnwKyALWN=f0XiiFicnDHOfWfOCT4tebqxxw@mail.gmail.com>
-	<50F51B9F.8020504@canonical.com>
-	<50F52218.9020106@bisect.de>
-	<CAPrxi59+Q234v50c9s_fiFH8__=Hc63pWmVLDDEZQGq_Lm8J_w@mail.gmail.com>
+From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
+Subject: Grid data placement
+Date: Tue, 15 Jan 2013 11:38:57 -0600
+Message-ID: <50F59431.3000401@bmrb.wisc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig91FEE9FEABD3F25A90219824"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:33645 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755255Ab3AORgW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 12:36:22 -0500
-Received: by mail-qc0-f169.google.com with SMTP id t2so242163qcq.0
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 09:36:22 -0800 (PST)
-In-Reply-To: <CAPrxi59+Q234v50c9s_fiFH8__=Hc63pWmVLDDEZQGq_Lm8J_w@mail.gmail.com>
+Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:45147 "EHLO
+	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755986Ab3AORpM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 12:45:12 -0500
+Received: from stingray.bmrb.wisc.edu (stingray.bmrb.wisc.edu [144.92.167.179])
+	by mail.bmrb.wisc.edu (Postfix) with ESMTP id 2DE292C00EF
+	for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 11:39:07 -0600 (CST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Danny Al-Gaaf <danny.al-gaaf@bisect.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, James Page <james.page@canonical.com>, Gary Lowell <gary.lowell@inktank.com>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Jan 15, 2013 at 6:55 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> On Tue, Jan 15, 2013 at 1:32 AM, Danny Al-Gaaf <danny.al-gaaf@bisect.de> wrote:
->> Am 15.01.2013 10:04, schrieb James Page:
->>> On 12/01/13 16:36, Noah Watkins wrote:
->>>> On Thu, Jan 10, 2013 at 9:13 PM, Gary Lowell
->>>> <gary.lowell@inktank.com> wrote:
->>
->> I would also prefer to not add another huge build dependency to ceph,
->> especially since it's e.g. not supported by SLES11 and since ceph
->> currently builds fine (even with these small warnings from autotools).
->
-> Ahh, I had in my head a separate repository for Java bindings managed
-> by maven (or ant). Either way, I have no strong opinion -- we only
-> have one junit dependency :)
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig91FEE9FEABD3F25A90219824
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I don't believe Ceph currently requires any Java to build, and it's
-going to remain that way if I have anything to say about it. ;) Hadoop
-bindings can be packaged in about a billion different ways that don't
-require core Ceph to depend on a Java toolchain.
--Greg
+Hi everyone,
+
+quick question: can I get ceph to replicate a bunch of files to every
+host in compute cluster and then have those hosts read those files from
+local disk?
+
+TFM looks like a custom crush map should get the files to [osd on] every
+host, but I'm not clear on the read step: do I need an mds on every host
+and mount the fs off localhost's mds?
+
+(We've $APP running on the cluster, normally one instance/cpu core, that
+mmap's (read only) ~30GB of binary files. I/O over NFS kills the cluster
+even with a few hosts. Currently the files are rsync'ed to every host at
+the start of the batch; that'll only scale to a few dozen hosts at best.)=
+
+
+TIA,
+--=20
+Dimitri Maziuk
+Programmer/sysadmin
+BioMagResBank, UW-Madison -- http://www.bmrb.wisc.edu
+
+
+
+
+--------------enig91FEE9FEABD3F25A90219824
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.14 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iD8DBQFQ9ZQ7xzG8ttqkbbgRAsiJAJ9prPu5wnGwuh6iIOgIBahDXBWdlACfQIzT
+RNDv4EnaZA0Xqb33BgRWyf4=
+=emjZ
+-----END PGP SIGNATURE-----
+
+--------------enig91FEE9FEABD3F25A90219824--
