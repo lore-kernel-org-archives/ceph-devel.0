@@ -1,26 +1,26 @@
-From: Sage Weil <sage@inktank.com>
-Subject: REMINDER: all argonaut users should upgrade to v0.48.3argonaut
-Date: Tue, 15 Jan 2013 13:49:54 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301151348330.24455@cobra.newdream.net>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Test infrastructure: 2 or more servers?
+Date: Tue, 15 Jan 2013 23:00:31 +0100
+Message-ID: <CAJH6TXhBucB2t-ZRmXf5bCZyNaTRJoSHZhoJ9hsW8mR7NxhWnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35273 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756929Ab3AOVtz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 16:49:55 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D500A80060
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 13:49:54 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id B210480060
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 13:49:54 -0800 (PST)
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:55144 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754012Ab3AOWAc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 17:00:32 -0500
+Received: by mail-wg0-f43.google.com with SMTP id e12so430306wge.22
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 14:00:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-That there are some critical bugs that are fixed in v0.48.3, including one 
-that can lead to data loss in power loss or kernel panic situations.  
-Please upgrade if you have not already done so!
+For a test infrastructure (that will be the definitive one after some
+months) do you think that starting with only 2 servers and many ODSs
+will be ok?
 
-sage
+OpenStack swift suggest at least 3 servers (due to it's replica = 3),
+with ceph is possible to start with 2 and then grow up to 3, 6 and so
+on?
+
+Is possible to change the number of replicas in realtime ?
