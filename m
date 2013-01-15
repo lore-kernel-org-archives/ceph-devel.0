@@ -1,57 +1,346 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their performance
- impact
-Date: Tue, 15 Jan 2013 11:46:36 -0600
-Message-ID: <50F595FC.7020903@inktank.com>
-References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com> <50F40C4B.6000301@inktank.com> <CAJH6TXir4HL0Z7jtEg2r0Or7LygawXQHp0Ou+jF-ow1zXZAryg@mail.gmail.com>
+From: <gregkh@linuxfoundation.org>
+Subject: Patch "rbd: kill create_snap sysfs entry" has been added to the 3.4-stable tree
+Date: Tue, 15 Jan 2013 10:13:58 -0800
+Message-ID: <13582736381900@kroah.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:51765 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751759Ab3AORqf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 12:46:35 -0500
-Received: by mail-ie0-f172.google.com with SMTP id c13so683670ieb.17
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 09:46:35 -0800 (PST)
-In-Reply-To: <CAJH6TXir4HL0Z7jtEg2r0Or7LygawXQHp0Ou+jF-ow1zXZAryg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Florian Haas <florian@hastexo.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: elder@inktank.com, ceph-devel@vger.kernel.org, josh.durgin@inktank.com
+Cc: stable@vger.kernel.org, stable-commits@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 01/15/2013 03:31 AM, Gandalf Corvotempesta wrote:
-> 2013/1/14 Mark Nelson <mark.nelson@inktank.com>:
->> The advice that I usually give people is that if performance is a big
->> concern, try to match filestore disk and journal performance is nearly
->> matched.  In my test setup, I use 1 intel 520 SSD to host 3 journals for
->> 7200rpm enterprise SATA disks.  A 1:4 ratio or even 1:6 ratio may also work
->> fine depending on various factors.  So far the limits I've hit with very
->> minimal tuning seem to be around 15 spinning disks and 5 SSDs for around
->> 1.4GB/s (2.8GB/s including journal writes) to one node.
->
-> Is this a ratio based on OSDs/SSDs or on OSDs/Server ?
-> For example, a server with 12 spinning disks plus 2 internal SSD should be used
-> for 12 OSDs. The first 6 will have journal on SSD1, the latest 6 will use SSD2.
->
-> In this case, ratio is 1:6, right?
-> Or are you referring to the whole server?
->
 
-OSDS/SSD I think if I understand you correctly. Basically you just want 
-to match OSD and Journal (and network) throughput to be relatively 
-similar.  That's not always easy given budgets and whether you are more 
-interested in sequential throughput or IOPs.
+This is a note to let you know that I've just added the patch titled
 
-I think the 12 bay supermicro 2U "A" chassis with 12 spinning disks, 
-10GbE, and two controllers is potentially a really nice balanced 
-combination.  You could go cheap controllers plus 2 fast SSDs (like 
-400-500MB/s seq) or more expensive controllers with WB cache and just 
-use the 12 spinning disks for data and journals (and keep the rear 
-drives for OS/logs/etc).  Either could potentially be good solutions 
-with slightly different performance characteristics.
+    rbd: kill create_snap sysfs entry
 
-Of course if you are going all out for IOPs, you probably would be 
-looking at a somewhat different kind of solution anyway.
+to the 3.4-stable tree which can be found at:
+    http://www.kernel.org/git/?p=linux/kernel/git/stable/stable-queue.git;a=summary
 
-Mark
+The filename of the patch is:
+     rbd-kill-create_snap-sysfs-entry.patch
+and it can be found in the queue-3.4 subdirectory.
+
+If you, or anyone else, feels it should not be added to the stable tree,
+please let <stable@vger.kernel.org> know about it.
+
+
+From cd9155deb01c86a31836e9a963c208666f5d5abc Mon Sep 17 00:00:00 2001
+From: Alex Elder <elder@inktank.com>
+Date: Fri, 10 Aug 2012 13:12:10 -0700
+Subject: rbd: kill create_snap sysfs entry
+
+
+From: Alex Elder <elder@inktank.com>
+
+Josh proposed the following change, and I don't think I could
+explain it any better than he did:
+
+    From: Josh Durgin <josh.durgin@inktank.com>
+    Date: Tue, 24 Jul 2012 14:22:11 -0700
+    To: ceph-devel <ceph-devel@vger.kernel.org>
+    Message-ID: <500F1203.9050605@inktank.com>
+    From: Josh Durgin <josh.durgin@inktank.com>
+
+
+    Right now the kernel still has one piece of rbd management
+    duplicated from the rbd command line tool: snapshot creation.
+    There's nothing special about snapshot creation that makes it
+    advantageous to do from the kernel, so I'd like to remove the
+    create_snap sysfs interface.  That is,
+	/sys/bus/rbd/devices/<id>/create_snap
+    would be removed.
+
+    Does anyone rely on the sysfs interface for creating rbd
+    snapshots?  If so, how hard would it be to replace with:
+
+	rbd snap create pool/image@snap
+
+    Is there any benefit to the sysfs interface that I'm missing?
+
+    Josh
+
+This patch implements this proposal, removing the code that
+implements the "snap_create" sysfs interface for rbd images.
+As a result, quite a lot of other supporting code goes away.
+
+[elder@inktank.com: commented out rbd_req_sync_exec() to avoid warning]
+
+Suggested-by: Josh Durgin <josh.durgin@inktank.com>
+Signed-off-by: Alex Elder <elder@inktank.com>
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+(based on commit 02cdb02ceab1f3dd9ac2bc899fc51f0e0e744782)
+---
+ Documentation/ABI/testing/sysfs-bus-rbd |    6 -
+ drivers/block/rbd.c                     |  165 --------------------------------
+ 2 files changed, 2 insertions(+), 169 deletions(-)
+
+--- a/Documentation/ABI/testing/sysfs-bus-rbd
++++ b/Documentation/ABI/testing/sysfs-bus-rbd
+@@ -51,12 +51,6 @@ current_snap
+ 
+ 	The current snapshot for which the device is mapped.
+ 
+-create_snap
+-
+-	Create a snapshot:
+-
+-	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
+-
+ snap_*
+ 
+ 	A directory per each snapshot
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -201,10 +201,6 @@ static DEFINE_SPINLOCK(rbd_client_list_l
+ 
+ static int __rbd_init_snaps_header(struct rbd_device *rbd_dev);
+ static void rbd_dev_release(struct device *dev);
+-static ssize_t rbd_snap_add(struct device *dev,
+-			    struct device_attribute *attr,
+-			    const char *buf,
+-			    size_t count);
+ static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
+ 				  struct rbd_snap *snap);
+ 
+@@ -1307,71 +1303,7 @@ static int rbd_req_sync_unwatch(struct r
+ 	return ret;
+ }
+ 
+-struct rbd_notify_info {
+-	struct rbd_device *dev;
+-};
+-
+-static void rbd_notify_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
+-{
+-	struct rbd_device *dev = (struct rbd_device *)data;
+-	if (!dev)
+-		return;
+-
+-	dout("rbd_notify_cb %s notify_id=%lld opcode=%d\n", dev->obj_md_name,
+-		notify_id, (int)opcode);
+-}
+-
+-/*
+- * Request sync osd notify
+- */
+-static int rbd_req_sync_notify(struct rbd_device *dev,
+-		          const char *obj)
+-{
+-	struct ceph_osd_req_op *ops;
+-	struct ceph_osd_client *osdc = &dev->rbd_client->client->osdc;
+-	struct ceph_osd_event *event;
+-	struct rbd_notify_info info;
+-	int payload_len = sizeof(u32) + sizeof(u32);
+-	int ret;
+-
+-	ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_NOTIFY, payload_len);
+-	if (ret < 0)
+-		return ret;
+-
+-	info.dev = dev;
+-
+-	ret = ceph_osdc_create_event(osdc, rbd_notify_cb, 1,
+-				     (void *)&info, &event);
+-	if (ret < 0)
+-		goto fail;
+-
+-	ops[0].watch.ver = 1;
+-	ops[0].watch.flag = 1;
+-	ops[0].watch.cookie = event->cookie;
+-	ops[0].watch.prot_ver = RADOS_NOTIFY_VER;
+-	ops[0].watch.timeout = 12;
+-
+-	ret = rbd_req_sync_op(dev, NULL,
+-			       CEPH_NOSNAP,
+-			       0,
+-			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+-			       ops,
+-			       1, obj, 0, 0, NULL, NULL, NULL);
+-	if (ret < 0)
+-		goto fail_event;
+-
+-	ret = ceph_osdc_wait_event(event, CEPH_OSD_TIMEOUT_DEFAULT);
+-	dout("ceph_osdc_wait_event returned %d\n", ret);
+-	rbd_destroy_ops(ops);
+-	return 0;
+-
+-fail_event:
+-	ceph_osdc_cancel_event(event);
+-fail:
+-	rbd_destroy_ops(ops);
+-	return ret;
+-}
+-
++#if 0
+ /*
+  * Request sync osd read
+  */
+@@ -1411,6 +1343,7 @@ static int rbd_req_sync_exec(struct rbd_
+ 	dout("cls_exec returned %d\n", ret);
+ 	return ret;
+ }
++#endif
+ 
+ static struct rbd_req_coll *rbd_alloc_coll(int num_reqs)
+ {
+@@ -1645,57 +1578,6 @@ out_dh:
+ 	return rc;
+ }
+ 
+-/*
+- * create a snapshot
+- */
+-static int rbd_header_add_snap(struct rbd_device *dev,
+-			       const char *snap_name,
+-			       gfp_t gfp_flags)
+-{
+-	int name_len = strlen(snap_name);
+-	u64 new_snapid;
+-	int ret;
+-	void *data, *p, *e;
+-	u64 ver;
+-	struct ceph_mon_client *monc;
+-
+-	/* we should create a snapshot only if we're pointing at the head */
+-	if (dev->snap_id != CEPH_NOSNAP)
+-		return -EINVAL;
+-
+-	monc = &dev->rbd_client->client->monc;
+-	ret = ceph_monc_create_snapid(monc, dev->poolid, &new_snapid);
+-	dout("created snapid=%lld\n", new_snapid);
+-	if (ret < 0)
+-		return ret;
+-
+-	data = kmalloc(name_len + 16, gfp_flags);
+-	if (!data)
+-		return -ENOMEM;
+-
+-	p = data;
+-	e = data + name_len + 16;
+-
+-	ceph_encode_string_safe(&p, e, snap_name, name_len, bad);
+-	ceph_encode_64_safe(&p, e, new_snapid, bad);
+-
+-	ret = rbd_req_sync_exec(dev, dev->obj_md_name, "rbd", "snap_add",
+-				data, p - data, &ver);
+-
+-	kfree(data);
+-
+-	if (ret < 0)
+-		return ret;
+-
+-	down_write(&dev->header_rwsem);
+-	dev->header.snapc->seq = new_snapid;
+-	up_write(&dev->header_rwsem);
+-
+-	return 0;
+-bad:
+-	return -ERANGE;
+-}
+-
+ static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
+ {
+ 	struct rbd_snap *snap;
+@@ -1923,7 +1805,6 @@ static DEVICE_ATTR(pool, S_IRUGO, rbd_po
+ static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
+ static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
+ static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
+-static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
+ 
+ static struct attribute *rbd_attrs[] = {
+ 	&dev_attr_size.attr,
+@@ -1933,7 +1814,6 @@ static struct attribute *rbd_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_current_snap.attr,
+ 	&dev_attr_refresh.attr,
+-	&dev_attr_create_snap.attr,
+ 	NULL
+ };
+ 
+@@ -2563,47 +2443,6 @@ done:
+ 	return ret;
+ }
+ 
+-static ssize_t rbd_snap_add(struct device *dev,
+-			    struct device_attribute *attr,
+-			    const char *buf,
+-			    size_t count)
+-{
+-	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+-	int ret;
+-	char *name = kmalloc(count + 1, GFP_KERNEL);
+-	if (!name)
+-		return -ENOMEM;
+-
+-	snprintf(name, count, "%s", buf);
+-
+-	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-
+-	ret = rbd_header_add_snap(rbd_dev,
+-				  name, GFP_KERNEL);
+-	if (ret < 0)
+-		goto err_unlock;
+-
+-	ret = __rbd_update_snaps(rbd_dev);
+-	if (ret < 0)
+-		goto err_unlock;
+-
+-	/* shouldn't hold ctl_mutex when notifying.. notify might
+-	   trigger a watch callback that would need to get that mutex */
+-	mutex_unlock(&ctl_mutex);
+-
+-	/* make a best effort, don't error if failed */
+-	rbd_req_sync_notify(rbd_dev, rbd_dev->obj_md_name);
+-
+-	ret = count;
+-	kfree(name);
+-	return ret;
+-
+-err_unlock:
+-	mutex_unlock(&ctl_mutex);
+-	kfree(name);
+-	return ret;
+-}
+-
+ /*
+  * create control files in sysfs
+  * /sys/bus/rbd/...
+
+
+Patches currently in stable-queue which might be from elder@inktank.com are
+
+queue-3.4/libceph-remove-osdtimeout-option.patch
+queue-3.4/rbd-use-reference-counting-for-the-snap-context.patch
+queue-3.4/libceph-move-linger-requests-sooner-in-kick_requests.patch
+queue-3.4/ceph-tolerate-and-warn-on-extraneous-dentry-from-mds.patch
+queue-3.4/ceph-don-t-reference-req-after-put.patch
+queue-3.4/ceph-close-old-con-before-reopening-on-mds-reconnect.patch
+queue-3.4/libceph-fix-osdmap-decode-error-paths.patch
+queue-3.4/libceph-fix-protocol-feature-mismatch-failure-path.patch
+queue-3.4/libceph-warn-don-t-bug-on-unexpected-connection-states.patch
+queue-3.4/rbd-do-not-allow-remove-of-mounted-on-image.patch
+queue-3.4/libceph-socket-can-close-in-any-connection-state.patch
+queue-3.4/libceph-init-osd-o_node-in-create_osd.patch
+queue-3.4/libceph-init-event-node-in-ceph_osdc_create_event.patch
+queue-3.4/libceph-don-t-use-rb_init_node-in-ceph_osdc_alloc_request.patch
+queue-3.4/rbd-return-errors-for-mapped-but-deleted-snapshot.patch
+queue-3.4/rbd-remove-linger-unconditionally.patch
+queue-3.4/ceph-propagate-layout-error-on-osd-request-creation.patch
+queue-3.4/rbd-kill-create_snap-sysfs-entry.patch
+queue-3.4/rbd-drop-dev-reference-on-error-in-rbd_open.patch
+queue-3.4/libceph-avoid-using-freed-osd-in-__kick_osd_requests.patch
+queue-3.4/rbd-set-image-size-when-header-is-updated.patch
+queue-3.4/rbd-only-reset-capacity-when-pointing-to-head.patch
+queue-3.4/libceph-always-reset-osds-when-kicking.patch
+queue-3.4/rbd-fix-bug-in-rbd_dev_id_put.patch
+queue-3.4/libceph-report-connection-fault-with-warning.patch
+queue-3.4/rbd-add-read_only-rbd-map-option.patch
+queue-3.4/libceph-unlock-unprocessed-pages-in-start_read-error-path.patch
+queue-3.4/rbd-bug-on-invalid-layout.patch
+queue-3.4/libceph-register-request-before-unregister-linger.patch
+queue-3.4/rbd-kill-notify_timeout-option.patch
+queue-3.4/rbd-expose-the-correct-size-of-the-device-in-sysfs.patch
+queue-3.4/rbd-send-header-version-when-notifying.patch
