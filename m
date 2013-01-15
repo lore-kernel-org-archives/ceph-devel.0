@@ -1,134 +1,127 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH 1/2] rbd: define flags field, use it for exists flag
-Date: Mon, 14 Jan 2013 22:09:08 -0800
-Message-ID: <50F4F284.9090002@inktank.com>
-References: <50F4535A.6030601@inktank.com> <50F4538B.4010106@inktank.com> <50F46B40.9010907@inktank.com> <50F4776F.2080407@inktank.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Slow requests
+Date: Tue, 15 Jan 2013 08:13:26 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5D3F77@SHSMSX102.ccr.corp.intel.com>
+References: <50CDD3DB.7000501@mermaidconsulting.dk>
+ <C4049E4484F13747B672D64B9C12C31328DADAC9@PWMAILM01.cscinfo.com>
+ <alpine.DEB.2.00.1212161454110.18820@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="ks_c_5601-1987"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f49.google.com ([209.85.160.49]:60049 "EHLO
-	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751230Ab3AOGJM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 01:09:12 -0500
-Received: by mail-pb0-f49.google.com with SMTP id un15so2633934pbc.22
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jan 2013 22:09:11 -0800 (PST)
-In-Reply-To: <50F4776F.2080407@inktank.com>
+Received: from mga11.intel.com ([192.55.52.93]:35922 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753645Ab3AOINb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Jan 2013 03:13:31 -0500
+In-Reply-To: <alpine.DEB.2.00.1212161454110.18820@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, "Holcombe, Christopher" <cholcomb@cscinfo.com>
+Cc: =?ks_c_5601-1987?B?SmVucyBLcmlzdGlhbiBTqapnYWFyZA==?= <jens@mermaidconsulting.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I think I agree that the claim is that the onus is on the set, and so
-I think the proposed code is safe.
-
-On 01/14/2013 01:23 PM, Alex Elder wrote:
-> On 01/14/2013 02:32 PM, Dan Mick wrote:
->> I see that set_bit is atomic, but I don't see that test_bit is.  Am I
->> missing a subtlety?
->
-> That's an interesting observation.  I'm certain it's safe, but
-> I needed to research it a bit, and I still haven't verified it
-> to my satisfaction.
->
-> I *think* (but please look over the following and see if you
-> come to the same conclusion) that this operation doesn't need
-> to be made atomic, because the implementation of the routines
-> that implement the "set" operations guarantee their effects are
-> visible once they are done.
->
-> But I'm not sure whether "visible" here means precisely that
-> another CPU will be forced to go read the updated memory when
-> it calls test_bit().
->
-> http://www.kernel.org/doc/Documentation/atomic_ops.txt
-> The section of interest can be found by looking for the
-> sentence I'm talking about:
->    Likewise, the atomic bit operation must be visible globally before any
->    subsequent memory operation is made visible.
->
-> It doesn't come right and explain it though.  Please let me
-> know what you think.
->
-> 					-Alex
->
->
->> On 01/14/2013 10:50 AM, Alex Elder wrote:
->>> Define a new rbd device flags field, manipulated using atomic bit
->>> operations.  Replace the use of the current "exists" flag with a
->>> bit in this new "flags" field.
->>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>    drivers/block/rbd.c |   17 ++++++++++++-----
->>>    1 file changed, 12 insertions(+), 5 deletions(-)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index 02002b1..9eb1631 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -232,7 +232,7 @@ struct rbd_device {
->>>        spinlock_t        lock;        /* queue lock */
->>>
->>>        struct rbd_image_header    header;
->>> -    atomic_t        exists;
->>> +    unsigned long        flags;
->>>        struct rbd_spec        *spec;
->>>
->>>        char            *header_name;
->>> @@ -260,6 +260,12 @@ struct rbd_device {
->>>        unsigned long        open_count;
->>>    };
->>>
->>> +/* Flag bits for rbd_dev->flags */
->>> +
->>> +enum rbd_dev_flags {
->>> +    rbd_dev_flag_exists,    /* mapped snapshot has not been deleted */
->>> +};
->>> +
->>>    static DEFINE_MUTEX(ctl_mutex);      /* Serialize
->>> open/close/setup/teardown */
->>>
->>>    static LIST_HEAD(rbd_dev_list);    /* devices */
->>> @@ -756,7 +762,8 @@ static int rbd_dev_set_mapping(struct rbd_device
->>> *rbd_dev)
->>>                goto done;
->>>            rbd_dev->mapping.read_only = true;
->>>        }
->>> -    atomic_set(&rbd_dev->exists, 1);
->>> +    set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
->>> +
->>>    done:
->>>        return ret;
->>>    }
->>> @@ -1654,7 +1661,7 @@ static void rbd_rq_fn(struct request_queue *q)
->>>                snapc = ceph_get_snap_context(rbd_dev->header.snapc);
->>>                up_read(&rbd_dev->header_rwsem);
->>>                rbd_assert(snapc != NULL);
->>> -        } else if (!atomic_read(&rbd_dev->exists)) {
->>> +        } else if (!test_bit(rbd_dev_flag_exists, &rbd_dev->flags)) {
->>>                rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
->>>                dout("request for non-existent snapshot");
->>>                result = -ENXIO;
->>> @@ -2270,7 +2277,7 @@ struct rbd_device *rbd_dev_create(struct
->>> rbd_client *rbdc,
->>>            return NULL;
->>>
->>>        spin_lock_init(&rbd_dev->lock);
->>> -    atomic_set(&rbd_dev->exists, 0);
->>> +    rbd_dev->flags = 0;
->>>        INIT_LIST_HEAD(&rbd_dev->node);
->>>        INIT_LIST_HEAD(&rbd_dev->snaps);
->>>        init_rwsem(&rbd_dev->header_rwsem);
->>> @@ -2902,7 +2909,7 @@ static int rbd_dev_snaps_update(struct rbd_device
->>> *rbd_dev)
->>>                /* Existing snapshot not in the new snap context */
->>>
->>>                if (rbd_dev->spec->snap_id == snap->id)
->>> -                atomic_set(&rbd_dev->exists, 0);
->>> +                set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
->>>                rbd_remove_snap_dev(snap);
->>>                dout("%ssnap id %llu has been removed\n",
->>>                    rbd_dev->spec->snap_id == snap->id ?
->>>
->
+SGksDQoJSSBoYXZlIGFsc28gc2VlbiB0aGUgc2FtZSB3YXJuaW5nIGV2ZW4gd2hlbiBJIHVzZSB2
+MC41Ni4xIChib3RoIGtlcm5lbCByYmQgYW5kIE9TRCBzaWRlKSB3aGVuIHdyaXRlIHN0cmVzcyBp
+cyBoaWdoIGVub3VnaChTYXkgSSBoYXZlIDMgb3NkcyBidXQgaGF2aW5nIDR+NSBjbGllbnRzIGRv
+aW5nIGRkIG9uIHRvcCBvZiB0aGUgcmJkKS4NCjIwMTMtMDEtMTUgMTU6NTQ6MDUuOTkwMDUyIDdm
+Zjk3ZGQwYzcwMCAgMCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QgMzIuNTQ1NjI0IHNlY29uZHMg
+b2xkLCByZWNlaXZlZCBhdCAyMDEzLTAxLTE1IDE1OjUzOjMzLjQ0NDM0ODogb3NkX29wKGNsaWVu
+dC40MTI1LjE6NTE1NzQgcmIuMC4xMDBmLjZiOGI0NTY3LjAwMDAwMDAwMDgyNyBbd3JpdGUgMzY3
+MDAxNn41MjQyODhdIDIuMWFlODI1MmMpIGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQoy
+MDEzLTAxLTE1IDE1OjU0OjA1Ljk5MDA1NSA3ZmY5N2RkMGM3MDAgIDAgbG9nIFtXUk5dIDogc2xv
+dyByZXF1ZXN0IDMyLjUzMzE5NyBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wMS0xNSAx
+NTo1MzozMy40NTY3NzU6IG9zZF9vcChjbGllbnQuNDEyNS4xOjUxNTk5IHJiLjAuMTAwZS42Yjhi
+NDU2Ny4wMDAwMDAwMDA3YTcgW3dyaXRlIDM1MjI1NjB+NTI0Mjg4XSAyLjU0YmNmNzk3KSBjdXJy
+ZW50bHkgd2FpdGluZyBmb3Igc3ViIG9wcw0KMjAxMy0wMS0xNSAxNTo1NDowNS45OTAwNTggN2Zm
+OTdkZDBjNzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdCAzMi41MTk3Mzggc2Vjb25kcyBv
+bGQsIHJlY2VpdmVkIGF0IDIwMTMtMDEtMTUgMTU6NTM6MzMuNDcwMjM0OiBvc2Rfb3AoY2xpZW50
+LjQxMjUuMTo1MTYwMCByYi4wLjEwMGUuNmI4YjQ1NjcuMDAwMDAwMDAwN2E3IFt3cml0ZSA0MDQ2
+ODQ4fjE0NzQ1Nl0gMi41NGJjZjc5NykgY3VycmVudGx5IHdhaXRpbmcgZm9yIHN1YiBvcHMNCjIw
+MTMtMDEtMTUgMTU6NTQ6MDYuOTkwMzU1IDdmZjk3ZGQwYzcwMCAgMCBsb2cgW1dSTl0gOiAyIHNs
+b3cgcmVxdWVzdHMsIDIgaW5jbHVkZWQgYmVsb3c7IG9sZGVzdCBibG9ja2VkIGZvciA+IDMzLjIy
+NTc3MyBzZWNzDQoyMDEzLTAxLTE1IDE1OjU0OjA2Ljk5MDM2NiA3ZmY5N2RkMGM3MDAgIDAgbG9n
+IFtXUk5dIDogc2xvdyByZXF1ZXN0IDMzLjIyNTc3MyBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQg
+MjAxMy0wMS0xNSAxNTo1MzozMy43NjQ1NDA6IG9zZF9vcChjbGllbnQuNDEyNS4xOjUxNjY1IHJi
+LjAuMTAwZi42YjhiNDU2Ny4wMDAwMDAwMDA4MmUgW3dyaXRlIDMxNDU3Mjh+NTI0Mjg4XSAyLjNj
+MDBhMGZiKSBjdXJyZW50bHkgd2FpdGluZyBmb3Igc3ViIG9wcw0KMjAxMy0wMS0xNSAxNTo1NDow
+Ni45OTAzNzEgN2ZmOTdkZDBjNzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdCAzMy4yMjEz
+NDMgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTMtMDEtMTUgMTU6NTM6MzMuNzY4OTcwOiBv
+c2Rfb3AoY2xpZW50LjQxMjUuMTo1MTY2NiByYi4wLjEwMGYuNmI4YjQ1NjcuMDAwMDAwMDAwODJl
+IFt3cml0ZSAzNjcwMDE2fjUyNDI4OF0gMi4zYzAwYTBmYikgY3VycmVudGx5IHdhaXRpbmcgZm9y
+IHN1YiBvcHMNCjIwMTMtMDEtMTUgMTU6NTQ6MTguOTkzNzU5IDdmZjk3ZGQwYzcwMCAgMCBsb2cg
+W1dSTl0gOiA2IHNsb3cgcmVxdWVzdHMsIDYgaW5jbHVkZWQgYmVsb3c7IG9sZGVzdCBibG9ja2Vk
+IGZvciA+IDMwLjMxMzE5NCBzZWNzDQoyMDEzLTAxLTE1IDE1OjU0OjE4Ljk5Mzc2OSA3ZmY5N2Rk
+MGM3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0IDMwLjMxMzE5NCBzZWNvbmRzIG9sZCwg
+cmVjZWl2ZWQgYXQgMjAxMy0wMS0xNSAxNTo1Mzo0OC42ODA0ODg6IG9zZF9vcChjbGllbnQuNDEy
+NS4xOjUyMzMzIHJiLjAuMTAwZC42YjhiNDU2Ny4wMDAwMDAwMDA4NTEgW3dyaXRlIDEwNDg1NzZ+
+NTI0Mjg4XSAyLjQzYjc2MDk5KSBjdXJyZW50bHkgd2FpdGluZyBmb3Igc3ViIG9wcw0KMjAxMy0w
+MS0xNSAxNTo1NDoxOC45OTM3NzQgN2ZmOTdkZDBjNzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVx
+dWVzdCAzMC4zMDg4MDAgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTMtMDEtMTUgMTU6NTM6
+NDguNjg0ODgyOiBvc2Rfb3AoY2xpZW50LjQxMjUuMTo1MjMzNCByYi4wLjEwMGQuNmI4YjQ1Njcu
+MDAwMDAwMDAwODUxIFt3cml0ZSAxNTcyODY0fjUyNDI4OF0gMi40M2I3NjA5OSkgY3VycmVudGx5
+IHdhaXRpbmcgZm9yIHN1YiBvcHMNCjIwMTMtMDEtMTUgMTU6NTQ6MTguOTkzNzc4IDdmZjk3ZGQw
+YzcwMCAgMCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QgMzAuMzA0Mzg5IHNlY29uZHMgb2xkLCBy
+ZWNlaXZlZCBhdCAyMDEzLTAxLTE1IDE1OjUzOjQ4LjY4OTI5Mzogb3NkX29wKGNsaWVudC40MTI1
+LjE6NTIzMzUgcmIuMC4xMDBkLjZiOGI0NTY3LjAwMDAwMDAwMDg1MSBbd3JpdGUgMjA5NzE1Mn41
+MjQyODhdIDIuNDNiNzYwOTkpIGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQoyMDEzLTAx
+LTE1IDE1OjU0OjE4Ljk5Mzc4MiA3ZmY5N2RkMGM3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1
+ZXN0IDMwLjI5OTc4MyBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wMS0xNSAxNTo1Mzo0
+OC42OTM4OTk6IG9zZF9vcChjbGllbnQuNDEyNS4xOjUyMzM2IHJiLjAuMTAwZC42YjhiNDU2Ny4w
+MDAwMDAwMDA4NTEgW3dyaXRlIDI2MjE0NDB+NTI0Mjg4XSAyLjQzYjc2MDk5KSBjdXJyZW50bHkg
+d2FpdGluZyBmb3Igc3ViIG9wcw0KMjAxMy0wMS0xNSAxNTo1NDoxOC45OTM3ODcgN2ZmOTdkZDBj
+NzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdCAzMC4yOTUzNDAgc2Vjb25kcyBvbGQsIHJl
+Y2VpdmVkIGF0IDIwMTMtMDEtMTUgMTU6NTM6NDguNjk4MzQyOiBvc2Rfb3AoY2xpZW50LjQxMjUu
+MTo1MjMzNyByYi4wLjEwMGQuNmI4YjQ1NjcuMDAwMDAwMDAwODUxIFt3cml0ZSAzMTQ1NzI4fjUy
+NDI4OF0gMi40M2I3NjA5OSkgY3VycmVudGx5IHdhaXRpbmcgZm9yIHN1YiBvcHMgDQoNCgkJCQkJ
+CQkJCQkJCQkJCQkJCQkJCQkJCQkJWGlhb3hpDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVs
+LW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KU2VudDogMjAx
+MtK0MTLqxTE37O0gNjo1NQ0KVG86IEhvbGNvbWJlLCBDaHJpc3RvcGhlcg0KQ2M6IEplbnMgS3Jp
+c3RpYW4gU6mqZ2FhcmQ7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSRTog
+U2xvdyByZXF1ZXN0cw0KDQp2MC41MiBpcyBhbHNvIHF1aXRlIG9sZC4gIFRoaXMgd2FzIHJlc29s
+dmVkIGluIHYwLjU1LCBJIGJlbGlldmUuICBXaGVyZSBhcmUgeW91IGxvb2tpbmcgZm9yIHRoZSBS
+UE1zPyAgdjAuNTUgc2hvdWxkIGJlIHRoZXJlLi4uDQoNCnNhZ2UNCg0KDQpPbiBTdW4sIDE2IERl
+YyAyMDEyLCBIb2xjb21iZSwgQ2hyaXN0b3BoZXIgd3JvdGU6DQoNCj4gSSBoZWFyZCB0aGUgc29s
+dXRpb24gZm9yIHRoaXMgd2FzIHRvIHJlc3RhcnQgdGhlIG9zZCdzLiAgVGhhdCBmaXhlZCBpdCBm
+b3IgbWUuDQo+IA0KPiAtQ2hyaXMNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgt
+ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSmVucyBLcmlzdGlhbiAN
+Cj4gUz9nYWFyZA0KPiBTZW50OiBTdW5kYXksIERlY2VtYmVyIDE2LCAyMDEyIDk6MDAgQU0NCj4g
+VG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFNsb3cgcmVxdWVzdHMN
+Cj4gDQo+IEhpLA0KPiANCj4gTXkgbG9nIGlzIGZpbGxpbmcgdXAgd2l0aCB3YXJuaW5ncyBhYm91
+dCBhIHNpbmdsZSBzbG93IHJlcXVlc3QgdGhhdCBoYXMgYmVlbiBhcm91bmQgZm9yIGEgdmVyeSBs
+b25nIHRpbWU6DQo+IA0KPiBvc2QuMSAxMC4wLjAuMjo2ODAwLzkwMCAxNjI5MjYgOiBbV1JOXSAx
+IHNsb3cgcmVxdWVzdHMsIDEgaW5jbHVkZWQgDQo+IGJlbG93OyBvbGRlc3QgYmxvY2tlZCBmb3Ig
+PiA4NDQ0Ni4zMTIwNTEgc2Vjcw0KPiANCj4gb3NkLjEgMTAuMC4wLjI6NjgwMC85MDAgMTYyOTI3
+IDogW1dSTl0gc2xvdyByZXF1ZXN0IDg0NDQ2LjMxMjA1MSBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQg
+YXQgMjAxMi0xMi0xNSAxNToyNzo1Ni44OTE0Mzc6DQo+IG9zZF9zdWJfb3AoY2xpZW50LjQ1Mjgu
+MDoxOTYwMjIxOSAwLmZlDQo+IDM4MDdiNWZlL3JiLjAuMTFiNy40YTkzM2JhYS4wMDAwMDAwODYy
+OWUvaGVhZC8vMCBbXSB2IDUzJzE4NTg4OCANCj4gc25hcHNldD0wPVtdOltdIHNuYXBjPTA9W10p
+IHY3IGN1cnJlbnRseSBzdGFydGVkDQo+IA0KPiANCj4gSG93IGNhbiBJIGlkZW50aWZ5IHRoZSBj
+YXVzZSBvZiB0aGlzIGFuZCBob3cgY2FuIEkgY2FuY2VsIHRoaXMgcmVxdWVzdD8NCj4gDQo+IEkn
+bSBydW5uaW5nIENlcGggb24gRmVkb3JhIDE3IHVzaW5nIHRoZSBsYXRlc3QgUlBNcyBhdmFpbGFi
+bGUgZnJvbSBjZXBoLmNvbSAoMC41Mi02KS4NCj4gDQo+IA0KPiBUaGFua3MgaW4gYWR2YW5jZSwN
+Cj4gLS0NCj4gSmVucyBLcmlzdGlhbiBTP2dhYXJkLCBNZXJtYWlkIENvbnN1bHRpbmcgQXBTLCAN
+Cj4gamVuc0BtZXJtYWlkY29uc3VsdGluZy5kaywgaHR0cDovL3d3dy5tZXJtYWlkY29uc3VsdGlu
+Zy5jb20vDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQg
+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiANCj4gX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gDQo+IE5PVElDRTogVGhpcyBlLW1haWwgYW5k
+IGFueSBhdHRhY2htZW50cyBpcyBpbnRlbmRlZCBvbmx5IGZvciB1c2UgYnkgdGhlIGFkZHJlc3Nl
+ZShzKSBuYW1lZCBoZXJlaW4gYW5kIG1heSBjb250YWluIGxlZ2FsbHkgcHJpdmlsZWdlZCwgcHJv
+cHJpZXRhcnkgb3IgY29uZmlkZW50aWFsIGluZm9ybWF0aW9uLiBJZiB5b3UgYXJlIG5vdCB0aGUg
+aW50ZW5kZWQgcmVjaXBpZW50IG9mIHRoaXMgZS1tYWlsLCB5b3UgYXJlIGhlcmVieSBub3RpZmll
+ZCB0aGF0IGFueSBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24gb3IgY29weWluZyBvZiB0aGlz
+IGVtYWlsLCBhbmQgYW55IGF0dGFjaG1lbnRzIHRoZXJldG8sIGlzIHN0cmljdGx5IHByb2hpYml0
+ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZW1haWwgaW4gZXJyb3IgcGxlYXNlIGltbWVkaWF0ZWx5
+IG5vdGlmeSBtZSB2aWEgcmVwbHkgZW1haWwgb3IgYXQgKDgwMCkgOTI3LTk4MDAgYW5kIHBlcm1h
+bmVudGx5IGRlbGV0ZSB0aGUgb3JpZ2luYWwgY29weSBhbmQgYW55IGNvcHkgb2YgYW55IGUtbWFp
+bCwgYW5kIGFueSBwcmludG91dC4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+byANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+DQo+IA0KPiANCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
+am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
