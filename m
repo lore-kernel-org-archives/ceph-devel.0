@@ -1,26 +1,28 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Test infrastructure: 2 or more servers?
-Date: Tue, 15 Jan 2013 23:00:31 +0100
-Message-ID: <CAJH6TXhBucB2t-ZRmXf5bCZyNaTRJoSHZhoJ9hsW8mR7NxhWnA@mail.gmail.com>
+From: Xing Lin <xinglin@cs.utah.edu>
+Subject: Re: Test infrastructure: 2 or more servers?
+Date: Tue, 15 Jan 2013 15:03:55 -0700
+Message-ID: <50F5D24B.70308@cs.utah.edu>
+References: <CAJH6TXhBucB2t-ZRmXf5bCZyNaTRJoSHZhoJ9hsW8mR7NxhWnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f43.google.com ([74.125.82.43]:55144 "EHLO
-	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754012Ab3AOWAc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 17:00:32 -0500
-Received: by mail-wg0-f43.google.com with SMTP id e12so430306wge.22
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 14:00:31 -0800 (PST)
+Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:36135 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755632Ab3AOWEB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 17:04:01 -0500
+In-Reply-To: <CAJH6TXhBucB2t-ZRmXf5bCZyNaTRJoSHZhoJ9hsW8mR7NxhWnA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-For a test infrastructure (that will be the definitive one after some
-months) do you think that starting with only 2 servers and many ODSs
-will be ok?
+You can change the number replicas in runtime with the following command:
 
-OpenStack swift suggest at least 3 servers (due to it's replica = 3),
-with ceph is possible to start with 2 and then grow up to 3, 6 and so
-on?
+$ ceph osd pool set {poolname} size {num-replicas}
 
-Is possible to change the number of replicas in realtime ?
+Xing
+
+On 01/15/2013 03:00 PM, Gandalf Corvotempesta wrote:
+> Is possible to change the number of replicas in realtime ?
+
