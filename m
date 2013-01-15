@@ -1,39 +1,29 @@
 From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their
- performance impact
-Date: Tue, 15 Jan 2013 22:58:15 +0100
-Message-ID: <CAJH6TXh4XTSvQxdUVVN7-s52JU7qKAOTeLw9XAE_kzw+36wQ6w@mail.gmail.com>
-References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com>
-	<50F40C4B.6000301@inktank.com>
-	<CAJH6TXir4HL0Z7jtEg2r0Or7LygawXQHp0Ou+jF-ow1zXZAryg@mail.gmail.com>
-	<50F595FC.7020903@inktank.com>
-	<CAJH6TXgwhhzM+0OfLf_=rw5fMrrde_4tT8KjX0N-RecnQ_O6uw@mail.gmail.com>
-	<50F5CCC4.7050408@inktank.com>
+Subject: Re: Test infrastructure: 2 or more servers?
+Date: Tue, 15 Jan 2013 23:26:42 +0100
+Message-ID: <CAJH6TXjAv4mVBkcYbWg0u_CPmfkf8UEwXKTkrvST32B6u+Jg2A@mail.gmail.com>
+References: <CAJH6TXhBucB2t-ZRmXf5bCZyNaTRJoSHZhoJ9hsW8mR7NxhWnA@mail.gmail.com>
+	<50F5D24B.70308@cs.utah.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:56540 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755375Ab3AOWG3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 17:06:29 -0500
-Received: by mail-wg0-f49.google.com with SMTP id 15so415691wgd.4
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 14:06:28 -0800 (PST)
-In-Reply-To: <50F5CCC4.7050408@inktank.com>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:48217 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755137Ab3AOW0p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 17:26:45 -0500
+Received: by mail-wi0-f177.google.com with SMTP id hm2so652878wib.4
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 14:26:43 -0800 (PST)
+In-Reply-To: <50F5D24B.70308@cs.utah.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Florian Haas <florian@hastexo.com>, ceph-devel@vger.kernel.org
+To: Xing Lin <xinglin@cs.utah.edu>
+Cc: ceph-devel@vger.kernel.org
 
-2013/1/15 Mark Nelson <mark.nelson@inktank.com>:
-> http://www.supermicro.com/products/chassis/2U/826/SC826BA-R920LP.cfm
+2013/1/15 Xing Lin <xinglin@cs.utah.edu>:
+> You can change the number replicas in runtime with the following command:
 >
-> That chassis has 12 3.5" bays in front, with 2 2.5" bays in back.  an
-> interesting setup could be 12 spinning disks, with 2 very fast SSDs used for
-> journals and OS.  Would need to test it first, and not sure I like putting
-> the OS on the journal drives.  A more modest setup would be just to have the
-> 12 spinning disks for data and journals and the rear drives for the OS.
+> $ ceph osd pool set {poolname} size {num-replicas}
 
-Thank you. We have planned the same with a DELL R515 12+2 disks.
-OS should be loaded from a RAID1 partitions from 2 spinning disks.
-
-Or even no raid, in case of failure, the whole node is replicated by ceph.
+So it's absolutely safe to start with just 2 server, make all the
+necessary tests and when ready to go in production, increase the
+servers and replicas?
