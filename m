@@ -1,53 +1,44 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Grid data placement
-Date: Tue, 15 Jan 2013 11:05:41 -0800
-Message-ID: <CAPYLRzikyW47f_OmePZES=7rcAjWLFFcBHJ2Lyk6fFY-7-YcbA@mail.gmail.com>
-References: <50F59431.3000401@bmrb.wisc.edu>
-	<CAPYLRzhZdP6ehio9MgOZ7VnPSnMa05NUPmaRG3D_+tmWhe+oYA@mail.gmail.com>
-	<50F5A116.4090607@bmrb.wisc.edu>
-	<CAPYLRzgP8iKxD69+D_S7TtWUsre=y5JF51yWJDoMFHSUufJNQg@mail.gmail.com>
-	<50F5A747.2060404@bmrb.wisc.edu>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Another rbd compatibility issue between 0.48.2argonaut-2 and
+ 0.56.1 ?
+Date: Tue, 15 Jan 2013 11:42:03 -0800
+Message-ID: <50F5B10B.5060601@inktank.com>
+References: <50F3B0E7.3090809@fremaks.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:41499 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757584Ab3AOTFm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 14:05:42 -0500
-Received: by mail-qa0-f43.google.com with SMTP id cr7so2699049qab.9
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 11:05:41 -0800 (PST)
-In-Reply-To: <50F5A747.2060404@bmrb.wisc.edu>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:38596 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752637Ab3AOTnM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 14:43:12 -0500
+Received: by mail-pa0-f43.google.com with SMTP id fb10so302001pad.2
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 11:43:12 -0800 (PST)
+In-Reply-To: <50F3B0E7.3090809@fremaks.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-15?Q?Simon_Frerichs_=7C=A0Fremaks_GmbH?= <frerichs@fremaks.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 15, 2013 at 11:00 AM, Dimitri Maziuk <dmaziuk@bmrb.wisc.edu> wrote:
-> On 01/15/2013 12:36 PM, Gregory Farnum wrote:
->> On Tue, Jan 15, 2013 at 10:33 AM, Dimitri Maziuk <dmaziuk@bmrb.wisc.edu> wrote:
+On 01/13/2013 11:16 PM, Simon Frerichs | Fremaks GmbH wrote:
+> Hi,
 >
->>> At the start of the batch #cores-in-the-cluster processes try to mmap
->>> the same 2GB and start reading it from SEEK_SET at the same time. I
->>> won't know until I try but I suspect it won't like that.
->>
->> Well, it'll be #servers-in-cluster serving up 4MB chunks out of cache.
->> It's possible you could overwhelm their networking but my bet is
->> they'll just get spread out slightly on the first block and then not
->> contend in the future.
+> we've updated ceph on one node from argonaut to 0.56.1.
+> The osds are working fine but i see the following error:
 >
-> In the future the application spreads out the reads as well: running
-> instances go through the data at different speed, and when one's
-> finished, the next one starts on the same core & it mmap's the first
-> chunk again.
+> rbd info kvm1395
+> rbd: error opening image kvm1395: (5) Input/output error
+> 2013-01-14 06:09:10.162206 7efff3aed760 -1 librbd: Error getting lock
+> info: (5) Input/output error
 >
->> Just as long as you're thinking of it as a test system that would make
->> us very happy. :)
+> rbd --version
+> ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
 >
-> Well, IRL this is throw-away data generated at the start of a batch, and
-> we're good if one batch a month runs to completion. So if it doesn't
-> crash all the time every time, that actually should be good enough for
-> me. However, not all of the nodes have spare disk slots, so I couldn't
-> do a full-scale deployment anyway, not without rebuilding half the nodes.
+> Switching rbd back to argonaut fixes this error.
+>
+> Any hints?
 
-In that case you are my favorite kind of user and you should install
-and try it out right away! :D
+This was fixed in the next and master branches last week by
+4483285c9fb16f09986e2e48b855cd3db869e33c, but this was after
+0.56.1 was released. It should be in the next point release
+if there is one.
