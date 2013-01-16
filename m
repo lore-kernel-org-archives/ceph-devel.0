@@ -1,92 +1,77 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH REPOST 1/2] rbd: make exists flag atomic
-Date: Tue, 15 Jan 2013 16:29:42 -0800
-Message-ID: <50F5F476.7080901@inktank.com>
-References: <50E60BD0.30408@inktank.com> <50E60C02.2090605@inktank.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Ceph slow request & unstable issue
+Date: Wed, 16 Jan 2013 00:58:43 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f54.google.com ([209.85.160.54]:36683 "EHLO
-	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932235Ab3APAav (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 19:30:51 -0500
-Received: by mail-pb0-f54.google.com with SMTP id wz12so368276pbc.13
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 16:30:51 -0800 (PST)
-In-Reply-To: <50E60C02.2090605@inktank.com>
+Received: from mga14.intel.com ([143.182.124.37]:38795 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756612Ab3APA6r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Jan 2013 19:58:47 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "sage@inktank.com" <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/03/2013 02:53 PM, Alex Elder wrote:
-> The rbd_device->exists field can be updated asynchronously, changing
-> from set to clear if a mapped snapshot disappears from the base
-> image's snapshot context.
->
-> Currently, value of the "exists" flag is only read and modified
-> under protection of the header semaphore, but that will change with
-> the next patch.  Making it atomic ensures this won't be a problem
-> because the a the non-existence of device will be immediately known.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
-
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
->   drivers/block/rbd.c |    9 +++++----
->   1 file changed, 5 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 1348825..a3b0d43 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -229,7 +229,7 @@ struct rbd_device {
->   	spinlock_t		lock;		/* queue lock */
->
->   	struct rbd_image_header	header;
-> -	bool                    exists;
-> +	atomic_t		exists;
->   	struct rbd_spec		*spec;
->
->   	char			*header_name;
-> @@ -751,7 +751,7 @@ static int rbd_dev_set_mapping(struct rbd_device
-> *rbd_dev)
->   			goto done;
->   		rbd_dev->mapping.read_only = true;
->   	}
-> -	rbd_dev->exists = true;
-> +	atomic_set(&rbd_dev->exists, 1);
->   done:
->   	return ret;
->   }
-> @@ -1670,7 +1670,7 @@ static void rbd_rq_fn(struct request_queue *q)
->   		/* Grab a reference to the snapshot context */
->
->   		down_read(&rbd_dev->header_rwsem);
-> -		if (rbd_dev->exists) {
-> +		if (atomic_read(&rbd_dev->exists)) {
->   			snapc = ceph_get_snap_context(rbd_dev->header.snapc);
->   			rbd_assert(snapc != NULL);
->   		}
-> @@ -2292,6 +2292,7 @@ struct rbd_device *rbd_dev_create(struct
-> rbd_client *rbdc,
->   		return NULL;
->
->   	spin_lock_init(&rbd_dev->lock);
-> +	atomic_set(&rbd_dev->exists, 0);
->   	INIT_LIST_HEAD(&rbd_dev->node);
->   	INIT_LIST_HEAD(&rbd_dev->snaps);
->   	init_rwsem(&rbd_dev->header_rwsem);
-> @@ -2916,7 +2917,7 @@ static int rbd_dev_snaps_update(struct rbd_device
-> *rbd_dev)
->   			/* Existing snapshot not in the new snap context */
->
->   			if (rbd_dev->spec->snap_id == snap->id)
-> -				rbd_dev->exists = false;
-> +				atomic_set(&rbd_dev->exists, 0);
->   			rbd_remove_snap_dev(snap);
->   			dout("%ssnap id %llu has been removed\n",
->   				rbd_dev->spec->snap_id == snap->id ?
->
-
+SGkgbGlzdCwNCglXZSBhcmUgc3VmZmVyaW5nIGZyb20gT1NEIG9yIE9TIGRvd24gd2hlbiB0aGVy
+ZSBpcyBjb250aW51aW5nIGhpZ2ggcHJlc3N1cmUgb24gdGhlIENlcGggcmFjay4NCglCYXNpY2Fs
+bHkgd2UgYXJlIG9uIFVidW50dSAxMi4wNCsgQ2VwaCAwLjU2LjEsIDYgbm9kZXMsIGluIGVhY2gg
+bm9kZXMgd2l0aCAyMCAqIHNwaW5kbGVzICsgNCogU1NEcyBhcyBqb3VybmFsLigxMjAgc3BpbmRs
+ZXMgaW4gdG90YWwpDQoJV2UgY3JlYXRlIGEgbG90cyBvZiBSQkQgdm9sdW1lcyAoc2F5IDI0MCks
+bW91bnRpbmcgdG8gMTYgZGlmZmVyZW50IGNsaWVudCBtYWNoaW5lcyAoIDE1IFJCRCBWb2x1bWVz
+LyBjbGllbnQpIGFuZCBydW5uaW5nIEREIGNvbmN1cnJlbnRseSBvbiB0b3Agb2YgZWFjaCBSQkQu
+DQoJDQoJVGhlIGlzc3VlcyBhcmU6DQoxLiBTbG93IHJlcXVlc3RzIA0KoaGhoUZyb20gdGhlIGxp
+c3QtYXJjaGl2ZSBpdCBzZWVtcyBzb2x2ZWQgaW4gMC41Ni4xIGJ1dCB3ZSBzdGlsbCBub3RpY2Ug
+c3VjaCB3YXJuaW5nDQoyLiBPU0QgRG93biBvciBldmVuIGhvc3QgZG93bg0KTGlrZSB0aGUgbWVz
+c2FnZSBiZWxvdy5TZWVtcyBzb21lIE9TRCBoYXMgYmVlbiBibG9ja2luZyB0aGVyZSBmb3IgcXVp
+dGUgYSBsb25nIHRpbWUuDQoNCglTdWdnZXN0aW9ucyBhcmUgaGlnaGx5IGFwcHJlY2lhdGUuVGhh
+bmtzDQoJCQkJCQkJCQkJCQkJCQkJCQkJCQlYaWFveGkgDQoNCl9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpCYWQgbmV3czoNCg0KSSBoYXZlICBiYWNrIGFs
+bCBteSBDZXBoIG1hY2hpbmWhr3MgT1MgdG8ga2VybmVsICAzLjIuMC0yMywgd2hpY2ggVWJ1bnR1
+IDEyLjA0IHVzZS4NCkkgcnVuIGRkIGNvbW1hbmQgKGRkIGlmPS9kZXYvemVybyBicz0xTSBjb3Vu
+dD02MDAwMCBvZj0vZGV2L3JiZCR7aX0gJiApb24gQ2VwaCBjbGllbnQgdG8gY3JlYXRlIGRhdGEg
+cHJlcGFyZSB0ZXN0IGF0IGxhc3QgbmlnaHQuDQpOb3csIEkgaGF2ZSBvbmUgbWFjaGluZSBkb3du
+IChjYW6hr3QgYmUgcmVhY2hlZCBieSBwaW5nKSwgYW5vdGhlciB0d28gbWFjaGluZSBoYXMgYWxs
+IE9TRCBkYWVtb24gZG93biwgd2hpbGUgdGhlIHRocmVlIGxlZnQgaGFzIHNvbWUgZGFlbW9uIGRv
+d24uDQoNCkkgaGF2ZSBtYW55IHdhcm5pbmdzIGluIE9TRCBsb2cgbGlrZSB0aGlzOg0KDQpubyBm
+bGFnIHBvaW50cyByZWFjaGVkDQoyMDEzLTAxLTE1IDE5OjE0OjIyLjc2OTg5OCA3ZjIwYTJkNTc3
+MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0IDUyLjIxODEwNiBzZWNvbmRzIG9sZCwgcmVj
+ZWl2ZWQgYXQgMjAxMy0wMS0xNSAxOToxMzozMC41NTE3MTg6IG9zZF9vcChjbGllbnQuMTA2NzQu
+MToxMDAyNDE3IHJiLjAuMjdhOC42YjhiNDU2Ny4wMDAwMDAwMDBlYmEgW3dyaXRlIDMxNDU3Mjh+
+NTI0Mjg4XSAyLmM2MTgxMGVlIFJFVFJZKSBjdXJyZW50bHkgd2FpdGluZyBmb3Igc3ViIG9wcw0K
+MjAxMy0wMS0xNSAxOToxNDoyMy43NzAwNzcgN2YyMGEyZDU3NzAwICAwIGxvZyBbV1JOXSA6IDIx
+IHNsb3cgcmVxdWVzdHMsIDYgaW5jbHVkZWQgYmVsb3c7IG9sZGVzdCBibG9ja2VkIGZvciA+IDEx
+MzIuMTM4OTgzIHNlY3MNCjIwMTMtMDEtMTUgMTk6MTQ6MjMuNzcwMDg2IDdmMjBhMmQ1NzcwMCAg
+MCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QgNTMuMjE2NDA0IHNlY29uZHMgb2xkLCByZWNlaXZl
+ZCBhdCAyMDEzLTAxLTE1IDE5OjEzOjMwLjU1MzYxNjogb3NkX29wKGNsaWVudC4xMDY3MS4xOjEw
+NjY4NjAgcmIuMC4yODJjLjZiOGI0NTY3LjAwMDAwMDAwMTA1NyBbd3JpdGUgMjYyMTQ0MH41MjQy
+ODhdIDIuZWE3YWNlYmMpIGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQoyMDEzLTAxLTE1
+IDE5OjE0OjIzLjc3MDA5NiA3ZjIwYTJkNTc3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0
+IDUxLjQ0MjAzMiBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wMS0xNSAxOToxMzozMi4z
+Mjc5ODg6IG9zZF9vcChjbGllbnQuMTA2NzQuMToxMDAyNDE4DQoNClNpbWlsYXIgaW5mbyBpbiBk
+bWVzZyB3ZSBoYXZlIHNhdyBwZXJ2aW91czoNCg0KWzIxMTk5LjAzNjQ3Nl0gSU5GTzogdGFzayBj
+ZXBoLW9zZDo3Nzg4IGJsb2NrZWQgZm9yIG1vcmUgdGhhbiAxMjAgc2Vjb25kcy4NClsyMTE5OS4w
+Mzc0OTNdICJlY2hvIDAgPiAvcHJvYy9zeXMva2VybmVsL2h1bmdfdGFza190aW1lb3V0X3NlY3Mi
+IGRpc2FibGVzIHRoaXMgbWVzc2FnZS4NClsyMTE5OS4wMzg4NDFdIGNlcGgtb3NkICAgICAgICBE
+IDAwMDAwMDAwMDAwMDAwMDYgICAgIDAgIDc3ODggICAgICAxIDB4MDAwMDAwMDANClsyMTE5OS4w
+Mzg4NDRdICBmZmZmODgwZmVmZGFmY2M4IDAwMDAwMDAwMDAwMDAwODYgMDAwMDAwMDAwMDAwMDAw
+MCBmZmZmZmZmZmZmZmZmZmUwDQpbMjExOTkuMDM4ODQ4XSAgZmZmZjg4MGZlZmRhZmZkOCBmZmZm
+ODgwZmVmZGFmZmQ4IGZmZmY4ODBmZWZkYWZmZDggMDAwMDAwMDAwMDAxMzc4MA0KWzIxMTk5LjAz
+ODg1Ml0gIGZmZmY4ODA4MWFhNTgwMDAgZmZmZjg4MGY2OGY1MmRlMCBmZmZmODgwZjY4ZjUyZGUw
+IGZmZmY4ODIwMTc1NTYyMDANClsyMTE5OS4wMzg4NTZdIENhbGwgVHJhY2U6DQpbMjExOTkuMDM4
+ODU4XSAgWzxmZmZmZmZmZjgxNjVhNTVmPl0gc2NoZWR1bGUrMHgzZi8weDYwDQpbMjExOTkuMDM4
+ODYxXSAgWzxmZmZmZmZmZjgxMDZiN2U1Pl0gZXhpdF9tbSsweDg1LzB4MTMwDQpbMjExOTkuMDM4
+ODY0XSAgWzxmZmZmZmZmZjgxMDZiOWZlPl0gZG9fZXhpdCsweDE2ZS8weDQyMA0KWzIxMTk5LjAz
+ODg2Nl0gIFs8ZmZmZmZmZmY4MTA5ZDg4Zj5dID8gX191bnF1ZXVlX2Z1dGV4KzB4M2YvMHg4MA0K
+WzIxMTk5LjAzODg2OV0gIFs8ZmZmZmZmZmY4MTA3YTE5YT5dID8gX19kZXF1ZXVlX3NpZ25hbCsw
+eDZhLzB4YjANClsyMTE5OS4wMzg4NzJdICBbPGZmZmZmZmZmODEwNmJlNTQ+XSBkb19ncm91cF9l
+eGl0KzB4NDQvMHhhMA0KWzIxMTk5LjAzODg3NF0gIFs8ZmZmZmZmZmY4MTA3Y2NkYz5dIGdldF9z
+aWduYWxfdG9fZGVsaXZlcisweDIxYy8weDQyMA0KWzIxMTk5LjAzODg3N10gIFs8ZmZmZmZmZmY4
+MTAxMzg2NT5dIGRvX3NpZ25hbCsweDQ1LzB4MTMwDQpbMjExOTkuMDM4ODgwXSAgWzxmZmZmZmZm
+ZjgxMGEwOTFjPl0gPyBkb19mdXRleCsweDdjLzB4MWIwDQpbMjExOTkuMDM4ODgyXSAgWzxmZmZm
+ZmZmZjgxMGEwYjVhPl0gPyBzeXNfZnV0ZXgrMHgxMGEvMHgxYTANClsyMTE5OS4wMzg4ODVdICBb
+PGZmZmZmZmZmODEwMTNiMTU+XSBkb19ub3RpZnlfcmVzdW1lKzB4NjUvMHg4MA0KWzIxMTk5LjAz
+ODg4N10gIFs8ZmZmZmZmZmY4MTY2NGQ1MD5dIGludF9zaWduYWwrMHgxMi8weDE3DQoNCg0KVGhh
+bmtzLg0KLWNoZW4NCg0K
