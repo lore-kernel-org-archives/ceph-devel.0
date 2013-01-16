@@ -1,77 +1,159 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: Ceph slow request & unstable issue
-Date: Wed, 16 Jan 2013 00:58:43 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: define flags field, use it for exists flag
+Date: Tue, 15 Jan 2013 17:08:55 -0800
+Message-ID: <50F5FDA7.6040509@inktank.com>
+References: <50F4535A.6030601@inktank.com> <50F4538B.4010106@inktank.com> <50F46B40.9010907@inktank.com> <50F4776F.2080407@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:38795 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756612Ab3APA6r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Jan 2013 19:58:47 -0500
-Content-Language: en-US
+Received: from mail-da0-f41.google.com ([209.85.210.41]:58887 "EHLO
+	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756811Ab3APBKF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 20:10:05 -0500
+Received: by mail-da0-f41.google.com with SMTP id e20so302839dak.14
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 17:10:04 -0800 (PST)
+In-Reply-To: <50F4776F.2080407@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "sage@inktank.com" <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgbGlzdCwNCglXZSBhcmUgc3VmZmVyaW5nIGZyb20gT1NEIG9yIE9TIGRvd24gd2hlbiB0aGVy
-ZSBpcyBjb250aW51aW5nIGhpZ2ggcHJlc3N1cmUgb24gdGhlIENlcGggcmFjay4NCglCYXNpY2Fs
-bHkgd2UgYXJlIG9uIFVidW50dSAxMi4wNCsgQ2VwaCAwLjU2LjEsIDYgbm9kZXMsIGluIGVhY2gg
-bm9kZXMgd2l0aCAyMCAqIHNwaW5kbGVzICsgNCogU1NEcyBhcyBqb3VybmFsLigxMjAgc3BpbmRs
-ZXMgaW4gdG90YWwpDQoJV2UgY3JlYXRlIGEgbG90cyBvZiBSQkQgdm9sdW1lcyAoc2F5IDI0MCks
-bW91bnRpbmcgdG8gMTYgZGlmZmVyZW50IGNsaWVudCBtYWNoaW5lcyAoIDE1IFJCRCBWb2x1bWVz
-LyBjbGllbnQpIGFuZCBydW5uaW5nIEREIGNvbmN1cnJlbnRseSBvbiB0b3Agb2YgZWFjaCBSQkQu
-DQoJDQoJVGhlIGlzc3VlcyBhcmU6DQoxLiBTbG93IHJlcXVlc3RzIA0KoaGhoUZyb20gdGhlIGxp
-c3QtYXJjaGl2ZSBpdCBzZWVtcyBzb2x2ZWQgaW4gMC41Ni4xIGJ1dCB3ZSBzdGlsbCBub3RpY2Ug
-c3VjaCB3YXJuaW5nDQoyLiBPU0QgRG93biBvciBldmVuIGhvc3QgZG93bg0KTGlrZSB0aGUgbWVz
-c2FnZSBiZWxvdy5TZWVtcyBzb21lIE9TRCBoYXMgYmVlbiBibG9ja2luZyB0aGVyZSBmb3IgcXVp
-dGUgYSBsb25nIHRpbWUuDQoNCglTdWdnZXN0aW9ucyBhcmUgaGlnaGx5IGFwcHJlY2lhdGUuVGhh
-bmtzDQoJCQkJCQkJCQkJCQkJCQkJCQkJCQlYaWFveGkgDQoNCl9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpCYWQgbmV3czoNCg0KSSBoYXZlICBiYWNrIGFs
-bCBteSBDZXBoIG1hY2hpbmWhr3MgT1MgdG8ga2VybmVsICAzLjIuMC0yMywgd2hpY2ggVWJ1bnR1
-IDEyLjA0IHVzZS4NCkkgcnVuIGRkIGNvbW1hbmQgKGRkIGlmPS9kZXYvemVybyBicz0xTSBjb3Vu
-dD02MDAwMCBvZj0vZGV2L3JiZCR7aX0gJiApb24gQ2VwaCBjbGllbnQgdG8gY3JlYXRlIGRhdGEg
-cHJlcGFyZSB0ZXN0IGF0IGxhc3QgbmlnaHQuDQpOb3csIEkgaGF2ZSBvbmUgbWFjaGluZSBkb3du
-IChjYW6hr3QgYmUgcmVhY2hlZCBieSBwaW5nKSwgYW5vdGhlciB0d28gbWFjaGluZSBoYXMgYWxs
-IE9TRCBkYWVtb24gZG93biwgd2hpbGUgdGhlIHRocmVlIGxlZnQgaGFzIHNvbWUgZGFlbW9uIGRv
-d24uDQoNCkkgaGF2ZSBtYW55IHdhcm5pbmdzIGluIE9TRCBsb2cgbGlrZSB0aGlzOg0KDQpubyBm
-bGFnIHBvaW50cyByZWFjaGVkDQoyMDEzLTAxLTE1IDE5OjE0OjIyLjc2OTg5OCA3ZjIwYTJkNTc3
-MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0IDUyLjIxODEwNiBzZWNvbmRzIG9sZCwgcmVj
-ZWl2ZWQgYXQgMjAxMy0wMS0xNSAxOToxMzozMC41NTE3MTg6IG9zZF9vcChjbGllbnQuMTA2NzQu
-MToxMDAyNDE3IHJiLjAuMjdhOC42YjhiNDU2Ny4wMDAwMDAwMDBlYmEgW3dyaXRlIDMxNDU3Mjh+
-NTI0Mjg4XSAyLmM2MTgxMGVlIFJFVFJZKSBjdXJyZW50bHkgd2FpdGluZyBmb3Igc3ViIG9wcw0K
-MjAxMy0wMS0xNSAxOToxNDoyMy43NzAwNzcgN2YyMGEyZDU3NzAwICAwIGxvZyBbV1JOXSA6IDIx
-IHNsb3cgcmVxdWVzdHMsIDYgaW5jbHVkZWQgYmVsb3c7IG9sZGVzdCBibG9ja2VkIGZvciA+IDEx
-MzIuMTM4OTgzIHNlY3MNCjIwMTMtMDEtMTUgMTk6MTQ6MjMuNzcwMDg2IDdmMjBhMmQ1NzcwMCAg
-MCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QgNTMuMjE2NDA0IHNlY29uZHMgb2xkLCByZWNlaXZl
-ZCBhdCAyMDEzLTAxLTE1IDE5OjEzOjMwLjU1MzYxNjogb3NkX29wKGNsaWVudC4xMDY3MS4xOjEw
-NjY4NjAgcmIuMC4yODJjLjZiOGI0NTY3LjAwMDAwMDAwMTA1NyBbd3JpdGUgMjYyMTQ0MH41MjQy
-ODhdIDIuZWE3YWNlYmMpIGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQoyMDEzLTAxLTE1
-IDE5OjE0OjIzLjc3MDA5NiA3ZjIwYTJkNTc3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0
-IDUxLjQ0MjAzMiBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wMS0xNSAxOToxMzozMi4z
-Mjc5ODg6IG9zZF9vcChjbGllbnQuMTA2NzQuMToxMDAyNDE4DQoNClNpbWlsYXIgaW5mbyBpbiBk
-bWVzZyB3ZSBoYXZlIHNhdyBwZXJ2aW91czoNCg0KWzIxMTk5LjAzNjQ3Nl0gSU5GTzogdGFzayBj
-ZXBoLW9zZDo3Nzg4IGJsb2NrZWQgZm9yIG1vcmUgdGhhbiAxMjAgc2Vjb25kcy4NClsyMTE5OS4w
-Mzc0OTNdICJlY2hvIDAgPiAvcHJvYy9zeXMva2VybmVsL2h1bmdfdGFza190aW1lb3V0X3NlY3Mi
-IGRpc2FibGVzIHRoaXMgbWVzc2FnZS4NClsyMTE5OS4wMzg4NDFdIGNlcGgtb3NkICAgICAgICBE
-IDAwMDAwMDAwMDAwMDAwMDYgICAgIDAgIDc3ODggICAgICAxIDB4MDAwMDAwMDANClsyMTE5OS4w
-Mzg4NDRdICBmZmZmODgwZmVmZGFmY2M4IDAwMDAwMDAwMDAwMDAwODYgMDAwMDAwMDAwMDAwMDAw
-MCBmZmZmZmZmZmZmZmZmZmUwDQpbMjExOTkuMDM4ODQ4XSAgZmZmZjg4MGZlZmRhZmZkOCBmZmZm
-ODgwZmVmZGFmZmQ4IGZmZmY4ODBmZWZkYWZmZDggMDAwMDAwMDAwMDAxMzc4MA0KWzIxMTk5LjAz
-ODg1Ml0gIGZmZmY4ODA4MWFhNTgwMDAgZmZmZjg4MGY2OGY1MmRlMCBmZmZmODgwZjY4ZjUyZGUw
-IGZmZmY4ODIwMTc1NTYyMDANClsyMTE5OS4wMzg4NTZdIENhbGwgVHJhY2U6DQpbMjExOTkuMDM4
-ODU4XSAgWzxmZmZmZmZmZjgxNjVhNTVmPl0gc2NoZWR1bGUrMHgzZi8weDYwDQpbMjExOTkuMDM4
-ODYxXSAgWzxmZmZmZmZmZjgxMDZiN2U1Pl0gZXhpdF9tbSsweDg1LzB4MTMwDQpbMjExOTkuMDM4
-ODY0XSAgWzxmZmZmZmZmZjgxMDZiOWZlPl0gZG9fZXhpdCsweDE2ZS8weDQyMA0KWzIxMTk5LjAz
-ODg2Nl0gIFs8ZmZmZmZmZmY4MTA5ZDg4Zj5dID8gX191bnF1ZXVlX2Z1dGV4KzB4M2YvMHg4MA0K
-WzIxMTk5LjAzODg2OV0gIFs8ZmZmZmZmZmY4MTA3YTE5YT5dID8gX19kZXF1ZXVlX3NpZ25hbCsw
-eDZhLzB4YjANClsyMTE5OS4wMzg4NzJdICBbPGZmZmZmZmZmODEwNmJlNTQ+XSBkb19ncm91cF9l
-eGl0KzB4NDQvMHhhMA0KWzIxMTk5LjAzODg3NF0gIFs8ZmZmZmZmZmY4MTA3Y2NkYz5dIGdldF9z
-aWduYWxfdG9fZGVsaXZlcisweDIxYy8weDQyMA0KWzIxMTk5LjAzODg3N10gIFs8ZmZmZmZmZmY4
-MTAxMzg2NT5dIGRvX3NpZ25hbCsweDQ1LzB4MTMwDQpbMjExOTkuMDM4ODgwXSAgWzxmZmZmZmZm
-ZjgxMGEwOTFjPl0gPyBkb19mdXRleCsweDdjLzB4MWIwDQpbMjExOTkuMDM4ODgyXSAgWzxmZmZm
-ZmZmZjgxMGEwYjVhPl0gPyBzeXNfZnV0ZXgrMHgxMGEvMHgxYTANClsyMTE5OS4wMzg4ODVdICBb
-PGZmZmZmZmZmODEwMTNiMTU+XSBkb19ub3RpZnlfcmVzdW1lKzB4NjUvMHg4MA0KWzIxMTk5LjAz
-ODg4N10gIFs8ZmZmZmZmZmY4MTY2NGQ1MD5dIGludF9zaWduYWwrMHgxMi8weDE3DQoNCg0KVGhh
-bmtzLg0KLWNoZW4NCg0K
+On 01/14/2013 01:23 PM, Alex Elder wrote:
+> On 01/14/2013 02:32 PM, Dan Mick wrote:
+>> I see that set_bit is atomic, but I don't see that test_bit is.  Am I
+>> missing a subtlety?
+>
+> That's an interesting observation.  I'm certain it's safe, but
+> I needed to research it a bit, and I still haven't verified it
+> to my satisfaction.
+>
+> I *think* (but please look over the following and see if you
+> come to the same conclusion) that this operation doesn't need
+> to be made atomic, because the implementation of the routines
+> that implement the "set" operations guarantee their effects are
+> visible once they are done.
+>
+> But I'm not sure whether "visible" here means precisely that
+> another CPU will be forced to go read the updated memory when
+> it calls test_bit().
+>
+> http://www.kernel.org/doc/Documentation/atomic_ops.txt
+> The section of interest can be found by looking for the
+> sentence I'm talking about:
+>    Likewise, the atomic bit operation must be visible globally before any
+>    subsequent memory operation is made visible.
+
+I read that differently. I think that only applies to the test_and_set 
+style operations mentioned directly above, not set_bit.
+
+Documentation/memory-barriers.txt confirms this interpretation:
+
+     The following operations are potential problems as they do
+     _not_ imply memory barriers, but might be used for
+     implementing such things as UNLOCK-class operations:
+
+             atomic_set();
+             set_bit();
+             clear_bit();
+             change_bit();
+
+     With these the appropriate explicit memory barrier should be
+     used if necessary (smp_mb__before_clear_bit() for instance).
+
+And:
+
+     Memory operations that occur after an UNLOCK operation may appear to
+     happen before it completes.
+
+So I think we need a memory barrier before and after set_bit for the
+removing flag, but we don't need barriers for the exists flag, since
+it's a best-effort value that can't stop already-in-flight requests.
+
+Josh
+
+> It doesn't come right and explain it though.  Please let me
+> know what you think.
+>
+> 					-Alex
+>
+>
+>> On 01/14/2013 10:50 AM, Alex Elder wrote:
+>>> Define a new rbd device flags field, manipulated using atomic bit
+>>> operations.  Replace the use of the current "exists" flag with a
+>>> bit in this new "flags" field.
+>>>
+>>> Signed-off-by: Alex Elder <elder@inktank.com>
+>>> ---
+>>>    drivers/block/rbd.c |   17 ++++++++++++-----
+>>>    1 file changed, 12 insertions(+), 5 deletions(-)
+>>>
+>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>>> index 02002b1..9eb1631 100644
+>>> --- a/drivers/block/rbd.c
+>>> +++ b/drivers/block/rbd.c
+>>> @@ -232,7 +232,7 @@ struct rbd_device {
+>>>        spinlock_t        lock;        /* queue lock */
+>>>
+>>>        struct rbd_image_header    header;
+>>> -    atomic_t        exists;
+>>> +    unsigned long        flags;
+>>>        struct rbd_spec        *spec;
+>>>
+>>>        char            *header_name;
+>>> @@ -260,6 +260,12 @@ struct rbd_device {
+>>>        unsigned long        open_count;
+>>>    };
+>>>
+>>> +/* Flag bits for rbd_dev->flags */
+>>> +
+>>> +enum rbd_dev_flags {
+>>> +    rbd_dev_flag_exists,    /* mapped snapshot has not been deleted */
+>>> +};
+>>> +
+>>>    static DEFINE_MUTEX(ctl_mutex);      /* Serialize
+>>> open/close/setup/teardown */
+>>>
+>>>    static LIST_HEAD(rbd_dev_list);    /* devices */
+>>> @@ -756,7 +762,8 @@ static int rbd_dev_set_mapping(struct rbd_device
+>>> *rbd_dev)
+>>>                goto done;
+>>>            rbd_dev->mapping.read_only = true;
+>>>        }
+>>> -    atomic_set(&rbd_dev->exists, 1);
+>>> +    set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
+>>> +
+>>>    done:
+>>>        return ret;
+>>>    }
+>>> @@ -1654,7 +1661,7 @@ static void rbd_rq_fn(struct request_queue *q)
+>>>                snapc = ceph_get_snap_context(rbd_dev->header.snapc);
+>>>                up_read(&rbd_dev->header_rwsem);
+>>>                rbd_assert(snapc != NULL);
+>>> -        } else if (!atomic_read(&rbd_dev->exists)) {
+>>> +        } else if (!test_bit(rbd_dev_flag_exists, &rbd_dev->flags)) {
+>>>                rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
+>>>                dout("request for non-existent snapshot");
+>>>                result = -ENXIO;
+>>> @@ -2270,7 +2277,7 @@ struct rbd_device *rbd_dev_create(struct
+>>> rbd_client *rbdc,
+>>>            return NULL;
+>>>
+>>>        spin_lock_init(&rbd_dev->lock);
+>>> -    atomic_set(&rbd_dev->exists, 0);
+>>> +    rbd_dev->flags = 0;
+>>>        INIT_LIST_HEAD(&rbd_dev->node);
+>>>        INIT_LIST_HEAD(&rbd_dev->snaps);
+>>>        init_rwsem(&rbd_dev->header_rwsem);
+>>> @@ -2902,7 +2909,7 @@ static int rbd_dev_snaps_update(struct rbd_device
+>>> *rbd_dev)
+>>>                /* Existing snapshot not in the new snap context */
+>>>
+>>>                if (rbd_dev->spec->snap_id == snap->id)
+>>> -                atomic_set(&rbd_dev->exists, 0);
+>>> +                set_bit(rbd_dev_flag_exists, &rbd_dev->flags);
+>>>                rbd_remove_snap_dev(snap);
+>>>                dout("%ssnap id %llu has been removed\n",
+>>>                    rbd_dev->spec->snap_id == snap->id ?
+>>>
+
