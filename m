@@ -1,69 +1,125 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Ceph version 0.56.1, data loss on power failure
-Date: Wed, 16 Jan 2013 11:53:22 +0100
-Message-ID: <50F686A2.2060901@widodh.nl>
-References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com> <CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com> <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com> <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com> <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com> <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com> <CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com> <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: [PATCH] configure.ac: fix problem with --enable-cephfs-java
+Date: Wed, 16 Jan 2013 13:40:17 +0100
+Message-ID: <1358340017-26454-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42572 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757049Ab3APKxk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 05:53:40 -0500
-In-Reply-To: <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:33299 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751558Ab3APMkV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jan 2013 07:40:21 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcin Szukala <szukala.marcin@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Gary Lowell <gary.lowell@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>, Danny Al-Gaaf <dalgaaf@suse.de>
 
+The AS_IF used to cover java related checks via --enable-cephfs-java
+didn't work correctly. Use a plain 'if/fi' instead to make sure this
+section is only executed if --enable-cephfs-java is used.
 
+Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+---
+ configure.ac | 66 ++++++++++++++++++++++++++++++------------------------------
+ 1 file changed, 33 insertions(+), 33 deletions(-)
 
-On 01/16/2013 11:50 AM, Marcin Szukala wrote:
-> Hi all,
->
-> Any ideas how can I resolve my issue? Or where the problem is?
->
-> Let me describe the issue.
-> Host boots up and maps RBD image with XFS filesystems
-> Host mounts the filesystems from the RBD image
-> Host starts to write data to the mounted filesystems
-> Host experiences power failure
-> Host comes up and map the RBD image
-> Host mounts the filesystems from the RBD image
-> All data from all filesystems is lost
-> Host is able to use the filesystems with no problems.
->
-> Filesystem is XFS, no errors on filesystem,
->
+diff --git a/configure.ac b/configure.ac
+index 32814b8..b67e5cd 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -263,15 +263,15 @@ AM_CONDITIONAL(WITH_TCMALLOC, [test "$HAVE_LIBTCMALLOC" = "1"])
+ #   - this might become bigger. maybe should be own m4 file
+ #
+ AC_ARG_ENABLE(cephfs-java,
+-    AC_HELP_STRING([--enable-cephfs-java], [build libcephfs Java bindings]),
++    [AC_HELP_STRING([--enable-cephfs-java], [build libcephfs Java bindings])],
+     [], [enable_cephfs_java=no])
+ 
+-AM_CONDITIONAL(ENABLE_CEPHFS_JAVA, test "x$enable_cephfs_java" = "xyes")
++AM_CONDITIONAL(ENABLE_CEPHFS_JAVA, [test "x$enable_cephfs_java" = "xyes"])
+ 
+ AC_ARG_WITH(jdk-dir,
+     AC_HELP_STRING([--with-jdk-dir(=DIR)], [Path to JDK directory]))
+ 
+-AS_IF([test "x$enable_cephfs_java" = "xyes"], [
++if test "x$enable_cephfs_java" = "xyes"; then
+ 
+ 	# setup bin/include dirs from --with-jdk-dir (search for jni.h, javac)
+ 	AS_IF([test -n "$with_jdk_dir"], [
+@@ -293,36 +293,36 @@ AS_IF([test "x$enable_cephfs_java" = "xyes"], [
+ 		   AS_IF([test -r "$jnih"], [
+ 				  EXTRA_JDK_INC_DIR=`dirname $jnih`])])
+ 
+-  # cephfs_java_test only makes sense if java is already turned on
++        # cephfs_java_test only makes sense if java is already turned on
+ 	# setup CLASSPATH for Debian default junit4.jar package 
+-    #
+-    # Configuring --with-debug and --enable-cephfs-java will throw an error if
+-    # JUnit4 cannot be found. While currently this works for users who have
+-    # installed via the package manager on Ubuntu, we need to expand this
+-    # check to 1) support other distrubtions and 2) allow users to influence
+-    # the search path.
+-  AS_IF([test "x$with_debug" = "xyes"], [
+-      dir='/usr/share/java'
+-      junit4_jar=`find $dir -name junit4.jar | head -n 1`
+-		  AS_IF([test -r "$junit4_jar"], [
+-	      EXTRA_CLASSPATH_JAR=`dirname $junit4_jar`/junit4.jar
+-      AC_SUBST(EXTRA_CLASSPATH_JAR)
+-      [have_junit4=1]], [
+-      AC_MSG_NOTICE([Cannot find junit4.jar (apt-get install junit4)])
+-      [have_junit4=0]])])
+-
+-      AC_CHECK_CLASSPATH
+-      AC_PROG_JAVAC
+-      AC_PROG_JAVAH
+-      AC_PROG_JAR
+-
+-      CLASSPATH=$CLASSPATH:$EXTRA_CLASSPATH_JAR
+-      export CLASSPATH
+-      AC_MSG_NOTICE([classpath - $CLASSPATH])
+-      AS_IF([test "$have_junit4" = "1"], [
+-	    AC_CHECK_CLASS([org.junit.rules.ExternalResource], [], [
+-	    AC_MSG_NOTICE(Could not find org.junit.rules.ExternalResource)
+-	    have_junit4=0])])
++        #
++        # Configuring --with-debug and --enable-cephfs-java will throw an error if
++        # JUnit4 cannot be found. While currently this works for users who have
++        # installed via the package manager on Ubuntu, we need to expand this
++        # check to 1 support other distrubtions and 2 allow users to influence
++        # the search path.
++        AS_IF([test "x$with_debug" = "xyes"], [
++        	dir='/usr/share/java'
++	        junit4_jar=`find $dir -name junit4.jar | head -n 1`
++		AS_IF([test -r "$junit4_jar"], [
++		      EXTRA_CLASSPATH_JAR=`dirname $junit4_jar`/junit4.jar
++		      AC_SUBST(EXTRA_CLASSPATH_JAR)
++		      [have_junit4=1]], [
++		      AC_MSG_NOTICE([Cannot find junit4.jar (apt-get install junit4)])
++		      [have_junit4=0]])])
++
++        AC_CHECK_CLASSPATH
++        AC_PROG_JAVAC
++        AC_PROG_JAVAH
++        AC_PROG_JAR
++
++        CLASSPATH=$CLASSPATH:$EXTRA_CLASSPATH_JAR
++        export CLASSPATH
++        AC_MSG_NOTICE([classpath - $CLASSPATH])
++        AS_IF([test "$have_junit4" = "1"], [
++		AC_CHECK_CLASS([org.junit.rules.ExternalResource], [], [
++		AC_MSG_NOTICE(Could not find org.junit.rules.ExternalResource)
++		have_junit4=0])])
+ 
+         # Check for jni.h
+ 	CPPFLAGS_save=$CPPFLAGS
+@@ -339,7 +339,7 @@ AS_IF([test "x$enable_cephfs_java" = "xyes"], [
+ 
+ 	# Setup output var
+ 	AC_SUBST(JDK_CPPFLAGS)
+-])
++fi
+ AM_CONDITIONAL(HAVE_JUNIT4, [test "$have_junit4" = "1"])
+ 
+ # jni?
+-- 
+1.8.1
 
-That simply does not make sense to me. How can all data be gone and the 
-FS just mount cleanly.
-
-Can you try to format the RBD with EXT4 and see if that makes any 
-difference.
-
-Could you also try to run a "sync" prior to pulling the power from the 
-host to see if that makes any difference.
-
-Wido
-
-> Kernel 3.5.0-19-generic
->
-> root@openstack-1:/etc/init# ceph -s
->     health HEALTH_OK
->     monmap e1: 3 mons at
-> {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
-> election epoch 10, quorum 0,1,2 a,b,d
->     osdmap e132: 56 osds: 56 up, 56 in
->      pgmap v87165: 13744 pgs: 13744 active+clean; 52727 MB data, 102 GB
-> used, 52028 GB / 52131 GB avail
->     mdsmap e1: 0/0/1 up
->
-> Regards,
-> Marcin
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
