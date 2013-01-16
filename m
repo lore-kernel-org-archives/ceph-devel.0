@@ -1,127 +1,38 @@
-From: Tomasz Paszkowski <ss7pro@gmail.com>
-Subject: Re: Ceph version 0.56.1, data loss on power failure
-Date: Wed, 16 Jan 2013 21:48:17 +0100
-Message-ID: <CAMvP8PCSjqVjKHCozZzR7EmYug017DGJPiRWNyQz43P8m_shpg@mail.gmail.com>
-References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
- <CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
- <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
- <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
- <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
- <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com>
- <CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com>
- <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
- <50F686A2.2060901@widodh.nl> <alpine.DEB.2.00.1301160859010.15921@cobra.newdream.net>
- <49E5320E-C2D4-4B80-A3E7-914F73E487D4@widodh.nl> <alpine.DEB.2.00.1301161009300.27925@cobra.newdream.net>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: flashcache
+Date: Wed, 16 Jan 2013 22:22:18 +0100
+Message-ID: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f53.google.com ([209.85.214.53]:41941 "EHLO
-	mail-bk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756393Ab3APUsj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 15:48:39 -0500
-Received: by mail-bk0-f53.google.com with SMTP id j5so972080bkw.12
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 12:48:37 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301161009300.27925@cobra.newdream.net>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:36983 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756332Ab3APVWT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 16:22:19 -0500
+Received: by mail-wg0-f50.google.com with SMTP id es5so1157069wgb.17
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 13:22:18 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Marcin is using kernel RBD.
+In a ceph cluster, flashcache with writeback is considered safe?
+In case of SSD failure, the flashcache contents should be already been
+replicated (by ceph) in other servers, right?
 
+I'm planning to use this configuration: Supermicro with 12 spinning
+disks e 2 SSD.
+6 spinning disks will have ceph journal on SSD1, the other 6 disks
+will have ceph journal on disks2.
 
-On Wed, Jan 16, 2013 at 7:10 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 16 Jan 2013, Wido den Hollander wrote:
->>
->> Op 16 jan. 2013 om 18:00 heeft Sage Weil <sage@inktank.com> het volgende geschreven:
->>
->> > On Wed, 16 Jan 2013, Wido den Hollander wrote:
->> >>
->> >> On 01/16/2013 11:50 AM, Marcin Szukala wrote:
->> >>> Hi all,
->> >>>
->> >>> Any ideas how can I resolve my issue? Or where the problem is?
->> >>>
->> >>> Let me describe the issue.
->> >>> Host boots up and maps RBD image with XFS filesystems
->> >>> Host mounts the filesystems from the RBD image
->> >>> Host starts to write data to the mounted filesystems
->> >>> Host experiences power failure
->> >>> Host comes up and map the RBD image
->> >>> Host mounts the filesystems from the RBD image
->> >>> All data from all filesystems is lost
->> >>> Host is able to use the filesystems with no problems.
->> >>>
->> >>> Filesystem is XFS, no errors on filesystem,
->> >>
->> >> That simply does not make sense to me. How can all data be gone and the FS
->> >> just mount cleanly.
->> >>
->> >> Can you try to format the RBD with EXT4 and see if that makes any difference.
->> >>
->> >> Could you also try to run a "sync" prior to pulling the power from the host to
->> >> see if that makes any difference.
->> >
->> > A few other quick questions:
->> >
->> > What version of qemu and librbd are you using?  What is the command line
->> > that is used to start the VM?  This could be a problem with the qemu
->> > and librbd caching configuration.
->> >
->>
->> I don't think he uses Qemu. From what I understand he uses kernel RBD
->> since he uses the words 'map' and 'unmap'
->
-> That's what I originally thought too, and then I saw
->
->> >>> root@openstack-1:/etc/init# ceph -s
->
-> and wasn't sure...
->
-> Marcin?
->
-> sage
->
->
->
->
->
->> >>>    health HEALTH_OK
->> >>>    monmap e1: 3 mons at
->> >>> {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
->> >>> election epoch 10, quorum 0,1,2 a,b,d
->> >>>    osdmap e132: 56 osds: 56 up, 56 in
->> >>>     pgmap v87165: 13744 pgs: 13744 active+clean; 52727 MB data, 102 GB
->> >>> used, 52028 GB / 52131 GB avail
->> >>>    mdsmap e1: 0/0/1 up
->> >>>
->> >>> Regards,
->> >>> Marcin
->> >>> --
->> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >>> the body of a message to majordomo@vger.kernel.org
->> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+One OSD for each spinning disk (a single XFS filesystem for the whole disk).
+XFS metadata to a parition of SSD1
+XFS flashcache to another partition of SSD1
 
+So, 3 partitions for each OSD on the SSD.
+How big should be these partitions? Any advice?
 
+No raid at all, except for 1 RAID-1 volume made with a 10GB partitions
+on each SSD, for the OS. Log files will be replicated to a remote
+server, so writes on OS partitions are very very low.
 
--- 
-Tomasz Paszkowski
-SS7, Asterisk, SAN, Datacenter, Cloud Computing
-+48500166299
+Any hint? Adivice? Critics?
