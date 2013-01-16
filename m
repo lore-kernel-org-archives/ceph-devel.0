@@ -1,117 +1,77 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH REPOST 2/2] rbd: a little more cleanup of rbd_rq_fn()
-Date: Tue, 15 Jan 2013 16:02:54 -0800
-Message-ID: <50F5EE2E.2000506@inktank.com>
-References: <50E6094F.9080101@inktank.com> <50E60990.90109@inktank.com>
+Subject: Re: [PATCH REPOST] rbd: end request on error in rbd_do_request()
+ caller
+Date: Tue, 15 Jan 2013 16:05:28 -0800
+Message-ID: <50F5EEC8.8070004@inktank.com>
+References: <50E60B83.2070703@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f42.google.com ([209.85.160.42]:46415 "EHLO
-	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932264Ab3APAEE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 19:04:04 -0500
-Received: by mail-pb0-f42.google.com with SMTP id rp2so359369pbb.29
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 16:04:03 -0800 (PST)
-In-Reply-To: <50E60990.90109@inktank.com>
+Received: from mail-da0-f52.google.com ([209.85.210.52]:44559 "EHLO
+	mail-da0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932492Ab3APAGh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 19:06:37 -0500
+Received: by mail-da0-f52.google.com with SMTP id f10so278889dak.11
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 16:06:37 -0800 (PST)
+In-Reply-To: <50E60B83.2070703@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/03/2013 02:43 PM, Alex Elder wrote:
-> Now that a big hunk in the middle of rbd_rq_fn() has been moved
-> into its own routine we can simplify it a little more.
+On 01/03/2013 02:51 PM, Alex Elder wrote:
+> Only one of the three callers of rbd_do_request() provide a
+> collection structure to aggregate status.
+>
+> If an error occurs in rbd_do_request(), have the caller
+> take care of calling rbd_coll_end_req() if necessary in
+> that one spot.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
->   drivers/block/rbd.c |   50
-> +++++++++++++++++++++++---------------------------
->   1 file changed, 23 insertions(+), 27 deletions(-)
+>   drivers/block/rbd.c |   11 ++++-------
+>   1 file changed, 4 insertions(+), 7 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 88b9b2e..0a35c34 100644
+> index 0a35c34..1348825 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1647,53 +1647,49 @@ static int rbd_dev_do_request(struct request *rq,
->   static void rbd_rq_fn(struct request_queue *q)
->   {
->   	struct rbd_device *rbd_dev = q->queuedata;
-> +	bool read_only = rbd_dev->mapping.read_only;
->   	struct request *rq;
+> @@ -1126,12 +1126,8 @@ static int rbd_do_request(struct request *rq,
+>   	struct ceph_osd_client *osdc;
 >
->   	while ((rq = blk_fetch_request(q))) {
-> -		struct bio *bio;
-> -		bool do_write;
-> -		unsigned int size;
-> -		u64 ofs;
-> -		struct ceph_snap_context *snapc;
-> +		struct ceph_snap_context *snapc = NULL;
->   		int result;
+>   	rbd_req = kzalloc(sizeof(*rbd_req), GFP_NOIO);
+> -	if (!rbd_req) {
+> -		if (coll)
+> -			rbd_coll_end_req_index(rq, coll, coll_index,
+> -					       (s32) -ENOMEM, len);
+> +	if (!rbd_req)
+>   		return -ENOMEM;
+> -	}
 >
->   		dout("fetched request\n");
->
-> -		/* filter out block requests we don't understand */
-> +		/* Filter out block requests we don't understand */
-> +
->   		if ((rq->cmd_type != REQ_TYPE_FS)) {
->   			__blk_end_request_all(rq, 0);
->   			continue;
->   		}
-> +		spin_unlock_irq(q->queue_lock);
->
-> -		/* deduce our operation (read, write) */
-> -		do_write = (rq_data_dir(rq) == WRITE);
-> -		if (do_write && rbd_dev->mapping.read_only) {
-> -			__blk_end_request_all(rq, -EROFS);
-> -			continue;
-> -		}
-> +		/* Stop writes to a read-only device */
->
-> -		spin_unlock_irq(q->queue_lock);
-> +		result = -EROFS;
-> +		if (read_only && rq_data_dir(rq) == WRITE)
-> +			goto out_end_request;
-> +
-> +		/* Grab a reference to the snapshot context */
->
->   		down_read(&rbd_dev->header_rwsem);
-> +		if (rbd_dev->exists) {
-> +			snapc = ceph_get_snap_context(rbd_dev->header.snapc);
-> +			rbd_assert(snapc != NULL);
-> +		}
-> +		up_read(&rbd_dev->header_rwsem);
->
-> -		if (!rbd_dev->exists) {
-> +		if (!snapc) {
->   			rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
-> -			up_read(&rbd_dev->header_rwsem);
->   			dout("request for non-existent snapshot");
-> -			spin_lock_irq(q->queue_lock);
-> -			__blk_end_request_all(rq, -ENXIO);
-> -			continue;
-> +			result = -ENXIO;
-> +			goto out_end_request;
->   		}
->
-> -		snapc = ceph_get_snap_context(rbd_dev->header.snapc);
+>   	if (coll) {
+>   		rbd_req->coll = coll;
+> @@ -1206,7 +1202,6 @@ done_err:
+>   	bio_chain_put(rbd_req->bio);
+>   	ceph_osdc_put_request(osd_req);
+>   done_pages:
+> -	rbd_coll_end_req(rbd_req, (s32) ret, len);
+>   	kfree(rbd_req);
+>   	return ret;
+>   }
+> @@ -1359,7 +1354,9 @@ static int rbd_do_op(struct request *rq,
+>   			     ops,
+>   			     coll, coll_index,
+>   			     rbd_req_cb, 0, NULL);
 > -
-> -		up_read(&rbd_dev->header_rwsem);
-> -
-> -		size = blk_rq_bytes(rq);
-> -		ofs = blk_rq_pos(rq) * SECTOR_SIZE;
-> -		bio = rq->bio;
-> -
-> -		result = rbd_dev_do_request(rq, rbd_dev, snapc, ofs, size, bio);
-> +		result = rbd_dev_do_request(rq, rbd_dev, snapc,
-> +				blk_rq_pos(rq) * SECTOR_SIZE,
-> +				blk_rq_bytes(rq), rq->bio);
-> +out_end_request:
->   		ceph_put_snap_context(snapc);
->   		spin_lock_irq(q->queue_lock);
->   		if (result < 0)
+> +	if (ret < 0)
+> +		rbd_coll_end_req_index(rq, coll, coll_index,
+> +					(s32) ret, seg_len);
+>   	rbd_destroy_ops(ops);
+>   done:
+>   	kfree(seg_name);
 >
 
