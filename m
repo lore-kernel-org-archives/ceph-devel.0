@@ -1,65 +1,41 @@
-From: "aleonov@nazarianin.com" <aleonov@nazarianin.com>
-Subject: ceph-osd can`t start after crush server
-Date: Wed, 16 Jan 2013 11:53:47 +0600
-Message-ID: <50F6406B.3020906@nazarianin.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: OSD nodes with >=8 spinners, SSD-backed journals, and their performance impact
+Date: Wed, 16 Jan 2013 08:41:38 +0100
+Message-ID: <5C92D618-3B0A-472B-99B8-988161B9B16F@profihost.ag>
+References: <CAPUexz-D2KTf5q_Tmmm1SE3of7urrgn1T=ac_jhjxHHCe42pMA@mail.gmail.com> <50F40C4B.6000301@inktank.com> <CAJH6TXir4HL0Z7jtEg2r0Or7LygawXQHp0Ou+jF-ow1zXZAryg@mail.gmail.com> <50F595FC.7020903@inktank.com> <CAJH6TXgwhhzM+0OfLf_=rw5fMrrde_4tT8KjX0N-RecnQ_O6uw@mail.gmail.com> <50F5CCC4.7050408@inktank.com> <CAJH6TXh4XTSvQxdUVVN7-s52JU7qKAOTeLw9XAE_kzw+36wQ6w@mail.gmail.com>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:37288 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750831Ab3APFxv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 00:53:51 -0500
-Received: by mail-lb0-f173.google.com with SMTP id c1so746344lbg.4
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jan 2013 21:53:49 -0800 (PST)
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:52893 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757577Ab3APHln convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 02:41:43 -0500
+In-Reply-To: <CAJH6TXh4XTSvQxdUVVN7-s52JU7qKAOTeLw9XAE_kzw+36wQ6w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Florian Haas <florian@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-     Hello All
-Ceph-osd can`t start after crush server. I use XFS for osd folder.
+Why do you use 3,5' at all instead of 2,5?
 
-Best regards,
-                      Aleksey Leonov
+Am 15.01.2013 um 22:58 schrieb Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>:
 
-/usr/bin/ceph-osd -i 1 --pid-file /var/run/ceph/osd.1.pid -c 
-/etc/ceph/ceph.conf -d
-2013-01-16 11:20:57.994965 7f73b089e780  0 ceph version 0.56.1 
-(e4a541624df62ef353e754391cbbb707f54b16f7), process ceph-osd, pid 20960
-starting osd.1 at :/0 osd_data /ceph/osd/osd.1 /ceph/osd/osd.1/journal
-2013-01-16 11:20:58.068506 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount FIEMAP ioctl is supported and appears to work
-2013-01-16 11:20:58.068538 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
-2013-01-16 11:20:58.068940 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount did NOT detect btrfs
-2013-01-16 11:20:58.081290 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount syncfs(2) syscall fully supported (by glibc and kernel)
-2013-01-16 11:20:58.081424 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount found snaps <>
-2013-01-16 11:20:58.113247 7f73b089e780  0 filestore(/ceph/osd/osd.1) 
-mount: enabling WRITEAHEAD journal mode: btrfs not detected
-2013-01-16 11:20:58.118473 7f73b089e780  1 journal _open 
-/ceph/osd/osd.1/journal fd 19: 1048576000 bytes, block size 4096 bytes, 
-directio = 1, aio = 0
-2013-01-16 11:20:58.118632 7f73b089e780  1 journal _open 
-/ceph/osd/osd.1/journal fd 19: 1048576000 bytes, block size 4096 bytes, 
-directio = 1, aio = 0
-2013-01-16 11:20:58.120640 7f73b089e780  1 journal close 
-/ceph/osd/osd.1/journal
-*** Caught signal (Segmentation fault) **
-  in thread 7f73b089e780
-  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
-  1: /usr/bin/ceph-osd() [0x7edcc4]
-  2: (()+0x10460) [0x7f73b028c460]
-  3: (std::vector<__gnu_cxx::_Hashtable_node<std::pair<pg_t const, PG*> 
- >*, std::allocator<__gnu_cxx::_Hashtable_node<std::pair<pg_t const, 
-PG*> >*> 
- >::_M_fill_insert(__gnu_cxx::__normal_iterator<__gnu_cxx::_Hashtable_node<std::pair<pg_t const, PG*> >**, std::vector<__gnu_cxx::_Hashtable_node<std::pair<pg_t const, PG*> >*, std::allocator<__gnu_cxx::_Hashtable_node<std::pair<pg_t const, PG*> >*> > >, unsigned long, __gnu_cxx::_Hashtable_node<std::pair<pg_t const, PG*> >* const&)+0x70) [0x69bdd0]
-  4: (OSD::OSD(int, Messenger*, Messenger*, Messenger*, Messenger*, 
-MonClient*, std::string const&, std::string const&)+0xdd9) [0x67d889]
-  5: (main()+0x3df4) [0x59bb84]
-  6: (__libc_start_main()+0xfd) [0x7f73ae4444bd]
-  7: /usr/bin/ceph-osd() [0x597989]
-Segmentation fault
-
+> 2013/1/15 Mark Nelson <mark.nelson@inktank.com>:
+>> http://www.supermicro.com/products/chassis/2U/826/SC826BA-R920LP.cfm
+>> 
+>> That chassis has 12 3.5" bays in front, with 2 2.5" bays in back.  an
+>> interesting setup could be 12 spinning disks, with 2 very fast SSDs used for
+>> journals and OS.  Would need to test it first, and not sure I like putting
+>> the OS on the journal drives.  A more modest setup would be just to have the
+>> 12 spinning disks for data and journals and the rear drives for the OS.
+> 
+> Thank you. We have planned the same with a DELL R515 12+2 disks.
+> OS should be loaded from a RAID1 partitions from 2 spinning disks.
+> 
+> Or even no raid, in case of failure, the whole node is replicated by ceph.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
