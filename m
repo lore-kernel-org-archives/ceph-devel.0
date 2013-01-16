@@ -1,88 +1,99 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: HOWTO: teuthology and code coverage
-Date: Wed, 16 Jan 2013 15:01:08 +0100
-Message-ID: <50F6B2A4.5090608@dachary.org>
+From: Dino Yancey <dino2gnt@gmail.com>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Wed, 16 Jan 2013 08:10:04 -0600
+Message-ID: <CA+GnOzRYVxCgFLNCs4_-gBMO_t1_GqoZ8e1sKNhEA3GYRyTB5w@mail.gmail.com>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com>
+	<CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com>
+	<CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com>
+	<CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+	<CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com>
+	<CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com>
+	<CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com>
+	<CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
+	<50F686A2.2060901@widodh.nl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig03ACD7920D89C7E1A2CF30D0"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:39030 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754620Ab3APOBL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 09:01:11 -0500
-Received: from [10.8.2.6] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 740B626394
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 15:01:08 +0100 (CET)
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:45526 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753420Ab3APOKF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 09:10:05 -0500
+Received: by mail-ie0-f181.google.com with SMTP id 16so2496639iea.26
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 06:10:04 -0800 (PST)
+In-Reply-To: <50F686A2.2060901@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Marcin Szukala <szukala.marcin@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig03ACD7920D89C7E1A2CF30D0
-Content-Type: multipart/mixed;
- boundary="------------050801050807090508090201"
+Hi Marcin,
 
-This is a multi-part message in MIME format.
---------------050801050807090508090201
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Not sure if anyone asked, but are your OSD journals on actual disk or
+are you using tmpfs?
 
-Hi,
+Dino
 
-I'm happy to report that running teuthology to get a lcov code coverage r=
-eport worked for me.
+On Wed, Jan 16, 2013 at 4:53 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>
+>
+> On 01/16/2013 11:50 AM, Marcin Szukala wrote:
+>>
+>> Hi all,
+>>
+>> Any ideas how can I resolve my issue? Or where the problem is?
+>>
+>> Let me describe the issue.
+>> Host boots up and maps RBD image with XFS filesystems
+>> Host mounts the filesystems from the RBD image
+>> Host starts to write data to the mounted filesystems
+>> Host experiences power failure
+>> Host comes up and map the RBD image
+>> Host mounts the filesystems from the RBD image
+>> All data from all filesystems is lost
+>> Host is able to use the filesystems with no problems.
+>>
+>> Filesystem is XFS, no errors on filesystem,
+>>
+>
+> That simply does not make sense to me. How can all data be gone and the FS
+> just mount cleanly.
+>
+> Can you try to format the RBD with EXT4 and see if that makes any
+> difference.
+>
+> Could you also try to run a "sync" prior to pulling the power from the host
+> to see if that makes any difference.
+>
+> Wido
+>
+>
+>> Kernel 3.5.0-19-generic
+>>
+>> root@openstack-1:/etc/init# ceph -s
+>>     health HEALTH_OK
+>>     monmap e1: 3 mons at
+>> {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
+>> election epoch 10, quorum 0,1,2 a,b,d
+>>     osdmap e132: 56 osds: 56 up, 56 in
+>>      pgmap v87165: 13744 pgs: 13744 active+clean; 52727 MB data, 102 GB
+>> used, 52028 GB / 52131 GB avail
+>>     mdsmap e1: 0/0/1 up
+>>
+>> Regards,
+>> Marcin
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-http://dachary.org/wp-uploads/2013/01/teuthology/total/mon/Monitor.cc.gco=
-v.html
-
-It took me a while to figure out the logic (thanks Josh for the help :-).=
- I wrote a HOWTO explaining the steps in detail. It should be straightfor=
-ward to run on an OpenStack tenant, using virtual machines instead of bar=
-e metal.
-
-http://dachary.org/?p=3D1788
-
-Cheers
 
 
---------------050801050807090508090201
-Content-Type: text/x-vcard; charset=utf-8;
- name="loic.vcf"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: attachment;
- filename="loic.vcf"
-
-begin:vcard
-fn:Loic Dachary
-n:Dachary;Loic
-org:Artisan Logiciel Libre
-adr:;;12 bd Magenta;Paris;;75010;France
-email;internet:loic@dachary.org
-title:Senior Developer
-tel;work:+33 4 84 25 08 05
-tel;home:+33 9 51 18 43 38
-tel;cell:+33 6 64 03 29 07
-note:Born 131414404 before EPOCH.
-url:http://dachary.org/
-version:2.1
-end:vcard
-
-
---------------050801050807090508090201--
-
---------------enig03ACD7920D89C7E1A2CF30D0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlD2sqQACgkQ8dLMyEl6F22w8QCfdDIpBl9StMOQde3pLBWkHFxc
-hNkAnRT/dc1fInZl5gaShgfUrIxqCEqZ
-=bvZf
------END PGP SIGNATURE-----
-
---------------enig03ACD7920D89C7E1A2CF30D0--
+-- 
+______________________________
+Dino Yancey
+2GNT.com Admin
