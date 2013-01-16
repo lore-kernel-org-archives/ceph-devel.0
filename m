@@ -1,81 +1,68 @@
 From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: flashcache
-Date: Wed, 16 Jan 2013 15:53:20 -0600
-Message-ID: <50F72150.7080002@inktank.com>
-References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com> <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
+Date: Wed, 16 Jan 2013 15:55:13 -0600
+Message-ID: <50F721C1.8070200@inktank.com>
+References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com> <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net> <CAJH6TXhCFvA6UF7e+wYOJAxuHi5Q1ug=TQao24Uxd7_AV_ppkg@mail.gmail.com> <alpine.DEB.2.00.1301161342580.27925@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:62484 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757308Ab3APVxS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 16:53:18 -0500
-Received: by mail-ie0-f177.google.com with SMTP id k13so3437452iea.8
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 13:53:18 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:41588 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757037Ab3APVzL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 16:55:11 -0500
+Received: by mail-ie0-f174.google.com with SMTP id c11so3554428ieb.33
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 13:55:10 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1301161342580.27925@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, ceph-devel@vger.kernel.org
 
-On 01/16/2013 03:29 PM, Sage Weil wrote:
+On 01/16/2013 03:46 PM, Sage Weil wrote:
 > On Wed, 16 Jan 2013, Gandalf Corvotempesta wrote:
->> In a ceph cluster, flashcache with writeback is considered safe?
->> In case of SSD failure, the flashcache contents should be already been
->> replicated (by ceph) in other servers, right?
->
-> This sort of configuration effectively bundles the disk and SSD into a
-> single unit, where the failure of either results in the loss of both.
->  From Ceph's perspective, it doesn't matter if the thing it is sitting on
-> is a single disk, an SSD+disk flashcache thing, or a big RAID array.  All
-> that changes is the probability of failure.
->
-> The thing to watch out for *knowing* that the whole is lost when one part
-> fails (vs plowing ahead with a corrupt fs).
->
->> I'm planning to use this configuration: Supermicro with 12 spinning
->> disks e 2 SSD.
->> 6 spinning disks will have ceph journal on SSD1, the other 6 disks
->> will have ceph journal on disks2.
+>> 2013/1/16 Sage Weil <sage@inktank.com>:
+>>> This sort of configuration effectively bundles the disk and SSD into a
+>>> single unit, where the failure of either results in the loss of both.
+>>>  From Ceph's perspective, it doesn't matter if the thing it is sitting on
+>>> is a single disk, an SSD+disk flashcache thing, or a big RAID array.  All
+>>> that changes is the probability of failure.
 >>
->> One OSD for each spinning disk (a single XFS filesystem for the whole disk).
->> XFS metadata to a parition of SSD1
->> XFS flashcache to another partition of SSD1
->>
->> So, 3 partitions for each OSD on the SSD.
->> How big should be these partitions? Any advice?
->>
->> No raid at all, except for 1 RAID-1 volume made with a 10GB partitions
->> on each SSD, for the OS. Log files will be replicated to a remote
->> server, so writes on OS partitions are very very low.
->>
->> Any hint? Adivice? Critics?
-
-Looks like a fun configuration to test!  Having said that, I have no 
-idea how stable flashcache is.  It's certainly not something we've used 
-in production before!  Keep that in mind.
-
-With only 2 SSDs for 12 spinning disks, you'll need to make sure the 
-SSDs are really fast.  I use Intel 520s for testing which are great, but 
-I wouldn't use them in  production.  The S3700 might be a good bet at 
-larger sizes, but it looks like the 100GB version is a lot slower than 
-the 200GB version, and that's still a bit slower than the 400GB version. 
-  Assuming you have 10GbE, you'll probably be capped by the SSDs for 
-large block sequential workloads.  Having said that, I still think this 
-has potential to be a nice setup.  Just be aware that we usually don't 
-stick that much stuff on the SSDs!
-
+>> Ok, it will fail, but this should not be an issue, in a cluster like
+>> ceph, right?
+>> With or without flashcache or SSD, ceph should be able to handle
+>> disks/nodes/osds failures on its own by replicating in real time to
+>> multiple server.
 >
-> I would worry that there is a lot of stuff piling onto the SSD and it may
-> become your bottleneck.  My guess is that another 1-2 SSDs will be a
-> better 'balance', but only experiementation will really tell us that.
+> Exactly.
 >
+>> Should I worry about loosing data in case of failure? It should
+>> rebalance automatically in case of failure with no data loss.
+>
+> You should not worry, except to the extent that 2 might fail
+> simultaneously, and failures in general are not good things.
+>
+>>> I would worry that there is a lot of stuff piling onto the SSD and it may
+>>> become your bottleneck.  My guess is that another 1-2 SSDs will be a
+>>> better 'balance', but only experiementation will really tell us that.
+>>>
+>>> Otherwise, those seem to all be good things to put on teh SSD!
+>>
+>> I can't add more than 2 SSD, I don't have enough space.
+>> I can move OS to the first 2 spinning disks in raid1 software, if this
+>> will improve performance of SSD
+>>
+>> What about swap? I'm thinking to no use swap at all and start with
+>> 16/32GB RAM
+>
+> You could use the first (single) disk for os and logs.  You might not even
+> bother with raid1, since you will presumably be replicating across hosts.
+> When the OSD disk dies, you can re-run your chef/juju/puppet rule or
+> whatever provisioning tool is at work to reinstall/configure the OS disk.
+> The data on the SSDs and data disks will all be intact.
 
-It'd be amazing if supermicro could cram another 2 SSD slots in the 
-back.  Maybe by that time we'll all be using PCIE flash storage though. :)
+Other options might be network boot or even usb stick boot.
 
-> Otherwise, those seem to all be good things to put on teh SSD!
 >
 > sage
 > --
