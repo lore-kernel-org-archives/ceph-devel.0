@@ -1,96 +1,86 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Ceph slow request & unstable issue
-Date: Wed, 16 Jan 2013 08:58:38 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301160854170.15921@cobra.newdream.net>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com> <CABYiri_50ijzfm1y-ryNULXq8DDNUWghrBaQBfzBkspzjpZx1A@mail.gmail.com>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Wed, 16 Jan 2013 09:00:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301160859010.15921@cobra.newdream.net>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com> <CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com> <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com> <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+ <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com> <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com> <CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com> <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
+ <50F686A2.2060901@widodh.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45448 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45512 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757652Ab3APQ6j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 11:58:39 -0500
-In-Reply-To: <CABYiri_50ijzfm1y-ryNULXq8DDNUWghrBaQBfzBkspzjpZx1A@mail.gmail.com>
+	with ESMTP id S1757400Ab3APRA2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 12:00:28 -0500
+In-Reply-To: <50F686A2.2060901@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Marcin Szukala <szukala.marcin@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+On Wed, 16 Jan 2013, Wido den Hollander wrote:
+> 
+> On 01/16/2013 11:50 AM, Marcin Szukala wrote:
+> > Hi all,
+> > 
+> > Any ideas how can I resolve my issue? Or where the problem is?
+> > 
+> > Let me describe the issue.
+> > Host boots up and maps RBD image with XFS filesystems
+> > Host mounts the filesystems from the RBD image
+> > Host starts to write data to the mounted filesystems
+> > Host experiences power failure
+> > Host comes up and map the RBD image
+> > Host mounts the filesystems from the RBD image
+> > All data from all filesystems is lost
+> > Host is able to use the filesystems with no problems.
+> > 
+> > Filesystem is XFS, no errors on filesystem,
+> > 
+> 
+> That simply does not make sense to me. How can all data be gone and the FS
+> just mount cleanly.
+> 
+> Can you try to format the RBD with EXT4 and see if that makes any difference.
+> 
+> Could you also try to run a "sync" prior to pulling the power from the host to
+> see if that makes any difference.
 
-On Wed, 16 Jan 2013, Andrey Korolyov wrote:
-> On Wed, Jan 16, 2013 at 4:58 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
-> > Hi list,
-> >         We are suffering from OSD or OS down when there is continuing high pressure on the Ceph rack.
-> >         Basically we are on Ubuntu 12.04+ Ceph 0.56.1, 6 nodes, in each nodes with 20 * spindles + 4* SSDs as journal.(120 spindles in total)
-> >         We create a lots of RBD volumes (say 240),mounting to 16 different client machines ( 15 RBD Volumes/ client) and running DD concurrently on top of each RBD.
-> >
-> >         The issues are:
-> > 1. Slow requests
-> > ??From the list-archive it seems solved in 0.56.1 but we still notice such warning
-> > 2. OSD Down or even host down
-> > Like the message below.Seems some OSD has been blocking there for quite a long time.
-> >
-> >         Suggestions are highly appreciate.Thanks
-> >                                                                                                                                                                         Xiaoxi
-> >
-> > _____________________________________________
-> >
-> > Bad news:
-> >
-> > I have  back all my Ceph machine?s OS to kernel  3.2.0-23, which Ubuntu 12.04 use.
-> > I run dd command (dd if=/dev/zero bs=1M count=60000 of=/dev/rbd${i} & )on Ceph client to create data prepare test at last night.
-> > Now, I have one machine down (can?t be reached by ping), another two machine has all OSD daemon down, while the three left has some daemon down.
-> >
-> > I have many warnings in OSD log like this:
-> >
-> > no flag points reached
-> > 2013-01-15 19:14:22.769898 7f20a2d57700  0 log [WRN] : slow request 52.218106 seconds old, received at 2013-01-15 19:13:30.551718: osd_op(client.10674.1:1002417 rb.0.27a8.6b8b4567.000000000eba [write 3145728~524288] 2.c61810ee RETRY) currently waiting for sub ops
-> > 2013-01-15 19:14:23.770077 7f20a2d57700  0 log [WRN] : 21 slow requests, 6 included below; oldest blocked for > 1132.138983 secs
-> > 2013-01-15 19:14:23.770086 7f20a2d57700  0 log [WRN] : slow request 53.216404 seconds old, received at 2013-01-15 19:13:30.553616: osd_op(client.10671.1:1066860 rb.0.282c.6b8b4567.000000001057 [write 2621440~524288] 2.ea7acebc) currently waiting for sub ops
-> > 2013-01-15 19:14:23.770096 7f20a2d57700  0 log [WRN] : slow request 51.442032 seconds old, received at 2013-01-15 19:13:32.327988: osd_op(client.10674.1:1002418
-> >
-> > Similar info in dmesg we have saw pervious:
-> >
-> > [21199.036476] INFO: task ceph-osd:7788 blocked for more than 120 seconds.
-> > [21199.037493] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> > [21199.038841] ceph-osd        D 0000000000000006     0  7788      1 0x00000000
-> > [21199.038844]  ffff880fefdafcc8 0000000000000086 0000000000000000 ffffffffffffffe0
-> > [21199.038848]  ffff880fefdaffd8 ffff880fefdaffd8 ffff880fefdaffd8 0000000000013780
-> > [21199.038852]  ffff88081aa58000 ffff880f68f52de0 ffff880f68f52de0 ffff882017556200
-> > [21199.038856] Call Trace:
-> > [21199.038858]  [<ffffffff8165a55f>] schedule+0x3f/0x60
-> > [21199.038861]  [<ffffffff8106b7e5>] exit_mm+0x85/0x130
-> > [21199.038864]  [<ffffffff8106b9fe>] do_exit+0x16e/0x420
-> > [21199.038866]  [<ffffffff8109d88f>] ? __unqueue_futex+0x3f/0x80
-> > [21199.038869]  [<ffffffff8107a19a>] ? __dequeue_signal+0x6a/0xb0
-> > [21199.038872]  [<ffffffff8106be54>] do_group_exit+0x44/0xa0
-> > [21199.038874]  [<ffffffff8107ccdc>] get_signal_to_deliver+0x21c/0x420
-> > [21199.038877]  [<ffffffff81013865>] do_signal+0x45/0x130
-> > [21199.038880]  [<ffffffff810a091c>] ? do_futex+0x7c/0x1b0
-> > [21199.038882]  [<ffffffff810a0b5a>] ? sys_futex+0x10a/0x1a0
-> > [21199.038885]  [<ffffffff81013b15>] do_notify_resume+0x65/0x80
-> > [21199.038887]  [<ffffffff81664d50>] int_signal+0x12/0x17
+A few other quick questions:
 
-We have seen this stack trace several times over the past 6 months, but 
-are not sure what the trigger is.  In principle, the ceph server-side 
-daemons shouldn't be capable of locking up like this, but clearly 
-something is amiss between what they are doing in userland and how the 
-kernel is tolerating that.  Low memory, perhaps?  In each case where we 
-tried to track it down, the problem seemed to go away on its own.  Is this 
-easily reproducible in your case?
+What version of qemu and librbd are you using?  What is the command line 
+that is used to start the VM?  This could be a problem with the qemu 
+and librbd caching configuration.
 
-> my 0.02$:
-> http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg11531.html
-> and kernel panic from two different hosts from yesterday during ceph
-> startup(on 3.8-rc3, images from console available at
-> http://imgur.com/wIRVn,k0QCS#0) leads to suggestion that Ceph may have
-> been introduced lockup-alike behavior not a long ago, causing, in my
-> case, excessive amount of context switches on the host leading to osd
-> flaps and panic at the ip-ib stack due to same issue.
-
-For the stack trace my first guess would be a problem with the IB driver 
-that is triggered by memory pressure.  Can you characterize what the 
-system utilization (CPU, memory) looks like leading up to the lockup?
-
+Thanks!
 sage
+
+
+> 
+> Wido
+> 
+> > Kernel 3.5.0-19-generic
+> > 
+> > root@openstack-1:/etc/init# ceph -s
+> >     health HEALTH_OK
+> >     monmap e1: 3 mons at
+> > {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
+> > election epoch 10, quorum 0,1,2 a,b,d
+> >     osdmap e132: 56 osds: 56 up, 56 in
+> >      pgmap v87165: 13744 pgs: 13744 active+clean; 52727 MB data, 102 GB
+> > used, 52028 GB / 52131 GB avail
+> >     mdsmap e1: 0/0/1 up
+> > 
+> > Regards,
+> > Marcin
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
