@@ -1,99 +1,101 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: 8 out of 12 OSDs died after expansion on 0.56.1 (void
- OSD::do_waiters())
-Date: Wed, 16 Jan 2013 10:03:59 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301161003210.27925@cobra.newdream.net>
-References: <50F6CD90.3070007@widodh.nl>
+Subject: Re: Ceph version 0.56.1, data loss on power failure
+Date: Wed, 16 Jan 2013 10:10:06 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301161009300.27925@cobra.newdream.net>
+References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com> <CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com> <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com> <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com>
+ <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com> <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com> <CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com> <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com>
+ <50F686A2.2060901@widodh.nl> <alpine.DEB.2.00.1301160859010.15921@cobra.newdream.net> <49E5320E-C2D4-4B80-A3E7-914F73E487D4@widodh.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46607 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46690 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753390Ab3APSEA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 13:04:00 -0500
-In-Reply-To: <50F6CD90.3070007@widodh.nl>
+	with ESMTP id S1755608Ab3APSKH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 13:10:07 -0500
+In-Reply-To: <49E5320E-C2D4-4B80-A3E7-914F73E487D4@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Marcin Szukala <szukala.marcin@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Wido,
+On Wed, 16 Jan 2013, Wido den Hollander wrote:
+> 
+> Op 16 jan. 2013 om 18:00 heeft Sage Weil <sage@inktank.com> het volgende geschreven:
+> 
+> > On Wed, 16 Jan 2013, Wido den Hollander wrote:
+> >> 
+> >> On 01/16/2013 11:50 AM, Marcin Szukala wrote:
+> >>> Hi all,
+> >>> 
+> >>> Any ideas how can I resolve my issue? Or where the problem is?
+> >>> 
+> >>> Let me describe the issue.
+> >>> Host boots up and maps RBD image with XFS filesystems
+> >>> Host mounts the filesystems from the RBD image
+> >>> Host starts to write data to the mounted filesystems
+> >>> Host experiences power failure
+> >>> Host comes up and map the RBD image
+> >>> Host mounts the filesystems from the RBD image
+> >>> All data from all filesystems is lost
+> >>> Host is able to use the filesystems with no problems.
+> >>> 
+> >>> Filesystem is XFS, no errors on filesystem,
+> >> 
+> >> That simply does not make sense to me. How can all data be gone and the FS
+> >> just mount cleanly.
+> >> 
+> >> Can you try to format the RBD with EXT4 and see if that makes any difference.
+> >> 
+> >> Could you also try to run a "sync" prior to pulling the power from the host to
+> >> see if that makes any difference.
+> > 
+> > A few other quick questions:
+> > 
+> > What version of qemu and librbd are you using?  What is the command line 
+> > that is used to start the VM?  This could be a problem with the qemu 
+> > and librbd caching configuration.
+> > 
+> 
+> I don't think he uses Qemu. From what I understand he uses kernel RBD 
+> since he uses the words 'map' and 'unmap'
 
-Do you have any logs leading up to the crash?  I'm hoping the last message 
-was osd_map, in which case I can explain this.. but let me know.
+That's what I originally thought too, and then I saw
 
-http://tracker.newdream.net/issues/3816
+> >>> root@openstack-1:/etc/init# ceph -s
 
-Thanks!
+and wasn't sure...
+
+Marcin?
+
 sage
 
 
-On Wed, 16 Jan 2013, Wido den Hollander wrote:
 
-> Hi,
-> 
-> I'm testing a small Ceph cluster with Asus C60M1-1 mainboards.
-> 
-> The setup is:
-> - AMD Fusion C60 CPU
-> - 8GB DDR3
-> - 1x Intel 520 120GB SSD (OS + Journaling)
-> - 4x 1TB disk
-> 
-> I had two of these systems running, but yesterday I wanted to add a third one.
-> 
-> So I had 8 OSDs (one per disk) running on 0.56.1 and I added one host bringing
-> the total to 12.
-> 
-> The cluster came into a degraded state (about 50%) and it started to recover
-> until it reached somewhere about 48%
-> 
-> In a manner of about 5 minutes all the original 8 OSDs had crashed with the
-> same backtrace:
-> 
->     -1> 2013-01-15 17:20:29.058426 7f95a0fd8700 10 --
-> [2a00:f10:113:0:6051:e06c:df3:f374]:6803/4913 reaper done
->      0> 2013-01-15 17:20:29.061054 7f959cfd0700 -1 osd/OSD.cc: In function
-> 'void OSD::do_waiters()' thread 7f959cfd0700 time 2013-01-15 17:20:29.057714
-> osd/OSD.cc: 3318: FAILED assert(osd_lock.is_locked())
-> 
->  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->  1: (OSD::do_waiters()+0x2c3) [0x6251f3]
->  2: (OSD::ms_dispatch(Message*)+0x1c4) [0x62d714]
->  3: (DispatchQueue::entry()+0x349) [0x8ba289]
->  4: (DispatchQueue::DispatchThread::entry()+0xd) [0x8137cd]
->  5: (()+0x7e9a) [0x7f95a95dae9a]
->  6: (clone()+0x6d) [0x7f95a805ecbd]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
-> interpret this.
-> 
-> So osd.0 - osd.7 were down and osd.8 - osd.11 (the new ones) were still
-> running happily.
-> 
-> I have to note that during this recovery the load of the first two machines
-> spiked to 10 and the CPUs were 0% idle.
-> 
-> This morning I started all the OSDs again with a default loglevel since I
-> don't want to stress the CPUs even more.
-> 
-> I know the C60 CPU is kind of limited, but it's a test-case!
-> 
-> The recovery started again and it showed about 90MB/sec (Gbit network) coming
-> into the new node.
-> 
-> After about 4 hours the recovery successfully completed:
-> 
-> 736 pgs: 1736 active+clean; 837 GB data, 1671 GB used, 9501 GB / 11172 GB
-> avail
-> 
-> Now, there was no high logging level on the OSDs prior to their crash, I only
-> have the default logs.
-> 
-> And nothing happened after I started them again, all 12 are up now.
-> 
-> Is this a known one? If not, I'll file a bug in the tracker.
-> 
-> Wido
+
+
+> >>>    health HEALTH_OK
+> >>>    monmap e1: 3 mons at
+> >>> {a=10.3.82.102:6789/0,b=10.3.82.103:6789/0,d=10.3.82.105:6789/0},
+> >>> election epoch 10, quorum 0,1,2 a,b,d
+> >>>    osdmap e132: 56 osds: 56 up, 56 in
+> >>>     pgmap v87165: 13744 pgs: 13744 active+clean; 52727 MB data, 102 GB
+> >>> used, 52028 GB / 52131 GB avail
+> >>>    mdsmap e1: 0/0/1 up
+> >>> 
+> >>> Regards,
+> >>> Marcin
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
