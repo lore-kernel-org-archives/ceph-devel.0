@@ -1,50 +1,38 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: REMINDER: all argonaut users should upgrade to v0.48.3argonaut
-Date: Wed, 16 Jan 2013 16:23:20 +0100
-Message-ID: <CAOLwVU=0N2rrKFWoXoLm9ZmjgchVDcTCx7LHXTctvp9WVORRJw@mail.gmail.com>
-References: <alpine.DEB.2.00.1301151348330.24455@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH] libceph: for chooseleaf rules, retry CRUSH map
+ descent from root if leaf is failed
+Date: Wed, 16 Jan 2013 08:25:04 -0700
+Message-ID: <50F6C650.1010600@sandia.gov>
+References: <1354292125-174877-1-git-send-email-jaschut@sandia.gov>
+ <alpine.DEB.2.00.1301151855300.6529@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:39520 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752037Ab3APPXm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 10:23:42 -0500
-Received: by mail-la0-f43.google.com with SMTP id eg20so1518772lab.2
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 07:23:40 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301151348330.24455@cobra.newdream.net>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:42099 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750963Ab3APPZY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 10:25:24 -0500
+In-Reply-To: <alpine.DEB.2.00.1301151855300.6529@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-Can we use this doc as a reference for the upgrade?
+Hi Sage,
 
-https://github.com/ceph/ceph/blob/eb02eaede53c03579d015ca00a888a48dbab7=
-39a/doc/install/upgrading-ceph.rst
+On 01/15/2013 07:55 PM, Sage Weil wrote:
+> Hi Jim-
+> 
+> I just realized this didn't make it into our tree.  It's now in testing, 
+> and will get merged in the next window.  D'oh!
 
-Thanks.
+That's great news - thanks for the update.
 
---
-Regards,
-S=E9bastien Han.
+-- Jim
 
-
-On Tue, Jan 15, 2013 at 10:49 PM, Sage Weil <sage@inktank.com> wrote:
-> That there are some critical bugs that are fixed in v0.48.3, includin=
-g one
-> that can lead to data loss in power loss or kernel panic situations.
-> Please upgrade if you have not already done so!
->
+> 
 > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
