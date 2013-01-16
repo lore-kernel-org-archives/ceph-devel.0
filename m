@@ -1,202 +1,201 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: for chooseleaf rules, retry CRUSH map descent
- from root if leaf is failed
-Date: Tue, 15 Jan 2013 18:55:55 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301151855300.6529@cobra.newdream.net>
-References: <1354292125-174877-1-git-send-email-jaschut@sandia.gov>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Adding flashcache for data disk to cache Ceph metadata writes
+Date: Wed, 16 Jan 2013 04:00:46 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5DED31@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38605 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756105Ab3APCz4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jan 2013 21:55:56 -0500
-In-Reply-To: <1354292125-174877-1-git-send-email-jaschut@sandia.gov>
+Received: from mga09.intel.com ([134.134.136.24]:45446 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756664Ab3APEBE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Jan 2013 23:01:04 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Jim-
-
-I just realized this didn't make it into our tree.  It's now in testing, 
-and will get merged in the next window.  D'oh!
-
-sage
-
-
-On Fri, 30 Nov 2012, Jim Schutt wrote:
-
-> Add libceph support for a new CRUSH tunable recently added to Ceph servers.
-> 
-> Consider the CRUSH rule
->   step chooseleaf firstn 0 type <node_type>
-> 
-> This rule means that <n> replicas will be chosen in a manner such that
-> each chosen leaf's branch will contain a unique instance of <node_type>.
-> 
-> When an object is re-replicated after a leaf failure, if the CRUSH map uses
-> a chooseleaf rule the remapped replica ends up under the <node_type> bucket
-> that held the failed leaf.  This causes uneven data distribution across the
-> storage cluster, to the point that when all the leaves but one fail under a
-> particular <node_type> bucket, that remaining leaf holds all the data from
-> its failed peers.
-> 
-> This behavior also limits the number of peers that can participate in the
-> re-replication of the data held by the failed leaf, which increases the
-> time required to re-replicate after a failure.
-> 
-> For a chooseleaf CRUSH rule, the tree descent has two steps: call them the
-> inner and outer descents.
-> 
-> If the tree descent down to <node_type> is the outer descent, and the descent
-> from <node_type> down to a leaf is the inner descent, the issue is that a
-> down leaf is detected on the inner descent, so only the inner descent is
-> retried.
-> 
-> In order to disperse re-replicated data as widely as possible across a
-> storage cluster after a failure, we want to retry the outer descent. So,
-> fix up crush_choose() to allow the inner descent to return immediately on
-> choosing a failed leaf.  Wire this up as a new CRUSH tunable.
-> 
-> Note that after this change, for a chooseleaf rule, if the primary OSD
-> in a placement group has failed, choosing a replacement may result in
-> one of the other OSDs in the PG colliding with the new primary.  This
-> requires that OSD's data for that PG to need moving as well.  This
-> seems unavoidable but should be relatively rare.
-> 
-> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
-> ---
->  include/linux/ceph/ceph_features.h |    4 +++-
->  include/linux/crush/crush.h        |    2 ++
->  net/ceph/crush/mapper.c            |   13 ++++++++++---
->  net/ceph/osdmap.c                  |    6 ++++++
->  4 files changed, 21 insertions(+), 4 deletions(-)
-> 
-> diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-> index dad579b..61e5af4 100644
-> --- a/include/linux/ceph/ceph_features.h
-> +++ b/include/linux/ceph/ceph_features.h
-> @@ -14,13 +14,15 @@
->  #define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
->  /* bits 8-17 defined by user-space; not supported yet here */
->  #define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
-> +#define CEPH_FEATURE_CRUSH_TUNABLES2 (1<<25)
->  
->  /*
->   * Features supported.
->   */
->  #define CEPH_FEATURES_SUPPORTED_DEFAULT  \
->  	(CEPH_FEATURE_NOSRCADDR |	 \
-> -	 CEPH_FEATURE_CRUSH_TUNABLES)
-> +	 CEPH_FEATURE_CRUSH_TUNABLES |	 \
-> +	 CEPH_FEATURE_CRUSH_TUNABLES2)
->  
->  #define CEPH_FEATURES_REQUIRED_DEFAULT   \
->  	(CEPH_FEATURE_NOSRCADDR)
-> diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-> index 25baa28..6a1101f 100644
-> --- a/include/linux/crush/crush.h
-> +++ b/include/linux/crush/crush.h
-> @@ -162,6 +162,8 @@ struct crush_map {
->  	__u32 choose_local_fallback_tries;
->  	/* choose attempts before giving up */ 
->  	__u32 choose_total_tries;
-> +	/* attempt chooseleaf inner descent once; on failure retry outer descent */
-> +	__u32 chooseleaf_descend_once;
->  };
->  
->  
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index 35fce75..96c8a58 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -287,6 +287,7 @@ static int is_out(const struct crush_map *map, const __u32 *weight, int item, in
->   * @outpos: our position in that vector
->   * @firstn: true if choosing "first n" items, false if choosing "indep"
->   * @recurse_to_leaf: true if we want one device under each item of given type
-> + * @descend_once: true if we should only try one descent before giving up
->   * @out2: second output vector for leaf items (if @recurse_to_leaf)
->   */
->  static int crush_choose(const struct crush_map *map,
-> @@ -295,7 +296,7 @@ static int crush_choose(const struct crush_map *map,
->  			int x, int numrep, int type,
->  			int *out, int outpos,
->  			int firstn, int recurse_to_leaf,
-> -			int *out2)
-> +			int descend_once, int *out2)
->  {
->  	int rep;
->  	unsigned int ftotal, flocal;
-> @@ -399,6 +400,7 @@ static int crush_choose(const struct crush_map *map,
->  							 x, outpos+1, 0,
->  							 out2, outpos,
->  							 firstn, 0,
-> +							 map->chooseleaf_descend_once,
->  							 NULL) <= outpos)
->  							/* didn't get leaf */
->  							reject = 1;
-> @@ -422,7 +424,10 @@ reject:
->  					ftotal++;
->  					flocal++;
->  
-> -					if (collide && flocal <= map->choose_local_tries)
-> +					if (reject && descend_once)
-> +						/* let outer call try again */
-> +						skip_rep = 1;
-> +					else if (collide && flocal <= map->choose_local_tries)
->  						/* retry locally a few times */
->  						retry_bucket = 1;
->  					else if (map->choose_local_fallback_tries > 0 &&
-> @@ -485,6 +490,7 @@ int crush_do_rule(const struct crush_map *map,
->  	int i, j;
->  	int numrep;
->  	int firstn;
-> +	const int descend_once = 0;
->  
->  	if ((__u32)ruleno >= map->max_rules) {
->  		dprintk(" bad ruleno %d\n", ruleno);
-> @@ -544,7 +550,8 @@ int crush_do_rule(const struct crush_map *map,
->  						      curstep->arg2,
->  						      o+osize, j,
->  						      firstn,
-> -						      recurse_to_leaf, c+osize);
-> +						      recurse_to_leaf,
-> +						      descend_once, c+osize);
->  			}
->  
->  			if (recurse_to_leaf)
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 3124b71..72f878e 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -170,6 +170,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
->          c->choose_local_tries = 2;
->          c->choose_local_fallback_tries = 5;
->          c->choose_total_tries = 19;
-> +	c->chooseleaf_descend_once = 0;
->  
->  	ceph_decode_need(p, end, 4*sizeof(u32), bad);
->  	magic = ceph_decode_32(p);
-> @@ -336,6 +337,11 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
->          dout("crush decode tunable choose_total_tries = %d",
->               c->choose_total_tries);
->  
-> +	ceph_decode_need(p, end, sizeof(u32), done);
-> +	c->chooseleaf_descend_once = ceph_decode_32(p);
-> +	dout("crush decode tunable chooseleaf_descend_once = %d",
-> +	     c->chooseleaf_descend_once);
-> +
->  done:
->  	dout("crush_decode success\n");
->  	return c;
-> -- 
-> 1.7.8.2
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGkgTGlzdCwNCglJIGhhdmUgaW50cm9kdWNlZCBmbGFzaGNhY2hlIChodHRwczovL2dpdGh1Yi5j
+b20vZmFjZWJvb2svZmxhc2hjYWNoZSkgYWltIGF0IHJlZHVjZSBDZXBoIG1ldGFkYXRhIElPcyB0
+byBPU0QncyBkaXNrLiBCYXNpY2FsbHksIGZvciBldmVyeSBkYXRhIHdyaXRlcywgY2VwaCBuZWVk
+IHRvIHdyaXRlIDMgdGhpbmdzOg0KUGcgbG9nDQpQZyBpbmZvDQpBY3R1YWwgZGF0YQ0KCUZpcnN0
+IDIgcmVxdWVzdHMgYXJlIHNtYWxsLCBidXQgZm9yIG5vbi1idHJmcyBmaWxlc3lzdGVtLCB0aGUg
+Zmlyc3QgMiB3cml0ZXMgd2lsbCByZXN1bHRzIE9TRCBkaXNrIHRvIGRvIDIgc2Vla3MsIGl0J3Mg
+Y3JpdGljYWwgdG8gc3BpbmRsZS1kaXNrJ3MgdGhyb3VnaHB1dCBhcyBtZW50aW9uZWQgaW4gZWFy
+bGllciBtYWlsLg0KDQoJSSBsaXN0IHRoZSBkZXRhaWwgb2YgbXkgZXhwZXJpbWVudCAsIGFueSBp
+bnB1dHMgaXMgaGlnaGx5IGFwcHJlY2lhdGUuDQoNCglbU2V0dXBdDQoJMiBIb3N0LCAxIFNTRCB3
+aXRoIDEgU0FUQSBkaXNrLCBTU0QgaXMgcGFydGl0aW9uZWQgaW50byA0IHBhcnRpdGlvbnMuIFAx
+IGFzIE9TRCBKb3VybmFsLCBQMiBhcyBGbGFzaENhY2hlIGZvciBzYXRhLiBQMyB1c2VkIGFzIFhG
+UyBtZXRhZGF0YSBqb3VybmFsLg0KCTEgQ2xpZW50LDEgUkJEIFZvbHVtZSBjcmVhdGVkIGFuZCBt
+b3VudGVkDQoJW0ZsYXNoQ2FjaGUgc2V0dXBdDQoJCVtDcmVhdGUgY2FjaGVkIGRldmljZV0NCgkJ
+CWZsYXNoY2FjaGVfY3JlYXRlIC12IC1wIGJhY2sgZnNkYyAvZGV2L3NkYTIgL2Rldi9zZGMNCgkJ
+W0NyZWF0ZSBmaWxlc3lzdGVtXQ0KCQkJbWtmcy54ZnMgLWYgLWkgc2l6ZT0yMDQ4IC1kIGFnY291
+bnQ9MSAtbCBsb2dkZXY9L2Rldi9zZGEzLHNpemU9MTI4bSAvZGV2L21hcHBlci9mc2RjDQoJCVtN
+b3VudF0NCgkJCW1vdW50IC1vIGxvZ2Rldj0vZGV2L3NkYTMgLW8gbG9nYnNpemU9MjU2ayAtbyBk
+ZWxheWxvZyAtbyBpbm9kZTY0IC9kZXYvbWFwcGVyL2ZzZGMgL2RhdGEvb3NkLjIxLw0KCQlbVHVu
+aW5nXQ0KCQkJc3lzY3RsIGRldi5mbGFzaGNhY2hlLnNkYTkrc2RjLnNraXBfc2VxX3RocmVzaF9r
+Yj0zMg0KCQkJDQoJCQlTaW5jZSBJIGFtIGFpbWluZyB0byBjYWNoZSBvbmx5IGNlcGggbWV0YWRh
+dGEgYW5kIHRoZSBtZXRhZGF0YSB3cml0ZXMgYXJlIHZlcnkgc21hbGwsIHNvIEkgY29uZmlndXJl
+ZCBmbGFzaGNhY2hlIHRvIHNraXAgYWxsIHNlcXVlbnRpYWwgd3JpdGUgbGFyZ2VyIHRoYW4gMzJL
+LiBCYXNpY2FsbHkgeW91IGNhbiBzZXQgdGhpcyB0byAxSyBiZWNhdXNlIHRoZSAJCQltZXRhIHdy
+aXRlcyBhcmUgYWxsIGxlc3MgdGhhbiAxSy4gSSBzZXQgaXQgdG8gMzJLIGp1c3QgZm9yIGEgcXVp
+Y2sgdGVzdC4NCglbRXhwZXJpbWVudF0NCgkJRG9pbmcgZGQgZnJvbSB0aGUgY2xpZW50IG9uIHRv
+cCBvZiB0aGUgUkJEIFZvbHVtZQ0KCVtSZXN1bHRdDQoJCVRocm91Z2hwdXQgYm9vc3QgZnJvbSAz
+N01CL3MgdG8gfiA5ME1CL3MsIHNpbmNlIHRoZSBmbGFzaGNhY2hlIHdvcmtpbmcgaW4gRE0gbGV2
+ZWwsIGl0J3MgdHJhbnNwYXJlbnQgdG8gQ2VwaC4NCg0KCU15IHRlc3QgaXMganVzdCBhIHF1aWNr
+IHRlc3QsIGZ1cnRoZXIgdGVzdCAoaW5jbHVkZSBzZXF1ZW50aWFsIFIvVyxyYW5kb20gUi9XKSBh
+cmUgaW4gc2NoZWR1bGUuIFdpbGwgY29tZSBiYWNrIHdpdGggeW91IGlmIHRoZXJlIGFyZSBzb21l
+IHByb2dyZXNzLg0KCQkJCQ0KCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCVhp
+YW94aQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FnZSBXZWlsIFttYWls
+dG86c2FnZUBpbmt0YW5rLmNvbV0gDQpTZW50OiAyMDEzxOox1MIxNsjVIDU6NDMNClRvOiBDaGVu
+LCBYaWFveGkNCkNjOiBNYXJrIE5lbHNvbjsgWWFuLCBaaGVuZyANClN1YmplY3Q6IFJFOiBTZXBl
+cmF0ZSBtZXRhZGF0YSBkaXNrIGZvciBPU0QNCg0KT24gVHVlLCAxNSBKYW4gMjAxMywgQ2hlbiwg
+WGlhb3hpIHdyb3RlOg0KPiBIaSBTYWdlLA0KPiAJRmxhc2hDYWNoZSB3b3JrcyB3ZWxsIGZvciB0
+aGlzIHNjZW5hcmlvcywgSSBjcmVhdGVkIGEgaHlicmlkLWRpc2sgd2l0aCAxIHNzZCBwYXJ0aXRp
+b24oc2hhcmVkIHRoZSBzYW1lIHNzZCBidXQgZGlmZmVyZW50IHBhdGl0aW9uIHdpdGggQ2VwaCBq
+b3VybmFsIGFuZCBYRlMgam91cm5hbCkgYW5kIDEgc2F0YSBkaXNrLkNvbmZpZ3VyZWQgdGhlIEZs
+YXNoQ2FjaGUgdG8gaWdub3JlIGFsbCBzZXF1ZW50aWFsIHJlcXVlc3QgbGFyZ2VyIHRoYW4gMzJL
+KFdlbGwsIGl0IGNhbiBiZSBzZXQgdG8gYSBzbWFsbGVyIG51bWJlcikuDQo+IAlUaGUgcmVzdWx0
+cyBzaG93cyBhIGNvbXBhcmFibGUgcGVyZm9ybWFuY2Ugd2l0aCBDZXBoTWV0YS10by1zc2Qgc29s
+dXRpb24uDQo+IAlTaW5jZSBmbGFzaGNhY2hlIHdvcmtpbmcgaW4gdGhlIERNIGxheWVyICwgSSBz
+dXBwb3NlIGl0J3MgdHJhbnNwYXJlbnQgDQo+IHRvIENlcGgsIHJpZ2h0Pw0KDQpSaWdodC4gIFRo
+YXQncyBncmVhdCB0byBoZWFyIHRoYXQgaXQgd29ya3Mgd2VsbC4gIElmIHlvdSBkb24ndCBtaW5k
+LCBpdCB3b3VsZCBiZSBncmVhdCBpZiB5b3UgY291bGQgcmVwb3J0IHRoZSBzYW1lIHRoaW5nIHRv
+IGNlcGgtZGV2ZWwgd2l0aCBhIGJpdCBvZiBkZXRhaWwgYWJvdXQgaG93IHlvdSBjb25maWd1cmVk
+IEZsYXNoQ2FjaGUgc28gdGhhdCBvdGhlcnMgY2FuIGRvIHRoZSBzYW1lLg0KDQpUaGFua3MhDQpz
+YWdlDQoNCg0KPiAJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJWGlhb3hpDQo+IA0KPiAtLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzYWdlQGlua3Rh
+bmsuY29tXQ0KPiBTZW50OiAyMDEzPzE/MTU/IDI6MTkNCj4gVG86IENoZW4sIFhpYW94aQ0KPiBD
+YzogTWFyayBOZWxzb247IFlhbiwgWmhlbmcgOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+PiBTdWJqZWN0OiBSRTogU2VwZXJhdGUgbWV0YWRhdGEgZGlzayBmb3IgT1NEDQo+IA0KPiBPbiBN
+b24sIDE0IEphbiAyMDEzLCBDaGVuLCBYaWFveGkgd3JvdGU6DQo+ID4gSGkgU2FnZSwNCj4gPiAg
+ICAgVGhhbmtzIGZvciB5b3VyIG1haWx+DQo+ID4gCVdvdWxkIHlvdSBoYXZlIGEgdGltZXRhYmxl
+IGFib3V0IHdoZW4gc3VjaCBpbXByb3ZlbWVudCBjYW4gYmUgcmVhZHk/SXQncyBjcml0aWNhbCBm
+b3Igbm9uLWJ0cmZzIGZpbGVzeXN0ZW0uDQo+ID4gCUkgYW0gdGhpbmtpbmcgYWJvdXQgaW50cm9k
+dWNpbmcgZmxhc2hjYWNoZSBpbnRvIG15IGNvbmZpZ3VyYXRpb24gdG8gY2FjaGUgc3VjaCBtZXRh
+IHdyaXRlLCBzaW5jZSBmbGFzaGNhY2hlIHdvcmtpbmcgdW5kZXIgdGhlIGZpbGVzeXN0ZW0sIEkg
+c3VwcG9zZSBpdCB3aWxsIG5vdCBicmVhayB0aGUgYXNzdW1wdGlvbiBpbnNpZGUgQ2VwaC4gSSB3
+aWxsIHRyeSBpdCBvbiB0b21vcnJvdyBhbmQgY29tZSBiYWNrIHdpdGggeW91IH4NCj4gPiAJVGhh
+bmtzIGFnYWluIGZvciB0aGUgaGVscHMhDQo+IA0KPiBJIHRoaW5rIGF2b2lkaW5nIHRoZSBwZ2lu
+Zm8gY2hhbmdlIG1heSBiZSBwcmV0dHkgc2ltcGxlLiAgVGhlIGxvZyBvbmUgSSBhbSBhIGJpdCBs
+ZXNzIGNvbmNlcm5lZCBhYm91dCAodGhlIGFwcGVuZHMgZnJvbSBtYW55IHJiZCBJT3Mgd2lsbCBn
+ZXQgYWdncmVnYXRlZCBpbnRvIGEgc21hbGwgbnVtYmVyIG9mIFhGUyBJT3MpLCBhbmQgY2hhbmdp
+bmcgdGhhdCBhcm91bmQgd291bGQgYmUgYSBiaWdnZXIgZGVhbC4NCj4gDQo+IHNhZ2UNCj4gDQo+
+IA0KPiA+IAkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCVhpYW94aQ0KPiA+IA0KPiA+IC0tLS0tT3Jp
+Z2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBpbmt0
+YW5rLmNvbV0NCj4gPiBTZW50OiAyMDEzPzE/MTM/IDA6NTcNCj4gPiBUbzogQ2hlbiwgWGlhb3hp
+DQo+ID4gQ2M6IE1hcmsgTmVsc29uOyBZYW4sIFpoZW5nIDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
+bC5vcmcNCj4gPiBTdWJqZWN0OiBSRTogU2VwZXJhdGUgbWV0YWRhdGEgZGlzayBmb3IgT1NEDQo+
+ID4gDQo+ID4gT24gU2F0LCAxMiBKYW4gMjAxMywgQ2hlbiwgWGlhb3hpIHdyb3RlOg0KPiA+ID4g
+SGkgWmhlbmc/DQo+ID4gPiAJSSBoYXZlIHB1dCBYRlMgbG9nIHRvIGEgc2VwYXJhdGUgZGlzaywg
+aW5kZWVkIGl0IHByb3ZpZGUgc29tZSBwZXJmb3JtYW5jZSBnYWluIGJ1dCBub3QgdGhhdCBzaWdu
+aWZpY2FudC4NCj4gPiA+IAlDZXBoJ3MgbWV0YWRhdGEgaXMgc29tZWhvdyBzZXBhcmF0ZShpdCdz
+IHNvbWUgZmlsZXMgcmVzaWRlIGluIE9TRCdzIGRpc2spLCB0aGVyZWZvcmUsaXQgY2Fubm90IGJl
+IGhlbHBlZCBieSBuZWl0aGVyIFhGUyBqb3VybmFsIGxvZyBub3IgT1NEJ3Mgam91cm5hbC5UaGF0
+J3Mgd2h5IEkgYW0gdHJ5aW5nIHRvIHB1dCBjZXBoJ3MgbWV0YWRhdGEoL2RhdGEvb3NkLngvbWV0
+YSBmb2xkZXIgKSB0byBhIHNlcGFyYXRlIFNTRCBkaXNrLg0KPiA+ID4gVG8gTmVsc29uLA0KPiA+
+ID4gCUkgZGlkIHRoZSBleHBlcmltZW50IHdpdGgganVzdCAxIGNsaWVudCwgaWYgdXNpbmcgbW9y
+ZSBjbGllbnRzLCB0aGUgZ2FpbiB3aWxsIG5vdCBiZSB0aGF0IG11Y2guDQo+ID4gPiAJSXQgbG9v
+a3MgdG8gbWUgdGhhdCBhIHNpbmdsZSB3cml0ZSBmcm9tIGNsaWVudCBzaWRlIGJlY29tZSAzIHdy
+aXRlcyB0byBkaXNrIGlzIHNvbWVob3cgYSBiaWcgb3ZlcmhlYWQgZm9yIGluLXBsYWNlLXVwZGF0
+ZSBmaWxlc3lzdGVtIHN1Y2ggbGlrZSBYRlMgc2luY2UgaXQgaW50cm9kdWNlIG1vcmUgc2Vla3Mu
+T3V0LW9mLXBsYWNlLXVwZGF0ZSBmaWxlc3lzdGVtIHdpbGwgbm90IHN1ZmZlciBhIGxvdCBmb3Ig
+c3VjaCBwYXR0ZXJuLEkgZGlkbj90IGZpbmQgdGhpcyBwcm9ibGVtIHdoZW4gSSB1c2luZyBCVFJG
+UyBhcyBiYWNrZW5kIGZpbGVzeXN0ZW0uIEJ1dCBmb3JCVFJGUywgZnJhZ21lbnRhdGlvbiBpcyBh
+bm90aGVyIHBlcmZvcm1hbmNlIGtpbGxlciwgZm9yIGEgc2luZ2xlIFJCRCB2b2x1bWUsIGlmIHlv
+dSBkaWQgYSBsb3Qgb2YgcmFuZG9tIHdyaXRlIG9uIGl0LCB0aGUgc2VxdWVudGlhbCByZWFkIHBl
+cmZvcm1hbmNlIHdpbGwgZHJvcCB0byAzMCUgb2YgYSBuZXcgUkJEIHZvbHVtZS4gVGhpcyBtYWtl
+IEJUUkZTIHVudXNhYmxlIGluIHByb2R1Y3Rpb24uDQo+ID4gPiAJU2VwYXJhdGUgQ2VwaCBtZXRh
+IHNlZW1zIHF1aXRlIGVhc3kgdG8gbWUgKCBJIGp1c3QgbW91bnQgYSBwYXJ0aXRpb24gdG8gL2Rh
+dGEvb3NkLlgvbWV0YSksIGlzIGl0IHJpZ2h0ICA/IGlzIHRoZXJlIGFueSBwb3RlbnRpYWwgcHJv
+YmxlbSBpbiBpdD8gDQo+ID4gDQo+ID4gVW5mb3J0dW5hdGVseSwgeWVzLiAgVGhlIGNlcGggam91
+cm5hbCBhbmQgZnMgc3luYyBhcmUgY2FyZWZ1bGx5IHRpbWVkLiAgDQo+ID4gVGhlIGNlcGgtb3Nk
+IGFzc3VtZXMgdGhhdCBzeW5jZnMoMikgb24gdGhlICRvc2RfZGF0YS9jdXJyZW50L2NvbW1pdF9v
+cF9zZXEgZmlsZSB3aWxsIHN5bmMgZXZlcnl0aGluZywgYnV0IGlmIG1ldGEvIGlzIGFub3RoZXIg
+ZnMgdGhhdCBpc250IHRydWUuICBBdCB0aGUgZXZlcnkgbGVhc3QsIHRoZSBjb2RlIG5lZWRzIHRv
+IGJlIG1vZGlmaWVkIHRvIHN5bmMgdGhhdCBhcyB3ZWxsLg0KPiA+IA0KPiA+IFRoYXQgc2FpZCwg
+dGhlcmUgaXMgYSBsb3Qgb2YgaW1wcm92ZW1lbnQgdGhhdCBjYW4gYmUgaGFkIGhlcmUuICBUaGUg
+dGhyZWUgdGhpbmdzIHdlIHdyaXRlIGFyZToNCj4gPiANCj4gPiAgdGhlIHBnIGxvZw0KPiA+ICB0
+aGUgcGcgaW5mbywgc3ByZWFkIGFjcm9zcyB0aGUgcGcgZGlyIHhhdHRyIGFuZCB0aGF0IHBnaW5m
+byBmaWxlICANCj4gPiB0aGUgYWN0dWFsIGlvDQo+ID4gDQo+ID4gVGhlIHBnIGxvZyBjb3VsZCBn
+byBpbiBsZXZlbGRiLCB3aGljaCB3b3VsZCB0cmFuc2xhdGUgdGhvc2Ugd3JpdGVzIGludG8gYSBz
+aW5nbGUgc2VxdWVudGlhbCBzdHJlYW0gYWNyb3NzIHRoZSBlbnRpcmUgT1NELiAgQW5kIHRoZSBQ
+RyBpbmZvIHNlcGFyYXRlIGJldHdlZW4gdGhlIHhhdHRyIGFuZCB0aGUgZmlsZSBpcyBmYXIgZnJv
+bSBvcHRpbWFsOiBtb3N0IG9mIHRoYXQgZGF0YSBkb2Vzbid0IGFjdHVhbGx5IGNoYW5nZSBvbiBl
+YWNoIHdyaXRlLiAgV2hhdCBsaXR0bGUgZG9lcyBpcyB2ZXJ5IHNtYWxsLCBhbmQgY291bGQgYmUg
+bW92ZWQgaW50byB0aGUgeGF0dHIsIGF2b2lkaW5nIHRvdWNoaW5nIHRoZSBmaWxlICh3aGljaCBt
+ZWFucyBhbiBpbm9kZSArIGRhdGEgYmxvY2sgd3JpdGUpIGF0IGFsbC4NCj4gPiANCj4gPiBXZSBu
+ZWVkIHRvIGxvb2sgYSBiaXQgbW9yZSBjbG9zZWx5IHRvIHNlZSBob3cgZGlmZmljdWx0IHRoYXQg
+d2lsbCByZWFsbHkgYmUgdG8gaW1wbGVtZW50LCBidXQgSSB0aGluayBpdCBpcyBwcm9taXNpbmch
+DQo+ID4gDQo+ID4gc2FnZQ0KPiA+IA0KPiA+IA0KPiA+ID4gDQo+ID4gPiAJCQkJCQkJCQkJCQkJ
+CQkJCQkJCQkJCQkJCQkJCQlYaWFveGkgLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+
+IEZyb206IE1hcmsgTmVsc29uIFttYWlsdG86bWFyay5uZWxzb25AaW5rdGFuay5jb21dDQo+ID4g
+PiBTZW50OiAyMDEzPzE/MTI/IDIxOjM2DQo+ID4gPiBUbzogWWFuLCBaaGVuZw0KPiA+ID4gQ2M6
+IENoZW4sIFhpYW94aTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+IFN1YmplY3Q6
+IFJlOiBTZXBlcmF0ZSBtZXRhZGF0YSBkaXNrIGZvciBPU0QNCj4gPiA+IA0KPiA+ID4gSGkgWGlh
+b3hpIGFuZCBaaGVuZywNCj4gPiA+IA0KPiA+ID4gV2UndmUgcGxheWVkIHdpdGggYm90aCBvZiB0
+aGVzZSBzb21lIGludGVybmFsbHksIGJ1dCBub3QgZm9yIGEgcHJvZHVjdGlvbiBkZXBsb3ltZW50
+LiBNb3N0bHkganVzdCBmb3IgZGlhZ25vc2luZyBwZXJmb3JtYW5jZSBwcm9ibGVtcy4gDQo+ID4g
+PiAgIEl0J3MgYmVlbiBhIHdoaWxlIHNpbmNlIEkgbGFzdCBwbGF5ZWQgd2l0aCB0aGlzLCBidXQg
+SSBoYWRuJ3Qgc2VlbiBhIHdob2xlIGxvdCBvZiBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudHMgYXQg
+dGhlIHRpbWUuICBUaGF0IG1heSBoYXZlIGJlZW4gZHVlIHRvIHRoZSBoYXJkd2FyZSBpbiB1c2Us
+IG9yIHBlcmhhcHMgb3RoZXIgcGFydHMgb2YgQ2VwaCBoYXZlIGltcHJvdmVkIHRvIHRoZSBwb2lu
+dCB3aGVyZSB0aGlzIG1hdHRlcnMgbm93IQ0KPiANCj4gPiA+IA0KPiA+ID4gT24gYSBzaWRlIG5v
+dGUsIEJ0cmZzIGFsc28gaGFkIGEgZ29vZ2xlIHN1bW1lciBvZiBjb2RlIHByb2plY3QgdG8gbGV0
+IHlvdSBwdXQgbWV0YWRhdGEgb24gYW4gZXh0ZXJuYWwgZGV2aWNlLiAgT3JpZ2luYWxseSBJIHRo
+aW5rIHRoYXQgd2FzIHN1cHBvc2VkIHRvIG1ha2UgaXQgaW50byAzLjcsIGJ1dCBhbSBub3Qgc3Vy
+ZSBpZiB0aGF0IGhhcHBlbmVkLg0KPiA+ID4gDQo+ID4gPiBNYXJrDQo+ID4gPiANCj4gPiA+IE9u
+IDAxLzEyLzIwMTMgMDY6MjEgQU0sIFlhbiwgWmhlbmcgd3JvdGU6DQo+ID4gPiA+IE9uIFNhdCwg
+SmFuIDEyLCAyMDEzIGF0IDI6NTcgUE0sIENoZW4sIFhpYW94aSA8eGlhb3hpLmNoZW5AaW50ZWwu
+Y29tPiB3cm90ZToNCj4gPiA+ID4+DQo+ID4gPiA+PiBIaSBsaXN0LA0KPiA+ID4gPj4gICAgICAg
+ICAgRm9yIGEgcmJkIHdyaXRlIHJlcXVlc3QsIENlcGggbmVlZCB0byBkbyAzIHdyaXRlczoNCj4g
+PiA+ID4+IDIwMTMtMDEtMTAgMTM6MTA6MTUuNTM5OTY3IDdmNTJmNTE2YzcwMCAxMA0KPiA+ID4g
+Pj5maWxlc3RvcmUoL2RhdGEvb3NkLjIxKSBfZG9fdHJhbnNhY3Rpb24gb24gMHgzMjdkNzkwDQo+
+ID4gPiA+PiAyMDEzLTAxLTEwIDEzOjEwOjE1LjUzOTk3OSA3ZjUyZjUxNmM3MDAgMTUNCj4gPiA+
+ID4+ZmlsZXN0b3JlKC9kYXRhL29zZC4yMSkgd3JpdGUgbWV0YS81MTZiODAxYy9wZ2xvZ18yLjFh
+LzAvLy0xDQo+ID4gPiA+PjM2MDE1fjE0Nw0KPiA+ID4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41
+NDAwMTYgN2Y1MmY1MTZjNzAwIDE1DQo+ID4gPiA+PmZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpDQo+
+ID4gPiA+PnBhdGg6IA0KPiA+ID4gPj4vZGF0YS9vc2QuMjEvY3VycmVudC9tZXRhL0RJUl9DL3Bn
+bG9nXHUyLjFhX18wXzUxNkI4MDFDX19ub25lDQo+ID4gPiA+PiAyMDEzLTAxLTEwIDEzOjEwOjE1
+LjU0MDE2NCA3ZjUyZjUxNmM3MDAgMTUNCj4gPiA+ID4+ZmlsZXN0b3JlKC9kYXRhL29zZC4yMSkg
+d3JpdGUgbWV0YS8yOGQyZjRhOC9wZ2luZm9fMi4xYS8wLy8tMQ0KPiA+ID4gPj4wfjQ5Ng0KPiA+
+ID4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41NDAxODkgN2Y1MmY1MTZjNzAwIDE1DQo+ID4gPiA+
+PmZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpDQo+ID4gPiA+PnBhdGg6IA0KPiA+ID4gPj4vZGF0YS9v
+c2QuMjEvY3VycmVudC9tZXRhL0RJUl84L3BnaW5mb1x1Mi4xYV9fMF8yOEQyRjRBOF9fbm9uZQ0K
+PiA+ID4gPj4gMjAxMy0wMS0xMCAxMzoxMDoxNS41NDAyMTcgN2Y1MmY1MTZjNzAwIDEwDQo+ID4g
+PiA+PmZpbGVzdG9yZSgvZGF0YS9vc2QuMjEpIF9kb190cmFuc2FjdGlvbiBvbiAweDMyN2Q3MDgN
+Cj4gPiA+ID4+IDIwMTMtMDEtMTAgMTM6MTA6MTUuNTQwMjIyIDdmNTJmNTE2YzcwMCAxNQ0KPiA+
+ID4gPj5maWxlc3RvcmUoL2RhdGEvb3NkLjIxKSB3cml0ZQ0KPiA+ID4gPj4yLjFhX2hlYWQvOGFi
+ZjM0MWEvcmIuMC4xMDZlLjZiOGI0NTY3LjAwMDAwMDAwMDJkMy9oZWFkLy8yDQo+ID4gPiA+PjMy
+Mjc2NDh+NTI0Mjg4DQo+ID4gPiA+PiAyMDEzLTAxLTEwIDEzOjEwOjE1LjU0MDI0NSA3ZjUyZjUx
+NmM3MDAgMTUNCj4gPiA+ID4+ZmlsZXN0b3JlKC9kYXRhL29zZC4yMSkNCj4gPiA+ID4+cGF0aDog
+DQo+ID4gPiA+Pi9kYXRhL29zZC4yMS9jdXJyZW50LzIuMWFfaGVhZC9yYi4wLjEwNmUuNmI4YjQ1
+NjcuMDAwMDAwMDAwMmQzX18NCj4gPiA+ID4+aGUNCj4gPiA+ID4+YWQNCj4gPiA+ID4+XzgNCj4g
+PiA+ID4+QUJGMzQxQV9fMg0KPiA+ID4gPj5sDQo+ID4gPiA+PiAgICAgICAgICBJZiB1c2luZyBY
+RlMgYXMgYmFja2VuZCBmaWxlIHN5c3RlbSBhbmQgcnVubmluZyB4ZnMgb24gdG9wIG9mIHRyYWRp
+dGlvbmFsIHNhdGEgZGlzaywgaXQgd2lsbCBpbnRyb2R1Y2UgYSBsb3Qgb2Ygc2Vla3MgYW5kIHRo
+ZXJlZm9yZSByZWR1Y2UgYmFuZHdpZHRoLCBhIGJsa3RyYWNlIGlzIGF2YWlsYWJsZSBoZXJlIDoo
+IGh0dHA6Ly93dzMuc2luYWltZy5jbi9tdzY5MC82ZTFhZWU0N2p3MWUwcXNieGJ2ZGRqLmpwZykg
+dG8gZGVtb25zdHJhdGUgdGhpcyBpc3N1ZS4oIHNpbmdsZSBjbGllbnQgcnVubmluZyBkZCBvbiB0
+b3Agb2YgYSBuZXcgUkJEIHZvbHVtZXMpLg0KPiA+ID4gPj4gICAgICAgICAgVGhlbiBJIHRyaWVk
+IHRvIG1vdmUgL29zZC5YL2N1cnJlbnQvbWV0YSB0byBhIHNlcGFyYXRlIGRpc2ssIHRoZSBiYW5k
+d2lkdGggYm9vc3RlZC4obG9vayBibGt0cmFjZSBhdCBodHRwOi8vd3c0LnNpbmFpbWcuY24vbXc2
+OTAvNmUxYWVlNDdqdzFlMHFzYWR6MWJpai5qcGcpLg0KPiA+ID4gPj4gICAgICAgICAgSSBoYXZl
+bid0IHRlc3Qgb3RoZXIgYWNjZXNzIHBhdHRlcm4gb3Igc29tZXRoaW5nIGVsc2UsIGJ1dCBpdCBs
+b29rcyB0byBtZSB0aGF0IG1vdmluZyBzdWNoIG1ldGEgdG8gYSBzZXBhcmF0ZSBkaXNrIChzc2Qg
+b3Igc2F0YSB3aXRoIGJ0cmZzKSB3aWxsIGJlbmVmaXQgY2VwaCB3cml0ZSBwZXJmb3JtYW5jZSwg
+aXMgaXQgdHJ1ZT8gV2lsbCBjZXBoIGludHJvZHVjZSB0aGlzIGZlYXR1cmUgaW4gdGhlIGZ1dHVy
+ZT8gIElzIHRoZXJlIGFueSBwb3RlbnRpYWwgcHJvYmxlbSBmb3Igc3VjaCBoYWNrPw0KPiA+ID4g
+Pj4NCj4gPiA+ID4NCj4gPiA+ID4gRGlkIHlvdSB0cnkgcHV0dGluZyBYRlMgbWV0YWRhdGEgbG9n
+IGEgc2VwYXJhdGUgYW5kIGZhc3QgZGV2aWNlIA0KPiA+ID4gPiAobWtmcy54ZnMgLWwgbG9nZGV2
+PS9kZXYvc2RieCxzaXplPTEwMDAwYikuIEkgdGhpbmsgaXQgd2lsbCANCj4gPiA+ID4gYm9vc3Qg
+cGVyZm9ybWFuY2UgdG9vLg0KPiA+ID4gPg0KPiA+ID4gPiBSZWdhcmRzDQo+ID4gPiA+IFlhbiwg
+WmhlbmcNCj4gPiA+ID4gLS0NCj4gPiA+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiA+ID4gPiBpbiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIA0KPiA+
+ID4gPiBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo+ID4gPiA+DQo+ID4gPiANCj4gPiA+IE4/Pz8/eT8/Pz9iPz8/Pz92Pz8/Pz97
+Lm4/Pz8/Pz96Pz9heT8/Pz8/Pz8/aiA/Pz9mPz8/Pz8/Pz8/Pz8/Pz8/Pzordj8/Pz8/Pz8/ID8/
+elorPz8/Pz8/Ij8hPw0KPiA+IE4/Pz8/eT8/Pz9iPz8/Pz92Pz8/Pz97Lm4/Pz8/Pz96Pz9heT8/
+Pz8/Pz8/aiA/Pz9mPz8/Pz8/Pz8/Pz8/Pz8/Pzordj8/Pz8/Pz8/ID8/elorPz8/Pz8/Ij8hPw0K
+PiANCg==
