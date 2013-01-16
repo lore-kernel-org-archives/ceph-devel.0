@@ -1,125 +1,141 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH] configure.ac: fix problem with --enable-cephfs-java
-Date: Wed, 16 Jan 2013 13:40:17 +0100
-Message-ID: <1358340017-26454-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: code coverage and teuthology
+Date: Wed, 16 Jan 2013 13:52:01 +0100
+Message-ID: <50F6A271.9060503@dachary.org>
+References: <50EF49C4.1020909@dachary.org> <50F43FAB.2050609@inktank.com> <50F52B23.4090903@dachary.org> <50F58FFF.6020508@inktank.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig5EA54840800BFCFCCD4E2BC1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:33299 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751558Ab3APMkV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jan 2013 07:40:21 -0500
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:42864 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752576Ab3APMwF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 07:52:05 -0500
+In-Reply-To: <50F58FFF.6020508@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Gary Lowell <gary.lowell@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>, Danny Al-Gaaf <dalgaaf@suse.de>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-The AS_IF used to cover java related checks via --enable-cephfs-java
-didn't work correctly. Use a plain 'if/fi' instead to make sure this
-section is only executed if --enable-cephfs-java is used.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig5EA54840800BFCFCCD4E2BC1
+Content-Type: multipart/mixed;
+ boundary="------------040700000804000407060303"
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- configure.ac | 66 ++++++++++++++++++++++++++++++------------------------------
- 1 file changed, 33 insertions(+), 33 deletions(-)
+This is a multi-part message in MIME format.
+--------------040700000804000407060303
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/configure.ac b/configure.ac
-index 32814b8..b67e5cd 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -263,15 +263,15 @@ AM_CONDITIONAL(WITH_TCMALLOC, [test "$HAVE_LIBTCMALLOC" = "1"])
- #   - this might become bigger. maybe should be own m4 file
- #
- AC_ARG_ENABLE(cephfs-java,
--    AC_HELP_STRING([--enable-cephfs-java], [build libcephfs Java bindings]),
-+    [AC_HELP_STRING([--enable-cephfs-java], [build libcephfs Java bindings])],
-     [], [enable_cephfs_java=no])
- 
--AM_CONDITIONAL(ENABLE_CEPHFS_JAVA, test "x$enable_cephfs_java" = "xyes")
-+AM_CONDITIONAL(ENABLE_CEPHFS_JAVA, [test "x$enable_cephfs_java" = "xyes"])
- 
- AC_ARG_WITH(jdk-dir,
-     AC_HELP_STRING([--with-jdk-dir(=DIR)], [Path to JDK directory]))
- 
--AS_IF([test "x$enable_cephfs_java" = "xyes"], [
-+if test "x$enable_cephfs_java" = "xyes"; then
- 
- 	# setup bin/include dirs from --with-jdk-dir (search for jni.h, javac)
- 	AS_IF([test -n "$with_jdk_dir"], [
-@@ -293,36 +293,36 @@ AS_IF([test "x$enable_cephfs_java" = "xyes"], [
- 		   AS_IF([test -r "$jnih"], [
- 				  EXTRA_JDK_INC_DIR=`dirname $jnih`])])
- 
--  # cephfs_java_test only makes sense if java is already turned on
-+        # cephfs_java_test only makes sense if java is already turned on
- 	# setup CLASSPATH for Debian default junit4.jar package 
--    #
--    # Configuring --with-debug and --enable-cephfs-java will throw an error if
--    # JUnit4 cannot be found. While currently this works for users who have
--    # installed via the package manager on Ubuntu, we need to expand this
--    # check to 1) support other distrubtions and 2) allow users to influence
--    # the search path.
--  AS_IF([test "x$with_debug" = "xyes"], [
--      dir='/usr/share/java'
--      junit4_jar=`find $dir -name junit4.jar | head -n 1`
--		  AS_IF([test -r "$junit4_jar"], [
--	      EXTRA_CLASSPATH_JAR=`dirname $junit4_jar`/junit4.jar
--      AC_SUBST(EXTRA_CLASSPATH_JAR)
--      [have_junit4=1]], [
--      AC_MSG_NOTICE([Cannot find junit4.jar (apt-get install junit4)])
--      [have_junit4=0]])])
--
--      AC_CHECK_CLASSPATH
--      AC_PROG_JAVAC
--      AC_PROG_JAVAH
--      AC_PROG_JAR
--
--      CLASSPATH=$CLASSPATH:$EXTRA_CLASSPATH_JAR
--      export CLASSPATH
--      AC_MSG_NOTICE([classpath - $CLASSPATH])
--      AS_IF([test "$have_junit4" = "1"], [
--	    AC_CHECK_CLASS([org.junit.rules.ExternalResource], [], [
--	    AC_MSG_NOTICE(Could not find org.junit.rules.ExternalResource)
--	    have_junit4=0])])
-+        #
-+        # Configuring --with-debug and --enable-cephfs-java will throw an error if
-+        # JUnit4 cannot be found. While currently this works for users who have
-+        # installed via the package manager on Ubuntu, we need to expand this
-+        # check to 1 support other distrubtions and 2 allow users to influence
-+        # the search path.
-+        AS_IF([test "x$with_debug" = "xyes"], [
-+        	dir='/usr/share/java'
-+	        junit4_jar=`find $dir -name junit4.jar | head -n 1`
-+		AS_IF([test -r "$junit4_jar"], [
-+		      EXTRA_CLASSPATH_JAR=`dirname $junit4_jar`/junit4.jar
-+		      AC_SUBST(EXTRA_CLASSPATH_JAR)
-+		      [have_junit4=1]], [
-+		      AC_MSG_NOTICE([Cannot find junit4.jar (apt-get install junit4)])
-+		      [have_junit4=0]])])
-+
-+        AC_CHECK_CLASSPATH
-+        AC_PROG_JAVAC
-+        AC_PROG_JAVAH
-+        AC_PROG_JAR
-+
-+        CLASSPATH=$CLASSPATH:$EXTRA_CLASSPATH_JAR
-+        export CLASSPATH
-+        AC_MSG_NOTICE([classpath - $CLASSPATH])
-+        AS_IF([test "$have_junit4" = "1"], [
-+		AC_CHECK_CLASS([org.junit.rules.ExternalResource], [], [
-+		AC_MSG_NOTICE(Could not find org.junit.rules.ExternalResource)
-+		have_junit4=0])])
- 
-         # Check for jni.h
- 	CPPFLAGS_save=$CPPFLAGS
-@@ -339,7 +339,7 @@ AS_IF([test "x$enable_cephfs_java" = "xyes"], [
- 
- 	# Setup output var
- 	AC_SUBST(JDK_CPPFLAGS)
--])
-+fi
- AM_CONDITIONAL(HAVE_JUNIT4, [test "$have_junit4" = "1"])
- 
- # jni?
--- 
-1.8.1
+On 01/15/2013 06:21 PM, Josh Durgin wrote:
+> On 01/15/2013 02:10 AM, Loic Dachary wrote:
+>> On 01/14/2013 06:26 PM, Josh Durgin wrote:
+>>>
+>>> Looking at how it's run automatically might help:
+>>>
+>>> https://github.com/ceph/teuthology/blob/master/teuthology/coverage.py=
+#L88
+>>>
+>>>
+>>> You should also add 'coverage: true' for the ceph task overrides.
+>>> This way daemons are killed with SIGTERM, and the atexit function
+>>> that outputs coverage information will run.
+>>>
+>>> Then you don't need your patch changing the flavor either.
+>>> For each task X, the docstring for teuthology.task.X.task documents
+>>> example usage and extra options like this.
+>> Hi,
+>>
+>> That helped a lot, thanks :-) I think I'm almost there. After running:=
 
+>>
+>> ./virtualenv/bin/teuthology --archive /tmp/a1 /srv/3node_rgw.yaml
+>>
+>> wget -O /tmp/build/tmp.tgz http://gitbuilder.ceph.com/ceph-tarball-pre=
+cise-x86_64-gcov/sha1/$(cat /tmp/a1/ceph-sha1)/ceph.x86_64.tgz
+>>
+>> echo ceph_build_output_dir: /tmp/build >> ~/.teuthology.yaml
+>>
+>> ./virtualenv/bin/teuthology-coverage -v --html-output /tmp/html --lcov=
+-output /tmp/lcov --cov-tools-dir /srv/teuthology/coverage /tmp
+>>
+>> I get
+>>
+>> INFO:teuthology.coverage:initializing coverage data...
+>> Retrieving source and .gcno files...
+>> Initializing lcov files...
+>> Deleting all .da files in /tmp/lcov/ceph/src and subdirectories
+>> Done.
+>> Capturing coverage data from /tmp/lcov/ceph/src
+>> Found gcov version: 4.7.2
+>> Scanning /tmp/lcov/ceph/src for .gcno files ...
+>> Found 692 graph files in /tmp/lcov/ceph/src
+>> Processing src/test_libhadoopcephfs_build-AuthMethodList.gcno
+>> geninfo: ERROR: /tmp/lcov/ceph/src/test_libhadoopcephfs_build-AuthMeth=
+odList.gcno: reached unexpected end of file
+>>
+>> root@ceph:/srv/teuthology# ls -l /tmp/lcov/ceph/src/test_libhadoopceph=
+fs_build-AuthMethodList.gcno
+>> -rw-r--r-- 1 root root 41088 Jan 15 09:49 /tmp/lcov/ceph/src/test_libh=
+adoopcephfs_build-AuthMethodList.gcno
+>>
+>> I'm using
+>>
+>> lcov: LCOV version 1.9
+>>
+>> The only problem I can think of is that the machine I'm running lcov o=
+n is a Debian GNU/Linux Wheezy, trying to analyze coverage for binaries c=
+reated for Ubuntu Precise. They are both amd64 but .gcno files may have d=
+ependencies to the toolchain.
+>>
+>> Did you ever run into similar problems ?
+>
+> I think I did when I built and ran on debian, and it was fixed with a
+> later version of lcov (I think 1.9-2). I didn't try doing the coverage
+> analysis on a different distribution from where ceph was built and run
+> though, so that may also cause some issues.
+It was indeed a compatibility problem : running lcov on precise works fin=
+e.
+
+Thanks :-)
+>
+> Josh
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--------------040700000804000407060303
+Content-Type: text/x-vcard; charset=utf-8;
+ name="loic.vcf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="loic.vcf"
+
+YmVnaW46dmNhcmQNCmZuOkxvaWMgRGFjaGFyeQ0KbjpEYWNoYXJ5O0xvaWMNCm9yZzpBcnRp
+c2FuIExvZ2ljaWVsIExpYnJlDQphZHI6OzsxMiBiZCBNYWdlbnRhO1BhcmlzOzs3NTAxMDtG
+cmFuY2UNCmVtYWlsO2ludGVybmV0OmxvaWNAZGFjaGFyeS5vcmcNCnRpdGxlOlNlbmlvciBE
+ZXZlbG9wZXINCnRlbDt3b3JrOiszMyA0IDg0IDI1IDA4IDA1DQp0ZWw7aG9tZTorMzMgOSA1
+MSAxOCA0MyAzOA0KdGVsO2NlbGw6KzMzIDYgNjQgMDMgMjkgMDcNCm5vdGU6Qm9ybiAxMzE0
+MTQ0MDQgYmVmb3JlIEVQT0NILg0KdXJsOmh0dHA6Ly9kYWNoYXJ5Lm9yZy8NCnZlcnNpb246
+Mi4xDQplbmQ6dmNhcmQNCg0K
+--------------040700000804000407060303--
+
+--------------enig5EA54840800BFCFCCD4E2BC1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlD2onEACgkQ8dLMyEl6F20zcgCgtXu/t3+pkzvZ33MeoWjvJgeG
+CV0AoIRhvJSziVKerJByKuszSJN2htQs
+=Hzpm
+-----END PGP SIGNATURE-----
+
+--------------enig5EA54840800BFCFCCD4E2BC1--
