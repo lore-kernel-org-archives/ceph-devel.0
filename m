@@ -1,120 +1,82 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Ceph slow request & unstable issue
-Date: Thu, 17 Jan 2013 00:33:38 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5DF0FA@SHSMSX102.ccr.corp.intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com>
- <CABYiri_50ijzfm1y-ryNULXq8DDNUWghrBaQBfzBkspzjpZx1A@mail.gmail.com>
- <alpine.DEB.2.00.1301160854170.15921@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: mds: first stab at lookup-by-ino problem/soln description
+Date: Wed, 16 Jan 2013 17:17:52 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301161715090.17435@cobra.newdream.net>
+References: <alpine.DEB.2.00.1301142231260.12153@cobra.newdream.net> <CAPYLRzg8j02fgMBC1cgUnot4XH4y--BR=PnbLo+J-RUkPBVpGQ@mail.gmail.com> <CAKMAVE9Y4C4VvGzXL3kS5nCpqzFMOO43m2XRgwre7OLXz+nvRQ@mail.gmail.com>
+ <CAPYLRzhoWNj1gyjxDiasF6gCJvLUMkdLAQ8m0_EY+02+cTFT1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:14547 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756874Ab3AQAdo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jan 2013 19:33:44 -0500
-In-Reply-To: <alpine.DEB.2.00.1301160854170.15921@cobra.newdream.net>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:52672 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755972Ab3AQBRw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 20:17:52 -0500
+In-Reply-To: <CAPYLRzhoWNj1gyjxDiasF6gCJvLUMkdLAQ8m0_EY+02+cTFT1Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Andrey Korolyov <andrey@xdel.ru>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZaOsDQoJQm90aCBDUFUgYW5kIE1lbW9yeSB1dGlsaXphdGlvbiBhcmUgdmVyeSBsb3cu
-IENQVSBpcyB+IDIwJSAod2l0aCA2MCUgSU9XQUlUKSwgTWVtb3J5IGlzIGZhciBtb3JlIGxlc3Mg
-LiBJIGhhdmUgMzIgQ29yZSBTYW5keWJyaWRlZ2UgQ1BVKDY0IENvcmUgZm9yIEhUKSwgdG9nZXRo
-ZXIgd2l0aCAxMjhHQiBSQU0gcGVyIG5vZGUuDQoJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJ
-CQkJCQlYaWFveGkNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNhZ2UgV2Vp
-bCBbbWFpbHRvOnNhZ2VAaW5rdGFuay5jb21dIA0KU2VudDogMjAxM8TqMdTCMTfI1SAwOjU5DQpU
-bzogQW5kcmV5IEtvcm9seW92DQpDYzogQ2hlbiwgWGlhb3hpOyBjZXBoLWRldmVsQHZnZXIua2Vy
-bmVsLm9yZw0KU3ViamVjdDogUmU6IENlcGggc2xvdyByZXF1ZXN0ICYgdW5zdGFibGUgaXNzdWUN
-Cg0KSGksDQoNCk9uIFdlZCwgMTYgSmFuIDIwMTMsIEFuZHJleSBLb3JvbHlvdiB3cm90ZToNCj4g
-T24gV2VkLCBKYW4gMTYsIDIwMTMgYXQgNDo1OCBBTSwgQ2hlbiwgWGlhb3hpIDx4aWFveGkuY2hl
-bkBpbnRlbC5jb20+IHdyb3RlOg0KPiA+IEhpIGxpc3QsDQo+ID4gICAgICAgICBXZSBhcmUgc3Vm
-ZmVyaW5nIGZyb20gT1NEIG9yIE9TIGRvd24gd2hlbiB0aGVyZSBpcyBjb250aW51aW5nIGhpZ2gg
-cHJlc3N1cmUgb24gdGhlIENlcGggcmFjay4NCj4gPiAgICAgICAgIEJhc2ljYWxseSB3ZSBhcmUg
-b24gVWJ1bnR1IDEyLjA0KyBDZXBoIDAuNTYuMSwgNiBub2RlcywgaW4gZWFjaCBub2RlcyB3aXRo
-IDIwICogc3BpbmRsZXMgKyA0KiBTU0RzIGFzIGpvdXJuYWwuKDEyMCBzcGluZGxlcyBpbiB0b3Rh
-bCkNCj4gPiAgICAgICAgIFdlIGNyZWF0ZSBhIGxvdHMgb2YgUkJEIHZvbHVtZXMgKHNheSAyNDAp
-LG1vdW50aW5nIHRvIDE2IGRpZmZlcmVudCBjbGllbnQgbWFjaGluZXMgKCAxNSBSQkQgVm9sdW1l
-cy8gY2xpZW50KSBhbmQgcnVubmluZyBERCBjb25jdXJyZW50bHkgb24gdG9wIG9mIGVhY2ggUkJE
-Lg0KPiA+DQo+ID4gICAgICAgICBUaGUgaXNzdWVzIGFyZToNCj4gPiAxLiBTbG93IHJlcXVlc3Rz
-DQo+ID4gPz9Gcm9tIHRoZSBsaXN0LWFyY2hpdmUgaXQgc2VlbXMgc29sdmVkIGluIDAuNTYuMSBi
-dXQgd2Ugc3RpbGwgDQo+ID4gbm90aWNlIHN1Y2ggd2FybmluZyAyLiBPU0QgRG93biBvciBldmVu
-IGhvc3QgZG93biBMaWtlIHRoZSBtZXNzYWdlIA0KPiA+IGJlbG93LlNlZW1zIHNvbWUgT1NEIGhh
-cyBiZWVuIGJsb2NraW5nIHRoZXJlIGZvciBxdWl0ZSBhIGxvbmcgdGltZS4NCj4gPg0KPiA+ICAg
-ICAgICAgU3VnZ2VzdGlvbnMgYXJlIGhpZ2hseSBhcHByZWNpYXRlLlRoYW5rcw0KPiA+ICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA0KPiA+IFhp
-YW94aQ0KPiA+DQo+ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fDQo+ID4NCj4gPiBCYWQgbmV3czoNCj4gPg0KPiA+IEkgaGF2ZSAgYmFjayBhbGwgbXkgQ2Vw
-aCBtYWNoaW5lP3MgT1MgdG8ga2VybmVsICAzLjIuMC0yMywgd2hpY2ggVWJ1bnR1IDEyLjA0IHVz
-ZS4NCj4gPiBJIHJ1biBkZCBjb21tYW5kIChkZCBpZj0vZGV2L3plcm8gYnM9MU0gY291bnQ9NjAw
-MDAgb2Y9L2Rldi9yYmQke2l9ICYgKW9uIENlcGggY2xpZW50IHRvIGNyZWF0ZSBkYXRhIHByZXBh
-cmUgdGVzdCBhdCBsYXN0IG5pZ2h0Lg0KPiA+IE5vdywgSSBoYXZlIG9uZSBtYWNoaW5lIGRvd24g
-KGNhbj90IGJlIHJlYWNoZWQgYnkgcGluZyksIGFub3RoZXIgdHdvIG1hY2hpbmUgaGFzIGFsbCBP
-U0QgZGFlbW9uIGRvd24sIHdoaWxlIHRoZSB0aHJlZSBsZWZ0IGhhcyBzb21lIGRhZW1vbiBkb3du
-Lg0KPiA+DQo+ID4gSSBoYXZlIG1hbnkgd2FybmluZ3MgaW4gT1NEIGxvZyBsaWtlIHRoaXM6DQo+
-ID4NCj4gPiBubyBmbGFnIHBvaW50cyByZWFjaGVkDQo+ID4gMjAxMy0wMS0xNSAxOToxNDoyMi43
-Njk4OTggN2YyMGEyZDU3NzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdCANCj4gPiA1Mi4y
-MTgxMDYgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTMtMDEtMTUgMTk6MTM6MzAuNTUxNzE4
-OiANCj4gPiBvc2Rfb3AoY2xpZW50LjEwNjc0LjE6MTAwMjQxNyByYi4wLjI3YTguNmI4YjQ1Njcu
-MDAwMDAwMDAwZWJhIFt3cml0ZSANCj4gPiAzMTQ1NzI4fjUyNDI4OF0gMi5jNjE4MTBlZSBSRVRS
-WSkgY3VycmVudGx5IHdhaXRpbmcgZm9yIHN1YiBvcHMNCj4gPiAyMDEzLTAxLTE1IDE5OjE0OjIz
-Ljc3MDA3NyA3ZjIwYTJkNTc3MDAgIDAgbG9nIFtXUk5dIDogMjEgc2xvdyANCj4gPiByZXF1ZXN0
-cywgNiBpbmNsdWRlZCBiZWxvdzsgb2xkZXN0IGJsb2NrZWQgZm9yID4gMTEzMi4xMzg5ODMgc2Vj
-cw0KPiA+IDIwMTMtMDEtMTUgMTk6MTQ6MjMuNzcwMDg2IDdmMjBhMmQ1NzcwMCAgMCBsb2cgW1dS
-Tl0gOiBzbG93IHJlcXVlc3QgDQo+ID4gNTMuMjE2NDA0IHNlY29uZHMgb2xkLCByZWNlaXZlZCBh
-dCAyMDEzLTAxLTE1IDE5OjEzOjMwLjU1MzYxNjogDQo+ID4gb3NkX29wKGNsaWVudC4xMDY3MS4x
-OjEwNjY4NjAgcmIuMC4yODJjLjZiOGI0NTY3LjAwMDAwMDAwMTA1NyBbd3JpdGUgDQo+ID4gMjYy
-MTQ0MH41MjQyODhdIDIuZWE3YWNlYmMpIGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQo+
-ID4gMjAxMy0wMS0xNSAxOToxNDoyMy43NzAwOTYgN2YyMGEyZDU3NzAwICAwIGxvZyBbV1JOXSA6
-IHNsb3cgcmVxdWVzdCANCj4gPiA1MS40NDIwMzIgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIw
-MTMtMDEtMTUgMTk6MTM6MzIuMzI3OTg4OiANCj4gPiBvc2Rfb3AoY2xpZW50LjEwNjc0LjE6MTAw
-MjQxOA0KPiA+DQo+ID4gU2ltaWxhciBpbmZvIGluIGRtZXNnIHdlIGhhdmUgc2F3IHBlcnZpb3Vz
-Og0KPiA+DQo+ID4gWzIxMTk5LjAzNjQ3Nl0gSU5GTzogdGFzayBjZXBoLW9zZDo3Nzg4IGJsb2Nr
-ZWQgZm9yIG1vcmUgdGhhbiAxMjAgc2Vjb25kcy4NCj4gPiBbMjExOTkuMDM3NDkzXSAiZWNobyAw
-ID4gL3Byb2Mvc3lzL2tlcm5lbC9odW5nX3Rhc2tfdGltZW91dF9zZWNzIiBkaXNhYmxlcyB0aGlz
-IG1lc3NhZ2UuDQo+ID4gWzIxMTk5LjAzODg0MV0gY2VwaC1vc2QgICAgICAgIEQgMDAwMDAwMDAw
-MDAwMDAwNiAgICAgMCAgNzc4OCAgICAgIDEgMHgwMDAwMDAwMA0KPiA+IFsyMTE5OS4wMzg4NDRd
-ICBmZmZmODgwZmVmZGFmY2M4IDAwMDAwMDAwMDAwMDAwODYgMDAwMDAwMDAwMDAwMDAwMCANCj4g
-PiBmZmZmZmZmZmZmZmZmZmUwIFsyMTE5OS4wMzg4NDhdICBmZmZmODgwZmVmZGFmZmQ4IGZmZmY4
-ODBmZWZkYWZmZDggDQo+ID4gZmZmZjg4MGZlZmRhZmZkOCAwMDAwMDAwMDAwMDEzNzgwIFsyMTE5
-OS4wMzg4NTJdICBmZmZmODgwODFhYTU4MDAwIA0KPiA+IGZmZmY4ODBmNjhmNTJkZTAgZmZmZjg4
-MGY2OGY1MmRlMCBmZmZmODgyMDE3NTU2MjAwIFsyMTE5OS4wMzg4NTZdIENhbGwgVHJhY2U6DQo+
-ID4gWzIxMTk5LjAzODg1OF0gIFs8ZmZmZmZmZmY4MTY1YTU1Zj5dIHNjaGVkdWxlKzB4M2YvMHg2
-MCANCj4gPiBbMjExOTkuMDM4ODYxXSAgWzxmZmZmZmZmZjgxMDZiN2U1Pl0gZXhpdF9tbSsweDg1
-LzB4MTMwIA0KPiA+IFsyMTE5OS4wMzg4NjRdICBbPGZmZmZmZmZmODEwNmI5ZmU+XSBkb19leGl0
-KzB4MTZlLzB4NDIwIA0KPiA+IFsyMTE5OS4wMzg4NjZdICBbPGZmZmZmZmZmODEwOWQ4OGY+XSA/
-IF9fdW5xdWV1ZV9mdXRleCsweDNmLzB4ODAgDQo+ID4gWzIxMTk5LjAzODg2OV0gIFs8ZmZmZmZm
-ZmY4MTA3YTE5YT5dID8gX19kZXF1ZXVlX3NpZ25hbCsweDZhLzB4YjAgDQo+ID4gWzIxMTk5LjAz
-ODg3Ml0gIFs8ZmZmZmZmZmY4MTA2YmU1ND5dIGRvX2dyb3VwX2V4aXQrMHg0NC8weGEwIA0KPiA+
-IFsyMTE5OS4wMzg4NzRdICBbPGZmZmZmZmZmODEwN2NjZGM+XSANCj4gPiBnZXRfc2lnbmFsX3Rv
-X2RlbGl2ZXIrMHgyMWMvMHg0MjAgWzIxMTk5LjAzODg3N10gIA0KPiA+IFs8ZmZmZmZmZmY4MTAx
-Mzg2NT5dIGRvX3NpZ25hbCsweDQ1LzB4MTMwIFsyMTE5OS4wMzg4ODBdICANCj4gPiBbPGZmZmZm
-ZmZmODEwYTA5MWM+XSA/IGRvX2Z1dGV4KzB4N2MvMHgxYjAgWzIxMTk5LjAzODg4Ml0gIA0KPiA+
-IFs8ZmZmZmZmZmY4MTBhMGI1YT5dID8gc3lzX2Z1dGV4KzB4MTBhLzB4MWEwIFsyMTE5OS4wMzg4
-ODVdICANCj4gPiBbPGZmZmZmZmZmODEwMTNiMTU+XSBkb19ub3RpZnlfcmVzdW1lKzB4NjUvMHg4
-MCBbMjExOTkuMDM4ODg3XSAgDQo+ID4gWzxmZmZmZmZmZjgxNjY0ZDUwPl0gaW50X3NpZ25hbCsw
-eDEyLzB4MTcNCg0KV2UgaGF2ZSBzZWVuIHRoaXMgc3RhY2sgdHJhY2Ugc2V2ZXJhbCB0aW1lcyBv
-dmVyIHRoZSBwYXN0IDYgbW9udGhzLCBidXQgYXJlIG5vdCBzdXJlIHdoYXQgdGhlIHRyaWdnZXIg
-aXMuICBJbiBwcmluY2lwbGUsIHRoZSBjZXBoIHNlcnZlci1zaWRlIGRhZW1vbnMgc2hvdWxkbid0
-IGJlIGNhcGFibGUgb2YgbG9ja2luZyB1cCBsaWtlIHRoaXMsIGJ1dCBjbGVhcmx5IHNvbWV0aGlu
-ZyBpcyBhbWlzcyBiZXR3ZWVuIHdoYXQgdGhleSBhcmUgZG9pbmcgaW4gdXNlcmxhbmQgYW5kIGhv
-dyB0aGUga2VybmVsIGlzIHRvbGVyYXRpbmcgdGhhdC4gIExvdyBtZW1vcnksIHBlcmhhcHM/ICBJ
-biBlYWNoIGNhc2Ugd2hlcmUgd2UgdHJpZWQgdG8gdHJhY2sgaXQgZG93biwgdGhlIHByb2JsZW0g
-c2VlbWVkIHRvIGdvIGF3YXkgb24gaXRzIG93bi4gIElzIHRoaXMgZWFzaWx5IHJlcHJvZHVjaWJs
-ZSBpbiB5b3VyIGNhc2U/DQoNCj4gbXkgMC4wMiQ6DQo+IGh0dHA6Ly93d3cubWFpbC1hcmNoaXZl
-LmNvbS9jZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZy9tc2cxMTUzMS5odG1sDQo+IGFuZCBrZXJu
-ZWwgcGFuaWMgZnJvbSB0d28gZGlmZmVyZW50IGhvc3RzIGZyb20geWVzdGVyZGF5IGR1cmluZyBj
-ZXBoIA0KPiBzdGFydHVwKG9uIDMuOC1yYzMsIGltYWdlcyBmcm9tIGNvbnNvbGUgYXZhaWxhYmxl
-IGF0DQo+IGh0dHA6Ly9pbWd1ci5jb20vd0lSVm4sazBRQ1MjMCkgbGVhZHMgdG8gc3VnZ2VzdGlv
-biB0aGF0IENlcGggbWF5IGhhdmUgDQo+IGJlZW4gaW50cm9kdWNlZCBsb2NrdXAtYWxpa2UgYmVo
-YXZpb3Igbm90IGEgbG9uZyBhZ28sIGNhdXNpbmcsIGluIG15IA0KPiBjYXNlLCBleGNlc3NpdmUg
-YW1vdW50IG9mIGNvbnRleHQgc3dpdGNoZXMgb24gdGhlIGhvc3QgbGVhZGluZyB0byBvc2QgDQo+
-IGZsYXBzIGFuZCBwYW5pYyBhdCB0aGUgaXAtaWIgc3RhY2sgZHVlIHRvIHNhbWUgaXNzdWUuDQoN
-CkZvciB0aGUgc3RhY2sgdHJhY2UgbXkgZmlyc3QgZ3Vlc3Mgd291bGQgYmUgYSBwcm9ibGVtIHdp
-dGggdGhlIElCIGRyaXZlciB0aGF0IGlzIHRyaWdnZXJlZCBieSBtZW1vcnkgcHJlc3N1cmUuICBD
-YW4geW91IGNoYXJhY3Rlcml6ZSB3aGF0IHRoZSBzeXN0ZW0gdXRpbGl6YXRpb24gKENQVSwgbWVt
-b3J5KSBsb29rcyBsaWtlIGxlYWRpbmcgdXAgdG8gdGhlIGxvY2t1cD8NCg0Kc2FnZQ0K
+On Wed, 16 Jan 2013, Gregory Farnum wrote:
+> On Wed, Jan 16, 2013 at 3:54 PM, Sam Lang <sam.lang@inktank.com> wrote:
+> >
+> > On Wed, Jan 16, 2013 at 3:52 PM, Gregory Farnum <greg@inktank.com> wrote:
+> >>
+> >> My biggest concern with this was how it worked on cluster with
+> >> multiple data pools, and Sage's initial response was to either
+> >> 1) create an object for each inode that lives in the metadata pool,
+> >> and holds the backtraces (rather than putting them as attributes on
+> >> the first object in the file), or
+> >> 2) use a more sophisticated data structure, perhaps built on Eleanor's
+> >> b-tree project from last summer
+> >> (http://ceph.com/community/summer-adventures-with-ceph-building-a-b-tree/)
+> >>
+> >> I had thought that we could just query each data pool for the object,
+> >> but Sage points out that 100-pool clusters aren't exactly unreasonable
+> >> and that would take quite a lot of query time. And having the
+> >> backtraces in the data pools significantly complicates things with our
+> >> rules about setting layouts on new files.
+> >>
+> >> So this is going to need some kind of revision, please suggest
+> >> alternatives!
+> >
+> >
+> > Correct me if I'm wrong, but this seems like its only an issue in the NFS
+> > reexport case, as fsck can walk through the data objects in each pool (in
+> > parallel?) and verify back/forward consistency, so we won't have to guess
+> > which pool an ino is in.
+> >
+> > Given that, if we could stuff the pool id in the ino for the file returned
+> > through the client interfaces, then we wouldn't have to guess.
+> >
+> > -sam
+> 
+> I'm not familiar with the interfaces at work there. Do we have a free
+> 32 bits we can steal in order to do that stuffing? (I *think* it would
+> go in the NFS filehandle structure rather than the ino, right?)
+
+Right, there is at least 8 more bytes in a standard fh (16 bytes iirc) to 
+stuff whatever we want into.
+
+> We would need to also store that information in order to eventually
+> replace the anchor table, but of course that's much easier to deal
+> with. If we can just do it this way, that still leaves handling files
+> which don't have any data written yet ? under our current system,
+> users can apply a data layout to any inode which has not had data
+> written to it yet. Unfortunately that gets hard to deal with if a user
+> touches a bunch of files and then comes back to place them the next
+> day. :/ I suppose un-touched files could have the special property
+> that their lookup data is stored in the metadata pool and it gets
+> moved as soon as they have data ? in the typical case files are
+> written right away and so this wouldn't be any more writes, just a bit
+> more logic.
+
+We can also change the semantics, here.  It could be that you have to 
+specify the file's layout on create, and can't after it was created.  
+Otherwise you get the directory/subtree's layout.  We could store the pool 
+with the remote dentry link, for instance, and we could stick it in the 
+fh.  So the <ino, pool> is really the "locator" that you would need.
+
+That could work...
+
+sage
