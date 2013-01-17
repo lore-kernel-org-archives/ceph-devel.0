@@ -1,62 +1,48 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: radosgw boto issue
-Date: Thu, 17 Jan 2013 13:47:12 -0800
-Message-ID: <CAC-hyiGOdY=F7a74u=f3=BK1VH2rB15SkDG+ezALhHd04tVRZw@mail.gmail.com>
-References: <50F86DA5.4070502@umiacs.umd.edu>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Thu, 17 Jan 2013 14:03:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net>
+ <50F85FEC.7030305@mermaidconsulting.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f176.google.com ([209.85.210.176]:51477 "EHLO
-	mail-ia0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755608Ab3AQVrN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 16:47:13 -0500
-Received: by mail-ia0-f176.google.com with SMTP id i18so808704iac.7
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 13:47:13 -0800 (PST)
-In-Reply-To: <50F86DA5.4070502@umiacs.umd.edu>
+Received: from cobra.newdream.net ([66.33.216.30]:36846 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752293Ab3AQWDo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 17:03:44 -0500
+In-Reply-To: <50F85FEC.7030305@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: derek@umiacs.umd.edu
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 17, 2013 at 1:31 PM, Derek Yarnell <derek@umiacs.umd.edu> wrote:
-> Hi,
->
-> Has anyone used boto (python amazon S3 library) to upload files to
-> radosgw?  I have recently upgraded to 0.56.1 and my javascript code that
-> I wrote to upload from within the browser is working fine.
->
-> When I use the boto library I am getting 500 errors in my apache error logs
->
-> FastCGI: comm with server "/var/www/ceph/s3gw.fcgi" aborted: error
-> parsing headers: duplicate header 'Status'
->
-> I have captured the incoming request and it seems valid.
->
-> PUT /zeta/rhel5.list HTTP/1.1
-> Host: myobjstore.mydomain.com
-> Accept-Encoding: identity
-> Content-Length: 15909
-> Content-MD5: UZj3mZeD8WbVeeqFqS81vA==
-> Expect: 100-Continue
-> Date: Thu, 17 Jan 2013 19:00:37 GMT
-> User-Agent: Boto/2.6.0 (linux2)
-> Content-Type: application/octet-stream
-> Authorization: AWS ###:###
->
-> Found this ticket which seems very similar but is 2 years old.
->
->   http://tracker.newdream.net/issues/439
->
-> Currently radosgw does not seem to have much in the way of logging of
-> the connection. It has a log file but I have never been able to get it
-> to log anything.  Is there anyway to get it to spit out a bit more of
-> what it is doing or what it is sending back to the client?
->
+Hi Jens-
 
-Are you using apache? What fastcgi module are you using? If it's just
-a default mod_fastcgi/mod_fcgid then set the following in your
-ceph.conf (under the radosgw related section):
+On Thu, 17 Jan 2013, Jens Kristian S?gaard wrote:
+> Hi Sage,
+> 
+> > The fix for this is in v0.56.1, so I think you are seeing something else.
+> > If this is something you can reproduce with 'debug osd = 10' or 20 and
+> > 'debug ms = 1', that would be extremely helpful!
+> 
+> I have set the debug level and restarted the osd. It initialized for about an
+> hour and then crashed after 5 minutes with the same error message.
+> 
+> You can download the full logs here:
+> 
+> http://bit.ly/WbcSQp
+> 
+> Thanks for your help!
 
- rgw print continue = false
+Unfortunately I can't see what the thread gets stuck doing after it stops 
+doing work (at an apparently normal point).  Is there any chance you can 
+attach to it with gdb as soon as the log slows down and the initial 
+timeout messages appear?  Or check the core file and see what thread 
+7fd8c1ff3700 is up to?
 
-Yehuda
+Also, 'debug tp = 20' would narrow things down slightly.
+
+Thanks!
+sage
+
