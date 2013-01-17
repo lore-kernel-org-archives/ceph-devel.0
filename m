@@ -1,70 +1,41 @@
-From: Christopher Kunz <chrislist@de-punkt.de>
-Subject: Current OSD weight vs. target weight
-Date: Thu, 17 Jan 2013 16:58:41 +0100
-Message-ID: <50F81FB1.2060909@de-punkt.de>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: flashcache
+Date: Thu, 17 Jan 2013 11:12:53 -0500
+Message-ID: <D36B9470-CEF7-43D2-83E3-F91ABA983100@ornl.gov>
+References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
+ <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
+ <50F72150.7080002@inktank.com>
+ <CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com>
+ <CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com>
+ <50F7FE9B.6050908@inktank.com>
+ <44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov>
+ <CAJH6TXhMXfsgx607aOxpLmpq15vg44AW8NHbm_Yw8yC45CHyKA@mail.gmail.com>
+ <F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov>
+ <CAJH6TXi2g_Z56SfEjsK9tTdvxBvHUbMfM5UuQf37LAL4K5wTaQ@mail.gmail.com>
+ <25E46CD3-17AA-4F31-B157-4B3666408C82@ornl.gov>
+ <CAJH6TXj_JjmUsK4FhZhPiH0Eh4hYouJCJCMCmk6A1F2rw6=fxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-2.de-punkt.de ([93.190.64.238]:60063 "EHLO
-	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756824Ab3AQQFJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:05:09 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mail-2.de-punkt.de (Postfix) with ESMTP id E6FF83A332
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 16:58:42 +0100 (CET)
-Received: from mail-2.de-punkt.de ([127.0.0.1])
-	by localhost (mail-10.de-punkt.de [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id UnP4HSYgv-Vk for <ceph-devel@vger.kernel.org>;
-	Thu, 17 Jan 2013 16:58:42 +0100 (CET)
-Received: from Christophers-MacBook-Pro.local (p4FD072C0.dip.t-dialin.net [79.208.114.192])
-	(Authenticated sender: chris@de-punkt.de)
-	by mail-2.de-punkt.de (Postfix) with ESMTPSA id B92393A310
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 16:58:42 +0100 (CET)
+Received: from mta01.ornl.gov ([128.219.177.14]:33188 "EHLO mta01.ornl.gov"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756903Ab3AQQM4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:12:56 -0500
+In-Reply-To: <CAJH6TXj_JjmUsK4FhZhPiH0Eh4hYouJCJCMCmk6A1F2rw6=fxA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Joseph Glanville <joseph.glanville@orionvm.com.au>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On Jan 17, 2013, at 11:01 AM, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com> wrote:
 
-if run during a user-issued reweight (i.e. "ceph osd crush reweight x
-y"), "ceph osd tree" shows the target weight of an OSD. Is there a way
-to see the *current* weight of the OSD?
+> 2013/1/17 Atchley, Scott <atchleyes@ornl.gov>:
+>> Yes. It should get close to 1 GB/s where 1GbE is limited to about 125 MB/s. Lower latency? Probably since most Ethernet drivers set interrupt coalescing by default. Intel e1000 driver, for example, have a cluster mode that reduces (or turns off) interrupt coalescing. I don't know if ceph is latency sensitive or not.
+> 
+> Sorry, I meant 10GbE.
 
-We would like to be able to approximate the amount of rollback necessar=
-y
-per OSD if we need to cancel a larger reweight at some point. This seem=
-s
-impossible, though, without knowing the current weight.
+10GbE should get close to 1.2 GB/s compared to 1 GB/s for IB SDR. Latency again depends on the Ethernet driver.
 
-Any hints how to do this?
-
-Regards,
-
---ck
-
---=20
-filoo GmbH
-Dr. Christopher Kunz
-
-E-Mail: chris@filoo.de
-Tel.: (+49) 0 52 41 8 67 30 -18
-=46ax: (+49) 0 52 41 / 8 67 30 -20
-
-Please sign & encrypt mail wherever possible, my key:
-C882 8ED1 7DD1 9011 C088 EA50 5CFA 2EEB 397A CAC1
-
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-
-HRB4355, AG G=FCtersloh
-Gesch=E4ftsf=FChrer: S.Grewing, J.Rehp=F6hler, Dr. C.Kunz
-
-=46iloo im Web: http://www.filoo.de/
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-Werden Sie unser Fan auf Facebook: http://facebook.com/filoogmbh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Scott
