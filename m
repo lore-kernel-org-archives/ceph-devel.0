@@ -1,34 +1,44 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: flashcache
-Date: Thu, 17 Jan 2013 16:14:07 +0100
-Message-ID: <CAJH6TXi2g_Z56SfEjsK9tTdvxBvHUbMfM5UuQf37LAL4K5wTaQ@mail.gmail.com>
-References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
-	<alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
-	<50F72150.7080002@inktank.com>
-	<CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com>
-	<CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com>
-	<50F7FE9B.6050908@inktank.com>
-	<44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov>
-	<CAJH6TXhMXfsgx607aOxpLmpq15vg44AW8NHbm_Yw8yC45CHyKA@mail.gmail.com>
-	<F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Thu, 17 Jan 2013 16:33:12 +0100
+Message-ID: <50F819B8.4070004@widodh.nl>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f173.google.com ([74.125.82.173]:45547 "EHLO
-	mail-we0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755593Ab3AQPOJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 10:14:09 -0500
-Received: by mail-we0-f173.google.com with SMTP id z2so297826wey.18
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 07:14:07 -0800 (PST)
-In-Reply-To: <F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:56874 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755930Ab3AQPdP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 10:33:15 -0500
+In-Reply-To: <50F80FA0.5010504@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Atchley, Scott" <atchleyes@ornl.gov>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Joseph Glanville <joseph.glanville@orionvm.com.au>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2013/1/17 Atchley, Scott <atchleyes@ornl.gov>:
-> IPoIB appears as a traditional Ethernet device to Linux and can be used as such. Ceph has no idea that it is not Ethernet.
+Hi,
 
-Ok. Now it's clear.
-AFAIK, a standard SDR IB card should give use more speed than GbE
-(less overhead?) and lower latency, I think.
+On 01/17/2013 03:50 PM, Stefan Priebe wrote:
+> Hi,
+>
+> Am 17.01.2013 15:47, schrieb Wido den Hollander:
+>> You might want to try building from 'next' yourself or fetch some new
+>> packages from the RPM repos: http://eu.ceph.com/docs/master/install/rpm/
+>
+> Should it be backported to bobtail branch as well?
+>
+
+Don't think it's in there. I found the commit in the next branch: 
+https://github.com/ceph/ceph/commit/7e94f6f1a7b7a865433edacd6a521f6ea1170eac
+
+Doesn't seem to be in 'bobtail'.
+
+Wido
+
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
