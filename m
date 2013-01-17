@@ -1,69 +1,123 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH REPOST 6/6] rbd: move remaining osd op setup into rbd_osd_req_op_create()
-Date: Thu, 17 Jan 2013 16:25:06 -0600
-Message-ID: <50F87A42.8010402@inktank.com>
-References: <50E6EF5F.9080200@inktank.com> <50E6F028.6040904@inktank.com> <50F77CC5.6070703@inktank.com> <50F7800C.4070306@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: define flags field, use it for exists flag
+Date: Thu, 17 Jan 2013 17:16:42 -0600
+Message-ID: <50F8865A.9020001@inktank.com>
+References: <50F4535A.6030601@inktank.com> <50F4538B.4010106@inktank.com> <50F46B40.9010907@inktank.com> <50F4776F.2080407@inktank.com> <50F5FDA7.6040509@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:65485 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752034Ab3AQWZJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 17:25:09 -0500
-Received: by mail-ie0-f179.google.com with SMTP id k14so5561499iea.10
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 14:25:08 -0800 (PST)
-In-Reply-To: <50F7800C.4070306@inktank.com>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:41227 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752576Ab3AQXQv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 18:16:51 -0500
+Received: by mail-ie0-f169.google.com with SMTP id c14so5696380ieb.28
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 15:16:51 -0800 (PST)
+In-Reply-To: <50F5FDA7.6040509@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/16/2013 10:37 PM, Alex Elder wrote:
-> On 01/16/2013 10:23 PM, Josh Durgin wrote:
->> On 01/04/2013 07:07 AM, Alex Elder wrote:
->>> The two remaining osd ops used by rbd are CEPH_OSD_OP_WATCH and
->>> CEPH_OSD_OP_NOTIFY_ACK.  Move the setup of those operations into
->>> rbd_osd_req_op_create(), and get rid of rbd_create_rw_op() and
->>> rbd_destroy_op().
->>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
-
-. . .
-
->>> +    case CEPH_OSD_OP_NOTIFY_ACK:
->>> +    case CEPH_OSD_OP_WATCH:
->>> +        /* rbd_osd_req_op_create(NOTIFY_ACK, cookie, version) */
->>> +        /* rbd_osd_req_op_create(WATCH, cookie, version, flag) */
->>> +        op->watch.cookie = va_arg(args, u64);
->>> +        op->watch.ver = va_arg(args, u64);
->>> +        op->watch.ver = cpu_to_le64(op->watch.ver);    /* XXX */
+On 01/15/2013 07:08 PM, Josh Durgin wrote:
+> On 01/14/2013 01:23 PM, Alex Elder wrote:
+>> On 01/14/2013 02:32 PM, Dan Mick wrote:
+>>> I see that set_bit is atomic, but I don't see that test_bit is.  Am I
+>>> missing a subtlety?
 >>
->> why the /* XXX */ comment?
+>> That's an interesting observation.  I'm certain it's safe, but
+>> I needed to research it a bit, and I still haven't verified it
+>> to my satisfaction.
+>>
+>> I *think* (but please look over the following and see if you
+>> come to the same conclusion) that this operation doesn't need
+>> to be made atomic, because the implementation of the routines
+>> that implement the "set" operations guarantee their effects are
+>> visible once they are done.
+>>
+>> But I'm not sure whether "visible" here means precisely that
+>> another CPU will be forced to go read the updated memory when
+>> it calls test_bit().
+>>
+>> http://www.kernel.org/doc/Documentation/atomic_ops.txt
+>> The section of interest can be found by looking for the
+>> sentence I'm talking about:
+>>    Likewise, the atomic bit operation must be visible globally before any
+>>    subsequent memory operation is made visible.
 > 
-> Because it's the only value here that is converted
-> from cpu byte order.  It was added in this commit:
+> I read that differently. I think that only applies to the test_and_set
+> style operations mentioned directly above, not set_bit.
 > 
->     a71b891bc7d77a070e723c8c53d1dd73cf931555
->     rbd: send header version when notifying
+> Documentation/memory-barriers.txt confirms this interpretation:
 > 
-> And I think was done without full understanding that it
-> was being done different from all the others.  I think
-> it may be wrong but I haven't really looked at it yet.
-> Pulling them all into this function made this difference
-> more obvious.
+>     The following operations are potential problems as they do
+>     _not_ imply memory barriers, but might be used for
+>     implementing such things as UNLOCK-class operations:
+> 
+>             atomic_set();
+>             set_bit();
+>             clear_bit();
+>             change_bit();
+> 
+>     With these the appropriate explicit memory barrier should be
+>     used if necessary (smp_mb__before_clear_bit() for instance).
+> 
+> And:
+> 
+>     Memory operations that occur after an UNLOCK operation may appear to
+>     happen before it completes.
+> 
+> So I think we need a memory barrier before and after set_bit for the
+> removing flag, but we don't need barriers for the exists flag, since
+> it's a best-effort value that can't stop already-in-flight requests.
 
-I've created this to track getting this issue resolved:
-    http://tracker.newdream.net/issues/3847
+You know, I agree with your analysis but now I'm not sure
+even that's enough.
 
-> It was a "note to self" that I wanted to fix that.
-> 
-> I normally try to resolve anything like that before I
-> post for review but I guess I forgot.  There may be
-> others.
+Here's the code in question (from the other patch):
 
-I'm deleting the "XXX" comment before I commit this change.
+Test side:
+        mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+        if (!test_bit(rbd_dev_flag_removing, &rbd_dev->flags)) {
+                (void) get_device(&rbd_dev->dev);
+                set_device_ro(bdev, rbd_dev->mapping.read_only);
+                rbd_dev->open_count++;
+        } else {
+                ret = -ENOENT;
+        }
+        mutex_unlock(&ctl_mutex);
+
+
+Set side:
+        if (rbd_dev->open_count) {
+                ret = -EBUSY;
+                goto done;
+        }
+        set_bit(rbd_dev_flag_removing, &rbd_dev->flags);
+
+And here's the scenario I'm thinking about.  Initially,
+suppose rbd_dev->open_count is 0 and the removing flag
+is not set.
+
+OPENING THREAD                  UNMAPPING THREAD
+--------------                  ----------------
+                                if (rbd_dev->open_count) {
+                                    /* not taken, it's zero */
+                                    ret = -EBUSY;
+                                    goto done;
+                                }
+if (!test_bit(removing)) {
+    /* not set yet! */          /* barrier won't help here */
+                                set_bit(removing);
+                                /* clean stuff up */
+    rbd_dev->open_count++;      /* == kablooie == */
+} else {
+    ret = -ENOENT;
+}
+
+So I think we need a spinlock, or some other thing.
+
+In any case, I'm not going to commit this change until
+we've had a chance to talk about it a little more.
 
 					-Alex
-
-. . .
