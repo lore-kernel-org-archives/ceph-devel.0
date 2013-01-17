@@ -1,47 +1,41 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH REPOST 0/4] rbd: explicitly support only one osd op
-Date: Wed, 16 Jan 2013 18:27:49 -0800
-Message-ID: <50F761A5.6010702@inktank.com>
-References: <50E6EA94.1040001@inktank.com>
+Subject: Re: [PATCH REPOST 0/3] rbd: no need for file mapping calculation
+Date: Wed, 16 Jan 2013 18:34:54 -0800
+Message-ID: <50F7634E.9010204@inktank.com>
+References: <50E6EC84.2060304@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:35302 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757843Ab3AQC1w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 21:27:52 -0500
-Received: by mail-pa0-f49.google.com with SMTP id bi1so1149546pad.8
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 18:27:51 -0800 (PST)
-In-Reply-To: <50E6EA94.1040001@inktank.com>
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:37932 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757581Ab3AQCe6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 21:34:58 -0500
+Received: by mail-pb0-f47.google.com with SMTP id wz17so1090115pbc.34
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 18:34:57 -0800 (PST)
+In-Reply-To: <50E6EC84.2060304@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/04/2013 06:43 AM, Alex Elder wrote:
-> An osd request can be made up of multiple "ops", all of which are
-> completed (or not) transactionally.  There is partial support for
-> multiple ops in an rbd request in the rbd code, but it's incomplete
-> and not even supported by the osd client or the messenger right now.
->
-> I see three problems with this partial implementation:  it gives a
-> false impression of how things work; it complicates some code in
-> some cases where it's not necessary; and it may constrain how one
-> might pursue fully implementing multiple ops in a request to ways
-> that don't fit well with how we want to do things.
->
-> So this series just simplifies things, making it explicit that there
-> is only one op in an kernel osd client request right now.
+On 01/04/2013 06:51 AM, Alex Elder wrote:
+> Currently every osd request submitted by the rbd code undergoes a
+> file mapping operation, which is common with what the ceph file system
+> uses.  But some analysis shows that there is no need to do this for
+> rbd, because it already takes care of its own blocking of image data
+> into distinct objects.  Removing this simplifies things.  I especially
+> think removing this improves things conceptually, removing a complex
+> mapping operation from the I/O path.
 >
 > 					-Alex
 >
-> [PATCH REPOST 1/4] rbd: pass num_op with ops array
-> [PATCH REPOST 2/4] libceph: pass num_op with ops
-> [PATCH REPOST 3/4] rbd: there is really only one op
-> [PATCH REPOST 4/4] rbd: assume single op in a request
+> [PATCH REPOST 1/3] rbd: pull in ceph_calc_raw_layout()
+> [PATCH REPOST 2/3] rbd: open code rbd_calc_raw_layout()
+> [PATCH REPOST 3/3] rbd: don't bother calculating file mapping
 
-These look good.
+We'll want to use similar methods later for fancier rbd striping with 
+format 2 images, but that'll take more restructuring later anyway.
+This is fine for now.
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
