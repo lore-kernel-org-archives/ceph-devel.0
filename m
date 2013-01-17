@@ -1,60 +1,127 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: mds: first stab at lookup-by-ino problem/soln description
-Date: Wed, 16 Jan 2013 17:33:00 -0800
-Message-ID: <CAPYLRzh+wi1CbiK45QzJkw33yUd7aNYhbPtAf=b7UoejVQTjuw@mail.gmail.com>
-References: <alpine.DEB.2.00.1301142231260.12153@cobra.newdream.net>
-	<CAPYLRzg8j02fgMBC1cgUnot4XH4y--BR=PnbLo+J-RUkPBVpGQ@mail.gmail.com>
-	<CAKMAVE9Y4C4VvGzXL3kS5nCpqzFMOO43m2XRgwre7OLXz+nvRQ@mail.gmail.com>
-	<CAPYLRzhoWNj1gyjxDiasF6gCJvLUMkdLAQ8m0_EY+02+cTFT1Q@mail.gmail.com>
-	<alpine.DEB.2.00.1301161715090.17435@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: RE: Ceph slow request & unstable issue
+Date: Wed, 16 Jan 2013 18:15:58 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301161811150.23687@cobra.newdream.net>
+References: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com> <CABYiri_50ijzfm1y-ryNULXq8DDNUWghrBaQBfzBkspzjpZx1A@mail.gmail.com> <alpine.DEB.2.00.1301160854170.15921@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC5DF0FA@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:53027 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756821Ab3AQBdB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 20:33:01 -0500
-Received: by mail-qa0-f44.google.com with SMTP id o13so42278qaj.17
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 17:33:00 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301161715090.17435@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:53433 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754485Ab3AQCP7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 21:15:59 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5DF0FA@SHSMSX102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Andrey Korolyov <andrey@xdel.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 16, 2013 at 5:17 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 16 Jan 2013, Gregory Farnum wrote:
->> I'm not familiar with the interfaces at work there. Do we have a free
->> 32 bits we can steal in order to do that stuffing? (I *think* it would
->> go in the NFS filehandle structure rather than the ino, right?)
->
-> Right, there is at least 8 more bytes in a standard fh (16 bytes iirc) to
-> stuff whatever we want into.
->
->> We would need to also store that information in order to eventually
->> replace the anchor table, but of course that's much easier to deal
->> with. If we can just do it this way, that still leaves handling files
->> which don't have any data written yet ? under our current system,
->> users can apply a data layout to any inode which has not had data
->> written to it yet. Unfortunately that gets hard to deal with if a user
->> touches a bunch of files and then comes back to place them the next
->> day. :/ I suppose un-touched files could have the special property
->> that their lookup data is stored in the metadata pool and it gets
->> moved as soon as they have data ? in the typical case files are
->> written right away and so this wouldn't be any more writes, just a bit
->> more logic.
->
-> We can also change the semantics, here.  It could be that you have to
-> specify the file's layout on create, and can't after it was created.
-> Otherwise you get the directory/subtree's layout.  We could store the pool
-> with the remote dentry link, for instance, and we could stick it in the
-> fh.  So the <ino, pool> is really the "locator" that you would need.
->
-> That could work...
+On Thu, 17 Jan 2013, Chen, Xiaoxi wrote:
+> Hi Sage?
+> 	Both CPU and Memory utilization are very low. CPU is ~ 20% (with 
+> 60% IOWAIT), Memory is far more less . I have 32 Core Sandybridege 
+> CPU(64 Core for HT), together with 128GB RAM per node.
 
-I'm less a fan of forcing users to specify file layouts on create
-since there aren't any standard interfaces which would let them do
-that, so a lot of use cases would be restricted to directory-level
-layout changes. Granted that covers the big ones, but we do have a
-non-zero number of users who have learned our previous semantics,
-right?
+Hmm!
+
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@inktank.com] 
+> Sent: 2013?1?17? 0:59
+> To: Andrey Korolyov
+> Cc: Chen, Xiaoxi; ceph-devel@vger.kernel.org
+> Subject: Re: Ceph slow request & unstable issue
+> 
+> Hi,
+> 
+> On Wed, 16 Jan 2013, Andrey Korolyov wrote:
+> > On Wed, Jan 16, 2013 at 4:58 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
+> > > Hi list,
+> > >         We are suffering from OSD or OS down when there is continuing high pressure on the Ceph rack.
+> > >         Basically we are on Ubuntu 12.04+ Ceph 0.56.1, 6 nodes, in each nodes with 20 * spindles + 4* SSDs as journal.(120 spindles in total)
+> > >         We create a lots of RBD volumes (say 240),mounting to 16 different client machines ( 15 RBD Volumes/ client) and running DD concurrently on top of each RBD.
+> > >
+> > >         The issues are:
+> > > 1. Slow requests
+> > > ??From the list-archive it seems solved in 0.56.1 but we still 
+> > > notice such warning 2. OSD Down or even host down Like the message 
+> > > below.Seems some OSD has been blocking there for quite a long time.
+
+There is still an issue with throttling recovery/migration traffic 
+leading to the slow requests that should be fixed shortly.
+
+> > >         Suggestions are highly appreciate.Thanks
+> > >                                                                                                                                                                         
+> > > Xiaoxi
+> > >
+> > > _____________________________________________
+> > >
+> > > Bad news:
+> > >
+> > > I have  back all my Ceph machine?s OS to kernel  3.2.0-23, which Ubuntu 12.04 use.
+> > > I run dd command (dd if=/dev/zero bs=1M count=60000 of=/dev/rbd${i} & )on Ceph client to create data prepare test at last night.
+
+Oooh, you are running the kernel RBD client on a 3.2 kernel.  There have 
+been a long series of fixes since then, but we've only backported as far 
+back as 3.4.  Can you try a newer kernel version for the client?  
+Something a recnet 3.4 or 3.7 series, like 3.7.2 or 3.4.25... 
+
+Thanks!
+
+> > > Now, I have one machine down (can?t be reached by ping), another two machine has all OSD daemon down, while the three left has some daemon down.
+> > >
+> > > I have many warnings in OSD log like this:
+> > >
+> > > no flag points reached
+> > > 2013-01-15 19:14:22.769898 7f20a2d57700  0 log [WRN] : slow request 
+> > > 52.218106 seconds old, received at 2013-01-15 19:13:30.551718: 
+> > > osd_op(client.10674.1:1002417 rb.0.27a8.6b8b4567.000000000eba [write 
+> > > 3145728~524288] 2.c61810ee RETRY) currently waiting for sub ops
+> > > 2013-01-15 19:14:23.770077 7f20a2d57700  0 log [WRN] : 21 slow 
+> > > requests, 6 included below; oldest blocked for > 1132.138983 secs
+> > > 2013-01-15 19:14:23.770086 7f20a2d57700  0 log [WRN] : slow request 
+> > > 53.216404 seconds old, received at 2013-01-15 19:13:30.553616: 
+> > > osd_op(client.10671.1:1066860 rb.0.282c.6b8b4567.000000001057 [write 
+> > > 2621440~524288] 2.ea7acebc) currently waiting for sub ops
+> > > 2013-01-15 19:14:23.770096 7f20a2d57700  0 log [WRN] : slow request 
+> > > 51.442032 seconds old, received at 2013-01-15 19:13:32.327988: 
+> > > osd_op(client.10674.1:1002418
+> > >
+> > > Similar info in dmesg we have saw pervious:
+> > >
+> > > [21199.036476] INFO: task ceph-osd:7788 blocked for more than 120 seconds.
+> > > [21199.037493] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> > > [21199.038841] ceph-osd        D 0000000000000006     0  7788      1 0x00000000
+> > > [21199.038844]  ffff880fefdafcc8 0000000000000086 0000000000000000 
+> > > ffffffffffffffe0 [21199.038848]  ffff880fefdaffd8 ffff880fefdaffd8 
+> > > ffff880fefdaffd8 0000000000013780 [21199.038852]  ffff88081aa58000 
+> > > ffff880f68f52de0 ffff880f68f52de0 ffff882017556200 [21199.038856] Call Trace:
+> > > [21199.038858]  [<ffffffff8165a55f>] schedule+0x3f/0x60 
+> > > [21199.038861]  [<ffffffff8106b7e5>] exit_mm+0x85/0x130 
+> > > [21199.038864]  [<ffffffff8106b9fe>] do_exit+0x16e/0x420 
+> > > [21199.038866]  [<ffffffff8109d88f>] ? __unqueue_futex+0x3f/0x80 
+> > > [21199.038869]  [<ffffffff8107a19a>] ? __dequeue_signal+0x6a/0xb0 
+> > > [21199.038872]  [<ffffffff8106be54>] do_group_exit+0x44/0xa0 
+> > > [21199.038874]  [<ffffffff8107ccdc>] 
+> > > get_signal_to_deliver+0x21c/0x420 [21199.038877]  
+> > > [<ffffffff81013865>] do_signal+0x45/0x130 [21199.038880]  
+> > > [<ffffffff810a091c>] ? do_futex+0x7c/0x1b0 [21199.038882]  
+> > > [<ffffffff810a0b5a>] ? sys_futex+0x10a/0x1a0 [21199.038885]  
+> > > [<ffffffff81013b15>] do_notify_resume+0x65/0x80 [21199.038887]  
+> > > [<ffffffff81664d50>] int_signal+0x12/0x17
+> 
+> We have seen this stack trace several times over the past 6 months, but are not sure what the trigger is.  In principle, the ceph server-side daemons shouldn't be capable of locking up like this, but clearly something is amiss between what they are doing in userland and how the kernel is tolerating that.  Low memory, perhaps?  In each case where we tried to track it down, the problem seemed to go away on its own.  Is this easily reproducible in your case?
+> 
+> > my 0.02$:
+> > http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg11531.html
+> > and kernel panic from two different hosts from yesterday during ceph 
+> > startup(on 3.8-rc3, images from console available at
+> > http://imgur.com/wIRVn,k0QCS#0) leads to suggestion that Ceph may have 
+> > been introduced lockup-alike behavior not a long ago, causing, in my 
+> > case, excessive amount of context switches on the host leading to osd 
+> > flaps and panic at the ip-ib stack due to same issue.
+> 
+> For the stack trace my first guess would be a problem with the IB driver that is triggered by memory pressure.  Can you characterize what the system utilization (CPU, memory) looks like leading up to the lockup?
+> 
+> sage
+> N????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
