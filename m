@@ -1,80 +1,107 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: Ceph version 0.56.1, data loss on power failure
-Date: Thu, 17 Jan 2013 09:37:04 +0100
-Message-ID: <50F7B830.8080301@univ-nantes.fr>
-References: <CA+-7kDCRhRnijbEt2NxX2BgAqfF5fLaXoMOB7VUTCpeTgn9X9Q@mail.gmail.com> <CAF6-1L7otPweDqmq-MzEnO+TU5aHSZ3JKW+SaqG740Hw5q9ULA@mail.gmail.com> <CA+-7kDAxr7pa2MsVxsdxH5BLghDwDMs+SrKZhpAcJSjXwG=RuQ@mail.gmail.com> <CAPYLRzje19sAjtyRq8PX2zV0=GHpnzWdqOMk04UVUaRn2T7TOg@mail.gmail.com> <CA+-7kDCODuG-mWXEHv_QFdo1Guow55dd55+yPz85hKN+5rU1Gw@mail.gmail.com> <CAPYLRzhu1Tdj_MQnVJOQj6rFpVGDyiokx9k-ysb+jpbh_3F9wA@mail.gmail.com> <CA+-7kDBDWCv=dZN1Avc+BqLfxz5KKGNMHOjZvq5D7SnM6RSjvA@mail.gmail.com> <CA+-7kDCLhNx3QQ3OUGxrKT6VJszyPuPdgceA8C-pqYZRBqKkZQ@mail.gmail.com> <50F686A2.2060901@widodh.nl> <50F6B48E.6000003@univ-nantes.fr> <CA+-7kDBMmK_SxOob1p0oibufPsCjDT1h42hyOhe=amyw8+O0tg@mail.gmail.com> <CAOx6V3YCcGX1ivkK87Lz97unyMozBGQEr8qA1dtBSHkwd=6w1w@mail.gmail.com>
+From: Matthew Anderson <matthewa@base3.com.au>
+Subject: Single host VM limit when using RBD
+Date: Thu, 17 Jan 2013 08:37:17 +0000
+Message-ID: <38A500831D3DE24B90BD200D6C8701351BB3AF0F@Exchange2010-2.corit.local>
+References: <38A500831D3DE24B90BD200D6C8701351BB3AA15@Exchange2010-2.corit.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-lmb.cpub.univ-nantes.fr ([193.52.103.110]:36031 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1759231Ab3AQIhG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 03:37:06 -0500
-In-Reply-To: <CAOx6V3YCcGX1ivkK87Lz97unyMozBGQEr8qA1dtBSHkwd=6w1w@mail.gmail.com>
+Received: from mail.base3.com.au ([27.106.198.3]:24252 "EHLO mail.base3.com.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759324Ab3AQIh3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 03:37:29 -0500
+In-Reply-To: <38A500831D3DE24B90BD200D6C8701351BB3AA15@Exchange2010-2.corit.local>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Mitchell <jeffrey.mitchell@gmail.com>
-Cc: Marcin Szukala <szukala.marcin@gmail.com>, Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Le 16/01/2013 17:56, Jeff Mitchell a =C3=A9crit :
-> FWIW, my ceph data dirs (for e.g. mons) are all on XFS. I've
-> experienced a lot of corruption on these on power loss to the node --
-> and in some cases even when power wasn't lost, and the box was simply
-> rebooted. This is on Ubuntu 12.04 with the ceph-provied 3.6.3 kernel
-> (as I'm using RBD on these).
->
-> It's pretty much to the point where I'm thinking of changing them all
-> over to ext4 for these data dirs, as the hassle of rebuilding mons
-> constantly is just not worth the trouble.
-In october, I've lost a complete ceph cluster, because of a combination=
- of
-a memory management bug in kernel 3.6 + a bug in XFS (another BUG) (I=20
-Had 12 Nodes, replication was at 2, 5/6 machines were crashed in a row,=
-=20
-because of mm bug, and 2 ended with unrecoverable corruption)
+I've run into a limit on the maximum number of RBD backed VM's that I'm=
+ able to run on a single host. I have 20 VM's (21 RBD volumes open) run=
+ning on a single host and when booting the 21st machine I get the below=
+ error from libvirt/QEMU. I'm able to shut down a VM and start another =
+in it's place so there seems to be a hard limit on the amount of volume=
+s I'm able to have open.=A0 I did some googling and the error 11 from p=
+thread_create seems to mean 'resource unavailable' so I'm probably runn=
+ing into a thread limit of some sort. I did try increasing the max_thre=
+ad kernel option but nothing changed. I moved a few VM's to a different=
+ empty host and they start with no issues at all.
 
-so, 150 TB of data on the cluster were unrecoverable. Hopefully it was=20
-only test data.
+This machine has 4 OSD's running on it in addition to the 20 VM's. Kern=
+el 3.7.1. Ceph 0.56.1 and QEMU 1.3.0. There is currently 65GB of 96GB f=
+ree ram and no swap.=20
 
-if you want the gory details see here :
+Can anyone suggest where the limit might be or anything I can do to nar=
+row down the problem?
 
-http://oss.sgi.com/archives/xfs/2012-10/msg00420.html
+Thanks
+-Matt
+-------------------------
 
-This XFS bug was corrected in 3.0.52, 3.2.34,3.4.19,3.6.7. Dave chinner=
-=20
-was very quick to fix the problem.
+Error starting domain: internal error Process exited while reading cons=
+ole log output: char device redirected to /dev/pts/23
+Thread::try_create(): pthread_create failed with error 11common/Thread.=
+cc: In function 'void Thread::create(size_t)' thread 7f4eb5a65960 time =
+2013-01-17 02:32:58.096437
+common/Thread.cc: 110: FAILED assert(ret =3D=3D 0)
+ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+1: (()+0x2aaa8f) [0x7f4eb2de8a8f]
+2: (SafeTimer::init()+0x95) [0x7f4eb2cd2575]
+3: (librados::RadosClient::connect()+0x72c) [0x7f4eb2c689dc]
+4: (()+0xa0290) [0x7f4eb5b27290]
+5: (()+0x879dd) [0x7f4eb5b0e9dd]
+6: (()+0x87c1b) [0x7f4eb5b0ec1b]
+7: (()+0x87ae1) [0x7f4eb5b0eae1]
+8: (()+0x87d50) [0x7f4eb5b0ed50]
+9: (()+0xb37b2) [0x7f4eb5b3a7b2]
+10: (()+0x1e83eb) [0x7f4eb5c6f3eb]
+11: (()+0x1ab54a) [0x7f4eb5c3254a]
+12: (main()+0x9da) [0x7f4eb5c72a3a]
+13: (__libc_start_main()+0xfd) [0x7f4eb1ab4cdd]
+14: (()+0x710b9) [0x7f4eb5af80b9]
+NOTE: a copy of the executable, or `objdump -rdS <executable>` is neede=
+d to interpret this.
+terminate called after
 
-Add the last bug, (journal not flushed properly), not yet fixed on=20
-latest kernels.... I can understand your reaction...
-
-But, believe it or not, I'm still confident with XFS. I've been using i=
-t=20
-for more than 10 years on TB and TB of data, and apart those recents=20
-problems , XFS have been extremely good (stability, performance, crash=20
-tolerance) all this time.
-
-Not saying ext4 isn't good, but if you follow kernel developpement,=20
-you'll see that it's not bug-free either...
-
-And not speaking of btrfs which was totally unstable with ceph on my=20
-last tries (6 month ago)
-
-In fact, ceph is hammering hardware strongly, so it's very good to find=
-=20
-bugs in linux kernel :)
-
-
-So, for the moment, i'm sticking with 3.4.25 kernel. Longterm kernel,=20
-proven, stable : no mm problems, no xfs problems.
-
-
-Cheers,
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+Traceback (most recent call last):
+=A0 File "/usr/share/virt-manager/virtManager/asyncjob.py", line 96, in=
+ cb_wrapper
+=A0=A0=A0 callback(asyncjob, *args, **kwargs)
+=A0 File "/usr/share/virt-manager/virtManager/asyncjob.py", line 117, i=
+n tmpcb
+=A0=A0=A0 callback(*args, **kwargs)
+=A0 File "/usr/share/virt-manager/virtManager/domain.py", line 1090, in=
+ startup
+=A0=A0=A0 self._backend.create()
+=A0 File "/usr/lib/python2.7/dist-packages/libvirt.py", line 620, in cr=
+eate
+=A0=A0=A0 if ret =3D=3D -1: raise libvirtError ('virDomainCreate() fail=
+ed', dom=3Dself)
+libvirtError: internal error Process exited while reading console log o=
+utput: char device redirected to /dev/pts/23
+Thread::try_create(): pthread_create failed with error 11common/Thread.=
+cc: In function 'void Thread::create(size_t)' thread 7f4eb5a65960 time =
+2013-01-17 02:32:58.096437
+common/Thread.cc: 110: FAILED assert(ret =3D=3D 0)
+ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+1: (()+0x2aaa8f) [0x7f4eb2de8a8f]
+2: (SafeTimer::init()+0x95) [0x7f4eb2cd2575]
+3: (librados::RadosClient::connect()+0x72c) [0x7f4eb2c689dc]
+4: (()+0xa0290) [0x7f4eb5b27290]
+5: (()+0x879dd) [0x7f4eb5b0e9dd]
+6: (()+0x87c1b) [0x7f4eb5b0ec1b]
+7: (()+0x87ae1) [0x7f4eb5b0eae1]
+8: (()+0x87d50) [0x7f4eb5b0ed50]
+9: (()+0xb37b2) [0x7f4eb5b3a7b2]
+10: (()+0x1e83eb) [0x7f4eb5c6f3eb]
+11: (()+0x1ab54a) [0x7f4eb5c3254a]
+12: (main()+0x9da) [0x7f4eb5c72a3a]
+13: (__libc_start_main()+0xfd) [0x7f4eb1ab4cdd]
+14: (()+0x710b9) [0x7f4eb5af80b9]
+NOTE: a copy of the executable, or `objdump -rdS <executable>` is neede=
+d to interpret this.
+terminate called after
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
