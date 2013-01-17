@@ -1,32 +1,84 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: flashcache
-Date: Thu, 17 Jan 2013 17:24:03 +0100
-Message-ID: <50F825A3.9090405@profihost.ag>
-References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com> <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net> <50F72150.7080002@inktank.com> <CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com> <CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com> <50F7FE9B.6050908@inktank.com> <44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov> <CAJH6TXhMXfsgx607aOxpLmpq15vg44AW8NHbm_Yw8yC45CHyKA@mail.gmail.com> <F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov> <CAJH6TXi2g_Z56SfEjsK9tTdvxBvHUbMfM5UuQf37LAL4K5wTaQ@mail.gmail.com> <25E46CD3-17AA-4F31-B157-4B3666408C82@ornl.gov> <CAJH6TXj_JjmUsK4FhZhPiH0Eh4hYouJCJCMCmk6A1F2rw6=fxA@mail.gmail.com> <D36B9470-CEF7-43D2-83E3-F91ABA983100@ornl.gov> <50F824C8.3040704@profihost.ag> <CAJH6TXiRe03RFPNENT44TOBT4bDvU
- 8BX=3=avjtvEpk0vZGTyw@mail.gmail.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: ceph from poc to production
+Date: Thu, 17 Jan 2013 17:24:28 +0100
+Message-ID: <CAOLwVU=1vjeoFBa84doczbEeJ5nAasBLE2z9YAR-oUd5+wANrw@mail.gmail.com>
+References: <50F6F471.7030108@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:42469 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756918Ab3AQQYD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:24:03 -0500
-In-Reply-To: <CAJH6TXiRe03RFPNENT44TOBT4bDvU8BX=3=avjtvEpk0vZGTyw@mail.gmail.com>
+Received: from mail-la0-f42.google.com ([209.85.215.42]:55498 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757159Ab3AQQYu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:24:50 -0500
+Received: by mail-la0-f42.google.com with SMTP id fe20so2887483lab.15
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 08:24:48 -0800 (PST)
+In-Reply-To: <50F6F471.7030108@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Mark Nelson <mark.nelson@inktank.com>, Joseph Glanville <joseph.glanville@orionvm.com.au>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Stephan,
 
-Am 17.01.2013 17:21, schrieb Gandalf Corvotempesta:
-> 2013/1/17 Stefan Priebe <s.priebe@profihost.ag>:
->> We're using bonded active/active 2x10GbE with Intel ixgbe and i'm able to
->> get 2.3GB/s.
+> - Increase the osdmax value
+
+Well actually this doesn't seem to be necessary because when you issue
+a "ceph osd create" the osdmax value is automatically incremented. It
+just that a while ago I saw on the ML or IRC that it was a good
+practice to do this. And this documentation
+http://ceph.com/docs/master/rados/operations/control/ says:
+
+"Set the max_osd parameter in the osd map. This is necessary when
+expanding the storage cluster."
+
+Maybe the doc is outdated on this option, I don't know.
+
+> - Set =93filestore flusher=94 option to false, in your [osd] section
+
+During my benchmarks sessions I noticed that disabling this option
+brought way better performance, at least for old hardware. Fo recent
+hardware I haven't seen any difference, but I kept the habit to
+disable it. There are some discussions about this option on the ML. As
+far as I can remember, it's harmless to disable it.
+=46rom the doc here
+http://ceph.com/docs/master/rados/configuration/filestore-config-ref/:
+
+"The filestore flusher forces data from large writes to be written out
+using sync file range before the sync in order to (hopefully) reduce
+the cost of the eventual sync. In practice, disabling =91filestore
+flusher=92 seems to improve performance in some cases."
+
+Cheers,
+
+--
+Regards,
+S=E9bastien Han.
+
+
+On Wed, Jan 16, 2013 at 7:41 PM, Stefan Priebe <s.priebe@profihost.ag> =
+wrote:
 >
-> Which kind of switch do you use?
-
-HP 5920
-
-Stefan
+> Hello Sebastien,
+>   hello list,
+>
+> first nice article sebastien ;-) thanks for contributing.
+>
+> I've two question regarding the tips:
+>
+> Can somebody explain me why i should do this?:
+> - Increase the osdmax value
+> - Set =93filestore flusher=94 option to false, in your [osd] section
+>
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
