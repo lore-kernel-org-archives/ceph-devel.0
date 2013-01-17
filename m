@@ -1,126 +1,162 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH REPOST] rbd: use a common layout for each device
-Date: Wed, 16 Jan 2013 19:08:04 -0800
-Message-ID: <50F76B14.1090806@inktank.com>
-References: <50E6ED29.3060108@inktank.com>
+Subject: Re: [PATCH REPOST] rbd: combine rbd sync watch/unwatch functions
+Date: Wed, 16 Jan 2013 19:10:19 -0800
+Message-ID: <50F76B9B.5020707@inktank.com>
+References: <50E6ED4C.7080009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:60600 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757568Ab3AQDIH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 22:08:07 -0500
-Received: by mail-pb0-f52.google.com with SMTP id ro2so1112213pbb.39
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 19:08:07 -0800 (PST)
-In-Reply-To: <50E6ED29.3060108@inktank.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:59835 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758781Ab3AQDKW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 22:10:22 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so1170256pad.5
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 19:10:21 -0800 (PST)
+In-Reply-To: <50E6ED4C.7080009@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/04/2013 06:54 AM, Alex Elder wrote:
-> Each osd message includes a layout structure, and for rbd it is
-> always the same (at least for osd's in a given pool).
->
-> Initialize a layout structure when an rbd_dev gets created and just
-> copy that into osd requests for the rbd image.
->
-> Replace an assertion that was done when initializing the layout
-> structures with code that catches and handles anything that would
-> trigger the assertion as soon as it is identified.  This precludes
-> that (bad) condition from ever occurring.
+On 01/04/2013 06:55 AM, Alex Elder wrote:
+> The rbd_req_sync_watch() and rbd_req_sync_unwatch() functions are
+> nearly identical.  Combine them into a single function with a flag
+> indicating whether a watch is to be initiated or torn down.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
->   drivers/block/rbd.c |   34 +++++++++++++++++++++++-----------
->   1 file changed, 23 insertions(+), 11 deletions(-)
+>   drivers/block/rbd.c |   81
+> +++++++++++++++++----------------------------------
+>   1 file changed, 27 insertions(+), 54 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 072608e..7c35608 100644
+> index 7c35608..c1e5f24 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -235,6 +235,8 @@ struct rbd_device {
->
->   	char			*header_name;
->
-> +	struct ceph_file_layout	layout;
-> +
->   	struct ceph_osd_event   *watch_event;
->   	struct ceph_osd_request *watch_request;
->
-> @@ -1091,16 +1093,6 @@ static void rbd_coll_end_req(struct rbd_request
-> *rbd_req,
->   				ret, len);
+> @@ -1429,74 +1429,48 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
+> u8 opcode, void *data)
 >   }
 >
-> -static void rbd_layout_init(struct ceph_file_layout *layout, u64 pool_id)
-> -{
-> -	memset(layout, 0, sizeof (*layout));
-> -	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> -	layout->fl_stripe_count = cpu_to_le32(1);
-> -	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> -	rbd_assert(pool_id <= (u64) U32_MAX);
-> -	layout->fl_pg_pool = cpu_to_le32((u32) pool_id);
+>   /*
+> - * Request sync osd watch
+> + * Request sync osd watch/unwatch.  The value of "start" determines
+> + * whether a watch request is being initiated or torn down.
+>    */
+> -static int rbd_req_sync_watch(struct rbd_device *rbd_dev)
+> +static int rbd_req_sync_watch(struct rbd_device *rbd_dev, int start)
+>   {
+>   	struct ceph_osd_req_op *op;
+> -	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> +	struct ceph_osd_request **linger_req = NULL;
+> +	__le64 version = 0;
+>   	int ret;
+>
+>   	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
+>   	if (!op)
+>   		return -ENOMEM;
+>
+> -	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0,
+> -				     (void *)rbd_dev, &rbd_dev->watch_event);
+> -	if (ret < 0)
+> -		goto fail;
+> -
+> -	op->watch.ver = cpu_to_le64(rbd_dev->header.obj_version);
+> -	op->watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
+> -	op->watch.flag = 1;
+> -
+> -	ret = rbd_req_sync_op(rbd_dev,
+> -			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+> -			      op,
+> -			      rbd_dev->header_name,
+> -			      0, 0, NULL,
+> -			      &rbd_dev->watch_request, NULL);
+> -
+> -	if (ret < 0)
+> -		goto fail_event;
+> -
+> -	rbd_destroy_op(op);
+> -	return 0;
+> -
+> -fail_event:
+> -	ceph_osdc_cancel_event(rbd_dev->watch_event);
+> -	rbd_dev->watch_event = NULL;
+> -fail:
+> -	rbd_destroy_op(op);
+> -	return ret;
 > -}
 > -
->   /*
->    * Send ceph osd request
->    */
-> @@ -1165,7 +1157,7 @@ static int rbd_do_request(struct request *rq,
->   	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
->   	osd_req->r_oid_len = strlen(osd_req->r_oid);
+> -/*
+> - * Request sync osd unwatch
+> - */
+> -static int rbd_req_sync_unwatch(struct rbd_device *rbd_dev)
+> -{
+> -	struct ceph_osd_req_op *op;
+> -	int ret;
+> +	if (start) {
+> +		struct ceph_osd_client *osdc;
 >
-> -	rbd_layout_init(&osd_req->r_file_layout, rbd_dev->spec->pool_id);
-> +	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
+> -	op = rbd_create_rw_op(CEPH_OSD_OP_WATCH, 0);
+> -	if (!op)
+> -		return -ENOMEM;
+> +		osdc = &rbd_dev->rbd_client->client->osdc;
+> +		ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0, rbd_dev,
+> +						&rbd_dev->watch_event);
+> +		if (ret < 0)
+> +			goto done;
+> +		version = cpu_to_le64(rbd_dev->header.obj_version);
+> +		linger_req = &rbd_dev->watch_request;
+> +	}
 >
->   	if (op->op == CEPH_OSD_OP_READ || op->op == CEPH_OSD_OP_WRITE) {
->   		op->extent.offset = ofs;
-> @@ -2295,6 +2287,13 @@ struct rbd_device *rbd_dev_create(struct
-> rbd_client *rbdc,
->   	rbd_dev->spec = spec;
->   	rbd_dev->rbd_client = rbdc;
+> -	op->watch.ver = 0;
+> +	op->watch.ver = version;
+>   	op->watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
+> -	op->watch.flag = 0;
+> +	op->watch.flag = (u8) start ? 1 : 0;
 >
-> +	/* Initialize the layout used for all rbd requests */
+>   	ret = rbd_req_sync_op(rbd_dev,
+>   			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+> -			      op,
+> -			      rbd_dev->header_name,
+> -			      0, 0, NULL, NULL, NULL);
+> -
+> +			      op, rbd_dev->header_name,
+> +			      0, 0, NULL, linger_req, NULL);
+>
+> +	if (!start || ret < 0) {
+> +		ceph_osdc_cancel_event(rbd_dev->watch_event);
+> +		rbd_dev->watch_event = NULL;
+> +	}
+> +done:
+>   	rbd_destroy_op(op);
+> -	ceph_osdc_cancel_event(rbd_dev->watch_event);
+> -	rbd_dev->watch_event = NULL;
 > +
-> +	rbd_dev->layout.fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> +	rbd_dev->layout.fl_stripe_count = cpu_to_le32(1);
-> +	rbd_dev->layout.fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
-> +	rbd_dev->layout.fl_pg_pool = cpu_to_le32((u32) spec->pool_id);
-> +
->   	return rbd_dev;
+>   	return ret;
 >   }
 >
-> @@ -2549,6 +2548,12 @@ static int rbd_dev_v2_parent_info(struct
-> rbd_device *rbd_dev)
->   	if (parent_spec->pool_id == CEPH_NOPOOL)
->   		goto out;	/* No parent?  No problem. */
+> @@ -3031,7 +3005,7 @@ static int rbd_init_watch_dev(struct rbd_device
+> *rbd_dev)
+>   	int ret, rc;
 >
-> +	/* The ceph file layout needs to fit pool id in 32 bits */
-> +
-> +	ret = -EIO;
-> +	if (WARN_ON(parent_spec->pool_id > (u64) U32_MAX))
-> +		goto out;
-> +
->   	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
->   	if (IS_ERR(image_id)) {
->   		ret = PTR_ERR(image_id);
-> @@ -3678,6 +3683,13 @@ static ssize_t rbd_add(struct bus_type *bus,
->   		goto err_out_client;
->   	spec->pool_id = (u64) rc;
+>   	do {
+> -		ret = rbd_req_sync_watch(rbd_dev);
+> +		ret = rbd_req_sync_watch(rbd_dev, 1);
+>   		if (ret == -ERANGE) {
+>   			rc = rbd_dev_refresh(rbd_dev, NULL);
+>   			if (rc < 0)
+> @@ -3750,8 +3724,7 @@ static void rbd_dev_release(struct device *dev)
+>   						    rbd_dev->watch_request);
+>   	}
+>   	if (rbd_dev->watch_event)
+> -		rbd_req_sync_unwatch(rbd_dev);
+> -
+> +		rbd_req_sync_watch(rbd_dev, 0);
 >
-> +	/* The ceph file layout needs to fit pool id in 32 bits */
-> +
-> +	if (WARN_ON(spec->pool_id > (u64) U32_MAX)) {
-> +		rc = -EIO;
-> +		goto err_out_client;
-> +	}
-> +
->   	rbd_dev = rbd_dev_create(rbdc, spec);
->   	if (!rbd_dev)
->   		goto err_out_client;
+>   	/* clean up and free blkdev */
+>   	rbd_free_disk(rbd_dev);
 >
 
