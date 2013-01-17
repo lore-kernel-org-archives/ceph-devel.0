@@ -1,41 +1,57 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH REPOST 0/3] rbd: no need for file mapping calculation
-Date: Wed, 16 Jan 2013 18:34:54 -0800
-Message-ID: <50F7634E.9010204@inktank.com>
-References: <50E6EC84.2060304@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: tgt backend driver for Ceph block devices (rbd)
+Date: Wed, 16 Jan 2013 18:47:14 -0800
+Message-ID: <50F76632.4040404@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:37932 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757581Ab3AQCe6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 21:34:58 -0500
-Received: by mail-pb0-f47.google.com with SMTP id wz17so1090115pbc.34
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 18:34:57 -0800 (PST)
-In-Reply-To: <50E6EC84.2060304@inktank.com>
+Received: from mail-pb0-f42.google.com ([209.85.160.42]:40394 "EHLO
+	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756218Ab3AQCrR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jan 2013 21:47:17 -0500
+Received: by mail-pb0-f42.google.com with SMTP id rp2so1099607pbb.15
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jan 2013 18:47:16 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: stgt@vger.kernel.org
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 01/04/2013 06:51 AM, Alex Elder wrote:
-> Currently every osd request submitted by the rbd code undergoes a
-> file mapping operation, which is common with what the ceph file system
-> uses.  But some analysis shows that there is no need to do this for
-> rbd, because it already takes care of its own blocking of image data
-> into distinct objects.  Removing this simplifies things.  I especially
-> think removing this improves things conceptually, removing a complex
-> mapping operation from the I/O path.
->
-> 					-Alex
->
-> [PATCH REPOST 1/3] rbd: pull in ceph_calc_raw_layout()
-> [PATCH REPOST 2/3] rbd: open code rbd_calc_raw_layout()
-> [PATCH REPOST 3/3] rbd: don't bother calculating file mapping
+Hi, all.  I recently hacked at bs_rdwr and made it work as a 
+proof-of-concept driver allowing tgt to be backed by the Ceph[1] storage 
+cluster's RADOS block device (rbd)[2].  I thought I'd share the results 
+of my investigations, as it's useful even in its current form:
 
-We'll want to use similar methods later for fancier rbd striping with 
-format 2 images, but that'll take more restructuring later anyway.
-This is fine for now.
+http://github.com/dmick/tgt, forked from http://github.com/fujita/tgt
+branch bs_rbd (https://github.com/dmick/tgt/tree/bs_rbd)
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+This is a simple transliteration of bs_rdwr to use librbd/librados
+calls instead of normal file I/O calls (so might be instructive to diff 
+bs_rbd.c against bs_rdwr.c to see what was involved).  It currently uses 
+only the synchronous librbd interfaces, so each tgtd worker thread will 
+block for completion of each request.  See the commit comment
+for usage advice.
+
+For those with less exposure to Ceph:
+
+Ceph is a distributed storage system, and rbd provides a block-device 
+abstraction to that storage that can be used directly from the kernel or 
+from a userland library and things built on it.  That is:
+
+1) you can create rbd images in the cluster, and then expose them as
+kernel block devices to machines that talk to the cluster
+
+2) You can create rbd images in the cluster, and then expose them to 
+qemu-kvm virtual machines without kernel support (by using 
+librbd/librados to access the cluster).
+
+bs_rbd adds another access path: exposing rbd images as iSCSI targets
+with strictly-userland code.
+
+I was quite impressed at how easy this was, and how well-organized the 
+stgt source is.  Kudos to the developers and maintainers!
+
+--
+
+[1] http://ceph.com, http://ceph.com/docs
+[2] http://ceph.com/ceph-storage/block-storage/
