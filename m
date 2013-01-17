@@ -1,127 +1,78 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: ceph from poc to production
-Date: Thu, 17 Jan 2013 17:34:27 +0100
-Message-ID: <CAOLwVUnnxT=tBXOakUHy1xChxC6FS2HvYP5GEQ=dvs-NpMG=sQ@mail.gmail.com>
-References: <50F6F471.7030108@profihost.ag> <CAOLwVU=1vjeoFBa84doczbEeJ5nAasBLE2z9YAR-oUd5+wANrw@mail.gmail.com>
- <50F82705.50502@inktank.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: flashcache
+Date: Thu, 17 Jan 2013 19:39:11 +0300
+Message-ID: <CABYiri9jwpdw6d39NiSg30PYUs2mK6Gkhety4pQohwjJGMnPxQ@mail.gmail.com>
+References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
+ <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net> <50F72150.7080002@inktank.com>
+ <CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com>
+ <CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com>
+ <50F7FE9B.6050908@inktank.com> <44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov>
+ <CAJH6TXhMXfsgx607aOxpLmpq15vg44AW8NHbm_Yw8yC45CHyKA@mail.gmail.com>
+ <F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov> <CABYiri8DDSdGj90geThMRygO7jNhuDS5nK5TRxwLsv0FgKV2gw@mail.gmail.com>
+ <74BABD37-71E8-4D69-871E-93F40EBD15BC@ornl.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f41.google.com ([209.85.215.41]:34419 "EHLO
-	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757090Ab3AQQes convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:34:48 -0500
-Received: by mail-la0-f41.google.com with SMTP id em20so2894969lab.14
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 08:34:47 -0800 (PST)
-In-Reply-To: <50F82705.50502@inktank.com>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:34010 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757121Ab3AQQjc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:39:32 -0500
+Received: by mail-oa0-f42.google.com with SMTP id j1so2863540oag.1
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 08:39:32 -0800 (PST)
+In-Reply-To: <74BABD37-71E8-4D69-871E-93F40EBD15BC@ornl.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Atchley, Scott" <atchleyes@ornl.gov>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Mark Nelson <mark.nelson@inktank.com>, Joseph Glanville <joseph.glanville@orionvm.com.au>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Cool, I look forward to reading it!
---
-Regards,
-S=E9bastien Han.
+On Thu, Jan 17, 2013 at 7:47 PM, Atchley, Scott <atchleyes@ornl.gov> wrote:
+> On Jan 17, 2013, at 10:07 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>
+>> On Thu, Jan 17, 2013 at 7:00 PM, Atchley, Scott <atchleyes@ornl.gov> wrote:
+>>> On Jan 17, 2013, at 9:48 AM, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com> wrote:
+>>>
+>>>> 2013/1/17 Atchley, Scott <atchleyes@ornl.gov>:
+>>>>> IB DDR should get you close to 2 GB/s with IPoIB. I have gotten our IB QDR PCI-E Gen. 2 up to 2.8 GB/s measured via netperf with lots of tuning. Since it uses the traditional socket stack through the kernel, CPU usage will be as high (or higher if QDR) than 10GbE.
+>>>>
+>>>> Which kind of tuning? Do you have a paper about this?
+>>>
+>>> No, I followed the Mellanox tuning guide and modified their interrupt affinity scripts.
+>>
+>> Did you tried to bind interrupts only to core to which QPI link
+>> belongs in reality and measure difference with spread-over-all-cores
+>> binding?
+>
+> This is the modified part. I bound the mlx4-async handler to core 0 and the mlx4-ib-1-0 handle to core 1 for our machines.
+>
+>>>> But, actually, is possible to use ceph with IPoIB in a stable way or
+>>>> is this experimental ?
+>>>
+>>> IPoIB appears as a traditional Ethernet device to Linux and can be used as such.
+>>
+>> Not exactly, this summer kernel added additional driver for fully
+>> featured L2(ib ethernet driver), before that it was quite painful to
+>> do any possible failover using ipoib.
+>
+> I assume it is now an EoIB driver. Does it replace the IPoIB driver?
+>
+Nope, it is upper-layer thing: https://lwn.net/Articles/509448/
 
-
-On Thu, Jan 17, 2013 at 5:29 PM, Mark Nelson <mark.nelson@inktank.com> =
-wrote:
-> On 01/17/2013 10:24 AM, S=E9bastien Han wrote:
->>
->> Hi Stephan,
->>
->>> - Increase the osdmax value
->>
->>
->> Well actually this doesn't seem to be necessary because when you iss=
-ue
->> a "ceph osd create" the osdmax value is automatically incremented. I=
-t
->> just that a while ago I saw on the ML or IRC that it was a good
->> practice to do this. And this documentation
->> http://ceph.com/docs/master/rados/operations/control/ says:
->>
->> "Set the max_osd parameter in the osd map. This is necessary when
->> expanding the storage cluster."
->>
->> Maybe the doc is outdated on this option, I don't know.
->>
->>> - Set =93filestore flusher=94 option to false, in your [osd] sectio=
-n
->>
->>
->> During my benchmarks sessions I noticed that disabling this option
->> brought way better performance, at least for old hardware. Fo recent
->> hardware I haven't seen any difference, but I kept the habit to
->> disable it. There are some discussions about this option on the ML. =
-As
->> far as I can remember, it's harmless to disable it.
->>  From the doc here
->> http://ceph.com/docs/master/rados/configuration/filestore-config-ref=
-/:
->
->
-> I actually have been doing parametric sweeps over the various ceph tu=
-nables
-> to try to see what affects performance.  I'll have an article coming =
-out
-> soonish documenting some of the findings.  Typically disabling the fl=
-usher
-> seems to be beneficial on XFS and BTRFS, but it seems to be the oppos=
-ite on
-> EXT4.
->
->
->>
->> "The filestore flusher forces data from large writes to be written o=
-ut
->> using sync file range before the sync in order to (hopefully) reduce
->> the cost of the eventual sync. In practice, disabling =91filestore
->> flusher=92 seems to improve performance in some cases."
->>
->> Cheers,
->>
->> --
->> Regards,
->> S=E9bastien Han.
->>
->>
->> On Wed, Jan 16, 2013 at 7:41 PM, Stefan Priebe <s.priebe@profihost.a=
-g>
->> wrote:
+>>>> I don't know if i support for rsocket that is experimental/untested
+>>>> and IPoIB is a stable workaroud or what else.
 >>>
+>>> IPoIB is much more used and pretty stable, while rsockets is new with limited testing. That said, more people using it will help Sean improve it.
 >>>
->>> Hello Sebastien,
->>>    hello list,
+>>> Ideally, we would like support for zero-copy and reduced CPU usage (via OS-bypass) and with more interconnects than just InfiniBand. :-)
 >>>
->>> first nice article sebastien ;-) thanks for contributing.
+>>>> And is a dual controller needed on each OSD node? Ceph is able to
+>>>> handle OSD network failures? This is really important to know. It
+>>>> change the whole network topology.
 >>>
->>> I've two question regarding the tips:
+>>> I will let others answer this.
 >>>
->>> Can somebody explain me why i should do this?:
->>> - Increase the osdmax value
->>> - Set =93filestore flusher=94 option to false, in your [osd] sectio=
-n
->>>
->>> Greets,
->>> Stefan
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
+>>> Scott--
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >>> the body of a message to majordomo@vger.kernel.org
 >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
