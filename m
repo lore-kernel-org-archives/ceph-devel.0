@@ -1,49 +1,72 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: fix type of snap_id in rbd_dev_v2_snap_info()
-Date: Thu, 17 Jan 2013 09:41:36 -0800
-Message-ID: <50F837D0.1020800@inktank.com>
-References: <50F0D5B2.2090904@inktank.com>
+Subject: Re: [PATCH REPOST 4/4] rbd: add warnings to rbd_dev_probe_update_spec()
+Date: Thu, 17 Jan 2013 09:39:02 -0800
+Message-ID: <50F83736.1000006@inktank.com>
+References: <50E5D7A9.6040101@inktank.com> <50E5D816.9010104@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f41.google.com ([209.85.210.41]:41211 "EHLO
-	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753161Ab3AQRlj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 12:41:39 -0500
-Received: by mail-da0-f41.google.com with SMTP id e20so1219066dak.28
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 09:41:39 -0800 (PST)
-In-Reply-To: <50F0D5B2.2090904@inktank.com>
+Received: from mail-da0-f43.google.com ([209.85.210.43]:62088 "EHLO
+	mail-da0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755596Ab3AQRjK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 12:39:10 -0500
+Received: by mail-da0-f43.google.com with SMTP id u36so1203836dak.2
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 09:39:10 -0800 (PST)
+In-Reply-To: <50E5D816.9010104@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/11/2013 07:17 PM, Alex Elder wrote:
-> The type of the snap_id local variable is defined with the
-> wrong byte order.  Fix that.
+On 01/03/2013 11:12 AM, Alex Elder wrote:
+> Josh suggested adding warnings to this function to help users
+> diagnose problems.
 >
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
+> Other than memory allocatino errors, there are two places where
+> errors can be returned.  Both represent problems that should
+> have been caught earlier, and as such might well have been
+> handled with BUG_ON() calls.  But if either ever did manage to
+> happen, it will be reported.
 
-Oops, I missed that too.
+The pool could be deleted without us knowing after
+our first check.
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
->   drivers/block/rbd.c |    2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |    9 +++++++--
+>   1 file changed, 7 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 02002b1..47443eb 100644
+> index ce6c0cb..530a121 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2800,7 +2800,7 @@ out:
->   static char *rbd_dev_v2_snap_info(struct rbd_device *rbd_dev, u32 which,
->   		u64 *snap_size, u64 *snap_features)
->   {
-> -	__le64 snap_id;
-> +	u64 snap_id;
->   	u8 order;
->   	int ret;
+> @@ -2644,8 +2644,11 @@ static int rbd_dev_probe_update_spec(struct
+> rbd_device *rbd_dev)
+>
+>   	osdc = &rbd_dev->rbd_client->client->osdc;
+>   	name = ceph_pg_pool_name_by_id(osdc->osdmap, rbd_dev->spec->pool_id);
+> -	if (!name)
+> -		return -EIO;	/* pool id too large (>= 2^31) */
+> +	if (!name) {
+> +		rbd_warn(rbd_dev, "there is no pool with id %llu",
+> +			rbd_dev->spec->pool_id);	/* Really a BUG() */
+> +		return -EIO;
+> +	}
+>
+>   	rbd_dev->spec->pool_name = kstrdup(name, GFP_KERNEL);
+>   	if (!rbd_dev->spec->pool_name)
+> @@ -2663,6 +2666,8 @@ static int rbd_dev_probe_update_spec(struct
+> rbd_device *rbd_dev)
+>
+>   	name = rbd_snap_name(rbd_dev, rbd_dev->spec->snap_id);
+>   	if (!name) {
+> +		rbd_warn(rbd_dev, "no snapshot with id %llu",
+> +			rbd_dev->spec->snap_id);	/* Really a BUG() */
+>   		ret = -EIO;
+>   		goto out_err;
+>   	}
 >
 
