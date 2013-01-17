@@ -1,206 +1,111 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Single host VM limit when using RBD
-Date: Thu, 17 Jan 2013 11:55:17 -0700
-Message-ID: <50F84915.60104@sandia.gov>
-References: <38A500831D3DE24B90BD200D6C8701351BB3AA15@Exchange2010-2.corit.local>
- <38A500831D3DE24B90BD200D6C8701351BB3AF0F@Exchange2010-2.corit.local>
- <CABYiri94ZzEDhvvZg=AUyJcDfgBZ9s8vh+4727OQyE5K4DN1nQ@mail.gmail.com>
- <38A500831D3DE24B90BD200D6C8701351BB3AF77@Exchange2010-2.corit.local>
- <406175B4-665C-4D05-B97C-986593D1647F@inktank.com>
-Mime-Version: 1.0
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: ceph from poc to production
+Date: Thu, 17 Jan 2013 19:58:54 +0100
+Message-ID: <204CEFAF-7388-48AA-9E5C-48D09D6A777A@profihost.ag>
+References: <50F6F471.7030108@profihost.ag> <CAOLwVU=1vjeoFBa84doczbEeJ5nAasBLE2z9YAR-oUd5+wANrw@mail.gmail.com> <50F82705.50502@inktank.com>
+Mime-Version: 1.0 (1.0)
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:37948 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755763Ab3AQSzr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 13:55:47 -0500
-In-Reply-To: <406175B4-665C-4D05-B97C-986593D1647F@inktank.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:48339 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753176Ab3AQS66 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 13:58:58 -0500
+In-Reply-To: <50F82705.50502@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: Matthew Anderson <matthewa@base3.com.au>, Andrey Korolyov <andrey@xdel.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: =?utf-8?Q?S=C3=A9bastien_Han?= <han.sebastien@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/17/2013 11:36 AM, Dan Mick wrote:
-> How about RLIMIT_NPROC, or memory exhaustion?
+Great! Any ETA?
 
-Also, check /proc/sys/kernel/pid_max.
+Am 17.01.2013 um 17:29 schrieb Mark Nelson <mark.nelson@inktank.com>:
 
-I've solved a similar pthread_create problem by increasing this
-to 256k, up from 32k.
-
--- Jim
-
+> On 01/17/2013 10:24 AM, S=C3=A9bastien Han wrote:
+>> Hi Stephan,
+>>=20
+>>> - Increase the osdmax value
+>>=20
+>> Well actually this doesn't seem to be necessary because when you iss=
+ue
+>> a "ceph osd create" the osdmax value is automatically incremented. I=
+t
+>> just that a while ago I saw on the ML or IRC that it was a good
+>> practice to do this. And this documentation
+>> http://ceph.com/docs/master/rados/operations/control/ says:
+>>=20
+>> "Set the max_osd parameter in the osd map. This is necessary when
+>> expanding the storage cluster."
+>>=20
+>> Maybe the doc is outdated on this option, I don't know.
+>>=20
+>>> - Set =E2=80=9Cfilestore flusher=E2=80=9D option to false, in your =
+[osd] section
+>>=20
+>> During my benchmarks sessions I noticed that disabling this option
+>> brought way better performance, at least for old hardware. Fo recent
+>> hardware I haven't seen any difference, but I kept the habit to
+>> disable it. There are some discussions about this option on the ML. =
+As
+>> far as I can remember, it's harmless to disable it.
+>> From the doc here
+>> http://ceph.com/docs/master/rados/configuration/filestore-config-ref=
+/:
 >=20
-> On Jan 17, 2013, at 12:47 AM, Matthew Anderson <matthewa@base3.com.au=
-> wrote:
+> I actually have been doing parametric sweeps over the various ceph tu=
+nables to try to see what affects performance.  I'll have an article co=
+ming out soonish documenting some of the findings.  Typically disabling=
+ the flusher seems to be beneficial on XFS and BTRFS, but it seems to b=
+e the opposite on EXT4.
 >=20
->> Hi Audrey,
->>
->> I did try your suggestion beforehand and it doesn't appear to fix th=
-e issue.=20
->>
->> [root@KVM04 ~]# cat  /proc/sys/kernel/threads-max=20
->> 2549635
->> [root@KVM04 ~]# echo 5549635 > /proc/sys/kernel/threads-max
->> [root@KVM04 ~]# virsh start EX03
->> error: Failed to start domain EX03
->> error: internal error Process exited while reading console log outpu=
-t: char device redirected to /dev/pts/23
->> Thread::try_create(): pthread_create failed with error 11common/Thre=
-ad.cc: In function 'void Thread::create(size_t)' thread 7f5ec9706960 ti=
-me 2013-01-17 16:46:50.935681
->> common/Thread.cc: 110: FAILED assert(ret =3D=3D 0)
->> ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->> 1: (()+0x2aaa8f) [0x7f5ec6a89a8f]
->> 2: (SafeTimer::init()+0x95) [0x7f5ec6973575]
->> 3: (librados::RadosClient::connect()+0x72c) [0x7f5ec69099dc]
->> 4: (()+0xa0290) [0x7f5ec97c8290]
->> 5: (()+0x879dd) [0x7f5ec97af9dd]
->> 6: (()+0x87c1b) [0x7f5ec97afc1b]
->> 7: (()+0x87ae1) [0x7f5ec97afae1]
->> 8: (()+0x87d50) [0x7f5ec97afd50]
->> 9: (()+0xb37b2) [0x7f5ec97db7b2]
->> 10: (()+0x1e83eb) [0x7f5ec99103eb]
->> 11: (()+0x1ab54a) [0x7f5ec98d354a]
->> 12: (main()+0x9da) [0x7f5ec9913a3a]
->> 13: (__libc_start_main()+0xfd) [0x7f5ec5755cdd]
->> 14: (()+0x710b9) [0x7f5ec97990b9]
->> NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to interpret this.
->> terminate called after
->>    =20
->>
->>
->> -----Original Message-----
->> From: Andrey Korolyov [mailto:andrey@xdel.ru]=20
->> Sent: Thursday, 17 January 2013 4:42 PM
->> To: Matthew Anderson
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: Single host VM limit when using RBD
->>
->> Hi Matthew,
->>
->> Seems to a low value in /proc/sys/kernel/threads-max value.
->>
->> On Thu, Jan 17, 2013 at 12:37 PM, Matthew Anderson <matthewa@base3.c=
-om.au> wrote:
->>> I've run into a limit on the maximum number of RBD backed VM's that=
- I'm able to run on a single host. I have 20 VM's (21 RBD volumes open)=
- running on a single host and when booting the 21st machine I get the b=
-elow error from libvirt/QEMU. I'm able to shut down a VM and start anot=
-her in it's place so there seems to be a hard limit on the amount of vo=
-lumes I'm able to have open.  I did some googling and the error 11 from=
- pthread_create seems to mean 'resource unavailable' so I'm probably ru=
-nning into a thread limit of some sort. I did try increasing the max_th=
-read kernel option but nothing changed. I moved a few VM's to a differe=
-nt empty host and they start with no issues at all.
->>>
->>> This machine has 4 OSD's running on it in addition to the 20 VM's. =
-Kernel 3.7.1. Ceph 0.56.1 and QEMU 1.3.0. There is currently 65GB of 96=
-GB free ram and no swap.
->>>
->>> Can anyone suggest where the limit might be or anything I can do to=
- narrow down the problem?
->>>
->>> Thanks
->>> -Matt
->>> -------------------------
->>>
->>> Error starting domain: internal error Process exited while reading=20
->>> console log output: char device redirected to /dev/pts/23
->>> Thread::try_create(): pthread_create failed with error=20
->>> 11common/Thread.cc: In function 'void Thread::create(size_t)' threa=
-d=20
->>> 7f4eb5a65960 time 2013-01-17 02:32:58.096437
->>> common/Thread.cc: 110: FAILED assert(ret =3D=3D 0) ceph version 0.5=
-6.1=20
->>> (e4a541624df62ef353e754391cbbb707f54b16f7)
->>> 1: (()+0x2aaa8f) [0x7f4eb2de8a8f]
->>> 2: (SafeTimer::init()+0x95) [0x7f4eb2cd2575]
->>> 3: (librados::RadosClient::connect()+0x72c) [0x7f4eb2c689dc]
->>> 4: (()+0xa0290) [0x7f4eb5b27290]
->>> 5: (()+0x879dd) [0x7f4eb5b0e9dd]
->>> 6: (()+0x87c1b) [0x7f4eb5b0ec1b]
->>> 7: (()+0x87ae1) [0x7f4eb5b0eae1]
->>> 8: (()+0x87d50) [0x7f4eb5b0ed50]
->>> 9: (()+0xb37b2) [0x7f4eb5b3a7b2]
->>> 10: (()+0x1e83eb) [0x7f4eb5c6f3eb]
->>> 11: (()+0x1ab54a) [0x7f4eb5c3254a]
->>> 12: (main()+0x9da) [0x7f4eb5c72a3a]
->>> 13: (__libc_start_main()+0xfd) [0x7f4eb1ab4cdd]
->>> 14: (()+0x710b9) [0x7f4eb5af80b9]
->>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
-eeded to interpret this.
->>> terminate called after
->>>
->>> Traceback (most recent call last):
->>>  File "/usr/share/virt-manager/virtManager/asyncjob.py", line 96, i=
-n cb_wrapper
->>>    callback(asyncjob, *args, **kwargs)
->>>  File "/usr/share/virt-manager/virtManager/asyncjob.py", line 117, =
-in tmpcb
->>>    callback(*args, **kwargs)
->>>  File "/usr/share/virt-manager/virtManager/domain.py", line 1090, i=
-n startup
->>>    self._backend.create()
->>>  File "/usr/lib/python2.7/dist-packages/libvirt.py", line 620, in c=
-reate
->>>    if ret =3D=3D -1: raise libvirtError ('virDomainCreate() failed'=
-,=20
->>> dom=3Dself)
->>> libvirtError: internal error Process exited while reading console l=
-og=20
->>> output: char device redirected to /dev/pts/23
->>> Thread::try_create(): pthread_create failed with error=20
->>> 11common/Thread.cc: In function 'void Thread::create(size_t)' threa=
-d=20
->>> 7f4eb5a65960 time 2013-01-17 02:32:58.096437
->>> common/Thread.cc: 110: FAILED assert(ret =3D=3D 0) ceph version 0.5=
-6.1=20
->>> (e4a541624df62ef353e754391cbbb707f54b16f7)
->>> 1: (()+0x2aaa8f) [0x7f4eb2de8a8f]
->>> 2: (SafeTimer::init()+0x95) [0x7f4eb2cd2575]
->>> 3: (librados::RadosClient::connect()+0x72c) [0x7f4eb2c689dc]
->>> 4: (()+0xa0290) [0x7f4eb5b27290]
->>> 5: (()+0x879dd) [0x7f4eb5b0e9dd]
->>> 6: (()+0x87c1b) [0x7f4eb5b0ec1b]
->>> 7: (()+0x87ae1) [0x7f4eb5b0eae1]
->>> 8: (()+0x87d50) [0x7f4eb5b0ed50]
->>> 9: (()+0xb37b2) [0x7f4eb5b3a7b2]
->>> 10: (()+0x1e83eb) [0x7f4eb5c6f3eb]
->>> 11: (()+0x1ab54a) [0x7f4eb5c3254a]
->>> 12: (main()+0x9da) [0x7f4eb5c72a3a]
->>> 13: (__libc_start_main()+0xfd) [0x7f4eb1ab4cdd]
->>> 14: (()+0x710b9) [0x7f4eb5af80b9]
->>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
-eeded to interpret this.
->>> terminate called after
->>>
+>>=20
+>> "The filestore flusher forces data from large writes to be written o=
+ut
+>> using sync file range before the sync in order to (hopefully) reduce
+>> the cost of the eventual sync. In practice, disabling =E2=80=98files=
+tore
+>> flusher=E2=80=99 seems to improve performance in some cases."
+>>=20
+>> Cheers,
+>>=20
+>> --
+>> Regards,
+>> S=C3=A9bastien Han.
+>>=20
+>>=20
+>> On Wed, Jan 16, 2013 at 7:41 PM, Stefan Priebe <s.priebe@profihost.a=
+g> wrote:
+>>>=20
+>>> Hello Sebastien,
+>>>   hello list,
+>>>=20
+>>> first nice article sebastien ;-) thanks for contributing.
+>>>=20
+>>> I've two question regarding the tips:
+>>>=20
+>>> Can somebody explain me why i should do this?:
+>>> - Increase the osdmax value
+>>> - Set =E2=80=9Cfilestore flusher=E2=80=9D option to false, in your =
+[osd] section
+>>>=20
+>>> Greets,
+>>> Stefan
 >>> --
 >>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"=20
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o=20
->>> info at  http://vger.kernel.org/majordomo-info.html
->> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=EF=BF=BDf=EF=BF=BD=
-=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=1E=EF=BF=BDw=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=EF=BF=
-=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=07=
-=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=
-=BD=EF=BF=BD!=EF=BF=BDi
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-
-
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
