@@ -1,108 +1,68 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
-Subject: Hit suicide timeout after adding new osd
-Date: Thu, 17 Jan 2013 15:35:38 +0100
-Message-ID: <50F80C3A.9020007@mermaidconsulting.dk>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: flashcache
+Date: Thu, 17 Jan 2013 09:30:26 -0500
+Message-ID: <44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov>
+References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
+ <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
+ <50F72150.7080002@inktank.com>
+ <CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com>
+ <CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com>
+ <50F7FE9B.6050908@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx02.stofanet.dk ([212.10.10.12]:35371 "EHLO mx02.stofanet.dk"
+Received: from mta01.ornl.gov ([128.219.177.14]:58866 "EHLO mta01.ornl.gov"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756586Ab3AQOfl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Jan 2013 09:35:41 -0500
+	id S1753867Ab3AQOkH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 09:40:07 -0500
+In-Reply-To: <50F7FE9B.6050908@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Joseph Glanville <joseph.glanville@orionvm.com.au>, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi guys,
+On Jan 17, 2013, at 8:37 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
 
-I had a functioning Ceph system that reported HEALTH_OK. It was running=
-=20
-with 3 osds on 3 servers.
+> On 01/17/2013 07:32 AM, Joseph Glanville wrote:
+>> On 17 January 2013 20:46, Gandalf Corvotempesta
+>> <gandalf.corvotempesta@gmail.com>  wrote:
+>>> 2013/1/16 Mark Nelson<mark.nelson@inktank.com>:
+>> 
+>>> I don't know if I have to use a single two port IB card (switch
+>>> redundancy and no card redundancy) or
+>>> I have to use two single port cards. (or a single one port IB?)
+>> 
+>> On the topic of IB..
+>> 
+>> But slightly off-topic all the same..  I would love to attempt getting
+>> Ceph running on rsockets if I could find the time (alas we don't run
+>> Ceph).
+>> rsockets is a fully userland implementation of BSD sockets over RDMA,
+>> supporting fork and all the usual goodies, in theory unless you are
+>> using the kernel RBD module (of the kernel FS module etc) you should
+>> be able to run it on rsockets and enjoy a considerable performance
+>> increase.
+>> 
+>> rsockets is available in the librdmacm git up on Open Fabrics and dev
+>> + support happens on the linux-rdma list.
+>> 
+> 
+> There's been some talk about rsockets on the list before.  I think there 
+> are a couple of different folks that have tried (succeeded?) in getting 
+> it working.  barring that, it sounds like if you tune interrupt affinity 
+> settings and various other bits you can get IPoIB up into the 2GB/s+ 
+> range which while not RDMA speed, is at least better than 10GbE.
 
-Then I added an extra osd on 1 of the servers using the commands from=20
-the documentation here:
+IB DDR should get you close to 2 GB/s with IPoIB. I have gotten our IB QDR PCI-E Gen. 2 up to 2.8 GB/s measured via netperf with lots of tuning. Since it uses the traditional socket stack through the kernel, CPU usage will be as high (or higher if QDR) than 10GbE.
 
-http://ceph.com/docs/master/rados/operations/add-or-rm-osds/
+I would be interested in seeing if rsockets helps ceph. I have questions though.
 
-Shortly after I did that 2 of the existing osds crashed.
+By default, rsockets still has to copy data in and out. It has extensions for zero-copy, but they do not work with non-blocking sockets. Does ceph use non-blocking sockets?
 
-I restarted them and after some hours they were up and running again,=20
-but soon one of them crashed again - and a third existing osd crashed a=
-s=20
-well. I restarted those two and waited some hours for them to come up. =
-A=20
-short while later one of them crashed again.
+How many simultaneous connections does it support before falling over into the non-rsockets path?
 
-I have then restarted restarted that last one and watched the logs=20
-closely. It seems the same patterns repeats itself every time. It start=
-s=20
-up doing its normal maintenance before going "up" (takes a long while).=
-=20
-Then it seems to be running, but logs the following every 5 seconds:
+If rsockets has a ceiling on connections and falls over to the non-socket path, can the application determine if it is safe to use the zero-copy extensions for a specific connection or do they fail gracefully?
 
-heartbeat_map is_healthy 'OSD::op_tp thread 0x7f051b7f6700' had timed=20
-out after 30
-
-After some time it logs:
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
-heartbeat_map is_healthy 'OSD::op_tp thread 0x7f051b7f6700' had suicide=
-=20
-timed out after 300
-
-2013-01-17 15:24:35.051524 7f053f149700 -1 common/HeartbeatMap.cc: In=20
-function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*,=20
-const char*, time_t)' thread 7f053f149700 time 2013-01-17 15:24:33.8496=
-54
-common/HeartbeatMap.cc: 78: FAILED assert(0 =3D=3D "hit suicide timeout=
-")
-
-  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
-  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*=
-,=20
-long)+0x2eb) [0x8462bb]
-  2: (ceph::HeartbeatMap::is_healthy()+0x8e) [0x846a9e]
-  3: (ceph::HeartbeatMap::check_touch_file()+0x28) [0x846cc8]
-  4: (CephContextServiceThread::entry()+0x55) [0x8e01c5]
-  5: /lib64/libpthread.so.0() [0x360de07d14]
-  6: (clone()+0x6d) [0x360d6f167d]
-  NOTE: a copy of the executable, or `objdump -rdS <executable>` is=20
-needed to interpret this.
-
-2013-01-17 15:24:35.301183 7f053f149700 -1 *** Caught signal (Aborted) =
-**
-  in thread 7f053f149700
-
-  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
-  1: /usr/bin/ceph-osd() [0x82ea90]
-  2: /lib64/libpthread.so.0() [0x360de0efe0]
-  3: (gsignal()+0x35) [0x360d635925]
-  4: (abort()+0x148) [0x360d6370d8]
-  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x3611660dad]
-  NOTE: a copy of the executable, or `objdump -rdS <executable>` is=20
-needed to interpret this.
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
-
-How can I avoid this? - is it a bug, or have I done something wrong?
-
-I'm running Ceph 0.56.1 from the official RPMs on Fedora 17.
-The underlying disks and network connectivity has been tested and=20
-nothing seems to be wrong there.
-
-Thanks in advance for your assistance!
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Scott
