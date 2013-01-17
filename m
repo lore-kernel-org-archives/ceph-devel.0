@@ -1,338 +1,220 @@
-From: Sam Lang <sam.lang@inktank.com>
-Subject: Re: mds: first stab at lookup-by-ino problem/soln description
-Date: Thu, 17 Jan 2013 10:41:49 -0600
-Message-ID: <CAKMAVE_-zJY8RH4VD8zR=BfRMHtTt1W3O++3TuQiEuAY14NLQw@mail.gmail.com>
-References: <alpine.DEB.2.00.1301142231260.12153@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: RE: Ceph slow request & unstable issue
+Date: Thu, 17 Jan 2013 08:57:09 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301170855260.1415@cobra.newdream.net>
+References: <6F3FA899187F0043BA1827A69DA2F7CC5DCC63@SHSMSX102.ccr.corp.intel.com> <CABYiri_50ijzfm1y-ryNULXq8DDNUWghrBaQBfzBkspzjpZx1A@mail.gmail.com> <alpine.DEB.2.00.1301160854170.15921@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC5DF17D@SHSMSX102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1301161816060.23687@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC5DF1C2@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1301161834230.23687@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC5E091B@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f50.google.com ([209.85.219.50]:49621 "EHLO
-	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755257Ab3AQQlu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:41:50 -0500
-Received: by mail-oa0-f50.google.com with SMTP id n16so2862781oag.9
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jan 2013 08:41:49 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301142231260.12153@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:33175 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754527Ab3AQQ5K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jan 2013 11:57:10 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5E091B@SHSMSX102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 15, 2013 at 5:35 PM, Sage Weil <sage@inktank.com> wrote:
-> One of the first things we need to fix in the MDS is how we support
-> lookup-by-ino.  It's important for fsck, NFS reexport, and (insofar as
-> there are limitations to the current anchor table design) hard links and
-> snapshots.
->
-> Below is a description of the problem and a rough sketch of my proposed
-> solution.  This is the first time I thought about the lookup algorithm in
-> any detail, so I've probably missed something, and the 'ghost entries' bit
-> is what came to mind on the plane.  Hopefully we can think of something a
-> bit lighter weight.
->
-> Anyway, poke holes if anything isn't clear, if you have any better ideas,
-> or if it's time to refine further.  This is just a starting point for the
-> conversation.
->
->
-> The problem
-> -----------
->
-> The MDS stores all fs metadata (files, inodes) in a hierarchy,
-> allowing it to distribute responsibility among ceph-mds daemons by
-> partitioning the namespace hierarchically.  This is also a huge win
-> for inode prefetching: loading the directory gets you both the names
-> and the inodes in a single IO.
->
-> One consequence of this is that we do not have a flat "inode table"
-> that let's us look up files by inode number.  We *can* find
-> directories by ino simply because they are stored in an object named
-> after the ino.  However, we can't populate the cache this way because
-> the metadata in cache must be fully attached to the root to avoid
-> various forms of MDS anarchy.
->
-> Lookup-by-ino is currently needed for hard links.  The first link to a
-> file is deemed the "primary" link, and that is where the inode is
-> stored.  Any additional links are internally "remote" links, and
-> reference the inode by ino.  However, there are other uses for
-> lookup-by-ino, including NFS reexport and fsck.
->
-> Anchor table
-> ------------
->
-> The anchor table is currently used to locate inodes that have hard
-> links.  Inodes in the anchor table are said to be "anchored," and can
-> be found by ino alone with no knowledge of their path.  Normally, only
-> inodes that have hard links need to be anchored.  There are a few
-> other cases, but they are not relevant here.
->
-> The anchor table is a flat table of records like:
->
->  ino -> (parent ino, hash(name), refcount)
->
-> All parent ino's referenced in the table also have records.  The
-> refcount includes both other records listing a given ino as parent and
-> the anchor itself (i.e., the inode).  To anchor an inode, we insert
-> records for the ino and all ancestors (if they are not already present).
->
-> An anchor removal means decrementing the ino record.  Once a refcount
-> hits 0 it can be removed, and the parent ino's refcount can be
-> decremented.
->
-> A directory rename involves changing the parent ino value for an
-> existing record, populating the new ancestors into the table (as
-> needed), and decrementing the old parent's refcount.
->
-> This all works great if there are a small number of anchors, but does
-> not scale.  The entire table is managed by a single MDS, and is
-> currently kept in memory.  We do not want to anchor every inode in the
-> system or this is impractical.
->
-> But, be want lookup-by-ino for NFS reexport, and something
-> similar/related for fsck.
->
->
-> Current lookup by ino procedure
-> -------------------------------
->
-> ::
->
->  lookup_ino(ino)
->    send message mds.N -> mds.0
->      "anchor lookup $ino"
->    get reply message mds.0 -> mds.N
->      reply contains record for $ino and all ancestors (an "anchor trace")
->    parent = depest ancestor in trace that we have in our cache
->    while parent != ino
->      child = parent.lookup(hash(name))
->      if not found
->        restart from the top
->      parent = child
->
->
-> Directory backpointers
-> ----------------------
->
-> There is partial infrastructure for supporting fsck that is already maintained
-> for directories.  Each directory object (the first object for the directory,
-> if there are multiple fragments) has an attr that provides a snapshot of ancestors
-> called a "backtrace".::
->
->  struct inode_backtrace_t {
->    inodeno_t ino;       // my ino
->    vector<inode_backpointer_t> ancestors;
->  }
->
->  struct inode_backpointer_t {
->    inodeno_t dirino;    // containing directory ino
->    string dname;        // linking dentry name
->    version_t version;   // child's version at time of backpointer creation
->  };
->
-> The backpointer version field is there to establish *when* this
-> particular pointer was valid.  For a large directory /a/b/c, every
-> item in c would have an attr that describes the ancestors /a/b/c.  If
-> c were renamed to /c, we only update c's backtrace and not it's
-> children, so any future observer needs to be able to tell that the /c
-> forward pointer is newer than the backtrace's backpointer.
->
-> We already maintain backtraces for all directories in the system for
-> use by a future fsck tool.  They are updated asynchronously after
-> directory renames.
->
->
-> Proposal: file backtraces
-> -------------------------
->
-> Extend the current backtrace infrastructure to include files as well
-> as directories.  Attach the backtrace to the first object for the file
-> (normally named something like $ino.00000000000).
->
-> Initially have the MDS set that attr sometime after the file is
-> created but before it drops out of the journal.  On rename, the MDS
-> would similarly adjust the attr before the rename operation is trimmed
-> from the journal.  The lets us wait a while before setting the op to
-> the OSD object, combining the cumulative effects of any sequence of
-> renames over a reasonable period of time into a single update.  This
-> should work well given typical workloads (many updates, then file goes
-> idle).
->
-> Later, optimize so that the initial attr is set by the client on first
-> write, avoiding an extra MDS -> OSD message (unless, say, the client
-> doesn't write to that first block).
->
->
-> Proposal: use backtraces for lookup by ino
-> ------------------------------------------
->
-> Use a process similar to current anchor lookups: get the backtrace
-> from the file object, and then use that information to traverse
-> forward through the hierarchy to find the given inode.  The process is
-> more "racy" than the anchor table approach, however: the anchor table
-> reply always has an up-to-date snapshot of the ancestors.  The
-> backtrace, however, is an ancestor trace that may be out of date.
->
-> The lookup algorithm, in procedural pseudocode::
->
->  lookup_ino(ino) {
->    get backtrace for ino's first data object
->    parent = deepest nested ancestor in our cache
->    while parent != ino,
->      child = child of parent (in backtrace)
->      if parent auth is not us,
->        forward lookup request to auth mds
->      attempt a forward lookup from parent -> child
->        this may involve fetching directory content into the cache, etc.
->      if not found,
->        lookup_ino(child)
->      parent = child
->    end
->  }
->
-> Each MDS will have the root inode open, so this will always have
-> somewhere to start.
->
-> Note that forwarding the request to the auth MDS means both that the
-> auth can actually *do* the lookup (by loading any missing directory
-> content) and also moving the request to the MDS that is most likely
-> to have the child in its cache (because it owns that part of the
-> hierarchy).
->
-> If an item was renamed sometime after our backtrace was generated, the
-> lookup step will fail.  If the rename was recent, we will have the
-> nested child still in our cache (as a consequence of processing the
-> rename operaton itself).  If it was a rename from a long time ago, the
-> recursive lookup_ino(child) will find the new backtrace and all will
-> be well.
->
-> However: if the rename was in the middle (after the local MDS trimmed
-> the removal of the old dentry, but before the new MDS updated the
-> backtrace) we have a problem.  The old parent needs to maintain enough
-> information to be able to send a forward lookup on to the new child's
-> auth MDS until we know the child's backtrace has been updated.
-> However, we cannot easily pin the child in the old MDS's memory
-> because the MDS may restart and it would complicate rejoin to ensure
-> that that replica is restored.  It also is probably not a good idea to
-> make the backtrace update a synchronous part of the already-expensive
-> two-phase commit that is required for committing the rename itself.
->
-> My best idea so far is to have a sort of "ghost reference" indicating
-> that a recent rename of ino X in this dir sent it to new parent Y.  In
-> the general case, there was no crash, and X is actually in our cache,
-> and we consequently know exacty who Y is.  If for some reason we
-> don't, we can do a lookup_ino(Y) to continue.  The "ghost refernces"
-> would be persistently recorded with the dir, pinned by any child who
-> has not yet updated its backtrace.  Once the backtrace is updated, a
-> message would be sent to remove the ghost entry.
+On Thu, 17 Jan 2013, Chen, Xiaoxi wrote:
+> Some update& summary for tested case till now:
+> Ceph is v0.56.1
+> 
+> 1.	RBD:Ubuntu 13.04 + 3.7Kernel 
+> 	OSD:Ubuntu 13.04 + 3.7Kernel
+> 	XFS
+> 
+> 	Result: Kernel Panic on both RBD and OSD sides
 
-I'm concerned about the lazy update of backtraces.  If we want to do
-an online fsck, we will have to somehow ensure that the backtrace was
-written out otherwise we'll get spurious orphaned files being
-reported.  Even if we only ever want offline fsck, we will have to
-ensure that the MDS will have flushed out all the pending backtraces
-before exiting.  For consistency purposes, an async update of the
-backtrace seems problematic.
+We're very interested in the RBD client-side kernel panic!  I don't think 
+there are known issues with 3.7.
 
-I think we can still ensure consistency if we:
+> 2.	RBD:Ubuntu 13.04 +3.2Kernel
+> 	OSD:Ubuntu 13.04 +3.2Kernel
+> 	XFS
+> 	
+> 	Result:Kernel Panic on RBD( ~15Minus)
 
-1) Set the backtrace on first write, as empty files have nothing to
-recover.  This still gives us good performance on create.
-2) Always update the backtrace synchronously on rename.  This will
-affect rename performance, but it avoids the races that occur and
-simplifies that logic significantly.  I think we should optimize the
-create performance, but let renames take a hit in favor of
-consistency.
+This less so; we've only backported fixes as far as 3.4.
 
--sam
+> 3.	RBD:Ubuntu 13.04 + 3.6.7 Kernel (Suggested by Ceph.com)
+> 	OSD:Ubuntu 13.04 + 3.2	 Kernel 
+> 	XFS
+> 
+> 	Result: Auto-reset on OSD ( ~ 30 mins after the test started)
+> 
+> 4.	RBD:Ubuntu 13.04+3.6.7 Kernel (Suggested by Ceph.com)
+> 	OSD:Ubuntu 12.04 + 3.2.0-36 Kernel (Suggested by Ceph.com)
+> 	XFS
+> 	
+> 	Result:auto-reset on OSD ( ~ 30 mins after the test started)
 
->
->
-> Optimization: bump temperature for forward lookups
-> --------------------------------------------------
->
-> Consider /a/b/c, with a million files in it, each with a backtrace
-> attr.  c is renamed to /c, and then we do a random lookup by ino on
-> the files in c.
->
-> On a small cluster, the first such lookup will traverse /a and then b,
-> find that c is not present, and recursively look up c by ino to find
-> the inode in its new home (/c).  Subsequent lookups for files inside c
-> will then find the immediate parent c in cache and have only a single
-> forward lookup to do.
->
-> On a large cluster, the request will usually hit an MDS that is not
-> auth for c and will not have it in cache.  This will again incur the
-> expensive forward lookup that fails and has to recursively find c by
-> ino.
->
-> Once we eventually *do* find c, we can make the forward lookups
-> increase the temperature for c (perhaps more than we normally would
-> for lookups) such that c is replicated to other MDS caches.  Once this
-> happens, subsequent backtraces will immediately identify the correct
-> parent and forward to requests to the c auth without the expensive
-> traversal and recursion.
->
-> Specifically, we want to (significantly) bump temperature for forward
-> lookups that happen after we had to recursively lookup by ino, since
-> that is the part of the process we want to avoid in future requests.
-> (We may need to do some minor tweaking to the opportunistic
-> replication of hot metadata to do this.)
->
->
-> Ghost entries
-> -------------
->
-> Each directory can have 0 or more "ghost entries" that look something
-> like::
->
->   (hash(old name), ino)
->
-> The entry is a persistent part of the dirfrag, recorded either in the
-> journal or in the dirfrag object.  Each entry is "owned" by the ino it
-> references.
->
-> Each inode thus has a list of ghost records it owns::
->
->   (parent ino, hash(old name))
->
-> These are similarly part of the inode_t, recorded in the journal or
-> with the inode in its current parent dirfrag.
->
-> When a rename commits, these records are added to the old parent and
-> do the renamed item's inode.
->
-> After the inode's new backtrace is written and the DIRTYPARENT flag is
-> cleared, we are at liberty to remove these records.  If the old parent
-> and the inode are on the same MDS, this can be done in a single
-> EUpdate.
->
-> If the old parent and the new inode are on different nodes, we need a
-> multiphase process:
->
-> 1. update the inode, moving the ghost record to a 'pending_removal' list.
-> 2. send a request to the directory mds to remove the ghost record.
-> 3. update the inode to remove the pending_removal item.
->
-> If there is an intervening failure, we will discover on replay that
-> the inode has something on the pending_removal list and will restart
-> the process to remove the dirfrag record.
->
->
-> Misc notes
-> ----------
->
-> There is a DIRTYPARENT flag that is used to record that the inode
-> backtrace needs to be updated.  This is not persistent: if we restart
-> the MDS and replay the journal (and the rename operation), we don't
-> re-flag it as DIRTYPARENT and the backtrace update is lost.  The fix
-> should work similarly to how the existing LogSegment list items behave
-> (and how the "ghost entries" described above would behave).
->
-> If all goes well, we can eventually drop the anchor table and use this
-> instead.  That is probably tricky for existing file systems; handling
-> those seamlessly may or may not be worth the effort.
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+These the the weird exit_mm traces shown below?
+
+> 5.	RBD:Ubuntu 13.04+3.6.7 Kernel (Suggested by Ceph.com)
+> 	OSD:Ubuntu 13.04 +3.6.7 (Suggested by Sage)
+> 	XFS
+> 
+> 	Result: seems stable for last 1 hour, still running till now
+
+Eager to hear how this goes.
+
+Thanks!
+sage
+
+
+> 
+> 
+> Test 3&4 are repeatable.
+> My test setup 
+> OSD side:
+>   3 nodes, 60 Disks(20 per nodes,1 per OSD),10Gb E, 4 *Intel 520 SSD per node as journal,XFS
+>   For each node,2 * Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GH + 128GB RAM were used.
+> RBD side:
+>   8 nodes,for each node:10Gb E,2 * Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GH , 128GB RAM
+> 
+> Method:
+> 	Create 240 RBD and mounted to 8 nodes ( 30 RBD per nodes), doing DD concurrently on all 240 RBDs.
+> 
+> 	After ~ 30 minutes, it's likely to have one of the OSD node reset.
+> 
+> Ceph OSD logs, syslog and dmesg from reseted node are available if you needed.(It looks to me that no valuable information except a lot of slow-request in OSD's log)
+> 
+> 
+> 																			Xiaoxi
+> 
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@inktank.com] 
+> Sent: 2013?1?17? 10:35
+> To: Chen, Xiaoxi
+> Subject: RE: Ceph slow request & unstable issue
+> 
+> On Thu, 17 Jan 2013, Chen, Xiaoxi wrote:
+> > No, on the OSD node, not the same node. OSD node with 3.2 kernel while 
+> > client node with 3.6 kernel
+> > 
+> > We did suffer kernel panic on rbd client nodes but after upgrade 
+> > client kernel to 3.6.6 it seems solved .
+> 
+> Is it easy to try the 3.6 kernel on the osd nodes too?
+> 
+> 
+> > 
+> > 
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@inktank.com]
+> > Sent: 2013?1?17? 10:17
+> > To: Chen, Xiaoxi
+> > Subject: RE: Ceph slow request & unstable issue
+> > 
+> > On Thu, 17 Jan 2013, Chen, Xiaoxi wrote:
+> > > It is easily to reproduce in my setup...
+> > > Once I have enough high load on it and waiting for tens of minutes? I can see such log.
+> > > As a forecast, "slow requests" more than 30~60s  are frequently present in ceph osd's log.
+> > 
+> > Just replied to your other email.  Do I understand correctly that you are seeing this problem on the *rbd client* nodes?  Or also on the OSDs?  Are they the same nodes?
+> > 
+> > sage
+> > 
+> > > 
+> > > -----Original Message-----
+> > > From: Sage Weil [mailto:sage@inktank.com]
+> > > Sent: 2013?1?17? 0:59
+> > > To: Andrey Korolyov
+> > > Cc: Chen, Xiaoxi; ceph-devel@vger.kernel.org
+> > > Subject: Re: Ceph slow request & unstable issue
+> > > 
+> > > Hi,
+> > > 
+> > > On Wed, 16 Jan 2013, Andrey Korolyov wrote:
+> > > > On Wed, Jan 16, 2013 at 4:58 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
+> > > > > Hi list,
+> > > > >         We are suffering from OSD or OS down when there is continuing high pressure on the Ceph rack.
+> > > > >         Basically we are on Ubuntu 12.04+ Ceph 0.56.1, 6 nodes, in each nodes with 20 * spindles + 4* SSDs as journal.(120 spindles in total)
+> > > > >         We create a lots of RBD volumes (say 240),mounting to 16 different client machines ( 15 RBD Volumes/ client) and running DD concurrently on top of each RBD.
+> > > > >
+> > > > >         The issues are:
+> > > > > 1. Slow requests
+> > > > > ??From the list-archive it seems solved in 0.56.1 but we still 
+> > > > > notice such warning 2. OSD Down or even host down Like the 
+> > > > > message below.Seems some OSD has been blocking there for quite a long time.
+> > > > >
+> > > > >         Suggestions are highly appreciate.Thanks
+> > > > >                                                                                                                                                                         
+> > > > > Xiaoxi
+> > > > >
+> > > > > _____________________________________________
+> > > > >
+> > > > > Bad news:
+> > > > >
+> > > > > I have  back all my Ceph machine?s OS to kernel  3.2.0-23, which Ubuntu 12.04 use.
+> > > > > I run dd command (dd if=/dev/zero bs=1M count=60000 of=/dev/rbd${i} & )on Ceph client to create data prepare test at last night.
+> > > > > Now, I have one machine down (can?t be reached by ping), another two machine has all OSD daemon down, while the three left has some daemon down.
+> > > > >
+> > > > > I have many warnings in OSD log like this:
+> > > > >
+> > > > > no flag points reached
+> > > > > 2013-01-15 19:14:22.769898 7f20a2d57700  0 log [WRN] : slow 
+> > > > > request
+> > > > > 52.218106 seconds old, received at 2013-01-15 19:13:30.551718: 
+> > > > > osd_op(client.10674.1:1002417 rb.0.27a8.6b8b4567.000000000eba 
+> > > > > [write 3145728~524288] 2.c61810ee RETRY) currently waiting for 
+> > > > > sub ops
+> > > > > 2013-01-15 19:14:23.770077 7f20a2d57700  0 log [WRN] : 21 slow 
+> > > > > requests, 6 included below; oldest blocked for > 1132.138983 
+> > > > > secs
+> > > > > 2013-01-15 19:14:23.770086 7f20a2d57700  0 log [WRN] : slow 
+> > > > > request
+> > > > > 53.216404 seconds old, received at 2013-01-15 19:13:30.553616: 
+> > > > > osd_op(client.10671.1:1066860 rb.0.282c.6b8b4567.000000001057 
+> > > > > [write 2621440~524288] 2.ea7acebc) currently waiting for sub ops
+> > > > > 2013-01-15 19:14:23.770096 7f20a2d57700  0 log [WRN] : slow 
+> > > > > request
+> > > > > 51.442032 seconds old, received at 2013-01-15 19:13:32.327988: 
+> > > > > osd_op(client.10674.1:1002418
+> > > > >
+> > > > > Similar info in dmesg we have saw pervious:
+> > > > >
+> > > > > [21199.036476] INFO: task ceph-osd:7788 blocked for more than 120 seconds.
+> > > > > [21199.037493] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> > > > > [21199.038841] ceph-osd        D 0000000000000006     0  7788      1 0x00000000
+> > > > > [21199.038844]  ffff880fefdafcc8 0000000000000086 
+> > > > > 0000000000000000
+> > > > > ffffffffffffffe0 [21199.038848]  ffff880fefdaffd8 
+> > > > > ffff880fefdaffd8
+> > > > > ffff880fefdaffd8 0000000000013780 [21199.038852]  
+> > > > > ffff88081aa58000
+> > > > > ffff880f68f52de0 ffff880f68f52de0 ffff882017556200 [21199.038856] Call Trace:
+> > > > > [21199.038858]  [<ffffffff8165a55f>] schedule+0x3f/0x60 
+> > > > > [21199.038861]  [<ffffffff8106b7e5>] exit_mm+0x85/0x130 
+> > > > > [21199.038864]  [<ffffffff8106b9fe>] do_exit+0x16e/0x420 
+> > > > > [21199.038866]  [<ffffffff8109d88f>] ? __unqueue_futex+0x3f/0x80 
+> > > > > [21199.038869]  [<ffffffff8107a19a>] ? 
+> > > > > __dequeue_signal+0x6a/0xb0 [21199.038872]  [<ffffffff8106be54>] 
+> > > > > do_group_exit+0x44/0xa0 [21199.038874]  [<ffffffff8107ccdc>]
+> > > > > get_signal_to_deliver+0x21c/0x420 [21199.038877] 
+> > > > > [<ffffffff81013865>] do_signal+0x45/0x130 [21199.038880] 
+> > > > > [<ffffffff810a091c>] ? do_futex+0x7c/0x1b0 [21199.038882] 
+> > > > > [<ffffffff810a0b5a>] ? sys_futex+0x10a/0x1a0 [21199.038885] 
+> > > > > [<ffffffff81013b15>] do_notify_resume+0x65/0x80 [21199.038887] 
+> > > > > [<ffffffff81664d50>] int_signal+0x12/0x17
+> > > 
+> > > We have seen this stack trace several times over the past 6 months, but are not sure what the trigger is.  In principle, the ceph server-side daemons shouldn't be capable of locking up like this, but clearly something is amiss between what they are doing in userland and how the kernel is tolerating that.  Low memory, perhaps?  In each case where we tried to track it down, the problem seemed to go away on its own.  Is this easily reproducible in your case?
+> > > 
+> > > > my 0.02$:
+> > > > http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg11531.ht
+> > > > ml and kernel panic from two different hosts from yesterday during 
+> > > > ceph startup(on 3.8-rc3, images from console available at
+> > > > http://imgur.com/wIRVn,k0QCS#0) leads to suggestion that Ceph may 
+> > > > have been introduced lockup-alike behavior not a long ago, 
+> > > > causing, in my case, excessive amount of context switches on the 
+> > > > host leading to osd flaps and panic at the ip-ib stack due to same issue.
+> > > 
+> > > For the stack trace my first guess would be a problem with the IB driver that is triggered by memory pressure.  Can you characterize what the system utilization (CPU, memory) looks like leading up to the lockup?
+> > > 
+> > > sage
+> > > 
+> > 
+> 
