@@ -1,51 +1,51 @@
-From: Cesar Mello <cmello@gmail.com>
-Subject: Re: ListBuckets works but PutObject does not
-Date: Fri, 18 Jan 2013 11:35:23 -0200
-Message-ID: <CAJVE5RVYzm=FigqP2+RQM3-isRi80RTte+P__9bFvmA66w5s6Q@mail.gmail.com>
-References: <CAJVE5RX+MWwjp3FFJn4jr99s87MW-cvzPRsxNBuF89==PyoOaA@mail.gmail.com>
-	<CAFpvEKkiRzH+d0ZXKurkxzN+q=HuJ_1i6xuw6KMPyFSzgXPixg@mail.gmail.com>
+From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
+Subject: Re: tgt backend driver for Ceph block devices (rbd)
+Date: Sat, 19 Jan 2013 01:29:42 +0900 (JST)
+Message-ID: <20130119.012942.1305564732068186811.fujita.tomonori@lab.ntt.co.jp>
+References: <50F76632.4040404@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:36960 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751901Ab3ARNfZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 08:35:25 -0500
-Received: by mail-la0-f52.google.com with SMTP id ee20so1770969lab.11
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 05:35:23 -0800 (PST)
-In-Reply-To: <CAFpvEKkiRzH+d0ZXKurkxzN+q=HuJ_1i6xuw6KMPyFSzgXPixg@mail.gmail.com>
+Received: from tama500.ecl.ntt.co.jp ([129.60.39.148]:39282 "EHLO
+	tama500.ecl.ntt.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751146Ab3ARQ3z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 11:29:55 -0500
+In-Reply-To: <50F76632.4040404@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christophe Le Guern <c35sys@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: dan.mick@inktank.com
+Cc: stgt@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi Christophe,
+On Wed, 16 Jan 2013 18:47:14 -0800
+Dan Mick <dan.mick@inktank.com> wrote:
 
-Thank you so much, the problem seemed to be just the DNS.
+> Hi, all.  I recently hacked at bs_rdwr and made it work as a
+> proof-of-concept driver allowing tgt to be backed by the Ceph[1]
+> storage cluster's RADOS block device (rbd)[2].  I thought I'd share
+> the results of my investigations, as it's useful even in its current
+> form:
 
-Now the Windows client connects, but I'm getting a "MethodNotAllowed"
-response for the PutBucket request. Progress!
+Sounds interesting. If you send a patch, I'm happy to review and merge
+it.
 
-Best regards!
-Cesar
+> http://github.com/dmick/tgt, forked from http://github.com/fujita/tgt
+> branch bs_rbd (https://github.com/dmick/tgt/tree/bs_rbd)
+> 
+> This is a simple transliteration of bs_rdwr to use librbd/librados
+> calls instead of normal file I/O calls (so might be instructive to
+> diff bs_rbd.c against bs_rdwr.c to see what was involved).  It
+> currently uses only the synchronous librbd interfaces, so each tgtd
+> worker thread will block for completion of each request.  See the
 
-On Fri, Jan 18, 2013 at 11:22 AM, Christophe Le Guern <c35sys@gmail.com> wrote:
-> On Fri, Jan 18, 2013 at 2:01 PM, Cesar Mello <cmello@gmail.com> wrote:
->> I've noticed the ListBuckets sample sends an http request to the URL
->> ubuntu1, which works. (ubuntu1 is the host name of the apache
->> machine). But the PutBucket sample sends an http request to
->> 'my-new-mucket.ubuntu1', and this does not get resolved. So I'm
->> currently investigating the apache config.
->>
->> (I'm a Windows guy not very used to apache and Linux, sorry).
->>
->> Any suggestions are appreciated, but I'm sure I can work out this
->> before my vacation ends. :-)
->
-> Hi Cesar,
->
-> I used dnsmasq and wildcard for the DNS part. (e.g. *.ubuntu1 for you).
-> You can install it on your linux server then point your client to use
-> dnsmasq as your resolver.
->
-> Christophe
+That's fine. I/O worker threads are supposed to handle such
+synchronous API (bs_rwdr.c use read/write system calls with O_SYNC).
+
+If rdb provides the async API and it's preferable, then you don't need
+to use I/O worker threads like bs_aio.c
+
+
+> I was quite impressed at how easy this was, and how well-organized the
+> stgt source is.  Kudos to the developers and maintainers!
+
+Thanks ;)
