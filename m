@@ -1,40 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Hit suicide timeout after adding new osd
-Date: Fri, 18 Jan 2013 13:44:25 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net>
-References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk>
- <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: max useful journal size
+Date: Fri, 18 Jan 2013 17:20:24 -0500
+Message-ID: <CACkq2mokPwwgue_OjsZngzGLLt5XODZiJdD5YwCDJ1um5TQ9eA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50237 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751885Ab3ARVoZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 16:44:25 -0500
-In-Reply-To: <50F9C051.7070900@mermaidconsulting.dk>
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:59334 "EHLO
+	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755179Ab3ARWUr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 17:20:47 -0500
+Received: by mail-ea0-f174.google.com with SMTP id 1so1637847eaa.19
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 14:20:46 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 18 Jan 2013, Jens Kristian S?gaard wrote:
-> Hi,
-> 
-> > Getting closer.. it looks like someone is blocked with map_lock held, or
-> > leaked the lock.  Can you do a 'thread apply all bt' with that same core
-> > file/process?
-> 
-> Sure, here's the result:
+Hey folks,
 
-Ah, I think it's the PG removal workqueue being unfriendly.  Annoyingly I 
-made a kludge around this for another cluster hitting it and then forgot 
-to get it integrated.  Can you give wip-pg-removal a go and see if that 
-resolves the problem?
+The Ceph docs give the following recommendation on sizing your journal:
 
-It's building right now.. packages should show up shortly on 
-gitbuilder.ceph.com once it goes green here
+osd journal size = {2 * (expected throughput * filestore min sync interval)}
 
-	http://ceph.com/gitbuilder.cgi
+The default value of min sync interval is .01.  If you use throughput
+of a mediocre 7200RPM drive of 100MB/sec, this comes to 2 MB.  That
+seems like the lower bound to have the journal do anything at all.
 
-Thanks!
-sage
+My question is what is the upper bound?  There's clearly a limit to
+how big make, such that it just becomes wasted space.  The reason I
+want to know is that since I will be journals on SSDs, with each
+journal being a dedicated partition, there is a benefit to not making
+the partition bigger than it needs to be.  All that unpartitioned
+space can be used by the SSD firmware for wear-leveling and other
+things (so long as it remains unpartitioned).
+
+Would the following calc be appopriate?
+
+Assume an SSD write speed of 400MB/sec.  Default max sync interval is 5.
+
+2 * (400 MB/sec * 5sec) = 4 GB.
+
+So is it appropriate to assume that if I can't write to an SSD faster
+than 400 MB/sec, and I keep the default sync interval values, a
+journal greater than 4GB is just a waste?
+
+I had been using 10GB journals...  seems like overkill.
+
+Or put another way, if I want to use 10GB journals, I should bump the
+max sync interval to 12.5.
+
+ - Travis
