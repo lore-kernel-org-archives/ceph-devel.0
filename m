@@ -1,40 +1,45 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: error for Translation-en .deb package
-Date: Fri, 18 Jan 2013 12:54:42 -0500
-Message-ID: <CACkq2mqyOYUgLqUy0uJZb-+0wHtrLfTdRGhLeL5zAa55UTwoQQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: branches
+Date: Fri, 18 Jan 2013 10:32:25 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301181031130.8622@cobra.newdream.net>
+References: <alpine.DEB.2.00.1301081038580.30467@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f41.google.com ([74.125.83.41]:64351 "EHLO
-	mail-ee0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751858Ab3ARRzE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 12:55:04 -0500
-Received: by mail-ee0-f41.google.com with SMTP id c13so1947793eek.0
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 09:55:03 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:47768 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751332Ab3ARScZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 13:32:25 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 97ACC80079
+	for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 10:32:25 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7232A80079
+	for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 10:32:25 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1301081038580.30467@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey folks,
+I went ahead and made this change last week.
 
-Anyone else seeing this issue?
+Just a remind, the new world order is:
 
-# apt-get update
+> master
+>  - active development
+> next
+>  - frozen for next release
+>  - bug fixes only
+>  - regularly merged back into master
+> last
+>  - last release (instead of 'testing')
+>  - packages at /debian-testing and /debian-last, /rpm-testing, /rpm-last
+> bobtail
+>  - bobtail backport series 0.56.x
+>  - packages at /debian-bobtail (and /debian, until cuttlefish), 
+>    /rpm-bobtail, /rpm
+> argonaut
+>  - argonaut backport series 0.48.x
+>  - packages at /debian-argonaut
 
-<snip>
-Ign http://ceph.com precise/main Translation-en_US
-Err http://ceph.com precise/main Translation-en
-  Error reading from server. Remote end closed connection
-Fetched 2,746 kB in 2min 35s (17.6 kB/s)
-W: Failed to fetch
-http://ceph.com/debian-bobtail/dists/precise/main/i18n/Translation-en
-Error reading from server. Remote end closed connection
-
-E: Some index files failed to download. They have been ignored, or old
-ones used instead.
-
-
-I get it on all my servers.
-
-# cat /etc/apt/sources.list.d/ceph.list
-deb http://ceph.com/debian-bobtail/ precise main
+sage
