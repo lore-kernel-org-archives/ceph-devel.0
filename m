@@ -1,51 +1,40 @@
-From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
-Subject: Re: tgt backend driver for Ceph block devices (rbd)
-Date: Sat, 19 Jan 2013 01:29:42 +0900 (JST)
-Message-ID: <20130119.012942.1305564732068186811.fujita.tomonori@lab.ntt.co.jp>
-References: <50F76632.4040404@inktank.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: error for Translation-en .deb package
+Date: Fri, 18 Jan 2013 12:54:42 -0500
+Message-ID: <CACkq2mqyOYUgLqUy0uJZb-+0wHtrLfTdRGhLeL5zAa55UTwoQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tama500.ecl.ntt.co.jp ([129.60.39.148]:39282 "EHLO
-	tama500.ecl.ntt.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751146Ab3ARQ3z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 11:29:55 -0500
-In-Reply-To: <50F76632.4040404@inktank.com>
+Received: from mail-ee0-f41.google.com ([74.125.83.41]:64351 "EHLO
+	mail-ee0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751858Ab3ARRzE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jan 2013 12:55:04 -0500
+Received: by mail-ee0-f41.google.com with SMTP id c13so1947793eek.0
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Jan 2013 09:55:03 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dan.mick@inktank.com
-Cc: stgt@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 16 Jan 2013 18:47:14 -0800
-Dan Mick <dan.mick@inktank.com> wrote:
+Hey folks,
 
-> Hi, all.  I recently hacked at bs_rdwr and made it work as a
-> proof-of-concept driver allowing tgt to be backed by the Ceph[1]
-> storage cluster's RADOS block device (rbd)[2].  I thought I'd share
-> the results of my investigations, as it's useful even in its current
-> form:
+Anyone else seeing this issue?
 
-Sounds interesting. If you send a patch, I'm happy to review and merge
-it.
+# apt-get update
 
-> http://github.com/dmick/tgt, forked from http://github.com/fujita/tgt
-> branch bs_rbd (https://github.com/dmick/tgt/tree/bs_rbd)
-> 
-> This is a simple transliteration of bs_rdwr to use librbd/librados
-> calls instead of normal file I/O calls (so might be instructive to
-> diff bs_rbd.c against bs_rdwr.c to see what was involved).  It
-> currently uses only the synchronous librbd interfaces, so each tgtd
-> worker thread will block for completion of each request.  See the
+<snip>
+Ign http://ceph.com precise/main Translation-en_US
+Err http://ceph.com precise/main Translation-en
+  Error reading from server. Remote end closed connection
+Fetched 2,746 kB in 2min 35s (17.6 kB/s)
+W: Failed to fetch
+http://ceph.com/debian-bobtail/dists/precise/main/i18n/Translation-en
+Error reading from server. Remote end closed connection
 
-That's fine. I/O worker threads are supposed to handle such
-synchronous API (bs_rwdr.c use read/write system calls with O_SYNC).
-
-If rdb provides the async API and it's preferable, then you don't need
-to use I/O worker threads like bs_aio.c
+E: Some index files failed to download. They have been ignored, or old
+ones used instead.
 
 
-> I was quite impressed at how easy this was, and how well-organized the
-> stgt source is.  Kudos to the developers and maintainers!
+I get it on all my servers.
 
-Thanks ;)
+# cat /etc/apt/sources.list.d/ceph.list
+deb http://ceph.com/debian-bobtail/ precise main
