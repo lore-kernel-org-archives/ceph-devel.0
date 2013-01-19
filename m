@@ -1,38 +1,59 @@
-From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Subject: Re: Understanding Ceph
-Date: Sat, 19 Jan 2013 10:26:20 -0600
-Message-ID: <50FAC92C.8030709@bmrb.wisc.edu>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com>
-Reply-To: dmaziuk@bmrb.wisc.edu
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Sat, 19 Jan 2013 08:44:49 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk>
+ <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net>
+ <50FA6681.10507@mermaidconsulting.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:57773 "EHLO
-	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751863Ab3ASQ0k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jan 2013 11:26:40 -0500
-In-Reply-To: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:58730 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751949Ab3ASQot (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jan 2013 11:44:49 -0500
+In-Reply-To: <50FA6681.10507@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Peter Smith <peterfruits@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 1/19/2013 9:50 AM, Peter Smith wrote:
+On Sat, 19 Jan 2013, Jens Kristian S?gaard wrote:
+> Hi Sage,
+> 
+> Thanks for the speedy reply!
+> 
+> > to get it integrated.  Can you give wip-pg-removal a go and see if
+> > that resolves the problem? It's building right now.. packages should
+> > show up shortly on gitbuilder.ceph.com once it goes green here
+> > http://ceph.com/gitbuilder.cgi
+> 
+> It is only listed for OpenSUSE 12 where it is in yellow state.
 
-> 3. OS recommendation: The OS recommendation page:
-> http://ceph.com/docs/master/install/os-recommendations/#bobtail-0-56
-> says CentOS 6.3 has a default kernel with old kernel client. CentOS
-> 6.3 is our production environment.
+Whoops, I forgot about the time zones... the fix is merged into master and 
+a I dropped the wip branch.  I just repushed the patches (on top of 
+bobtail) for you.
 
-I was unable to get ceph to run on centos 6.3 following the "5 minute 
-quick start" document. I did get one machine to "unclean" cluster state 
-using elrepo's kernel 3.7, but that kernel doesn't boot on most of our 
-boxen (boot-time oops in pata-acpi).
+http://gitbuilder.ceph.com/ceph-rpm-fc17-x86_64-basic/ref/wip-pg-removal/
 
-It looks to me that unless inktank backports rbd.ko to 2.6.32, centos/sl 
-users won't be able to test ceph for a couple of years: until centos 7.1 
-comes out and we get the chance to reimage our hardware.
+Thanks!
+sage
 
-Dima
 
+> 
+> I'm running Fedora 17.
+> 
+> I would really much like to test the fix soon, as multiple osds have now
+> crashed with the same error. I now have unfound pgs and the cluster is
+> no longer usable.
+> 
+> -- 
+> Jens Kristian S?gaard, Mermaid Consulting ApS,
+> jens@mermaidconsulting.dk,
+> http://www.mermaidconsulting.com/
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
