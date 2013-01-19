@@ -1,144 +1,169 @@
-From: Sage Weil <sage@inktank.com>
-Subject: RE: max useful journal size
-Date: Sat, 19 Jan 2013 09:42:36 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301190940510.29915@cobra.newdream.net>
-References: <CACkq2mokPwwgue_OjsZngzGLLt5XODZiJdD5YwCDJ1um5TQ9eA@mail.gmail.com> <CAPYLRzjkw92FU-q7tDWJSCuOjOE5OBaYZfPE0NT67cK532Gdwg@mail.gmail.com> <CACkq2mpwzsAtTRh7Cg0-c3GXTf8-V3OnrO6ojxE5gDnks9MMDQ@mail.gmail.com> <alpine.DEB.2.00.1301181454460.8622@cobra.newdream.net>
- <CACkq2mrKccAP+w2OUwTtDBU0GKrFFV=7aXKwbewmZaooEWRS4Q@mail.gmail.com> <alpine.DEB.2.00.1301182055580.29915@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC5E1F65@SHSMSX102.ccr.corp.intel.com>
+From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
+	<jens@mermaidconsulting.dk>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Sat, 19 Jan 2013 18:56:53 +0100
+Message-ID: <50FADE65.5050403@mermaidconsulting.dk>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk> <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net> <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59122 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752068Ab3ASRmh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jan 2013 12:42:37 -0500
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5E1F65@SHSMSX102.ccr.corp.intel.com>
+Received: from mx06.stofanet.dk ([212.10.10.58]:45428 "EHLO mx06.stofanet.dk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752282Ab3ASR47 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 19 Jan 2013 12:56:59 -0500
+In-Reply-To: <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: Travis Rhoden <trhoden@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, 19 Jan 2013, Chen, Xiaoxi wrote:
-> Does the sync really sync between Journal and Data disk?
-> From the code it seems just call syncfs on data disk and report the synced lenth to journal.Below is my understanding about this topic:
-> 
-> Assume journal ahead disk with 1GB,the sync will not make the disk write the 1GB and catch up with journal, instead, it just call a syncfs to make some *finished but still in pagecache* writes go actually to disk.After doing so, this is a consistent point, it's safe to trim the space which the synced writes had taken(say 800M maybe).
+Hi Sage,
 
-Right.  Although I'm not sure what you mean by about 800MB.
+> a I dropped the wip branch.  I just repushed the patches (on top of=20
+> bobtail) for you.
 
-> >>osd journal size = {2 * (expected throughput * filestore max sync interval)}
-> 
-> Journal will trigger a sync(by signal the condition of sync_thread) when 
-> it exceed "haft-full", so basically, sync will happen only when:1) 
-> journal reach haft full 2) reach max_sync_interval. The factor 2 seems 
-> to prevent 1 ) from happen, that is, try to make sync only happen when 
-> it reach max interval.
+Thanks for the new build!
 
-The half full and max sync interval thresholds will be about the same 
-point in time if the journal is sized that way.  Is that what you mean?  
-I'm not sure I'm following...
+I have finished testing it on one osd - sadly the osd crashed again, bu=
+t=20
+now with a new stack trace.
 
-sage
+0> 2013-01-19 18:48:44.636938 7fb5597f2700 -1 ./osd/OSDMap.h: In=20
+function 'const epoch_t& OSDMap::get_up_thru(int) const' thread=20
+7fb5597f2700 time 2013-01-19 18:48:44.499494
+=2E/osd/OSDMap.h: 367: FAILED assert(exists(osd))
+
+  ceph version 0.56.1-25-g25a6b1b (25a6b1b325db2a2b45963f83623c447ec577=
+c5ef)
+  1: /usr/bin/ceph-osd() [0x60db42]
+  2: /usr/bin/ceph-osd() [0x6e3b35]
+  3: (pg_interval_t::check_new_interval(std::vector<int,=20
+std::allocator<int> > const&, std::vector<int, std::allocator<int> >=20
+const&, std::vector<int, std::allocator<int> > const&, std::vector<int,=
+=20
+std::allocator<int> > const&, unsigned int, unsigned int,=20
+std::tr1::shared_ptr<OSDMap const>, std::tr1::shared_ptr<OSDMap const>,=
+=20
+long, pg_t, std::map<unsigned int, pg_interval_t, std::less<unsigned=20
+int>, std::allocator<std::pair<unsigned int const, pg_interval_t> > >*,=
+=20
+std::ostream*)+0x250) [0x935590]
+  4: (PG::start_peering_interval(std::tr1::shared_ptr<OSDMap const>,=20
+std::vector<int, std::allocator<int> > const&, std::vector<int,=20
+std::allocator<int> > const&)+0x353) [0x7563c3]
+  5: (PG::RecoveryState::Reset::react(PG::AdvMap const&)+0x21e) [0x7588=
+7e]
+  6: (boost::statechart::detail::reaction_result=20
+boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>::local_react_impl_non_empty::local_=
+react_impl<boost::mpl::list5<boost::statechart::custom_reaction<PG::Adv=
+Map>,=20
+boost::statechart::custom_reaction<PG::ActMap>,=20
+boost::statechart::custom_reaction<PG::NullEvt>,=20
+boost::statechart::custom_reaction<PG::FlushedEvt>,=20
+boost::statechart::transition<boost::statechart::event_base,=20
+PG::RecoveryState::Crashed,=20
+boost::statechart::detail::no_context<boost::statechart::event_base>,=20
+&boost::statechart::detail::no_context<boost::statechart::event_base>::=
+no_function>=20
+ >, boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>=20
+ >(boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>&, boost::statechart::event_base=20
+const&, void const*)+0x86) [0x78abb6]
+  7: (boost::statechart::detail::reaction_result=20
+boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>::local_react_impl_non_empty::local_=
+react_impl<boost::mpl::list<boost::statechart::custom_reaction<PG::Quer=
+yState>,=20
+boost::statechart::custom_reaction<PG::AdvMap>,=20
+boost::statechart::custom_reaction<PG::ActMap>,=20
+boost::statechart::custom_reaction<PG::NullEvt>,=20
+boost::statechart::custom_reaction<PG::FlushedEvt>,=20
+boost::statechart::transition<boost::statechart::event_base,=20
+PG::RecoveryState::Crashed,=20
+boost::statechart::detail::no_context<boost::statechart::event_base>,=20
+&boost::statechart::detail::no_context<boost::statechart::event_base>::=
+no_function>,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>=20
+ >(boost::statechart::simple_state<PG::RecoveryState::Reset,=20
+PG::RecoveryState::RecoveryMachine, boost::mpl::list<mpl_::na, mpl_::na=
+,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,=20
+mpl_::na, mpl_::na, mpl_::na, mpl_::na>,=20
+(boost::statechart::history_mode)0>&, boost::statechart::event_base=20
+const&, void const*)+0x53) [0x78ac33]
+  8:=20
+(boost::statechart::state_machine<PG::RecoveryState::RecoveryMachine,=20
+PG::RecoveryState::Initial, std::allocator<void>,=20
+boost::statechart::null_exception_translator>::send_event(boost::statec=
+hart::event_base=20
+const&)+0x5b) [0x76f58b]
+  9:=20
+(boost::statechart::state_machine<PG::RecoveryState::RecoveryMachine,=20
+PG::RecoveryState::Initial, std::allocator<void>,=20
+boost::statechart::null_exception_translator>::process_event(boost::sta=
+techart::event_base=20
+const&)+0x19) [0x76f619]
+  10: (PG::RecoveryState::handle_event(boost::statechart::event_base=20
+const&, PG::RecoveryCtx*)+0x4d) [0x76f6cd]
+  11: (PG::handle_advance_map(std::tr1::shared_ptr<OSDMap const>,=20
+std::tr1::shared_ptr<OSDMap const>, std::vector<int, std::allocator<int=
+>=20
+ >&, std::vector<int, std::allocator<int> >&, PG::RecoveryCtx*)+0x196)=20
+[0x72bf46]
+  12: (OSD::advance_pg(unsigned int, PG*, PG::RecoveryCtx*,=20
+std::set<boost::intrusive_ptr<PG>, std::less<boost::intrusive_ptr<PG> >=
+,=20
+std::allocator<boost::intrusive_ptr<PG> > >*)+0x48b) [0x6cf14b]
+  13: (OSD::process_peering_events(std::list<PG*, std::allocator<PG*> >=
+=20
+const&)+0x2a6) [0x6cf7f6]
+  14: (OSD::PeeringWQ::_process(std::list<PG*, std::allocator<PG*> >=20
+const&)+0x17) [0x70a3f7]
+  15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x95c) [0x8ccccc]
+  16: (ThreadPool::WorkThread::entry()+0x10) [0x8cdc40]
+  17: /lib64/libpthread.so.0() [0x360de07d14]
+  18: (clone()+0x6d) [0x360d6f167d]
 
 
-> 
-> 													Xiaoxi
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: 2013?1?19? 12:56
-> To: Travis Rhoden
-> Cc: ceph-devel
-> Subject: Re: max useful journal size
-> 
-> On Fri, 18 Jan 2013, Travis Rhoden wrote:
-> > Thanks for the clarifcation, Sage. That makes sense. Especially when I 
-> > think about it in the sense that if I have an SSD capable of 
-> > 400MB/sec, and the journal doesn't flush for 5 seconds, there is 2GB 
-> > of data sync. The disk only does 100-150MB/sec, so this could take up 
-> > to twenty seconds to write out. And all the while more data is coming 
-> > in. Now I see the purpose of having the bigger journal.
-> > 
-> > Of course it only goes so far, and when its full, its full. I get that too.
-> > 
-> > I submitted a pull request to change the docs to specify filestore max 
-> > sync instead of min.
-> 
-> Pulled, thanks!
-> 
-> sage
-> 
-> 
-> > 
-> > On Fri, Jan 18, 2013 at 5:56 PM, Sage Weil <sage@inktank.com> wrote:
-> > > On Fri, 18 Jan 2013, Travis Rhoden wrote:
-> > >> On Fri, Jan 18, 2013 at 5:43 PM, Gregory Farnum <greg@inktank.com> wrote:
-> > >> > On Fri, Jan 18, 2013 at 2:20 PM, Travis Rhoden <trhoden@gmail.com> wrote:
-> > >> >> Hey folks,
-> > >> >>
-> > >> >> The Ceph docs give the following recommendation on sizing your journal:
-> > >> >>
-> > >> >> osd journal size = {2 * (expected throughput * filestore min 
-> > >> >> sync interval)}
-> > >> >>
-> > >> >> The default value of min sync interval is .01.  If you use 
-> > >> >> throughput of a mediocre 7200RPM drive of 100MB/sec, this comes 
-> > >> >> to 2 MB.  That seems like the lower bound to have the journal do anything at all.
-> > >> >
-> > >> > Ah. This should refer to the max sync interval, not the min!
-> > >>
-> > >> I wondered about that.  But wasn't confident enough to ask about it.
-> > >> >
-> > >> >> My question is what is the upper bound?  There's clearly a limit 
-> > >> >> to how big make, such that it just becomes wasted space.  The 
-> > >> >> reason I want to know is that since I will be journals on SSDs, 
-> > >> >> with each journal being a dedicated partition, there is a 
-> > >> >> benefit to not making the partition bigger than it needs to be.  
-> > >> >> All that unpartitioned space can be used by the SSD firmware for 
-> > >> >> wear-leveling and other things (so long as it remains unpartitioned).
-> > >> >>
-> > >> >> Would the following calc be appopriate?
-> > >> >>
-> > >> >> Assume an SSD write speed of 400MB/sec.  Default max sync interval is 5.
-> > >> >>
-> > >> >> 2 * (400 MB/sec * 5sec) = 4 GB.
-> > >> >>
-> > >> >> So is it appropriate to assume that if I can't write to an SSD 
-> > >> >> faster than 400 MB/sec, and I keep the default sync interval 
-> > >> >> values, a journal greater than 4GB is just a waste?
-> > >> >>
-> > >> >> I had been using 10GB journals...  seems like overkill.
-> > >> >>
-> > >> >> Or put another way, if I want to use 10GB journals, I should 
-> > >> >> bump the max sync interval to 12.5.
-> > >> >
-> > >> > It can of course grow as large as you let it, and I would leave 
-> > >> > some extra room as a margin. The main consideration is that the 
-> > >> > journal doesn't like getting too far ahead of the filestore, and 
-> > >> > that's what the above calculation uses to set size.
-> > >>
-> > >> Is "max sync interval" a hard stop, though?  I mean, once 5 seconds 
-> > >> pass, it's going to flush/sync no matter what, right? So there is 
-> > >> no point in making it much bigger than what can be written to the 
-> > >> journal in those 5 seconds.  I feel like I must be missing 
-> > >> something, though, otherwise the recommendation wouldn't to make 
-> > >> the journal 2x that size.
-> > >
-> > > The sync itself can take time, and we *initiate* the sync at that time.
-> > > Hence the 2x.  When the journal fills up there is a hefty 
-> > > performance hit, too.  When you adjust this down, check back at some 
-> > > ponit and make sure you don't see JOURNAL FULL messages in your log 
-> > > that point to a problem (with the code or the tuning logic).
-> > >
-> > > Thanks!
-> > > sage
-> > >
-> > >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+--=20
+Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+jens@mermaidconsulting.dk,
+http://www.mermaidconsulting.com/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
