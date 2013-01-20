@@ -1,64 +1,80 @@
-From: Constantinos Venetsanopoulos <cven@grnet.gr>
-Subject: Re: Inktank team @ FOSDEM 2013 ?
-Date: Sun, 20 Jan 2013 19:13:10 +0200
-Message-ID: <50FC25A6.1070803@grnet.gr>
-References: <50FBBC59.4000006@grnet.gr> <50FBD097.3020206@dachary.org> <CAP8Oy=+ZEmdn9pdvvTuEehZvQygHCkQ7Fu7NZk=wyxgHeT5rig@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: questions on networks and hardware
+Date: Sun, 20 Jan 2013 18:16:50 +0100
+Message-ID: <50FC2682.3020601@widodh.nl>
+References: <EFFE82E1-B74B-4DAB-8801-5311FA903618@jnielsen.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:46615 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752398Ab3ATRNQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 20 Jan 2013 12:13:16 -0500
-In-Reply-To: <CAP8Oy=+ZEmdn9pdvvTuEehZvQygHCkQ7Fu7NZk=wyxgHeT5rig@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:50795 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752392Ab3ATRQz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jan 2013 12:16:55 -0500
+In-Reply-To: <EFFE82E1-B74B-4DAB-8801-5311FA903618@jnielsen.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: John Nielsen <lists@jnielsen.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hello Loic, Sebastien, Patrick,
+Hi,
 
-that's great news! I'm sure we'll have some very interesting stuff to 
-talk about.
-Saturday 14:00 @ K.3.201 also seems fine.
-
-Thanks,
-Constantinos
-
-
-On 1/20/2013 6:19 PM, Patrick McGarry wrote:
-> Hey guys,
+On 01/19/2013 12:34 AM, John Nielsen wrote:
+> I'm planning a Ceph deployment which will include:
+> 	10Gbit/s public/client network
+> 	10Gbit/s cluster network
+> 	dedicated mon hosts (3 to start)
+> 	dedicated storage hosts (multiple disks, one XFS and OSD per disk, 3-5 to start)
+> 	dedicated RADOS gateway host (1 to start)
 >
-> I will be attending from Inktank and would love to meet all of you
-> folks.  Also, for what it's worth, the wiki has been deprecated and
-> mostly redirects to the doc.  If you are trying to take a look at
-> Sebatien's page you'll most likely have to use:
+> I've done some initial testing and read through most of the docs but I still have a few questions. Please respond even if you just have a suggestion or response for one of them.
 >
-> http://wiki.ceph.com/deprecated/FOSDEM2013
->
-> Thanks.
->
->
-> Best Regards,
->
-> Patrick
->
-> On Sun, Jan 20, 2013 at 6:10 AM, Loic Dachary <loic@dachary.org> wrote:
->> On 01/20/2013 10:43 AM, Constantinos Venetsanopoulos wrote:
->>> Hello,
->>>
->>> I'd like to ask if anybody of the team will be attending FOSDEM 2013 [1],
->>> held at Brussels. I'm just asking, because we will be having a talk there at
->>> the cloud devroom and will be referencing our experiences with RADOS.
->>> So, it would be nice if we could also meet in person with any of you guys.
->> Hi,
->>
->> Sebastien Han and myself will be there (but we're not with Inktank ;-). It would be great to organize an informal meeting to discuss Ceph and I've just added a page to the wiki (defunct but still useful), listing our names : http://ceph.com/wiki/FOSDEM2013
->>
->> Cheers
->>
->
+> If I have "cluster network" and "public network" entries under [global] or [osd], do I still need to specify "public addr" and "cluster addr" for each OSD individually?
 >
 
+Already answered, but no. You don't need to. The OSDs will bind to the 
+available IP in that network.
+
+> Which network(s) should the monitor hosts be on? If both, is it valid to have more than one "mon addr" entry per mon host or is there a different way to do it?
+>
+
+They should be on the "public" network since the clients also need to be 
+able to reach the monitors.
+
+> Is it worthwhile to have 10G NIC's on the monitor hosts? (The storage hosts will each have 2x 10Gbit/s NIC's.)
+>
+
+No, not really. 1Gbit should be more then enough for your monitors. 3 
+monitors should also be good. No need to go for 5 or 7.
+
+> I'd like to have 2x 10Gbit/s NIC's on the gateway host and maximize throughput. Any suggestions on how to best do that? I'm assuming it will talk to the OSD's on the Ceph public/client network, so does that imply a third even-more-public network for the gateway's clients?
+>
+
+No, there is no third network. You could trunk the 2 NICs with LACP or 
+something. Since the client will open TCP connections to all the OSDs 
+you will get a pretty good balancing over the available bandwith.
+
+> I think this has come up before, but has anyone written up something with more details on setting up gateways? Hardware recommendations, strategies to improve caching and performance, multiple gateway setups with and without a load balancer, etc.
+
+Not that I know. I'm still trying to play with RGW and Varnish in front 
+of it, but haven't really taken the time yet. The goal is to offload a 
+lot of the caching to Varnish and have Varnish 'ban' objects when they 
+change.
+
+You could also use Varnish as a loadbalancer. But in this case you could 
+also use RR-DNS or LVS with Direct Routing, that way only incoming 
+traffic goes through the loadbalancer and return traffic goes directly 
+to your network's gateway.
+
+Wido
+
+>
+> Thanks!
+>
+> JN
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
