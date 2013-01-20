@@ -1,36 +1,64 @@
-From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Subject: Re: Understanding Ceph
-Date: Sun, 20 Jan 2013 10:39:43 -0600
-Message-ID: <50FC1DCF.8010304@bmrb.wisc.edu>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net>
-Reply-To: dmaziuk@bmrb.wisc.edu
+From: Constantinos Venetsanopoulos <cven@grnet.gr>
+Subject: Re: Inktank team @ FOSDEM 2013 ?
+Date: Sun, 20 Jan 2013 19:13:10 +0200
+Message-ID: <50FC25A6.1070803@grnet.gr>
+References: <50FBBC59.4000006@grnet.gr> <50FBD097.3020206@dachary.org> <CAP8Oy=+ZEmdn9pdvvTuEehZvQygHCkQ7Fu7NZk=wyxgHeT5rig@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:60429 "EHLO
-	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752090Ab3ATQkJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jan 2013 11:40:09 -0500
-Received: from [192.168.1.2] (71-90-100-249.dhcp.ftbg.wi.charter.com [71.90.100.249])
-	(Authenticated sender: dmaziuk)
-	by mail.bmrb.wisc.edu (Postfix) with ESMTPSA id C1EFA2C010D
-	for <ceph-devel@vger.kernel.org>; Sun, 20 Jan 2013 10:40:08 -0600 (CST)
-In-Reply-To: <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net>
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:46615 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752398Ab3ATRNQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 20 Jan 2013 12:13:16 -0500
+In-Reply-To: <CAP8Oy=+ZEmdn9pdvvTuEehZvQygHCkQ7Fu7NZk=wyxgHeT5rig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On 1/19/2013 12:16 PM, Sage Weil wrote:
+Hello Loic, Sebastien, Patrick,
 
-> We generally recommend the KVM+librbd route, as it is easier to manage the
-> dependencies, and is well integrated with libvirt.  FWIW this is what
-> OpenStack and CloudStack normally use.
+that's great news! I'm sure we'll have some very interesting stuff to 
+talk about.
+Saturday 14:00 @ K.3.201 also seems fine.
 
-OK, so is there a quick stat document for that configuration?
+Thanks,
+Constantinos
 
-(Oh, and "form" in my other message is supposed to be "from": tyop)
 
-Dima
-
+On 1/20/2013 6:19 PM, Patrick McGarry wrote:
+> Hey guys,
+>
+> I will be attending from Inktank and would love to meet all of you
+> folks.  Also, for what it's worth, the wiki has been deprecated and
+> mostly redirects to the doc.  If you are trying to take a look at
+> Sebatien's page you'll most likely have to use:
+>
+> http://wiki.ceph.com/deprecated/FOSDEM2013
+>
+> Thanks.
+>
+>
+> Best Regards,
+>
+> Patrick
+>
+> On Sun, Jan 20, 2013 at 6:10 AM, Loic Dachary <loic@dachary.org> wrote:
+>> On 01/20/2013 10:43 AM, Constantinos Venetsanopoulos wrote:
+>>> Hello,
+>>>
+>>> I'd like to ask if anybody of the team will be attending FOSDEM 2013 [1],
+>>> held at Brussels. I'm just asking, because we will be having a talk there at
+>>> the cloud devroom and will be referencing our experiences with RADOS.
+>>> So, it would be nice if we could also meet in person with any of you guys.
+>> Hi,
+>>
+>> Sebastien Han and myself will be there (but we're not with Inktank ;-). It would be great to organize an informal meeting to discuss Ceph and I've just added a page to the wiki (defunct but still useful), listing our names : http://ceph.com/wiki/FOSDEM2013
+>>
+>> Cheers
+>>
+>
+>
 
