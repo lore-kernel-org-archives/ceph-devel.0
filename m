@@ -1,31 +1,47 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: questions on networks and hardware
-Date: Sun, 20 Jan 2013 21:30:26 +0100
-Message-ID: <CAJH6TXi40uB5Xup3xob+zVJaf6q=4dKjdgs4+NkD-fa5Bh2z0Q@mail.gmail.com>
-References: <EFFE82E1-B74B-4DAB-8801-5311FA903618@jnielsen.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: osd max write size
+Date: Sun, 20 Jan 2013 14:20:55 -0800
+Message-ID: <F9430D5EBF0C4AF69B6294426724EAC0@inktank.com>
+References: <50FC4034.4070906@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:35990 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752452Ab3ATUa2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jan 2013 15:30:28 -0500
-Received: by mail-wi0-f169.google.com with SMTP id hq12so1868318wib.0
-        for <ceph-devel@vger.kernel.org>; Sun, 20 Jan 2013 12:30:27 -0800 (PST)
-In-Reply-To: <EFFE82E1-B74B-4DAB-8801-5311FA903618@jnielsen.net>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:57875 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752515Ab3ATWU5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jan 2013 17:20:57 -0500
+Received: by mail-pa0-f44.google.com with SMTP id hz11so3017774pad.3
+        for <ceph-devel@vger.kernel.org>; Sun, 20 Jan 2013 14:20:57 -0800 (PST)
+In-Reply-To: <50FC4034.4070906@profihost.ag>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Nielsen <lists@jnielsen.net>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-2013/1/19 John Nielsen <lists@jnielsen.net>:
-> I'm planning a Ceph deployment which will include:
->         10Gbit/s public/client network
->         10Gbit/s cluster network
+On Sunday, January 20, 2013 at 11:06 AM, Stefan Priebe wrote:
+> Hi,
+> =20
+> what is the purpose or idea behind this setting?
+> =20
+Couple different things:
+1) The OSDs can't accept writes which won't fit inside their journal, a=
+nd if you have a small journal you could conceivably attempt to write s=
+omething which wouldn't fit. This doesn't happen so much any more, but =
+it did sometimes in the past.
+1b) The MDS uses this setting to limit the size of some of its operatio=
+ns (mostly directory updates), which can (rarely) grow quite large.
+2) The OSDs don't have any other strict limits on how large an op you s=
+end around, but performance becomes a problem if they grow too large. T=
+his setting caps the operation size it allows.
 
-I'm still trying to know if a redundant cluster networks is needed or not.
-Is ceph able to manage a cluster network failure from on OSD?
+It defaults to 90MB and you can change it if you want to, but I'm not s=
+ure why you would=E2=80=A6
+-Greg
 
-What I would like to know if ceph will monitor OSD from the public
-side (that should be redundant, because client will use it to connect
-to the cluster) or from the cluster side.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
