@@ -1,51 +1,36 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Hit suicide timeout after adding new osd
-Date: Sat, 19 Jan 2013 14:04:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301191402300.31658@cobra.newdream.net>
-References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk>
- <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net>
- <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net> <50FADE65.5050403@mermaidconsulting.dk> <alpine.DEB.2.00.1301191016320.29915@cobra.newdream.net> <50FAE8AB.5000602@mermaidconsulting.dk>
- <alpine.DEB.2.00.1301191207440.31658@cobra.newdream.net> <50FB023F.6030305@mermaidconsulting.dk>
+From: Jeff Mitchell <jeffrey.mitchell@gmail.com>
+Subject: Re: Understanding Ceph
+Date: Sat, 19 Jan 2013 19:41:03 -0500
+Message-ID: <CAOx6V3bex4EEd8Y6hzwiWnAUkpxUvJ2xQHh0exxSwx+XmbnooA@mail.gmail.com>
+References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com>
+ <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net>
+ <CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com>
+ <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <48082542-C93C-4732-8307-8D6F42C1D915@gmail.com>
+ <50FB0BBC.3080309@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60952 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751809Ab3ASWEp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jan 2013 17:04:45 -0500
-In-Reply-To: <50FB023F.6030305@mermaidconsulting.dk>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:63411 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751235Ab3ATAlY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jan 2013 19:41:24 -0500
+Received: by mail-pa0-f52.google.com with SMTP id fb1so2745271pad.25
+        for <ceph-devel@vger.kernel.org>; Sat, 19 Jan 2013 16:41:23 -0800 (PST)
+In-Reply-To: <50FB0BBC.3080309@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Peter Smith <peterfruits@gmail.com>, Sage Weil <sage@inktank.com>, Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, 19 Jan 2013, Jens Kristian S?gaard wrote:
-> Hi Sage,
-> 
-> >> It generated 128 MB of logs in those seconds.
-> 
-> > Yes, please!  That looks like the same spot as last time.
-> 
-> Here's a download link for the logs:
-> 
-> http://bit.ly/11Hn7BN
+> I'd recommend qemu 1.2+. You'll probably need a newer libvirt than Centos 6
+> has as well. libvirt 0.10+ is ideal. Ubuntu has an older
+> version, but with important fixes backported.
 
-Can you 'ceph osd getmap 555 -o 555' and 'ceph osd getmap 556 -o 556', and 
-attach those to the bug below?
+Your guys' most supported/tested platform is Precise, according to
+http://ceph.com/docs/master/install/os-recommendations/ -- so is it
+more ideal to run Precise (with your packages) with the older +
+patched versions of libvirt and qemu, or better to run e.g. Quantal
+with newer libvirt + qemu but a less tested platform?
 
-	http://tracker.newdream.net/issues/3879
-
-Thanks!
-sage
-
-> 
-> -- 
-> Jens Kristian S?gaard, Mermaid Consulting ApS,
-> jens@mermaidconsulting.dk,
-> http://www.mermaidconsulting.com/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks,
+Jeff
