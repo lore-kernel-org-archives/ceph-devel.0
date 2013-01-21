@@ -1,37 +1,54 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: Ceph docs page down
-Date: Mon, 21 Jan 2013 17:16:09 +0100
-Message-ID: <50FD69C9.4010804@widodh.nl>
-References: <CACkq2mpwNrhujqOjeSCOxFZOFzcy3W4=GjyVDaq47Fsb0c=K7w@mail.gmail.com>
+Date: Mon, 21 Jan 2013 08:31:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301210830010.29915@cobra.newdream.net>
+References: <CACkq2mpwNrhujqOjeSCOxFZOFzcy3W4=GjyVDaq47Fsb0c=K7w@mail.gmail.com> <50FD69C9.4010804@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:59618 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751781Ab3AUQQL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jan 2013 11:16:11 -0500
-In-Reply-To: <CACkq2mpwNrhujqOjeSCOxFZOFzcy3W4=GjyVDaq47Fsb0c=K7w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:50828 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752683Ab3AUQbp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jan 2013 11:31:45 -0500
+In-Reply-To: <50FD69C9.4010804@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Travis Rhoden <trhoden@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+They're back up now.
 
-On 01/21/2013 05:11 PM, Travis Rhoden wrote:
-> I suspect someone is working on it, but http://ceph.com/docs/master/
-> is returning HTTP 404.
->
+They're auto-generated from git, the build failed due to an 
+intermittent network connectivity problem, and eventually the old content 
+timed out because master wasn't updated over the weekend.  Need to 
+special-case the docs gitbuilder, or increase the timeout, or something so 
+that this doesn't happen again..
 
-I don't know if anyone is working on it, but in the meantime, use: 
-http://eu.ceph.com/docs/master/
+sage
 
-Wido
+On Mon, 21 Jan 2013, Wido den Hollander wrote:
 
->   - Travis
+> Hi,
+> 
+> On 01/21/2013 05:11 PM, Travis Rhoden wrote:
+> > I suspect someone is working on it, but http://ceph.com/docs/master/
+> > is returning HTTP 404.
+> > 
+> 
+> I don't know if anyone is working on it, but in the meantime, use:
+> http://eu.ceph.com/docs/master/
+> 
+> Wido
+> 
+> >   - Travis
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> 
+> 
