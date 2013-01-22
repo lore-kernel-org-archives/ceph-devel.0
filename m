@@ -1,50 +1,97 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Questions about journals, performance and disk utilization.
-Date: Tue, 22 Jan 2013 15:57:02 -0600
-Message-ID: <50FF0B2E.6010301@inktank.com>
-References: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk> <50FF0197.6020202@inktank.com> <50FF0410.3030308@gmail.com> <50FF098C.8050707@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 1/3] rbd: small changes
+Date: Tue, 22 Jan 2013 15:57:58 -0600
+Message-ID: <50FF0B66.20805@inktank.com>
+References: <50FF0B22.5060201@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:59362 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751490Ab3AVV4w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:56:52 -0500
-Received: by mail-ie0-f179.google.com with SMTP id k14so12419871iea.38
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 13:56:51 -0800 (PST)
-In-Reply-To: <50FF098C.8050707@profihost.ag>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:64110 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753858Ab3AVV6C (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:58:02 -0500
+Received: by mail-ie0-f180.google.com with SMTP id c10so12344275ieb.39
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 13:58:01 -0800 (PST)
+In-Reply-To: <50FF0B22.5060201@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Jeff Mitchell <jeffrey.mitchell@gmail.com>, martin <martin@skytech.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/22/2013 03:50 PM, Stefan Priebe wrote:
-> Hi,
-> Am 22.01.2013 22:26, schrieb Jeff Mitchell:
->> Mark Nelson wrote:
->>> It may (or may not) help to use a power-of-2 number of PGs. It's
->>> generally a good idea to do this anyway, so if you haven't set up your
->>> production cluster yet, you may want to play around with this. Basically
->>> just take whatever number you were planning on using and round it up (or
->>> down slightly). IE if you were going to use 7,000 PGs, round up to 8192.
->>
->> As I was asking about earlier on IRC, I'm in a situation where the docs
->> did not mention this in the section about calculating PGs so I have a
->> non-power-of-2 -- and since there are some production things running on
->> that pool I can't currently change it.
->
-> Oh same thing here - did i miss the doc or can someone point me the
-> location.
->
-> Is there a chance to change the number of PGs for a pool?
->
-> Greets,
-> Stefan
+A few very minor changes to the rbd code:
+    - RBD_MAX_OPT_LEN is unused, so get rid of it
+    - Consolidate rbd options definitions
+    - Make rbd_segment_name() return pointer to const char
 
-Honestly I don't know if it will actually have a significant effect. 
-ceph_stable_mod will map things optimally when pg_num is a power of 2, 
-but that's only part of how things work.  It may not matter very much 
-with high PG counts.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
 
-Mark
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 007b726..4ed0741 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -69,7 +69,6 @@
+ 			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
+
+ #define RBD_MAX_SNAP_COUNT	510	/* allows max snapc to fit in 4KB */
+-#define RBD_MAX_OPT_LEN		1024
+
+ #define RBD_SNAP_HEAD_NAME	"-"
+
+@@ -96,8 +95,6 @@
+ #define DEV_NAME_LEN		32
+ #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
+
+-#define RBD_READ_ONLY_DEFAULT		false
+-
+ /*
+  * block device image metadata (in-memory version)
+  */
+@@ -156,10 +153,6 @@ struct rbd_spec {
+ 	struct kref	kref;
+ };
+
+-struct rbd_options {
+-	bool	read_only;
+-};
+-
+ /*
+  * an instance of the client.  multiple devices may share an rbd client.
+  */
+@@ -475,6 +468,12 @@ static match_table_t rbd_opts_tokens = {
+ 	{-1, NULL}
+ };
+
++struct rbd_options {
++	bool	read_only;
++};
++
++#define RBD_READ_ONLY_DEFAULT	false
++
+ static int parse_rbd_opts_token(char *c, void *private)
+ {
+ 	struct rbd_options *rbd_opts = private;
+@@ -773,7 +772,7 @@ static void rbd_header_free(struct rbd_image_header
+*header)
+ 	header->snapc = NULL;
+ }
+
+-static char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
++static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+ {
+ 	char *name;
+ 	u64 segment;
+@@ -1338,7 +1337,7 @@ static int rbd_do_op(struct request *rq,
+ 		     struct rbd_req_coll *coll,
+ 		     int coll_index)
+ {
+-	char *seg_name;
++	const char *seg_name;
+ 	u64 seg_ofs;
+ 	u64 seg_len;
+ 	int ret;
+-- 
+1.7.9.5
+
