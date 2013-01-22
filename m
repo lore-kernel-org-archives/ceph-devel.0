@@ -1,70 +1,70 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Consistently reading/writing rados objects via command line
-Date: Tue, 22 Jan 2013 09:43:00 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301220942010.8085@cobra.newdream.net>
-References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com> <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net> <CAPud5_4fdrdSb9aNms1H=4HPm_YYovQQuVJgzF4APcRKWXOzqQ@mail.gmail.com>
- <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: handling fs errors
+Date: Tue, 22 Jan 2013 09:59:01 -0800
+Message-ID: <1DF968B4EB7E403E85C6113EF54236C9@inktank.com>
+References: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
+ <CAC-hyiHnGXrr5hiZF__BP_uWZeSrhFk_psphAcRPwb5qGa69cw@mail.gmail.com>
+ <50FE9037.8040501@widodh.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34721 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752145Ab3AVRnB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 12:43:01 -0500
-In-Reply-To: <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net>
+Received: from mail-da0-f41.google.com ([209.85.210.41]:49394 "EHLO
+	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754346Ab3AVR7F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 12:59:05 -0500
+Received: by mail-da0-f41.google.com with SMTP id e20so3370431dak.28
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 09:59:05 -0800 (PST)
+In-Reply-To: <50FE9037.8040501@widodh.nl>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On Tue, 22 Jan 2013, Sage Weil wrote:
-> On Tue, 22 Jan 2013, Nick Bartos wrote:
-> > Assuming that the clone is atomic so that the client only ever grabbed
-> > a complete old or new version of the file, that method really seems
-> > ideal.  How much work/time would that be?
-> > 
-> > The objects will likely average around 10-20MB, but it's possible that
-> > in some cases they may grow to a few hundred MB.
-
-Please keep in mind that a few hundred MB is on the large side for a raw 
-rados object.  Be aware that it will make the relative disk utilization 
-more erratic.
-
-sage
-
-
-> 
-> You're in luck--my email load was mercifully light this morning.  
-> 
->   713  ./rados -p data ls -
->   714  ./rados put foo.tmp /etc/passwd  -p data --object-locator foo
->   715  ./rados clone foo.tmp foo -p data --object-locator foo
->   716  ./rados -p data ls -
->   717  ./rados -p data rm foo.tmp --object-locator foo
->   718  ./rados -p data ls -
->   719  ./rados -p data get foo -
-> 
-> see wip-rados-clone.
-> 
-> sage
-> 
-> 
+On Tuesday, January 22, 2013 at 5:12 AM, Wido den Hollander wrote:
+> On 01/22/2013 07:12 AM, Yehuda Sadeh wrote:
+> > On Mon, Jan 21, 2013 at 10:05 PM, Sage Weil <sage@inktank.com (mailto:sage@inktank.com)> wrote:
+> > > We observed an interesting situation over the weekend. The XFS volume
+> > > ceph-osd locked up (hung in xfs_ilock) for somewhere between 2 and 4
+> > > minutes. After 3 minutes (180s), ceph-osd gave up waiting and committed
+> > > suicide. XFS seemed to unwedge itself a bit after that, as the daemon was
+> > > able to restart and continue.
+> > > 
+> > > The problem is that during that 180s the OSD was claiming to be alive but
+> > > not able to do any IO. That heartbeat check is meant as a sanity check
+> > > against a wedged kernel, but waiting so long meant that the ceph-osd
+> > > wasn't failed by the cluster quickly enough and client IO stalled.
+> > > 
+> > > We could simply change that timeout to something close to the heartbeat
+> > > interval (currently default is 20s). That will make ceph-osd much more
+> > > sensitive to fs stalls that may be transient (high load, whatever).
+> > > 
+> > > Another option would be to make the osd heartbeat replies conditional on
+> > > whether the internal heartbeat is healthy. Then the heartbeat warnings
+> > > could start at 10-20s, ping replies would pause, but the suicide could
+> > > still be 180s out. If the stall is short-lived, pings will continue, the
+> > > osd will mark itself back up (if it was marked down) and continue.
+> > > 
+> > > Having written that out, the last option sounds like the obvious choice.
+> > > Any other thoughts?
 > > 
 > > 
-> > On Mon, Jan 21, 2013 at 9:14 PM, Sage Weil <sage@inktank.com> wrote:
-> > > With a bit of additional support in the rados tool, we could write to
-> > > object $foo.tmp with key $foo, and then clone it into position and delete
-> > > the .tmp.
-> > >
-> > > If they're really big objects, though, you may also be better off with
-> > > radosgw, which provides striping and atomicity..
-> > >
-> > > sage
 > > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > Another option would be to have the osd reply to the ping with some
+> > health description.
 > 
 > 
+> 
+> Looking to the future with more monitoring that might be a good idea.
+> 
+> If an OSD simply stops sending heartbeats if the internal conditions 
+> aren't met you don't know what's going on.
+> 
+> If the heartbeat would have metadata which tells: "I'm here, but not in 
+> such a good shape" that could be reported back to the monitors.
+
+
+I think we want to move towards more comprehensive pinging like this, but it's not something to do in haste. Pausing pings when the internal threads are disappearing sounds like a good simple step to make the reporting better match reality.
+-Greg 
+
