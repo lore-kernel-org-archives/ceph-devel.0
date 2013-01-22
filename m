@@ -1,87 +1,102 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: what is the syntax to use to specify xfs in ceph.conf
-Date: Tue, 22 Jan 2013 15:01:56 -0500
-Message-ID: <CACkq2mqVQYgyFBmT2UjwEcNcHB88qPZhnZO6-_AjW21oLRgkWw@mail.gmail.com>
-References: <1358882205.98747.YahooMailNeo@web121906.mail.ne1.yahoo.com>
+From: martin <martin@skytech.dk>
+Subject: Questions about journals, performance and disk utilization.
+Date: Tue, 22 Jan 2013 20:59:35 +0100
+Message-ID: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:48064 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753366Ab3AVUCS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:02:18 -0500
-Received: by mail-ee0-f45.google.com with SMTP id b57so3562933eek.4
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 12:02:17 -0800 (PST)
-In-Reply-To: <1358882205.98747.YahooMailNeo@web121906.mail.ne1.yahoo.com>
+Received: from mail.skytech.dk ([95.154.26.34]:43910 "EHLO
+	mailserver.skytech.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755195Ab3AVUIt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:08:49 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mailserver.skytech.dk (Postfix) with ESMTP id AEAC7645DC6
+	for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 20:59:51 +0100 (CET)
+Received: from mailserver.skytech.dk ([127.0.0.1])
+	by localhost (mailserver.skytech.dk [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id ihigECzaN5ei for <ceph-devel@vger.kernel.org>;
+	Tue, 22 Jan 2013 20:59:36 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Isaac Otsiabah <zmoo76b@yahoo.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-If using mkcephfs, you can just give it a "devs" option.
+Hi list,
 
-I"m pretty sure this changed in bobtail (0.56).  I just setup a
-cluster on 0.56.1, and used the following.  Worked like a charm:
+In a mixed SSD & SATA setup (5 or 8 nodes each holding 8x SATA and 4x 
+SSD) would it make sense to skip having journals on SSD or is the 
+advantage of doing so just too great? We're looking into having 2 pools, 
+sata and ssd and will be creating guests belonging into either of these 
+groups based on if they require high/heavy io.
 
-[osd]
-        osd mkfs type = xfs
-        osd mkfs options xfs = "-f"
-        osd mount options xfs = "rw,noatime,inode64,logbufs=8,logbsize=256k"
-[osd.0]
-        host = ceph1
-        devs = /dev/sdc
-        osd journal = /dev/sda5
+Also, we currently lean on going with a very simple setup using a 
+serverboard with 8x onboard raid slots (LSI 2308) and 6x onboard sata 
+slots and just attach all disks to both onboard controller and onboard 
+slots (for cost and simplicity) - and just pass them along as JBOD.
 
-[osd.1]
-        host = ceph1
-        devs = /dev/sdd
-        osd journal = /dev/sda6
+Any suggestions/input about:
+- Would it make sense to drop onboard controller and aim for a better 
+controller (cache/battery backed 12-16 port one)
+- Attach another cheapo JBOD card like SAS2008/LSI 2308 etc.
+- or just go with this setup (to keep it simpler and cheaper)
 
+Journals:
+- Would it make sense to kill say 1 ssd and 1 sata and attach 2 fast 
+SSD for journals? Or would that be 'redundant' in our case since we 
+already have a pool with sata and ssd (we do not expect heavy io in the 
+sata pool)
 
-A generic example is in the docs, here:
-http://ceph.com/docs/master/rados/configuration/ceph-conf/#example-ceph-conf
+Rbd striping:
+- Performance - afaik rbd is striped over objects; if one would create 
+say a 20GB rbd image would this mostly be striped over very few 
+objects/pg (say ~3 nodes as would be min. in our setup) or would one 
+expect it to be striped over pretty much the entirety of the nodes (5 or 
+8 in our case) in smaller objects (or even across all OSD?)
 
-Remember to use --mkfs when using mkcephfs.
+Disks:
+- Any advice for SATA disks? I know a vendor like Seagate have their 
+'normal' enterprise disks (ES.3-models) and are also selling their 
+cloud-based disks (CS models). Any suggestions/experience what to look 
+at/aim at? Or what are people using in general?
 
-HTH.
+Disk utilization:
+- I've noticed in our testsetup that we have several pg's taking up 
+ >300GB data each - is this normal? This results in some odd situations 
+where disk usage can vary by up to 15-20% (2TB disks). If we adjust the 
+weight it eventually means one of these pg will go to another disk and 
+it has to copy 300GB data. We're using 0.56.1.
 
- - Travis
+Some output from 'ceph pg dump':
+pg_stat objects mip     degr    unf     bytes   log     disklog state   
+state_stamp     v       reported        up      acting  last_scrub      
+scrub_stamp     last_deep_scrub deep_scrub_stamp
+4.5     90772   0       0       0       379301388412    150969  150969  
+active+clean    2013-01-22 00:07:13.384272      2827'412414     
+2795'3317565    [1,2]   [1,2]   2827'397587     2013-01-22 
+00:07:13.384225      2744'299767     2013-01-17 05:40:40.737279
 
-On Tue, Jan 22, 2013 at 2:16 PM, Isaac Otsiabah <zmoo76b@yahoo.com> wrote:
->
->
-> When my ceph data drives use btrfs as the underneath fileystem, the devices in my ceph.conf contain the lines "btrfs devs = /dev/sdx" as shown below.
->
->
-> ceph.conf
-> =======
-> .......
-> .......
-> .......
-> ......
->
-> [osd.0]
->         host = host1
->         public address = 10.5.0.123
->         cluster address = 10.5.1.123
->         btrfs devs = /dev/sde
->
-> [osd.1]
->         host = host2
->         public address = 10.5.0.123
->         cluster address = 10.5.1.123
->         btrfs devs = /dev/sdf
->
-> .......
-> .......
-> ......
->
->
-> Now, i want to use xfs as the underneath filesystem so in the ceph.conf file, should the lines "btrfs devs = /dev/sdx" be changed to "xfs devs = /dev/sdx" ?
->
-> Isaac
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Results in disk usage like:
+Filesystem                                              Size  Used 
+Avail Use% Mounted on
+/dev/sdd1                                               1.9T  1.4T  
+446G  77% /srv/ceph/osd5
+/dev/sdb1                                               1.4T  1.1T  
+331G  77% /srv/ceph/osd0
+/dev/sda1                                               1.9T  1.4T  
+442G  77% /srv/ceph/osd1
+/dev/sdc1                                               1.9T  1.8T   
+84G  96% /srv/ceph/osd2
+
+If we reweight sdc down (even with 0.00X % at a time) one of those big 
+pg's will eventually move to any one of the above disks and the image 
+will look exactly the same with the exception another disk will have 96% 
+usage instead (I've bumped cluster full % to 98% in this setup).
+
+Apologies up front if questions like these are not supposed to go to 
+this mailling-list.
+
+Any advice/ideas/suggestions are very welcome!
+
+Cheers,
+Martin Nielsen
