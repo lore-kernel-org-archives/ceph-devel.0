@@ -1,68 +1,29 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Consistently reading/writing rados objects via command line
-Date: Tue, 22 Jan 2013 12:28:30 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301221228250.17154@cobra.newdream.net>
-References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com> <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net> <CAPud5_4fdrdSb9aNms1H=4HPm_YYovQQuVJgzF4APcRKWXOzqQ@mail.gmail.com>
- <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net> <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: ssh passwords
+Date: Tue, 22 Jan 2013 21:44:44 +0100
+Message-ID: <CAJH6TXgCSh3zzm053YcVrf3u8kRpAaMpBTj_Rscrhx57Mg7F6A@mail.gmail.com>
+References: <CAJH6TXgFSLBAypG-wgJQ3=AjDk80ZhU1Yd94SBVyxSo4s3BW6A@mail.gmail.com>
+	<87FF75E30B3F4DCABD5DCE389CCE5A0A@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37134 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755508Ab3AVU2a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:28:30 -0500
-In-Reply-To: <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com>
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:44326 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754632Ab3AVUoq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:44:46 -0500
+Received: by mail-wg0-f45.google.com with SMTP id dq12so198414wgb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 12:44:44 -0800 (PST)
+In-Reply-To: <87FF75E30B3F4DCABD5DCE389CCE5A0A@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, 22 Jan 2013, Nick Bartos wrote:
-> Thanks!  Is it safe to just apply that last commit to 0.56.1?  Also,
-> is the rados command 'clonedata' instead of 'clone'?  That's what it
-> looked like in the code.
+2013/1/22 Gregory Farnum <greg@inktank.com>:
+> If you're using mkcephfs to set it up, or asking etc/init.d/ceph to start up daemons on each node, it uses ssh to go in and do that. I believe the Quick-start guide is using both of those. :)
 
-Yep, and yep!
+I'm using mkcephfs but actually I have just one host, mkcephfs is
+trying to connect to itself via scp.
 
-s
-
-> 
-> On Tue, Jan 22, 2013 at 9:27 AM, Sage Weil <sage@inktank.com> wrote:
-> > On Tue, 22 Jan 2013, Nick Bartos wrote:
-> >> Assuming that the clone is atomic so that the client only ever grabbed
-> >> a complete old or new version of the file, that method really seems
-> >> ideal.  How much work/time would that be?
-> >>
-> >> The objects will likely average around 10-20MB, but it's possible that
-> >> in some cases they may grow to a few hundred MB.
-> >
-> > You're in luck--my email load was mercifully light this morning.
-> >
-> >   713  ./rados -p data ls -
-> >   714  ./rados put foo.tmp /etc/passwd  -p data --object-locator foo
-> >   715  ./rados clone foo.tmp foo -p data --object-locator foo
-> >   716  ./rados -p data ls -
-> >   717  ./rados -p data rm foo.tmp --object-locator foo
-> >   718  ./rados -p data ls -
-> >   719  ./rados -p data get foo -
-> >
-> > see wip-rados-clone.
-> >
-> > sage
-> >
-> >
-> >>
-> >>
-> >> On Mon, Jan 21, 2013 at 9:14 PM, Sage Weil <sage@inktank.com> wrote:
-> >> > With a bit of additional support in the rados tool, we could write to
-> >> > object $foo.tmp with key $foo, and then clone it into position and delete
-> >> > the .tmp.
-> >> >
-> >> > If they're really big objects, though, you may also be better off with
-> >> > radosgw, which provides striping and atomicity..
-> >> >
-> >> > sage
-> >>
-> >>
-> 
-> 
+I think that an additional check should be made: if the host is the
+same as "hostname -f" a standard cp should be used in place of scp
