@@ -1,18 +1,18 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 10/12] rbd: send notify ack asynchronously
-Date: Tue, 22 Jan 2013 16:30:59 -0600
-Message-ID: <50FF1323.20208@inktank.com>
+Subject: [PATCH 11/12] rbd: implement sync method with new code
+Date: Tue, 22 Jan 2013 16:31:32 -0600
+Message-ID: <50FF1344.2080200@inktank.com>
 References: <50FF11EA.3000808@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:55168 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753190Ab3AVWbD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:31:03 -0500
-Received: by mail-ie0-f172.google.com with SMTP id c13so12674414ieb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:31:02 -0800 (PST)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:42516 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753371Ab3AVWbf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:31:35 -0500
+Received: by mail-ia0-f174.google.com with SMTP id o25so3568076iad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:31:35 -0800 (PST)
 In-Reply-To: <50FF11EA.3000808@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
