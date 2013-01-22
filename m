@@ -1,43 +1,46 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Consistently reading/writing rados objects via command line
-Date: Mon, 21 Jan 2013 21:14:46 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net>
-References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com>
+Subject: handling fs errors
+Date: Mon, 21 Jan 2013 22:05:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57459 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:57784 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750942Ab3AVFOr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 00:14:47 -0500
-In-Reply-To: <0CFBBA27610A4E35A8D340A46E009F40@inktank.com>
+	with ESMTP id S1752058Ab3AVGFn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 01:05:43 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 57F9980060
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Jan 2013 22:05:43 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 3644580060
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Jan 2013 22:05:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Nick Bartos <nick@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 21 Jan 2013, Gregory Farnum wrote:
-> On Monday, January 21, 2013 at 5:01 PM, Nick Bartos wrote:
-> > I would like to store some objects in rados, and retrieve them in a
-> > consistent manor. In my initial tests, if I do a 'rados -p foo put
-> > test /tmp/test', while it is uploading I can do a 'rados -p foo get
-> > test /tmp/blah' on another machine, and it will download a partially
-> > written file without returning an error code, so the downloader cannot
-> > tell the file is corrupt/incomplete.
-> >  
-> > My question is, how do I read/write objects in rados via the command
-> > line in such a way where the downloader does not get a corrupt or
-> > incomplete file? It's fine if it just returns an error on the client
-> > and I can try again, I just need to be notified on error.
-> >  
-> You must be writing large-ish objects? By default the rados tool will upload objects 4MB at a time and you're trying to download mid-way through the full object upload. You can add a "--block-size 20971520" to upload 20MB in a single operation, but make sure you don't exceed the "osd max write size" (90MB by default).
-> This is all client-side stuff, though ? from the RADOS object store's perspective, the file is complete after each 4MB write. If you want something more sophisticated (like handling larger objects) you'll need to do at least some minimal tooling of your own, e.g. by setting an object xattr before starting and after finishing the file change, then checking for that presence when reading (and locking on reads or doing a check when the read completes). You can do that with the "setxattr", "rmxattr", and "getxattr" options.
+We observed an interesting situation over the weekend.  The XFS volume 
+ceph-osd locked up (hung in xfs_ilock) for somewhere between 2 and 4 
+minutes.  After 3 minutes (180s), ceph-osd gave up waiting and committed 
+suicide.  XFS seemed to unwedge itself a bit after that, as the daemon was 
+able to restart and continue.
 
-With a bit of additional support in the rados tool, we could write to 
-object $foo.tmp with key $foo, and then clone it into position and delete 
-the .tmp.
+The problem is that during that 180s the OSD was claiming to be alive but 
+not able to do any IO.  That heartbeat check is meant as a sanity check 
+against a wedged kernel, but waiting so long meant that the ceph-osd 
+wasn't failed by the cluster quickly enough and client IO stalled.
 
-If they're really big objects, though, you may also be better off with 
-radosgw, which provides striping and atomicity..
+We could simply change that timeout to something close to the heartbeat 
+interval (currently default is 20s).  That will make ceph-osd much more 
+sensitive to fs stalls that may be transient (high load, whatever).
+
+Another option would be to make the osd heartbeat replies conditional on 
+whether the internal heartbeat is healthy.  Then the heartbeat warnings 
+could start at 10-20s, ping replies would pause, but the suicide could 
+still be 180s out.  If the stall is short-lived, pings will continue, the 
+osd will mark itself back up (if it was marked down) and continue.
+
+Having written that out, the last option sounds like the obvious choice.  
+Any other thoughts?
 
 sage
