@@ -1,57 +1,49 @@
-From: Neil Levine <neil.levine@inktank.com>
-Subject: Re: ssh passwords
-Date: Tue, 22 Jan 2013 11:35:50 -0800
-Message-ID: <CANygib-XkRn43PSk=ivOp8RVqqxGVGpDcfbbMYEOo-mNYFARsw@mail.gmail.com>
-References: <CAJH6TXgFSLBAypG-wgJQ3=AjDk80ZhU1Yd94SBVyxSo4s3BW6A@mail.gmail.com>
-	<50FEDE7A.5070307@cs.utah.edu>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: [0.48.3] OSD memory leak when scrubbing
+Date: Tue, 22 Jan 2013 21:01:30 +0100
+Message-ID: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f50.google.com ([209.85.212.50]:50806 "EHLO
-	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751625Ab3AVTfw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 14:35:52 -0500
-Received: by mail-vb0-f50.google.com with SMTP id ft2so6513794vbb.9
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 11:35:50 -0800 (PST)
-In-Reply-To: <50FEDE7A.5070307@cs.utah.edu>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:55785 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752624Ab3AVUBb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:01:31 -0500
+Received: by mail-ob0-f176.google.com with SMTP id un3so7328535obb.7
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 12:01:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xing Lin <xinglin@cs.utah.edu>
-Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Out of interest, would people prefer that the Ceph deployment script
-didn't try to handle server-server file copy and just did the local
-setup only, or is it useful that it tries to be a mini-config
-management tool at the same time?
+Hi,
 
-Neil
+Since I have ceph in prod, I experienced a memory leak in the OSD
+forcing to restart them every 5 or 6 days. Without that the OSD
+process just grows infinitely and eventually gets killed by the OOM
+killer. (To make sure it wasn't "legitimate", I left one grow up to 4G
+or RSS ...).
 
-On Tue, Jan 22, 2013 at 10:46 AM, Xing Lin <xinglin@cs.utah.edu> wrote:
-> If it is the command 'mkcephfs' that asked you for ssh password, then that
-> is probably because that script needs to push some files (ceph.conf, e.g) to
-> other hosts. If we open that script, we can see that it uses 'scp' to send
-> some files. If I remember correctly, for every osd at other hosts, it will
-> ask us ssh password seven times. So, we'd better set up public key first. :)
->
-> Xing
->
->
-> On 01/22/2013 11:24 AM, Gandalf Corvotempesta wrote:
->>
->> Hi all,
->> i'm trying my very first ceph installation following the 5-minutes
->> quickstart:
->> http://ceph.com/docs/master/start/quick-start/#install-debian-ubuntu
->>
->> just a question: why ceph is asking me  for SSH password? Is ceph
->> trying to connect to itself via SSH?
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Here's for example the RSS usage of the 12 OSDs process
+http://i.imgur.com/ZJxyldq.png during a few hours.
+
+What I've just noticed is that if I look at the logs of the osd
+process right when it grows, I can see it's scrubbing PGs from pool
+#3. When scrubbing PGs from other pools, nothing really happens memory
+wise.
+
+Pool #3 is the pool where I have all the RBD images for the VMs and so
+have a bunch of small read/write/modify. The other pools are used by
+RGW for object storage and are mostly write-once,read-many-times of
+relatively large objects.
+
+I'm planning to upgrade to 0.56.1 this week end and I was hoping to
+see if someone knew if that issue had been fixed with the scrubbing
+code ?
+
+I've seen other posts about memory leaks but at the time, it wasn't
+confirmed what was the source. Here I clearly see it's the scrubbing
+on pools that have RBD image.
+
+Cheers,
+
+      Sylvain
