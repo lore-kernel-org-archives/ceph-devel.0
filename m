@@ -1,92 +1,142 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 07/12] rbd: get rid of rbd_req_sync_watch()
-Date: Tue, 22 Jan 2013 16:30:03 -0600
-Message-ID: <50FF12EB.2000208@inktank.com>
+Subject: [PATCH 08/12] rbd: use new code for notify ack
+Date: Tue, 22 Jan 2013 16:30:18 -0600
+Message-ID: <50FF12FA.4020307@inktank.com>
 References: <50FF11EA.3000808@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:53014 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752537Ab3AVWaG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:30:06 -0500
-Received: by mail-ia0-f174.google.com with SMTP id o25so3618199iad.33
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:30:06 -0800 (PST)
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:46301 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753190Ab3AVWaW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:30:22 -0500
+Received: by mail-ie0-f180.google.com with SMTP id c10so12389908ieb.39
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:30:21 -0800 (PST)
 In-Reply-To: <50FF11EA.3000808@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Get rid of rbd_req_sync_watch(), because it is no longer used.
+Use the new object request tracking mechanism for handling a
+notify_ack request.
+
+Move the callback function below the definition of this so we don't
+have to do a pre-declaration.
+
+This resolves:
+    http://tracker.newdream.net/issues/3754
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   42 ------------------------------------------
- 1 file changed, 42 deletions(-)
+ drivers/block/rbd.c |   76
++++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 55 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3c110b3..7dedd18 100644
+index 7dedd18..08465ae 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1340,47 +1340,6 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
- 	rbd_req_sync_notify_ack(rbd_dev, hver, notify_id);
+@@ -1320,27 +1320,6 @@ static int rbd_req_sync_notify_ack(struct
+rbd_device *rbd_dev,
+ 	return ret;
  }
 
--/*
-- * Request sync osd watch/unwatch.  The value of "start" determines
-- * whether a watch request is being initiated or torn down.
-- */
--static int rbd_req_sync_watch(struct rbd_device *rbd_dev, int start)
+-static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
 -{
--	struct ceph_osd_req_op *op;
--	int ret = 0;
+-	struct rbd_device *rbd_dev = (struct rbd_device *)data;
+-	u64 hver;
+-	int rc;
 -
--	rbd_assert(start ^ !!rbd_dev->watch_event);
--	rbd_assert(start ^ !!rbd_dev->watch_request);
+-	if (!rbd_dev)
+-		return;
 -
--	if (start) {
--		struct ceph_osd_client *osdc;
+-	dout("rbd_watch_cb %s notify_id=%llu opcode=%u\n",
+-		rbd_dev->header_name, (unsigned long long) notify_id,
+-		(unsigned int) opcode);
+-	rc = rbd_dev_refresh(rbd_dev, &hver);
+-	if (rc)
+-		rbd_warn(rbd_dev, "got notification but failed to "
+-			   " update snaps: %d\n", rc);
 -
--		osdc = &rbd_dev->rbd_client->client->osdc;
--		ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0, rbd_dev,
--						&rbd_dev->watch_event);
--		if (ret < 0)
--			return ret;
--	}
--
--	op = rbd_osd_req_op_create(CEPH_OSD_OP_WATCH,
--				rbd_dev->watch_event->cookie,
--				rbd_dev->header.obj_version, start);
--	if (op)
--		ret = rbd_req_sync_op(rbd_dev,
--			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
--			      op, rbd_dev->header_name,
--			      0, 0, NULL, NULL);
--
--	/* Cancel the event if we're tearing down, or on error */
--
--	if (!start || !op || ret < 0) {
--		ceph_osdc_cancel_event(rbd_dev->watch_event);
--		rbd_dev->watch_event = NULL;
--	}
--	rbd_osd_req_op_destroy(op);
--
--	return ret;
+-	rbd_req_sync_notify_ack(rbd_dev, hver, notify_id);
 -}
-
+-
+-
  /*
   * Synchronous osd object method call
-@@ -3956,7 +3915,6 @@ static int rbd_dev_probe_finish(struct rbd_device
-*rbd_dev)
- 	if (ret)
- 		goto err_out_bus;
+  */
+@@ -1493,6 +1472,7 @@ static void rbd_osd_req_callback(struct
+ceph_osd_request *osd_req,
+ 	case CEPH_OSD_OP_WRITE:
+ 		rbd_osd_write_callback(obj_request, op);
+ 		break;
++	case CEPH_OSD_OP_NOTIFY_ACK:
+ 	case CEPH_OSD_OP_WATCH:
+ 		rbd_osd_trivial_callback(obj_request, op);
+ 		break;
+@@ -1827,6 +1807,60 @@ static int rbd_image_request_submit(struct
+rbd_image_request *image_request)
+ 	return ret;
+ }
 
--	(void) rbd_req_sync_watch;	/* avoid a warning */
- 	ret = rbd_dev_header_watch_sync(rbd_dev, 1);
- 	if (ret)
- 		goto err_out_bus;
++static int rbd_obj_notify_ack_sync(struct rbd_device *rbd_dev,
++				   u64 ver, u64 notify_id)
++{
++	struct rbd_obj_request *obj_request;
++	struct ceph_osd_req_op *op;
++	struct ceph_osd_client *osdc;
++	int ret;
++
++	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
++						obj_req_nodata);
++	if (!obj_request)
++		return -ENOMEM;
++
++	ret = -ENOMEM;
++	op = rbd_osd_req_op_create(CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver);
++	if (!op)
++		goto out_err;
++	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
++						obj_request, op);
++	rbd_osd_req_op_destroy(op);
++	if (!obj_request->osd_req)
++		goto out_err;
++
++	osdc = &rbd_dev->rbd_client->client->osdc;
++	ret = rbd_obj_request_submit(osdc, obj_request);
++	if (!ret)
++		ret = rbd_obj_request_wait(obj_request);
++out_err:
++	rbd_obj_request_put(obj_request);
++
++	return ret;
++}
++
++static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
++{
++	struct rbd_device *rbd_dev = (struct rbd_device *)data;
++	u64 hver;
++	int rc;
++
++	if (!rbd_dev)
++		return;
++
++	dout("rbd_watch_cb %s notify_id=%llu opcode=%u\n",
++		rbd_dev->header_name, (unsigned long long) notify_id,
++		(unsigned int) opcode);
++	rc = rbd_dev_refresh(rbd_dev, &hver);
++	if (rc)
++		rbd_warn(rbd_dev, "got notification but failed to "
++			   " update snaps: %d\n", rc);
++
++	(void) rbd_req_sync_notify_ack;	/* avoid a warning */
++	rbd_obj_notify_ack_sync(rbd_dev, hver, notify_id);
++}
++
+ /*
+  * Request sync osd watch/unwatch.  The value of "start" determines
+  * whether a watch request is being initiated or torn down.
 -- 
 1.7.9.5
 
