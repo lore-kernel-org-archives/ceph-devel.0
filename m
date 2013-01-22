@@ -1,102 +1,68 @@
-From: martin <martin@skytech.dk>
-Subject: Questions about journals, performance and disk utilization.
-Date: Tue, 22 Jan 2013 20:59:35 +0100
-Message-ID: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Consistently reading/writing rados objects via command line
+Date: Tue, 22 Jan 2013 12:28:30 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301221228250.17154@cobra.newdream.net>
+References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com> <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net> <CAPud5_4fdrdSb9aNms1H=4HPm_YYovQQuVJgzF4APcRKWXOzqQ@mail.gmail.com>
+ <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net> <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.skytech.dk ([95.154.26.34]:43910 "EHLO
-	mailserver.skytech.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755195Ab3AVUIt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:08:49 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mailserver.skytech.dk (Postfix) with ESMTP id AEAC7645DC6
-	for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 20:59:51 +0100 (CET)
-Received: from mailserver.skytech.dk ([127.0.0.1])
-	by localhost (mailserver.skytech.dk [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id ihigECzaN5ei for <ceph-devel@vger.kernel.org>;
-	Tue, 22 Jan 2013 20:59:36 +0100 (CET)
+Received: from cobra.newdream.net ([66.33.216.30]:37134 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755508Ab3AVU2a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 15:28:30 -0500
+In-Reply-To: <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Nick Bartos <nick@pistoncloud.com>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi list,
+On Tue, 22 Jan 2013, Nick Bartos wrote:
+> Thanks!  Is it safe to just apply that last commit to 0.56.1?  Also,
+> is the rados command 'clonedata' instead of 'clone'?  That's what it
+> looked like in the code.
 
-In a mixed SSD & SATA setup (5 or 8 nodes each holding 8x SATA and 4x 
-SSD) would it make sense to skip having journals on SSD or is the 
-advantage of doing so just too great? We're looking into having 2 pools, 
-sata and ssd and will be creating guests belonging into either of these 
-groups based on if they require high/heavy io.
+Yep, and yep!
 
-Also, we currently lean on going with a very simple setup using a 
-serverboard with 8x onboard raid slots (LSI 2308) and 6x onboard sata 
-slots and just attach all disks to both onboard controller and onboard 
-slots (for cost and simplicity) - and just pass them along as JBOD.
+s
 
-Any suggestions/input about:
-- Would it make sense to drop onboard controller and aim for a better 
-controller (cache/battery backed 12-16 port one)
-- Attach another cheapo JBOD card like SAS2008/LSI 2308 etc.
-- or just go with this setup (to keep it simpler and cheaper)
-
-Journals:
-- Would it make sense to kill say 1 ssd and 1 sata and attach 2 fast 
-SSD for journals? Or would that be 'redundant' in our case since we 
-already have a pool with sata and ssd (we do not expect heavy io in the 
-sata pool)
-
-Rbd striping:
-- Performance - afaik rbd is striped over objects; if one would create 
-say a 20GB rbd image would this mostly be striped over very few 
-objects/pg (say ~3 nodes as would be min. in our setup) or would one 
-expect it to be striped over pretty much the entirety of the nodes (5 or 
-8 in our case) in smaller objects (or even across all OSD?)
-
-Disks:
-- Any advice for SATA disks? I know a vendor like Seagate have their 
-'normal' enterprise disks (ES.3-models) and are also selling their 
-cloud-based disks (CS models). Any suggestions/experience what to look 
-at/aim at? Or what are people using in general?
-
-Disk utilization:
-- I've noticed in our testsetup that we have several pg's taking up 
- >300GB data each - is this normal? This results in some odd situations 
-where disk usage can vary by up to 15-20% (2TB disks). If we adjust the 
-weight it eventually means one of these pg will go to another disk and 
-it has to copy 300GB data. We're using 0.56.1.
-
-Some output from 'ceph pg dump':
-pg_stat objects mip     degr    unf     bytes   log     disklog state   
-state_stamp     v       reported        up      acting  last_scrub      
-scrub_stamp     last_deep_scrub deep_scrub_stamp
-4.5     90772   0       0       0       379301388412    150969  150969  
-active+clean    2013-01-22 00:07:13.384272      2827'412414     
-2795'3317565    [1,2]   [1,2]   2827'397587     2013-01-22 
-00:07:13.384225      2744'299767     2013-01-17 05:40:40.737279
-
-Results in disk usage like:
-Filesystem                                              Size  Used 
-Avail Use% Mounted on
-/dev/sdd1                                               1.9T  1.4T  
-446G  77% /srv/ceph/osd5
-/dev/sdb1                                               1.4T  1.1T  
-331G  77% /srv/ceph/osd0
-/dev/sda1                                               1.9T  1.4T  
-442G  77% /srv/ceph/osd1
-/dev/sdc1                                               1.9T  1.8T   
-84G  96% /srv/ceph/osd2
-
-If we reweight sdc down (even with 0.00X % at a time) one of those big 
-pg's will eventually move to any one of the above disks and the image 
-will look exactly the same with the exception another disk will have 96% 
-usage instead (I've bumped cluster full % to 98% in this setup).
-
-Apologies up front if questions like these are not supposed to go to 
-this mailling-list.
-
-Any advice/ideas/suggestions are very welcome!
-
-Cheers,
-Martin Nielsen
+> 
+> On Tue, Jan 22, 2013 at 9:27 AM, Sage Weil <sage@inktank.com> wrote:
+> > On Tue, 22 Jan 2013, Nick Bartos wrote:
+> >> Assuming that the clone is atomic so that the client only ever grabbed
+> >> a complete old or new version of the file, that method really seems
+> >> ideal.  How much work/time would that be?
+> >>
+> >> The objects will likely average around 10-20MB, but it's possible that
+> >> in some cases they may grow to a few hundred MB.
+> >
+> > You're in luck--my email load was mercifully light this morning.
+> >
+> >   713  ./rados -p data ls -
+> >   714  ./rados put foo.tmp /etc/passwd  -p data --object-locator foo
+> >   715  ./rados clone foo.tmp foo -p data --object-locator foo
+> >   716  ./rados -p data ls -
+> >   717  ./rados -p data rm foo.tmp --object-locator foo
+> >   718  ./rados -p data ls -
+> >   719  ./rados -p data get foo -
+> >
+> > see wip-rados-clone.
+> >
+> > sage
+> >
+> >
+> >>
+> >>
+> >> On Mon, Jan 21, 2013 at 9:14 PM, Sage Weil <sage@inktank.com> wrote:
+> >> > With a bit of additional support in the rados tool, we could write to
+> >> > object $foo.tmp with key $foo, and then clone it into position and delete
+> >> > the .tmp.
+> >> >
+> >> > If they're really big objects, though, you may also be better off with
+> >> > radosgw, which provides striping and atomicity..
+> >> >
+> >> > sage
+> >>
+> >>
+> 
+> 
