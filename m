@@ -1,99 +1,63 @@
 From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: [PATCH 1/3] rbd: small changes
-Date: Tue, 22 Jan 2013 14:40:12 -0800
-Message-ID: <50FF154C.1010002@inktank.com>
-References: <50FF0B22.5060201@inktank.com> <50FF0B66.20805@inktank.com>
+Subject: Re: [PATCH 2/3] rbd: check for overflow in rbd_get_num_segments()
+Date: Tue, 22 Jan 2013 14:40:48 -0800
+Message-ID: <50FF1570.4090709@inktank.com>
+References: <50FF0B22.5060201@inktank.com> <50FF0B76.5040402@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:63587 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753097Ab3AVWkQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:40:16 -0500
-Received: by mail-pa0-f52.google.com with SMTP id fb1so4317035pad.25
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:40:15 -0800 (PST)
-In-Reply-To: <50FF0B66.20805@inktank.com>
+Received: from mail-da0-f48.google.com ([209.85.210.48]:64284 "EHLO
+	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753272Ab3AVWkw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:40:52 -0500
+Received: by mail-da0-f48.google.com with SMTP id k18so3484718dae.7
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:40:51 -0800 (PST)
+In-Reply-To: <50FF0B76.5040402@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
-On 01/22/2013 01:57 PM, Alex Elder wrote:
-> A few very minor changes to the rbd code:
->      - RBD_MAX_OPT_LEN is unused, so get rid of it
->      - Consolidate rbd options definitions
->      - Make rbd_segment_name() return pointer to const char
+On 01/22/2013 01:58 PM, Alex Elder wrote:
+> The return type of rbd_get_num_segments() is int, but the values it
+> operates on are u64.  Although it's not likely, there's no guarantee
+> the result won't exceed what can be respresented in an int.  The
+> function is already designed to return -ERANGE on error, so just add
+> this possible overflow as another reason to return that.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   17 ++++++++---------
->   1 file changed, 8 insertions(+), 9 deletions(-)
+>   drivers/block/rbd.c |    7 ++++++-
+>   1 file changed, 6 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 007b726..4ed0741 100644
+> index 4ed0741..58d01e3 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -69,7 +69,6 @@
->   			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
->
->   #define RBD_MAX_SNAP_COUNT	510	/* allows max snapc to fit in 4KB */
-> -#define RBD_MAX_OPT_LEN		1024
->
->   #define RBD_SNAP_HEAD_NAME	"-"
->
-> @@ -96,8 +95,6 @@
->   #define DEV_NAME_LEN		32
->   #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
->
-> -#define RBD_READ_ONLY_DEFAULT		false
-> -
->   /*
->    * block device image metadata (in-memory version)
->    */
-> @@ -156,10 +153,6 @@ struct rbd_spec {
->   	struct kref	kref;
->   };
->
-> -struct rbd_options {
-> -	bool	read_only;
-> -};
-> -
->   /*
->    * an instance of the client.  multiple devices may share an rbd client.
->    */
-> @@ -475,6 +468,12 @@ static match_table_t rbd_opts_tokens = {
->   	{-1, NULL}
->   };
->
-> +struct rbd_options {
-> +	bool	read_only;
-> +};
-> +
-> +#define RBD_READ_ONLY_DEFAULT	false
-> +
->   static int parse_rbd_opts_token(char *c, void *private)
+> @@ -820,6 +820,7 @@ static int rbd_get_num_segments(struct
+> rbd_image_header *header,
 >   {
->   	struct rbd_options *rbd_opts = private;
-> @@ -773,7 +772,7 @@ static void rbd_header_free(struct rbd_image_header
-> *header)
->   	header->snapc = NULL;
+>   	u64 start_seg;
+>   	u64 end_seg;
+> +	u64 result;
+>
+>   	if (!len)
+>   		return 0;
+> @@ -829,7 +830,11 @@ static int rbd_get_num_segments(struct
+> rbd_image_header *header,
+>   	start_seg = ofs >> header->obj_order;
+>   	end_seg = (ofs + len - 1) >> header->obj_order;
+>
+> -	return end_seg - start_seg + 1;
+> +	result = end_seg - start_seg + 1;
+> +	if (result > (u64) INT_MAX)
+> +		return -ERANGE;
+> +
+> +	return (int) result;
 >   }
 >
-> -static char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
-> +static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
->   {
->   	char *name;
->   	u64 segment;
-> @@ -1338,7 +1337,7 @@ static int rbd_do_op(struct request *rq,
->   		     struct rbd_req_coll *coll,
->   		     int coll_index)
->   {
-> -	char *seg_name;
-> +	const char *seg_name;
->   	u64 seg_ofs;
->   	u64 seg_len;
->   	int ret;
+>   /*
 >
