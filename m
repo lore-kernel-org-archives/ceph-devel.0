@@ -1,72 +1,40 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Inktank team @ FOSDEM 2013 ?
-Date: Tue, 22 Jan 2013 22:41:38 +0100
-Message-ID: <50FF0792.9050600@dachary.org>
-References: <50FBBC59.4000006@grnet.gr> <50FBD097.3020206@dachary.org> <CAP8Oy=+ZEmdn9pdvvTuEehZvQygHCkQ7Fu7NZk=wyxgHeT5rig@mail.gmail.com> <50FC25A6.1070803@grnet.gr> <50FEDB38.2020300@ubuntu.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: Questions about journals, performance and disk utilization.
+Date: Tue, 22 Jan 2013 22:50:04 +0100
+Message-ID: <50FF098C.8050707@profihost.ag>
+References: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk> <50FF0197.6020202@inktank.com> <50FF0410.3030308@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigAD8863D009988747DEABF7E0"
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:38891 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751123Ab3AVVlk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:41:40 -0500
-In-Reply-To: <50FEDB38.2020300@ubuntu.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:46596 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751513Ab3AVVuG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:50:06 -0500
+In-Reply-To: <50FF0410.3030308@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Jeff Mitchell <jeffrey.mitchell@gmail.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, martin <martin@skytech.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigAD8863D009988747DEABF7E0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
+Am 22.01.2013 22:26, schrieb Jeff Mitchell:
+> Mark Nelson wrote:
+>> It may (or may not) help to use a power-of-2 number of PGs. It's
+>> generally a good idea to do this anyway, so if you haven't set up your
+>> production cluster yet, you may want to play around with this. Basically
+>> just take whatever number you were planning on using and round it up (or
+>> down slightly). IE if you were going to use 7,000 PGs, round up to 8192.
+>
+> As I was asking about earlier on IRC, I'm in a situation where the docs
+> did not mention this in the section about calculating PGs so I have a
+> non-power-of-2 -- and since there are some production things running on
+> that pool I can't currently change it.
 
+Oh same thing here - did i miss the doc or can someone point me the 
+location.
 
+Is there a chance to change the number of PGs for a pool?
 
-On 01/22/2013 07:32 PM, James Page wrote:
-> Hi All
->=20
-> On 20/01/13 11:13, Constantinos Venetsanopoulos wrote:
->> Hello Loic, Sebastien, Patrick,
->=20
->> that's great news! I'm sure we'll have some very interesting stuff
->> to talk about. Saturday 14:00 @ K.3.201 also seems fine.
->=20
-> I'm attending FOSDEM as well - I'll see you there!
->=20
-
-I've updated http://wiki.ceph.com/deprecated/FOSDEM2013 with your name.
-
-See you there :-)
-
-> Cheers
->=20
-> James
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enigAD8863D009988747DEABF7E0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlD/B5IACgkQ8dLMyEl6F23uKgCffPrWmbSeyLembnSRpJQMo6wt
-vckAmwSZYAekiGZ7+Rbu5RFwrniyQhm0
-=5ANF
------END PGP SIGNATURE-----
-
---------------enigAD8863D009988747DEABF7E0--
+Greets,
+Stefan
