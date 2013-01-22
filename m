@@ -1,104 +1,71 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: handling fs errors
-Date: Wed, 23 Jan 2013 01:20:08 +0300
-Message-ID: <CABYiri8U-pW4ekuJEy0xtvwFE6mzV1JnO=7n+BD7BTbH9nBOwA@mail.gmail.com>
-References: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 00/12] rbd: new request tracking code
+Date: Tue, 22 Jan 2013 16:25:46 -0600
+Message-ID: <50FF11EA.3000808@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:56802 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752226Ab3AVWU3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:20:29 -0500
-Received: by mail-ob0-f174.google.com with SMTP id 16so1682003obc.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:20:28 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
+Received: from mail-ia0-f179.google.com ([209.85.210.179]:48450 "EHLO
+	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750797Ab3AVWZt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:25:49 -0500
+Received: by mail-ia0-f179.google.com with SMTP id x24so3602509iak.10
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:25:49 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 22, 2013 at 10:05 AM, Sage Weil <sage@inktank.com> wrote:
-> We observed an interesting situation over the weekend.  The XFS volume
-> ceph-osd locked up (hung in xfs_ilock) for somewhere between 2 and 4
-> minutes.  After 3 minutes (180s), ceph-osd gave up waiting and committed
-> suicide.  XFS seemed to unwedge itself a bit after that, as the daemon was
-> able to restart and continue.
->
-> The problem is that during that 180s the OSD was claiming to be alive but
-> not able to do any IO.  That heartbeat check is meant as a sanity check
-> against a wedged kernel, but waiting so long meant that the ceph-osd
-> wasn't failed by the cluster quickly enough and client IO stalled.
->
-> We could simply change that timeout to something close to the heartbeat
-> interval (currently default is 20s).  That will make ceph-osd much more
-> sensitive to fs stalls that may be transient (high load, whatever).
->
-> Another option would be to make the osd heartbeat replies conditional on
-> whether the internal heartbeat is healthy.  Then the heartbeat warnings
-> could start at 10-20s, ping replies would pause, but the suicide could
-> still be 180s out.  If the stall is short-lived, pings will continue, the
-> osd will mark itself back up (if it was marked down) and continue.
->
-> Having written that out, the last option sounds like the obvious choice.
-> Any other thoughts?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This series of patches reimplements the way rbd requests are
+managed.
 
-By the way, is there any worth of preventing situation below - one
-host buried down in the softlocks marking almost all neighbors down
-for a short time? That`s harmless, because all osds will rejoin
-cluster in couple of next heartbeats, but all I/O will stuck at this
-time, rather than only operations with pgs on failing osd, so may be
-it`ll be useful to introduce kind of down-mark-quorum for such cases.
+The motivation for doing this is that the existing code assumes
+in places that every I/O request was associated with a Linux
+request initiated from the block layer.  In order to support
+layered rbd images, we need to initiate rbd image requests
+within rbd.  In addition, the size of an rbd object in a parent
+image could be smaller than the object size in the child.  That
+means satisfying a request to a single object in the child image
+may require issuing requests to multiple objects in the parent.
+This too was not easily supported by the existing code.
 
-2013-01-22 14:40:31.481174 mon.0 [INF] osd.0 10.5.0.10:6800/6578
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481085 >=
-grace 20
-.000000)
-2013-01-22 14:40:31.481293 mon.0 [INF] osd.1 10.5.0.11:6800/6488
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481228 >=
-grace 20
-.000000)
-2013-01-22 14:40:31.481410 mon.0 [INF] osd.2 10.5.0.12:6803/7561
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481355 >=
-grace 20
-.000000)
-2013-01-22 14:40:31.481522 mon.0 [INF] osd.4 10.5.0.14:6803/5697
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481467 >=
-grace 20
-.000000)
-2013-01-22 14:40:31.481641 mon.0 [INF] osd.6 10.5.0.16:6803/5679
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481586 >=
-grace 20.000000)
-2013-01-22 14:40:31.481746 mon.0 [INF] osd.8 10.5.0.10:6803/6638
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481700 >=
-grace 20.000000)
-2013-01-22 14:40:31.481863 mon.0 [INF] osd.9 10.5.0.11:6803/6547
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481811 >=
-grace 20.000000)
-2013-01-22 14:40:31.481976 mon.0 [INF] osd.10 10.5.0.12:6800/7019
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.481916 >=
-grace 20.000000)
-2013-01-22 14:40:31.482077 mon.0 [INF] osd.12 10.5.0.14:6800/5637
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482022 >=
-grace 20.000000)
-2013-01-22 14:40:31.482184 mon.0 [INF] osd.14 10.5.0.16:6800/5620
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482130 >=
-grace 20.000000)
-2013-01-22 14:40:31.482334 mon.0 [INF] osd.17 10.5.0.31:6800/5854
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482275 >=
-grace 20.000000)
-2013-01-22 14:40:31.482436 mon.0 [INF] osd.18 10.5.0.32:6800/5981
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482389 >=
-grace 20.000000)
-2013-01-22 14:40:31.482539 mon.0 [INF] osd.19 10.5.0.33:6800/5570
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482489 >=
-grace 20.000000)
-2013-01-22 14:40:31.482667 mon.0 [INF] osd.20 10.5.0.34:6800/5643
-failed (3 reports from 1 peers after 2013-01-22 14:40:54.482620 >=
-grace 20.000000)
+In this new code, we distinguish between an "image request"
+and an "object request."  An image request is an I/O
+operation defined in terms of an entire rbd image--its offset
+and length are relative to the image as a whole.  An object
+request is a request targeted at a single rbd object.  An
+image request is implemented using one or more object requests,
+but individual object requests can also be used for doing
+things like reading or operating on the rbd image header
+object.
+
+The new code also more clearly separates itself from the
+osd client, especially with respect to request completion.
+Each object request supplies a common callback function with
+its osd client request.  This callback handles certain
+rbd-specific tasks, like zero-filling portions of a read
+buffer that were not supplied by the.  A simple wait routine
+is now supplied to allow synchronous completion of an object
+request.
+
+This set of changes is available in the ceph-client git
+repository branch "wip-rbd-review".  That branch also
+begins with three unrelated commits (which I recently posted
+for review) and ends with two others (which are temporary
+and there only to test with version 2 image support
+enabled).
+
+					-Alex
+
+[PATCH 01/12] rbd: new request tracking code
+[PATCH 02/12] rbd: kill rbd_rq_fn() and all other related code
+[PATCH 03/12] rbd: kill rbd_req_coll and rbd_request
+[PATCH 04/12] rbd: implement sync object read with new code
+[PATCH 05/12] rbd: get rid of rbd_req_sync_read()
+[PATCH 06/12] rbd: implement watch/unwatch with new code
+[PATCH 07/12] rbd: get rid of rbd_req_sync_watch()
+[PATCH 08/12] rbd: use new code for notify ack
+[PATCH 09/12] rbd: get rid of rbd_req_sync_notify_ack()
+[PATCH 10/12] rbd: send notify ack asynchronously
+[PATCH 11/12] rbd: implement sync method with new code
+[PATCH 12/12] rbd: get rid of rbd_req_sync_exec()
