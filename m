@@ -1,52 +1,76 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: handling fs errors
-Date: Tue, 22 Jan 2013 08:09:20 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5E3A4B@SHSMSX102.ccr.corp.intel.com>
-References: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: handling fs errors
+Date: Tue, 22 Jan 2013 14:12:23 +0100
+Message-ID: <50FE9037.8040501@widodh.nl>
+References: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net> <CAC-hyiHnGXrr5hiZF__BP_uWZeSrhFk_psphAcRPwb5qGa69cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:25466 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752263Ab3AVIJ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jan 2013 03:09:57 -0500
-In-Reply-To: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
-Content-Language: en-US
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:34682 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751726Ab3AVNM2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 08:12:28 -0500
+In-Reply-To: <CAC-hyiHnGXrr5hiZF__BP_uWZeSrhFk_psphAcRPwb5qGa69cw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-SXMgdGhlcmUgYW55IGtub3duIGNvbm5lY3Rpb24gd2l0aCB0aGUgcHJldmlvdXMgZGlzY3Vzc2lv
-biAiIEhpdCBzdWljaWRlIHRpbWVvdXQgYWZ0ZXIgYWRkaW5nIG5ldyBvc2QiIG9yICJDZXBoIHVu
-c3RhYmxlIG9uIFhGUyIgPw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KU2VudDogMjAxM8TqMdTCMjLI
-1SAxNDowNg0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBoYW5kbGlu
-ZyBmcyBlcnJvcnMNCg0KV2Ugb2JzZXJ2ZWQgYW4gaW50ZXJlc3Rpbmcgc2l0dWF0aW9uIG92ZXIg
-dGhlIHdlZWtlbmQuICBUaGUgWEZTIHZvbHVtZSBjZXBoLW9zZCBsb2NrZWQgdXAgKGh1bmcgaW4g
-eGZzX2lsb2NrKSBmb3Igc29tZXdoZXJlIGJldHdlZW4gMiBhbmQgNCBtaW51dGVzLiAgQWZ0ZXIg
-MyBtaW51dGVzICgxODBzKSwgY2VwaC1vc2QgZ2F2ZSB1cCB3YWl0aW5nIGFuZCBjb21taXR0ZWQg
-c3VpY2lkZS4gIFhGUyBzZWVtZWQgdG8gdW53ZWRnZSBpdHNlbGYgYSBiaXQgYWZ0ZXIgdGhhdCwg
-YXMgdGhlIGRhZW1vbiB3YXMgYWJsZSB0byByZXN0YXJ0IGFuZCBjb250aW51ZS4NCg0KVGhlIHBy
-b2JsZW0gaXMgdGhhdCBkdXJpbmcgdGhhdCAxODBzIHRoZSBPU0Qgd2FzIGNsYWltaW5nIHRvIGJl
-IGFsaXZlIGJ1dCBub3QgYWJsZSB0byBkbyBhbnkgSU8uICBUaGF0IGhlYXJ0YmVhdCBjaGVjayBp
-cyBtZWFudCBhcyBhIHNhbml0eSBjaGVjayBhZ2FpbnN0IGEgd2VkZ2VkIGtlcm5lbCwgYnV0IHdh
-aXRpbmcgc28gbG9uZyBtZWFudCB0aGF0IHRoZSBjZXBoLW9zZCB3YXNuJ3QgZmFpbGVkIGJ5IHRo
-ZSBjbHVzdGVyIHF1aWNrbHkgZW5vdWdoIGFuZCBjbGllbnQgSU8gc3RhbGxlZC4NCg0KV2UgY291
-bGQgc2ltcGx5IGNoYW5nZSB0aGF0IHRpbWVvdXQgdG8gc29tZXRoaW5nIGNsb3NlIHRvIHRoZSBo
-ZWFydGJlYXQgaW50ZXJ2YWwgKGN1cnJlbnRseSBkZWZhdWx0IGlzIDIwcykuICBUaGF0IHdpbGwg
-bWFrZSBjZXBoLW9zZCBtdWNoIG1vcmUgc2Vuc2l0aXZlIHRvIGZzIHN0YWxscyB0aGF0IG1heSBi
-ZSB0cmFuc2llbnQgKGhpZ2ggbG9hZCwgd2hhdGV2ZXIpLg0KDQpBbm90aGVyIG9wdGlvbiB3b3Vs
-ZCBiZSB0byBtYWtlIHRoZSBvc2QgaGVhcnRiZWF0IHJlcGxpZXMgY29uZGl0aW9uYWwgb24gd2hl
-dGhlciB0aGUgaW50ZXJuYWwgaGVhcnRiZWF0IGlzIGhlYWx0aHkuICBUaGVuIHRoZSBoZWFydGJl
-YXQgd2FybmluZ3MgY291bGQgc3RhcnQgYXQgMTAtMjBzLCBwaW5nIHJlcGxpZXMgd291bGQgcGF1
-c2UsIGJ1dCB0aGUgc3VpY2lkZSBjb3VsZCBzdGlsbCBiZSAxODBzIG91dC4gIElmIHRoZSBzdGFs
-bCBpcyBzaG9ydC1saXZlZCwgcGluZ3Mgd2lsbCBjb250aW51ZSwgdGhlIG9zZCB3aWxsIG1hcmsg
-aXRzZWxmIGJhY2sgdXAgKGlmIGl0IHdhcyBtYXJrZWQgZG93bikgYW5kIGNvbnRpbnVlLg0KDQpI
-YXZpbmcgd3JpdHRlbiB0aGF0IG91dCwgdGhlIGxhc3Qgb3B0aW9uIHNvdW5kcyBsaWtlIHRoZSBv
-YnZpb3VzIGNob2ljZS4gIA0KQW55IG90aGVyIHRob3VnaHRzPw0KDQpzYWdlDQotLQ0KVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
-ZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0K
+
+
+On 01/22/2013 07:12 AM, Yehuda Sadeh wrote:
+> On Mon, Jan 21, 2013 at 10:05 PM, Sage Weil <sage@inktank.com> wrote:
+>> We observed an interesting situation over the weekend.  The XFS volume
+>> ceph-osd locked up (hung in xfs_ilock) for somewhere between 2 and 4
+>> minutes.  After 3 minutes (180s), ceph-osd gave up waiting and committed
+>> suicide.  XFS seemed to unwedge itself a bit after that, as the daemon was
+>> able to restart and continue.
+>>
+>> The problem is that during that 180s the OSD was claiming to be alive but
+>> not able to do any IO.  That heartbeat check is meant as a sanity check
+>> against a wedged kernel, but waiting so long meant that the ceph-osd
+>> wasn't failed by the cluster quickly enough and client IO stalled.
+>>
+>> We could simply change that timeout to something close to the heartbeat
+>> interval (currently default is 20s).  That will make ceph-osd much more
+>> sensitive to fs stalls that may be transient (high load, whatever).
+>>
+>> Another option would be to make the osd heartbeat replies conditional on
+>> whether the internal heartbeat is healthy.  Then the heartbeat warnings
+>> could start at 10-20s, ping replies would pause, but the suicide could
+>> still be 180s out.  If the stall is short-lived, pings will continue, the
+>> osd will mark itself back up (if it was marked down) and continue.
+>>
+>> Having written that out, the last option sounds like the obvious choice.
+>> Any other thoughts?
+>>
+>
+> Another option would be to have the osd reply to the ping with some
+> health description.
+>
+
+Looking to the future with more monitoring that might be a good idea.
+
+If an OSD simply stops sending heartbeats if the internal conditions 
+aren't met you don't know what's going on.
+
+If the heartbeat would have metadata which tells: "I'm here, but not in 
+such a good shape" that could be reported back to the monitors.
+
+Monitoring tools could read this out and could sent out 
+notifications/alerts to where they want.
+
+Now we assume I/O completely stalls, but the metadata could also contain 
+high latency? If the latency goes over threshold X you can still mark 
+the OSD out temporarily since it will impact clients, but some 
+information towards the monitor might be useful.
+
+Wido
+
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
