@@ -1,52 +1,47 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: questions on networks and hardware
-Date: Tue, 22 Jan 2013 13:05:09 -0800
-Message-ID: <50FEFF05.1050700@inktank.com>
-References: <EFFE82E1-B74B-4DAB-8801-5311FA903618@jnielsen.net> <CAJH6TXi40uB5Xup3xob+zVJaf6q=4dKjdgs4+NkD-fa5Bh2z0Q@mail.gmail.com> <6C6B937F81BD480D8B439B27D504FE9C@inktank.com> <CAJH6TXiutMfJ51G3itP83=-eSX+W9xtdPftNj0j0xcg+rHANmw@mail.gmail.com> <BA913A5056344C77AE4476417C3197A3@inktank.com> <CAJH6TXhxCBeB7-0vw3mbVO05zckH=F5JiVBJG7woW2SfwrBFBQ@mail.gmail.com>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: flashcache
+Date: Tue, 22 Jan 2013 16:06:18 -0500
+Message-ID: <EC8A8ED0-DBD0-4C29-93D0-C656CD4A82A9@ornl.gov>
+References: <CAJH6TXiJjEq4C7k5p39Eo+pgwoq372r29RJriBee+irJPLvLpw@mail.gmail.com>
+ <alpine.DEB.2.00.1301161325280.27925@cobra.newdream.net>
+ <50F72150.7080002@inktank.com>
+ <CAJH6TXjY+vhEme6mAsnkWwVD2Xix7N_5GOAHEA92DszASz3yMQ@mail.gmail.com>
+ <CAOzFzEhXTTtMDtsgR1ckRsdSxuCo=f8HGwd2+kJEthSGbwq1-w@mail.gmail.com>
+ <50F7FE9B.6050908@inktank.com>
+ <44CC6A16-2ADD-4DBB-8B07-0E16032AEDA2@ornl.gov>
+ <CAJH6TXhMXfsgx607aOxpLmpq15vg44AW8NHbm_Yw8yC45CHyKA@mail.gmail.com>
+ <F926561F-9D73-4B74-AFC7-F5B962810733@ornl.gov>
+ <CAJH6TXi2g_Z56SfEjsK9tTdvxBvHUbMfM5UuQf37LAL4K5wTaQ@mail.gmail.com>
+ <25E46CD3-17AA-4F31-B157-4B3666408C82@ornl.gov>
+ <CAJH6TXj_JjmUsK4FhZhPiH0Eh4hYouJCJCMCmk6A1F2rw6=fxA@mail.gmail.com>
+ <D36B9470-CEF7-43D2-83E3-F91ABA983100@ornl.gov>
+ <CAJH6TXidPR+-Mg-=9xwSPRN_SVkZ=8Fv2rfJ5tyk86mNp8fcKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:35757 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751789Ab3AVVFN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:05:13 -0500
-Received: by mail-pa0-f45.google.com with SMTP id bg2so4280326pad.4
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 13:05:12 -0800 (PST)
-In-Reply-To: <CAJH6TXhxCBeB7-0vw3mbVO05zckH=F5JiVBJG7woW2SfwrBFBQ@mail.gmail.com>
+Received: from mta02.ornl.gov ([128.219.177.12]:58553 "EHLO mta02.ornl.gov"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752136Ab3AVVGU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 16:06:20 -0500
+In-Reply-To: <CAJH6TXidPR+-Mg-=9xwSPRN_SVkZ=8Fv2rfJ5tyk86mNp8fcKw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Gregory Farnum <greg@inktank.com>, John Nielsen <lists@jnielsen.net>, ceph-devel@vger.kernel.org
+Cc: Mark Nelson <mark.nelson@inktank.com>, Joseph Glanville <joseph.glanville@orionvm.com.au>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Jan 17, 2013, at 11:19 AM, Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com> wrote:
 
+> 2013/1/17 Atchley, Scott <atchleyes@ornl.gov>:
+>> 10GbE should get close to 1.2 GB/s compared to 1 GB/s for IB SDR. Latency again depends on the Ethernet driver.
+> 
+> 10GbE faster than IB SDR? Really ?
 
-On 01/21/2013 12:19 AM, Gandalf Corvotempesta wrote:
-> 2013/1/21 Gregory Farnum <greg@inktank.com>:
->> I'm not quite sure what you mean=85the use of the "cluster network" =
-and "public network" are really just intended as conveniences for peopl=
-e with multiple NICs on their box. There's nothing preventing you from =
-running everything on the same network=85(and more specifically, from d=
-ifferent speed grades to different boxes, but keeping them all on the s=
-ame network).
->
-> I mean using two cluster network and two pubic networks. 4 NICs in to=
-tal.
-> Our cluster network will be 10GBe or Infiniband DDR/QDR, making a
-> fully redundany cluster network (two nics on each server, two
-> switches) will double our costs.
+Define faster. Throughput or latency?
 
-Well, again, you needn't use two different networks for Ceph; that=20
-capability is there so that you *can* only use the faster gear for the=20
-cluster traffic if you want to limit costs but still segregate traffic.=
-=20
-  If you're just after a fully-redundant network (by which I assume you=
-=20
-also mean fully-redundant fabric, power, etc.), there's no reason it=20
-can't all be fast gear.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Throughput, yes. You can easily measure 1.2 GB/s using many 10GbE NICs.
+
+Latency, (mostly) no. IB SDR is about 4 us while the best TCP performance I have measured over 10GbE is about 16 us (interrupt coalescing turned off, NAGLE off, etc). Some vendors (e.g. Myricom and SolarFlare) have userspace, OS-bypass socket libraries for their NICs that get this down to 3-6 us.
+
+Scott
