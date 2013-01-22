@@ -1,223 +1,99 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 12/12] rbd: get rid of rbd_req_sync_exec()
-Date: Tue, 22 Jan 2013 16:31:41 -0600
-Message-ID: <50FF134D.3020500@inktank.com>
-References: <50FF11EA.3000808@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: [PATCH 1/3] rbd: small changes
+Date: Tue, 22 Jan 2013 14:40:12 -0800
+Message-ID: <50FF154C.1010002@inktank.com>
+References: <50FF0B22.5060201@inktank.com> <50FF0B66.20805@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:64949 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753582Ab3AVWbo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:31:44 -0500
-Received: by mail-ie0-f173.google.com with SMTP id e13so12543571iej.4
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:31:44 -0800 (PST)
-In-Reply-To: <50FF11EA.3000808@inktank.com>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:63587 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753097Ab3AVWkQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:40:16 -0500
+Received: by mail-pa0-f52.google.com with SMTP id fb1so4317035pad.25
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:40:15 -0800 (PST)
+In-Reply-To: <50FF0B66.20805@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Get rid rbd_req_sync_exec() because it is no longer used.  That
-eliminates the last use of rbd_req_sync_op(), so get rid of that
-too.  And finally, that leaves rbd_do_request() unreferenced, so get
-rid of that.
+Reviewed-by: Dan Mick <dan.mick@inktank.com>
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |  160
----------------------------------------------------
- 1 file changed, 160 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 934bb61..b655088 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1148,126 +1148,6 @@ static void rbd_osd_req_op_destroy(struct
-ceph_osd_req_op *op)
- 	kfree(op);
- }
-
--/*
-- * Send ceph osd request
-- */
--static int rbd_do_request(struct request *rq,
--			  struct rbd_device *rbd_dev,
--			  struct ceph_snap_context *snapc,
--			  u64 snapid,
--			  const char *object_name, u64 ofs, u64 len,
--			  struct bio *bio,
--			  struct page **pages,
--			  int num_pages,
--			  int flags,
--			  struct ceph_osd_req_op *op,
--			  void (*rbd_cb)(struct ceph_osd_request *,
--					 struct ceph_msg *),
--			  u64 *ver)
--{
--	struct ceph_osd_client *osdc;
--	struct ceph_osd_request *osd_req;
--	struct timespec mtime = CURRENT_TIME;
--	int ret;
--
--	dout("rbd_do_request object_name=%s ofs=%llu len=%llu\n",
--		object_name, (unsigned long long) ofs,
--		(unsigned long long) len);
--
--	osdc = &rbd_dev->rbd_client->client->osdc;
--	osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_NOIO);
--	if (!osd_req)
--		return -ENOMEM;
--
--	osd_req->r_flags = flags;
--	osd_req->r_pages = pages;
--	if (bio) {
--		osd_req->r_bio = bio;
--		bio_get(osd_req->r_bio);
--	}
--
--	osd_req->r_callback = rbd_cb;
--	osd_req->r_priv = NULL;
--
--	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
--	osd_req->r_oid_len = strlen(osd_req->r_oid);
--
--	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
--	osd_req->r_num_pages = calc_pages_for(ofs, len);
--	osd_req->r_page_alignment = ofs & ~PAGE_MASK;
--
--	ceph_osdc_build_request(osd_req, ofs, len, 1, op,
--				snapc, snapid, &mtime);
--
--	if (op->op == CEPH_OSD_OP_WATCH && op->watch.flag) {
--		ceph_osdc_set_request_linger(osdc, osd_req);
--		rbd_dev->watch_request = osd_req;
--	}
--
--	ret = ceph_osdc_start_request(osdc, osd_req, false);
--	if (ret < 0)
--		goto done_err;
--
--	if (!rbd_cb) {
--		u64 version;
--
--		ret = ceph_osdc_wait_request(osdc, osd_req);
--		version = le64_to_cpu(osd_req->r_reassert_version.version);
--		if (ver)
--			*ver = version;
--		dout("reassert_ver=%llu\n", (unsigned long long) version);
--		ceph_osdc_put_request(osd_req);
--	}
--	return ret;
--
--done_err:
--	if (bio)
--		bio_chain_put(osd_req->r_bio);
--	ceph_osdc_put_request(osd_req);
--
--	return ret;
--}
--
--/*
-- * Do a synchronous ceph osd operation
-- */
--static int rbd_req_sync_op(struct rbd_device *rbd_dev,
--			   int flags,
--			   struct ceph_osd_req_op *op,
--			   const char *object_name,
--			   u64 ofs, u64 inbound_size,
--			   char *inbound,
--			   u64 *ver)
--{
--	int ret;
--	struct page **pages;
--	int num_pages;
--
--	rbd_assert(op != NULL);
--
--	num_pages = calc_pages_for(ofs, inbound_size);
--	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
--	if (IS_ERR(pages))
--		return PTR_ERR(pages);
--
--	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
--			  object_name, ofs, inbound_size, NULL,
--			  pages, num_pages,
--			  flags,
--			  op,
--			  NULL,
--			  ver);
--	if (ret < 0)
--		goto done;
--
--	if ((flags & CEPH_OSD_FLAG_READ) && inbound)
--		ret = ceph_copy_from_page_vector(pages, inbound, ofs, ret);
--
--done:
--	ceph_release_page_vector(pages, num_pages);
--	return ret;
--}
--
- static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
- 				struct rbd_obj_request *obj_request)
- {
-@@ -1288,45 +1168,6 @@ static int rbd_obj_request_wait(struct
-rbd_obj_request *obj_request)
- 	return wait_for_completion_interruptible(&obj_request->completion);
- }
-
--/*
-- * Synchronous osd object method call
-- */
--static int rbd_req_sync_exec(struct rbd_device *rbd_dev,
--			     const char *object_name,
--			     const char *class_name,
--			     const char *method_name,
--			     const char *outbound,
--			     size_t outbound_size,
--			     char *inbound,
--			     size_t inbound_size,
--			     u64 *ver)
--{
--	struct ceph_osd_req_op *op;
--	int ret;
--
--	/*
--	 * Any input parameters required by the method we're calling
--	 * will be sent along with the class and method names as
--	 * part of the message payload.  That data and its size are
--	 * supplied via the indata and indata_len fields (named from
--	 * the perspective of the server side) in the OSD request
--	 * operation.
--	 */
--	op = rbd_osd_req_op_create(CEPH_OSD_OP_CALL, class_name,
--					method_name, outbound, outbound_size);
--	if (!op)
--		return -ENOMEM;
--
--	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, op,
--			       object_name, 0, inbound_size, inbound,
--			       ver);
--
--	rbd_osd_req_op_destroy(op);
--
--	dout("cls_exec returned %d\n", ret);
--	return ret;
--}
--
- /* Returns true if this call completed the last object request */
-
- static bool rbd_block_request_complete(struct rbd_image_request
-*image_request,
-@@ -2825,7 +2666,6 @@ static int _rbd_dev_v2_snap_size(struct rbd_device
-*rbd_dev, u64 snap_id,
- 		__le64 size;
- 	} __attribute__ ((packed)) size_buf = { 0 };
-
--	(void) rbd_req_sync_exec;	/* Avoid a warning */
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_size",
- 				(char *) &snapid, sizeof (snapid),
--- 
-1.7.9.5
-
+On 01/22/2013 01:57 PM, Alex Elder wrote:
+> A few very minor changes to the rbd code:
+>      - RBD_MAX_OPT_LEN is unused, so get rid of it
+>      - Consolidate rbd options definitions
+>      - Make rbd_segment_name() return pointer to const char
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   17 ++++++++---------
+>   1 file changed, 8 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 007b726..4ed0741 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -69,7 +69,6 @@
+>   			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
+>
+>   #define RBD_MAX_SNAP_COUNT	510	/* allows max snapc to fit in 4KB */
+> -#define RBD_MAX_OPT_LEN		1024
+>
+>   #define RBD_SNAP_HEAD_NAME	"-"
+>
+> @@ -96,8 +95,6 @@
+>   #define DEV_NAME_LEN		32
+>   #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
+>
+> -#define RBD_READ_ONLY_DEFAULT		false
+> -
+>   /*
+>    * block device image metadata (in-memory version)
+>    */
+> @@ -156,10 +153,6 @@ struct rbd_spec {
+>   	struct kref	kref;
+>   };
+>
+> -struct rbd_options {
+> -	bool	read_only;
+> -};
+> -
+>   /*
+>    * an instance of the client.  multiple devices may share an rbd client.
+>    */
+> @@ -475,6 +468,12 @@ static match_table_t rbd_opts_tokens = {
+>   	{-1, NULL}
+>   };
+>
+> +struct rbd_options {
+> +	bool	read_only;
+> +};
+> +
+> +#define RBD_READ_ONLY_DEFAULT	false
+> +
+>   static int parse_rbd_opts_token(char *c, void *private)
+>   {
+>   	struct rbd_options *rbd_opts = private;
+> @@ -773,7 +772,7 @@ static void rbd_header_free(struct rbd_image_header
+> *header)
+>   	header->snapc = NULL;
+>   }
+>
+> -static char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+> +static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+>   {
+>   	char *name;
+>   	u64 segment;
+> @@ -1338,7 +1337,7 @@ static int rbd_do_op(struct request *rq,
+>   		     struct rbd_req_coll *coll,
+>   		     int coll_index)
+>   {
+> -	char *seg_name;
+> +	const char *seg_name;
+>   	u64 seg_ofs;
+>   	u64 seg_len;
+>   	int ret;
+>
