@@ -1,78 +1,104 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Questions about journals, performance and disk utilization.
-Date: Tue, 22 Jan 2013 16:11:39 -0600
-Message-ID: <50FF0E9B.4040606@inktank.com>
-References: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk> <50FF0197.6020202@inktank.com> <50FF0410.3030308@gmail.com> <50FF098C.8050707@profihost.ag> <50FF0B2E.6010301@inktank.com> <211179F2EB514DFA98FD55D7F2311A80@inktank.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: handling fs errors
+Date: Wed, 23 Jan 2013 01:20:08 +0300
+Message-ID: <CABYiri8U-pW4ekuJEy0xtvwFE6mzV1JnO=7n+BD7BTbH9nBOwA@mail.gmail.com>
+References: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:62645 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751561Ab3AVWLe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:11:34 -0500
-Received: by mail-ia0-f171.google.com with SMTP id z13so2470544iaz.30
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:11:34 -0800 (PST)
-In-Reply-To: <211179F2EB514DFA98FD55D7F2311A80@inktank.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:56802 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752226Ab3AVWU3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 17:20:29 -0500
+Received: by mail-ob0-f174.google.com with SMTP id 16so1682003obc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 14:20:28 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1301212200031.29915@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, Jeff Mitchell <jeffrey.mitchell@gmail.com>, martin <martin@skytech.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 01/22/2013 04:00 PM, Gregory Farnum wrote:
-> On Tuesday, January 22, 2013 at 1:57 PM, Mark Nelson wrote:
->> On 01/22/2013 03:50 PM, Stefan Priebe wrote:
->>> Hi,
->>> Am 22.01.2013 22:26, schrieb Jeff Mitchell:
->>>> Mark Nelson wrote:
->>>>> It may (or may not) help to use a power-of-2 number of PGs. It's
->>>>> generally a good idea to do this anyway, so if you haven't set up your
->>>>> production cluster yet, you may want to play around with this. Basically
->>>>> just take whatever number you were planning on using and round it up (or
->>>>> down slightly). IE if you were going to use 7,000 PGs, round up to 8192.
->>>>
->>>>
->>>>
->>>> As I was asking about earlier on IRC, I'm in a situation where the docs
->>>> did not mention this in the section about calculating PGs so I have a
->>>> non-power-of-2 -- and since there are some production things running on
->>>> that pool I can't currently change it.
->>>
->>>
->>>
->>> Oh same thing here - did i miss the doc or can someone point me the
->>> location.
->>>
->>> Is there a chance to change the number of PGs for a pool?
->>>
->>> Greets,
->>> Stefan
->>
->>
->>
->> Honestly I don't know if it will actually have a significant effect.
->> ceph_stable_mod will map things optimally when pg_num is a power of 2,
->> but that's only part of how things work. It may not matter very much
->> with high PG counts.
+On Tue, Jan 22, 2013 at 10:05 AM, Sage Weil <sage@inktank.com> wrote:
+> We observed an interesting situation over the weekend.  The XFS volume
+> ceph-osd locked up (hung in xfs_ilock) for somewhere between 2 and 4
+> minutes.  After 3 minutes (180s), ceph-osd gave up waiting and committed
+> suicide.  XFS seemed to unwedge itself a bit after that, as the daemon was
+> able to restart and continue.
 >
-> IIRC, having a non-power of 2 count means that the extra PGs (above the lower-bounding power of 2) will be twice the size of the other PGs. For reasonable PG counts this should not cause any problems.
-> -Greg
+> The problem is that during that 180s the OSD was claiming to be alive but
+> not able to do any IO.  That heartbeat check is meant as a sanity check
+> against a wedged kernel, but waiting so long meant that the ceph-osd
+> wasn't failed by the cluster quickly enough and client IO stalled.
 >
+> We could simply change that timeout to something close to the heartbeat
+> interval (currently default is 20s).  That will make ceph-osd much more
+> sensitive to fs stalls that may be transient (high load, whatever).
+>
+> Another option would be to make the osd heartbeat replies conditional on
+> whether the internal heartbeat is healthy.  Then the heartbeat warnings
+> could start at 10-20s, ping replies would pause, but the suicide could
+> still be 180s out.  If the stall is short-lived, pings will continue, the
+> osd will mark itself back up (if it was marked down) and continue.
+>
+> Having written that out, the last option sounds like the obvious choice.
+> Any other thoughts?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Hrm, for some reason I thought there was more to it than that.  I 
-suppose then you really are just at the mercy then of the distribution 
-of big PGs vs small PGs on each OSD.
+By the way, is there any worth of preventing situation below - one
+host buried down in the softlocks marking almost all neighbors down
+for a short time? That`s harmless, because all osds will rejoin
+cluster in couple of next heartbeats, but all I/O will stuck at this
+time, rather than only operations with pgs on failing osd, so may be
+it`ll be useful to introduce kind of down-mark-quorum for such cases.
 
-A while back I was talking to Sage about doing something like (forgive 
-the python):
-
-def ceph_stable_mod2(x, b, bmask):
-      if ((x & bmask) < b):
-          return x & bmask
-      else:
-          return x % b
-
-but that doesn't give as nice splitting behaviour.  Still, unless I'm 
-missing something, isn't splitting kind of a rare event anyway?
-
-Mark
+2013-01-22 14:40:31.481174 mon.0 [INF] osd.0 10.5.0.10:6800/6578
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481085 >=
+grace 20
+.000000)
+2013-01-22 14:40:31.481293 mon.0 [INF] osd.1 10.5.0.11:6800/6488
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481228 >=
+grace 20
+.000000)
+2013-01-22 14:40:31.481410 mon.0 [INF] osd.2 10.5.0.12:6803/7561
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481355 >=
+grace 20
+.000000)
+2013-01-22 14:40:31.481522 mon.0 [INF] osd.4 10.5.0.14:6803/5697
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481467 >=
+grace 20
+.000000)
+2013-01-22 14:40:31.481641 mon.0 [INF] osd.6 10.5.0.16:6803/5679
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481586 >=
+grace 20.000000)
+2013-01-22 14:40:31.481746 mon.0 [INF] osd.8 10.5.0.10:6803/6638
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481700 >=
+grace 20.000000)
+2013-01-22 14:40:31.481863 mon.0 [INF] osd.9 10.5.0.11:6803/6547
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481811 >=
+grace 20.000000)
+2013-01-22 14:40:31.481976 mon.0 [INF] osd.10 10.5.0.12:6800/7019
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.481916 >=
+grace 20.000000)
+2013-01-22 14:40:31.482077 mon.0 [INF] osd.12 10.5.0.14:6800/5637
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482022 >=
+grace 20.000000)
+2013-01-22 14:40:31.482184 mon.0 [INF] osd.14 10.5.0.16:6800/5620
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482130 >=
+grace 20.000000)
+2013-01-22 14:40:31.482334 mon.0 [INF] osd.17 10.5.0.31:6800/5854
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482275 >=
+grace 20.000000)
+2013-01-22 14:40:31.482436 mon.0 [INF] osd.18 10.5.0.32:6800/5981
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482389 >=
+grace 20.000000)
+2013-01-22 14:40:31.482539 mon.0 [INF] osd.19 10.5.0.33:6800/5570
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482489 >=
+grace 20.000000)
+2013-01-22 14:40:31.482667 mon.0 [INF] osd.20 10.5.0.34:6800/5643
+failed (3 reports from 1 peers after 2013-01-22 14:40:54.482620 >=
+grace 20.000000)
