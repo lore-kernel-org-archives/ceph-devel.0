@@ -1,103 +1,65 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] net/ceph/osdmap.c: fix undefined behavior when using
- snprintf()
-Date: Wed, 23 Jan 2013 10:48:07 -0600
-Message-ID: <51001447.3030600@inktank.com>
-References: <1358882429-19066-1-git-send-email-dinggnu@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 01/25] mds: fix end check in
+ Server::handle_client_readdir()
+Date: Wed, 23 Jan 2013 09:17:15 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301230916200.29291@cobra.newdream.net>
+References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com> <1358910541-15535-2-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <1358882429-19066-1-git-send-email-dinggnu@gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: Cong Ding <dinggnu@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:50855 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754634Ab3AWRRP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 12:17:15 -0500
+In-Reply-To: <1358910541-15535-2-git-send-email-zheng.z.yan@intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 01/22/2013 01:20 PM, Cong Ding wrote:
-> The variable "str" is used as both the source and destination in function
-> snprintf(), which is undefined behavior based on C11. The original description
-> in C11 is:
-> 	"If copying takes place between objects that
-> 	overlap, the behavior is undefined."
+Hi Yan,
 
-Yes, this was an ill-advised thing to do in this function.
+I pushed this one to next, thanks.  BTW what are you using to reproduce 
+this?  We'd like to continue to improve the coverage of 
+ceph-qa-suite.git/suites/fs.
 
-In fact, the only place this function is used (in osdmap_show()),
-the non-static buffer was not initialized before the call.  (It
-might happen to work because the same stack space was getting
-reused each time through the loop.  Eeeeew!)
+Thanks!
+sage
 
-This is just an awful couple of functions.
+On Wed, 23 Jan 2013, Yan, Zheng wrote:
 
-> And, the function of ceph_osdmap_state_str() is to return the osdmap state, so
-> it should return "doesn't exist" when all the conditions are not satisfied. I
-> fix it in this patch.
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 > 
-> Based on C11, snprintf() does nothing if n==0:
-> 	"If n is zero, nothing is written, and s may be a
-> 	null pointer. Otherwise, output characters beyond
-> 	the n-1st are discarded rather than being written to
-> 	the array, and a null character is written at the
-> 	end of the characters actually written into the
-> 	array."
-> so I remove the unnecessary check of len (because it is not a busy path and
-> saves a few lines of code).
-
-True.  But since you know it's not going to do anything why
-not only make the call if len is non-zero?  I.e.:
-
-	else if (len)
-		snprintf(str, len, "doesn't exist");
-
-With your permission I'll make this change and will commit
-this for you.  OK?
-
-> Signed-off-by: Cong Ding <dinggnu@gmail.com>
-
-Reviewed-by: Alex Elder <elder@inktank.com>
-
+> commit 1174dd3188 (don't retry readdir request after issuing caps)
+> introduced an bug that wrongly marks 'end' in the the readdir reply.
+> The code that touches existing dentries re-uses an iterator, and the
+> iterator is used for checking if readdir is end.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 > ---
->  net/ceph/osdmap.c |   27 ++++++++-------------------
->  1 file changed, 8 insertions(+), 19 deletions(-)
+>  src/mds/Server.cc | 8 +++-----
+>  1 file changed, 3 insertions(+), 5 deletions(-)
 > 
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index de73214..3131a99d3 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -13,26 +13,15 @@
+> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+> index b70445e..45eed81 100644
+> --- a/src/mds/Server.cc
+> +++ b/src/mds/Server.cc
+> @@ -2895,11 +2895,9 @@ void Server::handle_client_readdir(MDRequest *mdr)
+>  	continue;
+>        } else {
+>  	// touch everything i _do_ have
+> -	for (it = dir->begin(); 
+> -	     it != dir->end(); 
+> -	     it++) 
+> -	  if (!it->second->get_linkage()->is_null())
+> -	    mdcache->lru.lru_touch(it->second);
+> +	for (CDir::map_t::iterator p = dir->begin(); p != dir->end(); p++)
+> +	  if (!p->second->get_linkage()->is_null())
+> +	    mdcache->lru.lru_touch(p->second);
 >  
->  char *ceph_osdmap_state_str(char *str, int len, int state)
->  {
-> -	int flag = 0;
-> -
-> -	if (!len)
-> -		goto done;
-> -
-> -	*str = '\0';
-> -	if (state) {
-> -		if (state & CEPH_OSD_EXISTS) {
-> -			snprintf(str, len, "exists");
-> -			flag = 1;
-> -		}
-> -		if (state & CEPH_OSD_UP) {
-> -			snprintf(str, len, "%s%s%s", str, (flag ? ", " : ""),
-> -				 "up");
-> -			flag = 1;
-> -		}
-> -	} else {
-> +	if ((state & CEPH_OSD_EXISTS) && (state & CEPH_OSD_UP))
-> +		snprintf(str, len, "exists, up");
-> +	else if (state & CEPH_OSD_EXISTS)
-> +		snprintf(str, len, "exists");
-> +	else if (state & CEPH_OSD_UP)
-> +		snprintf(str, len, "up");
-> +	else
->  		snprintf(str, len, "doesn't exist");
-> -	}
-> -done:
-> +
->  	return str;
->  }
->  
+>  	// already issued caps and leases, reply immediately.
+>  	if (dnbl.length() > 0) {
+> -- 
+> 1.7.11.7
+> 
 > 
