@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 22/25] mds: properly clear CDir::STATE_COMPLETE when replaying EImportStart
-Date: Wed, 23 Jan 2013 11:08:58 +0800
-Message-ID: <1358910541-15535-23-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 15/25] mds: send resolve messages after all MDS reach resolve stage
+Date: Wed, 23 Jan 2013 11:08:51 +0800
+Message-ID: <1358910541-15535-16-git-send-email-zheng.z.yan@intel.com>
 References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:1721 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:1296 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753069Ab3AWDJY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jan 2013 22:09:24 -0500
+	id S1753069Ab3AWDJS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jan 2013 22:09:18 -0500
 In-Reply-To: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,143 +16,106 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-when replaying EImportStart, we should set/clear directory's COMPLETE
-flag according with the flag in the journal entry.
+Current code sends resolve messages when resolving MDS set changes.
+There is no need to send resolve messages when some MDS leave the
+resolve stage. Sending message while some MDS are replaying is also
+not very useful.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc         |  5 +++--
- src/mds/Migrator.cc        |  4 +---
- src/mds/Server.cc          |  2 +-
- src/mds/events/EMetaBlob.h | 20 +++++++++++++++++---
- src/mds/journal.cc         |  2 ++
- 5 files changed, 24 insertions(+), 9 deletions(-)
+ src/mds/MDCache.cc |  4 ++++
+ src/mds/MDS.cc     | 13 ++++++-------
+ src/mds/MDS.h      |  5 ++++-
+ src/mds/MDSMap.h   |  6 ++++++
+ 4 files changed, 20 insertions(+), 8 deletions(-)
 
 diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index f258451..14d1fcb 100644
+index 4374656..73da4c1 100644
 --- a/src/mds/MDCache.cc
 +++ b/src/mds/MDCache.cc
-@@ -466,7 +466,7 @@ void MDCache::_create_system_file(CDir *dir, const char *name, CInode *in, Conte
-     le->metablob.add_root(true, in);
-   }
-   if (mdir)
--    le->metablob.add_dir(mdir, true, true, true); // dirty AND complete AND new
-+    le->metablob.add_new_dir(mdir); // dirty AND complete AND new
+@@ -2739,6 +2739,10 @@ void MDCache::handle_resolve(MMDSResolve *m)
+   int from = m->get_source().num();
  
-   mds->mdlog->submit_entry(le);
-   mds->mdlog->wait_for_safe(new C_MDC_CreateSystemFile(this, mut, dn, dpv, fin));
-@@ -3280,6 +3280,7 @@ void MDCache::recalc_auth_bits()
-       else {
- 	dir->state_set(CDir::STATE_REJOINING);
- 	dir->state_clear(CDir::STATE_AUTH);
-+	dir->state_clear(CDir::STATE_COMPLETE);
- 	if (dir->is_dirty()) 
- 	  dir->mark_clean();
-       }
-@@ -8385,7 +8386,7 @@ void MDCache::_purge_stray_purged(CDentry *dn, int r)
-     pf->rstat.sub(in->inode.accounted_rstat);
- 
-     le->metablob.add_dir_context(dn->dir);
--    EMetaBlob::dirlump& dl = le->metablob.add_dir(dn->dir, true, false, false);
-+    EMetaBlob::dirlump& dl = le->metablob.add_dir(dn->dir, true);
-     le->metablob.add_null_dentry(dl, dn, true);
-     le->metablob.add_destroyed_inode(in->ino());
- 
-diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
-index 453cfaf..3449306 100644
---- a/src/mds/Migrator.cc
-+++ b/src/mds/Migrator.cc
-@@ -2391,9 +2391,7 @@ int Migrator::decode_import_dir(bufferlist::iterator& blp,
- 
-   // add to journal entry
-   if (le) 
--    le->metablob.add_dir(dir, 
--			 true,                 // Hmm: dirty=false would be okay in some cases
--			 dir->is_complete());  
-+    le->metablob.add_import_dir(dir);
- 
-   int num_imported = 0;
- 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 1b3d49e..5f3119d 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -3827,7 +3827,7 @@ void Server::handle_client_mkdir(MDRequest *mdr)
-   journal_allocated_inos(mdr, &le->metablob);
-   mdcache->predirty_journal_parents(mdr, &le->metablob, newi, dn->get_dir(), PREDIRTY_PRIMARY|PREDIRTY_DIR, 1);
-   le->metablob.add_primary_dentry(dn, true, newi);
--  le->metablob.add_dir(newdir, true, true, true); // dirty AND complete AND new
-+  le->metablob.add_new_dir(newdir); // dirty AND complete AND new
-   
-   // issue a cap on the directory
-   int cmode = CEPH_FILE_MODE_RDWR;
-diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
-index 77ceb94..bd0a8f7 100644
---- a/src/mds/events/EMetaBlob.h
-+++ b/src/mds/events/EMetaBlob.h
-@@ -283,6 +283,7 @@ public:
-     static const int STATE_COMPLETE =    (1<<1);
-     static const int STATE_DIRTY =       (1<<2);  // dirty due to THIS journal item, that is!
-     static const int STATE_NEW =         (1<<3);  // new directory
-+    static const int STATE_IMPORTING =	 (1<<4);  // importing directory
- 
-     //version_t  dirv;
-     fnode_t fnode;
-@@ -305,6 +306,8 @@ public:
-     void mark_dirty() { state |= STATE_DIRTY; }
-     bool is_new() { return state & STATE_NEW; }
-     void mark_new() { state |= STATE_NEW; }
-+    bool is_importing() { return state & STATE_IMPORTING; }
-+    void mark_importing() { state |= STATE_IMPORTING; }
- 
-     list<std::tr1::shared_ptr<fullbit> >   &get_dfull()   { return dfull; }
-     list<remotebit> &get_dremote() { return dremote; }
-@@ -634,11 +637,21 @@ private:
- 							      &in->old_inodes)));
+   if (mds->get_state() < MDSMap::STATE_RESOLVE) {
++    if (mds->get_want_state() == CEPH_MDS_STATE_RESOLVE) {
++      mds->wait_for_resolve(new C_MDS_RetryMessage(mds, m));
++      return;
++    }
+     // wait until we reach the resolve stage!
+     m->put();
+     return;
+diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
+index bd4bed9..4153417 100644
+--- a/src/mds/MDS.cc
++++ b/src/mds/MDS.cc
+@@ -974,14 +974,12 @@ void MDS::handle_mds_map(MMDSMap *m)
+   // RESOLVE
+   // is someone else newly resolving?
+   if (is_resolve() || is_rejoin() || is_clientreplay() || is_active() || is_stopping()) {
+-    set<int> oldresolve, resolve;
+-    oldmap->get_mds_set(oldresolve, MDSMap::STATE_RESOLVE);
+-    mdsmap->get_mds_set(resolve, MDSMap::STATE_RESOLVE);
+-    if (oldresolve != resolve) {
+-      dout(10) << " resolve set is " << resolve << ", was " << oldresolve << dendl;
++    if (!oldmap->is_resolving() && mdsmap->is_resolving()) {
++      set<int> oldresolve, resolve;
++      mdsmap->get_mds_set(resolve, MDSMap::STATE_RESOLVE);
++      dout(10) << " resolve set is " << resolve << dendl;
+       calc_recovery_set();
+-      if (!mdsmap->is_any_failed())
+-	mdcache->send_resolves();
++      mdcache->send_resolves();
+     }
    }
    
--  dirlump& add_dir(CDir *dir, bool dirty, bool complete=false, bool isnew=false) {
-+  dirlump& add_dir(CDir *dir, bool dirty, bool complete=false) {
-     return add_dir(dir->dirfrag(), dir->get_projected_fnode(), dir->get_projected_version(),
--		   dirty, complete, isnew);
-+		   dirty, complete);
+@@ -1410,6 +1408,7 @@ void MDS::resolve_start()
+   reopen_log();
+ 
+   mdcache->resolve_start();
++  finish_contexts(g_ceph_context, waiting_for_resolve);
+ }
+ void MDS::resolve_done()
+ {
+diff --git a/src/mds/MDS.h b/src/mds/MDS.h
+index a90587e..f61ad8d 100644
+--- a/src/mds/MDS.h
++++ b/src/mds/MDS.h
+@@ -196,7 +196,7 @@ class MDS : public Dispatcher {
+   int state;         // my confirmed state
+   int want_state;    // the state i want
+ 
+-  list<Context*> waiting_for_active, waiting_for_replay, waiting_for_reconnect;
++  list<Context*> waiting_for_active, waiting_for_replay, waiting_for_reconnect, waiting_for_resolve;
+   list<Context*> replay_queue;
+   map<int, list<Context*> > waiting_for_active_peer;
+   list<Message*> waiting_for_nolaggy;
+@@ -219,6 +219,9 @@ class MDS : public Dispatcher {
+   void wait_for_reconnect(Context *c) {
+     waiting_for_reconnect.push_back(c);
    }
--  dirlump& add_dir(dirfrag_t df, fnode_t *pf, version_t pv, bool dirty, bool complete=false, bool isnew=false) {
-+  dirlump& add_new_dir(CDir *dir) {
-+    return add_dir(dir->dirfrag(), dir->get_projected_fnode(), dir->get_projected_version(),
-+		   true, true, true); // dirty AND complete AND new
++  void wait_for_resolve(Context *c) {
++    waiting_for_resolve.push_back(c);
 +  }
-+  dirlump& add_import_dir(CDir *dir) {
-+    // dirty=false would be okay in some cases
-+    return add_dir(dir->dirfrag(), dir->get_projected_fnode(), dir->get_projected_version(),
-+		   true, dir->is_complete(), false, true);
-+  }
-+  dirlump& add_dir(dirfrag_t df, fnode_t *pf, version_t pv, bool dirty,
-+		   bool complete=false, bool isnew=false, bool importing=false) {
-     if (lump_map.count(df) == 0)
-       lump_order.push_back(df);
- 
-@@ -648,6 +661,7 @@ private:
-     if (complete) l.mark_complete();
-     if (dirty) l.mark_dirty();
-     if (isnew) l.mark_new();
-+    if (importing) l.mark_importing();
-     return l;
+   void wait_for_mdsmap(epoch_t e, Context *c) {
+     waiting_for_mdsmap[e].push_back(c);
    }
-   
-diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-index e8b8c2f..bba3507 100644
---- a/src/mds/journal.cc
-+++ b/src/mds/journal.cc
-@@ -516,6 +516,8 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg, MDSlaveUpdate *slaveup)
-       dir->mark_new(logseg);
-     if (lump.is_complete())
-       dir->mark_complete();
-+    else if (lump.is_importing())
-+      dir->state_clear(CDir::STATE_COMPLETE);
-     
-     dout(10) << "EMetaBlob.replay updated dir " << *dir << dendl;  
- 
+diff --git a/src/mds/MDSMap.h b/src/mds/MDSMap.h
+index 3a83ed8..47c2c52 100644
+--- a/src/mds/MDSMap.h
++++ b/src/mds/MDSMap.h
+@@ -449,6 +449,12 @@ public:
+   bool is_any_failed() {
+     return failed.size();
+   }
++  bool is_resolving() {
++    return
++      get_num_mds(STATE_RESOLVE) > 0 &&
++      get_num_mds(STATE_REPLAY) == 0 &&
++      failed.empty();
++  }
+   bool is_rejoining() {  
+     // nodes are rejoining cache state
+     return 
 -- 
 1.7.11.7
 
