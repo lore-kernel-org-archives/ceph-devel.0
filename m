@@ -1,42 +1,41 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Will multi-monitor speed up  pg initializing?
-Date: Wed, 23 Jan 2013 05:05:58 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301230505040.17536@cobra.newdream.net>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5E4A14@SHSMSX102.ccr.corp.intel.com>
+From: Paul Sherriffs <PSherriffs@humancircuit.com>
+Subject: Using a Data Pool
+Date: Wed, 23 Jan 2013 13:01:19 +0000
+Message-ID: <480DDC4F67FD9A438EE28BFEB1299FA98981C0A3@EX3.HQDOMAIN.LOCAL>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1488354798-1358946358=:17536"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47726 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755062Ab3AWNF7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 08:05:59 -0500
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5E4A14@SHSMSX102.ccr.corp.intel.com>
+Received: from 173-13-192-33-WashingtonDC.hfc.comcastbusiness.net ([173.13.192.33]:54938
+	"EHLO barracuda.ppionline.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750852Ab3AWNMU convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Jan 2013 08:12:20 -0500
+Received: from EX3.HQDOMAIN.LOCAL (ex3.hqdomain.local [10.1.1.24]) by barracuda.ppionline.com with ESMTP id 2rGMn6uIJexCFNmE for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 08:01:21 -0500 (EST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hello All;
 
---557981400-1488354798-1358946358=:17536
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
+I have been trying to associate a directory to a data pool (both called 'Media') according to a previous thread on this list. It all works except the last line:
 
-On Wed, 23 Jan 2013, Chen, Xiaoxi wrote:
->=20
-> Hi list,
-> =A0=A0=A0=A0=A0=A0=A0=A0 When first time I start my ceph cluster,it tak=
-es more than 15 minutes to get all the pg active&clean. It's fast at firs=
-t (say 100pg/s) but quite slow when only hundreds of PG left peering.
-> =A0=A0=A0=A0=A0=A0=A0=A0 Is it a common situation? Since there is quite=
- a few disk IO and network IO during this time, what stop osd from faster=
- initialize?
-> =A0=A0=A0=A0=A0=A0=A0=A0 Can multi-monitor do any help with this?
 
-How many PGs and OSDs?  Do the OSDs come up at the same time, or is there=
-=20
-a small number of OSDs that initially get all PGs?
+ceph osd pool create Media 500 500
 
-sage
---557981400-1488354798-1358946358=:17536--
+ceph mds add_data_pool 3
+
+>added data pool 3 to mdsmap
+
+mkdir /mnt/ceph/Media
+
+cephfs /mnt/ceph/Media set_layout -p 3
+
+>Segmentation fault
+
+
+What am I doing wrong? I'm running 0.56.1 on Ubantu 12.10 Kernel 3.7.1
+
+Thanks
+-Paul
