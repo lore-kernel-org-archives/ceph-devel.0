@@ -1,40 +1,33 @@
-From: Jeff Mitchell <jeffrey.mitchell@gmail.com>
-Subject: Re: Questions about journals, performance and disk utilization.
-Date: Tue, 22 Jan 2013 21:23:56 -0500
-Message-ID: <CAOx6V3aqGUV38kgH4MF0zc4AfPF=QvdRbHdZfgPZvSTNprxqbw@mail.gmail.com>
-References: <58f5e24e5ac1a7bfff8fc6b90719ec75@skytech.dk> <50FF0197.6020202@inktank.com>
- <50FF0410.3030308@gmail.com> <50FF098C.8050707@profihost.ag>
- <50FF0B2E.6010301@inktank.com> <50FF0B6A.6070408@gmail.com> <50FF2DE3.7020404@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 00/24] fixes for MDS cluster recovery
+Date: Wed, 23 Jan 2013 11:08:36 +0800
+Message-ID: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:40381 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751633Ab3AWCYR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jan 2013 21:24:17 -0500
-Received: by mail-pa0-f41.google.com with SMTP id bj3so4449948pad.0
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jan 2013 18:24:17 -0800 (PST)
-In-Reply-To: <50FF2DE3.7020404@inktank.com>
+Received: from mga01.intel.com ([192.55.52.88]:18683 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752766Ab3AWDJF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jan 2013 22:09:05 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Stefan Priebe <s.priebe@profihost.ag>, martin <martin@skytech.dk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Tue, Jan 22, 2013 at 7:25 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 01/22/2013 01:58 PM, Jeff Mitchell wrote:
->>
->> I'd be interested in figuring out the right way to migrate an RBD from
->> one pool to another regardless.
->
->
-> Each way involves copying data, since by definition a different pool
-> will use different placement groups.
->
-> You could export/import with the rbd tool, do a manual dd like you
-> mentioned, or clone and then flatten in the new pool. The simplest
-> is probably 'rbd cp pool1/image pool2/image'.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Awesome -- I didn't know about 'rbd cp', and I'll have to look into
-cloning/flattening. Thanks for the info.
+Patch 1 fixes a readdir bug I introduced, I think it should be included in next release.
 
---Jeff
+Patch 2 and patch 3 are non-critical fixes for my previous patches.
+
+Patch 4 modifies the EMetaBlob format to support journalling multiple root inodes
+
+The rest patches in this series fix issues of MDS cluster recovery. Most of them are
+related to cross authority rename. Without these patches, if I restarted a busy MDS
+cluster (thrash_exports = 1), there were about 50% chance that MDS crash at the
+replay or resolve stage. With these patches, the restarting MDS can almost always
+enter the rejoin stage in my test.
+  
+This patch series are also in:
+  git://github.com/ukernel/ceph.git wip-mds
+
+Regards
+Yan, Zheng
