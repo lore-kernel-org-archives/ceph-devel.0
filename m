@@ -1,93 +1,53 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] net/ceph/osdmap.c: fix undefined behavior when using
- snprintf()
-Date: Wed, 23 Jan 2013 11:47:54 -0600
-Message-ID: <5100224A.8010102@inktank.com>
-References: <1358882429-19066-1-git-send-email-dinggnu@gmail.com> <51001447.3030600@inktank.com> <20130123174150.GA26336@gmail.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: radosgw
+Date: Wed, 23 Jan 2013 18:56:55 +0100
+Message-ID: <CAJH6TXg+7Sp=3_B047OG+KGQK00X5ZtKXAT+UB2KROBDaqVruA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130123174150.GA26336@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Cong Ding <dinggnu@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-we0-f181.google.com ([74.125.82.181]:55484 "EHLO
+	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756310Ab3AWR45 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 12:56:57 -0500
+Received: by mail-we0-f181.google.com with SMTP id u7so2406876wey.26
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 09:56:55 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 01/23/2013 11:41 AM, Cong Ding wrote:
-> On Wed, Jan 23, 2013 at 10:48:07AM -0600, Alex Elder wrote:
->> On 01/22/2013 01:20 PM, Cong Ding wrote:
->>> The variable "str" is used as both the source and destination in function
->>> snprintf(), which is undefined behavior based on C11. The original description
->>> in C11 is:
->>> 	"If copying takes place between objects that
->>> 	overlap, the behavior is undefined."
->>
->> Yes, this was an ill-advised thing to do in this function.
->>
->> In fact, the only place this function is used (in osdmap_show()),
->> the non-static buffer was not initialized before the call.  (It
->> might happen to work because the same stack space was getting
->> reused each time through the loop.  Eeeeew!)
->>
->> This is just an awful couple of functions.
->>
->>> And, the function of ceph_osdmap_state_str() is to return the osdmap state, so
->>> it should return "doesn't exist" when all the conditions are not satisfied. I
->>> fix it in this patch.
->>>
->>> Based on C11, snprintf() does nothing if n==0:
->>> 	"If n is zero, nothing is written, and s may be a
->>> 	null pointer. Otherwise, output characters beyond
->>> 	the n-1st are discarded rather than being written to
->>> 	the array, and a null character is written at the
->>> 	end of the characters actually written into the
->>> 	array."
->>> so I remove the unnecessary check of len (because it is not a busy path and
->>> saves a few lines of code).
->>
->> True.  But since you know it's not going to do anything why
->> not only make the call if len is non-zero?  I.e.:
->>
->> 	else if (len)
->> 		snprintf(str, len, "doesn't exist");
->>
->> With your permission I'll make this change and will commit
->> this for you.  OK?
-> It's fine, thanks. But I think it's better to check len in the beginning
-> because other conditions also call snprintf with parameter len. Like this:
+I'm trying to configure RadosGW but actually, radosgw doesn't start.
 
-OK.  I'll do this.  Thank you.		-Alex
+I've followed this guide:
+http://ceph.com/docs/master/radosgw/config/
+
+Apache configuration is OK and i've added the following configuration
+to my ceph.conf:
+
+[client.radosgw.gateway]
+        host = {host-name}
+        keyring = /etc/ceph/keyring.radosgw.gateway
+        rgw socket path = /tmp/radosgw.sock
+        log file = /var/log/ceph/radosgw.log
 
 
-> 	if (!len)
-> 		return str;
-> 
-> 	if ((state & CEPH_OSD_EXISTS) && (state & CEPH_OSD_UP))
-> 		snprintf(str, len, "exists, up");
-> 	else if (state & CEPH_OSD_EXISTS)
-> 		snprintf(str, len, "exists");
-> 	else if (state & CEPH_OSD_UP)
-> 		snprintf(str, len, "up");
-> 	else
-> 		snprintf(str, len, "doesn't exist");
-> 
-> 	return str;
-> 
-> or like this:
-> 
-> 	if (len) {
-> 		if ((state & CEPH_OSD_EXISTS) && (state & CEPH_OSD_UP))
-> 			snprintf(str, len, "exists, up");
-> 		else if (state & CEPH_OSD_EXISTS)
-> 			snprintf(str, len, "exists");
-> 		else if (state & CEPH_OSD_UP)
-> 			snprintf(str, len, "up");
-> 		else
-> 			snprintf(str, len, "doesn't exist");
-> 	}
-> 	return str;
-> 
-> Thanks,
-> - cong
-> 
+i've copied ceph.conf to all servers, even on radosgw.
+
+Then, on radosgw node, i've run:
+
+mkdir -p /var/lib/ceph/radosgw/ceph-radosgw.gateway
+ceph-authtool --create-keyring /etc/ceph/keyring.radosgw.gateway
+chmod +r /etc/ceph/keyring.radosgw.gateway
+ceph-authtool /etc/ceph/keyring.radosgw.gateway -n
+client.radosgw.gateway --gen-key
+ceph-authtool -n client.radosgw.gateway --cap osd 'allow rwx' --cap
+mon 'allow r' /etc/ceph/keyring.radosgw.gateway
+ceph -k /etc/ceph/ceph.keyring auth add client.radosgw.gateway -i
+/etc/ceph/keyring.radosgw.gateway
+
+but after that, radosgw doesn't start:
+
+# radosgw
+radosgw: must specify 'rgw socket path' to run as a daemon
+
+
+but "rgw socket path" is already present in ceph.conf
