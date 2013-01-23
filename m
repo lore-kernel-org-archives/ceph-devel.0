@@ -1,83 +1,103 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Re: Understanding Ceph
-Date: Wed, 23 Jan 2013 11:19:49 -0500
-Message-ID: <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com>
-	<50FAC92C.8030709@bmrb.wisc.edu>
-	<alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net>
-	<CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com>
-	<alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net>
-	<50FAE116.2010504@gmail.com>
-	<alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net>
-	<50FC1DCF.8010304@bmrb.wisc.edu>
-	<CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] net/ceph/osdmap.c: fix undefined behavior when using
+ snprintf()
+Date: Wed, 23 Jan 2013 10:48:07 -0600
+Message-ID: <51001447.3030600@inktank.com>
+References: <1358882429-19066-1-git-send-email-dinggnu@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f47.google.com ([209.85.210.47]:40847 "EHLO
-	mail-da0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756384Ab3AWQTt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 11:19:49 -0500
-Received: by mail-da0-f47.google.com with SMTP id s35so3856075dak.20
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 08:19:49 -0800 (PST)
-In-Reply-To: <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sam Lang <sam.lang@inktank.com>
-Cc: dmaziuk@bmrb.wisc.edu, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <1358882429-19066-1-git-send-email-dinggnu@gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Cong Ding <dinggnu@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Dimitri,
+On 01/22/2013 01:20 PM, Cong Ding wrote:
+> The variable "str" is used as both the source and destination in function
+> snprintf(), which is undefined behavior based on C11. The original description
+> in C11 is:
+> 	"If copying takes place between objects that
+> 	overlap, the behavior is undefined."
 
-For what it's worth I also stepped through the process of spinning up
-Ceph and OpenStack on a single EC2 node in a recent blog entry:
+Yes, this was an ill-advised thing to do in this function.
 
-http://ceph.com/howto/building-a-public-ami-with-ceph-and-openstack/
+In fact, the only place this function is used (in osdmap_show()),
+the non-static buffer was not initialized before the call.  (It
+might happen to work because the same stack space was getting
+reused each time through the loop.  Eeeeew!)
 
-It has some shortcuts (read: not meant to be production) but it may
-help give you a quicker quickstart.  Feel free to shout if you have
-questions, either here or poke scuttlemonkey on #ceph or twitter.
-Good luck.  Thanks.
+This is just an awful couple of functions.
 
+> And, the function of ceph_osdmap_state_str() is to return the osdmap state, so
+> it should return "doesn't exist" when all the conditions are not satisfied. I
+> fix it in this patch.
+> 
+> Based on C11, snprintf() does nothing if n==0:
+> 	"If n is zero, nothing is written, and s may be a
+> 	null pointer. Otherwise, output characters beyond
+> 	the n-1st are discarded rather than being written to
+> 	the array, and a null character is written at the
+> 	end of the characters actually written into the
+> 	array."
+> so I remove the unnecessary check of len (because it is not a busy path and
+> saves a few lines of code).
 
-Best Regards,
+True.  But since you know it's not going to do anything why
+not only make the call if len is non-zero?  I.e.:
 
-Patrick
+	else if (len)
+		snprintf(str, len, "doesn't exist");
 
-On Wed, Jan 23, 2013 at 10:13 AM, Sam Lang <sam.lang@inktank.com> wrote:
-> On Sun, Jan 20, 2013 at 10:39 AM, Dimitri Maziuk <dmaziuk@bmrb.wisc.edu> wrote:
->> On 1/19/2013 12:16 PM, Sage Weil wrote:
->>
->>> We generally recommend the KVM+librbd route, as it is easier to manage the
->>> dependencies, and is well integrated with libvirt.  FWIW this is what
->>> OpenStack and CloudStack normally use.
->>
->>
->> OK, so is there a quick stat document for that configuration?
->
-> http://ceph.com/docs/master/rbd/rbd-openstack/
-> -sam
->
->>
->> (Oh, and "form" in my other message is supposed to be "from": tyop)
->>
->> Dima
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+With your permission I'll make this change and will commit
+this for you.  OK?
 
+> Signed-off-by: Cong Ding <dinggnu@gmail.com>
 
+Reviewed-by: Alex Elder <elder@inktank.com>
 
--- 
-Patrick McGarry
-Director, Community
-Inktank
-
-@scuttlemonkey @inktank @ceph
+> ---
+>  net/ceph/osdmap.c |   27 ++++++++-------------------
+>  1 file changed, 8 insertions(+), 19 deletions(-)
+> 
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index de73214..3131a99d3 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -13,26 +13,15 @@
+>  
+>  char *ceph_osdmap_state_str(char *str, int len, int state)
+>  {
+> -	int flag = 0;
+> -
+> -	if (!len)
+> -		goto done;
+> -
+> -	*str = '\0';
+> -	if (state) {
+> -		if (state & CEPH_OSD_EXISTS) {
+> -			snprintf(str, len, "exists");
+> -			flag = 1;
+> -		}
+> -		if (state & CEPH_OSD_UP) {
+> -			snprintf(str, len, "%s%s%s", str, (flag ? ", " : ""),
+> -				 "up");
+> -			flag = 1;
+> -		}
+> -	} else {
+> +	if ((state & CEPH_OSD_EXISTS) && (state & CEPH_OSD_UP))
+> +		snprintf(str, len, "exists, up");
+> +	else if (state & CEPH_OSD_EXISTS)
+> +		snprintf(str, len, "exists");
+> +	else if (state & CEPH_OSD_UP)
+> +		snprintf(str, len, "up");
+> +	else
+>  		snprintf(str, len, "doesn't exist");
+> -	}
+> -done:
+> +
+>  	return str;
+>  }
+>  
+> 
