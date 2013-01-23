@@ -1,61 +1,42 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
+	<jens@mermaidconsulting.dk>
 Subject: Re: Hit suicide timeout after adding new osd
-Date: Wed, 23 Jan 2013 13:26:33 +0100
-Message-ID: <50FFD6F9.1010705@widodh.nl>
+Date: Wed, 23 Jan 2013 13:29:48 +0100
+Message-ID: <50FFD7BC.6040502@mermaidconsulting.dk>
 References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80EFF.7020803@widodh.nl> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk> <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net> <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net> <50FADE65.5050403@mermaidconsulting.dk> <alpine.DEB.2.00.1301191016320.29915@cobra.newdream.net> <50FAE8AB.5000602@mermaidconsulting.dk> <alpine.DEB.2.00.1301201613130.31658@cobra.newdr
- eam.net> <50FCE759.9070309@mermaidconsulting.dk> <alpine.DEB.2.00.1301202310260.29915@cobra.newdream.net> <50FFD420.7000604@mermaidconsulting.dk>
+ eam.net> <50FCE759.9070309@mermaidconsulting.dk> <alpine.DEB.2.00.1301202310260.29915@cobra.newdream.net> <50FFD420.7000604@mermaidconsulting.dk> <50FFD6F9.1010705@widodh.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45286 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755405Ab3AWM0f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 07:26:35 -0500
-In-Reply-To: <50FFD420.7000604@mermaidconsulting.dk>
+Received: from mx04.stofanet.dk ([212.10.10.14]:59235 "EHLO mx04.stofanet.dk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755387Ab3AWM36 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Jan 2013 07:29:58 -0500
+In-Reply-To: <50FFD6F9.1010705@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: Sage Weil <sage@inktank.com>, Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/23/2013 01:14 PM, Jens Kristian S=F8gaard wrote:
-> Hi Sage,
->
->> I think the problem now is just that 'osd target transaction size' i=
-s
->> too big (default is 300).  Recommended 50.. let's see how that goes.
->> Even smaller (20 or 25) would probably be fine.
->
+Hi Wido,
 
-Going through the code and reading that this solved it for Jens, could=20
-this issue be traced back to less powerful CPUs?
+> Going through the code and reading that this solved it for Jens, coul=
+d=20
+> this issue be traced back to less powerful CPUs?
 
-I've seen this on Atom and Fusion platforms which both don't excel in=20
-their computing power.
+Depends on what you mean by less powerful.
 
- From what I read is that the OSD by default does 300 transactions and=20
-then commits them? If the CPU is to slow to handle all the work timeout=
-s=20
-can occur because it can't do all the transactions inside the set windo=
-w?
+All my OSD servers are equipped with Xeon E5606 CPUs. That is a=20
+quad-core 2.13 Ghz CPU.
 
-By lowering the number of transactions it sends out a heartbeat more=20
-often thus keeping itself alive.
+They are not used for anything else than Ceph.
 
-Correct?
-
-Wido
-
-> I set it to 50, and that seems to have solved all my problems.
->
-> After a day or so my cluster got to a HEALTH_OK state again. It has b=
-een
-> running for a few days now without any crashes!
->
-> Thanks for all your help!
->
-
+--=20
+Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+jens@mermaidconsulting.dk,
+http://www.mermaidconsulting.com/
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
