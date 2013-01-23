@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 23/25] mds: move variables special to rename into MDRequest::more
-Date: Wed, 23 Jan 2013 11:08:59 +0800
-Message-ID: <1358910541-15535-24-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 13/25] mds: fix slave rename rollback
+Date: Wed, 23 Jan 2013 11:08:49 +0800
+Message-ID: <1358910541-15535-14-git-send-email-zheng.z.yan@intel.com>
 References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:36351 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:11370 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753101Ab3AWDJZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jan 2013 22:09:25 -0500
+	id S1752936Ab3AWDJR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jan 2013 22:09:17 -0500
 In-Reply-To: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,392 +16,437 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-My previous patches add two pointers (ambiguous_auth_inode and
-auth_pin_freeze) to class Mutation. They are both used by cross
-authority rename, both point to the renamed inode. Later patches
-need add more rename special state to MDRequest, So just move them
-into MDRequest::more
+The main issue of old slave rename rollback code is that it assumes
+all affected objects are in the cache. The assumption is not true
+when MDS does rollback in the resolve stage. This patch removes the
+assumption and makes Server::do_rename_rollback() check individual
+object and roll back change.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc  |  16 +++++---
- src/mds/Mutation.cc | 110 ++++++++++++++++++++++++++++++----------------------
- src/mds/Mutation.h  |  32 +++++++--------
- src/mds/Server.cc   |  34 ++++++++--------
- 4 files changed, 105 insertions(+), 87 deletions(-)
+ src/mds/Server.cc | 314 ++++++++++++++++++++++++++++++++++--------------------
+ src/mds/Server.h  |   3 +-
+ 2 files changed, 198 insertions(+), 119 deletions(-)
 
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 14d1fcb..499b4e0 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -2626,7 +2626,7 @@ void MDCache::handle_mds_failure(int who)
-     }
-     
-     // failed node is slave?
--    if (!p->second->committing) {
-+    if (p->second->is_master() && !p->second->committing) {
-       if (p->second->more()->witnessed.count(who)) {
- 	dout(10) << " master request " << *p->second << " no longer witnessed by slave mds." << who
- 		 << dendl;
-@@ -2642,8 +2642,12 @@ void MDCache::handle_mds_failure(int who)
- 	mds->wait_for_active_peer(who, new C_MDS_RetryRequest(this, p->second));
-       }
- 
--      if (p->second->more()->prepared_inode_exporter == who)
--	p->second->more()->prepared_inode_exporter = -1;
-+      if (p->second->has_more() && p->second->more()->is_ambiguous_auth &&
-+	  p->second->more()->rename_inode->authority().first == who) {
-+	dout(10) << " master request " << *p->second << " waiting for renamed inode's auth mds." << who
-+		 << " to recover" << dendl;
-+	p->second->clear_ambiguous_auth();
-+      }
-     }
-   }
- 
-@@ -7733,14 +7737,14 @@ void MDCache::request_cleanup(MDRequest *mdr)
- {
-   dout(15) << "request_cleanup " << *mdr << dendl;
- 
-+  if (mdr->has_more() && mdr->more()->is_ambiguous_auth)
-+    mdr->clear_ambiguous_auth();
-+
-   request_drop_locks(mdr);
- 
-   // drop (local) auth pins
-   mdr->drop_local_auth_pins();
- 
--  if (mdr->ambiguous_auth_inode)
--    mdr->clear_ambiguous_auth(mdr->ambiguous_auth_inode);
--
-   // drop stickydirs
-   for (set<CInode*>::iterator p = mdr->stickydirs.begin();
-        p != mdr->stickydirs.end();
-diff --git a/src/mds/Mutation.cc b/src/mds/Mutation.cc
-index 1c4cd13..367181c 100644
---- a/src/mds/Mutation.cc
-+++ b/src/mds/Mutation.cc
-@@ -82,55 +82,8 @@ void Mutation::auth_unpin(MDSCacheObject *object)
-   auth_pins.erase(object);
- }
- 
--bool Mutation::freeze_auth_pin(CInode *inode)
--{
--  assert(!auth_pin_freeze || auth_pin_freeze == inode);
--  auth_pin_freeze = inode;
--  auth_pin(inode);
--  if (!inode->freeze_inode(1))
--    return false;
--
--  inode->freeze_auth_pin();
--  inode->unfreeze_inode();
--  return true;
--}
--
--void Mutation::unfreeze_auth_pin(CInode *inode)
--{
--  assert(auth_pin_freeze == inode);
--  assert(is_auth_pinned(inode));
--  if (inode->is_frozen_auth_pin())
--    inode->unfreeze_auth_pin();
--  else
--    inode->unfreeze_inode();
--  auth_pin_freeze = NULL;
--}
--
--void Mutation::set_ambiguous_auth(CInode *inode)
--{
--  if (!ambiguous_auth_inode) {
--    inode->set_ambiguous_auth();
--    ambiguous_auth_inode = inode;
--  } else
--    assert(ambiguous_auth_inode == inode);
--}
--
--void Mutation::clear_ambiguous_auth(CInode *inode)
--{
--  assert(ambiguous_auth_inode == inode);
--  ambiguous_auth_inode->clear_ambiguous_auth();
--  ambiguous_auth_inode = NULL;
--}
--
--bool Mutation::can_auth_pin(MDSCacheObject *object)
--{
--  return object->can_auth_pin() || (is_auth_pinned(object) && object == auth_pin_freeze);
--}
--
- void Mutation::drop_local_auth_pins()
- {
--  if (auth_pin_freeze)
--    unfreeze_auth_pin(auth_pin_freeze);
-   for (set<MDSCacheObject*>::iterator it = auth_pins.begin();
-        it != auth_pins.end();
-        it++) {
-@@ -230,6 +183,11 @@ MDRequest::More* MDRequest::more()
-   return _more;
- }
- 
-+bool MDRequest::has_more()
-+{
-+  return _more;
-+}
-+
- bool MDRequest::are_slaves()
- {
-   return _more && !_more->slaves.empty();
-@@ -245,6 +203,64 @@ bool MDRequest::did_ino_allocation()
-   return alloc_ino || used_prealloc_ino || prealloc_inos.size();
- }      
- 
-+bool MDRequest::freeze_auth_pin(CInode *inode)
-+{
-+  assert(!more()->rename_inode || more()->rename_inode == inode);
-+  more()->rename_inode = inode;
-+  more()->is_freeze_authpin = true;
-+  auth_pin(inode);
-+  if (!inode->freeze_inode(1)) {
-+    return false;
-+  }
-+  inode->freeze_auth_pin();
-+  inode->unfreeze_inode();
-+  return true;
-+}
-+
-+void MDRequest::unfreeze_auth_pin()
-+{
-+  assert(more()->is_freeze_authpin);
-+  CInode *inode = more()->rename_inode;
-+  if (inode->is_frozen_auth_pin())
-+    inode->unfreeze_auth_pin();
-+  else
-+    inode->unfreeze_inode();
-+  more()->is_freeze_authpin = false;
-+}
-+
-+void MDRequest::set_ambiguous_auth(CInode *inode)
-+{
-+  assert(!more()->rename_inode || more()->rename_inode == inode);
-+  assert(!more()->is_ambiguous_auth);
-+
-+  inode->set_ambiguous_auth();
-+  more()->rename_inode = inode;
-+  more()->is_ambiguous_auth = true;
-+}
-+
-+void MDRequest::clear_ambiguous_auth()
-+{
-+  CInode *inode = more()->rename_inode;
-+  assert(inode && more()->is_ambiguous_auth);
-+  inode->clear_ambiguous_auth();
-+  more()->is_ambiguous_auth = false;
-+}
-+
-+bool MDRequest::can_auth_pin(MDSCacheObject *object)
-+{
-+  return object->can_auth_pin() ||
-+         (is_auth_pinned(object) && has_more() &&
-+	  more()->is_freeze_authpin &&
-+	  more()->rename_inode == object);
-+}
-+
-+void MDRequest::drop_local_auth_pins()
-+{
-+  if (has_more() && more()->is_freeze_authpin)
-+    unfreeze_auth_pin();
-+  Mutation::drop_local_auth_pins();
-+}
-+
- void MDRequest::print(ostream &out)
- {
-   out << "request(" << reqid;
-diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
-index 36d62a7..c64657f 100644
---- a/src/mds/Mutation.h
-+++ b/src/mds/Mutation.h
-@@ -50,8 +50,6 @@ struct Mutation {
-   // auth pins
-   set< MDSCacheObject* > remote_auth_pins;
-   set< MDSCacheObject* > auth_pins;
--  CInode *auth_pin_freeze;
--  CInode* ambiguous_auth_inode;
-   
-   // held locks
-   set< SimpleLock* > rdlocks;  // always local.
-@@ -83,16 +81,12 @@ struct Mutation {
-     : attempt(0),
-       ls(0),
-       slave_to_mds(-1),
--      auth_pin_freeze(NULL),
--      ambiguous_auth_inode(NULL),
-       locking(NULL),
-       done_locking(false), committing(false), aborted(false), killed(false) { }
-   Mutation(metareqid_t ri, __u32 att=0, int slave_to=-1)
-     : reqid(ri), attempt(att),
-       ls(0),
-       slave_to_mds(slave_to), 
--      auth_pin_freeze(NULL),
--      ambiguous_auth_inode(NULL),
-       locking(NULL),
-       done_locking(false), committing(false), aborted(false), killed(false) { }
-   virtual ~Mutation() {
-@@ -126,12 +120,7 @@ struct Mutation {
-   bool is_auth_pinned(MDSCacheObject *object);
-   void auth_pin(MDSCacheObject *object);
-   void auth_unpin(MDSCacheObject *object);
--  bool freeze_auth_pin(CInode *inode);
--  void unfreeze_auth_pin(CInode *inode);
--  bool can_auth_pin(MDSCacheObject *object);
-   void drop_local_auth_pins();
--  void set_ambiguous_auth(CInode *inode);
--  void clear_ambiguous_auth(CInode *inode);
-   void add_projected_inode(CInode *in);
-   void pop_and_dirty_projected_inodes();
-   void add_projected_fnode(CDir *dir);
-@@ -212,9 +201,10 @@ struct MDRequest : public Mutation {
-     version_t dst_reanchor_atid;  // dst->stray
-     bufferlist inode_import;
-     version_t inode_import_v;
--    CInode* destdn_was_remote_inode;
--    bool was_inode_exportor;
--    int prepared_inode_exporter; // has asked auth of srci to mark srci as ambiguous auth
-+    CInode* rename_inode;
-+    bool is_freeze_authpin;
-+    bool is_ambiguous_auth;
-+    bool is_inode_exporter;
- 
-     map<client_t,entity_inst_t> imported_client_map;
-     map<client_t,uint64_t> sseq_map;
-@@ -233,10 +223,9 @@ struct MDRequest : public Mutation {
- 
-     More() : 
-       src_reanchor_atid(0), dst_reanchor_atid(0), inode_import_v(0),
--      destdn_was_remote_inode(0), was_inode_exportor(false),
--      prepared_inode_exporter(-1), flock_was_waiting(false),
--      stid(0),
--      slave_commit(0) { }
-+      rename_inode(0), is_freeze_authpin(false), is_ambiguous_auth(false),
-+      is_inode_exporter(false), flock_was_waiting(false),
-+      stid(0), slave_commit(0) { }
-   } *_more;
- 
- 
-@@ -285,9 +274,16 @@ struct MDRequest : public Mutation {
-   }
-   
-   More* more();
-+  bool has_more();
-   bool are_slaves();
-   bool slave_did_prepare();
-   bool did_ino_allocation();
-+  bool freeze_auth_pin(CInode *inode);
-+  void unfreeze_auth_pin();
-+  bool can_auth_pin(MDSCacheObject *object);
-+  void drop_local_auth_pins();
-+  void set_ambiguous_auth(CInode *inode);
-+  void clear_ambiguous_auth();
- 
-   void print(ostream &out);
- };
 diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 5f3119d..ad28750 100644
+index fedd4c2..4f2222f 100644
 --- a/src/mds/Server.cc
 +++ b/src/mds/Server.cc
-@@ -5452,13 +5452,11 @@ void Server::handle_client_rename(MDRequest *mdr)
-   int last = -1;
-   if (!srcdn->is_auth()) {
-     last = srcdn->authority().first;
--    // set ambiguous auth for srci
--    mdr->set_ambiguous_auth(srci);
--    // Ask auth of srci to mark srci as ambiguous auth if more than two MDS
--    // are involved in the rename operation
--    if (srcdnl->is_primary() && mdr->more()->prepared_inode_exporter == -1) {
-+    // ask auth of srci to mark srci as ambiguous auth if more than two MDS
-+    // are involved in the rename operation.
-+    if (srcdnl->is_primary() && !mdr->more()->is_ambiguous_auth) {
-       dout(10) << " preparing ambiguous auth for srci" << dendl;
--      mdr->more()->prepared_inode_exporter = last;
-+      mdr->set_ambiguous_auth(srci);
-       _rename_prepare_witness(mdr, last, witnesses, srcdn, destdn, straydn);
-       return;
-     }
-@@ -6057,7 +6055,7 @@ void Server::_rename_apply(MDRequest *mdr, CDentry *srcdn, CDentry *destdn, CDen
-       in->state_set(CInode::STATE_AUTH);
-       imported_inode = true;
+@@ -5010,7 +5010,7 @@ void Server::do_rmdir_rollback(bufferlist &rbl, int master, MDRequest *mdr)
  
--      mdr->clear_ambiguous_auth(in);
-+      mdr->clear_ambiguous_auth();
-     }
+ void Server::_rmdir_rollback_finish(MDRequest *mdr, metareqid_t reqid, CDentry *dn, CDentry *straydn)
+ {
+-  dout(10) << "_rmdir_rollback_finish " << *mdr << dendl;
++  dout(10) << "_rmdir_rollback_finish " << reqid << dendl;
  
-     if (destdn->is_auth()) {
-@@ -6197,7 +6195,7 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
+   CInode *in = straydn->get_linkage()->get_inode();
+   straydn->get_dir()->unlink_inode(dn);
+@@ -6429,15 +6429,12 @@ void Server::_commit_slave_rename(MDRequest *mdr, int r,
+ }
  
-       // unfreeze auth pin after freezing the inode to avoid queueing waiters
-       if (srcdnl->get_inode()->is_frozen_auth_pin())
--	mdr->unfreeze_auth_pin(srcdnl->get_inode());
-+	mdr->unfreeze_auth_pin();
+ void _rollback_repair_dir(Mutation *mut, CDir *dir, rename_rollback::drec &r, utime_t ctime, 
+-			  bool isdir, int linkunlink, bool primary, frag_info_t &dirstat, nest_info_t &rstat)
++			  bool isdir, int linkunlink, nest_info_t &rstat)
+ {
+   fnode_t *pf;
+-  if (dir->is_auth()) {
+-    pf = dir->project_fnode();
+-    mut->add_projected_fnode(dir);
+-    pf->version = dir->pre_dirty();
+-  } else
+-    pf = dir->get_projected_fnode();
++  pf = dir->project_fnode();
++  mut->add_projected_fnode(dir);
++  pf->version = dir->pre_dirty();
  
-       if (!frozen_inode) {
- 	srcdnl->get_inode()->add_waiter(CInode::WAIT_FROZEN, new C_MDS_RetryRequest(mdcache, mdr));
-@@ -6210,7 +6208,7 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
-        * with subtree migrations because all slaves will pin
-        * srcdn->get_inode() for duration of this rename.
-        */
--      srcdnl->get_inode()->set_ambiguous_auth();
-+      mdr->set_ambiguous_auth(srcdnl->get_inode());
+   if (isdir) {
+     pf->fragstat.nsubdirs += linkunlink;
+@@ -6446,7 +6443,7 @@ void _rollback_repair_dir(Mutation *mut, CDir *dir, rename_rollback::drec &r, ut
+     pf->fragstat.nfiles += linkunlink;
+     pf->rstat.rfiles += linkunlink;
+   }    
+-  if (primary) {
++  if (r.ino) {
+     pf->rstat.rbytes += linkunlink * rstat.rbytes;
+     pf->rstat.rfiles += linkunlink * rstat.rfiles;
+     pf->rstat.rsubdirs += linkunlink * rstat.rsubdirs;
+@@ -6457,21 +6454,24 @@ void _rollback_repair_dir(Mutation *mut, CDir *dir, rename_rollback::drec &r, ut
+     pf->fragstat.mtime = r.dirfrag_old_mtime;
+     if (pf->rstat.rctime == ctime)
+       pf->rstat.rctime = r.dirfrag_old_rctime;
+-    mut->add_updated_lock(&dir->get_inode()->filelock);
+-    mut->add_updated_lock(&dir->get_inode()->nestlock);
+   }
++  mut->add_updated_lock(&dir->get_inode()->filelock);
++  mut->add_updated_lock(&dir->get_inode()->nestlock);
+ }
  
-       // just mark the source inode as ambiguous auth if more than two MDS are involved.
-       // the master will send another OP_RENAMEPREP slave request later.
-@@ -6244,7 +6242,7 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
-     dout(10) << " witness list sufficient: includes all srcdn replicas" << dendl;
-   } else if (srcdnl->is_primary() && srcdn->authority() != destdn->authority()) {
-     // set ambiguous auth for srci on witnesses
--    srcdnl->get_inode()->set_ambiguous_auth();
-+    mdr->set_ambiguous_auth(srcdnl->get_inode());
+ struct C_MDS_LoggedRenameRollback : public Context {
+   Server *server;
+   Mutation *mut;
+   MDRequest *mdr;
+-  CInode *in;
+-  CDir *olddir;
++  CDentry *srcdn;
++  version_t srcdnpv;
++  CDentry *destdn;
++  CDentry *straydn;
+   C_MDS_LoggedRenameRollback(Server *s, Mutation *m, MDRequest *r,
+-			     CInode *i, CDir *d) : server(s), mut(m), mdr(r), in(i), olddir(d) {}
++			     CDentry *sd, version_t pv, CDentry *dd, CDentry *st) :
++    server(s), mut(m), mdr(r), srcdn(sd), srcdnpv(pv), destdn(dd), straydn(st) {}
+   void finish(int r) {
+-    server->_rename_rollback_finish(mut, mdr, in, olddir);
++    server->_rename_rollback_finish(mut, mdr, srcdn, srcdnpv, destdn, straydn);
+   }
+ };
+ 
+@@ -6489,87 +6489,128 @@ void Server::do_rename_rollback(bufferlist &rbl, int master, MDRequest *mdr)
+   Mutation *mut = new Mutation(rollback.reqid);
+   mut->ls = mds->mdlog->get_current_segment();
+ 
++  CDentry *srcdn = NULL;
+   CDir *srcdir = mds->mdcache->get_dirfrag(rollback.orig_src.dirfrag);
+-  assert(srcdir);
+-  dout(10) << "  srcdir " << *srcdir << dendl;
+-  CDentry *srcdn = srcdir->lookup(rollback.orig_src.dname);
+-  assert(srcdn);
+-  dout(10) << "   srcdn " << *srcdn << dendl;
+-  CDentry::linkage_t *srcdnl = srcdn->get_linkage();
+-  assert(srcdnl->is_null());
++  if (srcdir) {
++    dout(10) << "  srcdir " << *srcdir << dendl;
++    srcdn = srcdir->lookup(rollback.orig_src.dname);
++    if (srcdn) {
++      dout(10) << "   srcdn " << *srcdn << dendl;
++      assert(srcdn->get_linkage()->is_null());
++    } else
++      dout(10) << "   srcdn not found" << dendl;
++  } else
++    dout(10) << "  srcdir not found" << dendl;
+ 
+-  CInode *in;
+-  if (rollback.orig_src.ino)
+-    in = mds->mdcache->get_inode(rollback.orig_src.ino);
+-  else
+-    in = mds->mdcache->get_inode(rollback.orig_src.remote_ino);    
+-  assert(in);
+-  
++  CDentry *destdn = NULL;
+   CDir *destdir = mds->mdcache->get_dirfrag(rollback.orig_dest.dirfrag);
+-  assert(destdir);
+-  dout(10) << " destdir " << *destdir << dendl;
+-  CDentry *destdn = destdir->lookup(rollback.orig_dest.dname);
+-  assert(destdn);
+-  CDentry::linkage_t *destdnl = destdn->get_linkage();
+-  dout(10) << "  destdn " << *destdn << dendl;
++  if (destdir) {
++    dout(10) << " destdir " << *destdir << dendl;
++    destdn = destdir->lookup(rollback.orig_dest.dname);
++    if (destdn)
++      dout(10) << "  destdn " << *destdn << dendl;
++    else
++      dout(10) << "  destdn not found" << dendl;
++  } else
++    dout(10) << " destdir not found" << dendl;
+ 
+-  CDir *straydir = 0;
+-  CDentry *straydn = 0;
+-  CDentry::linkage_t *straydnl = 0;
++  CInode *in = NULL;
++  if (rollback.orig_src.ino) {
++    in = mds->mdcache->get_inode(rollback.orig_src.ino);
++    if (in && in->is_dir())
++      assert(srcdn && destdn);
++  } else
++    in = mds->mdcache->get_inode(rollback.orig_src.remote_ino);
++
++  CDir *straydir = NULL;
++  CDentry *straydn = NULL;
+   if (rollback.stray.dirfrag.ino) {
+     straydir = mds->mdcache->get_dirfrag(rollback.stray.dirfrag);
+-    assert(straydir);
+-    dout(10) << "straydir " << *straydir << dendl;
+-    straydn = straydir->lookup(rollback.stray.dname);
+-    assert(straydn);
+-    straydnl = straydn->get_linkage();
+-    assert(straydnl->is_primary());
+-    dout(10) << " straydn " << *straydn << dendl;
++    if (straydir) {
++      dout(10) << "straydir " << *straydir << dendl;
++      straydn = straydir->lookup(rollback.stray.dname);
++      if (straydn) {
++	dout(10) << " straydn " << *straydn << dendl;
++	assert(straydn->get_linkage()->is_primary());
++      } else
++	dout(10) << " straydn not found" << dendl;
++    } else
++      dout(10) << "straydir not found" << dendl;
+   }
+-  
+-  // unlink
+-  destdir->unlink_inode(destdn);
+-  if (straydn)
+-    straydir->unlink_inode(straydn);
+ 
+-  bool linkmerge = ((rollback.orig_src.ino && 
+-		     rollback.orig_src.ino == rollback.orig_dest.remote_ino) ||
+-		    (rollback.orig_dest.ino && 
+-		     rollback.orig_dest.ino == rollback.orig_src.remote_ino));
++  CInode *target = NULL;
++  if (rollback.orig_dest.ino) {
++    target = mds->mdcache->get_inode(rollback.orig_dest.ino);
++    if (target)
++      assert(destdn && straydn);
++  } else if (rollback.orig_dest.remote_ino)
++    target = mds->mdcache->get_inode(rollback.orig_dest.remote_ino);
++
++  // can't use is_auth() in the resolve stage
++  int whoami = mds->get_nodeid();
++  // slave
++  assert(!destdn || destdn->authority().first != whoami);
++  assert(!straydn || straydn->authority().first != whoami);
++
++  bool force_journal_src = false;
++  bool force_journal_dest = false;
++  if (in && in->is_dir() && srcdn->authority().first != whoami)
++    force_journal_src = _need_force_journal(in, false);
++  if (target && target->is_dir())
++    force_journal_dest = _need_force_journal(in, true);
+   
++  version_t srcdnpv = 0;
+   // repair src
+-  if (rollback.orig_src.ino)
+-    srcdir->link_primary_inode(srcdn, in);
+-  else
+-    srcdir->link_remote_inode(srcdn, rollback.orig_src.remote_ino, 
+-			      rollback.orig_src.remote_d_type);
+-  inode_t *pi;
+-  if (in->is_auth()) {
+-    pi = in->project_inode();
+-    mut->add_projected_inode(in);
+-    pi->version = in->pre_dirty();
+-  } else
+-    pi = in->get_projected_inode();
+-  if (pi->ctime == rollback.ctime)
+-    pi->ctime = rollback.orig_src.old_ctime;
++  if (srcdn) {
++    if (srcdn->authority().first == whoami)
++      srcdnpv = srcdn->pre_dirty();
++    if (rollback.orig_src.ino) {
++      assert(in);
++      srcdn->push_projected_linkage(in);
++    } else
++      srcdn->push_projected_linkage(rollback.orig_src.remote_ino,
++				    rollback.orig_src.remote_d_type);
++  }
+ 
+-  _rollback_repair_dir(mut, srcdir, rollback.orig_src, rollback.ctime,
+-		       in->is_dir(), 1, srcdnl->is_primary(), pi->dirstat, pi->rstat);
++  inode_t *pi = 0;
++  if (in) {
++    if (in->authority().first == whoami) {
++      pi = in->project_inode();
++      mut->add_projected_inode(in);
++      pi->version = in->pre_dirty();
++    } else
++      pi = in->get_projected_inode();
++    if (pi->ctime == rollback.ctime)
++      pi->ctime = rollback.orig_src.old_ctime;
++  }
++
++  if (srcdn && srcdn->authority().first == whoami) {
++    nest_info_t blah;
++    _rollback_repair_dir(mut, srcdir, rollback.orig_src, rollback.ctime,
++			 in ? in->is_dir() : false, 1, pi ? pi->rstat : blah);
++  }
+ 
+   // repair dest
+-  CInode *target = 0;
+-  if (rollback.orig_dest.ino) {
+-    target = mds->mdcache->get_inode(rollback.orig_dest.ino);
+-    destdir->link_primary_inode(destdn, target);
+-    assert(linkmerge || straydn);
+-  } else if (rollback.orig_dest.remote_ino) {
+-    target = mds->mdcache->get_inode(rollback.orig_dest.remote_ino);
+-    destdir->link_remote_inode(destdn, rollback.orig_dest.remote_ino, 
+-			       rollback.orig_dest.remote_d_type);
++  if (destdn) {
++    if (rollback.orig_dest.ino && target) {
++      destdn->push_projected_linkage(target);
++    } else if (rollback.orig_dest.remote_ino) {
++      destdn->push_projected_linkage(rollback.orig_dest.remote_ino,
++				     rollback.orig_dest.remote_d_type);
++    } else {
++      // the dentry will be trimmed soon, it's ok to have wrong linkage
++      if (rollback.orig_dest.ino)
++	assert(mds->is_resolve());
++      destdn->push_projected_linkage();
++    }
+   }
+-  inode_t *ti = 0;
++
++  if (straydn)
++    destdn->push_projected_linkage();
++
++  inode_t *ti = NULL;
+   if (target) {
+-    if (target->is_auth()) {
++    if (target->authority().first == whoami) {
+       ti = target->project_inode();
+       mut->add_projected_inode(target);
+       ti->version = target->pre_dirty();
+@@ -6579,63 +6620,100 @@ void Server::do_rename_rollback(bufferlist &rbl, int master, MDRequest *mdr)
+       ti->ctime = rollback.orig_dest.old_ctime;
+     ti->nlink++;
+   }
+-  if (target)
+-    _rollback_repair_dir(mut, destdir, rollback.orig_dest, rollback.ctime,
+-			 target->is_dir(), 0, destdnl->is_primary(), ti->dirstat, ti->rstat);
+-  else {
+-    frag_info_t blah;
+-    nest_info_t blah2;
+-    _rollback_repair_dir(mut, destdir, rollback.orig_dest, rollback.ctime, 0, -1, 0, blah, blah2);
+-  }
+-
+-  // repair stray
+-  if (straydir)
+-    _rollback_repair_dir(mut, straydir, rollback.stray, rollback.ctime,
+-			 target->is_dir(), -1, true, ti->dirstat, ti->rstat);
+ 
+-  dout(0) << "  srcdn back to " << *srcdn << dendl;
+-  dout(0) << "   srci back to " << *srcdnl->get_inode() << dendl;
+-  dout(0) << " destdn back to " << *destdn << dendl;
+-  if (destdnl->get_inode()) dout(0) << "  desti back to " << *destdnl->get_inode() << dendl;
++  if (srcdn)
++    dout(0) << " srcdn back to " << *srcdn << dendl;
++  if (in)
++    dout(0) << "  srci back to " << *in << dendl;
++  if (destdn)
++    dout(0) << " destdn back to " << *destdn << dendl;
++  if (target)
++    dout(0) << "  desti back to " << *target << dendl;
+   
+   // journal it
+   ESlaveUpdate *le = new ESlaveUpdate(mdlog, "slave_rename_rollback", rollback.reqid, master,
+ 				      ESlaveUpdate::OP_ROLLBACK, ESlaveUpdate::RENAME);
+   mdlog->start_entry(le);
+ 
+-  le->commit.add_dir_context(srcdir);
+-  le->commit.add_primary_dentry(srcdn, true, 0);
+-  le->commit.add_dir_context(destdir);
+-  if (destdnl->is_null())
+-    le->commit.add_null_dentry(destdn, true);
+-  else if (destdnl->is_primary())
+-    le->commit.add_primary_dentry(destdn, true, 0);
+-  else if (destdnl->is_remote())
+-    le->commit.add_remote_dentry(destdn, true);
+-  if (straydn) {
+-    le->commit.add_dir_context(straydir);
+-    le->commit.add_null_dentry(straydn, true);
++  if (srcdn && (srcdn->authority().first == whoami || force_journal_src)) {
++    le->commit.add_dir_context(srcdir);
++    if (rollback.orig_src.ino)
++      le->commit.add_primary_dentry(srcdn, true);
++    else
++      le->commit.add_remote_dentry(srcdn, true);
    }
  
-   // encode everything we'd need to roll this back... basically, just the original state.
-@@ -6324,7 +6322,7 @@ void Server::_logged_slave_rename(MDRequest *mdr,
- 
-     // remove mdr auth pin
-     mdr->auth_unpin(srcdnl->get_inode());
--    mdr->more()->was_inode_exportor = true;
-+    mdr->more()->is_inode_exporter = true;
-     
-     dout(10) << " exported srci " << *srcdnl->get_inode() << dendl;
+-  if (in->is_dir()) {
++  if (force_journal_dest) {
++    assert(rollback.orig_dest.ino);
++    le->commit.add_dir_context(destdir);
++    le->commit.add_primary_dentry(destdn, true);
++  }
++
++  // slave: no need to journal straydn
++
++  if (target && target->authority().first == whoami) {
++    assert(rollback.orig_dest.remote_ino);
++    le->commit.add_dir_context(target->get_projected_parent_dir());
++    le->commit.add_primary_dentry(target->get_projected_parent_dn(), true, target);
++  }
++
++  if (force_journal_dest) {
++    dout(10) << " noting rename target ino " << target->ino() << " in metablob" << dendl;
++    le->commit.renamed_dirino = target->ino();
++  } else if (force_journal_src || (in && in->is_dir() && srcdn->authority().first == whoami)) {
+     dout(10) << " noting renamed dir ino " << in->ino() << " in metablob" << dendl;
+     le->commit.renamed_dirino = in->ino();
+-    mdcache->project_subtree_rename(in, destdir, srcdir);
    }
-@@ -6363,7 +6361,7 @@ void Server::_commit_slave_rename(MDRequest *mdr, int r,
+   
++  if (target && target->is_dir()) {
++    assert(destdn);
++    mdcache->project_subtree_rename(in, straydir, destdir);
++  }
++
++  if (in && in->is_dir()) {
++    assert(srcdn);
++    mdcache->project_subtree_rename(in, destdir, srcdir);
++  }
++
+   mdlog->submit_entry(le, new C_MDS_LoggedRenameRollback(this, mut, mdr,
+-							 srcdnl->get_inode(), destdir));
++							 srcdn, srcdnpv, destdn, straydn));
+   mdlog->flush();
+ }
  
-     // unfreeze+singleauth inode
-     //  hmm, do i really need to delay this?
--    if (mdr->more()->was_inode_exportor) {
-+    if (mdr->more()->is_inode_exporter) {
+-void Server::_rename_rollback_finish(Mutation *mut, MDRequest *mdr, CInode *in, CDir *olddir)
++void Server::_rename_rollback_finish(Mutation *mut, MDRequest *mdr, CDentry *srcdn,
++				     version_t srcdnpv, CDentry *destdn, CDentry *straydn)
+ {
+-  dout(10) << "_rename_rollback_finish" << dendl;
++  dout(10) << "_rename_rollback_finish" << mut->reqid << dendl;
++
++  if (straydn) {
++    straydn->get_dir()->unlink_inode(straydn);
++    straydn->pop_projected_linkage();
++  }
++  if (destdn) {
++    destdn->get_dir()->unlink_inode(destdn);
++    destdn->pop_projected_linkage();
++  }
++  if (srcdn) {
++    srcdn->pop_projected_linkage();
++    if (srcdn->authority().first == mds->get_nodeid())
++      srcdn->mark_dirty(srcdnpv, mut->ls);
++  }
++
+   mut->apply();
  
-       CInode *in = destdnl->get_inode();
+-  // update subtree map?
+-  if (in->is_dir())
+-    mdcache->adjust_subtree_after_rename(in, olddir, true);
++  if (srcdn) {
++    CInode *in = srcdn->get_linkage()->get_inode();
++    // update subtree map?
++    if (in && in->is_dir())
++      mdcache->adjust_subtree_after_rename(in, destdn->get_dir(), true);
++  }
++
++  if (destdn) {
++    CInode *oldin = destdn->get_linkage()->get_inode();
++    // update subtree map?
++    if (oldin && oldin->is_dir())
++      mdcache->adjust_subtree_after_rename(oldin, straydn->get_dir(), true);
++  }
  
-@@ -6389,8 +6387,10 @@ void Server::_commit_slave_rename(MDRequest *mdr, int r,
-     }
+   if (mdr)
+     mds->mdcache->request_finish(mdr);
+diff --git a/src/mds/Server.h b/src/mds/Server.h
+index e028912..85ab340 100644
+--- a/src/mds/Server.h
++++ b/src/mds/Server.h
+@@ -232,7 +232,8 @@ public:
+   void _logged_slave_rename(MDRequest *mdr, CDentry *srcdn, CDentry *destdn, CDentry *straydn);
+   void _commit_slave_rename(MDRequest *mdr, int r, CDentry *srcdn, CDentry *destdn, CDentry *straydn);
+   void do_rename_rollback(bufferlist &rbl, int master, MDRequest *mdr);
+-  void _rename_rollback_finish(Mutation *mut, MDRequest *mdr, CInode *in, CDir *olddir);
++  void _rename_rollback_finish(Mutation *mut, MDRequest *mdr, CDentry *srcdn,
++			       version_t srcdnpv, CDentry *destdn, CDentry *staydn);
  
-     // singleauth
--    if (destdnl->is_primary() && srcdn->authority() != destdn->authority())
--      destdnl->get_inode()->clear_ambiguous_auth(finished);
-+    if (mdr->more()->is_ambiguous_auth) {
-+      mdr->more()->rename_inode->clear_ambiguous_auth(finished);
-+      mdr->more()->is_ambiguous_auth = false;
-+    }
- 
-     mds->queue_waiters(finished);
-     mdr->cleanup();
-@@ -6409,8 +6409,10 @@ void Server::_commit_slave_rename(MDRequest *mdr, int r,
-     }
- 
-     // singleauth
--    if (destdnl->is_primary() && srcdn->authority() != destdn->authority())
--      destdnl->get_inode()->clear_ambiguous_auth(finished);
-+    if (mdr->more()->is_ambiguous_auth) {
-+      mdr->more()->rename_inode->clear_ambiguous_auth(finished);
-+      mdr->more()->is_ambiguous_auth = false;
-+    }
- 
-     mds->queue_waiters(finished);
+ };
  
 -- 
 1.7.11.7
