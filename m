@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 08/25] mds: fix "had dentry linked to wrong inode" warning
-Date: Wed, 23 Jan 2013 11:08:44 +0800
-Message-ID: <1358910541-15535-9-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 11/25] mds: don't journal non-auth rename source directory
+Date: Wed, 23 Jan 2013 11:08:47 +0800
+Message-ID: <1358910541-15535-12-git-send-email-zheng.z.yan@intel.com>
 References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:12218 "EHLO mga01.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:51770 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752980Ab3AWDJM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jan 2013 22:09:12 -0500
+	id S1752936Ab3AWDJO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jan 2013 22:09:14 -0500
 In-Reply-To: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,98 +16,97 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The reason of "had dentry linked to wrong inode" warning is that
-Server::_rename_prepare() adds the destdir to the EMetaBlob before
-adding the straydir. So during MDS recovers, the destdir is first
-replayed. The old inode is directly replaced by the source inode.
-We can void the warning by adding the straydir first.
+After replaying a slave rename, non-auth directory that we rename out of will
+be trimmed. So there is no need to journal it.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Server.cc  |  7 +++++++
- src/mds/journal.cc | 30 +++++++++++++++++++-----------
- 2 files changed, 26 insertions(+), 11 deletions(-)
+ src/mds/Server.cc | 26 ++++++++++----------------
+ 1 file changed, 10 insertions(+), 16 deletions(-)
 
 diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 4492341..157f6ac 100644
+index 1ec0c81..fedd4c2 100644
 --- a/src/mds/Server.cc
 +++ b/src/mds/Server.cc
-@@ -5804,6 +5804,13 @@ void Server::_rename_prepare(MDRequest *mdr,
-   // prepare nesting, mtime updates
-   int predirty_dir = silent ? 0:PREDIRTY_DIR;
+@@ -4868,10 +4868,9 @@ void Server::handle_slave_rmdir_prep(MDRequest *mdr)
+   mdlog->start_entry(le);
+   le->rollback = mdr->more()->rollback_bl;
+ 
+-  le->commit.add_dir_context(dn->get_dir());
+   le->commit.add_dir_context(straydn->get_dir());
+   le->commit.add_primary_dentry(straydn, true, in);
+-  le->commit.add_null_dentry(dn, true);
++  // slave: no need to journal original dentry
+ 
+   dout(10) << " noting renamed (unlinked) dir ino " << in->ino() << " in metablob" << dendl;
+   le->commit.renamed_dirino = in->ino();
+@@ -4997,9 +4996,8 @@ void Server::do_rmdir_rollback(bufferlist &rbl, int master, MDRequest *mdr)
+   mdlog->start_entry(le);
    
-+  // guarantee stray dir is processed first during journal replay. unlink the old inode,
-+  // then link the source inode to destdn
-+  if (destdnl->is_primary() && straydn->is_auth()) {
-+    metablob->add_dir_context(straydn->get_dir());
-+    metablob->add_dir(straydn->get_dir(), true);
-+  }
-+
-   // sub off target
-   if (destdn->is_auth() && !destdnl->is_null()) {
-     mdcache->predirty_journal_parents(mdr, metablob, oldin, destdn->get_dir(),
-diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-index 4bd6f89..ae380f3 100644
---- a/src/mds/journal.cc
-+++ b/src/mds/journal.cc
-@@ -545,18 +545,14 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
- 	mds->mdcache->add_inode(in);
- 	if (!dn->get_linkage()->is_null()) {
- 	  if (dn->get_linkage()->is_primary()) {
--	    CInode *old_in = dn->get_linkage()->get_inode();
-+	    unlinked.insert(dn->get_linkage()->get_inode());
- 	    stringstream ss;
- 	    ss << "EMetaBlob.replay FIXME had dentry linked to wrong inode " << *dn
--	        << " " << *old_in
--	        << " should be " << p->inode.ino;
-+	       << " " << *dn->get_linkage()->get_inode() << " should be " << p->inode.ino;
- 	    dout(0) << ss.str() << dendl;
- 	    mds->clog.warn(ss);
--	    dir->unlink_inode(dn);
--	    mds->mdcache->remove_inode_recursive(old_in);
--
--	    //assert(0); // hrm!  fallout from sloppy unlink?  or?  hmmm FIXME investigate further
- 	  }
-+	  dir->unlink_inode(dn);
- 	}
- 	unlinked.erase(in);
- 	dir->link_primary_inode(dn, in);
-@@ -574,8 +570,17 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
- 	p->update_inode(mds, in);
- 	if (p->dirty) in->_mark_dirty(logseg);
- 	if (dn->get_linkage()->get_inode() != in) {
--	  if (!dn->get_linkage()->is_null())  // note: might be remote.  as with stray reintegration.
-+	  if (!dn->get_linkage()->is_null()) { // note: might be remote.  as with stray reintegration.
-+	    if (dn->get_linkage()->is_primary()) {
-+	      unlinked.insert(dn->get_linkage()->get_inode());
-+	      stringstream ss;
-+	      ss << "EMetaBlob.replay FIXME had dentry linked to wrong inode " << *dn
-+		 << " " << *dn->get_linkage()->get_inode() << " should be " << p->inode.ino;
-+	      dout(0) << ss.str() << dendl;
-+	      mds->clog.warn(ss);
-+	    }
- 	    dir->unlink_inode(dn);
-+	  }
- 	  unlinked.erase(in);
- 	  dir->link_primary_inode(dn, in);
- 	  dout(10) << "EMetaBlob.replay linked " << *in << dendl;
-@@ -600,10 +605,13 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
-       } else {
- 	if (!dn->get_linkage()->is_null()) {
- 	  dout(10) << "EMetaBlob.replay unlinking " << *dn << dendl;
--	  if (dn->get_linkage()->is_primary())
-+	  if (dn->get_linkage()->is_primary()) {
- 	    unlinked.insert(dn->get_linkage()->get_inode());
--	  if (dn->get_linkage()->get_inode() == renamed_diri)
--	    olddir = dir;
-+	    stringstream ss;
-+	    ss << "EMetaBlob.replay FIXME had dentry linked to wrong inode " << *dn
-+	       << " " << *dn->get_linkage()->get_inode() << " should be remote " << p->ino;
-+	    dout(0) << ss.str() << dendl;
-+	  }
- 	  dir->unlink_inode(dn);
- 	}
- 	dir->link_remote_inode(dn, p->ino, p->d_type);
+   le->commit.add_dir_context(dn->get_dir());
+-  le->commit.add_dir_context(straydn->get_dir());
+   le->commit.add_primary_dentry(dn, true, in);
+-  le->commit.add_null_dentry(straydn, true);
++  // slave: no need to journal straydn
+   
+   dout(10) << " noting renamed (unlinked) dir ino " << in->ino() << " in metablob" << dendl;
+   le->commit.renamed_dirino = in->ino();
+@@ -5702,15 +5700,15 @@ void Server::_rename_prepare(MDRequest *mdr,
+ 		    (srcdnl->is_primary() || destdnl->is_primary()));
+   bool silent = srcdn->get_dir()->inode->is_stray();
+ 
+-  bool force_journal = false;
++  bool force_journal_dest = false;
+   if (srci->is_dir() && !destdn->is_auth()) {
+     if (srci->is_auth()) {
+       // if we are auth for srci and exporting it, force journal because journal replay needs
+       // the source inode to create auth subtrees.
+-      dout(10) << " we are exporting srci, will force journal" << dendl;
+-      force_journal = true;
++      dout(10) << " we are exporting srci, will force journal destdn" << dendl;
++      force_journal_dest = true;
+     } else
+-      force_journal = _need_force_journal(srci, false);
++      force_journal_dest = _need_force_journal(srci, false);
+   }
+ 
+   bool force_journal_stray = false;
+@@ -5721,12 +5719,12 @@ void Server::_rename_prepare(MDRequest *mdr,
+     dout(10) << " merging remote and primary links to the same inode" << dendl;
+   if (silent)
+     dout(10) << " reintegrating stray; will avoid changing nlink or dir mtime" << dendl;
+-  if (force_journal)
+-    dout(10) << " forcing journal of rename because we (will) have auth subtrees nested beneath it" << dendl;
++  if (force_journal_dest)
++    dout(10) << " forcing journal destdn because we (will) have auth subtrees nested beneath it" << dendl;
+   if (force_journal_stray)
+     dout(10) << " forcing journal straydn because we (will) have auth subtrees nested beneath it" << dendl;
+ 
+-  if (srci->is_dir() && (destdn->is_auth() || force_journal)) {
++  if (srci->is_dir() && (destdn->is_auth() || force_journal_dest)) {
+     dout(10) << " noting renamed dir ino " << srci->ino() << " in metablob" << dendl;
+     metablob->renamed_dirino = srci->ino();
+   } else if (oldin && oldin->is_dir() && force_journal_stray) {
+@@ -5919,7 +5917,7 @@ void Server::_rename_prepare(MDRequest *mdr,
+ 
+     if (destdn->is_auth())
+       metablob->add_primary_dentry(destdn, true, srci);
+-    else if (force_journal) {
++    else if (force_journal_dest) {
+       dout(10) << " forced journaling destdn " << *destdn << dendl;
+       metablob->add_dir_context(destdn->get_dir());
+       metablob->add_primary_dentry(destdn, true, srci);
+@@ -5936,10 +5934,6 @@ void Server::_rename_prepare(MDRequest *mdr,
+     if (srcdnl->is_primary() && !srci->is_dir() && !destdn->is_auth())
+       metablob->add_primary_dentry(srcdn, true, srci);
+     metablob->add_null_dentry(srcdn, true);
+-  } else if (force_journal) {
+-    dout(10) << " forced journaling srcdn " << *srcdn << dendl;
+-    metablob->add_dir_context(srcdn->get_dir());
+-    metablob->add_null_dentry(srcdn, true);
+   } else
+     dout(10) << " NOT journaling srcdn " << *srcdn << dendl;
+ 
 -- 
 1.7.11.7
 
