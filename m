@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 11/25] mds: don't journal non-auth rename source directory
-Date: Wed, 23 Jan 2013 11:08:47 +0800
-Message-ID: <1358910541-15535-12-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 12/25] mds: preserve non-auth/unlinked objects until slave commit
+Date: Wed, 23 Jan 2013 11:08:48 +0800
+Message-ID: <1358910541-15535-13-git-send-email-zheng.z.yan@intel.com>
 References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:51770 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752936Ab3AWDJO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jan 2013 22:09:14 -0500
+	id S1752818Ab3AWDJQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jan 2013 22:09:16 -0500
 In-Reply-To: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,97 +16,338 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-After replaying a slave rename, non-auth directory that we rename out of will
-be trimmed. So there is no need to journal it.
+The MDS should not trim objects in non-auth subtree immediately after
+replaying a slave rename. Because the slave rename may require rollback
+later and these objects are needed for rollback.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Server.cc | 26 ++++++++++----------------
- 1 file changed, 10 insertions(+), 16 deletions(-)
+ src/mds/MDCache.cc         | 93 +++++++++++++++++++++++++++++++++++++---------
+ src/mds/MDCache.h          |  5 +++
+ src/mds/Mutation.h         |  5 ++-
+ src/mds/events/EMetaBlob.h |  3 +-
+ src/mds/journal.cc         | 53 +++++++++++++-------------
+ 5 files changed, 113 insertions(+), 46 deletions(-)
 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 1ec0c81..fedd4c2 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -4868,10 +4868,9 @@ void Server::handle_slave_rmdir_prep(MDRequest *mdr)
-   mdlog->start_entry(le);
-   le->rollback = mdr->more()->rollback_bl;
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index adcf8c1..5a6d3f2 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -2867,16 +2867,14 @@ void MDCache::handle_resolve_ack(MMDSResolveAck *ack)
+     
+     if (mds->is_resolve()) {
+       // replay
+-      assert(uncommitted_slave_updates[from].count(*p));
++      MDSlaveUpdate *su = get_uncommitted_slave_update(from, *p);
++      assert(su);
++
+       // log commit
+       mds->mdlog->start_submit_entry(new ESlaveUpdate(mds->mdlog, "unknown", *p, from,
+-						      ESlaveUpdate::OP_COMMIT,
+-						      uncommitted_slave_updates[from][*p]->origop));
++						      ESlaveUpdate::OP_COMMIT, su->origop));
  
--  le->commit.add_dir_context(dn->get_dir());
-   le->commit.add_dir_context(straydn->get_dir());
-   le->commit.add_primary_dentry(straydn, true, in);
--  le->commit.add_null_dentry(dn, true);
-+  // slave: no need to journal original dentry
+-      delete uncommitted_slave_updates[from][*p];
+-      uncommitted_slave_updates[from].erase(*p);
+-      if (uncommitted_slave_updates[from].empty())
+-	uncommitted_slave_updates.erase(from);
++      finish_uncommitted_slave_update(from, *p);
  
-   dout(10) << " noting renamed (unlinked) dir ino " << in->ino() << " in metablob" << dendl;
-   le->commit.renamed_dirino = in->ino();
-@@ -4997,9 +4996,8 @@ void Server::do_rmdir_rollback(bufferlist &rbl, int master, MDRequest *mdr)
-   mdlog->start_entry(le);
-   
-   le->commit.add_dir_context(dn->get_dir());
--  le->commit.add_dir_context(straydn->get_dir());
-   le->commit.add_primary_dentry(dn, true, in);
--  le->commit.add_null_dentry(straydn, true);
-+  // slave: no need to journal straydn
-   
-   dout(10) << " noting renamed (unlinked) dir ino " << in->ino() << " in metablob" << dendl;
-   le->commit.renamed_dirino = in->ino();
-@@ -5702,15 +5700,15 @@ void Server::_rename_prepare(MDRequest *mdr,
- 		    (srcdnl->is_primary() || destdnl->is_primary()));
-   bool silent = srcdn->get_dir()->inode->is_stray();
+       mds->mdlog->wait_for_safe(new C_MDC_SlaveCommit(this, from, *p));
+       mds->mdlog->flush();
+@@ -2893,28 +2891,26 @@ void MDCache::handle_resolve_ack(MMDSResolveAck *ack)
+     dout(10) << " abort on slave " << *p << dendl;
  
--  bool force_journal = false;
-+  bool force_journal_dest = false;
-   if (srci->is_dir() && !destdn->is_auth()) {
-     if (srci->is_auth()) {
-       // if we are auth for srci and exporting it, force journal because journal replay needs
-       // the source inode to create auth subtrees.
--      dout(10) << " we are exporting srci, will force journal" << dendl;
--      force_journal = true;
-+      dout(10) << " we are exporting srci, will force journal destdn" << dendl;
-+      force_journal_dest = true;
-     } else
--      force_journal = _need_force_journal(srci, false);
-+      force_journal_dest = _need_force_journal(srci, false);
+     if (mds->is_resolve()) {
+-      assert(uncommitted_slave_updates[from].count(*p));
++      MDSlaveUpdate *su = get_uncommitted_slave_update(from, *p);
++      assert(su);
+ 
+       // perform rollback (and journal a rollback entry)
+       // note: this will hold up the resolve a bit, until the rollback entries journal.
+-      switch (uncommitted_slave_updates[from][*p]->origop) {
++      switch (su->origop) {
+       case ESlaveUpdate::LINK:
+-	mds->server->do_link_rollback(uncommitted_slave_updates[from][*p]->rollback, from, 0);
++	mds->server->do_link_rollback(su->rollback, from, 0);
+ 	break;
+       case ESlaveUpdate::RENAME:
+-	mds->server->do_rename_rollback(uncommitted_slave_updates[from][*p]->rollback, from, 0);
++	mds->server->do_rename_rollback(su->rollback, from, 0);
+ 	break;
+       case ESlaveUpdate::RMDIR:
+-	mds->server->do_rmdir_rollback(uncommitted_slave_updates[from][*p]->rollback, from, 0);
++	mds->server->do_rmdir_rollback(su->rollback, from, 0);
+ 	break;
+       default:
+ 	assert(0);
+       }
+ 
+-      delete uncommitted_slave_updates[from][*p];
+-      uncommitted_slave_updates[from].erase(*p);
+-      if (uncommitted_slave_updates[from].empty())
+-	uncommitted_slave_updates.erase(from);
++      finish_uncommitted_slave_update(from, *p);
+     } else {
+       MDRequest *mdr = request_get(*p);
+       if (mdr->more()->slave_commit) {
+@@ -2939,7 +2935,63 @@ void MDCache::handle_resolve_ack(MMDSResolveAck *ack)
+   ack->put();
+ }
+ 
++void MDCache::add_uncommitted_slave_update(int master, metareqid_t reqid, MDSlaveUpdate *su)
++{
++  assert(uncommitted_slave_updates[master].count(reqid) == 0);
++  uncommitted_slave_updates[master][reqid] = su;
++  if (su->rename_olddir)
++    uncommitted_slave_rename_olddir[su->rename_olddir]++;
++  for(set<CInode*>::iterator p = su->unlinked.begin(); p != su->unlinked.end(); p++)
++     uncommitted_slave_unlink[*p]++;
++}
++
++void MDCache::finish_uncommitted_slave_update(int master, metareqid_t reqid)
++{
++  assert(uncommitted_slave_updates[master].count(reqid));
++  MDSlaveUpdate* su = uncommitted_slave_updates[master][reqid];
++
++  uncommitted_slave_updates[master].erase(reqid);
++  if (uncommitted_slave_updates[master].empty())
++    uncommitted_slave_updates.erase(master);
++  // discard the non-auth subtree we renamed out of
++  if (su->rename_olddir) {
++    uncommitted_slave_rename_olddir[su->rename_olddir]--;
++    if (uncommitted_slave_rename_olddir[su->rename_olddir] == 0) {
++      uncommitted_slave_rename_olddir.erase(su->rename_olddir);
++      // in the resolve stage, there probably are unfinished rename rollback,
++      // trim_non_auth_subtree() does not recognize projected linkage change.
++      // non-auth subtrees will be trimmed when the resolve stage finishes.
++      if (!mds->is_resolve()) {
++	CDir *root = get_subtree_root(su->rename_olddir);
++	if (root->get_dir_auth() == CDIR_AUTH_UNDEF)
++	  try_trim_non_auth_subtree(root);
++      }
++    }
++  }
++  // removed the inodes that were unlinked by slave update
++  for(set<CInode*>::iterator p = su->unlinked.begin(); p != su->unlinked.end(); p++) {
++    CInode *in = *p;
++    uncommitted_slave_unlink[in]--;
++    if (uncommitted_slave_unlink[in] == 0) {
++      uncommitted_slave_unlink.erase(in);
++      if (!in->get_projected_parent_dn())
++	mds->mdcache->remove_inode_recursive(in);
++    }
++  }
++  delete su;
++}
+ 
++MDSlaveUpdate* MDCache::get_uncommitted_slave_update(int master, metareqid_t reqid)
++{
++
++  MDSlaveUpdate* su = NULL;
++  if (uncommitted_slave_updates.count(master) &&
++      uncommitted_slave_updates[master].count(reqid)) {
++    su = uncommitted_slave_updates[master][reqid];
++    assert(su);
++  }
++  return su;
++}
+ 
+ void MDCache::disambiguate_imports()
+ {
+@@ -5788,6 +5840,10 @@ bool MDCache::trim_non_auth_subtree(CDir *dir)
+ {
+   dout(10) << "trim_non_auth_subtree(" << dir << ") " << *dir << dendl;
+ 
++  // preserve the dir for rollback
++  if (uncommitted_slave_rename_olddir.count(dir))
++    return true;
++
+   bool keep_dir = false;
+   CDir::map_t::iterator j = dir->begin();
+   CDir::map_t::iterator i = j;
+@@ -5805,7 +5861,9 @@ bool MDCache::trim_non_auth_subtree(CDir *dir)
+         for (list<CDir*>::iterator subdir = subdirs.begin();
+             subdir != subdirs.end();
+             ++subdir) {
+-          if ((*subdir)->is_subtree_root() || my_ambiguous_imports.count((*subdir)->dirfrag())) {
++          if (uncommitted_slave_rename_olddir.count(*subdir) || // preserve the dir for rollback
++	      my_ambiguous_imports.count((*subdir)->dirfrag()) ||
++	      (*subdir)->is_subtree_root()) {
+             keep_inode = true;
+             dout(10) << "trim_non_auth_subtree(" << dir << ") subdir " << *subdir << "is kept!" << dendl;
+           }
+@@ -5837,6 +5895,7 @@ bool MDCache::trim_non_auth_subtree(CDir *dir)
+       dir->remove_dentry(dn);
+     }
+   }
++
+   /**
+    * We've now checked all our children and deleted those that need it.
+    * Now return to caller, and tell them if *we're* a keeper.
+diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
+index 31c7467..ecf5b29 100644
+--- a/src/mds/MDCache.h
++++ b/src/mds/MDCache.h
+@@ -312,6 +312,8 @@ protected:
+   map<int, map<dirfrag_t, vector<dirfrag_t> > > other_ambiguous_imports;  
+ 
+   map<int, map<metareqid_t, MDSlaveUpdate*> > uncommitted_slave_updates;  // slave: for replay.
++  map<CDir*, int> uncommitted_slave_rename_olddir;  // slave: preserve the non-auth dir until seeing commit.
++  map<CInode*, int> uncommitted_slave_unlink;  // slave: preserve the unlinked inode until seeing commit.
+ 
+   // track master requests whose slaves haven't acknowledged commit
+   struct umaster {
+@@ -337,6 +339,9 @@ protected:
+   void disambiguate_imports();
+   void recalc_auth_bits();
+   void trim_unlinked_inodes();
++  void add_uncommitted_slave_update(int master, metareqid_t reqid, MDSlaveUpdate*);
++  void finish_uncommitted_slave_update(int master, metareqid_t reqid);
++  MDSlaveUpdate* get_uncommitted_slave_update(int master, metareqid_t reqid);
+ public:
+   void remove_inode_recursive(CInode *in);
+ 
+diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
+index d0d3eca..36d62a7 100644
+--- a/src/mds/Mutation.h
++++ b/src/mds/Mutation.h
+@@ -298,10 +298,13 @@ struct MDSlaveUpdate {
+   bufferlist rollback;
+   elist<MDSlaveUpdate*>::item item;
+   Context *waiter;
++  CDir* rename_olddir;
++  set<CInode*> unlinked;
+   MDSlaveUpdate(int oo, bufferlist &rbl, elist<MDSlaveUpdate*> &list) :
+     origop(oo),
+     item(this),
+-    waiter(0) {
++    waiter(0),
++    rename_olddir(0) {
+     rollback.claim(rbl);
+     list.push_back(&item);
+   }
+diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
+index 9bbd615..77ceb94 100644
+--- a/src/mds/events/EMetaBlob.h
++++ b/src/mds/events/EMetaBlob.h
+@@ -27,6 +27,7 @@
+ class MDS;
+ class MDLog;
+ class LogSegment;
++class MDSlaveUpdate;
+ 
+ /*
+  * a bunch of metadata in the journal
+@@ -674,7 +675,7 @@ private:
    }
  
-   bool force_journal_stray = false;
-@@ -5721,12 +5719,12 @@ void Server::_rename_prepare(MDRequest *mdr,
-     dout(10) << " merging remote and primary links to the same inode" << dendl;
-   if (silent)
-     dout(10) << " reintegrating stray; will avoid changing nlink or dir mtime" << dendl;
--  if (force_journal)
--    dout(10) << " forcing journal of rename because we (will) have auth subtrees nested beneath it" << dendl;
-+  if (force_journal_dest)
-+    dout(10) << " forcing journal destdn because we (will) have auth subtrees nested beneath it" << dendl;
-   if (force_journal_stray)
-     dout(10) << " forcing journal straydn because we (will) have auth subtrees nested beneath it" << dendl;
+   void update_segment(LogSegment *ls);
+-  void replay(MDS *mds, LogSegment *ls=0);
++  void replay(MDS *mds, LogSegment *ls, MDSlaveUpdate *su=NULL);
+ };
+ WRITE_CLASS_ENCODER(EMetaBlob)
+ WRITE_CLASS_ENCODER(EMetaBlob::fullbit)
+diff --git a/src/mds/journal.cc b/src/mds/journal.cc
+index 72a5e5e..3e7e0fa 100644
+--- a/src/mds/journal.cc
++++ b/src/mds/journal.cc
+@@ -415,7 +415,7 @@ void EMetaBlob::fullbit::update_inode(MDS *mds, CInode *in)
+   in->old_inodes = old_inodes;
+ }
  
--  if (srci->is_dir() && (destdn->is_auth() || force_journal)) {
-+  if (srci->is_dir() && (destdn->is_auth() || force_journal_dest)) {
-     dout(10) << " noting renamed dir ino " << srci->ino() << " in metablob" << dendl;
-     metablob->renamed_dirino = srci->ino();
-   } else if (oldin && oldin->is_dir() && force_journal_stray) {
-@@ -5919,7 +5917,7 @@ void Server::_rename_prepare(MDRequest *mdr,
+-void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
++void EMetaBlob::replay(MDS *mds, LogSegment *logseg, MDSlaveUpdate *slaveup)
+ {
+   dout(10) << "EMetaBlob.replay " << lump_map.size() << " dirlumps by " << client_name << dendl;
  
-     if (destdn->is_auth())
-       metablob->add_primary_dentry(destdn, true, srci);
--    else if (force_journal) {
-+    else if (force_journal_dest) {
-       dout(10) << " forced journaling destdn " << *destdn << dendl;
-       metablob->add_dir_context(destdn->get_dir());
-       metablob->add_primary_dentry(destdn, true, srci);
-@@ -5936,10 +5934,6 @@ void Server::_rename_prepare(MDRequest *mdr,
-     if (srcdnl->is_primary() && !srci->is_dir() && !destdn->is_auth())
-       metablob->add_primary_dentry(srcdn, true, srci);
-     metablob->add_null_dentry(srcdn, true);
--  } else if (force_journal) {
--    dout(10) << " forced journaling srcdn " << *srcdn << dendl;
--    metablob->add_dir_context(srcdn->get_dir());
--    metablob->add_null_dentry(srcdn, true);
-   } else
-     dout(10) << " NOT journaling srcdn " << *srcdn << dendl;
+@@ -676,8 +676,12 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
+       
+       // see if we can discard the subtree we renamed out of
+       CDir *root = mds->mdcache->get_subtree_root(olddir);
+-      if (root->get_dir_auth() == CDIR_AUTH_UNDEF)
+-	mds->mdcache->try_trim_non_auth_subtree(root);
++      if (root->get_dir_auth() == CDIR_AUTH_UNDEF) {
++	if (slaveup) // preserve the old dir until slave commit
++	  slaveup->rename_olddir = olddir;
++	else
++	  mds->mdcache->try_trim_non_auth_subtree(root);
++      }
+     }
  
+     // if we are the srci importer, we'll also have some dirfrags we have to open up...
+@@ -710,8 +714,12 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
+     for (set<CInode*>::iterator p = linked.begin(); p != linked.end(); p++)
+       unlinked.erase(*p);
+     dout(10) << " unlinked set contains " << unlinked << dendl;
+-    for (map<CInode*, CDir*>::iterator p = unlinked.begin(); p != unlinked.end(); ++p)
+-      mds->mdcache->remove_inode_recursive(p->first);
++    for (map<CInode*, CDir*>::iterator p = unlinked.begin(); p != unlinked.end(); ++p) {
++      if (slaveup) // preserve unlinked inodes until slave commit
++	slaveup->unlinked.insert(p->first);
++      else
++	mds->mdcache->remove_inode_recursive(p->first);
++    }
+   }
+ 
+   // table client transactions
+@@ -1107,23 +1115,21 @@ void ECommitted::replay(MDS *mds)
+ 
+ void ESlaveUpdate::replay(MDS *mds)
+ {
++  MDSlaveUpdate *su;
+   switch (op) {
+   case ESlaveUpdate::OP_PREPARE:
+     dout(10) << "ESlaveUpdate.replay prepare " << reqid << " for mds." << master 
+ 	     << ": applying commit, saving rollback info" << dendl;
+-    assert(mds->mdcache->uncommitted_slave_updates[master].count(reqid) == 0);
+-    commit.replay(mds, _segment);
+-    mds->mdcache->uncommitted_slave_updates[master][reqid] = 
+-      new MDSlaveUpdate(origop, rollback, _segment->slave_updates);
++    su = new MDSlaveUpdate(origop, rollback, _segment->slave_updates);
++    commit.replay(mds, _segment, su);
++    mds->mdcache->add_uncommitted_slave_update(master, reqid, su);
+     break;
+ 
+   case ESlaveUpdate::OP_COMMIT:
+-    if (mds->mdcache->uncommitted_slave_updates[master].count(reqid)) {
++    su = mds->mdcache->get_uncommitted_slave_update(master, reqid);
++    if (su) {
+       dout(10) << "ESlaveUpdate.replay commit " << reqid << " for mds." << master << dendl;
+-      delete mds->mdcache->uncommitted_slave_updates[master][reqid];
+-      mds->mdcache->uncommitted_slave_updates[master].erase(reqid);
+-      if (mds->mdcache->uncommitted_slave_updates[master].empty())
+-	mds->mdcache->uncommitted_slave_updates.erase(master);
++      mds->mdcache->finish_uncommitted_slave_update(master, reqid);
+     } else {
+       dout(10) << "ESlaveUpdate.replay commit " << reqid << " for mds." << master 
+ 	       << ": ignoring, no previously saved prepare" << dendl;
+@@ -1131,19 +1137,12 @@ void ESlaveUpdate::replay(MDS *mds)
+     break;
+ 
+   case ESlaveUpdate::OP_ROLLBACK:
+-    if (mds->mdcache->uncommitted_slave_updates[master].count(reqid)) {
+-      dout(10) << "ESlaveUpdate.replay abort " << reqid << " for mds." << master
+-	       << ": applying rollback commit blob" << dendl;
+-      assert(mds->mdcache->uncommitted_slave_updates[master].count(reqid));
+-      commit.replay(mds, _segment);
+-      delete mds->mdcache->uncommitted_slave_updates[master][reqid];
+-      mds->mdcache->uncommitted_slave_updates[master].erase(reqid);
+-      if (mds->mdcache->uncommitted_slave_updates[master].empty())
+-	mds->mdcache->uncommitted_slave_updates.erase(master);
+-    } else {
+-      dout(10) << "ESlaveUpdate.replay abort " << reqid << " for mds." << master 
+-	       << ": ignoring, no previously saved prepare" << dendl;
+-    }
++    dout(10) << "ESlaveUpdate.replay abort " << reqid << " for mds." << master
++	     << ": applying rollback commit blob" << dendl;
++    su = mds->mdcache->get_uncommitted_slave_update(master, reqid);
++    if (su)
++      mds->mdcache->finish_uncommitted_slave_update(master, reqid);
++    commit.replay(mds, _segment);
+     break;
+ 
+   default:
 -- 
 1.7.11.7
 
