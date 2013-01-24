@@ -1,78 +1,136 @@
-From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Subject: Re: Understanding Ceph
-Date: Wed, 23 Jan 2013 20:36:30 -0600
-Message-ID: <51009E2E.10206@bmrb.wisc.edu>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net> <50FC1DCF.8010304@bmrb.wisc.edu> <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com> <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com> <51007C0C.2030107@bmrb.wisc.edu> <96316186-B7ED-46F9-A01D-C88165C40530@jnielsen.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Consistently reading/writing rados objects via command line
+Date: Wed, 23 Jan 2013 20:25:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301232023150.10201@cobra.newdream.net>
+References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com> <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net> <CAPud5_4fdrdSb9aNms1H=4HPm_YYovQQuVJgzF4APcRKWXOzqQ@mail.gmail.com>
+ <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net> <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com> <alpine.DEB.2.00.1301221228250.17154@cobra.newdream.net> <CAPud5_4fetJgKLQMbc7f9bTSZY2zRu612Q93OUdyk3phi-ipTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig359702C216B26FEC6A3AF4F6"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:44130 "EHLO
-	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752874Ab3AXCgr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 21:36:47 -0500
-Received: from stingray.bmrb.wisc.edu (stingray.bmrb.wisc.edu [144.92.167.179])
-	by mail.bmrb.wisc.edu (Postfix) with ESMTP id 06DF72C0375
-	for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 20:36:47 -0600 (CST)
-In-Reply-To: <96316186-B7ED-46F9-A01D-C88165C40530@jnielsen.net>
+Received: from cobra.newdream.net ([66.33.216.30]:59284 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752884Ab3AXEZc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 23:25:32 -0500
+In-Reply-To: <CAPud5_4fetJgKLQMbc7f9bTSZY2zRu612Q93OUdyk3phi-ipTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nick Bartos <nick@pistoncloud.com>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig359702C216B26FEC6A3AF4F6
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Nick-
 
-On 01/23/2013 06:17 PM, John Nielsen wrote:
-=2E..
-> http://ceph.com/docs/master/install/rpm/
-> http://ceph.com/docs/master/start/quick-start/
->=20
-> Between those two links my own quick-start on CentOS 6.3 was maybe 6 mi=
-nutes. YMMV.
+The problem here looks to just be that do_get() in rados.cc isn't making 
+any attempt to read large objects in chunks.  I'm not sure where the 2GB 
+limit is, but it well beyond non-optimal before it gets to that point.  
+That function needs to read in chunks of a few MB and keep going until it 
+gets a short read, modulo some extra futzing for stdout.
 
-It does, obviously, since
+Any takers?  :)
 
-"Deploy the configuration
-=2E..
-2. Execute the following on the Ceph server host
-cd /etc/ceph
-sudo mkcephfs -a -c /etc/ceph/ceph.conf -k ceph.keyring
-"
-
-was failing here until I booted an elrepo 3.7 kernel with rbd.ko.
-
->> HEALTH_WARN 384 pgs degraded; 384 pgs stuck unclean; recovery 21/42 de=
-graded (50.000%)
-
->> What does that mean? That I only have one OSD? Or is it genuinely unhe=
-althy?
-
-> Assuming you have more than one host ...
-
-I just said I have one host. So is that expected when I only have one hos=
-t?
-
---=20
-Dimitri Maziuk
-Programmer/sysadmin
-BioMagResBank, UW-Madison -- http://www.bmrb.wisc.edu
+sage
 
 
---------------enig359702C216B26FEC6A3AF4F6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+On Wed, 23 Jan 2013, Nick Bartos wrote:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iD8DBQFRAJ4+xzG8ttqkbbgRAhTxAKC3LO+V9DdMD+GjCBIvp/EaDKWHmQCfdhqH
-hIdb6aStSfGf/Fjza+vODC0=
-=YHFZ
------END PGP SIGNATURE-----
-
---------------enig359702C216B26FEC6A3AF4F6--
+> This seems to be working ok for the most part, but I noticed that
+> using large files gives errors getting them (but not putting them).
+> The problems start after 2GB which, as you said, is larger than should
+> be used in this method.  It shouldn't affect us since we shouldn't be
+> using this for files that large, but I thought it was worth reporting.
+> 
+> This is the test:
+> 
+> dd if=/dev/zero of=4.bin bs=1M count=100
+> export FILE=4.bin
+> rados -p swift_ring ls -
+> rados -p swift_ring put $FILE.tmp $FILE --object-locator $FILE
+> rados -p swift_ring clonedata $FILE.tmp $FILE --object-locator $FILE
+> rados -p swift_ring ls -
+> rados -p swift_ring rm $FILE.tmp --object-locator $FILE
+> rados -p swift_ring ls -
+> rados -p swift_ring stat $FILE
+> rm -f $FILE.downloaded
+> rados -p swift_ring get $FILE $FILE.downloaded
+> 
+> These are the results:
+> 
+> dd if=/dev/zero of=4.bin bs=1M count=1000:
+> # rados -p swift_ring stat $FILE
+> swift_ring/4.bin mtime 1358967088, size 1048576000
+> rados -p swift_ring get $FILE $FILE.downloaded
+> <ok>
+> 
+> dd if=/dev/zero of=4.bin bs=1M count=2000:
+> # rados -p swift_ring stat $FILE
+> swift_ring/4.bin mtime 1358967172, size 2097152000
+> # rados -p swift_ring get $FILE $FILE.downloaded
+> <ok>
+> 
+> dd if=/dev/zero of=4.bin bs=1M count=3000:
+> # rados -p swift_ring stat $FILE
+> swift_ring/4.bin mtime 1358966844, size 3145728000
+> # rados -p swift_ring get $FILE $FILE.downloaded
+> error getting swift_ring/4.bin: Unknown error 1149239296
+> 
+> dd if=/dev/zero of=4.bin bs=1M count=8000:
+> # rados -p swift_ring stat $FILE
+> swift_ring/4.bin mtime 1358967388, size 8388608000
+> # rados -p swift_ring get $FILE $FILE.downloaded
+> error getting swift_ring/4.bin: Bad address
+> 
+> 
+> 
+> 
+> 
+> On Tue, Jan 22, 2013 at 12:28 PM, Sage Weil <sage@inktank.com> wrote:
+> > On Tue, 22 Jan 2013, Nick Bartos wrote:
+> >> Thanks!  Is it safe to just apply that last commit to 0.56.1?  Also,
+> >> is the rados command 'clonedata' instead of 'clone'?  That's what it
+> >> looked like in the code.
+> >
+> > Yep, and yep!
+> >
+> > s
+> >
+> >>
+> >> On Tue, Jan 22, 2013 at 9:27 AM, Sage Weil <sage@inktank.com> wrote:
+> >> > On Tue, 22 Jan 2013, Nick Bartos wrote:
+> >> >> Assuming that the clone is atomic so that the client only ever grabbed
+> >> >> a complete old or new version of the file, that method really seems
+> >> >> ideal.  How much work/time would that be?
+> >> >>
+> >> >> The objects will likely average around 10-20MB, but it's possible that
+> >> >> in some cases they may grow to a few hundred MB.
+> >> >
+> >> > You're in luck--my email load was mercifully light this morning.
+> >> >
+> >> >   713  ./rados -p data ls -
+> >> >   714  ./rados put foo.tmp /etc/passwd  -p data --object-locator foo
+> >> >   715  ./rados clone foo.tmp foo -p data --object-locator foo
+> >> >   716  ./rados -p data ls -
+> >> >   717  ./rados -p data rm foo.tmp --object-locator foo
+> >> >   718  ./rados -p data ls -
+> >> >   719  ./rados -p data get foo -
+> >> >
+> >> > see wip-rados-clone.
+> >> >
+> >> > sage
+> >> >
+> >> >
+> >> >>
+> >> >>
+> >> >> On Mon, Jan 21, 2013 at 9:14 PM, Sage Weil <sage@inktank.com> wrote:
+> >> >> > With a bit of additional support in the rados tool, we could write to
+> >> >> > object $foo.tmp with key $foo, and then clone it into position and delete
+> >> >> > the .tmp.
+> >> >> >
+> >> >> > If they're really big objects, though, you may also be better off with
+> >> >> > radosgw, which provides striping and atomicity..
+> >> >> >
+> >> >> > sage
+> >> >>
+> >> >>
+> >>
+> >>
+> 
+> 
