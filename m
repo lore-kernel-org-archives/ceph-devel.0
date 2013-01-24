@@ -1,53 +1,45 @@
-From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Subject: Re: Understanding Ceph
-Date: Thu, 24 Jan 2013 14:14:53 -0600
-Message-ID: <5101963D.1050609@bmrb.wisc.edu>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <50FC1C0F.9090706@bmrb.wisc.edu> <51017A72.1010706@inktank.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: [PATCH 0/2] two small patches for CEPH wireshark plugin
+Date: Thu, 24 Jan 2013 21:49:05 +0100
+Message-ID: <51019E41.9070705@bisect.de>
+References: <1359048081-17840-1-git-send-email-danny.al-gaaf@bisect.de> <alpine.DEB.2.00.1301241028420.13935@cobra.newdream.net>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig97C2C169987F2BD5CB013CD3"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:46812 "EHLO
-	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161007Ab3AXUOy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 15:14:54 -0500
-In-Reply-To: <51017A72.1010706@inktank.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:41141 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755539Ab3AXUtI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Jan 2013 15:49:08 -0500
+In-Reply-To: <alpine.DEB.2.00.1301241028420.13935@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig97C2C169987F2BD5CB013CD3
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Am 24.01.2013 19:31, schrieb Sage Weil:
+> Hi Danny!
+[...]
+> Since you brought up wireshark...
+> 
+> We would LOVE LOVE LOVE it if this plugin could get upstream into 
+> wireshark.  
 
-On 01/24/2013 12:16 PM, Dan Mick wrote:
+Yes, this would be great.
 
-> This is an apparently-unique problem, and we'd love to see details.
+> IIRC, the problem (last time we checked, ages ago) was that 
+> there were strict coding guidelines for that project that weren't 
+> followed.  I'm not sure if that is still the case, or even if that is 
+> accurate.
+> 
+> It would be great if someone on this list who is looking for a way to 
+> contribute could take the lead on trying to make this happen... :-)
 
-I hate it when it makes a liar out of me, this time around it worked on
-2.6.23 -- FSVO "worked": I did get it to "384 pgs stuck unclean" stage.
+I'll take a look at it maybe ... if I find some free time for it.
 
---=20
-Dimitri Maziuk
-Programmer/sysadmin
-BioMagResBank, UW-Madison -- http://www.bmrb.wisc.edu
+What about the patches? Can we apply them to the ceph git tree until we
+have another solution for the wireshark code?
 
-
---------------enig97C2C169987F2BD5CB013CD3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iD8DBQFRAZY9xzG8ttqkbbgRAnxnAKC5FucPOpd4FnU7JaqDmK1nyEIewwCfddKx
-XleUh6j7wOC9uMIB4WgDywQ=
-=umZR
------END PGP SIGNATURE-----
-
---------------enig97C2C169987F2BD5CB013CD3--
+Danny
