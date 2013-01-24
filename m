@@ -1,117 +1,75 @@
-From: Cesar Mello <cmello@gmail.com>
-Subject: Re: radosgw: "MethodNotAllowed" response for AWS C# Sample
-Date: Thu, 24 Jan 2013 00:13:55 -0200
-Message-ID: <CAJVE5RWoK_v7vFS=V60FtZsd_Z9EfCsFkqrwpSygJXG9qk8uig@mail.gmail.com>
-References: <CAJVE5RWMk8sbeLt52OuV+18aZeDa4J5x48x1bLyjSqT8RE4apw@mail.gmail.com>
-	<CAC-hyiF5j_V4_Oou_6JSkDTBJzWLxWb+W=w_7YWhrEuv5WO8BQ@mail.gmail.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 01/25] mds: fix end check in Server::handle_client_readdir()
+Date: Thu, 24 Jan 2013 10:16:29 +0800
+Message-ID: <5100997D.6010905@intel.com>
+References: <1358910541-15535-1-git-send-email-zheng.z.yan@intel.com> <1358910541-15535-2-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1301230916200.29291@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f171.google.com ([209.85.220.171]:42579 "EHLO
-	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752821Ab3AXCN4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 21:13:56 -0500
-Received: by mail-vc0-f171.google.com with SMTP id p1so2457083vcq.2
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 18:13:55 -0800 (PST)
-In-Reply-To: <CAC-hyiF5j_V4_Oou_6JSkDTBJzWLxWb+W=w_7YWhrEuv5WO8BQ@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:40145 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752954Ab3AXCQa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Jan 2013 21:16:30 -0500
+In-Reply-To: <alpine.DEB.2.00.1301230916200.29291@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Yes the radosgw log shows the request. The handler->get_op call is
-returning null at rgw/rgw_main.cc (RGWProcess::handle_request).
+On 01/24/2013 01:17 AM, Sage Weil wrote:
+> Hi Yan,
+> 
+> I pushed this one to next, thanks.  BTW what are you using to reproduce 
+> this?  We'd like to continue to improve the coverage of 
+> ceph-qa-suite.git/suites/fs.
+> 
 
-I've confirmed putting this log:
+My scripts delete the test directory after finishing a round of fsstress testing.
+I noticed that 'rm' emitted "cannot remove directory : Directory not empty" errors
+These errors are tentative, if re-try deleting them, it will succeed.
 
-  if (!op) {
+Regards
+Yan, Zheng
 
-    req->log(s, "get_op failed!");
-    abort_early(s, -ERR_METHOD_NOT_ALLOWED);
-    goto done;
-  }
-
-I'm pasting a copy of the log below. Any suggestion for helping me
-debug this by myself is appreciated.
-
-Thanks for the attention!
-
-Best regards
-Mello
-
-2013-01-24 00:06:32.935275 7f2ec1c28780 20 enqueued request req=0x194c9c0
-2013-01-24 00:06:32.935317 7f2ec1c28780 20 RGWWQ:
-2013-01-24 00:06:32.935327 7f2ec1c28780 20 req: 0x194c9c0
-2013-01-24 00:06:32.935344 7f2ec1c28780 10 allocated request req=0x1951ef0
-2013-01-24 00:06:32.935357 7f2e5a79c700 20 dequeued request req=0x194c9c0
-2013-01-24 00:06:32.935379 7f2e5a79c700 20 RGWWQ: empty
-2013-01-24 00:06:32.935387 7f2e5a79c700  1 ====== starting new request
-req=0x194c9c0 =====
-2013-01-24 00:06:32.935458 7f2e5a79c700  2 req 1:0.000071::::initializing
-2013-01-24 00:06:32.935470 7f2e5a79c700  2 req
-1:0.000084::::initializing do MELLO
-2013-01-24 00:06:32.935500 7f2e5a79c700 10 meta>> HTTP_X_AMZ_DATE=Thu,
-24 Jan 2013 02:06:35 GMT
-2013-01-24 00:06:32.935521 7f2e5a79c700 10 x>> x-amz-date:Thu, 24 Jan
-2013 02:06:35 GMT
-2013-01-24 00:06:32.935569 7f2e5a79c700 10 s->object=<NULL> s->bucket=<NULL>
-2013-01-24 00:06:32.935583 7f2e5a79c700 20 FCGI_ROLE=RESPONDER
-2013-01-24 00:06:32.935584 7f2e5a79c700 20 SCRIPT_URL=/
-2013-01-24 00:06:32.935585 7f2e5a79c700 20 SCRIPT_URI=http://my-new-bucket.l3/
-2013-01-24 00:06:32.935586 7f2e5a79c700 20 HTTP_AUTHORIZATION=AWS
-JJABVJ3AWBS1ZOCML7NS:iASHPmV0rFQH5/zPslZDs4Wa+A8=
-2013-01-24 00:06:32.935587 7f2e5a79c700 20
-HTTP_USER_AGENT=aws-sdk-dotnet/1.5.10.0 .NET Runtime/4.0 .NET
-Framework/4.0 OS/6.0.6002.131072 S3Sync
-2013-01-24 00:06:32.935590 7f2e5a79c700 20 HTTP_X_AMZ_DATE=Thu, 24 Jan
-2013 02:06:35 GMT
-2013-01-24 00:06:32.935591 7f2e5a79c700 20 HTTP_HOST=my-new-bucket.l3
-2013-01-24 00:06:32.935592 7f2e5a79c700 20 CONTENT_LENGTH=0
-2013-01-24 00:06:32.935593 7f2e5a79c700 20 HTTP_CONNECTION=Keep-Alive
-2013-01-24 00:06:32.935594 7f2e5a79c700 20 PATH=/usr/local/bin:/usr/bin:/bin
-2013-01-24 00:06:32.935595 7f2e5a79c700 20 SERVER_SIGNATURE=
-2013-01-24 00:06:32.935596 7f2e5a79c700 20
-SERVER_SOFTWARE=Apache/2.2.22 (Ubuntu)
-2013-01-24 00:06:32.935597 7f2e5a79c700 20 SERVER_NAME=my-new-bucket.l3
-2013-01-24 00:06:32.935598 7f2e5a79c700 20 SERVER_ADDR=192.168.25.2
-2013-01-24 00:06:32.935601 7f2e5a79c700 20 SERVER_PORT=80
-2013-01-24 00:06:32.935602 7f2e5a79c700 20 REMOTE_ADDR=192.168.25.3
-2013-01-24 00:06:32.935603 7f2e5a79c700 20 DOCUMENT_ROOT=/var/www
-2013-01-24 00:06:32.935604 7f2e5a79c700 20 SERVER_ADMIN=cmello@gmail.com
-2013-01-24 00:06:32.935605 7f2e5a79c700 20 SCRIPT_FILENAME=/var/www/s3gw.fcgi
-2013-01-24 00:06:32.935606 7f2e5a79c700 20 REMOTE_PORT=50190
-2013-01-24 00:06:32.935606 7f2e5a79c700 20 GATEWAY_INTERFACE=CGI/1.1
-2013-01-24 00:06:32.935607 7f2e5a79c700 20 SERVER_PROTOCOL=HTTP/1.1
-2013-01-24 00:06:32.935608 7f2e5a79c700 20 REQUEST_METHOD=PUT
-2013-01-24 00:06:32.935609 7f2e5a79c700 20 QUERY_STRING=page=&params=
-2013-01-24 00:06:32.935610 7f2e5a79c700 20 REQUEST_URI=/
-2013-01-24 00:06:32.935611 7f2e5a79c700 20 SCRIPT_NAME=/
-2013-01-24 00:06:32.935619 7f2e5a79c700  2 req 1:0.000233:s3:PUT /::getting op
-2013-01-24 00:06:32.935625 7f2e5a79c700  2 req 1:0.000239:s3:PUT
-/::get_op failed!
-2013-01-24 00:06:32.935687 7f2e5a79c700  2 req 1:0.000301:s3:PUT
-/::http status=405
-2013-01-24 00:06:32.935781 7f2e5a79c700  1 ====== req done
-req=0x194c9c0 http_status=405 ======
-2013-01-24 00:06:33.056517 7f2d5e7fc700  1 -- 127.0.0.1:0/1008137 <==
-osd.1 127.0.0.1:6804/5559 49 ==== osd_op_reply(77 gc.31 [call] ack =
-0) v4 ==== 104+0+0 (4138896711 0 0) 0x7f2d3c000d40 con 0x7f2d48002260
-
-
-On Wed, Jan 23, 2013 at 10:51 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> On Wed, Jan 23, 2013 at 4:46 PM, Cesar Mello <cmello@gmail.com> wrote:
->> Hi,
+> Thanks!
+> sage
+> 
+> On Wed, 23 Jan 2013, Yan, Zheng wrote:
+> 
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 >>
->> When running the PutObject sample from
->> http://ceph.com/docs/master/radosgw/s3/csharp/ I get a
->> "MethodNotAllowed" response. Please has anyone successfully run this
->> sample?
+>> commit 1174dd3188 (don't retry readdir request after issuing caps)
+>> introduced an bug that wrongly marks 'end' in the the readdir reply.
+>> The code that touches existing dentries re-uses an iterator, and the
+>> iterator is used for checking if readdir is end.
 >>
->> I have tested with a current local build (0.56).
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> ---
+>>  src/mds/Server.cc | 8 +++-----
+>>  1 file changed, 3 insertions(+), 5 deletions(-)
 >>
->
-> Is there anything in the radosgw log? in the apache access, error
-> logs? It might be that your apache has some other (maybe default) site
-> configured to handle requests, and it doesn't really reach radosgw.
->
-> Yehuda
+>> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+>> index b70445e..45eed81 100644
+>> --- a/src/mds/Server.cc
+>> +++ b/src/mds/Server.cc
+>> @@ -2895,11 +2895,9 @@ void Server::handle_client_readdir(MDRequest *mdr)
+>>  	continue;
+>>        } else {
+>>  	// touch everything i _do_ have
+>> -	for (it = dir->begin(); 
+>> -	     it != dir->end(); 
+>> -	     it++) 
+>> -	  if (!it->second->get_linkage()->is_null())
+>> -	    mdcache->lru.lru_touch(it->second);
+>> +	for (CDir::map_t::iterator p = dir->begin(); p != dir->end(); p++)
+>> +	  if (!p->second->get_linkage()->is_null())
+>> +	    mdcache->lru.lru_touch(p->second);
+>>  
+>>  	// already issued caps and leases, reply immediately.
+>>  	if (dnbl.length() > 0) {
+>> -- 
+>> 1.7.11.7
+>>
+>>
+
