@@ -1,71 +1,73 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: some questions about ceph
-Date: Wed, 23 Jan 2013 16:01:57 -0800
-Message-ID: <41D812A2765C43A1A6F2CAC5B9EA8DCE@inktank.com>
-References: <CAFKnYyQbZcsCH_DwsQC-2eagU+A1a0g7PRS_L769_FC8QVJTxg@mail.gmail.com>
+From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
+Subject: Re: Understanding Ceph
+Date: Wed, 23 Jan 2013 18:10:52 -0600
+Message-ID: <51007C0C.2030107@bmrb.wisc.edu>
+References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net> <50FC1DCF.8010304@bmrb.wisc.edu> <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com> <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig28301531FBA5F7AEC010D049"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:63302 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752191Ab3AXACB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 19:02:01 -0500
-Received: by mail-pb0-f41.google.com with SMTP id xa7so5022225pbc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 16:02:01 -0800 (PST)
-In-Reply-To: <CAFKnYyQbZcsCH_DwsQC-2eagU+A1a0g7PRS_L769_FC8QVJTxg@mail.gmail.com>
-Content-Disposition: inline
+Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:43739 "EHLO
+	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751465Ab3AXAKx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 19:10:53 -0500
+Received: from stingray.bmrb.wisc.edu (stingray.bmrb.wisc.edu [144.92.167.179])
+	by mail.bmrb.wisc.edu (Postfix) with ESMTP id B9DA82C0598
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Jan 2013 18:10:52 -0600 (CST)
+In-Reply-To: <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yue Li <xyly781@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Sheng Qiu <herbert1984106@gmail.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wednesday, January 23, 2013 at 3:35 PM, Yue Li wrote:
-> Hi,
-> =20
-> i have some questions about ceph.
-> =20
-> ceph provide a POSIX client for users.
-> for aio-read/write, it still use page cache on client side (seems to
-> me). How long will the page cache expire (in case the data on server
-> side has changed)?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig28301531FBA5F7AEC010D049
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-The kernel client does this automatically; ceph-fuse currently doesn't =
-do page cache invalidation (so, yes, you can get stale data), but fixin=
-g this is in our queue and should be coming pretty soon: http://tracker=
-=2Enewdream.net/issues/2215
- =20
-> if we miss the page cache, we need to fetch data from server side for
-> read accesses, what's the minimum transfer unit between client and
-> OSDs?
+On 01/23/2013 10:19 AM, Patrick McGarry wrote:
 
-There is no hard limit, although there will be a practical minimum base=
-d on the read ahead and prefetch settings you specify.
- =20
-> for write accesses, will the client batch the write request data into
-> units of obj size then transferring to OSDs?
+> http://ceph.com/howto/building-a-public-ami-with-ceph-and-openstack/
 
-It will try to write out what it can, but no =E2=80=94 if you aren't do=
-ing any syncs yourself, then the client will write out dirty data accor=
-ding to an LRU (in ceph-fuse) or the regular page cache eviction algori=
-thms (for the kernel), aggregating the dirty data it has available.
- =20
-> generally what's the minimum transfer unit between client and OSDs?
+> On Wed, Jan 23, 2013 at 10:13 AM, Sam Lang <sam.lang@inktank.com> wrote=
+:
 
-No minimum.
- =20
-> =20
-> How to ensure the consistency for multi-write from clients on the sam=
-e
-> piece of data or parallel read and write on the same data?
+>> http://ceph.com/docs/master/rbd/rbd-openstack/
 
-If you have multiple clients accessing the same piece of data and at le=
-ast one is a writer, they will go into a synchronous mode and data acce=
-ss is coordinated and ordered by the MDS.
--Greg
+These are both great, I'm sure, but Patrick's page says "I chose to
+follow the 5 minute quickstart guide" and the rbd-openstack page says
+"Important ... you must have a running Ceph cluster."
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+My problem is I can;t find a "5 minute quickstart guide" for RHEL 6. and
+I didn't get a "running ceph cluster" by trying to follow the existing
+(ubuntu) guide and adjust for centos 6.3.
+
+So I'm stuck at a point way before those guides become relevant: once I
+had one OSD/MDS/MON box up, I got "HEALTH_WARN 384 pgs degraded; 384 pgs
+stuck unclean; recovery 21/42 degraded (50.000%)" (384 appears be the
+number of placement groups created by default).
+
+What does that mean? That I only have one OSD? Or is it genuinely unhealt=
+hy?
+
+--=20
+Dimitri Maziuk
+Programmer/sysadmin
+BioMagResBank, UW-Madison -- http://www.bmrb.wisc.edu
+
+
+--------------enig28301531FBA5F7AEC010D049
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.14 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iD8DBQFRAHwMxzG8ttqkbbgRAkPTAKCz4sBaf0CSUC1I7Tx6yRl1dGd80ACeMTbX
+QXyjsZ4/ww/sKRrw6PjPUpc=
+=1uco
+-----END PGP SIGNATURE-----
+
+--------------enig28301531FBA5F7AEC010D049--
