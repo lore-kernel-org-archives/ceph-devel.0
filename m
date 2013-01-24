@@ -1,129 +1,57 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 3/3] rbd: don't retry setting up header watch
-Date: Thu, 24 Jan 2013 15:36:13 -0800
-Message-ID: <5101C56D.9070602@inktank.com>
-References: <50FF0B22.5060201@inktank.com> <50FF0B8A.6080007@inktank.com> <5101BF46.2080605@inktank.com> <5101C42E.700@inktank.com>
+Subject: Re: Understanding Ceph
+Date: Thu, 24 Jan 2013 15:38:27 -0800
+Message-ID: <5101C5F3.6040509@inktank.com>
+References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net> <50FC1DCF.8010304@bmrb.wisc.edu> <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com> <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com> <51007C0C.2030107@bmrb.wisc.edu> <CAJH6TXhwBY+gTDDksCfMroDodeN1b8ttM7zjNc2tn5PXzYbcZg@mail.gmail.com> <51013D5F.7090105@bmrb.wisc.edu> <CAKMAVE9HMo4x3seuG7ppeafSRJmBwjUXrLv0GUA-z5kDXyhoQA@mail.gmail.com> <51015318.8000404@bmrb.wisc.edu> <CAM2gkg6m2S0DtgapSOg16GTmGQHsj7fz=a3XzH0ZsvcCWHcBtg@mail.gmail.com> <510190EF.60306@bmrb.wisc.edu> <CAM2gkg6pN2546gBS8J0J=RUtL6RONzBunkF1ovPoRtP_MynzjA@mail.gmail.com>
+  <5101B281.6050206@bmrb.wisc.edu> <5101BB32.1070306@inktank.com> <CAM2gkg6_NQSz1aAKUqweHMK1HhMjAM_HYr=+-umynyOzgd0QoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:47935 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755819Ab3AXXgS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 18:36:18 -0500
-Received: by mail-pa0-f49.google.com with SMTP id bi1so5789762pad.8
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 15:36:18 -0800 (PST)
-In-Reply-To: <5101C42E.700@inktank.com>
+Received: from mail-da0-f48.google.com ([209.85.210.48]:60398 "EHLO
+	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756080Ab3AXXie (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 18:38:34 -0500
+Received: by mail-da0-f48.google.com with SMTP id k18so4490256dae.35
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 15:38:33 -0800 (PST)
+In-Reply-To: <CAM2gkg6_NQSz1aAKUqweHMK1HhMjAM_HYr=+-umynyOzgd0QoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Wilkins <john.wilkins@inktank.com>
+Cc: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>, Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/24/2013 03:30 PM, Alex Elder wrote:
-> On 01/24/2013 05:09 PM, Josh Durgin wrote:
->> On 01/22/2013 01:58 PM, Alex Elder wrote:
->>> When an rbd image is initially mapped a watch event is registered so
->>> we can do something if the header object changes.  Right now if that
->>> returns ERANGE we loop back and try to initiate it again.  However
->>> the code that sets up the watch event doesn't clean up after itself
->>> very well, and doing that properly will require some work.
->>
->> The osds will never return ERANGE. That part of a watch operation was
->> never implemented.
->>
->>> For now, just stop retrying, and if ERANGE gets returned, fail the
->>> map request.
+On 01/24/2013 03:36 PM, John Wilkins wrote:
+> Do I need to update the doc for Dima's comment then, or will the bug
+> fix take care of it?
+
+Fixing the packages will take care of it.
+
+> On Thu, Jan 24, 2013 at 2:52 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+>> On 01/24/2013 02:15 PM, Dimitri Maziuk wrote:
 >>>
->>> This resolves (for the near term):
->>>       http://tracker.newdream.net/issues/3860
+>>> John,
+>>>
+>>> in block device quick start (http://ceph.com/docs/master/start/quick-rbd/)
+>>>
+>>> "sudo rbd map foo --pool rbd --name client.admin"
+>>>
+>>> maps the image to /dev/rbd0 here (centos 6.3/bobtail) so the subsequent
+>>>
+>>> "4. Use the block device. In the following example, create a file system.
+>>>
+>>> sudo mkfs.ext4 -m0 /dev/rbd/rbd/foo"
+>>>
+>>> should end with "/dev/rbd0" instead of "/dev/rbd/rbd/foo".
+>>>
 >>
->> The code change is fine, but the commit message should be changed.
->> The retry is currently useless because ERANGE will never happen there,
->> so removing it makes sense, but the real fix is
->> http://www.tracker.newdream.net/issues/3871
+>> That's what happens when the udev rule for rbd isn't installed.
+>>
+>> The rpm should include it, but it doesn't seem to be mentioned in the
+>> spec file. I filed http://www.tracker.newdream.net/issues/3930 to track
+>> that.
+>>
+>> Josh
 >
-> So the fix is to post a watch *before* the initial
-> read of the header/snapshot context?
-
-Yes.
-
-> I think, as it turns out, the new request code
-> cleans up after itself just fine.  And I also
-> think that it wouldn't be too hard to set up
-> the watch earlier.  The main issue is making
-> sure the watch callback doesn't assume everything
-> is known about the image.
-
-Agreed. It's probably not too hard to change.
-
-Josh
-
->> With the commit message updated,
->> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
->>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>    drivers/block/rbd.c |   23 ++++-------------------
->>>    1 file changed, 4 insertions(+), 19 deletions(-)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index 58d01e3..6689363 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -1474,6 +1474,9 @@ static int rbd_req_sync_watch(struct rbd_device
->>> *rbd_dev, int start)
->>>        struct ceph_osd_req_op *op;
->>>        int ret = 0;
->>>
->>> +    rbd_assert(start ^ !!rbd_dev->watch_event);
->>> +    rbd_assert(start ^ !!rbd_dev->watch_request);
->>> +
->>>        if (start) {
->>>            struct ceph_osd_client *osdc;
->>>
->>> @@ -1482,8 +1485,6 @@ static int rbd_req_sync_watch(struct rbd_device
->>> *rbd_dev, int start)
->>>                            &rbd_dev->watch_event);
->>>            if (ret < 0)
->>>                return ret;
->>> -    } else {
->>> -        rbd_assert(rbd_dev->watch_request != NULL);
->>>        }
->>>
->>>        op = rbd_osd_req_op_create(CEPH_OSD_OP_WATCH,
->>> @@ -3023,22 +3024,6 @@ static void rbd_bus_del_dev(struct rbd_device
->>> *rbd_dev)
->>>        device_unregister(&rbd_dev->dev);
->>>    }
->>>
->>> -static int rbd_init_watch_dev(struct rbd_device *rbd_dev)
->>> -{
->>> -    int ret, rc;
->>> -
->>> -    do {
->>> -        ret = rbd_req_sync_watch(rbd_dev, 1);
->>> -        if (ret == -ERANGE) {
->>> -            rc = rbd_dev_refresh(rbd_dev, NULL);
->>> -            if (rc < 0)
->>> -                return rc;
->>> -        }
->>> -    } while (ret == -ERANGE);
->>> -
->>> -    return ret;
->>> -}
->>> -
->>>    static atomic64_t rbd_dev_id_max = ATOMIC64_INIT(0);
->>>
->>>    /*
->>> @@ -3584,7 +3569,7 @@ static int rbd_dev_probe_finish(struct rbd_device
->>> *rbd_dev)
->>>        if (ret)
->>>            goto err_out_bus;
->>>
->>> -    ret = rbd_init_watch_dev(rbd_dev);
->>> +    ret = rbd_req_sync_watch(rbd_dev, 1);
->>>        if (ret)
->>>            goto err_out_bus;
->>>
->>
+>
+>
 
