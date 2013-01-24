@@ -1,46 +1,30 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
-Subject: Re: Understanding Ceph
-Date: Thu, 24 Jan 2013 17:18:12 +0100
-Message-ID: <51015EC4.7050704@mermaidconsulting.dk>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net> <50FC1DCF.8010304@bmrb.wisc.edu> <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com> <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com> <51007C0C.2030107@bmrb.wisc.edu> <96316186-B7ED-46F9-A01D-C88165C40530@jnielsen.net> <5101572E.2080207@bmrb.wisc.edu> <5101590B.4040002@mermaidconsulting.dk> <51015A09.50702@widodh.nl> <51015DF1.7050708@bmrb.wisc.edu>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 01/12, v2] rbd: new request tracking code
+Date: Thu, 24 Jan 2013 10:22:05 -0600
+Message-ID: <51015FAD.1040209@inktank.com>
+References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [193.189.92.131] ([193.189.92.131]:36776 "EHLO mail2.mdc.dk"
-	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1753478Ab3AXQSO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 Jan 2013 11:18:14 -0500
-In-Reply-To: <51015DF1.7050708@bmrb.wisc.edu>
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:49685 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753474Ab3AXQWJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 11:22:09 -0500
+Received: by mail-ob0-f179.google.com with SMTP id x4so9915979obh.10
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 08:22:09 -0800 (PST)
+In-Reply-To: <5101406E.4060602@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dmaziuk@bmrb.wisc.edu
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Dimitri,
+On 01/24/2013 08:08 AM, Alex Elder wrote:
+> The remaining patches in the series have changed accordingly,
+> but they have not really changed substantively, so I am
+> not re-posting those (but will if it's requested).
 
-> The step that's failing without the kernel module is "Deploy the
-> configuration #2":
->   mkcephfs -a -c /etc/ceph/ceph.conf -k ceph.keyring
+This was requested.  So I'm going to re-post the remainder
+of the series.  They'll show up as responses to the first
+one I posted.
 
-Could you elaborate on how it fails?
-
-Do you get an error message?
-
-> Are you saying I'm to run "qemu -drive ..." instead of mkcephfs?
-
-No, not at all.
-
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://wwww.mermaidconsulting.com/
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					-Alex
