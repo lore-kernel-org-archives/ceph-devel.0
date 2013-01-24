@@ -1,136 +1,65 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Consistently reading/writing rados objects via command line
-Date: Wed, 23 Jan 2013 20:25:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301232023150.10201@cobra.newdream.net>
-References: <CAPud5_7tn1yEkCZSb+f7MC8_-jGFPzm+VZp6RAMBK8vaX3sArA@mail.gmail.com> <0CFBBA27610A4E35A8D340A46E009F40@inktank.com> <alpine.DEB.2.00.1301212113140.29915@cobra.newdream.net> <CAPud5_4fdrdSb9aNms1H=4HPm_YYovQQuVJgzF4APcRKWXOzqQ@mail.gmail.com>
- <alpine.DEB.2.00.1301220906540.4085@cobra.newdream.net> <CAPud5_68kM1xki2MQ_1bWGgxsQxgWNB1pa98Oz9EMdw=WiZoGw@mail.gmail.com> <alpine.DEB.2.00.1301221228250.17154@cobra.newdream.net> <CAPud5_4fetJgKLQMbc7f9bTSZY2zRu612Q93OUdyk3phi-ipTw@mail.gmail.com>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Wed, 23 Jan 2013 20:28:41 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301232028170.10201@cobra.newdream.net>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F80FA0.5010504@profihost.ag> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk>
+ <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net>
+ <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net> <50FADE65.5050403@mermaidconsulting.dk> <alpine.DEB.2.00.1301191016320.29915@cobra.newdream.net> <50FAE8AB.5000602@mermaidconsulting.dk>
+ <alpine.DEB.2.00.1301201613130.31658@cobra.newdream.net> <50FCE759.9070309@mermaidconsulting.dk> <alpine.DEB.2.00.1301202310260.29915@cobra.newdream.net> <50FFD420.7000604@mermaidconsulting.dk> <51004F2A.2010009@mermaidconsulting.dk>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59284 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:59289 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752884Ab3AXEZc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 23:25:32 -0500
-In-Reply-To: <CAPud5_4fetJgKLQMbc7f9bTSZY2zRu612Q93OUdyk3phi-ipTw@mail.gmail.com>
+	with ESMTP id S1752884Ab3AXE2l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jan 2013 23:28:41 -0500
+In-Reply-To: <51004F2A.2010009@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Nick-
+On Wed, 23 Jan 2013, Jens Kristian S?gaard wrote:
+> Hi Sage,
+> 
+> > > I think the problem now is just that 'osd target transaction size' is
+> > I set it to 50, and that seems to have solved all my problems.
+> > After a day or so my cluster got to a HEALTH_OK state again. It has been
+> > running for a few days now without any crashes!
+> 
+> Hmm, one of the OSDs crashed again, sadly.
+> 
+> It logs:
+> 
+>    -2> 2013-01-23 18:01:23.563624 7f67524da700  1 heartbeat_map is_healthy
+> 'FileStore::op_tp thread 0x7f673affd700' had timed out after 60
+>     -1> 2013-01-23 18:01:23.563657 7f67524da700  1 heartbeat_map is_healthy
+> 'FileStore::op_tp thread 0x7f673affd700' had suicide timed out after 180
+>      0> 2013-01-23 18:01:24.257996 7f67524da700 -1 common/HeartbeatMap.cc: In
+> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const
+> char*, time_t)' thread 7f67524da700 time 2013-01-23 18:01:23.563677
+> common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
+> 
+> 
+> With this stack trace:
+> 
+>  ceph version 0.56.1-26-g3bd8f6b (3bd8f6b7235eb14cab778e3c6dcdc636aff4f539)
+>  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+> long)+0x2eb) [0x846ecb]
+>  2: (ceph::HeartbeatMap::is_healthy()+0x8e) [0x8476ae]
+>  3: (ceph::HeartbeatMap::check_touch_file()+0x28) [0x8478d8]
+>  4: (CephContextServiceThread::entry()+0x55) [0x8e0f45]
+>  5: /lib64/libpthread.so.0() [0x3cbc807d14]
+>  6: (clone()+0x6d) [0x3cbc0f167d]
+> 
+> 
+> I have saved the core file, if there's anything in there you need?
+> 
+> Or do you think I just need to set the target transaction size even lower than
+> 50?
 
-The problem here looks to just be that do_get() in rados.cc isn't making 
-any attempt to read large objects in chunks.  I'm not sure where the 2GB 
-limit is, but it well beyond non-optimal before it gets to that point.  
-That function needs to read in chunks of a few MB and keep going until it 
-gets a short read, modulo some extra futzing for stdout.
+Can you share the output from 'thread apply all bt' so we can see what it 
+was doing?
 
-Any takers?  :)
-
-sage
-
-
-On Wed, 23 Jan 2013, Nick Bartos wrote:
-
-> This seems to be working ok for the most part, but I noticed that
-> using large files gives errors getting them (but not putting them).
-> The problems start after 2GB which, as you said, is larger than should
-> be used in this method.  It shouldn't affect us since we shouldn't be
-> using this for files that large, but I thought it was worth reporting.
-> 
-> This is the test:
-> 
-> dd if=/dev/zero of=4.bin bs=1M count=100
-> export FILE=4.bin
-> rados -p swift_ring ls -
-> rados -p swift_ring put $FILE.tmp $FILE --object-locator $FILE
-> rados -p swift_ring clonedata $FILE.tmp $FILE --object-locator $FILE
-> rados -p swift_ring ls -
-> rados -p swift_ring rm $FILE.tmp --object-locator $FILE
-> rados -p swift_ring ls -
-> rados -p swift_ring stat $FILE
-> rm -f $FILE.downloaded
-> rados -p swift_ring get $FILE $FILE.downloaded
-> 
-> These are the results:
-> 
-> dd if=/dev/zero of=4.bin bs=1M count=1000:
-> # rados -p swift_ring stat $FILE
-> swift_ring/4.bin mtime 1358967088, size 1048576000
-> rados -p swift_ring get $FILE $FILE.downloaded
-> <ok>
-> 
-> dd if=/dev/zero of=4.bin bs=1M count=2000:
-> # rados -p swift_ring stat $FILE
-> swift_ring/4.bin mtime 1358967172, size 2097152000
-> # rados -p swift_ring get $FILE $FILE.downloaded
-> <ok>
-> 
-> dd if=/dev/zero of=4.bin bs=1M count=3000:
-> # rados -p swift_ring stat $FILE
-> swift_ring/4.bin mtime 1358966844, size 3145728000
-> # rados -p swift_ring get $FILE $FILE.downloaded
-> error getting swift_ring/4.bin: Unknown error 1149239296
-> 
-> dd if=/dev/zero of=4.bin bs=1M count=8000:
-> # rados -p swift_ring stat $FILE
-> swift_ring/4.bin mtime 1358967388, size 8388608000
-> # rados -p swift_ring get $FILE $FILE.downloaded
-> error getting swift_ring/4.bin: Bad address
-> 
-> 
-> 
-> 
-> 
-> On Tue, Jan 22, 2013 at 12:28 PM, Sage Weil <sage@inktank.com> wrote:
-> > On Tue, 22 Jan 2013, Nick Bartos wrote:
-> >> Thanks!  Is it safe to just apply that last commit to 0.56.1?  Also,
-> >> is the rados command 'clonedata' instead of 'clone'?  That's what it
-> >> looked like in the code.
-> >
-> > Yep, and yep!
-> >
-> > s
-> >
-> >>
-> >> On Tue, Jan 22, 2013 at 9:27 AM, Sage Weil <sage@inktank.com> wrote:
-> >> > On Tue, 22 Jan 2013, Nick Bartos wrote:
-> >> >> Assuming that the clone is atomic so that the client only ever grabbed
-> >> >> a complete old or new version of the file, that method really seems
-> >> >> ideal.  How much work/time would that be?
-> >> >>
-> >> >> The objects will likely average around 10-20MB, but it's possible that
-> >> >> in some cases they may grow to a few hundred MB.
-> >> >
-> >> > You're in luck--my email load was mercifully light this morning.
-> >> >
-> >> >   713  ./rados -p data ls -
-> >> >   714  ./rados put foo.tmp /etc/passwd  -p data --object-locator foo
-> >> >   715  ./rados clone foo.tmp foo -p data --object-locator foo
-> >> >   716  ./rados -p data ls -
-> >> >   717  ./rados -p data rm foo.tmp --object-locator foo
-> >> >   718  ./rados -p data ls -
-> >> >   719  ./rados -p data get foo -
-> >> >
-> >> > see wip-rados-clone.
-> >> >
-> >> > sage
-> >> >
-> >> >
-> >> >>
-> >> >>
-> >> >> On Mon, Jan 21, 2013 at 9:14 PM, Sage Weil <sage@inktank.com> wrote:
-> >> >> > With a bit of additional support in the rados tool, we could write to
-> >> >> > object $foo.tmp with key $foo, and then clone it into position and delete
-> >> >> > the .tmp.
-> >> >> >
-> >> >> > If they're really big objects, though, you may also be better off with
-> >> >> > radosgw, which provides striping and atomicity..
-> >> >> >
-> >> >> > sage
-> >> >>
-> >> >>
-> >>
-> >>
-> 
-> 
+thanks!
+s
