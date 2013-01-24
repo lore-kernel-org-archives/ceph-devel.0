@@ -1,40 +1,45 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: Understanding Ceph
-Date: Thu, 24 Jan 2013 09:49:04 +0100
-Message-ID: <CAJH6TXhwBY+gTDDksCfMroDodeN1b8ttM7zjNc2tn5PXzYbcZg@mail.gmail.com>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com>
-	<50FAC92C.8030709@bmrb.wisc.edu>
-	<alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net>
-	<CAPrNTukzfE0KNMG+Rww8FBOCFq_BZr29Kb0zQRCf0K40oX4enQ@mail.gmail.com>
-	<alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net>
-	<50FAE116.2010504@gmail.com>
-	<alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net>
-	<50FC1DCF.8010304@bmrb.wisc.edu>
-	<CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com>
-	<CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com>
-	<51007C0C.2030107@bmrb.wisc.edu>
+From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
+	<jens@mermaidconsulting.dk>
+Subject: Re: Hit suicide timeout after adding new osd
+Date: Thu, 24 Jan 2013 11:08:18 +0100
+Message-ID: <51010812.6000908@mermaidconsulting.dk>
+References: <50F80C3A.9020007@mermaidconsulting.dk> <50F819B8.4070004@widodh.nl> <50F81A9F.2090104@profihost.ag> <alpine.DEB.2.00.1301170916420.10574@cobra.newdream.net> <50F85FEC.7030305@mermaidconsulting.dk> <alpine.DEB.2.00.1301171402130.21470@cobra.newdream.net> <50F930EE.9070201@mermaidconsulting.dk> <alpine.DEB.2.00.1301181327580.8622@cobra.newdream.net> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net> <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net> <50FADE65.5050403@mermaidconsulting.dk> <alpine.DEB.2.00.1301191016320.29915@cobra.newdream.net> <50FAE8AB.5000602@mermaidconsulting.dk> <alpine.DEB.2.00.1301201613130.31658@cobra.newdream.net> <50FCE759.9070309@mermaidconsulting.dk> <alpine.DEB.
+ 2.00.1301202310260.29915@cobra.newdream.net> <50FFD420.7000604@mermaidconsulting.dk> <51004F2A.2010009@mermaidconsulting.dk> <alpine.DEB.2.00.1301232028170.10201@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:57192 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751242Ab3AXItG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 03:49:06 -0500
-Received: by mail-wi0-f178.google.com with SMTP id hn3so212175wib.5
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 00:49:04 -0800 (PST)
-In-Reply-To: <51007C0C.2030107@bmrb.wisc.edu>
+Received: from [193.189.92.131] ([193.189.92.131]:47126 "EHLO mail2.mdc.dk"
+	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1752824Ab3AXKkf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Jan 2013 05:40:35 -0500
+In-Reply-To: <alpine.DEB.2.00.1301232028170.10201@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2013/1/24 Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>:
-> So I'm stuck at a point way before those guides become relevant: once I
-> had one OSD/MDS/MON box up, I got "HEALTH_WARN 384 pgs degraded; 384 pgs
-> stuck unclean; recovery 21/42 degraded (50.000%)" (384 appears be the
-> number of placement groups created by default).
->
-> What does that mean? That I only have one OSD? Or is it genuinely unhealthy?
+Hi Sage,
 
-ceph is building it's cluster. You should wait for it.
-In my case, it needed 5-10 minutes.
+> Can you share the output from 'thread apply all bt' so we can see wha=
+t it
+> was doing?
+
+Yes, ofcourse!
+
+You can download the output here:
+
+http://bit.ly/UY7TDe
+
+--=20
+Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+jens@mermaidconsulting.dk,
+http://wwww.mermaidconsulting.com/
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
