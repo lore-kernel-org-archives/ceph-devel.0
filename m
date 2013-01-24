@@ -1,37 +1,40 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: Understanding Ceph
-Date: Thu, 24 Jan 2013 10:16:18 -0800
-Message-ID: <51017A72.1010706@inktank.com>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <50FAC92C.8030709@bmrb.wisc.edu> <alpine.DEB.2.00.1301190911470.29915@cobra.newdream.net> <50FC1C0F.9090706@bmrb.wisc.edu>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 0/2] two small patches for CEPH wireshark plugin
+Date: Thu, 24 Jan 2013 10:31:26 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301241028420.13935@cobra.newdream.net>
+References: <1359048081-17840-1-git-send-email-danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:54045 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753389Ab3AXSQW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 13:16:22 -0500
-Received: by mail-pb0-f51.google.com with SMTP id ro12so5576736pbb.24
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 10:16:21 -0800 (PST)
-In-Reply-To: <50FC1C0F.9090706@bmrb.wisc.edu>
+Received: from cobra.newdream.net ([66.33.216.30]:38442 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754705Ab3AXSb1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 13:31:27 -0500
+In-Reply-To: <1359048081-17840-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dmaziuk@bmrb.wisc.edu
-Cc: ceph-devel@vger.kernel.org
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>
 
-On 01/20/2013 08:32 AM, Dimitri Maziuk wrote:
-> On 1/19/2013 11:13 AM, Sage Weil wrote:
->
->> If you want to use the kernel client(s), that is true: there are no 
->> plans
->> to backport the client code to the ancient RHEL kernels. Nothing 
->> prevents
->> you from running the server side, though, or the userland clients
->> (ceph-fuse, librbd, qemu/KVM, radosgw, etc.)
->
-> mkcephfs form 5-minute start fails without rbd.ko. I already reported 
-> that.
->
-> Dima
+Hi Danny!
 
-This is an apparently-unique problem, and we'd love to see details.
+On Thu, 24 Jan 2013, Danny Al-Gaaf wrote:
+> Danny Al-Gaaf (2):
+>   wireshark: fix guint64 print format handling
+>   wireshark: fix indention
+> 
+>  wireshark/ceph/packet-ceph.c | 46 ++++++++++++++++++++++----------------------
+>  1 file changed, 23 insertions(+), 23 deletions(-)
+
+Since you brought up wireshark...
+
+We would LOVE LOVE LOVE it if this plugin could get upstream into 
+wireshark.  IIRC, the problem (last time we checked, ages ago) was that 
+there were strict coding guidelines for that project that weren't 
+followed.  I'm not sure if that is still the case, or even if that is 
+accurate.
+
+It would be great if someone on this list who is looking for a way to 
+contribute could take the lead on trying to make this happen... :-)
+
+sage
