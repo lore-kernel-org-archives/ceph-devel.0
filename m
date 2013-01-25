@@ -1,52 +1,114 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: radosgw
-Date: Fri, 25 Jan 2013 09:18:51 +0100
-Message-ID: <CAJH6TXj-4RWMnJKOm5pxjYZkVLaNh9KRR4dOyYu8sJsZOz7jFA@mail.gmail.com>
-References: <CAJH6TXg+7Sp=3_B047OG+KGQK00X5ZtKXAT+UB2KROBDaqVruA@mail.gmail.com>
-	<CAC-hyiHsL3j9MviM1B0_hhEkt8GeLjeqbWn-ApE82+M+EQYmUA@mail.gmail.com>
-	<CAJH6TXgocN-yWD930i+o80ATLLj5sXo+CcDvE4-JuWses7yPmQ@mail.gmail.com>
-	<CAC-hyiFfeZY9ELrwRCkH5roMTjYys=SEN2SRsyLyNvx0zUD5Pw@mail.gmail.com>
-	<CAJH6TXgbEfJTAHBZE0GfDbzPH8ys8sFAQLn2+zxfxtLkppvQUA@mail.gmail.com>
-	<CAJH6TXh68YA2=Dc86==21LjOtAfiZHSzXRgxMPtepw2TBV_tyQ@mail.gmail.com>
-	<CAC-hyiE2i_p3AWA11o8rLRJEXUNyoYmhSri861Sk-M=TeuZXcg@mail.gmail.com>
-	<CAJH6TXgYCA4oZXOocTcTC_oZEm=nsV-YB4K9vSW9pN6-32ORdg@mail.gmail.com>
-	<CAJVE5RVi_fODAj1Ja2V8iObB4W1Nd=HhwFat23c8fyeo5f1Yyw@mail.gmail.com>
+From: Ugis <ugis22@gmail.com>
+Subject: Re: how to protect rbd from multiple simultaneous mapping
+Date: Fri, 25 Jan 2013 12:47:46 +0200
+Message-ID: <CAE63xUPwAtkv=FEmKac8BUgM+pX0u61+vi_ew8_Zgphf0jttJQ@mail.gmail.com>
+References: <CAE63xUMSqAFGLtm-ObkbYETQtMDdtwLsPAEgMLFtEpM6azfxqA@mail.gmail.com>
+	<5101909D.70501@inktank.com>
+	<CA+jddaN6RhfKV20AV-mnGteYKnYPioGHtDkqDRqgJcOizbySuw@mail.gmail.com>
+	<alpine.DEB.2.00.1301241738290.13935@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:42443 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751325Ab3AYISw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 03:18:52 -0500
-Received: by mail-wi0-f173.google.com with SMTP id hn17so1184875wib.12
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 00:18:51 -0800 (PST)
-In-Reply-To: <CAJVE5RVi_fODAj1Ja2V8iObB4W1Nd=HhwFat23c8fyeo5f1Yyw@mail.gmail.com>
+Received: from mail-ia0-f171.google.com ([209.85.210.171]:40552 "EHLO
+	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756656Ab3AYKrr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 05:47:47 -0500
+Received: by mail-ia0-f171.google.com with SMTP id z13so376380iaz.16
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 02:47:47 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1301241738290.13935@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Cesar Mello <cmello@gmail.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
 
-2013/1/25 Cesar Mello <cmello@gmail.com>:
-> Just as a curiosity, I lost some time because I didn't read this:
+This could work, thanks!
+
+P.S. Is there a way to tell which client has mapped certain rbd if no
+"rbd lock" is used?
+It would be useful to see that info in output of "rbd info <image>".
+Probably attribute for rbd like "max_map_count_allowed" would be
+useful in future - just to make sure rbd is not mapped from multiple
+clients if it must not. I suppose it can actually happen if multiple
+admins work with same rbds from multiple clients and no strict "rbd
+lock add.." procedure is followed.
+
+Ugis
+
+
+2013/1/25 Sage Weil <sage@inktank.com>:
+> On Thu, 24 Jan 2013, Mandell Degerness wrote:
+>> The advisory locks are nice, but it would be really nice to have the
+>> fencing.  If a node is temporarily off the network and a heartbeat
+>> monitor attempts to bring up a service on a different node, there is
+>> no way to ensure that the first node will not write data to the rbd
+>> after the rbd is mounted on the second node.  It would be nice if, on
+>> seeing that an advisory lock exists, you could tell ceph "Do not
+>> accept data from node X until further notice".
 >
-> .. important:: Check the key output. Sometimes ``radosgw-admin``
->    generates a key with an escape (``\``) character, and some clients
->    do not know how to handle escape characters. Remedies include
->    removing the escape character (``\``), encapsulating the string
->    in quotes, or simply regenerating the key and ensuring that it
->    does not have an escape character.
-
-Is not my case bacause my key is accepted propery (i'm able to list
-and create buckets)
-my issue seems to be related to the header 100-Continue.
-Without
-
-rgw print continue = false
-
-i'm receiving error 500
-
-with
-
-rgw print continue = false
-
-i recieve duplicate header status (and then error 500)
+> Just a reminder: you can use the information from the locks to fence.  The
+> basic process is:
+>
+>  - identify old rbd lock holder (rbd lock list <img>)
+>  - blacklist old owner (ceph osd blacklist add <addr>)
+>  - break old rbd lock (rbd lock remove <img> <lockid> <addr>)
+>  - lock rbd image on new host (rbd lock add <img> <lockid>)
+>  - map rbd image on new host
+>
+> The oddity here is that the old VM can in theory continue to write up
+> until the OSD hears about the blacklist via the internal gossip.  This is
+> okay because the act of the new VM touching any part of the image (and the
+> OSD that stores it) ensures that that OSD gets the blacklist information.
+> So on XFS, for example, the act of replaying the XFS journal ensures that
+> any attempt by the old VM to write to the journal will get EIO.
+>
+> sage
+>
+>
+>
+>>
+>> On Thu, Jan 24, 2013 at 11:50 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+>> > On 01/24/2013 05:30 AM, Ugis wrote:
+>> >>
+>> >> Hi,
+>> >>
+>> >> I have rbd which contains non-cluster filesystem. If this rbd is
+>> >> mapped+mounted on one host, it should not be mapped+mounted on the
+>> >> other simultaneously.
+>> >> How to protect such rbd from being mapped on the other host?
+>> >>
+>> >> At ceph level the only option is to use "lock add [image-name]
+>> >> [lock-id]" and check for existance of this lock on the other client or
+>> >> is it possible to protect rbd in a way that on other clients "rbd map
+>> >> " command would just fail with something like Permission denied
+>> >> without using arbitrary locks? In other words, can one limit the count
+>> >> of clients that may map certain rbd?
+>> >
+>> >
+>> > This is what the lock commands were added for. The lock add command
+>> > will exit non-zero if the image is already locked, so you can run
+>> > something like:
+>> >
+>> >     rbd lock add [image-name] [lock-id] && rbd map [image-name]
+>> >
+>> > to avoid mapping an image that's in use elsewhere.
+>> >
+>> > The lock-id is user-defined, so you could (for example) use the
+>> > hostname of the machine mapping the image to tell where it's
+>> > in use.
+>> >
+>> > Josh
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
