@@ -1,51 +1,26 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: ceph write path
-Date: Thu, 24 Jan 2013 21:41:22 -0500
-Message-ID: <CAB7xdikxeLumDMJNYacoxiiijkx2vekAdc5ccDy0A+5isOJ-3Q@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: recoverying from 95% full osd
+Date: Thu, 24 Jan 2013 20:11:58 -0800
+Message-ID: <5102060E.6030009@inktank.com>
+References: <CAD5ewroRv5-F0ZxBUmXqjz77zNenHQsrBacJ7LgXCqyduoxHsQ@mail.gmail.com> <CAPYLRzjv2tjndJCAgCqj8uBcGdC4vCiU1hd3oG2MdqLA7fW3Yg@mail.gmail.com> <CAD5ewrrKB0kxMDq2Hg-XStQUdVhjtgTWvmb3OoZTzHcZ3wpUrQ@mail.gmail.com> <alpine.DEB.2.00.1301082251590.2227@cobra.newdream.net> <778D42BCC03C4BB589117CE6FB62B5D6@inktank.com> <CAD5ewrr7tiVTR3zna_iKqzg-GfwmERey1g4dn92yMA6fQNaaYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f178.google.com ([209.85.210.178]:42409 "EHLO
-	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753389Ab3AYClW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 21:41:22 -0500
-Received: by mail-ia0-f178.google.com with SMTP id y26so5826953iab.23
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 18:41:22 -0800 (PST)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:39555 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752732Ab3AYEMC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 23:12:02 -0500
+Received: by mail-pb0-f46.google.com with SMTP id uo15so138415pbc.19
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 20:12:01 -0800 (PST)
+In-Reply-To: <CAD5ewrr7tiVTR3zna_iKqzg-GfwmERey1g4dn92yMA6fQNaaYw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Roman Hlynovskiy <roman.hlynovskiy@gmail.com>
+Cc: Gregory Farnum <greg@inktank.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
 
-i am trying to understand the ceph codes on client side.
-for write path, if it's aio_write, the ceph_write_begin() allocate
-pages in page cache to buffer the written data, however i did not see
-it allocated any space on the remote OSDs (for local fs such as ext2,
-the get_block() did this),
-i suppose it's done later when invoke kernel flushing process to write
-back the dirty pages.
+> what is pool 2 (rbd) for? looks like it's absolutely empty.
 
-i checked the ceph_writepages_start(), here it seems organize the
-dirty data and prepare the requests to send to the OSDs.  For new
-allocated written data, how it maps to the OSDs and where it is done?
-is it done in ceph_osdc_new_request()?
-
-If the transfer unit is not limited to sizes of obj, i supposed that
-ceph needed to packed several pieces of data (smaller than one obj
-size)  together so that there won't be internal fragmentation for an
-object. who does this job and which part of source codes/files are
-related with this?
-
-I really want to get a deep understanding about the codes, so i raised
-these questions. if my understanding is not correct, please figure
-out. i will be very appreciated.
-
-Thanks,
-Sheng
-
---
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+by default it's for rbd images (see the rbd command etc.).  It being 
+empty or not has no effect on the other pools.
