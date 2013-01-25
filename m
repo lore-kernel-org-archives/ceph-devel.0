@@ -1,55 +1,41 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: lagging peering wq
-Date: Fri, 25 Jan 2013 10:33:27 -0800
-Message-ID: <CA+4uBUZs7MHF0CFJUhzm8qTR3H-0k9LTu+Rnvwy9XFKS7v3_XQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1301250946420.14545@cobra.newdream.net>
-	<FCA7E277340B4E18BB343E80E78D3E13@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Fri, 25 Jan 2013 21:16:29 +0100
+Message-ID: <CAF6-1L7HJMwqDPWwpkbqyTNbGbVhm_5pCbR73nTtnk0eD8xB4g@mail.gmail.com>
+References: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com>
+	<CAOLwVUkLdECXqoj2rpOh0hm66FPv0tEe-Z8A1oOj9Geer3NJ+A@mail.gmail.com>
+	<CAF6-1L40y-JvBr9J3Cx9p9nX=uEaz+pMrA2+g9rJDV-1AQxqtA@mail.gmail.com>
+	<CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
+	<CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f49.google.com ([209.85.212.49]:53946 "EHLO
-	mail-vb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756144Ab3AYSd2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 13:33:28 -0500
-Received: by mail-vb0-f49.google.com with SMTP id s24so501334vbi.22
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 10:33:27 -0800 (PST)
-In-Reply-To: <FCA7E277340B4E18BB343E80E78D3E13@inktank.com>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:50024 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752744Ab3AYUXu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 15:23:50 -0500
+Received: by mail-oa0-f51.google.com with SMTP id n12so953788oag.38
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 12:23:50 -0800 (PST)
+In-Reply-To: <CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-The only way I can see that this would happen is if maps were being
-generated much more quickly than pgs could be updated...the solution
-to that would be to throttle new map handling to the rate at which PGs
-consume them at the OSD.  Alternately, you could tweak the map
-creation rate at the mons.
--Sam
+> Could provide those heaps? Is it possible?
 
-On Fri, Jan 25, 2013 at 10:01 AM, Gregory Farnum <greg@inktank.com> wrote:
-> On Friday, January 25, 2013 at 9:50 AM, Sage Weil wrote:
->> Faidon/paravoid's cluster has a bunch of OSDs that are up, but the pg
->> queries indicate they are tens of thousands of epochs behind:
->>
->> "history": { "epoch_created": 14,
->> "last_epoch_started": 88174,
->> "last_epoch_clean": 88174,
->> "last_epoch_split": 0,
->> "same_up_since": 88172,
->> "same_interval_since": 88172,
->> "same_primary_since": 88172,
->>
->> (where the current map epoch is 102000 or thereabouts).
->>
->> I think just restarting all OSDs at once will get him caught up (esp with
->> a 'ceph osd set noup' block until they are done processing maps), but I
->> wonder if we may want an additional check that if any PG falls more than X
->> epochs behind the OSD marks it self down and catches up before coming
->> in...
->>
->> What do you think?
->
-> Sam's explained to me why this "shouldn't" happen (since events for each PG get queued on every map update), so it sounds like it would be better to prevent the mess (e.g., add some basic fairness to the PG work queue dispatchers in order to prevent any PG from falling so far behind), rather than trying to clean the mess up.
-> -Greg
->
+We're updating this weekend to 0.56.1.
+
+If it still happens after the update, I'll try and reproduce it on our
+test infra and do the profile there, because unfortunately running the
+profiler seem to make it eat up CPU and RAM a lot ...
+
+I also need to test is it happens when I force a scrub myself because
+I can't let the profile run the whole day and just wait for it to
+happen naturally, so I need a way to trigger a scrub of all PGs on a
+given pool.
+
+
+Cheers,
+
+    Sylvain
