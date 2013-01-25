@@ -1,90 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: how to protect rbd from multiple simultaneous mapping
-Date: Thu, 24 Jan 2013 17:41:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301241738290.13935@cobra.newdream.net>
-References: <CAE63xUMSqAFGLtm-ObkbYETQtMDdtwLsPAEgMLFtEpM6azfxqA@mail.gmail.com> <5101909D.70501@inktank.com> <CA+jddaN6RhfKV20AV-mnGteYKnYPioGHtDkqDRqgJcOizbySuw@mail.gmail.com>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: ceph write path
+Date: Thu, 24 Jan 2013 21:41:22 -0500
+Message-ID: <CAB7xdikxeLumDMJNYacoxiiijkx2vekAdc5ccDy0A+5isOJ-3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43422 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753749Ab3AYBlc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 20:41:32 -0500
-In-Reply-To: <CA+jddaN6RhfKV20AV-mnGteYKnYPioGHtDkqDRqgJcOizbySuw@mail.gmail.com>
+Received: from mail-ia0-f178.google.com ([209.85.210.178]:42409 "EHLO
+	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753389Ab3AYClW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 21:41:22 -0500
+Received: by mail-ia0-f178.google.com with SMTP id y26so5826953iab.23
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 18:41:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 24 Jan 2013, Mandell Degerness wrote:
-> The advisory locks are nice, but it would be really nice to have the
-> fencing.  If a node is temporarily off the network and a heartbeat
-> monitor attempts to bring up a service on a different node, there is
-> no way to ensure that the first node will not write data to the rbd
-> after the rbd is mounted on the second node.  It would be nice if, on
-> seeing that an advisory lock exists, you could tell ceph "Do not
-> accept data from node X until further notice".
+Hi,
 
-Just a reminder: you can use the information from the locks to fence.  The 
-basic process is:
+i am trying to understand the ceph codes on client side.
+for write path, if it's aio_write, the ceph_write_begin() allocate
+pages in page cache to buffer the written data, however i did not see
+it allocated any space on the remote OSDs (for local fs such as ext2,
+the get_block() did this),
+i suppose it's done later when invoke kernel flushing process to write
+back the dirty pages.
 
- - identify old rbd lock holder (rbd lock list <img>)
- - blacklist old owner (ceph osd blacklist add <addr>)
- - break old rbd lock (rbd lock remove <img> <lockid> <addr>)
- - lock rbd image on new host (rbd lock add <img> <lockid>)
- - map rbd image on new host
+i checked the ceph_writepages_start(), here it seems organize the
+dirty data and prepare the requests to send to the OSDs.  For new
+allocated written data, how it maps to the OSDs and where it is done?
+is it done in ceph_osdc_new_request()?
 
-The oddity here is that the old VM can in theory continue to write up 
-until the OSD hears about the blacklist via the internal gossip.  This is 
-okay because the act of the new VM touching any part of the image (and the 
-OSD that stores it) ensures that that OSD gets the blacklist information.  
-So on XFS, for example, the act of replaying the XFS journal ensures that 
-any attempt by the old VM to write to the journal will get EIO.
+If the transfer unit is not limited to sizes of obj, i supposed that
+ceph needed to packed several pieces of data (smaller than one obj
+size)  together so that there won't be internal fragmentation for an
+object. who does this job and which part of source codes/files are
+related with this?
 
-sage
+I really want to get a deep understanding about the codes, so i raised
+these questions. if my understanding is not correct, please figure
+out. i will be very appreciated.
 
+Thanks,
+Sheng
 
-
-> 
-> On Thu, Jan 24, 2013 at 11:50 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> > On 01/24/2013 05:30 AM, Ugis wrote:
-> >>
-> >> Hi,
-> >>
-> >> I have rbd which contains non-cluster filesystem. If this rbd is
-> >> mapped+mounted on one host, it should not be mapped+mounted on the
-> >> other simultaneously.
-> >> How to protect such rbd from being mapped on the other host?
-> >>
-> >> At ceph level the only option is to use "lock add [image-name]
-> >> [lock-id]" and check for existance of this lock on the other client or
-> >> is it possible to protect rbd in a way that on other clients "rbd map
-> >> " command would just fail with something like Permission denied
-> >> without using arbitrary locks? In other words, can one limit the count
-> >> of clients that may map certain rbd?
-> >
-> >
-> > This is what the lock commands were added for. The lock add command
-> > will exit non-zero if the image is already locked, so you can run
-> > something like:
-> >
-> >     rbd lock add [image-name] [lock-id] && rbd map [image-name]
-> >
-> > to avoid mapping an image that's in use elsewhere.
-> >
-> > The lock-id is user-defined, so you could (for example) use the
-> > hostname of the machine mapping the image to tell where it's
-> > in use.
-> >
-> > Josh
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--
+Sheng Qiu
+Texas A & M University
+Room 332B Wisenbaker
+email: herbert1984106@gmail.com
+College Station, TX 77843-3259
