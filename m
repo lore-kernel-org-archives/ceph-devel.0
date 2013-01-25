@@ -1,54 +1,63 @@
-From: Cesar Mello <cmello@gmail.com>
-Subject: Re: radosgw
-Date: Thu, 24 Jan 2013 22:24:18 -0200
-Message-ID: <CAJVE5RVi_fODAj1Ja2V8iObB4W1Nd=HhwFat23c8fyeo5f1Yyw@mail.gmail.com>
-References: <CAJH6TXg+7Sp=3_B047OG+KGQK00X5ZtKXAT+UB2KROBDaqVruA@mail.gmail.com>
-	<CAC-hyiHsL3j9MviM1B0_hhEkt8GeLjeqbWn-ApE82+M+EQYmUA@mail.gmail.com>
-	<CAJH6TXgocN-yWD930i+o80ATLLj5sXo+CcDvE4-JuWses7yPmQ@mail.gmail.com>
-	<CAC-hyiFfeZY9ELrwRCkH5roMTjYys=SEN2SRsyLyNvx0zUD5Pw@mail.gmail.com>
-	<CAJH6TXgbEfJTAHBZE0GfDbzPH8ys8sFAQLn2+zxfxtLkppvQUA@mail.gmail.com>
-	<CAJH6TXh68YA2=Dc86==21LjOtAfiZHSzXRgxMPtepw2TBV_tyQ@mail.gmail.com>
-	<CAC-hyiE2i_p3AWA11o8rLRJEXUNyoYmhSri861Sk-M=TeuZXcg@mail.gmail.com>
-	<CAJH6TXgYCA4oZXOocTcTC_oZEm=nsV-YB4K9vSW9pN6-32ORdg@mail.gmail.com>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: how to protect rbd from multiple simultaneous mapping
+Date: Thu, 24 Jan 2013 17:30:03 -0800
+Message-ID: <CA+jddaN6RhfKV20AV-mnGteYKnYPioGHtDkqDRqgJcOizbySuw@mail.gmail.com>
+References: <CAE63xUMSqAFGLtm-ObkbYETQtMDdtwLsPAEgMLFtEpM6azfxqA@mail.gmail.com>
+	<5101909D.70501@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:39116 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754838Ab3AYAYT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 19:24:19 -0500
-Received: by mail-vc0-f178.google.com with SMTP id m8so8336297vcd.9
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 16:24:18 -0800 (PST)
-In-Reply-To: <CAJH6TXgYCA4oZXOocTcTC_oZEm=nsV-YB4K9vSW9pN6-32ORdg@mail.gmail.com>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:49919 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751065Ab3AYBaF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 20:30:05 -0500
+Received: by mail-wi0-f174.google.com with SMTP id hq4so1005196wib.13
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 17:30:03 -0800 (PST)
+In-Reply-To: <5101909D.70501@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Just as a curiosity, I lost some time because I didn't read this:
+The advisory locks are nice, but it would be really nice to have the
+fencing.  If a node is temporarily off the network and a heartbeat
+monitor attempts to bring up a service on a different node, there is
+no way to ensure that the first node will not write data to the rbd
+after the rbd is mounted on the second node.  It would be nice if, on
+seeing that an advisory lock exists, you could tell ceph "Do not
+accept data from node X until further notice".
 
-.. important:: Check the key output. Sometimes ``radosgw-admin``
-   generates a key with an escape (``\``) character, and some clients
-   do not know how to handle escape characters. Remedies include
-   removing the escape character (``\``), encapsulating the string
-   in quotes, or simply regenerating the key and ensuring that it
-   does not have an escape character.
-
-Best regards
-Mello
-
-On Thu, Jan 24, 2013 at 8:10 PM, Gandalf Corvotempesta
-<gandalf.corvotempesta@gmail.com> wrote:
-> 2013/1/23 Yehuda Sadeh <yehuda@inktank.com>:
->> You mean a radosgw user?
+On Thu, Jan 24, 2013 at 11:50 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 01/24/2013 05:30 AM, Ugis wrote:
+>>
+>> Hi,
+>>
+>> I have rbd which contains non-cluster filesystem. If this rbd is
+>> mapped+mounted on one host, it should not be mapped+mounted on the
+>> other simultaneously.
+>> How to protect such rbd from being mapped on the other host?
+>>
+>> At ceph level the only option is to use "lock add [image-name]
+>> [lock-id]" and check for existance of this lock on the other client or
+>> is it possible to protect rbd in a way that on other clients "rbd map
+>> " command would just fail with something like Permission denied
+>> without using arbitrary locks? In other words, can one limit the count
+>> of clients that may map certain rbd?
 >
-> This command:
-> radosgw-admin user create --uid=johndoe --display-name="John Doe"
-> --email=john@example.com
 >
-> should be ran on radosgw node or on ceph node?
-> Because I'm able to create the user, but unable to authenticate with
-> any S3 client (I receive a 403 error)
+> This is what the lock commands were added for. The lock add command
+> will exit non-zero if the image is already locked, so you can run
+> something like:
+>
+>     rbd lock add [image-name] [lock-id] && rbd map [image-name]
+>
+> to avoid mapping an image that's in use elsewhere.
+>
+> The lock-id is user-defined, so you could (for example) use the
+> hostname of the machine mapping the image to tell where it's
+> in use.
+>
+> Josh
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
