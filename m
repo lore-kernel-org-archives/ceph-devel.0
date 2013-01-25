@@ -1,57 +1,55 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Understanding Ceph
-Date: Thu, 24 Jan 2013 15:38:27 -0800
-Message-ID: <5101C5F3.6040509@inktank.com>
-References: <CAPrNTukzeSN8ZfO_Mhtx9LkHqe0M3tUxJuQG=gwwJD4w+-OGEg@mail.gmail.com> <alpine.DEB.2.00.1301190933000.29915@cobra.newdream.net> <50FAE116.2010504@gmail.com> <alpine.DEB.2.00.1301191012400.29915@cobra.newdream.net> <50FC1DCF.8010304@bmrb.wisc.edu> <CAKMAVE-4g_0Jab6sQ3S49oMadENEzetCLOB0sAo_o39d+RnDaQ@mail.gmail.com> <CAP8Oy=Kwbs0AV9Tb3un79FuFB=R4M78wgb2g3+Fb=K70nXfEnA@mail.gmail.com> <51007C0C.2030107@bmrb.wisc.edu> <CAJH6TXhwBY+gTDDksCfMroDodeN1b8ttM7zjNc2tn5PXzYbcZg@mail.gmail.com> <51013D5F.7090105@bmrb.wisc.edu> <CAKMAVE9HMo4x3seuG7ppeafSRJmBwjUXrLv0GUA-z5kDXyhoQA@mail.gmail.com> <51015318.8000404@bmrb.wisc.edu> <CAM2gkg6m2S0DtgapSOg16GTmGQHsj7fz=a3XzH0ZsvcCWHcBtg@mail.gmail.com> <510190EF.60306@bmrb.wisc.edu> <CAM2gkg6pN2546gBS8J0J=RUtL6RONzBunkF1ovPoRtP_MynzjA@mail.gmail.com>
-  <5101B281.6050206@bmrb.wisc.edu> <5101BB32.1070306@inktank.com> <CAM2gkg6_NQSz1aAKUqweHMK1HhMjAM_HYr=+-umynyOzgd0QoA@mail.gmail.com>
+From: Cesar Mello <cmello@gmail.com>
+Subject: Re: radosgw
+Date: Thu, 24 Jan 2013 22:24:18 -0200
+Message-ID: <CAJVE5RVi_fODAj1Ja2V8iObB4W1Nd=HhwFat23c8fyeo5f1Yyw@mail.gmail.com>
+References: <CAJH6TXg+7Sp=3_B047OG+KGQK00X5ZtKXAT+UB2KROBDaqVruA@mail.gmail.com>
+	<CAC-hyiHsL3j9MviM1B0_hhEkt8GeLjeqbWn-ApE82+M+EQYmUA@mail.gmail.com>
+	<CAJH6TXgocN-yWD930i+o80ATLLj5sXo+CcDvE4-JuWses7yPmQ@mail.gmail.com>
+	<CAC-hyiFfeZY9ELrwRCkH5roMTjYys=SEN2SRsyLyNvx0zUD5Pw@mail.gmail.com>
+	<CAJH6TXgbEfJTAHBZE0GfDbzPH8ys8sFAQLn2+zxfxtLkppvQUA@mail.gmail.com>
+	<CAJH6TXh68YA2=Dc86==21LjOtAfiZHSzXRgxMPtepw2TBV_tyQ@mail.gmail.com>
+	<CAC-hyiE2i_p3AWA11o8rLRJEXUNyoYmhSri861Sk-M=TeuZXcg@mail.gmail.com>
+	<CAJH6TXgYCA4oZXOocTcTC_oZEm=nsV-YB4K9vSW9pN6-32ORdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f48.google.com ([209.85.210.48]:60398 "EHLO
-	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756080Ab3AXXie (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 18:38:34 -0500
-Received: by mail-da0-f48.google.com with SMTP id k18so4490256dae.35
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 15:38:33 -0800 (PST)
-In-Reply-To: <CAM2gkg6_NQSz1aAKUqweHMK1HhMjAM_HYr=+-umynyOzgd0QoA@mail.gmail.com>
+Received: from mail-vc0-f178.google.com ([209.85.220.178]:39116 "EHLO
+	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754838Ab3AYAYT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jan 2013 19:24:19 -0500
+Received: by mail-vc0-f178.google.com with SMTP id m8so8336297vcd.9
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jan 2013 16:24:18 -0800 (PST)
+In-Reply-To: <CAJH6TXgYCA4oZXOocTcTC_oZEm=nsV-YB4K9vSW9pN6-32ORdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Wilkins <john.wilkins@inktank.com>
-Cc: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>, Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org
 
-On 01/24/2013 03:36 PM, John Wilkins wrote:
-> Do I need to update the doc for Dima's comment then, or will the bug
-> fix take care of it?
+Just as a curiosity, I lost some time because I didn't read this:
 
-Fixing the packages will take care of it.
+.. important:: Check the key output. Sometimes ``radosgw-admin``
+   generates a key with an escape (``\``) character, and some clients
+   do not know how to handle escape characters. Remedies include
+   removing the escape character (``\``), encapsulating the string
+   in quotes, or simply regenerating the key and ensuring that it
+   does not have an escape character.
 
-> On Thu, Jan 24, 2013 at 2:52 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> On 01/24/2013 02:15 PM, Dimitri Maziuk wrote:
->>>
->>> John,
->>>
->>> in block device quick start (http://ceph.com/docs/master/start/quick-rbd/)
->>>
->>> "sudo rbd map foo --pool rbd --name client.admin"
->>>
->>> maps the image to /dev/rbd0 here (centos 6.3/bobtail) so the subsequent
->>>
->>> "4. Use the block device. In the following example, create a file system.
->>>
->>> sudo mkfs.ext4 -m0 /dev/rbd/rbd/foo"
->>>
->>> should end with "/dev/rbd0" instead of "/dev/rbd/rbd/foo".
->>>
->>
->> That's what happens when the udev rule for rbd isn't installed.
->>
->> The rpm should include it, but it doesn't seem to be mentioned in the
->> spec file. I filed http://www.tracker.newdream.net/issues/3930 to track
->> that.
->>
->> Josh
+Best regards
+Mello
+
+On Thu, Jan 24, 2013 at 8:10 PM, Gandalf Corvotempesta
+<gandalf.corvotempesta@gmail.com> wrote:
+> 2013/1/23 Yehuda Sadeh <yehuda@inktank.com>:
+>> You mean a radosgw user?
 >
+> This command:
+> radosgw-admin user create --uid=johndoe --display-name="John Doe"
+> --email=john@example.com
 >
->
-
+> should be ran on radosgw node or on ceph node?
+> Because I'm able to create the user, but unable to authenticate with
+> any S3 client (I receive a 403 error)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
