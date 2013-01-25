@@ -1,112 +1,75 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: ceph write path
-Date: Fri, 25 Jan 2013 10:20:59 -0600
-Message-ID: <CAB7xdin1y1WVEtvSRHWLv6iOaid-c4sUOaAWdgVZozY2UUHJtA@mail.gmail.com>
-References: <CAB7xdikxeLumDMJNYacoxiiijkx2vekAdc5ccDy0A+5isOJ-3Q@mail.gmail.com>
-	<alpine.DEB.2.00.1301242056150.14731@cobra.newdream.net>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Fri, 25 Jan 2013 17:29:20 +0100
+Message-ID: <CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com>
+References: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com>
+ <CAOLwVUkLdECXqoj2rpOh0hm66FPv0tEe-Z8A1oOj9Geer3NJ+A@mail.gmail.com>
+ <CAF6-1L40y-JvBr9J3Cx9p9nX=uEaz+pMrA2+g9rJDV-1AQxqtA@mail.gmail.com> <CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:38691 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754981Ab3AYQVB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 11:21:01 -0500
-Received: by mail-oa0-f51.google.com with SMTP id n12so607540oag.24
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 08:20:59 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301242056150.14731@cobra.newdream.net>
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:59205 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756592Ab3AYQ3o convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jan 2013 11:29:44 -0500
+Received: by mail-lb0-f170.google.com with SMTP id ge1so1041379lbb.29
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Jan 2013 08:29:42 -0800 (PST)
+In-Reply-To: <CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi,
 
-i am appreciated for your reply.
+Could provide those heaps? Is it possible?
 
-by my understanding on reading the client codes, i think ceph
-allocates msg based on individual file. In another word, if one client
-is updating on different files (each file is doing small
-writes/updates, i.e. 4kb), ceph has to compose different msgs for each
-file and send them to the corresponding OSDs. if there are msgs
-targeted on the same OSDs, can they be merged at client side? This may
-help if the bandwidth of network is not sufficient, although i do not
-know how much the chance they fall onto the same OSDs.
-if my understanding is not correct, please figure out. i am doing
-research on DFS, and pretty interested on ceph. Have you considered
-manage a hybrid storage pool, while may compose of some faster devices
-such as NVRAM/SSD and some slow devices such as HDD, and make ceph be
-aware of this to better place/distribute data instead of a flat way.
-
-Thanks,
-Sheng
+--
+Regards,
+S=E9bastien Han.
 
 
-On Thu, Jan 24, 2013 at 11:00 PM, Sage Weil <sage@inktank.com> wrote:
-> Hi Sheng,
+On Tue, Jan 22, 2013 at 10:38 PM, S=E9bastien Han <han.sebastien@gmail.=
+com> wrote:
+> Well ideally you want to run the profiler during the scrubbing proces=
+s
+> when the memory leaks appear :-).
+> --
+> Regards,
+> S=E9bastien Han.
 >
-> On Thu, 24 Jan 2013, sheng qiu wrote:
->> i am trying to understand the ceph codes on client side.
->> for write path, if it's aio_write, the ceph_write_begin() allocate
->> pages in page cache to buffer the written data, however i did not see
->> it allocated any space on the remote OSDs (for local fs such as ext2,
->> the get_block() did this),
->> i suppose it's done later when invoke kernel flushing process to write
->> back the dirty pages.
 >
-> Right.  Objects are instantiated and written to teh osds when the write
-> operations are sent over the network, normally during writeback (via
-> the ->writepages() op in addr.c).
->
->> i checked the ceph_writepages_start(), here it seems organize the
->> dirty data and prepare the requests to send to the OSDs.  For new
->> allocated written data, how it maps to the OSDs and where it is done?
->> is it done in ceph_osdc_new_request()?
->
-> I happens later, when the actual request is ready to go over the wire. The
-> target OSD may change in the meantime, or the request may have to be
-> resent to another OSD.  As far as the upper layers are concerned, though,
-> they are writing to the object, without caring where the object happens to
-> currently live.
->
->> If the transfer unit is not limited to sizes of obj, i supposed that
->> ceph needed to packed several pieces of data (smaller than one obj
->> size)  together so that there won't be internal fragmentation for an
->> object. who does this job and which part of source codes/files are
->> related with this?
->
-> Each file is striped over a different sequence of objects.  Small
-> files mean small objects.  Large files stipe over (by default) 4
-> MB objects.  It's the OSDs job to store these efficiently.  We just use a
-> local file system.  btrfs is great about packing small files inline in the
-> btree; xfs and ext4 are more convential fs's and pretty well.
->
-> sage
->
->> I really want to get a deep understanding about the codes, so i raised
->> these questions. if my understanding is not correct, please figure
->> out. i will be very appreciated.
+> On Tue, Jan 22, 2013 at 10:32 PM, Sylvain Munaut
+> <s.munaut@whatever-company.com> wrote:
+>> Hi,
 >>
->> Thanks,
->> Sheng
+>>> I don't really want to try the mem profiler, I had quite a bad
+>>> experience with it on a test cluster. While running the profiler so=
+me
+>>> OSD crashed...
+>>> The only way to fix this is to provide a heap dump. Could you provi=
+de one?
 >>
->> --
->> Sheng Qiu
->> Texas A & M University
->> Room 332B Wisenbaker
->> email: herbert1984106@gmail.com
->> College Station, TX 77843-3259
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> I just did:
 >>
+>> ceph osd tell 0 heap start_profiler
+>> ceph osd tell 0 heap dump
+>> ceph osd tell 0 heap stop_profiler
 >>
-
-
-
--- 
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+>> and it produced osd.0.profile.0001.heap
+>>
+>> Is it enough or do I actually have to leave it running ?
+>>
+>> I had to stop the profiler because after doing the dump, the OSD
+>> process was taking 100% of CPU ... stopping the profiler restored it
+>> to normal.
+>>
+>> Cheers,
+>>
+>>     Sylvain
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
