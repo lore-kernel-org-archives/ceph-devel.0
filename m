@@ -1,60 +1,81 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/4] rbd: track object rather than osd request for watch
-Date: Sat, 26 Jan 2013 14:40:54 -0600
-Message-ID: <51043F56.9070500@inktank.com>
+Subject: [PATCH 3/4] rbd: decrement obj request count when deleting
+Date: Sat, 26 Jan 2013 14:41:08 -0600
+Message-ID: <51043F64.6020800@inktank.com>
 References: <51043EF2.4070305@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:43409 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754292Ab3AZUk4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Jan 2013 15:40:56 -0500
-Received: by mail-ia0-f171.google.com with SMTP id z13so2435197iaz.30
-        for <ceph-devel@vger.kernel.org>; Sat, 26 Jan 2013 12:40:56 -0800 (PST)
+Received: from mail-ia0-f175.google.com ([209.85.210.175]:54190 "EHLO
+	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754305Ab3AZUlK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Jan 2013 15:41:10 -0500
+Received: by mail-ia0-f175.google.com with SMTP id r4so2374700iaj.6
+        for <ceph-devel@vger.kernel.org>; Sat, 26 Jan 2013 12:41:09 -0800 (PST)
 In-Reply-To: <51043EF2.4070305@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Switch to keeping track of the object request pointer rather than
-the osd request used to watch the rbd image header object.
+Decrement the obj_request_count value when deleting an object
+request from its image request's list.  Rearrange a few lines
+in the surrounding code.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/block/rbd.c |   16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 363a813..4e78402 100644
+index 4e78402..340773f 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -270,7 +270,7 @@ struct rbd_device {
- 	struct ceph_file_layout	layout;
+@@ -1071,22 +1071,29 @@ static void rbd_img_request_put(struct
+rbd_img_request *img_request)
+ static inline void rbd_img_obj_request_add(struct rbd_img_request
+*img_request,
+ 					struct rbd_obj_request *obj_request)
+ {
++	rbd_assert(obj_request->img_request == NULL);
++
+ 	rbd_obj_request_get(obj_request);
+ 	obj_request->img_request = img_request;
+-	list_add_tail(&obj_request->links, &img_request->obj_requests);
+-	obj_request->which = img_request->obj_request_count++;
++	obj_request->which = img_request->obj_request_count;
+ 	rbd_assert(obj_request->which != BAD_WHICH);
++	img_request->obj_request_count++;
++	list_add_tail(&obj_request->links, &img_request->obj_requests);
+ }
 
- 	struct ceph_osd_event   *watch_event;
--	struct ceph_osd_request *watch_request;
-+	struct rbd_obj_request	*watch_request;
+ static inline void rbd_img_obj_request_del(struct rbd_img_request
+*img_request,
+ 					struct rbd_obj_request *obj_request)
+ {
+ 	rbd_assert(obj_request->which != BAD_WHICH);
+-	obj_request->which = BAD_WHICH;
++
+ 	list_del(&obj_request->links);
++	rbd_assert(img_request->obj_request_count > 0);
++	img_request->obj_request_count--;
++	rbd_assert(obj_request->which == img_request->obj_request_count);
++	obj_request->which = BAD_WHICH;
+ 	rbd_assert(obj_request->img_request == img_request);
+-	obj_request->callback = NULL;
+ 	obj_request->img_request = NULL;
++	obj_request->callback = NULL;
+ 	rbd_obj_request_put(obj_request);
+ }
 
- 	struct rbd_spec		*parent_spec;
- 	u64			parent_overlap;
-@@ -1728,11 +1728,11 @@ static int rbd_dev_header_watch_sync(struct
-rbd_device *rbd_dev, int start)
- 		goto out_cancel;
+@@ -1482,6 +1489,7 @@ static void rbd_img_request_destroy(struct kref *kref)
 
- 	if (start) {
--		rbd_dev->watch_request = obj_request->osd_req;
--		ceph_osdc_set_request_linger(osdc, rbd_dev->watch_request);
-+		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
-+		rbd_dev->watch_request = obj_request;
- 	} else {
- 		ceph_osdc_unregister_linger_request(osdc,
--						rbd_dev->watch_request);
-+					rbd_dev->watch_request->osd_req);
- 		rbd_dev->watch_request = NULL;
- 	}
- 	ret = rbd_obj_request_submit(osdc, obj_request);
+ 	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
+ 		rbd_img_obj_request_del(img_request, obj_request);
++	rbd_assert(img_request->obj_request_count == 0);
+
+ 	if (img_request->write_request)
+ 		ceph_put_snap_context(img_request->snapc);
 -- 
 1.7.9.5
 
