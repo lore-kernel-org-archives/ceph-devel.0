@@ -1,118 +1,37 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: don't drop watch requests on completion
-Date: Sat, 26 Jan 2013 14:41:21 -0600
-Message-ID: <51043F71.3050208@inktank.com>
-References: <51043EF2.4070305@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Sun, 27 Jan 2013 17:17:30 +0100
+Message-ID: <CAF6-1L4SfogRx0=46A8YR4dW1f-qOLNSh-7mT9HS_NKz9CjCZQ@mail.gmail.com>
+References: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com>
+	<CAOLwVUkLdECXqoj2rpOh0hm66FPv0tEe-Z8A1oOj9Geer3NJ+A@mail.gmail.com>
+	<CAF6-1L40y-JvBr9J3Cx9p9nX=uEaz+pMrA2+g9rJDV-1AQxqtA@mail.gmail.com>
+	<CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
+	<CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com>
+	<CAF6-1L7HJMwqDPWwpkbqyTNbGbVhm_5pCbR73nTtnk0eD8xB4g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:54816 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754188Ab3AZUlX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Jan 2013 15:41:23 -0500
-Received: by mail-ia0-f171.google.com with SMTP id z13so2427263iaz.16
-        for <ceph-devel@vger.kernel.org>; Sat, 26 Jan 2013 12:41:22 -0800 (PST)
-In-Reply-To: <51043EF2.4070305@inktank.com>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:34233 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753177Ab3A0QRb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jan 2013 11:17:31 -0500
+Received: by mail-ob0-f176.google.com with SMTP id v19so2020335obq.35
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Jan 2013 08:17:30 -0800 (PST)
+In-Reply-To: <CAF6-1L7HJMwqDPWwpkbqyTNbGbVhm_5pCbR73nTtnk0eD8xB4g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-The new request code arranges to get a callback for every osd
-request we submit (this was not the case previously).
+Hi,
 
-We register a lingering object watch request for the header object
-for each mapped rbd image.
+Just to keep you posted,  upgraded our cluster yesterday to a custom
+compiled 0.56.1 and it has now been more than 24h and there is no sign
+on memory leak anymore. Previously it would rise by ~ 100 M every 24h
+almost like clock work and now, it's been slightly more than 24h and
+memory is stable. (it fluctuates, but no large jumps that stay
+forever).
 
-If a connection problem occurs, the osd client will re-submit
-lingering requests.  And each time such a request is re-submitted,
-its callback function will get called again.
+Cheers,
 
-We therefore need to ensure the object request associated with the
-lingering osd request stays valid, and the way to do that is to have
-an extra reference to the lingering osd request.
-
-So when a request to initiate a watch has completed, do not drop a
-reference as one normally would.  Instead, hold off dropping that
-reference until the request to tear down that watch request is done.
-
-Also, only set the rbd device's watch_request pointer after the
-watch request has been completed successfully, and clear the
-pointer once it's been torn down.
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   31 ++++++++++++++++++++++---------
- 1 file changed, 22 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 340773f..177ba0c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1716,6 +1716,7 @@ static int rbd_dev_header_watch_sync(struct
-rbd_device *rbd_dev, int start)
- 						&rbd_dev->watch_event);
- 		if (ret < 0)
- 			return ret;
-+		rbd_assert(rbd_dev->watch_event != NULL);
- 	}
-
- 	ret = -ENOMEM;
-@@ -1735,32 +1736,44 @@ static int rbd_dev_header_watch_sync(struct
-rbd_device *rbd_dev, int start)
- 	if (!obj_request->osd_req)
- 		goto out_cancel;
-
--	if (start) {
-+	if (start)
- 		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
--		rbd_dev->watch_request = obj_request;
--	} else {
-+	else
- 		ceph_osdc_unregister_linger_request(osdc,
- 					rbd_dev->watch_request->osd_req);
--		rbd_dev->watch_request = NULL;
--	}
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
- 		goto out_cancel;
- 	ret = rbd_obj_request_wait(obj_request);
- 	if (ret)
- 		goto out_cancel;
--
- 	ret = obj_request->result;
- 	if (ret)
- 		goto out_cancel;
-
--	if (start)
--		goto done;	/* Done if setting up the watch request */
-+	/*
-+	 * Since a watch request is set to linger the osd client
-+	 * will hang onto it in case it needs to be re-sent in the
-+	 * event of connection loss.  If we're initiating the watch
-+	 * we therefore do *not* want to drop our reference to the
-+	 * object request now; we'll effectively transfer ownership
-+	 * of it to the osd client instead.  Instead, we'll drop
-+	 * that reference when the watch request gets torn down.
-+	 */
-+	if (start) {
-+		rbd_dev->watch_request = obj_request;
-+
-+		return 0;
-+	}
-+
-+	/* We have successfully torn down the watch request */
-+
-+	rbd_obj_request_put(rbd_dev->watch_request);
-+	rbd_dev->watch_request = NULL;
- out_cancel:
- 	/* Cancel the event if we're tearing down, or on error */
- 	ceph_osdc_cancel_event(rbd_dev->watch_event);
- 	rbd_dev->watch_event = NULL;
--done:
- 	if (obj_request)
- 		rbd_obj_request_put(obj_request);
-
--- 
-1.7.9.5
-
+    Sylvain
