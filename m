@@ -1,38 +1,36 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Subject: Re: can't download from radosgw
-Date: Mon, 28 Jan 2013 12:55:24 +0100
-Message-ID: <CAJH6TXg8fcdTPGHuqyOZvNyrUp1wVGA7AhNx_p+wquvViyowPQ@mail.gmail.com>
-References: <CAJH6TXi90idR13oTxDQCfaSgJh3P8A4h44rHQZSt8uX9kLX02A@mail.gmail.com>
+From: Sam Lang <sam.lang@inktank.com>
+Subject: Re: page allocation failures on osd nodes
+Date: Mon, 28 Jan 2013 07:48:54 -0600
+Message-ID: <CAKMAVE9ZMGnnv07d90W3YoXo8A6v5n9AjczzdFJUS8x4MC5QvQ@mail.gmail.com>
+References: <CABYiri-9QoO1PdbyN29MrwsEg10XTD_HDpamaiNGSCuYDNnULg@mail.gmail.com>
+	<CABYiri-RToE33ESDw7jmiL=de3oggE0Q9YWU9csLDSvRmVQieg@mail.gmail.com>
+	<CAKMAVE80tW5ewwBVxeS-ZbaRuBY-Msg5i2a_Px_F+PaS_4jpHw@mail.gmail.com>
+	<CABYiri-BxsBCdvTdO74K=htTL++hvLsgMxpoVi6Mx-D8RXdASQ@mail.gmail.com>
+	<CABYiri8RdxnappbKOER0qAja99HSUoh1rvtGwTXzG6JJDsFLuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:42652 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753090Ab3A1Lz0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jan 2013 06:55:26 -0500
-Received: by mail-wi0-f182.google.com with SMTP id hn14so1335215wib.9
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jan 2013 03:55:25 -0800 (PST)
-In-Reply-To: <CAJH6TXi90idR13oTxDQCfaSgJh3P8A4h44rHQZSt8uX9kLX02A@mail.gmail.com>
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:47052 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757295Ab3A1Nsz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jan 2013 08:48:55 -0500
+Received: by mail-oa0-f52.google.com with SMTP id k14so1920005oag.25
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jan 2013 05:48:54 -0800 (PST)
+In-Reply-To: <CABYiri8RdxnappbKOER0qAja99HSUoh1rvtGwTXzG6JJDsFLuQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2013/1/28 Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>:
-> 2013-01-28 12:22:27.759162 7fe8657c3700  0 NOTICE: failed to send
-> response to client
-> 2013-01-28 12:22:27.759186 7fe8657c3700  0 ERROR: s->cio->print()
-> returned err=-1
-> 2013-01-28 12:22:27.759206 7fe8657c3700  0 ERROR: s->cio->print()
-> returned err=-1
-> 2013-01-28 12:22:27.759211 7fe8657c3700  0 ERROR: s->cio->print()
-> returned err=-1
-> 2013-01-28 12:22:27.759216 7fe8657c3700  0 ERROR: s->cio->print()
-> returned err=-1
-> 2013-01-28 12:22:27.759268 7fe8657c3700  2 req 128:0.051384:s3:GET
-> /public2/shared/9780470398661.pdf:get_obj:http status=403
-> 2013-01-28 12:22:27.759336 7fe8657c3700  1 ====== req done
-> req=0x3192980 http_status=403 ======
+On Sun, Jan 27, 2013 at 2:52 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
 
+> Ahem. once on almost empty node same trace produced by qemu
+> process(which was actually pinned to the specific numa node), so seems
+> that`s generally is a some scheduler/mm bug, not directly related to
+> the osd processes. In other words, the less percentage of memory
+> actually is an RSS, the more is a probability of such allocation
+> failure.
 
-This happens only with Google Chrome.
-Firefox, curl, wget and many other are able to download properly.
+This might be a known bug in xen for your kernel?  The xen users list
+might be able to help.
+-sam
