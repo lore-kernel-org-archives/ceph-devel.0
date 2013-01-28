@@ -1,144 +1,43 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] rbd: prevent open for image being removed
-Date: Mon, 28 Jan 2013 16:09:31 -0600
-Message-ID: <5106F71B.2030002@inktank.com>
-References: <5106F6D2.7040805@inktank.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: [PATCH 0/3] fix some rbd-fuse related issues
+Date: Mon, 28 Jan 2013 15:23:10 -0800
+Message-ID: <5107085E.9010603@inktank.com>
+References: <1359387224-6769-1-git-send-email-danny.al-gaaf@bisect.de> <DF8EC7BE-68C4-46B9-8F42-4F32165458A7@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f181.google.com ([209.85.210.181]:55442 "EHLO
-	mail-ia0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754748Ab3A1WJa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jan 2013 17:09:30 -0500
-Received: by mail-ia0-f181.google.com with SMTP id k25so4892679iah.40
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jan 2013 14:09:30 -0800 (PST)
-In-Reply-To: <5106F6D2.7040805@inktank.com>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:43342 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753045Ab3A1XXO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jan 2013 18:23:14 -0500
+Received: by mail-pb0-f48.google.com with SMTP id wy12so1782796pbc.7
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jan 2013 15:23:13 -0800 (PST)
+In-Reply-To: <DF8EC7BE-68C4-46B9-8F42-4F32165458A7@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-An open request for a mapped rbd image can arrive while removal of
-that mapping is underway.  We need to prevent such an open request
-from succeeding.  (It appears that Maciej Galkiewicz ran into this
-problem.)
+Actually Sage merged them into master.  Thanks again.
 
-Define and use a "removing" flag to indicate a mapping is getting
-removed.  Set it in the remove path after verifying nothing holds
-the device open.  And check it in the open path before allowing the
-open to proceed.  Acquire the rbd device's lock around each of these
-spots to avoid any races accessing the flags and open_count fields.
-
-This addresses:
-    http://tracker.newdream.net/issues/3427
-
-Reported-by:  Maciej Galkiewicz <maciejgalkiewicz@ragnarson.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   42 +++++++++++++++++++++++++++++++++---------
- 1 file changed, 33 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 107df40..03b15b8 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -259,10 +259,10 @@ struct rbd_device {
-
- 	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
-
--	spinlock_t		lock;		/* queue lock */
-+	spinlock_t		lock;		/* queue, flags, open_count */
-
- 	struct rbd_image_header	header;
--	unsigned long		flags;
-+	unsigned long		flags;		/* possibly lock protected */
- 	struct rbd_spec		*spec;
-
- 	char			*header_name;
-@@ -288,13 +288,20 @@ struct rbd_device {
-
- 	/* sysfs related */
- 	struct device		dev;
--	unsigned long		open_count;
-+	unsigned long		open_count;	/* protected by lock */
- };
-
--/* Flag bits for rbd_dev->flags */
-+/*
-+ * Flag bits for rbd_dev->flags.  If atomicity is required,
-+ * rbd_dev->lock is used to protect access.
-+ *
-+ * Currently, only the "removing" flag (which is coupled with the
-+ * "open_count" field) requires atomic access.
-+ */
-
- enum rbd_dev_flags {
- 	rbd_dev_flag_exists,	/* mapped snapshot has not been deleted */
-+	rbd_dev_flag_removing,	/* this mapping is being removed */
- };
-
- static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-@@ -383,14 +390,23 @@ static int rbd_dev_v2_refresh(struct rbd_device
-*rbd_dev, u64 *hver);
- static int rbd_open(struct block_device *bdev, fmode_t mode)
- {
- 	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-+	bool removing = false;
-
- 	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
- 		return -EROFS;
-
-+	spin_lock(&rbd_dev->lock);
-+	if (test_bit(rbd_dev_flag_removing, &rbd_dev->flags))
-+		removing = true;
-+	else
-+		rbd_dev->open_count++;
-+	spin_unlock(&rbd_dev->lock);
-+	if (removing)
-+		return -ENOENT;
-+
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 	(void) get_device(&rbd_dev->dev);
- 	set_device_ro(bdev, rbd_dev->mapping.read_only);
--	rbd_dev->open_count++;
- 	mutex_unlock(&ctl_mutex);
-
- 	return 0;
-@@ -399,10 +415,14 @@ static int rbd_open(struct block_device *bdev,
-fmode_t mode)
- static int rbd_release(struct gendisk *disk, fmode_t mode)
- {
- 	struct rbd_device *rbd_dev = disk->private_data;
-+	unsigned long open_count_before;
-+
-+	spin_lock(&rbd_dev->lock);
-+	open_count_before = rbd_dev->open_count--;
-+	spin_unlock(&rbd_dev->lock);
-+	rbd_assert(open_count_before > 0);
-
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--	rbd_assert(rbd_dev->open_count > 0);
--	rbd_dev->open_count--;
- 	put_device(&rbd_dev->dev);
- 	mutex_unlock(&ctl_mutex);
-
-@@ -4135,10 +4155,14 @@ static ssize_t rbd_remove(struct bus_type *bus,
- 		goto done;
- 	}
-
--	if (rbd_dev->open_count) {
-+	spin_lock(&rbd_dev->lock);
-+	if (rbd_dev->open_count)
- 		ret = -EBUSY;
-+	else
-+		set_bit(rbd_dev_flag_removing, &rbd_dev->flags);
-+	spin_unlock(&rbd_dev->lock);
-+	if (ret < 0)
- 		goto done;
--	}
-
- 	while (rbd_dev->parent_spec) {
- 		struct rbd_device *first = rbd_dev;
--- 
-1.7.9.5
-
+On 01/28/2013 09:45 AM, Dan Mick wrote:
+> Thanks Danny, I'll look at these today.
+>
+> On Jan 28, 2013, at 7:33 AM, Danny Al-Gaaf <danny.al-gaaf@bisect.de> wrote:
+>
+>> Here three patches to fix some issues with the new rbd-fuse
+>> code and an issues with the fuse handling in configure.
+>>
+>> Danny Al-Gaaf (3):
+>>   configure: fix check for fuse_getgroups()
+>>   rbd-fuse: fix usage of conn->want
+>>   rbd-fuse: fix printf format for off_t and size_t
+>>
+>> configure.ac            |  8 ++++----
+>> src/rbd_fuse/rbd-fuse.c | 12 +++++++-----
+>> 2 files changed, 11 insertions(+), 9 deletions(-)
+>>
+>> --
+>> 1.8.1.1
+>>
