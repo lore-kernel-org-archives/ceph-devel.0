@@ -1,44 +1,35 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 4/6] mds: allow handling slave request in the clientreplay stage
-Date: Mon, 28 Jan 2013 10:28:24 +0800
-Message-ID: <1359340106-24257-5-git-send-email-zheng.z.yan@intel.com>
-References: <1359340106-24257-1-git-send-email-zheng.z.yan@intel.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: RadosGW performance and disk space usage
+Date: Sun, 27 Jan 2013 18:32:13 -0800
+Message-ID: <5105E32D.3000308@inktank.com>
+References: <CAJVE5RXTM4iARw=wpaUX_ofZgP6tHLjiG6JoakpbhEXf7ZgVLQ@mail.gmail.com> <CAKMAVE-JJVsinn4ys2o-p=b-7-_u9KGvd1fxwfMX0=44fS4T8w@mail.gmail.com> <51036B24.3070006@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:52188 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752122Ab3A1C2d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 27 Jan 2013 21:28:33 -0500
-In-Reply-To: <1359340106-24257-1-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:42263 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751349Ab3A1CcR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jan 2013 21:32:17 -0500
+Received: by mail-pa0-f42.google.com with SMTP id rl6so1230432pac.29
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Jan 2013 18:32:17 -0800 (PST)
+In-Reply-To: <51036B24.3070006@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Sam Lang <sam.lang@inktank.com>
+Cc: Cesar Mello <cmello@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+On 1/25/2013 9:35 PM, Dan Mick wrote:
+>
+>>> If the S3 API is not well suited to my scenario, then my effort should
+>>> be better directed to porting or writing a native ceph client for
+>>> Windows. I just need an API to read and write/append blocks to files.
+>>> Any comments are really appreciated.
+>>
+>> Hopefully someone with more windows experience will give you better
+>> info/advice than I can.
+>
+> The python bindings should Just Work(tm).  Just a thought.
 
-replaying a client request may need to create slave request and the slave
-MDS can be also in the clientreplay stage.
-
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/Server.cc | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 083c287..520d389 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -101,6 +101,10 @@ void Server::dispatch(Message *m)
- 		(m->get_type() == CEPH_MSG_CLIENT_REQUEST &&
- 		 ((MClientRequest*)m)->is_replay()))) {
-       // replaying!
-+    } else if (mds->is_clientreplay() && m->get_type() == MSG_MDS_SLAVE_REQUEST &&
-+	       (((MMDSSlaveRequest*)m)->is_reply() ||
-+		!mds->mdsmap->is_active(m->get_source().num()))) {
-+      // slave reply or the master is also in the clientreplay stage
-     } else {
-       dout(3) << "not active yet, waiting" << dendl;
-       mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
--- 
-1.7.11.7
-
+...but of course, as Sam points out, they rely on the C++ libs.  Duh. 
+Sorry to mislead.
