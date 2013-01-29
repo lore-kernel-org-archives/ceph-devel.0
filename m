@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 05/12, v2] rbd: get rid of rbd_req_sync_read()
-Date: Tue, 29 Jan 2013 02:48:53 -0800
-Message-ID: <5107A915.5040502@inktank.com>
-References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com> <51016261.8010609@inktank.com>
+Subject: Re: [PATCH 06/12, v2] rbd: implement watch/unwatch with new code
+Date: Tue, 29 Jan 2013 02:53:36 -0800
+Message-ID: <5107AA30.2030009@inktank.com>
+References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com> <51016274.2070408@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:50241 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751210Ab3A2KtA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 05:49:00 -0500
-Received: by mail-pb0-f47.google.com with SMTP id rp8so209043pbb.20
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 02:48:59 -0800 (PST)
-In-Reply-To: <51016261.8010609@inktank.com>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:64690 "EHLO
+	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753993Ab3A2Kxo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 05:53:44 -0500
+Received: by mail-pa0-f45.google.com with SMTP id bg2so325582pad.4
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 02:53:43 -0800 (PST)
+In-Reply-To: <51016274.2070408@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -22,56 +22,177 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 01/24/2013 08:33 AM, Alex Elder wrote:
-> Delete rbd_req_sync_read() is no longer used, so get rid of it.
+> Implement a new function to set up or tear down a watch event
+> for an mapped rbd image header using the new request code.
+>
+> Create a new object request type "nodata" to handle this.  And
+> define rbd_osd_trivial_callback() which simply marks a request done.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   24 ------------------------
->   1 file changed, 24 deletions(-)
+>   drivers/block/rbd.c |   87
+> +++++++++++++++++++++++++++++++++++++++++++++++++--
+>   1 file changed, 84 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 742236b..750fc73 100644
+> index 750fc73..7b1eddc 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1315,29 +1315,6 @@ static void rbd_obj_request_complete(struct
+> @@ -170,7 +170,7 @@ typedef void (*rbd_img_callback_t)(struct
+> rbd_img_request *);
+>   struct rbd_obj_request;
+>   typedef void (*rbd_obj_callback_t)(struct rbd_obj_request *);
+>
+> -enum obj_req_type { obj_req_bio, obj_req_pages };
+> +enum obj_req_type { obj_req_nodata, obj_req_bio, obj_req_pages };
+>
+>   struct rbd_obj_request {
+>   	const char		*object_name;
+> @@ -1083,6 +1083,7 @@ static inline void rbd_img_obj_request_del(struct
+> rbd_img_request *img_request,
+>   static bool obj_req_type_valid(enum obj_req_type type)
+>   {
+>   	switch (type) {
+> +	case obj_req_nodata:
+>   	case obj_req_bio:
+>   	case obj_req_pages:
+>   		return true;
+> @@ -1306,6 +1307,12 @@ static int rbd_obj_request_wait(struct
 > rbd_obj_request *obj_request)
+>   	return wait_for_completion_interruptible(&obj_request->completion);
 >   }
 >
->   /*
-> - * Synchronously read a range from an object into a provided buffer
-> - */
-> -static int rbd_req_sync_read(struct rbd_device *rbd_dev,
-> -			  const char *object_name,
-> -			  u64 ofs, u64 len,
-> -			  char *buf,
-> -			  u64 *ver)
-> -{
-> -	struct ceph_osd_req_op *op;
-> -	int ret;
-> -
-> -	op = rbd_osd_req_op_create(CEPH_OSD_OP_READ, ofs, len);
-> -	if (!op)
-> -		return -ENOMEM;
-> -
-> -	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ,
-> -			       op, object_name, ofs, len, buf, ver);
-> -	rbd_osd_req_op_destroy(op);
-> -
-> -	return ret;
-> -}
-> -
-> -/*
->    * Request sync osd watch
->    */
->   static int rbd_req_sync_notify_ack(struct rbd_device *rbd_dev,
-> @@ -2113,7 +2090,6 @@ rbd_dev_v1_header_read(struct rbd_device *rbd_dev,
-> u64 *version)
->   		if (!ondisk)
->   			return ERR_PTR(-ENOMEM);
+> +static void rbd_osd_trivial_callback(struct rbd_obj_request *obj_request,
+> +				struct ceph_osd_op *op)
+> +{
+> +	atomic_set(&obj_request->done, 1);
+> +}
+> +
+>   static void rbd_obj_request_complete(struct rbd_obj_request *obj_request)
+>   {
+>   	if (obj_request->callback)
+> @@ -1500,6 +1507,9 @@ static void rbd_osd_req_callback(struct
+> ceph_osd_request *osd_req,
+>   	case CEPH_OSD_OP_WRITE:
+>   		rbd_osd_write_callback(obj_request, op);
+>   		break;
+> +	case CEPH_OSD_OP_WATCH:
+> +		rbd_osd_trivial_callback(obj_request, op);
+> +		break;
+>   	default:
+>   		rbd_warn(NULL, "%s: unsupported op %hu\n",
+>   			obj_request->object_name, (unsigned short) opcode);
+> @@ -1543,6 +1553,8 @@ static struct ceph_osd_request *rbd_osd_req_create(
 >
-> -		(void) rbd_req_sync_read;	/* avoid a warning */
->   		ret = rbd_obj_read_sync(rbd_dev, rbd_dev->header_name,
->   				       0, size,
->   				       (char *) ondisk, version);
+>   	rbd_assert(obj_req_type_valid(obj_request->type));
+>   	switch (obj_request->type) {
+> +	case obj_req_nodata:
+> +		break;		/* Nothing to do */
+>   	case obj_req_bio:
+>   		rbd_assert(obj_request->bio_list != NULL);
+>   		osd_req->r_bio = obj_request->bio_list;
+> @@ -1637,6 +1649,8 @@ static void rbd_obj_request_destroy(struct kref *kref)
+>
+>   	rbd_assert(obj_req_type_valid(obj_request->type));
+>   	switch (obj_request->type) {
+> +	case obj_req_nodata:
+> +		break;		/* Nothing to do */
+>   	case obj_req_bio:
+>   		if (obj_request->bio_list)
+>   			bio_chain_put(obj_request->bio_list);
+> @@ -1863,6 +1877,72 @@ static int rbd_img_request_submit(struct
+> rbd_img_request *img_request)
+>   	return 0;
+>   }
+>
+> +/*
+> + * Request sync osd watch/unwatch.  The value of "start" determines
+> + * whether a watch request is being initiated or torn down.
+> + */
+> +static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev, int start)
+> +{
+> +	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> +	struct rbd_obj_request *obj_request;
+> +	struct ceph_osd_req_op *op;
+> +	int ret;
+> +
+> +	rbd_assert(start ^ !!rbd_dev->watch_event);
+> +	rbd_assert(start ^ !!rbd_dev->watch_request);
+> +
+> +	if (start) {
+> +		ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0, rbd_dev,
+> +						&rbd_dev->watch_event);
+> +		if (ret < 0)
+> +			return ret;
+> +	}
+> +
+> +	ret = -ENOMEM;
+> +	obj_request = rbd_obj_request_create(rbd_dev->header_name,
+> +						0, 0, obj_req_nodata);
+> +	if (!obj_request)
+> +		goto out_cancel;
+> +
+> +	op = rbd_osd_req_op_create(CEPH_OSD_OP_WATCH,
+> +				rbd_dev->watch_event->cookie,
+> +				rbd_dev->header.obj_version, start);
+> +	if (!op)
+> +		goto out_cancel;
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true,
+> +							obj_request, op);
+> +	rbd_osd_req_op_destroy(op);
+> +	if (!obj_request->osd_req)
+> +		goto out_cancel;
+> +
+> +	if (start) {
+> +		rbd_dev->watch_request = obj_request->osd_req;
+> +		ceph_osdc_set_request_linger(osdc, rbd_dev->watch_request);
+> +	}
+> +	ret = rbd_obj_request_submit(osdc, obj_request);
+> +	if (ret)
+> +		goto out_cancel;
+> +	ret = rbd_obj_request_wait(obj_request);
+> +	if (ret)
+> +		goto out_cancel;
+> +
+> +	ret = obj_request->result;
+> +	if (ret)
+> +		goto out_cancel;
+> +
+> +	if (start)
+> +		goto done;	/* Done if setting up the watch request */
+> +out_cancel:
+> +	/* Cancel the event if we're tearing down, or on error */
+> +	ceph_osdc_cancel_event(rbd_dev->watch_event);
+> +	rbd_dev->watch_event = NULL;
+> +done:
+> +	if (obj_request)
+> +		rbd_obj_request_put(obj_request);
+> +
+> +	return ret;
+> +}
+> +
+>   static void rbd_request_fn(struct request_queue *q)
+>   {
+>   	struct rbd_device *rbd_dev = q->queuedata;
+> @@ -3880,7 +3960,8 @@ static int rbd_dev_probe_finish(struct rbd_device
+> *rbd_dev)
+>   	if (ret)
+>   		goto err_out_bus;
+>
+> -	ret = rbd_req_sync_watch(rbd_dev, 1);
+> +	(void) rbd_req_sync_watch;	/* avoid a warning */
+> +	ret = rbd_dev_header_watch_sync(rbd_dev, 1);
+>   	if (ret)
+>   		goto err_out_bus;
+>
+> @@ -4043,7 +4124,7 @@ static void rbd_dev_release(struct device *dev)
+>   						    rbd_dev->watch_request);
+>   	}
+>   	if (rbd_dev->watch_event)
+> -		rbd_req_sync_watch(rbd_dev, 0);
+> +		rbd_dev_header_watch_sync(rbd_dev, 0);
+>
+>   	/* clean up and free blkdev */
+>   	rbd_free_disk(rbd_dev);
 >
 
