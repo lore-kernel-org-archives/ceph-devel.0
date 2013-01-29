@@ -1,47 +1,74 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Ceph Production Environment Setup and Configurations?
-Date: Tue, 29 Jan 2013 11:25:01 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5E93B4@SHSMSX102.ccr.corp.intel.com>
-References: <CAPhYxPwK+wM1pBpaf7zXM-L6PagcKiQ_v07MXypRGrxj4oQZtw@mail.gmail.com>
-	<CAPhYxPwrqS9ahnn+D2JgjO8HKdorQaOeo6teEP5=+K23iNodKg@mail.gmail.com>
- <CAJH6TXiBo9byu5apLdGWS7g2X5OG7a-VKvGS6OS=WmdnxHfthA@mail.gmail.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: Ceph Production Environment Setup and Configurations?
+Date: Tue, 29 Jan 2013 11:34:48 +0000
+Message-ID: <5107B3D8.8060504@inktank.com>
+References: <CAPhYxPwK+wM1pBpaf7zXM-L6PagcKiQ_v07MXypRGrxj4oQZtw@mail.gmail.com> <CAPhYxPwrqS9ahnn+D2JgjO8HKdorQaOeo6teEP5=+K23iNodKg@mail.gmail.com> <CAJH6TXiBo9byu5apLdGWS7g2X5OG7a-VKvGS6OS=WmdnxHfthA@mail.gmail.com> <6F3FA899187F0043BA1827A69DA2F7CC5E93B4@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:40680 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751580Ab3A2LZh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Jan 2013 06:25:37 -0500
-In-Reply-To: <CAJH6TXiBo9byu5apLdGWS7g2X5OG7a-VKvGS6OS=WmdnxHfthA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:36513 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751483Ab3A2LfL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 06:35:11 -0500
+Received: by mail-lb0-f172.google.com with SMTP id n8so592013lbj.17
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 03:35:09 -0800 (PST)
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5E93B4@SHSMSX102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, femi anjorin <femi.anjorin@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ross Turk <ross@inktank.com>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, femi anjorin <femi.anjorin@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ross Turk <ross@inktank.com>
 
-W1RoZSBmb2xsb3dpbmcgdmlld3Mgb25seSBiZWhhbGYgb2YgbXlzZWxmLCBub3QgcmVsYXRlIHdp
-dGggSW50ZWwuLl0NCkxvb2tpbmcgZm9yd2FyZCBmb3IgdGhlIHBlcmZvcm1hbmNlIGRhdGEgb24g
-QXRvbS4NCkF0b20gcGVyZm9ybSBiYWRseSBpbiBTd2lmdCwgYnV0IHNpbmNlIENlcGggaXMgc2xp
-Z2h0bHkgZWZmaWNpZW50IHRoYW4gU3dpZnQsIGl0IG11c3QgYmUgYmV0dGVyLg0KSSBoYXZlIHNv
-bWUgY29uY2VybiBhYm91dCB3ZWF0aGVyIEF0b20gY2FuIHN1cHBvcnQgc3VjaCBoaWdoIHRocm91
-Z2hwdXQoIHlvdSBoYXZlIDE2IGRpc2tzLCBhc3N1bWluZyA1ME1CL3MgcGVyIGRpc2ssIHlvdSB3
-b3VsZCBsaWtlIHRvIGhhdmUgNTAqMTYgKjIoaW5jbHVkZSBqb3VybmFsIHdyaXRlKT0xNjAwTUIv
-cyAsdG9nZXRoZXIgd2l0aCBjb3JyZXNwb25kaW5nIG5ldHdvcmsgdGhyb3VnaHB1dCwgc2F5IDEw
-R2JFLiBUaGUgdG90YWwgSU8gdGhyb3VnaHB1dCBzZWVtcyB0b28gaGlnaCBmb3IgQXRvbS4gQmFp
-ZHUgKHd3dy5iYWlkdS5jb20pIHVzZSBBcm0gYmFzZWQgc3RvcmFnZSBub2RlKG5vdCB1c2luZyBj
-ZXBoLGJ1dCB0aGVpciBvd24gREZTKSwgYSBub2RlIHdpdGggYSBxdWFkLWNvcmUgQXJtIHRvZ2V0
-aGVyIHdpdGggNCBkaXNrcywgYW5kIGEgMlUgYm94IGNhbiBwdXQgdXAgdG8gNiBub2RlcywgdGhl
-IDYgbm9kZXMgc2hhcmUgYSAxMEdiIE5JQy4gQWx0aG91Z2ggQXRvbSBpcyBkaWZmZXJlbnQgd2l0
-aCBBcm0sIGJ1dCB5b3UgY2FuIHRha2UgQmFpZHUgYXMgYSByZWZlcmVuY2UuDQoNCg0KLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
-b3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBP
-ZiBHYW5kYWxmIENvcnZvdGVtcGVzdGENClNlbnQ6IDIwMTPE6jHUwjI5yNUgMTc6MjUNClRvOiBm
-ZW1pIGFuam9yaW4NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgUm9zcyBUdXJrDQpT
-dWJqZWN0OiBSZTogQ2VwaCBQcm9kdWN0aW9uIEVudmlyb25tZW50IFNldHVwIGFuZCBDb25maWd1
-cmF0aW9ucz8NCg0KMjAxMy8xLzI5IGZlbWkgYW5qb3JpbiA8ZmVtaS5hbmpvcmluQGdtYWlsLmNv
-bT46DQo+IENQVSAtIEludGVsKFIpIEF0b20oVE0pIENQVSBENTI1ICAgQCAxLjgwR0h6DQoNCkF0
-b20/IEZvciB3aGljaCBraW5kIG9mIHJvbGUgPw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
-cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
-byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On 01/29/2013 11:25 AM, Chen, Xiaoxi wrote:
+> [The following views only behalf of myself, not relate with Intel..]
+> Looking forward for the performance data on Atom.
+> Atom perform badly in Swift, but since Ceph is slightly efficient tha=
+n Swift, it must be better.
+> I have some concern about weather Atom can support such high throughp=
+ut( you have 16 disks, assuming 50MB/s per disk, you would like to have=
+ 50*16 *2(include journal write)=3D1600MB/s ,together with correspondin=
+g network throughput, say 10GbE. The total IO throughput seems too high=
+ for Atom. Baidu (www.baidu.com) use Arm based storage node(not using c=
+eph,but their own DFS), a node with a quad-core Arm together with 4 dis=
+ks, and a 2U box can put up to 6 nodes, the 6 nodes share a 10Gb NIC. A=
+lthough Atom is different with Arm, but you can take Baidu as a referen=
+ce.
+>=20
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Gandalf Corvotempesta
+> Sent: 2013=C4=EA1=D4=C229=C8=D5 17:25
+> To: femi anjorin
+> Cc: ceph-devel@vger.kernel.org; Ross Turk
+> Subject: Re: Ceph Production Environment Setup and Configurations?
+>=20
+> 2013/1/29 femi anjorin <femi.anjorin@gmail.com>:
+>> CPU - Intel(R) Atom(TM) CPU D525   @ 1.80GHz
+>=20
+> Atom? For which kind of role ?
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the body of a message to majordomo@vger.kernel.org More majordomo i=
+nfo at  http://vger.kernel.org/majordomo-info.html
+> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=81=7F)=DE=BA=
+{.n=81=7F+=89=B7=9Cz=98]z=F7=A5=8A{ay=81=7F=1D=CA=87=DA=99=81=7F,j=07=AD=
+=A2f=A3=A2=B7h=9A=8B=E0z=81=7F=1E=AEw=A5=A2=81=7F=0C=A2=B7=A6j:+v=89=A8=
+=8Aw=E8j=D8m=B6=9F=81=7F=81=7F=07=AB=91=EA=E7zZ+=83=F9=9A=8E=8A=DD=A2j"=
+=9D=FA!tml=3D
+>=20
+
+
+=46WIW, Wido had been testing Ceph on Atoms a while back.  I don't know
+what conclusions he reached, or even if he has already reached any
+conclusions at all.  I, for one, would be really interested in knowing
+how well (or how poorly) Atoms deal with Ceph.
+
+Maybe Wido can share some thoughts on this one? :-)
+
+  -Joao
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
