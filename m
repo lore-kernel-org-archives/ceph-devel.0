@@ -1,225 +1,47 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 12/12, v2] rbd: get rid of rbd_req_sync_exec()
-Date: Tue, 29 Jan 2013 03:10:42 -0800
-Message-ID: <5107AE32.7090403@inktank.com>
-References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com> <51016315.4050101@inktank.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Ceph Production Environment Setup and Configurations?
+Date: Tue, 29 Jan 2013 11:25:01 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5E93B4@SHSMSX102.ccr.corp.intel.com>
+References: <CAPhYxPwK+wM1pBpaf7zXM-L6PagcKiQ_v07MXypRGrxj4oQZtw@mail.gmail.com>
+	<CAPhYxPwrqS9ahnn+D2JgjO8HKdorQaOeo6teEP5=+K23iNodKg@mail.gmail.com>
+ <CAJH6TXiBo9byu5apLdGWS7g2X5OG7a-VKvGS6OS=WmdnxHfthA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f42.google.com ([209.85.160.42]:46445 "EHLO
-	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751720Ab3A2LKq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 06:10:46 -0500
-Received: by mail-pb0-f42.google.com with SMTP id wz17so220223pbc.29
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 03:10:45 -0800 (PST)
-In-Reply-To: <51016315.4050101@inktank.com>
+Received: from mga02.intel.com ([134.134.136.20]:40680 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751580Ab3A2LZh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Jan 2013 06:25:37 -0500
+In-Reply-To: <CAJH6TXiBo9byu5apLdGWS7g2X5OG7a-VKvGS6OS=WmdnxHfthA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, femi anjorin <femi.anjorin@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ross Turk <ross@inktank.com>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
-On 01/24/2013 08:36 AM, Alex Elder wrote:
-> Get rid rbd_req_sync_exec() because it is no longer used.  That
-> eliminates the last use of rbd_req_sync_op(), so get rid of that
-> too.  And finally, that leaves rbd_do_request() unreferenced, so get
-> rid of that.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |  160
-> ---------------------------------------------------
->   1 file changed, 160 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 5ad2ac2..c807a4c 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1160,126 +1160,6 @@ static void rbd_osd_req_op_destroy(struct
-> ceph_osd_req_op *op)
->   	kfree(op);
->   }
->
-> -/*
-> - * Send ceph osd request
-> - */
-> -static int rbd_do_request(struct request *rq,
-> -			  struct rbd_device *rbd_dev,
-> -			  struct ceph_snap_context *snapc,
-> -			  u64 snapid,
-> -			  const char *object_name, u64 ofs, u64 len,
-> -			  struct bio *bio,
-> -			  struct page **pages,
-> -			  int num_pages,
-> -			  int flags,
-> -			  struct ceph_osd_req_op *op,
-> -			  void (*rbd_cb)(struct ceph_osd_request *,
-> -					 struct ceph_msg *),
-> -			  u64 *ver)
-> -{
-> -	struct ceph_osd_client *osdc;
-> -	struct ceph_osd_request *osd_req;
-> -	struct timespec mtime = CURRENT_TIME;
-> -	int ret;
-> -
-> -	dout("rbd_do_request object_name=%s ofs=%llu len=%llu\n",
-> -		object_name, (unsigned long long) ofs,
-> -		(unsigned long long) len);
-> -
-> -	osdc = &rbd_dev->rbd_client->client->osdc;
-> -	osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_NOIO);
-> -	if (!osd_req)
-> -		return -ENOMEM;
-> -
-> -	osd_req->r_flags = flags;
-> -	osd_req->r_pages = pages;
-> -	if (bio) {
-> -		osd_req->r_bio = bio;
-> -		bio_get(osd_req->r_bio);
-> -	}
-> -
-> -	osd_req->r_callback = rbd_cb;
-> -	osd_req->r_priv = NULL;
-> -
-> -	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
-> -	osd_req->r_oid_len = strlen(osd_req->r_oid);
-> -
-> -	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
-> -	osd_req->r_num_pages = calc_pages_for(ofs, len);
-> -	osd_req->r_page_alignment = ofs & ~PAGE_MASK;
-> -
-> -	ceph_osdc_build_request(osd_req, ofs, len, 1, op,
-> -				snapc, snapid, &mtime);
-> -
-> -	if (op->op == CEPH_OSD_OP_WATCH && op->watch.flag) {
-> -		ceph_osdc_set_request_linger(osdc, osd_req);
-> -		rbd_dev->watch_request = osd_req;
-> -	}
-> -
-> -	ret = ceph_osdc_start_request(osdc, osd_req, false);
-> -	if (ret < 0)
-> -		goto done_err;
-> -
-> -	if (!rbd_cb) {
-> -		u64 version;
-> -
-> -		ret = ceph_osdc_wait_request(osdc, osd_req);
-> -		version = le64_to_cpu(osd_req->r_reassert_version.version);
-> -		if (ver)
-> -			*ver = version;
-> -		dout("reassert_ver=%llu\n", (unsigned long long) version);
-> -		ceph_osdc_put_request(osd_req);
-> -	}
-> -	return ret;
-> -
-> -done_err:
-> -	if (bio)
-> -		bio_chain_put(osd_req->r_bio);
-> -	ceph_osdc_put_request(osd_req);
-> -
-> -	return ret;
-> -}
-> -
-> -/*
-> - * Do a synchronous ceph osd operation
-> - */
-> -static int rbd_req_sync_op(struct rbd_device *rbd_dev,
-> -			   int flags,
-> -			   struct ceph_osd_req_op *op,
-> -			   const char *object_name,
-> -			   u64 ofs, u64 inbound_size,
-> -			   char *inbound,
-> -			   u64 *ver)
-> -{
-> -	int ret;
-> -	struct page **pages;
-> -	int num_pages;
-> -
-> -	rbd_assert(op != NULL);
-> -
-> -	num_pages = calc_pages_for(ofs, inbound_size);
-> -	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
-> -	if (IS_ERR(pages))
-> -		return PTR_ERR(pages);
-> -
-> -	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
-> -			  object_name, ofs, inbound_size, NULL,
-> -			  pages, num_pages,
-> -			  flags,
-> -			  op,
-> -			  NULL,
-> -			  ver);
-> -	if (ret < 0)
-> -		goto done;
-> -
-> -	if ((flags & CEPH_OSD_FLAG_READ) && inbound)
-> -		ret = ceph_copy_from_page_vector(pages, inbound, ofs, ret);
-> -
-> -done:
-> -	ceph_release_page_vector(pages, num_pages);
-> -	return ret;
-> -}
-> -
->   static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
->   				struct rbd_obj_request *obj_request)
->   {
-> @@ -1315,45 +1195,6 @@ static void rbd_obj_request_complete(struct
-> rbd_obj_request *obj_request)
->   		complete_all(&obj_request->completion);
->   }
->
-> -/*
-> - * Synchronous osd object method call
-> - */
-> -static int rbd_req_sync_exec(struct rbd_device *rbd_dev,
-> -			     const char *object_name,
-> -			     const char *class_name,
-> -			     const char *method_name,
-> -			     const char *outbound,
-> -			     size_t outbound_size,
-> -			     char *inbound,
-> -			     size_t inbound_size,
-> -			     u64 *ver)
-> -{
-> -	struct ceph_osd_req_op *op;
-> -	int ret;
-> -
-> -	/*
-> -	 * Any input parameters required by the method we're calling
-> -	 * will be sent along with the class and method names as
-> -	 * part of the message payload.  That data and its size are
-> -	 * supplied via the indata and indata_len fields (named from
-> -	 * the perspective of the server side) in the OSD request
-> -	 * operation.
-> -	 */
-> -	op = rbd_osd_req_op_create(CEPH_OSD_OP_CALL, class_name,
-> -					method_name, outbound, outbound_size);
-> -	if (!op)
-> -		return -ENOMEM;
-> -
-> -	ret = rbd_req_sync_op(rbd_dev, CEPH_OSD_FLAG_READ, op,
-> -			       object_name, 0, inbound_size, inbound,
-> -			       ver);
-> -
-> -	rbd_osd_req_op_destroy(op);
-> -
-> -	dout("cls_exec returned %d\n", ret);
-> -	return ret;
-> -}
-> -
->   static void rbd_osd_read_callback(struct rbd_obj_request *obj_request,
->   				struct ceph_osd_op *op)
->   {
-> @@ -2829,7 +2670,6 @@ static int _rbd_dev_v2_snap_size(struct rbd_device
-> *rbd_dev, u64 snap_id,
->   		__le64 size;
->   	} __attribute__ ((packed)) size_buf = { 0 };
->
-> -	(void) rbd_req_sync_exec;	/* Avoid a warning */
->   	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
->   				"rbd", "get_size",
->   				(char *) &snapid, sizeof (snapid),
->
-
+W1RoZSBmb2xsb3dpbmcgdmlld3Mgb25seSBiZWhhbGYgb2YgbXlzZWxmLCBub3QgcmVsYXRlIHdp
+dGggSW50ZWwuLl0NCkxvb2tpbmcgZm9yd2FyZCBmb3IgdGhlIHBlcmZvcm1hbmNlIGRhdGEgb24g
+QXRvbS4NCkF0b20gcGVyZm9ybSBiYWRseSBpbiBTd2lmdCwgYnV0IHNpbmNlIENlcGggaXMgc2xp
+Z2h0bHkgZWZmaWNpZW50IHRoYW4gU3dpZnQsIGl0IG11c3QgYmUgYmV0dGVyLg0KSSBoYXZlIHNv
+bWUgY29uY2VybiBhYm91dCB3ZWF0aGVyIEF0b20gY2FuIHN1cHBvcnQgc3VjaCBoaWdoIHRocm91
+Z2hwdXQoIHlvdSBoYXZlIDE2IGRpc2tzLCBhc3N1bWluZyA1ME1CL3MgcGVyIGRpc2ssIHlvdSB3
+b3VsZCBsaWtlIHRvIGhhdmUgNTAqMTYgKjIoaW5jbHVkZSBqb3VybmFsIHdyaXRlKT0xNjAwTUIv
+cyAsdG9nZXRoZXIgd2l0aCBjb3JyZXNwb25kaW5nIG5ldHdvcmsgdGhyb3VnaHB1dCwgc2F5IDEw
+R2JFLiBUaGUgdG90YWwgSU8gdGhyb3VnaHB1dCBzZWVtcyB0b28gaGlnaCBmb3IgQXRvbS4gQmFp
+ZHUgKHd3dy5iYWlkdS5jb20pIHVzZSBBcm0gYmFzZWQgc3RvcmFnZSBub2RlKG5vdCB1c2luZyBj
+ZXBoLGJ1dCB0aGVpciBvd24gREZTKSwgYSBub2RlIHdpdGggYSBxdWFkLWNvcmUgQXJtIHRvZ2V0
+aGVyIHdpdGggNCBkaXNrcywgYW5kIGEgMlUgYm94IGNhbiBwdXQgdXAgdG8gNiBub2RlcywgdGhl
+IDYgbm9kZXMgc2hhcmUgYSAxMEdiIE5JQy4gQWx0aG91Z2ggQXRvbSBpcyBkaWZmZXJlbnQgd2l0
+aCBBcm0sIGJ1dCB5b3UgY2FuIHRha2UgQmFpZHUgYXMgYSByZWZlcmVuY2UuDQoNCg0KLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBP
+ZiBHYW5kYWxmIENvcnZvdGVtcGVzdGENClNlbnQ6IDIwMTPE6jHUwjI5yNUgMTc6MjUNClRvOiBm
+ZW1pIGFuam9yaW4NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgUm9zcyBUdXJrDQpT
+dWJqZWN0OiBSZTogQ2VwaCBQcm9kdWN0aW9uIEVudmlyb25tZW50IFNldHVwIGFuZCBDb25maWd1
+cmF0aW9ucz8NCg0KMjAxMy8xLzI5IGZlbWkgYW5qb3JpbiA8ZmVtaS5hbmpvcmluQGdtYWlsLmNv
+bT46DQo+IENQVSAtIEludGVsKFIpIEF0b20oVE0pIENQVSBENTI1ICAgQCAxLjgwR0h6DQoNCkF0
+b20/IEZvciB3aGljaCBraW5kIG9mIHJvbGUgPw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
