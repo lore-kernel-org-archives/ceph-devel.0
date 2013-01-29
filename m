@@ -1,164 +1,232 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 03/12, v2] rbd: kill rbd_req_coll and rbd_request
-Date: Tue, 29 Jan 2013 02:44:28 -0800
-Message-ID: <5107A80C.2050904@inktank.com>
-References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com> <51016234.5050805@inktank.com>
+Subject: Re: [PATCH 04/12, v2] rbd: implement sync object read with new code
+Date: Tue, 29 Jan 2013 02:48:22 -0800
+Message-ID: <5107A8F6.7010104@inktank.com>
+References: <50FF11EA.3000808@inktank.com> <50FF128B.1030405@inktank.com> <5101406E.4060602@inktank.com> <51016249.4010405@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:49967 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752027Ab3A2Kog (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 05:44:36 -0500
-Received: by mail-pa0-f46.google.com with SMTP id kp14so321712pab.5
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 02:44:35 -0800 (PST)
-In-Reply-To: <51016234.5050805@inktank.com>
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:48511 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751720Ab3A2Ksc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jan 2013 05:48:32 -0500
+Received: by mail-pa0-f41.google.com with SMTP id bj3so325646pad.28
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Jan 2013 02:48:30 -0800 (PST)
+In-Reply-To: <51016249.4010405@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+A couple small comments, but looks good.
+
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 01/24/2013 08:32 AM, Alex Elder wrote:
-> The two remaining callers of rbd_do_request() always pass a null
-> collection pointer, so the "coll" and "coll_index" parameters are
-> not needed.  There is no other use of that data structure, so it
-> can be eliminated.
+On 01/24/2013 08:33 AM, Alex Elder wrote:
+> Reimplement the synchronous read operation used for reading a
+> version 1 header using the new request tracking code.  Name the
+> resulting function rbd_obj_read_sync() to better reflect that
+> it's a full object operation, not an object request.  To do this,
+> implement a new obj_req_pages object request type.
 >
-> Deleting them means there is no need to allocate a rbd_request
-> structure for the callback function.  And since that's the only use
-> of *that* structure, it too can be eliminated.
+> This implements a new mechanism to allow the caller to wait for
+> completion for an rbd_obj_request by calling rbd_obj_request_wait().
+>
+> This partially resolves:
+>      http://tracker.newdream.net/issues/3755
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   58
-> +++------------------------------------------------
->   1 file changed, 3 insertions(+), 55 deletions(-)
+>   drivers/block/rbd.c |   96
+> ++++++++++++++++++++++++++++++++++++++++++++++++---
+>   1 file changed, 92 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 7caddea..3302cea 100644
+> index 3302cea..742236b 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -162,25 +162,6 @@ struct rbd_client {
->   	struct list_head	node;
+> @@ -170,7 +170,7 @@ typedef void (*rbd_img_callback_t)(struct
+> rbd_img_request *);
+>   struct rbd_obj_request;
+>   typedef void (*rbd_obj_callback_t)(struct rbd_obj_request *);
+>
+> -enum obj_req_type { obj_req_bio };	/* More types to come */
+> +enum obj_req_type { obj_req_bio, obj_req_pages };
+
+Should be capitalized
+
+>   struct rbd_obj_request {
+>   	const char		*object_name;
+> @@ -182,7 +182,13 @@ struct rbd_obj_request {
+>   	u32			which;		/* posn image request list */
+>
+>   	enum obj_req_type	type;
+> -	struct bio		*bio_list;
+> +	union {
+> +		struct bio	*bio_list;
+> +		struct {
+> +			struct page	**pages;
+> +			u32		page_count;
+> +		};
+> +	};
+>
+>   	struct ceph_osd_request	*osd_req;
+>
+> @@ -192,6 +198,7 @@ struct rbd_obj_request {
+>   	atomic_t		done;
+>
+>   	rbd_obj_callback_t	callback;
+> +	struct completion	completion;
+>
+>   	struct kref		kref;
 >   };
->
-> -/*
-> - * a request completion status
-> - */
-> -struct rbd_req_status {
-> -	int done;
-> -	s32 rc;
-> -	u64 bytes;
-> -};
-> -
-> -/*
-> - * a collection of requests
-> - */
-> -struct rbd_req_coll {
-> -	int			total;
-> -	int			num_done;
-> -	struct kref		kref;
-> -	struct rbd_req_status	status[0];
-> -};
-> -
->   struct rbd_img_request;
->   typedef void (*rbd_img_callback_t)(struct rbd_img_request *);
->
-> @@ -242,18 +223,6 @@ struct rbd_img_request {
->   #define for_each_obj_request_safe(ireq, oreq, n) \
->   	list_for_each_entry_safe_reverse(oreq, n, &ireq->obj_requests, links)
->
-> -/*
-> - * a single io request
-> - */
-> -struct rbd_request {
-> -	struct request		*rq;		/* blk layer request */
-> -	struct bio		*bio;		/* cloned bio */
-> -	struct page		**pages;	/* list of used pages */
-> -	u64			len;
-> -	int			coll_index;
-> -	struct rbd_req_coll	*coll;
-> -};
-> -
->   struct rbd_snap {
->   	struct	device		dev;
->   	const char		*name;
-> @@ -1195,21 +1164,18 @@ static int rbd_do_request(struct request *rq,
->   			  int num_pages,
->   			  int flags,
->   			  struct ceph_osd_req_op *op,
-> -			  struct rbd_req_coll *coll,
-> -			  int coll_index,
->   			  void (*rbd_cb)(struct ceph_osd_request *,
->   					 struct ceph_msg *),
->   			  u64 *ver)
+> @@ -1077,6 +1084,7 @@ static bool obj_req_type_valid(enum obj_req_type type)
 >   {
->   	struct ceph_osd_client *osdc;
->   	struct ceph_osd_request *osd_req;
-> -	struct rbd_request *rbd_req = NULL;
->   	struct timespec mtime = CURRENT_TIME;
->   	int ret;
+>   	switch (type) {
+>   	case obj_req_bio:
+> +	case obj_req_pages:
+>   		return true;
+>   	default:
+>   		return false;
+> @@ -1291,14 +1299,23 @@ static void rbd_img_request_complete(struct
+> rbd_img_request *img_request)
+>   		rbd_img_request_put(img_request);
+>   }
 >
-> -	dout("rbd_do_request object_name=%s ofs=%llu len=%llu coll=%p[%d]\n",
-> +	dout("rbd_do_request object_name=%s ofs=%llu len=%llu\n",
->   		object_name, (unsigned long long) ofs,
-> -		(unsigned long long) len, coll, coll_index);
-> +		(unsigned long long) len);
+> +/* Caller is responsible for rbd_obj_request_destroy(obj_request) */
+> +
+> +static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
+> +{
+> +	return wait_for_completion_interruptible(&obj_request->completion);
+> +}
+> +
+>   static void rbd_obj_request_complete(struct rbd_obj_request *obj_request)
+>   {
+>   	if (obj_request->callback)
+>   		obj_request->callback(obj_request);
+> +	else
+> +		complete_all(&obj_request->completion);
+>   }
 >
->   	osdc = &rbd_dev->rbd_client->client->osdc;
->   	osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_NOIO);
-> @@ -1223,22 +1189,8 @@ static int rbd_do_request(struct request *rq,
->   		bio_get(osd_req->r_bio);
+>   /*
+> - * Request sync osd read
+> + * Synchronously read a range from an object into a provided buffer
+>    */
+>   static int rbd_req_sync_read(struct rbd_device *rbd_dev,
+>   			  const char *object_name,
+> @@ -1556,6 +1573,11 @@ static struct ceph_osd_request *rbd_osd_req_create(
+>   		/* osd client requires "num pages" even for bio */
+>   		osd_req->r_num_pages = calc_pages_for(offset, length);
+>   		break;
+> +	case obj_req_pages:
+> +		osd_req->r_pages = obj_request->pages;
+> +		osd_req->r_num_pages = obj_request->page_count;
+> +		osd_req->r_page_alignment = offset & ~PAGE_MASK;
+> +		break;
 >   	}
 >
-> -	if (coll) {
-> -		ret = -ENOMEM;
-> -		rbd_req = kmalloc(sizeof(*rbd_req), GFP_NOIO);
-> -		if (!rbd_req)
-> -			goto done_osd_req;
-> -
-> -		rbd_req->rq = rq;
-> -		rbd_req->bio = bio;
-> -		rbd_req->pages = pages;
-> -		rbd_req->len = len;
-> -		rbd_req->coll = coll;
-> -		rbd_req->coll_index = coll_index;
-> -	}
-> -
->   	osd_req->r_callback = rbd_cb;
-> -	osd_req->r_priv = rbd_req;
-> +	osd_req->r_priv = NULL;
+>   	if (write_request) {
+> @@ -1618,6 +1640,7 @@ static struct rbd_obj_request
+> *rbd_obj_request_create(const char *object_name,
+>   	obj_request->type = type;
+>   	INIT_LIST_HEAD(&obj_request->links);
+>   	atomic_set(&obj_request->done, 0);
+> +	init_completion(&obj_request->completion);
+>   	kref_init(&obj_request->kref);
 >
->   	strncpy(osd_req->r_oid, object_name, sizeof(osd_req->r_oid));
->   	osd_req->r_oid_len = strlen(osd_req->r_oid);
-> @@ -1274,8 +1226,6 @@ static int rbd_do_request(struct request *rq,
->   done_err:
->   	if (bio)
->   		bio_chain_put(osd_req->r_bio);
-> -	kfree(rbd_req);
-> -done_osd_req:
->   	ceph_osdc_put_request(osd_req);
+>   	return obj_request;
+> @@ -1641,6 +1664,11 @@ static void rbd_obj_request_destroy(struct kref
+> *kref)
+>   		if (obj_request->bio_list)
+>   			bio_chain_put(obj_request->bio_list);
+>   		break;
+> +	case obj_req_pages:
+> +		if (obj_request->pages)
+> +			ceph_release_page_vector(obj_request->pages,
+> +						obj_request->page_count);
+> +		break;
+>   	}
 >
->   	return ret;
-> @@ -1314,7 +1264,6 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
->   			  pages, num_pages,
->   			  flags,
->   			  op,
-> -			  NULL, 0,
->   			  NULL,
->   			  ver);
->   	if (ret < 0)
-> @@ -1390,7 +1339,6 @@ static int rbd_req_sync_notify_ack(struct
-> rbd_device *rbd_dev,
->   			  NULL, 0,
->   			  CEPH_OSD_FLAG_READ,
->   			  op,
-> -			  NULL, 0,
->   			  rbd_simple_req_cb, NULL);
+>   	kfree(obj_request);
+> @@ -1988,6 +2016,65 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
+>   	put_disk(disk);
+>   }
 >
->   	rbd_osd_req_op_destroy(op);
+> +static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+> +				const char *object_name,
+> +				u64 offset, u64 length,
+> +				char *buf, u64 *version)
+> +
+> +{
+> +	struct ceph_osd_req_op *op;
+> +	struct rbd_obj_request *obj_request;
+> +	struct ceph_osd_client *osdc;
+> +	struct page **pages = NULL;
+> +	u32 page_count;
+> +	int ret;
+> +
+> +	page_count = (u32) calc_pages_for(offset, length);
+> +	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+> +	if (IS_ERR(pages))
+> +		ret = PTR_ERR(pages);
+> +
+> +	ret = -ENOMEM;
+> +	obj_request = rbd_obj_request_create(object_name, offset, length,
+> +						obj_req_pages);
+> +	if (!obj_request)
+> +		goto out;
+> +
+> +	obj_request->pages = pages;
+> +	obj_request->page_count = page_count;
+> +
+> +	op = rbd_osd_req_op_create(CEPH_OSD_OP_READ, offset, length);
+> +	if (!op)
+> +		goto out;
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+> +						obj_request, op);
+> +	rbd_osd_req_op_destroy(op);
+> +	if (!obj_request->osd_req)
+> +		goto out;
+> +
+> +	osdc = &rbd_dev->rbd_client->client->osdc;
+> +	ret = rbd_obj_request_submit(osdc, obj_request);
+> +	if (ret)
+> +		goto out;
+> +	ret = rbd_obj_request_wait(obj_request);
+> +	if (ret)
+> +		goto out;
+> +
+> +	ret = obj_request->result;
+> +	if (ret < 0)
+> +		goto out;
+> +	ret = ceph_copy_from_page_vector(pages, buf, 0, obj_request->xferred);
+> +	if (version)
+> +		*version = obj_request->version;
+
+No need to worry about the version. Nothing should use it.
+
+> +out:
+> +	if (obj_request)
+> +		rbd_obj_request_put(obj_request);
+> +	else
+> +		ceph_release_page_vector(pages, page_count);
+> +
+> +	return ret;
+> +}
+> +
+>   /*
+>    * Read the complete header for the given rbd device.
+>    *
+> @@ -2026,7 +2113,8 @@ rbd_dev_v1_header_read(struct rbd_device *rbd_dev,
+> u64 *version)
+>   		if (!ondisk)
+>   			return ERR_PTR(-ENOMEM);
+>
+> -		ret = rbd_req_sync_read(rbd_dev, rbd_dev->header_name,
+> +		(void) rbd_req_sync_read;	/* avoid a warning */
+> +		ret = rbd_obj_read_sync(rbd_dev, rbd_dev->header_name,
+>   				       0, size,
+>   				       (char *) ondisk, version);
 >
 
