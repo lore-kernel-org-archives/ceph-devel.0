@@ -1,61 +1,101 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: [PATCH 0/2] two small patches for CEPH wireshark plugin
-Date: Mon, 28 Jan 2013 20:35:59 -0800
-Message-ID: <A96E0EEB-4620-4634-880B-4DC087C14F92@inktank.com>
-References: <1359048081-17840-1-git-send-email-danny.al-gaaf@bisect.de> <alpine.DEB.2.00.1301241028420.13935@cobra.newdream.net> <51019E41.9070705@bisect.de>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: [ceph] locking fun with d_materialise_unique()
+Date: Tue, 29 Jan 2013 04:52:13 +0000
+Message-ID: <20130129045213.GH4503@ZenIV.linux.org.uk>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f42.google.com ([209.85.160.42]:64786 "EHLO
-	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753323Ab3A2EgE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jan 2013 23:36:04 -0500
-Received: by mail-pb0-f42.google.com with SMTP id wz17so21335pbc.29
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jan 2013 20:36:03 -0800 (PST)
-In-Reply-To: <51019E41.9070705@bisect.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+	There's a fun potential problem with CEPH_MDS_OP_LOOKUPSNAP handling
+in ceph_fill_trace().  Consider the following scenario:
 
-You could look at the wip-wireshark-zafman branch.  I rebased it and force pushed it.   It has changes to the wireshark.patch and a minor change I needed to get it to build.  I'm surprised the recent checkin didn't include the change to packet-ceph.c which I needed to get it to build.
+Process calls stat(2).  Lookup locks parent, allocates dentry and calls
+->lookup().  Request is created and sent over the wire.  Then we sit and
+wait for completion.  Just as the reply has arrived, process gets SIGKILL.
+OK, we get to
+                /*
+                 * ensure we aren't running concurrently with
+                 * ceph_fill_trace or ceph_readdir_prepopulate, which
+                 * rely on locks (dir mutex) held by our caller.
+                 */
+                mutex_lock(&req->r_fill_mutex);
+                req->r_err = err;
+                req->r_aborted = true;
+                mutex_unlock(&req->r_fill_mutex);
+and we got there before handle_reply() grabbed ->r_fill_mutex.  Then we return
+to ceph_lookup(), drop the reference to request and bugger off.  Parent is
+unlocked by caller.
 
-David Zafman
-Senior Developer
-david.zafman@inktank.com
+In the meanwhile, there's another thread sitting in handle_reply().  It
+got ->r_fill_mutex and called ceph_fill_trace().  Had that been something
+like rename request, ceph_fill_trace() would've checked req->r_aborted and
+that would've been it.  However, we hit this:
+        } else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+                   req->r_op == CEPH_MDS_OP_MKSNAP) {
+                struct dentry *dn = req->r_dentry;
+and proceed to
+                dout(" linking snapped dir %p to dn %p\n", in, dn);
+                dn = splice_dentry(dn, in, NULL, true);
+which does
+        realdn = d_materialise_unique(dn, in);
+and we are in trouble - d_materialise_unique() assumes that ->i_mutex on parent
+is held, which isn't guaranteed anymore.  Not that d_delete() done a couple
+of lines earlier was any better...
 
+I'm not sure if we are guaranteed that ceph_readdir_prepopulate() won't
+get to its splice_dentry() and d_delete() calls in similar situations -
+I hadn't checked that one yet.  If it isn't guaranteed, we have a problem
+there as well.
 
+I might very well be missing something - that code is seriously convoluted,
+and race wouldn't be easy to hit, so I don't have anything resembling
+a candidate reproducer ;-/  IOW, this is just from RTFS and I'd really
+appreciate comments from folks familiar with ceph.
 
-On Jan 24, 2013, at 12:49 PM, Danny Al-Gaaf <danny.al-gaaf@bisect.de> wrote:
+VFS side of requirements is fairly simple:
+	* d_splice_alias(d, _), d_add_ci(d, _), d_add(d, _),
+d_materialise_unique(d, _), d_delete(d), d_move(_, d) should be called
+only with ->i_mutex held on the parent of d.
+	* d_move(d, _), d_add_unique(d, _), d_instantiate_unique(d, _),
+d_instantiate(d, _) should be called only with d being parentless (i.e.
+d->d_parent == d, aka. IS_ROOT(d)) or with ->i_mutex held on the parent of d.
+	* with the exception of "prepopulate dentry tree at ->get_sb() time"
+kind of situations, d_alloc(d, _) and d_alloc_name(d, _) should be called
+only with d->d_inode->i_mutex held (and it won't be too hard to get rid of
+those exceptions, actually).
+	* lookup_one_len(_, d, _) should only be called with ->i_mutex held
+on d->d_inode
+	* d_move(d1, d2) in case when d1 and d2 have different parents
+should only be called with ->s_vfs_rename_mutex held on d1->d_sb (== d2->d_sb).
 
-> Am 24.01.2013 19:31, schrieb Sage Weil:
->> Hi Danny!
-> [...]
->> Since you brought up wireshark...
->> 
->> We would LOVE LOVE LOVE it if this plugin could get upstream into 
->> wireshark.  
-> 
-> Yes, this would be great.
-> 
->> IIRC, the problem (last time we checked, ages ago) was that 
->> there were strict coding guidelines for that project that weren't 
->> followed.  I'm not sure if that is still the case, or even if that is 
->> accurate.
->> 
->> It would be great if someone on this list who is looking for a way to 
->> contribute could take the lead on trying to make this happen... :-)
-> 
-> I'll take a look at it maybe ... if I find some free time for it.
-> 
-> What about the patches? Can we apply them to the ceph git tree until we
-> have another solution for the wireshark code?
-> 
-> Danny
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We are guaranteed that ->i_mutex is held on (inode of) parent of d in
+        ->lookup(_, d, _)
+        ->atomic_open(_, d, _, _, _, _)
+        ->mkdir(_, d, _)
+        ->symlink(_, d, _)
+        ->create(_, d, _, _)
+        ->mknod(_, d, _, _)
+        ->link(_, _, d)
+        ->unlink(_, d)
+        ->rmdir(_, d)
+        ->rename(_, d, _, _)
+        ->rename(_, _, _, d)
+Note that this is *not* guaranteed for another argument of ->link() - the
+inode we are linking has ->i_mutex held, but nothing of that kind is promised
+for its parent directory.
+We also are guaranteed that ->i_mutex is held on the inode of opened
+directory passed to ->readdir() and on victims of ->unlink(), ->rmdir() and
+overwriting ->rename().
 
+FWIW, I went through that stuff this weekend and we are fairly close to having
+those requirements satisfied - I'll push a branch with the accumulated fixes
+in a few and after that we should be down to very few remaining violations and
+dubious places (ceph issues above being one of those).  And yes, this stuff
+really need to be in Documentation/filesystems somewhere, along with the
+full description of locking rules for ->d_parent and ->d_name accesses.  I'm
+trying to put that together right now...
