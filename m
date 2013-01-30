@@ -1,48 +1,63 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: [PATCH 0/6] fix build (ceph.spec)
-Date: Wed, 30 Jan 2013 19:30:39 +0100
-Message-ID: <510966CF.6070501@bisect.de>
-References: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de> <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com>
-Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/4] rbd: unregister linger in watch sync routine
+Date: Wed, 30 Jan 2013 11:30:20 -0800
+Message-ID: <510974CC.6@inktank.com>
+References: <51043EF2.4070305@inktank.com> <51043F49.2020904@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:52748 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755152Ab3A3San (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Jan 2013 13:30:43 -0500
-In-Reply-To: <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:39260 "EHLO
+	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755333Ab3A3Tae (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:30:34 -0500
+Received: by mail-pa0-f45.google.com with SMTP id bg2so1264184pad.32
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 11:30:33 -0800 (PST)
+In-Reply-To: <51043F49.2020904@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: dan.mick@inktank.com, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Watkins Noah <noah.watkins@inktank.com>
+To: Alex Elder <elder@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 30.01.2013 19:07, schrieb Gregory Farnum:
-> On Wednesday, January 30, 2013 at 10:00 AM, Danny Al-Gaaf wrote:
->> This set fixes some issues in the spec file.
->> 
->> I'm not sure what the reason for
->> #35e5d74e5c5786bc91df5dc10b5c08c77305df4e was. But I would revert
->> it and fix the underlaying issues instead.
-> 
-> 
-> That is a pretty obtuse commit message, but it was actually because
-> while rbd-fuse is ready to be in-tree, we don't think it's ready for
-> people to be using; there are some undocumented gotchas involved with
-> it and not a lot of testing. :)
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-Hm, but this is git master and not a released ceph version or the next
-tree. IMO rbd-fuse should be installed in the master branch to be
-tested. Otherwise it will be build but maybe never tested by others than
-developers which know it's there.
+On 01/26/2013 12:40 PM, Alex Elder wrote:
+> Move the code that unregisters an rbd device's lingering header
+> object watch request into rbd_dev_header_watch_sync(), so it
+> occurs in the same function that originally sets up that request.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   10 ++++------
+>   1 file changed, 4 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 47e5798..363a813 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1730,6 +1730,10 @@ static int rbd_dev_header_watch_sync(struct
+> rbd_device *rbd_dev, int start)
+>   	if (start) {
+>   		rbd_dev->watch_request = obj_request->osd_req;
+>   		ceph_osdc_set_request_linger(osdc, rbd_dev->watch_request);
+> +	} else {
+> +		ceph_osdc_unregister_linger_request(osdc,
+> +						rbd_dev->watch_request);
+> +		rbd_dev->watch_request = NULL;
+>   	}
+>   	ret = rbd_obj_request_submit(osdc, obj_request);
+>   	if (ret)
+> @@ -4040,12 +4044,6 @@ static void rbd_dev_release(struct device *dev)
+>   {
+>   	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>
+> -	if (rbd_dev->watch_request) {
+> -		struct ceph_client *client = rbd_dev->rbd_client->client;
+> -
+> -		ceph_osdc_unregister_linger_request(&client->osdc,
+> -						    rbd_dev->watch_request);
+> -	}
+>   	if (rbd_dev->watch_event)
+>   		rbd_dev_header_watch_sync(rbd_dev, 0);
+>
 
-> I'll let others comment on the Java library moves and other packaging
-> changes. -Greg
-
-Only an additional comment: I've moved the libcephfs_jni.* files to
-%{_libdir} because this is what SUSE already do for e.g. the *.so files
-in the libjnidispatch package.
-
-Danny
