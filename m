@@ -1,86 +1,48 @@
-From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
-Subject: AW: RadosGW S3 Api
-Date: Wed, 30 Jan 2013 18:13:42 +0000
-Message-ID: <5EFBD28BA42C604BB012164C72CA5604502B0F34@SMBXKO6.cgm.ag>
-References: <5EFBD28BA42C604BB012164C72CA5604502B0E1D@SMBXKO6.cgm.ag>
-	<5EFBD28BA42C604BB012164C72CA5604502B0E6B@SMBXKO6.cgm.ag>
-	<CAC-hyiGdR8AMMFk41tWgjmYNAqffTd8R8UacdcaFEPErEr=+Rw@mail.gmail.com>
-	<5EFBD28BA42C604BB012164C72CA5604502B0EDE@SMBXKO6.cgm.ag>
- <CAC-hyiEFYF4xGx3nAWaOBDjrRTxLJ_P33A40NescWLBeCnATyQ@mail.gmail.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: [PATCH 0/6] fix build (ceph.spec)
+Date: Wed, 30 Jan 2013 19:30:39 +0100
+Message-ID: <510966CF.6070501@bisect.de>
+References: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de> <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smxko1.compugroup.com ([193.47.161.177]:59961 "EHLO
-	SMXKO1.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754017Ab3A3SNz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 13:13:55 -0500
-In-Reply-To: <CAC-hyiEFYF4xGx3nAWaOBDjrRTxLJ_P33A40NescWLBeCnATyQ@mail.gmail.com>
-Content-Language: de-DE
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:52748 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755152Ab3A3San (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Jan 2013 13:30:43 -0500
+In-Reply-To: <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: dan.mick@inktank.com, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Watkins Noah <noah.watkins@inktank.com>
 
-Yeah, therefore i ask about an example apache config with ssl support, =
-its not described in the ceph manual, only you have to active the ssl m=
-odule, but not how the conf must look.
-I tested the freeware "s3 browser", but it makes also errors...
+Am 30.01.2013 19:07, schrieb Gregory Farnum:
+> On Wednesday, January 30, 2013 at 10:00 AM, Danny Al-Gaaf wrote:
+>> This set fixes some issues in the spec file.
+>> 
+>> I'm not sure what the reason for
+>> #35e5d74e5c5786bc91df5dc10b5c08c77305df4e was. But I would revert
+>> it and fix the underlaying issues instead.
+> 
+> 
+> That is a pretty obtuse commit message, but it was actually because
+> while rbd-fuse is ready to be in-tree, we don't think it's ready for
+> people to be using; there are some undocumented gotchas involved with
+> it and not a lot of testing. :)
 
-Do you somebody know who has knowledge about using radosgw with ssl?
+Hm, but this is git master and not a released ceph version or the next
+tree. IMO rbd-fuse should be installed in the master branch to be
+tested. Otherwise it will be build but maybe never tested by others than
+developers which know it's there.
 
+> I'll let others comment on the Java library moves and other packaging
+> changes. -Greg
 
------Urspr=FCngliche Nachricht-----
-Von: yehudasa@gmail.com [mailto:yehudasa@gmail.com] Im Auftrag von Yehu=
-da Sadeh
-Gesendet: Mittwoch, 30. Januar 2013 18:54
-An: J=E4ger, Philipp
-Cc: ceph-devel@vger.kernel.org
-Betreff: Re: RadosGW S3 Api
+Only an additional comment: I've moved the libcephfs_jni.* files to
+%{_libdir} because this is what SUSE already do for e.g. the *.so files
+in the libjnidispatch package.
 
-On Wed, Jan 30, 2013 at 9:34 AM, J=E4ger, Philipp <Philipp.Jaeger@cgm.c=
-om> wrote:
-> Hello, thanks for the answer.
-> I don't know, the programmer say the api (s3 api java) wants to conne=
-ct per https. When you know a possibility to  (de)actiate ssl, I would =
-be happy you can tell:) than im sure its not a ssl problem.
->
->
-> Do you know the error message "peer not authenticated"?
-> I think its not a rados error message, because when you google for it=
-, you can see that it's common ssl error in java.
-
-Then it's probably ssl error. Radosgw doesn't generate such an error.
-
-> But it can be an inherited error because of rados misconfiguration I =
-think.
->
->
-> How do I know if the gateway can be reached?
-> Nothing special in the logs..
->
-> Have you looked into the confs in the zip file I added to the mail?
-
-Yeah. there's not much there.
-
-> Im very unsure about the apache ssl configuration, when I set the fas=
-tcgi virtual host section also to 443, I get an error message, but I do=
-nk think its right to leave it on 80.
-
-
-> Don't you ever set up radosgw with ssl ?
-
-that's really orthogonal to radosgw, more of the web server (apache) is=
-sue.
-
-Try using some out of the box s3 client before using the api to help wi=
-th diagnosing the issue. It looks to me like some issues with your apac=
-he configuration (ssl, fastcgi).
-
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Danny
