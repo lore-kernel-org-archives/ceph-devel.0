@@ -1,44 +1,74 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: cephx execute permissions for RBD operations
-Date: Wed, 30 Jan 2013 17:21:01 +0100
-Message-ID: <5109486D.7040505@widodh.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: John Nielsen <lists@jnielsen.net>
+Subject: Re: Geo-replication with RADOS GW
+Date: Wed, 30 Jan 2013 09:30:11 -0700
+Message-ID: <2FECDD68-4116-47BC-A709-8C0BB2585049@jnielsen.net>
+References: <CAEU8emnv5z9JmkqTG4+ddNV6wRLQfeSQyPShznyg=xFzqTYwpg@mail.gmail.com> <4A295B7B36B341578D4F02AC963BB353@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:39223 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754267Ab3A3QVF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 11:21:05 -0500
-Received: from [IPv6:2a00:f10:113:0:808d:9060:49f6:b290] (unknown [IPv6:2a00:f10:113:0:808d:9060:49f6:b290])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id AF6D6435B5
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 17:21:02 +0100 (CET)
+Received: from secure.freebsdsolutions.net ([69.55.234.48]:34377 "EHLO
+	ns1.jnielsen.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751042Ab3A3QaO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 11:30:14 -0500
+In-Reply-To: <4A295B7B36B341578D4F02AC963BB353@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ben Rowland <ben.rowland@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Jan 28, 2013, at 11:32 AM, Gregory Farnum <greg@inktank.com> wrote:
 
-Yesterday I ran into a weird situation where my libvirt RBD pool
-just wouldn't work.
+> On Monday, January 28, 2013 at 9:54 AM, Ben Rowland wrote:
+>> Hi,
+>>=20
+>> I'm considering using Ceph to create a cluster across several data
+>> centres, with the strict requirement that writes should go to both
+>> DCs. This seems possible by specifying rules in the CRUSH map, with
+>> an understood latency hit resulting from purely synchronous writes.
+>>=20
+>> The part I'm unsure about is how the RADOS GW fits into this picture=
+=2E
+>> For high availability (and to improve best-case latency on reads),
+>> we'd want to run a gateway in each data centre. However, the first
+>> paragraph of the following post suggests this is not possible:
+>>=20
+>> http://article.gmane.org/gmane.comp.file-systems.ceph.devel/12238
+>>=20
+>> Is there a hard restriction on how many radosgw instances can run
+>> across the cluster, or is the point of the above post more about a
+>> performance hit?
+>=20
+> It's talking about the performance hit. Most people can't afford data=
+-center level connectivity between two different buildings. ;) If you d=
+id have a Ceph cluster split across two DC (with the bandwidth to suppo=
+rt them) this will work fine. There aren't any strict limits on the num=
+ber of gateways you stick on a cluster, just the scaling costs associat=
+ed with cache invalidation notifications.
+>=20
+>=20
+>> It seems to me it should be possible to run more
+>> than one radosgw, particularly if each instance communicates with a
+>> local OSD which can proxy reads/writes to the primary (which may or
+>> may not be DC-local).
+>=20
+> They aren't going to do this, though =97 each gateway will communicat=
+e with the primaries directly.
 
-Turned out the credentials I was using only had rw permissions for OSDs 
-instead of rwx or *.
+I don't know what the timeline is, but Yehuda proposed recently the ide=
+a of master and slave "zones" (subsets of a cluster) and other changes =
+to facilitate "rgw geo-replication and disaster recovery". See this mes=
+sage:
+	http://article.gmane.org/gmane.comp.file-systems.ceph.devel/12238
 
-This caused rbd_open to fail, looking at librbd itself I understand why 
-execute permissions are required to do so (locks, watches).
+If/when that comes to fruition it would open a lot of possibilities for=
+ the kind of scenario you're talking about. (Yes, I'm looking forward t=
+o it. :) )
 
-What is however the best way to detect if you don't have the required 
-permissions?
+JN
 
-This piece of code: 
-http://libvirt.org/git/?p=libvirt.git;a=blob;f=src/storage/storage_backend_rbd.c;h=8a0e517502c482f23f01bc63e95f1dc210d711cd;hb=master#l215
-
-I simply check if the open fails, but just "failed to open the RBD 
-image" wasn't really that clear.
-
-I'd like to give a more useful error instead of that, but what error 
-codes can I expect?
-
-Wido
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
