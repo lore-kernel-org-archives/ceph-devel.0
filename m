@@ -1,12 +1,12 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 3/6] ceph.spec.in: move libcephfs_jni.so to ceph-devel
-Date: Wed, 30 Jan 2013 19:00:42 +0100
-Message-ID: <1359568845-7634-4-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 6/6] ceph.spec.in: fix file section for ceph-resource-agents
+Date: Wed, 30 Jan 2013 19:00:45 +0100
+Message-ID: <1359568845-7634-7-git-send-email-danny.al-gaaf@bisect.de>
 References: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:51046 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:51049 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756609Ab3A3SAs (ORCPT
+	by vger.kernel.org with ESMTP id S1756613Ab3A3SAs (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
 	Wed, 30 Jan 2013 13:00:48 -0500
 In-Reply-To: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de>
@@ -15,35 +15,28 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-Move libcephfs_jni.so to the ceph-devel package since so-files they
-shouldn't be part of the library package.
+Create needed dirs (/usr/lib/ocf/resource.d/ceph) for the ceph-resource-agents
+subpackage.
 
 Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- ceph.spec.in | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ ceph.spec.in | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/ceph.spec.in b/ceph.spec.in
-index 38aef98..67a4915 100644
+index 0db7792..668edca 100644
 --- a/ceph.spec.in
 +++ b/ceph.spec.in
-@@ -414,6 +414,7 @@ fi
- %{_libdir}/libcephfs.so
- %{_libdir}/librbd.so
- %{_libdir}/librados.so
-+/usr/lib/jni/libcephfs_jni.so
+@@ -446,6 +446,9 @@ fi
+ %if %{with ocf}
+ %files resource-agents
+ %defattr(0755,root,root,-)
++%dir /usr/lib/ocf
++%dir /usr/lib/ocf/resource.d
++%dir /usr/lib/ocf/resource.d/ceph
+ /usr/lib/ocf/resource.d/%{name}/*
+ %endif
  
- #################################################################################
- %files radosgw
-@@ -561,7 +562,7 @@ fi
- 
- %files -n libcephfs_jni1
- %defattr(-,root,root,-)
--/usr/lib/jni/libcephfs_jni.so*
-+/usr/lib/jni/libcephfs_jni.so.*
- 
- %files -n cephfs-java
- %defattr(-,root,root,-)
 -- 
 1.8.1.1
 
