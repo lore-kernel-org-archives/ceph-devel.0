@@ -1,160 +1,207 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RadosGW S3 Api
-Date: Wed, 30 Jan 2013 08:04:39 -0800
-Message-ID: <CAC-hyiGdR8AMMFk41tWgjmYNAqffTd8R8UacdcaFEPErEr=+Rw@mail.gmail.com>
-References: <5EFBD28BA42C604BB012164C72CA5604502B0E1D@SMBXKO6.cgm.ag>
-	<5EFBD28BA42C604BB012164C72CA5604502B0E6B@SMBXKO6.cgm.ag>
+From: femi anjorin <femi.anjorin@gmail.com>
+Subject: HEALTH_ERR 18624 pgs stuck inactive; 18624 pgs stuck unclean; no osds
+Date: Wed, 30 Jan 2013 17:12:32 +0100
+Message-ID: <CAPhYxPzj_XkjqjJ+8GMM5m_GnmH-cfFyZmCgyPV4npg16XZ8ag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:35174 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753733Ab3A3QEk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 11:04:40 -0500
-Received: by mail-ie0-f170.google.com with SMTP id c11so1443798ieb.29
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 08:04:40 -0800 (PST)
-In-Reply-To: <5EFBD28BA42C604BB012164C72CA5604502B0E6B@SMBXKO6.cgm.ag>
+Received: from mail-qe0-f51.google.com ([209.85.128.51]:64301 "EHLO
+	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755709Ab3A3QMe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 11:12:34 -0500
+Received: by mail-qe0-f51.google.com with SMTP id 6so783581qea.24
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 08:12:33 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jan 30, 2013 at 7:44 AM, J=E4ger, Philipp <Philipp.Jaeger@cgm.c=
-om> wrote:
-> Hello everybody,
->
-> we want to set up ceph+radosgw to use it with the S3 API.
->
-> So I set it up with this manual:
->
-> http://ceph.com/docs/master/radosgw/manual-install/
->
-> and this:
-> http://ceph.com/docs/master/radosgw/config/
->
->
-> At the moment we want to test in our local network, its not published=
- to the internet.
->
-> We make a wildcard cname entry in our dns to forward subdomain calls =
-to the server: *.servername.cgm.ag =3D> servername.cgm.ag
->
-> We have to activate SSL for an encrypted connection.
->
-> Our programmer want to connect and create a bucket like its described=
- here:
-> http://ceph.com/docs/master/radosgw/s3/java/
->
-> He gets the following:
->
-> "FAILED: createBucket
-> com.amazonaws.AmazonClientException: Unable to execute HTTP request: =
-peer not authenticated
->        at com.amazonaws.http.AmazonHttpClient.executeHelper(AmazonHtt=
-pClient.java:328)
->        at com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClien=
-t.java:165)
->        at com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Cli=
-ent.java:2949)
->        at com.amazonaws.services.s3.AmazonS3Client.createBucket(Amazo=
-nS3Client.java:616)
->        at com.amazonaws.services.s3.AmazonS3Client.createBucket(Amazo=
-nS3Client.java:538)
->        at com.cgm.connect.securefiletransfer.hwb.S3Test.createBucket(=
-S3Test.java:64)
->        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
->        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAcc=
-essorImpl.java:57)
->        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingM=
-ethodAccessorImpl.java:43)
->        at java.lang.reflect.Method.invoke(Method.java:601)
->        at org.testng.internal.MethodInvocationHelper.invokeMethod(Met=
-hodInvocationHelper.java:80)
->        at org.testng.internal.Invoker.invokeMethod(Invoker.java:691)
->        at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:8=
-83)
->        at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:=
-1208)
->        at org.testng.internal.TestMethodWorker.invokeTestMethods(Test=
-MethodWorker.java:127)
->        at org.testng.internal.TestMethodWorker.run(TestMethodWorker.j=
-ava:111)
->        at org.testng.TestRunner.privateRun(TestRunner.java:753)
->        at org.testng.TestRunner.run(TestRunner.java:613)
->        at org.testng.SuiteRunner.runTest(SuiteRunner.java:335)
->        at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:330=
-)
->        at org.testng.SuiteRunner.privateRun(SuiteRunner.java:292)
->        at org.testng.SuiteRunner.run(SuiteRunner.java:241)
->        at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.jav=
-a:52)
->        at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
->        at org.testng.TestNG.runSuitesSequentially(TestNG.java:1169)
->        at org.testng.TestNG.runSuitesLocally(TestNG.java:1094)
->        at org.testng.TestNG.run(TestNG.java:1006)
->        at org.testng.remote.RemoteTestNG.run(RemoteTestNG.java:107)
->        at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java=
-:199)
->        at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:170)
-> Caused by: javax.net.ssl.SSLPeerUnverifiedException: peer not authent=
-icated
->        at sun.security.ssl.SSLSessionImpl.getPeerCertificates(SSLSess=
-ionImpl.java:397)
->        at org.apache.http.conn.ssl.AbstractVerifier.verify(AbstractVe=
-rifier.java:128)
->        at org.apache.http.conn.ssl.SSLSocketFactory.connectSocket(SSL=
-SocketFactory.java:390)
->        at org.apache.http.impl.conn.DefaultClientConnectionOperator.o=
-penConnection(DefaultClientConnectionOperator.java:148)
->        at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPo=
-olEntry.java:149)
->        at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(Ab=
-stractPooledConnAdapter.java:121)
->        at org.apache.http.impl.client.DefaultRequestDirector.tryConne=
-ct(DefaultRequestDirector.java:561)
->        at org.apache.http.impl.client.DefaultRequestDirector.execute(=
-DefaultRequestDirector.java:415)
->        at org.apache.http.impl.client.AbstractHttpClient.execute(Abst=
-ractHttpClient.java:820)
->        at org.apache.http.impl.client.AbstractHttpClient.execute(Abst=
-ractHttpClient.java:754)
->        at org.apache.http.impl.client.AbstractHttpClient.execute(Abst=
-ractHttpClient.java:732)
->        at com.amazonaws.http.AmazonHttpClient.executeHelper(AmazonHtt=
-pClient.java:280)
->        ... 29 more
->
-> "
->
-> Domain: cgm.ag
-> Name of the server: sg3cephtstko1 =3D sg3cephtstko1.cgm.ag(fqdn)
-> In the /var/www folder is the s3gw.fcgi script with the command descr=
-ibed in the manual.
->
-> We have bought a wildcard ssl certificate for our domain, so no probl=
-em with self signed certificates I think.
->
-> Radosgw,ceph and apache service is running.
->
->
-> So do you have any ideas where the problem is?
->
-> "peer not authenticated" =3D> Is it a problem of SSL or something to =
-do with the radosgw config?
-> Is there a possibility to test the functionality that you can say the=
-re's no problem with the set up in general, for example a script runnin=
-g on the server itself?
-> Is there something we forget or misconfigured?
->
->
+Hi,
 
-Does it work without https? Do requests reach the gateway? What does
-the radosgw log show? What does the apache access log show?
+Can anyone help with this?
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am running a cluster of 6 servers. Each with 16 hard drives. I
+mounted all the hard drives on the recommended mount point
+/var/lib/ceph/osd/ceph-n . look like this:
+/dev/sda1 on /var/lib/ceph/osd/ceph-0
+/dev/sdb1 on /var/lib/ceph/osd/ceph-1
+/dev/sdc1 on /var/lib/ceph/osd/ceph-2
+/dev/sdd1 on /var/lib/ceph/osd/ceph-3
+/dev/sde1 on /var/lib/ceph/osd/ceph-4
+/dev/sdf1 on /var/lib/ceph/osd/ceph-5
+/dev/sdg1 on /var/lib/ceph/osd/ceph-6
+/dev/sdh1 on /var/lib/ceph/osd/ceph-7
+/dev/sdi1 on /var/lib/ceph/osd/ceph-8
+/dev/sdj1 on /var/lib/ceph/osd/ceph-9
+/dev/sdk1 on /var/lib/ceph/osd/ceph-10
+/dev/sdl1 on /var/lib/ceph/osd/ceph-11
+/dev/sdm1 on /var/lib/ceph/osd/ceph-12
+/dev/sdn1 on /var/lib/ceph/osd/ceph-13
+/dev/sdo1 on /var/lib/ceph/osd/ceph-14
+/dev/sdp1 on /var/lib/ceph/osd/ceph-15
+
+
+Below is a summarized copy of my  ceph.conf file. Since i have 16
+drive on each server ...so i did a configuration of osd.0 - osd.95.
+While I did configuration of 3 monitors and 1 mds server.
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+[global]
+                auth cluster required = cephx
+                auth service required = cephx
+                auth client required = cephx
+                debug ms = 1
+[osd]
+                osd journal size = 10000
+                filestore xattr use omap = true
+
+[osd.0]
+                hostname = testserver109
+                devs = /dev/sda1
+[osd.1]
+                hostname = testserver109
+                devs = /dev/sdb1
+.
+.
+.
+[osd.16]
+                hostname = testserver110
+                devs = /dev/sda1
+.
+.
+[osd.95]
+                hostname = testserver114
+                devs = /dev/sdp1
+
+[mon]
+                mon data = /var/lib/ceph/mon/$cluster-$id
+
+[mon.a]
+                host = testserver109
+                mon addr = 172.16.1.9:6789
+
+[mon.b]
+                host = testserver110
+                mon addr = 172.16.1.10:6789
+
+[mon.c]
+                host = testserver111
+                mon addr = 172.16.1.11:6789
+[mds.a]
+                host = testserver025
+
+[mon]
+        debug mon = 20
+        debug paxos = 20
+        debug auth = 20
+
+[osd]
+        debug osd = 20
+        debug filestore = 20
+        debug journal = 20
+        debug monc = 20
+
+[mds]
+        debug mds = 20
+        debug mds balancer = 20
+        debug mds log = 20
+        debug mds migrator = 20
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Steps:
+1. I did mkcephfs -a -c /etc/ceph/ceph.conf -k ceph.keyring
+temp dir is /tmp/mkcephfs.G5cBEIaS1o
+preparing monmap in /tmp/mkcephfs.G5cBEIaS1o/monmap
+/usr/bin/monmaptool --create --clobber --add a 172.16.1.9:6789 --add b
+172.16.1.10:6789 --add c 172.16.1.11:6789 --print
+/tmp/mkcephfs.G5cBEIaS1o/monmap
+/usr/bin/monmaptool: monmap file /tmp/mkcephfs.G5cBEIaS1o/monmap
+/usr/bin/monmaptool: generated fsid 3dd34cbf-e228-4ced-850c-68cde0a7d8b5
+epoch 0
+fsid 3dd34cbf-e228-4ced-850c-68cde0a7d8b5
+last_changed 2013-01-30 12:38:14.564735
+created 2013-01-30 12:38:14.564735
+0: 172.16.1.9:6789/0 mon.a
+1: 172.16.1.10:6789/0 mon.b
+2: 172.16.1.11:6789/0 mon.c
+/usr/bin/monmaptool: writing epoch 0 to
+/tmp/mkcephfs.G5cBEIaS1o/monmap (3 monitors)
+=== mds.a ===
+creating private key for mds.a keyring /var/lib/ceph/mds/ceph-a/keyring
+creating /var/lib/ceph/mds/ceph-a/keyring
+Building generic osdmap from /tmp/mkcephfs.G5cBEIaS1o/conf
+/usr/bin/osdmaptool: osdmap file '/tmp/mkcephfs.G5cBEIaS1o/osdmap'
+/usr/bin/osdmaptool: writing epoch 1 to /tmp/mkcephfs.G5cBEIaS1o/osdmap
+Generating admin key at /tmp/mkcephfs.G5cBEIaS1o/keyring.admin
+creating /tmp/mkcephfs.G5cBEIaS1o/keyring.admin
+Building initial monitor keyring
+added entity mds.a auth auth(auid = 18446744073709551615
+key=AQAnBglRaGP7MxAANo/xsy5P9NxMzCZGmHQDCw== with 0 caps)
+=== mon.a ===
+pushing everything to testserver109
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-a for mon.a
+=== mon.b ===
+pushing everything to testserver110
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-b for mon.b
+=== mon.c ===
+pushing everything to testserver111
+/usr/bin/ceph-mon: created monfs at /var/lib/ceph/mon/ceph-c for mon.c
+placing client.admin keyring in ceph.keyring
+
+---------------------------------------------------------------------------------------------------------------------------------------
+Apparently the monitor and mds got created and the ceph.keyring was
+created BUT the OSDs were not created.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+2. I copied to ceph.keyring to all node
+3. I did a "service ceph -a start" command  (on all node)
+4. I did a "ceph health"  (on the node where i used the mkcephfs)
+
+2013-01-30 13:12:18.822022 7f80ea476760  1 -- :/0 messenger.start
+2013-01-30 13:12:18.822911 7f80ea476760  1 -- :/3458 -->
+172.16.1.9:6789/0 -- auth(proto 0 30 bytes epoch 0) v1 -- ?+0
+0x131aae0 con 0x131a700
+2013-01-30 13:12:18.823439 7f80ea474700  1 -- 172.16.0.25:0/3458
+learned my addr 172.16.0.25:0/3458
+2013-01-30 13:12:18.824574 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 1 ==== mon_map v1 ==== 473+0+0 (3454127086 0
+0) 0x7f80d0000b10 con 0x131a700
+2013-01-30 13:12:18.824687 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 2 ==== auth_reply(proto 2 0 Success) v1 ====
+33+0+0 (3089139024 0 0) 0x7f80d0000eb0 con 0x131a700
+2013-01-30 13:12:18.824847 7f80dd7bb700  1 -- 172.16.0.25:0/3458 -->
+172.16.1.9:6789/0 -- auth(proto 2 32 bytes epoch 0) v1 -- ?+0
+0x7f80d4001620 con 0x131a700
+2013-01-30 13:12:18.826010 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 3 ==== auth_reply(proto 2 0 Success) v1 ====
+206+0+0 (3859488439 0 0) 0x7f80d0000eb0 con 0x131a700
+2013-01-30 13:12:18.826130 7f80dd7bb700  1 -- 172.16.0.25:0/3458 -->
+172.16.1.9:6789/0 -- auth(proto 2 165 bytes epoch 0) v1 -- ?+0
+0x7f80d4003720 con 0x131a700
+2013-01-30 13:12:18.827557 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 4 ==== auth_reply(proto 2 0 Success) v1 ====
+409+0+0 (4218726993 0 0) 0x7f80d0000eb0 con 0x131a700
+2013-01-30 13:12:18.827654 7f80dd7bb700  1 -- 172.16.0.25:0/3458 -->
+172.16.1.9:6789/0 -- mon_subscribe({monmap=0+}) v2 -- ?+0 0x131adc0
+con 0x131a700
+2013-01-30 13:12:18.827715 7f80ea476760  1 -- 172.16.0.25:0/3458 -->
+172.16.1.9:6789/0 -- mon_command(health v 0) v1 -- ?+0 0x13188d0 con
+0x131a700
+2013-01-30 13:12:18.828343 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 5 ==== mon_map v1 ==== 473+0+0 (3454127086 0
+0) 0x7f80d00010e0 con 0x131a700
+2013-01-30 13:12:18.828394 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 6 ==== mon_subscribe_ack(300s) v1 ==== 20+0+0
+(3529768468 0 0) 0x7f80d00012c0 con 0x131a700
+HEALTH_ERR 18624 pgs stuck inactive; 18624 pgs stuck unclean; no osds
+2013-01-30 13:12:18.906689 7f80dd7bb700  1 -- 172.16.0.25:0/3458 <==
+mon.0 172.16.1.9:6789/0 7 ==== mon_command_ack([health]=0 HEALTH_ERR
+18624 pgs stuck inactive; 18624 pgs stuck unclean; no osds v0) v1 ====
+109+0+0 (1820397562 0 0) 0x7f80d0000eb0 con 0x131a700
+2013-01-30 13:12:18.906749 7f80ea476760  1 -- 172.16.0.25:0/3458 mark_down_all
+2013-01-30 13:12:18.906826 7f80ea476760  1 -- 172.16.0.25:0/3458
+shutdown complete.
+
+----------------------------------------------------------------------------------------------------------------------------------
+Issues:
+" HEALTH_ERR 18624 pgs stuck inactive; 18624 pgs stuck unclean; no osds"
+"mark_down_all"
+"shutdown complete"
