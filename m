@@ -1,19 +1,18 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 3/4] rbd: decrement obj request count when deleting
-Date: Wed, 30 Jan 2013 11:30:54 -0800
-Message-ID: <510974EE.1040305@inktank.com>
-References: <51043EF2.4070305@inktank.com> <51043F64.6020800@inktank.com>
+From: Josh Durgin <joshd@hq.newdream.net>
+Subject: Re: [PATCH 2/4] rbd: track object rather than osd request for watch
+Date: Wed, 30 Jan 2013 11:30:32 -0800
+Message-ID: <510974D8.3080900@hq.newdream.net>
+References: <51043EF2.4070305@inktank.com> <51043F56.9070500@inktank.com>
+Reply-To: joshd@hq.newdream.net
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:40698 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756738Ab3A3TbI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:31:08 -0500
-Received: by mail-pa0-f50.google.com with SMTP id hz10so1266915pad.9
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 11:31:07 -0800 (PST)
-In-Reply-To: <51043F64.6020800@inktank.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:43739 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753697Ab3A3TiY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:38:24 -0500
+In-Reply-To: <51043F56.9070500@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,64 +20,43 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 01/26/2013 12:41 PM, Alex Elder wrote:
-> Decrement the obj_request_count value when deleting an object
-> request from its image request's list.  Rearrange a few lines
-> in the surrounding code.
+On 01/26/2013 12:40 PM, Alex Elder wrote:
+> Switch to keeping track of the object request pointer rather than
+> the osd request used to watch the rbd image header object.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   16 ++++++++++++----
->   1 file changed, 12 insertions(+), 4 deletions(-)
+>   drivers/block/rbd.c |    8 ++++----
+>   1 file changed, 4 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4e78402..340773f 100644
+> index 363a813..4e78402 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1071,22 +1071,29 @@ static void rbd_img_request_put(struct
-> rbd_img_request *img_request)
->   static inline void rbd_img_obj_request_add(struct rbd_img_request
-> *img_request,
->   					struct rbd_obj_request *obj_request)
->   {
-> +	rbd_assert(obj_request->img_request == NULL);
-> +
->   	rbd_obj_request_get(obj_request);
->   	obj_request->img_request = img_request;
-> -	list_add_tail(&obj_request->links, &img_request->obj_requests);
-> -	obj_request->which = img_request->obj_request_count++;
-> +	obj_request->which = img_request->obj_request_count;
->   	rbd_assert(obj_request->which != BAD_WHICH);
-> +	img_request->obj_request_count++;
-> +	list_add_tail(&obj_request->links, &img_request->obj_requests);
->   }
+> @@ -270,7 +270,7 @@ struct rbd_device {
+>   	struct ceph_file_layout	layout;
 >
->   static inline void rbd_img_obj_request_del(struct rbd_img_request
-> *img_request,
->   					struct rbd_obj_request *obj_request)
->   {
->   	rbd_assert(obj_request->which != BAD_WHICH);
-> -	obj_request->which = BAD_WHICH;
-> +
->   	list_del(&obj_request->links);
-> +	rbd_assert(img_request->obj_request_count > 0);
-> +	img_request->obj_request_count--;
-> +	rbd_assert(obj_request->which == img_request->obj_request_count);
-> +	obj_request->which = BAD_WHICH;
->   	rbd_assert(obj_request->img_request == img_request);
-> -	obj_request->callback = NULL;
->   	obj_request->img_request = NULL;
-> +	obj_request->callback = NULL;
->   	rbd_obj_request_put(obj_request);
->   }
+>   	struct ceph_osd_event   *watch_event;
+> -	struct ceph_osd_request *watch_request;
+> +	struct rbd_obj_request	*watch_request;
 >
-> @@ -1482,6 +1489,7 @@ static void rbd_img_request_destroy(struct kref *kref)
+>   	struct rbd_spec		*parent_spec;
+>   	u64			parent_overlap;
+> @@ -1728,11 +1728,11 @@ static int rbd_dev_header_watch_sync(struct
+> rbd_device *rbd_dev, int start)
+>   		goto out_cancel;
 >
->   	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
->   		rbd_img_obj_request_del(img_request, obj_request);
-> +	rbd_assert(img_request->obj_request_count == 0);
->
->   	if (img_request->write_request)
->   		ceph_put_snap_context(img_request->snapc);
+>   	if (start) {
+> -		rbd_dev->watch_request = obj_request->osd_req;
+> -		ceph_osdc_set_request_linger(osdc, rbd_dev->watch_request);
+> +		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
+> +		rbd_dev->watch_request = obj_request;
+>   	} else {
+>   		ceph_osdc_unregister_linger_request(osdc,
+> -						rbd_dev->watch_request);
+> +					rbd_dev->watch_request->osd_req);
+>   		rbd_dev->watch_request = NULL;
+>   	}
+>   	ret = rbd_obj_request_submit(osdc, obj_request);
 >
 
