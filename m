@@ -1,62 +1,51 @@
-From: Josh Durgin <joshd@hq.newdream.net>
-Subject: Re: [PATCH 2/4] rbd: track object rather than osd request for watch
-Date: Wed, 30 Jan 2013 11:30:32 -0800
-Message-ID: <510974D8.3080900@hq.newdream.net>
-References: <51043EF2.4070305@inktank.com> <51043F56.9070500@inktank.com>
-Reply-To: joshd@hq.newdream.net
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Wed, 30 Jan 2013 11:40:34 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301301139490.18801@cobra.newdream.net>
+References: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com> <CAOLwVUkLdECXqoj2rpOh0hm66FPv0tEe-Z8A1oOj9Geer3NJ+A@mail.gmail.com> <CAF6-1L40y-JvBr9J3Cx9p9nX=uEaz+pMrA2+g9rJDV-1AQxqtA@mail.gmail.com> <CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
+ <CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com> <CAF6-1L7HJMwqDPWwpkbqyTNbGbVhm_5pCbR73nTtnk0eD8xB4g@mail.gmail.com> <CAF6-1L4SfogRx0=46A8YR4dW1f-qOLNSh-7mT9HS_NKz9CjCZQ@mail.gmail.com> <alpine.DEB.2.00.1301270946190.16117@cobra.newdream.net>
+ <CAF6-1L76dwdxGp2MGJTWFF4VwmzMT3a62tSTZhE8P1b-OOSBuw@mail.gmail.com> <alpine.DEB.2.00.1301300116210.4449@cobra.newdream.net> <CAF6-1L61H28xXDPZBC5Um0tyJLs2uGX8S7G2UjpL64fnt7oRcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:43739 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753697Ab3A3TiY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:38:24 -0500
-In-Reply-To: <51043F56.9070500@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53840 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756857Ab3A3Tkf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:40:35 -0500
+In-Reply-To: <CAF6-1L61H28xXDPZBC5Um0tyJLs2uGX8S7G2UjpL64fnt7oRcA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+On Wed, 30 Jan 2013, Sylvain Munaut wrote:
+> Hi,
+> 
+> 
+> > Can you try disabling scrubbing and see if the leak stops?
+> >
+> >         ceph osd tell \* injectargs '--osd-scrub-load-threshold .01'
+> >
+> > (that will work for 0.56.1, but is fixed in later versions, btw.)  On
+> > newer code,
+> >
+> >         ceph osd tell \* injectargs '--osd-scrub-min-interval 1000000'
+> >         ceph osd tell \* injectargs '--osd-scrub-max-interval 10000000'
+> 
+> Ok, I just did that.
+> (I have 0.56.1 + a few more patches from the bobtail branch (up to
+> c5fe0965572c07... )
+> 
+> I'll report back tomorrow.
+> 
+> 
+> > Tracking this via
+> >
+> >         http://tracker.ceph.com/issues/3883
+> 
+> Should I post the updates on the ML or on the ticket ?
 
-On 01/26/2013 12:40 PM, Alex Elder wrote:
-> Switch to keeping track of the object request pointer rather than
-> the osd request used to watch the rbd image header object.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    8 ++++----
->   1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 363a813..4e78402 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -270,7 +270,7 @@ struct rbd_device {
->   	struct ceph_file_layout	layout;
->
->   	struct ceph_osd_event   *watch_event;
-> -	struct ceph_osd_request *watch_request;
-> +	struct rbd_obj_request	*watch_request;
->
->   	struct rbd_spec		*parent_spec;
->   	u64			parent_overlap;
-> @@ -1728,11 +1728,11 @@ static int rbd_dev_header_watch_sync(struct
-> rbd_device *rbd_dev, int start)
->   		goto out_cancel;
->
->   	if (start) {
-> -		rbd_dev->watch_request = obj_request->osd_req;
-> -		ceph_osdc_set_request_linger(osdc, rbd_dev->watch_request);
-> +		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
-> +		rbd_dev->watch_request = obj_request;
->   	} else {
->   		ceph_osdc_unregister_linger_request(osdc,
-> -						rbd_dev->watch_request);
-> +					rbd_dev->watch_request->osd_req);
->   		rbd_dev->watch_request = NULL;
->   	}
->   	ret = rbd_obj_request_submit(osdc, obj_request);
->
+Either or both.  We try to keep the ticket up to date, either way.
 
+Thanks!
+s
