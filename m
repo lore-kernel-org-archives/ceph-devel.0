@@ -1,150 +1,56 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/2] rbd: prevent open for image being removed
-Date: Wed, 30 Jan 2013 11:52:23 -0800
-Message-ID: <510979F7.5000902@inktank.com>
-References: <5106F6D2.7040805@inktank.com> <5106F71B.2030002@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 0/6] fix build (ceph.spec)
+Date: Wed, 30 Jan 2013 11:55:18 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1301301153510.18801@cobra.newdream.net>
+References: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de> <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com> <510966CF.6070501@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:46138 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753177Ab3A3Twg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:52:36 -0500
-Received: by mail-pb0-f53.google.com with SMTP id un1so1153419pbc.26
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 11:52:36 -0800 (PST)
-In-Reply-To: <5106F71B.2030002@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53977 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756769Ab3A3TzS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 14:55:18 -0500
+In-Reply-To: <510966CF.6070501@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: Gregory Farnum <greg@inktank.com>, dan.mick@inktank.com, ceph-devel@vger.kernel.org, Watkins Noah <noah.watkins@inktank.com>
 
-Enums should be capitalized according to Documentation/CodingStyle.
+On Wed, 30 Jan 2013, Danny Al-Gaaf wrote:
+> Am 30.01.2013 19:07, schrieb Gregory Farnum:
+> > On Wednesday, January 30, 2013 at 10:00 AM, Danny Al-Gaaf wrote:
+> >> This set fixes some issues in the spec file.
+> >> 
+> >> I'm not sure what the reason for
+> >> #35e5d74e5c5786bc91df5dc10b5c08c77305df4e was. But I would revert
+> >> it and fix the underlaying issues instead.
+> > 
+> > 
+> > That is a pretty obtuse commit message, but it was actually because
+> > while rbd-fuse is ready to be in-tree, we don't think it's ready for
+> > people to be using; there are some undocumented gotchas involved with
+> > it and not a lot of testing. :)
+> 
+> Hm, but this is git master and not a released ceph version or the next
+> tree. IMO rbd-fuse should be installed in the master branch to be
+> tested. Otherwise it will be build but maybe never tested by others than
+> developers which know it's there.
 
-Other than that, looks good.
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+I think the end goal is to build an rbd-fuse package, just like ceph-fuse.  
+I'm not sure it matters how mature the tool is before it goes into the 
+package; as long as it is separate, people can not install it, and the 
+distros can keep it out of their supported repos as they like.
 
-On 01/28/2013 02:09 PM, Alex Elder wrote:
-> An open request for a mapped rbd image can arrive while removal of
-> that mapping is underway.  We need to prevent such an open request
-> from succeeding.  (It appears that Maciej Galkiewicz ran into this
-> problem.)
->
-> Define and use a "removing" flag to indicate a mapping is getting
-> removed.  Set it in the remove path after verifying nothing holds
-> the device open.  And check it in the open path before allowing the
-> open to proceed.  Acquire the rbd device's lock around each of these
-> spots to avoid any races accessing the flags and open_count fields.
->
-> This addresses:
->      http://tracker.newdream.net/issues/3427
->
-> Reported-by:  Maciej Galkiewicz <maciejgalkiewicz@ragnarson.com>
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   42 +++++++++++++++++++++++++++++++++---------
->   1 file changed, 33 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 107df40..03b15b8 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -259,10 +259,10 @@ struct rbd_device {
->
->   	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
->
-> -	spinlock_t		lock;		/* queue lock */
-> +	spinlock_t		lock;		/* queue, flags, open_count */
->
->   	struct rbd_image_header	header;
-> -	unsigned long		flags;
-> +	unsigned long		flags;		/* possibly lock protected */
->   	struct rbd_spec		*spec;
->
->   	char			*header_name;
-> @@ -288,13 +288,20 @@ struct rbd_device {
->
->   	/* sysfs related */
->   	struct device		dev;
-> -	unsigned long		open_count;
-> +	unsigned long		open_count;	/* protected by lock */
->   };
->
-> -/* Flag bits for rbd_dev->flags */
-> +/*
-> + * Flag bits for rbd_dev->flags.  If atomicity is required,
-> + * rbd_dev->lock is used to protect access.
-> + *
-> + * Currently, only the "removing" flag (which is coupled with the
-> + * "open_count" field) requires atomic access.
-> + */
->
->   enum rbd_dev_flags {
->   	rbd_dev_flag_exists,	/* mapped snapshot has not been deleted */
-> +	rbd_dev_flag_removing,	/* this mapping is being removed */
->   };
->
->   static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
-> @@ -383,14 +390,23 @@ static int rbd_dev_v2_refresh(struct rbd_device
-> *rbd_dev, u64 *hver);
->   static int rbd_open(struct block_device *bdev, fmode_t mode)
->   {
->   	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-> +	bool removing = false;
->
->   	if ((mode & FMODE_WRITE) && rbd_dev->mapping.read_only)
->   		return -EROFS;
->
-> +	spin_lock(&rbd_dev->lock);
-> +	if (test_bit(rbd_dev_flag_removing, &rbd_dev->flags))
-> +		removing = true;
-> +	else
-> +		rbd_dev->open_count++;
-> +	spin_unlock(&rbd_dev->lock);
-> +	if (removing)
-> +		return -ENOENT;
-> +
->   	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
->   	(void) get_device(&rbd_dev->dev);
->   	set_device_ro(bdev, rbd_dev->mapping.read_only);
-> -	rbd_dev->open_count++;
->   	mutex_unlock(&ctl_mutex);
->
->   	return 0;
-> @@ -399,10 +415,14 @@ static int rbd_open(struct block_device *bdev,
-> fmode_t mode)
->   static int rbd_release(struct gendisk *disk, fmode_t mode)
->   {
->   	struct rbd_device *rbd_dev = disk->private_data;
-> +	unsigned long open_count_before;
-> +
-> +	spin_lock(&rbd_dev->lock);
-> +	open_count_before = rbd_dev->open_count--;
-> +	spin_unlock(&rbd_dev->lock);
-> +	rbd_assert(open_count_before > 0);
->
->   	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-> -	rbd_assert(rbd_dev->open_count > 0);
-> -	rbd_dev->open_count--;
->   	put_device(&rbd_dev->dev);
->   	mutex_unlock(&ctl_mutex);
->
-> @@ -4135,10 +4155,14 @@ static ssize_t rbd_remove(struct bus_type *bus,
->   		goto done;
->   	}
->
-> -	if (rbd_dev->open_count) {
-> +	spin_lock(&rbd_dev->lock);
-> +	if (rbd_dev->open_count)
->   		ret = -EBUSY;
-> +	else
-> +		set_bit(rbd_dev_flag_removing, &rbd_dev->flags);
-> +	spin_unlock(&rbd_dev->lock);
-> +	if (ret < 0)
->   		goto done;
-> -	}
->
->   	while (rbd_dev->parent_spec) {
->   		struct rbd_device *first = rbd_dev;
->
+s
 
+> 
+> > I'll let others comment on the Java library moves and other packaging
+> > changes. -Greg
+> 
+> Only an additional comment: I've moved the libcephfs_jni.* files to
+> %{_libdir} because this is what SUSE already do for e.g. the *.so files
+> in the libjnidispatch package.
+> 
+> Danny
+> 
+> 
