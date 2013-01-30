@@ -1,108 +1,62 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] rbd: don't take extra bio reference for osd client
-Date: Wed, 30 Jan 2013 14:49:12 -0600
-Message-ID: <51098748.7080601@inktank.com>
-References: <510986E4.7050901@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: cephx execute permissions for RBD operations
+Date: Wed, 30 Jan 2013 13:20:03 -0800
+Message-ID: <51098E83.5000402@inktank.com>
+References: <5109486D.7040505@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f169.google.com ([209.85.210.169]:56731 "EHLO
-	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755169Ab3A3UtJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 15:49:09 -0500
-Received: by mail-ia0-f169.google.com with SMTP id j5so3018941iaf.0
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 12:49:09 -0800 (PST)
-In-Reply-To: <510986E4.7050901@inktank.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:35919 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755496Ab3A3VUR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 16:20:17 -0500
+Received: by mail-pa0-f44.google.com with SMTP id hz11so1308298pad.3
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 13:20:16 -0800 (PST)
+In-Reply-To: <5109486D.7040505@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Currently, if the OSD client finds an osd request has had a bio list
-attached to it, it drops a reference to it (or rather, to the first
-entry on that list) when the request is released.
+On 01/30/2013 08:21 AM, Wido den Hollander wrote:
+> Hi,
+>
+> Yesterday I ran into a weird situation where my libvirt RBD pool
+> just wouldn't work.
+>
+> Turned out the credentials I was using only had rw permissions for OSDs
+> instead of rwx or *.
+>
+> This caused rbd_open to fail, looking at librbd itself I understand why
+> execute permissions are required to do so (locks, watches).
 
-The code that added that reference (i.e., the rbd client) is
-therefore required to take an extra reference to that first bio
-structure.
+It's actually not the watches, but the general metadata stored in the
+header object (snapshots, locks, and for format 2 images everything
+else).
 
-The osd client doesn't really do anything with the bio pointer other
-than transfer it from the osd request structure to outgoing (for
-writes) and ingoing (for reads) messages.  So it really isn't the
-right place to be taking or dropping references.
+> What is however the best way to detect if you don't have the required
+> permissions?
 
-Furthermore, the rbd client already holds references to all bio
-structures it passes to the osd client, and holds them until the
-request is completed.  So there's no need for this extra reference
-whatsoever.
+rbd_open() should return -EPERM. From the cli, doing 'rbd info' will do
+this and tell you. The one case where you need more permissions
+(allow class-read object_prefix rbd_children) is when unprotecting a
+snapshot, which will fail with -EPERM when it is attempted. That only
+matters for format 2 images though.
 
-So remove the bio_put() call in ceph_osdc_release_request(), as
-well as its matching bio_get() call in rbd_osd_req_create().
+> This piece of code:
+> http://libvirt.org/git/?p=libvirt.git;a=blob;f=src/storage/storage_backend_rbd.c;h=8a0e517502c482f23f01bc63e95f1dc210d711cd;hb=master#l215
+>
+>
+> I simply check if the open fails, but just "failed to open the RBD
+> image" wasn't really that clear.
+>
+> I'd like to give a more useful error instead of that, but what error
+> codes can I expect?
 
-This change could lead to a crash if old libceph.ko was used with
-new rbd.ko.  Add a compatibility check at rbd initialization time to
-avoid this possibilty.
+-EPERM for this case, others could be -EIO, -ENOSPC (since a watch is a
+write), -ENOENT, -ENOSYS (trying to open an image that librbd or the
+osds don't support), and possibly others I'm forgetting.
 
-This resolves:
-    http://tracker.ceph.com/issues/3798    and
-    http://tracker.ceph.com/issues/3799
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c    |    3 ++-
- net/ceph/ceph_common.c |    2 +-
- net/ceph/osd_client.c  |    4 ----
- 3 files changed, 3 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a9ce58c..6586800 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1342,7 +1342,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
- 	case OBJ_REQUEST_BIO:
- 		rbd_assert(obj_request->bio_list != NULL);
- 		osd_req->r_bio = obj_request->bio_list;
--		bio_get(osd_req->r_bio);
- 		/* osd client requires "num pages" even for bio */
- 		osd_req->r_num_pages = calc_pages_for(offset, length);
- 		break;
-@@ -4150,6 +4149,8 @@ int __init rbd_init(void)
- {
- 	int rc;
-
-+	if (!libceph_compatible(NULL))
-+		return -EINVAL;
- 	rc = rbd_sysfs_init();
- 	if (rc)
- 		return rc;
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index a98c03f..c236c235 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -39,7 +39,7 @@
-  */
- bool libceph_compatible(void *data)
- {
--	return false;
-+	return true;
- }
- EXPORT_SYMBOL(libceph_compatible);
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 500ae8b..ba03648 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -147,10 +147,6 @@ void ceph_osdc_release_request(struct kref *kref)
- 	if (req->r_own_pages)
- 		ceph_release_page_vector(req->r_pages,
- 					 req->r_num_pages);
--#ifdef CONFIG_BLOCK
--	if (req->r_bio)
--		bio_put(req->r_bio);
--#endif
- 	ceph_put_snap_context(req->r_snapc);
- 	ceph_pagelist_release(&req->r_trail);
- 	if (req->r_mempool)
--- 
-1.7.9.5
+Josh
 
