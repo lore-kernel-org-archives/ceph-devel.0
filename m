@@ -1,86 +1,108 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/2] libceph: add a compatibility check interface
-Date: Wed, 30 Jan 2013 14:49:04 -0600
-Message-ID: <51098740.2000200@inktank.com>
+Subject: [PATCH 2/2] rbd: don't take extra bio reference for osd client
+Date: Wed, 30 Jan 2013 14:49:12 -0600
+Message-ID: <51098748.7080601@inktank.com>
 References: <510986E4.7050901@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f169.google.com ([209.85.210.169]:63042 "EHLO
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:56731 "EHLO
 	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755169Ab3A3UtC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 15:49:02 -0500
-Received: by mail-ia0-f169.google.com with SMTP id j5so3000377iaf.28
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 12:49:01 -0800 (PST)
+	with ESMTP id S1755169Ab3A3UtJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 15:49:09 -0500
+Received: by mail-ia0-f169.google.com with SMTP id j5so3018941iaf.0
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 12:49:09 -0800 (PST)
 In-Reply-To: <510986E4.7050901@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-An upcoming change implements semantic change that could lead to
-a crash if an old version of the libceph kernel module is used with
-a new version of the rbd kernel module.
+Currently, if the OSD client finds an osd request has had a bio list
+attached to it, it drops a reference to it (or rather, to the first
+entry on that list) when the request is released.
 
-In order to preclude that possibility, this adds a compatibilty
-check interface.  If this interface doesn't exist, the modules are
-obviously not compatible.  But if it does exist, this provides a way
-of letting the caller know whether it will operate properly with
-this libceph module.
+The code that added that reference (i.e., the rbd client) is
+therefore required to take an extra reference to that first bio
+structure.
 
-Perhaps confusingly, it returns false right now.  The semantic
-change mentioned above will make it return true.
+The osd client doesn't really do anything with the bio pointer other
+than transfer it from the osd request structure to outgoing (for
+writes) and ingoing (for reads) messages.  So it really isn't the
+right place to be taking or dropping references.
+
+Furthermore, the rbd client already holds references to all bio
+structures it passes to the osd client, and holds them until the
+request is completed.  So there's no need for this extra reference
+whatsoever.
+
+So remove the bio_put() call in ceph_osdc_release_request(), as
+well as its matching bio_get() call in rbd_osd_req_create().
+
+This change could lead to a crash if old libceph.ko was used with
+new rbd.ko.  Add a compatibility check at rbd initialization time to
+avoid this possibilty.
 
 This resolves:
-    http://tracker.ceph.com/issues/3800
+    http://tracker.ceph.com/issues/3798    and
+    http://tracker.ceph.com/issues/3799
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- include/linux/ceph/libceph.h |    2 ++
- net/ceph/ceph_common.c       |   16 ++++++++++++++++
- 2 files changed, 18 insertions(+)
+ drivers/block/rbd.c    |    3 ++-
+ net/ceph/ceph_common.c |    2 +-
+ net/ceph/osd_client.c  |    4 ----
+ 3 files changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 084d3c6..c44275a 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -193,6 +193,8 @@ static inline int calc_pages_for(u64 off, u64 len)
- }
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index a9ce58c..6586800 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1342,7 +1342,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
+ 	case OBJ_REQUEST_BIO:
+ 		rbd_assert(obj_request->bio_list != NULL);
+ 		osd_req->r_bio = obj_request->bio_list;
+-		bio_get(osd_req->r_bio);
+ 		/* osd client requires "num pages" even for bio */
+ 		osd_req->r_num_pages = calc_pages_for(offset, length);
+ 		break;
+@@ -4150,6 +4149,8 @@ int __init rbd_init(void)
+ {
+ 	int rc;
 
- /* ceph_common.c */
-+extern bool libceph_compatible(void *data);
-+
- extern const char *ceph_msg_type_name(int type);
- extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid
-*fsid);
- extern struct kmem_cache *ceph_inode_cachep;
++	if (!libceph_compatible(NULL))
++		return -EINVAL;
+ 	rc = rbd_sysfs_init();
+ 	if (rc)
+ 		return rc;
 diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index ee71ea2..a98c03f 100644
+index a98c03f..c236c235 100644
 --- a/net/ceph/ceph_common.c
 +++ b/net/ceph/ceph_common.c
-@@ -26,6 +26,22 @@
- #include "crypto.h"
+@@ -39,7 +39,7 @@
+  */
+ bool libceph_compatible(void *data)
+ {
+-	return false;
++	return true;
+ }
+ EXPORT_SYMBOL(libceph_compatible);
 
-
-+/*
-+ * Module compatibility interface.  For now it doesn't do anything,
-+ * but its existence signals a certain level of functionality.
-+ *
-+ * The data buffer is used to pass information both to and from
-+ * libceph.  The return value indicates whether libceph determines
-+ * it is compatible with the caller (from another kernel module),
-+ * given the provided data.
-+ *
-+ * The data pointer can be null.
-+ */
-+bool libceph_compatible(void *data)
-+{
-+	return false;
-+}
-+EXPORT_SYMBOL(libceph_compatible);
-
- /*
-  * find filename portion of a path (/foo/bar/baz -> baz)
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 500ae8b..ba03648 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -147,10 +147,6 @@ void ceph_osdc_release_request(struct kref *kref)
+ 	if (req->r_own_pages)
+ 		ceph_release_page_vector(req->r_pages,
+ 					 req->r_num_pages);
+-#ifdef CONFIG_BLOCK
+-	if (req->r_bio)
+-		bio_put(req->r_bio);
+-#endif
+ 	ceph_put_snap_context(req->r_snapc);
+ 	ceph_pagelist_release(&req->r_trail);
+ 	if (req->r_mempool)
 -- 
 1.7.9.5
 
