@@ -1,65 +1,55 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Slow request in XFS
-Date: Thu, 31 Jan 2013 13:41:20 -0700
-Message-ID: <510AD6F0.7020700@sandia.gov>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5EA81F@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
- <510A8AA0.6000508@sandia.gov>
- <alpine.DEB.2.00.1301311159460.807@cobra.newdream.net>
+From: Neil Levine <neil.levine@inktank.com>
+Subject: Re: Geo-replication with RBD
+Date: Thu, 31 Jan 2013 15:27:36 -0800
+Message-ID: <CANygib8Z=+ik3WbPNcyXTkSV3o2wC9+06fp58EnhUax3cgJBng@mail.gmail.com>
+References: <5B735879-C53B-4C07-8F60-97889F275481@portal.onet.pl>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:49010 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753114Ab3AaUlr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 15:41:47 -0500
-In-Reply-To: <alpine.DEB.2.00.1301311159460.807@cobra.newdream.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:57144 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751523Ab3AaX1h convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 18:27:37 -0500
+Received: by mail-vc0-f174.google.com with SMTP id n11so2134617vch.33
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 15:27:36 -0800 (PST)
+In-Reply-To: <5B735879-C53B-4C07-8F60-97889F275481@portal.onet.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Skowron_S=B3awomir?= <slawomir.skowron@grupaonet.pl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/31/2013 01:00 PM, Sage Weil wrote:
-> On Thu, 31 Jan 2013, Jim Schutt wrote:
->> On 01/31/2013 05:43 AM, Sage Weil wrote:
->>> Hi-
->>>
->>> Can you reproduce this with logs?  It looks like there are a few ops that 
->>> are hanging for a very long time, but there isn't enough information here 
->>> except to point to osds 610, 612, 615, and 68...
->>
->> FWIW, I have a small pile of disks with bad sections in
->> them - these sections aren't bad enough that writes fail,
->> but they are bad enough that throughput drops by a factor
->> of ~20.
->>
->> Do OSDs already collect statistics on, say, op commit
->> elapsed time (assuming that's the statistic most directly
->> related to slow writes on only some sections of a disk),
->> in a way that could be used to diagnose such disks?
->>
->> If not, is there enough structure already in place that
->> it would be easy to add?
-> 
-> They're tracking it internally, but it gets averaged into the totals 
-> before a user gets to see any per-request latencies.  The per-daemon 
-> totals are available via the admin socket 'perf dump' command.  Have you 
-> looked at that information yet?
+Skowron,
 
-Not yet - thanks for the pointer.
+Can you go into a bit more detail on your specific use-case? What type
+of data are you storing in rbd (type, volume)?
 
-I'll take a look, and see what happens when I 
-put one of my questionable disks back in.
+Neil
 
-Thanks!
-
--- Jim
-
-> 
-> sage
-> 
-> 
-
-
+On Wed, Jan 30, 2013 at 10:42 PM, Skowron S=C5=82awomir
+<slawomir.skowron@grupaonet.pl> wrote:
+> I make new thread, because i think it's a diffrent case.
+>
+> We have managed async geo-replication of s3 service, beetwen two ceph=
+ clusters in two DC's, and to amazon s3 as third. All this via s3 API. =
+I love to see native RGW geo-replication with described features in ano=
+ther thread.
+>
+> There is another case. What about RBD replication ?? It's much more c=
+omplicated, and for disaster recovery much more important, just like in=
+ enterprise storage arrays.
+> One cluster in two DC's, not solving problem, because we need securit=
+y in data consistency, and isolation.
+> Do you thinking about this case ??
+>
+> Regards
+> Slawomir Skowron--
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
