@@ -1,95 +1,65 @@
-From: =?utf-8?B?SsOkZ2VyLCBQaGlsaXBw?= <Philipp.Jaeger@cgm.com>
-Subject: AW: RadosGW S3 Api
-Date: Thu, 31 Jan 2013 18:32:10 +0000
-Message-ID: <5EFBD28BA42C604BB012164C72CA5604502B23ED@SMBXKO6.cgm.ag>
-References: <5EFBD28BA42C604BB012164C72CA5604502B0E1D@SMBXKO6.cgm.ag>
-	<5EFBD28BA42C604BB012164C72CA5604502B0E6B@SMBXKO6.cgm.ag>
-	<CAC-hyiGdR8AMMFk41tWgjmYNAqffTd8R8UacdcaFEPErEr=+Rw@mail.gmail.com>
-	<5EFBD28BA42C604BB012164C72CA5604502B0EDE@SMBXKO6.cgm.ag>
-	<CAC-hyiEFYF4xGx3nAWaOBDjrRTxLJ_P33A40NescWLBeCnATyQ@mail.gmail.com>
-	<5EFBD28BA42C604BB012164C72CA5604502B0F34@SMBXKO6.cgm.ag>
- <CAMmJxtJrsC0C+6JiCKntytgmwANfDf8e2fpKQkOwF=KV+=kCEQ@mail.gmail.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: Paxos and long-lasting deleted data
+Date: Thu, 31 Jan 2013 18:41:19 +0000
+Message-ID: <510ABACF.7040703@inktank.com>
+References: <CABYiri8fbbpuhh0RguqdsmYEbEkYz_+PKO4UJqWqKb1TwDcc6A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smxko1.compugroup.com ([193.47.161.177]:53664 "EHLO
-	SMXKO1.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342Ab3AaScN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 13:32:13 -0500
-Content-Language: de-DE
+Received: from mail-we0-f172.google.com ([74.125.82.172]:55667 "EHLO
+	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752877Ab3AaSls (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 13:41:48 -0500
+Received: by mail-we0-f172.google.com with SMTP id x10so2317958wey.31
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 10:41:46 -0800 (PST)
+In-Reply-To: <CABYiri8fbbpuhh0RguqdsmYEbEkYz_+PKO4UJqWqKb1TwDcc6A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Axel Eriksson <john@insane.se>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGVsbG8sDQoNCnRoYW5rIHlvdSB2ZXJ5IHZlcnkgbXVjaCwgaXQgd29ya3MgaW4gZ2VuZXJhbCBu
-b3cg4pi6DQoNCkNhbiB5b3Ugc2F5IHNvbWV0aGluZyBhYm91dCBob3cgdG8gbGltaXQgdGhlIHJp
-Z2h0cyBvZiB0aGUgdXNlciBJIGNyZWF0ZWQgbGlrZSBpbiB0aGUgbWFudWFsPw0KV2Ugd2FudCB0
-byBjcmVhdGUgYW4gYWNjb3VudCwgd2hpY2ggaGFzIG5vIHJpZ2h0cyB0byBjcmVhdGUgYnVja2V0
-cy4gY2Fubm90IGZpbmQgYSBmaXR0aW5nIG1hbnVhbCBmb3IgdGhhdC4NCg0KVGhhbmsgeW91IHZl
-cnkgbXVjaA0KDQpSZWdhcmRzDQpQaGlsaXBwDQoNClZvbjogSm9obiBBeGVsIEVyaWtzc29uIFtt
-YWlsdG86am9obkBpbnNhbmUuc2VdIA0KR2VzZW5kZXQ6IERvbm5lcnN0YWcsIDMxLiBKYW51YXIg
-MjAxMyAwMDoxMQ0KQW46IErDpGdlciwgUGhpbGlwcA0KQ2M6IFllaHVkYSBTYWRlaDsgY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkJldHJlZmY6IFJlOiBSYWRvc0dXIFMzIEFwaQ0KDQpUaGlz
-IGlzIHRoZSBjb25maWcgd2UncmUgdXNpbmc6DQoNCkZhc3RDZ2lFeHRlcm5hbFNlcnZlciAvdG1w
-L3JhZG9zZ3cuZmNnaSAtc29ja2V0IC92YXIvcnVuL2NlcGgvcmd3LnNvY2sNCg0KTG9nRm9ybWF0
-ICIle1gtRm9yd2FyZGVkLUZvcn1pICVsICV1ICV0IFwiJXJcIiAlPnMgJU8gXCIle1JlZmVyZXJ9
-aVwiIFwiJXtVc2VyLUFnZW50fWlcIiIgcHJveHlfY29tYmluZWQNCkxvZ0Zvcm1hdCAiJXtYLUZv
-cndhcmRlZC1Gb3J9aSAlaCAlbCAldSAldCBcIiVyXCIgJT5zICVPIFwiJXtSZWZlcmVyfWlcIiBc
-IiV7VXNlci1BZ2VudH1pXCIiIHByb3h5X2RlYnVnDQoNCjxWaXJ0dWFsSG9zdCAqOjQ0Mz4NCsKg
-IFNlcnZlck5hbWUgPG91cnNlcnZlcm5hbWU+DQrCoCBTZXJ2ZXJBbGlhcyAqDQrCoCBTZXJ2ZXJB
-ZG1pbiBhZG1pbkA8b3Vyc2VydmVybmFtZT4NCsKgIERvY3VtZW50Um9vdCAvdmFyL3d3dw0KDQrC
-oCBLZWVwQWxpdmUgb2ZmDQoNCsKgIFNTTEVuZ2luZSBvbg0KwqAgU1NMQ2VydGlmaWNhdGVGaWxl
-IC9ldGMvYXBhY2hlMi9zc2wuY2VydA0KwqAgU1NMQ2VydGlmaWNhdGVLZXlGaWxlIC9ldGMvYXBh
-Y2hlMi9zc2wua2V5DQrCoCBTZXRFbnZJZiBVc2VyLUFnZW50ICIuKk1TSUUuKiIgbm9rZWVwYWxp
-dmUgc3NsLXVuY2xlYW4tc2h1dGRvd24NCg0KwqAgUmV3cml0ZUVuZ2luZSBPbg0KwqAgUmV3cml0
-ZVJ1bGUgwqAgwqAgwqAgwqAgwqAgwqAgXi8oLiopIC9yYWRvc2d3LmZjZ2k/JXtRVUVSWV9TVFJJ
-Tkd9IFtFPUhUVFBfQVVUSE9SSVpBVElPTjole0hUVFA6QXV0aG9yaXphdGlvbn0sTF0NCg0KwqAg
-PElmTW9kdWxlIG1vZF9mYXN0Y2dpLmM+DQrCoCDCoCA8RGlyZWN0b3J5IC92YXIvd3d3Lz4NCsKg
-IMKgIMKgIE9wdGlvbnMgK0V4ZWNDR0kNCsKgIMKgIMKgIEFsbG93T3ZlcnJpZGUgQWxsDQrCoCDC
-oCDCoCBTZXRIYW5kbGVyIGZhc3RjZ2ktc2NyaXB0DQrCoCDCoCDCoCBPcmRlciBhbGxvdyxkZW55
-DQrCoCDCoCDCoCBBbGxvdyBmcm9tIGFsbA0KwqAgwqAgwqAgQXV0aEJhc2ljQXV0aG9yaXRhdGl2
-ZSBPZmYNCsKgIMKgIDwvRGlyZWN0b3J5Pg0KwqAgPC9JZk1vZHVsZT4NCg0KwqAgQWxsb3dFbmNv
-ZGVkU2xhc2hlcyBPbg0KDQrCoCBFcnJvckxvZyAvdmFyL2xvZy9hcGFjaGUyL2Vycm9yLmxvZw0K
-wqAgQ3VzdG9tTG9nIC92YXIvbG9nL2FwYWNoZTIvcmd3LWFjY2Vzcy5sb2cgcHJveHlfY29tYmlu
-ZWQNCsKgIFNlcnZlclNpZ25hdHVyZSBPZmYNCjwvVmlydHVhbEhvc3Q+DQoNCkhvcGUgaXQgaGVs
-cHMhDQoNCkpvaG4NCg0KT24gV2VkLCBKYW4gMzAsIDIwMTMgYXQgMTA6MTMgQU0sIErDpGdlciwg
-UGhpbGlwcCA8UGhpbGlwcC5KYWVnZXJAY2dtLmNvbT4gd3JvdGU6DQpZZWFoLCB0aGVyZWZvcmUg
-aSBhc2sgYWJvdXQgYW4gZXhhbXBsZSBhcGFjaGUgY29uZmlnIHdpdGggc3NsIHN1cHBvcnQsIGl0
-cyBub3QgZGVzY3JpYmVkIGluIHRoZSBjZXBoIG1hbnVhbCwgb25seSB5b3UgaGF2ZSB0byBhY3Rp
-dmUgdGhlIHNzbCBtb2R1bGUsIGJ1dCBub3QgaG93IHRoZSBjb25mIG11c3QgbG9vay4NCkkgdGVz
-dGVkIHRoZSBmcmVld2FyZSAiczMgYnJvd3NlciIsIGJ1dCBpdCBtYWtlcyBhbHNvIGVycm9ycy4u
-Lg0KDQpEbyB5b3Ugc29tZWJvZHkga25vdyB3aG8gaGFzIGtub3dsZWRnZSBhYm91dCB1c2luZyBy
-YWRvc2d3IHdpdGggc3NsPw0KDQoNCi0tLS0tVXJzcHLDvG5nbGljaGUgTmFjaHJpY2h0LS0tLS0N
-ClZvbjogeWVodWRhc2FAZ21haWwuY29tIFttYWlsdG86eWVodWRhc2FAZ21haWwuY29tXSBJbSBB
-dWZ0cmFnIHZvbiBZZWh1ZGEgU2FkZWgNCkdlc2VuZGV0OiBNaXR0d29jaCwgMzAuIEphbnVhciAy
-MDEzIDE4OjU0DQpBbjogSsOkZ2VyLCBQaGlsaXBwDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmcNCkJldHJlZmY6IFJlOiBSYWRvc0dXIFMzIEFwaQ0KDQpPbiBXZWQsIEphbiAzMCwgMjAx
-MyBhdCA5OjM0IEFNLCBKw6RnZXIsIFBoaWxpcHAgPFBoaWxpcHAuSmFlZ2VyQGNnbS5jb20+IHdy
-b3RlOg0KPiBIZWxsbywgdGhhbmtzIGZvciB0aGUgYW5zd2VyLg0KPiBJIGRvbid0IGtub3csIHRo
-ZSBwcm9ncmFtbWVyIHNheSB0aGUgYXBpIChzMyBhcGkgamF2YSkgd2FudHMgdG8gY29ubmVjdCBw
-ZXIgaHR0cHMuIFdoZW4geW91IGtub3cgYSBwb3NzaWJpbGl0eSB0byDCoChkZSlhY3RpYXRlIHNz
-bCwgSSB3b3VsZCBiZSBoYXBweSB5b3UgY2FuIHRlbGw6KSB0aGFuIGltIHN1cmUgaXRzIG5vdCBh
-IHNzbCBwcm9ibGVtLg0KPg0KPg0KPiBEbyB5b3Uga25vdyB0aGUgZXJyb3IgbWVzc2FnZSAicGVl
-ciBub3QgYXV0aGVudGljYXRlZCI/DQo+IEkgdGhpbmsgaXRzIG5vdCBhIHJhZG9zIGVycm9yIG1l
-c3NhZ2UsIGJlY2F1c2Ugd2hlbiB5b3UgZ29vZ2xlIGZvciBpdCwgeW91IGNhbiBzZWUgdGhhdCBp
-dCdzIGNvbW1vbiBzc2wgZXJyb3IgaW4gamF2YS4NCg0KVGhlbiBpdCdzIHByb2JhYmx5IHNzbCBl
-cnJvci4gUmFkb3NndyBkb2Vzbid0IGdlbmVyYXRlIHN1Y2ggYW4gZXJyb3IuDQoNCj4gQnV0IGl0
-IGNhbiBiZSBhbiBpbmhlcml0ZWQgZXJyb3IgYmVjYXVzZSBvZiByYWRvcyBtaXNjb25maWd1cmF0
-aW9uIEkgdGhpbmsuDQo+DQo+DQo+IEhvdyBkbyBJIGtub3cgaWYgdGhlIGdhdGV3YXkgY2FuIGJl
-IHJlYWNoZWQ/DQo+IE5vdGhpbmcgc3BlY2lhbCBpbiB0aGUgbG9ncy4uDQo+DQo+IEhhdmUgeW91
-IGxvb2tlZCBpbnRvIHRoZSBjb25mcyBpbiB0aGUgemlwIGZpbGUgSSBhZGRlZCB0byB0aGUgbWFp
-bD8NCg0KWWVhaC4gdGhlcmUncyBub3QgbXVjaCB0aGVyZS4NCg0KPiBJbSB2ZXJ5IHVuc3VyZSBh
-Ym91dCB0aGUgYXBhY2hlIHNzbCBjb25maWd1cmF0aW9uLCB3aGVuIEkgc2V0IHRoZSBmYXN0Y2dp
-IHZpcnR1YWwgaG9zdCBzZWN0aW9uIGFsc28gdG8gNDQzLCBJIGdldCBhbiBlcnJvciBtZXNzYWdl
-LCBidXQgSSBkb25rIHRoaW5rIGl0cyByaWdodCB0byBsZWF2ZSBpdCBvbiA4MC4NCg0KDQo+IERv
-bid0IHlvdSBldmVyIHNldCB1cCByYWRvc2d3IHdpdGggc3NsID8NCg0KdGhhdCdzIHJlYWxseSBv
-cnRob2dvbmFsIHRvIHJhZG9zZ3csIG1vcmUgb2YgdGhlIHdlYiBzZXJ2ZXIgKGFwYWNoZSkgaXNz
-dWUuDQoNClRyeSB1c2luZyBzb21lIG91dCBvZiB0aGUgYm94IHMzIGNsaWVudCBiZWZvcmUgdXNp
-bmcgdGhlIGFwaSB0byBoZWxwIHdpdGggZGlhZ25vc2luZyB0aGUgaXNzdWUuIEl0IGxvb2tzIHRv
-IG1lIGxpa2Ugc29tZSBpc3N1ZXMgd2l0aCB5b3VyIGFwYWNoZSBjb25maWd1cmF0aW9uIChzc2ws
-IGZhc3RjZ2kpLg0KDQoNClllaHVkYQ0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGlu
-Zm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
+On 01/31/2013 06:17 PM, Andrey Korolyov wrote:
+> Hi,
+>
+> Please take a look, this data remains for days and seems not to be
+> deleted in future too:
+>
+> pool name       category                 KB      objects       clones
+>     degraded      unfound           rd        rd KB           wr
+> wr KB
+> data            -                          0            0            0
+>             0           0            0            0            0
+>      0
+> install         -                   15736833         3856            0
+>             0           0           16            3       464648
+> 60970390
+> metadata        -                          0            0            0
+>             0           0            0            0            0
+>      0
+> prod-rack0      -                  364027905        88895            0
+>             0           0           32            0       267626
+> 689034186
+> rbd             -                    4194305         1027            0
+>             0           0            4            1        11269
+> 25165828
+>    total used      6900914368        93778
+>    total avail    18335469376
+>    total space    25236383744
+>
+> for pool in $(rados lspools) ; do rbd ls -l $pool ; done | grep -v
+> SIZE | awk '{ sum += $2} END { print sum }'
+> rbd: pool data doesn't contain rbd images
+> rbd: pool metadata doesn't contain rbd images
+> 526360
+>
+> I have same thing before, but not so contrast as there. Cluster was
+> put on moderate failure test, dropping one or two osds at once under
+> I/O pressure with replication factor three.
+
+Just wondering if there was something else you wanted to discuss on your 
+email given the email subject. Wanted by any chance discuss anything 
+regarding Paxos?
+
+   -Joao
+
