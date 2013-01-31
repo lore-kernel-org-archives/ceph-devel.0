@@ -1,48 +1,35 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Slow request in XFS
-Date: Thu, 31 Jan 2013 08:15:44 -0700
-Message-ID: <510A8AA0.6000508@sandia.gov>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5EA81F@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Thu, 31 Jan 2013 16:26:26 +0100
+Message-ID: <CAF6-1L7cQ7TSngZG7T5+4168TUVs3ynOCcb2xpOsNadCFmxAew@mail.gmail.com>
+References: <CAF6-1L5z39ZsPwBz5yJWDvQoX7UaUZ5PVpUwfVhoBne56Z018Q@mail.gmail.com>
+	<31226757.422.1359645742478.JavaMail.dspano@it1>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [132.175.109.14] ([132.175.109.14]:60425 "EHLO
-	sentry-two.sandia.gov" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1751458Ab3AaPQ1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 10:16:27 -0500
-In-Reply-To: <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:59032 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754325Ab3AaP01 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 10:26:27 -0500
+Received: by mail-oa0-f42.google.com with SMTP id i18so2810345oag.1
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 07:26:26 -0800 (PST)
+In-Reply-To: <31226757.422.1359645742478.JavaMail.dspano@it1>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dave Spano <dspano@optogenics.com>
+Cc: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On 01/31/2013 05:43 AM, Sage Weil wrote:
-> Hi-
-> 
-> Can you reproduce this with logs?  It looks like there are a few ops that 
-> are hanging for a very long time, but there isn't enough information here 
-> except to point to osds 610, 612, 615, and 68...
+Hi,
 
-FWIW, I have a small pile of disks with bad sections in
-them - these sections aren't bad enough that writes fail,
-but they are bad enough that throughput drops by a factor
-of ~20.
+> I'm crossing my fingers, but I just noticed that since I upgraded to kernel
+> version 3.2.0-36-generic on Ubuntu 12.04 the other day, ceph-osd memory
+> usage has stayed stable.
 
-Do OSDs already collect statistics on, say, op commit
-elapsed time (assuming that's the statistic most directly
-related to slow writes on only some sections of a disk),
-in a way that could be used to diagnose such disks?
+Unfortunately for me, I'm already on 3.2.0-36-generic  (Ubuntu 12.04 as well).
 
-If not, is there enough structure already in place that
-it would be easy to add?
+Cheers,
 
--- Jim
-
-> 
-> thanks!
-> s
+    Sylvain
 
 
+PS: Dave sorry for the double, I forgot reply-to-all ...
