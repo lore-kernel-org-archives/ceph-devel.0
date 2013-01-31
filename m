@@ -1,119 +1,48 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH] ceph-filestore-dump.cc: don't use po::value<string>()->required()
-Date: Thu, 31 Jan 2013 15:41:19 +0100
-Message-ID: <1359643279-1370-1-git-send-email-danny.al-gaaf@bisect.de>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: Slow request in XFS
+Date: Thu, 31 Jan 2013 08:15:44 -0700
+Message-ID: <510A8AA0.6000508@sandia.gov>
+References: <6F3FA899187F0043BA1827A69DA2F7CC5EA81F@SHSMSX102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:58349 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751339Ab3AaOlZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 31 Jan 2013 09:41:25 -0500
+Received: from [132.175.109.14] ([132.175.109.14]:60425 "EHLO
+	sentry-two.sandia.gov" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1751458Ab3AaPQ1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 10:16:27 -0500
+In-Reply-To: <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>, David Zafman <david.zafman@inktank.com>
+To: Sage Weil <sage@inktank.com>
+Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Don't use po::value<string>()->required() since this breaks build on
-RHEL/CentOs6. Check if the options are set as in the code of other
-ceph parts.
+On 01/31/2013 05:43 AM, Sage Weil wrote:
+> Hi-
+> 
+> Can you reproduce this with logs?  It looks like there are a few ops that 
+> are hanging for a very long time, but there isn't enough information here 
+> except to point to osds 610, 612, 615, and 68...
 
-Move some checks up in the code to validate options as soon
-as possible. Remove printing 'help' twice.
+FWIW, I have a small pile of disks with bad sections in
+them - these sections aren't bad enough that writes fail,
+but they are bad enough that throughput drops by a factor
+of ~20.
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- src/tools/ceph-filestore-dump.cc | 57 +++++++++++++++++++++++-----------------
- 1 file changed, 33 insertions(+), 24 deletions(-)
+Do OSDs already collect statistics on, say, op commit
+elapsed time (assuming that's the statistic most directly
+related to slow writes on only some sections of a disk),
+in a way that could be used to diagnose such disks?
 
-diff --git a/src/tools/ceph-filestore-dump.cc b/src/tools/ceph-filestore-dump.cc
-index d470468..d967c12 100644
---- a/src/tools/ceph-filestore-dump.cc
-+++ b/src/tools/ceph-filestore-dump.cc
-@@ -53,13 +53,13 @@ int main(int argc, char **argv)
-   po::options_description desc("Allowed options");
-   desc.add_options()
-     ("help", "produce help message")
--    ("filestore-path", po::value<string>(&fspath)->required(),
-+    ("filestore-path", po::value<string>(&fspath),
-      "path to filestore directory, mandatory")
--    ("journal-path", po::value<string>(&jpath)->required(),
-+    ("journal-path", po::value<string>(&jpath),
-      "path to journal, mandatory")
--    ("pgid", po::value<string>(&pgid)->required(),
-+    ("pgid", po::value<string>(&pgid),
-      "PG id, mandatory")
--    ("type", po::value<string>(&type)->required(),
-+    ("type", po::value<string>(&type),
-      "Type which is 'info' or 'log'")
-     ("debug", "Enable diagnostic output to stderr")
-     ;
-@@ -72,13 +72,39 @@ int main(int argc, char **argv)
-     po::notify(vm);
-   }
-   catch(...) {
--    cout << desc << "\n";
-+    cout << desc << std::endl;
-     exit(1);
-   }
-      
--  //Never get here with required() options
-+  if (!vm.count("filestore-path")) {
-+    cout << "Must provide filestore-path" << std::endl
-+	 << desc << std::endl;
-+    return 1;
-+  } 
-+  if (!vm.count("journal-path")) {
-+    cout << "Must provide journal-path" << std::endl
-+	 << desc << std::endl;
-+    return 1;
-+  } 
-+  if (!vm.count("pgid")) {
-+    cout << "Must provide pgid" << std::endl
-+	 << desc << std::endl;
-+    return 1;
-+  } 
-+  if (!vm.count("type")) {
-+    cout << "Must provide type ('info' or 'log')" << std::endl
-+	 << desc << std::endl;
-+    return 1;
-+  } 
-+  
-   if (vm.count("help")) {
--    cout << desc << "\n";
-+    cout << desc << std::endl;
-+    return 1;
-+  }
-+
-+  if (fspath.length() == 0 || jpath.length() == 0 || pgid.length() == 0 ||
-+    (type != "info" && type != "log")) {
-+    cerr << "Invalid params" << std::endl;
-     exit(1);
-   }
- 
-@@ -106,23 +132,6 @@ int main(int argc, char **argv)
-   g_ceph_context->_conf->apply_changes(NULL);
-   g_conf = g_ceph_context->_conf;
- 
--  if (!vm.count("filestore-path") || !vm.count("journal-path")) {
--    cout << "Must provide filestore-path and journal-path" << std::endl
--	 << desc << std::endl;
--    return 1;
--  }
--
--  if (vm.count("help")) {
--    cout << desc << std::endl;
--    return 1;
--  }
--
--  if (fspath.length() == 0 || jpath.length() == 0 || pgid.length() == 0 ||
--    (type != "info" && type != "log")) {
--    cerr << "Invalid params" << std::endl;
--    exit(1);
--  }
--
-   //Verify that fspath really is an osd store
-   struct stat st;
-   if (::stat(fspath.c_str(), &st) == -1) {
--- 
-1.8.1.1
+If not, is there enough structure already in place that
+it would be easy to add?
+
+-- Jim
+
+> 
+> thanks!
+> s
+
 
