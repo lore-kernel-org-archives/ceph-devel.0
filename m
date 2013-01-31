@@ -1,185 +1,53 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: ceph write path
-Date: Thu, 31 Jan 2013 11:41:20 -0600
-Message-ID: <CAB7xdik0hGU9G1Nmk1Ai56ViXzGmLSgCBU9at0TyJps-DPXUHA@mail.gmail.com>
-References: <CAB7xdikxeLumDMJNYacoxiiijkx2vekAdc5ccDy0A+5isOJ-3Q@mail.gmail.com>
-	<alpine.DEB.2.00.1301242056150.14731@cobra.newdream.net>
-	<CAB7xdin1y1WVEtvSRHWLv6iOaid-c4sUOaAWdgVZozY2UUHJtA@mail.gmail.com>
-	<alpine.DEB.2.00.1301250843550.11516@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Paxos and long-lasting deleted data
+Date: Thu, 31 Jan 2013 21:17:44 +0300
+Message-ID: <CABYiri8fbbpuhh0RguqdsmYEbEkYz_+PKO4UJqWqKb1TwDcc6A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:56071 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751945Ab3AaRl3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 12:41:29 -0500
-Received: by mail-ia0-f171.google.com with SMTP id z13so4209957iaz.16
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 09:41:29 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301250843550.11516@cobra.newdream.net>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:46055 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753873Ab3AaSSG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 13:18:06 -0500
+Received: by mail-oa0-f42.google.com with SMTP id i18so3030137oag.1
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 10:18:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi,
 
-thanks for your reply. sorry to bother you again.
+Please take a look, this data remains for days and seems not to be
+deleted in future too:
 
-i like your suggestion "create different pools with different types of
-storage devices". Can you give me a quick guide, if i want to
-implement this function, which code files i need to review in ceph
-server side?
-i tried to figure out myself, but not quite work well. The code base
-is very complicated to me as a new guy to ceph.
+pool name       category                 KB      objects       clones
+   degraded      unfound           rd        rd KB           wr
+wr KB
+data            -                          0            0            0
+           0           0            0            0            0
+    0
+install         -                   15736833         3856            0
+           0           0           16            3       464648
+60970390
+metadata        -                          0            0            0
+           0           0            0            0            0
+    0
+prod-rack0      -                  364027905        88895            0
+           0           0           32            0       267626
+689034186
+rbd             -                    4194305         1027            0
+           0           0            4            1        11269
+25165828
+  total used      6900914368        93778
+  total avail    18335469376
+  total space    25236383744
 
-i reviewed the codes on kernel client part, generally it will first
-calculate the obj-id and pgid and pg-pool id. Then call
-ceph_osdc_start_request() to use CRUSH to actually map to the OSDs
-list and send the request through the socket connection.
-some concepts are not clear to me:
+for pool in $(rados lspools) ; do rbd ls -l $pool ; done | grep -v
+SIZE | awk '{ sum += $2} END { print sum }'
+rbd: pool data doesn't contain rbd images
+rbd: pool metadata doesn't contain rbd images
+526360
 
-a. what is the pg pool used for? is it a logical group of PGs? if so,
-how do you group the PGs?
-b. How does the client/monitor know the alive OSDs? i suppose ceph
-should maintain a table or list which have information for all
-connected OSDs. if so, can you tell me what's the data structure in
-the code? How do you fill/update this table? i suppose you can get the
-initial OSDs from the configure file during setting up.
-
-If i want to implement my function, i guess i need to do the following job:
-
-a. tag different obj with which pool it want to go (i.e. SSD or HDD)
-b. put the obj into the proper PG and PG pools.
-c. when map PG to OSD, map them to the proper OSD.
-
-Do you think this is the correct path for it?
-
-Thanks,
-Sheng
-
-On Fri, Jan 25, 2013 at 10:46 AM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 25 Jan 2013, sheng qiu wrote:
->> Hi Sage,
->>
->> i am appreciated for your reply.
->>
->> by my understanding on reading the client codes, i think ceph
->> allocates msg based on individual file. In another word, if one client
->> is updating on different files (each file is doing small
->> writes/updates, i.e. 4kb), ceph has to compose different msgs for each
->> file and send them to the corresponding OSDs.
->
-> Right.
->
->> if there are msgs
->> targeted on the same OSDs, can they be merged at client side?
->
-> No..
->
->> This may
->> help if the bandwidth of network is not sufficient, although i do not
->> know how much the chance they fall onto the same OSDs.
->
-> It would save on the header/footer msg overhead, but increase complexity
-> on both sides (esp the OSD side).  I don't think it's worth it.
->
->> if my understanding is not correct, please figure out. i am doing
->> research on DFS, and pretty interested on ceph. Have you considered
->> manage a hybrid storage pool, while may compose of some faster devices
->> such as NVRAM/SSD and some slow devices such as HDD, and make ceph be
->> aware of this to better place/distribute data instead of a flat way.
->
-> You can create different pols with different types of storage, and
-> distribute uniformly ("flat") across each pool.  Eventually, we'd like
-> cephfs to migrate files between pools based on temperature.
->
-> Alternatively, you can build hybrid OSDs that combine SSD and HDDs (and/or
-> NVRAM) and do the teiring inside each OSD.
->
-> sage
->
->>
->> Thanks,
->> Sheng
->>
->>
->> On Thu, Jan 24, 2013 at 11:00 PM, Sage Weil <sage@inktank.com> wrote:
->> > Hi Sheng,
->> >
->> > On Thu, 24 Jan 2013, sheng qiu wrote:
->> >> i am trying to understand the ceph codes on client side.
->> >> for write path, if it's aio_write, the ceph_write_begin() allocate
->> >> pages in page cache to buffer the written data, however i did not see
->> >> it allocated any space on the remote OSDs (for local fs such as ext2,
->> >> the get_block() did this),
->> >> i suppose it's done later when invoke kernel flushing process to write
->> >> back the dirty pages.
->> >
->> > Right.  Objects are instantiated and written to teh osds when the write
->> > operations are sent over the network, normally during writeback (via
->> > the ->writepages() op in addr.c).
->> >
->> >> i checked the ceph_writepages_start(), here it seems organize the
->> >> dirty data and prepare the requests to send to the OSDs.  For new
->> >> allocated written data, how it maps to the OSDs and where it is done?
->> >> is it done in ceph_osdc_new_request()?
->> >
->> > I happens later, when the actual request is ready to go over the wire. The
->> > target OSD may change in the meantime, or the request may have to be
->> > resent to another OSD.  As far as the upper layers are concerned, though,
->> > they are writing to the object, without caring where the object happens to
->> > currently live.
->> >
->> >> If the transfer unit is not limited to sizes of obj, i supposed that
->> >> ceph needed to packed several pieces of data (smaller than one obj
->> >> size)  together so that there won't be internal fragmentation for an
->> >> object. who does this job and which part of source codes/files are
->> >> related with this?
->> >
->> > Each file is striped over a different sequence of objects.  Small
->> > files mean small objects.  Large files stipe over (by default) 4
->> > MB objects.  It's the OSDs job to store these efficiently.  We just use a
->> > local file system.  btrfs is great about packing small files inline in the
->> > btree; xfs and ext4 are more convential fs's and pretty well.
->> >
->> > sage
->> >
->> >> I really want to get a deep understanding about the codes, so i raised
->> >> these questions. if my understanding is not correct, please figure
->> >> out. i will be very appreciated.
->> >>
->> >> Thanks,
->> >> Sheng
->> >>
->> >> --
->> >> Sheng Qiu
->> >> Texas A & M University
->> >> Room 332B Wisenbaker
->> >> email: herbert1984106@gmail.com
->> >> College Station, TX 77843-3259
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->>
->>
->>
->> --
->> Sheng Qiu
->> Texas A & M University
->> Room 332B Wisenbaker
->> email: herbert1984106@gmail.com
->> College Station, TX 77843-3259
->>
->>
-
-
-
--- 
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+I have same thing before, but not so contrast as there. Cluster was
+put on moderate failure test, dropping one or two osds at once under
+I/O pressure with replication factor three.
