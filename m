@@ -1,137 +1,121 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: v0.56.2 released
-Date: Thu, 31 Jan 2013 12:32:10 +0000
-Message-ID: <510A644A.90605@inktank.com>
-References: <alpine.DEB.2.00.1301301540030.6225@cobra.newdream.net> <510A2085.3080301@profihost.ag> <510A3DEB.4000900@profihost.ag> <alpine.DEB.2.00.1301310415550.11107@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 2/2] rbd: don't take extra bio reference for osd client
+Date: Thu, 31 Jan 2013 06:33:41 -0600
+Message-ID: <510A64A5.7080601@inktank.com>
+References: <510986E4.7050901@inktank.com> <51098748.7080601@inktank.com> <5109BBCE.9050206@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:57106 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751339Ab3AaMch (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 07:32:37 -0500
-Received: by mail-wg0-f44.google.com with SMTP id dr12so1937070wgb.11
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 04:32:36 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1301310415550.11107@cobra.newdream.net>
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:42566 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751769Ab3AaMdi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jan 2013 07:33:38 -0500
+Received: by mail-ie0-f172.google.com with SMTP id c10so2260175ieb.3
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 04:33:38 -0800 (PST)
+In-Reply-To: <5109BBCE.9050206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/31/2013 12:16 PM, Sage Weil wrote:
-> On Thu, 31 Jan 2013, Stefan Priebe - Profihost AG wrote:
->> Hi,
->>
->> great to see that we now have op/s and B/s output in ceph -w / ceph -s.
->>
->> But is it reading or writing or both? Also if there are not ops the ;
->> and the rest of the line is missing instead of printing zeros. This
->> makes parsing harder.
->>
->> See:
->> 2013-01-31 10:46:42.045874 mon.0 [INF] pgmap v4037097: 8128 pgs: 8128
->> active+clean; 172 GB data, 366 GB used, 4970 GB / 5336 GB avail; 8086B/s
->> wr, 1op/s
->>
->> 2013-01-31 10:46:43.056919 mon.0 [INF] pgmap v4037098: 8128 pgs: 8128
->> active+clean; 172 GB data, 366 GB used, 4970 GB / 5336 GB avail
->
-> This output is meant for a human.  If you need to parse it, we should be
-> adding a --format=json option for ceph -s and/or -w so that's not
-> necessary...
->
-> sage
+On 01/30/2013 06:33 PM, Josh Durgin wrote:
+> It'd be nice to have a log message when libceph_compatible fails.
+> It could be a future patch though.
+> 
+> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-One of the timecheck-related patches on master introduced the 
-possibility of outputting 'health' and 'status' in json.
+You're right, and I had thought of doing that but forgot.
+I will add it before I commit.  Thanks a lot.
 
-'ceph status --format=json' however is only outputting the same info as 
-its plain counterpart, but with a different entry for each map, sort of 
-like this:
+					-Alex
 
-{
-"monmap": "3 mons at 
-{a=10.0.0.1:6789/0,b=10.0.0.2:6789/0,c=10.0.0.3:6789/0}",
-"election_epoch": 2,
-"quorum", "0 1 2",
-...
-}
-
-This could be easily converted into something more useful though.
-
-   -Joao
-
-
->
->
+> On 01/30/2013 12:49 PM, Alex Elder wrote:
+>> Currently, if the OSD client finds an osd request has had a bio list
+>> attached to it, it drops a reference to it (or rather, to the first
+>> entry on that list) when the request is released.
 >>
->> Stefan
+>> The code that added that reference (i.e., the rbd client) is
+>> therefore required to take an extra reference to that first bio
+>> structure.
 >>
->> Am 31.01.2013 08:43, schrieb Stefan Priebe - Profihost AG:
->>> Hello,
->>>
->>> while compiling the bobtail branch i've seen this warning:
->>> mon/PGMap.cc: In member function ?void
->>> PGMap::apply_incremental(CephContext*, const PGMap::Incremental&)?:
->>> mon/PGMap.cc:247: warning: comparison between signed and unsigned
->>> integer expressions
->>>    CXX    libmon_a-LogMonitor.o
->>>
->>> Greets,
->>> Stefan
->>>
->>> Am 31.01.2013 00:46, schrieb Sage Weil:
->>>> The next bobtail point release is ready, and it's looking pretty good.
->>>> This is an important update for the 0.56.x backport series that fixes a
->>>> number of bugs and several performance issues. All v0.56.x users are
->>>> encouraged to upgrade.
->>>>
->>>> Notable changes since v0.56.1:
->>>>
->>>>   * osd: snapshot trimming fixes
->>>>   * osd: scrub snapshot metadata
->>>>   * osd: fix osdmap trimming
->>>>   * osd: misc peering fixes
->>>>   * osd: stop heartbeating with peers if internal threads are stuck/hung
->>>>   * osd: PG removal is friendlier to other workloads
->>>>   * osd: fix recovery start delay (was causing very slow recovery)
->>>>   * osd: fix scheduling of explicitly requested scrubs
->>>>   * osd: fix scrub interval config options
->>>>   * osd: improve recovery vs client io tuning
->>>>   * osd: improve 'slow request' warning detail for better diagnosis
->>>>   * osd: default CRUSH map now distributes across hosts, not OSDs
->>>>   * osd: fix crash on 32-bit hosts triggered by librbd clients
->>>>   * librbd: fix error handling when talking to older OSDs
->>>>   * mon: fix a few rare crashes
->>>>   * ceph command: ability to easily adjust CRUSH tunables
->>>>   * radosgw: object copy does not copy source ACLs
->>>>   * rados command: fix omap command usage
->>>>   * sysvinit script: set ulimit -n properly on remote hosts
->>>>   * msgr: fix narrow race with message queuing
->>>>   * fixed compilation on some old distros (e.g., RHEL 5.x)
->>>>
->>>> There are a small number of interface changes related to the default CRUSH
->>>> rule and scrub interval configuration options. Please see the full release
->>>> notes.
->>>>
->>>> You can get v0.56.2 in the usual fashion:
->>>>
->>>>   * Git at git://github.com/ceph/ceph.git
->>>>   * Tarball at http://ceph.com/download/ceph-0.56.2.tar.gz
->>>>   * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
->>>>   * For RPMs, see http://ceph.com/docs/master/install/rpm
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
+>> The osd client doesn't really do anything with the bio pointer other
+>> than transfer it from the osd request structure to outgoing (for
+>> writes) and ingoing (for reads) messages.  So it really isn't the
+>> right place to be taking or dropping references.
 >>
+>> Furthermore, the rbd client already holds references to all bio
+>> structures it passes to the osd client, and holds them until the
+>> request is completed.  So there's no need for this extra reference
+>> whatsoever.
 >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+>> So remove the bio_put() call in ceph_osdc_release_request(), as
+>> well as its matching bio_get() call in rbd_osd_req_create().
+>>
+>> This change could lead to a crash if old libceph.ko was used with
+>> new rbd.ko.  Add a compatibility check at rbd initialization time to
+>> avoid this possibilty.
+>>
+>> This resolves:
+>>      http://tracker.ceph.com/issues/3798    and
+>>      http://tracker.ceph.com/issues/3799
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c    |    3 ++-
+>>   net/ceph/ceph_common.c |    2 +-
+>>   net/ceph/osd_client.c  |    4 ----
+>>   3 files changed, 3 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index a9ce58c..6586800 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -1342,7 +1342,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
+>>       case OBJ_REQUEST_BIO:
+>>           rbd_assert(obj_request->bio_list != NULL);
+>>           osd_req->r_bio = obj_request->bio_list;
+>> -        bio_get(osd_req->r_bio);
+>>           /* osd client requires "num pages" even for bio */
+>>           osd_req->r_num_pages = calc_pages_for(offset, length);
+>>           break;
+>> @@ -4150,6 +4149,8 @@ int __init rbd_init(void)
+>>   {
+>>       int rc;
+>>
+>> +    if (!libceph_compatible(NULL))
+>> +        return -EINVAL;
+>>       rc = rbd_sysfs_init();
+>>       if (rc)
+>>           return rc;
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+>> index a98c03f..c236c235 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -39,7 +39,7 @@
+>>    */
+>>   bool libceph_compatible(void *data)
+>>   {
+>> -    return false;
+>> +    return true;
+>>   }
+>>   EXPORT_SYMBOL(libceph_compatible);
+>>
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 500ae8b..ba03648 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -147,10 +147,6 @@ void ceph_osdc_release_request(struct kref *kref)
+>>       if (req->r_own_pages)
+>>           ceph_release_page_vector(req->r_pages,
+>>                        req->r_num_pages);
+>> -#ifdef CONFIG_BLOCK
+>> -    if (req->r_bio)
+>> -        bio_put(req->r_bio);
+>> -#endif
+>>       ceph_put_snap_context(req->r_snapc);
+>>       ceph_pagelist_release(&req->r_trail);
+>>       if (req->r_mempool)
+>>
+> 
 
