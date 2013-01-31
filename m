@@ -1,61 +1,89 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.56.2 released
-Date: Wed, 30 Jan 2013 15:46:42 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1301301540030.6225@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/2] libceph: add a compatibility check interface
+Date: Wed, 30 Jan 2013 16:29:46 -0800
+Message-ID: <5109BAFA.40006@inktank.com>
+References: <510986E4.7050901@inktank.com> <51098740.2000200@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56237 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756833Ab3A3Xqn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 18:46:43 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 2958F80049
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 15:46:43 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 00ACD80049
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 15:46:42 -0800 (PST)
+Received: from mail-da0-f42.google.com ([209.85.210.42]:59874 "EHLO
+	mail-da0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751760Ab3AaAaA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jan 2013 19:30:00 -0500
+Received: by mail-da0-f42.google.com with SMTP id z17so1019849dal.1
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jan 2013 16:29:59 -0800 (PST)
+In-Reply-To: <51098740.2000200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The next bobtail point release is ready, and it's looking pretty good. 
-This is an important update for the 0.56.x backport series that fixes a 
-number of bugs and several performance issues. All v0.56.x users are 
-encouraged to upgrade. 
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-Notable changes since v0.56.1:
-
- * osd: snapshot trimming fixes
- * osd: scrub snapshot metadata
- * osd: fix osdmap trimming
- * osd: misc peering fixes
- * osd: stop heartbeating with peers if internal threads are stuck/hung
- * osd: PG removal is friendlier to other workloads
- * osd: fix recovery start delay (was causing very slow recovery)
- * osd: fix scheduling of explicitly requested scrubs
- * osd: fix scrub interval config options
- * osd: improve recovery vs client io tuning
- * osd: improve 'slow request' warning detail for better diagnosis
- * osd: default CRUSH map now distributes across hosts, not OSDs
- * osd: fix crash on 32-bit hosts triggered by librbd clients
- * librbd: fix error handling when talking to older OSDs
- * mon: fix a few rare crashes
- * ceph command: ability to easily adjust CRUSH tunables
- * radosgw: object copy does not copy source ACLs
- * rados command: fix omap command usage
- * sysvinit script: set ulimit -n properly on remote hosts
- * msgr: fix narrow race with message queuing
- * fixed compilation on some old distros (e.g., RHEL 5.x)
-
-There are a small number of interface changes related to the default CRUSH 
-rule and scrub interval configuration options. Please see the full release 
-notes.
-
-You can get v0.56.2 in the usual fashion:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.56.2.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+On 01/30/2013 12:49 PM, Alex Elder wrote:
+> An upcoming change implements semantic change that could lead to
+> a crash if an old version of the libceph kernel module is used with
+> a new version of the rbd kernel module.
+>
+> In order to preclude that possibility, this adds a compatibilty
+> check interface.  If this interface doesn't exist, the modules are
+> obviously not compatible.  But if it does exist, this provides a way
+> of letting the caller know whether it will operate properly with
+> this libceph module.
+>
+> Perhaps confusingly, it returns false right now.  The semantic
+> change mentioned above will make it return true.
+>
+> This resolves:
+>      http://tracker.ceph.com/issues/3800
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   include/linux/ceph/libceph.h |    2 ++
+>   net/ceph/ceph_common.c       |   16 ++++++++++++++++
+>   2 files changed, 18 insertions(+)
+>
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 084d3c6..c44275a 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -193,6 +193,8 @@ static inline int calc_pages_for(u64 off, u64 len)
+>   }
+>
+>   /* ceph_common.c */
+> +extern bool libceph_compatible(void *data);
+> +
+>   extern const char *ceph_msg_type_name(int type);
+>   extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid
+> *fsid);
+>   extern struct kmem_cache *ceph_inode_cachep;
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index ee71ea2..a98c03f 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -26,6 +26,22 @@
+>   #include "crypto.h"
+>
+>
+> +/*
+> + * Module compatibility interface.  For now it doesn't do anything,
+> + * but its existence signals a certain level of functionality.
+> + *
+> + * The data buffer is used to pass information both to and from
+> + * libceph.  The return value indicates whether libceph determines
+> + * it is compatible with the caller (from another kernel module),
+> + * given the provided data.
+> + *
+> + * The data pointer can be null.
+> + */
+> +bool libceph_compatible(void *data)
+> +{
+> +	return false;
+> +}
+> +EXPORT_SYMBOL(libceph_compatible);
+>
+>   /*
+>    * find filename portion of a path (/foo/bar/baz -> baz)
+>
 
