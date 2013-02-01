@@ -1,82 +1,169 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: some performance issue
-Date: Fri, 01 Feb 2013 15:10:33 -0600
-Message-ID: <510C2F49.8010401@inktank.com>
-References: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: John Axel Eriksson <john@insane.se>
+Subject: Re: AW: RadosGW S3 Api
+Date: Fri, 1 Feb 2013 14:25:36 -0800
+Message-ID: <AB0C5C24-965E-4916-9D18-FD738116C7FA@insane.se>
+References: <5EFBD28BA42C604BB012164C72CA5604502B0E1D@SMBXKO6.cgm.ag> <5EFBD28BA42C604BB012164C72CA5604502B0E6B@SMBXKO6.cgm.ag> <CAC-hyiGdR8AMMFk41tWgjmYNAqffTd8R8UacdcaFEPErEr=+Rw@mail.gmail.com> <5EFBD28BA42C604BB012164C72CA5604502B0EDE@SMBXKO6.cgm.ag> <CAC-hyiEFYF4xGx3nAWaOBDjrRTxLJ_P33A40NescWLBeCnATyQ@mail.gmail.com> <5EFBD28BA42C604BB012164C72CA5604502B0F34@SMBXKO6.cgm.ag> <CAMmJxtJrsC0C+6JiCKntytgmwANfDf8e2fpKQkOwF=KV+=kCEQ@mail.gmail.com> <5EFBD28BA42C604BB012164C72CA5604502B23ED@SMBXKO6.cgm.ag>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:41010 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757227Ab3BAVK3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 16:10:29 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so5891927iak.24
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 13:10:28 -0800 (PST)
-In-Reply-To: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:57826 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757724Ab3BAWZj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 17:25:39 -0500
+Received: by mail-pa0-f51.google.com with SMTP id hz1so1527163pad.24
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 14:25:39 -0800 (PST)
+In-Reply-To: <5EFBD28BA42C604BB012164C72CA5604502B23ED@SMBXKO6.cgm.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sheng qiu <herbert1984106@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "=?utf-8?Q? J=C3=A4ger,_Philipp ?=" <Philipp.Jaeger@cgm.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 02/01/2013 02:20 PM, sheng qiu wrote:
-> Hi,
->
-> i did one experiment which gives some interesting result.
->
-> i create two OSD (ext4), each is a SSD attached on the same PC. i also
-> configure one monitor and one mds on that PC.
-> so generally, my OSDs, monitor and mds locate on the same node.
->
-> i set up the ceph service and mount the ceph also on a local directory
-> on that PC. so client, OSDs, monitor and mds all on the same node.
-> i suppose this will exclude the network communication cost.
->
-> i run fio benchmark which create one 10GB file (larger than main
-> memory) on the ceph mount point. it perform sequential read/write and
-> random read/write on the file, and generate the throughput result.
->
-> next i umount the ceph and stop ceph service. i create ext4 on the
-> same SSD that used as OSD before. then run the same workloads and get
-> the throughput result.
->
-> here are the results:
->
-> (throughput kb/s)Seq-read	Rand-read	Seq-write	Rand-write
-> ceph	                 7378	4740	           790	1211
-> ext4	                 58260	17334	 54697	34257
->
-> as you see, the ceph has huge performance down, even monitor, mds,
-> client and osds locate on the same physical machine.
-> another interesting thing is the seq-write has lower throughput
-> compared with random-write under ceph. not quite clear....
->
-> does anyone have idea about why ceph has that performance down?
+Unfortunately we're not using it that
+way, so I don't know what possibilities there are. Hopefully someone el=
+se can help you out.
 
-Hi Sheng,
+Good luck!
 
-Are you using RBD or CephFS (and kernel or userland clients?)  How much 
-replication?  Also, what FIO settings?
+31 jan 2013 kl. 10:32 skrev J=C3=A4ger, Philipp <Philipp.Jaeger@cgm.com=
+>:
 
-In general, it is difficult to make distributed storage systems perform 
-as well as local storage for small read/write workloads.  You need a lot 
-of concurrency to hide the latencies, and if the local storage is 
-incredibly fast (like an SSD!) you have a huge uphill battle.
-
-Regarding the network, Even though you ran everything on localhost, ceph 
-is still using TCP sockets to do all of the communication.
-
-Having said that, I think we can do better than 790 IOPs for seq writes, 
-even if it's 2x replication.  The trick is to find where in the stack 
-things are getting held up.  You might want to look at tools like iostat 
-and collectl, and look at some of the op latency data in the ceph admin 
-socket.  A basic introduction is described in sebastian's article here:
-
-http://www.sebastien-han.fr/blog/2012/08/14/ceph-admin-socket/
-
->
-> Thanks,
-> Sheng
->
->
-
+> Hello,
+>=20
+> thank you very very much, it works in general now =E2=98=BA
+>=20
+> Can you say something about how to limit the rights of the user I cre=
+ated like in the manual?
+> We want to create an account, which has no rights to create buckets. =
+cannot find a fitting manual for that.
+>=20
+> Thank you very much
+>=20
+> Regards
+> Philipp
+>=20
+> Von: John Axel Eriksson [mailto:john@insane.se]=20
+> Gesendet: Donnerstag, 31. Januar 2013 00:11
+> An: J=C3=A4ger, Philipp
+> Cc: Yehuda Sadeh; ceph-devel@vger.kernel.org
+> Betreff: Re: RadosGW S3 Api
+>=20
+> This is the config we're using:
+>=20
+> FastCgiExternalServer /tmp/radosgw.fcgi -socket /var/run/ceph/rgw.soc=
+k
+>=20
+> LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %O \"%{Referer}i\"=
+ \"%{User-Agent}i\"" proxy_combined
+> LogFormat "%{X-Forwarded-For}i %h %l %u %t \"%r\" %>s %O \"%{Referer}=
+i\" \"%{User-Agent}i\"" proxy_debug
+>=20
+> <VirtualHost *:443>
+>   ServerName <ourservername>
+>   ServerAlias *
+>   ServerAdmin admin@<ourservername>
+>   DocumentRoot /var/www
+>=20
+>   KeepAlive off
+>=20
+>   SSLEngine on
+>   SSLCertificateFile /etc/apache2/ssl.cert
+>   SSLCertificateKeyFile /etc/apache2/ssl.key
+>   SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
+>=20
+>   RewriteEngine On
+>   RewriteRule             ^/(.*) /radosgw.fcgi?%{QUERY_STRING} [E=3DH=
+TTP_AUTHORIZATION:%{HTTP:Authorization},L]
+>=20
+>   <IfModule mod_fastcgi.c>
+>     <Directory /var/www/>
+>       Options +ExecCGI
+>       AllowOverride All
+>       SetHandler fastcgi-script
+>       Order allow,deny
+>       Allow from all
+>       AuthBasicAuthoritative Off
+>     </Directory>
+>   </IfModule>
+>=20
+>   AllowEncodedSlashes On
+>=20
+>   ErrorLog /var/log/apache2/error.log
+>   CustomLog /var/log/apache2/rgw-access.log proxy_combined
+>   ServerSignature Off
+> </VirtualHost>
+>=20
+> Hope it helps!
+>=20
+> John
+>=20
+> On Wed, Jan 30, 2013 at 10:13 AM, J=C3=A4ger, Philipp <Philipp.Jaeger=
+@cgm.com> wrote:
+> Yeah, therefore i ask about an example apache config with ssl support=
+, its not described in the ceph manual, only you have to active the ssl=
+ module, but not how the conf must look.
+> I tested the freeware "s3 browser", but it makes also errors...
+>=20
+> Do you somebody know who has knowledge about using radosgw with ssl?
+>=20
+>=20
+> -----Urspr=C3=BCngliche Nachricht-----
+> Von: yehudasa@gmail.com [mailto:yehudasa@gmail.com] Im Auftrag von Ye=
+huda Sadeh
+> Gesendet: Mittwoch, 30. Januar 2013 18:54
+> An: J=C3=A4ger, Philipp
+> Cc: ceph-devel@vger.kernel.org
+> Betreff: Re: RadosGW S3 Api
+>=20
+> On Wed, Jan 30, 2013 at 9:34 AM, J=C3=A4ger, Philipp <Philipp.Jaeger@=
+cgm.com> wrote:
+>> Hello, thanks for the answer.
+>> I don't know, the programmer say the api (s3 api java) wants to conn=
+ect per https. When you know a possibility to  (de)actiate ssl, I would=
+ be happy you can tell:) than im sure its not a ssl problem.
+>>=20
+>>=20
+>> Do you know the error message "peer not authenticated"?
+>> I think its not a rados error message, because when you google for i=
+t, you can see that it's common ssl error in java.
+>=20
+> Then it's probably ssl error. Radosgw doesn't generate such an error.
+>=20
+>> But it can be an inherited error because of rados misconfiguration I=
+ think.
+>>=20
+>>=20
+>> How do I know if the gateway can be reached?
+>> Nothing special in the logs..
+>>=20
+>> Have you looked into the confs in the zip file I added to the mail?
+>=20
+> Yeah. there's not much there.
+>=20
+>> Im very unsure about the apache ssl configuration, when I set the fa=
+stcgi virtual host section also to 443, I get an error message, but I d=
+onk think its right to leave it on 80.
+>=20
+>=20
+>> Don't you ever set up radosgw with ssl ?
+>=20
+> that's really orthogonal to radosgw, more of the web server (apache) =
+issue.
+>=20
+> Try using some out of the box s3 client before using the api to help =
+with diagnosing the issue. It looks to me like some issues with your ap=
+ache configuration (ssl, fastcgi).
+>=20
+>=20
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
