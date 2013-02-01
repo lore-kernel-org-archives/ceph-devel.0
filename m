@@ -1,160 +1,156 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+From: Sage Weil <sage@inktank.com>
 Subject: RE: Slow request in XFS
-Date: Fri, 1 Feb 2013 08:39:46 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5EB394@SHSMSX102.ccr.corp.intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC5EA81F@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net>
- <510A8AA0.6000508@sandia.gov>
- <alpine.DEB.2.00.1301311159460.807@cobra.newdream.net>
+Date: Fri, 1 Feb 2013 04:19:59 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302010415540.11209@cobra.newdream.net>
+References: <6F3FA899187F0043BA1827A69DA2F7CC5EA81F@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1301310441590.11107@cobra.newdream.net> <510A8AA0.6000508@sandia.gov> <alpine.DEB.2.00.1301311159460.807@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC5EB394@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:24108 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754598Ab3BAIjw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Feb 2013 03:39:52 -0500
-In-Reply-To: <alpine.DEB.2.00.1301311159460.807@cobra.newdream.net>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:47494 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751688Ab3BAMUA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 07:20:00 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC5EB394@SHSMSX102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Jim Schutt <jaschut@sandia.gov>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SXMgaXQgcmlnaHQgdG8gaGF2ZSBzdWNoIGEgbG90IHBnIHNjcnViaW5nP0kgZGlkbid0IHR1bmUg
-YW55dGhpbmcNCg0KMjAxMy0wMi0wMSAxNjozNzo1My45NDM5MzMgb3NkLjEyIFtJTkZdIDEuNGE4
-IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzc6NTQuMzc5NDYzIG9zZC4xNCBbSU5GXSAx
-LjkzIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzc6NTUuMDc2MzQ5IG9zZC4yMTAgW0lO
-Rl0gMi40YTIgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozNzo1Ni4zNzk4NjYgb3NkLjE0
-IFtJTkZdIDEuOTYgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozNzo1Ni42NjQ3NjEgb3Nk
-LjE1IFtJTkZdIDEuYTBjIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzc6NTYuOTA4MTY5
-IG9zZC4xMjAgW0lORl0gMi4zOSBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM3OjU2Ljk0
-NDUyNSBvc2QuMTIgW0lORl0gMS40YWQgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozNzo1
-Ny43ODk2MDUgb3NkLjExOSBbSU5GXSAxLjI1IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6
-Mzc6NTguMDc2ODcyIG9zZC4yMTAgW0lORl0gMi40ZjUgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0w
-MSAxNjozNzo1OC4zODAxOTMgb3NkLjE0IFtJTkZdIDEuZWEgZGVlcC1zY3J1YiBvaw0KMjAxMy0w
-Mi0wMSAxNjozNzo1OC43ODk4MTcgb3NkLjExOSBbSU5GXSAxLjY1IGRlZXAtc2NydWIgb2sNCjIw
-MTMtMDItMDEgMTY6Mzc6NTkuMTc0NzU4IG9zZC4xMyBbSU5GXSAxLjRlYyBkZWVwLXNjcnViIG9r
-DQoyMDEzLTAyLTAxIDE2OjM3OjU5Ljk0NTU1MyBvc2QuMTIgW0lORl0gMS40YjUgZGVlcC1zY3J1
-YiBvaw0KMjAxMy0wMi0wMSAxNjozODowMC43NTc4ODEgb3NkLjI4IFtJTkZdIDEuNWQ2IGRlZXAt
-c2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDAuNzkwMjgyIG9zZC4xMTkgW0lORl0gMS42YiBk
-ZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjAwLjk0NTUyNyBvc2QuMTIgW0lORl0gMS40
-YzQgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowMS42NjU5NTYgb3NkLjE1IFtJTkZd
-IDEuYTFlIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDIuNjY2MTQyIG9zZC4xNSBb
-SU5GXSAyLjJkIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDIuNzkwNTI1IG9zZC4x
-MTkgW0lORl0gMS5iNyBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjAyLjg4MDU5NSBv
-c2QuMjggW0lORl0gMS42MDkgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowMy4wNzc5
-MTcgb3NkLjIxMCBbSU5GXSAyLjUwZiBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjAz
-LjYyMjQwOSBtb24uMCBbSU5GXSBwZ21hcCB2NTI0OiA3ODcyIHBnczogODEgYWN0aXZlLCA3NzEw
-IGFjdGl2ZStjbGVhbiwgODEgcGVlcmluZzsgMCBieXRlcyBkYXRhLCAxNzM4IE1CIHVzZWQsIDI3
-OTMwIEdCIC8gMjc5MzEgR0IgYXZhaWwNCjIwMTMtMDItMDEgMTY6Mzg6MDMuNjY2NDQ3IG9zZC4x
-NSBbSU5GXSAyLjMxIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDQuNzMxNTg4IG1v
-bi4wIFtJTkZdIHBnbWFwIHY1MjU6IDc4NzIgcGdzOiA3NSBhY3RpdmUsIDc3MTYgYWN0aXZlK2Ns
-ZWFuLCA4MSBwZWVyaW5nOyAwIGJ5dGVzIGRhdGEsIDE3MzggTUIgdXNlZCwgMjc5MzAgR0IgLyAy
-NzkzMSBHQiBhdmFpbA0KMjAxMy0wMi0wMSAxNjozNzo1NS42ODg5ODggb3NkLjI5IFtJTkZdIDEu
-ODJmIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzc6NTYuMTQyNDI0IG9zZC4yMTYgW0lO
-Rl0gMi40ZmMgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozNzo1OC42ODk2Mjcgb3NkLjI5
-IFtJTkZdIDEuODMxIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzc6NTkuNjg5ODUxIG9z
-ZC4yOSBbSU5GXSAxLjg0NSBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjAxLjE0MzE1
-NyBvc2QuMjE2IFtJTkZdIDIuNTBkIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDEu
-NjkwMjA3IG9zZC4yOSBbSU5GXSAxLjg4MiBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4
-OjAyLjE0MzcwNCBvc2QuMjE2IFtJTkZdIDIuNTUxIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEg
-MTY6Mzg6MDIuNjkwNTEwIG9zZC4yOSBbSU5GXSAxLjhiZSBkZWVwLXNjcnViIG9rDQoyMDEzLTAy
-LTAxIDE2OjM4OjAzLjE0Mzk2MSBvc2QuMjE2IFtJTkZdIDIuNTYxIGRlZXAtc2NydWIgb2sNCjIw
-MTMtMDItMDEgMTY6Mzg6MDQuMTQ0MzU2IG9zZC4yMTYgW0lORl0gMi42MWMgZGVlcC1zY3J1YiBv
-aw0KMjAxMy0wMi0wMSAxNjozODowNS44OTA3OTEgbW9uLjAgW0lORl0gcGdtYXAgdjUyNjogNzg3
-MiBwZ3M6IDc1IGFjdGl2ZSwgNzcxNiBhY3RpdmUrY2xlYW4sIDgxIHBlZXJpbmc7IDAgYnl0ZXMg
-ZGF0YSwgMTczOCBNQiB1c2VkLCAyNzkzMCBHQiAvIDI3OTMxIEdCIGF2YWlsDQoyMDEzLTAyLTAx
-IDE2OjM4OjA2Ljk3NDk3NiBtb24uMCBbSU5GXSBwZ21hcCB2NTI3OiA3ODcyIHBnczogNzcgYWN0
-aXZlLCA3NzE2IGFjdGl2ZStjbGVhbiwgNzggcGVlcmluZywgMSBhY3RpdmUrY2xlYW4rc2NydWJi
-aW5nK2RlZXA7IDAgYnl0ZXMgZGF0YSwgMTczOCBNQiB1c2VkLCAyNzkzMCBHQiAvIDI3OTMxIEdC
-IGF2YWlsDQoyMDEzLTAyLTAxIDE2OjM4OjA4LjA5MjQ5MCBtb24uMCBbSU5GXSBwZ21hcCB2NTI4
-OiA3ODcyIHBnczogNzcgYWN0aXZlLCA3NzE2IGFjdGl2ZStjbGVhbiwgNzggcGVlcmluZywgMSBh
-Y3RpdmUrY2xlYW4rc2NydWJiaW5nK2RlZXA7IDAgYnl0ZXMgZGF0YSwgMTczOCBNQiB1c2VkLCAy
-NzkzMCBHQiAvIDI3OTMxIEdCIGF2YWlsDQoyMDEzLTAyLTAxIDE2OjM4OjAyLjMxODg5NiBvc2Qu
-MjIwIFtJTkZdIDIuM2I5IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDIuNjE4NDQz
-IG9zZC4yMiBbSU5GXSAyLjNiMCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA0LjMx
-OTM4MSBvc2QuMjIwIFtJTkZdIDIuM2NmIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6
-MDQuNjE4OTMyIG9zZC4yMiBbSU5GXSAyLjNiNiBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2
-OjM4OjA5LjE2MDU0NSBtb24uMCBbSU5GXSBwZ21hcCB2NTI5OiA3ODcyIHBnczogNzcgYWN0aXZl
-LCA3NzE2IGFjdGl2ZStjbGVhbiwgNzggcGVlcmluZywgMSBhY3RpdmUrY2xlYW4rc2NydWJiaW5n
-K2RlZXA7IDAgYnl0ZXMgZGF0YSwgMTczOCBNQiB1c2VkLCAyNzkzMCBHQiAvIDI3OTMxIEdCIGF2
-YWlsDQoyMDEzLTAyLTAxIDE2OjM4OjEwLjI0NDcxMSBtb24uMCBbSU5GXSBwZ21hcCB2NTMwOiA3
-ODcyIHBnczogNzcgYWN0aXZlLCA3NzE2IGFjdGl2ZStjbGVhbiwgNzggcGVlcmluZywgMSBhY3Rp
-dmUrY2xlYW4rc2NydWJiaW5nK2RlZXA7IDAgYnl0ZXMgZGF0YSwgMTczOCBNQiB1c2VkLCAyNzkz
-MCBHQiAvIDI3OTMxIEdCIGF2YWlsDQoyMDEzLTAyLTAxIDE2OjM4OjAwLjc4OTgzOCBvc2QuMjQg
-W0lORl0gMS43MzQgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowMS41NDMyNjYgb3Nk
-LjI1IFtJTkZdIDEuODI3IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDIuNTQzNjYy
-IG9zZC4yNSBbSU5GXSAxLjgzNCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjAzLjA4
-NTc3OCBvc2QuMjExIFtJTkZdIDIuYTI0IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6
-MDMuNzkwNTAzIG9zZC4yNCBbSU5GXSAxLjczNyBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2
-OjM4OjA2Ljc5MTAzNiBvc2QuMjQgW0lORl0gMS43NGYgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0w
-MSAxNjozODowOC41NDQ3OTAgb3NkLjI1IFtJTkZdIDEuODNhIGRlZXAtc2NydWIgb2sNCjIwMTMt
-MDItMDEgMTY6Mzg6MTAuNTQ1MDg4IG9zZC4yNSBbSU5GXSAxLjgzZiBkZWVwLXNjcnViIG9rDQoy
-MDEzLTAyLTAxIDE2OjM4OjExLjQ1Mzg1MyBtb24uMCBbSU5GXSBwZ21hcCB2NTMxOiA3ODcyIHBn
-czogNzcgYWN0aXZlLCA3NzE2IGFjdGl2ZStjbGVhbiwgNzggcGVlcmluZywgMSBhY3RpdmUrY2xl
-YW4rc2NydWJiaW5nK2RlZXA7IDAgYnl0ZXMgZGF0YSwgMTczOCBNQiB1c2VkLCAyNzkzMCBHQiAv
-IDI3OTMxIEdCIGF2YWlsDQoyMDEzLTAyLTAxIDE2OjM4OjAyLjA2NDI0NSBvc2QuMTExIFtJTkZd
-IDEuNTIyIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDIuMTY5ODA1IG9zZC4xMTAg
-W0lORl0gMS42MDggZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowNS4wNjQ3Mzkgb3Nk
-LjExMSBbSU5GXSAxLjUyNiBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA1LjA5ODE1
-OCBvc2QuMTcgW0lORl0gMS4yODIgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowNi4w
-NjUxMjggb3NkLjExMSBbSU5GXSAxLjUzZCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4
-OjA3LjA5ODQ0MyBvc2QuMTcgW0lORl0gMS4yZGMgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAx
-NjozODowOS4wOTg5MDEgb3NkLjE3IFtJTkZdIDEuMmU1IGRlZXAtc2NydWIgb2sNCjIwMTMtMDIt
-MDEgMTY6Mzg6MDkuMjM2NjczIG9zZC4xNiBbSU5GXSAwLjFlYSBkZWVwLXNjcnViIG9rDQoyMDEz
-LTAyLTAxIDE2OjM4OjAzLjEyNDk4MiBvc2QuMjcgW0lORl0gMS41NDUgZGVlcC1zY3J1YiBvaw0K
-MjAxMy0wMi0wMSAxNjozODowNC4wNzgxMTggb3NkLjIxMCBbSU5GXSAyLjUyZCBkZWVwLXNjcnVi
-IG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA0LjEyNTE1OCBvc2QuMjEzIFtJTkZdIDIuODEzIGRlZXAt
-c2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDQuMzgxNDE1IG9zZC4xNCBbSU5GXSAxLjEwMyBk
-ZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA0LjY2Njc0NCBvc2QuMTUgW0lORl0gMi5h
-OCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA1LjA3ODU5OCBvc2QuMjEwIFtJTkZd
-IDIuNTM0IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDUuMTI1MzE5IG9zZC4yMTMg
-W0lORl0gMi44M2QgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowNS4zMDA0NzQgb3Nk
-LjExNyBbSU5GXSAxLjNhMCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA1LjM4MTYy
-NSBvc2QuMTQgW0lORl0gMS4xMDggZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowNS44
-ODEyMjMgb3NkLjI4IFtJTkZdIDEuNjM0IGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6
-MDYuMDc4NzIzIG9zZC4yMTAgW0lORl0gMi41NTIgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAx
-NjozODowNi4wOTMwMTggb3NkLjExMyBbSU5GXSAxLjM0OSBkZWVwLXNjcnViIG9rDQoyMDEzLTAy
-LTAxIDE2OjM4OjA2LjEyNTQ4NSBvc2QuMjcgW0lORl0gMS41NDYgZGVlcC1zY3J1YiBvaw0KMjAx
-My0wMi0wMSAxNjozODowNi4zMDA3NTkgb3NkLjExNyBbSU5GXSAxLjNmYyBkZWVwLXNjcnViIG9r
-DQoyMDEzLTAyLTAxIDE2OjM4OjA2Ljg4MTIyOSBvc2QuMjggW0lORl0gMS42NDcgZGVlcC1zY3J1
-YiBvaw0KMjAxMy0wMi0wMSAxNjozODowNi45NDY4MjMgb3NkLjEyIFtJTkZdIDEuNTE0IGRlZXAt
-c2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDguMDkzNzU4IG9zZC4xMTMgW0lORl0gMS4zYWYg
-ZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODowOC43OTE2ODkgb3NkLjExOSBbSU5GXSAx
-LjEwYSBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA5LjA3OTM1NSBvc2QuMjEwIFtJ
-TkZdIDIuNTVjIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDkuMTI1ODg2IG9zZC4y
-NyBbSU5GXSAxLjU0YSBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2OjM4OjA5Ljc0NzM3MyBv
-c2QuMTE4IFtJTkZdIDAuOTkyIGRlZXAtc2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MDkuNzky
-MTAxIG9zZC4xMTkgW0lORl0gMS4xMWEgZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODox
-MC4wNzk3MDcgb3NkLjIxMCBbSU5GXSAyLjVhMCBkZWVwLXNjcnViIG9rDQoyMDEzLTAyLTAxIDE2
-OjM4OjEwLjc0NzYxNSBvc2QuMTE4IFtJTkZdIDAuOWE2IGRlZXAtc2NydWIgb2sNCjIwMTMtMDIt
-MDEgMTY6Mzg6MTEuMTI2MzA1IG9zZC4yMTMgW0lORl0gMi44NWUgZGVlcC1zY3J1YiBvaw0KMjAx
-My0wMi0wMSAxNjozODoxMS4zOTA2MTEgb3NkLjIxNCBbSU5GXSAyLjI2NiBkZWVwLXNjcnViIG9r
-DQoyMDEzLTAyLTAxIDE2OjM4OjExLjY5MjAxNSBvc2QuMjkgW0lORl0gMS44YzYgZGVlcC1zY3J1
-YiBvaw0KMjAxMy0wMi0wMSAxNjozODoxMS45NDc2ODggb3NkLjEyIFtJTkZdIDEuNTIzIGRlZXAt
-c2NydWIgb2sNCjIwMTMtMDItMDEgMTY6Mzg6MTIuMzAxNTExIG9zZC4xMTcgW0lORl0gMS40NDIg
-ZGVlcC1zY3J1YiBvaw0KMjAxMy0wMi0wMSAxNjozODoxMi4zOTAyMjAgb3NkLjIxNCBbSU5GXSAy
-LjI2YyBkZWVwLXNjcnViIG9rDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBT
-YWdlIFdlaWwgW21haWx0bzpzYWdlQGlua3RhbmsuY29tXSANClNlbnQ6IDIwMTPE6jLUwjHI1SA0
-OjAxDQpUbzogSmltIFNjaHV0dA0KQ2M6IENoZW4sIFhpYW94aTsgY2VwaC1kZXZlbEB2Z2VyLmtl
-cm5lbC5vcmcNClN1YmplY3Q6IFJlOiBTbG93IHJlcXVlc3QgaW4gWEZTDQoNCk9uIFRodSwgMzEg
-SmFuIDIwMTMsIEppbSBTY2h1dHQgd3JvdGU6DQo+IE9uIDAxLzMxLzIwMTMgMDU6NDMgQU0sIFNh
-Z2UgV2VpbCB3cm90ZToNCj4gPiBIaS0NCj4gPiANCj4gPiBDYW4geW91IHJlcHJvZHVjZSB0aGlz
-IHdpdGggbG9ncz8gIEl0IGxvb2tzIGxpa2UgdGhlcmUgYXJlIGEgZmV3IG9wcyANCj4gPiB0aGF0
-IGFyZSBoYW5naW5nIGZvciBhIHZlcnkgbG9uZyB0aW1lLCBidXQgdGhlcmUgaXNuJ3QgZW5vdWdo
-IA0KPiA+IGluZm9ybWF0aW9uIGhlcmUgZXhjZXB0IHRvIHBvaW50IHRvIG9zZHMgNjEwLCA2MTIs
-IDYxNSwgYW5kIDY4Li4uDQo+IA0KPiBGV0lXLCBJIGhhdmUgYSBzbWFsbCBwaWxlIG9mIGRpc2tz
-IHdpdGggYmFkIHNlY3Rpb25zIGluIHRoZW0gLSB0aGVzZSANCj4gc2VjdGlvbnMgYXJlbid0IGJh
-ZCBlbm91Z2ggdGhhdCB3cml0ZXMgZmFpbCwgYnV0IHRoZXkgYXJlIGJhZCBlbm91Z2ggDQo+IHRo
-YXQgdGhyb3VnaHB1dCBkcm9wcyBieSBhIGZhY3RvciBvZiB+MjAuDQo+IA0KPiBEbyBPU0RzIGFs
-cmVhZHkgY29sbGVjdCBzdGF0aXN0aWNzIG9uLCBzYXksIG9wIGNvbW1pdCBlbGFwc2VkIHRpbWUg
-DQo+IChhc3N1bWluZyB0aGF0J3MgdGhlIHN0YXRpc3RpYyBtb3N0IGRpcmVjdGx5IHJlbGF0ZWQg
-dG8gc2xvdyB3cml0ZXMgb24gDQo+IG9ubHkgc29tZSBzZWN0aW9ucyBvZiBhIGRpc2spLCBpbiBh
-IHdheSB0aGF0IGNvdWxkIGJlIHVzZWQgdG8gZGlhZ25vc2UgDQo+IHN1Y2ggZGlza3M/DQo+IA0K
-PiBJZiBub3QsIGlzIHRoZXJlIGVub3VnaCBzdHJ1Y3R1cmUgYWxyZWFkeSBpbiBwbGFjZSB0aGF0
-IGl0IHdvdWxkIGJlIA0KPiBlYXN5IHRvIGFkZD8NCg0KVGhleSdyZSB0cmFja2luZyBpdCBpbnRl
-cm5hbGx5LCBidXQgaXQgZ2V0cyBhdmVyYWdlZCBpbnRvIHRoZSB0b3RhbHMgYmVmb3JlIGEgdXNl
-ciBnZXRzIHRvIHNlZSBhbnkgcGVyLXJlcXVlc3QgbGF0ZW5jaWVzLiAgVGhlIHBlci1kYWVtb24g
-dG90YWxzIGFyZSBhdmFpbGFibGUgdmlhIHRoZSBhZG1pbiBzb2NrZXQgJ3BlcmYgZHVtcCcgY29t
-bWFuZC4gIEhhdmUgeW91IGxvb2tlZCBhdCB0aGF0IGluZm9ybWF0aW9uIHlldD8NCg0Kc2FnZQ0K
+On Fri, 1 Feb 2013, Chen, Xiaoxi wrote:
+
+> Is it right to have such a lot pg scrubing?I didn't tune anything
+
+For a new cluster, you'll see a bunch of these as the initial scrub 
+happens.  Then it's once per configurable period.. 24h for the regular 
+scrub (metadata) and a week for the deep scrub (reread all data).  Do
+
+ ceph --show-config | grep scrub
+
+to see the options and their defaults.
+
+sage
+
+> 
+> 2013-02-01 16:37:53.943933 osd.12 [INF] 1.4a8 deep-scrub ok
+> 2013-02-01 16:37:54.379463 osd.14 [INF] 1.93 deep-scrub ok
+> 2013-02-01 16:37:55.076349 osd.210 [INF] 2.4a2 deep-scrub ok
+> 2013-02-01 16:37:56.379866 osd.14 [INF] 1.96 deep-scrub ok
+> 2013-02-01 16:37:56.664761 osd.15 [INF] 1.a0c deep-scrub ok
+> 2013-02-01 16:37:56.908169 osd.120 [INF] 2.39 deep-scrub ok
+> 2013-02-01 16:37:56.944525 osd.12 [INF] 1.4ad deep-scrub ok
+> 2013-02-01 16:37:57.789605 osd.119 [INF] 1.25 deep-scrub ok
+> 2013-02-01 16:37:58.076872 osd.210 [INF] 2.4f5 deep-scrub ok
+> 2013-02-01 16:37:58.380193 osd.14 [INF] 1.ea deep-scrub ok
+> 2013-02-01 16:37:58.789817 osd.119 [INF] 1.65 deep-scrub ok
+> 2013-02-01 16:37:59.174758 osd.13 [INF] 1.4ec deep-scrub ok
+> 2013-02-01 16:37:59.945553 osd.12 [INF] 1.4b5 deep-scrub ok
+> 2013-02-01 16:38:00.757881 osd.28 [INF] 1.5d6 deep-scrub ok
+> 2013-02-01 16:38:00.790282 osd.119 [INF] 1.6b deep-scrub ok
+> 2013-02-01 16:38:00.945527 osd.12 [INF] 1.4c4 deep-scrub ok
+> 2013-02-01 16:38:01.665956 osd.15 [INF] 1.a1e deep-scrub ok
+> 2013-02-01 16:38:02.666142 osd.15 [INF] 2.2d deep-scrub ok
+> 2013-02-01 16:38:02.790525 osd.119 [INF] 1.b7 deep-scrub ok
+> 2013-02-01 16:38:02.880595 osd.28 [INF] 1.609 deep-scrub ok
+> 2013-02-01 16:38:03.077917 osd.210 [INF] 2.50f deep-scrub ok
+> 2013-02-01 16:38:03.622409 mon.0 [INF] pgmap v524: 7872 pgs: 81 active, 7710 active+clean, 81 peering; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:03.666447 osd.15 [INF] 2.31 deep-scrub ok
+> 2013-02-01 16:38:04.731588 mon.0 [INF] pgmap v525: 7872 pgs: 75 active, 7716 active+clean, 81 peering; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:37:55.688988 osd.29 [INF] 1.82f deep-scrub ok
+> 2013-02-01 16:37:56.142424 osd.216 [INF] 2.4fc deep-scrub ok
+> 2013-02-01 16:37:58.689627 osd.29 [INF] 1.831 deep-scrub ok
+> 2013-02-01 16:37:59.689851 osd.29 [INF] 1.845 deep-scrub ok
+> 2013-02-01 16:38:01.143157 osd.216 [INF] 2.50d deep-scrub ok
+> 2013-02-01 16:38:01.690207 osd.29 [INF] 1.882 deep-scrub ok
+> 2013-02-01 16:38:02.143704 osd.216 [INF] 2.551 deep-scrub ok
+> 2013-02-01 16:38:02.690510 osd.29 [INF] 1.8be deep-scrub ok
+> 2013-02-01 16:38:03.143961 osd.216 [INF] 2.561 deep-scrub ok
+> 2013-02-01 16:38:04.144356 osd.216 [INF] 2.61c deep-scrub ok
+> 2013-02-01 16:38:05.890791 mon.0 [INF] pgmap v526: 7872 pgs: 75 active, 7716 active+clean, 81 peering; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:06.974976 mon.0 [INF] pgmap v527: 7872 pgs: 77 active, 7716 active+clean, 78 peering, 1 active+clean+scrubbing+deep; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:08.092490 mon.0 [INF] pgmap v528: 7872 pgs: 77 active, 7716 active+clean, 78 peering, 1 active+clean+scrubbing+deep; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:02.318896 osd.220 [INF] 2.3b9 deep-scrub ok
+> 2013-02-01 16:38:02.618443 osd.22 [INF] 2.3b0 deep-scrub ok
+> 2013-02-01 16:38:04.319381 osd.220 [INF] 2.3cf deep-scrub ok
+> 2013-02-01 16:38:04.618932 osd.22 [INF] 2.3b6 deep-scrub ok
+> 2013-02-01 16:38:09.160545 mon.0 [INF] pgmap v529: 7872 pgs: 77 active, 7716 active+clean, 78 peering, 1 active+clean+scrubbing+deep; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:10.244711 mon.0 [INF] pgmap v530: 7872 pgs: 77 active, 7716 active+clean, 78 peering, 1 active+clean+scrubbing+deep; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:00.789838 osd.24 [INF] 1.734 deep-scrub ok
+> 2013-02-01 16:38:01.543266 osd.25 [INF] 1.827 deep-scrub ok
+> 2013-02-01 16:38:02.543662 osd.25 [INF] 1.834 deep-scrub ok
+> 2013-02-01 16:38:03.085778 osd.211 [INF] 2.a24 deep-scrub ok
+> 2013-02-01 16:38:03.790503 osd.24 [INF] 1.737 deep-scrub ok
+> 2013-02-01 16:38:06.791036 osd.24 [INF] 1.74f deep-scrub ok
+> 2013-02-01 16:38:08.544790 osd.25 [INF] 1.83a deep-scrub ok
+> 2013-02-01 16:38:10.545088 osd.25 [INF] 1.83f deep-scrub ok
+> 2013-02-01 16:38:11.453853 mon.0 [INF] pgmap v531: 7872 pgs: 77 active, 7716 active+clean, 78 peering, 1 active+clean+scrubbing+deep; 0 bytes data, 1738 MB used, 27930 GB / 27931 GB avail
+> 2013-02-01 16:38:02.064245 osd.111 [INF] 1.522 deep-scrub ok
+> 2013-02-01 16:38:02.169805 osd.110 [INF] 1.608 deep-scrub ok
+> 2013-02-01 16:38:05.064739 osd.111 [INF] 1.526 deep-scrub ok
+> 2013-02-01 16:38:05.098158 osd.17 [INF] 1.282 deep-scrub ok
+> 2013-02-01 16:38:06.065128 osd.111 [INF] 1.53d deep-scrub ok
+> 2013-02-01 16:38:07.098443 osd.17 [INF] 1.2dc deep-scrub ok
+> 2013-02-01 16:38:09.098901 osd.17 [INF] 1.2e5 deep-scrub ok
+> 2013-02-01 16:38:09.236673 osd.16 [INF] 0.1ea deep-scrub ok
+> 2013-02-01 16:38:03.124982 osd.27 [INF] 1.545 deep-scrub ok
+> 2013-02-01 16:38:04.078118 osd.210 [INF] 2.52d deep-scrub ok
+> 2013-02-01 16:38:04.125158 osd.213 [INF] 2.813 deep-scrub ok
+> 2013-02-01 16:38:04.381415 osd.14 [INF] 1.103 deep-scrub ok
+> 2013-02-01 16:38:04.666744 osd.15 [INF] 2.a8 deep-scrub ok
+> 2013-02-01 16:38:05.078598 osd.210 [INF] 2.534 deep-scrub ok
+> 2013-02-01 16:38:05.125319 osd.213 [INF] 2.83d deep-scrub ok
+> 2013-02-01 16:38:05.300474 osd.117 [INF] 1.3a0 deep-scrub ok
+> 2013-02-01 16:38:05.381625 osd.14 [INF] 1.108 deep-scrub ok
+> 2013-02-01 16:38:05.881223 osd.28 [INF] 1.634 deep-scrub ok
+> 2013-02-01 16:38:06.078723 osd.210 [INF] 2.552 deep-scrub ok
+> 2013-02-01 16:38:06.093018 osd.113 [INF] 1.349 deep-scrub ok
+> 2013-02-01 16:38:06.125485 osd.27 [INF] 1.546 deep-scrub ok
+> 2013-02-01 16:38:06.300759 osd.117 [INF] 1.3fc deep-scrub ok
+> 2013-02-01 16:38:06.881229 osd.28 [INF] 1.647 deep-scrub ok
+> 2013-02-01 16:38:06.946823 osd.12 [INF] 1.514 deep-scrub ok
+> 2013-02-01 16:38:08.093758 osd.113 [INF] 1.3af deep-scrub ok
+> 2013-02-01 16:38:08.791689 osd.119 [INF] 1.10a deep-scrub ok
+> 2013-02-01 16:38:09.079355 osd.210 [INF] 2.55c deep-scrub ok
+> 2013-02-01 16:38:09.125886 osd.27 [INF] 1.54a deep-scrub ok
+> 2013-02-01 16:38:09.747373 osd.118 [INF] 0.992 deep-scrub ok
+> 2013-02-01 16:38:09.792101 osd.119 [INF] 1.11a deep-scrub ok
+> 2013-02-01 16:38:10.079707 osd.210 [INF] 2.5a0 deep-scrub ok
+> 2013-02-01 16:38:10.747615 osd.118 [INF] 0.9a6 deep-scrub ok
+> 2013-02-01 16:38:11.126305 osd.213 [INF] 2.85e deep-scrub ok
+> 2013-02-01 16:38:11.390611 osd.214 [INF] 2.266 deep-scrub ok
+> 2013-02-01 16:38:11.692015 osd.29 [INF] 1.8c6 deep-scrub ok
+> 2013-02-01 16:38:11.947688 osd.12 [INF] 1.523 deep-scrub ok
+> 2013-02-01 16:38:12.301511 osd.117 [INF] 1.442 deep-scrub ok
+> 2013-02-01 16:38:12.390220 osd.214 [INF] 2.26c deep-scrub ok
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@inktank.com] 
+> Sent: 2013?2?1? 4:01
+> To: Jim Schutt
+> Cc: Chen, Xiaoxi; ceph-devel@vger.kernel.org
+> Subject: Re: Slow request in XFS
+> 
+> On Thu, 31 Jan 2013, Jim Schutt wrote:
+> > On 01/31/2013 05:43 AM, Sage Weil wrote:
+> > > Hi-
+> > > 
+> > > Can you reproduce this with logs?  It looks like there are a few ops 
+> > > that are hanging for a very long time, but there isn't enough 
+> > > information here except to point to osds 610, 612, 615, and 68...
+> > 
+> > FWIW, I have a small pile of disks with bad sections in them - these 
+> > sections aren't bad enough that writes fail, but they are bad enough 
+> > that throughput drops by a factor of ~20.
+> > 
+> > Do OSDs already collect statistics on, say, op commit elapsed time 
+> > (assuming that's the statistic most directly related to slow writes on 
+> > only some sections of a disk), in a way that could be used to diagnose 
+> > such disks?
+> > 
+> > If not, is there enough structure already in place that it would be 
+> > easy to add?
+> 
+> They're tracking it internally, but it gets averaged into the totals before a user gets to see any per-request latencies.  The per-daemon totals are available via the admin socket 'perf dump' command.  Have you looked at that information yet?
+> 
+> sage
+> N????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
