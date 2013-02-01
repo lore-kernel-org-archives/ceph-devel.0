@@ -1,64 +1,60 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RadowGW and multiple parts upload
-Date: Fri, 1 Feb 2013 10:44:23 -0800
-Message-ID: <CAC-hyiHERjdtY5ZN1PqFhVqz_pXOMN0hL6Va3FO7atGD07uc1g@mail.gmail.com>
-References: <CAJH6TXgfL8CVKyV71fsobi6e=AxOWZczbZa-TjosYodGJCbzEg@mail.gmail.com>
-	<CAC-hyiHi-GoPcjj+A08OjKdsQZiLf6c02mdyC+zPxT5jnU2CSA@mail.gmail.com>
-	<CAJH6TXjeUAVdFosZTiuxeePUOVhLfXiZ_iQ-VfM-boC1fNyCbA@mail.gmail.com>
-	<CAC-hyiEJd-zwtU5oeKBTeAyfN832TqZE3aPZmcGSe_O8iU2=pg@mail.gmail.com>
-	<CAJH6TXgqaP59Ph4dRUYK75AfFeAhcZWTxEse55v9LnCniUFg2g@mail.gmail.com>
-	<CAC-hyiGFfafct0zNnX4+N9y-Eaw9sjsgmoVyn4heTN7hhzfwXw@mail.gmail.com>
-	<CAJH6TXiU2QG-5DzaL6dOzQYO9APb+2HsDa+fpvWvTBg-D=Oacg@mail.gmail.com>
-	<CAC-hyiHkSC-9Y3_hhqtNBth5_RmTDZQS3wBbDriewtQDJtgL-A@mail.gmail.com>
-	<CAJH6TXjq8or0ByvWWJRNX4i9Yy+CXm3=hwUbPYPmKFCA3t2drw@mail.gmail.com>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: some performance issue
+Date: Fri, 1 Feb 2013 14:20:16 -0600
+Message-ID: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:61725 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756669Ab3BASoY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 13:44:24 -0500
-Received: by mail-ie0-f178.google.com with SMTP id c13so3708775ieb.23
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 10:44:23 -0800 (PST)
-In-Reply-To: <CAJH6TXjq8or0ByvWWJRNX4i9Yy+CXm3=hwUbPYPmKFCA3t2drw@mail.gmail.com>
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:46293 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756267Ab3BAUUR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 15:20:17 -0500
+Received: by mail-ie0-f179.google.com with SMTP id k11so2599600iea.38
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 12:20:16 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Then I think the next step would be to take tcp dump on the apache side.
+Hi,
 
-On Fri, Feb 1, 2013 at 10:32 AM, Gandalf Corvotempesta
-<gandalf.corvotempesta@gmail.com> wrote:
-> I'm using apache with your fastcgi module.
->
-> Il giorno 01/feb/2013 19:31, "Yehuda Sadeh" <yehuda@inktank.com> ha scritto:
->
->> The client can hang up the sending side of the socket, while still
->> receiving data. It can also be an issue with some other middleman.
->> Which web server are you using, which fastcgi module?
->>
->> On Fri, Feb 1, 2013 at 10:26 AM, Gandalf Corvotempesta
->> <gandalf.corvotempesta@gmail.com> wrote:
->> > I don't think this is a client issue because if client disconnect early
->> > no
->> > request is made and no error 400 will be sent.
->> >
->> > How will you send a response if no request is made?
->> >
->> > Il giorno 01/feb/2013 19:19, "Yehuda Sadeh" <yehuda@inktank.com> ha
->> > scritto:
->> >
->> >> On Fri, Feb 1, 2013 at 9:51 AM, Gandalf Corvotempesta
->> >> <gandalf.corvotempesta@gmail.com> wrote:
->> >> > 2013/2/1 Yehuda Sadeh <yehuda@inktank.com>:
->> >> >> Can you get just the sequence that fails (not the entire history)?
->> >> >
->> >> > Is the following enough?
->> >> > http://pastebin.com/CS4MwdRf
->> >>
->> >>
->> >> From what I can see, it looks like it's just receiving part of the
->> >> expected data, might be the client disconnects early.
->> >>
->> >> Yehuda
+i did one experiment which gives some interesting result.
+
+i create two OSD (ext4), each is a SSD attached on the same PC. i also
+configure one monitor and one mds on that PC.
+so generally, my OSDs, monitor and mds locate on the same node.
+
+i set up the ceph service and mount the ceph also on a local directory
+on that PC. so client, OSDs, monitor and mds all on the same node.
+i suppose this will exclude the network communication cost.
+
+i run fio benchmark which create one 10GB file (larger than main
+memory) on the ceph mount point. it perform sequential read/write and
+random read/write on the file, and generate the throughput result.
+
+next i umount the ceph and stop ceph service. i create ext4 on the
+same SSD that used as OSD before. then run the same workloads and get
+the throughput result.
+
+here are the results:
+
+(throughput kb/s)Seq-read	Rand-read	Seq-write	Rand-write
+ceph	                 7378	4740	           790	1211
+ext4	                 58260	17334	 54697	34257
+
+as you see, the ceph has huge performance down, even monitor, mds,
+client and osds locate on the same physical machine.
+another interesting thing is the seq-write has lower throughput
+compared with random-write under ceph. not quite clear....
+
+does anyone have idea about why ceph has that performance down?
+
+Thanks,
+Sheng
+
+
+-- 
+Sheng Qiu
+Texas A & M University
+Room 332B Wisenbaker
+email: herbert1984106@gmail.com
+College Station, TX 77843-3259
