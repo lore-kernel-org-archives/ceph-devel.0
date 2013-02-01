@@ -1,51 +1,65 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: [PATCH 0/6] fix build (ceph.spec)
-Date: Thu, 31 Jan 2013 23:00:48 -0800
-Message-ID: <FFA4897D-6F2D-43A3-B52D-6F700D537B63@inktank.com>
-References: <1359568845-7634-1-git-send-email-danny.al-gaaf@bisect.de> <92E15B6073484C53B4AE3A0B85F0FC25@inktank.com> <510966CF.6070501@bisect.de> <alpine.DEB.2.00.1301301153510.18801@cobra.newdream.net> <5109FC4C.1070407@inktank.com> <5109FCD5.4040303@inktank.com>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: =?ISO-8859-1?Q?Alexis_G=DCNST_HORN?=
+	<alexis.gunsthorn@outscale.com>
+Subject: Maintenance mode
+Date: Fri, 1 Feb 2013 08:40:52 +0100
+Message-ID: <CAEqYNSaOVFQyYaN=e0JeBBvj7r3hnjc3f=gtw3_HQsSsxJBLFw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:37851 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918Ab3BAHAx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 02:00:53 -0500
-Received: by mail-pb0-f47.google.com with SMTP id rp8so2018059pbb.20
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 23:00:53 -0800 (PST)
-In-Reply-To: <5109FCD5.4040303@inktank.com>
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:45002 "HELO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1750918Ab3BAHkz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 02:40:55 -0500
+Received: by mail-oa0-f72.google.com with SMTP id j6so14173049oag.11
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jan 2013 23:40:52 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>, Gregory Farnum <greg@inktank.com>, Watkins Noah <noah.watkins@inktank.com>, Dan Mick <dan.mick@inktank.com>
 
-The patches have been applied to the wip-rpm-update3 branch.  Additionally, rbd-fuse has been put into it's own package.
+Hello to all,
 
-Please have a look and let me know if that works for everyone.
+Here is my setup :
 
+- 2 racks
+- osd1 .. osd6 in rack1
+- osd7 .. osd12 in rack2
+- replica = 2
+- CRUSH map set to put replicas accross racks
+
+My question :
+Let's imagine that one day, I need to unplug one of the racks (let's
+say, rack1). No problem because an other copy of my objects will be in
+the other rack. But, if i do it, Ceph will start to rebalance data
+accross OSDs.
+
+So, is there a way to put nodes in "Maintenance mode", in order to put
+Ceph in "degraded" mode, but avoiding any  remaping.
+
+The idea is to have a command like :
+
+$ ceph osd set maintenance=on osd.1
+$ ceph osd set maintenance=on osd.2
+$ ceph osd set maintenance=on osd.3
+$ ceph osd set maintenance=on osd.4
+$ ceph osd set maintenance=on osd.5
+$ ceph osd set maintenance=on osd.6
+
+So Ceph knows that 6 osds are down, goes into degraded mode, but
+without remapping data.
+Then, once maintenance finished, i'll only have to do the opposite :
+
+$ ceph osd set maintenance=off osd.1
+$ ceph osd set maintenance=off osd.2
+$ ceph osd set maintenance=off osd.3
+$ ceph osd set maintenance=off osd.4
+$ ceph osd set maintenance=off osd.5
+$ ceph osd set maintenance=off osd.6
+
+What do you think ?
+I know that there is a way in Ceph doc to do so with reweight, but
+it's a little bit complex...
+
+What do you think ?
 Thanks,
-Gary
 
-On Jan 30, 2013, at 9:10 PM, Dan Mick wrote:
-
-> 
-> 
-> On 01/30/2013 09:08 PM, Dan Mick wrote:
->> 
->> 
->> On 01/30/2013 11:55 AM, Sage Weil wrote:
->> 
->>> I think the end goal is to build an rbd-fuse package, just like
->>> ceph-fuse.
->>> I'm not sure it matters how mature the tool is before it goes into the
->>> package; as long as it is separate, people can not install it, and the
->>> distros can keep it out of their supported repos as they like.
->> 
->> I like that plan a lot better.
-> 
-> and the major reason it wasn't yet done is that there are no manpages, tests, etc., but I wanted this to be available to experimenters.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Alexis
