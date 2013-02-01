@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: fix messenger CONFIG_BLOCK dependencies
-Date: Fri, 01 Feb 2013 09:20:29 -0800
-Message-ID: <510BF95D.9000306@inktank.com>
-References: <510B5321.9020000@inktank.com>
+Subject: Re: [PATCH] libceph: don't require r_num_pages for bio requests
+Date: Fri, 01 Feb 2013 09:22:04 -0800
+Message-ID: <510BF9BC.1000408@inktank.com>
+References: <510B52FD.3010907@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f45.google.com ([209.85.160.45]:43312 "EHLO
-	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756871Ab3BARUc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 12:20:32 -0500
-Received: by mail-pb0-f45.google.com with SMTP id rq13so2230474pbb.4
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 09:20:31 -0800 (PST)
-In-Reply-To: <510B5321.9020000@inktank.com>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:63394 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756967Ab3BARWH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Feb 2013 12:22:07 -0500
+Received: by mail-pa0-f49.google.com with SMTP id kp6so302984pab.22
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Feb 2013 09:22:07 -0800 (PST)
+In-Reply-To: <510B52FD.3010907@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,65 +21,73 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 01/31/2013 09:31 PM, Alex Elder wrote:
-> The ceph messenger has a few spots that are only used when
-> bio messages are supported, and that's only when CONFIG_BLOCK
-> is defined.  This surrounds a couple of spots with #ifdef's
-> that would cause a problem if CONFIG_BLOCK were not present
-> in the kernel configuration.
+On 01/31/2013 09:30 PM, Alex Elder wrote:
+> There is a check in the completion path for osd requests that
+> ensures the number of pages allocated is enough to hold the amount
+> of incoming data expected.
+>
+> For bio requests coming from rbd the "number of pages" is not really
+> meaningful (although total length would be).  So stop requiring that
+> nr_pages be supplied for bio requests.  This is done by checking
+> whether the pages pointer is null before checking the value of
+> nr_pages.
+>
+> Note that this value is passed on to the messenger, but there it's
+> only used for debugging--it's never used for validation.
+>
+> While here, change another spot that used r_pages in a debug message
+> inappropriately, and also invalidate the r_con_filling_msg pointer
+> after dropping a reference to it.
 >
 > This resolves:
->      http://tracker.ceph.com/issues/3976
+>      http://tracker.ceph.com/issues/3875
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   include/linux/ceph/messenger.h |    2 ++
->   net/ceph/messenger.c           |    5 ++++-
->   2 files changed, 6 insertions(+), 1 deletion(-)
+>   drivers/block/rbd.c   |    2 --
+>   net/ceph/osd_client.c |    7 ++++---
+>   2 files changed, 4 insertions(+), 5 deletions(-)
 >
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 14ba5ee..60903e0 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -83,9 +83,11 @@ struct ceph_msg {
->   	struct list_head list_head;
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 3ba4836..14a6967 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1342,8 +1342,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
+>   	case OBJ_REQUEST_BIO:
+>   		rbd_assert(obj_request->bio_list != NULL);
+>   		osd_req->r_bio = obj_request->bio_list;
+> -		/* osd client requires "num pages" even for bio */
+> -		osd_req->r_num_pages = calc_pages_for(offset, length);
+>   		break;
+>   	case OBJ_REQUEST_PAGES:
+>   		osd_req->r_pages = obj_request->pages;
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index ba03648..d9d58bb 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -137,10 +137,11 @@ void ceph_osdc_release_request(struct kref *kref)
+>   	if (req->r_request)
+>   		ceph_msg_put(req->r_request);
+>   	if (req->r_con_filling_msg) {
+> -		dout("%s revoking pages %p from con %p\n", __func__,
+> -		     req->r_pages, req->r_con_filling_msg);
+> +		dout("%s revoking msg %p from con %p\n", __func__,
+> +		     req->r_reply, req->r_con_filling_msg);
+>   		ceph_msg_revoke_incoming(req->r_reply);
+>   		req->r_con_filling_msg->ops->put(req->r_con_filling_msg);
+> +		req->r_con_filling_msg = NULL;
+>   	}
+>   	if (req->r_reply)
+>   		ceph_msg_put(req->r_reply);
+> @@ -1981,7 +1982,7 @@ static struct ceph_msg *get_reply(struct
+> ceph_connection *con,
+>   	if (data_len > 0) {
+>   		int want = calc_pages_for(req->r_page_alignment, data_len);
 >
->   	struct kref kref;
-> +#ifdef CONFIG_BLOCK
->   	struct bio  *bio;		/* instead of pages/pagelist */
->   	struct bio  *bio_iter;		/* bio iterator */
->   	int bio_seg;			/* current bio segment */
-> +#endif /* CONFIG_BLOCK */
->   	struct ceph_pagelist *trail;	/* the trailing part of the data */
->   	bool front_is_vmalloc;
->   	bool more_to_follow;
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 5ccf87e..8a62a55 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -9,8 +9,9 @@
->   #include <linux/slab.h>
->   #include <linux/socket.h>
->   #include <linux/string.h>
-> +#ifdef	CONFIG_BLOCK
->   #include <linux/bio.h>
-> -#include <linux/blkdev.h>
-> +#endif	/* CONFIG_BLOCK */
->   #include <linux/dns_resolver.h>
->   #include <net/tcp.h>
->
-> @@ -2651,9 +2652,11 @@ struct ceph_msg *ceph_msg_new(int type, int
-> front_len, gfp_t flags,
->   	m->page_alignment = 0;
->   	m->pages = NULL;
->   	m->pagelist = NULL;
-> +#ifdef	CONFIG_BLOCK
->   	m->bio = NULL;
->   	m->bio_iter = NULL;
->   	m->bio_seg = 0;
-> +#endif	/* CONFIG_BLOCK */
->   	m->trail = NULL;
->
->   	/* front */
+> -		if (unlikely(req->r_num_pages < want)) {
+> +		if (req->r_pages && unlikely(req->r_num_pages < want)) {
+>   			pr_warning("tid %lld reply has %d bytes %d pages, we"
+>   				   " had only %d pages ready\n", tid, data_len,
+>   				   want, req->r_num_pages);
 >
 
