@@ -1,38 +1,114 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: CEPH HEALTH NOT OK ceph version 0.56.2.!!!
-Date: Mon, 04 Feb 2013 14:27:13 +0000
-Message-ID: <510FC541.8060301@inktank.com>
-References: <CAPhYxPy=HqwYgZ9RfW0a9-LtDB2nTMOB33Hc6KhGcJ+zYfEmxA@mail.gmail.com>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: Re: some performance issue
+Date: Mon, 4 Feb 2013 09:36:48 -0600
+Message-ID: <CAB7xdi=y-n0P=vptiO-LvRUF7pcuqe1gJVwRtDkWbi+K7U=u8Q@mail.gmail.com>
+References: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
+	<510C2F49.8010401@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:46861 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755656Ab3BDO1w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 09:27:52 -0500
-Received: by mail-ee0-f46.google.com with SMTP id e49so3349595eek.33
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 06:27:50 -0800 (PST)
-In-Reply-To: <CAPhYxPy=HqwYgZ9RfW0a9-LtDB2nTMOB33Hc6KhGcJ+zYfEmxA@mail.gmail.com>
+Received: from mail-ia0-f179.google.com ([209.85.210.179]:45467 "EHLO
+	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754435Ab3BDPgt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 10:36:49 -0500
+Received: by mail-ia0-f179.google.com with SMTP id x24so8256727iak.10
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 07:36:49 -0800 (PST)
+In-Reply-To: <510C2F49.8010401@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: femi anjorin <femi.anjorin@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This wasn't obvious due to all the debug being outputted, but here's why 
-'ceph health' wasn't replying with HEALTH_OK:
+Hi Mark,
 
-On 02/04/2013 12:21 PM, femi anjorin wrote:
-> 2013-02-04 12:56:15.818985 7f149bfff700  1 HEALTH_WARN 4987 pgs
-> peering; 4987 pgs stuck inactive; 5109 pgs stuck unclean
+thanks a lot for your reply.
 
-Furthermore, on your other email in which you ran 'ceph health detail', 
-this appear to have gone away, as it is replying with HEALTH_OK again.
+On Fri, Feb 1, 2013 at 3:10 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> On 02/01/2013 02:20 PM, sheng qiu wrote:
+>>
+>> Hi,
+>>
+>> i did one experiment which gives some interesting result.
+>>
+>> i create two OSD (ext4), each is a SSD attached on the same PC. i also
+>> configure one monitor and one mds on that PC.
+>> so generally, my OSDs, monitor and mds locate on the same node.
+>>
+>> i set up the ceph service and mount the ceph also on a local directory
+>> on that PC. so client, OSDs, monitor and mds all on the same node.
+>> i suppose this will exclude the network communication cost.
+>>
+>> i run fio benchmark which create one 10GB file (larger than main
+>> memory) on the ceph mount point. it perform sequential read/write and
+>> random read/write on the file, and generate the throughput result.
+>>
+>> next i umount the ceph and stop ceph service. i create ext4 on the
+>> same SSD that used as OSD before. then run the same workloads and get
+>> the throughput result.
+>>
+>> here are the results:
+>>
+>> (throughput kb/s)Seq-read       Rand-read       Seq-write       Rand-write
+>> ceph                     7378   4740               790  1211
+>> ext4                     58260  17334    54697  34257
+>>
+>> as you see, the ceph has huge performance down, even monitor, mds,
+>> client and osds locate on the same physical machine.
+>> another interesting thing is the seq-write has lower throughput
+>> compared with random-write under ceph. not quite clear....
+>>
+>> does anyone have idea about why ceph has that performance down?
+>
+>
+> Hi Sheng,
+>
+> Are you using RBD or CephFS (and kernel or userland clients?)  How much
+> replication?  Also, what FIO settings?
+>
 
-You might want to set '--debug-ms 0' when you run 'ceph', or set it in 
-your ceph.conf, leaving it at a higher level only for daemons (i.e., 
-under [mds], [mon], [osd]...).  The resulting output will be clearer and 
-more easily understandable.
+   i am using CephFS and kernel clients. the replication is by default
+(3?). the FIO is using the ssd-test script, IO request size is 4kb.
 
-   -Joao
+> In general, it is difficult to make distributed storage systems perform as
+> well as local storage for small read/write workloads.  You need a lot of
+> concurrency to hide the latencies, and if the local storage is incredibly
+> fast (like an SSD!) you have a huge uphill battle.
+>
+> Regarding the network, Even though you ran everything on localhost, ceph is
+> still using TCP sockets to do all of the communication.
+>
 
+   i guess when it checked the remote ip is actually the local
+address, it will directly patch the send packets to the receive
+buffer. right?
+
+> Having said that, I think we can do better than 790 IOPs for seq writes,
+> even if it's 2x replication.  The trick is to find where in the stack things
+> are getting held up.  You might want to look at tools like iostat and
+> collectl, and look at some of the op latency data in the ceph admin socket.
+> A basic introduction is described in sebastian's article here:
+>
+> http://www.sebastien-han.fr/blog/2012/08/14/ceph-admin-socket/
+>
+>>
+>> Thanks,
+>> Sheng
+>>
+>>
+>
+
+I would try your suggestion to find where the bottleneck is.
+the reason i did this experiment is just trying to find some potential
+issues with ceph. i am a Ph.d. student and trying to do some research
+work on it.
+i would be happy to hear your suggestions.
+
+Thanks,
+Sheng
+
+-- 
+Sheng Qiu
+Texas A & M University
+Room 332B Wisenbaker
+email: herbert1984106@gmail.com
+College Station, TX 77843-3259
