@@ -1,58 +1,157 @@
-From: Mark Kampe <mark.kampe@inktank.com>
-Subject: Re: some performance issue
-Date: Mon, 04 Feb 2013 09:29:26 -0800
-Message-ID: <510FEFF6.7010709@inktank.com>
-References: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com> <510C2F49.8010401@inktank.com> <CAB7xdi=y-n0P=vptiO-LvRUF7pcuqe1gJVwRtDkWbi+K7U=u8Q@mail.gmail.com> <6F3FA899187F0043BA1827A69DA2F7CC5ECFFC@SHSMSX102.ccr.corp.intel.com> <CAB7xdinzWjS7PfWCf+3HLby7DYVr4Yz21C1WLV6Fa=6CwzjTOA@mail.gmail.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: [0.48.3] OSD memory leak when scrubbing
+Date: Mon, 4 Feb 2013 18:29:15 +0100
+Message-ID: <CAOLwVUmNc_kZgbuKO4VY2mTBAV4FkwrLT=YdK1qJZhsK=sjbMQ@mail.gmail.com>
+References: <CAF6-1L5Evp-vz1K4M9tu4vVLfbBzXfgL4+GHBGzGjZJ-KoPt3A@mail.gmail.com>
+ <CAOLwVUkLdECXqoj2rpOh0hm66FPv0tEe-Z8A1oOj9Geer3NJ+A@mail.gmail.com>
+ <CAF6-1L40y-JvBr9J3Cx9p9nX=uEaz+pMrA2+g9rJDV-1AQxqtA@mail.gmail.com>
+ <CAOLwVUm-LOStdMRNJeuA8qSzy2x3twMssBFA43J0MYVrFPNcbA@mail.gmail.com>
+ <CAOLwVUmMCX_jHBc5Fqs_emT5E4ThoHd3nhUxmwhEJAZN4H3t9g@mail.gmail.com>
+ <CAF6-1L7HJMwqDPWwpkbqyTNbGbVhm_5pCbR73nTtnk0eD8xB4g@mail.gmail.com>
+ <CAF6-1L4SfogRx0=46A8YR4dW1f-qOLNSh-7mT9HS_NKz9CjCZQ@mail.gmail.com>
+ <alpine.DEB.2.00.1301270946190.16117@cobra.newdream.net> <CAF6-1L76dwdxGp2MGJTWFF4VwmzMT3a62tSTZhE8P1b-OOSBuw@mail.gmail.com>
+ <alpine.DEB.2.00.1301300116210.4449@cobra.newdream.net> <CAF6-1L61H28xXDPZBC5Um0tyJLs2uGX8S7G2UjpL64fnt7oRcA@mail.gmail.com>
+ <alpine.DEB.2.00.1301301139490.18801@cobra.newdream.net> <CAF6-1L5z39ZsPwBz5yJWDvQoX7UaUZ5PVpUwfVhoBne56Z018Q@mail.gmail.com>
+ <alpine.DEB.2.00.1301311141240.807@cobra.newdream.net> <510EA9A1.6070505@dachary.org>
+ <CAOLwVUkUFvLihb6KbxG9Et7R_-ZTZpLQJYTjXm9TEe40V_ZRHg@mail.gmail.com> <CAOLwVUmYm0shGzdxfyg6LXSDgxa1hxF_Kh1oRDZXKtupvGB3VQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:52845 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753696Ab3BDR3a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 12:29:30 -0500
-Received: by mail-ie0-f180.google.com with SMTP id bn7so4969469ieb.39
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 09:29:28 -0800 (PST)
-In-Reply-To: <CAB7xdinzWjS7PfWCf+3HLby7DYVr4Yz21C1WLV6Fa=6CwzjTOA@mail.gmail.com>
+Received: from mail-oa0-f54.google.com ([209.85.219.54]:47234 "EHLO
+	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753986Ab3BDR3g convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 12:29:36 -0500
+Received: by mail-oa0-f54.google.com with SMTP id n12so3963052oag.13
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 09:29:35 -0800 (PST)
+In-Reply-To: <CAOLwVUmYm0shGzdxfyg6LXSDgxa1hxF_Kh1oRDZXKtupvGB3VQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sheng qiu <herbert1984106@gmail.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Sage Weil <sage@inktank.com>, Sylvain Munaut <s.munaut@whatever-company.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Writes are intrinsically more expensive (in both the file
-system and hardware) but it is not uncommon for individual
-small random writes to substantially outperform reads even
-if O_DIRECT.
+Hum just tried several times on my test cluster and I can't get any
+core dump. Does Ceph commit suicide or something? Is it expected
+behavior?
+--
+Regards,
+S=E9bastien Han.
 
-If the I/O is not massively parallel, reads are going to be
-processed one at a time (e.g. ~6ms seek, ~4ms latency, and
-27us transfer).  Writes, however, are commonly accepted by
-the drive and then queued, enabling the drive to choose among
-the competing requests to significantly (e.g. 2-3x) reduce
-both average seek time and rotational latency.
 
-If the I/O is being buffered, the performance advantages for
-random writes can be even greater (due to a deeper request
-queue and potential request aggregation).  Isolated random
-reads (with few cache hits) get a much smaller performance
-boost (if any) from buffered I/O.
-
-With massively parallel requests, however, the write
-advantage should evaporate.
-
-On 02/04/2013 09:15 AM, sheng qiu wrote:
-> Hi Xiaoxi,
+On Sun, Feb 3, 2013 at 10:03 PM, S=E9bastien Han <han.sebastien@gmail.c=
+om> wrote:
+> Hi Lo=EFc,
 >
-> thanks for your reply.
+> Thanks for bringing our discussion on the ML. I'll check that tomorro=
+w :-).
 >
-> On Mon, Feb 4, 2013 at 10:52 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
->> I doubt your data is correct ,even the ext4 data, have you use O_DIRECT when doing the test? It's unusual to have 2X random write IOPS than random read.
+> Cheer
+> --
+> Regards,
+> S=E9bastien Han.
+>
+>
+> On Sun, Feb 3, 2013 at 10:01 PM, S=E9bastien Han <han.sebastien@gmail=
+=2Ecom> wrote:
+>> Hi Lo=EFc,
 >>
->
->   i did not use O_DIRECT. so page cache is used during the test.
-> one thing i guess why random write is better than random read is that
-> since the io request size is 4KB, so for each write request if miss on
-> page cache, it will allocate a new page and write the complete 4KB
-> dirty data there (since no partitional writes, no need to fetch the
-> missed data from OSDs). While for read requests, it has to wait until
-> the data are fetched from the OSDs.
+>> Thanks for bringing our discussion on the ML. I'll check that tomorr=
+ow :-).
+>>
+>> Cheers
+>>
+>> --
+>> Regards,
+>> S=E9bastien Han.
+>>
+>>
+>> On Sun, Feb 3, 2013 at 7:17 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>>>
+>>> Hi,
+>>>
+>>> As discussed during FOSDEM, the script you wrote to kill the OSD wh=
+en it
+>>> grows too much could be amended to core dump instead of just being =
+killed &
+>>> restarted. The binary + core could probably be used to figure out w=
+here the
+>>> leak is.
+>>>
+>>> You should make sure the OSD current working directory is in a file=
+ system
+>>> with enough free disk space to accomodate for the dump and set
+>>>
+>>> ulimit -c unlimited
+>>>
+>>> before running it ( your system default is probably ulimit -c 0 whi=
+ch
+>>> inhibits core dumps ). When you detect that OSD grows too much kill=
+ it with
+>>>
+>>> kill -SEGV $pid
+>>>
+>>> and upload the core found in the working directory, together with t=
+he
+>>> binary in a public place. If the osd binary is compiled with -g but=
+ without
+>>> changing the -O settings, you should have a larger binary file but =
+no
+>>> negative impact on performances. Forensics analysis will be made a =
+lot
+>>> easier with the debugging symbols.
+>>>
+>>> My 2cts
+>>>
+>>> On 01/31/2013 08:57 PM, Sage Weil wrote:
+>>> > On Thu, 31 Jan 2013, Sylvain Munaut wrote:
+>>> >> Hi,
+>>> >>
+>>> >> I disabled scrubbing using
+>>> >>
+>>> >>> ceph osd tell \* injectargs '--osd-scrub-min-interval 1000000'
+>>> >>> ceph osd tell \* injectargs '--osd-scrub-max-interval 10000000'
+>>> >>
+>>> >> and the leak seems to be gone.
+>>> >>
+>>> >> See the graph at  http://i.imgur.com/A0KmVot.png  with the OSD m=
+emory
+>>> >> for the 12 osd processes over the last 3.5 days.
+>>> >> Memory was rising every 24h. I did the change yesterday around 1=
+3h00
+>>> >> and OSDs stopped growing. OSD memory even seems to go down slowl=
+y by
+>>> >> small blocks.
+>>> >>
+>>> >> Of course I assume disabling scrubbing is not a long term soluti=
+on and
+>>> >> I should re-enable it ... (how do I do that btw ? what were the
+>>> >> default values for those parameters)
+>>> >
+>>> > It depends on the exact commit you're on.  You can see the defaul=
+ts if
+>>> > you
+>>> > do
+>>> >
+>>> >  ceph-osd --show-config | grep osd_scrub
+>>> >
+>>> > Thanks for testing this... I have a few other ideas to try to rep=
+roduce.
+>>> >
+>>> > sage
+>>> > --
+>>> > To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>>> > the body of a message to majordomo@vger.kernel.org
+>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+>>>
+>>> --
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
