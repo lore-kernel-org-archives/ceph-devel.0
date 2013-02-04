@@ -1,114 +1,76 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: some performance issue
-Date: Mon, 4 Feb 2013 09:36:48 -0600
-Message-ID: <CAB7xdi=y-n0P=vptiO-LvRUF7pcuqe1gJVwRtDkWbi+K7U=u8Q@mail.gmail.com>
-References: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
-	<510C2F49.8010401@inktank.com>
+From: Ugis <ugis22@gmail.com>
+Subject: different weight reports by "ceph osd tree" and crushmap
+Date: Mon, 4 Feb 2013 17:59:40 +0200
+Message-ID: <CAE63xUM0q_M2Q8w_6R+ksxONg_ppkOtvA6PY-uFR7C2g7XNgRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:45467 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754435Ab3BDPgt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 10:36:49 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so8256727iak.10
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 07:36:49 -0800 (PST)
-In-Reply-To: <510C2F49.8010401@inktank.com>
+Received: from mail-ia0-f181.google.com ([209.85.210.181]:51059 "EHLO
+	mail-ia0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755863Ab3BDP7l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 10:59:41 -0500
+Received: by mail-ia0-f181.google.com with SMTP id k25so8197345iah.26
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 07:59:40 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Mark,
+Hi,
 
-thanks a lot for your reply.
+ceph=0.56.2.
+I wonder where is the right place to look for actual weights of OSDs?
+Why "ceph osd tree" and freshly exported crusmap differ in weights?
 
-On Fri, Feb 1, 2013 at 3:10 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
-> On 02/01/2013 02:20 PM, sheng qiu wrote:
->>
->> Hi,
->>
->> i did one experiment which gives some interesting result.
->>
->> i create two OSD (ext4), each is a SSD attached on the same PC. i also
->> configure one monitor and one mds on that PC.
->> so generally, my OSDs, monitor and mds locate on the same node.
->>
->> i set up the ceph service and mount the ceph also on a local directory
->> on that PC. so client, OSDs, monitor and mds all on the same node.
->> i suppose this will exclude the network communication cost.
->>
->> i run fio benchmark which create one 10GB file (larger than main
->> memory) on the ceph mount point. it perform sequential read/write and
->> random read/write on the file, and generate the throughput result.
->>
->> next i umount the ceph and stop ceph service. i create ext4 on the
->> same SSD that used as OSD before. then run the same workloads and get
->> the throughput result.
->>
->> here are the results:
->>
->> (throughput kb/s)Seq-read       Rand-read       Seq-write       Rand-write
->> ceph                     7378   4740               790  1211
->> ext4                     58260  17334    54697  34257
->>
->> as you see, the ceph has huge performance down, even monitor, mds,
->> client and osds locate on the same physical machine.
->> another interesting thing is the seq-write has lower throughput
->> compared with random-write under ceph. not quite clear....
->>
->> does anyone have idea about why ceph has that performance down?
->
->
-> Hi Sheng,
->
-> Are you using RBD or CephFS (and kernel or userland clients?)  How much
-> replication?  Also, what FIO settings?
->
+# ceph osd tree
+# id    weight  type name       up/down reweight
+-2      6.2     host ceph2
+0       0.4             osd.0   up      0.373
+2       3               osd.2   up      2.8
+4       2.8             osd.4   up      0.373
+-1      10.9    pool default
+-7      6.2             ups 10KVA
+-3      6.2                     rack rack1
+-2      6.2                             host ceph2
+0       0.4                                     osd.0   up      0.373
+2       3                                       osd.2   up      2.8
+4       2.8                                     osd.4   up      0.373
+-8      4.7             ups 6KVA
+-6      4.7                     rack rack4
+-4      2                               host ceph1
+1       2                                       osd.1   up      1.9
+-9      2.7                             host ceph4
+3       2.7                                     osd.3   up      2.8
+(above weights are correct)
 
-   i am using CephFS and kernel clients. the replication is by default
-(3?). the FIO is using the ssd-test script, IO request size is 4kb.
+# ceph health detail
+HEALTH_WARN 1 near full osd(s)
+osd.4 is near full at 94%
 
-> In general, it is difficult to make distributed storage systems perform as
-> well as local storage for small read/write workloads.  You need a lot of
-> concurrency to hide the latencies, and if the local storage is incredibly
-> fast (like an SSD!) you have a huge uphill battle.
->
-> Regarding the network, Even though you ran everything on localhost, ceph is
-> still using TCP sockets to do all of the communication.
->
+Afterwards did :
+"ceph osd getcrushmap -o map.bin" + "crushtool -d map.bin -o map.plain"
+and here is the excerpt from map.plain:
+...
+# buckets
+host ceph2 {
+        id -2           # do not change unnecessarily
+        # weight 6.200
+        alg straw
+        hash 0  # rjenkins1
+        item osd.0 weight 0.400
+        item osd.2 weight 3.000
+        item osd.4 weight 2.800
+...
 
-   i guess when it checked the remote ip is actually the local
-address, it will directly patch the send packets to the receive
-buffer. right?
+I see now why my osd.4 is filling faster than its twin osd.0.
 
-> Having said that, I think we can do better than 790 IOPs for seq writes,
-> even if it's 2x replication.  The trick is to find where in the stack things
-> are getting held up.  You might want to look at tools like iostat and
-> collectl, and look at some of the op latency data in the ceph admin socket.
-> A basic introduction is described in sebastian's article here:
->
-> http://www.sebastien-han.fr/blog/2012/08/14/ceph-admin-socket/
->
->>
->> Thanks,
->> Sheng
->>
->>
->
+At some point in past I did "ceph osd reweight osd.x Z.Z" to tune
+weights to match actual TB size of disks, cluster did data rebalancing
+so weights should be the same crush is using, right?
 
-I would try your suggestion to find where the bottleneck is.
-the reason i did this experiment is just trying to find some potential
-issues with ceph. i am a Ph.d. student and trying to do some research
-work on it.
-i would be happy to hear your suggestions.
+Any thoughts?
 
-Thanks,
-Sheng
+I will rewrite crushmap weights by hand and try to import the crushmap
+- hope this will rebalance OSDs.
+Or are there other suggestions how to solve this?
 
--- 
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+Ugis
