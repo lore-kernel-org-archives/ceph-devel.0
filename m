@@ -1,12 +1,12 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 03/10] tp_bench.cc: remove twice included <iostream>
-Date: Mon,  4 Feb 2013 17:54:02 +0100
-Message-ID: <1359996849-26302-4-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 06/10] testxattr.cc: remove twice included <iostream>
+Date: Mon,  4 Feb 2013 17:54:05 +0100
+Message-ID: <1359996849-26302-7-git-send-email-danny.al-gaaf@bisect.de>
 References: <1359996849-26302-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:58021 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:58009 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756214Ab3BDQyO (ORCPT
+	by vger.kernel.org with ESMTP id S1756061Ab3BDQyO (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 11:54:14 -0500
 In-Reply-To: <1359996849-26302-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -18,21 +18,21 @@ Cleanup includes, remove twice included <iostream>.
 
 Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- src/test/bench/tp_bench.cc | 1 -
+ src/test/old/testxattr.cc | 1 -
  1 file changed, 1 deletion(-)
 
-diff --git a/src/test/bench/tp_bench.cc b/src/test/bench/tp_bench.cc
-index daee790..31a4db3 100644
---- a/src/test/bench/tp_bench.cc
-+++ b/src/test/bench/tp_bench.cc
-@@ -12,7 +12,6 @@
- #include <sstream>
- #include <stdlib.h>
- #include <fstream>
+diff --git a/src/test/old/testxattr.cc b/src/test/old/testxattr.cc
+index 65bb4b1..b1ef126 100644
+--- a/src/test/old/testxattr.cc
++++ b/src/test/old/testxattr.cc
+@@ -9,7 +9,6 @@ using namespace std;
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <sys/file.h>
 -#include <iostream>
- 
- #include "common/Formatter.h"
- 
+ #include <errno.h>
+ #include <dirent.h>
+ #include <sys/xattr.h>
 -- 
 1.8.1.2
 
