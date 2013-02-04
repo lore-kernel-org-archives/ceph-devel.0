@@ -1,34 +1,55 @@
-From: "aleonov@nazarianin.com" <aleonov@nazarianin.com>
-Subject: Re: Maintenance mode
-Date: Mon, 04 Feb 2013 13:40:20 +0600
-Message-ID: <510F65E4.1050404@nazarianin.com>
-References: <CAEqYNSaOVFQyYaN=e0JeBBvj7r3hnjc3f=gtw3_HQsSsxJBLFw@mail.gmail.com> <16B6063F84B648D2BC7A4B01D365C070@inktank.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Re: Paxos and long-lasting deleted data
+Date: Mon, 4 Feb 2013 08:46:21 +0000
+Message-ID: <86D7D063-0BF6-4C3A-9DD3-9E8F08721ADF@intel.com>
+References: <CABYiri8fbbpuhh0RguqdsmYEbEkYz_+PKO4UJqWqKb1TwDcc6A@mail.gmail.com>
+ <CAPYLRzjwn4LxnzbX9SBJL7x7AtX6=pmv84HXBGykNGHn7zVLTA@mail.gmail.com>
+ <CABYiri82rCvVD79rnhm3mFPoegnF7w4SNyUrFr+axEoty69n1A@mail.gmail.com>
+ <CAPYLRzieYDDOrbpj_Cs0czxA3uFrLez6A5gKdQoMFT2dyA9vqA@mail.gmail.com>
+ <CABYiri-Q=N+N9TQrTkex+WVF0wu94CuXMx_FHXBsEsrjaO1kPQ@mail.gmail.com>
+ <CABYiri-A=_YnR31uZ57Jqu=oWOpcm9yauezB=0=okLbQA3wYtg@mail.gmail.com>
+ <9D4D1E35A663400D9BC055C2C879DF8A@inktank.com>,<CABYiri-i8LYcp2K60gxjnm=oQjMTziWYpNzvgOn7eBuP=2SaYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:33466 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751825Ab3BDHkd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 02:40:33 -0500
-Received: by mail-la0-f44.google.com with SMTP id eb20so4331964lab.31
-        for <ceph-devel@vger.kernel.org>; Sun, 03 Feb 2013 23:40:27 -0800 (PST)
-In-Reply-To: <16B6063F84B648D2BC7A4B01D365C070@inktank.com>
+Received: from mga01.intel.com ([192.55.52.88]:20276 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753691Ab3BDIqq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Feb 2013 03:46:46 -0500
+In-Reply-To: <CABYiri-i8LYcp2K60gxjnm=oQjMTziWYpNzvgOn7eBuP=2SaYQ@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Gregory Farnum <greg@inktank.com>, Dan Mick <dan.mick@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
-
-I have "slow requests" when set one of two osd  in "noout" and restart 
-server. What can I do to safely shut down the server?
-
--Alex
-> Try "ceph osd set noout" beforehand and then "ceph osd unset noout". That will prevent any OSDs from getting removed from the mapping, so no data will be rebalanced. I don't think there's a way to prevent OSDs from getting zapped on an individual basis, though.
-> This is described briefly in the docs at http://ceph.com/docs/master/rados/operations/troubleshooting-osd/?highlight=noout, though it could probably be a bit more clear.
-> -Greg
->
->
->
-
+SSBoYXZlIGhpdCB0aGUgc2FtZSBpc3N1ZSx3aGVuIEkgdHJ5IHRvIHJlbW92ZSBhIHBvb2wgd2hp
+Y2ggY29udGFpbnMgYSBsb3Qgb2YgZGF0YSx0aGUgZGVsZXRlIGZpbmlzaGVkLGJvdGggY2VwaCAt
+dyBhbmQgaW9zdGF0IHNob3cgbm8gYWN0aXZpdHkuIA0KQnV0IHRoZSAndXNlZCcgZmllbGQgcmVt
+YWluIGEgbGFyZ2UgbnVtYmVyKGFsb3VnaHQgbGVzcyB0aGFuIG9yaWdpbmFsIHZhbGllKS4gaW50
+ZXJhdGUgbHMgYWxsIHRoZSBsZWZ0ZWQgcG9vbCBzb2x2ZSB0aGUgaW5jb25zaXN0ZW5jeS4NCg0K
+DQoNCtTaIDIwMTMtMi00o6wxMzozMqOsIkFuZHJleSBLb3JvbHlvdiIgPGFuZHJleUB4ZGVsLnJ1
+PiDQtLXAo7oNCg0KPiBPbiBNb24sIEZlYiA0LCAyMDEzIGF0IDE6NDYgQU0sIEdyZWdvcnkgRmFy
+bnVtIDxncmVnQGlua3RhbmsuY29tPiB3cm90ZToNCj4+IE9uIFN1bmRheSwgRmVicnVhcnkgMywg
+MjAxMyBhdCAxMTo0NSBBTSwgQW5kcmV5IEtvcm9seW92IHdyb3RlOg0KPj4+IEp1c3QgYW4gdXBk
+YXRlOiB0aGlzIGRhdGEgc3RheWVkIGFmdGVyIHBvb2wgZGVsZXRpb24sIHNvIHRoZXJlIGlzDQo+
+Pj4gcHJvYmFibHkgYSB3YXkgdG8gZGVsZXRlIGdhcmJhZ2UgYnl0ZXMgb24gbGl2ZSBwb29sIHdp
+dGhvdXQgZG9pbmcgYW55DQo+Pj4gaGFybShob3BlIHNvKSwgc2luY2UgaXQgaXMgY2FuIGJlIGRp
+c3NlY3RlZCBmcm9tIGFjdHVhbCBwb29sIHBvb2wgZGF0YQ0KPj4+IHBsYWNlbWVudCwgaW4gdGhl
+b3J5Lg0KPj4gDQo+PiANCj4+IFdoYXQ/IFlvdSBtZWFuIHlvdSBkZWxldGVkIHRoZSBwb29sIGFu
+ZCB0aGUgZGF0YSBpbiB1c2UgYnkgdGhlIGNsdXN0ZXIgZGlkbid0IGRyb3A/IElmIHRoYXQncyB0
+aGUgY2FzZSwgY2hlY2sgYW5kIHNlZSBpZiBpdCdzIHN0aWxsIGF0IHRoZSBzYW1lIGxldmVsIKGq
+IHBvb2wgZGVsZXRlcyBhcmUgYXN5bmNocm9ub3VzIGFuZCB0aHJvdHRsZWQgdG8gcHJldmVudCBp
+bXBhY3RpbmcgY2xpZW50IG9wZXJhdGlvbnMgdG9vIG11Y2guDQo+IA0KPiBZZXAsIG9mIGNvdXJz
+ZSwgSSBtZWFudCB0aGlzIGV4YWN0bHkgLSBJIGhhdmUgd2FpdGVkIHVudGlsIGBgY2VwaCAtdycn
+DQo+IHZhbHVlcyB3YXMgc3RhYmlsaXplZCBmb3IgYSBsb25nIHBlcmlvZCwgdGhlbiBjaGVja2Vk
+IHRoYXQgYSBidW5jaCBvZg0KPiBmaWxlcyB3aXRoIHNhbWUgcHJlZml4IGFzIGluIGRlbGV0ZWQg
+cG9vbCByZW1haW5zLCB0aGVuIEkgcHVyZ2VkIHRoZW0NCj4gbWFudWFsbHkuIElgbSBub3Qgc3Vy
+ZSBpZiB0aGlzIGRhdGEgd2FzIGluIHVzZSBhdCB0aGUgbW9tZW50IG9mIHBvb2wNCj4gcmVtb3Zh
+bCwgYXMgSSBtZW50aW9uZWQgYWJvdmUsIGl0YHMganVzdCBnYXJiYWdlIHByb2R1Y2VkIGR1cmlu
+Zw0KPiBwZXJpb2RzIHdoZW4gY2x1c3RlciB3YXMgZGVncmFkZWQgaGVhdmlseS4NCj4gDQo+PiAt
+R3JlZw0KPj4gDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0
+ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
