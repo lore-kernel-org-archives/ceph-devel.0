@@ -1,88 +1,32 @@
-From: charles L <charlesboy009@hotmail.com>
-Subject: =?windows-1256?Q?RE:_Ceph_D?= =?windows-1256?Q?evelopment?=
- =?windows-1256?Q?_with_Ecli?= =?windows-1256?Q?pse=FE?=
-Date: Mon, 4 Feb 2013 14:01:25 +0100
-Message-ID: <DUB116-W124FC6A2EE7FCBDD873D42E0010@phx.gbl>
-References: <DUB116-W12467CE5C3C0CAECA94D647E0030@phx.gbl>,<CBC0FE06F6854C9E8071A40270E28FA8@inktank.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: CEPH HEALTH NOT OK ceph version 0.56.2.!!!
+Date: Mon, 04 Feb 2013 13:29:41 +0000
+Message-ID: <510FB7C5.6020106@inktank.com>
+References: <CAPhYxPy=HqwYgZ9RfW0a9-LtDB2nTMOB33Hc6KhGcJ+zYfEmxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1256
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dub0-omc4-s32.dub0.hotmail.com ([157.55.2.107]:4635 "EHLO
-	dub0-omc4-s32.dub0.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753996Ab3BDNB1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 08:01:27 -0500
-In-Reply-To: <CBC0FE06F6854C9E8071A40270E28FA8@inktank.com>
+Received: from mail-ee0-f49.google.com ([74.125.83.49]:38520 "EHLO
+	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754143Ab3BDNaT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 08:30:19 -0500
+Received: by mail-ee0-f49.google.com with SMTP id d4so3090050eek.22
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Feb 2013 05:30:18 -0800 (PST)
+In-Reply-To: <CAPhYxPy=HqwYgZ9RfW0a9-LtDB2nTMOB33Hc6KhGcJ+zYfEmxA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: greg@inktank.com
-Cc: ceph-devel@vger.kernel.org, post.the.reply@gmail.com
+To: femi anjorin <femi.anjorin@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
+On 02/04/2013 12:21 PM, femi anjorin wrote:
+> The mon is ok
+> The mds is ok
+> The osds were properly mount by mkcephfs -mkfs
+>
+> But "ceph health" wont respond  ok !!!
 
-Hi Greg,
+'ceph health detail' should provide further insight to what's happening.
 
-I guess setting Ceph up outside of Eclipse include doing the =A0followi=
-ng on any linux system:
+   -Joao
 
-1. To prepare the source tree after it has been git cloned,
-$ git submodule update --init
-
-2. To build the server daemons, and FUSE client, execute the following:
-$ ./autogen.sh
-$ ./configure
-$ make
-3. Creating a C/C++ project on eclipse and importing the Makefile into =
-Eclipse ...to put the ceph project under Eclipse control...
-
-BUT its not working!!! Makefile not visible in Eclipse and wont import.=
-=2E. I guess i have missed some steps in setting it up outside Eclipse =
-or the process of importing ...
-
-
-=2E.. I will appreciate your guidance and guidance from the community t=
-oo...
-
-
-Regards,
-
-Charles.
-
-
-
-
-> Date: Sat, 2 Feb 2013 18:16:08 -0800
-> From: greg@inktank.com
-> To: charlesboy009@hotmail.com
-> CC: ceph-devel@vger.kernel.org; post.the.reply@gmail.com
-> Subject: Re: Ceph Development with Eclipse=FE
->=20
-> I actually still do this. Set it up Ceph outside of Eclipse initially=
-, then import it as a project with an existing Makefile. It should pick=
- up on everything it needs to well enough. :)=20
-> -Greg
->=20
->=20
-> On Saturday, February 2, 2013 at 9:40 AM, charles L wrote:
->=20
-> >=20
-> >=20
-> > Hi=20
-> >=20
-> > I am a beginner at c++ and eclipse. I need some startup help to dev=
-elop ceph with eclipse. If you could provide your config file on eclips=
-e, it will be a great starting point and very appreciated.
-> >=20
-> > Regards,
-> >=20
-> > Charles.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
- 		 	   		 =20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
