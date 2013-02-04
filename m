@@ -1,96 +1,101 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: different weight reports by "ceph osd tree" and crushmap
-Date: Mon, 4 Feb 2013 08:51:06 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302040849070.24807@cobra.newdream.net>
-References: <CAE63xUM0q_M2Q8w_6R+ksxONg_ppkOtvA6PY-uFR7C2g7XNgRQ@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: some performance issue
+Date: Mon, 4 Feb 2013 16:52:28 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5ECFFC@SHSMSX102.ccr.corp.intel.com>
+References: <CAB7xdinwhd6gmqbzeC7Gp+ugDbJhOcr1TwX-1KYg5=geWbT0+g@mail.gmail.com>
+	<510C2F49.8010401@inktank.com>
+ <CAB7xdi=y-n0P=vptiO-LvRUF7pcuqe1gJVwRtDkWbi+K7U=u8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47589 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754348Ab3BDQvH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Feb 2013 11:51:07 -0500
-In-Reply-To: <CAE63xUM0q_M2Q8w_6R+ksxONg_ppkOtvA6PY-uFR7C2g7XNgRQ@mail.gmail.com>
+Received: from mga11.intel.com ([192.55.52.93]:16875 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756584Ab3BDQwl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Feb 2013 11:52:41 -0500
+In-Reply-To: <CAB7xdi=y-n0P=vptiO-LvRUF7pcuqe1gJVwRtDkWbi+K7U=u8Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ugis <ugis22@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: sheng qiu <herbert1984106@gmail.com>, Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 4 Feb 2013, Ugis wrote:
-> Hi,
-> 
-> ceph=0.56.2.
-> I wonder where is the right place to look for actual weights of OSDs?
-> Why "ceph osd tree" and freshly exported crusmap differ in weights?
-> 
-> # ceph osd tree
-> # id    weight  type name       up/down reweight
-> -2      6.2     host ceph2
-> 0       0.4             osd.0   up      0.373
-> 2       3               osd.2   up      2.8
-> 4       2.8             osd.4   up      0.373
-> -1      10.9    pool default
-> -7      6.2             ups 10KVA
-> -3      6.2                     rack rack1
-> -2      6.2                             host ceph2
-> 0       0.4                                     osd.0   up      0.373
-> 2       3                                       osd.2   up      2.8
-> 4       2.8                                     osd.4   up      0.373
-> -8      4.7             ups 6KVA
-> -6      4.7                     rack rack4
-> -4      2                               host ceph1
-> 1       2                                       osd.1   up      1.9
-> -9      2.7                             host ceph4
-> 3       2.7                                     osd.3   up      2.8
-
-The "reweight" values on teh right side should be between 0 and 1.  I'm 
-fixing the monitor ocmmand now to properly enforce this.  1 means "in" 
-(the osd gets data), 0 means "out" (the osd gets no data), and anthing in 
-between is sort of like a partial failure.
-
-The CRUSH weights on the left should be proportional to the raw capacity. 
-The reweights are meant for final corrections only.
-
-sage
-
-
-> (above weights are correct)
-> 
-> # ceph health detail
-> HEALTH_WARN 1 near full osd(s)
-> osd.4 is near full at 94%
-> 
-> Afterwards did :
-> "ceph osd getcrushmap -o map.bin" + "crushtool -d map.bin -o map.plain"
-> and here is the excerpt from map.plain:
-> ...
-> # buckets
-> host ceph2 {
->         id -2           # do not change unnecessarily
->         # weight 6.200
->         alg straw
->         hash 0  # rjenkins1
->         item osd.0 weight 0.400
->         item osd.2 weight 3.000
->         item osd.4 weight 2.800
-> ...
-> 
-> I see now why my osd.4 is filling faster than its twin osd.0.
-> 
-> At some point in past I did "ceph osd reweight osd.x Z.Z" to tune
-> weights to match actual TB size of disks, cluster did data rebalancing
-> so weights should be the same crush is using, right?
-> 
-> Any thoughts?
-> 
-> I will rewrite crushmap weights by hand and try to import the crushmap
-> - hope this will rebalance OSDs.
-> Or are there other suggestions how to solve this?
-> 
-> Ugis
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SSBkb3VidCB5b3VyIGRhdGEgaXMgY29ycmVjdCAsZXZlbiB0aGUgZXh0NCBkYXRhLCBoYXZlIHlv
+dSB1c2UgT19ESVJFQ1Qgd2hlbiBkb2luZyB0aGUgdGVzdD8gSXQncyB1bnVzdWFsIHRvIGhhdmUg
+MlggcmFuZG9tIHdyaXRlIElPUFMgdGhhbiByYW5kb20gcmVhZC4NCg0KQ2VwaEZTIGtlcm5lbCBj
+bGllbnQgc2VlbXMgbm90IHN0YWJsZSBlbm91Z2gsIHRoaW5rIHR3aWNlIGJlZm9yZSB5b3UgdXNl
+IGl0Lg0KRnJvbSB5b3VyIHByZXZpb3VzIG1haWwgSSBndWVzcyB5b3Ugd291bGQgbGlrZSB0byBk
+byBzb21lIGNhY2hpbmcgb3IgZHluYW1pYyB0aXJpbmcgLGludHJvZHVjaW5nIHNzZCBpbnRvIERG
+UyBmb3IgYmV0dGVyIHBlcmZvcm1hbmNlLiBUaGVyZSBhcmUgYSBsb3Qgb2YgbGF5ZXIgeW91IGNh
+biBkbyBzdWNoIGtpbmQgb2YgY2FjaGluZyBvciBtaWdyYXRpb24sIHlvdSBjYW4gY2FjaGUgb24g
+Y2xpZW50IHNpZGUgLCBvciBkbyBhcyBzYWdlIHNhaWQgLGhhdmluZyBhIGRpc2sgcG9vbCBhbmQg
+YSBzc2QgcG9vbCB0aGVuIG1pZ3JhdGUgZGF0YSBiZXR3ZWVuIHRoZW0sIG9yIHlvdSBjYW4gY2Fj
+aGUgaW5zaWRlIE9TRC4gDQpXZSBhcmUgYWxzbyBpbnRlcmVzdGVkIGluIHNpbWlsYXIgcmVzZWFy
+Y2guIEJ1dCBpdCdzIHN0aWxsIFdJUC4gDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpG
+cm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwt
+b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2Ygc2hlbmcgcWl1DQpTZW50OiAyMDEz
+xOoy1MI0yNUgMjM6MzcNClRvOiBNYXJrIE5lbHNvbg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnDQpTdWJqZWN0OiBSZTogc29tZSBwZXJmb3JtYW5jZSBpc3N1ZQ0KDQpIaSBNYXJrLA0K
+DQp0aGFua3MgYSBsb3QgZm9yIHlvdXIgcmVwbHkuDQoNCk9uIEZyaSwgRmViIDEsIDIwMTMgYXQg
+MzoxMCBQTSwgTWFyayBOZWxzb24gPG1hcmsubmVsc29uQGlua3RhbmsuY29tPiB3cm90ZToNCj4g
+T24gMDIvMDEvMjAxMyAwMjoyMCBQTSwgc2hlbmcgcWl1IHdyb3RlOg0KPj4NCj4+IEhpLA0KPj4N
+Cj4+IGkgZGlkIG9uZSBleHBlcmltZW50IHdoaWNoIGdpdmVzIHNvbWUgaW50ZXJlc3RpbmcgcmVz
+dWx0Lg0KPj4NCj4+IGkgY3JlYXRlIHR3byBPU0QgKGV4dDQpLCBlYWNoIGlzIGEgU1NEIGF0dGFj
+aGVkIG9uIHRoZSBzYW1lIFBDLiBpIA0KPj4gYWxzbyBjb25maWd1cmUgb25lIG1vbml0b3IgYW5k
+IG9uZSBtZHMgb24gdGhhdCBQQy4NCj4+IHNvIGdlbmVyYWxseSwgbXkgT1NEcywgbW9uaXRvciBh
+bmQgbWRzIGxvY2F0ZSBvbiB0aGUgc2FtZSBub2RlLg0KPj4NCj4+IGkgc2V0IHVwIHRoZSBjZXBo
+IHNlcnZpY2UgYW5kIG1vdW50IHRoZSBjZXBoIGFsc28gb24gYSBsb2NhbCANCj4+IGRpcmVjdG9y
+eSBvbiB0aGF0IFBDLiBzbyBjbGllbnQsIE9TRHMsIG1vbml0b3IgYW5kIG1kcyBhbGwgb24gdGhl
+IHNhbWUgbm9kZS4NCj4+IGkgc3VwcG9zZSB0aGlzIHdpbGwgZXhjbHVkZSB0aGUgbmV0d29yayBj
+b21tdW5pY2F0aW9uIGNvc3QuDQo+Pg0KPj4gaSBydW4gZmlvIGJlbmNobWFyayB3aGljaCBjcmVh
+dGUgb25lIDEwR0IgZmlsZSAobGFyZ2VyIHRoYW4gbWFpbg0KPj4gbWVtb3J5KSBvbiB0aGUgY2Vw
+aCBtb3VudCBwb2ludC4gaXQgcGVyZm9ybSBzZXF1ZW50aWFsIHJlYWQvd3JpdGUgYW5kIA0KPj4g
+cmFuZG9tIHJlYWQvd3JpdGUgb24gdGhlIGZpbGUsIGFuZCBnZW5lcmF0ZSB0aGUgdGhyb3VnaHB1
+dCByZXN1bHQuDQo+Pg0KPj4gbmV4dCBpIHVtb3VudCB0aGUgY2VwaCBhbmQgc3RvcCBjZXBoIHNl
+cnZpY2UuIGkgY3JlYXRlIGV4dDQgb24gdGhlIA0KPj4gc2FtZSBTU0QgdGhhdCB1c2VkIGFzIE9T
+RCBiZWZvcmUuIHRoZW4gcnVuIHRoZSBzYW1lIHdvcmtsb2FkcyBhbmQgZ2V0IA0KPj4gdGhlIHRo
+cm91Z2hwdXQgcmVzdWx0Lg0KPj4NCj4+IGhlcmUgYXJlIHRoZSByZXN1bHRzOg0KPj4NCj4+ICh0
+aHJvdWdocHV0IGtiL3MpU2VxLXJlYWQgICAgICAgUmFuZC1yZWFkICAgICAgIFNlcS13cml0ZSAg
+ICAgICBSYW5kLXdyaXRlDQo+PiBjZXBoICAgICAgICAgICAgICAgICAgICAgNzM3OCAgIDQ3NDAg
+ICAgICAgICAgICAgICA3OTAgIDEyMTENCj4+IGV4dDQgICAgICAgICAgICAgICAgICAgICA1ODI2
+MCAgMTczMzQgICAgNTQ2OTcgIDM0MjU3DQo+Pg0KPj4gYXMgeW91IHNlZSwgdGhlIGNlcGggaGFz
+IGh1Z2UgcGVyZm9ybWFuY2UgZG93biwgZXZlbiBtb25pdG9yLCBtZHMsIA0KPj4gY2xpZW50IGFu
+ZCBvc2RzIGxvY2F0ZSBvbiB0aGUgc2FtZSBwaHlzaWNhbCBtYWNoaW5lLg0KPj4gYW5vdGhlciBp
+bnRlcmVzdGluZyB0aGluZyBpcyB0aGUgc2VxLXdyaXRlIGhhcyBsb3dlciB0aHJvdWdocHV0IA0K
+Pj4gY29tcGFyZWQgd2l0aCByYW5kb20td3JpdGUgdW5kZXIgY2VwaC4gbm90IHF1aXRlIGNsZWFy
+Li4uLg0KPj4NCj4+IGRvZXMgYW55b25lIGhhdmUgaWRlYSBhYm91dCB3aHkgY2VwaCBoYXMgdGhh
+dCBwZXJmb3JtYW5jZSBkb3duPw0KPg0KPg0KPiBIaSBTaGVuZywNCj4NCj4gQXJlIHlvdSB1c2lu
+ZyBSQkQgb3IgQ2VwaEZTIChhbmQga2VybmVsIG9yIHVzZXJsYW5kIGNsaWVudHM/KSAgSG93IA0K
+PiBtdWNoIHJlcGxpY2F0aW9uPyAgQWxzbywgd2hhdCBGSU8gc2V0dGluZ3M/DQo+DQoNCiAgIGkg
+YW0gdXNpbmcgQ2VwaEZTIGFuZCBrZXJuZWwgY2xpZW50cy4gdGhlIHJlcGxpY2F0aW9uIGlzIGJ5
+IGRlZmF1bHQgKDM/KS4gdGhlIEZJTyBpcyB1c2luZyB0aGUgc3NkLXRlc3Qgc2NyaXB0LCBJTyBy
+ZXF1ZXN0IHNpemUgaXMgNGtiLg0KDQo+IEluIGdlbmVyYWwsIGl0IGlzIGRpZmZpY3VsdCB0byBt
+YWtlIGRpc3RyaWJ1dGVkIHN0b3JhZ2Ugc3lzdGVtcyANCj4gcGVyZm9ybSBhcyB3ZWxsIGFzIGxv
+Y2FsIHN0b3JhZ2UgZm9yIHNtYWxsIHJlYWQvd3JpdGUgd29ya2xvYWRzLiAgWW91IA0KPiBuZWVk
+IGEgbG90IG9mIGNvbmN1cnJlbmN5IHRvIGhpZGUgdGhlIGxhdGVuY2llcywgYW5kIGlmIHRoZSBs
+b2NhbCANCj4gc3RvcmFnZSBpcyBpbmNyZWRpYmx5IGZhc3QgKGxpa2UgYW4gU1NEISkgeW91IGhh
+dmUgYSBodWdlIHVwaGlsbCBiYXR0bGUuDQo+DQo+IFJlZ2FyZGluZyB0aGUgbmV0d29yaywgRXZl
+biB0aG91Z2ggeW91IHJhbiBldmVyeXRoaW5nIG9uIGxvY2FsaG9zdCwgDQo+IGNlcGggaXMgc3Rp
+bGwgdXNpbmcgVENQIHNvY2tldHMgdG8gZG8gYWxsIG9mIHRoZSBjb21tdW5pY2F0aW9uLg0KPg0K
+DQogICBpIGd1ZXNzIHdoZW4gaXQgY2hlY2tlZCB0aGUgcmVtb3RlIGlwIGlzIGFjdHVhbGx5IHRo
+ZSBsb2NhbCBhZGRyZXNzLCBpdCB3aWxsIGRpcmVjdGx5IHBhdGNoIHRoZSBzZW5kIHBhY2tldHMg
+dG8gdGhlIHJlY2VpdmUgYnVmZmVyLiByaWdodD8NCg0KPiBIYXZpbmcgc2FpZCB0aGF0LCBJIHRo
+aW5rIHdlIGNhbiBkbyBiZXR0ZXIgdGhhbiA3OTAgSU9QcyBmb3Igc2VxIA0KPiB3cml0ZXMsIGV2
+ZW4gaWYgaXQncyAyeCByZXBsaWNhdGlvbi4gIFRoZSB0cmljayBpcyB0byBmaW5kIHdoZXJlIGlu
+IA0KPiB0aGUgc3RhY2sgdGhpbmdzIGFyZSBnZXR0aW5nIGhlbGQgdXAuICBZb3UgbWlnaHQgd2Fu
+dCB0byBsb29rIGF0IHRvb2xzIA0KPiBsaWtlIGlvc3RhdCBhbmQgY29sbGVjdGwsIGFuZCBsb29r
+IGF0IHNvbWUgb2YgdGhlIG9wIGxhdGVuY3kgZGF0YSBpbiB0aGUgY2VwaCBhZG1pbiBzb2NrZXQu
+DQo+IEEgYmFzaWMgaW50cm9kdWN0aW9uIGlzIGRlc2NyaWJlZCBpbiBzZWJhc3RpYW4ncyBhcnRp
+Y2xlIGhlcmU6DQo+DQo+IGh0dHA6Ly93d3cuc2ViYXN0aWVuLWhhbi5mci9ibG9nLzIwMTIvMDgv
+MTQvY2VwaC1hZG1pbi1zb2NrZXQvDQo+DQo+Pg0KPj4gVGhhbmtzLA0KPj4gU2hlbmcNCj4+DQo+
+Pg0KPg0KDQpJIHdvdWxkIHRyeSB5b3VyIHN1Z2dlc3Rpb24gdG8gZmluZCB3aGVyZSB0aGUgYm90
+dGxlbmVjayBpcy4NCnRoZSByZWFzb24gaSBkaWQgdGhpcyBleHBlcmltZW50IGlzIGp1c3QgdHJ5
+aW5nIHRvIGZpbmQgc29tZSBwb3RlbnRpYWwgaXNzdWVzIHdpdGggY2VwaC4gaSBhbSBhIFBoLmQu
+IHN0dWRlbnQgYW5kIHRyeWluZyB0byBkbyBzb21lIHJlc2VhcmNoIHdvcmsgb24gaXQuDQppIHdv
+dWxkIGJlIGhhcHB5IHRvIGhlYXIgeW91ciBzdWdnZXN0aW9ucy4NCg0KVGhhbmtzLA0KU2hlbmcN
+Cg0KLS0NClNoZW5nIFFpdQ0KVGV4YXMgQSAmIE0gVW5pdmVyc2l0eQ0KUm9vbSAzMzJCIFdpc2Vu
+YmFrZXINCmVtYWlsOiBoZXJiZXJ0MTk4NDEwNkBnbWFpbC5jb20NCkNvbGxlZ2UgU3RhdGlvbiwg
+VFggNzc4NDMtMzI1OQ0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRw
+Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
