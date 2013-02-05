@@ -1,247 +1,107 @@
-From: Mandell Degerness <mandell@pistoncloud.com>
-Subject: Re: v0.56.2 released
-Date: Tue, 5 Feb 2013 13:09:44 -0800
-Message-ID: <CA+jddaPeeBqNa7ojs=KYnFGJ_PeLUmH-b_P2GBCA=LUN1DKVuQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1301301540030.6225@cobra.newdream.net>
-	<CA+jddaPMgRGwQSnyt=xF=46FpO11-Uc8Etjb_-NzSJuyoHFW0g@mail.gmail.com>
-	<alpine.DEB.2.00.1302051132570.25165@cobra.newdream.net>
-	<CA+jddaM49H57Ukq6ioBgp7Ch5yUUH7rPGzkNyDtVxYRUaYWhoA@mail.gmail.com>
-	<alpine.DEB.2.00.1302051146100.25165@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Ceph Development with Eclipse
+Date: Tue, 5 Feb 2013 13:52:20 -0800
+Message-ID: <CAPYLRziwaNaDjVj3Zpy7qvJY4MKu-JRCPWziW+5dMW6u5w86Cw@mail.gmail.com>
+References: <DUB116-W12467CE5C3C0CAECA94D647E0030@phx.gbl>
+	<CBC0FE06F6854C9E8071A40270E28FA8@inktank.com>
+	<DUB116-W124FC6A2EE7FCBDD873D42E0010@phx.gbl>
+	<DUB116-W13850868466A31861CC70B6E0000@phx.gbl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:37189 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754228Ab3BEVJp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 16:09:45 -0500
-Received: by mail-wi0-f182.google.com with SMTP id hi18so820522wib.15
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 13:09:44 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1302051146100.25165@cobra.newdream.net>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:36372 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756282Ab3BEVwV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 16:52:21 -0500
+Received: by mail-qa0-f46.google.com with SMTP id o13so2027085qaj.12
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 13:52:21 -0800 (PST)
+In-Reply-To: <DUB116-W13850868466A31861CC70B6E0000@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: charles L <charlesboy009@hotmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm doing a ceph-mon --mkfs from an initial .conf that has no OSDs
-defined in it.  All osds are added dynamically.  We'll try your patch.
- I would think that we would want to have a way to specify in the
-.conf file which option to use.  It would be important to be able to
-revert back to OSD first in test scenarios.
+I haven't done the initial setup in several years, but as I recall,
+once Ceph was built it was a simple matter of doing "New Makefile
+Project with Existing Code" in Eclipse. Make sure you've got the C++
+version of Eclipse.
+Other than that, I'm afraid you'll need to go through the Eclipse
+support systems. :)
+-Greg
 
-On Tue, Feb 5, 2013 at 12:37 PM, Sage Weil <sage@inktank.com> wrote:
-> On Tue, 5 Feb 2013, Mandell Degerness wrote:
->> We are doing the latter.  What is the best way to force it to host
->> first selection?
+On Mon, Feb 4, 2013 at 9:18 PM, charles L <charlesboy009@hotmail.com> wrote:
 >
-> Checking the code, you should be seeing either hosts (unless you've
-> changed osd_crush_chooseleaf_type from its default of 1).  Or, if the map
-> generation is being done from a prepared ceph.conf, it should do hosts if
-> there is more than one host in the initial conf.
+> hi Greg ...
 >
-> Maybe you're doing the ceph-mon --mkfs from an initial .conf that has only
-> 1 host to begin with, and others are added after?
+> I waited all day for your reply ...guess u had much to do today...
 >
-> I can make it observe the config setting in all cases (instead of trying
-> to guess what the user wants).  I pushed a patch to wip-osdmap-chooseleaf
-> that you can cherry-pick that does this.. can you let me know if that
-> resolves the issue, and/or if you think this makes the most sense for
-> users?
+> I can see that no one else can help from the community ..they seems not to be familiar with my scenario...and I see you are the only one that understand my tout...
 >
-> sage
+> Pls kindly find time to respond with the steps i need to take ...thanks a million...
 >
 >
+> Regards,
 >
+> Charles.
 >
->>
->> On Tue, Feb 5, 2013 at 11:34 AM, Sage Weil <sage@inktank.com> wrote:
->> > On Tue, 5 Feb 2013, Mandell Degerness wrote:
->> >> We are using v0.56.2 and it still seems that the default crushmap is
->> >> osd centered.  Here is the crushmap as dumped:
->> >>
->> >> [root@node-172-19-0-15 ~]# cat crush.txt
->> >> # begin crush map
->> >>
->> >> # devices
->> >> device 0 osd.0
->> >> device 1 osd.1
->> >> device 2 osd.2
->> >> device 3 osd.3
->> >> device 4 osd.4
->> >> device 5 osd.5
->> >> device 6 osd.6
->> >> device 7 osd.7
->> >> device 8 osd.8
->> >> device 9 osd.9
->> >> device 10 osd.10
->> >> device 11 osd.11
->> >> device 12 osd.12
->> >> device 13 osd.13
->> >> device 14 osd.14
->> >>
->> >> # types
->> >> type 0 osd
->> >> type 1 host
->> >> type 2 rack
->> >> type 3 row
->> >> type 4 room
->> >> type 5 datacenter
->> >> type 6 root
->> >>
->> >> # buckets
->> >> host 172.19.0.14 {
->> >> id -2 # do not change unnecessarily
->> >> # weight 6.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item osd.0 weight 1.000
->> >> item osd.4 weight 1.000
->> >> item osd.5 weight 1.000
->> >> item osd.12 weight 1.000
->> >> item osd.13 weight 1.000
->> >> item osd.14 weight 1.000
->> >> }
->> >> host 172.19.0.13 {
->> >> id -4 # do not change unnecessarily
->> >> # weight 3.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item osd.2 weight 1.000
->> >> item osd.7 weight 1.000
->> >> item osd.9 weight 1.000
->> >> }
->> >> host 172.19.0.16 {
->> >> id -5 # do not change unnecessarily
->> >> # weight 3.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item osd.3 weight 1.000
->> >> item osd.6 weight 1.000
->> >> item osd.10 weight 1.000
->> >> }
->> >> host 172.19.0.15 {
->> >> id -6 # do not change unnecessarily
->> >> # weight 3.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item osd.1 weight 1.000
->> >> item osd.8 weight 1.000
->> >> item osd.11 weight 1.000
->> >> }
->> >> rack 0 {
->> >> id -3 # do not change unnecessarily
->> >> # weight 15.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item 172.19.0.14 weight 6.000
->> >> item 172.19.0.13 weight 3.000
->> >> item 172.19.0.16 weight 3.000
->> >> item 172.19.0.15 weight 3.000
->> >> }
->> >> root default {
->> >> id -1 # do not change unnecessarily
->> >> # weight 15.000
->> >> alg straw
->> >> hash 0 # rjenkins1
->> >> item 0 weight 15.000
->> >> }
->> >>
->> >> # rules
->> >> rule data {
->> >> ruleset 0
->> >> type replicated
->> >> min_size 1
->> >> max_size 10
->> >> step take default
->> >> step choose firstn 0 type osd
->> >> step emit
->> >> }
->> >> rule metadata {
->> >> ruleset 1
->> >> type replicated
->> >> min_size 1
->> >> max_size 10
->> >> step take default
->> >> step choose firstn 0 type osd
->> >> step emit
->> >> }
->> >> rule rbd {
->> >> ruleset 2
->> >> type replicated
->> >> min_size 1
->> >> max_size 10
->> >> step take default
->> >> step choose firstn 0 type osd
->> >> step emit
->> >> }
->> >>
->> >> # end crush map
->> >> [root@node-172-19-0-15 ~]# ceph --version
->> >> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
->> >>
->> >> We do not run any explicit crushtool commands as part of our start up
->> >> at this time.  Should we be?
->> >
->> > Do you run mkcephfs?  If you are passing in a ceph.conf to mkcephfs, it is
->> > still dynamically choosing a rule based on whether you have enough osds (3
->> > i think?  i forget).  If you are running ceph-mon --mkfs directly (as
->> > ceph-deploy, chef, juju do), it will always default to osds.
->> >
->> > sage
->> >
->> >>
->> >> Regards,
->> >> Mandell Degerness
->> >>
->> >> On Wed, Jan 30, 2013 at 3:46 PM, Sage Weil <sage@inktank.com> wrote:
->> >> > The next bobtail point release is ready, and it's looking pretty good.
->> >> > This is an important update for the 0.56.x backport series that fixes a
->> >> > number of bugs and several performance issues. All v0.56.x users are
->> >> > encouraged to upgrade.
->> >> >
->> >> > Notable changes since v0.56.1:
->> >> >
->> >> >  * osd: snapshot trimming fixes
->> >> >  * osd: scrub snapshot metadata
->> >> >  * osd: fix osdmap trimming
->> >> >  * osd: misc peering fixes
->> >> >  * osd: stop heartbeating with peers if internal threads are stuck/hung
->> >> >  * osd: PG removal is friendlier to other workloads
->> >> >  * osd: fix recovery start delay (was causing very slow recovery)
->> >> >  * osd: fix scheduling of explicitly requested scrubs
->> >> >  * osd: fix scrub interval config options
->> >> >  * osd: improve recovery vs client io tuning
->> >> >  * osd: improve 'slow request' warning detail for better diagnosis
->> >> >  * osd: default CRUSH map now distributes across hosts, not OSDs
->> >> >  * osd: fix crash on 32-bit hosts triggered by librbd clients
->> >> >  * librbd: fix error handling when talking to older OSDs
->> >> >  * mon: fix a few rare crashes
->> >> >  * ceph command: ability to easily adjust CRUSH tunables
->> >> >  * radosgw: object copy does not copy source ACLs
->> >> >  * rados command: fix omap command usage
->> >> >  * sysvinit script: set ulimit -n properly on remote hosts
->> >> >  * msgr: fix narrow race with message queuing
->> >> >  * fixed compilation on some old distros (e.g., RHEL 5.x)
->> >> >
->> >> > There are a small number of interface changes related to the default CRUSH
->> >> > rule and scrub interval configuration options. Please see the full release
->> >> > notes.
->> >> >
->> >> > You can get v0.56.2 in the usual fashion:
->> >> >
->> >> >  * Git at git://github.com/ceph/ceph.git
->> >> >  * Tarball at http://ceph.com/download/ceph-0.56.2.tar.gz
->> >> >  * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
->> >> >  * For RPMs, see http://ceph.com/docs/master/install/rpm
->> >> >
->> >> > --
->> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> > the body of a message to majordomo@vger.kernel.org
->> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
+> ----------------------------------------
+>> From: charlesboy009@hotmail.com
+>> To: greg@inktank.com
+>> CC: ceph-devel@vger.kernel.org; post.the.reply@gmail.com
+>> Subject: RE: Ceph Development with Eclipse
+>> Date: Mon, 4 Feb 2013 14:01:25 +0100
 >>
 >>
+>> Hi Greg,
+>>
+>> I guess setting Ceph up outside of Eclipse include doing the following on any linux system:
+>>
+>> 1. To prepare the source tree after it has been git cloned,
+>> $ git submodule update --init
+>>
+>> 2. To build the server daemons, and FUSE client, execute the following:
+>> $ ./autogen.sh
+>> $ ./configure
+>> $ make
+>> 3. Creating a C/C++ project on eclipse and importing the Makefile into Eclipse ...to put the ceph project under Eclipse control...
+>>
+>> BUT its not working!!! Makefile not visible in Eclipse and wont import... I guess i have missed some steps in setting it up outside Eclipse or the process of importing ...
+>>
+>>
+>> ... I will appreciate your guidance and guidance from the community too...
+>>
+>>
+>> Regards,
+>>
+>> Charles.
+>>
+>>
+>>
+>>
+>> > Date: Sat, 2 Feb 2013 18:16:08 -0800
+>> > From: greg@inktank.com
+>> > To: charlesboy009@hotmail.com
+>> > CC: ceph-devel@vger.kernel.org; post.the.reply@gmail.com
+>> > Subject: Re: Ceph Development with Eclipse
+>> >
+>> > I actually still do this. Set it up Ceph outside of Eclipse initially, then import it as a project with an existing Makefile. It should pick up on everything it needs to well enough. :)
+>> > -Greg
+>> >
+>> >
+>> > On Saturday, February 2, 2013 at 9:40 AM, charles L wrote:
+>> >
+>> > >
+>> > >
+>> > > Hi
+>> > >
+>> > > I am a beginner at c++ and eclipse. I need some startup help to develop ceph with eclipse. If you could provide your config file on eclipse, it will be a great starting point and very appreciated.
+>> > >
+>> > > Regards,
+>> > >
+>> > > Charles.
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>
