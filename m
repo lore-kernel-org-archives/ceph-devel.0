@@ -1,84 +1,63 @@
 From: Martin B Nielsen <martin@unity3d.com>
-Subject: Re: CEPH HEALTH NOT OK ...CEPHFS mount error !!!
-Date: Tue, 5 Feb 2013 13:57:34 +0100
-Message-ID: <CAD3n6hHS1e8ty9T+XcMS6e0EMWH7PxmnATpYKch6G-r+smFAtA@mail.gmail.com>
-References: <CAPhYxPz19P-2h1J_5UXixvwyLOn+-va1j2RuYo9z0+Jpi7V0ug@mail.gmail.com>
+Subject: Increase number of pg in running system
+Date: Tue, 5 Feb 2013 14:06:50 +0100
+Message-ID: <CAD3n6hFb=m_PL27sWZ5BSBAYP3xmTGZS_DrL-4ozF2+JbndMCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:45431 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753311Ab3BEM5h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 07:57:37 -0500
-Received: by mail-ob0-f176.google.com with SMTP id v19so97110obq.7
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 04:57:36 -0800 (PST)
-In-Reply-To: <CAPhYxPz19P-2h1J_5UXixvwyLOn+-va1j2RuYo9z0+Jpi7V0ug@mail.gmail.com>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:53023 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754748Ab3BENGv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 08:06:51 -0500
+Received: by mail-oa0-f42.google.com with SMTP id i18so116591oag.15
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 05:06:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: femi anjorin <femi.anjorin@gmail.com>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Looks like you don't have the module installed.
+Hi,
 
-Can you check your kernel config have:
-CONFIG_CEPH_FS=m
+Looking at:
+http://ceph.com/docs/master/rados/operations/pools/
 
-You can check on debian/ubuntu with:
-cat /boot/config-`uname -r` | grep CONFIG_CEPH_FS
+It has this description roughly in the middle:
 
-Which distro/kernel are you using?
+---------------
+Important
+Increasing the number of placement groups in a pool after you create
+the pool is still an experimental feature in Bobtail (v 0.56). We
+recommend defining a reasonable number of placement groups and
+maintaining that number until Ceph=92s placement group splitting and
+merging functionality matures.
+---------------
+
+However, I cannot find any references how to do this?
+
+I'm asking since we have a test system with 10TB data with only the
+default 8 PG's created.
+
+So currently the system is throwing 400GB pg's around whenever we test
+removing disks.
+
+The system sometimes wants to put 2x pg's on an OSD which cannot hold
+it and it winds up with cluster full. If there is ~750GB free on a OSD
+it might decide to put 2x 400GB pgs on it (even though there are other
+OSD with even more disk free than that - these disks are exact same
+type, size and weights).
+
+System is running bobcat 0.56.2
+
+The system holds 2 big rbd images and it is not an option to create a
+new pool with higher pg count and copy them (not enough total space
+available).
+
+Thanks in advance,
 
 Cheers,
 Martin
-
-On Tue, Feb 5, 2013 at 1:49 PM, femi anjorin <femi.anjorin@gmail.com> wrote:
-> Hi ...
->
-> Thanks. i set --debug ms = 0. The result is HEALTH_OK ...but i get an
-> error when trying to setup an client access to the cluster CEPHFS!!!
-> ----------------------------------------------------------------------------------------
-> I tried setting up another server which should act as client..
-> - i install ceph on it.
-> - got the configuration file from the cluster servers to the new
-> server ...  /etc/ceph/ceph.conf
-> -i did ...  mkdir /mnt/mycephfs
-> -i copied the key from ceph.keyring and used it in the command below
-> -i try to run this command: mount -t ceph 172.16.0.25:6789:/
-> /mnt/mycephfs -o
-> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
-> Here is the result i got:::
->
-> [root@testclient]# mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
-> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
-> FATAL: Module ceph not found.
-> mount.ceph: modprobe failed, exit status 1
-> mount error: ceph filesystem not supported by the system
->
-> Regards,
-> Femi.
->
-> On Mon, Feb 4, 2013 at 3:27 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
->> This wasn't obvious due to all the debug being outputted, but here's why
->> 'ceph health' wasn't replying with HEALTH_OK:
->>
->>
->> On 02/04/2013 12:21 PM, femi anjorin wrote:
->>>
->>> 2013-02-04 12:56:15.818985 7f149bfff700  1 HEALTH_WARN 4987 pgs
->>> peering; 4987 pgs stuck inactive; 5109 pgs stuck unclean
->>
->>
->> Furthermore, on your other email in which you ran 'ceph health detail', this
->> appear to have gone away, as it is replying with HEALTH_OK again.
->>
->> You might want to set '--debug-ms 0' when you run 'ceph', or set it in your
->> ceph.conf, leaving it at a higher level only for daemons (i.e., under [mds],
->> [mon], [osd]...).  The resulting output will be clearer and more easily
->> understandable.
->>
->>   -Joao
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
