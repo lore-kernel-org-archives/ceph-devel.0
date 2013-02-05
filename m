@@ -1,60 +1,64 @@
-From: Lukas Czerner <lczerner@redhat.com>
-Subject: [PATCH v2 07/18] ceph: use ->invalidatepage() length argument
-Date: Tue,  5 Feb 2013 10:12:00 +0100
-Message-ID: <1360055531-26309-8-git-send-email-lczerner@redhat.com>
-References: <1360055531-26309-1-git-send-email-lczerner@redhat.com>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1360055531-26309-1-git-send-email-lczerner@redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org
-Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
-
-->invalidatepage() aop now accepts range to invalidate so we can make
-use of it in ceph_invalidatepage().
-
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+From: femi anjorin <femi.anjorin@gmail.com>
+Subject: Re: CEPH HEALTH NOT OK ...CEPHFS mount error !!!
+Date: Tue, 5 Feb 2013 13:49:58 +0100
+Message-ID: <CAPhYxPz19P-2h1J_5UXixvwyLOn+-va1j2RuYo9z0+Jpi7V0ug@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qe0-f42.google.com ([209.85.128.42]:40333 "EHLO
+	mail-qe0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751622Ab3BEMt7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 07:49:59 -0500
+Received: by mail-qe0-f42.google.com with SMTP id 2so44217qeb.29
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 04:49:58 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Joao Eduardo Luis <joao.luis@inktank.com>
 Cc: ceph-devel@vger.kernel.org
----
- fs/ceph/addr.c |   12 ++++++------
- 1 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 8953532..1e09410 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -164,20 +164,20 @@ static void ceph_invalidatepage(struct page *page, unsigned int offset,
- 	if (!PageDirty(page))
- 		pr_err("%p invalidatepage %p page not dirty\n", inode, page);
- 
--	if (offset == 0)
-+	if (offset == 0 && length == PAGE_CACHE_SIZE)
- 		ClearPageChecked(page);
- 
- 	ci = ceph_inode(inode);
--	if (offset == 0) {
--		dout("%p invalidatepage %p idx %lu full dirty page %u\n",
--		     inode, page, page->index, offset);
-+	if (offset == 0 && length == PAGE_CACHE_SIZE) {
-+		dout("%p invalidatepage %p idx %lu full dirty page\n",
-+		     inode, page, page->index);
- 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
- 		ceph_put_snap_context(snapc);
- 		page->private = 0;
- 		ClearPagePrivate(page);
- 	} else {
--		dout("%p invalidatepage %p idx %lu partial dirty page\n",
--		     inode, page, page->index);
-+		dout("%p invalidatepage %p idx %lu partial dirty page %u(%u)\n",
-+		     inode, page, page->index, offset, length);
- 	}
- }
- 
--- 
-1.7.7.6
+Hi ...
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks. i set --debug ms = 0. The result is HEALTH_OK ...but i get an
+error when trying to setup an client access to the cluster CEPHFS!!!
+----------------------------------------------------------------------------------------
+I tried setting up another server which should act as client..
+- i install ceph on it.
+- got the configuration file from the cluster servers to the new
+server ...  /etc/ceph/ceph.conf
+-i did ...  mkdir /mnt/mycephfs
+-i copied the key from ceph.keyring and used it in the command below
+-i try to run this command: mount -t ceph 172.16.0.25:6789:/
+/mnt/mycephfs -o
+name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
+Here is the result i got:::
+
+[root@testclient]# mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
+name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
+FATAL: Module ceph not found.
+mount.ceph: modprobe failed, exit status 1
+mount error: ceph filesystem not supported by the system
+
+Regards,
+Femi.
+
+On Mon, Feb 4, 2013 at 3:27 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
+> This wasn't obvious due to all the debug being outputted, but here's why
+> 'ceph health' wasn't replying with HEALTH_OK:
+>
+>
+> On 02/04/2013 12:21 PM, femi anjorin wrote:
+>>
+>> 2013-02-04 12:56:15.818985 7f149bfff700  1 HEALTH_WARN 4987 pgs
+>> peering; 4987 pgs stuck inactive; 5109 pgs stuck unclean
+>
+>
+> Furthermore, on your other email in which you ran 'ceph health detail', this
+> appear to have gone away, as it is replying with HEALTH_OK again.
+>
+> You might want to set '--debug-ms 0' when you run 'ceph', or set it in your
+> ceph.conf, leaving it at a higher level only for daemons (i.e., under [mds],
+> [mon], [osd]...).  The resulting output will be clearer and more easily
+> understandable.
+>
+>   -Joao
+>
