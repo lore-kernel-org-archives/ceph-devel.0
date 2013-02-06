@@ -1,27 +1,25 @@
-From: Dan Mick <dan.mick@inktank.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
 Subject: Re: rest mgmt api
-Date: Wed, 06 Feb 2013 11:22:55 -0800
-Message-ID: <5112AD8F.2030009@inktank.com>
+Date: Wed, 06 Feb 2013 19:25:11 +0000
+Message-ID: <5112AE17.6080605@inktank.com>
 References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:57416 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755247Ab3BFTW7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 14:22:59 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so1988963iak.38
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 11:22:58 -0800 (PST)
+Received: from mail-we0-f172.google.com ([74.125.82.172]:60716 "EHLO
+	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757845Ab3BFTZ4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 14:25:56 -0500
+Received: by mail-we0-f172.google.com with SMTP id x10so1447034wey.17
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 11:25:54 -0800 (PST)
 In-Reply-To: <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-
-
-On 02/06/2013 10:15 AM, Yehuda Sadeh wrote:
+On 02/06/2013 06:15 PM, Yehuda Sadeh wrote:
 > On Wed, Feb 6, 2013 at 9:25 AM, Sage Weil <sage@inktank.com> wrote:
 >> One of the goals for cuttlefish is to improvement manageability of the
 >> system.  This will invovle both cleaning up the CLI and adding a REST API
@@ -50,10 +48,10 @@ On 02/06/2013 10:15 AM, Yehuda Sadeh wrote:
 >
 > I'm in favor of the more modular and flexible approach, #1.
 
-The more I think about it, the more I am too.  I can imagine admin 
-flexibility being key: not just redundancy/failover, but also access 
-perms, and the more independent the REST channel is from the normal auth 
-channels, the better, I think.
+Also in favour of #1 rather than #2.  I believe the monitors should be 
+as light as possible, and embedding a web server is going on the 
+opposite direction.  Also, relying on libraries to interface with the 
+monitors allows the users to employ them however they see fit.
 
 >> Note that neither of these solves the HA issue directly; HTTP is a
 >> client/server protocol, so whoever is using the API can specify only one
@@ -67,7 +65,10 @@ channels, the better, I think.
 > Right. However, that's really an orthogonal issue. It'll be easier
 > scaling the HTTP endpoints if they're decoupled from the monitors.
 
-and easier to rewrite/redeploy, and authenticate, etc.
+Again, I'm with Yehuda on this one. And I would also assume that by 
+relying on a library, instead of on a embedded web server, this could be 
+smoothed over by letting the library's monclient hunt for a new monitor, 
+thus freeing whatever is in the middle from taking on this responsibility.
 
 >> The somewhat orthogonal question is how to clean up the CLI usage,
 >> parsing, and get equivalence in the new REST API.
@@ -89,5 +90,25 @@ and easier to rewrite/redeploy, and authenticate, etc.
 > I'd rather keep the clients dumb, not involve them with the actual
 > configuration logic. Will make our lives easier in the long run.
 
-Yes, and I really really want to simplify/table-ify the command parsing 
-code.
+I'm all for keeping clients dumb, but I believe that the responsibility 
+of outputting in a human-readable format should be theirs.
+
+My take on this is to keep the current behaviour (client issues a 
+command and the monitor handles it as it sees fit), but all 
+communication should be done in json, either to or from the monitors. 
+This would allow us to provide more information on each result, getting 
+rid of all the annoying format on the reply messages and simplify a 
+great deal of code on the monitor end by removing the silly need of 
+returning on either plain-text or json.  We would then let the 
+client-side libraries deal with converting it to whichever format the 
+user wants (plain-text, xml, w/e).  As for new commands on the monitor 
+that are not present on the library, replies to said commands could then 
+be presented just in json, or we could come up with a standardized way 
+to always convert json into a human-readable format/any other format.
+
+This would however mean to be able to parse json on the monitors (which 
+we do not currently do, although we do produce json output).  I can't 
+say I have strong feeling for the client->monitor communication to be 
+done in json, but for sake of coherency I do think it would be best.
+
+   -Joao
