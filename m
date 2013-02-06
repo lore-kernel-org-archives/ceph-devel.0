@@ -1,92 +1,57 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: rest mgmt api
-Date: Wed, 6 Feb 2013 10:15:05 -0800
-Message-ID: <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
-References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: [PATCH 2/3] .gitignore: cleanup and sort entries
+Date: Wed, 06 Feb 2013 19:31:25 +0100
+Message-ID: <5112A17D.2080609@bisect.de>
+References: <1359998564-27004-1-git-send-email-danny.al-gaaf@bisect.de> <1359998564-27004-3-git-send-email-danny.al-gaaf@bisect.de> <51121F03.8000005@inktank.com>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f172.google.com ([209.85.210.172]:55566 "EHLO
-	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752089Ab3BFSPH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 13:15:07 -0500
-Received: by mail-ia0-f172.google.com with SMTP id u8so1947094iag.3
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 10:15:05 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:37913 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753765Ab3BFSb3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 13:31:29 -0500
+In-Reply-To: <51121F03.8000005@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-On Wed, Feb 6, 2013 at 9:25 AM, Sage Weil <sage@inktank.com> wrote:
-> One of the goals for cuttlefish is to improvement manageability of the
-> system.  This will invovle both cleaning up the CLI and adding a REST API
-> to do everything the CLI current does.  There are a few implementation
-> choices to make.
->
-> Currenty the 'ceph' tool has a bunch of code to send messages to the
-> monitor and wait for replies.  This is 90% of what users currently can do.
-> For the most part, the commands are interpreted by the monitor.  A small
-> subset of commands (ceph tell ..., ceph pg <pgid> ...) will send commands
-> directory to OSDs.
->
->
-> There are two main options for a REST endpoint that we've discussed so
-> far:
->
-> 1- Wrap the above in a clean library (probably integrating most of the
-> code into Objecter/MonClient.. see wip-monc for a start on this).  Wrap
-> libcephadmin in python and make a simple HTTP/REST front-end.  Users would
-> deploy mgmt endpoints in addition to/alongside monitors and everything
-> else.  If they want the rest api at all.
->
-> 2- Embed a web server in the ceph-mon daemons, and push the current admin
-> 'client' functionality there.  Come up with some basic authentication so
-> that this doesn't break the current security model.
+Thanks for the comments,
 
-I'm in favor of the more modular and flexible approach, #1.
+I will send an updated version of this patch with extra local handling
+of Makefiles and where it makes sense also for some other files.
 
->
-> Note that neither of these solves the HA issue directly; HTTP is a
-> client/server protocol, so whoever is using the API can specify only one
-> server endpoint.  If it is a monitor, they'll need to be prepare to fail
-> over to another in their code, or set up a load balancer.  Same goes for
-> the restful endpoint, if it fails.  The difference is that a single
-> endpoint can proxy to whichever monitors are in quorum, so a much smaller
-> set of errors (endpoint machine crash, buggy endpoint) affect availability
-> of the API.
+Danny
 
-Right. However, that's really an orthogonal issue. It'll be easier
-scaling the HTTP endpoints if they're decoupled from the monitors.
+Am 06.02.2013 10:14, schrieb Josh Durgin:
+> I like the cleanup in general, but non-generic entries should have
+> a leading /, otherwise they match files with the same name in
+> subdirectories as well.
+> 
+> For example, putting Makefile in .gitignore will also ignore static
+> makefiles in the qa subdirectories. Some of the existing entries are
+> already missing this leading /.
+> 
+> On 02/04/2013 09:22 AM, Danny Al-Gaaf wrote:
+>> Cleanup old entries and sort the existing entries. Remove no longer
+>> existing entries/files. Move src/* entries from top level .gitignore
+>> to the correct subdir .gitignore file.
+>>
+>> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+>> ---
+>>   .gitignore           |  78 ++++++++++-------------
+>>   doc/.gitignore       |   3 +-
+>>   src/.gitignore       | 173
+>> +++++++++++++--------------------------------------
+>>   src/.gitignore.orig  | 142 ++++++++++++++++++++++++++++++++++++++++++
+> 
+> No need for this file
+> 
+>>   src/gtest/.gitignore |   2 +
+>>   5 files changed, 221 insertions(+), 177 deletions(-)
+>>   create mode 100644 src/.gitignore.orig
+>>   create mode 100644 src/gtest/.gitignore
+>>
 
->
->
-> The somewhat orthogonal question is how to clean up the CLI usage,
-> parsing, and get equivalence in the new REST API.
->
-> One option is to create a basic framework in the monitor so that there is
-> a table of api commands.  The 'parsing' would be regularized and validated
-> in a generic way.  The rest endpoint would pass the URI through in a
-> generic way (sanitized json?) that can be matched against the same table.
->
-> Another option is to support a single set of commands on the monitor side,
-> and do the REST->CLI or CLI->REST or CLI,REST->json translation on the
-> client side.  The command registry framework above would live in the CLI
-> utility and REST endpoints instead (or libcephadmin).  This means that the
-> monitor code is simpler, but also means that the libcephadmin or ceph tool
-> and REST endpoint need to be running the latest code to be able to send
-> the latest commands to the monitor.  It also means multiple places where
-> the command set is defined (mon and endpoint and cli).
-
-I'd rather keep the clients dumb, not involve them with the actual
-configuration logic. Will make our lives easier in the long run.
-
->
-> Either way there is a fair bit of refactoring, but it should be a net
-> cleanup.  I'd like to get some consensus on how to proceed before we
-> expend too much effort.  Ian scheduled a quick chat Friday, so let's get
-> any other suggestions or ideas out before then so we can move forward...
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
