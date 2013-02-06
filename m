@@ -1,79 +1,72 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Increase number of pg in running system
-Date: Tue, 5 Feb 2013 17:49:55 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302051743380.19543@cobra.newdream.net>
-References: <CAD3n6hFb=m_PL27sWZ5BSBAYP3xmTGZS_DrL-4ozF2+JbndMCA@mail.gmail.com> <loom.20130205T153942-509@post.gmane.org> <CA+jddaN5zjDEhknDq2RCsTmXQUDbJB-VKV0K3JcT09Ai0Pdz=Q@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Increase number of pg in running system
+Date: Wed, 6 Feb 2013 03:22:38 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5EDF9D@SHSMSX102.ccr.corp.intel.com>
+References: <CAD3n6hFb=m_PL27sWZ5BSBAYP3xmTGZS_DrL-4ozF2+JbndMCA@mail.gmail.com>
+ <loom.20130205T153942-509@post.gmane.org>
+ <CA+jddaN5zjDEhknDq2RCsTmXQUDbJB-VKV0K3JcT09Ai0Pdz=Q@mail.gmail.com>
+ <alpine.DEB.2.00.1302051743380.19543@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35798 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754731Ab3BFBt4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 20:49:56 -0500
-In-Reply-To: <CA+jddaN5zjDEhknDq2RCsTmXQUDbJB-VKV0K3JcT09Ai0Pdz=Q@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:10044 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753390Ab3BFDWl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Feb 2013 22:22:41 -0500
+In-Reply-To: <alpine.DEB.2.00.1302051743380.19543@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 5 Feb 2013, Mandell Degerness wrote:
-> I would like very much to specify pg_num and pgp_num for the default
-> pools, but they are defaulting to 64 (no OSDs are defined in the
-> config file).  I have tried using the options indicated by Artem, but
-> they didn't seem to have any effect on the data and rbd pools which
-> are created by default.  Is there something I am missing?
-
-Ah, I see.  Specifying this is awkward.  In [mon] or [global],
-
- osd pg bits = N
- osd pgp bits = N
-
-where N is the the number of bits to shift 1 to the left.  So for 1024 
-PGs, you'd do 10.  (What it's actually doing is MIN(1, num_osds) << N.  
-The default N is 6, so you're probaby seeing 64 PGs per pool by default.)
-
-sage
-
-
-> 
-> On Tue, Feb 5, 2013 at 6:40 AM, ArtemGr <artemciy@gmail.com> wrote:
-> > Martin B Nielsen <martin <at> unity3d.com> writes:
-> >> Hi,
-> >>
-> >> Looking at:
-> >> http://ceph.com/docs/master/rados/operations/pools/
-> >>
-> >> It has this description roughly in the middle:
-> >>
-> >> ---------------
-> >> Important
-> >> Increasing the number of placement groups in a pool after you create
-> >> the pool is still an experimental feature in Bobtail (v 0.56). We
-> >> recommend defining a reasonable number of placement groups and
-> >> maintaining that number until Ceph?s placement group splitting and
-> >> merging functionality matures.
-> >> ---------------
-> >>
-> >> However, I cannot find any references how to do this?
-> >>
-> >> I'm asking since we have a test system with 10TB data with only the
-> >> default 8 PG's created.
-> >
-> > Here's how I do it in ceph.conf:
-> >
-> > [osd]
-> >   ; Increase groups number in order to decrease scrub size
-> >   osd pool default pg num = 64
-> >   osd pool default pgp num = 64
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+QnV0IGNhbiB3ZSBjaGFuZ2UgdGhlIHBnX251bSBvZiBhIHBvb2wgd2hlbiB0aGUgcG9vbCBjb250
+YWlucyBkYXRhPyBJZiB5ZXMsIGhvdyB0byBkbyB0aGlzPw0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
+ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0K
+U2VudDogMjAxM8TqMtTCNsjVIDk6NTANClRvOiBNYW5kZWxsIERlZ2VybmVzcw0KQ2M6IGNlcGgt
+ZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogSW5jcmVhc2UgbnVtYmVyIG9mIHBn
+IGluIHJ1bm5pbmcgc3lzdGVtDQoNCk9uIFR1ZSwgNSBGZWIgMjAxMywgTWFuZGVsbCBEZWdlcm5l
+c3Mgd3JvdGU6DQo+IEkgd291bGQgbGlrZSB2ZXJ5IG11Y2ggdG8gc3BlY2lmeSBwZ19udW0gYW5k
+IHBncF9udW0gZm9yIHRoZSBkZWZhdWx0IA0KPiBwb29scywgYnV0IHRoZXkgYXJlIGRlZmF1bHRp
+bmcgdG8gNjQgKG5vIE9TRHMgYXJlIGRlZmluZWQgaW4gdGhlIA0KPiBjb25maWcgZmlsZSkuICBJ
+IGhhdmUgdHJpZWQgdXNpbmcgdGhlIG9wdGlvbnMgaW5kaWNhdGVkIGJ5IEFydGVtLCBidXQgDQo+
+IHRoZXkgZGlkbid0IHNlZW0gdG8gaGF2ZSBhbnkgZWZmZWN0IG9uIHRoZSBkYXRhIGFuZCByYmQg
+cG9vbHMgd2hpY2ggDQo+IGFyZSBjcmVhdGVkIGJ5IGRlZmF1bHQuICBJcyB0aGVyZSBzb21ldGhp
+bmcgSSBhbSBtaXNzaW5nPw0KDQpBaCwgSSBzZWUuICBTcGVjaWZ5aW5nIHRoaXMgaXMgYXdrd2Fy
+ZC4gIEluIFttb25dIG9yIFtnbG9iYWxdLA0KDQogb3NkIHBnIGJpdHMgPSBODQogb3NkIHBncCBi
+aXRzID0gTg0KDQp3aGVyZSBOIGlzIHRoZSB0aGUgbnVtYmVyIG9mIGJpdHMgdG8gc2hpZnQgMSB0
+byB0aGUgbGVmdC4gIFNvIGZvciAxMDI0IFBHcywgeW91J2QgZG8gMTAuICAoV2hhdCBpdCdzIGFj
+dHVhbGx5IGRvaW5nIGlzIE1JTigxLCBudW1fb3NkcykgPDwgTi4gIA0KVGhlIGRlZmF1bHQgTiBp
+cyA2LCBzbyB5b3UncmUgcHJvYmFieSBzZWVpbmcgNjQgUEdzIHBlciBwb29sIGJ5IGRlZmF1bHQu
+KQ0KDQpzYWdlDQoNCg0KPiANCj4gT24gVHVlLCBGZWIgNSwgMjAxMyBhdCA2OjQwIEFNLCBBcnRl
+bUdyIDxhcnRlbWNpeUBnbWFpbC5jb20+IHdyb3RlOg0KPiA+IE1hcnRpbiBCIE5pZWxzZW4gPG1h
+cnRpbiA8YXQ+IHVuaXR5M2QuY29tPiB3cml0ZXM6DQo+ID4+IEhpLA0KPiA+Pg0KPiA+PiBMb29r
+aW5nIGF0Og0KPiA+PiBodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvcmFkb3Mvb3BlcmF0aW9u
+cy9wb29scy8NCj4gPj4NCj4gPj4gSXQgaGFzIHRoaXMgZGVzY3JpcHRpb24gcm91Z2hseSBpbiB0
+aGUgbWlkZGxlOg0KPiA+Pg0KPiA+PiAtLS0tLS0tLS0tLS0tLS0NCj4gPj4gSW1wb3J0YW50DQo+
+ID4+IEluY3JlYXNpbmcgdGhlIG51bWJlciBvZiBwbGFjZW1lbnQgZ3JvdXBzIGluIGEgcG9vbCBh
+ZnRlciB5b3UgDQo+ID4+IGNyZWF0ZSB0aGUgcG9vbCBpcyBzdGlsbCBhbiBleHBlcmltZW50YWwg
+ZmVhdHVyZSBpbiBCb2J0YWlsICh2IA0KPiA+PiAwLjU2KS4gV2UgcmVjb21tZW5kIGRlZmluaW5n
+IGEgcmVhc29uYWJsZSBudW1iZXIgb2YgcGxhY2VtZW50IA0KPiA+PiBncm91cHMgYW5kIG1haW50
+YWluaW5nIHRoYXQgbnVtYmVyIHVudGlsIENlcGg/cyBwbGFjZW1lbnQgZ3JvdXAgDQo+ID4+IHNw
+bGl0dGluZyBhbmQgbWVyZ2luZyBmdW5jdGlvbmFsaXR5IG1hdHVyZXMuDQo+ID4+IC0tLS0tLS0t
+LS0tLS0tLQ0KPiA+Pg0KPiA+PiBIb3dldmVyLCBJIGNhbm5vdCBmaW5kIGFueSByZWZlcmVuY2Vz
+IGhvdyB0byBkbyB0aGlzPw0KPiA+Pg0KPiA+PiBJJ20gYXNraW5nIHNpbmNlIHdlIGhhdmUgYSB0
+ZXN0IHN5c3RlbSB3aXRoIDEwVEIgZGF0YSB3aXRoIG9ubHkgdGhlIA0KPiA+PiBkZWZhdWx0IDgg
+UEcncyBjcmVhdGVkLg0KPiA+DQo+ID4gSGVyZSdzIGhvdyBJIGRvIGl0IGluIGNlcGguY29uZjoN
+Cj4gPg0KPiA+IFtvc2RdDQo+ID4gICA7IEluY3JlYXNlIGdyb3VwcyBudW1iZXIgaW4gb3JkZXIg
+dG8gZGVjcmVhc2Ugc2NydWIgc2l6ZQ0KPiA+ICAgb3NkIHBvb2wgZGVmYXVsdCBwZyBudW0gPSA2
+NA0KPiA+ICAgb3NkIHBvb2wgZGVmYXVsdCBwZ3AgbnVtID0gNjQNCj4gPg0KPiA+DQo+ID4gLS0N
+Cj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgDQo+ID4gY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
+L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2Ny
+aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
+IiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0KPiANCj4gDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
