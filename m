@@ -1,57 +1,54 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: [PATCH 2/3] .gitignore: cleanup and sort entries
-Date: Wed, 06 Feb 2013 19:31:25 +0100
-Message-ID: <5112A17D.2080609@bisect.de>
-References: <1359998564-27004-1-git-send-email-danny.al-gaaf@bisect.de> <1359998564-27004-3-git-send-email-danny.al-gaaf@bisect.de> <51121F03.8000005@inktank.com>
-Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH v2 0/8] fix some issues from cppchecker/clang++
+Date: Wed, 6 Feb 2013 10:44:11 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302061044040.13326@cobra.newdream.net>
+References: <1360148571-6984-1-git-send-email-danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:37913 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753765Ab3BFSb3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 13:31:29 -0500
-In-Reply-To: <51121F03.8000005@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46422 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754094Ab3BFSoM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 13:44:12 -0500
+In-Reply-To: <1360148571-6984-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>, Gary Lowell <gary.lowell@inktank.com>
 
-Thanks for the comments,
+THanks-
 
-I will send an updated version of this patch with extra local handling
-of Makefiles and where it makes sense also for some other files.
+I just pulled this in, along with the rbd-fuse fix.
 
-Danny
+On Wed, 6 Feb 2013, Danny Al-Gaaf wrote:
 
-Am 06.02.2013 10:14, schrieb Josh Durgin:
-> I like the cleanup in general, but non-generic entries should have
-> a leading /, otherwise they match files with the same name in
-> subdirectories as well.
+> These patches fix some issues found by using cppchecker/clang++.
 > 
-> For example, putting Makefile in .gitignore will also ignore static
-> makefiles in the qa subdirectories. Some of the existing entries are
-> already missing this leading /.
+> ---
+> v2: - [4/8]: don't copy append_buffer and last_p
+>     - [7/8]: use C++ initalize syntax for constructor
 > 
-> On 02/04/2013 09:22 AM, Danny Al-Gaaf wrote:
->> Cleanup old entries and sort the existing entries. Remove no longer
->> existing entries/files. Move src/* entries from top level .gitignore
->> to the correct subdir .gitignore file.
->>
->> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
->> ---
->>   .gitignore           |  78 ++++++++++-------------
->>   doc/.gitignore       |   3 +-
->>   src/.gitignore       | 173
->> +++++++++++++--------------------------------------
->>   src/.gitignore.orig  | 142 ++++++++++++++++++++++++++++++++++++++++++
+> Danny Al-Gaaf (8):
+>   WorkQueue.h: fix cast
+>   ceph_crypto.cc: remove unused shutdown() outside crypto ifdef's
+>   obj_bencher.cc: use vector instead of VLA's
+>   include/buffer.h: fix operator=
+>   include/types.h: change operator<< function parameter
+>   include/xlist.h: fix C-style pointer casting
+>   messages/MOSDRepScrub.h: initialize member variable in constructor
+>   msg/Message.h: fix C-style pointer casting
 > 
-> No need for this file
+>  src/common/WorkQueue.h      |  4 ++--
+>  src/common/ceph_crypto.cc   |  1 -
+>  src/common/obj_bencher.cc   | 13 +++++++------
+>  src/include/buffer.h        |  8 +++++---
+>  src/include/types.h         |  2 +-
+>  src/include/xlist.h         |  6 +++---
+>  src/messages/MOSDRepScrub.h |  5 ++++-
+>  src/msg/Message.h           |  4 ++--
+>  8 files changed, 24 insertions(+), 19 deletions(-)
 > 
->>   src/gtest/.gitignore |   2 +
->>   5 files changed, 221 insertions(+), 177 deletions(-)
->>   create mode 100644 src/.gitignore.orig
->>   create mode 100644 src/gtest/.gitignore
->>
-
+> -- 
+> 1.8.1.2
+> 
+> 
