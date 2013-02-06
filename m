@@ -1,57 +1,100 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/8] fix some issues from cppchecker/clang++
-Date: Tue, 5 Feb 2013 21:51:05 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302052150430.22404@cobra.newdream.net>
-References: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: CEPHFS mount error !!!
+Date: Tue, 05 Feb 2013 22:55:32 -0800
+Message-ID: <5111FE64.7050909@inktank.com>
+References: <CAPhYxPzgHeuivJZDt7CGPjbxfO8r288pdQMEKnX90_UvPEqbBw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37384 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751236Ab3BFFvF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 00:51:05 -0500
-In-Reply-To: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:36159 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751719Ab3BFGzg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 01:55:36 -0500
+Received: by mail-ie0-f171.google.com with SMTP id 10so1465696ied.2
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 22:55:35 -0800 (PST)
+In-Reply-To: <CAPhYxPzgHeuivJZDt7CGPjbxfO8r288pdQMEKnX90_UvPEqbBw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>
+To: femi anjorin <femi.anjorin@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Joao Eduardo Luis <joao.luis@inktank.com>, Martin B Nielsen <martin@unity3d.com>, Ross Turk <ross@inktank.com>
 
-On Tue, 5 Feb 2013, Danny Al-Gaaf wrote:
-> These patches fix some issues found by using cppchecker/clang++.
+Yes; as Martin said last night, you don't have the ceph module.
+Did you build your own kernel?
 
-A couple comments, but otherwise these look good. 
+See
+http://ceph.com/docs/master/install/os-recommendations/#linux-kernel
 
-Thanks, Danny!
-sage
-
-
-> 
-> Danny Al-Gaaf (8):
->   WorkQueue.h: fix cast
->   ceph_crypto.cc: remove unused shutdown() outside crypto ifdef's
->   obj_bencher.cc: use vector instead of VLA's
->   include/buffer.h: fix operator=
->   include/types.h: change operator<< function parameter
->   include/xlist.h: fix C-style pointer casting
->   messages/MOSDRepScrub.h: initialize member variable in constructor
->   msg/Message.h: fix C-style pointer casting
-> 
->  src/common/WorkQueue.h      |  4 ++--
->  src/common/ceph_crypto.cc   |  1 -
->  src/common/obj_bencher.cc   | 13 +++++++------
->  src/include/buffer.h        | 10 +++++++---
->  src/include/types.h         |  2 +-
->  src/include/xlist.h         |  6 +++---
->  src/messages/MOSDRepScrub.h |  2 +-
->  src/msg/Message.h           |  4 ++--
->  8 files changed, 23 insertions(+), 19 deletions(-)
-> 
-> -- 
-> 1.8.1.2
-> 
+On 02/05/2013 09:37 PM, femi anjorin wrote:
+> Linux 2.6.32-279.19.1.el6.x86_64 x86_64 CentOS 6.3
+>
+> Pls can somebody help ... This command not working on CentOS 6.3 !!!!
+>
+> mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
+> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
+>
+>   FATAL: Module ceph not found.
+>   mount.ceph: modprobe failed, exit status 1
+>   mount error: ceph filesystem not supported by the system
+>
+>
+> Regards,
+> Femi
+>
+>
+>
+>
+>
+> On Tue, Feb 5, 2013 at 1:49 PM, femi anjorin <femi.anjorin@gmail.com> wrote:
+>>
+>> Hi ...
+>>
+>> Thanks. i set --debug ms = 0. The result is HEALTH_OK ...but i get an
+>> error when trying to setup an client access to the cluster CEPHFS!!!
+>> ----------------------------------------------------------------------------------------
+>> I tried setting up another server which should act as client..
+>> - i install ceph on it.
+>> - got the configuration file from the cluster servers to the new
+>> server ...  /etc/ceph/ceph.conf
+>> -i did ...  mkdir /mnt/mycephfs
+>> -i copied the key from ceph.keyring and used it in the command below
+>> -i try to run this command: mount -t ceph 172.16.0.25:6789:/
+>> /mnt/mycephfs -o
+>> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
+>> Here is the result i got:::
+>>
+>> [root@testclient]# mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
+>> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
+>> FATAL: Module ceph not found.
+>> mount.ceph: modprobe failed, exit status 1
+>> mount error: ceph filesystem not supported by the system
+>>
+>> Regards,
+>> Femi.
+>>
+>> On Mon, Feb 4, 2013 at 3:27 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
+>>> This wasn't obvious due to all the debug being outputted, but here's why
+>>> 'ceph health' wasn't replying with HEALTH_OK:
+>>>
+>>>
+>>> On 02/04/2013 12:21 PM, femi anjorin wrote:
+>>>>
+>>>> 2013-02-04 12:56:15.818985 7f149bfff700  1 HEALTH_WARN 4987 pgs
+>>>> peering; 4987 pgs stuck inactive; 5109 pgs stuck unclean
+>>>
+>>>
+>>> Furthermore, on your other email in which you ran 'ceph health detail', this
+>>> appear to have gone away, as it is replying with HEALTH_OK again.
+>>>
+>>> You might want to set '--debug-ms 0' when you run 'ceph', or set it in your
+>>> ceph.conf, leaving it at a higher level only for daemons (i.e., under [mds],
+>>> [mon], [osd]...).  The resulting output will be clearer and more easily
+>>> understandable.
+>>>
+>>>    -Joao
+>>>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
