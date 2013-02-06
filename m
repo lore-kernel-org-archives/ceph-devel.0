@@ -1,72 +1,60 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Increase number of pg in running system
-Date: Wed, 6 Feb 2013 03:22:38 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC5EDF9D@SHSMSX102.ccr.corp.intel.com>
-References: <CAD3n6hFb=m_PL27sWZ5BSBAYP3xmTGZS_DrL-4ozF2+JbndMCA@mail.gmail.com>
- <loom.20130205T153942-509@post.gmane.org>
- <CA+jddaN5zjDEhknDq2RCsTmXQUDbJB-VKV0K3JcT09Ai0Pdz=Q@mail.gmail.com>
- <alpine.DEB.2.00.1302051743380.19543@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+From: Gary Lowell <gary.lowell@inktank.com>
+Subject: Re: [PATCH 0/8] fix some issues from cppchecker/clang++
+Date: Tue, 5 Feb 2013 19:50:46 -0800
+Message-ID: <9D23CE98-68BE-47AA-89BA-0D114E564E88@inktank.com>
+References: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:10044 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753390Ab3BFDWl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Feb 2013 22:22:41 -0500
-In-Reply-To: <alpine.DEB.2.00.1302051743380.19543@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-da0-f50.google.com ([209.85.210.50]:33233 "EHLO
+	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753785Ab3BFDuv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 22:50:51 -0500
+Received: by mail-da0-f50.google.com with SMTP id h15so394461dan.37
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 19:50:50 -0800 (PST)
+In-Reply-To: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Mandell Degerness <mandell@pistoncloud.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-QnV0IGNhbiB3ZSBjaGFuZ2UgdGhlIHBnX251bSBvZiBhIHBvb2wgd2hlbiB0aGUgcG9vbCBjb250
-YWlucyBkYXRhPyBJZiB5ZXMsIGhvdyB0byBkbyB0aGlzPw0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0K
-U2VudDogMjAxM8TqMtTCNsjVIDk6NTANClRvOiBNYW5kZWxsIERlZ2VybmVzcw0KQ2M6IGNlcGgt
-ZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogSW5jcmVhc2UgbnVtYmVyIG9mIHBn
-IGluIHJ1bm5pbmcgc3lzdGVtDQoNCk9uIFR1ZSwgNSBGZWIgMjAxMywgTWFuZGVsbCBEZWdlcm5l
-c3Mgd3JvdGU6DQo+IEkgd291bGQgbGlrZSB2ZXJ5IG11Y2ggdG8gc3BlY2lmeSBwZ19udW0gYW5k
-IHBncF9udW0gZm9yIHRoZSBkZWZhdWx0IA0KPiBwb29scywgYnV0IHRoZXkgYXJlIGRlZmF1bHRp
-bmcgdG8gNjQgKG5vIE9TRHMgYXJlIGRlZmluZWQgaW4gdGhlIA0KPiBjb25maWcgZmlsZSkuICBJ
-IGhhdmUgdHJpZWQgdXNpbmcgdGhlIG9wdGlvbnMgaW5kaWNhdGVkIGJ5IEFydGVtLCBidXQgDQo+
-IHRoZXkgZGlkbid0IHNlZW0gdG8gaGF2ZSBhbnkgZWZmZWN0IG9uIHRoZSBkYXRhIGFuZCByYmQg
-cG9vbHMgd2hpY2ggDQo+IGFyZSBjcmVhdGVkIGJ5IGRlZmF1bHQuICBJcyB0aGVyZSBzb21ldGhp
-bmcgSSBhbSBtaXNzaW5nPw0KDQpBaCwgSSBzZWUuICBTcGVjaWZ5aW5nIHRoaXMgaXMgYXdrd2Fy
-ZC4gIEluIFttb25dIG9yIFtnbG9iYWxdLA0KDQogb3NkIHBnIGJpdHMgPSBODQogb3NkIHBncCBi
-aXRzID0gTg0KDQp3aGVyZSBOIGlzIHRoZSB0aGUgbnVtYmVyIG9mIGJpdHMgdG8gc2hpZnQgMSB0
-byB0aGUgbGVmdC4gIFNvIGZvciAxMDI0IFBHcywgeW91J2QgZG8gMTAuICAoV2hhdCBpdCdzIGFj
-dHVhbGx5IGRvaW5nIGlzIE1JTigxLCBudW1fb3NkcykgPDwgTi4gIA0KVGhlIGRlZmF1bHQgTiBp
-cyA2LCBzbyB5b3UncmUgcHJvYmFieSBzZWVpbmcgNjQgUEdzIHBlciBwb29sIGJ5IGRlZmF1bHQu
-KQ0KDQpzYWdlDQoNCg0KPiANCj4gT24gVHVlLCBGZWIgNSwgMjAxMyBhdCA2OjQwIEFNLCBBcnRl
-bUdyIDxhcnRlbWNpeUBnbWFpbC5jb20+IHdyb3RlOg0KPiA+IE1hcnRpbiBCIE5pZWxzZW4gPG1h
-cnRpbiA8YXQ+IHVuaXR5M2QuY29tPiB3cml0ZXM6DQo+ID4+IEhpLA0KPiA+Pg0KPiA+PiBMb29r
-aW5nIGF0Og0KPiA+PiBodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvcmFkb3Mvb3BlcmF0aW9u
-cy9wb29scy8NCj4gPj4NCj4gPj4gSXQgaGFzIHRoaXMgZGVzY3JpcHRpb24gcm91Z2hseSBpbiB0
-aGUgbWlkZGxlOg0KPiA+Pg0KPiA+PiAtLS0tLS0tLS0tLS0tLS0NCj4gPj4gSW1wb3J0YW50DQo+
-ID4+IEluY3JlYXNpbmcgdGhlIG51bWJlciBvZiBwbGFjZW1lbnQgZ3JvdXBzIGluIGEgcG9vbCBh
-ZnRlciB5b3UgDQo+ID4+IGNyZWF0ZSB0aGUgcG9vbCBpcyBzdGlsbCBhbiBleHBlcmltZW50YWwg
-ZmVhdHVyZSBpbiBCb2J0YWlsICh2IA0KPiA+PiAwLjU2KS4gV2UgcmVjb21tZW5kIGRlZmluaW5n
-IGEgcmVhc29uYWJsZSBudW1iZXIgb2YgcGxhY2VtZW50IA0KPiA+PiBncm91cHMgYW5kIG1haW50
-YWluaW5nIHRoYXQgbnVtYmVyIHVudGlsIENlcGg/cyBwbGFjZW1lbnQgZ3JvdXAgDQo+ID4+IHNw
-bGl0dGluZyBhbmQgbWVyZ2luZyBmdW5jdGlvbmFsaXR5IG1hdHVyZXMuDQo+ID4+IC0tLS0tLS0t
-LS0tLS0tLQ0KPiA+Pg0KPiA+PiBIb3dldmVyLCBJIGNhbm5vdCBmaW5kIGFueSByZWZlcmVuY2Vz
-IGhvdyB0byBkbyB0aGlzPw0KPiA+Pg0KPiA+PiBJJ20gYXNraW5nIHNpbmNlIHdlIGhhdmUgYSB0
-ZXN0IHN5c3RlbSB3aXRoIDEwVEIgZGF0YSB3aXRoIG9ubHkgdGhlIA0KPiA+PiBkZWZhdWx0IDgg
-UEcncyBjcmVhdGVkLg0KPiA+DQo+ID4gSGVyZSdzIGhvdyBJIGRvIGl0IGluIGNlcGguY29uZjoN
-Cj4gPg0KPiA+IFtvc2RdDQo+ID4gICA7IEluY3JlYXNlIGdyb3VwcyBudW1iZXIgaW4gb3JkZXIg
-dG8gZGVjcmVhc2Ugc2NydWIgc2l6ZQ0KPiA+ICAgb3NkIHBvb2wgZGVmYXVsdCBwZyBudW0gPSA2
-NA0KPiA+ICAgb3NkIHBvb2wgZGVmYXVsdCBwZ3AgbnVtID0gNjQNCj4gPg0KPiA+DQo+ID4gLS0N
-Cj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgDQo+ID4gY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
-L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2Ny
-aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
-IiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbA0KPiANCj4gDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9m
-IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+Hi Danny -
+
+These patches are now in the wip.cppchecker branch.  Build so far looks good.
+
+Cheers,
+Gary
+
+On Feb 5, 2013, at 2:52 PM, Danny Al-Gaaf wrote:
+
+> These patches fix some issues found by using cppchecker/clang++.
+> 
+> Danny Al-Gaaf (8):
+>  WorkQueue.h: fix cast
+>  ceph_crypto.cc: remove unused shutdown() outside crypto ifdef's
+>  obj_bencher.cc: use vector instead of VLA's
+>  include/buffer.h: fix operator=
+>  include/types.h: change operator<< function parameter
+>  include/xlist.h: fix C-style pointer casting
+>  messages/MOSDRepScrub.h: initialize member variable in constructor
+>  msg/Message.h: fix C-style pointer casting
+> 
+> src/common/WorkQueue.h      |  4 ++--
+> src/common/ceph_crypto.cc   |  1 -
+> src/common/obj_bencher.cc   | 13 +++++++------
+> src/include/buffer.h        | 10 +++++++---
+> src/include/types.h         |  2 +-
+> src/include/xlist.h         |  6 +++---
+> src/messages/MOSDRepScrub.h |  2 +-
+> src/msg/Message.h           |  4 ++--
+> 8 files changed, 23 insertions(+), 19 deletions(-)
+> 
+> -- 
+> 1.8.1.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
