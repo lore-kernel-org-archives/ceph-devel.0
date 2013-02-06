@@ -1,55 +1,68 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH 4/8] include/buffer.h: fix operator=
-Date: Tue,  5 Feb 2013 23:52:26 +0100
-Message-ID: <1360104750-16098-5-git-send-email-danny.al-gaaf@bisect.de>
-References: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: Increase number of pg in running system
+Date: Tue, 5 Feb 2013 17:35:17 -0800
+Message-ID: <CA+jddaN5zjDEhknDq2RCsTmXQUDbJB-VKV0K3JcT09Ai0Pdz=Q@mail.gmail.com>
+References: <CAD3n6hFb=m_PL27sWZ5BSBAYP3xmTGZS_DrL-4ozF2+JbndMCA@mail.gmail.com>
+	<loom.20130205T153942-509@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:50847 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756332Ab3BEWwg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 17:52:36 -0500
-In-Reply-To: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:54786 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754070Ab3BFBfT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Feb 2013 20:35:19 -0500
+Received: by mail-wi0-f169.google.com with SMTP id l13so4703330wie.0
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 17:35:17 -0800 (PST)
+In-Reply-To: <loom.20130205T153942-509@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-Fix operator=: return "iterator&" instead of 'iterator'. Also set last_p and
-other.append_buffer and check if 'this' equals 'other' before set anything.
+I would like very much to specify pg_num and pgp_num for the default
+pools, but they are defaulting to 64 (no OSDs are defined in the
+config file).  I have tried using the options indicated by Artem, but
+they didn't seem to have any effect on the data and rbd pools which
+are created by default.  Is there something I am missing?
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- src/include/buffer.h | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
-
-diff --git a/src/include/buffer.h b/src/include/buffer.h
-index 9a635bd..448d947 100644
---- a/src/include/buffer.h
-+++ b/src/include/buffer.h
-@@ -248,7 +248,7 @@ public:
- 					p(other.p),
- 					p_off(other.p_off) {}
- 
--      iterator operator=(const iterator& other) {
-+      iterator& operator=(const iterator& other) {
- 	if (this != &other) {
- 	  bl = other.bl;
- 	  ls = other.ls;
-@@ -305,8 +305,12 @@ public:
-     
-     list(const list& other) : _buffers(other._buffers), _len(other._len), last_p(this) { }
-     list& operator= (const list& other) {
--      _buffers = other._buffers;
--      _len = other._len;
-+      if (this != &other) {
-+        _buffers = other._buffers;
-+        _len = other._len;
-+        last_p = other.last_p;
-+	append_buffer = other.append_buffer;
-+      }
-       return *this;
-     }
- 
--- 
-1.8.1.2
-
+On Tue, Feb 5, 2013 at 6:40 AM, ArtemGr <artemciy@gmail.com> wrote:
+> Martin B Nielsen <martin <at> unity3d.com> writes:
+>> Hi,
+>>
+>> Looking at:
+>> http://ceph.com/docs/master/rados/operations/pools/
+>>
+>> It has this description roughly in the middle:
+>>
+>> ---------------
+>> Important
+>> Increasing the number of placement groups in a pool after you create
+>> the pool is still an experimental feature in Bobtail (v 0.56). We
+>> recommend defining a reasonable number of placement groups and
+>> maintaining that number until Ceph=92s placement group splitting and
+>> merging functionality matures.
+>> ---------------
+>>
+>> However, I cannot find any references how to do this?
+>>
+>> I'm asking since we have a test system with 10TB data with only the
+>> default 8 PG's created.
+>
+> Here's how I do it in ceph.conf:
+>
+> [osd]
+>   ; Increase groups number in order to decrease scrub size
+>   osd pool default pg num =3D 64
+>   osd pool default pgp num =3D 64
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
