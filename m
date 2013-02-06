@@ -1,102 +1,81 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: json parsing/decoding
-Date: Wed, 6 Feb 2013 14:19:04 -0800
-Message-ID: <CAC-hyiG=Ar3nuEcCttG_7YMSu3aeo6KpyQ9nHi6-bYBTK3tmaw@mail.gmail.com>
+From: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
+Subject: Re: rest mgmt api
+Date: Wed, 06 Feb 2013 16:20:19 -0600
+Message-ID: <5112D723.3030500@bmrb.wisc.edu>
+References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com> <5112AE17.6080605@inktank.com> <alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net> <5112B43D.6070602@bmrb.wisc.edu> <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig2C89BAB72CF77CE3FF345652"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:45496 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755931Ab3BFWTF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 17:19:05 -0500
-Received: by mail-ie0-f175.google.com with SMTP id c12so2656055ieb.34
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 14:19:04 -0800 (PST)
+Received: from cowfish.bmrb.wisc.edu ([144.92.167.220]:35625 "EHLO
+	mail.bmrb.wisc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755931Ab3BFWUU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 17:20:20 -0500
+Received: from stingray.bmrb.wisc.edu (stingray.bmrb.wisc.edu [144.92.167.179])
+	by mail.bmrb.wisc.edu (Postfix) with ESMTP id 2C3932C010F
+	for <ceph-devel@vger.kernel.org>; Wed,  6 Feb 2013 16:20:20 -0600 (CST)
+In-Reply-To: <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The matter of json decoding was brought up as part of the discussion
-of the ceph management api. I recently had to deal with it with the
-rados gateway, as I wasn't too happy was the current mechanisms that
-were used for this purpose. So I introduced a new decode_json()
-functionality (now in common/ceph_json.* at the wip-json-decode
-branch). It's very similar to the regular encode/decode stuff that we
-use to encode/decode structures. Encoding is being done using the
-already existing dump() method, and decoding will be done through the
-new decode_json() method.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig2C89BAB72CF77CE3FF345652
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-As an example we'll define a new UserInfo structure:
+On 02/06/2013 02:14 PM, Sage Weil wrote:
+> On Wed, 6 Feb 2013, Dimitri Maziuk wrote:
 
-struct UserInfo {
-  string uid;
-  string display_name;
-  int max_buckets;
-  list<Key> keys;
+>> Any reason you can't have your CLI json-encode the commands (or,
+>> conversely, your cgi/wsgi/php/servlet URL handler decode them into
+>> vector<string>) before passing them on to the monitor?
+>=20
+> We can, but they won't necessarily look the same, because it is unlikel=
+y=20
+> we can make a sane 1:1 translation of the CLI to REST that makes sense,=
+=20
+> and it would be nice to avoid baking knowledge about the individual=20
+> commands into the client side.
+>=20
+>  ceph osd pool create <poolname> <numpgs>
+>    vs
+>  /osd/pool/?op=3Dcreate&poolname=3Dfoo&numpgs=3Dbar
+>=20
+> or whatever.  I know next to nothing about REST API design best practic=
+es,=20
+> but I'm guessing it doesn't look like a CLI.
 
-  void dump(Formatter *f) const;
-  void decode_json(JSONObj *obj);
-};
+(Last I looked "?op=3Dcreate&poolname=3Dfoo" was the Old Busted CGI, The =
+New
+Shiny Hotness(tm) was supposed to look like "/create/foo" -- and I never
+understood how the optional parameters are supposed to work. But that's
+beside the point.)
 
-The dump() method will look like this:
+To me you sounded like you the piece that actually does the work
+(daemon?) should understand both (and have a built-in httpd on top).
+What I meant is it should know just one and let the UI modules do the
+translation.
 
-void UserInfo::dump(Formatter *f) const
-{
-  f->open_object_section("user_info");
-  f->dump_string("user_id", uid);
-  f->dump_string("display_name", display_name);
-  f->dump_int("max_buckets", (int)max_buckets);
-
-  f->open_array_section("keys");
-  for (list<Key>::iterator iter = keys.begin(); siter != keys.end(); ++iter) {
-    iter->dump(f);
-  }
-  f->close_section();
-
-  f->close_section();
-}
-
-It is recommended that every dump() method opens an object section and
-puts everything within, so that every object could be easily embedded
-within other objects. We can also probably create some template that
-will remove the need of doing that inner loop, e.g.:
-  ...
-  f->dump_array("keys", keys);
-  ...
-
-In any case, the corresponding json decoding function looks like this:
-
-void UserInfo::decode_json(JSONObj *obj) {
-  JSONDecoder::decode_json("user_id", uid, obj);
-  JSONDecoder::decode_json("display_name", display_name, obj);
-  JSONDecoder::decode_json("max_buckets", max_buckets, obj);
-  JSONDecoder::decode_json("keys", keys, obj);
-}
+--=20
+Dimitri Maziuk
+Programmer/sysadmin
+BioMagResBank, UW-Madison -- http://www.bmrb.wisc.edu
 
 
-and we'll decode the structure like this:
+--------------enig2C89BAB72CF77CE3FF345652
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-...
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.14 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-UserInfo user_info;
+iD8DBQFREtckxzG8ttqkbbgRAhb+AJ4orvYp5mZyHVA6fcGP+j76iTWuywCeLecV
+UMw7syP62p2PPAShwMAI6BM=
+=bGp3
+-----END PGP SIGNATURE-----
 
-JSONParser parser;
-
-if (!parser.parse(buf, len))
-  return -EINVAL;
-...
-try {
-  user_info.decode(&parser);
-} catch (JSONDecoder::err& e) {
-...
-}
-
-
-The default behavior is that every field is optional, so that it just
-ignores fields that are not found in the json structure. If a field is
-set to be mandatory (by extra param to the decode_json()), then an
-exception will be thrown. Note that all fields should be initialized
-to the default value before decoding as passed json might not contain
-any relevant field.
-
-
-Yehuda
+--------------enig2C89BAB72CF77CE3FF345652--
