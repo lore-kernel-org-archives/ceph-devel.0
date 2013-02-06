@@ -1,84 +1,56 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: silence logrotate some more
-Date: Wed, 6 Feb 2013 12:51:15 -0800
-Message-ID: <30D1B51B-1D4B-474A-87C2-F7E413D3AC0D@inktank.com>
-References: <ormwvhnyj2.fsf@livre.home>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: rest mgmt api
+Date: Wed, 06 Feb 2013 13:19:02 -0800
+Message-ID: <5112C8C6.5020402@inktank.com>
+References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com> <5112AE17.6080605@inktank.com> <alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net> <5112B43D.6070602@bmrb.wisc.edu> <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:61959 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758625Ab3BFUvT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 15:51:19 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k10so2480734iea.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 12:51:19 -0800 (PST)
-In-Reply-To: <ormwvhnyj2.fsf@livre.home>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:59240 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758026Ab3BFVTH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 16:19:07 -0500
+Received: by mail-ia0-f174.google.com with SMTP id o25so2187860iad.33
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 13:19:06 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>, ceph-devel@vger.kernel.org
 
-Hi Alex -
 
-This patch has been merged to master.  I made the same change to the ne=
-w rgw logrotate.conf.
 
-Cheers,
-Gary
+On 02/06/2013 12:14 PM, Sage Weil wrote:
+> On Wed, 6 Feb 2013, Dimitri Maziuk wrote:
+>> On 02/06/2013 01:34 PM, Sage Weil wrote:
+>>
+>>> I think the one caveat here is that having a single registry for commands
+>>> in the monitor means that commands can come in two flavors: vector<string>
+>>> (cli) and URL (presumably in json form).  But a single command
+>>> dispatch/registry framework will make that distinction pretty simple...
+>>
+>> Any reason you can't have your CLI json-encode the commands (or,
+>> conversely, your cgi/wsgi/php/servlet URL handler decode them into
+>> vector<string>) before passing them on to the monitor?
+>
+> We can, but they won't necessarily look the same, because it is unlikely
+> we can make a sane 1:1 translation of the CLI to REST that makes sense,
+> and it would be nice to avoid baking knowledge about the individual
+> commands into the client side.
+>
+>   ceph osd pool create <poolname> <numpgs>
+>     vs
+>   /osd/pool/?op=create&poolname=foo&numpgs=bar
+>
+> or whatever.  I know next to nothing about REST API design best practices,
+> but I'm guessing it doesn't look like a CLI.
+>
+> sage
 
-On Feb 6, 2013, at 9:27 AM, Alexandre Oliva wrote:
-
-> I was getting email with logrotate error output from =93which invoke-=
-rc.d=94
-> on systems without an invoke-rc.d.  This patch silences it.
->=20
-> Silence stderr from which when running logrotate
->=20
-> From: Alexandre Oliva <oliva@gnu.org>
->=20
-> Signed-off-by: Alexandre Oliva <oliva@gnu.org>
-> ---
-> src/logrotate.conf |    9 ++++++---
-> 1 file changed, 6 insertions(+), 3 deletions(-)
->=20
-> diff --git a/src/logrotate.conf b/src/logrotate.conf
-> index 9af3104..c443eed 100644
-> --- a/src/logrotate.conf
-> +++ b/src/logrotate.conf
-> @@ -4,13 +4,16 @@
->     compress
->     sharedscripts
->     postrotate
-> -        if which invoke-rc.d > /dev/null && [ -x `which invoke-rc.d`=
- ]; then
-> +        if which invoke-rc.d > /dev/null 2>&1 &&=20
-> +	   [ -x `which invoke-rc.d` ]; then
->             invoke-rc.d ceph reload >/dev/null
-> -        elif which service > /dev/null && [ -x `which service` ]; th=
-en
-> +        elif which service > /dev/null 2>&1 &&=20
-> +	     [ -x `which service` ]; then
->             service ceph reload >/dev/null
->         fi
->         # Possibly reload twice, but depending on ceph.conf the reloa=
-d above may be a no-op
-> -        if which initctl > /dev/null && [ -x `which initctl` ]; then
-> +        if which initctl > /dev/null 2>&1 &&=20
-> +	   [ -x `which initctl` ]; then
->             # upstart reload isn't very helpful here:
->             #   https://bugs.launchpad.net/upstart/+bug/1012938
->             for type in mon osd mds; do
->=20
->=20
-> --=20
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Well we could easily package, say, "mon getmap" into a json
+vector-of-strings for transmission as the http payload of the PUT
+request, *or* encode them as a simple "s1=mon&s2=getmap", but again, the
+data format is so simple that I'm not sure it buys much. We definitely
+want all the interpretation centralized in the daemons, I think, so this
+is just string marshalling however we choose to do it.
