@@ -1,16 +1,18 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Dan Mick <dan.mick@inktank.com>
 Subject: Re: rest mgmt api
-Date: Wed, 06 Feb 2013 20:05:43 +0100
-Message-ID: <5112A987.3050707@widodh.nl>
+Date: Wed, 06 Feb 2013 11:22:55 -0800
+Message-ID: <5112AD8F.2030009@inktank.com>
 References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38472 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757945Ab3BFTFs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 14:05:48 -0500
+Received: from mail-ia0-f179.google.com ([209.85.210.179]:57416 "EHLO
+	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755247Ab3BFTW7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 14:22:59 -0500
+Received: by mail-ia0-f179.google.com with SMTP id x24so1988963iak.38
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 11:22:58 -0800 (PST)
 In-Reply-To: <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,7 +21,7 @@ Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
 
 
-On 02/06/2013 07:15 PM, Yehuda Sadeh wrote:
+On 02/06/2013 10:15 AM, Yehuda Sadeh wrote:
 > On Wed, Feb 6, 2013 at 9:25 AM, Sage Weil <sage@inktank.com> wrote:
 >> One of the goals for cuttlefish is to improvement manageability of the
 >> system.  This will invovle both cleaning up the CLI and adding a REST API
@@ -47,15 +49,12 @@ On 02/06/2013 07:15 PM, Yehuda Sadeh wrote:
 >> that this doesn't break the current security model.
 >
 > I'm in favor of the more modular and flexible approach, #1.
->
 
-+1 I'd go for #1. When there is a simple library which can do this stuff 
-your not tied into Python, but once can also directly link against it or 
-do languages like Java or PHP.
+The more I think about it, the more I am too.  I can imagine admin 
+flexibility being key: not just redundancy/failover, but also access 
+perms, and the more independent the REST channel is from the normal auth 
+channels, the better, I think.
 
-Python can do the REST stuff and you can loadbalance over that.
-
->>
 >> Note that neither of these solves the HA issue directly; HTTP is a
 >> client/server protocol, so whoever is using the API can specify only one
 >> server endpoint.  If it is a monitor, they'll need to be prepare to fail
@@ -67,9 +66,9 @@ Python can do the REST stuff and you can loadbalance over that.
 >
 > Right. However, that's really an orthogonal issue. It'll be easier
 > scaling the HTTP endpoints if they're decoupled from the monitors.
->
->>
->>
+
+and easier to rewrite/redeploy, and authenticate, etc.
+
 >> The somewhat orthogonal question is how to clean up the CLI usage,
 >> parsing, and get equivalence in the new REST API.
 >>
@@ -89,18 +88,6 @@ Python can do the REST stuff and you can loadbalance over that.
 >
 > I'd rather keep the clients dumb, not involve them with the actual
 > configuration logic. Will make our lives easier in the long run.
->
->>
->> Either way there is a fair bit of refactoring, but it should be a net
->> cleanup.  I'd like to get some consensus on how to proceed before we
->> expend too much effort.  Ian scheduled a quick chat Friday, so let's get
->> any other suggestions or ideas out before then so we can move forward...
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+Yes, and I really really want to simplify/table-ify the command parsing 
+code.
