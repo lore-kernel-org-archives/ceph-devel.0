@@ -1,43 +1,41 @@
 From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH v2 0/8] fix some issues from cppchecker/clang++
-Date: Wed,  6 Feb 2013 12:02:43 +0100
-Message-ID: <1360148571-6984-1-git-send-email-danny.al-gaaf@bisect.de>
+Subject: [PATCH 2/8] ceph_crypto.cc: remove unused shutdown() outside crypto ifdef's
+Date: Wed,  6 Feb 2013 12:02:45 +0100
+Message-ID: <1360148571-6984-3-git-send-email-danny.al-gaaf@bisect.de>
+References: <1360148571-6984-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:32970 "EHLO
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:32976 "EHLO
 	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757346Ab3BFLC4 (ORCPT
+	by vger.kernel.org with ESMTP id S1757359Ab3BFLC4 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 06:02:56 -0500
+In-Reply-To: <1360148571-6984-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>, Gary Lowell <gary.lowell@inktank.com>
 
-These patches fix some issues found by using cppchecker/clang++.
+Fix "out-of-line declaration of a member must be a definition
+[-Wout-of-line-declaration]". Remove ceph::crypto::shutdown() outside
+the crypto related ifdef's. Without nss or cryptopp configure will
+fail anyways.
 
+Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
-v2: - [4/8]: don't copy append_buffer and last_p
-    - [7/8]: use C++ initalize syntax for constructor
+ src/common/ceph_crypto.cc | 1 -
+ 1 file changed, 1 deletion(-)
 
-Danny Al-Gaaf (8):
-  WorkQueue.h: fix cast
-  ceph_crypto.cc: remove unused shutdown() outside crypto ifdef's
-  obj_bencher.cc: use vector instead of VLA's
-  include/buffer.h: fix operator=
-  include/types.h: change operator<< function parameter
-  include/xlist.h: fix C-style pointer casting
-  messages/MOSDRepScrub.h: initialize member variable in constructor
-  msg/Message.h: fix C-style pointer casting
-
- src/common/WorkQueue.h      |  4 ++--
- src/common/ceph_crypto.cc   |  1 -
- src/common/obj_bencher.cc   | 13 +++++++------
- src/include/buffer.h        |  8 +++++---
- src/include/types.h         |  2 +-
- src/include/xlist.h         |  6 +++---
- src/messages/MOSDRepScrub.h |  5 ++++-
- src/msg/Message.h           |  4 ++--
- 8 files changed, 24 insertions(+), 19 deletions(-)
-
+diff --git a/src/common/ceph_crypto.cc b/src/common/ceph_crypto.cc
+index 3f04349..96fa157 100644
+--- a/src/common/ceph_crypto.cc
++++ b/src/common/ceph_crypto.cc
+@@ -20,7 +20,6 @@
+ #include <pthread.h>
+ #include <stdlib.h>
+ 
+-void ceph::crypto::shutdown();
+ 
+ #ifdef USE_CRYPTOPP
+ void ceph::crypto::init(CephContext *cct)
 -- 
 1.8.1.2
 
