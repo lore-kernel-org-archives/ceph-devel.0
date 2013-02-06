@@ -1,85 +1,70 @@
-From: femi anjorin <femi.anjorin@gmail.com>
-Subject: CEPHFS mount error !!!
-Date: Wed, 6 Feb 2013 06:37:51 +0100
-Message-ID: <CAPhYxPzgHeuivJZDt7CGPjbxfO8r288pdQMEKnX90_UvPEqbBw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 4/8] include/buffer.h: fix operator=
+Date: Tue, 5 Feb 2013 21:47:58 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302052146570.22404@cobra.newdream.net>
+References: <1360104750-16098-1-git-send-email-danny.al-gaaf@bisect.de> <1360104750-16098-5-git-send-email-danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:64961 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751244Ab3BFFhw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 00:37:52 -0500
-Received: by mail-qc0-f180.google.com with SMTP id v28so372646qcm.25
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Feb 2013 21:37:51 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:37358 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751470Ab3BFFr7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 00:47:59 -0500
+In-Reply-To: <1360104750-16098-5-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, Martin B Nielsen <martin@unity3d.com>, Ross Turk <ross@inktank.com>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>
 
-Linux 2.6.32-279.19.1.el6.x86_64 x86_64 CentOS 6.3
+On Tue, 5 Feb 2013, Danny Al-Gaaf wrote:
+> Fix operator=: return "iterator&" instead of 'iterator'. Also set last_p and
+> other.append_buffer and check if 'this' equals 'other' before set anything.
+> 
+> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+> ---
+>  src/include/buffer.h | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
+> 
+> diff --git a/src/include/buffer.h b/src/include/buffer.h
+> index 9a635bd..448d947 100644
+> --- a/src/include/buffer.h
+> +++ b/src/include/buffer.h
+> @@ -248,7 +248,7 @@ public:
+>  					p(other.p),
+>  					p_off(other.p_off) {}
+>  
+> -      iterator operator=(const iterator& other) {
+> +      iterator& operator=(const iterator& other) {
+>  	if (this != &other) {
+>  	  bl = other.bl;
+>  	  ls = other.ls;
+> @@ -305,8 +305,12 @@ public:
+>      
+>      list(const list& other) : _buffers(other._buffers), _len(other._len), last_p(this) { }
+>      list& operator= (const list& other) {
+> -      _buffers = other._buffers;
+> -      _len = other._len;
+> +      if (this != &other) {
+> +        _buffers = other._buffers;
+> +        _len = other._len;
+> +        last_p = other.last_p;
+> +	append_buffer = other.append_buffer;
 
-Pls can somebody help ... This command not working on CentOS 6.3 !!!!
+These two fields shouldn't be copied.  append_buffer is a private buffer 
+we are writing into when we call the encode() helpers, and having two 
+lists sharing it would allow them to clobber each other in hard-to-debug 
+ways.  last_p is in the same category.
 
-mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
-name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
-
- FATAL: Module ceph not found.
- mount.ceph: modprobe failed, exit status 1
- mount error: ceph filesystem not supported by the system
-
-
-Regards,
-Femi
-
-
-
-
-
-On Tue, Feb 5, 2013 at 1:49 PM, femi anjorin <femi.anjorin@gmail.com> wrote:
->
-> Hi ...
->
-> Thanks. i set --debug ms = 0. The result is HEALTH_OK ...but i get an
-> error when trying to setup an client access to the cluster CEPHFS!!!
-> ----------------------------------------------------------------------------------------
-> I tried setting up another server which should act as client..
-> - i install ceph on it.
-> - got the configuration file from the cluster servers to the new
-> server ...  /etc/ceph/ceph.conf
-> -i did ...  mkdir /mnt/mycephfs
-> -i copied the key from ceph.keyring and used it in the command below
-> -i try to run this command: mount -t ceph 172.16.0.25:6789:/
-> /mnt/mycephfs -o
-> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
-> Here is the result i got:::
->
-> [root@testclient]# mount -t ceph 172.16.0.25:6789:/ /mnt/mycephfs -o
-> name=admin,secret=AQCqnw9RmBPpOBAAeJjkIgKGYvyRGlekTpUPog==
-> FATAL: Module ceph not found.
-> mount.ceph: modprobe failed, exit status 1
-> mount error: ceph filesystem not supported by the system
->
-> Regards,
-> Femi.
->
-> On Mon, Feb 4, 2013 at 3:27 PM, Joao Eduardo Luis <joao.luis@inktank.com> wrote:
-> > This wasn't obvious due to all the debug being outputted, but here's why
-> > 'ceph health' wasn't replying with HEALTH_OK:
-> >
-> >
-> > On 02/04/2013 12:21 PM, femi anjorin wrote:
-> >>
-> >> 2013-02-04 12:56:15.818985 7f149bfff700  1 HEALTH_WARN 4987 pgs
-> >> peering; 4987 pgs stuck inactive; 5109 pgs stuck unclean
-> >
-> >
-> > Furthermore, on your other email in which you ran 'ceph health detail', this
-> > appear to have gone away, as it is replying with HEALTH_OK again.
-> >
-> > You might want to set '--debug-ms 0' when you run 'ceph', or set it in your
-> > ceph.conf, leaving it at a higher level only for daemons (i.e., under [mds],
-> > [mon], [osd]...).  The resulting output will be clearer and more easily
-> > understandable.
-> >
-> >   -Joao
-> >
+> +      }
+>        return *this;
+>      }
+>  
+> -- 
+> 1.8.1.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
