@@ -1,144 +1,32 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: json parsing/decoding
-Date: Wed, 6 Feb 2013 17:05:38 -0800
-Message-ID: <CAC-hyiH9-VJ_t+4DHVZ2CkHEmpNRFWuQGJOphkg6HN1K+frNQw@mail.gmail.com>
-References: <CAC-hyiG=Ar3nuEcCttG_7YMSu3aeo6KpyQ9nHi6-bYBTK3tmaw@mail.gmail.com>
-	<alpine.DEB.2.00.1302061420570.13326@cobra.newdream.net>
-	<CAC-hyiH_EYk_urtbjQZ=GM+d0C75x_-g6Txf6dJTToWZ9g3SSg@mail.gmail.com>
-	<alpine.DEB.2.00.1302061647070.13326@cobra.newdream.net>
+From: Jeff Mitchell <jeffrey.mitchell@gmail.com>
+Subject: Re: rest mgmt api
+Date: Wed, 06 Feb 2013 20:45:07 -0500
+Message-ID: <51130723.3030101@gmail.com>
+References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com> <5112AE17.6080605@inktank.com> <alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net> <5112B43D.6070602@bmrb.wisc.edu> <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net> <5112D723.3030500@bmrb.wisc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:63441 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752219Ab3BGBFk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 20:05:40 -0500
-Received: by mail-la0-f45.google.com with SMTP id er20so2068542lab.18
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 17:05:38 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1302061647070.13326@cobra.newdream.net>
+Received: from mail-vc0-f182.google.com ([209.85.220.182]:40897 "EHLO
+	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755964Ab3BGBpN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Feb 2013 20:45:13 -0500
+Received: by mail-vc0-f182.google.com with SMTP id fl17so1310945vcb.27
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Feb 2013 17:45:12 -0800 (PST)
+In-Reply-To: <5112D723.3030500@bmrb.wisc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Feb 6, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 6 Feb 2013, Yehuda Sadeh wrote:
->> On Wed, Feb 6, 2013 at 2:23 PM, Sage Weil <sage@inktank.com> wrote:
->> > On Wed, 6 Feb 2013, Yehuda Sadeh wrote:
->> >> The matter of json decoding was brought up as part of the discussion
->> >> of the ceph management api. I recently had to deal with it with the
->> >> rados gateway, as I wasn't too happy was the current mechanisms that
->> >> were used for this purpose. So I introduced a new decode_json()
->> >> functionality (now in common/ceph_json.* at the wip-json-decode
->> >> branch). It's very similar to the regular encode/decode stuff that we
->> >> use to encode/decode structures. Encoding is being done using the
->> >> already existing dump() method, and decoding will be done through the
->> >> new decode_json() method.
->> >>
->> >> As an example we'll define a new UserInfo structure:
->> >>
->> >> struct UserInfo {
->> >>   string uid;
->> >>   string display_name;
->> >>   int max_buckets;
->> >>   list<Key> keys;
->> >>
->> >>   void dump(Formatter *f) const;
->> >>   void decode_json(JSONObj *obj);
->> >> };
->> >>
->> >> The dump() method will look like this:
->> >>
->> >> void UserInfo::dump(Formatter *f) const
->> >> {
->> >>   f->open_object_section("user_info");
->> >>   f->dump_string("user_id", uid);
->> >>   f->dump_string("display_name", display_name);
->> >>   f->dump_int("max_buckets", (int)max_buckets);
->> >>
->> >>   f->open_array_section("keys");
->> >>   for (list<Key>::iterator iter = keys.begin(); siter != keys.end(); ++iter) {
->> >>     iter->dump(f);
->> >>   }
->> >>   f->close_section();
->> >>
->> >>   f->close_section();
->> >> }
->> >>
->> >> It is recommended that every dump() method opens an object section and
->> >> puts everything within, so that every object could be easily embedded
->> >> within other objects. We can also probably create some template that
->> >
->> > The current loose convention is that the dump objects do not define the
->> > container they dump into.  It's a bit weird, but it lets you do things
->> > like:
->> >
->> > map<Key, Value> foo;
->> >
->> >    f->open_array_section("keys");
->> >    for (map<Key,Value>::iterator iter = keys.begin(); siter != keys.end(); ++iter) {
->> >      f->open_object_section("thing");
->> >      f->dump_string("key", iter->first);
->> >      iter->second.dump(f);
->> >      f->close_section();
->> >    }
->> >    f->close_section();
->> >
->> > Admittedly that doesn't come up *that* often, but it happened enough when
->> > we first started doing the dump stuff that all/most of the dumpers work
->> > that way.
->> >
->> > How should we deal with that?
->> >
->>
->> Modify the dumpers to not work this way? It's a matter of conventions,
->> not set in stone. If we keep this form then we'd need to create
->> decoders for these records:
->>
->> struct KeyRecord {
->>   Key k;
->>   Value v;
->>
->>   void decode_json(JSONObj *obj) {
->>     JSONDecoder::decode_json("key", key, obj);
->>     v.decode_json(obj);
->>   }
->> };
->>
->> This will work, assuming Value doesn't have any field indexed by "key".
->
-> I think it mostly comes up in dumping other structures, not parsing, so it
-> may be mostly ok on that end. I'm not sure how to manage dumping, though,
-> if the section is opened inside the value object's dump().
->
-> This also worries me: ceph_dencoder does
->
->       jf.open_object_section("object");
->       den->dump(&jf);
->       jf.close_section();
->
-> which means that this sort of change will probably the type
-> encoding/decode unit tests we run.
->
-> Maybe something like
->
-> void encode_json(Formatter *f) const
-> {
->   f->open_object_section("mytype");
->   dump(f);
->   f->close_section();
-> }
->
-> will give us the cleaner interface you're looking for.  And the
+Dimitri Maziuk wrote:
+> (Last I looked "?op=create&poolname=foo" was the Old Busted CGI, The New
+> Shiny Hotness(tm) was supposed to look like "/create/foo" -- and I never
+> understood how the optional parameters are supposed to work. But that's
+> beside the point.)
 
-Yeah.
+They're different. One is using the path to interpret functionality; one is using query parameters. The former requires custom path parsing/interpreting code for your particular application; the latter is a very well supported/understood way of getting key/value pairs.
 
-> ceph-dencoder type definitions can mark types which implement one or the
-> other... or we can implement the encode_json one for all objects as a
-> wrapper via a macro or something we don't have to duplicate teh
-> boilerplate everywhere?
->
-That's one option. Not sure if I like the idea of doing it through a
-macro, but it's solvable anyway.
+Neither is right or wrong, they're just different. People seem to prefer the path method these days because it seems cleaner/nicer; the other thing people do is just POST the parameters instead of GETting, which lets you still use key/value parameters but not have an ugly URL.
 
-Yehuda
+--Jeff
