@@ -1,7 +1,7 @@
-From: sheng qiu <herbert1984106@gmail.com>
+From: Gregory Farnum <greg@inktank.com>
 Subject: Re: ceph mkfs failed
-Date: Fri, 8 Feb 2013 15:18:28 -0600
-Message-ID: <CAB7xdimY+OREdOgu6JKgZ4ZyeeZPxwe4ifgzMa83JzRsWUGT_w@mail.gmail.com>
+Date: Fri, 8 Feb 2013 13:19:50 -0800
+Message-ID: <CAPYLRzg449HHva-YrT2EMSQrfpqHWYuXjLmhDy9fRrvkC92BPA@mail.gmail.com>
 References: <CAB7xdi=5q-e7FEXjrf524as4FPW-pM4z9wDrCm7boPVTr7sVLg@mail.gmail.com>
 	<51140CFF.8000207@inktank.com>
 	<CAB7xdimctzpk8qeRLJqxxeNRJEFpc2EpVHd37qj0E-OCeBP13A@mail.gmail.com>
@@ -14,161 +14,176 @@ References: <CAB7xdi=5q-e7FEXjrf524as4FPW-pM4z9wDrCm7boPVTr7sVLg@mail.gmail.com>
 	<CAB7xdinp4=R6AXnoGwxLP+O9=_fSbhNgJQCN8b+ywn=pFk7Eow@mail.gmail.com>
 	<CAB7xdikofu0xVBk1C6sAVtqePyAuaQ4yhp2EmmMYbTwXy9H-aA@mail.gmail.com>
 	<CAB7xdinY4ehBug+9iagho5Th8=4a7Vt1zAVhmfs9Ex6+Vdqd0w@mail.gmail.com>
+	<CAB7xdimY+OREdOgu6JKgZ4ZyeeZPxwe4ifgzMa83JzRsWUGT_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:37344 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1947114Ab3BHVS2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 16:18:28 -0500
-Received: by mail-ie0-f180.google.com with SMTP id bn7so5484788ieb.39
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Feb 2013 13:18:28 -0800 (PST)
-In-Reply-To: <CAB7xdinY4ehBug+9iagho5Th8=4a7Vt1zAVhmfs9Ex6+Vdqd0w@mail.gmail.com>
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:54716 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753615Ab3BHVZ3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 16:25:29 -0500
+Received: by mail-qe0-f46.google.com with SMTP id 1so1871843qec.5
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Feb 2013 13:25:28 -0800 (PST)
+In-Reply-To: <CAB7xdimY+OREdOgu6JKgZ4ZyeeZPxwe4ifgzMa83JzRsWUGT_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Dan Mick <dan.mick@inktank.com>, Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, Dan Mick <dan.mick@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-ok, i have figured out it.....
+On Fri, Feb 8, 2013 at 1:18 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+> ok, i have figured out it.....
 
-Thanks,
-Sheng
+That looks like a LevelDB issue given the backtrace (and the OSD isn't
+responding because it crashed). If you figured out why LevelDB
+crashed, it'd be good to know so that other people can reference this
+if they see something similar. :)
+-Greg
 
-On Fri, Feb 8, 2013 at 2:57 PM, sheng qiu <herbert1984106@gmail.com> wrote:
-> ok, this is tested using ext3/ext4 on a normal SSD as OSD.
->
-> ceph -s shows:
-> health HEALTH_WARN 384 pgs degraded; 384 pgs stuck unclean; recovery
-> 22/44 degraded (50.000%)
->    monmap e1: 1 mons at {0=165.91.215.237:6789/0}, election epoch 2, quorum 0 0
->    osdmap e3: 1 osds: 1 up, 1 in
->     pgmap v10: 384 pgs: 384 active+degraded; 26716 bytes data, 1184 MB
-> used, 55857 MB / 60093 MB avail; 22/44 degraded (50.000%)
->    mdsmap e4: 1/1/1 up {0=0=up:active}
->
-> dmesg shows:
-> [  212.758376] libceph: client4106 fsid f60af615-67cb-4245-91cb-22752821f3e6
-> [  212.759869] libceph: mon0 165.91.215.237:6789 session established
-> [  338.292461] libceph: osd0 165.91.215.237:6801 socket closed (con state OPEN)
-> [  338.292483] libceph: osd0 165.91.215.237:6801 socket error on write
-> [  339.161231] libceph: osd0 165.91.215.237:6801 socket error on write
-> [  340.159003] libceph: osd0 165.91.215.237:6801 socket error on write
-> [  342.158514] libceph: osd0 165.91.215.237:6801 socket error on write
-> [  346.149549] libceph: osd0 165.91.215.237:6801 socket error on write
->
-> osd.0.log shows:
-> 2013-02-08 14:52:51.649726 7f82780f6700  0 -- 165.91.215.237:6801/7135
->>> 165.91.215.237:0/3238315774 pipe(0x2d61240 sd=803 :6801 pgs=0 cs=0
-> l=0).accept peer addr is really 165.91.215.237:0/3238315774 (socket is
-> 165.91.215.237:57270/0)
-> 2013-02-08 14:53:26.103770 7f8283c10700 -1 *** Caught signal
-> (Segmentation fault) **
->  in thread 7f8283c10700
->
->  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->  1: ./ceph-osd() [0x78648a]
->  2: (()+0x10060) [0x7f828cb0e060]
->  3: (fwrite()+0x34) [0x7f828aea3ec4]
->  4: (leveldb::log::Writer::EmitPhysicalRecord(leveldb::log::RecordType,
-> char const*, unsigned long)+0x11f) [0x76d93f]
->  5: (leveldb::log::Writer::AddRecord(leveldb::Slice const&)+0x74) [0x76dae4]
->  6: (leveldb::DBImpl::Write(leveldb::WriteOptions const&,
-> leveldb::WriteBatch*)+0x160) [0x763050]
->  7: (LevelDBStore::submit_transaction(std::tr1::shared_ptr<KeyValueDB::TransactionImpl>)+0x2a)
-> [0x74ec1a]
->  8: (DBObjectMap::remove_xattrs(hobject_t const&,
-> std::set<std::string, std::less<std::string>,
-> std::allocator<std::string> > const&, SequencerPosition const*)+0x16a)
-> [0x746fca]
->  9: (FileStore::_setattrs(coll_t, hobject_t const&,
-> std::map<std::string, ceph::buffer::ptr, std::less<std::string>,
-> std::allocator<std::pair<std::string const, ceph::buffer::ptr> > >&,
-> SequencerPosition const&)+0xe7f) [0x719aff]
->  10: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
-> long, int)+0x3cba) [0x71e7da]
->  11: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x4c)
-> [0x72152c]
->  12: (FileStore::_do_op(FileStore::OpSequencer*)+0x1b1) [0x6f1331]
->  13: (ThreadPool::worker(ThreadPool::WorkThread*)+0x4bc) [0x827dec]
->  14: (ThreadPool::WorkThread::entry()+0x10) [0x829cb0]
->  15: (()+0x7efc) [0x7f828cb05efc]
->  16: (clone()+0x6d) [0x7f828af1cf8d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
->
-> any suggestions?
->
-> Thanks,
-> Sheng
->
-> On Fri, Feb 8, 2013 at 11:53 AM, sheng qiu <herbert1984106@gmail.com> wrote:
->> Hi,
+
+> On Fri, Feb 8, 2013 at 2:57 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+>> ok, this is tested using ext3/ext4 on a normal SSD as OSD.
 >>
->> i think it's not related with my local FS. i build a ext4 on a ramdisk
->> and used it as OSD.
->> when i run the iozone or fio on the mounted client point, it  shows
->> the same info as before:
->>
->> 2013-02-08 11:45:06.803915 7f28ec7c4700  0 -- 165.91.215.237:6801/7101
->>>> 165.91.215.237:0/1990103183 pipe(0x2ded240 sd=803 :6801 pgs=0 cs=0
->> l=0).accept peer addr is really 165.91.215.237:0/1990103183 (socket is
->> 165.91.215.237:60553/0)
->> 2013-02-08 11:45:06.879009 7f28f7add700 -1 *** Caught signal
->> (Segmentation fault) **
->>  in thread 7f28f7add700
->>
->> the ceph -s shows, also the same as using my own local FS:
->>
->>   health HEALTH_WARN 384 pgs degraded; 384 pgs stuck unclean; recovery
->> 21/42 degraded (50.000%)
+>> ceph -s shows:
+>> health HEALTH_WARN 384 pgs degraded; 384 pgs stuck unclean; recovery
+>> 22/44 degraded (50.000%)
 >>    monmap e1: 1 mons at {0=165.91.215.237:6789/0}, election epoch 2, quorum 0 0
 >>    osdmap e3: 1 osds: 1 up, 1 in
->>     pgmap v7: 384 pgs: 384 active+degraded; 21003 bytes data, 276 MB
->> used, 3484 MB / 3961 MB avail; 21/42 degraded (50.000%)
+>>     pgmap v10: 384 pgs: 384 active+degraded; 26716 bytes data, 1184 MB
+>> used, 55857 MB / 60093 MB avail; 22/44 degraded (50.000%)
 >>    mdsmap e4: 1/1/1 up {0=0=up:active}
 >>
 >> dmesg shows:
+>> [  212.758376] libceph: client4106 fsid f60af615-67cb-4245-91cb-22752821f3e6
+>> [  212.759869] libceph: mon0 165.91.215.237:6789 session established
+>> [  338.292461] libceph: osd0 165.91.215.237:6801 socket closed (con state OPEN)
+>> [  338.292483] libceph: osd0 165.91.215.237:6801 socket error on write
+>> [  339.161231] libceph: osd0 165.91.215.237:6801 socket error on write
+>> [  340.159003] libceph: osd0 165.91.215.237:6801 socket error on write
+>> [  342.158514] libceph: osd0 165.91.215.237:6801 socket error on write
+>> [  346.149549] libceph: osd0 165.91.215.237:6801 socket error on write
 >>
->> [  656.799209] libceph: client4099 fsid da0fe76d-8506-4bf8-8b49-172fd8bc6d1f
->> [  656.800657] libceph: mon0 165.91.215.237:6789 session established
->> [  683.789954] libceph: osd0 165.91.215.237:6801 socket closed (con state OPEN)
->> [  683.790007] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  684.909095] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  685.903425] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  687.903937] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  691.897037] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  699.899197] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  715.903415] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  747.912122] libceph: osd0 165.91.215.237:6801 socket error on write
->> [  811.929323] libceph: osd0 165.91.215.237:6801 socket error on write
+>> osd.0.log shows:
+>> 2013-02-08 14:52:51.649726 7f82780f6700  0 -- 165.91.215.237:6801/7135
+>>>> 165.91.215.237:0/3238315774 pipe(0x2d61240 sd=803 :6801 pgs=0 cs=0
+>> l=0).accept peer addr is really 165.91.215.237:0/3238315774 (socket is
+>> 165.91.215.237:57270/0)
+>> 2013-02-08 14:53:26.103770 7f8283c10700 -1 *** Caught signal
+>> (Segmentation fault) **
+>>  in thread 7f8283c10700
+>>
+>>  ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+>>  1: ./ceph-osd() [0x78648a]
+>>  2: (()+0x10060) [0x7f828cb0e060]
+>>  3: (fwrite()+0x34) [0x7f828aea3ec4]
+>>  4: (leveldb::log::Writer::EmitPhysicalRecord(leveldb::log::RecordType,
+>> char const*, unsigned long)+0x11f) [0x76d93f]
+>>  5: (leveldb::log::Writer::AddRecord(leveldb::Slice const&)+0x74) [0x76dae4]
+>>  6: (leveldb::DBImpl::Write(leveldb::WriteOptions const&,
+>> leveldb::WriteBatch*)+0x160) [0x763050]
+>>  7: (LevelDBStore::submit_transaction(std::tr1::shared_ptr<KeyValueDB::TransactionImpl>)+0x2a)
+>> [0x74ec1a]
+>>  8: (DBObjectMap::remove_xattrs(hobject_t const&,
+>> std::set<std::string, std::less<std::string>,
+>> std::allocator<std::string> > const&, SequencerPosition const*)+0x16a)
+>> [0x746fca]
+>>  9: (FileStore::_setattrs(coll_t, hobject_t const&,
+>> std::map<std::string, ceph::buffer::ptr, std::less<std::string>,
+>> std::allocator<std::pair<std::string const, ceph::buffer::ptr> > >&,
+>> SequencerPosition const&)+0xe7f) [0x719aff]
+>>  10: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
+>> long, int)+0x3cba) [0x71e7da]
+>>  11: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
+>> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x4c)
+>> [0x72152c]
+>>  12: (FileStore::_do_op(FileStore::OpSequencer*)+0x1b1) [0x6f1331]
+>>  13: (ThreadPool::worker(ThreadPool::WorkThread*)+0x4bc) [0x827dec]
+>>  14: (ThreadPool::WorkThread::entry()+0x10) [0x829cb0]
+>>  15: (()+0x7efc) [0x7f828cb05efc]
+>>  16: (clone()+0x6d) [0x7f828af1cf8d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>>
+>> any suggestions?
 >>
 >> Thanks,
 >> Sheng
 >>
->>
->> On Fri, Feb 8, 2013 at 11:07 AM, sheng qiu <herbert1984106@gmail.com> wrote:
->>> Hi Sage,
+>> On Fri, Feb 8, 2013 at 11:53 AM, sheng qiu <herbert1984106@gmail.com> wrote:
+>>> Hi,
 >>>
->>> it's a memory based fs similar to pramfs.
+>>> i think it's not related with my local FS. i build a ext4 on a ramdisk
+>>> and used it as OSD.
+>>> when i run the iozone or fio on the mounted client point, it  shows
+>>> the same info as before:
+>>>
+>>> 2013-02-08 11:45:06.803915 7f28ec7c4700  0 -- 165.91.215.237:6801/7101
+>>>>> 165.91.215.237:0/1990103183 pipe(0x2ded240 sd=803 :6801 pgs=0 cs=0
+>>> l=0).accept peer addr is really 165.91.215.237:0/1990103183 (socket is
+>>> 165.91.215.237:60553/0)
+>>> 2013-02-08 11:45:06.879009 7f28f7add700 -1 *** Caught signal
+>>> (Segmentation fault) **
+>>>  in thread 7f28f7add700
+>>>
+>>> the ceph -s shows, also the same as using my own local FS:
+>>>
+>>>   health HEALTH_WARN 384 pgs degraded; 384 pgs stuck unclean; recovery
+>>> 21/42 degraded (50.000%)
+>>>    monmap e1: 1 mons at {0=165.91.215.237:6789/0}, election epoch 2, quorum 0 0
+>>>    osdmap e3: 1 osds: 1 up, 1 in
+>>>     pgmap v7: 384 pgs: 384 active+degraded; 21003 bytes data, 276 MB
+>>> used, 3484 MB / 3961 MB avail; 21/42 degraded (50.000%)
+>>>    mdsmap e4: 1/1/1 up {0=0=up:active}
+>>>
+>>> dmesg shows:
+>>>
+>>> [  656.799209] libceph: client4099 fsid da0fe76d-8506-4bf8-8b49-172fd8bc6d1f
+>>> [  656.800657] libceph: mon0 165.91.215.237:6789 session established
+>>> [  683.789954] libceph: osd0 165.91.215.237:6801 socket closed (con state OPEN)
+>>> [  683.790007] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  684.909095] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  685.903425] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  687.903937] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  691.897037] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  699.899197] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  715.903415] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  747.912122] libceph: osd0 165.91.215.237:6801 socket error on write
+>>> [  811.929323] libceph: osd0 165.91.215.237:6801 socket error on write
 >>>
 >>> Thanks,
 >>> Sheng
 >>>
->>> On Fri, Feb 8, 2013 at 11:02 AM, Sage Weil <sage@inktank.com> wrote:
->>>> Hi Sheng-
+>>>
+>>> On Fri, Feb 8, 2013 at 11:07 AM, sheng qiu <herbert1984106@gmail.com> wrote:
+>>>> Hi Sage,
 >>>>
->>>> On Fri, 8 Feb 2013, sheng qiu wrote:
->>>>> least pass through the init-ceph script). i made a minor change on
->>>>> ceph code, i changed the link_object() in LFNIndex.cc, basically i
->>>>> changed the hard link call ::link() to symlink(), as my local fs does
->>>>> not support hard link (the directory entry stores together with the
->>>>> related inodes).
+>>>> it's a memory based fs similar to pramfs.
 >>>>
->>>> Unrelated question: which local fs are you using?
+>>>> Thanks,
+>>>> Sheng
 >>>>
->>>> sage
+>>>> On Fri, Feb 8, 2013 at 11:02 AM, Sage Weil <sage@inktank.com> wrote:
+>>>>> Hi Sheng-
+>>>>>
+>>>>> On Fri, 8 Feb 2013, sheng qiu wrote:
+>>>>>> least pass through the init-ceph script). i made a minor change on
+>>>>>> ceph code, i changed the link_object() in LFNIndex.cc, basically i
+>>>>>> changed the hard link call ::link() to symlink(), as my local fs does
+>>>>>> not support hard link (the directory entry stores together with the
+>>>>>> related inodes).
+>>>>>
+>>>>> Unrelated question: which local fs are you using?
+>>>>>
+>>>>> sage
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Sheng Qiu
+>>>> Texas A & M University
+>>>> Room 332B Wisenbaker
+>>>> email: herbert1984106@gmail.com
+>>>> College Station, TX 77843-3259
 >>>
 >>>
 >>>
@@ -196,12 +211,3 @@ On Fri, Feb 8, 2013 at 2:57 PM, sheng qiu <herbert1984106@gmail.com> wrote:
 > Room 332B Wisenbaker
 > email: herbert1984106@gmail.com
 > College Station, TX 77843-3259
-
-
-
--- 
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
