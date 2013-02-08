@@ -1,75 +1,36 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: [PATCH v2 5/6] SyntheticClient.cc: fix some memory leaks in the error handling
-Date: Fri,  8 Feb 2013 18:52:20 +0100
-Message-ID: <1360345940-8481-1-git-send-email-danny.al-gaaf@bisect.de>
-References: <51153A4F.8030107@bisect.de>
+From: Christopher Kunz <chrislist@de-punkt.de>
+Subject: Re: the autobuild gpg key expired!
+Date: Fri, 08 Feb 2013 18:52:52 +0100
+Message-ID: <51153B74.3040203@de-punkt.de>
+References: <alpine.DEB.2.00.1302072235180.28547@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:44655 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1946881Ab3BHRw1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 12:52:27 -0500
-In-Reply-To: <51153A4F.8030107@bisect.de>
+Received: from mail-3.de-punkt.de ([93.190.64.33]:34327 "EHLO
+	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946833Ab3BHRw4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 12:52:56 -0500
+In-Reply-To: <alpine.DEB.2.00.1302072235180.28547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-Fix some memory leaks in case of error handling due to failed
-client->open() calls.
+Am 08.02.13 07:46, schrieb Sage Weil:
+>  wget -q -O- https://raw.github.com/ceph/ceph/master/keys/autobuild.asc | sudo apt-key add -
 
-Error from cppcheck was:
-[src/client/SyntheticClient.cc:1980]: (error) Memory leak: buf
-[src/client/SyntheticClient.cc:2040]: (error) Memory leak: buf
-[src/client/SyntheticClient.cc:2090]: (error) Memory leak: buf
+This doesn't work because raw.github.com uses a certificate issued to CN
+= *.a.ssl.fastly.net
+for whatever reason, and wget will complain.
 
----
-v2: - fix order in two cases 
+It complains rightly, because there is no way to verifiy that this is
+*actually* github.com we're speaking to. If you want the key regardless,
+you can use this line:
 
-Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
----
- src/client/SyntheticClient.cc | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
+wget --no-check-certificate -q -O-
+https://raw.github.com/ceph/ceph/master/keys/autobuild.asc | sudo
+apt-key add -
 
-diff --git a/src/client/SyntheticClient.cc b/src/client/SyntheticClient.cc
-index b2a936f..0da8bed 100644
---- a/src/client/SyntheticClient.cc
-+++ b/src/client/SyntheticClient.cc
-@@ -1977,7 +1977,10 @@ int SyntheticClient::write_file(string& fn, int size, loff_t wrsize)   // size i
- 
-   int fd = client->open(fn.c_str(), O_RDWR|O_CREAT);
-   dout(5) << "writing to " << fn << " fd " << fd << dendl;
--  if (fd < 0) return fd;
-+  if (fd < 0) {
-+    delete[] buf;
-+    return fd;
-+  }
-   
-   utime_t from = ceph_clock_now(g_ceph_context);
-   utime_t start = from;
-@@ -2037,7 +2040,10 @@ int SyntheticClient::write_fd(int fd, int size, int wrsize)   // size is in MB,
-   uint64_t chunks = (uint64_t)size * (uint64_t)(1024*1024) / (uint64_t)wrsize;
- 
-   //dout(5) << "SyntheticClient::write_fd: writing to fd " << fd << dendl;
--  if (fd < 0) return fd;
-+  if (fd < 0) {
-+    delete[] buf;
-+    return fd;
-+  }
- 
-   for (unsigned i=0; i<chunks; i++) {
-     if (time_to_stop()) {
-@@ -2087,7 +2093,10 @@ int SyntheticClient::read_file(const std::string& fn, int size,
- 
-   int fd = client->open(fn.c_str(), O_RDONLY);
-   dout(5) << "reading from " << fn << " fd " << fd << dendl;
--  if (fd < 0) return fd;
-+  if (fd < 0) {
-+    delete[] buf;
-+    return fd;
-+  }
- 
-   utime_t from = ceph_clock_now(g_ceph_context);
-   utime_t start = from;
--- 
-1.8.1.2
+Regards,
 
+--ck
