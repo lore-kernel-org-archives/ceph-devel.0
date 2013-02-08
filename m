@@ -1,101 +1,57 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: allow STAT osd operations
-Date: Fri, 08 Feb 2013 10:20:03 -0600
-Message-ID: <511525B3.30108@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: [PATCH 2/6] os/FileStore.cc: fix realloc memory leak in error case
+Date: Fri,  8 Feb 2013 17:24:59 +0100
+Message-ID: <1360340703-7170-3-git-send-email-danny.al-gaaf@bisect.de>
+References: <1360340703-7170-1-git-send-email-danny.al-gaaf@bisect.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:40477 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758646Ab3BHQUH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 11:20:07 -0500
-Received: by mail-ia0-f174.google.com with SMTP id o25so4320226iad.5
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Feb 2013 08:20:07 -0800 (PST)
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:39576 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1946646Ab3BHQZG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 11:25:06 -0500
+In-Reply-To: <1360340703-7170-1-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Danny Al-Gaaf <dalgaaf@suse.de>, Sage Weil <sage@inktank.com>
 
-Add support for CEPH_OSD_OP_STAT operations in the osd client
-and in rbd.
+Fix error from cppcheck:
 
-This operation sends no data to the osd; everything required is
-encoded in identity of the target object.
+[src/os/FileStore.cc:512]: (error) Common realloc mistake: 'fiemap'
+  nulled but not freed upon failure
 
-The result will be ENOENT if the object doesn't exist.  If it does
-exist and no other error occurs the server returns the size and last
-modification time of the target object as output data (in little
-endian format).  The size is a 64 bit unsigned and the time is
-ceph_timespec structure (two unsigned 32-bit integers, representing
-a seconds and nanoseconds value).
-
-This resolves:
-    http://tracker.ceph.com/issues/4007
-
-Signed-off-by: Alex Elder <elder@inktank.com>
+Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 ---
- drivers/block/rbd.c   |   15 +++++++++++++++
- net/ceph/osd_client.c |    3 ++-
- 2 files changed, 17 insertions(+), 1 deletion(-)
+ src/os/FileStore.cc | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 6e9e2c2..37361bd 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1148,6 +1148,8 @@ struct ceph_osd_req_op *rbd_osd_req_op_create(u16
-opcode, ...)
- 		if (opcode == CEPH_OSD_OP_WRITE)
- 			op->payload_len = op->extent.length;
- 		break;
-+	case CEPH_OSD_OP_STAT:
-+		break;
- 	case CEPH_OSD_OP_CALL:
- 		/* rbd_osd_req_op_create(CALL, class, method, data, datalen) */
- 		op->cls.class_name = va_arg(args, char *);
-@@ -1277,6 +1279,16 @@ static void rbd_osd_write_callback(struct
-rbd_obj_request *obj_request,
- 	obj_request_done_set(obj_request);
- }
-
-+/*
-+ * For a simple stat call there's nothing to do.  We'll do more if
-+ * this is part of a write sequence for a layered image.
-+ */
-+static void rbd_osd_stat_callback(struct rbd_obj_request *obj_request,
-+				struct ceph_osd_op *op)
-+{
-+	obj_request_done_set(obj_request);
-+}
-+
- static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
- 				struct ceph_msg *msg)
+diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
+index 1bab9c3..44f3b57 100644
+--- a/src/os/FileStore.cc
++++ b/src/os/FileStore.cc
+@@ -490,6 +490,7 @@ bool parse_attrname(char **name)
+ static int do_fiemap(int fd, off_t start, size_t len, struct fiemap **pfiemap)
  {
-@@ -1307,6 +1319,9 @@ static void rbd_osd_req_callback(struct
-ceph_osd_request *osd_req,
- 	case CEPH_OSD_OP_WRITE:
- 		rbd_osd_write_callback(obj_request, op);
- 		break;
-+	case CEPH_OSD_OP_STAT:
-+		rbd_osd_stat_callback(obj_request, op);
-+		break;
- 	case CEPH_OSD_OP_CALL:
- 	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_WATCH:
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index d9d58bb..3e4d8c4 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -244,7 +244,8 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		dst->extent.truncate_seq =
- 			cpu_to_le32(src->extent.truncate_seq);
- 		break;
--
-+	case CEPH_OSD_OP_STAT:
-+		break;
- 	case CEPH_OSD_OP_GETXATTR:
- 	case CEPH_OSD_OP_SETXATTR:
- 	case CEPH_OSD_OP_CMPXATTR:
+   struct fiemap *fiemap = NULL;
++  struct fiemap *_realloc_fiemap = NULL;
+   int size;
+   int ret;
+ 
+@@ -509,11 +510,13 @@ static int do_fiemap(int fd, off_t start, size_t len, struct fiemap **pfiemap)
+ 
+   size = sizeof(struct fiemap_extent) * (fiemap->fm_mapped_extents);
+ 
+-  fiemap = (struct fiemap *)realloc(fiemap, sizeof(struct fiemap) +
++  _realloc_fiemap = (struct fiemap *)realloc(fiemap, sizeof(struct fiemap) +
+                                     size);
+-  if (!fiemap) {
++  if (!_realloc_fiemap) {
+     ret = -ENOMEM;
+     goto done_err;
++  } else {
++    fiemap = _realloc_fiemap;
+   }
+ 
+   memset(fiemap->fm_extents, 0, size);
 -- 
-1.7.9.5
+1.8.1.2
 
