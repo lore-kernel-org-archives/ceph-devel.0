@@ -1,59 +1,60 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Links to various language bindings
-Date: Sat, 09 Feb 2013 10:50:02 +0100
-Message-ID: <51161BCA.6060005@42on.com>
-References: <5114BFFD.1060807@widodh.nl> <7ADDC8C0-BB74-44DC-8BE7-2837796DDCCF@cs.ucsc.edu>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: Unable to mount cephfs - can't read superblock
+Date: Sat, 09 Feb 2013 20:40:02 +1000
+Message-ID: <kf5920$1de$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:36815 "EHLO websrv.42on.com"
+Received: from plane.gmane.org ([80.91.229.3]:48674 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752436Ab3BIJ6i (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 9 Feb 2013 04:58:38 -0500
-In-Reply-To: <7ADDC8C0-BB74-44DC-8BE7-2837796DDCCF@cs.ucsc.edu>
+	id S1752714Ab3BIKkR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 9 Feb 2013 05:40:17 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1U47rE-0003AM-Or
+	for ceph-devel@vger.kernel.org; Sat, 09 Feb 2013 11:40:32 +0100
+Received: from 124-170-93-254.dyn.iinet.net.au ([124.170.93.254])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 11:40:32 +0100
+Received: from a.nielsen by 124-170-93-254.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 11:40:32 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Noah,
+Hi again,
 
-On 02/08/2013 04:42 PM, Noah Watkins wrote:
->
-> On Feb 8, 2013, at 1:06 AM, Wido den Hollander <wido@widodh.nl> wrote:
->
->> Hi,
->>
->> I knew that there were Java bindings for RADOS, but they weren't linked.
->>
->> Well, some searching on Github lead me to Noah's bindings [0], but it was a bit of searching.
->
-> The RADOS Java bindings on my Github page should be taken down--they are very old and not stable. Any links to it should probably be taken down. If there is interest in the RADOS Java bindings, I'd be happy to get that ball rolling.
->
+I'm trying to mount my new Ceph volume on a remote PC using cephfs.  I've 
+followed the quick start guide, but when I try to mount the filesystem I get this:
 
-Could you then update the README?
+remote$ mount -t ceph 192.168.0.6:6789:/ /mnt/ceph/
+mount: 192.168.0.6:6789:/: can't read superblock
 
-I did a quick test yesterday with them and they worked fine, but I just 
-created a Cluster object and a pool, didn't do anything fancy.
+remote$ dmesg | tail
+[951382.981690] libceph: client4105 fsid aa447ff8-8270-491b-b59e-2735e852eaf5
+[951382.983486] libceph: mon0 192.168.0.6:6789 session established
 
-rados4j is also on Github, does anyone know the status of that?
+I'm not sure what the problem is.  The osd, mon and mds daemons are running on 
+the Ceph host and no traffic is firewalled between the two machines.  I have 
+disabled authentication in ceph.conf.  The only issue I can see is this:
 
-Anyway, what about making these language bindings more clear to end 
-users so they can experience the full power of RADOS?
+cephhost$ ceph health
+HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean
 
-Wido
+I'm not sure what that means as I have only used mkcephfs and then started the 
+ceph service.  I haven't actually used it yet so I'm not sure where the 
+unclean pgs are coming from.  The underlying filesystem is ext4 though.
 
-> - Noah--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+I'm a bit stuck as to what to do next.  I can't see why the filesystem won't 
+mount remotely, and the troubleshooting docs say unclean pgs are related to 
+outages which doesn't seem possible on a newly created volume with only one 
+osd/mon/mds instance.
 
+Any pointers would be much appreciated!
 
--- 
-Wido den Hollander
-42on B.V.
+Many thanks,
+Adam.
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
