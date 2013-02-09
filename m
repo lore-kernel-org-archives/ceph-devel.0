@@ -1,58 +1,85 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: preferred OSD
-Date: Fri, 8 Feb 2013 16:45:04 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302081642230.13223@cobra.newdream.net>
-References: <CALFpzo5YGNi0tNc2HeauCQ_Kh4hgxzEtVLu5TdT1Nb-GZBvKTw@mail.gmail.com>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: mkcephfs error: cannot remove `/var/lib/ceph/osd/ceph-0'
+Date: Sat, 09 Feb 2013 13:39:29 +1000
+Message-ID: <kf4gdf$nn4$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45244 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932209Ab3BIApG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 19:45:06 -0500
-In-Reply-To: <CALFpzo5YGNi0tNc2HeauCQ_Kh4hgxzEtVLu5TdT1Nb-GZBvKTw@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:56090 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932270Ab3BIDju (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 8 Feb 2013 22:39:50 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1U41IF-0005mE-Aq
+	for ceph-devel@vger.kernel.org; Sat, 09 Feb 2013 04:39:59 +0100
+Received: from 124-170-93-254.dyn.iinet.net.au ([124.170.93.254])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 04:39:59 +0100
+Received: from a.nielsen by 124-170-93-254.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 04:39:59 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcus Sorensen <shadowsor@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Marcus-
+Hi all,
 
-On Fri, 8 Feb 2013, Marcus Sorensen wrote:
-> I know people have been disscussing on and off about providing a
-> "preferred OSD" for things like multi-datacenter, or even within a
-> datacenter, choosing an OSD that would avoid traversing uplinks.  Has
-> there been any discussion on how to do this? I seem to remember people
-> saying things like 'the crush map doesn't work that way at the
-> moment'. Presumably, when a client needs to access an object, it looks
-> up where the object should be stored via the crush map, which returns
-> all OSDs that could be read from. I was thinking this morning that you
-> could potentially leave the crush map out of it, by setting a location
-> for each OSD in the ceph.conf, and an /etc/ceph/location file for the
-> client.  Then use the absolute value of the difference to determine
-> preferred OSD. So, if OSD0 was location=1, and OSD1 was location=3,
-> and client 1 was location=2, then it would do the normal thing, but if
-> client 1 was location=1.3, then it would prefer OSD0 for reads.
-> Perhaps that's overly simplistic and wouldn't scale to meet everyone's
-> requirements, but you could do multiple locations and sprinkle clients
-> in between them all in various ways.  Or perhaps the location is a
-> matrix, so you could literally map it out on a grid with a set of
-> coordinates. What ideas are being discussed around how to implement
-> this?
+I'm trying to set up a test Ceph node, but mkcephfs is failing because =
+it's=20
+trying to erase my mount point, which it can't do because the disk I wa=
+nt to=20
+use with Ceph is mounted there.  I finally found some manual installati=
+on=20
+steps in the mkcephfs manpage (I think these really should be included =
+in the=20
+online docs!) and this is the bit that fails:
 
-We can do something like this for reads today, where we pick a read 
-replica based on the closest IP or some other metric/mask.  We generally 
-don't enable this because it leads to non-optimal cache behavior, but it 
-could in principle be enabled via a config option for certain clusters 
-(and in fact some of that code is already in place).
+$ mkcephfs --init-local-daemons mon -d /tmp/foo
+=3D=3D=3D mon.0 =3D=3D=3D
+rm: cannot remove `/var/lib/ceph/osd/ceph-0': Device or resource busy
+/usr/bin/ceph-mon: error creating monfs: (5) Input/output error
+2013-02-09 13:17:24.941676 b7358710 -1 store(/var/lib/ceph/osd/ceph-0/)=
+=20
+MonitorStore::mkfs: failed to remove /var/lib/ceph/osd/ceph-0/: rm retu=
+rned=20
+run_cmd(rm): exited with status 1
+2013-02-09 13:17:24.941746 b7358710 -1 mon.0@-1(probing) e0 store->mkfs=
+ failed=20
+with: (5) Input/output error
 
-Writes always have to go through the primary, though, which is the same 
-osd regardless of who or where the clients are.
+What am I doing wrong?  I am going off the ceph.com docs[1], which says=
+ "If=20
+you are running multiple OSDs per host and one hard disk per OSD, you s=
+hould=20
+mount the disk under the OSD data directory (if you haven=E2=80=99t don=
+e so already)".=20
+  I am only running one OSD on this host, does this mean I shouldn't mo=
+unt the=20
+disk before running mkcephfs?  Won't that just create all the files on =
+the=20
+wrong disk?
 
-FWIW, CRUSH is not really the issue.  You could modify the OSDMap to 
-explicitly enumerate all PGs and their exact mappings to devices, and it 
-still wouldn't be that big for most clusters.  But the problem is the 
-same.. for any PG there is one single primary who tends the replicas, and 
-that is where writes and (normally) reads go.
+I'm running Debian Squeeze with the debian-bobtail packages installed a=
+s per=20
+the ceph.com Debian instructions[2].
 
-sage
+Any suggestions?
+
+Many thanks,
+Adam.
+
+[1] http://ceph.com/docs/master/rados/deployment/mkcephfs/
+[2] http://ceph.com/docs/master/install/debian/
+
+P.S. I would've posted on ceph-users except it's not carried on GMane y=
+et.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
