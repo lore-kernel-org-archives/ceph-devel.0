@@ -1,41 +1,37 @@
-From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: Quantal gitbuilder is broken
-Date: Fri, 8 Feb 2013 16:09:11 -0800
-Message-ID: <550EED21-CC16-42EA-AE0F-F181DDB9350C@inktank.com>
-References: <CAPYLRzjEk88NEX3HmBoEuWtgsMsY5iMYU0X6YD6b1NtVaGTNAQ@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 7bit
+From: Marcus Sorensen <shadowsor@gmail.com>
+Subject: preferred OSD
+Date: Fri, 8 Feb 2013 17:12:45 -0700
+Message-ID: <CALFpzo5YGNi0tNc2HeauCQ_Kh4hgxzEtVLu5TdT1Nb-GZBvKTw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f50.google.com ([209.85.210.50]:58747 "EHLO
-	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1947339Ab3BIAJQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 19:09:16 -0500
-Received: by mail-da0-f50.google.com with SMTP id h15so2049236dan.9
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Feb 2013 16:09:15 -0800 (PST)
-In-Reply-To: <CAPYLRzjEk88NEX3HmBoEuWtgsMsY5iMYU0X6YD6b1NtVaGTNAQ@mail.gmail.com>
+Received: from mail-ve0-f171.google.com ([209.85.128.171]:43326 "EHLO
+	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1947339Ab3BIAMq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Feb 2013 19:12:46 -0500
+Received: by mail-ve0-f171.google.com with SMTP id b10so3823858vea.2
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Feb 2013 16:12:45 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Greg -
-
-It's new and not quite finished being set up.
-
-Cheers,
-Gary
-
-On Feb 8, 2013, at 2:51 PM, Gregory Farnum wrote:
-
-> I'm not sure who's responsible for this, but I see everything is red
-> on our i386 Quantal gitbuilder. Probably just needs
-> libboost-program-options installed, based on the error I'm seeing in
-> one of my branches? Although there are some warnings I'm not too used
-> to seeing in there as well.
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+I know people have been disscussing on and off about providing a
+"preferred OSD" for things like multi-datacenter, or even within a
+datacenter, choosing an OSD that would avoid traversing uplinks.  Has
+there been any discussion on how to do this? I seem to remember people
+saying things like 'the crush map doesn't work that way at the
+moment'. Presumably, when a client needs to access an object, it looks
+up where the object should be stored via the crush map, which returns
+all OSDs that could be read from. I was thinking this morning that you
+could potentially leave the crush map out of it, by setting a location
+for each OSD in the ceph.conf, and an /etc/ceph/location file for the
+client.  Then use the absolute value of the difference to determine
+preferred OSD. So, if OSD0 was location=1, and OSD1 was location=3,
+and client 1 was location=2, then it would do the normal thing, but if
+client 1 was location=1.3, then it would prefer OSD0 for reads.
+Perhaps that's overly simplistic and wouldn't scale to meet everyone's
+requirements, but you could do multiple locations and sprinkle clients
+in between them all in various ways.  Or perhaps the location is a
+matrix, so you could literally map it out on a grid with a set of
+coordinates. What ideas are being discussed around how to implement
+this?
