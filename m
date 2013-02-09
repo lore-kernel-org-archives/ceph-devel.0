@@ -1,50 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: the autobuild gpg key expired!
-Date: Fri, 8 Feb 2013 21:18:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302082116240.5874@cobra.newdream.net>
-References: <alpine.DEB.2.00.1302072235180.28547@cobra.newdream.net> <51153B74.3040203@de-punkt.de> <alpine.DEB.2.00.1302080955010.21274@cobra.newdream.net>
+From: Adam Nielsen <a.nielsen@shikadi.net>
+Subject: Re: mkcephfs error: cannot remove `/var/lib/ceph/osd/ceph-0'
+Date: Sat, 09 Feb 2013 15:39:57 +1000
+Message-ID: <kf4nfb$6ge$1@ger.gmane.org>
+References: <kf4gdf$nn4$1@ger.gmane.org> <alpine.DEB.2.00.1302082055130.5874@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46793 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847Ab3BIFSM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Feb 2013 00:18:12 -0500
-In-Reply-To: <alpine.DEB.2.00.1302080955010.21274@cobra.newdream.net>
+Received: from plane.gmane.org ([80.91.229.3]:54853 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751186Ab3BIFkN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 9 Feb 2013 00:40:13 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1U43Aq-0004g9-H4
+	for ceph-devel@vger.kernel.org; Sat, 09 Feb 2013 06:40:28 +0100
+Received: from 124-170-93-254.dyn.iinet.net.au ([124.170.93.254])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 06:40:28 +0100
+Received: from a.nielsen by 124-170-93-254.dyn.iinet.net.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Feb 2013 06:40:28 +0100
+In-Reply-To: <alpine.DEB.2.00.1302082055130.5874@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christopher Kunz <chrislist@de-punkt.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 8 Feb 2013, Sage Weil wrote:
-> On Fri, 8 Feb 2013, Christopher Kunz wrote:
-> > Am 08.02.13 07:46, schrieb Sage Weil:
-> > >  wget -q -O- https://raw.github.com/ceph/ceph/master/keys/autobuild.asc | sudo apt-key add -
-> > 
-> > This doesn't work because raw.github.com uses a certificate issued to CN
-> > = *.a.ssl.fastly.net
-> > for whatever reason, and wget will complain.
-> > 
-> > It complains rightly, because there is no way to verifiy that this is
-> > *actually* github.com we're speaking to. If you want the key regardless,
-> > you can use this line:
-> > 
-> > wget --no-check-certificate -q -O-
-> > https://raw.github.com/ceph/ceph/master/keys/autobuild.asc | sudo
-> > apt-key add -
-> 
-> We're setting up https on ceph.com so that we can publish these securely, 
-> and will follow up with another email (and an update to the docs).
+>> $ mkcephfs --init-local-daemons mon -d /tmp/foo
+>
+> Not sure if this is the problem, but: you're creating the mon...
+>
+>> === mon.0 ===
+>> rm: cannot remove `/var/lib/ceph/osd/ceph-0': Device or resource busy
+>
+> ..but the path is /var/lib/ceph/osd/...?  Did you override the paths in
+> your ceph.conf?
 
-Ceph.com how has SSL and the docs are updated with new locations for the 
-signing keys.
+Ah yes I did, I see the problem now.  What I wanted to do was to put *all* 
+Ceph data onto the same disk (since I am booting the machine off an SD card so 
+there is not enough space for much else.)
 
-For official releases:
+What's the best solution in this case?  Should I override the mon path and put 
+it as /var/lib/ceph/osd/ceph-0/mon/ for example, or should I mount my disk as 
+/var/lib/ceph instead?
 
- wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
+Many thanks,
+Adam.
 
-For autobuilt packages:
 
- wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc' | sudo apt-key add -
-
-sage
