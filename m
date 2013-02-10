@@ -1,71 +1,82 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 00/15] fix more issues from clang(++) and cppchecker
-Date: Sat, 9 Feb 2013 22:02:35 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302092201010.11665@cobra.newdream.net>
-References: <1360266123-28972-1-git-send-email-danny.al-gaaf@bisect.de>
+Subject: Re: [PATCH 5/6] SyntheticClient.cc: fix some memory leaks in the
+ error handling
+Date: Sat, 9 Feb 2013 22:04:12 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302092203440.11665@cobra.newdream.net>
+References: <1360340703-7170-1-git-send-email-danny.al-gaaf@bisect.de> <1360340703-7170-6-git-send-email-danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54244 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54249 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752082Ab3BJGCf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 01:02:35 -0500
-In-Reply-To: <1360266123-28972-1-git-send-email-danny.al-gaaf@bisect.de>
+	with ESMTP id S1751192Ab3BJGEN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 01:04:13 -0500
+In-Reply-To: <1360340703-7170-6-git-send-email-danny.al-gaaf@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <dalgaaf@suse.de>
 
-Hey Danny-
-
-These look good, modulo those 2 comments.  Do you have a public git tree 
-with these patches I can cherry-pick or pull from?  It's a bit faster than 
-yanking them off the list for merge (although posting to the list for 
-review is still good, of course).
-
-Thanks!
-sage
-
-
-On Thu, 7 Feb 2013, Danny Al-Gaaf wrote:
-
-> Here another set of patches to fix issues found by clang/clang++ 
-> and cppchecker.
+On Fri, 8 Feb 2013, Danny Al-Gaaf wrote:
+> Fix some memory leaks in case of error handling due to failed
+> client->open() calls.
 > 
-> Danny Al-Gaaf (15):
->   kv_flat_btree_async.cc: use vector instead of VLA's
->   common/config.h: declaration of config_option as struct
->   src/msg/msg_types.h: pass function parameter by reference
->   fuse_ll.cc: fix -Wgnu-designator
->   common/AsyncReserver.h: use empty() instead of size()
->   common/WorkQueue.h: use empty() instead of size()
->   common/config.cc: fix -Wgnu-designator
->   src/log/Entry.h: pass function parameter by reference
->   src/mon/PGMonitor.cc: remove unused variable
->   src/msg/Messenger.h: pass function parameter by reference
->   src/osd/OSD.h: use empty() instead of size()
->   src/osd/PG.h: use empty() instead of size()
->   src/osd/osd_types.h: pass function parameter by reference
->   test_mon_workloadgen.cc: fix -Wgnu
->   librados/librados.cc: fix implicitly-defined namespace 'std'
+> Error from cppcheck was:
+> [src/client/SyntheticClient.cc:1980]: (error) Memory leak: buf
+> [src/client/SyntheticClient.cc:2040]: (error) Memory leak: buf
+> [src/client/SyntheticClient.cc:2090]: (error) Memory leak: buf
 > 
->  src/client/fuse_ll.cc                      | 68 +++++++++++++++---------------
->  src/common/AsyncReserver.h                 |  2 +-
->  src/common/WorkQueue.h                     |  2 +-
->  src/common/config.cc                       | 14 +++---
->  src/common/config.h                        |  2 +-
->  src/key_value_store/kv_flat_btree_async.cc | 14 +++---
->  src/librados/librados.cc                   | 16 ++++++-
->  src/log/Entry.h                            |  2 +-
->  src/mon/PGMonitor.cc                       |  1 -
->  src/msg/Messenger.h                        |  2 +-
->  src/msg/msg_types.h                        |  2 +-
->  src/osd/OSD.h                              |  4 +-
->  src/osd/PG.h                               |  2 +-
->  src/osd/osd_types.h                        |  2 +-
->  src/test/mon/test_mon_workloadgen.cc       |  3 +-
->  15 files changed, 74 insertions(+), 62 deletions(-)
+> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+> ---
+>  src/client/SyntheticClient.cc | 15 ++++++++++++---
+>  1 file changed, 12 insertions(+), 3 deletions(-)
 > 
+> diff --git a/src/client/SyntheticClient.cc b/src/client/SyntheticClient.cc
+> index b2a936f..0da8bed 100644
+> --- a/src/client/SyntheticClient.cc
+> +++ b/src/client/SyntheticClient.cc
+> @@ -1977,7 +1977,10 @@ int SyntheticClient::write_file(string& fn, int size, loff_t wrsize)   // size i
+>  
+>    int fd = client->open(fn.c_str(), O_RDWR|O_CREAT);
+>    dout(5) << "writing to " << fn << " fd " << fd << dendl;
+> -  if (fd < 0) return fd;
+> +  if (fd < 0) {
+> +    delete[] buf;
+> +    return fd;
+> +  }
+>    
+>    utime_t from = ceph_clock_now(g_ceph_context);
+>    utime_t start = from;
+> @@ -2037,7 +2040,10 @@ int SyntheticClient::write_fd(int fd, int size, int wrsize)   // size is in MB,
+>    uint64_t chunks = (uint64_t)size * (uint64_t)(1024*1024) / (uint64_t)wrsize;
+>  
+>    //dout(5) << "SyntheticClient::write_fd: writing to fd " << fd << dendl;
+> -  if (fd < 0) return fd;
+> +  if (fd < 0) {
+> +    return fd;
+> +    delete[] buf;
+
+oops, wrong order...
+
+> +  }
+>  
+>    for (unsigned i=0; i<chunks; i++) {
+>      if (time_to_stop()) {
+> @@ -2087,7 +2093,10 @@ int SyntheticClient::read_file(const std::string& fn, int size,
+>  
+>    int fd = client->open(fn.c_str(), O_RDONLY);
+>    dout(5) << "reading from " << fn << " fd " << fd << dendl;
+> -  if (fd < 0) return fd;
+> +  if (fd < 0) {
+> +    return fd;
+> +    delete[] buf;
+
+here too!
+
+> +  }
+>  
+>    utime_t from = ceph_clock_now(g_ceph_context);
+>    utime_t start = from;
 > -- 
 > 1.8.1.2
 > 
