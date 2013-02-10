@@ -1,268 +1,49 @@
-From: Olivier Bonvalet <ceph.list@daevel.fr>
-Subject: Re: OSD down
-Date: Sun, 10 Feb 2013 20:52:25 +0100
-Message-ID: <1360525945.17404.32.camel@boolette.noo>
-References: <1360518334.17404.30.camel@boolette.noo>
-	 <A7A4887C552A4204863A686EB7F50D98@inktank.com>
-Reply-To: ceph-devel@vger.kernel.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: Links to various language bindings
+Date: Sun, 10 Feb 2013 13:24:39 -0800
+Message-ID: <30CAB946-70A4-46E7-A0A2-7C6325199F27@cs.ucsc.edu>
+References: <5114BFFD.1060807@widodh.nl> <7ADDC8C0-BB74-44DC-8BE7-2837796DDCCF@cs.ucsc.edu> <51161BCA.6060005@42on.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from licorne.daevel.fr ([178.32.94.222]:41373 "EHLO
-	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761030Ab3BJTw3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 14:52:29 -0500
-In-Reply-To: <A7A4887C552A4204863A686EB7F50D98@inktank.com>
+Received: from mail-da0-f41.google.com ([209.85.210.41]:62079 "EHLO
+	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755705Ab3BJVYl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 16:24:41 -0500
+Received: by mail-da0-f41.google.com with SMTP id e20so2474768dak.14
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Feb 2013 13:24:41 -0800 (PST)
+In-Reply-To: <51161BCA.6060005@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel@vger.kernel.org
-
-Wow... all that verbose stuff is =C2=ABjust=C2=BB a read error ?
-
-But ok, I will continue on the ceph-users list then ;)
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
-Le dimanche 10 f=C3=A9vrier 2013 =C3=A0 10:10 -0800, Gregory Farnum a =C3=
-=A9crit :
-> The OSD daemon is getting back EIO when it tries to do a read. Sounds=
- like your disk is going bad.=20
-> -Greg
->=20
-> PS: This question is a good fit for the new ceph-users list. :)
->=20
->=20
-> On Sunday, February 10, 2013 at 9:45 AM, Olivier Bonvalet wrote:
->=20
-> > Hi,
-> >=20
-> > I have an OSD which often stopped (ceph 0.56.2), with that in logs =
-:
-> >=20
-> > 446 stamp 2013-02-10 18:37:27.559777) v2 =3D=3D=3D=3D 47+0+0 (40680=
-38983 0 0)
-> > 0x11e028c0 con 0x573d6e0
-> > -3> 2013-02-10 18:37:27.561618 7f1c765d5700 1 --
-> > 192.168.42.1:0/5824 <=3D=3D osd.31 192.168.42.3:6811/23050 129 =3D=3D=
-=3D=3D
-> > osd_ping(ping_reply e13446 stamp 2013-02-10 18:37:27.559777) v2 =3D=
-=3D=3D=3D 47
-> > +0+0 (4068038983 0 0) 0x73be380 con 0x573d420
-> > -2> 2013-02-10 18:37:27.562674 7f1c765d5700 1 --
-> > 192.168.42.1:0/5824 <=3D=3D osd.1 192.168.42.2:6803/7458 129 =3D=3D=
-=3D=3D
-> > osd_ping(ping_reply e13446 stamp 2013-02-10 18:37:27.559777) v2 =3D=
-=3D=3D=3D 47
-> > +0+0 (4068038983 0 0) 0x6bd8a80 con 0x573dc60
-> > -1> 2013-02-10 18:37:28.217626 7f1c805e9700 5 osd.12 13444 tick
-> > 0> 2013-02-10 18:37:28.552692 7f1c725cd700 -1 os/FileStore.cc (http=
-://FileStore.cc): In
-> > function 'virtual int FileStore::read(coll_t, const hobject_t&,
-> > uint64_t, size_t, ceph::bufferlist&)' thread 7f1c725cd700 time
-> > 2013-02-10 18:37:28.537715
-> > os/FileStore.cc (http://FileStore.cc): 2732: FAILED assert(!m_files=
-tore_fail_eio || got !=3D -5)
-> >=20
-> > ceph version ()
-> > 1: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsign=
-ed
-> > long, ceph::buffer::list&)+0x462) [0x725f92]
-> > 2: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-> > std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
-> > 3: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-> > bool)+0x29b) [0x6866bb]
-> > 4: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
-> > 5: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
-> > 6: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
-> > 7: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
-> > 8: (()+0x68ca) [0x7f1c852f48ca]
-> > 9: (clone()+0x6d) [0x7f1c83e23b6d]
-> > NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> > needed to interpret this.
-> >=20
-> > --- logging levels ---
-> > 0/ 5 none
-> > 0/ 1 lockdep
-> > 0/ 1 context
-> > 1/ 1 crush
-> > 1/ 5 mds
-> > 1/ 5 mds_balancer
-> > 1/ 5 mds_locker
-> > 1/ 5 mds_log
-> > 1/ 5 mds_log_expire
-> > 1/ 5 mds_migrator
-> > 0/ 1 buffer
-> > 0/ 1 timer
-> > 0/ 1 filer
-> > 0/ 1 striper
-> > 0/ 1 objecter
-> > 0/ 5 rados
-> > 0/ 5 rbd
-> > 0/ 5 journaler
-> > 0/ 5 objectcacher
-> > 0/ 5 client
-> > 0/ 5 osd
-> > 0/ 5 optracker
-> > 0/ 5 objclass
-> > 1/ 3 filestore
-> > 1/ 3 journal
-> > 0/ 5 ms
-> > 1/ 5 mon
-> > 0/10 monc
-> > 0/ 5 paxos
-> > 0/ 5 tp
-> > 1/ 5 auth
-> > 1/ 5 crypto
-> > 1/ 1 finisher
-> > 1/ 5 heartbeatmap
-> > 1/ 5 perfcounter
-> > 1/ 5 rgw
-> > 1/ 5 hadoop
-> > 1/ 5 javaclient
-> > 1/ 5 asok
-> > 1/ 1 throttle
-> > -2/-2 (syslog threshold)
-> > -1/-1 (stderr threshold)
-> > max_recent 100000
-> > max_new 1000
-> > log_file /var/log/ceph/osd.12.log
-> > --- end dump of recent events ---
-> > 2013-02-10 18:37:29.236649 7f1c725cd700 -1 *** Caught signal (Abort=
-ed)
-> > **
-> > in thread 7f1c725cd700
-> >=20
-> > ceph version ()
-> > 1: /usr/bin/ceph-osd() [0x7a0db9]
-> > 2: (()+0xeff0) [0x7f1c852fcff0]
-> > 3: (gsignal()+0x35) [0x7f1c83d861b5]
-> > 4: (abort()+0x180) [0x7f1c83d88fc0]
-> > 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f1c8461adc5=
-]
-> > 6: (()+0xcb166) [0x7f1c84619166]
-> > 7: (()+0xcb193) [0x7f1c84619193]
-> > 8: (()+0xcb28e) [0x7f1c8461928e]
-> > 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> > const*)+0x7c9) [0x8f3fc9]
-> > 10: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsig=
-ned
-> > long, ceph::buffer::list&)+0x462) [0x725f92]
-> > 11: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-> > std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
-> > 12: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-> > bool)+0x29b) [0x6866bb]
-> > 13: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
-> > 14: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
-> > 15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
-> > 16: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
-> > 17: (()+0x68ca) [0x7f1c852f48ca]
-> > 18: (clone()+0x6d) [0x7f1c83e23b6d]
-> > NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> > needed to interpret this.
-> >=20
-> > --- begin dump of recent events ---
-> > -1> 2013-02-10 18:37:29.217778 7f1c805e9700 5 osd.12 13444 tick
-> > 0> 2013-02-10 18:37:29.236649 7f1c725cd700 -1 *** Caught signal
-> > (Aborted) **
-> > in thread 7f1c725cd700
-> >=20
-> > ceph version ()
-> > 1: /usr/bin/ceph-osd() [0x7a0db9]
-> > 2: (()+0xeff0) [0x7f1c852fcff0]
-> > 3: (gsignal()+0x35) [0x7f1c83d861b5]
-> > 4: (abort()+0x180) [0x7f1c83d88fc0]
-> > 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f1c8461adc5=
-]
-> > 6: (()+0xcb166) [0x7f1c84619166]
-> > 7: (()+0xcb193) [0x7f1c84619193]
-> > 8: (()+0xcb28e) [0x7f1c8461928e]
-> > 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> > const*)+0x7c9) [0x8f3fc9]
-> > 10: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsig=
-ned
-> > long, ceph::buffer::list&)+0x462) [0x725f92]
-> > 11: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-> > std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
-> > 12: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-> > bool)+0x29b) [0x6866bb]
-> > 13: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
-> > 14: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
-> > 15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
-> > 16: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
-> > 17: (()+0x68ca) [0x7f1c852f48ca]
-> > 18: (clone()+0x6d) [0x7f1c83e23b6d]
-> > NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> > needed to interpret this.
-> >=20
-> > --- logging levels ---
-> > 0/ 5 none
-> > 0/ 1 lockdep
-> > 0/ 1 context
-> > 1/ 1 crush
-> > 1/ 5 mds
-> > 1/ 5 mds_balancer
-> > 1/ 5 mds_locker
-> > 1/ 5 mds_log
-> > 1/ 5 mds_log_expire
-> > 1/ 5 mds_migrator
-> > 0/ 1 buffer
-> > 0/ 1 timer
-> > 0/ 1 filer
-> > 0/ 1 striper
-> > 0/ 1 objecter
-> > 0/ 5 rados
-> > 0/ 5 rbd
-> > 0/ 5 journaler
-> > 0/ 5 objectcacher
-> > 0/ 5 client
-> > 0/ 5 osd
-> > 0/ 5 optracker
-> > 0/ 5 objclass
-> > 1/ 3 filestore
-> > 1/ 3 journal
-> > 0/ 5 ms
-> > 1/ 5 mon
-> > 0/10 monc
-> > 0/ 5 paxos
-> > 0/ 5 tp
-> > 1/ 5 auth
-> > 1/ 5 crypto
-> > 1/ 1 finisher
-> > 1/ 5 heartbeatmap
-> > 1/ 5 perfcounter
-> > 1/ 5 rgw
-> > 1/ 5 hadoop
-> > 1/ 5 javaclient
-> > 1/ 5 asok
-> > 1/ 1 throttle
-> > -2/-2 (syslog threshold)
-> > -1/-1 (stderr threshold)
-> > max_recent 100000
-> > max_new 1000
-> > log_file /var/log/ceph/osd.12.log
-> > --- end dump of recent events ---
-> >=20
-> >=20
-> >=20
-> > What should I do ?
-> >=20
-> >=20
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org (mailto:majordom=
-o@vger.kernel.org)
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
->=20
+On Feb 9, 2013, at 1:50 AM, Wido den Hollander <wido@42on.com> wrote:
 
+> Hi Noah,
+> 
+> On 02/08/2013 04:42 PM, Noah Watkins wrote:
+>> 
+>> On Feb 8, 2013, at 1:06 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>> 
+>>> Hi,
+>>> 
+>>> I knew that there were Java bindings for RADOS, but they weren't linked.
+>>> 
+>>> Well, some searching on Github lead me to Noah's bindings [0], but it was a bit of searching.
+>> 
+>> The RADOS Java bindings on my Github page should be taken down--they are very old and not stable. Any links to it should probably be taken down. If there is interest in the RADOS Java bindings, I'd be happy to get that ball rolling.
+>> 
+> 
+> Could you then update the README?
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Sure.
+
+> I did a quick test yesterday with them and they worked fine, but I just created a Cluster object and a pool, didn't do anything fancy.
+
+Yes, they do "work", and in fact I think some people might be playing with them. They are however full of various problems, and likely need a re-write. I wouldn't rely on them for anything important.
+
+- Noah
+
