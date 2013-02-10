@@ -1,223 +1,425 @@
-From: Olivier Bonvalet <ceph.list@daevel.fr>
-Subject: OSD down
-Date: Sun, 10 Feb 2013 18:45:34 +0100
-Message-ID: <1360518334.17404.30.camel@boolette.noo>
-Reply-To: ceph-devel@vger.kernel.org
+From: Mike Dawson <mike.dawson@scholarstack.com>
+Subject: Re: Possible filesystem corruption or something else?
+Date: Sun, 10 Feb 2013 13:09:44 -0500
+Message-ID: <5117E268.9000704@scholarstack.com>
+References: <CAMmJxt++bSc0n5U1Xs2TH6PLYb_oL9qXS_4JOSbtWAs_t23o=w@mail.gmail.com> <F247D651090445BE9A851933C9F8037F@inktank.com> <CAMmJxt+cF1HPo=V4KgYrcPmxN3mq=F55asbaE4wXOmJcGrRXVA@mail.gmail.com> <CAMmJxtLxTm5T=0aWEWiWSupmaxO0fWdP_JZfUF5EKHS3+ts_OA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from licorne.daevel.fr ([178.32.94.222]:39364 "EHLO
-	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755619Ab3BJRvz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 12:51:55 -0500
-Received: from luuna.daevel.fr ([82.67.37.138] helo=[192.168.1.50])
-	by licorne.daevel.fr with esmtpsa (SSL3.0:RSA_AES_256_CBC_SHA1:32)
-	(Exim 4.72)
-	(envelope-from <ceph.list@daevel.fr>)
-	id 1U4ay7-0002RF-HT
-	for ceph-devel@vger.kernel.org; Sun, 10 Feb 2013 18:45:35 +0100
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:36071 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756040Ab3BJSIE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 13:08:04 -0500
+Received: by mail-ie0-f182.google.com with SMTP id k14so6915619iea.27
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Feb 2013 10:08:02 -0800 (PST)
+In-Reply-To: <CAMmJxtLxTm5T=0aWEWiWSupmaxO0fWdP_JZfUF5EKHS3+ts_OA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: John Axel Eriksson <john@insane.se>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+jmlowe originated a bug related to sparse RBD images and OSDs on btrfs=20
+which resulted in the patch you linked from Josef. See:
 
-I have an OSD which often stopped (ceph 0.56.2), with that in logs :
+http://tracker.ceph.com/issues/3810
 
-446 stamp 2013-02-10 18:37:27.559777) v2 ==== 47+0+0 (4068038983 0 0)
-0x11e028c0 con 0x573d6e0
-    -3> 2013-02-10 18:37:27.561618 7f1c765d5700  1 --
-192.168.42.1:0/5824 <== osd.31 192.168.42.3:6811/23050 129 ====
-osd_ping(ping_reply e13446 stamp 2013-02-10 18:37:27.559777) v2 ==== 47
-+0+0 (4068038983 0 0) 0x73be380 con 0x573d420
-    -2> 2013-02-10 18:37:27.562674 7f1c765d5700  1 --
-192.168.42.1:0/5824 <== osd.1 192.168.42.2:6803/7458 129 ====
-osd_ping(ping_reply e13446 stamp 2013-02-10 18:37:27.559777) v2 ==== 47
-+0+0 (4068038983 0 0) 0x6bd8a80 con 0x573dc60
-    -1> 2013-02-10 18:37:28.217626 7f1c805e9700  5 osd.12 13444 tick
-     0> 2013-02-10 18:37:28.552692 7f1c725cd700 -1 os/FileStore.cc: In
-function 'virtual int FileStore::read(coll_t, const hobject_t&,
-uint64_t, size_t, ceph::bufferlist&)' thread 7f1c725cd700 time
-2013-02-10 18:37:28.537715
-os/FileStore.cc: 2732: FAILED assert(!m_filestore_fail_eio || got != -5)
+and
 
- ceph version  ()
- 1: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsigned
-long, ceph::buffer::list&)+0x462) [0x725f92]
- 2: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
- 3: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-bool)+0x29b) [0x6866bb]
- 4: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
- 5: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
- 6: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
- 7: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
- 8: (()+0x68ca) [0x7f1c852f48ca]
- 9: (clone()+0x6d) [0x7f1c83e23b6d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
+http://www.mail-archive.com/linux-btrfs@vger.kernel.org/msg21667.html
 
---- logging levels ---
-   0/ 5 none
-   0/ 1 lockdep
-   0/ 1 context
-   1/ 1 crush
-   1/ 5 mds
-   1/ 5 mds_balancer
-   1/ 5 mds_locker
-   1/ 5 mds_log
-   1/ 5 mds_log_expire
-   1/ 5 mds_migrator
-   0/ 1 buffer
-   0/ 1 timer
-   0/ 1 filer
-   0/ 1 striper
-   0/ 1 objecter
-   0/ 5 rados
-   0/ 5 rbd
-   0/ 5 journaler
-   0/ 5 objectcacher
-   0/ 5 client
-   0/ 5 osd
-   0/ 5 optracker
-   0/ 5 objclass
-   1/ 3 filestore
-   1/ 3 journal
-   0/ 5 ms
-   1/ 5 mon
-   0/10 monc
-   0/ 5 paxos
-   0/ 5 tp
-   1/ 5 auth
-   1/ 5 crypto
-   1/ 1 finisher
-   1/ 5 heartbeatmap
-   1/ 5 perfcounter
-   1/ 5 rgw
-   1/ 5 hadoop
-   1/ 5 javaclient
-   1/ 5 asok
-   1/ 1 throttle
-  -2/-2 (syslog threshold)
-  -1/-1 (stderr threshold)
-  max_recent    100000
-  max_new         1000
-  log_file /var/log/ceph/osd.12.log
---- end dump of recent events ---
-2013-02-10 18:37:29.236649 7f1c725cd700 -1 *** Caught signal (Aborted)
-**
- in thread 7f1c725cd700
+I believe Josef's patch was merged into 3.8-rc7 a few days ago.
 
- ceph version  ()
- 1: /usr/bin/ceph-osd() [0x7a0db9]
- 2: (()+0xeff0) [0x7f1c852fcff0]
- 3: (gsignal()+0x35) [0x7f1c83d861b5]
- 4: (abort()+0x180) [0x7f1c83d88fc0]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f1c8461adc5]
- 6: (()+0xcb166) [0x7f1c84619166]
- 7: (()+0xcb193) [0x7f1c84619193]
- 8: (()+0xcb28e) [0x7f1c8461928e]
- 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x7c9) [0x8f3fc9]
- 10: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsigned
-long, ceph::buffer::list&)+0x462) [0x725f92]
- 11: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
- 12: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-bool)+0x29b) [0x6866bb]
- 13: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
- 14: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
- 15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
- 16: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
- 17: (()+0x68ca) [0x7f1c852f48ca]
- 18: (clone()+0x6d) [0x7f1c83e23b6d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
+- Mike
 
---- begin dump of recent events ---
-    -1> 2013-02-10 18:37:29.217778 7f1c805e9700  5 osd.12 13444 tick
-     0> 2013-02-10 18:37:29.236649 7f1c725cd700 -1 *** Caught signal
-(Aborted) **
- in thread 7f1c725cd700
+On 2/10/2013 6:17 AM, John Axel Eriksson wrote:
+> Seems as if this may be fixed in a later kernel, see:
+>
+> http://code.google.com/p/leveldb/issues/detail?id=3D97
+> and
+> https://git.kernel.org/?p=3Dlinux/kernel/git/josef/btrfs-next.git;a=3D=
+commit;h=3Dd468abec6b9fd7132d012d33573ecb8056c7c43f
+>
+> Sorry if this email reached anyone more than once - had some trouble
+> with html vs plain text in gmail (ceph-list doesn't allow html email)=
+=2E
+>
+> On Sat, Feb 9, 2013 at 6:21 PM, John Axel Eriksson <john@insane.se> w=
+rote:
+>> This sounds very much like what we've been experiencing. Actually,
+>> come to think of it, when I (a month ago or so) enabled more logging=
+,
+>> when one osd crashed, I vaguely remember thinking "it seems to have =
+to
+>> do with leveldb". I guess it can be circumvented by disabling
+>> compression on btrfs (though I don't know for sure). Thing is - that=
+'s
+>> the reason we chose btrfs in the first place... the savings are huge
+>> for us - I think we only need around 20% of the storage we'd otherwi=
+se
+>> need - with compression enabled. Depends on the data you store and w=
+e
+>> store stuff that compresses really really well.
+>>
+>> Guess I'll have to keep looking for answers, maybe someone else on t=
+he
+>> list knows more?
+>>
+>> Thanks!
+>>
+>> On Sat, Feb 9, 2013 at 5:41 PM, Gregory Farnum <greg@inktank.com> wr=
+ote:
+>>> On Saturday, February 9, 2013 at 6:23 AM, John Axel Eriksson wrote:
+>>>> Three times now, twice on one osd, once on another we've had the o=
+sd
+>>>> crash. Restarting it wouldn't help - it would crash with the same
+>>>> error. The only way I found to get it up again was to reformat bot=
+h
+>>>> the journal disk and the disk ceph is using for storage... basical=
+ly
+>>>> recreating the osd.
+>>>> This has got me thinking it's some sort of filesystem corruption g=
+oing
+>>>> on but I can't be sure.
+>>>>
+>>>> Thing is, the first two times this happended on 0.48.3 (argonaut) =
+and
+>>>> this last time it happened on 0.56.2 - I upgraded hoping this issu=
+e
+>>>> was fixed.
+>>>>
+>>>> There is another possibility than ceph itself - we're using btrfs =
+on
+>>>> the ceph disks. We're using it because in general we haven't seen =
+any
+>>>> problems. We've been running ceph on these for six months without
+>>>> issue. We also really need the compression btrfs can do (we're sav=
+ing
+>>>> vast amounts of space this way because of the nature of the data w=
+e're
+>>>> storing).
+>>>>
+>>>> Kernel is, and has been 3.6.2-030602-generic for a long time now, =
+I
+>>>> think we started out on 3.5.x but pretty quickly went to 3.6.2. Th=
+e
+>>>> disks are formatted like so:
+>>>> mkfs.btrfs -l 32k -n 32k /dev/xvdf
+>>>>
+>>>> Otherwise the nodes are running on Ubuntu 12.04.1 LTS. This is all
+>>>> running on EC2. Thanks for any help I can get!
+>>>>
+>>>> I know it may not be verbose enough but this is the log I got from
+>>>> this last crash:
+>>>
+>>> This log indicates the problem is a corruption in the integrated le=
+veldb database. And you mention using btrfs compression, so I point you=
+ to http://tracker.ceph.com/issues/2563. :( I don't know anything more =
+than that; maybe somebody else on the team knows more=85Sam?
+>>> -Greg
+>>>
+>>>
+>>>>
+>>>> 2013-02-09 13:18:08.685989 7f3f92949780 1 journal _open
+>>>> /mnt/osd.2.journal fd 7: 1048576000 bytes, block size 4096 bytes,
+>>>> directio =3D 1, aio =3D 0
+>>>> 2013-02-09 13:18:08.693418 7f3f92949780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mkjournal created journal on
+>>>> /mnt/osd.2.journal
+>>>> 2013-02-09 13:18:08.693481 7f3f92949780 -1 created new journal
+>>>> /mnt/osd.2.journal for object store /var/lib/ceph/osd/ceph-2
+>>>> 2013-02-09 13:18:21.926143 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is supporte=
+d
+>>>> and appears to work
+>>>> 2013-02-09 13:18:21.926214 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is disabled=
+ via
+>>>> 'filestore fiemap' config option
+>>>> 2013-02-09 13:18:21.926704 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount detected btrfs
+>>>> 2013-02-09 13:18:21.926881 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs CLONE_RANGE ioctl =
+is
+>>>> supported
+>>>> 2013-02-09 13:18:21.996613 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE is
+>>>> supported
+>>>> 2013-02-09 13:18:21.998330 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_DESTROY is
+>>>> supported
+>>>> 2013-02-09 13:18:21.999840 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs START_SYNC is
+>>>> supported (transid 549552)
+>>>> 2013-02-09 13:18:22.032267 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs WAIT_SYNC is suppo=
+rted
+>>>> 2013-02-09 13:18:22.045994 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE_V2 is
+>>>> supported
+>>>> 2013-02-09 13:18:22.104523 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount syncfs(2) syscall fully
+>>>> supported (by glibc and kernel)
+>>>> 2013-02-09 13:18:22.104811 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount found snaps
+>>>> <4282852,4282856>
+>>>> 2013-02-09 13:18:22.323175 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount: enabling PARALLEL journ=
+al
+>>>> mode: btrfs, SNAP_CREATE_V2 detected and 'filestore btrfs snap' mo=
+de
+>>>> is enabled
+>>>> 2013-02-09 13:18:23.041769 7f09b4dc7700 -1 *** Caught signal (Abor=
+ted) **
+>>>> in thread 7f09b4dc7700
+>>>>
+>>>> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>>>> 1: /usr/bin/ceph-osd() [0x7828da]
+>>>> 2: (()+0xfcb0) [0x7f09b8bc8cb0]
+>>>> 3: (gsignal()+0x35) [0x7f09b7587425]
+>>>> 4: (abort()+0x17b) [0x7f09b758ab8b]
+>>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f09b7ed969=
+d]
+>>>> 6: (()+0xb5846) [0x7f09b7ed7846]
+>>>> 7: (()+0xb5873) [0x7f09b7ed7873]
+>>>> 8: (()+0xb596e) [0x7f09b7ed796e]
+>>>> 9: (std::__throw_length_error(char const*)+0x57) [0x7f09b7e84907]
+>>>> 10: (()+0x9eaa2) [0x7f09b7ec0aa2]
+>>>> 11: (char* std::string::_S_construct<char const*>(char const*, cha=
+r
+>>>> const*, std::allocator<char> const&, std::forward_iterator_tag)+0x=
+35)
+>>>> [0x7f09b7ec2495]
+>>>> 12: (std::basic_string<char, std::char_traits<char>,
+>>>> std::allocator<char> >::basic_string(char const*, unsigned long,
+>>>> std::allocator<char> const&)+0x1d) [0x7f09b7ec261d]
+>>>> 13: (leveldb::InternalKeyComparator::FindShortestSeparator(std::st=
+ring*,
+>>>> leveldb::Slice const&) const+0x47) [0x769137]
+>>>> 14: (leveldb::TableBuilder::Add(leveldb::Slice const&, leveldb::Sl=
+ice
+>>>> const&)+0x92) [0x777b62]
+>>>> 15: (leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::Compaction=
+State*)+0x482)
+>>>> [0x7639a2]
+>>>> 16: (leveldb::DBImpl::BackgroundCompaction()+0x2b0) [0x7641a0]
+>>>> 17: (leveldb::DBImpl::BackgroundCall()+0x68) [0x764c48]
+>>>> 18: /usr/bin/ceph-osd() [0x77dbef]
+>>>> 19: (()+0x7e9a) [0x7f09b8bc0e9a]
+>>>> 20: (clone()+0x6d) [0x7f09b7644cbd]
+>>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>> needed to interpret this.
+>>>>
+>>>> --- begin dump of recent events ---
+>>>> -35> 2013-02-09 13:18:21.898622 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command perfcounters_dump hook 0x1c42010
+>>>> -34> 2013-02-09 13:18:21.898746 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command 1 hook 0x1c42010
+>>>> -33> 2013-02-09 13:18:21.898765 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command perf dump hook 0x1c42010
+>>>> -32> 2013-02-09 13:18:21.898789 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command perfcounters_schema hook 0x1c42010
+>>>> -31> 2013-02-09 13:18:21.898799 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command 2 hook 0x1c42010
+>>>> -30> 2013-02-09 13:18:21.898807 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command perf schema hook 0x1c42010
+>>>> -29> 2013-02-09 13:18:21.898812 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command config show hook 0x1c42010
+>>>> -28> 2013-02-09 13:18:21.898820 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command config set hook 0x1c42010
+>>>> -27> 2013-02-09 13:18:21.898824 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command log flush hook 0x1c42010
+>>>> -26> 2013-02-09 13:18:21.898826 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command log dump hook 0x1c42010
+>>>> -25> 2013-02-09 13:18:21.898833 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command log reopen hook 0x1c42010
+>>>> -24> 2013-02-09 13:18:21.900486 7f09b972d780 0 ceph version 0.56.2
+>>>> (586538e22afba85c59beda49789ec42024e7a061), process ceph-osd, pid =
+3948
+>>>> -23> 2013-02-09 13:18:21.901111 7f09b972d780 1
+>>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6800/3948 need_addr=
+=3D1
+>>>> -22> 2013-02-09 13:18:21.901159 7f09b972d780 1
+>>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6801/3948 need_addr=
+=3D1
+>>>> -21> 2013-02-09 13:18:21.901179 7f09b972d780 1
+>>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6802/3948 need_addr=
+=3D1
+>>>> -20> 2013-02-09 13:18:21.902977 7f09b972d780 1 finished
+>>>> global_init_daemonize
+>>>> -19> 2013-02-09 13:18:21.907341 7f09b972d780 5 asok(0x1c4d000)
+>>>> init /var/run/ceph/ceph-osd.2.asok
+>>>> -18> 2013-02-09 13:18:21.907404 7f09b972d780 5 asok(0x1c4d000)
+>>>> bind_and_listen /var/run/ceph/ceph-osd.2.asok
+>>>> -17> 2013-02-09 13:18:21.907470 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command 0 hook 0x1c410b0
+>>>> -16> 2013-02-09 13:18:21.907487 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command version hook 0x1c410b0
+>>>> -15> 2013-02-09 13:18:21.907499 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command git_version hook 0x1c410b0
+>>>> -14> 2013-02-09 13:18:21.907508 7f09b972d780 5 asok(0x1c4d000)
+>>>> register_command help hook 0x1c420c0
+>>>> -13> 2013-02-09 13:18:21.907581 7f09b55c8700 5 asok(0x1c4d000) ent=
+ry start
+>>>> -12> 2013-02-09 13:18:21.926143 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is supporte=
+d
+>>>> and appears to work
+>>>> -11> 2013-02-09 13:18:21.926214 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is disabled=
+ via
+>>>> 'filestore fiemap' config option
+>>>> -10> 2013-02-09 13:18:21.926704 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount detected btrfs
+>>>> -9> 2013-02-09 13:18:21.926881 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs CLONE_RANGE ioctl =
+is
+>>>> supported
+>>>> -8> 2013-02-09 13:18:21.996613 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE is
+>>>> supported
+>>>> -7> 2013-02-09 13:18:21.998330 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_DESTROY is
+>>>> supported
+>>>> -6> 2013-02-09 13:18:21.999840 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs START_SYNC is
+>>>> supported (transid 549552)
+>>>> -5> 2013-02-09 13:18:22.032267 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs WAIT_SYNC is suppo=
+rted
+>>>> -4> 2013-02-09 13:18:22.045994 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE_V2 is
+>>>> supported
+>>>> -3> 2013-02-09 13:18:22.104523 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount syncfs(2) syscall fully
+>>>> supported (by glibc and kernel)
+>>>> -2> 2013-02-09 13:18:22.104811 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount found snaps
+>>>> <4282852,4282856>
+>>>> -1> 2013-02-09 13:18:22.323175 7f09b972d780 0
+>>>> filestore(/var/lib/ceph/osd/ceph-2) mount: enabling PARALLEL journ=
+al
+>>>> mode: btrfs, SNAP_CREATE_V2 detected and 'filestore btrfs snap' mo=
+de
+>>>> is enabled
+>>>> 0> 2013-02-09 13:18:23.041769 7f09b4dc7700 -1 *** Caught signal
+>>>> (Aborted) **
+>>>> in thread 7f09b4dc7700
+>>>>
+>>>> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>>>> 1: /usr/bin/ceph-osd() [0x7828da]
+>>>> 2: (()+0xfcb0) [0x7f09b8bc8cb0]
+>>>> 3: (gsignal()+0x35) [0x7f09b7587425]
+>>>> 4: (abort()+0x17b) [0x7f09b758ab8b]
+>>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f09b7ed969=
+d]
+>>>> 6: (()+0xb5846) [0x7f09b7ed7846]
+>>>> 7: (()+0xb5873) [0x7f09b7ed7873]
+>>>> 8: (()+0xb596e) [0x7f09b7ed796e]
+>>>> 9: (std::__throw_length_error(char const*)+0x57) [0x7f09b7e84907]
+>>>> 10: (()+0x9eaa2) [0x7f09b7ec0aa2]
+>>>> 11: (char* std::string::_S_construct<char const*>(char const*, cha=
+r
+>>>> const*, std::allocator<char> const&, std::forward_iterator_tag)+0x=
+35)
+>>>> [0x7f09b7ec2495]
+>>>> 12: (std::basic_string<char, std::char_traits<char>,
+>>>> std::allocator<char> >::basic_string(char const*, unsigned long,
+>>>> std::allocator<char> const&)+0x1d) [0x7f09b7ec261d]
+>>>> 13: (leveldb::InternalKeyComparator::FindShortestSeparator(std::st=
+ring*,
+>>>> leveldb::Slice const&) const+0x47) [0x769137]
+>>>> 14: (leveldb::TableBuilder::Add(leveldb::Slice const&, leveldb::Sl=
+ice
+>>>> const&)+0x92) [0x777b62]
+>>>> 15: (leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::Compaction=
+State*)+0x482)
+>>>> [0x7639a2]
+>>>> 16: (leveldb::DBImpl::BackgroundCompaction()+0x2b0) [0x7641a0]
+>>>> 17: (leveldb::DBImpl::BackgroundCall()+0x68) [0x764c48]
+>>>> 18: /usr/bin/ceph-osd() [0x77dbef]
+>>>> 19: (()+0x7e9a) [0x7f09b8bc0e9a]
+>>>> 20: (clone()+0x6d) [0x7f09b7644cbd]
+>>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>> needed to interpret this.
+>>>>
+>>>> --- logging levels ---
+>>>> 0/ 5 none
+>>>> 0/ 1 lockdep
+>>>> 0/ 1 context
+>>>> 1/ 1 crush
+>>>> 1/ 5 mds
+>>>> 1/ 5 mds_balancer
+>>>> 1/ 5 mds_locker
+>>>> 1/ 5 mds_log
+>>>> 1/ 5 mds_log_expire
+>>>> 1/ 5 mds_migrator
+>>>> 0/ 1 buffer
+>>>> 0/ 1 timer
+>>>> 0/ 1 filer
+>>>> 0/ 1 striper
+>>>> 0/ 1 objecter
+>>>> 0/ 5 rados
+>>>> 0/ 5 rbd
+>>>> 0/ 5 journaler
+>>>> 0/ 5 objectcacher
+>>>> 0/ 5 client
+>>>> 0/ 5 osd
+>>>> 0/ 5 optracker
+>>>> 0/ 5 objclass
+>>>> 1/ 3 filestore
+>>>> 1/ 3 journal
+>>>> 0/ 5 ms
+>>>> 1/ 5 mon
+>>>> 0/10 monc
+>>>> 0/ 5 paxos
+>>>> 0/ 5 tp
+>>>> 1/ 5 auth
+>>>> 1/ 5 crypto
+>>>> 1/ 1 finisher
+>>>> 1/ 5 heartbeatmap
+>>>> 1/ 5 perfcounter
+>>>> 1/ 5 rgw
+>>>> 1/ 5 hadoop
+>>>> 1/ 5 javaclient
+>>>> 1/ 5 asok
+>>>> 1/ 1 throttle
+>>>> -2/-2 (syslog threshold)
+>>>> -1/-1 (stderr threshold)
+>>>> max_recent 100000
+>>>> max_new 1000
+>>>> log_file /var/log/ceph/ceph-osd.2.log
+>>>> --- end dump of recent events ---
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org (mailto:majordo=
+mo@vger.kernel.org)
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
- ceph version  ()
- 1: /usr/bin/ceph-osd() [0x7a0db9]
- 2: (()+0xeff0) [0x7f1c852fcff0]
- 3: (gsignal()+0x35) [0x7f1c83d861b5]
- 4: (abort()+0x180) [0x7f1c83d88fc0]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f1c8461adc5]
- 6: (()+0xcb166) [0x7f1c84619166]
- 7: (()+0xcb193) [0x7f1c84619193]
- 8: (()+0xcb28e) [0x7f1c8461928e]
- 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x7c9) [0x8f3fc9]
- 10: (FileStore::read(coll_t, hobject_t const&, unsigned long, unsigned
-long, ceph::buffer::list&)+0x462) [0x725f92]
- 11: (PG::_scan_list(ScrubMap&, std::vector<hobject_t,
-std::allocator<hobject_t> >&, bool)+0x371) [0x685da1]
- 12: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t,
-bool)+0x29b) [0x6866bb]
- 13: (PG::replica_scrub(MOSDRepScrub*)+0x8e9) [0x6952b9]
- 14: (OSD::RepScrubWQ::_process(MOSDRepScrub*)+0xc2) [0x6410a2]
- 15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x80f9e9]
- 16: (ThreadPool::WorkThread::entry()+0x10) [0x8121f0]
- 17: (()+0x68ca) [0x7f1c852f48ca]
- 18: (clone()+0x6d) [0x7f1c83e23b6d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
+--=20
 
---- logging levels ---
-   0/ 5 none
-   0/ 1 lockdep
-   0/ 1 context
-   1/ 1 crush
-   1/ 5 mds
-   1/ 5 mds_balancer
-   1/ 5 mds_locker
-   1/ 5 mds_log
-   1/ 5 mds_log_expire
-   1/ 5 mds_migrator
-   0/ 1 buffer
-   0/ 1 timer
-   0/ 1 filer
-   0/ 1 striper
-   0/ 1 objecter
-   0/ 5 rados
-   0/ 5 rbd
-   0/ 5 journaler
-   0/ 5 objectcacher
-   0/ 5 client
-   0/ 5 osd
-   0/ 5 optracker
-   0/ 5 objclass
-   1/ 3 filestore
-   1/ 3 journal
-   0/ 5 ms
-   1/ 5 mon
-   0/10 monc
-   0/ 5 paxos
-   0/ 5 tp
-   1/ 5 auth
-   1/ 5 crypto
-   1/ 1 finisher
-   1/ 5 heartbeatmap
-   1/ 5 perfcounter
-   1/ 5 rgw
-   1/ 5 hadoop
-   1/ 5 javaclient
-   1/ 5 asok
-   1/ 1 throttle
-  -2/-2 (syslog threshold)
-  -1/-1 (stderr threshold)
-  max_recent    100000
-  max_new         1000
-  log_file /var/log/ceph/osd.12.log
---- end dump of recent events ---
+Thanks,
 
-
-
-What should I do ?
-
-
-
+Mike Dawson
+Co-Founder, ScholarStack
+6330 East 75th Street, Suite 170
+Indianapolis, IN 46250
+317-490-3018
+http://www.scholarstack.com
+@ScholarStack
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
