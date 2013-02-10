@@ -1,253 +1,382 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Unit testing questions for FileStore::_detect_fs
-Date: Sun, 10 Feb 2013 11:36:38 +0100
-Message-ID: <51177836.4050201@dachary.org>
-References: <511243A9.8060804@dachary.org> <alpine.DEB.2.00.1302060844200.10508@cobra.newdream.net>
+From: John Axel Eriksson <john@insane.se>
+Subject: Re: Possible filesystem corruption or something else?
+Date: Sun, 10 Feb 2013 12:17:27 +0100
+Message-ID: <CAMmJxtLxTm5T=0aWEWiWSupmaxO0fWdP_JZfUF5EKHS3+ts_OA@mail.gmail.com>
+References: <CAMmJxt++bSc0n5U1Xs2TH6PLYb_oL9qXS_4JOSbtWAs_t23o=w@mail.gmail.com>
+	<F247D651090445BE9A851933C9F8037F@inktank.com>
+	<CAMmJxt+cF1HPo=V4KgYrcPmxN3mq=F55asbaE4wXOmJcGrRXVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigB8DADCBE6730608215F82DAD"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:47153 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754571Ab3BJKgm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 05:36:42 -0500
-In-Reply-To: <alpine.DEB.2.00.1302060844200.10508@cobra.newdream.net>
+Received: from mail-ve0-f169.google.com ([209.85.128.169]:55936 "EHLO
+	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754392Ab3BJLR2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Feb 2013 06:17:28 -0500
+Received: by mail-ve0-f169.google.com with SMTP id 15so4576893vea.28
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Feb 2013 03:17:27 -0800 (PST)
+In-Reply-To: <CAMmJxt+cF1HPo=V4KgYrcPmxN3mq=F55asbaE4wXOmJcGrRXVA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigB8DADCBE6730608215F82DAD
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Seems as if this may be fixed in a later kernel, see:
 
-Hi,
+http://code.google.com/p/leveldb/issues/detail?id=3D97
+and
+https://git.kernel.org/?p=3Dlinux/kernel/git/josef/btrfs-next.git;a=3Dc=
+ommit;h=3Dd468abec6b9fd7132d012d33573ecb8056c7c43f
 
-On 02/06/2013 05:47 PM, Sage Weil wrote:
-> On Wed, 6 Feb 2013, Loic Dachary wrote:
->> Hi,
->>
->> The patch below adds unit tests for FileStore::_detect_fs, but it need=
-s to run
->> as root in order to mount the ext3, ext4 and btrfs file systems create=
-d for test purposes.
->>
->> Is there a way to mount filesystems without root privileges ?
->=20
-> Not that I know of.
->=20
-> There are several other tests that are meant ot be run separate from th=
+Sorry if this email reached anyone more than once - had some trouble
+with html vs plain text in gmail (ceph-list doesn't allow html email).
+
+On Sat, Feb 9, 2013 at 6:21 PM, John Axel Eriksson <john@insane.se> wro=
+te:
+> This sounds very much like what we've been experiencing. Actually,
+> come to think of it, when I (a month ago or so) enabled more logging,
+> when one osd crashed, I vaguely remember thinking "it seems to have t=
+o
+> do with leveldb". I guess it can be circumvented by disabling
+> compression on btrfs (though I don't know for sure). Thing is - that'=
+s
+> the reason we chose btrfs in the first place... the savings are huge
+> for us - I think we only need around 20% of the storage we'd otherwis=
 e
-> build environment that use gtest (test_filejournal, the api functional =
-
-> tests, etc.).  As long as this is built to a separate binary, I don't=20
-> think it's a problem.  We should converge on unittest_* for the stuff=20
-> 'make check' runs and test_* for stuff that is meant to run elsewhere. =
-=20
-> Having our normal qa harness be root is not a problem.
-
-If I understand correctly, these test_* binaries can then be included in =
-scripts found in ceph/qa/workunits and used by teuthology. The simplest e=
-xample being https://github.com/ceph/ceph/blob/master/qa/workunits/rbd/te=
-st_librbd.sh
-
-Cheers
-=20
->> configure.ac does not detect the presence of commands such as
->> mkfs.ext4 or mkfs.btrfs. The patch below does not add
->> AC_CHECK_TOOL([BTRFS], [mkfs.btrfs], ...)  because it has no use
->> except for unit testing. Instead, the TEST_F(StoreTest, _detect_fs)
->> function checks if /sbin/mkfs.btrfs is an executable. If it is not,
->> "SKIP btrfs because /sbin/mkfs.btrfs is not executable" is displayed
->> and nothing is done.
+> need - with compression enabled. Depends on the data you store and we
+> store stuff that compresses really really well.
+>
+> Guess I'll have to keep looking for answers, maybe someone else on th=
+e
+> list knows more?
+>
+> Thanks!
+>
+> On Sat, Feb 9, 2013 at 5:41 PM, Gregory Farnum <greg@inktank.com> wro=
+te:
+>> On Saturday, February 9, 2013 at 6:23 AM, John Axel Eriksson wrote:
+>>> Three times now, twice on one osd, once on another we've had the os=
+d
+>>> crash. Restarting it wouldn't help - it would crash with the same
+>>> error. The only way I found to get it up again was to reformat both
+>>> the journal disk and the disk ceph is using for storage... basicall=
+y
+>>> recreating the osd.
+>>> This has got me thinking it's some sort of filesystem corruption go=
+ing
+>>> on but I can't be sure.
+>>>
+>>> Thing is, the first two times this happended on 0.48.3 (argonaut) a=
+nd
+>>> this last time it happened on 0.56.2 - I upgraded hoping this issue
+>>> was fixed.
+>>>
+>>> There is another possibility than ceph itself - we're using btrfs o=
+n
+>>> the ceph disks. We're using it because in general we haven't seen a=
+ny
+>>> problems. We've been running ceph on these for six months without
+>>> issue. We also really need the compression btrfs can do (we're savi=
+ng
+>>> vast amounts of space this way because of the nature of the data we=
+'re
+>>> storing).
+>>>
+>>> Kernel is, and has been 3.6.2-030602-generic for a long time now, I
+>>> think we started out on 3.5.x but pretty quickly went to 3.6.2. The
+>>> disks are formatted like so:
+>>> mkfs.btrfs -l 32k -n 32k /dev/xvdf
+>>>
+>>> Otherwise the nodes are running on Ubuntu 12.04.1 LTS. This is all
+>>> running on EC2. Thanks for any help I can get!
+>>>
+>>> I know it may not be verbose enough but this is the log I got from
+>>> this last crash:
 >>
->> The drawback is that it is quite difficult to figure out what tools
->> must be installed to maximize test coverage.
->>
->> How would you implement unit test tools detection ?
->>
->> The error returned when ext4 is mounted without user_xattr is the same=
-
->> as the error returned when ext4 is is mounted with user_xattr but
->> without the filestore_xattr_use_omap option : -ENOTSUP. From the point=
-
->> of view of the unit tests, they cannot be distinguished, except by
->> parsing the messages sent to derr which show
->>
->> Extended attributes don't appear to work.
->>
->> or
->>
->> limited size xattrs -- enable filestore_xattr_use_omap
->>
->> Is parsing the output a good practice to assert success or failure dur=
-ing unit testing ?
->=20
-> I'm not sure it is worth the complexity.  IMO it would be better to cha=
-nge=20
-> the return value (suggestions?) or not both distinguishing between the =
-two=20
-> cases in the test.
->=20
-> sage
->=20
->>
->> Cheers
->>
->> diff --git a/src/test/filestore/store_test.cc b/src/test/filestore/sto=
-re_test.cc
->> index c98ffb0..7ba38e2 100644
->> --- a/src/test/filestore/store_test.cc
->> +++ b/src/test/filestore/store_test.cc
->> @@ -16,6 +16,7 @@
->>  #include <string.h>
->>  #include <iostream>
->>  #include <time.h>
->> +#include <sys/mount.h>
->>  #include "os/FileStore.h"
->>  #include "include/Context.h"
->>  #include "common/ceph_argparse.h"
->> @@ -38,6 +39,7 @@ public:
->>
->>    StoreTest() : store(0) {}
->>    virtual void SetUp() {
->> +    ::system("rm -fr store_test_temp_dir store_test_temp_journal");
->>      ::mkdir("store_test_temp_dir", 0777);
->>      ObjectStore *store_ =3D new FileStore(string("store_test_temp_dir=
-"), string("store_test_temp_journal"));
->>      store.reset(store_);
->> @@ -823,6 +825,95 @@ TEST_F(StoreTest, ColSplitTest3) {
->>  }
->>  #endif
->>
->> +TEST_F(StoreTest, _detect_fs) {
->> +  if (getuid() !=3D 0) {
->> +    cerr << "SKIP because it does not run as root" << std::endl;
->> +    return;
->> +  }
->> +
->> +  if (access("/dev/zero", R_OK) !=3D 0) {
->> +    cerr << "SKIP because /dev/zero is not a readable file" << std::e=
-ndl;
->> +    return;
->> +  }
->> +
->> +  const string mnt("/tmp/test_filestore");
->> +  ::mkdir(mnt.c_str(), 0755);
->> +  ::umount(mnt.c_str());
->> +  const string disk(mnt + ".disk");
->> +  ::unlink(disk.c_str());
->> +  ASSERT_EQ(::system(string("dd if=3D/dev/zero of=3D" + disk + " bs=3D=
-1 count=3D0 seek=3D1G").c_str()), 0);
->> +
->> +  const string dir("store_test_temp_dir");
->> +  const string journal("store_test_temp_journal");
->> +
->> +  const string mkfs_ext4("/sbin/mkfs.ext4");
->> +  if (::access(mkfs_ext4.c_str(), X_OK) =3D=3D 0) {
->> +
->> +    ASSERT_EQ(::system((mkfs_ext4 + " -q -F " + disk).c_str()), 0);
->> +    //
->> +    // without user_xattr, ext4 fails
->> +    //
->> +    {
->> +      g_ceph_context->_conf->set_val("filestore_xattr_use_omap", "tru=
-e");
->> +      ASSERT_EQ(::system((string("mount -o loop,nouser_xattr ") + dis=
-k + " " + mnt).c_str()), 0);
->> +      ASSERT_EQ(::chdir(mnt.c_str()), 0);
->> +      ASSERT_EQ(::mkdir(dir.c_str(), 0755), 0);
->> +      FileStore store(dir, journal);
->> +      ASSERT_EQ(store._detect_fs(), -ENOTSUP);
->> +      ASSERT_EQ(::chdir("/tmp"), 0);
->> +      ASSERT_EQ(::umount(mnt.c_str()), 0);
->> +    }
->> +    //
->> +    // mounted with user_xattr, ext4 fails if filestore_xattr_use_oma=
-p is false
->> +    //
->> +    {
->> +      g_ceph_context->_conf->set_val("filestore_xattr_use_omap", "fal=
-se");
->> +      ASSERT_EQ(::system((string("mount -o loop,user_xattr ") + disk =
-+ " " + mnt).c_str()), 0);
->> +      ASSERT_EQ(::chdir(mnt.c_str()), 0);
->> +      FileStore store(dir, journal);
->> +      ASSERT_EQ(store._detect_fs(), -ENOTSUP);
->> +      ASSERT_EQ(::chdir("/tmp"), 0);
->> +      ASSERT_EQ(::umount(mnt.c_str()), 0);
->> +    }
->> +    //
->> +    // mounted with user_xattr, ext4 succeeds if filestore_xattr_use_=
-omap is true
->> +    //
->> +    {
->> +      g_ceph_context->_conf->set_val("filestore_xattr_use_omap", "tru=
-e");
->> +      ASSERT_EQ(::system((string("mount -o loop,user_xattr ") + disk =
-+ " " + mnt).c_str()), 0);
->> +      ASSERT_EQ(::chdir(mnt.c_str()), 0);
->> +      FileStore store(dir, journal);
->> +      ASSERT_EQ(store._detect_fs(), 0);
->> +      ASSERT_EQ(::chdir("/tmp"), 0);
->> +      ASSERT_EQ(::umount(mnt.c_str()), 0);
->> +    }
->> +  } else {
->> +    cerr << "SKIP ext4 because " << mkfs_ext4 << " is not executable"=
- << std::endl;
->> +  }
->> +
->> +  g_ceph_context->_conf->set_val("filestore_xattr_use_omap", "false")=
-;
->> +  ASSERT_EQ(::unlink(disk.c_str()), 0);
->> +  ASSERT_EQ(::system(string("dd if=3D/dev/zero of=3D" + disk + " bs=3D=
-1 count=3D0 seek=3D1G").c_str()), 0);
->> +  const string mkfs_btrfs("/sbin/mkfs.btrfs");
->> +  if (::access(mkfs_btrfs.c_str(), X_OK) =3D=3D 0) {
->> +    ASSERT_EQ(::system((mkfs_btrfs + " " + disk).c_str()), 0);
->> +    //
->> +    // btrfs succeeds
->> +    //
->> +    {
->> +      ASSERT_EQ(::system((string("mount -o loop ") + disk + " " + mnt=
-).c_str()), 0);
->> +      ASSERT_EQ(::chdir(mnt.c_str()), 0);
->> +      ASSERT_EQ(::mkdir(dir.c_str(), 0755), 0);
->> +      FileStore store(dir, journal);
->> +      ASSERT_EQ(store._detect_fs(), 0);
->> +      ASSERT_EQ(::chdir("/tmp"), 0);
->> +      ASSERT_EQ(::umount(mnt.c_str()), 0);
->> +    }
->> +  } else {
->> +    cerr << "SKIP btrfs because " << mkfs_btrfs << " is not executabl=
-e" << std::endl;
->> +  }
->> +}
->> +
->>
->> --=20
->> Lo?c Dachary, Artisan Logiciel Libre
+>> This log indicates the problem is a corruption in the integrated lev=
+eldb database. And you mention using btrfs compression, so I point you =
+to http://tracker.ceph.com/issues/2563. :( I don't know anything more t=
+han that; maybe somebody else on the team knows more=85Sam?
+>> -Greg
 >>
 >>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enigB8DADCBE6730608215F82DAD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlEXeDcACgkQ8dLMyEl6F2140gCePcZkrIkUQZQQ45mgNVk2lPms
-IMMAnA3ZptaTxrdzAgDQGV9ry4GrwLkD
-=RX3t
------END PGP SIGNATURE-----
-
---------------enigB8DADCBE6730608215F82DAD--
+>>>
+>>> 2013-02-09 13:18:08.685989 7f3f92949780 1 journal _open
+>>> /mnt/osd.2.journal fd 7: 1048576000 bytes, block size 4096 bytes,
+>>> directio =3D 1, aio =3D 0
+>>> 2013-02-09 13:18:08.693418 7f3f92949780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mkjournal created journal on
+>>> /mnt/osd.2.journal
+>>> 2013-02-09 13:18:08.693481 7f3f92949780 -1 created new journal
+>>> /mnt/osd.2.journal for object store /var/lib/ceph/osd/ceph-2
+>>> 2013-02-09 13:18:21.926143 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is supported
+>>> and appears to work
+>>> 2013-02-09 13:18:21.926214 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is disabled =
+via
+>>> 'filestore fiemap' config option
+>>> 2013-02-09 13:18:21.926704 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount detected btrfs
+>>> 2013-02-09 13:18:21.926881 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs CLONE_RANGE ioctl i=
+s
+>>> supported
+>>> 2013-02-09 13:18:21.996613 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE is
+>>> supported
+>>> 2013-02-09 13:18:21.998330 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_DESTROY is
+>>> supported
+>>> 2013-02-09 13:18:21.999840 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs START_SYNC is
+>>> supported (transid 549552)
+>>> 2013-02-09 13:18:22.032267 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs WAIT_SYNC is suppor=
+ted
+>>> 2013-02-09 13:18:22.045994 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE_V2 is
+>>> supported
+>>> 2013-02-09 13:18:22.104523 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount syncfs(2) syscall fully
+>>> supported (by glibc and kernel)
+>>> 2013-02-09 13:18:22.104811 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount found snaps
+>>> <4282852,4282856>
+>>> 2013-02-09 13:18:22.323175 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount: enabling PARALLEL journa=
+l
+>>> mode: btrfs, SNAP_CREATE_V2 detected and 'filestore btrfs snap' mod=
+e
+>>> is enabled
+>>> 2013-02-09 13:18:23.041769 7f09b4dc7700 -1 *** Caught signal (Abort=
+ed) **
+>>> in thread 7f09b4dc7700
+>>>
+>>> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>>> 1: /usr/bin/ceph-osd() [0x7828da]
+>>> 2: (()+0xfcb0) [0x7f09b8bc8cb0]
+>>> 3: (gsignal()+0x35) [0x7f09b7587425]
+>>> 4: (abort()+0x17b) [0x7f09b758ab8b]
+>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f09b7ed969d=
+]
+>>> 6: (()+0xb5846) [0x7f09b7ed7846]
+>>> 7: (()+0xb5873) [0x7f09b7ed7873]
+>>> 8: (()+0xb596e) [0x7f09b7ed796e]
+>>> 9: (std::__throw_length_error(char const*)+0x57) [0x7f09b7e84907]
+>>> 10: (()+0x9eaa2) [0x7f09b7ec0aa2]
+>>> 11: (char* std::string::_S_construct<char const*>(char const*, char
+>>> const*, std::allocator<char> const&, std::forward_iterator_tag)+0x3=
+5)
+>>> [0x7f09b7ec2495]
+>>> 12: (std::basic_string<char, std::char_traits<char>,
+>>> std::allocator<char> >::basic_string(char const*, unsigned long,
+>>> std::allocator<char> const&)+0x1d) [0x7f09b7ec261d]
+>>> 13: (leveldb::InternalKeyComparator::FindShortestSeparator(std::str=
+ing*,
+>>> leveldb::Slice const&) const+0x47) [0x769137]
+>>> 14: (leveldb::TableBuilder::Add(leveldb::Slice const&, leveldb::Sli=
+ce
+>>> const&)+0x92) [0x777b62]
+>>> 15: (leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::CompactionS=
+tate*)+0x482)
+>>> [0x7639a2]
+>>> 16: (leveldb::DBImpl::BackgroundCompaction()+0x2b0) [0x7641a0]
+>>> 17: (leveldb::DBImpl::BackgroundCall()+0x68) [0x764c48]
+>>> 18: /usr/bin/ceph-osd() [0x77dbef]
+>>> 19: (()+0x7e9a) [0x7f09b8bc0e9a]
+>>> 20: (clone()+0x6d) [0x7f09b7644cbd]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>> needed to interpret this.
+>>>
+>>> --- begin dump of recent events ---
+>>> -35> 2013-02-09 13:18:21.898622 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command perfcounters_dump hook 0x1c42010
+>>> -34> 2013-02-09 13:18:21.898746 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command 1 hook 0x1c42010
+>>> -33> 2013-02-09 13:18:21.898765 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command perf dump hook 0x1c42010
+>>> -32> 2013-02-09 13:18:21.898789 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command perfcounters_schema hook 0x1c42010
+>>> -31> 2013-02-09 13:18:21.898799 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command 2 hook 0x1c42010
+>>> -30> 2013-02-09 13:18:21.898807 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command perf schema hook 0x1c42010
+>>> -29> 2013-02-09 13:18:21.898812 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command config show hook 0x1c42010
+>>> -28> 2013-02-09 13:18:21.898820 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command config set hook 0x1c42010
+>>> -27> 2013-02-09 13:18:21.898824 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command log flush hook 0x1c42010
+>>> -26> 2013-02-09 13:18:21.898826 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command log dump hook 0x1c42010
+>>> -25> 2013-02-09 13:18:21.898833 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command log reopen hook 0x1c42010
+>>> -24> 2013-02-09 13:18:21.900486 7f09b972d780 0 ceph version 0.56.2
+>>> (586538e22afba85c59beda49789ec42024e7a061), process ceph-osd, pid 3=
+948
+>>> -23> 2013-02-09 13:18:21.901111 7f09b972d780 1
+>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6800/3948 need_addr=3D=
+1
+>>> -22> 2013-02-09 13:18:21.901159 7f09b972d780 1
+>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6801/3948 need_addr=3D=
+1
+>>> -21> 2013-02-09 13:18:21.901179 7f09b972d780 1
+>>> accepter.accepter.bind my_inst.addr is 0.0.0.0:6802/3948 need_addr=3D=
+1
+>>> -20> 2013-02-09 13:18:21.902977 7f09b972d780 1 finished
+>>> global_init_daemonize
+>>> -19> 2013-02-09 13:18:21.907341 7f09b972d780 5 asok(0x1c4d000)
+>>> init /var/run/ceph/ceph-osd.2.asok
+>>> -18> 2013-02-09 13:18:21.907404 7f09b972d780 5 asok(0x1c4d000)
+>>> bind_and_listen /var/run/ceph/ceph-osd.2.asok
+>>> -17> 2013-02-09 13:18:21.907470 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command 0 hook 0x1c410b0
+>>> -16> 2013-02-09 13:18:21.907487 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command version hook 0x1c410b0
+>>> -15> 2013-02-09 13:18:21.907499 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command git_version hook 0x1c410b0
+>>> -14> 2013-02-09 13:18:21.907508 7f09b972d780 5 asok(0x1c4d000)
+>>> register_command help hook 0x1c420c0
+>>> -13> 2013-02-09 13:18:21.907581 7f09b55c8700 5 asok(0x1c4d000) entr=
+y start
+>>> -12> 2013-02-09 13:18:21.926143 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is supported
+>>> and appears to work
+>>> -11> 2013-02-09 13:18:21.926214 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount FIEMAP ioctl is disabled =
+via
+>>> 'filestore fiemap' config option
+>>> -10> 2013-02-09 13:18:21.926704 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount detected btrfs
+>>> -9> 2013-02-09 13:18:21.926881 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs CLONE_RANGE ioctl i=
+s
+>>> supported
+>>> -8> 2013-02-09 13:18:21.996613 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE is
+>>> supported
+>>> -7> 2013-02-09 13:18:21.998330 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_DESTROY is
+>>> supported
+>>> -6> 2013-02-09 13:18:21.999840 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs START_SYNC is
+>>> supported (transid 549552)
+>>> -5> 2013-02-09 13:18:22.032267 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs WAIT_SYNC is suppor=
+ted
+>>> -4> 2013-02-09 13:18:22.045994 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount btrfs SNAP_CREATE_V2 is
+>>> supported
+>>> -3> 2013-02-09 13:18:22.104523 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount syncfs(2) syscall fully
+>>> supported (by glibc and kernel)
+>>> -2> 2013-02-09 13:18:22.104811 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount found snaps
+>>> <4282852,4282856>
+>>> -1> 2013-02-09 13:18:22.323175 7f09b972d780 0
+>>> filestore(/var/lib/ceph/osd/ceph-2) mount: enabling PARALLEL journa=
+l
+>>> mode: btrfs, SNAP_CREATE_V2 detected and 'filestore btrfs snap' mod=
+e
+>>> is enabled
+>>> 0> 2013-02-09 13:18:23.041769 7f09b4dc7700 -1 *** Caught signal
+>>> (Aborted) **
+>>> in thread 7f09b4dc7700
+>>>
+>>> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>>> 1: /usr/bin/ceph-osd() [0x7828da]
+>>> 2: (()+0xfcb0) [0x7f09b8bc8cb0]
+>>> 3: (gsignal()+0x35) [0x7f09b7587425]
+>>> 4: (abort()+0x17b) [0x7f09b758ab8b]
+>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f09b7ed969d=
+]
+>>> 6: (()+0xb5846) [0x7f09b7ed7846]
+>>> 7: (()+0xb5873) [0x7f09b7ed7873]
+>>> 8: (()+0xb596e) [0x7f09b7ed796e]
+>>> 9: (std::__throw_length_error(char const*)+0x57) [0x7f09b7e84907]
+>>> 10: (()+0x9eaa2) [0x7f09b7ec0aa2]
+>>> 11: (char* std::string::_S_construct<char const*>(char const*, char
+>>> const*, std::allocator<char> const&, std::forward_iterator_tag)+0x3=
+5)
+>>> [0x7f09b7ec2495]
+>>> 12: (std::basic_string<char, std::char_traits<char>,
+>>> std::allocator<char> >::basic_string(char const*, unsigned long,
+>>> std::allocator<char> const&)+0x1d) [0x7f09b7ec261d]
+>>> 13: (leveldb::InternalKeyComparator::FindShortestSeparator(std::str=
+ing*,
+>>> leveldb::Slice const&) const+0x47) [0x769137]
+>>> 14: (leveldb::TableBuilder::Add(leveldb::Slice const&, leveldb::Sli=
+ce
+>>> const&)+0x92) [0x777b62]
+>>> 15: (leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::CompactionS=
+tate*)+0x482)
+>>> [0x7639a2]
+>>> 16: (leveldb::DBImpl::BackgroundCompaction()+0x2b0) [0x7641a0]
+>>> 17: (leveldb::DBImpl::BackgroundCall()+0x68) [0x764c48]
+>>> 18: /usr/bin/ceph-osd() [0x77dbef]
+>>> 19: (()+0x7e9a) [0x7f09b8bc0e9a]
+>>> 20: (clone()+0x6d) [0x7f09b7644cbd]
+>>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>> needed to interpret this.
+>>>
+>>> --- logging levels ---
+>>> 0/ 5 none
+>>> 0/ 1 lockdep
+>>> 0/ 1 context
+>>> 1/ 1 crush
+>>> 1/ 5 mds
+>>> 1/ 5 mds_balancer
+>>> 1/ 5 mds_locker
+>>> 1/ 5 mds_log
+>>> 1/ 5 mds_log_expire
+>>> 1/ 5 mds_migrator
+>>> 0/ 1 buffer
+>>> 0/ 1 timer
+>>> 0/ 1 filer
+>>> 0/ 1 striper
+>>> 0/ 1 objecter
+>>> 0/ 5 rados
+>>> 0/ 5 rbd
+>>> 0/ 5 journaler
+>>> 0/ 5 objectcacher
+>>> 0/ 5 client
+>>> 0/ 5 osd
+>>> 0/ 5 optracker
+>>> 0/ 5 objclass
+>>> 1/ 3 filestore
+>>> 1/ 3 journal
+>>> 0/ 5 ms
+>>> 1/ 5 mon
+>>> 0/10 monc
+>>> 0/ 5 paxos
+>>> 0/ 5 tp
+>>> 1/ 5 auth
+>>> 1/ 5 crypto
+>>> 1/ 1 finisher
+>>> 1/ 5 heartbeatmap
+>>> 1/ 5 perfcounter
+>>> 1/ 5 rgw
+>>> 1/ 5 hadoop
+>>> 1/ 5 javaclient
+>>> 1/ 5 asok
+>>> 1/ 1 throttle
+>>> -2/-2 (syslog threshold)
+>>> -1/-1 (stderr threshold)
+>>> max_recent 100000
+>>> max_new 1000
+>>> log_file /var/log/ceph/ceph-osd.2.log
+>>> --- end dump of recent events ---
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org (mailto:majordom=
+o@vger.kernel.org)
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
