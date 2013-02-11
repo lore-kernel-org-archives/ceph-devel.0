@@ -1,107 +1,59 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: chain_fsetxattr extra chunk removal
-Date: Mon, 11 Feb 2013 23:12:40 +0100
-Message-ID: <51196CD8.3030104@dachary.org>
-References: <511415A4.5050203@dachary.org> <CAC-hyiFwyJ9mFKvhcOh0dzGMTM4bFXXphn3vzfJRNuZm90HGCA@mail.gmail.com> <51194FB4.8010603@dachary.org>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: File exists not handled in 0.48argonaut1
+Date: Mon, 11 Feb 2013 14:21:12 -0800
+Message-ID: <CA+jddaNJ8XRFBb1nO6c7sVdeXxnd95a0S7r8Yuj1gubLAR-_AQ@mail.gmail.com>
+References: <CA+jddaOAmvuwG1naPF2e4vwBh240UfX4OW_3Z93r5sJD-rAPjQ@mail.gmail.com>
+	<CA+jddaO5KmTY=_dc38Sq4UP8vsSKJsMGmvig2CfEVOhntiv2aw@mail.gmail.com>
+	<CA+4uBUbt5FXbQQpyEBGqKcA9yL0ReVNMFxgD6C7auw7=COE5vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigEF09172BC924C38D84DFB13C"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:38409 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932253Ab3BKWMm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 17:12:42 -0500
-In-Reply-To: <51194FB4.8010603@dachary.org>
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:44107 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932630Ab3BKWVM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 17:21:12 -0500
+Received: by mail-ie0-f179.google.com with SMTP id k11so8370754iea.10
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 14:21:12 -0800 (PST)
+In-Reply-To: <CA+4uBUbt5FXbQQpyEBGqKcA9yL0ReVNMFxgD6C7auw7=COE5vw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+To: Samuel Just <sam.just@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigEF09172BC924C38D84DFB13C
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Since the attachment didn't work, apparently, here is a link to the log:
 
-Hi,
+http://dl.dropbox.com/u/766198/error17.log.gz
 
-I amended the unit tests ( https://github.com/ceph/ceph/pull/40/files ) t=
-o cover the code below. A review would be much appreciated :-)
-
-Cheers
-
-On 02/11/2013 09:08 PM, Loic Dachary wrote:
->=20
->=20
-> On 02/11/2013 06:13 AM, Yehuda Sadeh wrote:
->> On Thu, Feb 7, 2013 at 12:59 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->>> Hi,
->>>
->>> While writing unit tests for chain_xattr.cc I tried to understand how=
- to create the conditions to trigger this part of the chain_fsetxattr fun=
-ction:
->>>
->>>   /* if we're exactly at a chunk size, remove the next one (if wasn't=
- removed
->>>      before) */
->>>   if (ret >=3D 0 && chunk_size =3D=3D CHAIN_XATTR_MAX_BLOCK_LEN) {
->>>     get_raw_xattr_name(name, i, raw_name, sizeof(raw_name));
->>>     int r =3D sys_fremovexattr(fd, raw_name);
->>>     if (r < 0 && r !=3D -ENODATA)
->>>       ret =3D r;
->>>   }
->>>
->>> I suspect this cleans up extra empty attributes created as a side eff=
-ect of a previous version of the function. Or I just don't understand the=
- case it addresses.
->>>
->>> I'd very much appreciate a hint :-)
->>>
+On Mon, Feb 11, 2013 at 1:42 PM, Samuel Just <sam.just@inktank.com> wrote:
+> I don't see the more complete log.
+> -Sam
+>
+> On Mon, Feb 11, 2013 at 11:12 AM, Mandell Degerness
+> <mandell@pistoncloud.com> wrote:
+>> Anyone have any thoughts on this???  It looks like I may have to wipe
+>> out the OSDs effected and rebuild them, but I'm afraid that may result
+>> in data loss because of the old OSD first crush map in place :(.
 >>
->> Well, the code has changed a bit, but originally when a chain was
->> overwritten we didn't bother to remove the xattrs tail. When we read
->> the chain we stop either when we got a short xattr, or when the next
->> xattr in the chain didn't exist.  So when writing an xattr that was
->> perfectly aligned with the block len we had to remove the next xattr
->> in order make sure that readers will not over-read. I'm not too sure
->> whether that still the case, Sam might have a better idea.
->> In any case, it might be a good idea to test the case where we have a
->> big xattr that spans across multiple blocks (e.g., > 3) and being
->> overwritten by a short xattr. Probably also need to test it with
->> different combinations of aligned and non-aligned block sizes.
->=20
-> I understand now and I'll modify the pull request https://github.com/ce=
-ph/ceph/pull/40 accordingly.
->=20
-> Thanks :-)
->=20
->>
->> Thanks,
->> Yehuda
+>> On Fri, Feb 8, 2013 at 1:36 PM, Mandell Degerness
+>> <mandell@pistoncloud.com> wrote:
+>>> We ran into an error which appears very much like a bug fixed in 0.44.
+>>>
+>>> This cluster is running version:
+>>>
+>>> ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>>>
+>>> The error line is:
+>>>
+>>> Feb  8 18:50:07 192.168.8.14 ceph-osd: 2013-02-08 18:50:07.545682
+>>> 7f40f9f08700  0 filestore(/mnt/osd97)  error (17) File exists not
+>>> handled on operation 20 (11279344.0.0, or op 0, counting from 0)
+>>>
+>>> A more complete log is attached.
+>>>
+>>> First question: is this a know bug fixed in more recent versions?
+>>>
+>>> Second question: is there any hope of recovery?
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enigEF09172BC924C38D84DFB13C
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlEZbNgACgkQ8dLMyEl6F20nygCePgL8mSikwYcDecSYcuMqXhvI
-AY8AoMJWGiH90MgWSTuyzj94AhjTSRSr
-=8ecc
------END PGP SIGNATURE-----
-
---------------enigEF09172BC924C38D84DFB13C--
