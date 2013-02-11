@@ -1,32 +1,48 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSD Weights
-Date: Mon, 11 Feb 2013 13:31:01 -0800
-Message-ID: <CAPYLRzh2+S8ijuRGs+Nv7rRaN2e7k-RH8HSr-qHeSSXWr+TQYw@mail.gmail.com>
-References: <C4049E4484F13747B672D64B9C12C31328E13918@PWMAILM01.cscinfo.com>
+From: Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
+Subject: Re: [PATCH] fs: encode_fh: return FILEID_INVALID if invalid fid_type
+Date: Tue, 12 Feb 2013 08:33:11 +1100
+Message-ID: <20130211213311.GE8257@dastard>
+References: <1360571159-3666-1-git-send-email-linkinjeon@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:62895 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932605Ab3BKVbF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 16:31:05 -0500
-Received: by mail-qc0-f177.google.com with SMTP id u28so2357506qcs.22
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 13:31:02 -0800 (PST)
-In-Reply-To: <C4049E4484F13747B672D64B9C12C31328E13918@PWMAILM01.cscinfo.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Holcombe, Christopher" <cholcomb@cscinfo.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nilfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1360571159-3666-1-git-send-email-linkinjeon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-nilfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Namjae Jeon <linkinjeon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, chris.mason-5c4llco8/ftWk0Htik3J/w@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org, konishi.ryusuke-Zyj7fXuS5i5L9jVzuh4AOg@public.gmane.org, mfasheh-IBi9RG/b67k@public.gmane.org, jlbec-KSFe+WNznQmEi8DpZVb4nw@public.gmane.org, jack-AlSwsSmVLrQ@public.gmane.org, bpm-sJ/iWh9BUns@public.gmane.org, elder-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Namjae Jeon <namjae.jeon-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Vivek Trivedi <t.vivek-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 11, 2013 at 12:43 PM, Holcombe, Christopher
-<cholcomb@cscinfo.com> wrote:
-> Hi Everyone,
->
-> I just wanted to confirm my thoughts on the ceph osd weightings.  My understanding is they are a statistical distribution number.  My current setup has 3TB hard drives and they all have the default weight of 1.  I was thinking that if I mixed in 4TB hard drives in the future it would only put 3TB of data on them.  I thought if I changed the weight to 3 for the 3TB hard drives and 4 for the 4TB hard drives it would correctly use the larger storage disks.  Is that correct?
+On Mon, Feb 11, 2013 at 05:25:58PM +0900, Namjae Jeon wrote:
+> From: Namjae Jeon <namjae.jeon-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+> 
+> This patch is a follow up on below patch:
+> 
+> [PATCH] exportfs: add FILEID_INVALID to indicate invalid fid_type
+> commit: 216b6cbdcbd86b1db0754d58886b466ae31f5a63 
+....
+> diff --git a/fs/xfs/xfs_export.c b/fs/xfs/xfs_export.c
+> index a836118..3391800 100644
+> --- a/fs/xfs/xfs_export.c
+> +++ b/fs/xfs/xfs_export.c
+> @@ -48,7 +48,7 @@ static int xfs_fileid_length(int fileid_type)
+>  	case FILEID_INO32_GEN_PARENT | XFS_FILEID_TYPE_64FLAG:
+>  		return 6;
+>  	}
+> -	return 255; /* invalid */
+> +	return FILEID_INVALID; /* invalid */
+>  }
 
-Yep, looks good.
--Greg
-PS: This is a good question for the new ceph-users list.
-(http://ceph.com/community/introducing-ceph-users/)
-:)
+I think you can drop the "/* invalid */" comment from there now as
+it is redundant with this change.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nilfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
