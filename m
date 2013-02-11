@@ -1,70 +1,98 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: rest mgmt api
-Date: Mon, 11 Feb 2013 12:04:06 -0800
-Message-ID: <CAPYLRzh5JD3hvxB5VFrmEXq2g9JuEk-ODQquahPMwGMRiqSc6g@mail.gmail.com>
-References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net>
-	<CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
-	<5112AE17.6080605@inktank.com>
-	<alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net>
-	<5112B43D.6070602@bmrb.wisc.edu>
-	<alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: chain_fsetxattr extra chunk removal
+Date: Mon, 11 Feb 2013 21:08:20 +0100
+Message-ID: <51194FB4.8010603@dachary.org>
+References: <511415A4.5050203@dachary.org> <CAC-hyiFwyJ9mFKvhcOh0dzGMTM4bFXXphn3vzfJRNuZm90HGCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig17E84A29D7217B2131388FAC"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:61349 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758792Ab3BKUEI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 15:04:08 -0500
-Received: by mail-qc0-f172.google.com with SMTP id b25so2383326qca.3
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 12:04:07 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:53524 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758792Ab3BKUIX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 15:08:23 -0500
+In-Reply-To: <CAC-hyiFwyJ9mFKvhcOh0dzGMTM4bFXXphn3vzfJRNuZm90HGCA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Dimitri Maziuk <dmaziuk@bmrb.wisc.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-On Wed, Feb 6, 2013 at 12:14 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 6 Feb 2013, Dimitri Maziuk wrote:
->> On 02/06/2013 01:34 PM, Sage Weil wrote:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig17E84A29D7217B2131388FAC
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 02/11/2013 06:13 AM, Yehuda Sadeh wrote:
+> On Thu, Feb 7, 2013 at 12:59 PM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi,
 >>
->> > I think the one caveat here is that having a single registry for c=
-ommands
->> > in the monitor means that commands can come in two flavors: vector=
-<string>
->> > (cli) and URL (presumably in json form).  But a single command
->> > dispatch/registry framework will make that distinction pretty simp=
-le...
+>> While writing unit tests for chain_xattr.cc I tried to understand how =
+to create the conditions to trigger this part of the chain_fsetxattr func=
+tion:
 >>
->> Any reason you can't have your CLI json-encode the commands (or,
->> conversely, your cgi/wsgi/php/servlet URL handler decode them into
->> vector<string>) before passing them on to the monitor?
->
-> We can, but they won't necessarily look the same, because it is unlik=
-ely
-> we can make a sane 1:1 translation of the CLI to REST that makes sens=
-e,
-> and it would be nice to avoid baking knowledge about the individual
-> commands into the client side.
+>>   /* if we're exactly at a chunk size, remove the next one (if wasn't =
+removed
+>>      before) */
+>>   if (ret >=3D 0 && chunk_size =3D=3D CHAIN_XATTR_MAX_BLOCK_LEN) {
+>>     get_raw_xattr_name(name, i, raw_name, sizeof(raw_name));
+>>     int r =3D sys_fremovexattr(fd, raw_name);
+>>     if (r < 0 && r !=3D -ENODATA)
+>>       ret =3D r;
+>>   }
+>>
+>> I suspect this cleans up extra empty attributes created as a side effe=
+ct of a previous version of the function. Or I just don't understand the =
+case it addresses.
+>>
+>> I'd very much appreciate a hint :-)
+>>
+>=20
+> Well, the code has changed a bit, but originally when a chain was
+> overwritten we didn't bother to remove the xattrs tail. When we read
+> the chain we stop either when we got a short xattr, or when the next
+> xattr in the chain didn't exist.  So when writing an xattr that was
+> perfectly aligned with the block len we had to remove the next xattr
+> in order make sure that readers will not over-read. I'm not too sure
+> whether that still the case, Sam might have a better idea.
+> In any case, it might be a good idea to test the case where we have a
+> big xattr that spans across multiple blocks (e.g., > 3) and being
+> overwritten by a short xattr. Probably also need to test it with
+> different combinations of aligned and non-aligned block sizes.
 
-I disagree and am with Joao on this one =97 the monitor parsing is
-ridiculous as it stand right now, and we should be trying to get rid
-of the manual string parsing. The monitors should be parsing JSON
-commands that are sent by the client; it makes validation and the
-logic control flow a lot easier. We're going to want some level of
-intelligence in the clients so that they can tailor themselves to the
-appropriate UI conventions, and having two different parsing paths in
-the monitors is just asking for trouble: they will get out of sync and
-have different kinds of parsing errors.
+I understand now and I'll modify the pull request https://github.com/ceph=
+/ceph/pull/40 accordingly.
 
-What we could do is have the monitors speak JSON only, and then give
-the clients a minimal intelligence so that the CLI could (for
-instance) prettify the options for commands it knows about, but still
-allow pass-through for access to newer commands it hasn't yet heard
-of.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+Thanks :-)
+
+>=20
+> Thanks,
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--------------enig17E84A29D7217B2131388FAC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlEZT7QACgkQ8dLMyEl6F23XAACffuANzKgkYAWQe6jpZNSgDGa4
+h30An0CN7itTAME3s2Rfeiy4FWvURD2c
+=q4F6
+-----END PGP SIGNATURE-----
+
+--------------enig17E84A29D7217B2131388FAC--
