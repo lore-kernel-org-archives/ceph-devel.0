@@ -1,206 +1,109 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: rest mgmt api
-Date: Mon, 11 Feb 2013 14:41:37 -0800
-Message-ID: <CAPYLRzhfsYeqRVhxt+i7N7Djer7TfwVzZy67jJuyZ6LVM0P2yw@mail.gmail.com>
-References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net>
-	<CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com>
-	<5112AE17.6080605@inktank.com>
-	<alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net>
-	<5112B43D.6070602@bmrb.wisc.edu>
-	<alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net>
-	<CAPYLRzh5JD3hvxB5VFrmEXq2g9JuEk-ODQquahPMwGMRiqSc6g@mail.gmail.com>
-	<alpine.DEB.2.00.1302111345000.27987@cobra.newdream.net>
+Subject: Re: Crash and strange things on MDS
+Date: Mon, 11 Feb 2013 14:47:13 -0800
+Message-ID: <CAPYLRzjYwD5nHdcE-p_jjzQWuPLXVfxOzW9O1d6mHKw3ig-jzw@mail.gmail.com>
+References: <20130204180154.GO3286@kdecherf.com>
+	<20130211130518.GN6997@kdecherf.com>
+	<CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
+	<20130211185424.GA27669@kdecherf.com>
+	<CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
+	<20130211222449.GA553@kdecherf.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:45954 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932641Ab3BKWli convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 17:41:38 -0500
-Received: by mail-qc0-f182.google.com with SMTP id k19so2378239qcs.41
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 14:41:37 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1302111345000.27987@cobra.newdream.net>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:63279 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932817Ab3BKWrP convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 17:47:15 -0500
+Received: by mail-qa0-f43.google.com with SMTP id dx4so1400441qab.9
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 14:47:14 -0800 (PST)
+In-Reply-To: <20130211222449.GA553@kdecherf.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Kevin Decherf <kevin@kdecherf.com>
+Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
 
-On Mon, Feb 11, 2013 at 2:00 PM, Sage Weil <sage@inktank.com> wrote:
-> On Mon, 11 Feb 2013, Gregory Farnum wrote:
->> On Wed, Feb 6, 2013 at 12:14 PM, Sage Weil <sage@inktank.com> wrote:
->> > On Wed, 6 Feb 2013, Dimitri Maziuk wrote:
->> >> On 02/06/2013 01:34 PM, Sage Weil wrote:
->> >>
->> >> > I think the one caveat here is that having a single registry fo=
-r commands
->> >> > in the monitor means that commands can come in two flavors: vec=
-tor<string>
->> >> > (cli) and URL (presumably in json form).  But a single command
->> >> > dispatch/registry framework will make that distinction pretty s=
-imple...
->> >>
->> >> Any reason you can't have your CLI json-encode the commands (or,
->> >> conversely, your cgi/wsgi/php/servlet URL handler decode them int=
-o
->> >> vector<string>) before passing them on to the monitor?
+On Mon, Feb 11, 2013 at 2:24 PM, Kevin Decherf <kevin@kdecherf.com> wro=
+te:
+> On Mon, Feb 11, 2013 at 12:25:59PM -0800, Gregory Farnum wrote:
+>> On Mon, Feb 4, 2013 at 10:01 AM, Kevin Decherf <kevin@kdecherf.com> =
+wrote:
+>> > References:
+>> > [1] http://www.spinics.net/lists/ceph-devel/msg04903.html
+>> > [2] ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
+>> >     1: /usr/bin/ceph-mds() [0x817e82]
+>> >     2: (()+0xf140) [0x7f9091d30140]
+>> >     3: (MDCache::request_drop_foreign_locks(MDRequest*)+0x21) [0x5=
+b9dc1]
+>> >     4: (MDCache::request_drop_locks(MDRequest*)+0x19) [0x5baae9]
+>> >     5: (MDCache::request_cleanup(MDRequest*)+0x60) [0x5bab70]
+>> >     6: (MDCache::request_kill(MDRequest*)+0x80) [0x5bae90]
+>> >     7: (Server::journal_close_session(Session*, int)+0x372) [0x549=
+aa2]
+>> >     8: (Server::kill_session(Session*)+0x137) [0x549c67]
+>> >     9: (Server::find_idle_sessions()+0x12a6) [0x54b0d6]
+>> >     10: (MDS::tick()+0x338) [0x4da928]
+>> >     11: (SafeTimer::timer_thread()+0x1af) [0x78151f]
+>> >     12: (SafeTimerThread::entry()+0xd) [0x782bad]
+>> >     13: (()+0x7ddf) [0x7f9091d28ddf]
+>> >     14: (clone()+0x6d) [0x7f90909cc24d]
+>>
+>> This in particular is quite odd. Do you have any logging from when
+>> that happened? (Oftentimes the log can have a bunch of debugging
+>> information from shortly before the crash.)
+>
+> Yes, there is a dump of 100,000 events for this backtrace in the link=
+ed
+> archive (I need 7 hours to upload it).
+
+Can you just pastebin the last couple hundred lines? I'm mostly
+interested if there's anything from the function which actually caused
+the assert/segfault. Also, the log should compress well and get much
+smaller!
+
+>> On Mon, Feb 11, 2013 at 10:54 AM, Kevin Decherf <kevin@kdecherf.com>=
+ wrote:
+>> > Furthermore, I observe another strange thing more or less related =
+to the
+>> > storms.
 >> >
->> > We can, but they won't necessarily look the same, because it is un=
-likely
->> > we can make a sane 1:1 translation of the CLI to REST that makes s=
-ense,
->> > and it would be nice to avoid baking knowledge about the individua=
-l
->> > commands into the client side.
->>
->> I disagree and am with Joao on this one ? the monitor parsing is
->> ridiculous as it stand right now, and we should be trying to get rid
->> of the manual string parsing. The monitors should be parsing JSON
->> commands that are sent by the client; it makes validation and the
->
-> No argument that the current parsing code is bad...
->
->> logic control flow a lot easier. We're going to want some level of
->> intelligence in the clients so that they can tailor themselves to th=
-e
->> appropriate UI conventions, and having two different parsing paths i=
-n
->
-> What do you mean by tailor to UI conventions?
-
-Implementing and/or allowing positional versus named parameters, to
-toss off one suggestion. Obviously the CLI will want to allow input
-data in a format different than an API, but a port to a different
-platform might prefer named parameters instead of positional ones, or
-whatever.
-Basically I'm agreeing that we as users want to be able to input data
-differently and have it mean the same thing ;) ....
-
->> the monitors is just asking for trouble: they will get out of sync a=
+>> > During a rsync command to write ~20G of data on Ceph and during (a=
 nd
->> have different kinds of parsing errors.
+>> > after) the storm, one OSD sends a lot of data to the active MDS
+>> > (400Mbps peak each 6 seconds). After a quick check, I found that w=
+hen I
+>> > stop osd.23, osd.14 stops its peaks.
 >>
->> What we could do is have the monitors speak JSON only, and then give
->> the clients a minimal intelligence so that the CLI could (for
->> instance) prettify the options for commands it knows about, but stil=
-l
->> allow pass-through for access to newer commands it hasn't yet heard
->> of.
+>> This is consistent with Sam's suggestion that MDS is thrashing its
+>> cache, and is grabbing a directory object off of the OSDs. How large
+>> are the directories you're using? If they're a significant fraction =
+of
+>> your cache size, it might be worth enabling the (sadly less stable)
+>> directory fragmentation options, which will split them up into small=
+er
+>> fragments that can be independently read and written to disk.
 >
-> That doesn't really help; it means the mon still has to understand th=
-e
-> CLI grammar.
->
-> What we are talking about is the difference between:
->
-> [ 'osd', 'down', '123' ]
->
-> and
->
-> {
->   URI: '/osd/down',
->   OSD-Id: 123
-> }
->
-> or however we generically translate the HTTP request into JSON.  Once=
- we
-> normalize the code, calling it "parsing" is probably misleading.  The=
- top
-> (CLI) fragment will match against a rule like:
->
->  [ STR("osd"), STR("down"), POSINT ]
->
-> or however we encode the syntax, while the below would match against
->
->  { .prefix =3D "/osd/down",
->    .fields =3D [ "OSD-Id": POSINT ]
->  }
->
-> ..or something.  I'm making this syntax up, but you get the idea: the=
-re
-> would be a strict format for the request and generic code that valida=
-tes
-> it and passes the resulting arguments/matches into a function like
->
->  int do_command_osd_down(int n);
->
-> regardless of which type of input pattern it matched.
+> The distribution is heterogeneous: we have a folder of ~17G for 300k
+> objects, another of ~2G for 150k objects and a lof of smaller directo=
+ries.
 
-=2E..but my instinct is to want one canonical code path in the monitors=
-,
-not two. Two allows for discrepancies in what each method allows to
-come in that we're not going to have if they all come in to the
-monitor in a single form. So I say that the canonicalization should
-happen client-side, and the enforcement should happen server-side (and
-probably client-side as well, but that's just for courtesy).
-You've suggested that we want the monitors to do the parsing so that
-old clients will work, but given that new commands in the monitors
-often require new capabilities in the clients, having it be slightly
-more awkward to send new commands to new monitors from old clients
-doesn't seem like such a big deal to me =97 if somebody's running
-monitor version .64 and client ceph tool version .60 and wants to use
-a new thing, I don't feel bad about making them give the CLI a command
-which completely specifies what the JSON looks like, instead of using
-the pretty wrapping they'd get if they upgraded their client.
+Sorry, you mean 300,000 files in the single folder?
+If so, that's definitely why it's behaving so badly =97 your folder is
+larger than your maximum cache size settings, and so if you run an
+"ls" or anything the MDS will read the whole thing off disk, then
+instantly drop most of the folder from its cache. Then re-read again
+for the next request to list contents, etc etc.
 
-Having a canonicalized format also means that when we return errors
-they can be a lot more useful, since the monitor can specify what
-fields it received and which ones were bad, instead of just outputting
-a string from whichever line of code actually broke. Consider an
-incoming command whose canonical form is
-
-[ 'crush', 'add', '123', '1.0' ]
-
-And the parsing code runs through that and it fails and the string
-going back says "error: does not specify weight!". But the user looks
-and says "yes I did, it's 1.0!"
-
-Versus if the error came back as
-"Received command: ['area': 'crush', 'command': 'add', 'osd name':
-'123', 'osd id': '1.0', 'CRUSH weight': MISSING ]. Error: does not
-specify weight!"
-
-to pick one random example that people have had trouble with. That's a
-lot harder if we need to support two different methods of parsing
-incoming and support that format outgoing.
-
-And to use the same example subject, if we have a standard encoding
-coming in to the monitor, it's a lot easier to handle different
-versions of commands from users and clients =97 perhaps the client
-interface was originally
-
-"ceph crush add osd.123 123 1.0"
-
-but we later decided that was stupid and switched it to just be
-
-"ceph crush add 123 1.0".
-
-If the format is specified by strings in the monitor, a client sending
-the old style fails. Whereas if it's incoming fields, then we can
-switch the parsing requirement from
-
-{"field": "crush", "command": "add", "name": STR().POS_INT(), "id":
-POS_INT(), "weight": POS_FLOAT}
-
-to
-
-{"field": "crush", "command": "add", OPTIONAL("name":
-STR().POS_INT()), "id": POS_INT(), "weight": POS_FLOAT}
-
-Or even something that incorporates versioning explicitly, like
-
-{"command version": "0.56" "field": "crush", "command": "add",
-VERSION(0.48, "name": STR().POS_INT()), "id": POS_INT(), "weight":
-POS_FLOAT}
-
-instead of requiring users to change all their habits and tools
-instantly upon upgrade.
-
-
-Hell, there's probably a way we can export that parse table back out
-to the clients on request so they can use a programmatic
-pretty-fication for anything they don't recognize and pretty-fi
-already.
+> Are you talking about the mds bal frag and mds bal split * settings?
+> Do you have any advice about the value to use?
+If you set "mds bal frag =3D true" in your config, it will split up
+those very large directories into smaller fragments and behave a lot
+better. This isn't quite as stable (thus the default to "off"), so if
+you have the memory to just really up your cache size I'd start with
+that and see if it makes your problems better. But if it doesn't,
+directory fragmentation does work reasonably well and it's something
+we'd be interested in bug reports for. :)
 -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
