@@ -1,93 +1,82 @@
-From: Kevin Decherf <kevin@kdecherf.com>
-Subject: Re: Crash and strange things on MDS
-Date: Mon, 11 Feb 2013 14:05:18 +0100
-Message-ID: <20130211130518.GN6997@kdecherf.com>
-References: <20130204180154.GO3286@kdecherf.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: [PATCH 01/15] kv_flat_btree_async.cc: use vector instead of VLA's
+Date: Mon, 11 Feb 2013 14:21:33 +0100
+Message-ID: <5118F05D.8020304@bisect.de>
+References: <1360266123-28972-1-git-send-email-danny.al-gaaf@bisect.de> <1360266123-28972-2-git-send-email-danny.al-gaaf@bisect.de> <alpine.DEB.2.00.1302092155330.11665@cobra.newdream.net>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:63251 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757101Ab3BKNFX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 08:05:23 -0500
-Received: by mail-wi0-f179.google.com with SMTP id ez12so3067227wid.6
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 05:05:22 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20130204180154.GO3286@kdecherf.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:49110 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757157Ab3BKNVj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 11 Feb 2013 08:21:39 -0500
+In-Reply-To: <alpine.DEB.2.00.1302092155330.11665@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: support@clever-cloud.com
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Feb 04, 2013 at 07:01:54PM +0100, Kevin Decherf wrote:
-> Hey everyone,
+Am 10.02.2013 06:57, schrieb Sage Weil:
+> On Thu, 7 Feb 2013, Danny Al-Gaaf wrote:
+>> Fix "variable length array of non-POD element type" errors caused by
+>> using librados::ObjectWriteOperation VLAs. (-Wvla)
+>>
+>> Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+>> ---
+>>  src/key_value_store/kv_flat_btree_async.cc | 14 +++++++-------
+>>  1 file changed, 7 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/src/key_value_store/kv_flat_btree_async.cc b/src/key_value_store/kv_flat_btree_async.cc
+>> index 96c6cb0..4342e70 100644
+>> --- a/src/key_value_store/kv_flat_btree_async.cc
+>> +++ b/src/key_value_store/kv_flat_btree_async.cc
+>> @@ -1119,9 +1119,9 @@ int KvFlatBtreeAsync::cleanup(const index_data &idata, const int &errno) {
+>>      //all changes were created except for updating the index and possibly
+>>      //deleting the objects. roll forward.
+>>      vector<pair<pair<int, string>, librados::ObjectWriteOperation*> > ops;
+>> -    librados::ObjectWriteOperation owos[idata.to_delete.size() + 1];
+>> +    vector<librados::ObjectWriteOperation*> owos(idata.to_delete.size() + 1);
 > 
-> It's my first post here to expose a potential issue I found today using
-> Ceph 0.56.1.
+> I haven't read much of the surrounding code, but from what is included 
+> here I don't think this is equivalent... these are just null pointers 
+> initially, and so
 > 
-> The cluster configuration is, briefly: 27 osd of ~900GB and 3 MON/MDS.
-> All nodes are running Exherbo (source-based distribution) with Ceph
-> 0.56.1 and Linux 3.7.0. We are only using CephFS on this cluster which
-> is mounted on ~60 clients (increasing each day). Objects are replicated
-> three times and the cluster handles only 7GB of data atm for 350k
-> objects.
+>>      for (int i = 0; i <= (int)idata.to_delete.size(); ++i) {
+>> -      ops.push_back(make_pair(pair<int, string>(0, ""), &owos[i]));
+>> +      ops.push_back(make_pair(pair<int, string>(0, ""), owos[i]));
 > 
-> In certain conditions (I don't know them atm), some clients hang,
-> generate CPU overloads (kworker) and are unable to make any IO on
-> Ceph. The active MDS have ~20Mbps in/out during the issue (less than
-> 2Mbps in normal activity). I don't know if it's directly linked but we
-> also observe a lot of missing files at the same time.
+> this doesn't do anything useful... owos[i] may as well be NULL.  Why not 
+> make it
 > 
-> The problem is similar to this one [1].
+> vector<librados::ObjectWriteOperation> owos(...)
 > 
-> A restart of the client or the MDS was enough before today, but we found
-> a new behavior: the active MDS consumes a lot of CPU during 3 to 5 hours
-> with ~25% clients hanging.
-> 
-> In logs I found a segfault with this backtrace [2] and 100,000 dumped
-> events during the first hang. We observed another hang which produces
-> lot of these events (in debug mode):
->    - "mds.0.server FAIL on ESTALE but attempting recovery"
->    - "mds.0.server reply_request -116 (Stale NFS file handle)
->       client_request(client.10991:1031 getattr As #1000004bab0
->       RETRY=132)"
-> 
-> We have no profiling tools available on these nodes, and I don't know
-> what I should search in the 35 GB log file.
-> 
-> Note: the segmentation fault occured only once but the problem was
-> observed four times on this cluster.
-> 
-> Any help may be appreciated.
-> 
-> References:
-> [1] http://www.spinics.net/lists/ceph-devel/msg04903.html
-> [2] ceph version 0.56.1 (e4a541624df62ef353e754391cbbb707f54b16f7)
->     1: /usr/bin/ceph-mds() [0x817e82]
->     2: (()+0xf140) [0x7f9091d30140]
->     3: (MDCache::request_drop_foreign_locks(MDRequest*)+0x21) [0x5b9dc1]
->     4: (MDCache::request_drop_locks(MDRequest*)+0x19) [0x5baae9]
->     5: (MDCache::request_cleanup(MDRequest*)+0x60) [0x5bab70]
->     6: (MDCache::request_kill(MDRequest*)+0x80) [0x5bae90]
->     7: (Server::journal_close_session(Session*, int)+0x372) [0x549aa2]
->     8: (Server::kill_session(Session*)+0x137) [0x549c67]
->     9: (Server::find_idle_sessions()+0x12a6) [0x54b0d6]
->     10: (MDS::tick()+0x338) [0x4da928]
->     11: (SafeTimer::timer_thread()+0x1af) [0x78151f]
->     12: (SafeTimerThread::entry()+0xd) [0x782bad]
->     13: (()+0x7ddf) [0x7f9091d28ddf]
->     14: (clone()+0x6d) [0x7f90909cc24d]
+> ?
 
-I found a possible cause/way to reproduce this issue.
-We have now ~90 clients for 18GB / 650k objects and the storm occurs
-when we execute an "intensive IO" command (tar of the whole pool / rsync
-in one folder) on one of our client (the only which uses ceph-fuse,
-don't know if it's limited to it or not).
+Because this would lead to a linker error:
 
-Any idea?
+kv_flat_btree_async.o: In function `void
+std::__uninitialized_fill_n<false>::__uninit_fill_n<librados::ObjectWriteOperation*,
+unsigned long,
+librados::ObjectWriteOperation>(librados::ObjectWriteOperation*,
+unsigned long, librados::ObjectWriteOperation const&)':
+/usr/bin/../lib64/gcc/x86_64-suse-linux/4.7/../../../../include/c++/4.7/bits/stl_uninitialized.h:188:
+undefined reference to
+`librados::ObjectOperation::ObjectOperation(librados::ObjectOperation
+const&)'
+/usr/bin/../lib64/gcc/x86_64-suse-linux/4.7/../../../../include/c++/4.7/bits/stl_uninitialized.h:188:
+undefined reference to
+`librados::ObjectOperation::ObjectOperation(librados::ObjectOperation
+const&)'
 
-Cheers,
--- 
-Kevin Decherf - @Kdecherf
-GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
-http://kdecherf.com
+
+Because in src/include/rados/librados.hpp
+librados::ObjectOperation::ObjectOperation(librados::ObjectOperation
+const&) was is defined, but not implemented in the librados.cc.
+
+Not sure if removing ObjectOperation(librados::ObjectOperation const&)
+is the way to go here.
+
+Danny
