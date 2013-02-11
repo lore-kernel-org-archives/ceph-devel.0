@@ -1,98 +1,85 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: chain_fsetxattr extra chunk removal
-Date: Mon, 11 Feb 2013 21:08:20 +0100
-Message-ID: <51194FB4.8010603@dachary.org>
-References: <511415A4.5050203@dachary.org> <CAC-hyiFwyJ9mFKvhcOh0dzGMTM4bFXXphn3vzfJRNuZm90HGCA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: preferred OSD
+Date: Mon, 11 Feb 2013 12:11:45 -0800
+Message-ID: <CAPYLRzgJLzzs4HXatvyJnXzMn2A5LaN0evN0=+xvbPdnT7r2Pg@mail.gmail.com>
+References: <CALFpzo5YGNi0tNc2HeauCQ_Kh4hgxzEtVLu5TdT1Nb-GZBvKTw@mail.gmail.com>
+	<alpine.DEB.2.00.1302081642230.13223@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig17E84A29D7217B2131388FAC"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:53524 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758792Ab3BKUIX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 15:08:23 -0500
-In-Reply-To: <CAC-hyiFwyJ9mFKvhcOh0dzGMTM4bFXXphn3vzfJRNuZm90HGCA@mail.gmail.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:51966 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932253Ab3BKULq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 15:11:46 -0500
+Received: by mail-qa0-f53.google.com with SMTP id z4so1336692qan.12
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 12:11:45 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1302081642230.13223@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+To: Sage Weil <sage@inktank.com>
+Cc: Marcus Sorensen <shadowsor@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig17E84A29D7217B2131388FAC
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Fri, Feb 8, 2013 at 4:45 PM, Sage Weil <sage@inktank.com> wrote:
+> Hi Marcus-
+>
+> On Fri, 8 Feb 2013, Marcus Sorensen wrote:
+>> I know people have been disscussing on and off about providing a
+>> "preferred OSD" for things like multi-datacenter, or even within a
+>> datacenter, choosing an OSD that would avoid traversing uplinks.  Ha=
+s
+>> there been any discussion on how to do this? I seem to remember peop=
+le
+>> saying things like 'the crush map doesn't work that way at the
+>> moment'. Presumably, when a client needs to access an object, it loo=
+ks
+>> up where the object should be stored via the crush map, which return=
+s
+>> all OSDs that could be read from.
 
+Exactly.
 
+>> I was thinking this morning that you
+>> could potentially leave the crush map out of it, by setting a locati=
+on
+>> for each OSD in the ceph.conf, and an /etc/ceph/location file for th=
+e
+>> client.  Then use the absolute value of the difference to determine
+>> preferred OSD. So, if OSD0 was location=3D1, and OSD1 was location=3D=
+3,
+>> and client 1 was location=3D2, then it would do the normal thing, bu=
+t if
+>> client 1 was location=3D1.3, then it would prefer OSD0 for reads.
+>> Perhaps that's overly simplistic and wouldn't scale to meet everyone=
+'s
+>> requirements, but you could do multiple locations and sprinkle clien=
+ts
+>> in between them all in various ways.  Or perhaps the location is a
+>> matrix, so you could literally map it out on a grid with a set of
+>> coordinates. What ideas are being discussed around how to implement
+>> this?
+>
+> We can do something like this for reads today, where we pick a read
+> replica based on the closest IP or some other metric/mask.  We genera=
+lly
+> don't enable this because it leads to non-optimal cache behavior, but=
+ it
+> could in principle be enabled via a config option for certain cluster=
+s
+> (and in fact some of that code is already in place).
 
-On 02/11/2013 06:13 AM, Yehuda Sadeh wrote:
-> On Thu, Feb 7, 2013 at 12:59 PM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi,
->>
->> While writing unit tests for chain_xattr.cc I tried to understand how =
-to create the conditions to trigger this part of the chain_fsetxattr func=
-tion:
->>
->>   /* if we're exactly at a chunk size, remove the next one (if wasn't =
-removed
->>      before) */
->>   if (ret >=3D 0 && chunk_size =3D=3D CHAIN_XATTR_MAX_BLOCK_LEN) {
->>     get_raw_xattr_name(name, i, raw_name, sizeof(raw_name));
->>     int r =3D sys_fremovexattr(fd, raw_name);
->>     if (r < 0 && r !=3D -ENODATA)
->>       ret =3D r;
->>   }
->>
->> I suspect this cleans up extra empty attributes created as a side effe=
-ct of a previous version of the function. Or I just don't understand the =
-case it addresses.
->>
->> I'd very much appreciate a hint :-)
->>
->=20
-> Well, the code has changed a bit, but originally when a chain was
-> overwritten we didn't bother to remove the xattrs tail. When we read
-> the chain we stop either when we got a short xattr, or when the next
-> xattr in the chain didn't exist.  So when writing an xattr that was
-> perfectly aligned with the block len we had to remove the next xattr
-> in order make sure that readers will not over-read. I'm not too sure
-> whether that still the case, Sam might have a better idea.
-> In any case, it might be a good idea to test the case where we have a
-> big xattr that spans across multiple blocks (e.g., > 3) and being
-> overwritten by a short xattr. Probably also need to test it with
-> different combinations of aligned and non-aligned block sizes.
-
-I understand now and I'll modify the pull request https://github.com/ceph=
-/ceph/pull/40 accordingly.
-
-Thanks :-)
-
->=20
-> Thanks,
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+Just to be specific =97 there are currently flags which will let the
+client read from local-host if it can figure that out, and those
+aren't heavily-tested but do work when we turn them on. Other metrics
+of "close" don't appear yet, though.
+In general, CRUSH locations seem like a good measure of closeness that
+the client could rely on, rather than a separate "location" value, but
+it does restrict the usefulness if you've configured multiple CRUSH
+root nodes. I think it would need to support a tree of some kind
+though, rather than just a linear value.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enig17E84A29D7217B2131388FAC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlEZT7QACgkQ8dLMyEl6F23XAACffuANzKgkYAWQe6jpZNSgDGa4
-h30An0CN7itTAME3s2Rfeiy4FWvURD2c
-=q4F6
------END PGP SIGNATURE-----
-
---------------enig17E84A29D7217B2131388FAC--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
