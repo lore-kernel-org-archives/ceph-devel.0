@@ -1,85 +1,105 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: IPv6 address confusion in OSDs
-Date: Mon, 11 Feb 2013 05:59:30 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302110557470.5429@cobra.newdream.net>
-References: <20760.44431.980428.594955@Simons-MacBook-Air-33597.local> <alpine.DEB.2.00.1302110540510.5429@cobra.newdream.net> <20760.63564.116948.748465@Simons-MacBook-Air-33597.local>
+Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
+Date: Mon, 11 Feb 2013 06:28:52 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net>
+References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35462 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35675 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756466Ab3BKN7c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 08:59:32 -0500
-In-Reply-To: <20760.63564.116948.748465@Simons-MacBook-Air-33597.local>
+	with ESMTP id S1756660Ab3BKO2x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 09:28:53 -0500
+In-Reply-To: <5118FB31.6020902@risc-software.at>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Simon Leinen <simon.leinen@switch.ch>
-Cc: ceph-devel@vger.kernel.org
+To: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
+Cc: ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
 
-On Mon, 11 Feb 2013, Simon Leinen wrote:
-> Sage Weil writes:
-> > On Mon, 11 Feb 2013, Simon Leinen wrote:
-> >> We run a ten-node 64-OSD Ceph cluster and use IPv6 where possible.
+On Mon, 11 Feb 2013, Wolfgang Hennerbichler wrote:
 > 
-> I should have mentioned that this is under Ubuntu 12.10 with version
-> 0.56.1-1quantal of the ceph packages.  Sorry about the omission.
 > 
-> >> Today I noticed this error message from an OSD just after I restarted
-> >> it (in an attempt to resolve an issue with some "stuck" pgs that
-> >> included that OSD):
-> >> 
-> >> 2013-02-11 09:24:57.232811 osd.35 [ERR] map e768 had wrong cluster addr ([2001:620:0:6::106]:6822/1990 != my [fe80::67d:7bff:fef1:78b%vlan301]:6822/1990)
-> >> 
-> >> These two addresses belong to the same interface:
-> >> 
-> >> root@h1:~# ip -6 addr list dev vlan301
-> >> 7: vlan301@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 
-> >> inet6 2001:620:0:6::106/64 scope global 
-> >> valid_lft forever preferred_lft forever
-> >> inet6 fe80::67d:7bff:fef1:78b/64 scope link 
-> >> valid_lft forever preferred_lft forever
-> >> 
-> >> 2001:620:... is the global-scope address, and this is how OSDs are
-> >> addressed in our ceph.conf.  fe80:... is the link-local address that
-> >> every IPv6 interface has.  Shouldn't these be treated as equivalent?
+> On 02/11/2013 03:02 PM, Wido den Hollander wrote:
 > 
-> > Is this OSD by chance sharing a host with one of the monitors?
+> > You are looking at a way to "extract" the snapshot, correct?
 > 
-> Yes, indeed! We have five monitors, i.e. every other server runs a
-> ceph-mon in addition to the 4-9 ceph-osd processes each server has.
-> This (h1) is one of the servers that has both.
+> No.
 > 
-> > The 'my address' value is learned by looking at the socket we connect to 
-> > the monitor with...
+> > Why would
+> > you want to mount it and backup the files?
 > 
-> Thanks for the hint! I'll look at the code and try to understand
-> what's happening and how this could be avoided.
-> 
-> The cluster seems to have recovered from this particular error by
-> itself. 
+> because then I can do things like incremental backups. There will be a
+> ceph cluster at an ISP soon, who hosts various services on various VMs,
+> and it is important that the mailspool for example is backed up
+> efficiently, because it's huge and the number of files is also high.
 
-That makes sense if the trigger here is it random choosely to connect to 
-the local monitor first and learning the address that way.  Adding 
-'debug ms = 20' to your ceph.conf may give a hint.. looked for a 'learned 
-by addr' message (or somethign similar) right at startup time.
+Note that an alternative way to approach incremental backups is at the 
+block device level.  We plan to implement an incremental backup function 
+for the relative change between two snapshots (or a snapshot and the 
+head).  It's O(n) the size of the device vs the number of files, but 
+should be more efficient for all but the most sparse of images.  The 
+implementation should be simple; the challenge is mostly around the 
+incremental file format, probably.
 
-> But in general, when I reboot servers, there's often some pgs
-> that remain stuck, and I have to restart some OSDs until ceph -w shows
-> everything as "active+clean".
+That doesn't help you now, but would be a relatively self-contained piece 
+of functionality for someone to contribute to RBD.  This isn't a top 
+priority yet, so it will be a while before the inktank devs can get to it.
 
-Note that 'ceph osd down NN' may give similar results as restarting the 
-daemon.
-
-> (Our network setup is somewhat complex, with IPv6 over VLANs over
-> "bonded" 10GEs redundantly connected to a pair of Brocade switches
-> running VLAG (something like multi-chassis Etherchannel).  So it's
-> possible that there are some connectivity issues hiding somewhere.)
-
-Let us know what you find!
 sage
 
 
+> 
+> > Couldn't you better handle this in the Virtual Machine itself?
+> 
+> not really. open, changing files, a lot of virtual machines that one
+> needs to take care of, and so on.
+> 
+> > If you want to backup the virtual machines to an extern location you
+> > could use either "rbd" or "qemu-img" to get the snapshot out of the Ceph
+> > cluster:
+> > 
+> > $ rbd export --snap <snapshot> <image name> <destination>
+> > 
+> > Or use qemu-img
+> > 
+> > $ qemu-img convert -f raw -O qcow2 -s <snapshot> rbd:rbd/<image>
+> > <image>.qcow2
+> > 
+> > You then get files which you can backup externally.
+> > 
+> > Would that work?
+> 
+> sure, but this is a very inefficient way of backing things up, because
+> one would back up on block level. I want to back up on filesystem level.
+> 
+> > Wido
+> > 
+> >> thanks a lot for you answers
+> >> Wolfgang
+> >>
+> > 
+> > 
+> 
+> 
 > -- 
-> Simon.
+> DI (FH) Wolfgang Hennerbichler
+> Software Development
+> Unit Advanced Computing Technologies
+> RISC Software GmbH
+> A company of the Johannes Kepler University Linz
+> 
+> IT-Center
+> Softwarepark 35
+> 4232 Hagenberg
+> Austria
+> 
+> Phone: +43 7236 3343 245
+> Fax: +43 7236 3343 250
+> wolfgang.hennerbichler@risc-software.at
+> http://www.risc-software.at
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > 
 > 
