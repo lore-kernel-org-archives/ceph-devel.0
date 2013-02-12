@@ -1,95 +1,42 @@
-From: Kevin Decherf <kevin@kdecherf.com>
-Subject: Re: Crash and strange things on MDS
-Date: Tue, 12 Feb 2013 00:33:05 +0100
-Message-ID: <20130211233305.GB553@kdecherf.com>
-References: <20130204180154.GO3286@kdecherf.com>
- <20130211130518.GN6997@kdecherf.com>
- <CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
- <20130211185424.GA27669@kdecherf.com>
- <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
- <20130211222449.GA553@kdecherf.com>
- <CAPYLRzjYwD5nHdcE-p_jjzQWuPLXVfxOzW9O1d6mHKw3ig-jzw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: rest mgmt api
+Date: Mon, 11 Feb 2013 16:51:29 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302111646290.27987@cobra.newdream.net>
+References: <alpine.DEB.2.00.1302051452200.27331@cobra.newdream.net> <CAC-hyiFPcjXBYr8Wd8YWEk0aBmpM_1smPNktyA5FHVMac8Ji0A@mail.gmail.com> <5112AE17.6080605@inktank.com> <alpine.DEB.2.00.1302061130220.13326@cobra.newdream.net> <5112B43D.6070602@bmrb.wisc.edu>
+ <alpine.DEB.2.00.1302061211550.13326@cobra.newdream.net> <CAPYLRzh5JD3hvxB5VFrmEXq2g9JuEk-ODQquahPMwGMRiqSc6g@mail.gmail.com> <alpine.DEB.2.00.1302111345000.27987@cobra.newdream.net> <CAPYLRzhfsYeqRVhxt+i7N7Djer7TfwVzZy67jJuyZ6LVM0P2yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:61357 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760215Ab3BKXdJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 18:33:09 -0500
-Received: by mail-wi0-f177.google.com with SMTP id hm14so3759726wib.16
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Feb 2013 15:33:07 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CAPYLRzjYwD5nHdcE-p_jjzQWuPLXVfxOzW9O1d6mHKw3ig-jzw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41587 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932674Ab3BLAv3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Feb 2013 19:51:29 -0500
+In-Reply-To: <CAPYLRzhfsYeqRVhxt+i7N7Djer7TfwVzZy67jJuyZ6LVM0P2yw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
-Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 11, 2013 at 02:47:13PM -0800, Gregory Farnum wrote:
-> On Mon, Feb 11, 2013 at 2:24 PM, Kevin Decherf <kevin@kdecherf.com> w=
-rote:
-> > On Mon, Feb 11, 2013 at 12:25:59PM -0800, Gregory Farnum wrote:
-> > Yes, there is a dump of 100,000 events for this backtrace in the li=
-nked
-> > archive (I need 7 hours to upload it).
->=20
-> Can you just pastebin the last couple hundred lines? I'm mostly
-> interested if there's anything from the function which actually cause=
-d
-> the assert/segfault. Also, the log should compress well and get much
-> smaller!
+On Mon, 11 Feb 2013, Gregory Farnum wrote:
+> [...]
+> ...but my instinct is to want one canonical code path in the monitors,
+> not two. Two allows for discrepancies in what each method allows to
+> [...]
 
-Sent in pm.
+Yeah, I'm convinced.
 
-And yes, I have a good compression rate but...
+Just chatted with Dan and Josh a bit about this.  Josh had the interesting 
+idea that the specification of what commands are supported could be 
+requested from the monitor is some canonical form (say, a blob of JSON), 
+and then enforced at the client.  That would be translated into an 
+argparse config for the CLI, and a simple matching/validation table for 
+the REST endpoint.
 
-   % ls -lh                            =20
-   total 38G
-   -rw-r--r-- 1 kdecherf kdecherf 3.3G Feb 11 18:36 cc-ceph-log.tar.gz
-   -rw------- 1 kdecherf kdecherf  66M Feb  4 17:57 ceph.log
-   -rw-r--r-- 1 kdecherf kdecherf 3.5G Feb  4 14:44 ceph-mds.b.log
-   -rw-r--r-- 1 kdecherf kdecherf  31G Feb  5 15:55 ceph-mds.c.log
-   -rw-r--r-- 1 kdecherf kdecherf  27M Feb 11 19:46 ceph-osd.14.log
+That might be worth the complexity to get the best of both worlds... but 
+first Dan is looking at whether Python's argparse will do everything we 
+want for the CLI end of things.
 
-;-)
+In the meantime, the first set of tasks still stand: move the ceph tool 
+cruft into MonClient and Objecter and out of tool/common.cc for starters.
 
-> > The distribution is heterogeneous: we have a folder of ~17G for 300=
-k
-> > objects, another of ~2G for 150k objects and a lof of smaller direc=
-tories.
->=20
-> Sorry, you mean 300,000 files in the single folder?
-> If so, that's definitely why it's behaving so badly =E2=80=94 your fo=
-lder is
-> larger than your maximum cache size settings, and so if you run an
-> "ls" or anything the MDS will read the whole thing off disk, then
-> instantly drop most of the folder from its cache. Then re-read again
-> for the next request to list contents, etc etc.
-
-The biggest top-level folder contains 300k files but splitted into
-several subfolders (a subfolder does not contain more than 10,000 files
-at its level).
-
-> > Are you talking about the mds bal frag and mds bal split * settings=
-?
-> > Do you have any advice about the value to use?
-> If you set "mds bal frag =3D true" in your config, it will split up
-> those very large directories into smaller fragments and behave a lot
-> better. This isn't quite as stable (thus the default to "off"), so if
-> you have the memory to just really up your cache size I'd start with
-> that and see if it makes your problems better. But if it doesn't,
-> directory fragmentation does work reasonably well and it's something
-> we'd be interested in bug reports for. :)
-
-I will try it, thanks!
-
---=20
-Kevin Decherf - @Kdecherf
-GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
-http://kdecherf.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
