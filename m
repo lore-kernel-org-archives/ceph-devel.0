@@ -1,56 +1,94 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: OSD Weights
-Date: Wed, 13 Feb 2013 09:23:22 -0600
-Message-ID: <CAB7xdi=7Eod6KgXb3X1LtbViYzhG5nCL2puW1ez=5QbXDCkCAA@mail.gmail.com>
-References: <C4049E4484F13747B672D64B9C12C31328E13918@PWMAILM01.cscinfo.com>
-	<CAPYLRzh2+S8ijuRGs+Nv7rRaN2e7k-RH8HSr-qHeSSXWr+TQYw@mail.gmail.com>
+From: femi anjorin <femi.anjorin@gmail.com>
+Subject: Fwd: optimizing ceph-fuse performance
+Date: Wed, 13 Feb 2013 16:26:10 +0100
+Message-ID: <CAPhYxPybc7=qbw5_h59yUp=BgCkkd-JfUvX_yoLOHrDiyULuDg@mail.gmail.com>
+References: <CAPhYxPzLpw5H9W4LxCaWWeOPRYwVsSJb7h1OgQzswbCMT9S_xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:63908 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934145Ab3BMPXZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 10:23:25 -0500
-Received: by mail-ie0-f176.google.com with SMTP id k13so1782518iea.35
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 07:23:22 -0800 (PST)
-In-Reply-To: <CAPYLRzh2+S8ijuRGs+Nv7rRaN2e7k-RH8HSr-qHeSSXWr+TQYw@mail.gmail.com>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:60852 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758942Ab3BMP0L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 10:26:11 -0500
+Received: by mail-ie0-f180.google.com with SMTP id bn7so1788546ieb.25
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 07:26:11 -0800 (PST)
+In-Reply-To: <CAPhYxPzLpw5H9W4LxCaWWeOPRYwVsSJb7h1OgQzswbCMT9S_xA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "Holcombe, Christopher" <cholcomb@cscinfo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org
+Cc: Dan Mick <dan.mick@inktank.com>, Joao Eduardo Luis <joao.luis@inktank.com>, Martin B Nielsen <martin@unity3d.com>, Gregory Farnum <greg@inktank.com>
 
-Hi Gregory,
-
-once running ceph online, will ceph change the weight dynamically (if
-not set properly) or it can only be changed by the user through
-command line or it cannot be changed online?
-
-Thanks,
-Sheng
-
-On Mon, Feb 11, 2013 at 3:31 PM, Gregory Farnum <greg@inktank.com> wrote:
-> On Mon, Feb 11, 2013 at 12:43 PM, Holcombe, Christopher
-> <cholcomb@cscinfo.com> wrote:
->> Hi Everyone,
->>
->> I just wanted to confirm my thoughts on the ceph osd weightings.  My understanding is they are a statistical distribution number.  My current setup has 3TB hard drives and they all have the default weight of 1.  I was thinking that if I mixed in 4TB hard drives in the future it would only put 3TB of data on them.  I thought if I changed the weight to 3 for the 3TB hard drives and 4 for the 4TB hard drives it would correctly use the larger storage disks.  Is that correct?
->
-> Yep, looks good.
-> -Greg
-> PS: This is a good question for the new ceph-users list.
-> (http://ceph.com/community/introducing-ceph-users/)
-> :)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I setup ceph cluster on 28 nodes.
+24 nodes for osds...Each storage node has 16 drives.  raid0 on 4
+drives. therefore i have 4 osds daemon on each node. each osd daemon
+is allocated a raid volume. so total of 96 osds daemon in the entire
+cluster.
+3 nodes for mon ...
+1 node for mds ...
+I mounted a share with CEPH-FUSE and im generating load to the cluster
+through the mount point.
+Network bandwidth is fairly
+mon nodes - 20 gb to switch
+osd nodes - 1 gb to switch
+mds node - 20 gb to switch
 
 
+Questions:
+1. How to optimize the network for better performance
+2. Is 1 mds good for this cluster ?
+3. How check for replication and what replication factors should be used?
+4. What the debug logging configuration should look like?
 
--- 
-Sheng Qiu
-Texas A & M University
-Room 332B Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+All the aim is make ceph-fuse give its best in write,read and delete
+operations... Pls kindly guide me.
+
+Thanks
+
+
+
+
+
+
+
+---------- Forwarded message ----------
+
+
+
+Hi,
+
+Pls can somebody help interprete what this configuration signify.
+
+[global]
+        debug ms = 0
+
+[mon]
+        debug mon = 20
+        debug paxos = 20
+        debug auth = 20
+
+[osd]
+        debug osd = 20
+        debug filestore = 20
+        debug journal = 20
+        debug monc = 20
+
+[mds]
+        debug mds = 20
+        debug mds balancer = 20
+        debug mds log = 20
+        debug mds migrator = 20
+
+
+ I used the same configuration and my boot disk got full
+
+ceph-mds.a.log =  50299281408
+ceph-mon.a.log = 173858816
+
+Moreover the results of my test using ceph-fuse to mount a share and
+exportiing the share with samba isn't so good... How can i turn off
+some of the logs to optimize ceph performance in a write,read and
+delete operations. I will publish the result as soon as i can get the
+cluster more optimized.
+
+
+regards.
