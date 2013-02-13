@@ -1,47 +1,63 @@
-From: Mandell Degerness <mandell@pistoncloud.com>
-Subject: OSD failure on start
-Date: Wed, 13 Feb 2013 11:57:31 -0800
-Message-ID: <CA+jddaPFHhwvyA73BA=58b=MMkF8me5WeSm0LcThp9XLho=k7A@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: rbd export speed limit
+Date: Wed, 13 Feb 2013 12:21:44 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302131220570.20247@cobra.newdream.net>
+References: <511AA47B.3020309@profihost.ag> <CABYiri_QzZaOeXp5Rcys3HZRRwF2nexh4GvmA5WMFw9Z+GVZjQ@mail.gmail.com> <511B46A2.4060107@profihost.ag> <alpine.DEB.2.00.1302130812090.23349@cobra.newdream.net> <511BE8AC.3090600@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:54457 "EHLO
-	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756947Ab3BMT5d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 14:57:33 -0500
-Received: by mail-wg0-f52.google.com with SMTP id 12so1262515wgh.31
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 11:57:32 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:60413 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751439Ab3BMUVo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 15:21:44 -0500
+In-Reply-To: <511BE8AC.3090600@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Andrey Korolyov <andrey@xdel.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm getting this error on one of my OSD's when I try to start it.
+On Wed, 13 Feb 2013, Stefan Priebe wrote:
+> Hi,
+> 
+> first sorry i got this totally wrong. The speed is not correct and i mixed
+> this with another operation going on at the same time.
+> 
+> The problem isn't the rbd export in my case it the fstrim issued on all VMs.
+> 
+> This results in writes up to 400Mb/s per OSD and then results in aborted /
+> hanging task in VMs. Is it possible to give trim commands lower priority?
 
-I can gather more complete log data if no-one recognizes the error from this:
+Is that 400Mb or MB?  Measured over the network, or on the disk itself?
 
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.612847
-7f4f607e7780  0 filestore(/mnt/osd96) mount found snaps <>
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.615147
-7f4f607e7780  0 filestore(/mnt/osd96) mount: enabling WRITEAHEAD
-journal mode: btrfs not detected
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.658965
-7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
-bytes, block size 4096 bytes, directio = 1, aio = 0
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.720091
-7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
-bytes, block size 4096 bytes, directio = 1, aio = 0
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.721871
-7f4f607e7780 -1 osd/OSD.cc: In function 'OSDMapRef
-OSD::get_map(epoch_t)' thread 7f4f607e7780 time 2013-02-13
-19:30:04.721278
-osd/OSD.cc: 4029: FAILED assert(_get_map_bl(epoch, bl))
+I'm wondering if this is a lack of punch support on the kernel..
 
- ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
- 1: (OSD::get_map(unsigned int)+0x560) [0x7f4f60a411e0]
- 2: (OSD::init()+0x5a3) [0x7f4f60a53ce3]
- 3: (main()+0x4462) [0x7f4f6096d182]
- 4: (__libc_start_main()+0xfd) [0x7f4f5e64b26d]
- 5: (()+0x16e829) [0x7f4f60968829]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-Feb 13 19:30:04 node-192-168-8-14 ceph-osd: --- begin dump of recent events ---
+sage
+
+> 
+> Greets,
+> Stefan
+> Am 13.02.2013 17:13, schrieb Sage Weil:
+> > On Wed, 13 Feb 2013, Stefan Priebe - Profihost AG wrote:
+> > > Hi,
+> > > Am 12.02.2013 21:45, schrieb Andrey Korolyov:
+> > > > you may be interested in throttle(1) as a side solution with stdout
+> > > > export option.
+> > > What's throttle? Never seen this. Wouldn't it be possible to use tc?
+> > > 
+> > > > By the way, on which interconnect you have manage to
+> > > > get such speeds,
+> > > Bonded Intel 2x 10GBE
+> > > 
+> > > > if you mean 'commited' bytes(e.g. not almost empty
+> > > > allocated image)?
+> > > Yes commited images.
+> > 
+> > FWIW I'm pretty sure the rbd export is doing a single IO at a time
+> > (reading one chunk, 4MB by default).  Are there lots of them in parallel,
+> > or is a single export operation significantly affecting performance?
+> > That would be a bit surprising to me..
+> > 
+> > sage
+> > 
+> 
+> 
