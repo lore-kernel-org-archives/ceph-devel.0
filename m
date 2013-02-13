@@ -1,50 +1,76 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: rbd export speed limit
-Date: Wed, 13 Feb 2013 22:43:33 +0100
-Message-ID: <511C0905.7070509@profihost.ag>
-References: <511AA47B.3020309@profihost.ag> <CABYiri_QzZaOeXp5Rcys3HZRRwF2nexh4GvmA5WMFw9Z+GVZjQ@mail.gmail.com> <511B46A2.4060107@profihost.ag> <alpine.DEB.2.00.1302130812090.23349@cobra.newdream.net> <511BE8AC.3090600@profihost.ag> <alpine.DEB.2.00.1302131220570.20247@cobra.newdream.net> <511BF726.9030606@profihost.ag> <CAPYLRzhwhWjakVc2Ec8jP-8e+7VOB5eqDf63yCCLL2fxFHJ0-w@mail.gmail.com>
+From: Mike Dawson <mike.dawson@scholarstack.com>
+Subject: Re: OSD failure on start
+Date: Wed, 13 Feb 2013 17:08:39 -0500
+Message-ID: <511C0EE7.3090809@scholarstack.com>
+References: <CA+jddaPFHhwvyA73BA=58b=MMkF8me5WeSm0LcThp9XLho=k7A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:41569 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934131Ab3BMVng (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 16:43:36 -0500
-In-Reply-To: <CAPYLRzhwhWjakVc2Ec8jP-8e+7VOB5eqDf63yCCLL2fxFHJ0-w@mail.gmail.com>
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:56456 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760376Ab3BMWIk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 17:08:40 -0500
+Received: by mail-ie0-f173.google.com with SMTP id 9so2416567iec.18
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 14:08:40 -0800 (PST)
+In-Reply-To: <CA+jddaPFHhwvyA73BA=58b=MMkF8me5WeSm0LcThp9XLho=k7A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Andrey Korolyov <andrey@xdel.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mandell Degerness <mandell@pistoncloud.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-HI Greg,
+Mandell,
 
-Am 13.02.2013 21:38, schrieb Gregory Farnum:
->> Sorry it's MB - so the SSDs get fully utilized meased via /proc/diskstats .
->>
->>> I'm wondering if this is a lack of punch support on the kernel..
->>
->> I'm using 3.7.7 running XFS.
+A few of us saw a similar failure on 0.56.1.
+
+http://tracker.ceph.com/issues/3770
+
+Sam Just patched the issue for 0.56.2. My understanding is Sam's patch 
+prevents the issue in the future, but doesn't repair a previously 
+damaged OSD.
+
+If you have good replication (or a good backup), I have had luck 
+removing the affected OSD, formatting, and re-adding it. I believe Sam 
+may have a manual process to fix it if you can't wipe this OSD.
+
+Good Luck,
+Mike
+
+
+On 2/13/2013 2:57 PM, Mandell Degerness wrote:
+> I'm getting this error on one of my OSD's when I try to start it.
 >
-> Sounds like maybe the client trim is ending up issuing a truly
-> ridiculous number of truncate or trim operations from librbd to the
-> OSDs?
-Yes for every single unused disk block ;-(
+> I can gather more complete log data if no-one recognizes the error from this:
+>
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.612847
+> 7f4f607e7780  0 filestore(/mnt/osd96) mount found snaps <>
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.615147
+> 7f4f607e7780  0 filestore(/mnt/osd96) mount: enabling WRITEAHEAD
+> journal mode: btrfs not detected
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.658965
+> 7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
+> bytes, block size 4096 bytes, directio = 1, aio = 0
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.720091
+> 7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
+> bytes, block size 4096 bytes, directio = 1, aio = 0
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.721871
+> 7f4f607e7780 -1 osd/OSD.cc: In function 'OSDMapRef
+> OSD::get_map(epoch_t)' thread 7f4f607e7780 time 2013-02-13
+> 19:30:04.721278
+> osd/OSD.cc: 4029: FAILED assert(_get_map_bl(epoch, bl))
+>
+>   ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
+>   1: (OSD::get_map(unsigned int)+0x560) [0x7f4f60a411e0]
+>   2: (OSD::init()+0x5a3) [0x7f4f60a53ce3]
+>   3: (main()+0x4462) [0x7f4f6096d182]
+>   4: (__libc_start_main()+0xfd) [0x7f4f5e64b26d]
+>   5: (()+0x16e829) [0x7f4f60968829]
+>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: --- begin dump of recent events ---
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-> Like one for every RADOS block that could exist, or possibly
-> even for each VM disk block? (Perhaps not; I'm not sure how trim got
-> implemented.)
-I'm pretty sure Disk block...
-
-> FWIW a full fstrim is not generally an operation you can really do in
-> the background even on a real desktop...so if running it one one or
-> several VMs makes the cluster unusable for all of them, that's a
-> problem, but if it only causes IO trouble for the one which is
-> trimming that'd be not ideal but less of an issue.
-
-Yes if you can control this yes if you have no access to the client 
-machines no... or you can just disable trim support - but it's a nice 
-feature for provisioning...
-
-Greets,
-Stefan
