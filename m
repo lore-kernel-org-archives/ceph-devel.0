@@ -1,147 +1,53 @@
-From: Ben Rowland <ben.rowland@gmail.com>
-Subject: Write Replication on Degraded PGs
-Date: Wed, 13 Feb 2013 11:40:27 +0000
-Message-ID: <CAEU8emmTpA7TqYDuQ0=ybN_NkmosWAghn+vu=ggGEFwPeFps9w@mail.gmail.com>
+From: Kevin Decherf <kevin@kdecherf.com>
+Subject: Re: Crash and strange things on MDS
+Date: Wed, 13 Feb 2013 12:47:50 +0100
+Message-ID: <20130213114750.GC7399@kdecherf.com>
+References: <20130204180154.GO3286@kdecherf.com>
+ <20130211130518.GN6997@kdecherf.com>
+ <CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
+ <20130211185424.GA27669@kdecherf.com>
+ <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f47.google.com ([209.85.215.47]:51394 "EHLO
-	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759144Ab3BMLk3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 06:40:29 -0500
-Received: by mail-la0-f47.google.com with SMTP id fj20so1065727lab.34
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 03:40:28 -0800 (PST)
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:40570 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754806Ab3BMLr4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 06:47:56 -0500
+Received: by mail-wg0-f46.google.com with SMTP id fg15so872121wgb.13
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 03:47:55 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
 
-Hi,
+On Mon, Feb 11, 2013 at 12:25:59PM -0800, Gregory Farnum wrote:
+> On Mon, Feb 11, 2013 at 10:54 AM, Kevin Decherf <kevin@kdecherf.com> wrote:
+> > Furthermore, I observe another strange thing more or less related to the
+> > storms.
+> >
+> > During a rsync command to write ~20G of data on Ceph and during (and
+> > after) the storm, one OSD sends a lot of data to the active MDS
+> > (400Mbps peak each 6 seconds). After a quick check, I found that when I
+> > stop osd.23, osd.14 stops its peaks.
+> 
+> This is consistent with Sam's suggestion that MDS is thrashing its
+> cache, and is grabbing a directory object off of the OSDs. How large
+> are the directories you're using? If they're a significant fraction of
+> your cache size, it might be worth enabling the (sadly less stable)
+> directory fragmentation options, which will split them up into smaller
+> fragments that can be independently read and written to disk.
 
-Apologies that this is a fairly long post, but hopefully all my
-questions are similar (or even invalid!)
+I set mds cache size to 400000 but now I observe ~900Mbps peaks from
+osd.14 to the active mds, osd.18 and osd.2.
 
-Does Ceph allow writes to proceed if it's not possible to satisfy the
-rules for replica placement across failure domains, as specified in
-the CRUSH map?  For example, if my CRUSH map says to place one replica
-on each of 2 hosts, and no devices are up on one of the hosts, what
-will happen?
+osd.14 shares some pg with osd.18 and osd.2:
+http://pastebin.com/raw.php?i=uBAcTcu4
 
-=46rom tests on a small cluster, my finding is that Ceph will allow
-writes to proceed in this case, even when there are less OSDs "in" the
-cluster than the replication size.
 
-If this is the expected behaviour of Ceph, then it seems to prefer
-write-availability over read-availability (in this case my data is
-only stored on 1 OSD, thus a SPOF).  Is there any way to change this
-trade-off, e.g. as you can in Cassandra with its write quorums?
-
-=46rom reading the paper which details the CRUSH replica placement
-algorithm, I understand several concepts:
-
-- The CRUSH algorithm loops over n replicas, for each descending from
-items in the current set (buckets) until it finds a device
-- "CRUSH may reject and reselect items using a modi=EF=AC=81ed input fo=
-r three
-different reasons: if an item has already been selected in the current
-set (a collision..., if a device is failed, or if a device is
-overloaded."
-
-I'm not clear on what will happen if these constraints cannot be met,
-say in the case mentioned above.  Does Ceph store the object once
-only, not meeting the replica size, or does it store the object twice
-on the same OSD somehow?  The latter would violate point 2 above,
-unless the word "reselect" is appropriate here.
-
-Now, if any details are required (no need to read if my questions are
-already answered) ...
-
-I'm running some tests with 2 hosts, each running only 1 OSD. There is
-one monitor running on one of the hosts. I have the default CRUSH map
-and performing writes via RGW. My understanding of the following
-default 'data' crush rule is that Ceph will place 1 copy on each of
-the 2 OSDs:
-
-device 0 osd.0
-device 1 osd.1
-
-type 0 osd
-type 1 host
-
-host squeezeceph1 {
-        id -2           # do not change unnecessarily
-        # weight 1.000
-        alg straw
-        hash 0  # rjenkins1
-        item osd.0 weight 1.000
-}
-host squeezeceph2 {
-        id -4           # do not change unnecessarily
-        # weight 1.000
-        alg straw
-        hash 0  # rjenkins1
-        item osd.1 weight 1.000
-}
-
-rule data {
-        ruleset 0
-        type replicated
-        min_size 1
-        max_size 10
-        step take default
-        step chooseleaf firstn 0 type host
-        step emit
-}
-
-I'm using RGW which has a replication size of 2:
-
-root@squeezeceph1:~/crushmaps# ceph osd dump | grep 'rep size'
-=2E..
-pool 3 '.rgw' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 8
-pgp_num 8 last_change 9 owner 18446744073709551615
-=2E..
-
-All seems well when the cluster is healthy - any particular PG in my
-RGW pool resolves to the two OSD IDs:
-
-root@squeezeceph1:~/crushmaps# ceph osd map .rgw someobjectid
-osdmap e52 pool '.rgw' (3) object 'someobjectid' -> pg 3.f31055a1
-(3.1) -> up [0,1] acting [0,1]
-
-Now I bring down osd.1, such that PGs are reported as degraded:
-
-root@squeezeceph1:~/crushmaps# ceph health
-HEALTH_WARN 632 pgs degraded; 604 pgs stuck unclean; recovery 100/200
-degraded (50.000%); 1/2 in osds are down
-
-Now the same PG is mapped as follows:
-
-root@squeezeceph1:~/crushmaps# ceph osd map .rgw someobjectid
-osdmap e54 pool '.rgw' (3) object 'someobjectid' -> pg 3.f31055a1
-(3.1) -> up [0] acting [0]
-
-This shows only osd.0 occupying the PG.  At this point osd.1 is down
-but still 'in' (as reported by "ceph osd tree").  At this point writes
-to the RGW succeed which is expected given the statement in the
-documentation "If an OSD goes down, Ceph marks each placement group
-assigned to the OSD as degraded ... a client can still write a new
-object to a degraded placement group if it is active."  I could close
-this gap as much as possible by reducing the "mon osd down out
-interval" from 300 to 0.
-
-After the 5 minutes have passed, osd.1 is out of the cluster (as
-reported by "ceph osd dump").  The command "ceph osd map .rgw
-someobjectid" from above returns the same result (the PG is mapped to
-only 1 OSD which is fair enough).
-
-At this point writes still succeed; for my use-case they'd ideally
-fail.  Is osd.1 still considered 'active' at this point?
-
-Many thanks!
-
-Ben
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Kevin Decherf - @Kdecherf
+GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
+http://kdecherf.com
