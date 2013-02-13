@@ -1,53 +1,55 @@
-From: Kevin Decherf <kevin@kdecherf.com>
-Subject: Re: Crash and strange things on MDS
-Date: Wed, 13 Feb 2013 12:47:50 +0100
-Message-ID: <20130213114750.GC7399@kdecherf.com>
-References: <20130204180154.GO3286@kdecherf.com>
- <20130211130518.GN6997@kdecherf.com>
- <CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
- <20130211185424.GA27669@kdecherf.com>
- <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
+From: femi anjorin <femi.anjorin@gmail.com>
+Subject: optimizing ceph-fuse performance
+Date: Wed, 13 Feb 2013 13:31:17 +0100
+Message-ID: <CAPhYxPzLpw5H9W4LxCaWWeOPRYwVsSJb7h1OgQzswbCMT9S_xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:40570 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754806Ab3BMLr4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 06:47:56 -0500
-Received: by mail-wg0-f46.google.com with SMTP id fg15so872121wgb.13
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 03:47:55 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
+Received: from mail-oa0-f48.google.com ([209.85.219.48]:57556 "EHLO
+	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933922Ab3BMMbR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 07:31:17 -0500
+Received: by mail-oa0-f48.google.com with SMTP id j1so1185056oag.7
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 04:31:17 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
+To: ceph-devel@vger.kernel.org
 
-On Mon, Feb 11, 2013 at 12:25:59PM -0800, Gregory Farnum wrote:
-> On Mon, Feb 11, 2013 at 10:54 AM, Kevin Decherf <kevin@kdecherf.com> wrote:
-> > Furthermore, I observe another strange thing more or less related to the
-> > storms.
-> >
-> > During a rsync command to write ~20G of data on Ceph and during (and
-> > after) the storm, one OSD sends a lot of data to the active MDS
-> > (400Mbps peak each 6 seconds). After a quick check, I found that when I
-> > stop osd.23, osd.14 stops its peaks.
-> 
-> This is consistent with Sam's suggestion that MDS is thrashing its
-> cache, and is grabbing a directory object off of the OSDs. How large
-> are the directories you're using? If they're a significant fraction of
-> your cache size, it might be worth enabling the (sadly less stable)
-> directory fragmentation options, which will split them up into smaller
-> fragments that can be independently read and written to disk.
+Hi,
 
-I set mds cache size to 400000 but now I observe ~900Mbps peaks from
-osd.14 to the active mds, osd.18 and osd.2.
+Pls can somebody help interprete what this configuration signify.
 
-osd.14 shares some pg with osd.18 and osd.2:
-http://pastebin.com/raw.php?i=uBAcTcu4
+[global]
+        debug ms = 0
+
+[mon]
+        debug mon = 20
+        debug paxos = 20
+        debug auth = 20
+
+[osd]
+        debug osd = 20
+        debug filestore = 20
+        debug journal = 20
+        debug monc = 20
+
+[mds]
+        debug mds = 20
+        debug mds balancer = 20
+        debug mds log = 20
+        debug mds migrator = 20
 
 
--- 
-Kevin Decherf - @Kdecherf
-GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
-http://kdecherf.com
+ I used the same configuration and my boot disk got full
+
+ceph-mds.a.log =  50299281408
+ceph-mon.a.log = 173858816
+
+Moreover the results of my test using ceph-fuse to mount a share and
+exportiing the share with samba isn't so good... How can i turn off
+some of the logs to optimize ceph performance in a write,read and
+delete operations. I will publish the result as soon as i can get the
+cluster more optimized.
+
+
+regards.
