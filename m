@@ -1,235 +1,97 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: OSD dies after seconds
-Date: Wed, 13 Feb 2013 09:21:17 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302130918110.20247@cobra.newdream.net>
-References: <CAGnkcrkf6GmTdUqM7zK=L7-1OREMaAsYF0fKpvRFMR_ck2QGmw@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Write Replication on Degraded PGs
+Date: Wed, 13 Feb 2013 10:16:35 -0800
+Message-ID: <CAPYLRziQC3FkOJy+EsFuQAmSY3j+9F0YZ9kTkc9Cc+JcUaZ7ug@mail.gmail.com>
+References: <CAEU8emmTpA7TqYDuQ0=ybN_NkmosWAghn+vu=ggGEFwPeFps9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58655 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759964Ab3BMRVS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 12:21:18 -0500
-In-Reply-To: <CAGnkcrkf6GmTdUqM7zK=L7-1OREMaAsYF0fKpvRFMR_ck2QGmw@mail.gmail.com>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:64214 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965013Ab3BMSQi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 13:16:38 -0500
+Received: by mail-qa0-f45.google.com with SMTP id g10so2264748qah.18
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 10:16:37 -0800 (PST)
+In-Reply-To: <CAEU8emmTpA7TqYDuQ0=ybN_NkmosWAghn+vu=ggGEFwPeFps9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesus Cuenca <jcuenca@cnb.csic.es>
-Cc: ceph-devel@vger.kernel.org
+To: Ben Rowland <ben.rowland@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 13 Feb 2013, Jesus Cuenca wrote:
+On Wed, Feb 13, 2013 at 3:40 AM, Ben Rowland <ben.rowland@gmail.com> wr=
+ote:
 > Hi,
-> 
-> I'm setting up a small ceph 0.56.2 cluster on 3 64-bit Debian 6
-> servers with kernel 3.7.2.
+>
+> Apologies that this is a fairly long post, but hopefully all my
+> questions are similar (or even invalid!)
+>
+> Does Ceph allow writes to proceed if it's not possible to satisfy the
+> rules for replica placement across failure domains, as specified in
+> the CRUSH map?  For example, if my CRUSH map says to place one replic=
+a
+> on each of 2 hosts, and no devices are up on one of the hosts, what
+> will happen?
 
-This might be
+As you've discovered, it will write to only the up host. You can
+control this behavior by setting the min write size on your pools =E2=80=
+=94
+"ceph osd set <pool> min_size <size>" =E2=80=94 to be the minimum numbe=
+r of
+writes you'd like to guarantee are on disk. You can also set the "osd
+pool default min size" parameter on the monitors; it defaults to 0
+which is interpreted as "half of the requested size". (So for a size 2
+pool, it will require at least one copy [d'oh], for a size 5 pool, it
+will require at least 3 copies, etc.)
+So it sounds from the rest of your post like you'd want to, for each
+pool that RGW uses (it's not just .rgw), run "ceph osd set .rgw
+min_size 2". (and for .rgw.buckets, etc etc)
 
-	http://tracker.ceph.com/issues/3595
+> From tests on a small cluster, my finding is that Ceph will allow
+> writes to proceed in this case, even when there are less OSDs "in" th=
+e
+> cluster than the replication size.
+>
+> If this is the expected behaviour of Ceph, then it seems to prefer
+> write-availability over read-availability (in this case my data is
+> only stored on 1 OSD, thus a SPOF).  Is there any way to change this
+> trade-off, e.g. as you can in Cassandra with its write quorums?
 
-which is problems with google perftools (which we use by default) and the 
-version in squeeze, which is buggy.  This doesn't seem to affect all 
-squeeze users.
+I'm not quite sure this is describing it correctly =E2=80=94 Ceph guara=
+ntees
+that anything that's been written to disk will be readable later on,
+and placement groups won't go active if they can't retrieve all data.
+The sort of flexible policies allowed by Cassandra aren't possible
+within Ceph =E2=80=94 it is a strictly consistent system.
 
-Does it seg fault?
 
-sage
+> From reading the paper which details the CRUSH replica placement
+> algorithm, I understand several concepts:
+>
+> - The CRUSH algorithm loops over n replicas, for each descending from
+> items in the current set (buckets) until it finds a device
+> - "CRUSH may reject and reselect items using a modi=EF=AC=81ed input =
+for three
+> different reasons: if an item has already been selected in the curren=
+t
+> set (a collision..., if a device is failed, or if a device is
+> overloaded."
+>
+> I'm not clear on what will happen if these constraints cannot be met,
+> say in the case mentioned above.  Does Ceph store the object once
+> only, not meeting the replica size, or does it store the object twice
+> on the same OSD somehow?  The latter would violate point 2 above,
+> unless the word "reselect" is appropriate here.
 
-
-> 
-> My problem is that OSD die. First I try to start them with the init script:
-> 
-> > /etc/init.d/ceph start osd.0
-> ...
-> starting osd.0 at :/0 osd_data /var/lib/ceph/osd/ceph-0
-> /var/lib/ceph/osd/ceph-0/journal
-> 
-> > ps -ef | grep ceph
-> (No ceph-osd process)
-> 
-> I then run with debugging:
-> 
-> > ceph-osd -i 0 --debug_ms 20 --debug_osd 20 --debug_filestore 20 --debug_journal 20 -d
-> starting osd.0 at :/0 osd_data /var/lib/ceph/osd/ceph-0
-> /var/lib/ceph/osd/ceph-0/journal
-> 2013-02-13 18:04:40.351830 7fe98cd8a760 10 -- :/0 rank.bind :/0
-> 2013-02-13 18:04:40.351895 7fe98cd8a760 10 accepter.accepter.bind
-> 2013-02-13 18:04:40.351910 7fe98cd8a760 10 accepter.accepter.bind
-> bound on random port 0.0.0.0:6800/0
-> 2013-02-13 18:04:40.351919 7fe98cd8a760 10 accepter.accepter.bind
-> bound to 0.0.0.0:6800/0
-> 2013-02-13 18:04:40.351930 7fe98cd8a760  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6800/8438 need_addr=1
-> 2013-02-13 18:04:40.351935 7fe98cd8a760 10 -- :/0 rank.bind :/0
-> 2013-02-13 18:04:40.351938 7fe98cd8a760 10 accepter.accepter.bind
-> 2013-02-13 18:04:40.351943 7fe98cd8a760 10 accepter.accepter.bind
-> bound on random port 0.0.0.0:6801/0
-> 2013-02-13 18:04:40.351946 7fe98cd8a760 10 accepter.accepter.bind
-> bound to 0.0.0.0:6801/0
-> 2013-02-13 18:04:40.351952 7fe98cd8a760  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6801/8438 need_addr=1
-> 2013-02-13 18:04:40.351959 7fe98cd8a760 10 -- :/0 rank.bind :/0
-> 2013-02-13 18:04:40.351961 7fe98cd8a760 10 accepter.accepter.bind
-> 2013-02-13 18:04:40.351966 7fe98cd8a760 10 accepter.accepter.bind
-> bound on random port 0.0.0.0:6802/0
-> 2013-02-13 18:04:40.351969 7fe98cd8a760 10 accepter.accepter.bind
-> bound to 0.0.0.0:6802/0
-> 2013-02-13 18:04:40.351975 7fe98cd8a760  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6802/8438 need_addr=1
-> 2013-02-13 18:04:40.352636 7fe98cd8a760  5
-> filestore(/var/lib/ceph/osd/ceph-0) basedir /var/lib/ceph/osd/ceph-0
-> journal /var/lib/ceph/osd/ceph-0/journa
-> l
-> 2013-02-13 18:04:40.352664 7fe98cd8a760 10
-> filestore(/var/lib/ceph/osd/ceph-0) mount fsid is
-> 0ab92be4-3b42-47bc-bd88-b0e11da5b450
-> 2013-02-13 18:04:40.426222 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount FIEMAP ioctl is supported
-> and appears to work
-> 2013-02-13 18:04:40.426234 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount FIEMAP ioctl is disabled via
-> 'filestore fiemap' config option
-> 2013-02-13 18:04:40.426567 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount did NOT detect btrfs
-> 2013-02-13 18:04:40.426575 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount syncfs(2) syscall not
-> supported
-> 2013-02-13 18:04:40.426630 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount no syncfs(2), must use
-> sync(2).
-> 2013-02-13 18:04:40.426631 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount WARNING: multiple ceph-osd
-> daemons on the same host will be slow
-> 2013-02-13 18:04:40.426701 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount found snaps <>
-> 2013-02-13 18:04:40.426719 7fe98cd8a760  5
-> filestore(/var/lib/ceph/osd/ceph-0) mount op_seq is 2
-> 2013-02-13 18:04:40.515151 7fe98cd8a760 20 filestore (init)dbobjectmap: seq is 1
-> 2013-02-13 18:04:40.515217 7fe98cd8a760 10
-> filestore(/var/lib/ceph/osd/ceph-0) open_journal at
-> /var/lib/ceph/osd/ceph-0/journal
-> 2013-02-13 18:04:40.515243 7fe98cd8a760  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount: enabling WRITEAHEAD journal
-> mode: btrfs not detected
-> 2013-02-13 18:04:40.515252 7fe98cd8a760 10
-> filestore(/var/lib/ceph/osd/ceph-0) list_collections
-> 2013-02-13 18:04:40.515352 7fe98cd8a760 10 journal journal_replay fs op_seq 2
-> 2013-02-13 18:04:40.515359 7fe98cd8a760  2 journal open
-> /var/lib/ceph/osd/ceph-0/journal fsid
-> 0ab92be4-3b42-47bc-bd88-b0e11da5b450 fs_op_seq 2
-> 2013-02-13 18:04:40.515373 7fe98cd8a760 10 journal _open journal is
-> not a block device, NOT checking disk write cache on
-> '/var/lib/ceph/osd/ceph-0/jour
-> nal'
-> 2013-02-13 18:04:40.515385 7fe98cd8a760  1 journal _open
-> /var/lib/ceph/osd/ceph-0/journal fd 17: 10485760000 bytes, block size
-> 4096 bytes, directio = 1
-> , aio = 0
-> 2013-02-13 18:04:40.515393 7fe98cd8a760 10 journal read_header
-> 2013-02-13 18:04:40.515409 7fe98cd8a760 10 journal header: block_size
-> 4096 alignment 4096 max_size 10485760000
-> 2013-02-13 18:04:40.515411 7fe98cd8a760 10 journal header: start 4096
-> 2013-02-13 18:04:40.515412 7fe98cd8a760 10 journal  write_pos 4096
-> 2013-02-13 18:04:40.515415 7fe98cd8a760 10 journal open header.fsid =
-> 0ab92be4-3b42-47bc-bd88-b0e11da5b450
-> 2013-02-13 18:04:40.515434 7fe98cd8a760  2 journal read_entry 4096 :
-> seq 2 424 bytes
-> 2013-02-13 18:04:40.515439 7fe98cd8a760  2 journal read_entry 8192 :
-> bad header magic, end of journal
-> 2013-02-13 18:04:40.515443 7fe98cd8a760 10 journal open reached end of journal.
-> 2013-02-13 18:04:40.515446 7fe98cd8a760  2 journal read_entry 8192 :
-> bad header magic, end of journal
-> 2013-02-13 18:04:40.515447 7fe98cd8a760  3 journal journal_replay: end
-> of journal, done.
-> 2013-02-13 18:04:40.515444 7fe989567700 20
-> filestore(/var/lib/ceph/osd/ceph-0) sync_entry waiting for
-> max_interval 5.000000
-> 2013-02-13 18:04:40.515457 7fe98cd8a760 10 journal _open journal is
-> not a block device, NOT checking disk write cache on
-> '/var/lib/ceph/osd/ceph-0/jour
-> nal'
-> 2013-02-13 18:04:40.515465 7fe98cd8a760  1 journal _open
-> /var/lib/ceph/osd/ceph-0/journal fd 17: 10485760000 bytes, block size
-> 4096 bytes, directio = 1
-> , aio = 0
-> 2013-02-13 18:04:40.515516 7fe98cd8a760 10 journal journal_start
-> 2013-02-13 18:04:40.515545 7fe983fff700 10 journal
-> write_finish_thread_entry enter
-> 2013-02-13 18:04:40.515555 7fe983fff700 20 journal
-> write_finish_thread_entry sleeping
-> 2013-02-13 18:04:40.515550 7fe988d66700 10 journal write_thread_entry start
-> 2013-02-13 18:04:40.515559 7fe988d66700 20 journal write_thread_entry
-> going to sleep
-> 2013-02-13 18:04:40.515840 7fe981ffb700 20
-> filestore(/var/lib/ceph/osd/ceph-0) flusher_entry start
-> 2013-02-13 18:04:40.515851 7fe981ffb700 20
-> filestore(/var/lib/ceph/osd/ceph-0) flusher_entry sleeping
-> 2013-02-13 18:04:40.515938 7fe98cd8a760  5
-> filestore(/var/lib/ceph/osd/ceph-0) umount /var/lib/ceph/osd/ceph-0
-> 2013-02-13 18:04:40.515958 7fe981ffb700 20
-> filestore(/var/lib/ceph/osd/ceph-0) flusher_entry awoke
-> 2013-02-13 18:04:40.515973 7fe981ffb700 20
-> filestore(/var/lib/ceph/osd/ceph-0) flusher_entry finish
-> 2013-02-13 18:04:40.515991 7fe989567700 20
-> filestore(/var/lib/ceph/osd/ceph-0) sync_entry force_sync set
-> 2013-02-13 18:04:40.516007 7fe989567700 10 journal commit_start
-> max_applied_seq 2, open_ops 0
-> 2013-02-13 18:04:40.516011 7fe989567700 10 journal commit_start
-> blocked, all open_ops have completed
-> 2013-02-13 18:04:40.516012 7fe989567700 10 journal commit_start nothing to do
-> 2013-02-13 18:04:40.516015 7fe989567700 10 journal commit_start
-> 2013-02-13 18:04:40.516199 7fe98cd8a760 10 journal journal_stop
-> 2013-02-13 18:04:40.516338 7fe98cd8a760  1 journal close
-> /var/lib/ceph/osd/ceph-0/journal
-> 2013-02-13 18:04:40.516361 7fe983fff700 10 journal
-> write_finish_thread_entry exit
-> 2013-02-13 18:04:40.516413 7fe988d66700 20 journal write_thread_entry woke up
-> 2013-02-13 18:04:40.516423 7fe988d66700 10 journal write_thread_entry finish
-> 
-> Here it is my ceph.conf:
-> 
-> [global]
->         auth cluster required = cephx
->         auth service required = cephx
->         auth client required = cephx
-> 
-> [osd]
-> 
-> [mon.a]
->         host = hosta
->         mon addr = 192.168.0.200:6789
-> 
-> [mon.b]
->         host = hostb
->         mon addr = 192.168.0.186:6789
-> 
-> [mon.c]
->         host = hostc
->         mon addr = 192.168.0.136:6789
-> 
-> [osd.0]
->         host = hosta
->         osd mkfs type=xfs
->         devs = /dev/sdb1
->         filestore_xattr_use_omap = 1
-> 
-> [osd.1]
->         host = hostb
->         osd mkfs type=xfs
->         devs = /dev/sdb1
->         filestore_xattr_use_omap = 1
-> 
-> [mds.a]
->         host = hosta
-> 
-> Any ideas?
-> 
-> I began testing with ceph 0.56.1, and then upgraded to 0.56.2, hoping
-> it might fix this strange problem.
-> 
-> Thanks and kind regards,
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+CRUSH has a specified retry size; if it can't meet the constraints
+then it spits out whatever replicas it was able to select. The
+higher-level system needs to decide what to do with that list. Ceph
+chooses to use whatever CRUSH gives back, within the minimum size
+constraint specified above and a few other override mechanisms we
+don't need to into here. :)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
