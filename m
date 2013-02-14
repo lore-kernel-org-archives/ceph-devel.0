@@ -1,96 +1,38 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: OSD failure on start
-Date: Wed, 13 Feb 2013 18:52:52 -0800
-Message-ID: <CA+4uBUaGYw_N5MxdQuABBE8WzA2f3gja=gZZ2yysWq+0ZtWJXw@mail.gmail.com>
-References: <CA+jddaPFHhwvyA73BA=58b=MMkF8me5WeSm0LcThp9XLho=k7A@mail.gmail.com>
-	<511C0EE7.3090809@scholarstack.com>
-	<CA+jddaNnTAnKjXjivSugHrErfUbS03xGkfrJU6ET5Pc566ogSw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Ross David Turk <ross@inktank.com>
+Subject: The Ceph Census
+Date: Wed, 13 Feb 2013 19:06:21 -0800
+Message-ID: <E88459BA-85E3-446A-8A91-C65134C6782D@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f51.google.com ([209.85.212.51]:34486 "EHLO
-	mail-vb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752489Ab3BNCwx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 21:52:53 -0500
-Received: by mail-vb0-f51.google.com with SMTP id fq11so1169846vbb.24
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 18:52:53 -0800 (PST)
-In-Reply-To: <CA+jddaNnTAnKjXjivSugHrErfUbS03xGkfrJU6ET5Pc566ogSw@mail.gmail.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:59173 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756976Ab3BNDGY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Feb 2013 22:06:24 -0500
+Received: by mail-pa0-f44.google.com with SMTP id kp1so1061719pab.3
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Feb 2013 19:06:23 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
-Cc: Mike Dawson <mike.dawson@scholarstack.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-Actually, that bug did not exist in 48.1, must have been something
-different.  Was the the node you had the trouble with the pg logs on?
--Sam
 
-On Wed, Feb 13, 2013 at 2:47 PM, Mandell Degerness
-<mandell@pistoncloud.com> wrote:
-> Thanks.  I'm glad to hear it is fixed in new version.  Wiping the OSD worked.
->
-> On Wed, Feb 13, 2013 at 2:08 PM, Mike Dawson
-> <mike.dawson@scholarstack.com> wrote:
->> Mandell,
->>
->> A few of us saw a similar failure on 0.56.1.
->>
->> http://tracker.ceph.com/issues/3770
->>
->> Sam Just patched the issue for 0.56.2. My understanding is Sam's patch
->> prevents the issue in the future, but doesn't repair a previously damaged
->> OSD.
->>
->> If you have good replication (or a good backup), I have had luck removing
->> the affected OSD, formatting, and re-adding it. I believe Sam may have a
->> manual process to fix it if you can't wipe this OSD.
->>
->> Good Luck,
->> Mike
->>
->>
->>
->> On 2/13/2013 2:57 PM, Mandell Degerness wrote:
->>>
->>> I'm getting this error on one of my OSD's when I try to start it.
->>>
->>> I can gather more complete log data if no-one recognizes the error from
->>> this:
->>>
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.612847
->>> 7f4f607e7780  0 filestore(/mnt/osd96) mount found snaps <>
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.615147
->>> 7f4f607e7780  0 filestore(/mnt/osd96) mount: enabling WRITEAHEAD
->>> journal mode: btrfs not detected
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.658965
->>> 7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
->>> bytes, block size 4096 bytes, directio = 1, aio = 0
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.720091
->>> 7f4f607e7780  1 journal _open /mnt/osd96/journal fd 30: 8589934592
->>> bytes, block size 4096 bytes, directio = 1, aio = 0
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: 2013-02-13 19:30:04.721871
->>> 7f4f607e7780 -1 osd/OSD.cc: In function 'OSDMapRef
->>> OSD::get_map(epoch_t)' thread 7f4f607e7780 time 2013-02-13
->>> 19:30:04.721278
->>> osd/OSD.cc: 4029: FAILED assert(_get_map_bl(epoch, bl))
->>>
->>>   ceph version 0.48.1argonaut
->>> (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c)
->>>   1: (OSD::get_map(unsigned int)+0x560) [0x7f4f60a411e0]
->>>   2: (OSD::init()+0x5a3) [0x7f4f60a53ce3]
->>>   3: (main()+0x4462) [0x7f4f6096d182]
->>>   4: (__libc_start_main()+0xfd) [0x7f4f5e64b26d]
->>>   5: (()+0x16e829) [0x7f4f60968829]
->>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>> needed to interpret this.
->>> Feb 13 19:30:04 node-192-168-8-14 ceph-osd: --- begin dump of recent
->>> events ---
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi!  It's been a while since my last poll about Ceph deployments and use cases.  Since there are so many more of us now, I think it's a good time to do it again.  This time, I've set up a survey.
+
+I am particularly interested in how many deployments of Ceph there are, how much underlying storage they manage, whether they're in production, and how people plan to use them.
+
+It's a very short survey (10 questions, mostly multiple-choice), and shouldn't take more than a minute or two.  The results will be public, and I think it will help us all figure out how to focus our efforts.
+
+http://ceph.com/census
+
+This information will be compiled and published on the Ceph blog for all to review and enjoy.  Thanks!
+
+Cheers,
+Ross
+
+--
+Ross Turk
+Community, Inktank
+
+@rossturk @inktank @ceph
+
