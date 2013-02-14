@@ -1,83 +1,67 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
-Date: Thu, 14 Feb 2013 12:53:52 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net>
-References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk>
+From: Ben Rowland <ben.rowland@gmail.com>
+Subject: Re: Write Replication on Degraded PGs
+Date: Thu, 14 Feb 2013 23:53:05 +0000
+Message-ID: <CAEU8emn4FV+00iShH1Jg1CoiC7gu+TkUxnKRiJEW7Vb420Q52A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [66.33.216.30] ([66.33.216.30]:43101 "EHLO cobra.newdream.net"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S934978Ab3BNUyd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Feb 2013 15:54:33 -0500
-In-Reply-To: <511D3A35.7090702@mermaidconsulting.dk>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:40158 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935101Ab3BNXxH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Feb 2013 18:53:07 -0500
+Received: by mail-la0-f52.google.com with SMTP id fs12so2809107lab.25
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Feb 2013 15:53:05 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
-Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Jens-
+> On 13 Feb 2013 18:16, "Gregory Farnum" <greg@inktank.com> wrote:
+> >
+> > On Wed, Feb 13, 2013 at 3:40 AM, Ben Rowland <ben.rowland@gmail.com=
+> wrote:
 
-On Thu, 14 Feb 2013, Jens Kristian S?gaard wrote:
-> Hi Sage,
-> 
-> > block device level.  We plan to implement an incremental backup function for
-> > the relative change between two snapshots (or a snapshot and the head).
-> > It's O(n) the size of the device vs the number of files, but should be more
-> > efficient for all but the most sparse of images.  The implementation should
-> > be simple; the challenge is mostly around the incremental file format,
-> > probably.
-> > That doesn't help you now, but would be a relatively self-contained piece of
-> > functionality for someone to contribute to RBD.  This isn't a top 
-> 
-> I'm very interesting in having an incremental backup tool for Ceph, so if it
-> is possible for me to do, I would like to take a shot at implementing it. It
-> will be a spare time project, so I cannot say how fast it will progress
-> though.
-> 
-> If you have any details on how you would like to see the implementation work,
-> please let me know!
+> So it sounds from the rest of your post like you'd want to, for each
+> pool that RGW uses (it's not just .rgw), run "ceph osd set .rgw
+> min_size 2". (and for .rgw.buckets, etc etc)
 
-Great to hear you're interested in this!  There is a feature in the 
-tracker open:
+Thanks, that did the trick. When the number of up OSDs is less than
+min_size, writes block for 30s then return http 500. Ceph honours my
+crush rule in this case - adding more OSDs to only one of two failure
+domains continues to block writes - all well and good!
 
-	http://tracker.ceph.com/issues/4084
+> > If this is the expected behaviour of Ceph, then it seems to prefer
+> > write-availability over read-availability (in this case my data is
+> > only stored on 1 OSD, thus a SPOF).  Is there any way to change thi=
+s
+> > trade-off, e.g. as you can in Cassandra with its write quorums?
+>
+> I'm not quite sure this is describing it correctly =97 Ceph guarantee=
+s
+> that anything that's been written to disk will be readable later on,
+> and placement groups won't go active if they can't retrieve all data.
+> The sort of flexible policies allowed by Cassandra aren't possible
+> within Ceph =97 it is a strictly consistent system.
 
-(Not that there is much information there yet!)
+Are objects always readable even if a PG is missing some OSDs, and
+where it cannot recover? Example: 2 hosts each with 1 osd, pool
+min_size is 2, with a crush rule saying to write to both hosts. I
+write a file successfully, then one host goes down, and eventually is
+marked 'out'. Is the file readable on the 'up' host (say if I'm
+running rgw there?) What if the up host does not have the primary
+copy?
 
-I think this breaks down into a few different pieces:
+=46urthermore, if Ceph is strictly consistent, how would it resolve
+possible stale reads? Say, if in the 2 hosts example, the network
+connection died, but min_size was set to 1. Would it be possible for
+writes to proceed, say making edits to an existing object? Could
+readers at the other host see stale data?
 
-1) Decide what output format to use.  We want to use something that is 
-resembles a portable, standard way of representing an incremental set of 
-changes to a block device (or large file).  I'm not sure what is out 
-there, but we should look carefully before making up our own format.
+Thanks again in advance,
 
-2) Expose changes objects between rados snapshots.  This is some generic 
-functionality we would bake into librbd that would probably work similarly 
-to how read_iterate() currently does (you specify a callback).  We 
-probably also want to provide this information directly to a user, so that 
-they can get a dump of (offsets, length) pairs for integration with their 
-own tool.  I expect this is just a core librbd method.
-
-3) Write a dumper based on #2 that outputs in format from #1.  The 
-callback would (instead of printing file offsets) write the data to the 
-output stream with appropriate metadata indicating which part of the image 
-it is.  Ideally the output part would be modular, too, so that we can come 
-back later and implement support for new formats easily.  The output data 
-stream should be able to be directed at stdout or a file.
-
-4) Write an importer for #1.  It would take as input an existing image, 
-assumed to be in the state of the reference snapshot, and write all the 
-changed bits.  Take input from stdin or a file.
-
-5) If necessary, extend the above so that image resize events are properly 
-handled.
-
-Probably the trickiest bit here is #2, as it will probably involve adding 
-some low-level rados operations to efficiently query the snapshot state 
-from the client.  With this (and any of the rest), we can help figure out 
-how to integrate it cleanly.  My suggestion is to start with #1, though 
-(and make sure the rest of this all makes sense to everyone).
-
-THanks!
-sage
+Ben
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
