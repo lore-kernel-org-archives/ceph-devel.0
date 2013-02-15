@@ -1,82 +1,65 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: slow requests, hunting for new mon
-Date: Thu, 14 Feb 2013 17:35:51 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302141728430.11259@cobra.newdream.net>
-References: <20130212072815.GA17655@onthe.net.au> <slrnkhr316.ntb.chris@chris.onthe.net.au>
+Subject: experimental dmcrypt support
+Date: Thu, 14 Feb 2013 17:57:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302141748510.11259@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45694 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45834 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759142Ab3BOBfv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Feb 2013 20:35:51 -0500
-In-Reply-To: <slrnkhr316.ntb.chris@chris.onthe.net.au>
+	with ESMTP id S1759811Ab3BOB5n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Feb 2013 20:57:43 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7EFAC80060
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Feb 2013 17:57:43 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 57E3080060
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Feb 2013 17:57:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 15 Feb 2013, Chris Dunlop wrote:
-> On 2013-02-12, Chris Dunlop <chris@onthe.net.au> wrote:
-> > Hi,
-> >
-> > What are likely causes for "slow requests" and "monclient: hunting for new
-> > mon" messages? E.g.:
-> >
-> > 2013-02-12 16:27:07.318943 7f9c0bc16700  0 monclient: hunting for new mon
-> > ...
-> > 2013-02-12 16:27:45.892314 7f9c13c26700  0 log [WRN] : 6 slow requests, 6 included below; oldest blocked for > 30.383883 secs
-> > 2013-02-12 16:27:45.892323 7f9c13c26700  0 log [WRN] : slow request 30.383883 seconds old, received at 2013-02-12 16:27:15.508374: osd_op(client.9821.0:122242 rb.0.209f.74b0dc51.000000000120 [write 921600~4096] 2.981cf6bc) v4 currently no flag points reached
-> > 2013-02-12 16:27:45.892328 7f9c13c26700  0 log [WRN] : slow request 30.383782 seconds old, received at 2013-02-12 16:27:15.508475: osd_op(client.9821.0:122243 rb.0.209f.74b0dc51.000000000120 [write 987136~4096] 2.981cf6bc) v4 currently no flag points reached
-> > 2013-02-12 16:27:45.892334 7f9c13c26700  0 log [WRN] : slow request 30.383720 seconds old, received at 2013-02-12 16:27:15.508537: osd_op(client.9821.0:122244 rb.0.209f.74b0dc51.000000000120 [write 1036288~8192] 2.981cf6bc) v4 currently no flag points reached
-> > 2013-02-12 16:27:45.892338 7f9c13c26700  0 log [WRN] : slow request 30.383684 seconds old, received at 2013-02-12 16:27:15.508573: osd_op(client.9821.0:122245 rb.0.209f.74b0dc51.000000000122 [write 1454080~4096] 2.fff29a9a) v4 currently no flag points reached
-> > 2013-02-12 16:27:45.892341 7f9c13c26700  0 log [WRN] : slow request 30.328986 seconds old, received at 2013-02-12 16:27:15.563271: osd_op(client.9821.0:122246 rb.0.209f.74b0dc51.000000000122 [write 1482752~4096] 2.fff29a9a) v4 currently no flag points reached
-> 
-> OK, for the sake of anyone who might come across this thread when
-> searching for similar issues...
-> 
-> http://ceph.com/docs/master/rados/operations/troubleshooting-osd/#slow-or-unresponsive-osd
-> 
-> ...unfortunately the error message in the link above says "old request"
-> rather than "slow request" (old code?), so that page doesn't come up
-> when googling for the "slow request" message. The page needs
-> updating.
+Alexandre and I have been working on adding basic dm-crypt support to 
+ceph-disk-prepare/activate.  At this point it is working reasonably well, 
+but before we move forward I thought I'd see if anyone has 
+feedback/comments on the implementation.
 
-Updated, thanks!
+The initial goals are very simple: transparently dm-crypt the volumes for 
+the osd data and journal befor we use them, and store the keys somewhere 
+on the local host (currently /etc/ceph/dmcrypt-keys).  Eventually we'll 
+want to something more sophisticated there--there is a whole industry to 
+supprot key management and compliance for this sort of thing--but slotting 
+that in later should be pretty simple.
 
-> The underlying problem in our case seems to have been spikes in the
-> number of IOPS going to the disks (e.g. watch 'iostat -x' output). Whilst
-> the disks were coping with steady state load, occasionally something (in
-> this case, activity in a vm running on rbd) would cause a spike in
-> activity and the disks couldn't cope. I'd initially looked at the amount
-> of data going to the disks and thought it was well with the disks'
-> capabilities, however I hadn't considered the IOPS.
-> 
-> The (partial?) solution was to move the journals onto a separate device,
-> halving the IOPS going to the data disk (write journal, write data) as
-> well as avoiding having the heads slamming back and forth between the
-> data and journal. We're continuing to watch the IOPS and will add more
-> OSDs to spread the load further if necessary.
-> 
-> I still don't know what the "hunting" messages actually indicate, but
-> they've also disappeared since fixing the "slow request" messages.
+For now, the basic process looks like this:
 
-This usually means the monitor was responding and we (the OSD or client) 
-is trying to reconnect (to a random monitor).
+ ceph-disk-prepare --dmcrypt DATADISK [JOURNALDISK]
 
-> Incidentally, it strikes me that there is a significant amount of write
-> amplification going on when running vms with a file system such as xfs
-> or ext4 (with journal) on top of rbd/rados (with journal) on top of xfs
-> (with journal). I.e. a single write from a vm can turn into up to 8
-> separate writes by the time it hits the underlying xfs filesystem. I
-> think this is why our ceph setup is struggling at far less load on the
-> same hardware compared to the drbd setup we're wanting to replace.
+When --dmcrypt is passed, we generate a unique UUID for the data and 
+journal both (the data one matches the OSD uuid), and label the 
+GPT partitions.  We also set the type to special "dmcrypted osd" and 
+"dmcrypted journal" types.  The dm-crypt mapped devices appear in 
+/dev/mapper/$UUID, so the journal symlink inside the data dir of the 
+data volume points there.  Keys are stored in 
+/etc/ceph/dmcrypt-keys/$UUID.
 
-Currently, yes.  There is always going to be some additional overhead 
-because the object data is stored in a file system.  We were/are doing 
-several other non-optimal things too, however, that is being improved in 
-the current master branch (moving some metadata into leveldb which does a 
-better job of managing the IO pattern).  Stay tuned!
+Normally, to activate an OSD, a udev rule triggres on teh osd partition 
+type and runs ceph-disk-active.  In this case, it's slightly more 
+complicated.  A udev rule triggers on the encrypted journal partition type 
+and starts dm-crypt (using the key in /etc/ceph/...).  For the encrypted 
+osd partition, we first start dm-crypt, then run ceph-disk-activate on the 
+resulting /dev/mapper/$UUID volume.
 
+That's basically it.  Leveraging udev makes this pretty simple, and should 
+be portable to any distro (vs, say, using upstart events to do the same 
+steps).
+
+Later, we may want to add some super-simple key management so that the 
+keys are stored on the monitor instead of in a local directory, but for 
+some users at least this is sufficient (where the concern is really about 
+disposal of disks).
+
+See wip-dmcrypt in ceph.git to take a look.
+
+Thanks!
 sage
-
