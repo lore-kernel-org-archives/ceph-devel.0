@@ -1,54 +1,71 @@
-From: Ross David Turk <ross@inktank.com>
-Subject: Re: The Ceph Census
-Date: Fri, 15 Feb 2013 09:34:38 -0800
-Message-ID: <1E90C528-D654-4664-93C5-7310EAEEB6B6@inktank.com>
-References: <E88459BA-85E3-446A-8A91-C65134C6782D@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Mon losing touch with OSDs
+Date: Sat, 16 Feb 2013 09:05:21 +1100
+Message-ID: <20130215220521.GA29999@onthe.net.au>
+References: <20130215032939.GA25578@onthe.net.au>
+ <alpine.DEB.2.00.1302142051250.19927@cobra.newdream.net>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:32785 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755170Ab3BORel convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Feb 2013 12:34:41 -0500
-Received: by mail-pb0-f43.google.com with SMTP id md12so691108pbc.30
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Feb 2013 09:34:40 -0800 (PST)
-In-Reply-To: <E88459BA-85E3-446A-8A91-C65134C6782D@inktank.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:54449 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751616Ab3BOWFY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Feb 2013 17:05:24 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1302142051250.19927@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
+G'day Sage,
 
-Hey folks.  We've gotten nearly 50 responses so far, and the data is proving to be quite interesting!  I will share it on the blog early next week.
-
-The survey will be open until next Monday so that everyone has an opportunity to participate.  If you haven't gotten around to adding your cluster, you still can - it's a pretty short list of questions, shouldn't take more than a minute or two.
-
-http://ceph.com/census
-
-Thanks,
-Ross
-
-
-On Feb 13, 2013, at 7:06 PM, Ross David Turk <ross@inktank.com> wrote:
-
+On Thu, Feb 14, 2013 at 08:57:11PM -0800, Sage Weil wrote:
+> On Fri, 15 Feb 2013, Chris Dunlop wrote:
+>> In an otherwise seemingly healthy cluster (ceph 0.56.2), what might cause the
+>> mons to lose touch with the osds?
 > 
-> Hi!  It's been a while since my last poll about Ceph deployments and use cases.  Since there are so many more of us now, I think it's a good time to do it again.  This time, I've set up a survey.
-> 
-> I am particularly interested in how many deployments of Ceph there are, how much underlying storage they manage, whether they're in production, and how people plan to use them.
-> 
-> It's a very short survey (10 questions, mostly multiple-choice), and shouldn't take more than a minute or two.  The results will be public, and I think it will help us all figure out how to focus our efforts.
-> 
-> http://ceph.com/census
-> 
-> This information will be compiled and published on the Ceph blog for all to review and enjoy.  Thanks!
-> 
-> Cheers,
-> Ross
+> Can you enable 'debug ms = 1' on the mons and leave them that way, in the 
+> hopes that this happens again?  It will give us more information to go on.
 
+Debug turned on.
 
---
-Ross Turk
-Community, Inktank
+>> Perhaps the mon lost osd.1 because it was too slow, but that hadn't happened in
+>> any of the many previous "slow requests" intances, and the timing doesn't look
+>> quite right: the mon complains it hasn't heard from osd.0 since 20:11:19, but
+>> the osd.0 log shows nothing problems at all, then the mon complains about not
+>> having heard from osd.1 since 20:11:21, whereas the first indication of trouble
+>> on osd.1 was the request from 20:26:20 not being processed in a timely fashion.
+> 
+> My guess is the above was a side-effect of osd.0 being marked out.   On 
+> 0.56.2 there is some strange peering workqueue laggyness that could 
+> potentially contribute as well.  I recommend moving to 0.56.3.
 
-@rossturk @inktank @ceph
+Upgraded to 0.56.3.
 
+>> Trying to manually set the osds in (e.g. ceph osd in 0) didn't help, nor did
+>> restarting the osds ('service ceph restart osd' on each osd host).
+>> 
+>> The immediate issue was resolved by restarting ceph completely on one of the
+>> mon/osd hosts (service ceph restart). Possibly a restart of just the mon would
+>> have been sufficient.
+> 
+> Did you notice that the osds you restarted didn't immediately mark 
+> themselves in?  Again, it could be explained by the peering wq issue, 
+> especially if there are pools in your cluster that are not getting any IO.
+
+Sorry, no. I was kicking myself later for losing the 'ceph -s' output 
+when I killed that terminal session but in the heat of the moment...
+
+I can't see anything about osd marking themselves in from the logs from the
+time (with no debugging), but I'm on my ipad at the moment so I could easily
+have missed it. Should that info be in the logs somewhere?
+
+There's certainly unused pools: we're only using the rbd pool and so the
+default data and metadata pools are unused.
+
+Thanks for your attention!
+
+Cheers,
+
+Chris
