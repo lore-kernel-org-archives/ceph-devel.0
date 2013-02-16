@@ -1,58 +1,93 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] libceph: update ceph_mds_state_name() and ceph_mds_op_name()
-Date: Sat, 16 Feb 2013 11:06:52 -0600
-Message-ID: <511FBCAC.4090506@inktank.com>
-References: <511FBC54.9060408@inktank.com>
+Subject: [PATCH] ceph: simplify ceph_sync_write() page_align, calculation
+Date: Sat, 16 Feb 2013 11:07:32 -0600
+Message-ID: <511FBCD4.5040709@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:49520 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753786Ab3BPRGz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:06:55 -0500
-Received: by mail-qa0-f44.google.com with SMTP id bv4so739351qab.3
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:06:54 -0800 (PST)
-In-Reply-To: <511FBC54.9060408@inktank.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:45230 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753801Ab3BPRHf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:07:35 -0500
+Received: by mail-qc0-f179.google.com with SMTP id b40so1564654qcq.24
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:07:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Update ceph_mds_state_name() and ceph_mds_op_name() to include the
-newly-added definitions in "ceph_fs.h", and to match its counterpart
-in the user space code.
+In ceph_sync_write() there is some magic that computes page_align
+for an osd request.  But a little analysis shows it can be
+simplified.
+
+First, we have:
+ 	io_align = pos & ~PAGE_MASK;
+which is used here:
+	page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
+
+Note (pos - io_align) simply rounds "pos" down to the nearest multiple
+of the page size.
+
+We also have:
+ 	buf_align = (unsigned long)data & ~PAGE_MASK;
+
+Adding buf_align to that rounded-down "pos" value will stay within
+the same page; the result will just be offset by the page offset for
+the "data" pointer.  The final mask therefore leaves just the value
+of "buf_align".
+
+The same simplification can be done in striped_read().
+
+One more simplification.  Note that the result of calc_pages_for()
+is invariant of which page the offset starts in--the only thing that
+matters is the offset within the starting page.  We will have
+put the proper page offset to use into "page_align", so just use
+that in calculating num_pages.
+
+This resolves:
+    http://tracker.ceph.com/issues/4166
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/ceph/strings.c |    4 ++++
- 1 file changed, 4 insertions(+)
+ fs/ceph/file.c |   18 +++++-------------
+ 1 file changed, 5 insertions(+), 13 deletions(-)
 
-diff --git a/fs/ceph/strings.c b/fs/ceph/strings.c
-index cd5097d..89fa4a9 100644
---- a/fs/ceph/strings.c
-+++ b/fs/ceph/strings.c
-@@ -15,6 +15,7 @@ const char *ceph_mds_state_name(int s)
- 	case CEPH_MDS_STATE_BOOT:       return "up:boot";
- 	case CEPH_MDS_STATE_STANDBY:    return "up:standby";
- 	case CEPH_MDS_STATE_STANDBY_REPLAY:    return "up:standby-replay";
-+	case CEPH_MDS_STATE_REPLAYONCE: return "up:oneshot-replay";
- 	case CEPH_MDS_STATE_CREATING:   return "up:creating";
- 	case CEPH_MDS_STATE_STARTING:   return "up:starting";
- 		/* up and in */
-@@ -50,10 +51,13 @@ const char *ceph_mds_op_name(int op)
- 	case CEPH_MDS_OP_LOOKUP:  return "lookup";
- 	case CEPH_MDS_OP_LOOKUPHASH:  return "lookuphash";
- 	case CEPH_MDS_OP_LOOKUPPARENT:  return "lookupparent";
-+	case CEPH_MDS_OP_LOOKUPINO:  return "lookupino";
- 	case CEPH_MDS_OP_GETATTR:  return "getattr";
- 	case CEPH_MDS_OP_SETXATTR: return "setxattr";
- 	case CEPH_MDS_OP_SETATTR: return "setattr";
- 	case CEPH_MDS_OP_RMXATTR: return "rmxattr";
-+	case CEPH_MDS_OP_SETLAYOUT: return "setlayou";
-+	case CEPH_MDS_OP_SETDIRLAYOUT: return "setdirlayout";
- 	case CEPH_MDS_OP_READDIR: return "readdir";
- 	case CEPH_MDS_OP_MKNOD: return "mknod";
- 	case CEPH_MDS_OP_LINK: return "link";
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 9c4325e..6123ad4 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -331,10 +331,7 @@ static int striped_read(struct inode *inode,
+ 	io_align = off & ~PAGE_MASK;
+
+ more:
+-	if (o_direct)
+-		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
+-	else
+-		page_align = pos & ~PAGE_MASK;
++	page_align = o_direct ? buf_align : io_align;
+ 	this_len = left;
+ 	ret = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
+ 				  &ci->i_layout, pos, &this_len,
+@@ -526,15 +523,10 @@ more:
+ 	io_align = pos & ~PAGE_MASK;
+ 	buf_align = (unsigned long)data & ~PAGE_MASK;
+ 	len = left;
+-	if (file->f_flags & O_DIRECT) {
+-		/* write from beginning of first page, regardless of
+-		   io alignment */
+-		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
+-		num_pages = calc_pages_for((unsigned long)data, len);
+-	} else {
+-		page_align = pos & ~PAGE_MASK;
+-		num_pages = calc_pages_for(pos, len);
+-	}
++
++	/* write from beginning of first page, regardless of io alignment */
++	page_align = file->f_flags & O_DIRECT ? buf_align : io_align;
++	num_pages = calc_pages_for(page_align, len);
+ 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 				    ceph_vino(inode), pos, &len,
+ 				    CEPH_OSD_OP_WRITE, flags,
 -- 
 1.7.9.5
 
