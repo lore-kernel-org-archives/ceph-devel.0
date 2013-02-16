@@ -1,29 +1,153 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/3] libceph: update ceph_fs.h and related code
-Date: Sat, 16 Feb 2013 11:05:24 -0600
-Message-ID: <511FBC54.9060408@inktank.com>
+Subject: [PATCH 1/2] libceph: update ceph_fs.h
+Date: Sat, 16 Feb 2013 11:06:39 -0600
+Message-ID: <511FBC9F.40805@inktank.com>
+References: <511FBC54.9060408@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f52.google.com ([209.85.128.52]:56618 "EHLO
-	mail-qe0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753680Ab3BPRF1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:05:27 -0500
-Received: by mail-qe0-f52.google.com with SMTP id 6so1870969qeb.39
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:05:26 -0800 (PST)
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:37940 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753548Ab3BPRGl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:06:41 -0500
+Received: by mail-qc0-f174.google.com with SMTP id z24so1571435qcq.19
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:06:41 -0800 (PST)
+In-Reply-To: <511FBC54.9060408@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This series updates "include/linux/ceph/ceph_fs.h" to nearly match
-its user space counterpart in "src/include/ceph_fs.h".
+(Whoops, there were only two patches, not three.)
 
-There are still a few things that should be reconciled by updating
-that user space code; that work is covered by:
-    http://tracker.ceph.com/issues/4168
+Update most of "include/linux/ceph/ceph_fs.h" to match its user
+space counterpart in "src/include/ceph_fs.h" in the ceph tree.
 
-					-Alex
+Everything that has changed is either:
+    - added definitions (therefore no real effect on existing code)
+    - deleting unused symbols
+    - added or revised comments
 
-[PATCH 1/2] libceph: update ceph_fs.h
-[PATCH 2/2] libceph: update ceph_mds_state_name() and ceph_mds_op_name()
+There were some differences between the struct definitions for
+ceph_mon_subscribe_item and the open field of ceph_mds_request_args;
+those differences remain.
+
+This and the next commit resolve:
+    http://tracker.ceph.com/issues/4165
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ include/linux/ceph/ceph_fs.h |   32 ++++++++++++++++++++++++--------
+ 1 file changed, 24 insertions(+), 8 deletions(-)
+
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index cf6f4d9..2ad7b86 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -21,16 +21,14 @@
+  * internal cluster protocols separately from the public,
+  * client-facing protocol.
+  */
+-#define CEPH_OSD_PROTOCOL     8 /* cluster internal */
+-#define CEPH_MDS_PROTOCOL    12 /* cluster internal */
+-#define CEPH_MON_PROTOCOL     5 /* cluster internal */
+ #define CEPH_OSDC_PROTOCOL   24 /* server/client */
+ #define CEPH_MDSC_PROTOCOL   32 /* server/client */
+ #define CEPH_MONC_PROTOCOL   15 /* server/client */
+
+
+-#define CEPH_INO_ROOT  1
+-#define CEPH_INO_CEPH  2        /* hidden .ceph dir */
++#define CEPH_INO_ROOT   1
++#define CEPH_INO_CEPH   2       /* hidden .ceph dir */
++#define CEPH_INO_DOTDOT 3	/* used by ceph fuse for parent (..) */
+
+ /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
+ #define CEPH_MAX_MON   31
+@@ -51,7 +49,7 @@ struct ceph_file_layout {
+ 	__le32 fl_object_stripe_unit;  /* UNUSED.  for per-object parity, if
+any */
+
+ 	/* object -> pg layout */
+-	__le32 fl_unused;       /* unused; used to be preferred primary (-1) */
++	__le32 fl_unused;       /* unused; used to be preferred primary for pg
+(-1 for none) */
+ 	__le32 fl_pg_pool;      /* namespace, crush ruleset, rep level */
+ } __attribute__ ((packed));
+
+@@ -101,6 +99,8 @@ struct ceph_dir_layout {
+ #define CEPH_MSG_MON_SUBSCRIBE_ACK      16
+ #define CEPH_MSG_AUTH			17
+ #define CEPH_MSG_AUTH_REPLY		18
++#define CEPH_MSG_MON_GET_VERSION        19
++#define CEPH_MSG_MON_GET_VERSION_REPLY  20
+
+ /* client <-> mds */
+ #define CEPH_MSG_MDS_MAP                21
+@@ -221,6 +221,11 @@ struct ceph_mon_subscribe_ack {
+ } __attribute__ ((packed));
+
+ /*
++ * mdsmap flags
++ */
++#define CEPH_MDSMAP_DOWN    (1<<0)  /* cluster deliberately down */
++
++/*
+  * mds states
+  *   > 0 -> in
+  *  <= 0 -> out
+@@ -233,6 +238,7 @@ struct ceph_mon_subscribe_ack {
+ #define CEPH_MDS_STATE_CREATING    -6  /* up, creating MDS instance. */
+ #define CEPH_MDS_STATE_STARTING    -7  /* up, starting previously
+stopped mds */
+ #define CEPH_MDS_STATE_STANDBY_REPLAY -8 /* up, tailing active node's
+journal */
++#define CEPH_MDS_STATE_REPLAYONCE   -9 /* up, replaying an active
+node's journal */
+
+ #define CEPH_MDS_STATE_REPLAY       8  /* up, replaying journal. */
+ #define CEPH_MDS_STATE_RESOLVE      9  /* up, disambiguating distributed
+@@ -264,6 +270,7 @@ extern const char *ceph_mds_state_name(int s);
+ #define CEPH_LOCK_IXATTR      2048
+ #define CEPH_LOCK_IFLOCK      4096  /* advisory file locks */
+ #define CEPH_LOCK_INO         8192  /* immutable inode bits; not a lock */
++#define CEPH_LOCK_IPOLICY     16384 /* policy lock on dirs. MDS internal */
+
+ /* client_session ops */
+ enum {
+@@ -338,6 +345,12 @@ extern const char *ceph_mds_op_name(int op);
+ #define CEPH_SETATTR_SIZE  32
+ #define CEPH_SETATTR_CTIME 64
+
++/*
++ * Ceph setxattr request flags.
++ */
++#define CEPH_XATTR_CREATE  1
++#define CEPH_XATTR_REPLACE 2
++
+ union ceph_mds_request_args {
+ 	struct {
+ 		__le32 mask;                 /* CEPH_CAP_* */
+@@ -522,14 +535,17 @@ int ceph_flags_to_mode(int flags);
+ #define CEPH_CAP_GWREXTEND  64  /* (file) client can extend EOF */
+ #define CEPH_CAP_GLAZYIO   128  /* (file) client can perform lazy io */
+
++#define CEPH_CAP_SIMPLE_BITS  2
++#define CEPH_CAP_FILE_BITS    8
++
+ /* per-lock shift */
+ #define CEPH_CAP_SAUTH      2
+ #define CEPH_CAP_SLINK      4
+ #define CEPH_CAP_SXATTR     6
+ #define CEPH_CAP_SFILE      8
+-#define CEPH_CAP_SFLOCK    20
++#define CEPH_CAP_SFLOCK    20
+
+-#define CEPH_CAP_BITS       22
++#define CEPH_CAP_BITS      22
+
+ /* composed values */
+ #define CEPH_CAP_AUTH_SHARED  (CEPH_CAP_GSHARED  << CEPH_CAP_SAUTH)
+-- 
+1.7.9.5
+
