@@ -1,66 +1,87 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Cleanup Patches
-Date: Sat, 16 Feb 2013 10:23:55 -0600
-Message-ID: <511FB29B.3060606@inktank.com>
+Subject: [PATCH] libceph: improve packing in struct ceph_osd_req_op
+Date: Sat, 16 Feb 2013 10:24:49 -0600
+Message-ID: <511FB2D1.4090306@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:35035 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753543Ab3BPQYD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 11:24:03 -0500
-Received: by mail-qa0-f44.google.com with SMTP id bv4so728364qab.17
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 08:23:57 -0800 (PST)
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:59969 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753559Ab3BPQYw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 11:24:52 -0500
+Received: by mail-qc0-f179.google.com with SMTP id b40so1565369qcq.38
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 08:24:51 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I'm about to post several series that contain a bunch of
-cleanups.  The motivation for this is to simplify some code
-before setting out to refactor it, to eliminate any unneeded
-complexity.
+The layout of struct ceph_osd_req_op leaves lots of holes.
+Rearranging things a little for better field alignment
+reduces the size by a third.
 
-I've grouped them into smaller series though the patches in
-a series may not appear to be logically connected.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ include/linux/ceph/osd_client.h |   15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
 
-These have all been tested together though, and were
-applied in the sequence shown below.  They're available
-in the branch "wip-osd-cleanup" on the ceph-client git
-repository.
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index 69287cc..82bf633 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -157,6 +157,7 @@ struct ceph_osd_client {
 
-					-Alex
+ struct ceph_osd_req_op {
+ 	u16 op;           /* CEPH_OSD_OP_* */
++	u32 payload_len;
+ 	union {
+ 		struct {
+ 			u64 offset, length;
+@@ -165,23 +166,24 @@ struct ceph_osd_req_op {
+ 		} extent;
+ 		struct {
+ 			const char *name;
+-			u32 name_len;
+ 			const char  *val;
++			u32 name_len;
+ 			u32 value_len;
+ 			__u8 cmp_op;       /* CEPH_OSD_CMPXATTR_OP_* */
+ 			__u8 cmp_mode;     /* CEPH_OSD_CMPXATTR_MODE_* */
+ 		} xattr;
+ 		struct {
+ 			const char *class_name;
+-			__u8 class_len;
+ 			const char *method_name;
+-			__u8 method_len;
+-			__u8 argc;
+ 			const char *indata;
+ 			u32 indata_len;
++			__u8 class_len;
++			__u8 method_len;
++			__u8 argc;
+ 		} cls;
+ 		struct {
+-			u64 cookie, count;
++			u64 cookie;
++			u64 count;
+ 		} pgls;
+ 	        struct {
+ 		        u64 snapid;
+@@ -189,12 +191,11 @@ struct ceph_osd_req_op {
+ 		struct {
+ 			u64 cookie;
+ 			u64 ver;
+-			__u8 flag;
+ 			u32 prot_ver;
+ 			u32 timeout;
++			__u8 flag;
+ 		} watch;
+ 	};
+-	u32 payload_len;
+ };
 
-[PATCH] libceph: improve packing in struct ceph_osd_req_op
+ extern int ceph_osdc_init(struct ceph_osd_client *osdc,
+-- 
+1.7.9.5
 
-[PATCH 0/4] libceph: get rid of some unneeded function parameters
-[PATCH 1/4] ceph: kill ceph_osdc_writepages() "nofail" parameter
-[PATCH 2/4] ceph: kill ceph_osdc_writepages() "dosync" parameter
-[PATCH 3/4] ceph: kill ceph_osdc_writepages() "flags" parameter
-[PATCH 4/4] ceph: kill ceph_osdc_new_request() "num_reply"
-
-[PATCH 0/3] libceph: a few miscellaneous cleanups
-[PATCH 1/3] libceph: lock outside send_queued()
-[PATCH 2/3] libdeph: don't export ceph_osdc_init() or
-[PATCH 3/3] libceph: kill ceph_calc_raw_layout()
-
-[PATCH 0/2] libceph: get rid of unused "one shot" event support
-[PATCH 1/2] libceph: kill ceph_osdc_create_event() "one_shot"
-[PATCH 2/2] libceph: kill ceph_osdc_wait_event()
-
-[PATCH 0/3] libceph: update rados.h and related code
-[PATCH 1/3] libceph: update rados.h
-[PATCH 2/3] libceph: add ceph_osd_state_name()
-[PATCH 3/3] libceph: update ceph_osd_op_name()
-
-[PATCH 0/2] libceph: update osd_req_encode_op()
-[PATCH 1/2] libceph: report defined but unsupported osd ops
-[PATCH 2/2] libceph: remove dead code in osd_req_encode_op()
-
-[PATCH 0/2] libceph: update ceph_fs.h and related code
-[PATCH 1/2] libceph: update ceph_fs.h
-[PATCH 2/2] libceph: update ceph_mds_state_name() and ceph_mds_op_name()
-
-[PATCH] ceph: simplify ceph_sync_write() page_align
-
-[PATCH] libceph: simplify data length calculation
