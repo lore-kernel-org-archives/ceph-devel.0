@@ -1,115 +1,82 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] libceph: remove dead code in osd_req_encode_op()
-Date: Sat, 16 Feb 2013 11:01:07 -0600
-Message-ID: <511FBB53.80401@inktank.com>
-References: <511FBB12.6050207@inktank.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: mds crashes upon access to some snapshotted files
+Date: Sat, 16 Feb 2013 15:00:42 -0200
+Message-ID: <orfw0wry6d.fsf@livre.home>
+References: <ortxpcs9h5.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="=-=-="
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:34673 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753130Ab3BPRBJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:01:09 -0500
-Received: by mail-qc0-f179.google.com with SMTP id b40so1563233qcq.24
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:01:09 -0800 (PST)
-In-Reply-To: <511FBB12.6050207@inktank.com>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:59265 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753662Ab3BPRFV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:05:21 -0500
+Received: from freie (home.lxoliva.fsfla.org [172.31.160.22])
+	by linux-libre.fsfla.org (8.14.3/8.14.3/Debian-9.1ubuntu1) with ESMTP id r1GH5GBN002118
+	for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 17:05:17 GMT
+In-Reply-To: <ortxpcs9h5.fsf@livre.home> (Alexandre Oliva's message of "Sat,
+	16 Feb 2013 10:56:38 -0200")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In osd_req_encode_op() there are a few cases that handle osd
-opcodes that are never used in the kernel.  The presence of
-this code gives the impression it's correct (which really can't
-be assumed), and may impose some unnecessary restrictions on
-some upcoming refactoring of this code.
+--=-=-=
 
-So delete this effectively dead code, and report uses of the
-previously handled cases as unsupported.
+On Feb 16, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
+> I suppose this might be the result of some filesystem corruption, but I
+> have some files in my ceph tree that, when accessed, crash the mds.
+
+Here's another patch from my mds crash avoidance series.
+
+With it, instead of a crash, I get a message like this in the mds log:
+
+  2013-02-16 13:49:16.360480 7f0e7a0f1700  0 mds.0.cache  hmm, 82 is not the first in old_inodes; 2 is
+
+
+--=-=-=
+Content-Type: text/x-diff
+Content-Disposition: inline; filename=mds-relax-p-not-first-assert.patch
+
+mds: relax p-not-first assert within first>last
+
+From: Alexandre Oliva <oliva@gnu.org>
+
+Instead of crashing, just warn about p not being the initial entry in
+old_inodes.
+
+Signed-off-by: Alexandre Oliva <oliva@gnu.org>
 ---
- net/ceph/osd_client.c |   31 +++++--------------------------
- 1 file changed, 5 insertions(+), 26 deletions(-)
+ src/mds/MDCache.cc |    8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index ac7bcbf..bbd1575 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -231,19 +231,6 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		dst->extent.truncate_seq =
- 			cpu_to_le32(src->extent.truncate_seq);
- 		break;
--
--	case CEPH_OSD_OP_GETXATTR:
--	case CEPH_OSD_OP_SETXATTR:
--	case CEPH_OSD_OP_CMPXATTR:
--		dst->xattr.name_len = cpu_to_le32(src->xattr.name_len);
--		dst->xattr.value_len = cpu_to_le32(src->xattr.value_len);
--		dst->xattr.cmp_op = src->xattr.cmp_op;
--		dst->xattr.cmp_mode = src->xattr.cmp_mode;
--		ceph_pagelist_append(&req->r_trail, src->xattr.name,
--				     src->xattr.name_len);
--		ceph_pagelist_append(&req->r_trail, src->xattr.val,
--				     src->xattr.value_len);
--		break;
- 	case CEPH_OSD_OP_CALL:
- 		dst->cls.class_len = src->cls.class_len;
- 		dst->cls.method_len = src->cls.method_len;
-@@ -256,21 +243,8 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		ceph_pagelist_append(&req->r_trail, src->cls.indata,
- 				     src->cls.indata_len);
- 		break;
--	case CEPH_OSD_OP_ROLLBACK:
--		dst->snap.snapid = cpu_to_le64(src->snap.snapid);
--		break;
- 	case CEPH_OSD_OP_STARTSYNC:
- 		break;
--	case CEPH_OSD_OP_NOTIFY:
--		{
--			__le32 prot_ver = cpu_to_le32(src->watch.prot_ver);
--			__le32 timeout = cpu_to_le32(src->watch.timeout);
--
--			ceph_pagelist_append(&req->r_trail,
--						&prot_ver, sizeof(prot_ver));
--			ceph_pagelist_append(&req->r_trail,
--						&timeout, sizeof(timeout));
--		}
- 	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_WATCH:
- 		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
-@@ -285,6 +259,7 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 	case CEPH_OSD_OP_MAPEXT:
- 	case CEPH_OSD_OP_MASKTRUNC:
- 	case CEPH_OSD_OP_SPARSE_READ:
-+	case CEPH_OSD_OP_NOTIFY:
- 	case CEPH_OSD_OP_ASSERT_VER:
- 	case CEPH_OSD_OP_WRITEFULL:
- 	case CEPH_OSD_OP_TRUNCATE:
-@@ -297,6 +272,7 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 	case CEPH_OSD_OP_TMAPPUT:
- 	case CEPH_OSD_OP_TMAPGET:
- 	case CEPH_OSD_OP_CREATE:
-+	case CEPH_OSD_OP_ROLLBACK:
- 	case CEPH_OSD_OP_OMAPGETKEYS:
- 	case CEPH_OSD_OP_OMAPGETVALS:
- 	case CEPH_OSD_OP_OMAPGETHEADER:
-@@ -310,7 +286,10 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 	case CEPH_OSD_OP_CLONERANGE:
- 	case CEPH_OSD_OP_ASSERT_SRC_VERSION:
- 	case CEPH_OSD_OP_SRC_CMPXATTR:
-+	case CEPH_OSD_OP_GETXATTR:
- 	case CEPH_OSD_OP_GETXATTRS:
-+	case CEPH_OSD_OP_CMPXATTR:
-+	case CEPH_OSD_OP_SETXATTR:
- 	case CEPH_OSD_OP_SETXATTRS:
- 	case CEPH_OSD_OP_RESETXATTRS:
- 	case CEPH_OSD_OP_RMXATTR:
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 58a8b8a..32faf396 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -1763,7 +1763,13 @@ void MDCache::project_rstat_frag_to_inode(nest_info_t& rstat, nest_info_t& accou
+ 	first = p->second.first;
+ 	if (first > last) {
+ 	  dout(10) << " oldest old_inode is [" << first << "," << p->first << "], done." << dendl;
+-	  assert(p == pin->old_inodes.begin());
++	  if (p != pin->old_inodes.begin())
++	    dout(0) << " hmm, " << p->first
++		    << " is not the first in old_inodes; "
++		    << (pin->old_inodes.begin() != pin->old_inodes.end()
++			? pin->old_inodes.begin()->first
++			: snapid_t (CEPH_NOSNAP))
++		    << " is" << dendl;
+ 	  break;
+ 	}
+ 	if (p->first > last) {
+
+--=-=-=
+
+
+
 -- 
-1.7.9.5
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
 
+--=-=-=--
