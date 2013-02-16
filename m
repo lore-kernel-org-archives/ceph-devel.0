@@ -1,93 +1,72 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] ceph: simplify ceph_sync_write() page_align, calculation
-Date: Sat, 16 Feb 2013 11:07:32 -0600
-Message-ID: <511FBCD4.5040709@inktank.com>
+Subject: [PATCH] libceph: simplify data length calculation
+Date: Sat, 16 Feb 2013 11:08:05 -0600
+Message-ID: <511FBCF5.7090506@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:45230 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753801Ab3BPRHf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:07:35 -0500
-Received: by mail-qc0-f179.google.com with SMTP id b40so1564654qcq.24
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:07:34 -0800 (PST)
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:63241 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753844Ab3BPRIH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 12:08:07 -0500
+Received: by mail-qc0-f176.google.com with SMTP id n41so1578400qco.35
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 09:08:06 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In ceph_sync_write() there is some magic that computes page_align
-for an osd request.  But a little analysis shows it can be
-simplified.
-
-First, we have:
- 	io_align = pos & ~PAGE_MASK;
-which is used here:
-	page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
-
-Note (pos - io_align) simply rounds "pos" down to the nearest multiple
-of the page size.
-
-We also have:
- 	buf_align = (unsigned long)data & ~PAGE_MASK;
-
-Adding buf_align to that rounded-down "pos" value will stay within
-the same page; the result will just be offset by the page offset for
-the "data" pointer.  The final mask therefore leaves just the value
-of "buf_align".
-
-The same simplification can be done in striped_read().
-
-One more simplification.  Note that the result of calc_pages_for()
-is invariant of which page the offset starts in--the only thing that
-matters is the offset within the starting page.  We will have
-put the proper page offset to use into "page_align", so just use
-that in calculating num_pages.
-
-This resolves:
-    http://tracker.ceph.com/issues/4166
+Simplify the way the data length recorded in a message header is
+calculated in ceph_osdc_build_request().
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/ceph/file.c |   18 +++++-------------
- 1 file changed, 5 insertions(+), 13 deletions(-)
+ net/ceph/osd_client.c |   12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 9c4325e..6123ad4 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -331,10 +331,7 @@ static int striped_read(struct inode *inode,
- 	io_align = off & ~PAGE_MASK;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index bbd1575..b58748e 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -335,7 +335,7 @@ void ceph_osdc_build_request(struct ceph_osd_request
+*req,
+ 	void *p;
+ 	size_t msg_size = sizeof(*head) + num_op*sizeof(*op);
+ 	int flags = req->r_flags;
+-	u64 data_len = 0;
++	u64 data_len;
+ 	int i;
 
- more:
--	if (o_direct)
--		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
--	else
--		page_align = pos & ~PAGE_MASK;
-+	page_align = o_direct ? buf_align : io_align;
- 	this_len = left;
- 	ret = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
- 				  &ci->i_layout, pos, &this_len,
-@@ -526,15 +523,10 @@ more:
- 	io_align = pos & ~PAGE_MASK;
- 	buf_align = (unsigned long)data & ~PAGE_MASK;
- 	len = left;
--	if (file->f_flags & O_DIRECT) {
--		/* write from beginning of first page, regardless of
--		   io alignment */
--		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
--		num_pages = calc_pages_for((unsigned long)data, len);
--	} else {
--		page_align = pos & ~PAGE_MASK;
--		num_pages = calc_pages_for(pos, len);
--	}
-+
-+	/* write from beginning of first page, regardless of io alignment */
-+	page_align = file->f_flags & O_DIRECT ? buf_align : io_align;
-+	num_pages = calc_pages_for(page_align, len);
- 	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
- 				    ceph_vino(inode), pos, &len,
- 				    CEPH_OSD_OP_WRITE, flags,
+ 	WARN_ON((flags & (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE)) == 0);
+@@ -363,8 +363,6 @@ void ceph_osdc_build_request(struct ceph_osd_request
+*req,
+ 	while (num_op--)
+ 		osd_req_encode_op(req, op++, src_op++);
+
+-	data_len += req->r_trail.length;
+-
+ 	if (snapc) {
+ 		head->snap_seq = cpu_to_le64(snapc->seq);
+ 		head->num_snaps = cpu_to_le32(snapc->num_snaps);
+@@ -374,14 +372,12 @@ void ceph_osdc_build_request(struct
+ceph_osd_request *req,
+ 		}
+ 	}
+
++	data_len = req->r_trail.length;
+ 	if (flags & CEPH_OSD_FLAG_WRITE) {
+ 		req->r_request->hdr.data_off = cpu_to_le16(off);
+-		req->r_request->hdr.data_len = cpu_to_le32(len + data_len);
+-	} else if (data_len) {
+-		req->r_request->hdr.data_off = 0;
+-		req->r_request->hdr.data_len = cpu_to_le32(data_len);
++		data_len += len;
+ 	}
+-
++	req->r_request->hdr.data_len = cpu_to_le32(data_len);
+ 	req->r_request->page_alignment = req->r_page_alignment;
+
+ 	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
 -- 
 1.7.9.5
 
