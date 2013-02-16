@@ -1,262 +1,71 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/3] libceph: update rados.h
-Date: Sat, 16 Feb 2013 10:57:13 -0600
-Message-ID: <511FBA69.4070505@inktank.com>
+Subject: [PATCH 2/3] libceph: add ceph_osd_state_name()
+Date: Sat, 16 Feb 2013 10:57:27 -0600
+Message-ID: <511FBA77.3040104@inktank.com>
 References: <511FBA36.4020407@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:37185 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753551Ab3BPQ5Q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 11:57:16 -0500
-Received: by mail-qc0-f172.google.com with SMTP id b25so1591937qca.31
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 08:57:15 -0800 (PST)
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:51618 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753639Ab3BPQ5a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 11:57:30 -0500
+Received: by mail-qc0-f176.google.com with SMTP id n41so1556989qco.21
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 08:57:29 -0800 (PST)
 In-Reply-To: <511FBA36.4020407@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Update most of "include/linux/ceph/rados.h" to match its user space
-counterpart in "src/include/rados.h" in the ceph tree.
-
-Almost everything that has changed is either:
-    - added or revised comments
-    - added definitions (therefore no real effect on existing code)
-    - defining the same value a different way (e.g., "1 << 0" vs "1")
-
-The only exceptions are:
-    - The declaration of ceph_osd_state_name() was excluded; that
-      will be inserted in the next patch.
-    - ceph_osd_op_mode_read() and ceph_osd_op_mode_modify() are
-      defined differently, but they were never used in the kernel
-    - CEPH_OSD_FLAG_PEERSTAT is now CEPH_OSD_FLAG_PEERSTAT_OLD, but
-      that was never used in the kernel
-
-Anything that was present in this file but not in its user space
-counterpart was left intact here.  I left the definitions of
-EOLDSNAPC and EBLACKLISTED using numerical values here; I'm
-not sure the right way to go with those.
-
-This and the next two commits resolve:
-    http://tracker.ceph.com/issues/4164
+Add the definition of ceph_osd_state_name(), to match its
+counterpart in user space.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- include/linux/ceph/rados.h |   91
-++++++++++++++++++++++++++++++++++----------
- 1 file changed, 71 insertions(+), 20 deletions(-)
+ include/linux/ceph/rados.h |    2 ++
+ net/ceph/ceph_strings.c    |   15 +++++++++++++++
+ 2 files changed, 17 insertions(+)
 
 diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index 2c04afe..9c3b4aa 100644
+index 9c3b4aa..b65182a 100644
 --- a/include/linux/ceph/rados.h
 +++ b/include/linux/ceph/rados.h
-@@ -145,8 +145,10 @@ struct ceph_eversion {
-  */
+@@ -150,6 +150,8 @@ struct ceph_eversion {
+ #define CEPH_OSD_AUTOOUT (1<<2)  /* osd was automatically marked out */
+ #define CEPH_OSD_NEW     (1<<3)  /* osd is new, never marked in */
 
- /* status bits */
--#define CEPH_OSD_EXISTS 1
--#define CEPH_OSD_UP     2
-+#define CEPH_OSD_EXISTS  (1<<0)
-+#define CEPH_OSD_UP      (1<<1)
-+#define CEPH_OSD_AUTOOUT (1<<2)  /* osd was automatically marked out */
-+#define CEPH_OSD_NEW     (1<<3)  /* osd is new, never marked in */
-
++extern const char *ceph_osd_state_name(int s);
++
  /* osd weights.  fixed point value: 0x10000 == 1.0 ("in"), 0 == "out" */
  #define CEPH_OSD_IN  0x10000
-@@ -161,9 +163,25 @@ struct ceph_eversion {
- #define CEPH_OSDMAP_PAUSERD  (1<<2)  /* pause all reads */
- #define CEPH_OSDMAP_PAUSEWR  (1<<3)  /* pause all writes */
- #define CEPH_OSDMAP_PAUSEREC (1<<4)  /* pause recovery */
-+#define CEPH_OSDMAP_NOUP     (1<<5)  /* block osd boot */
-+#define CEPH_OSDMAP_NODOWN   (1<<6)  /* block osd mark-down/failure */
-+#define CEPH_OSDMAP_NOOUT    (1<<7)  /* block osd auto mark-out */
-+#define CEPH_OSDMAP_NOIN     (1<<8)  /* block osd auto mark-in */
-+#define CEPH_OSDMAP_NOBACKFILL (1<<9) /* block osd backfill */
-+#define CEPH_OSDMAP_NORECOVER (1<<10) /* block osd recovery and backfill */
-+
-+/*
-+ * The error code to return when an OSD can't handle a write
-+ * because it is too large.
-+ */
-+#define OSD_WRITETOOBIG EMSGSIZE
-
- /*
-  * osd ops
-+ *
-+ * WARNING: do not use these op codes directly.  Use the helpers
-+ * defined below instead.  In certain cases, op code behavior was
-+ * redefined, resulting in special-cases in the helpers.
-  */
- #define CEPH_OSD_OP_MODE       0xf000
- #define CEPH_OSD_OP_MODE_RD    0x1000
-@@ -177,6 +195,7 @@ struct ceph_eversion {
- #define CEPH_OSD_OP_TYPE_ATTR  0x0300
- #define CEPH_OSD_OP_TYPE_EXEC  0x0400
- #define CEPH_OSD_OP_TYPE_PG    0x0500
-+#define CEPH_OSD_OP_TYPE_MULTI 0x0600 /* multiobject */
-
- enum {
- 	/** data **/
-@@ -217,6 +236,23 @@ enum {
-
- 	CEPH_OSD_OP_WATCH   = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 15,
-
-+	/* omap */
-+	CEPH_OSD_OP_OMAPGETKEYS   = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_DATA | 17,
-+	CEPH_OSD_OP_OMAPGETVALS   = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_DATA | 18,
-+	CEPH_OSD_OP_OMAPGETHEADER = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_DATA | 19,
-+	CEPH_OSD_OP_OMAPGETVALSBYKEYS  =
-+	  CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 20,
-+	CEPH_OSD_OP_OMAPSETVALS   = CEPH_OSD_OP_MODE_WR |
-CEPH_OSD_OP_TYPE_DATA | 21,
-+	CEPH_OSD_OP_OMAPSETHEADER = CEPH_OSD_OP_MODE_WR |
-CEPH_OSD_OP_TYPE_DATA | 22,
-+	CEPH_OSD_OP_OMAPCLEAR     = CEPH_OSD_OP_MODE_WR |
-CEPH_OSD_OP_TYPE_DATA | 23,
-+	CEPH_OSD_OP_OMAPRMKEYS    = CEPH_OSD_OP_MODE_WR |
-CEPH_OSD_OP_TYPE_DATA | 24,
-+	CEPH_OSD_OP_OMAP_CMP      = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_DATA | 25,
-+
-+	/** multi **/
-+	CEPH_OSD_OP_CLONERANGE = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_MULTI | 1,
-+	CEPH_OSD_OP_ASSERT_SRC_VERSION = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_MULTI | 2,
-+	CEPH_OSD_OP_SRC_CMPXATTR = CEPH_OSD_OP_MODE_RD |
-CEPH_OSD_OP_TYPE_MULTI | 3,
-+
- 	/** attrs **/
- 	/* read */
- 	CEPH_OSD_OP_GETXATTR  = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_ATTR | 1,
-@@ -238,6 +274,7 @@ enum {
- 	CEPH_OSD_OP_SCRUB_RESERVE   = CEPH_OSD_OP_MODE_SUB | 6,
- 	CEPH_OSD_OP_SCRUB_UNRESERVE = CEPH_OSD_OP_MODE_SUB | 7,
- 	CEPH_OSD_OP_SCRUB_STOP      = CEPH_OSD_OP_MODE_SUB | 8,
-+	CEPH_OSD_OP_SCRUB_MAP     = CEPH_OSD_OP_MODE_SUB | 9,
-
- 	/** lock **/
- 	CEPH_OSD_OP_WRLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 1,
-@@ -248,10 +285,12 @@ enum {
- 	CEPH_OSD_OP_DNLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 6,
-
- 	/** exec **/
-+	/* note: the RD bit here is wrong; see special-case below in helper */
- 	CEPH_OSD_OP_CALL    = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_EXEC | 1,
-
- 	/** pg **/
- 	CEPH_OSD_OP_PGLS      = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_PG | 1,
-+	CEPH_OSD_OP_PGLS_FILTER = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_PG | 2,
- };
-
- static inline int ceph_osd_op_type_lock(int op)
-@@ -274,6 +313,10 @@ static inline int ceph_osd_op_type_pg(int op)
- {
- 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_PG;
+ #define CEPH_OSD_OUT 0
+diff --git a/net/ceph/ceph_strings.c b/net/ceph/ceph_strings.c
+index 3fbda04..833075c 100644
+--- a/net/ceph/ceph_strings.c
++++ b/net/ceph/ceph_strings.c
+@@ -68,6 +68,21 @@ const char *ceph_osd_op_name(int op)
+ 	return "???";
  }
-+static inline int ceph_osd_op_type_multi(int op)
+
++const char *ceph_osd_state_name(int s)
 +{
-+	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_MULTI;
++	switch (s) {
++	case CEPH_OSD_EXISTS:
++		return "exists";
++	case CEPH_OSD_UP:
++		return "up";
++	case CEPH_OSD_AUTOOUT:
++		return "autoout";
++	case CEPH_OSD_NEW:
++		return "new";
++	default:
++		return "???";
++	}
 +}
 
- static inline int ceph_osd_op_mode_subop(int op)
+ const char *ceph_pool_op_name(int op)
  {
-@@ -281,11 +324,12 @@ static inline int ceph_osd_op_mode_subop(int op)
- }
- static inline int ceph_osd_op_mode_read(int op)
- {
--	return (op & CEPH_OSD_OP_MODE) == CEPH_OSD_OP_MODE_RD;
-+	return (op & CEPH_OSD_OP_MODE_RD) &&
-+		op != CEPH_OSD_OP_CALL;
- }
- static inline int ceph_osd_op_mode_modify(int op)
- {
--	return (op & CEPH_OSD_OP_MODE) == CEPH_OSD_OP_MODE_WR;
-+	return op & CEPH_OSD_OP_MODE_WR;
- }
-
- /*
-@@ -294,34 +338,38 @@ static inline int ceph_osd_op_mode_modify(int op)
-  */
- #define CEPH_OSD_TMAP_HDR 'h'
- #define CEPH_OSD_TMAP_SET 's'
-+#define CEPH_OSD_TMAP_CREATE 'c' /* create key */
- #define CEPH_OSD_TMAP_RM  'r'
-+#define CEPH_OSD_TMAP_RMSLOPPY 'R'
-
- extern const char *ceph_osd_op_name(int op);
-
--
- /*
-  * osd op flags
-  *
-  * An op may be READ, WRITE, or READ|WRITE.
-  */
- enum {
--	CEPH_OSD_FLAG_ACK = 1,          /* want (or is) "ack" ack */
--	CEPH_OSD_FLAG_ONNVRAM = 2,      /* want (or is) "onnvram" ack */
--	CEPH_OSD_FLAG_ONDISK = 4,       /* want (or is) "ondisk" ack */
--	CEPH_OSD_FLAG_RETRY = 8,        /* resend attempt */
--	CEPH_OSD_FLAG_READ = 16,        /* op may read */
--	CEPH_OSD_FLAG_WRITE = 32,       /* op may write */
--	CEPH_OSD_FLAG_ORDERSNAP = 64,   /* EOLDSNAP if snapc is out of order */
--	CEPH_OSD_FLAG_PEERSTAT = 128,   /* msg includes osd_peer_stat */
--	CEPH_OSD_FLAG_BALANCE_READS = 256,
--	CEPH_OSD_FLAG_PARALLELEXEC = 512, /* execute op in parallel */
--	CEPH_OSD_FLAG_PGOP = 1024,      /* pg op, no object */
--	CEPH_OSD_FLAG_EXEC = 2048,      /* op may exec */
--	CEPH_OSD_FLAG_EXEC_PUBLIC = 4096, /* op may exec (public) */
-+	CEPH_OSD_FLAG_ACK =            0x0001,  /* want (or is) "ack" ack */
-+	CEPH_OSD_FLAG_ONNVRAM =        0x0002,  /* want (or is) "onnvram" ack */
-+	CEPH_OSD_FLAG_ONDISK =         0x0004,  /* want (or is) "ondisk" ack */
-+	CEPH_OSD_FLAG_RETRY =          0x0008,  /* resend attempt */
-+	CEPH_OSD_FLAG_READ =           0x0010,  /* op may read */
-+	CEPH_OSD_FLAG_WRITE =          0x0020,  /* op may write */
-+	CEPH_OSD_FLAG_ORDERSNAP =      0x0040,  /* EOLDSNAP if snapc is out of
-order */
-+	CEPH_OSD_FLAG_PEERSTAT_OLD =   0x0080,  /* DEPRECATED msg includes
-osd_peer_stat */
-+	CEPH_OSD_FLAG_BALANCE_READS =  0x0100,
-+	CEPH_OSD_FLAG_PARALLELEXEC =   0x0200,  /* execute op in parallel */
-+	CEPH_OSD_FLAG_PGOP =           0x0400,  /* pg op, no object */
-+	CEPH_OSD_FLAG_EXEC =           0x0800,  /* op may exec */
-+	CEPH_OSD_FLAG_EXEC_PUBLIC =    0x1000,  /* DEPRECATED op may exec
-(public) */
-+	CEPH_OSD_FLAG_LOCALIZE_READS = 0x2000,  /* read from nearby replica,
-if any */
-+	CEPH_OSD_FLAG_RWORDERED =      0x4000,  /* order wrt concurrent reads */
- };
-
- enum {
- 	CEPH_OSD_OP_FLAG_EXCL = 1,      /* EXCL object create */
-+	CEPH_OSD_OP_FLAG_FAILOK = 2,    /* continue despite failure */
- };
-
- #define EOLDSNAPC    ERESTART  /* ORDERSNAP flag set; writer has old
-snapc*/
-@@ -381,7 +429,11 @@ struct ceph_osd_op {
- 			__le64 ver;
- 			__u8 flag;	/* 0 = unwatch, 1 = watch */
- 		} __attribute__ ((packed)) watch;
--};
-+		struct {
-+			__le64 offset, length;
-+			__le64 src_offset;
-+		} __attribute__ ((packed)) clonerange;
-+	};
- 	__le32 payload_len;
- } __attribute__ ((packed));
-
-@@ -424,5 +476,4 @@ struct ceph_osd_reply_head {
- } __attribute__ ((packed));
-
-
--
- #endif
 -- 
 1.7.9.5
 
