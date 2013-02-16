@@ -1,66 +1,92 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
-Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
-Date: Sun, 17 Feb 2013 00:16:40 +0100
-Message-ID: <51201358.3010103@mermaidconsulting.dk>
-References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk> <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net> <511F72D2.5020104@mermaidconsulting.dk> <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] libceph: improve packing in struct ceph_osd_req_op
+Date: Sat, 16 Feb 2013 15:23:19 -0800
+Message-ID: <512014E7.3070104@inktank.com>
+References: <511FB2D1.4090306@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx03.stofanet.dk ([212.10.10.13]:57396 "EHLO mx03.stofanet.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754687Ab3BPXQo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 16 Feb 2013 18:16:44 -0500
-In-Reply-To: <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:47963 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754772Ab3BPXXX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 18:23:23 -0500
+Received: by mail-pa0-f46.google.com with SMTP id kp14so2255439pab.5
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 15:23:23 -0800 (PST)
+In-Reply-To: <511FB2D1.4090306@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-> Would qcow2 let you store the incremental portion of a backup without=
- the=20
-> actual image?  A common use case would be:
+On 02/16/2013 08:24 AM, Alex Elder wrote:
+> The layout of struct ceph_osd_req_op leaves lots of holes.
+> Rearranging things a little for better field alignment
+> reduces the size by a third.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   include/linux/ceph/osd_client.h |   15 ++++++++-------
+>   1 file changed, 8 insertions(+), 7 deletions(-)
+>
+> diff --git a/include/linux/ceph/osd_client.h
+> b/include/linux/ceph/osd_client.h
+> index 69287cc..82bf633 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -157,6 +157,7 @@ struct ceph_osd_client {
+>
+>   struct ceph_osd_req_op {
+>   	u16 op;           /* CEPH_OSD_OP_* */
+> +	u32 payload_len;
+>   	union {
+>   		struct {
+>   			u64 offset, length;
+> @@ -165,23 +166,24 @@ struct ceph_osd_req_op {
+>   		} extent;
+>   		struct {
+>   			const char *name;
+> -			u32 name_len;
+>   			const char  *val;
+> +			u32 name_len;
+>   			u32 value_len;
+>   			__u8 cmp_op;       /* CEPH_OSD_CMPXATTR_OP_* */
+>   			__u8 cmp_mode;     /* CEPH_OSD_CMPXATTR_MODE_* */
+>   		} xattr;
+>   		struct {
+>   			const char *class_name;
+> -			__u8 class_len;
+>   			const char *method_name;
+> -			__u8 method_len;
+> -			__u8 argc;
+>   			const char *indata;
+>   			u32 indata_len;
+> +			__u8 class_len;
+> +			__u8 method_len;
+> +			__u8 argc;
+>   		} cls;
+>   		struct {
+> -			u64 cookie, count;
+> +			u64 cookie;
+> +			u64 count;
+>   		} pgls;
+>   	        struct {
+>   		        u64 snapid;
+> @@ -189,12 +191,11 @@ struct ceph_osd_req_op {
+>   		struct {
+>   			u64 cookie;
+>   			u64 ver;
+> -			__u8 flag;
+>   			u32 prot_ver;
+>   			u32 timeout;
+> +			__u8 flag;
+>   		} watch;
+>   	};
+> -	u32 payload_len;
+>   };
+>
+>   extern int ceph_osdc_init(struct ceph_osd_client *osdc,
+>
 
-> - take snapshot1 on cluster A
-> - copy image to cluster B, possibly without writing to an intermediat=
-e=20
->   file.. e.g. 'rbd export ... - | ssh otherhost rbd import - ...'
-> and later,
-> - take snapshot2 on cluster A
-> - stream snapshot1->2 incremental to cluster B
-
-Well, qcow2 is designed for storing image files on disk, not as a=20
-"streamed" file format - so it is not covered by the specification.=20
-However, I don't see what should keep us from using it the way you desc=
-ribe.
-
-The only drawback is that standard qcow2 tools will not be able to work=
-=20
-with the incremental file on its own - they would need the base image t=
-o=20
-be file based.
-
-Basically a qcow2 "incremental" file contains:
-
-  - string holding the path and filename of the backing file
-  - lookup table that tells which blocks are included in the file
-  - actual data in 512 byte blocks
-
-In this "streaming" case we would not have a path and file to the=20
-backing file. Instead we could store something like=20
-rbd:pool/imagename@snapname instead of a traditional path and file name=
-=2E
-
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
