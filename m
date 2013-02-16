@@ -1,35 +1,122 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: send mail to redmine tickets
-Date: Sat, 16 Feb 2013 14:54:28 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302161454020.25660@cobra.newdream.net>
-References: <511F5030.5000603@dachary.org>
+Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
+Date: Sat, 16 Feb 2013 14:59:05 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
+References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk> <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net>
+ <511F72D2.5020104@mermaidconsulting.dk>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35706 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35737 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754919Ab3BPWy3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 17:54:29 -0500
-In-Reply-To: <511F5030.5000603@dachary.org>
+	with ESMTP id S1754370Ab3BPW7F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 17:59:05 -0500
+In-Reply-To: <511F72D2.5020104@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, sandon@inktank.com
+To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
 
-On Sat, 16 Feb 2013, Loic Dachary wrote:
-> Hi,
+On Sat, 16 Feb 2013, Jens Kristian S?gaard wrote:
+> Hi Sage,
 > 
-> It would be nice to cc a ticket when proposing a patch related to it. 
-> For instance in the context of http://tracker.ceph.com/issues/4157 it 
-> would have been nice to add [#4157] in the subject of 
-> http://marc.info/?l=ceph-devel&m=136100588219116&w=4 and cc 
-> bugs@tracker.ceph.com to link the patch to the ticket.
+> > 1) Decide what output format to use.  We want to use something that is 
 > 
-> Is redmine configured to allow this ?
-> 
-> http://www.redmine.org/projects/redmine/wiki/RedmineReceivingEmails#How-it-works
+> I have given it some thought, and my initial suggestion to keep things simple
+> is to use the QCOW2 image format.
 
-Not yet.  We're upgrading Redmine this weekend... once that is done, this 
-would be a good thing ot set up!
+Would qcow2 let you store the incremental portion of a backup without the 
+actual image?  A common use case would be:
+
+- take snapshot1 on cluster A
+- copy image to cluster B, possibly without writing to an intermediate 
+  file.. e.g. 'rbd export ... - | ssh otherhost rbd import - ...'
+
+and later,
+
+- take snapshot2 on cluster A
+- stream snapshot1->2 incremental to cluster B
 
 sage
+
+
+
+> 
+> The birds eye view of the process would be as follows:
+> 
+> * Initial backup
+> 
+> User supplied information: pool, image name
+> 
+> Create rbd snapshot of the image named "backup_1", where 1 could be a
+> timestamp or an integer count.
+> 
+> Save the snapshot to a standard qcow2 image. Similar to:
+> 
+> qemu-img convert rbd:data/myimage@backup_1 -O qcow2
+> data_myimage_backup_1.qcow2
+> 
+> Note: I don't know if qemu-img actually supports reading from snapshots
+> currently.
+> 
+> 
+> * Incremental backup
+> 
+> User supplied information: pool, image name, path to initial backup or
+> previous incremental file
+> 
+> Create rbd snapshot of the image named "backup_2", where 2 could be a
+> timestamp or an integer count.
+> 
+> Determine previous snapshot identifier from given file name.
+> 
+> Determine objects changed from the snapshot given by that identifier and the
+> newly created snapshot.
+> 
+> Construct QCOW2 L1- and L2-tables in memory from that changeset.
+> 
+> Create new qcow2 image with the previous backup file as the backing image, and
+> write out the tables and changed blocks.
+> 
+> Delete previous rbd snapshot.
+> 
+> 
+> * Restoring and mounting
+> 
+> 
+> The use of the QCOW2 format means that we can use existing tools for restoring
+> and mounting the backups.
+> 
+> To restore a backup the user can simply choose either the initial backup file
+> or an incremental, and use qemu-img to copy that to a new rbd image.
+> 
+> To mount the initial backup or an incremental, the user can use qemu-nbd to
+> mount and explore the backup to determine which one to restore.
+> 
+> The performance of restores and mounts would ofcourse be weakened if the
+> backup consists of a large number of incrementals. In that case the existing
+> qemu-img tool could be used to flatten the backup.
+> 
+> 
+> * Pros/cons
+> 
+> The QCOW2 format support compression, so we could implement compressed backups
+> without much effort.
+> 
+> The disadvantages to using QCOW2 like this is that we do not have any
+> checksumming or safe guards against potential errors such as users mixing up
+> images.
+> 
+> Another disadvantage to this approach is that vital information is stored in
+> the actual filename of the backup file. I don't see any place in the QCOW2
+> file format for storing this information inside the file, sadly.
+> 
+> We could opt for storing it inside a plain text file that accompanies the
+> QCOW2 file, or tarballing the qcow2 file and that plain text file.
+> 
+> -- 
+> Jens Kristian S?gaard, Mermaid Consulting ApS,
+> jens@mermaidconsulting.dk,
+> http://www.mermaidconsulting.com/
+> 
+> 
