@@ -1,112 +1,59 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: [PATCH] fix operator>=(bufferlist& l, bufferlist& r)
-Date: Sat, 16 Feb 2013 10:11:15 +0100
-Message-ID: <1361005875-768-1-git-send-email-loic@dachary.org>
+Subject: send mail to redmine tickets
+Date: Sat, 16 Feb 2013 10:24:00 +0100
+Message-ID: <511F5030.5000603@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigF672D80AF5EF99404CE1AFF7"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:46349 "EHLO
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:53008 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752691Ab3BPJLR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 04:11:17 -0500
-Received: from bet.dachary.org (unknown [10.8.0.50])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 0ABCD26394
-	for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 10:11:15 +0100 (CET)
+	with ESMTP id S1752840Ab3BPJYE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 04:24:04 -0500
+Received: from [10.8.0.50] (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 163F926394
+	for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 10:24:01 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-  bufferlist a;
-  a.append("A");
-  bufferlist ab;
-  ab.append("AB");
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigF672D80AF5EF99404CE1AFF7
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-a >= ab failed, throwing an instance of 'ceph::buffer::end_of_buffer'
-because it tried to access a[1]. All comparison operators should be
-tested using a lexicographic sort like strcmp or memcmp (-1, 0, 1).
-In the meantime, the missing test is added:
+Hi,
 
-  if (l.length() == p && r.length() > p) return false;
+It would be nice to cc a ticket when proposing a patch related to it. For=
+ instance in the context of http://tracker.ceph.com/issues/4157 it would =
+have been nice to add [#4157] in the subject of http://marc.info/?l=3Dcep=
+h-devel&m=3D136100588219116&w=3D4 and cc bugs@tracker.ceph.com to link th=
+e patch to the ticket.=20
 
-A set of unit tests demonstrating the problem and covering all comparison
-operators are added to show that the proposed fix works as expected.
+Is redmine configured to allow this ?=20
 
-http://tracker.ceph.com/issues/4157 refs #4157
+http://www.redmine.org/projects/redmine/wiki/RedmineReceivingEmails#How-i=
+t-works
 
-Signed-off-by: Loic Dachary <loic@dachary.org>
----
- src/include/buffer.h   |    1 +
- src/test/bufferlist.cc |   47 +++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 48 insertions(+)
+Cheers
 
-diff --git a/src/include/buffer.h b/src/include/buffer.h
-index 4f87ed7..b84e7f4 100644
---- a/src/include/buffer.h
-+++ b/src/include/buffer.h
-@@ -467,6 +467,7 @@ inline bool operator>=(bufferlist& l, bufferlist& r) {
-   for (unsigned p = 0; ; p++) {
-     if (l.length() > p && r.length() == p) return true;
-     if (r.length() == p && l.length() == p) return true;
-+    if (l.length() == p && r.length() > p) return false;
-     if (l[p] > r[p]) return true;
-     if (l[p] < r[p]) return false;
-   }
-diff --git a/src/test/bufferlist.cc b/src/test/bufferlist.cc
-index 91e37e6..71c2e79 100644
---- a/src/test/bufferlist.cc
-+++ b/src/test/bufferlist.cc
-@@ -57,6 +57,53 @@ TEST(BufferList, zero) {
-   }
- }
- 
-+TEST(BufferList, compare) {
-+  bufferlist a;
-+  a.append("A");
-+  bufferlist ab;
-+  ab.append("AB");
-+  bufferlist ac;
-+  ac.append("AC");
-+  //
-+  // bool operator>(bufferlist& l, bufferlist& r)
-+  //
-+  ASSERT_FALSE(a > ab);
-+  ASSERT_TRUE(ab > a);
-+  ASSERT_TRUE(ac > ab);
-+  ASSERT_FALSE(ab > ac);
-+  ASSERT_FALSE(ab > ab);
-+  //
-+  // bool operator>=(bufferlist& l, bufferlist& r)
-+  //
-+  ASSERT_FALSE(a >= ab);
-+  ASSERT_TRUE(ab >= a);
-+  ASSERT_TRUE(ac >= ab);
-+  ASSERT_FALSE(ab >= ac);
-+  ASSERT_TRUE(ab >= ab);
-+  //
-+  // bool operator<(bufferlist& l, bufferlist& r)
-+  //
-+  ASSERT_TRUE(a < ab);
-+  ASSERT_FALSE(ab < a);
-+  ASSERT_FALSE(ac < ab);
-+  ASSERT_TRUE(ab < ac);
-+  ASSERT_FALSE(ab < ab);
-+  //
-+  // bool operator<=(bufferlist& l, bufferlist& r)
-+  //
-+  ASSERT_TRUE(a <= ab);
-+  ASSERT_FALSE(ab <= a);
-+  ASSERT_FALSE(ac <= ab);
-+  ASSERT_TRUE(ab <= ac);
-+  ASSERT_TRUE(ab <= ab);
-+  //
-+  // bool operator==(bufferlist &l, bufferlist &r)
-+  //
-+  ASSERT_FALSE(a == ab);
-+  ASSERT_FALSE(ac == ab);
-+  ASSERT_TRUE(ab == ab);
-+}
-+
- TEST(BufferList, EmptyAppend) {
-   bufferlist bl;
-   bufferptr ptr;
--- 
-1.7.10.4
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
+
+--------------enigF672D80AF5EF99404CE1AFF7
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlEfUDAACgkQ8dLMyEl6F23lkACfbdtE0Oy14xyuPiXoK4x6nPr4
+NkYAnj1oftXGrwNBGpUO9qllkbc8NOuG
+=9KO8
+-----END PGP SIGNATURE-----
+
+--------------enigF672D80AF5EF99404CE1AFF7--
