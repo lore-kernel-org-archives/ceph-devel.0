@@ -1,122 +1,66 @@
-From: Sage Weil <sage@inktank.com>
+From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
+	<jens@mermaidconsulting.dk>
 Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
-Date: Sat, 16 Feb 2013 14:59:05 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
-References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk> <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net>
- <511F72D2.5020104@mermaidconsulting.dk>
+Date: Sun, 17 Feb 2013 00:16:40 +0100
+Message-ID: <51201358.3010103@mermaidconsulting.dk>
+References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk> <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net> <511F72D2.5020104@mermaidconsulting.dk> <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35737 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754370Ab3BPW7F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 17:59:05 -0500
-In-Reply-To: <511F72D2.5020104@mermaidconsulting.dk>
+Received: from mx03.stofanet.dk ([212.10.10.13]:57396 "EHLO mx03.stofanet.dk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754687Ab3BPXQo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 16 Feb 2013 18:16:44 -0500
+In-Reply-To: <alpine.DEB.2.00.1302161456480.25660@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+To: Sage Weil <sage@inktank.com>
 Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
 
-On Sat, 16 Feb 2013, Jens Kristian S?gaard wrote:
-> Hi Sage,
-> 
-> > 1) Decide what output format to use.  We want to use something that is 
-> 
-> I have given it some thought, and my initial suggestion to keep things simple
-> is to use the QCOW2 image format.
+Hi Sage,
 
-Would qcow2 let you store the incremental portion of a backup without the 
-actual image?  A common use case would be:
+> Would qcow2 let you store the incremental portion of a backup without=
+ the=20
+> actual image?  A common use case would be:
 
-- take snapshot1 on cluster A
-- copy image to cluster B, possibly without writing to an intermediate 
-  file.. e.g. 'rbd export ... - | ssh otherhost rbd import - ...'
+> - take snapshot1 on cluster A
+> - copy image to cluster B, possibly without writing to an intermediat=
+e=20
+>   file.. e.g. 'rbd export ... - | ssh otherhost rbd import - ...'
+> and later,
+> - take snapshot2 on cluster A
+> - stream snapshot1->2 incremental to cluster B
 
-and later,
+Well, qcow2 is designed for storing image files on disk, not as a=20
+"streamed" file format - so it is not covered by the specification.=20
+However, I don't see what should keep us from using it the way you desc=
+ribe.
 
-- take snapshot2 on cluster A
-- stream snapshot1->2 incremental to cluster B
+The only drawback is that standard qcow2 tools will not be able to work=
+=20
+with the incremental file on its own - they would need the base image t=
+o=20
+be file based.
 
-sage
+Basically a qcow2 "incremental" file contains:
 
+  - string holding the path and filename of the backing file
+  - lookup table that tells which blocks are included in the file
+  - actual data in 512 byte blocks
 
+In this "streaming" case we would not have a path and file to the=20
+backing file. Instead we could store something like=20
+rbd:pool/imagename@snapname instead of a traditional path and file name=
+=2E
 
-> 
-> The birds eye view of the process would be as follows:
-> 
-> * Initial backup
-> 
-> User supplied information: pool, image name
-> 
-> Create rbd snapshot of the image named "backup_1", where 1 could be a
-> timestamp or an integer count.
-> 
-> Save the snapshot to a standard qcow2 image. Similar to:
-> 
-> qemu-img convert rbd:data/myimage@backup_1 -O qcow2
-> data_myimage_backup_1.qcow2
-> 
-> Note: I don't know if qemu-img actually supports reading from snapshots
-> currently.
-> 
-> 
-> * Incremental backup
-> 
-> User supplied information: pool, image name, path to initial backup or
-> previous incremental file
-> 
-> Create rbd snapshot of the image named "backup_2", where 2 could be a
-> timestamp or an integer count.
-> 
-> Determine previous snapshot identifier from given file name.
-> 
-> Determine objects changed from the snapshot given by that identifier and the
-> newly created snapshot.
-> 
-> Construct QCOW2 L1- and L2-tables in memory from that changeset.
-> 
-> Create new qcow2 image with the previous backup file as the backing image, and
-> write out the tables and changed blocks.
-> 
-> Delete previous rbd snapshot.
-> 
-> 
-> * Restoring and mounting
-> 
-> 
-> The use of the QCOW2 format means that we can use existing tools for restoring
-> and mounting the backups.
-> 
-> To restore a backup the user can simply choose either the initial backup file
-> or an incremental, and use qemu-img to copy that to a new rbd image.
-> 
-> To mount the initial backup or an incremental, the user can use qemu-nbd to
-> mount and explore the backup to determine which one to restore.
-> 
-> The performance of restores and mounts would ofcourse be weakened if the
-> backup consists of a large number of incrementals. In that case the existing
-> qemu-img tool could be used to flatten the backup.
-> 
-> 
-> * Pros/cons
-> 
-> The QCOW2 format support compression, so we could implement compressed backups
-> without much effort.
-> 
-> The disadvantages to using QCOW2 like this is that we do not have any
-> checksumming or safe guards against potential errors such as users mixing up
-> images.
-> 
-> Another disadvantage to this approach is that vital information is stored in
-> the actual filename of the backup file. I don't see any place in the QCOW2
-> file format for storing this information inside the file, sadly.
-> 
-> We could opt for storing it inside a plain text file that accompanies the
-> QCOW2 file, or tarballing the qcow2 file and that plain text file.
-> 
-> -- 
-> Jens Kristian S?gaard, Mermaid Consulting ApS,
-> jens@mermaidconsulting.dk,
-> http://www.mermaidconsulting.com/
-> 
-> 
+--=20
+Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+jens@mermaidconsulting.dk,
+http://www.mermaidconsulting.com/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
