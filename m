@@ -1,200 +1,2003 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Hit suicide timeout after adding new osd
-Date: Sun, 17 Feb 2013 09:52:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302170949490.25660@cobra.newdream.net>
-References: <50F80C3A.9020007@mermaidconsulting.dk> <50F9C051.7070900@mermaidconsulting.dk> <alpine.DEB.2.00.1301181342410.8622@cobra.newdream.net> <50FA6681.10507@mermaidconsulting.dk> <alpine.DEB.2.00.1301190737110.29915@cobra.newdream.net>
- <50FADE65.5050403@mermaidconsulting.dk> <alpine.DEB.2.00.1301191016320.29915@cobra.newdream.net> <50FAE8AB.5000602@mermaidconsulting.dk> <alpine.DEB.2.00.1301201613130.31658@cobra.newdream.net> <50FCE759.9070309@mermaidconsulting.dk>
- <alpine.DEB.2.00.1301202310260.29915@cobra.newdream.net> <50FFD420.7000604@mermaidconsulting.dk> <51004F2A.2010009@mermaidconsulting.dk> <CABYiri8yXr2Q7-fQSnO1LjyZ34-MGNzkfTyty9MOAZ0C13639A@mail.gmail.com> <alpine.DEB.2.00.1301232037130.10201@cobra.newdream.net>
- <CABYiri_LcsJxwd73gORHmzixUBQJRYh4zSCCMhb16O5-=akj_g@mail.gmail.com> <alpine.DEB.2.00.1301241000020.13935@cobra.newdream.net> <CABYiri9T+obP1aruYMTktaftKyZi1-r6ocRH71575v5QOJ5h8w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Loic Dachary <loic@dachary.org>
+Subject: [PATCH] unit tests for src/common/buffer.{cc,h}
+Date: Sun, 17 Feb 2013 20:38:52 +0100
+Message-ID: <1361129932-7466-1-git-send-email-loic@dachary.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42065 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751439Ab3BQRwp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Feb 2013 12:52:45 -0500
-In-Reply-To: <CABYiri9T+obP1aruYMTktaftKyZi1-r6ocRH71575v5QOJ5h8w@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:38294 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752210Ab3BQTi7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Feb 2013 14:38:59 -0500
+Received: from bet.dachary.org (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 9E7E026394
+	for <ceph-devel@vger.kernel.org>; Sun, 17 Feb 2013 20:38:53 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: =?ISO-8859-15?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>, Stefan Priebe <s.priebe@profihost.ag>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Sun, 17 Feb 2013, Andrey Korolyov wrote:
-> On Thu, Jan 24, 2013 at 10:01 PM, Sage Weil <sage@inktank.com> wrote:
-> > On Thu, 24 Jan 2013, Andrey Korolyov wrote:
-> >> On Thu, Jan 24, 2013 at 8:39 AM, Sage Weil <sage@inktank.com> wrote:
-> >> > On Thu, 24 Jan 2013, Andrey Korolyov wrote:
-> >> >> On Thu, Jan 24, 2013 at 12:59 AM, Jens Kristian S?gaard
-> >> >> <jens@mermaidconsulting.dk> wrote:
-> >> >> > Hi Sage,
-> >> >> >
-> >> >> >>> I think the problem now is just that 'osd target transaction size' is
-> >> >> >>
-> >> >> >> I set it to 50, and that seems to have solved all my problems.
-> >> >> >>
-> >> >> >> After a day or so my cluster got to a HEALTH_OK state again. It has been
-> >> >> >> running for a few days now without any crashes!
-> >> >> >
-> >> >> >
-> >> >> > Hmm, one of the OSDs crashed again, sadly.
-> >> >> >
-> >> >> > It logs:
-> >> >> >
-> >> >> >    -2> 2013-01-23 18:01:23.563624 7f67524da700  1 heartbeat_map is_healthy
-> >> >> > 'FileStore::op_tp thread 0x7f673affd700' had timed out after 60
-> >> >> >     -1> 2013-01-23 18:01:23.563657 7f67524da700  1 heartbeat_map is_healthy
-> >> >> > 'FileStore::op_tp thread 0x7f673affd700' had suicide timed out after 180
-> >> >> >      0> 2013-01-23 18:01:24.257996 7f67524da700 -1 common/HeartbeatMap.cc:
-> >> >> > In function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*,
-> >> >> > const char*, time_t)' thread 7f67524da700 time 2013-01-23 18:01:23.563677
-> >> >> >
-> >> >> > common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
-> >> >> >
-> >> >> >
-> >> >> > With this stack trace:
-> >> >> >
-> >> >> >  ceph version 0.56.1-26-g3bd8f6b (3bd8f6b7235eb14cab778e3c6dcdc636aff4f539)
-> >> >> >  1: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
-> >> >> > long)+0x2eb) [0x846ecb]
-> >> >> >  2: (ceph::HeartbeatMap::is_healthy()+0x8e) [0x8476ae]
-> >> >> >  3: (ceph::HeartbeatMap::check_touch_file()+0x28) [0x8478d8]
-> >> >> >  4: (CephContextServiceThread::entry()+0x55) [0x8e0f45]
-> >> >> >  5: /lib64/libpthread.so.0() [0x3cbc807d14]
-> >> >> >  6: (clone()+0x6d) [0x3cbc0f167d]
-> >> >> >
-> >> >> >
-> >> >> > I have saved the core file, if there's anything in there you need?
-> >> >> >
-> >> >> > Or do you think I just need to set the target transaction size even lower
-> >> >> > than 50?
-> >> >> >
-> >> >> >
-> >> >>
-> >> >> I was able to catch this too on rejoin to very busy cluster and seems
-> >> >> I need to lower this value at least at start time. Also
-> >> >> c5fe0965572c074a2a33660719ce3222d18c1464 has increased overall time
-> >> >> before restarted or new osd will join a cluster, and for 2M objects/3T
-> >> >> of replicated data restart of the cluster was took almost a hour
-> >> >> before it actually begins to work. The worst thing is that a single
-> >> >> osd, if restarted, will mark as up after couple of minutes, then after
-> >> >> almost half of hour(eating 100 percent of one cpu, ) as down and then
-> >> >> cluster will start to redistribute data after 300s timeout, osd still
-> >> >> doing something.
-> >> >
-> >> > Okay, something is very wrong.  Can you reproduce this with a log?  Or
-> >> > even a partial log while it is spinning?  You can adjust the log level on
-> >> > a running process with
-> >> >
-> >> >   ceph --admin-daemon /var/run/ceph-osd.NN.asok config set debug_osd 20
-> >> >   ceph --admin-daemon /var/run/ceph-osd.NN.asok config set debug_ms 1
-> >> >
-> >> > We haven't been able to reproduce this, so I'm very much interested in any
-> >> > light you can shine here.
-> >> >
-> >>
-> >> Unfortunately cluster finally hit ``suicide timeout'' by every osd, so
-> >> there was no logs, only some backtraces[1].
-> >> Yesterday after an osd was not able to join cluster in a hour, I
-> >> decided to wait until data is remapped, then tried to restart cluster,
-> >> leaving it overnight, to morning all osd processes are dead, with the
-> >> same backtraces. Before it, after a silly node crash(related to
-> >> deadlocks in kernel kvm code), some pgs remains to stay in peering
-> >> state without any blocker in json output, so I had decided to restart
-> >> osd to which primary copy belongs, because it helped before. So most
-> >> interesting part is missing, but I`ll reformat cluster soon and will
-> >> try to catch this again after filling some data in.
-> >>
-> >> [1]. http://xdel.ru/downloads/ceph-log/osd-heartbeat/
-> >
-> > Thanks, I believe I see the problem.  The peering workqueue is way behind,
-> > and it is trying to it all in one lump, timing out the work queue.  The
-> > workaround is to increase the timeout.  We'll put together a proper fix.
-> >
-> > sage
-> 
-> Hi Sage,
-> 
-> Single OSDs still not able to join a cluster after restart, osd
-> process eats one core and reads disk by long continuous periods, about
-> hundreds of seconds, then staying eating 100% of core, then repeat. On
-> relatively new cluster, it is not repeatable even with almost same
-> data commit, only week or two of writes, snapshot creation, etc.
-> exposes that. Please see log below:
+Implement unit tests covering most lines of code ( > 92% ) and all
+methods as show by the output of make check-coverage :
+http://dachary.org/wp-uploads/2013/03/ceph-lcov/ .
 
-This sounds like the fixed code chewing through PGs with very old epochs 
-due to the (now fixed) bug in .2.  Are there some pools that were 
-completely idle on this cluster prior to the upgrade?  The problem before 
-was that we weren't persisting the new osdmap epochs for those PGs if they 
-never saw any IO, which means they have to do catch-up on restart.  They 
-will come up eventually.
+The following static constructors are implemented by opaque classes
+defined in buffer.cc ( buffer::raw_char, buffer::raw_posix_aligned
+etc. ). Testing the implementation of these classes is done by
+variations of the calls to the static constructors.
 
-Alternatively, you can stop ceph-osd and manually delete those PG 
-directories (i'm guessing its the data and metadata pools).  And/or, you 
-can delete those pools from the cluster prior to the restart.
+    copy(const char *c, unsigned len);
+    create(unsigned len);
+    claim_char(unsigned len, char *buf);
+    create_malloc(unsigned len);
+    claim_malloc(unsigned len, char *buf);
+    create_static(unsigned len, char *buf);
+    create_page_aligned(unsigned len);
 
-Sorry about this--I should have made a specific mention about this 
-possibility in the .3 release notes.  I'll add something there today.
+The raw_mmap_pages class cannot be tested because it is commented out in
+raw_posix_aligned. The raw_hack_aligned class is only tested under Cygwin.
+The raw_posix_aligned class is not tested under Cygwin.
 
-sage
+The unittest_bufferlist.sh script calls unittest_bufferlist with the
+CEPH_BUFFER_TRACK=true environment variable to enable the code
+tracking the memory usage. It cannot be done within the bufferlist.cc
+file itself because it relies on the initialization of a global
+variable  ( buffer_track_alloc ).
 
+When raw_posix_aligned is called on DARWIN, the data is not aligned
+on CEPH_PAGE_SIZE because it calls valloc(size) which is the equivalent of
+memalign(sysconf(_SC_PAGESIZE),size) and not memalign(CEPH_PAGE_SIZE,size).
+For this reason the alignment test is de-activated on DARWIN.
 
-> 
-> 2013-02-17 12:08:17.503992 7fbe8795c780  0 ceph version
-> 0.56.3-2-g290a352 (290a352c3f9e241deac562e980ac8c6a74033ba6), process
-> ceph-osd, pid 29283
-> starting osd.26 at :/0 osd_data /var/lib/ceph/osd/26
-> /var/lib/ceph/osd/journal/journal26
-> 2013-02-17 12:08:17.508193 7fbe8795c780  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6803/29283 need_addr=1
-> 2013-02-17 12:08:17.508222 7fbe8795c780  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6804/29283 need_addr=1
-> 2013-02-17 12:08:17.508244 7fbe8795c780  1 accepter.accepter.bind
-> my_inst.addr is 0.0.0.0:6805/29283 need_addr=1
-> 2013-02-17 12:08:17.508665 7fbe8795c780  5
-> filestore(/var/lib/ceph/osd/26) basedir /var/lib/ceph/osd/26 journal
-> /var/lib/ceph/osd/journal/journal26
-> 2013-02-17 12:08:17.508712 7fbe8795c780 10
-> filestore(/var/lib/ceph/osd/26) mount fsid is
-> 67783a66-178e-430a-a031-757bd45ae718
-> 2013-02-17 12:08:17.512110 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount FIEMAP ioctl is supported and
-> appears to work
-> 2013-02-17 12:08:17.512122 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount FIEMAP ioctl is disabled via
-> 'filestore fiemap' config option
-> 2013-02-17 12:08:17.512590 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount did NOT detect btrfs
-> 2013-02-17 12:08:17.532726 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount syncfs(2) syscall fully
-> supported (by glibc and kernel)
-> 2013-02-17 12:08:17.532901 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount found snaps <>
-> 2013-02-17 12:08:17.532929 7fbe8795c780  5
-> filestore(/var/lib/ceph/osd/26) mount op_seq is 53467469
-> 2013-02-17 12:08:17.534953 7fbe8795c780 20 filestore
-> (init)dbobjectmap: seq is 852347
-> 2013-02-17 12:08:17.534981 7fbe8795c780 10
-> filestore(/var/lib/ceph/osd/26) open_journal at
-> /var/lib/ceph/osd/journal/journal26
-> 2013-02-17 12:08:17.535035 7fbe8795c780  0
-> filestore(/var/lib/ceph/osd/26) mount: enabling WRITEAHEAD journal
-> mode: btrfs not detected
-> 2013-02-17 12:08:17.535046 7fbe8795c780 10
-> filestore(/var/lib/ceph/osd/26) list_collections
-> 2013-02-17 12:08:17.668919 7fbe83ba2700 20
-> filestore(/var/lib/ceph/osd/26) sync_entry waiting for max_interval
-> 5.000000
-> 2013-02-17 12:08:17.669993 7fbe80b9c700 20
-> filestore(/var/lib/ceph/osd/26) flusher_entry start
-> 2013-02-17 12:08:17.670012 7fbe80b9c700 20
-> filestore(/var/lib/ceph/osd/26) flusher_entry sleeping
-> 2013-02-17 12:08:17.670104 7fbe8795c780  5
-> filestore(/var/lib/ceph/osd/26) umount /var/lib/ceph/osd/26
-> 2013-02-17 12:08:17.670126 7fbe83ba2700 20
-> filestore(/var/lib/ceph/osd/26) sync_entry force_sync set
-> 2013-02-17 12:08:17.670162 7fbe80b9c700 20
-> filestore(/var/lib/ceph/osd/26) flusher_entry awoke
-> 2013-02-17 12:08:17.670169 7fbe80b9c700 20
-> filestore(/var/lib/ceph/osd/26) flusher_entry finish
-> 
-> 
+The tests are grouped in
+
+TEST(BufferPtr, ... ) for buffer::ptr
+TEST(BufferListIterator, ...) for buffer::list::iterator
+TEST(BufferList, ...) for buffer::list
+TEST(BufferHash, ...) for buffer::hash
+
+and each method ( and all variations of the prototype ) are
+included into a single TEST() function.
+
+Although most aspects of the methods are tested, including exceptions
+and border cases, inconsistencies are not highlighted . For
+instance
+
+    buffer::list::iterator i;
+    i.advance(1);
+
+would dereference a buffer::raw NULL pointer although
+
+    buffer::ptr p;
+    p.wasted()
+
+asserts instead of dereferencing the buffer::raw NULL pointer. It
+would be better to always assert in case a NULL pointer is about to be
+used. But this is a minor inconsistency that is probably not worth a
+test.
+
+The following buffer::list methods
+
+    ssize_t read_fd(int fd, size_t len);
+    int write_fd(int fd) const;
+
+are not fully tested because the border cases cannot be reliably
+reproduced. Going thru a pointer indirection when calling the ::writev
+or safe_read functions would allow the test to create mockups to synthetize
+the conditions for border cases.
+
+tracker.ceph.com/issues/4066 refs #4066
+
+Signed-off-by: Loic Dachary <loic@dachary.org>
+---
+ src/Makefile.am            |    5 +-
+ src/test/bufferlist.cc     | 1801 +++++++++++++++++++++++++++++++++++++++++---
+ src/unittest_bufferlist.sh |   19 +
+ 3 files changed, 1731 insertions(+), 94 deletions(-)
+ create mode 100755 src/unittest_bufferlist.sh
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 556de51..1725588 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -19,7 +19,8 @@ EXTRA_DIST = \
+ 	libs3/libs3.spec \
+ 	libs3/mswin \
+ 	libs3/src \
+-	libs3/test
++	libs3/test \
++	unittest_bufferlist.sh
+ 
+ CLEANFILES =
+ bin_PROGRAMS =
+@@ -38,7 +39,7 @@ check_PROGRAMS =
+ # tests to actually run on "make check"; if you need extra, non-test,
+ # executables built, you need to replace this with manual assignments
+ # target by target
+-TESTS = $(check_PROGRAMS)
++TESTS = $(check_PROGRAMS) unittest_bufferlist.sh
+ 
+ check-local:
+ 	$(srcdir)/test/encoding/check-generated.sh
+diff --git a/src/test/bufferlist.cc b/src/test/bufferlist.cc
+index 7abced1..6f8ba19 100644
+--- a/src/test/bufferlist.cc
++++ b/src/test/bufferlist.cc
+@@ -1,77 +1,1650 @@
++// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
++// vim: ts=8 sw=2 smarttab
++/*
++ * Ceph - scalable distributed file system
++ *
++ * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
++ *
++ * Author: Loic Dachary <loic@dachary.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU Library Public License as published by
++ * the Free Software Foundation; either version 2, or (at your option)
++ * any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Library Public License for more details.
++ *
++ */
++
+ #include <tr1/memory>
++#include <limits.h>
++#include <errno.h>
++#include <sys/uio.h>
+ 
+ #include "include/buffer.h"
+ #include "include/encoding.h"
++#include "common/environment.h"
+ 
+ #include "gtest/gtest.h"
+ #include "stdlib.h"
+-
++#include "fcntl.h"
++#include "sys/stat.h"
+ 
+ #define MAX_TEST 1000000
+ 
+-TEST(BufferPtr, cmp) {
+-  bufferptr empty;
+-  bufferptr a("A", 1);
+-  bufferptr ab("AB", 2);
+-  bufferptr af("AF", 2);
+-  bufferptr acc("ACC", 3);
+-  EXPECT_GE(-1, empty.cmp(a));
+-  EXPECT_LE(1, a.cmp(empty));
+-  EXPECT_GE(-1, a.cmp(ab));
+-  EXPECT_LE(1, ab.cmp(a));
+-  EXPECT_EQ(0, ab.cmp(ab));
+-  EXPECT_GE(-1, ab.cmp(af));
+-  EXPECT_LE(1, af.cmp(ab));
+-  EXPECT_GE(-1, acc.cmp(af));
+-  EXPECT_LE(1, af.cmp(acc));
++TEST(Buffer, constructors) {
++  bool ceph_buffer_track = get_env_bool("CEPH_BUFFER_TRACK");
++  unsigned len = 17;
++  //
++  // buffer::create
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    bufferptr ptr(buffer::create(len));
++    EXPECT_EQ(len, ptr.length());
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++  }
++  //
++  // buffer::claim_char
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    char* str = new char[len];
++    ::memset(str, 'X', len);
++    bufferptr ptr(buffer::claim_char(len, str));
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(str, ptr.c_str());
++    bufferptr clone = ptr.clone();
++    EXPECT_EQ(0, ::memcmp(clone.c_str(), ptr.c_str(), len));
++  }
++  //
++  // buffer::create_static
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    char* str = new char[len];
++    bufferptr ptr(buffer::create_static(len, str));
++    if (ceph_buffer_track)
++      EXPECT_EQ(0, buffer::get_total_alloc());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(str, ptr.c_str());
++    delete [] str;
++  }
++  //
++  // buffer::create_malloc
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    bufferptr ptr(buffer::create_malloc(len));
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_THROW(buffer::create_malloc((unsigned)ULLONG_MAX), buffer::bad_alloc);
++  }
++  //
++  // buffer::claim_malloc
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    char* str = (char*)malloc(len);
++    ::memset(str, 'X', len);
++    bufferptr ptr(buffer::claim_malloc(len, str));
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(str, ptr.c_str());
++    bufferptr clone = ptr.clone();
++    EXPECT_EQ(0, ::memcmp(clone.c_str(), ptr.c_str(), len));
++  }
++  //
++  // buffer::copy
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    const std::string expected(len, 'X');
++    bufferptr ptr(buffer::copy(expected.c_str(), expected.size()));
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++    EXPECT_NE(expected.c_str(), ptr.c_str());
++    EXPECT_EQ(0, ::memcmp(expected.c_str(), ptr.c_str(), len));
++  }
++  //
++  // buffer::create_page_aligned
++  //
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++  {
++    bufferptr ptr(buffer::create_page_aligned(len));
++    ::memset(ptr.c_str(), 'X', len);
++    if (ceph_buffer_track)
++      EXPECT_EQ(len, (unsigned)buffer::get_total_alloc());
++    EXPECT_THROW(buffer::create_page_aligned((unsigned)ULLONG_MAX), buffer::bad_alloc);
++#ifndef DARWIN
++    ASSERT_TRUE(ptr.is_page_aligned());
++#endif // DARWIN 
++    bufferptr clone = ptr.clone();
++    EXPECT_EQ(0, ::memcmp(clone.c_str(), ptr.c_str(), len));
++  }
++  if (ceph_buffer_track)
++    EXPECT_EQ(0, buffer::get_total_alloc());
++}
++
++TEST(BufferRaw, ostream) {
++  bufferptr ptr(1);
++  std::ostringstream stream;
++  stream << *ptr.get_raw();
++  EXPECT_GT(stream.str().size(), stream.str().find("buffer::raw("));
++  EXPECT_GT(stream.str().size(), stream.str().find("len 1 nref 1)"));
++}
++
++//                                     
++// +-----------+                +-----+
++// |           |                |     |
++// |  offset   +----------------+     |
++// |           |                |     |
++// |  length   +----            |     |
++// |           |    \-------    |     |
++// +-----------+            \---+     |
++// |   ptr     |                +-----+
++// +-----------+                | raw |
++//                              +-----+
++//
++TEST(BufferPtr, constructors) {
++  unsigned len = 17;
++  //
++  // ptr::ptr()
++  //
++  {
++    buffer::ptr ptr;
++    EXPECT_FALSE(ptr.have_raw());
++    EXPECT_EQ((unsigned)0, ptr.offset());
++    EXPECT_EQ((unsigned)0, ptr.length());
++  }
++  //
++  // ptr::ptr(raw *r)
++  //
++  {
++    bufferptr ptr(buffer::create(len));
++    EXPECT_TRUE(ptr.have_raw());
++    EXPECT_EQ((unsigned)0, ptr.offset());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(ptr.raw_length(), ptr.length());
++    EXPECT_EQ(1, ptr.raw_nref());
++  }
++  //
++  // ptr::ptr(unsigned l)
++  //
++  {
++    bufferptr ptr(len);
++    EXPECT_TRUE(ptr.have_raw());
++    EXPECT_EQ((unsigned)0, ptr.offset());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(1, ptr.raw_nref());
++  }
++  //
++  // ptr(const char *d, unsigned l)
++  //
++  {
++    const std::string str(len, 'X');
++    bufferptr ptr(str.c_str(), len);
++    EXPECT_TRUE(ptr.have_raw());
++    EXPECT_EQ((unsigned)0, ptr.offset());
++    EXPECT_EQ(len, ptr.length());
++    EXPECT_EQ(1, ptr.raw_nref());
++    EXPECT_EQ(0, ::memcmp(str.c_str(), ptr.c_str(), len));
++  }
++  //
++  // ptr(const ptr& p)
++  //
++  {
++    const std::string str(len, 'X');
++    bufferptr original(str.c_str(), len);
++    bufferptr ptr(original);
++    EXPECT_TRUE(ptr.have_raw());
++    EXPECT_EQ(original.get_raw(), ptr.get_raw());
++    EXPECT_EQ(2, ptr.raw_nref());
++    EXPECT_EQ(0, ::memcmp(original.c_str(), ptr.c_str(), len));
++  }
++  //
++  // ptr(const ptr& p, unsigned o, unsigned l)
++  //
++  {
++    const std::string str(len, 'X');
++    bufferptr original(str.c_str(), len);
++    bufferptr ptr(original, 0, 0);
++    EXPECT_TRUE(ptr.have_raw());
++    EXPECT_EQ(original.get_raw(), ptr.get_raw());
++    EXPECT_EQ(2, ptr.raw_nref());
++    EXPECT_EQ(0, ::memcmp(original.c_str(), ptr.c_str(), len));
++    EXPECT_THROW(bufferptr(original, 0, original.length() + 1), FailedAssertion);
++    EXPECT_THROW(bufferptr(bufferptr(), 0, 0), FailedAssertion);
++  }
++}
++
++TEST(BufferPtr, assignment) {
++  unsigned len = 17;
++  //
++  // override a bufferptr set with the same raw
++  //
++  {
++    bufferptr original(len);
++    bufferptr same_raw(original.get_raw());
++    unsigned offset = 5;
++    unsigned length = len - offset;
++    original.set_offset(offset);
++    original.set_length(length);
++    same_raw = original;
++    ASSERT_EQ(2, original.raw_nref());
++    ASSERT_EQ(same_raw.get_raw(), original.get_raw());
++    ASSERT_EQ(same_raw.offset(), original.offset());
++    ASSERT_EQ(same_raw.length(), original.length());
++  }
++
++  //
++  // self assignment is a noop
++  //
++  {
++    bufferptr original(len);
++    original = original;
++    ASSERT_EQ(1, original.raw_nref());
++    ASSERT_EQ((unsigned)0, original.offset());
++    ASSERT_EQ(len, original.length());
++  }
++  
++  //
++  // a copy points to the same raw
++  //
++  {
++    bufferptr original(len);
++    unsigned offset = 5;
++    unsigned length = len - offset;
++    original.set_offset(offset);
++    original.set_length(length);
++    bufferptr ptr;
++    ptr = original;
++    ASSERT_EQ(2, original.raw_nref());
++    ASSERT_EQ(ptr.get_raw(), original.get_raw());
++    ASSERT_EQ(original.offset(), ptr.offset());
++    ASSERT_EQ(original.length(), ptr.length());
++  }
++}
++
++TEST(BufferPtr, clone) {
++  unsigned len = 17;
++  bufferptr ptr(len);
++  ::memset(ptr.c_str(), 'X', len);
++  bufferptr clone = ptr.clone();
++  EXPECT_EQ(0, ::memcmp(clone.c_str(), ptr.c_str(), len));
++}
++
++TEST(BufferPtr, swap) {
++  unsigned len = 17;
++
++  bufferptr ptr1(len);
++  ::memset(ptr1.c_str(), 'X', len);
++  unsigned ptr1_offset = 4;
++  ptr1.set_offset(ptr1_offset);
++  unsigned ptr1_length = 3;
++  ptr1.set_length(ptr1_length);
++
++  bufferptr ptr2(len);
++  ::memset(ptr2.c_str(), 'Y', len);
++  unsigned ptr2_offset = 5;
++  ptr2.set_offset(ptr2_offset);
++  unsigned ptr2_length = 7;
++  ptr2.set_length(ptr2_length);
++
++  ptr1.swap(ptr2);
++
++  EXPECT_EQ(ptr2_length, ptr1.length());
++  EXPECT_EQ(ptr2_offset, ptr1.offset());
++  EXPECT_EQ('Y', ptr1[0]);
++
++  EXPECT_EQ(ptr1_length, ptr2.length());
++  EXPECT_EQ(ptr1_offset, ptr2.offset());
++  EXPECT_EQ('X', ptr2[0]);
++}
++
++TEST(BufferPtr, release) {
++  unsigned len = 17;
++
++  bufferptr ptr1(len);
++  {
++    bufferptr ptr2(ptr1);
++    EXPECT_EQ(2, ptr1.raw_nref());
++  }
++  EXPECT_EQ(1, ptr1.raw_nref());
++}
++
++TEST(BufferPtr, have_raw) {
++  {
++    bufferptr ptr;
++    EXPECT_FALSE(ptr.have_raw());
++  }
++  {
++    bufferptr ptr(1);
++    EXPECT_TRUE(ptr.have_raw());
++  }
++}
++
++TEST(BufferPtr, at_buffer_head) {
++  bufferptr ptr(2);
++  EXPECT_TRUE(ptr.at_buffer_head());
++  ptr.set_offset(1);
++  EXPECT_FALSE(ptr.at_buffer_head());
++}
++
++TEST(BufferPtr, at_buffer_tail) {
++  bufferptr ptr(2);
++  EXPECT_TRUE(ptr.at_buffer_tail());
++  ptr.set_length(1);
++  EXPECT_FALSE(ptr.at_buffer_tail());
++}
++
++TEST(BufferPtr, is_n_page_sized) {
++  {
++    bufferptr ptr(CEPH_PAGE_SIZE);
++    EXPECT_TRUE(ptr.is_n_page_sized());
++  }
++  {
++    bufferptr ptr(1);
++    EXPECT_FALSE(ptr.is_n_page_sized());
++  }
++}
++
++TEST(BufferPtr, accessors) {
++  unsigned len = 17;
++  bufferptr ptr(len);
++  ptr.c_str()[0] = 'X';
++  ptr[1] = 'Y';
++  const bufferptr const_ptr(ptr);
++
++  EXPECT_NE((void*)NULL, (void*)ptr.get_raw());
++  EXPECT_EQ('X', ptr.c_str()[0]);
++  {
++    bufferptr ptr;
++    EXPECT_THROW(ptr.c_str(), FailedAssertion);
++    EXPECT_THROW(ptr[0], FailedAssertion);
++  }
++  EXPECT_EQ('X', const_ptr.c_str()[0]);
++  {
++    const bufferptr const_ptr;
++    EXPECT_THROW(const_ptr.c_str(), FailedAssertion);
++    EXPECT_THROW(const_ptr[0], FailedAssertion);
++  }
++  EXPECT_EQ(len, const_ptr.length());
++  EXPECT_EQ((unsigned)0, const_ptr.offset());
++  EXPECT_EQ((unsigned)0, const_ptr.start());
++  EXPECT_EQ(len, const_ptr.end());
++  EXPECT_EQ(len, const_ptr.end());
++  {
++    bufferptr ptr(len);
++    unsigned unused = 1;
++    ptr.set_length(ptr.length() - unused);
++    EXPECT_EQ(unused, ptr.unused_tail_length());
++  }
++  {
++    bufferptr ptr;
++    EXPECT_EQ((unsigned)0, ptr.unused_tail_length());
++  }
++  EXPECT_THROW(ptr[len], FailedAssertion);
++  EXPECT_THROW(const_ptr[len], FailedAssertion);
++  {
++    const bufferptr const_ptr;
++    EXPECT_THROW(const_ptr.raw_c_str(), FailedAssertion);
++    EXPECT_THROW(const_ptr.raw_length(), FailedAssertion);
++    EXPECT_THROW(const_ptr.raw_nref(), FailedAssertion);
++  }
++  EXPECT_NE((const char *)NULL, const_ptr.raw_c_str());
++  EXPECT_EQ(len, const_ptr.raw_length());
++  EXPECT_EQ(2, const_ptr.raw_nref());
++  {
++    bufferptr ptr(len);
++    unsigned wasted = 1;
++    ptr.set_length(ptr.length() - wasted * 2);
++    ptr.set_offset(wasted);
++    EXPECT_EQ(wasted * 2, ptr.wasted());
++  }
++}
++
++TEST(BufferPtr, cmp) {
++  bufferptr empty;
++  bufferptr a("A", 1);
++  bufferptr ab("AB", 2);
++  bufferptr af("AF", 2);
++  bufferptr acc("ACC", 3);
++  EXPECT_GE(-1, empty.cmp(a));
++  EXPECT_LE(1, a.cmp(empty));
++  EXPECT_GE(-1, a.cmp(ab));
++  EXPECT_LE(1, ab.cmp(a));
++  EXPECT_EQ(0, ab.cmp(ab));
++  EXPECT_GE(-1, ab.cmp(af));
++  EXPECT_LE(1, af.cmp(ab));
++  EXPECT_GE(-1, acc.cmp(af));
++  EXPECT_LE(1, af.cmp(acc));
++}
++
++TEST(BufferPtr, is_zero) {
++  char str[2] = { '\0', 'X' };
++  {
++    const bufferptr ptr(buffer::create_static(2, str));
++    EXPECT_FALSE(ptr.is_zero());
++  }
++  {
++    const bufferptr ptr(buffer::create_static(1, str));
++    EXPECT_TRUE(ptr.is_zero());
++  }
++}
++
++TEST(BufferPtr, copy_out) {
++  {
++    const bufferptr ptr;
++    EXPECT_THROW(ptr.copy_out((unsigned)0, (unsigned)0, NULL), FailedAssertion);
++  }
++  {
++    char in[] = "ABC";
++    const bufferptr ptr(buffer::create_static(strlen(in), in));
++    EXPECT_THROW(ptr.copy_out((unsigned)0, strlen(in) + 1, NULL), buffer::end_of_buffer);
++    EXPECT_THROW(ptr.copy_out(strlen(in) + 1, (unsigned)0, NULL), buffer::end_of_buffer);
++    char out[1] = { 'X' };
++    ptr.copy_out((unsigned)1, (unsigned)1, out);
++    EXPECT_EQ('B', out[0]);
++  }
++}
++
++TEST(BufferPtr, copy_in) {
++  {
++    bufferptr ptr;
++    EXPECT_THROW(ptr.copy_in((unsigned)0, (unsigned)0, NULL), FailedAssertion);
++  }
++  {
++    char in[] = "ABCD";
++    bufferptr ptr(2);
++    EXPECT_THROW(ptr.copy_in((unsigned)0, strlen(in) + 1, NULL), FailedAssertion);
++    EXPECT_THROW(ptr.copy_in(strlen(in) + 1, (unsigned)0, NULL), FailedAssertion);
++    ptr.copy_in((unsigned)0, (unsigned)2, in);
++    EXPECT_EQ(in[0], ptr[0]);
++    EXPECT_EQ(in[1], ptr[1]);
++  }
++}
++
++TEST(BufferPtr, append) {
++  {
++    bufferptr ptr;
++    EXPECT_THROW(ptr.append('A'), FailedAssertion);
++    EXPECT_THROW(ptr.append("B", (unsigned)1), FailedAssertion);
++  }
++  {
++    bufferptr ptr(2);
++    EXPECT_THROW(ptr.append('A'), FailedAssertion);
++    EXPECT_THROW(ptr.append("B", (unsigned)1), FailedAssertion);
++    ptr.set_length(0);
++    ptr.append('A');
++    EXPECT_EQ((unsigned)1, ptr.length());
++    EXPECT_EQ('A', ptr[0]);
++    ptr.append("B", (unsigned)1);
++    EXPECT_EQ((unsigned)2, ptr.length());
++    EXPECT_EQ('B', ptr[1]);
++  }
++}
++
++TEST(BufferPtr, zero) {
++  char str[] = "XXXX";
++  bufferptr ptr(buffer::create_static(strlen(str), str));
++  EXPECT_THROW(ptr.zero(ptr.length() + 1, 0), FailedAssertion);
++  ptr.zero(1, 1);
++  EXPECT_EQ('X', ptr[0]);
++  EXPECT_EQ('\0', ptr[1]);
++  EXPECT_EQ('X', ptr[2]);
++  ptr.zero();
++  EXPECT_EQ('\0', ptr[0]);
++}
++
++TEST(BufferPtr, ostream) {
++  {
++    bufferptr ptr;
++    std::ostringstream stream;
++    stream << ptr;
++    EXPECT_GT(stream.str().size(), stream.str().find("buffer:ptr(0~0 no raw"));
++  }
++  {
++    char str[] = "XXXX";
++    bufferptr ptr(buffer::create_static(strlen(str), str));
++    std::ostringstream stream;
++    stream << ptr;
++    EXPECT_GT(stream.str().size(), stream.str().find("len 4 nref 1)"));
++  }  
++}
++
++//
++//                                             +---------+
++//                                             | +-----+ |
++//    list              ptr                    | |     | |
++// +----------+       +-----+                  | |     | |
++// | append_  >------->     >-------------------->     | |
++// |  buffer  |       +-----+                  | |     | |
++// +----------+                        ptr     | |     | |
++// |   _len   |      list            +-----+   | |     | |
++// +----------+    +------+     ,--->+     >----->     | |
++// | _buffers >---->      >-----     +-----+   | +-----+ |
++// +----------+    +----^-+     \      ptr     |   raw   |
++// |  last_p  |        /         `-->+-----+   | +-----+ |
++// +--------+-+       /              +     >----->     | |
++//          |       ,-          ,--->+-----+   | |     | |
++//          |      /        ,---               | |     | |
++//          |     /     ,---                   | |     | |
++//        +-v--+-^--+--^+-------+              | |     | |
++//        | bl | ls | p | p_off >--------------->|     | |
++//        +----+----+-----+-----+              | +-----+ |
++//        |               | off >------------->|   raw   |
++//        +---------------+-----+              |         |
++//              iterator                       +---------+
++//
++TEST(BufferListIterator, constructors) {
++  //
++  // iterator()
++  //
++  {
++    buffer::list::iterator i;
++    EXPECT_EQ((unsigned)0, i.get_off());
++  }
++
++  //
++  // iterator(list *l, unsigned o=0)
++  //
++  {
++    bufferlist bl;
++    bl.append("ABC", 3);
++
++    {
++      bufferlist::iterator i(&bl);
++      EXPECT_EQ((unsigned)0, i.get_off());
++      EXPECT_EQ('A', *i);
++    }
++    {
++      bufferlist::iterator i(&bl, 1);
++      EXPECT_EQ('B', *i);
++      EXPECT_EQ((unsigned)2, i.get_remaining());
++    }
++  }
++
++  //
++  // iterator(list *l, unsigned o, std::list<ptr>::iterator ip, unsigned po)
++  // not tested because of http://tracker.ceph.com/issues/4101
++
++  //
++  // iterator(const iterator& other)
++  //
++  {
++    bufferlist bl;
++    bl.append("ABC", 3);
++    bufferlist::iterator i(&bl, 1);
++    bufferlist::iterator j(i);
++    EXPECT_EQ(*i, *j);
++    ++j;
++    EXPECT_NE(*i, *j);
++    EXPECT_EQ('B', *i);
++    EXPECT_EQ('C', *j);
++    bl.c_str()[1] = 'X';
++    j.advance(-1);
++    EXPECT_EQ('X', *j);
++  }
++}
++
++TEST(BufferListIterator, operator_equal) {
++  bufferlist bl;
++  bl.append("ABC", 3);
++  bufferlist::iterator i(&bl, 1);
++
++  i = i;
++  EXPECT_EQ('B', *i);
++  bufferlist::iterator j;
++  j = i;
++  EXPECT_EQ('B', *j);
++}
++
++TEST(BufferListIterator, get_off) {
++  bufferlist bl;
++  bl.append("ABC", 3);
++  bufferlist::iterator i(&bl, 1);
++  EXPECT_EQ((unsigned)1, i.get_off());
++}
++
++TEST(BufferListIterator, get_remaining) {
++  bufferlist bl;
++  bl.append("ABC", 3);
++  bufferlist::iterator i(&bl, 1);
++  EXPECT_EQ((unsigned)2, i.get_remaining());
++}
++
++TEST(BufferListIterator, end) {
++  bufferlist bl;
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_TRUE(i.end());
++  }
++  bl.append("ABC", 3);
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_FALSE(i.end());
++  }
++}
++
++TEST(BufferListIterator, advance) {
++  bufferlist bl;
++  const std::string one("ABC");
++  bl.append(bufferptr(one.c_str(), one.size()));
++  const std::string two("DEF");
++  bl.append(bufferptr(two.c_str(), two.size()));
++
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer);
++  }
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_THROW(i.advance(-1), buffer::end_of_buffer);
++  }
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_EQ('A', *i);
++    i.advance(1);
++    EXPECT_EQ('B', *i);
++    i.advance(3);
++    EXPECT_EQ('E', *i);
++    i.advance(-3);
++    EXPECT_EQ('B', *i);
++    i.advance(-1);
++    EXPECT_EQ('A', *i);
++  }
++}
++
++TEST(BufferListIterator, seek) {
++  bufferlist bl;
++  bl.append("ABC", 3);
++  bufferlist::iterator i(&bl, 1);
++  EXPECT_EQ('B', *i);
++  i.seek(2);
++  EXPECT_EQ('C', *i);
++}
++
++TEST(BufferListIterator, operator_star) {
++  bufferlist bl;
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_THROW(*i, buffer::end_of_buffer);
++  }
++  bl.append("ABC", 3);
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_EQ('A', *i);
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer);
++    EXPECT_THROW(*i, buffer::end_of_buffer);
++  }
++}
++
++TEST(BufferListIterator, operator_plus_plus) {
++  bufferlist bl;
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_THROW(++i, buffer::end_of_buffer);
++  }
++  bl.append("ABC", 3);
++  {
++    bufferlist::iterator i(&bl);
++    ++i;
++    EXPECT_EQ('B', *i);
++  }  
++}
++
++TEST(BufferListIterator, get_current_ptr) {
++  bufferlist bl;
++  {
++    bufferlist::iterator i(&bl);
++    EXPECT_THROW(++i, buffer::end_of_buffer);
++  }
++  bl.append("ABC", 3);
++  {
++    bufferlist::iterator i(&bl, 1);
++    const buffer::ptr ptr = i.get_current_ptr();
++    EXPECT_EQ('B', ptr[0]);
++    EXPECT_EQ((unsigned)1, ptr.offset());
++    EXPECT_EQ((unsigned)2, ptr.length());
++  }  
++}
++
++TEST(BufferListIterator, copy) {
++  bufferlist bl;
++  const char *expected = "ABC";
++  bl.append(expected, 3);
++  //
++  // void copy(unsigned len, char *dest);
++  //
++  {
++    char* copy = (char*)malloc(3);
++    ::memset(copy, 'X', 3);
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    i.copy(2, copy);
++    EXPECT_EQ(0, ::memcmp(copy, expected, 2));
++    EXPECT_EQ('X', copy[2]);
++    i.seek(0);
++    i.copy(3, copy);
++    EXPECT_EQ(0, ::memcmp(copy, expected, 3));
++  }
++  //
++  // void buffer::list::iterator::copy(unsigned len, ptr &dest)
++  //
++  {
++    bufferptr ptr;
++    bufferlist::iterator i(&bl);
++    i.copy(2, ptr);
++    EXPECT_EQ((unsigned)2, ptr.length());
++    EXPECT_EQ('A', ptr[0]);
++    EXPECT_EQ('B', ptr[1]);
++  }
++  //
++  // void buffer::list::iterator::copy(unsigned len, list &dest)
++  //
++  {
++    bufferlist copy;
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    i.copy(2, copy);
++    EXPECT_EQ(0, ::memcmp(copy.c_str(), expected, 2));
++    i.seek(0);
++    i.copy(3, copy);
++    EXPECT_EQ('A', copy[0]);
++    EXPECT_EQ('B', copy[1]);
++    EXPECT_EQ('A', copy[2]);
++    EXPECT_EQ('B', copy[3]);
++    EXPECT_EQ('C', copy[4]);
++    EXPECT_EQ((unsigned)(2 + 3), copy.length());
++  }
++  //
++  // void buffer::list::iterator::copy_all(list &dest)
++  //
++  {
++    bufferlist copy;
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    i.copy_all(copy);
++    EXPECT_EQ('A', copy[0]);
++    EXPECT_EQ('B', copy[1]);
++    EXPECT_EQ('C', copy[2]);
++    EXPECT_EQ((unsigned)3, copy.length());
++  }
++  //
++  // void copy(unsigned len, std::string &dest)
++  //
++  {
++    std::string copy;
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    i.copy(2, copy);
++    EXPECT_EQ(0, ::memcmp(copy.c_str(), expected, 2));
++    i.seek(0);
++    i.copy(3, copy);
++    EXPECT_EQ('A', copy[0]);
++    EXPECT_EQ('B', copy[1]);
++    EXPECT_EQ('A', copy[2]);
++    EXPECT_EQ('B', copy[3]);
++    EXPECT_EQ('C', copy[4]);
++    EXPECT_EQ((unsigned)(2 + 3), copy.length());
++  }
++}
++
++TEST(BufferListIterator, copy_in) {
++  bufferlist bl;
++  const char *existing = "XXX";
++  bl.append(existing, 3);
++  //
++  // void buffer::list::iterator::copy_in(unsigned len, const char *src)
++  //
++  {
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    const char *expected = "ABC";
++    i.copy_in(3, expected);
++    EXPECT_EQ(0, ::memcmp(bl.c_str(), expected, 3));
++    EXPECT_EQ('A', bl[0]);
++    EXPECT_EQ('B', bl[1]);
++    EXPECT_EQ('C', bl[2]);
++    EXPECT_EQ((unsigned)3, bl.length());
++  }
++  //
++  // void buffer::list::iterator::copy_in(unsigned len, const list& otherl)
++  //
++  {
++    bufferlist::iterator i(&bl);
++    //
++    // demonstrates that it seeks back to offset if p == ls->end()
++    //
++    EXPECT_THROW(i.advance(200), buffer::end_of_buffer); 
++    bufferlist expected;
++    expected.append("ABC", 3);
++    i.copy_in(3, expected);
++    EXPECT_EQ(0, ::memcmp(bl.c_str(), expected.c_str(), 3));
++    EXPECT_EQ('A', bl[0]);
++    EXPECT_EQ('B', bl[1]);
++    EXPECT_EQ('C', bl[2]);
++    EXPECT_EQ((unsigned)3, bl.length());
++  }
++}
++
++TEST(BufferList, constructors) {
++  //
++  // list()
++  //
++  {
++    bufferlist bl;
++    ASSERT_EQ((unsigned)0, bl.length());
++  }
++  //
++  // list(unsigned prealloc)
++  //
++  {
++    bufferlist bl(1);
++    ASSERT_EQ((unsigned)0, bl.length());
++    bl.append('A');
++    ASSERT_EQ('A', bl[0]);
++  }
++  //
++  // list(const list& other)
++  //
++  {
++    bufferlist bl(1);
++    bl.append('A');
++    ASSERT_EQ('A', bl[0]);
++    bufferlist copy(bl);
++    ASSERT_EQ('A', copy[0]);
++  }
++}
++
++TEST(BufferList, operator_equal) {
++  bufferlist bl;
++  bl.append("ABC", 3);
++  {
++    std::string dest;
++    bl.copy(1, 1, dest);
++    ASSERT_EQ('B', dest[0]);
++  }
++  bufferlist copy;
++  copy = bl;
++  {
++    std::string dest;
++    copy.copy(1, 1, dest);
++    ASSERT_EQ('B', dest[0]);
++  }
++}
++
++TEST(BufferList, buffers) {
++  bufferlist bl;
++  ASSERT_EQ((unsigned)0, bl.buffers().size());
++  bl.append('A');
++  ASSERT_EQ((unsigned)1, bl.buffers().size());
++}
++
++TEST(BufferList, swap) {
++  bufferlist b1;
++  b1.append('A');
++
++  bufferlist b2;
++  b2.append('B');
++
++  b1.swap(b2);
++
++  std::string s1;
++  b1.copy(0, 1, s1);
++  ASSERT_EQ('B', s1[0]);
++
++  std::string s2;
++  b2.copy(0, 1, s2);
++  ASSERT_EQ('A', s2[0]);
++}
++
++TEST(BufferList, length) {
++  bufferlist bl;
++  ASSERT_EQ((unsigned)0, bl.length());
++  bl.append('A');
++  ASSERT_EQ((unsigned)1, bl.length());
++}
++
++TEST(BufferList, contents_equal) {
++  //
++  // A BB
++  // AB B
++  //
++  bufferlist bl1;
++  bl1.append("A");
++  bl1.append("BB");
++  bufferlist bl2;
++  ASSERT_FALSE(bl1.contents_equal(bl2)); // different length
++  bl2.append("AB");
++  bl2.append("B");
++  ASSERT_TRUE(bl1.contents_equal(bl2)); // same length same content
++  //
++  // ABC
++  //
++  bufferlist bl3;
++  bl3.append("ABC");
++  ASSERT_FALSE(bl1.contents_equal(bl3)); // same length different content
++}
++
++TEST(BufferList, is_page_aligned) {
++  {
++    bufferlist bl;
++    EXPECT_TRUE(bl.is_page_aligned());
++  }
++  {
++    bufferlist bl;
++    bufferptr ptr(2);
++    ptr.set_offset(1);
++    ptr.set_length(1);
++    bl.append(ptr);
++    EXPECT_FALSE(bl.is_page_aligned());
++    bl.rebuild_page_aligned();
++    EXPECT_FALSE(bl.is_page_aligned());
++  }
++  {
++    bufferlist bl;
++    bufferptr ptr(CEPH_PAGE_SIZE + 1);
++    ptr.set_offset(1);
++    ptr.set_length(CEPH_PAGE_SIZE);
++    bl.append(ptr);
++    EXPECT_FALSE(bl.is_page_aligned());
++    bl.rebuild_page_aligned();
++    EXPECT_TRUE(bl.is_page_aligned());
++  }
++}
++
++TEST(BufferList, is_n_page_sized) {
++  {
++    bufferlist bl;
++    EXPECT_TRUE(bl.is_n_page_sized());
++  }
++  {
++    bufferlist bl;
++    bl.append_zero(1);
++    EXPECT_FALSE(bl.is_n_page_sized());
++  }
++  {
++    bufferlist bl;
++    bl.append_zero(CEPH_PAGE_SIZE);
++    EXPECT_TRUE(bl.is_n_page_sized());
++  }
++}
++
++TEST(BufferList, is_zero) {
++  {
++    bufferlist bl;
++    EXPECT_TRUE(bl.is_zero());
++  }
++  {
++    bufferlist bl;
++    bl.append('A');
++    EXPECT_FALSE(bl.is_zero());
++  }
++  {
++    bufferlist bl;
++    bl.append_zero(1);
++    EXPECT_TRUE(bl.is_zero());
++  }
++}
++
++TEST(BufferList, clear) {
++  bufferlist bl;
++  unsigned len = 17;
++  bl.append_zero(len);
++  bl.clear();
++  EXPECT_EQ((unsigned)0, bl.length());
++  EXPECT_EQ((unsigned)0, bl.buffers().size());
++}
++
++TEST(BufferList, push_front) {
++  //
++  // void push_front(ptr& bp)
++  //
++  {
++    bufferlist bl;
++    bufferptr ptr;
++    bl.push_front(ptr);
++    EXPECT_EQ((unsigned)0, bl.length());
++    EXPECT_EQ((unsigned)0, bl.buffers().size());
++  }
++  unsigned len = 17;
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferptr ptr(len);
++    ptr.c_str()[0] = 'B';
++    bl.push_front(ptr);
++    EXPECT_EQ((unsigned)(1 + len), bl.length());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ('B', bl.buffers().front()[0]);
++    EXPECT_EQ(ptr.get_raw(), bl.buffers().front().get_raw());
++  }
++  //
++  // void push_front(raw *r)
++  //
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferptr ptr(len);
++    ptr.c_str()[0] = 'B';
++    bl.push_front(ptr.get_raw());
++    EXPECT_EQ((unsigned)(1 + len), bl.length());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ('B', bl.buffers().front()[0]);
++    EXPECT_EQ(ptr.get_raw(), bl.buffers().front().get_raw());
++  }
++}
++
++TEST(BufferList, push_back) {
++  //
++  // void push_back(ptr& bp)
++  //
++  {
++    bufferlist bl;
++    bufferptr ptr;
++    bl.push_back(ptr);
++    EXPECT_EQ((unsigned)0, bl.length());
++    EXPECT_EQ((unsigned)0, bl.buffers().size());
++  }
++  unsigned len = 17;
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferptr ptr(len);
++    ptr.c_str()[0] = 'B';
++    bl.push_back(ptr);
++    EXPECT_EQ((unsigned)(1 + len), bl.length());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ('B', bl.buffers().back()[0]);
++    EXPECT_EQ(ptr.get_raw(), bl.buffers().back().get_raw());
++  }
++  //
++  // void push_back(raw *r)
++  //
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferptr ptr(len);
++    ptr.c_str()[0] = 'B';
++    bl.push_back(ptr.get_raw());
++    EXPECT_EQ((unsigned)(1 + len), bl.length());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ('B', bl.buffers().back()[0]);
++    EXPECT_EQ(ptr.get_raw(), bl.buffers().back().get_raw());
++  }
++}
++
++TEST(BufferList, is_contiguous) {
++  bufferlist bl;
++  EXPECT_TRUE(bl.is_contiguous());
++  EXPECT_EQ((unsigned)0, bl.buffers().size());
++  bl.append('A');  
++  EXPECT_TRUE(bl.is_contiguous());
++  EXPECT_EQ((unsigned)1, bl.buffers().size());
++  bufferptr ptr(1);
++  bl.push_back(ptr);
++  EXPECT_FALSE(bl.is_contiguous());
++  EXPECT_EQ((unsigned)2, bl.buffers().size());
++}
++
++TEST(BufferList, rebuild) {
++  {
++    bufferlist bl;
++    bufferptr ptr(2);
++    ptr.set_offset(1);
++    ptr.set_length(1);
++    bl.append(ptr);
++    EXPECT_FALSE(bl.is_page_aligned());
++    bl.rebuild();
++    EXPECT_FALSE(bl.is_page_aligned());
++  }
++  {
++    bufferlist bl;
++    const std::string str(CEPH_PAGE_SIZE, 'X');
++    bl.append(str.c_str(), str.size());
++    bl.append(str.c_str(), str.size());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_TRUE(bl.is_page_aligned());
++    bl.rebuild();
++    EXPECT_TRUE(bl.is_page_aligned());
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++  }
++}
++
++TEST(BufferList, rebuild_page_aligned) {
++  {
++    bufferlist bl;
++    {
++      bufferptr ptr(CEPH_PAGE_SIZE + 1);
++      ptr.set_offset(1);
++      ptr.set_length(CEPH_PAGE_SIZE);
++      bl.append(ptr);
++    }
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++    EXPECT_FALSE(bl.is_page_aligned());
++    bl.rebuild_page_aligned();
++    EXPECT_TRUE(bl.is_page_aligned());
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++  }
++  {
++    bufferlist bl;
++    {
++      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE));
++      bl.append(ptr);
++    }
++    {
++      bufferptr ptr(CEPH_PAGE_SIZE + 1);
++      bl.append(ptr);
++    }
++    {
++      bufferptr ptr(2);
++      ptr.set_offset(1);
++      ptr.set_length(1);
++      bl.append(ptr);
++    }
++    {
++      bufferptr ptr(CEPH_PAGE_SIZE - 2);
++      bl.append(ptr);
++    }
++    {
++      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE));
++      bl.append(ptr);
++    }
++    {
++      bufferptr ptr(CEPH_PAGE_SIZE + 1);
++      ptr.set_offset(1);
++      ptr.set_length(CEPH_PAGE_SIZE);
++      bl.append(ptr);
++    }
++    EXPECT_EQ((unsigned)6, bl.buffers().size());
++    EXPECT_TRUE((bl.length() & ~CEPH_PAGE_MASK) == 0);
++    EXPECT_FALSE(bl.is_page_aligned());
++    bl.rebuild_page_aligned();
++    EXPECT_TRUE(bl.is_page_aligned());
++    EXPECT_EQ((unsigned)4, bl.buffers().size());
++  }
++}
++
++TEST(BufferList, claim) {
++  bufferlist from;
++  {
++    bufferptr ptr(2);
++    from.append(ptr);
++  }
++  bufferlist to;
++  {
++    bufferptr ptr(4);
++    to.append(ptr);
++  }
++  EXPECT_EQ((unsigned)4, to.length());
++  EXPECT_EQ((unsigned)1, to.buffers().size());
++  to.claim(from);
++  EXPECT_EQ((unsigned)2, to.length());
++  EXPECT_EQ((unsigned)1, to.buffers().size());
++  EXPECT_EQ((unsigned)0, from.buffers().size());
++  EXPECT_EQ((unsigned)0, from.length());
++}
++
++TEST(BufferList, claim_append) {
++  bufferlist from;
++  {
++    bufferptr ptr(2);
++    from.append(ptr);
++  }
++  bufferlist to;
++  {
++    bufferptr ptr(4);
++    to.append(ptr);
++  }
++  EXPECT_EQ((unsigned)4, to.length());
++  EXPECT_EQ((unsigned)1, to.buffers().size());
++  to.claim_append(from);
++  EXPECT_EQ((unsigned)(4 + 2), to.length());
++  EXPECT_EQ((unsigned)4, to.buffers().front().length());
++  EXPECT_EQ((unsigned)2, to.buffers().back().length());
++  EXPECT_EQ((unsigned)2, to.buffers().size());
++  EXPECT_EQ((unsigned)0, from.buffers().size());
++  EXPECT_EQ((unsigned)0, from.length());
++}
++
++TEST(BufferList, claim_prepend) {
++  bufferlist from;
++  {
++    bufferptr ptr(2);
++    from.append(ptr);
++  }
++  bufferlist to;
++  {
++    bufferptr ptr(4);
++    to.append(ptr);
++  }
++  EXPECT_EQ((unsigned)4, to.length());
++  EXPECT_EQ((unsigned)1, to.buffers().size());
++  to.claim_prepend(from);
++  EXPECT_EQ((unsigned)(2 + 4), to.length());
++  EXPECT_EQ((unsigned)2, to.buffers().front().length());
++  EXPECT_EQ((unsigned)4, to.buffers().back().length());
++  EXPECT_EQ((unsigned)2, to.buffers().size());
++  EXPECT_EQ((unsigned)0, from.buffers().size());
++  EXPECT_EQ((unsigned)0, from.length());
++}
++
++TEST(BufferList, begin) {
++  bufferlist bl;
++  bl.append("ABC");
++  bufferlist::iterator i = bl.begin();
++  EXPECT_EQ('A', *i);
++}
++
++TEST(BufferList, end) {
++  bufferlist bl;
++  bl.append("ABC");
++  bufferlist::iterator i = bl.end();
++  i.advance(-1);
++  EXPECT_EQ('C', *i);
++}
++
++TEST(BufferList, copy) {
++  //
++  // void copy(unsigned off, unsigned len, char *dest) const;
++  //
++  {
++    bufferlist bl;
++    EXPECT_THROW(bl.copy((unsigned)100, (unsigned)100, (char*)0), buffer::end_of_buffer);
++    const char *expected = "ABC";
++    bl.append(expected);
++    char *dest = new char[2];
++    bl.copy(1, 2, dest);
++    EXPECT_EQ(0, ::memcmp(expected + 1, dest, 2));
++    delete [] dest;
++  }
++  //
++  // void copy(unsigned off, unsigned len, list &dest) const;
++  //
++  {
++    bufferlist bl;
++    bufferlist dest;
++    EXPECT_THROW(bl.copy((unsigned)100, (unsigned)100, dest), buffer::end_of_buffer);
++    const char *expected = "ABC";
++    bl.append(expected);
++    bl.copy(1, 2, dest);
++    EXPECT_EQ(0, ::memcmp(expected + 1, dest.c_str(), 2));
++  }
++  //
++  // void copy(unsigned off, unsigned len, std::string &dest) const;
++  //
++  {
++    bufferlist bl;
++    std::string dest;
++    EXPECT_THROW(bl.copy((unsigned)100, (unsigned)100, dest), buffer::end_of_buffer);
++    const char *expected = "ABC";
++    bl.append(expected);
++    bl.copy(1, 2, dest);
++    EXPECT_EQ(0, ::memcmp(expected + 1, dest.c_str(), 2));
++  }
++}
++
++TEST(BufferList, copy_in) {
++  //
++  // void copy_in(unsigned off, unsigned len, const char *src);
++  //
++  {
++    bufferlist bl;
++    bl.append("XXX");
++    EXPECT_THROW(bl.copy_in((unsigned)100, (unsigned)100, (char*)0), buffer::end_of_buffer);
++    bl.copy_in(1, 2, "AB");
++    EXPECT_EQ(0, ::memcmp("XAB", bl.c_str(), 3));
++  }
++  //
++  // void copy_in(unsigned off, unsigned len, const list& src);
++  //
++  {
++    bufferlist bl;
++    bl.append("XXX");
++    bufferlist src;
++    src.append("ABC");
++    EXPECT_THROW(bl.copy_in((unsigned)100, (unsigned)100, src), buffer::end_of_buffer);
++    bl.copy_in(1, 2, src);
++    EXPECT_EQ(0, ::memcmp("XAB", bl.c_str(), 3));    
++  }
+ }
+ 
+-TEST(BufferList, zero) {
++TEST(BufferList, append) {
+   //
+-  // void zero()
++  // void append(char c);
+   //
+   {
+     bufferlist bl;
++    EXPECT_EQ((unsigned)0, bl.buffers().size());
+     bl.append('A');
+-    EXPECT_EQ('A', bl[0]);
+-    bl.zero();
+-    EXPECT_EQ('\0', bl[0]);
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++    EXPECT_TRUE(bl.is_page_aligned());
+   }
+   //
+-  // void zero(unsigned o, unsigned l)
++  // void append(const char *data, unsigned len);
++  //
++  {
++    bufferlist bl(CEPH_PAGE_SIZE);
++    std::string str(CEPH_PAGE_SIZE * 2, 'X');
++    bl.append(str.c_str(), str.size());
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ(CEPH_PAGE_SIZE, bl.buffers().front().length());
++    EXPECT_EQ(CEPH_PAGE_SIZE, bl.buffers().back().length());
++  }
++  //
++  // void append(const std::string& s);
++  //
++  {
++    bufferlist bl(CEPH_PAGE_SIZE);
++    std::string str(CEPH_PAGE_SIZE * 2, 'X');
++    bl.append(str);
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ(CEPH_PAGE_SIZE, bl.buffers().front().length());
++    EXPECT_EQ(CEPH_PAGE_SIZE, bl.buffers().back().length());
++  }
++  //
++  // void append(const ptr& bp);
++  //
++  {
++    bufferlist bl;
++    EXPECT_EQ((unsigned)0, bl.buffers().size());
++    EXPECT_EQ((unsigned)0, bl.length());
++    {
++      bufferptr ptr;
++      bl.append(ptr);
++      EXPECT_EQ((unsigned)0, bl.buffers().size());
++      EXPECT_EQ((unsigned)0, bl.length());
++    }
++    {
++      bufferptr ptr(3);
++      bl.append(ptr);
++      EXPECT_EQ((unsigned)1, bl.buffers().size());
++      EXPECT_EQ((unsigned)3, bl.length());
++    }
++  }
++  //
++  // void append(const ptr& bp, unsigned off, unsigned len);
++  //
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferptr back(bl.buffers().back());
++    bufferptr in(back);
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++    EXPECT_EQ((unsigned)1, bl.length());
++    EXPECT_THROW(bl.append(in, (unsigned)100, (unsigned)100), FailedAssertion);
++    EXPECT_LT((unsigned)0, in.unused_tail_length());
++    in.append('B');
++    bl.append(in, back.end(), 1);
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++    EXPECT_EQ((unsigned)2, bl.length());
++    EXPECT_EQ('B', bl[1]);
++  }
++  {
++    bufferlist bl;
++    EXPECT_EQ((unsigned)0, bl.buffers().size());
++    EXPECT_EQ((unsigned)0, bl.length());
++    bufferptr ptr(2);
++    ptr.set_length(0);
++    ptr.append("AB", 2);
++    bl.append(ptr, 1, 1);
++    EXPECT_EQ((unsigned)1, bl.buffers().size());
++    EXPECT_EQ((unsigned)1, bl.length());
++  }
++  //
++  // void append(const list& bl);
++  //
++  {
++    bufferlist bl;
++    bl.append('A');
++    bufferlist other;
++    other.append('B');
++    bl.append(other);
++    EXPECT_EQ((unsigned)2, bl.buffers().size());
++    EXPECT_EQ('B', bl[1]);
++  }
++  //
++  // void append(std::istream& in);
+   //
++  {
++    bufferlist bl;
++    std::string expected("ABC\n\nDEF\n");
++    std::istringstream is("ABC\n\nDEF");
++    bl.append(is);
++    EXPECT_EQ(0, ::memcmp(expected.c_str(), bl.c_str(), expected.size()));
++    EXPECT_EQ(expected.size(), bl.length());
++  }
++}
++
++TEST(BufferList, append_zero) {
++  bufferlist bl;
++  bl.append('A');
++  EXPECT_EQ((unsigned)1, bl.buffers().size());
++  EXPECT_EQ((unsigned)1, bl.length());
++  bl.append_zero(1);
++  EXPECT_EQ((unsigned)2, bl.buffers().size());
++  EXPECT_EQ((unsigned)2, bl.length());
++  EXPECT_EQ('\0', bl[1]);
++}
++
++TEST(BufferList, operator_brackets) {
++  bufferlist bl;
++  EXPECT_THROW(bl[1], buffer::end_of_buffer);
++  bl.append('A');
++  bufferlist other;
++  other.append('B');
++  bl.append(other);
++  EXPECT_EQ((unsigned)2, bl.buffers().size());
++  EXPECT_EQ('B', bl[1]);
++}
++
++TEST(BufferList, c_str) {
++  bufferlist bl;
++  EXPECT_EQ((const char*)NULL, bl.c_str());
++  bl.append('A');
++  bufferlist other;
++  other.append('B');
++  bl.append(other);
++  EXPECT_EQ((unsigned)2, bl.buffers().size());
++  EXPECT_EQ(0, ::memcmp("AB", bl.c_str(), 2));
++}
++
++TEST(BufferList, substr_of) {
++  bufferlist bl;
++  EXPECT_THROW(bl.substr_of(bl, 1, 1), buffer::end_of_buffer);
+   const char *s[] = {
+     "ABC",
+     "DEF",
+     "GHI",
+-    "KLM"
++    "JKL"
+   };
+-  {
+-    bufferlist bl;
+-    bufferptr ptr(s[0], strlen(s[0]));
++  for (unsigned i = 0; i < 4; i++) {
++    bufferptr ptr(s[i], strlen(s[i]));
+     bl.push_back(ptr);
+-    bl.zero((unsigned)0, (unsigned)1);
+-    EXPECT_EQ(0, ::memcmp("\0BC", bl.c_str(), 3));
+   }
+-  {
+-    bufferlist bl;
+-    for (unsigned i = 0; i < 4; i++) {
+-      bufferptr ptr(s[i], strlen(s[i]));
+-      bl.push_back(ptr);
+-    }
+-    EXPECT_THROW(bl.zero((unsigned)0, (unsigned)2000), FailedAssertion);
+-    bl.zero((unsigned)2, (unsigned)5);
+-    EXPECT_EQ(0, ::memcmp("AB\0\0\0\0\0HIKLM", bl.c_str(), 9));
++  EXPECT_EQ((unsigned)4, bl.buffers().size());
++
++  bufferlist other;
++  other.append("TO BE CLEARED");
++  other.substr_of(bl, 4, 4);
++  EXPECT_EQ((unsigned)2, other.buffers().size());
++  EXPECT_EQ((unsigned)4, other.length());
++  EXPECT_EQ(0, ::memcmp("EFGH", other.c_str(), 4));
++}
++
++TEST(BufferList, splice) {
++  bufferlist bl;
++  EXPECT_THROW(bl.splice(1, 1), buffer::end_of_buffer);
++  const char *s[] = {
++    "ABC",
++    "DEF",
++    "GHI",
++    "JKL"
++  };
++  for (unsigned i = 0; i < 4; i++) {
++    bufferptr ptr(s[i], strlen(s[i]));
++    bl.push_back(ptr);
+   }
++  EXPECT_EQ((unsigned)4, bl.buffers().size());
++  EXPECT_THROW(bl.splice(0, 0), FailedAssertion);
++
++  bufferlist other;
++  other.append('X');
++  bl.splice(4, 4, &other);
++  EXPECT_EQ((unsigned)3, other.buffers().size());
++  EXPECT_EQ((unsigned)5, other.length());
++  EXPECT_EQ(0, ::memcmp("XEFGH", other.c_str(), other.length()));
++  EXPECT_EQ((unsigned)8, bl.length());
+   {
+-    bufferlist bl;
+-    for (unsigned i = 0; i < 4; i++) {
+-      bufferptr ptr(s[i], strlen(s[i]));
+-      bl.push_back(ptr);
+-    }
+-    bl.zero((unsigned)3, (unsigned)3);
+-    EXPECT_EQ(0, ::memcmp("ABC\0\0\0GHIKLM", bl.c_str(), 9));
++    bufferlist tmp(bl);
++    EXPECT_EQ(0, ::memcmp("ABCDIJKL", tmp.c_str(), tmp.length()));
++  }
++
++  bl.splice(4, 4);
++  EXPECT_EQ((unsigned)4, bl.length());
++  EXPECT_EQ(0, ::memcmp("ABCD", bl.c_str(), bl.length()));
++}
++
++TEST(BufferList, write) {
++  std::ostringstream stream;
++  bufferlist bl;
++  bl.append("ABC");
++  bl.write(1, 2, stream);
++  EXPECT_EQ("BC", stream.str());
++}
++
++TEST(BufferList, encode_base64) {
++  bufferlist bl;
++  bl.append("ABCD");
++  bufferlist other;
++  bl.encode_base64(other);
++  const char *expected = "QUJDRA==";
++  EXPECT_EQ(0, ::memcmp(expected, other.c_str(), strlen(expected)));
++}
++
++TEST(BufferList, decode_base64) {
++  bufferlist bl;
++  bl.append("QUJDRA==");
++  bufferlist other;
++  other.decode_base64(bl);
++  const char *expected = "ABCD";
++  EXPECT_EQ(0, ::memcmp(expected, other.c_str(), strlen(expected)));
++  bufferlist malformed;
++  malformed.append("QUJDRA");
++  EXPECT_THROW(other.decode_base64(malformed), buffer::malformed_input);
++}
++
++TEST(BufferList, hexdump) {
++  bufferlist bl;
++  std::ostringstream stream;
++  bl.append("013245678901234\0006789012345678901234", 32);
++  bl.hexdump(stream);
++  EXPECT_EQ("0000 : 30 31 33 32 34 35 36 37 38 39 30 31 32 33 34 00 : 013245678901234.\n"
++	    "0010 : 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30 31 : 6789012345678901\n",
++	    stream.str());
++}
++
++TEST(BufferList, read_file) {
++  std::string error;
++  bufferlist bl;
++  ::unlink("testfile");
++  EXPECT_EQ(-ENOENT, bl.read_file("UNLIKELY", &error));
++  ::system("echo ABC > testfile ; chmod 0 testfile");
++  EXPECT_EQ(-EACCES, bl.read_file("testfile", &error));
++  ::system("chmod +r testfile");
++  EXPECT_EQ(0, bl.read_file("testfile", &error));
++  ::unlink("testfile");
++  EXPECT_EQ((unsigned)4, bl.length());
++  std::string actual(bl.c_str(), bl.length());
++  EXPECT_EQ("ABC\n", actual);
++}
++
++TEST(BufferList, read_fd) {
++  unsigned len = 4;
++  ::unlink("testfile");
++  ::system("echo ABC > testfile");
++  int fd = -1;
++  bufferlist bl;
++  EXPECT_EQ(-EBADF, bl.read_fd(fd, len));
++  fd = ::open("testfile", O_RDONLY);
++  EXPECT_EQ(len, bl.read_fd(fd, len));
++  EXPECT_EQ(len, bl.length());
++  EXPECT_EQ(CEPH_PAGE_SIZE - len, bl.buffers().front().unused_tail_length());
++  ::close(fd);
++  ::unlink("testfile");
++}
++
++TEST(BufferList, write_file) {
++  ::unlink("testfile");
++  int mode = 0600;
++  bufferlist bl;
++  EXPECT_EQ(-ENOENT, bl.write_file("un/like/ly", mode));
++  bl.append("ABC");
++  EXPECT_EQ(0, bl.write_file("testfile", mode));
++  struct stat st;
++  memset(&st, 0, sizeof(st));
++  ::stat("testfile", &st);
++  EXPECT_EQ((unsigned)(mode | S_IFREG), st.st_mode);
++  ::unlink("testfile");
++}
++
++TEST(BufferList, write_fd) {
++  ::unlink("testfile");
++  int fd = ::open("testfile", O_WRONLY|O_CREAT|O_TRUNC, 0600);
++  bufferlist bl;
++  for (unsigned i = 0; i < IOV_MAX * 2; i++) {
++    bufferptr ptr("A", 1);
++    bl.push_back(ptr);
+   }
++  EXPECT_EQ(0, bl.write_fd(fd));
++  ::close(fd);
++  struct stat st;
++  memset(&st, 0, sizeof(st));
++  ::stat("testfile", &st);
++  EXPECT_EQ(IOV_MAX * 2, st.st_size);
++  ::unlink("testfile");
++}
++
++TEST(BufferList, crc32c) {
++  bufferlist bl;
++  __u32 crc = 0;
++  bl.append("A");
++  crc = bl.crc32c(crc);
++  EXPECT_EQ((unsigned)0xB3109EBF, crc);
++  crc = bl.crc32c(crc);
++  EXPECT_EQ((unsigned)0x5FA5C0CC, crc);
+ }
+ 
+ TEST(BufferList, compare) {
+@@ -121,6 +1694,72 @@ TEST(BufferList, compare) {
+   ASSERT_TRUE(ab == ab);
+ }
+ 
++TEST(BufferList, ostream) {
++  std::ostringstream stream;
++  bufferlist bl;
++  const char *s[] = {
++    "ABC",
++    "DEF"
++  };
++  for (unsigned i = 0; i < 2; i++) {
++    bufferptr ptr(s[i], strlen(s[i]));
++    bl.push_back(ptr);
++  }
++  stream << bl;
++  std::cerr << stream.str() << std::endl;
++  EXPECT_GT(stream.str().size(), stream.str().find("list(len=6,"));
++  EXPECT_GT(stream.str().size(), stream.str().find("len 3 nref 1),\n"));
++  EXPECT_GT(stream.str().size(), stream.str().find("len 3 nref 1)\n"));
++}
++
++TEST(BufferList, zero) {
++  //
++  // void zero()
++  //
++  {
++    bufferlist bl;
++    bl.append('A');
++    EXPECT_EQ('A', bl[0]);
++    bl.zero();
++    EXPECT_EQ('\0', bl[0]);
++  }
++  //
++  // void zero(unsigned o, unsigned l)
++  //
++  const char *s[] = {
++    "ABC",
++    "DEF",
++    "GHI",
++    "KLM"
++  };
++  {
++    bufferlist bl;
++    bufferptr ptr(s[0], strlen(s[0]));
++    bl.push_back(ptr);
++    bl.zero((unsigned)0, (unsigned)1);
++    EXPECT_EQ(0, ::memcmp("\0BC", bl.c_str(), 3));
++  }
++  {
++    bufferlist bl;
++    for (unsigned i = 0; i < 4; i++) {
++      bufferptr ptr(s[i], strlen(s[i]));
++      bl.push_back(ptr);
++    }
++    EXPECT_THROW(bl.zero((unsigned)0, (unsigned)2000), FailedAssertion);
++    bl.zero((unsigned)2, (unsigned)5);
++    EXPECT_EQ(0, ::memcmp("AB\0\0\0\0\0HIKLM", bl.c_str(), 9));
++  }
++  {
++    bufferlist bl;
++    for (unsigned i = 0; i < 4; i++) {
++      bufferptr ptr(s[i], strlen(s[i]));
++      bl.push_back(ptr);
++    }
++    bl.zero((unsigned)3, (unsigned)3);
++    EXPECT_EQ(0, ::memcmp("ABC\0\0\0GHIKLM", bl.c_str(), 9));
++  }
++}
++
+ TEST(BufferList, EmptyAppend) {
+   bufferlist bl;
+   bufferptr ptr;
+@@ -151,54 +1790,6 @@ TEST(BufferList, TestPtrAppend) {
+   ASSERT_EQ(memcmp(bl.c_str(), correct, curpos), 0);
+ }
+ 
+-TEST(BufferList, ptr_assignment) {
+-  unsigned len = 17;
+-  //
+-  // override a bufferptr set with the same raw
+-  //
+-  {
+-    bufferptr original(len);
+-    bufferptr same_raw(original.get_raw());
+-    unsigned offset = 5;
+-    unsigned length = len - offset;
+-    original.set_offset(offset);
+-    original.set_length(length);
+-    same_raw = original;
+-    ASSERT_EQ(2, original.raw_nref());
+-    ASSERT_EQ(same_raw.get_raw(), original.get_raw());
+-    ASSERT_EQ(same_raw.offset(), original.offset());
+-    ASSERT_EQ(same_raw.length(), original.length());
+-  }
+-
+-  //
+-  // self assignment is a noop
+-  //
+-  {
+-    bufferptr original(len);
+-    original = original;
+-    ASSERT_EQ(1, original.raw_nref());
+-    ASSERT_EQ((unsigned)0, original.offset());
+-    ASSERT_EQ(len, original.length());
+-  }
+-  
+-  //
+-  // a copy points to the same raw
+-  //
+-  {
+-    bufferptr original(len);
+-    unsigned offset = 5;
+-    unsigned length = len - offset;
+-    original.set_offset(offset);
+-    original.set_length(length);
+-    bufferptr ptr;
+-    ptr = original;
+-    ASSERT_EQ(2, original.raw_nref());
+-    ASSERT_EQ(ptr.get_raw(), original.get_raw());
+-    ASSERT_EQ(original.offset(), ptr.offset());
+-    ASSERT_EQ(original.length(), ptr.length());
+-  }
+-}
+-
+ TEST(BufferList, TestDirectAppend) {
+   bufferlist bl;
+   char correct[MAX_TEST];
+@@ -234,3 +1825,29 @@ TEST(BufferList, TestCopyAll) {
+   bl2.copy(0, BIG_SZ, (char*)big2);
+   ASSERT_EQ(memcmp(big.get(), big2, BIG_SZ), 0);
+ }
++
++TEST(BufferHash, all) {
++  {
++    bufferlist bl;
++    bl.append("A");
++    bufferhash hash;
++    EXPECT_EQ((unsigned)0, hash.digest());
++    hash.update(bl);
++    EXPECT_EQ((unsigned)0xB3109EBF, hash.digest());
++    hash.update(bl);
++    EXPECT_EQ((unsigned)0x5FA5C0CC, hash.digest());
++  }
++  {
++    bufferlist bl;
++    bl.append("A");
++    bufferhash hash;
++    EXPECT_EQ((unsigned)0, hash.digest());
++    bufferhash& returned_hash =  hash << bl;
++    EXPECT_EQ(&returned_hash, &hash);
++    EXPECT_EQ((unsigned)0xB3109EBF, hash.digest());
++  }
++}
++
++// Local Variables:
++// compile-command: "cd .. ; make unittest_bufferlist ; ulimit -s unlimited ; CEPH_BUFFER_TRACK=true valgrind --max-stackframe=20000000 --tool=memcheck ./unittest_bufferlist # --gtest_filter=BufferList.constructors"
++// End:
+diff --git a/src/unittest_bufferlist.sh b/src/unittest_bufferlist.sh
+new file mode 100755
+index 0000000..0f05afe
+--- /dev/null
++++ b/src/unittest_bufferlist.sh
+@@ -0,0 +1,19 @@
++#!/bin/bash
++#
++# Ceph - scalable distributed file system
++#
++# Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
++#
++# Author: Loic Dachary <loic@dachary.org>
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU Library Public License as published by
++# the Free Software Foundation; either version 2, or (at your option)
++# any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU Library Public License for more details.
++#
++CEPH_BUFFER_TRACK=true ./unittest_bufferlist
+-- 
+1.7.10.4
+
