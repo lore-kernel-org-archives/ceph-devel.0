@@ -1,77 +1,85 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: simplify data length calculation
-Date: Sat, 16 Feb 2013 16:46:58 -0800
-Message-ID: <51202882.3090807@inktank.com>
-References: <511FBCF5.7090506@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Loic Dachary <loic@dachary.org>
+Subject: [PATCH] buffer::ptr::cmp only compares up to the smallest length
+Date: Sun, 17 Feb 2013 02:44:25 +0100
+Message-ID: <1361065465-11115-1-git-send-email-loic@dachary.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f47.google.com ([209.85.210.47]:44690 "EHLO
-	mail-da0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754809Ab3BQArC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 19:47:02 -0500
-Received: by mail-da0-f47.google.com with SMTP id s35so1983256dak.34
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Feb 2013 16:47:01 -0800 (PST)
-In-Reply-To: <511FBCF5.7090506@inktank.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:34310 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754904Ab3BQBo3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Feb 2013 20:44:29 -0500
+Received: from bet.dachary.org (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 4B8D526394
+	for <ceph-devel@vger.kernel.org>; Sun, 17 Feb 2013 02:44:26 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+When running
 
-On 02/16/2013 09:08 AM, Alex Elder wrote:
-> Simplify the way the data length recorded in a message header is
-> calculated in ceph_osdc_build_request().
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   net/ceph/osd_client.c |   12 ++++--------
->   1 file changed, 4 insertions(+), 8 deletions(-)
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index bbd1575..b58748e 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -335,7 +335,7 @@ void ceph_osdc_build_request(struct ceph_osd_request
-> *req,
->   	void *p;
->   	size_t msg_size = sizeof(*head) + num_op*sizeof(*op);
->   	int flags = req->r_flags;
-> -	u64 data_len = 0;
-> +	u64 data_len;
->   	int i;
->
->   	WARN_ON((flags & (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE)) == 0);
-> @@ -363,8 +363,6 @@ void ceph_osdc_build_request(struct ceph_osd_request
-> *req,
->   	while (num_op--)
->   		osd_req_encode_op(req, op++, src_op++);
->
-> -	data_len += req->r_trail.length;
-> -
->   	if (snapc) {
->   		head->snap_seq = cpu_to_le64(snapc->seq);
->   		head->num_snaps = cpu_to_le32(snapc->num_snaps);
-> @@ -374,14 +372,12 @@ void ceph_osdc_build_request(struct
-> ceph_osd_request *req,
->   		}
->   	}
->
-> +	data_len = req->r_trail.length;
->   	if (flags & CEPH_OSD_FLAG_WRITE) {
->   		req->r_request->hdr.data_off = cpu_to_le16(off);
-> -		req->r_request->hdr.data_len = cpu_to_le32(len + data_len);
-> -	} else if (data_len) {
-> -		req->r_request->hdr.data_off = 0;
-> -		req->r_request->hdr.data_len = cpu_to_le32(data_len);
-> +		data_len += len;
->   	}
-> -
-> +	req->r_request->hdr.data_len = cpu_to_le32(data_len);
->   	req->r_request->page_alignment = req->r_page_alignment;
->
->   	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
->
+  bufferptr a("A", 1);
+  bufferptr ab("AB", 2);
+  a.cmp(ab);
+
+it returned zero because cmp only compared up to the length of the
+smallest buffer. The tests comparing the length of the buffers are
+moved before the memcmp comparing the actual content of the buffers.
+
+http://tracker.ceph.com/issues/4170 refs #4170
+
+Signed-off-by: Loic Dachary <loic@dachary.org>
+---
+ src/common/buffer.cc   |    8 +-------
+ src/test/bufferlist.cc |   14 ++++++++++++++
+ 2 files changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/src/common/buffer.cc b/src/common/buffer.cc
+index e10d6c9..5a88849 100644
+--- a/src/common/buffer.cc
++++ b/src/common/buffer.cc
+@@ -368,17 +368,11 @@ bool buffer_track_alloc = get_env_bool("CEPH_BUFFER_TRACK");
+ 
+   int buffer::ptr::cmp(const ptr& o)
+   {
+-    int l = _len < o._len ? _len : o._len;
+-    if (l) {
+-      int r = memcmp(c_str(), o.c_str(), l);
+-      if (!r)
+-	return r;
+-    }
+     if (_len < o._len)
+       return -1;
+     if (_len > o._len)
+       return 1;
+-    return 0;
++    return memcmp(c_str(), o.c_str(), _len);
+   }
+ 
+   bool buffer::ptr::is_zero() const
+diff --git a/src/test/bufferlist.cc b/src/test/bufferlist.cc
+index 71c2e79..aac41c6 100644
+--- a/src/test/bufferlist.cc
++++ b/src/test/bufferlist.cc
+@@ -9,6 +9,20 @@
+ 
+ #define MAX_TEST 1000000
+ 
++TEST(BufferPtr, cmp) {
++  bufferptr empty;
++  bufferptr a("A", 1);
++  bufferptr ab("AB", 2);
++  bufferptr af("AF", 2);
++  EXPECT_GE(-1, empty.cmp(a));
++  EXPECT_LE(1, a.cmp(empty));
++  EXPECT_GE(-1, a.cmp(ab));
++  EXPECT_LE(1, ab.cmp(a));
++  EXPECT_EQ(0, ab.cmp(ab));
++  EXPECT_GE(-1, ab.cmp(af));
++  EXPECT_LE(1, af.cmp(ab));
++}
++
+ TEST(BufferList, zero) {
+   //
+   // void zero()
+-- 
+1.7.10.4
 
