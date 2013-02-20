@@ -1,72 +1,159 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Re: Ceph support in OpenNebula
-Date: Wed, 20 Feb 2013 10:54:06 -0500
-Message-ID: <CAP8Oy=LDyp537TGm_jSpUKg7a1LF-H6SELwn+K3mphmC-1Q4Kg@mail.gmail.com>
-References: <CA+HrgRowreiBM-isY+bW3VFe94yKQCb7YdShXEVW6OEBW+b9dQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Geo-replication with RBD
+Date: Wed, 20 Feb 2013 08:33:40 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302200832180.23463@cobra.newdream.net>
+References: <5B735879-C53B-4C07-8F60-97889F275481@portal.onet.pl> <CANygib8Z=+ik3WbPNcyXTkSV3o2wC9+06fp58EnhUax3cgJBng@mail.gmail.com> <CAMwB3TiWKJ+e+81B4gDSkNnPMWQRzpqCT7pDJU+d_q0iTfjP5A@mail.gmail.com> <CAMwB3TixO3gOhP5g+47NbSwpBU7PYV8vT2Ymm0-HgDLjh0RHcQ@mail.gmail.com>
+ <CAOLwVU=L2SK=uHh+9nRihsPN3gawyHnnTtyBm98oKXNMZ_U9Aw@mail.gmail.com> <-6440009782960940725@unknownmsgid>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:64893 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933631Ab3BTPyG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 10:54:06 -0500
-Received: by mail-pb0-f52.google.com with SMTP id ma3so2950883pbc.39
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Feb 2013 07:54:06 -0800 (PST)
-In-Reply-To: <CA+HrgRowreiBM-isY+bW3VFe94yKQCb7YdShXEVW6OEBW+b9dQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43421 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933878Ab3BTQdk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 11:33:40 -0500
+In-Reply-To: <-6440009782960940725@unknownmsgid>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaime Melis <jmelis@opennebula.org>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, Neil Levine <neil.levine@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey Jaime,
+On Wed, 20 Feb 2013, S?awomir Skowron wrote:
+> My requirement is to have full disaster recovery, buisness continuity,
+> and failover of automatet services on second Datacenter, and not on
+> same ceph cluster.
+> Datacenters have 10GE dedicated link, for communication, and there is
+> option to expand cluster into two DataCenters, but it is not what i
+> mean.
+> There are advantages of this option like fast snapshots, and fast
+> switch of services, but there are some problems.
+> 
+> When we talk about disaster recovery i mean that whole storage cluster
+> have problems, not only services at top of storage. I am thinking
+> about bug, or mistake of admin, that makes cluster not accessible in
+> any copy, or a upgrade that makes data corruption, or upgrade that is
+> disruptive for services - auto failover services into another DC,
+> before upgrade cluster.
+> 
+> If cluster have a solution to replicate data in rbd images to next
+> cluster, than, only data are migrated, and when disaster comes, than
+> there is no need to work on last imported snapshot (there can be
+> constantly imported snapshot with minutes, or hour, before last
+> production), but work on data from now. And when we have automated
+> solution to recover DB (one of app service on top of rbd) clusters in
+> new datacenter infrastructure, than we have a real disaster recovery
+> solution.
+> 
+> That's why we made, a s3 api layer synchronization to another DC, and
+> Amazon, and only RBD is left.
 
-Awesome!  Love to see new integrations pop up.  I'd love to feature a
-bit about the integration (what work went into it, implementation
-choices, current features, future dev work, etc) on the Ceph.com blog
-if you are willing to write something.
+Have you read the thread from Jens last week, 'snapshot, clone and mount a 
+VM-Image'?  Would this type of capability capture you're requirements?
 
-I'll connect with you directly about a doc discussion.  Thanks!
+sage
 
-
-Best Regards,
-
-Patrick
-
-On Wed, Feb 20, 2013 at 6:59 AM, Jaime Melis <jmelis@opennebula.org> wrote:
-> Hello everyone,
->
-> I'm an OpenNebula [1] developer. We've been working on integrating
-> OpenNebula with native Ceph drivers (using libvirt). The integration
-> is now complete, ready for testing. You can find more information
-> about its usage here [2].
->
-> We will maintain these drivers officially and extend its features, so
-> if you have any questions, comments or suggestions, please let me
-> know.
->
-> I would be very happy to write an OpenNebula page in Ceph's documentation.
->
-> [1] http://opennebula.org
-> [2] http://opennebula.org/documentation:rel4.0:ceph_ds
->
-> Cheers,
-> Jaime
->
-> --
-> Jaime Melis
-> Project Engineer
-> OpenNebula - The Open Source Toolkit for Cloud Computing
-> www.OpenNebula.org | jmelis@opennebula.org
+> 
+> Dnia 19 lut 2013 o godz. 10:23 "S?bastien Han"
+> <han.sebastien@gmail.com> napisa?(a):
+> 
+> > Hi,
+> >
+> > For of all, I have some questions about your setup:
+> >
+> > * What are your requirements?
+> > * Are the DCs far from each others?
+> >
+> > If they are reasonably close to each others, you can setup a single
+> > cluster, with replicas across both DCs and manage the RBD devices with
+> > pacemaker.
+> >
+> > Cheers.
+> >
+> > --
+> > Regards,
+> > S?bastien Han.
+> >
+> >
+> > On Mon, Feb 18, 2013 at 3:20 PM, S?awomir Skowron <szibis@gmail.com> wrote:
+> >> Hi, Sorry for very late response, but i was sick.
+> >>
+> >> Our case is to make a failover rbd instance in another cluster. We are
+> >> storing block device images, for some services like Database. We need
+> >> to have a two clusters, synchronized, for a quick failover, if first
+> >> cluster goes down, or for upgrade with restart, or many other cases.
+> >>
+> >> Volumes are in many sizes: 1-500GB
+> >> external block device for kvm vm, like EBS.
+> >>
+> >> On Mon, Feb 18, 2013 at 3:07 PM, S?awomir Skowron <szibis@gmail.com> wrote:
+> >>> Hi, Sorry for very late response, but i was sick.
+> >>>
+> >>> Our case is to make a failover rbd instance in another cluster. We are
+> >>> storing block device images, for some services like Database. We need to
+> >>> have a two clusters, synchronized, for a quick failover, if first cluster
+> >>> goes down, or for upgrade with restart, or many other cases.
+> >>>
+> >>> Volumes are in many sizes: 1-500GB
+> >>> external block device for kvm vm, like EBS.
+> >>>
+> >>>
+> >>> On Fri, Feb 1, 2013 at 12:27 AM, Neil Levine <neil.levine@inktank.com>
+> >>> wrote:
+> >>>>
+> >>>> Skowron,
+> >>>>
+> >>>> Can you go into a bit more detail on your specific use-case? What type
+> >>>> of data are you storing in rbd (type, volume)?
+> >>>>
+> >>>> Neil
+> >>>>
+> >>>> On Wed, Jan 30, 2013 at 10:42 PM, Skowron S?awomir
+> >>>> <slawomir.skowron@grupaonet.pl> wrote:
+> >>>>> I make new thread, because i think it's a diffrent case.
+> >>>>>
+> >>>>> We have managed async geo-replication of s3 service, beetwen two ceph
+> >>>>> clusters in two DC's, and to amazon s3 as third. All this via s3 API. I love
+> >>>>> to see native RGW geo-replication with described features in another thread.
+> >>>>>
+> >>>>> There is another case. What about RBD replication ?? It's much more
+> >>>>> complicated, and for disaster recovery much more important, just like in
+> >>>>> enterprise storage arrays.
+> >>>>> One cluster in two DC's, not solving problem, because we need security
+> >>>>> in data consistency, and isolation.
+> >>>>> Do you thinking about this case ??
+> >>>>>
+> >>>>> Regards
+> >>>>> Slawomir Skowron--
+> >>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>>> the body of a message to majordomo@vger.kernel.org
+> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>> the body of a message to majordomo@vger.kernel.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>>
+> >>>
+> >>>
+> >>> --
+> >>> -----
+> >>> Pozdrawiam
+> >>>
+> >>> S?awek "sZiBis" Skowron
+> >>
+> >>
+> >>
+> >> --
+> >> -----
+> >> Pozdrawiam
+> >>
+> >> S?awek "sZiBis" Skowron
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---
-Patrick McGarry
-Director, Community
-Inktank
-
-@scuttlemonkey @inktank @ceph
+> 
+> 
