@@ -1,34 +1,80 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Hadoop DNS/topology details
-Date: Wed, 20 Feb 2013 09:59:29 -0800
-Message-ID: <D405F6AD-81F8-440D-AEFF-5DC051A028B9@cs.ucsc.edu>
-References: <13BF7821-647C-4234-B696-5AA41ECCD6E5@cs.ucsc.edu> <CAPYLRzjy-TCTobh1mi1=d9omx0ZWvEce6ZB9vvf3ON5MVaC-MA@mail.gmail.com> <16038FC6-8930-46AE-A5C5-1169230CDDA8@cs.ucsc.edu> <alpine.DEB.2.00.1302191637520.18860@cobra.newdream.net> <E6DCD080-3F18-40D2-95F1-EE66B1C468CB@cs.ucsc.edu> <alpine.DEB.2.00.1302200930060.26205@cobra.newdream.net> <648CA9DB-73D5-4C1B-8852-9E41F5784788@cs.ucsc.edu>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: enable old OSD snapshot to re-join a cluster
+Date: Wed, 20 Feb 2013 10:52:30 -0800
+Message-ID: <CAPYLRzjG3ws-TJt+XOv0vp-oRuOZti+b1yjBZw_shhmdQE9F4g@mail.gmail.com>
+References: <orr4kbgbn3.fsf@livre.home>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f42.google.com ([209.85.210.42]:43078 "EHLO
-	mail-da0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756469Ab3BTR7b convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 12:59:31 -0500
-Received: by mail-da0-f42.google.com with SMTP id z17so3629785dal.1
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Feb 2013 09:59:30 -0800 (PST)
-In-Reply-To: <648CA9DB-73D5-4C1B-8852-9E41F5784788@cs.ucsc.edu>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:44211 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756008Ab3BTSwb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 13:52:31 -0500
+Received: by mail-qa0-f50.google.com with SMTP id dx4so2587944qab.9
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Feb 2013 10:52:30 -0800 (PST)
+In-Reply-To: <orr4kbgbn3.fsf@livre.home>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Joe Buck <jbbuck@gmail.com>
+To: Alexandre Oliva <oliva@gnu.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Tue, Feb 19, 2013 at 2:52 PM, Alexandre Oliva <oliva@gnu.org> wrote:
+> It recently occurred to me that I messed up an OSD's storage, and
+> decided that the easiest way to bring it back was to roll it back to =
+an
+> earlier snapshot I'd taken (along the lines of clustersnap) and let i=
+t
+> recover from there.
+>
+> The problem with that idea was that the cluster had advanced too much
+> since the snapshot was taken: the latest OSDMap known by that snapsho=
+t
+> was far behind the range still carried by the monitors.
+>
+> Determined to let that osd recover from all the data it already had,
+> rather than restarting from scratch, I hacked up a =93solution=94 tha=
+t
+> appears to work: with the patch below, the OSD will use the contents =
+of
+> an earlier OSDMap (presumably the latest one it has) for a newer OSDM=
+ap
+> it can't get any more.
+>
+> A single run of osd with this patch was enough for it to pick up the
+> newer state and join the cluster; from then on, the patched osd was n=
+o
+> longer necessary, and presumably should not be used except for this s=
+ort
+> of emergency.
+>
+> Of course this can only possibly work reliably if other nodes are up
+> with same or newer versions of each of the PGs (but then, rolling bac=
+k
+> the OSD to an older snapshot would't be safe otherwise).  I don't kno=
+w
+> of any other scenarios in which this patch will not recover things
+> correctly, but unless someone far more familiar with ceph internals t=
+han
+> I am vows for it, I'd recommend using this only if you're really
+> desperate to avoid a recovery from scratch, and you save snapshots of
+> the other osds (as you probably already do, or you wouldn't have olde=
+r
+> snapshots to rollback to :-) and the mon *before* you get the patched
+> ceph-osd to run, and that you stop the mds or otherwise avoid changes
+> that you're not willing to lose should the patch not work for you and
+> you have to go back to the saved state and let the osd recover from
+> scratch.  If it works, lucky us; if it breaks, well, I told you :-)
 
-On Feb 20, 2013, at 9:57 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> 
->    vector<int> osds;
->  }
-> 
->  ceph_get_file_extents(file, offset, length, vector<extent>& extents);
-> 
-> Then we could re-use the Striper or something?
-> 
-> -Noah
-
-Although, I think your previous suggestion would be much simpler to do for the C api :)
+Yeah, this ought to basically work but it's very dangerous =97
+potentially breaking invariants about cluster state changes, etc. I
+wouldn't use it if the cluster wasn't otherwise healthy; other nodes
+breaking in the middle of this operation could cause serious problems,
+etc. I'd much prefer that one just recovers over the wire using normal
+recovery paths... ;)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
