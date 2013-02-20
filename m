@@ -1,24 +1,27 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] ceph: eliminate sparse warnings in fs code
-Date: Tue, 19 Feb 2013 18:45:34 -0600
-Message-ID: <51241CAE.3020201@inktank.com>
+Subject: [PATCH] libceph: eliminate sparse warnings
+Date: Tue, 19 Feb 2013 18:45:58 -0600
+Message-ID: <51241CC6.5090101@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f182.google.com ([209.85.210.182]:35682 "EHLO
-	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932691Ab3BTAph (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 19:45:37 -0500
-Received: by mail-ia0-f182.google.com with SMTP id k38so56219iah.41
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 16:45:36 -0800 (PST)
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:39924 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933373Ab3BTAqB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 19:46:01 -0500
+Received: by mail-ie0-f169.google.com with SMTP id 13so9433131iea.28
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 16:46:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Fix the causes for sparse warnings reported in the ceph file system
-code.  Here there are only two (and they're sort of silly but
-they're easy to fix).
+Eliminate most of the problems in the libceph code that cause sparse
+to issue warnings.
+    - Convert functions that are never referenced externally to have
+      static scope.
+    - Pass NULL rather than 0 for a pointer argument in one spot in
+      ceph_monc_delete_snapid()
 
 This partially resolves:
     http://tracker.ceph.com/issues/4184
@@ -26,30 +29,68 @@ This partially resolves:
 Reported-by: Fengguang Wu <fengguang.wu@intel.com>
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/ceph/xattr.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ net/ceph/crypto.c     |    7 ++++---
+ net/ceph/messenger.c  |    2 +-
+ net/ceph/mon_client.c |    2 +-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 2135817..9b6b2b6 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -213,7 +213,7 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
- 	XATTR_NAME_CEPH(dir, rsubdirs),
- 	XATTR_NAME_CEPH(dir, rbytes),
- 	XATTR_NAME_CEPH(dir, rctime),
--	{ 0 }	/* Required table terminator */
-+	{ .name = NULL, 0 }	/* Required table terminator */
- };
- static size_t ceph_dir_vxattrs_name_size;	/* total size of all names */
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index af14cb4..6e7a236 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -423,7 +423,8 @@ int ceph_encrypt2(struct ceph_crypto_key *secret,
+void *dst, size_t *dst_len,
+ 	}
+ }
 
-@@ -232,7 +232,7 @@ static struct ceph_vxattr ceph_file_vxattrs[] = {
- 	XATTR_LAYOUT_FIELD(file, layout, stripe_count),
- 	XATTR_LAYOUT_FIELD(file, layout, object_size),
- 	XATTR_LAYOUT_FIELD(file, layout, pool),
--	{ 0 }	/* Required table terminator */
-+	{ .name = NULL, 0 }	/* Required table terminator */
- };
- static size_t ceph_file_vxattrs_name_size;	/* total size of all names */
+-int ceph_key_instantiate(struct key *key, struct key_preparsed_payload
+*prep)
++static int ceph_key_instantiate(struct key *key,
++				struct key_preparsed_payload *prep)
+ {
+ 	struct ceph_crypto_key *ckey;
+ 	size_t datalen = prep->datalen;
+@@ -458,12 +459,12 @@ err:
+ 	return ret;
+ }
+
+-int ceph_key_match(const struct key *key, const void *description)
++static int ceph_key_match(const struct key *key, const void *description)
+ {
+ 	return strcmp(key->description, description) == 0;
+ }
+
+-void ceph_key_destroy(struct key *key) {
++static void ceph_key_destroy(struct key *key) {
+ 	struct ceph_crypto_key *ckey = key->payload.data;
+
+ 	ceph_crypto_key_destroy(ckey);
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 8a62a55..ab702cd 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -172,7 +172,7 @@ static void encode_my_addr(struct ceph_messenger *msgr)
+  */
+ static struct workqueue_struct *ceph_msgr_wq;
+
+-void _ceph_msgr_exit(void)
++static void _ceph_msgr_exit(void)
+ {
+ 	if (ceph_msgr_wq) {
+ 		destroy_workqueue(ceph_msgr_wq);
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 812eb3b..aef5b10 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -697,7 +697,7 @@ int ceph_monc_delete_snapid(struct ceph_mon_client
+*monc,
+ 			    u32 pool, u64 snapid)
+ {
+ 	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
+-				   pool, snapid, 0, 0);
++				   pool, snapid, NULL, 0);
+
+ }
 
 -- 
 1.7.9.5
