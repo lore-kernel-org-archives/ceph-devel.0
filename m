@@ -1,136 +1,44 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/5] libceph: separate non-locked fault handling
-Date: Tue, 19 Feb 2013 18:55:52 -0600
-Message-ID: <51241F18.3030709@inktank.com>
-References: <51241E15.80903@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Crash and strange things on MDS
+Date: Tue, 19 Feb 2013 17:09:30 -0800
+Message-ID: <CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
+References: <20130211130518.GN6997@kdecherf.com>
+	<CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
+	<20130211185424.GA27669@kdecherf.com>
+	<CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
+	<20130213114750.GC7399@kdecherf.com>
+	<CAPYLRzhYWzvq6-Tp5uCJWc9tHAB2WFXFCDZ7ETyQgQwvSB1c+Q@mail.gmail.com>
+	<20130216010217.GA26823@kdecherf.com>
+	<CAKMAVE8wv0gx6RYkFxVd3NCSiYDrOc0L42VeL4uq6z3fZMk52A@mail.gmail.com>
+	<20130216182403.GB5313@kdecherf.com>
+	<CAPYLRzibP6m3iEBMLs-B2u8t-cjv5-BE8_58dh55h7V2kzXSfQ@mail.gmail.com>
+	<20130220010052.GO7121@kdecherf.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:43996 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933774Ab3BTBDT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 20:03:19 -0500
-Received: by mail-qa0-f45.google.com with SMTP id g10so2184440qah.11
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 17:03:18 -0800 (PST)
-In-Reply-To: <51241E15.80903@inktank.com>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:34215 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932307Ab3BTBJc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 20:09:32 -0500
+Received: by mail-qa0-f54.google.com with SMTP id hg5so2152854qab.6
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 17:09:31 -0800 (PST)
+In-Reply-To: <20130220010052.GO7121@kdecherf.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Kevin Decherf <kevin@kdecherf.com>
+Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
 
-An error occurring on a ceph connection is treated as a fault,
-causing the connection to be reset.  The initial part of this fault
-handling has to be done while holding the connection mutex, but
-it must then be dropped for the last part.
+On Tue, Feb 19, 2013 at 5:00 PM, Kevin Decherf <kevin@kdecherf.com> wrote:
+> On Tue, Feb 19, 2013 at 10:15:48AM -0800, Gregory Farnum wrote:
+>> Looks like you've got ~424k dentries pinned, and it's trying to keep
+>> 400k inodes in cache. So you're still a bit oversubscribed, yes. This
+>> might just be the issue where your clients are keeping a bunch of
+>> inodes cached for the VFS (http://tracker.ceph.com/issues/3289).
+>
+> Thanks for the analyze. We use only one ceph-fuse client at this time
+> which makes all "high-load" commands like rsync, tar and cp on a huge
+> amount of files. Well, I will replace it by the kernel client.
 
-Separate the part of this fault handling that executes without the
-lock into its own function, con_fault_finish().  Move the call to
-this new function, as well as call that drops the connection mutex,
-into ceph_fault().  Rename that function con_fault() to reflect that
-it's only handling the connection part of the fault handling.
-
-The motivation for this was a warning from sparse about the locking
-being done here.  Rearranging things this way keeps all the mutex
-manipulation within ceph_fault(), and this stops sparse from
-complaining.
-
-This partially resolves:
-    http://tracker.ceph.com/issues/4184
-
-Reported-by: Fengguang Wu <fengguang.wu@intel.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- net/ceph/messenger.c |   42 +++++++++++++++++++++++-------------------
- 1 file changed, 23 insertions(+), 19 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 686973c..0fe9cbd 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -115,7 +115,7 @@ static struct lock_class_key socket_class;
-
- static void queue_con(struct ceph_connection *con);
- static void con_work(struct work_struct *);
--static void ceph_fault(struct ceph_connection *con);
-+static void con_fault(struct ceph_connection *con);
-
- /*
-  * Nicely render a sockaddr as a string.  An array of formatted
-@@ -2314,6 +2314,23 @@ static bool con_backoff(struct ceph_connection *con)
- 	return true;
- }
-
-+/* Finish fault handling; con->mutex must *not* be held here */
-+
-+static void con_fault_finish(struct ceph_connection *con)
-+{
-+	/*
-+	 * in case we faulted due to authentication, invalidate our
-+	 * current tickets so that we can get new ones.
-+	 */
-+	if (con->auth_retry && con->ops->invalidate_authorizer) {
-+		dout("calling invalidate_authorizer()\n");
-+		con->ops->invalidate_authorizer(con);
-+	}
-+
-+	if (con->ops->fault)
-+		con->ops->fault(con);
-+}
-+
- /*
-  * Do some work on a connection.  Drop a connection ref when we're done.
-  */
-@@ -2370,7 +2387,9 @@ done_unlocked:
- 	return;
-
- fault:
--	ceph_fault(con);     /* error/fault path */
-+	con_fault(con);
-+	mutex_unlock(&con->mutex);
-+	con_fault_finish(con);
- 	goto done_unlocked;
- }
-
-@@ -2379,8 +2398,7 @@ fault:
-  * Generic error/fault handler.  A retry mechanism is used with
-  * exponential backoff
-  */
--static void ceph_fault(struct ceph_connection *con)
--	__releases(con->mutex)
-+static void con_fault(struct ceph_connection *con)
- {
- 	pr_warning("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
- 	       ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg);
-@@ -2396,7 +2414,7 @@ static void ceph_fault(struct ceph_connection *con)
- 	if (test_bit(CON_FLAG_LOSSYTX, &con->flags)) {
- 		dout("fault on LOSSYTX channel, marking CLOSED\n");
- 		con->state = CON_STATE_CLOSED;
--		goto out_unlock;
-+		return;
- 	}
-
- 	if (con->in_msg) {
-@@ -2427,20 +2445,6 @@ static void ceph_fault(struct ceph_connection *con)
- 		set_bit(CON_FLAG_BACKOFF, &con->flags);
- 		queue_con(con);
- 	}
--
--out_unlock:
--	mutex_unlock(&con->mutex);
--	/*
--	 * in case we faulted due to authentication, invalidate our
--	 * current tickets so that we can get new ones.
--	 */
--	if (con->auth_retry && con->ops->invalidate_authorizer) {
--		dout("calling invalidate_authorizer()\n");
--		con->ops->invalidate_authorizer(con);
--	}
--
--	if (con->ops->fault)
--		con->ops->fault(con);
- }
-
-
--- 
-1.7.9.5
-
+Oh, that bug is just an explanation of what's happening; I believe it
+exists in the kernel client as well.
+-Greg
