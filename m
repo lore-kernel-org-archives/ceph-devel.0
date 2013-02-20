@@ -1,28 +1,24 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: eliminate sparse warnings
-Date: Tue, 19 Feb 2013 18:45:15 -0600
-Message-ID: <51241C9B.209@inktank.com>
+Subject: [PATCH] ceph: eliminate sparse warnings in fs code
+Date: Tue, 19 Feb 2013 18:45:34 -0600
+Message-ID: <51241CAE.3020201@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:62125 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932691Ab3BTApS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 19:45:18 -0500
-Received: by mail-ie0-f170.google.com with SMTP id c11so9465631ieb.29
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 16:45:17 -0800 (PST)
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:35682 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932691Ab3BTAph (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 19:45:37 -0500
+Received: by mail-ia0-f182.google.com with SMTP id k38so56219iah.41
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 16:45:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Fengguang Wu reminded me that there were outstanding sparse reports
-in the ceph and rbd code.  This patch fixes these problems in rbd
-that lead to those reports:
-    - Convert functions that are never referenced externally to have
-      static scope.
-    - Add a lockdep annotation to rbd_request_fn(), because it
-      releases a lock before acquiring it again.
+Fix the causes for sparse warnings reported in the ceph file system
+code.  Here there are only two (and they're sort of silly but
+they're easy to fix).
 
 This partially resolves:
     http://tracker.ceph.com/issues/4184
@@ -30,68 +26,31 @@ This partially resolves:
 Reported-by: Fengguang Wu <fengguang.wu@intel.com>
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
+ fs/ceph/xattr.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b0eea3e..ff5476c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1127,7 +1127,7 @@ static bool obj_request_type_valid(enum
-obj_request_type type)
- 	}
- }
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 2135817..9b6b2b6 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -213,7 +213,7 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 	XATTR_NAME_CEPH(dir, rsubdirs),
+ 	XATTR_NAME_CEPH(dir, rbytes),
+ 	XATTR_NAME_CEPH(dir, rctime),
+-	{ 0 }	/* Required table terminator */
++	{ .name = NULL, 0 }	/* Required table terminator */
+ };
+ static size_t ceph_dir_vxattrs_name_size;	/* total size of all names */
 
--struct ceph_osd_req_op *rbd_osd_req_op_create(u16 opcode, ...)
-+static struct ceph_osd_req_op *rbd_osd_req_op_create(u16 opcode, ...)
- {
- 	struct ceph_osd_req_op *op;
- 	va_list args;
-@@ -1482,7 +1482,8 @@ static void rbd_obj_request_destroy(struct kref *kref)
-  * that comprises the image request, and the Linux request pointer
-  * (if there is one).
-  */
--struct rbd_img_request *rbd_img_request_create(struct rbd_device *rbd_dev,
-+static struct rbd_img_request *rbd_img_request_create(
-+					struct rbd_device *rbd_dev,
- 					u64 offset, u64 length,
- 					bool write_request)
- {
-@@ -1903,6 +1904,7 @@ out:
- }
+@@ -232,7 +232,7 @@ static struct ceph_vxattr ceph_file_vxattrs[] = {
+ 	XATTR_LAYOUT_FIELD(file, layout, stripe_count),
+ 	XATTR_LAYOUT_FIELD(file, layout, object_size),
+ 	XATTR_LAYOUT_FIELD(file, layout, pool),
+-	{ 0 }	/* Required table terminator */
++	{ .name = NULL, 0 }	/* Required table terminator */
+ };
+ static size_t ceph_file_vxattrs_name_size;	/* total size of all names */
 
- static void rbd_request_fn(struct request_queue *q)
-+		__releases(q->queue_lock) __acquires(q->queue_lock)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	bool read_only = rbd_dev->mapping.read_only;
-@@ -2627,7 +2629,7 @@ static void rbd_spec_free(struct kref *kref)
- 	kfree(spec);
- }
-
--struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
-+static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
- 				struct rbd_spec *spec)
- {
- 	struct rbd_device *rbd_dev;
-@@ -4178,7 +4180,7 @@ static void rbd_sysfs_cleanup(void)
- 	device_unregister(&rbd_root_dev);
- }
-
--int __init rbd_init(void)
-+static int __init rbd_init(void)
- {
- 	int rc;
-
-@@ -4194,7 +4196,7 @@ int __init rbd_init(void)
- 	return 0;
- }
-
--void __exit rbd_exit(void)
-+static void __exit rbd_exit(void)
- {
- 	rbd_sysfs_cleanup();
- }
 -- 
 1.7.9.5
 
