@@ -1,183 +1,43 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Geo-replication with RBD
-Date: Wed, 20 Feb 2013 09:19:10 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302200915470.26205@cobra.newdream.net>
-References: <5B735879-C53B-4C07-8F60-97889F275481@portal.onet.pl> <CANygib8Z=+ik3WbPNcyXTkSV3o2wC9+06fp58EnhUax3cgJBng@mail.gmail.com> <CAMwB3TiWKJ+e+81B4gDSkNnPMWQRzpqCT7pDJU+d_q0iTfjP5A@mail.gmail.com> <CAMwB3TixO3gOhP5g+47NbSwpBU7PYV8vT2Ymm0-HgDLjh0RHcQ@mail.gmail.com>
- <CAOLwVU=L2SK=uHh+9nRihsPN3gawyHnnTtyBm98oKXNMZ_U9Aw@mail.gmail.com> <-6440009782960940725@unknownmsgid> <alpine.DEB.2.00.1302200832180.23463@cobra.newdream.net> <-4374240445035147123@unknownmsgid>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: Hadoop DNS/topology details
+Date: Wed, 20 Feb 2013 09:27:04 -0800
+Message-ID: <E6DCD080-3F18-40D2-95F1-EE66B1C468CB@cs.ucsc.edu>
+References: <13BF7821-647C-4234-B696-5AA41ECCD6E5@cs.ucsc.edu> <CAPYLRzjy-TCTobh1mi1=d9omx0ZWvEce6ZB9vvf3ON5MVaC-MA@mail.gmail.com> <16038FC6-8930-46AE-A5C5-1169230CDDA8@cs.ucsc.edu> <alpine.DEB.2.00.1302191637520.18860@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43909 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758846Ab3BTRTN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 12:19:13 -0500
-In-Reply-To: <-4374240445035147123@unknownmsgid>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:51224 "EHLO
+	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933947Ab3BTR1H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Feb 2013 12:27:07 -0500
+Received: by mail-pa0-f45.google.com with SMTP id kl14so4127868pab.18
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Feb 2013 09:27:05 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1302191637520.18860@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Cc: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, Neil Levine <neil.levine@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-On Wed, 20 Feb 2013, S?awomir Skowron wrote:
-> Like i say, yes. Now it is only option, to migrate data from one
-> cluster to other, and now it must be enough, with some auto features.
-> 
-> But is there any timeline, or any brainstorming in ceph internal
-> meetings, about any possible replication in block level, or something
-> like that ??
-
-I would like to get this in for cuttlefish (0.61).  See #4207 for the 
-underlying rados bits.  We also need to settle the file format discussion; 
-any input there would be appreciated!
-
-sage
+To: Sage Weil <sage@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Joe Buck <jbbuck@gmail.com>
 
 
+On Feb 19, 2013, at 4:39 PM, Sage Weil <sage@inktank.com> wrote:
+
+> However, we do have host and rack information in the crush map, at least 
+> for non-customized installations.  How about something like
 > 
-> On 20 lut 2013, at 17:33, Sage Weil <sage@inktank.com> wrote:
+>  string ceph_get_osd_crush_location(int osd, string type);
 > 
-> > On Wed, 20 Feb 2013, S?awomir Skowron wrote:
-> >> My requirement is to have full disaster recovery, buisness continuity,
-> >> and failover of automatet services on second Datacenter, and not on
-> >> same ceph cluster.
-> >> Datacenters have 10GE dedicated link, for communication, and there is
-> >> option to expand cluster into two DataCenters, but it is not what i
-> >> mean.
-> >> There are advantages of this option like fast snapshots, and fast
-> >> switch of services, but there are some problems.
-> >>
-> >> When we talk about disaster recovery i mean that whole storage cluster
-> >> have problems, not only services at top of storage. I am thinking
-> >> about bug, or mistake of admin, that makes cluster not accessible in
-> >> any copy, or a upgrade that makes data corruption, or upgrade that is
-> >> disruptive for services - auto failover services into another DC,
-> >> before upgrade cluster.
-> >>
-> >> If cluster have a solution to replicate data in rbd images to next
-> >> cluster, than, only data are migrated, and when disaster comes, than
-> >> there is no need to work on last imported snapshot (there can be
-> >> constantly imported snapshot with minutes, or hour, before last
-> >> production), but work on data from now. And when we have automated
-> >> solution to recover DB (one of app service on top of rbd) clusters in
-> >> new datacenter infrastructure, than we have a real disaster recovery
-> >> solution.
-> >>
-> >> That's why we made, a s3 api layer synchronization to another DC, and
-> >> Amazon, and only RBD is left.
-> >
-> > Have you read the thread from Jens last week, 'snapshot, clone and mount a
-> > VM-Image'?  Would this type of capability capture you're requirements?
-> >
-> > sage
-> >
-> >>
-> >> Dnia 19 lut 2013 o godz. 10:23 "S?bastien Han"
-> >> <han.sebastien@gmail.com> napisa?(a):
-> >>
-> >>> Hi,
-> >>>
-> >>> For of all, I have some questions about your setup:
-> >>>
-> >>> * What are your requirements?
-> >>> * Are the DCs far from each others?
-> >>>
-> >>> If they are reasonably close to each others, you can setup a single
-> >>> cluster, with replicas across both DCs and manage the RBD devices with
-> >>> pacemaker.
-> >>>
-> >>> Cheers.
-> >>>
-> >>> --
-> >>> Regards,
-> >>> S?bastien Han.
-> >>>
-> >>>
-> >>> On Mon, Feb 18, 2013 at 3:20 PM, S?awomir Skowron <szibis@gmail.com> wrote:
-> >>>> Hi, Sorry for very late response, but i was sick.
-> >>>>
-> >>>> Our case is to make a failover rbd instance in another cluster. We are
-> >>>> storing block device images, for some services like Database. We need
-> >>>> to have a two clusters, synchronized, for a quick failover, if first
-> >>>> cluster goes down, or for upgrade with restart, or many other cases.
-> >>>>
-> >>>> Volumes are in many sizes: 1-500GB
-> >>>> external block device for kvm vm, like EBS.
-> >>>>
-> >>>> On Mon, Feb 18, 2013 at 3:07 PM, S?awomir Skowron <szibis@gmail.com> wrote:
-> >>>>> Hi, Sorry for very late response, but i was sick.
-> >>>>>
-> >>>>> Our case is to make a failover rbd instance in another cluster. We are
-> >>>>> storing block device images, for some services like Database. We need to
-> >>>>> have a two clusters, synchronized, for a quick failover, if first cluster
-> >>>>> goes down, or for upgrade with restart, or many other cases.
-> >>>>>
-> >>>>> Volumes are in many sizes: 1-500GB
-> >>>>> external block device for kvm vm, like EBS.
-> >>>>>
-> >>>>>
-> >>>>> On Fri, Feb 1, 2013 at 12:27 AM, Neil Levine <neil.levine@inktank.com>
-> >>>>> wrote:
-> >>>>>>
-> >>>>>> Skowron,
-> >>>>>>
-> >>>>>> Can you go into a bit more detail on your specific use-case? What type
-> >>>>>> of data are you storing in rbd (type, volume)?
-> >>>>>>
-> >>>>>> Neil
-> >>>>>>
-> >>>>>> On Wed, Jan 30, 2013 at 10:42 PM, Skowron S?awomir
-> >>>>>> <slawomir.skowron@grupaonet.pl> wrote:
-> >>>>>>> I make new thread, because i think it's a diffrent case.
-> >>>>>>>
-> >>>>>>> We have managed async geo-replication of s3 service, beetwen two ceph
-> >>>>>>> clusters in two DC's, and to amazon s3 as third. All this via s3 API. I love
-> >>>>>>> to see native RGW geo-replication with described features in another thread.
-> >>>>>>>
-> >>>>>>> There is another case. What about RBD replication ?? It's much more
-> >>>>>>> complicated, and for disaster recovery much more important, just like in
-> >>>>>>> enterprise storage arrays.
-> >>>>>>> One cluster in two DC's, not solving problem, because we need security
-> >>>>>>> in data consistency, and isolation.
-> >>>>>>> Do you thinking about this case ??
-> >>>>>>>
-> >>>>>>> Regards
-> >>>>>>> Slawomir Skowron--
-> >>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>>>>> the body of a message to majordomo@vger.kernel.org
-> >>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>>> --
-> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>>>> the body of a message to majordomo@vger.kernel.org
-> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>>
-> >>>>>
-> >>>>>
-> >>>>>
-> >>>>> --
-> >>>>> -----
-> >>>>> Pozdrawiam
-> >>>>>
-> >>>>> S?awek "sZiBis" Skowron
-> >>>>
-> >>>>
-> >>>>
-> >>>> --
-> >>>> -----
-> >>>> Pozdrawiam
-> >>>>
-> >>>> S?awek "sZiBis" Skowron
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> or similar.  We could call that with "host" and "rack" and get exactly 
+> what we need, without making any changes to the data structures.
+
+This would then be used in conjunction with an interface:
+
+ ceph_offset_to_osds(offset, vector<int>& osds)
+    ...
+    osdmpa->pg_to_acting_osds(osds)
+    ...
+
+or something like this that replaces the current extent-to-sockaddr interface? The proposed interface about would do the host/ip mapping, as well as the topology mapping?
+
+- Noah
+
