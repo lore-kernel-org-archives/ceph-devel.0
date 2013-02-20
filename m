@@ -1,44 +1,314 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Crash and strange things on MDS
-Date: Tue, 19 Feb 2013 17:09:30 -0800
-Message-ID: <CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
-References: <20130211130518.GN6997@kdecherf.com>
-	<CAKMAVE_J4GOA_yUF5ue-y+_iFVhbvCqaGPvBOfgtEuO7CzRU6g@mail.gmail.com>
-	<20130211185424.GA27669@kdecherf.com>
-	<CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
-	<20130213114750.GC7399@kdecherf.com>
-	<CAPYLRzhYWzvq6-Tp5uCJWc9tHAB2WFXFCDZ7ETyQgQwvSB1c+Q@mail.gmail.com>
-	<20130216010217.GA26823@kdecherf.com>
-	<CAKMAVE8wv0gx6RYkFxVd3NCSiYDrOc0L42VeL4uq6z3fZMk52A@mail.gmail.com>
-	<20130216182403.GB5313@kdecherf.com>
-	<CAPYLRzibP6m3iEBMLs-B2u8t-cjv5-BE8_58dh55h7V2kzXSfQ@mail.gmail.com>
-	<20130220010052.GO7121@kdecherf.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Mon losing touch with OSDs
+Date: Wed, 20 Feb 2013 13:07:03 +1100
+Message-ID: <20130220020703.GA8567@onthe.net.au>
+References: <20130215032939.GA25578@onthe.net.au>
+ <alpine.DEB.2.00.1302142051250.19927@cobra.newdream.net>
+ <20130215220521.GA29999@onthe.net.au>
+ <20130217234107.GA19416@onthe.net.au>
+ <alpine.DEB.2.00.1302171743460.25660@cobra.newdream.net>
+ <20130219030202.GA5010@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f54.google.com ([209.85.216.54]:34215 "EHLO
-	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932307Ab3BTBJc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 20:09:32 -0500
-Received: by mail-qa0-f54.google.com with SMTP id hg5so2152854qab.6
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Feb 2013 17:09:31 -0800 (PST)
-In-Reply-To: <20130220010052.GO7121@kdecherf.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:40705 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933498Ab3BTCHJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Feb 2013 21:07:09 -0500
+Content-Disposition: inline
+In-Reply-To: <20130219030202.GA5010@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Decherf <kevin@kdecherf.com>
-Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Feb 19, 2013 at 5:00 PM, Kevin Decherf <kevin@kdecherf.com> wrote:
-> On Tue, Feb 19, 2013 at 10:15:48AM -0800, Gregory Farnum wrote:
->> Looks like you've got ~424k dentries pinned, and it's trying to keep
->> 400k inodes in cache. So you're still a bit oversubscribed, yes. This
->> might just be the issue where your clients are keeping a bunch of
->> inodes cached for the VFS (http://tracker.ceph.com/issues/3289).
->
-> Thanks for the analyze. We use only one ceph-fuse client at this time
-> which makes all "high-load" commands like rsync, tar and cp on a huge
-> amount of files. Well, I will replace it by the kernel client.
+On Tue, Feb 19, 2013 at 02:02:03PM +1100, Chris Dunlop wrote:
+> On Sun, Feb 17, 2013 at 05:44:29PM -0800, Sage Weil wrote:
+>> On Mon, 18 Feb 2013, Chris Dunlop wrote:
+>>> On Sat, Feb 16, 2013 at 09:05:21AM +1100, Chris Dunlop wrote:
+>>>> On Thu, Feb 14, 2013 at 08:57:11PM -0800, Sage Weil wrote:
+>>>>> On Fri, 15 Feb 2013, Chris Dunlop wrote:
+>>>>>> In an otherwise seemingly healthy cluster (ceph 0.56.2), what might cause the
+>>>>>> mons to lose touch with the osds?
+>>>>> 
+>>>>> Can you enable 'debug ms = 1' on the mons and leave them that way, in the 
+>>>>> hopes that this happens again?  It will give us more information to go on.
+>>>> 
+>>>> Debug turned on.
+>>> 
+>>> We haven't experienced the cluster losing touch with the osds completely
+>>> since upgrading from 0.56.2 to 0.56.3, but we did lose touch with osd.1
+>>> for a few seconds before it recovered. See below for logs (reminder: 3
+>>> boxes, b2 is mon-only, b4 is mon+osd.0, b5 is mon+osd.1).
+>> 
+>> Hrm, I don't see any obvious clues.  You could enable 'debug ms = 1' on 
+>> the osds as well.  That will give us more to go on if/when it happens 
+>> again, and should not affect performance significantly.
+> 
+> Done: ceph osd tell '*' injectargs '--debug-ms 1'
+> 
+> Now to wait for it to happen again.
 
-Oh, that bug is just an explanation of what's happening; I believe it
-exists in the kernel client as well.
--Greg
+OK, we got it again. Full logs covering the incident available at:
+
+https://www.dropbox.com/s/kguzwyjfglv3ypl/ceph-logs.zip
+
+Archive:  /tmp/ceph-logs.zip
+ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
+--------  ------  ------- ---- ---------- ----- --------  ----
+   11492  Defl:X     1186  90% 2013-02-20 12:04 c0cba4ae  ceph-mon.b2.log
+ 1270789  Defl:X    89278  93% 2013-02-20 12:00 2208d035  ceph-mon.b4.log
+ 1375858  Defl:X   104025  92% 2013-02-20 12:05 c64c1dad  ceph-mon.b5.log
+ 2020042  Defl:X   215000  89% 2013-02-20 10:40 f74ae4ca  ceph-osd.0.log
+ 2075512  Defl:X   224098  89% 2013-02-20 12:05 b454d2ec  ceph-osd.1.log
+  154938  Defl:X    12989  92% 2013-02-20 12:04 d2729b05  ceph.log
+--------          -------  ---                            -------
+ 6908631           646576  91%                            6 files
+
+My naive analysis, based on the log extracts below (best viewed on a wide
+screen!)...
+
+Osd.0 starts hearing much-delayed ping_replies from osd.1 and tells the mon,
+which marks osd.1 down.
+
+However the whole time, the osd.1 log indicates that it's receiving and
+responding to each ping from osd.0 in a timely fashion. In contrast, the osd.0
+log indicates it isn't seeing the osd.1 replies for a while, then sees them all
+arrive in a flurry, until they're "delayed" enough to cause osd.0 to tell the
+mon.
+
+During the time osd.0 is not seeing the osd.1 ping_replies, there's other traffic
+(osd_op, osd_sub_op, osd_sub_op_reply etc.) between osd.0 and osd.1, indicating
+that it's not a network problem.
+
+The load on both osds during this period was >90% idle and <1% iow.
+
+Is this pointing to osd.0 experiencing some kind of scheduling or priority
+starvation on the ping thread (assuming the ping is in it's own thread)?
+
+The next odd thing is that, although the osds are both back by 04:38:50 ("2
+osds: 2 up, 2 in"), the system still wasn't working (see the disk stats for
+both osd.0 and osd.1) and didn't recover until ceph (mon + osd) was restarted
+on one of the boxes at around 05:50 (not shown in the logs, but full logs
+available if needed).
+
+Prior to the restart:
+
+# ceph health
+HEALTH_WARN 281 pgs peering; 281 pgs stuck inactive; 576 pgs stuck unclean
+
+(Sorry, once again didn't get a 'ceph -s' prior to the restart.)
+
+Chris.
+
+----------------------------------------------------------------------
+ceph.log
+----------------------------------------------------------------------
+2013-02-20 04:37:51.074128 mon.0 10.200.63.130:6789/0 120771 : [INF] pgmap v3000932: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:37:53.541471 mon.0 10.200.63.130:6789/0 120772 : [INF] pgmap v3000933: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:37:56.063059 mon.0 10.200.63.130:6789/0 120773 : [INF] pgmap v3000934: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:37:58.532763 mon.0 10.200.63.130:6789/0 120774 : [INF] pgmap v3000935: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+<<<< osd.0 sees delayed ping_replies from here >>>>
+2013-02-20 04:38:01.057939 mon.0 10.200.63.130:6789/0 120775 : [INF] pgmap v3000936: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:03.541404 mon.0 10.200.63.130:6789/0 120776 : [INF] pgmap v3000937: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:06.133004 mon.0 10.200.63.130:6789/0 120777 : [INF] pgmap v3000938: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:08.540471 mon.0 10.200.63.130:6789/0 120778 : [INF] pgmap v3000939: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:11.064003 mon.0 10.200.63.130:6789/0 120779 : [INF] pgmap v3000940: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:13.547845 mon.0 10.200.63.130:6789/0 120780 : [INF] pgmap v3000941: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:16.062892 mon.0 10.200.63.130:6789/0 120781 : [INF] pgmap v3000942: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:18.530804 mon.0 10.200.63.130:6789/0 120782 : [INF] pgmap v3000943: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:21.080347 mon.0 10.200.63.130:6789/0 120783 : [INF] pgmap v3000944: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:23.555523 mon.0 10.200.63.130:6789/0 120784 : [INF] pgmap v3000945: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:26.071449 mon.0 10.200.63.130:6789/0 120785 : [INF] pgmap v3000946: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:28.561133 mon.0 10.200.63.130:6789/0 120786 : [INF] pgmap v3000947: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:31.068101 mon.0 10.200.63.130:6789/0 120787 : [INF] pgmap v3000948: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:33.536022 mon.0 10.200.63.130:6789/0 120788 : [INF] pgmap v3000949: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:36.081591 mon.0 10.200.63.130:6789/0 120789 : [INF] pgmap v3000950: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:38.380909 mon.0 10.200.63.130:6789/0 120790 : [DBG] osd.1 10.200.63.133:6801/21178 reported failed by osd.0 10.200.63.132:6801/18444
+2013-02-20 04:38:43.372798 mon.0 10.200.63.130:6789/0 120793 : [DBG] osd.1 10.200.63.133:6801/21178 reported failed by osd.0 10.200.63.132:6801/18444
+2013-02-20 04:38:48.373930 mon.0 10.200.63.130:6789/0 120796 : [DBG] osd.1 10.200.63.133:6801/21178 reported failed by osd.0 10.200.63.132:6801/18444
+2013-02-20 04:38:48.373990 mon.0 10.200.63.130:6789/0 120797 : [INF] osd.1 10.200.63.133:6801/21178 failed (3 reports from 1 peers after 2013-02-20 04:39:11.373918 >= grace 20.000000)
+2013-02-20 04:38:48.565717 mon.0 10.200.63.130:6789/0 120798 : [INF] osdmap e791: 2 osds: 1 up, 2 in
+2013-02-20 04:38:48.670726 mon.0 10.200.63.130:6789/0 120799 : [INF] pgmap v3000955: 576 pgs: 575 active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:49.073328 mon.0 10.200.63.130:6789/0 120800 : [INF] pgmap v3000956: 576 pgs: 271 active+clean, 304 stale+active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:49.654554 mon.0 10.200.63.130:6789/0 120801 : [INF] osdmap e792: 2 osds: 1 up, 2 in
+2013-02-20 04:38:49.857067 mon.0 10.200.63.130:6789/0 120802 : [INF] pgmap v3000957: 576 pgs: 271 active+clean, 304 stale+active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:50.749644 mon.0 10.200.63.130:6789/0 120803 : [INF] osdmap e793: 2 osds: 2 up, 2 in
+2013-02-20 04:38:50.749710 mon.0 10.200.63.130:6789/0 120804 : [INF] osd.1 10.200.63.133:6801/21178 boot
+2013-02-20 04:38:50.850887 mon.0 10.200.63.130:6789/0 120805 : [INF] pgmap v3000958: 576 pgs: 271 active+clean, 304 stale+active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:51.834189 mon.0 10.200.63.130:6789/0 120806 : [INF] osdmap e794: 2 osds: 2 up, 2 in
+2013-02-20 04:38:51.956560 mon.0 10.200.63.130:6789/0 120807 : [INF] pgmap v3000959: 576 pgs: 271 active+clean, 304 stale+active+clean, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:56.162743 mon.0 10.200.63.130:6789/0 120808 : [INF] pgmap v3000960: 576 pgs: 295 active, 271 active+clean, 9 peering, 1 active+clean+scrubbing; 410 GB data, 842 GB used, 2881 GB / 3724 GB avail
+2013-02-20 04:38:57.235082 mon.0 10.200.63.130:6789/0 120809 : [INF] pgmap v3000961: 576 pgs: 295 active, 281 peering; 410 GB data, 841 GB used, 2882 GB / 3724 GB avail
+2013-02-20 04:38:48.660979 osd.1 10.200.63.133:6801/21178 997 : [WRN] map e791 wrongly marked me down
+2013-02-20 04:39:01.158928 mon.0 10.200.63.130:6789/0 120810 : [INF] pgmap v3000962: 576 pgs: 295 active, 281 peering; 410 GB data, 841 GB used, 2882 GB / 3724 GB avail
+2013-02-20 04:39:19.111723 osd.0 10.200.63.132:6801/18444 800 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.770732 secs
+2013-02-20 04:39:19.111729 osd.0 10.200.63.132:6801/18444 801 : [WRN] slow request 30.770732 seconds old, received at 2013-02-20 04:38:48.340908: osd_op(client.9971.0:685981 rb.0.1c62.2ae8944a.0000000003aa [write 3878912~4096] 2.c82ee285) v4 currently reached pg
+2013-02-20 04:39:19.111735 osd.0 10.200.63.132:6801/18444 802 : [WRN] slow request 30.770225 seconds old, received at 2013-02-20 04:38:48.341415: osd_op(client.9971.0:685984 rb.0.1c62.2ae8944a.000000000439 [write 364544~20480] 2.b16f5ace) v4 currently reached pg
+2013-02-20 04:39:19.111738 osd.0 10.200.63.132:6801/18444 803 : [WRN] slow request 30.456112 seconds old, received at 2013-02-20 04:38:48.655528: osd_op(client.9986.0:178417 broot.rbd [watch 1~0] 2.d30a2f40) v4 currently reached pg
+2013-02-20 04:39:19.111743 osd.0 10.200.63.132:6801/18444 804 : [WRN] slow request 30.456106 seconds old, received at 2013-02-20 04:38:48.655534: osd_op(client.9989.0:215170 broot-nfs2.rbd [watch 1~0] 2.7802d31e) v4 currently reached pg
+2013-02-20 04:39:19.111747 osd.0 10.200.63.132:6801/18444 805 : [WRN] slow request 30.455860 seconds old, received at 2013-02-20 04:38:48.655780: osd_op(client.9968.0:302450 dns1.rbd [watch 1~0] 2.383712c1) v4 currently reached pg
+
+----------------------------------------------------------------------
+grep osd_ping ceph-osd.0.log
+----------------------------------------------------------------------
+2013-02-20 04:37:57.347387 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:37:57.347384) v2 -- ?+0 0xbd248c0 con 0xa2dcdc0
+2013-02-20 04:37:57.349406 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79153 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:37:57.347384) v2 ==== 47+0+0 (2837779695 0 0) 0xbc28a80 con 0xa2dcdc0
+2013-02-20 04:37:57.847588 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:37:57.847586) v2 -- ?+0 0xa1ea540 con 0xa2dcdc0
+2013-02-20 04:37:58.050400 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79154 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:37:57.847586) v2 ==== 47+0+0 (3920125339 0 0) 0xdb34000 con 0xa2dcdc0
+<<<< osd.0 sees delayed ping_replies from here >>>>
+2013-02-20 04:37:59.547719 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:37:59.547716) v2 -- ?+0 0x73e5340 con 0xa2dcdc0
+2013-02-20 04:38:00.047911 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:00.047909) v2 -- ?+0 0x99bbc00 con 0xa2dcdc0
+2013-02-20 04:38:01.748080 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:01.748077) v2 -- ?+0 0xa1eb6c0 con 0xa2dcdc0
+2013-02-20 04:38:03.448223 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:03.448220) v2 -- ?+0 0x99bb180 con 0xa2dcdc0
+2013-02-20 04:38:03.948413 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:03.948411) v2 -- ?+0 0x99ba700 con 0xa2dcdc0
+2013-02-20 04:38:04.448601 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:04.448598) v2 -- ?+0 0x99ba540 con 0xa2dcdc0
+2013-02-20 04:38:04.948724 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:04.948720) v2 -- ?+0 0xa1ebdc0 con 0xa2dcdc0
+2013-02-20 04:38:08.448860 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:08.448856) v2 -- ?+0 0xb676380 con 0xa2dcdc0
+2013-02-20 04:38:08.949028 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:08.949025) v2 -- ?+0 0xbc28380 con 0xa2dcdc0
+2013-02-20 04:38:10.649263 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:10.649260) v2 -- ?+0 0x965d340 con 0xa2dcdc0
+2013-02-20 04:38:11.749458 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:11.749455) v2 -- ?+0 0xa1eafc0 con 0xa2dcdc0
+2013-02-20 04:38:12.799154 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79155 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:37:59.547716) v2 ==== 47+0+0 (1242454262 0 0) 0xbc29880 con 0xa2dcdc0
+2013-02-20 04:38:12.799459 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79156 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:00.047909) v2 ==== 47+0+0 (3852750933 0 0) 0xcaff180 con 0xa2dcdc0
+2013-02-20 04:38:12.799496 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79157 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:01.748077) v2 ==== 47+0+0 (3672189647 0 0) 0xb677340 con 0xa2dcdc0
+2013-02-20 04:38:12.799542 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79158 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:03.448220) v2 ==== 47+0+0 (38366945 0 0) 0xbc28c40 con 0xa2dcdc0
+2013-02-20 04:38:12.799554 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79159 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:03.948411) v2 ==== 47+0+0 (83904766 0 0) 0x884ee00 con 0xa2dcdc0
+2013-02-20 04:38:12.799573 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79160 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:04.448598) v2 ==== 47+0+0 (2688468082 0 0) 0x10c5c1c0 con 0xa2dcdc0
+2013-02-20 04:38:12.799667 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79161 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:04.948720) v2 ==== 47+0+0 (4187258751 0 0) 0xb21a540 con 0xa2dcdc0
+2013-02-20 04:38:12.799689 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79162 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:08.448856) v2 ==== 47+0+0 (4176431512 0 0) 0xb21b180 con 0xa2dcdc0
+2013-02-20 04:38:12.799710 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79163 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:08.949025) v2 ==== 47+0+0 (2888471344 0 0) 0xb21b340 con 0xa2dcdc0
+2013-02-20 04:38:12.799728 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79164 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:10.649260) v2 ==== 47+0+0 (3060931781 0 0) 0xb21aa80 con 0xa2dcdc0
+2013-02-20 04:38:12.799745 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79165 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:11.749455) v2 ==== 47+0+0 (2767620502 0 0) 0x8d4e380 con 0xa2dcdc0
+2013-02-20 04:38:14.049649 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:14.049645) v2 -- ?+0 0xa1ea000 con 0xa2dcdc0
+2013-02-20 04:38:14.260608 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79166 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:14.049645) v2 ==== 47+0+0 (462572634 0 0) 0xbc29a40 con 0xa2dcdc0
+2013-02-20 04:38:15.149828 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:15.149826) v2 -- ?+0 0xac85340 con 0xa2dcdc0
+2013-02-20 04:38:15.151892 7f1090f23700  1 -- 192.168.254.132:0/18444 <== osd.1 192.168.254.133:6803/21178 79167 ==== osd_ping(ping_reply e790 stamp 2013-02-20 04:38:15.149826) v2 ==== 47+0+0 (2092320694 0 0) 0xdb34380 con 0xa2dcdc0
+2013-02-20 04:38:21.050059 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:21.050056) v2 -- ?+0 0xb677c00 con 0xa2dcdc0
+2013-02-20 04:38:25.750198 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:25.750195) v2 -- ?+0 0xbd24000 con 0xa2dcdc0
+2013-02-20 04:38:28.650370 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:28.650367) v2 -- ?+0 0x7e94a80 con 0xa2dcdc0
+2013-02-20 04:38:32.150553 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:32.150550) v2 -- ?+0 0xb677500 con 0xa2dcdc0
+2013-02-20 04:38:34.450740 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:34.450737) v2 -- ?+0 0x9bc7500 con 0xa2dcdc0
+2013-02-20 04:38:35.369720 7f109af37700 -1 osd.0 790 heartbeat_check: no reply from osd.1 since 2013-02-20 04:38:15.149826 (cutoff 2013-02-20 04:38:15.369719)
+2013-02-20 04:38:36.369895 7f109af37700 -1 osd.0 790 heartbeat_check: no reply from osd.1 since 2013-02-20 04:38:15.149826 (cutoff 2013-02-20 04:38:16.369894)
+
+----------------------------------------------------------------------
+grep osd_ping ceph-osd.1.log
+----------------------------------------------------------------------
+2013-02-20 04:37:57.847878 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79154 ==== osd_ping(ping e790 stamp 2013-02-20 04:37:57.847586) v2 ==== 47+0+0 (2625351075 0 0) 0xb441880 con 0xb9a89a0
+2013-02-20 04:37:57.847957 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:37:57.847586) v2 -- ?+0 0xe5921c0 con 0xb9a89a0
+<<<< osd.0 sees delayed ping_replies from here >>>>
+2013-02-20 04:37:59.547994 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79155 ==== osd_ping(ping e790 stamp 2013-02-20 04:37:59.547716) v2 ==== 47+0+0 (1071491278 0 0) 0xb440700 con 0xb9a89a0
+2013-02-20 04:37:59.548066 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:37:59.547716) v2 -- ?+0 0xb441880 con 0xb9a89a0
+2013-02-20 04:38:00.048174 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79156 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:00.047909) v2 ==== 47+0+0 (2423758957 0 0) 0xc987a40 con 0xb9a89a0
+2013-02-20 04:38:00.048262 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:00.047909) v2 -- ?+0 0xb440700 con 0xb9a89a0
+2013-02-20 04:38:01.748248 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79157 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:01.748077) v2 ==== 47+0+0 (2939345655 0 0) 0xb6d96c0 con 0xb9a89a0
+2013-02-20 04:38:01.748330 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:01.748077) v2 -- ?+0 0xc987a40 con 0xb9a89a0
+2013-02-20 04:38:03.448435 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79158 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:03.448220) v2 ==== 47+0+0 (2006621913 0 0) 0xb71c540 con 0xb9a89a0
+2013-02-20 04:38:03.448531 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:03.448220) v2 -- ?+0 0xb6d96c0 con 0xb9a89a0
+2013-02-20 04:38:04.163566 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79159 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:03.948411) v2 ==== 47+0+0 (1892923590 0 0) 0xc02b6c0 con 0xb9a89a0
+2013-02-20 04:38:04.163648 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:03.948411) v2 -- ?+0 0xb71c540 con 0xb9a89a0
+2013-02-20 04:38:04.448837 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79160 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:04.448598) v2 ==== 47+0+0 (3589092426 0 0) 0xc02a8c0 con 0xb9a89a0
+2013-02-20 04:38:04.448876 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:04.448598) v2 -- ?+0 0xc02b6c0 con 0xb9a89a0
+2013-02-20 04:38:04.949019 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79161 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:04.948720) v2 ==== 47+0+0 (2353499975 0 0) 0x6fae700 con 0xb9a89a0
+2013-02-20 04:38:04.949106 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:04.948720) v2 -- ?+0 0xc02a8c0 con 0xb9a89a0
+2013-02-20 04:38:08.449126 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79162 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:08.448856) v2 ==== 47+0+0 (2369567136 0 0) 0xc02ac40 con 0xb9a89a0
+2013-02-20 04:38:08.449210 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:08.448856) v2 -- ?+0 0x6fae700 con 0xb9a89a0
+2013-02-20 04:38:08.949215 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79163 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:08.949025) v2 ==== 47+0+0 (3656999688 0 0) 0xc02ba40 con 0xb9a89a0
+2013-02-20 04:38:08.949277 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:08.949025) v2 -- ?+0 0xc02ac40 con 0xb9a89a0
+2013-02-20 04:38:10.649580 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79164 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:10.649260) v2 ==== 47+0+0 (3282169085 0 0) 0xc02a000 con 0xb9a89a0
+2013-02-20 04:38:10.649647 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:10.649260) v2 -- ?+0 0xc02ba40 con 0xb9a89a0
+2013-02-20 04:38:11.749750 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79165 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:11.749455) v2 ==== 47+0+0 (3508894126 0 0) 0xe593180 con 0xb9a89a0
+2013-02-20 04:38:11.749835 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:11.749455) v2 -- ?+0 0xc02a000 con 0xb9a89a0
+2013-02-20 04:38:14.049868 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79166 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:14.049645) v2 ==== 47+0+0 (1849801826 0 0) 0xc02bdc0 con 0xb9a89a0
+2013-02-20 04:38:14.049943 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:14.049645) v2 -- ?+0 0xe593180 con 0xb9a89a0
+2013-02-20 04:38:15.150155 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79167 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:15.149826) v2 ==== 47+0+0 (157661070 0 0) 0xb6d9340 con 0xb9a89a0
+2013-02-20 04:38:15.150242 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:15.149826) v2 -- ?+0 0xc02bdc0 con 0xb9a89a0
+2013-02-20 04:38:21.050348 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79168 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:21.050056) v2 ==== 47+0+0 (2307149705 0 0) 0xbf4bc00 con 0xb9a89a0
+2013-02-20 04:38:21.050433 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:21.050056) v2 -- ?+0 0xb6d9340 con 0xb9a89a0
+2013-02-20 04:38:25.750415 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79169 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:25.750195) v2 ==== 47+0+0 (3873827452 0 0) 0xe592000 con 0xb9a89a0
+2013-02-20 04:38:25.750548 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:25.750195) v2 -- ?+0 0xbf4bc00 con 0xb9a89a0
+2013-02-20 04:38:28.650634 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79170 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:28.650367) v2 ==== 47+0+0 (718534970 0 0) 0x78ff880 con 0xb9a89a0
+2013-02-20 04:38:28.650713 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:28.650367) v2 -- ?+0 0xe592000 con 0xb9a89a0
+2013-02-20 04:38:32.150855 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79171 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:32.150550) v2 ==== 47+0+0 (1909552382 0 0) 0x6fae000 con 0xb9a89a0
+2013-02-20 04:38:32.150939 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:32.150550) v2 -- ?+0 0x78ff880 con 0xb9a89a0
+2013-02-20 04:38:34.450994 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79172 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:34.450737) v2 ==== 47+0+0 (886776134 0 0) 0xd304700 con 0xb9a89a0
+2013-02-20 04:38:34.451033 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:34.450737) v2 -- ?+0 0x6fae000 con 0xb9a89a0
+2013-02-20 04:38:37.351175 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79173 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:37.350908) v2 ==== 47+0+0 (2444468724 0 0) 0xe593340 con 0xb9a89a0
+2013-02-20 04:38:37.351215 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:37.350908) v2 -- ?+0 0xd304700 con 0xb9a89a0
+2013-02-20 04:38:41.451417 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79174 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:41.451094) v2 ==== 47+0+0 (4159941099 0 0) 0xb6d8380 con 0xb9a89a0
+2013-02-20 04:38:41.451477 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:41.451094) v2 -- ?+0 0xe593340 con 0xb9a89a0
+2013-02-20 04:38:43.751635 7f564b733700  1 -- 192.168.254.133:6803/21178 <== osd.0 192.168.254.132:0/18444 79175 ==== osd_ping(ping e790 stamp 2013-02-20 04:38:43.751289) v2 ==== 47+0+0 (800627449 0 0) 0xbb0b180 con 0xb9a89a0
+2013-02-20 04:38:43.751675 7f564b733700  1 -- 192.168.254.133:6803/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e790 stamp 2013-02-20 04:38:43.751289) v2 -- ?+0 0xb6d8380 con 0xb9a89a0
+2013-02-20 04:38:53.151872 7f564b733700  1 -- 192.168.254.133:6802/21178 <== osd.0 192.168.254.132:0/18444 1 ==== osd_ping(ping e794 stamp 2013-02-20 04:38:53.151589) v2 ==== 47+0+0 (3010557341 0 0) 0x78ff880 con 0x10d39340
+2013-02-20 04:38:53.151908 7f564b733700  1 -- 192.168.254.133:6802/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e794 stamp 2013-02-20 04:38:53.151589) v2 -- ?+0 0xbb0b180 con 0x10d39340
+2013-02-20 04:38:56.052292 7f564b733700  1 -- 192.168.254.133:6802/21178 <== osd.0 192.168.254.132:0/18444 2 ==== osd_ping(ping e794 stamp 2013-02-20 04:38:56.051788) v2 ==== 47+0+0 (4254185894 0 0) 0xb6d9340 con 0x10d39340
+2013-02-20 04:38:56.052330 7f564b733700  1 -- 192.168.254.133:6802/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e794 stamp 2013-02-20 04:38:56.051788) v2 -- ?+0 0x78ff880 con 0x10d39340
+2013-02-20 04:38:57.152438 7f564b733700  1 -- 192.168.254.133:6802/21178 <== osd.0 192.168.254.132:0/18444 3 ==== osd_ping(ping e794 stamp 2013-02-20 04:38:57.152006) v2 ==== 47+0+0 (1503720898 0 0) 0xb6d96c0 con 0x10d39340
+2013-02-20 04:38:57.152472 7f564b733700  1 -- 192.168.254.133:6802/21178 --> 192.168.254.132:0/18444 -- osd_ping(ping_reply e794 stamp 2013-02-20 04:38:57.152006) v2 -- ?+0 0xb6d9340 con 0x10d39340
+
+----------------------------------------------------------------------
+ceph-osd.0.log, showing osd.0 <=> osd.1 activity whilst osd.1 ping_replies aren't being seen
+----------------------------------------------------------------------
+<<<< osd.0 sees delayed ping_replies from here >>>>
+2013-02-20 04:37:59.547719 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:37:59.547716) v2 -- ?+0 0x73e5340 con 0xa2dcdc0
+2013-02-20 04:38:00.047911 7f108bf19700  1 -- 192.168.254.132:0/18444 --> 192.168.254.133:6803/21178 -- osd_ping(ping e790 stamp 2013-02-20 04:38:00.047909) v2 -- ?+0 0x99bbc00 con 0xa2dcdc0
+2013-02-20 04:38:00.342856 7f108e71e700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.9811.0:498225 2.51 4d55cd51/rb.0.2150.2ae8944a.000000000628/head//2 [] v 790'271511 snapset=0=[]:[] snapc=0=[]) v7 -- ?+8799 0x8f91400
+2013-02-20 04:38:01.046192 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989786 ==== osd_sub_op(unknown.0.0:0 2.4e 0//0//-1 [scrub-map] v 0'0 snapset=0=[]:[] snapc=0=[]) v7 ==== 955+0+21617430 (245718815 0 180673924) 0xd19d200 con 0x9571080
+2013-02-20 04:38:01.046297 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989787 ==== osd_sub_op_reply(client.9971.0:685924 2.4e b16f5ace/rb.0.1c62.2ae8944a.000000000439/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (3427135234 0 0) 0xa9c4f00 con 0x9571080
+2013-02-20 04:38:01.046352 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989788 ==== osd_sub_op_reply(client.9953.0:367558 2.5a 6d3052da/rbd_data.242f2ae8944a.000000000000002c/head//2 [] ondisk, result = 0) v1 ==== 164+0+0 (2641157471 0 0) 0x86f2280 con 0x9571080
+2013-02-20 04:38:01.046390 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989789 ==== osd_sub_op_reply(client.9953.0:367559 2.28 8340fa28/rbd_data.242f2ae8944a.0000000000000096/head//2 [] ondisk, result = 0) v1 ==== 164+0+0 (2759328511 0 0) 0x95d2780 con 0x9571080
+2013-02-20 04:38:01.046743 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989790 ==== osd_sub_op_reply(client.9953.0:367560 2.5a 6678d7da/rbd_data.242f2ae8944a.0000000000000b8b/head//2 [] ondisk, result = 0) v1 ==== 164+0+0 (602117107 0 0) 0xda1fb80 con 0x9571080
+2013-02-20 04:38:01.047020 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989791 ==== osd_sub_op_reply(client.9811.0:498225 2.51 4d55cd51/rb.0.2150.2ae8944a.000000000628/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (435514219 0 0) 0xac43400 con 0x9571080
+2013-02-20 04:38:01.047240 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989792 ==== osd_sub_op(client.9995.0:4402170 2.77 3b454af7/rb.0.1cf8.2ae8944a.000000000e35/head//2 [] v 790'353333 snapset=0=[]:[] snapc=0=[]) v7 ==== 1107+0+8799 (240510986 0 1818934932) 0x8f91400 con 0x9571080
+2013-02-20 04:38:01.047600 7f108cf1b700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- replica scrub(pg: 2.4e,from:0'0,to:0'0,epoch:790,start:6388b3ce//0//-1,end:cff8e3ce//0//-1,chunky:1,deep:0,version:4) v4 -- ?+0 0xb0b3b00
+2013-02-20 04:38:01.050467 7f108df1d700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.9811.0:498226 2.51 4d55cd51/rb.0.2150.2ae8944a.000000000628/head//2 [] v 790'271512 snapset=0=[]:[] snapc=0=[]) v7 -- ?+4703 0xd19d200
+2013-02-20 04:38:01.060518 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989793 ==== osd_sub_op(client.9968.0:302420 2.74 2c5fc7f4/rb.0.1c64.74b0dc51.00000000043b/head//2 [] v 790'498230 snapset=0=[]:[] snapc=0=[]) v7 ==== 1107+0+16991 (2821939739 0 1047147434) 0xd19d200 con 0x9571080
+2013-02-20 04:38:01.072310 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989794 ==== osd_sub_op_reply(client.9811.0:498226 2.51 4d55cd51/rb.0.2150.2ae8944a.000000000628/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (3589886011 0 0) 0xaf1ef00 con 0x9571080
+2013-02-20 04:38:01.086276 7f1093f29700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op_reply(client.9995.0:4402170 2.77 3b454af7/rb.0.1cf8.2ae8944a.000000000e35/head//2 [] ondisk, result = 0) v1 -- ?+0 0xc477400
+2013-02-20 04:38:01.090522 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989795 ==== osd_sub_op(client.9995.0:4402171 2.77 3b454af7/rb.0.1cf8.2ae8944a.000000000e35/head//2 [] v 790'353334 snapset=0=[]:[] snapc=0=[]) v7 ==== 1107+0+4703 (4105904555 0 2838991357) 0xbddea00 con 0x9571080
+2013-02-20 04:38:01.097246 7f1093f29700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op_reply(client.9968.0:302420 2.74 2c5fc7f4/rb.0.1c64.74b0dc51.00000000043b/head//2 [] ondisk, result = 0) v1 -- ?+0 0x9055400
+2013-02-20 04:38:01.100259 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989796 ==== osd_sub_op(client.9968.0:302421 2.74 2c5fc7f4/rb.0.1c64.74b0dc51.00000000043b/head//2 [] v 790'498231 snapset=0=[]:[] snapc=0=[]) v7 ==== 1107+0+4703 (3340239323 0 2873835958) 0x810f400 con 0x9571080
+2013-02-20 04:38:01.110432 7f1093f29700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op_reply(client.9995.0:4402171 2.77 3b454af7/rb.0.1cf8.2ae8944a.000000000e35/head//2 [] ondisk, result = 0) v1 -- ?+0 0xc477680
+2013-02-20 04:38:01.121128 7f1093f29700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op_reply(client.9968.0:302421 2.74 2c5fc7f4/rb.0.1c64.74b0dc51.00000000043b/head//2 [] ondisk, result = 0) v1 -- ?+0 0x296d680
+2013-02-20 04:38:01.366189 7f108e71e700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.10001.0:3423766 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] v 790'768516 snapset=0=[]:[] snapc=0=[]) v7 -- ?+4703 0x9fe1400
+2013-02-20 04:38:01.366377 7f108e71e700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.10001.0:3423767 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] v 790'768517 snapset=0=[]:[] snapc=0=[]) v7 -- ?+4703 0xb978a00
+2013-02-20 04:38:01.366519 7f108e71e700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.10001.0:3423768 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] v 790'768518 snapset=0=[]:[] snapc=0=[]) v7 -- ?+4703 0x815d200
+2013-02-20 04:38:01.366728 7f108df1d700  1 -- 192.168.254.132:6802/18444 --> osd.1 192.168.254.133:6801/21178 -- osd_sub_op(client.10001.0:3423770 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] v 790'768519 snapset=0=[]:[] snapc=0=[]) v7 -- ?+4703 0xc557e00
+2013-02-20 04:38:01.367681 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989797 ==== osd_sub_op(client.10001.0:3423769 2.17 37564117/rb.0.209f.74b0dc51.000000001200/head//2 [] v 790'353128 snapset=0=[]:[] snapc=0=[]) v7 ==== 1107+0+4703 (1225650648 0 1162937880) 0xa052800 con 0x9571080
+2013-02-20 04:38:01.378938 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989798 ==== osd_sub_op_reply(client.10001.0:3423766 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (2250676101 0 0) 0xc47768 0 con 0x9571080
+2013-02-20 04:38:01.379109 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989799 ==== osd_sub_op_reply(client.10001.0:3423767 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (2794751629 0 0) 0x7b1aa0 0 con 0x9571080
+2013-02-20 04:38:01.379162 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989800 ==== osd_sub_op_reply(client.10001.0:3423768 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (41013162 0 0) 0x8086a00 con 0x9571080
+2013-02-20 04:38:01.379396 7f1091f25700  1 -- 192.168.254.132:6802/18444 <== osd.1 192.168.254.133:6801/21178 4989801 ==== osd_sub_op_reply(client.10001.0:3423770 2.7d f598cffd/rb.0.209f.74b0dc51.000000000a00/head//2 [] ondisk, result = 0) v1 ==== 157+0+0 (2912526559 0 0) 0xb05450 0 con 0x9571080
+
+----------------------------------------------------------------------
+osd.0 load and disk
+----------------------------------------------------------------------
+                    load %user %nice  %sys  %iow  %stl %idle  dev rrqm/s wrqm/s    r/s    w/s    rkB/s    wkB/s arq-sz aqu-sz  await  rwait wwait %util
+2013-02-20-04:37:56  0.6   1.4   0.0   1.4   0.5   0.0  94.1  sdn    0.0    0.0    0.0   19.1     0.00   182.00  19.09   0.59  30.87   0.00  30.9  14.5
+2013-02-20-04:38:11  0.6   1.2   0.0   1.1   1.0   0.0  93.4  sdn    0.0    0.0    0.0   20.8     0.00   152.00  14.62   0.79  38.14   0.00  38.1  12.5
+2013-02-20-04:38:26  0.6   1.3   0.0   1.1   0.5   0.0  94.0  sdn    0.0    0.0    0.0   17.4     0.00   170.53  19.60   0.69  39.85   0.00  39.8  14.7
+2013-02-20-04:38:41  0.6   1.1   0.0   1.2   0.5   0.0  94.3  sdn    0.0    0.2    0.0   21.8     0.00   179.83  16.50   0.61  28.17   0.00  28.2  12.1
+2013-02-20-04:38:56  0.8   1.7   0.0   1.2   4.3   0.0  90.6  sdn    0.0    0.1    0.2  141.1     1.60  1838.33  26.04  41.68 294.67 283.33 294.7  53.9
+2013-02-20-04:39:11  0.7   0.3   0.0   0.3   0.3   0.0  98.3  sdn    0.0    0.0    0.0    2.3     0.00    45.20  39.88   0.16  85.00   0.00  85.0   4.8
+2013-02-20-04:39:26  0.6   0.1   0.0   0.1   0.0   0.0  99.2  sdn    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:39:41  0.5   0.4   0.0   0.3   0.1   0.0  99.4  sdn    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:39:56  0.4   0.2   0.0   0.2   0.1   0.0  99.5  sdn    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:40:11  0.3   0.3   0.0   0.3   0.0   0.0  99.5  sdn    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+
+----------------------------------------------------------------------
+osd.1 load and disk
+----------------------------------------------------------------------
+                    load %user %nice  %sys  %iow  %stl %idle  dev rrqm/s wrqm/s    r/s    w/s    rkB/s    wkB/s arq-sz aqu-sz  await  rwait wwait %util
+2013-02-20-04:37:57  0.8   0.3   0.0   0.2   0.6   0.0  97.7  sdg    0.0    0.1    2.5   19.7    10.40   179.93  17.15   0.97  43.63  38.16  44.3  19.3
+2013-02-20-04:38:12  1.0   0.3   0.0   0.3   0.7   0.0  97.4  sdg    0.0    0.1    2.8   28.0    11.47   232.20  15.82   0.71  23.20  25.48  23.0  16.1
+2013-02-20-04:38:27  0.8   0.4   0.0   0.2   0.7   0.0  97.4  sdg    0.0    0.0    2.7   11.3    10.67   102.87  16.30   0.31  22.30  14.25  24.2  11.1
+2013-02-20-04:38:42  0.7   0.2   0.0   0.2   0.8   0.0  97.6  sdg    0.0    0.0    2.3   22.3     9.07   198.07  16.84   1.15  46.72  31.18  48.3  20.9
+2013-02-20-04:38:57  0.6   0.6   0.0   0.5   5.2   0.0  92.9  sdg    0.0    0.0   15.8  162.7    63.73  1613.37  18.79  32.51 182.07  24.94 197.3  63.1
+2013-02-20-04:39:12  0.5   0.0   0.0   0.0   0.1   0.0  99.8  sdg    0.0    0.0    0.0    5.8     0.00    76.87  26.51   0.32  57.82   0.00  57.8   9.2
+2013-02-20-04:39:27  0.4   0.0   0.0   0.0   0.1   0.0  99.9  sdg    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:39:42  0.6   0.0   0.0   0.0   0.1   0.0  99.8  sdg    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:39:57  0.5   0.0   0.0   0.0   0.1   0.0  99.8  sdg    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+2013-02-20-04:40:12  0.4   0.0   0.0   0.0   0.1   0.0  99.8  sdg    0.0    0.0    0.0    0.0     0.00     0.00   0.00   0.00   0.00   0.00   0.0   0.0
+
+
+----------------------------------------------------------------------
