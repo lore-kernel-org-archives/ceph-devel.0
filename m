@@ -1,40 +1,57 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: rbd export speed limit
-Date: Thu, 21 Feb 2013 10:53:23 +0300
-Message-ID: <CABYiri88+iXrUxHL3FCVEdx85ww4-MhMnZugRVOxB=495rdpAg@mail.gmail.com>
-References: <511AA47B.3020309@profihost.ag>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: pg stuck in peering
+Date: Thu, 21 Feb 2013 11:09:45 +0100
+Message-ID: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:49148 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751803Ab3BUHxq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 02:53:46 -0500
-Received: by mail-ob0-f176.google.com with SMTP id v19so8479808obq.21
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Feb 2013 23:53:44 -0800 (PST)
-In-Reply-To: <511AA47B.3020309@profihost.ag>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:63333 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751575Ab3BUKJq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 05:09:46 -0500
+Received: by mail-wi0-f176.google.com with SMTP id hm14so7273051wib.9
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Feb 2013 02:09:45 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Gregory Farnum <greg@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Feb 13, 2013 at 12:22 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
-> Hi,
->
-> is there a speed limit option for rbd export? Right now i'm able to produce
-> several SLOW requests from IMPORTANT valid requests while just exporting a
-> snapshot which is not really important.
->
-> rbd export runs with 2400MB/s and each OSD with 250MB/s so it seems to block
-> valid normal read / write operations.
->
-> Greets,
-> Stefan
-> --
+Hi
+I have some trouble on a test cluster.
+Many PGs are stuck in "peering" state from yesterday:
 
-Can confirm this in some specific case - when 0.56.2 and 0.56.3
-coexist for a long time, nodes with newer running version can produce
-such warnings at the beginning of export huge snapshots, not during
-entire export. And there are real impact on clients - for example I
-can see messages from watchdog in the KVM guests. For now, I will do
-an input throttling on export as temporary workaround.
+pg 1.2 is peering, acting [3,4]
+pg 0.3 is peering, acting [3,4]
+pg 2.1 is peering, acting [3,4]
+pg 3.0 is peering, acting [3,4]
+pg 1.3 is peering, acting [1,4]
+pg 0.2 is peering, acting [3,4]
+pg 2.0 is peering, acting [3,4]
+pg 3.1 is peering, acting [1,4]
+pg 4.6 is down+peering, acting [4,0]
+pg 5.7 is peering, acting [3,1]
+pg 6.4 is down+peering, acting [4,0]
+pg 7.5 is peering, acting [3,1]
+pg 0.1 is active+degraded, acting [4,0]
+pg 2.3 is peering, acting [3,4]
+pg 3.2 is peering, acting [3,4]
+pg 4.5 is down+peering, acting [2,4]
+pg 5.4 is down+peering, acting [2,4]
+pg 6.7 is peering, acting [0,4]
+pg 7.6 is peering, acting [0,4]
+pg 1.1 is peering, acting [3,4]
+pg 0.0 is active+degraded, acting [4,0]
+pg 2.2 is peering, acting [1,4]
+pg 3.3 is peering, acting [2,4]
+pg 4.4 is peering, acting [1,4]
+pg 5.5 is down+peering, acting [4,0]
+pg 6.6 is peering, acting [3,1]
+pg 7.7 is down+peering, acting [2,4]
+
+HEALTH_WARN 332 pgs degraded; 316 pgs down; 316 pgs peering; 93 pgs
+stale; 316 pgs stuck inactive; 93 pgs stuck stale; 764 pgs stuck
+unclean
+
+
+
+any advice ? I think that a not healthy cluster prevent me to run RGW
+due to some timeout.
