@@ -1,53 +1,75 @@
-From: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: pg stuck in peering
-Date: Thu, 21 Feb 2013 13:23:52 +0100
-Message-ID: <512611D8.6050203@risc-software.at>
-References: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com> <CAD3n6hEzrMACSbFygh7=PM2z4zmXzKQ=n8oY7WiYy5JKUqMx2g@mail.gmail.com> <CAJH6TXizbuz-hoH-sxCe3H724BM2DDAuOuJduNwCiZAnK_txrw@mail.gmail.com> <5126028C.80008@risc-software.at> <CAJH6TXg_Kq=Mgk_PJVhG+sVZEp-kLsMAJw7d2bKM=YN1550F9Q@mail.gmail.com>
+Date: Thu, 21 Feb 2013 08:46:12 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302210845080.26699@cobra.newdream.net>
+References: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from email.edvz.uni-linz.ac.at ([140.78.3.65]:33442 "EHLO
-	email.uni-linz.ac.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752313Ab3BUMXy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 07:23:54 -0500
-In-Reply-To: <CAJH6TXg_Kq=Mgk_PJVhG+sVZEp-kLsMAJw7d2bKM=YN1550F9Q@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:56756 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754947Ab3BUQqM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 11:46:12 -0500
+In-Reply-To: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
+On Thu, 21 Feb 2013, Gandalf Corvotempesta wrote:
+> Hi
+> I have some trouble on a test cluster.
+> Many PGs are stuck in "peering" state from yesterday:
+> 
+> pg 1.2 is peering, acting [3,4]
+> pg 0.3 is peering, acting [3,4]
+> pg 2.1 is peering, acting [3,4]
+> pg 3.0 is peering, acting [3,4]
+> pg 1.3 is peering, acting [1,4]
+> pg 0.2 is peering, acting [3,4]
+> pg 2.0 is peering, acting [3,4]
+> pg 3.1 is peering, acting [1,4]
+> pg 4.6 is down+peering, acting [4,0]
+> pg 5.7 is peering, acting [3,1]
+> pg 6.4 is down+peering, acting [4,0]
+> pg 7.5 is peering, acting [3,1]
+> pg 0.1 is active+degraded, acting [4,0]
+> pg 2.3 is peering, acting [3,4]
+> pg 3.2 is peering, acting [3,4]
+> pg 4.5 is down+peering, acting [2,4]
+> pg 5.4 is down+peering, acting [2,4]
+> pg 6.7 is peering, acting [0,4]
+> pg 7.6 is peering, acting [0,4]
+> pg 1.1 is peering, acting [3,4]
+> pg 0.0 is active+degraded, acting [4,0]
+> pg 2.2 is peering, acting [1,4]
+> pg 3.3 is peering, acting [2,4]
+> pg 4.4 is peering, acting [1,4]
+> pg 5.5 is down+peering, acting [4,0]
+> pg 6.6 is peering, acting [3,1]
+> pg 7.7 is down+peering, acting [2,4]
+
+You can 'ceph pg <pgid> query' on the individual pgid's above to see why 
+it is blocked.. look near the end of the json dump.  This kind of 
+diagnosis is documented under the section on handling common failures.  It 
+should tell you which specific OSD needs to be started (or possibly marked 
+'lost').
+
+sage
 
 
-On 02/21/2013 12:32 PM, Gandalf Corvotempesta wrote:
-
-> all dirs are mounted.
-> I have to manually restart many many time to get all osd up. Seems to be random.
-
-this should not happen. unstable networking connection? have you checked
-tail -f /var/log/syslog on your ceph-hosts?
-
-> If ceph status is not in HELTH_OK, radosgw doesn't start at all. Is this ok?
-
-what does ceph osd tree say?
-what is the output of ceph health detail?
-
-I don't have experience with radosgw, sorry.
-
-
--- 
-DI (FH) Wolfgang Hennerbichler
-Software Development
-Unit Advanced Computing Technologies
-RISC Software GmbH
-A company of the Johannes Kepler University Linz
-
-IT-Center
-Softwarepark 35
-4232 Hagenberg
-Austria
-
-Phone: +43 7236 3343 245
-Fax: +43 7236 3343 250
-wolfgang.hennerbichler@risc-software.at
-http://www.risc-software.at
+> 
+> HEALTH_WARN 332 pgs degraded; 316 pgs down; 316 pgs peering; 93 pgs
+> stale; 316 pgs stuck inactive; 93 pgs stuck stale; 764 pgs stuck
+> unclean
+> 
+> 
+> 
+> any advice ? I think that a not healthy cluster prevent me to run RGW
+> due to some timeout.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
