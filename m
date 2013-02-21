@@ -1,75 +1,66 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: pg stuck in peering
-Date: Thu, 21 Feb 2013 08:46:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302210845080.26699@cobra.newdream.net>
-References: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Able to crash mon with invalid command
+Date: Thu, 21 Feb 2013 12:11:23 -0500
+Message-ID: <CACkq2motaanU4NNWFPYXGQuisJwnRPTJB556j22fWRLove772w@mail.gmail.com>
+References: <CACkq2mpBFukD0kSQm6TArLNXGYMTuZDV7XF0tCXsN_qLR7cgKA@mail.gmail.com>
+ <CACkq2mrxHsoi03DyQDgFCT=rHUPhnSg67dmAePyfAc-uLmP4eA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56756 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754947Ab3BUQqM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 11:46:12 -0500
-In-Reply-To: <CAJH6TXiVQ8cqyL5Z-XKz8PqjyuVyg=wM67eg5830sMSp546ReA@mail.gmail.com>
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:54738 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753614Ab3BURLs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 12:11:48 -0500
+Received: by mail-oa0-f52.google.com with SMTP id k14so9226883oag.25
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Feb 2013 09:11:46 -0800 (PST)
+In-Reply-To: <CACkq2mrxHsoi03DyQDgFCT=rHUPhnSg67dmAePyfAc-uLmP4eA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 21 Feb 2013, Gandalf Corvotempesta wrote:
-> Hi
-> I have some trouble on a test cluster.
-> Many PGs are stuck in "peering" state from yesterday:
-> 
-> pg 1.2 is peering, acting [3,4]
-> pg 0.3 is peering, acting [3,4]
-> pg 2.1 is peering, acting [3,4]
-> pg 3.0 is peering, acting [3,4]
-> pg 1.3 is peering, acting [1,4]
-> pg 0.2 is peering, acting [3,4]
-> pg 2.0 is peering, acting [3,4]
-> pg 3.1 is peering, acting [1,4]
-> pg 4.6 is down+peering, acting [4,0]
-> pg 5.7 is peering, acting [3,1]
-> pg 6.4 is down+peering, acting [4,0]
-> pg 7.5 is peering, acting [3,1]
-> pg 0.1 is active+degraded, acting [4,0]
-> pg 2.3 is peering, acting [3,4]
-> pg 3.2 is peering, acting [3,4]
-> pg 4.5 is down+peering, acting [2,4]
-> pg 5.4 is down+peering, acting [2,4]
-> pg 6.7 is peering, acting [0,4]
-> pg 7.6 is peering, acting [0,4]
-> pg 1.1 is peering, acting [3,4]
-> pg 0.0 is active+degraded, acting [4,0]
-> pg 2.2 is peering, acting [1,4]
-> pg 3.3 is peering, acting [2,4]
-> pg 4.4 is peering, acting [1,4]
-> pg 5.5 is down+peering, acting [4,0]
-> pg 6.6 is peering, acting [3,1]
-> pg 7.7 is down+peering, acting [2,4]
+I threw this at ceph-users yesterday, but no responses.  It is
+probably a better candidate for ceph-devel anyhow:
 
-You can 'ceph pg <pgid> query' on the individual pgid's above to see why 
-it is blocked.. look near the end of the json dump.  This kind of 
-diagnosis is documented under the section on handling common failures.  It 
-should tell you which specific OSD needs to be started (or possibly marked 
-'lost').
+I typed in the following command and it crashed one of my monitors:
 
-sage
+# ceph quorum
+2013-02-20 18:22:59.327916 7f908186f700  0 monclient: hunting for new mon
+unknown quorum subcommand; use exit or enter
 
+# ceph -s
+   health HEALTH_WARN 1 mons down, quorum 0,1,3,4 a,b,d,e
 
-> 
-> HEALTH_WARN 332 pgs degraded; 316 pgs down; 316 pgs peering; 93 pgs
-> stale; 316 pgs stuck inactive; 93 pgs stuck stale; 764 pgs stuck
-> unclean
-> 
-> 
-> 
-> any advice ? I think that a not healthy cluster prevent me to run RGW
-> due to some timeout.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Log from ceph-mon.c.log:
+
+    -1> 2013-02-20 18:22:57.594190 7f92d84db700  0 mon.c@2(peon) e1
+handle_command mon_command(quorum v 0) v1
+     0> 2013-02-20 18:22:57.721764 7f92d84db700 -1 *** Caught signal
+(Segmentation fault) **
+ in thread 7f92d84db700
+
+ ceph version 0.56.3 (6eb7e15a4783b122e9b0c85ea9ba064145958aa5)
+ 1: /usr/bin/ceph-mon() [0x5379da]
+ 2: (()+0xfcb0) [0x7f92dd8cecb0]
+ 3: (std::string::compare(char const*) const+0x2c) [0x7f92dcfe382c]
+ 4: (bool std::operator==<char, std::char_traits<char>,
+std::allocator<char> >(std::basic_string<char, std::char_traits<char>,
+std::allocator<char> > const&, char const*)+0x9) [0x488919]
+ 5: (Monitor::handle_command(MMonCommand*)+0x13a8) [0x4741e8]
+ 6: (Monitor::_ms_dispatch(Message*)+0x103b) [0x484bcb]
+ 7: (Monitor::ms_dispatch(Message*)+0x32) [0x4945c2]
+ 8: (DispatchQueue::entry()+0x349) [0x63d009]
+ 9: (DispatchQueue::DispatchThread::entry()+0xd) [0x5d67bd]
+ 10: (()+0x7e9a) [0x7f92dd8c6e9a]
+ 11: (clone()+0x6d) [0x7f92dc767cbd]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
+
+I had meant to do "ceph quorum_status".  doh.
+Version is 0.56.3 all around
+
+Looking at the source code, it is a valid command -- and the monitor
+correctly responded that it needed either "exit" or "enter" after the
+command.  I don't know why it segfaulted, though.  I've tried it again
+a couple of times since, and no segfaults.
+
+ - Travis
