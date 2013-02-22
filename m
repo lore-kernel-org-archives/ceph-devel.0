@@ -1,30 +1,93 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Four miscellaneous patches
-Date: Fri, 22 Feb 2013 11:15:45 -0600
-Message-ID: <5127A7C1.3070609@inktank.com>
+Subject: [PATCH] rbd: ignore zero-length requests
+Date: Fri, 22 Feb 2013 11:17:03 -0600
+Message-ID: <5127A80F.4040301@inktank.com>
+References: <5127A7C1.3070609@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:45878 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757679Ab3BVRPt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 12:15:49 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k10so971725iea.5
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 09:15:49 -0800 (PST)
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:39247 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757555Ab3BVRRG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 12:17:06 -0500
+Received: by mail-ia0-f173.google.com with SMTP id h37so734438iak.4
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 09:17:06 -0800 (PST)
+In-Reply-To: <5127A7C1.3070609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-The following patches address some issues that were found while
-investigating a kernel rbd client performance issue this week.
+The old request code simply ignored zero-length requests.  We should
+still operate that same way to avoid any changes in behavior.  We
+can implement handling for special zero-length requests separately
+(see http://tracker.ceph.com/issues/4236).
 
-These patches are available in the branch "test/wip-4234,5,7,8"
-in the ceph-client git repository.
+Add some assertions based on this new constraint.
 
-					-Alex
+This resolves:
+    http://tracker.ceph.com/issues/4237
 
-[PATCH] rbd: ignore zero-length requests
-[PATCH] rbd: barriers are hard
-[PATCH] rbd: normalize dout() calls
-[PATCH] libceph: define connection flag helpers
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b0eea3e..3cc003b 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1560,6 +1560,7 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+ 	image_offset = img_request->offset;
+ 	rbd_assert(image_offset == bio_list->bi_sector << SECTOR_SHIFT);
+ 	resid = img_request->length;
++	rbd_assert(resid > 0);
+ 	while (resid) {
+ 		const char *object_name;
+ 		unsigned int clone_size;
+@@ -1627,8 +1628,10 @@ static void rbd_img_obj_callback(struct
+rbd_obj_request *obj_request)
+ 	bool more = true;
+
+ 	img_request = obj_request->img_request;
++
+ 	rbd_assert(img_request != NULL);
+ 	rbd_assert(img_request->rq != NULL);
++	rbd_assert(img_request->obj_request_count > 0);
+ 	rbd_assert(which != BAD_WHICH);
+ 	rbd_assert(which < img_request->obj_request_count);
+ 	rbd_assert(which >= img_request->next_completion);
+@@ -1918,6 +1921,19 @@ static void rbd_request_fn(struct request_queue *q)
+ 		/* Ignore any non-FS requests that filter through. */
+
+ 		if (rq->cmd_type != REQ_TYPE_FS) {
++			dout("%s: non-fs request type %d\n", __func__,
++				(int) rq->cmd_type);
++			__blk_end_request_all(rq, 0);
++			continue;
++		}
++
++		/* Ignore/skip any zero-length requests */
++
++		offset = (u64) blk_rq_pos(rq) << SECTOR_SHIFT;
++		length = (u64) blk_rq_bytes(rq);
++
++		if (!length) {
++			dout("%s: zero-length request\n", __func__);
+ 			__blk_end_request_all(rq, 0);
+ 			continue;
+ 		}
+@@ -1947,9 +1963,6 @@ static void rbd_request_fn(struct request_queue *q)
+ 			goto end_request;
+ 		}
+
+-		offset = (u64) blk_rq_pos(rq) << SECTOR_SHIFT;
+-		length = (u64) blk_rq_bytes(rq);
+-
+ 		result = -EINVAL;
+ 		if (WARN_ON(offset && length > U64_MAX - offset + 1))
+ 			goto end_request;	/* Shouldn't happen */
+-- 
+1.7.9.5
+
