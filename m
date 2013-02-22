@@ -1,129 +1,124 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: [ceph-users] Fwd: Re: Able to crash mon with invalid command
-Date: Thu, 21 Feb 2013 13:12:11 -0500
-Message-ID: <CACkq2mprW8d8NHFDa2ykAtf0azG5Ss4F5fw=w1RabO7=gj1HUg@mail.gmail.com>
-References: <51265B08.5000901@inktank.com> <51265DC6.1050109@inktank.com>
+From: <Kelvin_Huang@wiwynn.com>
+Subject: Ceph scalar & replicas performance
+Date: Fri, 22 Feb 2013 01:01:00 +0000
+Message-ID: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=koi8-r
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f42.google.com ([209.85.219.42]:36081 "EHLO
-	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755015Ab3BUSMb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 13:12:31 -0500
-Received: by mail-oa0-f42.google.com with SMTP id i18so9597244oag.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Feb 2013 10:12:31 -0800 (PST)
-In-Reply-To: <51265DC6.1050109@inktank.com>
+Received: from twnhumsw3.wistron.com ([220.128.89.23]:52000 "EHLO
+	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753692Ab3BVBGI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 20:06:08 -0500
+Received: from GDC-CLDCAS-P03.whq.wistron (unverified [10.37.38.64]) by TWNHUMSW3.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Taa0d8f0d60c0a816711cfc@TWNHUMSW3.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Fri, 22 Feb 2013 09:05:19 +0800
+Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao.luis@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+To: ceph-devel@vger.kernel.org
 
-Thanks Joao!
+Hi all,
+I have some problem after my scalar performance test !!
 
-I see what you are talking about now.  I should have seen that.  I did
-quick scan to see if there was any other place like that, but that
-looks like the only one.  "injectargs" has appropriate safety checks.
+Setup:
+Linux kernel: 3.2.0
+OS: Ubuntu 12.04
+Storage server : 11 HDD (each storage server has 11 osd, 7200 rpm, 1T) =
++ 10GbE NIC + RAID card: LSI MegaRAID SAS 9260-4i
+         For every HDD: RAID0, Write Policy: Write Back with BBU, Read =
+Policy: ReadAhead, IO Policy: Direct Storage server number : 1 to 4
 
- - Travis
+Ceph version : 0.48.2
+Replicas : 2
 
-On Thu, Feb 21, 2013 at 12:47 PM, Joao Eduardo Luis
-<joao.luis@inktank.com> wrote:
-> Forgot to cross-post this to ceph-devel.
->
->
->
-> -------- Original Message --------
-> Subject: Re: [ceph-users] Able to crash mon with invalid command
-> Date: Thu, 21 Feb 2013 17:36:08 +0000
-> From: Joao Eduardo Luis <joao.luis@inktank.com>
-> To: Travis Rhoden <trhoden@gmail.com>
-> CC: ceph-users@ceph.com
->
-> On 02/21/2013 05:33 PM, Joao Eduardo Luis wrote:
->>
->> On 02/20/2013 06:39 PM, Travis Rhoden wrote:
->>>
->>> Actually, looking at the source code, that is a valid command -- and the
->>> monitor correctly responded that it needed either "exit" or "enter"
->>> after the command.  I don't know why it segfaulted, though.
->>
->>
->> By far the weirdest segfault I've seen in a while.
->>
->> Will look into this and report back.
->>
->> Thanks!
->>
->>    -Joao
->
->
-> Oh, not weird at all.  We're trying to read the next position in the
-> array without even checking if it exists.  I'll have a fix in a minute
-> or so.
->
-> Thanks again!
->
->   -Joao
->
->>
->>>
->>> On Wed, Feb 20, 2013 at 1:31 PM, Travis Rhoden <trhoden@gmail.com
->>> <mailto:trhoden@gmail.com>> wrote:
->>>
->>>     I typed in the following command and it crashed one of my monitors:
->>>
->>>     # ceph quorum
->>>     2013-02-20 18:22:59.327916 7f908186f700  0 monclient: hunting for
->>>     new mon
->>>     unknown quorum subcommand; use exit or enter
->>>
->>>     # ceph -s
->>>         health HEALTH_WARN 1 mons down, quorum 0,1,3,4 a,b,d,e
->>>
->>>     Log from ceph-mon.c.log:
->>>
->>>          -1> 2013-02-20 18:22:57.594190 7f92d84db700  0 mon.c@2(peon) e1
->>>     handle_command mon_command(quorum v 0) v1
->>>           0> 2013-02-20 18:22:57.721764 7f92d84db700 -1 *** Caught
->>>     signal (Segmentation fault) **
->>>       in thread 7f92d84db700
->>>
->>>       ceph version 0.56.3 (6eb7e15a4783b122e9b0c85ea9ba064145958aa5)
->>>       1: /usr/bin/ceph-mon() [0x5379da]
->>>       2: (()+0xfcb0) [0x7f92dd8cecb0]
->>>       3: (std::string::compare(char const*) const+0x2c) [0x7f92dcfe382c]
->>>       4: (bool std::operator==<char, std::char_traits<char>,
->>>     std::allocator<char> >(std::basic_string<char,
->>>     std::char_traits<char>, std::allocator<char> > const&, char
->>>     const*)+0x9) [0x488919]
->>>       5: (Monitor::handle_command(MMonCommand*)+0x13a8) [0x4741e8]
->>>       6: (Monitor::_ms_dispatch(Message*)+0x103b) [0x484bcb]
->>>       7: (Monitor::ms_dispatch(Message*)+0x32) [0x4945c2]
->>>       8: (DispatchQueue::entry()+0x349) [0x63d009]
->>>       9: (DispatchQueue::DispatchThread::entry()+0xd) [0x5d67bd]
->>>       10: (()+0x7e9a) [0x7f92dd8c6e9a]
->>>       11: (clone()+0x6d) [0x7f92dc767cbd]
->>>       NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>     needed to interpret this.
->>>
->>>     I had meant to do "ceph quorum_status".  doh.
->>>     Version is 0.56.3 all around
->>>
->>>       - Travis
->>>
->>>
->>>
->>>
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>
->>
->
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+=46IO cmd: =20
+[Sequencial Read]
+fio --iodepth =3D 32 --numjobs=3D1 --runtime=3D120  --bs =3D 65536 --rw=
+ =3D read --ioengine=3Dlibaio --group_reporting --direct=3D1 --eta=3Dal=
+ways --ramp_time=3D10 --thinktime=3D10=20
+
+[Sequencial Read]
+fio --iodepth =3D 32 --numjobs=3D1 --runtime=3D120  --bs =3D 65536 --rw=
+ =3D write --ioengine=3Dlibaio --group_reporting --direct=3D1 --eta=3Da=
+lways --ramp_time=3D10 --thinktime=3D10=20
+
+[Random Read]
+fio --iodepth =3D 32 --numjobs=3D8 --runtime=3D120  --bs =3D 65536 --rw=
+ =3D randread --ioengine=3Dlibaio --group_reporting --direct=3D1 --eta=3D=
+always --ramp_time=3D10 --thinktime=3D10=20
+
+[Random Write]
+fio --iodepth =3D 32 --numjobs=3D8 --runtime=3D120  --bs =3D 65536 --rw=
+ =3D randwrite --ioengine=3Dlibaio --group_reporting --direct=3D1 --eta=
+=3Dalways --ramp_time=3D10 --thinktime=3D10
+
+Use ceph client then create 1T RBD image for testing, the client also h=
+as 10GbE NIC , Linux kernel 3.2.0 , Ubuntu 12.04
+
+Performance result:=20
+                      Bandwidth (MB/sec)=20
+=82=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81storage server number=81Sequential Read =81Sequential Write=81Random=
+ Read=81Random Write =81=20
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          1        =81      259     =81     76       =81    837    =81=
+    26       =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          2        =81      349     =81    121       =81    950    =81=
+    45       =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          3        =81      354     =81    108       =81    490    =81=
+    71       =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          4        =81      338     =81    103       =81    610    =81=
+    89       =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+
+We expect that bandwidth will increase when storage server increase und=
+er all case, but the result is not !!=20
+Can you share your idea for read/write bandwidth when storage server in=
+creasing ?
+
+In another case, we fixed use 4 storage servers then adjust the number =
+of replicas 2 to 4
+
+Performance result:
+
+                        Bandwidth (MB/sec)=20
+=82=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81  replicas number    =81Sequential Read =81Sequential Write=81Random=
+ Read=81Random Write =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          2        =81       338    =81      103     =81     614    =
+=81      89     =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          3        =81       337    =81      76      =81     791    =
+=81      62     =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+=81          4        =81       337    =81      60      =81     754    =
+=81      43     =81
+=86=80=80=80=80=80=80=80=80=80 =8A=80=80=80=80=80=80=80=80=80=80=80=80=80=
+=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80=80
+
+The bandwidth of write will decrease when replicas increase that is eas=
+y to know, but why read bandwidth did not increase?
+
+
+Kelvin
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
