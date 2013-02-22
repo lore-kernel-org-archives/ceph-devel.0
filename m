@@ -1,111 +1,67 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Ceph scalar & replicas performance
-Date: Fri, 22 Feb 2013 09:57:21 -0800
-Message-ID: <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
-References: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
+Subject: Re: [PATCH 3/3] ceph: fix vmtruncate deadlock
+Date: Fri, 22 Feb 2013 10:54:17 -0800
+Message-ID: <CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
+References: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com>
+	<1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f42.google.com ([209.85.128.42]:32825 "EHLO
-	mail-qe0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757702Ab3BVR5W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 12:57:22 -0500
-Received: by mail-qe0-f42.google.com with SMTP id f6so124425qej.1
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 09:57:21 -0800 (PST)
-In-Reply-To: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:61730 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758338Ab3BVSyS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 13:54:18 -0500
+Received: by mail-qa0-f43.google.com with SMTP id dx4so572732qab.2
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 10:54:17 -0800 (PST)
+In-Reply-To: <1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kelvin_Huang@wiwynn.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-T24gVGh1LCBGZWIgMjEsIDIwMTMgYXQgNTowMSBQTSwgIDxLZWx2aW5fSHVhbmdAd2l3eW5uLmNv
-bT4gd3JvdGU6DQo+IEhpIGFsbCwNCj4gSSBoYXZlIHNvbWUgcHJvYmxlbSBhZnRlciBteSBzY2Fs
-YXIgcGVyZm9ybWFuY2UgdGVzdCAhIQ0KPg0KPiBTZXR1cDoNCj4gTGludXgga2VybmVsOiAzLjIu
-MA0KPiBPUzogVWJ1bnR1IDEyLjA0DQo+IFN0b3JhZ2Ugc2VydmVyIDogMTEgSEREIChlYWNoIHN0
-b3JhZ2Ugc2VydmVyIGhhcyAxMSBvc2QsIDcyMDAgcnBtLCAxVCkgKyAxMEdiRSBOSUMgKyBSQUlE
-IGNhcmQ6IExTSSBNZWdhUkFJRCBTQVMgOTI2MC00aQ0KPiAgICAgICAgICBGb3IgZXZlcnkgSERE
-OiBSQUlEMCwgV3JpdGUgUG9saWN5OiBXcml0ZSBCYWNrIHdpdGggQkJVLCBSZWFkIFBvbGljeTog
-UmVhZEFoZWFkLCBJTyBQb2xpY3k6IERpcmVjdCBTdG9yYWdlIHNlcnZlciBudW1iZXIgOiAxIHRv
-IDQNCj4NCj4gQ2VwaCB2ZXJzaW9uIDogMC40OC4yDQo+IFJlcGxpY2FzIDogMg0KPg0KPiBGSU8g
-Y21kOg0KPiBbU2VxdWVuY2lhbCBSZWFkXQ0KPiBmaW8gLS1pb2RlcHRoID0gMzIgLS1udW1qb2Jz
-PTEgLS1ydW50aW1lPTEyMCAgLS1icyA9IDY1NTM2IC0tcncgPSByZWFkIC0taW9lbmdpbmU9bGli
-YWlvIC0tZ3JvdXBfcmVwb3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9YWx3YXlzIC0tcmFtcF90aW1l
-PTEwIC0tdGhpbmt0aW1lPTEwDQo+DQo+IFtTZXF1ZW5jaWFsIFJlYWRdDQo+IGZpbyAtLWlvZGVw
-dGggPSAzMiAtLW51bWpvYnM9MSAtLXJ1bnRpbWU9MTIwICAtLWJzID0gNjU1MzYgLS1ydyA9IHdy
-aXRlIC0taW9lbmdpbmU9bGliYWlvIC0tZ3JvdXBfcmVwb3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9
-YWx3YXlzIC0tcmFtcF90aW1lPTEwIC0tdGhpbmt0aW1lPTEwDQo+DQo+IFtSYW5kb20gUmVhZF0N
-Cj4gZmlvIC0taW9kZXB0aCA9IDMyIC0tbnVtam9icz04IC0tcnVudGltZT0xMjAgIC0tYnMgPSA2
-NTUzNiAtLXJ3ID0gcmFuZHJlYWQgLS1pb2VuZ2luZT1saWJhaW8gLS1ncm91cF9yZXBvcnRpbmcg
-LS1kaXJlY3Q9MSAtLWV0YT1hbHdheXMgLS1yYW1wX3RpbWU9MTAgLS10aGlua3RpbWU9MTANCj4N
-Cj4gW1JhbmRvbSBXcml0ZV0NCj4gZmlvIC0taW9kZXB0aCA9IDMyIC0tbnVtam9icz04IC0tcnVu
-dGltZT0xMjAgIC0tYnMgPSA2NTUzNiAtLXJ3ID0gcmFuZHdyaXRlIC0taW9lbmdpbmU9bGliYWlv
-IC0tZ3JvdXBfcmVwb3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9YWx3YXlzIC0tcmFtcF90aW1lPTEw
-IC0tdGhpbmt0aW1lPTEwDQo+DQo+IFVzZSBjZXBoIGNsaWVudCB0aGVuIGNyZWF0ZSAxVCBSQkQg
-aW1hZ2UgZm9yIHRlc3RpbmcsIHRoZSBjbGllbnQgYWxzbyBoYXMgMTBHYkUgTklDICwgTGludXgg
-a2VybmVsIDMuMi4wICwgVWJ1bnR1IDEyLjA0DQo+DQo+IFBlcmZvcm1hbmNlIHJlc3VsdDoNCj4g
-ICAgICAgICAgICAgICAgICAgICAgIEJhbmR3aWR0aCAoTUIvc2VjKQ0KPiDilIzilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g
-4pSCc3RvcmFnZSBzZXJ2ZXIgbnVtYmVy4pSCU2VxdWVudGlhbCBSZWFkIOKUglNlcXVlbnRpYWwg
-V3JpdGXilIJSYW5kb20gUmVhZOKUglJhbmRvbSBXcml0ZSDilIINCj4g4pSc4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDi
-lIIgICAgICAgICAgMSAgICAgICAg4pSCICAgICAgMjU5ICAgICDilIIgICAgIDc2ICAgICAgIOKU
-giAgICA4MzcgICAg4pSCICAgIDI2ICAgICAgIOKUgg0KPiDilJzilIDilIDilIDilIDilIDilIDi
-lIDilIDilIAg4pS84pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgICAg
-ICAgICAyICAgICAgICDilIIgICAgICAzNDkgICAgIOKUgiAgICAxMjEgICAgICAg4pSCICAgIDk1
-MCAgICDilIIgICAgNDUgICAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDMg
-ICAgICAgIOKUgiAgICAgIDM1NCAgICAg4pSCICAgIDEwOCAgICAgICDilIIgICAgNDkwICAgIOKU
-giAgICA3MSAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKUvOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDilIIgICAgICAgICAgNCAgICAgICAg
-4pSCICAgICAgMzM4ICAgICDilIIgICAgMTAzICAgICAgIOKUgiAgICA2MTAgICAg4pSCICAgIDg5
-ICAgICAgIOKUgg0KPiDilJzilIDilIDilIDilIDilIDilIDilIDilIDilIAg4pS84pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+DQo+IFdlIGV4cGVjdCB0aGF0IGJhbmR3aWR0aCB3
-aWxsIGluY3JlYXNlIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVhc2UgdW5kZXIgYWxsIGNhc2Us
-IGJ1dCB0aGUgcmVzdWx0IGlzIG5vdCAhIQ0KPiBDYW4geW91IHNoYXJlIHlvdXIgaWRlYSBmb3Ig
-cmVhZC93cml0ZSBiYW5kd2lkdGggd2hlbiBzdG9yYWdlIHNlcnZlciBpbmNyZWFzaW5nID8NCg0K
-VGhlcmUncyBhIGJ1bmNoIG9mIHN0dWZmIHRoYXQgY291bGQgYmUgd2VpcmQgaGVyZS4gSXMgeW91
-ciBzd2l0Y2gNCmNhcGFibGUgb2YgaGFuZGxpbmcgYWxsIHRoZSB0cmFmZmljIGdvaW5nIG92ZXIg
-aXQ/IEhhdmUgeW91DQpiZW5jaG1hcmtlZCB0aGUgZHJpdmVzIGFuZCBmaWxlc3lzdGVtcyBvbiBl
-YWNoIG5vZGUgaW5kaXZpZHVhbGx5IHRvDQptYWtlIHN1cmUgdGhleSBhbGwgaGF2ZSB0aGUgc2Ft
-ZSBiZWhhdmlvciwgb3IgYXJlIHNvbWUgb2YgeW91cg0KYWRkaXRpb25zIHNsb3dlciB0aGFuIHRo
-ZSBvdGhlcnM/IChNeSBtb25leSBpcyBvbiB5b3UgaGF2aW5nIHNvbWUgc2xvdw0KZHJpdmVzIHRo
-YXQgYXJlIGRyYWdnaW5nIGV2ZXJ5dGhpbmcgZG93bi4pDQoNCg0KPiBJbiBhbm90aGVyIGNhc2Us
-IHdlIGZpeGVkIHVzZSA0IHN0b3JhZ2Ugc2VydmVycyB0aGVuIGFkanVzdCB0aGUgbnVtYmVyIG9m
-IHJlcGxpY2FzIDIgdG8gNA0KPg0KPiBQZXJmb3JtYW5jZSByZXN1bHQ6DQo+DQo+ICAgICAgICAg
-ICAgICAgICAgICAgICAgIEJhbmR3aWR0aCAoTUIvc2VjKQ0KPiDilIzilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICBy
-ZXBsaWNhcyBudW1iZXIgICAg4pSCU2VxdWVudGlhbCBSZWFkIOKUglNlcXVlbnRpYWwgV3JpdGXi
-lIJSYW5kb20gUmVhZOKUglJhbmRvbSBXcml0ZSDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDilIIgICAg
-ICAgICAgMiAgICAgICAg4pSCICAgICAgIDMzOCAgICDilIIgICAgICAxMDMgICAgIOKUgiAgICAg
-NjE0ICAgIOKUgiAgICAgIDg5ICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDilIIgICAgICAgICAg
-MyAgICAgICAg4pSCICAgICAgIDMzNyAgICDilIIgICAgICA3NiAgICAgIOKUgiAgICAgNzkxICAg
-IOKUgiAgICAgIDYyICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKU
-vOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDilIIgICAgICAgICAgNCAgICAg
-ICAg4pSCICAgICAgIDMzNyAgICDilIIgICAgICA2MCAgICAgIOKUgiAgICAgNzU0ICAgIOKUgiAg
-ICAgIDQzICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKUvOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPg0KPiBUaGUgYmFuZHdpZHRoIG9mIHdyaXRl
-IHdpbGwgZGVjcmVhc2Ugd2hlbiByZXBsaWNhcyBpbmNyZWFzZSB0aGF0IGlzIGVhc3kgdG8ga25v
-dywgYnV0IHdoeSByZWFkIGJhbmR3aWR0aCBkaWQgbm90IGluY3JlYXNlPw0KDQpSZWFkcyBhcmUg
-YWx3YXlzIHNlcnZlZCBmcm9tIHRoZSAicHJpbWFyeSIgT1NELCBidXQgZXZlbiBpZiB0aGV5DQp3
-ZXJlbid0LCB5b3UgZGlzdHJpYnV0ZSB0aGUgc2FtZSBudW1iZXIgb2YgcmVhZHMgb3ZlciB0aGUg
-c2FtZSBudW1iZXINCm9mIGRpc2tzIG5vIG1hdHRlciBob3cgbWFueSByZXBsaWNhcyB5b3UgaGF2
-ZSBvZiBlYWNoIGluZGl2aWR1YWwgZGF0YQ0KYmxvY2suLi4NCkJ1dCBpbiBwYXJ0aWN1bGFyIHRo
-ZSBjaGFuZ2UgaW4gcmFuZG9tIHJlYWQgdmFsdWVzIHRoYXQgeW91J3JlIHNlZWluZw0KaW5kaWNh
-dGVzIHRoYXQgeW91ciBkYXRhIGlzIHZlcnkgbm9pc3kg4oCUIEknbSBub3Qgc3VyZSBJJ2QgdHJ1
-c3QgYW55IG9mDQp0aGUgdmFsdWVzIHlvdSdyZSBzZWVpbmcsIGVzcGVjaWFsbHkgdGhlIHdlaXJk
-ZXIgdHJlbmRzLiBJdCBtaWdodCBiZQ0KYWxsIG5vaXNlIGFuZCBubyByZWFsIGRhdGEgdmFsdWUu
-DQotR3JlZw0K
+I haven't spent that much time in the kernel client, but this patch
+isn't working out for me. In particular, I'm pretty sure we need to
+preserve this:
+
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 5d5c32b..b9d8417 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2067,12 +2067,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+>         }
+>         have = __ceph_caps_issued(ci, &implemented);
+>
+> -       /*
+> -        * disallow writes while a truncate is pending
+> -        */
+> -       if (ci->i_truncate_pending)
+> -               have &= ~CEPH_CAP_FILE_WR;
+> -
+>         if ((have & need) == need) {
+>                 /*
+>                  * Look at (implemented & ~have & not) so that we keep waiting
+
+Because if there's a pending truncate, we really can't write. You do
+handle it in the particular case of doing buffered file writes, but
+these caps are a marker of permission, and the client shouldn't have
+write permission to a file until it's up to date on the truncates. Or
+am I misunderstanding something?
+
+
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index a1e5b81..bf7849a 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -653,7 +653,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+>         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+>              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+>  again:
+> -       __ceph_do_pending_vmtruncate(inode);
+
+There doesn't seem to be any kind of replacement for this? We need to
+do any pending truncates before reading or we might get stale data
+back.
+
+The first two in the series look good to me, but I'll wait and pull
+them in as a unit with this one once we're done discussing. :)
+-Greg
