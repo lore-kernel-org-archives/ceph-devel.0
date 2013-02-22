@@ -1,67 +1,56 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 3/3] ceph: fix vmtruncate deadlock
-Date: Fri, 22 Feb 2013 10:54:17 -0800
-Message-ID: <CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
-References: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com>
-	<1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
+From: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
+Subject: OSD memory usage
+Date: Fri, 22 Feb 2013 15:26:16 -0500
+Message-ID: <201302222026.r1MKQGQI022115@ayesha.phys.virginia.edu>
+Reply-To: bkw1a@ayesha.phys.virginia.edu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:61730 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758338Ab3BVSyS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 13:54:18 -0500
-Received: by mail-qa0-f43.google.com with SMTP id dx4so572732qab.2
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 10:54:17 -0800 (PST)
-In-Reply-To: <1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
+Received: from ayesha.phys.Virginia.EDU ([128.143.102.43]:57177 "EHLO
+	ayesha.phys.virginia.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756101Ab3BVU0R (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 15:26:17 -0500
+Received: from ayesha.phys.virginia.edu (localhost [127.0.0.1])
+	by ayesha.phys.virginia.edu (8.14.4/8.14.4) with ESMTP id r1MKQGQI022115
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 15:26:16 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-I haven't spent that much time in the kernel client, but this patch
-isn't working out for me. In particular, I'm pretty sure we need to
-preserve this:
+Hi folks,
 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 5d5c32b..b9d8417 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2067,12 +2067,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
->         }
->         have = __ceph_caps_issued(ci, &implemented);
->
-> -       /*
-> -        * disallow writes while a truncate is pending
-> -        */
-> -       if (ci->i_truncate_pending)
-> -               have &= ~CEPH_CAP_FILE_WR;
-> -
->         if ((have & need) == need) {
->                 /*
->                  * Look at (implemented & ~have & not) so that we keep waiting
+	I was having trouble with OSDs crashing under ceph 0.56.2
+(CentoOS, 64-bit, installed from rpms, using the "elrepo" kernel),
+so I eagerly installed 0.56.3.  Since then, I've been having a lot
+of trouble getting the OSDs running, either because of previous
+crashes or because of some change in 0.56.3.
 
-Because if there's a pending truncate, we really can't write. You do
-handle it in the particular case of doing buffered file writes, but
-these caps are a marker of permission, and the client shouldn't have
-write permission to a file until it's up to date on the truncates. Or
-am I misunderstanding something?
+	What's happening now is that the OSD processes are using
+so much memory that the machines start swapping, and eventually
+die.  Today, I tried systematically starting up a few OSDs at
+a time and watching memory usage.  The processes climb pretty
+quickly up to 2-3 GB in RSIZE.  If I let them run for a while and
+then restart them, I find that they tend to settle into an RSIZE
+of about 1.5 GB.  Unfortunately, I don't seem to have any records
+of how big these processes were under 0.56.2, but this is way
+too big to fit into the memory available, when I start up all of
+the OSD processes.  My impression was that the sizes used to
+be well under 1 GB  when the cluster was idle.
+
+	Is there anything I can do to reduce the memory
+footprint of ceph-osd?
+
+	Thanks for any advice.
+
+					Bryan
+
+-- 
+========================================================================
+Bryan Wright              |"If you take cranberries and stew them like 
+Physics Department        | applesauce, they taste much more like prunes
+University of Virginia    | than rhubarb does."  --  Groucho 
+Charlottesville, VA  22901|			
+(434) 924-7218            |         bryan@virginia.edu
+========================================================================
 
 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index a1e5b81..bf7849a 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -653,7 +653,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
->         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
->              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
->  again:
-> -       __ceph_do_pending_vmtruncate(inode);
-
-There doesn't seem to be any kind of replacement for this? We need to
-do any pending truncates before reading or we might get stale data
-back.
-
-The first two in the series look good to me, but I'll wait and pull
-them in as a unit with this one once we're done discussing. :)
--Greg
