@@ -1,52 +1,15 @@
-From: Yasuhiro Ohara <yasu@soe.ucsc.edu>
-Subject: Re: Question on extended attributes
-Date: Thu, 21 Feb 2013 17:47:27 -0800 (PST)
-Message-ID: <20130221.174727.92817039.yasu@soe.ucsc.edu>
-References: <20130221.171343.75467379.yasu@soe.ucsc.edu>
-	<CAC-hyiFVp7VMZyBLHMqh-HMBE77Wiktye60uj=LqZRSE7JZzhQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 0/3] ceph: misc fixes
+Date: Fri, 22 Feb 2013 10:08:16 +0800
+Message-ID: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f44.google.com ([209.85.210.44]:46202 "EHLO
-	mail-da0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755109Ab3BVBrd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Feb 2013 20:47:33 -0500
-Received: by mail-da0-f44.google.com with SMTP id z20so89452dae.3
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Feb 2013 17:47:33 -0800 (PST)
-In-Reply-To: <CAC-hyiFVp7VMZyBLHMqh-HMBE77Wiktye60uj=LqZRSE7JZzhQ@mail.gmail.com>
+Received: from mga14.intel.com ([143.182.124.37]:37776 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754587Ab3BVCIW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Feb 2013 21:08:22 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, sage@inktank.com
 
-
-It worked. Thanks :)
-
-regards,
-Yasu
-
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Question on extended attributes
-Date: Thu, 21 Feb 2013 17:43:14 -0800
-Message-ID: <CAC-hyiFVp7VMZyBLHMqh-HMBE77Wiktye60uj=LqZRSE7JZzhQ@mail.gmail.com>
-
-> On Thu, Feb 21, 2013 at 5:13 PM, Yasuhiro Ohara <yasu@soe.ucsc.edu> wrote:
->>
->> Hi.
->>
->> Can we add extended attributes on a file stored in the Ceph
->> mounted space ? I'm running the Ceph FS using Btrfs.
->>
->> The setfattr command returns Operation not supported.
->> Is it not supported ?
->>
-> 
-> It is supported. What's the exact command that you're running? Maybe
-> your xattr is not in a valid namespace, try doing the following:
-> 
-> # setfattr -n user.foo <filename>
-> 
-> 
-> 
-> Yehuda
+These patches are also in:
+  git://github.com/ukernel/linux.git wip-ceph
