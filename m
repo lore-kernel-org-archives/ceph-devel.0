@@ -1,78 +1,323 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: barriers are hard
-Date: Fri, 22 Feb 2013 11:17:20 -0600
-Message-ID: <5127A820.6070505@inktank.com>
+Subject: [PATCH] rbd: normalize dout() calls
+Date: Fri, 22 Feb 2013 11:17:32 -0600
+Message-ID: <5127A82C.5040608@inktank.com>
 References: <5127A7C1.3070609@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:64258 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758313Ab3BVRRX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 12:17:23 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so737631iak.10
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 09:17:22 -0800 (PST)
+Received: from mail-ia0-f176.google.com ([209.85.210.176]:42975 "EHLO
+	mail-ia0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758338Ab3BVRRf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Feb 2013 12:17:35 -0500
+Received: by mail-ia0-f176.google.com with SMTP id i18so729518iac.21
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Feb 2013 09:17:35 -0800 (PST)
 In-Reply-To: <5127A7C1.3070609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Let's go shopping!
+Add dout() calls to facilitate tracing of image and object requests.
+Change a few existing calls so they use __func__ rather than the
+hard-coded function name.  Have calls always add ":" after the name
+of the function, and prefix pointer values with a consistent tag
+indicating what it represents.  (Note that there remain some older
+dout() calls that are left untouched by this patch.)
 
-I'm afraid this may not have gotten it right:
-    07741308  rbd: add barriers near done flag operations
-
-The smp_wmb() should have been done *before* setting the done flag,
-to ensure all other data was valid before marking the object request
-done.
-
-Switch to use atomic_inc_return() here to set the done flag, which
-allows us to verify we don't mark something done more than once.
-Doing this also implies general barriers before and after the call.
-
-And although a read memory barrier might have been sufficient before
-reading the done flag, convert this to a full memory barrier just
-to put this issue to bed.
+Issue a warning if rbd_osd_write_callback() ever gets a short write.
 
 This resolves:
-    http://tracker.ceph.com/issues/4238
+    http://tracker.ceph.com/issues/4235
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
+ drivers/block/rbd.c |   66
++++++++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 61 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3cc003b..bd6078b 100644
+index bd6078b..a9c86ca 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1226,13 +1226,22 @@ static void obj_request_done_init(struct
-rbd_obj_request *obj_request)
+@@ -443,7 +443,7 @@ static struct rbd_client *rbd_client_create(struct
+ceph_options *ceph_opts)
+ 	struct rbd_client *rbdc;
+ 	int ret = -ENOMEM;
 
- static void obj_request_done_set(struct rbd_obj_request *obj_request)
- {
--	atomic_set(&obj_request->done, 1);
--	smp_wmb();
-+	int done;
+-	dout("rbd_client_create\n");
++	dout("%s:\n", __func__);
+ 	rbdc = kmalloc(sizeof(struct rbd_client), GFP_KERNEL);
+ 	if (!rbdc)
+ 		goto out_opt;
+@@ -467,8 +467,8 @@ static struct rbd_client *rbd_client_create(struct
+ceph_options *ceph_opts)
+ 	spin_unlock(&rbd_client_list_lock);
+
+ 	mutex_unlock(&ctl_mutex);
++	dout("%s: rbdc %p\n", __func__, rbdc);
+
+-	dout("rbd_client_create created %p\n", rbdc);
+ 	return rbdc;
+
+ out_err:
+@@ -479,6 +479,8 @@ out_mutex:
+ out_opt:
+ 	if (ceph_opts)
+ 		ceph_destroy_options(ceph_opts);
++	dout("%s: error %d\n", __func__, ret);
 +
-+	done = atomic_inc_return(&obj_request->done);
-+	if (done > 1) {
+ 	return ERR_PTR(ret);
+ }
+
+@@ -605,7 +607,7 @@ static void rbd_client_release(struct kref *kref)
+ {
+ 	struct rbd_client *rbdc = container_of(kref, struct rbd_client, kref);
+
+-	dout("rbd_release_client %p\n", rbdc);
++	dout("%s: rbdc %p\n", __func__, rbdc);
+ 	spin_lock(&rbd_client_list_lock);
+ 	list_del(&rbdc->node);
+ 	spin_unlock(&rbd_client_list_lock);
+@@ -1064,6 +1066,8 @@ out_err:
+
+ static void rbd_obj_request_get(struct rbd_obj_request *obj_request)
+ {
++	dout("%s: obj %p (was %d)\n", __func__, obj_request,
++		atomic_read(&obj_request->kref.refcount));
+ 	kref_get(&obj_request->kref);
+ }
+
+@@ -1071,11 +1075,15 @@ static void rbd_obj_request_destroy(struct kref
+*kref);
+ static void rbd_obj_request_put(struct rbd_obj_request *obj_request)
+ {
+ 	rbd_assert(obj_request != NULL);
++	dout("%s: obj %p (was %d)\n", __func__, obj_request,
++		atomic_read(&obj_request->kref.refcount));
+ 	kref_put(&obj_request->kref, rbd_obj_request_destroy);
+ }
+
+ static void rbd_img_request_get(struct rbd_img_request *img_request)
+ {
++	dout("%s: img %p (was %d)\n", __func__, img_request,
++		atomic_read(&img_request->kref.refcount));
+ 	kref_get(&img_request->kref);
+ }
+
+@@ -1083,6 +1091,8 @@ static void rbd_img_request_destroy(struct kref
+*kref);
+ static void rbd_img_request_put(struct rbd_img_request *img_request)
+ {
+ 	rbd_assert(img_request != NULL);
++	dout("%s: img %p (was %d)\n", __func__, img_request,
++		atomic_read(&img_request->kref.refcount));
+ 	kref_put(&img_request->kref, rbd_img_request_destroy);
+ }
+
+@@ -1097,6 +1107,8 @@ static inline void rbd_img_obj_request_add(struct
+rbd_img_request *img_request,
+ 	rbd_assert(obj_request->which != BAD_WHICH);
+ 	img_request->obj_request_count++;
+ 	list_add_tail(&obj_request->links, &img_request->obj_requests);
++	dout("%s: img %p obj %p w=%u\n", __func__, img_request, obj_request,
++		obj_request->which);
+ }
+
+ static inline void rbd_img_obj_request_del(struct rbd_img_request
+*img_request,
+@@ -1104,6 +1116,8 @@ static inline void rbd_img_obj_request_del(struct
+rbd_img_request *img_request,
+ {
+ 	rbd_assert(obj_request->which != BAD_WHICH);
+
++	dout("%s: img %p obj %p w=%u\n", __func__, img_request, obj_request,
++		obj_request->which);
+ 	list_del(&obj_request->links);
+ 	rbd_assert(img_request->obj_request_count > 0);
+ 	img_request->obj_request_count--;
+@@ -1200,11 +1214,14 @@ static void rbd_osd_req_op_destroy(struct
+ceph_osd_req_op *op)
+ static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
+ 				struct rbd_obj_request *obj_request)
+ {
++	dout("%s: osdc %p obj %p\n", __func__, osdc, obj_request);
++
+ 	return ceph_osdc_start_request(osdc, obj_request->osd_req, false);
+ }
+
+ static void rbd_img_request_complete(struct rbd_img_request *img_request)
+ {
++	dout("%s: img %p\n", __func__, img_request);
+ 	if (img_request->callback)
+ 		img_request->callback(img_request);
+ 	else
+@@ -1215,6 +1232,8 @@ static void rbd_img_request_complete(struct
+rbd_img_request *img_request)
+
+ static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
+ {
++	dout("%s: obj %p\n", __func__, obj_request);
++
+ 	return wait_for_completion_interruptible(&obj_request->completion);
+ }
+
+@@ -1248,11 +1267,14 @@ static bool obj_request_done_test(struct
+rbd_obj_request *obj_request)
+ static void rbd_osd_trivial_callback(struct rbd_obj_request *obj_request,
+ 				struct ceph_osd_op *op)
+ {
++	dout("%s: obj %p\n", __func__, obj_request);
+ 	obj_request_done_set(obj_request);
+ }
+
+ static void rbd_obj_request_complete(struct rbd_obj_request *obj_request)
+ {
++	dout("%s: obj %p cb %p\n", __func__, obj_request,
++		obj_request->callback);
+ 	if (obj_request->callback)
+ 		obj_request->callback(obj_request);
+ 	else
+@@ -1270,6 +1292,8 @@ static void rbd_osd_read_callback(struct
+rbd_obj_request *obj_request,
+ 	 */
+ 	xferred = le64_to_cpu(op->extent.length);
+ 	rbd_assert(xferred < (u64) UINT_MAX);
++	dout("%s: obj %p result %d %llu/%llu\n", __func__, obj_request,
++		obj_request->result, xferred, obj_request->length);
+ 	if (obj_request->result == (s32) -ENOENT) {
+ 		zero_bio_chain(obj_request->bio_list, 0);
+ 		obj_request->result = 0;
+@@ -1284,7 +1308,22 @@ static void rbd_osd_read_callback(struct
+rbd_obj_request *obj_request,
+ static void rbd_osd_write_callback(struct rbd_obj_request *obj_request,
+ 				struct ceph_osd_op *op)
+ {
++
+ 	obj_request->xferred = le64_to_cpu(op->extent.length);
++	dout("%s: obj %p result %d %llu/%llu\n", __func__, obj_request,
++		obj_request->result, obj_request->xferred, obj_request->length);
++
++	/* A short write really shouldn't occur.  Warn if we see one */
++
++	if (obj_request->xferred != obj_request->length) {
 +		struct rbd_img_request *img_request = obj_request->img_request;
 +		struct rbd_device *rbd_dev;
 +
 +		rbd_dev = img_request ? img_request->rbd_dev : NULL;
-+		rbd_warn(rbd_dev, "obj_request %p was already done\n",
-+			obj_request);
++		rbd_warn(rbd_dev, "wrote %llu want %llu\n",
++			obj_request->xferred, obj_request->length);
 +	}
++
+ 	obj_request_done_set(obj_request);
  }
 
- static bool obj_request_done_test(struct rbd_obj_request *obj_request)
+@@ -1295,6 +1334,7 @@ static void rbd_osd_write_callback(struct
+rbd_obj_request *obj_request,
+ static void rbd_osd_stat_callback(struct rbd_obj_request *obj_request,
+ 				struct ceph_osd_op *op)
  {
--	smp_rmb();
-+	smp_mb();
- 	return atomic_read(&obj_request->done) != 0;
++	dout("%s: obj %p\n", __func__, obj_request);
+ 	obj_request_done_set(obj_request);
  }
+
+@@ -1307,6 +1347,7 @@ static void rbd_osd_req_callback(struct
+ceph_osd_request *osd_req,
+ 	u32 num_ops;
+ 	u16 opcode;
+
++	dout("%s: osd_req %p msg %p\n", __func__, osd_req, msg);
+ 	rbd_assert(osd_req == obj_request->osd_req);
+ 	rbd_assert(!!obj_request->img_request ^
+ 				(obj_request->which == BAD_WHICH));
+@@ -1453,6 +1494,9 @@ static struct rbd_obj_request
+*rbd_obj_request_create(const char *object_name,
+ 	init_completion(&obj_request->completion);
+ 	kref_init(&obj_request->kref);
+
++	dout("%s: \"%s\" %llu/%llu %d -> obj %p\n", __func__, object_name,
++		offset, length, (int)type, obj_request);
++
+ 	return obj_request;
+ }
+
+@@ -1462,6 +1506,8 @@ static void rbd_obj_request_destroy(struct kref *kref)
+
+ 	obj_request = container_of(kref, struct rbd_obj_request, kref);
+
++	dout("%s: obj %p\n", __func__, obj_request);
++
+ 	rbd_assert(obj_request->img_request == NULL);
+ 	rbd_assert(obj_request->which == BAD_WHICH);
+
+@@ -1531,6 +1577,10 @@ struct rbd_img_request
+*rbd_img_request_create(struct rbd_device *rbd_dev,
+ 	rbd_img_request_get(img_request);	/* Avoid a warning */
+ 	rbd_img_request_put(img_request);	/* TEMPORARY */
+
++	dout("%s: rbd_dev %p %s %llu/%llu -> img %p\n", __func__, rbd_dev,
++		write_request ? "write" : "read", offset, length,
++		img_request);
++
+ 	return img_request;
+ }
+
+@@ -1542,6 +1592,8 @@ static void rbd_img_request_destroy(struct kref *kref)
+
+ 	img_request = container_of(kref, struct rbd_img_request, kref);
+
++	dout("%s: img %p\n", __func__, img_request);
++
+ 	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
+ 		rbd_img_obj_request_del(img_request, obj_request);
+ 	rbd_assert(img_request->obj_request_count == 0);
+@@ -1563,6 +1615,8 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+ 	u64 resid;
+ 	u16 opcode;
+
++	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
++
+ 	opcode = img_request->write_request ? CEPH_OSD_OP_WRITE
+ 					      : CEPH_OSD_OP_READ;
+ 	bio_offset = 0;
+@@ -1638,6 +1692,7 @@ static void rbd_img_obj_callback(struct
+rbd_obj_request *obj_request)
+
+ 	img_request = obj_request->img_request;
+
++	dout("%s: img %p obj %p\n", __func__, img_request, obj_request);
+ 	rbd_assert(img_request != NULL);
+ 	rbd_assert(img_request->rq != NULL);
+ 	rbd_assert(img_request->obj_request_count > 0);
+@@ -1685,6 +1740,7 @@ static int rbd_img_request_submit(struct
+rbd_img_request *img_request)
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+
++	dout("%s: img %p\n", __func__, img_request);
+ 	for_each_obj_request(img_request, obj_request) {
+ 		int ret;
+
+@@ -1745,7 +1801,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
+u8 opcode, void *data)
+ 	if (!rbd_dev)
+ 		return;
+
+-	dout("rbd_watch_cb %s notify_id=%llu opcode=%u\n",
++	dout("%s: \"%s\" notify_id %llu opcode %u\n", __func__,
+ 		rbd_dev->header_name, (unsigned long long) notify_id,
+ 		(unsigned int) opcode);
+ 	rc = rbd_dev_refresh(rbd_dev, &hver);
+@@ -3371,7 +3427,7 @@ static int rbd_dev_snaps_register(struct
+rbd_device *rbd_dev)
+ 	struct rbd_snap *snap;
+ 	int ret = 0;
+
+-	dout("%s called\n", __func__);
++	dout("%s:\n", __func__);
+ 	if (WARN_ON(!device_is_registered(&rbd_dev->dev)))
+ 		return -EIO;
 
 -- 
 1.7.9.5
