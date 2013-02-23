@@ -1,57 +1,98 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [RFC] Inline data support for Ceph
-Date: Sat, 23 Feb 2013 08:25:09 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302230817170.26331@cobra.newdream.net>
-References: <tencent_135BE907506ADB755BF2E58C@qq.com>
+From: Alexandre Marangone <alexandre.marangone@inktank.com>
+Subject: Re: [Ceph - Feature #4230] (New) librados: node.js bindings
+Date: Sat, 23 Feb 2013 12:49:40 -0800
+Message-ID: <CAP-Tmqg4CBeJdncpueeScXXV48oYQJ9BzB=uHpyJpYahWbXptg@mail.gmail.com>
+References: <redmine.issue-4230.20130222104241@tracker.ceph.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50730 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757171Ab3BWQZJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Feb 2013 11:25:09 -0500
-In-Reply-To: <tencent_135BE907506ADB755BF2E58C@qq.com>
+Received: from mail-wg0-f51.google.com ([74.125.82.51]:49021 "EHLO
+	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757340Ab3BWUtm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Feb 2013 15:49:42 -0500
+Received: by mail-wg0-f51.google.com with SMTP id 8so1386926wgl.18
+        for <ceph-devel@vger.kernel.org>; Sat, 23 Feb 2013 12:49:41 -0800 (PST)
+In-Reply-To: <redmine.issue-4230.20130222104241@tracker.ceph.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-2022-JP?Q?=1B$B=5DjsU=1B=28J?= <wangli@kylinos.com.cn>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: redmine@tracker.ceph.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Hi Wido,
 
-On Sat, 23 Feb 2013, ?? wrote:
-> Hi there,
->    We have a team working on Ceph optimization, for the purpose of integrating with OpenStack.
->    Currently, Ceph could make use of the inline data feature implemented in the local file system, such as btrfs. However, we think it maybe better to implement inline data at a higher level, i.e, let Ceph aware. Since it could save the client the calculation of object location and communication with the OSDs. It hopefully will receive a good IO speedup for small files, with a slightly heavier load for MDS. 
->     We have worked out a plan to do it, and the job is ongoing, and we are wondering the community 's response to this job and its fate for inclusion, comments are appreciated.
+Also cc'ing ceph-devel.
 
-This sounds very interesting!  As long as it is an optional size 
-threshold to control how much data is stuff in the inode/on the mds, I 
-think it's a fine idea.  My main concern is that we also think about other 
-future changes while extending the protocol and data types.
+Few months ago I started to write node bindings to librados. No
+specific use case either, just curious to learn a little bit more
+about v8 and librados.
 
-Namely: content addressible storage/dedup.  One idea we've kicked around 
-in the past is to option convert existing data in the $ino.$block objects 
-into chunks that are named by their content hash.  In that scenario, the 
-MDS would need to store a list/map of offsets to hashes and pass that to 
-the client so that it can read the data.  That storage strategy does not 
-lend itself to overwrites, though, so the thought is to conceptually have 
-the data stored in "layers", where the normal vanilla striping is the top 
-layer, the dedup hash tree is a lower layer, and an overwrite fill in a 
-portion of the upper layer that obscures the lower layer... eventually 
-allowing the obscured region of the lower layer to be released or requeued 
-for dedup.
+My first work was to do a 1:1 wrapping, but it wasn't javascripty enough.
+I started over and was able to do stuff like:
+var librados = require('./build/Release/nrados');
+var rados = new librados.Rados({
+   'user': 'admin',
+   'keyring': '/etc/ceph/keyring',
+   'monitors': '[ 192.168.0.20 ]'
+});
 
-In the context of this change, it would be nice to see the data types 
-describing the content to be generalized in some data type(s) that can be 
-easily extended in the future.  Maybe a "data description" type, with a 
-code indicating whether it is inline, 'normal', for (in the future) some 
-other scheme.
+var ioctx = new librados.IoCtx();
+rados.connect(function (err) {
+   if (err)
+       throw err;
+   rados.ioctx_create('mypool', ioctx, function (err) {
+     if (err)
+       throw err;
+     ioctx.write_full('myobject1', 'aa');
+   });
+});
+Which is better, but still, clumsy (I want to get rid of ioctx_create).
+I need to put some thoughts into the overall design.
 
-Another interesting question is how the client will query that content.  
-Currrently the MDS passes all metadata to the client aggressively (e.g., 
-on readdir and lookup/stat).  For a file with a potentially largeish data 
-payload, it may make sense to have another op that lets the client 
-explicitly query it.  Getting it to all behave with the cap bits may be 
-tricky.
+I didn't touch the code for about two months, and couldn't find it
+this morning. As soon as I figure out where it is, I'll create a
+github repo.
 
-sage
+Of course, thoughts and suggestions are welcome.
+
+--
+Alexandre
+
+On Fri, Feb 22, 2013 at 2:42 AM,  <redmine@tracker.ceph.com> wrote:
+> Issue #4230 has been reported by Wido den Hollander.
+> ________________________________
+>
+> Feature #4230: librados: node.js bindings
+>
+> Author: Wido den Hollander
+> Status: New
+> Priority: Low
+> Assignee:
+> Category: librados
+> Target version:
+> Source: Community (dev)
+> Tags:
+> Reviewed:
+>
+> Although I don't have a use-case at this specific point it would be very
+> cool to have node.js bindings.
+>
+> From the docs it seems pretty simple to write these bindings and make cool
+> stuff with it.
+>
+> I'm just opening the feature here so that it shows up and can be picked up:
+>
+> Some reference docs:
+>
+> http://nodejs.org/api/addons.html#addons_wrapping_c_objects
+> http://www.slideshare.net/nsm.nikhil/writing-native-bindings-to-nodejs-in-c
+> https://github.com/nikhilm/jsfoo-pune-2012
+>
+> Without bindings you would be able to use node-ffi, but I think native
+> bindings would be cleaner: https://github.com/rbranson/node-ffi
+>
+> ________________________________
+>
+> You have received this notification because you have either subscribed to
+> it, or are involved in it.
+> To change your notification preferences, please click here:
+> http://tracker.ceph.com/my/account
