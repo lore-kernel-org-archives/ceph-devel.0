@@ -1,63 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: OpenStack summit : Ceph design session
-Date: Sat, 23 Feb 2013 11:33:22 +0100
-Message-ID: <51289AF2.9010509@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [RFC] Inline data support for Ceph
+Date: Sat, 23 Feb 2013 08:25:09 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1302230817170.26331@cobra.newdream.net>
+References: <tencent_135BE907506ADB755BF2E58C@qq.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigD864513D088BF25EDD336887"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:60706 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755189Ab3BWKdZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Feb 2013 05:33:25 -0500
-Received: from [10.8.0.50] (unknown [10.8.0.50])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 5012026396
-	for <ceph-devel@vger.kernel.org>; Sat, 23 Feb 2013 11:33:23 +0100 (CET)
+Received: from cobra.newdream.net ([66.33.216.30]:50730 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757171Ab3BWQZJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Feb 2013 11:25:09 -0500
+In-Reply-To: <tencent_135BE907506ADB755BF2E58C@qq.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigD864513D088BF25EDD336887
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+To: =?ISO-2022-JP?Q?=1B$B=5DjsU=1B=28J?= <wangli@kylinos.com.cn>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
 
-In anticipation of the next OpenStack summit http://www.openstack.org/sum=
-mit/portland-2013/, I proposed a session to discuss OpenStack and Ceph in=
-tegration. Our meeting during FOSDEM earlier this month was a great exper=
-ience although it was planned at the last minute. I hope we can organize =
-something even better for the summit.
+On Sat, 23 Feb 2013, ?? wrote:
+> Hi there,
+>    We have a team working on Ceph optimization, for the purpose of integrating with OpenStack.
+>    Currently, Ceph could make use of the inline data feature implemented in the local file system, such as btrfs. However, we think it maybe better to implement inline data at a higher level, i.e, let Ceph aware. Since it could save the client the calculation of object location and communication with the OSDs. It hopefully will receive a good IO speedup for small files, with a slightly heavier load for MDS. 
+>     We have worked out a plan to do it, and the job is ongoing, and we are wondering the community 's response to this job and its fate for inclusion, comments are appreciated.
 
-For developers and contributors to both Ceph and OpenStack such as myself=
-, it would be a great opportunity to figure out a sensible roadmap for th=
-e next six months. I realize this roadmap is already clear for Josh Durgi=
-n and other Ceph / OpenStack developers who are passionately invested in =
-both projects for a long time. However I am new to both projects and such=
- a session would be a precious guide and highly motivating.
+This sounds very interesting!  As long as it is an optional size 
+threshold to control how much data is stuff in the inode/on the mds, I 
+think it's a fine idea.  My main concern is that we also think about other 
+future changes while extending the protocol and data types.
 
-http://summit.openstack.org/cfp/details/38
+Namely: content addressible storage/dedup.  One idea we've kicked around 
+in the past is to option convert existing data in the $ino.$block objects 
+into chunks that are named by their content hash.  In that scenario, the 
+MDS would need to store a list/map of offsets to hashes and pass that to 
+the client so that it can read the data.  That storage strategy does not 
+lend itself to overwrites, though, so the thought is to conceptually have 
+the data stored in "layers", where the normal vanilla striping is the top 
+layer, the dedup hash tree is a lower layer, and an overwrite fill in a 
+portion of the upper layer that obscures the lower layer... eventually 
+allowing the obscured region of the lower layer to be released or requeued 
+for dedup.
 
-What do you think ?
+In the context of this change, it would be nice to see the data types 
+describing the content to be generalized in some data type(s) that can be 
+easily extended in the future.  Maybe a "data description" type, with a 
+code indicating whether it is inline, 'normal', for (in the future) some 
+other scheme.
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Another interesting question is how the client will query that content.  
+Currrently the MDS passes all metadata to the client aggressively (e.g., 
+on readdir and lookup/stat).  For a file with a potentially largeish data 
+payload, it may make sense to have another op that lets the client 
+explicitly query it.  Getting it to all behave with the cap bits may be 
+tricky.
 
-
---------------enigD864513D088BF25EDD336887
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlEomvIACgkQ8dLMyEl6F23r3gCguPJBgzYFiJggRRlUlaq48cEr
-McUAn3R5tV4r3jVBKZYbnk54J963m+7y
-=CQ1P
------END PGP SIGNATURE-----
-
---------------enigD864513D088BF25EDD336887--
+sage
