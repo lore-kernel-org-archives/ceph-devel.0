@@ -1,82 +1,57 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 3/3] ceph: fix vmtruncate deadlock
-Date: Sat, 23 Feb 2013 12:31:32 +0800
-Message-ID: <51284624.9050007@intel.com>
-References: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com> <1361498899-15831-4-git-send-email-zheng.z.yan@intel.com> <CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: ceph internals : buffer lists
+Date: Sat, 23 Feb 2013 10:37:40 +0100
+Message-ID: <51288DE4.6090306@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig2FEE98B1767AB8D7D79615A4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:4791 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757366Ab3BWEbf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Feb 2013 23:31:35 -0500
-In-Reply-To: <CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:53311 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755453Ab3BWJhm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Feb 2013 04:37:42 -0500
+Received: from [10.8.0.50] (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 0F73926396
+	for <ceph-devel@vger.kernel.org>; Sat, 23 Feb 2013 10:37:41 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 02/23/2013 02:54 AM, Gregory Farnum wrote:
-> I haven't spent that much time in the kernel client, but this patch
-> isn't working out for me. In particular, I'm pretty sure we need to
-> preserve this:
-> 
->> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->> index 5d5c32b..b9d8417 100644
->> --- a/fs/ceph/caps.c
->> +++ b/fs/ceph/caps.c
->> @@ -2067,12 +2067,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
->>         }
->>         have = __ceph_caps_issued(ci, &implemented);
->>
->> -       /*
->> -        * disallow writes while a truncate is pending
->> -        */
->> -       if (ci->i_truncate_pending)
->> -               have &= ~CEPH_CAP_FILE_WR;
->> -
->>         if ((have & need) == need) {
->>                 /*
->>                  * Look at (implemented & ~have & not) so that we keep waiting
-> 
-> Because if there's a pending truncate, we really can't write. You do
-> handle it in the particular case of doing buffered file writes, but
-> these caps are a marker of permission, and the client shouldn't have
-> write permission to a file until it's up to date on the truncates. Or
-> am I misunderstanding something?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig2FEE98B1767AB8D7D79615A4
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-pending vmtruncate is only relevant to buffered write case. If client doesn't have 'b' cap,
-the page cache is empty, and __ceph_do_pending_vmtruncate is no-op. For buffered write,
-this patch only affects situation that clients receives truncate request from MDS in the
-middle of write. I think it's better to do vmtruncate after write finishes. 
+Hi,
 
-> 
-> 
->> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index a1e5b81..bf7849a 100644
->> --- a/fs/ceph/file.c
->> +++ b/fs/ceph/file.c
->> @@ -653,7 +653,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
->>         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
->>              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
->>  again:
->> -       __ceph_do_pending_vmtruncate(inode);
-> 
-> There doesn't seem to be any kind of replacement for this? We need to
-> do any pending truncates before reading or we might get stale data
-> back.
+As a followup to my work on the buffer lists ( https://github.com/ceph/ce=
+ph/commit/fb472a57c6a17e9d2f74a5d226e4e0c91ae9f2a2#src/test/bufferlist.cc=
+ ), I wrote down an article explaining how they work
 
-generic_file_aio_read checks i_size when coping data to user buffer, so the user program can't
-get stale data. This __ceph_do_pending_vmtruncate is not protected by i_mutex, it's a potential
-bug, that's the reason I remove it.
+http://dachary.org/?p=3D1904
 
-Regards
-Yan, Zheng
+I hope it will be useful to developers who need a quick overview. If ther=
+e are mistakes or mis-conceptions, please let me know and I'll fix it.
 
-> 
-> The first two in the series look good to me, but I'll wait and pull
-> them in as a unit with this one once we're done discussing. :)
-> -Greg
-> 
+Cheers
 
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--------------enig2FEE98B1767AB8D7D79615A4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlEojeQACgkQ8dLMyEl6F23W/QCeNM3q66EOANdFj/cFlgian9dj
+CZ4AoK8Xb32kASg5XeyyDSRxdWwZoGTr
+=cqyr
+-----END PGP SIGNATURE-----
+
+--------------enig2FEE98B1767AB8D7D79615A4--
