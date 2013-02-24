@@ -1,60 +1,32 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: OpenStack summit : Ceph design session
-Date: Sun, 24 Feb 2013 18:05:01 +0100
-Message-ID: <CAOLwVUmOH6vh9tc_sBHoR75ku5Mi9qOJTrD+KDwE7pBrREKNoQ@mail.gmail.com>
-References: <51289AF2.9010509@dachary.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: CephFS: stable release?
+Date: Sun, 24 Feb 2013 14:41:27 -0800
+Message-ID: <655D5B8BA34841288B351F2C19C68F34@inktank.com>
+References: <CAJH6TXh12ocVd00Vf5GaTxF53nxg0gxt9CUP=8YntaNznCtG-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:55835 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758288Ab3BXRFX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Feb 2013 12:05:23 -0500
-Received: by mail-oa0-f52.google.com with SMTP id k14so2083603oag.39
-        for <ceph-devel@vger.kernel.org>; Sun, 24 Feb 2013 09:05:22 -0800 (PST)
-In-Reply-To: <51289AF2.9010509@dachary.org>
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:34639 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759357Ab3BXWl3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Feb 2013 17:41:29 -0500
+Received: by mail-pb0-f51.google.com with SMTP id un15so1313874pbc.38
+        for <ceph-devel@vger.kernel.org>; Sun, 24 Feb 2013 14:41:28 -0800 (PST)
+In-Reply-To: <CAJH6TXh12ocVd00Vf5GaTxF53nxg0gxt9CUP=8YntaNznCtG-w@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Saturday, February 23, 2013 at 2:14 AM, Gandalf Corvotempesta wrote:
+> Hi all,
+> do you have an ETA about a stable realease (or something usable in
+> production) for CephFS?
 
-I would love to have such discussion. I think it's a good initiative.
+Short answer: no. 
 
-Cheers.
---
-Regards,
-S=E9bastien Han.
+However, we do have a team of people working on the FS again as of a month or so ago. We're doing a lot of stabilization (bug fixes), code cleanups, and utility work in the coming months; we can estimate the utility and cleanup work but not the bugs that we'll find, and those are our main concern right now. Depending on how the next couple months of QA and bug fixing go we should be able to publicize real estimates soonish.
+-Greg
 
-
-On Sat, Feb 23, 2013 at 11:33 AM, Loic Dachary <loic@dachary.org> wrote=
-:
-> Hi,
->
-> In anticipation of the next OpenStack summit http://www.openstack.org=
-/summit/portland-2013/, I proposed a session to discuss OpenStack and C=
-eph integration. Our meeting during FOSDEM earlier this month was a gre=
-at experience although it was planned at the last minute. I hope we can=
- organize something even better for the summit.
->
-> For developers and contributors to both Ceph and OpenStack such as my=
-self, it would be a great opportunity to figure out a sensible roadmap =
-for the next six months. I realize this roadmap is already clear for Jo=
-sh Durgin and other Ceph / OpenStack developers who are passionately in=
-vested in both projects for a long time. However I am new to both proje=
-cts and such a session would be a precious guide and highly motivating.
->
-> http://summit.openstack.org/cfp/details/38
->
-> What do you think ?
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
