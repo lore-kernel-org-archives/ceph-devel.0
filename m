@@ -1,110 +1,123 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: OSD memory leaks?
-Date: Sun, 24 Feb 2013 16:21:37 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302241619380.26649@cobra.newdream.net>
-References: <CAOLwVUk-pf22gXFD+8A8FGgtE4mWfz3r8minKQ6vP6q_ftYRdQ@mail.gmail.com> <8366806.170.1357747859058.JavaMail.dspano@it1> <CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com> <CAF6-1L4WOGHNU=qLOuOWktsDirc-nO2ZM0+nQL9vxF2KKuWVqg@mail.gmail.com>
- <CAPYLRziCObXZaOcqA8CDfheJTYce1w3m5754+0Dz-ToYJYKuDg@mail.gmail.com> <CAOLwVUkA5G+RyzembvZnv2gA5h-E+kNR_me_Hgoisjk0dmSWSg@mail.gmail.com> <CAPYLRzjx24oOEpjcvKa2ELJYb6QAxTegVatysMAobbP-h1v8Xg@mail.gmail.com> <CAOLwVUn0SetsDgE2vqioFn+53xDi7Uh9TivDX2JOH6Qu5pEEUA@mail.gmail.com>
- <alpine.DEB.2.00.1302221642570.5703@cobra.newdream.net> <CAOLwVU=iAvD4pd_SZdL5MAWvd3fOYno7=rdk+YA8Tc6EBFy_cA@mail.gmail.com>
+From: <Kelvin_Huang@wiwynn.com>
+Subject: RE: Ceph scalar & replicas performance
+Date: Mon, 25 Feb 2013 01:57:59 +0000
+Message-ID: <86F425174C7E4F418CCF4E62056152E593858C@GDC-CLDMBX-P01.whq.wistron>
+References: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
+ <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33014 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759292Ab3BYAVi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Feb 2013 19:21:38 -0500
-In-Reply-To: <CAOLwVU=iAvD4pd_SZdL5MAWvd3fOYno7=rdk+YA8Tc6EBFy_cA@mail.gmail.com>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:54811 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752154Ab3BYB6E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Feb 2013 20:58:04 -0500
+Received: from GDC-CLDCAS-P02.whq.wistron (unverified [10.37.38.63]) by TWNHUMSW5.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Taa1d335b9bc0a81673163c@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Mon, 25 Feb 2013 09:59:05 +0800
+In-Reply-To: <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
+Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Cc: Gregory Farnum <greg@inktank.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Dave Spano <dspano@optogenics.com>, ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+To: ceph-devel@vger.kernel.org
+Cc: Eric_YH_Chen@wiwynn.com
 
-On Mon, 25 Feb 2013, S?bastien Han wrote:
-> Hi Sage,
-> 
-> Sorry it's a production system, so I can't test it.
-> So at the end, you can't get anything out of the core dump?
-
-I saw a bunch of dup object anmes, which is what led us to the pg log 
-theory.  I can look a bit more carefully to confirm, but in the end it 
-would be nice to see users scrubbing without leaking.
-
-This may be a bit moot because we want to allow trimming for other 
-reasons, so those patches are being tested and working their way into 
-master.  We'll backport when things are solid.
-
-In the meantime, if someone has been able to reproduce this in a test 
-environment, testing is obviously welcome :)
-
-sage
-
-
-
-
- > 
-> --
-> Regards,
-> S?bastien Han.
-> 
-> 
-> On Sat, Feb 23, 2013 at 1:44 AM, Sage Weil <sage@inktank.com> wrote:
-> > On Fri, 22 Feb 2013, S?bastien Han wrote:
-> >> Hi all,
-> >>
-> >> I finally got a core dump.
-> >>
-> >> I did it with a kill -SEGV on the OSD process.
-> >>
-> >> https://www.dropbox.com/s/ahv6hm0ipnak5rf/core-ceph-osd-11-0-0-20100-1361539008
-> >>
-> >> Hope we will get something out of it :-).
-> >
-> > AHA!  We have a theory.  The pg log isnt trimmed during scrub (because teh
-> > old scrub code required that), but the new (deep) scrub can take a very
-> > long time, which means the pg log will eat ram in the meantime..
-> > especially under high iops.
-> >
-> > Can you try wip-osd-log-trim (which is bobtail + a simple patch) and see
-> > if that seems to work?  Note that that patch shouldn't be run in a mixed
-> > argonaut+bobtail cluster, since it isn't properly checking if the scrub is
-> > class or chunky/deep.
-> >
-> > Thanks!
-> > sage
-> >
-> >
-> >  > --
-> >> Regards,
-> >> S?bastien Han.
-> >>
-> >>
-> >> On Fri, Jan 11, 2013 at 7:13 PM, Gregory Farnum <greg@inktank.com> wrote:
-> >> > On Fri, Jan 11, 2013 at 6:57 AM, S?bastien Han <han.sebastien@gmail.com> wrote:
-> >> >>> Is osd.1 using the heap profiler as well? Keep in mind that active use
-> >> >>> of the memory profiler will itself cause memory usage to increase ?
-> >> >>> this sounds a bit like that to me since it's staying stable at a large
-> >> >>> but finite portion of total memory.
-> >> >>
-> >> >> Well, the memory consumption was already high before the profiler was
-> >> >> started. So yes with the memory profiler enable an OSD might consume
-> >> >> more memory but this doesn't cause the memory leaks.
-> >> >
-> >> > My concern is that maybe you saw a leak but when you restarted with
-> >> > the memory profiling you lost whatever conditions caused it.
-> >> >
-> >> >> Any ideas? Nothing to say about my scrumbing theory?
-> >> > I like it, but Sam indicates that without some heap dumps which
-> >> > capture the actual leak then scrub is too large to effectively code
-> >> > review for leaks. :(
-> >> > -Greg
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0
+bzpncmVnQGlua3RhbmsuY29tXSANClNlbnQ6IFNhdHVyZGF5LCBGZWJydWFyeSAyMywgMjAxMyAx
+OjU3IEFNDQpUbzogS2VsdmluIEh1YW5nL1dZSFEvV2l3eW5uDQpDYzogY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBDZXBoIHNjYWxhciAmIHJlcGxpY2FzIHBlcmZvcm1h
+bmNlDQoNCk9uIFRodSwgRmViIDIxLCAyMDEzIGF0IDU6MDEgUE0sICA8S2VsdmluX0h1YW5nQHdp
+d3lubi5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+IEkgaGF2ZSBzb21lIHByb2JsZW0gYWZ0ZXIg
+bXkgc2NhbGFyIHBlcmZvcm1hbmNlIHRlc3QgISENCj4NCj4gU2V0dXA6DQo+IExpbnV4IGtlcm5l
+bDogMy4yLjANCj4gT1M6IFVidW50dSAxMi4wNA0KPiBTdG9yYWdlIHNlcnZlciA6IDExIEhERCAo
+ZWFjaCBzdG9yYWdlIHNlcnZlciBoYXMgMTEgb3NkLCA3MjAwIHJwbSwgMVQpICsgMTBHYkUgTklD
+ICsgUkFJRCBjYXJkOiBMU0kgTWVnYVJBSUQgU0FTIDkyNjAtNGkNCj4gICAgICAgICAgRm9yIGV2
+ZXJ5IEhERDogUkFJRDAsIFdyaXRlIFBvbGljeTogV3JpdGUgQmFjayB3aXRoIEJCVSwgUmVhZCBQ
+b2xpY3k6IFJlYWRBaGVhZCwgSU8gUG9saWN5OiBEaXJlY3QgU3RvcmFnZSBzZXJ2ZXIgbnVtYmVy
+IDogMSB0byA0DQo+DQo+IENlcGggdmVyc2lvbiA6IDAuNDguMg0KPiBSZXBsaWNhcyA6IDINCj4N
+Cj4gRklPIGNtZDoNCj4gW1NlcXVlbmNpYWwgUmVhZF0NCj4gZmlvIC0taW9kZXB0aCA9IDMyIC0t
+bnVtam9icz0xIC0tcnVudGltZT0xMjAgIC0tYnMgPSA2NTUzNiAtLXJ3ID0gcmVhZCAtLWlvZW5n
+aW5lPWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0xIC0tZXRhPWFsd2F5cyAtLXJh
+bXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBbU2VxdWVuY2lhbCBSZWFkXQ0KPiBmaW8g
+LS1pb2RlcHRoID0gMzIgLS1udW1qb2JzPTEgLS1ydW50aW1lPTEyMCAgLS1icyA9IDY1NTM2IC0t
+cncgPSB3cml0ZSAtLWlvZW5naW5lPWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0x
+IC0tZXRhPWFsd2F5cyAtLXJhbXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBbUmFuZG9t
+IFJlYWRdDQo+IGZpbyAtLWlvZGVwdGggPSAzMiAtLW51bWpvYnM9OCAtLXJ1bnRpbWU9MTIwICAt
+LWJzID0gNjU1MzYgLS1ydyA9IHJhbmRyZWFkIC0taW9lbmdpbmU9bGliYWlvIC0tZ3JvdXBfcmVw
+b3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9YWx3YXlzIC0tcmFtcF90aW1lPTEwIC0tdGhpbmt0aW1l
+PTEwDQo+DQo+IFtSYW5kb20gV3JpdGVdDQo+IGZpbyAtLWlvZGVwdGggPSAzMiAtLW51bWpvYnM9
+OCAtLXJ1bnRpbWU9MTIwICAtLWJzID0gNjU1MzYgLS1ydyA9IHJhbmR3cml0ZSAtLWlvZW5naW5l
+PWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0xIC0tZXRhPWFsd2F5cyAtLXJhbXBf
+dGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBVc2UgY2VwaCBjbGllbnQgdGhlbiBjcmVhdGUg
+MVQgUkJEIGltYWdlIGZvciB0ZXN0aW5nLCB0aGUgY2xpZW50IGFsc28gaGFzIDEwR2JFIE5JQyAs
+IExpbnV4IGtlcm5lbCAzLjIuMCAsIFVidW50dSAxMi4wNA0KPg0KPiBQZXJmb3JtYW5jZSByZXN1
+bHQ6DQo+ICAgICAgICAgICAgICAgICAgICAgICBCYW5kd2lkdGggKE1CL3NlYykNCj4g4pSM4pSA
+4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
+4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
+4pSADQo+IOKUgnN0b3JhZ2Ugc2VydmVyIG51bWJlcuKUglNlcXVlbnRpYWwgUmVhZCDilIJTZXF1
+ZW50aWFsIFdyaXRl4pSCUmFuZG9tIFJlYWTilIJSYW5kb20gV3JpdGUg4pSCDQo+IOKUnOKUgOKU
+gOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIANCj4g4pSCICAgICAgICAgIDEgICAgICAgIOKUgiAgICAgIDI1OSAgICAg4pSCICAgICA3NiAg
+ICAgICDilIIgICAgODM3ICAgIOKUgiAgICAyNiAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA
+4pSA4pSA4pSA4pSA4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
+gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDi
+lIIgICAgICAgICAgMiAgICAgICAg4pSCICAgICAgMzQ5ICAgICDilIIgICAgMTIxICAgICAgIOKU
+giAgICA5NTAgICAg4pSCICAgIDQ1ICAgICAgIOKUgg0KPiDilJzilIDilIDilIDilIDilIDilIDi
+lIDilIDilIAg4pS84pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
+4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgICAg
+ICAgICAzICAgICAgICDilIIgICAgICAzNTQgICAgIOKUgiAgICAxMDggICAgICAg4pSCICAgIDQ5
+MCAgICDilIIgICAgNzEgICAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
+gCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDQg
+ICAgICAgIOKUgiAgICAgIDMzOCAgICAg4pSCICAgIDEwMyAgICAgICDilIIgICAgNjEwICAgIOKU
+giAgICA4OSAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKUvOKU
+gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
+gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPg0KPiBXZSBleHBlY3QgdGhhdCBiYW5k
+d2lkdGggd2lsbCBpbmNyZWFzZSB3aGVuIHN0b3JhZ2Ugc2VydmVyIGluY3JlYXNlIHVuZGVyIGFs
+bCBjYXNlLCBidXQgdGhlIHJlc3VsdCBpcyBub3QgISENCj4gQ2FuIHlvdSBzaGFyZSB5b3VyIGlk
+ZWEgZm9yIHJlYWQvd3JpdGUgYmFuZHdpZHRoIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVhc2lu
+ZyA/DQoNCj4gVGhlcmUncyBhIGJ1bmNoIG9mIHN0dWZmIHRoYXQgY291bGQgYmUgd2VpcmQgaGVy
+ZS4gSXMgeW91ciBzd2l0Y2gNCj4gY2FwYWJsZSBvZiBoYW5kbGluZyBhbGwgdGhlIHRyYWZmaWMg
+Z29pbmcgb3ZlciBpdD8gSGF2ZSB5b3UNCj4gYmVuY2htYXJrZWQgdGhlIGRyaXZlcyBhbmQgZmls
+ZXN5c3RlbXMgb24gZWFjaCBub2RlIGluZGl2aWR1YWxseSB0bw0KPiBtYWtlIHN1cmUgdGhleSBh
+bGwgaGF2ZSB0aGUgc2FtZSBiZWhhdmlvciwgb3IgYXJlIHNvbWUgb2YgeW91cg0KPiBhZGRpdGlv
+bnMgc2xvd2VyIHRoYW4gdGhlIG90aGVycz8gKE15IG1vbmV5IGlzIG9uIHlvdSBoYXZpbmcgc29t
+ZSBzbG93DQo+IGRyaXZlcyB0aGF0IGFyZSBkcmFnZ2luZyBldmVyeXRoaW5nIGRvd24uKQ0KDQpP
+a2F5LCBJIHdpbGwgZ28gdG8gcmUtY2hlY2sgdGhlIHNldHRpbmcgb2YgZWFjaCBzdG9yYWdlIHNl
+cnZlciwgYnV0IEkgc3RpbGwgaW50ZXJlc3RlZCB3YW50IHRvIGtub3cgdGhlIGNvcnJlY3QgdHJl
+bmQgKFNlcSBSL1cgYW5kIFJhbmRvbSBSL1cpIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVhc2lu
+ZywNCm9yIHlvdSBoYXZlIHNpbWlsYXIgZXhwZXJpbWVudCBjYW4gc2hhcmUgdGhlIHJlc3VsdD8N
+Cg0KVGhhbmtzICEhIA0KDQoNCj4gSW4gYW5vdGhlciBjYXNlLCB3ZSBmaXhlZCB1c2UgNCBzdG9y
+YWdlIHNlcnZlcnMgdGhlbiBhZGp1c3QgdGhlIG51bWJlciBvZiByZXBsaWNhcyAyIHRvIDQNCj4N
+Cj4gUGVyZm9ybWFuY2UgcmVzdWx0Og0KPg0KPiAgICAgICAgICAgICAgICAgICAgICAgICBCYW5k
+d2lkdGggKE1CL3NlYykNCj4g4pSM4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
+4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
+4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgcmVwbGljYXMgbnVtYmVyICAgIOKU
+glNlcXVlbnRpYWwgUmVhZCDilIJTZXF1ZW50aWFsIFdyaXRl4pSCUmFuZG9tIFJlYWTilIJSYW5k
+b20gV3JpdGUg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDIgICAgICAgIOKUgiAg
+ICAgICAzMzggICAg4pSCICAgICAgMTAzICAgICDilIIgICAgIDYxNCAgICDilIIgICAgICA4OSAg
+ICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDMgICAgICAgIOKUgiAgICAgICAz
+MzcgICAg4pSCICAgICAgNzYgICAgICDilIIgICAgIDc5MSAgICDilIIgICAgICA2MiAgICAg4pSC
+DQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDQgICAgICAgIOKUgiAgICAgICAzMzcgICAg
+4pSCICAgICAgNjAgICAgICDilIIgICAgIDc1NCAgICDilIIgICAgICA0MyAgICAg4pSCDQo+IOKU
+nOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
+lIDilIDilIANCj4NCj4gVGhlIGJhbmR3aWR0aCBvZiB3cml0ZSB3aWxsIGRlY3JlYXNlIHdoZW4g
+cmVwbGljYXMgaW5jcmVhc2UgdGhhdCBpcyBlYXN5IHRvIGtub3csIGJ1dCB3aHkgcmVhZCBiYW5k
+d2lkdGggZGlkIG5vdCBpbmNyZWFzZT8NCg0KPiBSZWFkcyBhcmUgYWx3YXlzIHNlcnZlZCBmcm9t
+IHRoZSAicHJpbWFyeSIgT1NELCBidXQgZXZlbiBpZiB0aGV5DQo+IHdlcmVuJ3QsIHlvdSBkaXN0
+cmlidXRlIHRoZSBzYW1lIG51bWJlciBvZiByZWFkcyBvdmVyIHRoZSBzYW1lIG51bWJlcg0KPiBv
+ZiBkaXNrcyBubyBtYXR0ZXIgaG93IG1hbnkgcmVwbGljYXMgeW91IGhhdmUgb2YgZWFjaCBpbmRp
+dmlkdWFsIGRhdGENCj4gYmxvY2suLi4NCj4gQnV0IGluIHBhcnRpY3VsYXIgdGhlIGNoYW5nZSBp
+biByYW5kb20gcmVhZCB2YWx1ZXMgdGhhdCB5b3UncmUgc2VlaW5nDQo+IGluZGljYXRlcyB0aGF0
+IHlvdXIgZGF0YSBpcyB2ZXJ5IG5vaXN5IOKAlCBJJ20gbm90IHN1cmUgSSdkIHRydXN0IGFueSBv
+Zg0KPiB0aGUgdmFsdWVzIHlvdSdyZSBzZWVpbmcsIGVzcGVjaWFsbHkgdGhlIHdlaXJkZXIgdHJl
+bmRzLiBJdCBtaWdodCBiZQ0KPiBhbGwgbm9pc2UgYW5kIG5vIHJlYWwgZGF0YSB2YWx1ZS4NCj4g
+LUdyZWcNCg==
