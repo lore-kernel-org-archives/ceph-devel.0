@@ -1,123 +1,61 @@
-From: <Kelvin_Huang@wiwynn.com>
-Subject: RE: Ceph scalar & replicas performance
-Date: Mon, 25 Feb 2013 01:57:59 +0000
-Message-ID: <86F425174C7E4F418CCF4E62056152E593858C@GDC-CLDMBX-P01.whq.wistron>
-References: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
- <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
+From: Neil Levine <neil.levine@inktank.com>
+Subject: Re: OpenStack summit : Ceph design session
+Date: Sun, 24 Feb 2013 22:12:16 -0800
+Message-ID: <CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com>
+References: <51289AF2.9010509@dachary.org>
+	<512A9F5F.7080706@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:54811 "EHLO
-	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752154Ab3BYB6E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Feb 2013 20:58:04 -0500
-Received: from GDC-CLDCAS-P02.whq.wistron (unverified [10.37.38.63]) by TWNHUMSW5.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Taa1d335b9bc0a81673163c@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
- Mon, 25 Feb 2013 09:59:05 +0800
-In-Reply-To: <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
-Content-Language: zh-TW
+Received: from mail-ia0-f175.google.com ([209.85.210.175]:62319 "EHLO
+	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751849Ab3BYGMR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Feb 2013 01:12:17 -0500
+Received: by mail-ia0-f175.google.com with SMTP id r4so2136788iaj.6
+        for <ceph-devel@vger.kernel.org>; Sun, 24 Feb 2013 22:12:16 -0800 (PST)
+In-Reply-To: <512A9F5F.7080706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Eric_YH_Chen@wiwynn.com
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0
-bzpncmVnQGlua3RhbmsuY29tXSANClNlbnQ6IFNhdHVyZGF5LCBGZWJydWFyeSAyMywgMjAxMyAx
-OjU3IEFNDQpUbzogS2VsdmluIEh1YW5nL1dZSFEvV2l3eW5uDQpDYzogY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBDZXBoIHNjYWxhciAmIHJlcGxpY2FzIHBlcmZvcm1h
-bmNlDQoNCk9uIFRodSwgRmViIDIxLCAyMDEzIGF0IDU6MDEgUE0sICA8S2VsdmluX0h1YW5nQHdp
-d3lubi5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+IEkgaGF2ZSBzb21lIHByb2JsZW0gYWZ0ZXIg
-bXkgc2NhbGFyIHBlcmZvcm1hbmNlIHRlc3QgISENCj4NCj4gU2V0dXA6DQo+IExpbnV4IGtlcm5l
-bDogMy4yLjANCj4gT1M6IFVidW50dSAxMi4wNA0KPiBTdG9yYWdlIHNlcnZlciA6IDExIEhERCAo
-ZWFjaCBzdG9yYWdlIHNlcnZlciBoYXMgMTEgb3NkLCA3MjAwIHJwbSwgMVQpICsgMTBHYkUgTklD
-ICsgUkFJRCBjYXJkOiBMU0kgTWVnYVJBSUQgU0FTIDkyNjAtNGkNCj4gICAgICAgICAgRm9yIGV2
-ZXJ5IEhERDogUkFJRDAsIFdyaXRlIFBvbGljeTogV3JpdGUgQmFjayB3aXRoIEJCVSwgUmVhZCBQ
-b2xpY3k6IFJlYWRBaGVhZCwgSU8gUG9saWN5OiBEaXJlY3QgU3RvcmFnZSBzZXJ2ZXIgbnVtYmVy
-IDogMSB0byA0DQo+DQo+IENlcGggdmVyc2lvbiA6IDAuNDguMg0KPiBSZXBsaWNhcyA6IDINCj4N
-Cj4gRklPIGNtZDoNCj4gW1NlcXVlbmNpYWwgUmVhZF0NCj4gZmlvIC0taW9kZXB0aCA9IDMyIC0t
-bnVtam9icz0xIC0tcnVudGltZT0xMjAgIC0tYnMgPSA2NTUzNiAtLXJ3ID0gcmVhZCAtLWlvZW5n
-aW5lPWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0xIC0tZXRhPWFsd2F5cyAtLXJh
-bXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBbU2VxdWVuY2lhbCBSZWFkXQ0KPiBmaW8g
-LS1pb2RlcHRoID0gMzIgLS1udW1qb2JzPTEgLS1ydW50aW1lPTEyMCAgLS1icyA9IDY1NTM2IC0t
-cncgPSB3cml0ZSAtLWlvZW5naW5lPWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0x
-IC0tZXRhPWFsd2F5cyAtLXJhbXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBbUmFuZG9t
-IFJlYWRdDQo+IGZpbyAtLWlvZGVwdGggPSAzMiAtLW51bWpvYnM9OCAtLXJ1bnRpbWU9MTIwICAt
-LWJzID0gNjU1MzYgLS1ydyA9IHJhbmRyZWFkIC0taW9lbmdpbmU9bGliYWlvIC0tZ3JvdXBfcmVw
-b3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9YWx3YXlzIC0tcmFtcF90aW1lPTEwIC0tdGhpbmt0aW1l
-PTEwDQo+DQo+IFtSYW5kb20gV3JpdGVdDQo+IGZpbyAtLWlvZGVwdGggPSAzMiAtLW51bWpvYnM9
-OCAtLXJ1bnRpbWU9MTIwICAtLWJzID0gNjU1MzYgLS1ydyA9IHJhbmR3cml0ZSAtLWlvZW5naW5l
-PWxpYmFpbyAtLWdyb3VwX3JlcG9ydGluZyAtLWRpcmVjdD0xIC0tZXRhPWFsd2F5cyAtLXJhbXBf
-dGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBVc2UgY2VwaCBjbGllbnQgdGhlbiBjcmVhdGUg
-MVQgUkJEIGltYWdlIGZvciB0ZXN0aW5nLCB0aGUgY2xpZW50IGFsc28gaGFzIDEwR2JFIE5JQyAs
-IExpbnV4IGtlcm5lbCAzLjIuMCAsIFVidW50dSAxMi4wNA0KPg0KPiBQZXJmb3JtYW5jZSByZXN1
-bHQ6DQo+ICAgICAgICAgICAgICAgICAgICAgICBCYW5kd2lkdGggKE1CL3NlYykNCj4g4pSM4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSADQo+IOKUgnN0b3JhZ2Ugc2VydmVyIG51bWJlcuKUglNlcXVlbnRpYWwgUmVhZCDilIJTZXF1
-ZW50aWFsIFdyaXRl4pSCUmFuZG9tIFJlYWTilIJSYW5kb20gV3JpdGUg4pSCDQo+IOKUnOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIANCj4g4pSCICAgICAgICAgIDEgICAgICAgIOKUgiAgICAgIDI1OSAgICAg4pSCICAgICA3NiAg
-ICAgICDilIIgICAgODM3ICAgIOKUgiAgICAyNiAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDi
-lIIgICAgICAgICAgMiAgICAgICAg4pSCICAgICAgMzQ5ICAgICDilIIgICAgMTIxICAgICAgIOKU
-giAgICA5NTAgICAg4pSCICAgIDQ1ICAgICAgIOKUgg0KPiDilJzilIDilIDilIDilIDilIDilIDi
-lIDilIDilIAg4pS84pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgICAg
-ICAgICAzICAgICAgICDilIIgICAgICAzNTQgICAgIOKUgiAgICAxMDggICAgICAg4pSCICAgIDQ5
-MCAgICDilIIgICAgNzEgICAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDQg
-ICAgICAgIOKUgiAgICAgIDMzOCAgICAg4pSCICAgIDEwMyAgICAgICDilIIgICAgNjEwICAgIOKU
-giAgICA4OSAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKUvOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPg0KPiBXZSBleHBlY3QgdGhhdCBiYW5k
-d2lkdGggd2lsbCBpbmNyZWFzZSB3aGVuIHN0b3JhZ2Ugc2VydmVyIGluY3JlYXNlIHVuZGVyIGFs
-bCBjYXNlLCBidXQgdGhlIHJlc3VsdCBpcyBub3QgISENCj4gQ2FuIHlvdSBzaGFyZSB5b3VyIGlk
-ZWEgZm9yIHJlYWQvd3JpdGUgYmFuZHdpZHRoIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVhc2lu
-ZyA/DQoNCj4gVGhlcmUncyBhIGJ1bmNoIG9mIHN0dWZmIHRoYXQgY291bGQgYmUgd2VpcmQgaGVy
-ZS4gSXMgeW91ciBzd2l0Y2gNCj4gY2FwYWJsZSBvZiBoYW5kbGluZyBhbGwgdGhlIHRyYWZmaWMg
-Z29pbmcgb3ZlciBpdD8gSGF2ZSB5b3UNCj4gYmVuY2htYXJrZWQgdGhlIGRyaXZlcyBhbmQgZmls
-ZXN5c3RlbXMgb24gZWFjaCBub2RlIGluZGl2aWR1YWxseSB0bw0KPiBtYWtlIHN1cmUgdGhleSBh
-bGwgaGF2ZSB0aGUgc2FtZSBiZWhhdmlvciwgb3IgYXJlIHNvbWUgb2YgeW91cg0KPiBhZGRpdGlv
-bnMgc2xvd2VyIHRoYW4gdGhlIG90aGVycz8gKE15IG1vbmV5IGlzIG9uIHlvdSBoYXZpbmcgc29t
-ZSBzbG93DQo+IGRyaXZlcyB0aGF0IGFyZSBkcmFnZ2luZyBldmVyeXRoaW5nIGRvd24uKQ0KDQpP
-a2F5LCBJIHdpbGwgZ28gdG8gcmUtY2hlY2sgdGhlIHNldHRpbmcgb2YgZWFjaCBzdG9yYWdlIHNl
-cnZlciwgYnV0IEkgc3RpbGwgaW50ZXJlc3RlZCB3YW50IHRvIGtub3cgdGhlIGNvcnJlY3QgdHJl
-bmQgKFNlcSBSL1cgYW5kIFJhbmRvbSBSL1cpIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVhc2lu
-ZywNCm9yIHlvdSBoYXZlIHNpbWlsYXIgZXhwZXJpbWVudCBjYW4gc2hhcmUgdGhlIHJlc3VsdD8N
-Cg0KVGhhbmtzICEhIA0KDQoNCj4gSW4gYW5vdGhlciBjYXNlLCB3ZSBmaXhlZCB1c2UgNCBzdG9y
-YWdlIHNlcnZlcnMgdGhlbiBhZGp1c3QgdGhlIG51bWJlciBvZiByZXBsaWNhcyAyIHRvIDQNCj4N
-Cj4gUGVyZm9ybWFuY2UgcmVzdWx0Og0KPg0KPiAgICAgICAgICAgICAgICAgICAgICAgICBCYW5k
-d2lkdGggKE1CL3NlYykNCj4g4pSM4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgcmVwbGljYXMgbnVtYmVyICAgIOKU
-glNlcXVlbnRpYWwgUmVhZCDilIJTZXF1ZW50aWFsIFdyaXRl4pSCUmFuZG9tIFJlYWTilIJSYW5k
-b20gV3JpdGUg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDIgICAgICAgIOKUgiAg
-ICAgICAzMzggICAg4pSCICAgICAgMTAzICAgICDilIIgICAgIDYxNCAgICDilIIgICAgICA4OSAg
-ICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDMgICAgICAgIOKUgiAgICAgICAz
-MzcgICAg4pSCICAgICAgNzYgICAgICDilIIgICAgIDc5MSAgICDilIIgICAgICA2MiAgICAg4pSC
-DQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDQgICAgICAgIOKUgiAgICAgICAzMzcgICAg
-4pSCICAgICAgNjAgICAgICDilIIgICAgIDc1NCAgICDilIIgICAgICA0MyAgICAg4pSCDQo+IOKU
-nOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIANCj4NCj4gVGhlIGJhbmR3aWR0aCBvZiB3cml0ZSB3aWxsIGRlY3JlYXNlIHdoZW4g
-cmVwbGljYXMgaW5jcmVhc2UgdGhhdCBpcyBlYXN5IHRvIGtub3csIGJ1dCB3aHkgcmVhZCBiYW5k
-d2lkdGggZGlkIG5vdCBpbmNyZWFzZT8NCg0KPiBSZWFkcyBhcmUgYWx3YXlzIHNlcnZlZCBmcm9t
-IHRoZSAicHJpbWFyeSIgT1NELCBidXQgZXZlbiBpZiB0aGV5DQo+IHdlcmVuJ3QsIHlvdSBkaXN0
-cmlidXRlIHRoZSBzYW1lIG51bWJlciBvZiByZWFkcyBvdmVyIHRoZSBzYW1lIG51bWJlcg0KPiBv
-ZiBkaXNrcyBubyBtYXR0ZXIgaG93IG1hbnkgcmVwbGljYXMgeW91IGhhdmUgb2YgZWFjaCBpbmRp
-dmlkdWFsIGRhdGENCj4gYmxvY2suLi4NCj4gQnV0IGluIHBhcnRpY3VsYXIgdGhlIGNoYW5nZSBp
-biByYW5kb20gcmVhZCB2YWx1ZXMgdGhhdCB5b3UncmUgc2VlaW5nDQo+IGluZGljYXRlcyB0aGF0
-IHlvdXIgZGF0YSBpcyB2ZXJ5IG5vaXN5IOKAlCBJJ20gbm90IHN1cmUgSSdkIHRydXN0IGFueSBv
-Zg0KPiB0aGUgdmFsdWVzIHlvdSdyZSBzZWVpbmcsIGVzcGVjaWFsbHkgdGhlIHdlaXJkZXIgdHJl
-bmRzLiBJdCBtaWdodCBiZQ0KPiBhbGwgbm9pc2UgYW5kIG5vIHJlYWwgZGF0YSB2YWx1ZS4NCj4g
-LUdyZWcNCg==
+Thanks for taking the lead on this Loic.
+
+As a blueprint, I'd like to look at RBD backups to secondary clusters
+within Openstack. Nick Barcet and others have mentioned ideas for this
+now that Cinder is multi-cluster aware.
+
+Neil
+
+On Sun, Feb 24, 2013 at 3:16 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 02/23/2013 02:33 AM, Loic Dachary wrote:
+>>
+>> Hi,
+>>
+>> In anticipation of the next OpenStack summit
+>> http://www.openstack.org/summit/portland-2013/, I proposed a session to
+>> discuss OpenStack and Ceph integration. Our meeting during FOSDEM earlier
+>> this month was a great experience although it was planned at the last
+>> minute. I hope we can organize something even better for the summit.
+>>
+>> For developers and contributors to both Ceph and OpenStack such as myself,
+>> it would be a great opportunity to figure out a sensible roadmap for the
+>> next six months. I realize this roadmap is already clear for Josh Durgin and
+>> other Ceph / OpenStack developers who are passionately invested in both
+>> projects for a long time. However I am new to both projects and such a
+>> session would be a precious guide and highly motivating.
+>>
+>> http://summit.openstack.org/cfp/details/38
+>>
+>> What do you think ?
+>>
+>
+> Sounds like a great idea!
+> Thanks for putting together the session!
+>
+> Josh
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
