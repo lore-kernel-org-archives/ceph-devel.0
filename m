@@ -1,56 +1,132 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Updated sparse warning message patches
-Date: Mon, 25 Feb 2013 11:15:18 -0800
-Message-ID: <512BB846.7060107@inktank.com>
-References: <5127A85D.1070000@inktank.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: osdc/ObjectCacher.cc: 834: FAILED assert(ob->last_commit_tid < tid)
+Date: Mon, 25 Feb 2013 14:53:59 -0500
+Message-ID: <CACkq2mpOSGnpWtjpx9JDgFnEPL3FuqLC-3Ux71y2TS8kPzLC7g@mail.gmail.com>
+References: <511CFDDF.6080406@tuxadero.com> <alpine.DEB.2.00.1302140916260.19760@cobra.newdream.net>
+ <511D24CE.4030507@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:61077 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754529Ab3BYTPk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Feb 2013 14:15:40 -0500
-Received: by mail-pa0-f43.google.com with SMTP id bh2so1942393pad.16
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Feb 2013 11:15:39 -0800 (PST)
-In-Reply-To: <5127A85D.1070000@inktank.com>
+Received: from mail-bk0-f54.google.com ([209.85.214.54]:42080 "EHLO
+	mail-bk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758580Ab3BYTyV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Feb 2013 14:54:21 -0500
+Received: by mail-bk0-f54.google.com with SMTP id w5so1504031bku.27
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Feb 2013 11:54:20 -0800 (PST)
+In-Reply-To: <511D24CE.4030507@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org >> ceph-devel" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 02/22/2013 09:18 AM, Alex Elder wrote:
-> I'm re-posting these patches because I've updated them to be
-> based on the patches I just posted ("Four miscellaneous patches").
->
-> These patches are available in the branch "test/wip-4184" in
-> the ceph-client git repository.  That branch is based on
-> branch "test/wip-4234,5,7,8".
->
-> (Here's the original description)
->
-> What follows is a few series of patches that get rid of code
-> issues that lead to warnings from the sparse utility.
->
-> The first three patches address the warnings in the rbd, ceph
-> file system, and libceph code respectively.  After that, one
-> warning remains in libceph, and that is addressed by a series
-> of five patches which both address the underlying problem and
-> reorganized and clean up the surrounding code.  The last two
-> are meant to be combined into one before commit; they've been
-> posted as two separate patches to make them easier to review.
->
-> 					-Alex
->
-> [PATCH, v2] rbd: eliminate sparse warnings
-> [PATCH, v2] ceph: eliminate sparse warnings in fs code
-> [PATCH, v2] libceph: eliminate sparse warnings
-> [PATCH 1/5, v2] libceph: encapsulate connection backoff
-> [PATCH 2/5, v2] libceph: separate non-locked fault handling
-> [PATCH 3/5, v2] libceph: use a flag to indicate a fault has occurred
-> [PATCH 4/5, v2] libceph: use a do..while loop in con_work()
-> [PATCH 5/5, v2] libceph: indent properly
+Any word on what the status of this is?  I just ran into it myself,
+all on 0.56.3, latest KVM/qemu for Ubuntu 12.04.
 
-These all look good too.
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Looking at the bug in tracker, it's resolved.  Is this going to be
+backported to bobtail?
 
+I'm booting VMs directly off of RBD, and this bug takes a few of them
+down at startup.  I don't have a reproducilble method for it -- it's
+more that one out of every 10 or 15 VMs starts up and then crashes,
+and this error shows up in the qemu logs.
+
+Thanks.
+
+On Thu, Feb 14, 2013 at 12:54 PM, Martin Mailand <martin@tuxadero.com> wrote:
+> Hi Sage,
+>
+> everything is on 0.56.2 and the cluster is healthy.
+> I can reproduce it with an apt-get upgrade within the vm, the vm os is
+> 12.04. Most of the time the assertion happened when the firmware .deb is
+> updated. See the log in my first email.
+> But I use a custom build qemu version (1.4-rc1), which was build against
+> 0.56.2.
+>
+>
+> root@store1:~# ceph -s
+>    health HEALTH_OK
+>    monmap e1: 1 mons at {a=192.168.195.33:6789/0}, election epoch 1,
+> quorum 0 a
+>    osdmap e160: 20 osds: 20 up, 20 in
+>     pgmap v28314: 3264 pgs: 3264 active+clean; 437 GB data, 1027 GB
+> used, 144 TB / 145 TB avail
+>    mdsmap e1: 0/0/1 up
+>
+> root@store1:~# ceph --version
+> ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>
+>
+> root@compute4:~# dpkg -l|grep 'rbd\|rados\|qemu'
+> ii  librados2                        0.56.2-1precise
+> RADOS distributed object store client library
+> ii  librbd1                          0.56.2-1precise
+> RADOS block device client library
+> ii  qemu-common                      1.4.0-rc1-vdsp1.0
+> qemu common functionality (bios, documentation, etc)
+> ii  qemu-kvm                         1.4.0-rc1-vdsp1.0
+> Full virtualization on i386 and amd64 hardware
+> ii  qemu-utils                       1.4.0-rc1-vdsp1.0
+> qemu utilities
+>
+>
+> -martin
+>
+> On 14.02.2013 18:18, Sage Weil wrote:
+>> Hi Martin-
+>>
+>> On Thu, 14 Feb 2013, Martin Mailand wrote:
+>>> Hi List,
+>>>
+>>> I get reproducible this assertion, how can I help to debug it?
+>>
+>> Can you describe the workload?  Are the OSDs also running 0.56.2(+)?  Any
+>> other activity on the server side (data migration, OSD failure, etc.) that
+>> may have contributed?
+>>
+>> We just reopened http://tracker.ceph.com/issues/2947 to track this.  I'm
+>> working on reproducing it now as well.
+>>
+>> Thanks!
+>> sage
+>>
+>>
+>>
+>>>
+>>>
+>>> -martin
+>>>
+>>> (Lese Datenbank ... 52246 Dateien und Verzeichnisse sind derzeit
+>>> installiert.)
+>>> Vorbereitung zum Ersetzen von linux-firmware 1.79 (durch
+>>> .../linux-firmware_1.79.1_all.deb) ...
+>>> Ersatz f?r linux-firmware wird entpackt ...
+>>> osdc/ObjectCacher.cc: In function 'void
+>>> ObjectCacher::bh_write_commit(int64_t, sobject_t, loff_t, uint64_t,
+>>> tid_t, int)' thread 7f72b7fff700 time 2013-02-14 16:04:48.867285
+>>> osdc/ObjectCacher.cc: 834: FAILED assert(ob->last_commit_tid < tid)
+>>>  ceph version 0.56.2 (586538e22afba85c59beda49789ec42024e7a061)
+>>>  1: (ObjectCacher::bh_write_commit(long, sobject_t, long, unsigned long,
+>>> unsigned long, int)+0xd68) [0x7f72d4050848]
+>>>  2: (ObjectCacher::C_WriteCommit::finish(int)+0x6b) [0x7f72d405742b]
+>>>  3: (Context::complete(int)+0xa) [0x7f72d400f9ba]
+>>>  4: (librbd::C_Request::finish(int)+0x85) [0x7f72d403f145]
+>>>  5: (Context::complete(int)+0xa) [0x7f72d400f9ba]
+>>>  6: (librbd::rados_req_cb(void*, void*)+0x47) [0x7f72d40241b7]
+>>>  7: (librados::C_AioSafe::finish(int)+0x1d) [0x7f72d33db16d]
+>>>  8: (Finisher::finisher_thread_entry()+0x1c0) [0x7f72d3444e50]
+>>>  9: (()+0x7e9a) [0x7f72d03c7e9a]
+>>>  10: (clone()+0x6d) [0x7f72d00f4cbd]
+>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>> needed to interpret this.
+>>> terminate called after throwing an instance of 'ceph::FailedAssertion'
+>>> Aborted
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
