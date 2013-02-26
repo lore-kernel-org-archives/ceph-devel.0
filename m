@@ -1,69 +1,75 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: maintanance on osd host
-Date: Tue, 26 Feb 2013 12:27:32 -0800
-Message-ID: <CAPYLRzi+Mrcyp-Nd8C-hqBWfUAvSCNOYY8PE9Po7uPfPTcS9EQ@mail.gmail.com>
-References: <512CCD19.7010509@profihost.ag>
-	<alpine.DEB.2.00.1302260904440.2730@cobra.newdream.net>
-	<727CEF0E-7D1E-4298-B0E4-9729CAA4E787@profihost.ag>
-	<alpine.DEB.2.00.1302260922510.4819@cobra.newdream.net>
-	<512D10AA.2020906@profihost.ag>
+From: Mark Kampe <mark.kampe@inktank.com>
+Subject: Geographic DR for RGW
+Date: Tue, 26 Feb 2013 13:39:53 -0800
+Message-ID: <512D2BA9.4070601@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:53934 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752035Ab3BZU1e convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 15:27:34 -0500
-Received: by mail-wi0-f173.google.com with SMTP id hq4so5394869wib.12
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Feb 2013 12:27:33 -0800 (PST)
-In-Reply-To: <512D10AA.2020906@profihost.ag>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:43892 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754025Ab3BZVj4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 16:39:56 -0500
+Received: by mail-pb0-f48.google.com with SMTP id wy12so2616159pbc.35
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Feb 2013 13:39:56 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 26, 2013 at 11:44 AM, Stefan Priebe <s.priebe@profihost.ag>=
- wrote:
-> Hi Sage,
->
-> Am 26.02.2013 18:24, schrieb Sage Weil:
->
->> On Tue, 26 Feb 2013, Stefan Priebe - Profihost AG wrote:
->>>
->>> But that redults in a 1-3s hickup for all KVM vms. This is not what=
- I
->>> want.
->>
->>
->> You can do
->>
->>   kill $pid
->>   ceph osd down $osdid
->>
->> (or even reverse the order, if the sequence is quick enough) to avoi=
-d
->> waiting for the failure detection delay.  But if the OSDs are going =
-down,
->> then the peering has to happen one way or another.
->
->
-> But exaclty this results in starting backfill immediatly. My idea was=
- to
-> first mark the osd down so the mon knows about this fact. So no I/O i=
-s
-> stalled. And then reboot the whole host but exactly this does not wor=
-k like
-> expected as backfilling is starting immediatly after setting the osd =
-to down
-> ;-(
+A few weeks ago, Yehuda Sadeh sent out a proposal for adding
+support for asynchronous remote site replication to the RADOS
+Gateway.  We have done some preliminary planning and are
+now starting the implementation work.
 
-"out" and "down" are quite different =97 are you sure you tried "down"
-and not "out"? (You reference out in your first email, rather than
-down.)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+At the 100,000' level (from which height all water looks
+drinkable and all mountains climbable) the work can be
+divided into:
+
+    1. a bunch of changes within the gateway to create
+       regions, add new attributes to buckets and objects,
+       log new information and implement/expose some new
+       operations
+
+    2. new RESTful APIs to exploit and manage the new
+       behaviors, and associated unit test suites.
+
+    3. free-standing data and metadata synchronization
+       agents that learn of and propagate changes
+
+    4. management agents to monitor, control, and report
+       on this activity.
+
+    5. white-box test suites to stress change detection,
+       reconciliation, propagation, and replay.
+
+We feel that we pretty much have to do (1) (lots of changes
+to a great deal of complicated code).  Category (2) is
+new code, and (in principle) decoupled from the internals
+of the gateway, but it has many tendrils.  C++ developers
+with some familiarity with the Gateway could definitely help
+here ... but it is questionable whether or not it makes
+sense to try to bring new people up to speed for a project
+that will only last a few months.
+
+In the near term, the most modular pieces with the lowest
+activation energy are (3), and in two months there may be
+enough working to enable work on (4) and (5).  The
+synchronization and management agents are free-standing
+processes based on RESTful APIs, and so can be implemented
+in pretty much anything (Python, Java, C++, Ruby, ...).
+
+If there are other people who are able to help make this
+happen, we would love to invite your participation.  This
+is an opportunity to:
+    * accelerate the development of a strategic feature
+    * help to shape some major new functionality
+    * get very familiar with the Gateway code
+    * play with eventual consistency, asynchronous pull replication
+    * be one of the kool kids
+    * earn Karma and improve the world through Open Source contribution
+
+thank you,
+
+    Mark.Kampe@inktank.com
+    VP, Engineering
+
