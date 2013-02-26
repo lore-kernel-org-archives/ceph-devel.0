@@ -1,76 +1,55 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: maintanance on osd host
-Date: Tue, 26 Feb 2013 09:24:01 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302260922510.4819@cobra.newdream.net>
-References: <512CCD19.7010509@profihost.ag> <alpine.DEB.2.00.1302260904440.2730@cobra.newdream.net> <727CEF0E-7D1E-4298-B0E4-9729CAA4E787@profihost.ag>
+From: Kevin Decherf <kevin@kdecherf.com>
+Subject: Re: Crash and strange things on MDS
+Date: Tue, 26 Feb 2013 18:57:42 +0100
+Message-ID: <20130226175742.GE16091@kdecherf.com>
+References: <20130211185424.GA27669@kdecherf.com>
+ <CAPYLRzjZgTH5PaDTXSxJz8fW6arqUpOLdnKBHrcv4vohggZLVQ@mail.gmail.com>
+ <20130213114750.GC7399@kdecherf.com>
+ <CAPYLRzhYWzvq6-Tp5uCJWc9tHAB2WFXFCDZ7ETyQgQwvSB1c+Q@mail.gmail.com>
+ <20130216010217.GA26823@kdecherf.com>
+ <CAKMAVE8wv0gx6RYkFxVd3NCSiYDrOc0L42VeL4uq6z3fZMk52A@mail.gmail.com>
+ <20130216182403.GB5313@kdecherf.com>
+ <CAPYLRzibP6m3iEBMLs-B2u8t-cjv5-BE8_58dh55h7V2kzXSfQ@mail.gmail.com>
+ <20130220010052.GO7121@kdecherf.com>
+ <CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50168 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753015Ab3BZRYC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 12:24:02 -0500
-In-Reply-To: <727CEF0E-7D1E-4298-B0E4-9729CAA4E787@profihost.ag>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:55252 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753555Ab3BZR6F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 12:58:05 -0500
+Received: by mail-wg0-f44.google.com with SMTP id dr12so3666557wgb.35
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Feb 2013 09:58:03 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sam Lang <sam.lang@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, support@clever-cloud.com
 
-On Tue, 26 Feb 2013, Stefan Priebe - Profihost AG wrote:
-> But that redults in a 1-3s hickup for all KVM vms. This is not what I want.
-
-You can do
-
- kill $pid
- ceph osd down $osdid
-
-(or even reverse the order, if the sequence is quick enough) to avoid 
-waiting for the failure detection delay.  But if the OSDs are going down, 
-then the peering has to happen one way or another.
-
-sage
-
-
+On Tue, Feb 19, 2013 at 05:09:30PM -0800, Gregory Farnum wrote:
+> On Tue, Feb 19, 2013 at 5:00 PM, Kevin Decherf <kevin@kdecherf.com> wrote:
+> > On Tue, Feb 19, 2013 at 10:15:48AM -0800, Gregory Farnum wrote:
+> >> Looks like you've got ~424k dentries pinned, and it's trying to keep
+> >> 400k inodes in cache. So you're still a bit oversubscribed, yes. This
+> >> might just be the issue where your clients are keeping a bunch of
+> >> inodes cached for the VFS (http://tracker.ceph.com/issues/3289).
+> >
+> > Thanks for the analyze. We use only one ceph-fuse client at this time
+> > which makes all "high-load" commands like rsync, tar and cp on a huge
+> > amount of files. Well, I will replace it by the kernel client.
 > 
-> Stefan
-> 
-> Am 26.02.2013 um 18:06 schrieb Sage Weil <sage@inktank.com>:
-> 
-> > On Tue, 26 Feb 2013, Stefan Priebe - Profihost AG wrote:
-> >> Hi list,
-> >> 
-> >> how can i do a short maintanance like a kernel upgrade on an osd host?
-> >> Right now ceph starts to backfill immediatly if i say:
-> >> ceph osd out 41
-> >> ...
-> >> 
-> >> Without ceph osd out command all clients hang for the time ceph does not
-> >> know that the host was rebootet.
-> >> 
-> >> I tried
-> >> ceph osd set nodown and ceph osd set noout
-> >> but this doesn't result in any difference
-> > 
-> > For a temporary event like this, you want the osd to be down (so that io 
-> > can continue with remaining replicas) but NOT to mark it out (so that data 
-> > doesn't get rebalanced).  The simplest way to do that is
-> > 
-> > ceph osd set noout
-> > killall ceph-osd
-> > .. reboot ..
-> > 
-> > Just remember to do
-> > 
-> > ceph osd unset noout
-> > 
-> > when you are done so that future osds that fail will get marked out on 
-> > their own after the 5 minute (default) interval.
-> > 
-> > sage
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> Oh, that bug is just an explanation of what's happening; I believe it
+> exists in the kernel client as well.
+
+After setting the mds cache size to 900k, storms are gone.
+However we continue to observe high latency on some clients (always the
+same clients): each IO takes between 40 and 90ms (for example with
+Wordpress, it takes ~20 seconds to load all needed files...).
+With a non-laggy client, IO requests take less than 1ms.
+
+-- 
+Kevin Decherf - @Kdecherf
+GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
+http://kdecherf.com
