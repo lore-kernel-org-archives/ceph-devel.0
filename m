@@ -1,141 +1,117 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] libceph: isolate other message data fields
-Date: Mon, 25 Feb 2013 17:42:53 -0600
-Message-ID: <512BF6FD.6010708@inktank.com>
-References: <512BF683.5050905@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [PATCH 3/3] ceph: fix vmtruncate deadlock
+Date: Mon, 25 Feb 2013 16:01:12 -0800
+Message-ID: <CAPYLRzinxnLg9+c-2Bh2f=S6vjqdTi+WjGsf02FTkj1sJK0iSQ@mail.gmail.com>
+References: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com>
+	<1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
+	<CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
+	<51284624.9050007@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f169.google.com ([209.85.210.169]:57827 "EHLO
-	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759861Ab3BYXm4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Feb 2013 18:42:56 -0500
-Received: by mail-ia0-f169.google.com with SMTP id j5so3024259iaf.0
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Feb 2013 15:42:56 -0800 (PST)
-In-Reply-To: <512BF683.5050905@inktank.com>
+Received: from mail-qe0-f43.google.com ([209.85.128.43]:44403 "EHLO
+	mail-qe0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753635Ab3BZABN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Feb 2013 19:01:13 -0500
+Received: by mail-qe0-f43.google.com with SMTP id s14so2033619qeb.2
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Feb 2013 16:01:12 -0800 (PST)
+In-Reply-To: <51284624.9050007@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-Define ceph_msg_data_set_pagelist(), ceph_msg_data_set_bio(), and
-ceph_msg_data_set_trail() to clearly abstract the assignment the
-remaining data-related fields in a ceph message structure.  These
-fields should never be used more than once; add BUG_ON() calls to
-guarantee this.  Use the new functions in the osd client and mds
-client.
+On Fri, Feb 22, 2013 at 8:31 PM, Yan, Zheng <zheng.z.yan@intel.com> wro=
+te:
+> On 02/23/2013 02:54 AM, Gregory Farnum wrote:
+>> I haven't spent that much time in the kernel client, but this patch
+>> isn't working out for me. In particular, I'm pretty sure we need to
+>> preserve this:
+>>
+>>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>>> index 5d5c32b..b9d8417 100644
+>>> --- a/fs/ceph/caps.c
+>>> +++ b/fs/ceph/caps.c
+>>> @@ -2067,12 +2067,6 @@ static int try_get_cap_refs(struct ceph_inod=
+e_info *ci, int need, int want,
+>>>         }
+>>>         have =3D __ceph_caps_issued(ci, &implemented);
+>>>
+>>> -       /*
+>>> -        * disallow writes while a truncate is pending
+>>> -        */
+>>> -       if (ci->i_truncate_pending)
+>>> -               have &=3D ~CEPH_CAP_FILE_WR;
+>>> -
+>>>         if ((have & need) =3D=3D need) {
+>>>                 /*
+>>>                  * Look at (implemented & ~have & not) so that we k=
+eep waiting
+>>
+>> Because if there's a pending truncate, we really can't write. You do
+>> handle it in the particular case of doing buffered file writes, but
+>> these caps are a marker of permission, and the client shouldn't have
+>> write permission to a file until it's up to date on the truncates. O=
+r
+>> am I misunderstanding something?
+>
+> pending vmtruncate is only relevant to buffered write case. If client=
+ doesn't have 'b' cap,
+> the page cache is empty, and __ceph_do_pending_vmtruncate is no-op. F=
+or buffered write,
+> this patch only affects situation that clients receives truncate requ=
+est from MDS in the
+> middle of write.
+It looks to me like truncates can get queued for later, so that's not t=
+he case?
+And how could the client receive a truncate while in the middle of
+writing? Either it's got the write caps (in which case nobody else can
+truncate), or it shouldn't be writing...I suppose if somebody enables
+lazyIO that would do it, but again in that case I imagine we'd rather
+do the truncate before writing:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- fs/ceph/mds_client.c           |    4 ++--
- include/linux/ceph/messenger.h |    6 ++++++
- net/ceph/messenger.c           |   28 ++++++++++++++++++++++++++++
- net/ceph/osd_client.c          |    6 +++---
- 4 files changed, 39 insertions(+), 5 deletions(-)
+> I think it's better to do vmtruncate after write finishes.
+What if you're writing past the truncate point? Then your written data
+would be truncated off even though it should have been a file
+extension.
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index d8842a1..c0eb44d 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2599,8 +2599,8 @@ static void send_mds_reconnect(struct
-ceph_mds_client *mdsc,
- 			goto fail;
- 	}
 
--	reply->pagelist = pagelist;
--	reply->pagelist_count = calc_pages_for(0, pagelist->length);
-+	ceph_msg_data_set_pagelist(reply, pagelist,
-+				calc_pages_for(0, pagelist->length));
- 	if (recon_state.flock)
- 		reply->hdr.version = cpu_to_le16(2);
- 	reply->hdr.data_len = cpu_to_le32(pagelist->length);
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index eeb28a0..3cb3e8c 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -222,6 +222,12 @@ extern void ceph_con_keepalive(struct
-ceph_connection *con);
+>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>> index a1e5b81..bf7849a 100644
+>>> --- a/fs/ceph/file.c
+>>> +++ b/fs/ceph/file.c
+>>> @@ -653,7 +653,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb=
+, const struct iovec *iov,
+>>>         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %=
+p\n",
+>>>              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+>>>  again:
+>>> -       __ceph_do_pending_vmtruncate(inode);
+>>
+>> There doesn't seem to be any kind of replacement for this? We need t=
+o
+>> do any pending truncates before reading or we might get stale data
+>> back.
+>
+> generic_file_aio_read checks i_size when coping data to user buffer, =
+so the user program can't
+> get stale data. This __ceph_do_pending_vmtruncate is not protected by=
+ i_mutex, it's a potential
+> bug, that's the reason I remove it.
 
- extern void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page
-**pages,
- 				unsigned int page_count, size_t alignment);
-+extern void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
-+				struct ceph_pagelist *pagelist,
-+				unsigned int page_count);
-+extern void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio);
-+extern void ceph_msg_data_set_trail(struct ceph_msg *msg,
-+				struct ceph_pagelist *trail);
+Oh, you're right about the locking (I think, anyway?). However, i_size
+doesn't protect us =97 we might for instance have truncated to zero and
+then back up to the original file size. :( But that doesn't look like
+it's handled correctly anyway (racy) =97 am I misreading that badly or
+is the infrastructure in fact broken in that case?
 
- extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
- 				     bool can_fail);
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 7328e1b..82e3212 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2687,6 +2687,34 @@ void ceph_msg_data_set_pages(struct ceph_msg
-*msg, struct page **pages,
- }
- EXPORT_SYMBOL(ceph_msg_data_set_pages);
-
-+void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
-+				struct ceph_pagelist *pagelist,
-+				unsigned int pagelist_count)
-+{
-+	BUG_ON(msg->pagelist);
-+	BUG_ON(msg->pagelist_count);
-+
-+	msg->pagelist = pagelist;
-+	msg->pagelist_count = pagelist_count;
-+}
-+EXPORT_SYMBOL(ceph_msg_data_set_pagelist);
-+
-+void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio)
-+{
-+	BUG_ON(msg->bio);
-+
-+	msg->bio = bio;
-+}
-+EXPORT_SYMBOL(ceph_msg_data_set_bio);
-+
-+void ceph_msg_data_set_trail(struct ceph_msg *msg, struct ceph_pagelist
-*trail)
-+{
-+	BUG_ON(msg->trail);
-+
-+	msg->trail = trail;
-+}
-+EXPORT_SYMBOL(ceph_msg_data_set_trail);
-+
- /*
-  * construct a new message with given type, size
-  * the new msg has a ref count of 1.
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 0f8351d..f984500 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1632,9 +1632,9 @@ int ceph_osdc_start_request(struct ceph_osd_client
-*osdc,
- 	ceph_msg_data_set_pages(req->r_request, req->r_pages, req->r_num_pages,
- 				req->r_page_alignment);
- #ifdef CONFIG_BLOCK
--	req->r_request->bio = req->r_bio;
-+	ceph_msg_data_set_bio(req->r_request, req->r_bio);
- #endif
--	req->r_request->trail = &req->r_trail;
-+	ceph_msg_data_set_trail(req->r_request, &req->r_trail);
-
- 	register_request(osdc, req);
-
-@@ -1984,7 +1984,7 @@ static struct ceph_msg *get_reply(struct
-ceph_connection *con,
- 		ceph_msg_data_set_pages(m, req->r_pages, req->r_num_pages,
- 					req->r_page_alignment);
- #ifdef CONFIG_BLOCK
--		m->bio = req->r_bio;
-+		ceph_msg_data_set_bio(m, req->r_bio);
- #endif
- 	}
- 	*skip = 0;
--- 
-1.7.9.5
-
+As I said, I don't spend much time in the kernel client, but I looked
+around a bit more and this is what I came up with. Education, if
+nothing else. ;)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
