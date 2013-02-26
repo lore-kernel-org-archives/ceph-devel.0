@@ -1,95 +1,129 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: make ceph_msg->bio_seg be unsigned
-Date: Tue, 26 Feb 2013 10:12:48 -0800
-Message-ID: <512CFB20.3060507@inktank.com>
-References: <512BE85F.5090502@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [PATCH 3/3] ceph: fix vmtruncate deadlock
+Date: Tue, 26 Feb 2013 10:19:26 -0800
+Message-ID: <CAPYLRziup+6SumRJLt0WLUS3AHAGsxuUZTdru67mO4Cp=GP+SA@mail.gmail.com>
+References: <1361498899-15831-1-git-send-email-zheng.z.yan@intel.com>
+	<1361498899-15831-4-git-send-email-zheng.z.yan@intel.com>
+	<CAPYLRziAgfT0F2cdNe+sMbiphBMz20Sm3oSgqkdwNcJL-K--DQ@mail.gmail.com>
+	<51284624.9050007@intel.com>
+	<CAPYLRzinxnLg9+c-2Bh2f=S6vjqdTi+WjGsf02FTkj1sJK0iSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f50.google.com ([209.85.160.50]:34974 "EHLO
-	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751490Ab3BZSNL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 13:13:11 -0500
-Received: by mail-pb0-f50.google.com with SMTP id up1so2519337pbc.37
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Feb 2013 10:13:11 -0800 (PST)
-In-Reply-To: <512BE85F.5090502@inktank.com>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:40577 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751490Ab3BZST2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Feb 2013 13:19:28 -0500
+Received: by mail-wg0-f50.google.com with SMTP id es5so3587836wgb.17
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Feb 2013 10:19:26 -0800 (PST)
+In-Reply-To: <CAPYLRzinxnLg9+c-2Bh2f=S6vjqdTi+WjGsf02FTkj1sJK0iSQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+On Mon, Feb 25, 2013 at 4:01 PM, Gregory Farnum <greg@inktank.com> wrot=
+e:
+> On Fri, Feb 22, 2013 at 8:31 PM, Yan, Zheng <zheng.z.yan@intel.com> w=
+rote:
+>> On 02/23/2013 02:54 AM, Gregory Farnum wrote:
+>>> I haven't spent that much time in the kernel client, but this patch
+>>> isn't working out for me. In particular, I'm pretty sure we need to
+>>> preserve this:
+>>>
+>>>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>>>> index 5d5c32b..b9d8417 100644
+>>>> --- a/fs/ceph/caps.c
+>>>> +++ b/fs/ceph/caps.c
+>>>> @@ -2067,12 +2067,6 @@ static int try_get_cap_refs(struct ceph_ino=
+de_info *ci, int need, int want,
+>>>>         }
+>>>>         have =3D __ceph_caps_issued(ci, &implemented);
+>>>>
+>>>> -       /*
+>>>> -        * disallow writes while a truncate is pending
+>>>> -        */
+>>>> -       if (ci->i_truncate_pending)
+>>>> -               have &=3D ~CEPH_CAP_FILE_WR;
+>>>> -
+>>>>         if ((have & need) =3D=3D need) {
+>>>>                 /*
+>>>>                  * Look at (implemented & ~have & not) so that we =
+keep waiting
+>>>
+>>> Because if there's a pending truncate, we really can't write. You d=
+o
+>>> handle it in the particular case of doing buffered file writes, but
+>>> these caps are a marker of permission, and the client shouldn't hav=
+e
+>>> write permission to a file until it's up to date on the truncates. =
+Or
+>>> am I misunderstanding something?
+>>
+>> pending vmtruncate is only relevant to buffered write case. If clien=
+t doesn't have 'b' cap,
+>> the page cache is empty, and __ceph_do_pending_vmtruncate is no-op. =
+=46or buffered write,
+>> this patch only affects situation that clients receives truncate req=
+uest from MDS in the
+>> middle of write.
+> It looks to me like truncates can get queued for later, so that's not=
+ the case?
+> And how could the client receive a truncate while in the middle of
+> writing? Either it's got the write caps (in which case nobody else ca=
+n
+> truncate), or it shouldn't be writing...I suppose if somebody enables
+> lazyIO that would do it, but again in that case I imagine we'd rather
+> do the truncate before writing:
+>
+>> I think it's better to do vmtruncate after write finishes.
+> What if you're writing past the truncate point? Then your written dat=
+a
+> would be truncated off even though it should have been a file
+> extension.
+>
+>
+>>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>>> index a1e5b81..bf7849a 100644
+>>>> --- a/fs/ceph/file.c
+>>>> +++ b/fs/ceph/file.c
+>>>> @@ -653,7 +653,6 @@ static ssize_t ceph_aio_read(struct kiocb *ioc=
+b, const struct iovec *iov,
+>>>>         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on =
+%p\n",
+>>>>              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+>>>>  again:
+>>>> -       __ceph_do_pending_vmtruncate(inode);
+>>>
+>>> There doesn't seem to be any kind of replacement for this? We need =
+to
+>>> do any pending truncates before reading or we might get stale data
+>>> back.
+>>
+>> generic_file_aio_read checks i_size when coping data to user buffer,=
+ so the user program can't
+>> get stale data. This __ceph_do_pending_vmtruncate is not protected b=
+y i_mutex, it's a potential
+>> bug, that's the reason I remove it.
+>
+> Oh, you're right about the locking (I think, anyway?). However, i_siz=
+e
+> doesn't protect us =97 we might for instance have truncated to zero a=
+nd
+> then back up to the original file size. :( But that doesn't look like
+> it's handled correctly anyway (racy) =97 am I misreading that badly o=
+r
+> is the infrastructure in fact broken in that case?
 
-On 02/25/2013 02:40 PM, Alex Elder wrote:
-> The bio_seg field is used by the ceph messenger in iterating through
-> a bio.  It should never have a negative value, so make it an
-> unsigned.
->
-> Change variables used to hold bio_seg values to all be unsigned as
-> well.  Change two variable names in init_bio_iter() to match the
-> convention used everywhere else.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   include/linux/ceph/messenger.h |    2 +-
->   net/ceph/messenger.c           |   16 +++++++++-------
->   2 files changed, 10 insertions(+), 8 deletions(-)
->
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 60903e0..8297288 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -86,7 +86,7 @@ struct ceph_msg {
->   #ifdef CONFIG_BLOCK
->   	struct bio  *bio;		/* instead of pages/pagelist */
->   	struct bio  *bio_iter;		/* bio iterator */
-> -	int bio_seg;			/* current bio segment */
-> +	unsigned int bio_seg;		/* current bio segment */
->   #endif /* CONFIG_BLOCK */
->   	struct ceph_pagelist *trail;	/* the trailing part of the data */
->   	bool front_is_vmalloc;
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 2c0669f..c06f940 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -697,18 +697,19 @@ static void con_out_kvec_add(struct
-> ceph_connection *con,
->   }
->
->   #ifdef CONFIG_BLOCK
-> -static void init_bio_iter(struct bio *bio, struct bio **iter, int *seg)
-> +static void init_bio_iter(struct bio *bio, struct bio **bio_iter,
-> +			unsigned int *bio_seg)
->   {
->   	if (!bio) {
-> -		*iter = NULL;
-> -		*seg = 0;
-> +		*bio_iter = NULL;
-> +		*bio_seg = 0;
->   		return;
->   	}
-> -	*iter = bio;
-> -	*seg = bio->bi_idx;
-> +	*bio_iter = bio;
-> +	*bio_seg = (unsigned int) bio->bi_idx;
->   }
->
-> -static void iter_bio_next(struct bio **bio_iter, int *seg)
-> +static void iter_bio_next(struct bio **bio_iter, unsigned int *seg)
->   {
->   	if (*bio_iter == NULL)
->   		return;
-> @@ -1818,7 +1819,8 @@ static int read_partial_message_pages(struct
-> ceph_connection *con,
->
->   #ifdef CONFIG_BLOCK
->   static int read_partial_message_bio(struct ceph_connection *con,
-> -				    struct bio **bio_iter, int *bio_seg,
-> +				    struct bio **bio_iter,
-> +				    unsigned int *bio_seg,
->   				    unsigned int data_len, bool do_datacrc)
->   {
->   	struct bio_vec *bv = bio_iovec_idx(*bio_iter, *bio_seg);
->
-
+Sage pointed out in standup today that we only send a truncate message
+for truncate downs, and he thinks that the more complicated cases
+(truncate to zero, write out 2KB, truncate to 1KB) are okay thanks to
+the capabilities bits. I haven't thought it through but that seems
+plausible to me.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
