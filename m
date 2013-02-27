@@ -1,42 +1,39 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: maintanance on osd host
-Date: Wed, 27 Feb 2013 08:37:09 +0100
-Message-ID: <512DB7A5.3090500@profihost.ag>
-References: <512CCD19.7010509@profihost.ag> <alpine.DEB.2.00.1302260904440.2730@cobra.newdream.net> <727CEF0E-7D1E-4298-B0E4-9729CAA4E787@profihost.ag> <alpine.DEB.2.00.1302260922510.4819@cobra.newdream.net> <512D10AA.2020906@profihost.ag> <CAPYLRzi+Mrcyp-Nd8C-hqBWfUAvSCNOYY8PE9Po7uPfPTcS9EQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Filippos Giannakos <philipgian@grnet.gr>
+Subject: [PATCH] Add X-Python-Version >=2.6 to debian control file.
+Date: Wed, 27 Feb 2013 13:56:08 +0200
+Message-ID: <1361966168-22618-1-git-send-email-philipgian@grnet.gr>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:44286 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752567Ab3B0HhR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Feb 2013 02:37:17 -0500
-In-Reply-To: <CAPYLRzi+Mrcyp-Nd8C-hqBWfUAvSCNOYY8PE9Po7uPfPTcS9EQ@mail.gmail.com>
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:18359 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751521Ab3B0MLc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Feb 2013 07:11:32 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com, Filippos Giannakos <philipgian@grnet.gr>
 
-Hi Greg,
-  Hi Sage,
+python-ceph complains when installed to debian squeeze about the 'with'
+statement. Apparently installation tries to install the python-ceph package for
+python 2.5, which does not support the 'with' statement natively.
 
-Am 26.02.2013 21:27, schrieb Gregory Farnum:
-> On Tue, Feb 26, 2013 at 11:44 AM, Stefan Priebe <s.priebe@profihost.a=
-g> wrote:
-> "out" and "down" are quite different =97 are you sure you tried "down=
-"
-> and not "out"? (You reference out in your first email, rather than
-> down.)
-> -Greg
+Signed-off-by: Filippos Giannakos <philipgian@grnet.gr>
+---
+ debian/control |    1 +
+ 1 file changed, 1 insertion(+)
 
-sorry that's it i misread down / out. Sorry. Wouldn't it make sense to
-mark the osd automatically down when shutting down via the init script?
-It doesn't seem to make sense to hope for the automatic detection when
-somebody uses the init script.
+diff --git a/debian/control b/debian/control
+index eefb4ee..fbf517b 100644
+--- a/debian/control
++++ b/debian/control
+@@ -8,6 +8,7 @@ Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.hu>
+ Uploaders: Sage Weil <sage@newdream.net>
+ Build-Depends: debhelper (>= 6.0.7~), autotools-dev, autoconf, automake, libfuse-dev, libboost-dev (>= 1.34), libboost-thread-dev, libedit-dev, libnss3-dev, libtool, libexpat1-dev, libfcgi-dev, libatomic-ops-dev, libgoogle-perftools-dev [i386 amd64], pkg-config, libcurl4-gnutls-dev, libkeyutils-dev, uuid-dev, libaio-dev, python (>= 2.6.6-3~), libxml2-dev, javahelper, default-jdk, junit4, libboost-program-options-dev
+ Standards-Version: 3.9.3
++X-Python-Version: >=2.6
+ 
+ Package: ceph
+ Architecture: linux-any
+-- 
+1.7.10.4
 
-Stefan
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
