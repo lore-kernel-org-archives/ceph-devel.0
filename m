@@ -1,57 +1,130 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling under
- very heavy write load
-Date: Thu, 28 Feb 2013 13:06:02 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1302281258330.4819@cobra.newdream.net>
-References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov> <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com> <4F29CDAA.408@sandia.gov> <CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com> <4F2AABF5.6050803@sandia.gov>
- <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com> <4F47AEE3.5080305@sandia.gov> <alpine.DEB.2.00.1302201551580.26205@cobra.newdream.net> <512D0A1F.30801@sandia.gov> <alpine.DEB.2.00.1302261135190.4819@cobra.newdream.net>
- <512FB1E7.8090001@sandia.gov>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [ceph-users] snapshot, clone and mount a VM-Image
+Date: Thu, 28 Feb 2013 15:33:43 -0800
+Message-ID: <512FE957.9040703@inktank.com>
+References: <5118C6BF.70207@risc-software.at> <5118FA0D.606@42on.com> <5118FB31.6020902@risc-software.at> <alpine.DEB.2.00.1302110624370.5429@cobra.newdream.net> <511D3A35.7090702@mermaidconsulting.dk> <alpine.DEB.2.00.1302141241020.22023@cobra.newdream.net> <511F72D2.5020104@mermaidconsulting.dk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46184 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760451Ab3B1VGD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Feb 2013 16:06:03 -0500
-In-Reply-To: <512FB1E7.8090001@sandia.gov>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:57731 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751715Ab3B1XeK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Feb 2013 18:34:10 -0500
+Received: by mail-pa0-f47.google.com with SMTP id bj3so1428700pad.20
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Feb 2013 15:34:09 -0800 (PST)
+In-Reply-To: <511F72D2.5020104@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org, sri@basam.org
+To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Sage Weil <sage@inktank.com>, Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
 
-On Thu, 28 Feb 2013, Jim Schutt wrote:
+On 02/16/2013 03:51 AM, Jens Kristian S=F8gaard wrote:
 > Hi Sage,
-> 
-> On 02/26/2013 12:36 PM, Sage Weil wrote:
-> > On Tue, 26 Feb 2013, Jim Schutt wrote:
-> >>> I think the right solution is to make an option that will setsockopt on 
-> >>> SO_RECVBUF to some value (say, 256KB).  I pushed a branch that does this, 
-> >>> wip-tcp.  Do you mind checking to see if this addresses the issue (without 
-> >>> manually adjusting things in /proc)?
-> >>
-> >> I'll be happy to test it out...
-> > 
-> > That would be great!  It's branch wip-tcp, and the setting is 'ms tcp 
-> > rcvbuf'.
-> 
-> I've verified that I can reproduce the slowdown with the
-> default value of 1 for /proc/sys/net/ipv4/tcp_moderate_rcvbuf,
-> and 'ms tcp rcvbuf' at 0.
-> 
-> I've also verified that I could not reproduce any slowdown when
-> I configure 'ms tcp rcvbuf' to 256 KiB on OSDs.
-> 
-> So, that's great news - sorry for the delay in testing.
+>
+>> 1) Decide what output format to use.  We want to use something that =
+is
+>
+> I have given it some thought, and my initial suggestion to keep thing=
+s
+> simple is to use the QCOW2 image format.
+>
+> The birds eye view of the process would be as follows:
+>
+> * Initial backup
+>
+> User supplied information: pool, image name
+>
+> Create rbd snapshot of the image named "backup_1", where 1 could be a
+> timestamp or an integer count.
+>
+> Save the snapshot to a standard qcow2 image. Similar to:
+>
+> qemu-img convert rbd:data/myimage@backup_1 -O qcow2
+> data_myimage_backup_1.qcow2
+>
+> Note: I don't know if qemu-img actually supports reading from snapsho=
+ts
+> currently.
 
-Awesome--thanks so much for testing that!  Pulling it into master now.
- 
-> Also, FWIW, I ended up testing with commits cb15e6e0f4 and
-> c346282940 cherry-picked on top of next as of a day or
-> so ago (commit f58601d681), as for some reason wip-tcp
-> wouldn't work for me - ceph-mon was non-responsive in
-> some way I didn't dig into.
+It does.
 
-Yeah, sorry about that.  I rebased wip-tcp a few days ago but you may have 
-picked up the previous version.
+> * Incremental backup
+>
+> User supplied information: pool, image name, path to initial backup o=
+r
+> previous incremental file
+>
+> Create rbd snapshot of the image named "backup_2", where 2 could be a
+> timestamp or an integer count.
+>
+> Determine previous snapshot identifier from given file name.
+>
+> Determine objects changed from the snapshot given by that identifier =
+and
+> the newly created snapshot.
+>
+> Construct QCOW2 L1- and L2-tables in memory from that changeset.
+>
+> Create new qcow2 image with the previous backup file as the backing
+> image, and write out the tables and changed blocks.
+>
+> Delete previous rbd snapshot.
+>
+>
+> * Restoring and mounting
+>
+>
+> The use of the QCOW2 format means that we can use existing tools for
+> restoring and mounting the backups.
+>
+> To restore a backup the user can simply choose either the initial bac=
+kup
+> file or an incremental, and use qemu-img to copy that to a new rbd im=
+age.
+>
+> To mount the initial backup or an incremental, the user can use qemu-=
+nbd
+> to mount and explore the backup to determine which one to restore.
+>
+> The performance of restores and mounts would ofcourse be weakened if =
+the
+> backup consists of a large number of incrementals. In that case the
+> existing qemu-img tool could be used to flatten the backup.
+>
+>
+> * Pros/cons
+>
+> The QCOW2 format support compression, so we could implement compresse=
+d
+> backups without much effort.
+>
+> The disadvantages to using QCOW2 like this is that we do not have any
+> checksumming or safe guards against potential errors such as users
+> mixing up images.
+>
+> Another disadvantage to this approach is that vital information is
+> stored in the actual filename of the backup file. I don't see any pla=
+ce
+> in the QCOW2 file format for storing this information inside the file=
+,
+> sadly.
+>
+> We could opt for storing it inside a plain text file that accompanies
+> the QCOW2 file, or tarballing the qcow2 file and that plain text file=
+=2E
 
-sage
+qcow2 seems like a good initial format given the existing tools. We
+could always add another format later, or wrap it with extra
+information like you suggest.
+
+Have you had a chance to start implementing this yet? It'd be great to
+get it working in the next month.
+
+Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
