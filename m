@@ -1,78 +1,56 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: complete lingering requests only once
-Date: Thu, 28 Feb 2013 08:41:03 -0600
-Message-ID: <512F6C7F.4030805@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: maintanance on osd host
+Date: Thu, 28 Feb 2013 08:14:29 -0800
+Message-ID: <CAPYLRzh4YFTuZ4rrewYPX3j0kg6bA2bSuyhrKtJ=3SRYHOTgdg@mail.gmail.com>
+References: <512CCD19.7010509@profihost.ag>
+	<alpine.DEB.2.00.1302260904440.2730@cobra.newdream.net>
+	<727CEF0E-7D1E-4298-B0E4-9729CAA4E787@profihost.ag>
+	<alpine.DEB.2.00.1302260922510.4819@cobra.newdream.net>
+	<512D10AA.2020906@profihost.ag>
+	<CAPYLRzi+Mrcyp-Nd8C-hqBWfUAvSCNOYY8PE9Po7uPfPTcS9EQ@mail.gmail.com>
+	<512DB7A5.3090500@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:53610 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751192Ab3B1OlG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Feb 2013 09:41:06 -0500
-Received: by mail-ie0-f177.google.com with SMTP id 16so2074505iea.8
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Feb 2013 06:41:05 -0800 (PST)
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:63429 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753873Ab3B1QOa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Feb 2013 11:14:30 -0500
+Received: by mail-qc0-f174.google.com with SMTP id z24so182334qcq.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Feb 2013 08:14:29 -0800 (PST)
+In-Reply-To: <512DB7A5.3090500@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-An osd request marked to linger will be re-submitted in the event
-a connection to the target osd gets dropped.  Currently, if there
-is a callback function associated with a request it will be called
-each time a request is submitted--which for lingering requests can
-be more than once.
+On Tue, Feb 26, 2013 at 11:37 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+> Hi Greg,
+>   Hi Sage,
+>
+> Am 26.02.2013 21:27, schrieb Gregory Farnum:
+>> On Tue, Feb 26, 2013 at 11:44 AM, Stefan Priebe <s.priebe@profihost.=
+ag> wrote:
+>> "out" and "down" are quite different =97 are you sure you tried "dow=
+n"
+>> and not "out"? (You reference out in your first email, rather than
+>> down.)
+>> -Greg
+>
+> sorry that's it i misread down / out. Sorry. Wouldn't it make sense t=
+o
+> mark the osd automatically down when shutting down via the init scrip=
+t?
+> It doesn't seem to make sense to hope for the automatic detection whe=
+n
+> somebody uses the init script.
 
-Change it so a request--including lingering ones--will get completed
-(from the perspective of the user of the osd client) exactly once.
-
-This resolves:
-    http://tracker.ceph.com/issues/3967
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- include/linux/ceph/osd_client.h |    1 +
- net/ceph/osd_client.c           |    5 +++++
- 2 files changed, 6 insertions(+)
-
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index 1dd5d46..a79f833 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -85,6 +85,7 @@ struct ceph_osd_request {
- 	s32               r_reply_op_result[CEPH_OSD_MAX_OP];
- 	int               r_got_reply;
- 	int		  r_linger;
-+	int		  r_completed;
-
- 	struct ceph_osd_client *r_osdc;
- 	struct kref       r_kref;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 1d9ebf9..a28c976a 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1174,6 +1174,7 @@ static void handle_reply(struct ceph_osd_client
-*osdc, struct ceph_msg *msg,
- 	u32 reassert_epoch;
- 	u64 reassert_version;
- 	u32 osdmap_epoch;
-+	int already_completed;
- 	int i;
-
- 	tid = le64_to_cpu(msg->hdr.tid);
-@@ -1282,7 +1283,11 @@ static void handle_reply(struct ceph_osd_client
-*osdc, struct ceph_msg *msg,
- 	    ((flags & CEPH_OSD_FLAG_WRITE) == 0))
- 		__unregister_request(osdc, req);
-
-+	already_completed = req->r_completed;
-+	req->r_completed = 1;
- 	mutex_unlock(&osdc->request_mutex);
-+	if (already_completed)
-+		goto done;
-
- 	if (req->r_callback)
- 		req->r_callback(req, msg);
--- 
-1.7.9.5
-
+Yes, yes it would. http://tracker.ceph.com/issues/4267 :)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
