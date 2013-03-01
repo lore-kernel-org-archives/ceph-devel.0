@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 5/7] ceph: revert commit 22cddde104
-Date: Fri,  1 Mar 2013 14:46:22 +0800
-Message-ID: <1362120384-5188-6-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 4/7] ceph: use I_COMPLETE inode flag instead of D_COMPLETE flag
+Date: Fri,  1 Mar 2013 14:46:21 +0800
+Message-ID: <1362120384-5188-5-git-send-email-zheng.z.yan@intel.com>
 References: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:58983 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752093Ab3CAGqd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Mar 2013 01:46:33 -0500
+	id S1750870Ab3CAGqc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 Mar 2013 01:46:32 -0500
 In-Reply-To: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,233 +16,356 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-commit 22cddde104 breaks the atomicity of write operation, it also
-introduces a deadlock between write and truncate.
+commit c6ffe10015 moved the flag that tracks if the dcache contents
+for a directory are complete to dentry. The problem is there are
+lots of places that use ceph_dir_{set,clear,test}_complete() while
+holding i_ceph_lock. but ceph_dir_{set,clear,test}_complete() may
+sleep because they call dput().
+
+This patch basically reverts that commit. For ceph_d_prune(), it's
+called with both the dentry to prune and the parent dentry are
+locked. So it's safe to access the parent dentry's d_inode and
+clear I_COMPLETE flag.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/addr.c       | 51 +++---------------------------------
- fs/ceph/file.c       | 73 +++++++++++++++++++++++++++++++---------------------
- fs/ceph/mds_client.c |  1 +
- 3 files changed, 48 insertions(+), 77 deletions(-)
+ fs/ceph/caps.c       |  8 ++++---
+ fs/ceph/dir.c        | 62 ++++++++++------------------------------------------
+ fs/ceph/inode.c      | 30 +++++++++++--------------
+ fs/ceph/mds_client.c |  6 ++---
+ fs/ceph/super.h      | 23 ++-----------------
+ 5 files changed, 34 insertions(+), 95 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index cfef3e0..d662025 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1067,51 +1067,23 @@ static int ceph_write_begin(struct file *file, struct address_space *mapping,
- 			    struct page **pagep, void **fsdata)
- {
- 	struct inode *inode = file->f_dentry->d_inode;
--	struct ceph_inode_info *ci = ceph_inode(inode);
--	struct ceph_file_info *fi = file->private_data;
- 	struct page *page;
- 	pgoff_t index = pos >> PAGE_CACHE_SHIFT;
--	int r, want, got = 0;
--
--	if (fi->fmode & CEPH_FILE_MODE_LAZY)
--		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
--	else
--		want = CEPH_CAP_FILE_BUFFER;
--
--	dout("write_begin %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
--	     inode, ceph_vinop(inode), pos, len, inode->i_size);
--	r = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, pos+len);
--	if (r < 0)
--		return r;
--	dout("write_begin %p %llx.%llx %llu~%u  got cap refs on %s\n",
--	     inode, ceph_vinop(inode), pos, len, ceph_cap_string(got));
--	if (!(got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO))) {
--		ceph_put_cap_refs(ci, got);
--		return -EAGAIN;
--	}
-+	int r;
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 61f3833..76634f4 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -490,15 +490,17 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
+ 		ci->i_rdcache_gen++;
  
- 	do {
- 		/* get a page */
- 		page = grab_cache_page_write_begin(mapping, index, 0);
--		if (!page) {
--			r = -ENOMEM;
--			break;
--		}
-+		if (!page)
-+			return -ENOMEM;
-+		*pagep = page;
- 
- 		dout("write_begin file %p inode %p page %p %d~%d\n", file,
- 		     inode, page, (int)pos, (int)len);
- 
- 		r = ceph_update_writeable_page(file, pos, len, page);
--		if (r)
--			page_cache_release(page);
- 	} while (r == -EAGAIN);
- 
--	if (r) {
--		ceph_put_cap_refs(ci, got);
--	} else {
--		*pagep = page;
--		*(int *)fsdata = got;
--	}
- 	return r;
+ 	/*
+-	 * if we are newly issued FILE_SHARED, clear D_COMPLETE; we
++	 * if we are newly issued FILE_SHARED, clear I_COMPLETE; we
+ 	 * don't know what happened to this directory while we didn't
+ 	 * have the cap.
+ 	 */
+ 	if ((issued & CEPH_CAP_FILE_SHARED) &&
+ 	    (had & CEPH_CAP_FILE_SHARED) == 0) {
+ 		ci->i_shared_gen++;
+-		if (S_ISDIR(ci->vfs_inode.i_mode))
+-			ceph_dir_clear_complete(&ci->vfs_inode);
++		if (S_ISDIR(ci->vfs_inode.i_mode)) {
++			dout(" marking %p NOT complete\n", &ci->vfs_inode);
++			ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
++		}
+ 	}
  }
  
-@@ -1125,12 +1097,10 @@ static int ceph_write_end(struct file *file, struct address_space *mapping,
- 			  struct page *page, void *fsdata)
- {
- 	struct inode *inode = file->f_dentry->d_inode;
--	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	unsigned from = pos & (PAGE_CACHE_SIZE - 1);
- 	int check_cap = 0;
--	int got = (unsigned long)fsdata;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 8c1aabe..76821be 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -107,7 +107,7 @@ static unsigned fpos_off(loff_t p)
+  * falling back to a "normal" sync readdir if any dentries in the dir
+  * are dropped.
+  *
+- * D_COMPLETE tells indicates we have all dentries in the dir.  It is
++ * I_COMPLETE tells indicates we have all dentries in the dir.  It is
+  * defined IFF we hold CEPH_CAP_FILE_SHARED (which will be revoked by
+  * the MDS if/when the directory is modified).
+  */
+@@ -198,8 +198,8 @@ more:
+ 	filp->f_pos++;
  
- 	dout("write_end file %p inode %p page %p %d~%d (%d)\n", file,
- 	     inode, page, (int)pos, (int)copied, (int)len);
-@@ -1153,19 +1123,6 @@ static int ceph_write_end(struct file *file, struct address_space *mapping,
- 	up_read(&mdsc->snap_rwsem);
- 	page_cache_release(page);
- 
--	if (copied > 0) {
--		int dirty;
--		spin_lock(&ci->i_ceph_lock);
--		dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
--		spin_unlock(&ci->i_ceph_lock);
--		if (dirty)
--			__mark_inode_dirty(inode, dirty);
--	}
--
--	dout("write_end %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
--	     inode, ceph_vinop(inode), pos, len, ceph_cap_string(got));
--	ceph_put_cap_refs(ci, got);
--
- 	if (check_cap)
- 		ceph_check_caps(ceph_inode(inode), CHECK_CAPS_AUTHONLY, NULL);
- 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 9c4325e..a949805 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -718,53 +718,63 @@ static ssize_t ceph_aio_write(struct kiocb *iocb, const struct iovec *iov,
- 	struct ceph_osd_client *osdc =
- 		&ceph_sb_to_client(inode->i_sb)->client->osdc;
- 	loff_t endoff = pos + iov->iov_len;
--	int got = 0;
--	int ret, err, written;
-+	int want, got = 0;
-+	int ret, err;
- 
- 	if (ceph_snap(inode) != CEPH_NOSNAP)
- 		return -EROFS;
- 
- retry_snap:
--	written = 0;
- 	if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL))
- 		return -ENOSPC;
- 	__ceph_do_pending_vmtruncate(inode);
-+	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
-+	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
-+	     inode->i_size);
-+	if (fi->fmode & CEPH_FILE_MODE_LAZY)
-+		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
-+	else
-+		want = CEPH_CAP_FILE_BUFFER;
-+	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
-+	if (ret < 0)
-+		goto out_put;
- 
--	/*
--	 * try to do a buffered write.  if we don't have sufficient
--	 * caps, we'll get -EAGAIN from generic_file_aio_write, or a
--	 * short write if we only get caps for some pages.
--	 */
--	if (!(iocb->ki_filp->f_flags & O_DIRECT) &&
--	    !(inode->i_sb->s_flags & MS_SYNCHRONOUS) &&
--	    !(fi->flags & CEPH_F_SYNC)) {
--		ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
--		if (ret >= 0)
--			written = ret;
-+	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
-+	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
-+	     ceph_cap_string(got));
-+
-+	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
-+	    (iocb->ki_filp->f_flags & O_DIRECT) ||
-+	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
-+	    (fi->flags & CEPH_F_SYNC)) {
-+		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
-+			&iocb->ki_pos);
-+	} else {
-+		/*
-+		 * buffered write; drop Fw early to avoid slow
-+		 * revocation if we get stuck on balance_dirty_pages
-+		 */
-+		int dirty;
- 
-+		spin_lock(&ci->i_ceph_lock);
-+		dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
-+		spin_unlock(&ci->i_ceph_lock);
-+		ceph_put_cap_refs(ci, got);
-+
-+		ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
- 		if ((ret >= 0 || ret == -EIOCBQUEUED) &&
- 		    ((file->f_flags & O_SYNC) || IS_SYNC(file->f_mapping->host)
- 		     || ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_NEARFULL))) {
--			err = vfs_fsync_range(file, pos, pos + written - 1, 1);
-+			err = vfs_fsync_range(file, pos, pos + ret - 1, 1);
- 			if (err < 0)
- 				ret = err;
- 		}
--		if ((ret < 0 && ret != -EAGAIN) || pos + written >= endoff)
--			goto out;
--	}
- 
--	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
--	     inode, ceph_vinop(inode), pos + written,
--	     (unsigned)iov->iov_len - written, inode->i_size);
--	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, 0, &got, endoff);
--	if (ret < 0)
-+		if (dirty)
-+			__mark_inode_dirty(inode, dirty);
+ 	/* make sure a dentry wasn't dropped while we didn't have parent lock */
+-	if (!ceph_dir_test_complete(dir)) {
+-		dout(" lost D_COMPLETE on %p; falling back to mds\n", dir);
++	if (!ceph_i_test(dir, CEPH_I_COMPLETE)) {
++		dout(" lost I_COMPLETE on %p; falling back to mds\n", dir);
+ 		err = -EAGAIN;
  		goto out;
-+	}
- 
--	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
--	     inode, ceph_vinop(inode), pos + written,
--	     (unsigned)iov->iov_len - written, ceph_cap_string(got));
--	ret = ceph_sync_write(file, iov->iov_base + written,
--			      iov->iov_len - written, &iocb->ki_pos);
- 	if (ret >= 0) {
- 		int dirty;
- 		spin_lock(&ci->i_ceph_lock);
-@@ -773,10 +783,13 @@ retry_snap:
- 		if (dirty)
- 			__mark_inode_dirty(inode, dirty);
  	}
-+
-+out_put:
- 	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
--	     inode, ceph_vinop(inode), pos + written,
--	     (unsigned)iov->iov_len - written, ceph_cap_string(got));
-+	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
-+	     ceph_cap_string(got));
- 	ceph_put_cap_refs(ci, got);
-+
- out:
- 	if (ret == -EOLDSNAPC) {
- 		dout("aio_write %p %llx.%llx %llu~%u got EOLDSNAPC, retrying\n",
+@@ -284,7 +284,7 @@ static int ceph_readdir(struct file *filp, void *dirent, filldir_t filldir)
+ 	if ((filp->f_pos == 2 || fi->dentry) &&
+ 	    !ceph_test_mount_opt(fsc, NOASYNCREADDIR) &&
+ 	    ceph_snap(inode) != CEPH_SNAPDIR &&
+-	    ceph_dir_test_complete(inode) &&
++	    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
+ 	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
+ 		spin_unlock(&ci->i_ceph_lock);
+ 		err = __dcache_readdir(filp, dirent, filldir);
+@@ -350,7 +350,7 @@ more:
+ 
+ 		if (!req->r_did_prepopulate) {
+ 			dout("readdir !did_prepopulate");
+-			fi->dir_release_count--;    /* preclude D_COMPLETE */
++			fi->dir_release_count--;    /* preclude I_COMPLETE */
+ 		}
+ 
+ 		/* note next offset and last dentry name */
+@@ -429,7 +429,8 @@ more:
+ 	 */
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (ci->i_release_count == fi->dir_release_count) {
+-		ceph_dir_set_complete(inode);
++		dout(" marking %p complete\n", inode);
++		ci->i_ceph_flags |= CEPH_I_COMPLETE;
+ 		ci->i_max_offset = filp->f_pos;
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+@@ -604,7 +605,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 			    fsc->mount_options->snapdir_name,
+ 			    dentry->d_name.len) &&
+ 		    !is_root_ceph_dentry(dir, dentry) &&
+-		    ceph_dir_test_complete(dir) &&
++		    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
+ 		    (__ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1))) {
+ 			spin_unlock(&ci->i_ceph_lock);
+ 			dout(" dir %p complete, -ENOENT\n", dir);
+@@ -908,7 +909,7 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		 */
+ 
+ 		/* d_move screws up d_subdirs order */
+-		ceph_dir_clear_complete(new_dir);
++		ceph_i_clear(new_dir, CEPH_I_COMPLETE);
+ 
+ 		d_move(old_dentry, new_dentry);
+ 
+@@ -1065,44 +1066,6 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+ }
+ 
+ /*
+- * Set/clear/test dir complete flag on the dir's dentry.
+- */
+-void ceph_dir_set_complete(struct inode *inode)
+-{
+-	struct dentry *dentry = d_find_any_alias(inode);
+-	
+-	if (dentry && ceph_dentry(dentry) &&
+-	    ceph_test_mount_opt(ceph_sb_to_client(dentry->d_sb), DCACHE)) {
+-		dout(" marking %p (%p) complete\n", inode, dentry);
+-		set_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+-	}
+-	dput(dentry);
+-}
+-
+-void ceph_dir_clear_complete(struct inode *inode)
+-{
+-	struct dentry *dentry = d_find_any_alias(inode);
+-
+-	if (dentry && ceph_dentry(dentry)) {
+-		dout(" marking %p (%p) complete\n", inode, dentry);
+-		set_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+-	}
+-	dput(dentry);
+-}
+-
+-bool ceph_dir_test_complete(struct inode *inode)
+-{
+-	struct dentry *dentry = d_find_any_alias(inode);
+-
+-	if (dentry && ceph_dentry(dentry)) {
+-		dout(" marking %p (%p) NOT complete\n", inode, dentry);
+-		clear_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+-	}
+-	dput(dentry);
+-	return false;
+-}
+-
+-/*
+  * When the VFS prunes a dentry from the cache, we need to clear the
+  * complete flag on the parent directory.
+  *
+@@ -1110,15 +1073,13 @@ bool ceph_dir_test_complete(struct inode *inode)
+  */
+ static void ceph_d_prune(struct dentry *dentry)
+ {
+-	struct ceph_dentry_info *di;
+-
+ 	dout("ceph_d_prune %p\n", dentry);
+ 
+ 	/* do we have a valid parent? */
+ 	if (IS_ROOT(dentry))
+ 		return;
+ 
+-	/* if we are not hashed, we don't affect D_COMPLETE */
++	/* if we are not hashed, we don't affect I_COMPLETE */
+ 	if (d_unhashed(dentry))
+ 		return;
+ 
+@@ -1126,8 +1087,7 @@ static void ceph_d_prune(struct dentry *dentry)
+ 	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
+ 	 * cleared until d_release
+ 	 */
+-	di = ceph_dentry(dentry->d_parent);
+-	clear_bit(CEPH_D_COMPLETE, &di->flags);
++	ceph_i_clear(dentry->d_parent->d_inode, CEPH_I_COMPLETE);
+ }
+ 
+ /*
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 2971eaa..42c5769 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -561,7 +561,6 @@ static int fill_inode(struct inode *inode,
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	int i;
+ 	int issued = 0, implemented;
+-	int updating_inode = 0;
+ 	struct timespec mtime, atime, ctime;
+ 	u32 nsplits;
+ 	struct ceph_buffer *xattr_blob = NULL;
+@@ -601,7 +600,6 @@ static int fill_inode(struct inode *inode,
+ 	    (ci->i_version & ~1) >= le64_to_cpu(info->version))
+ 		goto no_change;
+ 	
+-	updating_inode = 1;
+ 	issued = __ceph_caps_issued(ci, &implemented);
+ 	issued |= implemented | __ceph_caps_dirty(ci);
+ 
+@@ -716,6 +714,17 @@ static int fill_inode(struct inode *inode,
+ 		       ceph_vinop(inode), inode->i_mode);
+ 	}
+ 
++	/* set dir completion flag? */
++	if (S_ISDIR(inode->i_mode) &&
++	    ci->i_files == 0 && ci->i_subdirs == 0 &&
++	    ceph_snap(inode) == CEPH_NOSNAP &&
++	    (le32_to_cpu(info->cap.caps) & CEPH_CAP_FILE_SHARED) &&
++	    (issued & CEPH_CAP_FILE_EXCL) == 0 &&
++	    (ci->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
++		dout(" marking %p complete (empty)\n", inode);
++		ci->i_ceph_flags |= CEPH_I_COMPLETE;
++		ci->i_max_offset = 2;
++	}
+ no_change:
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+@@ -766,19 +775,6 @@ no_change:
+ 		__ceph_get_fmode(ci, cap_fmode);
+ 	}
+ 
+-	/* set dir completion flag? */
+-	if (S_ISDIR(inode->i_mode) &&
+-	    updating_inode &&                 /* didn't jump to no_change */
+-	    ci->i_files == 0 && ci->i_subdirs == 0 &&
+-	    ceph_snap(inode) == CEPH_NOSNAP &&
+-	    (le32_to_cpu(info->cap.caps) & CEPH_CAP_FILE_SHARED) &&
+-	    (issued & CEPH_CAP_FILE_EXCL) == 0 &&
+-	    !ceph_dir_test_complete(inode)) {
+-		dout(" marking %p complete (empty)\n", inode);
+-		ceph_dir_set_complete(inode);
+-		ci->i_max_offset = 2;
+-	}
+-
+ 	/* update delegation info? */
+ 	if (dirinfo)
+ 		ceph_fill_dirfrag(inode, dirinfo);
+@@ -860,7 +856,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
+ 	di = ceph_dentry(dn);
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+-	if (!ceph_dir_test_complete(inode)) {
++	if ((ceph_inode(inode)->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
+ 		spin_unlock(&ci->i_ceph_lock);
+ 		return;
+ 	}
+@@ -1065,7 +1061,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 			 * d_move() puts the renamed dentry at the end of
+ 			 * d_subdirs.  We need to assign it an appropriate
+ 			 * directory offset so we can behave when holding
+-			 * D_COMPLETE.
++			 * I_COMPLETE.
+ 			 */
+ 			ceph_set_dentry_offset(req->r_old_dentry);
+ 			dout("dn %p gets new offset %lld\n", req->r_old_dentry, 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index e52b0fb..ab899c8 100644
+index ccc68b0..e52b0fb 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -1916,6 +1916,7 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
- 		req = list_entry(tmp_list.next,
- 				 struct ceph_mds_request, r_wait);
- 		list_del_init(&req->r_wait);
-+		dout(" wake request %p tid %llu\n", req, req->r_tid);
- 		__do_request(mdsc, req);
- 	}
+@@ -2029,7 +2029,7 @@ out:
  }
+ 
+ /*
+- * Invalidate dir D_COMPLETE, dentry lease state on an aborted MDS
++ * Invalidate dir I_COMPLETE, dentry lease state on an aborted MDS
+  * namespace request.
+  */
+ void ceph_invalidate_dir_request(struct ceph_mds_request *req)
+@@ -2037,9 +2037,9 @@ void ceph_invalidate_dir_request(struct ceph_mds_request *req)
+ 	struct inode *inode = req->r_locked_dir;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 
+-	dout("invalidate_dir_request %p (D_COMPLETE, lease(s))\n", inode);
++	dout("invalidate_dir_request %p (I_COMPLETE, lease(s))\n", inode);
+ 	spin_lock(&ci->i_ceph_lock);
+-	ceph_dir_clear_complete(inode);
++	ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
+ 	ci->i_release_count++;
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 4353ebc..efbcb56 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -204,7 +204,6 @@ struct ceph_inode_xattr {
+  * Ceph dentry state
+  */
+ struct ceph_dentry_info {
+-	unsigned long flags;
+ 	struct ceph_mds_session *lease_session;
+ 	u32 lease_gen, lease_shared_gen;
+ 	u32 lease_seq;
+@@ -215,18 +214,6 @@ struct ceph_dentry_info {
+ 	u64 offset;
+ };
+ 
+-/*
+- * dentry flags
+- *
+- * The locking for D_COMPLETE is a bit odd:
+- *  - we can clear it at almost any time (see ceph_d_prune)
+- *  - it is only meaningful if:
+- *    - we hold dir inode i_ceph_lock
+- *    - we hold dir FILE_SHARED caps
+- *    - the dentry D_COMPLETE is set
+- */
+-#define CEPH_D_COMPLETE 1  /* if set, d_u.d_subdirs is complete directory */
+-
+ struct ceph_inode_xattrs_info {
+ 	/*
+ 	 * (still encoded) xattr blob. we avoid the overhead of parsing
+@@ -267,7 +254,7 @@ struct ceph_inode_info {
+ 	struct timespec i_rctime;
+ 	u64 i_rbytes, i_rfiles, i_rsubdirs;
+ 	u64 i_files, i_subdirs;
+-	u64 i_max_offset;  /* largest readdir offset, set with D_COMPLETE */
++	u64 i_max_offset;  /* largest readdir offset, set with I_COMPLETE */
+ 
+ 	struct rb_root i_fragtree;
+ 	struct mutex i_fragtree_mutex;
+@@ -432,6 +419,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+ /*
+  * Ceph inode.
+  */
++#define CEPH_I_COMPLETE  1  /* we have complete directory cached */
+ #define CEPH_I_NODELAY   4  /* do not delay cap release */
+ #define CEPH_I_FLUSH     8  /* do not delay flush of dirty metadata */
+ #define CEPH_I_NOFLUSH  16  /* do not flush dirty caps */
+@@ -489,13 +477,6 @@ static inline loff_t ceph_make_fpos(unsigned frag, unsigned off)
+ }
+ 
+ /*
+- * set/clear directory D_COMPLETE flag
+- */
+-void ceph_dir_set_complete(struct inode *inode);
+-void ceph_dir_clear_complete(struct inode *inode);
+-bool ceph_dir_test_complete(struct inode *inode);
+-
+-/*
+  * caps helpers
+  */
+ static inline bool __ceph_is_any_real_caps(struct ceph_inode_info *ci)
 -- 
 1.7.11.7
 
