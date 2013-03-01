@@ -1,143 +1,101 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 7/7] ceph: acquire i_mutex in __ceph_do_pending_vmtruncate
-Date: Fri,  1 Mar 2013 14:46:24 +0800
-Message-ID: <1362120384-5188-8-git-send-email-zheng.z.yan@intel.com>
-References: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: OSD memory leaks?
+Date: Fri, 01 Mar 2013 16:51:01 +0100
+Message-ID: <5130CE65.7050606@42on.com>
+References: <CAOLwVUk-pf22gXFD+8A8FGgtE4mWfz3r8minKQ6vP6q_ftYRdQ@mail.gmail.com> <8366806.170.1357747859058.JavaMail.dspano@it1> <CAOLwVUkTkm22ndq97O+5ziJF+C+nGpeJwrXhPc2Ls39R+utXVg@mail.gmail.com> <CAF6-1L4WOGHNU=qLOuOWktsDirc-nO2ZM0+nQL9vxF2KKuWVqg@mail.gmail.com> <CAPYLRziCObXZaOcqA8CDfheJTYce1w3m5754+0Dz-ToYJYKuDg@mail.gmail.com> <CAOLwVUkA5G+RyzembvZnv2gA5h-E+kNR_me_Hgoisjk0dmSWSg@mail.gmail.com> <CAPYLRzjx24oOEpjcvKa2ELJYb6QAxTegVatysMAobbP-h1v8Xg@mail.gmail.com> <CAOLwVUn0SetsDgE2vqioFn+53xDi7Uh9TivDX2JOH6Qu5pEEUA@mail.gmail.com> <alpine.DEB.2.00.1302221642570.5703@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:12200 "EHLO mga09.intel.com"
+Received: from websrv.42on.com ([31.25.102.167]:40979 "EHLO websrv.42on.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752169Ab3CAGqi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Mar 2013 01:46:38 -0500
-In-Reply-To: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com>
+	id S1752155Ab3CAPvF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 Mar 2013 10:51:05 -0500
+In-Reply-To: <alpine.DEB.2.00.1302221642570.5703@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Sage Weil <sage@inktank.com>
+Cc: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>, Gregory Farnum <greg@inktank.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Dave Spano <dspano@optogenics.com>, ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+On 02/23/2013 01:44 AM, Sage Weil wrote:
+> On Fri, 22 Feb 2013, S?bastien Han wrote:
+>> Hi all,
+>>
+>> I finally got a core dump.
+>>
+>> I did it with a kill -SEGV on the OSD process.
+>>
+>> https://www.dropbox.com/s/ahv6hm0ipnak5rf/core-ceph-osd-11-0-0-20100-1361539008
+>>
+>> Hope we will get something out of it :-).
+>
+> AHA!  We have a theory.  The pg log isnt trimmed during scrub (because teh
+> old scrub code required that), but the new (deep) scrub can take a very
+> long time, which means the pg log will eat ram in the meantime..
+> especially under high iops.
+>
 
-make __ceph_do_pending_vmtruncate() acquire i_mutex if the caller
-does not hold the mutex, so ceph_aio_read() can call it safely.
+Does the number of PGs influence the memory leak? So my theory is that 
+when you have a high number of PGs with a low number of objects per PG 
+you don't see the memory leak.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/file.c  |  6 +++---
- fs/ceph/inode.c | 18 +++++++++---------
- fs/ceph/super.h |  2 +-
- 3 files changed, 13 insertions(+), 13 deletions(-)
+I saw the memory leak on a RBD system where a pool had just 8 PGs, but 
+after going to 1024 PGs in a new pool it seemed to be resolved.
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 28ef273..b9eedd4 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -653,7 +653,7 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
- 	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
- again:
--	__ceph_do_pending_vmtruncate(inode);
-+	__ceph_do_pending_vmtruncate(inode, true);
- 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
- 		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
- 	else
-@@ -730,7 +730,7 @@ retry_snap:
- 		ret = -ENOSPC;
- 		goto out;
- 	}
--	__ceph_do_pending_vmtruncate(inode);
-+	__ceph_do_pending_vmtruncate(inode, true);
- 	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
- 	     inode->i_size);
-@@ -801,7 +801,7 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
- 	int ret;
- 
- 	mutex_lock(&inode->i_mutex);
--	__ceph_do_pending_vmtruncate(inode);
-+	__ceph_do_pending_vmtruncate(inode, false);
- 
- 	if (whence == SEEK_END || whence == SEEK_DATA || whence == SEEK_HOLE) {
- 		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 42c5769..2b3fee7 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1416,7 +1416,7 @@ out:
- 
- 
- /*
-- * called by trunc_wq; take i_mutex ourselves
-+ * called by trunc_wq;
-  *
-  * We also truncate in a separate thread as well.
-  */
-@@ -1427,9 +1427,7 @@ static void ceph_vmtruncate_work(struct work_struct *work)
- 	struct inode *inode = &ci->vfs_inode;
- 
- 	dout("vmtruncate_work %p\n", inode);
--	mutex_lock(&inode->i_mutex);
--	__ceph_do_pending_vmtruncate(inode);
--	mutex_unlock(&inode->i_mutex);
-+	__ceph_do_pending_vmtruncate(inode, true);
- 	iput(inode);
- }
- 
-@@ -1453,12 +1451,10 @@ void ceph_queue_vmtruncate(struct inode *inode)
- }
- 
- /*
-- * called with i_mutex held.
-- *
-  * Make sure any pending truncation is applied before doing anything
-  * that may depend on it.
-  */
--void __ceph_do_pending_vmtruncate(struct inode *inode)
-+void __ceph_do_pending_vmtruncate(struct inode *inode, bool needlock)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	u64 to;
-@@ -1491,7 +1487,11 @@ retry:
- 	     ci->i_truncate_pending, to);
- 	spin_unlock(&ci->i_ceph_lock);
- 
-+	if (needlock)
-+		mutex_lock(&inode->i_mutex);
- 	truncate_inode_pages(inode->i_mapping, to);
-+	if (needlock)
-+		mutex_unlock(&inode->i_mutex);
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	if (to == ci->i_truncate_size) {
-@@ -1544,7 +1544,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- 	if (ceph_snap(inode) != CEPH_NOSNAP)
- 		return -EROFS;
- 
--	__ceph_do_pending_vmtruncate(inode);
-+	__ceph_do_pending_vmtruncate(inode, false);
- 
- 	err = inode_change_ok(inode, attr);
- 	if (err != 0)
-@@ -1722,7 +1722,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- 	     ceph_cap_string(dirtied), mask);
- 
- 	ceph_mdsc_put_request(req);
--	__ceph_do_pending_vmtruncate(inode);
-+	__ceph_do_pending_vmtruncate(inode, false);
- 	return err;
- out:
- 	spin_unlock(&ci->i_ceph_lock);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index efbcb56..e5f1875 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -694,7 +694,7 @@ extern int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- extern int ceph_inode_holds_cap(struct inode *inode, int mask);
- 
- extern int ceph_inode_set_size(struct inode *inode, loff_t size);
--extern void __ceph_do_pending_vmtruncate(struct inode *inode);
-+extern void __ceph_do_pending_vmtruncate(struct inode *inode, bool needlock);
- extern void ceph_queue_vmtruncate(struct inode *inode);
- 
- extern void ceph_queue_invalidate(struct inode *inode);
+I've asked somebody else to try your patch since he's still seeing it on 
+his systems. Hopefully that gives us some results.
+
+Wido
+
+> Can you try wip-osd-log-trim (which is bobtail + a simple patch) and see
+> if that seems to work?  Note that that patch shouldn't be run in a mixed
+> argonaut+bobtail cluster, since it isn't properly checking if the scrub is
+> class or chunky/deep.
+>
+> Thanks!
+> sage
+>
+>
+>   > --
+>> Regards,
+>> S?bastien Han.
+>>
+>>
+>> On Fri, Jan 11, 2013 at 7:13 PM, Gregory Farnum <greg@inktank.com> wrote:
+>>> On Fri, Jan 11, 2013 at 6:57 AM, S?bastien Han <han.sebastien@gmail.com> wrote:
+>>>>> Is osd.1 using the heap profiler as well? Keep in mind that active use
+>>>>> of the memory profiler will itself cause memory usage to increase ?
+>>>>> this sounds a bit like that to me since it's staying stable at a large
+>>>>> but finite portion of total memory.
+>>>>
+>>>> Well, the memory consumption was already high before the profiler was
+>>>> started. So yes with the memory profiler enable an OSD might consume
+>>>> more memory but this doesn't cause the memory leaks.
+>>>
+>>> My concern is that maybe you saw a leak but when you restarted with
+>>> the memory profiling you lost whatever conditions caused it.
+>>>
+>>>> Any ideas? Nothing to say about my scrumbing theory?
+>>> I like it, but Sam indicates that without some heap dumps which
+>>> capture the actual leak then scrub is too large to effectively code
+>>> review for leaks. :(
+>>> -Greg
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
 -- 
-1.7.11.7
+Wido den Hollander
+42on B.V.
 
+Phone: +31 (0)20 700 9902
+Skype: contact42on
