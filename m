@@ -1,132 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: OpenStack summit : Ceph design session
-Date: Sun, 03 Mar 2013 10:37:44 +0100
-Message-ID: <513319E8.7000105@dachary.org>
-References: <51289AF2.9010509@dachary.org> <512A9F5F.7080706@inktank.com> <CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com> <512B3725.4040602@dachary.org>
+From: Xing Lin <xinglin@cs.utah.edu>
+Subject: When ceph synchronizes journal to disk?
+Date: Sun, 03 Mar 2013 05:36:40 -0700
+Message-ID: <513343D8.8050402@cs.utah.edu>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig53E18BFCA989F7C63BB8C5F5"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:36111 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752749Ab3CCJhr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Mar 2013 04:37:47 -0500
-In-Reply-To: <512B3725.4040602@dachary.org>
+Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:49924 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752988Ab3CCMgn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Mar 2013 07:36:43 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id DED87650677
+	for <ceph-devel@vger.kernel.org>; Sun,  3 Mar 2013 05:36:42 -0700 (MST)
+Received: from mail-svr1.cs.utah.edu ([127.0.0.1])
+	by localhost (mail-svr1.cs.utah.edu [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id l9iWX6txtZul for <ceph-devel@vger.kernel.org>;
+	Sun,  3 Mar 2013 05:36:42 -0700 (MST)
+Received: from [192.168.1.100] (unknown [116.231.167.128])
+	by smtps.cs.utah.edu (Postfix) with ESMTPSA id 32B6765066F
+	for <ceph-devel@vger.kernel.org>; Sun,  3 Mar 2013 05:36:42 -0700 (MST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Neil Levine <neil.levine@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig53E18BFCA989F7C63BB8C5F5
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Neil,
+There were some discussions about this before on the mailing list but I 
+am still confused with this. I thought Ceph would flush data from the 
+journal to disk when either the journal is full or when the time to do 
+synchronization is due. In my test experiment, I used 24 osds(one osd 
+for each disk). I used a 10 GB tmpfs file as the journal disk for each 
+osd. Then for testing, I delayed the synchronization between the journal 
+and disk on purpose. I increased the 'journal min sync interval' to be 
+60 s and 'journal max sync interval' to be 300 s. Then I created a rbd 
+and then started a 4M sequential write workload with fio for 30 seconds. 
+I was expecting that no IO should happen to disks, unless we have filled 
+240 GB data (10G*24). However, 'iostat' showed there was data
+started to be written into disks (at about 20 MB/s per disk), right 
+after I started the sequential workload. Could someone help to explain 
+this situation? Thanks,
 
-I've updated http://summit.openstack.org/cfp/details/38 with the Geograph=
-ic DR related threads
+I am running 0.48.2. The related configuration is as follows.
+-----------------
+[osd]
+         osd journal size = 10000
+         osd journal = /dev/shm/journal/$name-journal
+         journal dio = false
+         filestore xattr use omap = true
 
-    Geo-replication with RADOS GW http://marc.info/?l=3Dceph-devel&m=3D13=
-5939566407623&w=3D4
-    Geographic DR for RGW http://marc.info/?l=3Dceph-devel&m=3D1361914799=
-31880&w=3D4
+         # The maximum interval in seconds for synchronizing the filestore.
+         filestore min sync interval = 60
+         filestore max sync interval = 300
+-------------
 
-I'm increasingly interested in figuring out how it fits with OpenStack.
-
-Cheers
-
-On 02/25/2013 11:04 AM, Loic Dachary wrote:
-> Hi Neil,
->=20
-> I've added "RBD backups secondary clusters within Openstack" to the lis=
-t of blueprints. Do you have links to mail threads / chat logs related to=
- this topic ?=20
->=20
-> I moved the content of the session to an etherpad for collaborative edi=
-ting
->=20
-> https://etherpad.openstack.org/roadmap-for-ceph-integration-with-openst=
-ack
->=20
-> and it is now linked from=20
->=20
-> http://summit.openstack.org/cfp/details/38
->=20
-> Cheers
->=20
-> On 02/25/2013 07:12 AM, Neil Levine wrote:
->> Thanks for taking the lead on this Loic.
->>
->> As a blueprint, I'd like to look at RBD backups to secondary clusters
->> within Openstack. Nick Barcet and others have mentioned ideas for this=
-
->> now that Cinder is multi-cluster aware.
->>
->> Neil
->>
->> On Sun, Feb 24, 2013 at 3:16 PM, Josh Durgin <josh.durgin@inktank.com>=
- wrote:
->>> On 02/23/2013 02:33 AM, Loic Dachary wrote:
->>>>
->>>> Hi,
->>>>
->>>> In anticipation of the next OpenStack summit
->>>> http://www.openstack.org/summit/portland-2013/, I proposed a session=
- to
->>>> discuss OpenStack and Ceph integration. Our meeting during FOSDEM ea=
-rlier
->>>> this month was a great experience although it was planned at the las=
-t
->>>> minute. I hope we can organize something even better for the summit.=
-
->>>>
->>>> For developers and contributors to both Ceph and OpenStack such as m=
-yself,
->>>> it would be a great opportunity to figure out a sensible roadmap for=
- the
->>>> next six months. I realize this roadmap is already clear for Josh Du=
-rgin and
->>>> other Ceph / OpenStack developers who are passionately invested in b=
-oth
->>>> projects for a long time. However I am new to both projects and such=
- a
->>>> session would be a precious guide and highly motivating.
->>>>
->>>> http://summit.openstack.org/cfp/details/38
->>>>
->>>> What do you think ?
->>>>
->>>
->>> Sounds like a great idea!
->>> Thanks for putting together the session!
->>>
->>> Josh
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enig53E18BFCA989F7C63BB8C5F5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlEzGegACgkQ8dLMyEl6F237SgCdFEjorMOpHi9smNBlZJD65Sgp
-fcAAn0xFt6f4bSBbIT90vjQUneP/hXSG
-=3wzQ
------END PGP SIGNATURE-----
-
---------------enig53E18BFCA989F7C63BB8C5F5--
+Xing
