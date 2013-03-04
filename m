@@ -1,73 +1,106 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Fwd: teuthology heads up
-Date: Mon, 4 Mar 2013 14:15:50 -0800
-Message-ID: <CAPYLRzh7rhqP6TncK-tJ-3TKL1Q4VKWP6Kf2kmnDfw=syhBcjg@mail.gmail.com>
-References: <CAKMAVE90MStKRrY3wKrr66Ex07STEv3VObcrkjtcrUJUMrrijw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: teuthology and code coverage revisited
+Date: Tue, 05 Mar 2013 00:40:22 +0100
+Message-ID: <513530E6.4000705@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig45C58554A3A27327DDBB0416"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f51.google.com ([209.85.128.51]:50243 "EHLO
-	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932378Ab3CDWPv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 17:15:51 -0500
-Received: by mail-qe0-f51.google.com with SMTP id nd7so4233113qeb.24
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 14:15:51 -0800 (PST)
-In-Reply-To: <CAKMAVE90MStKRrY3wKrr66Ex07STEv3VObcrkjtcrUJUMrrijw@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:56577 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758082Ab3CDXk1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 18:40:27 -0500
+Received: from [10.8.0.50] (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 7850B26394
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Mar 2013 00:40:23 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-We probably should have sent this to ceph-devel in the first place =97 =
-sorry guys!
--Greg
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig45C58554A3A27327DDBB0416
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+The "ceph code coverage" ( http://dachary.org/?p=3D1788 ) guide to collec=
+ting code coverage using teuthology was updated to take into account the =
+fact that teuthology now uses packages ( the install: task ). But it is s=
+till incomplete because I'm not sure how to collect the coverage data.
+
+For test purposes I used the simplest yaml file:
+
+check-locks: false
+roles:
+- - mon.a
+  - mon.c
+  - osd.0
+- - mon.b
+  - osd.1
+tasks:
+- install:
+- ceph:
+   branch: master
+   coverage: true
+   flavor: gcov
+   fs: xfs
+
+and it completes successfully. The method I learnt to collect code covera=
+ge back in january relied on a ceph-sha1 file being created in the --arch=
+ive but it's no longer there. Reading
+
+https://github.com/ceph/teuthology/commit/2653b5a07b880c202800c939efcd1cc=
+aaf254841#L0R72
+
+prompted me to try to add coverage: true :
+
+check-locks: false
+roles:
+- - mon.a
+  - mon.c
+  - osd.0
+- - mon.b
+  - osd.1
+tasks:
+- install:
+   coverage: true
+- ceph:
+   branch: master
+   coverage: true
+   flavor: gcov
+   fs: xfs
+
+but it fails with
+
+CommandFailedError: Command failed on 10.20.0.7 with status 1: 'rmdir -- =
+/tmp/cephtest/ubuntu@teuthology-2013-03-04_21-03-19'
+DEBUG:teuthology.run_tasks:Exception was not quenched, exiting: Exception=
+: failed to fetch package version from http://gitbuilder.ceph.com/ceph-de=
+b-quantal-x86_64-gcov/ref/master/version
+INFO:teuthology.run:Summary data:
+
+I would very much appreciate a hint.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
----------- Forwarded message ----------
-=46rom: Sam Lang <sam.lang@inktank.com>
-Date: Thu, Jan 31, 2013 at 7:40 AM
-Subject: teuthology heads up
-To: Dev <dev@inktank.com>
+--------------enig45C58554A3A27327DDBB0416
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-Hi All,
+iEYEARECAAYFAlE1MOYACgkQ8dLMyEl6F216NQCbBdAy9a/5onnW1pAxP4icbXj4
+/PsAn2FyvPQ3Od0n+iL5Iq9rtjJ/Cxgr
+=1oi/
+-----END PGP SIGNATURE-----
 
-I just pushed a change to the way teuthology creates a test directory
-on the plana nodes for each run.  Previously, everything went in
-/tmp/cephtest.  Now it will place the test directory in
-/home/ubuntu/cephtest/{testname}, where {testname} is the name given
-to teuthology-schedule
-(teuthology-2013-01-31_06:00:03-marginal-master-testing-basic).  Note
-that each run now gets a separate test subdir, so if you go looking on
-a node for the cause of a failure, it will be the subdir for that run
-that has the test state.
-
-If you run teuthology locally and don't specify a base test directory
-in your .teuthology.yaml, the test directory will now be
-/tmp/cephtest/{testname}, and if no name is specified for the run, it
-will default to {user}@{host}-{date} (e.g.
-slang@scout-2013-01-31_06:00:03).
-
-If you want to put the test directory in /home/ubuntu/cephtest (like
-scheduled runs do now), you need to add the following to your
-=2Eteuthology.yaml:
-
-base_test_dir: /home/ubuntu/cephtest
-
-If you want the old behavior, you need to add the following to your
-=2Eteuthology.yaml:
-
-test_path: /tmp/cephtest
-
-------
-
-One more thing, a separate commit adds a dependency on the pyexpect
-package, so you will need to rerun bootstrap to pick that up.
-
-Thanks,
--sam
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--------------enig45C58554A3A27327DDBB0416--
