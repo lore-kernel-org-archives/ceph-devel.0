@@ -1,154 +1,161 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: RGW Blocking on 1-2 PG's - argonaut
-Date: Mon, 4 Mar 2013 18:42:47 +0100
-Message-ID: <CAMwB3TjQqYqhmSouFEgaiGwby=_mpk3hOGcrcx=9ho_+h1NdMg@mail.gmail.com>
-References: <CAMwB3ThhN036aBHP+29fVJ47E=PxOnj+fTiKJrB2dANFn1-Q1w@mail.gmail.com>
-	<CAC-hyiGG+f7R1jCY8CPR2HKTa7bSetnGWs+ERii6iTdEAXpWMg@mail.gmail.com>
-	<CAMwB3ThWcpWNOp03tCv1vG1OckH0Nw0moKYnPDytNya2Hhv+XA@mail.gmail.com>
-	<alpine.DEB.2.00.1303040900500.14723@cobra.newdream.net>
-	<CAMwB3TjfkX8LJpBiicrcdf3UqZpYApBoEShebceee6KgY+C3kw@mail.gmail.com>
-	<CAPYLRzhMBBsgDHSwn84EimJJUb7uGtRx8-ef933Kayhv1UMsvQ@mail.gmail.com>
+From: Dave Spano <dspano@optogenics.com>
+Subject: OSD Crash
+Date: Mon, 4 Mar 2013 13:02:03 -0500 (EST)
+Message-ID: <33027299.339.1362420122090.JavaMail.dspano@it1>
+References: <8566685.312.1362419807745.JavaMail.dspano@it1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed;
+	boundary="----=_Part_336_6488584.1362420122087"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:48231 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757323Ab3CDRms convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 12:42:48 -0500
-Received: by mail-ie0-f172.google.com with SMTP id c10so6529815ieb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 09:42:48 -0800 (PST)
-In-Reply-To: <CAPYLRzhMBBsgDHSwn84EimJJUb7uGtRx8-ef933Kayhv1UMsvQ@mail.gmail.com>
+Received: from rrcs-24-103-221-203.nys.biz.rr.com ([24.103.221.203]:54526 "EHLO
+	mail.optogenics.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758229Ab3CDSCF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 13:02:05 -0500
+In-Reply-To: <8566685.312.1362419807745.JavaMail.dspano@it1>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Alone (one of this slow osd in mentioned tripple)
+------=_Part_336_6488584.1362420122087
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 
-2013-03-04 18:39:27.683035 osd.23 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 15.241943 sec at 68795 KB/sec
+I had one of my OSDs crash yesterday. I'm using ceph version 0.56.3 (6eb7e15a4783b122e9b0c85ea9ba064145958aa5). 
 
-in for loop (some slow request appear):
+The part of the log file where the crash happened is attached. Not really sure what lead up to it, but I did get an alert from my server monitor telling me my swap space got really low around the time it crashed. 
 
-for x in `seq 0 25`; do ceph osd tell $x bench;done
-2013-03-04 18:41:08.259454 osd.12 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.658448 sec at 27844 KB/sec
-2013-03-04 18:41:07.850213 osd.5 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.402402 sec at 28034 KB/sec
-2013-03-04 18:41:07.850231 osd.11 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.201831 sec at 28186 KB/sec
-2013-03-04 18:41:08.100186 osd.10 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.540605 sec at 27931 KB/sec
-2013-03-04 18:41:08.319766 osd.21 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.532806 sec at 27937 KB/sec
-2013-03-04 18:41:08.415835 osd.14 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.772730 sec at 27760 KB/sec
-2013-03-04 18:41:08.775264 osd.9 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.195523 sec at 27452 KB/sec
-2013-03-04 18:41:08.808824 osd.6 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.338387 sec at 27350 KB/sec
-2013-03-04 18:41:08.923809 osd.19 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.177933 sec at 27465 KB/sec
-2013-03-04 18:41:08.925848 osd.18 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.201476 sec at 27448 KB/sec
-2013-03-04 18:41:08.936961 osd.15 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.273058 sec at 27397 KB/sec
-2013-03-04 18:41:08.619022 osd.20 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.713017 sec at 27804 KB/sec
-2013-03-04 18:41:08.764705 osd.22 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.954886 sec at 27626 KB/sec
-2013-03-04 18:41:08.499156 osd.0 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.035553 sec at 27568 KB/sec
-2013-03-04 18:41:07.873457 osd.2 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.489969 sec at 27969 KB/sec
-2013-03-04 18:41:08.134530 osd.13 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.513056 sec at 27952 KB/sec
-2013-03-04 18:41:08.219142 osd.1 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.856368 sec at 27698 KB/sec
-2013-03-04 18:41:08.485806 osd.4 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.060621 sec at 27550 KB/sec
-2013-03-04 18:41:08.612236 osd.7 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.122105 sec at 27505 KB/sec
-2013-03-04 18:41:08.647494 osd.8 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.134885 sec at 27496 KB/sec
-2013-03-04 18:41:08.649267 osd.3 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.961966 sec at 27621 KB/sec
-2013-03-04 18:41:08.943610 osd.24 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.091272 sec at 27527 KB/sec
-2013-03-04 18:41:08.975838 osd.17 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.270884 sec at 27398 KB/sec
-2013-03-04 18:41:09.544561 osd.23 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.715030 sec at 27084 KB/sec
-2013-03-04 18:41:08.969981 osd.16 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 38.287596 sec at 27386 KB/sec
-2013-03-04 18:41:09.533789 osd.25 [INF] bench: wrote 1024 MB in blocks
-of 4096 KB in 37.954333 sec at 27627 KB/sec
+The OSD reconnected after restarting the service. Currently, I'm waiting patiently as 1 of my 400 pgs gets out of active+clean+scrubbing status. 
 
-I have a little fragmented xfs, but performance is still good.
-
-On Mon, Mar 4, 2013 at 6:25 PM, Gregory Farnum <greg@inktank.com> wrote=
-:
-> On Mon, Mar 4, 2013 at 9:23 AM, S=C5=82awomir Skowron <szibis@gmail.c=
-om> wrote:
->> On Mon, Mar 4, 2013 at 6:02 PM, Sage Weil <sage@inktank.com> wrote:
->>> On Mon, 4 Mar 2013, S?awomir Skowron wrote:
->>>> Ok, thanks for response. But if i have crush map like this in atta=
-chment.
->>>>
->>>> All data should be balanced equal, not including hosts with 0.5 we=
-ight.
->>>>
->>>> How make data auto balanced ?? when i know that some pq's have too
->>>> much data ?? I have 4800 pg's on RGW only with 78 OSD, it is quite
->>>> enough.
->>>>
->>>> pool 3 '.rgw.buckets' rep size 3 crush_ruleset 0 object_hash rjenk=
-ins
->>>> pg_num 4800 pgp_num 4800 last_change 908 owner 0
->>>>
->>>> When will bee possible to expand number of pg's ??
->>>
->>> Soon.  :)
->>>
->>> The bigger question for me is why there is one PG that is getting p=
-ounded
->>> while the others are not.  Is there a large skew in the workload to=
-ward a
->>> small number of very hot objects?
->>
->> Yes, there are constantly about 100-200 operations in second, all
->> going into RGW backend. But when problems comes, there are more
->> requests, more GET, and PUT, because of reconnect of applications,
->> with short timeouts. But statistically all new PUTs normally goes fo=
-r
->> many pg's, this should not overload a single master OSD. Maybe
->> balanced Reads from all replicas could help a little ??.
->>
->>>  I expect it should be obvious if you go
->>> to the loaded osd and do
->>>
->>>  ceph --admin-daemon /var/run/ceph/ceph-osd.NN.asok dump_ops_in_fli=
-ght
->>>
->>
->> Yes i did that, but only when cluster going unstable there are such
->> long operations. Normaly there are no ops in queue, only when cluste=
-r
->> going to rebalance, remap, or anything else.
->
-> Have you checked the baseline disk performance of the OSDs? Perhaps
-> it's not that the PG is bad but that the OSDs are slow.
+Dave Spano 
+Optogenics 
+Systems Administrator 
 
 
 
---
------
-Pozdrawiam
+------=_Part_336_6488584.1362420122087
+Content-Type: text/x-log; name=osd.0.log
+Content-Disposition: attachment; filename=osd.0.log
+Content-Transfer-Encoding: base64
 
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ICAgLTE3PiAyMDEzLTAzLTAzIDEzOjAyOjEzLjQ3ODE1MiA3ZjVkNWE5YjU3MDAgIDUgLS1PU0Q6
+OnRyYWNrZXItLSByZXFpZDogY2xpZW50LjEzMDM5LjA6Njg2MDM1OSwgc2VxOiA1MzkzMjIyLCB0
+aW1lOiAyMDEzLTAzLTAzIDEzOjAyOjEzLjQ3ODEzNCwgZXZlbnQ6IHdyaXRlX3RocmVhZF9pbl9q
+b3VybmFsX2J1ZmZlciwgcmVxdWVzdDogb3NkX3N1Yl9vcChjbGllbnQuMTMwMzkuMDo2ODYwMzU5
+IDMuMCBhMTBjMTdjOC9yYi4wLjJkZDcuMTZkMjhjNGYuMDAwMDAwMDAwMDJmL2hlYWQvLzMgW10g
+diA0MTEnMTk4MDA3NCBzbmFwc2V0PTA9W106W10gc25hcGM9MD1bXSkgdjcKICAgLTE2PiAyMDEz
+LTAzLTAzIDEzOjAyOjEzLjQ3ODE1MyA3ZjVkNTU5YWI3MDAgIDEgLS0gMTkyLjE2OC4zLjExOjY4
+MDEvNDUwMCAtLT4gb3NkLjEgMTkyLjE2OC4zLjEyOjY4MDIvMjQ2NyAtLSBvc2Rfc3ViX29wX3Jl
+cGx5KGNsaWVudC4xNDAwMC4xOjU3MDcwMCAwLjE2IDVlMDFhOTYvMTAwMDAzNzk3ZjIuMDAwMDAw
+MDAvaGVhZC8vMCBbXSBvbmRpc2ssIHJlc3VsdCA9IDApIHYxIC0tID8rMCAweGM0NWNjODAKICAg
+LTE1PiAyMDEzLTAzLTAzIDEzOjAyOjEzLjQ3ODE4NCA3ZjVkNWE5YjU3MDAgIDUgLS1PU0Q6OnRy
+YWNrZXItLSByZXFpZDogY2xpZW50LjE0MDAwLjE6NTcwNzAxLCBzZXE6IDUzOTMyMjMsIHRpbWU6
+IDIwMTMtMDMtMDMgMTM6MDI6MTMuNDc4MTg0LCBldmVudDogd3JpdGVfdGhyZWFkX2luX2pvdXJu
+YWxfYnVmZmVyLCByZXF1ZXN0OiBvc2Rfc3ViX29wKGNsaWVudC4xNDAwMC4xOjU3MDcwMSAwLjIy
+IDQwZGNjY2EyLzEwMDAwMTE2NGNhLjAwMDAwMDAyL2hlYWQvLzAgW10gdiA0MTEnNDQ3MzY5IHNu
+YXBzZXQ9MD1bXTpbXSBzbmFwYz0wPVtdKSB2NwogICAtMTQ+IDIwMTMtMDMtMDMgMTM6MDI6MTMu
+NDc4MjA5IDdmNWQ1YTliNTcwMCAgNSAtLU9TRDo6dHJhY2tlci0tIHJlcWlkOiBjbGllbnQuMTE3
+NTUuMDoyNjI1NjU4LCBzZXE6IDUzOTMyMjUsIHRpbWU6IDIwMTMtMDMtMDMgMTM6MDI6MTMuNDc4
+MjA5LCBldmVudDogd3JpdGVfdGhyZWFkX2luX2pvdXJuYWxfYnVmZmVyLCByZXF1ZXN0OiBvc2Rf
+c3ViX29wKGNsaWVudC4xMTc1NS4wOjI2MjU2NTggMy43IDJjYjAwNmE3L3JiLjAuMmVhNC42MTRj
+Mjc3Zi4wMDAwMDAwMDEwM2QvaGVhZC8vMyBbXSB2IDQxMSc2MDk1NTI5IHNuYXBzZXQ9MD1bXTpb
+XSBzbmFwYz0wPVtdKSB2NwogICAtMTM+IDIwMTMtMDMtMDMgMTM6MDI6MTMuNDc4MjM0IDdmNWQ1
+YTliNTcwMCAgNSAtLU9TRDo6dHJhY2tlci0tIHJlcWlkOiBjbGllbnQuMTE3NTUuMDoyNjI1NjU5
+LCBzZXE6IDUzOTMyMjYsIHRpbWU6IDIwMTMtMDMtMDMgMTM6MDI6MTMuNDc4MjM0LCBldmVudDog
+d3JpdGVfdGhyZWFkX2luX2pvdXJuYWxfYnVmZmVyLCByZXF1ZXN0OiBvc2Rfc3ViX29wKGNsaWVu
+dC4xMTc1NS4wOjI2MjU2NTkgMy43IDJjYjAwNmE3L3JiLjAuMmVhNC42MTRjMjc3Zi4wMDAwMDAw
+MDEwM2QvaGVhZC8vMyBbXSB2IDQxMSc2MDk1NTMwIHNuYXBzZXQ9MD1bXTpbXSBzbmFwYz0wPVtd
+KSB2NwogICAtMTI+IDIwMTMtMDMtMDMgMTM6MDI6MTMuNDg0Njk2IDdmNWQ1NDlhOTcwMCAgMSAt
+LSAxOTIuMTY4LjMuMTE6NjgwMC80NTAwIDw9PSBjbGllbnQuMTE3NTUgMTkyLjE2OC4xLjY0OjAv
+MTA2MjQxMSA5MDEyOCA9PT09IHBpbmcgdjEgPT09PSAwKzArMCAoMCAwIDApIDB4ZmY0ZTAwMCBj
+b24gMHgzMDdhNmUwCiAgIC0xMT4gMjAxMy0wMy0wMyAxMzowMjoxMy40ODk0NTcgN2Y1ZDRmOTlm
+NzAwICA1IC0tT1NEOjp0cmFja2VyLS0gcmVxaWQ6IGNsaWVudC4xMTc1NS4wOjI2MjU2NjAsIHNl
+cTogNTM5MzIyNywgdGltZTogMjAxMy0wMy0wMyAxMzowMjoxMy40ODk0NTcsIGV2ZW50OiBzdGFy
+dGVkLCByZXF1ZXN0OiBvc2Rfc3ViX29wKGNsaWVudC4xMTc1NS4wOjI2MjU2NjAgMy43IDJjYjAw
+NmE3L3JiLjAuMmVhNC42MTRjMjc3Zi4wMDAwMDAwMDEwM2QvaGVhZC8vMyBbXSB2IDQxMSc2MDk1
+NTMxIHNuYXBzZXQ9MD1bXTpbXSBzbmFwYz0wPVtdKSB2NwogICAtMTA+IDIwMTMtMDMtMDMgMTM6
+MDI6MTMuNDg5NTAzIDdmNWQ0Zjk5ZjcwMCAgNSAtLU9TRDo6dHJhY2tlci0tIHJlcWlkOiBjbGll
+bnQuMTE3NTUuMDoyNjI1NjYwLCBzZXE6IDUzOTMyMjcsIHRpbWU6IDIwMTMtMDMtMDMgMTM6MDI6
+MTMuNDg5NTAzLCBldmVudDogY29tbWl0X3F1ZXVlZF9mb3Jfam91cm5hbF93cml0ZSwgcmVxdWVz
+dDogb3NkX3N1Yl9vcChjbGllbnQuMTE3NTUuMDoyNjI1NjYwIDMuNyAyY2IwMDZhNy9yYi4wLjJl
+YTQuNjE0YzI3N2YuMDAwMDAwMDAxMDNkL2hlYWQvLzMgW10gdiA0MTEnNjA5NTUzMSBzbmFwc2V0
+PTA9W106W10gc25hcGM9MD1bXSkgdjcKICAgIC05PiAyMDEzLTAzLTAzIDEzOjAyOjEzLjU3MTYz
+MiA3ZjVkNTAxYTA3MDAgIDUgLS1PU0Q6OnRyYWNrZXItLSByZXFpZDogY2xpZW50LjExNzU1LjA6
+MjYyNTY1Nywgc2VxOiA1MzkzMjI0LCB0aW1lOiAyMDEzLTAzLTAzIDEzOjAyOjEzLjU3MTYzMSwg
+ZXZlbnQ6IHN0YXJ0ZWQsIHJlcXVlc3Q6IG9zZF9vcChjbGllbnQuMTE3NTUuMDoyNjI1NjU3IHJi
+LjAuMmVhNC42MTRjMjc3Zi4wMDAwMDAwMDAwM2QgW3dyaXRlIDEyNTMzNzZ+NDA5Nl0gMy5jN2Jk
+NmZmMSkgdjQKICAgIC04PiAyMDEzLTAzLTAzIDEzOjAyOjEzLjU3MTY2MSA3ZjVkNTAxYTA3MDAg
+IDUgLS1PU0Q6OnRyYWNrZXItLSByZXFpZDogY2xpZW50LjExNzU1LjA6MjYyNTY1Nywgc2VxOiA1
+MzkzMjI0LCB0aW1lOiAyMDEzLTAzLTAzIDEzOjAyOjEzLjU3MTY2MSwgZXZlbnQ6IHN0YXJ0ZWQs
+IHJlcXVlc3Q6IG9zZF9vcChjbGllbnQuMTE3NTUuMDoyNjI1NjU3IHJiLjAuMmVhNC42MTRjMjc3
+Zi4wMDAwMDAwMDAwM2QgW3dyaXRlIDEyNTMzNzZ+NDA5Nl0gMy5jN2JkNmZmMSkgdjQKICAgIC03
+PiAyMDEzLTAzLTAzIDEzOjAyOjEzLjU3MTczMyA3ZjVkNTAxYTA3MDAgIDUgLS1PU0Q6OnRyYWNr
+ZXItLSByZXFpZDogY2xpZW50LjExNzU1LjA6MjYyNTY1Nywgc2VxOiA1MzkzMjI0LCB0aW1lOiAy
+MDEzLTAzLTAzIDEzOjAyOjEzLjU3MTczMywgZXZlbnQ6IHdhaXRpbmcgZm9yIHN1Ym9wcyBmcm9t
+IFsxXSwgcmVxdWVzdDogb3NkX29wKGNsaWVudC4xMTc1NS4wOjI2MjU2NTcgcmIuMC4yZWE0LjYx
+NGMyNzdmLjAwMDAwMDAwMDAzZCBbd3JpdGUgMTI1MzM3Nn40MDk2XSAzLmM3YmQ2ZmYxKSB2NAog
+ICAgLTY+IDIwMTMtMDMtMDMgMTM6MDI6MTMuNTk4MDI4IDdmNWQ1YTliNTcwMCAgNSAtLU9TRDo6
+dHJhY2tlci0tIHJlcWlkOiBjbGllbnQuMTMwMzkuMDo2ODYwMzU5LCBzZXE6IDUzOTMyMjIsIHRp
+bWU6IDIwMTMtMDMtMDMgMTM6MDI6MTMuNTk4MDI3LCBldmVudDogam91cm5hbGVkX2NvbXBsZXRp
+b25fcXVldWVkLCByZXF1ZXN0OiBvc2Rfc3ViX29wKGNsaWVudC4xMzAzOS4wOjY4NjAzNTkgMy4w
+IGExMGMxN2M4L3JiLjAuMmRkNy4xNmQyOGM0Zi4wMDAwMDAwMDAwMmYvaGVhZC8vMyBbXSB2IDQx
+MScxOTgwMDc0IHNuYXBzZXQ9MD1bXTpbXSBzbmFwYz0wPVtdKSB2NwogICAgLTU+IDIwMTMtMDMt
+MDMgMTM6MDI6MTMuNTk4MDYxIDdmNWQ1YTliNTcwMCAgNSAtLU9TRDo6dHJhY2tlci0tIHJlcWlk
+OiBjbGllbnQuMTQwMDAuMTo1NzA3MDEsIHNlcTogNTM5MzIyMywgdGltZTogMjAxMy0wMy0wMyAx
+MzowMjoxMy41OTgwNjEsIGV2ZW50OiBqb3VybmFsZWRfY29tcGxldGlvbl9xdWV1ZWQsIHJlcXVl
+c3Q6IG9zZF9zdWJfb3AoY2xpZW50LjE0MDAwLjE6NTcwNzAxIDAuMjIgNDBkY2NjYTIvMTAwMDAx
+MTY0Y2EuMDAwMDAwMDIvaGVhZC8vMCBbXSB2IDQxMSc0NDczNjkgc25hcHNldD0wPVtdOltdIHNu
+YXBjPTA9W10pIHY3CiAgICAtND4gMjAxMy0wMy0wMyAxMzowMjoxMy41OTgwODEgN2Y1ZDVhOWI1
+NzAwICA1IC0tT1NEOjp0cmFja2VyLS0gcmVxaWQ6IGNsaWVudC4xMTc1NS4wOjI2MjU2NTgsIHNl
+cTogNTM5MzIyNSwgdGltZTogMjAxMy0wMy0wMyAxMzowMjoxMy41OTgwODEsIGV2ZW50OiBqb3Vy
+bmFsZWRfY29tcGxldGlvbl9xdWV1ZWQsIHJlcXVlc3Q6IG9zZF9zdWJfb3AoY2xpZW50LjExNzU1
+LjA6MjYyNTY1OCAzLjcgMmNiMDA2YTcvcmIuMC4yZWE0LjYxNGMyNzdmLjAwMDAwMDAwMTAzZC9o
+ZWFkLy8zIFtdIHYgNDExJzYwOTU1Mjkgc25hcHNldD0wPVtdOltdIHNuYXBjPTA9W10pIHY3CiAg
+ICAtMz4gMjAxMy0wMy0wMyAxMzowMjoxMy41OTgwOTggN2Y1ZDVhOWI1NzAwICA1IC0tT1NEOjp0
+cmFja2VyLS0gcmVxaWQ6IGNsaWVudC4xMTc1NS4wOjI2MjU2NTksIHNlcTogNTM5MzIyNiwgdGlt
+ZTogMjAxMy0wMy0wMyAxMzowMjoxMy41OTgwOTgsIGV2ZW50OiBqb3VybmFsZWRfY29tcGxldGlv
+bl9xdWV1ZWQsIHJlcXVlc3Q6IG9zZF9zdWJfb3AoY2xpZW50LjExNzU1LjA6MjYyNTY1OSAzLjcg
+MmNiMDA2YTcvcmIuMC4yZWE0LjYxNGMyNzdmLjAwMDAwMDAwMTAzZC9oZWFkLy8zIFtdIHYgNDEx
+JzYwOTU1MzAgc25hcHNldD0wPVtdOltdIHNuYXBjPTA9W10pIHY3CiAgICAtMj4gMjAxMy0wMy0w
+MyAxMzowMjoxMy41OTgxMzQgN2Y1ZDVhOWI1NzAwICA1IC0tT1NEOjp0cmFja2VyLS0gcmVxaWQ6
+IGNsaWVudC4xMTc1NS4wOjI2MjU2NjAsIHNlcTogNTM5MzIyNywgdGltZTogMjAxMy0wMy0wMyAx
+MzowMjoxMy41OTgxMzQsIGV2ZW50OiB3cml0ZV90aHJlYWRfaW5fam91cm5hbF9idWZmZXIsIHJl
+cXVlc3Q6IG9zZF9zdWJfb3AoY2xpZW50LjExNzU1LjA6MjYyNTY2MCAzLjcgMmNiMDA2YTcvcmIu
+MC4yZWE0LjYxNGMyNzdmLjAwMDAwMDAwMTAzZC9oZWFkLy8zIFtdIHYgNDExJzYwOTU1MzEgc25h
+cHNldD0wPVtdOltdIHNuYXBjPTA9W10pIHY3CiAgICAtMT4gMjAxMy0wMy0wMyAxMzowMjoxMy41
+OTgyNTcgN2Y1ZDVhOWI1NzAwICA1IC0tT1NEOjp0cmFja2VyLS0gcmVxaWQ6IGNsaWVudC4xMTc1
+NS4wOjI2MjU2NjAsIHNlcTogNTM5MzIyNywgdGltZTogMjAxMy0wMy0wMyAxMzowMjoxMy41OTgy
+NTcsIGV2ZW50OiBqb3VybmFsZWRfY29tcGxldGlvbl9xdWV1ZWQsIHJlcXVlc3Q6IG9zZF9zdWJf
+b3AoY2xpZW50LjExNzU1LjA6MjYyNTY2MCAzLjcgMmNiMDA2YTcvcmIuMC4yZWE0LjYxNGMyNzdm
+LjAwMDAwMDAwMTAzZC9oZWFkLy8zIFtdIHYgNDExJzYwOTU1MzEgc25hcHNldD0wPVtdOltdIHNu
+YXBjPTA9W10pIHY3CiAgICAgMD4gMjAxMy0wMy0wMyAxMzowMjoxMy43NTMwNjQgN2Y1ZDRjMDk3
+NzAwIC0xICoqKiBDYXVnaHQgc2lnbmFsIChBYm9ydGVkKSAqKgogaW4gdGhyZWFkIDdmNWQ0YzA5
+NzcwMAoKIGNlcGggdmVyc2lvbiAwLjU2LjMgKDZlYjdlMTVhNDc4M2IxMjJlOWIwYzg1ZWE5YmEw
+NjQxNDU5NThhYTUpCiAxOiAvdXNyL2Jpbi9jZXBoLW9zZCgpIFsweDc4NDMwYV0KIDI6ICgoKSsw
+eGZjYjApIFsweDdmNWQ2MGZjM2NiMF0KIDM6IChnc2lnbmFsKCkrMHgzNSkgWzB4N2Y1ZDVmOTgy
+NDI1XQogNDogKGFib3J0KCkrMHgxN2IpIFsweDdmNWQ1Zjk4NWI4Yl0KIDU6IChfX2dudV9jeHg6
+Ol9fdmVyYm9zZV90ZXJtaW5hdGVfaGFuZGxlcigpKzB4MTFkKSBbMHg3ZjVkNjAyZDQ2OWRdCiA2
+OiAoKCkrMHhiNTg0NikgWzB4N2Y1ZDYwMmQyODQ2XQogNzogKCgpKzB4YjU4NzMpIFsweDdmNWQ2
+MDJkMjg3M10KIDg6ICgoKSsweGI1OTZlKSBbMHg3ZjVkNjAyZDI5NmVdCiA5OiAoY2VwaDo6YnVm
+ZmVyOjpjcmVhdGVfcGFnZV9hbGlnbmVkKHVuc2lnbmVkIGludCkrMHg5NSkgWzB4ODJlZjI1XQog
+MTA6IChQaXBlOjpyZWFkX21lc3NhZ2UoTWVzc2FnZSoqKSsweDI0MjEpIFsweDhkMzU5MV0KIDEx
+OiAoUGlwZTo6cmVhZGVyKCkrMHg4YzIpIFsweDhlM2RiMl0KIDEyOiAoUGlwZTo6UmVhZGVyOjpl
+bnRyeSgpKzB4ZCkgWzB4OGU2NjhkXQogMTM6ICgoKSsweDdlOWEpIFsweDdmNWQ2MGZiYmU5YV0K
+IDE0OiAoY2xvbmUoKSsweDZkKSBbMHg3ZjVkNWZhM2ZjYmRdCiBOT1RFOiBhIGNvcHkgb2YgdGhl
+IGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8g
+aW50ZXJwcmV0IHRoaXMuCgotLS0gbG9nZ2luZyBsZXZlbHMgLS0tCiAgIDAvIDUgbm9uZQogICAw
+LyAxIGxvY2tkZXAKICAgMC8gMSBjb250ZXh0CiAgIDEvIDEgY3J1c2gKICAgMS8gNSBtZHMKICAg
+MS8gNSBtZHNfYmFsYW5jZXIKICAgMS8gNSBtZHNfbG9ja2VyCiAgIDEvIDUgbWRzX2xvZwogICAx
+LyA1IG1kc19sb2dfZXhwaXJlCiAgIDEvIDUgbWRzX21pZ3JhdG9yCiAgIDAvIDEgYnVmZmVyCiAg
+IDAvIDEgdGltZXIKICAgMC8gMSBmaWxlcgogICAwLyAxIHN0cmlwZXIKICAgMC8gMSBvYmplY3Rl
+cgogICAwLyA1IHJhZG9zCiAgIDAvIDUgcmJkCiAgIDAvIDUgam91cm5hbGVyCiAgIDAvIDUgb2Jq
+ZWN0Y2FjaGVyCiAgIDAvIDUgY2xpZW50CiAgIDAvIDUgb3NkCiAgIDAvIDUgb3B0cmFja2VyCiAg
+IDAvIDUgb2JqY2xhc3MKICAgMS8gMyBmaWxlc3RvcmUKICAgMS8gMyBqb3VybmFsCiAgIDAvIDUg
+bXMKICAgMS8gNSBtb24KICAgMC8xMCBtb25jCiAgIDAvIDUgcGF4b3MKICAgMC8gNSB0cAogICAx
+LyA1IGF1dGgKICAgMS8gNSBjcnlwdG8KICAgMS8gMSBmaW5pc2hlcgogICAxLyA1IGhlYXJ0YmVh
+dG1hcAogICAxLyA1IHBlcmZjb3VudGVyCiAgIDEvIDUgcmd3CiAgIDEvIDUgaGFkb29wCiAgIDEv
+IDUgamF2YWNsaWVudAogICAxLyA1IGFzb2sKICAgMS8gMSB0aHJvdHRsZQogIC0yLy0yIChzeXNs
+b2cgdGhyZXNob2xkKQogIC0xLy0xIChzdGRlcnIgdGhyZXNob2xkKQogIG1heF9yZWNlbnQgICAg
+MTAwMDAwCiAgbWF4X25ldyAgICAgICAgIDEwMDAKICBsb2dfZmlsZSAvdmFyL2xvZy9jZXBoL29z
+ZC4wLmxvZwotLS0gZW5kIGR1bXAgb2YgcmVjZW50IGV2ZW50cyAtLS0Kcm9vdEBoYTE6L3Zhci9s
+b2cvY2VwaCMgCgo=
+------=_Part_336_6488584.1362420122087--
