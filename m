@@ -1,471 +1,392 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/3] libceph: separate read and write data
-Date: Mon, 04 Mar 2013 12:18:27 -0600
-Message-ID: <5134E573.2070508@inktank.com>
-References: <5134E25E.4030701@inktank.com> <5134E515.6010006@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 4/7] ceph: use I_COMPLETE inode flag instead of D_COMPLETE
+ flag
+Date: Mon, 4 Mar 2013 10:19:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1303041018400.14723@cobra.newdream.net>
+References: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com> <1362120384-5188-5-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:35832 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757830Ab3CDSS0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 13:18:26 -0500
-Received: by mail-ie0-f181.google.com with SMTP id 17so6449279iea.26
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 10:18:26 -0800 (PST)
-In-Reply-To: <5134E515.6010006@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52264 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758435Ab3CDST2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 13:19:28 -0500
+In-Reply-To: <1362120384-5188-5-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-An osd request defines information about where data to be read
-should be placed as well as where data to write comes from.
-Currently these are represented by common fields.
+On Fri, 1 Mar 2013, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> commit c6ffe10015 moved the flag that tracks if the dcache contents
+> for a directory are complete to dentry. The problem is there are
+> lots of places that use ceph_dir_{set,clear,test}_complete() while
+> holding i_ceph_lock. but ceph_dir_{set,clear,test}_complete() may
+> sleep because they call dput().
+> 
+> This patch basically reverts that commit. For ceph_d_prune(), it's
+> called with both the dentry to prune and the parent dentry are
+> locked. So it's safe to access the parent dentry's d_inode and
+> clear I_COMPLETE flag.
 
-Keep information about data for writing separate from data to be
-read by splitting these into data_in and data_out fields.
+I'm trying to remember why I thought the D_COMPETE flag was necessary.  
+Maybe I didn't think that i_ceph_lock could safely nest inside of d_lock?  
+Or that the parent was locked?
 
-This is the key patch in this whole series, in that it actually
-identifies which osd requests generate outgoing data and which
-generate incoming data.  It's less obvious (currently) that an osd
-CALL op generates both outgoing and incoming data; that's the focus
-of some upcoming work.
+Anyway, assuming both of those things are in fact true, this looks good 
+(and simpler :).
 
-This resolves:
-    http://tracker.ceph.com/issues/4127
+sage
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c             |   18 +++++----
- fs/ceph/addr.c                  |   67 ++++++++++++++++---------------
- fs/ceph/file.c                  |   10 ++---
- include/linux/ceph/osd_client.h |    5 ++-
- net/ceph/osd_client.c           |   83
-++++++++++++++++++++++++---------------
- 5 files changed, 105 insertions(+), 78 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 70c3b39..a0a6182 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1385,6 +1385,7 @@ static struct ceph_osd_request *rbd_osd_req_create(
- 	struct ceph_snap_context *snapc = NULL;
- 	struct ceph_osd_client *osdc;
- 	struct ceph_osd_request *osd_req;
-+	struct ceph_osd_data *osd_data;
- 	struct timespec now;
- 	struct timespec *mtime;
- 	u64 snap_id = CEPH_NOSNAP;
-@@ -1405,6 +1406,7 @@ static struct ceph_osd_request *rbd_osd_req_create(
- 	osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_ATOMIC);
- 	if (!osd_req)
- 		return NULL;	/* ENOMEM */
-+	osd_data = write_request ? &osd_req->r_data_out : &osd_req->r_data_in;
-
- 	rbd_assert(obj_request_type_valid(obj_request->type));
- 	switch (obj_request->type) {
-@@ -1412,16 +1414,16 @@ static struct ceph_osd_request *rbd_osd_req_create(
- 		break;		/* Nothing to do */
- 	case OBJ_REQUEST_BIO:
- 		rbd_assert(obj_request->bio_list != NULL);
--		osd_req->r_data.type = CEPH_OSD_DATA_TYPE_BIO;
--		osd_req->r_data.bio = obj_request->bio_list;
-+		osd_data->type = CEPH_OSD_DATA_TYPE_BIO;
-+		osd_data->bio = obj_request->bio_list;
- 		break;
- 	case OBJ_REQUEST_PAGES:
--		osd_req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--		osd_req->r_data.pages = obj_request->pages;
--		osd_req->r_data.num_pages = obj_request->page_count;
--		osd_req->r_data.alignment = offset & ~PAGE_MASK;
--		osd_req->r_data.pages_from_pool = false;
--		osd_req->r_data.own_pages = false;
-+		osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-+		osd_data->pages = obj_request->pages;
-+		osd_data->num_pages = obj_request->page_count;
-+		osd_data->alignment = offset & ~PAGE_MASK;
-+		osd_data->pages_from_pool = false;
-+		osd_data->own_pages = false;
- 		break;
- 	}
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 1cf7894..6b223d5 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -243,9 +243,9 @@ static void finish_read(struct ceph_osd_request
-*req, struct ceph_msg *msg)
- 	dout("finish_read %p req %p rc %d bytes %d\n", inode, req, rc, bytes);
-
- 	/* unlock all pages, zeroing any data we didn't read */
--	BUG_ON(req->r_data.type != CEPH_OSD_DATA_TYPE_PAGES);
--	for (i = 0; i < req->r_data.num_pages; i++, bytes -= PAGE_CACHE_SIZE) {
--		struct page *page = req->r_data.pages[i];
-+	BUG_ON(req->r_data_in.type != CEPH_OSD_DATA_TYPE_PAGES);
-+	for (i = 0; i < req->r_data_in.num_pages; i++) {
-+		struct page *page = req->r_data_in.pages[i];
-
- 		if (bytes < (int)PAGE_CACHE_SIZE) {
- 			/* zero (remainder of) page */
-@@ -258,8 +258,9 @@ static void finish_read(struct ceph_osd_request
-*req, struct ceph_msg *msg)
- 		SetPageUptodate(page);
- 		unlock_page(page);
- 		page_cache_release(page);
-+		bytes -= PAGE_CACHE_SIZE;
- 	}
--	kfree(req->r_data.pages);
-+	kfree(req->r_data_in.pages);
- }
-
- static void ceph_unlock_page_vector(struct page **pages, int num_pages)
-@@ -337,10 +338,10 @@ static int start_read(struct inode *inode, struct
-list_head *page_list, int max)
- 		}
- 		pages[i] = page;
- 	}
--	req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--	req->r_data.pages = pages;
--	req->r_data.num_pages = nr_pages;
--	req->r_data.alignment = 0;
-+	req->r_data_in.type = CEPH_OSD_DATA_TYPE_PAGES;
-+	req->r_data_in.pages = pages;
-+	req->r_data_in.num_pages = nr_pages;
-+	req->r_data_in.alignment = 0;
- 	req->r_callback = finish_read;
- 	req->r_inode = inode;
-
-@@ -563,7 +564,7 @@ static void writepages_finish(struct
-ceph_osd_request *req,
- 	long writeback_stat;
- 	unsigned issued = ceph_caps_issued(ci);
-
--	BUG_ON(req->r_data.type != CEPH_OSD_DATA_TYPE_PAGES);
-+	BUG_ON(req->r_data_out.type != CEPH_OSD_DATA_TYPE_PAGES);
- 	if (rc >= 0) {
- 		/*
- 		 * Assume we wrote the pages we originally sent.  The
-@@ -571,7 +572,7 @@ static void writepages_finish(struct
-ceph_osd_request *req,
- 		 * raced with a truncation and was adjusted at the osd,
- 		 * so don't believe the reply.
- 		 */
--		wrote = req->r_data.num_pages;
-+		wrote = req->r_data_out.num_pages;
- 	} else {
- 		wrote = 0;
- 		mapping_set_error(mapping, rc);
-@@ -580,8 +581,8 @@ static void writepages_finish(struct
-ceph_osd_request *req,
- 	     inode, rc, bytes, wrote);
-
- 	/* clean all pages */
--	for (i = 0; i < req->r_data.num_pages; i++) {
--		page = req->r_data.pages[i];
-+	for (i = 0; i < req->r_data_out.num_pages; i++) {
-+		page = req->r_data_out.pages[i];
- 		BUG_ON(!page);
- 		WARN_ON(!PageUptodate(page));
-
-@@ -610,31 +611,34 @@ static void writepages_finish(struct
-ceph_osd_request *req,
- 		unlock_page(page);
- 	}
- 	dout("%p wrote+cleaned %d pages\n", inode, wrote);
--	ceph_put_wrbuffer_cap_refs(ci, req->r_data.num_pages, snapc);
-+	ceph_put_wrbuffer_cap_refs(ci, req->r_data_out.num_pages, snapc);
-
--	ceph_release_pages(req->r_data.pages, req->r_data.num_pages);
--	if (req->r_data.pages_from_pool)
--		mempool_free(req->r_data.pages,
-+	ceph_release_pages(req->r_data_out.pages, req->r_data_out.num_pages);
-+	if (req->r_data_out.pages_from_pool)
-+		mempool_free(req->r_data_out.pages,
- 			     ceph_sb_to_client(inode->i_sb)->wb_pagevec_pool);
- 	else
--		kfree(req->r_data.pages);
-+		kfree(req->r_data_out.pages);
- 	ceph_osdc_put_request(req);
- }
-
- /*
-  * allocate a page vec, either directly, or if necessary, via a the
-- * mempool.  we avoid the mempool if we can because req->r_data.num_pages
-+ * mempool.  we avoid the mempool if we can because
-req->r_data_out.num_pages
-  * may be less than the maximum write size.
-  */
- static void alloc_page_vec(struct ceph_fs_client *fsc,
- 			   struct ceph_osd_request *req)
- {
--	req->r_data.pages = kmalloc(sizeof(struct page *) * req->r_data.num_pages,
--			       GFP_NOFS);
--	if (!req->r_data.pages) {
--		req->r_data.pages = mempool_alloc(fsc->wb_pagevec_pool, GFP_NOFS);
--		req->r_data.pages_from_pool = 1;
--		WARN_ON(!req->r_data.pages);
-+	size_t size;
-+
-+	size = sizeof (struct page *) * req->r_data_out.num_pages;
-+	req->r_data_out.pages = kmalloc(size, GFP_NOFS);
-+	if (!req->r_data_out.pages) {
-+		req->r_data_out.pages = mempool_alloc(fsc->wb_pagevec_pool,
-+							GFP_NOFS);
-+		req->r_data_out.pages_from_pool = 1;
-+		WARN_ON(!req->r_data_out.pages);
- 	}
- }
-
-@@ -833,10 +837,11 @@ get_more_pages:
- 					break;
- 				}
-
--				req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--				req->r_data.num_pages = calc_pages_for(0, len);
--				req->r_data.alignment = 0;
--				max_pages = req->r_data.num_pages;
-+				req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
-+				req->r_data_out.num_pages =
-+						calc_pages_for(0, len);
-+				req->r_data_out.alignment = 0;
-+				max_pages = req->r_data_out.num_pages;
-
- 				alloc_page_vec(fsc, req);
- 				req->r_callback = writepages_finish;
-@@ -858,7 +863,7 @@ get_more_pages:
- 			}
-
- 			set_page_writeback(page);
--			req->r_data.pages[locked_pages] = page;
-+			req->r_data_out.pages[locked_pages] = page;
- 			locked_pages++;
- 			next = page->index + 1;
- 		}
-@@ -888,14 +893,14 @@ get_more_pages:
- 		}
-
- 		/* submit the write */
--		offset = req->r_data.pages[0]->index << PAGE_CACHE_SHIFT;
-+		offset = req->r_data_out.pages[0]->index << PAGE_CACHE_SHIFT;
- 		len = min((snap_size ? snap_size : i_size_read(inode)) - offset,
- 			  (u64)locked_pages << PAGE_CACHE_SHIFT);
- 		dout("writepages got %d pages at %llu~%llu\n",
- 		     locked_pages, offset, len);
-
- 		/* revise final length, page count */
--		req->r_data.num_pages = locked_pages;
-+		req->r_data_out.num_pages = locked_pages;
- 		req->r_request_ops[0].extent.length = cpu_to_le64(len);
- 		req->r_request_ops[0].payload_len = cpu_to_le32(len);
- 		req->r_request->hdr.data_len = cpu_to_le32(len);
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 0f7b3f4..431cd7b 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -568,13 +568,13 @@ more:
- 		if ((file->f_flags & O_SYNC) == 0) {
- 			/* get a second commit callback */
- 			req->r_safe_callback = sync_write_commit;
--			req->r_data.own_pages = 1;
-+			req->r_data_out.own_pages = 1;
- 		}
- 	}
--	req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--	req->r_data.pages = pages;
--	req->r_data.num_pages = num_pages;
--	req->r_data.alignment = page_align;
-+	req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
-+	req->r_data_out.pages = pages;
-+	req->r_data_out.num_pages = num_pages;
-+	req->r_data_out.alignment = page_align;
- 	req->r_inode = inode;
-
- 	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index 56604b3..40e0260 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -130,8 +130,9 @@ struct ceph_osd_request {
- 	struct ceph_file_layout r_file_layout;
- 	struct ceph_snap_context *r_snapc;    /* snap context for writes */
-
--	struct ceph_osd_data r_data;
--	struct ceph_pagelist r_trail;	      /* trailing part of the data */
-+	struct ceph_osd_data r_data_in;
-+	struct ceph_osd_data r_data_out;
-+	struct ceph_pagelist r_trail;	      /* trailing part of data out */
- };
-
- struct ceph_osd_event {
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 591e1b0..f9cf445 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -122,10 +122,16 @@ void ceph_osdc_release_request(struct kref *kref)
- 	}
- 	if (req->r_reply)
- 		ceph_msg_put(req->r_reply);
--	if (req->r_data.type == CEPH_OSD_DATA_TYPE_PAGES &&
--			req->r_data.own_pages)
--		ceph_release_page_vector(req->r_data.pages,
--					 req->r_data.num_pages);
-+
-+	if (req->r_data_in.type == CEPH_OSD_DATA_TYPE_PAGES &&
-+			req->r_data_in.own_pages)
-+		ceph_release_page_vector(req->r_data_in.pages,
-+					 req->r_data_in.num_pages);
-+	if (req->r_data_out.type == CEPH_OSD_DATA_TYPE_PAGES &&
-+			req->r_data_out.own_pages)
-+		ceph_release_page_vector(req->r_data_out.pages,
-+					 req->r_data_out.num_pages);
-+
- 	ceph_put_snap_context(req->r_snapc);
- 	ceph_pagelist_release(&req->r_trail);
- 	if (req->r_mempool)
-@@ -189,7 +195,8 @@ struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
- 	}
- 	req->r_reply = msg;
-
--	req->r_data.type = CEPH_OSD_DATA_TYPE_NONE;
-+	req->r_data_in.type = CEPH_OSD_DATA_TYPE_NONE;
-+	req->r_data_out.type = CEPH_OSD_DATA_TYPE_NONE;
- 	ceph_pagelist_init(&req->r_trail);
-
- 	/* create request message; allow space for oid */
-@@ -1740,17 +1747,21 @@ int ceph_osdc_start_request(struct
-ceph_osd_client *osdc,
- 			    bool nofail)
- {
- 	int rc = 0;
-+	struct ceph_osd_data *osd_data;
-+
-+	/* Set up outgoing data */
-
--	if (req->r_data.type == CEPH_OSD_DATA_TYPE_PAGES) {
--		req->r_request->pages = req->r_data.pages;
--		req->r_request->page_count = req->r_data.num_pages;
--		req->r_request->page_alignment = req->r_data.alignment;
-+	osd_data = &req->r_data_out;
-+	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-+		req->r_request->pages = osd_data->pages;
-+		req->r_request->page_count = osd_data->num_pages;
-+		req->r_request->page_alignment = osd_data->alignment;
- #ifdef CONFIG_BLOCK
--	} else if (req->r_data.type == CEPH_OSD_DATA_TYPE_BIO) {
--		req->r_request->bio = req->r_data.bio;
-+	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-+		req->r_request->bio = osd_data->bio;
- #endif
- 	} else {
--		pr_err("unknown request data type %d\n", req->r_data.type);
-+		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
- 	}
- 	req->r_request->trail = &req->r_trail;
-
-@@ -1939,6 +1950,7 @@ int ceph_osdc_readpages(struct ceph_osd_client *osdc,
- 			struct page **pages, int num_pages, int page_align)
- {
- 	struct ceph_osd_request *req;
-+	struct ceph_osd_data *osd_data;
- 	int rc = 0;
-
- 	dout("readpages on ino %llx.%llx on %llu~%llu\n", vino.ino,
-@@ -1951,13 +1963,15 @@ int ceph_osdc_readpages(struct ceph_osd_client
-*osdc,
- 		return PTR_ERR(req);
-
- 	/* it may be a short read due to an object boundary */
--	req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--	req->r_data.pages = pages;
--	req->r_data.num_pages = calc_pages_for(page_align, *plen);
--	req->r_data.alignment = page_align;
-+
-+	osd_data = &req->r_data_in;
-+	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-+	osd_data->pages = pages;
-+	osd_data->num_pages = calc_pages_for(page_align, *plen);
-+	osd_data->alignment = page_align;
-
- 	dout("readpages  final extent is %llu~%llu (%d pages align %d)\n",
--	     off, *plen, req->r_data.num_pages, page_align);
-+	     off, *plen, osd_data->num_pages, page_align);
-
- 	rc = ceph_osdc_start_request(osdc, req, false);
- 	if (!rc)
-@@ -1981,6 +1995,7 @@ int ceph_osdc_writepages(struct ceph_osd_client
-*osdc, struct ceph_vino vino,
- 			 struct page **pages, int num_pages)
- {
- 	struct ceph_osd_request *req;
-+	struct ceph_osd_data *osd_data;
- 	int rc = 0;
- 	int page_align = off & ~PAGE_MASK;
-
-@@ -1995,11 +2010,13 @@ int ceph_osdc_writepages(struct ceph_osd_client
-*osdc, struct ceph_vino vino,
- 		return PTR_ERR(req);
-
- 	/* it may be a short write due to an object boundary */
--	req->r_data.type = CEPH_OSD_DATA_TYPE_PAGES;
--	req->r_data.pages = pages;
--	req->r_data.num_pages = calc_pages_for(page_align, len);
--	req->r_data.alignment = page_align;
--	dout("writepages %llu~%llu (%d pages)\n", off, len,
-req->r_data.num_pages);
-+	osd_data = &req->r_data_out;
-+	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-+	osd_data->pages = pages;
-+	osd_data->num_pages = calc_pages_for(page_align, len);
-+	osd_data->alignment = page_align;
-+	dout("writepages %llu~%llu (%d pages)\n", off, len,
-+		osd_data->num_pages);
-
- 	rc = ceph_osdc_start_request(osdc, req, true);
- 	if (!rc)
-@@ -2092,28 +2109,30 @@ static struct ceph_msg *get_reply(struct
-ceph_connection *con,
- 	m = ceph_msg_get(req->r_reply);
-
- 	if (data_len > 0) {
--		if (req->r_data.type == CEPH_OSD_DATA_TYPE_PAGES) {
-+		struct ceph_osd_data *osd_data = &req->r_data_in;
-+
-+		if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
- 			int want;
-
--			want = calc_pages_for(req->r_data.alignment, data_len);
--			if (req->r_data.pages &&
--				unlikely(req->r_data.num_pages < want)) {
-+			want = calc_pages_for(osd_data->alignment, data_len);
-+			if (osd_data->pages &&
-+				unlikely(osd_data->num_pages < want)) {
-
- 				pr_warning("tid %lld reply has %d bytes %d "
- 					"pages, we had only %d pages ready\n",
- 					tid, data_len, want,
--					req->r_data.num_pages);
-+					osd_data->num_pages);
- 				*skip = 1;
- 				ceph_msg_put(m);
- 				m = NULL;
- 				goto out;
- 			}
--			m->pages = req->r_data.pages;
--			m->page_count = req->r_data.num_pages;
--			m->page_alignment = req->r_data.alignment;
-+			m->pages = osd_data->pages;
-+			m->page_count = osd_data->num_pages;
-+			m->page_alignment = osd_data->alignment;
- #ifdef CONFIG_BLOCK
--		} else if (req->r_data.type == CEPH_OSD_DATA_TYPE_BIO) {
--			m->bio = req->r_data.bio;
-+		} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-+			m->bio = osd_data->bio;
- #endif
- 		}
- 	}
--- 
-1.7.9.5
-
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/caps.c       |  8 ++++---
+>  fs/ceph/dir.c        | 62 ++++++++++------------------------------------------
+>  fs/ceph/inode.c      | 30 +++++++++++--------------
+>  fs/ceph/mds_client.c |  6 ++---
+>  fs/ceph/super.h      | 23 ++-----------------
+>  5 files changed, 34 insertions(+), 95 deletions(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 61f3833..76634f4 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -490,15 +490,17 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
+>  		ci->i_rdcache_gen++;
+>  
+>  	/*
+> -	 * if we are newly issued FILE_SHARED, clear D_COMPLETE; we
+> +	 * if we are newly issued FILE_SHARED, clear I_COMPLETE; we
+>  	 * don't know what happened to this directory while we didn't
+>  	 * have the cap.
+>  	 */
+>  	if ((issued & CEPH_CAP_FILE_SHARED) &&
+>  	    (had & CEPH_CAP_FILE_SHARED) == 0) {
+>  		ci->i_shared_gen++;
+> -		if (S_ISDIR(ci->vfs_inode.i_mode))
+> -			ceph_dir_clear_complete(&ci->vfs_inode);
+> +		if (S_ISDIR(ci->vfs_inode.i_mode)) {
+> +			dout(" marking %p NOT complete\n", &ci->vfs_inode);
+> +			ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
+> +		}
+>  	}
+>  }
+>  
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 8c1aabe..76821be 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -107,7 +107,7 @@ static unsigned fpos_off(loff_t p)
+>   * falling back to a "normal" sync readdir if any dentries in the dir
+>   * are dropped.
+>   *
+> - * D_COMPLETE tells indicates we have all dentries in the dir.  It is
+> + * I_COMPLETE tells indicates we have all dentries in the dir.  It is
+>   * defined IFF we hold CEPH_CAP_FILE_SHARED (which will be revoked by
+>   * the MDS if/when the directory is modified).
+>   */
+> @@ -198,8 +198,8 @@ more:
+>  	filp->f_pos++;
+>  
+>  	/* make sure a dentry wasn't dropped while we didn't have parent lock */
+> -	if (!ceph_dir_test_complete(dir)) {
+> -		dout(" lost D_COMPLETE on %p; falling back to mds\n", dir);
+> +	if (!ceph_i_test(dir, CEPH_I_COMPLETE)) {
+> +		dout(" lost I_COMPLETE on %p; falling back to mds\n", dir);
+>  		err = -EAGAIN;
+>  		goto out;
+>  	}
+> @@ -284,7 +284,7 @@ static int ceph_readdir(struct file *filp, void *dirent, filldir_t filldir)
+>  	if ((filp->f_pos == 2 || fi->dentry) &&
+>  	    !ceph_test_mount_opt(fsc, NOASYNCREADDIR) &&
+>  	    ceph_snap(inode) != CEPH_SNAPDIR &&
+> -	    ceph_dir_test_complete(inode) &&
+> +	    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
+>  	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
+>  		spin_unlock(&ci->i_ceph_lock);
+>  		err = __dcache_readdir(filp, dirent, filldir);
+> @@ -350,7 +350,7 @@ more:
+>  
+>  		if (!req->r_did_prepopulate) {
+>  			dout("readdir !did_prepopulate");
+> -			fi->dir_release_count--;    /* preclude D_COMPLETE */
+> +			fi->dir_release_count--;    /* preclude I_COMPLETE */
+>  		}
+>  
+>  		/* note next offset and last dentry name */
+> @@ -429,7 +429,8 @@ more:
+>  	 */
+>  	spin_lock(&ci->i_ceph_lock);
+>  	if (ci->i_release_count == fi->dir_release_count) {
+> -		ceph_dir_set_complete(inode);
+> +		dout(" marking %p complete\n", inode);
+> +		ci->i_ceph_flags |= CEPH_I_COMPLETE;
+>  		ci->i_max_offset = filp->f_pos;
+>  	}
+>  	spin_unlock(&ci->i_ceph_lock);
+> @@ -604,7 +605,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+>  			    fsc->mount_options->snapdir_name,
+>  			    dentry->d_name.len) &&
+>  		    !is_root_ceph_dentry(dir, dentry) &&
+> -		    ceph_dir_test_complete(dir) &&
+> +		    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
+>  		    (__ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1))) {
+>  			spin_unlock(&ci->i_ceph_lock);
+>  			dout(" dir %p complete, -ENOENT\n", dir);
+> @@ -908,7 +909,7 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+>  		 */
+>  
+>  		/* d_move screws up d_subdirs order */
+> -		ceph_dir_clear_complete(new_dir);
+> +		ceph_i_clear(new_dir, CEPH_I_COMPLETE);
+>  
+>  		d_move(old_dentry, new_dentry);
+>  
+> @@ -1065,44 +1066,6 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+>  }
+>  
+>  /*
+> - * Set/clear/test dir complete flag on the dir's dentry.
+> - */
+> -void ceph_dir_set_complete(struct inode *inode)
+> -{
+> -	struct dentry *dentry = d_find_any_alias(inode);
+> -	
+> -	if (dentry && ceph_dentry(dentry) &&
+> -	    ceph_test_mount_opt(ceph_sb_to_client(dentry->d_sb), DCACHE)) {
+> -		dout(" marking %p (%p) complete\n", inode, dentry);
+> -		set_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+> -	}
+> -	dput(dentry);
+> -}
+> -
+> -void ceph_dir_clear_complete(struct inode *inode)
+> -{
+> -	struct dentry *dentry = d_find_any_alias(inode);
+> -
+> -	if (dentry && ceph_dentry(dentry)) {
+> -		dout(" marking %p (%p) complete\n", inode, dentry);
+> -		set_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+> -	}
+> -	dput(dentry);
+> -}
+> -
+> -bool ceph_dir_test_complete(struct inode *inode)
+> -{
+> -	struct dentry *dentry = d_find_any_alias(inode);
+> -
+> -	if (dentry && ceph_dentry(dentry)) {
+> -		dout(" marking %p (%p) NOT complete\n", inode, dentry);
+> -		clear_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+> -	}
+> -	dput(dentry);
+> -	return false;
+> -}
+> -
+> -/*
+>   * When the VFS prunes a dentry from the cache, we need to clear the
+>   * complete flag on the parent directory.
+>   *
+> @@ -1110,15 +1073,13 @@ bool ceph_dir_test_complete(struct inode *inode)
+>   */
+>  static void ceph_d_prune(struct dentry *dentry)
+>  {
+> -	struct ceph_dentry_info *di;
+> -
+>  	dout("ceph_d_prune %p\n", dentry);
+>  
+>  	/* do we have a valid parent? */
+>  	if (IS_ROOT(dentry))
+>  		return;
+>  
+> -	/* if we are not hashed, we don't affect D_COMPLETE */
+> +	/* if we are not hashed, we don't affect I_COMPLETE */
+>  	if (d_unhashed(dentry))
+>  		return;
+>  
+> @@ -1126,8 +1087,7 @@ static void ceph_d_prune(struct dentry *dentry)
+>  	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
+>  	 * cleared until d_release
+>  	 */
+> -	di = ceph_dentry(dentry->d_parent);
+> -	clear_bit(CEPH_D_COMPLETE, &di->flags);
+> +	ceph_i_clear(dentry->d_parent->d_inode, CEPH_I_COMPLETE);
+>  }
+>  
+>  /*
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 2971eaa..42c5769 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -561,7 +561,6 @@ static int fill_inode(struct inode *inode,
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>  	int i;
+>  	int issued = 0, implemented;
+> -	int updating_inode = 0;
+>  	struct timespec mtime, atime, ctime;
+>  	u32 nsplits;
+>  	struct ceph_buffer *xattr_blob = NULL;
+> @@ -601,7 +600,6 @@ static int fill_inode(struct inode *inode,
+>  	    (ci->i_version & ~1) >= le64_to_cpu(info->version))
+>  		goto no_change;
+>  	
+> -	updating_inode = 1;
+>  	issued = __ceph_caps_issued(ci, &implemented);
+>  	issued |= implemented | __ceph_caps_dirty(ci);
+>  
+> @@ -716,6 +714,17 @@ static int fill_inode(struct inode *inode,
+>  		       ceph_vinop(inode), inode->i_mode);
+>  	}
+>  
+> +	/* set dir completion flag? */
+> +	if (S_ISDIR(inode->i_mode) &&
+> +	    ci->i_files == 0 && ci->i_subdirs == 0 &&
+> +	    ceph_snap(inode) == CEPH_NOSNAP &&
+> +	    (le32_to_cpu(info->cap.caps) & CEPH_CAP_FILE_SHARED) &&
+> +	    (issued & CEPH_CAP_FILE_EXCL) == 0 &&
+> +	    (ci->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
+> +		dout(" marking %p complete (empty)\n", inode);
+> +		ci->i_ceph_flags |= CEPH_I_COMPLETE;
+> +		ci->i_max_offset = 2;
+> +	}
+>  no_change:
+>  	spin_unlock(&ci->i_ceph_lock);
+>  
+> @@ -766,19 +775,6 @@ no_change:
+>  		__ceph_get_fmode(ci, cap_fmode);
+>  	}
+>  
+> -	/* set dir completion flag? */
+> -	if (S_ISDIR(inode->i_mode) &&
+> -	    updating_inode &&                 /* didn't jump to no_change */
+> -	    ci->i_files == 0 && ci->i_subdirs == 0 &&
+> -	    ceph_snap(inode) == CEPH_NOSNAP &&
+> -	    (le32_to_cpu(info->cap.caps) & CEPH_CAP_FILE_SHARED) &&
+> -	    (issued & CEPH_CAP_FILE_EXCL) == 0 &&
+> -	    !ceph_dir_test_complete(inode)) {
+> -		dout(" marking %p complete (empty)\n", inode);
+> -		ceph_dir_set_complete(inode);
+> -		ci->i_max_offset = 2;
+> -	}
+> -
+>  	/* update delegation info? */
+>  	if (dirinfo)
+>  		ceph_fill_dirfrag(inode, dirinfo);
+> @@ -860,7 +856,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
+>  	di = ceph_dentry(dn);
+>  
+>  	spin_lock(&ci->i_ceph_lock);
+> -	if (!ceph_dir_test_complete(inode)) {
+> +	if ((ceph_inode(inode)->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
+>  		spin_unlock(&ci->i_ceph_lock);
+>  		return;
+>  	}
+> @@ -1065,7 +1061,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+>  			 * d_move() puts the renamed dentry at the end of
+>  			 * d_subdirs.  We need to assign it an appropriate
+>  			 * directory offset so we can behave when holding
+> -			 * D_COMPLETE.
+> +			 * I_COMPLETE.
+>  			 */
+>  			ceph_set_dentry_offset(req->r_old_dentry);
+>  			dout("dn %p gets new offset %lld\n", req->r_old_dentry, 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index ccc68b0..e52b0fb 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2029,7 +2029,7 @@ out:
+>  }
+>  
+>  /*
+> - * Invalidate dir D_COMPLETE, dentry lease state on an aborted MDS
+> + * Invalidate dir I_COMPLETE, dentry lease state on an aborted MDS
+>   * namespace request.
+>   */
+>  void ceph_invalidate_dir_request(struct ceph_mds_request *req)
+> @@ -2037,9 +2037,9 @@ void ceph_invalidate_dir_request(struct ceph_mds_request *req)
+>  	struct inode *inode = req->r_locked_dir;
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>  
+> -	dout("invalidate_dir_request %p (D_COMPLETE, lease(s))\n", inode);
+> +	dout("invalidate_dir_request %p (I_COMPLETE, lease(s))\n", inode);
+>  	spin_lock(&ci->i_ceph_lock);
+> -	ceph_dir_clear_complete(inode);
+> +	ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
+>  	ci->i_release_count++;
+>  	spin_unlock(&ci->i_ceph_lock);
+>  
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 4353ebc..efbcb56 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -204,7 +204,6 @@ struct ceph_inode_xattr {
+>   * Ceph dentry state
+>   */
+>  struct ceph_dentry_info {
+> -	unsigned long flags;
+>  	struct ceph_mds_session *lease_session;
+>  	u32 lease_gen, lease_shared_gen;
+>  	u32 lease_seq;
+> @@ -215,18 +214,6 @@ struct ceph_dentry_info {
+>  	u64 offset;
+>  };
+>  
+> -/*
+> - * dentry flags
+> - *
+> - * The locking for D_COMPLETE is a bit odd:
+> - *  - we can clear it at almost any time (see ceph_d_prune)
+> - *  - it is only meaningful if:
+> - *    - we hold dir inode i_ceph_lock
+> - *    - we hold dir FILE_SHARED caps
+> - *    - the dentry D_COMPLETE is set
+> - */
+> -#define CEPH_D_COMPLETE 1  /* if set, d_u.d_subdirs is complete directory */
+> -
+>  struct ceph_inode_xattrs_info {
+>  	/*
+>  	 * (still encoded) xattr blob. we avoid the overhead of parsing
+> @@ -267,7 +254,7 @@ struct ceph_inode_info {
+>  	struct timespec i_rctime;
+>  	u64 i_rbytes, i_rfiles, i_rsubdirs;
+>  	u64 i_files, i_subdirs;
+> -	u64 i_max_offset;  /* largest readdir offset, set with D_COMPLETE */
+> +	u64 i_max_offset;  /* largest readdir offset, set with I_COMPLETE */
+>  
+>  	struct rb_root i_fragtree;
+>  	struct mutex i_fragtree_mutex;
+> @@ -432,6 +419,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+>  /*
+>   * Ceph inode.
+>   */
+> +#define CEPH_I_COMPLETE  1  /* we have complete directory cached */
+>  #define CEPH_I_NODELAY   4  /* do not delay cap release */
+>  #define CEPH_I_FLUSH     8  /* do not delay flush of dirty metadata */
+>  #define CEPH_I_NOFLUSH  16  /* do not flush dirty caps */
+> @@ -489,13 +477,6 @@ static inline loff_t ceph_make_fpos(unsigned frag, unsigned off)
+>  }
+>  
+>  /*
+> - * set/clear directory D_COMPLETE flag
+> - */
+> -void ceph_dir_set_complete(struct inode *inode);
+> -void ceph_dir_clear_complete(struct inode *inode);
+> -bool ceph_dir_test_complete(struct inode *inode);
+> -
+> -/*
+>   * caps helpers
+>   */
+>  static inline bool __ceph_is_any_real_caps(struct ceph_inode_info *ci)
+> -- 
+> 1.7.11.7
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
