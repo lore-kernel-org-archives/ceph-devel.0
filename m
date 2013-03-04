@@ -1,57 +1,65 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: When ceph synchronizes journal to disk?
-Date: Sun, 03 Mar 2013 05:36:40 -0700
-Message-ID: <513343D8.8050402@cs.utah.edu>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Approaches to wrapping aio_exec
+Date: Sun, 3 Mar 2013 17:08:46 -0800
+Message-ID: <B102A7D4-40F1-4D18-96FC-58188E3E2440@cs.ucsc.edu>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:49924 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752988Ab3CCMgn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Mar 2013 07:36:43 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id DED87650677
-	for <ceph-devel@vger.kernel.org>; Sun,  3 Mar 2013 05:36:42 -0700 (MST)
-Received: from mail-svr1.cs.utah.edu ([127.0.0.1])
-	by localhost (mail-svr1.cs.utah.edu [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id l9iWX6txtZul for <ceph-devel@vger.kernel.org>;
-	Sun,  3 Mar 2013 05:36:42 -0700 (MST)
-Received: from [192.168.1.100] (unknown [116.231.167.128])
-	by smtps.cs.utah.edu (Postfix) with ESMTPSA id 32B6765066F
-	for <ceph-devel@vger.kernel.org>; Sun,  3 Mar 2013 05:36:42 -0700 (MST)
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:44117 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754552Ab3CDBIs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Mar 2013 20:08:48 -0500
+Received: by mail-pb0-f51.google.com with SMTP id un15so2735432pbc.24
+        for <ceph-devel@vger.kernel.org>; Sun, 03 Mar 2013 17:08:48 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+I've built a custom protocol on top of Rados::exec that uses serialized=
+ versions of InputObject and OutputObject to implement the protocol. He=
+re's simple pseudo-code that provides my_service::exec:
 
-There were some discussions about this before on the mailing list but I 
-am still confused with this. I thought Ceph would flush data from the 
-journal to disk when either the journal is full or when the time to do 
-synchronization is due. In my test experiment, I used 24 osds(one osd 
-for each disk). I used a 10 GB tmpfs file as the journal disk for each 
-osd. Then for testing, I delayed the synchronization between the journal 
-and disk on purpose. I increased the 'journal min sync interval' to be 
-60 s and 'journal max sync interval' to be 300 s. Then I created a rbd 
-and then started a 4M sequential write workload with fio for 30 seconds. 
-I was expecting that no IO should happen to disks, unless we have filled 
-240 GB data (10G*24). However, 'iostat' showed there was data
-started to be written into disks (at about 20 MB/s per disk), right 
-after I started the sequential workload. Could someone help to explain 
-this situation? Thanks,
+ void my_service::exec(oid, input_params, bufferlist& out) {
+  bufferlist inbl, outbl;
+  InputObject in(input_params);
+  ::encode(in, inbl);
 
-I am running 0.48.2. The related configuration is as follows.
------------------
-[osd]
-         osd journal size = 10000
-         osd journal = /dev/shm/journal/$name-journal
-         journal dio = false
-         filestore xattr use omap = true
+  librados::exec(oid, inbl, outbl);
 
-         # The maximum interval in seconds for synchronizing the filestore.
-         filestore min sync interval = 60
-         filestore max sync interval = 300
--------------
+  OutputObject reply;
+  ::decode(reply, outbl);
+  out =3D reply.payload;
+ }
 
-Xing
+I'd like to provide a my_service::aio_exec that wraps librados::aio_exe=
+c, but doing so doesn't seem to be straight-forward with the current as=
+ync interface.
+
+Notice in the above example that the callers output bufferlist must be =
+unpacked from the reply protocol. However, the librados::aio_exec inter=
+face unpacks the output directly into the caller parameter:
+
+int librados::aio_exec(oid, =85, bufferlist *outbl)
+{
+=2E..
+   objecter->read(oid, oloc, rd, snap_seq, outbl, 0, onack, &c->objver)=
+;
+}
+
+What's needed is a intermediate bufferlist that can be decoded when the=
+ data is available.
+
+One way to do this would be wrap AioCompletion and intercept ack and sa=
+fe callbacks to do the data unpacking. The problem with this is that we=
+ have to introduce a new AioCompletion type, or new AioCompletionImpl. =
+I started to do this, but it feels quite clunky.
+
+Any suggestions for handling this?
+
+Thanks,
+Noah--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
