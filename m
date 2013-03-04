@@ -1,69 +1,29 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Approaches to wrapping aio_exec
-Date: Mon, 4 Mar 2013 11:44:12 -0800
-Message-ID: <CAC-hyiH50MPd2uQUDA-CaXSdEETWJ4o0+wCWpAduVMdJxyYeEA@mail.gmail.com>
-References: <B102A7D4-40F1-4D18-96FC-58188E3E2440@cs.ucsc.edu>
-	<CAC-hyiF+LGPmgeg7oVX_-7oJFAh5J54BfyZHX1h_0vwxtoShiA@mail.gmail.com>
-	<44EC9874-E8C9-4C20-89A1-3D491065739B@cs.ucsc.edu>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 1/3] libceph: drop mutex while allocating a message
+Date: Mon, 04 Mar 2013 13:52:20 -0600
+Message-ID: <5134FB74.9050607@inktank.com>
+References: <5134E25E.4030701@inktank.com> <5134E3AD.4080906@inktank.com> <5134E3F1.70008@inktank.com> <CAPYLRzhQeqbEK6wp+V8OWaAeyML1Uqh60vc0omanTyvCsXtTXQ@mail.gmail.com> <5134F53A.1010601@inktank.com> <CAPYLRzjwNgLro0RZORGsxU4e0nmDZTNpUQ2rTrB7Mk0ER6m_hQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:39269 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758840Ab3CDToN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 14:44:13 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so5152310iak.38
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 11:44:12 -0800 (PST)
-In-Reply-To: <44EC9874-E8C9-4C20-89A1-3D491065739B@cs.ucsc.edu>
+Received: from mail-ie0-f175.google.com ([209.85.223.175]:55127 "EHLO
+	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758289Ab3CDTwU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 14:52:20 -0500
+Received: by mail-ie0-f175.google.com with SMTP id c12so6541642ieb.20
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 11:52:20 -0800 (PST)
+In-Reply-To: <CAPYLRzjwNgLro0RZORGsxU4e0nmDZTNpUQ2rTrB7Mk0ER6m_hQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
+To: Gregory Farnum <greg@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 4, 2013 at 11:34 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
->
-> On Mar 3, 2013, at 6:31 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
->
->> I pushed the wip-librados-exec branch last week that solves a similar
->> issue. I added two more ObjectOperation::exec() api calls. The more
->> interesting one added a callback context that is called with the
->> output buffer of the completed sub-op. Currently in order to use it
->> you'll need to use operate()/aio_operate(), however, a similar
->> aio_exec interface can be added.
->
-> Thanks for the pointer to the branch. So, if I understand correctly,
-> we might have a new librados::aio_exec_completion call that accepts
-> a completion object? For example:
->
-> aio_exec_completion(AioCompletion *c, bufferlist *outbl,
->             ObjectOperationCompletion* completion)
-> {
->   Context *onack = new C_aio_Ack(c);
->
->   ::ObjectOperation rd;
->   ObjectOpCompletionCtx *ctx = new ObjectOpCompletionCtx(completion);
->   rd.call(cls, method, inbl, ctx->outbl, ctx, NULL);
->   objecter->read(oid, oloc, rd, snap_seq, outbl, 0, onack, &c->objver);
->
->   return 0;
-> }
->
-> where the caller would provide an ObjectOperationCompletion where it's
-> finish(..) would unwrap the protocol?
+On 03/04/2013 01:39 PM, Gregory Farnum wrote:
+>> My purpose in doing this is to make the third patch in
+>> > this series trivial to review.
+> The one that doesn't set the page_alignment for mds messages? *confused*
+> 
 
-Right.
 
->
-> Do you expect wip-librados-exec going up stream pretty soon, and would
-
-We can push it ahead if needed, it doesn't depend on any of the stuff
-I'm working on right now. It just waits for someone to properly review
-it.
-
-> something like librados::aio_exec_completion be a candidate for adding
-> to librados?
->
-
-Sure, if there's a need then I don't see why not.
-
-Yehuda
+Sorry, second patch in the series.	-Alex
