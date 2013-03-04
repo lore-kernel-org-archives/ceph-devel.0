@@ -1,151 +1,37 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 6/7] ceph: don't early drop Fw cap
-Date: Mon, 4 Mar 2013 10:26:45 -0800
-Message-ID: <CAPYLRziF-BTvksCM3LDfdwvjrLWXQhSdoF+PB3XJAd7KJp4cmw@mail.gmail.com>
-References: <1362120384-5188-1-git-send-email-zheng.z.yan@intel.com>
-	<1362120384-5188-7-git-send-email-zheng.z.yan@intel.com>
+From: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
+Subject: "--restart" broken due to bug in init script?
+Date: Mon, 04 Mar 2013 13:32:23 -0500
+Message-ID: <201303041832.r24IWN3f029106@ayesha.phys.virginia.edu>
+Reply-To: bkw1a@ayesha.phys.virginia.edu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:60257 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757191Ab3CDS0s convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 13:26:48 -0500
-Received: by mail-qa0-f43.google.com with SMTP id dx4so1363280qab.2
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 10:26:46 -0800 (PST)
-In-Reply-To: <1362120384-5188-7-git-send-email-zheng.z.yan@intel.com>
+Received: from ayesha.phys.Virginia.EDU ([128.143.102.43]:43359 "EHLO
+	ayesha.phys.virginia.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757699Ab3CDScY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 13:32:24 -0500
+Received: from ayesha.phys.virginia.edu (localhost [127.0.0.1])
+	by ayesha.phys.virginia.edu (8.14.4/8.14.4) with ESMTP id r24IWN3f029106
+	for <ceph-devel@vger.kernel.org>; Mon, 4 Mar 2013 13:32:23 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Feb 28, 2013 at 10:46 PM, Yan, Zheng <zheng.z.yan@intel.com> wr=
-ote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->
-> ceph_aio_write() has an optimization that marks CEPH_CAP_FILE_WR
-> cap dirty before data is copied to page cache and inode size is
-> updated. The optimization avoids slow cap revocation caused by
-> balance_dirty_pages(), but introduces inode size update race. If
-> ceph_check_caps() flushes the dirty cap before the inode size is
-> updated, MDS can miss the new inode size. So just remove the
-> optimization.
->
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/file.c | 42 +++++++++++++++++-------------------------
->  1 file changed, 17 insertions(+), 25 deletions(-)
->
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index a949805..28ef273 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -724,9 +724,12 @@ static ssize_t ceph_aio_write(struct kiocb *iocb=
-, const struct iovec *iov,
->         if (ceph_snap(inode) !=3D CEPH_NOSNAP)
->                 return -EROFS;
->
-> +       sb_start_write(inode->i_sb);
->  retry_snap:
-> -       if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL))
-> -               return -ENOSPC;
-> +       if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL)) {
-> +               ret =3D -ENOSPC;
-> +               goto out;
-> +       }
->         __ceph_do_pending_vmtruncate(inode);
->         dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %ll=
-u\n",
->              inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
-> @@ -750,29 +753,10 @@ retry_snap:
->                 ret =3D ceph_sync_write(file, iov->iov_base, iov->iov=
-_len,
->                         &iocb->ki_pos);
->         } else {
-> -               /*
-> -                * buffered write; drop Fw early to avoid slow
-> -                * revocation if we get stuck on balance_dirty_pages
-> -                */
-> -               int dirty;
-> -
-> -               spin_lock(&ci->i_ceph_lock);
-> -               dirty =3D __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR=
-);
-> -               spin_unlock(&ci->i_ceph_lock);
-> -               ceph_put_cap_refs(ci, got);
-> -
-> -               ret =3D generic_file_aio_write(iocb, iov, nr_segs, po=
-s);
-> -               if ((ret >=3D 0 || ret =3D=3D -EIOCBQUEUED) &&
-> -                   ((file->f_flags & O_SYNC) || IS_SYNC(file->f_mapp=
-ing->host)
-> -                    || ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_NE=
-ARFULL))) {
-> -                       err =3D vfs_fsync_range(file, pos, pos + ret =
-- 1, 1);
-> -                       if (err < 0)
-> -                               ret =3D err;
-> -               }
-> -
-> -               if (dirty)
-> -                       __mark_inode_dirty(inode, dirty);
-> -               goto out;
-> +               mutex_lock(&inode->i_mutex);
-> +               ret =3D __generic_file_aio_write(iocb, iov, nr_segs,
-> +                                              &iocb->ki_pos);
-> +               mutex_unlock(&inode->i_mutex);
+Hi folks,
 
-Hmm, you're here passing in a different value than the removed
-generic_file_aio_write() call did =97 &iocb->ki_pos instead of pos.
-Everything else is using the pos parameter so I rather expect that
-should still be used here?
-Also a quick skim of the interfaces makes me think that the two
-versions aren't interchangeable =97 __generic_file_aio_write() also
-handles O_SYNC in addition to grabbing i_mutex. Why'd you switch them?
-(I haven't checked deep enough to see if the unlocked version is
-correct or not, but it does say that's what most filesystems should
-use.)
--Greg
+	It looks like the "--restart" option in the ceph init script
+is broken.  The flag sets the variable "$docrun", but then
+later, when it's tested, the script looks for "$crun" instead.
+
+					Bryan
+
+-- 
+========================================================================
+Bryan Wright              |"If you take cranberries and stew them like 
+Physics Department        | applesauce, they taste much more like prunes
+University of Virginia    | than rhubarb does."  --  Groucho 
+Charlottesville, VA  22901|			
+(434) 924-7218            |         bryan@virginia.edu
+========================================================================
 
 
->         }
->
->         if (ret >=3D 0) {
-> @@ -790,12 +774,20 @@ out_put:
->              ceph_cap_string(got));
->         ceph_put_cap_refs(ci, got);
->
-> +       if (ret >=3D 0 &&
-> +           ((file->f_flags & O_SYNC) || IS_SYNC(file->f_mapping->hos=
-t) ||
-> +            ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_NEARFULL))) {
-> +               err =3D vfs_fsync_range(file, pos, pos + ret - 1, 1);
-> +               if (err < 0)
-> +                       ret =3D err;
-> +       }
->  out:
->         if (ret =3D=3D -EOLDSNAPC) {
->                 dout("aio_write %p %llx.%llx %llu~%u got EOLDSNAPC, r=
-etrying\n",
->                      inode, ceph_vinop(inode), pos, (unsigned)iov->io=
-v_len);
->                 goto retry_snap;
->         }
-> +       sb_end_write(inode->i_sb);
->
->         return ret;
->  }
-> --
-> 1.7.11.7
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
