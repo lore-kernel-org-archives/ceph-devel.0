@@ -1,59 +1,69 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 1/3] libceph: drop mutex while allocating a message
-Date: Mon, 4 Mar 2013 11:39:53 -0800
-Message-ID: <CAPYLRzjwNgLro0RZORGsxU4e0nmDZTNpUQ2rTrB7Mk0ER6m_hQ@mail.gmail.com>
-References: <5134E25E.4030701@inktank.com>
-	<5134E3AD.4080906@inktank.com>
-	<5134E3F1.70008@inktank.com>
-	<CAPYLRzhQeqbEK6wp+V8OWaAeyML1Uqh60vc0omanTyvCsXtTXQ@mail.gmail.com>
-	<5134F53A.1010601@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Approaches to wrapping aio_exec
+Date: Mon, 4 Mar 2013 11:44:12 -0800
+Message-ID: <CAC-hyiH50MPd2uQUDA-CaXSdEETWJ4o0+wCWpAduVMdJxyYeEA@mail.gmail.com>
+References: <B102A7D4-40F1-4D18-96FC-58188E3E2440@cs.ucsc.edu>
+	<CAC-hyiF+LGPmgeg7oVX_-7oJFAh5J54BfyZHX1h_0vwxtoShiA@mail.gmail.com>
+	<44EC9874-E8C9-4C20-89A1-3D491065739B@cs.ucsc.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:34538 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757496Ab3CDTkY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 14:40:24 -0500
-Received: by mail-qa0-f42.google.com with SMTP id cr7so1404689qab.8
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 11:40:23 -0800 (PST)
-In-Reply-To: <5134F53A.1010601@inktank.com>
+Received: from mail-ia0-f179.google.com ([209.85.210.179]:39269 "EHLO
+	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758840Ab3CDToN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Mar 2013 14:44:13 -0500
+Received: by mail-ia0-f179.google.com with SMTP id x24so5152310iak.38
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Mar 2013 11:44:12 -0800 (PST)
+In-Reply-To: <44EC9874-E8C9-4C20-89A1-3D491065739B@cs.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 4, 2013 at 11:25 AM, Alex Elder <elder@inktank.com> wrote:
-> On 03/04/2013 01:07 PM, Gregory Farnum wrote:
->> On Mon, Mar 4, 2013 at 10:12 AM, Alex Elder <elder@inktank.com> wrote:
->>> In ceph_con_in_msg_alloc(), if no alloc_msg method is defined for a
->>> connection a new message is allocated with ceph_msg_new().
->>>
->>> Drop the mutex before making this call, and make sure we're still
->>> connected when we get it back again.
->>
->> Why do we need to drop the mutex at all? The mds_alloc_msg() that
->> you're about to define doesn't seem to need it.
->> -Greg
->>
+On Mon, Mar 4, 2013 at 11:34 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
 >
-> My purpose in doing this is to make the third patch in
-> this series trivial to review.
+> On Mar 3, 2013, at 6:31 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>
+>> I pushed the wip-librados-exec branch last week that solves a similar
+>> issue. I added two more ObjectOperation::exec() api calls. The more
+>> interesting one added a callback context that is called with the
+>> output buffer of the completed sub-op. Currently in order to use it
+>> you'll need to use operate()/aio_operate(), however, a similar
+>> aio_exec interface can be added.
+>
+> Thanks for the pointer to the branch. So, if I understand correctly,
+> we might have a new librados::aio_exec_completion call that accepts
+> a completion object? For example:
+>
+> aio_exec_completion(AioCompletion *c, bufferlist *outbl,
+>             ObjectOperationCompletion* completion)
+> {
+>   Context *onack = new C_aio_Ack(c);
+>
+>   ::ObjectOperation rd;
+>   ObjectOpCompletionCtx *ctx = new ObjectOpCompletionCtx(completion);
+>   rd.call(cls, method, inbl, ctx->outbl, ctx, NULL);
+>   objecter->read(oid, oloc, rd, snap_seq, outbl, 0, onack, &c->objver);
+>
+>   return 0;
+> }
+>
+> where the caller would provide an ObjectOperationCompletion where it's
+> finish(..) would unwrap the protocol?
 
-The one that doesn't set the page_alignment for mds messages? *confused*
-
-> That is, I make the code
-> here match what will happen when I unify how all alloc_msg
-> calls get made, as a pre-step, and then it's easier to see
-> that the later patch is correct.
-
-Oh, and we do do the mutex_lock and unlock pair around alloc_msg.
-Right, looks good! :)
-Reviewed-by: Greg Farnum <greg@inktank.com>
-
+Right.
 
 >
-> I agree, it's not needed for that allocator.  By the same
-> token, it almost certainly causes no harm, and the end result
-> will be consistent handling by all users of this interface.
+> Do you expect wip-librados-exec going up stream pretty soon, and would
+
+We can push it ahead if needed, it doesn't depend on any of the stuff
+I'm working on right now. It just waits for someone to properly review
+it.
+
+> something like librados::aio_exec_completion be a candidate for adding
+> to librados?
 >
->                                         -Alex
+
+Sure, if there's a need then I don't see why not.
+
+Yehuda
