@@ -1,97 +1,88 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: v0.58 released
-Date: Tue, 5 Mar 2013 13:01:25 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1303051300220.1162@cobra.newdream.net>
-References: <alpine.DEB.2.00.1303051106370.28558@cobra.newdream.net> <513654BC.1030904@profihost.ag>
+From: Greg Farnum <greg@inktank.com>
+Subject: Re: [PATCH 3/5] ceph: only set message data pointers if
+ non-empty
+Date: Tue, 5 Mar 2013 13:20:47 -0800
+Message-ID: <5692F205D39C4841832682B184BC835A@inktank.com>
+References: <5135F859.1090606@inktank.com> <5135F8CA.1010706@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37199 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755845Ab3CEVB0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 16:01:26 -0500
-In-Reply-To: <513654BC.1030904@profihost.ag>
+Received: from mail-pb0-f53.google.com ([209.85.160.53]:54642 "EHLO
+	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756110Ab3CEVUx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 16:20:53 -0500
+Received: by mail-pb0-f53.google.com with SMTP id un1so4979369pbc.26
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 13:20:52 -0800 (PST)
+In-Reply-To: <5135F8CA.1010706@inktank.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-[Re-adding ceph-devel]
-
-On Tue, 5 Mar 2013, Stefan Priebe wrote:
-> Hi Sage,
+On Tuesday, March 5, 2013 at 5:53 AM, Alex Elder wrote:
+> The ceph file system doesn't typically send information in the
+> data portion of a message. (It relies on some functionality
+> exported by the osd client to read and write page data.)
 > 
-> thanks for the great new features. Are there any plans for incremental rbd
-> exports? Or export of just the changed rados objects between two snapshots?
-
-The librados bits just landed in master today (thanks to David Zafman).  
-The next step is to build an export and import function into the rbd (or 
-another) command line tool.
-
-sage
-
-
+> There are two spots it does send data though. The value assigned to
+> an extended attribute is held in one or more pages allocated by
+> ceph_sync_setxattr(). Eventually those pages are assigned to a
+> request message in create_request_message().
 > 
-> Greets,
-> Stefan
+> The second spot is when sending a reconnect message, where a
+> ceph pagelist is used to build up an array of snaprealm_reconnect
+> structures to send to the mds.
 > 
-> Am 05.03.2013 20:07, schrieb Sage Weil:
-> > It's been two weeks and v0.58 is baked. Notable changes since v0.57
-> > include:
-> > 
-> >   * mon: rearchitected to utilize single instance of paxos and a key/value
-> >     store (Joao Luis)
-> >   * librbd: fixed some locking issues with flatten (Josh Durgin)
-> >   * rbd: udevadm settle on map/unmap to avoid various races (Dan Mick)
-> >   * osd: move pg info, log into leveldb (== better performance) (David
-> >     Zafman)
-> >   * osd: fix pg log trimming (avoids memory bloat on degraded clusters)
-> >   * osd: fixed bug in journal checksums (Sam Just)
-> >   * osd: verify snap collections on startup (Sam Just)
-> >   * ceph-disk-prepare/activate: support for dm-crypt (Alexandre Marangone)
-> >   * ceph-disk-prepare/activate: support for sysvinit, directories or
-> >     partitions (not full disks)
-> >   * msgr: fixed race in connection reset
-> >   * msgr: fix comparison of IPv6 addresses (fixes monitor bringup via
-> >     ceph-deploy, chef)
-> >   * radosgw: fix object copy onto self (Yehuda Sadeh)
-> >   * radosgw: ACL grants in headers (Caleb Miles)
-> >   * radosgw: ability to listen to fastcgi via a port (Guilhem Lettron)
-> >   * mds: new encoding for all data types (to allow forward/backward
-> >     compatbility) (Greg Farnum)
-> >   * mds: fast failover between MDSs (enforce unique mds names)
-> >   * crush: ability to create, remove rules via CLI
-> >   * many many cleanups (Danny Al-Gaaf)
-> >   * buffer unit testing (Loic Dachary)
-> >   * fixed log rotation (Gary Lowell)
-> > 
-> > Also, although it is not part of the ceph packages, I'd also like to call
-> > out recent work on ceph-deploy, our new easy to use deployment tool:
-> > 
-> >   * ceph-deploy: support for Debian systems
-> >   * ceph-deploy: new safety checks
-> >   * ceph-deploy: support for dm-crypt on OSDs
-> > 
-> > There has also been a lot of work by Joe Buck and Noah Watkins on the
-> > Hadoop integration. The libcephfs-java package is in good shape, and
-> > they are very close to having a single .jar file to drop into a Hadoop
-> > installation to run on top of CephFS.
-> > 
-> > With the release of v0.58 we've also frozen v0.59, which will get two
-> > weeks of QA before it is released.
-> > 
-> > You can get v0.58 from the usual locations:
-> > 
-> >   * Git at git://github.com/ceph/ceph.git
-> >   * Tarball at http://ceph.com/download/ceph-0.58.tar.gz
-> >   * For Debian/Ubuntu packages, see
-> > http://ceph.com/docs/master/install/debian
-> >   * For RPMs, see http://ceph.com/docs/master/install/rpm
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
+> Change it so we only assign the outgoing data information for
+> these messages if there is outgoing data to send.
 > 
+> This is related to:
+> http://tracker.ceph.com/issues/4284
 > 
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+> fs/ceph/mds_client.c | 14 +++++++++++---
+> 1 file changed, 11 insertions(+), 3 deletions(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 42400ce..ae83aa9 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -1718,7 +1718,12 @@ static struct ceph_msg
+> *create_request_message(struct ceph_mds_client *mdsc,
+> msg->front.iov_len = p - msg->front.iov_base;
+> msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+> 
+> - ceph_msg_data_set_pages(msg, req->r_pages, req->r_num_pages, 0);
+> + if (req->r_num_pages) {
+> + /* outbound data set only by ceph_sync_setxattr() */
+> + BUG_ON(!req->r_pages);
+> + ceph_msg_data_set_pages(msg, req->r_pages,
+> + req->r_num_pages, 0);
+> + }
+> 
+> msg->hdr.data_len = cpu_to_le32(req->r_data_len);
+> msg->hdr.data_off = cpu_to_le16(0);
+> @@ -2599,10 +2604,13 @@ static void send_mds_reconnect(struct
+> ceph_mds_client *mdsc,
+> goto fail;
+> }
+> 
+> - ceph_msg_data_set_pagelist(reply, pagelist);
+> if (recon_state.flock)
+> reply->hdr.version = cpu_to_le16(2);
+> - reply->hdr.data_len = cpu_to_le32(pagelist->length);
+> + if (pagelist->length) {
+> + /* set up outbound data if we have any */
+> + reply->hdr.data_len = cpu_to_le32(pagelist->length);
+> + ceph_msg_data_set_pagelist(reply, pagelist);
+> + }
+> ceph_con_send(&session->s_con, reply);
+> 
+> mutex_unlock(&session->s_mutex);
+> 
+Reviewed-by: Greg Farnum <greg@inktank.com>
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+
