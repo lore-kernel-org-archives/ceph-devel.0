@@ -1,41 +1,93 @@
-From: Ugis <ugis22@gmail.com>
-Subject: Re: When ceph synchronizes journal to disk?
-Date: Tue, 5 Mar 2013 16:27:11 +0200
-Message-ID: <CAE63xUNUsCJ=c78HoGq2T-Bb3+gt+iLnMMQ1o_+4WG=rNc2ECw@mail.gmail.com>
-References: <513343D8.8050402@cs.utah.edu>
-	<CAPYLRzhAfvXfnCi4qRtdPEnV+v1qUy+DVED2Z0eep7eTvG__BA@mail.gmail.com>
-	<51357589.6080202@cs.utah.edu>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] libceph: clean up skipped message logic
+Date: Tue, 05 Mar 2013 09:33:28 -0600
+Message-ID: <51361048.50500@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:36495 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752677Ab3CEO1M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 09:27:12 -0500
-Received: by mail-ie0-f180.google.com with SMTP id bn7so7675813ieb.39
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 06:27:12 -0800 (PST)
-In-Reply-To: <51357589.6080202@cs.utah.edu>
+Received: from mail-ia0-f172.google.com ([209.85.210.172]:56062 "EHLO
+	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754960Ab3CEPdc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 10:33:32 -0500
+Received: by mail-ia0-f172.google.com with SMTP id l29so6189851iag.17
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 07:33:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xing Lin <xinglin@cs.utah.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-> I do not think I understand this well. When the writeahead journal mode is
-> in use, would you please explain what happens to a single 4M write request?
-> I assume that an entry in the journal will be created for this write request
-> and after this entry is flushed to the journal disk, Ceph returns
-> successful. There should be no IO to the osd's disk. All IOs are supposed to
-> go to the journal disk. At a later time, Ceph will start to apply these
-> changes to the normal filesystem by reading from the first entry at which
-> its previous synchronization stops. Finally, it will read this entry and
-> apply this write change to the normal file system. Could you please point
-> out where is wrong in my understanding? Thanks,
->
+(This patch is available as the top commit in branch
+"review/wip-4324" in the ceph-client git repository.)
 
-Probably you are expecting journal to behave like cache if I
-understood correctly. Journals are for integrity, caches are for io
-speed.
-For block device caching you could see more on flashcache or bcache.
+In ceph_con_in_msg_alloc() it is possible for a connection's
+alloc_msg method to indicate an incoming message should be skipped.
+By default, read_partial_message() initializes the skip variable
+to 0 before it gets provided to ceph_con_in_msg_alloc().
 
-BR,
-Ugis
+The osd client, mon client, and mds client each supply an alloc_msg
+method.  The mds client always assigns skip to be 0.
+
+The other two leave the skip value of as-is, or assigns it to zero,
+except:
+    - if no (osd or mon) request having the given tid is found, in
+      which case skip is set to 1 and NULL is returned; or
+    - in the osd client, if the data of the reply message is not
+      adequate to hold the message to be read, it assigns skip
+      value 1 and returns NULL.
+So the returned message pointer will always be NULL if skip is ever
+non-zero.
+
+Clean up the logic a bit in ceph_con_in_msg_alloc() to make this
+state of affairs more obvious.  Add a comment explaining how a null
+message pointer can mean either a message that should be skipped or
+a problem allocating a message.
+
+This resolves:
+    http://tracker.ceph.com/issues/4324
+
+Reported-by: Greg Farnum <greg@inktank.com>
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/messenger.c |   23 +++++++++++++----------
+ 1 file changed, 13 insertions(+), 10 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 5bf1bb5..644cb6c 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -2860,18 +2860,21 @@ static int ceph_con_in_msg_alloc(struct
+ceph_connection *con, int *skip)
+ 			ceph_msg_put(msg);
+ 		return -EAGAIN;
+ 	}
+-	con->in_msg = msg;
+-	if (con->in_msg) {
++	if (msg) {
++		BUG_ON(*skip);
++		con->in_msg = msg;
+ 		con->in_msg->con = con->ops->get(con);
+ 		BUG_ON(con->in_msg->con == NULL);
+-	}
+-	if (*skip) {
+-		con->in_msg = NULL;
+-		return 0;
+-	}
+-	if (!con->in_msg) {
+-		con->error_msg =
+-			"error allocating memory for incoming message";
++	} else {
++		/*
++		 * Null message pointer means either we should skip
++		 * this message or we couldn't allocate memory.  The
++		 * former is not an error.
++		 */
++		if (*skip)
++			return 0;
++		con->error_msg = "error allocating memory for incoming message";
++
+ 		return -ENOMEM;
+ 	}
+ 	memcpy(&con->in_msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
+-- 
+1.7.9.5
+
