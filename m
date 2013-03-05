@@ -1,73 +1,45 @@
-From: Dieter Kasper <d.kasper@kabelmail.de>
-Subject: Re: When ceph synchronizes journal to disk? / read request
-Date: Tue, 5 Mar 2013 09:37:02 +0100
-Message-ID: <20130305083702.GA12118@oder>
-References: <513343D8.8050402@cs.utah.edu>
- <CAPYLRzhAfvXfnCi4qRtdPEnV+v1qUy+DVED2Z0eep7eTvG__BA@mail.gmail.com>
- <51357589.6080202@cs.utah.edu>
-Mime-Version: 1.0
+From: Andrew Hume <andrew@research.att.com>
+Subject: rados get failure
+Date: Tue, 5 Mar 2013 03:55:35 -0700
+Message-ID: <B444B650-9F67-4A5C-AE7B-3A0F2DA421AB@research.att.com>
+Mime-Version: 1.0 (Apple Message framework v1085)
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpa1.mediabeam.com ([194.25.41.13]:48518 "EHLO
-	smtpa1.mediabeam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754878Ab3CEIte (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 03:49:34 -0500
-Content-Disposition: inline
-In-Reply-To: <51357589.6080202@cs.utah.edu>
+Received: from mail-pink.research.att.com ([192.20.225.111]:40255 "EHLO
+	mail-pink.research.att.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751746Ab3CEKzm convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Mar 2013 05:55:42 -0500
+Received: from mail-green.research.att.com (unknown [135.207.178.10])
+	by mail-pink.research.att.com (Postfix) with ESMTP id 7F3FC12016C
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Mar 2013 05:58:27 -0500 (EST)
+Received: from bigmail.research.att.com (bigmail.research.att.com [135.207.177.180])
+	by mail-green.research.att.com (Postfix) with ESMTP id 728CAE36D7
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Mar 2013 05:48:48 -0500 (EST)
+Received: from [192.168.1.161] (castle7164.research.att.com [135.207.39.164])
+	by bigmail.research.att.com (8.13.8+Sun/8.11.6) with ESMTP id r25AtfK5023726
+	for <ceph-devel@vger.kernel.org>; Tue, 5 Mar 2013 05:55:41 -0500 (EST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Xing Lin <xinglin@cs.utah.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dieter Kasper (KD)" <d.kasper@kabelmail.de>
+To: ceph-devel@vger.kernel.org
 
-Hi Gregory,
+i have a new ceph installation across 4 nodes with 10TB of storage.
+i loaded a few TB of objects (averaging 2-3GB each) via teh rados put command.
+when i do a rados get command to retrieve one of these objects,
+i get an "unknown error 1464856576".
 
-another interesting aspect for me is:
-How will a read-request for this block/sub-block (pending between journal and OSD)
-be satisfied (assuming the client will not cache) ?
-Will this read go to the journal or to the OSD ?
+i am running bobtail, and none of the logs contains anything alarming.
+any advice on how to proceed?
 
-Best Regards,
--Dieter
+(i would have included more details here but this mailing list has
+odd restrictions on content.)
 
-On Tue, Mar 05, 2013 at 05:33:13AM +0100, Xing Lin wrote:
-> Hi Gregory,
-> 
-> Thanks for your reply.
-> 
-> On 03/04/2013 09:55 AM, Gregory Farnum wrote:
-> > The "journal [min|max] sync interval" values specify how frequently
-> > the OSD's "FileStore" sends a sync to the disk. However, data is still
-> > written into the normal filesystem as it comes in, and the normal
-> > filesystem continues to schedule normal dirty data writeouts. This is
-> > good ? it means that when we do send a sync down you don't need to
-> > wait for all (30 seconds * 100MB/s) 3GB or whatever of data to go to
-> > disk before it's completed.
-> 
-> I do not think I understand this well. When the writeahead journal mode 
-> is in use, would you please explain what happens to a single 4M write 
-> request? I assume that an entry in the journal will be created for this 
-> write request and after this entry is flushed to the journal disk, Ceph 
-> returns successful. There should be no IO to the osd's disk. All IOs are 
-> supposed to go to the journal disk. At a later time, Ceph will start to 
-> apply these changes to the normal filesystem by reading from the first 
-> entry at which its previous synchronization stops. Finally, it will read 
-> this entry and apply this write change to the normal file system. Could 
-> you please point out where is wrong in my understanding? Thanks,
-> 
-> >> >I am running 0.48.2. The related configuration is as follows.
-> > If you're starting up a new cluster I recommend upgrading to the
-> > bobtail series (.56.3) instead of using Argonaut ? it's got a number
-> > of enhancements you'll appreciate!
-> 
-> Yeah, I would like to use bobtail series. However, I started to make 
-> small changes with Argonaut (0.48) and had ported my changes once to 
-> 0.48.2 when it was released. I think I am good to continue with it for 
-> the moment. I may consider to port my changes to bobtail series at a 
-> later time. Thanks,
-> 
-> Xing
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----------------------
+Andrew Hume
+623-551-2845 (VO and best)
+973-236-2014 (NJ)
+andrew@research.att.com
+
+
 
