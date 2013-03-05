@@ -1,93 +1,47 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: clean up skipped message logic
-Date: Tue, 05 Mar 2013 09:33:28 -0600
-Message-ID: <51361048.50500@inktank.com>
+Subject: Re: [PATCH 1/5] libceph: isolate message page field manipulation
+Date: Tue, 05 Mar 2013 10:03:24 -0600
+Message-ID: <5136174C.5000306@inktank.com>
+References: <5135F859.1090606@inktank.com> <5135F8A9.2080506@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f172.google.com ([209.85.210.172]:56062 "EHLO
-	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754960Ab3CEPdc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 10:33:32 -0500
-Received: by mail-ia0-f172.google.com with SMTP id l29so6189851iag.17
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 07:33:32 -0800 (PST)
+Received: from mail-ob0-f180.google.com ([209.85.214.180]:37361 "EHLO
+	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752839Ab3CEQD2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 11:03:28 -0500
+Received: by mail-ob0-f180.google.com with SMTP id ef5so2708123obb.39
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 08:03:28 -0800 (PST)
+In-Reply-To: <5135F8A9.2080506@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-(This patch is available as the top commit in branch
-"review/wip-4324" in the ceph-client git repository.)
+On 03/05/2013 07:52 AM, Alex Elder wrote:
+> +void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page **pages,
+> +		unsigned int page_count, size_t alignment)
+> +{
+> +	/* BUG_ON(!pages); */
+> +	/* BUG_ON(!page_count); */
+> +	/* BUG_ON(msg->pages); */
+> +	/* BUG_ON(msg->page_count); */
+> +
+> +	msg->pages = pages;
+> +	msg->page_count = page_count;
+> +	msg->page_alignment = alignment & PAGE_SIZE;
 
-In ceph_con_in_msg_alloc() it is possible for a connection's
-alloc_msg method to indicate an incoming message should be skipped.
-By default, read_partial_message() initializes the skip variable
-to 0 before it gets provided to ceph_con_in_msg_alloc().
+Whoops, this is supposed to be:
+	msg->page_alignment = alignment & ~PAGE_MASK;
 
-The osd client, mon client, and mds client each supply an alloc_msg
-method.  The mds client always assigns skip to be 0.
+I think it works despite the bug, it just isn't very
+good for performance on the other end...
 
-The other two leave the skip value of as-is, or assigns it to zero,
-except:
-    - if no (osd or mon) request having the given tid is found, in
-      which case skip is set to 1 and NULL is returned; or
-    - in the osd client, if the data of the reply message is not
-      adequate to hold the message to be read, it assigns skip
-      value 1 and returns NULL.
-So the returned message pointer will always be NULL if skip is ever
-non-zero.
+I will fix this before I commit anything (and after
+review).
 
-Clean up the logic a bit in ceph_con_in_msg_alloc() to make this
-state of affairs more obvious.  Add a comment explaining how a null
-message pointer can mean either a message that should be skipped or
-a problem allocating a message.
+					-Alex
 
-This resolves:
-    http://tracker.ceph.com/issues/4324
-
-Reported-by: Greg Farnum <greg@inktank.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- net/ceph/messenger.c |   23 +++++++++++++----------
- 1 file changed, 13 insertions(+), 10 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 5bf1bb5..644cb6c 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2860,18 +2860,21 @@ static int ceph_con_in_msg_alloc(struct
-ceph_connection *con, int *skip)
- 			ceph_msg_put(msg);
- 		return -EAGAIN;
- 	}
--	con->in_msg = msg;
--	if (con->in_msg) {
-+	if (msg) {
-+		BUG_ON(*skip);
-+		con->in_msg = msg;
- 		con->in_msg->con = con->ops->get(con);
- 		BUG_ON(con->in_msg->con == NULL);
--	}
--	if (*skip) {
--		con->in_msg = NULL;
--		return 0;
--	}
--	if (!con->in_msg) {
--		con->error_msg =
--			"error allocating memory for incoming message";
-+	} else {
-+		/*
-+		 * Null message pointer means either we should skip
-+		 * this message or we couldn't allocate memory.  The
-+		 * former is not an error.
-+		 */
-+		if (*skip)
-+			return 0;
-+		con->error_msg = "error allocating memory for incoming message";
-+
- 		return -ENOMEM;
- 	}
- 	memcpy(&con->in_msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
--- 
-1.7.9.5
+> +}
+> +EXPORT_SYMBOL(ceph_msg_data_set_pages);
 
