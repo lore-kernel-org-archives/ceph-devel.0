@@ -1,47 +1,52 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 1/5] libceph: isolate message page field manipulation
-Date: Tue, 05 Mar 2013 10:03:24 -0600
-Message-ID: <5136174C.5000306@inktank.com>
-References: <5135F859.1090606@inktank.com> <5135F8A9.2080506@inktank.com>
+From: Greg Farnum <greg@inktank.com>
+Subject: CephFS First product release discussion
+Date: Tue, 5 Mar 2013 09:03:15 -0800
+Message-ID: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:37361 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752839Ab3CEQD2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 11:03:28 -0500
-Received: by mail-ob0-f180.google.com with SMTP id ef5so2708123obb.39
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 08:03:28 -0800 (PST)
-In-Reply-To: <5135F8A9.2080506@inktank.com>
+Received: from mail-da0-f49.google.com ([209.85.210.49]:34675 "EHLO
+	mail-da0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751746Ab3CERDV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 12:03:21 -0500
+Received: by mail-da0-f49.google.com with SMTP id t11so32800daj.8
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 09:03:20 -0800 (PST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, "=?utf-8?Q?ceph-users=40lists.ceph.com?=" <ceph-users@lists.ceph.com>
 
-On 03/05/2013 07:52 AM, Alex Elder wrote:
-> +void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page **pages,
-> +		unsigned int page_count, size_t alignment)
-> +{
-> +	/* BUG_ON(!pages); */
-> +	/* BUG_ON(!page_count); */
-> +	/* BUG_ON(msg->pages); */
-> +	/* BUG_ON(msg->page_count); */
-> +
-> +	msg->pages = pages;
-> +	msg->page_count = page_count;
-> +	msg->page_alignment = alignment & PAGE_SIZE;
+This is a companion discussion to the blog post at http://ceph.com/dev-=
+notes/cephfs-mds-status-discussion/ =E2=80=94 go read that!
 
-Whoops, this is supposed to be:
-	msg->page_alignment = alignment & ~PAGE_MASK;
+The short and slightly alternate version: I spent most of about two wee=
+ks working on bugs related to snapshots in the MDS, and we started real=
+izing that we could probably do our first supported release of CephFS a=
+nd the related infrastructure much sooner if we didn't need to support =
+all of the whizbang features. (This isn't to say that the base feature =
+set is stable now, but it's much closer than when you turn on some of t=
+he other things.) I'd like to get feedback from you in the community on=
+ what minimum supported feature set would prompt or allow you to start =
+using CephFS in real environments =E2=80=94 not what you'd *like* to se=
+e, but what you *need* to see. This will allow us at Inktank to priorit=
+ize more effectively and hopefully get out a supported release much mor=
+e quickly! :)
 
-I think it works despite the bug, it just isn't very
-good for performance on the other end...
+The current proposed feature set is basically what's left over after we=
+'ve trimmed off everything we can think to split off, but if any of the=
+ proposed included features are also particularly important or don't ma=
+tter, be sure to mention them (NFS export in particular =E2=80=94 it wo=
+rks right now but isn't in great shape due to NFS filehandle caching).
 
-I will fix this before I commit anything (and after
-review).
+Thanks,
+-Greg
 
-					-Alex
+Software Engineer #42 @ http://inktank.com | http://ceph.com =20
 
-> +}
-> +EXPORT_SYMBOL(ceph_msg_data_set_pages);
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
