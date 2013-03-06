@@ -1,138 +1,51 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: CephFS First product release discussion
-Date: Wed, 06 Mar 2013 18:24:20 +0100
-Message-ID: <51377BC4.5070200@42on.com>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com> <51363490.4070408@42on.com> <1F15E079964848B9BE079E974A1946B4@inktank.com> <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net> <51363B30.7080006@42on.com> <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
+From: Alex Sla <4k3nd0@gmail.com>
+Subject: Mutiple network port for a single osd
+Date: Wed, 6 Mar 2013 18:27:20 +0100
+Message-ID: <CALLyzeYeMNwzn6osF8BbZ+qnbotCLCuxEn8vv9UNhPgnQaMktg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:45371 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752799Ab3CFRYX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 6 Mar 2013 12:24:23 -0500
-In-Reply-To: <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:62447 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752653Ab3CFR1W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 12:27:22 -0500
+Received: by mail-wg0-f42.google.com with SMTP id 12so5212752wgh.3
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 09:27:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Greg Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/05/2013 08:33 PM, Sage Weil wrote:
-> On Tue, 5 Mar 2013, Wido den Hollander wrote:
->>> Wido, by 'user quota' do you mean something that is uid-based, or would
->>> enforcement on subtree/directory quotas be sufficient for your use cases?
->>> I've been holding out hope that uid-based usage accounting is a thing of
->>> the past and that subtrees are sufficient for real users... in which case
->>> adding enfocement to the existing rstats infrastructure is a very
->>> manageable task.
->>>
->>
->> I mean actual uid-based quotas. That still plays nice with shared environments
->> like Samba or so where you have all homedirectories on a shared filesystems
->> and you set per user quotas. Samba reads out those quotas and propagates them
->> to the (Windows) client.
->
-> Does samba propagate the quota information (how much space is
-> used/available) or do enforcement on the client side?  (Is client
-> enforcement even necessary/useful if the backend will stop writes when the
-> quota is exceeded?)
->
+Hello guys,
 
-I'm not sure. It will at least tell the user how much he/she is using on 
-that volume and what the quota is. Not sure who enforces, Samba or the 
-filesystem.
+first of all, thank you for Ceph. Such an amazon technology. Great
+pleasure to work with.
 
- From a quick Google it seems like the filesystem has to enforce the 
-quota, Samba doesn't.
+Then to my question. I review Ceph in scope of security and need to
+understand how the single osd is create network port (for iptables).
+But i just saw some interesting thing:
 
->> I know this was a problem with ZFS as well. They also said they could do "per
->> filesystem quotas" so that would be sufficient, but for example NFS doesn't
->> export filesystems mounted in a export, so if you have a bunch of
->> homedirectories on the filesystem and you want to account the usage of each
->> user it's getting kind of hard.
->>
->> This could be solved if the clients directly mounted CephFS though.
->>
->> I'm talking about setups where you have 100k users in a LDAP and they all have
->> their data in a single filesystem and you want to track the usage of each
->> user, that's not an easy task without uid-based quotas.
->
-> Wouldn't each user live in a sub- or home directory?  If so, it seems like
-> the existing rstats would be sufficient to do the accounting piece; only
-> enforcement is missing.
->
->> Running 'du' on each directory would be much faster with Ceph since it
->> accounts tracks the subdirectories and shows their total size with an 'ls
->> -al'.
->>
->> Environments with 100k users also tend to be very dynamic with adding and
->> removing users all the time, so creating separate filesystems for them would
->> be very time consuming.
->>
->> Now, I'm not talking about enforcing soft or hard quotas, I'm just talking
->> about knowing how much space uid X and Y consume on the filesystem.
->
-> The part I'm most unclear on is what use cases people have where uid X and
-> Y are spread around the file system (not in a single or small set of sub
-> directories) and per-user (not, say, per-project) quotas are still
-> necessary.  In most environments, users get their own home directory and
-> everything lives there...
->
+Some of my osds running on more then one port.
 
-I see a POSIX-filesystem as being partially legacy and a part of that 
-legacy is user quotas.
+for example:
 
-If you want existing applications who rely on userquotas to seamlessly 
-switch from NFS to CephFS they will need this to work.
+Ports:
 
-We only talked about userquotas, but groupquotas are just as important.
+tcp        0      0 172.20.21.2:6902        0.0.0.0:*
+LISTEN      1635/ceph-osd
+tcp        0      0 172.20.21.2:6903        0.0.0.0:*
+LISTEN      1635/ceph-osd
+tcp        0      0 172.20.21.2:6904        0.0.0.0:*
+LISTEN      1635/ceph-osd
 
-If you have 10 users where 5 of them are in the group "webdev" and you 
-wan't to know how much space is being used by the group "webdev" you 
-want to probe the group quotas and you are done.
+ps aux|grep 1635
 
-In some setups like we have users have data in different directories 
-outside their home directories / NFS exports. On one machine you just 
-run "quota -u <uid>" and you know how much user X is using spread out 
-over all the filesystems.
+root      1635  1.9  0.2 1239708 172556 ?      Ssl  Feb23 301:34
+/usr/bin/ceph-osd --cluster=ceph -i 1 -f
 
-With rstats you would be able to achieve the same with some scripting, 
-but that doesn't make the migration seamless.
-
-Wido
-
-> sage
->
->
->>
->> Wido
->>
->>> sage
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->>
->> --
->> Wido den Hollander
->> 42on B.V.
->>
->> Phone: +31 (0)20 700 9902
->> Skype: contact42on
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+But some doesn't have this much ports. Why do this happen ? More
+important to know, up to how many port will be used? In overall it
+looks only 3.
 
 
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+so far
+4k3nd0
