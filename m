@@ -1,40 +1,138 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: Usable Space
-Date: Wed, 6 Mar 2013 15:59:54 +0100
-Message-ID: <CAF6-1L7CDsbW8jW1-DuV9-8ZpUSStpFAhY5iEBhSvB1gtk5B3Q@mail.gmail.com>
-References: <CAP8Oy=JrQiNYcwPNTqdyDzDk1A4LBEcSFzwLAqcgSFcUu-WhJg@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: CephFS First product release discussion
+Date: Wed, 06 Mar 2013 18:24:20 +0100
+Message-ID: <51377BC4.5070200@42on.com>
+References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com> <51363490.4070408@42on.com> <1F15E079964848B9BE079E974A1946B4@inktank.com> <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net> <51363B30.7080006@42on.com> <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f52.google.com ([209.85.214.52]:34818 "EHLO
-	mail-bk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755607Ab3CFO74 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 09:59:56 -0500
-Received: by mail-bk0-f52.google.com with SMTP id jk13so348888bkc.11
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 06:59:55 -0800 (PST)
-In-Reply-To: <CAP8Oy=JrQiNYcwPNTqdyDzDk1A4LBEcSFzwLAqcgSFcUu-WhJg@mail.gmail.com>
+Received: from websrv.42on.com ([31.25.102.167]:45371 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752799Ab3CFRYX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Mar 2013 12:24:23 -0500
+In-Reply-To: <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>, a.iwanowski@ogicom.pl
+To: Sage Weil <sage@inktank.com>
+Cc: Greg Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
-> Total Space: X / Y  ||  Usable Space: A / B
+On 03/05/2013 08:33 PM, Sage Weil wrote:
+> On Tue, 5 Mar 2013, Wido den Hollander wrote:
+>>> Wido, by 'user quota' do you mean something that is uid-based, or would
+>>> enforcement on subtree/directory quotas be sufficient for your use cases?
+>>> I've been holding out hope that uid-based usage accounting is a thing of
+>>> the past and that subtrees are sufficient for real users... in which case
+>>> adding enfocement to the existing rstats infrastructure is a very
+>>> manageable task.
+>>>
+>>
+>> I mean actual uid-based quotas. That still plays nice with shared environments
+>> like Samba or so where you have all homedirectories on a shared filesystems
+>> and you set per user quotas. Samba reads out those quotas and propagates them
+>> to the (Windows) client.
+>
+> Does samba propagate the quota information (how much space is
+> used/available) or do enforcement on the client side?  (Is client
+> enforcement even necessary/useful if the backend will stop writes when the
+> quota is exceeded?)
+>
 
-> Would it be possible to add this in at some point? Seems like a great
-> addition to go with some of the other 'usability enhancements' that
-> are planned.  Or would this get computationally sticky based on having
-> many pools with different replication levels?
+I'm not sure. It will at least tell the user how much he/she is using on 
+that volume and what the quota is. Not sure who enforces, Samba or the 
+filesystem.
 
-How would you even compute it ?
+ From a quick Google it seems like the filesystem has to enforce the 
+quota, Samba doesn't.
 
-I mean if the underlying storage is shared between several pools with
-different replication level, the "usable space" will depend in which
-space you actually put your data in ...
+>> I know this was a problem with ZFS as well. They also said they could do "per
+>> filesystem quotas" so that would be sufficient, but for example NFS doesn't
+>> export filesystems mounted in a export, so if you have a bunch of
+>> homedirectories on the filesystem and you want to account the usage of each
+>> user it's getting kind of hard.
+>>
+>> This could be solved if the clients directly mounted CephFS though.
+>>
+>> I'm talking about setups where you have 100k users in a LDAP and they all have
+>> their data in a single filesystem and you want to track the usage of each
+>> user, that's not an easy task without uid-based quotas.
+>
+> Wouldn't each user live in a sub- or home directory?  If so, it seems like
+> the existing rstats would be sufficient to do the accounting piece; only
+> enforcement is missing.
+>
+>> Running 'du' on each directory would be much faster with Ceph since it
+>> accounts tracks the subdirectories and shows their total size with an 'ls
+>> -al'.
+>>
+>> Environments with 100k users also tend to be very dynamic with adding and
+>> removing users all the time, so creating separate filesystems for them would
+>> be very time consuming.
+>>
+>> Now, I'm not talking about enforcing soft or hard quotas, I'm just talking
+>> about knowing how much space uid X and Y consume on the filesystem.
+>
+> The part I'm most unclear on is what use cases people have where uid X and
+> Y are spread around the file system (not in a single or small set of sub
+> directories) and per-user (not, say, per-project) quotas are still
+> necessary.  In most environments, users get their own home directory and
+> everything lives there...
+>
 
-You could do it "per pool" but even then I think it can get tricky
-because the CRUSH map could very well distribute the data in a pool on
-a subset of OSD so you'd need to take that into account as well.
+I see a POSIX-filesystem as being partially legacy and a part of that 
+legacy is user quotas.
 
-Cheers,
+If you want existing applications who rely on userquotas to seamlessly 
+switch from NFS to CephFS they will need this to work.
 
-   Sylvain
+We only talked about userquotas, but groupquotas are just as important.
+
+If you have 10 users where 5 of them are in the group "webdev" and you 
+wan't to know how much space is being used by the group "webdev" you 
+want to probe the group quotas and you are done.
+
+In some setups like we have users have data in different directories 
+outside their home directories / NFS exports. On one machine you just 
+run "quota -u <uid>" and you know how much user X is using spread out 
+over all the filesystems.
+
+With rstats you would be able to achieve the same with some scripting, 
+but that doesn't make the migration seamless.
+
+Wido
+
+> sage
+>
+>
+>>
+>> Wido
+>>
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>>
+>> --
+>> Wido den Hollander
+>> 42on B.V.
+>>
+>> Phone: +31 (0)20 700 9902
+>> Skype: contact42on
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
