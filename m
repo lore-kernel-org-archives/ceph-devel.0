@@ -1,127 +1,49 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: fix decoding of pgids
-Date: Wed, 6 Mar 2013 14:58:11 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1303061455340.7354@cobra.newdream.net>
-References: <1362608124-7567-1-git-send-email-sage@inktank.com> <CAC-hyiG0Eb8+0CLJLB0QHUzqidEQNCp1-Om6RSMZAGbBf8AU4Q@mail.gmail.com>
+From: Neil Levine <neil.levine@inktank.com>
+Subject: Re: OpenStack summit : Ceph design session
+Date: Wed, 6 Mar 2013 15:05:27 -0800
+Message-ID: <CANygib_BkX7oXGKNF44UxJL=1b=+6Kaw3janFaA4cDHPpxV9BQ@mail.gmail.com>
+References: <51289AF2.9010509@dachary.org>
+	<512A9F5F.7080706@inktank.com>
+	<CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com>
+	<512B3725.4040602@dachary.org>
+	<513319E8.7000105@dachary.org>
+	<CANygib_axAT=3vmG39GNCb0X_1Goycy+P6nF2UQyBcUm9EqbUA@mail.gmail.com>
+	<5137C71E.5090507@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50332 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756514Ab3CFW6L (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 17:58:11 -0500
-In-Reply-To: <CAC-hyiG0Eb8+0CLJLB0QHUzqidEQNCp1-Om6RSMZAGbBf8AU4Q@mail.gmail.com>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:35927 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753309Ab3CFXF2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 18:05:28 -0500
+Received: by mail-ie0-f177.google.com with SMTP id 16so9924538iea.8
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 15:05:27 -0800 (PST)
+In-Reply-To: <5137C71E.5090507@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 6 Mar 2013, Yehuda Sadeh wrote:
-> On Wed, Mar 6, 2013 at 2:15 PM, Sage Weil <sage@inktank.com> wrote:
-> > In 4f6a7e5ee1393ec4b243b39dac9f36992d161540 we effectively dropped support
-> > for the legacy encoding for the OSDMap and incremental.  However, we didn't
-> > fix the decoding for the pgid.
-> >
-> > Signed-off-by: Sage Weil <sage@inktank.com>
-> > ---
-> >  net/ceph/osdmap.c |   40 +++++++++++++++++++++++++++-------------
-> >  1 file changed, 27 insertions(+), 13 deletions(-)
-> >
-> > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> > index a47ee06..6975102 100644
-> > --- a/net/ceph/osdmap.c
-> > +++ b/net/ceph/osdmap.c
-> > @@ -654,6 +654,24 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
-> >         return 0;
-> >  }
-> >
-> > +static int __decode_pgid(void **p, void *end, struct ceph_pg *pg)
-> > +{
-> > +       u8 v;
-> > +
-> > +       ceph_decode_need(p, end, 1+8+4+4, bad);
-> > +       v = ceph_decode_8(p);
-> > +       if (v != 1)
-> > +               goto bad;
-> > +       pg->pool = ceph_decode_64(p);
-> > +       pg->seed = ceph_decode_32(p);
-> > +       *p += 4; /* skip preferred */
-> > +       return 0;
-> > +
-> > +bad:
-> > +       dout("error decoding pgid\n");
-> > +       return -EINVAL;
-> > +}
-> > +
-> >  /*
-> >   * decode a full map.
-> >   */
-> > @@ -745,13 +763,11 @@ struct ceph_osdmap *osdmap_decode(void **p, void *end)
-> >         for (i = 0; i < len; i++) {
-> >                 int n, j;
-> >                 struct ceph_pg pgid;
-> > -               struct ceph_pg_v1 pgid_v1;
-> >                 struct ceph_pg_mapping *pg;
-> >
-> > -               ceph_decode_need(p, end, sizeof(u32) + sizeof(u64), bad);
-> > -               ceph_decode_copy(p, &pgid_v1, sizeof(pgid_v1));
-> > -               pgid.pool = le32_to_cpu(pgid_v1.pool);
-> > -               pgid.seed = le16_to_cpu(pgid_v1.ps);
-> > +               err = __decode_pgid(p, end, &pgid);
-> > +               if (err)
-> > +                       goto bad;
-> >                 n = ceph_decode_32(p);
-> >                 err = -EINVAL;
-> >                 if (n > (UINT_MAX - sizeof(*pg)) / sizeof(u32))
-> > @@ -818,8 +834,8 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
-> >         u16 version;
-> >
-> >         ceph_decode_16_safe(p, end, version, bad);
-> > -       if (version > 6) {
-> > -               pr_warning("got unknown v %d > %d of inc osdmap\n", version, 6);
-> > +       if (version != 6) {
-> > +               pr_warning("got unknown v %d != 6 of inc osdmap\n", version);
-> >                 goto bad;
-> >         }
-> >
-> > @@ -963,15 +979,13 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
-> >         while (len--) {
-> >                 struct ceph_pg_mapping *pg;
-> >                 int j;
-> > -               struct ceph_pg_v1 pgid_v1;
-> >                 struct ceph_pg pgid;
-> >                 u32 pglen;
-> > -               ceph_decode_need(p, end, sizeof(u64) + sizeof(u32), bad);
-> > -               ceph_decode_copy(p, &pgid_v1, sizeof(pgid_v1));
-> > -               pgid.pool = le32_to_cpu(pgid_v1.pool);
-> > -               pgid.seed = le16_to_cpu(pgid_v1.ps);
-> > -               pglen = ceph_decode_32(p);
-> >
-> > +               err = __decode_pgid(p, end, &pgid);
-> > +               if (err)
-> > +                       goto bad;
-> 
-> maybe missing?
-> 
-> ceph_decode_need(p, end, sizeof(u32), bad);
+On Wed, Mar 6, 2013 at 2:45 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Neil,
+>
+> On 03/06/2013 08:27 PM, Neil Levine wrote:
+>> I think the multi-site RGW stuff is somewhat orthogonal to OpenStack
+>
+> Even when keystone is involved ?
 
-Yup, for both call sites.  Pushed updated patch to testing.
+Good question.
 
-Thanks!
-sage
+Yehuda: how would the asynchronously replicated user metadata interact
+with Keystone?
 
+>> Who approves the session at ODS and when is this decision made?
+>
+> I suspect Josh knows more than I do about this. During the cinder meeting earlier today J. Griffith said that if the nova track is too busy to host the "Roadmap for Ceph integration with OpenStack" session he was in favor of having it in the cinder track. Following his advice I suggested to Thierry Carrez to open a "Cross project" track ( http://lists.openstack.org/pipermail/openstack-dev/2013-March/006365.html )
 
-> 
-> > +               pglen = ceph_decode_32(p);
-> >                 if (pglen) {
-> >                         ceph_decode_need(p, end, pglen*sizeof(u32), bad);
-> >
-> > --
-> > 1.7.9.5
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I don't think Cinder is such a bad place for it to be as presumably
+the interaction to copy the block device to a secondary location would
+be triggered through a Cinder API call no?
+
+Neil
