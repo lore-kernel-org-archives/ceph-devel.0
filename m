@@ -1,99 +1,134 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: CephFS Space Accounting and Quotas (was: CephFS First product
- release discussion)
-Date: Wed, 6 Mar 2013 11:13:58 -0800
-Message-ID: <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
- <51363490.4070408@42on.com>
- <1F15E079964848B9BE079E974A1946B4@inktank.com>
- <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
- <51363B30.7080006@42on.com>
- <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
- <513793FD.7010001@sandia.gov>
+From: Neil Levine <neil.levine@inktank.com>
+Subject: Re: OpenStack summit : Ceph design session
+Date: Wed, 6 Mar 2013 11:27:38 -0800
+Message-ID: <CANygib_axAT=3vmG39GNCb0X_1Goycy+P6nF2UQyBcUm9EqbUA@mail.gmail.com>
+References: <51289AF2.9010509@dachary.org>
+	<512A9F5F.7080706@inktank.com>
+	<CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com>
+	<512B3725.4040602@dachary.org>
+	<513319E8.7000105@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f54.google.com ([209.85.160.54]:43120 "EHLO
-	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754186Ab3CFTOD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 14:14:03 -0500
-Received: by mail-pb0-f54.google.com with SMTP id rr4so6415740pbb.27
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 11:14:02 -0800 (PST)
-In-Reply-To: <513793FD.7010001@sandia.gov>
-Content-Disposition: inline
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:35123 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751935Ab3CFT1i convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 14:27:38 -0500
+Received: by mail-ia0-f173.google.com with SMTP id h37so7740784iak.32
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 11:27:38 -0800 (PST)
+In-Reply-To: <513319E8.7000105@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, Jim Schutt <jaschut@sandia.gov>
-Cc: Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wednesday, March 6, 2013 at 11:07 AM, Jim Schutt wrote:
-> On 03/05/2013 12:33 PM, Sage Weil wrote:
-> > > > Running 'du' on each directory would be much faster with Ceph s=
-ince it
-> > > > accounts tracks the subdirectories and shows their total size w=
-ith an 'ls
-> > > > -al'.
-> > > > =20
-> > > > Environments with 100k users also tend to be very dynamic with =
-adding and
-> > > > removing users all the time, so creating separate filesystems f=
-or them would
-> > > > be very time consuming.
-> > > > =20
-> > > > Now, I'm not talking about enforcing soft or hard quotas, I'm j=
-ust talking
-> > > > about knowing how much space uid X and Y consume on the filesys=
-tem.
-> > > =20
-> > =20
-> > =20
-> > The part I'm most unclear on is what use cases people have where ui=
-d X and =20
-> > Y are spread around the file system (not in a single or small set o=
-f sub =20
-> > directories) and per-user (not, say, per-project) quotas are still =
-=20
-> > necessary. In most environments, users get their own home directory=
- and =20
-> > everything lives there...
-> =20
-> =20
-> =20
-> Hmmm, is there a tool I should be using that will return the space
-> used by a directory, and all its descendants?
-> =20
-> If it's 'du', that tool is definitely not fast for me.
-> =20
-> I'm doing an 'strace du -s <path>', where <path> has one
-> subdirectory which contains ~600 files. I've got ~200 clients
-> mounting the file system, and each client wrote 3 files in that
-> directory.
-> =20
-> I'm doing the 'du' from one of those nodes, and the strace is showing
-> me du is doing a 'newfstat' for each file. For each file that was
-> written on a different client from where du is running, that 'newfsta=
-t'
-> takes tens of seconds to return. Which means my 'du' has been running
-> for quite some time and hasn't finished yet....
-> =20
-> I'm hoping there's another tool I'm supposed to be using that I
-> don't know about yet. Our use case includes tens of millions
-> of files written from thousands of clients, and whatever tool
-> we use to do space accounting needs to not walk an entire directory
-> tree, checking each file.
+I think the multi-site RGW stuff is somewhat orthogonal to OpenStack
+where as the RBD backups needs to factor in Horizon, Cinder APIs and
+where the logic for managing the backups sits.
 
-Check out the directory sizes with ls -l or whatever =E2=80=94 those nu=
-mbers are semantically meaningful! :)
+Ross is looking to get a wiki setup for Ceph blueprints so we can
+document the incremental snapshot stuff and then use this as a basis
+for creating the OpenStack blueprint.
 
-Unfortunately we can't (currently) use those "recursive statistics" to =
-do proper hard quotas on subdirectories as they're lazily propagated fo=
-llowing client ops, not as part of the updates. (Lazily in the technica=
-l sense =E2=80=94 it's actually quite fast in general). But they'd work=
- fine for soft quotas if somebody wrote the code, or to block writes on=
- a slight time lag.
--Greg
+Who approves the session at ODS and when is this decision made?
 
+Neil
+
+On Sun, Mar 3, 2013 at 1:37 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Neil,
+>
+> I've updated http://summit.openstack.org/cfp/details/38 with the Geog=
+raphic DR related threads
+>
+>     Geo-replication with RADOS GW http://marc.info/?l=3Dceph-devel&m=3D=
+135939566407623&w=3D4
+>     Geographic DR for RGW http://marc.info/?l=3Dceph-devel&m=3D136191=
+479931880&w=3D4
+>
+> I'm increasingly interested in figuring out how it fits with OpenStac=
+k.
+>
+> Cheers
+>
+> On 02/25/2013 11:04 AM, Loic Dachary wrote:
+>> Hi Neil,
+>>
+>> I've added "RBD backups secondary clusters within Openstack" to the =
+list of blueprints. Do you have links to mail threads / chat logs relat=
+ed to this topic ?
+>>
+>> I moved the content of the session to an etherpad for collaborative =
+editing
+>>
+>> https://etherpad.openstack.org/roadmap-for-ceph-integration-with-ope=
+nstack
+>>
+>> and it is now linked from
+>>
+>> http://summit.openstack.org/cfp/details/38
+>>
+>> Cheers
+>>
+>> On 02/25/2013 07:12 AM, Neil Levine wrote:
+>>> Thanks for taking the lead on this Loic.
+>>>
+>>> As a blueprint, I'd like to look at RBD backups to secondary cluste=
+rs
+>>> within Openstack. Nick Barcet and others have mentioned ideas for t=
+his
+>>> now that Cinder is multi-cluster aware.
+>>>
+>>> Neil
+>>>
+>>> On Sun, Feb 24, 2013 at 3:16 PM, Josh Durgin <josh.durgin@inktank.c=
+om> wrote:
+>>>> On 02/23/2013 02:33 AM, Loic Dachary wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>> In anticipation of the next OpenStack summit
+>>>>> http://www.openstack.org/summit/portland-2013/, I proposed a sess=
+ion to
+>>>>> discuss OpenStack and Ceph integration. Our meeting during FOSDEM=
+ earlier
+>>>>> this month was a great experience although it was planned at the =
+last
+>>>>> minute. I hope we can organize something even better for the summ=
+it.
+>>>>>
+>>>>> For developers and contributors to both Ceph and OpenStack such a=
+s myself,
+>>>>> it would be a great opportunity to figure out a sensible roadmap =
+for the
+>>>>> next six months. I realize this roadmap is already clear for Josh=
+ Durgin and
+>>>>> other Ceph / OpenStack developers who are passionately invested i=
+n both
+>>>>> projects for a long time. However I am new to both projects and s=
+uch a
+>>>>> session would be a precious guide and highly motivating.
+>>>>>
+>>>>> http://summit.openstack.org/cfp/details/38
+>>>>>
+>>>>> What do you think ?
+>>>>>
+>>>>
+>>>> Sounds like a great idea!
+>>>> Thanks for putting together the session!
+>>>>
+>>>> Josh
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
