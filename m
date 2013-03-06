@@ -1,134 +1,137 @@
-From: Neil Levine <neil.levine@inktank.com>
-Subject: Re: OpenStack summit : Ceph design session
-Date: Wed, 6 Mar 2013 11:27:38 -0800
-Message-ID: <CANygib_axAT=3vmG39GNCb0X_1Goycy+P6nF2UQyBcUm9EqbUA@mail.gmail.com>
-References: <51289AF2.9010509@dachary.org>
-	<512A9F5F.7080706@inktank.com>
-	<CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com>
-	<512B3725.4040602@dachary.org>
-	<513319E8.7000105@dachary.org>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: CephFS Space Accounting and Quotas
+Date: Wed, 6 Mar 2013 12:58:05 -0700
+Message-ID: <51379FCD.9000502@sandia.gov>
+References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
+ <51363490.4070408@42on.com>
+ <1F15E079964848B9BE079E974A1946B4@inktank.com>
+ <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
+ <51363B30.7080006@42on.com>
+ <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
+ <513793FD.7010001@sandia.gov>
+ <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f173.google.com ([209.85.210.173]:35123 "EHLO
-	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751935Ab3CFT1i convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 14:27:38 -0500
-Received: by mail-ia0-f173.google.com with SMTP id h37so7740784iak.32
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 11:27:38 -0800 (PST)
-In-Reply-To: <513319E8.7000105@dachary.org>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:50199 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752943Ab3CFT7A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 14:59:00 -0500
+In-Reply-To: <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
 
-I think the multi-site RGW stuff is somewhat orthogonal to OpenStack
-where as the RBD backups needs to factor in Horizon, Cinder APIs and
-where the logic for managing the backups sits.
+On 03/06/2013 12:13 PM, Greg Farnum wrote:
+> On Wednesday, March 6, 2013 at 11:07 AM, Jim Schutt wrote:
+>> On 03/05/2013 12:33 PM, Sage Weil wrote:
+>>>>> Running 'du' on each directory would be much faster with Ceph sin=
+ce it
+>>>>> accounts tracks the subdirectories and shows their total size wit=
+h an 'ls
+>>>>> -al'.
+>>>>> =20
+>>>>> Environments with 100k users also tend to be very dynamic with ad=
+ding and
+>>>>> removing users all the time, so creating separate filesystems for=
+ them would
+>>>>> be very time consuming.
+>>>>> =20
+>>>>> Now, I'm not talking about enforcing soft or hard quotas, I'm jus=
+t talking
+>>>>> about knowing how much space uid X and Y consume on the filesyste=
+m.
+>>>> =20
+>>> =20
+>>> =20
+>>> The part I'm most unclear on is what use cases people have where ui=
+d X and =20
+>>> Y are spread around the file system (not in a single or small set o=
+f sub =20
+>>> directories) and per-user (not, say, per-project) quotas are still =
+=20
+>>> necessary. In most environments, users get their own home directory=
+ and =20
+>>> everything lives there...
+>> =20
+>> =20
+>> =20
+>> Hmmm, is there a tool I should be using that will return the space
+>> used by a directory, and all its descendants?
+>> =20
+>> If it's 'du', that tool is definitely not fast for me.
+>> =20
+>> I'm doing an 'strace du -s <path>', where <path> has one
+>> subdirectory which contains ~600 files. I've got ~200 clients
+>> mounting the file system, and each client wrote 3 files in that
+>> directory.
+>> =20
+>> I'm doing the 'du' from one of those nodes, and the strace is showin=
+g
+>> me du is doing a 'newfstat' for each file. For each file that was
+>> written on a different client from where du is running, that 'newfst=
+at'
+>> takes tens of seconds to return. Which means my 'du' has been runnin=
+g
+>> for quite some time and hasn't finished yet....
+>> =20
+>> I'm hoping there's another tool I'm supposed to be using that I
+>> don't know about yet. Our use case includes tens of millions
+>> of files written from thousands of clients, and whatever tool
+>> we use to do space accounting needs to not walk an entire directory
+>> tree, checking each file.
+>=20
+> Check out the directory sizes with ls -l or whatever =E2=80=94 those =
+numbers are semantically meaningful! :)
 
-Ross is looking to get a wiki setup for Ceph blueprints so we can
-document the incremental snapshot stuff and then use this as a basis
-for creating the OpenStack blueprint.
+That is just exceptionally cool!
 
-Who approves the session at ODS and when is this decision made?
+>=20
+> Unfortunately we can't (currently) use those "recursive statistics"
+> to do proper hard quotas on subdirectories as they're lazily
+> propagated following client ops, not as part of the updates. (Lazily
+> in the technical sense =E2=80=94 it's actually quite fast in general)=
+=2E But
+> they'd work fine for soft quotas if somebody wrote the code, or to
+> block writes on a slight time lag.
 
-Neil
+'ls -lh <dir>' seems to be just the thing if you already know <dir>.
 
-On Sun, Mar 3, 2013 at 1:37 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Neil,
->
-> I've updated http://summit.openstack.org/cfp/details/38 with the Geog=
-raphic DR related threads
->
->     Geo-replication with RADOS GW http://marc.info/?l=3Dceph-devel&m=3D=
-135939566407623&w=3D4
->     Geographic DR for RGW http://marc.info/?l=3Dceph-devel&m=3D136191=
-479931880&w=3D4
->
-> I'm increasingly interested in figuring out how it fits with OpenStac=
-k.
->
-> Cheers
->
-> On 02/25/2013 11:04 AM, Loic Dachary wrote:
->> Hi Neil,
->>
->> I've added "RBD backups secondary clusters within Openstack" to the =
-list of blueprints. Do you have links to mail threads / chat logs relat=
-ed to this topic ?
->>
->> I moved the content of the session to an etherpad for collaborative =
-editing
->>
->> https://etherpad.openstack.org/roadmap-for-ceph-integration-with-ope=
-nstack
->>
->> and it is now linked from
->>
->> http://summit.openstack.org/cfp/details/38
->>
->> Cheers
->>
->> On 02/25/2013 07:12 AM, Neil Levine wrote:
->>> Thanks for taking the lead on this Loic.
->>>
->>> As a blueprint, I'd like to look at RBD backups to secondary cluste=
-rs
->>> within Openstack. Nick Barcet and others have mentioned ideas for t=
-his
->>> now that Cinder is multi-cluster aware.
->>>
->>> Neil
->>>
->>> On Sun, Feb 24, 2013 at 3:16 PM, Josh Durgin <josh.durgin@inktank.c=
-om> wrote:
->>>> On 02/23/2013 02:33 AM, Loic Dachary wrote:
->>>>>
->>>>> Hi,
->>>>>
->>>>> In anticipation of the next OpenStack summit
->>>>> http://www.openstack.org/summit/portland-2013/, I proposed a sess=
-ion to
->>>>> discuss OpenStack and Ceph integration. Our meeting during FOSDEM=
- earlier
->>>>> this month was a great experience although it was planned at the =
-last
->>>>> minute. I hope we can organize something even better for the summ=
-it.
->>>>>
->>>>> For developers and contributors to both Ceph and OpenStack such a=
-s myself,
->>>>> it would be a great opportunity to figure out a sensible roadmap =
-for the
->>>>> next six months. I realize this roadmap is already clear for Josh=
- Durgin and
->>>>> other Ceph / OpenStack developers who are passionately invested i=
-n both
->>>>> projects for a long time. However I am new to both projects and s=
-uch a
->>>>> session would be a precious guide and highly motivating.
->>>>>
->>>>> http://summit.openstack.org/cfp/details/38
->>>>>
->>>>> What do you think ?
->>>>>
->>>>
->>>> Sounds like a great idea!
->>>> Thanks for putting together the session!
->>>>
->>>> Josh
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->
+And it's perfectly suitable for our use case of not scheduling
+new jobs for users consuming too much space.
+
+I was thinking I might need to find a subtree where all the
+subdirectories are owned by the same user, on the theory that
+all the files in such a subtree would be owned by that same
+user.  E.g., we might want such a capability to manage space per
+user in shared project directories.
+
+So, I tried 'find <dir> -type d -exec ls -lhd {} \;'
+
+Unfortunately, that ended up doing a 'newfstatat' on each file
+under <dir>, evidently to learn if it was a directory.  The
+result was that same slowdown for files written on other clients.
+
+Is there some other way I should be looking for directories if I
+don't already know what they are?
+
+Also, this issue of stat on files created on other clients seems
+like it's going to be problematic for many interactions our users
+will have with the files created by their parallel compute jobs -
+any suggestion on how to avoid or fix it?
+
+Thanks!
+
+-- Jim
+
+> -Greg
+>=20
+>=20
+>=20
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
