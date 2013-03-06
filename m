@@ -1,168 +1,119 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: OpenStack summit : Ceph design session
-Date: Wed, 06 Mar 2013 23:45:50 +0100
-Message-ID: <5137C71E.5090507@dachary.org>
-References: <51289AF2.9010509@dachary.org> <512A9F5F.7080706@inktank.com> <CANygib_m5h6F7u5ayzSTdZ2Y_8mO414dFXQup2w8NTWQtYWc9w@mail.gmail.com> <512B3725.4040602@dachary.org> <513319E8.7000105@dachary.org> <CANygib_axAT=3vmG39GNCb0X_1Goycy+P6nF2UQyBcUm9EqbUA@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: [PATCH] libceph: fix decoding of pgids
+Date: Wed, 6 Mar 2013 14:48:04 -0800
+Message-ID: <CAC-hyiG0Eb8+0CLJLB0QHUzqidEQNCp1-Om6RSMZAGbBf8AU4Q@mail.gmail.com>
+References: <1362608124-7567-1-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig1CA9D2B3A4D72C1AF5B35E66"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:36306 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752838Ab3CFWpz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 17:45:55 -0500
-In-Reply-To: <CANygib_axAT=3vmG39GNCb0X_1Goycy+P6nF2UQyBcUm9EqbUA@mail.gmail.com>
+Received: from mail-ie0-f178.google.com ([209.85.223.178]:57160 "EHLO
+	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754247Ab3CFWsG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 17:48:06 -0500
+Received: by mail-ie0-f178.google.com with SMTP id c13so10434538ieb.9
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Mar 2013 14:48:05 -0800 (PST)
+In-Reply-To: <1362608124-7567-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Neil Levine <neil.levine@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig1CA9D2B3A4D72C1AF5B35E66
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Wed, Mar 6, 2013 at 2:15 PM, Sage Weil <sage@inktank.com> wrote:
+> In 4f6a7e5ee1393ec4b243b39dac9f36992d161540 we effectively dropped support
+> for the legacy encoding for the OSDMap and incremental.  However, we didn't
+> fix the decoding for the pgid.
+>
+> Signed-off-by: Sage Weil <sage@inktank.com>
+> ---
+>  net/ceph/osdmap.c |   40 +++++++++++++++++++++++++++-------------
+>  1 file changed, 27 insertions(+), 13 deletions(-)
+>
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index a47ee06..6975102 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -654,6 +654,24 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
+>         return 0;
+>  }
+>
+> +static int __decode_pgid(void **p, void *end, struct ceph_pg *pg)
+> +{
+> +       u8 v;
+> +
+> +       ceph_decode_need(p, end, 1+8+4+4, bad);
+> +       v = ceph_decode_8(p);
+> +       if (v != 1)
+> +               goto bad;
+> +       pg->pool = ceph_decode_64(p);
+> +       pg->seed = ceph_decode_32(p);
+> +       *p += 4; /* skip preferred */
+> +       return 0;
+> +
+> +bad:
+> +       dout("error decoding pgid\n");
+> +       return -EINVAL;
+> +}
+> +
+>  /*
+>   * decode a full map.
+>   */
+> @@ -745,13 +763,11 @@ struct ceph_osdmap *osdmap_decode(void **p, void *end)
+>         for (i = 0; i < len; i++) {
+>                 int n, j;
+>                 struct ceph_pg pgid;
+> -               struct ceph_pg_v1 pgid_v1;
+>                 struct ceph_pg_mapping *pg;
+>
+> -               ceph_decode_need(p, end, sizeof(u32) + sizeof(u64), bad);
+> -               ceph_decode_copy(p, &pgid_v1, sizeof(pgid_v1));
+> -               pgid.pool = le32_to_cpu(pgid_v1.pool);
+> -               pgid.seed = le16_to_cpu(pgid_v1.ps);
+> +               err = __decode_pgid(p, end, &pgid);
+> +               if (err)
+> +                       goto bad;
+>                 n = ceph_decode_32(p);
+>                 err = -EINVAL;
+>                 if (n > (UINT_MAX - sizeof(*pg)) / sizeof(u32))
+> @@ -818,8 +834,8 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+>         u16 version;
+>
+>         ceph_decode_16_safe(p, end, version, bad);
+> -       if (version > 6) {
+> -               pr_warning("got unknown v %d > %d of inc osdmap\n", version, 6);
+> +       if (version != 6) {
+> +               pr_warning("got unknown v %d != 6 of inc osdmap\n", version);
+>                 goto bad;
+>         }
+>
+> @@ -963,15 +979,13 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+>         while (len--) {
+>                 struct ceph_pg_mapping *pg;
+>                 int j;
+> -               struct ceph_pg_v1 pgid_v1;
+>                 struct ceph_pg pgid;
+>                 u32 pglen;
+> -               ceph_decode_need(p, end, sizeof(u64) + sizeof(u32), bad);
+> -               ceph_decode_copy(p, &pgid_v1, sizeof(pgid_v1));
+> -               pgid.pool = le32_to_cpu(pgid_v1.pool);
+> -               pgid.seed = le16_to_cpu(pgid_v1.ps);
+> -               pglen = ceph_decode_32(p);
+>
+> +               err = __decode_pgid(p, end, &pgid);
+> +               if (err)
+> +                       goto bad;
 
-Hi Neil,
+maybe missing?
 
-On 03/06/2013 08:27 PM, Neil Levine wrote:
-> I think the multi-site RGW stuff is somewhat orthogonal to OpenStack
+ceph_decode_need(p, end, sizeof(u32), bad);
 
-Even when keystone is involved ?
-
-> where as the RBD backups needs to factor in Horizon, Cinder APIs and
-> where the logic for managing the backups sits.
->=20
-> Ross is looking to get a wiki setup for Ceph blueprints so we can
-> document the incremental snapshot stuff and then use this as a basis
-> for creating the OpenStack blueprint.
-
-Great.
-
-> Who approves the session at ODS and when is this decision made?
-
-I suspect Josh knows more than I do about this. During the cinder meeting=
- earlier today J. Griffith said that if the nova track is too busy to hos=
-t the "Roadmap for Ceph integration with OpenStack" session he was in fav=
-or of having it in the cinder track. Following his advice I suggested to =
-Thierry Carrez to open a "Cross project" track ( http://lists.openstack.o=
-rg/pipermail/openstack-dev/2013-March/006365.html )=20
-
-Cheers
-
-> Neil
->=20
-> On Sun, Mar 3, 2013 at 1:37 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Neil,
->>
->> I've updated http://summit.openstack.org/cfp/details/38 with the Geogr=
-aphic DR related threads
->>
->>     Geo-replication with RADOS GW http://marc.info/?l=3Dceph-devel&m=3D=
-135939566407623&w=3D4
->>     Geographic DR for RGW http://marc.info/?l=3Dceph-devel&m=3D1361914=
-79931880&w=3D4
->>
->> I'm increasingly interested in figuring out how it fits with OpenStack=
-=2E
->>
->> Cheers
->>
->> On 02/25/2013 11:04 AM, Loic Dachary wrote:
->>> Hi Neil,
->>>
->>> I've added "RBD backups secondary clusters within Openstack" to the l=
-ist of blueprints. Do you have links to mail threads / chat logs related =
-to this topic ?
->>>
->>> I moved the content of the session to an etherpad for collaborative e=
-diting
->>>
->>> https://etherpad.openstack.org/roadmap-for-ceph-integration-with-open=
-stack
->>>
->>> and it is now linked from
->>>
->>> http://summit.openstack.org/cfp/details/38
->>>
->>> Cheers
->>>
->>> On 02/25/2013 07:12 AM, Neil Levine wrote:
->>>> Thanks for taking the lead on this Loic.
->>>>
->>>> As a blueprint, I'd like to look at RBD backups to secondary cluster=
-s
->>>> within Openstack. Nick Barcet and others have mentioned ideas for th=
-is
->>>> now that Cinder is multi-cluster aware.
->>>>
->>>> Neil
->>>>
->>>> On Sun, Feb 24, 2013 at 3:16 PM, Josh Durgin <josh.durgin@inktank.co=
-m> wrote:
->>>>> On 02/23/2013 02:33 AM, Loic Dachary wrote:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> In anticipation of the next OpenStack summit
->>>>>> http://www.openstack.org/summit/portland-2013/, I proposed a sessi=
-on to
->>>>>> discuss OpenStack and Ceph integration. Our meeting during FOSDEM =
-earlier
->>>>>> this month was a great experience although it was planned at the l=
-ast
->>>>>> minute. I hope we can organize something even better for the summi=
-t.
->>>>>>
->>>>>> For developers and contributors to both Ceph and OpenStack such as=
- myself,
->>>>>> it would be a great opportunity to figure out a sensible roadmap f=
-or the
->>>>>> next six months. I realize this roadmap is already clear for Josh =
-Durgin and
->>>>>> other Ceph / OpenStack developers who are passionately invested in=
- both
->>>>>> projects for a long time. However I am new to both projects and su=
-ch a
->>>>>> session would be a precious guide and highly motivating.
->>>>>>
->>>>>> http://summit.openstack.org/cfp/details/38
->>>>>>
->>>>>> What do you think ?
->>>>>>
->>>>>
->>>>> Sounds like a great idea!
->>>>> Thanks for putting together the session!
->>>>>
->>>>> Josh
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enig1CA9D2B3A4D72C1AF5B35E66
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlE3xx4ACgkQ8dLMyEl6F20rcQCfVUSXet3LmdNOeUyWbGnAPjhE
-V6YAoL2y7INRRA8EWOwf8YP+KYTa6344
-=OZWC
------END PGP SIGNATURE-----
-
---------------enig1CA9D2B3A4D72C1AF5B35E66--
+> +               pglen = ceph_decode_32(p);
+>                 if (pglen) {
+>                         ceph_decode_need(p, end, pglen*sizeof(u32), bad);
+>
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
