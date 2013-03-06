@@ -1,62 +1,66 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: Re: When ceph synchronizes journal to disk?
-Date: Tue, 05 Mar 2013 18:50:02 -0700
-Message-ID: <5136A0CA.7050001@cs.utah.edu>
-References: <513343D8.8050402@cs.utah.edu> <CAPYLRzhAfvXfnCi4qRtdPEnV+v1qUy+DVED2Z0eep7eTvG__BA@mail.gmail.com> <51357589.6080202@cs.utah.edu> <5135F922.9020206@42on.com> <B8143C8DB41A458098CA3B73D784685B@inktank.com>
+From: Neil Levine <neil.levine@inktank.com>
+Subject: Re: [ceph-users] CephFS First product release discussion
+Date: Tue, 5 Mar 2013 21:01:29 -0800
+Message-ID: <CANygib-U_MQi1TMmQuT_Q9MVwPfT+PzJwN=+BMcBK69WuRfu3w@mail.gmail.com>
+References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rio.cs.utah.edu ([155.98.64.241]:45436 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752478Ab3CFBvf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Mar 2013 20:51:35 -0500
-In-Reply-To: <B8143C8DB41A458098CA3B73D784685B@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:51917 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750710Ab3CFFBa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Mar 2013 00:01:30 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k10so8760263iea.5
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Mar 2013 21:01:29 -0800 (PST)
+In-Reply-To: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Greg Farnum <greg@inktank.com>
-Cc: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Thanks very much for all your explanations. I am now much clearer about=
-=20
-it. Have a great day!
+As an extra request, it would be great if people explained a little
+about their use-case for the filesystem so we can better understand
+how the features requested map to the type of workloads people are
+trying.
 
-Xing
+Thanks
 
-On 03/05/2013 01:12 PM, Greg Farnum wrote:
->> All the data goes to the disk in write-back mode so it isn't safe ye=
-t
->> >until the flush is called. That's why it goes into the journal firs=
-t, to
->> >be consistent at all times.
->> > =20
->> >If you would buffer everything in the journal and flush that at onc=
-e you
->> >would overload the disk for that time.
->> > =20
->> >Let's say you have 300MB in the journal after 10 seconds and you wa=
-nt to
->> >flush that at once. That would mean that specific disk is unable to=
- do
->> >any other operations then writing with 60MB/sec for 5 seconds.
->> > =20
->> >It's better to always write in write-back mode to the disk and flus=
-h at
->> >a certain point.
->> > =20
->> >In the meantime the scheduler can do it's job to balance between th=
-e
->> >reads and the writes.
->> > =20
->> >Wido
-> Yep, what Wido said. Specifically, we do force the data to the journa=
-l with an fsync or equivalent before responding to the client, but once=
- it's stable on the journal we give it to the filesystem (without doing=
- any sort of forced sync). This is necessary =E2=80=94 all reads are se=
-rved from the filesystem.
+Neil
+
+On Tue, Mar 5, 2013 at 9:03 AM, Greg Farnum <greg@inktank.com> wrote:
+> This is a companion discussion to the blog post at http://ceph.com/de=
+v-notes/cephfs-mds-status-discussion/ =97 go read that!
+>
+> The short and slightly alternate version: I spent most of about two w=
+eeks working on bugs related to snapshots in the MDS, and we started re=
+alizing that we could probably do our first supported release of CephFS=
+ and the related infrastructure much sooner if we didn't need to suppor=
+t all of the whizbang features. (This isn't to say that the base featur=
+e set is stable now, but it's much closer than when you turn on some of=
+ the other things.) I'd like to get feedback from you in the community =
+on what minimum supported feature set would prompt or allow you to star=
+t using CephFS in real environments =97 not what you'd *like* to see, b=
+ut what you *need* to see. This will allow us at Inktank to prioritize =
+more effectively and hopefully get out a supported release much more qu=
+ickly! :)
+>
+> The current proposed feature set is basically what's left over after =
+we've trimmed off everything we can think to split off, but if any of t=
+he proposed included features are also particularly important or don't =
+matter, be sure to mention them (NFS export in particular =97 it works =
+right now but isn't in great shape due to NFS filehandle caching).
+>
+> Thanks,
 > -Greg
-
+>
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
