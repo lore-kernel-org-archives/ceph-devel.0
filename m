@@ -1,78 +1,114 @@
 From: Greg Farnum <greg@inktank.com>
-Subject: Re: changes to rados command
-Date: Thu, 7 Mar 2013 12:55:23 -0800
-Message-ID: <74BC2630EA0146BEA60A73393B40F964@inktank.com>
-References: <20130307192522.0F7C7EAF31@ningd5.research.att.com>
- <B48B0643D9BB4AB2A1798C68B52481F7@inktank.com>
- <ED04914F-28E0-4641-B00F-147CC757B184@research.att.com>
+Subject: Re: [PATCH 1/2] ceph: increase i_release_count when clear
+ I_COMPLETE flag
+Date: Thu, 7 Mar 2013 13:03:39 -0800
+Message-ID: <F994D6BB71B642259997BA453CFB0288@inktank.com>
+References: <1362656170-4337-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f44.google.com ([209.85.210.44]:64768 "EHLO
-	mail-da0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757176Ab3CGUz0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 15:55:26 -0500
-Received: by mail-da0-f44.google.com with SMTP id z20so98223dae.31
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Mar 2013 12:55:26 -0800 (PST)
-In-Reply-To: <ED04914F-28E0-4641-B00F-147CC757B184@research.att.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:50056 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756847Ab3CGVDn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 16:03:43 -0500
+Received: by mail-pa0-f44.google.com with SMTP id kp1so749468pab.17
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Mar 2013 13:03:43 -0800 (PST)
+In-Reply-To: <1362656170-4337-1-git-send-email-zheng.z.yan@intel.com>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Hume <andrew@research.att.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
-(Re-added the list for future reference)
+I'm pulling this in for now to make sure this clears out that ENOENT bu=
+g we hit =E2=80=94 but shouldn't we be fixing ceph_i_clear() to always =
+bump the i_release_count? It doesn't seem like it would ever be correct=
+ without it, and these are the only two callers. =20
 
-Well, you'll need to learn how to use git at a basic level in order to be able to work effectively on Ceph (or most other open-source projects).
-Some links that might be helpful:
-http://www.joelonsoftware.com/items/2010/03/17.html
-http://www.ibm.com/developerworks/library/l-git-subversion-1/
-http://try.github.com/
-
-I haven't been through these all thoroughly, but the first one should describe the mental model changes that motivate git, the second looks to be a deep tutorial, and the third will teach you the mechanics. :)
-
-
-Github pull requests are a Github nicety; their website will teach you how to use them. A simple git URL just requires that your git repository be accessible over the internet, and then you tell us what the URL is and what branch to pull from, and we can do so. (This of course requires that your changes actually be in a branch, so you'll need to have the commits arranged nicely and such.)
+The second one looks good to us and we'll test it but of course that ca=
+n't go upstream through our tree.
 -Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
 
-On Thursday, March 7, 2013 at 12:42 PM, Andrew Hume wrote:
+On Thursday, March 7, 2013 at 3:36 AM, Yan, Zheng wrote:
 
-> i don't know how to do teh first two (but i am a quickish learner).
-> i know how to type git diff | mail already.
-> if you can guide me a little on how to do teh git things, i'll do those.
-> 
-> 
-> On Mar 7, 2013, at 1:37 PM, Greg Farnum wrote:
-> > On Thursday, March 7, 2013 at 11:25 AM, Andrew Hume wrote:
-> > > 
-> > > in order to make the rados command more useful in scripts,
-> > > i'd like to make a change, specifically change to
-> > > 
-> > > rados -p pool getomapval obj key [fmt]
-> > > 
-> > > where fmt is an optional formatting parameter.
-> > > i've implemented 'str' which will print the value as an unadorned string.
-> > > 
-> > > what is the process for doing this?
-> > Patch submission, you mean? Github pull requests, sending a pull request with git URL to the list, or sending straight patches the list are all good. I'll like you more if you give me a URL of some form instead of making me get the patches out of email and into my git repo correctly, though. :)
-> > -Greg
-> > Software Engineer #42 @ http://inktank.com | http://ceph.com
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -----------------------
-> Andrew Hume
-> 623-551-2845 (VO and best)
-> 973-236-2014 (NJ)
-> andrew@research.att.com (mailto:andrew@research.att.com)
+> From: "Yan, Zheng" <zheng.z.yan@intel.com (mailto:zheng.z.yan@intel.c=
+om)>
+> =20
+> If some dentries were pruned or FILE_SHARED cap was revoked while
+> readdir is in progress. make sure ceph_readdir() does not mark the
+> directory as complete.
+> =20
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan@=
+intel.com)>
+> ---
+> fs/ceph/caps.c | 1 +
+> fs/ceph/dir.c | 13 +++++++++++--
+> 2 files changed, 12 insertions(+), 2 deletions(-)
+> =20
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 76634f4..35cebf3 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -500,6 +500,7 @@ static void __check_cap_issue(struct ceph_inode_i=
+nfo *ci, struct ceph_cap *cap,
+> if (S_ISDIR(ci->vfs_inode.i_mode)) {
+> dout(" marking %p NOT complete\n", &ci->vfs_inode);
+> ci->i_ceph_flags &=3D ~CEPH_I_COMPLETE;
+> + ci->i_release_count++;
+> }
+> }
+> }
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 76821be..068304c 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -909,7 +909,11 @@ static int ceph_rename(struct inode *old_dir, st=
+ruct dentry *old_dentry,
+> */
+> =20
+> /* d_move screws up d_subdirs order */
+> - ceph_i_clear(new_dir, CEPH_I_COMPLETE);
+> + struct ceph_inode_info *ci =3D ceph_inode(new_dir);
+> + spin_lock(&ci->i_ceph_lock);
+> + ci->i_ceph_flags &=3D ~CEPH_I_COMPLETE;
+> + ci->i_release_count++;
+> + spin_unlock(&ci->i_ceph_lock);
+> =20
+> d_move(old_dentry, new_dentry);
+> =20
+> @@ -1073,6 +1077,7 @@ static int ceph_snapdir_d_revalidate(struct den=
+try *dentry,
+> */
+> static void ceph_d_prune(struct dentry *dentry)
+> {
+> + struct ceph_inode_info *ci;
+> dout("ceph_d_prune %p\n", dentry);
+> =20
+> /* do we have a valid parent? */
+> @@ -1087,7 +1092,11 @@ static void ceph_d_prune(struct dentry *dentry=
+)
+> * we hold d_lock, so d_parent is stable, and d_fsdata is never
+> * cleared until d_release
+> */
+> - ceph_i_clear(dentry->d_parent->d_inode, CEPH_I_COMPLETE);
+> + ci =3D ceph_inode(dentry->d_parent->d_inode);
+> + spin_lock(&ci->i_ceph_lock);
+> + ci->i_ceph_flags &=3D ~CEPH_I_COMPLETE;
+> + ci->i_release_count++;
+> + spin_unlock(&ci->i_ceph_lock);
+> }
+> =20
+> /*
+> -- =20
+> 1.7.11.7
 
 
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
