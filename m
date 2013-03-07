@@ -1,92 +1,77 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: CephFS Space Accounting and Quotas
-Date: Thu, 7 Mar 2013 08:15:07 -0700
-Message-ID: <5138AEFB.5070200@sandia.gov>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
- <51363490.4070408@42on.com>
- <1F15E079964848B9BE079E974A1946B4@inktank.com>
- <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
- <51363B30.7080006@42on.com>
- <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
- <513793FD.7010001@sandia.gov>
- <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
- <51379FCD.9000502@sandia.gov>
- <D19243567199482692F961618A335817@inktank.com>
- <5137B4E9.1030505@sandia.gov>
- <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
- <5137CDE2.70105@sandia.gov>
- <8B6963669A2E49C286B9241DCD62F557@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: librbd bug?
+Date: Thu, 7 Mar 2013 08:36:34 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1303070834060.17618@cobra.newdream.net>
+References: <51386912.3020507@risc-software.at>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:51059 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755542Ab3CGPQI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 10:16:08 -0500
-In-Reply-To: <8B6963669A2E49C286B9241DCD62F557@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57168 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752209Ab3CGQge (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 11:36:34 -0500
+In-Reply-To: <51386912.3020507@risc-software.at>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
+To: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
+Cc: ceph-devel@vger.kernel.org
 
-On 03/06/2013 05:18 PM, Greg Farnum wrote:
-> On Wednesday, March 6, 2013 at 3:14 PM, Jim Schutt wrote:
->> When I'm doing these stat operations the file system is otherwise
->> idle.
+On Thu, 7 Mar 2013, Wolfgang Hennerbichler wrote:
+> Hi,
 > 
-> What's the cluster look like? This is just one active MDS and a couple hundred clients?
-
-1 mds, 1 mon, 576 osds, 198 cephfs clients.
-
+> I've a libvirt-VM that gets format 2 rbd-childs 'fed' by the superhost.
+> It crashed recently with this in the logs:
 > 
->> What is happening is that once one of these slow stat operations
->> on a file completes, it never happens again for that file, from
->> any client. At least, that's the case if I'm not writing to
->> the file any more. I haven't checked if appending to the files
->> restarts the behavior.
+> osdc/ObjectCacher.cc: In function 'void
+> ObjectCacher::bh_write_commit(int64_t, sobject_t, loff_t, uint64_t,
+> tid_t, int)' thread 7f0cab5fd700 time 2013-03-01 22:02:37.374410
+> osdc/ObjectCacher.cc: 834: FAILED assert(ob->last_commit_tid < tid)
+>  ceph version 0.56.3 (6eb7e15a4783b122e9b0c85ea9ba064145958aa5)
+>  1: (ObjectCacher::bh_write_commit(long, sobject_t, long, unsigned long,
+> unsigned long, int)+0xd68) [0x7f0d087cda28]
+>  2: (ObjectCacher::C_WriteCommit::finish(int)+0x6b) [0x7f0d087d460b]
+>  3: (Context::complete(int)+0xa) [0x7f0d0878c9fa]
+>  4: (librbd::C_Request::finish(int)+0x85) [0x7f0d087bc325]
+>  5: (Context::complete(int)+0xa) [0x7f0d0878c9fa]
+>  6: (librbd::rados_req_cb(void*, void*)+0x47) [0x7f0d087a1387]
+>  7: (librados::C_AioSafe::finish(int)+0x1d) [0x7f0d07b5834d]
+>  8: (Finisher::finisher_thread_entry()+0x1c0) [0x7f0d07bc20d0]
+>  9: (()+0x7e9a) [0x7f0d0546be9a]
+>  10: (clone()+0x6d) [0x7f0d05198cbd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> terminate called after throwing an instance of 'ceph::FailedAssertion'
 > 
-> I assume it'll come back, but if you could verify that'd be good.
+> Any clue why that happened?
 
-OK, I'll check it out.
+We fixed one bug that triggered this behavior, but I just saw another 
+occurence yesterday.  I'm working on reproducing it now.  Once I have 
+some confidence it is fully resolved I will backport the fix(es) to the 
+bobtail branch.
 
-> 
->  
->> On the client side I'm running with 3.8.2 + the ceph patch queue
->> that was merged into 3.9-rc1.
->>
->> On the server side I'm running recent next branch (commit 0f42eddef5),
->> with the tcp receive socket buffer option patches cherry-picked.
->> I've also got a patch that allows mkcephfs to use osd_pool_default_pg_num
->> rather than pg_bits to set initial number of PGs (same for pgp_num),
->> and a patch that lets me run with just one pool that contains both
->> data and metadata. I'm testing data distribution uniformity with 512K PGs.
->>
->> My MDS tunables are all at default settings.
->>
->>>
->>> We'll probably want to get a high-debug log of the MDS during these slow stats as well.
->>
->> OK.
->>
->> Do you want me to try to reproduce with a more standard setup?
-> No, this is fine. 
->  
->> Also, I see Sage just pushed a patch to pgid decoding - I expect
->> I need that as well, if I'm running the latest client code.
-> 
-> Yeah, if you've got the commit it references you'll want it.
-> 
->> Do you want the MDS log at 10 or 20?
-> More is better. ;)
-
-OK, thanks.
-
--- Jim
+Thanks!
+sage
 
 > 
+> -- 
+> DI (FH) Wolfgang Hennerbichler
+> Software Development
+> Unit Advanced Computing Technologies
+> RISC Software GmbH
+> A company of the Johannes Kepler University Linz
+> 
+> IT-Center
+> Softwarepark 35
+> 4232 Hagenberg
+> Austria
+> 
+> Phone: +43 7236 3343 245
+> Fax: +43 7236 3343 250
+> wolfgang.hennerbichler@risc-software.at
+> http://www.risc-software.at
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
-
-
