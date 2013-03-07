@@ -1,37 +1,26 @@
-From: "Bryan K. Wright" <bkw1a@ayesha.phys.virginia.edu>
-Subject: Re: stuff for v0.56.4
-Date: Thu, 07 Mar 2013 16:05:25 -0500
-Message-ID: <201303072105.r27L5P4E028007@ayesha.phys.virginia.edu>
-References: <alpine.DEB.2.00.1303051503480.1162@cobra.newdream.net>
-Reply-To: bkw1a@ayesha.phys.virginia.edu
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Is linux 3.8.2 up to date with all ceph patches?
+Date: Thu, 7 Mar 2013 13:23:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1303071323100.17054@cobra.newdream.net>
+References: <CAPud5_53zNYsGnEs89ynWiKWjz7i9bipkwdpEoh9fMJ+uV6GbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ayesha.phys.Virginia.EDU ([128.143.102.43]:57154 "EHLO
-	ayesha.phys.virginia.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757194Ab3CGVF1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 16:05:27 -0500
-In-reply-to: Your message of "Tue, 05 Mar 2013 15:10:38 PST."
-             <alpine.DEB.2.00.1303051503480.1162@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:59895 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751787Ab3CGVXW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Mar 2013 16:23:22 -0500
+In-Reply-To: <CAPud5_53zNYsGnEs89ynWiKWjz7i9bipkwdpEoh9fMJ+uV6GbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Nick Bartos <nick@pistoncloud.com>
 Cc: ceph-devel@vger.kernel.org
 
+On Thu, 7 Mar 2013, Nick Bartos wrote:
+> I'm looking at upgrading to 3.8.2 from 3.5.7 with patches, and I just
+> wanted to make sure that there weren't any additional ceph fixes that
+> should be applied to 3.8.2.
 
-sage@inktank.com said:
-> - pg log trimming (probably a conservative subset) to avoid memory bloat 
+Nothing that I'm aware of.  Alex?
 
-Anything that reduces the size of OSD processes would be appreciated.
-
-					Bryan
--- 
-========================================================================
-Bryan Wright              |"If you take cranberries and stew them like 
-Physics Department        | applesauce, they taste much more like prunes
-University of Virginia    | than rhubarb does."  --  Groucho 
-Charlottesville, VA  22901|			
-(434) 924-7218            |         bryan@virginia.edu
-========================================================================
-
-
+sage
