@@ -1,70 +1,185 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 2/2] fs: fix dentry_lru_prune()
-Date: Fri, 08 Mar 2013 14:40:46 +0800
-Message-ID: <513987EE.4030407@intel.com>
-References: <1362656256-4397-1-git-send-email-zheng.z.yan@intel.com> <20130308020445.GB23616@dastard> <51395034.40709@intel.com> <20130308062705.GD23616@dastard>
+From: Marco Aroldi <marco.aroldi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [solved] Changing CRUSH rule on a running cluster
+Date: Fri, 8 Mar 2013 09:30:06 +0100
+Message-ID: <CAHzdKUJX_Nb4rCo6LtuEGqPb9feE4Mixszm-1gt9RzGTrDX_Qw@mail.gmail.com>
+References: <1362385148.30983.7.camel@localhost>
+	<CAPYLRzj-9Hb=EdOLY6COOHcsKUujRqfCpUHqyp6tWS9UWzvf7Q@mail.gmail.com>
+	<1362559176.30983.43.camel@localhost>
+	<1362727086.10442.2.camel@boolette.noo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20130308062705.GD23616@dastard>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, sage@inktank.com, viro@zeniv.linux.org.uk
+Content-Type: multipart/mixed; boundary="===============0739408847=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1362727086.10442.2.camel-T8w5uV9mOHF8I82lbrcXxg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 03/08/2013 02:27 PM, Dave Chinner wrote:
-> On Fri, Mar 08, 2013 at 10:43:00AM +0800, Yan, Zheng wrote:
->> On 03/08/2013 10:04 AM, Dave Chinner wrote:
->>> On Thu, Mar 07, 2013 at 07:37:36PM +0800, Yan, Zheng wrote:
->>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>>>
->>>> dentry_lru_prune() should always call file system's d_prune callback.
->>>
->>> Why? What bug does this fix?
->>>
->>
->> Ceph uses a flag to track if the dcache contents for a directory are complete,
->> and it relies on d_prune() to clear the flag when some dentries are trimmed.
->> We noticed that dentry_lru_prune() sometimes does not call ceph_d_prune().
->> It seems the dentry in question is ancestor trimmed by try_prune_one_dentry().
-> 
-> That doesn't sound right to me. Any dentry that goes through
-> try_prune_one_dentry() is on a LRU list, and will end up in
-> dentry_kill() if the reference count drops to zero and hence calls
-> dentry_lru_prune() with a non-emtpy LRU pointer.
-> 
-> If it has a non-zero reference count, it gets removed from the LRU,
-> and the next call to dput() that drops the reference count to zero
-> will add it back to the LRU and it will go around again. So it
-> sounds to me like there is something else going on here.
-> 
-> FWIW, if the dentry is not on the LRU, why would it need pruning?
-> If it needs pruning regardless of it's status on the LRU, then
-> dentry_lru_prune() should go away entirely and pruning be done
-> explicity where it is needed rather than wrapped up in an unrelated
-> LRU operation....
-> 
+--===============0739408847==
+Content-Type: multipart/alternative; boundary=20cf3074b46ed0d42804d765a343
 
-I didn't described it clearly
+--20cf3074b46ed0d42804d765a343
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-static void try_prune_one_dentry(struct dentry *dentry)
-	__releases(dentry->d_lock)
-{
-	.....
-	/* Prune ancestors. */
-	dentry = parent;
-	while (dentry) {
-		spin_lock(&dentry->d_lock);
-		if (dentry->d_count > 1) {
-			dentry->d_count--;
-			spin_unlock(&dentry->d_lock);
-			return;
-		}
-		dentry = dentry_kill(dentry, 1);
-              ~~~~I mean dentries that are pruned here~~~~
-	}
-}
+Hi Oliver,
+can you post here on the mailing list the steps taken?
+From the IRC logs you said "if I use "choose .... osd", it works -- but
+"chooseleaf ... host" doesn't work"
+So, to have data balanced between 2 rooms, is the rule "step chooseleaf
+firstn 0 type room" correct?
 
-Regards
-Yan, Zheng
+Thanks
+
+--=20
+Marco
+
+
+2013/3/8 Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
+
+>
+> >
+> > Thanks for your answer. So I made some tests on a dedicated spool, I wa=
+s
+> > able to move data from =ABplatter=BB to =ABSSD=BB very well, it's great=
+.
+> >
+> > But I can't obtain that per "network" neither per "host" setup :
+> > with 2 hosts, each one with 2 OSD, and with a pool with use only 1
+> > replica (so, 2 copies), I tried this rule :
+> >
+> >         rule rbdperhost {
+> >               ruleset 5
+> >               type replicated
+> >               min_size 1
+> >               max_size 10
+> >               step take default
+> >               step chooseleaf firstn 0 type host
+> >               step emit
+> >         }
+> >
+> >
+> > As a result I obtain some PG which stuck in =ABactive+remapped=BB state=
+.
+> > When querying one of this PG, I see that CRUSH find only one OSD up for
+> > this one and can't find an other OSD to set replica.
+> >
+> > If I well understand, in this case the "chooseleaf firstn 0 type host"
+> > say to Ceph to choose 2 differents hosts, then in each of them choose
+> > one OSD. So with 2 hosts, it should works, no ?
+> >
+> > Thanks,
+> > Olivier B.
+> >
+> >
+>
+> So, as said on IRC, it's solved. My rules were not working, and after
+> use of =ABtunables=BB it's ok.
+>
+> I love that feature of changing data spreading on live !
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+--20cf3074b46ed0d42804d765a343
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div><div><div>Hi Oliver,<br></div>can you post here =
+on the mailing list the steps taken?<br></div>From the IRC logs you said &q=
+uot;<span class=3D"">if I use &quot;choose .... osd&quot;, it works -- </sp=
+an><span class=3D"">but &quot;chooseleaf ... host&quot; doesn&#39;t work&qu=
+ot;<br>
+
+</span></div><span class=3D"">So, to have data balanced between 2 rooms, is=
+ the rule &quot;</span><span class=3D""><span class=3D"">step chooseleaf fi=
+rstn 0 type room&quot; correct</span>? </span><span class=3D""><br><br></sp=
+an></div>
+
+<span class=3D"">Thanks<br><br>-- <br>Marco<br></span><div><div><div><div><=
+div><div class=3D"gmail_extra"><br><br><div class=3D"gmail_quote">2013/3/8 =
+Olivier Bonvalet <span dir=3D"ltr">&lt;<a href=3D"mailto:ceph.list@daevel.f=
+r" target=3D"_blank">ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org</a>&gt;</span><br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-=
+left:1px solid rgb(204,204,204);padding-left:1ex"><br>
+&gt;<br>
+&gt; Thanks for your answer. So I made some tests on a dedicated spool, I w=
+as<br>
+&gt; able to move data from =ABplatter=BB to =ABSSD=BB very well, it&#39;s =
+great.<br>
+&gt;<br>
+&gt; But I can&#39;t obtain that per &quot;network&quot; neither per &quot;=
+host&quot; setup :<br>
+&gt; with 2 hosts, each one with 2 OSD, and with a pool with use only 1<br>
+&gt; replica (so, 2 copies), I tried this rule :<br>
+&gt;<br>
+&gt; =A0 =A0 =A0 =A0 rule rbdperhost {<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 ruleset 5<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 type replicated<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 min_size 1<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_size 10<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 step take default<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 step chooseleaf firstn 0 type host<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 step emit<br>
+&gt; =A0 =A0 =A0 =A0 }<br>
+&gt;<br>
+&gt;<br>
+&gt; As a result I obtain some PG which stuck in =ABactive+remapped=BB stat=
+e.<br>
+&gt; When querying one of this PG, I see that CRUSH find only one OSD up fo=
+r<br>
+&gt; this one and can&#39;t find an other OSD to set replica.<br>
+&gt;<br>
+&gt; If I well understand, in this case the &quot;chooseleaf firstn 0 type =
+host&quot;<br>
+&gt; say to Ceph to choose 2 differents hosts, then in each of them choose<=
+br>
+&gt; one OSD. So with 2 hosts, it should works, no ?<br>
+&gt;<br>
+&gt; Thanks,<br>
+&gt; Olivier B.<br>
+&gt;<br>
+&gt;<br>
+<br>
+So, as said on IRC, it&#39;s solved. My rules were not working, and after<b=
+r>
+use of =ABtunables=BB it&#39;s ok.<br>
+<br>
+I love that feature of changing data spreading on live !<br>
+<br>
+<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+</blockquote></div><br></div></div></div></div></div></div></div>
+
+--20cf3074b46ed0d42804d765a343--
+
+--===============0739408847==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0739408847==--
