@@ -1,58 +1,58 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: librbd bug?
-Date: Thu, 7 Mar 2013 21:20:26 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1303072119260.17618@cobra.newdream.net>
-References: <51386912.3020507@risc-software.at> <513973B1.9080509@inktank.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] fs: fix dentry_lru_prune()
+Date: Fri, 8 Mar 2013 17:27:05 +1100
+Message-ID: <20130308062705.GD23616@dastard>
+References: <1362656256-4397-1-git-send-email-zheng.z.yan@intel.com>
+ <20130308020445.GB23616@dastard>
+ <51395034.40709@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36474 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750744Ab3CHFU1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Mar 2013 00:20:27 -0500
-In-Reply-To: <513973B1.9080509@inktank.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:22372 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750880Ab3CHG1I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Mar 2013 01:27:08 -0500
+Content-Disposition: inline
+In-Reply-To: <51395034.40709@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, sage@inktank.com, viro@zeniv.linux.org.uk
 
-On Thu, 7 Mar 2013, Dan Mick wrote:
-> On 03/07/2013 02:16 AM, Wolfgang Hennerbichler wrote:
-> > Hi,
+On Fri, Mar 08, 2013 at 10:43:00AM +0800, Yan, Zheng wrote:
+> On 03/08/2013 10:04 AM, Dave Chinner wrote:
+> > On Thu, Mar 07, 2013 at 07:37:36PM +0800, Yan, Zheng wrote:
+> >> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> >>
+> >> dentry_lru_prune() should always call file system's d_prune callback.
 > > 
-> > I've a libvirt-VM that gets format 2 rbd-childs 'fed' by the superhost.
-> > It crashed recently with this in the logs:
-> > 
-> > osdc/ObjectCacher.cc: In function 'void
-> > ObjectCacher::bh_write_commit(int64_t, sobject_t, loff_t, uint64_t,
-> > tid_t, int)' thread 7f0cab5fd700 time 2013-03-01 22:02:37.374410
-> > osdc/ObjectCacher.cc: 834: FAILED assert(ob->last_commit_tid < tid)
-> >   ceph version 0.56.3 (6eb7e15a4783b122e9b0c85ea9ba064145958aa5)
-> >   1: (ObjectCacher::bh_write_commit(long, sobject_t, long, unsigned long,
-> > unsigned long, int)+0xd68) [0x7f0d087cda28]
-> >   2: (ObjectCacher::C_WriteCommit::finish(int)+0x6b) [0x7f0d087d460b]
-> >   3: (Context::complete(int)+0xa) [0x7f0d0878c9fa]
-> >   4: (librbd::C_Request::finish(int)+0x85) [0x7f0d087bc325]
-> >   5: (Context::complete(int)+0xa) [0x7f0d0878c9fa]
-> >   6: (librbd::rados_req_cb(void*, void*)+0x47) [0x7f0d087a1387]
-> >   7: (librados::C_AioSafe::finish(int)+0x1d) [0x7f0d07b5834d]
-> >   8: (Finisher::finisher_thread_entry()+0x1c0) [0x7f0d07bc20d0]
-> >   9: (()+0x7e9a) [0x7f0d0546be9a]
-> >   10: (clone()+0x6d) [0x7f0d05198cbd]
-> >   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> > needed to interpret this.
-> > terminate called after throwing an instance of 'ceph::FailedAssertion'
-> > 
-> > Any clue why that happened?
+> > Why? What bug does this fix?
 > > 
 > 
-> This looks like
-> 
-> http://tracker.ceph.com/issues/4271
+> Ceph uses a flag to track if the dcache contents for a directory are complete,
+> and it relies on d_prune() to clear the flag when some dentries are trimmed.
+> We noticed that dentry_lru_prune() sometimes does not call ceph_d_prune().
+> It seems the dentry in question is ancestor trimmed by try_prune_one_dentry().
 
-I am chasing http://tracker.ceph.com/issues/4369, which may indicate a 
-problem with the fix for #4271.  Once this is sorted out, I'll cherry-pick 
-the fix to bobtail.
+That doesn't sound right to me. Any dentry that goes through
+try_prune_one_dentry() is on a LRU list, and will end up in
+dentry_kill() if the reference count drops to zero and hence calls
+dentry_lru_prune() with a non-emtpy LRU pointer.
 
-sage
+If it has a non-zero reference count, it gets removed from the LRU,
+and the next call to dput() that drops the reference count to zero
+will add it back to the LRU and it will go around again. So it
+sounds to me like there is something else going on here.
 
+FWIW, if the dentry is not on the LRU, why would it need pruning?
+If it needs pruning regardless of it's status on the LRU, then
+dentry_lru_prune() should go away entirely and pruning be done
+explicity where it is needed rather than wrapped up in an unrelated
+LRU operation....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
