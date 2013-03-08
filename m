@@ -1,49 +1,100 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: CephFS Space Accounting and Quotas
-Date: Fri, 8 Mar 2013 15:45:12 -0700
-Message-ID: <513A69F8.6050709@sandia.gov>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
- <51363490.4070408@42on.com>
- <1F15E079964848B9BE079E974A1946B4@inktank.com>
- <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
- <51363B30.7080006@42on.com>
- <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
- <513793FD.7010001@sandia.gov>
- <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
- <51379FCD.9000502@sandia.gov>
- <D19243567199482692F961618A335817@inktank.com>
- <5137B4E9.1030505@sandia.gov>
- <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
- <5137CDE2.70105@sandia.gov>
- <8B6963669A2E49C286B9241DCD62F557@inktank.com>
- <5138AEFB.5070200@sandia.gov>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Mon losing touch with OSDs
+Date: Sat, 9 Mar 2013 09:47:33 +1100
+Message-ID: <20130308224733.GA4701@onthe.net.au>
+References: <20130223000843.GA10200@onthe.net.au>
+ <alpine.DEB.2.00.1302221612230.5703@cobra.newdream.net>
+ <20130223005724.GB8844@onthe.net.au>
+ <alpine.DEB.2.00.1302221728550.19172@cobra.newdream.net>
+ <20130223014908.GA9749@onthe.net.au>
+ <alpine.DEB.2.00.1302221751200.19172@cobra.newdream.net>
+ <20130223020253.GA11899@onthe.net.au>
+ <20130301020239.GA16236@onthe.net.au>
+ <alpine.DEB.2.00.1302282059550.21965@cobra.newdream.net>
+ <20130308031240.GA14859@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:59660 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756564Ab3CHWpp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Mar 2013 17:45:45 -0500
-In-Reply-To: <5138AEFB.5070200@sandia.gov>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:54862 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932158Ab3CHWrg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Mar 2013 17:47:36 -0500
+Content-Disposition: inline
+In-Reply-To: <20130308031240.GA14859@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Greg Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 03/07/2013 08:15 AM, Jim Schutt wrote:
-> On 03/06/2013 05:18 PM, Greg Farnum wrote:
->> On Wednesday, March 6, 2013 at 3:14 PM, Jim Schutt wrote:
-
-[snip]
-
->>> Do you want the MDS log at 10 or 20?
->> More is better. ;)
+On Fri, Mar 08, 2013 at 02:12:40PM +1100, Chris Dunlop wrote:
+> On Thu, Feb 28, 2013 at 09:00:24PM -0800, Sage Weil wrote:
+>> On Fri, 1 Mar 2013, Chris Dunlop wrote:
+>>> On Sat, Feb 23, 2013 at 01:02:53PM +1100, Chris Dunlop wrote:
+>>>> On Fri, Feb 22, 2013 at 05:52:11PM -0800, Sage Weil wrote:
+>>>>> On Sat, 23 Feb 2013, Chris Dunlop wrote:
+>>>>>> On Fri, Feb 22, 2013 at 05:30:04PM -0800, Sage Weil wrote:
+>>>>>>> On Sat, 23 Feb 2013, Chris Dunlop wrote:
+>>>>>>>> On Fri, Feb 22, 2013 at 04:13:21PM -0800, Sage Weil wrote:
+>>>>>>>>> On Sat, 23 Feb 2013, Chris Dunlop wrote:
+>>>>>>>>>> On Fri, Feb 22, 2013 at 03:43:22PM -0800, Sage Weil wrote:
+>>>>>>>>>>> On Sat, 23 Feb 2013, Chris Dunlop wrote:
+>>>>>>>>>>>> On Fri, Feb 22, 2013 at 01:57:32PM -0800, Sage Weil wrote:
+>>>>>>>>>>>>> I just looked at the logs.  I can't tell what happend to cause that 10 
+>>>>>>>>>>>>> second delay.. strangely, messages were passing from 0 -> 1, but nothing 
+>>>>>>>>>>>>> came back from 1 -> 0 (although 1 was queuing, if not sending, them).
+>>>>>>>>>> 
+>>>>>>>>>> Is there any way of telling where they were delayed, i.e. in the 1's output
+>>>>>>>>>> queue or 0's input queue?
+>>>>>>>>> 
+>>>>>>>>> Yeah, if you bump it up to 'debug ms = 20'.  Be aware that that will 
+>>>>>>>>> generate a lot of logging, though.
+>>>>>>>> 
+>>>>>>>> I really don't want to load the system with too much logging, but I'm happy
+>>>>>>>> modifying code...  Are there specific interesting debug outputs which I can
+>>>>>>>> modify so they're output under "ms = 1"?
+>>>>>>> 
+>>>>>>> I'm basically interested in everything in writer() and write_message(), 
+>>>>>>> and reader() and read_message()...
+>>>>>> 
+>>>>>> Like this?
+>>>>> 
+>>>>> Yeah.  You could do 2 instead of 1 so you can turn it down.  I suspect 
+>>>>> that this is the lions share of what debug 20 will spam to the log, but 
+>>>>> hopefully the load is manageable!
+>>>> 
+>>>> Good idea on the '2'. I'll get that installed and wait for it to happen again.
+>>> 
+>>> FYI...
+>>> 
+>>> To avoid running out of disk space for the massive logs, I
+>>> started using logrotate on the ceph logs every two hours, which
+>>> does a 'service ceph reload' to re-open the log files.
+>>> 
+>>> In the week since doing that I haven't seen any 'slow requests'
+>>> at all (the load has stayed the same as before the change),
+>>> which means the issue with the osds dropping out, then the
+>>> system not recovering properly, also hasn't happened.
+>>> 
+>>> That's a bit suspicious, no?
+>> 
+>> I suspect the logging itself is changing the timing.  Let's wait and see 
+>> if we get lucky... 
 > 
-> OK, thanks.
+> We got "lucky"...
+> 
+> ceph-mon.0.log:
+> 2013-03-08 03:46:44.786682 7fcc62172700  1 -- 192.168.254.132:0/20298 --> 192.168.254.133:6801/23939 -- osd_ping(ping e815 stamp 2013-03-08 03:46:44.786679) v2 -- ?+0 0x765b180 con 0x6ab6160
+>   [no ping_reply logged, then later...]
+> 2013-03-08 03:46:56.211993 7fcc71190700 -1 osd.0 815 heartbeat_check: no reply from osd.1 since 2013-03-08 03:46:35.986327 (cutoff 2013-03-08 03:46:36.211992)
 
-I've sent some mds logs via private email...
+Bugger. I just realised that the cluster had come up without
+the "ms = 2" logging enabled, making these logs no more useful
+than the previous ones for working out who dropped the missing
+ping_reply.
 
--- Jim
+Injected "ms = 2" into the osds and mons, and added it to the
+config files.
 
+Sigh. And we're waiting again...
+
+Chris.
