@@ -1,48 +1,67 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/7, v2] libceph: abstract message data information
-Date: Sat, 09 Mar 2013 10:14:59 -0600
-Message-ID: <513B6003.8090400@inktank.com>
-References: <513B5CAF.4010702@inktank.com>
+Subject: [PATCH] libceph: don't clear bio_iter in prepare_write_message()
+Date: Sat, 09 Mar 2013 10:36:48 -0600
+Message-ID: <513B6520.8050303@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:52172 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758373Ab3CIQPC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 11:15:02 -0500
-Received: by mail-ie0-f178.google.com with SMTP id c13so3301019ieb.9
-        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 08:15:02 -0800 (PST)
-In-Reply-To: <513B5CAF.4010702@inktank.com>
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:41114 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758510Ab3CIQgv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 11:36:51 -0500
+Received: by mail-ia0-f182.google.com with SMTP id b35so647060iac.27
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 08:36:51 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 03/09/2013 10:00 AM, Alex Elder wrote:
-> Over half of these have been reviewed already, but I'm re-posting
-> them because I've rebased them to be on top of the series I just
-> posted (that is, these are based on branch "review/wip-cleanup"
-> or 60b789f libceph: record byte count not page count), and because
-> I've added two more patches since the last time I sent them out.
-> 
-> I won't bother summarizing them again this time, their individual
-> descriptions should be good enough.
-
-These patches are available in the branch "review/wip-abstract-2"
-of the ceph-client git repository.
+This patch is available in the branch "review/wip-msgr-refactor"
+(prior to 6 other patches) in the ceph-client git repository.
+That branch is based on branch "review/wip-abstract-2".
 
 					-Alex
 
-  					-Alex
-> 
-> The patches below marked with "***" are still in need of review.
-> 
-> [PATCH 1/7] libceph: isolate message page field manipulation
-> [PATCH 2/7] libceph: set page info with byte length         ***
-> [PATCH 3/7] libceph: isolate other message data fields
-> [PATCH 4/7] ceph: only set message data pointers if non-empty
-> [PATCH 5/7] libceph: record message data byte length        ***
-> [PATCH 6/7] libceph: set response data fields earlier       ***
-> [PATCH 7/7] libceph: activate message data assignment checks
-> 
+At one time it was necessary to clear a message's bio_iter field to
+avoid a bad pointer dereference in write_partial_msg_pages().
+
+That no longer seems to be the case.  Here's why.
+
+The message's bio fields represent (in this case) outgoing data.
+Between where the bio_iter is made NULL in prepare_write_message()
+and the call in that function to prepare_message_data(), the
+bio fields are never used.
+
+In prepare_message_data(), init-bio_iter() is called, and the result
+of that overwrites the value in the message's bio_iter field.
+
+Because it gets overwritten anyway, there is no need to set it to
+NULL.  So don't do it.
+
+This resolves:
+    http://tracker.ceph.com/issues/4402
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/messenger.c |    4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index e75a03d..17d9321 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -804,10 +804,6 @@ static void prepare_write_message(struct
+ceph_connection *con)
+ 		m->hdr.seq = cpu_to_le64(++con->out_seq);
+ 		m->needs_out_seq = false;
+ 	}
+-#ifdef CONFIG_BLOCK
+-	else
+-		m->bio_iter = NULL;
+-#endif
+
+ 	dout("prepare_write_message %p seq %lld type %d len %d+%d+%d (%zd)\n",
+ 	     m, con->out_seq, le16_to_cpu(m->hdr.type),
+-- 
+1.7.9.5
 
