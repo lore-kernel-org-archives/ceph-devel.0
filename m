@@ -1,78 +1,97 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: CephFS Space Accounting and Quotas
-Date: Fri, 8 Mar 2013 18:05:31 -0800
-Message-ID: <391D23EA41AE4F05BCE2E6367BA0FC3C@inktank.com>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
- <51363490.4070408@42on.com>
- <1F15E079964848B9BE079E974A1946B4@inktank.com>
- <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
- <51363B30.7080006@42on.com>
- <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
- <513793FD.7010001@sandia.gov>
- <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
- <51379FCD.9000502@sandia.gov>
- <D19243567199482692F961618A335817@inktank.com>
- <5137B4E9.1030505@sandia.gov>
- <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
- <5137CDE2.70105@sandia.gov>
- <8B6963669A2E49C286B9241DCD62F557@inktank.com>
- <5138AEFB.5070200@sandia.gov> <513A69F8.6050709@sandia.gov>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] fs: fix dentry_lru_prune()
+Date: Sat, 9 Mar 2013 20:35:09 +1100
+Message-ID: <20130309093509.GI23616@dastard>
+References: <1362656256-4397-1-git-send-email-zheng.z.yan@intel.com>
+ <20130308020445.GB23616@dastard>
+ <51395034.40709@intel.com>
+ <20130308062705.GD23616@dastard>
+ <513987EE.4030407@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f50.google.com ([209.85.210.50]:43356 "EHLO
-	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757154Ab3CICFg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Mar 2013 21:05:36 -0500
-Received: by mail-da0-f50.google.com with SMTP id h15so251336dan.37
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Mar 2013 18:05:36 -0800 (PST)
-In-Reply-To: <513A69F8.6050709@sandia.gov>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:49057 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756052Ab3CIJfN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 04:35:13 -0500
 Content-Disposition: inline
+In-Reply-To: <513987EE.4030407@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, sage@inktank.com, viro@zeniv.linux.org.uk
 
-On Friday, March 8, 2013 at 2:45 PM, Jim Schutt wrote:
-> On 03/07/2013 08:15 AM, Jim Schutt wrote:
-> > On 03/06/2013 05:18 PM, Greg Farnum wrote:
-> > > On Wednesday, March 6, 2013 at 3:14 PM, Jim Schutt wrote:
-> > =20
-> =20
-> =20
-> =20
-> [snip]
-> =20
-> > > > Do you want the MDS log at 10 or 20?
-> > > More is better. ;)
-> > =20
-> > =20
-> > =20
-> > OK, thanks.
-> =20
-> I've sent some mds logs via private email...
-> =20
-> -- Jim =20
-I'm going to need to probe into this a bit more, but on an initial exam=
-ination I see that most of your stats are actually happening very quick=
-ly =E2=80=94 it's just that occasionally they take quite a while. Going=
- through the MDS log for one of those, the inode in question is flagged=
- with "needsrecover" from its first appearance in the log =E2=80=94 tha=
-t really shouldn't happen unless a client had write caps on it and the =
-client disappeared. Any ideas? The slowness is being caused by the MDS =
-going out and looking at every object which could be in the file =E2=80=
-=94 there are a lot since the file has a listed size of 8GB.
-(There are several other mysteries here that can probably be traced to =
-different varieties of non-optimal and buggy code as well =E2=80=94 the=
-re is a client which has write caps on the inode in question despite it=
- needing recovery, but the recovery isn't triggered until the stat even=
-t occurs, etc).
--Greg
+On Fri, Mar 08, 2013 at 02:40:46PM +0800, Yan, Zheng wrote:
+> On 03/08/2013 02:27 PM, Dave Chinner wrote:
+> > On Fri, Mar 08, 2013 at 10:43:00AM +0800, Yan, Zheng wrote:
+> >> On 03/08/2013 10:04 AM, Dave Chinner wrote:
+> >>> On Thu, Mar 07, 2013 at 07:37:36PM +0800, Yan, Zheng wrote:
+> >>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> >>>>
+> >>>> dentry_lru_prune() should always call file system's d_prune callback.
+> >>>
+> >>> Why? What bug does this fix?
+> >>>
+> >>
+> >> Ceph uses a flag to track if the dcache contents for a directory are complete,
+> >> and it relies on d_prune() to clear the flag when some dentries are trimmed.
+> >> We noticed that dentry_lru_prune() sometimes does not call ceph_d_prune().
+> >> It seems the dentry in question is ancestor trimmed by try_prune_one_dentry().
+> > 
+> > That doesn't sound right to me. Any dentry that goes through
+> > try_prune_one_dentry() is on a LRU list, and will end up in
+> > dentry_kill() if the reference count drops to zero and hence calls
+> > dentry_lru_prune() with a non-emtpy LRU pointer.
+> > 
+> > If it has a non-zero reference count, it gets removed from the LRU,
+> > and the next call to dput() that drops the reference count to zero
+> > will add it back to the LRU and it will go around again. So it
+> > sounds to me like there is something else going on here.
+> > 
+> > FWIW, if the dentry is not on the LRU, why would it need pruning?
+> > If it needs pruning regardless of it's status on the LRU, then
+> > dentry_lru_prune() should go away entirely and pruning be done
+> > explicity where it is needed rather than wrapped up in an unrelated
+> > LRU operation....
+> > 
+> 
+> I didn't described it clearly
+> 
+> static void try_prune_one_dentry(struct dentry *dentry)
+> 	__releases(dentry->d_lock)
+> {
+> 	.....
+> 	/* Prune ancestors. */
+> 	dentry = parent;
+> 	while (dentry) {
+> 		spin_lock(&dentry->d_lock);
+> 		if (dentry->d_count > 1) {
+> 			dentry->d_count--;
+> 			spin_unlock(&dentry->d_lock);
+> 			return;
+> 		}
+> 		dentry = dentry_kill(dentry, 1);
+>               ~~~~I mean dentries that are pruned here~~~~
 
-Software Engineer #42 @ http://inktank.com | http://ceph.com=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+IOWs, what we have is a situation where the ancestor dentry never
+goes through dput(), and so never gets put on the LRU when it's
+reference count goes to zero. Hence associating d_prune with
+removing the dentry from the LRU is the wrong thing to be doing
+here.
+
+What about the other places that use dentry_lru_prune() - do they
+have the same problem? Oh, there's only one -
+shrink_dcache_for_umount_subtree() - and it looks to have the same
+problem as ancestors have their d_count decremented to zero in the
+loop rather than by dput() and so won't be on the LRU.
+
+IOWs, as I mentioned above, dentry_lru_prune should die as .d_prune
+is not related to the dentry LRU state at all and needs to be done
+unconditionally...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
