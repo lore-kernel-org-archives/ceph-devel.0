@@ -1,48 +1,38 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/8] libceph: miscellaneous cleanups
-Date: Sat, 09 Mar 2013 09:21:55 -0600
-Message-ID: <513B5393.7010303@inktank.com>
-References: <513B5116.2020305@inktank.com>
+Subject: [PATCH 0/7, v2] libceph: abstract message data information
+Date: Sat, 09 Mar 2013 10:00:47 -0600
+Message-ID: <513B5CAF.4010702@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:44149 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758645Ab3CIPV6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 10:21:58 -0500
-Received: by mail-ie0-f175.google.com with SMTP id c12so3220014ieb.34
-        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 07:21:58 -0800 (PST)
-In-Reply-To: <513B5116.2020305@inktank.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:60832 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758702Ab3CIQAu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 11:00:50 -0500
+Received: by mail-ia0-f174.google.com with SMTP id k38so699728iah.19
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 08:00:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 03/09/2013 09:11 AM, Alex Elder wrote:
-> This series contains a bunch of small cleanups.  All of
-> them I've created while working on other things, and most
-> of them were done in order to allow upcoming work to be
-> easier, or easier to understand.  I've moved them all to
-> the front of my stack of patches and now I'm posting them
-> as a set for review.  They apply on top of the ceph-client
-> "testing" branch as of a couple of days ago:
->     2f60d302  libceph: fix decoding of pgids
+Over half of these have been reviewed already, but I'm re-posting
+them because I've rebased them to be on top of the series I just
+posted (that is, these are based on branch "review/wip-cleanup"
+or 60b789f libceph: record byte count not page count), and because
+I've added two more patches since the last time I sent them out.
 
-I forgot to say, these are available on the "review/wip-cleanup"
-branch of the ceph-client repository.
+I won't bother summarizing them again this time, their individual
+descriptions should be good enough.
 
 					-Alex
 
+The patches below marked with "***" are still in need of review.
 
-> 					-Alex
-> 
-> [PATCH 1/8] libceph: define CEPH_MSG_MAX_MIDDLE_LEN
-> [PATCH 2/8] libceph: minor byte order problems in
-> [PATCH 3/8] libceph: change type of ceph_tcp_sendpage() "more"
-> [PATCH 4/8] libceph: kill args in read_partial_message_bio()
-> [PATCH 5/8] libceph: define and use in_msg_pos_next()
-> [PATCH 6/8] libceph: advance pagelist with list_rotate_left()
-> [PATCH 7/8] libceph: simplify new message initialization
-> [PATCH 8/8] libceph: record byte count not page count
-> 
-
+[PATCH 1/7] libceph: isolate message page field manipulation
+[PATCH 2/7] libceph: set page info with byte length         ***
+[PATCH 3/7] libceph: isolate other message data fields
+[PATCH 4/7] ceph: only set message data pointers if non-empty
+[PATCH 5/7] libceph: record message data byte length        ***
+[PATCH 6/7] libceph: set response data fields earlier       ***
+[PATCH 7/7] libceph: activate message data assignment checks
