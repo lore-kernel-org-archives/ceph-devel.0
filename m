@@ -1,51 +1,209 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/8] libceph: implement cursor for outgoing data items
-Date: Sun, 10 Mar 2013 14:19:22 -0500
-Message-ID: <513CDCBA.1080504@inktank.com>
-References: <513CD9BE.1070505@inktank.com>
+Subject: [PATCH] libceph: let osd ops determine request data length
+Date: Sun, 10 Mar 2013 15:30:30 -0500
+Message-ID: <513CED66.1060902@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f169.google.com ([209.85.210.169]:44221 "EHLO
-	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753039Ab3CJTTZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 15:19:25 -0400
-Received: by mail-ia0-f169.google.com with SMTP id j5so3015874iaf.28
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 12:19:24 -0700 (PDT)
-In-Reply-To: <513CD9BE.1070505@inktank.com>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:39107 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751110Ab3CJUae (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 16:30:34 -0400
+Received: by mail-qa0-f42.google.com with SMTP id cr7so654742qab.1
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 13:30:33 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 03/10/2013 02:06 PM, Alex Elder wrote:
-> This series makes the four distinct data items in a message (the
-> pages array, the pagelist, the bio, and the trail) take a generic
-> form, and then arranges for them all to be handled using a common
-> set of cursor routines that determine what data needs to be sent
-> next for a message.  There is more consolidation of this code
-> coming, but for now I'm leaving this series at 8 patches, which
-> includes the definition of cursor code for the three types of
-> data item.
-> 
-> 					-Alex
+(This is available as a commit in the branch "review/wip-kill-trail"
+in the ceph-client git repository.)
 
-These patches are available in branch "review/wip-cursor" on the
-ceph-client git repository.  That branch is based on the branch
-"review/wip-msgr-refactor".
+The length of outgoing data in an osd request is dependent on the
+osd ops that are embedded in that request.  Each op is encoded into
+a request message using osd_req_encode_op(), so that should be used
+to determine the amount of outgoing data implied by the op as it
+is encoded.
 
-Someday I will remember to say that every time I send out one
-of these things...
+Have osd_req_encode_op() return the number of bytes of outgoing data
+implied by the op being encoded, and accumulate and use that in
+ceph_osdc_build_request().
 
-					-Alex
+As a result, ceph_osdc_build_request() no longer requires its "len"
+parameter, so get rid of it.
 
-> [PATCH 1/8] libceph: define ceph_msg_has_*() data macros
-> [PATCH 2/8] libceph: be explicit about message data representation
-> [PATCH 3/8] libceph: abstract message data
-> [PATCH 4/8] libceph: start defining message data cursor
-> [PATCH 5/8] libceph: prepare for other message data item types
-> [PATCH 6/8] libceph: use data cursor for message pagelist
-> [PATCH 7/8] libceph: implement bio message data item cursor
-> [PATCH 8/8] libceph: implement pages array cursor
-> 
+Using the sum of the op lengths rather than the length provided is
+a valid change because:
+    - The only callers of osd ceph_osdc_build_request() are
+      rbd and the osd client (in ceph_osdc_new_request() on
+      behalf of the file system).
+    - When rbd calls it, the length provided is only non-zero for
+      write requests, and in that case the single op has the
+      same length value as what was passed here.
+    - When called from ceph_osdc_new_request(), (it's not all that
+      easy to see, but) the length passed is also always the same
+      as the extent length encoded in its (single) write op if
+      present.
+
+This resolves:
+    http://tracker.ceph.com/issues/4406
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c             |    2 +-
+ include/linux/ceph/osd_client.h |    3 +--
+ net/ceph/osd_client.c           |   33 +++++++++++++++++++--------------
+ 3 files changed, 21 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index ae6b976..cc74b2c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1449,7 +1449,7 @@ static struct ceph_osd_request *rbd_osd_req_create(
+
+ 	/* osd_req will get its own reference to snapc (if non-null) */
+
+-	ceph_osdc_build_request(osd_req, offset, length, 1, op,
++	ceph_osdc_build_request(osd_req, offset, 1, op,
+ 				snapc, snap_id, mtime);
+
+ 	return osd_req;
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index a8016df..bcf3f72 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -249,8 +249,7 @@ extern struct ceph_osd_request
+*ceph_osdc_alloc_request(struct ceph_osd_client *
+ 					       bool use_mempool,
+ 					       gfp_t gfp_flags);
+
+-extern void ceph_osdc_build_request(struct ceph_osd_request *req,
+-				    u64 off, u64 len,
++extern void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
+ 				    unsigned int num_op,
+ 				    struct ceph_osd_req_op *src_ops,
+ 				    struct ceph_snap_context *snapc,
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 37d8961..6b78903 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -222,10 +222,13 @@ struct ceph_osd_request
+*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ }
+ EXPORT_SYMBOL(ceph_osdc_alloc_request);
+
+-static void osd_req_encode_op(struct ceph_osd_request *req,
++static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 			      struct ceph_osd_op *dst,
+ 			      struct ceph_osd_req_op *src)
+ {
++	u64 out_data_len = 0;
++	u64 tmp;
++
+ 	dst->op = cpu_to_le16(src->op);
+
+ 	switch (src->op) {
+@@ -233,10 +236,10 @@ static void osd_req_encode_op(struct
+ceph_osd_request *req,
+ 		break;
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
+-		dst->extent.offset =
+-			cpu_to_le64(src->extent.offset);
+-		dst->extent.length =
+-			cpu_to_le64(src->extent.length);
++		if (CEPH_OSD_OP_WRITE)
++			out_data_len = src->extent.length;
++		dst->extent.offset = cpu_to_le64(src->extent.offset);
++		dst->extent.length = cpu_to_le64(src->extent.length);
+ 		dst->extent.truncate_size =
+ 			cpu_to_le64(src->extent.truncate_size);
+ 		dst->extent.truncate_seq =
+@@ -247,12 +250,14 @@ static void osd_req_encode_op(struct
+ceph_osd_request *req,
+ 		dst->cls.method_len = src->cls.method_len;
+ 		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
+
++		tmp = req->r_trail.length;
+ 		ceph_pagelist_append(&req->r_trail, src->cls.class_name,
+ 				     src->cls.class_len);
+ 		ceph_pagelist_append(&req->r_trail, src->cls.method_name,
+ 				     src->cls.method_len);
+ 		ceph_pagelist_append(&req->r_trail, src->cls.indata,
+ 				     src->cls.indata_len);
++		out_data_len = req->r_trail.length - tmp;
+ 		break;
+ 	case CEPH_OSD_OP_STARTSYNC:
+ 		break;
+@@ -326,6 +331,8 @@ static void osd_req_encode_op(struct
+ceph_osd_request *req,
+ 		break;
+ 	}
+ 	dst->payload_len = cpu_to_le32(src->payload_len);
++
++	return out_data_len;
+ }
+
+ /*
+@@ -333,7 +340,7 @@ static void osd_req_encode_op(struct
+ceph_osd_request *req,
+  *
+  */
+ void ceph_osdc_build_request(struct ceph_osd_request *req,
+-			     u64 off, u64 len, unsigned int num_ops,
++			     u64 off, unsigned int num_ops,
+ 			     struct ceph_osd_req_op *src_ops,
+ 			     struct ceph_snap_context *snapc, u64 snap_id,
+ 			     struct timespec *mtime)
+@@ -385,12 +392,13 @@ void ceph_osdc_build_request(struct
+ceph_osd_request *req,
+ 	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
+ 	p += req->r_oid_len;
+
+-	/* ops */
++	/* ops--can imply data */
+ 	ceph_encode_16(&p, num_ops);
+ 	src_op = src_ops;
+ 	req->r_request_ops = p;
++	data_len = 0;
+ 	for (i = 0; i < num_ops; i++, src_op++) {
+-		osd_req_encode_op(req, p, src_op);
++		data_len += osd_req_encode_op(req, p, src_op);
+ 		p += sizeof(struct ceph_osd_op);
+ 	}
+
+@@ -407,11 +415,9 @@ void ceph_osdc_build_request(struct
+ceph_osd_request *req,
+ 	req->r_request_attempts = p;
+ 	p += 4;
+
+-	data_len = req->r_trail.length;
+-	if (flags & CEPH_OSD_FLAG_WRITE) {
++	/* data */
++	if (flags & CEPH_OSD_FLAG_WRITE)
+ 		req->r_request->hdr.data_off = cpu_to_le16(off);
+-		data_len += len;
+-	}
+ 	req->r_request->hdr.data_len = cpu_to_le32(data_len);
+
+ 	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
+@@ -477,13 +483,12 @@ struct ceph_osd_request
+*ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 		ceph_osdc_put_request(req);
+ 		return ERR_PTR(r);
+ 	}
+-
+ 	req->r_file_layout = *layout;  /* keep a copy */
+
+ 	snprintf(req->r_oid, sizeof(req->r_oid), "%llx.%08llx", vino.ino, bno);
+ 	req->r_oid_len = strlen(req->r_oid);
+
+-	ceph_osdc_build_request(req, off, *plen, num_op, ops,
++	ceph_osdc_build_request(req, off, num_op, ops,
+ 				snapc, vino.snap, mtime);
+
+ 	return req;
+-- 
+1.7.9.5
 
