@@ -1,119 +1,168 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 6/6] libceph: define and use ceph_crc32c_page()
-Date: Sat, 09 Mar 2013 10:43:58 -0600
-Message-ID: <513B66CE.2000609@inktank.com>
-References: <513B661F.4050203@inktank.com>
+Subject: [PATCH 4/6, v2] libceph: encapsulate reading message data
+Date: Sat, 09 Mar 2013 18:38:45 -0600
+Message-ID: <513BD615.9040807@inktank.com>
+References: <513B661F.4050203@inktank.com> <513B66B3.3090704@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:42090 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932846Ab3CIQoB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 11:44:01 -0500
-Received: by mail-ia0-f179.google.com with SMTP id x24so2384706iak.24
-        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 08:44:00 -0800 (PST)
-In-Reply-To: <513B661F.4050203@inktank.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:44256 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751237Ab3CJAit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Mar 2013 19:38:49 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k10so3409597iea.5
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Mar 2013 16:38:49 -0800 (PST)
+In-Reply-To: <513B66B3.3090704@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Factor out a common block of code that updates a CRC calculation
-over a range of data in a page.
+The previously posted edition of this patch erroneously moved the
+initialization of the message position information so it happened
+every time the message was read rather than just when the message
+was first initialized.  This one no longer does that.
 
-This and the preceding patches are related to:
-    http://tracker.ceph.com/issues/4403
+Pull the code that reads the data portion into a message into
+a separate function read_partial_msg_data().
+
+Rename write_partial_msg_pages() to be write_partial_message_data()
+to match its read counterpart, and to reflect its more generic
+purpose.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/messenger.c |   47 ++++++++++++++++++++---------------------------
- 1 file changed, 20 insertions(+), 27 deletions(-)
+v2: do not move the call to prepare_message_data()
+
+ net/ceph/messenger.c |   63
+++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 41 insertions(+), 22 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 7df7941..e677fd3 100644
+index 813c299..8415896 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -1085,6 +1085,19 @@ static void in_msg_pos_next(struct
-ceph_connection *con, size_t len,
- #endif /* CONFIG_BLOCK */
- }
-
-+static u32 ceph_crc32c_page(u32 crc, struct page *page,
-+				unsigned int page_offset,
-+				unsigned int length)
-+{
-+	char *kaddr;
-+
-+	kaddr = kmap(page);
-+	BUG_ON(kaddr == NULL);
-+	crc = crc32c(crc, kaddr + page_offset, length);
-+	kunmap(page);
-+
-+	return crc;
-+}
- /*
-  * Write as much message data payload as we can.  If we finish, queue
-  * up the footer.
-@@ -1153,15 +1166,9 @@ static int write_partial_message_data(struct
+@@ -1076,7 +1076,7 @@ static void in_msg_pos_next(struct ceph_connection
+*con, size_t len,
+  *  0 -> socket full, but more to do
+  * <0 -> error
+  */
+-static int write_partial_msg_pages(struct ceph_connection *con)
++static int write_partial_message_data(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *msg = con->out_msg;
+ 	struct ceph_msg_pos *msg_pos = &con->out_msg_pos;
+@@ -1088,7 +1088,7 @@ static int write_partial_msg_pages(struct
 ceph_connection *con)
+ 	const size_t trail_len = (msg->trail ? msg->trail->length : 0);
+ 	const size_t trail_off = data_len - trail_len;
 
- 		page_offset = msg_pos->page_pos + bio_offset;
- 		if (do_datacrc && !msg_pos->did_page_crc) {
--			void *base;
- 			u32 crc = le32_to_cpu(msg->footer.data_crc);
--			char *kaddr;
+-	dout("write_partial_msg_pages %p msg %p page %d offset %d\n",
++	dout("%s %p msg %p page %d offset %d\n", __func__,
+ 	     con, msg, msg_pos->page, msg_pos->page_pos);
 
--			kaddr = kmap(page);
--			BUG_ON(kaddr == NULL);
--			base = kaddr + page_offset;
--			crc = crc32c(crc, base, length);
--			kunmap(page);
-+			crc = ceph_crc32c_page(crc, page, page_offset, length);
- 			msg->footer.data_crc = cpu_to_le32(crc);
- 			msg_pos->did_page_crc = true;
+ 	/*
+@@ -1157,7 +1157,7 @@ static int write_partial_msg_pages(struct
+ceph_connection *con)
+ 		out_msg_pos_next(con, page, length, (size_t) ret, in_trail);
+ 	}
+
+-	dout("write_partial_msg_pages %p msg %p done\n", con, msg);
++	dout("%s %p msg %p done\n", __func__, con, msg);
+
+ 	/* prepare and queue up footer, too */
+ 	if (!do_datacrc)
+@@ -1869,13 +1869,44 @@ static int read_partial_message_bio(struct
+ceph_connection *con,
+ }
+ #endif
+
++static int read_partial_msg_data(struct ceph_connection *con)
++{
++	struct ceph_msg *msg = con->in_msg;
++	struct ceph_msg_pos *msg_pos = &con->in_msg_pos;
++	const bool do_datacrc = !con->msgr->nocrc;
++	unsigned int data_len;
++	int ret = 0;
++
++	BUG_ON(!msg);
++
++	data_len = le32_to_cpu(con->in_hdr.data_len);
++	while (msg_pos->data_pos < data_len) {
++		if (msg->pages) {
++			ret = read_partial_message_pages(con, msg->pages,
++						 data_len, do_datacrc);
++			if (ret <= 0)
++				return ret;
++#ifdef CONFIG_BLOCK
++		} else if (msg->bio) {
++			ret = read_partial_message_bio(con,
++						 data_len, do_datacrc);
++			if (ret <= 0)
++				return ret;
++#endif
++		} else {
++			BUG_ON(1);
++		}
++	}
++
++	return ret;
++}
++
+ /*
+  * read (part of) a message.
+  */
+ static int read_partial_message(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *m = con->in_msg;
+-	struct ceph_msg_pos *msg_pos = &con->in_msg_pos;
+ 	int size;
+ 	int end;
+ 	int ret;
+@@ -1978,22 +2009,10 @@ static int read_partial_message(struct
+ceph_connection *con)
+ 	}
+
+ 	/* (page) data */
+-	while (msg_pos->data_pos < data_len) {
+-		if (m->pages) {
+-			ret = read_partial_message_pages(con, m->pages,
+-						 data_len, do_datacrc);
+-			if (ret <= 0)
+-				return ret;
+-#ifdef CONFIG_BLOCK
+-		} else if (m->bio) {
+-			ret = read_partial_message_bio(con,
+-						 data_len, do_datacrc);
+-			if (ret <= 0)
+-				return ret;
+-#endif
+-		} else {
+-			BUG_ON(1);
+-		}
++	if (data_len) {
++		ret = read_partial_msg_data(con);
++		if (ret <= 0)
++			return ret;
+ 	}
+
+ 	/* footer */
+@@ -2119,13 +2138,13 @@ more_kvec:
+ 			goto do_next;
  		}
-@@ -1843,16 +1850,9 @@ static int read_partial_message_pages(struct
-ceph_connection *con,
- 	if (ret <= 0)
- 		return ret;
 
--	if (do_datacrc) {
--		void *kaddr;
--		void *base;
--
--		kaddr = kmap(page);
--		BUG_ON(!kaddr);
--		base = kaddr + page_offset;
--		con->in_data_crc = crc32c(con->in_data_crc, base, ret);
--		kunmap(page);
--	}
-+	if (do_datacrc)
-+		con->in_data_crc = ceph_crc32c_page(con->in_data_crc, page,
-+							page_offset, ret);
-
- 	in_msg_pos_next(con, length, ret);
-
-@@ -1886,16 +1886,9 @@ static int read_partial_message_bio(struct
-ceph_connection *con,
- 	if (ret <= 0)
- 		return ret;
-
--	if (do_datacrc) {
--		void *kaddr;
--		void *base;
--
--		kaddr = kmap(page);
--		BUG_ON(!kaddr);
--		base = kaddr + page_offset;
--		con->in_data_crc = crc32c(con->in_data_crc, base, ret);
--		kunmap(page);
--	}
-+	if (do_datacrc)
-+		con->in_data_crc = ceph_crc32c_page(con->in_data_crc, page,
-+							page_offset, ret);
-
- 	in_msg_pos_next(con, length, ret);
-
+-		ret = write_partial_msg_pages(con);
++		ret = write_partial_message_data(con);
+ 		if (ret == 1)
+ 			goto more_kvec;  /* we need to send the footer, too! */
+ 		if (ret == 0)
+ 			goto out;
+ 		if (ret < 0) {
+-			dout("try_write write_partial_msg_pages err %d\n",
++			dout("try_write write_partial_message_data err %d\n",
+ 			     ret);
+ 			goto out;
+ 		}
 -- 
 1.7.9.5
 
