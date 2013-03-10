@@ -1,18 +1,18 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/8] libceph: be explicit about message data representation
-Date: Sun, 10 Mar 2013 14:14:48 -0500
-Message-ID: <513CDBA8.20600@inktank.com>
+Subject: [PATCH 3/8] libceph: abstract message data
+Date: Sun, 10 Mar 2013 14:15:50 -0500
+Message-ID: <513CDBE6.8040409@inktank.com>
 References: <513CD9BE.1070505@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f181.google.com ([209.85.210.181]:54554 "EHLO
-	mail-ia0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763Ab3CJTOv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 15:14:51 -0400
-Received: by mail-ia0-f181.google.com with SMTP id w33so2908230iag.40
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 12:14:51 -0700 (PDT)
+Received: from mail-ia0-f171.google.com ([209.85.210.171]:38470 "EHLO
+	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752331Ab3CJTPy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 15:15:54 -0400
+Received: by mail-ia0-f171.google.com with SMTP id z13so2979775iaz.16
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 12:15:53 -0700 (PDT)
 In-Reply-To: <513CD9BE.1070505@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
