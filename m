@@ -1,139 +1,187 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/4] libceph: kill osd request r_trail
-Date: Sun, 10 Mar 2013 15:36:32 -0500
-Message-ID: <513CEED0.9040107@inktank.com>
+Subject: [PATCH 3/4] libceph: kill message trail
+Date: Sun, 10 Mar 2013 15:36:44 -0500
+Message-ID: <513CEEDC.5050508@inktank.com>
 References: <513CEE83.4040900@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f52.google.com ([209.85.128.52]:35897 "EHLO
-	mail-qe0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751487Ab3CJUgg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 16:36:36 -0400
-Received: by mail-qe0-f52.google.com with SMTP id s14so1923895qeb.39
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 13:36:35 -0700 (PDT)
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:53465 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751487Ab3CJUgr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Mar 2013 16:36:47 -0400
+Received: by mail-qa0-f42.google.com with SMTP id cr7so656165qab.1
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 13:36:46 -0700 (PDT)
 In-Reply-To: <513CEE83.4040900@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The osd trail is a pagelist, used only for a CALL osd operation
-to hold the class and method names, along with any input data for
-the call.
+The wart that is the ceph message trail can now be removed, because
+its only user was the osd client, and the previous patch made that
+no longer hte case.
 
-It is only currently used by the rbd client, and when it's used it
-is the only bit of outbound data in the osd request.  Since we
-already support (non-trail) pagelist data in a message, we can
-just save this outbound CALL data in the "normal" pagelist rather
-than the trail, and get rid of the trail entirely.
-
-The existing pagelist support depends on the pagelist being
-dynamically allocated, and ownership of it is passed to the
-messenger once it's been attached to a message.  (That is to say,
-the messenger releases and frees the pagelist when it's done with
-it).  That means we need to dynamically allocate the pagelist also.
-
-Note that we simply assert that the allocation of a pagelist
-structure succeeds.  Appending to a pagelist might require a dynamic
-allocation, so we're already assuming we won't run into trouble
-doing so (we're just ignore any failures--and that should be fixed
-at some point).
-
-This resolves:
-    http://tracker.ceph.com/issues/4407
+The result allows write_partial_msg_pages() to be simplified
+considerably.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- include/linux/ceph/osd_client.h |    1 -
- net/ceph/osd_client.c           |   23 ++++++++++++-----------
- 2 files changed, 12 insertions(+), 12 deletions(-)
+ include/linux/ceph/messenger.h |    4 ----
+ net/ceph/messenger.c           |   44
++++++-----------------------------------
+ 2 files changed, 5 insertions(+), 43 deletions(-)
 
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index cf0ba93..1dab291 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -134,7 +134,6 @@ struct ceph_osd_request {
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index b53b9ef..0e4536c 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -69,7 +69,6 @@ struct ceph_messenger {
+ #ifdef CONFIG_BLOCK
+ #define ceph_msg_has_bio(m)		((m)->b.type == CEPH_MSG_DATA_BIO)
+ #endif /* CONFIG_BLOCK */
+-#define ceph_msg_has_trail(m)		((m)->t.type == CEPH_MSG_DATA_PAGELIST)
 
- 	struct ceph_osd_data r_data_in;
- 	struct ceph_osd_data r_data_out;
--	struct ceph_pagelist r_trail;	      /* trailing part of data out */
- };
+ enum ceph_msg_data_type {
+ 	CEPH_MSG_DATA_NONE,	/* message contains no data payload */
+@@ -155,7 +154,6 @@ struct ceph_msg {
+ #ifdef CONFIG_BLOCK
+ 	struct ceph_msg_data	b;	/* bio */
+ #endif /* CONFIG_BLOCK */
+-	struct ceph_msg_data	t;	/* trail */
 
- struct ceph_osd_event {
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8fa3300..d0a9fc4 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -138,7 +138,6 @@ void ceph_osdc_release_request(struct kref *kref)
+ 	struct ceph_connection *con;
+ 	struct list_head list_head;	/* links for connection lists */
+@@ -295,8 +293,6 @@ extern void ceph_msg_data_set_pages(struct ceph_msg
+*msg, struct page **pages,
+ extern void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
+ 				struct ceph_pagelist *pagelist);
+ extern void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio);
+-extern void ceph_msg_data_set_trail(struct ceph_msg *msg,
+-				struct ceph_pagelist *trail);
+
+ extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+ 				     bool can_fail);
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 12d416f..b7ddf2b 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1105,8 +1105,6 @@ static void prepare_message_data(struct ceph_msg *msg,
+ 		ceph_msg_data_cursor_init(&msg->p);
+ 	if (ceph_msg_has_pagelist(msg))
+ 		ceph_msg_data_cursor_init(&msg->l);
+-	if (ceph_msg_has_trail(msg))
+-		ceph_msg_data_cursor_init(&msg->t);
+
+ 	msg_pos->did_page_crc = false;
+ }
+@@ -1388,7 +1386,7 @@ out:
+ }
+
+ static void out_msg_pos_next(struct ceph_connection *con, struct page
+*page,
+-			size_t len, size_t sent, bool in_trail)
++			size_t len, size_t sent)
+ {
+ 	struct ceph_msg *msg = con->out_msg;
+ 	struct ceph_msg_pos *msg_pos = &con->out_msg_pos;
+@@ -1399,9 +1397,7 @@ static void out_msg_pos_next(struct
+ceph_connection *con, struct page *page,
+
+ 	msg_pos->data_pos += sent;
+ 	msg_pos->page_pos += sent;
+-	if (in_trail)
+-		need_crc = ceph_msg_data_advance(&msg->t, sent);
+-	else if (ceph_msg_has_pages(msg))
++	if (ceph_msg_has_pages(msg))
+ 		need_crc = ceph_msg_data_advance(&msg->p, sent);
+ 	else if (ceph_msg_has_pagelist(msg))
+ 		need_crc = ceph_msg_data_advance(&msg->l, sent);
+@@ -1471,14 +1467,6 @@ static int write_partial_message_data(struct
+ceph_connection *con)
+ 	bool do_datacrc = !con->msgr->nocrc;
+ 	int ret;
+ 	int total_max_write;
+-	bool in_trail = false;
+-	size_t trail_len = 0;
+-	size_t trail_off = data_len;
+-
+-	if (ceph_msg_has_trail(msg)) {
+-		trail_len = msg->t.pagelist->length;
+-		trail_off -= trail_len;
+-	}
+
+ 	dout("%s %p msg %p page %d offset %d\n", __func__,
+ 	     con, msg, msg_pos->page, msg_pos->page_pos);
+@@ -1498,16 +1486,9 @@ static int write_partial_message_data(struct
+ceph_connection *con)
+ 		bool use_cursor = false;
+ 		bool last_piece = true;	/* preserve existing behavior */
+
+-		in_trail = in_trail || msg_pos->data_pos >= trail_off;
+-		if (!in_trail)
+-			total_max_write = trail_off - msg_pos->data_pos;
++		total_max_write = data_len - msg_pos->data_pos;
+
+-		if (in_trail) {
+-			BUG_ON(!ceph_msg_has_trail(msg));
+-			use_cursor = true;
+-			page = ceph_msg_data_next(&msg->t, &page_offset,
+-							&length, &last_piece);
+-		} else if (ceph_msg_has_pages(msg)) {
++		if (ceph_msg_has_pages(msg)) {
+ 			use_cursor = true;
+ 			page = ceph_msg_data_next(&msg->p, &page_offset,
+ 							&length, &last_piece);
+@@ -1542,7 +1523,7 @@ static int write_partial_message_data(struct
+ceph_connection *con)
+ 		if (ret <= 0)
+ 			goto out;
+
+-		out_msg_pos_next(con, page, length, (size_t) ret, in_trail);
++		out_msg_pos_next(con, page, length, (size_t) ret);
  	}
 
- 	ceph_put_snap_context(req->r_snapc);
--	ceph_pagelist_release(&req->r_trail);
- 	if (req->r_mempool)
- 		mempool_free(req, req->r_osdc->req_mempool);
- 	else
-@@ -202,7 +201,6 @@ struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	dout("%s %p msg %p done\n", __func__, con, msg);
+@@ -3135,17 +3116,6 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
+struct bio *bio)
+ }
+ EXPORT_SYMBOL(ceph_msg_data_set_bio);
 
- 	req->r_data_in.type = CEPH_OSD_DATA_TYPE_NONE;
- 	req->r_data_out.type = CEPH_OSD_DATA_TYPE_NONE;
--	ceph_pagelist_init(&req->r_trail);
-
- 	/* create request message; allow space for oid */
- 	if (use_mempool)
-@@ -227,7 +225,7 @@ static u64 osd_req_encode_op(struct ceph_osd_request
-*req,
- 			      struct ceph_osd_req_op *src)
- {
- 	u64 out_data_len = 0;
--	u64 tmp;
-+	struct ceph_pagelist *pagelist;
-
- 	dst->op = cpu_to_le16(src->op);
-
-@@ -246,18 +244,23 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- 			cpu_to_le32(src->extent.truncate_seq);
- 		break;
- 	case CEPH_OSD_OP_CALL:
-+		pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
-+		BUG_ON(!pagelist);
-+		ceph_pagelist_init(pagelist);
-+
- 		dst->cls.class_len = src->cls.class_len;
- 		dst->cls.method_len = src->cls.method_len;
- 		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
+-void ceph_msg_data_set_trail(struct ceph_msg *msg, struct ceph_pagelist
+*trail)
+-{
+-	BUG_ON(!trail);
+-	BUG_ON(!trail->length);
+-	BUG_ON(msg->b.type != CEPH_MSG_DATA_NONE);
 -
--		tmp = req->r_trail.length;
--		ceph_pagelist_append(&req->r_trail, src->cls.class_name,
-+		ceph_pagelist_append(pagelist, src->cls.class_name,
- 				     src->cls.class_len);
--		ceph_pagelist_append(&req->r_trail, src->cls.method_name,
-+		ceph_pagelist_append(pagelist, src->cls.method_name,
- 				     src->cls.method_len);
--		ceph_pagelist_append(&req->r_trail, src->cls.indata,
-+		ceph_pagelist_append(pagelist, src->cls.indata,
- 				     src->cls.indata_len);
--		out_data_len = req->r_trail.length - tmp;
-+
-+		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGELIST;
-+		req->r_data_out.pagelist = pagelist;
-+		out_data_len = pagelist->length;
- 		break;
- 	case CEPH_OSD_OP_STARTSYNC:
- 		break;
-@@ -1782,8 +1785,6 @@ int ceph_osdc_start_request(struct ceph_osd_client
-*osdc,
+-	msg->t.type = CEPH_MSG_DATA_PAGELIST;
+-	msg->t.pagelist = trail;
+-}
+-EXPORT_SYMBOL(ceph_msg_data_set_trail);
+-
+ /*
+  * construct a new message with given type, size
+  * the new msg has a ref count of 1.
+@@ -3169,7 +3139,6 @@ struct ceph_msg *ceph_msg_new(int type, int
+front_len, gfp_t flags,
+ 	ceph_msg_data_init(&m->p);
+ 	ceph_msg_data_init(&m->l);
+ 	ceph_msg_data_init(&m->b);
+-	ceph_msg_data_init(&m->t);
 
- 	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
- 	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
--	if (req->r_trail.length)
--		ceph_msg_data_set_trail(req->r_request, &req->r_trail);
+ 	/* front */
+ 	m->front_max = front_len;
+@@ -3335,9 +3304,6 @@ void ceph_msg_last_put(struct kref *kref)
+ 		m->l.pagelist = NULL;
+ 	}
 
- 	register_request(osdc, req);
-
+-	if (ceph_msg_has_trail(m))
+-		m->t.pagelist = NULL;
+-
+ 	if (m->pool)
+ 		ceph_msgpool_put(m->pool, m);
+ 	else
 -- 
 1.7.9.5
 
