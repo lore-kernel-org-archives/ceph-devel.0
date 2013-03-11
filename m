@@ -1,75 +1,155 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Estimating OSD memory requirements (was Re: stuff for
- v0.56.4)
-Date: Mon, 11 Mar 2013 12:01:55 -0600
-Message-ID: <513E1C13.50104@sandia.gov>
-References: <201303111510.r2BFAUcx011721@ayesha.phys.virginia.edu>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 5/8] libceph: define and use in_msg_pos_next()
+Date: Mon, 11 Mar 2013 11:57:00 -0700
+Message-ID: <513E28FC.8060608@inktank.com>
+References: <513B5116.2020305@inktank.com> <513B51E5.6080503@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:39156 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751495Ab3CKSCj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 14:02:39 -0400
-In-Reply-To: <201303111510.r2BFAUcx011721@ayesha.phys.virginia.edu>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:62462 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754427Ab3CKS5l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 14:57:41 -0400
+Received: by mail-pb0-f46.google.com with SMTP id uo15so4055354pbc.5
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 11:57:40 -0700 (PDT)
+In-Reply-To: <513B51E5.6080503@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bkw1a@ayesha.phys.virginia.edu
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Bryan,
+On 03/09/2013 07:14 AM, Alex Elder wrote:
+> Define a new function in_msg_pos_next() to match out_msg_pos_next(),
+> and use it in place of code at the end of read_partial_message_pages()
+> and read_partial_message_bio().
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   net/ceph/messenger.c |   57
+> ++++++++++++++++++++++++++++++++------------------
+>   1 file changed, 37 insertions(+), 20 deletions(-)
+>
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 2017b88..fb5f6e7 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -1052,6 +1052,28 @@ static void out_msg_pos_next(struct
+> ceph_connection *con, struct page *page,
+>   #endif
+>   }
+>
+> +static void in_msg_pos_next(struct ceph_connection *con, size_t len,
+> +				size_t received)
+> +{
+> +	struct ceph_msg *msg = con->in_msg;
+> +
+> +	BUG_ON(!msg);
+> +	BUG_ON(!received);
+> +
+> +	con->in_msg_pos.data_pos += received;
+> +	con->in_msg_pos.page_pos += received;
+> +	if (received < len)
+> +		return;
 
-On 03/11/2013 09:10 AM, Bryan K. Wright wrote:
-> sage@inktank.com said:
->> On Thu, 7 Mar 2013, Bryan K. Wright wrote:
->>
->> sage@inktank.com said:
->>> - pg log trimming (probably a conservative subset) to avoid memory bloat 
->>
->> Anything that reduces the size of OSD processes would be appreciated.
->> You can probably do this with just
->>  log max recent = 1000
->> By default it's keeping 100k lines of logs in memory, which can eat a lot  of
->> ram (but is great when debugging issues).
-> 
-> 	Thanks for the tip about "log max recent".  I've made this 
-> change, but it doesn't seem to significantly reduce the size of the 
-> OSD processes.
-> 
-> 	In general, are there some rules of thumb for estimated the
-> memory requirements for OSDs?  I see processes blow up to 8gb of 
-> resident memory sometimes.  If I need to allow for that much memory
-> per OSD process, I may have to just walk away from ceph.
-> 
-> 	Does the memory usage scale with the size of the disks?
-> I've been trying to run 12 OSDs with 12 2TB disks on a single box.
-> Would I be better off (memory-usage-wise) if I RAIDed the disks
-> together and used a single OSD process?
-> 
-> 	Thanks for any advice.
+This is different from the condition in read_partial_message_pages()
+case, which only increments in_msg_pos.page and resets page_pos when
+page_pos == PAGE_SIZE. Maybe this is equivalent, but if so it's not
+obvious.
 
-You might also try tuning "osd client message size cap"; its
-current default is 500 MiB.
-
-During the periods your aggregate applied write load is higher
-than your OSD aggregate write bandwidth (taking into account
-replicas), you'll be buffering up this amount of client data.
-
-Since it only applies to incoming client messages, to figure
-total memory use I believe you need to multiply that by the
-number of replicas you're using.
-
-FWIW, for sequential writes from lots of clients, I can
-maintain full write bandwidth with "osd client message size
-cap" tuned to 60 MiB.
-
--- Jim
-
-> 
-> 					Bryan
-> 
-> 
-
+> +
+> +	BUG_ON(received != len);
+> +	con->in_msg_pos.page_pos = 0;
+> +	con->in_msg_pos.page++;
+> +#ifdef CONFIG_BLOCK
+> +	if (msg->bio)
+> +		iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+> +#endif /* CONFIG_BLOCK */
+> +}
+> +
+>   /*
+>    * Write as much message data payload as we can.  If we finish, queue
+>    * up the footer.
+> @@ -1789,6 +1811,7 @@ static int read_partial_message_pages(struct
+> ceph_connection *con,
+>   				      struct page **pages,
+>   				      unsigned int data_len, bool do_datacrc)
+>   {
+> +	struct page *page;
+>   	void *p;
+>   	int ret;
+>   	int left;
+> @@ -1797,22 +1820,18 @@ static int read_partial_message_pages(struct
+> ceph_connection *con,
+>   		   (int)(PAGE_SIZE - con->in_msg_pos.page_pos));
+>   	/* (page) data */
+>   	BUG_ON(pages == NULL);
+> -	p = kmap(pages[con->in_msg_pos.page]);
+> -	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+> -			       left);
+> +	page = pages[con->in_msg_pos.page];
+> +	p = kmap(page);
+> +	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos, left);
+>   	if (ret > 0 && do_datacrc)
+>   		con->in_data_crc =
+>   			crc32c(con->in_data_crc,
+>   				  p + con->in_msg_pos.page_pos, ret);
+> -	kunmap(pages[con->in_msg_pos.page]);
+> +	kunmap(page);
+>   	if (ret <= 0)
+>   		return ret;
+> -	con->in_msg_pos.data_pos += ret;
+> -	con->in_msg_pos.page_pos += ret;
+> -	if (con->in_msg_pos.page_pos == PAGE_SIZE) {
+> -		con->in_msg_pos.page_pos = 0;
+> -		con->in_msg_pos.page++;
+> -	}
+> +
+> +	in_msg_pos_next(con, left, ret);
+>
+>   	return ret;
+>   }
+> @@ -1823,32 +1842,30 @@ static int read_partial_message_bio(struct
+> ceph_connection *con,
+>   {
+>   	struct ceph_msg *msg = con->in_msg;
+>   	struct bio_vec *bv;
+> +	struct page *page;
+>   	void *p;
+>   	int ret, left;
+>
+>   	BUG_ON(!msg);
+>   	BUG_ON(!msg->bio_iter);
+>   	bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+> +
+>   	left = min((int)(data_len - con->in_msg_pos.data_pos),
+>   		   (int)(bv->bv_len - con->in_msg_pos.page_pos));
+>
+> -	p = kmap(bv->bv_page) + bv->bv_offset;
+> +	page = bv->bv_page;
+> +	p = kmap(page) + bv->bv_offset;
+>
+> -	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+> -			       left);
+> +	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos, left);
+>   	if (ret > 0 && do_datacrc)
+>   		con->in_data_crc =
+>   			crc32c(con->in_data_crc,
+>   				  p + con->in_msg_pos.page_pos, ret);
+> -	kunmap(bv->bv_page);
+> +	kunmap(page);
+>   	if (ret <= 0)
+>   		return ret;
+> -	con->in_msg_pos.data_pos += ret;
+> -	con->in_msg_pos.page_pos += ret;
+> -	if (con->in_msg_pos.page_pos == bv->bv_len) {
+> -		con->in_msg_pos.page_pos = 0;
+> -		iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+> -	}
+> +
+> +	in_msg_pos_next(con, left, ret);
+>
+>   	return ret;
+>   }
+>
 
