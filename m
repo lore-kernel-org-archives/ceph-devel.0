@@ -1,221 +1,137 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH, v2] libceph: let osd ops determine request data length
-Date: Mon, 11 Mar 2013 10:37:20 -0500
-Message-ID: <513DFA30.4090601@inktank.com>
-References: <513CED66.1060902@inktank.com>
+From: Greg Farnum <greg@inktank.com>
+Subject: Re: CephFS Space Accounting and Quotas
+Date: Mon, 11 Mar 2013 08:48:31 -0700
+Message-ID: <114836C3F596429AAB29E98225A25E1B@inktank.com>
+References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
+ <51363490.4070408@42on.com>
+ <1F15E079964848B9BE079E974A1946B4@inktank.com>
+ <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
+ <51363B30.7080006@42on.com>
+ <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
+ <513793FD.7010001@sandia.gov>
+ <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
+ <51379FCD.9000502@sandia.gov>
+ <D19243567199482692F961618A335817@inktank.com>
+ <5137B4E9.1030505@sandia.gov>
+ <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
+ <5137CDE2.70105@sandia.gov>
+ <8B6963669A2E49C286B9241DCD62F557@inktank.com>
+ <5138AEFB.5070200@sandia.gov> <513A69F8.6050709@sandia.gov>
+ <391D23EA41AE4F05BCE2E6367BA0FC3C@inktank.com>
+ <513DEE83.8030909@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f49.google.com ([209.85.212.49]:37449 "EHLO
-	mail-vb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752041Ab3CKPhY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 11:37:24 -0400
-Received: by mail-vb0-f49.google.com with SMTP id s24so1694765vbi.22
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 08:37:23 -0700 (PDT)
-In-Reply-To: <513CED66.1060902@inktank.com>
+Received: from mail-pb0-f54.google.com ([209.85.160.54]:44384 "EHLO
+	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751319Ab3CKPsg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 11:48:36 -0400
+Received: by mail-pb0-f54.google.com with SMTP id rr4so3881917pbb.27
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 08:48:36 -0700 (PDT)
+In-Reply-To: <513DEE83.8030909@sandia.gov>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
 
-The first version of this patch had a bug in osd_req_encode_op().
-A check intended to see if the source opcode indicated it was
-wrong.  It did this:
-    if (CEPH_OSD_OP_WRITE)
-when it should have done this:
-    if (src->op == CEPH_OSD_OP_WRITE)
-This versions corrects that problem.  The "review/wip-kill-trail"
-branch has been updated to reflect this change.
+On Monday, March 11, 2013 at 7:47 AM, Jim Schutt wrote:
+> On 03/08/2013 07:05 PM, Greg Farnum wrote:
+> > On Friday, March 8, 2013 at 2:45 PM, Jim Schutt wrote:
+> > > On 03/07/2013 08:15 AM, Jim Schutt wrote:
+> > > > On 03/06/2013 05:18 PM, Greg Farnum wrote:
+> > > > > On Wednesday, March 6, 2013 at 3:14 PM, Jim Schutt wrote:
+> > > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > [snip]
+> > > =20
+> > > > > > Do you want the MDS log at 10 or 20?
+> > > > > =20
+> > > > > More is better. ;)
+> > > > =20
+> > > > =20
+> > > > =20
+> > > > =20
+> > > > OK, thanks.
+> > > =20
+> > > =20
+> > > I've sent some mds logs via private email...
+> > > =20
+> > > -- Jim =20
+> > =20
+> > I'm going to need to probe into this a bit more, but on an initial
+> > examination I see that most of your stats are actually happening ve=
+ry
+> > quickly =E2=80=94 it's just that occasionally they take quite a whi=
+le.
+> =20
+> =20
+> =20
+> Interesting...
+> =20
+> > Going
+> > through the MDS log for one of those, the inode in question is
+> > flagged with "needsrecover" from its first appearance in the log =E2=
+=80=94
+> > that really shouldn't happen unless a client had write caps on it a=
+nd
+> > the client disappeared. Any ideas? The slowness is being caused by
+> > the MDS going out and looking at every object which could be in the
+> > file =E2=80=94 there are a lot since the file has a listed size of =
+8GB.
+> =20
+> =20
+> =20
+> For this run, the MDS logging slowed it down enough to cause the
+> client caps to occasionally go stale. I don't think it's the cause
+> of the issue, because I was having it before I turned MDS debugging
+> up. My client caps never go stale at, e.g., debug mds 5.
 
-					-Alex
+Oh, so this might be behaviorally different than you were seeing before=
+? Drat.
 
-The length of outgoing data in an osd request is dependent on the
-osd ops that are embedded in that request.  Each op is encoded into
-a request message using osd_req_encode_op(), so that should be used
-to determine the amount of outgoing data implied by the op as it
-is encoded.
+You had said before that each newfstatat was taking tens of seconds, wh=
+ereas in the strace log you sent along most of the individual calls wer=
+e taking a bit less than 20 milliseconds. Do you have an strace of them=
+ individually taking much more than that, or were you just noticing tha=
+t they took a long time in aggregate?
+I suppose if you were going to run it again then just the message loggi=
+ng could also be helpful. That way we could at least check and see the =
+message delays and if the MDS is doing other work in the course of answ=
+ering a request.
 
-Have osd_req_encode_op() return the number of bytes of outgoing data
-implied by the op being encoded, and accumulate and use that in
-ceph_osdc_build_request().
+> Otherwise, there were no signs of trouble while writing the files.
+> =20
+> Can you suggest which kernel client debugging I might enable that
+> would help understand what is happening? Also, I have the full
+> MDS log from writing the files, if that will help. It's big (~10 GiB)=
+=2E
+> =20
+> > (There are several other mysteries here that can probably be traced
+> > to different varieties of non-optimal and buggy code as well =E2=80=
+=94 there
+> > is a client which has write caps on the inode in question despite i=
+t
+> > needing recovery, but the recovery isn't triggered until the stat
+> > event occurs, etc).
+> =20
+> =20
+> =20
+> OK, thanks for taking a look. Let me know if there is other
+> logging I can enable that will be helpful.
 
-As a result, ceph_osdc_build_request() no longer requires its "len"
-parameter, so get rid of it.
+I'm going to want to spend more time with the log I've got, but I'll th=
+ink about if there's a different set of data we can gather less disrupt=
+ively. =20
+-Greg
 
-Using the sum of the op lengths rather than the length provided is
-a valid change because:
-    - The only callers of osd ceph_osdc_build_request() are
-      rbd and the osd client (in ceph_osdc_new_request() on
-      behalf of the file system).
-    - When rbd calls it, the length provided is only non-zero for
-      write requests, and in that case the single op has the
-      same length value as what was passed here.
-    - When called from ceph_osdc_new_request(), (it's not all that
-      easy to see, but) the length passed is also always the same
-      as the extent length encoded in its (single) write op if
-      present.
-
-This resolves:
-    http://tracker.ceph.com/issues/4406
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-v2:  Fix comparison bug in osd_req_encode_op()
-
- drivers/block/rbd.c             |    2 +-
- include/linux/ceph/osd_client.h |    3 +--
- net/ceph/osd_client.c           |   33 +++++++++++++++++++--------------
- 3 files changed, 21 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index ae6b976..cc74b2c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1449,7 +1449,7 @@ static struct ceph_osd_request *rbd_osd_req_create(
-
- 	/* osd_req will get its own reference to snapc (if non-null) */
-
--	ceph_osdc_build_request(osd_req, offset, length, 1, op,
-+	ceph_osdc_build_request(osd_req, offset, 1, op,
- 				snapc, snap_id, mtime);
-
- 	return osd_req;
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index a8016df..bcf3f72 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -249,8 +249,7 @@ extern struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *
- 					       bool use_mempool,
- 					       gfp_t gfp_flags);
-
--extern void ceph_osdc_build_request(struct ceph_osd_request *req,
--				    u64 off, u64 len,
-+extern void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
- 				    unsigned int num_op,
- 				    struct ceph_osd_req_op *src_ops,
- 				    struct ceph_snap_context *snapc,
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 37d8961..ce34faa 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -222,10 +222,13 @@ struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
- }
- EXPORT_SYMBOL(ceph_osdc_alloc_request);
-
--static void osd_req_encode_op(struct ceph_osd_request *req,
-+static u64 osd_req_encode_op(struct ceph_osd_request *req,
- 			      struct ceph_osd_op *dst,
- 			      struct ceph_osd_req_op *src)
- {
-+	u64 out_data_len = 0;
-+	u64 tmp;
-+
- 	dst->op = cpu_to_le16(src->op);
-
- 	switch (src->op) {
-@@ -233,10 +236,10 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		break;
- 	case CEPH_OSD_OP_READ:
- 	case CEPH_OSD_OP_WRITE:
--		dst->extent.offset =
--			cpu_to_le64(src->extent.offset);
--		dst->extent.length =
--			cpu_to_le64(src->extent.length);
-+		if (src->op == CEPH_OSD_OP_WRITE)
-+			out_data_len = src->extent.length;
-+		dst->extent.offset = cpu_to_le64(src->extent.offset);
-+		dst->extent.length = cpu_to_le64(src->extent.length);
- 		dst->extent.truncate_size =
- 			cpu_to_le64(src->extent.truncate_size);
- 		dst->extent.truncate_seq =
-@@ -247,12 +250,14 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		dst->cls.method_len = src->cls.method_len;
- 		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
-
-+		tmp = req->r_trail.length;
- 		ceph_pagelist_append(&req->r_trail, src->cls.class_name,
- 				     src->cls.class_len);
- 		ceph_pagelist_append(&req->r_trail, src->cls.method_name,
- 				     src->cls.method_len);
- 		ceph_pagelist_append(&req->r_trail, src->cls.indata,
- 				     src->cls.indata_len);
-+		out_data_len = req->r_trail.length - tmp;
- 		break;
- 	case CEPH_OSD_OP_STARTSYNC:
- 		break;
-@@ -326,6 +331,8 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
- 		break;
- 	}
- 	dst->payload_len = cpu_to_le32(src->payload_len);
-+
-+	return out_data_len;
- }
-
- /*
-@@ -333,7 +340,7 @@ static void osd_req_encode_op(struct
-ceph_osd_request *req,
-  *
-  */
- void ceph_osdc_build_request(struct ceph_osd_request *req,
--			     u64 off, u64 len, unsigned int num_ops,
-+			     u64 off, unsigned int num_ops,
- 			     struct ceph_osd_req_op *src_ops,
- 			     struct ceph_snap_context *snapc, u64 snap_id,
- 			     struct timespec *mtime)
-@@ -385,12 +392,13 @@ void ceph_osdc_build_request(struct
-ceph_osd_request *req,
- 	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
- 	p += req->r_oid_len;
-
--	/* ops */
-+	/* ops--can imply data */
- 	ceph_encode_16(&p, num_ops);
- 	src_op = src_ops;
- 	req->r_request_ops = p;
-+	data_len = 0;
- 	for (i = 0; i < num_ops; i++, src_op++) {
--		osd_req_encode_op(req, p, src_op);
-+		data_len += osd_req_encode_op(req, p, src_op);
- 		p += sizeof(struct ceph_osd_op);
- 	}
-
-@@ -407,11 +415,9 @@ void ceph_osdc_build_request(struct
-ceph_osd_request *req,
- 	req->r_request_attempts = p;
- 	p += 4;
-
--	data_len = req->r_trail.length;
--	if (flags & CEPH_OSD_FLAG_WRITE) {
-+	/* data */
-+	if (flags & CEPH_OSD_FLAG_WRITE)
- 		req->r_request->hdr.data_off = cpu_to_le16(off);
--		data_len += len;
--	}
- 	req->r_request->hdr.data_len = cpu_to_le32(data_len);
-
- 	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
-@@ -477,13 +483,12 @@ struct ceph_osd_request
-*ceph_osdc_new_request(struct ceph_osd_client *osdc,
- 		ceph_osdc_put_request(req);
- 		return ERR_PTR(r);
- 	}
--
- 	req->r_file_layout = *layout;  /* keep a copy */
-
- 	snprintf(req->r_oid, sizeof(req->r_oid), "%llx.%08llx", vino.ino, bno);
- 	req->r_oid_len = strlen(req->r_oid);
-
--	ceph_osdc_build_request(req, off, *plen, num_op, ops,
-+	ceph_osdc_build_request(req, off, num_op, ops,
- 				snapc, vino.snap, mtime);
-
- 	return req;
--- 
-1.7.9.5
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
