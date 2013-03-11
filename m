@@ -1,103 +1,127 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 5/8] libceph: define and use in_msg_pos_next()
-Date: Mon, 11 Mar 2013 12:28:58 -0700
-Message-ID: <513E307A.4090901@inktank.com>
-References: <513B5116.2020305@inktank.com> <513B51E5.6080503@inktank.com> <513E28FC.8060608@inktank.com> <513E2D9C.2030104@inktank.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: CephFS Space Accounting and Quotas
+Date: Mon, 11 Mar 2013 14:40:04 -0600
+Message-ID: <513E4124.9040309@sandia.gov>
+References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
+ <51363490.4070408@42on.com>
+ <1F15E079964848B9BE079E974A1946B4@inktank.com>
+ <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
+ <51363B30.7080006@42on.com>
+ <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
+ <513793FD.7010001@sandia.gov>
+ <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
+ <51379FCD.9000502@sandia.gov>
+ <D19243567199482692F961618A335817@inktank.com>
+ <5137B4E9.1030505@sandia.gov>
+ <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
+ <5137CDE2.70105@sandia.gov>
+ <8B6963669A2E49C286B9241DCD62F557@inktank.com>
+ <5138AEFB.5070200@sandia.gov> <513A69F8.6050709@sandia.gov>
+ <391D23EA41AE4F05BCE2E6367BA0FC3C@inktank.com>
+ <513DEE83.8030909@sandia.gov>
+ <114836C3F596429AAB29E98225A25E1B@inktank.com>
+ <513E0AF7.7050108@sandia.gov>
+ <90B756938EF64998B9230F4E48620CDE@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain;
+ charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:61345 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752194Ab3CKT3j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 15:29:39 -0400
-Received: by mail-pb0-f41.google.com with SMTP id um15so4144670pbc.28
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 12:29:38 -0700 (PDT)
-In-Reply-To: <513E2D9C.2030104@inktank.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:55351 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753336Ab3CKUlA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 16:41:00 -0400
+In-Reply-To: <90B756938EF64998B9230F4E48620CDE@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
 
-On 03/11/2013 12:16 PM, Alex Elder wrote:
-> On 03/11/2013 01:57 PM, Josh Durgin wrote:
->> On 03/09/2013 07:14 AM, Alex Elder wrote:
->>> Define a new function in_msg_pos_next() to match out_msg_pos_next(),
->>> and use it in place of code at the end of read_partial_message_pages()
->>> and read_partial_message_bio().
+On 03/11/2013 10:57 AM, Greg Farnum wrote:
+> On Monday, March 11, 2013 at 9:48 AM, Jim Schutt wrote:
+>> On 03/11/2013 09:48 AM, Greg Farnum wrote:
+>>> On Monday, March 11, 2013 at 7:47 AM, Jim Schutt wrote:
+>>>>
+>>>> For this run, the MDS logging slowed it down enough to cause the
+>>>> client caps to occasionally go stale. I don't think it's the cause
+>>>> of the issue, because I was having it before I turned MDS debugging
+>>>> up. My client caps never go stale at, e.g., debug mds 5.
 >>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>    net/ceph/messenger.c |   57
->>> ++++++++++++++++++++++++++++++++------------------
->>>    1 file changed, 37 insertions(+), 20 deletions(-)
 >>>
->>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->>> index 2017b88..fb5f6e7 100644
->>> --- a/net/ceph/messenger.c
->>> +++ b/net/ceph/messenger.c
->>> @@ -1052,6 +1052,28 @@ static void out_msg_pos_next(struct
->>> ceph_connection *con, struct page *page,
->>>    #endif
->>>    }
 >>>
->>> +static void in_msg_pos_next(struct ceph_connection *con, size_t len,
->>> +                size_t received)
->>> +{
->>> +    struct ceph_msg *msg = con->in_msg;
->>> +
->>> +    BUG_ON(!msg);
->>> +    BUG_ON(!received);
->>> +
->>> +    con->in_msg_pos.data_pos += received;
->>> +    con->in_msg_pos.page_pos += received;
->>> +    if (received < len)
->>> +        return;
+>>> Oh, so this might be behaviorally different than you were seeing before? Drat.
+>>>
+>>> You had said before that each newfstatat was taking tens of seconds,
+>>> whereas in the strace log you sent along most of the individual calls
+>>> were taking a bit less than 20 milliseconds. Do you have an strace of
+>>> them individually taking much more than that, or were you just
+>>> noticing that they took a long time in aggregate?
 >>
->> This is different from the condition in read_partial_message_pages()
->> case, which only increments in_msg_pos.page and resets page_pos when
->> page_pos == PAGE_SIZE. Maybe this is equivalent, but if so it's not
->> obvious.
->
-> You are correct.  And, despite my usual thoroughness and
-> verbosity, I didn't explain this one.
->
-> This message position structure (in_msg_pos) is tracking
-> how much of the message has been consumed.  Each time a
-> an incoming message is going to arrive, we find out how
-> much room is left--not surpassing the current page--and
-> provide that as the "len" (number of bytes) to receive:
->
->        left = min((int)(data_len - con->in_msg_pos.data_pos),
->               (int)(bv->bv_len - con->in_msg_pos.page_pos));
->
-> This is saying the amount we'll use is the lesser of:
-> - all that's left of the entire request
-> - all that's left in the current page
->
-> The number of bytes received is then used, along with
-> the "len" value, to determine how to advance the position.
-> If we received exactly how many were requested, we either
-> reached the end of the request or the end of the page.
-> In the first case, we're done, in the second, we move
-> onto the next page in the array.
->
-> In all cases but (possibly) on the last page, after adding
-> the number of bytes received, page_pos == PAGE_SIZE.  On the
-> last page, it doesn't really matter whether we increment
-> the page number and reset the page position, because we're
-> done and we won't come back here again.  The code previously
-> skipped over that last case, basically.  The new code
-> handles that case the same as the others, incrementing
-> and resetting.
->
-> So the short answer is, they are still equivalent.  And
-> I agree, it is not obvious.
->
-> If you are satisfied, I can add the above (or maybe an
-> abbreviated form of it) to the commit message.
+>>
+>>
+>> When I did the first strace, I didn't turn on timestamps, and I was
+>> watching it scroll by. I saw several stats in a row take ~30 secs,
+>> at which point I got bored, and took a look at the strace man page to
+>> figure out how to get timestamps ;)
+>>
+>> Also, another difference is for that test, I was looking at files
+>> I had written the day before, whereas for the strace log I sent,
+>> there was only several minutes between writing and the strace of find.
+>>
+>> I thought I had eliminated the page cache issue by using fdatasync
+>> when writing the files. Perhaps the real issue is affected by that
+>> delay?
+> 
+> I'm not sure. I can't think of any mechanism by which waiting longer
+> would increase the time lags, though, so I doubt it.
+> 
+>>> I suppose if you were going to run it again then just the message
+>>> logging could also be helpful. That way we could at least check and
+>>> see the message delays and if the MDS is doing other work in the
+>>> course of answering a request.
+>>
+>>
+>>
+>> I can do as many trials as needed to isolate the issue.
+>>
+>> What message debugging level is sufficient on the MDS; 1?
+> Yep, that will capture all incoming and outgoing messages. :) 
+>>
+>> If you want I can attempt to duplicate my memory of the first
+>> test I reported, writing the files today and doing the strace
+>> tomorrow (with timestamps, this time).
+>>
+>> Also, would it be helpful to write the files with minimal logging, in
+>> hopes of inducing minimal timing changes, then upping the logging
+>> for the stat phase?
+> 
+> Well that would give us better odds of not introducing failures of
+> any kind during the write phase, and then getting accurate
+> information on what's happening during the stats, so it probably
+> would. Basically I'd like as much logging as possible without
+> changing the states they system goes through. ;)
 
-Thanks for the explanation, that makes sense now.
-It'd be nice to have some form of it in the commit message.
+Hmmm, this is getting more interesting...
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+I just did two complete trials where I built a file system,
+did two sets of writes with minimal MDS logging, then 
+turned MDS logging up to 20 with MDS ms logging at 1 for
+the stat phase.
+
+In each trial my strace'd find finished in < 10 seconds,
+and there were no slow stat calls (they were taking ~19 ms
+each).
+
+I'm going to do a third trial where I let things rest
+overnight, after I write the files.  That delay is the
+only thing I haven't reproduced from my first trial....
+
+-- Jim
+
+
+> -Greg
+> 
+> 
+> 
+
+
