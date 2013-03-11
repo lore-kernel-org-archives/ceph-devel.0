@@ -1,85 +1,99 @@
-From: Yann ROBIN <yann.robin@youscribe.com>
-Subject: RE: Rados gateway 0.58 crash in RGWProcess::_clear
-Date: Sun, 10 Mar 2013 23:39:52 +0000
-Message-ID: <367CC0B0FC02EE47BF7482398BD623C55D3C754C@DB3PRD0311MB416.eurprd03.prod.outlook.com>
-References: <367CC0B0FC02EE47BF7482398BD623C55D3C74FE@DB3PRD0311MB416.eurprd03.prod.outlook.com>
- <CAC-hyiGuaH0j+QyAy6BP+UQK3wKb6hx+YU3pZpovqrcxoQTbUA@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 4/4, v2] libceph: more cleanup of write_partial_msg_pages()
+Date: Mon, 11 Mar 2013 00:08:10 -0500
+Message-ID: <513D66BA.8010106@inktank.com>
+References: <513CEE83.4040900@inktank.com> <513CEEE7.2090809@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:47640
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753249Ab3CJXy7 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 10 Mar 2013 19:54:59 -0400
-In-Reply-To: <CAC-hyiGuaH0j+QyAy6BP+UQK3wKb6hx+YU3pZpovqrcxoQTbUA@mail.gmail.com>
-Content-Language: fr-FR
+Received: from mail-qe0-f50.google.com ([209.85.128.50]:55504 "EHLO
+	mail-qe0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751047Ab3CKFIO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 01:08:14 -0400
+Received: by mail-qe0-f50.google.com with SMTP id k5so2058915qej.37
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Mar 2013 22:08:13 -0700 (PDT)
+In-Reply-To: <513CEEE7.2090809@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-The setup is multiple nginx accessing the fastcgi module using tcp sock=
-et.
-I found a ticket about multiple gateways issue : http://tracker.ceph.co=
-m/issues/2804 this may be related.
+I was a little sloppy in dealing with the zero_page case in
+write_partial_message_data(), and I believe it led to some
+problems I saw in testing.  So I've modified it so the length
+and last_piece values are calculated correctly, and that's
+reflected in this updated version of the patch.
 
-We'll test with only one nginx to see if we still have the issue.
+					-Alex
 
-Thanks,
+Basically all cases in write_partial_msg_pages() use the cursor, and
+as a result we can simplify that function quite a bit.
 
------Message d'origine-----
-De=A0: yehudasa@gmail.com [mailto:yehudasa@gmail.com] De la part de Yeh=
-uda Sadeh
-Envoy=E9=A0: dimanche 10 mars 2013 23:58
-=C0=A0: Yann ROBIN
-Cc=A0: ceph-devel@vger.kernel.org
-Objet=A0: Re: Rados gateway 0.58 crash in RGWProcess::_clear
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: fixed length and last_piece calculation for zero_page
 
-On Sun, Mar 10, 2013 at 3:48 PM, Yann ROBIN <yann.robin@youscribe.com> =
-wrote:
-> Hi,
->
-> We recently setup a cluster using version 0.58. We did massive parall=
-el upload to the gateway and saw the radosgw restarted every 5 to 10 mi=
-nutes.
-> Here are the debug log :
-> https://gist.github.com/kYann/5130775
->
-> Small version :
-> -2> 2013-03-10 23:20:02.916521 7fc1376ee700  1 =3D=3D=3D=3D=3D=3D req=
- done=20
-> -2> req=3D0x237fc10 http_status=3D200 =3D=3D=3D=3D=3D=3D
->     -1> 2013-03-10 23:20:02.916546 7fc1376ee700  1 RGWProcess::m_tp w=
-orker finish
->      0> 2013-03-10 23:20:02.931847 7fc1efa5b780 -1 rgw/rgw_main.cc: I=
-n=20
-> function 'virtual void RGWProcess::RGWWQ::_clear()' thread=20
-> 7fc1efa5b780 time 2013-03-10 23:20:02.922020
-> rgw/rgw_main.cc: 175: FAILED assert(process->m_req_queue.empty())
->
-> ceph version 0.58 (ba3f91e7504867a52a83399d60917e3414e8c3e2)
-> 1: (RGWRESTMgr_Admin::~RGWRESTMgr_Admin()+0) [0x474910]
-> 2: (ThreadPool::stop(bool)+0x1ed) [0x4909bd]
-> 3: (RGWProcess::run()+0x3c7) [0x473367]
-> 4: (main()+0x8b6) [0x447276]
-> 5: (__libc_start_main()+0xed) [0x7fc1ec92276d]
-> 6: /usr/bin/radosgw() [0x448871]
->
->
+ net/ceph/messenger.c |   20 ++++++--------------
+ 1 file changed, 6 insertions(+), 14 deletions(-)
 
-This obviously shouldn't happen. Just note that this code should only b=
-e reached either when trying to bring the gateway down, or when there's=
- some error on the fastcgi socket. Which web server are you using? Whic=
-h fastcgi module? How did you set up fastcgi?
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index b7ddf2b..6818c2f 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1466,7 +1466,6 @@ static int write_partial_message_data(struct
+ceph_connection *con)
+ 	unsigned int data_len = le32_to_cpu(msg->hdr.data_len);
+ 	bool do_datacrc = !con->msgr->nocrc;
+ 	int ret;
+-	int total_max_write;
 
-Thanks,
-Yehuda
+ 	dout("%s %p msg %p page %d offset %d\n", __func__,
+ 	     con, msg, msg_pos->page, msg_pos->page_pos);
+@@ -1480,36 +1479,29 @@ static int write_partial_message_data(struct
+ceph_connection *con)
+ 	 * been revoked, so use the zero page.
+ 	 */
+ 	while (data_len > msg_pos->data_pos) {
+-		struct page *page = NULL;
++		struct page *page;
+ 		size_t page_offset;
+ 		size_t length;
+-		bool use_cursor = false;
+-		bool last_piece = true;	/* preserve existing behavior */
+-
+-		total_max_write = data_len - msg_pos->data_pos;
++		bool last_piece;
+
+ 		if (ceph_msg_has_pages(msg)) {
+-			use_cursor = true;
+ 			page = ceph_msg_data_next(&msg->p, &page_offset,
+ 							&length, &last_piece);
+ 		} else if (ceph_msg_has_pagelist(msg)) {
+-			use_cursor = true;
+ 			page = ceph_msg_data_next(&msg->l, &page_offset,
+ 							&length, &last_piece);
+ #ifdef CONFIG_BLOCK
+ 		} else if (ceph_msg_has_bio(msg)) {
+-			use_cursor = true;
+ 			page = ceph_msg_data_next(&msg->b, &page_offset,
+ 							&length, &last_piece);
+ #endif
+ 		} else {
+-			page = zero_page;
+-		}
+-		if (!use_cursor) {
+-			length = min_t(int, PAGE_SIZE - msg_pos->page_pos,
+-					    total_max_write);
++			unsigned int resid = data_len - msg_pos->data_pos;
+
++			page = zero_page;
+ 			page_offset = msg_pos->page_pos;
++			length = min(resid, PAGE_SIZE - page_offset);
++			last_piece = length == resid;
+ 		}
+ 		if (do_datacrc && !msg_pos->did_page_crc) {
+ 			u32 crc = le32_to_cpu(msg->footer.data_crc);
+-- 
+1.7.9.5
 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
