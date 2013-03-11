@@ -1,72 +1,199 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: don't clear bio_iter in prepare_write_message()
-Date: Mon, 11 Mar 2013 12:07:47 -0700
-Message-ID: <513E2B83.3070509@inktank.com>
-References: <513B6520.8050303@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 5/8] libceph: define and use in_msg_pos_next()
+Date: Mon, 11 Mar 2013 14:16:44 -0500
+Message-ID: <513E2D9C.2030104@inktank.com>
+References: <513B5116.2020305@inktank.com> <513B51E5.6080503@inktank.com> <513E28FC.8060608@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:56288 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751636Ab3CKTI1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 15:08:27 -0400
-Received: by mail-pb0-f43.google.com with SMTP id md12so4123948pbc.30
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 12:08:27 -0700 (PDT)
-In-Reply-To: <513B6520.8050303@inktank.com>
+Received: from mail-ve0-f169.google.com ([209.85.128.169]:59796 "EHLO
+	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753845Ab3CKTQs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 15:16:48 -0400
+Received: by mail-ve0-f169.google.com with SMTP id 15so3028465vea.0
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 12:16:47 -0700 (PDT)
+In-Reply-To: <513E28FC.8060608@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+On 03/11/2013 01:57 PM, Josh Durgin wrote:
+> On 03/09/2013 07:14 AM, Alex Elder wrote:
+>> Define a new function in_msg_pos_next() to match out_msg_pos_next(),
+>> and use it in place of code at the end of read_partial_message_pages()
+>> and read_partial_message_bio().
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   net/ceph/messenger.c |   57
+>> ++++++++++++++++++++++++++++++++------------------
+>>   1 file changed, 37 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>> index 2017b88..fb5f6e7 100644
+>> --- a/net/ceph/messenger.c
+>> +++ b/net/ceph/messenger.c
+>> @@ -1052,6 +1052,28 @@ static void out_msg_pos_next(struct
+>> ceph_connection *con, struct page *page,
+>>   #endif
+>>   }
+>>
+>> +static void in_msg_pos_next(struct ceph_connection *con, size_t len,
+>> +                size_t received)
+>> +{
+>> +    struct ceph_msg *msg = con->in_msg;
+>> +
+>> +    BUG_ON(!msg);
+>> +    BUG_ON(!received);
+>> +
+>> +    con->in_msg_pos.data_pos += received;
+>> +    con->in_msg_pos.page_pos += received;
+>> +    if (received < len)
+>> +        return;
+> 
+> This is different from the condition in read_partial_message_pages()
+> case, which only increments in_msg_pos.page and resets page_pos when
+> page_pos == PAGE_SIZE. Maybe this is equivalent, but if so it's not
+> obvious.
 
-On 03/09/2013 08:36 AM, Alex Elder wrote:
-> This patch is available in the branch "review/wip-msgr-refactor"
-> (prior to 6 other patches) in the ceph-client git repository.
-> That branch is based on branch "review/wip-abstract-2".
->
-> 					-Alex
->
-> At one time it was necessary to clear a message's bio_iter field to
-> avoid a bad pointer dereference in write_partial_msg_pages().
->
-> That no longer seems to be the case.  Here's why.
->
-> The message's bio fields represent (in this case) outgoing data.
-> Between where the bio_iter is made NULL in prepare_write_message()
-> and the call in that function to prepare_message_data(), the
-> bio fields are never used.
->
-> In prepare_message_data(), init-bio_iter() is called, and the result
-> of that overwrites the value in the message's bio_iter field.
->
-> Because it gets overwritten anyway, there is no need to set it to
-> NULL.  So don't do it.
->
-> This resolves:
->      http://tracker.ceph.com/issues/4402
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   net/ceph/messenger.c |    4 ----
->   1 file changed, 4 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index e75a03d..17d9321 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -804,10 +804,6 @@ static void prepare_write_message(struct
-> ceph_connection *con)
->   		m->hdr.seq = cpu_to_le64(++con->out_seq);
->   		m->needs_out_seq = false;
->   	}
-> -#ifdef CONFIG_BLOCK
-> -	else
-> -		m->bio_iter = NULL;
-> -#endif
->
->   	dout("prepare_write_message %p seq %lld type %d len %d+%d+%d (%zd)\n",
->   	     m, con->out_seq, le16_to_cpu(m->hdr.type),
->
+You are correct.  And, despite my usual thoroughness and
+verbosity, I didn't explain this one.
+
+This message position structure (in_msg_pos) is tracking
+how much of the message has been consumed.  Each time a
+an incoming message is going to arrive, we find out how
+much room is left--not surpassing the current page--and
+provide that as the "len" (number of bytes) to receive:
+
+      left = min((int)(data_len - con->in_msg_pos.data_pos),
+             (int)(bv->bv_len - con->in_msg_pos.page_pos));
+
+This is saying the amount we'll use is the lesser of:
+- all that's left of the entire request
+- all that's left in the current page
+
+The number of bytes received is then used, along with
+the "len" value, to determine how to advance the position.
+If we received exactly how many were requested, we either
+reached the end of the request or the end of the page.
+In the first case, we're done, in the second, we move
+onto the next page in the array.
+
+In all cases but (possibly) on the last page, after adding
+the number of bytes received, page_pos == PAGE_SIZE.  On the
+last page, it doesn't really matter whether we increment
+the page number and reset the page position, because we're
+done and we won't come back here again.  The code previously
+skipped over that last case, basically.  The new code
+handles that case the same as the others, incrementing
+and resetting.
+
+So the short answer is, they are still equivalent.  And
+I agree, it is not obvious.
+
+If you are satisfied, I can add the above (or maybe an
+abbreviated form of it) to the commit message.
+
+					-Alex
+
+>> +
+>> +    BUG_ON(received != len);
+>> +    con->in_msg_pos.page_pos = 0;
+>> +    con->in_msg_pos.page++;
+>> +#ifdef CONFIG_BLOCK
+>> +    if (msg->bio)
+>> +        iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+>> +#endif /* CONFIG_BLOCK */
+>> +}
+>> +
+>>   /*
+>>    * Write as much message data payload as we can.  If we finish, queue
+>>    * up the footer.
+>> @@ -1789,6 +1811,7 @@ static int read_partial_message_pages(struct
+>> ceph_connection *con,
+>>                         struct page **pages,
+>>                         unsigned int data_len, bool do_datacrc)
+>>   {
+>> +    struct page *page;
+>>       void *p;
+>>       int ret;
+>>       int left;
+>> @@ -1797,22 +1820,18 @@ static int read_partial_message_pages(struct
+>> ceph_connection *con,
+>>              (int)(PAGE_SIZE - con->in_msg_pos.page_pos));
+>>       /* (page) data */
+>>       BUG_ON(pages == NULL);
+>> -    p = kmap(pages[con->in_msg_pos.page]);
+>> -    ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+>> -                   left);
+>> +    page = pages[con->in_msg_pos.page];
+>> +    p = kmap(page);
+>> +    ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+>> left);
+>>       if (ret > 0 && do_datacrc)
+>>           con->in_data_crc =
+>>               crc32c(con->in_data_crc,
+>>                     p + con->in_msg_pos.page_pos, ret);
+>> -    kunmap(pages[con->in_msg_pos.page]);
+>> +    kunmap(page);
+>>       if (ret <= 0)
+>>           return ret;
+>> -    con->in_msg_pos.data_pos += ret;
+>> -    con->in_msg_pos.page_pos += ret;
+>> -    if (con->in_msg_pos.page_pos == PAGE_SIZE) {
+>> -        con->in_msg_pos.page_pos = 0;
+>> -        con->in_msg_pos.page++;
+>> -    }
+>> +
+>> +    in_msg_pos_next(con, left, ret);
+>>
+>>       return ret;
+>>   }
+>> @@ -1823,32 +1842,30 @@ static int read_partial_message_bio(struct
+>> ceph_connection *con,
+>>   {
+>>       struct ceph_msg *msg = con->in_msg;
+>>       struct bio_vec *bv;
+>> +    struct page *page;
+>>       void *p;
+>>       int ret, left;
+>>
+>>       BUG_ON(!msg);
+>>       BUG_ON(!msg->bio_iter);
+>>       bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+>> +
+>>       left = min((int)(data_len - con->in_msg_pos.data_pos),
+>>              (int)(bv->bv_len - con->in_msg_pos.page_pos));
+>>
+>> -    p = kmap(bv->bv_page) + bv->bv_offset;
+>> +    page = bv->bv_page;
+>> +    p = kmap(page) + bv->bv_offset;
+>>
+>> -    ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+>> -                   left);
+>> +    ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+>> left);
+>>       if (ret > 0 && do_datacrc)
+>>           con->in_data_crc =
+>>               crc32c(con->in_data_crc,
+>>                     p + con->in_msg_pos.page_pos, ret);
+>> -    kunmap(bv->bv_page);
+>> +    kunmap(page);
+>>       if (ret <= 0)
+>>           return ret;
+>> -    con->in_msg_pos.data_pos += ret;
+>> -    con->in_msg_pos.page_pos += ret;
+>> -    if (con->in_msg_pos.page_pos == bv->bv_len) {
+>> -        con->in_msg_pos.page_pos = 0;
+>> -        iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+>> -    }
+>> +
+>> +    in_msg_pos_next(con, left, ret);
+>>
+>>       return ret;
+>>   }
+>>
+> 
 
