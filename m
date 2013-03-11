@@ -1,53 +1,56 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/8] libceph: implement cursor for outgoing data items
-Date: Mon, 11 Mar 2013 17:26:26 -0500
-Message-ID: <513E5A12.8030806@inktank.com>
-References: <513CD9BE.1070505@inktank.com> <513E5988.4000603@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 0/4] libceph: kill the "trail" portion of message data
+Date: Mon, 11 Mar 2013 15:44:07 -0700
+Message-ID: <513E5E37.9010503@inktank.com>
+References: <513CEE83.4040900@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:61165 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753506Ab3CKW03 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 18:26:29 -0400
-Received: by mail-ob0-f175.google.com with SMTP id uz6so3812993obc.20
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 15:26:29 -0700 (PDT)
-In-Reply-To: <513E5988.4000603@inktank.com>
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:59504 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753506Ab3CKWot (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Mar 2013 18:44:49 -0400
+Received: by mail-pb0-f52.google.com with SMTP id ma3so4262409pbc.11
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Mar 2013 15:44:48 -0700 (PDT)
+In-Reply-To: <513CEE83.4040900@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 03/11/2013 05:24 PM, Josh Durgin wrote:
-> On 03/10/2013 12:06 PM, Alex Elder wrote:
->> This series makes the four distinct data items in a message (the
->> pages array, the pagelist, the bio, and the trail) take a generic
->> form, and then arranges for them all to be handled using a common
->> set of cursor routines that determine what data needs to be sent
->> next for a message.  There is more consolidation of this code
->> coming, but for now I'm leaving this series at 8 patches, which
->> includes the definition of cursor code for the three types of
->> data item.
->>
->>                     -Alex
->>
->> [PATCH 1/8] libceph: define ceph_msg_has_*() data macros
->> [PATCH 2/8] libceph: be explicit about message data representation
->> [PATCH 3/8] libceph: abstract message data
->> [PATCH 4/8] libceph: start defining message data cursor
->> [PATCH 5/8] libceph: prepare for other message data item types
->> [PATCH 6/8] libceph: use data cursor for message pagelist
->> [PATCH 7/8] libceph: implement bio message data item cursor
->> [PATCH 8/8] libceph: implement pages array cursor
-> 
-> These look good. I assume you're going to remove the single character
-> struct members in a later series.
+On 03/10/2013 01:35 PM, Alex Elder wrote:
+> The trail portion of message data was added to support
+> two distinct sets of data for an osd request--one a
+> pagelist for providing parameters to object method
+> calls; and a second a page array for receiving data
+> back from the result of such a call.
+>
+> It's always been a bit of a weird thing bolted onto
+> a message though, and with the rework of the messenger
+> code it can now be removed.
+>
+> This series eliminates the trail by allowing the osd
+> client to record a (non-trail) pagelist for data, and
+> using the fact that we now distinguish incoming from
+> outgoing data to allow that to be specified distinct
+> from the page array used for the incoming response.
+>
+> Having done this, we can eliminate the trail from the
+> ceph message structure, and then that allows some
+> code to be simplified.
+>
+> These patches are available in the "review/wip-kill-trail"
+> branch of the ceph-client git repository.  That branch
+> is based on branch "review/wip-cursor".
+>
+> 					-Alex
+>
+> [PATCH 1/4] libceph: have osd requests support pagelist data
+> [PATCH 2/4] libceph: kill osd request r_trail
+> [PATCH 3/4] libceph: kill message trail
+> [PATCH 4/4] libceph: more cleanup of write_partial_msg_pages()
 
-Yes, I did the single characters for brevity, knowing
-they'd be going away.
+These look good.
 
-					-Alex
-> 
-> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
