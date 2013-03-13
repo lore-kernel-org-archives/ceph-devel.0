@@ -1,90 +1,72 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: CephFS Space Accounting and Quotas
-Date: Tue, 12 Mar 2013 16:34:01 -0600
-Message-ID: <513FAD59.4040205@sandia.gov>
-References: <E0B1337A572647BA9FCC0CE8CA946F42@inktank.com>
- <51363490.4070408@42on.com>
- <1F15E079964848B9BE079E974A1946B4@inktank.com>
- <alpine.DEB.2.00.1303051027180.26446@cobra.newdream.net>
- <51363B30.7080006@42on.com>
- <alpine.DEB.2.00.1303051131010.29462@cobra.newdream.net>
- <513793FD.7010001@sandia.gov>
- <340852C7DC4E472A9D6EA3E0AEDE6EB0@inktank.com>
- <51379FCD.9000502@sandia.gov>
- <D19243567199482692F961618A335817@inktank.com>
- <5137B4E9.1030505@sandia.gov>
- <1856965A675D4D5D971D5DC9AB01C657@inktank.com>
- <5137CDE2.70105@sandia.gov>
- <8B6963669A2E49C286B9241DCD62F557@inktank.com>
- <5138AEFB.5070200@sandia.gov> <513A69F8.6050709@sandia.gov>
- <391D23EA41AE4F05BCE2E6367BA0FC3C@inktank.com>
- <513DEE83.8030909@sandia.gov>
- <114836C3F596429AAB29E98225A25E1B@inktank.com>
- <513E0AF7.7050108@sandia.gov>
- <90B756938EF64998B9230F4E48620CDE@inktank.com>
- <513E4124.9040309@sandia.gov>
+From: Alex Elder <elder@inktank.com>
+Subject: More Messenger Patches
+Date: Tue, 12 Mar 2013 20:01:33 -0500
+Message-ID: <513FCFED.1080507@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:53156 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933715Ab3CLWe1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Mar 2013 18:34:27 -0400
-In-Reply-To: <513E4124.9040309@sandia.gov>
+Received: from mail-ob0-f180.google.com ([209.85.214.180]:53125 "EHLO
+	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932103Ab3CMBBh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Mar 2013 21:01:37 -0400
+Received: by mail-ob0-f180.google.com with SMTP id ef5so502736obb.11
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Mar 2013 18:01:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: Jim Schutt <jaschut@sandia.gov>, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>
+To: ceph-devel@vger.kernel.org
 
-On 03/11/2013 02:40 PM, Jim Schutt wrote:
->>> >> If you want I can attempt to duplicate my memory of the first
->>> >> test I reported, writing the files today and doing the strace
->>> >> tomorrow (with timestamps, this time).
->>> >>
->>> >> Also, would it be helpful to write the files with minimal logging, in
->>> >> hopes of inducing minimal timing changes, then upping the logging
->>> >> for the stat phase?
->> > 
->> > Well that would give us better odds of not introducing failures of
->> > any kind during the write phase, and then getting accurate
->> > information on what's happening during the stats, so it probably
->> > would. Basically I'd like as much logging as possible without
->> > changing the states they system goes through. ;)
-> Hmmm, this is getting more interesting...
-> 
-> I just did two complete trials where I built a file system,
-> did two sets of writes with minimal MDS logging, then 
-> turned MDS logging up to 20 with MDS ms logging at 1 for
-> the stat phase.
-> 
-> In each trial my strace'd find finished in < 10 seconds,
-> and there were no slow stat calls (they were taking ~19 ms
-> each).
-> 
-> I'm going to do a third trial where I let things rest
-> overnight, after I write the files.  That delay is the
-> only thing I haven't reproduced from my first trial....
+I'm about to post another set of patches.  As usual I've
+tried to group them logically, and in this case there are
+several single patches.
 
-As you suspected, that didn't make any difference either...
-That trial didn't reproduce the slow stat behavior.
+This series continues moving the messenger toward supporting
+multiple chunks of data in a single message.  We need this
+to support osd client requests which hold multiple osd
+operations, having one (or even more than one) separate
+pieces of data associated with each.  That in turn is
+needed to support rbd layering.
 
-It turns out that the only way I can reliably reproduce
-the slow stat behavior right now is to turn MDS debugging
-up to 20.
+Most of this process has been whittling away at the various
+ways the messenger represents its data.  There were at one
+time four distinct ways of representing it, and it was not
+clear which were independent or how they interacted.  The
+logic for handling incoming and outgoing messages was a
+little complicated by the presence of these different ways
+of representing things.
 
-I've got another set of logs with MDS debug ms = 1,
-which I'll send via an off-list email.
+We now have a unified "ceph_msg_data_item" structure
+that represents an abstract chunk of data, in one of
+several possible formats.  The patches change the code
+so data items are used for incoming data, then collapses
+them all into a single data item.  In the process it
+cleans up a bunch of structures and code that have
+been superseded by the abstracted way of doing things.
 
-I still haven't figured out what made that first test
-exhibit this behavior, when I was using debug mds = 5.
+These patches are available on the "review/wip-read-data-items"
+branch of the ceph-client git repository.
 
--- Jim
+					-Alex
 
-> 
-> -- Jim
-> 
-> 
+[PATCH] libceph: drop pages parameter
+
+[PATCH] libceph: no outbound zero data
+
+[PATCH] libceph: record residual bytes for all message data types
+
+[PATCH 0/4] libceph: use cursor for incoming data
+[PATCH 1/4] libceph: use cursor for bio reads
+[PATCH 2/4] libceph: kill ceph message bio_iter, bio_seg
+[PATCH 3/4] libceph: use cursor for inbound data pages
+[PATCH 4/4] libceph: get rid of read helpers
+
+[PATCH] libceph: collapse all data items into one
 
 
+[PATCH 0/4] libceph: get rid of ceph_msg_pos
+[PATCH 1/4] libceph: use cursor resid for loop condition
+[PATCH 2/4] libceph: kill most of ceph_msg_pos
+[PATCH 3/4] libceph: kill last of ceph_msg_pos
+[PATCH 4/4] libceph: use only ceph_msg_data_advance()
+
+[PATCH] libceph: make message data be a pointer
