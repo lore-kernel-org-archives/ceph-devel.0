@@ -1,323 +1,394 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH V2] ceph: use i_release_count to indicate dir's completeness
-Date: Wed, 13 Mar 2013 19:44:32 +0800
-Message-ID: <1363175072-28407-1-git-send-email-zheng.z.yan@intel.com>
+From: Dave Spano <dspano@optogenics.com>
+Subject: Re: OSD memory leaks?
+Date: Wed, 13 Mar 2013 09:12:38 -0400 (EDT)
+Message-ID: <18163498.32.1363180362051.JavaMail.dspano@it1>
+References: <9F9CA4292FC9418AAC3368044C8CBA5E@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:32844 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932480Ab3CMLol (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 13 Mar 2013 07:44:41 -0400
+Received: from rrcs-24-103-221-203.nys.biz.rr.com ([24.103.221.203]:58378 "EHLO
+	mail.optogenics.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932295Ab3CMNMo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Mar 2013 09:12:44 -0400
+In-Reply-To: <9F9CA4292FC9418AAC3368044C8CBA5E@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Samuel Just <sam.just@inktank.com>, Vladislav Gorbunov <vadikgo@gmail.com>, =?utf-8?Q?S=C3=A9bastien?= Han <han.sebastien@gmail.com>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Lol. I'm totally fine with that. My glance images pool isn't used too o=
+ften. I'm going to give that a try today and see what happens.=20
 
-Current ceph code tracks directory's completeness in two places.
-ceph_readdir() checks i_release_count to decide if it can set the
-I_COMPLETE flag in i_ceph_flags. All other places check the I_COMPLETE
-flag. This indirection introduces locking complexity.
+I'm still crossing my fingers, but since I added log max recent=3D10000=
+ to ceph.conf, I've been okay despite the improper pg_num, and a lot of=
+ scrubbing/deep scrubbing yesterday.=20
 
-This patch adds a new variable i_complete_count to ceph_inode_info.
-Set i_release_count's value to it when marking a directory complete.
-By comparing the two variables, we know if a directory is complete
+Dave Spano=20
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
-Changes since V1:
- define i_complete_count as atomic_t
 
- fs/ceph/caps.c       |  4 ++--
- fs/ceph/dir.c        | 25 +++++++++++++------------
- fs/ceph/inode.c      | 13 +++++++------
- fs/ceph/mds_client.c | 10 +++-------
- fs/ceph/super.h      | 42 ++++++++++++++++++++----------------------
- 5 files changed, 45 insertions(+), 49 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 76634f4..124e8a1 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -490,7 +490,7 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
- 		ci->i_rdcache_gen++;
- 
- 	/*
--	 * if we are newly issued FILE_SHARED, clear I_COMPLETE; we
-+	 * if we are newly issued FILE_SHARED, mark dir not complete; we
- 	 * don't know what happened to this directory while we didn't
- 	 * have the cap.
- 	 */
-@@ -499,7 +499,7 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
- 		ci->i_shared_gen++;
- 		if (S_ISDIR(ci->vfs_inode.i_mode)) {
- 			dout(" marking %p NOT complete\n", &ci->vfs_inode);
--			ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
-+			__ceph_dir_clear_complete(ci);
- 		}
- 	}
- }
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 76821be..11966c4 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -107,7 +107,7 @@ static unsigned fpos_off(loff_t p)
-  * falling back to a "normal" sync readdir if any dentries in the dir
-  * are dropped.
-  *
-- * I_COMPLETE tells indicates we have all dentries in the dir.  It is
-+ * Complete dir indicates that we have all dentries in the dir.  It is
-  * defined IFF we hold CEPH_CAP_FILE_SHARED (which will be revoked by
-  * the MDS if/when the directory is modified).
-  */
-@@ -198,8 +198,8 @@ more:
- 	filp->f_pos++;
- 
- 	/* make sure a dentry wasn't dropped while we didn't have parent lock */
--	if (!ceph_i_test(dir, CEPH_I_COMPLETE)) {
--		dout(" lost I_COMPLETE on %p; falling back to mds\n", dir);
-+	if (!ceph_dir_is_complete(dir)) {
-+		dout(" lost dir complete on %p; falling back to mds\n", dir);
- 		err = -EAGAIN;
- 		goto out;
- 	}
-@@ -258,7 +258,7 @@ static int ceph_readdir(struct file *filp, void *dirent, filldir_t filldir)
- 	if (filp->f_pos == 0) {
- 		/* note dir version at start of readdir so we can tell
- 		 * if any dentries get dropped */
--		fi->dir_release_count = ci->i_release_count;
-+		fi->dir_release_count = atomic_read(&ci->i_release_count);
- 
- 		dout("readdir off 0 -> '.'\n");
- 		if (filldir(dirent, ".", 1, ceph_make_fpos(0, 0),
-@@ -284,7 +284,7 @@ static int ceph_readdir(struct file *filp, void *dirent, filldir_t filldir)
- 	if ((filp->f_pos == 2 || fi->dentry) &&
- 	    !ceph_test_mount_opt(fsc, NOASYNCREADDIR) &&
- 	    ceph_snap(inode) != CEPH_SNAPDIR &&
--	    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
-+	    __ceph_dir_is_complete(ci) &&
- 	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		err = __dcache_readdir(filp, dirent, filldir);
-@@ -350,7 +350,8 @@ more:
- 
- 		if (!req->r_did_prepopulate) {
- 			dout("readdir !did_prepopulate");
--			fi->dir_release_count--;    /* preclude I_COMPLETE */
-+			/* preclude from marking dir complete */
-+			fi->dir_release_count--;
- 		}
- 
- 		/* note next offset and last dentry name */
-@@ -428,9 +429,9 @@ more:
- 	 * the complete dir contents in our cache.
- 	 */
- 	spin_lock(&ci->i_ceph_lock);
--	if (ci->i_release_count == fi->dir_release_count) {
-+	if (atomic_read(&ci->i_release_count) == fi->dir_release_count) {
- 		dout(" marking %p complete\n", inode);
--		ci->i_ceph_flags |= CEPH_I_COMPLETE;
-+		__ceph_dir_set_complete(ci, fi->dir_release_count);
- 		ci->i_max_offset = filp->f_pos;
- 	}
- 	spin_unlock(&ci->i_ceph_lock);
-@@ -605,7 +606,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
- 			    fsc->mount_options->snapdir_name,
- 			    dentry->d_name.len) &&
- 		    !is_root_ceph_dentry(dir, dentry) &&
--		    (ci->i_ceph_flags & CEPH_I_COMPLETE) &&
-+		    __ceph_dir_is_complete(ci) &&
- 		    (__ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1))) {
- 			spin_unlock(&ci->i_ceph_lock);
- 			dout(" dir %p complete, -ENOENT\n", dir);
-@@ -909,7 +910,7 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
- 		 */
- 
- 		/* d_move screws up d_subdirs order */
--		ceph_i_clear(new_dir, CEPH_I_COMPLETE);
-+		ceph_dir_clear_complete(new_dir);
- 
- 		d_move(old_dentry, new_dentry);
- 
-@@ -1079,7 +1080,7 @@ static void ceph_d_prune(struct dentry *dentry)
- 	if (IS_ROOT(dentry))
- 		return;
- 
--	/* if we are not hashed, we don't affect I_COMPLETE */
-+	/* if we are not hashed, we don't affect dir's completeness */
- 	if (d_unhashed(dentry))
- 		return;
- 
-@@ -1087,7 +1088,7 @@ static void ceph_d_prune(struct dentry *dentry)
- 	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
- 	 * cleared until d_release
- 	 */
--	ceph_i_clear(dentry->d_parent->d_inode, CEPH_I_COMPLETE);
-+	ceph_dir_clear_complete(dentry->d_parent->d_inode);
- }
- 
- /*
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 2b3fee7..5d730d4 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -302,7 +302,8 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	ci->i_version = 0;
- 	ci->i_time_warp_seq = 0;
- 	ci->i_ceph_flags = 0;
--	ci->i_release_count = 0;
-+	atomic_set(&ci->i_release_count, 1);
-+	atomic_set(&ci->i_complete_count, 0);
- 	ci->i_symlink = NULL;
- 
- 	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
-@@ -720,9 +721,9 @@ static int fill_inode(struct inode *inode,
- 	    ceph_snap(inode) == CEPH_NOSNAP &&
- 	    (le32_to_cpu(info->cap.caps) & CEPH_CAP_FILE_SHARED) &&
- 	    (issued & CEPH_CAP_FILE_EXCL) == 0 &&
--	    (ci->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
-+	    !__ceph_dir_is_complete(ci)) {
- 		dout(" marking %p complete (empty)\n", inode);
--		ci->i_ceph_flags |= CEPH_I_COMPLETE;
-+		__ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
- 		ci->i_max_offset = 2;
- 	}
- no_change:
-@@ -856,7 +857,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
- 	di = ceph_dentry(dn);
- 
- 	spin_lock(&ci->i_ceph_lock);
--	if ((ceph_inode(inode)->i_ceph_flags & CEPH_I_COMPLETE) == 0) {
-+	if (!__ceph_dir_is_complete(ci)) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		return;
- 	}
-@@ -1060,8 +1061,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 			/*
- 			 * d_move() puts the renamed dentry at the end of
- 			 * d_subdirs.  We need to assign it an appropriate
--			 * directory offset so we can behave when holding
--			 * I_COMPLETE.
-+			 * directory offset so we can behave when dir is
-+			 * complete.
- 			 */
- 			ceph_set_dentry_offset(req->r_old_dentry);
- 			dout("dn %p gets new offset %lld\n", req->r_old_dentry, 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ab899c8..edf90a5 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2030,20 +2030,16 @@ out:
- }
- 
- /*
-- * Invalidate dir I_COMPLETE, dentry lease state on an aborted MDS
-+ * Invalidate dir's completeness, dentry lease state on an aborted MDS
-  * namespace request.
-  */
- void ceph_invalidate_dir_request(struct ceph_mds_request *req)
- {
- 	struct inode *inode = req->r_locked_dir;
--	struct ceph_inode_info *ci = ceph_inode(inode);
- 
--	dout("invalidate_dir_request %p (I_COMPLETE, lease(s))\n", inode);
--	spin_lock(&ci->i_ceph_lock);
--	ci->i_ceph_flags &= ~CEPH_I_COMPLETE;
--	ci->i_release_count++;
--	spin_unlock(&ci->i_ceph_lock);
-+	dout("invalidate_dir_request %p (complete, lease(s))\n", inode);
- 
-+	ceph_dir_clear_complete(inode);
- 	if (req->r_dentry)
- 		ceph_invalidate_dentry_lease(req->r_dentry);
- 	if (req->r_old_dentry)
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index e5f1875..f0a902d 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -244,7 +244,8 @@ struct ceph_inode_info {
- 	u32 i_time_warp_seq;
- 
- 	unsigned i_ceph_flags;
--	unsigned long i_release_count;
-+	atomic_t i_release_count;
-+	atomic_t i_complete_count;
- 
- 	struct ceph_dir_layout i_dir_layout;
- 	struct ceph_file_layout i_layout;
-@@ -254,7 +255,7 @@ struct ceph_inode_info {
- 	struct timespec i_rctime;
- 	u64 i_rbytes, i_rfiles, i_rsubdirs;
- 	u64 i_files, i_subdirs;
--	u64 i_max_offset;  /* largest readdir offset, set with I_COMPLETE */
-+	u64 i_max_offset;  /* largest readdir offset, set with complete dir */
- 
- 	struct rb_root i_fragtree;
- 	struct mutex i_fragtree_mutex;
-@@ -419,38 +420,35 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- /*
-  * Ceph inode.
-  */
--#define CEPH_I_COMPLETE  1  /* we have complete directory cached */
- #define CEPH_I_NODELAY   4  /* do not delay cap release */
- #define CEPH_I_FLUSH     8  /* do not delay flush of dirty metadata */
- #define CEPH_I_NOFLUSH  16  /* do not flush dirty caps */
- 
--static inline void ceph_i_clear(struct inode *inode, unsigned mask)
-+static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
-+					   int release_count)
- {
--	struct ceph_inode_info *ci = ceph_inode(inode);
--
--	spin_lock(&ci->i_ceph_lock);
--	ci->i_ceph_flags &= ~mask;
--	spin_unlock(&ci->i_ceph_lock);
-+	atomic_set(&ci->i_complete_count, release_count);
- }
- 
--static inline void ceph_i_set(struct inode *inode, unsigned mask)
-+static inline void __ceph_dir_clear_complete(struct ceph_inode_info *ci)
- {
--	struct ceph_inode_info *ci = ceph_inode(inode);
-+	atomic_inc(&ci->i_release_count);
-+}
- 
--	spin_lock(&ci->i_ceph_lock);
--	ci->i_ceph_flags |= mask;
--	spin_unlock(&ci->i_ceph_lock);
-+static inline bool __ceph_dir_is_complete(struct ceph_inode_info *ci)
-+{
-+	return atomic_read(&ci->i_complete_count) ==
-+		atomic_read(&ci->i_release_count);
- }
- 
--static inline bool ceph_i_test(struct inode *inode, unsigned mask)
-+static inline void ceph_dir_clear_complete(struct inode *inode)
- {
--	struct ceph_inode_info *ci = ceph_inode(inode);
--	bool r;
-+	__ceph_dir_clear_complete(ceph_inode(inode));
-+}
- 
--	spin_lock(&ci->i_ceph_lock);
--	r = (ci->i_ceph_flags & mask) == mask;
--	spin_unlock(&ci->i_ceph_lock);
--	return r;
-+static inline bool ceph_dir_is_complete(struct inode *inode)
-+{
-+	return __ceph_dir_is_complete(ceph_inode(inode));
- }
- 
- 
-@@ -565,7 +563,7 @@ struct ceph_file_info {
- 	u64 next_offset;       /* offset of next chunk (last_name's + 1) */
- 	char *last_name;       /* last entry in previous chunk */
- 	struct dentry *dentry; /* next dentry (for dcache readdir) */
--	unsigned long dir_release_count;
-+	int dir_release_count;
- 
- 	/* used for -o dirstat read() on directory thing */
- 	char *dir_info;
--- 
-1.7.11.7
 
+----- Original Message -----=20
+
+=46rom: "Greg Farnum" <greg@inktank.com>=20
+To: "Dave Spano" <dspano@optogenics.com>=20
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@inktan=
+k.com>, "Wido den Hollander" <wido@42on.com>, "Sylvain Munaut" <s.munau=
+t@whatever-company.com>, "Samuel Just" <sam.just@inktank.com>, "Vladisl=
+av Gorbunov" <vadikgo@gmail.com>, "S=C3=A9bastien Han" <han.sebastien@g=
+mail.com>=20
+Sent: Tuesday, March 12, 2013 5:37:37 PM=20
+Subject: Re: OSD memory leaks?=20
+
+Yeah. There's not anything intelligent about that cppool mechanism. :)=20
+-Greg=20
+
+On Tuesday, March 12, 2013 at 2:15 PM, Dave Spano wrote:=20
+
+> I'd rather shut the cloud down and copy the pool to a new one than ta=
+ke any chances of corruption by using an experimental feature. My guess=
+ is that there cannot be any i/o to the pool while copying, otherwise y=
+ou'll lose the changes that are happening during the copy, correct?=20
+>=20
+> Dave Spano=20
+> Optogenics=20
+> Systems Administrator=20
+>=20
+>=20
+>=20
+> ----- Original Message -----=20
+>=20
+> From: "Greg Farnum" <greg@inktank.com (mailto:greg@inktank.com)>=20
+> To: "S=C3=A9bastien Han" <han.sebastien@gmail.com (mailto:han.sebasti=
+en@gmail.com)>=20
+> Cc: "Dave Spano" <dspano@optogenics.com (mailto:dspano@optogenics.com=
+)>, "ceph-devel" <ceph-devel@vger.kernel.org (mailto:ceph-devel@vger.ke=
+rnel.org)>, "Sage Weil" <sage@inktank.com (mailto:sage@inktank.com)>, "=
+Wido den Hollander" <wido@42on.com (mailto:wido@42on.com)>, "Sylvain Mu=
+naut" <s.munaut@whatever-company.com (mailto:s.munaut@whatever-company.=
+com)>, "Samuel Just" <sam.just@inktank.com (mailto:sam.just@inktank.com=
+)>, "Vladislav Gorbunov" <vadikgo@gmail.com (mailto:vadikgo@gmail.com)>=
+=20
+> Sent: Tuesday, March 12, 2013 4:20:13 PM=20
+> Subject: Re: OSD memory leaks?=20
+>=20
+> On Tuesday, March 12, 2013 at 1:10 PM, S=C3=A9bastien Han wrote:=20
+> > Well to avoid un necessary data movement, there is also an=20
+> > _experimental_ feature to change on fly the number of PGs in a pool=
+=2E=20
+> >=20
+> > ceph osd pool set <poolname> pg_num <numpgs> --allow-experimental-f=
+eature=20
+> Don't do that. We've got a set of 3 patches which fix bugs we know ab=
+out that aren't in bobtail yet, and I'm sure there's more we aren't awa=
+re of=E2=80=A6=20
+> -Greg=20
+>=20
+> Software Engineer #42 @ http://inktank.com | http://ceph.com=20
+>=20
+> >=20
+> > Cheers!=20
+> > --=20
+> > Regards,=20
+> > S=C3=A9bastien Han.=20
+> >=20
+> >=20
+> > On Tue, Mar 12, 2013 at 7:09 PM, Dave Spano <dspano@optogenics.com =
+(mailto:dspano@optogenics.com)> wrote:=20
+> > > Disregard my previous question. I found my answer in the post bel=
+ow. Absolutely brilliant! I thought I was screwed!=20
+> > >=20
+> > > http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/892=
+4=20
+> > >=20
+> > > Dave Spano=20
+> > > Optogenics=20
+> > > Systems Administrator=20
+> > >=20
+> > >=20
+> > >=20
+> > > ----- Original Message -----=20
+> > >=20
+> > > From: "Dave Spano" <dspano@optogenics.com (mailto:dspano@optogeni=
+cs.com)>=20
+> > > To: "S=C3=A9bastien Han" <han.sebastien@gmail.com (mailto:han.seb=
+astien@gmail.com)>=20
+> > > Cc: "Sage Weil" <sage@inktank.com (mailto:sage@inktank.com)>, "Wi=
+do den Hollander" <wido@42on.com (mailto:wido@42on.com)>, "Gregory Farn=
+um" <greg@inktank.com (mailto:greg@inktank.com)>, "Sylvain Munaut" <s.m=
+unaut@whatever-company.com (mailto:s.munaut@whatever-company.com)>, "ce=
+ph-devel" <ceph-devel@vger.kernel.org (mailto:ceph-devel@vger.kernel.or=
+g)>, "Samuel Just" <sam.just@inktank.com (mailto:sam.just@inktank.com)>=
+, "Vladislav Gorbunov" <vadikgo@gmail.com (mailto:vadikgo@gmail.com)>=20
+> > > Sent: Tuesday, March 12, 2013 1:41:21 PM=20
+> > > Subject: Re: OSD memory leaks?=20
+> > >=20
+> > >=20
+> > > If one were stupid enough to have their pg_num and pgp_num set to=
+ 8 on two of their pools, how could you fix that?=20
+> > >=20
+> > >=20
+> > > Dave Spano=20
+> > >=20
+> > >=20
+> > >=20
+> > > ----- Original Message -----=20
+> > >=20
+> > > From: "S=C3=A9bastien Han" <han.sebastien@gmail.com (mailto:han.s=
+ebastien@gmail.com)>=20
+> > > To: "Vladislav Gorbunov" <vadikgo@gmail.com (mailto:vadikgo@gmail=
+=2Ecom)>=20
+> > > Cc: "Sage Weil" <sage@inktank.com (mailto:sage@inktank.com)>, "Wi=
+do den Hollander" <wido@42on.com (mailto:wido@42on.com)>, "Gregory Farn=
+um" <greg@inktank.com (mailto:greg@inktank.com)>, "Sylvain Munaut" <s.m=
+unaut@whatever-company.com (mailto:s.munaut@whatever-company.com)>, "Da=
+ve Spano" <dspano@optogenics.com (mailto:dspano@optogenics.com)>, "ceph=
+-devel" <ceph-devel@vger.kernel.org (mailto:ceph-devel@vger.kernel.org)=
+>, "Samuel Just" <sam.just@inktank.com (mailto:sam.just@inktank.com)>=20
+> > > Sent: Tuesday, March 12, 2013 9:43:44 AM=20
+> > > Subject: Re: OSD memory leaks?=20
+> > >=20
+> > > > Sorry, i mean pg_num and pgp_num on all pools. Shown by the "ce=
+ph osd=20
+> > > > dump | grep 'rep size'"=20
+> > >=20
+> > >=20
+> > >=20
+> > >=20
+> > >=20
+> > > Well it's still 450 each...=20
+> > >=20
+> > > > The default pg_num value 8 is NOT suitable for big cluster.=20
+> > >=20
+> > > Thanks I know, I'm not new with Ceph. What's your point here? I=20
+> > > already said that pg_num was 450...=20
+> > > --=20
+> > > Regards,=20
+> > > S=C3=A9bastien Han.=20
+> > >=20
+> > >=20
+> > > On Tue, Mar 12, 2013 at 2:00 PM, Vladislav Gorbunov <vadikgo@gmai=
+l.com (mailto:vadikgo@gmail.com)> wrote:=20
+> > > > Sorry, i mean pg_num and pgp_num on all pools. Shown by the "ce=
+ph osd=20
+> > > > dump | grep 'rep size'"=20
+> > > > The default pg_num value 8 is NOT suitable for big cluster.=20
+> > > >=20
+> > > > 2013/3/13 S=C3=A9bastien Han <han.sebastien@gmail.com (mailto:h=
+an.sebastien@gmail.com)>:=20
+> > > > > Replica count has been set to 2.=20
+> > > > >=20
+> > > > > Why?=20
+> > > > > --=20
+> > > > > Regards,=20
+> > > > > S=C3=A9bastien Han.=20
+> > > > >=20
+> > > > >=20
+> > > > > On Tue, Mar 12, 2013 at 12:45 PM, Vladislav Gorbunov <vadikgo=
+@gmail.com (mailto:vadikgo@gmail.com)> wrote:=20
+> > > > > > > FYI I'm using 450 pgs for my pools.=20
+> > > > > >=20
+> > > > > >=20
+> > > > > >=20
+> > > > > >=20
+> > > > > > Please, can you show the number of object replicas?=20
+> > > > > >=20
+> > > > > > ceph osd dump | grep 'rep size'=20
+> > > > > >=20
+> > > > > > Vlad Gorbunov=20
+> > > > > >=20
+> > > > > > 2013/3/5 S=C3=A9bastien Han <han.sebastien@gmail.com (mailt=
+o:han.sebastien@gmail.com)>:=20
+> > > > > > > FYI I'm using 450 pgs for my pools.=20
+> > > > > > >=20
+> > > > > > > --=20
+> > > > > > > Regards,=20
+> > > > > > > S=C3=A9bastien Han.=20
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > > On Fri, Mar 1, 2013 at 8:10 PM, Sage Weil <sage@inktank.c=
+om (mailto:sage@inktank.com)> wrote:=20
+> > > > > > > >=20
+> > > > > > > > On Fri, 1 Mar 2013, Wido den Hollander wrote:=20
+> > > > > > > > > On 02/23/2013 01:44 AM, Sage Weil wrote:=20
+> > > > > > > > > > On Fri, 22 Feb 2013, S?bastien Han wrote:=20
+> > > > > > > > > > > Hi all,=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > I finally got a core dump.=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > I did it with a kill -SEGV on the OSD process.=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > https://www.dropbox.com/s/ahv6hm0ipnak5rf/core-ce=
+ph-osd-11-0-0-20100-1361539008=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > Hope we will get something out of it :-).=20
+> > > > > > > > > >=20
+> > > > > > > > > > AHA! We have a theory. The pg log isnt trimmed duri=
+ng scrub (because teh=20
+> > > > > > > > > > old scrub code required that), but the new (deep) s=
+crub can take a very=20
+> > > > > > > > > > long time, which means the pg log will eat ram in t=
+he meantime..=20
+> > > > > > > > > > especially under high iops.=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > Does the number of PGs influence the memory leak? So =
+my theory is that when=20
+> > > > > > > > > you have a high number of PGs with a low number of ob=
+jects per PG you don't=20
+> > > > > > > > > see the memory leak.=20
+> > > > > > > > >=20
+> > > > > > > > > I saw the memory leak on a RBD system where a pool ha=
+d just 8 PGs, but after=20
+> > > > > > > > > going to 1024 PGs in a new pool it seemed to be resol=
+ved.=20
+> > > > > > > > >=20
+> > > > > > > > > I've asked somebody else to try your patch since he's=
+ still seeing it on his=20
+> > > > > > > > > systems. Hopefully that gives us some results.=20
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > The PGs were active+clean when you saw the leak? There =
+is a problem (that=20
+> > > > > > > > we just fixed in master) where pg logs aren't trimmed f=
+or degraded PGs.=20
+> > > > > > > >=20
+> > > > > > > > sage=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > Wido=20
+> > > > > > > > >=20
+> > > > > > > > > > Can you try wip-osd-log-trim (which is bobtail + a =
+simple patch) and see=20
+> > > > > > > > > > if that seems to work? Note that that patch shouldn=
+'t be run in a mixed=20
+> > > > > > > > > > argonaut+bobtail cluster, since it isn't properly c=
+hecking if the scrub is=20
+> > > > > > > > > > class or chunky/deep.=20
+> > > > > > > > > >=20
+> > > > > > > > > > Thanks!=20
+> > > > > > > > > > sage=20
+> > > > > > > > > >=20
+> > > > > > > > > >=20
+> > > > > > > > > > > --=20
+> > > > > > > > > > > Regards,=20
+> > > > > > > > > > > S?bastien Han.=20
+> > > > > > > > > > >=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > On Fri, Jan 11, 2013 at 7:13 PM, Gregory Farnum <=
+greg@inktank.com (mailto:greg@inktank.com)> wrote:=20
+> > > > > > > > > > > > On Fri, Jan 11, 2013 at 6:57 AM, S?bastien Han =
+<han.sebastien@gmail.com (mailto:han.sebastien@gmail.com)>=20
+> > > > > > > > > > > > wrote:=20
+> > > > > > > > > > > > > > Is osd.1 using the heap profiler as well? K=
+eep in mind that active=20
+> > > > > > > > > > > > > > use=20
+> > > > > > > > > > > > > > of the memory profiler will itself cause me=
+mory usage to increase ?=20
+> > > > > > > > > > > > > > this sounds a bit like that to me since it'=
+s staying stable at a=20
+> > > > > > > > > > > > > > large=20
+> > > > > > > > > > > > > > but finite portion of total memory.=20
+> > > > > > > > > > > > >=20
+> > > > > > > > > > > > >=20
+> > > > > > > > > > > > >=20
+> > > > > > > > > > > > >=20
+> > > > > > > > > > > > >=20
+> > > > > > > > > > > > > Well, the memory consumption was already high=
+ before the profiler was=20
+> > > > > > > > > > > > > started. So yes with the memory profiler enab=
+le an OSD might consume=20
+> > > > > > > > > > > > > more memory but this doesn't cause the memory=
+ leaks.=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > > My concern is that maybe you saw a leak but whe=
+n you restarted with=20
+> > > > > > > > > > > > the memory profiling you lost whatever conditio=
+ns caused it.=20
+> > > > > > > > > > > >=20
+> > > > > > > > > > > > > Any ideas? Nothing to say about my scrumbing =
+theory?=20
+> > > > > > > > > > > > I like it, but Sam indicates that without some =
+heap dumps which=20
+> > > > > > > > > > > > capture the actual leak then scrub is too large=
+ to effectively code=20
+> > > > > > > > > > > > review for leaks. :(=20
+> > > > > > > > > > > > -Greg=20
+> > > > > > > > > > >=20
+> > > > > > > > > > >=20
+> > > > > > > > > > >=20
+> > > > > > > > > > >=20
+> > > > > > > > > > > --=20
+> > > > > > > > > > > To unsubscribe from this list: send the line "uns=
+ubscribe ceph-devel" in=20
+> > > > > > > > > > > the body of a message to majordomo@vger.kernel.or=
+g (mailto:majordomo@vger.kernel.org)=20
+> > > > > > > > > > > More majordomo info at http://vger.kernel.org/maj=
+ordomo-info.html=20
+> > > > > > > > > >=20
+> > > > > > > > > >=20
+> > > > > > > > > >=20
+> > > > > > > > > >=20
+> > > > > > > > > > --=20
+> > > > > > > > > > To unsubscribe from this list: send the line "unsub=
+scribe ceph-devel" in=20
+> > > > > > > > > > the body of a message to majordomo@vger.kernel.org =
+(mailto:majordomo@vger.kernel.org)=20
+> > > > > > > > > > More majordomo info at http://vger.kernel.org/major=
+domo-info.html=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > --=20
+> > > > > > > > > Wido den Hollander=20
+> > > > > > > > > 42on B.V.=20
+> > > > > > > > >=20
+> > > > > > > > > Phone: +31 (0)20 700 9902=20
+> > > > > > > > > Skype: contact42on=20
+> > > > > > > >=20
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > > --=20
+> > > > > > > To unsubscribe from this list: send the line "unsubscribe=
+ ceph-devel" in=20
+> > > > > > > the body of a message to majordomo@vger.kernel.org (mailt=
+o:majordomo@vger.kernel.org)=20
+> > > > > > > More majordomo info at http://vger.kernel.org/majordomo-i=
+nfo.html=20
+> > > > > >=20
+> > > > >=20
+> > > >=20
+> > >=20
+> > >=20
+> > >=20
+> > >=20
+> > > --=20
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in=20
+> > > the body of a message to majordomo@vger.kernel.org (mailto:majord=
+omo@vger.kernel.org)=20
+> > > More majordomo info at http://vger.kernel.org/majordomo-info.html=
+=20
+> >=20
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
