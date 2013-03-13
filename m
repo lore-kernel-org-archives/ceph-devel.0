@@ -1,66 +1,45 @@
-From: Wido den Hollander <wido@42on.com>
+From: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
 Subject: Re: Release Cadence
-Date: Wed, 13 Mar 2013 12:08:20 +0100
-Message-ID: <51405E24.9030702@42on.com>
-References: <CAP8Oy=LhkgGeUe8KLHJtbKwmsJe3-0idApOzx9kTsBm67fgEFA@mail.gmail.com>
+Date: Wed, 13 Mar 2013 12:41:37 +0100
+Message-ID: <514065F1.9030603@risc-software.at>
+References: <CAP8Oy=LhkgGeUe8KLHJtbKwmsJe3-0idApOzx9kTsBm67fgEFA@mail.gmail.com> <51405E24.9030702@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:56324 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754027Ab3CMLIW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 13 Mar 2013 07:08:22 -0400
-In-Reply-To: <CAP8Oy=LhkgGeUe8KLHJtbKwmsJe3-0idApOzx9kTsBm67fgEFA@mail.gmail.com>
+Received: from email.edvz.uni-linz.ac.at ([140.78.3.65]:48261 "EHLO
+	email.uni-linz.ac.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754569Ab3CMLlj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Mar 2013 07:41:39 -0400
+In-Reply-To: <51405E24.9030702@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On 03/12/2013 09:12 PM, Patrick McGarry wrote:
-> Hey all,
->
-> Just wanted to link to a few words on the new Ceph release cadence.
->
-> http://ceph.com/community/ceph-settles-in-to-aggressive-release-cadence/
->
-> Feel free to hit us with any questions.  Thanks.
->
->
+On 03/13/2013 12:08 PM, Wido den Hollander wrote:
+> Just to conclude, I think it's wise for now to not call anything "LTS"
+> yet. I however fully agree that in the longer run it would be desirable
+> for production deployments.
 
-One note in the LTS releases. While LTS releases would be great, I agree 
-that at this point in time Ceph isn't ready for it.
+I totally agreen on that, although I think the same thing was also
+stated in the blog post.
 
-Point being that the API changes and such are becoming less frequent, 
-but think about the burden of having to facilitate an upgrade path from 
-code which was written one year ago to the current point in time.
-
-Think about the new monitor proposal and such.
-
-Just to conclude, I think it's wise for now to not call anything "LTS" 
-yet. I however fully agree that in the longer run it would be desirable 
-for production deployments.
-
->
-> Best Regards,
->
-> --
-> Patrick McGarry
-> Director, Community
-> Inktank
->
-> http://ceph.com  ||  http://inktank.com
-> @scuttlemonkey || @ceph || @inktank
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+Wolfgang
 
 -- 
-Wido den Hollander
-42on B.V.
+DI (FH) Wolfgang Hennerbichler
+Software Development
+Unit Advanced Computing Technologies
+RISC Software GmbH
+A company of the Johannes Kepler University Linz
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+IT-Center
+Softwarepark 35
+4232 Hagenberg
+Austria
+
+Phone: +43 7236 3343 245
+Fax: +43 7236 3343 250
+wolfgang.hennerbichler@risc-software.at
+http://www.risc-software.at
