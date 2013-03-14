@@ -1,58 +1,56 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Direct IO on CephFS for blocks larger than 8MB
-Date: Thu, 14 Mar 2013 10:51:21 -0500
-Message-ID: <5141F1F9.1030509@inktank.com>
-References: <5A908216FB901F499F602F4F9CEF5B380FEA68C3@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1303140819420.11175@cobra.newdream.net> <1868F843065B483E80E7B83A24F389D2@inktank.com>
+From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Ceph at World Hosting Days
+Date: Thu, 14 Mar 2013 12:05:52 -0400
+Message-ID: <CAP8Oy=LH15kdPdLcPWuFEyQgpzPZ7v+Z1fJ6XkL=7OgjE3HEAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:42728 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933985Ab3CNPvW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 11:51:22 -0400
-Received: by mail-ie0-f176.google.com with SMTP id k13so3147137iea.7
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 08:51:21 -0700 (PDT)
-In-Reply-To: <1868F843065B483E80E7B83A24F389D2@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: "Huang, Xiwei" <xiwei.huang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 03/14/2013 10:44 AM, Greg Farnum wrote:
-> On Thursday, March 14, 2013 at 8:20 AM, Sage Weil wrote:
->> On Thu, 14 Mar 2013, Huang, Xiwei wrote:
->>> Hi, all,
->>> I noticed that CephFS fails to support Direct IO for blocks larger than 8MB, say:
->>> sudo dd if=/dev/zero of=mnt/cephfs/foo bs=16M count=1 oflag=direct
->>> dd: writing `mnt/cephfs/foo: Bad address
->>> 1+0 records in
->>> 0+0 records out
->>> 0 bytes (0 B) copied, 0.213948 s, 0.0 kB/s
->>> My version Ceph is 0.56.1.
->>> ??I also found the bug has been already reported as Bug #2657.
->>> Is this fixed in the new 0.58 version?
->>
->>
->>
->> I'm pretty sure this is a problem on the kernel client side of things, not
->> the server side (which by default handles writes up to ~100MB or so). I
->> suspect it isn't terribly difficult to fix, but hasn't been prioritized...
->>
->> sage
-> My guess too. Are direct IO writes of that size a common thing or of great import to you?
-> Either way, a comment on the tracker saying you've run into it will promote it up when we're doing bug scrubs and backlog reviews. :)
-> -Greg
+Hey Ceph fans,
 
-I imagine we'll see some applications doing large direct IO writes like 
-this in the HPC space.
+The World Hosting Days event in Rust, Germany [1] is fast-approaching,
+and a couple of Ceph disciples will be available to beat about the
+head and shoulders if you care to stop by the Dell booth.
 
-Mark
+So far I know both Nigel Thomas and myself will be in attendance from
+Inktank, and Wido from 42on will be there.  If anyone else plans on
+being there I would love to hear about it.  If we get a decent list I
+can put together a mugshot page on ceph.com and try to plan an
+impromptu sit-down similar to what we had at FOSDEM (which was
+great!).
 
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+If nothing else I'm sure we'll be in attendance at the Collesseo bar
+[2] in the evenings, so stop by and we'll enjoy a tall, frosty adult
+beverage and talk Ceph.
 
+If you aren't able to make it down for WHD, but would still like to
+kick around an Inktanker, I will be in Frankfurt until Sunday
+following the event.  Just hit me up via email or twitter, I'd be
+happy to sit down and provide you with a beverage-in-absentia.
+Looking forward to it.
+
+[1] http://www.worldhostingdays.com/
+[2] http://resort.europapark.de/lang-en/Restaurants-Bars/Bars/c718.html
+
+
+Best Regards,
+
+--
+Patrick McGarry
+Director, Community
+Inktank
+
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
