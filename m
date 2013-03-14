@@ -1,42 +1,67 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: CephFS locality API RFC
-Date: Thu, 14 Mar 2013 11:14:55 -0700
-Message-ID: <2A330211-CC95-42FB-967C-6FAD4E1895DC@cs.ucsc.edu>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Greg Farnum <greg@inktank.com>
+Subject: Re: CephFS locality API RFC
+Date: Thu, 14 Mar 2013 11:29:04 -0700
+Message-ID: <697CF5409C9749BBA0F2F86CCBDD2B17@inktank.com>
+References: <2A330211-CC95-42FB-967C-6FAD4E1895DC@cs.ucsc.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:49335 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932740Ab3CNSO5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 14:14:57 -0400
-Received: by mail-pb0-f43.google.com with SMTP id md12so2610183pbc.30
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 11:14:56 -0700 (PDT)
+Received: from mail-pb0-f54.google.com ([209.85.160.54]:64250 "EHLO
+	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751857Ab3CNS3J convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 14:29:09 -0400
+Received: by mail-pb0-f54.google.com with SMTP id rr4so2612299pbb.13
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 11:29:08 -0700 (PDT)
+In-Reply-To: <2A330211-CC95-42FB-967C-6FAD4E1895DC@cs.ucsc.edu>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-The current CephFS API is used to extract locality information as follows:
+On Thursday, March 14, 2013 at 11:14 AM, Noah Watkins wrote:
+> The current CephFS API is used to extract locality information as fol=
+lows:
+> =20
+> First we get a list of OSD IDs:
+> =20
+> ceph_get_file_extent_osds(offset) -> [OSD ID]*
+> =20
+> Using the OSD IDs we can then query for the CRUSH bucket hierarchy:
+> =20
+> ceph_get_osd_crush_location(osd_id) -> path
+> =20
+> The path includes hostname information, but we'd still like to get th=
+e IP. The current API for doing this is:
+> =20
+> ceph_get_file_stripe_address(offset) -> [sockaddr]*
+> =20
+> that returns an IP for each OSD holds replicas. The order of the outp=
+ut list should be the same as the the OSD list, but It'd be nice to hav=
+e a consistent API that deals with OSD id, making the correspondence ex=
+plicit.
+Agreed. We should probably deprecate the get_file_stripe_address() and =
+make them turn IDs into addresses on their own.
 
-First we get a list of OSD IDs:
+> For instance:
+> =20
+> ceph_get_file_stripe_address(osd_id) -> sockaddr
+How about =20
+ceph_get_osd_address(osd_id) -> sockaddr
+;)
 
-  ceph_get_file_extent_osds(offset) -> [OSD ID]*
+ =20
+> Another option is to have `ceph_get_osd_crush_location` return both t=
+he path and a sockaddr.
 
-Using the OSD IDs we can then query for the CRUSH bucket hierarchy:
+No way =E2=80=94 that's conflating two different things rather more tha=
+n we should be. For one thing the sockaddr can change during a daemon r=
+estart but the crush location won't.
+-Greg
 
-  ceph_get_osd_crush_location(osd_id) -> path
-
-The path includes hostname information, but we'd still like to get the IP. The current API for doing this is:
-
-  ceph_get_file_stripe_address(offset) -> [sockaddr]*
-
-that returns an IP for each OSD holds replicas. The order of the output list should be the same as the the OSD list, but It'd be nice to have a consistent API that deals with OSD id, making the correspondence explicit. For instance:
-
-  ceph_get_file_stripe_address(osd_id) -> sockaddr
-
-Another option is to have `ceph_get_osd_crush_location` return both the path and a sockaddr.
-
-Thoughts?
-
-Thanks,
-Noah
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
