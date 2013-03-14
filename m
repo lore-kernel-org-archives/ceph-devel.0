@@ -1,56 +1,42 @@
-From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Ceph at World Hosting Days
-Date: Thu, 14 Mar 2013 12:05:52 -0400
-Message-ID: <CAP8Oy=LH15kdPdLcPWuFEyQgpzPZ7v+Z1fJ6XkL=7OgjE3HEAw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: CephFS locality API RFC
+Date: Thu, 14 Mar 2013 11:14:55 -0700
+Message-ID: <2A330211-CC95-42FB-967C-6FAD4E1895DC@cs.ucsc.edu>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f43.google.com ([209.85.160.43]:49335 "EHLO
+	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932740Ab3CNSO5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 14:14:57 -0400
+Received: by mail-pb0-f43.google.com with SMTP id md12so2610183pbc.30
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 11:14:56 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey Ceph fans,
+The current CephFS API is used to extract locality information as follows:
 
-The World Hosting Days event in Rust, Germany [1] is fast-approaching,
-and a couple of Ceph disciples will be available to beat about the
-head and shoulders if you care to stop by the Dell booth.
+First we get a list of OSD IDs:
 
-So far I know both Nigel Thomas and myself will be in attendance from
-Inktank, and Wido from 42on will be there.  If anyone else plans on
-being there I would love to hear about it.  If we get a decent list I
-can put together a mugshot page on ceph.com and try to plan an
-impromptu sit-down similar to what we had at FOSDEM (which was
-great!).
+  ceph_get_file_extent_osds(offset) -> [OSD ID]*
 
-If nothing else I'm sure we'll be in attendance at the Collesseo bar
-[2] in the evenings, so stop by and we'll enjoy a tall, frosty adult
-beverage and talk Ceph.
+Using the OSD IDs we can then query for the CRUSH bucket hierarchy:
 
-If you aren't able to make it down for WHD, but would still like to
-kick around an Inktanker, I will be in Frankfurt until Sunday
-following the event.  Just hit me up via email or twitter, I'd be
-happy to sit down and provide you with a beverage-in-absentia.
-Looking forward to it.
+  ceph_get_osd_crush_location(osd_id) -> path
 
-[1] http://www.worldhostingdays.com/
-[2] http://resort.europapark.de/lang-en/Restaurants-Bars/Bars/c718.html
+The path includes hostname information, but we'd still like to get the IP. The current API for doing this is:
 
+  ceph_get_file_stripe_address(offset) -> [sockaddr]*
 
-Best Regards,
+that returns an IP for each OSD holds replicas. The order of the output list should be the same as the the OSD list, but It'd be nice to have a consistent API that deals with OSD id, making the correspondence explicit. For instance:
 
---
-Patrick McGarry
-Director, Community
-Inktank
+  ceph_get_file_stripe_address(osd_id) -> sockaddr
 
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+Another option is to have `ceph_get_osd_crush_location` return both the path and a sockaddr.
+
+Thoughts?
+
+Thanks,
+Noah
