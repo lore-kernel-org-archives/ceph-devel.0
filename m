@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: make message data be a pointer
-Date: Thu, 14 Mar 2013 12:54:45 -0700
-Message-ID: <51422B05.9040100@inktank.com>
-References: <513FD203.10401@inktank.com>
+Subject: Re: [PATCH] libceph: collapse all data items into one
+Date: Thu, 14 Mar 2013 12:50:00 -0700
+Message-ID: <514229E8.6060806@inktank.com>
+References: <513FD114.9000407@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:52944 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751072Ab3CNTz3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 15:55:29 -0400
-Received: by mail-pb0-f53.google.com with SMTP id un1so2685166pbc.40
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 12:55:29 -0700 (PDT)
-In-Reply-To: <513FD203.10401@inktank.com>
+Received: from mail-pb0-f43.google.com ([209.85.160.43]:63557 "EHLO
+	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751271Ab3CNT6F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Mar 2013 15:58:05 -0400
+Received: by mail-pb0-f43.google.com with SMTP id md12so2729384pbc.30
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Mar 2013 12:58:04 -0700 (PDT)
+In-Reply-To: <513FD114.9000407@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,265 +21,301 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 03/12/2013 06:10 PM, Alex Elder wrote:
-> Begin the transition from a single message data item to a list of
-> them by replacing the "data" structure in a message with a pointer
-> to a ceph_msg_data structure.
+On 03/12/2013 06:06 PM, Alex Elder wrote:
+> It turns out that only one of the data item types is ever used at
+> any one time in a single message (currently).
+>      - A page array is used by the osd client (on behalf of the file
+>        system) and by rbd.  Only one osd op (and therefore at most
+>        one data item) is ever used at a time by rbd.  And the only
+>        time the file system sends two, the second op contains no
+>        data.
+>      - A bio is only used by the rbd client (and again, only one
+>        data item per message)
+>      - A page list is used by the file system and by rbd for outgoing
+>        data, but only one op (and one dat item) at a time.
 >
-> A null pointer will indicate the message has no data; replace the
-> use of ceph_msg_has_data() with a simple check for a null pointer.
+> We can therefore collapse all three of our data item fields into a
+> single field "data", and depend on the messenger code to properly
+> handle it based on its type.
 >
-> Create functions ceph_msg_data_create() and ceph_msg_data_destroy()
-> to dynamically allocate and free a data item structure of a given type.
+> This allows us to eliminate quite a bit of duplicated code.
 >
-> When a message has its data item "set," allocate one of these to
-> hold the data description, and free it when the last reference to
-> the message is dropped.
->
-> This partially resolves:
+> This is related to:
 >      http://tracker.ceph.com/issues/4429
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   include/linux/ceph/messenger.h |    5 +--
->   net/ceph/messenger.c           |   91
-> +++++++++++++++++++++++++++-------------
->   2 files changed, 62 insertions(+), 34 deletions(-)
+>   include/linux/ceph/messenger.h |   12 +----
+>   net/ceph/messenger.c           |  112
+> ++++++++++++----------------------------
+>   2 files changed, 36 insertions(+), 88 deletions(-)
 >
 > diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 686df5b..3181321 100644
+> index 252e01b..af786b2 100644
 > --- a/include/linux/ceph/messenger.h
 > +++ b/include/linux/ceph/messenger.h
-> @@ -64,8 +64,6 @@ struct ceph_messenger {
+> @@ -64,11 +64,7 @@ struct ceph_messenger {
 >   	u32 required_features;
 >   };
 >
-> -#define ceph_msg_has_data(m)		((m)->data.type != CEPH_MSG_DATA_NONE)
-> -
+> -#define ceph_msg_has_pages(m)		((m)->p.type == CEPH_MSG_DATA_PAGES)
+> -#define ceph_msg_has_pagelist(m)	((m)->l.type == CEPH_MSG_DATA_PAGELIST)
+> -#ifdef CONFIG_BLOCK
+> -#define ceph_msg_has_bio(m)		((m)->b.type == CEPH_MSG_DATA_BIO)
+> -#endif /* CONFIG_BLOCK */
+> +#define ceph_msg_has_data(m)		((m)->data.type != CEPH_MSG_DATA_NONE)
+>
 >   enum ceph_msg_data_type {
 >   	CEPH_MSG_DATA_NONE,	/* message contains no data payload */
->   	CEPH_MSG_DATA_PAGES,	/* data source/destination is a page array */
-> @@ -141,8 +139,7 @@ struct ceph_msg {
->   	struct kvec front;              /* unaligned blobs of message */
+> @@ -145,11 +141,7 @@ struct ceph_msg {
 >   	struct ceph_buffer *middle;
 >
-> -	/* data payload */
-> -	struct ceph_msg_data	data;
-> +	struct ceph_msg_data	*data;	/* data payload */
+>   	/* data payload */
+> -	struct ceph_msg_data	p;	/* pages */
+> -	struct ceph_msg_data	l;	/* pagelist */
+> -#ifdef CONFIG_BLOCK
+> -	struct ceph_msg_data	b;	/* bio */
+> -#endif /* CONFIG_BLOCK */
+> +	struct ceph_msg_data	data;
 >
 >   	struct ceph_connection *con;
 >   	struct list_head list_head;	/* links for connection lists */
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 8e07ac4..d703813 100644
+> index 190b74b..30943c1 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -1086,7 +1086,7 @@ static void prepare_message_data(struct ceph_msg *msg)
+> @@ -1085,22 +1085,15 @@ static void prepare_message_data(struct ceph_msg
+> *msg,
+>
+>   	/* initialize page iterator */
+>   	msg_pos->page = 0;
+> -	if (ceph_msg_has_pages(msg))
+> -		msg_pos->page_pos = msg->p.alignment;
+> +	if (ceph_msg_has_data(msg))
+> +		msg_pos->page_pos = msg->data.alignment;
+>   	else
+>   		msg_pos->page_pos = 0;
+>   	msg_pos->data_pos = 0;
 >
 >   	/* Initialize data cursors */
 >
-> -	ceph_msg_data_cursor_init(&msg->data, data_len);
-> +	ceph_msg_data_cursor_init(msg->data, data_len);
+> -#ifdef CONFIG_BLOCK
+> -	if (ceph_msg_has_bio(msg))
+> -		ceph_msg_data_cursor_init(&msg->b, data_len);
+> -#endif /* CONFIG_BLOCK */
+> -	if (ceph_msg_has_pages(msg))
+> -		ceph_msg_data_cursor_init(&msg->p, data_len);
+> -	if (ceph_msg_has_pagelist(msg))
+> -		ceph_msg_data_cursor_init(&msg->l, data_len);
+> +	ceph_msg_data_cursor_init(&msg->data, data_len);
+>
+>   	msg_pos->did_page_crc = false;
 >   }
->
->   /*
-> @@ -1388,13 +1388,13 @@ static u32 ceph_crc32c_page(u32 crc, struct page
-> *page,
->   static int write_partial_message_data(struct ceph_connection *con)
->   {
->   	struct ceph_msg *msg = con->out_msg;
-> -	struct ceph_msg_data_cursor *cursor = &msg->data.cursor;
-> +	struct ceph_msg_data_cursor *cursor = &msg->data->cursor;
->   	bool do_datacrc = !con->msgr->nocrc;
->   	u32 crc;
->
->   	dout("%s %p msg %p\n", __func__, con, msg);
->
-> -	if (WARN_ON(!ceph_msg_has_data(msg)))
-> +	if (WARN_ON(!msg->data))
->   		return -EINVAL;
->
->   	/*
-> @@ -1414,7 +1414,7 @@ static int write_partial_message_data(struct
+> @@ -1166,10 +1159,10 @@ static void prepare_write_message(struct
 > ceph_connection *con)
->   		bool need_crc;
->   		int ret;
->
-> -		page = ceph_msg_data_next(&msg->data, &page_offset, &length,
-> +		page = ceph_msg_data_next(msg->data, &page_offset, &length,
->   							&last_piece);
->   		if (do_datacrc && cursor->need_crc)
->   			crc = ceph_crc32c_page(crc, page, page_offset, length);
-> @@ -1425,7 +1425,7 @@ static int write_partial_message_data(struct
-> ceph_connection *con)
->
->   			return ret;
->   		}
-> -		need_crc = ceph_msg_data_advance(&msg->data, (size_t) ret);
-> +		need_crc = ceph_msg_data_advance(msg->data, (size_t) ret);
+>   		m->needs_out_seq = false;
 >   	}
->   	msg->footer.data_crc = cpu_to_le32(crc);
 >
-> @@ -2075,7 +2075,7 @@ static int read_partial_message_section(struct
-> ceph_connection *con,
->   static int read_partial_msg_data(struct ceph_connection *con)
->   {
->   	struct ceph_msg *msg = con->in_msg;
-> -	struct ceph_msg_data_cursor *cursor = &msg->data.cursor;
-> +	struct ceph_msg_data_cursor *cursor = &msg->data->cursor;
->   	const bool do_datacrc = !con->msgr->nocrc;
->   	struct page *page;
->   	size_t page_offset;
-> @@ -2084,12 +2084,12 @@ static int read_partial_msg_data(struct
+> -	dout("prepare_write_message %p seq %lld type %d len %d+%d+%d (%zd)\n",
+> +	dout("prepare_write_message %p seq %lld type %d len %d+%d+%d\n",
+>   	     m, con->out_seq, le16_to_cpu(m->hdr.type),
+>   	     le32_to_cpu(m->hdr.front_len), le32_to_cpu(m->hdr.middle_len),
+> -	     le32_to_cpu(m->hdr.data_len), m->p.length);
+> +	     le32_to_cpu(m->hdr.data_len));
+>   	BUG_ON(le32_to_cpu(m->hdr.front_len) != m->front.iov_len);
+>
+>   	/* tag + hdr + front + middle */
+> @@ -1393,14 +1386,7 @@ static void out_msg_pos_next(struct
+> ceph_connection *con, struct page *page,
+>
+>   	msg_pos->data_pos += sent;
+>   	msg_pos->page_pos += sent;
+> -	if (ceph_msg_has_pages(msg))
+> -		need_crc = ceph_msg_data_advance(&msg->p, sent);
+> -	else if (ceph_msg_has_pagelist(msg))
+> -		need_crc = ceph_msg_data_advance(&msg->l, sent);
+> -#ifdef CONFIG_BLOCK
+> -	else if (ceph_msg_has_bio(msg))
+> -		need_crc = ceph_msg_data_advance(&msg->b, sent);
+> -#endif /* CONFIG_BLOCK */
+> +	need_crc = ceph_msg_data_advance(&msg->data, sent);
+>   	BUG_ON(need_crc && sent != len);
+>
+>   	if (sent < len)
+> @@ -1423,12 +1409,8 @@ static void in_msg_pos_next(struct
+> ceph_connection *con, size_t len,
+>
+>   	msg_pos->data_pos += received;
+>   	msg_pos->page_pos += received;
+> -	if (ceph_msg_has_pages(msg))
+> -		(void) ceph_msg_data_advance(&msg->p, received);
+> -#ifdef CONFIG_BLOCK
+> -	else if (ceph_msg_has_bio(msg))
+> -		(void) ceph_msg_data_advance(&msg->b, received);
+> -#endif /* CONFIG_BLOCK */
+> +	(void) ceph_msg_data_advance(&msg->data, received);
+> +
+>   	if (received < len)
+>   		return;
+>
+> @@ -1468,6 +1450,9 @@ static int write_partial_message_data(struct
+> ceph_connection *con)
+>   	dout("%s %p msg %p page %d offset %d\n", __func__,
+>   	     con, msg, msg_pos->page, msg_pos->page_pos);
+>
+> +	if (WARN_ON(!ceph_msg_has_data(msg)))
+> +		return -EINVAL;
+> +
+>   	/*
+>   	 * Iterate through each page that contains data to be
+>   	 * written, and send as much as possible for each.
+> @@ -1482,23 +1467,8 @@ static int write_partial_message_data(struct
+> ceph_connection *con)
+>   		size_t length;
+>   		bool last_piece;
+>
+> -		if (ceph_msg_has_pages(msg)) {
+> -			page = ceph_msg_data_next(&msg->p, &page_offset,
+> -							&length, &last_piece);
+> -		} else if (ceph_msg_has_pagelist(msg)) {
+> -			page = ceph_msg_data_next(&msg->l, &page_offset,
+> -							&length, &last_piece);
+> -#ifdef CONFIG_BLOCK
+> -		} else if (ceph_msg_has_bio(msg)) {
+> -			page = ceph_msg_data_next(&msg->b, &page_offset,
+> -							&length, &last_piece);
+> -#endif
+> -		} else {
+> -			WARN(1, "con %p data_len %u but no outbound data\n",
+> -				con, data_len);
+> -			ret = -EINVAL;
+> -			goto out;
+> -		}
+> +		page = ceph_msg_data_next(&msg->data, &page_offset, &length,
+> +							&last_piece);
+>   		if (do_datacrc && !msg_pos->did_page_crc) {
+>   			u32 crc = le32_to_cpu(msg->footer.data_crc);
+>
+> @@ -2170,20 +2140,13 @@ static int read_partial_msg_data(struct
 > ceph_connection *con)
 >   	int ret;
 >
 >   	BUG_ON(!msg);
-> -	if (WARN_ON(!ceph_msg_has_data(msg)))
-> +	if (!msg->data)
->   		return -EIO;
+> +	if (WARN_ON(!ceph_msg_has_data(msg)))
+> +		return -EIO;
 >
->   	crc = con->in_data_crc;
->   	while (cursor->resid) {
-> -		page = ceph_msg_data_next(&msg->data, &page_offset, &length,
-> +		page = ceph_msg_data_next(msg->data, &page_offset, &length,
->   							NULL);
+>   	data_len = le32_to_cpu(con->in_hdr.data_len);
+>   	while (msg_pos->data_pos < data_len) {
+> -		if (ceph_msg_has_pages(msg)) {
+> -			page = ceph_msg_data_next(&msg->p, &page_offset,
+> -					&length, NULL);
+> -#ifdef CONFIG_BLOCK
+> -		} else if (ceph_msg_has_bio(msg)) {
+> -			page = ceph_msg_data_next(&msg->b, &page_offset,
+> -					&length, NULL);
+> -#endif
+> -		} else {
+> -			BUG_ON(1);
+> -		}
+> +		page = ceph_msg_data_next(&msg->data, &page_offset, &length,
+> +							NULL);
 >   		ret = ceph_tcp_recvpage(con->sock, page, page_offset, length);
->   		if (ret <= 0) {
-> @@ -2100,7 +2100,7 @@ static int read_partial_msg_data(struct
+>   		if (ret <= 0)
+>   			return ret;
+> @@ -2191,7 +2154,6 @@ static int read_partial_msg_data(struct
 > ceph_connection *con)
->
 >   		if (do_datacrc)
->   			crc = ceph_crc32c_page(crc, page, page_offset, ret);
-> -		(void) ceph_msg_data_advance(&msg->data, (size_t) ret);
-> +		(void) ceph_msg_data_advance(msg->data, (size_t) ret);
+>   			con->in_data_crc = ceph_crc32c_page(con->in_data_crc,
+>   							page, page_offset, ret);
+> -
+>   		in_msg_pos_next(con, length, ret);
 >   	}
->   	con->in_data_crc = crc;
 >
-> @@ -2910,44 +2910,80 @@ void ceph_con_keepalive(struct ceph_connection *con)
->   }
->   EXPORT_SYMBOL(ceph_con_keepalive);
->
-> -static void ceph_msg_data_init(struct ceph_msg_data *data)
-> +static struct ceph_msg_data *ceph_msg_data_create(enum
-> ceph_msg_data_type type)
+> @@ -3011,12 +2973,12 @@ void ceph_msg_data_set_pages(struct ceph_msg
+> *msg, struct page **pages,
 >   {
-> -	data->type = CEPH_MSG_DATA_NONE;
-> +	struct ceph_msg_data *data;
-> +
-> +	if (WARN_ON(!ceph_msg_data_type_valid(type)))
-> +		return NULL;
-> +
-> +	data = kzalloc(sizeof (*data), GFP_NOFS);
-> +	if (data)
-> +		data->type = type;
-> +
-> +	return data;
-> +}
-> +
-> +static void ceph_msg_data_destroy(struct ceph_msg_data *data)
-> +{
-> +	if (!data)
-> +		return;
-> +
-> +	if (data->type == CEPH_MSG_DATA_PAGELIST) {
-> +		ceph_pagelist_release(data->pagelist);
-> +		kfree(data->pagelist);
-> +	}
-> +	kfree(data);
->   }
->
->   void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page **pages,
->   		size_t length, size_t alignment)
->   {
-> +	struct ceph_msg_data *data;
-> +
 >   	BUG_ON(!pages);
 >   	BUG_ON(!length);
-> -	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
-> +	BUG_ON(msg->data != NULL);
-> +
-> +	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGES);
-> +	BUG_ON(!data);
-> +	data->pages = pages;
-> +	data->length = length;
-> +	data->alignment = alignment & ~PAGE_MASK;
+> -	BUG_ON(msg->p.type != CEPH_MSG_DATA_NONE);
+> +	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
 >
-> -	msg->data.type = CEPH_MSG_DATA_PAGES;
-> -	msg->data.pages = pages;
-> -	msg->data.length = length;
-> -	msg->data.alignment = alignment & ~PAGE_MASK;
-> +	msg->data = data;
+> -	msg->p.type = CEPH_MSG_DATA_PAGES;
+> -	msg->p.pages = pages;
+> -	msg->p.length = length;
+> -	msg->p.alignment = alignment & ~PAGE_MASK;
+> +	msg->data.type = CEPH_MSG_DATA_PAGES;
+> +	msg->data.pages = pages;
+> +	msg->data.length = length;
+> +	msg->data.alignment = alignment & ~PAGE_MASK;
 >   }
 >   EXPORT_SYMBOL(ceph_msg_data_set_pages);
 >
->   void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
->   				struct ceph_pagelist *pagelist)
+> @@ -3025,20 +2987,20 @@ void ceph_msg_data_set_pagelist(struct ceph_msg
+> *msg,
 >   {
-> +	struct ceph_msg_data *data;
-> +
 >   	BUG_ON(!pagelist);
 >   	BUG_ON(!pagelist->length);
-> -	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
-> +	BUG_ON(msg->data != NULL);
-> +
-> +	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGELIST);
-> +	BUG_ON(!data);
-> +	data->pagelist = pagelist;
+> -	BUG_ON(msg->l.type != CEPH_MSG_DATA_NONE);
+> +	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
 >
-> -	msg->data.type = CEPH_MSG_DATA_PAGELIST;
-> -	msg->data.pagelist = pagelist;
-> +	msg->data = data;
+> -	msg->l.type = CEPH_MSG_DATA_PAGELIST;
+> -	msg->l.pagelist = pagelist;
+> +	msg->data.type = CEPH_MSG_DATA_PAGELIST;
+> +	msg->data.pagelist = pagelist;
 >   }
 >   EXPORT_SYMBOL(ceph_msg_data_set_pagelist);
 >
 >   void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio)
 >   {
-> +	struct ceph_msg_data *data;
-> +
 >   	BUG_ON(!bio);
-> -	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
-> +	BUG_ON(msg->data != NULL);
-> +
-> +	data = ceph_msg_data_create(CEPH_MSG_DATA_BIO);
-> +	BUG_ON(!data);
-> +	data->bio = bio;
+> -	BUG_ON(msg->b.type != CEPH_MSG_DATA_NONE);
+> +	BUG_ON(msg->data.type != CEPH_MSG_DATA_NONE);
 >
-> -	msg->data.type = CEPH_MSG_DATA_BIO;
-> -	msg->data.bio = bio;
-> +	msg->data = data;
+> -	msg->b.type = CEPH_MSG_DATA_BIO;
+> -	msg->b.bio = bio;
+> +	msg->data.type = CEPH_MSG_DATA_BIO;
+> +	msg->data.bio = bio;
 >   }
 >   EXPORT_SYMBOL(ceph_msg_data_set_bio);
 >
-> @@ -2971,8 +3007,6 @@ struct ceph_msg *ceph_msg_new(int type, int
+> @@ -3062,9 +3024,7 @@ struct ceph_msg *ceph_msg_new(int type, int
 > front_len, gfp_t flags,
 >   	INIT_LIST_HEAD(&m->list_head);
 >   	kref_init(&m->kref);
 >
-> -	ceph_msg_data_init(&m->data);
-> -
+> -	ceph_msg_data_init(&m->p);
+> -	ceph_msg_data_init(&m->l);
+> -	ceph_msg_data_init(&m->b);
+> +	ceph_msg_data_init(&m->data);
+>
 >   	/* front */
 >   	m->front_max = front_len;
->   	if (front_len) {
-> @@ -3127,11 +3161,8 @@ void ceph_msg_last_put(struct kref *kref)
+> @@ -3219,15 +3179,11 @@ void ceph_msg_last_put(struct kref *kref)
+>   		ceph_buffer_put(m->middle);
 >   		m->middle = NULL;
 >   	}
->
-> -	if (ceph_msg_has_data(m) && m->data.type == CEPH_MSG_DATA_PAGELIST) {
-> -		ceph_pagelist_release(m->data.pagelist);
-> -		kfree(m->data.pagelist);
-> -		m->data.pagelist = NULL;
+> -	if (ceph_msg_has_pages(m)) {
+> -		m->p.length = 0;
+> -		m->p.pages = NULL;
 > -	}
-> +	ceph_msg_data_destroy(m->data);
-> +	m->data = NULL;
+>
+> -	if (ceph_msg_has_pagelist(m)) {
+> -		ceph_pagelist_release(m->l.pagelist);
+> -		kfree(m->l.pagelist);
+> -		m->l.pagelist = NULL;
+> +	if (ceph_msg_has_data(m) && m->data.type == CEPH_MSG_DATA_PAGELIST) {
+> +		ceph_pagelist_release(m->data.pagelist);
+> +		kfree(m->data.pagelist);
+> +		m->data.pagelist = NULL;
+>   	}
 >
 >   	if (m->pool)
->   		ceph_msgpool_put(m->pool, m);
-> @@ -3143,7 +3174,7 @@ EXPORT_SYMBOL(ceph_msg_last_put);
+> @@ -3240,7 +3196,7 @@ EXPORT_SYMBOL(ceph_msg_last_put);
 >   void ceph_msg_dump(struct ceph_msg *msg)
 >   {
 >   	pr_debug("msg_dump %p (front_max %d length %zd)\n", msg,
-> -		 msg->front_max, msg->data.length);
-> +		 msg->front_max, msg->data->length);
+> -		 msg->front_max, msg->p.length);
+> +		 msg->front_max, msg->data.length);
 >   	print_hex_dump(KERN_DEBUG, "header: ",
 >   		       DUMP_PREFIX_OFFSET, 16, 1,
 >   		       &msg->hdr, sizeof(msg->hdr), true);
