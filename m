@@ -1,34 +1,41 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: OSD memory leaks?
-Date: Wed, 13 Mar 2013 17:15:31 -0700
-Message-ID: <514116A3.5070803@inktank.com>
-References: <511505218.2097.1363219547568.JavaMail.root@optogenics.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Ross David Turk <ross@inktank.com>
+Subject: Inktank Office Hours
+Date: Wed, 13 Mar 2013 18:39:08 -0700
+Message-ID: <BBF93274-F482-4AC6-9ED8-C6100D44FCF2@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f48.google.com ([209.85.210.48]:57186 "EHLO
-	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755630Ab3CNAQP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Mar 2013 20:16:15 -0400
-Received: by mail-da0-f48.google.com with SMTP id w4so640145dam.35
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Mar 2013 17:16:15 -0700 (PDT)
-In-Reply-To: <511505218.2097.1363219547568.JavaMail.root@optogenics.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42361 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755725Ab3CNBjJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Mar 2013 21:39:09 -0400
+Received: by mail-pb0-f46.google.com with SMTP id uo15so1580009pbc.5
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Mar 2013 18:39:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Spano <dspano@optogenics.com>
-Cc: Greg Farnum <greg@inktank.com>, =?UTF-8?B?U8OpYmFzdGllbiBIYW4=?= <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Samuel Just <sam.just@inktank.com>, Vladislav Gorbunov <vadikgo@gmail.com>
+To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On 03/13/2013 05:05 PM, Dave Spano wrote:
-> I renamed the old one from images to images-old, and the new one from images-new to images.
 
-This reminds me of a problem you might hit with this:
+Hi!
 
-RBD clones track the parent image pool by id, so they'll continue
-working after the pool is renamed. If you have any clones of the
-images-old pool, they'll stop working when that pool is deleted.
+As the Ceph community grows, it's important that help is available to new users.  Up to this point, Inktank engineers have been monitoring the channel and mailing list as time permits.  That made sense when there wasn't much foot traffic, but we have a lot now!  We'd like to introduce something a bit more predictable.
 
-To get around this, you'll need to flatten any clones whose parents are
-in images-old before deleting the images-old pool.
+Inktank is establishing "office hours" for IRC and the ceph-users mailing list.  During these hours, an Inktank engineer will be focused on answering questions and providing guidance to community users of Ceph.  Our first office hours will take place tomorrow.
 
-Josh
+Inktank office hours are posted on the new Getting Help page:
+http://ceph.com/resources/getting-help
+
+Naturally, folks from Inktank will still be around outside of those hours, although they may not be dedicated to the task of helping others.  It's important to keep in mind that this isn't tech support and it doesn't come with any of the guarantees you would expect from a professional support contract.
+
+You may have noticed that the Getting Help page has our Inktank logo on it.  I would like to do the same for any organization or individual who is interested in establishing office hours of their own.  There are plenty of hours left - drop a line to community@ceph.com if you're interested!
+
+Cheers,
+Ross
+
+--
+Ross Turk
+Community, Inktank
+
+@rossturk @inktank @ceph
+
