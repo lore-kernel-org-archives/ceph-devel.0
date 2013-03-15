@@ -1,58 +1,61 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Direct IO on CephFS for blocks larger than 8MB
-Date: Fri, 15 Mar 2013 09:33:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1303150931160.23110@cobra.newdream.net>
-References: <5A908216FB901F499F602F4F9CEF5B380FEA68C3@SHSMSX102.ccr.corp.intel.com>, <alpine.DEB.2.00.1303140819420.11175@cobra.newdream.net> <F9E1A4A5-FE26-460B-A228-99033A36ECF8@intel.com>
+From: Greg Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Crash and strange things on MDS
+Date: Fri, 15 Mar 2013 13:32:06 -0700
+Message-ID: <ECAA10260D284057A52D78127F8634A8@inktank.com>
+References: <20130220010052.GO7121@kdecherf.com>
+	<CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
+	<20130226175742.GE16091@kdecherf.com>
+	<CAPYLRziS4rTVWU8C1fDJ6W6jgk7s9SOVnRGOcdiH9YshqGNaww@mail.gmail.com>
+	<20130226195837.GH16091@kdecherf.com>
+	<CAPYLRziEUnD7SAipnUwF8gz=2ZvF3vKWyiv8xEcy1PP_Lhbw0w@mail.gmail.com>
+	<20130226215702.GI16091@kdecherf.com>
+	<CAPYLRzgbSOt+wwPh9KSQqxN_rnU808m2Fw5FBz7iVU-QzS8XGA@mail.gmail.com>
+	<20130227004923.GQ16091@kdecherf.com>
+	<CAPYLRzhbygkA9=DkVr474Nw8AOC2hAFG-1D6uS4WyfR=kUBXWQ@mail.gmail.com>
+	<20130308232943.GA2197@kdecherf.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35782 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751447Ab3COQd7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 12:33:59 -0400
-In-Reply-To: <F9E1A4A5-FE26-460B-A228-99033A36ECF8@intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Huang, Xiwei" <xiwei.huang@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20130308232943.GA2197-fShu9kyPgSlWk0Htik3J/w@public.gmane.org>
+Content-Disposition: inline
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Kevin Decherf <kevin-fShu9kyPgSlWk0Htik3J/w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 15 Mar 2013, Huang, Xiwei wrote:
-> ok. Thanks. Is there any documentation for ceph fs client arch as a 
-> reference if I'd like to look into this?
-
-Not really.
-
-The code you are interested in is fs/ceph/file.c.  The direct io path 
-should be pretty clear; it'll build up a list of pages and pass it 
-directly to the code in net/ceph/osd_client.c to go out over the wire.  
-Enabling debugging (echo module ceph +p > 
-/sys/kernel/debug/dynamic_debug/control, same for module libceph) and 
-doing a single large direct-io write should show you where things are 
-going wrong.
-
-sage
-
-
-> 
-> ???? iPhone
-> 
-> ? 2013-3-14?23:23?"Sage Weil" <sage@inktank.com> ???
-> 
-> > On Thu, 14 Mar 2013, Huang, Xiwei wrote:
-> >> Hi, all, 
-> >>     I noticed that CephFS fails to support Direct IO for blocks larger than 8MB, say:
-> >>            sudo dd if=/dev/zero of=mnt/cephfs/foo bs=16M count=1 oflag=direct
-> >>            dd: writing `mnt/cephfs/foo: Bad address
-> >>            1+0 records in
-> >>            0+0 records out
-> >>            0 bytes (0 B) copied, 0.213948 s, 0.0 kB/s
-> >>    My version Ceph is 0.56.1. 
-> >> ??I also found the bug has been already reported as Bug #2657.
-> >>    Is this fixed in the new 0.58 version?
-> > 
-> > I'm pretty sure this is a problem on the kernel client side of things, not 
-> > the server side (which by default handles writes up to ~100MB or so).  I 
-> > suspect it isn't terribly difficult to fix, but hasn't been prioritized...
-> > 
-> > sage
-> 
+T24gRnJpZGF5LCBNYXJjaCA4LCAyMDEzIGF0IDM6MjkgUE0sIEtldmluIERlY2hlcmYgd3JvdGU6
+Cj4gT24gRnJpLCBNYXIgMDEsIDIwMTMgYXQgMTE6MTI6MTdBTSAtMDgwMCwgR3JlZ29yeSBGYXJu
+dW0gd3JvdGU6Cj4gPiBPbiBUdWUsIEZlYiAyNiwgMjAxMyBhdCA0OjQ5IFBNLCBLZXZpbiBEZWNo
+ZXJmIDxrZXZpbkBrZGVjaGVyZi5jb20gKG1haWx0bzprZXZpbkBrZGVjaGVyZi5jb20pPiB3cm90
+ZToKPiA+ID4gWW91IHdpbGwgZmluZCB0aGUgYXJjaGl2ZSBoZXJlOiA8c25pcD4KPiA+ID4gVGhl
+IGRhdGEgaXMgbm90IGFub255bWl6ZWQuIEludGVyZXN0aW5nIGZvbGRlcnMvZmlsZXMgaGVyZSBh
+cmUKPiA+ID4gL3VzZXJfMzA5YmJkMzgtM2NmZi00NjhkLWE0NjUtZGMxN2MyNjBkZTBjLyoKPiA+
+ICAKPiA+ICAKPiA+ICAKPiA+IFNvcnJ5IGZvciB0aGUgZGVsYXksIGJ1dCBJIGhhdmUgcmV0cmll
+dmVkIHRoaXMgYXJjaGl2ZSBsb2NhbGx5IGF0Cj4gPiBsZWFzdCBzbyBpZiB5b3Ugd2FudCB0byBy
+ZW1vdmUgaXQgZnJvbSB5b3VyIHdlYnNlcnZlciB5b3UgY2FuIGRvIHNvLgo+ID4gOikgQWxzbywg
+SSBub3RpY2Ugd2hlbiBJIHVudGFyIGl0IHRoYXQgdGhlIGZpbGUgbmFtZSBpbmNsdWRlcwo+ID4g
+ImZpbHRlcmVkIiDigJQgd2hhdCBmaWx0ZXJzIGRpZCB5b3UgcnVuIGl0IHRocm91Z2g/Cj4gIAo+
+ICAKPiAgCj4gSGkgR3JlZ29yeSwKPiAgCj4gRG8geW91IGhhdmUgYW55IG5ld3MgYWJvdXQgaXQ/
+Cj4gIAoKSSB3cm90ZSBhIGNvdXBsZSB0b29scyB0byBkbyBsb2cgYW5hbHlzaXMgYW5kIGNyZWF0
+ZWQgYSBudW1iZXIgb2YgYnVncyB0byBtYWtlIHRoZSBNRFMgbW9yZSBhbWVuYWJsZSB0byBhbmFs
+eXNpcyBhcyBhIHJlc3VsdCBvZiB0aGlzLgpIYXZpbmcgc3BvdC1jaGVja2VkIHNvbWUgb2YgeW91
+ciBsb25nZXItcnVubmluZyByZXF1ZXN0cywgdGhleSdyZSBhbGwgZ2V0YXR0cnMgb3Igc2V0YXR0
+cnMgY29udGVuZGluZyBvbiBmaWxlcyBpbiB3aGF0IGxvb2sgdG8gYmUgc2hhcmVkIGNhY2hlIGFu
+ZCBwaHAgbGlicmFyaWVzLiBUaGVzZSBjb3ZlciBhIHJhbmdlIGZyb20gfjQwIG1pbGxpc2Vjb25k
+cyB0byB+MTUwIG1pbGxpc2Vjb25kcy4gSSdkIGxvb2sgaW50byB3aGF0IHlvdXIgc3BsaXQgYXBw
+bGljYXRpb25zIGFyZSBzaGFyaW5nIGFjcm9zcyB0aG9zZSBzcGFjZXMuCgpPbiB0aGUgdXAgc2lk
+ZSBmb3IgQ2VwaCwgPjgwJSBvZiB5b3VyIHJlcXVlc3RzIHRha2UgIjAiIG1pbGxpc2Vjb25kcyBh
+bmQgfjk1JSBvZiB0aGVtIHRha2UgbGVzcyB0aGFuIDIgbWlsbGlzZWNvbmRzLiBIdXJyYXksIGl0
+J3Mgbm90IHJpZGljdWxvdXNseSBzbG93IG1vc3Qgb2YgdGhlIHRpbWUuIDopCi1HcmVnCgpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
+aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
+bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
