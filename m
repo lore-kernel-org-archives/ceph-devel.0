@@ -1,67 +1,105 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Dave Spano <dspano@optogenics.com>
 Subject: Re: rados cppool and Openstack Glance and Cinder
-Date: Fri, 15 Mar 2013 15:11:17 -0700
-Message-ID: <51439C85.7030601@inktank.com>
-References: <26709654.147.1363384514684.JavaMail.dspano@it1>
+Date: Fri, 15 Mar 2013 18:29:19 -0400 (EDT)
+Message-ID: <3511211.179.1363386561337.JavaMail.dspano@it1>
+References: <51439C85.7030601@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:61439 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932129Ab3COWMF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 18:12:05 -0400
-Received: by mail-pb0-f41.google.com with SMTP id um15so4415568pbc.28
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Mar 2013 15:12:04 -0700 (PDT)
-In-Reply-To: <26709654.147.1363384514684.JavaMail.dspano@it1>
+Received: from rrcs-24-103-221-203.nys.biz.rr.com ([24.103.221.203]:39684 "EHLO
+	mail.optogenics.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754406Ab3COW3U convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 18:29:20 -0400
+In-Reply-To: <51439C85.7030601@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Spano <dspano@optogenics.com>
-Cc: Greg Farnum <greg@inktank.com>, =?UTF-8?B?U8OpYmFzdGllbiBIYW4=?= <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Samuel Just <sam.just@inktank.com>, Vladislav Gorbunov <vadikgo@gmail.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Greg Farnum <greg@inktank.com>, =?utf-8?Q?S=C3=A9bastien?= Han <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Samuel Just <sam.just@inktank.com>, Vladislav Gorbunov <vadikgo@gmail.com>
 
-On 03/15/2013 02:55 PM, Dave Spano wrote:
->
-> During my journey of using rados cppool, which is an awesome feature by the way, I found an interesting behavior related to cephx. I wanted to share it for anyone else who may be using Openstack, that decides to rename, or copy a pool.
->
-> My client.glance entry is currently set to this (with the exception of the key, of course):
->
-> client.glance
-> key: punkrawk
-> caps: [mon] allow r
-> caps: [osd] allow class-read object_prefix rbd_children, allow rwx
->
-> It was limited to the images pool based on the following example listed at http://ceph.com/docs/master/rbd/rbd-openstack/ :
->
-> ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
->
-> client.glance
-> key: punkrawk
-> caps: [mon] allow r
-> caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=images
->
->
->
-> What I found was that when I would create my pool as images-new or anything but images, then rename it to images I would have a problem. I could not even upload an image to an empty pool.
->
-> I could, however; upload to the pool if I renamed the original to images-old, then created a brand new pool called images.
->
-> My first guess is that there's a reference to the old name which would interfere whenever my client would try to use it with the client.glance keyring. I have not looked in the code yet, so I don't have any other concrete idea.
+Thank you Josh. Have a great weekend.=20
 
-Yeah, someone ran into this before, but apparently I hadn't finished
-creating the bug, so now there's http://tracker.ceph.com/issues/4471.
+Dave Spano=20
 
-Each pg includes its pool name in memory, and that isn't updated when
-the pool is renamed. Restarting the osd would refresh it, and creating
-a new pool creates entirely new pgs.
 
-> As soon as I lifted the pool restriction, as if by the power greyskull, I could upload, delete and take snapshots in the renamed pool.
->
-> I believe this would be rather easy for anyone to reproduce with a test install of Openstack.
 
-No openstack needed, just any ceph client with a restriction based on
-pool name.
+----- Original Message -----=20
 
-> Just create pool named images-new. Rename it to images, then try to upload an image. It should fail. Remove the pool restriction, and it will work.
+=46rom: "Josh Durgin" <josh.durgin@inktank.com>=20
+To: "Dave Spano" <dspano@optogenics.com>=20
+Cc: "Greg Farnum" <greg@inktank.com>, "S=C3=A9bastien Han" <han.sebasti=
+en@gmail.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Sage Weil" <=
+sage@inktank.com>, "Wido den Hollander" <wido@42on.com>, "Sylvain Munau=
+t" <s.munaut@whatever-company.com>, "Samuel Just" <sam.just@inktank.com=
+>, "Vladislav Gorbunov" <vadikgo@gmail.com>=20
+Sent: Friday, March 15, 2013 6:11:17 PM=20
+Subject: Re: rados cppool and Openstack Glance and Cinder=20
 
-Thanks for the detailed report!
+On 03/15/2013 02:55 PM, Dave Spano wrote:=20
+>=20
+> During my journey of using rados cppool, which is an awesome feature =
+by the way, I found an interesting behavior related to cephx. I wanted =
+to share it for anyone else who may be using Openstack, that decides to=
+ rename, or copy a pool.=20
+>=20
+> My client.glance entry is currently set to this (with the exception o=
+f the key, of course):=20
+>=20
+> client.glance=20
+> key: punkrawk=20
+> caps: [mon] allow r=20
+> caps: [osd] allow class-read object_prefix rbd_children, allow rwx=20
+>=20
+> It was limited to the images pool based on the following example list=
+ed at http://ceph.com/docs/master/rbd/rbd-openstack/ :=20
+>=20
+> ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-=
+read object_prefix rbd_children, allow rwx pool=3Dimages'=20
+>=20
+> client.glance=20
+> key: punkrawk=20
+> caps: [mon] allow r=20
+> caps: [osd] allow class-read object_prefix rbd_children, allow rwx po=
+ol=3Dimages=20
+>=20
+>=20
+>=20
+> What I found was that when I would create my pool as images-new or an=
+ything but images, then rename it to images I would have a problem. I c=
+ould not even upload an image to an empty pool.=20
+>=20
+> I could, however; upload to the pool if I renamed the original to ima=
+ges-old, then created a brand new pool called images.=20
+>=20
+> My first guess is that there's a reference to the old name which woul=
+d interfere whenever my client would try to use it with the client.glan=
+ce keyring. I have not looked in the code yet, so I don't have any othe=
+r concrete idea.=20
+
+Yeah, someone ran into this before, but apparently I hadn't finished=20
+creating the bug, so now there's http://tracker.ceph.com/issues/4471.=20
+
+Each pg includes its pool name in memory, and that isn't updated when=20
+the pool is renamed. Restarting the osd would refresh it, and creating=20
+a new pool creates entirely new pgs.=20
+
+> As soon as I lifted the pool restriction, as if by the power greyskul=
+l, I could upload, delete and take snapshots in the renamed pool.=20
+>=20
+> I believe this would be rather easy for anyone to reproduce with a te=
+st install of Openstack.=20
+
+No openstack needed, just any ceph client with a restriction based on=20
+pool name.=20
+
+> Just create pool named images-new. Rename it to images, then try to u=
+pload an image. It should fail. Remove the pool restriction, and it wil=
+l work.=20
+
+Thanks for the detailed report!=20
 Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
