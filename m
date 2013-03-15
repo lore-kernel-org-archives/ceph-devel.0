@@ -1,105 +1,70 @@
-From: Dave Spano <dspano@optogenics.com>
-Subject: Re: rados cppool and Openstack Glance and Cinder
-Date: Fri, 15 Mar 2013 18:29:19 -0400 (EDT)
-Message-ID: <3511211.179.1363386561337.JavaMail.dspano@it1>
-References: <51439C85.7030601@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rrcs-24-103-221-203.nys.biz.rr.com ([24.103.221.203]:39684 "EHLO
-	mail.optogenics.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754406Ab3COW3U convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 18:29:20 -0400
-In-Reply-To: <51439C85.7030601@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Greg Farnum <greg@inktank.com>, =?utf-8?Q?S=C3=A9bastien?= Han <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Samuel Just <sam.just@inktank.com>, Vladislav Gorbunov <vadikgo@gmail.com>
+From: Marc-Antoine Perennou <keruspe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Crash and strange things on MDS
+Date: Fri, 15 Mar 2013 23:40:55 +0100
+Message-ID: <1796148888197350323@unknownmsgid>
+References: <20130220010052.GO7121@kdecherf.com>
+	<CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
+	<20130226175742.GE16091@kdecherf.com>
+	<CAPYLRziS4rTVWU8C1fDJ6W6jgk7s9SOVnRGOcdiH9YshqGNaww@mail.gmail.com>
+	<20130226195837.GH16091@kdecherf.com>
+	<CAPYLRziEUnD7SAipnUwF8gz=2ZvF3vKWyiv8xEcy1PP_Lhbw0w@mail.gmail.com>
+	<20130226215702.GI16091@kdecherf.com>
+	<CAPYLRzgbSOt+wwPh9KSQqxN_rnU808m2Fw5FBz7iVU-QzS8XGA@mail.gmail.com>
+	<20130227004923.GQ16091@kdecherf.com>
+	<CAPYLRzhbygkA9=DkVr474Nw8AOC2hAFG-1D6uS4WyfR=kUBXWQ@mail.gmail.com>
+	<20130308232943.GA2197@kdecherf.com>
+	<ECAA10260D284057A52D78127F8634A8@inktank.com>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <ECAA10260D284057A52D78127F8634A8-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Greg Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Thank you Josh. Have a great weekend.=20
-
-Dave Spano=20
-
-
-
------ Original Message -----=20
-
-=46rom: "Josh Durgin" <josh.durgin@inktank.com>=20
-To: "Dave Spano" <dspano@optogenics.com>=20
-Cc: "Greg Farnum" <greg@inktank.com>, "S=C3=A9bastien Han" <han.sebasti=
-en@gmail.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Sage Weil" <=
-sage@inktank.com>, "Wido den Hollander" <wido@42on.com>, "Sylvain Munau=
-t" <s.munaut@whatever-company.com>, "Samuel Just" <sam.just@inktank.com=
->, "Vladislav Gorbunov" <vadikgo@gmail.com>=20
-Sent: Friday, March 15, 2013 6:11:17 PM=20
-Subject: Re: rados cppool and Openstack Glance and Cinder=20
-
-On 03/15/2013 02:55 PM, Dave Spano wrote:=20
->=20
-> During my journey of using rados cppool, which is an awesome feature =
-by the way, I found an interesting behavior related to cephx. I wanted =
-to share it for anyone else who may be using Openstack, that decides to=
- rename, or copy a pool.=20
->=20
-> My client.glance entry is currently set to this (with the exception o=
-f the key, of course):=20
->=20
-> client.glance=20
-> key: punkrawk=20
-> caps: [mon] allow r=20
-> caps: [osd] allow class-read object_prefix rbd_children, allow rwx=20
->=20
-> It was limited to the images pool based on the following example list=
-ed at http://ceph.com/docs/master/rbd/rbd-openstack/ :=20
->=20
-> ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-=
-read object_prefix rbd_children, allow rwx pool=3Dimages'=20
->=20
-> client.glance=20
-> key: punkrawk=20
-> caps: [mon] allow r=20
-> caps: [osd] allow class-read object_prefix rbd_children, allow rwx po=
-ol=3Dimages=20
->=20
->=20
->=20
-> What I found was that when I would create my pool as images-new or an=
-ything but images, then rename it to images I would have a problem. I c=
-ould not even upload an image to an empty pool.=20
->=20
-> I could, however; upload to the pool if I renamed the original to ima=
-ges-old, then created a brand new pool called images.=20
->=20
-> My first guess is that there's a reference to the old name which woul=
-d interfere whenever my client would try to use it with the client.glan=
-ce keyring. I have not looked in the code yet, so I don't have any othe=
-r concrete idea.=20
-
-Yeah, someone ran into this before, but apparently I hadn't finished=20
-creating the bug, so now there's http://tracker.ceph.com/issues/4471.=20
-
-Each pg includes its pool name in memory, and that isn't updated when=20
-the pool is renamed. Restarting the osd would refresh it, and creating=20
-a new pool creates entirely new pgs.=20
-
-> As soon as I lifted the pool restriction, as if by the power greyskul=
-l, I could upload, delete and take snapshots in the renamed pool.=20
->=20
-> I believe this would be rather easy for anyone to reproduce with a te=
-st install of Openstack.=20
-
-No openstack needed, just any ceph client with a restriction based on=20
-pool name.=20
-
-> Just create pool named images-new. Rename it to images, then try to u=
-pload an image. It should fail. Remove the pool restriction, and it wil=
-l work.=20
-
-Thanks for the detailed report!=20
-Josh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TGUgMTUgbWFycyAyMDEzIMOgIDIxOjMyLCBHcmVnIEZhcm51bSA8Z3JlZ0Bpbmt0YW5rLmNvbT4g
+YSDDqWNyaXQgOgoKPiBPbiBGcmlkYXksIE1hcmNoIDgsIDIwMTMgYXQgMzoyOSBQTSwgS2V2aW4g
+RGVjaGVyZiB3cm90ZToKPj4gT24gRnJpLCBNYXIgMDEsIDIwMTMgYXQgMTE6MTI6MTdBTSAtMDgw
+MCwgR3JlZ29yeSBGYXJudW0gd3JvdGU6Cj4+PiBPbiBUdWUsIEZlYiAyNiwgMjAxMyBhdCA0OjQ5
+IFBNLCBLZXZpbiBEZWNoZXJmIDxrZXZpbkBrZGVjaGVyZi5jb20gKG1haWx0bzprZXZpbkBrZGVj
+aGVyZi5jb20pPiB3cm90ZToKPj4+PiBZb3Ugd2lsbCBmaW5kIHRoZSBhcmNoaXZlIGhlcmU6IDxz
+bmlwPgo+Pj4+IFRoZSBkYXRhIGlzIG5vdCBhbm9ueW1pemVkLiBJbnRlcmVzdGluZyBmb2xkZXJz
+L2ZpbGVzIGhlcmUgYXJlCj4+Pj4gL3VzZXJfMzA5YmJkMzgtM2NmZi00NjhkLWE0NjUtZGMxN2My
+NjBkZTBjLyoKPj4+Cj4+Pgo+Pj4KPj4+IFNvcnJ5IGZvciB0aGUgZGVsYXksIGJ1dCBJIGhhdmUg
+cmV0cmlldmVkIHRoaXMgYXJjaGl2ZSBsb2NhbGx5IGF0Cj4+PiBsZWFzdCBzbyBpZiB5b3Ugd2Fu
+dCB0byByZW1vdmUgaXQgZnJvbSB5b3VyIHdlYnNlcnZlciB5b3UgY2FuIGRvIHNvLgo+Pj4gOikg
+QWxzbywgSSBub3RpY2Ugd2hlbiBJIHVudGFyIGl0IHRoYXQgdGhlIGZpbGUgbmFtZSBpbmNsdWRl
+cwo+Pj4gImZpbHRlcmVkIiDigJQgd2hhdCBmaWx0ZXJzIGRpZCB5b3UgcnVuIGl0IHRocm91Z2g/
+Cj4+Cj4+Cj4+Cj4+IEhpIEdyZWdvcnksCj4+Cj4+IERvIHlvdSBoYXZlIGFueSBuZXdzIGFib3V0
+IGl0Pwo+Cj4gSSB3cm90ZSBhIGNvdXBsZSB0b29scyB0byBkbyBsb2cgYW5hbHlzaXMgYW5kIGNy
+ZWF0ZWQgYSBudW1iZXIgb2YgYnVncyB0byBtYWtlIHRoZSBNRFMgbW9yZSBhbWVuYWJsZSB0byBh
+bmFseXNpcyBhcyBhIHJlc3VsdCBvZiB0aGlzLgo+IEhhdmluZyBzcG90LWNoZWNrZWQgc29tZSBv
+ZiB5b3VyIGxvbmdlci1ydW5uaW5nIHJlcXVlc3RzLCB0aGV5J3JlIGFsbCBnZXRhdHRycyBvciBz
+ZXRhdHRycyBjb250ZW5kaW5nIG9uIGZpbGVzIGluIHdoYXQgbG9vayB0byBiZSBzaGFyZWQgY2Fj
+aGUgYW5kIHBocCBsaWJyYXJpZXMuIFRoZXNlIGNvdmVyIGEgcmFuZ2UgZnJvbSB+NDAgbWlsbGlz
+ZWNvbmRzIHRvIH4xNTAgbWlsbGlzZWNvbmRzLiBJJ2QgbG9vayBpbnRvIHdoYXQgeW91ciBzcGxp
+dCBhcHBsaWNhdGlvbnMgYXJlIHNoYXJpbmcgYWNyb3NzIHRob3NlIHNwYWNlcy4KPgo+IE9uIHRo
+ZSB1cCBzaWRlIGZvciBDZXBoLCA+ODAlIG9mIHlvdXIgcmVxdWVzdHMgdGFrZSAiMCIgbWlsbGlz
+ZWNvbmRzIGFuZCB+OTUlIG9mIHRoZW0gdGFrZSBsZXNzIHRoYW4gMiBtaWxsaXNlY29uZHMuIEh1
+cnJheSwgaXQncyBub3QgcmlkaWN1bG91c2x5IHNsb3cgbW9zdCBvZiB0aGUgdGltZS4gOikKPiAt
+R3JlZwo+Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoKClRoYW5rIHlvdSBhIGxvdCBm
+b3IgdGhlc2UgZXhwbGFuYXRpb25zLCBsb29raW5nIGZvcndhcmQgZm9yIHRoZXNlIGZpeGVzIQpE
+byB5b3UgaGF2ZSBzb21lIHB1YmxpYyBidWcgcmVwb3J0cyByZWdhcmRpbmcgdGhpcyB0byBsaW5r
+IHVzPwoKR29vZCBsdWNrLCB0aGFuayB5b3UgZm9yIHlvdXIgZ3JlYXQgam9iIGFuZCBoYXZlIGEg
+bmljZSB3ZWVrZW5kCgpNYXJjLUFudG9pbmUgUGVyZW5ub3UKX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2Nl
+cGgtdXNlcnMtY2VwaC5jb20K
