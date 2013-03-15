@@ -1,7 +1,7 @@
-From: Marc-Antoine Perennou <keruspe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Greg Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: Crash and strange things on MDS
-Date: Fri, 15 Mar 2013 23:40:55 +0100
-Message-ID: <1796148888197350323@unknownmsgid>
+Date: Fri, 15 Mar 2013 15:53:11 -0700
+Message-ID: <24A512BFA0DA4DCC841A571C26211C25@inktank.com>
 References: <20130220010052.GO7121@kdecherf.com>
 	<CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
 	<20130226175742.GE16091@kdecherf.com>
@@ -14,11 +14,13 @@ References: <20130220010052.GO7121@kdecherf.com>
 	<CAPYLRzhbygkA9=DkVr474Nw8AOC2hAFG-1D6uS4WyfR=kUBXWQ@mail.gmail.com>
 	<20130308232943.GA2197@kdecherf.com>
 	<ECAA10260D284057A52D78127F8634A8@inktank.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	<1796148888197350323@unknownmsgid>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <ECAA10260D284057A52D78127F8634A8-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <1796148888197350323@unknownmsgid>
+Content-Disposition: inline
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -28,43 +30,18 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Greg Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: Marc-Antoine Perennou <keruspe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-TGUgMTUgbWFycyAyMDEzIMOgIDIxOjMyLCBHcmVnIEZhcm51bSA8Z3JlZ0Bpbmt0YW5rLmNvbT4g
-YSDDqWNyaXQgOgoKPiBPbiBGcmlkYXksIE1hcmNoIDgsIDIwMTMgYXQgMzoyOSBQTSwgS2V2aW4g
-RGVjaGVyZiB3cm90ZToKPj4gT24gRnJpLCBNYXIgMDEsIDIwMTMgYXQgMTE6MTI6MTdBTSAtMDgw
-MCwgR3JlZ29yeSBGYXJudW0gd3JvdGU6Cj4+PiBPbiBUdWUsIEZlYiAyNiwgMjAxMyBhdCA0OjQ5
-IFBNLCBLZXZpbiBEZWNoZXJmIDxrZXZpbkBrZGVjaGVyZi5jb20gKG1haWx0bzprZXZpbkBrZGVj
-aGVyZi5jb20pPiB3cm90ZToKPj4+PiBZb3Ugd2lsbCBmaW5kIHRoZSBhcmNoaXZlIGhlcmU6IDxz
-bmlwPgo+Pj4+IFRoZSBkYXRhIGlzIG5vdCBhbm9ueW1pemVkLiBJbnRlcmVzdGluZyBmb2xkZXJz
-L2ZpbGVzIGhlcmUgYXJlCj4+Pj4gL3VzZXJfMzA5YmJkMzgtM2NmZi00NjhkLWE0NjUtZGMxN2My
-NjBkZTBjLyoKPj4+Cj4+Pgo+Pj4KPj4+IFNvcnJ5IGZvciB0aGUgZGVsYXksIGJ1dCBJIGhhdmUg
-cmV0cmlldmVkIHRoaXMgYXJjaGl2ZSBsb2NhbGx5IGF0Cj4+PiBsZWFzdCBzbyBpZiB5b3Ugd2Fu
-dCB0byByZW1vdmUgaXQgZnJvbSB5b3VyIHdlYnNlcnZlciB5b3UgY2FuIGRvIHNvLgo+Pj4gOikg
-QWxzbywgSSBub3RpY2Ugd2hlbiBJIHVudGFyIGl0IHRoYXQgdGhlIGZpbGUgbmFtZSBpbmNsdWRl
-cwo+Pj4gImZpbHRlcmVkIiDigJQgd2hhdCBmaWx0ZXJzIGRpZCB5b3UgcnVuIGl0IHRocm91Z2g/
-Cj4+Cj4+Cj4+Cj4+IEhpIEdyZWdvcnksCj4+Cj4+IERvIHlvdSBoYXZlIGFueSBuZXdzIGFib3V0
-IGl0Pwo+Cj4gSSB3cm90ZSBhIGNvdXBsZSB0b29scyB0byBkbyBsb2cgYW5hbHlzaXMgYW5kIGNy
-ZWF0ZWQgYSBudW1iZXIgb2YgYnVncyB0byBtYWtlIHRoZSBNRFMgbW9yZSBhbWVuYWJsZSB0byBh
-bmFseXNpcyBhcyBhIHJlc3VsdCBvZiB0aGlzLgo+IEhhdmluZyBzcG90LWNoZWNrZWQgc29tZSBv
-ZiB5b3VyIGxvbmdlci1ydW5uaW5nIHJlcXVlc3RzLCB0aGV5J3JlIGFsbCBnZXRhdHRycyBvciBz
-ZXRhdHRycyBjb250ZW5kaW5nIG9uIGZpbGVzIGluIHdoYXQgbG9vayB0byBiZSBzaGFyZWQgY2Fj
-aGUgYW5kIHBocCBsaWJyYXJpZXMuIFRoZXNlIGNvdmVyIGEgcmFuZ2UgZnJvbSB+NDAgbWlsbGlz
-ZWNvbmRzIHRvIH4xNTAgbWlsbGlzZWNvbmRzLiBJJ2QgbG9vayBpbnRvIHdoYXQgeW91ciBzcGxp
-dCBhcHBsaWNhdGlvbnMgYXJlIHNoYXJpbmcgYWNyb3NzIHRob3NlIHNwYWNlcy4KPgo+IE9uIHRo
-ZSB1cCBzaWRlIGZvciBDZXBoLCA+ODAlIG9mIHlvdXIgcmVxdWVzdHMgdGFrZSAiMCIgbWlsbGlz
-ZWNvbmRzIGFuZCB+OTUlIG9mIHRoZW0gdGFrZSBsZXNzIHRoYW4gMiBtaWxsaXNlY29uZHMuIEh1
-cnJheSwgaXQncyBub3QgcmlkaWN1bG91c2x5IHNsb3cgbW9zdCBvZiB0aGUgdGltZS4gOikKPiAt
-R3JlZwo+Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoKClRoYW5rIHlvdSBhIGxvdCBm
-b3IgdGhlc2UgZXhwbGFuYXRpb25zLCBsb29raW5nIGZvcndhcmQgZm9yIHRoZXNlIGZpeGVzIQpE
-byB5b3UgaGF2ZSBzb21lIHB1YmxpYyBidWcgcmVwb3J0cyByZWdhcmRpbmcgdGhpcyB0byBsaW5r
-IHVzPwoKR29vZCBsdWNrLCB0aGFuayB5b3UgZm9yIHlvdXIgZ3JlYXQgam9iIGFuZCBoYXZlIGEg
-bmljZSB3ZWVrZW5kCgpNYXJjLUFudG9pbmUgUGVyZW5ub3UKX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2Nl
-cGgtdXNlcnMtY2VwaC5jb20K
+On Friday, March 15, 2013 at 3:40 PM, Marc-Antoine Perennou wrote:
+> Thank you a lot for these explanations, looking forward for these fixes!
+> Do you have some public bug reports regarding this to link us?
+> 
+> Good luck, thank you for your great job and have a nice weekend
+> 
+> Marc-Antoine Perennou 
+Well, for now the fixes are for stuff like "make analysis take less time, and export timing information more easily". The most immediately applicable one is probably http://tracker.ceph.com/issues/4354, which I hope to start on next week and should be done by the end of the sprint.
+-Greg
+
+Software Engineer #42 @ http://inktank.com | http://ceph.com
