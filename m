@@ -1,51 +1,112 @@
-From: "Huang, Xiwei" <xiwei.huang@intel.com>
-Subject: Re: Direct IO on CephFS for blocks larger than 8MB
-Date: Fri, 15 Mar 2013 07:05:13 +0000
-Message-ID: <281D9894-1F72-4878-B61D-647BBDA790C5@intel.com>
-References: <5A908216FB901F499F602F4F9CEF5B380FEA68C3@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1303140819420.11175@cobra.newdream.net>
- <1868F843065B483E80E7B83A24F389D2@inktank.com>,<5141F1F9.1030509@inktank.com>
+From: Ugis <ugis22@gmail.com>
+Subject: Re: zombie pgs
+Date: Fri, 15 Mar 2013 12:09:04 +0200
+Message-ID: <CAE63xUPRtLSFeBiy=dcXmnRvekFgn2eMQOBOCxNff0rogCfXAg@mail.gmail.com>
+References: <CAE63xUO5hgFxzY7bStB1M7V7mW6gCO73xpMSdrhkFDFRub-7Dg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:51940 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751429Ab3COHFR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Mar 2013 03:05:17 -0400
-In-Reply-To: <5141F1F9.1030509@inktank.com>
-Content-Language: zh-CN
+Received: from mail-ie0-f175.google.com ([209.85.223.175]:55777 "EHLO
+	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753282Ab3COKJF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 06:09:05 -0400
+Received: by mail-ie0-f175.google.com with SMTP id c12so4076095ieb.6
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Mar 2013 03:09:04 -0700 (PDT)
+In-Reply-To: <CAE63xUO5hgFxzY7bStB1M7V7mW6gCO73xpMSdrhkFDFRub-7Dg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Greg Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-WWVzIHRoYXQgd291bGQgYmUgYSB0eXBpY2FsIHNjZW5hcmlvLiA6KQ0KDQq3otfUztK1xCBpUGhv
-bmUNCg0K1NogMjAxMy0zLTE0o6wyMzo1MaOsIk1hcmsgTmVsc29uIiA8bWFyay5uZWxzb25AaW5r
-dGFuay5jb20+INC0tcCjug0KDQo+IE9uIDAzLzE0LzIwMTMgMTA6NDQgQU0sIEdyZWcgRmFybnVt
-IHdyb3RlOg0KPj4gT24gVGh1cnNkYXksIE1hcmNoIDE0LCAyMDEzIGF0IDg6MjAgQU0sIFNhZ2Ug
-V2VpbCB3cm90ZToNCj4+PiBPbiBUaHUsIDE0IE1hciAyMDEzLCBIdWFuZywgWGl3ZWkgd3JvdGU6
-DQo+Pj4+IEhpLCBhbGwsDQo+Pj4+IEkgbm90aWNlZCB0aGF0IENlcGhGUyBmYWlscyB0byBzdXBw
-b3J0IERpcmVjdCBJTyBmb3IgYmxvY2tzIGxhcmdlciB0aGFuIDhNQiwgc2F5Og0KPj4+PiBzdWRv
-IGRkIGlmPS9kZXYvemVybyBvZj1tbnQvY2VwaGZzL2ZvbyBicz0xNk0gY291bnQ9MSBvZmxhZz1k
-aXJlY3QNCj4+Pj4gZGQ6IHdyaXRpbmcgYG1udC9jZXBoZnMvZm9vOiBCYWQgYWRkcmVzcw0KPj4+
-PiAxKzAgcmVjb3JkcyBpbg0KPj4+PiAwKzAgcmVjb3JkcyBvdXQNCj4+Pj4gMCBieXRlcyAoMCBC
-KSBjb3BpZWQsIDAuMjEzOTQ4IHMsIDAuMCBrQi9zDQo+Pj4+IE15IHZlcnNpb24gQ2VwaCBpcyAw
-LjU2LjEuDQo+Pj4+ID8/SSBhbHNvIGZvdW5kIHRoZSBidWcgaGFzIGJlZW4gYWxyZWFkeSByZXBv
-cnRlZCBhcyBCdWcgIzI2NTcuDQo+Pj4+IElzIHRoaXMgZml4ZWQgaW4gdGhlIG5ldyAwLjU4IHZl
-cnNpb24/DQo+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gSSdtIHByZXR0eSBzdXJlIHRoaXMgaXMgYSBw
-cm9ibGVtIG9uIHRoZSBrZXJuZWwgY2xpZW50IHNpZGUgb2YgdGhpbmdzLCBub3QNCj4+PiB0aGUg
-c2VydmVyIHNpZGUgKHdoaWNoIGJ5IGRlZmF1bHQgaGFuZGxlcyB3cml0ZXMgdXAgdG8gfjEwME1C
-IG9yIHNvKS4gSQ0KPj4+IHN1c3BlY3QgaXQgaXNuJ3QgdGVycmlibHkgZGlmZmljdWx0IHRvIGZp
-eCwgYnV0IGhhc24ndCBiZWVuIHByaW9yaXRpemVkLi4uDQo+Pj4gDQo+Pj4gc2FnZQ0KPj4gTXkg
-Z3Vlc3MgdG9vLiBBcmUgZGlyZWN0IElPIHdyaXRlcyBvZiB0aGF0IHNpemUgYSBjb21tb24gdGhp
-bmcgb3Igb2YgZ3JlYXQgaW1wb3J0IHRvIHlvdT8NCj4+IEVpdGhlciB3YXksIGEgY29tbWVudCBv
-biB0aGUgdHJhY2tlciBzYXlpbmcgeW91J3ZlIHJ1biBpbnRvIGl0IHdpbGwgcHJvbW90ZSBpdCB1
-cCB3aGVuIHdlJ3JlIGRvaW5nIGJ1ZyBzY3J1YnMgYW5kIGJhY2tsb2cgcmV2aWV3cy4gOikNCj4+
-IC1HcmVnDQo+IA0KPiBJIGltYWdpbmUgd2UnbGwgc2VlIHNvbWUgYXBwbGljYXRpb25zIGRvaW5n
-IGxhcmdlIGRpcmVjdCBJTyB3cml0ZXMgbGlrZSB0aGlzIGluIHRoZSBIUEMgc3BhY2UuDQo+IA0K
-PiBNYXJrDQo+IA0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRv
-bW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+
-IA0K
+update: zombie PGs dissapeared after I deleted pool which previously
+was holding these PGs.
+
+Thoughts and suggestion after this:
+Docs say:"Stale Placement groups are in an unknown state - the OSDs
+that host them have not reported to the monitor cluster in a while
+(configured by mon_osd_report_timeout)."
+It means mons are passive here, they just wait for OSD to report, right?
+
+It would be desirable that scrubing("active" action) could inspect
+these stale PGs and let do something with them afterwards, mark lost
+at least.
+If mons report, that PGs are stale - and same time after scrubbing
+"ceph pg {pg-num} query" reports "i don't have pgid {pg-num}" - this
+does not seem right.
+
+Suggestion - scrubing process should take stale PGs into inspection checklist.
+
+Right, the way I got into stuck PGs was most probably wrong order of
+commands, but such scrubing improvement would help to resolve
+situation in future if someone did the same. When you get used to
+reliability of multiple copy pools - it is easy to mess up with single
+copy pools :)
+
+
+Ugis
+
+
+
+
+2013/3/12 Ugis <ugis22@gmail.com>:
+> Hi,
+>
+> Last week I have unintentionally created zombie pgs - they do not
+> exist any more, cannot detect/delete them with ceph tools but cluster
+> still thinks they exist and reports those as stale.
+>
+> how-to create zombie pgs on ceph 0.56.3:
+> create single copy pool+rbd with some data.
+> stop respective osds that hold pieces of this rbd.
+> reformat filesystem+ceph filesystem for stopped osds with same
+> {osd-nums}, start osds.
+>
+>
+> Now:
+> # ceph -s
+> health HEALTH_WARN 54 pgs stale; 54 pgs stuck stale
+>
+> #ceph health detail
+> ...
+> pg 15.60 is stuck stale for 530406.612888, current state
+> stale+active+clean, last acting [7]
+> pg 15.61 is stuck stale for 520394.297111, current state
+> stale+active+clean, last acting [6]
+> pg 15.63 is stuck stale for 519992.929160, current state
+> stale+active+clean, last acting [5]
+>
+> #ceph pg scrub 15.63
+> instructing pg 15.63 on osd.5 to scrub
+> wait while scrub finish
+>
+> # ceph osd deep-scrub 5
+> osd.5 instructed to deep-scrub
+> wait while scrub finish
+>
+> # ceph pg 15.63 query
+> i don't have pgid 15.63
+>
+> # ceph pg 15.63 mark_unfound_lost revert
+> i don't have pgid 15.63
+>
+> Logs at monitors, osd.5 do not show anything about finding these pgs
+> while scrubbing.
+>
+> Hoped to reveal non existant pgs via scrub and then "ceph pg {pg-id}
+> mark_unfound_lost revert" those, but scrubs do not find them,
+> shouldn't they?
+> I could try to remove respective single copy pool as missing pgs are
+> from only rbd that was in this pool, but this is not the best way -
+> there could be other rbds other times.
+>
+> How to remove these zombie pgs?
+>
+> P.S. While osds were reformatted + recovering in other terminal I run
+> "rbd rm -p single-copy-pool single-copy-rbd" from client. This command
+> hanged for tens of minutes then I Ctrl+c'd it. Do not remember if I
+> run rm before starting to reformat osds(should), but even if not there
+> should be no zombie pgs in cluster after deep scrub - they should be
+> unfound.
+>
+>
+> Regards,
+> Ugis Racko
