@@ -1,61 +1,67 @@
-From: Greg Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Crash and strange things on MDS
-Date: Fri, 15 Mar 2013 13:32:06 -0700
-Message-ID: <ECAA10260D284057A52D78127F8634A8@inktank.com>
-References: <20130220010052.GO7121@kdecherf.com>
-	<CAPYLRzgkR61eFuGU_NdL88bJvOD2em+TMO7g1g+X3RTFAZvY5Q@mail.gmail.com>
-	<20130226175742.GE16091@kdecherf.com>
-	<CAPYLRziS4rTVWU8C1fDJ6W6jgk7s9SOVnRGOcdiH9YshqGNaww@mail.gmail.com>
-	<20130226195837.GH16091@kdecherf.com>
-	<CAPYLRziEUnD7SAipnUwF8gz=2ZvF3vKWyiv8xEcy1PP_Lhbw0w@mail.gmail.com>
-	<20130226215702.GI16091@kdecherf.com>
-	<CAPYLRzgbSOt+wwPh9KSQqxN_rnU808m2Fw5FBz7iVU-QzS8XGA@mail.gmail.com>
-	<20130227004923.GQ16091@kdecherf.com>
-	<CAPYLRzhbygkA9=DkVr474Nw8AOC2hAFG-1D6uS4WyfR=kUBXWQ@mail.gmail.com>
-	<20130308232943.GA2197@kdecherf.com>
+From: Sam Lang <slang@inktank.com>
+Subject: Re: Mutiple network port for a single osd
+Date: Fri, 15 Mar 2013 16:39:17 -0500
+Message-ID: <CAKMAVE8YeKNL2ow+R++nLLrnu83Dm_WCsbqi34wn9y3QdD8pMw@mail.gmail.com>
+References: <CALLyzeYeMNwzn6osF8BbZ+qnbotCLCuxEn8vv9UNhPgnQaMktg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20130308232943.GA2197-fShu9kyPgSlWk0Htik3J/w@public.gmane.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Kevin Decherf <kevin-fShu9kyPgSlWk0Htik3J/w@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:48362 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754629Ab3COVjS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Mar 2013 17:39:18 -0400
+Received: by mail-oa0-f42.google.com with SMTP id i18so3971231oag.15
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Mar 2013 14:39:18 -0700 (PDT)
+In-Reply-To: <CALLyzeYeMNwzn6osF8BbZ+qnbotCLCuxEn8vv9UNhPgnQaMktg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alex Sla <4k3nd0@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-T24gRnJpZGF5LCBNYXJjaCA4LCAyMDEzIGF0IDM6MjkgUE0sIEtldmluIERlY2hlcmYgd3JvdGU6
-Cj4gT24gRnJpLCBNYXIgMDEsIDIwMTMgYXQgMTE6MTI6MTdBTSAtMDgwMCwgR3JlZ29yeSBGYXJu
-dW0gd3JvdGU6Cj4gPiBPbiBUdWUsIEZlYiAyNiwgMjAxMyBhdCA0OjQ5IFBNLCBLZXZpbiBEZWNo
-ZXJmIDxrZXZpbkBrZGVjaGVyZi5jb20gKG1haWx0bzprZXZpbkBrZGVjaGVyZi5jb20pPiB3cm90
-ZToKPiA+ID4gWW91IHdpbGwgZmluZCB0aGUgYXJjaGl2ZSBoZXJlOiA8c25pcD4KPiA+ID4gVGhl
-IGRhdGEgaXMgbm90IGFub255bWl6ZWQuIEludGVyZXN0aW5nIGZvbGRlcnMvZmlsZXMgaGVyZSBh
-cmUKPiA+ID4gL3VzZXJfMzA5YmJkMzgtM2NmZi00NjhkLWE0NjUtZGMxN2MyNjBkZTBjLyoKPiA+
-ICAKPiA+ICAKPiA+ICAKPiA+IFNvcnJ5IGZvciB0aGUgZGVsYXksIGJ1dCBJIGhhdmUgcmV0cmll
-dmVkIHRoaXMgYXJjaGl2ZSBsb2NhbGx5IGF0Cj4gPiBsZWFzdCBzbyBpZiB5b3Ugd2FudCB0byBy
-ZW1vdmUgaXQgZnJvbSB5b3VyIHdlYnNlcnZlciB5b3UgY2FuIGRvIHNvLgo+ID4gOikgQWxzbywg
-SSBub3RpY2Ugd2hlbiBJIHVudGFyIGl0IHRoYXQgdGhlIGZpbGUgbmFtZSBpbmNsdWRlcwo+ID4g
-ImZpbHRlcmVkIiDigJQgd2hhdCBmaWx0ZXJzIGRpZCB5b3UgcnVuIGl0IHRocm91Z2g/Cj4gIAo+
-ICAKPiAgCj4gSGkgR3JlZ29yeSwKPiAgCj4gRG8geW91IGhhdmUgYW55IG5ld3MgYWJvdXQgaXQ/
-Cj4gIAoKSSB3cm90ZSBhIGNvdXBsZSB0b29scyB0byBkbyBsb2cgYW5hbHlzaXMgYW5kIGNyZWF0
-ZWQgYSBudW1iZXIgb2YgYnVncyB0byBtYWtlIHRoZSBNRFMgbW9yZSBhbWVuYWJsZSB0byBhbmFs
-eXNpcyBhcyBhIHJlc3VsdCBvZiB0aGlzLgpIYXZpbmcgc3BvdC1jaGVja2VkIHNvbWUgb2YgeW91
-ciBsb25nZXItcnVubmluZyByZXF1ZXN0cywgdGhleSdyZSBhbGwgZ2V0YXR0cnMgb3Igc2V0YXR0
-cnMgY29udGVuZGluZyBvbiBmaWxlcyBpbiB3aGF0IGxvb2sgdG8gYmUgc2hhcmVkIGNhY2hlIGFu
-ZCBwaHAgbGlicmFyaWVzLiBUaGVzZSBjb3ZlciBhIHJhbmdlIGZyb20gfjQwIG1pbGxpc2Vjb25k
-cyB0byB+MTUwIG1pbGxpc2Vjb25kcy4gSSdkIGxvb2sgaW50byB3aGF0IHlvdXIgc3BsaXQgYXBw
-bGljYXRpb25zIGFyZSBzaGFyaW5nIGFjcm9zcyB0aG9zZSBzcGFjZXMuCgpPbiB0aGUgdXAgc2lk
-ZSBmb3IgQ2VwaCwgPjgwJSBvZiB5b3VyIHJlcXVlc3RzIHRha2UgIjAiIG1pbGxpc2Vjb25kcyBh
-bmQgfjk1JSBvZiB0aGVtIHRha2UgbGVzcyB0aGFuIDIgbWlsbGlzZWNvbmRzLiBIdXJyYXksIGl0
-J3Mgbm90IHJpZGljdWxvdXNseSBzbG93IG1vc3Qgb2YgdGhlIHRpbWUuIDopCi1HcmVnCgpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Wed, Mar 6, 2013 at 11:27 AM, Alex Sla <4k3nd0@gmail.com> wrote:
+> Hello guys,
+>
+> first of all, thank you for Ceph. Such an amazon technology. Great
+> pleasure to work with.
+>
+> Then to my question. I review Ceph in scope of security and need to
+> understand how the single osd is create network port (for iptables).
+
+The osd binds to the first available port in the range 6800-7100.  You
+can adjust the range with the config options ms_bind_port_min and
+ms_bind_port_max.
+-sam
+
+> But i just saw some interesting thing:
+>
+> Some of my osds running on more then one port.
+>
+> for example:
+>
+> Ports:
+>
+> tcp        0      0 172.20.21.2:6902        0.0.0.0:*
+> LISTEN      1635/ceph-osd
+> tcp        0      0 172.20.21.2:6903        0.0.0.0:*
+> LISTEN      1635/ceph-osd
+> tcp        0      0 172.20.21.2:6904        0.0.0.0:*
+> LISTEN      1635/ceph-osd
+>
+> ps aux|grep 1635
+>
+> root      1635  1.9  0.2 1239708 172556 ?      Ssl  Feb23 301:34
+> /usr/bin/ceph-osd --cluster=ceph -i 1 -f
+>
+> But some doesn't have this much ports. Why do this happen ? More
+> important to know, up to how many port will be used? In overall it
+> looks only 3.
+
+Its unclear what you're asking...
+>
+>
+> so far
+> 4k3nd0
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
