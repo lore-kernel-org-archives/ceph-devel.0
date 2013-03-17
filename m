@@ -1,128 +1,117 @@
-From: <Kelvin_Huang@wiwynn.com>
-Subject: RE: Ceph scalar & replicas performance
-Date: Sun, 17 Mar 2013 04:20:02 +0000
-Message-ID: <86F425174C7E4F418CCF4E62056152E593907E@GDC-CLDMBX-P01.whq.wistron>
-References: <86F425174C7E4F418CCF4E62056152E59383FE@GDC-CLDMBX-P01.whq.wistron>
- <CAPYLRzg2mYHf-deU0g=E_DmvyUrsmjtCx3VyiOxy0g6zVk3xgQ@mail.gmail.com>
+From: Drunkard Zhang <gongfan193@gmail.com>
+Subject: Re: Chinese translation of official docs
+Date: Sun, 17 Mar 2013 14:25:27 +0800
+Message-ID: <CAJiejCSrvHwpF+g2Nn4uwEdH5Z1phLkJYCGwrC-yWA5-9g-m9Q@mail.gmail.com>
+References: <CAJiejCSn_JDYLf-PqU=ZWYPL50FM=kMfemnWoBbZWG=JQnPUuQ@mail.gmail.com>
+ <813C241A-4E27-4030-B70D-C746538AD165@intel.com> <CAJiejCTJ-fnu1-aeUenA2u0kBdMB901pRbf16DAeqTUEW3fhSw@mail.gmail.com>
+ <CACCLA56f29d_h3LneAnSw=8PXsXoZoF71yfF88WihqfMkSLVzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw3.wistron.com ([220.128.89.23]:58610 "EHLO
-	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699Ab3CQEUG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 00:20:06 -0400
-Received: from GDC-CLDCAS-P05.whq.wistron (unverified [10.37.38.66]) by TWNHUMSW3.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Taa84b84eb2c0a81671e0c@TWNHUMSW3.wistron.com> for <ceph-devel@vger.kernel.org>;
- Sun, 17 Mar 2013 12:25:11 +0800
-Content-Language: zh-TW
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:42835 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750793Ab3CQGZs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 02:25:48 -0400
+Received: by mail-qe0-f46.google.com with SMTP id a11so2718658qen.19
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Mar 2013 23:25:47 -0700 (PDT)
+In-Reply-To: <CACCLA56f29d_h3LneAnSw=8PXsXoZoF71yfF88WihqfMkSLVzQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Eric_YH_Chen@wiwynn.com
+To: John Wong <gokoproject@gmail.com>
+Cc: "Huang, Xiwei" <xiwei.huang@intel.com>, maillist-linux <ceph-devel@vger.kernel.org>
 
-SGksIGFsbA0KDQpJIHRoaW5rIHlvdSBzaG91bGQgbWlzc2luZyB0aGlzIG1haWwsIHNvIEkgcmUt
-c2VudCB0aGUgbWFpbC4NCg0KVGhhbmtzISENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-CkZyb206IEtlbHZpbiBIdWFuZy9XWUhRL1dpd3lubiANClNlbnQ6IE1vbmRheSwgRmVicnVhcnkg
-MjUsIDIwMTMgOTo1OCBBTQ0KVG86ICdjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZycNCkNjOiBF
-cmljIFlIIENoZW4vV1lIUS9XaXd5bm4NClN1YmplY3Q6IFJFOiBDZXBoIHNjYWxhciAmIHJlcGxp
-Y2FzIHBlcmZvcm1hbmNlDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdy
-ZWdvcnkgRmFybnVtIFttYWlsdG86Z3JlZ0Bpbmt0YW5rLmNvbV0NClNlbnQ6IFNhdHVyZGF5LCBG
-ZWJydWFyeSAyMywgMjAxMyAxOjU3IEFNDQpUbzogS2VsdmluIEh1YW5nL1dZSFEvV2l3eW5uDQpD
-YzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBDZXBoIHNjYWxhciAm
-IHJlcGxpY2FzIHBlcmZvcm1hbmNlDQoNCk9uIFRodSwgRmViIDIxLCAyMDEzIGF0IDU6MDEgUE0s
-ICA8S2VsdmluX0h1YW5nQHdpd3lubi5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+IEkgaGF2ZSBz
-b21lIHByb2JsZW0gYWZ0ZXIgbXkgc2NhbGFyIHBlcmZvcm1hbmNlIHRlc3QgISENCj4NCj4gU2V0
-dXA6DQo+IExpbnV4IGtlcm5lbDogMy4yLjANCj4gT1M6IFVidW50dSAxMi4wNA0KPiBTdG9yYWdl
-IHNlcnZlciA6IDExIEhERCAoZWFjaCBzdG9yYWdlIHNlcnZlciBoYXMgMTEgb3NkLCA3MjAwIHJw
-bSwgMVQpICsgMTBHYkUgTklDICsgUkFJRCBjYXJkOiBMU0kgTWVnYVJBSUQgU0FTIDkyNjAtNGkN
-Cj4gICAgICAgICAgRm9yIGV2ZXJ5IEhERDogUkFJRDAsIFdyaXRlIFBvbGljeTogV3JpdGUgQmFj
-ayB3aXRoIEJCVSwgUmVhZCANCj4gUG9saWN5OiBSZWFkQWhlYWQsIElPIFBvbGljeTogRGlyZWN0
-IFN0b3JhZ2Ugc2VydmVyIG51bWJlciA6IDEgdG8gNA0KPg0KPiBDZXBoIHZlcnNpb24gOiAwLjQ4
-LjINCj4gUmVwbGljYXMgOiAyDQo+DQo+IEZJTyBjbWQ6DQo+IFtTZXF1ZW5jaWFsIFJlYWRdDQo+
-IGZpbyAtLWlvZGVwdGggPSAzMiAtLW51bWpvYnM9MSAtLXJ1bnRpbWU9MTIwICAtLWJzID0gNjU1
-MzYgLS1ydyA9IHJlYWQgDQo+IC0taW9lbmdpbmU9bGliYWlvIC0tZ3JvdXBfcmVwb3J0aW5nIC0t
-ZGlyZWN0PTEgLS1ldGE9YWx3YXlzIA0KPiAtLXJhbXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0K
-Pg0KPiBbU2VxdWVuY2lhbCBSZWFkXQ0KPiBmaW8gLS1pb2RlcHRoID0gMzIgLS1udW1qb2JzPTEg
-LS1ydW50aW1lPTEyMCAgLS1icyA9IDY1NTM2IC0tcncgPSANCj4gd3JpdGUgLS1pb2VuZ2luZT1s
-aWJhaW8gLS1ncm91cF9yZXBvcnRpbmcgLS1kaXJlY3Q9MSAtLWV0YT1hbHdheXMgDQo+IC0tcmFt
-cF90aW1lPTEwIC0tdGhpbmt0aW1lPTEwDQo+DQo+IFtSYW5kb20gUmVhZF0NCj4gZmlvIC0taW9k
-ZXB0aCA9IDMyIC0tbnVtam9icz04IC0tcnVudGltZT0xMjAgIC0tYnMgPSA2NTUzNiAtLXJ3ID0g
-DQo+IHJhbmRyZWFkIC0taW9lbmdpbmU9bGliYWlvIC0tZ3JvdXBfcmVwb3J0aW5nIC0tZGlyZWN0
-PTEgLS1ldGE9YWx3YXlzIA0KPiAtLXJhbXBfdGltZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBb
-UmFuZG9tIFdyaXRlXQ0KPiBmaW8gLS1pb2RlcHRoID0gMzIgLS1udW1qb2JzPTggLS1ydW50aW1l
-PTEyMCAgLS1icyA9IDY1NTM2IC0tcncgPSANCj4gcmFuZHdyaXRlIC0taW9lbmdpbmU9bGliYWlv
-IC0tZ3JvdXBfcmVwb3J0aW5nIC0tZGlyZWN0PTEgLS1ldGE9YWx3YXlzIA0KPiAtLXJhbXBfdGlt
-ZT0xMCAtLXRoaW5rdGltZT0xMA0KPg0KPiBVc2UgY2VwaCBjbGllbnQgdGhlbiBjcmVhdGUgMVQg
-UkJEIGltYWdlIGZvciB0ZXN0aW5nLCB0aGUgY2xpZW50IGFsc28gDQo+IGhhcyAxMEdiRSBOSUMg
-LCBMaW51eCBrZXJuZWwgMy4yLjAgLCBVYnVudHUgMTIuMDQNCj4NCj4gUGVyZm9ybWFuY2UgcmVz
-dWx0Og0KPiAgICAgICAgICAgICAgICAgICAgICAgQmFuZHdpZHRoIChNQi9zZWMpIA0KPiDilIzi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIANCj4g4pSCc3RvcmFnZSBzZXJ2ZXIgbnVtYmVy4pSCU2VxdWVudGlhbCBSZWFkIOKUglNl
-cXVlbnRpYWwgV3JpdGXilIJSYW5kb20gDQo+IFJlYWTilIJSYW5kb20gV3JpdGUg4pSCIOKUnOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIANCj4g4pSCICAgICAgICAgIDEgICAgICAgIOKUgiAgICAgIDI1OSAgICAg4pSCICAgICA3
-NiAgICAgICDilIIgICAgODM3ICAgIOKUgiAgICAyNiAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSAIOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0K
-PiDilIIgICAgICAgICAgMiAgICAgICAg4pSCICAgICAgMzQ5ICAgICDilIIgICAgMTIxICAgICAg
-IOKUgiAgICA5NTAgICAg4pSCICAgIDQ1ICAgICAgIOKUgg0KPiDilJzilIDilIDilIDilIDilIDi
-lIDilIDilIDilIAg4pS84pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAg
-ICAgICAgICAzICAgICAgICDilIIgICAgICAzNTQgICAgIOKUgiAgICAxMDggICAgICAg4pSCICAg
-IDQ5MCAgICDilIIgICAgNzEgICAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAg
-IDQgICAgICAgIOKUgiAgICAgIDMzOCAgICAg4pSCICAgIDEwMyAgICAgICDilIIgICAgNjEwICAg
-IOKUgiAgICA4OSAgICAgICDilIINCj4g4pSc4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIOKU
-vOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPg0KPiBXZSBleHBlY3QgdGhhdCBi
-YW5kd2lkdGggd2lsbCBpbmNyZWFzZSB3aGVuIHN0b3JhZ2Ugc2VydmVyIGluY3JlYXNlIHVuZGVy
-IGFsbCBjYXNlLCBidXQgdGhlIHJlc3VsdCBpcyBub3QgISENCj4gQ2FuIHlvdSBzaGFyZSB5b3Vy
-IGlkZWEgZm9yIHJlYWQvd3JpdGUgYmFuZHdpZHRoIHdoZW4gc3RvcmFnZSBzZXJ2ZXIgaW5jcmVh
-c2luZyA/DQoNCj4gVGhlcmUncyBhIGJ1bmNoIG9mIHN0dWZmIHRoYXQgY291bGQgYmUgd2VpcmQg
-aGVyZS4gSXMgeW91ciBzd2l0Y2ggDQo+IGNhcGFibGUgb2YgaGFuZGxpbmcgYWxsIHRoZSB0cmFm
-ZmljIGdvaW5nIG92ZXIgaXQ/IEhhdmUgeW91IA0KPiBiZW5jaG1hcmtlZCB0aGUgZHJpdmVzIGFu
-ZCBmaWxlc3lzdGVtcyBvbiBlYWNoIG5vZGUgaW5kaXZpZHVhbGx5IHRvIA0KPiBtYWtlIHN1cmUg
-dGhleSBhbGwgaGF2ZSB0aGUgc2FtZSBiZWhhdmlvciwgb3IgYXJlIHNvbWUgb2YgeW91ciANCj4g
-YWRkaXRpb25zIHNsb3dlciB0aGFuIHRoZSBvdGhlcnM/IChNeSBtb25leSBpcyBvbiB5b3UgaGF2
-aW5nIHNvbWUgc2xvdyANCj4gZHJpdmVzIHRoYXQgYXJlIGRyYWdnaW5nIGV2ZXJ5dGhpbmcgZG93
-bi4pDQoNCk9rYXksIEkgd2lsbCBnbyB0byByZS1jaGVjayB0aGUgc2V0dGluZyBvZiBlYWNoIHN0
-b3JhZ2Ugc2VydmVyLCBidXQgSSBzdGlsbCBpbnRlcmVzdGVkIHdhbnQgdG8ga25vdyB0aGUgY29y
-cmVjdCB0cmVuZCAoU2VxIFIvVyBhbmQgUmFuZG9tIFIvVykgd2hlbiBzdG9yYWdlIHNlcnZlciBp
-bmNyZWFzaW5nLCBvciB5b3UgaGF2ZSBzaW1pbGFyIGV4cGVyaW1lbnQgY2FuIHNoYXJlIHRoZSBy
-ZXN1bHQ/DQoNClRoYW5rcyAhISANCg0KDQo+IEluIGFub3RoZXIgY2FzZSwgd2UgZml4ZWQgdXNl
-IDQgc3RvcmFnZSBzZXJ2ZXJzIHRoZW4gYWRqdXN0IHRoZSBudW1iZXIgDQo+IG9mIHJlcGxpY2Fz
-IDIgdG8gNA0KPg0KPiBQZXJmb3JtYW5jZSByZXN1bHQ6DQo+DQo+ICAgICAgICAgICAgICAgICAg
-ICAgICAgIEJhbmR3aWR0aCAoTUIvc2VjKSANCj4g4pSM4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSADQo+IOKUgiAgcmVwbGljYXMg
-bnVtYmVyICAgIOKUglNlcXVlbnRpYWwgUmVhZCDilIJTZXF1ZW50aWFsIFdyaXRl4pSCUmFuZG9t
-IFJlYWTilIJSYW5kb20gV3JpdGUg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU
-gCDilLzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDIg
-ICAgICAgIOKUgiAgICAgICAzMzggICAg4pSCICAgICAgMTAzICAgICDilIIgICAgIDYxNCAgICDi
-lIIgICAgICA4OSAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDMgICAgICAg
-IOKUgiAgICAgICAzMzcgICAg4pSCICAgICAgNzYgICAgICDilIIgICAgIDc5MSAgICDilIIgICAg
-ICA2MiAgICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIANCj4g4pSCICAgICAgICAgIDQgICAgICAgIOKUgiAg
-ICAgICAzMzcgICAg4pSCICAgICAgNjAgICAgICDilIIgICAgIDc1NCAgICDilIIgICAgICA0MyAg
-ICAg4pSCDQo+IOKUnOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCDilLzilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIANCj4NCj4gVGhlIGJhbmR3aWR0aCBvZiB3cml0ZSB3aWxsIGRl
-Y3JlYXNlIHdoZW4gcmVwbGljYXMgaW5jcmVhc2UgdGhhdCBpcyBlYXN5IHRvIGtub3csIGJ1dCB3
-aHkgcmVhZCBiYW5kd2lkdGggZGlkIG5vdCBpbmNyZWFzZT8NCg0KPiBSZWFkcyBhcmUgYWx3YXlz
-IHNlcnZlZCBmcm9tIHRoZSAicHJpbWFyeSIgT1NELCBidXQgZXZlbiBpZiB0aGV5IA0KPiB3ZXJl
-bid0LCB5b3UgZGlzdHJpYnV0ZSB0aGUgc2FtZSBudW1iZXIgb2YgcmVhZHMgb3ZlciB0aGUgc2Ft
-ZSBudW1iZXIgDQo+IG9mIGRpc2tzIG5vIG1hdHRlciBob3cgbWFueSByZXBsaWNhcyB5b3UgaGF2
-ZSBvZiBlYWNoIGluZGl2aWR1YWwgZGF0YSANCj4gYmxvY2suLi4NCj4gQnV0IGluIHBhcnRpY3Vs
-YXIgdGhlIGNoYW5nZSBpbiByYW5kb20gcmVhZCB2YWx1ZXMgdGhhdCB5b3UncmUgc2VlaW5nIA0K
-PiBpbmRpY2F0ZXMgdGhhdCB5b3VyIGRhdGEgaXMgdmVyeSBub2lzeSDigJQgSSdtIG5vdCBzdXJl
-IEknZCB0cnVzdCBhbnkgb2YgDQo+IHRoZSB2YWx1ZXMgeW91J3JlIHNlZWluZywgZXNwZWNpYWxs
-eSB0aGUgd2VpcmRlciB0cmVuZHMuIEl0IG1pZ2h0IGJlIA0KPiBhbGwgbm9pc2UgYW5kIG5vIHJl
-YWwgZGF0YSB2YWx1ZS4NCj4gLUdyZWcNCg==
+2013/3/17 John Wong <gokoproject@gmail.com>:
+> Great work. But just my 0.0000002 cents:
+>
+> I think updating the doc is a time-consuming doc. I think the most ac=
+curate
+> doc is still the one in English, do we agree?
+>
+Agree, but we have to move on.
+
+> If we have non-English speaking users who are not comfortable reading=
+ the
+> English doc, then it is possible that they are not comfortable receiv=
+ing
+> help from the English-concentric mailing list, right? Do we have an
+> unofficial, Chinese-based Ceph support forum/mailing list? I remember=
+ my
+> middle school year with https://www.phpbb.com/support/intl/?from=3Dsu=
+bmenu
+>
+We need non-English documentation sooner or later, so let's start just
+now. I didn't find a great Chinese platform to workwith yet, they all
+need examined before shown, which wasted a lot time, I don't have that
+much time :-(
+
+Now, I'm managing the doc in .odt file, not a great way, need a better
+way supporting versioning.
+
+> Although I also prefer not to separate users from the main mailing li=
+st
+> under ceph, I suggest we add a small section for these self-organized
+> communities.
+>
+> Best,
+> John Wong
+>
+> If we do have these, maybe we should include them in the community se=
+ction
+> of Ceph? There should be a list available in the Ceph page.
+>
+> On Sun, Mar 17, 2013 at 12:09 AM, Drunkard Zhang <gongfan193@gmail.co=
+m>
+> wrote:
+>>
+>> 2013/3/17 Huang, Xiwei <xiwei.huang@intel.com>:
+>> > That's quite cool. I can also help on it. :)
+>> >
+>>
+>> Thanks a lot. As you can see in the doc, the Block Devices and RADOS
+>> Gateway just finished header part, we can start here.
+>>
+>> About the outdated things, I will update it up to official docs in
+>> next few weeks.
+>>
+>> >
+>> > =E5=9C=A8 2013-3-16=EF=BC=8C21:37=EF=BC=8C"Drunkard Zhang" <gongfa=
+n193@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+>> >
+>> >> Hi,
+>> >>    When I started digging ceph, there's too little Chinese docs, =
+so
+>> >> here I translated myself, hope someone need it :-)
+>> >>
+>> >> Status:
+>> >> I copied from http://ceph.com/docs/master/start/ about last Novem=
+ber,
+>> >> and it's not complete yet, but enough for general users to gettin=
+g
+>> >> started. I'll trying to get it finished and update-to-date as I g=
+ot
+>> >> free time.
+>> >>
+>> >> It's available from:
+>> >> http://ishare.iask.sina.com.cn/f/36067657.html
+>> >> https://github.com/drunkard/docs_zh/blob/master/ceph-docs_zh-v1.0=
+=2Epdf
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel"
+>> >> in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
