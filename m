@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 13/39] mds: don't send resolve message between active MDS
-Date: Sun, 17 Mar 2013 22:51:16 +0800
-Message-ID: <1363531902-24909-14-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 15/39] mds: don't send MDentry{Link,Unlink} before receiving cache rejoin
+Date: Sun, 17 Mar 2013 22:51:18 +0800
+Message-ID: <1363531902-24909-16-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga03.intel.com ([143.182.124.21]:34328 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932610Ab3CQOwe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:52:34 -0400
+	id S932610Ab3CQOwk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Mar 2013 10:52:40 -0400
 In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,129 +16,60 @@ Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-When MDS cluster is resolving, current behavior is sending subtree resolve
-message to all other MDS and waiting for all other MDS' resolve message.
-The problem is that active MDS can have diffent subtree map due to rename.
-Besides gathering active MDS's resolve messages are also racy. The only
-function for these messages is disambiguate other MDS' import. We can
-replace it by import finish notification.
+The active MDS calls MDCache::rejoin_scour_survivor_replicas() when it
+receives the cache rejoin message. The function will remove the objects
+replicated by MDentry{Link,Unlink} from replica map.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc  | 12 +++++++++---
- src/mds/Migrator.cc | 25 +++++++++++++++++++++++--
- src/mds/Migrator.h  |  3 ++-
- 3 files changed, 34 insertions(+), 6 deletions(-)
+ src/mds/MDCache.cc | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index c455a20..73c1d59 100644
+index 69db1dd..f102205 100644
 --- a/src/mds/MDCache.cc
 +++ b/src/mds/MDCache.cc
-@@ -2517,7 +2517,8 @@ void MDCache::send_subtree_resolves()
+@@ -3893,6 +3893,8 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+     }
+   }
+ 
++  assert(rejoin_gather.count(from));
++  rejoin_gather.erase(from);
+   if (survivor) {
+     // survivor.  do everything now.
+     for (map<inodeno_t,MMDSCacheRejoin::lock_bls>::iterator p = weak->inode_scatterlocks.begin();
+@@ -3911,8 +3913,6 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+       mds->locker->eval_gather(*p);
+   } else {
+     // done?
+-    assert(rejoin_gather.count(from));
+-    rejoin_gather.erase(from);
+     if (rejoin_gather.empty()) {
+       rejoin_gather_finish();
+     } else {
+@@ -9582,7 +9582,9 @@ void MDCache::send_dentry_link(CDentry *dn)
+   for (map<int,int>::iterator p = dn->replicas_begin(); 
+        p != dn->replicas_end(); 
         ++p) {
-     if (*p == mds->whoami)
+-    if (mds->mdsmap->get_state(p->first) < MDSMap::STATE_REJOIN) 
++    if (mds->mdsmap->get_state(p->first) < MDSMap::STATE_REJOIN ||
++	(mds->mdsmap->get_state(p->first) == MDSMap::STATE_REJOIN &&
++	 rejoin_gather.count(p->first)))
        continue;
--    resolves[*p] = new MMDSResolve;
-+    if (mds->is_resolve() || mds->mdsmap->is_resolve(*p))
-+      resolves[*p] = new MMDSResolve;
-   }
+     CDentry::linkage_t *dnl = dn->get_linkage();
+     MDentryLink *m = new MDentryLink(subtree->dirfrag(), dn->get_dir()->dirfrag(),
+@@ -9668,6 +9670,11 @@ void MDCache::send_dentry_unlink(CDentry *dn, CDentry *straydn, MDRequest *mdr)
+     if (mdr && mdr->more()->witnessed.count(it->first))
+       continue;
  
-   // known
-@@ -2837,7 +2838,7 @@ void MDCache::handle_resolve(MMDSResolve *m)
- 	  migrator->import_reverse(dir);
- 	} else {
- 	  dout(7) << "ambiguous import succeeded on " << *dir << dendl;
--	  migrator->import_finish(dir);
-+	  migrator->import_finish(dir, true);
- 	}
- 	my_ambiguous_imports.erase(p);  // no longer ambiguous.
-       }
-@@ -3432,7 +3433,12 @@ void MDCache::rejoin_send_rejoins()
-        ++p) {
-     CDir *dir = p->first;
-     assert(dir->is_subtree_root());
--    assert(!dir->is_ambiguous_dir_auth());
-+    if (dir->is_ambiguous_dir_auth()) {
-+      // exporter is recovering, importer is survivor.
-+      assert(rejoins.count(dir->authority().first));
-+      assert(!rejoins.count(dir->authority().second));
++    if (mds->mdsmap->get_state(it->first) < MDSMap::STATE_REJOIN ||
++	(mds->mdsmap->get_state(it->first) == MDSMap::STATE_REJOIN &&
++	 rejoin_gather.count(it->first)))
 +      continue;
-+    }
- 
-     // my subtree?
-     if (dir->is_auth())
-diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
-index 5e53803..833df12 100644
---- a/src/mds/Migrator.cc
-+++ b/src/mds/Migrator.cc
-@@ -2088,6 +2088,23 @@ void Migrator::import_reverse(CDir *dir)
-   }
- }
- 
-+void Migrator::import_notify_finish(CDir *dir, set<CDir*>& bounds)
-+{
-+  dout(7) << "import_notify_finish " << *dir << dendl;
 +
-+  for (set<int>::iterator p = import_bystanders[dir].begin();
-+       p != import_bystanders[dir].end();
-+       ++p) {
-+    MExportDirNotify *notify =
-+      new MExportDirNotify(dir->dirfrag(), false,
-+			   pair<int,int>(import_peer[dir->dirfrag()], mds->get_nodeid()),
-+			   pair<int,int>(mds->get_nodeid(), CDIR_AUTH_UNKNOWN));
-+    for (set<CDir*>::iterator i = bounds.begin(); i != bounds.end(); i++)
-+      notify->get_bounds().push_back((*i)->dirfrag());
-+    mds->send_message_mds(notify, *p);
-+  }
-+}
-+
- void Migrator::import_notify_abort(CDir *dir, set<CDir*>& bounds)
- {
-   dout(7) << "import_notify_abort " << *dir << dendl;
-@@ -2183,11 +2200,11 @@ void Migrator::handle_export_finish(MExportDirFinish *m)
-   CDir *dir = cache->get_dirfrag(m->get_dirfrag());
-   assert(dir);
-   dout(7) << "handle_export_finish on " << *dir << dendl;
--  import_finish(dir);
-+  import_finish(dir, false);
-   m->put();
- }
- 
--void Migrator::import_finish(CDir *dir) 
-+void Migrator::import_finish(CDir *dir, bool notify)
- {
-   dout(7) << "import_finish on " << *dir << dendl;
- 
-@@ -2205,6 +2222,10 @@ void Migrator::import_finish(CDir *dir)
-   // remove pins
-   set<CDir*> bounds;
-   cache->get_subtree_bounds(dir, bounds);
-+
-+  if (notify)
-+    import_notify_finish(dir, bounds);
-+
-   import_remove_pins(dir, bounds);
- 
-   map<CInode*, map<client_t,Capability::Export> > cap_imports;
-diff --git a/src/mds/Migrator.h b/src/mds/Migrator.h
-index 7988f32..2889a74 100644
---- a/src/mds/Migrator.h
-+++ b/src/mds/Migrator.h
-@@ -273,12 +273,13 @@ protected:
-   void import_reverse_unfreeze(CDir *dir);
-   void import_reverse_final(CDir *dir);
-   void import_notify_abort(CDir *dir, set<CDir*>& bounds);
-+  void import_notify_finish(CDir *dir, set<CDir*>& bounds);
-   void import_logged_start(dirfrag_t df, CDir *dir, int from,
- 			   map<client_t,entity_inst_t> &imported_client_map,
- 			   map<client_t,uint64_t>& sseqmap);
-   void handle_export_finish(MExportDirFinish *m);
- public:
--  void import_finish(CDir *dir);
-+  void import_finish(CDir *dir, bool notify);
- protected:
- 
-   void handle_export_caps(MExportCaps *m);
+     MDentryUnlink *unlink = new MDentryUnlink(dn->get_dir()->dirfrag(), dn->name);
+     if (straydn)
+       replicate_stray(straydn, it->first, unlink->straybl);
 -- 
 1.7.11.7
 
