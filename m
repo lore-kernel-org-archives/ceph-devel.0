@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 26/39] mds: issue caps when lock state in replica become SYNC
-Date: Sun, 17 Mar 2013 22:51:29 +0800
-Message-ID: <1363531902-24909-27-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 29/39] mds: avoid double auth pin for file recovery
+Date: Sun, 17 Mar 2013 22:51:32 +0800
+Message-ID: <1363531902-24909-30-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:5752 "EHLO mga03.intel.com"
+Received: from mga03.intel.com ([143.182.124.21]:30053 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932699Ab3CQOxh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:53:37 -0400
+	id S932679Ab3CQOxk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Mar 2013 10:53:40 -0400
 In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,26 +16,28 @@ Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-because client can request READ caps from non-auth MDS.
-
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Locker.cc | 2 ++
- 1 file changed, 2 insertions(+)
+ src/mds/MDCache.cc | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 4d45f99..28920d4 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -4403,6 +4403,8 @@ void Locker::handle_file_lock(ScatterLock *lock, MLock *m)
-     lock->set_state(LOCK_SYNC);
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 973a4d0..e9a79cd 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -5502,8 +5502,10 @@ void MDCache::_queue_file_recover(CInode *in)
+   dout(15) << "_queue_file_recover " << *in << dendl;
+   assert(in->is_auth());
+   in->state_clear(CInode::STATE_NEEDSRECOVER);
+-  in->state_set(CInode::STATE_RECOVERING);
+-  in->auth_pin(this);
++  if (!in->state_test(CInode::STATE_RECOVERING)) {
++    in->state_set(CInode::STATE_RECOVERING);
++    in->auth_pin(this);
++  }
+   file_recover_queue.insert(in);
+ }
  
-     lock->get_rdlock();
-+    if (caps)
-+      issue_caps(in);
-     lock->finish_waiters(SimpleLock::WAIT_RD|SimpleLock::WAIT_STABLE);
-     lock->put_rdlock();
-     break;
 -- 
 1.7.11.7
 
