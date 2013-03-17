@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 07/39] mds: mark connection down when MDS fails
-Date: Sun, 17 Mar 2013 22:51:10 +0800
-Message-ID: <1363531902-24909-8-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 09/39] mds: defer eval gather locks when removing replica
+Date: Sun, 17 Mar 2013 22:51:12 +0800
+Message-ID: <1363531902-24909-10-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga03.intel.com ([143.182.124.21]:34328 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932476Ab3CQOwL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:52:11 -0400
+	id S932587Ab3CQOwU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Mar 2013 10:52:20 -0400
 In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,42 +16,207 @@ Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-So if the MDS restarts and uses the same address, it does not get
-old messages.
+Locks' states should not change between composing the cache rejoin ack
+messages and sending the message. If Locker::eval_gather() is called
+in MDCache::{inode,dentry}_remove_replica(), it may wake requests and
+change locks' states.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDS.cc | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ src/mds/MDCache.cc | 51 ++++++++++++++++++++++++++++++---------------------
+ src/mds/MDCache.h  |  8 +++++---
+ 2 files changed, 35 insertions(+), 24 deletions(-)
 
-diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-index 859782a..282fa64 100644
---- a/src/mds/MDS.cc
-+++ b/src/mds/MDS.cc
-@@ -1046,8 +1046,10 @@ void MDS::handle_mds_map(MMDSMap *m)
-     oldmap->get_failed_mds_set(oldfailed);
-     mdsmap->get_failed_mds_set(failed);
-     for (set<int>::iterator p = failed.begin(); p != failed.end(); ++p)
--      if (oldfailed.count(*p) == 0)
-+      if (oldfailed.count(*p) == 0) {
-+	messenger->mark_down(oldmap->get_inst(*p).addr);
- 	mdcache->handle_mds_failure(*p);
-+      }
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 19dc60b..0f6b842 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -3729,6 +3729,7 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+   // possible response(s)
+   MMDSCacheRejoin *ack = 0;      // if survivor
+   set<vinodeno_t> acked_inodes;  // if survivor
++  set<SimpleLock *> gather_locks;  // if survivor
+   bool survivor = false;  // am i a survivor?
+ 
+   if (mds->is_clientreplay() || mds->is_active() || mds->is_stopping()) {
+@@ -3851,7 +3852,7 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+       assert(dnl->is_primary());
+       
+       if (survivor && dn->is_replica(from)) 
+-	dentry_remove_replica(dn, from);  // this induces a lock gather completion
++	dentry_remove_replica(dn, from, gather_locks);  // this induces a lock gather completion
+       int dnonce = dn->add_replica(from);
+       dout(10) << " have " << *dn << dendl;
+       if (ack) 
+@@ -3864,7 +3865,7 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+       assert(in);
+ 
+       if (survivor && in->is_replica(from)) 
+-	inode_remove_replica(in, from);
++	inode_remove_replica(in, from, gather_locks);
+       int inonce = in->add_replica(from);
+       dout(10) << " have " << *in << dendl;
+ 
+@@ -3887,7 +3888,7 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+     CInode *in = get_inode(*p);
+     assert(in);   // hmm fixme wrt stray?
+     if (survivor && in->is_replica(from)) 
+-      inode_remove_replica(in, from);    // this induces a lock gather completion
++      inode_remove_replica(in, from, gather_locks);    // this induces a lock gather completion
+     int inonce = in->add_replica(from);
+     dout(10) << " have base " << *in << dendl;
      
-     // or down then up?
-     //  did their addr/inst change?
-@@ -1055,8 +1057,10 @@ void MDS::handle_mds_map(MMDSMap *m)
-     mdsmap->get_up_mds_set(up);
-     for (set<int>::iterator p = up.begin(); p != up.end(); ++p) 
-       if (oldmap->have_inst(*p) &&
--	  oldmap->get_inst(*p) != mdsmap->get_inst(*p))
-+	  oldmap->get_inst(*p) != mdsmap->get_inst(*p)) {
-+	messenger->mark_down(oldmap->get_inst(*p).addr);
- 	mdcache->handle_mds_failure(*p);
-+      }
+@@ -3909,8 +3910,11 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+       ack->add_inode_base(in);
+     }
+ 
+-    rejoin_scour_survivor_replicas(from, ack, acked_inodes);
++    rejoin_scour_survivor_replicas(from, ack, gather_locks, acked_inodes);
+     mds->send_message(ack, weak->get_connection());
++
++    for (set<SimpleLock*>::iterator p = gather_locks.begin(); p != gather_locks.end(); ++p)
++      mds->locker->eval_gather(*p);
+   } else {
+     // done?
+     assert(rejoin_gather.count(from));
+@@ -4055,7 +4059,9 @@ bool MDCache::parallel_fetch_traverse_dir(inodeno_t ino, filepath& path,
+  * all validated replicas are acked with a strong nonce, etc.  if that isn't in the
+  * ack, the replica dne, and we can remove it from our replica maps.
+  */
+-void MDCache::rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack, set<vinodeno_t>& acked_inodes)
++void MDCache::rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack,
++					     set<SimpleLock *>& gather_locks,
++					     set<vinodeno_t>& acked_inodes)
+ {
+   dout(10) << "rejoin_scour_survivor_replicas from mds." << from << dendl;
+ 
+@@ -4070,7 +4076,7 @@ void MDCache::rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack, set
+     if (in->is_auth() &&
+ 	in->is_replica(from) &&
+ 	acked_inodes.count(p->second->vino()) == 0) {
+-      inode_remove_replica(in, from);
++      inode_remove_replica(in, from, gather_locks);
+       dout(10) << " rem " << *in << dendl;
+     }
+ 
+@@ -4099,7 +4105,7 @@ void MDCache::rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack, set
+ 	if (dn->is_replica(from) &&
+ 	    (ack->strong_dentries.count(dir->dirfrag()) == 0 ||
+ 	     ack->strong_dentries[dir->dirfrag()].count(string_snap_t(dn->name, dn->last)) == 0)) {
+-	  dentry_remove_replica(dn, from);
++	  dentry_remove_replica(dn, from, gather_locks);
+ 	  dout(10) << " rem " << *dn << dendl;
+ 	}
+       }
+@@ -6189,6 +6195,7 @@ void MDCache::handle_cache_expire(MCacheExpire *m)
+     return;
    }
-   if (is_clientreplay() || is_active() || is_stopping()) {
-     // did anyone stop?
+ 
++  set<SimpleLock *> gather_locks;
+   // loop over realms
+   for (map<dirfrag_t,MCacheExpire::realm>::iterator p = m->realms.begin();
+        p != m->realms.end();
+@@ -6255,7 +6262,7 @@ void MDCache::handle_cache_expire(MCacheExpire *m)
+ 	// remove from our cached_by
+ 	dout(7) << " inode expire on " << *in << " from mds." << from 
+ 		<< " cached_by was " << in->get_replicas() << dendl;
+-	inode_remove_replica(in, from);
++	inode_remove_replica(in, from, gather_locks);
+       } 
+       else {
+ 	// this is an old nonce, ignore expire.
+@@ -6332,7 +6339,7 @@ void MDCache::handle_cache_expire(MCacheExpire *m)
+ 	
+ 	if (nonce == dn->get_replica_nonce(from)) {
+ 	  dout(7) << "  dentry_expire on " << *dn << " from mds." << from << dendl;
+-	  dentry_remove_replica(dn, from);
++	  dentry_remove_replica(dn, from, gather_locks);
+ 	} 
+ 	else {
+ 	  dout(7) << "  dentry_expire on " << *dn << " from mds." << from
+@@ -6343,6 +6350,8 @@ void MDCache::handle_cache_expire(MCacheExpire *m)
+     }
+   }
+ 
++  for (set<SimpleLock*>::iterator p = gather_locks.begin(); p != gather_locks.end(); ++p)
++    mds->locker->eval_gather(*p);
+ 
+   // done
+   m->put();
+@@ -6368,35 +6377,35 @@ void MDCache::discard_delayed_expire(CDir *dir)
+   delayed_expire.erase(dir);  
+ }
+ 
+-void MDCache::inode_remove_replica(CInode *in, int from)
++void MDCache::inode_remove_replica(CInode *in, int from, set<SimpleLock *>& gather_locks)
+ {
+   in->remove_replica(from);
+   in->mds_caps_wanted.erase(from);
+   
+   // note: this code calls _eval more often than it needs to!
+   // fix lock
+-  if (in->authlock.remove_replica(from)) mds->locker->eval_gather(&in->authlock);
+-  if (in->linklock.remove_replica(from)) mds->locker->eval_gather(&in->linklock);
+-  if (in->dirfragtreelock.remove_replica(from)) mds->locker->eval_gather(&in->dirfragtreelock);
+-  if (in->filelock.remove_replica(from)) mds->locker->eval_gather(&in->filelock);
+-  if (in->snaplock.remove_replica(from)) mds->locker->eval_gather(&in->snaplock);
+-  if (in->xattrlock.remove_replica(from)) mds->locker->eval_gather(&in->xattrlock);
++  if (in->authlock.remove_replica(from)) gather_locks.insert(&in->authlock);
++  if (in->linklock.remove_replica(from)) gather_locks.insert(&in->linklock);
++  if (in->dirfragtreelock.remove_replica(from)) gather_locks.insert(&in->dirfragtreelock);
++  if (in->filelock.remove_replica(from)) gather_locks.insert(&in->filelock);
++  if (in->snaplock.remove_replica(from)) gather_locks.insert(&in->snaplock);
++  if (in->xattrlock.remove_replica(from)) gather_locks.insert(&in->xattrlock);
+ 
+-  if (in->nestlock.remove_replica(from)) mds->locker->eval_gather(&in->nestlock);
+-  if (in->flocklock.remove_replica(from)) mds->locker->eval_gather(&in->flocklock);
+-  if (in->policylock.remove_replica(from)) mds->locker->eval_gather(&in->policylock);
++  if (in->nestlock.remove_replica(from)) gather_locks.insert(&in->nestlock);
++  if (in->flocklock.remove_replica(from)) gather_locks.insert(&in->flocklock);
++  if (in->policylock.remove_replica(from)) gather_locks.insert(&in->policylock);
+ 
+   // trim?
+   maybe_eval_stray(in);
+ }
+ 
+-void MDCache::dentry_remove_replica(CDentry *dn, int from)
++void MDCache::dentry_remove_replica(CDentry *dn, int from, set<SimpleLock *>& gather_locks)
+ {
+   dn->remove_replica(from);
+ 
+   // fix lock
+   if (dn->lock.remove_replica(from))
+-    mds->locker->eval_gather(&dn->lock);
++    gather_locks.insert(&dn->lock);
+ 
+   CDentry::linkage_t *dnl = dn->get_projected_linkage();
+   if (dnl->is_primary())
+diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
+index f07ea74..a9f05c6 100644
+--- a/src/mds/MDCache.h
++++ b/src/mds/MDCache.h
+@@ -406,7 +406,9 @@ protected:
+   CDir* rejoin_invent_dirfrag(dirfrag_t df);
+   bool rejoin_fetch_dirfrags(MMDSCacheRejoin *m);
+   void handle_cache_rejoin_strong(MMDSCacheRejoin *m);
+-  void rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack, set<vinodeno_t>& acked_inodes);
++  void rejoin_scour_survivor_replicas(int from, MMDSCacheRejoin *ack,
++				      set<SimpleLock *>& gather_locks,
++				      set<vinodeno_t>& acked_inodes);
+   void handle_cache_rejoin_ack(MMDSCacheRejoin *m);
+   void handle_cache_rejoin_purge(MMDSCacheRejoin *m);
+   void handle_cache_rejoin_missing(MMDSCacheRejoin *m);
+@@ -607,8 +609,8 @@ public:
+   }
+ protected:
+ 
+-  void inode_remove_replica(CInode *in, int rep);
+-  void dentry_remove_replica(CDentry *dn, int rep);
++  void inode_remove_replica(CInode *in, int rep, set<SimpleLock *>& gather_locks);
++  void dentry_remove_replica(CDentry *dn, int rep, set<SimpleLock *>& gather_locks);
+ 
+   void rename_file(CDentry *srcdn, CDentry *destdn);
+ 
 -- 
 1.7.11.7
 
