@@ -1,36 +1,61 @@
-From: "Huang, Xiwei" <xiwei.huang@intel.com>
+From: Drunkard Zhang <gongfan193@gmail.com>
 Subject: Re: Chinese translation of official docs
-Date: Sun, 17 Mar 2013 03:14:22 +0000
-Message-ID: <813C241A-4E27-4030-B70D-C746538AD165@intel.com>
+Date: Sun, 17 Mar 2013 12:09:34 +0800
+Message-ID: <CAJiejCTJ-fnu1-aeUenA2u0kBdMB901pRbf16DAeqTUEW3fhSw@mail.gmail.com>
 References: <CAJiejCSn_JDYLf-PqU=ZWYPL50FM=kMfemnWoBbZWG=JQnPUuQ@mail.gmail.com>
+ <813C241A-4E27-4030-B70D-C746538AD165@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:49713 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755684Ab3CQDOm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 16 Mar 2013 23:14:42 -0400
-In-Reply-To: <CAJiejCSn_JDYLf-PqU=ZWYPL50FM=kMfemnWoBbZWG=JQnPUuQ@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mail-qc0-f181.google.com ([209.85.216.181]:38831 "EHLO
+	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699Ab3CQEJz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 00:09:55 -0400
+Received: by mail-qc0-f181.google.com with SMTP id a22so2243716qcs.12
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Mar 2013 21:09:55 -0700 (PDT)
+In-Reply-To: <813C241A-4E27-4030-B70D-C746538AD165@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Drunkard Zhang <gongfan193@gmail.com>
+To: "Huang, Xiwei" <xiwei.huang@intel.com>
 Cc: maillist-linux <ceph-devel@vger.kernel.org>
 
-VGhhdCdzIHF1aXRlIGNvb2wuIEkgY2FuIGFsc28gaGVscCBvbiBpdC4gOikNCg0Kt6LX1M7StcQg
-aVBob25lDQoNCtTaIDIwMTMtMy0xNqOsMjE6MzejrCJEcnVua2FyZCBaaGFuZyIgPGdvbmdmYW4x
-OTNAZ21haWwuY29tPiDQtLXAo7oNCg0KPiBIaSwNCj4gICAgV2hlbiBJIHN0YXJ0ZWQgZGlnZ2lu
-ZyBjZXBoLCB0aGVyZSdzIHRvbyBsaXR0bGUgQ2hpbmVzZSBkb2NzLCBzbw0KPiBoZXJlIEkgdHJh
-bnNsYXRlZCBteXNlbGYsIGhvcGUgc29tZW9uZSBuZWVkIGl0IDotKQ0KPiANCj4gU3RhdHVzOg0K
-PiBJIGNvcGllZCBmcm9tIGh0dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rlci9zdGFydC8gYWJvdXQg
-bGFzdCBOb3ZlbWJlciwNCj4gYW5kIGl0J3Mgbm90IGNvbXBsZXRlIHlldCwgYnV0IGVub3VnaCBm
-b3IgZ2VuZXJhbCB1c2VycyB0byBnZXR0aW5nDQo+IHN0YXJ0ZWQuIEknbGwgdHJ5aW5nIHRvIGdl
-dCBpdCBmaW5pc2hlZCBhbmQgdXBkYXRlLXRvLWRhdGUgYXMgSSBnb3QNCj4gZnJlZSB0aW1lLg0K
-PiANCj4gSXQncyBhdmFpbGFibGUgZnJvbToNCj4gaHR0cDovL2lzaGFyZS5pYXNrLnNpbmEuY29t
-LmNuL2YvMzYwNjc2NTcuaHRtbA0KPiBodHRwczovL2dpdGh1Yi5jb20vZHJ1bmthcmQvZG9jc196
-aC9ibG9iL21hc3Rlci9jZXBoLWRvY3NfemgtdjEuMC5wZGYNCj4gLS0NCj4gVG8gdW5zdWJzY3Jp
-YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwi
-IGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-DQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0K
+2013/3/17 Huang, Xiwei <xiwei.huang@intel.com>:
+> That's quite cool. I can also help on it. :)
+>
+
+Thanks a lot. As you can see in the doc, the Block Devices and RADOS
+Gateway just finished header part, we can start here.
+
+About the outdated things, I will update it up to official docs in
+next few weeks.
+
+>
+> =E5=9C=A8 2013-3-16=EF=BC=8C21:37=EF=BC=8C"Drunkard Zhang" <gongfan19=
+3@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+>
+>> Hi,
+>>    When I started digging ceph, there's too little Chinese docs, so
+>> here I translated myself, hope someone need it :-)
+>>
+>> Status:
+>> I copied from http://ceph.com/docs/master/start/ about last November=
+,
+>> and it's not complete yet, but enough for general users to getting
+>> started. I'll trying to get it finished and update-to-date as I got
+>> free time.
+>>
+>> It's available from:
+>> http://ishare.iask.sina.com.cn/f/36067657.html
+>> https://github.com/drunkard/docs_zh/blob/master/ceph-docs_zh-v1.0.pd=
+f
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
