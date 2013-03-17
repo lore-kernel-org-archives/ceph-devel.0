@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 17/39] mds: send resolve acks after master updates are safely logged
-Date: Sun, 17 Mar 2013 22:51:20 +0800
-Message-ID: <1363531902-24909-18-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 16/39] mds: send cache rejoin messages after gathering all resolves
+Date: Sun, 17 Mar 2013 22:51:19 +0800
+Message-ID: <1363531902-24909-17-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga03.intel.com ([143.182.124.21]:34328 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932610Ab3CQOws (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:52:48 -0400
+	id S932610Ab3CQOwo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Mar 2013 10:52:44 -0400
 In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -18,162 +18,68 @@ From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc | 33 +++++++++++++++++++++++++++++----
- src/mds/MDCache.h  |  7 ++++++-
- src/mds/Server.cc  |  9 +++++++++
- src/mds/journal.cc |  2 +-
- 4 files changed, 45 insertions(+), 6 deletions(-)
+ src/mds/MDCache.cc | 10 ++++++++++
+ src/mds/MDCache.h  |  5 +++++
+ 2 files changed, 15 insertions(+)
 
 diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 6853bf1..9b37b1e 100644
+index f102205..6853bf1 100644
 --- a/src/mds/MDCache.cc
 +++ b/src/mds/MDCache.cc
-@@ -2177,6 +2177,17 @@ void MDCache::committed_master_slave(metareqid_t r, int from)
-     log_master_commit(r);
+@@ -2914,6 +2914,8 @@ void MDCache::maybe_resolve_finish()
+       recalc_auth_bits();
+       trim_non_auth(); 
+       mds->resolve_done();
++    } else {
++      maybe_send_pending_rejoins();
+     }
+   }
  }
- 
-+void MDCache::logged_master_update(metareqid_t reqid)
-+{
-+  dout(10) << "logged_master_update " << reqid << dendl;
-+  assert(uncommitted_masters.count(reqid));
-+  uncommitted_masters[reqid].safe = true;
-+  if (pending_masters.count(reqid)) {
-+    pending_masters.erase(reqid);
-+    if (pending_masters.empty())
-+      process_delayed_resolve();
-+  }
-+}
- 
- /*
-  * The mds could crash after receiving all slaves' commit acknowledgement,
-@@ -2764,8 +2775,23 @@ void MDCache::handle_resolve(MMDSResolve *m)
-     return;
-   }
- 
-+  discard_delayed_resolve(from);
-+
-   // ambiguous slave requests?
-   if (!m->slave_requests.empty()) {
-+    for (vector<metareqid_t>::iterator p = m->slave_requests.begin();
-+	 p != m->slave_requests.end();
-+	 ++p) {
-+      if (uncommitted_masters.count(*p) && !uncommitted_masters[*p].safe)
-+	pending_masters.insert(*p);
-+    }
-+
-+    if (!pending_masters.empty()) {
-+      dout(10) << " still have pending updates, delay processing slave resolve" << dendl;
-+      delayed_resolve[from] = m;
-+      return;
-+    }
-+
-     MMDSResolveAck *ack = new MMDSResolveAck;
-     for (vector<metareqid_t>::iterator p = m->slave_requests.begin();
- 	 p != m->slave_requests.end();
-@@ -2788,7 +2814,6 @@ void MDCache::handle_resolve(MMDSResolve *m)
- 
-   if (!resolve_ack_gather.empty() || !need_resolve_rollback.empty()) {
-     dout(10) << "delay processing subtree resolve" << dendl;
--    discard_delayed_resolve(from);
-     delayed_resolve[from] = m;
-     return;
-   }
-@@ -2883,10 +2908,10 @@ void MDCache::handle_resolve(MMDSResolve *m)
- void MDCache::process_delayed_resolve()
+@@ -3398,6 +3400,13 @@ void MDCache::rejoin_send_rejoins()
  {
-   dout(10) << "process_delayed_resolve" << dendl;
--  for (map<int, MMDSResolve *>::iterator p = delayed_resolve.begin();
--       p != delayed_resolve.end(); ++p)
-+  map<int, MMDSResolve*> tmp;
-+  tmp.swap(delayed_resolve);
-+  for (map<int, MMDSResolve*>::iterator p = tmp.begin(); p != tmp.end(); ++p)
-     handle_resolve(p->second);
--  delayed_resolve.clear();
- }
+   dout(10) << "rejoin_send_rejoins with recovery_set " << recovery_set << dendl;
  
- void MDCache::discard_delayed_resolve(int who)
++  if (!resolve_gather.empty()) {
++    dout(7) << "rejoin_send_rejoins still waiting for resolves ("
++	    << resolve_gather << ")" << dendl;
++    rejoins_pending = true;
++    return;
++  }
++
+   map<int, MMDSCacheRejoin*> rejoins;
+ 
+   // encode cap list once.
+@@ -3571,6 +3580,7 @@ void MDCache::rejoin_send_rejoins()
+     mds->send_message_mds(p->second, p->first);
+   }
+   rejoin_ack_gather.insert(mds->whoami);   // we need to complete rejoin_gather_finish, too
++  rejoins_pending = false;
+ 
+   // nothing?
+   if (mds->is_rejoin() && rejoins.empty()) {
 diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
-index 379f715..8f262b9 100644
+index 278debf..379f715 100644
 --- a/src/mds/MDCache.h
 +++ b/src/mds/MDCache.h
-@@ -281,14 +281,16 @@ public:
- 				snapid_t follows=CEPH_NOSNAP);
+@@ -383,6 +383,7 @@ public:
  
-   // slaves
--  void add_uncommitted_master(metareqid_t reqid, LogSegment *ls, set<int> &slaves) {
-+  void add_uncommitted_master(metareqid_t reqid, LogSegment *ls, set<int> &slaves, bool safe=false) {
-     uncommitted_masters[reqid].ls = ls;
-     uncommitted_masters[reqid].slaves = slaves;
-+    uncommitted_masters[reqid].safe = safe;
-   }
-   void wait_for_uncommitted_master(metareqid_t reqid, Context *c) {
-     uncommitted_masters[reqid].waiters.push_back(c);
-   }
-   void log_master_commit(metareqid_t reqid);
-+  void logged_master_update(metareqid_t reqid);
-   void _logged_master_commit(metareqid_t reqid, LogSegment *ls, list<Context*> &waiters);
-   void committed_master_slave(metareqid_t r, int from);
-   void finish_committed_masters();
-@@ -320,9 +322,12 @@ protected:
-     set<int> slaves;
-     LogSegment *ls;
-     list<Context*> waiters;
-+    bool safe;
-   };
-   map<metareqid_t, umaster>                 uncommitted_masters;         // master: req -> slave set
- 
-+  set<metareqid_t>		pending_masters;
-+
-   //map<metareqid_t, bool>     ambiguous_slave_updates;         // for log trimming.
-   //map<metareqid_t, Context*> waiting_for_slave_update_commit;
-   friend class ESlaveUpdate;
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 8e89e4c..1330f11 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -4463,6 +4463,9 @@ void Server::_link_remote_finish(MDRequest *mdr, bool inc,
- 
-   assert(g_conf->mds_kill_link_at != 3);
- 
-+  if (!mdr->more()->witnessed.empty())
-+    mdcache->logged_master_update(mdr->reqid);
-+
-   if (inc) {
-     // link the new dentry
-     dn->pop_projected_linkage();
-@@ -5073,6 +5076,9 @@ void Server::_unlink_local_finish(MDRequest *mdr,
- {
-   dout(10) << "_unlink_local_finish " << *dn << dendl;
- 
-+  if (!mdr->more()->witnessed.empty())
-+    mdcache->logged_master_update(mdr->reqid);
-+
-   // unlink main dentry
-   dn->get_dir()->unlink_inode(dn);
-   dn->pop_projected_linkage();
-@@ -5881,6 +5887,9 @@ void Server::_rename_finish(MDRequest *mdr, CDentry *srcdn, CDentry *destdn, CDe
- {
-   dout(10) << "_rename_finish " << *mdr << dendl;
- 
-+  if (!mdr->more()->witnessed.empty())
-+    mdcache->logged_master_update(mdr->reqid);
-+
-   // apply
-   _rename_apply(mdr, srcdn, destdn, straydn);
- 
-diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-index 3375e40..6475eec 100644
---- a/src/mds/journal.cc
-+++ b/src/mds/journal.cc
-@@ -1738,7 +1738,7 @@ void EUpdate::replay(MDS *mds)
-     dout(10) << "EUpdate.replay " << reqid << " had slaves, expecting a matching ECommitted" << dendl;
-     _segment->uncommitted_masters.insert(reqid);
-     set<int> slaves;
--    mds->mdcache->add_uncommitted_master(reqid, _segment, slaves);
-+    mds->mdcache->add_uncommitted_master(reqid, _segment, slaves, true);
-   }
-   
-   if (client_map.length()) {
+ protected:
+   // [rejoin]
++  bool rejoins_pending;
+   set<int> rejoin_gather;      // nodes from whom i need a rejoin
+   set<int> rejoin_sent;        // nodes i sent a rejoin to
+   set<int> rejoin_ack_gather;  // nodes from whom i need a rejoin ack
+@@ -417,6 +418,10 @@ protected:
+   void handle_cache_rejoin_full(MMDSCacheRejoin *m);
+   void rejoin_send_acks();
+   void rejoin_trim_undef_inodes();
++  void maybe_send_pending_rejoins() {
++    if (rejoins_pending)
++      rejoin_send_rejoins();
++  }
+ public:
+   void rejoin_gather_finish();
+   void rejoin_send_rejoins();
 -- 
 1.7.11.7
 
