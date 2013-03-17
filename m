@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 11/39] mds: don't delay processing replica buffer in slave request
-Date: Sun, 17 Mar 2013 22:51:14 +0800
-Message-ID: <1363531902-24909-12-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 10/39] mds: unify slave request waiting
+Date: Sun, 17 Mar 2013 22:51:13 +0800
+Message-ID: <1363531902-24909-11-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga03.intel.com ([143.182.124.21]:34328 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932587Ab3CQOw1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:52:27 -0400
+	id S932587Ab3CQOwX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Mar 2013 10:52:23 -0400
 In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,189 +16,123 @@ Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Replicated objects need to be added into the cache immediately
+When requesting remote xlock or remote wrlock, the master request is
+put into lock object's REMOTEXLOCK waiting queue. The problem is that
+remote wrlock's target can be different from lock's auth MDS. When
+the lock's auth MDS recovers, MDCache::handle_mds_recovery() may wake
+incorrect request. So just unify slave request waiting, dispatch the
+master request when receiving slave request reply.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/MDCache.cc | 12 ++++++++++++
- src/mds/MDCache.h  |  2 +-
- src/mds/MDS.cc     |  6 +++---
- src/mds/Server.cc  | 55 +++++++++++++++++++++++++++++++++++++++---------------
- 4 files changed, 56 insertions(+), 19 deletions(-)
+ src/mds/Locker.cc | 49 ++++++++++++++++++++++---------------------------
+ src/mds/Server.cc | 12 ++++++++++--
+ 2 files changed, 32 insertions(+), 29 deletions(-)
 
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index 0f6b842..b668842 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -7722,6 +7722,18 @@ void MDCache::_find_ino_dir(inodeno_t ino, Context *fin, bufferlist& bl, int r)
- 
- /* ---------------------------- */
- 
-+int MDCache::get_num_client_requests()
-+{
-+  int count = 0;
-+  for (hash_map<metareqid_t, MDRequest*>::iterator p = active_requests.begin();
-+      p != active_requests.end();
-+      ++p) {
-+    if (p->second->reqid.name.is_client() && !p->second->is_slave())
-+      count++;
-+  }
-+  return count;
-+}
-+
- /* This function takes over the reference to the passed Message */
- MDRequest *MDCache::request_start(MClientRequest *req)
- {
-diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
-index a9f05c6..4634121 100644
---- a/src/mds/MDCache.h
-+++ b/src/mds/MDCache.h
-@@ -240,7 +240,7 @@ protected:
-   hash_map<metareqid_t, MDRequest*> active_requests; 
- 
- public:
--  int get_num_active_requests() { return active_requests.size(); }
-+  int get_num_client_requests();
- 
-   MDRequest* request_start(MClientRequest *req);
-   MDRequest* request_start_slave(metareqid_t rid, __u32 attempt, int by);
-diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-index b91dcbd..e99eecc 100644
---- a/src/mds/MDS.cc
-+++ b/src/mds/MDS.cc
-@@ -1900,9 +1900,9 @@ bool MDS::_dispatch(Message *m)
-       mdcache->is_open() &&
-       replay_queue.empty() &&
-       want_state == MDSMap::STATE_CLIENTREPLAY) {
--    dout(10) << " still have " << mdcache->get_num_active_requests()
--	     << " active replay requests" << dendl;
--    if (mdcache->get_num_active_requests() == 0)
-+    int num_requests = mdcache->get_num_client_requests();
-+    dout(10) << " still have " << num_requests << " active replay requests" << dendl;
-+    if (num_requests == 0)
-       clientreplay_done();
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index d06a9cc..0055a19 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -544,8 +544,6 @@ void Locker::cancel_locking(Mutation *mut, set<CInode*> *pneed_issue)
+       if (need_issue)
+ 	pneed_issue->insert(static_cast<CInode *>(lock->get_parent()));
+     }
+-  } else {
+-    lock->finish_waiters(SimpleLock::WAIT_REMOTEXLOCK);
+   }
+   mut->finish_locking(lock);
+ }
+@@ -1326,18 +1324,16 @@ void Locker::remote_wrlock_start(SimpleLock *lock, int target, MDRequest *mut)
    }
  
+   // send lock request
+-  if (!lock->is_waiter_for(SimpleLock::WAIT_REMOTEXLOCK)) {
+-    mut->start_locking(lock, target);
+-    mut->more()->slaves.insert(target);
+-    MMDSSlaveRequest *r = new MMDSSlaveRequest(mut->reqid, mut->attempt,
+-					       MMDSSlaveRequest::OP_WRLOCK);
+-    r->set_lock_type(lock->get_type());
+-    lock->get_parent()->set_object_info(r->get_object_info());
+-    mds->send_message_mds(r, target);
+-  }
+-  
+-  // wait
+-  lock->add_waiter(SimpleLock::WAIT_REMOTEXLOCK, new C_MDS_RetryRequest(mdcache, mut));
++  mut->start_locking(lock, target);
++  mut->more()->slaves.insert(target);
++  MMDSSlaveRequest *r = new MMDSSlaveRequest(mut->reqid, mut->attempt,
++					     MMDSSlaveRequest::OP_WRLOCK);
++  r->set_lock_type(lock->get_type());
++  lock->get_parent()->set_object_info(r->get_object_info());
++  mds->send_message_mds(r, target);
++
++  assert(mut->more()->waiting_on_slave.count(target) == 0);
++  mut->more()->waiting_on_slave.insert(target);
+ }
+ 
+ void Locker::remote_wrlock_finish(SimpleLock *lock, int target, Mutation *mut)
+@@ -1411,19 +1407,18 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequest *mut)
+     }
+     
+     // send lock request
+-    if (!lock->is_waiter_for(SimpleLock::WAIT_REMOTEXLOCK)) {
+-      int auth = lock->get_parent()->authority().first;
+-      mut->more()->slaves.insert(auth);
+-      mut->start_locking(lock, auth);
+-      MMDSSlaveRequest *r = new MMDSSlaveRequest(mut->reqid, mut->attempt,
+-						 MMDSSlaveRequest::OP_XLOCK);
+-      r->set_lock_type(lock->get_type());
+-      lock->get_parent()->set_object_info(r->get_object_info());
+-      mds->send_message_mds(r, auth);
+-    }
+-    
+-    // wait
+-    lock->add_waiter(SimpleLock::WAIT_REMOTEXLOCK, new C_MDS_RetryRequest(mdcache, mut));
++    int auth = lock->get_parent()->authority().first;
++    mut->more()->slaves.insert(auth);
++    mut->start_locking(lock, auth);
++    MMDSSlaveRequest *r = new MMDSSlaveRequest(mut->reqid, mut->attempt,
++					       MMDSSlaveRequest::OP_XLOCK);
++    r->set_lock_type(lock->get_type());
++    lock->get_parent()->set_object_info(r->get_object_info());
++    mds->send_message_mds(r, auth);
++
++    assert(mut->more()->waiting_on_slave.count(auth) == 0);
++    mut->more()->waiting_on_slave.insert(auth);
++
+     return false;
+   }
+ }
 diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 4c4c86b..8e89e4c 100644
+index 6d0519f..4c4c86b 100644
 --- a/src/mds/Server.cc
 +++ b/src/mds/Server.cc
-@@ -107,10 +107,8 @@ void Server::dispatch(Message *m)
- 		(m->get_type() == CEPH_MSG_CLIENT_REQUEST &&
- 		 (static_cast<MClientRequest*>(m))->is_replay()))) {
-       // replaying!
--    } else if (mds->is_clientreplay() && m->get_type() == MSG_MDS_SLAVE_REQUEST &&
--	       ((static_cast<MMDSSlaveRequest*>(m))->is_reply() ||
--		!mds->mdsmap->is_active(m->get_source().num()))) {
--      // slave reply or the master is also in the clientreplay stage
-+    } else if (m->get_type() == MSG_MDS_SLAVE_REQUEST) {
-+      // handle_slave_request() will wait if necessary
-     } else {
-       dout(3) << "not active yet, waiting" << dendl;
-       mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
-@@ -1291,6 +1289,13 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
-   if (m->is_reply())
-     return handle_slave_request_reply(m);
- 
-+  CDentry *straydn = NULL;
-+  if (m->stray.length() > 0) {
-+    straydn = mdcache->add_replica_stray(m->stray, from);
-+    assert(straydn);
-+    m->stray.clear();
-+  }
+@@ -1371,7 +1371,11 @@ void Server::handle_slave_request_reply(MMDSSlaveRequest *m)
+       mdr->locks.insert(lock);
+       mdr->finish_locking(lock);
+       lock->get_xlock(mdr, mdr->get_client());
+-      lock->finish_waiters(SimpleLock::WAIT_REMOTEXLOCK);
 +
-   // am i a new slave?
-   MDRequest *mdr = NULL;
-   if (mdcache->have_request(m->get_reqid())) {
-@@ -1326,9 +1331,26 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
-       m->put();
-       return;
++      assert(mdr->more()->waiting_on_slave.count(from));
++      mdr->more()->waiting_on_slave.erase(from);
++      assert(mdr->more()->waiting_on_slave.empty());
++      dispatch_client_request(mdr);
      }
--    mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), m->get_source().num());
-+    mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), from);
-   }
-   assert(mdr->slave_request == 0);     // only one at a time, please!  
+     break;
+     
+@@ -1385,7 +1389,11 @@ void Server::handle_slave_request_reply(MMDSSlaveRequest *m)
+       mdr->remote_wrlocks[lock] = from;
+       mdr->locks.insert(lock);
+       mdr->finish_locking(lock);
+-      lock->finish_waiters(SimpleLock::WAIT_REMOTEXLOCK);
 +
-+  if (straydn) {
-+    mdr->pin(straydn);
-+    mdr->straydn = straydn;
-+  }
-+
-+  if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
-+    dout(3) << "not clientreplay|active yet, waiting" << dendl;
-+    mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
-+    return;
-+  } else if (mds->is_clientreplay() && !mds->mdsmap->is_clientreplay(from) &&
-+	     mdr->locks.empty()) {
-+    dout(3) << "not active yet, waiting" << dendl;
-+    mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
-+    return;
-+  }
-+
-   mdr->slave_request = m;
-   
-   dispatch_slave_request(mdr);
-@@ -1339,6 +1361,12 @@ void Server::handle_slave_request_reply(MMDSSlaveRequest *m)
- {
-   int from = m->get_source().num();
-   
-+  if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
-+    dout(3) << "not clientreplay|active yet, waiting" << dendl;
-+    mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
-+    return;
-+  }
-+
-   if (m->get_op() == MMDSSlaveRequest::OP_COMMITTED) {
-     metareqid_t r = m->get_reqid();
-     mds->mdcache->committed_master_slave(r, from);
-@@ -5138,10 +5166,8 @@ void Server::handle_slave_rmdir_prep(MDRequest *mdr)
-   dout(10) << " dn " << *dn << dendl;
-   mdr->pin(dn);
++      assert(mdr->more()->waiting_on_slave.count(from));
++      mdr->more()->waiting_on_slave.erase(from);
++      assert(mdr->more()->waiting_on_slave.empty());
++      dispatch_client_request(mdr);
+     }
+     break;
  
--  assert(mdr->slave_request->stray.length() > 0);
--  CDentry *straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
--  assert(straydn);
--  mdr->pin(straydn);
-+  assert(mdr->straydn);
-+  CDentry *straydn = mdr->straydn;
-   dout(10) << " straydn " << *straydn << dendl;
-   
-   mdr->now = mdr->slave_request->now;
-@@ -5208,6 +5234,7 @@ void Server::_logged_slave_rmdir(MDRequest *mdr, CDentry *dn, CDentry *straydn)
-   // done.
-   mdr->slave_request->put();
-   mdr->slave_request = 0;
-+  mdr->straydn = 0;
- }
- 
- void Server::handle_slave_rmdir_prep_ack(MDRequest *mdr, MMDSSlaveRequest *ack)
-@@ -6460,15 +6487,12 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
-   // stray?
-   bool linkmerge = (srcdnl->get_inode() == destdnl->get_inode() &&
- 		    (srcdnl->is_primary() || destdnl->is_primary()));
--  CDentry *straydn = 0;
--  if (destdnl->is_primary() && !linkmerge) {
--    assert(mdr->slave_request->stray.length() > 0);
--    straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
-+  CDentry *straydn = mdr->straydn;
-+  if (destdnl->is_primary() && !linkmerge)
-     assert(straydn);
--    mdr->pin(straydn);
--  }
- 
-   mdr->now = mdr->slave_request->now;
-+  mdr->more()->srcdn_auth_mds = srcdn->authority().first;
- 
-   // set up commit waiter (early, to clean up any freezing etc we do)
-   if (!mdr->more()->slave_commit)
-@@ -6651,6 +6675,7 @@ void Server::_logged_slave_rename(MDRequest *mdr,
-   // done.
-   mdr->slave_request->put();
-   mdr->slave_request = 0;
-+  mdr->straydn = 0;
- }
- 
- void Server::_commit_slave_rename(MDRequest *mdr, int r,
 -- 
 1.7.11.7
 
