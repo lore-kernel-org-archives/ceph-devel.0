@@ -1,61 +1,61 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Chinese translation of official docs
-Date: Sun, 17 Mar 2013 12:09:34 +0800
-Message-ID: <CAJiejCTJ-fnu1-aeUenA2u0kBdMB901pRbf16DAeqTUEW3fhSw@mail.gmail.com>
-References: <CAJiejCSn_JDYLf-PqU=ZWYPL50FM=kMfemnWoBbZWG=JQnPUuQ@mail.gmail.com>
- <813C241A-4E27-4030-B70D-C746538AD165@intel.com>
+From: <Kelvin_Huang@wiwynn.com>
+Subject: Ceph availability test & recovering question
+Date: Sun, 17 Mar 2013 04:18:12 +0000
+Message-ID: <86F425174C7E4F418CCF4E62056152E593906F@GDC-CLDMBX-P01.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:38831 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699Ab3CQEJz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 00:09:55 -0400
-Received: by mail-qc0-f181.google.com with SMTP id a22so2243716qcs.12
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Mar 2013 21:09:55 -0700 (PDT)
-In-Reply-To: <813C241A-4E27-4030-B70D-C746538AD165@intel.com>
+Received: from twnhumsw2.wistron.com ([220.128.89.22]:55287 "EHLO
+	TWNHUMSW2.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699Ab3CQESQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 00:18:16 -0400
+Received: from GDC-CLDCAS-P01.whq.wistron (unverified [10.37.38.62]) by TWNHUMSW2.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Taa84b435bdc0a816701054@TWNHUMSW2.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Sun, 17 Mar 2013 12:20:43 +0800
+Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Huang, Xiwei" <xiwei.huang@intel.com>
-Cc: maillist-linux <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Eric_YH_Chen@wiwynn.com
 
-2013/3/17 Huang, Xiwei <xiwei.huang@intel.com>:
-> That's quite cool. I can also help on it. :)
->
+Hi, all
 
-Thanks a lot. As you can see in the doc, the Block Devices and RADOS
-Gateway just finished header part, we can start here.
+I have some problem after availability test
 
-About the outdated things, I will update it up to official docs in
-next few weeks.
+Setup:
+Linux kernel: 3.2.0
+OS: Ubuntu 12.04
+Storage server : 11 HDD (each storage server has 11 osd, 7200 rpm, 1T) + 10GbE NIC 
+RAID card: LSI MegaRAID SAS 9260-4i  For every HDD: RAID0, Write Policy: Write Back with BBU, Read Policy: ReadAhead, IO Policy: Direct 
+Storage server number : 2
 
->
-> =E5=9C=A8 2013-3-16=EF=BC=8C21:37=EF=BC=8C"Drunkard Zhang" <gongfan19=
-3@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
->
->> Hi,
->>    When I started digging ceph, there's too little Chinese docs, so
->> here I translated myself, hope someone need it :-)
->>
->> Status:
->> I copied from http://ceph.com/docs/master/start/ about last November=
-,
->> and it's not complete yet, but enough for general users to getting
->> started. I'll trying to get it finished and update-to-date as I got
->> free time.
->>
->> It's available from:
->> http://ishare.iask.sina.com.cn/f/36067657.html
->> https://github.com/drunkard/docs_zh/blob/master/ceph-docs_zh-v1.0.pd=
-f
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ceph version : 0.48.2
+Replicas : 2
+Monitor number:3
+
+
+We have two storage server as a cluter, then use ceph client create 1T RBD image for testing, the client also 
+has 10GbE NIC , Linux kernel 3.2.0 , Ubuntu 12.04
+
+We also use FIO to produce workload
+
+fio command:
+[Sequencial Read]
+fio --iodepth = 32 --numjobs=1 --runtime=120  --bs = 65536 --rw = read --ioengine=libaio --group_reporting --direct=1 --eta=always  --ramp_time=10 --thinktime=10
+
+[Sequencial Write]
+fio --iodepth = 32 --numjobs=1 --runtime=120  --bs = 65536 --rw = write --ioengine=libaio --group_reporting --direct=1 --eta=always  --ramp_time=10 --thinktime=10
+
+
+Now I want observe to ceph state when one storage server is crash, so I turn off one storage server networking.
+We expect that data write and data read operation can be quickly resume or even not be suspended in ceph recovering time, but the experimental results show 
+the data write and data read operation will pause for about 20~30 seconds in ceph recovering time.
+
+My question is:
+1.The state of I/O pause is normal when ceph recovering ?
+2.The pause time of I/O that can not be avoided when ceph recovering ?
+3.How to reduce the I/O pause time ?
+
+
+Thanks!!
