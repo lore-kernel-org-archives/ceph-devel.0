@@ -1,52 +1,38 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 35/39] mds: clear dirty inode rstat if import fails
-Date: Sun, 17 Mar 2013 22:51:38 +0800
-Message-ID: <1363531902-24909-36-git-send-email-zheng.z.yan@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+From: "m-ario3003883@libero.it" <m-ario3003883@libero.it>
+Subject: Mr.Francisco
+Date: Mon, 18 Mar 2013 01:52:06 +0100 (CET)
+Message-ID: <25568070.1462501363567926105.JavaMail.defaultUser@defaultHost>
+Reply-To: "m-ario3003883@libero.it" <m-ario3003883@libero.it>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:30053 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932724Ab3CQOyA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Mar 2013 10:54:00 -0400
-In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+Received: from outrelay01.libero.it ([212.52.84.101]:56178 "EHLO
+	outrelay01.libero.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750808Ab3CRAxr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 20:53:47 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+My names is Barrister Francisco Carlos Fern=C3=A1ndez Gir=C3=B3n of elA=
+bogado.com /=20
+=46rancisco Carlos Fern=C3=A1ndez Gir=C3=B3n Spain. I sent you a busine=
+ss proposal letter=20
+long time ago,but as I write you today you have not respond to me, I am=
+ using=20
+this medium to remind you again because I am really running out of time=
+=2E Please=20
+I would appreciate if you could confirm to me if you received the propo=
+sal=20
+letter please let me know through this Emails below:=20
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/CDir.cc     | 1 +
- src/mds/Migrator.cc | 2 ++
- 2 files changed, 3 insertions(+)
+=46or further clarification reach me on this Private Email:=20
+franciscofernandez394@yahoo.es
 
-diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
-index 34bd8d3..47b6753 100644
---- a/src/mds/CDir.cc
-+++ b/src/mds/CDir.cc
-@@ -1022,6 +1022,7 @@ void CDir::assimilate_dirty_rstat_inodes()
-   for (elist<CInode*>::iterator p = dirty_rstat_inodes.begin_use_current();
-        !p.end(); ++p) {
-     CInode *in = *p;
-+    assert(in->is_auth());
-     if (in->is_frozen())
-       continue;
- 
-diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
-index 0672d03..f563b8d 100644
---- a/src/mds/Migrator.cc
-+++ b/src/mds/Migrator.cc
-@@ -2052,6 +2052,8 @@ void Migrator::import_reverse(CDir *dir)
- 	in->clear_replica_map();
- 	if (in->is_dirty()) 
- 	  in->mark_clean();
-+	in->clear_dirty_rstat();
-+
- 	in->authlock.clear_gather();
- 	in->linklock.clear_gather();
- 	in->dirfragtreelock.clear_gather();
--- 
-1.7.11.7
-
+Best Regards,=20
+Mr.Francisco Carlos Fern=C3=A1ndez G.(Esq)
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
