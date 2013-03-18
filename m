@@ -1,38 +1,43 @@
-From: "m-ario3003883@libero.it" <m-ario3003883@libero.it>
-Subject: Mr.Francisco
-Date: Mon, 18 Mar 2013 01:52:06 +0100 (CET)
-Message-ID: <25568070.1462501363567926105.JavaMail.defaultUser@defaultHost>
-Reply-To: "m-ario3003883@libero.it" <m-ario3003883@libero.it>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: [radosgw] Race condition corrupting data on COPY ?
+Date: Mon, 18 Mar 2013 10:50:17 +0100
+Message-ID: <CAF6-1L6+un7+z0MmCH=vKzkXUOevhFDAneYqC3Krxm3nb0LP1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outrelay01.libero.it ([212.52.84.101]:56178 "EHLO
-	outrelay01.libero.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750808Ab3CRAxr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Mar 2013 20:53:47 -0400
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:62095 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751405Ab3CRJuS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Mar 2013 05:50:18 -0400
+Received: by mail-qa0-f46.google.com with SMTP id o13so1545612qaj.5
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Mar 2013 02:50:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-My names is Barrister Francisco Carlos Fern=C3=A1ndez Gir=C3=B3n of elA=
-bogado.com /=20
-=46rancisco Carlos Fern=C3=A1ndez Gir=C3=B3n Spain. I sent you a busine=
-ss proposal letter=20
-long time ago,but as I write you today you have not respond to me, I am=
- using=20
-this medium to remind you again because I am really running out of time=
-=2E Please=20
-I would appreciate if you could confirm to me if you received the propo=
-sal=20
-letter please let me know through this Emails below:=20
+Hi,
 
-=46or further clarification reach me on this Private Email:=20
-franciscofernandez394@yahoo.es
 
-Best Regards,=20
-Mr.Francisco Carlos Fern=C3=A1ndez G.(Esq)
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've just noticed something rather worrying on our cluster.
+
+Some files are apparently truncated. From the first look I had at it,
+it happened on files where there was a metadata update right after the
+file was stored. The exact sequence was:
+
+ - PUT to store the file
+ - GET to get the file (which at that point is still correct and has
+the proper length)
+ - PUT using a 'copy source' over itself to update the metadata
+
+all of theses happening sequentially in the same second, very quickly.
+
+Then subsequent GET return a truncated file.
+
+
+I'm looking into it to narrow down the issue but I wanted to know if
+anyone had seen something similar ?
+
+
+Cheers,
+
+     Sylvain
