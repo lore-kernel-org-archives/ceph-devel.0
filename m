@@ -1,44 +1,50 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Direct IO on CephFS for blocks larger than 8MB
-Date: Mon, 18 Mar 2013 14:21:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1303181421240.28537@cobra.newdream.net>
-References: <5A908216FB901F499F602F4F9CEF5B380FEA68C3@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1303140819420.11175@cobra.newdream.net> <F9E1A4A5-FE26-460B-A228-99033A36ECF8@intel.com> <alpine.DEB.2.00.1303150931160.23110@cobra.newdream.net>
- <B0E6BFC2-292E-4EB5-BE19-FD0F670EBDE3@enovance.com> <869D592D-E098-4EB9-8F25-FC8FBF715E03@intel.com> <CANExM-Oj1ctk5i0HL-7VXd8K3oP5oUTuUWMq-2F5u4i+cHz7Ww@mail.gmail.com> <555712E2BBAC4147BF96AE32C88A1C83@inktank.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: corruption of active mmapped files in btrfs snapshots
+Date: Mon, 18 Mar 2013 19:43:28 -0300
+Message-ID: <or8v5kfhwv.fsf@livre.home>
+References: <orhak8fm0u.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39863 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932368Ab3CRVVd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Mar 2013 17:21:33 -0400
-In-Reply-To: <555712E2BBAC4147BF96AE32C88A1C83@inktank.com>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:55383 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751120Ab3CRWnw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Mar 2013 18:43:52 -0400
+In-Reply-To: <orhak8fm0u.fsf@livre.home> (Alexandre Oliva's message of "Mon,
+	18 Mar 2013 18:14:41 -0300")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: Henry C Chang <henry.cy.chang@gmail.com>, "Huang, Xiwei" <xiwei.huang@intel.com>, Sebastien Han <sebastien.han@enovance.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 18 Mar 2013, Greg Farnum wrote:
-> On Saturday, March 16, 2013 at 5:38 AM, Henry C Chang wrote:
-> > The following patch should fix the problem.
-> > 
-> > -Henry
-> > 
-> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > index e51558f..4bcbcb6 100644
-> > --- a/fs/ceph/file.c
-> > +++ b/fs/ceph/file.c
-> > @@ -608,7 +608,7 @@ out:
-> > pos += len;
-> > written += len;
-> > left -= len;
-> > - data += written;
-> > + data += len;
-> > if (left)
-> > goto more;
-> 
-> This looks good to me. If you'd like to submit it as a proper patch with a sign-off I'll pull it into our tree. :)
-> -Greg
+While I wrote the previous email, a smoking gun formed in one of my
+servers: a snapshot that had passed a database consistency check turned
+out to be corrupted when I tried to rollback to it!  Since the snapshot
+was not modified in any way between the initial scripted check and the
+later manual check, the problem must be in btrfs.
 
-I just added a quick test and it fixes it up.  :)
+On Mar 18, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
 
-sage
+> I've scripted regular checks of osd snapshots, saving the
+> last-known-good database along with the first one that displays the
+> corruption.  Studying about two dozen failures over the weekend, that
+> took place on all of 13 btrfs-based osds on 3 servers running btrfs as
+> in 3.8.3(-gnu), I noticed that all of the corrupted databases had a
+> similar pattern: a stream of NULs of varying sizes at the end of a page,
+> starting at a block boundary (leveldb doesn't do page-sized blocking, so
+> blocks can start anywhere in a page), and ending close to the beginning
+> of the next page, although not exactly at the page boundary; 20 bytes
+> past the page boundary seemed to be the most common size, but the
+> occasional presence of NULs in the database contents makes it harder to
+> tell for sure.
+
+Additional corrupted snapshots collected today have confirmed this
+pattern, except that today I got several corrupted files with non-NULs
+right at the beginning of the page following the one that marked the
+beginning of the corrupted database block.
+
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
