@@ -1,52 +1,52 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 1/6] libceph: clear messenger auth_retry flag when we authenticate
-Date: Tue, 19 Mar 2013 16:08:01 -0700
-Message-ID: <1363734486-26879-1-git-send-email-sage@inktank.com>
+Subject: [PATCH 2/6] libceph: fix authorizer invalidation
+Date: Tue, 19 Mar 2013 16:08:02 -0700
+Message-ID: <1363734486-26879-2-git-send-email-sage@inktank.com>
+References: <1363734486-26879-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54519 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54521 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754146Ab3CSXII (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:08:08 -0400
+	with ESMTP id S1754146Ab3CSXIK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:08:10 -0400
+In-Reply-To: <1363734486-26879-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-We maintain a counter of failed auth attempts to allow us to retry once
-before failing.  However, if the second attempt succeeds, the flag isn't
-cleared, which makes us think auth failed again later when the connection
-resets for other reasons (like a socket error).
+We were invalidating the authorizer by removing the ticket handler
+entirely.  This was effective in inducing us to request a new authorizer,
+but in the meantime it mean that any authorizer we generated would get a
+new and initialized handler with secret_id=0, which would always be
+rejected by the server side with a confusing error message:
 
-This is one part of the sorry sequence of events in bug
+ auth: could not find secret_id=0
+ cephx: verify_authorizer could not get service secret for service osd secret_id=0
 
-	http://tracker.ceph.com/issues/4282
+Instead, simply clear the validity field.  This will still induce the auth
+code to request a new secret, but will let us continue to use the old
+ticket in the meantime.  The messenger code will probably continue to fail,
+but the exponential backoff will kick in, and eventually the we will get a
+new (hopefully more valid) ticket from the mon and be able to continue.
 
 Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- net/ceph/messenger.c |    3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ net/ceph/auth_x.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 997dacc..19af956 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -1988,7 +1988,6 @@ static int process_connect(struct ceph_connection *con)
- 			con->error_msg = "connect authorization failure";
- 			return -1;
- 		}
--		con->auth_retry = 1;
- 		con_out_kvec_reset(con);
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
-@@ -2073,7 +2072,7 @@ static int process_connect(struct ceph_connection *con)
+diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+index a16bf14..bd8758d 100644
+--- a/net/ceph/auth_x.c
++++ b/net/ceph/auth_x.c
+@@ -630,7 +630,7 @@ static void ceph_x_invalidate_authorizer(struct ceph_auth_client *ac,
  
- 		WARN_ON(con->state != CON_STATE_NEGOTIATING);
- 		con->state = CON_STATE_OPEN;
--
-+		con->auth_retry = 0;    /* we authenticated; clear flag */
- 		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
- 		con->connect_seq++;
- 		con->peer_features = server_feat;
+ 	th = get_ticket_handler(ac, peer_type);
+ 	if (!IS_ERR(th))
+-		remove_ticket_handler(ac, th);
++		memset(&th->validity, 0, sizeof(th->validity));
+ }
+ 
+ 
 -- 
 1.7.9.5
 
