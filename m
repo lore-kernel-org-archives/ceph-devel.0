@@ -1,115 +1,40 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: [PATCH 04/39] mds: make sure table request id unique
-Date: Tue, 19 Mar 2013 16:09:38 -0700
-Message-ID: <C7E493EEAA91442B9BD120B881E4638F@inktank.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
- <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
+From: Guilhem Lettron <guilhem@lettron.fr>
+Subject: Re: github pull requests
+Date: Wed, 20 Mar 2013 00:09:32 +0100
+Message-ID: <CAMQoE_3+Os=F75LE+7dLVK2LYamNbEqwk0wpTe5+b0UZvYnQzg@mail.gmail.com>
+References: <alpine.DEB.2.00.1303191550140.4850@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f48.google.com ([209.85.160.48]:44345 "EHLO
-	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754733Ab3CSXJm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:09:42 -0400
-Received: by mail-pb0-f48.google.com with SMTP id wy12so817193pbc.21
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Mar 2013 16:09:41 -0700 (PDT)
-In-Reply-To: <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
-Content-Disposition: inline
+Received: from mail-ob0-f171.google.com ([209.85.214.171]:65012 "EHLO
+	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754733Ab3CSXJx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:09:53 -0400
+Received: by mail-ob0-f171.google.com with SMTP id x4so1049545obh.16
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Mar 2013 16:09:53 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1303191550140.4850@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hmm, this is definitely narrowing the race (probably enough to never hi=
-t it), but it's not actually eliminating it (if the restart happens aft=
-er 4 billion requests=E2=80=A6). More importantly this kind of symptom =
-makes me worry that we might be papering over more serious issues with =
-colliding states in the Table on restart.
-I don't have the MDSTable semantics in my head so I'll need to look int=
-o this later unless somebody else volunteers to do so=E2=80=A6
--Greg
+Glad to see this openness! Everyone isn't like you.
+And I hope to see less [PATCH] in mailing-list, but maybe it's only a dream.
 
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Just my two cents.
 
+On Tue, Mar 19, 2013 at 11:54 PM, Sage Weil <sage@inktank.com> wrote:
+>
+> The only thing it doesn't do for you is zap the old branch.
 
-On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
+Github can do it: https://github.com/blog/1335-tidying-up-after-pull-requests
+You can "delete this branch" when pull request is closed (and better merged).
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> =20
-> When a MDS becomes active, the table server re-sends 'agree' messages
-> for old prepared request. If the recoverd MDS starts a new table requ=
-est
-> at the same time, The new request's ID can happen to be the same as o=
-ld
-> prepared request's ID, because current table client assigns request I=
-D
-> from zero after MDS restarts.
-> =20
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan@=
-intel.com)>
-> ---
-> src/mds/MDS.cc (http://MDS.cc) | 3 +++
-> src/mds/MDSTableClient.cc (http://MDSTableClient.cc) | 5 +++++
-> src/mds/MDSTableClient.h | 2 ++
-> 3 files changed, 10 insertions(+)
-> =20
-> diff --git a/src/mds/MDS.cc (http://MDS.cc) b/src/mds/MDS.cc (http://=
-MDS.cc)
-> index bb1c833..859782a 100644
-> --- a/src/mds/MDS.cc (http://MDS.cc)
-> +++ b/src/mds/MDS.cc (http://MDS.cc)
-> @@ -1212,6 +1212,9 @@ void MDS::boot_start(int step, int r)
-> dout(2) << "boot_start " << step << ": opening snap table" << dendl; =
-=20
-> snapserver->load(gather.new_sub());
-> }
-> +
-> + anchorclient->init();
-> + snapclient->init();
-> =20
-> dout(2) << "boot_start " << step << ": opening mds log" << dendl;
-> mdlog->open(gather.new_sub());
-> diff --git a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc) b/s=
-rc/mds/MDSTableClient.cc (http://MDSTableClient.cc)
-> index ea021f5..beba0a3 100644
-> --- a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
-> +++ b/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
-> @@ -34,6 +34,11 @@
-> #undef dout_prefix
-> #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".tablec=
-lient(" << get_mdstable_name(table) << ") "
-> =20
-> +void MDSTableClient::init()
-> +{
-> + // make reqid unique between MDS restarts
-> + last_reqid =3D (uint64_t)mds->mdsmap->get_epoch() << 32;
-> +}
-> =20
-> void MDSTableClient::handle_request(class MMDSTableRequest *m)
-> {
-> diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
-> index e15837f..78035db 100644
-> --- a/src/mds/MDSTableClient.h
-> +++ b/src/mds/MDSTableClient.h
-> @@ -63,6 +63,8 @@ public:
-> MDSTableClient(MDS *m, int tab) : mds(m), table(tab), last_reqid(0) {=
-}
-> virtual ~MDSTableClient() {}
-> =20
-> + void init();
-> +
-> void handle_request(MMDSTableRequest *m);
-> =20
-> void _prepare(bufferlist& mutation, version_t *ptid, bufferlist *pbl,=
- Context *onfinish);
-> -- =20
-> 1.7.11.7
+You can also use this: https://github.com/blog/1377-create-and-delete-branches
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
