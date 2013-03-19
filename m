@@ -1,279 +1,115 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 4/6] libceph: wrap auth ops in wrapper functions
-Date: Tue, 19 Mar 2013 16:08:04 -0700
-Message-ID: <1363734486-26879-4-git-send-email-sage@inktank.com>
-References: <1363734486-26879-1-git-send-email-sage@inktank.com>
+From: Greg Farnum <greg@inktank.com>
+Subject: Re: [PATCH 04/39] mds: make sure table request id unique
+Date: Tue, 19 Mar 2013 16:09:38 -0700
+Message-ID: <C7E493EEAA91442B9BD120B881E4638F@inktank.com>
+References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+ <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54526 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754760Ab3CSXIK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:08:10 -0400
-In-Reply-To: <1363734486-26879-1-git-send-email-sage@inktank.com>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:44345 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754733Ab3CSXJm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:09:42 -0400
+Received: by mail-pb0-f48.google.com with SMTP id wy12so817193pbc.21
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Mar 2013 16:09:41 -0700 (PDT)
+In-Reply-To: <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
-Use wrapper functions that check whether the auth op exists so that callers
-do not need a bunch of conditional checks.  Simplifies the external
-interface.
+Hmm, this is definitely narrowing the race (probably enough to never hi=
+t it), but it's not actually eliminating it (if the restart happens aft=
+er 4 billion requests=E2=80=A6). More importantly this kind of symptom =
+makes me worry that we might be papering over more serious issues with =
+colliding states in the Table on restart.
+I don't have the MDSTable semantics in my head so I'll need to look int=
+o this later unless somebody else volunteers to do so=E2=80=A6
+-Greg
 
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- fs/ceph/mds_client.c      |   26 ++++++++++++-------------
- include/linux/ceph/auth.h |   13 +++++++++++++
- net/ceph/auth.c           |   47 +++++++++++++++++++++++++++++++++++++++++++++
- net/ceph/auth_x.c         |    1 -
- net/ceph/mon_client.c     |    7 +++----
- net/ceph/osd_client.c     |   26 +++++++++----------------
- 6 files changed, 84 insertions(+), 36 deletions(-)
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 75cca49..c07ab3c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -365,9 +365,9 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
- 	     atomic_read(&s->s_ref), atomic_read(&s->s_ref)-1);
- 	if (atomic_dec_and_test(&s->s_ref)) {
- 		if (s->s_auth.authorizer)
--		     s->s_mdsc->fsc->client->monc.auth->ops->destroy_authorizer(
--			     s->s_mdsc->fsc->client->monc.auth,
--			     s->s_auth.authorizer);
-+			ceph_auth_destroy_authorizer(
-+				s->s_mdsc->fsc->client->monc.auth,
-+				s->s_auth.authorizer);
- 		kfree(s);
- 	}
- }
-@@ -3439,18 +3439,17 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
- 	struct ceph_auth_handshake *auth = &s->s_auth;
- 
- 	if (force_new && auth->authorizer) {
--		if (ac->ops && ac->ops->destroy_authorizer)
--			ac->ops->destroy_authorizer(ac, auth->authorizer);
-+		ceph_auth_destroy_authorizer(ac, auth->authorizer);
- 		auth->authorizer = NULL;
- 	}
--	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
--		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
--						     auth);
-+	if (!auth->authorizer) {
-+		int ret = ceph_auth_create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
-+						      auth);
- 		if (ret)
- 			return ERR_PTR(ret);
--	} else if (ac->ops && ac->ops_update_authorizer) {
--		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
--						     auth);
-+	} else {
-+		int ret = ceph_auth_update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
-+						      auth);
- 		if (ret)
- 			return ERR_PTR(ret);
- 	}
-@@ -3466,7 +3465,7 @@ static int verify_authorizer_reply(struct ceph_connection *con, int len)
- 	struct ceph_mds_client *mdsc = s->s_mdsc;
- 	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
- 
--	return ac->ops->verify_authorizer_reply(ac, s->s_auth.authorizer, len);
-+	return ceph_auth_verify_authorizer_reply(ac, s->s_auth.authorizer, len);
- }
- 
- static int invalidate_authorizer(struct ceph_connection *con)
-@@ -3475,8 +3474,7 @@ static int invalidate_authorizer(struct ceph_connection *con)
- 	struct ceph_mds_client *mdsc = s->s_mdsc;
- 	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
- 
--	if (ac->ops->invalidate_authorizer)
--		ac->ops->invalidate_authorizer(ac, CEPH_ENTITY_TYPE_MDS);
-+	ceph_auth_invalidate_authorizer(ac, CEPH_ENTITY_TYPE_MDS);
- 
- 	return ceph_monc_validate_auth(&mdsc->fsc->client->monc);
- }
-diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
-index 73e973e..c9c3b3a 100644
---- a/include/linux/ceph/auth.h
-+++ b/include/linux/ceph/auth.h
-@@ -97,5 +97,18 @@ extern int ceph_build_auth(struct ceph_auth_client *ac,
- 		    void *msg_buf, size_t msg_len);
- 
- extern int ceph_auth_is_authenticated(struct ceph_auth_client *ac);
-+extern int ceph_auth_create_authorizer(struct ceph_auth_client *ac,
-+				       int peer_type,
-+				       struct ceph_auth_handshake *auth);
-+extern void ceph_auth_destroy_authorizer(struct ceph_auth_client *ac,
-+					 struct ceph_authorizer *a);
-+extern int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
-+				       int peer_type,
-+				       struct ceph_auth_handshake *a);
-+extern int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
-+					     struct ceph_authorizer *a,
-+					     size_t len);
-+extern void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac,
-+					    int peer_type);
- 
- #endif
-diff --git a/net/ceph/auth.c b/net/ceph/auth.c
-index b4bf4ac..a22de54 100644
---- a/net/ceph/auth.c
-+++ b/net/ceph/auth.c
-@@ -257,3 +257,50 @@ int ceph_auth_is_authenticated(struct ceph_auth_client *ac)
- 		return 0;
- 	return ac->ops->is_authenticated(ac);
- }
-+EXPORT_SYMBOL(ceph_auth_is_authenticated);
-+
-+int ceph_auth_create_authorizer(struct ceph_auth_client *ac,
-+				int peer_type,
-+				struct ceph_auth_handshake *auth)
-+{
-+	if (ac->ops && ac->ops->create_authorizer)
-+		return ac->ops->create_authorizer(ac, peer_type, auth);
-+	return 0;
-+}
-+EXPORT_SYMBOL(ceph_auth_create_authorizer);
-+
-+void ceph_auth_destroy_authorizer(struct ceph_auth_client *ac,
-+				  struct ceph_authorizer *a)
-+{
-+	if (ac->ops && ac->ops->destroy_authorizer)
-+		ac->ops->destroy_authorizer(ac, a);
-+}
-+EXPORT_SYMBOL(ceph_auth_destroy_authorizer);
-+
-+int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
-+				int peer_type,
-+				struct ceph_auth_handshake *a)
-+{
-+	int ret = 0;
-+
-+	if (ac->ops && ac->ops->update_authorizer)
-+		ret = ac->ops->update_authorizer(ac, peer_type, a);
-+	return ret;
-+}
-+EXPORT_SYMBOL(ceph_auth_update_authorizer);
-+
-+int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
-+				      struct ceph_authorizer *a, size_t len)
-+{
-+	if (ac->ops && ac->ops->verify_authorizer_reply)
-+		return ac->ops->verify_authorizer_reply(ac, a, len);
-+	return 0;
-+}
-+EXPORT_SYMBOL(ceph_auth_verify_authorizer_reply);
-+
-+void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac, int peer_type)
-+{
-+	if (ac->ops && ac->ops->invalidate_authorizer)
-+		ac->ops->invalidate_authorizer(ac, peer_type);
-+}
-+EXPORT_SYMBOL(ceph_auth_invalidate_authorizer);
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index 2d59815..96238ba 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -562,7 +562,6 @@ static int ceph_x_update_authorizer(
- {
- 	struct ceph_x_authorizer *au;
- 	struct ceph_x_ticket_handler *th;
--	int ret;
- 
- 	th = get_ticket_handler(ac, peer_type);
- 	if (IS_ERR(th))
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index aef5b10..1fe25cd 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -737,7 +737,7 @@ static void delayed_work(struct work_struct *work)
- 
- 		__validate_auth(monc);
- 
--		if (monc->auth->ops->is_authenticated(monc->auth))
-+		if (ceph_auth_is_authenticated(monc->auth))
- 			__send_subscribe(monc);
- 	}
- 	__schedule_delayed(monc);
-@@ -892,8 +892,7 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
- 
- 	mutex_lock(&monc->mutex);
- 	had_debugfs_info = have_debugfs_info(monc);
--	if (monc->auth->ops)
--		was_auth = monc->auth->ops->is_authenticated(monc->auth);
-+	was_auth = ceph_auth_is_authenticated(monc->auth);
- 	monc->pending_auth = 0;
- 	ret = ceph_handle_auth_reply(monc->auth, msg->front.iov_base,
- 				     msg->front.iov_len,
-@@ -904,7 +903,7 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
- 		wake_up_all(&monc->client->auth_wq);
- 	} else if (ret > 0) {
- 		__send_prepared_auth_request(monc, ret);
--	} else if (!was_auth && monc->auth->ops->is_authenticated(monc->auth)) {
-+	} else if (!was_auth && ceph_auth_is_authenticated(monc->auth)) {
- 		dout("authenticated, starting session\n");
- 
- 		monc->client->msgr.inst.name.type = CEPH_ENTITY_TYPE_CLIENT;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 5ef24e3..7041906 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -666,8 +666,7 @@ static void put_osd(struct ceph_osd *osd)
- 	if (atomic_dec_and_test(&osd->o_ref) && osd->o_auth.authorizer) {
- 		struct ceph_auth_client *ac = osd->o_osdc->client->monc.auth;
- 
--		if (ac->ops && ac->ops->destroy_authorizer)
--			ac->ops->destroy_authorizer(ac, osd->o_auth.authorizer);
-+		ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
- 		kfree(osd);
- 	}
- }
-@@ -2211,17 +2210,16 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
- 	struct ceph_auth_handshake *auth = &o->o_auth;
- 
- 	if (force_new && auth->authorizer) {
--		if (ac->ops && ac->ops->destroy_authorizer)
--			ac->ops->destroy_authorizer(ac, auth->authorizer);
-+		ceph_auth_destroy_authorizer(ac, auth->authorizer);
- 		auth->authorizer = NULL;
- 	}
--	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
--		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
--							auth);
-+	if (!auth->authorizer) {
-+		int ret = ceph_auth_create_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
-+						      auth);
- 		if (ret)
- 			return ERR_PTR(ret);
--	} else if (ac->ops && ac->ops->update_authorizer) {
--		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
-+	} else {
-+		int ret = ceph_auth_update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
- 						     auth);
- 		if (ret)
- 			return ERR_PTR(ret);
-@@ -2238,11 +2236,7 @@ static int verify_authorizer_reply(struct ceph_connection *con, int len)
- 	struct ceph_osd_client *osdc = o->o_osdc;
- 	struct ceph_auth_client *ac = osdc->client->monc.auth;
- 
--	/*
--	 * XXX If ac->ops or ac->ops->verify_authorizer_reply is null,
--	 * XXX which do we do:  succeed or fail?
--	 */
--	return ac->ops->verify_authorizer_reply(ac, o->o_auth.authorizer, len);
-+	return ceph_auth_verify_authorizer_reply(ac, o->o_auth.authorizer, len);
- }
- 
- static int invalidate_authorizer(struct ceph_connection *con)
-@@ -2251,9 +2245,7 @@ static int invalidate_authorizer(struct ceph_connection *con)
- 	struct ceph_osd_client *osdc = o->o_osdc;
- 	struct ceph_auth_client *ac = osdc->client->monc.auth;
- 
--	if (ac->ops && ac->ops->invalidate_authorizer)
--		ac->ops->invalidate_authorizer(ac, CEPH_ENTITY_TYPE_OSD);
--
-+	ceph_auth_invalidate_authorizer(ac, CEPH_ENTITY_TYPE_OSD);
- 	return ceph_monc_validate_auth(&osdc->client->monc);
- }
- 
--- 
-1.7.9.5
 
+On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
+
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> =20
+> When a MDS becomes active, the table server re-sends 'agree' messages
+> for old prepared request. If the recoverd MDS starts a new table requ=
+est
+> at the same time, The new request's ID can happen to be the same as o=
+ld
+> prepared request's ID, because current table client assigns request I=
+D
+> from zero after MDS restarts.
+> =20
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan@=
+intel.com)>
+> ---
+> src/mds/MDS.cc (http://MDS.cc) | 3 +++
+> src/mds/MDSTableClient.cc (http://MDSTableClient.cc) | 5 +++++
+> src/mds/MDSTableClient.h | 2 ++
+> 3 files changed, 10 insertions(+)
+> =20
+> diff --git a/src/mds/MDS.cc (http://MDS.cc) b/src/mds/MDS.cc (http://=
+MDS.cc)
+> index bb1c833..859782a 100644
+> --- a/src/mds/MDS.cc (http://MDS.cc)
+> +++ b/src/mds/MDS.cc (http://MDS.cc)
+> @@ -1212,6 +1212,9 @@ void MDS::boot_start(int step, int r)
+> dout(2) << "boot_start " << step << ": opening snap table" << dendl; =
+=20
+> snapserver->load(gather.new_sub());
+> }
+> +
+> + anchorclient->init();
+> + snapclient->init();
+> =20
+> dout(2) << "boot_start " << step << ": opening mds log" << dendl;
+> mdlog->open(gather.new_sub());
+> diff --git a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc) b/s=
+rc/mds/MDSTableClient.cc (http://MDSTableClient.cc)
+> index ea021f5..beba0a3 100644
+> --- a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
+> +++ b/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
+> @@ -34,6 +34,11 @@
+> #undef dout_prefix
+> #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".tablec=
+lient(" << get_mdstable_name(table) << ") "
+> =20
+> +void MDSTableClient::init()
+> +{
+> + // make reqid unique between MDS restarts
+> + last_reqid =3D (uint64_t)mds->mdsmap->get_epoch() << 32;
+> +}
+> =20
+> void MDSTableClient::handle_request(class MMDSTableRequest *m)
+> {
+> diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
+> index e15837f..78035db 100644
+> --- a/src/mds/MDSTableClient.h
+> +++ b/src/mds/MDSTableClient.h
+> @@ -63,6 +63,8 @@ public:
+> MDSTableClient(MDS *m, int tab) : mds(m), table(tab), last_reqid(0) {=
+}
+> virtual ~MDSTableClient() {}
+> =20
+> + void init();
+> +
+> void handle_request(MMDSTableRequest *m);
+> =20
+> void _prepare(bufferlist& mutation, version_t *ptid, bufferlist *pbl,=
+ Context *onfinish);
+> -- =20
+> 1.7.11.7
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
