@@ -1,58 +1,52 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: deb/rpm package purge
-Date: Tue, 19 Mar 2013 18:01:08 -0500
-Message-ID: <5148EE34.9070401@inktank.com>
-References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net>  <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com>  <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net>  <1363732049.12547.22.camel@julia>  <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net> <1363733473.12547.33.camel@julia>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@inktank.com>
+Subject: [PATCH 1/6] libceph: clear messenger auth_retry flag when we authenticate
+Date: Tue, 19 Mar 2013 16:08:01 -0700
+Message-ID: <1363734486-26879-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:59353 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933312Ab3CSXBM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:01:12 -0400
-Received: by mail-ie0-f180.google.com with SMTP id a11so1160927iee.39
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Mar 2013 16:01:11 -0700 (PDT)
-In-Reply-To: <1363733473.12547.33.camel@julia>
+Received: from cobra.newdream.net ([66.33.216.30]:54519 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754146Ab3CSXII (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 19:08:08 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: Sage Weil <sage@inktank.com>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>
 
-On 03/19/2013 05:51 PM, Laszlo Boszormenyi (GCS) wrote:
-> On Tue, 2013-03-19 at 15:29 -0700, Sage Weil wrote:
->> On Tue, 19 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
->>>   In short, if user asks to purge the package, then the keys have to be
->>> removed as well. If someone thinks about a reinstallation, s/he should
->>> use remove instead.
->> The keys aren't a problem; they are still in the mon database
->> (/var/lib/ceph/mon/...).
->>
->> The real question is whether purge should remove /var/lib/ceph and
->> /var/log/ceph...
->   Sorry if I was not clear and/or generic enough. Use of 'dpkg --remove'
-> is to remove binaries of the package, but leave other things, runtime
-> data (configuration, logs, database settings/users and so on) to be left
-> untouched.
-> On the other hand, 'dpkg --purge' is to remove everything the package
-> has installed and/or generated. This includes debconf answers as well.
-> With other words, purge is used to make the system totally clean of the
-> package. As such, if the sysadmin install the package again, all debconf
-> questions will be asked again and all generated files will be generated
-> again from scratch.
->
+We maintain a counter of failed auth attempts to allow us to retry once
+before failing.  However, if the second attempt succeeds, the flag isn't
+cleared, which makes us think auth failed again later when the connection
+resets for other reasons (like a socket error).
 
-Hi Lazlo,
+This is one part of the sorry sequence of events in bug
 
-Thanks for the answers!  The question is whether or not the data in 
-/var/lib/ceph should be removed when that data was not generated as part 
-of the package installation process, but rather as part of the cluster 
-configuration after the package was installed.  IE the package creates 
-the directory, but the user creates the data that resides in it.  What 
-should purge do with the directory now that the user has placed 
-(critical) data in it that was not generated as part of the package 
-installation process?
+	http://tracker.ceph.com/issues/4282
 
-> Laszlo/GCS
->
+Signed-off-by: Sage Weil <sage@inktank.com>
+---
+ net/ceph/messenger.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 997dacc..19af956 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1988,7 +1988,6 @@ static int process_connect(struct ceph_connection *con)
+ 			con->error_msg = "connect authorization failure";
+ 			return -1;
+ 		}
+-		con->auth_retry = 1;
+ 		con_out_kvec_reset(con);
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+@@ -2073,7 +2072,7 @@ static int process_connect(struct ceph_connection *con)
+ 
+ 		WARN_ON(con->state != CON_STATE_NEGOTIATING);
+ 		con->state = CON_STATE_OPEN;
+-
++		con->auth_retry = 0;    /* we authenticated; clear flag */
+ 		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
+ 		con->connect_seq++;
+ 		con->peer_features = server_feat;
+-- 
+1.7.9.5
 
