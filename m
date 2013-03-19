@@ -1,33 +1,20 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Tue, 19 Mar 2013 16:26:56 -0300
-Message-ID: <or620ndwcf.fsf@livre.home>
-References: <orhak8fm0u.fsf@livre.home>
-	<20130318225245.25964.22219@localhost.localdomain>
-	<orzjy0dkz9.fsf@livre.home>
-	<20130319120940.29898.80124@localhost.localdomain>
-	<alpine.DEB.2.00.1303191027320.4850@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: deb/rpm package purge
+Date: Tue, 19 Mar 2013 12:48:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.00.1303191027320.4850@cobra.newdream.net> (Sage
-	Weil's message of "Tue, 19 Mar 2013 10:29:11 -0700 (PDT)")
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: Chris Mason <clmason@fusionio.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:51169 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751542Ab3CSTsD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 15:48:03 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, james.page@ubuntu.com, gcs@debian.hu
 
-On Mar 19, 2013, Sage Weil <sage@inktank.com> wrote:
+Should the package purge remove /var/lib/ceph/* (potential mon data, osd 
+data) and/or /var/log/ceph/* (logs)?  Right now it does, but mysql, for 
+example, leaves /var/lib/mysql where it is (not sure about logs).
 
-> There is a set of unit tests in the leveldb source tree that ought to do 
-> the trick:
-
-> 	git clone https://code.google.com/p/leveldb/
-
-But these don't create btrfs snapshots.
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+sage
