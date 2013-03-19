@@ -1,49 +1,33 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Tue, 19 Mar 2013 02:20:10 -0300
-Message-ID: <orzjy0dkz9.fsf@livre.home>
-References: <orhak8fm0u.fsf@livre.home>
-	<20130318225245.25964.22219@localhost.localdomain>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: inconsistent snapcolls
+Date: Tue, 19 Mar 2013 09:28:32 +0100
+Message-ID: <514821B0.3090706@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:55874 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754098Ab3CSFU1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 01:20:27 -0400
-In-Reply-To: <20130318225245.25964.22219@localhost.localdomain> (Chris Mason's
-	message of "Mon, 18 Mar 2013 18:52:45 -0400")
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:51029 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964921Ab3CSI2h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 04:28:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Mason <chris.mason@fusionio.com>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mar 18, 2013, Chris Mason <chris.mason@fusionio.com> wrote:
+Hello,
 
-> A few questions.  Does leveldb use O_DIRECT and mmap together?
+for testing purposes i've upgrade bobtail 0.56.3 to latest bobtail branch.
 
-No, it doesn't use O_DIRECT at all.  Its I/O interface is very
-simplified: it just opens each new file (database chunks limited to 2MB)
-with O_CREAT|O_RDWR|O_TRUNC, and then uses ftruncate, mmap, msync,
-munmap and fdatasync.  It doesn't seem to modify data once it's written;
-it only appends.  Reading data back from it uses a completely different
-class interface, using separate descriptors and using pread only.
+Since then i'm seeing a lot of messages like these:
 
-> (the source of a write being pages that are mmap'd from somewhere
-> else)
+2013-03-19 09:27:06.089820 osd.32 [ERR] 4.ac6 osd.41 inconsistent
+snapcolls on 34762ac6/rbd_data.26c8856b8b4567.0000000000000025/df3//4
+found be1 expected be1,df1
 
-AFAICT the source of the memcpy()s that append to the file are
-malloc()ed memory.
+What do they mean?
+Does ceph fix them automatically?
 
-> That's the most likely place for this kind of problem.  Also, you
-> mention crc errors.  Are those reported by btrfs or are they application
-> level crcs.
+Thanks!
 
-These are CRCs leveldb computes and writes out after each db block.  No
-btrfs CRC errors are reported in this process.
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Greets,
+Stefan
