@@ -1,158 +1,40 @@
-From: Chris Mason <chris.mason@fusionio.com>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Mon, 18 Mar 2013 18:52:45 -0400
-Message-ID: <20130318225245.25964.22219@localhost.localdomain>
-References: <orhak8fm0u.fsf@livre.home>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <orhak8fm0u.fsf@livre.home>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Alexandre Oliva <oliva@gnu.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: [PATCH] ceph: fix buffer pointer advance in ceph_sync_write
+Date: Tue, 19 Mar 2013 09:46:26 +0800
+Message-ID: <1363657586-9116-1-git-send-email-henry.cy.chang@gmail.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bk0-f43.google.com ([209.85.214.43]:48314 "EHLO
+	mail-bk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757492Ab3CSBqj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Mar 2013 21:46:39 -0400
+Received: by mail-bk0-f43.google.com with SMTP id jm19so2876826bkc.30
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Mar 2013 18:46:38 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-A few questions.  Does leveldb use O_DIRECT and mmap together? (the
-source of a write being pages that are mmap'd from somewhere else)
+We should advance the user data pointer by _len_ instead of _written_.
+_len_ is the data length written in each iteration while _written_ is the
+accumulated data length we have writtent out.
 
-That's the most likely place for this kind of problem.  Also, you
-mention crc errors.  Are those reported by btrfs or are they applicatio=
-n
-level crcs.
+Signed-off-by: Henry C Chang <henry.cy.chang@gmail.com>
+---
+ fs/ceph/file.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks for all the time you spent tracking it down this far.
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index e51558f..4bcbcb6 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -608,7 +608,7 @@ out:
+ 		pos += len;
+ 		written += len;
+ 		left -= len;
+-		data += written;
++		data += len;
+ 		if (left)
+ 			goto more;
+ 
+-- 
+1.7.9.5
 
--chris
-
-Quoting Alexandre Oliva (2013-03-18 17:14:41)
-> For quite a while, I've experienced oddities with snapshotted Firefox
-> _CACHE_00?_ files, whose checksums (and contents) would change after =
-the
-> btrfs snapshot was taken, and would even change depending on how the
-> file was brought to memory (e.g., rsyncing it to backup storage vs
-> checking its md5sum before or after the rsync).  This only affected
-> these cache files, so I didn't give it too much attention.
->=20
-> A similar problem seems to affect the leveldb databases maintained by
-> ceph within the periodic snapshots it takes of its object storage
-> volumes.  I'm told others using ceph on filesystems other than btrfs =
-are
-> not observing this problem, which makes me thing it's not memory
-> corruption within ceph itself.  I've looked into this for a bit, and =
-I'm
-> now inclined to believe it has to do with some bad interaction of mma=
-p
-> and snapshots; I'm not sure the fact that the filesystem has compress=
-ion
-> enabled has any effect, but that's certainly a possibility.
->=20
-> leveldb does not modify file contents once they're initialized, it on=
-ly
-> appends to files, ftruncate()ing them to about a MB early on, mmap()p=
-ing
-> that in and memcpy()ing blocks of various sizes to the end of the out=
-put
-> buffer, occasionally msync()ing the maps, or running fdatasync if it
-> didn't msync a map before munmap()ping it.  If it runs out of space i=
-n a
-> map, it munmap()s the previously mapped range, truncates the file to =
-a
-> larger size, then maps in the new tail of the file, starting at the p=
-age
-> it should append to next.
->=20
-> What I'm observing is that some btrfs snapshots taken by ceph osds,
-> containing the leveldb database, are corrupted, causing crashes durin=
-g
-> the use of the database.
->=20
-> I've scripted regular checks of osd snapshots, saving the
-> last-known-good database along with the first one that displays the
-> corruption.  Studying about two dozen failures over the weekend, that
-> took place on all of 13 btrfs-based osds on 3 servers running btrfs a=
-s
-> in 3.8.3(-gnu), I noticed that all of the corrupted databases had a
-> similar pattern: a stream of NULs of varying sizes at the end of a pa=
-ge,
-> starting at a block boundary (leveldb doesn't do page-sized blocking,=
- so
-> blocks can start anywhere in a page), and ending close to the beginni=
-ng
-> of the next page, although not exactly at the page boundary; 20 bytes
-> past the page boundary seemed to be the most common size, but the
-> occasional presence of NULs in the database contents makes it harder =
-to
-> tell for sure.
->=20
-> The stream of NULs ended in the middle of a database block (meaning i=
-t
-> was not the beginning of a subsequent database block written later; t=
-he
-> beginning of the database block was partially replaced with NULs).
-> Furthermore, the checksum fails to match on this one partially-NULed
-> block.  Since the checksum is computed just before the block and the
-> checksum trailer are memcpy()ed to the mmap()ed area, it is a certain=
-ty
-> that the block was copied entirely to the right place at some point, =
-and
-> if part of it became zeros, it's either because the modification was
-> partially lost, or because the mmapped buffer was partially overwritt=
-en.
-> The fact that all instances of corruption I looked at were correct ri=
-ght
-> to the end of one block boundary, and then all zeros instead of the
-> beginning of the subsequent block to the end of that page, makes a
-> failure to write that modified page seem more likely in my mind (more=
- so
-> given the Firefox _CACHE_ file oddities in snapshots); intense memory
-> pressure at the time of the corruption also seems to favor this
-> possibility.
->=20
-> Now, it could be that btrfs requires those who modify SHARED mmap()ed
-> files so as to make sure that data makes it to a subsequent snapshot,
-> along the lines of msync MS_ASYNC, and leveldb does not take this sor=
-t
-> of precaution.  However, I noticed that the unexpected stream of zero=
-s
-> after a prior block and before the rest of the subsequent block
-> *remains* in subsequent snapshots, which to me indicates the page upd=
-ate
-> is effectively lost.  This explains why even the running osd, that
-> operates on the =E2=80=9Ccurrent=E2=80=9D subvolumes from which snaps=
-hots for recovery
-> are taken, occasionally crashes because of database corruption, and w=
-ill
-> later fail to restart from an earlier snapshot due to that same
-> corruption.
->=20
->=20
-> Does this problem sound familiar to anyone else?
->=20
-> Should mmaped-file writers in general do more than umount or msync to
-> ensure changes make it to subsequent snapshots that are supposed to b=
-e
-> consistent?
->=20
-> Any tips on where to start looking so as to fix the problem, or even =
-to
-> confirm that the problem is indeed in btrfs?
->=20
->=20
-> TIA,
->=20
-> --=20
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs=
-" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
