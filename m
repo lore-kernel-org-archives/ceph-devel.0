@@ -1,63 +1,42 @@
-From: Chris Mason <clmason@fusionio.com>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Tue, 19 Mar 2013 08:09:40 -0400
-Message-ID: <20130319120940.29898.80124@localhost.localdomain>
-References: <orhak8fm0u.fsf@livre.home>
- <20130318225245.25964.22219@localhost.localdomain>
- <orzjy0dkz9.fsf@livre.home>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: inconsistent snapcolls
+Date: Tue, 19 Mar 2013 15:14:56 +0100
+Message-ID: <514872E0.3070708@profihost.ag>
+References: <514821B0.3090706@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dkim1.fusionio.com ([66.114.96.53]:51126 "EHLO
-	dkim1.fusionio.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751464Ab3CSMJn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 08:09:43 -0400
-Received: from mx1.fusionio.com (unknown [10.101.1.160])
-	by dkim1.fusionio.com (Postfix) with ESMTP id 390527C065C
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Mar 2013 06:09:43 -0600 (MDT)
-In-Reply-To: <orzjy0dkz9.fsf@livre.home>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:39107 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754870Ab3CSOPC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Mar 2013 10:15:02 -0400
+In-Reply-To: <514821B0.3090706@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>
 
-Quoting Alexandre Oliva (2013-03-19 01:20:10)
-> On Mar 18, 2013, Chris Mason <chris.mason@fusionio.com> wrote:
+Hi Sage,
+
+could it be that this one needs to be backported to bobtail?
+
+http://tracker.ceph.com/issues/4071
+
+Is this hte error i'm seeing? I can't find that commit in the bobtail
+branch.
+Am 19.03.2013 09:28, schrieb Stefan Priebe - Profihost AG:
+> Hello,
 > 
-> > A few questions.  Does leveldb use O_DIRECT and mmap together?
+> for testing purposes i've upgrade bobtail 0.56.3 to latest bobtail branch.
 > 
-> No, it doesn't use O_DIRECT at all.  Its I/O interface is very
-> simplified: it just opens each new file (database chunks limited to 2MB)
-> with O_CREAT|O_RDWR|O_TRUNC, and then uses ftruncate, mmap, msync,
-> munmap and fdatasync.  It doesn't seem to modify data once it's written;
-> it only appends.  Reading data back from it uses a completely different
-> class interface, using separate descriptors and using pread only.
+> Since then i'm seeing a lot of messages like these:
 > 
-> > (the source of a write being pages that are mmap'd from somewhere
-> > else)
+> 2013-03-19 09:27:06.089820 osd.32 [ERR] 4.ac6 osd.41 inconsistent
+> snapcolls on 34762ac6/rbd_data.26c8856b8b4567.0000000000000025/df3//4
+> found be1 expected be1,df1
 > 
-> AFAICT the source of the memcpy()s that append to the file are
-> malloc()ed memory.
-> 
-> > That's the most likely place for this kind of problem.  Also, you
-> > mention crc errors.  Are those reported by btrfs or are they application
-> > level crcs.
-> 
-> These are CRCs leveldb computes and writes out after each db block.  No
-> btrfs CRC errors are reported in this process.
+> What do they mean?
+> Does ceph fix them automatically?
 
-Ok, so we have three moving pieces here.
-
-1) leveldb truncating the files
-2) leveldb using mmap to write
-3) btrfs snapshots
-
-My guess is the truncate is creating a orphan item that is being
-processed inside the snapshot.
-
-Is it possible to create a smaller leveldb unit test that we might use
-to exercise all of this?
-
--chris
-
+Stefan
