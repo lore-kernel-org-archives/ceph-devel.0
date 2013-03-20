@@ -1,96 +1,167 @@
 From: Greg Farnum <greg@inktank.com>
-Subject: Re: [PATCH 04/39] mds: make sure table request id unique
-Date: Wed, 20 Mar 2013 11:31:23 -0700
-Message-ID: <971E9C644F3C4AD9A4BFA042FC238F34@inktank.com>
+Subject: Re: [PATCH 01/39] mds: preserve subtree bounds until slave
+ commit
+Date: Wed, 20 Mar 2013 11:33:20 -0700
+Message-ID: <724AC8B885B840DA8569FC8AD604B765@inktank.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
- <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
- <C7E493EEAA91442B9BD120B881E4638F@inktank.com>
- <51494EF6.6040607@intel.com>
- <alpine.DEB.2.00.1303192309380.11428@cobra.newdream.net>
- <51495BEC.9000802@intel.com>
+ <1363531902-24909-2-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:39425 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755567Ab3CTSb0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 14:31:26 -0400
-Received: by mail-pb0-f47.google.com with SMTP id rp2so1570821pbb.34
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 11:31:26 -0700 (PDT)
-In-Reply-To: <51495BEC.9000802@intel.com>
+Received: from mail-da0-f50.google.com ([209.85.210.50]:49813 "EHLO
+	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750902Ab3CTSdY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 14:33:24 -0400
+Received: by mail-da0-f50.google.com with SMTP id t1so1127679dae.23
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 11:33:23 -0700 (PDT)
+In-Reply-To: <1363531902-24909-2-git-send-email-zheng.z.yan@intel.com>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
-On Tuesday, March 19, 2013 at 11:49 PM, Yan, Zheng wrote:
-> On 03/20/2013 02:15 PM, Sage Weil wrote:
-> > On Wed, 20 Mar 2013, Yan, Zheng wrote:
-> > > On 03/20/2013 07:09 AM, Greg Farnum wrote:
-> > > > Hmm, this is definitely narrowing the race (probably enough to =
-never hit it), but it's not actually eliminating it (if the restart hap=
-pens after 4 billion requests?). More importantly this kind of symptom =
-makes me worry that we might be papering over more serious issues with =
-colliding states in the Table on restart.
-> > > > I don't have the MDSTable semantics in my head so I'll need to =
-look into this later unless somebody else volunteers to do so?
-> > > =20
-> > > =20
-> > > =20
-> > > Not just 4 billion requests, MDS restart has several stage, mdsma=
-p epoch =20
-> > > increases for each stage. I don't think there are any more collid=
-ing =20
-> > > states in the table. The table client/server use two phase commit=
-=2E it's =20
-> > > similar to client request that involves multiple MDS. the reqid i=
-s =20
-> > > analogy to client request id. The difference is client request ID=
- is =20
-> > > unique because new client always get an unique session id.
-> > =20
-> > =20
-> > =20
-> > Each time a tid is consumed (at least for an update) it is journale=
-d in =20
-> > the EMetaBlob::table_tids list, right? So we could actually take a =
-max =20
-> > from journal replay and pick up where we left off? That seems like =
-the =20
-> > cleanest.
-> > =20
-> > I'm not too worried about 2^32 tids, I guess, but it would be nicer=
- to =20
-> > avoid that possibility.
-> =20
-> =20
-> =20
-> Can we re-use the client request ID as table client request ID ?
-> =20
-> Regards
-> Yan, Zheng
+Reviewed-by: Greg Farnum <greg@inktank.com> 
 
-Not sure what you're referring to here =E2=80=94 do you mean the ID of =
-the filesystem client request which prompted the update? I don't think =
-that would work as client requests actually require two parts to be uni=
-que (the client GUID and the request seq number), and I'm pretty sure a=
- single client request can spawn multiple Table updates.
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-As I look over this more, it sure looks to me as if the effect of the c=
-ode we have (when non-broken) is to rollback every non-committed reques=
-t by an MDS which restarted =E2=80=94 the only time it can handle the T=
-ableServer's "agree" with a different response is if the MDS was incorr=
-ectly marked out by the map. Am I parsing this correctly, Sage? Given t=
-hat, and without having looked at the code more broadly, I think we wan=
-t to add some sort of implicit or explicit handshake letting each of th=
-em know if the MDS actually disappeared. We use the process/address non=
-ce to accomplish this in other places=E2=80=A6
--Greg
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
+
+> From: "Yan, Zheng" <zheng.z.yan@intel.com (mailto:zheng.z.yan@intel.com)>
+> 
+> When replaying an operation that rename a directory inode to non-auth subtree,
+> if the inode has subtree bounds, we should prevent them from being trimmed
+> until slave commit.
+> 
+> This patch also fixes a bug in ESlaveUpdate::replay(). EMetaBlob::replay()
+> should be called before MDCache::finish_uncommitted_slave_update().
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan@intel.com)>
+> ---
+> src/mds/MDCache.cc (http://MDCache.cc) | 21 +++++++++++----------
+> src/mds/Mutation.h | 5 ++---
+> src/mds/journal.cc (http://journal.cc) | 13 +++++++++----
+> 3 files changed, 22 insertions(+), 17 deletions(-)
+> 
+> diff --git a/src/mds/MDCache.cc (http://MDCache.cc) b/src/mds/MDCache.cc (http://MDCache.cc)
+> index fddcfc6..684e70b 100644
+> --- a/src/mds/MDCache.cc (http://MDCache.cc)
+> +++ b/src/mds/MDCache.cc (http://MDCache.cc)
+> @@ -3016,10 +3016,10 @@ void MDCache::add_uncommitted_slave_update(metareqid_t reqid, int master, MDSlav
+> {
+> assert(uncommitted_slave_updates[master].count(reqid) == 0);
+> uncommitted_slave_updates[master][reqid] = su;
+> - if (su->rename_olddir)
+> - uncommitted_slave_rename_olddir[su->rename_olddir]++;
+> + for(set<CDir*>::iterator p = su->olddirs.begin(); p != su->olddirs.end(); ++p)
+> + uncommitted_slave_rename_olddir[*p]++;
+> for(set<CInode*>::iterator p = su->unlinked.begin(); p != su->unlinked.end(); ++p)
+> - uncommitted_slave_unlink[*p]++;
+> + uncommitted_slave_unlink[*p]++;
+> }
+> 
+> void MDCache::finish_uncommitted_slave_update(metareqid_t reqid, int master)
+> @@ -3031,11 +3031,12 @@ void MDCache::finish_uncommitted_slave_update(metareqid_t reqid, int master)
+> if (uncommitted_slave_updates[master].empty())
+> uncommitted_slave_updates.erase(master);
+> // discard the non-auth subtree we renamed out of
+> - if (su->rename_olddir) {
+> - uncommitted_slave_rename_olddir[su->rename_olddir]--;
+> - if (uncommitted_slave_rename_olddir[su->rename_olddir] == 0) {
+> - uncommitted_slave_rename_olddir.erase(su->rename_olddir);
+> - CDir *root = get_subtree_root(su->rename_olddir);
+> + for(set<CDir*>::iterator p = su->olddirs.begin(); p != su->olddirs.end(); ++p) {
+> + CDir *dir = *p;
+> + uncommitted_slave_rename_olddir[dir]--;
+> + if (uncommitted_slave_rename_olddir[dir] == 0) {
+> + uncommitted_slave_rename_olddir.erase(dir);
+> + CDir *root = get_subtree_root(dir);
+> if (root->get_dir_auth() == CDIR_AUTH_UNDEF)
+> try_trim_non_auth_subtree(root);
+> }
+> @@ -6052,8 +6053,8 @@ bool MDCache::trim_non_auth_subtree(CDir *dir)
+> {
+> dout(10) << "trim_non_auth_subtree(" << dir << ") " << *dir << dendl;
+> 
+> - // preserve the dir for rollback
+> - if (uncommitted_slave_rename_olddir.count(dir))
+> + if (uncommitted_slave_rename_olddir.count(dir) || // preserve the dir for rollback
+> + my_ambiguous_imports.count(dir->dirfrag()))
+> return true;
+> 
+> bool keep_dir = false;
+> diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
+> index 55b84eb..5013f04 100644
+> --- a/src/mds/Mutation.h
+> +++ b/src/mds/Mutation.h
+> @@ -315,13 +315,12 @@ struct MDSlaveUpdate {
+> bufferlist rollback;
+> elist<MDSlaveUpdate*>::item item;
+> Context *waiter;
+> - CDir* rename_olddir;
+> + set<CDir*> olddirs;
+> set<CInode*> unlinked;
+> MDSlaveUpdate(int oo, bufferlist &rbl, elist<MDSlaveUpdate*> &list) :
+> origop(oo),
+> item(this),
+> - waiter(0),
+> - rename_olddir(0) {
+> + waiter(0) {
+> rollback.claim(rbl);
+> list.push_back(&item);
+> }
+> diff --git a/src/mds/journal.cc (http://journal.cc) b/src/mds/journal.cc (http://journal.cc)
+> index 5b3bd71..3375e40 100644
+> --- a/src/mds/journal.cc (http://journal.cc)
+> +++ b/src/mds/journal.cc (http://journal.cc)
+> @@ -1131,10 +1131,15 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg, MDSlaveUpdate *slaveup)
+> if (olddir) {
+> if (olddir->authority() != CDIR_AUTH_UNDEF &&
+> renamed_diri->authority() == CDIR_AUTH_UNDEF) {
+> + assert(slaveup); // auth to non-auth, must be slave prepare
+> list<frag_t> leaves;
+> renamed_diri->dirfragtree.get_leaves(leaves);
+> - for (list<frag_t>::iterator p = leaves.begin(); p != leaves.end(); ++p)
+> - renamed_diri->get_or_open_dirfrag(mds->mdcache, *p);
+> + for (list<frag_t>::iterator p = leaves.begin(); p != leaves.end(); ++p) {
+> + CDir *dir = renamed_diri->get_or_open_dirfrag(mds->mdcache, *p);
+> + // preserve subtree bound until slave commit
+> + if (dir->authority() == CDIR_AUTH_UNDEF)
+> + slaveup->olddirs.insert(dir);
+> + }
+> }
+> 
+> mds->mdcache->adjust_subtree_after_rename(renamed_diri, olddir, false);
+> @@ -1143,7 +1148,7 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg, MDSlaveUpdate *slaveup)
+> CDir *root = mds->mdcache->get_subtree_root(olddir);
+> if (root->get_dir_auth() == CDIR_AUTH_UNDEF) {
+> if (slaveup) // preserve the old dir until slave commit
+> - slaveup->rename_olddir = olddir;
+> + slaveup->olddirs.insert(olddir);
+> else
+> mds->mdcache->try_trim_non_auth_subtree(root);
+> }
+> @@ -2122,10 +2127,10 @@ void ESlaveUpdate::replay(MDS *mds)
+> case ESlaveUpdate::OP_ROLLBACK:
+> dout(10) << "ESlaveUpdate.replay abort " << reqid << " for mds." << master
+> << ": applying rollback commit blob" << dendl;
+> + commit.replay(mds, _segment);
+> su = mds->mdcache->get_uncommitted_slave_update(reqid, master);
+> if (su)
+> mds->mdcache->finish_uncommitted_slave_update(reqid, master);
+> - commit.replay(mds, _segment);
+> break;
+> 
+> default:
+> -- 
+> 1.7.11.7
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+
+
+
