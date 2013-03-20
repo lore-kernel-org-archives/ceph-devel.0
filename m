@@ -1,63 +1,48 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: deb/rpm package purge
-Date: Wed, 20 Mar 2013 05:48:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net>
-References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net> <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com> <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net> <1363732049.12547.22.camel@julia> <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net>
- <1363733473.12547.33.camel@julia> <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net> <1363760969.12547.52.camel@julia>
+From: "Dave (Bob)" <dave@bob-the-boat.me.uk>
+Subject: waiting for 1 open ops to drain
+Date: Wed, 20 Mar 2013 14:16:28 +0000
+Message-ID: <5149C4BC.7060701@bob-the-boat.me.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44775 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933340Ab3CTMsF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 08:48:05 -0400
-In-Reply-To: <1363760969.12547.52.camel@julia>
+Received: from i01.ip.uk.com ([86.54.60.3]:44156 "EHLO i01.ip.uk.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750839Ab3CTOXg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Mar 2013 10:23:36 -0400
+Received: from [81.187.164.216] (helo=[10.0.1.34])
+	by i01.ip.uk.com with esmtp (Exim 4.63)
+	(envelope-from <dave@bob-the-boat.me.uk>)
+	id 1UIJob-0002NE-Jn
+	for ceph-devel@vger.kernel.org; Wed, 20 Mar 2013 14:16:29 +0000
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: Dan Mick <dan.mick@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
+To: ceph-devel@vger.kernel.org
 
-On Wed, 20 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
-> On Tue, 2013-03-19 at 15:59 -0700, Sage Weil wrote:
-> > On Tue, 19 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
-> > > On the other hand, 'dpkg --purge' is to remove everything the package
-> > > has installed and/or generated. This includes debconf answers as well.
-> > > With other words, purge is used to make the system totally clean of the
-> > > package. As such, if the sysadmin install the package again, all debconf
-> > > questions will be asked again and all generated files will be generated
-> > > again from scratch.
-> > 
-> > I understand that part, but the policy isn't very clear about files that 
-> > are not part of the package but are generated as a result of the package 
-> > being installed (i.e., user data).
->  Forgive me, I just learnt English and my wording may not be that clear
-> for a natural speaker.
-> 
-> > As a point of comparison, mysql removes the config files but not 
-> > /var/lib/mysql.
->  As I remember, MySQL asks if /var/lib/mysql/ should be purged or not; I
-> may mix with an other (database related) package.
-> 
-> > The question is, is that okay/typical/desireable/recommended/a bad idea?
->  I can rephrase my words. Purge removes the (binary) package files, its
-> configuration and logs (its generated files). To emphasis, user files
-> are _not_ fall into this category and must remain as-is, _intact_.
-> Some packages writes a console message that 'your files remain at xxx,
-> they were not removed' on purge. Others just leave the dpkg warning
-> "directory not empty so not removed" which means user files may have
-> left there and that may be the reason the directory is not empty.
->  I'm in a rush, but hopefully will be able to note policy parts in the
-> afternoon (CET).
+I am using ceph 0.58 and kernel 3.9-rc2 and btrfs on my osds.
 
-Thanks, Laszlo, that's exactly what I was after!  Sorry for the confusing 
-exchange.  :)
+I have an osd that starts up but blocks with the log message 'waiting
+for 1 open ops to drain'.
 
-Sounds like in this case, the fix is simply to leave /var/lib/ceph 
-untouched.
+This never happens, and I can't get the osd 'up'.
 
-We'll need to update teuthology ceph.py and nuke to clean up /var/lib/ceph 
-(for qa runs), and I think we should add a ceph-deploy 'purgedata' command 
-to clean out /var/lib/ceph on a given host.
+I need to clear this problem. I have recently had an osd go problematic
+and I have recreated a fresh btrfs filesystem on the problem osd drive.
+I have also added a completely new osd.
 
-Thanks!
-sage
+The 'waiting for 1 open ops to drain' problem has occurred before the
+cluster has recovered from the earlier surgery and I need to get the
+data from this osd.
+
+I have increased the number of copies from 2 to 3 to give me more
+resilience in the future, but that has not taken effect yet.
+
+Once I get the cluster back to health, I will mkfs.btrfs and rebuild
+this osd and one other that is a legacy from earlier kernel/ceph versions.
+
+How can I tell the osd not to bother with waiting for its open ops to drain?
+
+Thank you in anticipation.
+
+David
+
