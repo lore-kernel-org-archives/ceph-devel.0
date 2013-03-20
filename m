@@ -1,219 +1,339 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: [PATCH 11/39] mds: don't delay processing replica buffer in
- slave request
-Date: Wed, 20 Mar 2013 14:19:00 -0700
-Message-ID: <7248FC83D26D4AF695C4488C64C660F6@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [PATCH 12/39] mds: compose and send resolve messages in batch
+Date: Wed, 20 Mar 2013 14:45:07 -0700
+Message-ID: <CAPYLRzjrJk87L14oerntrGRQJm2thX5kXouUadCd88i-t2Rm0Q@mail.gmail.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
- <1363531902-24909-12-git-send-email-zheng.z.yan@intel.com>
+	<1363531902-24909-13-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:65270 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751478Ab3CTVTF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 17:19:05 -0400
-Received: by mail-pb0-f44.google.com with SMTP id wz12so1685030pbc.3
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 14:19:04 -0700 (PDT)
-In-Reply-To: <1363531902-24909-12-git-send-email-zheng.z.yan@intel.com>
-Content-Disposition: inline
+Received: from mail-qe0-f50.google.com ([209.85.128.50]:41946 "EHLO
+	mail-qe0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab3CTVpI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 17:45:08 -0400
+Received: by mail-qe0-f50.google.com with SMTP id k5so1401122qej.23
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 14:45:07 -0700 (PDT)
+In-Reply-To: <1363531902-24909-13-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?Yan=2C_Zheng?= <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> Replicated objects need to be added into the cache immediately
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-Why do we need to add them right away? Shouldn't we have a journaled replica if we need it?
--Greg
+Reviewed-by: Greg Farnum <greg@inktank.com>
 
 Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>
+> Resolve messages for all MDS are the same, so we can compose and
+> send them in batch.
+>
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 > ---
-> src/mds/MDCache.cc | 12 ++++++++++++
-> src/mds/MDCache.h | 2 +-
-> src/mds/MDS.cc | 6 +++---
-> src/mds/Server.cc | 55 +++++++++++++++++++++++++++++++++++++++---------------
-> 4 files changed, 56 insertions(+), 19 deletions(-)
-> 
+>  src/mds/MDCache.cc | 181 +++++++++++++++++++++++++----------------------------
+>  src/mds/MDCache.h  |  11 ++--
+>  2 files changed, 93 insertions(+), 99 deletions(-)
+>
 > diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-> index 0f6b842..b668842 100644
+> index b668842..c455a20 100644
 > --- a/src/mds/MDCache.cc
 > +++ b/src/mds/MDCache.cc
-> @@ -7722,6 +7722,18 @@ void MDCache::_find_ino_dir(inodeno_t ino, Context *fin, bufferlist& bl, int r)
-> 
-> /* ---------------------------- */
-> 
-> +int MDCache::get_num_client_requests()
-> +{
-> + int count = 0;
-> + for (hash_map<metareqid_t, MDRequest*>::iterator p = active_requests.begin();
-> + p != active_requests.end();
-> + ++p) {
-> + if (p->second->reqid.name.is_client() && !p->second->is_slave())
-> + count++;
-> + }
-> + return count;
-> +}
+> @@ -2432,10 +2432,6 @@ void MDCache::resolve_start()
+>      if (rootdir)
+>        adjust_subtree_auth(rootdir, CDIR_AUTH_UNKNOWN);
+>    }
+> -
+> -  for (map<int, map<metareqid_t, MDSlaveUpdate*> >::iterator p = uncommitted_slave_updates.begin();
+> -       p != uncommitted_slave_updates.end(); ++p)
+> -    need_resolve_ack.insert(p->first);
+>  }
+>
+>  void MDCache::send_resolves()
+> @@ -2444,9 +2440,10 @@ void MDCache::send_resolves()
+>    got_resolve.clear();
+>    other_ambiguous_imports.clear();
+>
+> -  if (!need_resolve_ack.empty()) {
+> -    for (set<int>::iterator p = need_resolve_ack.begin(); p != need_resolve_ack.end(); ++p)
+> -      send_slave_resolve(*p);
+> +  send_slave_resolves();
+> +  if (!resolve_ack_gather.empty()) {
+> +    dout(10) << "send_resolves still waiting for resolve ack from ("
+> +             << need_resolve_ack << ")" << dendl;
+>      return;
+>    }
+>    if (!need_resolve_rollback.empty()) {
+> @@ -2454,95 +2451,74 @@ void MDCache::send_resolves()
+>              << need_resolve_rollback << ")" << dendl;
+>      return;
+>    }
+> -  assert(uncommitted_slave_updates.empty());
+> -  for (set<int>::iterator p = recovery_set.begin(); p != recovery_set.end(); ++p) {
+> -    int who = *p;
+> -    if (who == mds->whoami)
+> -      continue;
+> -    if (migrator->is_importing() ||
+> -       migrator->is_exporting())
+> -      send_resolve_later(who);
+> -    else
+> -      send_resolve_now(who);
+> -  }
+> -}
+> -
+> -void MDCache::send_resolve_later(int who)
+> -{
+> -  dout(10) << "send_resolve_later to mds." << who << dendl;
+> -  wants_resolve.insert(who);
+> +  send_subtree_resolves();
+>  }
+>
+> -void MDCache::maybe_send_pending_resolves()
+> +void MDCache::send_slave_resolves()
+>  {
+> -  if (wants_resolve.empty())
+> -    return;  // nothing to send.
+> -
+> -  // only if it's appropriate!
+> -  if (migrator->is_exporting() ||
+> -      migrator->is_importing()) {
+> -    dout(7) << "maybe_send_pending_resolves waiting, imports/exports still in progress" << dendl;
+> -    migrator->show_importing();
+> -    migrator->show_exporting();
+> -    return;  // not now
+> -  }
+> -
+> -  // ok, send them.
+> -  for (set<int>::iterator p = wants_resolve.begin();
+> -       p != wants_resolve.end();
+> -       ++p)
+> -    send_resolve_now(*p);
+> -  wants_resolve.clear();
+> -}
+> +  dout(10) << "send_slave_resolves" << dendl;
+>
+> +  map<int, MMDSResolve*> resolves;
+>
+> -class C_MDC_SendResolve : public Context {
+> -  MDCache *mdc;
+> -  int who;
+> -public:
+> -  C_MDC_SendResolve(MDCache *c, int w) : mdc(c), who(w) { }
+> -  void finish(int r) {
+> -    mdc->send_resolve_now(who);
+> -  }
+> -};
+> -
+> -void MDCache::send_slave_resolve(int who)
+> -{
+> -  dout(10) << "send_slave_resolve to mds." << who << dendl;
+> -  MMDSResolve *m = new MMDSResolve;
+> -
+> -  // list prepare requests lacking a commit
+> -  // [active survivor]
+> -  for (hash_map<metareqid_t, MDRequest*>::iterator p = active_requests.begin();
+> -      p != active_requests.end();
+> -      ++p) {
+> -    if (p->second->is_slave() && p->second->slave_to_mds == who) {
+> -      dout(10) << " including uncommitted " << *p->second << dendl;
+> -      m->add_slave_request(p->first);
+> +  if (mds->is_resolve()) {
+> +    for (map<int, map<metareqid_t, MDSlaveUpdate*> >::iterator p = uncommitted_slave_updates.begin();
+> +        p != uncommitted_slave_updates.end();
+> +        ++p) {
+> +      resolves[p->first] = new MMDSResolve;
+> +      for (map<metareqid_t, MDSlaveUpdate*>::iterator q = p->second.begin();
+> +          q != p->second.end();
+> +          ++q) {
+> +       dout(10) << " including uncommitted " << q->first << dendl;
+> +       resolves[p->first]->add_slave_request(q->first);
+> +      }
+>      }
+> -  }
+> -  // [resolving]
+> -  if (uncommitted_slave_updates.count(who) &&
+> -      !uncommitted_slave_updates[who].empty()) {
+> -    for (map<metareqid_t, MDSlaveUpdate*>::iterator p = uncommitted_slave_updates[who].begin();
+> -       p != uncommitted_slave_updates[who].end();
+> -       ++p) {
+> -      dout(10) << " including uncommitted " << p->first << dendl;
+> -      m->add_slave_request(p->first);
+> +  } else {
+> +    set<int> resolve_set;
+> +    mds->mdsmap->get_mds_set(resolve_set, MDSMap::STATE_RESOLVE);
+> +    for (hash_map<metareqid_t, MDRequest*>::iterator p = active_requests.begin();
+> +        p != active_requests.end();
+> +        ++p) {
+> +      if (!p->second->is_slave() || !p->second->slave_did_prepare())
+> +       continue;
+> +      int master = p->second->slave_to_mds;
+> +      if (resolve_set.count(master)) {
+> +       dout(10) << " including uncommitted " << *p->second << dendl;
+> +       if (!resolves.count(master))
+> +         resolves[master] = new MMDSResolve;
+> +       resolves[master]->add_slave_request(p->first);
+> +      }
+>      }
+>    }
+>
+> -  assert(!m->slave_requests.empty());
+> -  dout(10) << " will need resolve ack from mds." << who << dendl;
+> -  mds->send_message_mds(m, who);
+> +  for (map<int, MMDSResolve*>::iterator p = resolves.begin();
+> +       p != resolves.end();
+> +       ++p) {
+> +    dout(10) << "sending slave resolve to mds." << p->first << dendl;
+> +    mds->send_message_mds(p->second, p->first);
+> +    need_resolve_ack.insert(p->first);
+> +  }
+>  }
+>
+> -void MDCache::send_resolve_now(int who)
+> +void MDCache::send_subtree_resolves()
+>  {
+> -  dout(10) << "send_resolve_now to mds." << who << dendl;
+> -  MMDSResolve *m = new MMDSResolve;
+> +  dout(10) << "send_subtree_resolves" << dendl;
+>
+> -  show_subtrees();
+> +  if (migrator->is_exporting() || migrator->is_importing()) {
+> +    dout(7) << "send_subtree_resolves waiting, imports/exports still in progress" << dendl;
+> +    migrator->show_importing();
+> +    migrator->show_exporting();
+> +    resolves_pending = true;
+> +    return;  // not now
+> +  }
 > +
-> /* This function takes over the reference to the passed Message */
-> MDRequest *MDCache::request_start(MClientRequest *req)
-> {
+> +  map<int, MMDSResolve*> resolves;
+> +  for (set<int>::iterator p = recovery_set.begin();
+> +       p != recovery_set.end();
+> +       ++p) {
+> +    if (*p == mds->whoami)
+> +      continue;
+> +    resolves[*p] = new MMDSResolve;
+> +  }
+>
+>    // known
+>    for (map<CDir*,set<CDir*> >::iterator p = subtrees.begin();
+> @@ -2562,22 +2538,30 @@ void MDCache::send_resolve_now(int who)
+>        set<CDir*> bounds;
+>        get_subtree_bounds(dir, bounds);
+>        vector<dirfrag_t> dfls;
+> -      for (set<CDir*>::iterator p = bounds.begin(); p != bounds.end(); ++p)
+> -       dfls.push_back((*p)->dirfrag());
+> -      m->add_ambiguous_import(dir->dirfrag(), dfls);
+> +      for (set<CDir*>::iterator q = bounds.begin(); q != bounds.end(); ++q)
+> +       dfls.push_back((*q)->dirfrag());
+> +      for (map<int, MMDSResolve*>::iterator q = resolves.begin();
+> +          q != resolves.end();
+> +          ++q)
+> +       resolves[q->first]->add_ambiguous_import(dir->dirfrag(), dfls);
+>        dout(10) << " ambig " << dir->dirfrag() << " " << dfls << dendl;
+>      } else {
+>        // not ambiguous.
+> -      m->add_subtree(dir->dirfrag());
+> -
+> +      for (map<int, MMDSResolve*>::iterator q = resolves.begin();
+> +          q != resolves.end();
+> +          ++q)
+> +       resolves[q->first]->add_subtree(dir->dirfrag());
+>        // bounds too
+>        vector<dirfrag_t> dfls;
+>        for (set<CDir*>::iterator q = subtrees[dir].begin();
+>            q != subtrees[dir].end();
+>            ++q) {
+>         CDir *bound = *q;
+> -       m->add_subtree_bound(dir->dirfrag(), bound->dirfrag());
+>         dfls.push_back(bound->dirfrag());
+> +       for (map<int, MMDSResolve*>::iterator r = resolves.begin();
+> +            r != resolves.end();
+> +            ++r)
+> +         resolves[r->first]->add_subtree_bound(dir->dirfrag(), bound->dirfrag());
+>        }
+>        dout(10) << " claim " << dir->dirfrag() << " " << dfls << dendl;
+>      }
+> @@ -2587,15 +2571,23 @@ void MDCache::send_resolve_now(int who)
+>    for (map<dirfrag_t, vector<dirfrag_t> >::iterator p = my_ambiguous_imports.begin();
+>         p != my_ambiguous_imports.end();
+>         ++p) {
+> -    m->add_ambiguous_import(p->first, p->second);
+> +    for (map<int, MMDSResolve*>::iterator q = resolves.begin();
+> +        q != resolves.end();
+> +        ++q)
+> +      resolves[q->first]->add_ambiguous_import(p->first, p->second);
+>      dout(10) << " ambig " << p->first << " " << p->second << dendl;
+>    }
+>
+>    // send
+> -  mds->send_message_mds(m, who);
+> +  for (map<int, MMDSResolve*>::iterator p = resolves.begin();
+> +       p != resolves.end();
+> +       ++p) {
+> +    dout(10) << "sending subtee resolve to mds." << p->first << dendl;
+> +    mds->send_message_mds(p->second, p->first);
+> +  }
+> +  resolves_pending = false;
+>  }
+>
+> -
+>  void MDCache::handle_mds_failure(int who)
+>  {
+>    dout(7) << "handle_mds_failure mds." << who << dendl;
+> @@ -2631,7 +2623,6 @@ void MDCache::handle_mds_failure(int who)
+>      // slave to the failed node?
+>      if (p->second->slave_to_mds == who) {
+>        if (p->second->slave_did_prepare()) {
+> -       need_resolve_ack.insert(who);
+>         dout(10) << " slave request " << *p->second << " uncommitted, will resolve shortly" << dendl;
+>        } else {
+>         dout(10) << " slave request " << *p->second << " has no prepare, finishing up" << dendl;
+> @@ -3011,7 +3002,7 @@ void MDCache::handle_resolve_ack(MMDSResolveAck *ack)
+>
+>    need_resolve_ack.erase(from);
+>    if (need_resolve_ack.empty() && need_resolve_rollback.empty()) {
+> -    send_resolves();
+> +    send_subtree_resolves();
+>      process_delayed_resolve();
+>    }
+>
+> @@ -3078,7 +3069,7 @@ void MDCache::finish_rollback(metareqid_t reqid) {
+>      finish_uncommitted_slave_update(reqid, need_resolve_rollback[reqid]);
+>    need_resolve_rollback.erase(reqid);
+>    if (need_resolve_ack.empty() && need_resolve_rollback.empty()) {
+> -    send_resolves();
+> +    send_subtree_resolves();
+>      process_delayed_resolve();
+>    }
+>  }
 > diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
-> index a9f05c6..4634121 100644
+> index 4634121..10e3dd7 100644
 > --- a/src/mds/MDCache.h
 > +++ b/src/mds/MDCache.h
-> @@ -240,7 +240,7 @@ protected:
-> hash_map<metareqid_t, MDRequest*> active_requests; 
-> 
-> public:
-> - int get_num_active_requests() { return active_requests.size(); }
-> + int get_num_client_requests();
-> 
-> MDRequest* request_start(MClientRequest *req);
-> MDRequest* request_start_slave(metareqid_t rid, __u32 attempt, int by);
-> diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-> index b91dcbd..e99eecc 100644
-> --- a/src/mds/MDS.cc
-> +++ b/src/mds/MDS.cc
-> @@ -1900,9 +1900,9 @@ bool MDS::_dispatch(Message *m)
-> mdcache->is_open() &&
-> replay_queue.empty() &&
-> want_state == MDSMap::STATE_CLIENTREPLAY) {
-> - dout(10) << " still have " << mdcache->get_num_active_requests()
-> - << " active replay requests" << dendl;
-> - if (mdcache->get_num_active_requests() == 0)
-> + int num_requests = mdcache->get_num_client_requests();
-> + dout(10) << " still have " << num_requests << " active replay requests" << dendl;
-> + if (num_requests == 0)
-> clientreplay_done();
-> }
-> 
-> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> index 4c4c86b..8e89e4c 100644
-> --- a/src/mds/Server.cc
-> +++ b/src/mds/Server.cc
-> @@ -107,10 +107,8 @@ void Server::dispatch(Message *m)
-> (m->get_type() == CEPH_MSG_CLIENT_REQUEST &&
-> (static_cast<MClientRequest*>(m))->is_replay()))) {
-> // replaying!
-> - } else if (mds->is_clientreplay() && m->get_type() == MSG_MDS_SLAVE_REQUEST &&
-> - ((static_cast<MMDSSlaveRequest*>(m))->is_reply() ||
-> - !mds->mdsmap->is_active(m->get_source().num()))) {
-> - // slave reply or the master is also in the clientreplay stage
-> + } else if (m->get_type() == MSG_MDS_SLAVE_REQUEST) {
-> + // handle_slave_request() will wait if necessary
-> } else {
-> dout(3) << "not active yet, waiting" << dendl;
-> mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
-> @@ -1291,6 +1289,13 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
-> if (m->is_reply())
-> return handle_slave_request_reply(m);
-> 
-> + CDentry *straydn = NULL;
-> + if (m->stray.length() > 0) {
-> + straydn = mdcache->add_replica_stray(m->stray, from);
-> + assert(straydn);
-> + m->stray.clear();
-> + }
-> +
-> // am i a new slave?
-> MDRequest *mdr = NULL;
-> if (mdcache->have_request(m->get_reqid())) {
-> @@ -1326,9 +1331,26 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
-> m->put();
-> return;
-> }
-> - mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), m->get_source().num());
-> + mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), from);
-> }
-> assert(mdr->slave_request == 0); // only one at a time, please! 
-> +
-> + if (straydn) {
-> + mdr->pin(straydn);
-> + mdr->straydn = straydn;
-> + }
-> +
-> + if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
-> + dout(3) << "not clientreplay|active yet, waiting" << dendl;
-> + mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
-> + return;
-> + } else if (mds->is_clientreplay() && !mds->mdsmap->is_clientreplay(from) &&
-> + mdr->locks.empty()) {
-> + dout(3) << "not active yet, waiting" << dendl;
-> + mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
-> + return;
-> + }
-> +
-> mdr->slave_request = m;
-> 
-> dispatch_slave_request(mdr);
-> @@ -1339,6 +1361,12 @@ void Server::handle_slave_request_reply(MMDSSlaveRequest *m)
-> {
-> int from = m->get_source().num();
-> 
-> + if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
-> + dout(3) << "not clientreplay|active yet, waiting" << dendl;
-> + mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
-> + return;
-> + }
-> +
-> if (m->get_op() == MMDSSlaveRequest::OP_COMMITTED) {
-> metareqid_t r = m->get_reqid();
-> mds->mdcache->committed_master_slave(r, from);
-> @@ -5138,10 +5166,8 @@ void Server::handle_slave_rmdir_prep(MDRequest *mdr)
-> dout(10) << " dn " << *dn << dendl;
-> mdr->pin(dn);
-> 
-> - assert(mdr->slave_request->stray.length() > 0);
-> - CDentry *straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
-> - assert(straydn);
-> - mdr->pin(straydn);
-> + assert(mdr->straydn);
-> + CDentry *straydn = mdr->straydn;
-> dout(10) << " straydn " << *straydn << dendl;
-> 
-> mdr->now = mdr->slave_request->now;
-> @@ -5208,6 +5234,7 @@ void Server::_logged_slave_rmdir(MDRequest *mdr, CDentry *dn, CDentry *straydn)
-> // done.
-> mdr->slave_request->put();
-> mdr->slave_request = 0;
-> + mdr->straydn = 0;
-> }
-> 
-> void Server::handle_slave_rmdir_prep_ack(MDRequest *mdr, MMDSSlaveRequest *ack)
-> @@ -6460,15 +6487,12 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
-> // stray?
-> bool linkmerge = (srcdnl->get_inode() == destdnl->get_inode() &&
-> (srcdnl->is_primary() || destdnl->is_primary()));
-> - CDentry *straydn = 0;
-> - if (destdnl->is_primary() && !linkmerge) {
-> - assert(mdr->slave_request->stray.length() > 0);
-> - straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
-> + CDentry *straydn = mdr->straydn;
-> + if (destdnl->is_primary() && !linkmerge)
-> assert(straydn);
-> - mdr->pin(straydn);
-> - }
-> 
-> mdr->now = mdr->slave_request->now;
-> + mdr->more()->srcdn_auth_mds = srcdn->authority().first;
-> 
-> // set up commit waiter (early, to clean up any freezing etc we do)
-> if (!mdr->more()->slave_commit)
-> @@ -6651,6 +6675,7 @@ void Server::_logged_slave_rename(MDRequest *mdr,
-> // done.
-> mdr->slave_request->put();
-> mdr->slave_request = 0;
-> + mdr->straydn = 0;
-> }
-> 
-> void Server::_commit_slave_rename(MDRequest *mdr, int r,
-> -- 
+> @@ -328,6 +328,7 @@ protected:
+>    friend class ESlaveUpdate;
+>    friend class ECommitted;
+>
+> +  bool resolves_pending;
+>    set<int> wants_resolve;   // nodes i need to send my resolve to
+>    set<int> got_resolve;     // nodes i got resolves from
+>    set<int> need_resolve_ack;   // nodes i need a resolve_ack from
+> @@ -367,10 +368,12 @@ public:
+>    void finish_ambiguous_import(dirfrag_t dirino);
+>    void resolve_start();
+>    void send_resolves();
+> -  void send_slave_resolve(int who);
+> -  void send_resolve_now(int who);
+> -  void send_resolve_later(int who);
+> -  void maybe_send_pending_resolves();
+> +  void send_slave_resolves();
+> +  void send_subtree_resolves();
+> +  void maybe_send_pending_resolves() {
+> +    if (resolves_pending)
+> +      send_subtree_resolves();
+> +  }
+>
+>    void _move_subtree_map_bound(dirfrag_t df, dirfrag_t oldparent, dirfrag_t newparent,
+>                                map<dirfrag_t,vector<dirfrag_t> >& subtrees);
+> --
 > 1.7.11.7
-
-
-
+>
