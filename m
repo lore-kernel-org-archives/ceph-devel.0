@@ -1,131 +1,64 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 04/39] mds: make sure table request id unique
-Date: Wed, 20 Mar 2013 14:24:40 +0800
-Message-ID: <51495628.4050306@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com> <C7E493EEAA91442B9BD120B881E4638F@inktank.com> <51494EF6.6040607@intel.com> <alpine.DEB.2.00.1303192309380.11428@cobra.newdream.net>
+From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Subject: Re: deb/rpm package purge
+Date: Wed, 20 Mar 2013 06:29:29 +0000
+Message-ID: <1363760969.12547.52.camel@julia>
+References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net>
+	 <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com>
+	 <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net>
+	 <1363732049.12547.22.camel@julia>
+	 <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net>
+	 <1363733473.12547.33.camel@julia>
+	 <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:35140 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751020Ab3CTGYn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Mar 2013 02:24:43 -0400
-In-Reply-To: <alpine.DEB.2.00.1303192309380.11428@cobra.newdream.net>
+Received: from mail.barcikacomp.hu ([94.248.160.10]:39283 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750982Ab3CTG3a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 02:29:30 -0400
+In-Reply-To: <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: Greg Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+Cc: Dan Mick <dan.mick@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
 
-On 03/20/2013 02:15 PM, Sage Weil wrote:
-> On Wed, 20 Mar 2013, Yan, Zheng wrote:
->> On 03/20/2013 07:09 AM, Greg Farnum wrote:
->>> Hmm, this is definitely narrowing the race (probably enough to never hit it), but it's not actually eliminating it (if the restart happens after 4 billion requests?). More importantly this kind of symptom makes me worry that we might be papering over more serious issues with colliding states in the Table on restart.
->>> I don't have the MDSTable semantics in my head so I'll need to look into this later unless somebody else volunteers to do so?
->>
->> Not just 4 billion requests, MDS restart has several stage, mdsmap epoch 
->> increases for each stage. I don't think there are any more colliding 
->> states in the table. The table client/server use two phase commit. it's 
->> similar to client request that involves multiple MDS. the reqid is 
->> analogy to client request id. The difference is client request ID is 
->> unique because new client always get an unique session id.
+On Tue, 2013-03-19 at 15:59 -0700, Sage Weil wrote:
+> On Tue, 19 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
+> > On the other hand, 'dpkg --purge' is to remove everything the package
+> > has installed and/or generated. This includes debconf answers as well.
+> > With other words, purge is used to make the system totally clean of the
+> > package. As such, if the sysadmin install the package again, all debconf
+> > questions will be asked again and all generated files will be generated
+> > again from scratch.
 > 
-> Each time a tid is consumed (at least for an update) it is journaled in 
-> the EMetaBlob::table_tids list, right?  So we could actually take a max 
-> from journal replay and pick up where we left off?  That seems like the 
-> cleanest.
+> I understand that part, but the policy isn't very clear about files that 
+> are not part of the package but are generated as a result of the package 
+> being installed (i.e., user data).
+ Forgive me, I just learnt English and my wording may not be that clear
+for a natural speaker.
 
-This approach works only if client journal the reqid before it sending the request
-to the server. but current implementation is client journal the reqid when it receives
-server's agree message.
+> As a point of comparison, mysql removes the config files but not 
+> /var/lib/mysql.
+ As I remember, MySQL asks if /var/lib/mysql/ should be purged or not; I
+may mix with an other (database related) package.
 
-Regards
-Yan, Zheng 
-> 
-> I'm not too worried about 2^32 tids, I guess, but it would be nicer to 
-> avoid that possibility.
-> 
-> sage
-> 
->>
->> Thanks
->> Yan, Zheng
->>
->>> -Greg
->>>
->>> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>>
->>>
->>> On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
->>>
->>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>>>  
->>>> When a MDS becomes active, the table server re-sends 'agree' messages
->>>> for old prepared request. If the recoverd MDS starts a new table request
->>>> at the same time, The new request's ID can happen to be the same as old
->>>> prepared request's ID, because current table client assigns request ID
->>>> from zero after MDS restarts.
->>>>  
->>>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan@intel.com)>
->>>> ---
->>>> src/mds/MDS.cc (http://MDS.cc) | 3 +++
->>>> src/mds/MDSTableClient.cc (http://MDSTableClient.cc) | 5 +++++
->>>> src/mds/MDSTableClient.h | 2 ++
->>>> 3 files changed, 10 insertions(+)
->>>>  
->>>> diff --git a/src/mds/MDS.cc (http://MDS.cc) b/src/mds/MDS.cc (http://MDS.cc)
->>>> index bb1c833..859782a 100644
->>>> --- a/src/mds/MDS.cc (http://MDS.cc)
->>>> +++ b/src/mds/MDS.cc (http://MDS.cc)
->>>> @@ -1212,6 +1212,9 @@ void MDS::boot_start(int step, int r)
->>>> dout(2) << "boot_start " << step << ": opening snap table" << dendl;  
->>>> snapserver->load(gather.new_sub());
->>>> }
->>>> +
->>>> + anchorclient->init();
->>>> + snapclient->init();
->>>>  
->>>> dout(2) << "boot_start " << step << ": opening mds log" << dendl;
->>>> mdlog->open(gather.new_sub());
->>>> diff --git a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc) b/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
->>>> index ea021f5..beba0a3 100644
->>>> --- a/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
->>>> +++ b/src/mds/MDSTableClient.cc (http://MDSTableClient.cc)
->>>> @@ -34,6 +34,11 @@
->>>> #undef dout_prefix
->>>> #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".tableclient(" << get_mdstable_name(table) << ") "
->>>>  
->>>> +void MDSTableClient::init()
->>>> +{
->>>> + // make reqid unique between MDS restarts
->>>> + last_reqid = (uint64_t)mds->mdsmap->get_epoch() << 32;
->>>> +}
->>>>  
->>>> void MDSTableClient::handle_request(class MMDSTableRequest *m)
->>>> {
->>>> diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
->>>> index e15837f..78035db 100644
->>>> --- a/src/mds/MDSTableClient.h
->>>> +++ b/src/mds/MDSTableClient.h
->>>> @@ -63,6 +63,8 @@ public:
->>>> MDSTableClient(MDS *m, int tab) : mds(m), table(tab), last_reqid(0) {}
->>>> virtual ~MDSTableClient() {}
->>>>  
->>>> + void init();
->>>> +
->>>> void handle_request(MMDSTableRequest *m);
->>>>  
->>>> void _prepare(bufferlist& mutation, version_t *ptid, bufferlist *pbl, Context *onfinish);
->>>> --  
->>>> 1.7.11.7
->>>
->>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> The question is, is that okay/typical/desireable/recommended/a bad idea?
+ I can rephrase my words. Purge removes the (binary) package files, its
+configuration and logs (its generated files). To emphasis, user files
+are _not_ fall into this category and must remain as-is, _intact_.
+Some packages writes a console message that 'your files remain at xxx,
+they were not removed' on purge. Others just leave the dpkg warning
+"directory not empty so not removed" which means user files may have
+left there and that may be the reason the directory is not empty.
+ I'm in a rush, but hopefully will be able to note policy parts in the
+afternoon (CET).
+
+> The less important question is whether /var/log/ceph should be removed; 
+> I'm assuming yes?
+ Yes, logs are going to be removed.
+
+Hope I could answer your question now. Please note me if I should clear
+more parts of my answer.
+Laszlo/GCS
 
