@@ -1,86 +1,72 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: James Page <james.page@ubuntu.com>
 Subject: Re: deb/rpm package purge
-Date: Wed, 20 Mar 2013 09:48:42 -0500
-Message-ID: <5149CC4A.9030409@inktank.com>
-References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net> <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com> <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net> <1363732049.12547.22.camel@julia> <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net> <1363733473.12547.33.camel@julia> <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net> <1363760969.12547.52.camel@julia> <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net>
+Date: Wed, 20 Mar 2013 17:27:04 +0000
+Message-ID: <5149F168.8010802@ubuntu.com>
+References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net> <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com> <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net> <1363732049.12547.22.camel@julia> <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net> <1363733473.12547.33.camel@julia> <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net> <1363760969.12547.52.camel@julia> <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net> <5149CC4A.9030409@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:55150 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756542Ab3CTOso (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 10:48:44 -0400
-Received: by mail-ie0-f181.google.com with SMTP id 17so2135233iea.12
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 07:48:44 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net>
+Received: from youngberry.canonical.com ([91.189.89.112]:54557 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751747Ab3CTR1H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 13:27:07 -0400
+In-Reply-To: <5149CC4A.9030409@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
 
-On 03/20/2013 07:48 AM, Sage Weil wrote:
-> On Wed, 20 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
->> On Tue, 2013-03-19 at 15:59 -0700, Sage Weil wrote:
->>> On Tue, 19 Mar 2013, Laszlo Boszormenyi (GCS) wrote:
->>>> On the other hand, 'dpkg --purge' is to remove everything the package
->>>> has installed and/or generated. This includes debconf answers as well.
->>>> With other words, purge is used to make the system totally clean of the
->>>> package. As such, if the sysadmin install the package again, all debconf
->>>> questions will be asked again and all generated files will be generated
->>>> again from scratch.
->>>
->>> I understand that part, but the policy isn't very clear about files that
->>> are not part of the package but are generated as a result of the package
->>> being installed (i.e., user data).
->>   Forgive me, I just learnt English and my wording may not be that clear
->> for a natural speaker.
->>
->>> As a point of comparison, mysql removes the config files but not
->>> /var/lib/mysql.
->>   As I remember, MySQL asks if /var/lib/mysql/ should be purged or not; I
->> may mix with an other (database related) package.
->>
->>> The question is, is that okay/typical/desireable/recommended/a bad idea?
->>   I can rephrase my words. Purge removes the (binary) package files, its
->> configuration and logs (its generated files). To emphasis, user files
->> are _not_ fall into this category and must remain as-is, _intact_.
->> Some packages writes a console message that 'your files remain at xxx,
->> they were not removed' on purge. Others just leave the dpkg warning
->> "directory not empty so not removed" which means user files may have
->> left there and that may be the reason the directory is not empty.
->>   I'm in a rush, but hopefully will be able to note policy parts in the
->> afternoon (CET).
->
-> Thanks, Laszlo, that's exactly what I was after!  Sorry for the confusing
-> exchange.  :)
->
-> Sounds like in this case, the fix is simply to leave /var/lib/ceph
-> untouched.
->
-> We'll need to update teuthology ceph.py and nuke to clean up /var/lib/ceph
-> (for qa runs), and I think we should add a ceph-deploy 'purgedata' command
-> to clean out /var/lib/ceph on a given host.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-It's not as important given that it won't outright destroy the cluster, 
-but perhaps we should also leave /etc/ceph untouched on purge if a 
-ceph.conf file has been placed in it (since that also was not installed 
-by the package, but rather by a user?).  I figure we should probably try 
-to get it right now.  The message about the directory not being empty 
-sounds good.
+On 20/03/13 14:48, Mark Nelson wrote:
+>> 
+>> We'll need to update teuthology ceph.py and nuke to clean up 
+>> /var/lib/ceph (for qa runs), and I think we should add a
+>> ceph-deploy 'purgedata' command to clean out /var/lib/ceph on a
+>> given host.
+> 
+> It's not as important given that it won't outright destroy the
+> cluster, but perhaps we should also leave /etc/ceph untouched on
+> purge if a ceph.conf file has been placed in it (since that also
+> was not installed by the package, but rather by a user?).  I figure
+> we should probably try to get it right now.  The message about the
+> directory not being empty sounds good.
+> 
+> My thought here is:
+> 
+> - remove anything created by the packages in /var/lib/ceph that has
+> been untouched since package installation. - remove /var/lib/ceph
+> if it has been untouched - remove /etc/ceph if it has been
+> untouched
 
-My thought here is:
+If those directories are created by dpkg rather than maintainer
+scripts (i.e. in ceph.dirs rather than ceph.postinst) you should
+should get that all for free; if the directories contain anything dpkg
+does not know about it will just not removed them.
 
-- remove anything created by the packages in /var/lib/ceph that has been 
-untouched since package installation.
-- remove /var/lib/ceph if it has been untouched
-- remove /etc/ceph if it has been untouched
 
-Thoughts?
+- -- 
+James Page
+Ubuntu Core Developer
+Debian Maintainer
+james.page@ubuntu.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
 
->
-> Thanks!
-> sage
->
-
-Mark
+iQIcBAEBCAAGBQJRSfFoAAoJEL/srsug59jDJgsP/0zD4aKFtimFPh02/zdfJ3X0
+BEY8Jmnmt3HcCxSPbGleZ+2p/38iLfLz8HdM1ZpOwGDVIv13N45vG0wW9zF/843R
+8vKoGHJY7gAt/uY1fqa115m9txeNXAIZoaxwjrd6Zd31pgPvTBmfZhVsFKUnk7E5
+9JmUs/K8gjjAZajhkUKgddp2ID70n/WGdHR+iu5cy72TyuvXVBQV1OmyYi9lMIxM
+yHGnCM/X7x5DE1g61x532VP2D0gAegA2WWURoqQ6vAM3IZfVGVuvat+HdzZ8Ej8z
+LfTk+8n2alTj6s1Xp3KGbb/D231MIi3VBaFMQx5pBlM29lAv8OYKidRQpZc9bZe2
+5m5vhDutp4ZOZmqxDvDdayZgb/s8uVuodT2XK7qn4KbBRDEJN5aJKiUzXH0wTVTZ
+Lg/A/criFuzRP+ZH/Sh1pfSnLkNrrLMbdTglUv4krM2L6ZPOmEU3fh+UIXkr2u9t
+f6lnu4fVBwikDy/4hDztVL76IqB3wjnxYlJ1uHMHOrCugDeLRsGHdbCdFcoZonRW
+rUhdrtqzuuSbPHkzs/dEMCm4vF439YdmuL4WGsfzxEu+djcESDtzuAw4D1LRO12V
+JbEc9s8+L84oBJUv5dCSDG333jWc/8eihSs1ZG33NKZsWsNheppLR6aeXbg/nGi1
+53R63uM1Lv7f1UaTxvH8
+=6adU
+-----END PGP SIGNATURE-----
