@@ -1,210 +1,127 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 21/39] mds: encode dirfrag base in cache rejoin ack
-Date: Thu, 21 Mar 2013 14:58:53 -0700
-Message-ID: <CAPYLRzjMqbWy5cN842LhzUK6ELdjRMg9S35_hro-D06ukzM8MQ@mail.gmail.com>
+Subject: Re: [PATCH 04/39] mds: make sure table request id unique
+Date: Thu, 21 Mar 2013 15:03:47 -0700
+Message-ID: <CAPYLRzhrH-=9itgY95XuE+uP54b4GxqVstRtmmW9_Qn1C3dHXw@mail.gmail.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
-	<1363531902-24909-22-git-send-email-zheng.z.yan@intel.com>
-	<CAPYLRzjwL43cDez1aC7x_m7E71Udrus3vqm1+j1f4O+0MmG5+w@mail.gmail.com>
-	<514AAB91.1010107@intel.com>
+	<1363531902-24909-5-git-send-email-zheng.z.yan@intel.com>
+	<C7E493EEAA91442B9BD120B881E4638F@inktank.com>
+	<51494EF6.6040607@intel.com>
+	<alpine.DEB.2.00.1303192309380.11428@cobra.newdream.net>
+	<51495BEC.9000802@intel.com>
+	<971E9C644F3C4AD9A4BFA042FC238F34@inktank.com>
+	<514ABFC6.3080100@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:53452 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932240Ab3CUV6z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Mar 2013 17:58:55 -0400
-Received: by mail-qc0-f180.google.com with SMTP id v28so1638391qcm.25
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Mar 2013 14:58:53 -0700 (PDT)
-In-Reply-To: <514AAB91.1010107@intel.com>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:39095 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933068Ab3CUWDs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Mar 2013 18:03:48 -0400
+Received: by mail-qc0-f173.google.com with SMTP id b12so740869qca.32
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Mar 2013 15:03:47 -0700 (PDT)
+In-Reply-To: <514ABFC6.3080100@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 20, 2013 at 11:41 PM, Yan, Zheng <zheng.z.yan@intel.com> wr=
-ote:
-> On 03/21/2013 07:33 AM, Gregory Farnum wrote:
->> This needs to handle versioning the encoding based on peer feature b=
-its too.
+On Thu, Mar 21, 2013 at 1:07 AM, Yan, Zheng <zheng.z.yan@intel.com> wro=
+te:
+> On 03/21/2013 02:31 AM, Greg Farnum wrote:
+>> On Tuesday, March 19, 2013 at 11:49 PM, Yan, Zheng wrote:
+>>> On 03/20/2013 02:15 PM, Sage Weil wrote:
+>>>> On Wed, 20 Mar 2013, Yan, Zheng wrote:
+>>>>> On 03/20/2013 07:09 AM, Greg Farnum wrote:
+>>>>>> Hmm, this is definitely narrowing the race (probably enough to n=
+ever hit it), but it's not actually eliminating it (if the restart happ=
+ens after 4 billion requests?). More importantly this kind of symptom m=
+akes me worry that we might be papering over more serious issues with c=
+olliding states in the Table on restart.
+>>>>>> I don't have the MDSTable semantics in my head so I'll need to l=
+ook into this later unless somebody else volunteers to do so?
+>>>>>
+>>>>>
+>>>>>
+>>>>> Not just 4 billion requests, MDS restart has several stage, mdsma=
+p epoch
+>>>>> increases for each stage. I don't think there are any more collid=
+ing
+>>>>> states in the table. The table client/server use two phase commit=
+=2E it's
+>>>>> similar to client request that involves multiple MDS. the reqid i=
+s
+>>>>> analogy to client request id. The difference is client request ID=
+ is
+>>>>> unique because new client always get an unique session id.
+>>>>
+>>>>
+>>>>
+>>>> Each time a tid is consumed (at least for an update) it is journal=
+ed in
+>>>> the EMetaBlob::table_tids list, right? So we could actually take a=
+ max
+>>>> from journal replay and pick up where we left off? That seems like=
+ the
+>>>> cleanest.
+>>>>
+>>>> I'm not too worried about 2^32 tids, I guess, but it would be nice=
+r to
+>>>> avoid that possibility.
+>>>
+>>>
+>>>
+>>> Can we re-use the client request ID as table client request ID ?
+>>>
+>>> Regards
+>>> Yan, Zheng
 >>
->> On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> =
-wrote:
->>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>>
->>> Cache rejoin ack message already encodes inode base, make it also e=
-ncode
->>> dirfrag base. This allowes the message to replicate stray dentries =
-like
->>> MDentryUnlink message. The function will be used by later patch.
->>>
->>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->>> ---
->>>  src/mds/CDir.h                 | 20 +++++++++++++-------
->>>  src/mds/MDCache.cc             | 20 ++++++++++++++++++--
->>>  src/messages/MMDSCacheRejoin.h | 12 +++++++++++-
->>>  3 files changed, 42 insertions(+), 10 deletions(-)
->>>
->>> diff --git a/src/mds/CDir.h b/src/mds/CDir.h
->>> index 79946f1..f4a3a3d 100644
->>> --- a/src/mds/CDir.h
->>> +++ b/src/mds/CDir.h
->>> @@ -437,23 +437,29 @@ private:
->>>      ::encode(dist, bl);
->>>    }
->>>
->>> -  void encode_replica(int who, bufferlist& bl) {
->>> -    __u32 nonce =3D add_replica(who);
->>> -    ::encode(nonce, bl);
->>> +  void _encode_base(bufferlist& bl) {
->>>      ::encode(first, bl);
->>>      ::encode(fnode, bl);
->>>      ::encode(dir_rep, bl);
->>>      ::encode(dir_rep_by, bl);
->>>    }
->>> -  void decode_replica(bufferlist::iterator& p) {
->>> -    __u32 nonce;
->>> -    ::decode(nonce, p);
->>> -    replica_nonce =3D nonce;
->>> +  void _decode_base(bufferlist::iterator& p) {
->>>      ::decode(first, p);
->>>      ::decode(fnode, p);
->>>      ::decode(dir_rep, p);
->>>      ::decode(dir_rep_by, p);
->>>    }
->>> +  void encode_replica(int who, bufferlist& bl) {
->>> +    __u32 nonce =3D add_replica(who);
->>> +    ::encode(nonce, bl);
->>> +    _encode_base(bl);
->>> +  }
->>> +  void decode_replica(bufferlist::iterator& p) {
->>> +    __u32 nonce;
->>> +    ::decode(nonce, p);
->>> +    replica_nonce =3D nonce;
->>> +    _decode_base(p);
->>> +  }
->>>
->>>
->>>
->>> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
->>> index 8ba676e..344777e 100644
->>> --- a/src/mds/MDCache.cc
->>> +++ b/src/mds/MDCache.cc
->>> @@ -4510,8 +4510,22 @@ void MDCache::handle_cache_rejoin_ack(MMDSCa=
-cheRejoin *ack)
->>>      }
->>>    }
->>>
->>> +  // full dirfrags
->>> +  bufferlist::iterator p =3D ack->dirfrag_base.begin();
->>> +  while (!p.end()) {
->>> +    dirfrag_t df;
->>> +    bufferlist basebl;
->>> +    ::decode(df, p);
->>> +    ::decode(basebl, p);
->>> +    CDir *dir =3D get_dirfrag(df);
->>> +    assert(dir);
->>> +    bufferlist::iterator q =3D basebl.begin();
->>> +    dir->_decode_base(q);
->>> +    dout(10) << " got dir replica " << *dir << dendl;
->>> +  }
->>> +
->>>    // full inodes
->>> -  bufferlist::iterator p =3D ack->inode_base.begin();
->>> +  p =3D ack->inode_base.begin();
->>>    while (!p.end()) {
->>>      inodeno_t ino;
->>>      snapid_t last;
->>> @@ -5178,8 +5192,10 @@ void MDCache::rejoin_send_acks()
->>>        // dir
->>>        for (map<int,int>::iterator r =3D dir->replicas_begin();
->>>            r !=3D dir->replicas_end();
->>> -          ++r)
->>> +          ++r) {
->>>         ack[r->first]->add_strong_dirfrag(dir->dirfrag(), ++r->seco=
-nd, dir->dir_rep);
->>> +       ack[r->first]->add_dirfrag_base(dir);
->>> +      }
->>>
->>>        for (CDir::map_t::iterator q =3D dir->items.begin();
->>>            q !=3D dir->items.end();
->>> diff --git a/src/messages/MMDSCacheRejoin.h b/src/messages/MMDSCach=
-eRejoin.h
->>> index b88f551..7c37ab4 100644
->>> --- a/src/messages/MMDSCacheRejoin.h
->>> +++ b/src/messages/MMDSCacheRejoin.h
->>> @@ -20,6 +20,7 @@
->>>  #include "include/types.h"
->>>
->>>  #include "mds/CInode.h"
->>> +#include "mds/CDir.h"
->>>
->>>  // sent from replica to auth
->>>
->>> @@ -169,6 +170,7 @@ class MMDSCacheRejoin : public Message {
->>>    // full
->>>    bufferlist inode_base;
->>>    bufferlist inode_locks;
->>> +  bufferlist dirfrag_base;
->>>
->>>    // authpins, xlocks
->>>    struct slave_reqid {
->>> @@ -258,7 +260,13 @@ public:
->>>    void add_strong_dirfrag(dirfrag_t df, int n, int dr) {
->>>      strong_dirfrags[df] =3D dirfrag_strong(n, dr);
->>>    }
->>> -
->>> +  void add_dirfrag_base(CDir *dir) {
->>> +    ::encode(dir->dirfrag(), dirfrag_base);
->>> +    bufferlist bl;
->>> +    dir->_encode_base(bl);
->>> +    ::encode(bl, dirfrag_base);
->>> +  }
+>> Not sure what you're referring to here =97 do you mean the ID of the=
+ filesystem client request which prompted the update? I don't think tha=
+t would work as client requests actually require two parts to be unique=
+ (the client GUID and the request seq number), and I'm pretty sure a si=
+ngle client request can spawn multiple Table updates.
 >>
->> We are guilty of doing this in other places, but we should avoid
->> implicit encodings like this one, especially when the decode happens
->> somewhere else like it does here. We can make a vector dirfrag_bases
->> and add to that, and then encode and decode it along with the rest o=
-f
->> the message =97 would that work for your purposes?
+>
+> You are right, client request ID does not work.
+>
+>> As I look over this more, it sure looks to me as if the effect of th=
+e code we have (when non-broken) is to rollback every non-committed req=
+uest by an MDS which restarted =97 the only time it can handle the Tabl=
+eServer's "agree" with a different response is if the MDS was incorrect=
+ly marked out by the map. Am I parsing this correctly, Sage? Given that=
+, and without having looked at the code more broadly, I think we want t=
+o add some sort of implicit or explicit handshake letting each of them =
+know if the MDS actually disappeared. We use the process/address nonce =
+to accomplish this in other places=85
 >> -Greg
 >>
 >
-> update this patch or send a new patch that updates both {inode,dirfra=
-g}_base?
->
-> Thanks
-> Yan, Zheng
+> The table server sends 'agree' message to table client after a 'prepa=
+re entry' is safely logged. The table server re-sends 'agree' message i=
+n two cases, one is the table client restarts, another is the table ser=
+ver itself restarts.
+> The purpose of re-sending 'agree' message is to check if the table cl=
+ient still wants to keep the update preparation. (The table client migh=
+t crash before submitting the update). The purpose of reqid is associat=
+e table update
+> preparation request with the server's 'agree' reply message. The prob=
+lem here is that the table client does not make sure reqid unique betwe=
+en restarts. If you feel 2^32 reqids are still enough, set the reqid to=
+ a randomized 64bit
+> value should be safe enough.
 
-Updating this one is fine for me. :)
+Right. I'd like to somehow mark those reqid's so that we can tell when
+they come from a different incarnation of the MDS TableClient daemon.
+One way is via some piece of random data that will probably
+distinguish them, although if we have something which we can know is
+different that would be preferable. I think we can work something out
+of the startup session data each MDS does with the monitors, but I'm
+not sure I can check any time soon; I have a number of other things to
+get to now that I've gotten through (the first round on) this series.
+
+Thanks for all the patches, by the way. :)
 -Greg
-
-
->
->>> +
->>>    // dentries
->>>    void add_weak_dirfrag(dirfrag_t df) {
->>>      weak_dirfrags.insert(df);
->>> @@ -294,6 +302,7 @@ public:
->>>      ::encode(wrlocked_inodes, payload);
->>>      ::encode(cap_export_bl, payload);
->>>      ::encode(strong_dirfrags, payload);
->>> +    ::encode(dirfrag_base, payload);
->>>      ::encode(weak, payload);
->>>      ::encode(weak_dirfrags, payload);
->>>      ::encode(weak_inodes, payload);
->>> @@ -319,6 +328,7 @@ public:
->>>        ::decode(cap_export_paths, q);
->>>      }
->>>      ::decode(strong_dirfrags, p);
->>> +    ::decode(dirfrag_base, p);
->>>      ::decode(weak, p);
->>>      ::decode(weak_dirfrags, p);
->>>      ::decode(weak_inodes, p);
->>> --
->>> 1.7.11.7
->>>
->
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
