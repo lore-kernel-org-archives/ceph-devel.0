@@ -1,225 +1,190 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 11/39] mds: don't delay processing replica buffer in slave
- request
-Date: Thu, 21 Mar 2013 10:38:37 +0800
-Message-ID: <514A72AD.8090500@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-12-git-send-email-zheng.z.yan@intel.com> <7248FC83D26D4AF695C4488C64C660F6@inktank.com>
+Subject: Re: [PATCH 13/39] mds: don't send resolve message between active
+ MDS
+Date: Thu, 21 Mar 2013 10:55:41 +0800
+Message-ID: <514A76AD.5030005@intel.com>
+References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-14-git-send-email-zheng.z.yan@intel.com> <CAPYLRzj0BYniL2g21qhFFV0OvhZU-O+btnTFAfsj7=qPR-b_mw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:61799 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:63410 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752298Ab3CUCij (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Mar 2013 22:38:39 -0400
-In-Reply-To: <7248FC83D26D4AF695C4488C64C660F6@inktank.com>
+	id S1753800Ab3CUCzo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Mar 2013 22:55:44 -0400
+In-Reply-To: <CAPYLRzj0BYniL2g21qhFFV0OvhZU-O+btnTFAfsj7=qPR-b_mw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On 03/21/2013 05:19 AM, Greg Farnum wrote:
-> On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
+On 03/21/2013 05:56 AM, Gregory Farnum wrote:
+> On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> w=
+rote:
 >> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 >>
->> Replicated objects need to be added into the cache immediately
+>> When MDS cluster is resolving, current behavior is sending subtree r=
+esolve
+>> message to all other MDS and waiting for all other MDS' resolve mess=
+age.
+>> The problem is that active MDS can have diffent subtree map due to r=
+ename.
+>> Besides gathering active MDS's resolve messages are also racy. The o=
+nly
+>> function for these messages is disambiguate other MDS' import. We ca=
+n
+>> replace it by import finish notification.
 >>
 >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> Why do we need to add them right away? Shouldn't we have a journaled replica if we need it?
-> -Greg
+>> ---
+>>  src/mds/MDCache.cc  | 12 +++++++++---
+>>  src/mds/Migrator.cc | 25 +++++++++++++++++++++++--
+>>  src/mds/Migrator.h  |  3 ++-
+>>  3 files changed, 34 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+>> index c455a20..73c1d59 100644
+>> --- a/src/mds/MDCache.cc
+>> +++ b/src/mds/MDCache.cc
+>> @@ -2517,7 +2517,8 @@ void MDCache::send_subtree_resolves()
+>>         ++p) {
+>>      if (*p =3D=3D mds->whoami)
+>>        continue;
+>> -    resolves[*p] =3D new MMDSResolve;
+>> +    if (mds->is_resolve() || mds->mdsmap->is_resolve(*p))
+>> +      resolves[*p] =3D new MMDSResolve;
+>>    }
+>>
+>>    // known
+>> @@ -2837,7 +2838,7 @@ void MDCache::handle_resolve(MMDSResolve *m)
+>>           migrator->import_reverse(dir);
+>>         } else {
+>>           dout(7) << "ambiguous import succeeded on " << *dir << den=
+dl;
+>> -         migrator->import_finish(dir);
+>> +         migrator->import_finish(dir, true);
+>>         }
+>>         my_ambiguous_imports.erase(p);  // no longer ambiguous.
+>>        }
+>> @@ -3432,7 +3433,12 @@ void MDCache::rejoin_send_rejoins()
+>>         ++p) {
+>>      CDir *dir =3D p->first;
+>>      assert(dir->is_subtree_root());
+>> -    assert(!dir->is_ambiguous_dir_auth());
+>> +    if (dir->is_ambiguous_dir_auth()) {
+>> +      // exporter is recovering, importer is survivor.
+>=20
+> The importer has to be the MDS this code is running on, right?
 
-The issue I encountered is lock action message received, but replicated objects wasn't in the
-cache because slave request was delayed.
+This code is for bystanders. The exporter is recovering, and its resolv=
+e message didn't claim
+the subtree. So the export must succeed.
+
+>=20
+>> +      assert(rejoins.count(dir->authority().first));
+>> +      assert(!rejoins.count(dir->authority().second));
+>> +      continue;
+>> +    }
+>>
+>>      // my subtree?
+>>      if (dir->is_auth())
+>> diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
+>> index 5e53803..833df12 100644
+>> --- a/src/mds/Migrator.cc
+>> +++ b/src/mds/Migrator.cc
+>> @@ -2088,6 +2088,23 @@ void Migrator::import_reverse(CDir *dir)
+>>    }
+>>  }
+>>
+>> +void Migrator::import_notify_finish(CDir *dir, set<CDir*>& bounds)
+>> +{
+>> +  dout(7) << "import_notify_finish " << *dir << dendl;
+>> +
+>> +  for (set<int>::iterator p =3D import_bystanders[dir].begin();
+>> +       p !=3D import_bystanders[dir].end();
+>> +       ++p) {
+>> +    MExportDirNotify *notify =3D
+>> +      new MExportDirNotify(dir->dirfrag(), false,
+>> +                          pair<int,int>(import_peer[dir->dirfrag()]=
+, mds->get_nodeid()),
+>> +                          pair<int,int>(mds->get_nodeid(), CDIR_AUT=
+H_UNKNOWN));
+>=20
+> I don't think this is quite right =97 we're notifying them that we've
+> just finished importing data from somebody, right? And so we know tha=
+t
+> we're the auth node...
+
+Yes. In normal case, exporter notifies the bystanders. But if exporter =
+crashes, the importer notifies
+the bystanders after it confirms ambiguous import succeeds.
 
 Thanks
 Yan, Zheng
 
-
-> 
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->> ---
->> src/mds/MDCache.cc | 12 ++++++++++++
->> src/mds/MDCache.h | 2 +-
->> src/mds/MDS.cc | 6 +++---
->> src/mds/Server.cc | 55 +++++++++++++++++++++++++++++++++++++++---------------
->> 4 files changed, 56 insertions(+), 19 deletions(-)
->>
->> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
->> index 0f6b842..b668842 100644
->> --- a/src/mds/MDCache.cc
->> +++ b/src/mds/MDCache.cc
->> @@ -7722,6 +7722,18 @@ void MDCache::_find_ino_dir(inodeno_t ino, Context *fin, bufferlist& bl, int r)
->>
->> /* ---------------------------- */
->>
->> +int MDCache::get_num_client_requests()
->> +{
->> + int count = 0;
->> + for (hash_map<metareqid_t, MDRequest*>::iterator p = active_requests.begin();
->> + p != active_requests.end();
->> + ++p) {
->> + if (p->second->reqid.name.is_client() && !p->second->is_slave())
->> + count++;
->> + }
->> + return count;
+>=20
+>> +    for (set<CDir*>::iterator i =3D bounds.begin(); i !=3D bounds.e=
+nd(); i++)
+>> +      notify->get_bounds().push_back((*i)->dirfrag());
+>> +    mds->send_message_mds(notify, *p);
+>> +  }
 >> +}
 >> +
->> /* This function takes over the reference to the passed Message */
->> MDRequest *MDCache::request_start(MClientRequest *req)
->> {
->> diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
->> index a9f05c6..4634121 100644
->> --- a/src/mds/MDCache.h
->> +++ b/src/mds/MDCache.h
->> @@ -240,7 +240,7 @@ protected:
->> hash_map<metareqid_t, MDRequest*> active_requests; 
+>>  void Migrator::import_notify_abort(CDir *dir, set<CDir*>& bounds)
+>>  {
+>>    dout(7) << "import_notify_abort " << *dir << dendl;
+>> @@ -2183,11 +2200,11 @@ void Migrator::handle_export_finish(MExportD=
+irFinish *m)
+>>    CDir *dir =3D cache->get_dirfrag(m->get_dirfrag());
+>>    assert(dir);
+>>    dout(7) << "handle_export_finish on " << *dir << dendl;
+>> -  import_finish(dir);
+>> +  import_finish(dir, false);
+>>    m->put();
+>>  }
 >>
->> public:
->> - int get_num_active_requests() { return active_requests.size(); }
->> + int get_num_client_requests();
+>> -void Migrator::import_finish(CDir *dir)
+>> +void Migrator::import_finish(CDir *dir, bool notify)
+>>  {
+>>    dout(7) << "import_finish on " << *dir << dendl;
 >>
->> MDRequest* request_start(MClientRequest *req);
->> MDRequest* request_start_slave(metareqid_t rid, __u32 attempt, int by);
->> diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
->> index b91dcbd..e99eecc 100644
->> --- a/src/mds/MDS.cc
->> +++ b/src/mds/MDS.cc
->> @@ -1900,9 +1900,9 @@ bool MDS::_dispatch(Message *m)
->> mdcache->is_open() &&
->> replay_queue.empty() &&
->> want_state == MDSMap::STATE_CLIENTREPLAY) {
->> - dout(10) << " still have " << mdcache->get_num_active_requests()
->> - << " active replay requests" << dendl;
->> - if (mdcache->get_num_active_requests() == 0)
->> + int num_requests = mdcache->get_num_client_requests();
->> + dout(10) << " still have " << num_requests << " active replay requests" << dendl;
->> + if (num_requests == 0)
->> clientreplay_done();
->> }
->>
->> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
->> index 4c4c86b..8e89e4c 100644
->> --- a/src/mds/Server.cc
->> +++ b/src/mds/Server.cc
->> @@ -107,10 +107,8 @@ void Server::dispatch(Message *m)
->> (m->get_type() == CEPH_MSG_CLIENT_REQUEST &&
->> (static_cast<MClientRequest*>(m))->is_replay()))) {
->> // replaying!
->> - } else if (mds->is_clientreplay() && m->get_type() == MSG_MDS_SLAVE_REQUEST &&
->> - ((static_cast<MMDSSlaveRequest*>(m))->is_reply() ||
->> - !mds->mdsmap->is_active(m->get_source().num()))) {
->> - // slave reply or the master is also in the clientreplay stage
->> + } else if (m->get_type() == MSG_MDS_SLAVE_REQUEST) {
->> + // handle_slave_request() will wait if necessary
->> } else {
->> dout(3) << "not active yet, waiting" << dendl;
->> mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
->> @@ -1291,6 +1289,13 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
->> if (m->is_reply())
->> return handle_slave_request_reply(m);
->>
->> + CDentry *straydn = NULL;
->> + if (m->stray.length() > 0) {
->> + straydn = mdcache->add_replica_stray(m->stray, from);
->> + assert(straydn);
->> + m->stray.clear();
->> + }
+>> @@ -2205,6 +2222,10 @@ void Migrator::import_finish(CDir *dir)
+>>    // remove pins
+>>    set<CDir*> bounds;
+>>    cache->get_subtree_bounds(dir, bounds);
 >> +
->> // am i a new slave?
->> MDRequest *mdr = NULL;
->> if (mdcache->have_request(m->get_reqid())) {
->> @@ -1326,9 +1331,26 @@ void Server::handle_slave_request(MMDSSlaveRequest *m)
->> m->put();
->> return;
->> }
->> - mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), m->get_source().num());
->> + mdr = mdcache->request_start_slave(m->get_reqid(), m->get_attempt(), from);
->> }
->> assert(mdr->slave_request == 0); // only one at a time, please! 
+>> +  if (notify)
+>> +    import_notify_finish(dir, bounds);
 >> +
->> + if (straydn) {
->> + mdr->pin(straydn);
->> + mdr->straydn = straydn;
->> + }
->> +
->> + if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
->> + dout(3) << "not clientreplay|active yet, waiting" << dendl;
->> + mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
->> + return;
->> + } else if (mds->is_clientreplay() && !mds->mdsmap->is_clientreplay(from) &&
->> + mdr->locks.empty()) {
->> + dout(3) << "not active yet, waiting" << dendl;
->> + mds->wait_for_active(new C_MDS_RetryMessage(mds, m));
->> + return;
->> + }
->> +
->> mdr->slave_request = m;
+>>    import_remove_pins(dir, bounds);
 >>
->> dispatch_slave_request(mdr);
->> @@ -1339,6 +1361,12 @@ void Server::handle_slave_request_reply(MMDSSlaveRequest *m)
->> {
->> int from = m->get_source().num();
+>>    map<CInode*, map<client_t,Capability::Export> > cap_imports;
+>> diff --git a/src/mds/Migrator.h b/src/mds/Migrator.h
+>> index 7988f32..2889a74 100644
+>> --- a/src/mds/Migrator.h
+>> +++ b/src/mds/Migrator.h
+>> @@ -273,12 +273,13 @@ protected:
+>>    void import_reverse_unfreeze(CDir *dir);
+>>    void import_reverse_final(CDir *dir);
+>>    void import_notify_abort(CDir *dir, set<CDir*>& bounds);
+>> +  void import_notify_finish(CDir *dir, set<CDir*>& bounds);
+>>    void import_logged_start(dirfrag_t df, CDir *dir, int from,
+>>                            map<client_t,entity_inst_t> &imported_cli=
+ent_map,
+>>                            map<client_t,uint64_t>& sseqmap);
+>>    void handle_export_finish(MExportDirFinish *m);
+>>  public:
+>> -  void import_finish(CDir *dir);
+>> +  void import_finish(CDir *dir, bool notify);
+>>  protected:
 >>
->> + if (!mds->is_clientreplay() && !mds->is_active() && !mds->is_stopping()) {
->> + dout(3) << "not clientreplay|active yet, waiting" << dendl;
->> + mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
->> + return;
->> + }
->> +
->> if (m->get_op() == MMDSSlaveRequest::OP_COMMITTED) {
->> metareqid_t r = m->get_reqid();
->> mds->mdcache->committed_master_slave(r, from);
->> @@ -5138,10 +5166,8 @@ void Server::handle_slave_rmdir_prep(MDRequest *mdr)
->> dout(10) << " dn " << *dn << dendl;
->> mdr->pin(dn);
->>
->> - assert(mdr->slave_request->stray.length() > 0);
->> - CDentry *straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
->> - assert(straydn);
->> - mdr->pin(straydn);
->> + assert(mdr->straydn);
->> + CDentry *straydn = mdr->straydn;
->> dout(10) << " straydn " << *straydn << dendl;
->>
->> mdr->now = mdr->slave_request->now;
->> @@ -5208,6 +5234,7 @@ void Server::_logged_slave_rmdir(MDRequest *mdr, CDentry *dn, CDentry *straydn)
->> // done.
->> mdr->slave_request->put();
->> mdr->slave_request = 0;
->> + mdr->straydn = 0;
->> }
->>
->> void Server::handle_slave_rmdir_prep_ack(MDRequest *mdr, MMDSSlaveRequest *ack)
->> @@ -6460,15 +6487,12 @@ void Server::handle_slave_rename_prep(MDRequest *mdr)
->> // stray?
->> bool linkmerge = (srcdnl->get_inode() == destdnl->get_inode() &&
->> (srcdnl->is_primary() || destdnl->is_primary()));
->> - CDentry *straydn = 0;
->> - if (destdnl->is_primary() && !linkmerge) {
->> - assert(mdr->slave_request->stray.length() > 0);
->> - straydn = mdcache->add_replica_stray(mdr->slave_request->stray, mdr->slave_to_mds);
->> + CDentry *straydn = mdr->straydn;
->> + if (destdnl->is_primary() && !linkmerge)
->> assert(straydn);
->> - mdr->pin(straydn);
->> - }
->>
->> mdr->now = mdr->slave_request->now;
->> + mdr->more()->srcdn_auth_mds = srcdn->authority().first;
->>
->> // set up commit waiter (early, to clean up any freezing etc we do)
->> if (!mdr->more()->slave_commit)
->> @@ -6651,6 +6675,7 @@ void Server::_logged_slave_rename(MDRequest *mdr,
->> // done.
->> mdr->slave_request->put();
->> mdr->slave_request = 0;
->> + mdr->straydn = 0;
->> }
->>
->> void Server::_commit_slave_rename(MDRequest *mdr, int r,
->> -- 
+>>    void handle_export_caps(MExportCaps *m);
+>> --
 >> 1.7.11.7
-> 
-> 
-> 
+>>
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
