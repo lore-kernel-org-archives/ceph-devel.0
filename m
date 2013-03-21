@@ -1,83 +1,74 @@
-From: "Jacky.He" <jacky.he@gmail.com>
-Subject: RE: Latest bobtail branch still crashing KVM VMs in bh_write_commit()
-Date: Thu, 21 Mar 2013 08:58:52 +0800
-Message-ID: <514a5b4b.e5b6440a.5925.24ac@mx.google.com>
-References: <CACkq2mrSvLyy9j3HMAEiCHnuktnB_EQbnQ-JvAZcyLcjmjn3uQ@mail.gmail.com> <514A13A8.7010002@profihost.ag> <CACkq2mppEb=N=dKGNWLx-pm2nZGp44D-SEYBoVhxMNDxUjE5sw@mail.gmail.com> <514A189E.7070802@profihost.ag>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: deb/rpm package purge
+Date: Wed, 20 Mar 2013 18:08:25 -0700
+Message-ID: <514A5D89.5050908@inktank.com>
+References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net>  <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com>  <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net>  <1363732049.12547.22.camel@julia>  <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net>  <1363733473.12547.33.camel@julia>  <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net>  <1363760969.12547.52.camel@julia>  <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net> <1363821815.12547.97.camel@julia>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:50900 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752559Ab3CUBES (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 21:04:18 -0400
-Received: by mail-pb0-f41.google.com with SMTP id um15so1802923pbc.14
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 18:04:17 -0700 (PDT)
-In-Reply-To: <514A189E.7070802@profihost.ag>
-Content-Language: zh-cn
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:60299 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753695Ab3CUBI2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 21:08:28 -0400
+Received: by mail-pb0-f51.google.com with SMTP id un15so1781120pbc.24
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 18:08:28 -0700 (PDT)
+In-Reply-To: <1363821815.12547.97.camel@julia>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Stefan Priebe' <s.priebe@profihost.ag>, 'Travis Rhoden' <trhoden@gmail.com>
-Cc: bcampbell@axcess-financial.com, 'ceph-devel' <ceph-devel@vger.kernel.org>
+To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Cc: Sage Weil <sage@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
 
 
+>>>> As a point of comparison, mysql removes the config files but not
+>>>> /var/lib/mysql.
+>>>> The question is, is that okay/typical/desireable/recommended/a bad=
+ idea?
+>   I should have asked this sooner. Do you know _any_ program that rem=
+oves
+> your favorite music collection, your family photos or your business
+> emails when you do uninstall it?
+> I suspect that your question was theoretical instead.
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Stefan Priebe
-> Sent: Thursday, March 21, 2013 4:14 AM
-> To: Travis Rhoden
-> Cc: bcampbell@axcess-financial.com; ceph-devel
-> Subject: Re: Latest bobtail branch still crashing KVM VMs in
-bh_write_commit()
-> 
-> Hi,
-> 
-> > In this case, they are format 2. And they are from cloned snapshots.
-> > Exactly like the following:
-> >
-> > # rbd ls -l -p volumes
-> > NAME                                                         SIZE
-> > PARENT                                           FMT PROT LOCK
-> > volume-099a6d74-05bd-4f00-a12e-009d60629aa8                 5120M
-> > images/b8bdda90-664b-4906-86d6-dd33735441f2@snap   2
-> >
-> > I'm doing an OpenStack boot-from-volume setup.
-> 
-> OK i've never used cloned snapshots so maybe this is the reason.
-> 
-> >> strange i've never seen this. Which qemu version?
-> >
-> > # qemu-x86_64 -version
-> > qemu-x86_64 version 1.0 (qemu-kvm-1.0), Copyright (c) 2003-2008
-> > Fabrice Bellard
-> >
-> > that's coming from Ubuntu 12.04 apt repos.
-> 
-> maybe you should try qemu 1.4 there are a LOT of bugfixes. qemu-kvm does
-not
-> exist anymore it was merged into qemu with 1.3 or 1.4.
-> 
-[jacky_he] I also encountered the same issue, ceph version is 0.56.3.
-I have tried Qemu 1.3.1 and Qemu 1.4.0, KVM VM with format 2 cloned image
-crashs.
-My host OS is ubuntu 12.04, guest OS are CentOS 6.3 and Windows XP/Windows 7
+It's somewhat different in that the data is not owned by one user, but=20
+there are clear parallels.  The thing to be careful about here, IMO, is=
+=20
+not only to preserve the data, but the associated files that allow
+(reasonably-easy) access to that data.  (It's no good preserving the OS=
+D
+filestore if the keys, monmap, or osdmap are gone or hard to recover.)
 
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of
-> a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> __________ Information from ESET NOD32 Antivirus, version of virus
-signature
-> database 8141 (20130320) __________
-> 
-> The message was checked by ESET NOD32 Antivirus.
-> 
-> http://www.eset.com
-> 
+>> - remove /etc/ceph if it has been untouched
+>   This is an other case. dpkg itself handle package files here, calle=
+d
+> conffiles. I should check the method (md5sum and/or sha1 variants) us=
+ed
+> for the checksum on these files. On upgrade it's used not to overwrit=
+e
+> local changes by the user. It may worth to read a bit more about it[1=
+]
+> from Rapha=EBl Hertzog. He is the co-author of Debian Administrator's
+> handbook[2] BTW.
 
+Excellent reference; thanks for the pointer.
+
+>   On purge dpkg will remove the package conffiles no matter what. It
+> won't check if those were changed or not. You may not mark the files
+> under /etc as conffiles, but then you'll lose the mentioned
+> merge logic on upgrades; dpkg will just overwrite those.
+>   In short, files under /var/lib/ceph are the only candidates for
+> in-package checksumming. How many files under there that essential fo=
+r
+> the packages?
+>
+> Laszlo/GCS
+> [1] http://raphaelhertzog.com/2010/09/21/debian-conffile-configuratio=
+n-file-managed-by-dpkg/
+> [2] http://debian-handbook.info/
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
