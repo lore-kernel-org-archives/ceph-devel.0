@@ -1,72 +1,77 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: deb/rpm package purge
-Date: Wed, 20 Mar 2013 18:08:25 -0700
-Message-ID: <514A5D89.5050908@inktank.com>
-References: <alpine.DEB.2.00.1303191246330.4850@cobra.newdream.net>  <5148C4EE.5090205@inktank.com> <5148CEC2.2050405@inktank.com>  <alpine.DEB.2.00.1303191349360.4850@cobra.newdream.net>  <1363732049.12547.22.camel@julia>  <alpine.DEB.2.00.1303191528510.4850@cobra.newdream.net>  <1363733473.12547.33.camel@julia>  <alpine.DEB.2.00.1303191554590.4850@cobra.newdream.net>  <1363760969.12547.52.camel@julia>  <alpine.DEB.2.00.1303200545140.11428@cobra.newdream.net> <1363821815.12547.97.camel@julia>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 08/39] mds: consider MDS as recovered when it reaches
+ clientreply state.
+Date: Thu, 21 Mar 2013 10:22:54 +0800
+Message-ID: <514A6EFE.3000009@intel.com>
+References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-9-git-send-email-zheng.z.yan@intel.com> <80DEECF59AAD445C8EEEFCE71A74EA78@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:60299 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753695Ab3CUBI2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 21:08:28 -0400
-Received: by mail-pb0-f51.google.com with SMTP id un15so1781120pbc.24
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 18:08:28 -0700 (PDT)
-In-Reply-To: <1363821815.12547.97.camel@julia>
+Received: from mga09.intel.com ([134.134.136.24]:13088 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752844Ab3CUCW4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Mar 2013 22:22:56 -0400
+In-Reply-To: <80DEECF59AAD445C8EEEFCE71A74EA78@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: Sage Weil <sage@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, james.page@ubuntu.com
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
+On 03/21/2013 02:40 AM, Greg Farnum wrote:
+> The idea of this patch makes sense, but I'm not sure if we guarantee =
+that each daemon sees every map update =E2=80=94 if they don't then if =
+an MDS misses the map moving an MDS into CLIENTREPLAY then they won't p=
+rocess them as having recovered on the next map. Sage or Joao, what are=
+ the guarantees subscription provides? =20
+> -Greg
 
->>>> As a point of comparison, mysql removes the config files but not
->>>> /var/lib/mysql.
->>>> The question is, is that okay/typical/desireable/recommended/a bad=
- idea?
->   I should have asked this sooner. Do you know _any_ program that rem=
-oves
-> your favorite music collection, your family photos or your business
-> emails when you do uninstall it?
-> I suspect that your question was theoretical instead.
+See MDS::active_start(), it also kicks clientreplay waiters. And I will=
+ fix the 'clientreply' typo in my git tree.
 
-It's somewhat different in that the data is not owned by one user, but=20
-there are clear parallels.  The thing to be careful about here, IMO, is=
-=20
-not only to preserve the data, but the associated files that allow
-(reasonably-easy) access to that data.  (It's no good preserving the OS=
-D
-filestore if the keys, monmap, or osdmap are gone or hard to recover.)
+Thanks
+Yan, Zheng
 
->> - remove /etc/ceph if it has been untouched
->   This is an other case. dpkg itself handle package files here, calle=
-d
-> conffiles. I should check the method (md5sum and/or sha1 variants) us=
-ed
-> for the checksum on these files. On upgrade it's used not to overwrit=
-e
-> local changes by the user. It may worth to read a bit more about it[1=
-]
-> from Rapha=EBl Hertzog. He is the co-author of Debian Administrator's
-> handbook[2] BTW.
+>=20
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>=20
+>=20
+> On Sunday, March 17, 2013 at 7:51 AM, Yan, Zheng wrote:
+>=20
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com (mailto:zheng.z.yan@intel.=
+com)>
+>> =20
+>> MDS in clientreply state already start servering requests. It also
+>> make MDS::handle_mds_recovery() and MDS::recovery_done() match.
+>> =20
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com (mailto:zheng.z.yan=
+@intel.com)>
+>> ---
+>> src/mds/MDS.cc (http://MDS.cc) | 2 ++
+>> 1 file changed, 2 insertions(+)
+>> =20
+>> diff --git a/src/mds/MDS.cc (http://MDS.cc) b/src/mds/MDS.cc (http:/=
+/MDS.cc)
+>> index 282fa64..b91dcbd 100644
+>> --- a/src/mds/MDS.cc (http://MDS.cc)
+>> +++ b/src/mds/MDS.cc (http://MDS.cc)
+>> @@ -1032,7 +1032,9 @@ void MDS::handle_mds_map(MMDSMap *m)
+>> =20
+>> set<int> oldactive, active;
+>> oldmap->get_mds_set(oldactive, MDSMap::STATE_ACTIVE);
+>> + oldmap->get_mds_set(oldactive, MDSMap::STATE_CLIENTREPLAY);
+>> mdsmap->get_mds_set(active, MDSMap::STATE_ACTIVE);
+>> + mdsmap->get_mds_set(active, MDSMap::STATE_CLIENTREPLAY);
+>> for (set<int>::iterator p =3D active.begin(); p !=3D active.end(); +=
++p) =20
+>> if (*p !=3D whoami && // not me
+>> oldactive.count(*p) =3D=3D 0) // newly so?
+>> -- =20
+>> 1.7.11.7
+>=20
+>=20
+>=20
 
-Excellent reference; thanks for the pointer.
-
->   On purge dpkg will remove the package conffiles no matter what. It
-> won't check if those were changed or not. You may not mark the files
-> under /etc as conffiles, but then you'll lose the mentioned
-> merge logic on upgrades; dpkg will just overwrite those.
->   In short, files under /var/lib/ceph are the only candidates for
-> in-package checksumming. How many files under there that essential fo=
-r
-> the packages?
->
-> Laszlo/GCS
-> [1] http://raphaelhertzog.com/2010/09/21/debian-conffile-configuratio=
-n-file-managed-by-dpkg/
-> [2] http://debian-handbook.info/
->
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
