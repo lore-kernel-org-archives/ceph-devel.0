@@ -1,19 +1,19 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 36/39] mds: try merging subtree after clear EXPORTBOUND
-Date: Wed, 20 Mar 2013 20:44:03 -0700
-Message-ID: <CAPYLRzhsmvpUpAAGLk3s2Vb9x7LLN3q7Bt-g29W2-rF0mVBqXQ@mail.gmail.com>
+Subject: Re: [PATCH 37/39] mds: eval inodes with caps imported by cache rejoin message
+Date: Wed, 20 Mar 2013 20:45:41 -0700
+Message-ID: <CAPYLRzioEPawmqO1FgBEHcOOgqkrkG12k-+9hUt7gLpQuKrYBg@mail.gmail.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
-	<1363531902-24909-37-git-send-email-zheng.z.yan@intel.com>
+	<1363531902-24909-38-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:57790 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753980Ab3CUDoG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 23:44:06 -0400
-Received: by mail-we0-f169.google.com with SMTP id x56so1122566wey.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 20:44:03 -0700 (PDT)
-In-Reply-To: <1363531902-24909-37-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:61961 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750973Ab3CUDpm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Mar 2013 23:45:42 -0400
+Received: by mail-wi0-f176.google.com with SMTP id hm14so6066545wib.9
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Mar 2013 20:45:41 -0700 (PDT)
+In-Reply-To: <1363531902-24909-38-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zheng.z.yan@intel.com>
@@ -26,35 +26,21 @@ On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
 >
 > Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 > ---
->  src/mds/Migrator.cc | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+>  src/mds/MDCache.cc | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
-> index f563b8d..9cbad87 100644
-> --- a/src/mds/Migrator.cc
-> +++ b/src/mds/Migrator.cc
-> @@ -1340,10 +1340,6 @@ void Migrator::export_reverse(CDir *dir)
->    set<CDir*> bounds;
->    cache->get_subtree_bounds(dir, bounds);
->
-> -  // adjust auth, with possible subtree merge.
-> -  cache->adjust_subtree_auth(dir, mds->get_nodeid());
-> -  cache->try_subtree_merge(dir);  // NOTE: may journal subtree_map as side-effect
-> -
->    // remove exporting pins
->    list<CDir*> rq;
->    rq.push_back(dir);
-> @@ -1371,6 +1367,10 @@ void Migrator::export_reverse(CDir *dir)
->      bd->state_clear(CDir::STATE_EXPORTBOUND);
->    }
->
-> +  // adjust auth, with possible subtree merge.
-> +  cache->adjust_subtree_auth(dir, mds->get_nodeid());
-> +  cache->try_subtree_merge(dir);  // NOTE: may journal subtree_map as side-effect
-> +
->    // notify bystanders
->    export_notify_abort(dir, bounds);
->
+> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+> index 30687ec..24f1109 100644
+> --- a/src/mds/MDCache.cc
+> +++ b/src/mds/MDCache.cc
+> @@ -3823,6 +3823,7 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+>         dout(10) << " claiming cap import " << p->first << " client." << q->first << " on " << *in << dendl;
+>         rejoin_import_cap(in, q->first, q->second, from);
+>        }
+> +      mds->locker->eval(in, CEPH_CAP_LOCKS, true);
+>      }
+>    } else {
+>      assert(mds->is_rejoin());
 > --
 > 1.7.11.7
 >
