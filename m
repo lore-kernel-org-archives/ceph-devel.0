@@ -1,197 +1,66 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 21/39] mds: encode dirfrag base in cache rejoin ack
-Date: Thu, 21 Mar 2013 14:41:21 +0800
-Message-ID: <514AAB91.1010107@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-22-git-send-email-zheng.z.yan@intel.com> <CAPYLRzjwL43cDez1aC7x_m7E71Udrus3vqm1+j1f4O+0MmG5+w@mail.gmail.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: corruption of active mmapped files in btrfs snapshots
+Date: Thu, 21 Mar 2013 04:14:02 -0300
+Message-ID: <ord2utb4xx.fsf@livre.home>
+References: <orhak8fm0u.fsf@livre.home>
+	<20130318225245.25964.22219@localhost.localdomain>
+	<orzjy0dkz9.fsf@livre.home>
+	<20130319120940.29898.80124@localhost.localdomain>
+	<ora9pzdwdw.fsf@livre.home> <or1ubaesrx.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:3927 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753089Ab3CUGlY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Mar 2013 02:41:24 -0400
-In-Reply-To: <CAPYLRzjwL43cDez1aC7x_m7E71Udrus3vqm1+j1f4O+0MmG5+w@mail.gmail.com>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:60178 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753112Ab3CUHOw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Mar 2013 03:14:52 -0400
+In-Reply-To: <or1ubaesrx.fsf@livre.home> (Alexandre Oliva's message of "Tue,
+	19 Mar 2013 22:58:42 -0300")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Chris Mason <clmason@fusionio.com>
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 03/21/2013 07:33 AM, Gregory Farnum wrote:
-> This needs to handle versioning the encoding based on peer feature bi=
-ts too.
->=20
-> On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> w=
-rote:
->> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>
->> Cache rejoin ack message already encodes inode base, make it also en=
-code
->> dirfrag base. This allowes the message to replicate stray dentries l=
-ike
->> MDentryUnlink message. The function will be used by later patch.
->>
->> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->> ---
->>  src/mds/CDir.h                 | 20 +++++++++++++-------
->>  src/mds/MDCache.cc             | 20 ++++++++++++++++++--
->>  src/messages/MMDSCacheRejoin.h | 12 +++++++++++-
->>  3 files changed, 42 insertions(+), 10 deletions(-)
->>
->> diff --git a/src/mds/CDir.h b/src/mds/CDir.h
->> index 79946f1..f4a3a3d 100644
->> --- a/src/mds/CDir.h
->> +++ b/src/mds/CDir.h
->> @@ -437,23 +437,29 @@ private:
->>      ::encode(dist, bl);
->>    }
->>
->> -  void encode_replica(int who, bufferlist& bl) {
->> -    __u32 nonce =3D add_replica(who);
->> -    ::encode(nonce, bl);
->> +  void _encode_base(bufferlist& bl) {
->>      ::encode(first, bl);
->>      ::encode(fnode, bl);
->>      ::encode(dir_rep, bl);
->>      ::encode(dir_rep_by, bl);
->>    }
->> -  void decode_replica(bufferlist::iterator& p) {
->> -    __u32 nonce;
->> -    ::decode(nonce, p);
->> -    replica_nonce =3D nonce;
->> +  void _decode_base(bufferlist::iterator& p) {
->>      ::decode(first, p);
->>      ::decode(fnode, p);
->>      ::decode(dir_rep, p);
->>      ::decode(dir_rep_by, p);
->>    }
->> +  void encode_replica(int who, bufferlist& bl) {
->> +    __u32 nonce =3D add_replica(who);
->> +    ::encode(nonce, bl);
->> +    _encode_base(bl);
->> +  }
->> +  void decode_replica(bufferlist::iterator& p) {
->> +    __u32 nonce;
->> +    ::decode(nonce, p);
->> +    replica_nonce =3D nonce;
->> +    _decode_base(p);
->> +  }
->>
->>
->>
->> diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
->> index 8ba676e..344777e 100644
->> --- a/src/mds/MDCache.cc
->> +++ b/src/mds/MDCache.cc
->> @@ -4510,8 +4510,22 @@ void MDCache::handle_cache_rejoin_ack(MMDSCac=
-heRejoin *ack)
->>      }
->>    }
->>
->> +  // full dirfrags
->> +  bufferlist::iterator p =3D ack->dirfrag_base.begin();
->> +  while (!p.end()) {
->> +    dirfrag_t df;
->> +    bufferlist basebl;
->> +    ::decode(df, p);
->> +    ::decode(basebl, p);
->> +    CDir *dir =3D get_dirfrag(df);
->> +    assert(dir);
->> +    bufferlist::iterator q =3D basebl.begin();
->> +    dir->_decode_base(q);
->> +    dout(10) << " got dir replica " << *dir << dendl;
->> +  }
->> +
->>    // full inodes
->> -  bufferlist::iterator p =3D ack->inode_base.begin();
->> +  p =3D ack->inode_base.begin();
->>    while (!p.end()) {
->>      inodeno_t ino;
->>      snapid_t last;
->> @@ -5178,8 +5192,10 @@ void MDCache::rejoin_send_acks()
->>        // dir
->>        for (map<int,int>::iterator r =3D dir->replicas_begin();
->>            r !=3D dir->replicas_end();
->> -          ++r)
->> +          ++r) {
->>         ack[r->first]->add_strong_dirfrag(dir->dirfrag(), ++r->secon=
-d, dir->dir_rep);
->> +       ack[r->first]->add_dirfrag_base(dir);
->> +      }
->>
->>        for (CDir::map_t::iterator q =3D dir->items.begin();
->>            q !=3D dir->items.end();
->> diff --git a/src/messages/MMDSCacheRejoin.h b/src/messages/MMDSCache=
-Rejoin.h
->> index b88f551..7c37ab4 100644
->> --- a/src/messages/MMDSCacheRejoin.h
->> +++ b/src/messages/MMDSCacheRejoin.h
->> @@ -20,6 +20,7 @@
->>  #include "include/types.h"
->>
->>  #include "mds/CInode.h"
->> +#include "mds/CDir.h"
->>
->>  // sent from replica to auth
->>
->> @@ -169,6 +170,7 @@ class MMDSCacheRejoin : public Message {
->>    // full
->>    bufferlist inode_base;
->>    bufferlist inode_locks;
->> +  bufferlist dirfrag_base;
->>
->>    // authpins, xlocks
->>    struct slave_reqid {
->> @@ -258,7 +260,13 @@ public:
->>    void add_strong_dirfrag(dirfrag_t df, int n, int dr) {
->>      strong_dirfrags[df] =3D dirfrag_strong(n, dr);
->>    }
->> -
->> +  void add_dirfrag_base(CDir *dir) {
->> +    ::encode(dir->dirfrag(), dirfrag_base);
->> +    bufferlist bl;
->> +    dir->_encode_base(bl);
->> +    ::encode(bl, dirfrag_base);
->> +  }
->=20
-> We are guilty of doing this in other places, but we should avoid
-> implicit encodings like this one, especially when the decode happens
-> somewhere else like it does here. We can make a vector dirfrag_bases
-> and add to that, and then encode and decode it along with the rest of
-> the message =97 would that work for your purposes?
-> -Greg
->=20
+On Mar 19, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
 
-update this patch or send a new patch that updates both {inode,dirfrag}=
-_base?
+> On Mar 19, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
+>>> that is being processed inside the snapshot.
 
-Thanks
-Yan, Zheng
+>> This doesn't explain why the master database occasionally gets simil=
+arly
+>> corrupted, does it?
 
->> +
->>    // dentries
->>    void add_weak_dirfrag(dirfrag_t df) {
->>      weak_dirfrags.insert(df);
->> @@ -294,6 +302,7 @@ public:
->>      ::encode(wrlocked_inodes, payload);
->>      ::encode(cap_export_bl, payload);
->>      ::encode(strong_dirfrags, payload);
->> +    ::encode(dirfrag_base, payload);
->>      ::encode(weak, payload);
->>      ::encode(weak_dirfrags, payload);
->>      ::encode(weak_inodes, payload);
->> @@ -319,6 +328,7 @@ public:
->>        ::decode(cap_export_paths, q);
->>      }
->>      ::decode(strong_dirfrags, p);
->> +    ::decode(dirfrag_base, p);
->>      ::decode(weak, p);
->>      ::decode(weak_dirfrags, p);
->>      ::decode(weak_inodes, p);
->> --
->> 1.7.11.7
->>
+> Actually, scratch this bit for now.  I don't really have proof that t=
+he
+> master database actually gets corrupted while it's in use
 
+Scratch the =E2=80=9Cscratch this=E2=80=9D.  The master database actual=
+ly gets
+corrupted, and it's with recently-created files, created after earlier
+known-good snapshots.  So, it can't really be orphan processing, can it=
+?
+
+Some more info from the errors and instrumentation:
+
+- no data syncing on the affected files is taking place.  it's just
+  memcpy()ing data in <4KiB-sized chunks onto mmap()ed areas,
+  munmap()ing it, growing the file with ftruncate and mapping a
+  subsequent chunk for further output
+
+- the NULs at the end of pages do NOT occur at munmap/mmap boundaries a=
+s
+  I suspected at first, but they do coincide with the end of extents
+  that are smaller than the maximum compressed extent size.  So,
+  something's making btrfs flush pages to disk before the pages are
+  completely written (which is fine in principle), but apparently
+  failing to pick up subsequent changes to the pages (eek!)
+
+--=20
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+=46ree Software Evangelist      Red Hat Brazil Compiler Engineer
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
