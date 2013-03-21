@@ -1,94 +1,71 @@
-From: Chris Mason <chris.mason@fusionio.com>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Thu, 21 Mar 2013 19:06:21 -0400
-Message-ID: <20130321230621.30044.80640@localhost.localdomain>
-References: <orhak8fm0u.fsf@livre.home>
- <20130318225245.25964.22219@localhost.localdomain>
- <orzjy0dkz9.fsf@livre.home>
- <20130319120940.29898.80124@localhost.localdomain>
- <ora9pzdwdw.fsf@livre.home> <or1ubaesrx.fsf@livre.home>
- <ord2utb4xx.fsf@livre.home>
- <20130321180614.30044.29961@localhost.localdomain>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: github pull requests
+Date: Thu, 21 Mar 2013 16:15:56 -0700
+Message-ID: <CAPYLRzjyLmtFHLTny4Ni1FzhaAPqmmqTNt3ztDBL-oCMZZ7m0A@mail.gmail.com>
+References: <alpine.DEB.2.00.1303191550140.4850@cobra.newdream.net>
+	<CAMQoE_3+Os=F75LE+7dLVK2LYamNbEqwk0wpTe5+b0UZvYnQzg@mail.gmail.com>
+	<52FEF7AC-2E35-413D-A0E6-A69B2FB2271D@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=GB2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dkim2.fusionio.com ([66.114.96.54]:57093 "EHLO
-	dkim2.fusionio.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754012Ab3CUXGY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Mar 2013 19:06:24 -0400
-Received: from mx1.fusionio.com (unknown [10.101.1.160])
-	by dkim2.fusionio.com (Postfix) with ESMTP id 5ACDA9A067E
-	for <ceph-devel@vger.kernel.org>; Thu, 21 Mar 2013 17:06:24 -0600 (MDT)
-In-Reply-To: <20130321180614.30044.29961@localhost.localdomain>
+Received: from mail-qa0-f51.google.com ([209.85.216.51]:61026 "EHLO
+	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754037Ab3CUXP5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Mar 2013 19:15:57 -0400
+Received: by mail-qa0-f51.google.com with SMTP id g10so2011160qah.3
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Mar 2013 16:15:56 -0700 (PDT)
+In-Reply-To: <52FEF7AC-2E35-413D-A0E6-A69B2FB2271D@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Mason <clmason@fusionio.com>, Alexandre Oliva <oliva@gnu.org>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Guilhem Lettron <guilhem@lettron.fr>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ross Turk <ross@inktank.com>
 
-Quoting Chris Mason (2013-03-21 14:06:14)
-> Quoting Alexandre Oliva (2013-03-21 03:14:02)
-> > On Mar 19, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
-> >=20
-> > > On Mar 19, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
-> > >>> that is being processed inside the snapshot.
-> >=20
-> > >> This doesn't explain why the master database occasionally gets s=
-imilarly
-> > >> corrupted, does it?
-> >=20
-> > > Actually, scratch this bit for now.  I don't really have proof th=
-at the
-> > > master database actually gets corrupted while it's in use
-> >=20
-> > Scratch the =E2=80=9Cscratch this=E2=80=9D.  The master database ac=
-tually gets
-> > corrupted, and it's with recently-created files, created after earl=
-ier
-> > known-good snapshots.  So, it can't really be orphan processing, ca=
-n it?
->=20
-> Right, it can't be orphan processing.
->=20
-> >=20
-> > Some more info from the errors and instrumentation:
-> >=20
-> > - no data syncing on the affected files is taking place.  it's just
-> >   memcpy()ing data in <4KiB-sized chunks onto mmap()ed areas,
-> >   munmap()ing it, growing the file with ftruncate and mapping a
-> >   subsequent chunk for further output
-> >=20
-> > - the NULs at the end of pages do NOT occur at munmap/mmap boundari=
-es as
-> >   I suspected at first, but they do coincide with the end of extent=
-s
-> >   that are smaller than the maximum compressed extent size.  So,
-> >   something's making btrfs flush pages to disk before the pages are
-> >   completely written (which is fine in principle), but apparently
-> >   failing to pick up subsequent changes to the pages (eek!)
->=20
-> With mmap the kernel can pick any given time to start writing out dir=
-ty
-> pages.  The idea is that if the application makes more changes the pa=
-ge
-> becomes dirty again and the kernel writes it again.
->=20
-> So the question is, can you trigger this without snapshots being done
-> at all?  I'll try to make an mmap tester here that hammers on the
-> related code.  We usually test this with fsx, which catches all kinds=
- of
-> horrors.
+I'm not sure that we handle enough incoming yet that the extra process
+weight of something like Gerrit or Launchpad is necessary over Github.
+What are you looking for in that system which Github doesn't provide?
+-Greg
 
-So my test program creates an 8GB file in chunks of 1MB each.  Using
-truncate to extend the file and then mmap to write into the new hole.
-It is writing in 1MB chunks, ever so slightly not aligned.  After
-creating the whole file, it reads it back to look for errors.
-
-I'm running this with heavy memory pressure, but no snapshots.  No
-corruptions yet, but I'll let it run a while long.
-
--chris
-
+On Thu, Mar 21, 2013 at 3:58 PM, Chen, Xiaoxi <xiaoxi.chen@intel.com> w=
+rote:
+> can we have a review system like review.openstack.com?
+>
+> =B7=A2=D7=D4=CE=D2=B5=C4 iPhone
+>
+> =D4=DA 2013-3-20=A3=AC7:10=A3=AC"Guilhem Lettron" <guilhem@lettron.fr=
+> =D0=B4=B5=C0=A3=BA
+>
+>> Glad to see this openness! Everyone isn't like you.
+>> And I hope to see less [PATCH] in mailing-list, but maybe it's only =
+a dream.
+>>
+>> Just my two cents.
+>>
+>> On Tue, Mar 19, 2013 at 11:54 PM, Sage Weil <sage@inktank.com> wrote=
+:
+>>>
+>>> The only thing it doesn't do for you is zap the old branch.
+>>
+>> Github can do it: https://github.com/blog/1335-tidying-up-after-pull=
+-requests
+>> You can "delete this branch" when pull request is closed (and better=
+ merged).
+>>
+>> You can also use this: https://github.com/blog/1377-create-and-delet=
+e-branches
+>>
+>>>
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
