@@ -1,15 +1,15 @@
 From: Oliver Francke <Oliver.Francke@filoo.de>
 Subject: Latest 0.56.3 and qemu-1.4.0 and cloned VM-image producing massive fs-corruption, not crashing
 Date: Fri, 22 Mar 2013 20:09:19 +0100
-Message-ID: <34E007C3-D952-4350-83FA-F9BC34294EEF@filoo.de>
+Message-ID: <76476E24-8C91-4ADB-B0CC-1EC0B218089E@filoo.de>
 Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-2.de-punkt.de ([93.190.64.238]:45955 "EHLO
+Received: from mail-2.de-punkt.de ([93.190.64.238]:45992 "EHLO
 	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754675Ab3CVTOw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 15:14:52 -0400
+	with ESMTP id S1755048Ab3CVTTx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 15:19:53 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
