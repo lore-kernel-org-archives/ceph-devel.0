@@ -1,121 +1,38 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: Latest bobtail branch still crashing KVM VMs in bh_write_commit()
-Date: Fri, 22 Mar 2013 14:30:31 -0400
-Message-ID: <CACkq2mrnz+QrJQ5QpsJWqQ=iCS-jtFiPG78nUJrK8nojLpMdkg@mail.gmail.com>
-References: <CACkq2mrSvLyy9j3HMAEiCHnuktnB_EQbnQ-JvAZcyLcjmjn3uQ@mail.gmail.com>
- <514A13A8.7010002@profihost.ag> <CACkq2mppEb=N=dKGNWLx-pm2nZGp44D-SEYBoVhxMNDxUjE5sw@mail.gmail.com>
- <514A189E.7070802@profihost.ag> <514A19D7.1040309@inktank.com>
- <514A1CF9.5040807@inktank.com> <CACkq2mpTrjDy+RedjW2Qod8Yue0uNsM5y8ncHnmA+0nH7dsXLQ@mail.gmail.com>
- <CACkq2mo8Qbmr079ZG9PMM-2+qVD8Liq26+S1CZU1A+tTzNe_Fg@mail.gmail.com> <514C90C4.3050703@inktank.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: github pull requests
+Date: Fri, 22 Mar 2013 19:47:29 +0100
+Message-ID: <CAPUexz-F90hcr6SeJbrLEQ-MzYuurzMJg7=xaDcj_oxMc2wMhQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1303191550140.4850@cobra.newdream.net>
+	<CAMQoE_3+Os=F75LE+7dLVK2LYamNbEqwk0wpTe5+b0UZvYnQzg@mail.gmail.com>
+	<52FEF7AC-2E35-413D-A0E6-A69B2FB2271D@intel.com>
+	<CAPYLRzjyLmtFHLTny4Ni1FzhaAPqmmqTNt3ztDBL-oCMZZ7m0A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f49.google.com ([209.85.214.49]:55514 "EHLO
-	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422786Ab3CVSay (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 14:30:54 -0400
-Received: by mail-bk0-f49.google.com with SMTP id w11so2014575bku.22
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 11:30:53 -0700 (PDT)
-In-Reply-To: <514C90C4.3050703@inktank.com>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:50541 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754686Ab3CVSrb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 14:47:31 -0400
+Received: by mail-ie0-f180.google.com with SMTP id a11so5117737iee.11
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 11:47:30 -0700 (PDT)
+In-Reply-To: <CAPYLRzjyLmtFHLTny4Ni1FzhaAPqmmqTNt3ztDBL-oCMZZ7m0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Stefan Priebe <s.priebe@profihost.ag>, bcampbell@axcess-financial.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-That's awesome Josh.  Thanks for looking into it.  Good luck with the fix!
+On Fri, Mar 22, 2013 at 12:15 AM, Gregory Farnum <greg@inktank.com> wrote:
+> I'm not sure that we handle enough incoming yet that the extra process
+> weight of something like Gerrit or Launchpad is necessary over Github.
+> What are you looking for in that system which Github doesn't provide?
+> -Greg
 
- - Travis
+Automated regression tests and gated commits come to mind. Gerrit
+alone of course doesn't help with that, you'd probably want to
+consider either running Jenkins, or hook the master merges up with
+automatic teuthology runs.
 
-On Fri, Mar 22, 2013 at 1:11 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> I think I found the root cause based on your logs:
->
-> http://tracker.ceph.com/issues/4531
->
-> Josh
->
->
-> On 03/20/2013 02:47 PM, Travis Rhoden wrote:
->>
->> Didn't take long to re-create with the detailed debugging (ms =  20).
->> I'm sending Josh a link to the gzip'd log off-list, I"m not sure if
->> the log will contain any CephX keys or anything like that.
->>
->> On Wed, Mar 20, 2013 at 4:39 PM, Travis Rhoden <trhoden@gmail.com> wrote:
->>>
->>> Thanks Josh.  I will respond when I have something useful!
->>>
->>> On Wed, Mar 20, 2013 at 4:32 PM, Josh Durgin <josh.durgin@inktank.com>
->>> wrote:
->>>>
->>>> On 03/20/2013 01:19 PM, Josh Durgin wrote:
->>>>>
->>>>>
->>>>> On 03/20/2013 01:14 PM, Stefan Priebe wrote:
->>>>>>
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>>> In this case, they are format 2. And they are from cloned snapshots.
->>>>>>> Exactly like the following:
->>>>>>>
->>>>>>> # rbd ls -l -p volumes
->>>>>>> NAME                                                         SIZE
->>>>>>> PARENT                                           FMT PROT LOCK
->>>>>>> volume-099a6d74-05bd-4f00-a12e-009d60629aa8                 5120M
->>>>>>> images/b8bdda90-664b-4906-86d6-dd33735441f2@snap   2
->>>>>>>
->>>>>>> I'm doing an OpenStack boot-from-volume setup.
->>>>>>
->>>>>>
->>>>>>
->>>>>> OK i've never used cloned snapshots so maybe this is the reason.
->>>>>>
->>>>>>>> strange i've never seen this. Which qemu version?
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> # qemu-x86_64 -version
->>>>>>> qemu-x86_64 version 1.0 (qemu-kvm-1.0), Copyright (c) 2003-2008
->>>>>>> Fabrice Bellard
->>>>>>>
->>>>>>> that's coming from Ubuntu 12.04 apt repos.
->>>>>>
->>>>>>
->>>>>>
->>>>>> maybe you should try qemu 1.4 there are a LOT of bugfixes. qemu-kvm
->>>>>> does
->>>>>> not exist anymore it was merged into qemu with 1.3 or 1.4.
->>>>>
->>>>>
->>>>>
->>>>> This particular problem won't be solved by upgrading qemu. It's a ceph
->>>>> bug. Disabling caching would work around the issue.
->>>>>
->>>>> Travis, could you get a log from qemu of this happening with:
->>>>>
->>>>> debug ms = 20
->>>>> debug objectcacher = 20
->>>>> debug rbd = 20
->>>>> log file = /path/writeable/by/qemu
->>>>
->>>>
->>>>
->>>> If it doesn't reproduce with those settings, try changing debug ms to 1
->>>> instead of 20.
->>>>
->>>>
->>>>>   From those we can tell whether the issue is on the client side at
->>>>> least,
->>>>> and hopefully what's causing it.
->>>>>
->>>>> Thanks!
->>>>> Josh
->>>>
->>>>
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+Just my two cents, though.
+
+Cheers,
+Florian
