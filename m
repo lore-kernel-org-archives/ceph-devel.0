@@ -1,45 +1,93 @@
-From: Chris Mason <chris.mason@fusionio.com>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Fri, 22 Mar 2013 16:31:42 -0400
-Message-ID: <20130322203142.27874.84834@localhost.localdomain>
-References: <orhak8fm0u.fsf@livre.home>
- <20130322180705.27874.96638@localhost.localdomain>
+From: Sage Weil <sage@inktank.com>
+Subject: crush changes via cli
+Date: Fri, 22 Mar 2013 15:38:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1303221528240.18669@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dkim1.fusionio.com ([66.114.96.53]:57728 "EHLO
-	dkim1.fusionio.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422904Ab3CVUbp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 16:31:45 -0400
-Received: from mx1.fusionio.com (unknown [10.101.1.160])
-	by dkim1.fusionio.com (Postfix) with ESMTP id 8B5F17C04F9
-	for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 14:31:44 -0600 (MDT)
-In-Reply-To: <20130322180705.27874.96638@localhost.localdomain>
+Received: from cobra.newdream.net ([66.33.216.30]:51125 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1423438Ab3CVWik (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 18:38:40 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 9316D80455
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 15:38:40 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 6C13E80455
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 15:38:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Mason <chris.mason@fusionio.com>, Alexandre Oliva <oliva@gnu.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Quoting Chris Mason (2013-03-22 14:07:05)
-> [ mmap corruptions with leveldb and btrfs compression ]
-> 
-> I ran this a number of times with compression off and wasn't able to
-> trigger problems.  With compress=lzo, I see errors on every run.
-> 
-> Compile: gcc -Wall -o mmap-trunc mmap-trunc.c
-> Run: ./mmap-trunc file_name
-> 
-> The basic idea is to create a 256MB file in steps.  Each step ftruncates
-> the file larger, and then mmaps a region for writing.  It dirties some
-> unaligned bytes (a little more than 8K), and then munmaps.
-> 
-> Then a verify stage goes back through the file to make sure the data we
-> wrote is really there.  I'm using a simple rotating pattern of chars
-> that compress very well.
+There's a branch pending that lets you do the remainder of the most common 
+crush map changes via teh cli.  The command set breaks down like so:
 
-Going through the code here, when I change the test to truncate once in
-the very beginning, I still get errors.  So, it isn't an interaction
-between mmap and truncate.  It must be a problem between lzo and mmap.
+Updating leaves (devices):
 
--chris
+  ceph osd crush set <osd-id> <weight> <loc1> [<loc2> ...]
+  ceph osd crush add <osd-id> <weight> <loc1> [<loc2> ...]
+  ceph osd crush create-or-move <osd-id> <initial-weight> <loc1> [<loc2> ...]
+
+These let you create, add, and move devices in teh map.  The different 
+between add and set is that add will create an additional instance of the 
+osd (leaf), while set will move the old instance.  This is useful for some 
+configurations.
+
+The loc ... bits let you specify the 'where' part in teh form of key/value 
+pairs, like 'host=foo rack=bar root=default'.  It will find the 
+most-specific pair that matches an existing item, and create any 
+intervening ancestors.  For example, if my map has only a root=default 
+node (nothing else) and I do
+
+ ceph osd crush set osd.0 1 host=foo rack=myrack row=first root=default
+
+it will create teh row, rack, and host nodes, and then stick osd.0 inside 
+host=foo.
+
+Create-or-move is similar to set except that it won't ever change teh 
+weight of the device; only set the initial weight if it has to create it.  
+This is used by the upstart hook so that it doesn't inadvertantly clobber 
+changes the admin has made.
+
+The next set of commands adjust the map structure. Although people usually 
+create a tree structure, in reality the crush map is a DAG (directed 
+acyclic graph).
+
+
+  ceph osd crush rm <name> [ancestor]
+
+Will remove an osd or internal node from the, assuming there are no 
+children.  With the optional ancestor arg, it will remove only instances 
+under the given ancestor.  Otherwise, all instances are removed.  If it is 
+a bucket and non-empty, it does nothing.  
+
+  ceph osd crush unlink <bucketname> [ancestor]
+
+Is similar, but will let you remove a (or all) link(s) to a bucket even if 
+it is non-empty.  
+
+  ceph osd crush move <bucketname> <loc1> [<loc2> ...]
+
+will unlink the bucket from its existing location(s) and link it in a new 
+position.
+
+  ceph osd crush link <bucketname> <loc1> [<loc2> ...]
+
+Doesn't touch existing links, only adds a new one.
+
+Finally,
+
+  ceph osd crush add-bucket <bucketname> <type>
+
+is the one command that will create an internal node with no parent.  
+Normally this is just used to create the root of the tree (e.g., 
+root=default).  Once it is there, then devices can be added beneath with 
+it set, add, link, etc. and loc... bit will add any intervening ancestors 
+that are missing.
+
+This maps cleanly on to the internal data model that CRUSH is using.  As 
+long as it doesn't bend everyone's mind in uncomfortable ways, I'd like to 
+stick with it (or something like it)... but if there is something here 
+that seems wrong, let me know!
+
+sage
