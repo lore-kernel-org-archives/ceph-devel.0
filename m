@@ -1,68 +1,45 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Latest 0.56.3 and qemu-1.4.0 and cloned VM-image producing massive
- fs-corruption, not crashing
-Date: Fri, 22 Mar 2013 12:30:23 -0700
-Message-ID: <514CB14F.8040209@inktank.com>
-References: <34E007C3-D952-4350-83FA-F9BC34294EEF@filoo.de>
+From: Chris Mason <chris.mason@fusionio.com>
+Subject: Re: corruption of active mmapped files in btrfs snapshots
+Date: Fri, 22 Mar 2013 16:31:42 -0400
+Message-ID: <20130322203142.27874.84834@localhost.localdomain>
+References: <orhak8fm0u.fsf@livre.home>
+ <20130322180705.27874.96638@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f41.google.com ([209.85.210.41]:58228 "EHLO
-	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755148Ab3CVTbS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 15:31:18 -0400
-Received: by mail-da0-f41.google.com with SMTP id w4so2457774dam.28
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 12:31:18 -0700 (PDT)
-In-Reply-To: <34E007C3-D952-4350-83FA-F9BC34294EEF@filoo.de>
+Received: from dkim1.fusionio.com ([66.114.96.53]:57728 "EHLO
+	dkim1.fusionio.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422904Ab3CVUbp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Mar 2013 16:31:45 -0400
+Received: from mx1.fusionio.com (unknown [10.101.1.160])
+	by dkim1.fusionio.com (Postfix) with ESMTP id 8B5F17C04F9
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Mar 2013 14:31:44 -0600 (MDT)
+In-Reply-To: <20130322180705.27874.96638@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
+To: Chris Mason <chris.mason@fusionio.com>, Alexandre Oliva <oliva@gnu.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 03/22/2013 12:09 PM, Oliver Francke wrote:
-> Hi Josh, all,
->
-> I did not want to hijack the thread dealing with a crashing VM, but p=
-erhaps there are some common things.
->
-> Today I installed a fresh cluster with mkephfs, went fine, imported a=
- "master" debian 6.0 image with "format 2", made a snapshot, protected =
-it, and made some clones.
-> Clones mounted with qemu-nbd, fiddled a bit with IP/interfaces/hosts/=
-net.rules=85etc and cleanly unmounted, VM started, took 2 secs and the =
-VM was up n running. Cool.
->
-> Now an ordinary shutdown was performed, made a snapshot of this image=
-=2E Started again, did some "apt-get update=85 install s/t=85".
-> Shutdown -> rbd rollback -> startup again -> login -> install s/t els=
-e=85 filesystem showed "many" ex3-errors, fell into read-only mode, mas=
-sive corruption.
+Quoting Chris Mason (2013-03-22 14:07:05)
+> [ mmap corruptions with leveldb and btrfs compression ]
+> 
+> I ran this a number of times with compression off and wasn't able to
+> trigger problems.  With compress=lzo, I see errors on every run.
+> 
+> Compile: gcc -Wall -o mmap-trunc mmap-trunc.c
+> Run: ./mmap-trunc file_name
+> 
+> The basic idea is to create a 256MB file in steps.  Each step ftruncates
+> the file larger, and then mmaps a region for writing.  It dirties some
+> unaligned bytes (a little more than 8K), and then munmaps.
+> 
+> Then a verify stage goes back through the file to make sure the data we
+> wrote is really there.  I'm using a simple rotating pattern of chars
+> that compress very well.
 
-This sounds like it might be a bug in rollback. Could you try cloning
-and snapshotting again, but export the image before booting, and after
-rolling back, and compare the md5sums?
+Going through the code here, when I change the test to truncate once in
+the very beginning, I still get errors.  So, it isn't an interaction
+between mmap and truncate.  It must be a problem between lzo and mmap.
 
-Running the rollback with:
-
---debug-ms 1 --debug-rbd 20 --log-file rbd-rollback.log
-
-might help too. Does your ceph.conf where you ran the rollback have
-anything related to rbd_cache in it?
-
-> qemu config was with ":rbd_cache=3Dfalse" if it matters. Above scenar=
-io is reproducible, and as I stated out, no crash detected.
->
-> Perhaps it is in the same area as in the crash-thread, otherwise I wi=
-ll provide logfiles as needed.
-
-It's unrelated, the other thread is an issue with the cache, which does
-not cause corruption but triggers a crash.
-
-Josh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-chris
