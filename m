@@ -1,52 +1,288 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 22/39] mds: handle linkage mismatch during cache rejoin
-Date: Mon, 25 Mar 2013 09:14:24 -0700
-Message-ID: <CAPYLRzg8smtz=YLkN278iuFjJ_7S5Z=JmFLjONwdQ-Fd9STR-Q@mail.gmail.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
-	<1363531902-24909-23-git-send-email-zheng.z.yan@intel.com>
-	<CAPYLRzi5wRLUndEczMbrwjNBTwKwdOvFw=s5bhDNDcncWMxSuQ@mail.gmail.com>
-	<514BCA86.7090201@intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 5/6] libceph: wrap auth methods in a mutex
+Date: Mon, 25 Mar 2013 09:26:37 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1303250925530.12444@cobra.newdream.net>
+References: <1363734486-26879-1-git-send-email-sage@inktank.com> <1363734486-26879-5-git-send-email-sage@inktank.com> <51506006.50403@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f54.google.com ([209.85.216.54]:56362 "EHLO
-	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758531Ab3CYQO0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 12:14:26 -0400
-Received: by mail-qa0-f54.google.com with SMTP id o13so1370709qaj.6
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Mar 2013 09:14:25 -0700 (PDT)
-In-Reply-To: <514BCA86.7090201@intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48560 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758468Ab3CYQ0h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 12:26:37 -0400
+In-Reply-To: <51506006.50403@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Mar 21, 2013 at 8:05 PM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
-> On 03/22/2013 05:23 AM, Gregory Farnum wrote:
->> On Sun, Mar 17, 2013 at 7:51 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
->>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>>
->>> For MDS cluster, not all file system namespace operations that impact
->>> multiple MDS use two phase commit. Some operations use dentry link/unlink
->>> message to update replica dentry's linkage after they are committed by
->>> the master MDS. It's possible the master MDS crashes after journaling an
->>> operation, but before sending the dentry link/unlink messages. Later when
->>> the MDS recovers and receives cache rejoin messages from the surviving
->>> MDS, it will find linkage mismatch.
->>
->> I think you're here talking about link/unlink, and the MDS crashing
->> after it's sent out the LogEvent to the OSD but it hasn't actually
->> dispatched the observer slave requests. Is that right? This commit
->> message really confused me; I was trying to figure out which namespace
->> operations were hacking around a proper 2-phase commit by unlinking
->> and relinking inodes into the tree! (The link/unlink code also is
->> doing a 2-phase commit, it just doesn't force a particular order for
->> the journaling, which was previously left unhandled).
->
-> I was talking about the cases that use MDCache::send_dentry_{link,unlink}
-> to update replica dentry. There are a lot of usage in Server.cc.
+On Mon, 25 Mar 2013, Alex Elder wrote:
+> On 03/19/2013 06:08 PM, Sage Weil wrote:
+> > The auth code is called from a variety of contexts, include the mon_client
+> > (protected by the monc's mutex) and the messenger callbacks (currently
+> > protected by nothing).  Avoid chaos by protecting all auth state with a
+> > mutex.  Nothing is blocking, so this should be simple and lightweight.
+> > 
+> > Signed-off-by: Sage Weil <sage@inktank.com>
+> 
+> This looks good, but there are some cleanups that should have gone
+> into the previous patch that I suggest below.
+> 
+> Reviewed-by: Alex Elder <elder@inktank.com>
+> 
+> > ---
+> >  include/linux/ceph/auth.h |    2 ++
+> >  net/ceph/auth.c           |   78 ++++++++++++++++++++++++++++++++-------------
+> >  2 files changed, 58 insertions(+), 22 deletions(-)
+> > 
+> > diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
+> > index c9c3b3a..5f33868 100644
+> > --- a/include/linux/ceph/auth.h
+> > +++ b/include/linux/ceph/auth.h
+> > @@ -78,6 +78,8 @@ struct ceph_auth_client {
+> >  	u64 global_id;          /* our unique id in system */
+> >  	const struct ceph_crypto_key *key;     /* our secret key */
+> >  	unsigned want_keys;     /* which services we want */
+> > +
+> > +	struct mutex mutex;
+> >  };
+> >  
+> >  extern struct ceph_auth_client *ceph_auth_init(const char *name,
+> > diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+> > index a22de54..6b923bc 100644
+> > --- a/net/ceph/auth.c
+> > +++ b/net/ceph/auth.c
+> > @@ -47,6 +47,7 @@ struct ceph_auth_client *ceph_auth_init(const char *name, const struct ceph_cryp
+> >  	if (!ac)
+> >  		goto out;
+> >  
+> > +	mutex_init(&ac->mutex);
+> >  	ac->negotiating = true;
+> >  	if (name)
+> >  		ac->name = name;
+> > @@ -73,10 +74,12 @@ void ceph_auth_destroy(struct ceph_auth_client *ac)
+> >   */
+> >  void ceph_auth_reset(struct ceph_auth_client *ac)
+> >  {
+> > +	mutex_lock(&ac->mutex);
+> >  	dout("auth_reset %p\n", ac);
+> >  	if (ac->ops && !ac->negotiating)
+> >  		ac->ops->reset(ac);
+> >  	ac->negotiating = true;
+> > +	mutex_unlock(&ac->mutex);
+> >  }
+> >  
+> >  int ceph_entity_name_encode(const char *name, void **p, void *end)
+> > @@ -102,6 +105,7 @@ int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
+> >  	int i, num;
+> >  	int ret;
+> >  
+> > +	mutex_lock(&ac->mutex);
+> >  	dout("auth_build_hello\n");
+> >  	monhdr->have_version = 0;
+> >  	monhdr->session_mon = cpu_to_le16(-1);
+> > @@ -122,15 +126,19 @@ int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
+> >  
+> >  	ret = ceph_entity_name_encode(ac->name, &p, end);
+> >  	if (ret < 0)
+> > -		return ret;
+> > +		goto out;
+> >  	ceph_decode_need(&p, end, sizeof(u64), bad);
+> >  	ceph_encode_64(&p, ac->global_id);
+> >  
+> >  	ceph_encode_32(&lenp, p - lenp - sizeof(u32));
+> > -	return p - buf;
+> > +	ret = p - buf;
+> > +out:
+> > +	mutex_unlock(&ac->mutex);
+> > +	return ret;
+> >  
+> >  bad:
+> > -	return -ERANGE;
+> > +	ret = -ERANGE;
+> > +	goto out;
+> >  }
+> >  
+> >  static int ceph_build_auth_request(struct ceph_auth_client *ac,
+> > @@ -151,11 +159,13 @@ static int ceph_build_auth_request(struct ceph_auth_client *ac,
+> >  	if (ret < 0) {
+> >  		pr_err("error %d building auth method %s request\n", ret,
+> >  		       ac->ops->name);
+> > -		return ret;
+> > +		goto out;
+> >  	}
+> >  	dout(" built request %d bytes\n", ret);
+> >  	ceph_encode_32(&p, ret);
+> > -	return p + ret - msg_buf;
+> > +	ret = p + ret - msg_buf;
+> > +out:
+> > +	return ret;
+> >  }
+> >  
+> >  /*
+> > @@ -176,6 +186,7 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
+> >  	int result_msg_len;
+> >  	int ret = -EINVAL;
+> >  
+> > +	mutex_lock(&ac->mutex);
+> >  	dout("handle_auth_reply %p %p\n", p, end);
+> >  	ceph_decode_need(&p, end, sizeof(u32) * 3 + sizeof(u64), bad);
+> >  	protocol = ceph_decode_32(&p);
+> > @@ -227,35 +238,44 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
+> >  
+> >  	ret = ac->ops->handle_reply(ac, result, payload, payload_end);
+> 
+> I suggest creating ceph_auth_handle_reply() in the previous patch,
+> and then use it here.
 
-Ah, we do this on mknod and openc as well as an explicit client link,
-which makes sense. I think I was reading more into your statement than
-was actually there.
--Greg
+This one is an internal op that is not used outside of auth.c, and its 
+required.
+
+> 
+> >  	if (ret == -EAGAIN) {
+> > -		return ceph_build_auth_request(ac, reply_buf, reply_len);
+> > +		ret = ceph_build_auth_request(ac, reply_buf, reply_len);
+> >  	} else if (ret) {
+> >  		pr_err("auth method '%s' error %d\n", ac->ops->name, ret);
+> > -		return ret;
+> >  	}
+> > -	return 0;
+> >  
+> > -bad:
+> > -	pr_err("failed to decode auth msg\n");
+> >  out:
+> > +	mutex_unlock(&ac->mutex);
+> >  	return ret;
+> > +
+> > +bad:
+> > +	pr_err("failed to decode auth msg\n");
+> > +	ret = -EINVAL;
+> > +	goto out;
+> >  }
+> >  
+> >  int ceph_build_auth(struct ceph_auth_client *ac,
+> >  		    void *msg_buf, size_t msg_len)
+> >  {
+> > +	int ret = 0;
+> > +
+> > +	mutex_lock(&ac->mutex);
+> >  	if (!ac->protocol)
+> > -		return ceph_auth_build_hello(ac, msg_buf, msg_len);
+> > -	BUG_ON(!ac->ops);
+> > -	if (ac->ops->should_authenticate(ac))
+> 
+> Same basic suggestion here, create ceph_auth_should_authenticate()
+> in the previous patch and use it here.
+
+Ditto
+
+> 
+> > -		return ceph_build_auth_request(ac, msg_buf, msg_len);
+> > -	return 0;
+> > +		ret = ceph_auth_build_hello(ac, msg_buf, msg_len);
+> > +	else if (ac->ops->should_authenticate(ac))
+> > +		ret = ceph_build_auth_request(ac, msg_buf, msg_len);
+> > +	mutex_unlock(&ac->mutex);
+> > +	return ret;
+> >  }
+> >  
+> >  int ceph_auth_is_authenticated(struct ceph_auth_client *ac)
+> >  {
+> > -	if (!ac->ops)
+> > -		return 0;
+> > -	return ac->ops->is_authenticated(ac);
+> 
+> And ceph_auth_is_authenticated() here...
+
+These *are* the wrappers :)
+
+
+> 
+> > +	int ret = 0;
+> > +
+> > +	mutex_lock(&ac->mutex);
+> > +	if (ac->ops)
+> > +		ret = ac->ops->is_authenticated(ac);
+> > +	mutex_unlock(&ac->mutex);
+> > +	return ret;
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_is_authenticated);
+> >  
+> > @@ -263,17 +283,23 @@ int ceph_auth_create_authorizer(struct ceph_auth_client *ac,
+> >  				int peer_type,
+> >  				struct ceph_auth_handshake *auth)
+> >  {
+> > +	int ret = 0;
+> > +
+> > +	mutex_lock(&ac->mutex);
+> >  	if (ac->ops && ac->ops->create_authorizer)
+> > -		return ac->ops->create_authorizer(ac, peer_type, auth);
+> 
+> This should have been switched to use the helper in the previous patch.
+> 
+> > -	return 0;
+> > +		ret = ac->ops->create_authorizer(ac, peer_type, auth);
+> > +	mutex_unlock(&ac->mutex);
+> > +	return ret;
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_create_authorizer);
+> >  
+> >  void ceph_auth_destroy_authorizer(struct ceph_auth_client *ac,
+> >  				  struct ceph_authorizer *a)
+> >  {
+> > +	mutex_lock(&ac->mutex);
+> >  	if (ac->ops && ac->ops->destroy_authorizer)
+> 
+> And this too.
+> 
+> >  		ac->ops->destroy_authorizer(ac, a);
+> > +	mutex_unlock(&ac->mutex);
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_destroy_authorizer);
+> >  
+> > @@ -283,8 +309,10 @@ int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
+> >  {
+> >  	int ret = 0;
+> >  
+> > +	mutex_lock(&ac->mutex);
+> >  	if (ac->ops && ac->ops->update_authorizer)
+> >  		ret = ac->ops->update_authorizer(ac, peer_type, a);
+> 
+> And here, and so on.  (Done making this comment.)
+> 
+> > +	mutex_unlock(&ac->mutex);
+> >  	return ret;
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_update_authorizer);
+> > @@ -292,15 +320,21 @@ EXPORT_SYMBOL(ceph_auth_update_authorizer);
+> >  int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
+> >  				      struct ceph_authorizer *a, size_t len)
+> >  {
+> > +	int ret = 0;
+> > +
+> > +	mutex_lock(&ac->mutex);
+> >  	if (ac->ops && ac->ops->verify_authorizer_reply)
+> > -		return ac->ops->verify_authorizer_reply(ac, a, len);
+> > -	return 0;
+> > +		ret = ac->ops->verify_authorizer_reply(ac, a, len);
+> > +	mutex_unlock(&ac->mutex);
+> > +	return ret;
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_verify_authorizer_reply);
+> >  
+> >  void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac, int peer_type)
+> >  {
+> > +	mutex_lock(&ac->mutex);
+> >  	if (ac->ops && ac->ops->invalidate_authorizer)
+> >  		ac->ops->invalidate_authorizer(ac, peer_type);
+> > +	mutex_unlock(&ac->mutex);
+> >  }
+> >  EXPORT_SYMBOL(ceph_auth_invalidate_authorizer);
+> > 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
