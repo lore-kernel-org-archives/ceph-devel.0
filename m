@@ -1,312 +1,199 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 04/39] mds: make sure table request id unique
-Date: Mon, 25 Mar 2013 19:30:37 +0800
-Message-ID: <5150355D.1050501@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com> <1363531902-24909-5-git-send-email-zheng.z.yan@intel.com> <C7E493EEAA91442B9BD120B881E4638F@inktank.com> <51494EF6.6040607@intel.com> <alpine.DEB.2.00.1303192309380.11428@cobra.newdream.net> <51495BEC.9000802@intel.com> <971E9C644F3C4AD9A4BFA042FC238F34@inktank.com> <514ABFC6.3080100@intel.com> <CAPYLRzhrH-=9itgY95XuE+uP54b4GxqVstRtmmW9_Qn1C3dHXw@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] libceph: implement RECONNECT_SEQ feature
+Date: Mon, 25 Mar 2013 08:20:41 -0500
+Message-ID: <51504F29.5020703@inktank.com>
+References: <1363733312-26760-1-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:45383 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756056Ab3CYLav (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 25 Mar 2013 07:30:51 -0400
-In-Reply-To: <CAPYLRzhrH-=9itgY95XuE+uP54b4GxqVstRtmmW9_Qn1C3dHXw@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:51277 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757904Ab3CYNUk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 09:20:40 -0400
+Received: by mail-ie0-f174.google.com with SMTP id aq17so4365326iec.33
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Mar 2013 06:20:40 -0700 (PDT)
+In-Reply-To: <1363733312-26760-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 03/22/2013 06:03 AM, Gregory Farnum wrote:
-> Right. I'd like to somehow mark those reqid's so that we can tell when
-> they come from a different incarnation of the MDS TableClient daemon.
-> One way is via some piece of random data that will probably
-> distinguish them, although if we have something which we can know is
-> different that would be preferable. I think we can work something out
-> of the startup session data each MDS does with the monitors, but I'm
-> not sure I can check any time soon; I have a number of other things to
-> get to now that I've gotten through (the first round on) this series.
+On 03/19/2013 05:48 PM, Sage Weil wrote:
+> This is an old protocol extension that allows the client and server to
+> avoid resending old messages after a reconnect (following a socket error).
+> Instead, the exchange their sequence numbers during the handshake.  This
+> avoids sending a bunch of useless data over the socket.
 > 
+> It has been supported in the server code since v0.22 (Sep 2010).
 
-How about the attached patch?
+OK, a few comments below, but this looks good to me.
+Make the suggested (or implied) changes below if you
+like, but either way:
 
-Thanks
+Reviewed-by: Alex Elder <elder@inktank.com>
 
-----
-commit d460b766e16ec2cacac239a74af0e226108ab95a
-Author: Yan, Zheng <zheng.z.yan@intel.com>
-Date:   Sat Mar 16 08:02:18 2013 +0800
+> Signed-off-by: Sage Weil <sage@inktank.com>
+> ---
+>  include/linux/ceph/ceph_features.h |    2 ++
+>  include/linux/ceph/msgr.h          |    1 +
+>  net/ceph/messenger.c               |   47 +++++++++++++++++++++++++++++++++---
+>  3 files changed, 46 insertions(+), 4 deletions(-)
+> 
+> diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+> index 76554ce..4c420803 100644
+> --- a/include/linux/ceph/ceph_features.h
+> +++ b/include/linux/ceph/ceph_features.h
+> @@ -41,6 +41,7 @@
+>   */
+>  #define CEPH_FEATURES_SUPPORTED_DEFAULT  \
+>  	(CEPH_FEATURE_NOSRCADDR |		\
+> +	 CEPH_FEATURE_RECONNECT_SEQ |		\
+>  	 CEPH_FEATURE_PGID64 |			\
+>  	 CEPH_FEATURE_PGPOOL3 |			\
+>  	 CEPH_FEATURE_OSDENC |			\
+> @@ -51,6 +52,7 @@
+>  
+>  #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+>  	(CEPH_FEATURE_NOSRCADDR |	 \
+> +	 CEPH_FEATURE_RECONNECT_SEQ |	 \
+>  	 CEPH_FEATURE_PGID64 |		 \
+>  	 CEPH_FEATURE_PGPOOL3 |		 \
+>  	 CEPH_FEATURE_OSDENC)
 
-    mds: make sure table request id unique
-    
-    When a MDS becomes active, the table server re-sends 'agree' messages
-    for old prepared request. If the recoverd MDS starts a new table request
-    at the same time, The new request's ID can happen to be the same as old
-    prepared request's ID, because current table client code assigns request
-    ID from zero after MDS restarts.
-    
-    This patch make table server send 'ready' messages when table clients
-    become active or itself becomes active. The 'ready' message updates
-    table client's last_reqid to avoid request ID collision. The message
-    also replaces the roles of finish_recovery() and handle_mds_recovery()
-    callbacks for table client.
-    
-    Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+Is it really a required feature?
 
-diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-index bb1c833..834a7aa 100644
---- a/src/mds/MDS.cc
-+++ b/src/mds/MDS.cc
-@@ -1508,14 +1508,13 @@ void MDS::recovery_done()
-   
-   // kick anchortable (resent AGREEs)
-   if (mdsmap->get_tableserver() == whoami) {
--    anchorserver->finish_recovery();
--    snapserver->finish_recovery();
-+    set<int> active;
-+    mdsmap->get_mds_set(active, MDSMap::STATE_ACTIVE);
-+    mdsmap->get_mds_set(active, MDSMap::STATE_STOPPING);
-+    anchorserver->finish_recovery(active);
-+    snapserver->finish_recovery(active);
-   }
--  
--  // kick anchorclient (resent COMMITs)
--  anchorclient->finish_recovery();
--  snapclient->finish_recovery();
--  
-+
-   mdcache->start_recovered_truncates();
-   mdcache->do_file_recover();
- 
-@@ -1537,8 +1536,6 @@ void MDS::handle_mds_recovery(int who)
-     anchorserver->handle_mds_recovery(who);
-     snapserver->handle_mds_recovery(who);
-   }
--  anchorclient->handle_mds_recovery(who);
--  snapclient->handle_mds_recovery(who);
-   
-   queue_waiters(waiting_for_active_peer[who]);
-   waiting_for_active_peer.erase(who);
-diff --git a/src/mds/MDSTableClient.cc b/src/mds/MDSTableClient.cc
-index ea021f5..29e172b 100644
---- a/src/mds/MDSTableClient.cc
-+++ b/src/mds/MDSTableClient.cc
-@@ -101,6 +101,16 @@ void MDSTableClient::handle_request(class MMDSTableRequest *m)
-     }
-     break;
- 
-+  case TABLESERVER_OP_SERVER_READY:
-+    if (last_reqid == 0) {
-+      assert(reqid > 0);
-+      last_reqid = reqid;
-+    }
-+
-+    resend_queries();
-+    resend_prepares();
-+    resend_commits();
-+    break;
-   default:
-     assert(0);
-   }
-@@ -126,19 +136,23 @@ void MDSTableClient::_logged_ack(version_t tid)
- void MDSTableClient::_prepare(bufferlist& mutation, version_t *ptid, bufferlist *pbl,
- 			      Context *onfinish)
- {
--  uint64_t reqid = ++last_reqid;
--  dout(10) << "_prepare " << reqid << dendl;
--
--  // send message
--  MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_PREPARE, reqid);
--  req->bl = mutation;
--
--  pending_prepare[reqid].mutation = mutation;
--  pending_prepare[reqid].ptid = ptid;
--  pending_prepare[reqid].pbl = pbl;
--  pending_prepare[reqid].onfinish = onfinish;
--
--  send_to_tableserver(req);
-+  if (last_reqid > 0) {
-+    uint64_t reqid = ++last_reqid;
-+    dout(10) << "_prepare " << reqid << dendl;
-+    // send message
-+    MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_PREPARE, reqid);
-+    req->bl = mutation;
-+
-+    pending_prepare[reqid].mutation = mutation;
-+    pending_prepare[reqid].ptid = ptid;
-+    pending_prepare[reqid].pbl = pbl;
-+    pending_prepare[reqid].onfinish = onfinish;
-+
-+    send_to_tableserver(req);
-+  } else {
-+    dout(10) << "table server is not ready yet, waiting" << dendl;
-+    waiting_for_server.push_back(_pending_prepare(onfinish, ptid, pbl, mutation));
-+  }
- }
- 
- void MDSTableClient::send_to_tableserver(MMDSTableRequest *req)
-@@ -176,6 +190,7 @@ void MDSTableClient::got_journaled_agree(version_t tid, LogSegment *ls)
-   ls->pending_commit_tids[table].insert(tid);
-   pending_commit[tid] = ls;
- }
-+
- void MDSTableClient::got_journaled_ack(version_t tid)
- {
-   dout(10) << "got_journaled_ack " << tid << dendl;
-@@ -185,12 +200,6 @@ void MDSTableClient::got_journaled_ack(version_t tid)
-   }
- }
- 
--void MDSTableClient::finish_recovery()
--{
--  dout(7) << "finish_recovery" << dendl;
--  resend_commits();
--}
--
- void MDSTableClient::resend_commits()
- {
-   for (map<version_t,LogSegment*>::iterator p = pending_commit.begin();
-@@ -202,24 +211,18 @@ void MDSTableClient::resend_commits()
-   }
- }
- 
--void MDSTableClient::handle_mds_recovery(int who)
-+void MDSTableClient::resend_prepares()
- {
--  dout(7) << "handle_mds_recovery mds." << who << dendl;
--
--  if (who != mds->mdsmap->get_tableserver()) 
--    return; // do nothing.
--
--  resend_queries();
--  
--  // prepares.
-+  while (!waiting_for_server.empty()) {
-+    pending_prepare[++last_reqid] = waiting_for_server.front();
-+    waiting_for_server.pop_front();
-+  }
-   for (map<uint64_t, _pending_prepare>::iterator p = pending_prepare.begin();
-        p != pending_prepare.end();
-        ++p) {
--    dout(10) << "resending " << p->first << dendl;
-+    dout(10) << "resending prepare on " << p->first << dendl;
-     MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_PREPARE, p->first);
-     req->bl = p->second.mutation;
-     mds->send_message_mds(req, mds->mdsmap->get_tableserver());
--  } 
--
--  resend_commits();
-+  }
- }
-diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
-index e15837f..7638260 100644
---- a/src/mds/MDSTableClient.h
-+++ b/src/mds/MDSTableClient.h
-@@ -38,9 +38,12 @@ protected:
-     bufferlist mutation;
- 
-     _pending_prepare() : onfinish(0), ptid(0), pbl(0) {}
-+    _pending_prepare(Context *c, version_t *pt, bufferlist *pb, bufferlist& m) :
-+      onfinish(c), ptid(pt), pbl(pb), mutation(m) {}
-   };
- 
-   map<uint64_t, _pending_prepare> pending_prepare;
-+  list<_pending_prepare> waiting_for_server;
- 
-   // pending commits
-   map<version_t, LogSegment*> pending_commit;
-@@ -68,9 +71,8 @@ public:
-   void _prepare(bufferlist& mutation, version_t *ptid, bufferlist *pbl, Context *onfinish);
-   void commit(version_t tid, LogSegment *ls);
- 
--  // for recovery (by other nodes)
--  void handle_mds_recovery(int mds); // called when someone else recovers
-   void resend_commits();
-+  void resend_prepares();
- 
-   // for recovery (by me)
-   void got_journaled_agree(version_t tid, LogSegment *ls);
-@@ -82,7 +84,6 @@ public:
-   void wait_for_ack(version_t tid, Context *c) {
-     ack_waiters[tid].push_back(c);
-   }
--  void finish_recovery();                // called when i recover and go active
- 
-   void send_to_tableserver(MMDSTableRequest *req);
- 
-diff --git a/src/mds/MDSTableServer.cc b/src/mds/MDSTableServer.cc
-index 4f86ff1..e56e2b4 100644
---- a/src/mds/MDSTableServer.cc
-+++ b/src/mds/MDSTableServer.cc
-@@ -144,24 +144,30 @@ void MDSTableServer::do_server_update(bufferlist& bl)
- 
- // recovery
- 
--void MDSTableServer::finish_recovery()
-+void MDSTableServer::finish_recovery(set<int>& active)
- {
-   dout(7) << "finish_recovery" << dendl;
--  handle_mds_recovery(-1);  // resend agrees for everyone.
-+  for (set<int>::iterator p = active.begin(); p != active.end(); ++p)
-+    handle_mds_recovery(*p);  // resend agrees for everyone.
- }
- 
- void MDSTableServer::handle_mds_recovery(int who)
- {
--  if (who >= 0)
--    dout(7) << "handle_mds_recovery mds." << who << dendl;
--  
-+  dout(7) << "handle_mds_recovery mds." << who << dendl;
-+
-+  uint64_t next_reqid = 1;
-   // resend agrees for recovered mds
-   for (map<version_t,mds_table_pending_t>::iterator p = pending_for_mds.begin();
-        p != pending_for_mds.end();
-        ++p) {
--    if (who >= 0 && p->second.mds != who)
-+    if (p->second.mds != who)
-       continue;
-+    if (p->second.reqid >= next_reqid)
-+      next_reqid = p->second.reqid + 1;
-     MMDSTableRequest *reply = new MMDSTableRequest(table, TABLESERVER_OP_AGREE, p->second.reqid, p->second.tid);
--    mds->send_message_mds(reply, p->second.mds);
-+    mds->send_message_mds(reply, who);
-   }
-+
-+  MMDSTableRequest *reply = new MMDSTableRequest(table, TABLESERVER_OP_SERVER_READY, next_reqid);
-+  mds->send_message_mds(reply, who);
- }
-diff --git a/src/mds/MDSTableServer.h b/src/mds/MDSTableServer.h
-index 26cd594..55827e7 100644
---- a/src/mds/MDSTableServer.h
-+++ b/src/mds/MDSTableServer.h
-@@ -90,7 +90,7 @@ private:
-   }
- 
-   // recovery
--  void finish_recovery();
-+  void finish_recovery(set<int>& active);
-   void handle_mds_recovery(int who);
- };
- 
-diff --git a/src/mds/mds_table_types.h b/src/mds/mds_table_types.h
-index b094c75..c08519a 100644
---- a/src/mds/mds_table_types.h
-+++ b/src/mds/mds_table_types.h
-@@ -39,6 +39,7 @@ enum {
-   TABLESERVER_OP_ACK          = -6,
-   TABLESERVER_OP_ROLLBACK     =  7,
-   TABLESERVER_OP_SERVER_UPDATE = 8,
-+  TABLESERVER_OP_SERVER_READY = -9,
- };
- 
- inline const char *get_mdstableserver_opname(int op) {
-@@ -51,6 +52,7 @@ inline const char *get_mdstableserver_opname(int op) {
-   case TABLESERVER_OP_ACK: return "ack";
-   case TABLESERVER_OP_ROLLBACK: return "rollback";
-   case TABLESERVER_OP_SERVER_UPDATE: return "server_update";
-+  case TABLESERVER_OP_SERVER_READY: return "server_ready";
-   default: assert(0); return 0;
-   }
- };
+If the other end doesn't support it is there any
+reason we can't fall back to the old behavior?
+
+This code is only *responding* to a SEQ tag, it doesn't
+initiate one.  If one is never sent by the server the
+behavior remains correct, just slower.
+
+I also have two points you might help clarify for me:
+- Is this a server initiated feature, or could a client
+  send it?
+- Because it's a tagged bit of message data it really
+  could occur at any time--though at the end of a
+  reconnect negotiation is where it's valuable.  Correct?
+
+> diff --git a/include/linux/ceph/msgr.h b/include/linux/ceph/msgr.h
+> index 680d3d6..3d94a73 100644
+> --- a/include/linux/ceph/msgr.h
+> +++ b/include/linux/ceph/msgr.h
+> @@ -87,6 +87,7 @@ struct ceph_entity_inst {
+>  #define CEPH_MSGR_TAG_BADPROTOVER  10  /* bad protocol version */
+>  #define CEPH_MSGR_TAG_BADAUTHORIZER 11 /* bad authorizer */
+>  #define CEPH_MSGR_TAG_FEATURES      12 /* insufficient features */
+> +#define CEPH_MSGR_TAG_SEQ           13 /* 64-bit int follows with seen seq number */
+>  
+>  
+>  /*
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 997dacc..2bf2806 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -1247,6 +1247,24 @@ static void prepare_write_ack(struct ceph_connection *con)
+>  }
+>  
+>  /*
+> + * Prepare to share the seq during handshake
+> + */
+> +static void prepare_write_seq(struct ceph_connection *con)
+> +{
+> +	dout("prepare_write_seq %p %llu -> %llu\n", con,
+> +	     con->in_seq_acked, con->in_seq);
+> +	con->in_seq_acked = con->in_seq;
+> +
+> +	con_out_kvec_reset(con);
+> +
+> +	con->out_temp_ack = cpu_to_le64(con->in_seq_acked);
+> +	con_out_kvec_add(con, sizeof (con->out_temp_ack),
+> +			 &con->out_temp_ack);
+> +
+> +	con_flag_set(con, CON_FLAG_WRITE_PENDING);
+> +}
+> +
+> +/*
+>   * Prepare to write keepalive byte.
+>   */
+>  static void prepare_write_keepalive(struct ceph_connection *con)
+> @@ -1582,6 +1600,13 @@ static void prepare_read_ack(struct ceph_connection *con)
+>  	con->in_base_pos = 0;
+>  }
+>  
+> +static void prepare_read_seq(struct ceph_connection *con)
+> +{
+> +	dout("prepare_read_seq %p\n", con);
+> +	con->in_base_pos = 0;
+> +	con->in_tag = CEPH_MSGR_TAG_SEQ;
+> +}
+> +
+>  static void prepare_read_tag(struct ceph_connection *con)
+>  {
+>  	dout("prepare_read_tag %p\n", con);
+> @@ -2059,6 +2084,7 @@ static int process_connect(struct ceph_connection *con)
+>  		prepare_read_connect(con);
+>  		break;
+>  
+> +	case CEPH_MSGR_TAG_SEQ:
+>  	case CEPH_MSGR_TAG_READY:
+>  		if (req_feat & ~server_feat) {
+>  			pr_err("%s%lld %s protocol feature mismatch,"
+> @@ -2089,7 +2115,12 @@ static int process_connect(struct ceph_connection *con)
+>  
+>  		con->delay = 0;      /* reset backoff memory */
+>  
+> -		prepare_read_tag(con);
+> +		if (con->in_reply.tag == CEPH_MSGR_TAG_SEQ) {
+> +			prepare_write_seq(con);
+> +			prepare_read_seq(con);
+> +		} else {
+> +			prepare_read_tag(con);
+> +		}
+>  		break;
+>  
+>  	case CEPH_MSGR_TAG_WAIT:
+> @@ -2123,7 +2154,6 @@ static int read_partial_ack(struct ceph_connection *con)
+>  	return read_partial(con, end, size, &con->in_temp_ack);
+>  }
+>  
+> -
+>  /*
+>   * We can finally discard anything that's been acked.
+>   */
+> @@ -2148,8 +2178,6 @@ static void process_ack(struct ceph_connection *con)
+>  }
+>  
+>  
+> -
+> -
+>  static int read_partial_message_section(struct ceph_connection *con,
+>  					struct kvec *section,
+>  					unsigned int sec_len, u32 *crc)
+> @@ -2628,6 +2656,17 @@ more:
+>  		if (con->in_base_pos)
+>  			goto more;
+>  	}
+> +	if (con->in_tag == CEPH_MSGR_TAG_SEQ) {
+> +		/*
+> +		 * the final seq exchange is semantically equivalent
+> +		 * to an ACK; re-use those helpers.
+> +		 */
+> +		ret = read_partial_ack(con);
+> +		if (ret <= 0)
+> +			goto out;
+> +		process_ack(con);
+> +		goto more;
+> +	}
+
+This block (above) is identical to the block a little later on
+that handles CEPH_MSGR_TAG_ACK.  It might be nice to make that
+fact obvious by combining them (and if so, I would say here, not
+below).  (It's OK as-is, however.)
+
+>  	if (con->in_tag == CEPH_MSGR_TAG_READY) {
+>  		/*
+>  		 * what's next?
+> 
 
