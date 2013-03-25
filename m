@@ -1,84 +1,57 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: crush changes via cli
-Date: Mon, 25 Mar 2013 12:46:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1303251135330.12444@cobra.newdream.net>
-References: <alpine.DEB.2.00.1303221528240.18669@cobra.newdream.net> <CAPYLRzg2YUVBEL8oJ_N02w1dHwy7a9jpCAVkcRq8AhmyUMnuGw@mail.gmail.com> <alpine.DEB.2.00.1303221554130.32540@cobra.newdream.net> <43BCE0F438AB4C22AEEEFEDCD165068B@inktank.com>
- <alpine.DEB.2.00.1303241629400.1736@cobra.newdream.net> <CAPYLRzi4z1BMnhkENLyOoBRsDCcbsrnj5_bw+6CrWbP1Pws5NA@mail.gmail.com>
+Subject: v0.56.4 released
+Date: Mon, 25 Mar 2013 16:17:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1303251616110.12444@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51058 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54311 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932858Ab3CYTqV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 15:46:21 -0400
-In-Reply-To: <CAPYLRzi4z1BMnhkENLyOoBRsDCcbsrnj5_bw+6CrWbP1Pws5NA@mail.gmail.com>
+	with ESMTP id S932338Ab3CYXRF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 19:17:05 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-On Sun, 24 Mar 2013, Gregory Farnum wrote:
-> On Sun, Mar 24, 2013 at 5:04 PM, Sage Weil <sage@inktank.com> wrote:
-> > On Sun, 24 Mar 2013, Gregory Farnum wrote:
-> >> On Fri, Mar 22, 2013 at 3:58 PM, Sage Weil <sage@inktank.com (mailto:sage@inktank.com)> wrote:
-> >> > On Fri, 22 Mar 2013, Gregory Farnum wrote:
-> >> > > I suspect users are going to easily get in trouble without a more
-> >> > > rigid separation between multi-linked and single-linked buckets. It's
-> >> > > probably best if anybody who's gone to the trouble of setting up a DAG
-> >> > > can't wipe it out without being very explicit ? so for instance "move"
-> >> > > should only work against a bucket with a single parent.
-> >> > >
-> >> >
-> >> >
-> >> > Good idea; I'll add that.
-> >> >
-> >> > > Rather than
-> >> > > defaulting to all ancestors, removals should (for multiply-linked
-> >> > > buckets) require users to either specify a set of ancestors or to pass
-> >> > > in a "--all" flag.
-> >> >
-> >> > 'rm' only works on an empty bucket, so I'm not sure there is much danger
-> >> > is removing all links (and the bucket) in that case?
-> >>
-> >> Well, if "unlink" takes it out of the tree without requiring it to be empty then that would be one case.
-> >
-> > Oh, right.  That's true.  I'm still not a fan of an --all flag, though.
-> > In almost all cases, users will have maps with only 1 link, so the
-> > required flag will be confusing.  It also breaks the current behavior
-> > (which already removes all links).
-> 
-> I was thinking that if there was only one link it would remove that
-> one. I didn't realize it currently removed all links ? although I
-> dimly remember a bug about just randomly taking the first one it
-> finds. Is that new-ish behavior?
+There have been several important fixes that we've backported to bobtail 
+that users are hitting in the wild. Most notably, there was a problem with 
+pool names with - and _ that OpenStack users were hitting, and memory 
+usage by ceph-osd and other daemons due to the trimming of in-memory logs. 
+This and more is fixed in v0.56.4. We recommend that all bobtail users 
+upgrade.
 
-As far as I can tell it has always removed all instances.
+Notable changes include:
 
-> >> I guess mostly I'm just not sure what the use case is for keeping around
-> >> unlinked buckets so I'd rather keep the set of CLI options simpler. It's
-> >> not that hard to link a bucket into the tree where you want it and then
-> >> remove the other links.
-> >
-> > Yeah, that isn't often useful in and of itself... but it is possible (and
-> > often required) to create independent trees, and if you can link them, you
-> > have to be able to unlink them.
-> 
-> Currently we just have "rm", right? And that removes the link and the
-> bucket? Can't we just keep "rm" and for multiply-linked buckets
-> require a specification of which ancestor to remove the link from (or
-> a --all flag), and then delete the bucket when the final link is
-> removed?
+ * mon: fix bug in bringup with IPv6
+ * reduce default memory utilization by internal logging (all daemons)
+ * rgw: fix for bucket removal
+ * rgw: reopen logs after log rotation
+ * rgw: fix multipat upload listing
+ * rgw: don't copy object when copied onto self
+ * osd: fix caps parsing for pools with - or _
+ * osd: allow pg log trimming when degraded, scrubbing, recoverying 
+   (reducing memory consumption)
+ * osd: fix potential deadlock when 'journal aio = true'
+ * osd: various fixes for collection creation/removal, rename, temp 
+   collections
+ * osd: various fixes for PG split
+ * osd: deep-scrub omap key/value data
+ * osd: fix rare bug in journal replay
+ * osd: misc fixes for snapshot tracking
+ * osd: fix leak in recovery reservations on pool deletion
+ * osd: fix bug in connection management
+ * osd: fix for op ordering when rebalancing
+ * ceph-fuse: report file system size with correct units
+ * mds: get and set directory layout policies via virtual xattrs
+ * mkcephfs, init-ceph: close potential security issues with predictable 
+   filenames
 
-That would change current "rm" behavior.  (Even with the ancestor, it then 
-removes all instances under that ancestor, so the '--all' for multiples is 
-weird.)
+There is one minor change (fix) in the output to the 'ceph osd tree 
+--format=json' command. Please see the full release notes.
 
-Removing the bucket only when all instances is removed (and not when the 
-users asks for it) is more confusing, IMO.  If they want to keep the 
-bucket, unlink (and don't worry if it is empty or not). If they don't, 
-rm, and get ENOTEMPTY if there are still children.
+You can get v0.56.4 from the usual locations:
 
-Unless there are other strong opinions here, I'm inclined to merge this as 
-is.
-
-sage
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.56.4.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
