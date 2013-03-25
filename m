@@ -1,199 +1,299 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/6] libceph: add update_authorizer auth method
-Date: Mon, 25 Mar 2013 09:15:25 -0500
-Message-ID: <51505BFD.6030005@inktank.com>
-References: <1363734486-26879-1-git-send-email-sage@inktank.com> <1363734486-26879-3-git-send-email-sage@inktank.com>
+Subject: Re: [PATCH 4/6] libceph: wrap auth ops in wrapper functions
+Date: Mon, 25 Mar 2013 09:25:04 -0500
+Message-ID: <51505E40.9090105@inktank.com>
+References: <1363734486-26879-1-git-send-email-sage@inktank.com> <1363734486-26879-4-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f175.google.com ([209.85.210.175]:62108 "EHLO
-	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756358Ab3CYOPY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 10:15:24 -0400
-Received: by mail-ia0-f175.google.com with SMTP id y26so5441749iab.20
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Mar 2013 07:15:24 -0700 (PDT)
-In-Reply-To: <1363734486-26879-3-git-send-email-sage@inktank.com>
+Received: from mail-ia0-f172.google.com ([209.85.210.172]:57086 "EHLO
+	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756878Ab3CYOZD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 10:25:03 -0400
+Received: by mail-ia0-f172.google.com with SMTP id l29so5487911iag.17
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Mar 2013 07:25:02 -0700 (PDT)
+In-Reply-To: <1363734486-26879-4-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 On 03/19/2013 06:08 PM, Sage Weil wrote:
-> Currently the messenger calls out to a get_authorizer con op, which will
-> create a new authorizer if it doesn't yet have one.  In the meantime, when
-> we rotate our service keys, the authorizer doesn't get updated.  Eventually
-> it will be rejected by the server on a new connection attempt and get
-> invalidated, and we will then rebuild a new authorizer, but this is not
-> ideal.
-> 
-> Instead, if we do have an authorizer, call a new update_authorizer op that
-> will verify that the current authorizer is using the latest secret.  If it
-> is not, we will build a new one that does.  This avoids the transient
-> failure.
-> 
-> This fixes one of the sorry sequence of events for bug
-> 
-> 	http://tracker.ceph.com/issues/4282
+> Use wrapper functions that check whether the auth op exists so that callers
+> do not need a bunch of conditional checks.  Simplifies the external
+> interface.
 > 
 > Signed-off-by: Sage Weil <sage@inktank.com>
 
-A few things for you to consider below, but this looks
-OK to me.
+You know I like this...  It kind of modifies one or two
+earlier suggestions.
+
+My only minor suggestion is that the wrappers could be
+inlined in "ceph/auth.h" since they're just checking
+null pointers.
+
+Apparently if a non-existent verify_authorizer_reply method implies
+success.  (This answers the question in the deleted XXX comment.)
+I suppose this is reasonable, if you don't have a verifier then you
+get what you deserve.
 
 Reviewed-by: Alex Elder <elder@inktank.com>
 
 > ---
->  fs/ceph/mds_client.c      |    7 ++++++-
->  include/linux/ceph/auth.h |    3 +++
->  net/ceph/auth_x.c         |   23 +++++++++++++++++++++++
->  net/ceph/auth_x.h         |    1 +
->  net/ceph/osd_client.c     |    5 +++++
->  5 files changed, 38 insertions(+), 1 deletion(-)
+>  fs/ceph/mds_client.c      |   26 ++++++++++++-------------
+>  include/linux/ceph/auth.h |   13 +++++++++++++
+>  net/ceph/auth.c           |   47 +++++++++++++++++++++++++++++++++++++++++++++
+>  net/ceph/auth_x.c         |    1 -
+>  net/ceph/mon_client.c     |    7 +++----
+>  net/ceph/osd_client.c     |   26 +++++++++----------------
+>  6 files changed, 84 insertions(+), 36 deletions(-)
 > 
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 06ea2ca..75cca49 100644
+> index 75cca49..c07ab3c 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -3445,7 +3445,12 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+> @@ -365,9 +365,9 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
+>  	     atomic_read(&s->s_ref), atomic_read(&s->s_ref)-1);
+>  	if (atomic_dec_and_test(&s->s_ref)) {
+>  		if (s->s_auth.authorizer)
+> -		     s->s_mdsc->fsc->client->monc.auth->ops->destroy_authorizer(
+> -			     s->s_mdsc->fsc->client->monc.auth,
+> -			     s->s_auth.authorizer);
+> +			ceph_auth_destroy_authorizer(
+> +				s->s_mdsc->fsc->client->monc.auth,
+> +				s->s_auth.authorizer);
+>  		kfree(s);
 >  	}
->  	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
->  		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
-> -							auth);
-> +						     auth);
-> +		if (ret)
-> +			return ERR_PTR(ret);
-> +	} else if (ac->ops && ac->ops_update_authorizer) {
-> +		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
-> +						     auth);
+>  }
+> @@ -3439,18 +3439,17 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+>  	struct ceph_auth_handshake *auth = &s->s_auth;
+>  
+>  	if (force_new && auth->authorizer) {
+> -		if (ac->ops && ac->ops->destroy_authorizer)
+> -			ac->ops->destroy_authorizer(ac, auth->authorizer);
+> +		ceph_auth_destroy_authorizer(ac, auth->authorizer);
+>  		auth->authorizer = NULL;
+>  	}
+> -	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
+> -		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> -						     auth);
+> +	if (!auth->authorizer) {
+> +		int ret = ceph_auth_create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> +						      auth);
+>  		if (ret)
+>  			return ERR_PTR(ret);
+> -	} else if (ac->ops && ac->ops_update_authorizer) {
+> -		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> -						     auth);
+> +	} else {
+> +		int ret = ceph_auth_update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> +						      auth);
 >  		if (ret)
 >  			return ERR_PTR(ret);
 >  	}
-
-It appears that this means a user of this interface could provide
-only an update method and not a create method.  Maybe that's what
-you intend.  It seems like maybe we should update if we can,
-otherwise fall back to creating a new one.
-
-I would argue that the logic of this might be better stated:
-
-    if (!ac->ops)
-        goto out;
-    ret = 0;
-    if (auth->authorizer && ac->ops->update_authorizer)
-        ret = ac->ops->update_authorizer(...);
-    else if (ac->ops->create_authorizer)
-        ret = ac->ops->create_authorizer(...);
-    if (ret)
-        return ERR_PTR(ret);
-out:
-    *proto = ac->protocol;
-
-(And use the same pattern for the osd client, below.)
-
-> diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
-> index d4080f3..73e973e 100644
-> --- a/include/linux/ceph/auth.h
-> +++ b/include/linux/ceph/auth.h
-> @@ -52,6 +52,9 @@ struct ceph_auth_client_ops {
->  	 */
->  	int (*create_authorizer)(struct ceph_auth_client *ac, int peer_type,
->  				 struct ceph_auth_handshake *auth);
-> +	/* ensure that an existing authorizer is up to date */
-> +	int (*update_authorizer)(struct ceph_auth_client *ac, int peer_type,
-> +				 struct ceph_auth_handshake *auth);
->  	int (*verify_authorizer_reply)(struct ceph_auth_client *ac,
->  				       struct ceph_authorizer *a, size_t len);
->  	void (*destroy_authorizer)(struct ceph_auth_client *ac,
-> diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-> index bd8758d..2d59815 100644
-> --- a/net/ceph/auth_x.c
-> +++ b/net/ceph/auth_x.c
-> @@ -298,6 +298,7 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
->  			return -ENOMEM;
->  	}
->  	au->service = th->service;
-> +	au->secret_id = th->secret_id;
-
-The secret id for the ticket handler will be initially 0.
-
+> @@ -3466,7 +3465,7 @@ static int verify_authorizer_reply(struct ceph_connection *con, int len)
+>  	struct ceph_mds_client *mdsc = s->s_mdsc;
+>  	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
 >  
->  	msg_a = au->buf->vec.iov_base;
->  	msg_a->struct_v = 1;
-> @@ -555,6 +556,27 @@ static int ceph_x_create_authorizer(
->  	return 0;
+> -	return ac->ops->verify_authorizer_reply(ac, s->s_auth.authorizer, len);
+> +	return ceph_auth_verify_authorizer_reply(ac, s->s_auth.authorizer, len);
 >  }
 >  
-> +static int ceph_x_update_authorizer(
-> +	struct ceph_auth_client *ac, int peer_type,
-> +	struct ceph_auth_handshake *auth)
+>  static int invalidate_authorizer(struct ceph_connection *con)
+> @@ -3475,8 +3474,7 @@ static int invalidate_authorizer(struct ceph_connection *con)
+>  	struct ceph_mds_client *mdsc = s->s_mdsc;
+>  	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
+>  
+> -	if (ac->ops->invalidate_authorizer)
+> -		ac->ops->invalidate_authorizer(ac, CEPH_ENTITY_TYPE_MDS);
+> +	ceph_auth_invalidate_authorizer(ac, CEPH_ENTITY_TYPE_MDS);
+>  
+>  	return ceph_monc_validate_auth(&mdsc->fsc->client->monc);
+>  }
+> diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
+> index 73e973e..c9c3b3a 100644
+> --- a/include/linux/ceph/auth.h
+> +++ b/include/linux/ceph/auth.h
+> @@ -97,5 +97,18 @@ extern int ceph_build_auth(struct ceph_auth_client *ac,
+>  		    void *msg_buf, size_t msg_len);
+>  
+>  extern int ceph_auth_is_authenticated(struct ceph_auth_client *ac);
+> +extern int ceph_auth_create_authorizer(struct ceph_auth_client *ac,
+> +				       int peer_type,
+> +				       struct ceph_auth_handshake *auth);
+> +extern void ceph_auth_destroy_authorizer(struct ceph_auth_client *ac,
+> +					 struct ceph_authorizer *a);
+> +extern int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
+> +				       int peer_type,
+> +				       struct ceph_auth_handshake *a);
+> +extern int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
+> +					     struct ceph_authorizer *a,
+> +					     size_t len);
+> +extern void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac,
+> +					    int peer_type);
+>  
+>  #endif
+> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+> index b4bf4ac..a22de54 100644
+> --- a/net/ceph/auth.c
+> +++ b/net/ceph/auth.c
+> @@ -257,3 +257,50 @@ int ceph_auth_is_authenticated(struct ceph_auth_client *ac)
+>  		return 0;
+>  	return ac->ops->is_authenticated(ac);
+>  }
+> +EXPORT_SYMBOL(ceph_auth_is_authenticated);
+> +
+> +int ceph_auth_create_authorizer(struct ceph_auth_client *ac,
+> +				int peer_type,
+> +				struct ceph_auth_handshake *auth)
 > +{
-> +	struct ceph_x_authorizer *au;
-> +	struct ceph_x_ticket_handler *th;
-> +	int ret;
-> +
-> +	th = get_ticket_handler(ac, peer_type);
-> +	if (IS_ERR(th))
-> +		return PTR_ERR(th);
-> +
-> +	au = (struct ceph_x_authorizer *)auth->authorizer;
-> +	if (au->secret_id < th->secret_id) {
-
-Under what circumstances should the ticket handler's
-secret id get incremented?  (This patch never actually
-changes it from its initial value of 0.)
-
-...OK, now I've looked at the existing code, and I
-see that the secret id is already maintained in the
-ceph_x reply buffer, this patch just starts making
-use of it.  Apparently the ticket id is monotonically
-increasing and never 0.
-
-> +		dout("ceph_x_update_authorizer service %u secret %llu < %llu\n",
-> +		     au->service, au->secret_id, th->secret_id);
-> +		return ceph_x_build_authorizer(ac, th, au);
-> +	}
+> +	if (ac->ops && ac->ops->create_authorizer)
+> +		return ac->ops->create_authorizer(ac, peer_type, auth);
 > +	return 0;
 > +}
+> +EXPORT_SYMBOL(ceph_auth_create_authorizer);
 > +
->  static int ceph_x_verify_authorizer_reply(struct ceph_auth_client *ac,
->  					  struct ceph_authorizer *a, size_t len)
+> +void ceph_auth_destroy_authorizer(struct ceph_auth_client *ac,
+> +				  struct ceph_authorizer *a)
+> +{
+> +	if (ac->ops && ac->ops->destroy_authorizer)
+> +		ac->ops->destroy_authorizer(ac, a);
+> +}
+> +EXPORT_SYMBOL(ceph_auth_destroy_authorizer);
+> +
+> +int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
+> +				int peer_type,
+> +				struct ceph_auth_handshake *a)
+> +{
+> +	int ret = 0;
+> +
+> +	if (ac->ops && ac->ops->update_authorizer)
+> +		ret = ac->ops->update_authorizer(ac, peer_type, a);
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL(ceph_auth_update_authorizer);
+> +
+> +int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
+> +				      struct ceph_authorizer *a, size_t len)
+> +{
+> +	if (ac->ops && ac->ops->verify_authorizer_reply)
+> +		return ac->ops->verify_authorizer_reply(ac, a, len);
+> +	return 0;
+> +}
+> +EXPORT_SYMBOL(ceph_auth_verify_authorizer_reply);
+> +
+> +void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac, int peer_type)
+> +{
+> +	if (ac->ops && ac->ops->invalidate_authorizer)
+> +		ac->ops->invalidate_authorizer(ac, peer_type);
+> +}
+> +EXPORT_SYMBOL(ceph_auth_invalidate_authorizer);
+> diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+> index 2d59815..96238ba 100644
+> --- a/net/ceph/auth_x.c
+> +++ b/net/ceph/auth_x.c
+> @@ -562,7 +562,6 @@ static int ceph_x_update_authorizer(
 >  {
-> @@ -641,6 +663,7 @@ static const struct ceph_auth_client_ops ceph_x_ops = {
->  	.build_request = ceph_x_build_request,
->  	.handle_reply = ceph_x_handle_reply,
->  	.create_authorizer = ceph_x_create_authorizer,
-> +	.update_authorizer = ceph_x_update_authorizer,
->  	.verify_authorizer_reply = ceph_x_verify_authorizer_reply,
->  	.destroy_authorizer = ceph_x_destroy_authorizer,
->  	.invalidate_authorizer = ceph_x_invalidate_authorizer,
-> diff --git a/net/ceph/auth_x.h b/net/ceph/auth_x.h
-> index f459e93..c5a058d 100644
-> --- a/net/ceph/auth_x.h
-> +++ b/net/ceph/auth_x.h
-> @@ -29,6 +29,7 @@ struct ceph_x_authorizer {
->  	struct ceph_buffer *buf;
->  	unsigned int service;
->  	u64 nonce;
-> +	u64 secret_id;
->  	char reply_buf[128];  /* big enough for encrypted blob */
->  };
+>  	struct ceph_x_authorizer *au;
+>  	struct ceph_x_ticket_handler *th;
+> -	int ret;
 >  
+>  	th = get_ticket_handler(ac, peer_type);
+>  	if (IS_ERR(th))
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index aef5b10..1fe25cd 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -737,7 +737,7 @@ static void delayed_work(struct work_struct *work)
+>  
+>  		__validate_auth(monc);
+>  
+> -		if (monc->auth->ops->is_authenticated(monc->auth))
+> +		if (ceph_auth_is_authenticated(monc->auth))
+>  			__send_subscribe(monc);
+>  	}
+>  	__schedule_delayed(monc);
+> @@ -892,8 +892,7 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
+>  
+>  	mutex_lock(&monc->mutex);
+>  	had_debugfs_info = have_debugfs_info(monc);
+> -	if (monc->auth->ops)
+> -		was_auth = monc->auth->ops->is_authenticated(monc->auth);
+> +	was_auth = ceph_auth_is_authenticated(monc->auth);
+>  	monc->pending_auth = 0;
+>  	ret = ceph_handle_auth_reply(monc->auth, msg->front.iov_base,
+>  				     msg->front.iov_len,
+> @@ -904,7 +903,7 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
+>  		wake_up_all(&monc->client->auth_wq);
+>  	} else if (ret > 0) {
+>  		__send_prepared_auth_request(monc, ret);
+> -	} else if (!was_auth && monc->auth->ops->is_authenticated(monc->auth)) {
+> +	} else if (!was_auth && ceph_auth_is_authenticated(monc->auth)) {
+>  		dout("authenticated, starting session\n");
+>  
+>  		monc->client->msgr.inst.name.type = CEPH_ENTITY_TYPE_CLIENT;
 > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index cb14db8..5ef24e3 100644
+> index 5ef24e3..7041906 100644
 > --- a/net/ceph/osd_client.c
 > +++ b/net/ceph/osd_client.c
-> @@ -2220,6 +2220,11 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
->  							auth);
+> @@ -666,8 +666,7 @@ static void put_osd(struct ceph_osd *osd)
+>  	if (atomic_dec_and_test(&osd->o_ref) && osd->o_auth.authorizer) {
+>  		struct ceph_auth_client *ac = osd->o_osdc->client->monc.auth;
+>  
+> -		if (ac->ops && ac->ops->destroy_authorizer)
+> -			ac->ops->destroy_authorizer(ac, osd->o_auth.authorizer);
+> +		ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
+>  		kfree(osd);
+>  	}
+>  }
+> @@ -2211,17 +2210,16 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+>  	struct ceph_auth_handshake *auth = &o->o_auth;
+>  
+>  	if (force_new && auth->authorizer) {
+> -		if (ac->ops && ac->ops->destroy_authorizer)
+> -			ac->ops->destroy_authorizer(ac, auth->authorizer);
+> +		ceph_auth_destroy_authorizer(ac, auth->authorizer);
+>  		auth->authorizer = NULL;
+>  	}
+> -	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
+> -		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
+> -							auth);
+> +	if (!auth->authorizer) {
+> +		int ret = ceph_auth_create_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
+> +						      auth);
 >  		if (ret)
 >  			return ERR_PTR(ret);
-> +	} else if (ac->ops && ac->ops->update_authorizer) {
-> +		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
-> +						     auth);
-> +		if (ret)
-> +			return ERR_PTR(ret);
->  	}
->  	*proto = ac->protocol;
+> -	} else if (ac->ops && ac->ops->update_authorizer) {
+> -		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
+> +	} else {
+> +		int ret = ceph_auth_update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
+>  						     auth);
+>  		if (ret)
+>  			return ERR_PTR(ret);
+> @@ -2238,11 +2236,7 @@ static int verify_authorizer_reply(struct ceph_connection *con, int len)
+>  	struct ceph_osd_client *osdc = o->o_osdc;
+>  	struct ceph_auth_client *ac = osdc->client->monc.auth;
+>  
+> -	/*
+> -	 * XXX If ac->ops or ac->ops->verify_authorizer_reply is null,
+> -	 * XXX which do we do:  succeed or fail?
+> -	 */
+> -	return ac->ops->verify_authorizer_reply(ac, o->o_auth.authorizer, len);
+> +	return ceph_auth_verify_authorizer_reply(ac, o->o_auth.authorizer, len);
+>  }
+>  
+>  static int invalidate_authorizer(struct ceph_connection *con)
+> @@ -2251,9 +2245,7 @@ static int invalidate_authorizer(struct ceph_connection *con)
+>  	struct ceph_osd_client *osdc = o->o_osdc;
+>  	struct ceph_auth_client *ac = osdc->client->monc.auth;
+>  
+> -	if (ac->ops && ac->ops->invalidate_authorizer)
+> -		ac->ops->invalidate_authorizer(ac, CEPH_ENTITY_TYPE_OSD);
+> -
+> +	ceph_auth_invalidate_authorizer(ac, CEPH_ENTITY_TYPE_OSD);
+>  	return ceph_monc_validate_auth(&osdc->client->monc);
+>  }
 >  
 > 
 
