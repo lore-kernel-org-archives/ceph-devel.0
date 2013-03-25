@@ -1,93 +1,199 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Crach at sync_thread_timeout after heavy
- random writes.
-Date: Mon, 25 Mar 2013 13:59:01 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC622C0E@SHSMSX102.ccr.corp.intel.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 3/6] libceph: add update_authorizer auth method
+Date: Mon, 25 Mar 2013 09:15:25 -0500
+Message-ID: <51505BFD.6030005@inktank.com>
+References: <1363734486-26879-1-git-send-email-sage@inktank.com> <1363734486-26879-3-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "'ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org'
-	(ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org)" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ia0-f175.google.com ([209.85.210.175]:62108 "EHLO
+	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756358Ab3CYOPY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Mar 2013 10:15:24 -0400
+Received: by mail-ia0-f175.google.com with SMTP id y26so5441749iab.20
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Mar 2013 07:15:24 -0700 (PDT)
+In-Reply-To: <1363734486-26879-3-git-send-email-sage@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-UmVwaHJhc2UgaXQgdG8gbWFrZSBpdCBtb3JlIGNsZWFyDQoNCkZyb206IGNlcGgtdXNlcnMtYm91
-bmNlc0BsaXN0cy5jZXBoLmNvbSBbbWFpbHRvOmNlcGgtdXNlcnMtYm91bmNlc0BsaXN0cy5jZXBo
-LmNvbV0gT24gQmVoYWxmIE9mIENoZW4sIFhpYW94aQ0KU2VudDogMjAxM+W5tDPmnIgyNeaXpSAx
-NzowMg0KVG86ICdjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tJyAoY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbSkNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogW2NlcGgt
-dXNlcnNdIENlcGggQ3JhY2ggYXQgc3luY190aHJlYWRfdGltZW91dCBhZnRlciBoZWF2eSByYW5k
-b20gd3JpdGVzLg0KDQpIaSBsaXN0LA0KwqDCoMKgwqDCoMKgwqDCoCBXZSBoYXZlIGhpdCBhbmQg
-cmVwcm9kdWNlIHRoaXMgaXNzdWUgZm9yIHNldmVyYWwgdGltZXMsIGNlcGggd2lsbCBzdWljaWRl
-IGJlY2F1c2UgRmlsZVN0b3JlOiBzeW5jX2VudHJ5IHRpbWVkIG91dCBhZnRlciBhIHZlcnkgaGVh
-dnkgcmFuZG9tIElPIG9uIHRvcCBvZiB0aGUgUkJELg0KwqDCoMKgwqDCoMKgwqDCoCBNeSB0ZXN0
-IGVudmlyb25tZW50IGlzOg0KwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgIDQgTm9kZXMgY2VwaCBjbHVzdGVyIHdpdGggMjAgSEREcyBmb3IgT1NE
-cyBhbmQgNCBJbnRlbCBEQ1MzNzAwIHNzZHMgZm9yIGpvdXJuYWwgcGVyIG5vZGUsIHRoYXQgaXMg
-ODAgc3BpbmRsZXMgaW4gdG90YWwNCsKgwqDCoMKgwqDCoMKgwqAgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgIDQ4IFZNcyBzcHJlYWQgYWNyb3NzIDEyIFBoeXNpY2FsIG5vZGVz
-LCA0OCBSQkQgYXR0YWNoZWQgdG8gdGhlIFZNcyAxOjEgdmlhIFFFTVUsIFRoZSBRZW11IENhY2hl
-IGRpc2FibGVkLg0KwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgIENlcGggQCAwLjU4DQrCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqAgWEZTIHdlcmUgdXNlZC4NCsKgwqDCoMKgwqDCoMKgwqAgSSBh
-bSBydW5uaW5nICBBaW9zdHJlc3MgKHNvbWV0aGluZyBsaWtlIEZJTykgaW5zaWRlIFZNUyB0byBw
-cm9kdWNlIHJhbmRvbSB3cml0ZSByZXF1ZXN0cyBvbiB0b3Agb2YgZWFjaCBSQkRzLg0KDQrCoMKg
-wqDCoMKgwqDCoMKgIEZyb20gQ2VwaC13ICwgY2VwaCByZXBvcnRzIGEgdmVyeSBoaWdoIE9wcyAo
-MTAwMDArIC9zKSAsIGJ1dCB0ZWNobmljYWxseSAsIDgwIHNwaW5kbGVzIGNhbiBwcm92aWRlIHVw
-IHRvIDE1MCo4MC8yPTYwMDAgSU9QUyBmb3IgNEsgcmFuZG9tIHdyaXRlLg0KwqDCoMKgwqDCoMKg
-wqDCoCBXaGVuIGRpZ2dpbmcgaW50byB0aGUgY29kZSwgZnJvbSBGaWxlc3RvcmUuY2M6Ol93cml0
-ZSgpLCBpdCdzIGNsZWFyIHRoYXQgdGhlIE9TRCBvcGVuIG9iamVjdCBmaWxlcyB3aXRob3V0IE9f
-RElSRUNULCB0aGF0IG1lYW5zIGRhdGEgd3JpdGVzIHdpbGwgYmUgYnVmZmVyZWQgYnkgcGFnZWNh
-Y2hlLCBhbmQgdGhlbiByZXR1cm5lZC5BbHRob3VnaCA6OnN5bmNfZmlsZV9yYW5nZSBjYWxsZWQg
-LCBidXQgd2l0aCBmbGFnICJTWU5DX0ZJTEVfUkFOR0VfV1JJVEUiLCB0aGlzIHN5c3RlbSBjYWxs
-IGRvZXNu4oCZdCBhY3R1YWxseSBzeW5jIGRhdGEgdG8gZGlzayBiZWZvcmUgaXQgcmV0dXJucyAs
-aW5zdGVhZCwgaXQganVzdCBpbml0aWF0ZSB0aGUgd3JpdGUgb3V0IElPcy4gDQogICAgICAgICAg
-ICAgICAgICAgIFNvIHRoZSBzaXR1YXRpb24gaXMgLCBzaW5jZSBhbGwgd3JpdGVzIGp1c3QgZ28g
-dG8gcGFnZWNhY2hlICwgdGhlIGJhY2tlbmQgT1NEIGRhdGEgZGlzayAqKnNlZW1zKiogZXh0cmVt
-ZWx5IGZhc3QgZm9yIHJhbmRvbSB3cml0ZSwgc28gd2UgY2FuIHNlZSAgc3VjaCBhIGhpZ2ggT3Bz
-IGZyb20gQ2VwaC13LiBIb3dldmVyLCB3aGVuIE9TRCBTeW5jX3RocmVhZCB0cnlpbmcgdG8gc3lu
-YyB0aGUgRlMsIGl0IHVzZSA6OnN5bmNmcygpLCBiZWZvcmUgOjpzeW5jZnMgcmV0dXJuZWQsIHRo
-ZSBPUyBoYXMgdG8gZW5zdXJlIHRoYXQgYWxsIGRpcnR5IHBhZ2UgaW4gUGFnZUNhY2hlKHJlbGF0
-ZSB3aXRoIHRoYXQgcGFydGljdWxhciBGUykgIGhhZCB3cml0dGVuIGludG8gZGlzay4gVGhpcyB3
-aWxsIG9idmlvdXNseSB0YWtlIGxvbmcgdGltZSBhbmQgeW91IGNhbiBvbmx5IGV4cGVjdCAxMDAg
-SU9QUyBmb3Igbm9uLWJ0cmZzIGZpbGVzeXN0ZW0uICAgVGhlIHBlcmZvcm1hbmNlIGdhcCBleGlz
-dHMgdGhlcmUsIGEgU1NEIGpvdXJuYWwgY2FuIGRvIDRLIHJhbmRvbSB3aXJ0ZSBAICAxSyBJT1BT
-ICssIGJ1dCBmb3IgNCBIRERzKGpvdXJuYWxlZCAgYnkgdGhlIHNhbWUgU1NEKSwgdGhleSBjYW4g
-b25seSBwcm92aWRlIDQwMElPUFMuDQpXaXRoIHRoZSByYW5kb20gd3JpdGUgcHJlc3N1cmUgY29u
-dGludWluZyAsIHRoZSBhbW91bnQgb2YgZGlydHkgcGFnZSBpbiBQYWdlQ2FjaGUgd2lsbCBrZWVw
-IGluY3JlYXNpbmcgLCBzb29uZXIgb3IgbGF0ZXIsIHRoZSA6OnN5bmNmcygpIGNhbm5vdCByZXR1
-cm4gd2l0aGluIDYwMHModGhlIGRlZmF1bHQgdmFsdWUgb2YgZmlsZXN0b3JlX2NvbW1pdF90aW1l
-b3V0ICkgYW5kIHRyaWdnZXJlZCB0aGUgQVNTRVJUIHRvIHN1aWNpZGUgY2VwaC1vc2QgcHJvY2Vz
-cy4NCg0KICAgSSBoYXZlIHRyaWVkIHRvIHJlcHJvZHVjZSB0aGlzIGJ5IHJhZG9zIGJlbmNoLGJ1
-dCBmYWlsZWQuQmVjYXVzZSByYWRvcyBiZW5jaCAqKmNyZWF0ZSoqIG9iamVjdHMgcmF0aGVyIHRo
-YW4gbW9kaWZ5IHRoZW0sIGEgYnVja2V0IG9mIGNyZWF0ZXMgY2FuIGJlIG1lcmdlZCBpbnRvIGEg
-c2luZ2xlIGJpZyB3cml0ZXMuIFNvIEkgYXNzdW1lIGlmIGFueW9uZSBsaWtlIHRvIHJlcHJvZHVj
-ZSB0aGlzIGlzc3VlLCB5b3UgaGF2ZSB0byB1c2UgUUVNVS9LZXJuZWwgQ2xpZW50LCB1c2luZyBh
-IGZhc3Qgam91cm5hbChzYXkgdGVtcGZzKSAsIHNsb3cgZGF0YSBkaXNrLCBjaG9vc2luZyBhIHNt
-YWxsIGZpbGVzdG9yZV9jb21taXRfdGltZW91dCBtYXkgYmUgaGVscGZ1bCB0byByZXByb2R1Y2Ug
-dGhpcyBpc3N1ZSBpbiBhIHNtYWxsIHNjYWxlIGVudmlyb25tZW50Lg0KDQrCoMKgwqDCoMKgwqDC
-oMKgIENvdWxkIHlvdSBwbGVhc2UgbGV0IG1lIGtub3cgaWYgeW91IG5lZWQgYW55IG1vcmUgaW5m
-b3JtYXRpb25zICYgaGF2ZSBzb21lIHNvbHV0aW9ucz8gVGhhbmtzDQrCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgIMKgwqDCoMKgwqDCoMKgwqAgWGlhb3hpDQpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kv
-Y2VwaC11c2Vycy1jZXBoLmNvbQo=
+On 03/19/2013 06:08 PM, Sage Weil wrote:
+> Currently the messenger calls out to a get_authorizer con op, which will
+> create a new authorizer if it doesn't yet have one.  In the meantime, when
+> we rotate our service keys, the authorizer doesn't get updated.  Eventually
+> it will be rejected by the server on a new connection attempt and get
+> invalidated, and we will then rebuild a new authorizer, but this is not
+> ideal.
+> 
+> Instead, if we do have an authorizer, call a new update_authorizer op that
+> will verify that the current authorizer is using the latest secret.  If it
+> is not, we will build a new one that does.  This avoids the transient
+> failure.
+> 
+> This fixes one of the sorry sequence of events for bug
+> 
+> 	http://tracker.ceph.com/issues/4282
+> 
+> Signed-off-by: Sage Weil <sage@inktank.com>
+
+A few things for you to consider below, but this looks
+OK to me.
+
+Reviewed-by: Alex Elder <elder@inktank.com>
+
+> ---
+>  fs/ceph/mds_client.c      |    7 ++++++-
+>  include/linux/ceph/auth.h |    3 +++
+>  net/ceph/auth_x.c         |   23 +++++++++++++++++++++++
+>  net/ceph/auth_x.h         |    1 +
+>  net/ceph/osd_client.c     |    5 +++++
+>  5 files changed, 38 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 06ea2ca..75cca49 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -3445,7 +3445,12 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+>  	}
+>  	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
+>  		int ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> -							auth);
+> +						     auth);
+> +		if (ret)
+> +			return ERR_PTR(ret);
+> +	} else if (ac->ops && ac->ops_update_authorizer) {
+> +		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_MDS,
+> +						     auth);
+>  		if (ret)
+>  			return ERR_PTR(ret);
+>  	}
+
+It appears that this means a user of this interface could provide
+only an update method and not a create method.  Maybe that's what
+you intend.  It seems like maybe we should update if we can,
+otherwise fall back to creating a new one.
+
+I would argue that the logic of this might be better stated:
+
+    if (!ac->ops)
+        goto out;
+    ret = 0;
+    if (auth->authorizer && ac->ops->update_authorizer)
+        ret = ac->ops->update_authorizer(...);
+    else if (ac->ops->create_authorizer)
+        ret = ac->ops->create_authorizer(...);
+    if (ret)
+        return ERR_PTR(ret);
+out:
+    *proto = ac->protocol;
+
+(And use the same pattern for the osd client, below.)
+
+> diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
+> index d4080f3..73e973e 100644
+> --- a/include/linux/ceph/auth.h
+> +++ b/include/linux/ceph/auth.h
+> @@ -52,6 +52,9 @@ struct ceph_auth_client_ops {
+>  	 */
+>  	int (*create_authorizer)(struct ceph_auth_client *ac, int peer_type,
+>  				 struct ceph_auth_handshake *auth);
+> +	/* ensure that an existing authorizer is up to date */
+> +	int (*update_authorizer)(struct ceph_auth_client *ac, int peer_type,
+> +				 struct ceph_auth_handshake *auth);
+>  	int (*verify_authorizer_reply)(struct ceph_auth_client *ac,
+>  				       struct ceph_authorizer *a, size_t len);
+>  	void (*destroy_authorizer)(struct ceph_auth_client *ac,
+> diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+> index bd8758d..2d59815 100644
+> --- a/net/ceph/auth_x.c
+> +++ b/net/ceph/auth_x.c
+> @@ -298,6 +298,7 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
+>  			return -ENOMEM;
+>  	}
+>  	au->service = th->service;
+> +	au->secret_id = th->secret_id;
+
+The secret id for the ticket handler will be initially 0.
+
+>  
+>  	msg_a = au->buf->vec.iov_base;
+>  	msg_a->struct_v = 1;
+> @@ -555,6 +556,27 @@ static int ceph_x_create_authorizer(
+>  	return 0;
+>  }
+>  
+> +static int ceph_x_update_authorizer(
+> +	struct ceph_auth_client *ac, int peer_type,
+> +	struct ceph_auth_handshake *auth)
+> +{
+> +	struct ceph_x_authorizer *au;
+> +	struct ceph_x_ticket_handler *th;
+> +	int ret;
+> +
+> +	th = get_ticket_handler(ac, peer_type);
+> +	if (IS_ERR(th))
+> +		return PTR_ERR(th);
+> +
+> +	au = (struct ceph_x_authorizer *)auth->authorizer;
+> +	if (au->secret_id < th->secret_id) {
+
+Under what circumstances should the ticket handler's
+secret id get incremented?  (This patch never actually
+changes it from its initial value of 0.)
+
+...OK, now I've looked at the existing code, and I
+see that the secret id is already maintained in the
+ceph_x reply buffer, this patch just starts making
+use of it.  Apparently the ticket id is monotonically
+increasing and never 0.
+
+> +		dout("ceph_x_update_authorizer service %u secret %llu < %llu\n",
+> +		     au->service, au->secret_id, th->secret_id);
+> +		return ceph_x_build_authorizer(ac, th, au);
+> +	}
+> +	return 0;
+> +}
+> +
+>  static int ceph_x_verify_authorizer_reply(struct ceph_auth_client *ac,
+>  					  struct ceph_authorizer *a, size_t len)
+>  {
+> @@ -641,6 +663,7 @@ static const struct ceph_auth_client_ops ceph_x_ops = {
+>  	.build_request = ceph_x_build_request,
+>  	.handle_reply = ceph_x_handle_reply,
+>  	.create_authorizer = ceph_x_create_authorizer,
+> +	.update_authorizer = ceph_x_update_authorizer,
+>  	.verify_authorizer_reply = ceph_x_verify_authorizer_reply,
+>  	.destroy_authorizer = ceph_x_destroy_authorizer,
+>  	.invalidate_authorizer = ceph_x_invalidate_authorizer,
+> diff --git a/net/ceph/auth_x.h b/net/ceph/auth_x.h
+> index f459e93..c5a058d 100644
+> --- a/net/ceph/auth_x.h
+> +++ b/net/ceph/auth_x.h
+> @@ -29,6 +29,7 @@ struct ceph_x_authorizer {
+>  	struct ceph_buffer *buf;
+>  	unsigned int service;
+>  	u64 nonce;
+> +	u64 secret_id;
+>  	char reply_buf[128];  /* big enough for encrypted blob */
+>  };
+>  
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index cb14db8..5ef24e3 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2220,6 +2220,11 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+>  							auth);
+>  		if (ret)
+>  			return ERR_PTR(ret);
+> +	} else if (ac->ops && ac->ops->update_authorizer) {
+> +		int ret = ac->ops->update_authorizer(ac, CEPH_ENTITY_TYPE_OSD,
+> +						     auth);
+> +		if (ret)
+> +			return ERR_PTR(ret);
+>  	}
+>  	*proto = ac->protocol;
+>  
+> 
+
