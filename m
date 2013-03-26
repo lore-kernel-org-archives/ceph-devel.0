@@ -1,111 +1,146 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 6/6, v2] libceph: verify requests queued in order
-Date: Tue, 26 Mar 2013 09:50:59 -0500
-Message-ID: <5151B5D3.5040802@inktank.com>
-References: <5151071C.3000309@inktank.com> <515107C9.2000906@inktank.com>
+Subject: [PATCH 3/6, v2] libceph: requeue only sent requests when kicking
+Date: Tue, 26 Mar 2013 09:50:53 -0500
+Message-ID: <5151B5CD.2050700@inktank.com>
+References: <5151071C.3000309@inktank.com> <5151079E.3020108@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f170.google.com ([209.85.210.170]:38864 "EHLO
-	mail-ia0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933525Ab3CZOvB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Mar 2013 10:51:01 -0400
-Received: by mail-ia0-f170.google.com with SMTP id h8so6529889iaa.1
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Mar 2013 07:51:01 -0700 (PDT)
-In-Reply-To: <515107C9.2000906@inktank.com>
+Received: from mail-ia0-f176.google.com ([209.85.210.176]:46369 "EHLO
+	mail-ia0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933525Ab3CZOu4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Mar 2013 10:50:56 -0400
+Received: by mail-ia0-f176.google.com with SMTP id i1so6475517iaa.35
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Mar 2013 07:50:55 -0700 (PDT)
+In-Reply-To: <5151079E.3020108@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Add checking to verify all osd requests for an osd are added to the
-queue in order of increasing tid.
+The osd expects incoming requests for a given object from a given
+client to arrive in order, with the tid for each request being
+greater than the tid for requests that have already arrived.  This
+patch fixes two places the osd client might not maintain that
+ordering.
+
+For the osd client, the connection fault method is osd_reset().
+That function calls __reset_osd() to close and re-open the
+connection, then calls __kick_osd_requests() to cause all
+outstanding requests for the affected osd to be re-sent after
+the connection has been re-established.
+
+When an osd is reset, any in-flight messages will need to be
+re-sent.  An osd client maintains distinct lists for unsent and
+in-flight messages.  Meanwhile, an osd maintains a single list of
+all its requests (both sent and un-sent).  (Each message is linked
+into two lists--one for the osd client and one list for the osd.)
+
+To process an osd "kick" operation, the request list for the *osd*
+is traversed, and each request is moved off whichever osd *client*
+list it was on (unsent or sent) and placed onto the osd client's
+unsent list.  (It remains where it is on the osd's request list.)
+
+When that is done, osd_reset() calls __send_queued() to cause each
+of the osd client's unsent messages to be sent.
+
+OK, with that background...
+
+As the osd request list is traversed each request is prepended to
+the osd client's unsent list in the order they're seen.  The effect
+of this is to reverse the order of these requests as they are put
+(back) onto the unsent list.
+
+Instead, build up a list of only the requests for an osd that have
+already been sent (by checking their r_sent flag values).  Once an
+unsent request is found, stop examining requests and prepend the
+requests that need re-sending to the osd client's unsent list.
+
+Preserve the original order of requests in the process (previously
+re-queued requests were reversed in this process).  Because they
+have already been sent, they will have lower tids than any request
+already present on the unsent list.
+
+Just below that, traverse the linger list in forward order as
+before, but add them to the *tail* of the list rather than the head.
+These requests get re-registered, and in the process are give a new
+(higher) tid, so the should go at the end.
+
+This partially resolves:
+    http://tracker.ceph.com/issues/4392
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
-v2: Only check the last of the requests queued to resend.
+v2: Leave unsent requests in place; only requeue those already sent.
 
- net/ceph/osd_client.c |   44 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 43 insertions(+), 1 deletion(-)
+ net/ceph/osd_client.c |   33 +++++++++++++++++++++++++++++----
+ 1 file changed, 29 insertions(+), 4 deletions(-)
 
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 3b6657f..943400c 100644
+index 3723a7f..8b84fb4 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -563,6 +563,41 @@ __lookup_request_ge(struct ceph_osd_client *osdc,
- 	return NULL;
- }
-
-+#define list_last_entry(ptr, type, member) \
-+	list_entry((ptr)->prev, type, member)
-+
-+/*
-+ * Returns true if it's OK to move the given request to the
-+ * the osd client's unsent list.  Called before moving the
-+ * request to the beginning of the list (prepend == true) or
-+ * to the end  (prepend == * false).
-+ */
-+static bool osdc_unsent_check(struct ceph_osd_client *osdc,
-+			struct ceph_osd_request *req,
-+			bool prepend)
-+{
-+	struct ceph_osd_request *list_req;
-+	int bad;
-+
-+	if (list_empty(&osdc->req_unsent))
-+		return true;
-+
-+	if (prepend) {
-+		list_req = list_first_entry(&osdc->req_unsent,
-+				    struct ceph_osd_request,
-+				    r_req_lru_item);
-+		bad = WARN_ON(req->r_tid > list_req->r_tid);
-+	} else {
-+		list_req = list_last_entry(&osdc->req_unsent,
-+				    struct ceph_osd_request,
-+				    r_req_lru_item);
-+		bad = WARN_ON(req->r_tid < list_req->r_tid);
-+	}
-+	bad = bad || WARN_ON(req->r_tid == list_req->r_tid);
-+
-+	return !bad;
-+}
-+
- /*
-  * Resubmit requests pending on the given osd.
-  */
-@@ -603,7 +638,12 @@ static void __kick_osd_requests(struct
+@@ -570,21 +570,46 @@ static void __kick_osd_requests(struct
 ceph_osd_client *osdc,
+ 				struct ceph_osd *osd)
+ {
+ 	struct ceph_osd_request *req, *nreq;
++	LIST_HEAD(resend);
+ 	int err;
+
+ 	dout("__kick_osd_requests osd%d\n", osd->o_osd);
+ 	err = __reset_osd(osdc, osd);
+ 	if (err)
+ 		return;
+-
++	/*
++	 * Build up a list of requests to resend by traversing the
++	 * osd's list of requests.  Requests for a given object are
++	 * sent in tid order, and that is also the order they're
++	 * kept on this list.  Therefore all requests that are in
++	 * flight will be found first, followed by all requests that
++	 * have not yet been sent.  And to resend requests while
++	 * preserving this order we will want to put any sent
++	 * requests back on the front of the osd client's unsent
++	 * list.
++	 *
++	 * So we build a separate ordered list of already-sent
++	 * requests for the affected osd and splice it onto the
++	 * front of the osd client's unsent list.  Once we've seen a
++	 * request that has not yet been sent we're done.  Those
++	 * requests are already sitting right where they belong.
++	 */
+ 	list_for_each_entry(req, &osd->o_requests, r_osd_item) {
+-		list_move(&req->r_req_lru_item, &osdc->req_unsent);
+-		dout("requeued %p tid %llu osd%d\n", req, req->r_tid,
++		if (!req->r_sent)
++			break;
++		list_move_tail(&req->r_req_lru_item, &resend);
++		dout("requeueing %p tid %llu osd%d\n", req, req->r_tid,
+ 		     osd->o_osd);
  		if (!req->r_linger)
  			req->r_flags |= CEPH_OSD_FLAG_RETRY;
  	}
--	list_splice(&resend, &osdc->req_unsent);
-+	if (!list_empty(&resend)) {
-+		req = list_last_entry(&resend, struct ceph_osd_request,
-+					r_req_lru_item);
-+		osdc_unsent_check(osdc, req, true);
-+		list_splice(&resend, &osdc->req_unsent);
-+	}
++	list_splice(&resend, &osdc->req_unsent);
 
- 	/*
- 	 * Linger requests are re-registered before sending, which
-@@ -618,6 +658,7 @@ static void __kick_osd_requests(struct
++	/*
++	 * Linger requests are re-registered before sending, which
++	 * sets up a new tid for each.  We add them to the unsent
++	 * list at the end to keep things in tid order.
++	 */
+ 	list_for_each_entry_safe(req, nreq, &osd->o_linger_requests,
+ 				 r_linger_osd) {
+ 		/*
+@@ -593,7 +618,7 @@ static void __kick_osd_requests(struct
 ceph_osd_client *osdc,
  		 */
  		BUG_ON(!list_empty(&req->r_req_lru_item));
  		__register_request(osdc, req);
-+		osdc_unsent_check(osdc, req, false);
- 		list_add_tail(&req->r_req_lru_item, &osdc->req_unsent);
- 		list_add_tail(&req->r_osd_item, &req->r_osd->o_requests);
+-		list_add(&req->r_req_lru_item, &osdc->req_unsent);
++		list_add_tail(&req->r_req_lru_item, &osdc->req_unsent);
+ 		list_add(&req->r_osd_item, &req->r_osd->o_requests);
  		__unregister_linger_request(osdc, req);
-@@ -1036,6 +1077,7 @@ static int __map_request(struct ceph_osd_client *osdc,
- 	if (req->r_osd) {
- 		__remove_osd_from_lru(req->r_osd);
- 		list_add_tail(&req->r_osd_item, &req->r_osd->o_requests);
-+		osdc_unsent_check(osdc, req, false);
- 		list_move_tail(&req->r_req_lru_item, &osdc->req_unsent);
- 	} else {
- 		list_move_tail(&req->r_req_lru_item, &osdc->req_notarget);
+ 		dout("requeued lingering %p tid %llu osd%d\n", req, req->r_tid,
 -- 
 1.7.9.5
 
