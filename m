@@ -1,27 +1,38 @@
-From: "Nokia Cash Prize" <bruce@rev.net>
-Subject: File!
-Date: Tue, 26 Mar 2013 13:30:04 +0100
-Message-ID: <ba49e6c0808cb40d19f9dd9549a0e90a.squirrel@webmail.verat.net>
-Reply-To: wstundeptservice@yahoo.com.hk
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: prototype incremental rbd backup
+Date: Tue, 26 Mar 2013 13:36:21 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC62323A@SHSMSX102.ccr.corp.intel.com>
+References: <alpine.DEB.2.00.1303251635540.12444@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;charset=utf8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from olc-15.verat.net ([62.108.127.41]:41228 "EHLO olc-15.verat.net"
+Received: from mga03.intel.com ([143.182.124.21]:34654 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757991Ab3CZMoK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Mar 2013 08:44:10 -0400
+	id S933834Ab3CZNgZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Mar 2013 09:36:25 -0400
+In-Reply-To: <alpine.DEB.2.00.1303251635540.12444@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-
-
-Seven Hundred And Fifty Thousand Pounds was given to your Email ID in
-NOKIA 2013 CASH OFFER. Send your info:
-
-Name:
-address:
-Country:
-Occupation
-
+SWYgdGhpcyBmZWF0dXJlIHdvcmtzLCBJIHN1cHBvc2Ugd2UgY2FuIGhhdmUgImluY3JlbWVudGFs
+IGJhY2t1cCBSQkQoMiBjb3BpZXMsU1NEIGJhc2VkKSB0byBSYWRvcyAoIDMgQ29waWVzLEhERCBi
+YXNlZCkgIiB0byBhY2hpZXZlIGhpZ2hlciBIQSB3aXRoIHF1aXRlIGEgZmV3IGV4dHJhIGNvc3Qg
+OikNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBTYWdlIFdlaWwNClNlbnQ6IDIwMTPE6jPUwjI2yNUgNzozOQ0KVG86IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBwcm90b3R5cGUgaW5jcmVtZW50YWwg
+cmJkIGJhY2t1cA0KDQpUaGUgd2lwLXJiZC1kaWZmIGJyYW5jaCBoYXMgYW4gZWFybHkgcHJvdG90
+eXBlIG9mIHJiZCBpbmNyZW1lbnRhbCBiYWNrdXAvcmVzdG9yZS4gIEN1cnJlbnRseSBpdCB3b3Jr
+cyBsaWtlOg0KDQogcmJkIGV4cG9ydC1kaWZmIG15aW1hZ2VAdG8gLS1mcm9tLXNuYXAgZnJvbSAt
+IHwgXCAgcmJkIGltcG9ydC1kaWZmIC0gbXlpbWFnZWNvcHkgDQoNClRoZSBpbXBvcnQgYXBwbHkg
+dGhlIHVwZGF0ZSBzdHJlYW0gYW5kIHRoZW4gY3JlYXRlIHRoZSBmaW5hbCAndG8nIHNuYXAgKHdo
+aWNoIGlzIHJlZmVyZW5jZWQgaW4gdGhlIHN0cmVhbSBpdHNlbGYpLiAgQSBmaWxlbmFtZSBjYW4g
+YmUgdXNlZCBpbiBwbGFjZSBvZiAtLCBuYXR1cmFsbHkuDQoNCkl0J3Mgc3RpbGwgdmVyeSByb3Vn
+aCBhcm91bmQgdGhlIGVkZ2VzLCBidXQgaXQncyBwYXNzaW5nIG15IGJhc2ljIHRlc3RzOyBmZWVk
+YmFjayBpcyB3ZWxjb21lIQ0KDQpzYWdlDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
