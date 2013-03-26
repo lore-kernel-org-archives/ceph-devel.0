@@ -1,128 +1,97 @@
-From: Chris Mason <chris.mason@fusionio.com>
-Subject: Re: corruption of active mmapped files in btrfs snapshots
-Date: Mon, 25 Mar 2013 20:08:40 -0400
-Message-ID: <20130326000840.14340.30047@localhost.localdomain>
-References: <orhak8fm0u.fsf@livre.home>
- <20130322180705.27874.96638@localhost.localdomain>
- <20130322203142.27874.84834@localhost.localdomain>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: [ceph-users] Ceph Crach at sync_thread_timeout after heavy
+ random writes.
+Date: Tue, 26 Mar 2013 00:58:26 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC622F34@SHSMSX102.ccr.corp.intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC6228F3@SHSMSX102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1303250828280.10753@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <20130322203142.27874.84834@localhost.localdomain>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Chris Mason <chris.mason@fusionio.com>, Alexandre Oliva <oliva@gnu.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:1036 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758318Ab3CZA6a (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 25 Mar 2013 20:58:30 -0400
+In-Reply-To: <alpine.DEB.2.00.1303250828280.10753@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Quoting Chris Mason (2013-03-22 16:31:42)
-> Going through the code here, when I change the test to truncate once in
-> the very beginning, I still get errors.  So, it isn't an interaction
-> between mmap and truncate.  It must be a problem between lzo and mmap.
-
-With compression off, we use clear_page_dirty_for_io to create a wall
-between applications using mmap and our crc code.  Once we call
-clear_page_dirty_for_io, it means we're in the process of writing the
-page and anyone using mmap must wait (by calling page_mkwrite) before
-they are allowed to change the page.
-
-We use it with compression on as well, but it only ends up protecting
-the crcs.  It gets called after the compression is done, which allows
-applications to race in and modify the pages while we are compressing
-them.
-
-This patch changes our compression code to call clear_page_dirty_for_io
-before we compress, and then redirty the pages if the compression fails.
-
-Alexandre, many thanks for tracking this down into a well defined use
-case. 
-
--chris
-
-diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-index f173c5a..cdee391 100644
---- a/fs/btrfs/extent_io.c
-+++ b/fs/btrfs/extent_io.c
-@@ -1257,6 +1257,39 @@ int unlock_extent(struct extent_io_tree *tree, u64 start, u64 end)
- 				GFP_NOFS);
- }
- 
-+int extent_range_clear_dirty_for_io(struct inode *inode, u64 start, u64 end)
-+{
-+	unsigned long index = start >> PAGE_CACHE_SHIFT;
-+	unsigned long end_index = end >> PAGE_CACHE_SHIFT;
-+	struct page *page;
-+
-+	while (index <= end_index) {
-+		page = find_get_page(inode->i_mapping, index);
-+		BUG_ON(!page); /* Pages should be in the extent_io_tree */
-+		clear_page_dirty_for_io(page);
-+		page_cache_release(page);
-+		index++;
-+	}
-+	return 0;
-+}
-+
-+int extent_range_redirty_for_io(struct inode *inode, u64 start, u64 end)
-+{
-+	unsigned long index = start >> PAGE_CACHE_SHIFT;
-+	unsigned long end_index = end >> PAGE_CACHE_SHIFT;
-+	struct page *page;
-+
-+	while (index <= end_index) {
-+		page = find_get_page(inode->i_mapping, index);
-+		BUG_ON(!page); /* Pages should be in the extent_io_tree */
-+		account_page_redirty(page);
-+		__set_page_dirty_nobuffers(page);
-+		page_cache_release(page);
-+		index++;
-+	}
-+	return 0;
-+}
-+
- /*
-  * helper function to set both pages and extents in the tree writeback
-  */
-diff --git a/fs/btrfs/extent_io.h b/fs/btrfs/extent_io.h
-index 6068a19..258c921 100644
---- a/fs/btrfs/extent_io.h
-+++ b/fs/btrfs/extent_io.h
-@@ -325,6 +325,8 @@ int map_private_extent_buffer(struct extent_buffer *eb, unsigned long offset,
- 		      unsigned long *map_len);
- int extent_range_uptodate(struct extent_io_tree *tree,
- 			  u64 start, u64 end);
-+int extent_range_clear_dirty_for_io(struct inode *inode, u64 start, u64 end);
-+int extent_range_redirty_for_io(struct inode *inode, u64 start, u64 end);
- int extent_clear_unlock_delalloc(struct inode *inode,
- 				struct extent_io_tree *tree,
- 				u64 start, u64 end, struct page *locked_page,
-diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
-index ca1b767..88d4a18 100644
---- a/fs/btrfs/inode.c
-+++ b/fs/btrfs/inode.c
-@@ -353,6 +353,7 @@ static noinline int compress_file_range(struct inode *inode,
- 	int i;
- 	int will_compress;
- 	int compress_type = root->fs_info->compress_type;
-+	int redirty = 0;
- 
- 	/* if this is a small write inside eof, kick off a defrag */
- 	if ((end - start + 1) < 16 * 1024 &&
-@@ -415,6 +416,8 @@ again:
- 		if (BTRFS_I(inode)->force_compress)
- 			compress_type = BTRFS_I(inode)->force_compress;
- 
-+		extent_range_clear_dirty_for_io(inode, start, end);
-+		redirty = 1;
- 		ret = btrfs_compress_pages(compress_type,
- 					   inode->i_mapping, start,
- 					   total_compressed, pages,
-@@ -554,6 +557,8 @@ cleanup_and_bail_uncompressed:
- 			__set_page_dirty_nobuffers(locked_page);
- 			/* unlocked later on in the async handlers */
- 		}
-+		if (redirty)
-+			extent_range_redirty_for_io(inode, start, end);
- 		add_async_extent(async_cow, start, end - start + 1,
- 				 0, NULL, 0, BTRFS_COMPRESS_NONE);
- 		*num_added += 1;
+SGkgU2FnZSwNCglUaGFua3MgZm9yIHlvdXIgbWFpbC5XaGVuIHR1cm4gb24gZmlsZXN0b3JlIHN5
+bmMgZmx1c2gsIGl0IHNlZW1zIHdvcmtzIGFuZCBPU0QgcHJvY2VzcyBkb2Vzbid0IHN1aWNpZGUg
+YW55IG1vcmUgLiBJIGhhdmUgYWxyZWFkeSBkaXNhYmxlZCBmbHVzaGVyIGxvbmcgYWdlIHNpbmNl
+IGJvdGggTWFyaydzIGFuZCBteSByZXBvcnQgc2hvdyBkaXNhYmxlIGZsdXNoZXIgc2VlbXMgdG8g
+aW1wcm92ZSBwZXJmb3JtYW5jZShzbyBteSBvcmlnaW5hbCBjb25maWd1cmF0aW9uIGlzIGZpbGVz
+dG9yZV9mbHVzaGVyPWZhbHNlLCBmaWxlc3RvcmVfc3luY19mbHVzaD1mYWxzZShkZWZhdWx0KSks
+IGJ1dCBub3cgd2UgaGF2ZSB0byByZWNvbnNpZGVyIG9uIHRoaXMuIEkgd291bGQgbGlrZSB0byBz
+ZWUgdGhlIGludGVybmFsIGNvZGUgb2YgOjpzeW5jX2ZpbGVfcmFuZ2UoKSB0byBsZWFybiBtb3Jl
+IGFib3V0IGhvdyBpdCB3b3Jrcy4gRmlyc3QgZ3Vlc3MgaXMgOjpzeW5jX2ZpbGVfcmFuZ2Ugd2ls
+bCBwdXNoIHJlcXVlc3QgdG8gZGlzayBxdWV1ZSBhbmQgaWYgdGhlIGRpc2sgcXVldWUgaXMgZnVs
+bCwgdGhpcyBjYWxsIHdpbGwgYmxvY2sgYW5kIHdhaXQsIGJ1dCBub3Qgc3VyZS4NCg0KCUJ1dCBm
+cm9tIHRoZSBjb2RlIHBhdGgsKEJUVywgdGhlc2UgbGluZXMgb2YgY29kZXMgYXJlIGEgYml0IGhh
+cmQgdG8gZm9sbG93KQ0KCQkJaWYgKCFzaG91bGRfZmx1c2ggfHwJIW1fZmlsZXN0b3JlX2ZsdXNo
+ZXIgfHwJIXF1ZXVlX2ZsdXNoZXIoZmQsIG9mZnNldCwgbGVuKSkgDQoJCQl7DQogICAgICAJCQlp
+ZiAoc2hvdWxkX2ZsdXNoICYmIG1fZmlsZXN0b3JlX3N5bmNfZmx1c2gpDQoJCQkJCTo6c3luY19m
+aWxlX3JhbmdlKGZkLCBvZmZzZXQsIGxlbiwgU1lOQ19GSUxFX1JBTkdFX1dSSVRFKTsNCiAgICAg
+IAkJCWxmbl9jbG9zZShmZCk7DQogICAgCQl9DQoJV2l0aCB0aGUgZGVmYXVsdCBzZXR0aW5nICht
+X2ZpbGVzdG9yZV9mbHVzaGVyID0gdHJ1ZSkgLCB0aGUgZmx1c2hlciBxdWV1ZSB3aWxsIHNvb24g
+YnVybiBvdXQsIGluIHRoaXMgc2l0dWF0aW9uLCBpZiB1c2VyIGRvZXNuJ3QgdHVybiBvbiAiIG1f
+ZmlsZXN0b3JlX3N5bmNfZmx1c2ggPSB0dXJlICIsIGhlL3NoZSB3aWxsIGxpa2VseSB0byBoaXQg
+dGhlIHNhbWUgc2l0dWF0aW9uIHRoYXQgd3JpdGVzIHJlbWFpbiBpbiBwYWdlIGNhY2hlIGFuZCBP
+U0QgZGFlbW9uIGRpZWQgd2hlbiB0cnlpbmcgdG8gc3luYy4gSSBzdXBwb3NlIHRoZSByaWdodCBs
+b2dpY2FsIHNob3VsZCBiZShwZXJzdWFkZSBjb2RlKSwgOg0KCQkJaWYgKHNob3VsZF9mbHVzaCkg
+DQoJCQl7DQoJCQkJSWYobV9maWxlc3RvcmVfZmx1c2hlcikNCgkJCQkJSWYocXVldWVfZmx1c2hl
+cihmZCwgb2Zmc2V0LCBsZW4pDQoJCQkJCQlEbyBub3RoaW5nDQoJCQkJCUVsc2UNCgkJCQkJCTo6
+c3luY19maWxlX3JhbmdlKGZkLCBvZmZzZXQsIGxlbiwgU1lOQ19GSUxFX1JBTkdFX1dSSVRFKTsN
+CgkJCQlFbHNlDQoJCQkJCWlmIChtX2ZpbGVzdG9yZV9zeW5jX2ZsdXNoICkNCgkJCQkJCTo6c3lu
+Y19maWxlX3JhbmdlKGZkLCBvZmZzZXQsIGxlbiwgU1lOQ19GSUxFX1JBTkdFX1dSSVRFKTsNCiAg
+ICAgIAkJCWxmbl9jbG9zZShmZCk7DQogICAgCQl9DQoNCgkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJ
+CQkJCQkJWGlhb3hpDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FnZSBXZWls
+IFttYWlsdG86c2FnZUBpbmt0YW5rLmNvbV0gDQpTZW50OiAyMDEz5bm0M+aciDI15pelIDIzOjM1
+DQpUbzogQ2hlbiwgWGlhb3hpDQpDYzogJ2NlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20nIChjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tKTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1Ympl
+Y3Q6IFJlOiBbY2VwaC11c2Vyc10gQ2VwaCBDcmFjaCBhdCBzeW5jX3RocmVhZF90aW1lb3V0IGFm
+dGVyIGhlYXZ5IHJhbmRvbSB3cml0ZXMuDQoNCkhpIFhpYW94aSwNCg0KT24gTW9uLCAyNSBNYXIg
+MjAxMywgQ2hlbiwgWGlhb3hpIHdyb3RlOg0KPiDCoMKgwqDCoMKgwqDCoMKgIEZyb20gQ2VwaC13
+ICwgY2VwaCByZXBvcnRzIGEgdmVyeSBoaWdoIE9wcyAoMTAwMDArIC9zKSAsIGJ1dCANCj4gdGVj
+aG5pY2FsbHkgLCA4MCBzcGluZGxlcyBjYW4gcHJvdmlkZSB1cCB0byAxNTAqODAvMj02MDAwIElP
+UFMgZm9yIDRLIA0KPiByYW5kb20gd3JpdGUuDQo+IA0KPiDCoMKgwqDCoMKgwqDCoMKgIFdoZW4g
+ZGlnZ2luZyBpbnRvIHRoZSBjb2RlLCBJIGZvdW5kIHRoYXQgdGhlIE9TRCB3cml0ZSBkYXRhIA0K
+PiB0byBQYWdlY2FjaGUgdGhhbiByZXR1cm5lZCwgYWx0aG91Z2ggaXQgY2FsbGVkIDo6c3luY19m
+aWxlX3JhbmdlLCBidXQgDQo+IHRoaXMgc3lzY2FsbCBkb2Vzbj90IGFjdHVhbGx5IHN5bmMgZGF0
+YSB0byBkaXNrIHdoZW4gaXQgcmV0dXJuLGl0P3MgYW4gYXluYyBjYWxsLg0KPiBTbyB0aGUgc2l0
+dWF0aW9uIGlzICwgdGhlIHJhbmRvbSB3cml0ZSB3aWxsIGJlIGV4dHJlbWVseSBmYXN0IHNpbmNl
+IGl0IA0KPiBvbmx5IHdyaXRlIHRvIGpvdXJuYWwgYW5kIHBhZ2VjYWNoZSwgYnV0IG9uY2Ugc3lu
+Y2luZyAsIGl0IHdpbGwgdGFrZSANCj4gdmVyeSBsb25nIHRpbWUuIFRoZSBzcGVlZCBnYXAgYmV0
+d2VlbiBqb3VybmFsIGFuZCBPU0RzIGV4aXN0LCB0aGUgDQo+IGFtb3VudCBvZiBkYXRhIHRoYXQg
+bmVlZCB0byBiZSBzeW5jIGtlZXAgaW5jcmVhc2luZywgYW5kIGl0IHdpbGwgY2VydGFpbmx5IGV4
+Y2VlZCA2MDBzLg0KDQpUaGUgc3luY19maWxlX3JhbmdlIGlzIG9ubHkgdGhlcmUgdG8gcHVzaCB0
+aGluZ3MgdG8gZGlzayBzb29uZXIsIHNvIHRoYXQgdGhlIGV2ZW50dWFsIHN5bmNmcygyKSB0YWtl
+cyBsZXNzIHRpbWUuICBXaGVuIHRoZSBhc3luYyBmbHVzaGluZyBpcyBlbmFibGVkLCB0aGVyZSBp
+cyBhIGxpbWl0IHRvIHRoZSBudW1iZXIgb2YgZmx1c2hlcyB0aGF0IGFyZSBpbiB0aGUgcXVldWUs
+IGJ1dCBpZiBpdCBoaXRzIHRoZSBtYXggaXQganVzdCBkb2VzDQoNCiAgICBkb3V0KDEwKSA8PCAi
+cXVldWVfZmx1c2hlciBlcCAiIDw8IHN5bmNfZXBvY2ggPDwgIiBmZCAiIDw8IGZkIDw8ICIgIiA8
+PCBvZmYgPDwgIn4iIDw8IGxlbg0KCSAgICAgPDwgIiBxbGVuICIgPDwgZmx1c2hlcl9xdWV1ZV9s
+ZW4gDQoJICAgICA8PCAiIGhpdCBmbHVzaGVyX21heF9mZHMgIiA8PCBtX2ZpbGVzdG9yZV9mbHVz
+aGVyX21heF9mZHMNCgkgICAgIDw8ICIsIHNraXBwaW5nIGFzeW5jIGZsdXNoIiA8PCBkZW5kbDsN
+Cg0KQ2FuIHlvdSBjb25maXJtIHRoYXQgdGhlIGZpbGVzdG9yZSBpcyB0YWtpbmcgdGhpcyBwYXRo
+PyAgKGRlYnVnIGZpbGVzdG9yZSA9IDEwIGFuZCB0aGVuIHJlcHJvZHVjZS4pDQoNCllvdSBtYXkg
+d2FudCB0byB0cnkNCg0KIGZpbGVzdG9yZSBmbHVzaGVyID0gZmFsc2UNCiBmaWxlc3RvcmUgc3lu
+YyBmbHVzaCA9IHRydWUNCg0KYW5kIHNlZSBpZiB0aGF0IGNoYW5nZXMgdGhpbmdzLS1pdCB3aWxs
+IG1ha2UgdGhlIHN5bmNfZmlsZV9yYW5nZSgpIGhhcHBlbiBpbmxpbmUgYWZ0ZXIgdGhlIHdyaXRl
+Lg0KDQpBbnl3YXksIGl0IHNvdW5kcyBsaWtlIHlvdSBtYXkgYmUgcXVldWVpbmcgdXAgc28gbWFu
+eSByYW5kb20gd3JpdGVzIHRoYXQgdGhlIHN5bmMgdGFrZXMgZm9yZXZlci4gIEkndmUgbmV2ZXIg
+YWN0dWFsbHkgc2VlbiB0aGF0IGhhcHBlbiwgc28gaWYgd2UgY2FuIGNvbmZpcm0gdGhhdCdzIHdo
+YXQgaXMgZ29pbmcgb24gdGhhdCB3aWxsIGJlIHZlcnkgaW50ZXJlc3RpbmcuDQoNClRoYW5rcy0N
+CnNhZ2UNCg0KDQo+IA0KPiDCoA0KPiANCj4gwqDCoMKgwqDCoMKgwqDCoCBGb3IgbW9yZSBpbmZv
+cm1hdGlvbiwgSSBoYXZlIHRyaWVkIHRvIHJlcHJvZHVjZSB0aGlzIGJ5IHJhZG9zIA0KPiBiZW5j
+aCxidXQgZmFpbGVkLg0KPiANCj4gwqANCj4gDQo+IMKgwqDCoMKgwqDCoMKgwqAgQ291bGQgeW91
+IHBsZWFzZSBsZXQgbWUga25vdyBpZiB5b3UgbmVlZCBhbnkgbW9yZSANCj4gaW5mb3JtYXRpb25z
+ICYgaGF2ZSBzb21lIHNvbHV0aW9ucz8gVGhhbmtzDQo+IA0KPiDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgDQo/PyA/ID8/ID8gPz8gP8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqAgwqDCoMKgwqDCoMKgwqDCoCBYaWFveGkNCj4gDQo+IA0KPiANCg==
