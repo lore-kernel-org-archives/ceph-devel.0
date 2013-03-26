@@ -1,73 +1,111 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/6] libceph: send osd requests in tid order
-Date: Tue, 26 Mar 2013 09:49:39 -0500
-Message-ID: <5151B583.1090109@inktank.com>
-References: <5151071C.3000309@inktank.com>
+Subject: [PATCH 6/6, v2] libceph: verify requests queued in order
+Date: Tue, 26 Mar 2013 09:50:59 -0500
+Message-ID: <5151B5D3.5040802@inktank.com>
+References: <5151071C.3000309@inktank.com> <515107C9.2000906@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:61485 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933512Ab3CZOtm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Mar 2013 10:49:42 -0400
-Received: by mail-ie0-f174.google.com with SMTP id aq17so5863191iec.19
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Mar 2013 07:49:41 -0700 (PDT)
-In-Reply-To: <5151071C.3000309@inktank.com>
+Received: from mail-ia0-f170.google.com ([209.85.210.170]:38864 "EHLO
+	mail-ia0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933525Ab3CZOvB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Mar 2013 10:51:01 -0400
+Received: by mail-ia0-f170.google.com with SMTP id h8so6529889iaa.1
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Mar 2013 07:51:01 -0700 (PDT)
+In-Reply-To: <515107C9.2000906@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 03/25/2013 09:25 PM, Alex Elder wrote:
-> This series rearranges the way osd requests are placed onto an
-> osd client's unsent request list so that they are kept in
-> order based on their transaction ids.  The osd expects its
-> requests from a client to have monotonically increasing tids.
-> Since requests are sent to the osd in the order they are on
-> the unsent list if we keep them sorted there this property
-> is preserved.
-> 
-> 					-Alex
-> 
-> [PATCH 1/6] libceph: slightly defer registering osd request
-> [PATCH 2/6] libceph: no more kick_requests() race
+Add checking to verify all osd requests for an osd are added to the
+queue in order of increasing tid.
 
-I got some early feedback which clarified something for me
-and which led me to make a few changes, mostly to the third
-patch in this series.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: Only check the last of the requests queued to resend.
 
-What the osd requires is that the tids for requests to a
-given *object* from an osd client be increasing.  I had
-previously understood it was all requests from an osd
-client (regardless of target object) that needed increasing
-tids.  It turns out both properties hold (at least once
-this series of patches is applied) so this difference
-affects the explanations more than the code.
+ net/ceph/osd_client.c |   44 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 43 insertions(+), 1 deletion(-)
 
-I also realized that re-queueing unsent requests along
-with sent ones in __kick_osd_requests() means that some
-unsent requests could be moved ahead of others in the
-unsent list--others which have a higher tid.  So now
-we only move already-sent requests to the front and
-leave any that have not yet been sent where they were.
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 3b6657f..943400c 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -563,6 +563,41 @@ __lookup_request_ge(struct ceph_osd_client *osdc,
+ 	return NULL;
+ }
 
-I'm about to re-post updated versions of these patches
-reflecting these changes.  Only patches 3 and 6 were
-changed, and they're the only ones I"m going to post.
-Patches 4 and 5 were simply rebased for the changes
-in patch 3.
++#define list_last_entry(ptr, type, member) \
++	list_entry((ptr)->prev, type, member)
++
++/*
++ * Returns true if it's OK to move the given request to the
++ * the osd client's unsent list.  Called before moving the
++ * request to the beginning of the list (prepend == true) or
++ * to the end  (prepend == * false).
++ */
++static bool osdc_unsent_check(struct ceph_osd_client *osdc,
++			struct ceph_osd_request *req,
++			bool prepend)
++{
++	struct ceph_osd_request *list_req;
++	int bad;
++
++	if (list_empty(&osdc->req_unsent))
++		return true;
++
++	if (prepend) {
++		list_req = list_first_entry(&osdc->req_unsent,
++				    struct ceph_osd_request,
++				    r_req_lru_item);
++		bad = WARN_ON(req->r_tid > list_req->r_tid);
++	} else {
++		list_req = list_last_entry(&osdc->req_unsent,
++				    struct ceph_osd_request,
++				    r_req_lru_item);
++		bad = WARN_ON(req->r_tid < list_req->r_tid);
++	}
++	bad = bad || WARN_ON(req->r_tid == list_req->r_tid);
++
++	return !bad;
++}
++
+ /*
+  * Resubmit requests pending on the given osd.
+  */
+@@ -603,7 +638,12 @@ static void __kick_osd_requests(struct
+ceph_osd_client *osdc,
+ 		if (!req->r_linger)
+ 			req->r_flags |= CEPH_OSD_FLAG_RETRY;
+ 	}
+-	list_splice(&resend, &osdc->req_unsent);
++	if (!list_empty(&resend)) {
++		req = list_last_entry(&resend, struct ceph_osd_request,
++					r_req_lru_item);
++		osdc_unsent_check(osdc, req, true);
++		list_splice(&resend, &osdc->req_unsent);
++	}
 
-These updates patches (along with the others) are available
-in branch "review/wip-4392-2" of the ceph-client git repository.
-
-					-Alex
-
-[PATCH 3/6, v2] libceph: requeue only sent requests when kicking
-[PATCH 6/6, v2] libceph: verify requests queued in order
-
-> [PATCH 3/6] libceph: prepend requests in order when kicking
-> [PATCH 4/6] libceph: keep request lists in tid order
-> [PATCH 5/6] libceph: send queued requests when starting new one
-> [PATCH 6/6] libceph: verify requests queued in order
-> 
+ 	/*
+ 	 * Linger requests are re-registered before sending, which
+@@ -618,6 +658,7 @@ static void __kick_osd_requests(struct
+ceph_osd_client *osdc,
+ 		 */
+ 		BUG_ON(!list_empty(&req->r_req_lru_item));
+ 		__register_request(osdc, req);
++		osdc_unsent_check(osdc, req, false);
+ 		list_add_tail(&req->r_req_lru_item, &osdc->req_unsent);
+ 		list_add_tail(&req->r_osd_item, &req->r_osd->o_requests);
+ 		__unregister_linger_request(osdc, req);
+@@ -1036,6 +1077,7 @@ static int __map_request(struct ceph_osd_client *osdc,
+ 	if (req->r_osd) {
+ 		__remove_osd_from_lru(req->r_osd);
+ 		list_add_tail(&req->r_osd_item, &req->r_osd->o_requests);
++		osdc_unsent_check(osdc, req, false);
+ 		list_move_tail(&req->r_req_lru_item, &osdc->req_unsent);
+ 	} else {
+ 		list_move_tail(&req->r_req_lru_item, &osdc->req_notarget);
+-- 
+1.7.9.5
 
