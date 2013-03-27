@@ -1,80 +1,55 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: rados_pool_list usage
-Date: Wed, 27 Mar 2013 10:40:30 -0700
-Message-ID: <51532F0E.2070705@inktank.com>
-References: <5152B4EC.4070700@42on.com> <9B043BA89C1943F989AD6213B2361DD7@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Split Swift code with S3 code in Radosgw
+Date: Wed, 27 Mar 2013 10:44:51 -0700
+Message-ID: <CAC-hyiGzfULUrCmY4L9hf8G1giw8pES4RehCONyBTT03yLYGgA@mail.gmail.com>
+References: <tencent_3C5B3A0711EDF0AE28AE2231@qq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f54.google.com ([209.85.210.54]:38010 "EHLO
-	mail-da0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753428Ab3C0Rkf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Mar 2013 13:40:35 -0400
-Received: by mail-da0-f54.google.com with SMTP id p1so4185108dad.27
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Mar 2013 10:40:35 -0700 (PDT)
-In-Reply-To: <9B043BA89C1943F989AD6213B2361DD7@inktank.com>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:38110 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754401Ab3C0Row (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Mar 2013 13:44:52 -0400
+Received: by mail-ie0-f169.google.com with SMTP id qd14so9273159ieb.28
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Mar 2013 10:44:52 -0700 (PDT)
+In-Reply-To: <tencent_3C5B3A0711EDF0AE28AE2231@qq.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Li Wang <wangli@kylinos.com.cn>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, sage <sage@inktank.com>
 
-It looks like it attempts to behave as documented (somewhat surprisingly 
-and fragile-ly, IMO; I would have made it all-or-nothing and return 
-nothing in buf if len is too small).
+On Wed, Mar 27, 2013 at 8:19 AM, Li Wang <wangli@kylinos.com.cn> wrote:
+> Hi there,
+>     We are providing Openstack based cloud solution to customers. We have read the technical papers on Ceph, and our colleague
+> also consulted the comparision between Ceph and Swift from the ceph-user mailing list. Given the advantages of Ceph over
+> Swift, such as scalability, performance and the all-in-one design, we wanna replace swift with ceph in our openstack
+> solution. However, since the client applications are developed based on Swift API, as far as we know, currently only a subset of
+> Swift API is implemented by Ceph. And furthermore, it seems to us that the S3 compatability owns a higher priority or done
+> earlier in Ceph, the Swift compatibility code is fixed with S3 code, and kind of, yield to the S3 compatibility framework
+> and S3 semantics, which hamper us to add some Swift specific features into Radosgw. And with the developing of Swift as
+> well as S3, we think the current framework will suffer from the code elegance and larger API divergence.  We do wanna use
+> Ceph and also wanna make technical contributions to it. We are considering to revise the current framework to split the
+> Swift code with the S3 code, to allow a more friendly support to Swift API and make it easier to add Swift specific
+> features, such as custom metadata, expiring object, negative acl rule, so what is the Ceph community's response?
 
-The Python binding retries/resizes until it can return them all.
+The gateway code is layered in such a way that the Swift and S3 code
+both use a common infrastructure, but diverge where needed. There's a
+separation between the functional layer, and the presentation layer.
+Indeed S3 was where we started, so there were some choices that moved
+the development a bit towards it, however, we don't consider Swift a
+second grade citizen.
+None of the features that you specified really require separate
+frameworks. Most of the implementation work required will be done in
+the functional layer, and the Swift/S3 layer will just provide the
+interface. We already support custom metadata. Expiring object will
+also be used in S3. Negative acl rule can be implemented with or
+without needing the S3 layer to be bothered about it.
+We'd be more than happy to see more community contribution. If you
+bump into technical issues that you think are unsolvable within the
+current framework, we can always take a second look at it, figuring
+out what needs to be changed.
 
-What do you think is wrong, Wido?
+Thanks,
+Yehuda
 
-On 03/27/2013 08:59 AM, Gregory Farnum wrote:
->
->
-> On Wednesday, March 27, 2013 at 1:59 AM, Wido den Hollander wrote:
->
->> Hi,
->>
->> While working with rados_pool_list I stumbled upon what I think is a
->> documentation issue.
->>
->> librados.h tells me this:
->>
->> /**
->> * List objects in a pool
->> *
->> * Gets a list of pool names as NULL-terminated strings. The pool
->> * names will be placed in the supplied buffer one after another.
->> * After the last pool name, there will be two 0 bytes in a row.
->> *
->> * If len is too short to fit all the pool name entries we need, we
->> will fill
->> * as much as we can.
->> *
->> * @param cluster cluster handle
->> * @param buf output buffer
->> * @param len output buffer length
->> * @returns length of the buffer we would need to list all pools
->> */
->> int rados_pool_list(rados_t cluster, char *buf, size_t len);
->>
->> "If len is too short to fit all the pool name entries we need, we will
->> fill as much as we can."
->>
->>  From what I could remember it would return the length required if "len"
->> isn't long enough. Looking at the Python and PHP bindings (which I
->> wrote) it seems that is correct.
->>
->> It also says: "@returns length of the buffer we would need to list all
->> pools"
->>
->> Docs issue I guess?
-> It certainly returns the amount of space needed; does it not also fill in the given buffer with however many pools it could? (It might not, but those sentences aren't contradictory in my mind.)
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+@ http://inktank.com | http://ceph.com
