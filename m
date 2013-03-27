@@ -1,107 +1,191 @@
 From: Kent Overstreet <koverstreet@google.com>
-Subject: [PATCH 16/22] rbd: Refactor bio cloning, don't clone biovecs
-Date: Wed, 27 Mar 2013 10:39:46 -0700
-Message-ID: <1364405992-28424-17-git-send-email-koverstreet@google.com>
+Subject: [PATCH 13/22] ceph: Convert to bvec_iter
+Date: Wed, 27 Mar 2013 10:39:43 -0700
+Message-ID: <1364405992-28424-14-git-send-email-koverstreet@google.com>
 References: <1364405992-28424-1-git-send-email-koverstreet@google.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1364405992-28424-1-git-send-email-koverstreet@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: axboe@kernel.dk, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@vger.kernel.org
-Cc: tj@kernel.org, neilb@suse.de, Kent Overstreet <koverstreet@google.com>, Yehuda Sadeh <yehuda@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+Cc: tj@kernel.org, neilb@suse.de, Kent Overstreet <koverstreet@google.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Now that we've got drivers converted to the new immutable bvec
-primitives, bio splitting becomes much easier. In a few patches,
-bio_clone() will be changed to share the old bio's bvec instead of
-copying it, by default.
+Use new primitives which respect bi_bvec_done.
 
 Signed-off-by: Kent Overstreet <koverstreet@google.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Alex Elder <elder@inktank.com>
+Cc: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 ---
- drivers/block/rbd.c | 64 ++---------------------------------------------------
- 1 file changed, 2 insertions(+), 62 deletions(-)
+ include/linux/ceph/messenger.h |  3 ++-
+ net/ceph/messenger.c           | 53 ++++++++++++++++++++++--------------------
+ 2 files changed, 30 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d1e4fd8..d4e2406 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -929,73 +929,13 @@ static struct bio *bio_clone_range(struct bio *bio_src,
- 					unsigned int len,
- 					gfp_t gfpmask)
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 60903e0..dccf497 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -1,6 +1,7 @@
+ #ifndef __FS_CEPH_MESSENGER_H
+ #define __FS_CEPH_MESSENGER_H
+ 
++#include <linux/blk_types.h>
+ #include <linux/kref.h>
+ #include <linux/mutex.h>
+ #include <linux/net.h>
+@@ -86,7 +87,7 @@ struct ceph_msg {
+ #ifdef CONFIG_BLOCK
+ 	struct bio  *bio;		/* instead of pages/pagelist */
+ 	struct bio  *bio_iter;		/* bio iterator */
+-	int bio_seg;			/* current bio segment */
++	struct bvec_iter bvec_iter;	/* current bio segment */
+ #endif /* CONFIG_BLOCK */
+ 	struct ceph_pagelist *trail;	/* the trailing part of the data */
+ 	bool front_is_vmalloc;
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 0c102ec..ee88ae4 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -697,27 +697,30 @@ static void con_out_kvec_add(struct ceph_connection *con,
+ }
+ 
+ #ifdef CONFIG_BLOCK
+-static void init_bio_iter(struct bio *bio, struct bio **iter, int *seg)
++static void init_bio_iter(struct bio *bio, struct bio **iter,
++			  struct bvec_iter *bvec_iter)
  {
--	struct bio_vec bv;
--	struct bvec_iter iter;
--	struct bvec_iter end_iter;
--	unsigned int resid;
--	unsigned int voff;
--	unsigned short vcnt;
- 	struct bio *bio;
+ 	if (!bio) {
+ 		*iter = NULL;
+-		*seg = 0;
+ 		return;
+ 	}
+ 	*iter = bio;
+-	*seg = bio->bi_iter.bi_idx;
++	*bvec_iter = bio->bi_iter;
+ }
  
--	/* Handle the easy case for the caller */
--
--	if (!offset && len == bio_src->bi_iter.bi_size)
--		return bio_clone(bio_src, gfpmask);
--
--	if (WARN_ON_ONCE(!len))
--		return NULL;
--	if (WARN_ON_ONCE(len > bio_src->bi_iter.bi_size))
--		return NULL;
--	if (WARN_ON_ONCE(offset > bio_src->bi_iter.bi_size - len))
--		return NULL;
--
--	/* Find first affected segment... */
--
--	resid = offset;
--	bio_for_each_segment(bv, bio_src, iter) {
--		if (resid < bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	voff = resid;
--
--	/* ...and the last affected segment */
--
--	resid += len;
--	__bio_for_each_segment(bv, bio_src, end_iter, iter) {
--		if (resid <= bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	vcnt = end_iter.bi_idx = iter.bi_idx + 1;
--
--	/* Build the clone */
--
--	bio = bio_alloc(gfpmask, (unsigned int) vcnt);
-+	bio = bio_clone(bio_src, gfpmask);
- 	if (!bio)
- 		return NULL;	/* ENOMEM */
+-static void iter_bio_next(struct bio **bio_iter, int *seg)
++static void iter_bio_next(struct bio **bio_iter, struct bvec_iter *bvec_iter)
+ {
++	struct bio_vec bv;
++
+ 	if (*bio_iter == NULL)
+ 		return;
  
--	bio->bi_bdev = bio_src->bi_bdev;
--	bio->bi_iter.bi_sector = bio_src->bi_iter.bi_sector +
--		(offset >> SECTOR_SHIFT);
--	bio->bi_rw = bio_src->bi_rw;
--	bio->bi_flags |= 1 << BIO_CLONED;
--
--	/*
--	 * Copy over our part of the bio_vec, then update the first
--	 * and last (or only) entries.
--	 */
--	memcpy(&bio->bi_io_vec[0], &bio_src->bi_io_vec[iter.bi_idx],
--			vcnt * sizeof (struct bio_vec));
--	bio->bi_io_vec[0].bv_offset += voff;
--	if (vcnt > 1) {
--		bio->bi_io_vec[0].bv_len -= voff;
--		bio->bi_io_vec[vcnt - 1].bv_len = resid;
--	} else {
--		bio->bi_io_vec[0].bv_len = len;
--	}
--
--	bio->bi_vcnt = vcnt;
-+	bio_advance(bio, offset);
- 	bio->bi_iter.bi_size = len;
+-	BUG_ON(*seg >= (*bio_iter)->bi_vcnt);
++	BUG_ON(!bvec_iter->bi_size);
++	bv = bio_iovec_iter(*bio_iter, *bvec_iter);
  
- 	return bio;
+-	(*seg)++;
+-	if (*seg == (*bio_iter)->bi_vcnt)
+-		init_bio_iter((*bio_iter)->bi_next, bio_iter, seg);
++	bio_advance_iter(*bio_iter, bvec_iter, bv.bv_len);
++	if (!bvec_iter->bi_size)
++		init_bio_iter((*bio_iter)->bi_next, bio_iter, bvec_iter);
+ }
+ #endif
+ 
+@@ -736,7 +739,7 @@ static void prepare_write_message_data(struct ceph_connection *con)
+ 		con->out_msg_pos.page_pos = 0;
+ #ifdef CONFIG_BLOCK
+ 	if (msg->bio)
+-		init_bio_iter(msg->bio, &msg->bio_iter, &msg->bio_seg);
++		init_bio_iter(msg->bio, &msg->bio_iter, &msg->bvec_iter);
+ #endif
+ 	con->out_msg_pos.data_pos = 0;
+ 	con->out_msg_pos.did_page_crc = false;
+@@ -1047,7 +1050,7 @@ static void out_msg_pos_next(struct ceph_connection *con, struct page *page,
+ 			       &msg->pagelist->head);
+ #ifdef CONFIG_BLOCK
+ 	else if (msg->bio)
+-		iter_bio_next(&msg->bio_iter, &msg->bio_seg);
++		iter_bio_next(&msg->bio_iter, &msg->bvec_iter);
+ #endif
+ }
+ 
+@@ -1103,12 +1106,12 @@ static int write_partial_msg_pages(struct ceph_connection *con)
+ 						struct page, lru);
+ #ifdef CONFIG_BLOCK
+ 		} else if (msg->bio) {
+-			struct bio_vec *bv;
++			struct bio_vec bv;
+ 
+-			bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+-			page = bv->bv_page;
+-			bio_offset = bv->bv_offset;
+-			max_write = bv->bv_len;
++			bv = bio_iovec_iter(msg->bio_iter, msg->bvec_iter);
++			page = bv.bv_page;
++			bio_offset = bv.bv_offset;
++			max_write = bv.bv_len;
+ #endif
+ 		} else {
+ 			page = zero_page;
+@@ -1818,17 +1821,18 @@ static int read_partial_message_pages(struct ceph_connection *con,
+ 
+ #ifdef CONFIG_BLOCK
+ static int read_partial_message_bio(struct ceph_connection *con,
+-				    struct bio **bio_iter, int *bio_seg,
++				    struct bio **bio_iter,
++				    struct bvec_iter *bvec_iter,
+ 				    unsigned int data_len, bool do_datacrc)
+ {
+-	struct bio_vec *bv = bio_iovec_idx(*bio_iter, *bio_seg);
++	struct bio_vec bv = bio_iovec_iter(*bio_iter, *bvec_iter);
+ 	void *p;
+ 	int ret, left;
+ 
+ 	left = min((int)(data_len - con->in_msg_pos.data_pos),
+-		   (int)(bv->bv_len - con->in_msg_pos.page_pos));
++		   (int)(bv.bv_len - con->in_msg_pos.page_pos));
+ 
+-	p = kmap(bv->bv_page) + bv->bv_offset;
++	p = kmap(bv.bv_page) + bv.bv_offset;
+ 
+ 	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+ 			       left);
+@@ -1836,14 +1840,14 @@ static int read_partial_message_bio(struct ceph_connection *con,
+ 		con->in_data_crc =
+ 			crc32c(con->in_data_crc,
+ 				  p + con->in_msg_pos.page_pos, ret);
+-	kunmap(bv->bv_page);
++	kunmap(bv.bv_page);
+ 	if (ret <= 0)
+ 		return ret;
+ 	con->in_msg_pos.data_pos += ret;
+ 	con->in_msg_pos.page_pos += ret;
+-	if (con->in_msg_pos.page_pos == bv->bv_len) {
++	if (con->in_msg_pos.page_pos == bv.bv_len) {
+ 		con->in_msg_pos.page_pos = 0;
+-		iter_bio_next(bio_iter, bio_seg);
++		iter_bio_next(bio_iter, bvec_iter);
+ 	}
+ 
+ 	return ret;
+@@ -1945,7 +1949,7 @@ static int read_partial_message(struct ceph_connection *con)
+ 
+ #ifdef CONFIG_BLOCK
+ 		if (m->bio)
+-			init_bio_iter(m->bio, &m->bio_iter, &m->bio_seg);
++			init_bio_iter(m->bio, &m->bio_iter, &m->bvec_iter);
+ #endif
+ 	}
+ 
+@@ -1975,7 +1979,7 @@ static int read_partial_message(struct ceph_connection *con)
+ 		} else if (m->bio) {
+ 			BUG_ON(!m->bio_iter);
+ 			ret = read_partial_message_bio(con,
+-						 &m->bio_iter, &m->bio_seg,
++						 &m->bio_iter, &m->bvec_iter,
+ 						 data_len, do_datacrc);
+ 			if (ret <= 0)
+ 				return ret;
+@@ -2720,7 +2724,6 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+ #ifdef	CONFIG_BLOCK
+ 	m->bio = NULL;
+ 	m->bio_iter = NULL;
+-	m->bio_seg = 0;
+ #endif	/* CONFIG_BLOCK */
+ 	m->trail = NULL;
+ 
 -- 
 1.8.1.3
