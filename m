@@ -1,45 +1,67 @@
-From: "=?utf-8?B?TGkgV2FuZw==?=" <wangli@kylinos.com.cn>
-Subject: Split Swift code with S3 code in Radosgw
-Date: Wed, 27 Mar 2013 23:19:29 +0800
-Message-ID: <tencent_3C5B3A0711EDF0AE28AE2231@qq.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: rados_pool_list usage
+Date: Wed, 27 Mar 2013 08:59:49 -0700
+Message-ID: <9B043BA89C1943F989AD6213B2361DD7@inktank.com>
+References: <5152B4EC.4070700@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpbg63.qq.com ([103.7.29.150]:55940 "HELO smtpbg63.qq.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1751521Ab3C0PTd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 Mar 2013 11:19:33 -0400
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:59592 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752413Ab3C0P7w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Mar 2013 11:59:52 -0400
+Received: by mail-pa0-f43.google.com with SMTP id hz11so1049169pad.30
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Mar 2013 08:59:52 -0700 (PDT)
+In-Reply-To: <5152B4EC.4070700@42on.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?Y2VwaC1kZXZlbA==?= <ceph-devel@vger.kernel.org>
-Cc: =?utf-8?B?c2FnZQ==?= <sage@inktank.com>
+To: Wido den Hollander <wido@42on.com>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-SGkgdGhlcmUsDQogICAgV2UgYXJlIHByb3ZpZGluZyBPcGVuc3RhY2sgYmFzZWQgY2xvdWQg
-c29sdXRpb24gdG8gY3VzdG9tZXJzLiBXZSBoYXZlIHJlYWQgdGhlIHRlY2huaWNhbCBwYXBl
-cnMgb24gQ2VwaCwgYW5kIG91ciBjb2xsZWFndWUgDQphbHNvIGNvbnN1bHRlZCB0aGUgY29t
-cGFyaXNpb24gYmV0d2VlbiBDZXBoIGFuZCBTd2lmdCBmcm9tIHRoZSBjZXBoLXVzZXIgbWFp
-bGluZyBsaXN0LiBHaXZlbiB0aGUgYWR2YW50YWdlcyBvZiBDZXBoIG92ZXIgDQpTd2lmdCwg
-c3VjaCBhcyBzY2FsYWJpbGl0eSwgcGVyZm9ybWFuY2UgYW5kIHRoZSBhbGwtaW4tb25lIGRl
-c2lnbiwgd2Ugd2FubmEgcmVwbGFjZSBzd2lmdCB3aXRoIGNlcGggaW4gb3VyIG9wZW5zdGFj
-ayANCnNvbHV0aW9uLiBIb3dldmVyLCBzaW5jZSB0aGUgY2xpZW50IGFwcGxpY2F0aW9ucyBh
-cmUgZGV2ZWxvcGVkIGJhc2VkIG9uIFN3aWZ0IEFQSSwgYXMgZmFyIGFzIHdlIGtub3csIGN1
-cnJlbnRseSBvbmx5IGEgc3Vic2V0IG9mIA0KU3dpZnQgQVBJIGlzIGltcGxlbWVudGVkIGJ5
-IENlcGguIEFuZCBmdXJ0aGVybW9yZSwgaXQgc2VlbXMgdG8gdXMgdGhhdCB0aGUgUzMgY29t
-cGF0YWJpbGl0eSBvd25zIGEgaGlnaGVyIHByaW9yaXR5IG9yIGRvbmUgDQplYXJsaWVyIGlu
-IENlcGgsIHRoZSBTd2lmdCBjb21wYXRpYmlsaXR5IGNvZGUgaXMgZml4ZWQgd2l0aCBTMyBj
-b2RlLCBhbmQga2luZCBvZiwgeWllbGQgdG8gdGhlIFMzIGNvbXBhdGliaWxpdHkgZnJhbWV3
-b3JrIA0KYW5kIFMzIHNlbWFudGljcywgd2hpY2ggaGFtcGVyIHVzIHRvIGFkZCBzb21lIFN3
-aWZ0IHNwZWNpZmljIGZlYXR1cmVzIGludG8gUmFkb3Nndy4gQW5kIHdpdGggdGhlIGRldmVs
-b3Bpbmcgb2YgU3dpZnQgYXMgDQp3ZWxsIGFzIFMzLCB3ZSB0aGluayB0aGUgY3VycmVudCBm
-cmFtZXdvcmsgd2lsbCBzdWZmZXIgZnJvbSB0aGUgY29kZSBlbGVnYW5jZSBhbmQgbGFyZ2Vy
-IEFQSSBkaXZlcmdlbmNlLiAgV2UgZG8gd2FubmEgdXNlIA0KQ2VwaCBhbmQgYWxzbyB3YW5u
-YSBtYWtlIHRlY2huaWNhbCBjb250cmlidXRpb25zIHRvIGl0LiBXZSBhcmUgY29uc2lkZXJp
-bmcgdG8gcmV2aXNlIHRoZSBjdXJyZW50IGZyYW1ld29yayB0byBzcGxpdCB0aGUgDQpTd2lm
-dCBjb2RlIHdpdGggdGhlIFMzIGNvZGUsIHRvIGFsbG93IGEgbW9yZSBmcmllbmRseSBzdXBw
-b3J0IHRvIFN3aWZ0IEFQSSBhbmQgbWFrZSBpdCBlYXNpZXIgdG8gYWRkIFN3aWZ0IHNwZWNp
-ZmljIA0KZmVhdHVyZXMsIHN1Y2ggYXMgY3VzdG9tIG1ldGFkYXRhLCBleHBpcmluZyBvYmpl
-Y3QsIG5lZ2F0aXZlIGFjbCBydWxlLCBzbyB3aGF0IGlzIHRoZSBDZXBoIGNvbW11bml0eSdz
-IHJlc3BvbnNlPyANCg0KQ2hlZXJzLA0KTGkgV2FuZw==
+
+
+On Wednesday, March 27, 2013 at 1:59 AM, Wido den Hollander wrote:
+
+> Hi,
+> 
+> While working with rados_pool_list I stumbled upon what I think is a 
+> documentation issue.
+> 
+> librados.h tells me this:
+> 
+> /**
+> * List objects in a pool
+> *
+> * Gets a list of pool names as NULL-terminated strings. The pool
+> * names will be placed in the supplied buffer one after another.
+> * After the last pool name, there will be two 0 bytes in a row.
+> *
+> * If len is too short to fit all the pool name entries we need, we 
+> will fill
+> * as much as we can.
+> *
+> * @param cluster cluster handle
+> * @param buf output buffer
+> * @param len output buffer length
+> * @returns length of the buffer we would need to list all pools
+> */
+> int rados_pool_list(rados_t cluster, char *buf, size_t len);
+> 
+> "If len is too short to fit all the pool name entries we need, we will 
+> fill as much as we can."
+> 
+> From what I could remember it would return the length required if "len" 
+> isn't long enough. Looking at the Python and PHP bindings (which I 
+> wrote) it seems that is correct.
+> 
+> It also says: "@returns length of the buffer we would need to list all 
+> pools"
+> 
+> Docs issue I guess?
+It certainly returns the amount of space needed; does it not also fill in the given buffer with however many pools it could? (It might not, but those sentences aren't contradictory in my mind.)
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+
 
