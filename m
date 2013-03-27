@@ -1,31 +1,31 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: rados_pool_list usage
-Date: Wed, 27 Mar 2013 13:40:18 -0700
-Message-ID: <51535932.5030603@inktank.com>
-References: <5152B4EC.4070700@42on.com> <9B043BA89C1943F989AD6213B2361DD7@inktank.com> <51532F0E.2070705@inktank.com> <5153397B.3010301@42on.com>
+From: Lorieri <lorieri@gmail.com>
+Subject: radosgw S3 api
+Date: Wed, 27 Mar 2013 20:03:03 -0300
+Message-ID: <CAPHxCcSX7CRS2+-CWA7hGYAZKSm2PDn+hYd6+EtqHtSm+8fN3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:46886 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752290Ab3C0UkW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Mar 2013 16:40:22 -0400
-Received: by mail-pa0-f50.google.com with SMTP id bg2so2328558pad.37
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Mar 2013 13:40:21 -0700 (PDT)
-In-Reply-To: <5153397B.3010301@42on.com>
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:34188 "EHLO
+	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753075Ab3C0XDF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Mar 2013 19:03:05 -0400
+Received: by mail-ia0-f169.google.com with SMTP id j5so7820322iaf.14
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Mar 2013 16:03:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hi,
 
-> There is a typo though: "List objects in a pool"
->
-> That should be: "List all pools"
+There is a behavior in AWS S3 I could not reproduce in radosgw.
 
-yep.
--- 
-Dan Mick, Filesystem Engineering
-Inktank Storage, Inc.	http://inktank.com
-Ceph docs: http://ceph.com/docs
+If you create an empty bucket and makes it public, any object you put
+there will be public too, and will automatically be possible to access
+it by its http url.
+It is very helpful when people use some tools and browsers plugins to
+upload content or do a bulk sync.
+
+am I missing something ?
+
+thanks,
+-lorieri
