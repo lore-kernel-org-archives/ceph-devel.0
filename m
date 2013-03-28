@@ -1,87 +1,69 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Bad Blocks
-Date: Thu, 28 Mar 2013 08:54:08 -0700
-Message-ID: <CAPYLRzgGeMmErtUcnZmS5-o+hMSdkqUxLEj5S23CgG3OR3cw_g@mail.gmail.com>
-References: <b3fb63f5ebff9bde421043598c83d7ab@pl1.haspere.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: [ceph-users] Mon crash
+Date: Thu, 28 Mar 2013 19:03:46 +0000
+Message-ID: <51549412.4020707@inktank.com>
+References: <515396F3.3030106@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:57469 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755204Ab3C1PyJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Mar 2013 11:54:09 -0400
-Received: by mail-qa0-f41.google.com with SMTP id bs12so1610321qab.7
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Mar 2013 08:54:09 -0700 (PDT)
-In-Reply-To: <b3fb63f5ebff9bde421043598c83d7ab@pl1.haspere.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:54539 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752139Ab3C1TES (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Mar 2013 15:04:18 -0400
+Received: by mail-wi0-f176.google.com with SMTP id hm14so3629373wib.15
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Mar 2013 12:04:17 -0700 (PDT)
+In-Reply-To: <515396F3.3030106@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: YS3fpFE2ykfB@dyweni.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Martin Mailand <martin@tuxadero.com>
+Cc: ceph-users@ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The OSDs expect the underlying filesystem to keep their data clean and
-fail-crash in order to prevent accidentally introducing corruption
-into the system. There's some ongoing work to make that a little
-friendlier, but it's not done yet.
--Greg
+On 03/28/2013 01:03 AM, Martin Mailand wrote:
+> Hi,
+>
+> today one of my mons crashed, the log is here.
+> http://pastebin.com/ugr1fMJR
+>
+> I think the most important part is:
+> 2013-03-28 01:57:48.564647 7fac6c0ea700 -1
+> auth/none/AuthNoneServiceHandler.h: In function 'virtual int
+> AuthNoneServiceHandler::handle_request(ceph::buffer::list::iterator&,
+> ceph::bufferlist&, uint64_t&, AuthCapsInfo&, uint64_t*)' thread
+> 7fac6c0ea700 time 2013-03-28 01:57:48.563831
+> auth/none/AuthNoneServiceHandler.h: 35: FAILED assert(0)
+>
+> In the log it is reported that osd.12 is down, but it is not.
+>
+>   ceph -s
+>     health HEALTH_WARN 1 mons down, quorum 1,2 b,c
+>     monmap e1: 3 mons at
+> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
+> election epoch 32, quorum 1,2 b,c
+>     osdmap e133: 24 osds: 24 up, 24 in
+>      pgmap v22454: 4800 pgs: 4800 active+clean; 23185 MB data, 49126 MB
+> used, 174 TB / 174 TB avail
+>     mdsmap e1: 0/0/1 up
+>
 
-On Wed, Mar 20, 2013 at 11:55 AM, Dyweni - Ceph-Devel
-<YS3fpFE2ykfB@dyweni.com> wrote:
-> Hi All,
+Hi Martin,
+
+As John said in his reply, these should be reported to ceph-devel (CC'ing).
+
+Anyway, this is bug #4519 [1].  It was introduced after 0.58, released 
+under 0.59 and is already fixed in master.  As far as we can tell, only 
+when using auth none will anyone using 0.59 stumble upon it.
+
+   -Joao
+
+[1] - http://tracker.ceph.com/issues/4519
+
+
 >
-> I would like to understand how Ceph handles and recovers from bad blocks.
-> Would someone mind explaining this to me?  It wasn't very apparent from the
-> docs.
+> -martin
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
-> My ultimate goal to be able to get some extra life out of my disks, after I
-> detect that they may be failing.  (I'm talking about those disks that may
-> have a small amount of bad blocks, but otherwise seem file and still perform
-> well).
->
-> Here's what I've put together:
->
-> 1. BBR Hardware
->     - All hard disks come with a set number of blocks that are reserved for
-> remapping of failed blocks.  This is handled transparently by the hard disk.
-> The hard disk may not begin reporting failed blocks until all the reserved
-> blocks are used up.
->
-> 2. BBR Device Mapper Target
->     - Back in the EVMS days, IBM wrote a kernel module (dm-bbr) and a evms
-> plugin to manage that kernel module.  I have updated that kernel module to
-> work with the 3.6.11 kernel.  I have also rewrote some portions of the evms
-> plugin as a standalone bash script to allow me to initialize the BBR layer
-> and start the BBR device mapper target on that layer.  (So far it seems to
-> run fine, but requires more testing).
->
-> 3. BTRFS
->     - I've read that BTRFS can perform data scrubbing and repair damaged
-> files from redundant copies.
->
-> 4. CEPH
->     - I've read that CEPH can perform a deep scrub to find damaged copies.
-> I assume by the distributed nature of CEPH, it can repair the damaged copy
-> from the other OSDs.
->
-> One thing I am not clear on is when BTRFS / CEPH finds damaged data, what do
-> they do to prevent data from being written to the same area?
->
-> Also, I'm wondering if any parts to my layered approach are redundant /
-> unnecessary...  For instance if BTRFS marks the block bad internally, then
-> perhaps the BBR DM Target isn't needed...
->
->
-> In my testing recently, I had the following setup:
->   Disk -> DM-Crypt -> DM-BBR -> BTRFS -> OSD
->
-> When the OSD hit a bad block, the DM-BBR target successfully remapped it to
-> one of its own reserved blocks, BTRFS then reported data corruption, and the
-> OSD daemon crashed.
->
->
-> --
-> Thanks,
-> Dyweni
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
