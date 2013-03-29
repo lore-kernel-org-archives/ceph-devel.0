@@ -1,210 +1,427 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: define osd_req_opcode_valid()
-Date: Fri, 29 Mar 2013 16:24:20 -0500
-Message-ID: <51560684.5060509@inktank.com>
+Subject: [PATCH] libceph: define source request op functions
+Date: Fri, 29 Mar 2013 16:24:33 -0500
+Message-ID: <51560691.1060202@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f170.google.com ([209.85.210.170]:44513 "EHLO
-	mail-ia0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756793Ab3C2VYX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Mar 2013 17:24:23 -0400
-Received: by mail-ia0-f170.google.com with SMTP id h8so699515iaa.1
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Mar 2013 14:24:23 -0700 (PDT)
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:36590 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756793Ab3C2VYf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Mar 2013 17:24:35 -0400
+Received: by mail-ie0-f173.google.com with SMTP id 9so946844iec.18
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Mar 2013 14:24:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Define a separate function to determine the validity of an opcode,
-and use it inside osd_req_encode_op() in order to unclutter that
-function.
+The rbd code has a function that allocates and populates a
+ceph_osd_req_op structure (the in-core version of an osd request
+operation).  When reviewed, Josh suggested two things: that the
+big varargs function might be better split into type-specific
+functions; and that this functionality really belongs in the osd
+client rather than rbd.
 
-Don't update the destination op at all--and return zero--if an
-unsupported or unrecognized opcode is seen in osd_req_encode_op().
+This patch implements both of Josh's suggestions.  It breaks
+up the rbd function into separate functions and defines them
+in the osd client module as exported interfaces.  Unlike the
+rbd version, however, the functions don't allocate an osd_req_op
+structure; they are provided the address of one and that is
+initialized instead.
+
+The rbd function has been eliminated and calls to it have been
+replaced by calls to the new routines.  The rbd code now now use a
+stack (struct) variable to hold the op rather than allocating and
+freeing it each time.
+
+For now only the capabilities used by rbd are implemented.
+Implementing all the other osd op types, and making the rest of the
+code use it will be done separately, in the next few patches.
+
+Note that only the extent, cls, and watch portions of the
+ceph_osd_req_op structure are currently used.  Delete the others
+(xattr, pgls, and snap) from its definition so nobody thinks it's
+actually implemented or needed.  We can add it back again later
+if needed, when we know it's been tested.
+
+This resolves (and a few follow-on patches):
+    http://tracker.ceph.com/issues/3861
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/osd_client.c |  126
-++++++++++++++++++++++++++++---------------------
- 1 file changed, 72 insertions(+), 54 deletions(-)
+ drivers/block/rbd.c             |  117
+++++++---------------------------------
+ include/linux/ceph/osd_client.h |   26 ++++-----
+ net/ceph/osd_client.c           |   84 ++++++++++++++++++++++++++++
+ 3 files changed, 111 insertions(+), 116 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 015bf9f..4e5c043 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -220,70 +220,24 @@ struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 9c97204..02d821e 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1134,76 +1134,6 @@ static bool obj_request_type_valid(enum
+obj_request_type type)
+ 	}
  }
- EXPORT_SYMBOL(ceph_osdc_alloc_request);
 
--static u64 osd_req_encode_op(struct ceph_osd_request *req,
--			      struct ceph_osd_op *dst,
--			      struct ceph_osd_req_op *src)
-+static bool osd_req_opcode_valid(u16 opcode)
- {
--	u64 out_data_len = 0;
--	struct ceph_pagelist *pagelist;
+-static struct ceph_osd_req_op *rbd_osd_req_op_create(u16 opcode, ...)
+-{
+-	struct ceph_osd_req_op *op;
+-	va_list args;
+-	size_t size;
 -
--	dst->op = cpu_to_le16(src->op);
--
--	switch (src->op) {
+-	op = kzalloc(sizeof (*op), GFP_NOIO);
+-	if (!op)
+-		return NULL;
+-	op->op = opcode;
+-	va_start(args, opcode);
+-	switch (opcode) {
+-	case CEPH_OSD_OP_READ:
+-	case CEPH_OSD_OP_WRITE:
+-		/* rbd_osd_req_op_create(READ, offset, length) */
+-		/* rbd_osd_req_op_create(WRITE, offset, length) */
+-		op->extent.offset = va_arg(args, u64);
+-		op->extent.length = va_arg(args, u64);
+-		if (opcode == CEPH_OSD_OP_WRITE)
+-			op->payload_len = op->extent.length;
+-		break;
 -	case CEPH_OSD_OP_STAT:
 -		break;
-+	switch (opcode) {
- 	case CEPH_OSD_OP_READ:
--	case CEPH_OSD_OP_WRITE:
--		if (src->op == CEPH_OSD_OP_WRITE)
--			out_data_len = src->extent.length;
--		dst->extent.offset = cpu_to_le64(src->extent.offset);
--		dst->extent.length = cpu_to_le64(src->extent.length);
--		dst->extent.truncate_size =
--			cpu_to_le64(src->extent.truncate_size);
--		dst->extent.truncate_seq =
--			cpu_to_le32(src->extent.truncate_seq);
--		break;
 -	case CEPH_OSD_OP_CALL:
--		pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
--		BUG_ON(!pagelist);
--		ceph_pagelist_init(pagelist);
+-		/* rbd_osd_req_op_create(CALL, class, method, data, datalen) */
+-		op->cls.class_name = va_arg(args, char *);
+-		size = strlen(op->cls.class_name);
+-		rbd_assert(size <= (size_t) U8_MAX);
+-		op->cls.class_len = size;
+-		op->payload_len = size;
 -
--		dst->cls.class_len = src->cls.class_len;
--		dst->cls.method_len = src->cls.method_len;
--		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
--		ceph_pagelist_append(pagelist, src->cls.class_name,
--				     src->cls.class_len);
--		ceph_pagelist_append(pagelist, src->cls.method_name,
--				     src->cls.method_len);
--		ceph_pagelist_append(pagelist, src->cls.indata,
--				     src->cls.indata_len);
+-		op->cls.method_name = va_arg(args, char *);
+-		size = strlen(op->cls.method_name);
+-		rbd_assert(size <= (size_t) U8_MAX);
+-		op->cls.method_len = size;
+-		op->payload_len += size;
 -
--		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGELIST;
--		req->r_data_out.pagelist = pagelist;
--		out_data_len = pagelist->length;
--		break;
--	case CEPH_OSD_OP_STARTSYNC:
+-		op->cls.argc = 0;
+-		op->cls.indata = va_arg(args, void *);
+-		size = va_arg(args, size_t);
+-		rbd_assert(size <= (size_t) U32_MAX);
+-		op->cls.indata_len = (u32) size;
+-		op->payload_len += size;
 -		break;
 -	case CEPH_OSD_OP_NOTIFY_ACK:
 -	case CEPH_OSD_OP_WATCH:
--		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
--		dst->watch.ver = cpu_to_le64(src->watch.ver);
--		dst->watch.flag = src->watch.flag;
+-		/* rbd_osd_req_op_create(NOTIFY_ACK, cookie, version) */
+-		/* rbd_osd_req_op_create(WATCH, cookie, version, flag) */
+-		op->watch.cookie = va_arg(args, u64);
+-		op->watch.ver = va_arg(args, u64);
+-		op->watch.ver = cpu_to_le64(op->watch.ver);
+-		if (opcode == CEPH_OSD_OP_WATCH && va_arg(args, int))
+-			op->watch.flag = (u8) 1;
 -		break;
 -	default:
--		pr_err("unrecognized osd opcode %d\n", src->op);
--		WARN_ON(1);
+-		rbd_warn(NULL, "unsupported opcode %hu\n", opcode);
+-		kfree(op);
+-		op = NULL;
 -		break;
-+	case CEPH_OSD_OP_STAT:
- 	case CEPH_OSD_OP_MAPEXT:
- 	case CEPH_OSD_OP_MASKTRUNC:
- 	case CEPH_OSD_OP_SPARSE_READ:
- 	case CEPH_OSD_OP_NOTIFY:
-+	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_ASSERT_VER:
-+	case CEPH_OSD_OP_WRITE:
- 	case CEPH_OSD_OP_WRITEFULL:
- 	case CEPH_OSD_OP_TRUNCATE:
- 	case CEPH_OSD_OP_ZERO:
- 	case CEPH_OSD_OP_DELETE:
- 	case CEPH_OSD_OP_APPEND:
-+	case CEPH_OSD_OP_STARTSYNC:
- 	case CEPH_OSD_OP_SETTRUNC:
- 	case CEPH_OSD_OP_TRIMTRUNC:
- 	case CEPH_OSD_OP_TMAPUP:
-@@ -291,11 +245,11 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- 	case CEPH_OSD_OP_TMAPGET:
- 	case CEPH_OSD_OP_CREATE:
- 	case CEPH_OSD_OP_ROLLBACK:
-+	case CEPH_OSD_OP_WATCH:
- 	case CEPH_OSD_OP_OMAPGETKEYS:
- 	case CEPH_OSD_OP_OMAPGETVALS:
- 	case CEPH_OSD_OP_OMAPGETHEADER:
- 	case CEPH_OSD_OP_OMAPGETVALSBYKEYS:
--	case CEPH_OSD_OP_MODE_RD:
- 	case CEPH_OSD_OP_OMAPSETVALS:
- 	case CEPH_OSD_OP_OMAPSETHEADER:
- 	case CEPH_OSD_OP_OMAPCLEAR:
-@@ -326,13 +280,77 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- 	case CEPH_OSD_OP_RDUNLOCK:
- 	case CEPH_OSD_OP_UPLOCK:
- 	case CEPH_OSD_OP_DNLOCK:
-+	case CEPH_OSD_OP_CALL:
- 	case CEPH_OSD_OP_PGLS:
- 	case CEPH_OSD_OP_PGLS_FILTER:
-+		return true;
-+	default:
-+		return false;
-+	}
+-	}
+-	va_end(args);
+-
+-	return op;
+-}
+-
+-static void rbd_osd_req_op_destroy(struct ceph_osd_req_op *op)
+-{
+-	kfree(op);
+-}
+-
+ static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
+ 				struct rbd_obj_request *obj_request)
+ {
+@@ -1628,7 +1558,7 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+ 	while (resid) {
+ 		const char *object_name;
+ 		unsigned int clone_size;
+-		struct ceph_osd_req_op *op;
++		struct ceph_osd_req_op op;
+ 		u64 offset;
+ 		u64 length;
+
+@@ -1657,13 +1587,10 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+ 		 * request.  Note that the contents of the op are
+ 		 * copied by rbd_osd_req_create().
+ 		 */
+-		op = rbd_osd_req_op_create(opcode, offset, length);
+-		if (!op)
+-			goto out_partial;
++		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
+ 		obj_request->osd_req = rbd_osd_req_create(rbd_dev,
+ 						img_request->write_request,
+-						obj_request, op);
+-		rbd_osd_req_op_destroy(op);
++						obj_request, &op);
+ 		if (!obj_request->osd_req)
+ 			goto out_partial;
+ 		/* status and version are initially zero-filled */
+@@ -1765,7 +1692,7 @@ static int rbd_obj_notify_ack(struct rbd_device
+*rbd_dev,
+ 				   u64 ver, u64 notify_id)
+ {
+ 	struct rbd_obj_request *obj_request;
+-	struct ceph_osd_req_op *op;
++	struct ceph_osd_req_op op;
+ 	struct ceph_osd_client *osdc;
+ 	int ret;
+
+@@ -1775,12 +1702,9 @@ static int rbd_obj_notify_ack(struct rbd_device
+*rbd_dev,
+ 		return -ENOMEM;
+
+ 	ret = -ENOMEM;
+-	op = rbd_osd_req_op_create(CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver);
+-	if (!op)
+-		goto out;
++	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
+ 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+-						obj_request, op);
+-	rbd_osd_req_op_destroy(op);
++						obj_request, &op);
+ 	if (!obj_request->osd_req)
+ 		goto out;
+
+@@ -1822,7 +1746,7 @@ static int rbd_dev_header_watch_sync(struct
+rbd_device *rbd_dev, int start)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+-	struct ceph_osd_req_op *op;
++	struct ceph_osd_req_op op;
+ 	int ret;
+
+ 	rbd_assert(start ^ !!rbd_dev->watch_event);
+@@ -1842,14 +1766,11 @@ static int rbd_dev_header_watch_sync(struct
+rbd_device *rbd_dev, int start)
+ 	if (!obj_request)
+ 		goto out_cancel;
+
+-	op = rbd_osd_req_op_create(CEPH_OSD_OP_WATCH,
++	osd_req_op_watch_init(&op, CEPH_OSD_OP_WATCH,
+ 				rbd_dev->watch_event->cookie,
+ 				rbd_dev->header.obj_version, start);
+-	if (!op)
+-		goto out_cancel;
+ 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true,
+-							obj_request, op);
+-	rbd_osd_req_op_destroy(op);
++							obj_request, &op);
+ 	if (!obj_request->osd_req)
+ 		goto out_cancel;
+
+@@ -1911,7 +1832,7 @@ static int rbd_obj_method_sync(struct rbd_device
+*rbd_dev,
+ {
+ 	struct rbd_obj_request *obj_request;
+ 	struct ceph_osd_client *osdc;
+-	struct ceph_osd_req_op *op;
++	struct ceph_osd_req_op op;
+ 	struct page **pages;
+ 	u32 page_count;
+ 	int ret;
+@@ -1938,13 +1859,10 @@ static int rbd_obj_method_sync(struct rbd_device
+*rbd_dev,
+ 	obj_request->pages = pages;
+ 	obj_request->page_count = page_count;
+
+-	op = rbd_osd_req_op_create(CEPH_OSD_OP_CALL, class_name,
+-					method_name, outbound, outbound_size);
+-	if (!op)
+-		goto out;
++	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
++					outbound, outbound_size);
+ 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+-						obj_request, op);
+-	rbd_osd_req_op_destroy(op);
++						obj_request, &op);
+ 	if (!obj_request->osd_req)
+ 		goto out;
+
+@@ -2124,7 +2042,7 @@ static int rbd_obj_read_sync(struct rbd_device
+*rbd_dev,
+ 				char *buf, u64 *version)
+
+ {
+-	struct ceph_osd_req_op *op;
++	struct ceph_osd_req_op op;
+ 	struct rbd_obj_request *obj_request;
+ 	struct ceph_osd_client *osdc;
+ 	struct page **pages = NULL;
+@@ -2146,12 +2064,9 @@ static int rbd_obj_read_sync(struct rbd_device
+*rbd_dev,
+ 	obj_request->pages = pages;
+ 	obj_request->page_count = page_count;
+
+-	op = rbd_osd_req_op_create(CEPH_OSD_OP_READ, offset, length);
+-	if (!op)
+-		goto out;
++	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
+ 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+-						obj_request, op);
+-	rbd_osd_req_op_destroy(op);
++						obj_request, &op);
+ 	if (!obj_request->osd_req)
+ 		goto out;
+
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index 1dab291..5fd2cbf 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -202,14 +202,6 @@ struct ceph_osd_req_op {
+ 			u32 truncate_seq;
+ 		} extent;
+ 		struct {
+-			const char *name;
+-			const void *val;
+-			u32 name_len;
+-			u32 value_len;
+-			__u8 cmp_op;       /* CEPH_OSD_CMPXATTR_OP_* */
+-			__u8 cmp_mode;     /* CEPH_OSD_CMPXATTR_MODE_* */
+-		} xattr;
+-		struct {
+ 			const char *class_name;
+ 			const char *method_name;
+ 			const void *indata;
+@@ -220,13 +212,6 @@ struct ceph_osd_req_op {
+ 		} cls;
+ 		struct {
+ 			u64 cookie;
+-			u64 count;
+-		} pgls;
+-	        struct {
+-		        u64 snapid;
+-	        } snap;
+-		struct {
+-			u64 cookie;
+ 			u64 ver;
+ 			u32 prot_ver;
+ 			u32 timeout;
+@@ -244,6 +229,17 @@ extern void ceph_osdc_handle_reply(struct
+ceph_osd_client *osdc,
+ extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+ 				 struct ceph_msg *msg);
+
++extern void osd_req_op_init(struct ceph_osd_req_op *op, u16 opcode);
++extern void osd_req_op_extent_init(struct ceph_osd_req_op *op, u16 opcode,
++					u64 offset, u64 length,
++					u64 truncate_size, u32 truncate_seq);
++extern void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
++					const char *class, const char *method,
++					const void *request_data,
++					size_t request_data_size);
++extern void osd_req_op_watch_init(struct ceph_osd_req_op *op, u16 opcode,
++					u64 cookie, u64 version, int flag);
++
+ extern struct ceph_osd_request *ceph_osdc_alloc_request(struct
+ceph_osd_client *osdc,
+ 					       struct ceph_snap_context *snapc,
+ 					       unsigned int num_op,
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 4e5c043..02ed728 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -289,6 +289,90 @@ static bool osd_req_opcode_valid(u16 opcode)
+ 	}
+ }
+
++/*
++ * This is an osd op init function for opcodes that have no data or
++ * other information associated with them.  It also serves as a
++ * common init routine for all the other init functions, below.
++ */
++void osd_req_op_init(struct ceph_osd_req_op *op, u16 opcode)
++{
++	BUG_ON(!osd_req_opcode_valid(opcode));
++
++	memset(op, 0, sizeof (*op));
++
++	op->op = opcode;
 +}
 +
-+static u64 osd_req_encode_op(struct ceph_osd_request *req,
-+			      struct ceph_osd_op *dst,
-+			      struct ceph_osd_req_op *src)
++void osd_req_op_extent_init(struct ceph_osd_req_op *op, u16 opcode,
++				u64 offset, u64 length,
++				u64 truncate_size, u32 truncate_seq)
 +{
-+	u64 out_data_len = 0;
-+	struct ceph_pagelist *pagelist;
++	size_t payload_len = 0;
 +
-+	if (WARN_ON(!osd_req_opcode_valid(src->op))) {
-+		pr_err("unrecognized osd opcode %d\n", src->op);
++	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE);
 +
-+		return 0;
-+	}
++	osd_req_op_init(op, opcode);
 +
-+	switch (src->op) {
-+	case CEPH_OSD_OP_STAT:
-+		break;
-+	case CEPH_OSD_OP_READ:
-+	case CEPH_OSD_OP_WRITE:
-+		if (src->op == CEPH_OSD_OP_WRITE)
-+			out_data_len = src->extent.length;
-+		dst->extent.offset = cpu_to_le64(src->extent.offset);
-+		dst->extent.length = cpu_to_le64(src->extent.length);
-+		dst->extent.truncate_size =
-+			cpu_to_le64(src->extent.truncate_size);
-+		dst->extent.truncate_seq =
-+			cpu_to_le32(src->extent.truncate_seq);
-+		break;
-+	case CEPH_OSD_OP_CALL:
-+		pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
-+		BUG_ON(!pagelist);
-+		ceph_pagelist_init(pagelist);
++	op->extent.offset = offset;
++	op->extent.length = length;
++	op->extent.truncate_size = truncate_size;
++	op->extent.truncate_seq = truncate_seq;
++	if (opcode == CEPH_OSD_OP_WRITE)
++		payload_len += length;
 +
-+		dst->cls.class_len = src->cls.class_len;
-+		dst->cls.method_len = src->cls.method_len;
-+		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
-+		ceph_pagelist_append(pagelist, src->cls.class_name,
-+				     src->cls.class_len);
-+		ceph_pagelist_append(pagelist, src->cls.method_name,
-+				     src->cls.method_len);
-+		ceph_pagelist_append(pagelist, src->cls.indata,
-+				     src->cls.indata_len);
++	op->payload_len = payload_len;
++}
++EXPORT_SYMBOL(osd_req_op_extent_init);
 +
-+		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGELIST;
-+		req->r_data_out.pagelist = pagelist;
-+		out_data_len = pagelist->length;
-+		break;
-+	case CEPH_OSD_OP_STARTSYNC:
-+		break;
-+	case CEPH_OSD_OP_NOTIFY_ACK:
-+	case CEPH_OSD_OP_WATCH:
-+		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
-+		dst->watch.ver = cpu_to_le64(src->watch.ver);
-+		dst->watch.flag = src->watch.flag;
-+		break;
-+	default:
- 		pr_err("unsupported osd opcode %s\n",
- 			ceph_osd_op_name(src->op));
- 		WARN_ON(1);
--		break;
++void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
++			const char *class, const char *method,
++			const void *request_data, size_t request_data_size)
++{
++	size_t payload_len = 0;
++	size_t size;
 +
-+		return 0;
- 	}
-+	dst->op = cpu_to_le16(src->op);
- 	dst->payload_len = cpu_to_le32(src->payload_len);
-
- 	return out_data_len;
++	BUG_ON(opcode != CEPH_OSD_OP_CALL);
++
++	osd_req_op_init(op, opcode);
++
++	op->cls.class_name = class;
++	size = strlen(class);
++	BUG_ON(size > (size_t) U8_MAX);
++	op->cls.class_len = size;
++	payload_len += size;
++
++	op->cls.method_name = method;
++	size = strlen(method);
++	BUG_ON(size > (size_t) U8_MAX);
++	op->cls.method_len = size;
++	payload_len += size;
++
++	op->cls.indata = request_data;
++	BUG_ON(request_data_size > (size_t) U32_MAX);
++	op->cls.indata_len = (u32) request_data_size;
++	payload_len += request_data_size;
++
++	op->cls.argc = 0;	/* currently unused */
++
++	op->payload_len = payload_len;
++}
++EXPORT_SYMBOL(osd_req_op_cls_init);
++
++void osd_req_op_watch_init(struct ceph_osd_req_op *op, u16 opcode,
++				u64 cookie, u64 version, int flag)
++{
++	BUG_ON(opcode != CEPH_OSD_OP_NOTIFY_ACK && opcode != CEPH_OSD_OP_WATCH);
++
++	osd_req_op_init(op, opcode);
++
++	op->watch.cookie = cookie;
++	/* op->watch.ver = version; */	/* XXX 3847 */
++	op->watch.ver = cpu_to_le64(version);
++	if (opcode == CEPH_OSD_OP_WATCH && flag)
++		op->watch.flag = (u8) 1;
++}
++EXPORT_SYMBOL(osd_req_op_watch_init);
++
+ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 			      struct ceph_osd_op *dst,
+ 			      struct ceph_osd_req_op *src)
 -- 
 1.7.9.5
 
