@@ -1,65 +1,39 @@
-From: Phillip Williams <p.williams@americanmediadistributioninc.com>
-Subject: Offer to Attend Events for AMD
-Date: Fri, 29 Mar 2013 10:49:53 -0400
-Message-ID: <ac2b6901c4571e6cd59c12d7f29e0731@www.americanmediadistributioninc.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Using google mock
+Date: Fri, 29 Mar 2013 08:24:13 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1303290823350.6485@cobra.newdream.net>
+References: <51553FB4.8000208@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [204.12.61.126] ([204.12.61.126]:42964 "EHLO
-	s1051440.instanturl.net" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1755241Ab3C2O4H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 29 Mar 2013 10:56:07 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:52903 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754893Ab3C2PYN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Mar 2013 11:24:13 -0400
+In-Reply-To: <51553FB4.8000208@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I would like to know if you would have any interest in covering some
-events for us in your area?
+On Fri, 29 Mar 2013, Loic Dachary wrote:
+> Hi,
+> 
+> Google mock ( ) provides convenient string matchers ( http://code.google.com/p/googlemock/wiki/CheatSheet#String_Matchers ) that would be useful when writing unit tests. It is available in most distributions:
+> 
+> http://packages.debian.org/search?keywords=google-mock
+> https://launchpad.net/ubuntu/+source/google-mock
+> http://rpmfind.net/linux/rpm2html/search.php?query=gmock
+> 
+> I've never used it before. Any objection on adding it as a dependency in addition to google test ?
 
-There would be NO COST at all for admission, and it would not be
-necessary for you to be an experienced reporter.
+I think as long as it is in EPEL or we can get an el6 package for those 
+builds, it should be fine.
 
-We are looking for members of the public to cover events such as Music
-Concerts, Sporting Events, Restaurant Openings, Movies, Gallery
-Openings, Shows, and others.
+http://ceph.com/gitbuilder.cgi
 
-Since AMD has different pools relevant to experience (beginners up to
-experienced working reporters) should you not be familiar with our
-company, please take a moment to look into American Media Distribution
-with any source you deem trusted.
+is what we need to cover.
 
-Here is a link to the AMD BBB page for your convenience.
-
-http://www.bbb.org/new-jersey/business-reviews/news-service/american-media-distribution-in-howell-nj-90096055
-
-There is compensation for the events you would attend and again, there
-is no cost for admission to any of the events, and no obligation is
-required. 
-
-We will be accepting only a few people from your area so let us know
-if you are interested in obtaining any further information. 
-
-Phil Williams
-AMD Event Coverage Coordinator
-American Media Distribution(.com) or americanmediadist.com
-4057 US Hwy 9 North Howell NJ 07731
-888.319.6336 x714(by appointment only please)
-
--This e-mail and any accompanying attachments are confidential. This
-information is intended solely for the use of the individual to whom
-it is addressed. Any review, disclosure, copying, distribution, or use
-of this e-mail communication by others is strictly prohibited. THERE
-WILL BE NO FOLLOWING EMAILS SENT - If you are not the intended
-recipient, please notify us immediately by returning this message to
-the sender and delete all copies. Thank you for your cooperation.
--MacAfee Virus Checked - Virus Free-
-
--- no more reporter/event updates reply w NO MORE in subject
-
-
-
---
-
+Thanks!
+sage
 
