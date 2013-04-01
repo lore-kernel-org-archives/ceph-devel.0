@@ -1,67 +1,46 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] ceph: set up page array mempool with correct size
-Date: Mon, 01 Apr 2013 10:49:23 -0500
-Message-ID: <5159AC83.4060007@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [PATCH 00/39] fixes for MDS cluster recovery
+Date: Mon, 1 Apr 2013 10:00:15 -0700
+Message-ID: <CAPYLRzh1AffuLfLOJ0dUUnQn0KSrhY-Ti7g6JR=idTNzbD5=QA@mail.gmail.com>
+References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+	<5159496D.6040002@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:47962 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756728Ab3DAPt1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Apr 2013 11:49:27 -0400
-Received: by mail-ia0-f171.google.com with SMTP id z13so1998083iaz.2
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Apr 2013 08:49:26 -0700 (PDT)
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:56501 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758912Ab3DARAQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Apr 2013 13:00:16 -0400
+Received: by mail-qa0-f45.google.com with SMTP id hg5so959102qab.4
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Apr 2013 10:00:15 -0700 (PDT)
+In-Reply-To: <5159496D.6040002@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-In create_fs_client() a memory pool is set up be used for arrays of
-pages that might be needed in ceph_writepages_start() if memory is
-tight.  There are two problems with the way it's initialized:
-    - The size provided is the number of pages we want in the
-      array, but it should be the number of bytes required for
-      that many page pointers.
-    - The number of pages computed can end up being 0, while we
-      will always need at least one page.
+On Mon, Apr 1, 2013 at 1:46 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
+> On 03/17/2013 10:51 PM, Yan, Zheng wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>
+>> This serie fixes issues I encountered when running random MDS restart tests.
+>> With these patches, my 3 MDS setup that runs fsstress + thrash_exports can
+>> survive restarting one or two MDS dozens of times.
+>>
+>> But there still are lots of unsolved problems, Sometimes rstat corruption,
+>> request hangs ...
+>>
+>> This patch series are also in:
+>>   git://github.com/ukernel/ceph.git wip-mds
+>>
+>
+> I rebased these patches. Replaced patch 5 and patch 6 with two new patches.
+>
+> [PATCH] mds: avoid sending duplicated table prepare/commit
+> [PATCH] mds: don't roll back prepared table updates
 
-This patch fixes both of these problems.
-
-This resolves the two simple problems defined in:
-    http://tracker.ceph.com/issues/4603
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- fs/ceph/super.c |    7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 9fe17c6c..318bee0 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -479,6 +479,8 @@ static struct ceph_fs_client
-*create_fs_client(struct ceph_mount_options *fsopt,
- 		CEPH_FEATURE_FLOCK |
- 		CEPH_FEATURE_DIRLAYOUTHASH;
- 	const unsigned required_features = 0;
-+	int page_count;
-+	size_t size;
- 	int err = -ENOMEM;
-
- 	fsc = kzalloc(sizeof(*fsc), GFP_KERNEL);
-@@ -522,8 +524,9 @@ static struct ceph_fs_client
-*create_fs_client(struct ceph_mount_options *fsopt,
-
- 	/* set up mempools */
- 	err = -ENOMEM;
--	fsc->wb_pagevec_pool = mempool_create_kmalloc_pool(10,
--			      fsc->mount_options->wsize >> PAGE_CACHE_SHIFT);
-+	page_count = fsc->mount_options->wsize >> PAGE_CACHE_SHIFT;
-+	size = sizeof (struct page *) * (page_count ? page_count : 1);
-+	fsc->wb_pagevec_pool = mempool_create_kmalloc_pool(10, size);
- 	if (!fsc->wb_pagevec_pool)
- 		goto fail_trunc_wq;
-
--- 
-1.7.9.5
-
+All right, I've merged this whole series into master at last. Edited
+one commit in order to give MMDSCacheRejoin the new versioned encoding
+and added one commit to bump the MDS protocol like we talked about.
+Thanks for all the fixes!
+-Greg
