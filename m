@@ -1,14 +1,15 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] mds: avoid sending duplicated table prepare/commit
-Date: Mon,  1 Apr 2013 16:51:21 +0800
-Message-ID: <1364806282-15071-1-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH] mds: don't roll back prepared table updates
+Date: Mon,  1 Apr 2013 16:51:22 +0800
+Message-ID: <1364806282-15071-2-git-send-email-zheng.z.yan@intel.com>
 References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+ <1364806282-15071-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:19353 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755591Ab3DAIvg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 1 Apr 2013 04:51:36 -0400
-In-Reply-To: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
+	id S1755591Ab3DAIvi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Apr 2013 04:51:38 -0400
+In-Reply-To: <1364806282-15071-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, sage@inktank.com, greg@inktank.com
@@ -16,243 +17,84 @@ Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This patch makes table client defer sending table prepare/commit messages
-until receiving table server's 'ready' message. This avoid duplicated table
-prepare/commit messages.
+When table server is recovering, it re-sends 'agree' messages for
+prepared table updates. It is possible table client receives an
+'agree' messages before it commits the corresponding update. Don't
+send 'rollback' message back to the server in this case.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/AnchorClient.cc   |  9 +++++--
- src/mds/MDS.cc            | 14 +++++++++--
- src/mds/MDS.h             |  4 +++-
- src/mds/MDSTableClient.cc | 60 +++++++++++++++++++++++++----------------------
- src/mds/MDSTableClient.h  |  7 ++++--
- 5 files changed, 59 insertions(+), 35 deletions(-)
+ src/mds/MDSTableClient.cc | 11 ++++++++++-
+ src/mds/MDSTableClient.h  |  1 +
+ src/mds/MDSTableServer.cc |  9 ++++++---
+ 3 files changed, 17 insertions(+), 4 deletions(-)
 
-diff --git a/src/mds/AnchorClient.cc b/src/mds/AnchorClient.cc
-index 455e97f..bcc8710 100644
---- a/src/mds/AnchorClient.cc
-+++ b/src/mds/AnchorClient.cc
-@@ -41,7 +41,9 @@ void AnchorClient::handle_query_result(class MMDSTableRequest *m)
-   ::decode(ino, p);
-   ::decode(trace, p);
- 
--  assert(pending_lookup.count(ino));
-+  if (!pending_lookup.count(ino))
-+    return;
-+
-   list<_pending_lookup> ls;
-   ls.swap(pending_lookup[ino]);
-   pending_lookup.erase(ino);
-@@ -80,9 +82,12 @@ void AnchorClient::lookup(inodeno_t ino, vector<Anchor>& trace, Context *onfinis
- 
- void AnchorClient::_lookup(inodeno_t ino)
- {
-+  int ts = mds->mdsmap->get_tableserver();
-+  if (mds->mdsmap->get_state(ts) < MDSMap::STATE_REJOIN)
-+    return;
-   MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_QUERY, 0, 0);
-   ::encode(ino, req->bl);
--  mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-+  mds->send_message_mds(req, ts);
- }
- 
- 
-diff --git a/src/mds/MDS.cc b/src/mds/MDS.cc
-index 32bb064..2d48815 100644
---- a/src/mds/MDS.cc
-+++ b/src/mds/MDS.cc
-@@ -1050,7 +1050,7 @@ void MDS::handle_mds_map(MMDSMap *m)
-     for (set<int>::iterator p = failed.begin(); p != failed.end(); ++p)
-       if (oldfailed.count(*p) == 0) {
- 	messenger->mark_down(oldmap->get_inst(*p).addr);
--	mdcache->handle_mds_failure(*p);
-+	handle_mds_failure(*p);
-       }
-     
-     // or down then up?
-@@ -1061,7 +1061,7 @@ void MDS::handle_mds_map(MMDSMap *m)
-       if (oldmap->have_inst(*p) &&
- 	  oldmap->get_inst(*p) != mdsmap->get_inst(*p)) {
- 	messenger->mark_down(oldmap->get_inst(*p).addr);
--	mdcache->handle_mds_failure(*p);
-+	handle_mds_failure(*p);
-       }
-   }
-   if (is_clientreplay() || is_active() || is_stopping()) {
-@@ -1548,6 +1548,16 @@ void MDS::handle_mds_recovery(int who)
-   waiting_for_active_peer.erase(who);
- }
- 
-+void MDS::handle_mds_failure(int who)
-+{
-+  dout(5) << "handle_mds_failure mds." << who << dendl;
-+
-+  mdcache->handle_mds_failure(who);
-+
-+  anchorclient->handle_mds_failure(who);
-+  snapclient->handle_mds_failure(who);
-+}
-+
- void MDS::stopping_start()
- {
-   dout(2) << "stopping_start" << dendl;
-diff --git a/src/mds/MDS.h b/src/mds/MDS.h
-index 42e8516..6658cf0 100644
---- a/src/mds/MDS.h
-+++ b/src/mds/MDS.h
-@@ -378,13 +378,15 @@ class MDS : public Dispatcher {
-   void rejoin_joint_start();
-   void rejoin_done();
-   void recovery_done();
--  void handle_mds_recovery(int who);
-   void clientreplay_start();
-   void clientreplay_done();
-   void active_start();
-   void stopping_start();
-   void stopping_done();
- 
-+  void handle_mds_recovery(int who);
-+  void handle_mds_failure(int who);
-+
-   void suicide();
-   void respawn();
- 
 diff --git a/src/mds/MDSTableClient.cc b/src/mds/MDSTableClient.cc
-index 12331f9..2ce3286 100644
+index 2ce3286..b478149 100644
 --- a/src/mds/MDSTableClient.cc
 +++ b/src/mds/MDSTableClient.cc
-@@ -65,18 +65,15 @@ void MDSTableClient::handle_request(class MMDSTableRequest *m)
+@@ -59,11 +59,17 @@ void MDSTableClient::handle_request(class MMDSTableRequest *m)
+       if (pending_prepare[reqid].pbl)
+ 	*pending_prepare[reqid].pbl = m->bl;
+       pending_prepare.erase(reqid);
++      prepared_update[tid] = reqid;
+       if (onfinish) {
+         onfinish->finish(0);
+         delete onfinish;
        }
-     } 
+-    } 
++    }
++    else if (prepared_update.count(tid)) {
++      dout(10) << "got duplicated agree on " << reqid << " atid " << tid << dendl;
++      assert(prepared_update[tid] == reqid);
++      assert(!server_ready);
++    }
      else if (pending_commit.count(tid)) {
--      dout(10) << "stray agree on " << reqid
--	       << " tid " << tid
--	       << ", already committing, resending COMMIT"
--	       << dendl;      
--      MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_COMMIT, 0, tid);
--      mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-+      dout(10) << "stray agree on " << reqid << " tid " << tid
-+	       << ", already committing, will resend COMMIT" << dendl;
-+      assert(!server_ready);
-+      // will re-send commit when receiving the server ready message
-     }
-     else {
--      dout(10) << "stray agree on " << reqid
--	       << " tid " << tid
--	       << ", sending ROLLBACK"
--	       << dendl;      
-+      dout(10) << "stray agree on " << reqid << " tid " << tid
-+	       << ", sending ROLLBACK" << dendl;
-+      assert(!server_ready);
-       MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_ROLLBACK, 0, tid);
-       mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-     }
-@@ -102,6 +99,9 @@ void MDSTableClient::handle_request(class MMDSTableRequest *m)
-     break;
+       dout(10) << "stray agree on " << reqid << " tid " << tid
+ 	       << ", already committing, will resend COMMIT" << dendl;
+@@ -162,6 +168,9 @@ void MDSTableClient::commit(version_t tid, LogSegment *ls)
+ {
+   dout(10) << "commit " << tid << dendl;
  
-   case TABLESERVER_OP_SERVER_READY:
-+    assert(!server_ready);
-+    server_ready = true;
++  assert(prepared_update.count(tid));
++  prepared_update.erase(tid);
 +
-     if (last_reqid == ~0ULL)
-       last_reqid = reqid;
- 
-@@ -144,26 +144,18 @@ void MDSTableClient::_prepare(bufferlist& mutation, version_t *ptid, bufferlist
-   uint64_t reqid = ++last_reqid;
-   dout(10) << "_prepare " << reqid << dendl;
- 
--  // send message
--  MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_PREPARE, reqid);
--  req->bl = mutation;
--
-   pending_prepare[reqid].mutation = mutation;
-   pending_prepare[reqid].ptid = ptid;
-   pending_prepare[reqid].pbl = pbl;
-   pending_prepare[reqid].onfinish = onfinish;
- 
--  send_to_tableserver(req);
--}
--
--void MDSTableClient::send_to_tableserver(MMDSTableRequest *req)
--{
--  int ts = mds->mdsmap->get_tableserver();
--  if (mds->mdsmap->get_state(ts) >= MDSMap::STATE_CLIENTREPLAY)
--    mds->send_message_mds(req, ts);
--  else {
--    dout(10) << " deferring request to not-yet-active tableserver mds." << ts << dendl;
--  }
-+  if (server_ready) {
-+    // send message
-+    MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_PREPARE, reqid);
-+    req->bl = mutation;
-+    mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-+  } else
-+    dout(10) << "tableserver is not ready yet, deferring request" << dendl;
- }
- 
- void MDSTableClient::commit(version_t tid, LogSegment *ls)
-@@ -176,9 +168,12 @@ void MDSTableClient::commit(version_t tid, LogSegment *ls)
- 
-   assert(g_conf->mds_kill_mdstable_at != 4);
- 
--  // send message
--  MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_COMMIT, 0, tid);
--  send_to_tableserver(req);
-+  if (server_ready) {
-+    // send message
-+    MMDSTableRequest *req = new MMDSTableRequest(table, TABLESERVER_OP_COMMIT, 0, tid);
-+    mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-+  } else
-+    dout(10) << "tableserver is not ready yet, deferring request" << dendl;
- }
- 
- 
-@@ -228,3 +223,12 @@ void MDSTableClient::resend_prepares()
-     mds->send_message_mds(req, mds->mdsmap->get_tableserver());
-   }
- }
-+
-+void MDSTableClient::handle_mds_failure(int who)
-+{
-+  if (who != mds->mdsmap->get_tableserver())
-+    return; // do nothing.
-+
-+  dout(7) << "tableserver mds." << who << " fails" << dendl;
-+  server_ready = false;
-+}
+   assert(pending_commit.count(tid) == 0);
+   pending_commit[tid] = ls;
+   ls->pending_commit_tids[table].insert(tid);
 diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
-index 934f5fe..f8a84eb 100644
+index f8a84eb..16b14c4 100644
 --- a/src/mds/MDSTableClient.h
 +++ b/src/mds/MDSTableClient.h
-@@ -30,6 +30,8 @@ protected:
+@@ -45,6 +45,7 @@ protected:
+   };
  
-   uint64_t last_reqid;
+   map<uint64_t, _pending_prepare> pending_prepare;
++  map<version_t, uint64_t> prepared_update;
+   list<_pending_prepare> waiting_for_reqid;
  
-+  bool server_ready;
+   // pending commits
+diff --git a/src/mds/MDSTableServer.cc b/src/mds/MDSTableServer.cc
+index 00bea5e..b775246 100644
+--- a/src/mds/MDSTableServer.cc
++++ b/src/mds/MDSTableServer.cc
+@@ -120,10 +120,13 @@ void MDSTableServer::_commit_logged(MMDSTableRequest *req)
+ void MDSTableServer::handle_rollback(MMDSTableRequest *req)
+ {
+   dout(7) << "handle_rollback " << *req << dendl;
+-  _rollback(req->get_tid());
+-  _note_rollback(req->get_tid());
 +
-   // prepares
-   struct _pending_prepare {
-     Context *onfinish;
-@@ -63,7 +65,8 @@ protected:
-   void _logged_ack(version_t tid);
++  version_t tid = req->get_tid();
++  assert(pending_for_mds.count(tid));
++  _rollback(tid);
++  _note_rollback(tid);
+   mds->mdlog->start_submit_entry(new ETableServer(table, TABLESERVER_OP_ROLLBACK, 0, -1, 
+-						  req->get_tid(), version));
++						  tid, version));
+   req->put();
+ }
  
- public:
--  MDSTableClient(MDS *m, int tab) : mds(m), table(tab), last_reqid(~0ULL) {}
-+  MDSTableClient(MDS *m, int tab) :
-+    mds(m), table(tab), last_reqid(~0ULL), server_ready(false) {}
-   virtual ~MDSTableClient() {}
- 
-   void handle_request(MMDSTableRequest *m);
-@@ -85,7 +88,7 @@ public:
-     ack_waiters[tid].push_back(c);
-   }
- 
--  void send_to_tableserver(MMDSTableRequest *req);
-+  void handle_mds_failure(int mds);
- 
-   // child must implement
-   virtual void resend_queries() = 0;
 -- 
 1.7.11.7
 
