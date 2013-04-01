@@ -1,100 +1,67 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] mds: don't roll back prepared table updates
-Date: Mon,  1 Apr 2013 16:51:22 +0800
-Message-ID: <1364806282-15071-2-git-send-email-zheng.z.yan@intel.com>
-References: <1363531902-24909-1-git-send-email-zheng.z.yan@intel.com>
- <1364806282-15071-1-git-send-email-zheng.z.yan@intel.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] ceph: set up page array mempool with correct size
+Date: Mon, 01 Apr 2013 10:49:23 -0500
+Message-ID: <5159AC83.4060007@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:19353 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755591Ab3DAIvi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 1 Apr 2013 04:51:38 -0400
-In-Reply-To: <1364806282-15071-1-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-ia0-f171.google.com ([209.85.210.171]:47962 "EHLO
+	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756728Ab3DAPt1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Apr 2013 11:49:27 -0400
+Received: by mail-ia0-f171.google.com with SMTP id z13so1998083iaz.2
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Apr 2013 08:49:26 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com, greg@inktank.com
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+In create_fs_client() a memory pool is set up be used for arrays of
+pages that might be needed in ceph_writepages_start() if memory is
+tight.  There are two problems with the way it's initialized:
+    - The size provided is the number of pages we want in the
+      array, but it should be the number of bytes required for
+      that many page pointers.
+    - The number of pages computed can end up being 0, while we
+      will always need at least one page.
 
-When table server is recovering, it re-sends 'agree' messages for
-prepared table updates. It is possible table client receives an
-'agree' messages before it commits the corresponding update. Don't
-send 'rollback' message back to the server in this case.
+This patch fixes both of these problems.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+This resolves the two simple problems defined in:
+    http://tracker.ceph.com/issues/4603
+
+Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- src/mds/MDSTableClient.cc | 11 ++++++++++-
- src/mds/MDSTableClient.h  |  1 +
- src/mds/MDSTableServer.cc |  9 ++++++---
- 3 files changed, 17 insertions(+), 4 deletions(-)
+ fs/ceph/super.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/src/mds/MDSTableClient.cc b/src/mds/MDSTableClient.cc
-index 2ce3286..b478149 100644
---- a/src/mds/MDSTableClient.cc
-+++ b/src/mds/MDSTableClient.cc
-@@ -59,11 +59,17 @@ void MDSTableClient::handle_request(class MMDSTableRequest *m)
-       if (pending_prepare[reqid].pbl)
- 	*pending_prepare[reqid].pbl = m->bl;
-       pending_prepare.erase(reqid);
-+      prepared_update[tid] = reqid;
-       if (onfinish) {
-         onfinish->finish(0);
-         delete onfinish;
-       }
--    } 
-+    }
-+    else if (prepared_update.count(tid)) {
-+      dout(10) << "got duplicated agree on " << reqid << " atid " << tid << dendl;
-+      assert(prepared_update[tid] == reqid);
-+      assert(!server_ready);
-+    }
-     else if (pending_commit.count(tid)) {
-       dout(10) << "stray agree on " << reqid << " tid " << tid
- 	       << ", already committing, will resend COMMIT" << dendl;
-@@ -162,6 +168,9 @@ void MDSTableClient::commit(version_t tid, LogSegment *ls)
- {
-   dout(10) << "commit " << tid << dendl;
- 
-+  assert(prepared_update.count(tid));
-+  prepared_update.erase(tid);
-+
-   assert(pending_commit.count(tid) == 0);
-   pending_commit[tid] = ls;
-   ls->pending_commit_tids[table].insert(tid);
-diff --git a/src/mds/MDSTableClient.h b/src/mds/MDSTableClient.h
-index f8a84eb..16b14c4 100644
---- a/src/mds/MDSTableClient.h
-+++ b/src/mds/MDSTableClient.h
-@@ -45,6 +45,7 @@ protected:
-   };
- 
-   map<uint64_t, _pending_prepare> pending_prepare;
-+  map<version_t, uint64_t> prepared_update;
-   list<_pending_prepare> waiting_for_reqid;
- 
-   // pending commits
-diff --git a/src/mds/MDSTableServer.cc b/src/mds/MDSTableServer.cc
-index 00bea5e..b775246 100644
---- a/src/mds/MDSTableServer.cc
-+++ b/src/mds/MDSTableServer.cc
-@@ -120,10 +120,13 @@ void MDSTableServer::_commit_logged(MMDSTableRequest *req)
- void MDSTableServer::handle_rollback(MMDSTableRequest *req)
- {
-   dout(7) << "handle_rollback " << *req << dendl;
--  _rollback(req->get_tid());
--  _note_rollback(req->get_tid());
-+
-+  version_t tid = req->get_tid();
-+  assert(pending_for_mds.count(tid));
-+  _rollback(tid);
-+  _note_rollback(tid);
-   mds->mdlog->start_submit_entry(new ETableServer(table, TABLESERVER_OP_ROLLBACK, 0, -1, 
--						  req->get_tid(), version));
-+						  tid, version));
-   req->put();
- }
- 
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 9fe17c6c..318bee0 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -479,6 +479,8 @@ static struct ceph_fs_client
+*create_fs_client(struct ceph_mount_options *fsopt,
+ 		CEPH_FEATURE_FLOCK |
+ 		CEPH_FEATURE_DIRLAYOUTHASH;
+ 	const unsigned required_features = 0;
++	int page_count;
++	size_t size;
+ 	int err = -ENOMEM;
+
+ 	fsc = kzalloc(sizeof(*fsc), GFP_KERNEL);
+@@ -522,8 +524,9 @@ static struct ceph_fs_client
+*create_fs_client(struct ceph_mount_options *fsopt,
+
+ 	/* set up mempools */
+ 	err = -ENOMEM;
+-	fsc->wb_pagevec_pool = mempool_create_kmalloc_pool(10,
+-			      fsc->mount_options->wsize >> PAGE_CACHE_SHIFT);
++	page_count = fsc->mount_options->wsize >> PAGE_CACHE_SHIFT;
++	size = sizeof (struct page *) * (page_count ? page_count : 1);
++	fsc->wb_pagevec_pool = mempool_create_kmalloc_pool(10, size);
+ 	if (!fsc->wb_pagevec_pool)
+ 		goto fail_trunc_wq;
+
 -- 
-1.7.11.7
+1.7.9.5
 
