@@ -1,102 +1,126 @@
 From: "Jim Schutt" <jaschut@sandia.gov>
 Subject: Re: Trouble with paxos service for large PG count
-Date: Tue, 2 Apr 2013 12:18:32 -0600
-Message-ID: <515B20F8.5060203@sandia.gov>
+Date: Tue, 2 Apr 2013 13:16:28 -0600
+Message-ID: <515B2E8C.5090001@sandia.gov>
 References: <5159F899.4090001@sandia.gov> <515AFC5F.4000705@inktank.com>
+ <515B20F8.5060203@sandia.gov>
+ <CAGgG2xTdTOWvaPAK2FnxpzC1fsok50_HXXSgayEoD3J8SK6k3w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:39178 "EHLO
+Received: from sentry-two.sandia.gov ([132.175.109.14]:39340 "EHLO
 	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760629Ab3DBSSy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 14:18:54 -0400
-In-Reply-To: <515AFC5F.4000705@inktank.com>
+	with ESMTP id S932283Ab3DBTRz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 15:17:55 -0400
+In-Reply-To: <CAGgG2xTdTOWvaPAK2FnxpzC1fsok50_HXXSgayEoD3J8SK6k3w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao.luis@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Joao Luis <joao.luis@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 04/02/2013 09:42 AM, Joao Eduardo Luis wrote:
+On 04/02/2013 12:28 PM, Joao Luis wrote:
+> Right.  I'll push a patch to bump that sort of output to 30 when I get home.
 
-> On 04/01/2013 10:14 PM, Jim Schutt wrote:
->> Hi,
->>
->> I've been having trouble starting a new file system
->> created using the current next branch (most recently,
->> commit 3b5f663f11).
->>
->> I believe the trouble is related to how long it takes paxos to
->> process a pgmap proposal.
->>
->> For a configuration with 1 mon, 1 mds, and 576 osds, using
->> pg_bits = 3 and debug paxos = 10, if I start just the monitor,
->> here's what I get when paxos processes the first non-trivial
->> pgmap proposal:
->>
+Thanks - but FWIW, I don't think it's the root cause of my
+issue -- more below....
 > 
-> Just noticed one other thing.  With 'debug paxos = 10', you should have a whole bunch of output (the proposal's dump) after this:
-> 
->> 2013-04-01 14:04:16.330735 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(pgmap) propose_pending
->> 2013-04-01 14:04:16.358973 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos active c 1..3) queue_proposal bl 4943990 bytes; ctx = 0x11e81f0
->> 2013-04-01 14:04:16.359021 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued 4 4943990 bytes
->> 2013-04-01 14:04:16.359025 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued list_proposals 1 in queue:
-> 
-> and before this:
-> 
->> 2013-04-01 14:04:28.096284 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) begin for 4 4943990 bytes
-> 
-> for every snippet you sent on your previous email.
-> 
-> The code responsible for that shouldn't ever have made into master, and should be to blame for a great deal of the time spent.
-> 
-> Jim, can you confirm such output is present?
+> If you're willing, try reducing the paxos debug level to 0 and let us know
+> if those delays in the proposal go away.
 
-Yep, here's what I see:
+When I started debugging why I couldn't start new filesystems, several
+days ago, I wasn't using any debugging.  It took me until last Friday
+to track the issue into paxos, which is when I turned on its debugging.
 
-2013-04-01 14:04:16.359021 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued 4 4943990 bytes
-2013-04-01 14:04:16.359025 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued list_proposals 1 in queue:
--- entry #0
- proposed queued 0.000008 tx dump:
-{ "ops": [
-        { "op_num": 0,
-          "type": "PUT",
-          "prefix": "pgmap",
-          "key": "full_1",
-          "length": 46,
-          "bl": "0000 : 05 04 28 00 00 00 01 00 00 00 00 00 00 00 00 00 : ..(.............\n0010 : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 33 33 : ..............33\n0020 : 73 3f 9a 99 59 3f 40 e8 59 51 90 f0 a4 07       : s?..Y?@.YQ....\n"},
-        { "op_num": 1,
-          "type": "PUT",
-          "prefix": "pgmap",
-          "key": "full_latest",
-          "length": 8,
-          "bl": "0000 : 01 00 00 00 00 00 00 00                         : ........\n"},
-        { "op_num": 2,
-          "type": "PUT",
-          "prefix": "pgmap",
-          "key": "2",
-          "length": 4943790,
-          "bl": "0000 : 06 05 a8 6f 4b 00 02 00 00 00 00 00 00 00 18 36 : ...oK..........6
+Also, I've added the following bits of debug output:
 
-[snipped lots more of the bufferlist, then]
+diff --git a/src/mon/Paxos.cc b/src/mon/Paxos.cc
+index bf3eb92..70a8b5d 100644
+--- a/src/mon/Paxos.cc
++++ b/src/mon/Paxos.cc
+@@ -494,6 +494,8 @@ void Paxos::begin(bufferlist& v)
+   MonitorDBStore::Transaction t;
+   t.put(get_name(), last_committed+1, new_value);
+ 
++  utime_t tstart = ceph_clock_now(g_ceph_context);
++
+   dout(30) << __func__ << " transaction dump:\n";
+   JSONFormatter f(true);
+   t.dump(&f);
+@@ -506,7 +508,14 @@ void Paxos::begin(bufferlist& v)
+   f.flush(*_dout);
+   *_dout << dendl;
+ 
++  dout(10) <<  __func__ << " - JSON formatting, debug_tx decode took "
++           << ceph_clock_now(g_ceph_context) - tstart << dendl;
++
++  tstart = ceph_clock_now(g_ceph_context);
+   get_store()->apply_transaction(t);
++  dout(10) <<  __func__ << " - get_store()->apply_transaction took "
++           << ceph_clock_now(g_ceph_context) - tstart << dendl;
++
+ 
+   if (mon->get_quorum().size() == 1) {
+     // we're alone, take it easy
+diff --git a/src/mon/PaxosService.cc b/src/mon/PaxosService.cc
+index a66c5ec..808ce62 100644
+--- a/src/mon/PaxosService.cc
++++ b/src/mon/PaxosService.cc
+@@ -158,6 +158,8 @@ void PaxosService::propose_pending()
+   encode_pending(&t);
+   have_pending = false;
+ 
++  utime_t tstart = ceph_clock_now(g_ceph_context);
++
+   dout(30) << __func__ << " transaction dump:\n";
+   JSONFormatter f(true);
+   t.dump(&f);
+@@ -166,6 +168,9 @@ void PaxosService::propose_pending()
+ 
+   t.encode(bl);
+ 
++  dout(10) <<  __func__ << " - JSON formatting, encode took "
++           << ceph_clock_now(g_ceph_context) - tstart << dendl;
++
+   // apply to paxos
+   proposing.set(1);
+   paxos->propose_new_value(bl, new C_Committed(this));
 
-        { "op_num": 3,
-          "type": "PUT",
-          "prefix": "pgmap",
-          "key": "last_committed",
-          "length": 8,
-          "bl": "0000 : 02 00 00 00 00 00 00 00                         : ........\n"}]}
-2013-04-01 14:04:28.096284 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) begin for 4 4943990 bytes
 
-As you suggested, I see that sort of thing for every "propose_queued list_proposals" in my logs
+which produces this:
+
+2013-04-02 13:04:22.311743 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(pgmap) propose_pending
+2013-04-02 13:04:22.426810 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(pgmap) propose_pending - JSON formatting, encode took 0.000170
+2013-04-02 13:04:22.426874 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos active c 1..3) queue_proposal bl 19775198 bytes; ctx = 0x11e81f0
+2013-04-02 13:04:22.426999 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued 4 19775198 bytes
+2013-04-02 13:04:22.427003 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued list_proposals 1 in queue:
+2013-04-02 13:07:51.190312 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) begin for 4 19775198 bytes
+2013-04-02 13:07:51.190860 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos updating c 1..3) begin - JSON formatting, debug_tx decode took 0.000002
+2013-04-02 13:07:51.402134 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos updating c 1..3) begin - get_store()->apply_transaction took 0.211275
+2013-04-02 13:07:51.402178 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos updating c 1..3) commit 4
+2013-04-02 13:07:51.635113 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos active c 1..4) finish_queued_proposal finishing proposal
+2013-04-02 13:07:51.635152 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos active c 1..4) finish_queued_proposal finish it (proposal = 0x1261340)
+2013-04-02 13:07:51.635159 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos active c 1..4) finish_queued_proposal proposal took 209.208162 to finish
+2013-04-02 13:07:51.635193 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(pgmap) _active
+
+
+I thought I was timing the same JSON formatting in propose_pending()
+and begin(), but they take much different amounts of time.
+I don't understand why yet.....
+
+Also, I just noticed the elapsed time between these two lines:
+
+2013-04-02 13:04:22.427003 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued list_proposals 1 in queue:
+2013-04-02 13:07:51.190312 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) begin for 4 19775198 bytes
+
+It accounts for nearly the whole of the delay that finish_queued_proposal()
+is reporting.  Why did begin() take so long to start, I wonder ???
 
 -- Jim
 
-> 
+
 > 
 >   -Joao
-> 
-> 
 
 
