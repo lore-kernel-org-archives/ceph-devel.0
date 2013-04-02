@@ -1,58 +1,42 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.60 released
-Date: Mon, 1 Apr 2013 19:16:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1304011817500.28170@cobra.newdream.net>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: RGW: Refusing FastCGI request with empty CONTENT_LENGTH ? Why ?
+Date: Tue, 2 Apr 2013 15:03:43 +0200
+Message-ID: <CAF6-1L6y81uVN29ZJyjxOHv5r=cQXqoYdSV22AGHY1U9Xgu57g@mail.gmail.com>
+References: <CAF6-1L4GdD8w=3y-0fnVHLA1RPAoKmr-EwST9_pteD_i8opkPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38055 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758828Ab3DBCQt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Apr 2013 22:16:49 -0400
+Received: from mail-bk0-f52.google.com ([209.85.214.52]:37304 "EHLO
+	mail-bk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760561Ab3DBNDp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 09:03:45 -0400
+Received: by mail-bk0-f52.google.com with SMTP id it16so195915bkc.25
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Apr 2013 06:03:44 -0700 (PDT)
+In-Reply-To: <CAF6-1L4GdD8w=3y-0fnVHLA1RPAoKmr-EwST9_pteD_i8opkPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Another sprint and another release!  This is the last development release 
-before v0.61 Cuttlefish, which is due out in 4 weeks (around May 1).  The 
-next few weeks will be focused on making sure everything we've built over 
-the last few months is rock solid and ready for you.  We will have an -rc 
-release ready for you in a couple of weeks.  In the meantime, v0.60 has a 
-few goodies:
+Hi,
 
-* osd: make tracking of object snapshot metadata more efficient (Sam Just)
-* osd: misc fixes to PG split (Sam Just)
-* osd: improve journal corruption detection (Sam Just)
-* osd: improve handling when disk fills up (David Zafman)
-* osd: add 'noscrub', 'nodeepscrub' osdmap flags (David Zafman)
-* osd: fix hang in 'journal aio = true' mode (Sage Weil)
-* ceph-disk-prepare: fix mkfs args on old distros (Alexandre Marangone)
-* ceph-disk-activate: improve multicluster support, error handling (Sage 
-  Weil)
-* librbd: optionally wait for flush before enabling writeback (Josh 
-  Durgin)
-* crush: update weights for all instances of an item, not just the first 
-  (Sage Weil)
-* mon: shut down safely if disk approaches full (Joao Luis)
-* rgw: fix Content-Length on 32-bit machines (Jan Harkes)
-* mds: store and update backpointers/traces on directory, file objects 
-  (Sam Lang)
-* mds: improve session cleanup (Sage Weil)
-* mds, ceph-fuse: fix bugs with replayed requests after MDS restart (Sage 
-  Weil)
-* ceph-fuse: enable kernel cache invalidation (Sam Lang)
-* libcephfs: new topo API requests for Hadoop (Noah Watkins)
-* ceph-fuse: session handling cleanup, bug fixes (Sage Weil)
-* much code cleanup and optimization (Danny Al-Gaaf)
-* use less memory for logging by default
-* upstart: automatically set osd weight based on df (Guilhem Lettron)
-* init-ceph, mkcephfs: close a few security holes with -a  (Sage Weil)
-* rpm/deb: do not remove /var/lib/ceph on purge (v0.59 was the only 
-  release to do so)
 
-You can get v0.60 from the usual locations:
+In src/rgw/rgw_rest.cc you can find :
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.60.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+if (s->length) {
+  if (*s->length == '\0')
+    return -EINVAL;
+  s->content_length = atoll(s->length);
+}
+
+So that means if there is a CONTENT_LENGTH field in the environment
+but it's empty, then the request is just refused.
+
+Why ?
+
+As it turns out, nginx does send an empty CONTENT_LENGTH params ...
+which means it doesn't work at all of course.
+
+
+Cheers,
+
+     Sylvain
