@@ -1,34 +1,61 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: RGW: Refusing FastCGI request with empty CONTENT_LENGTH ? Why ?
-Date: Tue, 2 Apr 2013 15:28:42 +0200
-Message-ID: <CAF6-1L5L1s4hdvrFLAiF7Z0ByJ0JcDASwrvM4AexPfmgvCg0=w@mail.gmail.com>
-References: <CAF6-1L4GdD8w=3y-0fnVHLA1RPAoKmr-EwST9_pteD_i8opkPw@mail.gmail.com>
-	<CAF6-1L6y81uVN29ZJyjxOHv5r=cQXqoYdSV22AGHY1U9Xgu57g@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] libceph: drop mutex on error in handle_reply()
+Date: Tue, 02 Apr 2013 08:35:04 -0500
+Message-ID: <515ADE88.8080501@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f41.google.com ([209.85.214.41]:43598 "EHLO
-	mail-bk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760243Ab3DBN2n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 09:28:43 -0400
-Received: by mail-bk0-f41.google.com with SMTP id i18so213453bkv.14
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Apr 2013 06:28:42 -0700 (PDT)
-In-Reply-To: <CAF6-1L6y81uVN29ZJyjxOHv5r=cQXqoYdSV22AGHY1U9Xgu57g@mail.gmail.com>
+Received: from mail-vc0-f181.google.com ([209.85.220.181]:64716 "EHLO
+	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761146Ab3DBNfH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 09:35:07 -0400
+Received: by mail-vc0-f181.google.com with SMTP id hv10so401229vcb.40
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Apr 2013 06:35:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+The osd client mutex is acquired just before getting a reference to
+a request in handle_reply().  However the error paths after that
+don't drop the mutex before returning as they should.
 
-Replying to myself
+Drop the mutex after dropping the request reference.  Also add a
+bad_mutex label at that point and use it so the failed request
+lookup case can be handled with the rest.
 
-> So that means if there is a CONTENT_LENGTH field in the environment
-> but it's empty, then the request is just refused.
+This resolves:
+    http://tracker.ceph.com/issues/4615
 
-This is fixed in master but wasn't backported to the bobtail branch,
-which is how I missed it ...
-Sorry for the noise.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/osd_client.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-Cheers,
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 9b69f47..abbcde3 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1332,8 +1332,7 @@ static void handle_reply(struct ceph_osd_client
+*osdc, struct ceph_msg *msg,
+ 	req = __lookup_request(osdc, tid);
+ 	if (req == NULL) {
+ 		dout("handle_reply tid %llu dne\n", tid);
+-		mutex_unlock(&osdc->request_mutex);
+-		return;
++		goto bad_mutex;
+ 	}
+ 	ceph_osdc_get_request(req);
 
-    Sylvain
+@@ -1422,6 +1421,8 @@ done:
+
+ bad_put:
+ 	ceph_osdc_put_request(req);
++bad_mutex:
++	mutex_unlock(&osdc->request_mutex);
+ bad:
+ 	pr_err("corrupt osd_op_reply got %d %d\n",
+ 	       (int)msg->front.iov_len, le32_to_cpu(msg->hdr.front_len));
+-- 
+1.7.9.5
+
