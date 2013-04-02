@@ -1,58 +1,71 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: Trouble with paxos service for large PG count
-Date: Tue, 02 Apr 2013 16:42:23 +0100
-Message-ID: <515AFC5F.4000705@inktank.com>
-References: <5159F899.4090001@sandia.gov>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] libceph: drop mutex on error in handle_reply()
+Date: Tue, 2 Apr 2013 09:35:37 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304020935330.4476@cobra.newdream.net>
+References: <515ADE88.8080501@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f44.google.com ([74.125.83.44]:33071 "EHLO
-	mail-ee0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932588Ab3DBPtD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 11:49:03 -0400
-Received: by mail-ee0-f44.google.com with SMTP id l10so312978eei.31
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Apr 2013 08:49:02 -0700 (PDT)
-In-Reply-To: <5159F899.4090001@sandia.gov>
+Received: from cobra.newdream.net ([66.33.216.30]:44744 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761626Ab3DBQfi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 12:35:38 -0400
+In-Reply-To: <515ADE88.8080501@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 04/01/2013 10:14 PM, Jim Schutt wrote:
-> Hi,
->
-> I've been having trouble starting a new file system
-> created using the current next branch (most recently,
-> commit 3b5f663f11).
->
-> I believe the trouble is related to how long it takes paxos to
-> process a pgmap proposal.
->
-> For a configuration with 1 mon, 1 mds, and 576 osds, using
-> pg_bits = 3 and debug paxos = 10, if I start just the monitor,
-> here's what I get when paxos processes the first non-trivial
-> pgmap proposal:
->
+Reviewed-by: Sage Weil <sage@inktank.com>
 
-Just noticed one other thing.  With 'debug paxos = 10', you should have 
-a whole bunch of output (the proposal's dump) after this:
+On Tue, 2 Apr 2013, Alex Elder wrote:
 
-> 2013-04-01 14:04:16.330735 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(pgmap) propose_pending
-> 2013-04-01 14:04:16.358973 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos active c 1..3) queue_proposal bl 4943990 bytes; ctx = 0x11e81f0
-> 2013-04-01 14:04:16.359021 7ffff7fbe780  5 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued 4 4943990 bytes
-> 2013-04-01 14:04:16.359025 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) propose_queued list_proposals 1 in queue:
-
-and before this:
-
-> 2013-04-01 14:04:28.096284 7ffff7fbe780 10 mon.cs31@0(leader).paxos(paxos preparing update c 1..3) begin for 4 4943990 bytes
-
-for every snippet you sent on your previous email.
-
-The code responsible for that shouldn't ever have made into master, and 
-should be to blame for a great deal of the time spent.
-
-Jim, can you confirm such output is present?
-
-
-   -Joao
+> The osd client mutex is acquired just before getting a reference to
+> a request in handle_reply().  However the error paths after that
+> don't drop the mutex before returning as they should.
+> 
+> Drop the mutex after dropping the request reference.  Also add a
+> bad_mutex label at that point and use it so the failed request
+> lookup case can be handled with the rest.
+> 
+> This resolves:
+>     http://tracker.ceph.com/issues/4615
+> 
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>  net/ceph/osd_client.c |    5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 9b69f47..abbcde3 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1332,8 +1332,7 @@ static void handle_reply(struct ceph_osd_client
+> *osdc, struct ceph_msg *msg,
+>  	req = __lookup_request(osdc, tid);
+>  	if (req == NULL) {
+>  		dout("handle_reply tid %llu dne\n", tid);
+> -		mutex_unlock(&osdc->request_mutex);
+> -		return;
+> +		goto bad_mutex;
+>  	}
+>  	ceph_osdc_get_request(req);
+> 
+> @@ -1422,6 +1421,8 @@ done:
+> 
+>  bad_put:
+>  	ceph_osdc_put_request(req);
+> +bad_mutex:
+> +	mutex_unlock(&osdc->request_mutex);
+>  bad:
+>  	pr_err("corrupt osd_op_reply got %d %d\n",
+>  	       (int)msg->front.iov_len, le32_to_cpu(msg->hdr.front_len));
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
