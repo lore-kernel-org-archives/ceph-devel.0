@@ -1,71 +1,148 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: drop mutex on error in handle_reply()
-Date: Tue, 2 Apr 2013 09:35:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1304020935330.4476@cobra.newdream.net>
-References: <515ADE88.8080501@inktank.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: v0.60 released
+Date: Tue, 02 Apr 2013 14:13:50 -0300
+Message-ID: <orzjxghn3l.fsf@livre.home>
+References: <alpine.DEB.2.00.1304011817500.28170@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed; boundary="=-=-="
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44744 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761626Ab3DBQfi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 12:35:38 -0400
-In-Reply-To: <515ADE88.8080501@inktank.com>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:58329 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761176Ab3DBROE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Apr 2013 13:14:04 -0400
+In-Reply-To: <alpine.DEB.2.00.1304011817500.28170@cobra.newdream.net> (Sage
+	Weil's message of "Mon, 1 Apr 2013 19:16:49 -0700 (PDT)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+--=-=-=
 
-On Tue, 2 Apr 2013, Alex Elder wrote:
+On Apr  1, 2013, Sage Weil <sage@inktank.com> wrote:
 
-> The osd client mutex is acquired just before getting a reference to
-> a request in handle_reply().  However the error paths after that
-> don't drop the mutex before returning as they should.
-> 
-> Drop the mutex after dropping the request reference.  Also add a
-> bad_mutex label at that point and use it so the failed request
-> lookup case can be handled with the rest.
-> 
-> This resolves:
->     http://tracker.ceph.com/issues/4615
-> 
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->  net/ceph/osd_client.c |    5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 9b69f47..abbcde3 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1332,8 +1332,7 @@ static void handle_reply(struct ceph_osd_client
-> *osdc, struct ceph_msg *msg,
->  	req = __lookup_request(osdc, tid);
->  	if (req == NULL) {
->  		dout("handle_reply tid %llu dne\n", tid);
-> -		mutex_unlock(&osdc->request_mutex);
-> -		return;
-> +		goto bad_mutex;
->  	}
->  	ceph_osdc_get_request(req);
-> 
-> @@ -1422,6 +1421,8 @@ done:
-> 
->  bad_put:
->  	ceph_osdc_put_request(req);
-> +bad_mutex:
-> +	mutex_unlock(&osdc->request_mutex);
->  bad:
->  	pr_err("corrupt osd_op_reply got %d %d\n",
->  	       (int)msg->front.iov_len, le32_to_cpu(msg->hdr.front_len));
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> * mds, ceph-fuse: fix bugs with replayed requests after MDS restart (Sage 
+>   Weil)
+
+There's a brown paperbag bug in the session_info_t compat decoding code,
+that caused mds to crash on start up for me.  Here's a fix.  I also
+patched the spec file so that rpms would build.
+
+
+--=-=-=
+Content-Type: text/x-diff
+Content-Disposition: inline; filename=mds-session-info-compat-decode.patch
+
+Fix compat decoding of session_info_t
+
+From: Alexandre Oliva <oliva@gnu.org>
+
+Compat decoding built a set<tid_t> temporary to decode
+completed_requests with its old type and took info from the set and
+put it in completed_requests after decoding, but it decoded into the
+new type instead of the temporary.  Oops.  Fixed.
+
+Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+---
+ src/mds/mdstypes.cc |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mds/mdstypes.cc b/src/mds/mdstypes.cc
+index ad4a71a..6c34c63 100644
+--- a/src/mds/mdstypes.cc
++++ b/src/mds/mdstypes.cc
+@@ -543,7 +543,7 @@ void session_info_t::decode(bufferlist::iterator& p)
+   ::decode(inst, p);
+   if (struct_v == 2) {
+     set<tid_t> s;
+-    ::decode(completed_requests, p);
++    ::decode(s, p);
+     while (!s.empty()) {
+       completed_requests[*s.begin()] = inodeno_t();
+       s.erase(s.begin());
+
+--=-=-=
+Content-Type: text/x-diff
+Content-Disposition: inline; filename=ceph-spec-0.60.patch
+
+Package ceph_test_snap_mapper, drop dir dupes
+
+From: Alexandre Oliva <oliva@gnu.org>
+
+rpmbuild failed on ceph 0.60 because ceph_test_snap_mapper was
+installed but not packaged.
+
+rpm also complained about some directories packaged twice.  Some names
+used rpm macros, others mentioned /etc and /var explicitly.
+I consolidated them all into the placeholder directories group, and
+changed them to use the rpm macros.
+
+Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+---
+ ceph.spec.in |   26 ++++++++++++--------------
+ 1 file changed, 12 insertions(+), 14 deletions(-)
+
+diff --git a/ceph.spec.in b/ceph.spec.in
+index cb998c4..48aed35 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -413,13 +413,7 @@ fi
+ %{_mandir}/man8/ceph-debugpack.8*
+ %{_mandir}/man8/ceph-clsinfo.8.gz
+ %{_mandir}/man8/librados-config.8.gz
+-%dir %{_localstatedir}/lib/ceph/
+-%dir %{_localstatedir}/lib/ceph/tmp/
+-%dir %{_localstatedir}/log/ceph/
+-%ghost %dir %{_localstatedir}/run/ceph/
+-%dir %{_sysconfdir}/ceph/
+ /usr/sbin/rcceph
+-%dir %{_libdir}/rados-classes
+ %{_libdir}/rados-classes/libcls_rbd.so*
+ %{_libdir}/rados-classes/libcls_rgw.so*
+ %{_libdir}/rados-classes/libcls_lock.so*
+@@ -432,14 +426,17 @@ fi
+ 
+ #set up placeholder directories
+ %defattr(-,root,root,755)
+-%dir /etc/ceph
+-%dir /var/log/ceph
+-%dir /var/lib/ceph/tmp
+-%dir /var/lib/ceph/mon
+-%dir /var/lib/ceph/osd
+-%dir /var/lib/ceph/mds
+-%dir /var/lib/ceph/bootstrap-osd
+-%dir /var/lib/ceph/bootstrap-mds
++%dir %{_sysconfdir}/ceph/
++%dir %{_libdir}/rados-classes
++%dir %{_localstatedir}/lib/ceph/
++%dir %{_localstatedir}/lib/ceph/tmp/
++%dir %{_localstatedir}/log/ceph/
++%dir %{_localstatedir}/lib/ceph/mon
++%dir %{_localstatedir}/lib/ceph/osd
++%dir %{_localstatedir}/lib/ceph/mds
++%dir %{_localstatedir}/lib/ceph/bootstrap-osd
++%dir %{_localstatedir}/lib/ceph/bootstrap-mds
++%ghost %dir %{_localstatedir}/run/ceph/
+ 
+ #################################################################################
+ %files fuse
+@@ -610,6 +607,7 @@ fi
+ %{_bindir}/ceph_test_rados_api_stat
+ %{_bindir}/ceph_test_rados_api_watch_notify
+ %{_bindir}/ceph_test_rewrite_latency
++%{_bindir}/ceph_test_snap_mapper
+ %{_bindir}/ceph_test_stress_watch
+ %{_bindir}/ceph_test_trans
+ %{_bindir}/ceph_test_crypto
+
+--=-=-=
+
+
+
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
+
+--=-=-=--
