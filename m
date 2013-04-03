@@ -1,34 +1,51 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: RGW: Refusing FastCGI request with empty CONTENT_LENGTH ? Why ?
-Date: Wed, 3 Apr 2013 09:47:34 +0200
-Message-ID: <CAF6-1L7111XvU7rLhao1nYjyWcX4jBvDj6XGkJmkvFNgArS0ew@mail.gmail.com>
-References: <CAF6-1L4GdD8w=3y-0fnVHLA1RPAoKmr-EwST9_pteD_i8opkPw@mail.gmail.com>
-	<CAF6-1L6y81uVN29ZJyjxOHv5r=cQXqoYdSV22AGHY1U9Xgu57g@mail.gmail.com>
-	<CAF6-1L5L1s4hdvrFLAiF7Z0ByJ0JcDASwrvM4AexPfmgvCg0=w@mail.gmail.com>
-	<alpine.DEB.2.00.1304020827210.4476@cobra.newdream.net>
-	<515AF94D.4030708@inktank.com>
+From: Mike Bryant <mike.bryant@ocado.com>
+Subject: Re: mon crash on v0.59
+Date: Wed, 3 Apr 2013 10:59:10 +0100
+Message-ID: <CAPkekMshcwY=4SEFMcn1EC2HkmumahqeWATJ+e9oeqG-SAnh4w@mail.gmail.com>
+References: <CAPkekMtiZSs4q-U1uVDaGvv3vqKfu27d1pPMs1_0sHcsMfsq1Q@mail.gmail.com>
+	<515B16A8.6050806@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f49.google.com ([209.85.214.49]:62954 "EHLO
-	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932645Ab3DCHrg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 03:47:36 -0400
-Received: by mail-bk0-f49.google.com with SMTP id w12so633967bku.36
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Apr 2013 00:47:34 -0700 (PDT)
-In-Reply-To: <515AF94D.4030708@inktank.com>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:50125 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755463Ab3DCJ7Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 05:59:24 -0400
+Received: by mail-qe0-f72.google.com with SMTP id 1so2249699qec.3
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Apr 2013 02:59:10 -0700 (PDT)
+In-Reply-To: <515B16A8.6050806@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: Joao Eduardo Luis <joao.luis@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+>
+> Hi Mike,
+>
+> Are you able to reproduce this?  If so, could you set 'debug mon = 10' and
+> point me to the logs?
+>
+>
+>   -Joao
 
-> https://github.com/carsonoid/ceph/commit/96896eb092c3b4e0760e56d5228ef0d604951a12
+I've just had it happen with the debug logging on.
+Log: http://xelix.net/ceph/20130403/ceph-mon.hotcpc9039.log
 
-Yes, exactly. The same commit is also in the official same repo with
-the same commit ID.
+-- 
+Notice:  This email is confidential and may contain copyright material of 
+Ocado Limited (the "Company"). Opinions and views expressed in this message 
+may not necessarily reflect the opinions and views of the Company.
 
-Cheers,
+If you are not the intended recipient, please notify us immediately and 
+delete all copies of this message. Please note that it is your 
+responsibility to scan this message for viruses.
 
-    Sylvain
+Company reg. no. 3875000.
+
+Ocado Limited
+Titan Court
+3 Bishops Square
+Hatfield Business Park
+Hatfield
+Herts
+AL10 9NE
