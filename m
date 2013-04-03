@@ -1,64 +1,120 @@
-From: Jeremy Allison <jra-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>
-Subject: Re: CTDB Cluster Samba on Cephfs
-Date: Wed, 3 Apr 2013 14:42:01 -0700
-Message-ID: <20130403214201.GG23658@samba2>
-References: <CAKMAVE9FBKzZwrrO9psK-h95V6V=tufnsRApu7mMjc5cZx7_cQ@mail.gmail.com>
-Reply-To: Jeremy Allison <jra-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: Trouble getting a new file system to start, for v0.59 and
+ newer
+Date: Wed, 3 Apr 2013 16:40:45 -0600
+Message-ID: <515CAFED.60705@sandia.gov>
+References: <515C4EC4.5040602@sandia.gov>
+ <alpine.DEB.2.00.1304030857480.12367@cobra.newdream.net>
+ <515C6232.4070204@sandia.gov>
+ <CAPYLRzgT47iTKuv-YCQWfU_4O=prrkEByp9KAftj2jFMktve5Q@mail.gmail.com>
+ <CAPYLRzhzQp3xsf_QzzYYJo9RAj_sBV1THs2PJUhk1QRe9XB42w@mail.gmail.com>
+ <515C6DD1.2050702@sandia.gov>
+ <alpine.DEB.2.00.1304031123540.15431@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain;
+ charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKMAVE9FBKzZwrrO9psK-h95V6V=tufnsRApu7mMjc5cZx7_cQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sam Lang <slang-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kai Blin <kai-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Volker.Lendecke-3ekOc4rQMZmzQB+pC5nmwQ@public.gmane.org, samba-technical <samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:57804 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758730Ab3DCWlQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 18:41:16 -0400
+In-Reply-To: <alpine.DEB.2.00.1304031123540.15431@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, Joao Eduardo Luis <joao.luis@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Apr 03, 2013 at 03:53:58PM -0500, Sam Lang wrote:
-> On Thu, Mar 28, 2013 at 6:32 AM, Kai Blin <kai-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org> wrote:
-> > -----BEGIN PGP SIGNED MESSAGE-----
-> > Hash: SHA1
-> >
-> > On 2013-03-28 09:16, Volker Lendecke wrote:
-> >> On Wed, Mar 27, 2013 at 10:43:36PM -0700, Matthieu Patou wrote:
-> >>> On 03/27/2013 10:41 AM, Marco Aroldi wrote:
-> >>>> Hi list, I'm trying to create a active/active Samba cluster on
-> >>>> top of Cephfs I would ask if Ceph fully supports CTDB at this
-> >>>> time.
-> >>> If I'm not wrong Ceph (even CephFS) do not support exporting a
-> >>> block device or mounting the same FS more than once whereas CTDB
-> >>> explicitly require that you have a distributed filesystem where
-> >>> the same filesystem is mounted across all the nodes.
-> >>
-> >> Is that true? I thought Ceph was one of the cluster filesystems
-> >> doing just that. What is Ceph if not a cluster file system?
-> >
-> > There's some problem with mounting the in-kernel cephfs driver on
-> > systems running the osd, iirc. I had to use the fuse-based driver to
-> > mount, which obviously is not too great, speed-wise.
-> > See http://ceph.com/docs/master/faq/#try-ceph for a better description
-> > of the issue.
+On 04/03/2013 12:25 PM, Sage Weil wrote:
+>>> > > Sorry, guess I forgot some of the history since this piece at least is
+>>> > > resolved now. I'm surprised if 30-second timeouts are causing issues
+>>> > > without those overloads you were seeing; have you seen this issue
+>>> > > without your high debugging levels and without the bad PG commits (due
+>>> > > to debugging)?
+>> > 
+>> > I think so, because that's why I started with higher debugging
+>> > levels.
+>> > 
+>> > But, as it turns out, I'm just in the process of returning to my
+>> > testing of next, with all my debugging back to 0.  So, I'll try
+>> > the default timeout of 30 seconds first.  If I have trouble starting
+>> > up a new file system, I'll turn up the timeout and try again, without
+>> > any extra debugging.  Either way, I'll let you know what happens.
+> I would be curious to hear roughly what value between 30 and 300 is 
+> sufficient, if you can experiment just a bit.  We probably want to adjust 
+> the default.
 > 
-> Just to let folks know, we have a ceph vfs driver for samba that we
-> are testing out now.  We're planning to resolve a few of the bugs that
-> we're seeing presently with smbtorture, and send a pull request to the
-> samba repo.  If anyone wants to help with testing, let us know.  The
-> changes currently reside in the ceph branch of
-> http://github.com/ceph/samba.
+> Perhaps more importantly, we'll need to look at the performance of the pg 
+> stat updates on the mon.  There is a refactor due in that code that should 
+> improve life, but it's slated for dumpling.
 
-One thing I noticed. Returning a struct ceph_dir_result *
-cast to a DIR * struct won't work in 4.0.x as we expect
-dirfd(DIR *) to return a valid file descriptor.
+OK, here's some results, with all debugging at 0, using current next...
 
-More as I look at it.
+My testing is for 1 mon + 576 OSDs, 24/host. All my storage cluster hosts
+use 10 GbE NICs now.  The mon host uses an SSD for the mon data store.
+My test procedure is to start 'ceph -w', start all the OSDs, and once
+they're all running start the mon.  I report the time from starting
+the mon to all PGs active+clean.
 
-Jeremy.
+# PGs     osd mon ack    startup    notes
+            timeout       time
+-------  ------------    --------   -----
+ 55392      default      >30:00       1
+ 55392        300         18:36       2
+ 55392         60        >30:00       3
+ 55392        150        >30:00       4
+ 55392        240        >30:00       5
+ 55392        300        >30:00       2,6
+
+notes:
+1) lots of PGs marked stale, OSDs wrongly marked down
+     before I gave up on this case
+2) OSDs report lots of slow requests for "pg_notify(...) v4
+     currently wait for new map"
+3) some OSDs wrongly marked down, OSDs report some slow requests
+     for "pg_notify(...) v4 currently wait for new map"
+     before I gave up on this case
+4) appeared to be making progress; then an OSD was marked
+     out at ~21 minutes; many more marked out before I
+     gave up on this case
+5) some OSD reports of slow requests for "pg_notify",
+     some OSDs wrongly marked down, appeared to be making
+     progress, then stalled; then I gave up on this case
+6) retried this case, appeared to be making progress, but
+     after ~18 min stalled at 19701 active+clean, 35691 peering
+     until I gave up
+
+Hmmm, I didn't really expect the above results.  I ran out of
+time before attempting an even longer osd mon ack timeout.
+
+But either we're on the wrong trail, or 300 is not sufficient.
+Or, I'm doing something wrong and haven't yet figured out what
+it is.
+
+FWIW, on v0.57 or v0.58 I was testing with one pool at 256K PGs,
+and my memory is a new filesystem started up in ~5 minutes.  For
+that testing I had to increase 'paxos propose interval' to two
+or three seconds to keep the monitor writeout rate (as measured
+by vmstat) down to a sustained 50-70 MB/s during start-up.
+
+That was with a 1 GbE NIC in the mon; the reason I upgraded
+it was a filesystem with 512K PGs was taking too long to start,
+and I thought the mon might be network-limited since it had an
+SSD for the mon data store.
+
+For the testing above I used the default 'paxos propose interval'.
+I don't know if it matters, but vmstat sees only a little data
+being written on the mon system.
+
+-- Jim
+
+> 
+> sage
+> 
+>> > 
+>> > -- Jim
+>> > 
+>>> > > -Greg
+>>> > > Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
