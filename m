@@ -1,738 +1,378 @@
-From: Dewan Shamsul Alam <dewan.shamsul-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Cluster Map Problems
-Date: Wed, 3 Apr 2013 20:37:21 +0600
-Message-ID: <CAMj00WYMrEJqbXMhcYhb=ycnOr5RpwuqoakbNoWXNFxGc=r-ig@mail.gmail.com>
-References: <514B5958.8050902@tuxadero.com> <51539550.70806@tuxadero.com>
-	<CAM2gkg7h59X1u0L7P2Z9er+da3OoMw2Tmdbf=afWbUy8gKi+tA@mail.gmail.com>
-	<5153A218.1060402@tuxadero.com>
-	<CABZ+qq=LYqOC0o1S4-7iR-L2XweRQuBL6maoVz3LXwKKrJ90gg@mail.gmail.com>
-	<51542952.3020502@tuxadero.com>
-	<CAPYLRzhd2zLEQM=hgfLQWF5snSMn=NX=71b5kN+AYspAD24Q-g@mail.gmail.com>
-	<51547F73.9090303@tuxadero.com>
-	<CAPYLRzjeb5qeJGkeP+vxuWjwmh2KufKfJW8nMc7fVRPm+b3MHw@mail.gmail.com>
-	<515483CA.2080904@tuxadero.com>
-	<CAPYLRzi_CvAjEGYof=eWZ+9z3fC6hjfAyhPQ1fxgc2CNqYNsaA@mail.gmail.com>
-	<51548810.709@tuxadero.com>
-	<CAM2gkg7z3i9gzdo-ceDSJ5kZ_xhif7QieKLoS1YpvtbPt9w4PA@mail.gmail.com>
-	<51549AF3.3080903@tuxadero.com>
-	<CAPYLRzgyr5M8aWbtpdCn4ge6zcmgPS2k91k5-t4PyEiTernGaQ@mail.gmail.com>
-	<5154A267.4010207@tuxadero.com>
-	<CAM2gkg4fLE_N4kXdVX_2_suAy8-EuK=4ZTT0xqB0znjzYEB_5Q@mail.gmail.com>
-	<5154C339.7070705@tuxadero.com>
-	<CAM2gkg628PRNUye9poNJZ+fMNUpgRL=6CwoEXg6y=TqbtY3YhQ@mail.gmail.com>
-	<515C3D76.1060302@tuxadero.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Trouble getting a new file system to start, for v0.59 and newer
+Date: Wed, 3 Apr 2013 09:46:12 -0600
+Message-ID: <515C4EC4.5040602@sandia.gov>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0758254521=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <515C3D76.1060302-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Martin Mailand <martin-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0758254521==
-Content-Type: multipart/alternative; boundary=f46d040714d5abeab904d975ca23
-
---f46d040714d5abeab904d975ca23
-Content-Type: text/plain; charset=ISO-8859-1
-
-Hi,
-
-I've seen this in 0.56. In my case I shutdown one server then bring it
-back. I have to run /etc/init.d/ceph -a restart to make it healthy.  It
-doesn't impact the running VM I have in that cluster though.
-
-
-On Wed, Apr 3, 2013 at 8:32 PM, Martin Mailand <martin-64xna6+0MClWk0Htik3J/w@public.gmane.org> wrote:
-
-> Hi,
->
-> I still have this problem in v0.60.
-> If I stop one OSD, the OSD get set down after 20 seconds. But after 300
-> seconds the OSD get not set out, there for the ceph stays degraded for
-> ever.
-> I can reproduce it with a fresh created cluster.
->
-> root@store1:~# ceph -s
->    health HEALTH_WARN 405 pgs degraded; 405 pgs stuck unclean; recovery
-> 10603/259576 degraded (4.085%); 1/24 in osds are down
->    monmap e1: 3 mons at
-> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
-> election epoch 10, quorum 0,1,2 a,b,c
->    osdmap e150: 24 osds: 23 up, 24 in
->     pgmap v12028: 4800 pgs: 4395 active+clean, 405 active+degraded; 505
-> GB data, 1017 GB used, 173 TB / 174 TB avail; 0B/s rd, 6303B/s wr,
-> 2op/s; 10603/259576 degraded (4.085%)
->    mdsmap e1: 0/0/1 up
->
->
-> -martin
->
->
-> On 28.03.2013 23:45, John Wilkins wrote:
-> > Martin,
-> >
-> > I'm just speculating: since I just rewrote the networking section and
-> > there is an empty mon_host value, and I do recall a chat last week
-> > where mon_host was considered a different setting now, maybe you might
-> > try specifying:
-> >
-> > [mon.a]
-> >         mon host = store1
-> >         mon addr = 192.168.195.31:6789
-> >
-> > etc. for monitors. I'm assuming that's not the case, but I want to
-> > make sure my docs are right on this point.
-> >
-> >
-> > On Thu, Mar 28, 2013 at 3:24 PM, Martin Mailand <martin-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-> wrote:
-> >> Hi John,
-> >>
-> >> my ceph.conf is a bit further down in this email.
-> >>
-> >> -martin
-> >>
-> >> Am 28.03.2013 23:21, schrieb John Wilkins:
-> >>
-> >>> Martin,
-> >>>
-> >>> Would you mind posting your Ceph configuration file too?  I don't see
-> >>> any value set for "mon_host": ""
-> >>>
-> >>> On Thu, Mar 28, 2013 at 1:04 PM, Martin Mailand <martin-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-> >>> wrote:
-> >>>>
-> >>>> Hi Greg,
-> >>>>
-> >>>> the dump from mon.a is attached.
-> >>>>
-> >>>> -martin
-> >>>>
-> >>>> On 28.03.2013 20:55, Gregory Farnum wrote:
-> >>>>>
-> >>>>> Hmm. The monitor code for checking this all looks good to me. Can you
-> >>>>> go to one of your monitor nodes and dump the config?
-> >>>>>
-> >>>>> (
-> http://ceph.com/docs/master/rados/configuration/ceph-conf/?highlight=admin%20socket#viewing-a-configuration-at-runtime
-> )
-> >>>>> -Greg
-> >>>>>
-> >>>>> On Thu, Mar 28, 2013 at 12:33 PM, Martin Mailand <
-> martin-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-> >>>>> wrote:
-> >>>>>>
-> >>>>>> Hi,
-> >>>>>>
-> >>>>>> I get the same behavior an new created cluster as well, no changes
-> to
-> >>>>>> the cluster config at all.
-> >>>>>> I stop the osd.1, after 20 seconds it got marked down. But it never
-> get
-> >>>>>> marked out.
-> >>>>>>
-> >>>>>> ceph version 0.59 (cbae6a435c62899f857775f66659de052fb0e759)
-> >>>>>>
-> >>>>>> -martin
-> >>>>>>
-> >>>>>> On 28.03.2013 19:48, John Wilkins wrote:
-> >>>>>>>
-> >>>>>>> Martin,
-> >>>>>>>
-> >>>>>>> Greg is talking about noout. With Ceph, you can specifically
-> preclude
-> >>>>>>> OSDs from being marked out when down to prevent rebalancing--e.g.,
-> >>>>>>> during upgrades, short-term maintenance, etc.
-> >>>>>>>
-> >>>>>>>
-> >>>>>>>
-> http://ceph.com/docs/master/rados/operations/troubleshooting-osd/#stopping-w-out-rebalancing
-> >>>>>>>
-> >>>>>>> On Thu, Mar 28, 2013 at 11:12 AM, Martin Mailand <
-> martin-64xna6+0MClWk0Htik3J/w@public.gmane.org>
-> >>>>>>> wrote:
-> >>>>>>>>
-> >>>>>>>> Hi Greg,
-> >>>>>>>>
-> >>>>>>>> setting the osd manually out triggered the recovery.
-> >>>>>>>> But now it is the question, why is the osd not marked out after
-> 300
-> >>>>>>>> seconds? That's a default cluster, I use the 0.59 build from your
-> >>>>>>>> site.
-> >>>>>>>> And I didn't change any value, except for the crushmap.
-> >>>>>>>>
-> >>>>>>>> That's my ceph.conf.
-> >>>>>>>>
-> >>>>>>>> -martin
-> >>>>>>>>
-> >>>>>>>> [global]
-> >>>>>>>>          auth cluster requierd = none
-> >>>>>>>>          auth service required = none
-> >>>>>>>>          auth client required = none
-> >>>>>>>> #       log file = ""
-> >>>>>>>>          log_max_recent=100
-> >>>>>>>>          log_max_new=100
-> >>>>>>>>
-> >>>>>>>> [mon]
-> >>>>>>>>          mon data = /data/mon.$id
-> >>>>>>>> [mon.a]
-> >>>>>>>>          host = store1
-> >>>>>>>>          mon addr = 192.168.195.31:6789
-> >>>>>>>> [mon.b]
-> >>>>>>>>          host = store3
-> >>>>>>>>          mon addr = 192.168.195.33:6789
-> >>>>>>>> [mon.c]
-> >>>>>>>>          host = store5
-> >>>>>>>>          mon addr = 192.168.195.35:6789
-> >>>>>>>> [osd]
-> >>>>>>>>          journal aio = true
-> >>>>>>>>          osd data = /data/osd.$id
-> >>>>>>>>          osd mount options btrfs =
-> rw,noatime,nodiratime,autodefrag
-> >>>>>>>>          osd mkfs options btrfs = -n 32k -l 32k
-> >>>>>>>>
-> >>>>>>>> [osd.0]
-> >>>>>>>>          host = store1
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.1]
-> >>>>>>>>          host = store1
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.2]
-> >>>>>>>>          host = store1
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.3]
-> >>>>>>>>          host = store1
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>> [osd.4]
-> >>>>>>>>          host = store2
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.5]
-> >>>>>>>>          host = store2
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.6]
-> >>>>>>>>          host = store2
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.7]
-> >>>>>>>>          host = store2
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>> [osd.8]
-> >>>>>>>>          host = store3
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.9]
-> >>>>>>>>          host = store3
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.10]
-> >>>>>>>>          host = store3
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.11]
-> >>>>>>>>          host = store3
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>> [osd.12]
-> >>>>>>>>          host = store4
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.13]
-> >>>>>>>>          host = store4
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.14]
-> >>>>>>>>          host = store4
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.15]
-> >>>>>>>>          host = store4
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>> [osd.16]
-> >>>>>>>>          host = store5
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.17]
-> >>>>>>>>          host = store5
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.18]
-> >>>>>>>>          host = store5
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.19]
-> >>>>>>>>          host = store5
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>> [osd.20]
-> >>>>>>>>          host = store6
-> >>>>>>>>          osd journal = /dev/sdg1
-> >>>>>>>>          btrfs devs = /dev/sdc
-> >>>>>>>> [osd.21]
-> >>>>>>>>          host = store6
-> >>>>>>>>          osd journal = /dev/sdh1
-> >>>>>>>>          btrfs devs = /dev/sdd
-> >>>>>>>> [osd.22]
-> >>>>>>>>          host = store6
-> >>>>>>>>          osd journal = /dev/sdi1
-> >>>>>>>>          btrfs devs = /dev/sde
-> >>>>>>>> [osd.23]
-> >>>>>>>>          host = store6
-> >>>>>>>>          osd journal = /dev/sdj1
-> >>>>>>>>          btrfs devs = /dev/sdf
-> >>>>>>>>
-> >>>>>>>>
-> >>>>>>>> On 28.03.2013 19:01, Gregory Farnum wrote:
-> >>>>>>>>>
-> >>>>>>>>> Your crush map looks fine to me. I'm saying that your ceph -s
-> output
-> >>>>>>>>> showed the OSD still hadn't been marked out. No data will be
-> >>>>>>>>> migrated
-> >>>>>>>>> until it's marked out.
-> >>>>>>>>> After ten minutes it should have been marked out, but that's
-> based
-> >>>>>>>>> on
-> >>>>>>>>> a number of factors you have some control over. If you just want
-> a
-> >>>>>>>>> quick check of your crush map you can mark it out manually, too.
-> >>>>>>>>> -Greg
-> >>>>>>>>
-> >>>>>>>> _______________________________________________
-> >>>>>>>> ceph-users mailing list
-> >>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >>>>>>>
-> >>>>>>>
-> >>>>>>>
-> >>>>>>>
-> >>>
-> >>>
-> >>>
-> >>
-> >
-> >
-> >
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---f46d040714d5abeab904d975ca23
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>Hi,<br><br></div>I&#39;ve seen this in 0.56. In my ca=
-se I shutdown one server then bring it back. I have to run /etc/init.d/ceph=
- -a restart to make it healthy.=A0 It doesn&#39;t impact the running VM I h=
-ave in that cluster though.<br>
-</div><div class=3D"gmail_extra"><br><br><div class=3D"gmail_quote">On Wed,=
- Apr 3, 2013 at 8:32 PM, Martin Mailand <span dir=3D"ltr">&lt;<a href=3D"ma=
-ilto:martin-64xna6+0MClWk0Htik3J/w@public.gmane.org" target=3D"_blank">martin-64xna6+0MClWk0Htik3J/w@public.gmane.org</a>&gt;</sp=
-an> wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
-x #ccc solid;padding-left:1ex">Hi,<br>
-<br>
-I still have this problem in v0.60.<br>
-If I stop one OSD, the OSD get set down after 20 seconds. But after 300<br>
-seconds the OSD get not set out, there for the ceph stays degraded for ever=
-.<br>
-I can reproduce it with a fresh created cluster.<br>
-<br>
-root@store1:~# ceph -s<br>
-=A0 =A0health HEALTH_WARN 405 pgs degraded; 405 pgs stuck unclean; recovery=
-<br>
-10603/259576 degraded (4.085%); 1/24 in osds are down<br>
-=A0 =A0monmap e1: 3 mons at<br>
-{a=3D<a href=3D"http://192.168.195.31:6789/0,b=3D192.168.195.33:6789/0,c=3D=
-192.168.195.35:6789/0" target=3D"_blank">192.168.195.31:6789/0,b=3D192.168.=
-195.33:6789/0,c=3D192.168.195.35:6789/0</a>},<br>
-election epoch 10, quorum 0,1,2 a,b,c<br>
-=A0 =A0osdmap e150: 24 osds: 23 up, 24 in<br>
-=A0 =A0 pgmap v12028: 4800 pgs: 4395 active+clean, 405 active+degraded; 505=
-<br>
-GB data, 1017 GB used, 173 TB / 174 TB avail; 0B/s rd, 6303B/s wr,<br>
-2op/s; 10603/259576 degraded (4.085%)<br>
-=A0 =A0mdsmap e1: 0/0/1 up<br>
-<br>
-<br>
--martin<br>
-<br>
-<br>
-On 28.03.2013 23:45, John Wilkins wrote:<br>
-&gt; Martin,<br>
-&gt;<br>
-&gt; I&#39;m just speculating: since I just rewrote the networking section =
-and<br>
-&gt; there is an empty mon_host value, and I do recall a chat last week<br>
-&gt; where mon_host was considered a different setting now, maybe you might=
-<br>
-&gt; try specifying:<br>
-&gt;<br>
-&gt; [mon.a]<br>
-&gt; =A0 =A0 =A0 =A0 mon host =3D store1<br>
-&gt; =A0 =A0 =A0 =A0 mon addr =3D <a href=3D"http://192.168.195.31:6789" ta=
-rget=3D"_blank">192.168.195.31:6789</a><br>
-&gt;<br>
-&gt; etc. for monitors. I&#39;m assuming that&#39;s not the case, but I wan=
-t to<br>
-&gt; make sure my docs are right on this point.<br>
-&gt;<br>
-&gt;<br>
-&gt; On Thu, Mar 28, 2013 at 3:24 PM, Martin Mailand &lt;<a href=3D"mailto:=
-martin-64xna6+0MClWk0Htik3J/w@public.gmane.org">martin-64xna6+0MClWk0Htik3J/w@public.gmane.org</a>&gt; wrote:<br>
-&gt;&gt; Hi John,<br>
-&gt;&gt;<br>
-&gt;&gt; my ceph.conf is a bit further down in this email.<br>
-&gt;&gt;<br>
-&gt;&gt; -martin<br>
-&gt;&gt;<br>
-&gt;&gt; Am 28.03.2013 23:21, schrieb John Wilkins:<br>
-&gt;&gt;<br>
-&gt;&gt;&gt; Martin,<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;&gt; Would you mind posting your Ceph configuration file too? =A0I =
-don&#39;t see<br>
-&gt;&gt;&gt; any value set for &quot;mon_host&quot;: &quot;&quot;<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;&gt; On Thu, Mar 28, 2013 at 1:04 PM, Martin Mailand &lt;<a href=3D=
-"mailto:martin-64xna6+0MClWk0Htik3J/w@public.gmane.org">martin-64xna6+0MClWk0Htik3J/w@public.gmane.org</a>&gt;<br>
-&gt;&gt;&gt; wrote:<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; Hi Greg,<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; the dump from mon.a is attached.<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; -martin<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; On 28.03.2013 20:55, Gregory Farnum wrote:<br>
-&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt; Hmm. The monitor code for checking this all looks good=
- to me. Can you<br>
-&gt;&gt;&gt;&gt;&gt; go to one of your monitor nodes and dump the config?<b=
-r>
-&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt; (<a href=3D"http://ceph.com/docs/master/rados/configur=
-ation/ceph-conf/?highlight=3Dadmin%20socket#viewing-a-configuration-at-runt=
-ime" target=3D"_blank">http://ceph.com/docs/master/rados/configuration/ceph=
--conf/?highlight=3Dadmin%20socket#viewing-a-configuration-at-runtime</a>)<b=
-r>
-
-&gt;&gt;&gt;&gt;&gt; -Greg<br>
-&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt; On Thu, Mar 28, 2013 at 12:33 PM, Martin Mailand &lt;<=
-a href=3D"mailto:martin-64xna6+0MClWk0Htik3J/w@public.gmane.org">martin-64xna6+0MClWk0Htik3J/w@public.gmane.org</a>&gt;<br>
-&gt;&gt;&gt;&gt;&gt; wrote:<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; Hi,<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; I get the same behavior an new created cluster as =
-well, no changes to<br>
-&gt;&gt;&gt;&gt;&gt;&gt; the cluster config at all.<br>
-&gt;&gt;&gt;&gt;&gt;&gt; I stop the osd.1, after 20 seconds it got marked d=
-own. But it never get<br>
-&gt;&gt;&gt;&gt;&gt;&gt; marked out.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; ceph version 0.59 (cbae6a435c62899f857775f66659de0=
-52fb0e759)<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; -martin<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; On 28.03.2013 19:48, John Wilkins wrote:<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; Martin,<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; Greg is talking about noout. With Ceph, you ca=
-n specifically preclude<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; OSDs from being marked out when down to preven=
-t rebalancing--e.g.,<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; during upgrades, short-term maintenance, etc.<=
-br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"http://ceph.com/docs/master/rados/o=
-perations/troubleshooting-osd/#stopping-w-out-rebalancing" target=3D"_blank=
-">http://ceph.com/docs/master/rados/operations/troubleshooting-osd/#stoppin=
-g-w-out-rebalancing</a><br>
-
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; On Thu, Mar 28, 2013 at 11:12 AM, Martin Maila=
-nd &lt;<a href=3D"mailto:martin-64xna6+0MClWk0Htik3J/w@public.gmane.org">martin-64xna6+0MClWk0Htik3J/w@public.gmane.org</a>&gt;<b=
-r>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; wrote:<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Hi Greg,<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; setting the osd manually out triggered the=
- recovery.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; But now it is the question, why is the osd=
- not marked out after 300<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; seconds? That&#39;s a default cluster, I u=
-se the 0.59 build from your<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; site.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; And I didn&#39;t change any value, except =
-for the crushmap.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; That&#39;s my ceph.conf.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; -martin<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [global]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0auth cluster requierd =
-=3D none<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0auth service required =
-=3D none<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0auth client required =
-=3D none<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; # =A0 =A0 =A0 log file =3D &quot;&quot;<br=
->
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0log_max_recent=3D100<br=
->
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0log_max_new=3D100<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [mon]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0mon data =3D /data/mon.=
-$id<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [mon.a]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0mon addr =3D <a href=3D=
-"http://192.168.195.31:6789" target=3D"_blank">192.168.195.31:6789</a><br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [mon.b]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store3<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0mon addr =3D <a href=3D=
-"http://192.168.195.33:6789" target=3D"_blank">192.168.195.33:6789</a><br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [mon.c]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store5<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0mon addr =3D <a href=3D=
-"http://192.168.195.35:6789" target=3D"_blank">192.168.195.35:6789</a><br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0journal aio =3D true<br=
->
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd data =3D /data/osd.=
-$id<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd mount options btrfs=
- =3D rw,noatime,nodiratime,autodefrag<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd mkfs options btrfs =
-=3D -n 32k -l 32k<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.0]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.1]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.2]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.3]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.4]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store2<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.5]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store2<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.6]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store2<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.7]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store2<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.8]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store3<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.9]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store3<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.10]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store3<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.11]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store3<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.12]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store4<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.13]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store4<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.14]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store4<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.15]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store4<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.16]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store5<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.17]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store5<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.18]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store5<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.19]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store5<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.20]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store6<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-g1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdc=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.21]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store6<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-h1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdd=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.22]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store6<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-i1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sde=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [osd.23]<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0host =3D store6<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0osd journal =3D /dev/sd=
-j1<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; =A0 =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdf=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; On 28.03.2013 19:01, Gregory Farnum wrote:=
-<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Your crush map looks fine to me. I&#39=
-;m saying that your ceph -s output<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; showed the OSD still hadn&#39;t been m=
-arked out. No data will be<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; migrated<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; until it&#39;s marked out.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; After ten minutes it should have been =
-marked out, but that&#39;s based<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; on<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; a number of factors you have some cont=
-rol over. If you just want a<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; quick check of your crush map you can =
-mark it out manually, too.<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; -Greg<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; __________________________________________=
-_____<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; ceph-users mailing list<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFLNfb0M+mGrxg@public.gmane.org=
-m">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"http://lists.ceph.com/listinfo.=
-cgi/ceph-users-ceph.com" target=3D"_blank">http://lists.ceph.com/listinfo.c=
-gi/ceph-users-ceph.com</a><br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
-=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-</blockquote></div><br></div>
-
---f46d040714d5abeab904d975ca23--
-
---===============0758254521==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:37730 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758296Ab3DCPqr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 11:46:47 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Joao Eduardo Luis <joao.luis@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Hi Joao,
 
---===============0758254521==--
+I alluded in an earlier thread about an issue I've been recently
+having with starting a new filesystem, which I thought I had
+tracked into the paxos subsystem.  I believe I started having
+this trouble when I started testing v0.59, and it's still there
+in v0.60.
+
+The basic configuration is 1 mon, 1 mds, 576 OSDs.  Some time
+after starting the mon and the OSDs, PG creation progress stops.
+
+I'm finding this in my OSD logs, which I've been thinking is
+suggestive of why OSDs stop making progress:
+
+# cat osd.0.log | grep "acked PGStats"
+2013-04-02 15:40:28.944178 7ffff387a700  1 osd.0 2 mon hasn't acked PGStats in 30.034349 seconds, reconnecting elsewhere
+2013-04-02 15:42:24.570963 7ffff387a700  1 osd.0 14 mon hasn't acked PGStats in 30.072959 seconds, reconnecting elsewhere
+2013-04-02 15:43:22.664921 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.570739 seconds, reconnecting elsewhere
+2013-04-02 15:43:52.672461 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007379 seconds, reconnecting elsewhere
+2013-04-02 15:44:22.680691 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007095 seconds, reconnecting elsewhere
+2013-04-02 15:44:52.688936 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007221 seconds, reconnecting elsewhere
+2013-04-02 15:45:22.702066 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.012264 seconds, reconnecting elsewhere
+2013-04-02 15:45:52.711134 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007957 seconds, reconnecting elsewhere
+2013-04-02 15:46:22.719845 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007859 seconds, reconnecting elsewhere
+2013-04-02 15:46:52.729475 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.008756 seconds, reconnecting elsewhere
+
+
+I also thought paxos might be implicated because I noticed the auth
+paxos service appears to stop making progress.  The mon is getting
+lots of auth paxos service messages from all the OSDs:
+
+# cat mon.cs31.log  | grep paxos | grep "dispatch auth" | head -1
+2013-04-02 15:38:59.995457 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) dispatch auth(proto 0 30 bytes epoch 1) v1 from client.? 172.17.131.29:0/52585
+
+# cat mon.cs31.log  | grep paxos | grep "dispatch auth" | wc -l 
+8802
+
+but at some point the auth paxos service appears to stop making progress:
+
+# cat mon.cs31.log  | grep paxos | grep -v "dispatch auth" | grep auth
+2013-04-02 15:38:42.895202 7ffff7fbe780 10 mon.cs31@0(probing).paxosservice(auth) restart
+2013-04-02 15:38:42.905705 7ffff7fbe780 10 mon.cs31@0(probing).paxosservice(auth) restart
+2013-04-02 15:38:59.182158 7ffff7fbe780 10 mon.cs31@0(probing).paxosservice(auth) restart
+2013-04-02 15:38:59.192809 7ffff7fbe780 10 mon.cs31@0(probing).paxosservice(auth) restart
+2013-04-02 15:38:59.290602 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) election_finished
+2013-04-02 15:38:59.290608 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) _active
+2013-04-02 15:38:59.300707 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) scrub
+2013-04-02 15:38:59.308260 7ffff7fbe780  7 mon.cs31@0(leader).paxosservice(auth) _active creating new pending
+2013-04-02 15:38:59.329153 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) propose_pending
+2013-04-02 15:38:59.390988 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) _active
+2013-04-02 15:38:59.421164 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) scrub
+2013-04-02 15:38:59.427781 7ffff7fbe780  7 mon.cs31@0(leader).paxosservice(auth) _active creating new pending
+2013-04-02 15:38:59.448001 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) election_finished
+2013-04-02 15:38:59.448027 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) _active
+2013-04-02 15:38:59.453691 7ffff7fbe780 10 mon.cs31@0(leader).paxosservice(auth) scrub
+2013-04-02 15:38:59.459446 7ffff7fbe780  7 mon.cs31@0(leader).paxosservice(auth) _active creating new pending
+2013-04-02 15:38:59.500315 7ffff328d700 10 mon.cs31@0(leader).paxosservice(auth) propose_pending
+2013-04-02 15:38:59.569638 7ffff328d700 10 mon.cs31@0(leader).paxosservice(auth) _active
+2013-04-02 15:38:59.593526 7ffff328d700 10 mon.cs31@0(leader).paxosservice(auth) scrub
+2013-04-02 15:38:59.599250 7ffff328d700  7 mon.cs31@0(leader).paxosservice(auth) _active creating new pending
+2013-04-02 15:39:39.390156 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) propose_pending
+2013-04-02 15:39:39.435906 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) _active
+2013-04-02 15:39:39.456743 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) scrub
+2013-04-02 15:39:39.462498 7ffff2a8c700  7 mon.cs31@0(leader).paxosservice(auth) _active creating new pending
+
+even as it continues to receive auth paxos service messages:
+
+# cat mon.cs31.log  | grep paxos | grep -A 200000 "15:39:39.462498" | grep "dispatch auth" | wc -l
+8799
+
+for some time:
+
+# cat mon.cs31.log  | grep paxos | grep "dispatch auth" | tail -2
+2013-04-02 15:46:56.090494 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) dispatch auth(proto 0 28 bytes epoch 1) v1 from osd.379 172.17.131.47:6819/219107
+2013-04-02 15:46:56.127352 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(auth) dispatch auth(proto 0 28 bytes epoch 1) v1 from osd.311 172.17.131.44:6823/184079
+
+Is that all expected behavior for the auth paxos service?  
+
+To try to learn more about PGStat messages not getting acked, I caused
+Pipe:writer() and Pipe:reader() to log messages at a lower log level as
+they are sent and received, so I could see that vs. dispatch
+at debug ms 2.  Here's what the mon thinks is OSD 0's PGStat interaction:
+
+# cat mon.cs31.log | grep "172.17.131.32:6800" | grep stats'
+2013-04-02 15:39:58.923546 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 13 0x82ca800 pg_stats(2139 pgs tid 1 v 2) v1
+2013-04-02 15:40:03.927889 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 15 0x88f5280 pg_stats(2139 pgs tid 2 v 2) v1
+2013-04-02 15:40:08.936064 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 17 0x88f5000 pg_stats(2139 pgs tid 3 v 2) v1
+2013-04-02 15:40:13.943312 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 19 0x8e35780 pg_stats(2139 pgs tid 4 v 2) v1
+2013-04-02 15:40:18.949530 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 21 0x8e35500 pg_stats(2139 pgs tid 5 v 2) v1
+2013-04-02 15:40:23.953961 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x12a1400 sd=20 :6789 s=2 pgs=1 cs=1 l=1).reader got message 23 0x8e35280 pg_stats(2139 pgs tid 6 v 2) v1
+2013-04-02 15:40:42.812586 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 5 0x9178500 pg_stats(2139 pgs tid 7 v 2) v1
+2013-04-02 15:40:42.824276 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 7 0x9178a00 pg_stats(2139 pgs tid 8 v 2) v1
+2013-04-02 15:40:42.833998 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 9 0x9178780 pg_stats(2139 pgs tid 9 v 3) v1
+2013-04-02 15:40:42.839129 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 10 0x917d000 pg_stats(2139 pgs tid 10 v 3) v1
+2013-04-02 15:40:43.289351 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 5 ==== pg_stats(2139 pgs tid 7 v 2) v1 ==== 780831+0+0 (3242785419 0 0) 0x9178500 con 0x8ef77a0
+2013-04-02 15:40:43.289361 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 7 v 2) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:40:44.346624 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 11 0x9178f00 pg_stats(2139 pgs tid 11 v 3) v1
+2013-04-02 15:40:49.347796 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 12 0x9178c80 pg_stats(2139 pgs tid 12 v 3) v1
+2013-04-02 15:40:50.974070 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 7) v1 -- ?+0 0x94efc40 con 0x8ef77a0
+2013-04-02 15:40:50.975214 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 9 0x94efc40pg_stats_ack(2139 pgs tid 7) v1
+2013-04-02 15:40:52.148791 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 7 ==== pg_stats(2139 pgs tid 8 v 2) v1 ==== 780831+0+0 (767410827 0 0) 0x9178a00 con 0x8ef77a0
+2013-04-02 15:40:52.148798 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 8 v 2) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:40:52.184327 7ffff2a8c700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 0) v1 -- ?+0 0x95101c0 con 0x8ef77a0
+2013-04-02 15:40:52.184887 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 12 0x95101c0pg_stats_ack(2139 pgs tid 0) v1
+2013-04-02 15:40:54.355489 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 13 0x917d500 pg_stats(2139 pgs tid 13 v 3) v1
+2013-04-02 15:40:59.366894 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 15 0x12a1400 pg_stats(2139 pgs tid 14 v 3) v1
+2013-04-02 15:41:04.369893 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 16 0x88f5000 pg_stats(2139 pgs tid 15 v 3) v1
+2013-04-02 15:41:09.383145 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 17 0x8572580 pg_stats(2139 pgs tid 16 v 3) v1
+2013-04-02 15:41:10.331005 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 9 ==== pg_stats(2139 pgs tid 9 v 3) v1 ==== 780831+0+0 (2102719063 0 0) 0x9178780 con 0x8ef77a0
+2013-04-02 15:41:10.331015 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 9 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:14.386773 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 18 0x917df00 pg_stats(2139 pgs tid 17 v 3) v1
+2013-04-02 15:41:18.238008 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 9) v1 -- ?+0 0x887db00 con 0x8ef77a0
+2013-04-02 15:41:18.239168 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 15 0x887db00pg_stats_ack(2139 pgs tid 9) v1
+2013-04-02 15:41:19.393287 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 19 0x917dc80 pg_stats(1688 pgs tid 18 v 3) v1
+2013-04-02 15:41:24.402543 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 20 0x917da00 pg_stats(1688 pgs tid 19 v 3) v1
+2013-04-02 15:41:29.409268 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 22 0x917d780 pg_stats(1688 pgs tid 20 v 3) v1
+2013-04-02 15:41:32.417687 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 10 ==== pg_stats(2139 pgs tid 10 v 3) v1 ==== 780831+0+0 (1002730769 0 0) 0x917d000 con 0x8ef77a0
+2013-04-02 15:41:32.417694 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 10 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:34.412255 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 24 0x9178500 pg_stats(1688 pgs tid 21 v 3) v1
+2013-04-02 15:41:39.515106 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 10) v1 -- ?+0 0x8bdaf40 con 0x8ef77a0
+2013-04-02 15:41:39.516862 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 16 0x8bdaf40pg_stats_ack(2139 pgs tid 10) v1
+2013-04-02 15:41:41.428677 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 27 0x7436400 pg_stats(1956 pgs tid 22 v 4) v1
+2013-04-02 15:41:46.433146 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 29 0x7436180 pg_stats(1956 pgs tid 23 v 4) v1
+2013-04-02 15:41:51.436995 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 31 0x7435f00 pg_stats(1956 pgs tid 24 v 4) v1
+2013-04-02 15:41:53.051925 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 11 ==== pg_stats(2139 pgs tid 11 v 3) v1 ==== 780831+0+0 (676901400 0 0) 0x9178f00 con 0x8ef77a0
+2013-04-02 15:41:53.051937 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 11 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.102194 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 12 ==== pg_stats(2139 pgs tid 12 v 3) v1 ==== 780831+0+0 (998884584 0 0) 0x9178c80 con 0x8ef77a0
+2013-04-02 15:41:53.102201 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 12 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.154485 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 13 ==== pg_stats(2139 pgs tid 13 v 3) v1 ==== 780831+0+0 (1067499060 0 0) 0x917d500 con 0x8ef77a0
+2013-04-02 15:41:53.154492 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 13 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.177214 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 15 ==== pg_stats(2139 pgs tid 14 v 3) v1 ==== 780831+0+0 (2843573366 0 0) 0x12a1400 con 0x8ef77a0
+2013-04-02 15:41:53.177220 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 14 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.183387 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 16 ==== pg_stats(2139 pgs tid 15 v 3) v1 ==== 780831+0+0 (886357047 0 0) 0x88f5000 con 0x8ef77a0
+2013-04-02 15:41:53.183393 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 15 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.188461 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 17 ==== pg_stats(2139 pgs tid 16 v 3) v1 ==== 780831+0+0 (4068350826 0 0) 0x8572580 con 0x8ef77a0
+2013-04-02 15:41:53.188467 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 16 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.191039 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 18 ==== pg_stats(2139 pgs tid 17 v 3) v1 ==== 780831+0+0 (3808505220 0 0) 0x917df00 con 0x8ef77a0
+2013-04-02 15:41:53.191044 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(2139 pgs tid 17 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.195468 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 19 ==== pg_stats(1688 pgs tid 18 v 3) v1 ==== 616216+0+0 (786716567 0 0) 0x917dc80 con 0x8ef77a0
+2013-04-02 15:41:53.195474 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1688 pgs tid 18 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.197490 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 20 ==== pg_stats(1688 pgs tid 19 v 3) v1 ==== 616216+0+0 (1691256403 0 0) 0x917da00 con 0x8ef77a0
+2013-04-02 15:41:53.197495 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1688 pgs tid 19 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.203550 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 22 ==== pg_stats(1688 pgs tid 20 v 3) v1 ==== 616216+0+0 (2465465593 0 0) 0x917d780 con 0x8ef77a0
+2013-04-02 15:41:53.203556 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1688 pgs tid 20 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.205756 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 24 ==== pg_stats(1688 pgs tid 21 v 3) v1 ==== 616216+0+0 (4004343678 0 0) 0x9178500 con 0x8ef77a0
+2013-04-02 15:41:53.205762 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1688 pgs tid 21 v 3) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.208096 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 27 ==== pg_stats(1956 pgs tid 22 v 4) v1 ==== 716960+0+0 (2541888992 0 0) 0x7436400 con 0x8ef77a0
+2013-04-02 15:41:53.208102 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1956 pgs tid 22 v 4) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.210496 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 29 ==== pg_stats(1956 pgs tid 23 v 4) v1 ==== 716960+0+0 (3133069244 0 0) 0x7436180 con 0x8ef77a0
+2013-04-02 15:41:53.210502 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1956 pgs tid 23 v 4) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:53.212759 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 31 ==== pg_stats(1956 pgs tid 24 v 4) v1 ==== 716960+0+0 (584283437 0 0) 0x7435f00 con 0x8ef77a0
+2013-04-02 15:41:53.212764 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(1956 pgs tid 24 v 4) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:41:54.480038 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 11) v1 -- ?+0 0x95ab800 con 0x8ef77a0
+2013-04-02 15:41:54.480618 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 12) v1 -- ?+0 0x9554b40 con 0x8ef77a0
+2013-04-02 15:41:54.481098 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 32 0x95ab800pg_stats_ack(2139 pgs tid 11) v1
+2013-04-02 15:41:54.481564 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 13) v1 -- ?+0 0x95539c0 con 0x8ef77a0
+2013-04-02 15:41:54.482128 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 33 0x9554b40pg_stats_ack(2139 pgs tid 12) v1
+2013-04-02 15:41:54.483234 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 34 0x95539c0pg_stats_ack(2139 pgs tid 13) v1
+2013-04-02 15:41:54.484486 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 14) v1 -- ?+0 0x883f000 con 0x8ef77a0
+2013-04-02 15:41:54.485222 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 15) v1 -- ?+0 0x883e3c0 con 0x8ef77a0
+2013-04-02 15:41:54.485378 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 35 0x883f000pg_stats_ack(2139 pgs tid 14) v1
+2013-04-02 15:41:54.486164 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 16) v1 -- ?+0 0x8bdbb80 con 0x8ef77a0
+2013-04-02 15:41:54.486358 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 36 0x883e3c0pg_stats_ack(2139 pgs tid 15) v1
+2013-04-02 15:41:54.487053 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(2139 pgs tid 17) v1 -- ?+0 0x8bdb480 con 0x8ef77a0
+2013-04-02 15:41:54.487436 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 37 0x8bdbb80pg_stats_ack(2139 pgs tid 16) v1
+2013-04-02 15:41:54.488260 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1688 pgs tid 18) v1 -- ?+0 0x8bdd400 con 0x8ef77a0
+2013-04-02 15:41:54.488398 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 38 0x8bdb480pg_stats_ack(2139 pgs tid 17) v1
+2013-04-02 15:41:54.489004 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1688 pgs tid 19) v1 -- ?+0 0x8bdd080 con 0x8ef77a0
+2013-04-02 15:41:54.489306 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 39 0x8bdd400pg_stats_ack(1688 pgs tid 18) v1
+2013-04-02 15:41:54.489996 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1688 pgs tid 20) v1 -- ?+0 0x88601c0 con 0x8ef77a0
+2013-04-02 15:41:54.490083 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 40 0x8bdd080pg_stats_ack(1688 pgs tid 19) v1
+2013-04-02 15:41:54.490442 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1688 pgs tid 21) v1 -- ?+0 0x8865e80 con 0x8ef77a0
+2013-04-02 15:41:54.490837 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 41 0x88601c0pg_stats_ack(1688 pgs tid 20) v1
+2013-04-02 15:41:54.491416 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1956 pgs tid 22) v1 -- ?+0 0x8bddb00 con 0x8ef77a0
+2013-04-02 15:41:54.491807 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 42 0x8865e80pg_stats_ack(1688 pgs tid 21) v1
+2013-04-02 15:41:54.492195 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1956 pgs tid 23) v1 -- ?+0 0x8bde900 con 0x8ef77a0
+2013-04-02 15:41:54.492728 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 43 0x8bddb00pg_stats_ack(1956 pgs tid 22) v1
+2013-04-02 15:41:54.493313 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(1956 pgs tid 24) v1 -- ?+0 0x8bde580 con 0x8ef77a0
+2013-04-02 15:41:54.493707 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 44 0x8bde900pg_stats_ack(1956 pgs tid 23) v1
+2013-04-02 15:41:54.494585 7ffff1a8a700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).writer sending message 45 0x8bde580pg_stats_ack(1956 pgs tid 24) v1
+2013-04-02 15:42:00.522781 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 36 0x7435c80 pg_stats(108 pgs tid 25 v 7) v1
+2013-04-02 15:42:05.525728 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 38 0x7435a00 pg_stats(108 pgs tid 26 v 7) v1
+2013-04-02 15:42:10.530772 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 39 0x7435780 pg_stats(108 pgs tid 27 v 8) v1
+2013-04-02 15:42:15.565118 7fffa94ed700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917fa80 sd=596 :6789 s=2 pgs=2 cs=1 l=1).reader got message 42 0x1fa52080 pg_stats(108 pgs tid 28 v 11) v1
+2013-04-02 15:42:33.891896 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 4 0x1fa52080 pg_stats(108 pgs tid 30 v 14) v1
+2013-04-02 15:42:33.892425 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 5 0x7435780 pg_stats(108 pgs tid 31 v 14) v1
+2013-04-02 15:42:33.893026 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 9 0x1fb1fa80 pg_stats(108 pgs tid 32 v 16) v1
+2013-04-02 15:42:34.574255 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 11 0x1fb1fd00 pg_stats(108 pgs tid 33 v 16) v1
+2013-04-02 15:42:39.575512 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 12 0x1b4aaf80 pg_stats(108 pgs tid 34 v 16) v1
+2013-04-02 15:42:48.310568 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 4 ==== pg_stats(108 pgs tid 30 v 14) v1 ==== 40520+0+0 (2643097968 0 0) 0x1fa52080 con 0x8519760
+2013-04-02 15:42:48.310576 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(108 pgs tid 30 v 14) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:42:48.589731 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(108 pgs tid 30) v1 -- ?+0 0x8863d40 con 0x8519760
+2013-04-02 15:42:48.589885 7fffa8659700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).writer sending message 5 0x8863d40pg_stats_ack(108 pgs tid 30) v1
+2013-04-02 15:42:50.439778 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 5 ==== pg_stats(108 pgs tid 31 v 14) v1 ==== 40520+0+0 (3699058855 0 0) 0x7435780 con 0x8519760
+2013-04-02 15:42:50.439786 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(108 pgs tid 31 v 14) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:42:50.439869 7ffff2a8c700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(108 pgs tid 0) v1 -- ?+0 0xc26abc0 con 0x8519760
+2013-04-02 15:42:50.439926 7fffa8659700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).writer sending message 6 0xc26abc0pg_stats_ack(108 pgs tid 0) v1
+2013-04-02 15:42:50.442425 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 14 0x2dc3c00 pg_stats(108 pgs tid 35 v 17) v1
+2013-04-02 15:42:50.540570 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 15 0x154a8780 pg_stats(108 pgs tid 36 v 18) v1
+2013-04-02 15:42:51.087764 7ffff2a8c700  1 -- 172.17.131.31:6789/0 <== osd.0 172.17.131.32:6800/217031 9 ==== pg_stats(108 pgs tid 32 v 16) v1 ==== 40520+0+0 (3609079067 0 0) 0x1fb1fa80 con 0x8519760
+2013-04-02 15:42:51.087770 7ffff2a8c700 10 mon.cs31@0(leader).paxosservice(pgmap) dispatch pg_stats(108 pgs tid 32 v 16) v1 from osd.0 172.17.131.32:6800/217031
+2013-04-02 15:42:52.092802 7ffff328d700  1 -- 172.17.131.31:6789/0 --> 172.17.131.32:6800/217031 -- pg_stats_ack(108 pgs tid 32) v1 -- ?+0 0x1c62db00 con 0x8519760
+2013-04-02 15:42:52.092869 7fffa8659700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).writer sending message 13 0x1c62db00pg_stats_ack(108 pgs tid 32) v1
+2013-04-02 15:42:54.594268 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 19 0x154a8280 pg_stats(108 pgs tid 37 v 20) v1
+2013-04-02 15:43:22.177993 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 20 0x154a8000 pg_stats(108 pgs tid 38 v 20) v1
+2013-04-02 15:43:22.304697 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 22 0x88f6400 pg_stats(108 pgs tid 39 v 20) v1
+2013-04-02 15:43:22.354425 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 23 0x181b9400 pg_stats(108 pgs tid 40 v 20) v1
+2013-04-02 15:43:22.417111 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 25 0xb42d780 pg_stats(108 pgs tid 41 v 20) v1
+2013-04-02 15:43:22.454599 7fffa91ea700  2 -- 172.17.131.31:6789/0 >> 172.17.131.32:6800/217031 pipe(0x917eb80 sd=6 :6789 s=2 pgs=3 cs=1 l=1).reader got message 26 0xb42f300 pg_stats(108 pgs tid 42 v 20) v1
+
+Here is OSD 0's idea of its PGStat interaction with the mon:
+
+# cat osd.0.log | grep -i stats
+2013-04-02 15:39:58.909877 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 1 v 2) v1 -- ?+0 0x1748500 con 0x16098c0
+2013-04-02 15:39:58.918630 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 13 0x1748500pg_stats(2139 pgs tid 1 v 2) v1
+2013-04-02 15:40:03.915544 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 2 v 2) v1 -- ?+0 0x1748780 con 0x16098c0
+2013-04-02 15:40:03.922304 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 15 0x1748780pg_stats(2139 pgs tid 2 v 2) v1
+2013-04-02 15:40:08.920874 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 3 v 2) v1 -- ?+0 0x1748500 con 0x16098c0
+2013-04-02 15:40:08.929491 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 17 0x1748500pg_stats(2139 pgs tid 3 v 2) v1
+2013-04-02 15:40:13.928781 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 4 v 2) v1 -- ?+0 0x1748a00 con 0x16098c0
+2013-04-02 15:40:13.937503 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 19 0x1748a00pg_stats(2139 pgs tid 4 v 2) v1
+2013-04-02 15:40:18.936302 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 5 v 2) v1 -- ?+0 0x1748780 con 0x16098c0
+2013-04-02 15:40:18.944744 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 21 0x1748780pg_stats(2139 pgs tid 5 v 2) v1
+2013-04-02 15:40:23.941554 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 6 v 2) v1 -- ?+0 0x1748500 con 0x16098c0
+2013-04-02 15:40:23.949853 7ffff7fba700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748000 sd=27 :45108 s=2 pgs=8 cs=1 l=1).writer sending message 23 0x1748500pg_stats(2139 pgs tid 6 v 2) v1
+2013-04-02 15:40:28.944178 7ffff387a700  1 osd.0 2 mon hasn't acked PGStats in 30.034349 seconds, reconnecting elsewhere
+2013-04-02 15:40:42.798689 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 7 v 2) v1 -- ?+0 0x1748a00 con 0x1609e40
+2013-04-02 15:40:42.798728 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 8 v 2) v1 -- ?+0 0x1748000 con 0x1609e40
+2013-04-02 15:40:42.798813 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 9 v 3) v1 -- ?+0 0x1748500 con 0x1609e40
+2013-04-02 15:40:42.798833 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 10 v 3) v1 -- ?+0 0x1748780 con 0x1609e40
+2013-04-02 15:40:42.804039 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 5 0x1748a00pg_stats(2139 pgs tid 7 v 2) v1
+2013-04-02 15:40:42.815140 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 7 0x1748000pg_stats(2139 pgs tid 8 v 2) v1
+2013-04-02 15:40:42.825539 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 9 0x1748500pg_stats(2139 pgs tid 9 v 3) v1
+2013-04-02 15:40:42.833093 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 10 0x1748780pg_stats(2139 pgs tid 10 v 3) v1
+2013-04-02 15:40:44.332101 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 11 v 3) v1 -- ?+0 0x1749180 con 0x1609e40
+2013-04-02 15:40:44.340297 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 11 0x1749180pg_stats(2139 pgs tid 11 v 3) v1
+2013-04-02 15:40:49.338071 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 12 v 3) v1 -- ?+0 0x1748a00 con 0x1609e40
+2013-04-02 15:40:49.342361 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 12 0x1748a00pg_stats(2139 pgs tid 12 v 3) v1
+2013-04-02 15:40:50.977357 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 9 0x164fe00 pg_stats_ack(2139 pgs tid 7) v1
+2013-04-02 15:40:50.977597 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 9 ==== pg_stats_ack(2139 pgs tid 7) v1 ==== 62035+0+0 (726597769 0 0) 0x164fe00 con 0x1609e40
+2013-04-02 15:40:52.187136 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 12 0x164f380 pg_stats_ack(2139 pgs tid 0) v1
+2013-04-02 15:40:52.187290 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 12 ==== pg_stats_ack(2139 pgs tid 0) v1 ==== 62035+0+0 (726597769 0 0) 0x164f380 con 0x1609e40
+2013-04-02 15:40:54.344074 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 13 v 3) v1 -- ?+0 0x1748000 con 0x1609e40
+2013-04-02 15:40:54.348415 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 13 0x1748000pg_stats(2139 pgs tid 13 v 3) v1
+2013-04-02 15:40:59.351607 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 14 v 3) v1 -- ?+0 0x1748500 con 0x1609e40
+2013-04-02 15:40:59.359988 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 15 0x1748500pg_stats(2139 pgs tid 14 v 3) v1
+2013-04-02 15:41:04.359122 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 15 v 3) v1 -- ?+0 0x1748780 con 0x1609e40
+2013-04-02 15:41:04.364092 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 16 0x1748780pg_stats(2139 pgs tid 15 v 3) v1
+2013-04-02 15:41:09.366106 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 16 v 3) v1 -- ?+0 0x1749400 con 0x1609e40
+2013-04-02 15:41:09.374543 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 17 0x1749400pg_stats(2139 pgs tid 16 v 3) v1
+2013-04-02 15:41:14.371889 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(2139 pgs tid 17 v 3) v1 -- ?+0 0x1748a00 con 0x1609e40
+2013-04-02 15:41:14.380211 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 18 0x1748a00pg_stats(2139 pgs tid 17 v 3) v1
+2013-04-02 15:41:18.240897 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 15 0x164fe00 pg_stats_ack(2139 pgs tid 9) v1
+2013-04-02 15:41:18.241056 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 15 ==== pg_stats_ack(2139 pgs tid 9) v1 ==== 62035+0+0 (198780535 0 0) 0x164fe00 con 0x1609e40
+2013-04-02 15:41:19.380719 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1688 pgs tid 18 v 3) v1 -- ?+0 0x1749180 con 0x1609e40
+2013-04-02 15:41:19.387148 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 19 0x1749180pg_stats(1688 pgs tid 18 v 3) v1
+2013-04-02 15:41:24.389573 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1688 pgs tid 19 v 3) v1 -- ?+0 0x1748780 con 0x1609e40
+2013-04-02 15:41:24.396022 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 20 0x1748780pg_stats(1688 pgs tid 19 v 3) v1
+2013-04-02 15:41:29.396986 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1688 pgs tid 20 v 3) v1 -- ?+0 0x1748500 con 0x1609e40
+2013-04-02 15:41:29.403403 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 22 0x1748500pg_stats(1688 pgs tid 20 v 3) v1
+2013-04-02 15:41:34.401630 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1688 pgs tid 21 v 3) v1 -- ?+0 0x1748000 con 0x1609e40
+2013-04-02 15:41:34.407929 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 24 0x1748000pg_stats(1688 pgs tid 21 v 3) v1
+2013-04-02 15:41:39.519241 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 16 0x164d5c0 pg_stats_ack(2139 pgs tid 10) v1
+2013-04-02 15:41:39.519384 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 16 ==== pg_stats_ack(2139 pgs tid 10) v1 ==== 62035+0+0 (162752886 0 0) 0x164d5c0 con 0x1609e40
+2013-04-02 15:41:41.416252 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1956 pgs tid 22 v 4) v1 -- ?+0 0x174be80 con 0x1609e40
+2013-04-02 15:41:41.423974 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 27 0x174be80pg_stats(1956 pgs tid 22 v 4) v1
+2013-04-02 15:41:46.421537 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1956 pgs tid 23 v 4) v1 -- ?+0 0x174bc00 con 0x1609e40
+2013-04-02 15:41:46.429102 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 29 0x174bc00pg_stats(1956 pgs tid 23 v 4) v1
+2013-04-02 15:41:51.425198 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(1956 pgs tid 24 v 4) v1 -- ?+0 0x174b980 con 0x1609e40
+2013-04-02 15:41:51.433005 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 31 0x174b980pg_stats(1956 pgs tid 24 v 4) v1
+2013-04-02 15:41:54.483344 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 32 0x4732bc0 pg_stats_ack(2139 pgs tid 11) v1
+2013-04-02 15:41:54.483470 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 32 ==== pg_stats_ack(2139 pgs tid 11) v1 ==== 62035+0+0 (162752886 0 0) 0x4732bc0 con 0x1609e40
+2013-04-02 15:41:54.484667 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 33 0x4732680 pg_stats_ack(2139 pgs tid 12) v1
+2013-04-02 15:41:54.484796 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 33 ==== pg_stats_ack(2139 pgs tid 12) v1 ==== 62035+0+0 (162752886 0 0) 0x4732680 con 0x1609e40
+2013-04-02 15:41:54.485954 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 34 0x4732840 pg_stats_ack(2139 pgs tid 13) v1
+2013-04-02 15:41:54.486291 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 34 ==== pg_stats_ack(2139 pgs tid 13) v1 ==== 62035+0+0 (162752886 0 0) 0x4732840 con 0x1609e40
+2013-04-02 15:41:54.487671 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 35 0x4736040 pg_stats_ack(2139 pgs tid 14) v1
+2013-04-02 15:41:54.487791 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 35 ==== pg_stats_ack(2139 pgs tid 14) v1 ==== 62035+0+0 (162752886 0 0) 0x4736040 con 0x1609e40
+2013-04-02 15:41:54.488818 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 36 0x4b34440 pg_stats_ack(2139 pgs tid 15) v1
+2013-04-02 15:41:54.489018 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 36 ==== pg_stats_ack(2139 pgs tid 15) v1 ==== 62035+0+0 (162752886 0 0) 0x4b34440 con 0x1609e40
+2013-04-02 15:41:54.490044 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 37 0x164fa80 pg_stats_ack(2139 pgs tid 16) v1
+2013-04-02 15:41:54.490173 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 37 ==== pg_stats_ack(2139 pgs tid 16) v1 ==== 62035+0+0 (162752886 0 0) 0x164fa80 con 0x1609e40
+2013-04-02 15:41:54.491252 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 38 0x164f700 pg_stats_ack(2139 pgs tid 17) v1
+2013-04-02 15:41:54.491376 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 38 ==== pg_stats_ack(2139 pgs tid 17) v1 ==== 62035+0+0 (162752886 0 0) 0x164f700 con 0x1609e40
+2013-04-02 15:41:54.492139 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 39 0x4b34d00 pg_stats_ack(1688 pgs tid 18) v1
+2013-04-02 15:41:54.492427 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 39 ==== pg_stats_ack(1688 pgs tid 18) v1 ==== 48956+0+0 (1148031672 0 0) 0x4b34d00 con 0x1609e40
+2013-04-02 15:41:54.493228 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 40 0x3e63f00 pg_stats_ack(1688 pgs tid 19) v1
+2013-04-02 15:41:54.493359 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 40 ==== pg_stats_ack(1688 pgs tid 19) v1 ==== 48956+0+0 (1148031672 0 0) 0x3e63f00 con 0x1609e40
+2013-04-02 15:41:54.494104 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 41 0x3e63b80 pg_stats_ack(1688 pgs tid 20) v1
+2013-04-02 15:41:54.494228 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 41 ==== pg_stats_ack(1688 pgs tid 20) v1 ==== 48956+0+0 (1148031672 0 0) 0x3e63b80 con 0x1609e40
+2013-04-02 15:41:54.494914 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 42 0x3e640c0 pg_stats_ack(1688 pgs tid 21) v1
+2013-04-02 15:41:54.494979 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 42 ==== pg_stats_ack(1688 pgs tid 21) v1 ==== 48956+0+0 (1148031672 0 0) 0x3e640c0 con 0x1609e40
+2013-04-02 15:41:54.495941 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 43 0x17f5400 pg_stats_ack(1956 pgs tid 22) v1
+2013-04-02 15:41:54.496066 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 43 ==== pg_stats_ack(1956 pgs tid 22) v1 ==== 56728+0+0 (217165409 0 0) 0x17f5400 con 0x1609e40
+2013-04-02 15:41:54.496825 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 44 0x183fa80 pg_stats_ack(1956 pgs tid 23) v1
+2013-04-02 15:41:54.496945 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 44 ==== pg_stats_ack(1956 pgs tid 23) v1 ==== 56728+0+0 (217165409 0 0) 0x183fa80 con 0x1609e40
+2013-04-02 15:41:54.497867 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).reader got message 45 0x1839a40 pg_stats_ack(1956 pgs tid 24) v1
+2013-04-02 15:41:54.497983 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 45 ==== pg_stats_ack(1956 pgs tid 24) v1 ==== 56728+0+0 (217165409 0 0) 0x1839a40 con 0x1609e40
+2013-04-02 15:42:00.522449 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 25 v 7) v1 -- ?+0 0x4031b80 con 0x1609e40
+2013-04-02 15:42:00.523046 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 36 0x4031b80pg_stats(108 pgs tid 25 v 7) v1
+2013-04-02 15:42:05.525433 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 26 v 7) v1 -- ?+0 0x4031900 con 0x1609e40
+2013-04-02 15:42:05.526040 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 38 0x4031900pg_stats(108 pgs tid 26 v 7) v1
+2013-04-02 15:42:10.530320 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 27 v 8) v1 -- ?+0 0x4031680 con 0x1609e40
+2013-04-02 15:42:10.530987 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 39 0x4031680pg_stats(108 pgs tid 27 v 8) v1
+2013-04-02 15:42:15.564684 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 28 v 11) v1 -- ?+0 0x4031400 con 0x1609e40
+2013-04-02 15:42:15.565270 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 42 0x4031400pg_stats(108 pgs tid 28 v 11) v1
+2013-04-02 15:42:20.568779 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 29 v 13) v1 -- ?+0 0x5861180 con 0x1609e40
+2013-04-02 15:42:20.569360 7fffcce2c700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x1748c80 sd=24 :45195 s=2 pgs=1394 cs=1 l=1).writer sending message 45 0x5861180pg_stats(108 pgs tid 29 v 13) v1
+2013-04-02 15:42:24.570963 7ffff387a700  1 osd.0 14 mon hasn't acked PGStats in 30.072959 seconds, reconnecting elsewhere
+2013-04-02 15:42:33.891060 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 30 v 14) v1 -- ?+0 0x6794380 con 0x5819e40
+2013-04-02 15:42:33.891072 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 31 v 14) v1 -- ?+0 0x4031680 con 0x5819e40
+2013-04-02 15:42:33.891149 7fffe485c700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 32 v 16) v1 -- ?+0 0x6793e80 con 0x5819e40
+2013-04-02 15:42:33.891808 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 4 0x6794380pg_stats(108 pgs tid 30 v 14) v1
+2013-04-02 15:42:33.892402 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 5 0x4031680pg_stats(108 pgs tid 31 v 14) v1
+2013-04-02 15:42:33.893054 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 9 0x6793e80pg_stats(108 pgs tid 32 v 16) v1
+2013-04-02 15:42:34.573582 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 33 v 16) v1 -- ?+0 0x6793700 con 0x5819e40
+2013-04-02 15:42:34.574136 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 11 0x6793700pg_stats(108 pgs tid 33 v 16) v1
+2013-04-02 15:42:39.575223 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 34 v 16) v1 -- ?+0 0x6792d00 con 0x5819e40
+2013-04-02 15:42:39.575817 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 12 0x6792d00pg_stats(108 pgs tid 34 v 16) v1
+2013-04-02 15:42:44.576975 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 35 v 17) v1 -- ?+0 0x6795f00 con 0x5819e40
+2013-04-02 15:42:44.577611 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 14 0x6795f00pg_stats(108 pgs tid 35 v 17) v1
+2013-04-02 15:42:48.591071 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).reader got message 5 0x443d080 pg_stats_ack(108 pgs tid 30) v1
+2013-04-02 15:42:48.591184 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 5 ==== pg_stats_ack(108 pgs tid 30) v1 ==== 3136+0+0 (3131392639 0 0) 0x443d080 con 0x5819e40
+2013-04-02 15:42:49.577888 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 36 v 18) v1 -- ?+0 0x6795c80 con 0x5819e40
+2013-04-02 15:42:49.578479 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 15 0x6795c80pg_stats(108 pgs tid 36 v 18) v1
+2013-04-02 15:42:50.441073 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).reader got message 6 0x1823480 pg_stats_ack(108 pgs tid 0) v1
+2013-04-02 15:42:50.441140 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 6 ==== pg_stats_ack(108 pgs tid 0) v1 ==== 3136+0+0 (3131392639 0 0) 0x1823480 con 0x5819e40
+2013-04-02 15:42:52.094048 7fffcd82e700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).reader got message 13 0x6cbec80 pg_stats_ack(108 pgs tid 32) v1
+2013-04-02 15:42:52.094159 7fffe485c700  1 -- 172.17.131.32:6800/217031 <== mon.0 172.17.131.31:6789/0 13 ==== pg_stats_ack(108 pgs tid 32) v1 ==== 3136+0+0 (3721100430 0 0) 0x6cbec80 con 0x5819e40
+2013-04-02 15:42:54.594067 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 37 v 20) v1 -- ?+0 0x6797580 con 0x5819e40
+2013-04-02 15:42:54.594729 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 19 0x6797580pg_stats(108 pgs tid 37 v 20) v1
+2013-04-02 15:42:59.658795 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 38 v 20) v1 -- ?+0 0x174a300 con 0x5819e40
+2013-04-02 15:42:59.659279 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 20 0x174a300pg_stats(108 pgs tid 38 v 20) v1
+2013-04-02 15:43:04.660446 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 39 v 20) v1 -- ?+0 0x6793200 con 0x5819e40
+2013-04-02 15:43:04.660952 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 22 0x6793200pg_stats(108 pgs tid 39 v 20) v1
+2013-04-02 15:43:09.661467 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 40 v 20) v1 -- ?+0 0x6792a80 con 0x5819e40
+2013-04-02 15:43:09.661950 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 23 0x6792a80pg_stats(108 pgs tid 40 v 20) v1
+2013-04-02 15:43:14.662762 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 41 v 20) v1 -- ?+0 0x6792300 con 0x5819e40
+2013-04-02 15:43:14.663314 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 25 0x6792300pg_stats(108 pgs tid 41 v 20) v1
+2013-04-02 15:43:19.664054 7ffff387a700  1 -- 172.17.131.32:6800/217031 --> 172.17.131.31:6789/0 -- pg_stats(108 pgs tid 42 v 20) v1 -- ?+0 0x6791b80 con 0x5819e40
+2013-04-02 15:43:19.664776 7fff9bc1f700  2 -- 172.17.131.32:6800/217031 >> 172.17.131.31:6789/0 pipe(0x5862800 sd=27 :47851 s=2 pgs=1425 cs=1 l=1).writer sending message 26 0x6791b80pg_stats(108 pgs tid 42 v 20) v1
+2013-04-02 15:43:22.664921 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.570739 seconds, reconnecting elsewhere
+2013-04-02 15:43:52.672461 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007379 seconds, reconnecting elsewhere
+2013-04-02 15:44:22.680691 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007095 seconds, reconnecting elsewhere
+2013-04-02 15:44:52.688936 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007221 seconds, reconnecting elsewhere
+2013-04-02 15:45:22.702066 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.012264 seconds, reconnecting elsewhere
+2013-04-02 15:45:52.711134 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007957 seconds, reconnecting elsewhere
+2013-04-02 15:46:22.719845 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.007859 seconds, reconnecting elsewhere
+2013-04-02 15:46:52.729475 7ffff387a700  1 osd.0 20 mon hasn't acked PGStats in 30.008756 seconds, reconnecting elsewhere
+
+Why would OSD 0 stop trying to send PGStats to the mon?
+
+Maybe the above is all normal behavior, so any thoughts on what I
+should be looking for instead are greatly appreciated.
+
+On the bright side, this issue is completely reproducible for me,
+and I'll be happy to test anything you think might help sort it out.
+
+-- Jim
+
