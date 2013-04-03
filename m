@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: be explicit in masking bottom 16 bits
-Date: Wed, 03 Apr 2013 11:38:27 -0700
-Message-ID: <515C7723.6080700@inktank.com>
-References: <51560237.2040000@inktank.com>
+Subject: Re: [PATCH] ceph: move max constant definitions
+Date: Wed, 03 Apr 2013 11:38:46 -0700
+Message-ID: <515C7736.30203@inktank.com>
+References: <5156067F.7070404@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f42.google.com ([209.85.210.42]:51120 "EHLO
-	mail-da0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759936Ab3DCSiq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 14:38:46 -0400
-Received: by mail-da0-f42.google.com with SMTP id n15so778946dad.29
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Apr 2013 11:38:46 -0700 (PDT)
-In-Reply-To: <51560237.2040000@inktank.com>
+Received: from mail-pb0-f53.google.com ([209.85.160.53]:56928 "EHLO
+	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759936Ab3DCSjF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 14:39:05 -0400
+Received: by mail-pb0-f53.google.com with SMTP id un15so1000316pbc.12
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Apr 2013 11:39:04 -0700 (PDT)
+In-Reply-To: <5156067F.7070404@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,49 +21,56 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 03/29/2013 02:05 PM, Alex Elder wrote:
-> In ceph_osdc_build_request() there is a call to cpu_to_le16() which
-> provides a 64-bit value as its argument.  Because of the implied
-> byte swapping going on it looked pretty suspect to me.
+On 03/29/2013 02:24 PM, Alex Elder wrote:
+> Move some definitions for max integer values out of the rbd code and
+> into the more central "decode.h" header file.  These really belong
+> in a Linux (or libc) header somewhere, but I haven't gotten around
+> to proposing that yet.
 >
-> At the moment it turns out the behavior is well defined, but masking
-> off those bottom bits explicitly eliminates this distraction, and is
-> in fact more directly related to the purpose of the message header's
-> data_off field.
->
-> This resolves:
->      http://tracker.ceph.com/issues/4125
+> This is in preparation for moving some code out of rbd.c and into
+> the osd client.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   net/ceph/osd_client.c |   14 ++++++++++++--
->   1 file changed, 12 insertions(+), 2 deletions(-)
+>   drivers/block/rbd.c         |    7 -------
+>   include/linux/ceph/decode.h |    7 +++++++
+>   2 files changed, 7 insertions(+), 7 deletions(-)
 >
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 3b6657f..015bf9f 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -419,8 +419,18 @@ void ceph_osdc_build_request(struct
-> ceph_osd_request *req,
->   	p += 4;
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index d54a045..9c97204 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -52,13 +52,6 @@
+>   #define	SECTOR_SHIFT	9
+>   #define	SECTOR_SIZE	(1ULL << SECTOR_SHIFT)
 >
->   	/* data */
-> -	if (flags & CEPH_OSD_FLAG_WRITE)
-> -		req->r_request->hdr.data_off = cpu_to_le16(off);
-> +	if (flags & CEPH_OSD_FLAG_WRITE) {
-> +		u16 data_off;
+> -/* It might be useful to have these defined elsewhere */
+> -
+> -#define	U8_MAX	((u8)	(~0U))
+> -#define	U16_MAX	((u16)	(~0U))
+> -#define	U32_MAX	((u32)	(~0U))
+> -#define	U64_MAX	((u64)	(~0ULL))
+> -
+>   #define RBD_DRV_NAME "rbd"
+>   #define RBD_DRV_NAME_LONG "rbd (rados block device)"
+>
+> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
+> index 360d9d0..689f1df 100644
+> --- a/include/linux/ceph/decode.h
+> +++ b/include/linux/ceph/decode.h
+> @@ -8,6 +8,13 @@
+>
+>   #include <linux/ceph/types.h>
+>
+> +/* This seemed to be the easiest place to define these */
 > +
-> +		/*
-> +		 * The header "data_off" is a hint to the receiver
-> +		 * allowing it to align received data into its
-> +		 * buffers such that there's no need to re-copy
-> +		 * it before writing it to disk (direct I/O).
-> +		 */
-> +		data_off = (u16) (off & 0xffff);
-> +		req->r_request->hdr.data_off = cpu_to_le16(data_off);
-> +	}
->   	req->r_request->hdr.data_len = cpu_to_le32(data_len);
->
->   	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
+> +#define	U8_MAX	((u8)  (~0U))
+> +#define	U16_MAX	((u16) (~0U))
+> +#define	U32_MAX	((u32) (~0U))
+> +#define	U64_MAX	((u64) (~0ULL))
+> +
+>   /*
+>    * in all cases,
+>    *   void **p     pointer to position pointer
 >
 
