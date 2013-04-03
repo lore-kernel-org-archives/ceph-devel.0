@@ -1,47 +1,34 @@
-From: dawn li <defence986-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: subscibe
-Date: Wed, 3 Apr 2013 12:06:19 +0800
-Message-ID: <CAMVugGwDh89GKzdvDruo2dj2ooiFGXXYscX470yvBhvFdrCcMw@mail.gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: RGW: Refusing FastCGI request with empty CONTENT_LENGTH ? Why ?
+Date: Wed, 3 Apr 2013 09:47:34 +0200
+Message-ID: <CAF6-1L7111XvU7rLhao1nYjyWcX4jBvDj6XGkJmkvFNgArS0ew@mail.gmail.com>
+References: <CAF6-1L4GdD8w=3y-0fnVHLA1RPAoKmr-EwST9_pteD_i8opkPw@mail.gmail.com>
+	<CAF6-1L6y81uVN29ZJyjxOHv5r=cQXqoYdSV22AGHY1U9Xgu57g@mail.gmail.com>
+	<CAF6-1L5L1s4hdvrFLAiF7Z0ByJ0JcDASwrvM4AexPfmgvCg0=w@mail.gmail.com>
+	<alpine.DEB.2.00.1304020827210.4476@cobra.newdream.net>
+	<515AF94D.4030708@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0051760228=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-join-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0051760228==
-Content-Type: multipart/alternative; boundary=20cf3079b5eaf1629904d96cf9bc
-
---20cf3079b5eaf1629904d96cf9bc
 Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bk0-f49.google.com ([209.85.214.49]:62954 "EHLO
+	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932645Ab3DCHrg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Apr 2013 03:47:36 -0400
+Received: by mail-bk0-f49.google.com with SMTP id w12so633967bku.36
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Apr 2013 00:47:34 -0700 (PDT)
+In-Reply-To: <515AF94D.4030708@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-subscibe
+Hi,
 
---20cf3079b5eaf1629904d96cf9bc
-Content-Type: text/html; charset=ISO-8859-1
+> https://github.com/carsonoid/ceph/commit/96896eb092c3b4e0760e56d5228ef0d604951a12
 
-<div dir="ltr">subscibe<br></div>
+Yes, exactly. The same commit is also in the official same repo with
+the same commit ID.
 
---20cf3079b5eaf1629904d96cf9bc--
+Cheers,
 
---===============0051760228==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0051760228==--
+    Sylvain
