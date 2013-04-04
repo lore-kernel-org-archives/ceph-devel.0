@@ -1,46 +1,48 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/9]
-Date: Thu, 04 Apr 2013 11:16:21 -0500
-Message-ID: <515DA755.2090504@inktank.com>
+Subject: [PATCH 1/9] ceph: use page_offset() in ceph_writepages_start()
+Date: Thu, 04 Apr 2013 11:18:18 -0500
+Message-ID: <515DA7CA.4040808@inktank.com>
+References: <515DA755.2090504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:54930 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762844Ab3DDQQY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 12:16:24 -0400
-Received: by mail-ie0-f174.google.com with SMTP id aq17so3167832iec.19
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Apr 2013 09:16:23 -0700 (PDT)
+Received: from mail-ia0-f177.google.com ([209.85.210.177]:43260 "EHLO
+	mail-ia0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762890Ab3DDQSU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 12:18:20 -0400
+Received: by mail-ia0-f177.google.com with SMTP id w33so2317317iag.8
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Apr 2013 09:18:20 -0700 (PDT)
+In-Reply-To: <515DA755.2090504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-(The following patches are available in branch "review/wip-3761"
-on the ceph-client git respository.)
+There's one spot in ceph_writepages_start() that open-codes what
+page_offset() does safely.  Use the macro so we don't have to worry
+about wrapping.
 
-These are actually a few sets of patches but I'm just going to
-post them as a single series this time.
+This resolves:
+    http://tracker.ceph.com/issues/4648
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ fs/ceph/addr.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-[PATCH 1/9] ceph: use page_offset() in ceph_writepages_start()
-    Fixes a potential bug in ceph_writepages_start().
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 67d4965..6a5a08e 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -900,7 +900,7 @@ get_more_pages:
+ 		}
 
-[PATCH 2/9] libceph: drop ceph_osd_request->r_con_filling_msg
-    Removes a no-longer-needed field, to simplify code.
+ 		/* submit the write */
+-		offset = req->r_data_out.pages[0]->index << PAGE_CACHE_SHIFT;
++		offset = page_offset(req->r_data_out.pages[0]);
+ 		len = min((snap_size ? snap_size : i_size_read(inode)) - offset,
+ 			  (u64)locked_pages << PAGE_CACHE_SHIFT);
+ 		dout("writepages got %d pages at %llu~%llu\n",
+-- 
+1.7.9.5
 
-[PATCH 3/9] libceph: record length of bio list with bio
-[PATCH 4/9] libceph: record message data length
-    Has each message maintain its data length, so we can
-    avoid depending on what's in the message's header.
-
-[PATCH 5/9] libceph: don't build request in ceph_osdc_new_request()
-[PATCH 6/9] ceph: define ceph_writepages_osd_request()
-[PATCH 7/9] ceph: kill ceph alloc_page_vec()
-[PATCH 8/9] libceph: hold off building osd request
-[PATCH 9/9] ceph: build osd request message later for writepages
-    Defers "building" a request message until right before
-    it's submitted to the osd client to start its execution.
-    Also stops having the length field in a message header
-    get updated by the file system code.
