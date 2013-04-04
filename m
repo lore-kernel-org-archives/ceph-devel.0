@@ -1,125 +1,212 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 8/9] libceph: hold off building osd request
-Date: Thu, 04 Apr 2013 11:20:06 -0500
-Message-ID: <515DA836.6010204@inktank.com>
+Subject: [PATCH 9/9] ceph: build osd request message later for writepages
+Date: Thu, 04 Apr 2013 11:20:21 -0500
+Message-ID: <515DA845.2060204@inktank.com>
 References: <515DA755.2090504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:54626 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762991Ab3DDQUI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 12:20:08 -0400
-Received: by mail-ia0-f179.google.com with SMTP id x24so2396146iak.10
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Apr 2013 09:20:07 -0700 (PDT)
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:50270 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1763045Ab3DDQUX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 12:20:23 -0400
+Received: by mail-ie0-f173.google.com with SMTP id 9so3236919iec.32
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Apr 2013 09:20:22 -0700 (PDT)
 In-Reply-To: <515DA755.2090504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Defer building the osd request until just before submitting it in
-all callers except ceph_writepages_start().  (That caller will be
-handed in the next patch.)
+Hold off building the osd request message in ceph_writepages_start()
+until just before it will be submitted to the osd client for
+execution.
+
+We'll still create the request and allocate the page pointer array
+after we learn we have at least one page to write.  A local variable
+will be used to keep track of the allocated array of pages.  Wait
+until just before submitting the request for assigning that page
+array pointer to the request message.
+
+Create ands use a new function osd_req_op_extent_update() whose
+purpose is to serve this one spot where the length value supplied
+when an osd request's op was initially formatted might need to get
+changed (reduced, never increased) before submitting the request.
+
+Previously, ceph_writepages_start() assigned the message header's
+data length because of this update.  That's no longer necessary,
+because ceph_osdc_build_request() will recalculate the right
+value to use based on the content of the ops in the request.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/ceph/addr.c        |    4 ++--
- fs/ceph/file.c        |    7 ++++---
- net/ceph/osd_client.c |    8 ++++----
- 3 files changed, 10 insertions(+), 9 deletions(-)
+ fs/ceph/addr.c                  |   59
+++++++++++++++++++++++-----------------
+ include/linux/ceph/osd_client.h |    1 +
+ net/ceph/osd_client.c           |   13 +++++++++
+ 3 files changed, 47 insertions(+), 26 deletions(-)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e976c6d..125d0a8 100644
+index 125d0a8..e0dd74c 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -319,8 +319,6 @@ static int start_read(struct inode *inode, struct
-list_head *page_list, int max)
- 	if (IS_ERR(req))
- 		return PTR_ERR(req);
+@@ -737,10 +737,14 @@ retry:
 
--	ceph_osdc_build_request(req, off, 1, &op, NULL, vino.snap, NULL);
--
- 	/* build page vector */
- 	nr_pages = calc_pages_for(0, len);
- 	pages = kmalloc(sizeof(*pages) * nr_pages, GFP_NOFS);
-@@ -351,6 +349,8 @@ static int start_read(struct inode *inode, struct
-list_head *page_list, int max)
- 	req->r_callback = finish_read;
- 	req->r_inode = inode;
+ 	while (!done && index <= end) {
+ 		struct ceph_osd_req_op ops[2];
++		int num_ops = do_sync ? 2 : 1;
++		struct ceph_vino vino;
+ 		unsigned i;
+ 		int first;
+ 		pgoff_t next;
+ 		int pvec_pages, locked_pages;
++		struct page **pages = NULL;
++		mempool_t *pool = NULL;	/* Becomes non-null if mempool used */
+ 		struct page *page;
+ 		int want;
+ 		u64 offset, len;
+@@ -824,16 +828,19 @@ get_more_pages:
+ 				break;
+ 			}
 
-+	ceph_osdc_build_request(req, off, 1, &op, NULL, vino.snap, NULL);
+-			/* ok */
++			/*
++			 * We have something to write.  If this is
++			 * the first locked page this time through,
++			 * allocate an osd request and a page array
++			 * that it will use.
++			 */
+ 			if (locked_pages == 0) {
+-				struct ceph_vino vino;
+-				int num_ops = do_sync ? 2 : 1;
+ 				size_t size;
+-				struct page **pages;
+-				mempool_t *pool = NULL;
 +
- 	dout("start_read %p starting %p %lld~%lld\n", inode, req, off, len);
- 	ret = ceph_osdc_start_request(osdc, req, false);
- 	if (ret < 0)
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index f341c90..66b8469 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -540,9 +540,6 @@ more:
- 	if (IS_ERR(req))
- 		return PTR_ERR(req);
++				BUG_ON(pages);
 
--	ceph_osdc_build_request(req, pos, num_ops, ops,
--				snapc, vino.snap, &mtime);
+ 				/* prepare async write request */
+-				offset = (u64) page_offset(page);
++				offset = (u64)page_offset(page);
+ 				len = wsize;
+ 				req = ceph_writepages_osd_request(inode,
+ 							offset, &len, snapc,
+@@ -845,11 +852,6 @@ get_more_pages:
+ 					break;
+ 				}
+
+-				vino = ceph_vino(inode);
+-				ceph_osdc_build_request(req, offset,
+-					num_ops, ops, snapc, vino.snap,
+-					&inode->i_mtime);
 -
- 	/* write from beginning of first page, regardless of io alignment */
- 	page_align = file->f_flags & O_DIRECT ? buf_align : io_align;
- 	num_pages = calc_pages_for(page_align, len);
-@@ -583,6 +580,10 @@ more:
- 	req->r_data_out.alignment = page_align;
- 	req->r_inode = inode;
+ 				req->r_callback = writepages_finish;
+ 				req->r_inode = inode;
 
-+	/* BUG_ON(vino.snap != CEPH_NOSNAP); */
-+	ceph_osdc_build_request(req, pos, num_ops, ops,
-+				snapc, vino.snap, &mtime);
+@@ -858,16 +860,9 @@ get_more_pages:
+ 				pages = kmalloc(size, GFP_NOFS);
+ 				if (!pages) {
+ 					pool = fsc->wb_pagevec_pool;
+-
+ 					pages = mempool_alloc(pool, GFP_NOFS);
+-					WARN_ON(!pages);
++					BUG_ON(!pages);
+ 				}
+-
+-				req->r_data_out.pages = pages;
+-				req->r_data_out.pages_from_pool = !!pool;
+-				req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
+-				req->r_data_out.length = len;
+-				req->r_data_out.alignment = 0;
+ 			}
+
+ 			/* note position of first page in pvec */
+@@ -885,7 +880,7 @@ get_more_pages:
+ 			}
+
+ 			set_page_writeback(page);
+-			req->r_data_out.pages[locked_pages] = page;
++			pages[locked_pages] = page;
+ 			locked_pages++;
+ 			next = page->index + 1;
+ 		}
+@@ -914,18 +909,30 @@ get_more_pages:
+ 			pvec.nr -= i-first;
+ 		}
+
+-		/* submit the write */
+-		offset = page_offset(req->r_data_out.pages[0]);
++		/* Format the osd request message and submit the write */
 +
- 	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
- 	if (!ret) {
- 		if (req->r_safe_callback) {
++		offset = page_offset(pages[0]);
+ 		len = min((snap_size ? snap_size : i_size_read(inode)) - offset,
+ 			  (u64)locked_pages << PAGE_CACHE_SHIFT);
+ 		dout("writepages got %d pages at %llu~%llu\n",
+ 		     locked_pages, offset, len);
+
+-		/* revise final length, page count */
++		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
++		req->r_data_out.pages = pages;
+ 		req->r_data_out.length = len;
+-		req->r_request_ops[0].extent.length = cpu_to_le64(len);
+-		req->r_request_ops[0].payload_len = cpu_to_le32(len);
+-		req->r_request->hdr.data_len = cpu_to_le32(len);
++		req->r_data_out.alignment = 0;
++		req->r_data_out.pages_from_pool = !!pool;
++
++		pages = NULL;	/* request message now owns the pages array */
++		pool = NULL;
++
++		/* Update the write op length in case we changed it */
++
++		osd_req_op_extent_update(&ops[0], len);
++
++		vino = ceph_vino(inode);
++		ceph_osdc_build_request(req, offset, num_ops, ops,
++					snapc, vino.snap, &inode->i_mtime);
+
+ 		rc = ceph_osdc_start_request(&fsc->client->osdc, req, true);
+ 		BUG_ON(rc);
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index ffaf907..5ee1a37 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -234,6 +234,7 @@ extern void osd_req_op_init(struct ceph_osd_req_op
+*op, u16 opcode);
+ extern void osd_req_op_extent_init(struct ceph_osd_req_op *op, u16 opcode,
+ 					u64 offset, u64 length,
+ 					u64 truncate_size, u32 truncate_seq);
++extern void osd_req_op_extent_update(struct ceph_osd_req_op *op, u64
+length);
+ extern void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
+ 					const char *class, const char *method,
+ 					const void *request_data,
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 115790a..9ca693d 100644
+index 9ca693d..426ca1f 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -2056,8 +2056,6 @@ int ceph_osdc_readpages(struct ceph_osd_client *osdc,
- 	if (IS_ERR(req))
- 		return PTR_ERR(req);
+@@ -296,6 +296,19 @@ void osd_req_op_extent_init(struct ceph_osd_req_op
+*op, u16 opcode,
+ }
+ EXPORT_SYMBOL(osd_req_op_extent_init);
 
--	ceph_osdc_build_request(req, off, 1, &op, NULL, vino.snap, NULL);
--
- 	/* it may be a short read due to an object boundary */
-
- 	osd_data = &req->r_data_in;
-@@ -2069,6 +2067,8 @@ int ceph_osdc_readpages(struct ceph_osd_client *osdc,
- 	dout("readpages  final extent is %llu~%llu (%llu bytes align %d)\n",
- 	     off, *plen, osd_data->length, page_align);
-
-+	ceph_osdc_build_request(req, off, 1, &op, NULL, vino.snap, NULL);
++void osd_req_op_extent_update(struct ceph_osd_req_op *op, u64 length)
++{
++	u64 previous = op->extent.length;
 +
- 	rc = ceph_osdc_start_request(osdc, req, false);
- 	if (!rc)
- 		rc = ceph_osdc_wait_request(osdc, req);
-@@ -2105,8 +2105,6 @@ int ceph_osdc_writepages(struct ceph_osd_client
-*osdc, struct ceph_vino vino,
- 	if (IS_ERR(req))
- 		return PTR_ERR(req);
-
--	ceph_osdc_build_request(req, off, 1, &op, snapc, CEPH_NOSNAP, mtime);
--
- 	/* it may be a short write due to an object boundary */
- 	osd_data = &req->r_data_out;
- 	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-@@ -2115,6 +2113,8 @@ int ceph_osdc_writepages(struct ceph_osd_client
-*osdc, struct ceph_vino vino,
- 	osd_data->alignment = page_align;
- 	dout("writepages %llu~%llu (%llu bytes)\n", off, len, osd_data->length);
-
-+	ceph_osdc_build_request(req, off, 1, &op, snapc, CEPH_NOSNAP, mtime);
++	if (length == previous)
++		return;		/* Nothing to do */
++	BUG_ON(length > previous);
 +
- 	rc = ceph_osdc_start_request(osdc, req, true);
- 	if (!rc)
- 		rc = ceph_osdc_wait_request(osdc, req);
++	op->extent.length = length;
++	op->payload_len -= previous - length;
++}
++EXPORT_SYMBOL(osd_req_op_extent_update);
++
+ void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
+ 			const char *class, const char *method,
+ 			const void *request_data, size_t request_data_size)
 -- 
 1.7.9.5
 
