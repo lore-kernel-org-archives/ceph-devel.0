@@ -1,194 +1,70 @@
-From: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
-Subject: [PATCH RFC v2 2/4] dcache: introduce a new sequence read/write lock type
-Date: Fri,  5 Apr 2013 12:57:39 -0400
-Message-ID: <1365181061-30787-3-git-send-email-Waiman.Long@hp.com>
-References: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1365181061-30787-1-git-send-email-Waiman.Long-VXdhtT5mjnY@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <mszeredi-AlSwsSmVLrQ@public.gmane.org>, Ian Kent <raven-PKsaG3nR2I+sTnJN9+BGXg@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, autofs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chandramouleeswaran, Aswin" <aswin-VXdhtT5mjnY@public.gmane.org>, "Norton, Scott J" <scott.norton-VXdhtT5mjnY@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 02/20] libceph: compute incoming bytes once
+Date: Fri, 05 Apr 2013 09:01:27 -0500
+Message-ID: <515ED937.5080509@inktank.com>
+References: <515ED849.9060901@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:60336 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161756Ab3DEOB3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:01:29 -0400
+Received: by mail-ie0-f181.google.com with SMTP id 17so4252496iea.40
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:01:28 -0700 (PDT)
+In-Reply-To: <515ED849.9060901@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The current sequence lock supports 2 types of lock users:
+This is a simple change, extracting the number of incoming data
+bytes just once in handle_reply().
 
-1. A reader who wants a consistent set of information and is willing
-   to retry if the information changes. The information that the
-   reader needs cannot contain pointers, because any writer could
-   invalidate a pointer that a reader was following. This reader
-   will never block but they may have to retry if a writer is in
-   progress.
-2. A writer who may need to modify content of a data structure. Writer
-   blocks only if another writer is in progress.
-
-This type of lock is suitable for cases where there are a large number
-of readers and much less writers. However, it has a limitation that
-reader who may want to follow pointer or cannot tolerate unexpected
-changes in the protected data structure must take the writer lock
-even if it doesn't need to make any changes.
-
-To more efficiently support this type of readers, a new lock type is
-introduced by this patch: sequence read/write lock. Two types of readers
-are supported by this new lock:
-
-1. Reader who has the same behavior as a sequence lock reader.
-2. Reader who may need to follow pointers. This reader will block if
-   a writer is in progress. In turn, it blocks a writer if it is in
-   progress. Multiple readers of this type can proceed concurrently.
-   Taking this reader lock won't update the sequence number.
-
-This new lock type is a combination of the sequence lock and read/write
-lock. Hence it will have the same limitation of a read/write lock that
-writers may be starved if there is a lot of contention.
-
-Signed-off-by: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- include/linux/seqrwlock.h |  137 +++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 137 insertions(+), 0 deletions(-)
- create mode 100644 include/linux/seqrwlock.h
+ net/ceph/osd_client.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/include/linux/seqrwlock.h b/include/linux/seqrwlock.h
-new file mode 100644
-index 0000000..c6145ff
---- /dev/null
-+++ b/include/linux/seqrwlock.h
-@@ -0,0 +1,137 @@
-+#ifndef __LINUX_SEQRWLOCK_H
-+#define __LINUX_SEQRWLOCK_H
-+/*
-+ * Sequence Read/Write Lock
-+ * ------------------------
-+ * This new lock type is a combination of the sequence lock and read/write
-+ * lock. Three types of lock users are supported:
-+ * 1. Reader who wants a consistent set of information and is willing to
-+ *    retry if the information changes. The information that the reader
-+ *    need cannot contain pointers, because any writer could invalidate
-+ *    a pointer that a reader was following. This reader never block but
-+ *    they may have to retry if a writer is in progress.
-+ * 2. Reader who may need to follow pointers. This reader will block if
-+ *    a writer is in progress.
-+ * 3. Writer who may need to modify content of a data structure. Writer
-+ *    blocks if another writer or the 2nd type of reader is in progress.
-+ *
-+ * The current implementation layered on top of the regular read/write
-+ * lock. There is a chance that the writers may be starved by the readers.
-+ * So be careful when you decided to use this lock.
-+ *
-+ * Expected 1st type reader usage:
-+ * 	do {
-+ *	    seq = read_seqrwbegin(&foo);
-+ * 	...
-+ *      } while (read_seqrwretry(&foo, seq));
-+ *
-+ * Expected 2nd type reader usage:
-+ * 	read_seqrwlock(&foo)
-+ * 	...
-+ * 	read_seqrwunlock(&foo)
-+ *
-+ * Expected writer usage:
-+ * 	write_seqrwlock(&foo)
-+ * 	...
-+ * 	write_seqrwunlock(&foo)
-+ *
-+ * Based on the seqlock.h file
-+ * by Waiman Long
-+ */
-+
-+#include <linux/rwlock.h>
-+#include <linux/preempt.h>
-+#include <asm/processor.h>
-+
-+typedef struct {
-+	unsigned sequence;
-+	rwlock_t lock;
-+} seqrwlock_t;
-+
-+#define __SEQRWLOCK_UNLOCKED(lockname) \
-+		 { 0, __RW_LOCK_UNLOCKED(lockname) }
-+
-+#define seqrwlock_init(x)				\
-+	do {						\
-+		(x)->sequence = 0;			\
-+		rwlock_init(&(x)->lock);		\
-+	} while (0)
-+
-+#define DEFINE_SEQRWLOCK(x) \
-+		seqrwlock_t x = __SEQRWLOCK_UNLOCKED(x)
-+
-+/* For writer:
-+ * Lock out other writers and 2nd type of readers and update the sequence
-+ * number. Don't need preempt_disable() because that is in the read_lock and
-+ * write_lock already.
-+ */
-+static inline void write_seqrwlock(seqrwlock_t *sl)
-+{
-+	write_lock(&sl->lock);
-+	++sl->sequence;
-+	smp_wmb();
-+}
-+
-+static inline void write_seqrwunlock(seqrwlock_t *sl)
-+{
-+	smp_wmb();
-+	sl->sequence++;
-+	write_unlock(&sl->lock);
-+}
-+
-+static inline int write_tryseqrwlock(seqrwlock_t *sl)
-+{
-+	int ret = write_trylock(&sl->lock);
-+
-+	if (ret) {
-+		++sl->sequence;
-+		smp_wmb();
-+	}
-+	return ret;
-+}
-+
-+/* For 2nd type of reader:
-+ * Lock out other writers, but don't update the sequence number
-+ */
-+static inline void read_seqrwlock(seqrwlock_t *sl)
-+{
-+	read_lock(&sl->lock);
-+}
-+
-+static inline void read_seqrwunlock(seqrwlock_t *sl)
-+{
-+	read_unlock(&sl->lock);
-+}
-+
-+static inline int read_tryseqrwlock(seqrwlock_t *sl)
-+{
-+	return read_trylock(&sl->lock);
-+}
-+
-+/* Start of read calculation -- fetch last complete writer token */
-+static __always_inline unsigned read_seqrwbegin(const seqrwlock_t *sl)
-+{
-+	unsigned ret;
-+
-+repeat:
-+	ret = ACCESS_ONCE(sl->sequence);
-+	if (unlikely(ret & 1)) {
-+		cpu_relax();
-+		goto repeat;
-+	}
-+	smp_rmb();
-+	return ret;
-+}
-+
-+/*
-+ * Test if reader processed invalid data.
-+ *
-+ * If sequence value changed then writer changed data while in section.
-+ */
-+static __always_inline int read_seqrwretry(const seqrwlock_t *sl, unsigned start)
-+{
-+	smp_rmb();
-+	return unlikely(sl->sequence != start);
-+}
-+
-+#endif /* __LINUX_SEQLOCK_H */
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 426ca1f..1379b33 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1293,6 +1293,7 @@ static void handle_reply(struct ceph_osd_client
+*osdc, struct ceph_msg *msg,
+ 	u64 reassert_version;
+ 	u32 osdmap_epoch;
+ 	int already_completed;
++	u32 bytes;
+ 	int i;
+
+ 	tid = le64_to_cpu(msg->hdr.tid);
+@@ -1347,9 +1348,10 @@ static void handle_reply(struct ceph_osd_client
+*osdc, struct ceph_msg *msg,
+ 		payload_len += len;
+ 		p += sizeof(*op);
+ 	}
+-	if (payload_len != le32_to_cpu(msg->hdr.data_len)) {
++	bytes = le32_to_cpu(msg->hdr.data_len);
++	if (payload_len != bytes) {
+ 		pr_warning("sum of op payload lens %d != data_len %d",
+-			   payload_len, le32_to_cpu(msg->hdr.data_len));
++			   payload_len, bytes);
+ 		goto bad_put;
+ 	}
+
+@@ -1359,10 +1361,8 @@ static void handle_reply(struct ceph_osd_client
+*osdc, struct ceph_msg *msg,
+ 		req->r_reply_op_result[i] = ceph_decode_32(&p);
+
+ 	if (!req->r_got_reply) {
+-		unsigned int bytes;
+
+ 		req->r_result = result;
+-		bytes = le32_to_cpu(msg->hdr.data_len);
+ 		dout("handle_reply result %d bytes %d\n", req->r_result,
+ 		     bytes);
+ 		if (req->r_result == 0)
 -- 
-1.7.1
+1.7.9.5
+
