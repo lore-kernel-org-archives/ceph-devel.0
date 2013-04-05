@@ -1,90 +1,124 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 05/20] libceph: define ceph_osd_data_length()
-Date: Fri, 05 Apr 2013 11:17:18 -0700
-Message-ID: <515F152E.8090102@inktank.com>
-References: <515ED849.9060901@inktank.com> <515ED972.2030309@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 06/20] libceph: a few more osd data cleanups
+Date: Fri, 05 Apr 2013 09:02:52 -0500
+Message-ID: <515ED98C.5010709@inktank.com>
+References: <515ED849.9060901@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:55778 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162362Ab3DESRj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:17:39 -0400
-Received: by mail-pd0-f177.google.com with SMTP id u11so2129117pdi.22
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:17:39 -0700 (PDT)
-In-Reply-To: <515ED972.2030309@inktank.com>
+Received: from mail-ie0-f178.google.com ([209.85.223.178]:44030 "EHLO
+	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161757Ab3DEOCz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:02:55 -0400
+Received: by mail-ie0-f178.google.com with SMTP id bn7so4426843ieb.9
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:02:54 -0700 (PDT)
+In-Reply-To: <515ED849.9060901@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+These are very small changes that make use osd_data local pointers
+as shorthands for structures being operated on.
 
-On 04/05/2013 07:02 AM, Alex Elder wrote:
-> One more osd data helper, which returns the length of the
-> data item, regardless of its type.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   net/ceph/osd_client.c |   31 ++++++++++++++++++++++++++-----
->   1 file changed, 26 insertions(+), 5 deletions(-)
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index df0f856..110cd83 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -117,6 +117,25 @@ void ceph_osd_data_bio_init(struct ceph_osd_data
-> *osd_data,
->   EXPORT_SYMBOL(ceph_osd_data_bio_init);
->   #endif /* CONFIG_BLOCK */
->
-> +static u64 ceph_osd_data_length(struct ceph_osd_data *osd_data)
-> +{
-> +	switch (osd_data->type) {
-> +	case CEPH_OSD_DATA_TYPE_NONE:
-> +		return 0;
-> +	case CEPH_OSD_DATA_TYPE_PAGES:
-> +		return osd_data->length;
-> +	case CEPH_OSD_DATA_TYPE_PAGELIST:
-> +		return (u64)osd_data->pagelist->length;
-> +#ifdef CONFIG_BLOCK
-> +	case CEPH_OSD_DATA_TYPE_BIO:
-> +		return (u64)osd_data->bio_length;
-> +#endif /* CONFIG_BLOCK */
-> +	default:
-> +		WARN(true, "unrecognized data type %d\n", (int)osd_data->type);
-> +		return 0;
-> +	}
-> +}
-> +
->   static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
->   {
->   	if (osd_data->type != CEPH_OSD_DATA_TYPE_PAGES)
-> @@ -1887,17 +1906,19 @@ bad:
->   static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
->   				struct ceph_osd_data *osd_data)
->   {
-> +	u64 length = ceph_osd_data_length(osd_data);
-> +
->   	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-> -		BUG_ON(osd_data->length > (u64) SIZE_MAX);
-> -		if (osd_data->length)
-> +		BUG_ON(length > (u64) SIZE_MAX);
-> +		if (length)
->   			ceph_msg_data_set_pages(msg, osd_data->pages,
-> -				osd_data->length, osd_data->alignment);
-> +					length, osd_data->alignment);
->   	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
-> -		BUG_ON(!osd_data->pagelist->length);
-> +		BUG_ON(!length);
->   		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
->   #ifdef CONFIG_BLOCK
->   	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-> -		ceph_msg_data_set_bio(msg, osd_data->bio, osd_data->bio_length);
-> +		ceph_msg_data_set_bio(msg, osd_data->bio, length);
->   #endif
->   	} else {
->   		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
->
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ fs/ceph/addr.c |   30 +++++++++++++++++-------------
+ 1 file changed, 17 insertions(+), 13 deletions(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 8507389..c46b9d3 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -236,6 +236,7 @@ static int ceph_readpage(struct file *filp, struct
+page *page)
+ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
+ {
+ 	struct inode *inode = req->r_inode;
++	struct ceph_osd_data *osd_data;
+ 	int rc = req->r_result;
+ 	int bytes = le32_to_cpu(msg->hdr.data_len);
+ 	int num_pages;
+@@ -244,11 +245,12 @@ static void finish_read(struct ceph_osd_request
+*req, struct ceph_msg *msg)
+ 	dout("finish_read %p req %p rc %d bytes %d\n", inode, req, rc, bytes);
+
+ 	/* unlock all pages, zeroing any data we didn't read */
+-	BUG_ON(req->r_data_in.type != CEPH_OSD_DATA_TYPE_PAGES);
+-	num_pages = calc_pages_for((u64)req->r_data_in.alignment,
+-					(u64)req->r_data_in.length);
++	osd_data = &req->r_data_in;
++	BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_PAGES);
++	num_pages = calc_pages_for((u64)osd_data->alignment,
++					(u64)osd_data->length);
+ 	for (i = 0; i < num_pages; i++) {
+-		struct page *page = req->r_data_in.pages[i];
++		struct page *page = osd_data->pages[i];
+
+ 		if (bytes < (int)PAGE_CACHE_SIZE) {
+ 			/* zero (remainder of) page */
+@@ -263,7 +265,7 @@ static void finish_read(struct ceph_osd_request
+*req, struct ceph_msg *msg)
+ 		page_cache_release(page);
+ 		bytes -= PAGE_CACHE_SIZE;
+ 	}
+-	kfree(req->r_data_in.pages);
++	kfree(osd_data->pages);
+ }
+
+ static void ceph_unlock_page_vector(struct page **pages, int num_pages)
+@@ -557,6 +559,7 @@ static void writepages_finish(struct
+ceph_osd_request *req,
+ {
+ 	struct inode *inode = req->r_inode;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_osd_data *osd_data;
+ 	unsigned wrote;
+ 	struct page *page;
+ 	int num_pages;
+@@ -569,9 +572,10 @@ static void writepages_finish(struct
+ceph_osd_request *req,
+ 	long writeback_stat;
+ 	unsigned issued = ceph_caps_issued(ci);
+
+-	BUG_ON(req->r_data_out.type != CEPH_OSD_DATA_TYPE_PAGES);
+-	num_pages = calc_pages_for((u64)req->r_data_out.alignment,
+-					(u64)req->r_data_out.length);
++	osd_data = &req->r_data_out;
++	BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_PAGES);
++	num_pages = calc_pages_for((u64)osd_data->alignment,
++					(u64)osd_data->length);
+ 	if (rc >= 0) {
+ 		/*
+ 		 * Assume we wrote the pages we originally sent.  The
+@@ -589,7 +593,7 @@ static void writepages_finish(struct
+ceph_osd_request *req,
+
+ 	/* clean all pages */
+ 	for (i = 0; i < num_pages; i++) {
+-		page = req->r_data_out.pages[i];
++		page = osd_data->pages[i];
+ 		BUG_ON(!page);
+ 		WARN_ON(!PageUptodate(page));
+
+@@ -620,12 +624,12 @@ static void writepages_finish(struct
+ceph_osd_request *req,
+ 	dout("%p wrote+cleaned %d pages\n", inode, wrote);
+ 	ceph_put_wrbuffer_cap_refs(ci, num_pages, snapc);
+
+-	ceph_release_pages(req->r_data_out.pages, num_pages);
+-	if (req->r_data_out.pages_from_pool)
+-		mempool_free(req->r_data_out.pages,
++	ceph_release_pages(osd_data->pages, num_pages);
++	if (osd_data->pages_from_pool)
++		mempool_free(osd_data->pages,
+ 			     ceph_sb_to_client(inode->i_sb)->wb_pagevec_pool);
+ 	else
+-		kfree(req->r_data_out.pages);
++		kfree(osd_data->pages);
+ 	ceph_osdc_put_request(req);
+ }
+
+-- 
+1.7.9.5
 
