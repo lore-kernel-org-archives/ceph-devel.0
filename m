@@ -1,249 +1,194 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 16/20] libceph: move ceph_osdc_build_request()
-Date: Fri, 05 Apr 2013 09:05:18 -0500
-Message-ID: <515EDA1E.7080300@inktank.com>
-References: <515ED849.9060901@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f177.google.com ([209.85.210.177]:47688 "EHLO
-	mail-ia0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161548Ab3DEOFU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:05:20 -0400
-Received: by mail-ia0-f177.google.com with SMTP id w33so3235133iag.36
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:05:19 -0700 (PDT)
-In-Reply-To: <515ED849.9060901@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Subject: [PATCH RFC v2 2/4] dcache: introduce a new sequence read/write lock type
+Date: Fri,  5 Apr 2013 12:57:39 -0400
+Message-ID: <1365181061-30787-3-git-send-email-Waiman.Long@hp.com>
+References: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1365181061-30787-1-git-send-email-Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <mszeredi-AlSwsSmVLrQ@public.gmane.org>, Ian Kent <raven-PKsaG3nR2I+sTnJN9+BGXg@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, autofs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chandramouleeswaran, Aswin" <aswin-VXdhtT5mjnY@public.gmane.org>, "Norton, Scott J" <scott.norton-VXdhtT5mjnY@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This simply moves ceph_osdc_build_request() later in its source
-file without any change.  Done as a separate patch to facilitate
-review of the change in the next patch.
+The current sequence lock supports 2 types of lock users:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
+1. A reader who wants a consistent set of information and is willing
+   to retry if the information changes. The information that the
+   reader needs cannot contain pointers, because any writer could
+   invalidate a pointer that a reader was following. This reader
+   will never block but they may have to retry if a writer is in
+   progress.
+2. A writer who may need to modify content of a data structure. Writer
+   blocks only if another writer is in progress.
+
+This type of lock is suitable for cases where there are a large number
+of readers and much less writers. However, it has a limitation that
+reader who may want to follow pointer or cannot tolerate unexpected
+changes in the protected data structure must take the writer lock
+even if it doesn't need to make any changes.
+
+To more efficiently support this type of readers, a new lock type is
+introduced by this patch: sequence read/write lock. Two types of readers
+are supported by this new lock:
+
+1. Reader who has the same behavior as a sequence lock reader.
+2. Reader who may need to follow pointers. This reader will block if
+   a writer is in progress. In turn, it blocks a writer if it is in
+   progress. Multiple readers of this type can proceed concurrently.
+   Taking this reader lock won't update the sequence number.
+
+This new lock type is a combination of the sequence lock and read/write
+lock. Hence it will have the same limitation of a read/write lock that
+writers may be starved if there is a lot of contention.
+
+Signed-off-by: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
 ---
- net/ceph/osd_client.c |  196
-++++++++++++++++++++++++-------------------------
- 1 file changed, 98 insertions(+), 98 deletions(-)
+ include/linux/seqrwlock.h |  137 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 137 insertions(+), 0 deletions(-)
+ create mode 100644 include/linux/seqrwlock.h
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 6c6d7b8..f80984e 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -526,104 +526,6 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- }
-
- /*
-- * build new request AND message
-- *
-- */
--void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
--				struct ceph_snap_context *snapc, u64 snap_id,
--				struct timespec *mtime)
--{
--	struct ceph_msg *msg = req->r_request;
--	void *p;
--	size_t msg_size;
--	int flags = req->r_flags;
--	u64 data_len;
--	unsigned int i;
--
--	req->r_snapid = snap_id;
--	req->r_snapc = ceph_get_snap_context(snapc);
--
--	/* encode request */
--	msg->hdr.version = cpu_to_le16(4);
--
--	p = msg->front.iov_base;
--	ceph_encode_32(&p, 1);   /* client_inc  is always 1 */
--	req->r_request_osdmap_epoch = p;
--	p += 4;
--	req->r_request_flags = p;
--	p += 4;
--	if (req->r_flags & CEPH_OSD_FLAG_WRITE)
--		ceph_encode_timespec(p, mtime);
--	p += sizeof(struct ceph_timespec);
--	req->r_request_reassert_version = p;
--	p += sizeof(struct ceph_eversion); /* will get filled in */
--
--	/* oloc */
--	ceph_encode_8(&p, 4);
--	ceph_encode_8(&p, 4);
--	ceph_encode_32(&p, 8 + 4 + 4);
--	req->r_request_pool = p;
--	p += 8;
--	ceph_encode_32(&p, -1);  /* preferred */
--	ceph_encode_32(&p, 0);   /* key len */
--
--	ceph_encode_8(&p, 1);
--	req->r_request_pgid = p;
--	p += 8 + 4;
--	ceph_encode_32(&p, -1);  /* preferred */
--
--	/* oid */
--	ceph_encode_32(&p, req->r_oid_len);
--	memcpy(p, req->r_oid, req->r_oid_len);
--	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
--	p += req->r_oid_len;
--
--	/* ops--can imply data */
--	ceph_encode_16(&p, (u16)req->r_num_ops);
--	data_len = 0;
--	for (i = 0; i < req->r_num_ops; i++) {
--		data_len += osd_req_encode_op(req, p, i);
--		p += sizeof(struct ceph_osd_op);
--	}
--
--	/* snaps */
--	ceph_encode_64(&p, req->r_snapid);
--	ceph_encode_64(&p, req->r_snapc ? req->r_snapc->seq : 0);
--	ceph_encode_32(&p, req->r_snapc ? req->r_snapc->num_snaps : 0);
--	if (req->r_snapc) {
--		for (i = 0; i < snapc->num_snaps; i++) {
--			ceph_encode_64(&p, req->r_snapc->snaps[i]);
--		}
--	}
--
--	req->r_request_attempts = p;
--	p += 4;
--
--	/* data */
--	if (flags & CEPH_OSD_FLAG_WRITE) {
--		u16 data_off;
--
--		/*
--		 * The header "data_off" is a hint to the receiver
--		 * allowing it to align received data into its
--		 * buffers such that there's no need to re-copy
--		 * it before writing it to disk (direct I/O).
--		 */
--		data_off = (u16) (off & 0xffff);
--		req->r_request->hdr.data_off = cpu_to_le16(data_off);
--	}
--	req->r_request->hdr.data_len = cpu_to_le32(data_len);
--
--	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
--	msg_size = p - msg->front.iov_base;
--	msg->front.iov_len = msg_size;
--	msg->hdr.front_len = cpu_to_le32(msg_size);
--
--	dout("build_request msg_size was %d\n", (int)msg_size);
--}
--EXPORT_SYMBOL(ceph_osdc_build_request);
--
--/*
-  * build new request AND message, calculate layout, and adjust file
-  * extent as needed.
-  *
-@@ -1968,6 +1870,104 @@ static void ceph_osdc_msg_data_set(struct
-ceph_msg *msg,
- }
-
- /*
-+ * build new request AND message
+diff --git a/include/linux/seqrwlock.h b/include/linux/seqrwlock.h
+new file mode 100644
+index 0000000..c6145ff
+--- /dev/null
++++ b/include/linux/seqrwlock.h
+@@ -0,0 +1,137 @@
++#ifndef __LINUX_SEQRWLOCK_H
++#define __LINUX_SEQRWLOCK_H
++/*
++ * Sequence Read/Write Lock
++ * ------------------------
++ * This new lock type is a combination of the sequence lock and read/write
++ * lock. Three types of lock users are supported:
++ * 1. Reader who wants a consistent set of information and is willing to
++ *    retry if the information changes. The information that the reader
++ *    need cannot contain pointers, because any writer could invalidate
++ *    a pointer that a reader was following. This reader never block but
++ *    they may have to retry if a writer is in progress.
++ * 2. Reader who may need to follow pointers. This reader will block if
++ *    a writer is in progress.
++ * 3. Writer who may need to modify content of a data structure. Writer
++ *    blocks if another writer or the 2nd type of reader is in progress.
 + *
++ * The current implementation layered on top of the regular read/write
++ * lock. There is a chance that the writers may be starved by the readers.
++ * So be careful when you decided to use this lock.
++ *
++ * Expected 1st type reader usage:
++ * 	do {
++ *	    seq = read_seqrwbegin(&foo);
++ * 	...
++ *      } while (read_seqrwretry(&foo, seq));
++ *
++ * Expected 2nd type reader usage:
++ * 	read_seqrwlock(&foo)
++ * 	...
++ * 	read_seqrwunlock(&foo)
++ *
++ * Expected writer usage:
++ * 	write_seqrwlock(&foo)
++ * 	...
++ * 	write_seqrwunlock(&foo)
++ *
++ * Based on the seqlock.h file
++ * by Waiman Long
 + */
-+void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
-+				struct ceph_snap_context *snapc, u64 snap_id,
-+				struct timespec *mtime)
++
++#include <linux/rwlock.h>
++#include <linux/preempt.h>
++#include <asm/processor.h>
++
++typedef struct {
++	unsigned sequence;
++	rwlock_t lock;
++} seqrwlock_t;
++
++#define __SEQRWLOCK_UNLOCKED(lockname) \
++		 { 0, __RW_LOCK_UNLOCKED(lockname) }
++
++#define seqrwlock_init(x)				\
++	do {						\
++		(x)->sequence = 0;			\
++		rwlock_init(&(x)->lock);		\
++	} while (0)
++
++#define DEFINE_SEQRWLOCK(x) \
++		seqrwlock_t x = __SEQRWLOCK_UNLOCKED(x)
++
++/* For writer:
++ * Lock out other writers and 2nd type of readers and update the sequence
++ * number. Don't need preempt_disable() because that is in the read_lock and
++ * write_lock already.
++ */
++static inline void write_seqrwlock(seqrwlock_t *sl)
 +{
-+	struct ceph_msg *msg = req->r_request;
-+	void *p;
-+	size_t msg_size;
-+	int flags = req->r_flags;
-+	u64 data_len;
-+	unsigned int i;
-+
-+	req->r_snapid = snap_id;
-+	req->r_snapc = ceph_get_snap_context(snapc);
-+
-+	/* encode request */
-+	msg->hdr.version = cpu_to_le16(4);
-+
-+	p = msg->front.iov_base;
-+	ceph_encode_32(&p, 1);   /* client_inc  is always 1 */
-+	req->r_request_osdmap_epoch = p;
-+	p += 4;
-+	req->r_request_flags = p;
-+	p += 4;
-+	if (req->r_flags & CEPH_OSD_FLAG_WRITE)
-+		ceph_encode_timespec(p, mtime);
-+	p += sizeof(struct ceph_timespec);
-+	req->r_request_reassert_version = p;
-+	p += sizeof(struct ceph_eversion); /* will get filled in */
-+
-+	/* oloc */
-+	ceph_encode_8(&p, 4);
-+	ceph_encode_8(&p, 4);
-+	ceph_encode_32(&p, 8 + 4 + 4);
-+	req->r_request_pool = p;
-+	p += 8;
-+	ceph_encode_32(&p, -1);  /* preferred */
-+	ceph_encode_32(&p, 0);   /* key len */
-+
-+	ceph_encode_8(&p, 1);
-+	req->r_request_pgid = p;
-+	p += 8 + 4;
-+	ceph_encode_32(&p, -1);  /* preferred */
-+
-+	/* oid */
-+	ceph_encode_32(&p, req->r_oid_len);
-+	memcpy(p, req->r_oid, req->r_oid_len);
-+	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
-+	p += req->r_oid_len;
-+
-+	/* ops--can imply data */
-+	ceph_encode_16(&p, (u16)req->r_num_ops);
-+	data_len = 0;
-+	for (i = 0; i < req->r_num_ops; i++) {
-+		data_len += osd_req_encode_op(req, p, i);
-+		p += sizeof(struct ceph_osd_op);
-+	}
-+
-+	/* snaps */
-+	ceph_encode_64(&p, req->r_snapid);
-+	ceph_encode_64(&p, req->r_snapc ? req->r_snapc->seq : 0);
-+	ceph_encode_32(&p, req->r_snapc ? req->r_snapc->num_snaps : 0);
-+	if (req->r_snapc) {
-+		for (i = 0; i < snapc->num_snaps; i++) {
-+			ceph_encode_64(&p, req->r_snapc->snaps[i]);
-+		}
-+	}
-+
-+	req->r_request_attempts = p;
-+	p += 4;
-+
-+	/* data */
-+	if (flags & CEPH_OSD_FLAG_WRITE) {
-+		u16 data_off;
-+
-+		/*
-+		 * The header "data_off" is a hint to the receiver
-+		 * allowing it to align received data into its
-+		 * buffers such that there's no need to re-copy
-+		 * it before writing it to disk (direct I/O).
-+		 */
-+		data_off = (u16) (off & 0xffff);
-+		req->r_request->hdr.data_off = cpu_to_le16(data_off);
-+	}
-+	req->r_request->hdr.data_len = cpu_to_le32(data_len);
-+
-+	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
-+	msg_size = p - msg->front.iov_base;
-+	msg->front.iov_len = msg_size;
-+	msg->hdr.front_len = cpu_to_le32(msg_size);
-+
-+	dout("build_request msg_size was %d\n", (int)msg_size);
++	write_lock(&sl->lock);
++	++sl->sequence;
++	smp_wmb();
 +}
-+EXPORT_SYMBOL(ceph_osdc_build_request);
++
++static inline void write_seqrwunlock(seqrwlock_t *sl)
++{
++	smp_wmb();
++	sl->sequence++;
++	write_unlock(&sl->lock);
++}
++
++static inline int write_tryseqrwlock(seqrwlock_t *sl)
++{
++	int ret = write_trylock(&sl->lock);
++
++	if (ret) {
++		++sl->sequence;
++		smp_wmb();
++	}
++	return ret;
++}
++
++/* For 2nd type of reader:
++ * Lock out other writers, but don't update the sequence number
++ */
++static inline void read_seqrwlock(seqrwlock_t *sl)
++{
++	read_lock(&sl->lock);
++}
++
++static inline void read_seqrwunlock(seqrwlock_t *sl)
++{
++	read_unlock(&sl->lock);
++}
++
++static inline int read_tryseqrwlock(seqrwlock_t *sl)
++{
++	return read_trylock(&sl->lock);
++}
++
++/* Start of read calculation -- fetch last complete writer token */
++static __always_inline unsigned read_seqrwbegin(const seqrwlock_t *sl)
++{
++	unsigned ret;
++
++repeat:
++	ret = ACCESS_ONCE(sl->sequence);
++	if (unlikely(ret & 1)) {
++		cpu_relax();
++		goto repeat;
++	}
++	smp_rmb();
++	return ret;
++}
 +
 +/*
-  * Register request, send initial attempt.
-  */
- int ceph_osdc_start_request(struct ceph_osd_client *osdc,
++ * Test if reader processed invalid data.
++ *
++ * If sequence value changed then writer changed data while in section.
++ */
++static __always_inline int read_seqrwretry(const seqrwlock_t *sl, unsigned start)
++{
++	smp_rmb();
++	return unlikely(sl->sequence != start);
++}
++
++#endif /* __LINUX_SEQLOCK_H */
 -- 
-1.7.9.5
-
+1.7.1
