@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 03/20] libceph: define osd data initialization helpers
-Date: Fri, 05 Apr 2013 11:16:09 -0700
-Message-ID: <515F14E9.2000204@inktank.com>
-References: <515ED849.9060901@inktank.com> <515ED959.3090204@inktank.com>
+Subject: Re: [PATCH 07/20] rbd: define rbd_osd_req_format_op()
+Date: Fri, 05 Apr 2013 11:18:03 -0700
+Message-ID: <515F155B.5040502@inktank.com>
+References: <515ED849.9060901@inktank.com> <515ED9A1.7070809@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f170.google.com ([209.85.192.170]:43483 "EHLO
-	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162323Ab3DESQa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:16:30 -0400
-Received: by mail-pd0-f170.google.com with SMTP id 10so2142314pdi.15
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:16:30 -0700 (PDT)
-In-Reply-To: <515ED959.3090204@inktank.com>
+Received: from mail-da0-f48.google.com ([209.85.210.48]:37347 "EHLO
+	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1162370Ab3DESSZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:18:25 -0400
+Received: by mail-da0-f48.google.com with SMTP id p8so1685779dan.21
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:18:24 -0700 (PDT)
+In-Reply-To: <515ED9A1.7070809@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,240 +21,240 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 04/05/2013 07:02 AM, Alex Elder wrote:
-> Define and use functions that encapsulate the initializion of a
-> ceph_osd_data structure.
+On 04/05/2013 07:03 AM, Alex Elder wrote:
+> Define rbd_osd_req_format_op(), which encapsulates formatting
+> an osd op into an object request's osd request message.  Only
+> one op is supported right now.
+>
+> Stop calling ceph_osdc_build_request() in rbd_osd_req_create().
+> Instead, call rbd_osd_req_format_op() in each of the callers of
+> rbd_osd_req_create().
+>
+> This is to prepare for the next patch, in which the source ops for
+> an osd request will be held in the osd request itself.  Because of
+> that, we won't have the source op to work with until after the
+> request is created, so we can't format the op until then.
+>
+> This an the next patch resolve:
+>      http://tracker.ceph.com/issues/4656
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c             |   14 ++++------
->   fs/ceph/addr.c                  |   13 +++------
->   fs/ceph/file.c                  |   10 +++----
->   include/linux/ceph/osd_client.h |   11 ++++++++
->   net/ceph/osd_client.c           |   55
-> +++++++++++++++++++++++++++------------
->   5 files changed, 63 insertions(+), 40 deletions(-)
+>   drivers/block/rbd.c |   98
+> ++++++++++++++++++++++++++++-----------------------
+>   1 file changed, 53 insertions(+), 45 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 5e579fa..a9d88a0 100644
+> index a9d88a0..fc41675 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1350,17 +1350,13 @@ static struct ceph_osd_request *rbd_osd_req_create(
->   		break;		/* Nothing to do */
->   	case OBJ_REQUEST_BIO:
->   		rbd_assert(obj_request->bio_list != NULL);
-> -		osd_data->type = CEPH_OSD_DATA_TYPE_BIO;
-> -		osd_data->bio = obj_request->bio_list;
-> -		osd_data->bio_length = obj_request->length;
-> +		ceph_osd_data_bio_init(osd_data, obj_request->bio_list,
-> +					obj_request->length);
->   		break;
->   	case OBJ_REQUEST_PAGES:
-> -		osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-> -		osd_data->pages = obj_request->pages;
-> -		osd_data->length = obj_request->length;
-> -		osd_data->alignment = offset & ~PAGE_MASK;
-> -		osd_data->pages_from_pool = false;
-> -		osd_data->own_pages = false;
-> +		ceph_osd_data_pages_init(osd_data, obj_request->pages,
-> +				obj_request->length, offset & ~PAGE_MASK,
-> +				false, false);
->   		break;
->   	}
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index e0dd74c..8507389 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -342,10 +342,8 @@ static int start_read(struct inode *inode, struct
-> list_head *page_list, int max)
->   		}
->   		pages[i] = page;
->   	}
-> -	req->r_data_in.type = CEPH_OSD_DATA_TYPE_PAGES;
-> -	req->r_data_in.pages = pages;
-> -	req->r_data_in.length = len;
-> -	req->r_data_in.alignment = 0;
-> +	ceph_osd_data_pages_init(&req->r_data_in, pages, len, 0,
-> +					false, false);
->   	req->r_callback = finish_read;
->   	req->r_inode = inode;
->
-> @@ -917,11 +915,8 @@ get_more_pages:
->   		dout("writepages got %d pages at %llu~%llu\n",
->   		     locked_pages, offset, len);
->
-> -		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
-> -		req->r_data_out.pages = pages;
-> -		req->r_data_out.length = len;
-> -		req->r_data_out.alignment = 0;
-> -		req->r_data_out.pages_from_pool = !!pool;
-> +		ceph_osd_data_pages_init(&req->r_data_out, pages, len, 0,
-> +						!!pool, false);
->
->   		pages = NULL;	/* request message now owns the pages array */
->   		pool = NULL;
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 66b8469..2f2d0a1 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -491,6 +491,7 @@ static ssize_t ceph_sync_write(struct file *file,
-> const char __user *data,
->   	unsigned long buf_align;
->   	int ret;
->   	struct timespec mtime = CURRENT_TIME;
-> +	bool own_pages = false;
->
->   	if (ceph_snap(file->f_dentry->d_inode) != CEPH_NOSNAP)
->   		return -EROFS;
-> @@ -571,14 +572,11 @@ more:
->   		if ((file->f_flags & O_SYNC) == 0) {
->   			/* get a second commit callback */
->   			req->r_safe_callback = sync_write_commit;
-> -			req->r_data_out.own_pages = 1;
-> +			own_pages = true;
->   		}
->   	}
-> -	req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGES;
-> -	req->r_data_out.pages = pages;
-> -	req->r_data_out.length = len;
-> -	req->r_data_out.alignment = page_align;
-> -	req->r_inode = inode;
-> +	ceph_osd_data_pages_init(&req->r_data_out, pages, len, page_align,
-> +					false, own_pages);
->
->   	/* BUG_ON(vino.snap != CEPH_NOSNAP); */
->   	ceph_osdc_build_request(req, pos, num_ops, ops,
-> diff --git a/include/linux/ceph/osd_client.h
-> b/include/linux/ceph/osd_client.h
-> index 5ee1a37..af60dac 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -280,6 +280,17 @@ static inline void ceph_osdc_put_request(struct
-> ceph_osd_request *req)
->   	kref_put(&req->r_kref, ceph_osdc_release_request);
+> @@ -1311,29 +1311,47 @@ static void rbd_osd_req_callback(struct
+> ceph_osd_request *osd_req,
+>   		rbd_obj_request_complete(obj_request);
 >   }
 >
-> +extern void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
-> +				     struct page **pages, u64 length,
-> +				     u32 alignment, bool pages_from_pool,
-> +				     bool own_pages);
-> +extern void ceph_osd_data_pagelist_init(struct ceph_osd_data *osd_data,
-> +					struct ceph_pagelist *pagelist);
-> +#ifdef CONFIG_BLOCK
-> +extern void ceph_osd_data_bio_init(struct ceph_osd_data *osd_data,
-> +				   struct bio *bio, size_t bio_length);
-> +#endif /* CONFIG_BLOCK */
+> +static void rbd_osd_req_format_op(struct rbd_obj_request *obj_request,
+> +					bool write_request,
+> +					struct ceph_osd_req_op *op)
+> +{
+> +	struct rbd_img_request *img_request = obj_request->img_request;
+> +	struct ceph_snap_context *snapc = NULL;
+> +	u64 snap_id = CEPH_NOSNAP;
+> +	struct timespec *mtime = NULL;
+> +	struct timespec now;
 > +
->   extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
->   				   struct ceph_osd_request *req,
->   				   bool nofail);
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 1379b33..f8f8561 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -79,6 +79,38 @@ static int calc_layout(struct ceph_file_layout
-> *layout, u64 off, u64 *plen,
->   	return 0;
+> +	rbd_assert(obj_request->osd_req != NULL);
+> +
+> +	if (write_request) {
+> +		now = CURRENT_TIME;
+> +		mtime = &now;
+> +		if (img_request)
+> +			snapc = img_request->snapc;
+> +	} else if (img_request) {
+> +		snap_id = img_request->snap_id;
+> +	}
+> +
+> +	ceph_osdc_build_request(obj_request->osd_req, obj_request->offset,
+> +			1, op, snapc, snap_id, mtime);
+> +}
+> +
+>   static struct ceph_osd_request *rbd_osd_req_create(
+>   					struct rbd_device *rbd_dev,
+>   					bool write_request,
+> -					struct rbd_obj_request *obj_request,
+> -					struct ceph_osd_req_op *op)
+> +					struct rbd_obj_request *obj_request)
+>   {
+>   	struct rbd_img_request *img_request = obj_request->img_request;
+>   	struct ceph_snap_context *snapc = NULL;
+>   	struct ceph_osd_client *osdc;
+>   	struct ceph_osd_request *osd_req;
+>   	struct ceph_osd_data *osd_data;
+> -	struct timespec now;
+> -	struct timespec *mtime;
+> -	u64 snap_id = CEPH_NOSNAP;
+>   	u64 offset = obj_request->offset;
+> -	u64 length = obj_request->length;
+>
+>   	if (img_request) {
+>   		rbd_assert(img_request->write_request == write_request);
+>   		if (img_request->write_request)
+>   			snapc = img_request->snapc;
+> -		else
+> -			snap_id = img_request->snap_id;
+>   	}
+>
+>   	/* Allocate and initialize the request, for the single op */
+> @@ -1360,16 +1378,10 @@ static struct ceph_osd_request *rbd_osd_req_create(
+>   		break;
+>   	}
+>
+> -	if (write_request) {
+> +	if (write_request)
+>   		osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
+> -		now = CURRENT_TIME;
+> -		mtime = &now;
+> -	} else {
+> +	else
+>   		osd_req->r_flags = CEPH_OSD_FLAG_READ;
+> -		mtime = NULL;	/* not needed for reads */
+> -		offset = 0;	/* These are not used... */
+> -		length = 0;	/* ...for osd read requests */
+> -	}
+>
+>   	osd_req->r_callback = rbd_osd_req_callback;
+>   	osd_req->r_priv = obj_request;
+> @@ -1380,11 +1392,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
+>
+>   	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
+>
+> -	/* osd_req will get its own reference to snapc (if non-null) */
+> -
+> -	ceph_osdc_build_request(osd_req, offset, 1, op,
+> -				snapc, snap_id, mtime);
+> -
+>   	return osd_req;
 >   }
 >
-> +void ceph_osd_data_pages_init(struct ceph_osd_data *osd_data,
-> +			struct page **pages, u64 length, u32 alignment,
-> +			bool pages_from_pool, bool own_pages)
-> +{
-> +	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-> +	osd_data->pages = pages;
-> +	osd_data->length = length;
-> +	osd_data->alignment = alignment;
-> +	osd_data->pages_from_pool = pages_from_pool;
-> +	osd_data->own_pages = own_pages;
-> +}
-> +EXPORT_SYMBOL(ceph_osd_data_pages_init);
+> @@ -1538,6 +1545,7 @@ static int rbd_img_request_fill_bio(struct
+> rbd_img_request *img_request,
+>   	struct rbd_device *rbd_dev = img_request->rbd_dev;
+>   	struct rbd_obj_request *obj_request = NULL;
+>   	struct rbd_obj_request *next_obj_request;
+> +	bool write_request = img_request->write_request;
+>   	unsigned int bio_offset;
+>   	u64 image_offset;
+>   	u64 resid;
+> @@ -1545,8 +1553,7 @@ static int rbd_img_request_fill_bio(struct
+> rbd_img_request *img_request,
+>
+>   	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
+>
+> -	opcode = img_request->write_request ? CEPH_OSD_OP_WRITE
+> -					      : CEPH_OSD_OP_READ;
+> +	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
+>   	bio_offset = 0;
+>   	image_offset = img_request->offset;
+>   	rbd_assert(image_offset == bio_list->bi_sector << SECTOR_SHIFT);
+> @@ -1579,17 +1586,14 @@ static int rbd_img_request_fill_bio(struct
+> rbd_img_request *img_request,
+>   		if (!obj_request->bio_list)
+>   			goto out_partial;
+>
+> -		/*
+> -		 * Build up the op to use in building the osd
+> -		 * request.  Note that the contents of the op are
+> -		 * copied by rbd_osd_req_create().
+> -		 */
+> -		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
+>   		obj_request->osd_req = rbd_osd_req_create(rbd_dev,
+> -						img_request->write_request,
+> -						obj_request, &op);
+> +						write_request, obj_request);
+>   		if (!obj_request->osd_req)
+>   			goto out_partial;
 > +
-> +void ceph_osd_data_pagelist_init(struct ceph_osd_data *osd_data,
-> +			struct ceph_pagelist *pagelist)
-> +{
-> +	osd_data->type = CEPH_OSD_DATA_TYPE_PAGELIST;
-> +	osd_data->pagelist = pagelist;
-> +}
-> +EXPORT_SYMBOL(ceph_osd_data_pagelist_init);
+> +		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
+> +		rbd_osd_req_format_op(obj_request, write_request, &op);
 > +
-> +#ifdef CONFIG_BLOCK
-> +void ceph_osd_data_bio_init(struct ceph_osd_data *osd_data,
-> +			struct bio *bio, size_t bio_length)
-> +{
-> +	osd_data->type = CEPH_OSD_DATA_TYPE_BIO;
-> +	osd_data->bio = bio;
-> +	osd_data->bio_length = bio_length;
-> +}
-> +EXPORT_SYMBOL(ceph_osd_data_bio_init);
-> +#endif /* CONFIG_BLOCK */
+>   		/* status and version are initially zero-filled */
+>
+>   		rbd_img_obj_request_add(img_request, obj_request);
+> @@ -1699,12 +1703,13 @@ static int rbd_obj_notify_ack(struct rbd_device
+> *rbd_dev,
+>   		return -ENOMEM;
+>
+>   	ret = -ENOMEM;
+> -	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
+> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+> -						obj_request, &op);
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
+>   	if (!obj_request->osd_req)
+>   		goto out;
+>
+> +	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
+> +	rbd_osd_req_format_op(obj_request, false, &op);
 > +
->   /*
->    * requests
->    */
-> @@ -400,8 +432,7 @@ static u64 osd_req_encode_op(struct ceph_osd_request
-> *req,
->   		ceph_pagelist_append(pagelist, src->cls.indata,
->   				     src->cls.indata_len);
+>   	osdc = &rbd_dev->rbd_client->client->osdc;
+>   	obj_request->callback = rbd_obj_request_put;
+>   	ret = rbd_obj_request_submit(osdc, obj_request);
+> @@ -1763,13 +1768,14 @@ static int rbd_dev_header_watch_sync(struct
+> rbd_device *rbd_dev, int start)
+>   	if (!obj_request)
+>   		goto out_cancel;
 >
-> -		req->r_data_out.type = CEPH_OSD_DATA_TYPE_PAGELIST;
-> -		req->r_data_out.pagelist = pagelist;
-> +		ceph_osd_data_pagelist_init(&req->r_data_out, pagelist);
->   		out_data_len = pagelist->length;
->   		break;
->   	case CEPH_OSD_OP_STARTSYNC:
-> @@ -2056,7 +2087,6 @@ int ceph_osdc_readpages(struct ceph_osd_client *osdc,
->   			struct page **pages, int num_pages, int page_align)
->   {
->   	struct ceph_osd_request *req;
-> -	struct ceph_osd_data *osd_data;
->   	struct ceph_osd_req_op op;
->   	int rc = 0;
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, obj_request);
+> +	if (!obj_request->osd_req)
+> +		goto out_cancel;
+> +
+>   	osd_req_op_watch_init(&op, CEPH_OSD_OP_WATCH,
+>   				rbd_dev->watch_event->cookie,
+>   				rbd_dev->header.obj_version, start);
+> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true,
+> -							obj_request, &op);
+> -	if (!obj_request->osd_req)
+> -		goto out_cancel;
+> +	rbd_osd_req_format_op(obj_request, true, &op);
 >
-> @@ -2071,14 +2101,11 @@ int ceph_osdc_readpages(struct ceph_osd_client
-> *osdc,
+>   	if (start)
+>   		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
+> @@ -1855,13 +1861,14 @@ static int rbd_obj_method_sync(struct rbd_device
+> *rbd_dev,
+>   	obj_request->pages = pages;
+>   	obj_request->page_count = page_count;
 >
->   	/* it may be a short read due to an object boundary */
+> -	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
+> -					outbound, outbound_size);
+> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+> -						obj_request, &op);
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
+>   	if (!obj_request->osd_req)
+>   		goto out;
 >
-> -	osd_data = &req->r_data_in;
-> -	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-> -	osd_data->pages = pages;
-> -	osd_data->length = *plen;
-> -	osd_data->alignment = page_align;
-> +	ceph_osd_data_pages_init(&req->r_data_in, pages, *plen, page_align,
-> +				false, false);
+> +	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
+> +					outbound, outbound_size);
+> +	rbd_osd_req_format_op(obj_request, false, &op);
+> +
+>   	osdc = &rbd_dev->rbd_client->client->osdc;
+>   	ret = rbd_obj_request_submit(osdc, obj_request);
+>   	if (ret)
+> @@ -2060,12 +2067,13 @@ static int rbd_obj_read_sync(struct rbd_device
+> *rbd_dev,
+>   	obj_request->pages = pages;
+>   	obj_request->page_count = page_count;
 >
->   	dout("readpages  final extent is %llu~%llu (%llu bytes align %d)\n",
-> -	     off, *plen, osd_data->length, page_align);
-> +	     off, *plen, *plen, page_align);
+> -	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
+> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
+> -						obj_request, &op);
+> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
+>   	if (!obj_request->osd_req)
+>   		goto out;
 >
->   	ceph_osdc_build_request(req, off, 1, &op, NULL, vino.snap, NULL);
->
-> @@ -2104,7 +2131,6 @@ int ceph_osdc_writepages(struct ceph_osd_client
-> *osdc, struct ceph_vino vino,
->   			 struct page **pages, int num_pages)
->   {
->   	struct ceph_osd_request *req;
-> -	struct ceph_osd_data *osd_data;
->   	struct ceph_osd_req_op op;
->   	int rc = 0;
->   	int page_align = off & ~PAGE_MASK;
-> @@ -2119,12 +2145,9 @@ int ceph_osdc_writepages(struct ceph_osd_client
-> *osdc, struct ceph_vino vino,
->   		return PTR_ERR(req);
->
->   	/* it may be a short write due to an object boundary */
-> -	osd_data = &req->r_data_out;
-> -	osd_data->type = CEPH_OSD_DATA_TYPE_PAGES;
-> -	osd_data->pages = pages;
-> -	osd_data->length = len;
-> -	osd_data->alignment = page_align;
-> -	dout("writepages %llu~%llu (%llu bytes)\n", off, len, osd_data->length);
-> +	ceph_osd_data_pages_init(&req->r_data_out, pages, len, page_align,
-> +				false, false);
-> +	dout("writepages %llu~%llu (%llu bytes)\n", off, len, len);
->
->   	ceph_osdc_build_request(req, off, 1, &op, snapc, CEPH_NOSNAP, mtime);
+> +	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
+> +	rbd_osd_req_format_op(obj_request, false, &op);
+> +
+>   	osdc = &rbd_dev->rbd_client->client->osdc;
+>   	ret = rbd_obj_request_submit(osdc, obj_request);
+>   	if (ret)
 >
 
