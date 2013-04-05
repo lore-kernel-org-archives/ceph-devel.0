@@ -1,137 +1,266 @@
-From: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
-Subject: [PATCH v2 0/4] dcache: make dcache more scalable on large system
-Date: Fri,  5 Apr 2013 12:57:37 -0400
-Message-ID: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <mszeredi-AlSwsSmVLrQ@public.gmane.org>, Ian Kent <raven-PKsaG3nR2I+sTnJN9+BGXg@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, autofs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chandramouleeswaran, Aswin" <aswin-VXdhtT5mjnY@public.gmane.org>, "Norton, Scott J" <scott.norton-VXdhtT5mjnY@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 20/20] libceph: kill off osd request r_data_in and r_data_out
+Date: Fri, 05 Apr 2013 09:06:17 -0500
+Message-ID: <515EDA59.1080109@inktank.com>
+References: <515ED849.9060901@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:46991 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161475Ab3DEOGT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:06:19 -0400
+Received: by mail-ie0-f177.google.com with SMTP id tp5so4214252ieb.8
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:06:18 -0700 (PDT)
+In-Reply-To: <515ED849.9060901@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Change log:
+Finally!  Convert the osd op data pointers into real structures, and
+make the switch over to using them instead of having all ops share
+the in and/or out data structures in the osd request.
 
-v1->v2
- - Include performance improvement in the AIM7 benchmark results because
-   of this patch.
- - Modify dget_parent() to avoid taking the lock, if possible, to further
-   improve AIM7 benchmark results.
+Set up a new function to traverse the set of ops and release any
+data associated with them (pages).
 
-During some perf-record sessions of the kernel running the high_systime
-workload of the AIM7 benchmark, it was found that quite a large portion
-of the spinlock contention was due to the perf_event_mmap_event()
-function itself. This perf kernel function calls d_path() which,
-in turn, call path_get() and dput() indirectly. These 3 functions
-were the hottest functions shown in the perf-report output of
-the _raw_spin_lock() function in an 8-socket system with 80 cores
-(hyperthreading off) with a 3.7.10 kernel with a mutex patch applied:
+This and the patches leading up to it resolve:
+    http://tracker.ceph.com/issues/4657
 
--  11.97%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
-   - _raw_spin_lock
-      + 46.17% d_path
-      + 20.31% path_get
-      + 19.75% dput
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ include/linux/ceph/osd_client.h |    9 ++---
+ net/ceph/osd_client.c           |   79
++++++++++++++++++++--------------------
+ 2 files changed, 42 insertions(+), 46 deletions(-)
 
-In fact, the output of the "perf record -s -a" (without call-graph)
-showed:
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index dd4ca4ba..4ec46c0 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -87,14 +87,14 @@ struct ceph_osd_req_op {
+ 			u64 offset, length;
+ 			u64 truncate_size;
+ 			u32 truncate_seq;
+-			struct ceph_osd_data *osd_data;
++			struct ceph_osd_data osd_data;
+ 		} extent;
+ 		struct {
+ 			const char *class_name;
+ 			const char *method_name;
+ 			const void *request_data;
+-			struct ceph_osd_data *request_info;
+-			struct ceph_osd_data *response_data;
++			struct ceph_osd_data request_info;
++			struct ceph_osd_data response_data;
+ 			u32 request_data_len;
+ 			__u8 class_len;
+ 			__u8 method_len;
+@@ -164,9 +164,6 @@ struct ceph_osd_request {
 
- 11.73%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
-  8.85%             ls  [kernel.kallsyms]     [k] _raw_spin_lock
-  3.97%           true  [kernel.kallsyms]     [k] _raw_spin_lock
+ 	struct ceph_file_layout r_file_layout;
+ 	struct ceph_snap_context *r_snapc;    /* snap context for writes */
+-
+-	struct ceph_osd_data r_data_in;
+-	struct ceph_osd_data r_data_out;
+ };
 
-Without using the perf monitoring tool, the actual execution profile
-will be quite different. In fact, with this patch set applied, the
-output of the same "perf record -s -a" command became:
+ struct ceph_osd_event {
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index cc4003f..2562e4e 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -121,8 +121,7 @@ osd_req_op_extent_osd_data(struct ceph_osd_request
+*osd_req,
+ {
+ 	BUG_ON(which >= osd_req->r_num_ops);
 
-  2.05%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
-  0.30%             ls  [kernel.kallsyms]     [k] _raw_spin_lock
-  0.25%           true  [kernel.kallsyms]     [k] _raw_spin_lock
+-	/* return &osd_req->r_ops[which].extent.osd_data; */
+-	return write_request ? &osd_req->r_data_out : &osd_req->r_data_in;
++	return &osd_req->r_ops[which].extent.osd_data;
+ }
+ EXPORT_SYMBOL(osd_req_op_extent_osd_data);
 
-So the time spent on _raw_spin_lock() function went down from 24.55%
-to 2.60%. It can be seen that the performance data collected by the
-perf-record command can be heavily skewed in some cases on a system
-with a large number of CPUs. This set of patches enables the perf
-command to give a more accurate and reliable picture of what is really
-happening in the system. At the same time, they can also improve the
-general performance of systems especially those with a large number
-of CPUs.
+@@ -132,8 +131,7 @@ osd_req_op_cls_request_info(struct ceph_osd_request
+*osd_req,
+ {
+ 	BUG_ON(which >= osd_req->r_num_ops);
 
-The d_path() function takes the following two locks:
+-	/* return &osd_req->r_ops[which].cls.request_info; */
+-	return &osd_req->r_data_out;	/* Request data is outgoing */
++	return &osd_req->r_ops[which].cls.request_info;
+ }
+ EXPORT_SYMBOL(osd_req_op_cls_request_info);	/* ??? */
 
-1. dentry->d_lock [spinlock] from dget()/dget_parent()/dput()
-2. rename_lock    [seqlock]  from d_path()
+@@ -143,8 +141,7 @@ osd_req_op_cls_response_data(struct ceph_osd_request
+*osd_req,
+ {
+ 	BUG_ON(which >= osd_req->r_num_ops);
 
-This set of patches were designed to minimize the locking overhead
-of these code paths.
+-	/* return &osd_req->r_ops[which].cls.response_data; */
+-	return &osd_req->r_data_in;	/* Response data is incoming */
++	return &osd_req->r_ops[which].cls.response_data;
+ }
+ EXPORT_SYMBOL(osd_req_op_cls_response_data);	/* ??? */
 
-The current kernel takes the dentry->d_lock lock whenever it wants to
-increment or decrement the d_count reference count. However, nothing
-big will really happen until the reference count goes all the way to 1
-or 0.  Actually, we don't need to take the lock when reference count
-is bigger than 1. Instead, atomic cmpxchg() function can be used to
-increment or decrement the count in these situations. For safety,
-other reference count update operations have to be changed to use
-atomic instruction as well.
+@@ -158,9 +155,6 @@ void osd_req_op_extent_osd_data_pages(struct
+ceph_osd_request *osd_req,
+ 	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
+ 	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
+ 				pages_from_pool, own_pages);
+-
+-	osd_req->r_ops[which].extent.osd_data =
+-		osd_req_op_extent_osd_data(osd_req, which, write_request);
+ }
+ EXPORT_SYMBOL(osd_req_op_extent_osd_data_pages);
 
-The rename_lock is a sequence lock. The d_path() function takes the
-writer lock because it needs to traverse different dentries through
-pointers to get the full path name. Hence it can't tolerate changes
-in those pointers. But taking the writer lock also prevent multiple
-d_path() calls to proceed concurrently.
+@@ -172,9 +166,6 @@ void osd_req_op_extent_osd_data_pagelist(struct
+ceph_osd_request *osd_req,
 
-A solution is to introduce a new lock type where there will be a
-second type of reader which can block the writers - the sequence
-read/write lock (seqrwlock). The d_path() and related functions will
-then be changed to take the reader lock instead of the writer lock.
-This will allow multiple d_path() operations to proceed concurrently.
+ 	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
+ 	ceph_osd_data_pagelist_init(osd_data, pagelist);
+-
+-	osd_req->r_ops[which].extent.osd_data =
+-		osd_req_op_extent_osd_data(osd_req, which, write_request);
+ }
+ EXPORT_SYMBOL(osd_req_op_extent_osd_data_pagelist);
 
-Additional performance testing was conducted using the AIM7
-benchmark.  It is mainly the first patch that has impact on the AIM7
-benchmark. Please see the patch description of the first patch on
-more information about the benchmark results.
+@@ -187,9 +178,6 @@ void osd_req_op_extent_osd_data_bio(struct
+ceph_osd_request *osd_req,
 
-Incidentally, these patches also have a favorable impact on Oracle
-database performance when measured by the Oracle SLOB benchmark.
+ 	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
+ 	ceph_osd_data_bio_init(osd_data, bio, bio_length);
+-
+-	osd_req->r_ops[which].extent.osd_data =
+-		osd_req_op_extent_osd_data(osd_req, which, write_request);
+ }
+ EXPORT_SYMBOL(osd_req_op_extent_osd_data_bio);
+ #endif /* CONFIG_BLOCK */
+@@ -202,9 +190,6 @@ static void osd_req_op_cls_request_info_pagelist(
 
-The following tests with multiple threads were also run on kernels
-with and without the patch on an 8-socket 80-core system and a PC
-with 4-core i5 processor:
+ 	osd_data = osd_req_op_cls_request_info(osd_req, which);
+ 	ceph_osd_data_pagelist_init(osd_data, pagelist);
+-
+-	osd_req->r_ops[which].cls.request_info =
+-		osd_req_op_cls_request_info(osd_req, which);
+ }
 
-1. find $HOME -size 0b
-2. cat /proc/*/maps /proc/*/numa_maps
-3. git diff
+ void osd_req_op_cls_response_data_pages(struct ceph_osd_request *osd_req,
+@@ -216,9 +201,6 @@ void osd_req_op_cls_response_data_pages(struct
+ceph_osd_request *osd_req,
+ 	osd_data = osd_req_op_cls_response_data(osd_req, which);
+ 	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
+ 				pages_from_pool, own_pages);
+-
+-	osd_req->r_ops[which].cls.response_data =
+-		osd_req_op_cls_response_data(osd_req, which);
+ }
+ EXPORT_SYMBOL(osd_req_op_cls_response_data_pages);
 
-For both the find-size and cat-maps tests, the performance difference
-with hot cache was within a few percentage points and hence within
-the margin of error. Single-thread performance was slightly worse,
-but multithread performance was generally a bit better. Apparently,
-reference count update isn't a significant factor in those tests. Their
-perf traces indicates that there was less spinlock content in
-functions like dput(), but the function itself ran a little bit longer
-on average.
+@@ -241,18 +223,39 @@ static u64 ceph_osd_data_length(struct
+ceph_osd_data *osd_data)
+ 	}
+ }
 
-The git-diff test showed no difference in performance. There is a
-slight increase in system time compensated by a slight decrease in
-user time.
++
+ static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
+ {
+-	if (osd_data->type != CEPH_OSD_DATA_TYPE_PAGES)
+-		return;
+-
+-	if (osd_data->own_pages) {
++	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES && osd_data->own_pages) {
+ 		int num_pages;
 
-Of the 4 patches, patch 3 is dependent on patch 2. The other 2 patches
-are independent can be applied individually.
+ 		num_pages = calc_pages_for((u64)osd_data->alignment,
+ 						(u64)osd_data->length);
+ 		ceph_release_page_vector(osd_data->pages, num_pages);
+ 	}
++	ceph_osd_data_init(osd_data);
++}
++
++static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
++			unsigned int which)
++{
++	struct ceph_osd_req_op *op;
++
++	BUG_ON(which >= osd_req->r_num_ops);
++	op = &osd_req->r_ops[which];
++
++	switch (op->op) {
++	case CEPH_OSD_OP_READ:
++	case CEPH_OSD_OP_WRITE:
++		ceph_osd_data_release(&op->extent.osd_data);
++		break;
++	case CEPH_OSD_OP_CALL:
++		ceph_osd_data_release(&op->cls.request_info);
++		ceph_osd_data_release(&op->cls.response_data);
++		break;
++	default:
++		break;
++	}
+ }
 
-Signed-off-by: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+ /*
+@@ -261,6 +264,7 @@ static void ceph_osd_data_release(struct
+ceph_osd_data *osd_data)
+ void ceph_osdc_release_request(struct kref *kref)
+ {
+ 	struct ceph_osd_request *req;
++	unsigned int which;
 
-Waiman Long (4):
-  dcache: Don't take unnecessary lock in d_count update
-  dcache: introduce a new sequence read/write lock type
-  dcache: change rename_lock to a sequence read/write lock
-  dcache: don't need to take d_lock in prepend_path()
+ 	req = container_of(kref, struct ceph_osd_request, r_kref);
+ 	if (req->r_request)
+@@ -270,8 +274,8 @@ void ceph_osdc_release_request(struct kref *kref)
+ 		ceph_msg_put(req->r_reply);
+ 	}
 
- fs/autofs4/waitq.c        |    6 +-
- fs/ceph/mds_client.c      |    4 +-
- fs/cifs/dir.c             |    4 +-
- fs/dcache.c               |  125 ++++++++++++++++++++---------------------
- fs/namei.c                |    2 +-
- fs/nfs/namespace.c        |    6 +-
- include/linux/dcache.h    |  105 +++++++++++++++++++++++++++++++++--
- include/linux/seqrwlock.h |  137 +++++++++++++++++++++++++++++++++++++++++++++
- kernel/auditsc.c          |    4 +-
- 9 files changed, 311 insertions(+), 82 deletions(-)
- create mode 100644 include/linux/seqrwlock.h
+-	ceph_osd_data_release(&req->r_data_in);
+-	ceph_osd_data_release(&req->r_data_out);
++	for (which = 0; which < req->r_num_ops; which++)
++		osd_req_op_data_release(req, which);
+
+ 	ceph_put_snap_context(req->r_snapc);
+ 	if (req->r_mempool)
+@@ -595,27 +599,22 @@ static u64 osd_req_encode_op(struct
+ceph_osd_request *req,
+ 			cpu_to_le64(src->extent.truncate_size);
+ 		dst->extent.truncate_seq =
+ 			cpu_to_le32(src->extent.truncate_seq);
+-		if (src->op == CEPH_OSD_OP_WRITE) {
+-			WARN_ON(src->extent.osd_data != &req->r_data_out);
++		if (src->op == CEPH_OSD_OP_WRITE)
+ 			ceph_osdc_msg_data_set(req->r_request,
+-						src->extent.osd_data);
+-		} else {
+-			WARN_ON(src->extent.osd_data != &req->r_data_in);
++						&src->extent.osd_data);
++		else
+ 			ceph_osdc_msg_data_set(req->r_reply,
+-						src->extent.osd_data);
+-		}
++						&src->extent.osd_data);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+ 		dst->cls.class_len = src->cls.class_len;
+ 		dst->cls.method_len = src->cls.method_len;
+ 		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
+-		WARN_ON(src->cls.response_data != &req->r_data_in);
+-		ceph_osdc_msg_data_set(req->r_reply, src->cls.response_data);
+-		WARN_ON(src->cls.request_info != &req->r_data_out);
+-		ceph_osdc_msg_data_set(req->r_request, src->cls.request_info);
+-		BUG_ON(src->cls.request_info->type !=
++		ceph_osdc_msg_data_set(req->r_reply, &src->cls.response_data);
++		ceph_osdc_msg_data_set(req->r_request, &src->cls.request_info);
++		BUG_ON(src->cls.request_info.type !=
+ 					CEPH_OSD_DATA_TYPE_PAGELIST);
+-		request_data_len = src->cls.request_info->pagelist->length;
++		request_data_len = src->cls.request_info.pagelist->length;
+ 		break;
+ 	case CEPH_OSD_OP_STARTSYNC:
+ 		break;
+-- 
+1.7.9.5
+
