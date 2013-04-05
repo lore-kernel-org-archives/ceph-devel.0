@@ -1,515 +1,272 @@
-From: Waiman Long <Waiman.Long@hp.com>
-Subject: [PATCH v2 RFC 3/4] dcache: change rename_lock to a sequence read/write lock
-Date: Fri,  5 Apr 2013 12:57:40 -0400
-Message-ID: <1365181061-30787-4-git-send-email-Waiman.Long@hp.com>
-References: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
-Return-path: <autofs-owner@vger.kernel.org>
-In-Reply-To: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
-Sender: autofs-owner@vger.kernel.org
-To: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>
-Cc: Waiman Long <Waiman.Long@hp.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>, Andi Kleen <andi@firstfloor.org>, Dave Chinner <david@fromorbit.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 10/20] libceph: add data pointers in osd op structures
+Date: Fri, 05 Apr 2013 09:03:55 -0500
+Message-ID: <515ED9CB.3090501@inktank.com>
+References: <515ED849.9060901@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:65199 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161814Ab3DEOD5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:03:57 -0400
+Received: by mail-ie0-f182.google.com with SMTP id at1so4314531iec.41
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:03:57 -0700 (PDT)
+In-Reply-To: <515ED849.9060901@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The d_path() and related kernel functions currently take a writer
-lock on rename_lock because they need to follow pointers. By changing
-rename_lock to be the new sequence read/write lock, a reader lock
-can be taken and multiple d_path() threads can proceed concurrently
-without blocking each other.
+An extent type osd operation currently implies that there will
+be corresponding data supplied in the data portion of the request
+(for write) or response (for read) message.  Similarly, an osd class
+method operation implies a data item will be supplied to receive
+the response data from the operation.
 
-It is unlikely that the frequency of filesystem changes and d_path()
-name lookup will be high enough to cause writer starvation, the current
-limitation of the read/write lock should be acceptable in that case.
+Add a ceph_osd_data pointer to each of those structures, and assign
+it to point to eithre the incoming or the outgoing data structure in
+the osd message.  The data is not always available when an op is
+initially set up, so add two new functions to allow setting them
+after the op has been initialized.
 
-All the sites where rename_lock is referenced were modified to use the
-sequence read/write lock declaration and access functions.
+Begin to make use of the data item pointer available in the osd
+operation rather than the request data in or out structure in
+places where it's convenient.  Add some assertions to verify
+pointers are always set the way they're expected to be.
 
-When apply this patch to 3.8 or earlier releases, the unused function
-d_path_with_unreachable() in fs/dcache.c should be removed to avoid
-compilation warning.
+This is a sort of stepping stone toward really moving the data
+into the osd request ops, to allow for some validation before
+making that jump.
 
-Signed-off-by: Waiman Long <Waiman.Long@hp.com>
+This is the first in a series of patches that resolve:
+    http://tracker.ceph.com/issues/4657
+
+Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/autofs4/waitq.c     |    6 ++--
- fs/ceph/mds_client.c   |    4 +-
- fs/cifs/dir.c          |    4 +-
- fs/dcache.c            |   83 ++++++++++++++++++++++++-----------------------
- fs/nfs/namespace.c     |    6 ++--
- include/linux/dcache.h |    4 +-
- kernel/auditsc.c       |    4 +-
- 7 files changed, 56 insertions(+), 55 deletions(-)
+ drivers/block/rbd.c             |   24 ++++++++++++++++++++----
+ fs/ceph/addr.c                  |    8 +++++---
+ fs/ceph/file.c                  |    5 +++--
+ include/linux/ceph/osd_client.h |    6 ++++++
+ net/ceph/osd_client.c           |   26 +++++++++++++++++++++++++-
+ 5 files changed, 59 insertions(+), 10 deletions(-)
 
-diff --git a/fs/autofs4/waitq.c b/fs/autofs4/waitq.c
-index 3db70da..3afc4db 100644
---- a/fs/autofs4/waitq.c
-+++ b/fs/autofs4/waitq.c
-@@ -197,7 +197,7 @@ rename_retry:
- 	buf = *name;
- 	len = 0;
- 
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- 	rcu_read_lock();
- 	spin_lock(&sbi->fs_lock);
- 	for (tmp = dentry ; tmp != root ; tmp = tmp->d_parent)
-@@ -206,7 +206,7 @@ rename_retry:
- 	if (!len || --len > NAME_MAX) {
- 		spin_unlock(&sbi->fs_lock);
- 		rcu_read_unlock();
--		if (read_seqretry(&rename_lock, seq))
-+		if (read_seqrwretry(&rename_lock, seq))
- 			goto rename_retry;
- 		return 0;
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index e6e2191..59f9db1 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1315,23 +1315,39 @@ static void rbd_osd_req_format_op(struct
+rbd_obj_request *obj_request,
+ 					bool write_request)
+ {
+ 	struct rbd_img_request *img_request = obj_request->img_request;
++	struct ceph_osd_request *osd_req = obj_request->osd_req;
++	struct ceph_osd_data *osd_data = NULL;
+ 	struct ceph_snap_context *snapc = NULL;
+ 	u64 snap_id = CEPH_NOSNAP;
+ 	struct timespec *mtime = NULL;
+ 	struct timespec now;
+
+-	rbd_assert(obj_request->osd_req != NULL);
++	rbd_assert(osd_req != NULL);
+
+ 	if (write_request) {
++		osd_data = &osd_req->r_data_out;
+ 		now = CURRENT_TIME;
+ 		mtime = &now;
+ 		if (img_request)
+ 			snapc = img_request->snapc;
+-	} else if (img_request) {
+-		snap_id = img_request->snap_id;
++	} else {
++		osd_data = &osd_req->r_data_in;
++		if (img_request)
++			snap_id = img_request->snap_id;
  	}
-@@ -222,7 +222,7 @@ rename_retry:
++	if (obj_request->type != OBJ_REQUEST_NODATA) {
++		struct ceph_osd_req_op *op = &obj_request->osd_req->r_ops[0];
+
+-	ceph_osdc_build_request(obj_request->osd_req, obj_request->offset,
++		/*
++		 * If it has data, it's either a object class method
++		 * call (cls) or it's an extent operation.
++		 */
++		if (op->op == CEPH_OSD_OP_CALL)
++			osd_req_op_cls_response_data(op, osd_data);
++		else
++			osd_req_op_extent_osd_data(op, osd_data);
++	}
++	ceph_osdc_build_request(osd_req, obj_request->offset,
+ 			snapc, snap_id, mtime);
+ }
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 12bbba7..3caadb0 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -343,7 +343,8 @@ static int start_read(struct inode *inode, struct
+list_head *page_list, int max)
+ 		}
+ 		pages[i] = page;
  	}
- 	spin_unlock(&sbi->fs_lock);
- 	rcu_read_unlock();
--	if (read_seqretry(&rename_lock, seq))
-+	if (read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- 
- 	return len;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 442880d..da565c4 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1486,7 +1486,7 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *base,
- 
- retry:
- 	len = 0;
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- 	rcu_read_lock();
- 	for (temp = dentry; !IS_ROOT(temp);) {
- 		struct inode *inode = temp->d_inode;
-@@ -1536,7 +1536,7 @@ retry:
- 		temp = temp->d_parent;
- 	}
- 	rcu_read_unlock();
--	if (pos != 0 || read_seqretry(&rename_lock, seq)) {
-+	if (pos != 0 || read_seqrwretry(&rename_lock, seq)) {
- 		pr_err("build_path did not end path lookup where "
- 		       "expected, namelen is %d, pos is %d\n", len, pos);
- 		/* presumably this is only possible if racing with a
-diff --git a/fs/cifs/dir.c b/fs/cifs/dir.c
-index 1cd0162..707d849 100644
---- a/fs/cifs/dir.c
-+++ b/fs/cifs/dir.c
-@@ -96,7 +96,7 @@ build_path_from_dentry(struct dentry *direntry)
- 		dfsplen = 0;
- cifs_bp_rename_retry:
- 	namelen = dfsplen;
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- 	rcu_read_lock();
- 	for (temp = direntry; !IS_ROOT(temp);) {
- 		namelen += (1 + temp->d_name.len);
-@@ -136,7 +136,7 @@ cifs_bp_rename_retry:
+-	ceph_osd_data_pages_init(&req->r_data_in, pages, len, 0,
++	BUG_ON(req->r_ops[0].extent.osd_data != &req->r_data_in);
++	ceph_osd_data_pages_init(req->r_ops[0].extent.osd_data, pages, len, 0,
+ 					false, false);
+ 	req->r_callback = finish_read;
+ 	req->r_inode = inode;
+@@ -916,8 +917,9 @@ get_more_pages:
+ 		dout("writepages got %d pages at %llu~%llu\n",
+ 		     locked_pages, offset, len);
+
+-		ceph_osd_data_pages_init(&req->r_data_out, pages, len, 0,
+-						!!pool, false);
++		BUG_ON(req->r_ops[0].extent.osd_data != &req->r_data_out);
++		ceph_osd_data_pages_init(req->r_ops[0].extent.osd_data, pages,
++						len, 0, !!pool, false);
+
+ 		pages = NULL;	/* request message now owns the pages array */
+ 		pool = NULL;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index a1d85a8..66d0938 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -574,8 +574,9 @@ more:
+ 			own_pages = true;
  		}
  	}
- 	rcu_read_unlock();
--	if (namelen != dfsplen || read_seqretry(&rename_lock, seq)) {
-+	if (namelen != dfsplen || read_seqrwretry(&rename_lock, seq)) {
- 		cFYI(1, "did not end path lookup where expected. namelen=%d "
- 			"dfsplen=%d", namelen, dfsplen);
- 		/* presumably this is only possible if racing with a rename
-diff --git a/fs/dcache.c b/fs/dcache.c
-index 48c0680..9477d80 100644
---- a/fs/dcache.c
-+++ b/fs/dcache.c
-@@ -29,6 +29,7 @@
- #include <asm/uaccess.h>
- #include <linux/security.h>
- #include <linux/seqlock.h>
-+#include <linux/seqrwlock.h>
- #include <linux/swap.h>
- #include <linux/bootmem.h>
- #include <linux/fs_struct.h>
-@@ -82,7 +83,7 @@ int sysctl_vfs_cache_pressure __read_mostly = 100;
- EXPORT_SYMBOL_GPL(sysctl_vfs_cache_pressure);
- 
- static __cacheline_aligned_in_smp DEFINE_SPINLOCK(dcache_lru_lock);
--__cacheline_aligned_in_smp DEFINE_SEQLOCK(rename_lock);
-+__cacheline_aligned_in_smp DEFINE_SEQRWLOCK(rename_lock);
- 
- EXPORT_SYMBOL(rename_lock);
- 
-@@ -1020,7 +1021,7 @@ static struct dentry *try_to_ascend(struct dentry *old, int locked, unsigned seq
- 	 */
- 	if (new != old->d_parent ||
- 		 (old->d_flags & DCACHE_DENTRY_KILLED) ||
--		 (!locked && read_seqretry(&rename_lock, seq))) {
-+		 (!locked && read_seqrwretry(&rename_lock, seq))) {
- 		spin_unlock(&new->d_lock);
- 		new = NULL;
- 	}
-@@ -1049,7 +1050,7 @@ int have_submounts(struct dentry *parent)
- 	unsigned seq;
- 	int locked = 0;
- 
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- again:
- 	this_parent = parent;
- 
-@@ -1092,23 +1093,23 @@ resume:
- 		goto resume;
- 	}
- 	spin_unlock(&this_parent->d_lock);
--	if (!locked && read_seqretry(&rename_lock, seq))
-+	if (!locked && read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- 	if (locked)
--		write_sequnlock(&rename_lock);
-+		write_seqrwunlock(&rename_lock);
- 	return 0; /* No mount points found in tree */
- positive:
--	if (!locked && read_seqretry(&rename_lock, seq))
-+	if (!locked && read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- 	if (locked)
--		write_sequnlock(&rename_lock);
-+		write_seqrwunlock(&rename_lock);
- 	return 1;
- 
- rename_retry:
- 	if (locked)
- 		goto again;
- 	locked = 1;
--	write_seqlock(&rename_lock);
-+	write_seqrwlock(&rename_lock);
- 	goto again;
+-	ceph_osd_data_pages_init(&req->r_data_out, pages, len, page_align,
+-					false, own_pages);
++	BUG_ON(req->r_ops[0].extent.osd_data != &req->r_data_out);
++	ceph_osd_data_pages_init(req->r_ops[0].extent.osd_data, pages, len,
++					page_align, false, own_pages);
+
+ 	/* BUG_ON(vino.snap != CEPH_NOSNAP); */
+ 	ceph_osdc_build_request(req, pos, snapc, vino.snap, &mtime);
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index a9c4089..ae51935 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -87,12 +87,14 @@ struct ceph_osd_req_op {
+ 			u64 offset, length;
+ 			u64 truncate_size;
+ 			u32 truncate_seq;
++			struct ceph_osd_data *osd_data;
+ 		} extent;
+ 		struct {
+ 			const char *class_name;
+ 			const char *method_name;
+ 			const void *request_data;
+ 			u32 request_data_len;
++			struct ceph_osd_data *response_data;
+ 			__u8 class_len;
+ 			__u8 method_len;
+ 			__u8 argc;
+@@ -236,10 +238,14 @@ extern void osd_req_op_extent_init(struct
+ceph_osd_req_op *op, u16 opcode,
+ 					u64 offset, u64 length,
+ 					u64 truncate_size, u32 truncate_seq);
+ extern void osd_req_op_extent_update(struct ceph_osd_req_op *op, u64
+length);
++extern void osd_req_op_extent_osd_data(struct ceph_osd_req_op *op,
++					struct ceph_osd_data *osd_data);
+ extern void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
+ 					const char *class, const char *method,
+ 					const void *request_data,
+ 					size_t request_data_size);
++extern void osd_req_op_cls_response_data(struct ceph_osd_req_op *op,
++					struct ceph_osd_data *response_data);
+ extern void osd_req_op_watch_init(struct ceph_osd_req_op *op, u16 opcode,
+ 					u64 cookie, u64 version, int flag);
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index e74e454..2a14187 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -372,6 +372,13 @@ void osd_req_op_extent_update(struct
+ceph_osd_req_op *op, u64 length)
  }
- EXPORT_SYMBOL(have_submounts);
-@@ -1135,7 +1136,7 @@ static int select_parent(struct dentry *parent, struct list_head *dispose)
- 	int found = 0;
- 	int locked = 0;
- 
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- again:
- 	this_parent = parent;
- 	spin_lock(&this_parent->d_lock);
-@@ -1200,10 +1201,10 @@ resume:
- 	}
- out:
- 	spin_unlock(&this_parent->d_lock);
--	if (!locked && read_seqretry(&rename_lock, seq))
-+	if (!locked && read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- 	if (locked)
--		write_sequnlock(&rename_lock);
-+		write_seqrwunlock(&rename_lock);
- 	return found;
- 
- rename_retry:
-@@ -1212,7 +1213,7 @@ rename_retry:
- 	if (locked)
- 		goto again;
- 	locked = 1;
--	write_seqlock(&rename_lock);
-+	write_seqrwlock(&rename_lock);
- 	goto again;
+ EXPORT_SYMBOL(osd_req_op_extent_update);
+
++void osd_req_op_extent_osd_data(struct ceph_osd_req_op *op,
++				struct ceph_osd_data *osd_data)
++{
++	op->extent.osd_data = osd_data;
++}
++EXPORT_SYMBOL(osd_req_op_extent_osd_data);
++
+ void osd_req_op_cls_init(struct ceph_osd_req_op *op, u16 opcode,
+ 			const char *class, const char *method,
+ 			const void *request_data, size_t request_data_size)
+@@ -406,6 +413,13 @@ void osd_req_op_cls_init(struct ceph_osd_req_op
+*op, u16 opcode,
  }
- 
-@@ -1825,7 +1826,7 @@ struct dentry *__d_lookup_rcu(const struct dentry *parent,
- 	 * It is possible that concurrent renames can mess up our list
- 	 * walk here and result in missing our dentry, resulting in the
- 	 * false-negative result. d_lookup() protects against concurrent
--	 * renames using rename_lock seqlock.
-+	 * renames using rename_lock seqrwlock.
- 	 *
- 	 * See Documentation/filesystems/path-lookup.txt for more details.
- 	 */
-@@ -1893,11 +1894,11 @@ struct dentry *d_lookup(const struct dentry *parent, const struct qstr *name)
- 	unsigned seq;
- 
-         do {
--                seq = read_seqbegin(&rename_lock);
-+                seq = read_seqrwbegin(&rename_lock);
-                 dentry = __d_lookup(parent, name);
-                 if (dentry)
- 			break;
--	} while (read_seqretry(&rename_lock, seq));
-+	} while (read_seqrwretry(&rename_lock, seq));
- 	return dentry;
- }
- EXPORT_SYMBOL(d_lookup);
-@@ -1911,7 +1912,7 @@ EXPORT_SYMBOL(d_lookup);
-  * __d_lookup is like d_lookup, however it may (rarely) return a
-  * false-negative result due to unrelated rename activity.
-  *
-- * __d_lookup is slightly faster by avoiding rename_lock read seqlock,
-+ * __d_lookup is slightly faster by avoiding rename_lock read seqrwlock,
-  * however it must be used carefully, eg. with a following d_lookup in
-  * the case of failure.
-  *
-@@ -1943,7 +1944,7 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
- 	 * It is possible that concurrent renames can mess up our list
- 	 * walk here and result in missing our dentry, resulting in the
- 	 * false-negative result. d_lookup() protects against concurrent
--	 * renames using rename_lock seqlock.
-+	 * renames using rename_lock seqrwlock.
- 	 *
- 	 * See Documentation/filesystems/path-lookup.txt for more details.
- 	 */
-@@ -2318,9 +2319,9 @@ static void __d_move(struct dentry * dentry, struct dentry * target)
-  */
- void d_move(struct dentry *dentry, struct dentry *target)
+ EXPORT_SYMBOL(osd_req_op_cls_init);
+
++void osd_req_op_cls_response_data(struct ceph_osd_req_op *op,
++				struct ceph_osd_data *response_data)
++{
++	op->cls.response_data = response_data;
++}
++EXPORT_SYMBOL(osd_req_op_cls_response_data);
++
+ void osd_req_op_watch_init(struct ceph_osd_req_op *op, u16 opcode,
+ 				u64 cookie, u64 version, int flag)
  {
--	write_seqlock(&rename_lock);
-+	write_seqrwlock(&rename_lock);
- 	__d_move(dentry, target);
--	write_sequnlock(&rename_lock);
-+	write_seqrwunlock(&rename_lock);
- }
- EXPORT_SYMBOL(d_move);
- 
-@@ -2449,7 +2450,7 @@ struct dentry *d_materialise_unique(struct dentry *dentry, struct inode *inode)
- 		alias = __d_find_alias(inode, 0);
- 		if (alias) {
- 			actual = alias;
--			write_seqlock(&rename_lock);
-+			write_seqrwlock(&rename_lock);
- 
- 			if (d_ancestor(alias, dentry)) {
- 				/* Check for loops */
-@@ -2459,7 +2460,7 @@ struct dentry *d_materialise_unique(struct dentry *dentry, struct inode *inode)
- 				/* Is this an anonymous mountpoint that we
- 				 * could splice into our tree? */
- 				__d_materialise_dentry(dentry, alias);
--				write_sequnlock(&rename_lock);
-+				write_seqrwunlock(&rename_lock);
- 				__d_drop(alias);
- 				goto found;
- 			} else {
-@@ -2467,7 +2468,7 @@ struct dentry *d_materialise_unique(struct dentry *dentry, struct inode *inode)
- 				 * aliasing. This drops inode->i_lock */
- 				actual = __d_unalias(inode, dentry, alias);
- 			}
--			write_sequnlock(&rename_lock);
-+			write_seqrwunlock(&rename_lock);
- 			if (IS_ERR(actual)) {
- 				if (PTR_ERR(actual) == -ELOOP)
- 					pr_warn_ratelimited(
-@@ -2614,9 +2615,9 @@ char *__d_path(const struct path *path,
- 	int error;
- 
- 	prepend(&res, &buflen, "\0", 1);
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	error = prepend_path(path, root, &res, &buflen);
--	write_sequnlock(&rename_lock);
-+	read_seqrwunlock(&rename_lock);
- 
- 	if (error < 0)
- 		return ERR_PTR(error);
-@@ -2633,9 +2634,9 @@ char *d_absolute_path(const struct path *path,
- 	int error;
- 
- 	prepend(&res, &buflen, "\0", 1);
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	error = prepend_path(path, &root, &res, &buflen);
--	write_sequnlock(&rename_lock);
-+	read_seqrwunlock(&rename_lock);
- 
- 	if (error > 1)
- 		error = -EINVAL;
-@@ -2699,11 +2700,11 @@ char *d_path(const struct path *path, char *buf, int buflen)
- 		return path->dentry->d_op->d_dname(path->dentry, buf, buflen);
- 
- 	get_fs_root(current->fs, &root);
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	error = path_with_deleted(path, &root, &res, &buflen);
- 	if (error < 0)
- 		res = ERR_PTR(error);
--	write_sequnlock(&rename_lock);
-+	read_seqrwunlock(&rename_lock);
- 	path_put(&root);
- 	return res;
- }
-@@ -2768,9 +2769,9 @@ char *dentry_path_raw(struct dentry *dentry, char *buf, int buflen)
+@@ -449,6 +463,10 @@ static u64 osd_req_encode_op(struct
+ceph_osd_request *req,
+ 			cpu_to_le64(src->extent.truncate_size);
+ 		dst->extent.truncate_seq =
+ 			cpu_to_le32(src->extent.truncate_seq);
++		if (src->op == CEPH_OSD_OP_WRITE)
++			WARN_ON(src->extent.osd_data != &req->r_data_out);
++		else
++			WARN_ON(src->extent.osd_data != &req->r_data_in);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+ 		pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
+@@ -464,8 +482,9 @@ static u64 osd_req_encode_op(struct ceph_osd_request
+*req,
+ 				     src->cls.method_len);
+ 		ceph_pagelist_append(pagelist, src->cls.request_data,
+ 				     src->cls.request_data_len);
+-
+ 		ceph_osd_data_pagelist_init(&req->r_data_out, pagelist);
++
++		WARN_ON(src->cls.response_data != &req->r_data_in);
+ 		request_data_len = pagelist->length;
+ 		break;
+ 	case CEPH_OSD_OP_STARTSYNC:
+@@ -609,6 +628,7 @@ struct ceph_osd_request
+*ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 					       bool use_mempool)
  {
- 	char *retval;
- 
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	retval = __dentry_path(dentry, buf, buflen);
--	write_sequnlock(&rename_lock);
-+	read_seqrwunlock(&rename_lock);
- 
- 	return retval;
- }
-@@ -2781,7 +2782,7 @@ char *dentry_path(struct dentry *dentry, char *buf, int buflen)
- 	char *p = NULL;
- 	char *retval;
- 
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	if (d_unlinked(dentry)) {
- 		p = buf + buflen;
- 		if (prepend(&p, &buflen, "//deleted", 10) != 0)
-@@ -2789,7 +2790,7 @@ char *dentry_path(struct dentry *dentry, char *buf, int buflen)
- 		buflen++;
- 	}
- 	retval = __dentry_path(dentry, buf, buflen);
--	write_sequnlock(&rename_lock);
-+	read_seqrwunlock(&rename_lock);
- 	if (!IS_ERR(retval) && p)
- 		*p = '/';	/* restore '/' overriden with '\0' */
- 	return retval;
-@@ -2827,7 +2828,7 @@ SYSCALL_DEFINE2(getcwd, char __user *, buf, unsigned long, size)
- 	get_fs_root_and_pwd(current->fs, &root, &pwd);
- 
- 	error = -ENOENT;
--	write_seqlock(&rename_lock);
-+	read_seqrwlock(&rename_lock);
- 	if (!d_unlinked(pwd.dentry)) {
- 		unsigned long len;
- 		char *cwd = page + PAGE_SIZE;
-@@ -2835,7 +2836,7 @@ SYSCALL_DEFINE2(getcwd, char __user *, buf, unsigned long, size)
- 
- 		prepend(&cwd, &buflen, "\0", 1);
- 		error = prepend_path(&pwd, &root, &cwd, &buflen);
--		write_sequnlock(&rename_lock);
-+		read_seqrwunlock(&rename_lock);
- 
- 		if (error < 0)
- 			goto out;
-@@ -2855,7 +2856,7 @@ SYSCALL_DEFINE2(getcwd, char __user *, buf, unsigned long, size)
- 				error = -EFAULT;
- 		}
- 	} else {
--		write_sequnlock(&rename_lock);
-+		read_seqrwunlock(&rename_lock);
- 	}
- 
- out:
-@@ -2891,7 +2892,7 @@ int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
- 
- 	do {
- 		/* for restarting inner loop in case of seq retry */
--		seq = read_seqbegin(&rename_lock);
-+		seq = read_seqrwbegin(&rename_lock);
- 		/*
- 		 * Need rcu_readlock to protect against the d_parent trashing
- 		 * due to d_move
-@@ -2902,7 +2903,7 @@ int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
- 		else
- 			result = 0;
- 		rcu_read_unlock();
--	} while (read_seqretry(&rename_lock, seq));
-+	} while (read_seqrwretry(&rename_lock, seq));
- 
- 	return result;
- }
-@@ -2914,7 +2915,7 @@ void d_genocide(struct dentry *root)
- 	unsigned seq;
- 	int locked = 0;
- 
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- again:
- 	this_parent = root;
- 	spin_lock(&this_parent->d_lock);
-@@ -2957,17 +2958,17 @@ resume:
- 		goto resume;
- 	}
- 	spin_unlock(&this_parent->d_lock);
--	if (!locked && read_seqretry(&rename_lock, seq))
-+	if (!locked && read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- 	if (locked)
--		write_sequnlock(&rename_lock);
-+		write_seqrwunlock(&rename_lock);
- 	return;
- 
- rename_retry:
- 	if (locked)
- 		goto again;
- 	locked = 1;
--	write_seqlock(&rename_lock);
-+	write_seqrwlock(&rename_lock);
- 	goto again;
- }
- 
-diff --git a/fs/nfs/namespace.c b/fs/nfs/namespace.c
-index fc8dc20..0eca871 100644
---- a/fs/nfs/namespace.c
-+++ b/fs/nfs/namespace.c
-@@ -60,7 +60,7 @@ rename_retry:
- 	*--end = '\0';
- 	buflen--;
- 
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- 	rcu_read_lock();
- 	while (1) {
- 		spin_lock(&dentry->d_lock);
-@@ -76,7 +76,7 @@ rename_retry:
- 		spin_unlock(&dentry->d_lock);
- 		dentry = dentry->d_parent;
- 	}
--	if (read_seqretry(&rename_lock, seq)) {
-+	if (read_seqrwretry(&rename_lock, seq)) {
- 		spin_unlock(&dentry->d_lock);
- 		rcu_read_unlock();
- 		goto rename_retry;
-@@ -117,7 +117,7 @@ rename_retry:
- Elong_unlock:
- 	spin_unlock(&dentry->d_lock);
- 	rcu_read_unlock();
--	if (read_seqretry(&rename_lock, seq))
-+	if (read_seqrwretry(&rename_lock, seq))
- 		goto rename_retry;
- Elong:
- 	return ERR_PTR(-ENAMETOOLONG);
-diff --git a/include/linux/dcache.h b/include/linux/dcache.h
-index 99da5e2..5f05815 100644
---- a/include/linux/dcache.h
-+++ b/include/linux/dcache.h
-@@ -6,7 +6,7 @@
- #include <linux/rculist.h>
- #include <linux/rculist_bl.h>
- #include <linux/spinlock.h>
--#include <linux/seqlock.h>
-+#include <linux/seqrwlock.h>
- #include <linux/cache.h>
- #include <linux/rcupdate.h>
- 
-@@ -210,7 +210,7 @@ struct dentry_operations {
- 
- #define DCACHE_DENTRY_KILLED	0x100000
- 
--extern seqlock_t rename_lock;
-+extern seqrwlock_t rename_lock;
- 
- static inline int dname_external(struct dentry *dentry)
- {
-diff --git a/kernel/auditsc.c b/kernel/auditsc.c
-index a371f85..767421e 100644
---- a/kernel/auditsc.c
-+++ b/kernel/auditsc.c
-@@ -1892,7 +1892,7 @@ retry:
- 	drop = NULL;
- 	d = dentry;
- 	rcu_read_lock();
--	seq = read_seqbegin(&rename_lock);
-+	seq = read_seqrwbegin(&rename_lock);
- 	for(;;) {
- 		struct inode *inode = d->d_inode;
- 		if (inode && unlikely(!hlist_empty(&inode->i_fsnotify_marks))) {
-@@ -1910,7 +1910,7 @@ retry:
- 			break;
- 		d = parent;
- 	}
--	if (unlikely(read_seqretry(&rename_lock, seq) || drop)) {  /* in this order */
-+	if (unlikely(read_seqrwretry(&rename_lock, seq) || drop)) {  /* in this order */
- 		rcu_read_unlock();
- 		if (!drop) {
- 			/* just a race with rename */
+ 	struct ceph_osd_request *req;
++	struct ceph_osd_data *osd_data;
+ 	struct ceph_osd_req_op *op;
+ 	u64 objnum = 0;
+ 	u64 objoff = 0;
+@@ -623,6 +643,8 @@ struct ceph_osd_request
+*ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 					GFP_NOFS);
+ 	if (!req)
+ 		return ERR_PTR(-ENOMEM);
++	osd_data = opcode == CEPH_OSD_OP_WRITE ? &req->r_data_out
++					       : &req->r_data_in;
+
+ 	req->r_flags = flags;
+
+@@ -646,6 +668,8 @@ struct ceph_osd_request
+*ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 	op = &req->r_ops[0];
+ 	osd_req_op_extent_init(op, opcode, objoff, objlen,
+ 				truncate_size, truncate_seq);
++	osd_req_op_extent_osd_data(op, osd_data);
++
+ 	/*
+ 	 * A second op in the ops array means the caller wants to
+ 	 * also issue a include a 'startsync' command so that the
 -- 
-1.7.1
+1.7.9.5
 
