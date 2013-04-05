@@ -1,171 +1,175 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 19/20] libceph: set the data pointers when encoding ops
-Date: Fri, 05 Apr 2013 09:06:04 -0500
-Message-ID: <515EDA4C.4090305@inktank.com>
-References: <515ED849.9060901@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] os/LevelDBStore: tune LevelDB data blocking options to
+ be more suitable for PGStat values
+Date: Fri, 5 Apr 2013 08:06:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304050800040.5844@cobra.newdream.net>
+References: <1365115079-158190-1-git-send-email-jaschut@sandia.gov> <alpine.DEB.2.00.1304042142380.10899@cobra.newdream.net> <515EE0E3.4080109@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f175.google.com ([209.85.210.175]:56828 "EHLO
-	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161475Ab3DEOGH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:06:07 -0400
-Received: by mail-ia0-f175.google.com with SMTP id e16so3153408iaa.6
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:06:06 -0700 (PDT)
-In-Reply-To: <515ED849.9060901@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55938 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161922Ab3DEPGI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 11:06:08 -0400
+In-Reply-To: <515EE0E3.4080109@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jim Schutt <jaschut@sandia.gov>, sam.just@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-Still using the osd request r_data_in and r_data_out pointer, but
-we're basically only referring to it via the data pointers in the
-osd ops.  And we're transferring that information to the request
-or reply message only when the op indicates it's needed, in
-osd_req_encode_op().
+On Fri, 5 Apr 2013, Jim Schutt wrote:
+> On 04/04/2013 10:44 PM, Sage Weil wrote:
+> > Fantastic work tracking this down, Jim!
+> > 
+> > Looking at the Riak docs on tuning leveldb, it looks like a large write 
+> > buffer size is definitely a good idea.  The block size of 4MB is 
+> > significantly larger than what they recommend, though.. if we go this big 
+> > we also need to make the cache size larger (it defaults to 8MB?). 
+> 
+> I wondered about that, but the change in performance with
+> just these simple changes was so drastic that I thought
+> it was a good immediate change, with further tuning to
+> follow.
+> 
+> Although, I just tested startup, not actually running such
+> a filesystem.  Perhaps I missed the effects of insufficient
+> caching.
+> 
+> I ended up picking 4 MB because the 55K PG case has PGStat
+> values that are 20 MB in length, so it still takes 5 blocks
+> to store one.  Plus, I'd really like to be running at 256K
+> or 512K PGs to get the data uniformity across OSDs that I'm
+> after.
+> 
+> Perhaps these need to be config options - I just hated to add
+> more, when it would be hard for a user to discover that's the
+> thing that needed tuning to solve some particular performance
+> issue.  I'm hoping we can find one set of values that work well
+> for everyone.
 
-To avoid a forward reference, ceph_osdc_msg_data_set() was moved up
-in the file.
+I think the best option is to figure out the defaults that will work for 
+everyone, but still make config options.  I suspect there will be users 
+that need to tune for less memory.
 
-Don't bother calling ceph_osd_data_init(), in ceph_osd_alloc(),
-because the ops array will already be zeroed anyway.
+leveldb_block_size, leveldb_write_buffer_size, etc.
+ 
+> > Did you 
+> > try with a large write buffer but a smaller block size (like 256K or 
+> > 512K)?
+> 
+> I did try a 256K block size with an 8 MB write buffer, also with
+> no compression.  That caused the 55K PGs case to make much more
+> progress towards starting, but it still failed to come up - I
+> forget the details of what went awry.
+> 
+> > 
+> > I think either a larger cache or a smaller block size is okay, but 4MB 
+> > with an 8MB cache means only 2 blocks cached, which sounds non-ideal.
+> 
+> I can try fixing up a larger cache - I'll need to dig in
+> a little to figure out how to do it, so it might take me
+> a little while.  How big do you think it should be, given
+> that the large PG count cases I'm after might have PGStat
+> data lengths that are many tens of MB?
+> 
+> 64 MB? 256 MB?  Tunable?
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- include/linux/ceph/osd_client.h |    2 +-
- net/ceph/osd_client.c           |   63
-+++++++++++++++++++--------------------
- 2 files changed, 32 insertions(+), 33 deletions(-)
+The default is only 8MB, but this can safely go up to several gigs.  I 
+think 256 MB sounds like a reasonable default...
 
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index f8a00b4..dd4ca4ba 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -51,7 +51,7 @@ struct ceph_osd {
- #define CEPH_OSD_MAX_OP	2
+Sam, want to weigh in?
 
- enum ceph_osd_data_type {
--	CEPH_OSD_DATA_TYPE_NONE,
-+	CEPH_OSD_DATA_TYPE_NONE = 0,
- 	CEPH_OSD_DATA_TYPE_PAGES,
- 	CEPH_OSD_DATA_TYPE_PAGELIST,
- #ifdef CONFIG_BLOCK
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 86cb524..cc4003f 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -339,9 +339,6 @@ struct ceph_osd_request
-*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
- 	}
- 	req->r_reply = msg;
+> Also, I wondered about whether the writes need to be
+> sync'd?  Do these tunings change your mind about whether
+> that's needed?
 
--	ceph_osd_data_init(&req->r_data_in);
--	ceph_osd_data_init(&req->r_data_out);
--
- 	/* create request message; allow space for oid */
- 	if (use_mempool)
- 		msg = ceph_msgpool_get(&osdc->msgpool_op, 0);
-@@ -549,6 +546,28 @@ void osd_req_op_watch_init(struct ceph_osd_request
-*osd_req,
- }
- EXPORT_SYMBOL(osd_req_op_watch_init);
+The sync parameters shouldn't need to be changed.  os/FileStore.cc is 
+calling the sync when we do an overall filestore sync prior to a commit 
+point or btrfs snapshot.
 
-+static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
-+				struct ceph_osd_data *osd_data)
-+{
-+	u64 length = ceph_osd_data_length(osd_data);
-+
-+	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-+		BUG_ON(length > (u64) SIZE_MAX);
-+		if (length)
-+			ceph_msg_data_set_pages(msg, osd_data->pages,
-+					length, osd_data->alignment);
-+	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
-+		BUG_ON(!length);
-+		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
-+#ifdef CONFIG_BLOCK
-+	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-+		ceph_msg_data_set_bio(msg, osd_data->bio, length);
-+#endif
-+	} else {
-+		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
-+	}
-+}
-+
- static u64 osd_req_encode_op(struct ceph_osd_request *req,
- 			      struct ceph_osd_op *dst, unsigned int which)
- {
-@@ -576,17 +595,24 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- 			cpu_to_le64(src->extent.truncate_size);
- 		dst->extent.truncate_seq =
- 			cpu_to_le32(src->extent.truncate_seq);
--		if (src->op == CEPH_OSD_OP_WRITE)
-+		if (src->op == CEPH_OSD_OP_WRITE) {
- 			WARN_ON(src->extent.osd_data != &req->r_data_out);
--		else
-+			ceph_osdc_msg_data_set(req->r_request,
-+						src->extent.osd_data);
-+		} else {
- 			WARN_ON(src->extent.osd_data != &req->r_data_in);
-+			ceph_osdc_msg_data_set(req->r_reply,
-+						src->extent.osd_data);
-+		}
- 		break;
- 	case CEPH_OSD_OP_CALL:
- 		dst->cls.class_len = src->cls.class_len;
- 		dst->cls.method_len = src->cls.method_len;
- 		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
- 		WARN_ON(src->cls.response_data != &req->r_data_in);
-+		ceph_osdc_msg_data_set(req->r_reply, src->cls.response_data);
- 		WARN_ON(src->cls.request_info != &req->r_data_out);
-+		ceph_osdc_msg_data_set(req->r_request, src->cls.request_info);
- 		BUG_ON(src->cls.request_info->type !=
- 					CEPH_OSD_DATA_TYPE_PAGELIST);
- 		request_data_len = src->cls.request_info->pagelist->length;
-@@ -1930,28 +1956,6 @@ bad:
- 	return;
- }
+sage
 
--static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
--				struct ceph_osd_data *osd_data)
--{
--	u64 length = ceph_osd_data_length(osd_data);
--
--	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
--		BUG_ON(length > (u64) SIZE_MAX);
--		if (length)
--			ceph_msg_data_set_pages(msg, osd_data->pages,
--					length, osd_data->alignment);
--	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
--		BUG_ON(!length);
--		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
--#ifdef CONFIG_BLOCK
--	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
--		ceph_msg_data_set_bio(msg, osd_data->bio, length);
--#endif
--	} else {
--		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
--	}
--}
--
- /*
-  * build new request AND message
-  *
-@@ -1967,11 +1971,6 @@ void ceph_osdc_build_request(struct
-ceph_osd_request *req, u64 off,
- 	u64 data_len;
- 	unsigned int i;
 
--	/* Set up response incoming data and request outgoing data fields */
--
--	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
--	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
--
- 	req->r_snapid = snap_id;
- 	req->r_snapc = ceph_get_snap_context(snapc);
-
--- 
-1.7.9.5
-
+> 
+> > 
+> > Thanks!
+> > sage
+> > 
+> > 
+> > On Thu, 4 Apr 2013, Jim Schutt wrote:
+> > 
+> >> As reported in this thread
+> >>    http://www.spinics.net/lists/ceph-devel/msg13777.html
+> >> starting in v0.59 a new filesystem with ~55,000 PGs would not start after
+> >> a period of ~30 minutes.  By comparison, the same filesystem configuration
+> >> would start in ~1 minute for v0.58.
+> >>
+> >> The issue is that starting in v0.59, LevelDB is used for the monitor
+> >> data store.  For moderate to large numbers of PGs, the length of a PGStat value
+> >> stored via LevelDB is best measured in megabytes.  The default tunings for
+> >> LevelDB data blocking seem tuned for values with lengths measured in tens or
+> >> hundreds of bytes.
+> >>
+> >> With the data blocking tuning provided by this patch, here's a comparison
+> >> of filesystem startup times for v0.57, v0.58, and v0.59:
+> >>
+> >>       55,392 PGs   221,568 PGs
+> >> v0.57   1m 07s        9m 42s
+> >> v0.58   1m 04s       11m 44s
+> >> v0.59      45s        4m 17s
+> >>
+> >> Note that this patch turns off LevelDB's compression.  The block
+> >> tuning from this patch with compression enabled made no improvement
+> >> in the new filesystem startup time for v0.59, for either PG count
+> >> tested.  I'll note that at 55,392 PGs the PGStat length is ~20 MB;
+> >> perhaps that value length interacts pooly with LevelDB's compression
+> 
+> s/pooly/poorly/
+> 
+> Thanks -- Jim
+> 
+> >> at this block size.
+> >>
+> >> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+> >> ---
+> >>  src/os/LevelDBStore.cc |    3 +++
+> >>  1 files changed, 3 insertions(+), 0 deletions(-)
+> >>
+> >> diff --git a/src/os/LevelDBStore.cc b/src/os/LevelDBStore.cc
+> >> index 3d94096..1b6ae7d 100644
+> >> --- a/src/os/LevelDBStore.cc
+> >> +++ b/src/os/LevelDBStore.cc
+> >> @@ -16,6 +16,9 @@ int LevelDBStore::init(ostream &out, bool create_if_missing)
+> >>  {
+> >>    leveldb::Options options;
+> >>    options.create_if_missing = create_if_missing;
+> >> +  options.write_buffer_size = 32 * 1024 * 1024;
+> >> +  options.block_size = 4 * 1024 * 1024;
+> >> +  options.compression = leveldb::kNoCompression;
+> >>    leveldb::DB *_db;
+> >>    leveldb::Status status = leveldb::DB::Open(options, path, &_db);
+> >>    db.reset(_db);
+> >> -- 
+> >> 1.7.8.2
+> >>
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
