@@ -1,61 +1,73 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/9]
-Date: Fri, 05 Apr 2013 07:09:00 -0500
-Message-ID: <515EBEDC.9040507@inktank.com>
-References: <515DA755.2090504@inktank.com> <515E3EEC.5040604@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 01/20] rbd: define inbound data size for method ops
+Date: Fri, 05 Apr 2013 11:13:37 -0700
+Message-ID: <515F1451.5010104@inktank.com>
+References: <515ED849.9060901@inktank.com> <515ED92A.2010301@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:46048 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161144Ab3DEMJC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 08:09:02 -0400
-Received: by mail-ie0-f170.google.com with SMTP id c11so4279022ieb.29
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 05:09:02 -0700 (PDT)
-In-Reply-To: <515E3EEC.5040604@inktank.com>
+Received: from mail-pd0-f180.google.com ([209.85.192.180]:59468 "EHLO
+	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1162306Ab3DESN7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:13:59 -0400
+Received: by mail-pd0-f180.google.com with SMTP id q11so2142671pdj.11
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:13:58 -0700 (PDT)
+In-Reply-To: <515ED92A.2010301@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Alex Elder <elder@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 04/04/2013 10:03 PM, Josh Durgin wrote:
-> On 04/04/2013 09:16 AM, Alex Elder wrote:
->> (The following patches are available in branch "review/wip-3761"
->> on the ceph-client git respository.)
->>
->> These are actually a few sets of patches but I'm just going to
->> post them as a single series this time.
->>
->>                     -Alex
->>
->> [PATCH 1/9] ceph: use page_offset() in ceph_writepages_start()
->>      Fixes a potential bug in ceph_writepages_start().
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-. . .
-
->> [PATCH 9/9] ceph: build osd request message later for writepages
->>      Defers "building" a request message until right before
->>      it's submitted to the osd client to start its execution.
->>      Also stops having the length field in a message header
->>      get updated by the file system code.
-> 
-> These all look good. The one thing I'm uncertain about is changing
-> the mempool allocation failure from a WARN to a BUG, but it seems
-> there's no good way to recover at that point.
-
-It's reality.  About 20 lines later, pages is dereferenced.
-I think it's better to stop at the point of the failure
-and report exactly where it occurred than to (most likely)
-crash more mysteriously a little later on.
-
-If we exhaust the mempool, it wasn't big enough, and
-that's a bug in the size of the mempool or the design.
-
-Thanks a lot for the review.  More on their way shortly.
-
-					-Alex
-
-> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-> 
+On 04/05/2013 07:01 AM, Alex Elder wrote:
+> When rbd creates an object request containing an object method call
+> operation it is passing 0 for the size.  I originally thought this
+> was because the length was not needed for method calls, but I think
+> it really should be supplied, to describe how much space is
+> available to receive response data.  So provide the supplied length.
+>
+> This resolves:
+>      http://tracker.ceph.com/issues/4659
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   13 ++++++-------
+>   1 file changed, 6 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 9fb51b5..5e579fa 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1839,12 +1839,11 @@ static int rbd_obj_method_sync(struct rbd_device
+> *rbd_dev,
+>   	int ret;
+>
+>   	/*
+> -	 * Method calls are ultimately read operations but they
+> -	 * don't involve object data (so no offset or length).
+> -	 * The result should placed into the inbound buffer
+> -	 * provided.  They also supply outbound data--parameters for
+> -	 * the object method.  Currently if this is present it will
+> -	 * be a snapshot id.
+> +	 * Method calls are ultimately read operations.  The result
+> +	 * should placed into the inbound buffer provided.  They
+> +	 * also supply outbound data--parameters for the object
+> +	 * method.  Currently if this is present it will be a
+> +	 * snapshot id.
+>   	 */
+>   	page_count = (u32) calc_pages_for(0, inbound_size);
+>   	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+> @@ -1852,7 +1851,7 @@ static int rbd_obj_method_sync(struct rbd_device
+> *rbd_dev,
+>   		return PTR_ERR(pages);
+>
+>   	ret = -ENOMEM;
+> -	obj_request = rbd_obj_request_create(object_name, 0, 0,
+> +	obj_request = rbd_obj_request_create(object_name, 0, inbound_size,
+>   							OBJ_REQUEST_PAGES);
+>   	if (!obj_request)
+>   		goto out;
+>
 
