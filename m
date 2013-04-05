@@ -1,194 +1,79 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 6/6] libceph: add, don't set data for a message
-Date: Fri, 05 Apr 2013 17:26:46 -0500
-Message-ID: <515F4FA6.8020209@inktank.com>
-References: <515F4F01.2000704@inktank.com>
+Subject: [PATCH] libceph: fix possible CONFIG_BLOCK build problem
+Date: Fri, 05 Apr 2013 17:17:27 -0500
+Message-ID: <515F4D77.1080205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:60600 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162665Ab3DEW0s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 18:26:48 -0400
-Received: by mail-ie0-f178.google.com with SMTP id bn7so4864332ieb.37
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 15:26:48 -0700 (PDT)
-In-Reply-To: <515F4F01.2000704@inktank.com>
+Received: from mail-ia0-f172.google.com ([209.85.210.172]:34563 "EHLO
+	mail-ia0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1162867Ab3DEWRa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 18:17:30 -0400
+Received: by mail-ia0-f172.google.com with SMTP id l29so3644955iag.31
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 15:17:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Change the names of the functions that put data on a pagelist to
-reflect that we're adding to whatever's already there rather than
-just setting it to the one thing.  Currently only one data item is
-ever added to a message, but that's about to change.
-
-This resolves:
-    http://tracker.ceph.com/issues/2770
+This patch:
+    15a0d7b libceph: record message data length
+did not enclose some bio-specific code inside CONFIG_BLOCK as
+it should have.  Fix that.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- fs/ceph/mds_client.c           |    4 ++--
- include/linux/ceph/messenger.h |    6 +++---
- net/ceph/messenger.c           |   12 ++++++------
- net/ceph/osd_client.c          |   16 ++++++++--------
- 4 files changed, 19 insertions(+), 19 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index c07ab3c..15c265c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1724,7 +1724,7 @@ static struct ceph_msg
-*create_request_message(struct ceph_mds_client *mdsc,
- 	if (req->r_data_len) {
- 		/* outbound data set only by ceph_sync_setxattr() */
- 		BUG_ON(!req->r_pages);
--		ceph_msg_data_set_pages(msg, req->r_pages, req->r_data_len, 0);
-+		ceph_msg_data_add_pages(msg, req->r_pages, req->r_data_len, 0);
- 	}
-
- 	msg->hdr.data_len = cpu_to_le32(req->r_data_len);
-@@ -2608,7 +2608,7 @@ static void send_mds_reconnect(struct
-ceph_mds_client *mdsc,
- 	if (pagelist->length) {
- 		/* set up outbound data if we have any */
- 		reply->hdr.data_len = cpu_to_le32(pagelist->length);
--		ceph_msg_data_set_pagelist(reply, pagelist);
-+		ceph_msg_data_add_pagelist(reply, pagelist);
- 	}
- 	ceph_con_send(&session->s_con, reply);
+ include/linux/ceph/messenger.h |    2 ++
+ net/ceph/messenger.c           |    4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index de1d2e1..7c1420b 100644
+index b832c0c..cdeebae 100644
 --- a/include/linux/ceph/messenger.h
 +++ b/include/linux/ceph/messenger.h
-@@ -275,12 +275,12 @@ extern void ceph_msg_revoke_incoming(struct
-ceph_msg *msg);
-
- extern void ceph_con_keepalive(struct ceph_connection *con);
-
--extern void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page
-**pages,
-+extern void ceph_msg_data_add_pages(struct ceph_msg *msg, struct page
-**pages,
+@@ -271,8 +271,10 @@ extern void ceph_msg_data_set_pages(struct ceph_msg
+*msg, struct page **pages,
  				size_t length, size_t alignment);
--extern void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
-+extern void ceph_msg_data_add_pagelist(struct ceph_msg *msg,
+ extern void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
  				struct ceph_pagelist *pagelist);
- #ifdef CONFIG_BLOCK
--extern void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
-+extern void ceph_msg_data_add_bio(struct ceph_msg *msg, struct bio *bio,
++#ifdef CONFIG_BLOCK
+ extern void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
  				size_t length);
- #endif /* CONFIG_BLOCK */
++#endif /* CONFIG_BLOCK */
 
+ extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+ 				     bool can_fail);
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 3f78944..c46c4df 100644
+index a6fda95..994192b 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -3003,7 +3003,7 @@ static void ceph_msg_data_destroy(struct
-ceph_msg_data *data)
- 	kfree(data);
- }
+@@ -817,7 +817,7 @@ static bool ceph_msg_data_bio_advance(struct
+ceph_msg_data *data, size_t bytes)
 
--void ceph_msg_data_set_pages(struct ceph_msg *msg, struct page **pages,
-+void ceph_msg_data_add_pages(struct ceph_msg *msg, struct page **pages,
- 		size_t length, size_t alignment)
- {
- 	struct ceph_msg_data *data;
-@@ -3023,9 +3023,9 @@ void ceph_msg_data_set_pages(struct ceph_msg *msg,
-struct page **pages,
- 	list_add_tail(&data->links, &msg->data);
- 	msg->data_length += length;
+ 	return true;
  }
--EXPORT_SYMBOL(ceph_msg_data_set_pages);
-+EXPORT_SYMBOL(ceph_msg_data_add_pages);
-
--void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
-+void ceph_msg_data_add_pagelist(struct ceph_msg *msg,
- 				struct ceph_pagelist *pagelist)
- {
- 	struct ceph_msg_data *data;
-@@ -3042,10 +3042,10 @@ void ceph_msg_data_set_pagelist(struct ceph_msg
-*msg,
- 	list_add_tail(&data->links, &msg->data);
- 	msg->data_length += pagelist->length;
- }
--EXPORT_SYMBOL(ceph_msg_data_set_pagelist);
-+EXPORT_SYMBOL(ceph_msg_data_add_pagelist);
-
- #ifdef	CONFIG_BLOCK
--void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
-+void ceph_msg_data_add_bio(struct ceph_msg *msg, struct bio *bio,
- 		size_t length)
- {
- 	struct ceph_msg_data *data;
-@@ -3062,7 +3062,7 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
-struct bio *bio,
- 	list_add_tail(&data->links, &msg->data);
- 	msg->data_length += length;
- }
--EXPORT_SYMBOL(ceph_msg_data_set_bio);
-+EXPORT_SYMBOL(ceph_msg_data_add_bio);
- #endif	/* CONFIG_BLOCK */
+-#endif
++#endif /* CONFIG_BLOCK */
 
  /*
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 2562e4e..7322785 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -550,7 +550,7 @@ void osd_req_op_watch_init(struct ceph_osd_request
-*osd_req,
+  * For a page array, a piece comes from the first page in the array
+@@ -3011,6 +3011,7 @@ void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
  }
- EXPORT_SYMBOL(osd_req_op_watch_init);
+ EXPORT_SYMBOL(ceph_msg_data_set_pagelist);
 
--static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
-+static void ceph_osdc_msg_data_add(struct ceph_msg *msg,
- 				struct ceph_osd_data *osd_data)
++#ifdef	CONFIG_BLOCK
+ void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
+ 		size_t length)
  {
- 	u64 length = ceph_osd_data_length(osd_data);
-@@ -558,14 +558,14 @@ static void ceph_osdc_msg_data_set(struct ceph_msg
-*msg,
- 	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
- 		BUG_ON(length > (u64) SIZE_MAX);
- 		if (length)
--			ceph_msg_data_set_pages(msg, osd_data->pages,
-+			ceph_msg_data_add_pages(msg, osd_data->pages,
- 					length, osd_data->alignment);
- 	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
- 		BUG_ON(!length);
--		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
-+		ceph_msg_data_add_pagelist(msg, osd_data->pagelist);
- #ifdef CONFIG_BLOCK
- 	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
--		ceph_msg_data_set_bio(msg, osd_data->bio, length);
-+		ceph_msg_data_add_bio(msg, osd_data->bio, length);
- #endif
- 	} else {
- 		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
-@@ -600,18 +600,18 @@ static u64 osd_req_encode_op(struct
-ceph_osd_request *req,
- 		dst->extent.truncate_seq =
- 			cpu_to_le32(src->extent.truncate_seq);
- 		if (src->op == CEPH_OSD_OP_WRITE)
--			ceph_osdc_msg_data_set(req->r_request,
-+			ceph_osdc_msg_data_add(req->r_request,
- 						&src->extent.osd_data);
- 		else
--			ceph_osdc_msg_data_set(req->r_reply,
-+			ceph_osdc_msg_data_add(req->r_reply,
- 						&src->extent.osd_data);
- 		break;
- 	case CEPH_OSD_OP_CALL:
- 		dst->cls.class_len = src->cls.class_len;
- 		dst->cls.method_len = src->cls.method_len;
- 		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
--		ceph_osdc_msg_data_set(req->r_reply, &src->cls.response_data);
--		ceph_osdc_msg_data_set(req->r_request, &src->cls.request_info);
-+		ceph_osdc_msg_data_add(req->r_reply, &src->cls.response_data);
-+		ceph_osdc_msg_data_add(req->r_request, &src->cls.request_info);
- 		BUG_ON(src->cls.request_info.type !=
- 					CEPH_OSD_DATA_TYPE_PAGELIST);
- 		request_data_len = src->cls.request_info.pagelist->length;
+@@ -3028,6 +3029,7 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
+struct bio *bio,
+ 	msg->data_length = length;
+ }
+ EXPORT_SYMBOL(ceph_msg_data_set_bio);
++#endif	/* CONFIG_BLOCK */
+
+ /*
+  * construct a new message with given type, size
 -- 
 1.7.9.5
 
