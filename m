@@ -1,74 +1,57 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: [PATCH] os/LevelDBStore: tune LevelDB data blocking options to
- be more suitable for PGStat values
-Date: Thu,  4 Apr 2013 16:37:59 -0600
-Message-ID: <1365115079-158190-1-git-send-email-jaschut@sandia.gov>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 0/9]
+Date: Thu, 04 Apr 2013 20:03:08 -0700
+Message-ID: <515E3EEC.5040604@inktank.com>
+References: <515DA755.2090504@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:44121 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1765337Ab3DDWig (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 18:38:36 -0400
-Received: from interceptor2.sandia.gov (interceptor2.sandia.gov [132.175.109.18])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by sentry-two.sandia.gov (Postfix) with ESMTP id 1EDADD2D2AB
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Apr 2013 16:38:32 -0600 (MDT)
-Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor2.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Thu, 4 Apr 2013 16:38:16 -0600
+Received: from mail-da0-f43.google.com ([209.85.210.43]:37829 "EHLO
+	mail-da0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161109Ab3DEDCe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Apr 2013 23:02:34 -0400
+Received: by mail-da0-f43.google.com with SMTP id u36so1406169dak.30
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Apr 2013 20:02:33 -0700 (PDT)
+In-Reply-To: <515DA755.2090504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Jim Schutt <jaschut@sandia.gov>
+To: Alex Elder <elder@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-As reported in this thread
-   http://www.spinics.net/lists/ceph-devel/msg13777.html
-starting in v0.59 a new filesystem with ~55,000 PGs would not start after
-a period of ~30 minutes.  By comparison, the same filesystem configuration
-would start in ~1 minute for v0.58.
+On 04/04/2013 09:16 AM, Alex Elder wrote:
+> (The following patches are available in branch "review/wip-3761"
+> on the ceph-client git respository.)
+>
+> These are actually a few sets of patches but I'm just going to
+> post them as a single series this time.
+>
+> 					-Alex
+>
+> [PATCH 1/9] ceph: use page_offset() in ceph_writepages_start()
+>      Fixes a potential bug in ceph_writepages_start().
+>
+> [PATCH 2/9] libceph: drop ceph_osd_request->r_con_filling_msg
+>      Removes a no-longer-needed field, to simplify code.
+>
+> [PATCH 3/9] libceph: record length of bio list with bio
+> [PATCH 4/9] libceph: record message data length
+>      Has each message maintain its data length, so we can
+>      avoid depending on what's in the message's header.
+>
+> [PATCH 5/9] libceph: don't build request in ceph_osdc_new_request()
+> [PATCH 6/9] ceph: define ceph_writepages_osd_request()
+> [PATCH 7/9] ceph: kill ceph alloc_page_vec()
+> [PATCH 8/9] libceph: hold off building osd request
+> [PATCH 9/9] ceph: build osd request message later for writepages
+>      Defers "building" a request message until right before
+>      it's submitted to the osd client to start its execution.
+>      Also stops having the length field in a message header
+>      get updated by the file system code.
 
-The issue is that starting in v0.59, LevelDB is used for the monitor
-data store.  For moderate to large numbers of PGs, the length of a PGStat value
-stored via LevelDB is best measured in megabytes.  The default tunings for
-LevelDB data blocking seem tuned for values with lengths measured in tens or
-hundreds of bytes.
+These all look good. The one thing I'm uncertain about is changing
+the mempool allocation failure from a WARN to a BUG, but it seems
+there's no good way to recover at that point.
 
-With the data blocking tuning provided by this patch, here's a comparison
-of filesystem startup times for v0.57, v0.58, and v0.59:
-
-      55,392 PGs   221,568 PGs
-v0.57   1m 07s        9m 42s
-v0.58   1m 04s       11m 44s
-v0.59      45s        4m 17s
-
-Note that this patch turns off LevelDB's compression.  The block
-tuning from this patch with compression enabled made no improvement
-in the new filesystem startup time for v0.59, for either PG count
-tested.  I'll note that at 55,392 PGs the PGStat length is ~20 MB;
-perhaps that value length interacts pooly with LevelDB's compression
-at this block size.
-
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- src/os/LevelDBStore.cc |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/src/os/LevelDBStore.cc b/src/os/LevelDBStore.cc
-index 3d94096..1b6ae7d 100644
---- a/src/os/LevelDBStore.cc
-+++ b/src/os/LevelDBStore.cc
-@@ -16,6 +16,9 @@ int LevelDBStore::init(ostream &out, bool create_if_missing)
- {
-   leveldb::Options options;
-   options.create_if_missing = create_if_missing;
-+  options.write_buffer_size = 32 * 1024 * 1024;
-+  options.block_size = 4 * 1024 * 1024;
-+  options.compression = leveldb::kNoCompression;
-   leveldb::DB *_db;
-   leveldb::Status status = leveldb::DB::Open(options, path, &_db);
-   db.reset(_db);
--- 
-1.7.8.2
-
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
