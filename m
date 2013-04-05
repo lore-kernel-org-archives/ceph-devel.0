@@ -1,257 +1,301 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 07/20] rbd: define rbd_osd_req_format_op()
-Date: Fri, 05 Apr 2013 09:03:13 -0500
-Message-ID: <515ED9A1.7070809@inktank.com>
-References: <515ED849.9060901@inktank.com>
+Subject: [PATCH 2/6] libceph: move cursor into message
+Date: Fri, 05 Apr 2013 17:25:39 -0500
+Message-ID: <515F4F63.4040400@inktank.com>
+References: <515F4F01.2000704@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:34716 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161757Ab3DEODR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:03:17 -0400
-Received: by mail-ie0-f169.google.com with SMTP id qd14so4417245ieb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:03:17 -0700 (PDT)
-In-Reply-To: <515ED849.9060901@inktank.com>
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:34856 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1163044Ab3DEWZl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 18:25:41 -0400
+Received: by mail-ia0-f174.google.com with SMTP id b35so3539560iac.19
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 15:25:41 -0700 (PDT)
+In-Reply-To: <515F4F01.2000704@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Define rbd_osd_req_format_op(), which encapsulates formatting
-an osd op into an object request's osd request message.  Only
-one op is supported right now.
+A message will only be processing a single data item at a time, so
+there's no need for each data item to have its own cursor.
 
-Stop calling ceph_osdc_build_request() in rbd_osd_req_create().
-Instead, call rbd_osd_req_format_op() in each of the callers of
-rbd_osd_req_create().
+Move the cursor embedded in the message data structure into the
+message itself.  To minimize the impact, keep the data->cursor
+field, but make it be a pointer to the cursor in the message.
 
-This is to prepare for the next patch, in which the source ops for
-an osd request will be held in the osd request itself.  Because of
-that, we won't have the source op to work with until after the
-request is created, so we can't format the op until then.
+Move the definition of ceph_msg_data above ceph_msg_data_cursor so
+the cursor can point to the data without a forward definition rather
+than vice-versa.
 
-This an the next patch resolve:
-    http://tracker.ceph.com/issues/4656
+This and the upcoming patches are part of:
+    http://tracker.ceph.com/issues/3761
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   98
-++++++++++++++++++++++++++++-----------------------
- 1 file changed, 53 insertions(+), 45 deletions(-)
+ include/linux/ceph/messenger.h |   43
+++++++++++++++++++++--------------------
+ net/ceph/messenger.c           |   35 +++++++++++++++++---------------
+ 2 files changed, 41 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a9d88a0..fc41675 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1311,29 +1311,47 @@ static void rbd_osd_req_callback(struct
-ceph_osd_request *osd_req,
- 		rbd_obj_request_complete(obj_request);
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 4fb870a..e755724 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -88,6 +88,25 @@ static __inline__ bool ceph_msg_data_type_valid(enum
+ceph_msg_data_type type)
+ 	}
  }
 
-+static void rbd_osd_req_format_op(struct rbd_obj_request *obj_request,
-+					bool write_request,
-+					struct ceph_osd_req_op *op)
-+{
-+	struct rbd_img_request *img_request = obj_request->img_request;
-+	struct ceph_snap_context *snapc = NULL;
-+	u64 snap_id = CEPH_NOSNAP;
-+	struct timespec *mtime = NULL;
-+	struct timespec now;
++struct ceph_msg_data {
++	enum ceph_msg_data_type		type;
++	union {
++#ifdef CONFIG_BLOCK
++		struct {
++			struct bio	*bio;
++			size_t		bio_length;
++		};
++#endif /* CONFIG_BLOCK */
++		struct {
++			struct page	**pages;	/* NOT OWNER. */
++			size_t		length;		/* total # bytes */
++			unsigned int	alignment;	/* first page */
++		};
++		struct ceph_pagelist	*pagelist;
++	};
++	struct ceph_msg_data_cursor	*cursor;
++};
 +
-+	rbd_assert(obj_request->osd_req != NULL);
-+
-+	if (write_request) {
-+		now = CURRENT_TIME;
-+		mtime = &now;
-+		if (img_request)
-+			snapc = img_request->snapc;
-+	} else if (img_request) {
-+		snap_id = img_request->snap_id;
-+	}
-+
-+	ceph_osdc_build_request(obj_request->osd_req, obj_request->offset,
-+			1, op, snapc, snap_id, mtime);
-+}
-+
- static struct ceph_osd_request *rbd_osd_req_create(
- 					struct rbd_device *rbd_dev,
- 					bool write_request,
--					struct rbd_obj_request *obj_request,
--					struct ceph_osd_req_op *op)
-+					struct rbd_obj_request *obj_request)
+ struct ceph_msg_data_cursor {
+ 	size_t		resid;		/* bytes not yet consumed */
+ 	bool		last_piece;	/* now at last piece of data item */
+@@ -112,25 +131,6 @@ struct ceph_msg_data_cursor {
+ 	};
+ };
+
+-struct ceph_msg_data {
+-	enum ceph_msg_data_type		type;
+-	union {
+-#ifdef CONFIG_BLOCK
+-		struct {
+-			struct bio	*bio;
+-			size_t		bio_length;
+-		};
+-#endif /* CONFIG_BLOCK */
+-		struct {
+-			struct page	**pages;	/* NOT OWNER. */
+-			size_t		length;		/* total # bytes */
+-			unsigned int	alignment;	/* first page */
+-		};
+-		struct ceph_pagelist	*pagelist;
+-	};
+-	struct ceph_msg_data_cursor	cursor;		/* pagelist only */
+-};
+-
+ /*
+  * a single message.  it contains a header (src, dest, message type, etc.),
+  * footer (crc values, mainly), a "front" message body, and possibly a
+@@ -142,8 +142,9 @@ struct ceph_msg {
+ 	struct kvec front;              /* unaligned blobs of message */
+ 	struct ceph_buffer *middle;
+
+-	size_t			data_length;
+-	struct ceph_msg_data	*data;	/* data payload */
++	size_t				data_length;
++	struct ceph_msg_data		*data;
++	struct ceph_msg_data_cursor	cursor;
+
+ 	struct ceph_connection *con;
+ 	struct list_head list_head;	/* links for connection lists */
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 9571d03..287b7fb 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -725,7 +725,7 @@ static void con_out_kvec_add(struct ceph_connection
+*con,
+ static void ceph_msg_data_bio_cursor_init(struct ceph_msg_data *data,
+ 					size_t length)
  {
- 	struct rbd_img_request *img_request = obj_request->img_request;
- 	struct ceph_snap_context *snapc = NULL;
- 	struct ceph_osd_client *osdc;
- 	struct ceph_osd_request *osd_req;
- 	struct ceph_osd_data *osd_data;
--	struct timespec now;
--	struct timespec *mtime;
--	u64 snap_id = CEPH_NOSNAP;
- 	u64 offset = obj_request->offset;
--	u64 length = obj_request->length;
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct bio *bio;
 
- 	if (img_request) {
- 		rbd_assert(img_request->write_request == write_request);
- 		if (img_request->write_request)
- 			snapc = img_request->snapc;
--		else
--			snap_id = img_request->snap_id;
- 	}
+ 	BUG_ON(data->type != CEPH_MSG_DATA_BIO);
+@@ -745,7 +745,7 @@ static struct page *ceph_msg_data_bio_next(struct
+ceph_msg_data *data,
+ 						size_t *page_offset,
+ 						size_t *length)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct bio *bio;
+ 	struct bio_vec *bio_vec;
+ 	unsigned int index;
+@@ -774,7 +774,7 @@ static struct page *ceph_msg_data_bio_next(struct
+ceph_msg_data *data,
 
- 	/* Allocate and initialize the request, for the single op */
-@@ -1360,16 +1378,10 @@ static struct ceph_osd_request *rbd_osd_req_create(
+ static bool ceph_msg_data_bio_advance(struct ceph_msg_data *data,
+size_t bytes)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct bio *bio;
+ 	struct bio_vec *bio_vec;
+ 	unsigned int index;
+@@ -826,7 +826,7 @@ static bool ceph_msg_data_bio_advance(struct
+ceph_msg_data *data, size_t bytes)
+ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data *data,
+ 					size_t length)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	int page_count;
+
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
+@@ -849,7 +849,7 @@ static struct page *ceph_msg_data_pages_next(struct
+ceph_msg_data *data,
+ 					size_t *page_offset,
+ 					size_t *length)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
+
+@@ -868,7 +868,7 @@ static struct page *ceph_msg_data_pages_next(struct
+ceph_msg_data *data,
+ static bool ceph_msg_data_pages_advance(struct ceph_msg_data *data,
+ 						size_t bytes)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGES);
+
+@@ -897,7 +897,7 @@ static bool ceph_msg_data_pages_advance(struct
+ceph_msg_data *data,
+ static void ceph_msg_data_pagelist_cursor_init(struct ceph_msg_data *data,
+ 					size_t length)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct ceph_pagelist *pagelist;
+ 	struct page *page;
+
+@@ -923,7 +923,7 @@ static struct page
+*ceph_msg_data_pagelist_next(struct ceph_msg_data *data,
+ 						size_t *page_offset,
+ 						size_t *length)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct ceph_pagelist *pagelist;
+
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGELIST);
+@@ -941,13 +941,13 @@ static struct page
+*ceph_msg_data_pagelist_next(struct ceph_msg_data *data,
+ 	else
+ 		*length = PAGE_SIZE - *page_offset;
+
+-	return data->cursor.page;
++	return data->cursor->page;
+ }
+
+ static bool ceph_msg_data_pagelist_advance(struct ceph_msg_data *data,
+ 						size_t bytes)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	struct ceph_pagelist *pagelist;
+
+ 	BUG_ON(data->type != CEPH_MSG_DATA_PAGELIST);
+@@ -1003,7 +1003,7 @@ static void ceph_msg_data_cursor_init(struct
+ceph_msg_data *data,
+ 		/* BUG(); */
  		break;
  	}
-
--	if (write_request) {
-+	if (write_request)
- 		osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
--		now = CURRENT_TIME;
--		mtime = &now;
--	} else {
-+	else
- 		osd_req->r_flags = CEPH_OSD_FLAG_READ;
--		mtime = NULL;	/* not needed for reads */
--		offset = 0;	/* These are not used... */
--		length = 0;	/* ...for osd read requests */
--	}
-
- 	osd_req->r_callback = rbd_osd_req_callback;
- 	osd_req->r_priv = obj_request;
-@@ -1380,11 +1392,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
-
- 	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
-
--	/* osd_req will get its own reference to snapc (if non-null) */
--
--	ceph_osdc_build_request(osd_req, offset, 1, op,
--				snapc, snap_id, mtime);
--
- 	return osd_req;
+-	data->cursor.need_crc = true;
++	data->cursor->need_crc = true;
  }
 
-@@ -1538,6 +1545,7 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
- 	struct rbd_device *rbd_dev = img_request->rbd_dev;
- 	struct rbd_obj_request *obj_request = NULL;
- 	struct rbd_obj_request *next_obj_request;
-+	bool write_request = img_request->write_request;
- 	unsigned int bio_offset;
- 	u64 image_offset;
- 	u64 resid;
-@@ -1545,8 +1553,7 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
+ /*
+@@ -1039,7 +1039,7 @@ static struct page *ceph_msg_data_next(struct
+ceph_msg_data *data,
+ 	BUG_ON(*page_offset + *length > PAGE_SIZE);
+ 	BUG_ON(!*length);
+ 	if (last_piece)
+-		*last_piece = data->cursor.last_piece;
++		*last_piece = data->cursor->last_piece;
 
- 	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
+ 	return page;
+ }
+@@ -1050,7 +1050,7 @@ static struct page *ceph_msg_data_next(struct
+ceph_msg_data *data,
+  */
+ static bool ceph_msg_data_advance(struct ceph_msg_data *data, size_t bytes)
+ {
+-	struct ceph_msg_data_cursor *cursor = &data->cursor;
++	struct ceph_msg_data_cursor *cursor = data->cursor;
+ 	bool new_piece;
 
--	opcode = img_request->write_request ? CEPH_OSD_OP_WRITE
--					      : CEPH_OSD_OP_READ;
-+	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
- 	bio_offset = 0;
- 	image_offset = img_request->offset;
- 	rbd_assert(image_offset == bio_list->bi_sector << SECTOR_SHIFT);
-@@ -1579,17 +1586,14 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
- 		if (!obj_request->bio_list)
- 			goto out_partial;
+ 	BUG_ON(bytes > cursor->resid);
+@@ -1071,7 +1071,7 @@ static bool ceph_msg_data_advance(struct
+ceph_msg_data *data, size_t bytes)
+ 		BUG();
+ 		break;
+ 	}
+-	data->cursor.need_crc = new_piece;
++	data->cursor->need_crc = new_piece;
 
--		/*
--		 * Build up the op to use in building the osd
--		 * request.  Note that the contents of the op are
--		 * copied by rbd_osd_req_create().
--		 */
--		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
- 		obj_request->osd_req = rbd_osd_req_create(rbd_dev,
--						img_request->write_request,
--						obj_request, &op);
-+						write_request, obj_request);
- 		if (!obj_request->osd_req)
- 			goto out_partial;
-+
-+		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
-+		rbd_osd_req_format_op(obj_request, write_request, &op);
-+
- 		/* status and version are initially zero-filled */
+ 	return new_piece;
+ }
+@@ -1404,7 +1404,7 @@ static u32 ceph_crc32c_page(u32 crc, struct page
+*page,
+ static int write_partial_message_data(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *msg = con->out_msg;
+-	struct ceph_msg_data_cursor *cursor = &msg->data->cursor;
++	struct ceph_msg_data_cursor *cursor = msg->data->cursor;
+ 	bool do_datacrc = !con->msgr->nocrc;
+ 	u32 crc;
 
- 		rbd_img_obj_request_add(img_request, obj_request);
-@@ -1699,12 +1703,13 @@ static int rbd_obj_notify_ack(struct rbd_device
-*rbd_dev,
- 		return -ENOMEM;
+@@ -2102,7 +2102,7 @@ static int read_partial_message_section(struct
+ceph_connection *con,
+ static int read_partial_msg_data(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *msg = con->in_msg;
+-	struct ceph_msg_data_cursor *cursor = &msg->data->cursor;
++	struct ceph_msg_data_cursor *cursor = msg->data->cursor;
+ 	const bool do_datacrc = !con->msgr->nocrc;
+ 	struct page *page;
+ 	size_t page_offset;
+@@ -2989,6 +2989,7 @@ void ceph_msg_data_set_pages(struct ceph_msg *msg,
+struct page **pages,
 
- 	ret = -ENOMEM;
--	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
--						obj_request, &op);
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
- 	if (!obj_request->osd_req)
- 		goto out;
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGES);
+ 	BUG_ON(!data);
++	data->cursor = &msg->cursor;
+ 	data->pages = pages;
+ 	data->length = length;
+ 	data->alignment = alignment & ~PAGE_MASK;
+@@ -3010,6 +3011,7 @@ void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
 
-+	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
-+	rbd_osd_req_format_op(obj_request, false, &op);
-+
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	obj_request->callback = rbd_obj_request_put;
- 	ret = rbd_obj_request_submit(osdc, obj_request);
-@@ -1763,13 +1768,14 @@ static int rbd_dev_header_watch_sync(struct
-rbd_device *rbd_dev, int start)
- 	if (!obj_request)
- 		goto out_cancel;
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGELIST);
+ 	BUG_ON(!data);
++	data->cursor = &msg->cursor;
+ 	data->pagelist = pagelist;
 
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, obj_request);
-+	if (!obj_request->osd_req)
-+		goto out_cancel;
-+
- 	osd_req_op_watch_init(&op, CEPH_OSD_OP_WATCH,
- 				rbd_dev->watch_event->cookie,
- 				rbd_dev->header.obj_version, start);
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true,
--							obj_request, &op);
--	if (!obj_request->osd_req)
--		goto out_cancel;
-+	rbd_osd_req_format_op(obj_request, true, &op);
+ 	msg->data = data;
+@@ -3029,6 +3031,7 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
+struct bio *bio,
 
- 	if (start)
- 		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
-@@ -1855,13 +1861,14 @@ static int rbd_obj_method_sync(struct rbd_device
-*rbd_dev,
- 	obj_request->pages = pages;
- 	obj_request->page_count = page_count;
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_BIO);
+ 	BUG_ON(!data);
++	data->cursor = &msg->cursor;
+ 	data->bio = bio;
+ 	data->bio_length = length;
 
--	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
--					outbound, outbound_size);
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
--						obj_request, &op);
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
- 	if (!obj_request->osd_req)
- 		goto out;
-
-+	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
-+					outbound, outbound_size);
-+	rbd_osd_req_format_op(obj_request, false, &op);
-+
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
-@@ -2060,12 +2067,13 @@ static int rbd_obj_read_sync(struct rbd_device
-*rbd_dev,
- 	obj_request->pages = pages;
- 	obj_request->page_count = page_count;
-
--	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
--						obj_request, &op);
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
- 	if (!obj_request->osd_req)
- 		goto out;
-
-+	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
-+	rbd_osd_req_format_op(obj_request, false, &op);
-+
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
 -- 
 1.7.9.5
 
