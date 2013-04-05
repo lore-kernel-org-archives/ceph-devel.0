@@ -1,260 +1,52 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 07/20] rbd: define rbd_osd_req_format_op()
-Date: Fri, 05 Apr 2013 11:18:03 -0700
-Message-ID: <515F155B.5040502@inktank.com>
-References: <515ED849.9060901@inktank.com> <515ED9A1.7070809@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f48.google.com ([209.85.210.48]:37347 "EHLO
-	mail-da0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162370Ab3DESSZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:18:25 -0400
-Received: by mail-da0-f48.google.com with SMTP id p8so1685779dan.21
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:18:24 -0700 (PDT)
-In-Reply-To: <515ED9A1.7070809@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Subject: [PATCH v2 4/4] dcache: don't need to take d_lock in prepend_path()
+Date: Fri,  5 Apr 2013 12:57:41 -0400
+Message-ID: <1365181061-30787-5-git-send-email-Waiman.Long@hp.com>
+References: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1365181061-30787-1-git-send-email-Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <mszeredi-AlSwsSmVLrQ@public.gmane.org>, Ian Kent <raven-PKsaG3nR2I+sTnJN9+BGXg@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, autofs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chandramouleeswaran, Aswin" <aswin-VXdhtT5mjnY@public.gmane.org>, "Norton, Scott J" <scott.norton-VXdhtT5mjnY@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+The d_lock was used in prepend_path() to protect dentry->d_name from
+being changed under the hood. As the caller of prepend_path() has
+to take the rename_lock before calling into it, there is no chance
+that d_name will be changed. The d_lock lock is only needed when the
+rename_lock is not taken.
 
-On 04/05/2013 07:03 AM, Alex Elder wrote:
-> Define rbd_osd_req_format_op(), which encapsulates formatting
-> an osd op into an object request's osd request message.  Only
-> one op is supported right now.
->
-> Stop calling ceph_osdc_build_request() in rbd_osd_req_create().
-> Instead, call rbd_osd_req_format_op() in each of the callers of
-> rbd_osd_req_create().
->
-> This is to prepare for the next patch, in which the source ops for
-> an osd request will be held in the osd request itself.  Because of
-> that, we won't have the source op to work with until after the
-> request is created, so we can't format the op until then.
->
-> This an the next patch resolve:
->      http://tracker.ceph.com/issues/4656
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   98
-> ++++++++++++++++++++++++++++-----------------------
->   1 file changed, 53 insertions(+), 45 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index a9d88a0..fc41675 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1311,29 +1311,47 @@ static void rbd_osd_req_callback(struct
-> ceph_osd_request *osd_req,
->   		rbd_obj_request_complete(obj_request);
->   }
->
-> +static void rbd_osd_req_format_op(struct rbd_obj_request *obj_request,
-> +					bool write_request,
-> +					struct ceph_osd_req_op *op)
-> +{
-> +	struct rbd_img_request *img_request = obj_request->img_request;
-> +	struct ceph_snap_context *snapc = NULL;
-> +	u64 snap_id = CEPH_NOSNAP;
-> +	struct timespec *mtime = NULL;
-> +	struct timespec now;
-> +
-> +	rbd_assert(obj_request->osd_req != NULL);
-> +
-> +	if (write_request) {
-> +		now = CURRENT_TIME;
-> +		mtime = &now;
-> +		if (img_request)
-> +			snapc = img_request->snapc;
-> +	} else if (img_request) {
-> +		snap_id = img_request->snap_id;
-> +	}
-> +
-> +	ceph_osdc_build_request(obj_request->osd_req, obj_request->offset,
-> +			1, op, snapc, snap_id, mtime);
-> +}
-> +
->   static struct ceph_osd_request *rbd_osd_req_create(
->   					struct rbd_device *rbd_dev,
->   					bool write_request,
-> -					struct rbd_obj_request *obj_request,
-> -					struct ceph_osd_req_op *op)
-> +					struct rbd_obj_request *obj_request)
->   {
->   	struct rbd_img_request *img_request = obj_request->img_request;
->   	struct ceph_snap_context *snapc = NULL;
->   	struct ceph_osd_client *osdc;
->   	struct ceph_osd_request *osd_req;
->   	struct ceph_osd_data *osd_data;
-> -	struct timespec now;
-> -	struct timespec *mtime;
-> -	u64 snap_id = CEPH_NOSNAP;
->   	u64 offset = obj_request->offset;
-> -	u64 length = obj_request->length;
->
->   	if (img_request) {
->   		rbd_assert(img_request->write_request == write_request);
->   		if (img_request->write_request)
->   			snapc = img_request->snapc;
-> -		else
-> -			snap_id = img_request->snap_id;
->   	}
->
->   	/* Allocate and initialize the request, for the single op */
-> @@ -1360,16 +1378,10 @@ static struct ceph_osd_request *rbd_osd_req_create(
->   		break;
->   	}
->
-> -	if (write_request) {
-> +	if (write_request)
->   		osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
-> -		now = CURRENT_TIME;
-> -		mtime = &now;
-> -	} else {
-> +	else
->   		osd_req->r_flags = CEPH_OSD_FLAG_READ;
-> -		mtime = NULL;	/* not needed for reads */
-> -		offset = 0;	/* These are not used... */
-> -		length = 0;	/* ...for osd read requests */
-> -	}
->
->   	osd_req->r_callback = rbd_osd_req_callback;
->   	osd_req->r_priv = obj_request;
-> @@ -1380,11 +1392,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
->
->   	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
->
-> -	/* osd_req will get its own reference to snapc (if non-null) */
-> -
-> -	ceph_osdc_build_request(osd_req, offset, 1, op,
-> -				snapc, snap_id, mtime);
-> -
->   	return osd_req;
->   }
->
-> @@ -1538,6 +1545,7 @@ static int rbd_img_request_fill_bio(struct
-> rbd_img_request *img_request,
->   	struct rbd_device *rbd_dev = img_request->rbd_dev;
->   	struct rbd_obj_request *obj_request = NULL;
->   	struct rbd_obj_request *next_obj_request;
-> +	bool write_request = img_request->write_request;
->   	unsigned int bio_offset;
->   	u64 image_offset;
->   	u64 resid;
-> @@ -1545,8 +1553,7 @@ static int rbd_img_request_fill_bio(struct
-> rbd_img_request *img_request,
->
->   	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
->
-> -	opcode = img_request->write_request ? CEPH_OSD_OP_WRITE
-> -					      : CEPH_OSD_OP_READ;
-> +	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
->   	bio_offset = 0;
->   	image_offset = img_request->offset;
->   	rbd_assert(image_offset == bio_list->bi_sector << SECTOR_SHIFT);
-> @@ -1579,17 +1586,14 @@ static int rbd_img_request_fill_bio(struct
-> rbd_img_request *img_request,
->   		if (!obj_request->bio_list)
->   			goto out_partial;
->
-> -		/*
-> -		 * Build up the op to use in building the osd
-> -		 * request.  Note that the contents of the op are
-> -		 * copied by rbd_osd_req_create().
-> -		 */
-> -		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
->   		obj_request->osd_req = rbd_osd_req_create(rbd_dev,
-> -						img_request->write_request,
-> -						obj_request, &op);
-> +						write_request, obj_request);
->   		if (!obj_request->osd_req)
->   			goto out_partial;
-> +
-> +		osd_req_op_extent_init(&op, opcode, offset, length, 0, 0);
-> +		rbd_osd_req_format_op(obj_request, write_request, &op);
-> +
->   		/* status and version are initially zero-filled */
->
->   		rbd_img_obj_request_add(img_request, obj_request);
-> @@ -1699,12 +1703,13 @@ static int rbd_obj_notify_ack(struct rbd_device
-> *rbd_dev,
->   		return -ENOMEM;
->
->   	ret = -ENOMEM;
-> -	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
-> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
-> -						obj_request, &op);
-> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
->   	if (!obj_request->osd_req)
->   		goto out;
->
-> +	osd_req_op_watch_init(&op, CEPH_OSD_OP_NOTIFY_ACK, notify_id, ver, 0);
-> +	rbd_osd_req_format_op(obj_request, false, &op);
-> +
->   	osdc = &rbd_dev->rbd_client->client->osdc;
->   	obj_request->callback = rbd_obj_request_put;
->   	ret = rbd_obj_request_submit(osdc, obj_request);
-> @@ -1763,13 +1768,14 @@ static int rbd_dev_header_watch_sync(struct
-> rbd_device *rbd_dev, int start)
->   	if (!obj_request)
->   		goto out_cancel;
->
-> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, obj_request);
-> +	if (!obj_request->osd_req)
-> +		goto out_cancel;
-> +
->   	osd_req_op_watch_init(&op, CEPH_OSD_OP_WATCH,
->   				rbd_dev->watch_event->cookie,
->   				rbd_dev->header.obj_version, start);
-> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true,
-> -							obj_request, &op);
-> -	if (!obj_request->osd_req)
-> -		goto out_cancel;
-> +	rbd_osd_req_format_op(obj_request, true, &op);
->
->   	if (start)
->   		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
-> @@ -1855,13 +1861,14 @@ static int rbd_obj_method_sync(struct rbd_device
-> *rbd_dev,
->   	obj_request->pages = pages;
->   	obj_request->page_count = page_count;
->
-> -	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
-> -					outbound, outbound_size);
-> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
-> -						obj_request, &op);
-> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
->   	if (!obj_request->osd_req)
->   		goto out;
->
-> +	osd_req_op_cls_init(&op, CEPH_OSD_OP_CALL, class_name, method_name,
-> +					outbound, outbound_size);
-> +	rbd_osd_req_format_op(obj_request, false, &op);
-> +
->   	osdc = &rbd_dev->rbd_client->client->osdc;
->   	ret = rbd_obj_request_submit(osdc, obj_request);
->   	if (ret)
-> @@ -2060,12 +2067,13 @@ static int rbd_obj_read_sync(struct rbd_device
-> *rbd_dev,
->   	obj_request->pages = pages;
->   	obj_request->page_count = page_count;
->
-> -	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
-> -	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false,
-> -						obj_request, &op);
-> +	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
->   	if (!obj_request->osd_req)
->   		goto out;
->
-> +	osd_req_op_extent_init(&op, CEPH_OSD_OP_READ, offset, length, 0, 0);
-> +	rbd_osd_req_format_op(obj_request, false, &op);
-> +
->   	osdc = &rbd_dev->rbd_client->client->osdc;
->   	ret = rbd_obj_request_submit(osdc, obj_request);
->   	if (ret)
->
+Signed-off-by: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+---
+ fs/dcache.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
 
+diff --git a/fs/dcache.c b/fs/dcache.c
+index 9477d80..e3d6543 100644
+--- a/fs/dcache.c
++++ b/fs/dcache.c
+@@ -2529,6 +2529,7 @@ static int prepend_name(char **buffer, int *buflen, struct qstr *name)
+  * @buflen: pointer to buffer length
+  *
+  * Caller holds the rename_lock.
++ * There is no need to lock the dentry as its name cannot be changed.
+  */
+ static int prepend_path(const struct path *path,
+ 			const struct path *root,
+@@ -2555,9 +2556,7 @@ static int prepend_path(const struct path *path,
+ 		}
+ 		parent = dentry->d_parent;
+ 		prefetch(parent);
+-		spin_lock(&dentry->d_lock);
+ 		error = prepend_name(buffer, buflen, &dentry->d_name);
+-		spin_unlock(&dentry->d_lock);
+ 		if (!error)
+ 			error = prepend(buffer, buflen, "/", 1);
+ 		if (error)
+-- 
+1.7.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
