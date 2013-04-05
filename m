@@ -1,114 +1,171 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] libceph: provide data length when preparing message
-Date: Fri, 05 Apr 2013 11:12:49 -0700
-Message-ID: <515F1421.7040702@inktank.com>
-References: <515ED31E.4050307@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 19/20] libceph: set the data pointers when encoding ops
+Date: Fri, 05 Apr 2013 09:06:04 -0500
+Message-ID: <515EDA4C.4090305@inktank.com>
+References: <515ED849.9060901@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:47489 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162306Ab3DESNL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 14:13:11 -0400
-Received: by mail-pd0-f169.google.com with SMTP id 10so2161160pdc.28
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 11:13:11 -0700 (PDT)
-In-Reply-To: <515ED31E.4050307@inktank.com>
+Received: from mail-ia0-f175.google.com ([209.85.210.175]:56828 "EHLO
+	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161475Ab3DEOGH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:06:07 -0400
+Received: by mail-ia0-f175.google.com with SMTP id e16so3153408iaa.6
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:06:06 -0700 (PDT)
+In-Reply-To: <515ED849.9060901@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Still using the osd request r_data_in and r_data_out pointer, but
+we're basically only referring to it via the data pointers in the
+osd ops.  And we're transferring that information to the request
+or reply message only when the op indicates it's needed, in
+osd_req_encode_op().
 
-On 04/05/2013 06:35 AM, Alex Elder wrote:
-> In prepare_message_data(), the length used to initialize the cursor
-> is taken from the header of the message provided.  I'm working
-> toward not using the header data length field to determine length in
-> outbound messages, and this is a step in that direction.  For
-> inbound messages this will be set to be the actual number of bytes
-> that arriving (which may be less than the total size of the data
-> buffer available).
->
-> This resolves:
->      http://tracker.ceph.com/issues/4589
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   net/ceph/messenger.c |   18 ++++++++----------
->   1 file changed, 8 insertions(+), 10 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index fa9b4d0..78ab83d 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1076,18 +1076,14 @@ static bool ceph_msg_data_advance(struct
-> ceph_msg_data *data, size_t bytes)
->   	return new_piece;
->   }
->
-> -static void prepare_message_data(struct ceph_msg *msg)
-> +static void prepare_message_data(struct ceph_msg *msg, u32 data_len)
->   {
-> -	size_t data_len;
-> -
->   	BUG_ON(!msg);
-> -
-> -	data_len = le32_to_cpu(msg->hdr.data_len);
->   	BUG_ON(!data_len);
->
->   	/* Initialize data cursor */
->
-> -	ceph_msg_data_cursor_init(msg->data, data_len);
-> +	ceph_msg_data_cursor_init(msg->data, (size_t) data_len);
->   }
->
->   /*
-> @@ -1117,6 +1113,7 @@ static void prepare_write_message_footer(struct
-> ceph_connection *con)
->   static void prepare_write_message(struct ceph_connection *con)
->   {
->   	struct ceph_msg *m;
-> +	u32 data_len;
->   	u32 crc;
->
->   	con_out_kvec_reset(con);
-> @@ -1150,11 +1147,12 @@ static void prepare_write_message(struct
-> ceph_connection *con)
->   		m->hdr.seq = cpu_to_le64(++con->out_seq);
->   		m->needs_out_seq = false;
->   	}
-> +	data_len = le32_to_cpu(m->hdr.data_len);
->
->   	dout("prepare_write_message %p seq %lld type %d len %d+%d+%d\n",
->   	     m, con->out_seq, le16_to_cpu(m->hdr.type),
->   	     le32_to_cpu(m->hdr.front_len), le32_to_cpu(m->hdr.middle_len),
-> -	     le32_to_cpu(m->hdr.data_len));
-> +	     data_len);
->   	BUG_ON(le32_to_cpu(m->hdr.front_len) != m->front.iov_len);
->
->   	/* tag + hdr + front + middle */
-> @@ -1185,8 +1183,8 @@ static void prepare_write_message(struct
-> ceph_connection *con)
->
->   	/* is there a data payload? */
->   	con->out_msg->footer.data_crc = 0;
-> -	if (m->hdr.data_len) {
-> -		prepare_message_data(con->out_msg);
-> +	if (data_len) {
-> +		prepare_message_data(con->out_msg, data_len);
->   		con->out_more = 1;  /* data + footer will follow */
->   	} else {
->   		/* no, queue up footer too and be done */
-> @@ -2231,7 +2229,7 @@ static int read_partial_message(struct
-> ceph_connection *con)
->   		/* prepare for data payload, if any */
->
->   		if (data_len)
-> -			prepare_message_data(con->in_msg);
-> +			prepare_message_data(con->in_msg, data_len);
->   	}
->
->   	/* front */
->
+To avoid a forward reference, ceph_osdc_msg_data_set() was moved up
+in the file.
+
+Don't bother calling ceph_osd_data_init(), in ceph_osd_alloc(),
+because the ops array will already be zeroed anyway.
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ include/linux/ceph/osd_client.h |    2 +-
+ net/ceph/osd_client.c           |   63
++++++++++++++++++++--------------------
+ 2 files changed, 32 insertions(+), 33 deletions(-)
+
+diff --git a/include/linux/ceph/osd_client.h
+b/include/linux/ceph/osd_client.h
+index f8a00b4..dd4ca4ba 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -51,7 +51,7 @@ struct ceph_osd {
+ #define CEPH_OSD_MAX_OP	2
+
+ enum ceph_osd_data_type {
+-	CEPH_OSD_DATA_TYPE_NONE,
++	CEPH_OSD_DATA_TYPE_NONE = 0,
+ 	CEPH_OSD_DATA_TYPE_PAGES,
+ 	CEPH_OSD_DATA_TYPE_PAGELIST,
+ #ifdef CONFIG_BLOCK
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 86cb524..cc4003f 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -339,9 +339,6 @@ struct ceph_osd_request
+*ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	}
+ 	req->r_reply = msg;
+
+-	ceph_osd_data_init(&req->r_data_in);
+-	ceph_osd_data_init(&req->r_data_out);
+-
+ 	/* create request message; allow space for oid */
+ 	if (use_mempool)
+ 		msg = ceph_msgpool_get(&osdc->msgpool_op, 0);
+@@ -549,6 +546,28 @@ void osd_req_op_watch_init(struct ceph_osd_request
+*osd_req,
+ }
+ EXPORT_SYMBOL(osd_req_op_watch_init);
+
++static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
++				struct ceph_osd_data *osd_data)
++{
++	u64 length = ceph_osd_data_length(osd_data);
++
++	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
++		BUG_ON(length > (u64) SIZE_MAX);
++		if (length)
++			ceph_msg_data_set_pages(msg, osd_data->pages,
++					length, osd_data->alignment);
++	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
++		BUG_ON(!length);
++		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
++#ifdef CONFIG_BLOCK
++	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
++		ceph_msg_data_set_bio(msg, osd_data->bio, length);
++#endif
++	} else {
++		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
++	}
++}
++
+ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 			      struct ceph_osd_op *dst, unsigned int which)
+ {
+@@ -576,17 +595,24 @@ static u64 osd_req_encode_op(struct
+ceph_osd_request *req,
+ 			cpu_to_le64(src->extent.truncate_size);
+ 		dst->extent.truncate_seq =
+ 			cpu_to_le32(src->extent.truncate_seq);
+-		if (src->op == CEPH_OSD_OP_WRITE)
++		if (src->op == CEPH_OSD_OP_WRITE) {
+ 			WARN_ON(src->extent.osd_data != &req->r_data_out);
+-		else
++			ceph_osdc_msg_data_set(req->r_request,
++						src->extent.osd_data);
++		} else {
+ 			WARN_ON(src->extent.osd_data != &req->r_data_in);
++			ceph_osdc_msg_data_set(req->r_reply,
++						src->extent.osd_data);
++		}
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+ 		dst->cls.class_len = src->cls.class_len;
+ 		dst->cls.method_len = src->cls.method_len;
+ 		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
+ 		WARN_ON(src->cls.response_data != &req->r_data_in);
++		ceph_osdc_msg_data_set(req->r_reply, src->cls.response_data);
+ 		WARN_ON(src->cls.request_info != &req->r_data_out);
++		ceph_osdc_msg_data_set(req->r_request, src->cls.request_info);
+ 		BUG_ON(src->cls.request_info->type !=
+ 					CEPH_OSD_DATA_TYPE_PAGELIST);
+ 		request_data_len = src->cls.request_info->pagelist->length;
+@@ -1930,28 +1956,6 @@ bad:
+ 	return;
+ }
+
+-static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
+-				struct ceph_osd_data *osd_data)
+-{
+-	u64 length = ceph_osd_data_length(osd_data);
+-
+-	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
+-		BUG_ON(length > (u64) SIZE_MAX);
+-		if (length)
+-			ceph_msg_data_set_pages(msg, osd_data->pages,
+-					length, osd_data->alignment);
+-	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
+-		BUG_ON(!length);
+-		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
+-#ifdef CONFIG_BLOCK
+-	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
+-		ceph_msg_data_set_bio(msg, osd_data->bio, length);
+-#endif
+-	} else {
+-		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
+-	}
+-}
+-
+ /*
+  * build new request AND message
+  *
+@@ -1967,11 +1971,6 @@ void ceph_osdc_build_request(struct
+ceph_osd_request *req, u64 off,
+ 	u64 data_len;
+ 	unsigned int i;
+
+-	/* Set up response incoming data and request outgoing data fields */
+-
+-	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
+-	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
+-
+ 	req->r_snapid = snap_id;
+ 	req->r_snapc = ceph_get_snap_context(snapc);
+
+-- 
+1.7.9.5
 
