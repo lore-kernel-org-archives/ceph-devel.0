@@ -1,87 +1,137 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 05/20] libceph: define ceph_osd_data_length()
-Date: Fri, 05 Apr 2013 09:02:26 -0500
-Message-ID: <515ED972.2030309@inktank.com>
-References: <515ED849.9060901@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f181.google.com ([209.85.210.181]:34876 "EHLO
-	mail-ia0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161757Ab3DEOC2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 10:02:28 -0400
-Received: by mail-ia0-f181.google.com with SMTP id o25so3187606iad.26
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 07:02:28 -0700 (PDT)
-In-Reply-To: <515ED849.9060901@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+Subject: [PATCH v2 0/4] dcache: make dcache more scalable on large system
+Date: Fri,  5 Apr 2013 12:57:37 -0400
+Message-ID: <1365181061-30787-1-git-send-email-Waiman.Long@hp.com>
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <mszeredi-AlSwsSmVLrQ@public.gmane.org>, Ian Kent <raven-PKsaG3nR2I+sTnJN9+BGXg@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, autofs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chandramouleeswaran, Aswin" <aswin-VXdhtT5mjnY@public.gmane.org>, "Norton, Scott J" <scott.norton-VXdhtT5mjnY@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-One more osd data helper, which returns the length of the
-data item, regardless of its type.
+Change log:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- net/ceph/osd_client.c |   31 ++++++++++++++++++++++++++-----
- 1 file changed, 26 insertions(+), 5 deletions(-)
+v1->v2
+ - Include performance improvement in the AIM7 benchmark results because
+   of this patch.
+ - Modify dget_parent() to avoid taking the lock, if possible, to further
+   improve AIM7 benchmark results.
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index df0f856..110cd83 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -117,6 +117,25 @@ void ceph_osd_data_bio_init(struct ceph_osd_data
-*osd_data,
- EXPORT_SYMBOL(ceph_osd_data_bio_init);
- #endif /* CONFIG_BLOCK */
+During some perf-record sessions of the kernel running the high_systime
+workload of the AIM7 benchmark, it was found that quite a large portion
+of the spinlock contention was due to the perf_event_mmap_event()
+function itself. This perf kernel function calls d_path() which,
+in turn, call path_get() and dput() indirectly. These 3 functions
+were the hottest functions shown in the perf-report output of
+the _raw_spin_lock() function in an 8-socket system with 80 cores
+(hyperthreading off) with a 3.7.10 kernel with a mutex patch applied:
 
-+static u64 ceph_osd_data_length(struct ceph_osd_data *osd_data)
-+{
-+	switch (osd_data->type) {
-+	case CEPH_OSD_DATA_TYPE_NONE:
-+		return 0;
-+	case CEPH_OSD_DATA_TYPE_PAGES:
-+		return osd_data->length;
-+	case CEPH_OSD_DATA_TYPE_PAGELIST:
-+		return (u64)osd_data->pagelist->length;
-+#ifdef CONFIG_BLOCK
-+	case CEPH_OSD_DATA_TYPE_BIO:
-+		return (u64)osd_data->bio_length;
-+#endif /* CONFIG_BLOCK */
-+	default:
-+		WARN(true, "unrecognized data type %d\n", (int)osd_data->type);
-+		return 0;
-+	}
-+}
-+
- static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
- {
- 	if (osd_data->type != CEPH_OSD_DATA_TYPE_PAGES)
-@@ -1887,17 +1906,19 @@ bad:
- static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
- 				struct ceph_osd_data *osd_data)
- {
-+	u64 length = ceph_osd_data_length(osd_data);
-+
- 	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
--		BUG_ON(osd_data->length > (u64) SIZE_MAX);
--		if (osd_data->length)
-+		BUG_ON(length > (u64) SIZE_MAX);
-+		if (length)
- 			ceph_msg_data_set_pages(msg, osd_data->pages,
--				osd_data->length, osd_data->alignment);
-+					length, osd_data->alignment);
- 	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
--		BUG_ON(!osd_data->pagelist->length);
-+		BUG_ON(!length);
- 		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
- #ifdef CONFIG_BLOCK
- 	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
--		ceph_msg_data_set_bio(msg, osd_data->bio, osd_data->bio_length);
-+		ceph_msg_data_set_bio(msg, osd_data->bio, length);
- #endif
- 	} else {
- 		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
--- 
-1.7.9.5
+-  11.97%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
+   - _raw_spin_lock
+      + 46.17% d_path
+      + 20.31% path_get
+      + 19.75% dput
 
+In fact, the output of the "perf record -s -a" (without call-graph)
+showed:
+
+ 11.73%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
+  8.85%             ls  [kernel.kallsyms]     [k] _raw_spin_lock
+  3.97%           true  [kernel.kallsyms]     [k] _raw_spin_lock
+
+Without using the perf monitoring tool, the actual execution profile
+will be quite different. In fact, with this patch set applied, the
+output of the same "perf record -s -a" command became:
+
+  2.05%          reaim  [kernel.kallsyms]     [k] _raw_spin_lock
+  0.30%             ls  [kernel.kallsyms]     [k] _raw_spin_lock
+  0.25%           true  [kernel.kallsyms]     [k] _raw_spin_lock
+
+So the time spent on _raw_spin_lock() function went down from 24.55%
+to 2.60%. It can be seen that the performance data collected by the
+perf-record command can be heavily skewed in some cases on a system
+with a large number of CPUs. This set of patches enables the perf
+command to give a more accurate and reliable picture of what is really
+happening in the system. At the same time, they can also improve the
+general performance of systems especially those with a large number
+of CPUs.
+
+The d_path() function takes the following two locks:
+
+1. dentry->d_lock [spinlock] from dget()/dget_parent()/dput()
+2. rename_lock    [seqlock]  from d_path()
+
+This set of patches were designed to minimize the locking overhead
+of these code paths.
+
+The current kernel takes the dentry->d_lock lock whenever it wants to
+increment or decrement the d_count reference count. However, nothing
+big will really happen until the reference count goes all the way to 1
+or 0.  Actually, we don't need to take the lock when reference count
+is bigger than 1. Instead, atomic cmpxchg() function can be used to
+increment or decrement the count in these situations. For safety,
+other reference count update operations have to be changed to use
+atomic instruction as well.
+
+The rename_lock is a sequence lock. The d_path() function takes the
+writer lock because it needs to traverse different dentries through
+pointers to get the full path name. Hence it can't tolerate changes
+in those pointers. But taking the writer lock also prevent multiple
+d_path() calls to proceed concurrently.
+
+A solution is to introduce a new lock type where there will be a
+second type of reader which can block the writers - the sequence
+read/write lock (seqrwlock). The d_path() and related functions will
+then be changed to take the reader lock instead of the writer lock.
+This will allow multiple d_path() operations to proceed concurrently.
+
+Additional performance testing was conducted using the AIM7
+benchmark.  It is mainly the first patch that has impact on the AIM7
+benchmark. Please see the patch description of the first patch on
+more information about the benchmark results.
+
+Incidentally, these patches also have a favorable impact on Oracle
+database performance when measured by the Oracle SLOB benchmark.
+
+The following tests with multiple threads were also run on kernels
+with and without the patch on an 8-socket 80-core system and a PC
+with 4-core i5 processor:
+
+1. find $HOME -size 0b
+2. cat /proc/*/maps /proc/*/numa_maps
+3. git diff
+
+For both the find-size and cat-maps tests, the performance difference
+with hot cache was within a few percentage points and hence within
+the margin of error. Single-thread performance was slightly worse,
+but multithread performance was generally a bit better. Apparently,
+reference count update isn't a significant factor in those tests. Their
+perf traces indicates that there was less spinlock content in
+functions like dput(), but the function itself ran a little bit longer
+on average.
+
+The git-diff test showed no difference in performance. There is a
+slight increase in system time compensated by a slight decrease in
+user time.
+
+Of the 4 patches, patch 3 is dependent on patch 2. The other 2 patches
+are independent can be applied individually.
+
+Signed-off-by: Waiman Long <Waiman.Long-VXdhtT5mjnY@public.gmane.org>
+
+Waiman Long (4):
+  dcache: Don't take unnecessary lock in d_count update
+  dcache: introduce a new sequence read/write lock type
+  dcache: change rename_lock to a sequence read/write lock
+  dcache: don't need to take d_lock in prepend_path()
+
+ fs/autofs4/waitq.c        |    6 +-
+ fs/ceph/mds_client.c      |    4 +-
+ fs/cifs/dir.c             |    4 +-
+ fs/dcache.c               |  125 ++++++++++++++++++++---------------------
+ fs/namei.c                |    2 +-
+ fs/nfs/namespace.c        |    6 +-
+ include/linux/dcache.h    |  105 +++++++++++++++++++++++++++++++++--
+ include/linux/seqrwlock.h |  137 +++++++++++++++++++++++++++++++++++++++++++++
+ kernel/auditsc.c          |    4 +-
+ 9 files changed, 311 insertions(+), 82 deletions(-)
+ create mode 100644 include/linux/seqrwlock.h
