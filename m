@@ -1,43 +1,109 @@
-From: Lorieri <lorieri@gmail.com>
-Subject: pg dump --format crashes all mon nodes
-Date: Fri, 5 Apr 2013 21:49:15 -0300
-Message-ID: <CAPHxCcS+bHq5Roc6g6WZkn_hYn667Eod5b3fPv3Q4oU7JwatSg@mail.gmail.com>
+From: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
+Subject: Re: What will PGs do when the network splits?
+Date: Sat, 6 Apr 2013 20:44:08 +0800
+Message-ID: <CAMm-wc+voaekO8D=6rPks3dgSMxsNcdWwOO+xx589XS5YQ_nqw@mail.gmail.com>
+References: <CAMm-wcK9TBrR=qgO6__1efeimdN1uHGZsYk_Rfs2VO47U7JqvA@mail.gmail.com>
+	<CAAM7YAk6s9mfQvAH25ddVSA73s76Qhv4g=6C7xnPQBM78G8ouQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:53804 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932477Ab3DFAtP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Apr 2013 20:49:15 -0400
-Received: by mail-ie0-f179.google.com with SMTP id k11so4973512iea.38
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Apr 2013 17:49:15 -0700 (PDT)
+Received: from mail-ve0-f179.google.com ([209.85.128.179]:61995 "EHLO
+	mail-ve0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422842Ab3DFMoJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Apr 2013 08:44:09 -0400
+Received: by mail-ve0-f179.google.com with SMTP id cz11so4204484veb.24
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Apr 2013 05:44:08 -0700 (PDT)
+In-Reply-To: <CAAM7YAk6s9mfQvAH25ddVSA73s76Qhv4g=6C7xnPQBM78G8ouQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Oh... I think I find the answer.
 
-My colleague run ceph pg dump --format with no other arguments.
-It crashes all mon daemons in the cluster.
+New primay can't become Active without communcating with the old
+primay or at least one old replica. Instead, the new primay will enter
+InComplete state which does not provide service. so the old primary
+can provide services safely because it can still reach all its
+replicas.
 
-happens in ceph 0.60 and 0.56
-3 mon, 3 osd, default crush map
+On the other hand if the network splits between the primary and its
+replicas, new primary could become Active. But the old primary
+couldn't provide service anymore for it has lost its replicas, so the
+new primary can become Active safely.
 
-# ceph pg dump --format
-2013-04-05 21:21:42.198843 7f3b1e58b700  0 monclient: hunting for new mon
-2013-04-05 21:21:42.210685 7f3b1e58b700  0 monclient: hunting for new mon
-2013-04-05 21:21:42.229632 7f3b1e58b700  0 monclient: hunting for new mon
-2013-04-05 21:21:42.230233 7f3b22ca4700  0 -- 10.134.35.70:0/3005 >>
-10.134.35.68:6789/0 pipe(0x7f3b14005130 sd=3 :0 pgs=0 cs=0 l=1).fault
-2013-04-05 21:21:45.178005 7f3b1c486700  0 -- 10.134.35.70:0/3005 >>
-10.134.35.69:6789/0 pipe(0x7f3b18000f90 sd=3 :0 pgs=0 cs=0 l=1).fault
-2013-04-05 21:21:48.178089 7f3b22ca4700  0 -- 10.134.35.70:0/3005 >>
-10.134.35.70:6789/0 pipe(0x7f3b18003010 sd=4 :0 pgs=0 cs=0 l=1).fault
+That is, for the following two scene:
+1, the primay is partitioned from its replicas
+2, the primay and all its replicas are partitioned from the mons
+There will alway be only one Active primay for the same PG.
 
-# ceph health
-2013-04-05 21:24:22.365023 7f59371ec700  0 -- :/3114 >>
-10.134.35.70:6789/0 pipe(0x1e51540 sd=3 :0 pgs=0 cs=0 l=1).fault
-2013-04-05 21:24:25.365819 7f593d909700  0 -- :/3114 >>
-10.134.35.69:6789/0 pipe(0x7f592c000c00 sd=4 :0 pgs=0 cs=0 l=1).fault
-2013-04-05 21:24:28.365786 7f59371ec700  0 -- :/3114 >>
-10.134.35.70:6789/0 pipe(0x7f592c003010 sd=4 :0 pgs=0 cs=0 l=1).fault
+Am I right?
+
+
+On 6 April 2013 19:54, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Sat, Apr 6, 2013 at 1:22 PM, =D4=AC=B6=AC <yuandong1222@gmail.com>=
+ wrote:
+>>
+>> Hi guys.
+>>
+>> I have a problem when reading the codes of the ceph.
+>>
+>> In the osd.cc, the tick method will check if the mon is timeout by
+>> compare "now - g_conf->osd_mon_ack_timeout" with last_pg_stats_ack, =
+if
+>> it's timeout, then monc->reopen_session() will be called to try to
+>> re-connect to the mon.
+>>
+>> The question is that, if the network has splited so that the osd wil=
+l
+>> never be able to connect to any mon, how do the PGs on the osd know
+>> that? I think the PGs may still believe they are heathly with the
+>> current OSDMap even the mons have already mark their osd down & out
+>> (but couldn't tell them for the network problem), Then they continue
+>> to sevice clients who have the same OSDMap with them. So two primary
+>> PG may exist in the cluster at the same time which is terrible.
+>
+>
+> When OSDs communicate, they check if their OSDMaps match. If not, ODS=
+ that
+> has
+> newer OSDMap sends OSDMap to ODSs that have old map. To migrate a PG =
+to new
+> OSDs, the new OSDs need communicate with the old OSDs, so it's imposs=
+ible to
+> have
+> two active PG primaries exist at the same time.
+>
+>
+>>
+>>
+>> I want to knwon any code work with this issue or is there some wrong
+>> with my opinion?
+>>
+>> Thanks for any help!
+>>
+>>
+>> --
+>> =D4=AC=B6=AC
+>> Email:yuandong1222@gmail.com
+>> QQ:10200230
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
+
+
+--=20
+=D4=AC=B6=AC
+Email:yuandong1222@gmail.com
+QQ:10200230
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
