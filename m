@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 16/20] libceph: move ceph_osdc_build_request()
-Date: Mon, 08 Apr 2013 11:17:15 -0700
-Message-ID: <516309AB.3050109@inktank.com>
-References: <515ED849.9060901@inktank.com> <515EDA1E.7080300@inktank.com>
+Subject: Re: [PATCH 17/20] libceph: set message data when building osd request
+Date: Mon, 08 Apr 2013 11:17:36 -0700
+Message-ID: <516309C0.8070509@inktank.com>
+References: <515ED849.9060901@inktank.com> <515EDA2D.10306@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:38288 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935110Ab3DHSRo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 14:17:44 -0400
-Received: by mail-pa0-f54.google.com with SMTP id fa11so3366836pad.41
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 11:17:40 -0700 (PDT)
-In-Reply-To: <515EDA1E.7080300@inktank.com>
+Received: from mail-pd0-f178.google.com ([209.85.192.178]:35010 "EHLO
+	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935110Ab3DHSSN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 14:18:13 -0400
+Received: by mail-pd0-f178.google.com with SMTP id w11so3345016pde.9
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 11:18:12 -0700 (PDT)
+In-Reply-To: <515EDA2D.10306@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -22,231 +22,52 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 04/05/2013 07:05 AM, Alex Elder wrote:
-> This simply moves ceph_osdc_build_request() later in its source
-> file without any change.  Done as a separate patch to facilitate
-> review of the change in the next patch.
+> All calls of ceph_osdc_start_request() are preceded (in the case of
+> rbd, almost) immediately by a call to ceph_osdc_build_request().
+>
+> Move the build calls at the top of ceph_osdc_start_request() out of
+> there and into the ceph_osdc_build_request().  Nothing prevents
+> moving these calls to the top of ceph_osdc_build_request(), either
+> (and we're going to want them there in the next patch) so put them
+> at the top.
+>
+> This and the next patch are related to:
+>      http://tracker.ceph.com/issues/4657
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   net/ceph/osd_client.c |  196
-> ++++++++++++++++++++++++-------------------------
->   1 file changed, 98 insertions(+), 98 deletions(-)
+>   net/ceph/osd_client.c |   10 +++++-----
+>   1 file changed, 5 insertions(+), 5 deletions(-)
 >
 > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 6c6d7b8..f80984e 100644
+> index f80984e..40466ab 100644
 > --- a/net/ceph/osd_client.c
 > +++ b/net/ceph/osd_client.c
-> @@ -526,104 +526,6 @@ static u64 osd_req_encode_op(struct
-> ceph_osd_request *req,
->   }
+> @@ -1884,6 +1884,11 @@ void ceph_osdc_build_request(struct
+> ceph_osd_request *req, u64 off,
+>   	u64 data_len;
+>   	unsigned int i;
 >
->   /*
-> - * build new request AND message
-> - *
-> - */
-> -void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
-> -				struct ceph_snap_context *snapc, u64 snap_id,
-> -				struct timespec *mtime)
-> -{
-> -	struct ceph_msg *msg = req->r_request;
-> -	void *p;
-> -	size_t msg_size;
-> -	int flags = req->r_flags;
-> -	u64 data_len;
-> -	unsigned int i;
-> -
-> -	req->r_snapid = snap_id;
-> -	req->r_snapc = ceph_get_snap_context(snapc);
-> -
-> -	/* encode request */
-> -	msg->hdr.version = cpu_to_le16(4);
-> -
-> -	p = msg->front.iov_base;
-> -	ceph_encode_32(&p, 1);   /* client_inc  is always 1 */
-> -	req->r_request_osdmap_epoch = p;
-> -	p += 4;
-> -	req->r_request_flags = p;
-> -	p += 4;
-> -	if (req->r_flags & CEPH_OSD_FLAG_WRITE)
-> -		ceph_encode_timespec(p, mtime);
-> -	p += sizeof(struct ceph_timespec);
-> -	req->r_request_reassert_version = p;
-> -	p += sizeof(struct ceph_eversion); /* will get filled in */
-> -
-> -	/* oloc */
-> -	ceph_encode_8(&p, 4);
-> -	ceph_encode_8(&p, 4);
-> -	ceph_encode_32(&p, 8 + 4 + 4);
-> -	req->r_request_pool = p;
-> -	p += 8;
-> -	ceph_encode_32(&p, -1);  /* preferred */
-> -	ceph_encode_32(&p, 0);   /* key len */
-> -
-> -	ceph_encode_8(&p, 1);
-> -	req->r_request_pgid = p;
-> -	p += 8 + 4;
-> -	ceph_encode_32(&p, -1);  /* preferred */
-> -
-> -	/* oid */
-> -	ceph_encode_32(&p, req->r_oid_len);
-> -	memcpy(p, req->r_oid, req->r_oid_len);
-> -	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
-> -	p += req->r_oid_len;
-> -
-> -	/* ops--can imply data */
-> -	ceph_encode_16(&p, (u16)req->r_num_ops);
-> -	data_len = 0;
-> -	for (i = 0; i < req->r_num_ops; i++) {
-> -		data_len += osd_req_encode_op(req, p, i);
-> -		p += sizeof(struct ceph_osd_op);
-> -	}
-> -
-> -	/* snaps */
-> -	ceph_encode_64(&p, req->r_snapid);
-> -	ceph_encode_64(&p, req->r_snapc ? req->r_snapc->seq : 0);
-> -	ceph_encode_32(&p, req->r_snapc ? req->r_snapc->num_snaps : 0);
-> -	if (req->r_snapc) {
-> -		for (i = 0; i < snapc->num_snaps; i++) {
-> -			ceph_encode_64(&p, req->r_snapc->snaps[i]);
-> -		}
-> -	}
-> -
-> -	req->r_request_attempts = p;
-> -	p += 4;
-> -
-> -	/* data */
-> -	if (flags & CEPH_OSD_FLAG_WRITE) {
-> -		u16 data_off;
-> -
-> -		/*
-> -		 * The header "data_off" is a hint to the receiver
-> -		 * allowing it to align received data into its
-> -		 * buffers such that there's no need to re-copy
-> -		 * it before writing it to disk (direct I/O).
-> -		 */
-> -		data_off = (u16) (off & 0xffff);
-> -		req->r_request->hdr.data_off = cpu_to_le16(data_off);
-> -	}
-> -	req->r_request->hdr.data_len = cpu_to_le32(data_len);
-> -
-> -	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
-> -	msg_size = p - msg->front.iov_base;
-> -	msg->front.iov_len = msg_size;
-> -	msg->hdr.front_len = cpu_to_le32(msg_size);
-> -
-> -	dout("build_request msg_size was %d\n", (int)msg_size);
-> -}
-> -EXPORT_SYMBOL(ceph_osdc_build_request);
-> -
-> -/*
->    * build new request AND message, calculate layout, and adjust file
->    * extent as needed.
->    *
-> @@ -1968,6 +1870,104 @@ static void ceph_osdc_msg_data_set(struct
-> ceph_msg *msg,
->   }
+> +	/* Set up response incoming data and request outgoing data fields */
+> +
+> +	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
+> +	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
+> +
+>   	req->r_snapid = snap_id;
+>   	req->r_snapc = ceph_get_snap_context(snapc);
 >
->   /*
-> + * build new request AND message
-> + *
-> + */
-> +void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
-> +				struct ceph_snap_context *snapc, u64 snap_id,
-> +				struct timespec *mtime)
-> +{
-> +	struct ceph_msg *msg = req->r_request;
-> +	void *p;
-> +	size_t msg_size;
-> +	int flags = req->r_flags;
-> +	u64 data_len;
-> +	unsigned int i;
-> +
-> +	req->r_snapid = snap_id;
-> +	req->r_snapc = ceph_get_snap_context(snapc);
-> +
-> +	/* encode request */
-> +	msg->hdr.version = cpu_to_le16(4);
-> +
-> +	p = msg->front.iov_base;
-> +	ceph_encode_32(&p, 1);   /* client_inc  is always 1 */
-> +	req->r_request_osdmap_epoch = p;
-> +	p += 4;
-> +	req->r_request_flags = p;
-> +	p += 4;
-> +	if (req->r_flags & CEPH_OSD_FLAG_WRITE)
-> +		ceph_encode_timespec(p, mtime);
-> +	p += sizeof(struct ceph_timespec);
-> +	req->r_request_reassert_version = p;
-> +	p += sizeof(struct ceph_eversion); /* will get filled in */
-> +
-> +	/* oloc */
-> +	ceph_encode_8(&p, 4);
-> +	ceph_encode_8(&p, 4);
-> +	ceph_encode_32(&p, 8 + 4 + 4);
-> +	req->r_request_pool = p;
-> +	p += 8;
-> +	ceph_encode_32(&p, -1);  /* preferred */
-> +	ceph_encode_32(&p, 0);   /* key len */
-> +
-> +	ceph_encode_8(&p, 1);
-> +	req->r_request_pgid = p;
-> +	p += 8 + 4;
-> +	ceph_encode_32(&p, -1);  /* preferred */
-> +
-> +	/* oid */
-> +	ceph_encode_32(&p, req->r_oid_len);
-> +	memcpy(p, req->r_oid, req->r_oid_len);
-> +	dout("oid '%.*s' len %d\n", req->r_oid_len, req->r_oid, req->r_oid_len);
-> +	p += req->r_oid_len;
-> +
-> +	/* ops--can imply data */
-> +	ceph_encode_16(&p, (u16)req->r_num_ops);
-> +	data_len = 0;
-> +	for (i = 0; i < req->r_num_ops; i++) {
-> +		data_len += osd_req_encode_op(req, p, i);
-> +		p += sizeof(struct ceph_osd_op);
-> +	}
-> +
-> +	/* snaps */
-> +	ceph_encode_64(&p, req->r_snapid);
-> +	ceph_encode_64(&p, req->r_snapc ? req->r_snapc->seq : 0);
-> +	ceph_encode_32(&p, req->r_snapc ? req->r_snapc->num_snaps : 0);
-> +	if (req->r_snapc) {
-> +		for (i = 0; i < snapc->num_snaps; i++) {
-> +			ceph_encode_64(&p, req->r_snapc->snaps[i]);
-> +		}
-> +	}
-> +
-> +	req->r_request_attempts = p;
-> +	p += 4;
-> +
-> +	/* data */
-> +	if (flags & CEPH_OSD_FLAG_WRITE) {
-> +		u16 data_off;
-> +
-> +		/*
-> +		 * The header "data_off" is a hint to the receiver
-> +		 * allowing it to align received data into its
-> +		 * buffers such that there's no need to re-copy
-> +		 * it before writing it to disk (direct I/O).
-> +		 */
-> +		data_off = (u16) (off & 0xffff);
-> +		req->r_request->hdr.data_off = cpu_to_le16(data_off);
-> +	}
-> +	req->r_request->hdr.data_len = cpu_to_le32(data_len);
-> +
-> +	BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
-> +	msg_size = p - msg->front.iov_base;
-> +	msg->front.iov_len = msg_size;
-> +	msg->hdr.front_len = cpu_to_le32(msg_size);
-> +
-> +	dout("build_request msg_size was %d\n", (int)msg_size);
-> +}
-> +EXPORT_SYMBOL(ceph_osdc_build_request);
-> +
-> +/*
->    * Register request, send initial attempt.
->    */
->   int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+> @@ -1976,11 +1981,6 @@ int ceph_osdc_start_request(struct
+> ceph_osd_client *osdc,
+>   {
+>   	int rc = 0;
+>
+> -	/* Set up response incoming data and request outgoing data fields */
+> -
+> -	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
+> -	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
+> -
+>   	down_read(&osdc->map_sem);
+>   	mutex_lock(&osdc->request_mutex);
+>   	__register_request(osdc, req);
 >
 
