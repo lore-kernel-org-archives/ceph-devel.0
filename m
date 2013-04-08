@@ -1,173 +1,420 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 19/20] libceph: set the data pointers when encoding ops
-Date: Mon, 08 Apr 2013 13:03:20 -0700
-Message-ID: <51632288.1020903@inktank.com>
-References: <515ED849.9060901@inktank.com> <515EDA4C.4090305@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 5/6, v3] libceph: implement multiple data items in a message
+Date: Mon, 08 Apr 2013 18:48:34 -0500
+Message-ID: <51635752.5080507@inktank.com>
+References: <515F4F01.2000704@inktank.com> <515F4F96.4010308@inktank.com> <515F6009.3050704@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:55299 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935850Ab3DHUJq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 16:09:46 -0400
-Received: by mail-pd0-f175.google.com with SMTP id g10so3186384pdj.20
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 13:09:45 -0700 (PDT)
-In-Reply-To: <515EDA4C.4090305@inktank.com>
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:59117 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761645Ab3DHXsi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 19:48:38 -0400
+Received: by mail-oa0-f47.google.com with SMTP id o17so6746208oag.20
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 16:48:37 -0700 (PDT)
+In-Reply-To: <515F6009.3050704@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Josh Durgin <josh.durgin@inktank.com>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Sorry, I've found another problem with this patch.
+I've updated it below, and have updated the patches
+that followed it.  The result is available in the
+"review/wip-3761-5" branch of the ceph-client git
+repository.
 
-On 04/05/2013 07:06 AM, Alex Elder wrote:
-> Still using the osd request r_data_in and r_data_out pointer, but
-> we're basically only referring to it via the data pointers in the
-> osd ops.  And we're transferring that information to the request
-> or reply message only when the op indicates it's needed, in
-> osd_req_encode_op().
->
-> To avoid a forward reference, ceph_osdc_msg_data_set() was moved up
-> in the file.
->
-> Don't bother calling ceph_osd_data_init(), in ceph_osd_alloc(),
-> because the ops array will already be zeroed anyway.
->
+Previously there were assertions that caught attempts
+to add more than one data item to a message.  Those
+need to go away, now that we support multiple
+data items.
+
+
+
+This patch adds support to the messenger for more than one data item
+in its data list.
+
+A message data cursor has two more fields to support this:
+    - a count of the number of bytes left to be consumed across
+      all data items in the list, "total_resid"
+    - a pointer to the head of the list (for validation only)
+
+The cursor initialization routine has been split into two parts: the
+outer one, which initializes the cursor for traversing the entire
+list of data items; and the inner one, which initializes the cursor
+to start processing a single data item.
+
+When a message cursor is first initialized, the outer initialization
+routine sets total_resid to the length provided.  The data pointer
+is initialized to the first data item on the list.  From there, the
+inner initialization routine finishes by setting up to process the
+data item the cursor points to.
+
+Advancing the cursor consumes bytes in total_resid.  If the resid
+field reaches zero, it means the current data item is fully
+consumed.  If total_resid indicates there is more data, the cursor
+is advanced to point to the next data item, and then the inner
+initialization routine prepares for using that.  (A check is made at
+this point to make sure we don't wrap around the front of the list.)
+
+The type-specific init routines are modified so they can be given a
+length that's larger than what the data item can support.  The resid
+field is initialized to the smaller of the provided length and the
+length of the entire data item.
+
+When total_resid reaches zero, we're done.
+
+This resolves:
+    http://tracker.ceph.com/issues/3761
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: set total_resid to the passed-in length when initializing cursor
+v3: turn off single data item assertions; it's ok now
+
+ include/linux/ceph/messenger.h |    5 ++++-
+ net/ceph/messenger.c           |   48
+++++++++++++++++++++++++++--------------
+ 2 files changed, 36 insertions(+), 17 deletions(-)
+
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 318da01..de1d2e1 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -108,7 +108,10 @@ struct ceph_msg_data {
+ };
+
+ struct ceph_msg_data_cursor {
+-	struct ceph_msg_data	*data;		/* data item this describes */
++	size_t			total_resid;	/* across all data items */
++	struct list_head	*data_head;	/* = &ceph_msg->data */
++
++	struct ceph_msg_data	*data;		/* current data item */
+ 	size_t			resid;		/* bytes not yet consumed */
+ 	bool			last_piece;	/* current is last piece */
+ 	bool			need_crc;	/* crc update needed */
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 8bfe7d3..84703e5 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -734,7 +734,7 @@ static void ceph_msg_data_bio_cursor_init(struct
+ceph_msg_data_cursor *cursor,
+ 	BUG_ON(!bio);
+ 	BUG_ON(!bio->bi_vcnt);
+
+-	cursor->resid = length;
++	cursor->resid = min(length, data->bio_length);
+ 	cursor->bio = bio;
+ 	cursor->vector_index = 0;
+ 	cursor->vector_offset = 0;
+@@ -833,9 +833,8 @@ static void ceph_msg_data_pages_cursor_init(struct
+ceph_msg_data_cursor *cursor,
+
+ 	BUG_ON(!data->pages);
+ 	BUG_ON(!data->length);
+-	BUG_ON(length > data->length);	/* short reads are OK */
+
+-	cursor->resid = length;
++	cursor->resid = min(length, data->length);
+ 	page_count = calc_pages_for(data->alignment, (u64)data->length);
+ 	cursor->page_offset = data->alignment & ~PAGE_MASK;
+ 	cursor->page_index = 0;
+@@ -904,7 +903,6 @@ ceph_msg_data_pagelist_cursor_init(struct
+ceph_msg_data_cursor *cursor,
+
+ 	pagelist = data->pagelist;
+ 	BUG_ON(!pagelist);
+-	BUG_ON(length > pagelist->length);	/* short reads are OK */
+
+ 	if (!length)
+ 		return;		/* pagelist can be assigned but empty */
+@@ -912,7 +910,7 @@ ceph_msg_data_pagelist_cursor_init(struct
+ceph_msg_data_cursor *cursor,
+ 	BUG_ON(list_empty(&pagelist->head));
+ 	page = list_first_entry(&pagelist->head, struct page, lru);
+
+-	cursor->resid = length;
++	cursor->resid = min(length, pagelist->length);
+ 	cursor->page = page;
+ 	cursor->offset = 0;
+ 	cursor->last_piece = length <= PAGE_SIZE;
+@@ -982,13 +980,10 @@ static bool ceph_msg_data_pagelist_advance(struct
+ceph_msg_data_cursor *cursor,
+  * be processed in that piece.  It also tracks whether the current
+  * piece is the last one in the data item.
+  */
+-static void ceph_msg_data_cursor_init(struct ceph_msg *msg, size_t length)
++static void __ceph_msg_data_cursor_init(struct ceph_msg_data_cursor
+*cursor)
+ {
+-	struct ceph_msg_data_cursor *cursor = &msg->cursor;
+-	struct ceph_msg_data *data;
++	size_t length = cursor->total_resid;
+
+-	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
+-	cursor->data = data;
+ 	switch (cursor->data->type) {
+ 	case CEPH_MSG_DATA_PAGELIST:
+ 		ceph_msg_data_pagelist_cursor_init(cursor, length);
+@@ -1009,6 +1004,25 @@ static void ceph_msg_data_cursor_init(struct
+ceph_msg *msg, size_t length)
+ 	cursor->need_crc = true;
+ }
+
++static void ceph_msg_data_cursor_init(struct ceph_msg *msg, size_t length)
++{
++	struct ceph_msg_data_cursor *cursor = &msg->cursor;
++	struct ceph_msg_data *data;
++
++	BUG_ON(!length);
++	BUG_ON(length > msg->data_length);
++	BUG_ON(list_empty(&msg->data));
++
++	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
++
++	cursor->data_head = &msg->data;
++	cursor->total_resid = length;
++	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
++	cursor->data = data;
++
++	__ceph_msg_data_cursor_init(cursor);
++}
++
+ /*
+  * Return the page containing the next piece to process for a given
+  * data item, and supply the page offset and length of that piece.
+@@ -1073,8 +1087,16 @@ static bool ceph_msg_data_advance(struct
+ceph_msg_data_cursor *cursor,
+ 		BUG();
+ 		break;
+ 	}
++	cursor->total_resid -= bytes;
+ 	cursor->need_crc = new_piece;
+
++	if (!cursor->resid && cursor->total_resid) {
++		WARN_ON(!cursor->last_piece);
++		BUG_ON(list_is_last(&cursor->data->links, cursor->data_head));
++		cursor->data = list_entry_next(cursor->data, links);
++		__ceph_msg_data_cursor_init(cursor);
++	}
++
+ 	return new_piece;
+ }
+
+@@ -2990,8 +3012,6 @@ void ceph_msg_data_set_pages(struct ceph_msg *msg,
+struct page **pages,
+
+ 	BUG_ON(!pages);
+ 	BUG_ON(!length);
+-	BUG_ON(msg->data_length);
+-	BUG_ON(!list_empty(&msg->data));
+
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGES);
+ 	BUG_ON(!data);
+@@ -3012,8 +3032,6 @@ void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
+
+ 	BUG_ON(!pagelist);
+ 	BUG_ON(!pagelist->length);
+-	BUG_ON(msg->data_length);
+-	BUG_ON(!list_empty(&msg->data));
+
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_PAGELIST);
+ 	BUG_ON(!data);
+@@ -3031,8 +3049,6 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
+struct bio *bio,
+ 	struct ceph_msg_data *data;
+
+ 	BUG_ON(!bio);
+-	BUG_ON(msg->data_length);
+-	BUG_ON(!list_empty(&msg->data));
+
+ 	data = ceph_msg_data_create(CEPH_MSG_DATA_BIO);
+ 	BUG_ON(!data);
+-- 
+1.7.9.5
+
+
+
+On 04/05/2013 06:36 PM, Alex Elder wrote:
+> I found a problem in the first version of this.
+> 
+> ceph_msg_data_cursor_init() was mistakenly initializing
+> total_resid a second time, to the wrong value.  We want
+> to use the passed-in length, not the length of the data
+> available.  For write requests they're the same, but
+> read requests can be short, so this was wrong.
+> 
+> 					-Alex
+> 
+> 
+> This patch adds support to the messenger for more than one data item
+> in its data list.
+> 
+> A message data cursor has two more fields to support this:
+>     - a count of the number of bytes left to be consumed across
+>       all data items in the list, "total_resid"
+>     - a pointer to the head of the list (for validation only)
+> 
+> The cursor initialization routine has been split into two parts: the
+> outer one, which initializes the cursor for traversing the entire
+> list of data items; and the inner one, which initializes the cursor
+> to start processing a single data item.
+> 
+> When a message cursor is first initialized, the outer initialization
+> routine sets total_resid to the length provided.  The data pointer
+> is initialized to the first data item on the list.  From there, the
+> inner initialization routine finishes by setting up to process the
+> data item the cursor points to.
+> 
+> Advancing the cursor consumes bytes in total_resid.  If the resid
+> field reaches zero, it means the current data item is fully
+> consumed.  If total_resid indicates there is more data, the cursor
+> is advanced to point to the next data item, and then the inner
+> initialization routine prepares for using that.  (A check is made at
+> this point to make sure we don't wrap around the front of the list.)
+> 
+> The type-specific init routines are modified so they can be given a
+> length that's larger than what the data item can support.  The resid
+> field is initialized to the smaller of the provided length and the
+> length of the entire data item.
+> 
+> When total_resid reaches zero, we're done.
+> 
+> This resolves:
+>     http://tracker.ceph.com/issues/3761
+> 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   include/linux/ceph/osd_client.h |    2 +-
->   net/ceph/osd_client.c           |   63
-> +++++++++++++++++++--------------------
->   2 files changed, 32 insertions(+), 33 deletions(-)
->
-> diff --git a/include/linux/ceph/osd_client.h
-> b/include/linux/ceph/osd_client.h
-> index f8a00b4..dd4ca4ba 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -51,7 +51,7 @@ struct ceph_osd {
->   #define CEPH_OSD_MAX_OP	2
->
->   enum ceph_osd_data_type {
-> -	CEPH_OSD_DATA_TYPE_NONE,
-> +	CEPH_OSD_DATA_TYPE_NONE = 0,
->   	CEPH_OSD_DATA_TYPE_PAGES,
->   	CEPH_OSD_DATA_TYPE_PAGELIST,
->   #ifdef CONFIG_BLOCK
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 86cb524..cc4003f 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -339,9 +339,6 @@ struct ceph_osd_request
-> *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->   	}
->   	req->r_reply = msg;
->
-> -	ceph_osd_data_init(&req->r_data_in);
-> -	ceph_osd_data_init(&req->r_data_out);
-> -
->   	/* create request message; allow space for oid */
->   	if (use_mempool)
->   		msg = ceph_msgpool_get(&osdc->msgpool_op, 0);
-> @@ -549,6 +546,28 @@ void osd_req_op_watch_init(struct ceph_osd_request
-> *osd_req,
->   }
->   EXPORT_SYMBOL(osd_req_op_watch_init);
->
-> +static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
-> +				struct ceph_osd_data *osd_data)
-> +{
-> +	u64 length = ceph_osd_data_length(osd_data);
+> v2: set total_resid to the passed-in length when initializing cursor
+> 
+>  include/linux/ceph/messenger.h |    5 ++++-
+>  net/ceph/messenger.c           |   42
+> ++++++++++++++++++++++++++++++----------
+>  2 files changed, 36 insertions(+), 11 deletions(-)
+> 
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> index 318da01..de1d2e1 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -108,7 +108,10 @@ struct ceph_msg_data {
+>  };
+> 
+>  struct ceph_msg_data_cursor {
+> -	struct ceph_msg_data	*data;		/* data item this describes */
+> +	size_t			total_resid;	/* across all data items */
+> +	struct list_head	*data_head;	/* = &ceph_msg->data */
 > +
-> +	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-> +		BUG_ON(length > (u64) SIZE_MAX);
-> +		if (length)
-> +			ceph_msg_data_set_pages(msg, osd_data->pages,
-> +					length, osd_data->alignment);
-> +	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
-> +		BUG_ON(!length);
-> +		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
-> +#ifdef CONFIG_BLOCK
-> +	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-> +		ceph_msg_data_set_bio(msg, osd_data->bio, length);
-> +#endif
-> +	} else {
-> +		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
-> +	}
+> +	struct ceph_msg_data	*data;		/* current data item */
+>  	size_t			resid;		/* bytes not yet consumed */
+>  	bool			last_piece;	/* current is last piece */
+>  	bool			need_crc;	/* crc update needed */
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 9ce667e..bd1d804 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -734,7 +734,7 @@ static void ceph_msg_data_bio_cursor_init(struct
+> ceph_msg_data_cursor *cursor,
+>  	BUG_ON(!bio);
+>  	BUG_ON(!bio->bi_vcnt);
+> 
+> -	cursor->resid = length;
+> +	cursor->resid = min(length, data->bio_length);
+>  	cursor->bio = bio;
+>  	cursor->vector_index = 0;
+>  	cursor->vector_offset = 0;
+> @@ -833,9 +833,8 @@ static void ceph_msg_data_pages_cursor_init(struct
+> ceph_msg_data_cursor *cursor,
+> 
+>  	BUG_ON(!data->pages);
+>  	BUG_ON(!data->length);
+> -	BUG_ON(length > data->length);	/* short reads are OK */
+> 
+> -	cursor->resid = length;
+> +	cursor->resid = min(length, data->length);
+>  	page_count = calc_pages_for(data->alignment, (u64)data->length);
+>  	cursor->page_offset = data->alignment & ~PAGE_MASK;
+>  	cursor->page_index = 0;
+> @@ -904,7 +903,6 @@ ceph_msg_data_pagelist_cursor_init(struct
+> ceph_msg_data_cursor *cursor,
+> 
+>  	pagelist = data->pagelist;
+>  	BUG_ON(!pagelist);
+> -	BUG_ON(length > pagelist->length);	/* short reads are OK */
+> 
+>  	if (!length)
+>  		return;		/* pagelist can be assigned but empty */
+> @@ -912,7 +910,7 @@ ceph_msg_data_pagelist_cursor_init(struct
+> ceph_msg_data_cursor *cursor,
+>  	BUG_ON(list_empty(&pagelist->head));
+>  	page = list_first_entry(&pagelist->head, struct page, lru);
+> 
+> -	cursor->resid = length;
+> +	cursor->resid = min(length, pagelist->length);
+>  	cursor->page = page;
+>  	cursor->offset = 0;
+>  	cursor->last_piece = length <= PAGE_SIZE;
+> @@ -982,13 +980,10 @@ static bool ceph_msg_data_pagelist_advance(struct
+> ceph_msg_data_cursor *cursor,
+>   * be processed in that piece.  It also tracks whether the current
+>   * piece is the last one in the data item.
+>   */
+> -static void ceph_msg_data_cursor_init(struct ceph_msg *msg, size_t length)
+> +static void __ceph_msg_data_cursor_init(struct ceph_msg_data_cursor
+> *cursor)
+>  {
+> -	struct ceph_msg_data_cursor *cursor = &msg->cursor;
+> -	struct ceph_msg_data *data;
+> +	size_t length = cursor->total_resid;
+> 
+> -	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
+> -	cursor->data = data;
+>  	switch (cursor->data->type) {
+>  	case CEPH_MSG_DATA_PAGELIST:
+>  		ceph_msg_data_pagelist_cursor_init(cursor, length);
+> @@ -1009,6 +1004,25 @@ static void ceph_msg_data_cursor_init(struct
+> ceph_msg *msg, size_t length)
+>  	cursor->need_crc = true;
+>  }
+> 
+> +static void ceph_msg_data_cursor_init(struct ceph_msg *msg, size_t length)
+> +{
+> +	struct ceph_msg_data_cursor *cursor = &msg->cursor;
+> +	struct ceph_msg_data *data;
+> +
+> +	BUG_ON(!length);
+> +	BUG_ON(length > msg->data_length);
+> +	BUG_ON(list_empty(&msg->data));
+> +
+> +	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
+> +
+> +	cursor->data_head = &msg->data;
+> +	cursor->total_resid = length;
+> +	data = list_first_entry(&msg->data, struct ceph_msg_data, links);
+> +	cursor->data = data;
+> +
+> +	__ceph_msg_data_cursor_init(cursor);
 > +}
 > +
->   static u64 osd_req_encode_op(struct ceph_osd_request *req,
->   			      struct ceph_osd_op *dst, unsigned int which)
->   {
-> @@ -576,17 +595,24 @@ static u64 osd_req_encode_op(struct
-> ceph_osd_request *req,
->   			cpu_to_le64(src->extent.truncate_size);
->   		dst->extent.truncate_seq =
->   			cpu_to_le32(src->extent.truncate_seq);
-> -		if (src->op == CEPH_OSD_OP_WRITE)
-> +		if (src->op == CEPH_OSD_OP_WRITE) {
->   			WARN_ON(src->extent.osd_data != &req->r_data_out);
-> -		else
-> +			ceph_osdc_msg_data_set(req->r_request,
-> +						src->extent.osd_data);
-> +		} else {
->   			WARN_ON(src->extent.osd_data != &req->r_data_in);
-> +			ceph_osdc_msg_data_set(req->r_reply,
-> +						src->extent.osd_data);
-> +		}
->   		break;
->   	case CEPH_OSD_OP_CALL:
->   		dst->cls.class_len = src->cls.class_len;
->   		dst->cls.method_len = src->cls.method_len;
->   		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
->   		WARN_ON(src->cls.response_data != &req->r_data_in);
-> +		ceph_osdc_msg_data_set(req->r_reply, src->cls.response_data);
->   		WARN_ON(src->cls.request_info != &req->r_data_out);
-> +		ceph_osdc_msg_data_set(req->r_request, src->cls.request_info);
->   		BUG_ON(src->cls.request_info->type !=
->   					CEPH_OSD_DATA_TYPE_PAGELIST);
->   		request_data_len = src->cls.request_info->pagelist->length;
-> @@ -1930,28 +1956,6 @@ bad:
->   	return;
->   }
->
-> -static void ceph_osdc_msg_data_set(struct ceph_msg *msg,
-> -				struct ceph_osd_data *osd_data)
-> -{
-> -	u64 length = ceph_osd_data_length(osd_data);
-> -
-> -	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-> -		BUG_ON(length > (u64) SIZE_MAX);
-> -		if (length)
-> -			ceph_msg_data_set_pages(msg, osd_data->pages,
-> -					length, osd_data->alignment);
-> -	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGELIST) {
-> -		BUG_ON(!length);
-> -		ceph_msg_data_set_pagelist(msg, osd_data->pagelist);
-> -#ifdef CONFIG_BLOCK
-> -	} else if (osd_data->type == CEPH_OSD_DATA_TYPE_BIO) {
-> -		ceph_msg_data_set_bio(msg, osd_data->bio, length);
-> -#endif
-> -	} else {
-> -		BUG_ON(osd_data->type != CEPH_OSD_DATA_TYPE_NONE);
-> -	}
-> -}
-> -
->   /*
->    * build new request AND message
->    *
-> @@ -1967,11 +1971,6 @@ void ceph_osdc_build_request(struct
-> ceph_osd_request *req, u64 off,
->   	u64 data_len;
->   	unsigned int i;
->
-> -	/* Set up response incoming data and request outgoing data fields */
-> -
-> -	ceph_osdc_msg_data_set(req->r_reply, &req->r_data_in);
-> -	ceph_osdc_msg_data_set(req->r_request, &req->r_data_out);
-> -
->   	req->r_snapid = snap_id;
->   	req->r_snapc = ceph_get_snap_context(snapc);
->
+>  /*
+>   * Return the page containing the next piece to process for a given
+>   * data item, and supply the page offset and length of that piece.
+> @@ -1073,8 +1087,16 @@ static bool ceph_msg_data_advance(struct
+> ceph_msg_data_cursor *cursor,
+>  		BUG();
+>  		break;
+>  	}
+> +	cursor->total_resid -= bytes;
+>  	cursor->need_crc = new_piece;
+> 
+> +	if (!cursor->resid && cursor->total_resid) {
+> +		WARN_ON(!new_piece);
+> +		BUG_ON(list_is_last(&cursor->data->links, cursor->data_head));
+> +		cursor->data = list_entry_next(cursor->data, links);
+> +		__ceph_msg_data_cursor_init(cursor);
+> +	}
+> +
+>  	return new_piece;
+>  }
+> 
 
