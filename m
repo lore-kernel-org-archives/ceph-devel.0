@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 20/20] libceph: kill off osd request r_data_in and r_data_out
-Date: Mon, 08 Apr 2013 13:07:04 -0700
-Message-ID: <51632368.7080205@inktank.com>
-References: <515ED849.9060901@inktank.com> <515EDA59.1080109@inktank.com>
+Subject: Re: [PATCH] libceph: fix possible CONFIG_BLOCK build problem
+Date: Mon, 08 Apr 2013 13:07:38 -0700
+Message-ID: <5163238A.600@inktank.com>
+References: <515F4D77.1080205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:37060 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935880Ab3DHUHb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 16:07:31 -0400
-Received: by mail-pd0-f177.google.com with SMTP id u11so3418030pdi.36
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 13:07:31 -0700 (PDT)
-In-Reply-To: <515EDA59.1080109@inktank.com>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:54537 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935850Ab3DHUIN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Apr 2013 16:08:13 -0400
+Received: by mail-pa0-f43.google.com with SMTP id hz11so3452374pad.30
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Apr 2013 13:08:13 -0700 (PDT)
+In-Reply-To: <515F4D77.1080205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,249 +21,64 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 04/05/2013 07:06 AM, Alex Elder wrote:
-> Finally!  Convert the osd op data pointers into real structures, and
-> make the switch over to using them instead of having all ops share
-> the in and/or out data structures in the osd request.
->
-> Set up a new function to traverse the set of ops and release any
-> data associated with them (pages).
->
-> This and the patches leading up to it resolve:
->      http://tracker.ceph.com/issues/4657
+On 04/05/2013 03:17 PM, Alex Elder wrote:
+> This patch:
+>      15a0d7b libceph: record message data length
+> did not enclose some bio-specific code inside CONFIG_BLOCK as
+> it should have.  Fix that.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   include/linux/ceph/osd_client.h |    9 ++---
->   net/ceph/osd_client.c           |   79
-> +++++++++++++++++++--------------------
->   2 files changed, 42 insertions(+), 46 deletions(-)
+>   include/linux/ceph/messenger.h |    2 ++
+>   net/ceph/messenger.c           |    4 +++-
+>   2 files changed, 5 insertions(+), 1 deletion(-)
 >
-> diff --git a/include/linux/ceph/osd_client.h
-> b/include/linux/ceph/osd_client.h
-> index dd4ca4ba..4ec46c0 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -87,14 +87,14 @@ struct ceph_osd_req_op {
->   			u64 offset, length;
->   			u64 truncate_size;
->   			u32 truncate_seq;
-> -			struct ceph_osd_data *osd_data;
-> +			struct ceph_osd_data osd_data;
->   		} extent;
->   		struct {
->   			const char *class_name;
->   			const char *method_name;
->   			const void *request_data;
-> -			struct ceph_osd_data *request_info;
-> -			struct ceph_osd_data *response_data;
-> +			struct ceph_osd_data request_info;
-> +			struct ceph_osd_data response_data;
->   			u32 request_data_len;
->   			__u8 class_len;
->   			__u8 method_len;
-> @@ -164,9 +164,6 @@ struct ceph_osd_request {
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> index b832c0c..cdeebae 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -271,8 +271,10 @@ extern void ceph_msg_data_set_pages(struct ceph_msg
+> *msg, struct page **pages,
+>   				size_t length, size_t alignment);
+>   extern void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
+>   				struct ceph_pagelist *pagelist);
+> +#ifdef CONFIG_BLOCK
+>   extern void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
+>   				size_t length);
+> +#endif /* CONFIG_BLOCK */
 >
->   	struct ceph_file_layout r_file_layout;
->   	struct ceph_snap_context *r_snapc;    /* snap context for writes */
-> -
-> -	struct ceph_osd_data r_data_in;
-> -	struct ceph_osd_data r_data_out;
->   };
+>   extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+>   				     bool can_fail);
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index a6fda95..994192b 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -817,7 +817,7 @@ static bool ceph_msg_data_bio_advance(struct
+> ceph_msg_data *data, size_t bytes)
 >
->   struct ceph_osd_event {
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index cc4003f..2562e4e 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -121,8 +121,7 @@ osd_req_op_extent_osd_data(struct ceph_osd_request
-> *osd_req,
->   {
->   	BUG_ON(which >= osd_req->r_num_ops);
->
-> -	/* return &osd_req->r_ops[which].extent.osd_data; */
-> -	return write_request ? &osd_req->r_data_out : &osd_req->r_data_in;
-> +	return &osd_req->r_ops[which].extent.osd_data;
+>   	return true;
 >   }
->   EXPORT_SYMBOL(osd_req_op_extent_osd_data);
->
-> @@ -132,8 +131,7 @@ osd_req_op_cls_request_info(struct ceph_osd_request
-> *osd_req,
->   {
->   	BUG_ON(which >= osd_req->r_num_ops);
->
-> -	/* return &osd_req->r_ops[which].cls.request_info; */
-> -	return &osd_req->r_data_out;	/* Request data is outgoing */
-> +	return &osd_req->r_ops[which].cls.request_info;
->   }
->   EXPORT_SYMBOL(osd_req_op_cls_request_info);	/* ??? */
->
-> @@ -143,8 +141,7 @@ osd_req_op_cls_response_data(struct ceph_osd_request
-> *osd_req,
->   {
->   	BUG_ON(which >= osd_req->r_num_ops);
->
-> -	/* return &osd_req->r_ops[which].cls.response_data; */
-> -	return &osd_req->r_data_in;	/* Response data is incoming */
-> +	return &osd_req->r_ops[which].cls.response_data;
->   }
->   EXPORT_SYMBOL(osd_req_op_cls_response_data);	/* ??? */
->
-> @@ -158,9 +155,6 @@ void osd_req_op_extent_osd_data_pages(struct
-> ceph_osd_request *osd_req,
->   	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
->   	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
->   				pages_from_pool, own_pages);
-> -
-> -	osd_req->r_ops[which].extent.osd_data =
-> -		osd_req_op_extent_osd_data(osd_req, which, write_request);
->   }
->   EXPORT_SYMBOL(osd_req_op_extent_osd_data_pages);
->
-> @@ -172,9 +166,6 @@ void osd_req_op_extent_osd_data_pagelist(struct
-> ceph_osd_request *osd_req,
->
->   	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
->   	ceph_osd_data_pagelist_init(osd_data, pagelist);
-> -
-> -	osd_req->r_ops[which].extent.osd_data =
-> -		osd_req_op_extent_osd_data(osd_req, which, write_request);
->   }
->   EXPORT_SYMBOL(osd_req_op_extent_osd_data_pagelist);
->
-> @@ -187,9 +178,6 @@ void osd_req_op_extent_osd_data_bio(struct
-> ceph_osd_request *osd_req,
->
->   	osd_data = osd_req_op_extent_osd_data(osd_req, which, write_request);
->   	ceph_osd_data_bio_init(osd_data, bio, bio_length);
-> -
-> -	osd_req->r_ops[which].extent.osd_data =
-> -		osd_req_op_extent_osd_data(osd_req, which, write_request);
->   }
->   EXPORT_SYMBOL(osd_req_op_extent_osd_data_bio);
->   #endif /* CONFIG_BLOCK */
-> @@ -202,9 +190,6 @@ static void osd_req_op_cls_request_info_pagelist(
->
->   	osd_data = osd_req_op_cls_request_info(osd_req, which);
->   	ceph_osd_data_pagelist_init(osd_data, pagelist);
-> -
-> -	osd_req->r_ops[which].cls.request_info =
-> -		osd_req_op_cls_request_info(osd_req, which);
->   }
->
->   void osd_req_op_cls_response_data_pages(struct ceph_osd_request *osd_req,
-> @@ -216,9 +201,6 @@ void osd_req_op_cls_response_data_pages(struct
-> ceph_osd_request *osd_req,
->   	osd_data = osd_req_op_cls_response_data(osd_req, which);
->   	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
->   				pages_from_pool, own_pages);
-> -
-> -	osd_req->r_ops[which].cls.response_data =
-> -		osd_req_op_cls_response_data(osd_req, which);
->   }
->   EXPORT_SYMBOL(osd_req_op_cls_response_data_pages);
->
-> @@ -241,18 +223,39 @@ static u64 ceph_osd_data_length(struct
-> ceph_osd_data *osd_data)
->   	}
->   }
->
-> +
->   static void ceph_osd_data_release(struct ceph_osd_data *osd_data)
->   {
-> -	if (osd_data->type != CEPH_OSD_DATA_TYPE_PAGES)
-> -		return;
-> -
-> -	if (osd_data->own_pages) {
-> +	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES && osd_data->own_pages) {
->   		int num_pages;
->
->   		num_pages = calc_pages_for((u64)osd_data->alignment,
->   						(u64)osd_data->length);
->   		ceph_release_page_vector(osd_data->pages, num_pages);
->   	}
-> +	ceph_osd_data_init(osd_data);
-> +}
-> +
-> +static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
-> +			unsigned int which)
-> +{
-> +	struct ceph_osd_req_op *op;
-> +
-> +	BUG_ON(which >= osd_req->r_num_ops);
-> +	op = &osd_req->r_ops[which];
-> +
-> +	switch (op->op) {
-> +	case CEPH_OSD_OP_READ:
-> +	case CEPH_OSD_OP_WRITE:
-> +		ceph_osd_data_release(&op->extent.osd_data);
-> +		break;
-> +	case CEPH_OSD_OP_CALL:
-> +		ceph_osd_data_release(&op->cls.request_info);
-> +		ceph_osd_data_release(&op->cls.response_data);
-> +		break;
-> +	default:
-> +		break;
-> +	}
->   }
+> -#endif
+> +#endif /* CONFIG_BLOCK */
 >
 >   /*
-> @@ -261,6 +264,7 @@ static void ceph_osd_data_release(struct
-> ceph_osd_data *osd_data)
->   void ceph_osdc_release_request(struct kref *kref)
+>    * For a page array, a piece comes from the first page in the array
+> @@ -3011,6 +3011,7 @@ void ceph_msg_data_set_pagelist(struct ceph_msg *msg,
+>   }
+>   EXPORT_SYMBOL(ceph_msg_data_set_pagelist);
+>
+> +#ifdef	CONFIG_BLOCK
+>   void ceph_msg_data_set_bio(struct ceph_msg *msg, struct bio *bio,
+>   		size_t length)
 >   {
->   	struct ceph_osd_request *req;
-> +	unsigned int which;
+> @@ -3028,6 +3029,7 @@ void ceph_msg_data_set_bio(struct ceph_msg *msg,
+> struct bio *bio,
+>   	msg->data_length = length;
+>   }
+>   EXPORT_SYMBOL(ceph_msg_data_set_bio);
+> +#endif	/* CONFIG_BLOCK */
 >
->   	req = container_of(kref, struct ceph_osd_request, r_kref);
->   	if (req->r_request)
-> @@ -270,8 +274,8 @@ void ceph_osdc_release_request(struct kref *kref)
->   		ceph_msg_put(req->r_reply);
->   	}
->
-> -	ceph_osd_data_release(&req->r_data_in);
-> -	ceph_osd_data_release(&req->r_data_out);
-> +	for (which = 0; which < req->r_num_ops; which++)
-> +		osd_req_op_data_release(req, which);
->
->   	ceph_put_snap_context(req->r_snapc);
->   	if (req->r_mempool)
-> @@ -595,27 +599,22 @@ static u64 osd_req_encode_op(struct
-> ceph_osd_request *req,
->   			cpu_to_le64(src->extent.truncate_size);
->   		dst->extent.truncate_seq =
->   			cpu_to_le32(src->extent.truncate_seq);
-> -		if (src->op == CEPH_OSD_OP_WRITE) {
-> -			WARN_ON(src->extent.osd_data != &req->r_data_out);
-> +		if (src->op == CEPH_OSD_OP_WRITE)
->   			ceph_osdc_msg_data_set(req->r_request,
-> -						src->extent.osd_data);
-> -		} else {
-> -			WARN_ON(src->extent.osd_data != &req->r_data_in);
-> +						&src->extent.osd_data);
-> +		else
->   			ceph_osdc_msg_data_set(req->r_reply,
-> -						src->extent.osd_data);
-> -		}
-> +						&src->extent.osd_data);
->   		break;
->   	case CEPH_OSD_OP_CALL:
->   		dst->cls.class_len = src->cls.class_len;
->   		dst->cls.method_len = src->cls.method_len;
->   		dst->cls.indata_len = cpu_to_le32(src->cls.request_data_len);
-> -		WARN_ON(src->cls.response_data != &req->r_data_in);
-> -		ceph_osdc_msg_data_set(req->r_reply, src->cls.response_data);
-> -		WARN_ON(src->cls.request_info != &req->r_data_out);
-> -		ceph_osdc_msg_data_set(req->r_request, src->cls.request_info);
-> -		BUG_ON(src->cls.request_info->type !=
-> +		ceph_osdc_msg_data_set(req->r_reply, &src->cls.response_data);
-> +		ceph_osdc_msg_data_set(req->r_request, &src->cls.request_info);
-> +		BUG_ON(src->cls.request_info.type !=
->   					CEPH_OSD_DATA_TYPE_PAGELIST);
-> -		request_data_len = src->cls.request_info->pagelist->length;
-> +		request_data_len = src->cls.request_info.pagelist->length;
->   		break;
->   	case CEPH_OSD_OP_STARTSYNC:
->   		break;
+>   /*
+>    * construct a new message with given type, size
 >
 
