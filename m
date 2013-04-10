@@ -1,46 +1,44 @@
-From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: ceph recovering results in offline VMs
-Date: Wed, 10 Apr 2013 21:16:22 +0200
-Message-ID: <5165BA86.10509@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: revalidate_disk upon rbd resize
+Date: Wed, 10 Apr 2013 14:30:41 -0500
+Message-ID: <5165BDE1.7010908@inktank.com>
+References: <1365609989-14493-1-git-send-email-laurent@ksperis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365609989-14493-1-git-send-email-laurent@ksperis.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Laurent Barbe <laurent@ksperis.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hello list,
+On 04/10/2013 11:06 AM, Laurent Barbe wrote:
+> If rbd disk is open and rbd resize is done, new size is not visible by
+> filesystem.
+> Like is done in virtio-blk and dm driver, revalidate_disk() permits to
+> update the bd_inode size.
 
-i'm using ceph 0.56.4 and i've to replace some drives. But while ceph is 
-backfilling / recovering all VMs have high latencies and sometimes 
-they're even offline. I just replace one drive at a time.
+Looks good to me.  I'll take this in via the ceph-client tree.
+Thanks a lot.
 
-I putted in the new drives and i'm reweighting them from 0.0 to 1.0 in 
-0.1 steps.
+Reviewed-by: Alex Elder <elder@inktank.com>
 
-I already lowered osd recovery max active = 2 and osd max backfills = 3, 
-but when i put them back at 1.0 the vms are nearly all down.
-
-Right now some drives are SSDs so they're a lot faster than the HDDs i'm 
-going to replace them too.
-
-Nothing in the logs but it is recovering at 3700MB/s that this is not 
-possible on SATA HDDs is clear.
-
-Log example:
-2013-04-10 20:55:33.711289 mon.0 [INF] pgmap v9293315: 8128 pgs: 233 
-active, 7876 active+clean, 19 active+recovery_wait; 557 GB data, 1168 GB 
-used, 7003 GB / 8171 GB avail; 2108KB/s wr, 329op/s; 31/309692 degraded 
-(0.010%);  recovering 840 o/s, 3278MB/s
-
-Greets,
-Stefan
+> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
+> ---
+>  drivers/block/rbd.c |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index f556f8a..1963025 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -2293,6 +2293,7 @@ static void rbd_update_mapping_size(struct rbd_device *rbd_dev)
+>  	dout("setting size to %llu sectors", (unsigned long long) size);
+>  	rbd_dev->mapping.size = (u64) size;
+>  	set_capacity(rbd_dev->disk, size);
+> +	revalidate_disk(rbd_dev->disk);
+>  }
+>  
+>  /*
+> 
