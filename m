@@ -1,44 +1,54 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] rbd: revalidate_disk upon rbd resize
-Date: Wed, 10 Apr 2013 14:30:41 -0500
-Message-ID: <5165BDE1.7010908@inktank.com>
-References: <1365609989-14493-1-git-send-email-laurent@ksperis.com>
+Subject: [PATCH] rbd: do a safe list traversal in rbd_img_request_submit()
+Date: Wed, 10 Apr 2013 17:49:23 -0500
+Message-ID: <5165EC73.5000600@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1365609989-14493-1-git-send-email-laurent@ksperis.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Laurent Barbe <laurent@ksperis.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:56278 "EHLO
+	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934682Ab3DJWt0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Apr 2013 18:49:26 -0400
+Received: by mail-ia0-f169.google.com with SMTP id h23so768188iae.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Apr 2013 15:49:26 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 04/10/2013 11:06 AM, Laurent Barbe wrote:
-> If rbd disk is open and rbd resize is done, new size is not visible by
-> filesystem.
-> Like is done in virtio-blk and dm driver, revalidate_disk() permits to
-> update the bd_inode size.
+It's possible that the reference to the object request dropped
+inside the loop in rbd_img_request_submit() will be the last
+one, in which case the content of the object pointer can't be
+trusted.
 
-Looks good to me.  I'll take this in via the ceph-client tree.
-Thanks a lot.
+Use a safe form of the object request list traversal to avoid
+problems.
 
-Reviewed-by: Alex Elder <elder@inktank.com>
+This resolves:
+    http://tracker.ceph.com/issues/4705
 
-> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
-> ---
->  drivers/block/rbd.c |    1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index f556f8a..1963025 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2293,6 +2293,7 @@ static void rbd_update_mapping_size(struct rbd_device *rbd_dev)
->  	dout("setting size to %llu sectors", (unsigned long long) size);
->  	rbd_dev->mapping.size = (u64) size;
->  	set_capacity(rbd_dev->disk, size);
-> +	revalidate_disk(rbd_dev->disk);
->  }
->  
->  /*
-> 
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 3c0abe6..7eb1032 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1652,9 +1652,10 @@ static int rbd_img_request_submit(struct
+rbd_img_request *img_request)
+ 	struct rbd_device *rbd_dev = img_request->rbd_dev;
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
++	struct rbd_obj_request *next_obj_request;
+
+ 	dout("%s: img %p\n", __func__, img_request);
+-	for_each_obj_request(img_request, obj_request) {
++	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
+ 		int ret;
+
+ 		ret = rbd_obj_request_submit(osdc, obj_request);
+-- 
+1.7.9.5
+
