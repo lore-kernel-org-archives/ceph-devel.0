@@ -1,87 +1,90 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: expected I/O / rand 4k iops
-Date: Thu, 11 Apr 2013 07:27:04 -0500
-Message-ID: <5166AC18.1030808@inktank.com>
-References: <516665D0.8080704@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: revalidate_disk upon rbd resize
+Date: Thu, 11 Apr 2013 08:27:36 -0500
+Message-ID: <5166BA48.6070809@inktank.com>
+References: <1365609989-14493-1-git-send-email-laurent@ksperis.com> <5165BDE1.7010908@inktank.com> <516625A7.9020403@inktank.com> <CADksbcpbhp8-Db2bqQc_fFwmT-iObYdjK+rXJF5DiZ9wu1sSQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f175.google.com ([209.85.210.175]:63761 "EHLO
-	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933519Ab3DKM0y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 08:26:54 -0400
-Received: by mail-ia0-f175.google.com with SMTP id e16so1361648iaa.34
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 05:26:54 -0700 (PDT)
-In-Reply-To: <516665D0.8080704@profihost.ag>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CADksbcpbhp8-Db2bqQc_fFwmT-iObYdjK+rXJF5DiZ9wu1sSQA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Laurent Barbe <laurent@ksperis.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/11/2013 02:27 AM, Stefan Priebe - Profihost AG wrote:
-> Hello list,
->
-> is there any calculation of expected I/O available?
->
-> I've a test system running 6 hosts 4 OSDs each using SSD - i get 20.000
-> to 40.000 IOP/s not as much as i expected but OK right now.
+On 04/11/2013 03:47 AM, Laurent Barbe wrote:
+> Thanks Alex,
+> 
+> What do you mean about "lock inversion", deadlock ?
+> Is it the mutex_lock in block_dev.c:revalidate_disk() and the mutex
+> in rbd_dev_refresh ?
 
-Hi!
+Yes.
 
-How are you running your benchmarks Stefan?
+When we refresh an rbd device we get the rbd device header
+semaphore, and with this patch we then acquire the bdev's
+mutex.
 
-Doing reads from pagecache with RADOS bench I can do up to about 22,000 
-IOPs from a single host.
+Meanhwhile, via blkdev_close() __blkdev_put() acquires the
+bdev->bd_mutex, and eventually we get down to creating an
+image object request.  If it's a write, we need to get the
+snapshot context, and to do that we get the rbd device
+header mutex.
 
-See the page cache section of our bobtail vs argonaut article by 
-scrolling down a bit from here:
+So we're acquiring the locks in two different orders, and
+that's what I meant by "lock inversion," and yes, that
+can lead to deadlock.
 
-http://ceph.com/uncategorized/argonaut-vs-bobtail-performance-preview/#4kbradoswrite
+There may be a simple fix--like holding off calling
+revalidate_disk() until after we release the lock,
+most likely in rbd_dev_refresh().  But I just haven't
+really thought it through yet.
 
-I haven't tested putting OSDs directly on RAM disks recently, but it'd 
-probably be a good idea to try again at some point.
+					-Alex
 
->
-> If i replace the SSDs on one host with spinning disks but still using
-> dedicated journal on ssd (20GB / Disk/OSDK), i'm not able to get more
-> than 300 to 400 iop/s this seems to be pretty low.
-
-That's probably about right.  The journals really only absorb a small 
-portion of the incoming writes for free, and then you end up having to 
-wait on the disks behind the OSDs. If you have 4 spinning disks in the 
-system, each one is only really capable of around 150-200 IOPs assuming 
-typical 7200rpm units.  300-400 iops for 4 disks isn't great, but it's 
-probably not totally unrealistic either.
-
-So what would happen with 4 spinning disks in 1 node, but everything 
-else on SSD?  All of your outstanding operations will end up backing up 
-on the disks in the slow node while everything else sits mostly idle. 
-That's because there's a (configurable) maximum number of outstanding 
-operations that you can have in flight at once.  No matter how high you 
-set that though, eventually *all* outstanding operations will back up on 
-the slow node under a sustained workload.  You can mitigate this by 
-weighting the slow OSDs to have less data vs the others, but that's not 
-really an ideal solution.  Ceph really likes well balanced systems. 
-It'll work on heterogeneous clusters but it's definitely not ideal.
-
-As far as SSDs go, some folks seem to be having luck with Bcache and 
-fastcache to improve performance of spinning disk backed OSDs.  I admit 
-haven't had time to play with them yet but it's definitely on my list!
-
->
-> Everything tested using 0.56.4 and Qemu RBD.
-
-Out of curiosity, do you have RBD cache enabled?  I noticed on my test 
-setup that with 64G VM images it provide quite a bit of benefit even for 
-small random writes.
-
->
-> Greets,
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+> 
+> 2013/4/11 Alex Elder <elder@inktank.com>
+> 
+>> On 04/10/2013 02:30 PM, Alex Elder wrote:
+>>> On 04/10/2013 11:06 AM, Laurent Barbe wrote:
+>>>> If rbd disk is open and rbd resize is done, new size is not visible by
+>>>> filesystem.
+>>>> Like is done in virtio-blk and dm driver, revalidate_disk() permits to
+>>>> update the bd_inode size.
+>>>
+>>> Looks good to me.  I'll take this in via the ceph-client tree.
+>>> Thanks a lot.
+>>
+>> Unfortunately this leads to a lock inversion.  I'm going to
+>> think about how to go about resolving it, so I won't be
+>> committing it just yet.
+>>
+>>                                         -Alex
+>>
+>>>
+>>> Reviewed-by: Alex Elder <elder@inktank.com>
+>>>
+>>>> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
+>>>> ---
+>>>>  drivers/block/rbd.c |    1 +
+>>>>  1 file changed, 1 insertion(+)
+>>>>
+>>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>>>> index f556f8a..1963025 100644
+>>>> --- a/drivers/block/rbd.c
+>>>> +++ b/drivers/block/rbd.c
+>>>> @@ -2293,6 +2293,7 @@ static void rbd_update_mapping_size(struct
+>> rbd_device *rbd_dev)
+>>>>      dout("setting size to %llu sectors", (unsigned long long) size);
+>>>>      rbd_dev->mapping.size = (u64) size;
+>>>>      set_capacity(rbd_dev->disk, size);
+>>>> +    revalidate_disk(rbd_dev->disk);
+>>>>  }
+>>>>
+>>>>  /*
+>>>>
+>>>
+>>
+>>
+> 
