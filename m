@@ -1,12 +1,14 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 1/4] ceph: add osd request to inode unsafe list in advance
-Date: Fri, 12 Apr 2013 16:11:08 +0800
-Message-ID: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 2/4] ceph: take i_mutex before getting Fw cap
+Date: Fri, 12 Apr 2013 16:11:10 +0800
+Message-ID: <1365754273-14088-3-git-send-email-zheng.z.yan@intel.com>
+References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:54081 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752835Ab3DLILQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Apr 2013 04:11:16 -0400
+	id S1753702Ab3DLILT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Apr 2013 04:11:19 -0400
+In-Reply-To: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -14,91 +16,108 @@ Cc: greg@inktank.com, elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Right now we add osd requests to inode unsafe list after starting them.
-The problem here is osd request may have already finished when adding
-it to inode unsafe list.
+There is deadlock as illustrated bellow. The fix is taking i_mutex
+before getting Fw cap reference.
+
+      write                    truncate                 MDS
+---------------------     --------------------      --------------
+get Fw cap
+                          lock i_mutex
+lock i_mutex (blocked)
+                          request setattr.size  ->
+                                                <-   revoke Fw cap
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/caps.c | 14 ++++++++++----
- fs/ceph/file.c | 30 ++++++++++++------------------
- 2 files changed, 22 insertions(+), 22 deletions(-)
+ fs/ceph/caps.c | 13 +++++++------
+ fs/ceph/file.c | 12 ++++++------
+ 2 files changed, 13 insertions(+), 12 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 124e8a1..0da2e94 100644
+index 0da2e94..8737572 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1806,10 +1806,16 @@ static void sync_write_wait(struct inode *inode)
- 	if (list_empty(head))
+@@ -2058,6 +2058,13 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
  		goto out;
+ 	}
  
--	/* set upper bound as _last_ entry in chain */
--	req = list_entry(head->prev, struct ceph_osd_request,
--			 r_unsafe_item);
--	last_tid = req->r_tid;
-+	/* set upper bound as last started request */
-+	last_tid = (u64)-1;
-+	list_for_each_entry_reverse(req, head, r_unsafe_item) {
-+		if (req->r_tid != (u64)-1) {
-+			last_tid = req->r_tid;
-+			break;
-+		}
++	/* finish pending truncate */
++	while (ci->i_truncate_pending) {
++		spin_unlock(&ci->i_ceph_lock);
++		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
++		spin_lock(&ci->i_ceph_lock);
 +	}
-+	if (last_tid == (u64)-1)
-+		goto out;
++
+ 	if (need & CEPH_CAP_FILE_WR) {
+ 		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
+ 			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
+@@ -2079,12 +2086,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+ 	}
+ 	have = __ceph_caps_issued(ci, &implemented);
  
- 	do {
- 		ceph_osdc_get_request(req);
+-	/*
+-	 * disallow writes while a truncate is pending
+-	 */
+-	if (ci->i_truncate_pending)
+-		have &= ~CEPH_CAP_FILE_WR;
+-
+ 	if ((have & need) == need) {
+ 		/*
+ 		 * Look at (implemented & ~have & not) so that we keep waiting
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index b7e6caa..546a705 100644
+index 546a705..5490598 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -571,7 +571,14 @@ more:
- 		if ((file->f_flags & O_SYNC) == 0) {
- 			/* get a second commit callback */
- 			req->r_safe_callback = sync_write_commit;
-+			req->r_inode = inode;
-+			req->r_tid = (u64)-1;
- 			own_pages = true;
-+			spin_lock(&ci->i_unsafe_lock);
-+			list_add_tail(&req->r_unsafe_item,
-+				      &ci->i_unsafe_writes);
-+			spin_unlock(&ci->i_unsafe_lock);
-+			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
- 		}
+@@ -647,7 +647,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+ 	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+ again:
+-	__ceph_do_pending_vmtruncate(inode, true);
+ 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+ 		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+ 	else
+@@ -724,7 +723,7 @@ retry_snap:
+ 		ret = -ENOSPC;
+ 		goto out;
  	}
- 	osd_req_op_extent_osd_data_pages(req, 0, true, pages, len,
-@@ -582,25 +589,12 @@ more:
+-	__ceph_do_pending_vmtruncate(inode, true);
++	mutex_lock(&inode->i_mutex);
+ 	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+ 	     inode->i_size);
+@@ -733,8 +732,10 @@ retry_snap:
+ 	else
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
+-	if (ret < 0)
+-		goto out_put;
++	if (ret < 0) {
++		mutex_unlock(&inode->i_mutex);
++		goto out;
++	}
  
- 	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
- 	if (!ret) {
--		if (req->r_safe_callback) {
--			/*
--			 * Add to inode unsafe list only after we
--			 * start_request so that a tid has been assigned.
--			 */
--			spin_lock(&ci->i_unsafe_lock);
--			list_add_tail(&req->r_unsafe_item,
--				      &ci->i_unsafe_writes);
--			spin_unlock(&ci->i_unsafe_lock);
--			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
--		}
--		
- 		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
--		if (ret < 0 && req->r_safe_callback) {
--			spin_lock(&ci->i_unsafe_lock);
--			list_del_init(&req->r_unsafe_item);
--			spin_unlock(&ci->i_unsafe_lock);
--			ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
--		}
-+	} else if (req->r_safe_callback) {
-+		spin_lock(&ci->i_unsafe_lock);
-+		list_del_init(&req->r_unsafe_item);
-+		spin_unlock(&ci->i_unsafe_lock);
-+		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
+ 	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+@@ -744,10 +745,10 @@ retry_snap:
+ 	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+ 	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
+ 	    (fi->flags & CEPH_F_SYNC)) {
++		mutex_unlock(&inode->i_mutex);
+ 		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+ 			&iocb->ki_pos);
+ 	} else {
+-		mutex_lock(&inode->i_mutex);
+ 		ret = __generic_file_aio_write(iocb, iov, nr_segs,
+ 					       &iocb->ki_pos);
+ 		mutex_unlock(&inode->i_mutex);
+@@ -762,7 +763,6 @@ retry_snap:
+ 			__mark_inode_dirty(inode, dirty);
  	}
  
- 	if (file->f_flags & O_DIRECT)
+-out_put:
+ 	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+ 	     ceph_cap_string(got));
 -- 
 1.7.11.7
 
