@@ -1,118 +1,138 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 07/11] rbd: encapsulate image object end request handling
-Date: Thu, 11 Apr 2013 21:18:15 -0500
-Message-ID: <51676EE7.6070103@inktank.com>
+Subject: [PATCH 08/11] rbd: define an rbd object request flags field
+Date: Thu, 11 Apr 2013 21:18:28 -0500
+Message-ID: <51676EF4.7010703@inktank.com>
 References: <51676E0F.2010504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f180.google.com ([209.85.210.180]:32996 "EHLO
-	mail-ia0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751202Ab3DLCSP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 22:18:15 -0400
-Received: by mail-ia0-f180.google.com with SMTP id l29so1965710iag.25
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 19:18:15 -0700 (PDT)
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:33811 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752461Ab3DLCS3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 22:18:29 -0400
+Received: by mail-ia0-f182.google.com with SMTP id u20so2001320iag.27
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 19:18:28 -0700 (PDT)
 In-Reply-To: <51676E0F.2010504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Encapsulate the code that completes processing of an object request
-that's part of an image request.
+We're going to need some more Boolean values for object requests,
+so create a flags bit field and use it to record whether the request
+is done.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   54
-+++++++++++++++++++++++++++------------------------
- 1 file changed, 29 insertions(+), 25 deletions(-)
+ drivers/block/rbd.c |   58
++++++++++++++++++++++++++--------------------------
+ 1 file changed, 29 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a77157d..2d27115 100644
+index 2d27115..f7046e9 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1603,6 +1603,34 @@ static void rbd_img_request_destroy(struct kref
-*kref)
- 	kfree(img_request);
+@@ -170,10 +170,15 @@ enum obj_request_type {
+ 	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES
+ };
+
++enum obj_req_flags {
++	OBJ_REQ_DONE,		/* completion flag: not done = 0, done = 1 */
++};
++
+ struct rbd_obj_request {
+ 	const char		*object_name;
+ 	u64			offset;		/* object start byte */
+ 	u64			length;		/* bytes from offset */
++	unsigned long		flags;
+
+ 	struct rbd_img_request	*img_request;
+ 	u64			img_offset;	/* image relative offset */
+@@ -194,7 +199,6 @@ struct rbd_obj_request {
+ 	u64			xferred;	/* bytes transferred */
+ 	u64			version;
+ 	int			result;
+-	atomic_t		done;
+
+ 	rbd_obj_callback_t	callback;
+ 	struct completion	completion;
+@@ -1072,6 +1076,29 @@ out_err:
+ 	return NULL;
  }
 
-+static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
++/*
++ * The default/initial value for all object request flags is 0.  For
++ * each flag, once its value is set to 1 it is never reset to 0
++ * again.
++ */
++static void obj_request_done_set(struct rbd_obj_request *obj_request)
 +{
-+	struct rbd_img_request *img_request = obj_request->img_request;
-+	unsigned int xferred;
-+	int result;
++	if (test_and_set_bit(OBJ_REQ_DONE, &obj_request->flags)) {
++		struct rbd_img_request *img_request = obj_request->img_request;
++		struct rbd_device *rbd_dev;
 +
-+	rbd_assert(!img_request_child_test(img_request));
-+	rbd_assert(img_request->rq != NULL);
-+
-+	rbd_assert(obj_request->xferred <= (u64)UINT_MAX);
-+	xferred = (unsigned int)obj_request->xferred;
-+	result = obj_request->result;
-+	if (result) {
-+		struct rbd_device *rbd_dev = img_request->rbd_dev;
-+
-+		rbd_warn(rbd_dev, "%s %llx at %llx (%llx)\n",
-+			img_request_write_test(img_request) ? "write" : "read",
-+			obj_request->length, obj_request->img_offset,
-+			obj_request->offset);
-+		rbd_warn(rbd_dev, "  result %d xferred %x\n",
-+			result, xferred);
-+		if (!img_request->result)
-+			img_request->result = result;
++		rbd_dev = img_request ? img_request->rbd_dev : NULL;
++		rbd_warn(rbd_dev, "obj_request %p already marked done\n",
++			obj_request);
 +	}
-+
-+	return blk_end_request(img_request->rq, result, xferred);
 +}
 +
- static void rbd_img_obj_callback(struct rbd_obj_request *obj_request)
++static bool obj_request_done_test(struct rbd_obj_request *obj_request)
++{
++	smp_mb();
++	return test_bit(OBJ_REQ_DONE, &obj_request->flags) != 0;
++}
++
+ static void rbd_obj_request_get(struct rbd_obj_request *obj_request)
  {
- 	struct rbd_img_request *img_request;
-@@ -1613,9 +1641,6 @@ static void rbd_img_obj_callback(struct
+ 	dout("%s: obj %p (was %d)\n", __func__, obj_request,
+@@ -1192,33 +1219,6 @@ static int rbd_obj_request_wait(struct
 rbd_obj_request *obj_request)
+ 	return wait_for_completion_interruptible(&obj_request->completion);
+ }
 
- 	dout("%s: img %p obj %p\n", __func__, img_request, obj_request);
- 	rbd_assert(img_request != NULL);
--	rbd_assert(!img_request_child_test(img_request))
--	rbd_assert(img_request->rq != NULL);
+-static void obj_request_done_init(struct rbd_obj_request *obj_request)
+-{
+-	atomic_set(&obj_request->done, 0);
+-	smp_wmb();
+-}
 -
- 	rbd_assert(img_request->obj_request_count > 0);
- 	rbd_assert(which != BAD_WHICH);
- 	rbd_assert(which < img_request->obj_request_count);
-@@ -1626,33 +1651,12 @@ static void rbd_img_obj_callback(struct
-rbd_obj_request *obj_request)
- 		goto out;
-
- 	for_each_obj_request_from(img_request, obj_request) {
--		unsigned int xferred;
--		int result;
+-static void obj_request_done_set(struct rbd_obj_request *obj_request)
+-{
+-	int done;
 -
- 		rbd_assert(more);
- 		rbd_assert(which < img_request->obj_request_count);
-
- 		if (!obj_request_done_test(obj_request))
- 			break;
+-	done = atomic_inc_return(&obj_request->done);
+-	if (done > 1) {
+-		struct rbd_img_request *img_request = obj_request->img_request;
+-		struct rbd_device *rbd_dev;
 -
--		rbd_assert(obj_request->xferred <= (u64)UINT_MAX);
--		xferred = (unsigned int)obj_request->xferred;
--		result = obj_request->result;
--		if (result) {
--			struct rbd_device *rbd_dev = img_request->rbd_dev;
+-		rbd_dev = img_request ? img_request->rbd_dev : NULL;
+-		rbd_warn(rbd_dev, "obj_request %p was already done\n",
+-			obj_request);
+-	}
+-}
 -
--			rbd_warn(rbd_dev, "%s %llx at %llx (%llx)\n",
--				img_request_write_test(img_request) ? "write"
--								    : "read",
--				obj_request->length, obj_request->img_offset,
--				obj_request->offset);
--			rbd_warn(rbd_dev, "  result %d xferred %x\n",
--				result, xferred);
--			if (!img_request->result)
--				img_request->result = result;
--		}
+-static bool obj_request_done_test(struct rbd_obj_request *obj_request)
+-{
+-	smp_mb();
+-	return atomic_read(&obj_request->done) != 0;
+-}
 -
--		more = blk_end_request(img_request->rq, result, xferred);
-+		more = rbd_img_obj_end_request(obj_request);
- 		which++;
- 	}
+ /*
+  * The default/initial value for all image request flags is 0.  Each
+  * is conditionally set to 1 at image request initialization time
+@@ -1475,10 +1475,10 @@ static struct rbd_obj_request
+*rbd_obj_request_create(const char *object_name,
+ 	obj_request->object_name = memcpy(name, object_name, size);
+ 	obj_request->offset = offset;
+ 	obj_request->length = length;
++	obj_request->flags = 0;
+ 	obj_request->which = BAD_WHICH;
+ 	obj_request->type = type;
+ 	INIT_LIST_HEAD(&obj_request->links);
+-	obj_request_done_init(obj_request);
+ 	init_completion(&obj_request->completion);
+ 	kref_init(&obj_request->kref);
 
 -- 
 1.7.9.5
