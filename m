@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 2/4] ceph: take i_mutex before getting Fw cap
-Date: Fri, 12 Apr 2013 16:11:10 +0800
-Message-ID: <1365754273-14088-3-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 2/2] mds: change XLOCK/XLOCKDONE's next state to LOCK
+Date: Fri, 12 Apr 2013 16:11:11 +0800
+Message-ID: <1365754273-14088-4-git-send-email-zheng.z.yan@intel.com>
 References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:54081 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:55520 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753702Ab3DLILT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Apr 2013 04:11:19 -0400
+	id S1753720Ab3DLILU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Apr 2013 04:11:20 -0400
 In-Reply-To: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,108 +16,56 @@ Cc: greg@inktank.com, elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-There is deadlock as illustrated bellow. The fix is taking i_mutex
-before getting Fw cap reference.
-
-      write                    truncate                 MDS
----------------------     --------------------      --------------
-get Fw cap
-                          lock i_mutex
-lock i_mutex (blocked)
-                          request setattr.size  ->
-                                                <-   revoke Fw cap
+For simplelock and filelock, XLOCK/XLOCKDONE's next state is SYNC.
+But filelock in XLOCK/XLOCKDONE state allow Fb caps, filelock in
+SYNC state does not. So filelock can be stuck in XLOCK/XLOCKDONE
+state forever if there are Fb caps issued.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/caps.c | 13 +++++++------
- fs/ceph/file.c | 12 ++++++------
- 2 files changed, 13 insertions(+), 12 deletions(-)
+ src/mds/Locker.cc | 8 ++++++--
+ src/mds/locks.c   | 4 ++--
+ 2 files changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 0da2e94..8737572 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2058,6 +2058,13 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
- 		goto out;
- 	}
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index f86ba88..9f0043c 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -756,13 +756,17 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, list<C
+ 	(static_cast<ScatterLock *>(lock))->clear_scatter_wanted();
+ 	break;
  
-+	/* finish pending truncate */
-+	while (ci->i_truncate_pending) {
-+		spin_unlock(&ci->i_ceph_lock);
-+		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
-+		spin_lock(&ci->i_ceph_lock);
-+	}
++      case LOCK_XLOCK:
++      case LOCK_XLOCKDONE:
++	if (next != LOCK_SYNC)
++	  break;
++	// fall-thru
 +
- 	if (need & CEPH_CAP_FILE_WR) {
- 		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
- 			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
-@@ -2079,12 +2086,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
- 	}
- 	have = __ceph_caps_issued(ci, &implemented);
+ 	// to sync
+       case LOCK_EXCL_SYNC:
+       case LOCK_LOCK_SYNC:
+       case LOCK_MIX_SYNC:
+       case LOCK_XSYN_SYNC:
+-      case LOCK_XLOCK:
+-      case LOCK_XLOCKDONE:
+ 	if (lock->get_parent()->is_replicated()) {
+ 	  bufferlist softdata;
+ 	  lock->encode_locked_state(softdata);
+diff --git a/src/mds/locks.c b/src/mds/locks.c
+index 69b6bd6..c7dd5be 100644
+--- a/src/mds/locks.c
++++ b/src/mds/locks.c
+@@ -103,8 +103,8 @@ const struct sm_state_t filelock[LOCK_MAX] = {
+     [LOCK_MIX_LOCK2] = { LOCK_LOCK, false, LOCK_LOCK, AUTH, 0,   REQ, 0,   0,   0,   0,   0,0,0,0 },
  
--	/*
--	 * disallow writes while a truncate is pending
--	 */
--	if (ci->i_truncate_pending)
--		have &= ~CEPH_CAP_FILE_WR;
--
- 	if ((have & need) == need) {
- 		/*
- 		 * Look at (implemented & ~have & not) so that we keep waiting
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 546a705..5490598 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -647,7 +647,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
- 	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
- again:
--	__ceph_do_pending_vmtruncate(inode, true);
- 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
- 		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
- 	else
-@@ -724,7 +723,7 @@ retry_snap:
- 		ret = -ENOSPC;
- 		goto out;
- 	}
--	__ceph_do_pending_vmtruncate(inode, true);
-+	mutex_lock(&inode->i_mutex);
- 	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
- 	     inode->i_size);
-@@ -733,8 +732,10 @@ retry_snap:
- 	else
- 		want = CEPH_CAP_FILE_BUFFER;
- 	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
--	if (ret < 0)
--		goto out_put;
-+	if (ret < 0) {
-+		mutex_unlock(&inode->i_mutex);
-+		goto out;
-+	}
+     [LOCK_PREXLOCK]  = { LOCK_LOCK, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   ANY, CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
+-    [LOCK_XLOCK]     = { LOCK_SYNC, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
+-    [LOCK_XLOCKDONE] = { LOCK_SYNC, false, LOCK_LOCK, XCL,  XCL, XCL, 0,   0,   XCL, 0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,CEPH_CAP_GSHARED,0 },
++    [LOCK_XLOCK]     = { LOCK_LOCK, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
++    [LOCK_XLOCKDONE] = { LOCK_LOCK, false, LOCK_LOCK, XCL,  XCL, XCL, 0,   0,   XCL, 0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,CEPH_CAP_GSHARED,0 },
+     [LOCK_LOCK_XLOCK]= { LOCK_PREXLOCK,false,LOCK_LOCK,0,   XCL, 0,   0,   0,   0,   XCL, CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
  
- 	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
-@@ -744,10 +745,10 @@ retry_snap:
- 	    (iocb->ki_filp->f_flags & O_DIRECT) ||
- 	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
- 	    (fi->flags & CEPH_F_SYNC)) {
-+		mutex_unlock(&inode->i_mutex);
- 		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
- 			&iocb->ki_pos);
- 	} else {
--		mutex_lock(&inode->i_mutex);
- 		ret = __generic_file_aio_write(iocb, iov, nr_segs,
- 					       &iocb->ki_pos);
- 		mutex_unlock(&inode->i_mutex);
-@@ -762,7 +763,6 @@ retry_snap:
- 			__mark_inode_dirty(inode, dirty);
- 	}
- 
--out_put:
- 	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
- 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
- 	     ceph_cap_string(got));
+     [LOCK_MIX]       = { 0,         false, LOCK_MIX,  0,    0,   REQ, ANY, 0,   0,   0,   CEPH_CAP_GRD|CEPH_CAP_GWR|CEPH_CAP_GLAZYIO,0,0,CEPH_CAP_GRD },
 -- 
 1.7.11.7
 
