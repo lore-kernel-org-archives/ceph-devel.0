@@ -1,39 +1,104 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: new ceph-0.60 always crash mds
-Date: Fri, 12 Apr 2013 12:01:21 +0800
-Message-ID: <CAJiejCRunA9z=L2zTQP=b+=F2Pf17nG1CNoF1EN7rhvLwuqtKA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/4] ceph: add osd request to inode unsafe list in advance
+Date: Fri, 12 Apr 2013 16:11:08 +0800
+Message-ID: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:40809 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750741Ab3DLEBm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Apr 2013 00:01:42 -0400
-Received: by mail-qc0-f181.google.com with SMTP id a22so1019501qcs.26
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 21:01:41 -0700 (PDT)
+Received: from mga09.intel.com ([134.134.136.24]:54081 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752835Ab3DLILQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Apr 2013 04:11:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: maillist-linux <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: greg@inktank.com, elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-My newly created ceph cluster in ceph-0.60 always crash mds, the last messages:
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-     0> 2013-04-12 11:48:53.034644 7f691cf64700 -1 mds/MDSTable.cc: In
-function 'void MDSTable::load_2(int, ceph::bufferlist&, Context*)'
-thread 7f691cf64700 time 2013-04-12 11:48:53.033488
-mds/MDSTable.cc: 150: FAILED assert(0)
+Right now we add osd requests to inode unsafe list after starting them.
+The problem here is osd request may have already finished when adding
+it to inode unsafe list.
 
-I thought it was cephx problem, but after disable cephx and restart
-whole cluster, it's still that way.
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c | 14 ++++++++++----
+ fs/ceph/file.c | 30 ++++++++++++------------------
+ 2 files changed, 22 insertions(+), 22 deletions(-)
 
-auth cluster required = none
-auth service required = none
-auth client required = none
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 124e8a1..0da2e94 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1806,10 +1806,16 @@ static void sync_write_wait(struct inode *inode)
+ 	if (list_empty(head))
+ 		goto out;
+ 
+-	/* set upper bound as _last_ entry in chain */
+-	req = list_entry(head->prev, struct ceph_osd_request,
+-			 r_unsafe_item);
+-	last_tid = req->r_tid;
++	/* set upper bound as last started request */
++	last_tid = (u64)-1;
++	list_for_each_entry_reverse(req, head, r_unsafe_item) {
++		if (req->r_tid != (u64)-1) {
++			last_tid = req->r_tid;
++			break;
++		}
++	}
++	if (last_tid == (u64)-1)
++		goto out;
+ 
+ 	do {
+ 		ceph_osdc_get_request(req);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index b7e6caa..546a705 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -571,7 +571,14 @@ more:
+ 		if ((file->f_flags & O_SYNC) == 0) {
+ 			/* get a second commit callback */
+ 			req->r_safe_callback = sync_write_commit;
++			req->r_inode = inode;
++			req->r_tid = (u64)-1;
+ 			own_pages = true;
++			spin_lock(&ci->i_unsafe_lock);
++			list_add_tail(&req->r_unsafe_item,
++				      &ci->i_unsafe_writes);
++			spin_unlock(&ci->i_unsafe_lock);
++			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
+ 		}
+ 	}
+ 	osd_req_op_extent_osd_data_pages(req, 0, true, pages, len,
+@@ -582,25 +589,12 @@ more:
+ 
+ 	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
+ 	if (!ret) {
+-		if (req->r_safe_callback) {
+-			/*
+-			 * Add to inode unsafe list only after we
+-			 * start_request so that a tid has been assigned.
+-			 */
+-			spin_lock(&ci->i_unsafe_lock);
+-			list_add_tail(&req->r_unsafe_item,
+-				      &ci->i_unsafe_writes);
+-			spin_unlock(&ci->i_unsafe_lock);
+-			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
+-		}
+-		
+ 		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
+-		if (ret < 0 && req->r_safe_callback) {
+-			spin_lock(&ci->i_unsafe_lock);
+-			list_del_init(&req->r_unsafe_item);
+-			spin_unlock(&ci->i_unsafe_lock);
+-			ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
+-		}
++	} else if (req->r_safe_callback) {
++		spin_lock(&ci->i_unsafe_lock);
++		list_del_init(&req->r_unsafe_item);
++		spin_unlock(&ci->i_unsafe_lock);
++		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
+ 	}
+ 
+ 	if (file->f_flags & O_DIRECT)
+-- 
+1.7.11.7
 
-Previous setting:
-;auth cluster required = cephx
-;auth service required = cephx
-;auth client required = cephx
-;cephx require signatures = true
-;cephx cluster require signatures = true
-;cephx service require signatures = true
-;cephx sign messages = true
