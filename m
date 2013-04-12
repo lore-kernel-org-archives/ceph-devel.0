@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 2/2] mds: change XLOCK/XLOCKDONE's next state to LOCK
-Date: Fri, 12 Apr 2013 16:11:11 +0800
-Message-ID: <1365754273-14088-4-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 1/2] mds: pass proper mask to CInode::get_caps_issued
+Date: Fri, 12 Apr 2013 16:11:09 +0800
+Message-ID: <1365754273-14088-2-git-send-email-zheng.z.yan@intel.com>
 References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:55520 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:62108 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753720Ab3DLILU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Apr 2013 04:11:20 -0400
+	id S1753701Ab3DLILS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Apr 2013 04:11:18 -0400
 In-Reply-To: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,56 +16,44 @@ Cc: greg@inktank.com, elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-For simplelock and filelock, XLOCK/XLOCKDONE's next state is SYNC.
-But filelock in XLOCK/XLOCKDONE state allow Fb caps, filelock in
-SYNC state does not. So filelock can be stuck in XLOCK/XLOCKDONE
-state forever if there are Fb caps issued.
+There is a total of 22 cap bits and file lock uses 8 cap bits.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Locker.cc | 8 ++++++--
- src/mds/locks.c   | 4 ++--
- 2 files changed, 8 insertions(+), 4 deletions(-)
+ src/mds/CInode.h  | 4 ++--
+ src/mds/Locker.cc | 3 ++-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
 
+diff --git a/src/mds/CInode.h b/src/mds/CInode.h
+index 43af9c4..a3fe3cf 100644
+--- a/src/mds/CInode.h
++++ b/src/mds/CInode.h
+@@ -736,9 +736,9 @@ public:
+ 
+   // caps issued, wanted
+   int get_caps_issued(int *ploner = 0, int *pother = 0, int *pxlocker = 0,
+-		      int shift = 0, int mask = 0xffff);
++		      int shift = 0, int mask = -1);
+   bool is_any_caps_wanted();
+-  int get_caps_wanted(int *ploner = 0, int *pother = 0, int shift = 0, int mask = 0xffff);
++  int get_caps_wanted(int *ploner = 0, int *pother = 0, int shift = 0, int mask = -1);
+   bool issued_caps_need_gather(SimpleLock *lock);
+   void replicate_relax_locks();
+ 
 diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index f86ba88..9f0043c 100644
+index 7ba9f44..f86ba88 100644
 --- a/src/mds/Locker.cc
 +++ b/src/mds/Locker.cc
-@@ -756,13 +756,17 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, list<C
- 	(static_cast<ScatterLock *>(lock))->clear_scatter_wanted();
- 	break;
+@@ -616,7 +616,8 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, list<C
  
-+      case LOCK_XLOCK:
-+      case LOCK_XLOCKDONE:
-+	if (next != LOCK_SYNC)
-+	  break;
-+	// fall-thru
-+
- 	// to sync
-       case LOCK_EXCL_SYNC:
-       case LOCK_LOCK_SYNC:
-       case LOCK_MIX_SYNC:
-       case LOCK_XSYN_SYNC:
--      case LOCK_XLOCK:
--      case LOCK_XLOCKDONE:
- 	if (lock->get_parent()->is_replicated()) {
- 	  bufferlist softdata;
- 	  lock->encode_locked_state(softdata);
-diff --git a/src/mds/locks.c b/src/mds/locks.c
-index 69b6bd6..c7dd5be 100644
---- a/src/mds/locks.c
-+++ b/src/mds/locks.c
-@@ -103,8 +103,8 @@ const struct sm_state_t filelock[LOCK_MAX] = {
-     [LOCK_MIX_LOCK2] = { LOCK_LOCK, false, LOCK_LOCK, AUTH, 0,   REQ, 0,   0,   0,   0,   0,0,0,0 },
- 
-     [LOCK_PREXLOCK]  = { LOCK_LOCK, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   ANY, CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
--    [LOCK_XLOCK]     = { LOCK_SYNC, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
--    [LOCK_XLOCKDONE] = { LOCK_SYNC, false, LOCK_LOCK, XCL,  XCL, XCL, 0,   0,   XCL, 0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,CEPH_CAP_GSHARED,0 },
-+    [LOCK_XLOCK]     = { LOCK_LOCK, false, LOCK_LOCK, 0,    XCL, 0,   0,   0,   0,   0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
-+    [LOCK_XLOCKDONE] = { LOCK_LOCK, false, LOCK_LOCK, XCL,  XCL, XCL, 0,   0,   XCL, 0,   CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,CEPH_CAP_GSHARED,0 },
-     [LOCK_LOCK_XLOCK]= { LOCK_PREXLOCK,false,LOCK_LOCK,0,   XCL, 0,   0,   0,   0,   XCL, CEPH_CAP_GCACHE|CEPH_CAP_GBUFFER,0,0,0 },
- 
-     [LOCK_MIX]       = { 0,         false, LOCK_MIX,  0,    0,   REQ, ANY, 0,   0,   0,   CEPH_CAP_GRD|CEPH_CAP_GWR|CEPH_CAP_GLAZYIO,0,0,CEPH_CAP_GRD },
+   int loner_issued = 0, other_issued = 0, xlocker_issued = 0;
+   if (caps && in->is_head()) {
+-    in->get_caps_issued(&loner_issued, &other_issued, &xlocker_issued, lock->get_cap_shift(), 3);
++    in->get_caps_issued(&loner_issued, &other_issued, &xlocker_issued,
++			lock->get_cap_shift(), lock->get_cap_mask());
+     dout(10) << " next state is " << lock->get_state_name(next) 
+ 	     << " issued/allows loner " << gcap_string(loner_issued)
+ 	     << "/" << gcap_string(lock->gcaps_allowed(CAP_LONER, next))
 -- 
 1.7.11.7
 
