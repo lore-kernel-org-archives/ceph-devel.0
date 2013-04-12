@@ -1,139 +1,143 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 08/11] rbd: define an rbd object request flags field
-Date: Thu, 11 Apr 2013 21:18:28 -0500
-Message-ID: <51676EF4.7010703@inktank.com>
+Subject: [PATCH 09/11] rbd: add an object request flag for image data objects
+Date: Thu, 11 Apr 2013 21:18:39 -0500
+Message-ID: <51676EFF.60506@inktank.com>
 References: <51676E0F.2010504@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f182.google.com ([209.85.210.182]:33811 "EHLO
-	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752461Ab3DLCS3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 22:18:29 -0400
-Received: by mail-ia0-f182.google.com with SMTP id u20so2001320iag.27
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 19:18:28 -0700 (PDT)
+Received: from mail-ia0-f176.google.com ([209.85.210.176]:41136 "EHLO
+	mail-ia0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750974Ab3DLCSk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 22:18:40 -0400
+Received: by mail-ia0-f176.google.com with SMTP id o25so706576iad.7
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 19:18:39 -0700 (PDT)
 In-Reply-To: <51676E0F.2010504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We're going to need some more Boolean values for object requests,
-so create a flags bit field and use it to record whether the request
-is done.
+Add a flag to distinguish between object requests being done on
+standalone objects and requests being sent for objects representing
+rbd image data (i.e., object requests that are the result of image
+request).
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   58
-+++++++++++++++++++++++++--------------------------
- 1 file changed, 29 insertions(+), 29 deletions(-)
+ drivers/block/rbd.c |   37 +++++++++++++++++++++++++++++++++----
+ 1 file changed, 33 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2d27115..f7046e9 100644
+index f7046e9..3f162e2 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -170,10 +170,15 @@ enum obj_request_type {
- 	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES
+@@ -172,6 +172,7 @@ enum obj_request_type {
+
+ enum obj_req_flags {
+ 	OBJ_REQ_DONE,		/* completion flag: not done = 0, done = 1 */
++	OBJ_REQ_IMG_DATA,	/* object usage: standalone = 0, image = 1 */
  };
 
-+enum obj_req_flags {
-+	OBJ_REQ_DONE,		/* completion flag: not done = 0, done = 1 */
-+};
-+
  struct rbd_obj_request {
- 	const char		*object_name;
- 	u64			offset;		/* object start byte */
- 	u64			length;		/* bytes from offset */
-+	unsigned long		flags;
-
- 	struct rbd_img_request	*img_request;
- 	u64			img_offset;	/* image relative offset */
-@@ -194,7 +199,6 @@ struct rbd_obj_request {
- 	u64			xferred;	/* bytes transferred */
- 	u64			version;
- 	int			result;
--	atomic_t		done;
-
- 	rbd_obj_callback_t	callback;
- 	struct completion	completion;
-@@ -1072,6 +1076,29 @@ out_err:
- 	return NULL;
+@@ -1099,6 +1100,24 @@ static bool obj_request_done_test(struct
+rbd_obj_request *obj_request)
+ 	return test_bit(OBJ_REQ_DONE, &obj_request->flags) != 0;
  }
 
-+/*
-+ * The default/initial value for all object request flags is 0.  For
-+ * each flag, once its value is set to 1 it is never reset to 0
-+ * again.
-+ */
-+static void obj_request_done_set(struct rbd_obj_request *obj_request)
++static void obj_request_img_data_set(struct rbd_obj_request *obj_request)
 +{
-+	if (test_and_set_bit(OBJ_REQ_DONE, &obj_request->flags)) {
++	if (test_and_set_bit(OBJ_REQ_IMG_DATA, &obj_request->flags)) {
 +		struct rbd_img_request *img_request = obj_request->img_request;
 +		struct rbd_device *rbd_dev;
 +
 +		rbd_dev = img_request ? img_request->rbd_dev : NULL;
-+		rbd_warn(rbd_dev, "obj_request %p already marked done\n",
++		rbd_warn(rbd_dev, "obj_request %p already marked img_data\n",
 +			obj_request);
 +	}
 +}
 +
-+static bool obj_request_done_test(struct rbd_obj_request *obj_request)
++static bool obj_request_img_data_test(struct rbd_obj_request *obj_request)
 +{
 +	smp_mb();
-+	return test_bit(OBJ_REQ_DONE, &obj_request->flags) != 0;
++	return test_bit(OBJ_REQ_IMG_DATA, &obj_request->flags) != 0;
 +}
 +
  static void rbd_obj_request_get(struct rbd_obj_request *obj_request)
  {
  	dout("%s: obj %p (was %d)\n", __func__, obj_request,
-@@ -1192,33 +1219,6 @@ static int rbd_obj_request_wait(struct
-rbd_obj_request *obj_request)
- 	return wait_for_completion_interruptible(&obj_request->completion);
- }
-
--static void obj_request_done_init(struct rbd_obj_request *obj_request)
--{
--	atomic_set(&obj_request->done, 0);
--	smp_wmb();
--}
--
--static void obj_request_done_set(struct rbd_obj_request *obj_request)
--{
--	int done;
--
--	done = atomic_inc_return(&obj_request->done);
--	if (done > 1) {
--		struct rbd_img_request *img_request = obj_request->img_request;
--		struct rbd_device *rbd_dev;
--
--		rbd_dev = img_request ? img_request->rbd_dev : NULL;
--		rbd_warn(rbd_dev, "obj_request %p was already done\n",
--			obj_request);
--	}
--}
--
--static bool obj_request_done_test(struct rbd_obj_request *obj_request)
--{
--	smp_mb();
--	return atomic_read(&obj_request->done) != 0;
--}
--
- /*
-  * The default/initial value for all image request flags is 0.  Each
-  * is conditionally set to 1 at image request initialization time
-@@ -1475,10 +1475,10 @@ static struct rbd_obj_request
-*rbd_obj_request_create(const char *object_name,
- 	obj_request->object_name = memcpy(name, object_name, size);
- 	obj_request->offset = offset;
- 	obj_request->length = length;
-+	obj_request->flags = 0;
+@@ -1139,6 +1158,8 @@ static inline void rbd_img_obj_request_add(struct
+rbd_img_request *img_request,
+ 	rbd_obj_request_get(obj_request);
+ 	obj_request->img_request = img_request;
+ 	obj_request->which = img_request->obj_request_count;
++	rbd_assert(!obj_request_img_data_test(obj_request));
++	obj_request_img_data_set(obj_request);
+ 	rbd_assert(obj_request->which != BAD_WHICH);
+ 	img_request->obj_request_count++;
+ 	list_add_tail(&obj_request->links, &img_request->obj_requests);
+@@ -1158,6 +1179,7 @@ static inline void rbd_img_obj_request_del(struct
+rbd_img_request *img_request,
+ 	img_request->obj_request_count--;
+ 	rbd_assert(obj_request->which == img_request->obj_request_count);
  	obj_request->which = BAD_WHICH;
- 	obj_request->type = type;
- 	INIT_LIST_HEAD(&obj_request->links);
--	obj_request_done_init(obj_request);
- 	init_completion(&obj_request->completion);
- 	kref_init(&obj_request->kref);
++	rbd_assert(obj_request_img_data_test(obj_request));
+ 	rbd_assert(obj_request->img_request == img_request);
+ 	obj_request->img_request = NULL;
+ 	obj_request->callback = NULL;
+@@ -1343,7 +1365,9 @@ static void rbd_osd_req_callback(struct
+ceph_osd_request *osd_req,
 
+ 	dout("%s: osd_req %p msg %p\n", __func__, osd_req, msg);
+ 	rbd_assert(osd_req == obj_request->osd_req);
+-	rbd_assert(!!obj_request->img_request ^
++	rbd_assert(obj_request_img_data_test(obj_request) ^
++				!obj_request->img_request);
++	rbd_assert(obj_request_img_data_test(obj_request) ^
+ 				(obj_request->which == BAD_WHICH));
+
+ 	if (osd_req->r_result < 0)
+@@ -1413,12 +1437,13 @@ static struct ceph_osd_request *rbd_osd_req_create(
+ 					bool write_request,
+ 					struct rbd_obj_request *obj_request)
+ {
+-	struct rbd_img_request *img_request = obj_request->img_request;
+ 	struct ceph_snap_context *snapc = NULL;
+ 	struct ceph_osd_client *osdc;
+ 	struct ceph_osd_request *osd_req;
+
+-	if (img_request) {
++	if (obj_request_img_data_test(obj_request)) {
++		struct rbd_img_request *img_request = obj_request->img_request;
++
+ 		rbd_assert(write_request ==
+ 				img_request_write_test(img_request));
+ 		if (write_request)
+@@ -1605,10 +1630,13 @@ static void rbd_img_request_destroy(struct kref
+*kref)
+
+ static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
+ {
+-	struct rbd_img_request *img_request = obj_request->img_request;
++	struct rbd_img_request *img_request;
+ 	unsigned int xferred;
+ 	int result;
+
++	rbd_assert(obj_request_img_data_test(obj_request));
++	img_request = obj_request->img_request;
++
+ 	rbd_assert(!img_request_child_test(img_request));
+ 	rbd_assert(img_request->rq != NULL);
+
+@@ -1637,6 +1665,7 @@ static void rbd_img_obj_callback(struct
+rbd_obj_request *obj_request)
+ 	u32 which = obj_request->which;
+ 	bool more = true;
+
++	rbd_assert(obj_request_img_data_test(obj_request));
+ 	img_request = obj_request->img_request;
+
+ 	dout("%s: img %p obj %p\n", __func__, img_request, obj_request);
 -- 
 1.7.9.5
 
