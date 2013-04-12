@@ -1,58 +1,47 @@
-From: Ross David Turk <ross@inktank.com>
-Subject: Ceph Developer Summit
-Date: Thu, 11 Apr 2013 18:27:28 -0700
-Message-ID: <F54938FA-1070-4BF6-9E7D-0C0036F92384@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset=us-ascii
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 00/11] rbd: layered read functionality
+Date: Thu, 11 Apr 2013 21:14:39 -0500
+Message-ID: <51676E0F.2010504@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f50.google.com ([209.85.160.50]:51365 "EHLO
-	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752329Ab3DLB1a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 21:27:30 -0400
-Received: by mail-pb0-f50.google.com with SMTP id jt11so1134080pbb.9
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 18:27:30 -0700 (PDT)
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:65305 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750836Ab3DLCOk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Apr 2013 22:14:40 -0400
+Received: by mail-ie0-f176.google.com with SMTP id x12so2838958ief.35
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Apr 2013 19:14:39 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org
 
+This series puts in place code that is able to handle
+read requests on rbd clone images, forwarding them to
+a parent snapshot image if necessary.  Missing from this
+series is a temporary patch at the end which actually
+activates this functionality.  That will not go in
+until the rest of rbd layering functionality is in place.
 
-Hi, everyone!
+I'm going to restate that.  This code implements reads
+for layered rbd images, but the functionality will not
+be usable quite yet.
 
-I'm pleased to announce that we have begun preparations for the first 
-Ceph Developer Summit. This summit is where planning for the upcoming 
-Dumpling release will happen, and attendance is open to all. It will be 
-virtual (IRC, etherpad, video conference), so you won't even have to 
-get on an airplane! We're targeting May 6.
+Most of the series is adding flags to image and object
+requests, and putting in place some accounting in (parent)
+image requests so it can be used to record the completion
+of an object request that initiated it.
 
-Between now and then, we're gathering blueprints for new Ceph features! 
-A blueprint is a document that describes work someone intends to do, 
-usually reserved for larger features that require discussion. If 
-there's a feature you think Ceph should have, we encourage you to write 
-your thoughts and plans in a blueprint. Then make sure to attend the 
-summit to discuss its implementation with others in the Ceph community.
+					-Alex
 
-For more details, take a look at Patrick's blog post on ceph.com:
-
-http://ceph.com/events/ceph-developer-summit/
-
-Blueprints are currently being accepted at the Ceph wiki. On the front 
-page, at the bottom, there's a button to create a new one.
-
-Oh! Yeah! There's a wiki now. It's kind of bare-bones at the moment, as 
-most wikis are when they first enter the world, but it anxiously awaits 
-your content. Log in with your OpenID credentials and pick a username 
-to get started. If you're having trouble, or have feedback, your words 
-are always welcome at community@ceph.com.
-
-http://wiki.ceph.com
-
-Best,
-Ross
-
---
-Ross Turk
-Community, Inktank
-
-@rossturk @inktank @ceph
-
+[PATCH 01/11] rbd: record overall image request result
+[PATCH 02/11] rbd: record aggregate image transfer count
+[PATCH 03/11] rbd: record image-relative offset in object requests
+[PATCH 04/11] rbd: define image request flags
+[PATCH 05/11] rbd: define image request originator flag
+[PATCH 06/11] rbd: define image request layered flag
+[PATCH 07/11] rbd: encapsulate image object end request handling
+[PATCH 08/11] rbd: define an rbd object request flags field
+[PATCH 09/11] rbd: add an object request flag for image data objects
+[PATCH 10/11] rbd: probe the parent of an image if present
+[PATCH 11/11] rbd: implement layered reads
