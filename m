@@ -1,150 +1,109 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: new ceph-0.60 always crash mds
-Date: Sat, 13 Apr 2013 10:30:45 +0800
-Message-ID: <CAJiejCQTnPTpx+BDACQtGzTwu7=3UcPZpxm=AHoKbcz2PiC+dA@mail.gmail.com>
-References: <CAJiejCRunA9z=L2zTQP=b+=F2Pf17nG1CNoF1EN7rhvLwuqtKA@mail.gmail.com>
- <CAPYLRzgUTOFoiAr-siPKxPr_GgiJs69KgBWSc3Hy-qxqAaTzwg@mail.gmail.com>
- <CAJiejCS9cgvtGTtYEcmw7DMsP0EsUx_fg10RuLdeGo-rmFmGdw@mail.gmail.com> <CAPYLRzjbgmXAKxAsC+hwq-dJct8-oe6OQe2m9XYfieaek8569Q@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Re: ceph and efficient access of distributed resources
+Date: Sat, 13 Apr 2013 02:32:26 +0000
+Message-ID: <0444D343-5F96-49E9-9FCE-1C223129A3B1@intel.com>
+References: <loom.20130412T055215-88@post.gmane.org>
+	<51683184.9010301@inktank.com>,<CAPYLRzh669x=0xb9YGVkzEObGXheHd2o2LPpwU3Cwhfnzsb5ng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:50444 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752120Ab3DMCbH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Apr 2013 22:31:07 -0400
-Received: by mail-qa0-f45.google.com with SMTP id i20so91328qad.18
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Apr 2013 19:31:06 -0700 (PDT)
-In-Reply-To: <CAPYLRzjbgmXAKxAsC+hwq-dJct8-oe6OQe2m9XYfieaek8569Q@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:28406 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753470Ab3DMCcp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Apr 2013 22:32:45 -0400
+In-Reply-To: <CAPYLRzh669x=0xb9YGVkzEObGXheHd2o2LPpwU3Cwhfnzsb5ng@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
-Cc: maillist-linux <ceph-devel@vger.kernel.org>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2013/4/13 Gregory Farnum <greg@inktank.com>:
-> On Fri, Apr 12, 2013 at 5:19 PM, Drunkard Zhang <gongfan193@gmail.com> wrote:
->> 2013/4/13 Gregory Farnum <greg@inktank.com>:
->>> Have you made any changes from the default settings? That assert
->>
->> Do you means one of these settings?
->> auth cluster required = cephx
->> auth service required = cephx
->> auth client required = cephx
->> cephx require signatures = true
->> cephx cluster require signatures = true
->> cephx service require signatures = true
->> cephx sign messages = true
->> keyring = /etc/ceph/keyring
->
-> These all look fine.
->
->>
->> yes, these was my testing configs. And the command created the cluster was:
->> mkcephfs -v -a -c /etc/ceph/ceph.conf --mkfs
->>
->> I thought it was permission problem, so I grabbed just all keys from
->> 'ceph auth list' into /etc/ceph/keyring, mds still crashs.
->>
->> I wondering which point I should check for MDS's permission? Is it
->> just 'ceph auth list' ?
->
-> Yeah. Mine has pretty broad permissions:
-> mds.a
->         key: AQC0omhRaPzNLBAAz5J/JdZ6LrJo/DNG0ns8xg==
->         caps: [mds] allow
->         caps: [mon] allow *
->         caps: [osd] allow *
->
-> but I wasn't sure if yours were more constricted on pool access or something.
-
-Didn't change anything since created. Here's my previous config, is
-there any improper ?
-
-[global]
-cluster network = 10.205.119.0/24, 150.164.100.0/24
-tcp nodelay = true
-;tcp rcvbuf = 32*1024*1024
-;ms bind ipv6 = true
-;ms tcp read timeout = 900
-
-# Auth
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
-cephx require signatures = true
-cephx cluster require signatures = true
-cephx service require signatures = true
-cephx sign messages = true
-keyring = /etc/ceph/keyring
-
-mon osd full ratio = .85
-mon osd nearfull ratio = .75
-
-max open files = 812150
-log file = /var/log/ceph/$name.log
-pid file = /var/run/ceph/$name.pid
-;debug osd = 20
-;debug filestore = 20
-
-; MON, Always create an odd number.
-[mon]
-mon data = /ceph/$name
-osd pool default size = 2
-;osd pool default crush rule = 0
-;mon clock drift allowed = 1
-;mon clock drift warn backoff = 30
-
-[mon.a]
-host = c15
-mon addr = 10.205.119.15:6789
-
-[mon.b]
-host = c16
-mon addr = 10.205.119.16:6789
-
-[mon.c]
-host = squid79-log-ceph
-mon addr = 150.164.100.79:6789
-
-; MDS
-[mds]
-;debug ms = 1
-;debug mds = 20
-
-[mds.u]
-host = c15
-
-[mds.v]
-host = c16
-
-;[mds.w]
-;host =
-
-; OSD
-[osd]
-osd data = /ceph/$name
-osd journal = /ceph/$name/journal
-osd journal size = 2048 ; journal size, in megabytes
-journal aio = true
-journal dio = true
-journal block align = true
-;osd recovery max active = 5
-
-;filestore max sync interval = 5
-filestore min sync interval = 0.01
-filestore fiemap = true
-
-;btrfs options = rw,noatime
-osd mkfs type = xfs
-osd mkfs options xfs = -f -L $name
-osd mount options xfs = rw,noatime,nodiratime
-
-[osd.0]
-host = c15
-devs = /dev/sdb1
-osd heartbeat address = 10.205.119.15
-public addr = 10.205.119.15
-cluster addr = 10.205.119.15
-
-[snipped 32 osd]
-
-I got 33 OSDs totally, distributed in 3 servers.
+V2UgYXJlIGFsc28gZGlzY3Vzc2luZyB0aGlzIGludGVybmFsbHksIGFuZCBjb21lIG91dCB3aXRo
+IGFuIGlkZWEgdG8gd2FsayBhcm91bmQgaXQoT25seSBmb3IgUkJEIGNhc2UsaGF2ZW50IHRoaW5r
+IGFib3V0IE9iaiBzdG9yZSksYnV0IG5vdCB5ZXQgdGVzdGVkLiAgSWYgTWFyayBhbmQgR3JlZyBj
+YW4gcHJvdmlkZSBzb21lIGZlZWRiYWNrLHRoYXQgd291bGQgYmUgZ3JlYXQuDQoNCldlIGFyZSB0
+cnlpbmcgdG8gd3JpdGUgYSBzY3JpcHQgdG8gZ2VuZXJhdGUgc29tZSBwb29scyxmb3IgcmFjayBB
+LHRoZXJlIGlzIGEgcG9vbCBBLHdoaWNoIGRlZmluZWQgdGhlIGNydXNoIHJ1bGVzZXQgdG8gY2hv
+b3NlIE9zZCBpbiByYWNrQSBhcyB0aGUgcHJpbWFyeS5zbyBpZiB3ZSBoYXZlIDEwIHJhY2tzLHdl
+IHdpbGwgaGF2ZSAxMCBwb29scyBhbmQgMTAgcnVsZXMuDQoNCldoZW4gdGhlIFZNIG1pZ3JhdGVk
+IHRvIG90aGVyIHJhY2ssb3IgdGhlIHZvbHVtZSBiZSBkZXRhY2hlZCBhbmQgYXR0YWNoZWQgdG8g
+YW5vdGhlciBWTSBob3N0ZWQgaW4gb3RoZXIgcmFjayxhIGRhdGEgbWlncmF0aW9uIGlzIG5lZWRl
+ZC53ZSBhcmUgdGhpbmtpbmcgYWJvdXQgaG93IHRvIHNtb290aCBzdWNoIG1pZ3JhdGlvbg0KDQq3
+otfUztK1xCBpUGhvbmUNCg0K1NogMjAxMy00LTEzo6wwOjIwo6wiR3JlZ29yeSBGYXJudW0iIDxn
+cmVnQGlua3RhbmsuY29tPiDQtLXAo7oNCg0KPiBJIHdhcyBpbiB0aGUgbWlkZGxlIG9mIHdyaXRp
+bmcgYSByZXNwb25zZSB0byB0aGlzIHdoZW4gTWFyaydzIGVtYWlsDQo+IGNhbWUgaW4sIHNvIEkn
+bGwganVzdCBhZGQgYSBmZXcgdGhpbmdzOg0KPiANCj4gT24gRnJpLCBBcHIgMTIsIDIwMTMgYXQg
+OTowOCBBTSwgTWFyayBOZWxzb24gPG1hcmsubmVsc29uQGlua3RhbmsuY29tPiB3cm90ZToNCj4+
+IE9uIDA0LzExLzIwMTMgMTA6NTkgUE0sIE1hdHRoaWFzIFVybGljaHMgd3JvdGU6DQo+Pj4gDQo+
+Pj4gQXMgSSB1bmRlcnN0YW5kIGl0LCBpbiBDZXBoIG9uZSBjYW4gY2x1c3RlciBzdG9yYWdlIG5v
+ZGVzLCBidXQgb3RoZXJ3aXNlDQo+Pj4gZXZlcnkgbm9kZSBpcyBlc3NlbnRpYWxseSBpZGVudGlj
+YWwsIHNvIGlmIHRocmVlIHN0b3JhZ2Ugbm9kZXMgaGF2ZSBhDQo+Pj4gZmlsZSwNCj4+PiBjZXBo
+IHJhbmRvbWx5IHVzZXMgb25lIG9mIHRoZW0uDQo+PiANCj4+IA0KPj4gQ2VwaCBjbHVzdGVycyBo
+YXZlIHRoZSBjb25jZXB0IG9mIHBvb2xzLCB3aGVyZSBlYWNoIHBvb2wgaGFzIGEgY2VydGFpbg0K
+Pj4gbnVtYmVyIG9mIHBsYWNlbWVudCBncm91cHMuICBQbGFjZW1lbnQgZ3JvdXBzIGFyZSBqdXN0
+IGNvbGxlY3Rpb25zIG9mDQo+PiBtYXBwaW5ncyB0byBPU0RzLiAgRWFjaCBQRyBoYXMgYSBwcmlt
+YXJ5IE9TRCBhbmQgYSBudW1iZXIgb2Ygc2Vjb25kYXJ5IG9uZXMsDQo+PiBiYXNlZCBvbiB0aGUg
+cmVwbGljYXRpb24gbGV2ZWwgeW91IHNldCB3aGVuIHlvdSBtYWtlIHRoZSBwb29sLiBXaGVuIGFu
+DQo+PiBvYmplY3QgZ2V0cyB3cml0dGVuIHRvIHRoZSBjbHVzdGVyLCBDUlVTSCB3aWxsIGRldGVy
+bWluZSB3aGljaCBQRyB0aGUgZGF0YQ0KPj4gc2hvdWxkIGJlIHNlbnQgdG8uICBUaGUgZGF0YSB3
+aWxsIGZpcnN0IGhpdCB0aGUgcHJpbWFyeSBPU0QgYW5kIHRoZW4NCj4+IHJlcGxpY2F0ZWQgb3V0
+IHRvIHRoZSBvdGhlciBPU0RzIGluIHRoZSBzYW1lIHBsYWNlbWVudCBncm91cC4NCj4+IA0KPj4g
+Q3VycmVudGx5IHJlYWRzIGFsd2F5cyBjb21lIGZyb20gdGhlIHByaW1hcnkgT1NEIGluIHRoZSBw
+bGFjZW1lbnQgZ3JvdXANCj4+IHJhdGhlciB0aGFuIGEgc2Vjb25kYXJ5IGV2ZW4gaWYgdGhlIHNl
+Y29uZGFyeSBpcyBjbG9zZXIgdG8gdGhlIGNsaWVudC4gSSdtDQo+PiBndWVzc2luZyB0aGVyZSBh
+cmUgcHJvYmFibHkgc29tZSB0cmlja3MgdGhhdCBjb3VsZCBiZSBwbGF5ZWQgaGVyZSB0byBiZXN0
+DQo+PiBkZXRlcm1pbmUgd2hpY2ggbWFjaGluZXMgc2hvdWxkIHNlcnZpY2Ugd2hpY2ggY2xpZW50
+cywgYnV0IGl0J3Mgbm90IGV4YWN0bHkNCj4+IGFuIGVhc3kgcHJvYmxlbS4gIEluIG1hbnkgY2Fz
+ZXMgc3ByZWFkaW5nIHJlYWRzIG91dCBvdmVyIGFsbCBvZiB0aGUgT1NEcyBpbg0KPj4gdGhlIGNs
+dXN0ZXIgaXMgYmV0dGVyIHRoYW4gdHJ5aW5nIHRvIG9wdGltaXplIHJlYWRzIHRvIG9ubHkgaGl0
+IGxvY2FsIE9TRHMuDQo+PiBJZGVhbGx5IHlvdSBwcm9iYWJseSB3YW50IHRvIHByZWZlciBsb2Nh
+bCBPU0RzIGZpcnN0LCBidXQgbm90IGV4Y2x1c2l2ZWx5Lg0KPiANCj4gSW4gYWRkaXRpb24gdG8g
+anVzdCBkZXRlcm1pbmluZyB0aGUgbG9jYWxpdHkgKHdoaWNoIHdlJ3ZlIHN0YXJ0ZWQgb24NCj4g
+dmlhIGV4dGVybmFsIGludGVyZmFjZXMpLCB0aGlzIGhhcyBhIG51bWJlciBvZiBjb25zaXN0ZW5j
+eSBjaGFsbGVuZ2VzDQo+IGFzc29jaWF0ZWQgd2l0aCBpdC4gVGhlIGluZnJhc3RydWN0dXJlIHdl
+IGhhdmUgdG8gYWxsb3cgcmVhZGluZyBmcm9tDQo+IG5vbi1wcmltYXJpZXMgdGVuZHMgdG8gaW52
+b2x2ZSBjbGllbnRzIGhhdmluZyBkaWZmZXJlbnQgY29uc2lzdGVuY3kNCj4gZXhwZWN0YXRpb25z
+LCBhbmQgaXQncyBub3QgZnVsbHkgZXhwbG9yZWQgeWV0IG9yIHNldCB1cCBzbyB0aGF0DQo+IGNs
+aWVudHMgY2FuIGNob29zZSB0byByZWFkIGZyb20gYSBzcGVjaWZpYyBub24tcHJpbWFyeSChqiB0
+aGUgb3B0aW9ucw0KPiBjdXJyZW50bHkgYXJlICJsb2NhbCBpZiBhdmFpbGFibGUgYW5kIHdlIGNh
+biB0ZWxsIiwgInJhbmRvbSIsIGFuZA0KPiAicHJpbWFyeSIuDQo+IA0KPiANCj4+PiBUaGlzIGlz
+IG5vdCBlZmZpY2llbnQgdXNlIG9mIG5ldHdvcmsgcmVzb3VyY2VzIGluIGEgZGlzdHJpYnV0ZWQg
+ZGF0YQ0KPj4+IGNlbnRlci4NCj4+PiBPciBldmVuIGluIGEgbXVsdGktcmFjayBzaXR1YXRpb24u
+DQo+Pj4gDQo+Pj4gSSB3YW50IHRvIHByZWZlciBhY2Nlc3Npbmcgbm9kZXMgd2hpY2ggYXJlICJs
+b2NhbCIuDQo+Pj4gVGhlIGNsaWVudCBpbiByYWNrIEEgc2hvdWxkIHByZWZlciB0byByZWFkIGZy
+b20gdGhlIHN0b3JhZ2Ugbm9kZXMgdGhhdCBhcmUNCj4+PiBhbHNvIGluIHJhY2sgQS4NCj4+PiBE
+aXR0byBmb3IgcmFjayBCLg0KPj4+IERpdHRvIGZvciBzL3JhY2svZGF0YSBjZW50ZXIvLg0KPiAN
+Cj4gSSBkbyB3YW50IHRvIGFzayBpZiB5b3UncmUgc3VyZSB0aGlzIGlzIGFzIHVzZWZ1bCBhcyB5
+b3UgdGhpbmsgaXQgaXMuDQo+IFRoZXJlIGFyZSB1c2UgY2FzZXMgd2hlcmUgaXQgd291bGQgYmUs
+IGJ1dCBzaW5jZSB3cml0ZXMgaGF2ZSB0bw0KPiB0cmF2ZXJzZSB0aGVzZSBsaW5rcyAoYXQgYSBt
+dWx0aXBsZSBvZiB0aGUgYWN0dWFsIHdyaXRlIGNvdW50KSBhcyB3ZWxsDQo+IHlvdSBzaG91bGQg
+YmUgdmVyeSBjZXJ0YWluLiA6KQ0KPiANCj4+PiBBcyBmYXIgYXMgSSB1bmRlcnN0YW5kLCB0aGUg
+Q2VwaCBjbGllbnRzIGNhbid0IGRvIHRoYXQuDQo+Pj4gKE5vciBjYW4gQ2VwaCBub2RlcyBhbW9u
+ZyBlYWNoIG90aGVyLCBidXQgSSBjYXJlIGxlc3MgYWJvdXQgdGhhdCwgYXMgbW9zdA0KPj4+IHRy
+YWZmaWMgaXMgcmVhZGluZyBkYXRhLikNCj4+PiANCj4+PiBJIHRoaW5rIHRoaXMgaXMgYW4gaW1w
+b3J0YW50IGZlYXR1cmUgZm9yIG1hbnkgaGlnaC1yZWxpYWJpbGl0eSBzaXR1YXRpb25zLg0KPj4+
+IA0KPj4+IFdoYXQgd291bGQgYmUgdGhlIG5leHQgc3RlcHMgdG8gZ2V0IHRoaXMgZmVhdHVyZSwg
+YXNzdW1pbmcgSSBkb24ndCBoYXZlDQo+Pj4gdGltZQ0KPj4+IHRvIGltcGxlbWVudCBpdCBteXNl
+bGY/IFBlcnNpc3RlbnRseSBhbm5veSB0aGlzIG1haWxpbmcgbGlzdCB0aGF0IHBlb3BsZQ0KPj4+
+IG5lZWQgaXQ/IE9mZmVyIHRvIHBheSBmb3IgaW1wbGVtZW50aW5nIGl0PyBTaHV0IHVwIGFuZCBs
+b29rIGZvciBzb21lIG90aGVyDQo+Pj4gc29sdXRpb24gLS0gd2hpY2ggSSBhbHJlYWR5IGRpZCwg
+YnV0IEkgZGlkbid0IGZpbmQgYW55IHRoYXQncyBhcyBnb29kIGFzDQo+Pj4gQ2VwaCwgb3RoZXJ3
+aXNlPw0KPj4gDQo+PiANCj4+IEkgZG9uJ3QgcmVhbGx5IGhhdmUgdGhhdCBtdWNoIGluc2lnaHQg
+aW50byB0aGUgcHJvZHVjdCByb2FkbWFwLCBidXQgSSBhc3N1bWUNCj4+IHRoYXQgaWYgeW91IHNw
+b2tlIHRvIHNvbWUgb2Ygb3VyIGJ1c2luZXNzIGZvbGtzIGFib3V0IHBheWluZyBmb3IgZGV2ZWxv
+cG1lbnQNCj4+IHdvcmsgeW91J2QgYXQgbGVhc3QgZ2V0IGEgcmVzcG9uc2UuDQo+IA0KPiBZZWFo
+LiBJdCdzIG5vdCBhIGZlYXR1cmUgaW4gbGFyZ2UgZW5vdWdoIGRlbWFuZCByaWdodCBub3cgdGhh
+dCB3ZSBjYW4NCj4gc2VlIHRvIGJlIHdvcnRoIGJ1bXBpbmcgdXAgb3ZlciBvdGhlciB0aGluZ3Ms
+IGJ1dCBJIGRvbid0IHRoaW5rDQo+IGFueWJvZHkncyBvcHBvc2VkIHRvIGl0IGV4aXN0aW5nLiBB
+cyB3aXRoIE1hcmsgSSBoYXZlIG5vIGlkZWEgaWYNCj4geW91J3JlIGJlc3Qgb2ZmIGFza2luZyB1
+cyBvciBvdGhlcnMgdG8gZG8gdGhpbmdzIGZvciBtb25leSwgYnV0IGl0DQo+IHdvdWxkIGNlcnRh
+aW5seSBoYXZlIHRvIGdvIHRocm91Z2ggYnVzaW5lc3MgY2hhbm5lbHMuIChJZiBzb21lYm9keQ0K
+PiBvdXRzaWRlIElua3RhbmsgZGlkIHdhbnQgdG8gaW1wbGVtZW50IHRoaXMgZmVhdHVyZSwgSSdk
+IGxvdmUgdG8gdGFsaw0KPiB0byB0aGVtIGFib3V0IGl0IG9uIGFuIGluZm9ybWFsIGJ1dCBvbmdv
+aW5nIGJhc2lzIGR1cmluZyBkZXZlbG9wbWVudC4pDQo+IC1HcmVnDQo+IFNvZnR3YXJlIEVuZ2lu
+ZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNvbSB8IGh0dHA6Ly9jZXBoLmNvbQ0KPiAtLQ0KPiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
+Lmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
