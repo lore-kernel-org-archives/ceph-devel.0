@@ -1,64 +1,56 @@
-From: Martin Wilderoth <martin.wilderoth@linserv.se>
-Subject: osd stops
-Date: Sun, 14 Apr 2013 07:07:17 +0200 (CEST)
-Message-ID: <be5ef859-228b-4c98-a8a6-1870fface1ea@mail.linserv.se>
-References: <ab2410b5-fe4c-4600-a2c0-f36a708fb6e2@mail.linserv.se>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 00/11] rbd: layered read functionality
+Date: Sun, 14 Apr 2013 10:22:31 -0700
+Message-ID: <516AE5D7.4020909@inktank.com>
+References: <51676E0F.2010504@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 195-67-7-55.customer.telia.com ([195.67.7.55]:38311 "EHLO
-	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751139Ab3DNFSh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Apr 2013 01:18:37 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail.linserv.se (Postfix) with ESMTP id 0FA1E5E004
-	for <ceph-devel@vger.kernel.org>; Sun, 14 Apr 2013 07:07:19 +0200 (CEST)
-Received: from mail.linserv.se ([127.0.0.1])
-	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id KWze4HhqHPlN for <ceph-devel@vger.kernel.org>;
-	Sun, 14 Apr 2013 07:07:17 +0200 (CEST)
-Received: from mail.linserv.se (mail.linserv.se [195.67.7.55])
-	by mail.linserv.se (Postfix) with ESMTP id CD42C5E003
-	for <ceph-devel@vger.kernel.org>; Sun, 14 Apr 2013 07:07:17 +0200 (CEST)
-In-Reply-To: <ab2410b5-fe4c-4600-a2c0-f36a708fb6e2@mail.linserv.se>
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:43226 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752117Ab3DNRWi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Apr 2013 13:22:38 -0400
+Received: by mail-pd0-f182.google.com with SMTP id 3so2123394pdj.27
+        for <ceph-devel@vger.kernel.org>; Sun, 14 Apr 2013 10:22:38 -0700 (PDT)
+In-Reply-To: <51676E0F.2010504@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hello,
+On 04/11/2013 07:14 PM, Alex Elder wrote:
+> This series puts in place code that is able to handle
+> read requests on rbd clone images, forwarding them to
+> a parent snapshot image if necessary.  Missing from this
+> series is a temporary patch at the end which actually
+> activates this functionality.  That will not go in
+> until the rest of rbd layering functionality is in place.
+>
+> I'm going to restate that.  This code implements reads
+> for layered rbd images, but the functionality will not
+> be usable quite yet.
+>
+> Most of the series is adding flags to image and object
+> requests, and putting in place some accounting in (parent)
+> image requests so it can be used to record the completion
+> of an object request that initiated it.
+>
+> 					-Alex
+>
+> [PATCH 01/11] rbd: record overall image request result
+> [PATCH 02/11] rbd: record aggregate image transfer count
+> [PATCH 03/11] rbd: record image-relative offset in object requests
+> [PATCH 04/11] rbd: define image request flags
+> [PATCH 05/11] rbd: define image request originator flag
+> [PATCH 06/11] rbd: define image request layered flag
+> [PATCH 07/11] rbd: encapsulate image object end request handling
+> [PATCH 08/11] rbd: define an rbd object request flags field
+> [PATCH 09/11] rbd: add an object request flag for image data objects
+> [PATCH 10/11] rbd: probe the parent of an image if present
+> [PATCH 11/11] rbd: implement layered reads
 
-I have a ceph cluster running bobtail 0.56.4
+These are all pretty straight-forward since the infrastructure is in
+place. They all look good.
 
-I have been playing with the rbd images and kvm.
-The hardware for the osd,mon is 3 x HP G5 and 2 x SATA 2TB disk.
-and 2xSAS for the journals. (Old hardware)
-
-I have one host running kvm-rbd against the setup.
-The network is 1GB network.
-
-The scenario is as follows. I run my vm servers for some day/s
-then it hangs the cluster starts to recover and 2 osd+mon are down.
-And i have to restart that server.=20
-Health goes to OK after recovering and I can continue.
-
-I have noticed that i get high load related ceph-mon and osd
-on one of the hosts. The host that get high load is not always the same=
-=2E
-I guess that=E2=80=99s the host that the kvm-host uses for mon.
-
-What i can't figure out is why the osd's are stopping/crashing.
-And all load is sent to only that server mon, if that's what is happeni=
-ng ????
-Is it's possible to limit something. It feels like i'm overloading the =
-system ????
-
-I have not turned on debug. Please let me know if any logs would be of =
-any interest.
-
- /Best Regards Martin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
