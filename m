@@ -1,51 +1,33 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: Scrub shutdown the OSD process
-Date: Mon, 15 Apr 2013 20:32:59 +0200
-Message-ID: <1366050779.14655.4.camel@localhost>
-References: <1366018923.3018.3.camel@localhost>
-	<CAPYLRziFNxnUhyxHRUCzZBF6oQwrWt8YdxBtDrKzMMNuyuW=YQ@mail.gmail.com>
-	<1366046351.26980.0.camel@localhost>
-	<CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA@mail.gmail.com>
-Reply-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: ceph and efficient access of distributed resources
+Date: Mon, 15 Apr 2013 22:06:47 +0200
+Message-ID: <CAJH6TXgurT4yUshaH4QOgUKOaB3DqQd1-=HPshp+eH5HB7p3Hg@mail.gmail.com>
+References: <loom.20130412T055215-88@post.gmane.org>
+	<51683184.9010301@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:47895 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755190Ab3DOUGs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Apr 2013 16:06:48 -0400
+Received: by mail-wi0-f169.google.com with SMTP id c10so2013380wiw.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Apr 2013 13:06:47 -0700 (PDT)
+In-Reply-To: <51683184.9010301@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-TGUgbHVuZGkgMTUgYXZyaWwgMjAxMyDDoCAxMDo1NyAtMDcwMCwgR3JlZ29yeSBGYXJudW0gYSDD
-qWNyaXQgOgo+IE9uIE1vbiwgQXByIDE1LCAyMDEzIGF0IDEwOjE5IEFNLCBPbGl2aWVyIEJvbnZh
-bGV0IDxjZXBoLmxpc3RAZGFldmVsLmZyPiB3cm90ZToKPiA+IExlIGx1bmRpIDE1IGF2cmlsIDIw
-MTMgw6AgMTA6MTYgLTA3MDAsIEdyZWdvcnkgRmFybnVtIGEgw6ljcml0IDoKPiA+PiBBcmUgeW91
-IHNheWluZyB5b3Ugc2F3IHRoaXMgcHJvYmxlbSBtb3JlIHRoYW4gb25jZSwgYW5kIHNvIHlvdQo+
-ID4+IGNvbXBsZXRlbHkgd2lwZWQgdGhlIE9TRCBpbiBxdWVzdGlvbiwgdGhlbiBicm91Z2h0IGl0
-IGJhY2sgaW50byB0aGUKPiA+PiBjbHVzdGVyLCBhbmQgbm93IGl0J3Mgc2VlaW5nIHRoaXMgZXJy
-b3IgYWdhaW4/Cj4gPgo+ID4gWWVzLCBpdCdzIGV4YWN0bHkgdGhhdC4KPiA+Cj4gPgo+ID4+IEFy
-ZSBhbnkgb3RoZXIgT1NEcyBleHBlcmllbmNpbmcgdGhpcyBpc3N1ZT8KPiA+Cj4gPiBObywgb25s
-eSB0aGlzIG9uZSBoYXZlIHRoZSBwcm9ibGVtLgo+IAo+IERpZCB5b3UgcnVuIHNjcnVicyB3aGls
-ZSB0aGlzIG5vZGUgd2FzIG91dCBvZiB0aGUgY2x1c3Rlcj8gSWYgeW91Cj4gd2lwZWQgdGhlIGRh
-dGEgYW5kIHRoaXMgaXMgcmVjdXJyaW5nIHRoZW4gdGhpcyBpcyBhcHBhcmVudGx5IGFuIGlzc3Vl
-Cj4gd2l0aCB0aGUgY2x1c3RlciBzdGF0ZSwgbm90IGp1c3Qgb25lIG5vZGUsIGFuZCBhbnkgb3Ro
-ZXIgcHJpbWFyeSBmb3IKPiB0aGUgYnJva2VuIFBHKHMpIHNob3VsZCBjcmFzaCBhcyB3ZWxsLiBD
-YW4geW91IHZlcmlmeSBieSB0YWtpbmcgdGhpcwo+IG9uZSBkb3duIGFuZCB0aGVuIGRvaW5nIGEg
-ZnVsbCBzY3J1Yj8KPiAtR3JlZwo+IFNvZnR3YXJlIEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0
-YW5rLmNvbSB8IGh0dHA6Ly9jZXBoLmNvbQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCj4gCgpBbHNvIG5vdGUgdGhhdCBubyBQRyBpcyBtYXJrZWQgImNvcnJ1
-cHRlZCIuIEkgaGF2ZSBvbmx5IFBHIGluICJhY3RpdmUKK3JlbWFwcGVkIiBvciAiYWN0aXZlK2Rl
-Z3JhZGVkIi4KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
-L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+2013/4/12 Mark Nelson <mark.nelson@inktank.com>
+
+> Currently reads always come from the primary OSD in the placement group
+> rather than a secondary even if the secondary is closer to the client.
+>
+
+In this way, only one OSD will be involved in reading an object, this will
+result in a bottleneck if multiple clients needs to access to the same file.
+
+For example, a 3KB CSS file served by a webserver to 400 users, will be
+read just from one OSD. 400 users directed to 1 OSD  while (in case of
+replica 3) other 2 OSDs are available?
