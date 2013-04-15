@@ -1,216 +1,181 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: change how "safe" callback is used
-Date: Mon, 15 Apr 2013 11:20:42 -0500
-Message-ID: <516C28DA.5000702@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph and efficient access of distributed resources
+Date: Mon, 15 Apr 2013 09:42:23 -0700
+Message-ID: <CAPYLRzgB_NiMJJh06Htpsxq_NbwY041uS2rhEOphcjK6gORmrg@mail.gmail.com>
+References: <loom.20130412T055215-88@post.gmane.org>
+	<51683184.9010301@inktank.com>
+	<CAPYLRzh669x=0xb9YGVkzEObGXheHd2o2LPpwU3Cwhfnzsb5ng@mail.gmail.com>
+	<0444D343-5F96-49E9-9FCE-1C223129A3B1@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:42019 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753537Ab3DOQUn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Apr 2013 12:20:43 -0400
-Received: by mail-ia0-f174.google.com with SMTP id o25so1670935iad.5
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Apr 2013 09:20:43 -0700 (PDT)
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:43910 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755756Ab3DOQm0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Apr 2013 12:42:26 -0400
+Received: by mail-qa0-f44.google.com with SMTP id j8so541081qah.10
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Apr 2013 09:42:23 -0700 (PDT)
+In-Reply-To: <0444D343-5F96-49E9-9FCE-1C223129A3B1@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-(This is an alternative to another patch that Zheng Yan
-posted, "ceph: add osd request to inode unsafe list in
-advance".  As noted, he's reviewed this one and I think
-it can therefore take the place of his.)
+Yeah, this is very much like DreamHost is doing with their
+DreamCompute installation (you can find some talks about it online, I
+believe, though I'm not sure how much detail they include there versus
+in the Q&As).
 
-An osd request currently has two callbacks.  They inform the
-initiator of the request when we've received confirmation for the
-target osd that a request was received, and when the osd indicates
-all changes described by the request are durable.
+On Fri, Apr 12, 2013 at 7:32 PM, Chen, Xiaoxi <xiaoxi.chen@intel.com> w=
+rote:
+> We are also discussing this internally, and come out with an idea to =
+walk around it(Only for RBD case,havent think about Obj store),but not =
+yet tested.  If Mark and Greg can provide some feedback,that would be g=
+reat.
+>
+> We are trying to write a script to generate some pools,for rack A,the=
+re is a pool A,which defined the crush ruleset to choose Osd in rackA a=
+s the primary.so if we have 10 racks,we will have 10 pools and 10 rules=
+=2E
+>
+> When the VM migrated to other rack,or the volume be detached and atta=
+ched to another VM hosted in other rack,a data migration is needed.we a=
+re thinking about how to smooth such migration
 
-The only time the second callback is used is in the ceph file system
-for a synchronous write.  There's a race that makes some handling of
-this case unsafe.  This patch addresses this problem.  The error
-handling for this callback is also kind of gross, and this patch
-changes that as well.
+This is one of the use cases that layering is designed to handle (in
+addition to standard cloning and snapshots). Just create a clone that
+lives in the new pool, and either let it copy-up to the new position
+lazily or run the command at a time when you know your network is less
+busy.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-
-In ceph_sync_write(), if a safe callback is requested we want to add
-the request on the ceph inode's unsafe items list.  Because items on
-this list must have their tid set (by ceph_osd_start_request()), the
-request added *after* the call to that function returns.  The
-problem with this is that there's a race between starting the
-request and adding it to the unsafe items list; the request may
-already be complete before ceph_sync_write() even begins to put it
-on the list.
-
-
-To address this, we change the way the "safe" callback is used.
-Rather than just calling it when the request is "safe", we use it to
-notify the initiator the bounds (start and end) of the period during
-which the request is *unsafe*.  So the initiator gets notified just
-before the request gets sent to the osd (when it is "unsafe"), and
-again when it's known the results are durable (it's no longer
-unsafe).  The first call will get made just before the request
-message gets sent to the messenger for the first time, *before* the
-osd client's request mutex gets dropped.
-
-We then have this callback function insert the request on the ceph
-inode's unsafe list when we're told the request is unsafe.  This
-will avoid the race because this call will be made under protection
-of the osd client's request mutex.  It also nicely groups the setup
-and cleanup of the state associated with managing unsafe requests.
-
-The name of the "safe" callback field is changed to "unsafe" rather
-to better reflect its new purpose.  It has a Boolean "unsafe"
-parameter to indicate whether the request is becoming unsafe or is
-now safe.  Because the "msg" parameter wasn't used, we drop that.
-
-This resolves the original problem reportedin:
-    http://tracker.ceph.com/issues/4706
-
-Reported-by: Yan, Zheng <zheng.z.yan@intel.com>
-Signed-off-by: Alex Elder <elder@inktank.com>
-Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/file.c                  |   52
-+++++++++++++++++++++------------------
- include/linux/ceph/osd_client.h |    4 ++-
- net/ceph/osd_client.c           |    6 +++--
- 3 files changed, 35 insertions(+), 27 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 1d8d430..044f3bf 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -446,19 +446,35 @@ done:
- }
-
- /*
-- * Write commit callback, called if we requested both an ACK and
-- * ONDISK commit reply from the OSD.
-+ * Write commit request unsafe callback, called to tell us when a
-+ * request is unsafe (that is, in flight--has been handed to the
-+ * messenger to send to its target osd).  It is called again when
-+ * we've received a response message indicating the request is
-+ * "safe" (its CEPH_OSD_FLAG_ONDISK flag is set), or when a request
-+ * is completed early (and unsuccessfully) due to a timeout or
-+ * interrupt.
-+ *
-+ * This is used if we requested both an ACK and ONDISK commit reply
-+ * from the OSD.
-  */
--static void sync_write_commit(struct ceph_osd_request *req,
--			      struct ceph_msg *msg)
-+static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool
-unsafe)
- {
- 	struct ceph_inode_info *ci = ceph_inode(req->r_inode);
-
--	dout("sync_write_commit %p tid %llu\n", req, req->r_tid);
--	spin_lock(&ci->i_unsafe_lock);
--	list_del_init(&req->r_unsafe_item);
--	spin_unlock(&ci->i_unsafe_lock);
--	ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
-+	dout("%s %p tid %llu %ssafe\n", __func__, req, req->r_tid,
-+		unsafe ? "un" : "");
-+	if (unsafe) {
-+		ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
-+		spin_lock(&ci->i_unsafe_lock);
-+		list_add_tail(&req->r_unsafe_item,
-+			      &ci->i_unsafe_writes);
-+		spin_unlock(&ci->i_unsafe_lock);
-+	} else {
-+		spin_lock(&ci->i_unsafe_lock);
-+		list_del_init(&req->r_unsafe_item);
-+		spin_unlock(&ci->i_unsafe_lock);
-+		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
-+	}
- }
-
- /*
-@@ -570,7 +586,8 @@ more:
-
- 		if ((file->f_flags & O_SYNC) == 0) {
- 			/* get a second commit callback */
--			req->r_safe_callback = sync_write_commit;
-+			req->r_unsafe_callback = ceph_sync_write_unsafe;
-+			req->r_inode = inode;
- 			own_pages = true;
- 		}
- 	}
-@@ -581,21 +598,8 @@ more:
- 	ceph_osdc_build_request(req, pos, snapc, vino.snap, &mtime);
-
- 	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
--	if (!ret) {
--		if (req->r_safe_callback) {
--			/*
--			 * Add to inode unsafe list only after we
--			 * start_request so that a tid has been assigned.
--			 */
--			spin_lock(&ci->i_unsafe_lock);
--			list_add_tail(&req->r_unsafe_item,
--				      &ci->i_unsafe_writes);
--			spin_unlock(&ci->i_unsafe_lock);
--			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
--		}
--		
-+	if (!ret)
- 		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
--	}
-
- 	if (file->f_flags & O_DIRECT)
- 		ceph_put_page_vector(pages, num_pages, false);
-diff --git a/include/linux/ceph/osd_client.h
-b/include/linux/ceph/osd_client.h
-index 2a68a74..0d3358e 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -29,6 +29,7 @@ struct ceph_authorizer;
-  */
- typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *,
- 				     struct ceph_msg *);
-+typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *,
-bool);
-
- /* a given osd we're communicating with */
- struct ceph_osd {
-@@ -149,7 +150,8 @@ struct ceph_osd_request {
- 	struct kref       r_kref;
- 	bool              r_mempool;
- 	struct completion r_completion, r_safe_completion;
--	ceph_osdc_callback_t r_callback, r_safe_callback;
-+	ceph_osdc_callback_t r_callback;
-+	ceph_osdc_unsafe_callback_t r_unsafe_callback;
- 	struct ceph_eversion r_reassert_version;
- 	struct list_head  r_unsafe_item;
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 939be67..5b7ce57 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1403,8 +1403,8 @@ static void handle_osds_timeout(struct work_struct
-*work)
-
- static void complete_request(struct ceph_osd_request *req)
- {
--	if (req->r_safe_callback)
--		req->r_safe_callback(req, NULL);
-+	if (req->r_unsafe_callback)
-+		req->r_unsafe_callback(req, false);
- 	complete_all(&req->r_safe_completion);  /* fsync waiter */
- }
-
-@@ -2105,6 +2105,8 @@ int ceph_osdc_start_request(struct ceph_osd_client
-*osdc,
- 		dout("send_request %p no up osds in pg\n", req);
- 		ceph_monc_request_next_osdmap(&osdc->client->monc);
- 	} else {
-+		if (req->r_unsafe_callback)
-+			req->r_unsafe_callback(req, true);
- 		__send_queued(osdc);
- 	}
- 	rc = 0;
--- 
-1.7.9.5
-
+>
+> =B7=A2=D7=D4=CE=D2=B5=C4 iPhone
+>
+> =D4=DA 2013-4-13=A3=AC0:20=A3=AC"Gregory Farnum" <greg@inktank.com> =D0=
+=B4=B5=C0=A3=BA
+>
+>> I was in the middle of writing a response to this when Mark's email
+>> came in, so I'll just add a few things:
+>>
+>> On Fri, Apr 12, 2013 at 9:08 AM, Mark Nelson <mark.nelson@inktank.co=
+m> wrote:
+>>> On 04/11/2013 10:59 PM, Matthias Urlichs wrote:
+>>>>
+>>>> As I understand it, in Ceph one can cluster storage nodes, but oth=
+erwise
+>>>> every node is essentially identical, so if three storage nodes hav=
+e a
+>>>> file,
+>>>> ceph randomly uses one of them.
+>>>
+>>>
+>>> Ceph clusters have the concept of pools, where each pool has a cert=
+ain
+>>> number of placement groups.  Placement groups are just collections =
+of
+>>> mappings to OSDs.  Each PG has a primary OSD and a number of second=
+ary ones,
+>>> based on the replication level you set when you make the pool. When=
+ an
+>>> object gets written to the cluster, CRUSH will determine which PG t=
+he data
+>>> should be sent to.  The data will first hit the primary OSD and the=
+n
+>>> replicated out to the other OSDs in the same placement group.
+>>>
+>>> Currently reads always come from the primary OSD in the placement g=
+roup
+>>> rather than a secondary even if the secondary is closer to the clie=
+nt. I'm
+>>> guessing there are probably some tricks that could be played here t=
+o best
+>>> determine which machines should service which clients, but it's not=
+ exactly
+>>> an easy problem.  In many cases spreading reads out over all of the=
+ OSDs in
+>>> the cluster is better than trying to optimize reads to only hit loc=
+al OSDs.
+>>> Ideally you probably want to prefer local OSDs first, but not exclu=
+sively.
+>>
+>> In addition to just determining the locality (which we've started on
+>> via external interfaces), this has a number of consistency challenge=
+s
+>> associated with it. The infrastructure we have to allow reading from
+>> non-primaries tends to involve clients having different consistency
+>> expectations, and it's not fully explored yet or set up so that
+>> clients can choose to read from a specific non-primary =A1=AA the op=
+tions
+>> currently are "local if available and we can tell", "random", and
+>> "primary".
+>>
+>>
+>>>> This is not efficient use of network resources in a distributed da=
+ta
+>>>> center.
+>>>> Or even in a multi-rack situation.
+>>>>
+>>>> I want to prefer accessing nodes which are "local".
+>>>> The client in rack A should prefer to read from the storage nodes =
+that are
+>>>> also in rack A.
+>>>> Ditto for rack B.
+>>>> Ditto for s/rack/data center/.
+>>
+>> I do want to ask if you're sure this is as useful as you think it is=
+=2E
+>> There are use cases where it would be, but since writes have to
+>> traverse these links (at a multiple of the actual write count) as we=
+ll
+>> you should be very certain. :)
+>>
+>>>> As far as I understand, the Ceph clients can't do that.
+>>>> (Nor can Ceph nodes among each other, but I care less about that, =
+as most
+>>>> traffic is reading data.)
+>>>>
+>>>> I think this is an important feature for many high-reliability sit=
+uations.
+>>>>
+>>>> What would be the next steps to get this feature, assuming I don't=
+ have
+>>>> time
+>>>> to implement it myself? Persistently annoy this mailing list that =
+people
+>>>> need it? Offer to pay for implementing it? Shut up and look for so=
+me other
+>>>> solution -- which I already did, but I didn't find any that's as g=
+ood as
+>>>> Ceph, otherwise?
+>>>
+>>>
+>>> I don't really have that much insight into the product roadmap, but=
+ I assume
+>>> that if you spoke to some of our business folks about paying for de=
+velopment
+>>> work you'd at least get a response.
+>>
+>> Yeah. It's not a feature in large enough demand right now that we ca=
+n
+>> see to be worth bumping up over other things, but I don't think
+>> anybody's opposed to it existing. As with Mark I have no idea if
+>> you're best off asking us or others to do things for money, but it
+>> would certainly have to go through business channels. (If somebody
+>> outside Inktank did want to implement this feature, I'd love to talk
+>> to them about it on an informal but ongoing basis during development=
+=2E)
+>> -Greg
+>> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
