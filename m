@@ -1,60 +1,118 @@
-From: Mark Kampe <mark.kampe@inktank.com>
-Subject: Re: ceph and efficient access of distributed resources
-Date: Tue, 16 Apr 2013 07:18:27 -0700
-Message-ID: <516D5DB3.4060800@inktank.com>
-References: <loom.20130412T055215-88@post.gmane.org> <51683184.9010301@inktank.com> <CAJH6TXgurT4yUshaH4QOgUKOaB3DqQd1-=HPshp+eH5HB7p3Hg@mail.gmail.com> <516C7E55.1050801@inktank.com> <516C8168.40402@inktank.com> <CAJH6TXhRtWQ1ypEb5JOwzp9T3Nd7A=J_6Dn0M25vXjYMg8j7fQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [RESEND][PATCH] fs: remove dentry_lru_prune()
+Date: Tue, 16 Apr 2013 07:59:55 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304160755100.23181@cobra.newdream.net>
+References: <1366006401-3933-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:38850 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933365Ab3DPOSa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 10:18:30 -0400
-Received: by mail-pa0-f53.google.com with SMTP id bh4so368643pad.26
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 07:18:29 -0700 (PDT)
-In-Reply-To: <CAJH6TXhRtWQ1ypEb5JOwzp9T3Nd7A=J_6Dn0M25vXjYMg8j7fQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:47833 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756132Ab3DPO74 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 10:59:56 -0400
+In-Reply-To: <1366006401-3933-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: viro@zeniv.linux.org.uk, "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, david@fromorbit.com, greg@inktank.com
 
-On 04/16/13 00:20, Gandalf Corvotempesta wrote:
-> 2013/4/16 Mark Kampe <mark.kampe@inktank.com>:
->> The entire web is richly festooned with cache servers whose
->> sole raison d'etre is to solve precisely this problem.  They
->> are so good at it that back-bone providers often find it more
->> cash-efficient to buy more cache servers than to lay more
->> fiber.  Cache servers don't merely save disk I/O, they catch
->> these requests before they reach the server (or even the
->> backbone).
->
-> Mine was just an example, there are many other cases where a frotnend
-> cache is not possible.
-> I think that ceph should spread reads across the whole clusters by
-> default (like a big RAID-1), to archieve bandwidth improvement.
+On Mon, 15 Apr 2013, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> When pruning a dentry, its ancestor dentry can also be pruned. But
+> the ancestor dentry does not go through dput(), so it does not get
+> put on the dentry LRU. Hence associating d_prune with removing the
+> dentry from the LRU is the wrong.
+> 
+> The fix is remove dentry_lru_prune(). Call file system's d_prune()
+> callback directly when pruning dentries.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
-At my previous distributed storage start-up (Parascale) we had the
-ability to distribute reads across copies for load distribution
-purposes and everybody we talked to said "who cares!".  Why?
+Reviewed-by: Sage Weil <sage@inktank.com>
 
-    For hot-spot situations (as in your original example)
-    higher level caching is far more effective than random
-    traffic distribution.
+Thanks, Yan!  Sorry for the slow review turnaround; just got back from 
+vacation.
 
-    For lower level (e.g. coincidental) reuse, sending all the
-    requests to a single server will usually perform better.
-    Network I/O is much faster than disk I/O, and a single
-    recipient will have N * the cache hit rate that N servers
-    would have.
+Al, Ceph is still the only user here.  It should go in during the next 
+merge window along with other ceph fixes in this area.  Should I just pull 
+it into my tree?
 
-> What happens in case of a big file (for example, 100MB) with multiple
-> chunks? Is ceph smart enough to read multiple chunks from multiple
-> servers simultaneously or the whole file will be served by just an OSD
+sage
 
-RADOS is the underlying storage cluster, but the access methods (block,
-object, and file) stripe their data across many RADOS objects, which
-CRUSH very effectively distributes across all of the servers.  A 100MB
-read or write turns into dozens of parallel operations to servers all
-over the cluster.
 
+
+> ---
+>  fs/dcache.c | 31 +++++++++----------------------
+>  1 file changed, 9 insertions(+), 22 deletions(-)
+> 
+> diff --git a/fs/dcache.c b/fs/dcache.c
+> index e8bc342..3f957c7 100644
+> --- a/fs/dcache.c
+> +++ b/fs/dcache.c
+> @@ -337,23 +337,6 @@ static void dentry_lru_del(struct dentry *dentry)
+>  	}
+>  }
+>  
+> -/*
+> - * Remove a dentry that is unreferenced and about to be pruned
+> - * (unhashed and destroyed) from the LRU, and inform the file system.
+> - * This wrapper should be called _prior_ to unhashing a victim dentry.
+> - */
+> -static void dentry_lru_prune(struct dentry *dentry)
+> -{
+> -	if (!list_empty(&dentry->d_lru)) {
+> -		if (dentry->d_flags & DCACHE_OP_PRUNE)
+> -			dentry->d_op->d_prune(dentry);
+> -
+> -		spin_lock(&dcache_lru_lock);
+> -		__dentry_lru_del(dentry);
+> -		spin_unlock(&dcache_lru_lock);
+> -	}
+> -}
+> -
+>  static void dentry_lru_move_list(struct dentry *dentry, struct list_head *list)
+>  {
+>  	spin_lock(&dcache_lru_lock);
+> @@ -486,11 +469,13 @@ relock:
+>  	if (ref)
+>  		dentry->d_count--;
+>  	/*
+> -	 * if dentry was on the d_lru list delete it from there.
+>  	 * inform the fs via d_prune that this dentry is about to be
+>  	 * unhashed and destroyed.
+>  	 */
+> -	dentry_lru_prune(dentry);
+> +	if (dentry->d_flags & DCACHE_OP_PRUNE)
+> +		dentry->d_op->d_prune(dentry);
+> +
+> +	dentry_lru_del(dentry);
+>  	/* if it was on the hash then remove it */
+>  	__d_drop(dentry);
+>  	return d_kill(dentry, parent);
+> @@ -919,11 +904,13 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
+>  			struct inode *inode;
+>  
+>  			/*
+> -			 * remove the dentry from the lru, and inform
+> -			 * the fs that this dentry is about to be
+> +			 * inform the fs that this dentry is about to be
+>  			 * unhashed and destroyed.
+>  			 */
+> -			dentry_lru_prune(dentry);
+> +			if (dentry->d_flags & DCACHE_OP_PRUNE)
+> +				dentry->d_op->d_prune(dentry);
+> +
+> +			dentry_lru_del(dentry);
+>  			__d_shrink(dentry);
+>  
+>  			if (dentry->d_count != 0) {
+> -- 
+> 1.7.11.7
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
