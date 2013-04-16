@@ -1,69 +1,44 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: Performance problems
-Date: Tue, 16 Apr 2013 09:02:10 +0200
-Message-ID: <1366095730.3018.31.camel@localhost>
-References: <CAOiTGHkvMLqj4KC3ehGD=pOO77+Hkxs2ao1PzPyfeMQ2L6P5rg@mail.gmail.com>
-	<CAPYLRzioybviGrhN6CfoJh8sN1yPk2zi5khpQ+mzqTHoRRWCRg@mail.gmail.com>
-	<CAOiTGHnNrs5vki6Ht7ug6rLhBU6Uwm8+cN-JqpvHatbShC7qFA@mail.gmail.com>
-	<516322B2.2070103@inktank.com>
-	<CAOiTGHn_jeAwtK-jRGZL0zOgt7W8Tw_YVoWWwgXGpFvhMLQidg@mail.gmail.com>
-	<516336A6.5080806@inktank.com>
-	<CAOiTGH=iPdw_7RgHLoVFLC98c3Qy+XbOzLjVv0-e03MvEC8bCw@mail.gmail.com>
-	<5166AFD1.8070003@inktank.com>
-	<CAOiTGHmjW2EffvLjWqaHM+ObHNe+foURfXDXtEPTXSMiz6J_Wg@mail.gmail.com>
-	<5168229A.10002@inktank.com> <1365788736.32141.13.camel@localhost>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: ceph and efficient access of distributed resources
+Date: Tue, 16 Apr 2013 09:20:18 +0200
+Message-ID: <CAJH6TXhRtWQ1ypEb5JOwzp9T3Nd7A=J_6Dn0M25vXjYMg8j7fQ@mail.gmail.com>
+References: <loom.20130412T055215-88@post.gmane.org>
+	<51683184.9010301@inktank.com>
+	<CAJH6TXgurT4yUshaH4QOgUKOaB3DqQd1-=HPshp+eH5HB7p3Hg@mail.gmail.com>
+	<516C7E55.1050801@inktank.com>
+	<516C8168.40402@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1365788736.32141.13.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wg0-f53.google.com ([74.125.82.53]:41627 "EHLO
+	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755157Ab3DPHUT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 03:20:19 -0400
+Received: by mail-wg0-f53.google.com with SMTP id z11so139753wgg.8
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 00:20:18 -0700 (PDT)
+In-Reply-To: <516C8168.40402@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Kampe <mark.kampe@inktank.com>
+Cc: Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-CgpMZSB2ZW5kcmVkaSAxMiBhdnJpbCAyMDEzIMOgIDE5OjQ1ICswMjAwLCBPbGl2aWVyIEJvbnZh
-bGV0IGEgw6ljcml0IDoKPiBMZSB2ZW5kcmVkaSAxMiBhdnJpbCAyMDEzIMOgIDEwOjA0IC0wNTAw
-LCBNYXJrIE5lbHNvbiBhIMOpY3JpdCA6Cj4gPiBPbiAwNC8xMS8yMDEzIDA3OjI1IFBNLCBaaWVt
-b3dpdCBQaWVyenlja2kgd3JvdGU6Cj4gPiA+IE5vLCBJJ20gbm90IHVzaW5nIFJETUEgaW4gdGhp
-cyBjb25maWd1cmF0aW9uIHNpbmNlIHRoaXMgd2lsbCBldmVudHVhbGx5Cj4gPiA+IGdldCBkZXBs
-b3llZCB0byBwcm9kdWN0aW9uIHdpdGggMTBHIGV0aGVybmV0ICh5ZXMgUkRNQSBpcyBmYXN0ZXIp
-LiAgSQo+ID4gPiB3b3VsZCBwcmVmZXIgQ2VwaCBiZWNhdXNlIGl0IGhhcyBhIHN0b3JhZ2UgZHJp
-dmUgYnVpbHQgaW50byBPcGVuTmVidWxhCj4gPiA+IHdoaWNoIG15IGNvbXBhbnkgaXMgdXNpbmcg
-YW5kIGFzIHlvdSBtZW50aW9uZWQgaW5kaXZpZHVhbCBkcml2ZXMuCj4gPiA+Cj4gPiA+IEknbSBu
-b3Qgc3VyZSB3aGF0IHRoZSBwcm9ibGVtIGlzIGJ1dCBpdCBhcHBlYXJzIHRvIG1lIHRoYXQgb25l
-IG9mIHRoZQo+ID4gPiBob3N0cyBtYXkgYmUgaG9sZGluZyB1cCB0aGUgcmVzdC4uLiB3aXRoIENl
-cGggaWYgdGhlIHBlcmZvcm1hbmNlIG9mIG9uZQo+ID4gPiBvZiB0aGUgaG9zdHMgaXMgbXVjaCBm
-YXN0ZXIgdGhhbiBvdGhlcnMgY291bGQgdGhpcyBwb3RlbnRpYWxseSBzbG93IGRvd24KPiA+ID4g
-dGhlIGNsdXN0ZXIgdG8gdGhpcyBsZXZlbD8KPiA+IAo+ID4gRGVmaW5pdGVseSEgIEV2ZW4gMSBz
-bG93IE9TRCBjYW4gY2F1c2UgZHJhbWF0aWMgc2xvdyBkb3ducy4gIFRoaXMgaXMgCj4gPiBiZWNh
-dXNlIHdlIChieSBkZWZhdWx0KSB0cnkgdG8gZGlzdHJpYnV0ZSBkYXRhIGV2ZW5seSB0byBldmVy
-eSBPU0QgaW4gCj4gPiB0aGUgY2x1c3Rlci4gIElmIGV2ZW4gMSBPU0QgaXMgcmVhbGx5IHNsb3cs
-IGl0IHdpbGwgYWNjdW11bGF0ZSBtb3JlIGFuZCAKPiA+IG1vcmUgb3V0c3RhbmRpbmcgb3BlcmF0
-aW9ucyB3aGlsZSBhbGwgb2YgdGhlIG90aGVyIE9TRHMgY29tcGxldGUgdGhlaXIgCj4gPiByZXF1
-ZXN0cy4gIFdoYXQgd2lsbCBoYXBwZW4gaXMgdGhhdCBldmVudHVhbGx5IHlvdSB3aWxsIGhhdmUg
-YWxsIG9mIHlvdXIgCj4gPiBvdXRzdGFuZGluZyBvcGVyYXRpb25zIHdhaXRpbmcgb24gdGhhdCBz
-bG93IE9TRCwgYW5kIGFsbCBvZiB0aGUgb3RoZXIgCj4gPiBPU0RzIHdpbGwgc2l0IGlkbGUgd2Fp
-dGluZyBmb3IgbmV3IHJlcXVlc3RzLgo+ID4gCj4gPiBJZiB5b3Uga25vdyB0aGF0IHNvbWUgT1NE
-cyBhcmUgcGVybWFuZW50bHkgc2xvd2VyIHRoYW4gb3RoZXJzLCB5b3UgY2FuIAo+ID4gcmUtd2Vp
-Z2h0IHRoZW0gc28gdGhhdCB0aGV5IHJlY2VpdmUgZmV3ZXIgcmVxdWVzdHMgdGhhbiB0aGUgb3Ro
-ZXJzIHdoaWNoIAo+ID4gY2FuIG1pdGlnYXRlIHRoaXMsIGJ1dCB0aGF0IGlzbid0IGFsd2F5cyBh
-biBvcHRpbWFsIHNvbHV0aW9uLiAgU29tZSAKPiA+IHRpbWVzIGEgc2xvdyBPU0QgY2FuIGJlIGEg
-c2lnbiBvZiBvdGhlciBoYXJkd2FyZSBwcm9ibGVtcyB0b28uCj4gPiAKPiA+IE1hcmsKPiA+IAo+
-IAo+IGFuZCBkb2VzIHJlc3BvbnNlIHRpbWUgb2YgT1NEIGFyZSBsb2cgc29tZXdoZXJlLCB0byBp
-ZGVudGlmeSB0aGF0ICJ3ZWFrCj4gbGluayIgPwo+IAo+IAoKSSB0aGluayBJIGZvdW5kIHRoZSBh
-bnN3ZXIgd2l0aCB0aGUgYWRtaW4gc29ja2V0IDoKICAgIGNlcGggLS1hZG1pbi1kYWVtb24gL3Zh
-ci9ydW4vY2VwaC9jZXBoLW9zZC4xNC5hc29rIHBlcmYgZHVtcAoKRm9yIGV4YW1wbGUgaW4gdGhl
-IG91dHB1dCBJIGNhbiBzZWUgb3BfbGF0ZW5jeSwgb3Bfd19sYXRlbmN5LApvcF9yX2xhdGVuY3ks
-IG9wX3J3X2xhdGVuY3ksIGV0Yy4gR3JlYXQuCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20K
+2013/4/16 Mark Kampe <mark.kampe@inktank.com>:
+> The entire web is richly festooned with cache servers whose
+> sole raison d'etre is to solve precisely this problem.  They
+> are so good at it that back-bone providers often find it more
+> cash-efficient to buy more cache servers than to lay more
+> fiber.  Cache servers don't merely save disk I/O, they catch
+> these requests before they reach the server (or even the
+> backbone).
+
+Mine was just an example, there are many other cases where a frotnend
+cache is not possible.
+I think that ceph should spread reads across the whole clusters by
+default (like a big RAID-1), to archieve bandwidth improvement.
+
+Glusters does this, and also MooseFS.
+
+What happens in case of a big file (for example, 100MB) with multiple
+chunks? Is ceph smart enough to read multiple chunks from multiple
+servers simultaneously or the whole file will be served by just an OSD
+?
