@@ -1,141 +1,70 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH] radosgw: receiving unexpected error code while accessing
- an non-existing object by authorized not-owner user
-Date: Tue, 16 Apr 2013 08:11:35 -0700
-Message-ID: <CABBk=J9XPt6no=rF5fMf7HvixrUEzZbB6qNuJiEnV2-A=QcyCQ@mail.gmail.com>
-References: <1366102515-10136-1-git-send-email-liwang@ubuntukylin.com>
+From: Sam Lang <slang@inktank.com>
+Subject: Re: [ceph-users] CTDB Cluster Samba on Cephfs
+Date: Tue, 16 Apr 2013 10:41:40 -0500
+Message-ID: <CAKMAVE_8W8sL4_i1_V1pRJw2vTTX3yno6dZQcuXzBVWVPAPp9w@mail.gmail.com>
+References: <CAKMAVE9FBKzZwrrO9psK-h95V6V=tufnsRApu7mMjc5cZx7_cQ@mail.gmail.com>
+	<20130412231423.GB8603@samba2>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f181.google.com ([209.85.128.181]:59545 "EHLO
-	mail-ve0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755629Ab3DPPLg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 11:11:36 -0400
-Received: by mail-ve0-f181.google.com with SMTP id pa12so516850veb.12
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 08:11:35 -0700 (PDT)
-In-Reply-To: <1366102515-10136-1-git-send-email-liwang@ubuntukylin.com>
+Received: from mail-oa0-f49.google.com ([209.85.219.49]:45262 "EHLO
+	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935563Ab3DPPll (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 11:41:41 -0400
+Received: by mail-oa0-f49.google.com with SMTP id j6so619356oag.22
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 08:41:40 -0700 (PDT)
+In-Reply-To: <20130412231423.GB8603@samba2>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: Jeremy Allison <jra@samba.org>
+Cc: Kai Blin <kai@samba.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Volker.Lendecke@sernet.de, samba-technical <samba-technical@lists.samba.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Apr 16, 2013 at 1:55 AM, Li Wang <liwang@ubuntukylin.com> wrote:
-> This patch fixes a bug in radosgw swift compatibility code,
-> that is, if a not-owner but authorized user access a non-existing
-> object in a container, he wiil receive unexpected error code,
-> to repeat this bug, do the following steps,
+On Fri, Apr 12, 2013 at 6:14 PM, Jeremy Allison <jra@samba.org> wrote:
+> On Wed, Apr 03, 2013 at 03:53:58PM -0500, Sam Lang wrote:
+>> On Thu, Mar 28, 2013 at 6:32 AM, Kai Blin <kai@samba.org> wrote:
+>> > -----BEGIN PGP SIGNED MESSAGE-----
+>> > Hash: SHA1
+>> >
+>> > On 2013-03-28 09:16, Volker Lendecke wrote:
+>> >> On Wed, Mar 27, 2013 at 10:43:36PM -0700, Matthieu Patou wrote:
+>> >>> On 03/27/2013 10:41 AM, Marco Aroldi wrote:
+>> >>>> Hi list, I'm trying to create a active/active Samba cluster on
+>> >>>> top of Cephfs I would ask if Ceph fully supports CTDB at this
+>> >>>> time.
+>> >>> If I'm not wrong Ceph (even CephFS) do not support exporting a
+>> >>> block device or mounting the same FS more than once whereas CTDB
+>> >>> explicitly require that you have a distributed filesystem where
+>> >>> the same filesystem is mounted across all the nodes.
+>> >>
+>> >> Is that true? I thought Ceph was one of the cluster filesystems
+>> >> doing just that. What is Ceph if not a cluster file system?
+>> >
+>> > There's some problem with mounting the in-kernel cephfs driver on
+>> > systems running the osd, iirc. I had to use the fuse-based driver to
+>> > mount, which obviously is not too great, speed-wise.
+>> > See http://ceph.com/docs/master/faq/#try-ceph for a better description
+>> > of the issue.
+>>
+>> Just to let folks know, we have a ceph vfs driver for samba that we
+>> are testing out now.  We're planning to resolve a few of the bugs that
+>> we're seeing presently with smbtorture, and send a pull request to the
+>> samba repo.  If anyone wants to help with testing, let us know.  The
+>> changes currently reside in the ceph branch of
+>> http://github.com/ceph/samba.
 >
-> 1 User1 creates a container, and grants the read/write permission to user2
+> Does the libceph have an async API ?
 >
-> curl -X PUT -i -k -H "X-Auth-Token: $user1_token" $url/$container
-> curl -X POST -i -k -H "X-Auth-Token: $user1_token" -H "X-Container-Read:
-> $user2" -H "X-Container-Write: $user2" $url/$container
+> If we could plug it into the Samba async VFS pread_send/pwrite_send
+> API you'd get much better performance.
 >
-> 2 User2 queries the object 'obj' in the newly created container
-> by using HEAD instruction, note the container currently is empty
->
-> curl -X HEAD -i -k -H "X-Auth-Token: $user2_token" $url/$container/obj
->
-> 3 The response received by user2 is '401 Authorization Required',
-> rather than the expected '404 Not Found', the details are as follows,
->
-> HTTP/1.1 401 Authorization Required
-> Date: Tue, 16 Apr 2013 01:52:49 GMT
-> Server: Apache/2.2.22 (Ubuntu)
-> Accept-Ranges: bytes
-> Content-Length: 12
-> Vary: Accept-Encoding
-> Content-Type: text/plain; charset=utf-8
->
-> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> ---
->  src/rgw/rgw_acl.cc    |   11 +++++++++--
->  src/rgw/rgw_common.cc |   22 ++--------------------
->  2 files changed, 11 insertions(+), 22 deletions(-)
->
-> diff --git a/src/rgw/rgw_acl.cc b/src/rgw/rgw_acl.cc
-> index 1a90649..a27feec 100644
-> --- a/src/rgw/rgw_acl.cc
-> +++ b/src/rgw/rgw_acl.cc
-> @@ -93,6 +93,13 @@ int RGWAccessControlPolicy::get_perm(string& id, int perm_mask) {
->  bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask, int perm)
->  {
->    int test_perm = perm;
-> +
-> +  if (test_perm & (RGW_PERM_READ | RGW_PERM_READ_ACP)) {
-> +    test_perm |= RGW_PERM_READ_OBJS;
-> +  }
-> +  if (test_perm & (RGW_PERM_WRITE | RGW_PERM_WRITE_ACP)) {
-> +    test_perm |= RGW_PERM_WRITE_OBJS;
-> +  }
->
->    int policy_perm = get_perm(uid, test_perm);
->
-> @@ -101,10 +108,10 @@ bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask,
->       buckets, so the swift READ permission on bucket will allow listing
->       the bucket content */
->    if (policy_perm & RGW_PERM_WRITE_OBJS) {
-> -    policy_perm |= (RGW_PERM_WRITE | RGW_PERM_WRITE_ACP);
-> +    policy_perm |= (RGW_PERM_WRITE | RGW_PERM_WRITE_ACP) & perm;
->    }
->    if (policy_perm & RGW_PERM_READ_OBJS) {
-> -    policy_perm |= (RGW_PERM_READ | RGW_PERM_READ_ACP);
-> +    policy_perm |= (RGW_PERM_READ | RGW_PERM_READ_ACP) & perm;
->    }
->
->    int acl_perm = policy_perm & user_perm_mask;
-> diff --git a/src/rgw/rgw_common.cc b/src/rgw/rgw_common.cc
-> index d9c0a80..7b5b6c0 100644
-> --- a/src/rgw/rgw_common.cc
-> +++ b/src/rgw/rgw_common.cc
-> @@ -515,14 +515,6 @@ bool verify_bucket_permission(struct req_state *s, int perm)
->    if ((perm & (int)s->perm_mask) != perm)
->      return false;
->
-> -  if (s->bucket_acl->verify_permission(s->user.user_id, perm, perm))
-> -    return true;
-> -
-> -  if (perm & (RGW_PERM_READ | RGW_PERM_READ_ACP))
-> -    perm |= RGW_PERM_READ_OBJS;
-> -  if (perm & RGW_PERM_WRITE)
-> -    perm |= RGW_PERM_WRITE_OBJS;
-> -
->    return s->bucket_acl->verify_permission(s->user.user_id, perm, perm);
->  }
->
-> @@ -540,18 +532,8 @@ bool verify_object_permission(struct req_state *s, RGWAccessControlPolicy *bucke
->
->    if ((perm & (int)s->perm_mask) != perm)
->      return false;
-> -
-> -  int swift_perm = 0;
-> -  if (perm & (RGW_PERM_READ | RGW_PERM_READ_ACP))
-> -    swift_perm |= RGW_PERM_READ_OBJS;
-> -  if (perm & RGW_PERM_WRITE)
-> -    swift_perm |= RGW_PERM_WRITE_OBJS;
-> -
-> -  if (!swift_perm)
-> -    return false;
-> -  /* we already verified the user mask above, so we pass swift_perm as the mask here,
-> -     otherwise the mask might not cover the swift permissions bits */
-> -  return bucket_acl->verify_permission(s->user.user_id, swift_perm, swift_perm);
-> +
-> +  return bucket_acl->verify_permission(s->user.user_id, s->perm_mask, perm);
+> If libceph is thread-safe you could create your own modified
+> version of vfs_aio_pthread() that called the ceph backend
+> (although you'll need the ability to set credentials into
+> the ceph userspace calls to cope with seteuid changes).
 
-At this point we're interested at the READ_OBJS/WRITE_OBJS bits, but
-you're passing here the raw perm mask. So basically if a user have a
-bucket READ permission it'll be able to read all the objects in the
-bucket. We don't want that, this should only be possible if a user has
-READ_OBJS bit set on the bucket.
+It doesn't have an async API, but the internals of libcephfs are all
+asynchronous, so adding an async API shouldn't be hard.
+-sam
 
->  }
 >
->  bool verify_object_permission(struct req_state *s, int perm)
-> --
-
-The actual problem is in read_policy() where we forget about the swift
-ACLs, and only check for the bucket's READ bit. Maybe fix the problem
-there?
-
-Yehuda
+> Jeremy.
