@@ -1,100 +1,47 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH] mds: fix setting/removing xattrs on root
-Date: Tue, 16 Apr 2013 13:06:28 -0700
-Message-ID: <CAPYLRzgK5siEsvd-Uj8-4SxrUSLAz0j4S45TCb3ZCCzTkeFfFA@mail.gmail.com>
-References: <1366021404-5812-1-git-send-email-big.chiu@bigtera.com>
-	<1366021404-5812-2-git-send-email-big.chiu@bigtera.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: ceph and efficient access of distributed resources
+Date: Tue, 16 Apr 2013 22:06:31 +0200
+Message-ID: <CAJH6TXiaE-Srrs68JN=mGV2jWh_ofsHVC8zNWaG_BTaaeq0L8g@mail.gmail.com>
+References: <loom.20130412T055215-88@post.gmane.org>
+	<51683184.9010301@inktank.com>
+	<CAJH6TXgurT4yUshaH4QOgUKOaB3DqQd1-=HPshp+eH5HB7p3Hg@mail.gmail.com>
+	<516C7E55.1050801@inktank.com>
+	<516C8168.40402@inktank.com>
+	<CAJH6TXhRtWQ1ypEb5JOwzp9T3Nd7A=J_6Dn0M25vXjYMg8j7fQ@mail.gmail.com>
+	<516D5DB3.4060800@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f51.google.com ([209.85.128.51]:36470 "EHLO
-	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935907Ab3DPUG3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 16:06:29 -0400
-Received: by mail-qe0-f51.google.com with SMTP id 1so509881qec.38
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 13:06:28 -0700 (PDT)
-In-Reply-To: <1366021404-5812-2-git-send-email-big.chiu@bigtera.com>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:50697 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935907Ab3DPUGd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Apr 2013 16:06:33 -0400
+Received: by mail-wg0-f48.google.com with SMTP id f11so896578wgh.27
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Apr 2013 13:06:31 -0700 (PDT)
+In-Reply-To: <516D5DB3.4060800@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kuan Kai Chiu <big.chiu@bigtera.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, henry@bigtera.com
+To: Mark Kampe <mark.kampe@inktank.com>
+Cc: Matthias Urlichs <matthias@urlichs.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Apr 15, 2013 at 3:23 AM, Kuan Kai Chiu <big.chiu@bigtera.com> w=
-rote:
-> MDS crashes while journaling dirty root inode in handle_client_setxat=
-tr
-> and handle_client_removexattr. We should use journal_dirty_inode to
-> safely log root inode here.
-> ---
->  src/mds/Server.cc |    6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> index 11ab834..1e62dd2 100644
-> --- a/src/mds/Server.cc
-> +++ b/src/mds/Server.cc
-> @@ -3907,8 +3907,7 @@ void Server::handle_client_setxattr(MDRequest *=
-mdr)
->    mdlog->start_entry(le);
->    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_clie=
-nt_tid());
->    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PRED=
-IRTY_PRIMARY, false);
-> -  mdcache->journal_cow_inode(mdr, &le->metablob, cur);
-> -  le->metablob.add_primary_dentry(cur->get_projected_parent_dn(), tr=
-ue, cur);
-> +  mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
->
->    journal_and_reply(mdr, cur, 0, le, new C_MDS_inode_update_finish(m=
-ds, mdr, cur));
->  }
-> @@ -3964,8 +3963,7 @@ void Server::handle_client_removexattr(MDReques=
-t *mdr)
->    mdlog->start_entry(le);
->    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_clie=
-nt_tid());
->    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PRED=
-IRTY_PRIMARY, false);
-> -  mdcache->journal_cow_inode(mdr, &le->metablob, cur);
-> -  le->metablob.add_primary_dentry(cur->get_projected_parent_dn(), tr=
-ue, cur);
-> +  mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
->
->    journal_and_reply(mdr, cur, 0, le, new C_MDS_inode_update_finish(m=
-ds, mdr, cur));
->  }
+2013/4/16 Mark Kampe <mark.kampe@inktank.com>:
+> RADOS is the underlying storage cluster, but the access methods (block,
+> object, and file) stripe their data across many RADOS objects, which
+> CRUSH very effectively distributes across all of the servers.  A 100MB
+> read or write turns into dozens of parallel operations to servers all
+> over the cluster.
 
-This is fine as far as it goes, but we'll need your sign-off for us to
-incorporate it into the codebase. Also, have you run any tests with
-it? The reason I ask is that when I apply this patch, set an xattr on
-the root inode, and then restart the MDS and client, there are no
-xattrs on the root any more. I think this should fix that, but there
-may be other such issues:
-diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
-index 7065460..439bd78 100644
---- a/src/mds/events/EMetaBlob.h
-+++ b/src/mds/events/EMetaBlob.h
-@@ -468,7 +468,7 @@ private:
+Let me try to explain.
+AFAIK check will split datas into chunks of 4MB each, so, a single
+12MB file will be stored in 3 different chunks across multiple OSDs
+and then replicated many times (based on value of replica count)
 
-     if (!pi) pi =3D in->get_projected_inode();
-     if (!pdft) pdft =3D &in->dirfragtree;
--    if (!px) px =3D &in->xattrs;
-+    if (!px) px =3D in->get_projected_xattrs();
+Let's assume a 12MB file and a 3x replica.
+RADOS will create 3x3 chuks for the same file stored on 9 OSDs
 
-     bufferlist snapbl;
-     if (psnapbl)
-
-You've fallen victim to this new setup, incidentally =97 in the past th=
-e
-root inode wasn't allowed to get any of these modifications because
-it's not quite real in the way the rest of them are. We opened that up
-when we made the virtual xattr interface, but we weren't very careful
-about it so apparently we missed some side effects.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+When reading AFAIK replicas are not used, so all reads are done to the
+"master copy".
+But these 3 chunks are read in parallel on multiple OSDs or all read
+request are done trough a single OSD? In the first case we will have
+3x bandwidth for read operations directed to a file with at least 3
+chunks, in the latter we have a big bottleneck.
