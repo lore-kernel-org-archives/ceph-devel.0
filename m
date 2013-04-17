@@ -1,50 +1,82 @@
-From: proguest <proguest1942@hotmail.com>
-Subject: Re: rados gateway
-Date: Wed, 17 Apr 2013 15:46:19 +0000 (UTC)
-Message-ID: <loom.20130417T174440-91@post.gmane.org>
-References: <loom.20130417T164538-81@post.gmane.org> <CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com> <loom.20130417T170632-546@post.gmane.org> <CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com> <loom.20130417T172954-546@post.gmane.org> <CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Re: test osd on zfs
+Date: Wed, 17 Apr 2013 23:57:31 +0800
+Message-ID: <CANExM-OE+zd4QVBufmy3v=Yu4ki5N5KqmZiOQJkYt0xd66YtrQ@mail.gmail.com>
+References: <516E7D5C.7080309@nazarianin.com>
+	<alpine.DEB.2.00.1304170818000.27056@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:35502 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965236Ab3DQPqd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Apr 2013 11:46:33 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1USUZ3-0005Ca-EC
-	for ceph-devel@vger.kernel.org; Wed, 17 Apr 2013 17:46:29 +0200
-Received: from 114-44-219-144.dynamic.hinet.net ([114.44.219.144])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 17:46:29 +0200
-Received: from proguest1942 by 114-44-219-144.dynamic.hinet.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 17:46:29 +0200
+Received: from mail-ve0-f175.google.com ([209.85.128.175]:51396 "EHLO
+	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752855Ab3DQP5b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 11:57:31 -0400
+Received: by mail-ve0-f175.google.com with SMTP id m1so1554826ves.6
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 08:57:31 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1304170818000.27056@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Aleksey Leonov <aleonov@nazarianin.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Yehuda Sadeh <yehuda <at> inktank.com> writes:
+I looked into this problem earlier. The problem is that zfs does not
+return ERANGE when the size of value buffer passed to getxattr is too
+small. zfs returns with truncated xattr value.
 
-> 
-> On Wed, Apr 17, 2013 at 8:33 AM, proguest <proguest1942 <at> hotmail.com> 
-wrote:
-> > Yehuda Sadeh <yehuda <at> inktank.com> writes:
-> >
-> >>
-> >> On Wed, Apr 17, 2013 at 8:13 AM, proguest <proguest1942 <at> 
-hotmail.com>
-> > wrote:
-> > I missed. It's /etc/apache2/sites-enabled/rgw.conf
-> > The document said
-> > #sudo a2ensite rgw.conf
-> > #sudo a2dissite default
-> > so there's only one configure in sites-enabled
-> >
-> did you restart apache after reconfiguring it?
-Yeap, I restart radosgw ceph apache2 every time I changed configures 
+Regards,
+Henry
 
-
-
+2013/4/17 Sage Weil <sage@inktank.com>:
+> Hey,
+>
+> Can you test with the wip-debug-xattr branch?  Set debug filestore = 30
+> and it will dump the xattr values to the log on set and get, so we can see
+> what is going on.
+>
+> Also/alternatively, strace with -f -v -x, which will (I think) include the
+> full value of the get/setxattr args..
+>
+> Thanks!
+> sage
+>
+>
+> On Wed, 17 Apr 2013, Aleksey Leonov wrote:
+>
+>>      Hi all,
+>>
+>>      I create test VM for try run ceph osd on zfs.
+>>      mkcephfs run ok. Osd down 2 minutes after start.
+>>
+>> ceph.conf
+>> [global]
+>>          max open files = 131072
+>>          log file = /var/log/ceph/$name.log
+>>          pid file = /var/run/ceph/$name.pid
+>> [mon]
+>>          mon data = /ceph/mon/$name
+>> [mon.alpha]
+>>          host = ct1
+>>          mon addr = 10.10.10.2:6789
+>> [mds]
+>> [mds.alpha]
+>>          host = ct1
+>> [osd]
+>>          debug filestore = 20
+>>          filestore xattr use omap = true
+>>          osd data = /ceph/osd/$name
+>>          osd journal = /ceph/osd/$name/journal
+>>          osd journal size = 2000 ; journal size, in megabytes
+>>          journal dio = false
+>>          journal aio = false
+>>
+>> [osd.0]
+>>          host = ct1
+>>
+>>
+>>
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
