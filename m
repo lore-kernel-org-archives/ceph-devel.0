@@ -1,416 +1,186 @@
-From: Olivier Bonvalet <ceph.list@daevel.fr>
-Subject: Re: [ceph-users] Scrub shutdown the OSD process
-Date: Wed, 17 Apr 2013 11:48:44 +0200
-Message-ID: <1366192124.14655.20.camel@localhost>
-References: <1366018923.3018.3.camel@localhost>
-	 <CAPYLRziFNxnUhyxHRUCzZBF6oQwrWt8YdxBtDrKzMMNuyuW=YQ@mail.gmail.com>
-	 <1366046351.26980.0.camel@localhost>
-	 <CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA@mail.gmail.com>
-	 <1366095376.3018.28.camel@localhost>
-Reply-To: ceph-devel@vger.kernel.org
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 2/4] ceph: take i_mutex before getting Fw cap
+Date: Wed, 17 Apr 2013 20:14:27 +0800
+Message-ID: <516E9223.2050609@intel.com>
+References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com> <1365754273-14088-3-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1304162028020.23771@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from licorne.daevel.fr ([178.32.94.222]:59859 "EHLO
-	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965780Ab3DQJss convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 05:48:48 -0400
-In-Reply-To: <1366095376.3018.28.camel@localhost>
+Received: from mga03.intel.com ([143.182.124.21]:7573 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S966311Ab3DQMOd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Apr 2013 08:14:33 -0400
+In-Reply-To: <alpine.DEB.2.00.1304162028020.23771@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com, elder@inktank.com
 
-Le mardi 16 avril 2013 =C3=A0 08:56 +0200, Olivier Bonvalet a =C3=A9cri=
-t :
->=20
->=20
-> Le lundi 15 avril 2013 =C3=A0 10:57 -0700, Gregory Farnum a =C3=A9cri=
-t :
-> > On Mon, Apr 15, 2013 at 10:19 AM, Olivier Bonvalet <ceph.list@daeve=
-l.fr> wrote:
-> > > Le lundi 15 avril 2013 =C3=A0 10:16 -0700, Gregory Farnum a =C3=A9=
-crit :
-> > >> Are you saying you saw this problem more than once, and so you
-> > >> completely wiped the OSD in question, then brought it back into =
-the
-> > >> cluster, and now it's seeing this error again?
-> > >
-> > > Yes, it's exactly that.
-> > >
-> > >
-> > >> Are any other OSDs experiencing this issue?
-> > >
-> > > No, only this one have the problem.
-> >=20
-> > Did you run scrubs while this node was out of the cluster? If you
-> > wiped the data and this is recurring then this is apparently an iss=
-ue
-> > with the cluster state, not just one node, and any other primary fo=
-r
-> > the broken PG(s) should crash as well. Can you verify by taking thi=
-s
-> > one down and then doing a full scrub?
-> > -Greg
-> > Software Engineer #42 @ http://inktank.com | http://ceph.com
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users@lists.ceph.com
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >=20
->=20
-> So, I mark this OSD as "out" to balance data and be able to re-do a
-> scrum. You are probably right, since I now have 3 other OSD on the sa=
-me
-> host which are down.
->=20
-> I still haven't any PG in error (and the cluster is in HEALTH_WARN
-> status), but something goes wrong.
->=20
-> In syslog I have :
->=20
-> Apr 16 02:07:08 alim ceph-osd: 2013-04-16 02:07:06.742915 7fe65113170=
-0 -1 filestore(/var/lib/ceph/osd/ceph-31) could not find d452999/rb.0.2=
-d76b.238e1f29.00000000162d/f99//4 in index: (2) No such file or directo=
-ry
-> Apr 16 02:07:08 alim ceph-osd: 2013-04-16 02:07:06.742999 7fe65113170=
-0 -1 filestore(/var/lib/ceph/osd/ceph-31) could not find 85242299/rb.0.=
-1367.2ae8944a.000000001f9c/f98//4 in index: (2) No such file or directo=
-ry
-> Apr 16 03:41:11 alim ceph-osd: 2013-04-16 03:41:11.758150 7fe64f12d70=
-0 -1 osd.31 48020 heartbeat_check: no reply from osd.5 since 2013-04-16=
- 03:40:50.349130 (cutoff 2013-04-16 03:40:51.758149)
-> Apr 16 04:27:40 alim ceph-osd: 2013-04-16 04:27:40.529492 7fe65e14b70=
-0 -1 osd.31 48416 heartbeat_check: no reply from osd.26 since 2013-04-1=
-6 04:27:20.203868 (cutoff 2013-04-16 04:27:20.529489)
-> Apr 16 04:27:41 alim ceph-osd: 2013-04-16 04:27:41.529609 7fe65e14b70=
-0 -1 osd.31 48416 heartbeat_check: no reply from osd.26 since 2013-04-1=
-6 04:27:20.203868 (cutoff 2013-04-16 04:27:21.529605)
-> Apr 16 05:01:43 alim ceph-osd: 2013-04-16 05:01:43.440257 7fe64f12d70=
-0 -1 osd.31 48602 heartbeat_check: no reply from osd.4 since 2013-04-16=
- 05:01:22.529918 (cutoff 2013-04-16 05:01:23.440257)
-> Apr 16 05:01:43 alim ceph-osd: 2013-04-16 05:01:43.523985 7fe65e14b70=
-0 -1 osd.31 48602 heartbeat_check: no reply from osd.4 since 2013-04-16=
- 05:01:22.529918 (cutoff 2013-04-16 05:01:23.523984)
-> Apr 16 05:55:28 alim ceph-osd: 2013-04-16 05:55:27.770327 7fe65e14b70=
-0 -1 osd.31 48847 heartbeat_check: no reply from osd.26 since 2013-04-1=
-6 05:55:07.392502 (cutoff 2013-04-16 05:55:07.770323)
-> Apr 16 05:55:28 alim ceph-osd: 2013-04-16 05:55:28.497600 7fe64f12d70=
-0 -1 osd.31 48847 heartbeat_check: no reply from osd.26 since 2013-04-1=
-6 05:55:07.392502 (cutoff 2013-04-16 05:55:08.497598)
-> Apr 16 06:04:13 alim ceph-osd: 2013-04-16 06:04:13.051839 7fe65012f70=
-0 -1 osd/ReplicatedPG.cc: In function 'virtual void ReplicatedPG::_scru=
-b(ScrubMap&)' thread 7fe65012f700 time 2013-04-16 06:04:12.843977#012os=
-d/ReplicatedPG.cc: 7188: FAILED assert(head !=3D hobject_t())#012#012 c=
-eph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd3f55=
-)#012 1: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]#012 2: (PG=
-::scrub_compare_maps()+0xeb8) [0x696c18]#012 3: (PG::chunky_scrub()+0x2=
-d9) [0x6c37f9]#012 4: (PG::scrub()+0x145) [0x6c4e55]#012 5: (OSD::Scrub=
-WQ::_process(PG*)+0xc) [0x64048c]#012 6: (ThreadPool::worker(ThreadPool=
-::WorkThread*)+0x879) [0x815179]#012 7: (ThreadPool::WorkThread::entry(=
-)+0x10) [0x817980]#012 8: (()+0x68ca) [0x7fe6626558ca]#012 9: (clone()+=
-0x6d) [0x7fe661184b6d]#012 NOTE: a copy of the executable, or `objdump =
--rdS <executable>` is needed to interpret this.
-> Apr 16 06:04:13 alim ceph-osd:      0> 2013-04-16 06:04:13.051839 7fe=
-65012f700 -1 osd/ReplicatedPG.cc: In function 'virtual void ReplicatedP=
-G::_scrub(ScrubMap&)' thread 7fe65012f700 time 2013-04-16 06:04:12.8439=
-77#012osd/ReplicatedPG.cc: 7188: FAILED assert(head !=3D hobject_t())#0=
-12#012 ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd=
-3bbd3f55)#012 1: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]#01=
-2 2: (PG::scrub_compare_maps()+0xeb8) [0x696c18]#012 3: (PG::chunky_scr=
-ub()+0x2d9) [0x6c37f9]#012 4: (PG::scrub()+0x145) [0x6c4e55]#012 5: (OS=
-D::ScrubWQ::_process(PG*)+0xc) [0x64048c]#012 6: (ThreadPool::worker(Th=
-readPool::WorkThread*)+0x879) [0x815179]#012 7: (ThreadPool::WorkThread=
-::entry()+0x10) [0x817980]#012 8: (()+0x68ca) [0x7fe6626558ca]#012 9: (=
-clone()+0x6d) [0x7fe661184b6d]#012 NOTE: a copy of the executable, or `=
-objdump -rdS <executable>` is needed to interpret this.
-> Apr 16 06:04:13 alim ceph-osd: 2013-04-16 06:04:13.277072 7fe65012f70=
-0 -1 *** Caught signal (Aborted) **#012 in thread 7fe65012f700#012#012 =
-ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd3f5=
-5)#012 1: /usr/bin/ceph-osd() [0x7a6289]#012 2: (()+0xeff0) [0x7fe66265=
-dff0]#012 3: (gsignal()+0x35) [0x7fe6610e71b5]#012 4: (abort()+0x180) [=
-0x7fe6610e9fc0]#012 5: (__gnu_cxx::__verbose_terminate_handler()+0x115)=
- [0x7fe66197bdc5]#012 6: (()+0xcb166) [0x7fe66197a166]#012 7: (()+0xcb1=
-93) [0x7fe66197a193]#012 8: (()+0xcb28e) [0x7fe66197a28e]#012 9: (ceph:=
-:__ceph_assert_fail(char const*, char const*, int, char const*)+0x7c9) =
-[0x8f9549]#012 10: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]#=
-012 11: (PG::scrub_compare_maps()+0xeb8) [0x696c18]#012 12: (PG::chunky=
-_scrub()+0x2d9) [0x6c37f9]#012 13: (PG::scrub()+0x145) [0x6c4e55]#012 1=
-4: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]#012 15: (ThreadPool::wo=
-rker(ThreadPool::WorkThread*)+0x879) [0x815179]#012 16: (ThreadPool::Wo=
-rkThread::entry()+0x10) [0x817980]#012 17: (()+0x68ca) [0x7fe6626558ca]=
-#012 18: (clone()+0x6d) [0x7fe661184b6d]#012 NOTE: a copy of the execut=
-able, or `objdump -rdS <executable>` is needed to interpret this.
-> Apr 16 06:04:13 alim ceph-osd:      0> 2013-04-16 06:04:13.277072 7fe=
-65012f700 -1 *** Caught signal (Aborted) **#012 in thread 7fe65012f700#=
-012#012 ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccb=
-d3bbd3f55)#012 1: /usr/bin/ceph-osd() [0x7a6289]#012 2: (()+0xeff0) [0x=
-7fe66265dff0]#012 3: (gsignal()+0x35) [0x7fe6610e71b5]#012 4: (abort()+=
-0x180) [0x7fe6610e9fc0]#012 5: (__gnu_cxx::__verbose_terminate_handler(=
-)+0x115) [0x7fe66197bdc5]#012 6: (()+0xcb166) [0x7fe66197a166]#012 7: (=
-()+0xcb193) [0x7fe66197a193]#012 8: (()+0xcb28e) [0x7fe66197a28e]#012 9=
-: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)=
-+0x7c9) [0x8f9549]#012 10: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x=
-57a038]#012 11: (PG::scrub_compare_maps()+0xeb8) [0x696c18]#012 12: (PG=
-::chunky_scrub()+0x2d9) [0x6c37f9]#012 13: (PG::scrub()+0x145) [0x6c4e5=
-5]#012 14: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]#012 15: (Thread=
-Pool::worker(ThreadPool::WorkThread*)+0x879) [0x815179]#012 16: (Thread=
-Pool::WorkThread::entry()+0x10) [0x817980]#012 17: (()+0x68ca) [0x7fe66=
-26558ca]#012 18: (clone()+0x6d) [0x7fe661184b6d]#012 NOTE: a copy of th=
-e executable, or `objdump -rdS <executable>` is needed to interpret thi=
-s.
->=20
->=20
-> and last lines from osd.24.log are :
->=20
->    -10> 2013-04-16 08:08:54.991371 7f5bb4569700  2 osd.24 pg_epoch: 4=
-9397 pg[3.7c( v 49397'11387809 (49355'11386808,49397'11387809] local-le=
-s=3D49382 n=3D18795 ec=3D56 les/c 49382/49397 49375/49375/49375) [24,13=
-,6] r=3D0 lpr=3D49375 mlcod 49397'11387808 active+clean+scrubbing+deep =
-snaptrimq=3D[1f86~5,1f8c~8,2bd8~e]] scrub   osd.6 has 10 items
->     -9> 2013-04-16 08:08:54.991876 7f5bb4569700  2 osd.24 pg_epoch: 4=
-9397 pg[3.7c( v 49397'11387809 (49355'11386808,49397'11387809] local-le=
-s=3D49382 n=3D18795 ec=3D56 les/c 49382/49397 49375/49375/49375) [24,13=
-,6] r=3D0 lpr=3D49375 mlcod 49397'11387808 active+clean+scrubbing+deep =
-snaptrimq=3D[1f86~5,1f8c~8,2bd8~e]] 3.7c osd.24 inconsistent snapcolls =
-on 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 found  expected 12=
-d7
-> 3.7c osd.13 inconsistent snapcolls on 7b52237c/rb.0.15c26.238e1f29.00=
-0000000a76/12d7//3 found  expected 12d7
-> 3.7c osd.13: soid 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 s=
-ize 4194304 !=3D known size 0, digest 1360833101 !=3D known digest 0
-> 3.7c osd.6 inconsistent snapcolls on 7b52237c/rb.0.15c26.238e1f29.000=
-000000a76/12d7//3 found  expected 12d7
-> 3.7c osd.6: soid 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 si=
-ze 4194304 !=3D known size 0, digest 1360833101 !=3D known digest 0
->=20
->     -8> 2013-04-16 08:08:54.991906 7f5bb4569700  0 log [ERR] : 3.7c o=
-sd.24 inconsistent snapcolls on 7b52237c/rb.0.15c26.238e1f29.000000000a=
-76/12d7//3 found  expected 12d7
->     -7> 2013-04-16 08:08:54.991913 7f5bb4569700  0 log [ERR] : 3.7c o=
-sd.13 inconsistent snapcolls on 7b52237c/rb.0.15c26.238e1f29.000000000a=
-76/12d7//3 found  expected 12d7
->     -6> 2013-04-16 08:08:54.991915 7f5bb4569700  0 log [ERR] : 3.7c o=
-sd.13: soid 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 size 4194=
-304 !=3D known size 0, digest 1360833101 !=3D known digest 0
->     -5> 2013-04-16 08:08:54.991917 7f5bb4569700  0 log [ERR] : 3.7c o=
-sd.6 inconsistent snapcolls on 7b52237c/rb.0.15c26.238e1f29.000000000a7=
-6/12d7//3 found  expected 12d7
->     -4> 2013-04-16 08:08:54.991919 7f5bb4569700  0 log [ERR] : 3.7c o=
-sd.6: soid 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 size 41943=
-04 !=3D known size 0, digest 1360833101 !=3D known digest 0
->     -3> 2013-04-16 08:08:54.991986 7f5bb4569700  0 log [ERR] : deep-s=
-crub 3.7c 7b52237c/rb.0.15c26.238e1f29.000000000a76/12d7//3 on disk siz=
-e (0) does not match object info size (4194304)
->     -2> 2013-04-16 08:08:54.993813 7f5bbbd78700  5 --OSD::tracker-- r=
-eqid: client.1811920.1:164200641, seq: 4575, time: 2013-04-16 08:08:54.=
-993812, event: op_applied, request: osd_op(client.1811920.1:164200641 r=
-b.0.2d766.238e1f29.000000002c80 [write 442368~4096] 3.31aa16ec snapc 2b=
-c6=3D[2bc6,2b84,2b33,2ada,2a0e,2940,285f,2775,2633,25e8,24d1,2452,2363,=
-22c6,21a9,20db,1f98])
->     -1> 2013-04-16 08:08:54.993901 7f5bbbd78700  5 --OSD::tracker-- r=
-eqid: client.1811920.1:164200641, seq: 4575, time: 2013-04-16 08:08:54.=
-993901, event: done, request: osd_op(client.1811920.1:164200641 rb.0.2d=
-766.238e1f29.000000002c80 [write 442368~4096] 3.31aa16ec snapc 2bc6=3D[=
-2bc6,2b84,2b33,2ada,2a0e,2940,285f,2775,2633,25e8,24d1,2452,2363,22c6,2=
-1a9,20db,1f98])
->      0> 2013-04-16 08:08:54.994227 7f5bb4569700 -1 osd/ReplicatedPG.c=
-c: In function 'virtual void ReplicatedPG::_scrub(ScrubMap&)' thread 7f=
-5bb4569700 time 2013-04-16 08:08:54.991990
-> osd/ReplicatedPG.cc: 7188: FAILED assert(head !=3D hobject_t())
->=20
->  ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd=
-3f55)
->  1: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]
->  2: (PG::scrub_compare_maps()+0xeb8) [0x696c18]
->  3: (PG::chunky_scrub()+0x2d9) [0x6c37f9]
->  4: (PG::scrub()+0x145) [0x6c4e55]
->  5: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]
->  6: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x815179]
->  7: (ThreadPool::WorkThread::entry()+0x10) [0x817980]
->  8: (()+0x68ca) [0x7f5bc72908ca]
->  9: (clone()+0x6d) [0x7f5bc5dbfb6d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to interpret this.
->=20
-> --- logging levels ---
->    0/ 5 none
->    0/ 1 lockdep
->    0/ 1 context
->    1/ 1 crush
->    1/ 5 mds
->    1/ 5 mds_balancer
->    1/ 5 mds_locker
->    1/ 5 mds_log
->    1/ 5 mds_log_expire
->    1/ 5 mds_migrator
->    0/ 1 buffer
->    0/ 1 timer
->    0/ 1 filer
->    0/ 1 striper
->    0/ 1 objecter
->    0/ 5 rados
->    0/ 5 rbd
->    0/ 5 journaler
->    0/ 5 objectcacher
->    0/ 5 client
->    0/ 5 osd
->    0/ 5 optracker
->    0/ 5 objclass
->    1/ 3 filestore
->    1/ 3 journal
->    0/ 5 ms
->    1/ 5 mon
->    0/10 monc
->    0/ 5 paxos
->    0/ 5 tp
->    1/ 5 auth
->    1/ 5 crypto
->    1/ 1 finisher
->    1/ 5 heartbeatmap
->    1/ 5 perfcounter
->    1/ 5 rgw
->    1/ 5 hadoop
->    1/ 5 javaclient
->    1/ 5 asok
->    1/ 1 throttle
->   -1/-1 (syslog threshold)
->   -1/-1 (stderr threshold)
->   max_recent     10000
->   max_new         1000
->   log_file /var/log/ceph/osd.24.log
-> --- end dump of recent events ---
-> 2013-04-16 08:08:55.163535 7f5bb4569700 -1 *** Caught signal (Aborted=
-) **
->  in thread 7f5bb4569700
->=20
->  ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd=
-3f55)
->  1: /usr/bin/ceph-osd() [0x7a6289]
->  2: (()+0xeff0) [0x7f5bc7298ff0]
->  3: (gsignal()+0x35) [0x7f5bc5d221b5]
->  4: (abort()+0x180) [0x7f5bc5d24fc0]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f5bc65b6dc5]
->  6: (()+0xcb166) [0x7f5bc65b5166]
->  7: (()+0xcb193) [0x7f5bc65b5193]
->  8: (()+0xcb28e) [0x7f5bc65b528e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char con=
-st*)+0x7c9) [0x8f9549]
->  10: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]
->  11: (PG::scrub_compare_maps()+0xeb8) [0x696c18]
->  12: (PG::chunky_scrub()+0x2d9) [0x6c37f9]
->  13: (PG::scrub()+0x145) [0x6c4e55]
->  14: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]
->  15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x815179]
->  16: (ThreadPool::WorkThread::entry()+0x10) [0x817980]
->  17: (()+0x68ca) [0x7f5bc72908ca]
->  18: (clone()+0x6d) [0x7f5bc5dbfb6d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to interpret this.
->=20
-> --- begin dump of recent events ---
->      0> 2013-04-16 08:08:55.163535 7f5bb4569700 -1 *** Caught signal =
-(Aborted) **
->  in thread 7f5bb4569700
->=20
->  ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd=
-3f55)
->  1: /usr/bin/ceph-osd() [0x7a6289]
->  2: (()+0xeff0) [0x7f5bc7298ff0]
->  3: (gsignal()+0x35) [0x7f5bc5d221b5]
->  4: (abort()+0x180) [0x7f5bc5d24fc0]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f5bc65b6dc5]
->  6: (()+0xcb166) [0x7f5bc65b5166]
->  7: (()+0xcb193) [0x7f5bc65b5193]
->  8: (()+0xcb28e) [0x7f5bc65b528e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char con=
-st*)+0x7c9) [0x8f9549]
->  10: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]
->  11: (PG::scrub_compare_maps()+0xeb8) [0x696c18]
->  12: (PG::chunky_scrub()+0x2d9) [0x6c37f9]
->  13: (PG::scrub()+0x145) [0x6c4e55]
->  14: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]
->  15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x815179]
->  16: (ThreadPool::WorkThread::entry()+0x10) [0x817980]
->  17: (()+0x68ca) [0x7f5bc72908ca]
->  18: (clone()+0x6d) [0x7f5bc5dbfb6d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to interpret this.
->=20
-> --- logging levels ---
->    0/ 5 none
->    0/ 1 lockdep
->    0/ 1 context
->    1/ 1 crush
->    1/ 5 mds
->    1/ 5 mds_balancer
->    1/ 5 mds_locker
->    1/ 5 mds_log
->    1/ 5 mds_log_expire
->    1/ 5 mds_migrator
->    0/ 1 buffer
->    0/ 1 timer
->    0/ 1 filer
->    0/ 1 striper
->    0/ 1 objecter
->    0/ 5 rados
->    0/ 5 rbd
->    0/ 5 journaler
->    0/ 5 objectcacher
->    0/ 5 client
->    0/ 5 osd
->    0/ 5 optracker
->    0/ 5 objclass
->    1/ 3 filestore
->    1/ 3 journal
->    0/ 5 ms
->    1/ 5 mon
->    0/10 monc
->    0/ 5 paxos
->    0/ 5 tp
->    1/ 5 auth
->    1/ 5 crypto
->    1/ 1 finisher
->    1/ 5 heartbeatmap
->    1/ 5 perfcounter
->    1/ 5 rgw
->    1/ 5 hadoop
->    1/ 5 javaclient
->    1/ 5 asok
->    1/ 1 throttle
->   -1/-1 (syslog threshold)
->   -1/-1 (stderr threshold)
->   max_recent     10000
->   max_new         1000
->   log_file /var/log/ceph/osd.24.log
-> --- end dump of recent events ---
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+On 04/17/2013 11:42 AM, Sage Weil wrote:
+> On Fri, 12 Apr 2013, Yan, Zheng wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>
+>> There is deadlock as illustrated bellow. The fix is taking i_mutex
+>> before getting Fw cap reference.
+>>
+>>       write                    truncate                 MDS
+>> ---------------------     --------------------      --------------
+>> get Fw cap
+>>                           lock i_mutex
+>> lock i_mutex (blocked)
+>>                           request setattr.size  ->
+>>                                                 <-   revoke Fw cap
+>>
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> ---
+>>  fs/ceph/caps.c | 13 +++++++------
+>>  fs/ceph/file.c | 12 ++++++------
+>>  2 files changed, 13 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+>> index 0da2e94..8737572 100644
+>> --- a/fs/ceph/caps.c
+>> +++ b/fs/ceph/caps.c
+>> @@ -2058,6 +2058,13 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+>>  		goto out;
+>>  	}
+>>  
+>> +	/* finish pending truncate */
+>> +	while (ci->i_truncate_pending) {
+>> +		spin_unlock(&ci->i_ceph_lock);
+>> +		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
+>> +		spin_lock(&ci->i_ceph_lock);
+> 
+> I think if we retake i_ceph_lock we need to goto the top to make sure our 
+> local variables aren't stale.. in this case, just file_wanted.
+> 
+>> +	}
+>> +
+>>  	if (need & CEPH_CAP_FILE_WR) {
+>>  		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
+>>  			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
+>> @@ -2079,12 +2086,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+>>  	}
+>>  	have = __ceph_caps_issued(ci, &implemented);
+>>  
+>> -	/*
+>> -	 * disallow writes while a truncate is pending
+>> -	 */
+>> -	if (ci->i_truncate_pending)
+>> -		have &= ~CEPH_CAP_FILE_WR;
+>> -
+>>  	if ((have & need) == need) {
+>>  		/*
+>>  		 * Look at (implemented & ~have & not) so that we keep waiting
+>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>> index 546a705..5490598 100644
+>> --- a/fs/ceph/file.c
+>> +++ b/fs/ceph/file.c
+>> @@ -647,7 +647,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+>>  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+>>  	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+>>  again:
+>> -	__ceph_do_pending_vmtruncate(inode, true);
+>>  	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+>>  		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+>>  	else
+>> @@ -724,7 +723,7 @@ retry_snap:
+>>  		ret = -ENOSPC;
+>>  		goto out;
+>>  	}
+>> -	__ceph_do_pending_vmtruncate(inode, true);
+>> +	mutex_lock(&inode->i_mutex);
+>>  	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+>>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+>>  	     inode->i_size);
+>> @@ -733,8 +732,10 @@ retry_snap:
+>>  	else
+>>  		want = CEPH_CAP_FILE_BUFFER;
+>>  	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
+>> -	if (ret < 0)
+>> -		goto out_put;
+>> +	if (ret < 0) {
+>> +		mutex_unlock(&inode->i_mutex);
+>> +		goto out;
+>> +	}
+>>  
+>>  	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+>>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+>> @@ -744,10 +745,10 @@ retry_snap:
+>>  	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+>>  	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
+>>  	    (fi->flags & CEPH_F_SYNC)) {
+>> +		mutex_unlock(&inode->i_mutex);
+>>  		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+>>  			&iocb->ki_pos);
+>>  	} else {
+>> -		mutex_lock(&inode->i_mutex);
+>>  		ret = __generic_file_aio_write(iocb, iov, nr_segs,
+>>  					       &iocb->ki_pos);
+>>  		mutex_unlock(&inode->i_mutex);
+>> @@ -762,7 +763,6 @@ retry_snap:
+>>  			__mark_inode_dirty(inode, dirty);
+>>  	}
+>>  
+>> -out_put:
+>>  	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+>>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+>>  	     ceph_cap_string(got));
+> 
+> Mechanically, the rest of this looks correct.  I seem to remember us 
+> changing this (or something similar) so that we *didn't* hold i_mutex 
+> while waiting on the caps in order to avoid some deadlock.  But... looking 
+> through the git history I can't find anything.
+> 
+> I think the race to consider is if we are blocked waiting for the WR cap 
+> and the MDS sends us a truncate.  It will queue the async truncate work 
+> but that will block waiting for i_mutex.  Can that deadlock?  (I think no, 
+> but perhaps the pending truncate check needs to happen after we acquire 
+> the cap, too!)
+
+Maybe we should also call wake_up_all(&ci->i_cap_wq) when receiving truncate from
+MDS.
+
+To truncate a file, the MDS xlock the filelock firstly, which revokes all Fw caps
+from clients. Then the MDS sends truncate to clients and finally drops the xlock.
+It's impossible that client receives a truncate request while having Fw cap. So I
+don't think we need check pending truncate after acquiring the Fw cap.
+
+> 
+> Similarly, if we block holding i_mutex and wait for WR, but the MDS 
+> revokes some other cap (say, WRBUFFER), could we deadlock from teh 
+> async writeback worker?
+
+I think no, i_mutex is not involved in writeback.
+
+> 
+> Both sound dangerous to me.  I wonder if something in the spirit of
+> 
+> 	while (true) {
+> 		get_cap(Fw)
+> 		if (try_lock_mutex(...))
+> 			break;
+> 		put_cap(Fw);
+> 		lock_mutex(...)
+> 		unlock_mutex(...)
+> 	}
+> 
+> would be simpler.  Or, make a get_cap variant that drops i_mutex while 
+> waiting, but takes it before grabbing the actual Fw cap ref.
+> 
+
+See my patch "ceph: apply write checks in ceph_aio_write". I think we really
+should acquire i_mutex before getting caps. ceph_get_caps() needs a parameter
+'endoff', if the file is opened in append mode, the endoff is calculated from
+i_size. If we drop i_mutex in ceph_get_caps(), someone else may change the
+i_size.
 
 
-So, what can I do to fix that ?
+Regards
+Yan, Zheng
 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> sage
+> 
+
