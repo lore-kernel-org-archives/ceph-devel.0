@@ -1,92 +1,54 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
+From: proguest <proguest1942@hotmail.com>
 Subject: Re: rados gateway
-Date: Wed, 17 Apr 2013 09:52:33 -0700
-Message-ID: <CABBk=J9uw5WUcOvkCAuzO2R_nhNmbxzFVFFSQXM5vypVgXAykQ@mail.gmail.com>
-References: <loom.20130417T164538-81@post.gmane.org>
-	<CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com>
-	<loom.20130417T170632-546@post.gmane.org>
-	<CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com>
-	<loom.20130417T172954-546@post.gmane.org>
-	<CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com>
-	<loom.20130417T183106-585@post.gmane.org>
+Date: Wed, 17 Apr 2013 16:58:54 +0000 (UTC)
+Message-ID: <loom.20130417T185651-134@post.gmane.org>
+References: <loom.20130417T164538-81@post.gmane.org> <CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com> <loom.20130417T170632-546@post.gmane.org> <CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com> <loom.20130417T172954-546@post.gmane.org> <CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com> <loom.20130417T183106-585@post.gmane.org> <CABBk=J9uw5WUcOvkCAuzO2R_nhNmbxzFVFFSQXM5vypVgXAykQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f179.google.com ([209.85.210.179]:52001 "EHLO
-	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755239Ab3DQQwe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 12:52:34 -0400
-Received: by mail-ia0-f179.google.com with SMTP id l25so1628114iad.24
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 09:52:34 -0700 (PDT)
-In-Reply-To: <loom.20130417T183106-585@post.gmane.org>
+Received: from plane.gmane.org ([80.91.229.3]:36797 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755568Ab3DQQ7F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Apr 2013 12:59:05 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1USVhI-0006Kb-C6
+	for ceph-devel@vger.kernel.org; Wed, 17 Apr 2013 18:59:04 +0200
+Received: from 114-44-219-144.dynamic.hinet.net ([114.44.219.144])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 18:59:04 +0200
+Received: from proguest1942 by 114-44-219-144.dynamic.hinet.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 18:59:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: proguest <proguest1942@hotmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Do you have radosgw logs?
+Yehuda Sadeh <yehuda <at> inktank.com> writes:
 
-On Wed, Apr 17, 2013 at 9:33 AM, proguest <proguest1942@hotmail.com> wrote:
-> Yehuda Sadeh <yehuda <at> inktank.com> writes:
->
->>
->> On Wed, Apr 17, 2013 at 8:33 AM, proguest <proguest1942 <at> hotmail.com>
-> wrote:
->> > Yehuda Sadeh <yehuda <at> inktank.com> writes:
->> >
->> >>
->> >> On Wed, Apr 17, 2013 at 8:13 AM, proguest <proguest1942 <at>
-> hotmail.com>
->> > wrote:
->> >> > Yehuda Sadeh <yehuda <at> inktank.com> writes:
->> >> >
->> >> >>
->> >> >> Hard to know without additional info. It looks though as you might
->> >> >> have apache config issues (if you're using apache).
->> >> >>
->> >> >> Yehuda
->> >> > hi Yehuda
->> >> >
->> >> > thanks for replied me.
->> >> > It's only stardard setting with radosgw document.
->> >> > here's /etc/apache2/httpd.conf  only 1 line
->> >> >
->> >> > ServerName node74
->> >> >
->> >> > and here's /etc/apache2/sites-enabled  (just follow the website)
->> >>
->> >> is that the actual file name, or is that the directory where this
->> >> config file resides? do you have by any chance another default web
->> >> site set up under sites-enabled? did you restart apache after
->> >> configuring?
->> > I missed. It's /etc/apache2/sites-enabled/rgw.conf
->> > The document said
->> > #sudo a2ensite rgw.conf
->> > #sudo a2dissite default
->> > so there's only one configure in sites-enabled
->> >
->> did you restart apache after reconfiguring it?
-> Yeap, I always restart ceph apache2 radosgw after modified the file
->
->
-> by the way, I found apache error.log has something wrong while start apache
->
-> [Wed Apr 17 16:53:59 2013] [notice] caught SIGTERM, shutting down
-> [Wed Apr 17 16:53:59 2013] [alert] FastCGI: read() from pipe failed (0)
-> [Wed Apr 17 16:53:59 2013] [alert] FastCGI: the PM is shutting down, Apache
-> seems to have disappeared - bye
-> [Wed Apr 17 16:54:00 2013] [notice] FastCGI: process manager initialized
-> (pid 4768)
-> [Wed Apr 17 16:54:00 2013] [notice] Apache/2.2.17 (Ubuntu)
-> mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_ssl/2.2.17 OpenSSL/0.9.8o
-> configured -- resuming normal operations
->
-> But I don't know what is it means?
-> I think s3gw.fcgi is right, and I also enable fastcgi in apache2
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Do you have radosgw logs?
+> 
+Here're radosgw log
+The last two line are restart radosgw (2 times)
+Others are trying to connect radosgw..
+
+2013-04-17 14:58:24.335168 7fdb2af5c700  2 req 1:0.316409:s3:GET 
+/s3gw.fcgi:list_bucket:http status=404
+2013-04-17 14:58:24.336074 7fdb2af5c700  1 ====== req done req=0x7fdb240021d0 
+http_status=404 ======
+2013-04-17 14:58:48.987824 7fdb302af700  0 WARNING: RGWRados::log_usage(): 
+user name empty (bucket=s3gw.fcgi), skipping
+2013-04-17 16:28:00.331392 7f4df1a767a0 10 allocated request 
+req=0x7f4de000d390
+2013-04-17 16:35:55.935084 7f4de96d8700  0 monclient: hunting for new mon
+2013-04-17 17:19:23.276170 7f7c596ce7a0 10 allocated request 
+req=0x7f7c48010170
+2013-04-17 17:20:07.184676 7f3dbe64f7a0 10 allocated request 
+req=0x7f3db0001420
+
+
+
+
