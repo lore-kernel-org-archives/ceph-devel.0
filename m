@@ -1,186 +1,282 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 2/4] ceph: take i_mutex before getting Fw cap
-Date: Wed, 17 Apr 2013 20:14:27 +0800
-Message-ID: <516E9223.2050609@intel.com>
-References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com> <1365754273-14088-3-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1304162028020.23771@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] libceph: change how "safe" callback is used
+Date: Wed, 17 Apr 2013 08:32:54 -0500
+Message-ID: <516EA486.8040704@inktank.com>
+References: <516C28DA.5000702@inktank.com> <alpine.DEB.2.00.1304162018590.23771@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:7573 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S966311Ab3DQMOd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Apr 2013 08:14:33 -0400
-In-Reply-To: <alpine.DEB.2.00.1304162028020.23771@cobra.newdream.net>
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:49144 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966219Ab3DQNcz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 09:32:55 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so1818602iea.32
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 06:32:55 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1304162018590.23771@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com, elder@inktank.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On 04/17/2013 11:42 AM, Sage Weil wrote:
-> On Fri, 12 Apr 2013, Yan, Zheng wrote:
->> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+On 04/16/2013 10:26 PM, Sage Weil wrote:
+> On Mon, 15 Apr 2013, Alex Elder wrote:
+>> (This is an alternative to another patch that Zheng Yan
+>> posted, "ceph: add osd request to inode unsafe list in
+>> advance".  As noted, he's reviewed this one and I think
+>> it can therefore take the place of his.)
 >>
->> There is deadlock as illustrated bellow. The fix is taking i_mutex
->> before getting Fw cap reference.
+>> An osd request currently has two callbacks.  They inform the
+>> initiator of the request when we've received confirmation for the
+>> target osd that a request was received, and when the osd indicates
+>> all changes described by the request are durable.
 >>
->>       write                    truncate                 MDS
->> ---------------------     --------------------      --------------
->> get Fw cap
->>                           lock i_mutex
->> lock i_mutex (blocked)
->>                           request setattr.size  ->
->>                                                 <-   revoke Fw cap
+>> The only time the second callback is used is in the ceph file system
+>> for a synchronous write.  There's a race that makes some handling of
+>> this case unsafe.  This patch addresses this problem.  The error
+>> handling for this callback is also kind of gross, and this patch
+>> changes that as well.
 >>
->> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>>
+>> In ceph_sync_write(), if a safe callback is requested we want to add
+>> the request on the ceph inode's unsafe items list.  Because items on
+>> this list must have their tid set (by ceph_osd_start_request()), the
+>> request added *after* the call to that function returns.  The
+>> problem with this is that there's a race between starting the
+>> request and adding it to the unsafe items list; the request may
+>> already be complete before ceph_sync_write() even begins to put it
+>> on the list.
+>>
+>>
+>> To address this, we change the way the "safe" callback is used.
+>> Rather than just calling it when the request is "safe", we use it to
+>> notify the initiator the bounds (start and end) of the period during
+>> which the request is *unsafe*.  So the initiator gets notified just
+>> before the request gets sent to the osd (when it is "unsafe"), and
+>> again when it's known the results are durable (it's no longer
+>> unsafe).  The first call will get made just before the request
+>> message gets sent to the messenger for the first time, *before* the
+>> osd client's request mutex gets dropped.
+>>
+>> We then have this callback function insert the request on the ceph
+>> inode's unsafe list when we're told the request is unsafe.  This
+>> will avoid the race because this call will be made under protection
+>> of the osd client's request mutex.  It also nicely groups the setup
+>> and cleanup of the state associated with managing unsafe requests.
+>>
+>> The name of the "safe" callback field is changed to "unsafe" rather
+>> to better reflect its new purpose.  It has a Boolean "unsafe"
+>> parameter to indicate whether the request is becoming unsafe or is
+>> now safe.  Because the "msg" parameter wasn't used, we drop that.
+>>
+>> This resolves the original problem reportedin:
+>>     http://tracker.ceph.com/issues/4706
+>>
+>> Reported-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
 >> ---
->>  fs/ceph/caps.c | 13 +++++++------
->>  fs/ceph/file.c | 12 ++++++------
->>  2 files changed, 13 insertions(+), 12 deletions(-)
+>>  fs/ceph/file.c                  |   52
+>> +++++++++++++++++++++------------------
+>>  include/linux/ceph/osd_client.h |    4 ++-
+>>  net/ceph/osd_client.c           |    6 +++--
+>>  3 files changed, 35 insertions(+), 27 deletions(-)
 >>
->> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->> index 0da2e94..8737572 100644
->> --- a/fs/ceph/caps.c
->> +++ b/fs/ceph/caps.c
->> @@ -2058,6 +2058,13 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
->>  		goto out;
->>  	}
->>  
->> +	/* finish pending truncate */
->> +	while (ci->i_truncate_pending) {
->> +		spin_unlock(&ci->i_ceph_lock);
->> +		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
->> +		spin_lock(&ci->i_ceph_lock);
-> 
-> I think if we retake i_ceph_lock we need to goto the top to make sure our 
-> local variables aren't stale.. in this case, just file_wanted.
-> 
->> +	}
->> +
->>  	if (need & CEPH_CAP_FILE_WR) {
->>  		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
->>  			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
->> @@ -2079,12 +2086,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
->>  	}
->>  	have = __ceph_caps_issued(ci, &implemented);
->>  
->> -	/*
->> -	 * disallow writes while a truncate is pending
->> -	 */
->> -	if (ci->i_truncate_pending)
->> -		have &= ~CEPH_CAP_FILE_WR;
->> -
->>  	if ((have & need) == need) {
->>  		/*
->>  		 * Look at (implemented & ~have & not) so that we keep waiting
 >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index 546a705..5490598 100644
+>> index 1d8d430..044f3bf 100644
 >> --- a/fs/ceph/file.c
 >> +++ b/fs/ceph/file.c
->> @@ -647,7 +647,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
->>  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
->>  	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
->>  again:
->> -	__ceph_do_pending_vmtruncate(inode, true);
->>  	if (fi->fmode & CEPH_FILE_MODE_LAZY)
->>  		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
->>  	else
->> @@ -724,7 +723,7 @@ retry_snap:
->>  		ret = -ENOSPC;
->>  		goto out;
->>  	}
->> -	__ceph_do_pending_vmtruncate(inode, true);
->> +	mutex_lock(&inode->i_mutex);
->>  	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
->>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
->>  	     inode->i_size);
->> @@ -733,8 +732,10 @@ retry_snap:
->>  	else
->>  		want = CEPH_CAP_FILE_BUFFER;
->>  	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
->> -	if (ret < 0)
->> -		goto out_put;
->> +	if (ret < 0) {
->> +		mutex_unlock(&inode->i_mutex);
->> +		goto out;
+>> @@ -446,19 +446,35 @@ done:
+>>  }
+>>
+>>  /*
+>> - * Write commit callback, called if we requested both an ACK and
+>> - * ONDISK commit reply from the OSD.
+>> + * Write commit request unsafe callback, called to tell us when a
+>> + * request is unsafe (that is, in flight--has been handed to the
+>> + * messenger to send to its target osd).  It is called again when
+>> + * we've received a response message indicating the request is
+>> + * "safe" (its CEPH_OSD_FLAG_ONDISK flag is set), or when a request
+>> + * is completed early (and unsuccessfully) due to a timeout or
+>> + * interrupt.
+>> + *
+>> + * This is used if we requested both an ACK and ONDISK commit reply
+>> + * from the OSD.
+>>   */
+>> -static void sync_write_commit(struct ceph_osd_request *req,
+>> -			      struct ceph_msg *msg)
+>> +static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool
+>> unsafe)
+>>  {
+>>  	struct ceph_inode_info *ci = ceph_inode(req->r_inode);
+>>
+>> -	dout("sync_write_commit %p tid %llu\n", req, req->r_tid);
+>> -	spin_lock(&ci->i_unsafe_lock);
+>> -	list_del_init(&req->r_unsafe_item);
+>> -	spin_unlock(&ci->i_unsafe_lock);
+>> -	ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
+>> +	dout("%s %p tid %llu %ssafe\n", __func__, req, req->r_tid,
+>> +		unsafe ? "un" : "");
+>> +	if (unsafe) {
+>> +		ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
+>> +		spin_lock(&ci->i_unsafe_lock);
+>> +		list_add_tail(&req->r_unsafe_item,
+>> +			      &ci->i_unsafe_writes);
+>> +		spin_unlock(&ci->i_unsafe_lock);
+>> +	} else {
+>> +		spin_lock(&ci->i_unsafe_lock);
+>> +		list_del_init(&req->r_unsafe_item);
+>> +		spin_unlock(&ci->i_unsafe_lock);
+>> +		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
 >> +	}
->>  
->>  	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
->>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
->> @@ -744,10 +745,10 @@ retry_snap:
->>  	    (iocb->ki_filp->f_flags & O_DIRECT) ||
->>  	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
->>  	    (fi->flags & CEPH_F_SYNC)) {
->> +		mutex_unlock(&inode->i_mutex);
->>  		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
->>  			&iocb->ki_pos);
->>  	} else {
->> -		mutex_lock(&inode->i_mutex);
->>  		ret = __generic_file_aio_write(iocb, iov, nr_segs,
->>  					       &iocb->ki_pos);
->>  		mutex_unlock(&inode->i_mutex);
->> @@ -762,7 +763,6 @@ retry_snap:
->>  			__mark_inode_dirty(inode, dirty);
+>>  }
+> 
+> This now has to be called *exactly once* with unsafe = true and again 
+> with unsafe = false (and then may repeat).  But:
+
+Yes.  And my intention was to make it get marked at
+the one time a request is first successfully sent.
+Because at that instant it is really unsafe--something
+might happen, but it might not, and we won't know until
+there is an acknowledgement.
+
+And successful receipt of the acknowledgement is the
+instant at which it is safe again--we know the state
+change defined by the request is durable.  So yes,
+it is by design that both the beginning and end point
+of the "unsafe" period happen exactly once each.
+
+This is that place, *except* that as you point out below
+it is not if the request maps to no osd.  So that needs
+to be fixed.
+
+>>  /*
+>> @@ -570,7 +586,8 @@ more:
+>>
+>>  		if ((file->f_flags & O_SYNC) == 0) {
+>>  			/* get a second commit callback */
+>> -			req->r_safe_callback = sync_write_commit;
+>> +			req->r_unsafe_callback = ceph_sync_write_unsafe;
+>> +			req->r_inode = inode;
+>>  			own_pages = true;
+>>  		}
 >>  	}
->>  
->> -out_put:
->>  	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
->>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
->>  	     ceph_cap_string(got));
+>> @@ -581,21 +598,8 @@ more:
+>>  	ceph_osdc_build_request(req, pos, snapc, vino.snap, &mtime);
+>>
+>>  	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
+>> -	if (!ret) {
+>> -		if (req->r_safe_callback) {
+>> -			/*
+>> -			 * Add to inode unsafe list only after we
+>> -			 * start_request so that a tid has been assigned.
+>> -			 */
+>> -			spin_lock(&ci->i_unsafe_lock);
+>> -			list_add_tail(&req->r_unsafe_item,
+>> -				      &ci->i_unsafe_writes);
+>> -			spin_unlock(&ci->i_unsafe_lock);
+>> -			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
+>> -		}
+>> -		
+>> +	if (!ret)
+>>  		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
+>> -	}
+>>
+>>  	if (file->f_flags & O_DIRECT)
+>>  		ceph_put_page_vector(pages, num_pages, false);
+>> diff --git a/include/linux/ceph/osd_client.h
+>> b/include/linux/ceph/osd_client.h
+>> index 2a68a74..0d3358e 100644
+>> --- a/include/linux/ceph/osd_client.h
+>> +++ b/include/linux/ceph/osd_client.h
+>> @@ -29,6 +29,7 @@ struct ceph_authorizer;
+>>   */
+>>  typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *,
+>>  				     struct ceph_msg *);
+>> +typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *,
+>> bool);
+>>
+>>  /* a given osd we're communicating with */
+>>  struct ceph_osd {
+>> @@ -149,7 +150,8 @@ struct ceph_osd_request {
+>>  	struct kref       r_kref;
+>>  	bool              r_mempool;
+>>  	struct completion r_completion, r_safe_completion;
+>> -	ceph_osdc_callback_t r_callback, r_safe_callback;
+>> +	ceph_osdc_callback_t r_callback;
+>> +	ceph_osdc_unsafe_callback_t r_unsafe_callback;
+>>  	struct ceph_eversion r_reassert_version;
+>>  	struct list_head  r_unsafe_item;
+>>
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 939be67..5b7ce57 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -1403,8 +1403,8 @@ static void handle_osds_timeout(struct work_struct
+>> *work)
+>>
+>>  static void complete_request(struct ceph_osd_request *req)
+>>  {
+>> -	if (req->r_safe_callback)
+>> -		req->r_safe_callback(req, NULL);
+>> +	if (req->r_unsafe_callback)
+>> +		req->r_unsafe_callback(req, false);
+>>  	complete_all(&req->r_safe_completion);  /* fsync waiter */
+>>  }
+>>
+>> @@ -2105,6 +2105,8 @@ int ceph_osdc_start_request(struct ceph_osd_client
+>> *osdc,
+>>  		dout("send_request %p no up osds in pg\n", req);
+>>  		ceph_monc_request_next_osdmap(&osdc->client->monc);
+>>  	} else {
+>> +		if (req->r_unsafe_callback)
+>> +			req->r_unsafe_callback(req, true);
 > 
-> Mechanically, the rest of this looks correct.  I seem to remember us 
-> changing this (or something similar) so that we *didn't* hold i_mutex 
-> while waiting on the caps in order to avoid some deadlock.  But... looking 
-> through the git history I can't find anything.
-> 
-> I think the race to consider is if we are blocked waiting for the WR cap 
-> and the MDS sends us a truncate.  It will queue the async truncate work 
-> but that will block waiting for i_mutex.  Can that deadlock?  (I think no, 
-> but perhaps the pending truncate check needs to happen after we acquire 
-> the cap, too!)
+> This might not get called if we initially map to no osd... and later, if 
+> the request gets kicked, it isn't called then.
 
-Maybe we should also call wake_up_all(&ci->i_cap_wq) when receiving truncate from
-MDS.
+You're right, we need to hook into the place a request gets
+actually sent for the first time.  That may require a small
+rearrangement of code to make that point accessible.
 
-To truncate a file, the MDS xlock the filelock firstly, which revokes all Fw caps
-from clients. Then the MDS sends truncate to clients and finally drops the xlock.
-It's impossible that client receives a truncate request while having Fw cap. So I
-don't think we need check pending truncate after acquiring the Fw cap.
+> I also worry that the WR cap ref isn't taken immediately.  If the osd 
+> target is initially not there, we may not take that ref for who knows how 
+> long.. at which point we may have erroneously allowed the cap to be 
+> revoked by the MDS.
 
-> 
-> Similarly, if we block holding i_mutex and wait for WR, but the MDS 
-> revokes some other cap (say, WRBUFFER), could we deadlock from teh 
-> async writeback worker?
+Yes.  Again, if we manage to do the "request is unsafe" callback
+at the right time I think this is not a problem.
 
-I think no, i_mutex is not involved in writeback.
+> I think the right solution here is to still take the WR cap synchronously 
+> from within the write method.  Perhaps making it so (1) the unsafe=true 
+> case can be called multiple times (list_add_tail or something) and (2) 
+> doesn't do the cap get will work?
 
-> 
-> Both sound dangerous to me.  I wonder if something in the spirit of
-> 
-> 	while (true) {
-> 		get_cap(Fw)
-> 		if (try_lock_mutex(...))
-> 			break;
-> 		put_cap(Fw);
-> 		lock_mutex(...)
-> 		unlock_mutex(...)
-> 	}
-> 
-> would be simpler.  Or, make a get_cap variant that drops i_mutex while 
-> waiting, but takes it before grabbing the actual Fw cap ref.
-> 
+I don't think that's necessary.  Mark it unsafe when it's
+unsafe, once.  Mark it safe again when it's safe again.
 
-See my patch "ceph: apply write checks in ceph_aio_write". I think we really
-should acquire i_mutex before getting caps. ceph_get_caps() needs a parameter
-'endoff', if the file is opened in append mode, the endoff is calculated from
-i_size. If we drop i_mutex in ceph_get_caps(), someone else may change the
-i_size.
+I haven't looked at what exactly happens when the osd
+target changes after a map change, but the state of the
+request in this respect doesn't change.  Once it's out
+it's unsafe.  Once it's acknowledged, it's safe again.
 
+I'm going to take a look at having it cover the case
+where it doesn't get sent right away.
 
-Regards
-Yan, Zheng
-
+					-Alex
 
 > sage
 > 
+>>  		__send_queued(osdc);
+>>  	}
+>>  	rc = 0;
+>> -- 
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 
