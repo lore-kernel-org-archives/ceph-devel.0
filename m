@@ -1,295 +1,58 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: change how "safe" callback is used
-Date: Wed, 17 Apr 2013 08:35:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1304170830480.28750@cobra.newdream.net>
-References: <516C28DA.5000702@inktank.com> <alpine.DEB.2.00.1304162018590.23771@cobra.newdream.net> <516EA486.8040704@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: rados gateway
+Date: Wed, 17 Apr 2013 08:42:32 -0700
+Message-ID: <CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com>
+References: <loom.20130417T164538-81@post.gmane.org>
+	<CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com>
+	<loom.20130417T170632-546@post.gmane.org>
+	<CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com>
+	<loom.20130417T172954-546@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33728 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966772Ab3DQPfh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 11:35:37 -0400
-In-Reply-To: <516EA486.8040704@inktank.com>
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:33906 "EHLO
+	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965236Ab3DQPmd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 11:42:33 -0400
+Received: by mail-ia0-f169.google.com with SMTP id l29so323874iag.0
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 08:42:32 -0700 (PDT)
+In-Reply-To: <loom.20130417T172954-546@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: proguest <proguest1942@hotmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, 17 Apr 2013, Alex Elder wrote:
-> On 04/16/2013 10:26 PM, Sage Weil wrote:
-> > On Mon, 15 Apr 2013, Alex Elder wrote:
-> >> (This is an alternative to another patch that Zheng Yan
-> >> posted, "ceph: add osd request to inode unsafe list in
-> >> advance".  As noted, he's reviewed this one and I think
-> >> it can therefore take the place of his.)
-> >>
-> >> An osd request currently has two callbacks.  They inform the
-> >> initiator of the request when we've received confirmation for the
-> >> target osd that a request was received, and when the osd indicates
-> >> all changes described by the request are durable.
-> >>
-> >> The only time the second callback is used is in the ceph file system
-> >> for a synchronous write.  There's a race that makes some handling of
-> >> this case unsafe.  This patch addresses this problem.  The error
-> >> handling for this callback is also kind of gross, and this patch
-> >> changes that as well.
-> >>
-> >>
-> >> In ceph_sync_write(), if a safe callback is requested we want to add
-> >> the request on the ceph inode's unsafe items list.  Because items on
-> >> this list must have their tid set (by ceph_osd_start_request()), the
-> >> request added *after* the call to that function returns.  The
-> >> problem with this is that there's a race between starting the
-> >> request and adding it to the unsafe items list; the request may
-> >> already be complete before ceph_sync_write() even begins to put it
-> >> on the list.
-> >>
-> >>
-> >> To address this, we change the way the "safe" callback is used.
-> >> Rather than just calling it when the request is "safe", we use it to
-> >> notify the initiator the bounds (start and end) of the period during
-> >> which the request is *unsafe*.  So the initiator gets notified just
-> >> before the request gets sent to the osd (when it is "unsafe"), and
-> >> again when it's known the results are durable (it's no longer
-> >> unsafe).  The first call will get made just before the request
-> >> message gets sent to the messenger for the first time, *before* the
-> >> osd client's request mutex gets dropped.
-> >>
-> >> We then have this callback function insert the request on the ceph
-> >> inode's unsafe list when we're told the request is unsafe.  This
-> >> will avoid the race because this call will be made under protection
-> >> of the osd client's request mutex.  It also nicely groups the setup
-> >> and cleanup of the state associated with managing unsafe requests.
-> >>
-> >> The name of the "safe" callback field is changed to "unsafe" rather
-> >> to better reflect its new purpose.  It has a Boolean "unsafe"
-> >> parameter to indicate whether the request is becoming unsafe or is
-> >> now safe.  Because the "msg" parameter wasn't used, we drop that.
-> >>
-> >> This resolves the original problem reportedin:
-> >>     http://tracker.ceph.com/issues/4706
-> >>
-> >> Reported-by: Yan, Zheng <zheng.z.yan@intel.com>
-> >> Signed-off-by: Alex Elder <elder@inktank.com>
-> >> Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
-> >> ---
-> >>  fs/ceph/file.c                  |   52
-> >> +++++++++++++++++++++------------------
-> >>  include/linux/ceph/osd_client.h |    4 ++-
-> >>  net/ceph/osd_client.c           |    6 +++--
-> >>  3 files changed, 35 insertions(+), 27 deletions(-)
-> >>
-> >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> >> index 1d8d430..044f3bf 100644
-> >> --- a/fs/ceph/file.c
-> >> +++ b/fs/ceph/file.c
-> >> @@ -446,19 +446,35 @@ done:
-> >>  }
-> >>
-> >>  /*
-> >> - * Write commit callback, called if we requested both an ACK and
-> >> - * ONDISK commit reply from the OSD.
-> >> + * Write commit request unsafe callback, called to tell us when a
-> >> + * request is unsafe (that is, in flight--has been handed to the
-> >> + * messenger to send to its target osd).  It is called again when
-> >> + * we've received a response message indicating the request is
-> >> + * "safe" (its CEPH_OSD_FLAG_ONDISK flag is set), or when a request
-> >> + * is completed early (and unsuccessfully) due to a timeout or
-> >> + * interrupt.
-> >> + *
-> >> + * This is used if we requested both an ACK and ONDISK commit reply
-> >> + * from the OSD.
-> >>   */
-> >> -static void sync_write_commit(struct ceph_osd_request *req,
-> >> -			      struct ceph_msg *msg)
-> >> +static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool
-> >> unsafe)
-> >>  {
-> >>  	struct ceph_inode_info *ci = ceph_inode(req->r_inode);
-> >>
-> >> -	dout("sync_write_commit %p tid %llu\n", req, req->r_tid);
-> >> -	spin_lock(&ci->i_unsafe_lock);
-> >> -	list_del_init(&req->r_unsafe_item);
-> >> -	spin_unlock(&ci->i_unsafe_lock);
-> >> -	ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
-> >> +	dout("%s %p tid %llu %ssafe\n", __func__, req, req->r_tid,
-> >> +		unsafe ? "un" : "");
-> >> +	if (unsafe) {
-> >> +		ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
-> >> +		spin_lock(&ci->i_unsafe_lock);
-> >> +		list_add_tail(&req->r_unsafe_item,
-> >> +			      &ci->i_unsafe_writes);
-> >> +		spin_unlock(&ci->i_unsafe_lock);
-> >> +	} else {
-> >> +		spin_lock(&ci->i_unsafe_lock);
-> >> +		list_del_init(&req->r_unsafe_item);
-> >> +		spin_unlock(&ci->i_unsafe_lock);
-> >> +		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
-> >> +	}
-> >>  }
-> > 
-> > This now has to be called *exactly once* with unsafe = true and again 
-> > with unsafe = false (and then may repeat).  But:
-> 
-> Yes.  And my intention was to make it get marked at
-> the one time a request is first successfully sent.
-> Because at that instant it is really unsafe--something
-> might happen, but it might not, and we won't know until
-> there is an acknowledgement.
-> 
-> And successful receipt of the acknowledgement is the
-> instant at which it is safe again--we know the state
-> change defined by the request is durable.  So yes,
-> it is by design that both the beginning and end point
-> of the "unsafe" period happen exactly once each.
-> 
-> This is that place, *except* that as you point out below
-> it is not if the request maps to no osd.  So that needs
-> to be fixed.
-> 
-> >>  /*
-> >> @@ -570,7 +586,8 @@ more:
-> >>
-> >>  		if ((file->f_flags & O_SYNC) == 0) {
-> >>  			/* get a second commit callback */
-> >> -			req->r_safe_callback = sync_write_commit;
-> >> +			req->r_unsafe_callback = ceph_sync_write_unsafe;
-> >> +			req->r_inode = inode;
-> >>  			own_pages = true;
-> >>  		}
-> >>  	}
-> >> @@ -581,21 +598,8 @@ more:
-> >>  	ceph_osdc_build_request(req, pos, snapc, vino.snap, &mtime);
-> >>
-> >>  	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-> >> -	if (!ret) {
-> >> -		if (req->r_safe_callback) {
-> >> -			/*
-> >> -			 * Add to inode unsafe list only after we
-> >> -			 * start_request so that a tid has been assigned.
-> >> -			 */
-> >> -			spin_lock(&ci->i_unsafe_lock);
-> >> -			list_add_tail(&req->r_unsafe_item,
-> >> -				      &ci->i_unsafe_writes);
-> >> -			spin_unlock(&ci->i_unsafe_lock);
-> >> -			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
-> >> -		}
-> >> -		
-> >> +	if (!ret)
-> >>  		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> >> -	}
-> >>
-> >>  	if (file->f_flags & O_DIRECT)
-> >>  		ceph_put_page_vector(pages, num_pages, false);
-> >> diff --git a/include/linux/ceph/osd_client.h
-> >> b/include/linux/ceph/osd_client.h
-> >> index 2a68a74..0d3358e 100644
-> >> --- a/include/linux/ceph/osd_client.h
-> >> +++ b/include/linux/ceph/osd_client.h
-> >> @@ -29,6 +29,7 @@ struct ceph_authorizer;
-> >>   */
-> >>  typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *,
-> >>  				     struct ceph_msg *);
-> >> +typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *,
-> >> bool);
-> >>
-> >>  /* a given osd we're communicating with */
-> >>  struct ceph_osd {
-> >> @@ -149,7 +150,8 @@ struct ceph_osd_request {
-> >>  	struct kref       r_kref;
-> >>  	bool              r_mempool;
-> >>  	struct completion r_completion, r_safe_completion;
-> >> -	ceph_osdc_callback_t r_callback, r_safe_callback;
-> >> +	ceph_osdc_callback_t r_callback;
-> >> +	ceph_osdc_unsafe_callback_t r_unsafe_callback;
-> >>  	struct ceph_eversion r_reassert_version;
-> >>  	struct list_head  r_unsafe_item;
-> >>
-> >> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> >> index 939be67..5b7ce57 100644
-> >> --- a/net/ceph/osd_client.c
-> >> +++ b/net/ceph/osd_client.c
-> >> @@ -1403,8 +1403,8 @@ static void handle_osds_timeout(struct work_struct
-> >> *work)
-> >>
-> >>  static void complete_request(struct ceph_osd_request *req)
-> >>  {
-> >> -	if (req->r_safe_callback)
-> >> -		req->r_safe_callback(req, NULL);
-> >> +	if (req->r_unsafe_callback)
-> >> +		req->r_unsafe_callback(req, false);
-> >>  	complete_all(&req->r_safe_completion);  /* fsync waiter */
-> >>  }
-> >>
-> >> @@ -2105,6 +2105,8 @@ int ceph_osdc_start_request(struct ceph_osd_client
-> >> *osdc,
-> >>  		dout("send_request %p no up osds in pg\n", req);
-> >>  		ceph_monc_request_next_osdmap(&osdc->client->monc);
-> >>  	} else {
-> >> +		if (req->r_unsafe_callback)
-> >> +			req->r_unsafe_callback(req, true);
-> > 
-> > This might not get called if we initially map to no osd... and later, if 
-> > the request gets kicked, it isn't called then.
-> 
-> You're right, we need to hook into the place a request gets
-> actually sent for the first time.  That may require a small
-> rearrangement of code to make that point accessible.
-
-I think this is slightly misinterpreting the purpose of the 'unsafe' list.  
-That list is used for fsync(fd) so that we wait for any pending requests.  
-That is really writes from the perspective of the syscall/user/vfs, not 
-the backend writes to the osd.  If we have a write that is not sent yet 
-because the osd is down and fsync that fd, we still want to wait until 
-some osd comes online and the write actually happens.  The 'unsafe' start 
-is when ceph_sync_write() is called... not the when the request is sent 
-to the backend.
-
-That being the case, it will become unsafe exactly once, and safe again 
-exactly once (on success, or abort).
-
-s
-
-> > I also worry that the WR cap ref isn't taken immediately.  If the osd 
-> > target is initially not there, we may not take that ref for who knows how 
-> > long.. at which point we may have erroneously allowed the cap to be 
-> > revoked by the MDS.
-> 
-> Yes.  Again, if we manage to do the "request is unsafe" callback
-> at the right time I think this is not a problem.
-> 
-> > I think the right solution here is to still take the WR cap synchronously 
-> > from within the write method.  Perhaps making it so (1) the unsafe=true 
-> > case can be called multiple times (list_add_tail or something) and (2) 
-> > doesn't do the cap get will work?
-> 
-> I don't think that's necessary.  Mark it unsafe when it's
-> unsafe, once.  Mark it safe again when it's safe again.
-> 
-> I haven't looked at what exactly happens when the osd
-> target changes after a map change, but the state of the
-> request in this respect doesn't change.  Once it's out
-> it's unsafe.  Once it's acknowledged, it's safe again.
-> 
-> I'm going to take a look at having it cover the case
-> where it doesn't get sent right away.
-> 
-> 					-Alex
-> 
-> > sage
-> > 
-> >>  		__send_queued(osdc);
-> >>  	}
-> >>  	rc = 0;
-> >> -- 
-> >> 1.7.9.5
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> 
-> 
+On Wed, Apr 17, 2013 at 8:33 AM, proguest <proguest1942@hotmail.com> wrote:
+> Yehuda Sadeh <yehuda <at> inktank.com> writes:
+>
+>>
+>> On Wed, Apr 17, 2013 at 8:13 AM, proguest <proguest1942 <at> hotmail.com>
+> wrote:
+>> > Yehuda Sadeh <yehuda <at> inktank.com> writes:
+>> >
+>> >>
+>> >> Hard to know without additional info. It looks though as you might
+>> >> have apache config issues (if you're using apache).
+>> >>
+>> >> Yehuda
+>> > hi Yehuda
+>> >
+>> > thanks for replied me.
+>> > It's only stardard setting with radosgw document.
+>> > here's /etc/apache2/httpd.conf  only 1 line
+>> >
+>> > ServerName node74
+>> >
+>> > and here's /etc/apache2/sites-enabled  (just follow the website)
+>>
+>> is that the actual file name, or is that the directory where this
+>> config file resides? do you have by any chance another default web
+>> site set up under sites-enabled? did you restart apache after
+>> configuring?
+> I missed. It's /etc/apache2/sites-enabled/rgw.conf
+> The document said
+> #sudo a2ensite rgw.conf
+> #sudo a2dissite default
+> so there's only one configure in sites-enabled
+>
+did you restart apache after reconfiguring it?
