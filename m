@@ -1,108 +1,200 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: rados gateway
-Date: Wed, 17 Apr 2013 08:20:16 -0700
-Message-ID: <CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com>
-References: <loom.20130417T164538-81@post.gmane.org>
-	<CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com>
-	<loom.20130417T170632-546@post.gmane.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 2/4] ceph: take i_mutex before getting Fw cap
+Date: Wed, 17 Apr 2013 08:28:19 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304170826151.28750@cobra.newdream.net>
+References: <1365754273-14088-1-git-send-email-zheng.z.yan@intel.com> <1365754273-14088-3-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1304162028020.23771@cobra.newdream.net> <516E9223.2050609@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:43059 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756363Ab3DQPUQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 11:20:16 -0400
-Received: by mail-ie0-f172.google.com with SMTP id c10so2059057ieb.31
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 08:20:16 -0700 (PDT)
-In-Reply-To: <loom.20130417T170632-546@post.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:33596 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751038Ab3DQP2T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 11:28:19 -0400
+In-Reply-To: <516E9223.2050609@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: proguest <proguest1942@hotmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com, elder@inktank.com
 
-On Wed, Apr 17, 2013 at 8:13 AM, proguest <proguest1942@hotmail.com> wrote:
-> Yehuda Sadeh <yehuda <at> inktank.com> writes:
->
->>
->> On Wed, Apr 17, 2013 at 7:54 AM, proguest <proguest1942 <at> hotmail.com>
-> wrote:
->> > hi,
->> > I really need some help for my ceph radosgw.
->> > stuck on it for a really long time.
->> >
->> > I followed by the ceph document
->> > http://ceph.com/docs/master/start/quick-rgw/
->> >
->> > without any error or warnimg.
->> >
->> > i can even use radosgw-admin to create user successfully.
->> >
->> > But, I cant get into cephfs neither S3 nor swift.
->> >
->> > #swift -A http://<radosgw-host>/auth -U <user> -K <key> post test
->> >
->> > only responded Auth GET failed: http://<radosgw-host>:80 404 Not Found
->> >
->> > How can I solve this problem...? I really need a help
->> >
->>
->> Hard to know without additional info. It looks though as you might
->> have apache config issues (if you're using apache).
->>
->> Yehuda
-> hi Yehuda
->
-> thanks for replied me.
-> It's only stardard setting with radosgw document.
-> here's /etc/apache2/httpd.conf  only 1 line
->
-> ServerName node74
->
-> and here's /etc/apache2/sites-enabled  (just follow the website)
+On Wed, 17 Apr 2013, Yan, Zheng wrote:
+> On 04/17/2013 11:42 AM, Sage Weil wrote:
+> > On Fri, 12 Apr 2013, Yan, Zheng wrote:
+> >> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> >>
+> >> There is deadlock as illustrated bellow. The fix is taking i_mutex
+> >> before getting Fw cap reference.
+> >>
+> >>       write                    truncate                 MDS
+> >> ---------------------     --------------------      --------------
+> >> get Fw cap
+> >>                           lock i_mutex
+> >> lock i_mutex (blocked)
+> >>                           request setattr.size  ->
+> >>                                                 <-   revoke Fw cap
+> >>
+> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> >> ---
+> >>  fs/ceph/caps.c | 13 +++++++------
+> >>  fs/ceph/file.c | 12 ++++++------
+> >>  2 files changed, 13 insertions(+), 12 deletions(-)
+> >>
+> >> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> >> index 0da2e94..8737572 100644
+> >> --- a/fs/ceph/caps.c
+> >> +++ b/fs/ceph/caps.c
+> >> @@ -2058,6 +2058,13 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+> >>  		goto out;
+> >>  	}
+> >>  
+> >> +	/* finish pending truncate */
+> >> +	while (ci->i_truncate_pending) {
+> >> +		spin_unlock(&ci->i_ceph_lock);
+> >> +		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
+> >> +		spin_lock(&ci->i_ceph_lock);
+> > 
+> > I think if we retake i_ceph_lock we need to goto the top to make sure our 
+> > local variables aren't stale.. in this case, just file_wanted.
+> > 
+> >> +	}
+> >> +
+> >>  	if (need & CEPH_CAP_FILE_WR) {
+> >>  		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
+> >>  			dout("get_cap_refs %p endoff %llu > maxsize %llu\n",
+> >> @@ -2079,12 +2086,6 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+> >>  	}
+> >>  	have = __ceph_caps_issued(ci, &implemented);
+> >>  
+> >> -	/*
+> >> -	 * disallow writes while a truncate is pending
+> >> -	 */
+> >> -	if (ci->i_truncate_pending)
+> >> -		have &= ~CEPH_CAP_FILE_WR;
+> >> -
+> >>  	if ((have & need) == need) {
+> >>  		/*
+> >>  		 * Look at (implemented & ~have & not) so that we keep waiting
+> >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> >> index 546a705..5490598 100644
+> >> --- a/fs/ceph/file.c
+> >> +++ b/fs/ceph/file.c
+> >> @@ -647,7 +647,6 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+> >>  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+> >>  	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+> >>  again:
+> >> -	__ceph_do_pending_vmtruncate(inode, true);
+> >>  	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+> >>  		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+> >>  	else
+> >> @@ -724,7 +723,7 @@ retry_snap:
+> >>  		ret = -ENOSPC;
+> >>  		goto out;
+> >>  	}
+> >> -	__ceph_do_pending_vmtruncate(inode, true);
+> >> +	mutex_lock(&inode->i_mutex);
+> >>  	dout("aio_write %p %llx.%llx %llu~%u getting caps. i_size %llu\n",
+> >>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >>  	     inode->i_size);
+> >> @@ -733,8 +732,10 @@ retry_snap:
+> >>  	else
+> >>  		want = CEPH_CAP_FILE_BUFFER;
+> >>  	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
+> >> -	if (ret < 0)
+> >> -		goto out_put;
+> >> +	if (ret < 0) {
+> >> +		mutex_unlock(&inode->i_mutex);
+> >> +		goto out;
+> >> +	}
+> >>  
+> >>  	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+> >>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >> @@ -744,10 +745,10 @@ retry_snap:
+> >>  	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+> >>  	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
+> >>  	    (fi->flags & CEPH_F_SYNC)) {
+> >> +		mutex_unlock(&inode->i_mutex);
+> >>  		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+> >>  			&iocb->ki_pos);
+> >>  	} else {
+> >> -		mutex_lock(&inode->i_mutex);
+> >>  		ret = __generic_file_aio_write(iocb, iov, nr_segs,
+> >>  					       &iocb->ki_pos);
+> >>  		mutex_unlock(&inode->i_mutex);
+> >> @@ -762,7 +763,6 @@ retry_snap:
+> >>  			__mark_inode_dirty(inode, dirty);
+> >>  	}
+> >>  
+> >> -out_put:
+> >>  	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+> >>  	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+> >>  	     ceph_cap_string(got));
+> > 
+> > Mechanically, the rest of this looks correct.  I seem to remember us 
+> > changing this (or something similar) so that we *didn't* hold i_mutex 
+> > while waiting on the caps in order to avoid some deadlock.  But... looking 
+> > through the git history I can't find anything.
+> > 
+> > I think the race to consider is if we are blocked waiting for the WR cap 
+> > and the MDS sends us a truncate.  It will queue the async truncate work 
+> > but that will block waiting for i_mutex.  Can that deadlock?  (I think no, 
+> > but perhaps the pending truncate check needs to happen after we acquire 
+> > the cap, too!)
+> 
+> Maybe we should also call wake_up_all(&ci->i_cap_wq) when receiving truncate from
+> MDS.
+> 
+> To truncate a file, the MDS xlock the filelock firstly, which revokes all Fw caps
+> from clients. Then the MDS sends truncate to clients and finally drops the xlock.
+> It's impossible that client receives a truncate request while having Fw cap. So I
+> don't think we need check pending truncate after acquiring the Fw cap.
 
-is that the actual file name, or is that the directory where this
-config file resides? do you have by any chance another default web
-site set up under sites-enabled? did you restart apache after
-configuring?
+Okay, sounds good to me then!
 
->
-> FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
-> <VirtualHost *:80>
->         ServerName node74
->         ServerAdmin proguest1942@hotmail.com
->         DocumentRoot /var/www
-> </VirtualHost>
->
-> RewriteEngine On
-> RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*) /s3gw.fcgi?page=$1&params=$2&%
-> {QUERY_STRING} [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
->
-> <VirtualHost *:80>
->
->         <IfModule mod_fastcgi.c>
->                 <Directory /var/www>
->                         Options +ExecCGI
->                         AllowOverride All
->                         SetHandler fastcgi-script
->                         Order allow,deny
->                         Allow from all
->                         AuthBasicAuthoritative Off
->                 </Directory>
->         </IfModule>
->
->         AllowEncodedSlashes On
->         ErrorLog /var/log/apache2/error.log
->         CustomLog /var/log/apache2/access.log combined
->         ServerSignature Off
-> </VirtualHost>
->
-> without any other edit.
-> Also create a fcgi file named s3gw.fcgi in /var/www/
-> here's s3gw.fcgi
->
-> #!/bin/sh
-> exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway
->
-> I don't know what's wrong with my radosgw..
->
->
+Perhaps we should add a comment and WARN_ON that we don't have the Fw cap 
+at that time.
+
+Reviewed-by: Sage Weil <sage@inktank.com>
+
+ 
+> > 
+> > Similarly, if we block holding i_mutex and wait for WR, but the MDS 
+> > revokes some other cap (say, WRBUFFER), could we deadlock from teh 
+> > async writeback worker?
+> 
+> I think no, i_mutex is not involved in writeback.
+> 
+> > 
+> > Both sound dangerous to me.  I wonder if something in the spirit of
+> > 
+> > 	while (true) {
+> > 		get_cap(Fw)
+> > 		if (try_lock_mutex(...))
+> > 			break;
+> > 		put_cap(Fw);
+> > 		lock_mutex(...)
+> > 		unlock_mutex(...)
+> > 	}
+> > 
+> > would be simpler.  Or, make a get_cap variant that drops i_mutex while 
+> > waiting, but takes it before grabbing the actual Fw cap ref.
+> > 
+> 
+> See my patch "ceph: apply write checks in ceph_aio_write". I think we really
+> should acquire i_mutex before getting caps. ceph_get_caps() needs a parameter
+> 'endoff', if the file is opened in append mode, the endoff is calculated from
+> i_size. If we drop i_mutex in ceph_get_caps(), someone else may change the
+> i_size.
+> 
+> 
+> Regards
+> Yan, Zheng
+> 
+> 
+> > sage
+> > 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
