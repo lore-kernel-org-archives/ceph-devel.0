@@ -1,115 +1,75 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: rados gateway
-Date: Wed, 17 Apr 2013 11:22:37 -0700
-Message-ID: <CABBk=J_4Zhcnjtm_VDP9rdwG4fSOaaj_mknrpNm7JcAS0EJx_Q@mail.gmail.com>
-References: <loom.20130417T164538-81@post.gmane.org>
-	<CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com>
-	<loom.20130417T170632-546@post.gmane.org>
-	<CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com>
-	<loom.20130417T172954-546@post.gmane.org>
-	<CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com>
-	<loom.20130417T183106-585@post.gmane.org>
-	<CABBk=J9uw5WUcOvkCAuzO2R_nhNmbxzFVFFSQXM5vypVgXAykQ@mail.gmail.com>
-	<loom.20130417T185651-134@post.gmane.org>
-	<CABBk=J-P4KPXqsg7gZQBDvvyiaWHrStyQYx1mLWQ3YGMR0UN0g@mail.gmail.com>
-	<loom.20130417T194925-931@post.gmane.org>
+From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
+Subject: Re: Scrub shutdown the OSD process
+Date: Wed, 17 Apr 2013 20:52:05 +0200
+Message-ID: <1366224725.14655.30.camel@localhost>
+References: <1366018923.3018.3.camel@localhost>
+	<CAPYLRziFNxnUhyxHRUCzZBF6oQwrWt8YdxBtDrKzMMNuyuW=YQ@mail.gmail.com>
+	<1366046351.26980.0.camel@localhost>
+	<CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA@mail.gmail.com>
+	<1366095376.3018.28.camel@localhost>
+	<1366192124.14655.20.camel@localhost>
+Reply-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f169.google.com ([209.85.220.169]:52401 "EHLO
-	mail-vc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966324Ab3DQSWi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 14:22:38 -0400
-Received: by mail-vc0-f169.google.com with SMTP id hx10so1607820vcb.28
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 11:22:38 -0700 (PDT)
-In-Reply-To: <loom.20130417T194925-931@post.gmane.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: proguest <proguest1942@hotmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1366192124.14655.20.camel@localhost>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 17, 2013 at 11:02 AM, proguest <proguest1942@hotmail.com> wrote:
-> Yehuda Sadeh <yehuda <at> inktank.com> writes:
->
->>
->> On Wed, Apr 17, 2013 at 9:58 AM, proguest <proguest1942 <at> hotmail.com>
-> wrote:
->> > Yehuda Sadeh <yehuda <at> inktank.com> writes:
->> >
->> >>
->> >> Do you have radosgw logs?
->> >>
->> > Here're radosgw log
->> > The last two line are restart radosgw (2 times)
->> > Others are trying to connect radosgw..
->> >
->> > 2013-04-17 14:58:24.335168 7fdb2af5c700  2 req 1:0.316409:s3:GET
->> > /s3gw.fcgi:list_bucket:http status=404
->>
->> I noticed that the example closes and reopens the VirtualHost section.
->> Can you try the following config (doesn't close and reopens the
->> section, modified RewriteRule):
->>
->> FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
->>
->> <VirtualHost *:80>
->>         ServerName {fqdn}
->>         ServerAdmin {email.address}
->>         DocumentRoot /var/www
->>
->> RewriteEngine On
->> RewriteRule             ^/(.*) /s3gw.fcgi?%{QUERY_STRING}
->> [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
->>
->>         <IfModule mod_fastcgi.c>
->>                 <Directory /var/www>
->>                         Options +ExecCGI
->>                         AllowOverride All
->>                         SetHandler fastcgi-script
->>                         Order allow,deny
->>                         Allow from all
->>                         AuthBasicAuthoritative Off
->>                 </Directory>
->>         </IfModule>
->>
->>         AllowEncodedSlashes On
->>         ErrorLog /var/log/apache2/error.log
->>         CustomLog /var/log/apache2/access.log combined
->>         ServerSignature Off
->> </VirtualHost>
->
-> woo, it seems work!!
->
-> but there're another problem...
->
-> i tried:
-> # curl -H "X-Auth-User: richard:swift" -H "X-Auth-Key:
-> IlEOJlX08uuvXb\/\/xIhz5bLaDGIZmOV0oPSjB2eD" http://node74/auth
->
-> it resposed:
-> <?xml version="1.0" encoding="UTF-8"?><Error><Code>AccessDenied</Code>
-> </Error>
->
-> but here's my user info
-> { "user_id": "richard",
->   "rados_uid": 0,
->   "display_name": "richard",
->   "email": "richardchang@lsalab.cd.nthu.edu.tw",
->   "suspended": 0,
->   "max_buckets": 1000,
->   "subusers": [
->         { "id": "richard:swift",
->           "permissions": "full-control"}],
->   "keys": [
->         { "user": "richard",
->           "access_key": "OCDVLF6P4QGWIZP3Q7CF",
->           "secret_key": "IlEOJlX08uuvXb\/\/xIhz5bLaDGIZmOV0oPSjB2eD"}],
->   "swift_keys": [
->         { "user": "richard:swift",
->           "secret_key": "ojS\/KYsrUWnOmyJPREOBkwS26NqQl5tI9f7un28t"}]}
->
-> Am I choose the wrong key??
+Some additional infos :
+
+today at 18:57:40, the PG 3.1 [19,5,28] was having a scrub date of
+"2013-03-28 08:38:12.858041", and the OSD 28 was recovering.
+
+Ten minutes later (@ 19:07:40), that PG 3.1 was having a scrub date of
+today.
+
+But at 19:41:04 I seen a error in syslog :
+	osd.10 52042 heartbeat_check: no reply from osd.28 since 2013-04-17 19:40:43.565511
+
+So, since 19:47:44, the PG 3.1 [19,5] is in "active+degraded" state, is
+scrub date is returned to "2013-03-28 08:38:12.858041" ; and of course
+the osd.28 is DOWN, the process abort :
+
+     0> 2013-04-17 19:40:46.791010 7f6658f5a700 -1 *** Caught signal (Aborted) **
+ in thread 7f6658f5a700
+
+ ceph version 0.56.4-4-gd89ab0e (d89ab0ea6fa8d0961cad82f6a81eccbd3bbd3f55)
+ 1: /usr/bin/ceph-osd() [0x7a6289]
+ 2: (()+0xeff0) [0x7f666b488ff0]
+ 3: (gsignal()+0x35) [0x7f6669f121b5]
+ 4: (abort()+0x180) [0x7f6669f14fc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f666a7a6dc5]
+ 6: (()+0xcb166) [0x7f666a7a5166]
+ 7: (()+0xcb193) [0x7f666a7a5193]
+ 8: (()+0xcb28e) [0x7f666a7a528e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x7c9) [0x8f9549]
+ 10: (ReplicatedPG::_scrub(ScrubMap&)+0x1a78) [0x57a038]
+ 11: (PG::scrub_compare_maps()+0xeb8) [0x696c18]
+ 12: (PG::chunky_scrub()+0x2d9) [0x6c37f9]
+ 13: (PG::scrub()+0x145) [0x6c4e55]
+ 14: (OSD::ScrubWQ::_process(PG*)+0xc) [0x64048c]
+ 15: (ThreadPool::worker(ThreadPool::WorkThread*)+0x879) [0x815179]
+ 16: (ThreadPool::WorkThread::entry()+0x10) [0x817980]
+ 17: (()+0x68ca) [0x7f666b4808ca]
+ 18: (clone()+0x6d) [0x7f6669fafb6d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
 
 
-Yes. You need to use the swift key for that. Also try removing the
-backslashes from it.
+What I didn't understand is why the OSD process crash, instead of
+marking that PG "corrupted", and does that PG really "corrupted" are is
+this just an OSD bug ?
+
+Thanks,
+Olivier
