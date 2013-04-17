@@ -1,73 +1,79 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: rados gateway
-Date: Wed, 17 Apr 2013 10:33:21 -0700
-Message-ID: <CABBk=J-P4KPXqsg7gZQBDvvyiaWHrStyQYx1mLWQ3YGMR0UN0g@mail.gmail.com>
-References: <loom.20130417T164538-81@post.gmane.org>
-	<CABBk=J8-H9DYTcdca1OjqA5X1q_Zs1oOhjEUDZJVpJSfYx6kNw@mail.gmail.com>
-	<loom.20130417T170632-546@post.gmane.org>
-	<CABBk=J_evJc11twOEgBN51SPq9v_aiSyf=OzYW2i9Ghd5oFhBA@mail.gmail.com>
-	<loom.20130417T172954-546@post.gmane.org>
-	<CABBk=J8o83Srortoe_ouR3jZX7ObtgZ+yEhez5Cz24o-2EK2jw@mail.gmail.com>
-	<loom.20130417T183106-585@post.gmane.org>
-	<CABBk=J9uw5WUcOvkCAuzO2R_nhNmbxzFVFFSQXM5vypVgXAykQ@mail.gmail.com>
-	<loom.20130417T185651-134@post.gmane.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] libceph: change how "safe" callback is used
+Date: Wed, 17 Apr 2013 10:41:00 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304171033280.30041@cobra.newdream.net>
+References: <516C28DA.5000702@inktank.com> <alpine.DEB.2.00.1304162018590.23771@cobra.newdream.net> <516EA486.8040704@inktank.com> <alpine.DEB.2.00.1304170830480.28750@cobra.newdream.net> <516EDBC7.6080008@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f172.google.com ([209.85.220.172]:61826 "EHLO
-	mail-vc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965409Ab3DQRdW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 13:33:22 -0400
-Received: by mail-vc0-f172.google.com with SMTP id gd11so1540157vcb.17
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Apr 2013 10:33:22 -0700 (PDT)
-In-Reply-To: <loom.20130417T185651-134@post.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35214 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965148Ab3DQRlA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Apr 2013 13:41:00 -0400
+In-Reply-To: <516EDBC7.6080008@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: proguest <proguest1942@hotmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Wed, Apr 17, 2013 at 9:58 AM, proguest <proguest1942@hotmail.com> wrote:
-> Yehuda Sadeh <yehuda <at> inktank.com> writes:
->
->>
->> Do you have radosgw logs?
->>
-> Here're radosgw log
-> The last two line are restart radosgw (2 times)
-> Others are trying to connect radosgw..
->
-> 2013-04-17 14:58:24.335168 7fdb2af5c700  2 req 1:0.316409:s3:GET
-> /s3gw.fcgi:list_bucket:http status=404
+On Wed, 17 Apr 2013, Alex Elder wrote:
+> On 04/17/2013 10:35 AM, Sage Weil wrote:
+> >>> > > This might not get called if we initially map to no osd... and later, if 
+> >>> > > the request gets kicked, it isn't called then.
+> >> > 
+> >> > You're right, we need to hook into the place a request gets
+> >> > actually sent for the first time.  That may require a small
+> >> > rearrangement of code to make that point accessible.
+> > I think this is slightly misinterpreting the purpose of the 'unsafe' list.  
+> > That list is used for fsync(fd) so that we wait for any pending requests.  
+> > That is really writes from the perspective of the syscall/user/vfs, not 
+> > the backend writes to the osd.  If we have a write that is not sent yet 
+> > because the osd is down and fsync that fd, we still want to wait until 
+> > some osd comes online and the write actually happens.  The 'unsafe' start 
+> > is when ceph_sync_write() is called... not the when the request is sent 
+> > to the backend.
+> 
+> I'd argue that the notion of a request being unsafe is an osd
+> request concept--more general than just this one file system
+> case.  It is useful to know that we've issued something that
+> might change osd state, and then to know the state change is
+> durable.  That aligns well with what is needed here:  you want
+> to wait until you know the write request is durable (even if
+> you don't care whether the request has been sent or not).
+> 
+> >From the perspective of the caller of ceph_sync_write(), it
+> doesn't matter that it's the osd is deciding when it's safe or
+> not.  ceph_sync_write() waits for the osd request to complete
+> before returning.  Once it returns, the unsafe period is
+> over (and may have never even existed if there was an error).
 
-I noticed that the example closes and reopens the VirtualHost section.
-Can you try the following config (doesn't close and reopens the
-section, modified RewriteRule):
+Oh, I think we're both wrong.  :)
 
-FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
+Once ceph_sync_write() returns, the request has gotten an ack, so it has 
+been sent, but we maybe haven't gotten the COMMIT yet, and it should be on 
+the unsafe list.  You're right that it doesn't need to be on the unsafe 
+list before ceph_sync_write() returns, since fsync(2) doesn't need to wait 
+for a write(2) that hasn't returned yet.
+
+In that case, I think your v2 patch is correct.
+
+Reviewed-by: Sage Weil <sage@inktank.com>
 
 
-<VirtualHost *:80>
-        ServerName {fqdn}
-        ServerAdmin {email.address}
-        DocumentRoot /var/www
-
-RewriteEngine On
-RewriteRule             ^/(.*) /s3gw.fcgi?%{QUERY_STRING}
-[E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
-
-        <IfModule mod_fastcgi.c>
-                <Directory /var/www>
-                        Options +ExecCGI
-                        AllowOverride All
-                        SetHandler fastcgi-script
-                        Order allow,deny
-                        Allow from all
-                        AuthBasicAuthoritative Off
-                </Directory>
-        </IfModule>
-
-        AllowEncodedSlashes On
-        ErrorLog /var/log/apache2/error.log
-        CustomLog /var/log/apache2/access.log combined
-        ServerSignature Off
-</VirtualHost>
+> If sync_write_wait() should wait for something beyond just
+> the durability of writes then it should be waiting something
+> different than osd request completions.
+> 
+> I hope I'm not off base here.
+> 
+> My second version does the "request is unsafe" callback
+> exactly once, when it actually gets sent the first time
+> rather than when the request gets started.
+> 
+> 					-Alex
+> 
+> 
+> > That being the case, it will become unsafe exactly once, and safe again 
+> > exactly once (on success, or abort).
+> 
+> 
