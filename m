@@ -1,82 +1,49 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor write performance
-Date: Thu, 18 Apr 2013 08:43:47 -0500
-Message-ID: <516FF893.1030309@inktank.com>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: test osd on zfs
+Date: Thu, 18 Apr 2013 07:50:20 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304180747200.626@cobra.newdream.net>
+References: <516E7D5C.7080309@nazarianin.com> <alpine.DEB.2.00.1304170818000.27056@cobra.newdream.net> <CANExM-OE+zd4QVBufmy3v=Yu4ki5N5KqmZiOQJkYt0xd66YtrQ@mail.gmail.com> <516ECFB6.8090107@gmail.com> <CABBk=J93+1TRnjtr5D2cJWmre+tf85hAw3H1JnOL8hwKJuHDJA@mail.gmail.com>
+ <alpine.DEB.2.00.1304171005360.30041@cobra.newdream.net> <CABBk=J_k0gAEx6a-agno8KHtn4-iZe5pfQLcrgtU2Ki2_kd8nQ@mail.gmail.com> <516EF07E.4000909@llnl.gov> <CABBk=J90_TB2hNH=rh6b=iO+=DRQoHPCiTqDP=X+ygyM0xoeVw@mail.gmail.com> <516EF34E.5000000@profihost.ag>
+ <516F0321.2@inktank.com> <516F10BE.6020103@llnl.gov> <38892EC8-F082-4AC4-8B6D-F8A541DBC7B7@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f50.google.com ([209.85.212.50]:36696 "EHLO
-	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934480Ab3DRNny (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 09:43:54 -0400
-Received: by mail-vb0-f50.google.com with SMTP id w15so2371530vbb.37
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 06:43:53 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+Received: from cobra.newdream.net ([66.33.216.30]:46007 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966390Ab3DROuW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 10:50:22 -0400
+In-Reply-To: <38892EC8-F082-4AC4-8B6D-F8A541DBC7B7@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Brian Behlendorf <behlendorf1@llnl.gov>, Mark Nelson <mark.nelson@inktank.com>, Yehuda Sadeh <yehuda@inktank.com>, Jeff Mitchell <jeffrey.mitchell@gmail.com>, Henry C Chang <henry.cy.chang@gmail.com>, Aleksey Leonov <aleonov@nazarianin.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/18/2013 06:46 AM, James Harper wrote:
-> I'm doing some basic testing so I'm not really fussed about poor performance, but my write performance appears to be so bad I think I'm doing something wrong.
->
-> Using dd to test gives me kbytes/second for write performance for 4kb block sizes, while read performance is acceptable (for testing at least). For dd I'm using iflag=direct for read and oflag=direct for write testing.
->
-> My setup, approximately, is:
->
-> Two OSD's
-> . 1 x 7200RPM SATA disk each
-> . 2 x gigabit cluster network interfaces each in a bonded configuration directly attached (osd to osd, no switch)
-> . 1 x gigabit public network
-> . journal on another spindle
->
-> Three MON's
-> . 1 each on the OSD's
-> . 1 on another server, which is also the one used for testing performance
->
-> I'm using debian packages from ceph which are version 0.56.4
->
-> For comparison, my existing production storage is 2 servers running DRBD with iSCSI to the initiators which run Xen on top of a (C)LVM volumes on top of the iSCSI. Performance not spectacular but acceptable. The servers in question are the same specs as the servers I'm testing on.
->
-> Where should I start looking for performance problems? I've tried running some of the benchmark stuff in the documentation but I haven't gotten very far...
+On Thu, 18 Apr 2013, Stefan Priebe - Profihost AG wrote:
+> Am 17.04.2013 um 23:14 schrieb Brian Behlendorf <behlendorf1@llnl.gov>:
+> 
+> > On 04/17/2013 01:16 PM, Mark Nelson wrote:
+> >> I'll let Brian talk about the virtues of ZFS,
+> > 
+> > I think the virtues of ZFS have been discussed at length in various other forums.  But in short it brings some nice functionality to the table which may be useful to ceph and that's worth exploring.
+> Sure I know about the advantages of zfs.
+> 
+> I just thought about how ceph can benefit. Right now I've no idea. The 
+> osds should be single disks so zpool, zraid does not matter. Ceph does 
+> it own scrubbing and check summing and instead of btrfs ceph does not 
+> know how to use snapshots with zfs. That's why I'm asking.
 
-Hi James!  Sorry to hear about the performance trouble!  Is it just 
-sequential 4KB direct IO writes that are giving you troubles?  If you 
-are using the kernel version of RBD, we don't have any kind of cache 
-implemented there and since you are bypassing the pagecache on the 
-client, those writes are being sent to the different OSDs in 4KB chunks 
-over the network.  RBD stores data in blocks that are represented by 4MB 
-objects on one of the OSDs, so without cache a lot of sequential 4KB 
-writes will be hitting 1 OSD repeatedly and then moving on to the next 
-one.  Hopefully those writes would get aggregated at the OSD level, but 
-clearly that's not really happening here given your performance.
+The main things that come to mind:
 
-Here's a couple of thoughts:
+- zfs checksumming
+- ceph can eventually use zfs snapshots similarly to how it uses btrfs 
+  snapshots to create stable checkpoints as journal reference points, 
+  allowing parallel (instead of writeahead) journaling
+- can use raidz beneath a single ceph-osd for better reliability (e.g., 2x 
+  * raidz instead of 3x replication)
 
-1) If you are working with VMs, using the QEMU/KVM interface with virtio 
-drivers and RBD cache enabled will give you a huge jump in small 
-sequential write performance relative to what you are seeing now.
+ZFS doesn't have a clone function that we can use to enable efficient 
+cephfs/rbd/rados snaps, but maybe this will motivate someone to implement 
+one. :)
 
-2) You may want to try upgrading to 0.60.  We made a change to how the 
-pg_log works that causes fewer disk seeks during small IO, especially 
-with XFS.
-
-3) If you are still having trouble, testing your network, disk speeds, 
-and using rados bench to test the object store all may be helpful.
-
->
-> Thanks
->
-> James
-
-Good luck!
-
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+sage
 
