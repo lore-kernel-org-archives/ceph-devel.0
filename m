@@ -1,88 +1,32 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH v2] os/LevelDBStore: tune LevelDB data blocking options to
- be more suitable for PGStat values
-Date: Thu, 18 Apr 2013 15:42:21 -0700
-Message-ID: <CAPYLRzidc19tUHBcmuEXnpvgxQvhqKutaz=0-TCH9fZT3VFNSQ@mail.gmail.com>
-References: <1365180692-5233-1-git-send-email-jaschut@sandia.gov>
-	<CAPYLRzhaRg42eSOyQMGKLfQoyj81CriHKfsgXb2VnGGRhY2U6g@mail.gmail.com>
-	<5168636E.6030204@sandia.gov>
-	<CAPYLRzggH_LMgvJaoJ1aXHF8Q5pjc=zDiAPYdNrap5WypVhmnA@mail.gmail.com>
-	<517075FB.8090802@sandia.gov>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: poor write performance
+Date: Thu, 18 Apr 2013 23:11:58 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+ <516FE3CC.8080303@risc-software.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f52.google.com ([209.85.128.52]:58551 "EHLO
-	mail-qe0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S936708Ab3DRWmW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 18:42:22 -0400
-Received: by mail-qe0-f52.google.com with SMTP id jy17so2189493qeb.25
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 15:42:21 -0700 (PDT)
-In-Reply-To: <517075FB.8090802@sandia.gov>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:54875 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753871Ab3DRXMM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 19:12:12 -0400
+In-Reply-To: <516FE3CC.8080303@risc-software.at>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 18, 2013 at 3:38 PM, Jim Schutt <jaschut@sandia.gov> wrote:
-> Hi Greg,
->
-> On 04/16/2013 02:18 PM, Gregory Farnum wrote:
->> On Fri, Apr 12, 2013 at 12:41 PM, Jim Schutt <jaschut@sandia.gov> wrote:
->>> Hi Greg,
->>>
->>>
->>> On 04/10/2013 06:39 PM, Gregory Farnum wrote:
->>>> Jim,
->>>> I took this patch as a base for setting up config options which people
->>>> can tune manually and have pushed those changes to wip-leveldb-config.
->>>
->>> I was out of the office unexpectedly for a few days,
->>> so I'm just now taking a look.
->>>
->>>> Thanks very much for figuring out how to set up the cache et al!
->>>
->>> No problem!
->>>
->>>>
->>>> For now I restructured quite a bit of the data ingestion, and I took
->>>> your defaults for the monitor on the write buffer, block size, and
->>>> compression, but I left the cache off. These also don't apply to the
->>>> OSDs at all. In order to enable more experimentation I do pass through
->>>> the options though:
->>>> OPTION(mon_ldb_write_buffer_size, OPT_U64, 32*1024*1024) // monitor's
->>>> leveldb write buffer size
->>>> OPTION(mon_ldb_cache_size, OPT_U64, 0) // monitor's leveldb cache size
->>>> OPTION(mon_ldb_block_size, OPT_U64, 4*1024*1024) // monitor's leveldb block size
->>>> OPTION(mon_ldb_bloom_size, OPT_INT, 0) // monitor's leveldb bloom bits per entry
->>>> OPTION(mon_ldb_max_open_files, OPT_INT, 0) // monitor's leveldb max open files
->>>> OPTION(mon_ldb_compression, OPT_BOOL, false) // monitor's leveldb uses
->>>> compression
->>>> (and similar ones for osd_ldb_*).
->>
->> On request from Sage these are now "*_leveldb_*" instead of "*_ldb_*";
->> I pushed that a couple hours ago. In case you haven't already pulled
->> down a copy, and so you know for when it gets into mainline and you go
->> to adjust it. :)
->
-> I've been testing this over the last several days, both
-> via the wip-leveldb-config branch, and then the next branch
-> after that was merged into next.
->
-> I've gotten slightly better startup behavior with mon_ldb_cache_size
-> larger than the default 8 MiB in leveldb - I've used 64 MiB and
-> 256 MiB, and found little to prefer one over the other.  Both
-> seem to be preferable to the default, at least wrt. startup
-> behavior at the number of PGs (256K) I'm testing.
->
-> Other than that, I've had no trouble with the new tunings.
->
-> I'm sorry for the delay in reporting - I've had a little
-> hardware trouble, and was trying to be sure that any issues
-> I've been having were related to that and not these patches.
+> 
+> Hi James,
+> 
+> This is just pure speculation, but can you assure that the bonding works
+> correctly? Maybe you have issues there. I have seen a lot of incorrectly
+> configured bonding throughout my life as unix admin.
+> 
 
-Excellent, that's what we wanted to hear. I don't want to turn up the
-cache settings by default (that is RAM, after all!), but as long as
-it's easy to turn it up correctly for larger clusters I think we're
-set now. Thanks for everything. :)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+The bonding gives me iperf performance consistent with 2 x 1GB links so I think it's okay.
+
+James
