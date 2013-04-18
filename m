@@ -1,64 +1,82 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH V2] radosgw: receiving unexpected error code while accessing an non-existing object by authorized not-owner user
-Date: Thu, 18 Apr 2013 21:20:44 +0800
-Message-ID: <1366291244-5869-1-git-send-email-liwang@ubuntukylin.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: poor write performance
+Date: Thu, 18 Apr 2013 08:43:47 -0500
+Message-ID: <516FF893.1030309@inktank.com>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:32854 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755479Ab3DRNXB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 09:23:01 -0400
+Received: from mail-vb0-f50.google.com ([209.85.212.50]:36696 "EHLO
+	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934480Ab3DRNny (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 09:43:54 -0400
+Received: by mail-vb0-f50.google.com with SMTP id w15so2371530vbb.37
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 06:43:53 -0700 (PDT)
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This patch fixes a bug in radosgw swift compatibility code,
-that is, if a not-owner but authorized user access a non-existing
-object in a container, he wiil receive unexpected error code,
-to repeat this bug, do the following steps,
+On 04/18/2013 06:46 AM, James Harper wrote:
+> I'm doing some basic testing so I'm not really fussed about poor performance, but my write performance appears to be so bad I think I'm doing something wrong.
+>
+> Using dd to test gives me kbytes/second for write performance for 4kb block sizes, while read performance is acceptable (for testing at least). For dd I'm using iflag=direct for read and oflag=direct for write testing.
+>
+> My setup, approximately, is:
+>
+> Two OSD's
+> . 1 x 7200RPM SATA disk each
+> . 2 x gigabit cluster network interfaces each in a bonded configuration directly attached (osd to osd, no switch)
+> . 1 x gigabit public network
+> . journal on another spindle
+>
+> Three MON's
+> . 1 each on the OSD's
+> . 1 on another server, which is also the one used for testing performance
+>
+> I'm using debian packages from ceph which are version 0.56.4
+>
+> For comparison, my existing production storage is 2 servers running DRBD with iSCSI to the initiators which run Xen on top of a (C)LVM volumes on top of the iSCSI. Performance not spectacular but acceptable. The servers in question are the same specs as the servers I'm testing on.
+>
+> Where should I start looking for performance problems? I've tried running some of the benchmark stuff in the documentation but I haven't gotten very far...
 
-1 User1 creates a container, and grants the read/write permission to user2
+Hi James!  Sorry to hear about the performance trouble!  Is it just 
+sequential 4KB direct IO writes that are giving you troubles?  If you 
+are using the kernel version of RBD, we don't have any kind of cache 
+implemented there and since you are bypassing the pagecache on the 
+client, those writes are being sent to the different OSDs in 4KB chunks 
+over the network.  RBD stores data in blocks that are represented by 4MB 
+objects on one of the OSDs, so without cache a lot of sequential 4KB 
+writes will be hitting 1 OSD repeatedly and then moving on to the next 
+one.  Hopefully those writes would get aggregated at the OSD level, but 
+clearly that's not really happening here given your performance.
 
-curl -X PUT -i -k -H "X-Auth-Token: $user1_token" $url/$container
-curl -X POST -i -k -H "X-Auth-Token: $user1_token" -H "X-Container-Read:
-$user2" -H "X-Container-Write: $user2" $url/$container
+Here's a couple of thoughts:
 
-2 User2 queries the object 'obj' in the newly created container
-by using HEAD instruction, note the container currently is empty
+1) If you are working with VMs, using the QEMU/KVM interface with virtio 
+drivers and RBD cache enabled will give you a huge jump in small 
+sequential write performance relative to what you are seeing now.
 
-curl -X HEAD -i -k -H "X-Auth-Token: $user2_token" $url/$container/obj
+2) You may want to try upgrading to 0.60.  We made a change to how the 
+pg_log works that causes fewer disk seeks during small IO, especially 
+with XFS.
 
-3 The response received by user2 is '401 Authorization Required',
-rather than the expected '404 Not Found', the details are as follows,
+3) If you are still having trouble, testing your network, disk speeds, 
+and using rados bench to test the object store all may be helpful.
 
-HTTP/1.1 401 Authorization Required
-Date: Tue, 16 Apr 2013 01:52:49 GMT
-Server: Apache/2.2.22 (Ubuntu)
-Accept-Ranges: bytes
-Content-Length: 12
-Vary: Accept-Encoding
-Content-Type: text/plain; charset=utf-8
+>
+> Thanks
+>
+> James
 
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
----
- src/rgw/rgw_op.cc |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Good luck!
 
-diff --git a/src/rgw/rgw_op.cc b/src/rgw/rgw_op.cc
-index d2fbeeb..ef6448c 100644
---- a/src/rgw/rgw_op.cc
-+++ b/src/rgw/rgw_op.cc
-@@ -268,7 +268,7 @@ static int read_policy(RGWRados *store, struct req_state *s, RGWBucketInfo& buck
-       return ret;
-     string& owner = bucket_policy.get_owner().get_id();
-     if (owner.compare(s->user.user_id) != 0 &&
--        !bucket_policy.verify_permission(s->user.user_id, s->perm_mask, RGW_PERM_READ))
-+        !bucket_policy.verify_permission(s->user.user_id, s->perm_mask, RGW_PERM_READ) && !bucket_policy.verify_permission(s->user.user_id, RGW_PERM_READ_OBJS, RGW_PERM_READ_OBJS))
-       ret = -EACCES;
-     else
-       ret = -ENOENT;
--- 
-1.7.9.5
-
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
