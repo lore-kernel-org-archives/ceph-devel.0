@@ -1,93 +1,88 @@
-From: "Plaetinck, Dieter" <dieter@vimeo.com>
-Subject: Re: erasure coding (sorry)
-Date: Thu, 18 Apr 2013 17:31:13 -0400
-Message-ID: <20130418173113.74a53769@dieter-t420s>
-References: <20130418162842.0c61d1e2@dieter-t420s>
-	<alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net>
-	<517060B2.80706@inktank.com>
-	<51706120.2060702@inktank.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH v2] os/LevelDBStore: tune LevelDB data blocking
+ options to be more suitable for PGStat values
+Date: Thu, 18 Apr 2013 16:38:51 -0600
+Message-ID: <517075FB.8090802@sandia.gov>
+References: <1365180692-5233-1-git-send-email-jaschut@sandia.gov>
+ <CAPYLRzhaRg42eSOyQMGKLfQoyj81CriHKfsgXb2VnGGRhY2U6g@mail.gmail.com>
+ <5168636E.6030204@sandia.gov>
+ <CAPYLRzggH_LMgvJaoJ1aXHF8Q5pjc=zDiAPYdNrap5WypVhmnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain;
+ charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lav-excas.iac.com ([208.185.199.15]:18083 "EHLO
-	ny-iacmail.iac.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753048Ab3DRVbX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 17:31:23 -0400
-In-Reply-To: <51706120.2060702@inktank.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:52007 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S936482Ab3DRWj1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 18:39:27 -0400
+In-Reply-To: <CAPYLRzggH_LMgvJaoJ1aXHF8Q5pjc=zDiAPYdNrap5WypVhmnA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, cdl@asgaard.org, danm@annaisystems.com
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 18 Apr 2013 16:09:52 -0500
-Mark Nelson <mark.nelson@inktank.com> wrote:
+Hi Greg,
 
-> On 04/18/2013 04:08 PM, Josh Durgin wrote:
-> > On 04/18/2013 01:47 PM, Sage Weil wrote:
-> >> On Thu, 18 Apr 2013, Plaetinck, Dieter wrote:
-> >>> sorry to bring this up again, googling revealed some people don't
-> >>> like the subject [anymore].
-> >>>
-> >>> but I'm working on a new +- 3PB cluster for storage of immutable files.
-> >>> and it would be either all cold data, or mostly cold. 150MB avg
-> >>> filesize, max size 5GB (for now)
-> >>> For this use case, my impression is erasure coding would make a lot
-> >>> of sense
-> >>> (though I'm not sure about the computational overhead on storing and
-> >>> loading objects..? outbound traffic would peak at 6 Gbps, but I can
-> >>> make it way less and still keep a large cluster, by taking away the
-> >>> small set of hot files.
-> >>> inbound traffic would be minimal)
-> >>>
-> >>> I know that the answer a while ago was "no plans to implement erasure
-> >>> coding", has this changed?
-> >>> if not, is anyone aware of a similar system that does support it? I
-> >>> found QFS but that's meant for batch processing, has a single
-> >>> 'namenode' etc.
-> >>
-> >> We would love to do it, but it is not a priority at the moment (things
-> >> like multi-site replication are in much higher demand).  That of course
-> >> doesn't prevent someone outside of Inktank from working on it :)
-> >>
-> >> The main caveat is that it will be complicate.  For an initial
-> >> implementation, the full breadth of the rados API probably wouldn't be
-> >> support for erasure/parity encoded pools (thinkgs like rados classes and
-> >> the omap key/value api get tricky when you start talking about parity).
-> >> But for many (or even most) use cases, objects are just bytes, and those
-> >> restrictions are just fine.
-> >
-> > I talked to some folks interested in doing a more limited form of this
-> > yesterday. They started a blueprint [1]. One of their ideas was to have
-> > erasure coding done by a separate process (or thread perhaps). It would
-> > use erasure coding on an object and then use librados to store the
-> > rasure-encoded pieces in a separate pool, and finally leave a marker in
-> > place of the original object in the first pool.
-> >
-> > When the osd detected this marker, it would proxy the request to the
-> > erasure coding thread/process which would service the request on the
-> > second pool for reads, and potentially make writes move the data back to
-> > the first pool in a tiering sort of scenario.
-> >
-> > I might have misremembered some details, but I think it's an
-> > interesting way to get many of the benefits of erasure coding with a
-> > relatively small amount of work compared to a fully native osd solution.
-> >
-> > Josh
+On 04/16/2013 02:18 PM, Gregory Farnum wrote:
+> On Fri, Apr 12, 2013 at 12:41 PM, Jim Schutt <jaschut@sandia.gov> wrote:
+>> Hi Greg,
+>>
+>>
+>> On 04/10/2013 06:39 PM, Gregory Farnum wrote:
+>>> Jim,
+>>> I took this patch as a base for setting up config options which people
+>>> can tune manually and have pushed those changes to wip-leveldb-config.
+>>
+>> I was out of the office unexpectedly for a few days,
+>> so I'm just now taking a look.
+>>
+>>> Thanks very much for figuring out how to set up the cache et al!
+>>
+>> No problem!
+>>
+>>>
+>>> For now I restructured quite a bit of the data ingestion, and I took
+>>> your defaults for the monitor on the write buffer, block size, and
+>>> compression, but I left the cache off. These also don't apply to the
+>>> OSDs at all. In order to enable more experimentation I do pass through
+>>> the options though:
+>>> OPTION(mon_ldb_write_buffer_size, OPT_U64, 32*1024*1024) // monitor's
+>>> leveldb write buffer size
+>>> OPTION(mon_ldb_cache_size, OPT_U64, 0) // monitor's leveldb cache size
+>>> OPTION(mon_ldb_block_size, OPT_U64, 4*1024*1024) // monitor's leveldb block size
+>>> OPTION(mon_ldb_bloom_size, OPT_INT, 0) // monitor's leveldb bloom bits per entry
+>>> OPTION(mon_ldb_max_open_files, OPT_INT, 0) // monitor's leveldb max open files
+>>> OPTION(mon_ldb_compression, OPT_BOOL, false) // monitor's leveldb uses
+>>> compression
+>>> (and similar ones for osd_ldb_*).
 > 
-> Neat. :)
+> On request from Sage these are now "*_leveldb_*" instead of "*_ldb_*";
+> I pushed that a couple hours ago. In case you haven't already pulled
+> down a copy, and so you know for when it gets into mainline and you go
+> to adjust it. :)
+
+I've been testing this over the last several days, both
+via the wip-leveldb-config branch, and then the next branch
+after that was merged into next.
+
+I've gotten slightly better startup behavior with mon_ldb_cache_size
+larger than the default 8 MiB in leveldb - I've used 64 MiB and
+256 MiB, and found little to prefer one over the other.  Both
+seem to be preferable to the default, at least wrt. startup
+behavior at the number of PGs (256K) I'm testing.
+
+Other than that, I've had no trouble with the new tunings.
+
+I'm sorry for the delay in reporting - I've had a little
+hardware trouble, and was trying to be sure that any issues
+I've been having were related to that and not these patches.
+
+-- Jim
+
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> 
 > 
 
-@Bryan: I did come across cleversafe.  all the articles around it seemed promising,
-but unfortunately it seems everything related to the cleversafe open source project
-somehow vanished from the internet.  (e.g. http://www.cleversafe.org/) quite weird...
 
-@Sage: interesting. I thought it would be more relatively simple if one assumes
-the restriction of immutable files.  I'm not familiar with those ceph specifics you're mentioning.
-When building an erasure codes-based system, maybe there's ways to reuse existing ceph
-code and/or allow some integration with replication based objects, without aiming for full integration or
-full support of the rados api, based on some tradeoffs.
-
-@Josh, that sounds like an interesting approach.  Too bad that page doesn't contain any information yet :)
-
-Dieter
