@@ -1,167 +1,101 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH] Swift ACL .rlistings support
-Date: Thu, 18 Apr 2013 08:50:51 -0700
-Message-ID: <CAC-hyiG2YqpV4cv5PRCT2mGOYz6npXYcpHLW+AXXehyfF1J71w@mail.gmail.com>
-References: <1364911647-10771-1-git-send-email-liwang@ubuntukylin.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: poor write performance
+Date: Thu, 18 Apr 2013 20:46:35 +0400
+Message-ID: <CABYiri-9=ADNQgnVENJLrvW18f1+XcMTzDUSDmuLcikjS5u5iA@mail.gmail.com>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:49394 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967411Ab3DRPux (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 11:50:53 -0400
-Received: by mail-la0-f50.google.com with SMTP id el20so2697244lab.37
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 08:50:51 -0700 (PDT)
-In-Reply-To: <1364911647-10771-1-git-send-email-liwang@ubuntukylin.com>
+Received: from mail-vb0-f47.google.com ([209.85.212.47]:62758 "EHLO
+	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933132Ab3DRQq5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 12:46:57 -0400
+Received: by mail-vb0-f47.google.com with SMTP id x13so2598682vbb.6
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 09:46:56 -0700 (PDT)
+In-Reply-To: <516FF893.1030309@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: James Harper <james.harper@bendigoit.com.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sorry for the late response, this somehow went through the cracks. The
-main issue that I see with this patch is that it introduces a new bit
-for object listing that is not really needed. You just need to set the
-RGW_PERM_READ on the bucket. This way setting this flag through swift
-you'd be able to see it via S3. Is there any compelling reason not to
-do so?
+On Thu, Apr 18, 2013 at 5:43 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> On 04/18/2013 06:46 AM, James Harper wrote:
+>>
+>> I'm doing some basic testing so I'm not really fussed about poor
+>> performance, but my write performance appears to be so bad I think I'm doing
+>> something wrong.
+>>
+>> Using dd to test gives me kbytes/second for write performance for 4kb
+>> block sizes, while read performance is acceptable (for testing at least).
+>> For dd I'm using iflag=direct for read and oflag=direct for write testing.
+>>
+>> My setup, approximately, is:
+>>
+>> Two OSD's
+>> . 1 x 7200RPM SATA disk each
+>> . 2 x gigabit cluster network interfaces each in a bonded configuration
+>> directly attached (osd to osd, no switch)
+>> . 1 x gigabit public network
+>> . journal on another spindle
+>>
+>> Three MON's
+>> . 1 each on the OSD's
+>> . 1 on another server, which is also the one used for testing performance
+>>
+>> I'm using debian packages from ceph which are version 0.56.4
+>>
+>> For comparison, my existing production storage is 2 servers running DRBD
+>> with iSCSI to the initiators which run Xen on top of a (C)LVM volumes on top
+>> of the iSCSI. Performance not spectacular but acceptable. The servers in
+>> question are the same specs as the servers I'm testing on.
+>>
+>> Where should I start looking for performance problems? I've tried running
+>> some of the benchmark stuff in the documentation but I haven't gotten very
+>> far...
+>
+>
+> Hi James!  Sorry to hear about the performance trouble!  Is it just
+> sequential 4KB direct IO writes that are giving you troubles?  If you are
+> using the kernel version of RBD, we don't have any kind of cache implemented
+> there and since you are bypassing the pagecache on the client, those writes
+> are being sent to the different OSDs in 4KB chunks over the network.  RBD
+> stores data in blocks that are represented by 4MB objects on one of the
+> OSDs, so without cache a lot of sequential 4KB writes will be hitting 1 OSD
+> repeatedly and then moving on to the next one.  Hopefully those writes would
+> get aggregated at the OSD level, but clearly that's not really happening
+> here given your performance.
+>
+> Here's a couple of thoughts:
+>
+> 1) If you are working with VMs, using the QEMU/KVM interface with virtio
+> drivers and RBD cache enabled will give you a huge jump in small sequential
+> write performance relative to what you are seeing now.
+>
+> 2) You may want to try upgrading to 0.60.  We made a change to how the
+> pg_log works that causes fewer disk seeks during small IO, especially with
+> XFS.
 
-Thanks,
-Yehuda
+Can you point into related commits, if possible?
 
-On Tue, Apr 2, 2013 at 7:07 AM, Li Wang <liwang@ubuntukylin.com> wrote:
-> This patch implements the Swift ACL .rlistings for Radosgw,
-> it should be seamlessly compatible with earlier version as well
-> as S3.
 >
-> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> ---
->  src/rgw/rgw_acl.cc       |    3 +++
->  src/rgw/rgw_acl.h        |   19 ++++++++++++++-----
->  src/rgw/rgw_acl_swift.cc |   14 ++++++++++++++
->  src/rgw/rgw_op.cc        |    2 +-
->  4 files changed, 32 insertions(+), 6 deletions(-)
+> 3) If you are still having trouble, testing your network, disk speeds, and
+> using rados bench to test the object store all may be helpful.
 >
-> diff --git a/src/rgw/rgw_acl.cc b/src/rgw/rgw_acl.cc
-> index 1a90649..d6255e1 100644
-> --- a/src/rgw/rgw_acl.cc
-> +++ b/src/rgw/rgw_acl.cc
-> @@ -96,6 +96,9 @@ bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask,
+>>
+>> Thanks
+>>
+>> James
 >
->    int policy_perm = get_perm(uid, test_perm);
 >
-> +  if (policy_perm & RGW_PERM_READ) {
-> +    policy_perm |= (test_perm & RGW_PERM_READ_LIST);
-> +  }
->    /* the swift WRITE_OBJS perm is equivalent to the WRITE obj, just
->       convert those bits. Note that these bits will only be set on
->       buckets, so the swift READ permission on bucket will allow listing
-> diff --git a/src/rgw/rgw_acl.h b/src/rgw/rgw_acl.h
-> index c06e9eb..6374413 100644
-> --- a/src/rgw/rgw_acl.h
-> +++ b/src/rgw/rgw_acl.h
-> @@ -15,11 +15,15 @@ using namespace std;
->  #define RGW_PERM_WRITE           0x02
->  #define RGW_PERM_READ_ACP        0x04
->  #define RGW_PERM_WRITE_ACP       0x08
-> -#define RGW_PERM_READ_OBJS       0x10
-> -#define RGW_PERM_WRITE_OBJS      0x20
-> +#define RGW_PERM_READ_OBJS       0x10  // Swift read
-> +#define RGW_PERM_WRITE_OBJS      0x20  // Swift write
-> +#define RGW_PERM_READ_LIST       0x40  // Swift .rlistings
->  #define RGW_PERM_FULL_CONTROL    ( RGW_PERM_READ | RGW_PERM_WRITE | \
-> +                                  RGW_PERM_READ_ACP | RGW_PERM_WRITE_ACP | \
-> +                                  RGW_PERM_READ_LIST )
-> +#define RGW_PERM_ALL_S3          ( RGW_PERM_READ | RGW_PERM_WRITE | \
->                                    RGW_PERM_READ_ACP | RGW_PERM_WRITE_ACP )
-> -#define RGW_PERM_ALL_S3          RGW_PERM_FULL_CONTROL
-> +
+> Good luck!
 >
->  enum ACLGranteeTypeEnum {
->  /* numbers are encoded, should not change */
-> @@ -47,13 +51,18 @@ public:
->    void set_permissions(int perm) { flags = perm; }
 >
->    void encode(bufferlist& bl) const {
-> -    ENCODE_START(2, 2, bl);
-> +    ENCODE_START(3, 2, bl);
->      ::encode(flags, bl);
->      ENCODE_FINISH(bl);
->    }
->    void decode(bufferlist::iterator& bl) {
-> -    DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
-> +    DECODE_START_LEGACY_COMPAT_LEN(3, 2, 2, bl);
->      ::decode(flags, bl);
-> +    if (struct_v <= 2) {
-> +      ACLGrant grant;
-> +      grant.set_group(ACL_GROUP_ALL_USERS, RGW_PERM_READ_LIST);
-> +      acl.add_grant(&grant);
-> +    }
->      DECODE_FINISH(bl);
->    }
->    void dump(Formatter *f) const;
-> diff --git a/src/rgw/rgw_acl_swift.cc b/src/rgw/rgw_acl_swift.cc
-> index b02ce90..af5f804 100644
-> --- a/src/rgw/rgw_acl_swift.cc
-> +++ b/src/rgw/rgw_acl_swift.cc
-> @@ -15,6 +15,7 @@ using namespace std;
->  #define SWIFT_PERM_WRITE RGW_PERM_WRITE_OBJS
->
->  #define SWIFT_GROUP_ALL_USERS ".r:*"
-> +#define SWIFT_GROUP_LIST ".rlistings"
->
->  static int parse_list(string& uid_list, vector<string>& uids)
->  {
-> @@ -54,6 +55,11 @@ static bool uid_is_public(string& uid)
->           sub.compare(".referrer") == 0;
->  }
->
-> +static bool uid_is_list(string& uid)
-> +{
-> +  return uid.compare(SWIFT_GROUP_LIST) == 0;
-> +}
-> +
->  void RGWAccessControlPolicy_SWIFT::add_grants(RGWRados *store, vector<string>& uids, int perm)
->  {
->    vector<string>::iterator iter;
-> @@ -64,6 +70,9 @@ void RGWAccessControlPolicy_SWIFT::add_grants(RGWRados *store, vector<string>& u
->      if (uid_is_public(uid)) {
->        grant.set_group(ACL_GROUP_ALL_USERS, perm);
->        acl.add_grant(&grant);
-> +    } else if ((perm & SWIFT_PERM_READ) && (uid_is_list(uid))) {
-> +      grant.set_group(ACL_GROUP_ALL_USERS, RGW_PERM_READ_LIST);
-> +      acl.add_grant(&grant);
->      } else if (rgw_get_user_info_by_uid(store, uid, grant_user) < 0) {
->        ldout(cct, 10) << "grant user does not exist:" << uid << dendl;
->        /* skipping silently */
-> @@ -116,6 +125,11 @@ void RGWAccessControlPolicy_SWIFT::to_str(string& read, string& write)
->        if (grant.get_group() != ACL_GROUP_ALL_USERS)
->          continue;
->        id = SWIFT_GROUP_ALL_USERS;
-> +      if (perm & RGW_PERM_READ_LIST) {
-> +        if (!read.empty())
-> +          read.append(", ");
-> +        read.append(SWIFT_GROUP_LIST);
-> +      }
->      }
->      if (perm & SWIFT_PERM_READ) {
->        if (!read.empty())
-> diff --git a/src/rgw/rgw_op.cc b/src/rgw/rgw_op.cc
-> index 43415d4..5c4d95a 100644
-> --- a/src/rgw/rgw_op.cc
-> +++ b/src/rgw/rgw_op.cc
-> @@ -736,7 +736,7 @@ void RGWStatBucket::execute()
->
->  int RGWListBucket::verify_permission()
->  {
-> -  if (!verify_bucket_permission(s, RGW_PERM_READ))
-> +  if (!verify_bucket_permission(s, RGW_PERM_READ | RGW_PERM_READ_LIST))
->      return -EACCES;
->
->    return 0;
-> --
-> 1.7.9.5
->
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
