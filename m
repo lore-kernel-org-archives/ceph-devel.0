@@ -1,78 +1,259 @@
-From: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
-Subject: Re: poor write performance
-Date: Thu, 18 Apr 2013 14:15:08 +0200
-Message-ID: <516FE3CC.8080303@risc-software.at>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 7/7, v2] rbd: issue stat request before layered write
+Date: Thu, 18 Apr 2013 07:44:47 -0500
+Message-ID: <516FEABF.6000504@inktank.com>
+References: <516CC6E4.6070307@inktank.com> <516CC7CF.1070702@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from email.edvz.uni-linz.ac.at ([140.78.3.65]:20905 "EHLO
-	email.uni-linz.ac.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967090Ab3DRMPJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 08:15:09 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:47074 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965707Ab3DRMot (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 08:44:49 -0400
+Received: by mail-ie0-f181.google.com with SMTP id tp5so788745ieb.12
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 05:44:49 -0700 (PDT)
+In-Reply-To: <516CC7CF.1070702@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi James,
-
-This is just pure speculation, but can you assure that the bonding works
-correctly? Maybe you have issues there. I have seen a lot of incorrectly
-configured bonding throughout my life as unix admin.
-
-Maybe this could help you a little:
-http://www.wogri.at/Port-Channeling-802-3ad.338.0.html
-
-On 04/18/2013 01:46 PM, James Harper wrote:
-> I'm doing some basic testing so I'm not really fussed about poor performance, but my write performance appears to be so bad I think I'm doing something wrong.
-> 
-> Using dd to test gives me kbytes/second for write performance for 4kb block sizes, while read performance is acceptable (for testing at least). For dd I'm using iflag=direct for read and oflag=direct for write testing.
-> 
-> My setup, approximately, is:
-> 
-> Two OSD's
-> . 1 x 7200RPM SATA disk each
-> . 2 x gigabit cluster network interfaces each in a bonded configuration directly attached (osd to osd, no switch)
-> . 1 x gigabit public network
-> . journal on another spindle
-> 
-> Three MON's
-> . 1 each on the OSD's
-> . 1 on another server, which is also the one used for testing performance
-> 
-> I'm using debian packages from ceph which are version 0.56.4
-> 
-> For comparison, my existing production storage is 2 servers running DRBD with iSCSI to the initiators which run Xen on top of a (C)LVM volumes on top of the iSCSI. Performance not spectacular but acceptable. The servers in question are the same specs as the servers I'm testing on.
-> 
-> Where should I start looking for performance problems? I've tried running some of the benchmark stuff in the documentation but I haven't gotten very far...
-> 
-> Thanks
-> 
-> James
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+(Since this hasn't been reviewed I have updated it slightly.
+I rebased the series onto the current testing branch.  They
+are all available in the "review/wip-4679-3" in the ceph-client
+git repository.  I also made some minor changes in the definition
+of rbd_img_obj_exists_callback()).
 
 
+This is a step toward fully implementing layered writes.
+
+Add checks before request submission for the object(s) associated
+with an image request.  For write requests, if we don't know that
+the target object exists, issue a STAT request to find out.  When
+that request completes, mark the known and exists flags for the
+original object request accordingly and re-submit the object
+request.  (Note that this still does the existence check only; the
+copyup operation is not yet done.)
+
+A new object request is created to perform the existence check.  A
+pointer to the original request is added to that object request to
+allow the stat request to re-issue the original request after
+updating its flags.  If there is a failure with the stat request
+the error code is stored with the original request, which is then
+completed.
+
+This resolves:
+    http://tracker.ceph.com/issues/3418
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+v2: rebased to testing; small cleanup in rbd_img_obj_exists_callback()
+
+ drivers/block/rbd.c |  163
+++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 155 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b1b8ef8..ce2fb3a 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -183,9 +183,31 @@ struct rbd_obj_request {
+ 	u64			length;		/* bytes from offset */
+ 	unsigned long		flags;
+
+-	struct rbd_img_request	*img_request;
+-	u64			img_offset;	/* image relative offset */
+-	struct list_head	links;		/* img_request->obj_requests */
++	/*
++	 * An object request associated with an image will have its
++	 * img_data flag set; a standlone object request will not.
++	 *
++	 * A standalone object request will have which == BAD_WHICH
++	 * and a null obj_request pointer.
++	 *
++	 * An object request initiated in support of a layered image
++	 * object (to check for its existence before a write) will
++	 * have which == BAD_WHICH and a non-null obj_request pointer.
++	 *
++	 * Finally, an object request for rbd image data will have
++	 * which != BAD_WHICH, and will have a non-null img_request
++	 * pointer.  The value of which will be in the range
++	 * 0..(img_request->obj_request_count-1).
++	 */
++	union {
++		struct rbd_obj_request	*obj_request;	/* STAT op */
++		struct {
++			struct rbd_img_request	*img_request;
++			u64			img_offset;
++			/* links for img_request->obj_requests list */
++			struct list_head	links;
++		};
++	};
+ 	u32			which;		/* posn image request list */
+
+ 	enum obj_request_type	type;
+@@ -1656,10 +1678,6 @@ static struct rbd_img_request
+*rbd_img_request_create(
+ 	INIT_LIST_HEAD(&img_request->obj_requests);
+ 	kref_init(&img_request->kref);
+
+-	(void) obj_request_existence_set;
+-	(void) obj_request_known_test;
+-	(void) obj_request_exists_test;
+-
+ 	rbd_img_request_get(img_request);	/* Avoid a warning */
+ 	rbd_img_request_put(img_request);	/* TEMPORARY */
+
+@@ -1847,18 +1865,147 @@ out_unwind:
+ 	return -ENOMEM;
+ }
+
++static void rbd_img_obj_exists_callback(struct rbd_obj_request
+*obj_request)
++{
++	struct rbd_device *rbd_dev;
++	struct ceph_osd_client *osdc;
++	struct rbd_obj_request *orig_request;
++	int result;
++
++	rbd_assert(!obj_request_img_data_test(obj_request));
++
++	/*
++	 * All we need from the object request is the original
++	 * request and the result of the STAT op.  Grab those, then
++	 * we're done with the request.
++	 */
++	orig_request = obj_request->obj_request;
++	obj_request->obj_request = NULL;
++	rbd_assert(orig_request);
++	rbd_assert(orig_request->img_request);
++
++	result = obj_request->result;
++	obj_request->result = 0;
++
++	dout("%s: obj %p for obj %p result %d %llu/%llu\n", __func__,
++		obj_request, orig_request, result,
++		obj_request->xferred, obj_request->length);
++	rbd_obj_request_put(obj_request);
++
++	rbd_assert(orig_request);
++	rbd_assert(orig_request->img_request);
++	rbd_dev = orig_request->img_request->rbd_dev;
++	osdc = &rbd_dev->rbd_client->client->osdc;
++
++	/*
++	 * Our only purpose here is to determine whether the object
++	 * exists, and we don't want to treat the non-existence as
++	 * an error.  If something else comes back, transfer the
++	 * error to the original request and complete it now.
++	 */
++	if (!result) {
++		obj_request_existence_set(orig_request, true);
++	} else if (result == -ENOENT) {
++		obj_request_existence_set(orig_request, false);
++	} else if (result) {
++		orig_request->result = result;
++		goto out_err;
++	}
++
++	/*
++	 * Resubmit the original request now that we have recorded
++	 * whether the target object exists.
++	 */
++	orig_request->result = rbd_obj_request_submit(osdc, orig_request);
++out_err:
++	if (orig_request->result)
++		rbd_obj_request_complete(orig_request);
++	rbd_obj_request_put(orig_request);
++}
++
++static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
++{
++	struct rbd_obj_request *stat_request;
++	struct rbd_device *rbd_dev;
++	struct ceph_osd_client *osdc;
++	struct page **pages = NULL;
++	u32 page_count;
++	size_t size;
++	int ret;
++
++	/*
++	 * The response data for a STAT call consists of:
++	 *     le64 length;
++	 *     struct {
++	 *         le32 tv_sec;
++	 *         le32 tv_nsec;
++	 *     } mtime;
++	 */
++	size = sizeof (__le64) + sizeof (__le32) + sizeof (__le32);
++	page_count = (u32)calc_pages_for(0, size);
++	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
++	if (IS_ERR(pages))
++		return PTR_ERR(pages);
++
++	ret = -ENOMEM;
++	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
++							OBJ_REQUEST_PAGES);
++	if (!stat_request)
++		goto out;
++
++	rbd_obj_request_get(obj_request);
++	stat_request->obj_request = obj_request;
++	stat_request->pages = pages;
++	stat_request->page_count = page_count;
++
++	rbd_assert(obj_request->img_request);
++	rbd_dev = obj_request->img_request->rbd_dev;
++	stat_request->osd_req = rbd_osd_req_create(rbd_dev, false,
++						stat_request);
++	if (!stat_request->osd_req)
++		goto out;
++	stat_request->callback = rbd_img_obj_exists_callback;
++
++	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT);
++	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
++					false, false);
++	rbd_osd_req_format(stat_request, false);
++
++	osdc = &rbd_dev->rbd_client->client->osdc;
++	ret = rbd_obj_request_submit(osdc, stat_request);
++out:
++	if (ret)
++		rbd_obj_request_put(obj_request);
++
++	return ret;
++}
++
+ static int rbd_img_request_submit(struct rbd_img_request *img_request)
+ {
+ 	struct rbd_device *rbd_dev = img_request->rbd_dev;
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+ 	struct rbd_obj_request *next_obj_request;
++	bool write_request = img_request_write_test(img_request);
++	bool layered = img_request_layered_test(img_request);
+
+ 	dout("%s: img %p\n", __func__, img_request);
+ 	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
++		bool known;
++		bool object_exists;
+ 		int ret;
+
+-		ret = rbd_obj_request_submit(osdc, obj_request);
++		/*
++		 * We need to know whether the target object exists
++		 * for a layered write.  Issue an existence check
++		 * first if we need to.
++		 */
++		known = obj_request_known_test(obj_request);
++		object_exists = known && obj_request_exists_test(obj_request);
++		if (!write_request || !layered || object_exists)
++			ret = rbd_obj_request_submit(osdc, obj_request);
++		else
++			ret = rbd_img_obj_exists_submit(obj_request);
+ 		if (ret)
+ 			return ret;
+ 	}
 -- 
-DI (FH) Wolfgang Hennerbichler
-Software Development
-Unit Advanced Computing Technologies
-RISC Software GmbH
-A company of the Johannes Kepler University Linz
+1.7.9.5
 
-IT-Center
-Softwarepark 35
-4232 Hagenberg
-Austria
-
-Phone: +43 7236 3343 245
-Fax: +43 7236 3343 250
-wolfgang.hennerbichler@risc-software.at
-http://www.risc-software.at
