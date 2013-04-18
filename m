@@ -1,111 +1,194 @@
-From: Big Chiu <big.chiu@bigtera.com>
-Subject: Re: [PATCH] mds: fix setting/removing xattrs on root
-Date: Thu, 18 Apr 2013 15:16:39 +0800
-Message-ID: <CAAst5YOFEOjCFfXBA3xbe7wUkCmvKr+vwefv2vExEvuSxhG2Wg@mail.gmail.com>
-References: <1366021404-5812-1-git-send-email-big.chiu@bigtera.com>
-	<1366021404-5812-2-git-send-email-big.chiu@bigtera.com>
-	<CAPYLRzgK5siEsvd-Uj8-4SxrUSLAz0j4S45TCb3ZCCzTkeFfFA@mail.gmail.com>
+From: Malcolm Haak <malcolm@sgi.com>
+Subject: Re: RBD Read performance
+Date: Thu, 18 Apr 2013 17:22:29 +1000
+Message-ID: <516F9F35.1030507@sgi.com>
+References: <516F77FF.4060401@sgi.com> <516F9AEB.7000706@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f43.google.com ([209.85.128.43]:61111 "EHLO
-	mail-qe0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755550Ab3DRHQk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 03:16:40 -0400
-Received: by mail-qe0-f43.google.com with SMTP id f6so1456564qej.30
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Apr 2013 00:16:39 -0700 (PDT)
-In-Reply-To: <CAPYLRzgK5siEsvd-Uj8-4SxrUSLAz0j4S45TCb3ZCCzTkeFfFA@mail.gmail.com>
+Received: from relay1.sgi.com ([192.48.179.29]:42494 "EHLO relay.sgi.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965073Ab3DRHWe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Apr 2013 03:22:34 -0400
+In-Reply-To: <516F9AEB.7000706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Henry Chang <henry@bigtera.com>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-I didn't notice the bug. Guessing it was hidden because CephFS had been
-accessed by other daemons in my test environment. Thank you for the hin=
-t!
+Hi Mark!
 
-The signed-off patches are resent, also including your fix.
+Thanks for the quick reply!
 
-On Wed, Apr 17, 2013 at 4:06 AM, Gregory Farnum <greg@inktank.com> wrot=
-e:
-> On Mon, Apr 15, 2013 at 3:23 AM, Kuan Kai Chiu <big.chiu@bigtera.com>=
- wrote:
->> MDS crashes while journaling dirty root inode in handle_client_setxa=
-ttr
->> and handle_client_removexattr. We should use journal_dirty_inode to
->> safely log root inode here.
->> ---
->>  src/mds/Server.cc |    6 ++----
->>  1 file changed, 2 insertions(+), 4 deletions(-)
+I'll reply inline below.
+
+On 18/04/13 17:04, Mark Nelson wrote:
+> On 04/17/2013 11:35 PM, Malcolm Haak wrote:
+>> Hi all,
+>
+> Hi Malcolm!
+>
 >>
->> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
->> index 11ab834..1e62dd2 100644
->> --- a/src/mds/Server.cc
->> +++ b/src/mds/Server.cc
->> @@ -3907,8 +3907,7 @@ void Server::handle_client_setxattr(MDRequest =
-*mdr)
->>    mdlog->start_entry(le);
->>    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_cli=
-ent_tid());
->>    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PRE=
-DIRTY_PRIMARY, false);
->> -  mdcache->journal_cow_inode(mdr, &le->metablob, cur);
->> -  le->metablob.add_primary_dentry(cur->get_projected_parent_dn(), t=
-rue, cur);
->> +  mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
+>> I jumped into the IRC channel yesterday and they said to email
+>> ceph-devel. I have been having some read performance issues. With Reads
+>> being slower than writes by a factor of ~5-8.
+>
+> I recently saw this kind of behaviour (writes were fine, but reads were
+> terrible) on an IPoIB based cluster and it was caused by the same TCP
+> auto tune issues that Jim Schutt saw last year. It's worth a try at
+> least to see if it helps.
+>
+> echo "0" > /proc/sys/net/ipv4/tcp_moderate_rcvbuf
+>
+> on all of the clients and server nodes should be enough to test it out.
+>   Sage added an option in more recent Ceph builds that lets you work
+> around it too.
+>
+Awesome I will test this first up tomorrow.
 >>
->>    journal_and_reply(mdr, cur, 0, le, new C_MDS_inode_update_finish(=
-mds, mdr, cur));
->>  }
->> @@ -3964,8 +3963,7 @@ void Server::handle_client_removexattr(MDReque=
-st *mdr)
->>    mdlog->start_entry(le);
->>    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_cli=
-ent_tid());
->>    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PRE=
-DIRTY_PRIMARY, false);
->> -  mdcache->journal_cow_inode(mdr, &le->metablob, cur);
->> -  le->metablob.add_primary_dentry(cur->get_projected_parent_dn(), t=
-rue, cur);
->> +  mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
+>> First info:
+>> Server
+>> SLES 11 SP2
+>> Ceph 0.56.4.
+>> 12 OSD's  that are Hardware Raid 5 each of the twelve is made from 5
+>> NL-SAS disks for a total of 60 disks (Each lun can do around 320MB/s
+>> stream write and the same if not better read) Connected via 2xQDR IB
+>> OSD's/MDS and such all on same box (for testing)
+>> Box is a Quad AMD Opteron 6234
+>> Ram is 256Gb
+>> 10GB Journals
+>> osd_op_theads: 8
+>> osd_disk_threads:2
+>> Filestore_op_threads:4
+>> OSD's are all XFS
+>
+> Interesting setup!  QUAD socket Opteron boxes have somewhat slow and
+> slightly oversubscribed hypertransport links don't they?  I wonder if on
+> a system with so many disks and QDR-IB if that could become a problem...
+>
+> We typically like smaller nodes where we can reasonably do 1 OSD per
+> drive, but we've tested on a couple of 60 drive chassis in RAID configs
+> too.  Should be interesting to hear what kind of aggregate performance
+> you can eventually get.
+
+We are also going to try this out with 6 luns on a dual xeon box. The 
+Opteron box was the biggest scariest thing we had that was doing nothing.
+
+>
 >>
->>    journal_and_reply(mdr, cur, 0, le, new C_MDS_inode_update_finish(=
-mds, mdr, cur));
->>  }
+>> All nodes are connected via QDR IB using IP_O_IB. We get 1.7GB/s on TCP
+>> performance tests between the nodes.
+>>
+>> Clients: One is FC17 the other us Ubuntu 12.10 they only have around
+>> 32GB-70GB ram.
+>>
+>> We ran into an odd issue were the OSD's would all start in the same NUMA
+>> node and pretty much on the same processor core. We fixed that up with
+>> some cpuset magic.
 >
-> This is fine as far as it goes, but we'll need your sign-off for us t=
-o
-> incorporate it into the codebase. Also, have you run any tests with
-> it? The reason I ask is that when I apply this patch, set an xattr on
-> the root inode, and then restart the MDS and client, there are no
-> xattrs on the root any more. I think this should fix that, but there
-> may be other such issues:
-> diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
-> index 7065460..439bd78 100644
-> --- a/src/mds/events/EMetaBlob.h
-> +++ b/src/mds/events/EMetaBlob.h
-> @@ -468,7 +468,7 @@ private:
+> Strange!  Was that more due to cpuset or Ceph?  I can't imagine that we
+> are doing anything that would cause that.
 >
->      if (!pi) pi =3D in->get_projected_inode();
->      if (!pdft) pdft =3D &in->dirfragtree;
-> -    if (!px) px =3D &in->xattrs;
-> +    if (!px) px =3D in->get_projected_xattrs();
+
+More than likely it is an odd quirk in the SLES kernel.. but when I have 
+time I'll do some more poking. We were seeing insane CPU usage on some 
+cores because all the OSD's were piled up in one place.
+
+>>
+>> Performance testing we have done: (Note oflag=direct was yielding
+>> results within 5% of cached results)
+>>
+>>
+>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=3200
+>> 3200+0 records in
+>> 3200+0 records out
+>> 33554432000 bytes (34 GB) copied, 47.6685 s, 704 MB/s
+>> root@ty3:~#
+>> root@ty3:~# rm /test-rbd-fs/DELETEME
+>> root@ty3:~#
+>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=4800
+>> 4800+0 records in
+>> 4800+0 records out
+>> 50331648000 bytes (50 GB) copied, 69.5527 s, 724 MB/s
+>>
+>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>> count=2400
+>> 2400+0 records in
+>> 2400+0 records out
+>> 25165824000 bytes (25 GB) copied, 26.3593 s, 955 MB/s
+>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
+>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>> count=9600
+>> 9600+0 records in
+>> 9600+0 records out
+>> 100663296000 bytes (101 GB) copied, 145.212 s, 693 MB/s
+>>
+>> Both clients each doing a 140GB write (2x dogbreath's RAM) at the same
+>> time to two different rbds in the same pool.
+>>
+>> root@ty3:~# rm /test-rbd-fs/DELETEME
+>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=14000
+>> 14000+0 records in
+>> 14000+0 records out
+>> 146800640000 bytes (147 GB) copied, 412.404 s, 356 MB/s
+>> root@ty3:~#
+>>
+>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
+>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>> count=14000
+>> 14000+0 records in
+>> 14000+0 records out
+>> 146800640000 bytes (147 GB) copied, 433.351 s, 339 MB/s
+>> [root@dogbreath ~]#
+>>
+>> Onto reads...
+>> Also we found that doing iflag=direct increased read performance.
+>>
+>> [root@dogbreath ~]# dd of=/dev/null if=/test-rbd-fs/DELETEME bs=10M
+>> count=160
+>> 160+0 records in
+>> 160+0 records out
+>> 1677721600 bytes (1.7 GB) copied, 29.4242 s, 57.0 MB/s
+>> [root@dogbreath ~]#
+>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
+>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
+>> count=10000
+>> 10000+0 records in
+>> 10000+0 records out
+>> 41943040000 bytes (42 GB) copied, 382.334 s, 110 MB/s
+>> [root@dogbreath ~]#
+>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
+>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
+>> count=10000 iflag=direct
+>> 10000+0 records in
+>> 10000+0 records out
+>> 41943040000 bytes (42 GB) copied, 150.774 s, 278 MB/s
+>> [root@dogbreath ~]#
+>>
+>>
+>> So what info do you want/where do I start hunting for my wumpus?
 >
->      bufferlist snapbl;
->      if (psnapbl)
+> might also be worth looking at the size of the reads to see if there's a
+> lot of fragmentation.  Also, is this kernel rbd or qemu-kvm?
 >
-> You've fallen victim to this new setup, incidentally =97 in the past =
-the
-> root inode wasn't allowed to get any of these modifications because
-> it's not quite real in the way the rest of them are. We opened that u=
-p
-> when we made the virtual xattr interface, but we weren't very careful
-> about it so apparently we missed some side effects.
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Thing that got us was the back-end storage was showing very low read 
+rates. Where as when writing we could see almost a 2xWrite rate back to 
+physical disk (we assume that is Journal+data as the 2x is not from the 
+word go but ramps up around the 3-5 second mark)
+
+It is kernel rbd at the moment, we will be testing qemu-kvm after things 
+make sense.
+
+>>
+>> Regards
+>>
+>> Malcolm Haak
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
