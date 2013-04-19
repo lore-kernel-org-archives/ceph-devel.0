@@ -1,69 +1,49 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: bug in rbd rename command?
-Date: Fri, 19 Apr 2013 22:34:18 +0200
-Message-ID: <5171AA4A.9080403@profihost.ag>
-References: <5170F217.9020105@profihost.ag> <5171A883.2040006@inktank.com> <5171A917.6040704@profihost.ag> <alpine.DEB.2.00.1304191332560.13036@cobra.newdream.net>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: [PATCH -next] ceph: fix printk format warnings in file.c
+Date: Fri, 19 Apr 2013 14:20:07 -0700
+Message-ID: <5171B507.4030808@infradead.org>
+References: <20130419181924.a035efe6d5e73fe0db9ddb84@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:58761 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753992Ab3DSUeS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 16:34:18 -0400
-In-Reply-To: <alpine.DEB.2.00.1304191332560.13036@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Dan Mick <dan.mick@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <20130419181924.a035efe6d5e73fe0db9ddb84@canb.auug.org.au>
+Sender: linux-next-owner@vger.kernel.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+From: Randy Dunlap <rdunlap@infradead.org>
 
-Am 19.04.2013 22:33, schrieb Sage Weil:
-> I think we can make the --dest-pool default to --pool instead of rbd...
-> that's easy enough, right?
+Fix printk format warnings by using %zd for 'ssize_t' variables:
 
-Yes ;-) it doesn't hurt me but i've seen some people getting confused..
+fs/ceph/file.c:751:2: warning: format '%ld' expects argument of type 'long int', but argument 11 has type 'ssize_t' [-Wformat]
+fs/ceph/file.c:762:2: warning: format '%ld' expects argument of type 'long int', but argument 11 has type 'ssize_t' [-Wformat]
 
-> sage
->
-> On Fri, 19 Apr 2013, Stefan Priebe wrote:
->
->> Am 19.04.2013 22:26, schrieb Dan Mick:
->>> It's arguable, but we wanted to treat source and destination pools
->>> separately in general.
->>>
->>> Note that you can also specify images as POOLNAME/a and POOLNAME/b.
->> Sure i know that. But then -p does not make sense at all. Nobody want to use:
->> rbd -p POOLFORA rename a POOLFORB/b
->>
->> Wouldn't it be constant to expand this for b? I mean renaming from poola to
->> poolb isn't supported anyway ;-)
->>
->> Greets,
->> Stefan
->>
->>> On 04/19/2013 12:28 AM, Stefan Priebe - Profihost AG wrote:
->>>> Hi,
->>>>
->>>> if i issue rbd -p POOLNAME ... rename a b
->>>>
->>>> It uses the POOL for a but not for b.
->>>>
->>>> Output is then:
->>>> rbd: mv/rename across pools not supported
->>>> source pool: vmstorssd1 dest pool: rbd
->>>>
->>>> Shouldn't it use the pool provided by -p for both?
->>>>
->>>> Stefan
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Cc:	Sage Weil <sage@inktank.com>
+Cc:	ceph-devel@vger.kernel.org
+---
+ fs/ceph/file.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- linux-next-20130419.orig/fs/ceph/file.c
++++ linux-next-20130419/fs/ceph/file.c
+@@ -748,7 +748,7 @@ retry_snap:
+ 		goto out;
+ 	}
+ 
+-	dout("aio_write %p %llx.%llx %llu~%ld getting caps. i_size %llu\n",
++	dout("aio_write %p %llx.%llx %llu~%zd getting caps. i_size %llu\n",
+ 	     inode, ceph_vinop(inode), pos, count, inode->i_size);
+ 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+ 		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
+@@ -759,7 +759,7 @@ retry_snap:
+ 	if (err < 0)
+ 		goto out;
+ 
+-	dout("aio_write %p %llx.%llx %llu~%ld got cap refs on %s\n",
++	dout("aio_write %p %llx.%llx %llu~%zd got cap refs on %s\n",
+ 	     inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
+ 
+ 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
