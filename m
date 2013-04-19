@@ -1,153 +1,157 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/4] rbd: define separate read and write format funcs
-Date: Fri, 19 Apr 2013 17:49:50 -0500
-Message-ID: <5171CA0E.3020402@inktank.com>
+Subject: [PATCH 2/4] rbd: encapsulate submission of image object requests
+Date: Fri, 19 Apr 2013 17:50:02 -0500
+Message-ID: <5171CA1A.6010908@inktank.com>
 References: <5171C963.2050402@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:53779 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964846Ab3DSWtw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:49:52 -0400
-Received: by mail-ia0-f171.google.com with SMTP id f27so3892524iae.2
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:49:51 -0700 (PDT)
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:64670 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964846Ab3DSWuF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:50:05 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so5241221iea.32
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:50:04 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id wn10sm4977217igb.2.2013.04.19.15.49.50
+        by mx.google.com with ESMTPSA id wn10sm4973570igb.2.2013.04.19.15.50.03
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 19 Apr 2013 15:49:51 -0700 (PDT)
+        Fri, 19 Apr 2013 15:50:03 -0700 (PDT)
 In-Reply-To: <5171C963.2050402@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Separate rbd_osd_req_format() into two functions, one for read
-requests and the other for write requests.
+Object requests that are part of an image request are subject to
+some additional handling.  Define rbd_img_obj_request_submit() to
+encapsulate that, and use it when initially submitting an image
+object request, and when re-submitting it during callback of
+an object existence check.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   49
-++++++++++++++++++++++++++++---------------------
- 1 file changed, 28 insertions(+), 21 deletions(-)
+ drivers/block/rbd.c |   65
+++++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 43 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index ce2fb3a..a185239 100644
+index a185239..894af4f 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1489,28 +1489,31 @@ static void rbd_osd_req_callback(struct
-ceph_osd_request *osd_req,
- 		rbd_obj_request_complete(obj_request);
+@@ -423,6 +423,7 @@ void rbd_warn(struct rbd_device *rbd_dev, const char
+*fmt, ...)
+ #endif /* !RBD_DEBUG */
+
+ static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
++static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request);
+
+ static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver);
+ static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver);
+@@ -1874,8 +1875,6 @@ out_unwind:
+
+ static void rbd_img_obj_exists_callback(struct rbd_obj_request
+*obj_request)
+ {
+-	struct rbd_device *rbd_dev;
+-	struct ceph_osd_client *osdc;
+ 	struct rbd_obj_request *orig_request;
+ 	int result;
+
+@@ -1901,8 +1900,6 @@ static void rbd_img_obj_exists_callback(struct
+rbd_obj_request *obj_request)
+
+ 	rbd_assert(orig_request);
+ 	rbd_assert(orig_request->img_request);
+-	rbd_dev = orig_request->img_request->rbd_dev;
+-	osdc = &rbd_dev->rbd_client->client->osdc;
+
+ 	/*
+ 	 * Our only purpose here is to determine whether the object
+@@ -1923,7 +1920,7 @@ static void rbd_img_obj_exists_callback(struct
+rbd_obj_request *obj_request)
+ 	 * Resubmit the original request now that we have recorded
+ 	 * whether the target object exists.
+ 	 */
+-	orig_request->result = rbd_obj_request_submit(osdc, orig_request);
++	orig_request->result = rbd_img_obj_request_submit(orig_request);
+ out_err:
+ 	if (orig_request->result)
+ 		rbd_obj_request_complete(orig_request);
+@@ -1987,32 +1984,56 @@ out:
+ 	return ret;
  }
 
--static void rbd_osd_req_format(struct rbd_obj_request *obj_request,
--					bool write_request)
-+static void rbd_osd_req_format_read(struct rbd_obj_request *obj_request)
- {
- 	struct rbd_img_request *img_request = obj_request->img_request;
- 	struct ceph_osd_request *osd_req = obj_request->osd_req;
--	struct ceph_snap_context *snapc = NULL;
--	u64 snap_id = CEPH_NOSNAP;
--	struct timespec *mtime = NULL;
--	struct timespec now;
-+	u64 snap_id;
-
- 	rbd_assert(osd_req != NULL);
-
--	if (write_request) {
--		now = CURRENT_TIME;
--		mtime = &now;
--		if (img_request)
--			snapc = img_request->snapc;
--	} else if (img_request) {
--		snap_id = img_request->snap_id;
--	}
-+	snap_id = img_request ? img_request->snap_id : CEPH_NOSNAP;
-+	ceph_osdc_build_request(osd_req, obj_request->offset,
-+			NULL, snap_id, NULL);
++static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
++{
++	struct rbd_img_request *img_request;
++
++	rbd_assert(obj_request_img_data_test(obj_request));
++
++	img_request = obj_request->img_request;
++	rbd_assert(img_request);
++
++	/* (At the moment we don't care whether it exists or not...) */
++	(void) obj_request_exists_test;
++
++	/*
++	 * Only layered writes need special handling.  If it's not a
++	 * layered write, or it is a layered write but we know the
++	 * target object exists, it's no different from any other
++	 * object request.
++	 */
++	if (!img_request_write_test(img_request) ||
++		!img_request_layered_test(img_request) ||
++		obj_request_known_test(obj_request)) {
++
++		struct rbd_device *rbd_dev;
++		struct ceph_osd_client *osdc;
++
++		rbd_dev = obj_request->img_request->rbd_dev;
++		osdc = &rbd_dev->rbd_client->client->osdc;
++
++		return rbd_obj_request_submit(osdc, obj_request);
++	}
++
++	/*
++	 * It's a layered write and we don't know whether the target
++	 * exists.  Issue existence check; once that completes the
++	 * original request will be submitted again.
++	 */
++
++	return rbd_img_obj_exists_submit(obj_request);
 +}
 +
-+static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
-+{
-+	struct rbd_img_request *img_request = obj_request->img_request;
-+	struct ceph_osd_request *osd_req = obj_request->osd_req;
-+	struct ceph_snap_context *snapc;
-+	struct timespec mtime = CURRENT_TIME;
-+
-+	rbd_assert(osd_req != NULL);
-+
-+	snapc = img_request ? img_request->snapc : NULL;
- 	ceph_osdc_build_request(osd_req, obj_request->offset,
--			snapc, snap_id, mtime);
-+			snapc, CEPH_NOSNAP, &mtime);
- }
+ static int rbd_img_request_submit(struct rbd_img_request *img_request)
+ {
+-	struct rbd_device *rbd_dev = img_request->rbd_dev;
+-	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+ 	struct rbd_obj_request *next_obj_request;
+-	bool write_request = img_request_write_test(img_request);
+-	bool layered = img_request_layered_test(img_request);
 
- static struct ceph_osd_request *rbd_osd_req_create(
-@@ -1845,7 +1848,11 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
- 						0, 0);
- 		osd_req_op_extent_osd_data_bio(osd_req, 0,
- 				obj_request->bio_list, obj_request->length);
--		rbd_osd_req_format(obj_request, write_request);
-+
-+		if (write_request)
-+			rbd_osd_req_format_write(obj_request);
-+		else
-+			rbd_osd_req_format_read(obj_request);
+ 	dout("%s: img %p\n", __func__, img_request);
+ 	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
+-		bool known;
+-		bool object_exists;
+ 		int ret;
 
- 		obj_request->img_offset = img_offset;
- 		rbd_img_obj_request_add(img_request, obj_request);
-@@ -1969,7 +1976,7 @@ static int rbd_img_obj_exists_submit(struct
-rbd_obj_request *obj_request)
- 	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT);
- 	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
- 					false, false);
--	rbd_osd_req_format(stat_request, false);
-+	rbd_osd_req_format_read(stat_request);
-
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	ret = rbd_obj_request_submit(osdc, stat_request);
-@@ -2091,7 +2098,7 @@ static int rbd_obj_notify_ack(struct rbd_device
-*rbd_dev,
-
- 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_NOTIFY_ACK,
- 					notify_id, ver, 0);
--	rbd_osd_req_format(obj_request, false);
-+	rbd_osd_req_format_read(obj_request);
-
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- out:
-@@ -2161,7 +2168,7 @@ static int rbd_dev_header_watch_sync(struct
-rbd_device *rbd_dev, int start)
- 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
- 				rbd_dev->watch_event->cookie,
- 				rbd_dev->header.obj_version, start);
--	rbd_osd_req_format(obj_request, true);
-+	rbd_osd_req_format_write(obj_request);
-
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
-@@ -2262,7 +2269,7 @@ static int rbd_obj_method_sync(struct rbd_device
-*rbd_dev,
- 	osd_req_op_cls_response_data_pages(obj_request->osd_req, 0,
- 					obj_request->pages, inbound_size,
- 					0, false, false);
--	rbd_osd_req_format(obj_request, false);
-+	rbd_osd_req_format_read(obj_request);
-
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
-@@ -2473,7 +2480,7 @@ static int rbd_obj_read_sync(struct rbd_device
-*rbd_dev,
- 					obj_request->length,
- 					obj_request->offset & ~PAGE_MASK,
- 					false, false);
--	rbd_osd_req_format(obj_request, false);
-+	rbd_osd_req_format_read(obj_request);
-
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
+-		/*
+-		 * We need to know whether the target object exists
+-		 * for a layered write.  Issue an existence check
+-		 * first if we need to.
+-		 */
+-		known = obj_request_known_test(obj_request);
+-		object_exists = known && obj_request_exists_test(obj_request);
+-		if (!write_request || !layered || object_exists)
+-			ret = rbd_obj_request_submit(osdc, obj_request);
+-		else
+-			ret = rbd_img_obj_exists_submit(obj_request);
++		ret = rbd_img_obj_request_submit(obj_request);
+ 		if (ret)
+ 			return ret;
+ 	}
 -- 
 1.7.9.5
 
