@@ -1,131 +1,197 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/4] rbd: define zero_pages()
-Date: Fri, 19 Apr 2013 17:50:17 -0500
-Message-ID: <5171CA29.7000500@inktank.com>
+Subject: [PATCH 4/4] rbd: support page array image requests
+Date: Fri, 19 Apr 2013 17:50:29 -0500
+Message-ID: <5171CA35.40409@inktank.com>
 References: <5171C963.2050402@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:40786 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964846Ab3DSWuT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:50:19 -0400
-Received: by mail-ie0-f180.google.com with SMTP id to1so610047ieb.25
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:50:19 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id ie7sm4954655igb.1.2013.04.19.15.50.17
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 19 Apr 2013 15:50:18 -0700 (PDT)
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:54574 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964846Ab3DSWuc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:50:32 -0400
+Received: by mail-ie0-f171.google.com with SMTP id e11so5334963iej.30
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:50:31 -0700 (PDT)
 In-Reply-To: <5171C963.2050402@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Define a new function zero_pages() that zeroes a range of memory
-defined by a page array, along the lines of zero_bio_chain().  It
-saves and the irq flags like bvec_kmap_irq() does, though I'm not
-sure at this point that it's necessary.
+This patch adds the ability to build an image request whose data
+will be written from or read into memory described by a page array.
+(Previously only bio lists were supported.)
 
-Update rbd_img_obj_request_read_callback() to use the new function
-if the object request contains page rather than bio data.
+Originally this was going to define a new function for this purpose
+but it was largely identical to the rbd_img_request_fill_bio().  So
+instead, rbd_img_request_fill_bio() has been generalized to handle
+both types of image request.
 
-For the moment, only bio data is used for osd READ ops.
+For the moment we still only fill image requests with bio data.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   55
-+++++++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 47 insertions(+), 8 deletions(-)
+ drivers/block/rbd.c |   86
++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 66 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 894af4f..ac9abab 100644
+index ac9abab..91fcf36 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -971,6 +971,37 @@ static void zero_bio_chain(struct bio *chain, int
-start_ofs)
+@@ -1780,6 +1780,13 @@ static bool rbd_img_obj_end_request(struct
+rbd_obj_request *obj_request)
+ 			img_request->result = result;
+ 	}
+
++	/* Image object requests don't own their page array */
++
++	if (obj_request->type == OBJ_REQUEST_PAGES) {
++		obj_request->pages = NULL;
++		obj_request->page_count = 0;
++	}
++
+ 	if (img_request_child_test(img_request)) {
+ 		rbd_assert(img_request->obj_request != NULL);
+ 		more = obj_request->which < img_request->obj_request_count - 1;
+@@ -1830,30 +1837,48 @@ out:
+ 		rbd_img_request_complete(img_request);
  }
 
- /*
-+ * similar to zero_bio_chain(), zeros data defined by a page array,
-+ * starting at the given byte offset from the start of the array and
-+ * continuing up to the given end offset.  The pages array is
-+ * assumed to be big enough to hold all bytes up to the end.
-+ */
-+static void zero_pages(struct page **pages, u64 offset, u64 end)
-+{
-+	struct page **page = &pages[offset >> PAGE_SHIFT];
-+
-+	rbd_assert(end > offset);
-+	rbd_assert(end - offset <= (u64)SIZE_MAX);
-+	while (offset < end) {
-+		size_t page_offset;
-+		size_t length;
-+		unsigned long flags;
-+		void *kaddr;
-+
-+		page_offset = (size_t)(offset & ~PAGE_MASK);
-+		length = min(PAGE_SIZE - page_offset, (size_t)(end - offset));
-+		local_irq_save(flags);
-+		kaddr = kmap_atomic(*page);
-+		memset(kaddr + page_offset, 0, length);
-+		kunmap_atomic(kaddr);
-+		local_irq_restore(flags);
-+
-+		offset += length;
-+		page++;
-+	}
-+}
-+
+-static int rbd_img_request_fill_bio(struct rbd_img_request *img_request,
+-					struct bio *bio_list)
 +/*
-  * Clone a portion of a bio, starting at the given byte offset
-  * and continuing for the number of bytes indicated.
-  */
-@@ -1352,9 +1383,12 @@ static bool img_request_layered_test(struct
-rbd_img_request *img_request)
- static void
- rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
++ * Split up an image request into one or more object requests, each
++ * to a different object.  The the "type" parameter indicates
++ * whether "data_desc" is the pointer to the head of a list of bio
++ * structures, or the base of a page array.  In either case this
++ * function assumes data_desc describes memory sufficient to hold
++ * all data described by the image request.
++ */
++static int rbd_img_request_fill(struct rbd_img_request *img_request,
++					enum obj_request_type type,
++					void *data_desc)
  {
-+	u64 xferred = obj_request->xferred;
-+	u64 length = obj_request->length;
+ 	struct rbd_device *rbd_dev = img_request->rbd_dev;
+ 	struct rbd_obj_request *obj_request = NULL;
+ 	struct rbd_obj_request *next_obj_request;
+ 	bool write_request = img_request_write_test(img_request);
+-	unsigned int bio_offset;
++	struct bio *bio_list;
++	unsigned int bio_offset = 0;
++	struct page **pages;
+ 	u64 img_offset;
+ 	u64 resid;
+ 	u16 opcode;
+
+-	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
++	dout("%s: img %p type %d data_desc %p\n", __func__, img_request,
++		(int)type, data_desc);
+
+ 	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
+-	bio_offset = 0;
+ 	img_offset = img_request->offset;
+-	rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
+ 	resid = img_request->length;
+ 	rbd_assert(resid > 0);
 +
- 	dout("%s: obj %p img %p result %d %llu/%llu\n", __func__,
- 		obj_request, obj_request->img_request, obj_request->result,
--		obj_request->xferred, obj_request->length);
-+		xferred, length);
- 	/*
- 	 * ENOENT means a hole in the image.  We zero-fill the
- 	 * entire length of the request.  A short read also implies
-@@ -1362,15 +1396,20 @@ rbd_img_obj_request_read_callback(struct
++	if (type == OBJ_REQUEST_BIO) {
++		bio_list = data_desc;
++		rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
++	} else {
++		rbd_assert(type == OBJ_REQUEST_PAGES);
++		pages = data_desc;
++	}
++
+ 	while (resid) {
+ 		struct ceph_osd_request *osd_req;
+ 		const char *object_name;
+-		unsigned int clone_size;
+ 		u64 offset;
+ 		u64 length;
+
+@@ -1863,19 +1888,33 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+ 		offset = rbd_segment_offset(rbd_dev, img_offset);
+ 		length = rbd_segment_length(rbd_dev, img_offset, resid);
+ 		obj_request = rbd_obj_request_create(object_name,
+-						offset, length,
+-						OBJ_REQUEST_BIO);
++						offset, length, type);
+ 		kfree(object_name);	/* object request has its own copy */
+ 		if (!obj_request)
+ 			goto out_unwind;
+
+-		rbd_assert(length <= (u64) UINT_MAX);
+-		clone_size = (unsigned int) length;
+-		obj_request->bio_list = bio_chain_clone_range(&bio_list,
+-						&bio_offset, clone_size,
+-						GFP_ATOMIC);
+-		if (!obj_request->bio_list)
+-			goto out_partial;
++		if (type == OBJ_REQUEST_BIO) {
++			unsigned int clone_size;
++
++			rbd_assert(length <= (u64)UINT_MAX);
++			clone_size = (unsigned int)length;
++			obj_request->bio_list =
++					bio_chain_clone_range(&bio_list,
++								&bio_offset,
++								clone_size,
++								GFP_ATOMIC);
++			if (!obj_request->bio_list)
++				goto out_partial;
++		} else {
++			unsigned int page_count;
++
++			obj_request->pages = pages;
++			page_count = (u32)calc_pages_for(offset, length);
++			obj_request->page_count = page_count;
++			if ((offset + length) & ~PAGE_MASK)
++				page_count--;	/* more on last page */
++			pages += page_count;
++		}
+
+ 		osd_req = rbd_osd_req_create(rbd_dev, write_request,
+ 						obj_request);
+@@ -1886,8 +1925,13 @@ static int rbd_img_request_fill_bio(struct
+rbd_img_request *img_request,
+
+ 		osd_req_op_extent_init(osd_req, 0, opcode, offset, length,
+ 						0, 0);
+-		osd_req_op_extent_osd_data_bio(osd_req, 0,
+-				obj_request->bio_list, obj_request->length);
++		if (type == OBJ_REQUEST_BIO)
++			osd_req_op_extent_osd_data_bio(osd_req, 0,
++					obj_request->bio_list, length);
++		else
++			osd_req_op_extent_osd_data_pages(osd_req, 0,
++					obj_request->pages, length,
++					offset & ~PAGE_MASK, false, false);
+
+ 		if (write_request)
+ 			rbd_osd_req_format_write(obj_request);
+@@ -2120,7 +2164,8 @@ static void rbd_img_parent_read(struct
 rbd_obj_request *obj_request)
- 	 * update the xferred count to indicate the whole request
- 	 * was satisfied.
- 	 */
--	BUG_ON(obj_request->type != OBJ_REQUEST_BIO);
-+	rbd_assert(obj_request->type != OBJ_REQUEST_NODATA);
- 	if (obj_request->result == -ENOENT) {
--		zero_bio_chain(obj_request->bio_list, 0);
-+		if (obj_request->type == OBJ_REQUEST_BIO)
-+			zero_bio_chain(obj_request->bio_list, 0);
-+		else
-+			zero_pages(obj_request->pages, 0, length);
- 		obj_request->result = 0;
--		obj_request->xferred = obj_request->length;
--	} else if (obj_request->xferred < obj_request->length &&
--			!obj_request->result) {
--		zero_bio_chain(obj_request->bio_list, obj_request->xferred);
--		obj_request->xferred = obj_request->length;
-+		obj_request->xferred = length;
-+	} else if (xferred < length && !obj_request->result) {
-+		if (obj_request->type == OBJ_REQUEST_BIO)
-+			zero_bio_chain(obj_request->bio_list, xferred);
-+		else
-+			zero_pages(obj_request->pages, xferred, length);
-+		obj_request->xferred = length;
- 	}
- 	obj_request_done_set(obj_request);
- }
+ 	rbd_obj_request_get(obj_request);
+ 	img_request->obj_request = obj_request;
+
+-	result = rbd_img_request_fill_bio(img_request, obj_request->bio_list);
++	result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
++					obj_request->bio_list);
+ 	if (result)
+ 		goto out_err;
+
+@@ -2425,7 +2470,8 @@ static void rbd_request_fn(struct request_queue *q)
+
+ 		img_request->rq = rq;
+
+-		result = rbd_img_request_fill_bio(img_request, rq->bio);
++		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
++						rq->bio);
+ 		if (!result)
+ 			result = rbd_img_request_submit(img_request);
+ 		if (result)
 -- 
 1.7.9.5
 
