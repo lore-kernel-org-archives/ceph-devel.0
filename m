@@ -1,197 +1,260 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: support page array image requests
-Date: Fri, 19 Apr 2013 17:50:29 -0500
-Message-ID: <5171CA35.40409@inktank.com>
+Subject: [PATCH 1/2] rbd: implement full object parent reads
+Date: Fri, 19 Apr 2013 17:50:43 -0500
+Message-ID: <5171CA43.5070200@inktank.com>
 References: <5171C963.2050402@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:54574 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964846Ab3DSWuc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:50:32 -0400
-Received: by mail-ie0-f171.google.com with SMTP id e11so5334963iej.30
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:50:31 -0700 (PDT)
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:43323 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964846Ab3DSWuq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 18:50:46 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so5256742iea.4
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 15:50:45 -0700 (PDT)
 In-Reply-To: <5171C963.2050402@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This patch adds the ability to build an image request whose data
-will be written from or read into memory described by a page array.
-(Previously only bio lists were supported.)
-
-Originally this was going to define a new function for this purpose
-but it was largely identical to the rbd_img_request_fill_bio().  So
-instead, rbd_img_request_fill_bio() has been generalized to handle
-both types of image request.
-
-For the moment we still only fill image requests with bio data.
+As a step toward implementing layered writes, implement reading the
+data for a target object from the parent image for a write request
+whose target object is known to not exist.  Add a copyup_pages field
+to an image request to track the page array used (only) for such a
+request.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   86
-+++++++++++++++++++++++++++++++++++++++------------
- 1 file changed, 66 insertions(+), 20 deletions(-)
+ drivers/block/rbd.c |  152
+++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 143 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index ac9abab..91fcf36 100644
+index 91fcf36..c5d0619 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1780,6 +1780,13 @@ static bool rbd_img_obj_end_request(struct
-rbd_obj_request *obj_request)
- 			img_request->result = result;
- 	}
+@@ -250,6 +250,7 @@ struct rbd_img_request {
+ 		struct request		*rq;		/* block request */
+ 		struct rbd_obj_request	*obj_request;	/* obj req initiator */
+ 	};
++	struct page		**copyup_pages;
+ 	spinlock_t		completion_lock;/* protects next_completion */
+ 	u32			next_completion;
+ 	rbd_img_callback_t	callback;
+@@ -350,6 +351,8 @@ static DEFINE_SPINLOCK(rbd_dev_list_lock);
+ static LIST_HEAD(rbd_client_list);		/* clients */
+ static DEFINE_SPINLOCK(rbd_client_list_lock);
 
-+	/* Image object requests don't own their page array */
++static int rbd_img_request_submit(struct rbd_img_request *img_request);
 +
-+	if (obj_request->type == OBJ_REQUEST_PAGES) {
-+		obj_request->pages = NULL;
-+		obj_request->page_count = 0;
-+	}
-+
- 	if (img_request_child_test(img_request)) {
- 		rbd_assert(img_request->obj_request != NULL);
- 		more = obj_request->which < img_request->obj_request_count - 1;
-@@ -1830,30 +1837,48 @@ out:
- 		rbd_img_request_complete(img_request);
+ static int rbd_dev_snaps_update(struct rbd_device *rbd_dev);
+ static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
+
+@@ -1956,6 +1959,133 @@ out_unwind:
+ 	return -ENOMEM;
  }
 
--static int rbd_img_request_fill_bio(struct rbd_img_request *img_request,
--					struct bio *bio_list)
-+/*
-+ * Split up an image request into one or more object requests, each
-+ * to a different object.  The the "type" parameter indicates
-+ * whether "data_desc" is the pointer to the head of a list of bio
-+ * structures, or the base of a page array.  In either case this
-+ * function assumes data_desc describes memory sufficient to hold
-+ * all data described by the image request.
-+ */
-+static int rbd_img_request_fill(struct rbd_img_request *img_request,
-+					enum obj_request_type type,
-+					void *data_desc)
- {
- 	struct rbd_device *rbd_dev = img_request->rbd_dev;
- 	struct rbd_obj_request *obj_request = NULL;
- 	struct rbd_obj_request *next_obj_request;
- 	bool write_request = img_request_write_test(img_request);
--	unsigned int bio_offset;
-+	struct bio *bio_list;
-+	unsigned int bio_offset = 0;
++static void
++rbd_img_obj_parent_read_full_callback(struct rbd_img_request *img_request)
++{
++	struct rbd_obj_request *orig_request;
 +	struct page **pages;
- 	u64 img_offset;
- 	u64 resid;
- 	u16 opcode;
-
--	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
-+	dout("%s: img %p type %d data_desc %p\n", __func__, img_request,
-+		(int)type, data_desc);
-
- 	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
--	bio_offset = 0;
- 	img_offset = img_request->offset;
--	rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
- 	resid = img_request->length;
- 	rbd_assert(resid > 0);
++	u32 page_count;
++	int result;
++	u64 obj_size;
++	u64 xferred;
 +
-+	if (type == OBJ_REQUEST_BIO) {
-+		bio_list = data_desc;
-+		rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
-+	} else {
-+		rbd_assert(type == OBJ_REQUEST_PAGES);
-+		pages = data_desc;
++	rbd_assert(img_request_child_test(img_request));
++
++	/* First get what we need from the image request */
++
++	pages = img_request->copyup_pages;
++	rbd_assert(pages != NULL);
++	img_request->copyup_pages = NULL;
++
++	orig_request = img_request->obj_request;
++	rbd_assert(orig_request != NULL);
++
++	result = img_request->result;
++	obj_size = img_request->length;
++	xferred = img_request->xferred;
++
++	rbd_img_request_put(img_request);
++
++	obj_request_existence_set(orig_request, true);
++
++	page_count = (u32)calc_pages_for(0, obj_size);
++	ceph_release_page_vector(pages, page_count);
++
++	/* Resubmit the original request (for now). */
++
++	orig_request->result = rbd_img_obj_request_submit(orig_request);
++	if (orig_request->result) {
++		obj_request_done_set(orig_request);
++		rbd_obj_request_complete(orig_request);
++	}
++}
++
++/*
++ * Read from the parent image the range of data that covers the
++ * entire target of the given object request.  This is used for
++ * satisfying a layered image write request when the target of an
++ * object request from the image request does not exist.
++ *
++ * A page array big enough to hold the returned data is allocated
++ * and supplied to rbd_img_request_fill() as the "data descriptor."
++ * When the read completes, this page array will be transferred to
++ * the original object request for the copyup operation.
++ *
++ * If an error occurs, record it as the result of the original
++ * object request and mark it done so it gets completed.
++ */
++static int rbd_img_obj_parent_read_full(struct rbd_obj_request
+*obj_request)
++{
++	struct rbd_img_request *img_request = NULL;
++	struct rbd_img_request *parent_request = NULL;
++	struct rbd_device *rbd_dev;
++	u64 img_offset;
++	u64 length;
++	struct page **pages = NULL;
++	u32 page_count;
++	int result;
++
++	rbd_assert(obj_request_img_data_test(obj_request));
++	rbd_assert(obj_request->type == OBJ_REQUEST_BIO);
++
++	img_request = obj_request->img_request;
++	rbd_assert(img_request != NULL);
++	rbd_dev = img_request->rbd_dev;
++	rbd_assert(rbd_dev->parent != NULL);
++
++	/*
++	 * Determine the byte range covered by the object in the
++	 * child image to which the original request was to be sent.
++	 */
++	img_offset = obj_request->img_offset - obj_request->offset;
++	length = (u64)1 << rbd_dev->header.obj_order;
++
++	/*
++	 * Allocate a page array big enough to receive the data read
++	 * from the parent.
++	 */
++	page_count = (u32)calc_pages_for(0, length);
++	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
++	if (IS_ERR(pages)) {
++		result = PTR_ERR(pages);
++		pages = NULL;
++		goto out_err;
 +	}
 +
- 	while (resid) {
- 		struct ceph_osd_request *osd_req;
- 		const char *object_name;
--		unsigned int clone_size;
- 		u64 offset;
- 		u64 length;
-
-@@ -1863,19 +1888,33 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
- 		offset = rbd_segment_offset(rbd_dev, img_offset);
- 		length = rbd_segment_length(rbd_dev, img_offset, resid);
- 		obj_request = rbd_obj_request_create(object_name,
--						offset, length,
--						OBJ_REQUEST_BIO);
-+						offset, length, type);
- 		kfree(object_name);	/* object request has its own copy */
- 		if (!obj_request)
- 			goto out_unwind;
-
--		rbd_assert(length <= (u64) UINT_MAX);
--		clone_size = (unsigned int) length;
--		obj_request->bio_list = bio_chain_clone_range(&bio_list,
--						&bio_offset, clone_size,
--						GFP_ATOMIC);
--		if (!obj_request->bio_list)
--			goto out_partial;
-+		if (type == OBJ_REQUEST_BIO) {
-+			unsigned int clone_size;
++	result = -ENOMEM;
++	parent_request = rbd_img_request_create(rbd_dev->parent,
++						img_offset, length,
++						false, true);
++	if (!parent_request)
++		goto out_err;
++	rbd_obj_request_get(obj_request);
++	parent_request->obj_request = obj_request;
 +
-+			rbd_assert(length <= (u64)UINT_MAX);
-+			clone_size = (unsigned int)length;
-+			obj_request->bio_list =
-+					bio_chain_clone_range(&bio_list,
-+								&bio_offset,
-+								clone_size,
-+								GFP_ATOMIC);
-+			if (!obj_request->bio_list)
-+				goto out_partial;
-+		} else {
-+			unsigned int page_count;
++	result = rbd_img_request_fill(parent_request, OBJ_REQUEST_PAGES, pages);
++	if (result)
++		goto out_err;
++	parent_request->copyup_pages = pages;
 +
-+			obj_request->pages = pages;
-+			page_count = (u32)calc_pages_for(offset, length);
-+			obj_request->page_count = page_count;
-+			if ((offset + length) & ~PAGE_MASK)
-+				page_count--;	/* more on last page */
-+			pages += page_count;
-+		}
-
- 		osd_req = rbd_osd_req_create(rbd_dev, write_request,
- 						obj_request);
-@@ -1886,8 +1925,13 @@ static int rbd_img_request_fill_bio(struct
-rbd_img_request *img_request,
-
- 		osd_req_op_extent_init(osd_req, 0, opcode, offset, length,
- 						0, 0);
--		osd_req_op_extent_osd_data_bio(osd_req, 0,
--				obj_request->bio_list, obj_request->length);
-+		if (type == OBJ_REQUEST_BIO)
-+			osd_req_op_extent_osd_data_bio(osd_req, 0,
-+					obj_request->bio_list, length);
-+		else
-+			osd_req_op_extent_osd_data_pages(osd_req, 0,
-+					obj_request->pages, length,
-+					offset & ~PAGE_MASK, false, false);
-
- 		if (write_request)
- 			rbd_osd_req_format_write(obj_request);
-@@ -2120,7 +2164,8 @@ static void rbd_img_parent_read(struct
++	parent_request->callback = rbd_img_obj_parent_read_full_callback;
++	result = rbd_img_request_submit(parent_request);
++	if (!result)
++		return 0;
++
++	parent_request->copyup_pages = NULL;
++	parent_request->obj_request = NULL;
++	rbd_obj_request_put(obj_request);
++out_err:
++	if (pages)
++		ceph_release_page_vector(pages, page_count);
++	if (parent_request)
++		rbd_img_request_put(parent_request);
++	obj_request->result = result;
++	obj_request->xferred = 0;
++	obj_request_done_set(obj_request);
++
++	return result;
++}
++
+ static void rbd_img_obj_exists_callback(struct rbd_obj_request
+*obj_request)
+ {
+ 	struct rbd_obj_request *orig_request;
+@@ -1996,7 +2126,7 @@ static void rbd_img_obj_exists_callback(struct
 rbd_obj_request *obj_request)
- 	rbd_obj_request_get(obj_request);
- 	img_request->obj_request = obj_request;
+ 		obj_request_existence_set(orig_request, false);
+ 	} else if (result) {
+ 		orig_request->result = result;
+-		goto out_err;
++		goto out;
+ 	}
 
--	result = rbd_img_request_fill_bio(img_request, obj_request->bio_list);
-+	result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
-+					obj_request->bio_list);
- 	if (result)
- 		goto out_err;
+ 	/*
+@@ -2004,7 +2134,7 @@ static void rbd_img_obj_exists_callback(struct
+rbd_obj_request *obj_request)
+ 	 * whether the target object exists.
+ 	 */
+ 	orig_request->result = rbd_img_obj_request_submit(orig_request);
+-out_err:
++out:
+ 	if (orig_request->result)
+ 		rbd_obj_request_complete(orig_request);
+ 	rbd_obj_request_put(orig_request);
+@@ -2070,15 +2200,13 @@ out:
+ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request;
++	bool known;
 
-@@ -2425,7 +2470,8 @@ static void rbd_request_fn(struct request_queue *q)
+ 	rbd_assert(obj_request_img_data_test(obj_request));
 
- 		img_request->rq = rq;
+ 	img_request = obj_request->img_request;
+ 	rbd_assert(img_request);
 
--		result = rbd_img_request_fill_bio(img_request, rq->bio);
-+		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
-+						rq->bio);
- 		if (!result)
- 			result = rbd_img_request_submit(img_request);
- 		if (result)
+-	/* (At the moment we don't care whether it exists or not...) */
+-	(void) obj_request_exists_test;
+-
+ 	/*
+ 	 * Only layered writes need special handling.  If it's not a
+ 	 * layered write, or it is a layered write but we know the
+@@ -2087,7 +2215,8 @@ static int rbd_img_obj_request_submit(struct
+rbd_obj_request *obj_request)
+ 	 */
+ 	if (!img_request_write_test(img_request) ||
+ 		!img_request_layered_test(img_request) ||
+-		obj_request_known_test(obj_request)) {
++		((known = obj_request_known_test(obj_request)) &&
++			obj_request_exists_test(obj_request))) {
+
+ 		struct rbd_device *rbd_dev;
+ 		struct ceph_osd_client *osdc;
+@@ -2099,10 +2228,15 @@ static int rbd_img_obj_request_submit(struct
+rbd_obj_request *obj_request)
+ 	}
+
+ 	/*
+-	 * It's a layered write and we don't know whether the target
+-	 * exists.  Issue existence check; once that completes the
+-	 * original request will be submitted again.
++	 * It's a layered write.  The target object might exist but
++	 * we may not know that yet.  If we know it doesn't exist,
++	 * start by reading the data for the full target object from
++	 * the parent so we can use it for a copyup to the target.
+ 	 */
++	if (known)
++		return rbd_img_obj_parent_read_full(obj_request);
++
++	/* We don't know whether the target exists.  Go find out. */
+
+ 	return rbd_img_obj_exists_submit(obj_request);
+ }
 -- 
 1.7.9.5
 
