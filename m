@@ -1,39 +1,30 @@
-From: Jeff Mitchell <jeffrey.mitchell@gmail.com>
-Subject: Re: test osd on zfs
-Date: Fri, 19 Apr 2013 06:47:24 -0400
-Message-ID: <517120BC.8060205@gmail.com>
-References: <516E7D5C.7080309@nazarianin.com> <alpine.DEB.2.00.1304170818000.27056@cobra.newdream.net> <CANExM-OE+zd4QVBufmy3v=Yu4ki5N5KqmZiOQJkYt0xd66YtrQ@mail.gmail.com> <516ECFB6.8090107@gmail.com> <CABBk=J93+1TRnjtr5D2cJWmre+tf85hAw3H1JnOL8hwKJuHDJA@mail.gmail.com> <alpine.DEB.2.00.1304171005360.30041@cobra.newdream.net> <CABBk=J_k0gAEx6a-agno8KHtn4-iZe5pfQLcrgtU2Ki2_kd8nQ@mail.gmail.com> <516EF07E.4000909@llnl.gov> <CABBk=J90_TB2hNH=rh6b=iO+=DRQoHPCiTqDP=X+ygyM0xoeVw@mail.gmail.com> <516EF34E.5000000@profihost.ag> <516F0321.2@inktank.com> <516F10BE.6020103@llnl.gov> <38892EC8-F082-4AC4-8B6D-F8A541DBC7B7@profihost.ag> <alpine.DEB.2.00.1304180747200.626@cobra.newdream.net> <kkpjpj$vs5$1@ger.gmane.org>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: poor write performance
+Date: Fri, 19 Apr 2013 11:09:29 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+ <516FF893.1030309@inktank.com>
+ <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f45.google.com ([209.85.212.45]:65188 "EHLO
-	mail-vb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757487Ab3DSKr2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 06:47:28 -0400
-Received: by mail-vb0-f45.google.com with SMTP id w15so3448997vbf.4
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 03:47:27 -0700 (PDT)
-In-Reply-To: <kkpjpj$vs5$1@ger.gmane.org>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:44539 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757024Ab3DSLJ5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 07:09:57 -0400
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elsayed <eternaleye@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: James Harper <james.harper@bendigoit.com.au>, Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Alex Elsayed wrote:
-> Since Btrfs has implemented raid5/6 support (meaning raidz is only a feature
-> gain if you want 3x parity, which is unlikely to be useful for an OSD[1]),
-> the checksumming may be the only real benefit since it supports sha256 (in
-> addition to the non-cryptographic fletcher2/fletcher4), whereas btrfs only
-> has crc32c at this time.
+I just tried a 3.8 series kernel and can now get 25mbytes/second using dd with a 4mb block size, instead of the 700kbytes/second I was getting with the debian 3.2 kernel.
 
-Plus (in my real-world experience) *far* better robustness. If Ceph 
-could use either and both had feature parity, I'd choose ZFS in a 
-heartbeat. I've had too many simple Btrfs filesystems go corrupt, not 
-even using any fancy RAID features.
+I'm still getting 120kbytes/second with a dd 4kb block size though... is that expected?
 
-I wasn't aware that Ceph was using btrfs' file-scope clone command. ZFS 
-doesn't have that, although in theory with the new capabilities system 
-it could be supported in one implementation without requiring an on-disk 
-format change.
+James
 
---Jeff
