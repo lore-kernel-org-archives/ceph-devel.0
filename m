@@ -1,223 +1,133 @@
-From: Malcolm Haak <malcolm@sgi.com>
-Subject: Re: RBD Read performance
-Date: Fri, 19 Apr 2013 10:27:44 +1000
-Message-ID: <51708F80.8090803@sgi.com>
-References: <516F77FF.4060401@sgi.com> <516F9AEB.7000706@inktank.com> <516F9F35.1030507@sgi.com>
+From: "Christopher LILJENSTOLPE" <cdl@asgaard.org>
+Subject: Re: erasure coding (sorry)
+Date: Thu, 18 Apr 2013 17:29:24 -0700
+Message-ID: <4A3EE2C6-3F2A-479B-AA9F-F5FBDD2D30AF@asgaard.org>
+References: <20130418162842.0c61d1e2@dieter-t420s>
+ <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net>
+ <517060B2.80706@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed;
+ boundary="=_MailMate_80E898AB-1D69-474C-8D58-F544A1E3442D_=";
+ micalg=pgp-sha1; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay1.sgi.com ([192.48.179.29]:37004 "EHLO relay.sgi.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S967671Ab3DSA1t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Apr 2013 20:27:49 -0400
-In-Reply-To: <516F9F35.1030507@sgi.com>
+Received: from smtp1.emailarray.com ([65.39.216.14]:57981 "EHLO
+	smtp1.emailarray.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967575Ab3DSAgO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 20:36:14 -0400
+In-Reply-To: <517060B2.80706@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, "Plaetinck, Dieter" <dieter@vimeo.com>, ceph-devel@vger.kernel.org, danm@annaisystems.com
 
-Morning all,
+This is an OpenPGP/MIME signed message (RFC 3156 and 4880).
 
-Did the echos on all boxes involved... and the results are in..
+--=_MailMate_80E898AB-1D69-474C-8D58-F544A1E3442D_=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-[root@dogbreath ~]#
-[root@dogbreath ~]# dd if=/todd-rbd-fs/DELETEME of=/dev/null bs=4M 
-count=10000 iflag=direct
-10000+0 records in
-10000+0 records out
-41943040000 bytes (42 GB) copied, 144.083 s, 291 MB/s
-[root@dogbreath ~]# dd if=/todd-rbd-fs/DELETEME of=/dev/null bs=4M 
-count=10000
-10000+0 records in
-10000+0 records out
-41943040000 bytes (42 GB) copied, 316.025 s, 133 MB/s
-[root@dogbreath ~]#
+Supposedly, on 2013-Apr-18, at 14.08 PDT(-0700), someone claiming to be J=
+osh Durgin scribed:
 
-No change which is a shame. What other information or testing should I 
-start?
+> On 04/18/2013 01:47 PM, Sage Weil wrote:
+>> On Thu, 18 Apr 2013, Plaetinck, Dieter wrote:
+>>> sorry to bring this up again, googling revealed some people don't lik=
+e the subject [anymore].
+>>>
+>>> but I'm working on a new +- 3PB cluster for storage of immutable file=
+s.
+>>> and it would be either all cold data, or mostly cold. 150MB avg files=
+ize, max size 5GB (for now)
+>>> For this use case, my impression is erasure coding would make a lot o=
+f sense
+>>> (though I'm not sure about the computational overhead on storing and =
+loading objects..? outbound traffic would peak at 6 Gbps, but I can make =
+it way less and still keep a large cluster, by taking away the small set =
+of hot files.
+>>> inbound traffic would be minimal)
+>>>
+>>> I know that the answer a while ago was "no plans to implement erasure=
+ coding", has this changed?
+>>> if not, is anyone aware of a similar system that does support it? I f=
+ound QFS but that's meant for batch processing, has a single 'namenode' e=
+tc.
+>>
+>> We would love to do it, but it is not a priority at the moment (things=
 
-Regards
+>> like multi-site replication are in much higher demand).  That of cours=
+e
+>> doesn't prevent someone outside of Inktank from working on it :)
+>>
+>> The main caveat is that it will be complicate.  For an initial
+>> implementation, the full breadth of the rados API probably wouldn't be=
 
-Malcolm Haak
+>> support for erasure/parity encoded pools (thinkgs like rados classes a=
+nd
+>> the omap key/value api get tricky when you start talking about parity)=
+=2E
+>> But for many (or even most) use cases, objects are just bytes, and tho=
+se
+>> restrictions are just fine.
+>
+> I talked to some folks interested in doing a more limited form of this
+> yesterday. They started a blueprint [1]. One of their ideas was to have=
 
-On 18/04/13 17:22, Malcolm Haak wrote:
-> Hi Mark!
+> erasure coding done by a separate process (or thread perhaps). It would=
+
+> use erasure coding on an object and then use librados to store the
+> rasure-encoded pieces in a separate pool, and finally leave a marker in=
+
+> place of the original object in the first pool.
 >
-> Thanks for the quick reply!
+> When the osd detected this marker, it would proxy the request to the
+> erasure coding thread/process which would service the request on the
+> second pool for reads, and potentially make writes move the data back t=
+o
+> the first pool in a tiering sort of scenario.
 >
-> I'll reply inline below.
+> I might have misremembered some details, but I think it's an
+> interesting way to get many of the benefits of erasure coding with a re=
+latively small amount of work compared to a fully native osd solution.
+
+Greetings,
+
+	I'm one of those individuals :)  Our thinking is evolving on this, and I=
+ think we can keep most of the work out of the main machinery of ceph, an=
+d simply require a modified client that runs the "proxy" function on the =
+"hot" pool OSDs. Even wondering if it could be prototyped in fuse.  I wil=
+l be writing this up in the next day or two in the blueprint below.  Josh=
+ has the idea basically correct.
+
 >
-> On 18/04/13 17:04, Mark Nelson wrote:
->> On 04/17/2013 11:35 PM, Malcolm Haak wrote:
->>> Hi all,
->>
->> Hi Malcolm!
->>
->>>
->>> I jumped into the IRC channel yesterday and they said to email
->>> ceph-devel. I have been having some read performance issues. With Reads
->>> being slower than writes by a factor of ~5-8.
->>
->> I recently saw this kind of behaviour (writes were fine, but reads were
->> terrible) on an IPoIB based cluster and it was caused by the same TCP
->> auto tune issues that Jim Schutt saw last year. It's worth a try at
->> least to see if it helps.
->>
->> echo "0" > /proc/sys/net/ipv4/tcp_moderate_rcvbuf
->>
->> on all of the clients and server nodes should be enough to test it out.
->>   Sage added an option in more recent Ceph builds that lets you work
->> around it too.
->>
-> Awesome I will test this first up tomorrow.
->>>
->>> First info:
->>> Server
->>> SLES 11 SP2
->>> Ceph 0.56.4.
->>> 12 OSD's  that are Hardware Raid 5 each of the twelve is made from 5
->>> NL-SAS disks for a total of 60 disks (Each lun can do around 320MB/s
->>> stream write and the same if not better read) Connected via 2xQDR IB
->>> OSD's/MDS and such all on same box (for testing)
->>> Box is a Quad AMD Opteron 6234
->>> Ram is 256Gb
->>> 10GB Journals
->>> osd_op_theads: 8
->>> osd_disk_threads:2
->>> Filestore_op_threads:4
->>> OSD's are all XFS
->>
->> Interesting setup!  QUAD socket Opteron boxes have somewhat slow and
->> slightly oversubscribed hypertransport links don't they?  I wonder if on
->> a system with so many disks and QDR-IB if that could become a problem...
->>
->> We typically like smaller nodes where we can reasonably do 1 OSD per
->> drive, but we've tested on a couple of 60 drive chassis in RAID configs
->> too.  Should be interesting to hear what kind of aggregate performance
->> you can eventually get.
+> Josh
+
+Christopher
+
 >
-> We are also going to try this out with 6 luns on a dual xeon box. The
-> Opteron box was the biggest scariest thing we had that was doing nothing.
->
->>
->>>
->>> All nodes are connected via QDR IB using IP_O_IB. We get 1.7GB/s on TCP
->>> performance tests between the nodes.
->>>
->>> Clients: One is FC17 the other us Ubuntu 12.10 they only have around
->>> 32GB-70GB ram.
->>>
->>> We ran into an odd issue were the OSD's would all start in the same NUMA
->>> node and pretty much on the same processor core. We fixed that up with
->>> some cpuset magic.
->>
->> Strange!  Was that more due to cpuset or Ceph?  I can't imagine that we
->> are doing anything that would cause that.
->>
->
-> More than likely it is an odd quirk in the SLES kernel.. but when I have
-> time I'll do some more poking. We were seeing insane CPU usage on some
-> cores because all the OSD's were piled up in one place.
->
->>>
->>> Performance testing we have done: (Note oflag=direct was yielding
->>> results within 5% of cached results)
->>>
->>>
->>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=3200
->>> 3200+0 records in
->>> 3200+0 records out
->>> 33554432000 bytes (34 GB) copied, 47.6685 s, 704 MB/s
->>> root@ty3:~#
->>> root@ty3:~# rm /test-rbd-fs/DELETEME
->>> root@ty3:~#
->>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=4800
->>> 4800+0 records in
->>> 4800+0 records out
->>> 50331648000 bytes (50 GB) copied, 69.5527 s, 724 MB/s
->>>
->>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
->>> count=2400
->>> 2400+0 records in
->>> 2400+0 records out
->>> 25165824000 bytes (25 GB) copied, 26.3593 s, 955 MB/s
->>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
->>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
->>> count=9600
->>> 9600+0 records in
->>> 9600+0 records out
->>> 100663296000 bytes (101 GB) copied, 145.212 s, 693 MB/s
->>>
->>> Both clients each doing a 140GB write (2x dogbreath's RAM) at the same
->>> time to two different rbds in the same pool.
->>>
->>> root@ty3:~# rm /test-rbd-fs/DELETEME
->>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=14000
->>> 14000+0 records in
->>> 14000+0 records out
->>> 146800640000 bytes (147 GB) copied, 412.404 s, 356 MB/s
->>> root@ty3:~#
->>>
->>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
->>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
->>> count=14000
->>> 14000+0 records in
->>> 14000+0 records out
->>> 146800640000 bytes (147 GB) copied, 433.351 s, 339 MB/s
->>> [root@dogbreath ~]#
->>>
->>> Onto reads...
->>> Also we found that doing iflag=direct increased read performance.
->>>
->>> [root@dogbreath ~]# dd of=/dev/null if=/test-rbd-fs/DELETEME bs=10M
->>> count=160
->>> 160+0 records in
->>> 160+0 records out
->>> 1677721600 bytes (1.7 GB) copied, 29.4242 s, 57.0 MB/s
->>> [root@dogbreath ~]#
->>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
->>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
->>> count=10000
->>> 10000+0 records in
->>> 10000+0 records out
->>> 41943040000 bytes (42 GB) copied, 382.334 s, 110 MB/s
->>> [root@dogbreath ~]#
->>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
->>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
->>> count=10000 iflag=direct
->>> 10000+0 records in
->>> 10000+0 records out
->>> 41943040000 bytes (42 GB) copied, 150.774 s, 278 MB/s
->>> [root@dogbreath ~]#
->>>
->>>
->>> So what info do you want/where do I start hunting for my wumpus?
->>
->> might also be worth looking at the size of the reads to see if there's a
->> lot of fragmentation.  Also, is this kernel rbd or qemu-kvm?
->>
->
-> Thing that got us was the back-end storage was showing very low read
-> rates. Where as when writing we could see almost a 2xWrite rate back to
-> physical disk (we assume that is Journal+data as the 2x is not from the
-> word go but ramps up around the 3-5 second mark)
->
-> It is kernel rbd at the moment, we will be testing qemu-kvm after things
-> make sense.
->
->>>
->>> Regards
->>>
->>> Malcolm Haak
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> [1] http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
+ing_as_a_storage_backend
+
+
+--
+=E6=9D=8E=E6=9F=AF=E7=9D=BF
+Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+Check my calendar availability: https://tungle.me/cdl
+--=_MailMate_80E898AB-1D69-474C-8D58-F544A1E3442D_=
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename=signature.asc
+Content-Type: application/pgp-signature; name=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
+
+iQEcBAEBAgAGBQJRcI/kAAoJEGmx2Mt/+Iw/z50H/RCL3dX476eRowLqZArSxWWY
+xdAL5/CRhCM56sFD4g45BLDADZxviNcR2OeOMccWjUKsobF/Ltkym8gVr0/qrvl5
+0BIwE+30sD+YYVobXz8iGnEcpw8fhWHND9d55wCKyfD6bhSkxO2m4DqtrmefcUhe
+7CrblY34NkGtWWrAAjK5YZkws5Ug846oAz05HEgGLk8/+YmHtg3qIyMSZ/YXY/95
+3mGlddshQxtjITv6gwaT1JCucOQVoxcJksvlf95hYmJpMQkVwMlpRM59lswnMxa/
+wTE+DNmQZnKRAoNQtRFYg6aaSGAK5ECWB0rxfc0/vjVD3fgEPMBFUSNjr0jqdH8=
+=IVvc
+-----END PGP SIGNATURE-----
+
+--=_MailMate_80E898AB-1D69-474C-8D58-F544A1E3442D_=--
