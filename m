@@ -1,71 +1,223 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: poor write performance
-Date: Thu, 18 Apr 2013 23:23:12 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
- <516FF893.1030309@inktank.com>
+From: Malcolm Haak <malcolm@sgi.com>
+Subject: Re: RBD Read performance
+Date: Fri, 19 Apr 2013 10:27:44 +1000
+Message-ID: <51708F80.8090803@sgi.com>
+References: <516F77FF.4060401@sgi.com> <516F9AEB.7000706@inktank.com> <516F9F35.1030507@sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:49786 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966999Ab3DRXnF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Apr 2013 19:43:05 -0400
-In-Reply-To: <516FF893.1030309@inktank.com>
-Content-Language: en-US
+Received: from relay1.sgi.com ([192.48.179.29]:37004 "EHLO relay.sgi.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S967671Ab3DSA1t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Apr 2013 20:27:49 -0400
+In-Reply-To: <516F9F35.1030507@sgi.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-> > Where should I start looking for performance problems? I've tried running
-> > some of the benchmark stuff in the documentation but I haven't gotten very
-> > far...
-> 
-> Hi James!  Sorry to hear about the performance trouble!  Is it just
-> sequential 4KB direct IO writes that are giving you troubles?  If you
-> are using the kernel version of RBD, we don't have any kind of cache
-> implemented there and since you are bypassing the pagecache on the
-> client, those writes are being sent to the different OSDs in 4KB chunks
-> over the network.  RBD stores data in blocks that are represented by 4MB
-> objects on one of the OSDs, so without cache a lot of sequential 4KB
-> writes will be hitting 1 OSD repeatedly and then moving on to the next
-> one.  Hopefully those writes would get aggregated at the OSD level, but
-> clearly that's not really happening here given your performance.
+Morning all,
 
-Using dd I tried various block sizes. With 4kb I was getting around 500kbytes/second rate. With 1MB I was getting a few mbytes/second. Read performance seems great though.
+Did the echos on all boxes involved... and the results are in..
 
-> Here's a couple of thoughts:
-> 
-> 1) If you are working with VMs, using the QEMU/KVM interface with virtio
-> drivers and RBD cache enabled will give you a huge jump in small
-> sequential write performance relative to what you are seeing now.
+[root@dogbreath ~]#
+[root@dogbreath ~]# dd if=/todd-rbd-fs/DELETEME of=/dev/null bs=4M 
+count=10000 iflag=direct
+10000+0 records in
+10000+0 records out
+41943040000 bytes (42 GB) copied, 144.083 s, 291 MB/s
+[root@dogbreath ~]# dd if=/todd-rbd-fs/DELETEME of=/dev/null bs=4M 
+count=10000
+10000+0 records in
+10000+0 records out
+41943040000 bytes (42 GB) copied, 316.025 s, 133 MB/s
+[root@dogbreath ~]#
 
-I'm using Xen so that won't work for me right now, although I did notice someone posted some blktap code to support ceph.
+No change which is a shame. What other information or testing should I 
+start?
 
-I'm trying a windows restore of a physical machine into a VM under Xen and performance matches what I am seeing with dd - very very slow.
+Regards
 
-> 2) You may want to try upgrading to 0.60.  We made a change to how the
-> pg_log works that causes fewer disk seeks during small IO, especially
-> with XFS.
+Malcolm Haak
 
-Do packages for this exist for Debian? At the moment my sources.list contains "ceph.com/debian-bobtail wheezy main".
-
-> 3) If you are still having trouble, testing your network, disk speeds,
-> and using rados bench to test the object store all may be helpful.
-> 
-
-I tried that and while the write worked the seq test always said I had to do a write test first.
-
-While running my Xen restore, /var/log/ceph/ceph.log looks like:
-
-pgmap v18316: 832 pgs: 832 active+clean; 61443 MB data, 119 GB used, 1742 GB / 1862 GB avail; 824KB/s wr, 12op/s
-pgmap v18317: 832 pgs: 832 active+clean; 61446 MB data, 119 GB used, 1742 GB / 1862 GB avail; 649KB/s wr, 10op/s
-pgmap v18318: 832 pgs: 832 active+clean; 61449 MB data, 119 GB used, 1742 GB / 1862 GB avail; 652KB/s wr, 10op/s
-pgmap v18319: 832 pgs: 832 active+clean; 61452 MB data, 119 GB used, 1742 GB / 1862 GB avail; 614KB/s wr, 9op/s
-pgmap v18320: 832 pgs: 832 active+clean; 61454 MB data, 119 GB used, 1742 GB / 1862 GB avail; 537KB/s wr, 8op/s
-pgmap v18321: 832 pgs: 832 active+clean; 61457 MB data, 119 GB used, 1742 GB / 1862 GB avail; 511KB/s wr, 7op/s
-
-James
-
+On 18/04/13 17:22, Malcolm Haak wrote:
+> Hi Mark!
+>
+> Thanks for the quick reply!
+>
+> I'll reply inline below.
+>
+> On 18/04/13 17:04, Mark Nelson wrote:
+>> On 04/17/2013 11:35 PM, Malcolm Haak wrote:
+>>> Hi all,
+>>
+>> Hi Malcolm!
+>>
+>>>
+>>> I jumped into the IRC channel yesterday and they said to email
+>>> ceph-devel. I have been having some read performance issues. With Reads
+>>> being slower than writes by a factor of ~5-8.
+>>
+>> I recently saw this kind of behaviour (writes were fine, but reads were
+>> terrible) on an IPoIB based cluster and it was caused by the same TCP
+>> auto tune issues that Jim Schutt saw last year. It's worth a try at
+>> least to see if it helps.
+>>
+>> echo "0" > /proc/sys/net/ipv4/tcp_moderate_rcvbuf
+>>
+>> on all of the clients and server nodes should be enough to test it out.
+>>   Sage added an option in more recent Ceph builds that lets you work
+>> around it too.
+>>
+> Awesome I will test this first up tomorrow.
+>>>
+>>> First info:
+>>> Server
+>>> SLES 11 SP2
+>>> Ceph 0.56.4.
+>>> 12 OSD's  that are Hardware Raid 5 each of the twelve is made from 5
+>>> NL-SAS disks for a total of 60 disks (Each lun can do around 320MB/s
+>>> stream write and the same if not better read) Connected via 2xQDR IB
+>>> OSD's/MDS and such all on same box (for testing)
+>>> Box is a Quad AMD Opteron 6234
+>>> Ram is 256Gb
+>>> 10GB Journals
+>>> osd_op_theads: 8
+>>> osd_disk_threads:2
+>>> Filestore_op_threads:4
+>>> OSD's are all XFS
+>>
+>> Interesting setup!  QUAD socket Opteron boxes have somewhat slow and
+>> slightly oversubscribed hypertransport links don't they?  I wonder if on
+>> a system with so many disks and QDR-IB if that could become a problem...
+>>
+>> We typically like smaller nodes where we can reasonably do 1 OSD per
+>> drive, but we've tested on a couple of 60 drive chassis in RAID configs
+>> too.  Should be interesting to hear what kind of aggregate performance
+>> you can eventually get.
+>
+> We are also going to try this out with 6 luns on a dual xeon box. The
+> Opteron box was the biggest scariest thing we had that was doing nothing.
+>
+>>
+>>>
+>>> All nodes are connected via QDR IB using IP_O_IB. We get 1.7GB/s on TCP
+>>> performance tests between the nodes.
+>>>
+>>> Clients: One is FC17 the other us Ubuntu 12.10 they only have around
+>>> 32GB-70GB ram.
+>>>
+>>> We ran into an odd issue were the OSD's would all start in the same NUMA
+>>> node and pretty much on the same processor core. We fixed that up with
+>>> some cpuset magic.
+>>
+>> Strange!  Was that more due to cpuset or Ceph?  I can't imagine that we
+>> are doing anything that would cause that.
+>>
+>
+> More than likely it is an odd quirk in the SLES kernel.. but when I have
+> time I'll do some more poking. We were seeing insane CPU usage on some
+> cores because all the OSD's were piled up in one place.
+>
+>>>
+>>> Performance testing we have done: (Note oflag=direct was yielding
+>>> results within 5% of cached results)
+>>>
+>>>
+>>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=3200
+>>> 3200+0 records in
+>>> 3200+0 records out
+>>> 33554432000 bytes (34 GB) copied, 47.6685 s, 704 MB/s
+>>> root@ty3:~#
+>>> root@ty3:~# rm /test-rbd-fs/DELETEME
+>>> root@ty3:~#
+>>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=4800
+>>> 4800+0 records in
+>>> 4800+0 records out
+>>> 50331648000 bytes (50 GB) copied, 69.5527 s, 724 MB/s
+>>>
+>>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>>> count=2400
+>>> 2400+0 records in
+>>> 2400+0 records out
+>>> 25165824000 bytes (25 GB) copied, 26.3593 s, 955 MB/s
+>>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
+>>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>>> count=9600
+>>> 9600+0 records in
+>>> 9600+0 records out
+>>> 100663296000 bytes (101 GB) copied, 145.212 s, 693 MB/s
+>>>
+>>> Both clients each doing a 140GB write (2x dogbreath's RAM) at the same
+>>> time to two different rbds in the same pool.
+>>>
+>>> root@ty3:~# rm /test-rbd-fs/DELETEME
+>>> root@ty3:~# dd if=/dev/zero of=/test-rbd-fs/DELETEME bs=10M count=14000
+>>> 14000+0 records in
+>>> 14000+0 records out
+>>> 146800640000 bytes (147 GB) copied, 412.404 s, 356 MB/s
+>>> root@ty3:~#
+>>>
+>>> [root@dogbreath ~]# rm -f /test-rbd-fs/DELETEME
+>>> [root@dogbreath ~]# dd of=/test-rbd-fs/DELETEME if=/dev/zero bs=10M
+>>> count=14000
+>>> 14000+0 records in
+>>> 14000+0 records out
+>>> 146800640000 bytes (147 GB) copied, 433.351 s, 339 MB/s
+>>> [root@dogbreath ~]#
+>>>
+>>> Onto reads...
+>>> Also we found that doing iflag=direct increased read performance.
+>>>
+>>> [root@dogbreath ~]# dd of=/dev/null if=/test-rbd-fs/DELETEME bs=10M
+>>> count=160
+>>> 160+0 records in
+>>> 160+0 records out
+>>> 1677721600 bytes (1.7 GB) copied, 29.4242 s, 57.0 MB/s
+>>> [root@dogbreath ~]#
+>>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
+>>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
+>>> count=10000
+>>> 10000+0 records in
+>>> 10000+0 records out
+>>> 41943040000 bytes (42 GB) copied, 382.334 s, 110 MB/s
+>>> [root@dogbreath ~]#
+>>> [root@dogbreath ~]# echo 1 > /proc/sys/vm/drop_caches
+>>> [root@dogbreath ~]# dd if=/test-rbd-fs/DELETEME of=/dev/null bs=4M
+>>> count=10000 iflag=direct
+>>> 10000+0 records in
+>>> 10000+0 records out
+>>> 41943040000 bytes (42 GB) copied, 150.774 s, 278 MB/s
+>>> [root@dogbreath ~]#
+>>>
+>>>
+>>> So what info do you want/where do I start hunting for my wumpus?
+>>
+>> might also be worth looking at the size of the reads to see if there's a
+>> lot of fragmentation.  Also, is this kernel rbd or qemu-kvm?
+>>
+>
+> Thing that got us was the back-end storage was showing very low read
+> rates. Where as when writing we could see almost a 2xWrite rate back to
+> physical disk (we assume that is Journal+data as the 2x is not from the
+> word go but ramps up around the 3-5 second mark)
+>
+> It is kernel rbd at the moment, we will be testing qemu-kvm after things
+> make sense.
+>
+>>>
+>>> Regards
+>>>
+>>> Malcolm Haak
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
