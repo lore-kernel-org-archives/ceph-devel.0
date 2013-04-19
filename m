@@ -1,48 +1,45 @@
-From: Bernard Grymonpon <bernard@openminds.be>
-Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to test ? :p
-Date: Fri, 19 Apr 2013 16:40:24 +0200
-Message-ID: <67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com> <51704AF4.7060908@42on.com> <CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.2 \(1499\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: poor write performance
+Date: Fri, 19 Apr 2013 09:50:43 -0500
+Message-ID: <517159C3.5030100@inktank.com>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from november.openminds.be ([195.47.215.47]:40043 "EHLO
-	november.openminds.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030593Ab3DSOrk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 10:47:40 -0400
-Received: from [10.1.11.79] (office.loft169.be [88.151.240.193])
-	by november.openminds.be (Postfix) with ESMTPA id D9DFC120F951
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 16:40:24 +0200 (CEST)
-In-Reply-To: <CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:65337 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030593Ab3DSOut (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 10:50:49 -0400
+Received: by mail-qc0-f173.google.com with SMTP id b12so2071163qca.32
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 07:50:48 -0700 (PDT)
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We can test this, but just a couple of lines of input might be needed to get us going with this without digging through all the code.
+On 04/19/2013 06:09 AM, James Harper wrote:
+> I just tried a 3.8 series kernel and can now get 25mbytes/second using dd with a 4mb block size, instead of the 700kbytes/second I was getting with the debian 3.2 kernel.
 
-Rgds,
-Bernard
-Openminds BVBA
+That's.... unexpected.  Was this the kernel on the client, the OSDs, or 
+both?
 
-On 19 Apr 2013, at 16:37, Sylvain Munaut <s.munaut@whatever-company.com> wrote:
+>
+> I'm still getting 120kbytes/second with a dd 4kb block size though... is that expected?
 
-> Hi,
-> 
->> My Xen is kind of rusty, last time I used it was about 3 years ago, but
->> can't you do something similar like with Qemu? Just submit all the arguments
->> semi-column separated?
-> 
-> Yes probably, I just didn't get to it. I wanted to check first if this
-> approach was solving the issues I had with RBD kernel driver.
-> 
-> I'll try to stick as closely to the qemu syntax.
-> 
-> Cheers,
-> 
->   Sylvain
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+that's still quite a bit lower than I'd expect as well.  What were your 
+fs mount options on the OSDs?  Can you try some rados bench read/write 
+tests on your pool?  Something like:
 
+rados -p <pool> -b 4096 bench 300 write --no-cleanup -t 64
+rados -p <pool> -b 4096 bench 300 seq -t 64
+
+with 2 drives and 2x replication I wouldn't expect much without RBD 
+cache, but 120kb/s is rather excessively bad. :)
+
+>
+> James
+>
+
+Mark
