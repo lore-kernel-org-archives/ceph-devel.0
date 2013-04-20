@@ -1,67 +1,73 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/7] rbd: existence check or layered writes
-Date: Fri, 19 Apr 2013 20:04:25 -0700
-Message-ID: <517205B9.4090806@inktank.com>
-References: <516CC6E4.6070307@inktank.com>
+From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
+Subject: Re: Scrub shutdown the OSD process
+Date: Sat, 20 Apr 2013 09:10:39 +0200
+Message-ID: <1366441839.13398.6.camel@localhost>
+References: <1366018923.3018.3.camel@localhost>
+	<CAPYLRziFNxnUhyxHRUCzZBF6oQwrWt8YdxBtDrKzMMNuyuW=YQ@mail.gmail.com>
+	<1366046351.26980.0.camel@localhost>
+	<CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA@mail.gmail.com>
+	<1366095376.3018.28.camel@localhost>
+	<1366192124.14655.20.camel@localhost>
+	<1366224725.14655.30.camel@localhost>
+Reply-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:40562 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965621Ab3DTDE1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Apr 2013 23:04:27 -0400
-Received: by mail-pb0-f51.google.com with SMTP id rr4so110406pbb.38
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Apr 2013 20:04:27 -0700 (PDT)
-In-Reply-To: <516CC6E4.6070307@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1366224725.14655.30.camel@localhost>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/15/2013 08:35 PM, Alex Elder wrote:
-> I've broken these patches into three groups.
->
-> The first two are sort of cleanup from prior patches.
->
-> The next one adds support for simple ops that contain
-> a single data item, which I've termed "raw data."
->
-> The next two are some more refinements but they
-> were done intentionally to prepare for the last
-> one.
->
-> The sixth puts in place flags on object requests
-> that allow the last patch to determine whether it
-> needs to issue a STAT call for a target object
-> before doing a layered write request.
->
-> The layered write request ends up being fairly
-> simple.  Existence flags are recorded for the
-> target of object requests.  If it is unknown
-> whether the object exists, a new standalone
-> object request is created to do a STAT on the
-> object.  The result (success or ENOENT) is
-> recorded in a flag in the original request,
-> at which point the original request is
-> re-submitted.
->
-> This is the first step in doing layered writes.
->
-> 					-Alex
->
-> [PATCH 1/7] libceph: kill off osd data write_request parameters
-> [PATCH 2/7] libceph: clean up osd data field access functions
->
-> [PATCH 3/7] libceph: support raw data requests
->
-> [PATCH 4/7] rbd: adjust image object request ref counting
-> [PATCH 5/7] rbd: always check IMG_DATA flag
->
-> [PATCH 6/7] rbd: add target object existence flags
-> [PATCH 7/7] rbd: issue stat request before layered write
-
-These look good. Just a couple comments on the last one.
-
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
+TGUgbWVyY3JlZGkgMTcgYXZyaWwgMjAxMyDDoCAyMDo1MiArMDIwMCwgT2xpdmllciBCb252YWxl
+dCBhIMOpY3JpdCA6Cj4gV2hhdCBJIGRpZG4ndCB1bmRlcnN0YW5kIGlzIHdoeSB0aGUgT1NEIHBy
+b2Nlc3MgY3Jhc2gsIGluc3RlYWQgb2YKPiBtYXJraW5nIHRoYXQgUEcgImNvcnJ1cHRlZCIsIGFu
+ZCBkb2VzIHRoYXQgUEcgcmVhbGx5ICJjb3JydXB0ZWQiIGFyZQo+IGlzCj4gdGhpcyBqdXN0IGFu
+IE9TRCBidWcgPwoKT25jZSBhZ2FpbiwgYSBiaXQgbW9yZSBpbmZvcm1hdGlvbnMgOiBieSBzZWFy
+Y2hpbmcgaW5mb3JtYXRpb25zIGFib3V0Cm9uZSBvZiB0aGlzIGZhdWx0eSBQRyAoMy5kKSwgSSBm
+b3VuZCB0aGF0IDoKCiAgLTU5Mj4gMjAxMy0wNC0yMCAwODozMTo1Ni44MzgyODAgN2YwZjQxZDFi
+NzAwICAwIGxvZyBbRVJSXSA6IDMuZCBvc2QuMjUgaW5jb25zaXN0ZW50IHNuYXBjb2xscyBvbiBh
+ODYyMGIwZC9yYi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwNDYwMy8xMmQ3Ly8zIGZvdW5kICBl
+eHBlY3RlZCAxMmQ3CiAgLTU5MT4gMjAxMy0wNC0yMCAwODozMTo1Ni44MzgyODQgN2YwZjQxZDFi
+NzAwICAwIGxvZyBbRVJSXSA6IDMuZCBvc2QuNCBpbmNvbnNpc3RlbnQgc25hcGNvbGxzIG9uIGE4
+NjIwYjBkL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDA0NjAzLzEyZDcvLzMgZm91bmQgIGV4
+cGVjdGVkIDEyZDcKICAtNTkwPiAyMDEzLTA0LTIwIDA4OjMxOjU2LjgzODI5MCA3ZjBmNDFkMWI3
+MDAgIDAgbG9nIFtFUlJdIDogMy5kIG9zZC40OiBzb2lkIGE4NjIwYjBkL3JiLjAuMTVjMjYuMjM4
+ZTFmMjkuMDAwMDAwMDA0NjAzLzEyZDcvLzMgc2l6ZSA0MTk0MzA0ICE9IGtub3duIHNpemUgMAog
+IC01ODk+IDIwMTMtMDQtMjAgMDg6MzE6NTYuODM4MjkyIDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VS
+Ul0gOiAzLmQgb3NkLjExIGluY29uc2lzdGVudCBzbmFwY29sbHMgb24gYTg2MjBiMGQvcmIuMC4x
+NWMyNi4yMzhlMWYyOS4wMDAwMDAwMDQ2MDMvMTJkNy8vMyBmb3VuZCAgZXhwZWN0ZWQgMTJkNwog
+IC01ODg+IDIwMTMtMDQtMjAgMDg6MzE6NTYuODM4Mjk0IDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VS
+Ul0gOiAzLmQgb3NkLjExOiBzb2lkIGE4NjIwYjBkL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAw
+MDA0NjAzLzEyZDcvLzMgc2l6ZSA0MTk0MzA0ICE9IGtub3duIHNpemUgMAogIC01ODc+IDIwMTMt
+MDQtMjAgMDg6MzE6NTYuODM4Mzk1IDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VSUl0gOiBzY3J1YiAz
+LmQgYTg2MjBiMGQvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAwMDQ2MDMvMTJkNy8vMyBvbiBk
+aXNrIHNpemUgKDApIGRvZXMgbm90IG1hdGNoIG9iamVjdCBpbmZvIHNpemUgKDQxOTQzMDQpCgoK
+SSBwcmVmZXJlZCB0byB2ZXJpZnksIHNvIEkgZm91bmQgdGhhdCA6CgojIG1kNXN1bSAvdmFyL2xp
+Yi9jZXBoL29zZC9jZXBoLSovY3VycmVudC8zLmRfaGVhZC9ESVJfRC9ESVJfMC9ESVJfQi9ESVJf
+MC9yYi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwNDYwM19fMTJkN19BODYyMEIwRF9fMwoyMTdh
+YzI1MThkZmU5ZTE1MDJlNWJmZWRiOGJlMjliOCAgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC00L2N1
+cnJlbnQvMy5kX2hlYWQvRElSX0QvRElSXzAvRElSX0IvRElSXzAvcmIuMC4xNWMyNi4yMzhlMWYy
+OS4wMDAwMDAwMDQ2MDNfXzEyZDdfQTg2MjBCMERfXzMgKDRNQikKMjE3YWMyNTE4ZGZlOWUxNTAy
+ZTViZmVkYjhiZTI5YjggIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMTEvY3VycmVudC8zLmRfaGVh
+ZC9ESVJfRC9ESVJfMC9ESVJfQi9ESVJfMC9yYi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwNDYw
+M19fMTJkN19BODYyMEIwRF9fMyAoNE1CKQpkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3
+ZSAgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yNS9jdXJyZW50LzMuZF9oZWFkL0RJUl9EL0RJUl8w
+L0RJUl9CL0RJUl8wL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDA0NjAzX18xMmQ3X0E4NjIw
+QjBEX18zICgwQikKCgpTbyB0aGlzIG9iamVjdCBpcyBpZGVudGljYWwgb24gT1NEIDQgYW5kIDEx
+LCBidXQgaXMgZW1wdHkgb24gT1NEIDI1LgpTaW5jZSA0IGlzIHRoZSBtYXN0ZXIsIHRoaXMgc2hv
+dWxkIG5vdCBiZSBhIHByb2JsZW0sIHNvIEkgdHJ5IGEgcmVwYWlyLAp3aXRob3V0IGFueSBzdWNj
+ZXNzIDoKICAgIGNlcGggcGcgcmVwYWlyIDMuZAoKCklzIHRoZXJlIGEgd2F5IHRvIGZvcmNlIHJl
+d3JpdGUgb2YgdGhpcyByZXBsaWNhID8KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
+cGguY29tCg==
