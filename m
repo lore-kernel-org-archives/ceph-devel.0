@@ -1,59 +1,28 @@
-From: =?utf-8?B?SGFyYWxkIFLDtsOfbGVy?= <Harald.Roessler@btd.de>
-Subject: Re: poor write performance
-Date: Sat, 20 Apr 2013 12:52:55 +0200
-Message-ID: <1366455175.10716.1.camel@lde-hro-01>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: poor write performance
+Date: Sat, 20 Apr 2013 11:12:35 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B4F35E2CA@BITCOM1.int.sbss.com.au>
 References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
 	 <516FE3CC.8080303@risc-software.at>
 	 <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au>
+ <1366455175.10716.1.camel@lde-hro-01>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from odm-dns-01.odmedia.net ([87.238.139.200]:55304 "EHLO
-	odm-dns-01.odmedia.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754898Ab3DTK7x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Apr 2013 06:59:53 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au>
-Content-Language: de-DE
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:34772 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754964Ab3DTLNO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Apr 2013 07:13:14 -0400
+In-Reply-To: <1366455175.10716.1.camel@lde-hro-01>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
+To: =?utf-8?B?SGFyYWxkIFLDtsOfbGVy?= <Harald.Roessler@btd.de>
 Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSmFtZXMsDQoNCmRvIHlvdSBWTEFOJ3MgaW50ZXJmYWNlcyBjb25maWd1cmVkIG9uIHlvdXIg
-Ym9uZGluZyBpbnRlcmZhY2VzPyBCZWNhdXNlDQpJIHNhdyBhIHNpbWlsYXIgc2l0dWF0aW9uIGlu
-IG15IHNldHVwLg0KDQpLaW5kIFJlZ2FyZHMNCkhhcmFsZCBSb2Vzc2xlcg0KDQoNCk9uIEZyaSwg
-MjAxMy0wNC0xOSBhdCAwMToxMSArMDIwMCwgSmFtZXMgSGFycGVyIHdyb3RlOg0KPiA+IA0KPiA+
-IEhpIEphbWVzLA0KPiA+IA0KPiA+IFRoaXMgaXMganVzdCBwdXJlIHNwZWN1bGF0aW9uLCBidXQg
-Y2FuIHlvdSBhc3N1cmUgdGhhdCB0aGUgYm9uZGluZyB3b3Jrcw0KPiA+IGNvcnJlY3RseT8gTWF5
-YmUgeW91IGhhdmUgaXNzdWVzIHRoZXJlLiBJIGhhdmUgc2VlbiBhIGxvdCBvZiBpbmNvcnJlY3Rs
-eQ0KPiA+IGNvbmZpZ3VyZWQgYm9uZGluZyB0aHJvdWdob3V0IG15IGxpZmUgYXMgdW5peCBhZG1p
-bi4NCj4gPiANCj4gDQo+IFRoZSBib25kaW5nIGdpdmVzIG1lIGlwZXJmIHBlcmZvcm1hbmNlIGNv
-bnNpc3RlbnQgd2l0aCAyIHggMUdCIGxpbmtzIHNvIEkgdGhpbmsgaXQncyBva2F5Lg0KPiANCj4g
-SmFtZXMNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
-bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQotLSANCk1pdCBmcmV1
-bmRsaWNoZW4gR3LDvMOfZW4sDQpIYXJhbGQgUsO2w59sZXINCiANCi4gLiAuIC4gLiAuIC4gLiAu
-IC4gLiAuIC4gLiAuIC4NCiANCkJURCBTeXN0ZW0gR21iSA0KVGVsLjogKzQ5ICg4OSkgLSAyMCAw
-NSAtIDQ0IDMwDQpUZWwuOiArNDkgKDg5KSAtIDY2MCAyOTEgLSAyNTENCk1vYi46ICs0OSAoMTUx
-KSAtIDExIDcwIDE3IDU5DQpGYXg6ICArNDkgKDg5KSA4OSAtIDIwIDA1IC0gNDQgMTENCmhhcmFs
-ZC5yb2Vzc2xlckBidGQuZGUNCnd3dy5idGQuZGUNClByb2pla3Riw7xybyBBbGxpYW56LUFyZW5h
-IOKAoiBFYmVuZSA0DQpXZXJuZXItSGVpc2VuYmVyZy1BbGxlZSAyNSDigKIgRC04MDkzOSBNw7xu
-Y2hlbiANCkdvZXRoZXN0cmHDn2UgMzQg4oCiIEQtODAzMzYgTcO8bmNoZW4NCiANCkhSQiBNw7xu
-Y2hlbiAxNTQzNzANCkdlc2Now6RmdHNmw7xocmVyOiBTdGVmYW4gTGVpYmhhcmQsIEtlcnN0ZW4g
-S3LDtmhsLCBIYXJhbGQgUsO2w59sZXINCiANCi4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAu
-IC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4NCiBDT05G
-SURFTlRJQUxJVFkgTk9USUNFDQogDQpUaGlzIGNvbW11bmljYXRpb24gY29udGFpbnMgaW5mb3Jt
-YXRpb24gd2hpY2ggaXMgY29uZmlkZW50aWFsIGFuZCBtYXkNCmFsc28gYmUgcHJpdmlsZWdlZC4g
-SXQgaXMgZm9yIHRoZSBleGNsdXNpdmUgdXNlIG9mIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMp
-LiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50KHMpLCBwbGVhc2Ugbm90ZSB0
-aGF0DQphbnkgZGlzdHJpYnV0aW9uLCBjb3B5aW5nIG9yIHVzZSBvZiB0aGlzIGNvbW11bmljYXRp
-b24gb3IgdGhlDQppbmZvcm1hdGlvbiBpbiBpdCBpcyBzdHJpY3RseSAgcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcw0KY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5v
-dGlmeSB1cyAgaW1tZWRpYXRlbHkgYnkgdGVsZXBob25lIG9uDQorNDkgKDApIDg5IC0gMjAgMDUg
-LSA0NCAwMCBhbmQgdGhlbiBkZXN0cm95IHRoZSAgZW1haWwgYW5kIGFueSBjb3BpZXMgb2YNCml0
-LiBUaGlzIGNvbW11bmljYXRpb24gaXMgZnJvbSBCVEQgU3lzdGVtIEdtYkggd2hvc2UgIG9mZmlj
-ZSBpcyBhdA0KV2VybmVyLUhlaXNlbmJlcmctQWxsZWUgMjUsIEQtODA5MzkgTcO8bmNoZW4uDQou
-IC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4g
-LiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4NCg0K
+PiANCj4gSGkgSmFtZXMsDQo+IA0KPiBkbyB5b3UgVkxBTidzIGludGVyZmFjZXMgY29uZmlndXJl
+ZCBvbiB5b3VyIGJvbmRpbmcgaW50ZXJmYWNlcz8gQmVjYXVzZQ0KPiBJIHNhdyBhIHNpbWlsYXIg
+c2l0dWF0aW9uIGluIG15IHNldHVwLg0KPiANCg0KTm8gVkxBTidzIG9uIG15IGJvbmRpbmcgaW50
+ZXJmYWNlLCBhbHRob3VnaCBleHRlbnNpdmVseSB1c2VkIGVsc2V3aGVyZS4NCg0KVGhhbmtzDQoN
+CkphbWVzDQo=
