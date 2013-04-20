@@ -1,32 +1,59 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Release / development key on a keyserver?
-Date: Sat, 20 Apr 2013 09:48:24 +0200
-Message-ID: <51724848.80808@42on.com>
+From: =?utf-8?B?SGFyYWxkIFLDtsOfbGVy?= <Harald.Roessler@btd.de>
+Subject: Re: poor write performance
+Date: Sat, 20 Apr 2013 12:52:55 +0200
+Message-ID: <1366455175.10716.1.camel@lde-hro-01>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+	 <516FE3CC.8080303@risc-software.at>
+	 <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:55061 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753852Ab3DTHs1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 20 Apr 2013 03:48:27 -0400
-Received: from [IPv6:2a00:f10:11c:ab:3190:d322:64a7:e013] (unknown [IPv6:2a00:f10:11c:ab:3190:d322:64a7:e013])
-	by websrv.42on.com (Postfix) with ESMTPSA id 7E16FBF415
-	for <ceph-devel@vger.kernel.org>; Sat, 20 Apr 2013 09:48:24 +0200 (CEST)
+Received: from odm-dns-01.odmedia.net ([87.238.139.200]:55304 "EHLO
+	odm-dns-01.odmedia.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754898Ab3DTK7x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Apr 2013 06:59:53 -0400
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-Is it possible that the keys are pushed to for example keyserver.ubuntu.com?
-
-This makes integration with for example Puppetlabs Apt a bit easier when 
-adding a entry to /etc/apt/sources.list.d
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+SGkgSmFtZXMsDQoNCmRvIHlvdSBWTEFOJ3MgaW50ZXJmYWNlcyBjb25maWd1cmVkIG9uIHlvdXIg
+Ym9uZGluZyBpbnRlcmZhY2VzPyBCZWNhdXNlDQpJIHNhdyBhIHNpbWlsYXIgc2l0dWF0aW9uIGlu
+IG15IHNldHVwLg0KDQpLaW5kIFJlZ2FyZHMNCkhhcmFsZCBSb2Vzc2xlcg0KDQoNCk9uIEZyaSwg
+MjAxMy0wNC0xOSBhdCAwMToxMSArMDIwMCwgSmFtZXMgSGFycGVyIHdyb3RlOg0KPiA+IA0KPiA+
+IEhpIEphbWVzLA0KPiA+IA0KPiA+IFRoaXMgaXMganVzdCBwdXJlIHNwZWN1bGF0aW9uLCBidXQg
+Y2FuIHlvdSBhc3N1cmUgdGhhdCB0aGUgYm9uZGluZyB3b3Jrcw0KPiA+IGNvcnJlY3RseT8gTWF5
+YmUgeW91IGhhdmUgaXNzdWVzIHRoZXJlLiBJIGhhdmUgc2VlbiBhIGxvdCBvZiBpbmNvcnJlY3Rs
+eQ0KPiA+IGNvbmZpZ3VyZWQgYm9uZGluZyB0aHJvdWdob3V0IG15IGxpZmUgYXMgdW5peCBhZG1p
+bi4NCj4gPiANCj4gDQo+IFRoZSBib25kaW5nIGdpdmVzIG1lIGlwZXJmIHBlcmZvcm1hbmNlIGNv
+bnNpc3RlbnQgd2l0aCAyIHggMUdCIGxpbmtzIHNvIEkgdGhpbmsgaXQncyBva2F5Lg0KPiANCj4g
+SmFtZXMNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQotLSANCk1pdCBmcmV1
+bmRsaWNoZW4gR3LDvMOfZW4sDQpIYXJhbGQgUsO2w59sZXINCiANCi4gLiAuIC4gLiAuIC4gLiAu
+IC4gLiAuIC4gLiAuIC4NCiANCkJURCBTeXN0ZW0gR21iSA0KVGVsLjogKzQ5ICg4OSkgLSAyMCAw
+NSAtIDQ0IDMwDQpUZWwuOiArNDkgKDg5KSAtIDY2MCAyOTEgLSAyNTENCk1vYi46ICs0OSAoMTUx
+KSAtIDExIDcwIDE3IDU5DQpGYXg6ICArNDkgKDg5KSA4OSAtIDIwIDA1IC0gNDQgMTENCmhhcmFs
+ZC5yb2Vzc2xlckBidGQuZGUNCnd3dy5idGQuZGUNClByb2pla3Riw7xybyBBbGxpYW56LUFyZW5h
+IOKAoiBFYmVuZSA0DQpXZXJuZXItSGVpc2VuYmVyZy1BbGxlZSAyNSDigKIgRC04MDkzOSBNw7xu
+Y2hlbiANCkdvZXRoZXN0cmHDn2UgMzQg4oCiIEQtODAzMzYgTcO8bmNoZW4NCiANCkhSQiBNw7xu
+Y2hlbiAxNTQzNzANCkdlc2Now6RmdHNmw7xocmVyOiBTdGVmYW4gTGVpYmhhcmQsIEtlcnN0ZW4g
+S3LDtmhsLCBIYXJhbGQgUsO2w59sZXINCiANCi4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAu
+IC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4NCiBDT05G
+SURFTlRJQUxJVFkgTk9USUNFDQogDQpUaGlzIGNvbW11bmljYXRpb24gY29udGFpbnMgaW5mb3Jt
+YXRpb24gd2hpY2ggaXMgY29uZmlkZW50aWFsIGFuZCBtYXkNCmFsc28gYmUgcHJpdmlsZWdlZC4g
+SXQgaXMgZm9yIHRoZSBleGNsdXNpdmUgdXNlIG9mIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMp
+LiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50KHMpLCBwbGVhc2Ugbm90ZSB0
+aGF0DQphbnkgZGlzdHJpYnV0aW9uLCBjb3B5aW5nIG9yIHVzZSBvZiB0aGlzIGNvbW11bmljYXRp
+b24gb3IgdGhlDQppbmZvcm1hdGlvbiBpbiBpdCBpcyBzdHJpY3RseSAgcHJvaGliaXRlZC4gSWYg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcw0KY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5v
+dGlmeSB1cyAgaW1tZWRpYXRlbHkgYnkgdGVsZXBob25lIG9uDQorNDkgKDApIDg5IC0gMjAgMDUg
+LSA0NCAwMCBhbmQgdGhlbiBkZXN0cm95IHRoZSAgZW1haWwgYW5kIGFueSBjb3BpZXMgb2YNCml0
+LiBUaGlzIGNvbW11bmljYXRpb24gaXMgZnJvbSBCVEQgU3lzdGVtIEdtYkggd2hvc2UgIG9mZmlj
+ZSBpcyBhdA0KV2VybmVyLUhlaXNlbmJlcmctQWxsZWUgMjUsIEQtODA5MzkgTcO8bmNoZW4uDQou
+IC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4g
+LiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4NCg0K
