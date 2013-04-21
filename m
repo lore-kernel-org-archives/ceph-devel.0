@@ -1,132 +1,180 @@
-From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Subject: Re: Ceph Developer Summit
-Date: Sun, 21 Apr 2013 07:22:32 +0200
-Message-ID: <51737798.8030009@dachary.org>
-References: <F54938FA-1070-4BF6-9E7D-0C0036F92384@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: enforce parent overlap
+Date: Sun, 21 Apr 2013 00:34:13 -0500
+Message-ID: <51737A55.7040602@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1266321056=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <F54938FA-1070-4BF6-9E7D-0C0036F92384-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ross David Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---===============1266321056==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig608734FFB27125756A13EFD6"
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig608734FFB27125756A13EFD6
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi Ross,
-
-It would be convenient to discuss the implementation of blueprints using =
-and etherpad during the summit. I'm thinking
-
-http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encoding_as=
-_a_storage_backend#Coding_tasks
-
-for instance. Although a wiki is convenient for discussing before the sum=
-mit, an etherpad is better during the summit, IMHO.=20
-
-What do you think ?
-
-On 04/12/2013 03:27 AM, Ross David Turk wrote:
->=20
-> Hi, everyone!
->=20
-> I'm pleased to announce that we have begun preparations for the first=20
-> Ceph Developer Summit. This summit is where planning for the upcoming=20
-> Dumpling release will happen, and attendance is open to all. It will be=
-=20
-> virtual (IRC, etherpad, video conference), so you won't even have to=20
-> get on an airplane! We're targeting May 6.
->=20
-> Between now and then, we're gathering blueprints for new Ceph features!=
-=20
-> A blueprint is a document that describes work someone intends to do,=20
-> usually reserved for larger features that require discussion. If=20
-> there's a feature you think Ceph should have, we encourage you to write=
-=20
-> your thoughts and plans in a blueprint. Then make sure to attend the=20
-> summit to discuss its implementation with others in the Ceph community.=
-
->=20
-> For more details, take a look at Patrick's blog post on ceph.com:
->=20
-> http://ceph.com/events/ceph-developer-summit/
->=20
-> Blueprints are currently being accepted at the Ceph wiki. On the front =
-
-> page, at the bottom, there's a button to create a new one.
->=20
-> Oh! Yeah! There's a wiki now. It's kind of bare-bones at the moment, as=
-=20
-> most wikis are when they first enter the world, but it anxiously awaits=
-=20
-> your content. Log in with your OpenID credentials and pick a username=20
-> to get started. If you're having trouble, or have feedback, your words =
-
-> are always welcome at community-Qp0mS5GaXlThvxM+mQhndA@public.gmane.org
->=20
-> http://wiki.ceph.com
->=20
-> Best,
-> Ross
->=20
-> --
-> Ross Turk
-> Community, Inktank
->=20
-> @rossturk @inktank @ceph
->=20
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enig608734FFB27125756A13EFD6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlFzd5gACgkQ8dLMyEl6F20dNgCgi1/IOGZmcKrAA60mLiFjMupE
-S1UAnAlZ7HCPYQdhT43ifl63P99nxnJX
-=/JD5
------END PGP SIGNATURE-----
-
---------------enig608734FFB27125756A13EFD6--
-
---===============1266321056==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f170.google.com ([209.85.223.170]:58767 "EHLO
+	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751173Ab3DUFeQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Apr 2013 01:34:16 -0400
+Received: by mail-ie0-f170.google.com with SMTP id at1so2429037iec.15
+        for <ceph-devel@vger.kernel.org>; Sat, 20 Apr 2013 22:34:16 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
+        by mx.google.com with ESMTPSA id xf4sm10365691igb.8.2013.04.20.22.34.14
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sat, 20 Apr 2013 22:34:14 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+(This patch is available in branch "review/wip-overlap" of
+the ceph-client git repository.)
 
---===============1266321056==--
+
+
+A clone image has a defined overlap point with its parent image.
+That is the byte offset beyond which the parent image has no
+defined data to back the clone, and anything thereafter can be
+viewed as being zero-filled by the clone image.
+
+This is needed because a clone image can be resized.  If it gets
+resized larger than the snapshot it is based on, the overlap defines
+the original size.  If the clone gets resized downward below the
+original size the new clone size defines the overlap.  If the clone
+is subsequently resized to be larger, the overlap won't be increased
+because the previous resize invalidated any parent data beyond that
+point.
+
+This resolves:
+    http://tracker.ceph.com/issues/4724
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   64
++++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 54 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 5bf125c..5724d41 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1437,20 +1437,20 @@ static void rbd_osd_trivial_callback(struct
+rbd_obj_request *obj_request)
+ static void rbd_osd_read_callback(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request = NULL;
++	struct rbd_device *rbd_dev = NULL;
+ 	bool layered = false;
+
+ 	if (obj_request_img_data_test(obj_request)) {
+ 		img_request = obj_request->img_request;
+ 		layered = img_request && img_request_layered_test(img_request);
+-	} else {
+-		img_request = NULL;
+-		layered = false;
++		rbd_dev = img_request->rbd_dev;
+ 	}
+
+ 	dout("%s: obj %p img %p result %d %llu/%llu\n", __func__,
+ 		obj_request, img_request, obj_request->result,
+ 		obj_request->xferred, obj_request->length);
+-	if (layered && obj_request->result == -ENOENT)
++	if (layered && obj_request->result == -ENOENT &&
++			obj_request->img_offset < rbd_dev->parent_overlap)
+ 		rbd_img_parent_read(obj_request);
+ 	else if (img_request)
+ 		rbd_img_obj_request_read_callback(obj_request);
+@@ -2166,6 +2166,16 @@ static int rbd_img_obj_parent_read_full(struct
+rbd_obj_request *obj_request)
+ 	length = (u64)1 << rbd_dev->header.obj_order;
+
+ 	/*
++	 * There is no defined parent data beyond the parent
++	 * overlap, so limit what we read at that boundary if
++	 * necessary.
++	 */
++	if (img_offset + length > rbd_dev->parent_overlap) {
++		rbd_assert(img_offset < rbd_dev->parent_overlap);
++		length = obj_request->offset - obj_request->img_offset;
++	}
++
++	/*
+ 	 * Allocate a page array big enough to receive the data read
+ 	 * from the parent.
+ 	 */
+@@ -2325,21 +2335,28 @@ out:
+ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request;
++	struct rbd_device *rbd_dev;
+ 	bool known;
+
+ 	rbd_assert(obj_request_img_data_test(obj_request));
+
+ 	img_request = obj_request->img_request;
+ 	rbd_assert(img_request);
++	rbd_dev = img_request->rbd_dev;
+
+ 	/*
+-	 * Only layered writes need special handling.  If it's not a
+-	 * layered write, or it is a layered write but we know the
+-	 * target object exists, it's no different from any other
+-	 * object request.
++	 * Only writes to layered images need special handling.
++	 * Reads and non-layered writes are simple object requests.
++	 * Layered writes that start beyond the end of the overlap
++	 * with the parent have no parent data, so they too are
++	 * simple object requests.  Finally, if the target object is
++	 * known to already exist, its parent data has already been
++	 * copied, so a write to the object can also be handled as a
++	 * simple object request.
+ 	 */
+ 	if (!img_request_write_test(img_request) ||
+ 		!img_request_layered_test(img_request) ||
++		rbd_dev->parent_overlap <= obj_request->img_offset ||
+ 		((known = obj_request_known_test(obj_request)) &&
+ 			obj_request_exists_test(obj_request))) {
+
+@@ -2386,14 +2403,41 @@ static int rbd_img_request_submit(struct
+rbd_img_request *img_request)
+ static void rbd_img_parent_read_callback(struct rbd_img_request
+*img_request)
+ {
+ 	struct rbd_obj_request *obj_request;
++	struct rbd_device *rbd_dev;
++	u64 obj_end;
+
+ 	rbd_assert(img_request_child_test(img_request));
+
+ 	obj_request = img_request->obj_request;
+-	rbd_assert(obj_request != NULL);
++	rbd_assert(obj_request);
++	rbd_assert(obj_request->img_request);
++
+ 	obj_request->result = img_request->result;
+-	obj_request->xferred = img_request->xferred;
++	if (obj_request->result)
++		goto out;
+
++	/*
++	 * We need to zero anything beyond the parent overlap
++	 * boundary.  Since rbd_img_obj_request_read_callback()
++	 * will zero anything beyond the end of a short read, an
++	 * easy way to do this is to pretend the data from the
++	 * parent came up short--ending at the overlap boundary.
++	 */
++	rbd_assert(obj_request->img_offset < U64_MAX - obj_request->length);
++	obj_end = obj_request->img_offset + obj_request->length;
++	rbd_dev = obj_request->img_request->rbd_dev;
++	if (obj_end > rbd_dev->parent_overlap) {
++		u64 xferred = 0;
++
++		if (obj_request->img_offset < rbd_dev->parent_overlap)
++			xferred = rbd_dev->parent_overlap -
++					obj_request->img_offset;
++
++		obj_request->xferred = min(img_request->xferred, xferred);
++	} else {
++		obj_request->xferred = img_request->xferred;
++	}
++out:
+ 	rbd_img_obj_request_read_callback(obj_request);
+ 	rbd_obj_request_complete(obj_request);
+ }
+-- 
+1.7.9.5
+
