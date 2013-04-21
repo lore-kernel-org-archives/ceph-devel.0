@@ -1,44 +1,80 @@
-From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: clean shutdown and failover of osd
-Date: Sat, 20 Apr 2013 22:53:40 -0700
-Message-ID: <CAPYLRzhCrG3_iwC1TeFm=K3yowx38SbVfk8jTzGn+qq_zbYcGw@mail.gmail.com>
-References: <6035A0D088A63A46850C3988ED045A4B4F360D32@BITCOM1.int.sbss.com.au>
-	<CAPYLRzjU-BsA16rv+zSgR8ngcOm5L-tZ54kMNq=DrZWZr+VPFQ@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B4F360DEF@BITCOM1.int.sbss.com.au>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: poor write performance
+Date: Sun, 21 Apr 2013 08:52:05 -0500
+Message-ID: <5173EF05.9000404@inktank.com>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au> <517159C3.5030100@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D73B75D@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4F360DEF-mzsoxcrO4/2UD0RQwgcqbDSf8X3wrgjD@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: James Harper <james.harper-NMzNsA1hOHcW+bLBXbPJGg@public.gmane.org>, John Wilkins <john.wilkins-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:48071 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753430Ab3DUNwK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Apr 2013 09:52:10 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so6165525iea.18
+        for <ceph-devel@vger.kernel.org>; Sun, 21 Apr 2013 06:52:09 -0700 (PDT)
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4D73B75D@BITCOM1.int.sbss.com.au>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Apr 20, 2013 at 10:51 PM, James Harper
-<james.harper-NMzNsA1hOHcW+bLBXbPJGg@public.gmane.org> wrote:
+On 04/19/2013 08:30 PM, James Harper wrote:
+>>> rados -p <pool> -b 4096 bench 300 seq -t 64
 >>
->> [ This is a good query for ceph-users. ]
+>> sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
+>>       0       0         0         0         0         0         -         0
+>> read got -2
+>> error during benchmark: -5
+>> error 5: (5) Input/output error
+>>
+>> not sure what that's about...
 >>
 >
-> Well... this is embarrassing. In reading the docs at http://ceph.com/docs=
-/master/start/get-involved/ there was no mention of a users list so I just =
-assumed there wasn't one. Looking again I see that if I go to the link from=
- the main page http://ceph.com/resources/mailing-list-irc/ it's obviously t=
-here and I just never looked there.
+> Oops... I typo'd --no-cleanup. Now I get:
 >
-> Sorry for the noise. Maybe the web/docs admin could add a link to the get=
--involved docs page?
+>     sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
+>       0       0         0         0         0         0         -         0
+>   Total time run:        0.243709
+> Total reads made:     1292
+> Read size:            4096
+> Bandwidth (MB/sec):    20.709
+>
+> Average Latency:       0.0118838
+> Max latency:           0.031942
+> Min latency:           0.001445
+>
+> So it finishes instantly without seeming to do much actual testing...
 
-Haha, yep. Thanks for pointing that out =97 John? :)
--Greg
+My bad.  I forgot to tell you to do a sync/flush on the OSDs after the 
+write test.  All of those reads are probably coming from pagecache.  The 
+good news is that this is demonstrating that reading 4k objects from 
+pagecache isn't insanely bad on your setup (for larger sustained loads I 
+see 4k object reads from pagecache hit up to around 100MB/s with 
+multiple clients on my test nodes).
 
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+On your OSD nodes try:
+
+sync
+echo 3 > /proc/sys/vm/drop_caches
+
+right before you run the read test.
+
+Whatever issue you are facing is probably down at the filestore level or 
+possible lower down yet.
+
+How do your drives benchmark with something like fio doing random 4k 
+writes?  Are your drives dedicated for ceph?  What filesystem?  Also 
+what is the journal device you are using?
+
+Mark
+
+>
+> James
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
