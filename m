@@ -1,206 +1,274 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/2] rbd: void data pointers for rbd_obj_method_sync()
-Date: Sun, 21 Apr 2013 16:17:11 -0500
-Message-ID: <51745757.4070307@inktank.com>
-References: <5174571C.4010203@inktank.com>
+Subject: [PATCH] rbd: have rbd_obj_method_sync() return transfer count
+Date: Sun, 21 Apr 2013 16:17:37 -0500
+Message-ID: <51745771.5020009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:58906 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751720Ab3DUVRO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Apr 2013 17:17:14 -0400
-Received: by mail-ia0-f174.google.com with SMTP id h23so219053iae.33
-        for <ceph-devel@vger.kernel.org>; Sun, 21 Apr 2013 14:17:13 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id ua6sm12933298igb.0.2013.04.21.14.17.12
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Sun, 21 Apr 2013 14:17:12 -0700 (PDT)
-In-Reply-To: <5174571C.4010203@inktank.com>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:63270 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751720Ab3DUVRj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Apr 2013 17:17:39 -0400
+Received: by mail-ie0-f169.google.com with SMTP id ar20so6518382iec.28
+        for <ceph-devel@vger.kernel.org>; Sun, 21 Apr 2013 14:17:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Make the inbound and outbound data parameters have void rather than
-character type for rbd_obj_method_sync().  This makes it more clear
-they don't expect typed data, and eliminates the need for some silly
-type casts.
+Callers of rbd_obj_method_sync() don't know how many bytes of data
+got returned by the class method call.  As a result, they have been
+assuming enough got returned to decode whatever was expected.
 
-One more unrelated change: define the features buffer used in
-_rbd_dev_v2_snap_features() to be a packed data structure.
+This isn't safe.  We know how many bytes got transferred, so have
+rbd_obj_method_sync() return that amount (rather than just 0) if
+the call is successful.
+
+Change all callers to use this return value to ensure decoding of
+the results is done safely.
+
+On the other hand, most callers of rbd_obj_method_sync() only
+indicate success or failure, so all of *their* callers can simply
+test for non-zero result.
+
+This resolves:
+    http://tracker.ceph.com/issues/4773
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   44 ++++++++++++++++++++------------------------
- 1 file changed, 20 insertions(+), 24 deletions(-)
+ drivers/block/rbd.c |   60
+++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 33 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e6da301..46d9bf7 100644
+index 46d9bf7..3013cdb0 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2623,9 +2623,9 @@ static int rbd_obj_method_sync(struct rbd_device
+@@ -2642,7 +2642,7 @@ static int rbd_obj_method_sync(struct rbd_device
 *rbd_dev,
- 			     const char *object_name,
- 			     const char *class_name,
- 			     const char *method_name,
--			     const char *outbound,
-+			     const void *outbound,
- 			     size_t outbound_size,
--			     char *inbound,
-+			     void *inbound,
- 			     size_t inbound_size,
- 			     u64 *version)
- {
-@@ -3577,8 +3577,8 @@ static int _rbd_dev_v2_snap_size(struct rbd_device
-*rbd_dev, u64 snap_id,
-
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_size",
--				(char *) &snapid, sizeof (snapid),
--				(char *) &size_buf, sizeof (size_buf), NULL);
-+				&snapid, sizeof (snapid),
-+				&size_buf, sizeof (size_buf), NULL);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	 * method.  Currently if this is present it will be a
+ 	 * snapshot id.
+ 	 */
+-	page_count = (u32) calc_pages_for(0, inbound_size);
++	page_count = (u32)calc_pages_for(0, inbound_size);
+ 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+ 	if (IS_ERR(pages))
+ 		return PTR_ERR(pages);
+@@ -2689,7 +2689,9 @@ static int rbd_obj_method_sync(struct rbd_device
+*rbd_dev,
+ 	ret = obj_request->result;
  	if (ret < 0)
- 		return ret;
-@@ -3611,8 +3611,7 @@ static int rbd_dev_v2_object_prefix(struct
-rbd_device *rbd_dev)
- 		return -ENOMEM;
-
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
--				"rbd", "get_object_prefix",
--				NULL, 0,
-+				"rbd", "get_object_prefix", NULL, 0,
- 				reply_buf, RBD_OBJ_PREFIX_LEN_MAX, NULL);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
-@@ -3643,15 +3642,14 @@ static int _rbd_dev_v2_snap_features(struct
+ 		goto out;
+-	ret = 0;
++
++	rbd_assert(obj_request->xferred < (u64)INT_MAX);
++	ret = (int)obj_request->xferred;
+ 	ceph_copy_from_page_vector(pages, inbound, 0, obj_request->xferred);
+ 	if (version)
+ 		*version = obj_request->version;
+@@ -3582,13 +3584,15 @@ static int _rbd_dev_v2_snap_size(struct
 rbd_device *rbd_dev, u64 snap_id,
- 	struct {
- 		__le64 features;
- 		__le64 incompat;
--	} features_buf = { 0 };
-+	} __attribute__ ((packed)) features_buf = { 0 };
- 	u64 incompat;
- 	int ret;
-
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_features",
--				(char *) &snapid, sizeof (snapid),
--				(char *) &features_buf, sizeof (features_buf),
--				NULL);
-+				&snapid, sizeof (snapid),
-+				&features_buf, sizeof (features_buf), NULL);
  	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
  	if (ret < 0)
  		return ret;
-@@ -3705,15 +3703,15 @@ static int rbd_dev_v2_parent_info(struct
++	if (ret < sizeof (size_buf))
++		return -ERANGE;
+
+ 	*order = size_buf.order;
+ 	*snap_size = le64_to_cpu(size_buf.size);
+
+ 	dout("  snap_id 0x%016llx order = %u, snap_size = %llu\n",
+-		(unsigned long long) snap_id, (unsigned int) *order,
+-		(unsigned long long) *snap_size);
++		(unsigned long long)snap_id, (unsigned int)*order,
++		(unsigned long long)*snap_size);
+
+ 	return 0;
+ }
+@@ -3619,8 +3623,8 @@ static int rbd_dev_v2_object_prefix(struct
 rbd_device *rbd_dev)
- 	snapid = cpu_to_le64(CEPH_NOSNAP);
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_parent",
--				(char *) &snapid, sizeof (snapid),
--				(char *) reply_buf, size, NULL);
-+				&snapid, sizeof (snapid),
-+				reply_buf, size, NULL);
+
+ 	p = reply_buf;
+ 	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
+-						p + RBD_OBJ_PREFIX_LEN_MAX,
+-						NULL, GFP_NOIO);
++						p + ret, NULL, GFP_NOIO);
++	ret = 0;
+
+ 	if (IS_ERR(rbd_dev->header.object_prefix)) {
+ 		ret = PTR_ERR(rbd_dev->header.object_prefix);
+@@ -3628,7 +3632,6 @@ static int rbd_dev_v2_object_prefix(struct
+rbd_device *rbd_dev)
+ 	} else {
+ 		dout("  object_prefix = %s\n", rbd_dev->header.object_prefix);
+ 	}
+-
+ out:
+ 	kfree(reply_buf);
+
+@@ -3653,6 +3656,8 @@ static int _rbd_dev_v2_snap_features(struct
+rbd_device *rbd_dev, u64 snap_id,
  	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		return ret;
++	if (ret < sizeof (features_buf))
++		return -ERANGE;
+
+ 	incompat = le64_to_cpu(features_buf.incompat);
+ 	if (incompat & ~RBD_FEATURES_SUPPORTED)
+@@ -3661,9 +3666,9 @@ static int _rbd_dev_v2_snap_features(struct
+rbd_device *rbd_dev, u64 snap_id,
+ 	*snap_features = le64_to_cpu(features_buf.features);
+
+ 	dout("  snap_id 0x%016llx features = 0x%016llx incompat = 0x%016llx\n",
+-		(unsigned long long) snap_id,
+-		(unsigned long long) *snap_features,
+-		(unsigned long long) le64_to_cpu(features_buf.incompat));
++		(unsigned long long)snap_id,
++		(unsigned long long)*snap_features,
++		(unsigned long long)le64_to_cpu(features_buf.incompat));
+
+ 	return 0;
+ }
+@@ -3709,9 +3714,9 @@ static int rbd_dev_v2_parent_info(struct
+rbd_device *rbd_dev)
  	if (ret < 0)
  		goto out_err;
 
- 	ret = -ERANGE;
+-	ret = -ERANGE;
  	p = reply_buf;
--	end = (char *) reply_buf + size;
-+	end = reply_buf + size;
+ 	end = reply_buf + size;
++	ret = -ERANGE;
  	ceph_decode_64_safe(&p, end, parent_spec->pool_id, out_err);
  	if (parent_spec->pool_id == CEPH_NOPOOL)
  		goto out;	/* No parent?  No problem. */
-@@ -3766,7 +3764,7 @@ static char *rbd_dev_image_name(struct rbd_device
+@@ -3719,8 +3724,8 @@ static int rbd_dev_v2_parent_info(struct
+rbd_device *rbd_dev)
+ 	/* The ceph file layout needs to fit pool id in 32 bits */
+
+ 	ret = -EIO;
+-	if (WARN_ON(parent_spec->pool_id > (u64) U32_MAX))
+-		goto out;
++	if (WARN_ON(parent_spec->pool_id > (u64)U32_MAX))
++		goto out_err;
+
+ 	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+ 	if (IS_ERR(image_id)) {
+@@ -3765,7 +3770,7 @@ static char *rbd_dev_image_name(struct rbd_device
 *rbd_dev)
- 		return NULL;
 
  	p = image_id;
--	end = (char *) image_id + image_id_size;
-+	end = image_id + image_id_size;
- 	ceph_encode_string(&p, end, rbd_dev->spec->image_id, (u32) len);
+ 	end = image_id + image_id_size;
+-	ceph_encode_string(&p, end, rbd_dev->spec->image_id, (u32) len);
++	ceph_encode_string(&p, end, rbd_dev->spec->image_id, (u32)len);
 
  	size = sizeof (__le32) + RBD_IMAGE_NAME_LEN_MAX;
-@@ -3777,11 +3775,11 @@ static char *rbd_dev_image_name(struct
-rbd_device *rbd_dev)
- 	ret = rbd_obj_method_sync(rbd_dev, RBD_DIRECTORY,
- 				"rbd", "dir_get_name",
- 				image_id, image_id_size,
--				(char *) reply_buf, size, NULL);
-+				reply_buf, size, NULL);
+ 	reply_buf = kmalloc(size, GFP_KERNEL);
+@@ -3885,9 +3890,9 @@ static int rbd_dev_v2_snap_context(struct
+rbd_device *rbd_dev, u64 *ver)
  	if (ret < 0)
  		goto out;
+
+-	ret = -ERANGE;
  	p = reply_buf;
--	end = (char *) reply_buf + size;
-+	end = reply_buf + size;
- 	image_name = ceph_extract_encoded_string(&p, end, &len, GFP_KERNEL);
- 	if (IS_ERR(image_name))
- 		image_name = NULL;
-@@ -3830,7 +3828,7 @@ static int rbd_dev_probe_update_spec(struct
-rbd_device *rbd_dev)
-
- 	name = rbd_dev_image_name(rbd_dev);
- 	if (name)
--		rbd_dev->spec->image_name = (char *) name;
-+		rbd_dev->spec->image_name = (char *)name;
- 	else
- 		rbd_warn(rbd_dev, "unable to get image name");
-
-@@ -3881,8 +3879,7 @@ static int rbd_dev_v2_snap_context(struct
-rbd_device *rbd_dev, u64 *ver)
- 		return -ENOMEM;
-
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
--				"rbd", "get_snapcontext",
--				NULL, 0,
-+				"rbd", "get_snapcontext", NULL, 0,
- 				reply_buf, size, ver);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
-@@ -3890,7 +3887,7 @@ static int rbd_dev_v2_snap_context(struct
-rbd_device *rbd_dev, u64 *ver)
-
- 	ret = -ERANGE;
- 	p = reply_buf;
--	end = (char *) reply_buf + size;
-+	end = reply_buf + size;
+-	end = reply_buf + size;
++	end = reply_buf + ret;
++	ret = -ERANGE;
  	ceph_decode_64_safe(&p, end, seq, out);
  	ceph_decode_32_safe(&p, end, snap_count, out);
 
-@@ -3951,14 +3948,14 @@ static char *rbd_dev_v2_snap_name(struct
-rbd_device *rbd_dev, u32 which)
- 	snap_id = cpu_to_le64(rbd_dev->header.snapc->snaps[which]);
- 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_snapshot_name",
--				(char *) &snap_id, sizeof (snap_id),
-+				&snap_id, sizeof (snap_id),
- 				reply_buf, size, NULL);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
+@@ -3912,6 +3917,7 @@ static int rbd_dev_v2_snap_context(struct
+rbd_device *rbd_dev, u64 *ver)
+ 		ret = -ENOMEM;
  		goto out;
+ 	}
++	ret = 0;
 
- 	p = reply_buf;
--	end = (char *) reply_buf + size;
-+	end = reply_buf + size;
- 	snap_name = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
- 	if (IS_ERR(snap_name)) {
- 		ret = PTR_ERR(snap_name);
-@@ -4554,8 +4551,7 @@ static int rbd_dev_image_id(struct rbd_device
+ 	atomic_set(&snapc->nref, 1);
+ 	snapc->seq = seq;
+@@ -3922,12 +3928,11 @@ static int rbd_dev_v2_snap_context(struct
+rbd_device *rbd_dev, u64 *ver)
+ 	rbd_dev->header.snapc = snapc;
+
+ 	dout("  snap context seq = %llu, snap_count = %u\n",
+-		(unsigned long long) seq, (unsigned int) snap_count);
+-
++		(unsigned long long)seq, (unsigned int)snap_count);
+ out:
+ 	kfree(reply_buf);
+
+-	return 0;
++	return ret;
+ }
+
+ static char *rbd_dev_v2_snap_name(struct rbd_device *rbd_dev, u32 which)
+@@ -3962,7 +3967,7 @@ static char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+ 		goto out;
+ 	} else {
+ 		dout("  snap_id 0x%016llx snap_name = %s\n",
+-			(unsigned long long) le64_to_cpu(snap_id), snap_name);
++			(unsigned long long)le64_to_cpu(snap_id), snap_name);
+ 	}
+ 	kfree(reply_buf);
+
+@@ -4559,8 +4564,10 @@ static int rbd_dev_image_id(struct rbd_device
 *rbd_dev)
+
+ 	p = response;
+ 	rbd_dev->spec->image_id = ceph_extract_encoded_string(&p,
+-						p + RBD_IMAGE_ID_LEN_MAX,
++						p + ret,
+ 						NULL, GFP_NOIO);
++	ret = 0;
++
+ 	if (IS_ERR(rbd_dev->spec->image_id)) {
+ 		ret = PTR_ERR(rbd_dev->spec->image_id);
+ 		rbd_dev->spec->image_id = NULL;
+@@ -4605,7 +4612,7 @@ static int rbd_dev_v1_probe(struct rbd_device
+*rbd_dev)
+ 	/* Version 1 images have no parent (no layering) */
+
+ 	rbd_dev->parent_spec = NULL;
+-	rbd_dev->parent_overlap = 0;
++	rbd_dev->parent_overlap =40;
+
+ 	rbd_dev->image_format = 1;
+
+@@ -4641,28 +4648,27 @@ static int rbd_dev_v2_probe(struct rbd_device
+*rbd_dev)
+ 			RBD_HEADER_PREFIX, rbd_dev->spec->image_id);
+
+ 	/* Get the size and object order for the image */
+-
+ 	ret = rbd_dev_v2_image_size(rbd_dev);
+-	if (ret < 0)
++	if (ret)
+ 		goto out_err;
+
+ 	/* Get the object prefix (a.k.a. block_name) for the image */
+
+ 	ret = rbd_dev_v2_object_prefix(rbd_dev);
+-	if (ret < 0)
++	if (ret)
+ 		goto out_err;
+
+ 	/* Get the and check features for the image */
+
+ 	ret = rbd_dev_v2_features(rbd_dev);
+-	if (ret < 0)
++	if (ret)
+ 		goto out_err;
+
+ 	/* If the image supports layering, get the parent info */
+
+ 	if (rbd_dev->header.features & RBD_FEATURE_LAYERING) {
+ 		ret = rbd_dev_v2_parent_info(rbd_dev);
+-		if (ret < 0)
++		if (ret)
+ 			goto out_err;
  	}
 
- 	ret = rbd_obj_method_sync(rbd_dev, object_name,
--				"rbd", "get_id",
--				NULL, 0,
-+				"rbd", "get_id", NULL, 0,
- 				response, RBD_IMAGE_ID_LEN_MAX, NULL);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
 -- 
 1.7.9.5
 
