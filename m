@@ -1,86 +1,135 @@
-From: Jeff Mitchell <jeffrey.mitchell@gmail.com>
-Subject: Re: poor write performance
-Date: Sat, 20 Apr 2013 17:04:44 -0400
-Message-ID: <517302EC.5020701@gmail.com>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>  <516FE3CC.8080303@risc-software.at>  <6035A0D088A63A46850C3988ED045A4B4D736900@BITCOM1.int.sbss.com.au> <1366455175.10716.1.camel@lde-hro-01> <6035A0D088A63A46850C3988ED045A4B4F35E2CA@BITCOM1.int.sbss.com.au>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: erasure coding (sorry)
+Date: Sun, 21 Apr 2013 04:37:28 +0200
+Message-ID: <517350E8.1080600@dachary.org>
+References: <20130418162842.0c61d1e2@dieter-t420s> <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net> <517060B2.80706@inktank.com> <506B76E2-8814-45C8-8700-C4316E96FE30@inktank.com> <alpine.DEB.2.00.1304181425070.10005@cobra.newdream.net> <14614113-DA4A-4091-904A-5D0A8DA39245@asgaard.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigD9C3983C68FBC014473E2384"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f175.google.com ([209.85.128.175]:46315 "EHLO
-	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755284Ab3DTVEr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Apr 2013 17:04:47 -0400
-Received: by mail-ve0-f175.google.com with SMTP id m1so274293ves.6
-        for <ceph-devel@vger.kernel.org>; Sat, 20 Apr 2013 14:04:46 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4F35E2CA@BITCOM1.int.sbss.com.au>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:47823 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751404Ab3DUChe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Apr 2013 22:37:34 -0400
+In-Reply-To: <14614113-DA4A-4091-904A-5D0A8DA39245@asgaard.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: =?UTF-8?B?SGFyYWxkIFLDtsOfbGVy?= <Harald.Roessler@btd.de>, Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Christopher LILJENSTOLPE <cdl@asgaard.org>
+Cc: ceph-devel@vger.kernel.org
 
-James Harper wrote:
->> Hi James,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigD9C3983C68FBC014473E2384
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Christopher,
+
+I would like to offer my help on this blueprint. In
+
+http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encoding_as=
+_a_storage_backend
+
+you wrote=20
+
+"At this time, Annai is more than willing to help with this, but we don't=
+ have the resources (including ceph coders) to materially contribute code=
+=2E "
+
+and I can work on the coding part.
+
+Cheers
+
+On 04/19/2013 02:47 AM, Christopher LILJENSTOLPE wrote:
+> Supposedly, on 2013-Apr-18, at 14.26 PDT(-0700), someone claiming to be=
+ Sage Weil scribed:
+>=20
+>> On Thu, 18 Apr 2013, Noah Watkins wrote:
+>>> On Apr 18, 2013, at 2:08 PM, Josh Durgin <josh.durgin@inktank.com> wr=
+ote:
+>>>
+>>>> I talked to some folks interested in doing a more limited form of th=
+is
+>>>> yesterday. They started a blueprint [1]. One of their ideas was to h=
+ave
+>>>> erasure coding done by a separate process (or thread perhaps). It wo=
+uld
+>>>> use erasure coding on an object and then use librados to store the
+>>>> rasure-encoded pieces in a separate pool, and finally leave a marker=
+ in
+>>>> place of the original object in the first pool.
+>>>
+>>> This sounds at a high-level similar to work out of Microsoft:
+>>>
+>>> https://www.usenix.org/system/files/conference/atc12/atc12-final181_0=
+=2Epdf
+>>>
+>>> The basic idea is to replicate first, then erasure code in the backgr=
+ound.
 >>
->> do you VLAN's interfaces configured on your bonding interfaces? Because
->> I saw a similar situation in my setup.
+>> FWIW, I think a useful (and generic) concept to add to rados would be =
+a
+>> redirect symlink sort of thing that says "oh, this object is over ther=
+e is
+>> that other pool", such that client requests will be transparently
+>> redirected or proxied.  This will enable generic tiering type operatio=
+ns,
+>> and probably simplify/enable migration without a lot of additional
+>> complexity on the client side.
+>=20
+> More to come, but I'm starting to think of a union mount of a fuse "re-=
+directing" overlay.  The quick idea.
+>=20
+> On the "hot" pool, the OSD's would write to the host FS as usual.  Howe=
+ver, that FS is actually a light-weight fuse (at least for prototype) fs =
+that passes almost everything right down to the file system.  As the OSD =
+hits a capacity HWM, a watcher (asynchronous process), starts "evicting" =
+objects from the OSD.  It does that by using a modified ceph client that =
+calls zfec and uses CRUSH to place the resulting shards in the "cool" poo=
+l.  Once those are committed, it replaces the object in the "hot" OSD wit=
+h a special token. This is repeated until a LWM is reached.  When the OSD=
+ gets a read request for that object, when the fuse shim sees the token, =
+it knows to actually do a modified client fetch from the "cool" pool.  It=
+ returns the resulting object to the original requester and (potentially)=
+ stores the object back in the "hot" OSD (if you want a cache-like perfor=
+mance), replacing the token.  If necessary, some other object may get, in=
+ turn, evicted if the HWM is again breached.
+>=20
+> We would also need to modify the repair mechanism for the deep scrub in=
+ the "cool" pool to account for the repair being a re-constitution of an =
+invalid shard, rather than a copy (as there is only one copy of a given s=
+hard).
+>=20
+> I'll get a bit more of a write-up today, hopefully, in the wiki.
+>=20
+> 	Christopher
+>=20
 >>
->
-> No VLAN's on my bonding interface, although extensively used elsewhere.
+>> sage
+>=20
+>=20
+> --
+> =E6=9D=8E=E6=9F=AF=E7=9D=BF
+> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+> Check my calendar availability: https://tungle.me/cdl
 
-What the OP described is *exactly* like a problem I've been struggling 
-with. I thought the blame had lay elsewhere but maybe not.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-My setup:
 
-4 Ceph nodes, with 6 OSDs each and dual (bonded) 10GbE, with VLANs, 
-running Precise. OSDs are using XFS. Replica count of 3. 3 of these are 
-mons.
-4 compute nodes, with dual (bonded) 10GbE, with VLANs, running a base of 
-Precise along with a 3.6.3 Ceph-provided kernel, running KVM-based VMs. 
-2 of these are also mons. VMs are Precise and accessing RBD through the 
-kernel client.
+--------------enigD9C3983C68FBC014473E2384
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-(Eventually there will be 12 Ceph nodes. 5 mons seemed an appropriate 
-number and when I've run into issues in the past I've actually gotten to 
-cases where > 3 mons were knocked out, so 5 is a comfortable number 
-unless it's problematic.)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-In the VMs, I/O with ext4 is fine -- 10-15MB/s sustained. However, using 
-ZFS (via ZFSonLinux, not FUSE), I see write speeds of about 150kb/sec, 
-just like the OP.
+iEYEARECAAYFAlFzUOoACgkQ8dLMyEl6F234LACfRcYhIiR58uAqj+6FsJ+lPxdQ
+0wMAoKGd4zPJtgSOIFcGHCdoAeAAwfVF
+=o+Sm
+-----END PGP SIGNATURE-----
 
-I had figured that the problem lay with ZFS inside the VM (I've used 
-ZFSonLinux on many bare metal machines without a problem for a couple of 
-years now). The VMs were using virtio, and I'd heard that it was found 
-that pre-1.4 Qemu versions could have some serious problems with virtio 
-(which I didn't know at the time); also, I know that the kernel client 
-is not the preferred client, and the version I'm using is a rather older 
-version of the Ceph-provided builds. As a result, my plan was to try the 
-updated Qemu version along with native Qemu librados RBD support once 
-Raring was out, as I figured that the problem was either something in 
-ZFSonLinux (though I reported the issue and nobody had ever heard of any 
-such problem, or had any idea why it would be happening) or something 
-specifically about ZFS running inside Qemu, as ext4 in the VMs is fine.
-
-But, this thread has made me wonder if what's actually happening is in 
-fact something else -- either something, as someone else saw, to do with 
-using VLANs on the bonded interface (although I don't see such a write 
-problem with any other traffic going through these VLANs); or, something 
-about how ZFS inside the VM is writing to the RBD disk causing some kind 
-of giant slowdown in Ceph. The numbers that the OP cited were exactly in 
-line with what I was seeing.
-
-I don't know offhand what the block sizes are that the kernel client was 
-using, or that the different filesystems inside the VMs might be using 
-when trying to write to their virtual disks (I'm guessing that if you 
-are using virtio, as I am, it potentially could be anything). But 
-perhaps ZFS writes extremely small blocks and ext4 doesn't.
-
-Unfortunately, I don't have access to this testbed for the next few 
-weeks, so for the moment I can only recount my experience and not 
-actually test out any suggestions (unless I can corral someone with 
-access to it to run tests).
-
-Thanks,
-Jeff
+--------------enigD9C3983C68FBC014473E2384--
