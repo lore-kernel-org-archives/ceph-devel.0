@@ -1,80 +1,47 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor write performance
-Date: Mon, 22 Apr 2013 06:39:02 -0500
-Message-ID: <51752156.9050004@inktank.com>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au> <517159C3.5030100@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au> <CAF6-1L4Yxqmq0yED+gA_Xgupzg6AvWi6mBD59-aXYgUj3foaTw@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F36261A@BITCOM1.int.sbss.com.au> <CAF6-1L5aindF_41=d6JKvut5cBzXx_1btGw-EteGmijoma616A@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F3636DC@BITCOM1.int.sbss.com.au>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: poor write performance
+Date: Mon, 22 Apr 2013 11:40:26 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B4F363739@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+ <516FF893.1030309@inktank.com>
+ <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au>
+ <517159C3.5030100@inktank.com>
+ <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D73B75D@BITCOM1.int.sbss.com.au>
+ <5173EF05.9000404@inktank.com>
+ <6035A0D088A63A46850C3988ED045A4B4F362FEA@BITCOM1.int.sbss.com.au>
+ <51752031.2060704@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f180.google.com ([209.85.210.180]:52049 "EHLO
-	mail-ia0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750958Ab3DVLjK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 07:39:10 -0400
-Received: by mail-ia0-f180.google.com with SMTP id t29so2109944iag.11
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 04:39:10 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4F3636DC@BITCOM1.int.sbss.com.au>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:55170 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752003Ab3DVLkw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 07:40:52 -0400
+In-Reply-To: <51752031.2060704@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 04/22/2013 06:34 AM, James Harper wrote:
->> Hi,
->>
->>> Correct, but that's the theoretical maximum I was referring to. If I calculate
->> that I should be able to get 50MB/second then 30MB/second is acceptable
->> but 500KB/second is not :)
->>
->> I have written a small benchmark for RBD :
->>
->> https://gist.github.com/smunaut/5433222
->>
->> It uses the librbd API directly without kernel client and queue
->> requests long in advance and this should give an "upper" bound to what
->> you can get at best.
->> It reads and writes the whole image, so I usually just create a 1 or 2
->> G image for testing.
->>
->> Using two OSDs on two distinct recent 7200rpm drives (with journal on
->> the same disk as data), I get :
->>
->> Read: 89.52 Mb/s (2147483648 bytes in 22877 ms)
->> Write: 10.62 Mb/s (2147483648 bytes in 192874 ms)
->>
->
-> I like your benchmark tool!
->
-> How many replicas? With two OSD's with xfs on ~3yo 1TB disks with two replicas I get:
->
-> # ./a.out admin xen test
-> Read: 111.99 Mb/s (1073741824 bytes in 9144 ms)
-> Write: 29.68 Mb/s (1073741824 bytes in 34507 ms)
->
-> Which means I forgot to drop caches on the OSD's so I'm seeing the limit on my public network (single gigabit interface). After dropping caches I consistently get:
->
-> # ./a.out admin xen test
-> Read: 39.98 Mb/s (1073741824 bytes in 25614 ms)
-> Write: 23.11 Mb/s (1073741824 bytes in 44316 ms)
->
-> Journal is on the same disk. Network is... confusing :) but is basically public on a single gigabit and cluster on a bonded pair of gigabit links. The whole network thing is shared with my existing drbd cluster so performance may vary over time.
->
-> My read speed is consistently around 40MB/second, and my write speed is consistently around 22MB/second. I had expected better of read...
+> > I upgraded to 0.60 and that seems to have made a big difference. If I kill off
+> > one of my OSD's I get around 20MB/second throughput in live testing (test
+> > restore of Xen Windows VM from USB backup), which is pretty much the
+> > limit of the USB disk. If I reactivate the second OSD throughput drops back to
+> > ~10MB/second which isn't as good but is much better than I was getting.
+> >
+> 
+> Ah, are these disks both connected through USB(2?)?
+> 
 
-You may want to try increasing your read_ahead_kb on the OSD data disks 
-and see if that helps read speeds.
+I guess I was a bit brief :)
 
->
-> While running, iostat on each osd reports a read rate of around 20MB/second (1/2 total on each) during read test and a rate of 40-60MB/second (~2x total on each) during write test, which is pretty much exactly right.
->
-> iperf on the cluster network (pair of gigabits bonded) gives me about 1.97Gbits/second. iperf between osd and client is around 0.94Gbits/second.
->
-> changing the scheduler on the harddisk doesn't seem to make any difference, even when I set it to cfq which normally really sucks.
->
-> What ceph version are you using and what filesystem?
->
-> Thanks
->
-> James
->
+Both my OSD disks are SATA attached. Inside a VM I have attached another disk which is attached to the host via USB. This disk contains a backup of a server (using Windows Server Backup) and am doing a test restore of it, with ceph holding the C: drive of the virtual server (eg the write target). What I was saying is that I would never expect more than about 20-30MB/s write speed in this test because that is going to be approximately the limit of the USB interface that the data is coming from. This is more a production test than a benchmark, and I was just iostat to monitor the throughput of the /dev/rbdX interfaces while doing the restore.
+
+James
 
