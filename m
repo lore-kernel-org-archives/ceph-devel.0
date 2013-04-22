@@ -1,52 +1,102 @@
-From: Scott Sullivan <ssullivan@liquidweb.com>
-Subject: Authentication question with RBD+STGT
-Date: Mon, 22 Apr 2013 14:09:22 -0400
-Message-ID: <51757CD2.2070404@liquidweb.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Authentication question with RBD+STGT
+Date: Mon, 22 Apr 2013 21:02:53 +0200
+Message-ID: <5175895D.6060505@42on.com>
+References: <51757CD2.2070404@liquidweb.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from email.liquidweb.com ([209.59.139.27]:54282 "EHLO
-	email.liquidweb.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754537Ab3DVSpH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 14:45:07 -0400
-Received: from data.wks.liquidweb.com (data.wks.liquidweb.com [10.30.104.4])
-	(using TLSv1 with cipher AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by email.liquidweb.com (Postfix) with ESMTP id B4420FA40
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 14:11:23 -0400 (EDT)
+Received: from websrv.42on.com ([31.25.102.167]:57886 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754706Ab3DVTDA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 22 Apr 2013 15:03:00 -0400
+In-Reply-To: <51757CD2.2070404@liquidweb.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Scott Sullivan <ssullivan@liquidweb.com>
+Cc: ceph-devel@vger.kernel.org
 
-Referring to this: http://ceph.com/dev-notes/adding-support-for-rbd-to-stgt/
+Hi,
 
-I compiled the latest tgt with RBD support. My question is when using 
-this method to access RBD volumes, where do you tell it what user to 
-authenticate to the cluster with? I do see the above linked page 
-mentions it will read a local ceph.conf.
+On 04/22/2013 08:09 PM, Scott Sullivan wrote:
+> Referring to this:
+> http://ceph.com/dev-notes/adding-support-for-rbd-to-stgt/
+>
+> I compiled the latest tgt with RBD support. My question is when using
+> this method to access RBD volumes, where do you tell it what user to
+> authenticate to the cluster with? I do see the above linked page
+> mentions it will read a local ceph.conf.
 
-Say I want to use cephx for authentication; how do I tell this:
+It seems like you can't. A quick peek at the source code of mainline tgt:
 
-tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 
---backing-store pool0/test-image --bstype rbd
+bs_rbd.c
 
-to authenticate to pool0/test-image as user testuser? My local ceph.conf 
-(that I run the tgtadm command on) contains:
+static tgtadm_err bs_rbd_init(struct scsi_lu *lu)
+{
+..
+..
+         rados_ret = rados_create(&cluster, NULL);
+         if (rados_ret < 0) {
+                 eprintf("bs_rbd_init: rados_create: %d\n", rados_ret);
+                 return ret;
+         }
+..
+..
+}
 
-[global]
-         log_max_recent = 500
+Looking at librados.h:
 
-[mon.a]
-         host = c01-m01
-         mon addr = XX.XX.XX.XX:6789
+  * @param id the user to connect as (i.e. admin, not client.admin)
+  * @returns 0 on success, negative error code on failure
+  */
+int rados_create(rados_t *cluster, const char * const id);
 
-[mon.b]
-         host = c01-m02
-         mon addr = XX.XX.XX.XX:6789
+So it seems like tgt doesn't support Cephx at all? Or is the 
+documentation for librados wrong that it will use "admin" as id when 
+NULL is given and cephx is enabled?
 
-[mon.c]
-         host = c01-m03
-         mon addr = XX.XX.XX.XX:6789
+I'm not sure if you can pass the id in CEPH_ARGS, but you can give it a try:
+
+export CEPH_ARGS="--id myuser"
+tgtadm .......
+
+Wido
+
+>
+> Say I want to use cephx for authentication; how do I tell this:
+>
+> tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1
+> --backing-store pool0/test-image --bstype rbd
+>
+> to authenticate to pool0/test-image as user testuser? My local ceph.conf
+> (that I run the tgtadm command on) contains:
+>
+> [global]
+>          log_max_recent = 500
+>
+> [mon.a]
+>          host = c01-m01
+>          mon addr = XX.XX.XX.XX:6789
+>
+> [mon.b]
+>          host = c01-m02
+>          mon addr = XX.XX.XX.XX:6789
+>
+> [mon.c]
+>          host = c01-m03
+>          mon addr = XX.XX.XX.XX:6789
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
