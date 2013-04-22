@@ -1,85 +1,141 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor write performance
-Date: Mon, 22 Apr 2013 08:47:53 -0500
-Message-ID: <51753F89.8000508@inktank.com>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au> <517159C3.5030100@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au> <CAF6-1L4Yxqmq0yED+gA_Xgupzg6AvWi6mBD59-aXYgUj3foaTw@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F36261A@BITCOM1.int.sbss.com.au> <CAF6-1L5aindF_41=d6JKvut5cBzXx_1btGw-EteGmijoma616A@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F3636DC@BITCOM1.int.sbss.com.au> <51752156.9050004@inktank.com> <6035A0D088A63A46850C
- 3988ED045A4B4F3637AD@BITCOM1.int.sbss.com.au> <51752695.9080205@inktank.com>
+From: "Christopher LILJENSTOLPE" <cdl@asgaard.org>
+Subject: Re: erasure coding (sorry)
+Date: Mon, 22 Apr 2013 07:08:24 -0700
+Message-ID: <0AEB5F22-B38F-4702-95A1-B18938FE7F7C@asgaard.org>
+References: <20130418162842.0c61d1e2@dieter-t420s>
+ <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net>
+ <517060B2.80706@inktank.com> <51706120.2060702@inktank.com>
+ <20130418173113.74a53769@dieter-t420s>
+ <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org>
+ <5174F08F.2070001@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed;
+ boundary="=_MailMate_A162998C-47E5-4FBC-A557-5AC3B5B6D257_=";
+ micalg=pgp-sha1; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:51774 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751683Ab3DVNrz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 09:47:55 -0400
-Received: by mail-ie0-f170.google.com with SMTP id at1so3445104iec.1
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 06:47:55 -0700 (PDT)
-In-Reply-To: <51752695.9080205@inktank.com>
+Received: from smtp.emailarray.com ([69.28.212.198]:25392 "EHLO
+	smtp2.emailarray.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751498Ab3DVOIg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 10:08:36 -0400
+In-Reply-To: <5174F08F.2070001@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-On 04/22/2013 07:01 AM, Mark Nelson wrote:
-> On 04/22/2013 06:48 AM, James Harper wrote:
->>>> My read speed is consistently around 40MB/second, and my write speed is
->>>> consistently around 22MB/second. I had expected better of read...
+This is an OpenPGP/MIME signed message (RFC 3156 and 4880).
+
+--=_MailMate_A162998C-47E5-4FBC-A557-5AC3B5B6D257_=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Supposedly, on 2013-Apr-22, at 01.10 PDT(-0700), someone claiming to be L=
+oic Dachary scribed:
+
+> Hi Christopher,
+>
+> You wrote "A modified client/library could be used to store objects tha=
+t should be sharded, vs "standard" ceph treatment.  In this model, each s=
+hard would be written to a seperate PG, and each PG would we stored on ex=
+actly one OSD.  " but there is no way for a client to enforce the fact th=
+at two objects are stored in separate PG.
+
+Poorly worded.  The idea is that each shard becomes a seperate object, an=
+d the encoder/sharder would use CRUSH to identify the OSDs to hold the sh=
+ards.  However, the OSDs would treat the shard as an n=3D1 replication an=
+d just store locally.  =
+
+
+Actually, looking at this this morning, this is actually harder than the =
+prefered alternative (i.e. grafting a encode/decode into the (e)OSD.  It =
+was meant to cover the alternative approaches.  I didn't like this one, b=
+ut it now appears to be more difficult, and non-deterministic of the plac=
+ement.  =
+
+
+One question on CRUSH (it's been too long since I read the paper), if x i=
+s the same for two objects, and, using an n=3D3 returns R=3D{OSD18,OSD45,=
+OSD97}, if an object is handed to OSD45 that matches x, but has an n=3D1,=
+ would OSD45 store it, or would it forward it to OSD18 to store?  If it w=
+ould this idea is DOA.  Also, if x is held invariant, but n changes, does=
+ the same R set get returned (truncated to n members)?
+
+	Thx
+	Christopher
+
+
+
+>
+> Am I missing something ?
+>
+> On 04/22/2013 09:23 AM, Christopher LILJENSTOLPE wrote:
+>> Supposedly, on 2013-Apr-18, at 14.31 PDT(-0700), someone claiming to b=
+e Plaetinck, Dieter scribed:
+>>
+>>> On Thu, 18 Apr 2013 16:09:52 -0500
+>>> Mark Nelson <mark.nelson@inktank.com> wrote:
+>>
+>>>>
 >>>
->>> You may want to try increasing your read_ahead_kb on the OSD data disks
->>> and see if that helps read speeds.
+>>> @Bryan: I did come across cleversafe.  all the articles around it see=
+med promising,
+>>> but unfortunately it seems everything related to the cleversafe open =
+source project
+>>> somehow vanished from the internet.  (e.g. http://www.cleversafe.org/=
+) quite weird...
 >>>
+>>> @Sage: interesting. I thought it would be more relatively simple if o=
+ne assumes
+>>> the restriction of immutable files.  I'm not familiar with those ceph=
+ specifics you're mentioning.
+>>> When building an erasure codes-based system, maybe there's ways to re=
+use existing ceph
+>>> code and/or allow some integration with replication based objects, wi=
+thout aiming for full integration or
+>>> full support of the rados api, based on some tradeoffs.
+>>>
+>>> @Josh, that sounds like an interesting approach.  Too bad that page d=
+oesn't contain any information yet :)
 >>
->> Default appears to be 128 and I was getting 40MB/second
->> Increasing to 256 takes me up to 48MB/second
->> Increasing to 512 takes me up to 53Mb/second
+>> Greetings - it does now - see what you all think=E2=80=A6
 >>
->> Any further increases don't do anything that I can measure
+>> 	Christopher
 >>
->> Is increasing read_ahead_kb good for general performance, or just for
->> impressing people with benchmarks? If the kernel spent time reading
->> ahead woult it hurt random read/write performance?
+>>>
+>>> Dieter
+>>
+>>
+>> --
+>> =E6=9D=8E=E6=9F=AF=E7=9D=BF
+>> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+>> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+>> Check my calendar availability: https://tungle.me/cdl
 >
-> Potentially yes, but it depends on a lot of of factors.  I suspect that
-> increasing it may be acceptable on modern drives, but you'll need to do
-> some testing to see how it goes in practice.
->
-> If anyone on the list knows how many sectors per track is typical for
-> modern 1-3TB drives I'm dying to know. That would help us guess at how
-> much data can be writen/read on average without imposing any head
-> movement. :)
->
+> -- =
 
-Aha, sorry to reply to my own mail.  I found some specifications for 
-Hitachi drives at least:
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-http://www.hgst.com/tech/techlib.nsf/products/Ultrastar_7K4000
 
-look at section 4.2 of the "Ultrastar 7K4000 OEM Specification" document.
+--
+=E6=9D=8E=E6=9F=AF=E7=9D=BF
+Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+Check my calendar availability: https://tungle.me/cdl
+--=_MailMate_A162998C-47E5-4FBC-A557-5AC3B5B6D257_=
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename=signature.asc
+Content-Type: application/pgp-signature; name=signature.asc
 
-It specifies 310ktpi, or 310,000 tracks/inch.
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
 
-Via google I found that this drive is using 5 800GB platters, meaning 
-there are 10 heads in this drive.  Using hitachi's specifications:
+iQEcBAEBAgAGBQJRdURYAAoJEGmx2Mt/+Iw/ancH/3jluXC+yZztm5bXIZQwF2mH
+OY8ebn5H4ehFRK0El3+czcly0C5EGZ9dBTvdAKul1qkBU1YFe+hS+IohoVD8hWRx
+Yz79Xmma2r78q1wlK7jKvN2VrzVoVyYW5ClJ8DrBeIIOi9nhMi5PHoJujIXjdXB0
+pk92FdyorgNGIKYGaNgTiVL8RtOCl1jEU/ILZuUsJSP7wsDF3Tyn3UXQjG6sfe5h
+tV0iBPmTzdJLEQldHd8Dtxjk2JTMqDuao5s11hYOGa32YxP6ORcXwc0gtlQHt3Ga
+Gqxm0pTixt8r7REEWprtbOnKPJ7KzQD687mnjCWv2hlQmj7xpaRLA3n2+3wFdtg=
+=QTJK
+-----END PGP SIGNATURE-----
 
-(7,814,037,168 sectors / (310,000 tracks / inch * 3.5 inches)) / 10 
-heads * 512 bytes / sector = ~360KB/track head
-
-So assuming my math is right, it looks like we can read up to around 
-360KB of data before hitting a head switch.  Now unfortunately (or maybe 
-fortunately!) this is just the average case.  Outer tracks will store 
-more data than inner tracks, so depending on what portion of the disk 
-you are doing the read from, you might introduce head switches more or 
-less often.  It looks like even with a 256k or 512k read_ahead you 
-probably won't introduce a next-cylinder seek that often, though from 
-what I can find it's not going to be all that much more expensive vs a 
-head switch (2-3ms vs 1-2ms).
-
-Mark
-
->>
->> Thanks
->>
->> James
->>
->
-
+--=_MailMate_A162998C-47E5-4FBC-A557-5AC3B5B6D257_=--
