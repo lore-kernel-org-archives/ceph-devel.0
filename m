@@ -1,51 +1,160 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] rbd: revalidate_disk upon rbd resize
-Date: Mon, 22 Apr 2013 12:35:19 -0500
-Message-ID: <517574D7.3030004@inktank.com>
-References: <1365774766-29899-1-git-send-email-laurent@ksperis.com> <516C37D5.1090804@inktank.com> <51756F11.6050708@inktank.com> <alpine.DEB.2.00.1304221014410.15710@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f171.google.com ([209.85.210.171]:48354 "EHLO
-	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753870Ab3DVRfW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 13:35:22 -0400
-Received: by mail-ia0-f171.google.com with SMTP id f27so5613300iae.2
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 10:35:21 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1304221014410.15710@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Laurent Barbe <laurent@ksperis.com>, ceph-devel@vger.kernel.org
+From: Ross David Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Ceph Developer Summit
+Date: Mon, 22 Apr 2013 10:40:07 -0700
+Message-ID: <C884B3E9-1F1F-40FC-A328-5836B12D1209@inktank.com>
+References: <F54938FA-1070-4BF6-9E7D-0C0036F92384@inktank.com>
+	<51737798.8030009@dachary.org>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <51737798.8030009-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/22/2013 12:14 PM, Sage Weil wrote:
-> On Mon, 22 Apr 2013, Alex Elder wrote:
->> On 04/15/2013 12:24 PM, Alex Elder wrote:
->>> On 04/12/2013 08:52 AM, Laurent Barbe wrote:
->>>> If rbd disk is open and rbd resize is done, new size is not visible by
->>>> filesystem.
->>>> Like is done in virtio-blk and dm driver, revalidate_disk() permits to
->>>> update the bd_inode size.
->>>>
->>>> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
->>>
->>> This one looks good (too).  And this time I've tested
->>> it just to be sure I get no lockdep warnings.  Unless
->>> I see any strangeness in my sanity testing (which I
->>> don't expect) I'll commit this to the testing branch
->>> later today.  Thanks a lot.
->>>
->>> Reviewed-by: Alex Elder <elder@inktank.com>
->>
->> I have committed this to the "testing" branch of the
->> ceph-client git repository.
-> 
-> Is this the one that had the lockdep issue?
 
-It did, but moving where it got called (into
-rbd_dev_refresh(), outside the control mutex)
-resolved that.
+Hi Loic!
 
-					-Alex
+I totally agree.  I've actually set up an etherpad, but haven't had a =
 
+chance to tell anyone yet!  We should add one to each blueprint before =
+
+the summit begins.  You can find the etherpad here:
+
+http://pad.ceph.com
+
+I wrote a quick dekiscript plugin that embeds an etherpad inside a =
+
+wiki page.  If you include this tag in your wiki page, it will embed a =
+
+pad with the same name as the Wiki page ID:
+
+  {{ etherpad{} }}
+
+If you want to specify a pad name, use this instead:
+
+  {{ etherpad{ name: "foo" } }}
+
+Let me know if it works for you!
+
+Cheers,
+Ross
+
+ =
+
+On Apr 20, 2013, at 10:22 PM, Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org> wrote:
+
+> Hi Ross,
+> =
+
+> It would be convenient to discuss the implementation of blueprints using =
+and etherpad during the summit. I'm thinking
+> =
+
+> http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encoding_as=
+_a_storage_backend#Coding_tasks
+> =
+
+> for instance. Although a wiki is convenient for discussing before the sum=
+mit, an etherpad is better during the summit, IMHO. =
+
+> =
+
+> What do you think ?
+> =
+
+> On 04/12/2013 03:27 AM, Ross David Turk wrote:
+>> =
+
+>> Hi, everyone!
+>> =
+
+>> I'm pleased to announce that we have begun preparations for the first =
+
+>> Ceph Developer Summit. This summit is where planning for the upcoming =
+
+>> Dumpling release will happen, and attendance is open to all. It will be =
+
+>> virtual (IRC, etherpad, video conference), so you won't even have to =
+
+>> get on an airplane! We're targeting May 6.
+>> =
+
+>> Between now and then, we're gathering blueprints for new Ceph features! =
+
+>> A blueprint is a document that describes work someone intends to do, =
+
+>> usually reserved for larger features that require discussion. If =
+
+>> there's a feature you think Ceph should have, we encourage you to write =
+
+>> your thoughts and plans in a blueprint. Then make sure to attend the =
+
+>> summit to discuss its implementation with others in the Ceph community.
+>> =
+
+>> For more details, take a look at Patrick's blog post on ceph.com:
+>> =
+
+>> http://ceph.com/events/ceph-developer-summit/
+>> =
+
+>> Blueprints are currently being accepted at the Ceph wiki. On the front =
+
+>> page, at the bottom, there's a button to create a new one.
+>> =
+
+>> Oh! Yeah! There's a wiki now. It's kind of bare-bones at the moment, as =
+
+>> most wikis are when they first enter the world, but it anxiously awaits =
+
+>> your content. Log in with your OpenID credentials and pick a username =
+
+>> to get started. If you're having trouble, or have feedback, your words =
+
+>> are always welcome at community-Qp0mS5GaXlThvxM+mQhndA@public.gmane.org
+>> =
+
+>> http://wiki.ceph.com
+>> =
+
+>> Best,
+>> Ross
+>> =
+
+>> --
+>> Ross Turk
+>> Community, Inktank
+>> =
+
+>> @rossturk @inktank @ceph
+>> =
+
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> =
+
+> -- =
+
+> Lo=EFc Dachary, Artisan Logiciel Libre
+> =
+
+
+
+--
+Ross Turk
+Community, Inktank
+
+@rossturk @inktank @ceph
