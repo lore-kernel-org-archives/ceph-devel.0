@@ -1,143 +1,52 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/4] rbd: define zero_pages()
-Date: Mon, 22 Apr 2013 07:35:24 -0500
-Message-ID: <51752E8C.6060201@inktank.com>
-References: <5171C963.2050402@inktank.com> <5171CA29.7000500@inktank.com> <5174EF48.3020308@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: fecpp C++ forward error correction library
+Date: Mon, 22 Apr 2013 15:19:19 +0200
+Message-ID: <517538D7.6050706@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigDC933155AB912A403783F9A9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:65520 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753085Ab3DVMfZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 08:35:25 -0400
-Received: by mail-ie0-f175.google.com with SMTP id a11so5685611iee.34
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 05:35:25 -0700 (PDT)
-In-Reply-To: <5174EF48.3020308@inktank.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:40022 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753682Ab3DVNTV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 09:19:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Christopher LILJENSTOLPE <cdl@asgaard.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jack Lloyd <lloyd@randombit.net>
 
-On 04/22/2013 03:05 AM, Josh Durgin wrote:
-> On 04/19/2013 03:50 PM, Alex Elder wrote:
->> Define a new function zero_pages() that zeroes a range of memory
->> defined by a page array, along the lines of zero_bio_chain().  It
->> saves and the irq flags like bvec_kmap_irq() does, though I'm not
->> sure at this point that it's necessary.
-> 
-> It doesn't seem necessary to me. I don't see anything else doing
-> an irq save+restore around a k(un)map_atomic.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigDC933155AB912A403783F9A9
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I'm going to leave it in for now.  I also wonder whether
-I need I need a flush_dcache_page() in there before the
-unmap.  For x86 CPUs it's moot but for portability I'd
-like to do it right while the code is fresh in mind.
+Hi Christopher,
 
-http://tracker.ceph.com/issues/4777
+Jack Lloyd is the author of fecpp ( http://www.randombit.net/code/fecpp/ =
+) and he tells me someone sent him a new SIMD approach a few weeks ago. I=
+'m not sure what SIMD means yet, but I'll figure it out ;-). I tend to fa=
+vor fecpp because it is more self contained and may be easier to embed th=
+an https://pypi.python.org/pypi/zfec
 
-					-Alex
-> Other than that, looks good.
-> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-> 
->> Update rbd_img_obj_request_read_callback() to use the new function
->> if the object request contains page rather than bio data.
->>
->> For the moment, only bio data is used for osd READ ops.
->>
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>   drivers/block/rbd.c |   55
->> +++++++++++++++++++++++++++++++++++++++++++--------
->>   1 file changed, 47 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 894af4f..ac9abab 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -971,6 +971,37 @@ static void zero_bio_chain(struct bio *chain, int
->> start_ofs)
->>   }
->>
->>   /*
->> + * similar to zero_bio_chain(), zeros data defined by a page array,
->> + * starting at the given byte offset from the start of the array and
->> + * continuing up to the given end offset.  The pages array is
->> + * assumed to be big enough to hold all bytes up to the end.
->> + */
->> +static void zero_pages(struct page **pages, u64 offset, u64 end)
->> +{
->> +    struct page **page = &pages[offset >> PAGE_SHIFT];
->> +
->> +    rbd_assert(end > offset);
->> +    rbd_assert(end - offset <= (u64)SIZE_MAX);
->> +    while (offset < end) {
->> +        size_t page_offset;
->> +        size_t length;
->> +        unsigned long flags;
->> +        void *kaddr;
->> +
->> +        page_offset = (size_t)(offset & ~PAGE_MASK);
->> +        length = min(PAGE_SIZE - page_offset, (size_t)(end - offset));
->> +        local_irq_save(flags);
->> +        kaddr = kmap_atomic(*page);
->> +        memset(kaddr + page_offset, 0, length);
->> +        kunmap_atomic(kaddr);
->> +        local_irq_restore(flags);
->> +
->> +        offset += length;
->> +        page++;
->> +    }
->> +}
->> +
->> +/*
->>    * Clone a portion of a bio, starting at the given byte offset
->>    * and continuing for the number of bytes indicated.
->>    */
->> @@ -1352,9 +1383,12 @@ static bool img_request_layered_test(struct
->> rbd_img_request *img_request)
->>   static void
->>   rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
->>   {
->> +    u64 xferred = obj_request->xferred;
->> +    u64 length = obj_request->length;
->> +
->>       dout("%s: obj %p img %p result %d %llu/%llu\n", __func__,
->>           obj_request, obj_request->img_request, obj_request->result,
->> -        obj_request->xferred, obj_request->length);
->> +        xferred, length);
->>       /*
->>        * ENOENT means a hole in the image.  We zero-fill the
->>        * entire length of the request.  A short read also implies
->> @@ -1362,15 +1396,20 @@ rbd_img_obj_request_read_callback(struct
->> rbd_obj_request *obj_request)
->>        * update the xferred count to indicate the whole request
->>        * was satisfied.
->>        */
->> -    BUG_ON(obj_request->type != OBJ_REQUEST_BIO);
->> +    rbd_assert(obj_request->type != OBJ_REQUEST_NODATA);
->>       if (obj_request->result == -ENOENT) {
->> -        zero_bio_chain(obj_request->bio_list, 0);
->> +        if (obj_request->type == OBJ_REQUEST_BIO)
->> +            zero_bio_chain(obj_request->bio_list, 0);
->> +        else
->> +            zero_pages(obj_request->pages, 0, length);
->>           obj_request->result = 0;
->> -        obj_request->xferred = obj_request->length;
->> -    } else if (obj_request->xferred < obj_request->length &&
->> -            !obj_request->result) {
->> -        zero_bio_chain(obj_request->bio_list, obj_request->xferred);
->> -        obj_request->xferred = obj_request->length;
->> +        obj_request->xferred = length;
->> +    } else if (xferred < length && !obj_request->result) {
->> +        if (obj_request->type == OBJ_REQUEST_BIO)
->> +            zero_bio_chain(obj_request->bio_list, xferred);
->> +        else
->> +            zero_pages(obj_request->pages, xferred, length);
->> +        obj_request->xferred = length;
->>       }
->>       obj_request_done_set(obj_request);
->>   }
->>
-> 
+Cheers
 
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--------------enigDC933155AB912A403783F9A9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlF1ONcACgkQ8dLMyEl6F22oUQCeNCnZzjD1umKvjxLhF8ZcODH7
+QsoAnixmKJdMPJMIgqKbexpFAnnCCUOK
+=GSMN
+-----END PGP SIGNATURE-----
+
+--------------enigDC933155AB912A403783F9A9--
