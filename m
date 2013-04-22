@@ -1,275 +1,196 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/2] rbd: issue a copyup for layered writes
-Date: Mon, 22 Apr 2013 11:16:17 -0700
-Message-ID: <51757E71.5050608@inktank.com>
-References: <5171C963.2050402@inktank.com> <5171CA53.70406@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: erasure coding (sorry)
+Date: Mon, 22 Apr 2013 11:31:03 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304221125260.15710@cobra.newdream.net>
+References: <20130418162842.0c61d1e2@dieter-t420s> <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net> <517060B2.80706@inktank.com> <51706120.2060702@inktank.com> <20130418173113.74a53769@dieter-t420s> <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org>
+ <5174F08F.2070001@dachary.org> <0AEB5F22-B38F-4702-95A1-B18938FE7F7C@asgaard.org> <alpine.DEB.2.00.1304220805100.14056@cobra.newdream.net> <51757CEB.4090701@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f48.google.com ([209.85.220.48]:45646 "EHLO
-	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754382Ab3DVSRD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 14:17:03 -0400
-Received: by mail-pa0-f48.google.com with SMTP id lj1so3779289pab.7
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 11:17:01 -0700 (PDT)
-In-Reply-To: <5171CA53.70406@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35619 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754408Ab3DVSbE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 14:31:04 -0400
+In-Reply-To: <51757CEB.4090701@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-Alex Elder <elder@inktank.com> wrote:
+On Mon, 22 Apr 2013, Loic Dachary wrote:
+> Hi Sage,
+> 
+> On 04/22/2013 05:09 PM, Sage Weil wrote:
+> > On Mon, 22 Apr 2013, Christopher LILJENSTOLPE wrote:
+> >> Supposedly, on 2013-Apr-22, at 01.10 PDT(-0700), someone claiming to be Loic Dachary scribed:
+> >>
+> >>> Hi Christopher,
+> >>>
+> >>> You wrote "A modified client/library could be used to store objects that should be sharded, vs "standard" ceph treatment.  In this model, each shard would be written to a seperate PG, and each PG would we stored on exactly one OSD.  " but there is no way for a client to enforce the fact that two objects are stored in separate PG.
+> >>
+> >> Poorly worded.  The idea is that each shard becomes a seperate object, and the encoder/sharder would use CRUSH to identify the OSDs to hold the shards.  However, the OSDs would treat the shard as an n=1 replication and just store locally.  
+> >>
+> >> Actually, looking at this this morning, this is actually harder than the prefered alternative (i.e. grafting a encode/decode into the (e)OSD.  It was meant to cover the alternative approaches.  I didn't like this one, but it now appears to be more difficult, and non-deterministic of the placement.  
+> >>
+> >> One question on CRUSH (it's been too long since I read the paper), if x is the same for two objects, and, using an n=3 returns R={OSD18,OSD45,OSD97}, if an object is handed to OSD45 that matches x, but has an n=1, would OSD45 store it, or would it forward it to OSD18 to store?  If it would this idea is DOA.  Also, if x is held invariant, but n changes, does the same R set get returned (truncated to n members)?
+> > 
+> > It would go to osd18, the first item in the sequence that CRUSH generates.
+> >            
+> > As Loic observes, not having control of placement from above the librados
+> > level makes this more or less a non-started.  The only thing that might   
+> > work at that layer is to set up ~5 or more pools, each with a distinct set
+> > of OSDs, and put each shard/fragment in a different pool.  I don't think  
+> > that is a particularly good approach.
+> > 
+> > If we are going to do parity encoding (and I think we should!), I think we
+> > should fully integrate it into the OSD.
+> >            
+> > The simplest approach:
+> >            
+> >  - we create a new PG type for 'parity' or 'erasure' or whatever (type    
+> >    fields already exist)
+> >  - those PGs use the parity ('INDEP') crush mode so that placement is
+> >    intelligent
+> 
+> I assume you do not mean CEPH_FEATURE_INDEP_PG_MAP as used in
+> 
+> https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L5237
+> 
+> but CRUSH_RULE_CHOOSE_INDEP as used in
+> 
+> https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L331
+> 
+> when firstn == 0 because it was set in
+> 
+> https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L523
 
->This implements the main copyup functionality for layered writes.
->
->Here we add a copyup_pages field to the object request, which is
->used only for copyup requests to keep track of the page array
->containing data read from the parent image.
->
->A copyup request is the only request rbd has that requires two osd
->operations.  Because of this we handle copyup specially.  All image
->object requests get an osd request allocated when they are created.
->For a write request, if a copyup is copyup is required, the osd
->request origainlly allocated is released, and a new one (with room
+Right.
 
-A couple typos in this sentence, but looks good.
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
->for two osd ops) is allocated to replace it.  A new function
->rbd_osd_req_create_copyup() allocates an osd request suitable for
->a copyup request.
->
->The first op is then filled with a copyup object class method call,
->supplying the array of pages containing data read from the parent.
->The second op is filled in with the original write request.
->
->The original request otherwise remains intact, and it describes the
->original write request (found in the second osd op).  The presence
->of the copyup op is sort of implicit; a non-null copyup_pages field
->could be used to distinguish between a "normal" write request and a
->request containing both a copyup call and a write.
->
->This resolves:
->    http://tracker.ceph.com/issues/3419
->
->Signed-off-by: Alex Elder <elder@inktank.com>
->---
-> drivers/block/rbd.c |  149
->++++++++++++++++++++++++++++++++++++++++++++++-----
-> 1 file changed, 137 insertions(+), 12 deletions(-)
->
->diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->index c5d0619..12f7a5f 100644
->--- a/drivers/block/rbd.c
->+++ b/drivers/block/rbd.c
->@@ -218,6 +218,7 @@ struct rbd_obj_request {
-> 			u32		page_count;
-> 		};
-> 	};
->+	struct page		**copyup_pages;
->
-> 	struct ceph_osd_request	*osd_req;
->
->@@ -1498,7 +1499,7 @@ static void rbd_osd_req_callback(struct
->ceph_osd_request *osd_req,
-> 		obj_request->result = osd_req->r_result;
->	obj_request->version =
->le64_to_cpu(osd_req->r_reassert_version.version);
->
->-	WARN_ON(osd_req->r_num_ops != 1);	/* For now */
->+	BUG_ON(osd_req->r_num_ops > 2);
->
-> 	/*
-> 	 * We support a 64-bit length, but ultimately it has to be
->@@ -1601,6 +1602,48 @@ static struct ceph_osd_request
->*rbd_osd_req_create(
-> 	return osd_req;
-> }
->
->+/*
->+ * Create a copyup osd request based on the information in the
->+ * object request supplied.  A copyup request has two osd ops,
->+ * a copyup method call, and a "normal" write request.
->+ */
->+static struct ceph_osd_request *
->+rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
->+{
->+	struct rbd_img_request *img_request;
->+	struct ceph_snap_context *snapc;
->+	struct rbd_device *rbd_dev;
->+	struct ceph_osd_client *osdc;
->+	struct ceph_osd_request *osd_req;
->+
->+	rbd_assert(obj_request_img_data_test(obj_request));
->+	img_request = obj_request->img_request;
->+	rbd_assert(img_request);
->+	rbd_assert(img_request_write_test(img_request));
->+
->+	/* Allocate and initialize the request, for the two ops */
->+
->+	snapc = img_request->snapc;
->+	rbd_dev = img_request->rbd_dev;
->+	osdc = &rbd_dev->rbd_client->client->osdc;
->+	osd_req = ceph_osdc_alloc_request(osdc, snapc, 2, false, GFP_ATOMIC);
->+	if (!osd_req)
->+		return NULL;	/* ENOMEM */
->+
->+	osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
->+	osd_req->r_callback = rbd_osd_req_callback;
->+	osd_req->r_priv = obj_request;
->+
->+	osd_req->r_oid_len = strlen(obj_request->object_name);
->+	rbd_assert(osd_req->r_oid_len < sizeof (osd_req->r_oid));
->+	memcpy(osd_req->r_oid, obj_request->object_name, osd_req->r_oid_len);
->+
->+	osd_req->r_file_layout = rbd_dev->layout;	/* struct */
->+
->+	return osd_req;
->+}
->+
->+
-> static void rbd_osd_req_destroy(struct ceph_osd_request *osd_req)
-> {
-> 	ceph_osdc_put_request(osd_req);
->@@ -1960,11 +2003,49 @@ out_unwind:
-> }
->
-> static void
->+rbd_img_obj_copyup_callback(struct rbd_obj_request *obj_request)
->+{
->+	struct rbd_img_request *img_request;
->+	struct rbd_device *rbd_dev;
->+	u64 length;
->+	u32 page_count;
->+
->+	rbd_assert(obj_request->type == OBJ_REQUEST_BIO);
->+	rbd_assert(obj_request_img_data_test(obj_request));
->+	img_request = obj_request->img_request;
->+	rbd_assert(img_request);
->+
->+	rbd_dev = img_request->rbd_dev;
->+	rbd_assert(rbd_dev);
->+	length = (u64)1 << rbd_dev->header.obj_order;
->+	page_count = (u32)calc_pages_for(0, length);
->+
->+	rbd_assert(obj_request->copyup_pages);
->+	ceph_release_page_vector(obj_request->copyup_pages, page_count);
->+	obj_request->copyup_pages = NULL;
->+
->+	/*
->+	 * We want the transfer count to reflect the size of the
->+	 * original write request.  There is no such thing as a
->+	 * successful short write, so if the request was successful
->+	 * we can just set it to the originally-requested length.
->+	 */
->+	if (!obj_request->result)
->+		obj_request->xferred = obj_request->length;
->+
->+	/* Finish up with the normal image object callback */
->+
->+	rbd_img_obj_callback(obj_request);
->+}
->+
->+static void
->rbd_img_obj_parent_read_full_callback(struct rbd_img_request
->*img_request)
-> {
-> 	struct rbd_obj_request *orig_request;
->+	struct ceph_osd_request *osd_req;
->+	struct ceph_osd_client *osdc;
->+	struct rbd_device *rbd_dev;
-> 	struct page **pages;
->-	u32 page_count;
-> 	int result;
-> 	u64 obj_size;
-> 	u64 xferred;
->@@ -1979,25 +2060,60 @@ rbd_img_obj_parent_read_full_callback(struct
->rbd_img_request *img_request)
->
-> 	orig_request = img_request->obj_request;
-> 	rbd_assert(orig_request != NULL);
->-
->+	rbd_assert(orig_request->type == OBJ_REQUEST_BIO);
-> 	result = img_request->result;
-> 	obj_size = img_request->length;
-> 	xferred = img_request->xferred;
->
->+	rbd_dev = img_request->rbd_dev;
->+	rbd_assert(rbd_dev);
->+	rbd_assert(obj_size == (u64)1 << rbd_dev->header.obj_order);
->+
-> 	rbd_img_request_put(img_request);
->
->-	obj_request_existence_set(orig_request, true);
->+	if (result)
->+		goto out_err;
->+
->+	/* Allocate the new copyup osd request for the original request */
->
->-	page_count = (u32)calc_pages_for(0, obj_size);
->-	ceph_release_page_vector(pages, page_count);
->+	result = -ENOMEM;
->+	rbd_assert(!orig_request->osd_req);
->+	osd_req = rbd_osd_req_create_copyup(orig_request);
->+	if (!osd_req)
->+		goto out_err;
->+	orig_request->osd_req = osd_req;
->+	orig_request->copyup_pages = pages;
->
->-	/* Resubmit the original request (for now). */
->+	/* Initialize the copyup op */
->
->-	orig_request->result = rbd_img_obj_request_submit(orig_request);
->-	if (orig_request->result) {
->-		obj_request_done_set(orig_request);
->-		rbd_obj_request_complete(orig_request);
->-	}
->+	osd_req_op_cls_init(osd_req, 0, CEPH_OSD_OP_CALL, "rbd", "copyup");
->+	osd_req_op_cls_request_data_pages(osd_req, 0, pages, obj_size, 0,
->+						false, false);
->+
->+	/* Then the original write request op */
->+
->+	osd_req_op_extent_init(osd_req, 1, CEPH_OSD_OP_WRITE,
->+					orig_request->offset,
->+					orig_request->length, 0, 0);
->+	osd_req_op_extent_osd_data_bio(osd_req, 1, orig_request->bio_list,
->+					orig_request->length);
->+
->+	rbd_osd_req_format_write(orig_request);
->+
->+	/* All set, send it off. */
->+
->+	orig_request->callback = rbd_img_obj_copyup_callback;
->+	osdc = &rbd_dev->rbd_client->client->osdc;
->+	result = rbd_obj_request_submit(osdc, orig_request);
->+	if (!result)
->+		return;
->+out_err:
->+	/* Record the error code and complete the request */
->+
->+	orig_request->result = result;
->+	orig_request->xferred = 0;
->+	obj_request_done_set(orig_request);
->+	rbd_obj_request_complete(orig_request);
-> }
->
-> /*
->@@ -2034,6 +2150,15 @@ static int rbd_img_obj_parent_read_full(struct
->rbd_obj_request *obj_request)
-> 	rbd_assert(rbd_dev->parent != NULL);
->
-> 	/*
->+	 * First things first.  The original osd request is of no
->+	 * use to use any more, we'll need a new one that can hold
->+	 * the two ops in a copyup request.  We'll get that later,
->+	 * but for now we can release the old one.
->+	 */
->+	rbd_osd_req_destroy(obj_request->osd_req);
->+	obj_request->osd_req = NULL;
->+
->+	/*
-> 	 * Determine the byte range covered by the object in the
-> 	 * child image to which the original request was to be sent.
-> 	 */
+> I see that it would be simpler to write
+> 
+>    step choose indep 0 type row
+> 
+> and then rely on intelligent placement. Is there a reason why it would not be possible to use firstn instead of indep ?
 
+The indep placement avoids moving around a shard between ranks, because a 
+mapping of [0,1,2,3,4] will change to [0,6,2,3,4] (or something) if osd.1 
+fails and the shards on 2,3,4 won't need to be copied around.
+
+> >  - all reads and writes go to the 'primary'               
+> >  - the primary does the shard encoding and distributes the write pieces to
+> >    the other replicas
+> 
+> Although I understand how that would work when a PG receives a CEPH_OSD_OP_WRITEFULL
+> 
+> https://github.com/ceph/ceph/blob/master/src/osd/ReplicatedPG.cc#L2504
+> 
+> It may be inconvenient and expensive to recompute the parity encoded version if an object is written with a series of CEPH_OSD_OP_WRITE. The simplest way would be to decode the existing object, modify it according to what CEPH_OSD_OP_WRITE requires, encode it.
+
+Yeah.  Making small writes remotely efficient is a huge challenge.
+
+OTOH, if we have some sort of symlink/redirect, and we do writes to 
+replicated objects and only write erasure/parity data in full objects, 
+then we avoid that complexity.
+
+> 
+> >  - same for reads
+> >            
+> > There will be a pile of patches to move code around between PG and 
+> > ReplicatedPG, which will be annoying, but hopefully not too painful.  The 
+> > class structure and data types were set up with this in mind long ago.
+> > 
+> > Several key challenges:
+> > 
+> >  - come up with a scheme for internal naming to keep shards distinct
+> >  - safely rewriting a stripe when there is a partial overwrite.  probably 
+> >    want to write new stripes to distinct new objects (cloning old data as 
+> >    needed) and clean up the old ones once enough copies are present.
+> 
+> Do you mean RBD stripes ? 
+
+I'm thinking stipes of a logical object across the object's shards.  
+Mostly in terms of something like RAID4; I'm not sure what terminology is 
+typically used for erasure coding systems.  I'm assuming that stripes of 
+the object would be coded to so that partial object reads/updates of 
+large objects are vaguely efficient...
+
+Ideally, the implementation would have a field indicating what coding 
+technique is used (parity, erasure, whatever).  Different optimizations 
+are best for different coding strategies, but the minimum useful feature 
+in this case wouldn't optimize anything anyway :)
+
+> >  - recovery logic
+> 
+> If recovery is done from the scheduled scrubber in the ErasureCodedPG , I'm not sure if OSD.cc must be modified or is truly independent of the PG type 
+> 
+> https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L3818
+> 
+> I'll keep looking, thanks a lot for the hints :-)
+> 
+> Cheers
+> 
+> > sage
+> > 
+> > 
+> >>
+> >> 	Thx
+> >> 	Christopher
+> >>
+> >>
+> >>
+> >>>
+> >>> Am I missing something ?
+> >>>
+> >>> On 04/22/2013 09:23 AM, Christopher LILJENSTOLPE wrote:
+> >>>> Supposedly, on 2013-Apr-18, at 14.31 PDT(-0700), someone claiming to be Plaetinck, Dieter scribed:
+> >>>>
+> >>>>> On Thu, 18 Apr 2013 16:09:52 -0500
+> >>>>> Mark Nelson <mark.nelson@inktank.com> wrote:
+> >>>>
+> >>>>>>
+> >>>>>
+> >>>>> @Bryan: I did come across cleversafe.  all the articles around it seemed promising,
+> >>>>> but unfortunately it seems everything related to the cleversafe open source project
+> >>>>> somehow vanished from the internet.  (e.g. http://www.cleversafe.org/) quite weird...
+> >>>>>
+> >>>>> @Sage: interesting. I thought it would be more relatively simple if one assumes
+> >>>>> the restriction of immutable files.  I'm not familiar with those ceph specifics you're mentioning.
+> >>>>> When building an erasure codes-based system, maybe there's ways to reuse existing ceph
+> >>>>> code and/or allow some integration with replication based objects, without aiming for full integration or
+> >>>>> full support of the rados api, based on some tradeoffs.
+> >>>>>
+> >>>>> @Josh, that sounds like an interesting approach.  Too bad that page doesn't contain any information yet :)
+> >>>>
+> >>>> Greetings - it does now - see what you all think?
+> >>>>
+> >>>> 	Christopher
+> >>>>
+> >>>>>
+> >>>>> Dieter
+> >>>>
+> >>>>
+> >>>> --
+> >>>> ???
+> >>>> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+> >>>> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+> >>>> Check my calendar availability: https://tungle.me/cdl
+> >>>
+> >>> -- 
+> >>> Lo?c Dachary, Artisan Logiciel Libre
+> >>
+> >>
+> >> --
+> >> ???
+> >> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+> >> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+> >> Check my calendar availability: https://tungle.me/cdl
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> -- 
+> Lo?c Dachary, Artisan Logiciel Libre
+> 
+> 
