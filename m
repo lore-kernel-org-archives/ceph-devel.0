@@ -1,236 +1,265 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: erasure coding (sorry)
-Date: Mon, 22 Apr 2013 20:09:47 +0200
-Message-ID: <51757CEB.4090701@dachary.org>
-References: <20130418162842.0c61d1e2@dieter-t420s> <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net> <517060B2.80706@inktank.com> <51706120.2060702@inktank.com> <20130418173113.74a53769@dieter-t420s> <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org> <5174F08F.2070001@dachary.org> <0AEB5F22-B38F-4702-95A1-B18938FE7F7C@asgaard.org> <alpine.DEB.2.00.1304220805100.14056@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: implement full object parent reads
+Date: Mon, 22 Apr 2013 11:13:15 -0700
+Message-ID: <51757DBB.1080903@inktank.com>
+References: <5171C963.2050402@inktank.com> <5171CA43.5070200@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigA861632CB19D7DCDDBAA7F7F"
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:51483 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754298Ab3DVSJv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 14:09:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1304220805100.14056@cobra.newdream.net>
+Received: from mail-da0-f42.google.com ([209.85.210.42]:60701 "EHLO
+	mail-da0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754466Ab3DVSOA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 14:14:00 -0400
+Received: by mail-da0-f42.google.com with SMTP id n15so1428053dad.29
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 11:14:00 -0700 (PDT)
+In-Reply-To: <5171CA43.5070200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigA861632CB19D7DCDDBAA7F7F
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-Hi Sage,
+Alex Elder <elder@inktank.com> wrote:
+>As a step toward implementing layered writes, implement reading the
+>data for a target object from the parent image for a write request
+>whose target object is known to not exist.  Add a copyup_pages field
+>to an image request to track the page array used (only) for such a
+>request.
+>
+>Signed-off-by: Alex Elder <elder@inktank.com>
+>---
+> drivers/block/rbd.c |  152
+>++++++++++++++++++++++++++++++++++++++++++++++++---
+> 1 file changed, 143 insertions(+), 9 deletions(-)
+>
+>diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>index 91fcf36..c5d0619 100644
+>--- a/drivers/block/rbd.c
+>+++ b/drivers/block/rbd.c
+>@@ -250,6 +250,7 @@ struct rbd_img_request {
+> 		struct request		*rq;		/* block request */
+> 		struct rbd_obj_request	*obj_request;	/* obj req initiator */
+> 	};
+>+	struct page		**copyup_pages;
+> 	spinlock_t		completion_lock;/* protects next_completion */
+> 	u32			next_completion;
+> 	rbd_img_callback_t	callback;
+>@@ -350,6 +351,8 @@ static DEFINE_SPINLOCK(rbd_dev_list_lock);
+> static LIST_HEAD(rbd_client_list);		/* clients */
+> static DEFINE_SPINLOCK(rbd_client_list_lock);
+>
+>+static int rbd_img_request_submit(struct rbd_img_request
+>*img_request);
+>+
+> static int rbd_dev_snaps_update(struct rbd_device *rbd_dev);
+> static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
+>
+>@@ -1956,6 +1959,133 @@ out_unwind:
+> 	return -ENOMEM;
+> }
+>
+>+static void
+>+rbd_img_obj_parent_read_full_callback(struct rbd_img_request
+>*img_request)
+>+{
+>+	struct rbd_obj_request *orig_request;
+>+	struct page **pages;
+>+	u32 page_count;
+>+	int result;
+>+	u64 obj_size;
+>+	u64 xferred;
+>+
+>+	rbd_assert(img_request_child_test(img_request));
+>+
+>+	/* First get what we need from the image request */
+>+
+>+	pages = img_request->copyup_pages;
+>+	rbd_assert(pages != NULL);
+>+	img_request->copyup_pages = NULL;
+>+
+>+	orig_request = img_request->obj_request;
+>+	rbd_assert(orig_request != NULL);
+>+
+>+	result = img_request->result;
+>+	obj_size = img_request->length;
+>+	xferred = img_request->xferred;
+>+
+>+	rbd_img_request_put(img_request);
+>+
+>+	obj_request_existence_set(orig_request, true);
+>+
+>+	page_count = (u32)calc_pages_for(0, obj_size);
+>+	ceph_release_page_vector(pages, page_count);
+>+
+>+	/* Resubmit the original request (for now). */
+>+
+>+	orig_request->result = rbd_img_obj_request_submit(orig_request);
+>+	if (orig_request->result) {
+>+		obj_request_done_set(orig_request);
+>+		rbd_obj_request_complete(orig_request);
+>+	}
+>+}
+>+
+>+/*
+>+ * Read from the parent image the range of data that covers the
+>+ * entire target of the given object request.  This is used for
+>+ * satisfying a layered image write request when the target of an
+>+ * object request from the image request does not exist.
+>+ *
+>+ * A page array big enough to hold the returned data is allocated
+>+ * and supplied to rbd_img_request_fill() as the "data descriptor."
+>+ * When the read completes, this page array will be transferred to
+>+ * the original object request for the copyup operation.
+>+ *
+>+ * If an error occurs, record it as the result of the original
+>+ * object request and mark it done so it gets completed.
+>+ */
+>+static int rbd_img_obj_parent_read_full(struct rbd_obj_request
+>*obj_request)
+>+{
+>+	struct rbd_img_request *img_request = NULL;
+>+	struct rbd_img_request *parent_request = NULL;
+>+	struct rbd_device *rbd_dev;
+>+	u64 img_offset;
+>+	u64 length;
+>+	struct page **pages = NULL;
+>+	u32 page_count;
+>+	int result;
+>+
+>+	rbd_assert(obj_request_img_data_test(obj_request));
+>+	rbd_assert(obj_request->type == OBJ_REQUEST_BIO);
+>+
+>+	img_request = obj_request->img_request;
+>+	rbd_assert(img_request != NULL);
+>+	rbd_dev = img_request->rbd_dev;
+>+	rbd_assert(rbd_dev->parent != NULL);
+>+
+>+	/*
+>+	 * Determine the byte range covered by the object in the
+>+	 * child image to which the original request was to be sent.
+>+	 */
+>+	img_offset = obj_request->img_offset - obj_request->offset;
+>+	length = (u64)1 << rbd_dev->header.obj_order;
+>+
+>+	/*
+>+	 * Allocate a page array big enough to receive the data read
+>+	 * from the parent.
+>+	 */
+>+	page_count = (u32)calc_pages_for(0, length);
+>+	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+>+	if (IS_ERR(pages)) {
+>+		result = PTR_ERR(pages);
+>+		pages = NULL;
+>+		goto out_err;
+>+	}
+>+
+>+	result = -ENOMEM;
+>+	parent_request = rbd_img_request_create(rbd_dev->parent,
+>+						img_offset, length,
+>+						false, true);
+>+	if (!parent_request)
+>+		goto out_err;
+>+	rbd_obj_request_get(obj_request);
+>+	parent_request->obj_request = obj_request;
+>+
+>+	result = rbd_img_request_fill(parent_request, OBJ_REQUEST_PAGES,
+>pages);
+>+	if (result)
+>+		goto out_err;
+>+	parent_request->copyup_pages = pages;
+>+
+>+	parent_request->callback = rbd_img_obj_parent_read_full_callback;
+>+	result = rbd_img_request_submit(parent_request);
+>+	if (!result)
+>+		return 0;
+>+
+>+	parent_request->copyup_pages = NULL;
+>+	parent_request->obj_request = NULL;
+>+	rbd_obj_request_put(obj_request);
+>+out_err:
+>+	if (pages)
+>+		ceph_release_page_vector(pages, page_count);
+>+	if (parent_request)
+>+		rbd_img_request_put(parent_request);
+>+	obj_request->result = result;
+>+	obj_request->xferred = 0;
+>+	obj_request_done_set(obj_request);
+>+
+>+	return result;
+>+}
+>+
+> static void rbd_img_obj_exists_callback(struct rbd_obj_request
+>*obj_request)
+> {
+> 	struct rbd_obj_request *orig_request;
+>@@ -1996,7 +2126,7 @@ static void rbd_img_obj_exists_callback(struct
+>rbd_obj_request *obj_request)
+> 		obj_request_existence_set(orig_request, false);
+> 	} else if (result) {
+> 		orig_request->result = result;
+>-		goto out_err;
+>+		goto out;
+> 	}
+>
+> 	/*
+>@@ -2004,7 +2134,7 @@ static void rbd_img_obj_exists_callback(struct
+>rbd_obj_request *obj_request)
+> 	 * whether the target object exists.
+> 	 */
+> 	orig_request->result = rbd_img_obj_request_submit(orig_request);
+>-out_err:
+>+out:
+> 	if (orig_request->result)
+> 		rbd_obj_request_complete(orig_request);
+> 	rbd_obj_request_put(orig_request);
+>@@ -2070,15 +2200,13 @@ out:
+>static int rbd_img_obj_request_submit(struct rbd_obj_request
+>*obj_request)
+> {
+> 	struct rbd_img_request *img_request;
+>+	bool known;
+>
+> 	rbd_assert(obj_request_img_data_test(obj_request));
+>
+> 	img_request = obj_request->img_request;
+> 	rbd_assert(img_request);
+>
+>-	/* (At the moment we don't care whether it exists or not...) */
+>-	(void) obj_request_exists_test;
+>-
+> 	/*
+> 	 * Only layered writes need special handling.  If it's not a
+> 	 * layered write, or it is a layered write but we know the
+>@@ -2087,7 +2215,8 @@ static int rbd_img_obj_request_submit(struct
+>rbd_obj_request *obj_request)
+> 	 */
+> 	if (!img_request_write_test(img_request) ||
+> 		!img_request_layered_test(img_request) ||
+>-		obj_request_known_test(obj_request)) {
+>+		((known = obj_request_known_test(obj_request)) &&
+>+			obj_request_exists_test(obj_request))) {
+>
+> 		struct rbd_device *rbd_dev;
+> 		struct ceph_osd_client *osdc;
+>@@ -2099,10 +2228,15 @@ static int rbd_img_obj_request_submit(struct
+>rbd_obj_request *obj_request)
+> 	}
+>
+> 	/*
+>-	 * It's a layered write and we don't know whether the target
+>-	 * exists.  Issue existence check; once that completes the
+>-	 * original request will be submitted again.
+>+	 * It's a layered write.  The target object might exist but
+>+	 * we may not know that yet.  If we know it doesn't exist,
+>+	 * start by reading the data for the full target object from
+>+	 * the parent so we can use it for a copyup to the target.
+> 	 */
+>+	if (known)
+>+		return rbd_img_obj_parent_read_full(obj_request);
+>+
+>+	/* We don't know whether the target exists.  Go find out. */
+>
+> 	return rbd_img_obj_exists_submit(obj_request);
+> }
 
-On 04/22/2013 05:09 PM, Sage Weil wrote:
-> On Mon, 22 Apr 2013, Christopher LILJENSTOLPE wrote:
->> Supposedly, on 2013-Apr-22, at 01.10 PDT(-0700), someone claiming to b=
-e Loic Dachary scribed:
->>
->>> Hi Christopher,
->>>
->>> You wrote "A modified client/library could be used to store objects t=
-hat should be sharded, vs "standard" ceph treatment.  In this model, each=
- shard would be written to a seperate PG, and each PG would we stored on =
-exactly one OSD.  " but there is no way for a client to enforce the fact =
-that two objects are stored in separate PG.
->>
->> Poorly worded.  The idea is that each shard becomes a seperate object,=
- and the encoder/sharder would use CRUSH to identify the OSDs to hold the=
- shards.  However, the OSDs would treat the shard as an n=3D1 replication=
- and just store locally. =20
->>
->> Actually, looking at this this morning, this is actually harder than t=
-he prefered alternative (i.e. grafting a encode/decode into the (e)OSD.  =
-It was meant to cover the alternative approaches.  I didn't like this one=
-, but it now appears to be more difficult, and non-deterministic of the p=
-lacement. =20
->>
->> One question on CRUSH (it's been too long since I read the paper), if =
-x is the same for two objects, and, using an n=3D3 returns R=3D{OSD18,OSD=
-45,OSD97}, if an object is handed to OSD45 that matches x, but has an n=3D=
-1, would OSD45 store it, or would it forward it to OSD18 to store?  If it=
- would this idea is DOA.  Also, if x is held invariant, but n changes, do=
-es the same R set get returned (truncated to n members)?
->=20
-> It would go to osd18, the first item in the sequence that CRUSH generat=
-es.
->           =20
-> As Loic observes, not having control of placement from above the librad=
-os
-> level makes this more or less a non-started.  The only thing that might=
-  =20
-> work at that layer is to set up ~5 or more pools, each with a distinct =
-set
-> of OSDs, and put each shard/fragment in a different pool.  I don't thin=
-k =20
-> that is a particularly good approach.
->=20
-> If we are going to do parity encoding (and I think we should!), I think=
- we
-> should fully integrate it into the OSD.
->           =20
-> The simplest approach:
->           =20
->  - we create a new PG type for 'parity' or 'erasure' or whatever (type =
-  =20
->    fields already exist)
->  - those PGs use the parity ('INDEP') crush mode so that placement is
->    intelligent
-
-I assume you do not mean CEPH_FEATURE_INDEP_PG_MAP as used in
-
-https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L5237
-
-but CRUSH_RULE_CHOOSE_INDEP as used in
-
-https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L331
-
-when firstn =3D=3D 0 because it was set in
-
-https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L523
-
-I see that it would be simpler to write
-
-   step choose indep 0 type row
-
-and then rely on intelligent placement. Is there a reason why it would no=
-t be possible to use firstn instead of indep ?
-
->  - all reads and writes go to the 'primary'              =20
->  - the primary does the shard encoding and distributes the write pieces=
- to
->    the other replicas
-
-Although I understand how that would work when a PG receives a CEPH_OSD_O=
-P_WRITEFULL
-
-https://github.com/ceph/ceph/blob/master/src/osd/ReplicatedPG.cc#L2504
-
-It may be inconvenient and expensive to recompute the parity encoded vers=
-ion if an object is written with a series of CEPH_OSD_OP_WRITE. The simpl=
-est way would be to decode the existing object, modify it according to wh=
-at CEPH_OSD_OP_WRITE requires, encode it.
-
->  - same for reads
->           =20
-> There will be a pile of patches to move code around between PG and=20
-> ReplicatedPG, which will be annoying, but hopefully not too painful.  T=
-he=20
-> class structure and data types were set up with this in mind long ago.
->=20
-> Several key challenges:
->=20
->  - come up with a scheme for internal naming to keep shards distinct
->  - safely rewriting a stripe when there is a partial overwrite.  probab=
-ly=20
->    want to write new stripes to distinct new objects (cloning old data =
-as=20
->    needed) and clean up the old ones once enough copies are present.
-
-Do you mean RBD stripes ?=20
-
->  - recovery logic
-
-If recovery is done from the scheduled scrubber in the ErasureCodedPG , I=
-'m not sure if OSD.cc must be modified or is truly independent of the PG =
-type=20
-
-https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L3818
-
-I'll keep looking, thanks a lot for the hints :-)
-
-Cheers
-
-> sage
->=20
->=20
->>
->> 	Thx
->> 	Christopher
->>
->>
->>
->>>
->>> Am I missing something ?
->>>
->>> On 04/22/2013 09:23 AM, Christopher LILJENSTOLPE wrote:
->>>> Supposedly, on 2013-Apr-18, at 14.31 PDT(-0700), someone claiming to=
- be Plaetinck, Dieter scribed:
->>>>
->>>>> On Thu, 18 Apr 2013 16:09:52 -0500
->>>>> Mark Nelson <mark.nelson@inktank.com> wrote:
->>>>
->>>>>>
->>>>>
->>>>> @Bryan: I did come across cleversafe.  all the articles around it s=
-eemed promising,
->>>>> but unfortunately it seems everything related to the cleversafe ope=
-n source project
->>>>> somehow vanished from the internet.  (e.g. http://www.cleversafe.or=
-g/) quite weird...
->>>>>
->>>>> @Sage: interesting. I thought it would be more relatively simple if=
- one assumes
->>>>> the restriction of immutable files.  I'm not familiar with those ce=
-ph specifics you're mentioning.
->>>>> When building an erasure codes-based system, maybe there's ways to =
-reuse existing ceph
->>>>> code and/or allow some integration with replication based objects, =
-without aiming for full integration or
->>>>> full support of the rados api, based on some tradeoffs.
->>>>>
->>>>> @Josh, that sounds like an interesting approach.  Too bad that page=
- doesn't contain any information yet :)
->>>>
->>>> Greetings - it does now - see what you all think?
->>>>
->>>> 	Christopher
->>>>
->>>>>
->>>>> Dieter
->>>>
->>>>
->>>> --
->>>> ???
->>>> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
->>>> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
->>>> Check my calendar availability: https://tungle.me/cdl
->>>
->>> --=20
->>> Lo?c Dachary, Artisan Logiciel Libre
->>
->>
->> --
->> ???
->> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
->> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
->> Check my calendar availability: https://tungle.me/cdl
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enigA861632CB19D7DCDDBAA7F7F
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlF1fOwACgkQ8dLMyEl6F23s/ACguhSQzJ7BlqRcdSyGa5sZy5qs
-UigAmgKPgYzON9JcsudwhhutQ/BRGeIl
-=jBhk
------END PGP SIGNATURE-----
-
---------------enigA861632CB19D7DCDDBAA7F7F--
