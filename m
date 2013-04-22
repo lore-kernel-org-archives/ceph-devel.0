@@ -1,155 +1,39 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/4] rbd: encapsulate submission of image object requests
-Date: Mon, 22 Apr 2013 00:35:33 -0700
-Message-ID: <5174E845.8010900@inktank.com>
-References: <5171C963.2050402@inktank.com> <5171CA1A.6010908@inktank.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [RESEND][PATCH] fs: remove dentry_lru_prune()
+Date: Mon, 22 Apr 2013 17:56:23 +1000
+Message-ID: <20130422075623.GI13938@destitution>
+References: <1366006401-3933-1-git-send-email-zheng.z.yan@intel.com>
+ <alpine.DEB.2.00.1304160755100.23181@cobra.newdream.net>
+ <alpine.DEB.2.00.1304191343110.13036@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f53.google.com ([209.85.210.53]:36009 "EHLO
-	mail-da0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754057Ab3DVHfh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 03:35:37 -0400
-Received: by mail-da0-f53.google.com with SMTP id n34so472405dal.12
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 00:35:36 -0700 (PDT)
-In-Reply-To: <5171CA1A.6010908@inktank.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:5778 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754714Ab3DVHzt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 22 Apr 2013 03:55:49 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1304191343110.13036@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: viro@zeniv.linux.org.uk, "Yan, Zheng" <zheng.z.yan@intel.com>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, greg@inktank.com
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+On Sun, Apr 21, 2013 at 01:34:02PM -0700, Sage Weil wrote:
+> Al-
+> 
+> As I mentioned LSF, since there are no other users except for ceph, it's 
+> probably easiest if this goes through my tree.  Unless you expect 
+> conflicts with other vfs bits or want this to go through the vfs tree... 
+> Either way!
 
-On 04/19/2013 03:50 PM, Alex Elder wrote:
-> Object requests that are part of an image request are subject to
-> some additional handling.  Define rbd_img_obj_request_submit() to
-> encapsulate that, and use it when initially submitting an image
-> object request, and when re-submitting it during callback of
-> an object existence check.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   65
-> ++++++++++++++++++++++++++++++++++-----------------
->   1 file changed, 43 insertions(+), 22 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index a185239..894af4f 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -423,6 +423,7 @@ void rbd_warn(struct rbd_device *rbd_dev, const char
-> *fmt, ...)
->   #endif /* !RBD_DEBUG */
->
->   static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
-> +static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request);
->
->   static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver);
->   static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver);
-> @@ -1874,8 +1875,6 @@ out_unwind:
->
->   static void rbd_img_obj_exists_callback(struct rbd_obj_request
-> *obj_request)
->   {
-> -	struct rbd_device *rbd_dev;
-> -	struct ceph_osd_client *osdc;
->   	struct rbd_obj_request *orig_request;
->   	int result;
->
-> @@ -1901,8 +1900,6 @@ static void rbd_img_obj_exists_callback(struct
-> rbd_obj_request *obj_request)
->
->   	rbd_assert(orig_request);
->   	rbd_assert(orig_request->img_request);
-> -	rbd_dev = orig_request->img_request->rbd_dev;
-> -	osdc = &rbd_dev->rbd_client->client->osdc;
->
->   	/*
->   	 * Our only purpose here is to determine whether the object
-> @@ -1923,7 +1920,7 @@ static void rbd_img_obj_exists_callback(struct
-> rbd_obj_request *obj_request)
->   	 * Resubmit the original request now that we have recorded
->   	 * whether the target object exists.
->   	 */
-> -	orig_request->result = rbd_obj_request_submit(osdc, orig_request);
-> +	orig_request->result = rbd_img_obj_request_submit(orig_request);
->   out_err:
->   	if (orig_request->result)
->   		rbd_obj_request_complete(orig_request);
-> @@ -1987,32 +1984,56 @@ out:
->   	return ret;
->   }
->
-> +static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
-> +{
-> +	struct rbd_img_request *img_request;
-> +
-> +	rbd_assert(obj_request_img_data_test(obj_request));
-> +
-> +	img_request = obj_request->img_request;
-> +	rbd_assert(img_request);
-> +
-> +	/* (At the moment we don't care whether it exists or not...) */
-> +	(void) obj_request_exists_test;
-> +
-> +	/*
-> +	 * Only layered writes need special handling.  If it's not a
-> +	 * layered write, or it is a layered write but we know the
-> +	 * target object exists, it's no different from any other
-> +	 * object request.
-> +	 */
-> +	if (!img_request_write_test(img_request) ||
-> +		!img_request_layered_test(img_request) ||
-> +		obj_request_known_test(obj_request)) {
-> +
-> +		struct rbd_device *rbd_dev;
-> +		struct ceph_osd_client *osdc;
-> +
-> +		rbd_dev = obj_request->img_request->rbd_dev;
-> +		osdc = &rbd_dev->rbd_client->client->osdc;
-> +
-> +		return rbd_obj_request_submit(osdc, obj_request);
-> +	}
-> +
-> +	/*
-> +	 * It's a layered write and we don't know whether the target
-> +	 * exists.  Issue existence check; once that completes the
-> +	 * original request will be submitted again.
-> +	 */
-> +
-> +	return rbd_img_obj_exists_submit(obj_request);
-> +}
-> +
->   static int rbd_img_request_submit(struct rbd_img_request *img_request)
->   {
-> -	struct rbd_device *rbd_dev = img_request->rbd_dev;
-> -	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
->   	struct rbd_obj_request *obj_request;
->   	struct rbd_obj_request *next_obj_request;
-> -	bool write_request = img_request_write_test(img_request);
-> -	bool layered = img_request_layered_test(img_request);
->
->   	dout("%s: img %p\n", __func__, img_request);
->   	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
-> -		bool known;
-> -		bool object_exists;
->   		int ret;
->
-> -		/*
-> -		 * We need to know whether the target object exists
-> -		 * for a layered write.  Issue an existence check
-> -		 * first if we need to.
-> -		 */
-> -		known = obj_request_known_test(obj_request);
-> -		object_exists = known && obj_request_exists_test(obj_request);
-> -		if (!write_request || !layered || object_exists)
-> -			ret = rbd_obj_request_submit(osdc, obj_request);
-> -		else
-> -			ret = rbd_img_obj_exists_submit(obj_request);
-> +		ret = rbd_img_obj_request_submit(obj_request);
->   		if (ret)
->   			return ret;
->   	}
->
+Sage, it'll probably conflict with the generic LRU rework, so there
+might be some co-ordination needed there...
 
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
