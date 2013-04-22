@@ -1,97 +1,83 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor write performance
-Date: Mon, 22 Apr 2013 06:34:09 -0500
-Message-ID: <51752031.2060704@inktank.com>
-References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au> <517159C3.5030100@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D73B75D@BITCOM1.int.sbss.com.au> <5173EF05.9000404@inktank.com> <6035A0D088A63A46850C3988ED045A4B4F362FEA@BITCOM1.int.sbss.com.au>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: poor write performance
+Date: Mon, 22 Apr 2013 11:34:10 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B4F3636DC@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au>
+	<516FF893.1030309@inktank.com>
+	<6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au>
+	<6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au>
+	<6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au>
+	<6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au>
+	<517159C3.5030100@inktank.com>
+	<6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au>
+	<CAF6-1L4Yxqmq0yED+gA_Xgupzg6AvWi6mBD59-aXYgUj3foaTw@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B4F36261A@BITCOM1.int.sbss.com.au>
+ <CAF6-1L5aindF_41=d6JKvut5cBzXx_1btGw-EteGmijoma616A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:65252 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751718Ab3DVLeM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 07:34:12 -0400
-Received: by mail-ie0-f169.google.com with SMTP id ar20so7017138iec.28
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 04:34:12 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B4F362FEA@BITCOM1.int.sbss.com.au>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:60437 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751718Ab3DVLe3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 07:34:29 -0400
+In-Reply-To: <CAF6-1L5aindF_41=d6JKvut5cBzXx_1btGw-EteGmijoma616A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 04/22/2013 12:32 AM, James Harper wrote:
->>
->> On 04/19/2013 08:30 PM, James Harper wrote:
->>>>> rados -p <pool> -b 4096 bench 300 seq -t 64
->>>>
->>>> sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
->>>>        0       0         0         0         0         0         -         0
->>>> read got -2
->>>> error during benchmark: -5
->>>> error 5: (5) Input/output error
->>>>
->>>> not sure what that's about...
->>>>
->>>
->>> Oops... I typo'd --no-cleanup. Now I get:
->>>
->>>      sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
->>>        0       0         0         0         0         0         -         0
->>>    Total time run:        0.243709
->>> Total reads made:     1292
->>> Read size:            4096
->>> Bandwidth (MB/sec):    20.709
->>>
->>> Average Latency:       0.0118838
->>> Max latency:           0.031942
->>> Min latency:           0.001445
->>>
->>> So it finishes instantly without seeming to do much actual testing...
->>
->> My bad.  I forgot to tell you to do a sync/flush on the OSDs after the
->> write test.  All of those reads are probably coming from pagecache.  The
->> good news is that this is demonstrating that reading 4k objects from
->> pagecache isn't insanely bad on your setup (for larger sustained loads I
->> see 4k object reads from pagecache hit up to around 100MB/s with
->> multiple clients on my test nodes).
->>
->> On your OSD nodes try:
->>
->> sync
->> echo 3 > /proc/sys/vm/drop_caches
->>
->> right before you run the read test.
->>
->
-> I tell it to test for 300 seconds and it tests for 0 seconds so I must be doing something else wrong.
->
+> Hi,
+> 
+> > Correct, but that's the theoretical maximum I was referring to. If I calculate
+> that I should be able to get 50MB/second then 30MB/second is acceptable
+> but 500KB/second is not :)
+> 
+> I have written a small benchmark for RBD :
+> 
+> https://gist.github.com/smunaut/5433222
+> 
+> It uses the librbd API directly without kernel client and queue
+> requests long in advance and this should give an "upper" bound to what
+> you can get at best.
+> It reads and writes the whole image, so I usually just create a 1 or 2
+> G image for testing.
+> 
+> Using two OSDs on two distinct recent 7200rpm drives (with journal on
+> the same disk as data), I get :
+> 
+> Read: 89.52 Mb/s (2147483648 bytes in 22877 ms)
+> Write: 10.62 Mb/s (2147483648 bytes in 192874 ms)
+> 
 
-It will try to read for up to 300 seconds, but if it runs out of data it 
-stops.  Since you only wrote out something like 1300 4k objects, and you 
-were reading at 20+MB/s, the test ran for under a second.
+I like your benchmark tool!
 
->> Whatever issue you are facing is probably down at the filestore level or
->> possible lower down yet.
->>
->> How do your drives benchmark with something like fio doing random 4k
->> writes?  Are your drives dedicated for ceph?  What filesystem?  Also
->> what is the journal device you are using?
->>
->
-> Drives are dedicated for ceph. I originally put my journals on /, but that was ext3 and my throughput went down even further so the journal shares the osd disk for now.
->
-> I upgraded to 0.60 and that seems to have made a big difference. If I kill off one of my OSD's I get around 20MB/second throughput in live testing (test restore of Xen Windows VM from USB backup), which is pretty much the limit of the USB disk. If I reactivate the second OSD throughput drops back to ~10MB/second which isn't as good but is much better than I was getting.
->
+How many replicas? With two OSD's with xfs on ~3yo 1TB disks with two replicas I get:
 
-Ah, are these disks both connected through USB(2?)?
+# ./a.out admin xen test
+Read: 111.99 Mb/s (1073741824 bytes in 9144 ms)
+Write: 29.68 Mb/s (1073741824 bytes in 34507 ms)
 
-> Thanks
->
-> James
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Which means I forgot to drop caches on the OSD's so I'm seeing the limit on my public network (single gigabit interface). After dropping caches I consistently get:
+
+# ./a.out admin xen test
+Read: 39.98 Mb/s (1073741824 bytes in 25614 ms)
+Write: 23.11 Mb/s (1073741824 bytes in 44316 ms)
+
+Journal is on the same disk. Network is... confusing :) but is basically public on a single gigabit and cluster on a bonded pair of gigabit links. The whole network thing is shared with my existing drbd cluster so performance may vary over time.
+
+My read speed is consistently around 40MB/second, and my write speed is consistently around 22MB/second. I had expected better of read...
+
+While running, iostat on each osd reports a read rate of around 20MB/second (1/2 total on each) during read test and a rate of 40-60MB/second (~2x total on each) during write test, which is pretty much exactly right.
+
+iperf on the cluster network (pair of gigabits bonded) gives me about 1.97Gbits/second. iperf between osd and client is around 0.94Gbits/second.
+
+changing the scheduler on the harddisk doesn't seem to make any difference, even when I set it to cfq which normally really sucks.
+
+What ceph version are you using and what filesystem?
+
+Thanks
+
+James
 
