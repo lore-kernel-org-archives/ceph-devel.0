@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/2] libceph: add signed type limits
-Date: Mon, 22 Apr 2013 15:55:59 -0700
-Message-ID: <5175BFFF.5090303@inktank.com>
-References: <51745629.7080207@inktank.com> <51745656.60504@inktank.com> <517456CA.7040408@inktank.com>
+Subject: Re: [PATCH 2/2] libceph: validate timespec conversions
+Date: Mon, 22 Apr 2013 15:57:08 -0700
+Message-ID: <5175C044.20309@inktank.com>
+References: <51745629.7080207@inktank.com> <517456D7.8090603@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:62953 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751474Ab3DVW4n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 18:56:43 -0400
-Received: by mail-pa0-f42.google.com with SMTP id kl13so60095pab.15
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 15:56:43 -0700 (PDT)
-In-Reply-To: <517456CA.7040408@inktank.com>
+Received: from mail-pd0-f178.google.com ([209.85.192.178]:57847 "EHLO
+	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752616Ab3DVW5x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 18:57:53 -0400
+Received: by mail-pd0-f178.google.com with SMTP id w11so3903044pde.37
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 15:57:52 -0700 (PDT)
+In-Reply-To: <517456D7.8090603@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,48 +21,47 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 04/21/2013 02:14 PM, Alex Elder wrote:
-> (Sorry, the subject line didn't match the content.
-> Please ignore the previous one--this is the right
-> patch.)
+On 04/21/2013 02:15 PM, Alex Elder wrote:
+> A ceph timespec contains 32-bit unsigned values for its seconds and
+> nanoseconds components.  For a standard timespec, both fields are
+> signed, and the seconds field is almost surely 64 bits.
 >
->
-> Flesh out the limits defined in <linux/ceph/decode.h> to include the
-> maximum and minimum values for signed type S8, S16, S32, and S64.
+> Add some explicit casts so the fact that this conversion is taking
+> place is obvious.  Also trip a bug if we ever try to put out of
+> range (negative or too big) values into a ceph timespec.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   include/linux/ceph/decode.h |   18 ++++++++++++++----
->   1 file changed, 14 insertions(+), 4 deletions(-)
+>   include/linux/ceph/decode.h |   13 +++++++++----
+>   1 file changed, 9 insertions(+), 4 deletions(-)
 >
 > diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-> index 689f1df..9575a52 100644
+> index 9575a52..379f715 100644
 > --- a/include/linux/ceph/decode.h
 > +++ b/include/linux/ceph/decode.h
-> @@ -10,10 +10,20 @@
->
->   /* This seemed to be the easiest place to define these */
->
-> -#define	U8_MAX	((u8)  (~0U))
-> -#define	U16_MAX	((u16) (~0U))
-> -#define	U32_MAX	((u32) (~0U))
-> -#define	U64_MAX	((u64) (~0ULL))
-> +#define	U8_MAX	((u8)(~0U))
-> +#define	U16_MAX	((u16)(~0U))
-> +#define	U32_MAX	((u32)(~0U))
-> +#define	U64_MAX	((u64)(~0ULL))
+> @@ -154,14 +154,19 @@ bad:
+>   static inline void ceph_decode_timespec(struct timespec *ts,
+>   					const struct ceph_timespec *tv)
+>   {
+> -	ts->tv_sec = le32_to_cpu(tv->tv_sec);
+> -	ts->tv_nsec = le32_to_cpu(tv->tv_nsec);
+> +	ts->tv_sec = (__kernel_time_t)le32_to_cpu(tv->tv_sec);
+> +	ts->tv_nsec = (long)le32_to_cpu(tv->tv_nsec);
+>   }
+>   static inline void ceph_encode_timespec(struct ceph_timespec *tv,
+>   					const struct timespec *ts)
+>   {
+> -	tv->tv_sec = cpu_to_le32(ts->tv_sec);
+> -	tv->tv_nsec = cpu_to_le32(ts->tv_nsec);
+> +	BUG_ON(ts->tv_sec < 0);
+> +	BUG_ON(ts->tv_sec > (__kernel_time_t)U32_MAX);
+> +	BUG_ON(ts->tv_nsec < 0);
+> +	BUG_ON(ts->tv_nsec > (long)U32_MAX);
 > +
-> +#define	S8_MAX	((s8)(U8_MAX >> 1))
-> +#define	S16_MAX	((s16)(U16_MAX >> 1))
-> +#define	S32_MAX	((s32)(U32_MAX >> 1))
-> +#define	S64_MAX	((s64)(U64_MAX >> 1LL))
-> +
-> +#define	S8_MIN	((s8)(-S8_MAX - 1))
-> +#define	S16_MIN	((s16)(-S16_MAX - 1))
-> +#define	S32_MIN	((s32)(-S32_MAX - 1))
-> +#define	S64_MIN	((s64)(-S64_MAX - 1LL))
+> +	tv->tv_sec = cpu_to_le32((u32)ts->tv_sec);
+> +	tv->tv_nsec = cpu_to_le32((u32)ts->tv_nsec);
+>   }
 >
 >   /*
->    * in all cases,
 >
 
