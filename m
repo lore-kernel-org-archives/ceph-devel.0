@@ -1,81 +1,45 @@
-From: Olivier Bonvalet <ovh.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: Scrub shutdown the OSD process / data loss
-Date: Mon, 22 Apr 2013 19:05:00 +0200
-Message-ID: <1366650300.32627.1.camel@localhost>
-References: <1366018923.3018.3.camel@localhost>
-	<CAPYLRziFNxnUhyxHRUCzZBF6oQwrWt8YdxBtDrKzMMNuyuW=YQ@mail.gmail.com>
-	<1366046351.26980.0.camel@localhost>
-	<CAPYLRzjz3FVvm5OH-TBN3R8tmv8LREFYKTEX41Zk7DTLjoPXkA@mail.gmail.com>
-	<1366095376.3018.28.camel@localhost>
-	<1366192124.14655.20.camel@localhost>
-	<1366224725.14655.30.camel@localhost>
-	<1366441839.13398.6.camel@localhost>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: revalidate_disk upon rbd resize
+Date: Mon, 22 Apr 2013 12:10:41 -0500
+Message-ID: <51756F11.6050708@inktank.com>
+References: <1365774766-29899-1-git-send-email-laurent@ksperis.com> <516C37D5.1090804@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1366441839.13398.6.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:53223 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753244Ab3DVRKp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 13:10:45 -0400
+Received: by mail-ie0-f177.google.com with SMTP id 9so7134628iec.8
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 10:10:45 -0700 (PDT)
+In-Reply-To: <516C37D5.1090804@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Laurent Barbe <laurent@ksperis.com>
+Cc: ceph-devel@vger.kernel.org
 
-TGUgc2FtZWRpIDIwIGF2cmlsIDIwMTMgw6AgMDk6MTAgKzAyMDAsIE9saXZpZXIgQm9udmFsZXQg
-YSDDqWNyaXQgOgo+IExlIG1lcmNyZWRpIDE3IGF2cmlsIDIwMTMgw6AgMjA6NTIgKzAyMDAsIE9s
-aXZpZXIgQm9udmFsZXQgYSDDqWNyaXQgOgo+ID4gV2hhdCBJIGRpZG4ndCB1bmRlcnN0YW5kIGlz
-IHdoeSB0aGUgT1NEIHByb2Nlc3MgY3Jhc2gsIGluc3RlYWQgb2YKPiA+IG1hcmtpbmcgdGhhdCBQ
-RyAiY29ycnVwdGVkIiwgYW5kIGRvZXMgdGhhdCBQRyByZWFsbHkgImNvcnJ1cHRlZCIgYXJlCj4g
-PiBpcwo+ID4gdGhpcyBqdXN0IGFuIE9TRCBidWcgPwo+IAo+IE9uY2UgYWdhaW4sIGEgYml0IG1v
-cmUgaW5mb3JtYXRpb25zIDogYnkgc2VhcmNoaW5nIGluZm9ybWF0aW9ucyBhYm91dAo+IG9uZSBv
-ZiB0aGlzIGZhdWx0eSBQRyAoMy5kKSwgSSBmb3VuZCB0aGF0IDoKPiAKPiAgIC01OTI+IDIwMTMt
-MDQtMjAgMDg6MzE6NTYuODM4MjgwIDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VSUl0gOiAzLmQgb3Nk
-LjI1IGluY29uc2lzdGVudCBzbmFwY29sbHMgb24gYTg2MjBiMGQvcmIuMC4xNWMyNi4yMzhlMWYy
-OS4wMDAwMDAwMDQ2MDMvMTJkNy8vMyBmb3VuZCAgZXhwZWN0ZWQgMTJkNwo+ICAgLTU5MT4gMjAx
-My0wNC0yMCAwODozMTo1Ni44MzgyODQgN2YwZjQxZDFiNzAwICAwIGxvZyBbRVJSXSA6IDMuZCBv
-c2QuNCBpbmNvbnNpc3RlbnQgc25hcGNvbGxzIG9uIGE4NjIwYjBkL3JiLjAuMTVjMjYuMjM4ZTFm
-MjkuMDAwMDAwMDA0NjAzLzEyZDcvLzMgZm91bmQgIGV4cGVjdGVkIDEyZDcKPiAgIC01OTA+IDIw
-MTMtMDQtMjAgMDg6MzE6NTYuODM4MjkwIDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VSUl0gOiAzLmQg
-b3NkLjQ6IHNvaWQgYTg2MjBiMGQvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAwMDQ2MDMvMTJk
-Ny8vMyBzaXplIDQxOTQzMDQgIT0ga25vd24gc2l6ZSAwCj4gICAtNTg5PiAyMDEzLTA0LTIwIDA4
-OjMxOjU2LjgzODI5MiA3ZjBmNDFkMWI3MDAgIDAgbG9nIFtFUlJdIDogMy5kIG9zZC4xMSBpbmNv
-bnNpc3RlbnQgc25hcGNvbGxzIG9uIGE4NjIwYjBkL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAw
-MDA0NjAzLzEyZDcvLzMgZm91bmQgIGV4cGVjdGVkIDEyZDcKPiAgIC01ODg+IDIwMTMtMDQtMjAg
-MDg6MzE6NTYuODM4Mjk0IDdmMGY0MWQxYjcwMCAgMCBsb2cgW0VSUl0gOiAzLmQgb3NkLjExOiBz
-b2lkIGE4NjIwYjBkL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDA0NjAzLzEyZDcvLzMgc2l6
-ZSA0MTk0MzA0ICE9IGtub3duIHNpemUgMAo+ICAgLTU4Nz4gMjAxMy0wNC0yMCAwODozMTo1Ni44
-MzgzOTUgN2YwZjQxZDFiNzAwICAwIGxvZyBbRVJSXSA6IHNjcnViIDMuZCBhODYyMGIwZC9yYi4w
-LjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwNDYwMy8xMmQ3Ly8zIG9uIGRpc2sgc2l6ZSAoMCkgZG9l
-cyBub3QgbWF0Y2ggb2JqZWN0IGluZm8gc2l6ZSAoNDE5NDMwNCkKPiAKPiAKPiBJIHByZWZlcmVk
-IHRvIHZlcmlmeSwgc28gSSBmb3VuZCB0aGF0IDoKPiAKPiAjIG1kNXN1bSAvdmFyL2xpYi9jZXBo
-L29zZC9jZXBoLSovY3VycmVudC8zLmRfaGVhZC9ESVJfRC9ESVJfMC9ESVJfQi9ESVJfMC9yYi4w
-LjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwNDYwM19fMTJkN19BODYyMEIwRF9fMwo+IDIxN2FjMjUx
-OGRmZTllMTUwMmU1YmZlZGI4YmUyOWI4ICAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTQvY3VycmVu
-dC8zLmRfaGVhZC9ESVJfRC9ESVJfMC9ESVJfQi9ESVJfMC9yYi4wLjE1YzI2LjIzOGUxZjI5LjAw
-MDAwMDAwNDYwM19fMTJkN19BODYyMEIwRF9fMyAoNE1CKQo+IDIxN2FjMjUxOGRmZTllMTUwMmU1
-YmZlZGI4YmUyOWI4ICAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTExL2N1cnJlbnQvMy5kX2hlYWQv
-RElSX0QvRElSXzAvRElSX0IvRElSXzAvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAwMDQ2MDNf
-XzEyZDdfQTg2MjBCMERfXzMgKDRNQikKPiBkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3
-ZSAgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yNS9jdXJyZW50LzMuZF9oZWFkL0RJUl9EL0RJUl8w
-L0RJUl9CL0RJUl8wL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDA0NjAzX18xMmQ3X0E4NjIw
-QjBEX18zICgwQikKPiAKPiAKPiBTbyB0aGlzIG9iamVjdCBpcyBpZGVudGljYWwgb24gT1NEIDQg
-YW5kIDExLCBidXQgaXMgZW1wdHkgb24gT1NEIDI1Lgo+IFNpbmNlIDQgaXMgdGhlIG1hc3Rlciwg
-dGhpcyBzaG91bGQgbm90IGJlIGEgcHJvYmxlbSwgc28gSSB0cnkgYSByZXBhaXIsCj4gd2l0aG91
-dCBhbnkgc3VjY2VzcyA6Cj4gICAgIGNlcGggcGcgcmVwYWlyIDMuZAo+IAo+IAo+IElzIHRoZXJl
-IGEgd2F5IHRvIGZvcmNlIHJld3JpdGUgb2YgdGhpcyByZXBsaWNhID8KPiAKPiBfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGlu
-ZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQoKCkRvbid0IGtub3cgaWYgaXQncyBy
-ZWxhdGVkLCBidXQgSSBzZWUgZGF0YSBsb3NzIG9uIG15IGNsdXN0ZXIgb24KbXVsdGlwbGUgUkJE
-IGltYWdlcyAoY29ycnVwdGVkIEZTLCBkYXRhYmFzZSBhbmQgc29tZSBlbXB0eSBmaWxlcykuCgpJ
-IHN1cHBvc2UgSXQncyByZWxhdGVkLgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20K
+On 04/15/2013 12:24 PM, Alex Elder wrote:
+> On 04/12/2013 08:52 AM, Laurent Barbe wrote:
+>> If rbd disk is open and rbd resize is done, new size is not visible by
+>> filesystem.
+>> Like is done in virtio-blk and dm driver, revalidate_disk() permits to
+>> update the bd_inode size.
+>>
+>> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
+> 
+> This one looks good (too).  And this time I've tested
+> it just to be sure I get no lockdep warnings.  Unless
+> I see any strangeness in my sanity testing (which I
+> don't expect) I'll commit this to the testing branch
+> later today.  Thanks a lot.
+> 
+> Reviewed-by: Alex Elder <elder@inktank.com>
+
+I have committed this to the "testing" branch of the
+ceph-client git repository.
+
+					-Alex
+
+
+. . .
