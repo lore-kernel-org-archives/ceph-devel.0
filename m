@@ -1,97 +1,205 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: erasure coding (sorry)
-Date: Mon, 22 Apr 2013 10:10:55 +0200
-Message-ID: <5174F08F.2070001@dachary.org>
-References: <20130418162842.0c61d1e2@dieter-t420s> <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net> <517060B2.80706@inktank.com> <51706120.2060702@inktank.com> <20130418173113.74a53769@dieter-t420s> <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 4/4] rbd: support page array image requests
+Date: Mon, 22 Apr 2013 01:13:08 -0700
+Message-ID: <5174F114.1030408@inktank.com>
+References: <5171C963.2050402@inktank.com> <5171CA35.40409@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigA1DEE4B606D6057C370EA3FA"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:48082 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753941Ab3DVIK6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 04:10:58 -0400
-In-Reply-To: <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org>
+Received: from mail-da0-f45.google.com ([209.85.210.45]:55951 "EHLO
+	mail-da0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755636Ab3DVINL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 04:13:11 -0400
+Received: by mail-da0-f45.google.com with SMTP id v40so2983923dad.32
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Apr 2013 01:13:11 -0700 (PDT)
+In-Reply-To: <5171CA35.40409@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christopher LILJENSTOLPE <cdl@asgaard.org>
-Cc: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigA1DEE4B606D6057C370EA3FA
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+One typo in a comment. Looks good otherwise.
 
-Hi Christopher,
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-You wrote "A modified client/library could be used to store objects that =
-should be sharded, vs "standard" ceph treatment.  In this model, each sha=
-rd would be written to a seperate PG, and each PG would we stored on exac=
-tly one OSD.  " but there is no way for a client to enforce the fact that=
- two objects are stored in separate PG.
+On 04/19/2013 03:50 PM, Alex Elder wrote:
+> This patch adds the ability to build an image request whose data
+> will be written from or read into memory described by a page array.
+> (Previously only bio lists were supported.)
+>
+> Originally this was going to define a new function for this purpose
+> but it was largely identical to the rbd_img_request_fill_bio().  So
+> instead, rbd_img_request_fill_bio() has been generalized to handle
+> both types of image request.
+>
+> For the moment we still only fill image requests with bio data.
+>
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   86
+> +++++++++++++++++++++++++++++++++++++++------------
+>   1 file changed, 66 insertions(+), 20 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index ac9abab..91fcf36 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1780,6 +1780,13 @@ static bool rbd_img_obj_end_request(struct
+> rbd_obj_request *obj_request)
+>   			img_request->result = result;
+>   	}
+>
+> +	/* Image object requests don't own their page array */
+> +
+> +	if (obj_request->type == OBJ_REQUEST_PAGES) {
+> +		obj_request->pages = NULL;
+> +		obj_request->page_count = 0;
+> +	}
+> +
+>   	if (img_request_child_test(img_request)) {
+>   		rbd_assert(img_request->obj_request != NULL);
+>   		more = obj_request->which < img_request->obj_request_count - 1;
+> @@ -1830,30 +1837,48 @@ out:
+>   		rbd_img_request_complete(img_request);
+>   }
+>
+> -static int rbd_img_request_fill_bio(struct rbd_img_request *img_request,
+> -					struct bio *bio_list)
+> +/*
+> + * Split up an image request into one or more object requests, each
+> + * to a different object.  The the "type" parameter indicates
 
-Am I missing something ?
+repeated "the"
 
-On 04/22/2013 09:23 AM, Christopher LILJENSTOLPE wrote:
-> Supposedly, on 2013-Apr-18, at 14.31 PDT(-0700), someone claiming to be=
- Plaetinck, Dieter scribed:
->=20
->> On Thu, 18 Apr 2013 16:09:52 -0500
->> Mark Nelson <mark.nelson@inktank.com> wrote:
->=20
->>>
->>
->> @Bryan: I did come across cleversafe.  all the articles around it seem=
-ed promising,
->> but unfortunately it seems everything related to the cleversafe open s=
-ource project
->> somehow vanished from the internet.  (e.g. http://www.cleversafe.org/)=
- quite weird...
->>
->> @Sage: interesting. I thought it would be more relatively simple if on=
-e assumes
->> the restriction of immutable files.  I'm not familiar with those ceph =
-specifics you're mentioning.
->> When building an erasure codes-based system, maybe there's ways to reu=
-se existing ceph
->> code and/or allow some integration with replication based objects, wit=
-hout aiming for full integration or
->> full support of the rados api, based on some tradeoffs.
->>
->> @Josh, that sounds like an interesting approach.  Too bad that page do=
-esn't contain any information yet :)
->=20
-> Greetings - it does now - see what you all think=E2=80=A6
->=20
-> 	Christopher
->=20
->>
->> Dieter
->=20
->=20
-> --
-> =E6=9D=8E=E6=9F=AF=E7=9D=BF
-> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
-> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
-> Check my calendar availability: https://tungle.me/cdl
+> + * whether "data_desc" is the pointer to the head of a list of bio
+> + * structures, or the base of a page array.  In either case this
+> + * function assumes data_desc describes memory sufficient to hold
+> + * all data described by the image request.
+> + */
+> +static int rbd_img_request_fill(struct rbd_img_request *img_request,
+> +					enum obj_request_type type,
+> +					void *data_desc)
+>   {
+>   	struct rbd_device *rbd_dev = img_request->rbd_dev;
+>   	struct rbd_obj_request *obj_request = NULL;
+>   	struct rbd_obj_request *next_obj_request;
+>   	bool write_request = img_request_write_test(img_request);
+> -	unsigned int bio_offset;
+> +	struct bio *bio_list;
+> +	unsigned int bio_offset = 0;
+> +	struct page **pages;
+>   	u64 img_offset;
+>   	u64 resid;
+>   	u16 opcode;
+>
+> -	dout("%s: img %p bio %p\n", __func__, img_request, bio_list);
+> +	dout("%s: img %p type %d data_desc %p\n", __func__, img_request,
+> +		(int)type, data_desc);
+>
+>   	opcode = write_request ? CEPH_OSD_OP_WRITE : CEPH_OSD_OP_READ;
+> -	bio_offset = 0;
+>   	img_offset = img_request->offset;
+> -	rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
+>   	resid = img_request->length;
+>   	rbd_assert(resid > 0);
+> +
+> +	if (type == OBJ_REQUEST_BIO) {
+> +		bio_list = data_desc;
+> +		rbd_assert(img_offset == bio_list->bi_sector << SECTOR_SHIFT);
+> +	} else {
+> +		rbd_assert(type == OBJ_REQUEST_PAGES);
+> +		pages = data_desc;
+> +	}
+> +
+>   	while (resid) {
+>   		struct ceph_osd_request *osd_req;
+>   		const char *object_name;
+> -		unsigned int clone_size;
+>   		u64 offset;
+>   		u64 length;
+>
+> @@ -1863,19 +1888,33 @@ static int rbd_img_request_fill_bio(struct
+> rbd_img_request *img_request,
+>   		offset = rbd_segment_offset(rbd_dev, img_offset);
+>   		length = rbd_segment_length(rbd_dev, img_offset, resid);
+>   		obj_request = rbd_obj_request_create(object_name,
+> -						offset, length,
+> -						OBJ_REQUEST_BIO);
+> +						offset, length, type);
+>   		kfree(object_name);	/* object request has its own copy */
+>   		if (!obj_request)
+>   			goto out_unwind;
+>
+> -		rbd_assert(length <= (u64) UINT_MAX);
+> -		clone_size = (unsigned int) length;
+> -		obj_request->bio_list = bio_chain_clone_range(&bio_list,
+> -						&bio_offset, clone_size,
+> -						GFP_ATOMIC);
+> -		if (!obj_request->bio_list)
+> -			goto out_partial;
+> +		if (type == OBJ_REQUEST_BIO) {
+> +			unsigned int clone_size;
+> +
+> +			rbd_assert(length <= (u64)UINT_MAX);
+> +			clone_size = (unsigned int)length;
+> +			obj_request->bio_list =
+> +					bio_chain_clone_range(&bio_list,
+> +								&bio_offset,
+> +								clone_size,
+> +								GFP_ATOMIC);
+> +			if (!obj_request->bio_list)
+> +				goto out_partial;
+> +		} else {
+> +			unsigned int page_count;
+> +
+> +			obj_request->pages = pages;
+> +			page_count = (u32)calc_pages_for(offset, length);
+> +			obj_request->page_count = page_count;
+> +			if ((offset + length) & ~PAGE_MASK)
+> +				page_count--;	/* more on last page */
+> +			pages += page_count;
+> +		}
+>
+>   		osd_req = rbd_osd_req_create(rbd_dev, write_request,
+>   						obj_request);
+> @@ -1886,8 +1925,13 @@ static int rbd_img_request_fill_bio(struct
+> rbd_img_request *img_request,
+>
+>   		osd_req_op_extent_init(osd_req, 0, opcode, offset, length,
+>   						0, 0);
+> -		osd_req_op_extent_osd_data_bio(osd_req, 0,
+> -				obj_request->bio_list, obj_request->length);
+> +		if (type == OBJ_REQUEST_BIO)
+> +			osd_req_op_extent_osd_data_bio(osd_req, 0,
+> +					obj_request->bio_list, length);
+> +		else
+> +			osd_req_op_extent_osd_data_pages(osd_req, 0,
+> +					obj_request->pages, length,
+> +					offset & ~PAGE_MASK, false, false);
+>
+>   		if (write_request)
+>   			rbd_osd_req_format_write(obj_request);
+> @@ -2120,7 +2164,8 @@ static void rbd_img_parent_read(struct
+> rbd_obj_request *obj_request)
+>   	rbd_obj_request_get(obj_request);
+>   	img_request->obj_request = obj_request;
+>
+> -	result = rbd_img_request_fill_bio(img_request, obj_request->bio_list);
+> +	result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
+> +					obj_request->bio_list);
+>   	if (result)
+>   		goto out_err;
+>
+> @@ -2425,7 +2470,8 @@ static void rbd_request_fn(struct request_queue *q)
+>
+>   		img_request->rq = rq;
+>
+> -		result = rbd_img_request_fill_bio(img_request, rq->bio);
+> +		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
+> +						rq->bio);
+>   		if (!result)
+>   			result = rbd_img_request_submit(img_request);
+>   		if (result)
+>
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---------------enigA1DEE4B606D6057C370EA3FA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlF08I8ACgkQ8dLMyEl6F21d+wCfVNDilO8V1DIptLCWFTZHjrcx
-fn4AnRNUn1qjTYjKnLlNQ4Vu83vRDHUH
-=elts
------END PGP SIGNATURE-----
-
---------------enigA1DEE4B606D6057C370EA3FA--
