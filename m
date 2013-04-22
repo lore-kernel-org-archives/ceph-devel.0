@@ -1,85 +1,35 @@
-From: Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>
-Subject: Unique bug in ceph start script
-Date: Mon, 22 Apr 2013 17:06:12 +0200
-Message-ID: <20130422150612.GA22006@upset.ux.pdb.fsc.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: poor write performance
+Date: Mon, 22 Apr 2013 08:20:03 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304220815060.14431@cobra.newdream.net>
+References: <6035A0D088A63A46850C3988ED045A4B4D7359C9@BITCOM1.int.sbss.com.au> <516FF893.1030309@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73695A@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D7386A4@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B4D7386F7@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B4D739E99@BITCOM1.int.sbss.com.au> <517159C3.5030100@inktank.com> <6035A0D088A63A46850C3988ED045A4B4D73B052@BITCOM1.int.sbss.com.au>
+ <CAF6-1L4Yxqmq0yED+gA_Xgupzg6AvWi6mBD59-aXYgUj3foaTw@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F36261A@BITCOM1.int.sbss.com.au> <CAF6-1L5aindF_41=d6JKvut5cBzXx_1btGw-EteGmijoma616A@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B4F3636DC@BITCOM1.int.sbss.com.au>
+ <51752156.9050004@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="7JfCtLOvnd9MIVvH"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:37150 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752607Ab3DVPQT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 11:16:19 -0400
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:33229 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752711Ab3DVPUD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 11:20:03 -0400
+In-Reply-To: <51752156.9050004@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: James Harper <james.harper@bendigoit.com.au>, Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+> You may want to try increasing your read_ahead_kb on the OSD data disks and
+> see if that helps read speeds.
 
---7JfCtLOvnd9MIVvH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Jumping into this thread late, so I'm not sure if this was covered, but:
 
-Hallo,
+Remember that readahead on the OSDs will only help up to the size of the 
+object (4MB).  To get good read performance in general what is really 
+needed is for the librbd user to do readahead so that the next object(s)
+are being fetched before they are needed.  I don't think this happens with 
+'dd' (opening a block device as a file does not trigger the kernel VM 
+readahead code, IIRC).  Unless Sylvian implemented this in his tool 
+explicitly, it won't happen there either.
 
-I think I have found a bug in the ceph-0.56.4 start script concerning
-the following code section in src/init-ceph.in:
-
-212     if [ "$host" = "$hostname" ]; then
-213         cur_conf=$conf
-214     else
-215         unique=`dd if=/dev/urandom bs=16 count=1 2>/dev/null | md5sum | awk '{print $1}'`
-216         if echo $pushed_to | grep -v -q " $host "; then
-217             scp -q $conf $host:/tmp/ceph.conf.$unique
-218             trap "ssh $host rm /tmp/ceph.conf.$unique" EXIT
-219             pushed_to="$pushed_to $host "
-220         fi
-221         cur_conf="/tmp/ceph.conf.$unique"
-222     fi
-223     cmd="$cmd -c $cur_conf"
-
-Explanation:
-If there are more than one OSD instances configured for remote host
-"abc", the ceph configuration with a random file name will be copied
-to host "abc" and the pushed_to variable will be set. 
-
-Next time, if there is another OSD instance for remote host "abc",
-the pushed_to variable is already set and therefore _no_ new ceph
-configuration file will be copied to host "abc". That's OK but
-nevertheless a new random file name will be created in line 215/221
-and will be used in line 223. This leads to an error because the
-new configuration file name is unknown on host "abc".
-
-The appended patch fixes this misbehavior.
-
-With best regards,
-Andreas Friedrich
-----------------------------------------------------------------------
-FUJITSU
-Fujitsu Technology Solutions GmbH
-Heinz-Nixdorf-Ring 1, 33106 Paderborn, Germany
-Tel: +49 (5251) 525-1512
-Fax: +49 (5251) 525-321512
-Email: andreas.friedrich@ts.fujitsu.com
-Web: ts.fujitsu.com
-Company details: de.ts.fujitsu.com/imprint
-----------------------------------------------------------------------
-
---7JfCtLOvnd9MIVvH
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment; filename="unique-init.patch"
-
-diff -urN a/src/init-ceph.in b/src/init-ceph.in
---- a/src/init-ceph.in	2013-03-25 18:59:06.000000000 +0100
-+++ b/src/init-ceph.in	2013-04-22 16:34:02.000000000 +0200
-@@ -212,8 +212,8 @@
-     if [ "$host" = "$hostname" ]; then
- 	cur_conf=$conf
-     else
--	unique=`dd if=/dev/urandom bs=16 count=1 2>/dev/null | md5sum | awk '{print $1}'`
- 	if echo $pushed_to | grep -v -q " $host "; then
-+	    unique=`dd if=/dev/urandom bs=16 count=1 2>/dev/null | md5sum | awk '{print $1}'`
- 	    scp -q $conf $host:/tmp/ceph.conf.$unique
- 	    trap "ssh $host rm /tmp/ceph.conf.$unique" EXIT
- 	    pushed_to="$pushed_to $host "
-
---7JfCtLOvnd9MIVvH--
+sage
