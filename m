@@ -1,45 +1,74 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to test ? :p
-Date: Tue, 23 Apr 2013 17:06:04 +0200
-Message-ID: <CAF6-1L5bUiSO-6YLvDitb6GKhuiZJSy4RLwD27_HODsR1y-KGw@mail.gmail.com>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<51704AF4.7060908@42on.com>
-	<CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
-	<67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
-	<CAF6-1L50V3cn0Sqcw-LajZh=dO=x91HTe4mL2yQ-k5yiGeJ2sg@mail.gmail.com>
-	<E6E1667B-879F-4BF4-85DE-308C01BB7930@openminds.be>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH v3 07/18] ceph: use ->invalidatepage() length argument
+Date: Tue, 23 Apr 2013 09:04:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1304230904060.19511@cobra.newdream.net>
+References: <1365498867-27782-1-git-send-email-lczerner@redhat.com> <1365498867-27782-8-git-send-email-lczerner@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f49.google.com ([209.85.214.49]:47785 "EHLO
-	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755970Ab3DWPGG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Apr 2013 11:06:06 -0400
-Received: by mail-bk0-f49.google.com with SMTP id w5so314217bku.22
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Apr 2013 08:06:04 -0700 (PDT)
-In-Reply-To: <E6E1667B-879F-4BF4-85DE-308C01BB7930@openminds.be>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Bernard Grymonpon <bernard@openminds.be>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1365498867-27782-8-git-send-email-lczerner@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Lukas Czerner <lczerner@redhat.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Tue, 9 Apr 2013, Lukas Czerner wrote:
+> ->invalidatepage() aop now accepts range to invalidate so we can make
+> use of it in ceph_invalidatepage().
+> 
+> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
 
-> - client dom0: a simple quick debootstrap, and a low amount of memory to bypass buffers
+Acked-by: Sage Weil <sage@inktank.com>
 
-I assume you meant domU ?
-You ran those tests in a VM right ?
 
-> Thx for the work you've put in this! Seems to work nicely at first glance, but I'll do some more tests later on (with a more recent ceph cluster)...
+> ---
+>  fs/ceph/addr.c |   12 ++++++------
+>  1 files changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 168a35a..d953afd 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -164,20 +164,20 @@ static void ceph_invalidatepage(struct page *page, unsigned int offset,
+>  	if (!PageDirty(page))
+>  		pr_err("%p invalidatepage %p page not dirty\n", inode, page);
+>  
+> -	if (offset == 0)
+> +	if (offset == 0 && length == PAGE_CACHE_SIZE)
+>  		ClearPageChecked(page);
+>  
+>  	ci = ceph_inode(inode);
+> -	if (offset == 0) {
+> -		dout("%p invalidatepage %p idx %lu full dirty page %u\n",
+> -		     inode, page, page->index, offset);
+> +	if (offset == 0 && length == PAGE_CACHE_SIZE) {
+> +		dout("%p invalidatepage %p idx %lu full dirty page\n",
+> +		     inode, page, page->index);
+>  		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+>  		ceph_put_snap_context(snapc);
+>  		page->private = 0;
+>  		ClearPagePrivate(page);
+>  	} else {
+> -		dout("%p invalidatepage %p idx %lu partial dirty page\n",
+> -		     inode, page, page->index);
+> +		dout("%p invalidatepage %p idx %lu partial dirty page %u(%u)\n",
+> +		     inode, page, page->index, offset, length);
+>  	}
+>  }
+>  
+> -- 
+> 1.7.7.6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
-Thanks for testing. When you do more tests, it'd be interesting to
-compare the kernel driver with the blktap driver.
-
-I've actually identified a bottleneck caused the Xen IO ring splitting
-large requests into small 44k chunks, which tends to lower RBD
-performance a lot ... I'l still investigating possible solutions to
-that.
-
-Cheers,
-
-    Sylvain
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
