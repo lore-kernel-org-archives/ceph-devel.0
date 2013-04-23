@@ -1,51 +1,50 @@
-From: Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>
-Subject: Re: Unique bug in ceph start script
-Date: Tue, 23 Apr 2013 08:41:01 +0200
-Message-ID: <20130423064101.GA24976@upset.ux.pdb.fsc.net>
-References: <20130422150612.GA22006@upset.ux.pdb.fsc.net> <alpine.DEB.2.00.1304220836140.15710@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Distributed Deduplication in a Cloud-based Object Storage System
+Date: Tue, 23 Apr 2013 09:06:48 +0200
+Message-ID: <51763308.6010704@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigC5AC4F87C912540A75FFF230"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:45234 "EHLO
-	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754803Ab3DWGlX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Apr 2013 02:41:23 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1304220836140.15710@cobra.newdream.net>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:41935 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755190Ab3DWHGv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Apr 2013 03:06:51 -0400
+Received: from [10.8.0.50] (unknown [10.8.0.50])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 781D426397
+	for <ceph-devel@vger.kernel.org>; Tue, 23 Apr 2013 09:06:48 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mo, Apr 22, 2013 at 08:39:03 -0700, Sage Weil wrote:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigC5AC4F87C912540A75FFF230
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Hi Sage,
+Hi,
 
-...
-> Thanks for the report!  I think this doesn't quite solve the problem, 
-> though.  If all the items for a given target are processed in order, then 
-> $unique will be correct, but if you get hosta, hostb, hosta then it will 
-> be wrong.
-...
+For later reference. Who knows ... ;)
 
-sorry, but I don't recognize why it would be wrong:
+http://paulormg.files.wordpress.com/2012/08/thesis-paulo.pdf
 
-Applying my patch the code would do the following:
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-1. hosta:
-   Create ceph.conf.uniq1, copy it to hosta and use
-   ceph.conf.uniq1.
 
-2. hostb:
-   Create ceph.conf.uniq2, copy it to hostb and use
-   ceph.conf.uniq2.
+--------------enigC5AC4F87C912540A75FFF230
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-3. hosta:
-   Create ceph.conf.uniq3, copy it to hosta and use
-   ceph.conf.uniq3.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-So in this example two config files with different names but the same
-content would be copied to hosta. This is not very pretty but it 
-should work without error.
+iEYEARECAAYFAlF2MwgACgkQ8dLMyEl6F2239gCbBW/UNAxG6QqOfjw1w5pb26Kj
+DCsAnRNcuhNNZyPCfw1mtQc54rUhbAVN
+=lK9d
+-----END PGP SIGNATURE-----
 
-Andreas
+--------------enigC5AC4F87C912540A75FFF230--
