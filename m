@@ -1,74 +1,63 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to test ? :p
-Date: Tue, 23 Apr 2013 12:02:16 +0200
-Message-ID: <CAF6-1L50V3cn0Sqcw-LajZh=dO=x91HTe4mL2yQ-k5yiGeJ2sg@mail.gmail.com>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<51704AF4.7060908@42on.com>
-	<CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
-	<67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
+From: Constantinos Venetsanopoulos <cven@grnet.gr>
+Subject: Re: Distributed Deduplication in a Cloud-based Object Storage System
+Date: Tue, 23 Apr 2013 13:06:59 +0300
+Message-ID: <51765D43.5040207@grnet.gr>
+References: <51763308.6010704@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f48.google.com ([209.85.214.48]:54846 "EHLO
-	mail-bk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755641Ab3DWKCS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Apr 2013 06:02:18 -0400
-Received: by mail-bk0-f48.google.com with SMTP id jf3so175445bkc.21
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Apr 2013 03:02:16 -0700 (PDT)
-In-Reply-To: <67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:17975 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753845Ab3DWKW3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 23 Apr 2013 06:22:29 -0400
+In-Reply-To: <51763308.6010704@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bernard Grymonpon <bernard@openminds.be>, =?ISO-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, Wido den Hollander <wido@42on.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+Hello Loic,
 
-> We can test this, but just a couple of lines of input might be needed to get us going with this without digging through all the code.
+On 04/23/2013 10:06 AM, Loic Dachary wrote:
+> Hi,
+>
+> For later reference. Who knows ... ;)
+>
+> http://paulormg.files.wordpress.com/2012/08/thesis-paulo.pdf
+>
 
-Ok, so I added proper argument parsing (using the same format as the
-qemu rbd driver) now, so it's easier to test.
+that is very interesting! That was exactly what we were talking
+about during the Ceph meeting @ FOSDEM'13.
 
-First off, you need a working blktap setup for your distribution.
-So for example, you should be able to use
-"tap2:tapdisk:aio:/path/to/image.raw"  as a vbd.
+We have been running a similar design in production for over
+1.5 year now, with Synnefo [1], first over NFS and now over
+RADOS. Specifically, the Storage Service of Synnefo, called
+Pithos, stores content-addressable objects on the underlying
+storage, allowing us to do file syncing with native clients, not
+only for files but for VM Images, too.
 
-Starting for there you need to :
+We even have an extension for the OpenStack Object Storage
+API (which is what we expose to the users), to allow us for
+these advanced operations, the same way Paulo proposes.
 
- - Download and compile the rbd branch of git://github.com/smunaut/blktap.git
-   You will need the ceph development files/packages for this ( for
-debian librados-dev librbd-dev )
+If anyone is interested towards that direction, which we believe
+allows for very interesting things to be done, please take a
+look at the Pithos design and the corresponding OpenStack
+API:
 
-$ git clone git://github.com/smunaut/blktap.git
-$ cd blktap
-$ git checkout -b rbd origin/rbd
-$ ./autogen.sh
-$ ./configure
-$ make
+http://www.synnefo.org/docs/synnefo/latest/pithos.html#pithos-design
+http://www.synnefo.org/docs/synnefo/latest/pithos-api-guide.html#the-pithos-api
 
- - Replace the installed tapdisk binary with the new one
+The first document is somewhat outdated (sorry for that :)), but
+the concepts are there and have been tested in production.
 
-$ sudo cp ./drivers/.libs/tapdisk  /usr/bin/tapdisk
+Again, we are very happy to see other people exploring those
+paths in the cloud context too.
 
- - Add 'rbd' as supported format in 'xm'
-   For some reason 'xm' checks the image format itself before handing
-off to the tap-ctl ...
-
-   Edit /usr/lib/xen-4.1/lib/python/xen/xend/server/BlktapController.py
-and add 'rbd' in the blktap2_disk_types list at the top.
-   (location of file will vary depending on xen version and distribution)
-
- - Setup a proper /etc/ceph/ceph.conf containing at least the mon addresses
-   Also make sure you have a /etc/ceph/keyring with the user key if
-you use cephx
-
-Once that's done, you should be able to attach disk to a running VM using :
-
-$ xm block-attach test_vm tap2:tapdisk:rbd:rbd/test xvda2 w
-
-"rbd/test" above is the pool_name/image_name
-You can add the same options as with the qemu driver.
+Kind Regards,
+Constantinos
 
 
-Cheers,
-
-    Sylvain
+[1] http://www.synnefo.org
