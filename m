@@ -1,38 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Authentication question with RBD+STGT
-Date: Mon, 22 Apr 2013 20:49:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1304222049070.19511@cobra.newdream.net>
-References: <51757CD2.2070404@liquidweb.com> <5175CAFF.3020509@inktank.com>
+From: Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>
+Subject: Re: Unique bug in ceph start script
+Date: Tue, 23 Apr 2013 08:41:01 +0200
+Message-ID: <20130423064101.GA24976@upset.ux.pdb.fsc.net>
+References: <20130422150612.GA22006@upset.ux.pdb.fsc.net> <alpine.DEB.2.00.1304220836140.15710@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41290 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754467Ab3DWDtn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Apr 2013 23:49:43 -0400
-In-Reply-To: <5175CAFF.3020509@inktank.com>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:45234 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754803Ab3DWGlX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Apr 2013 02:41:23 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1304220836140.15710@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: Scott Sullivan <ssullivan@liquidweb.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 22 Apr 2013, Dan Mick wrote:
-> On 04/22/2013 11:09 AM, Scott Sullivan wrote:
-> > Referring to this:
-> > http://ceph.com/dev-notes/adding-support-for-rbd-to-stgt/
-> > 
-> > I compiled the latest tgt with RBD support. My question is when using
-> > this method to access RBD volumes, where do you tell it what user to
-> > authenticate to the cluster with? I do see the above linked page
-> > mentions it will read a local ceph.conf.
-> 
-> Yes, as Wido hints at, it passes NULL to rados_create()'s second arg; that
-> means it will authenticate as client.admin.  This could certainly be easily
-> fixed.
+On Mo, Apr 22, 2013 at 08:39:03 -0700, Sage Weil wrote:
 
-While we're talking about tgt, I think we should also switch this over to 
-use the aio librbd calls instead of the sync ones.  It's functionally 
-equivalent, but more efficient and cleaner.
+Hi Sage,
 
-sage
+...
+> Thanks for the report!  I think this doesn't quite solve the problem, 
+> though.  If all the items for a given target are processed in order, then 
+> $unique will be correct, but if you get hosta, hostb, hosta then it will 
+> be wrong.
+...
 
+sorry, but I don't recognize why it would be wrong:
+
+Applying my patch the code would do the following:
+
+1. hosta:
+   Create ceph.conf.uniq1, copy it to hosta and use
+   ceph.conf.uniq1.
+
+2. hostb:
+   Create ceph.conf.uniq2, copy it to hostb and use
+   ceph.conf.uniq2.
+
+3. hosta:
+   Create ceph.conf.uniq3, copy it to hosta and use
+   ceph.conf.uniq3.
+
+So in this example two config files with different names but the same
+content would be copied to hosta. This is not very pretty but it 
+should work without error.
+
+Andreas
