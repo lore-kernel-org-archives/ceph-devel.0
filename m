@@ -1,63 +1,41 @@
-From: Constantinos Venetsanopoulos <cven@grnet.gr>
-Subject: Re: Distributed Deduplication in a Cloud-based Object Storage System
-Date: Tue, 23 Apr 2013 13:06:59 +0300
-Message-ID: <51765D43.5040207@grnet.gr>
-References: <51763308.6010704@dachary.org>
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH v3 07/18] ceph: use ->invalidatepage() length argument
+Date: Tue, 23 Apr 2013 10:14:24 -0400
+Message-ID: <20130423141424.GC31170@thunk.org>
+References: <1365498867-27782-1-git-send-email-lczerner@redhat.com>
+ <1365498867-27782-8-git-send-email-lczerner@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:17975 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753845Ab3DWKW3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 23 Apr 2013 06:22:29 -0400
-In-Reply-To: <51763308.6010704@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1365498867-27782-8-git-send-email-lczerner@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Lukas Czerner <lczerner@redhat.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hello Loic,
+On Tue, Apr 09, 2013 at 11:14:16AM +0200, Lukas Czerner wrote:
+> ->invalidatepage() aop now accepts range to invalidate so we can make
+> use of it in ceph_invalidatepage().
+> 
+> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
 
-On 04/23/2013 10:06 AM, Loic Dachary wrote:
-> Hi,
->
-> For later reference. Who knows ... ;)
->
-> http://paulormg.files.wordpress.com/2012/08/thesis-paulo.pdf
->
+To ceph-devel,
 
-that is very interesting! That was exactly what we were talking
-about during the Ceph meeting @ FOSDEM'13.
+Since half of this patch series modifies ext4 extensively, and changes
+to the other file systems are relatively small, I plan to carry the
+invalidatepage patch set in the ext4 tree for the next development
+cycle (i.e., not the upcoming merge window, but the next one).  To
+that end, it would be great if you take a look at this patch set and
+send us an Acked-by signoff.
 
-We have been running a similar design in production for over
-1.5 year now, with Synnefo [1], first over NFS and now over
-RADOS. Specifically, the Storage Service of Synnefo, called
-Pithos, stores content-addressable objects on the underlying
-storage, allowing us to do file syncing with native clients, not
-only for files but for VM Images, too.
+Thanks!!
 
-We even have an extension for the OpenStack Object Storage
-API (which is what we expose to the users), to allow us for
-these advanced operations, the same way Paulo proposes.
+						- Ted
 
-If anyone is interested towards that direction, which we believe
-allows for very interesting things to be done, please take a
-look at the Pithos design and the corresponding OpenStack
-API:
-
-http://www.synnefo.org/docs/synnefo/latest/pithos.html#pithos-design
-http://www.synnefo.org/docs/synnefo/latest/pithos-api-guide.html#the-pithos-api
-
-The first document is somewhat outdated (sorry for that :)), but
-the concepts are there and have been tested in production.
-
-Again, we are very happy to see other people exploring those
-paths in the cloud context too.
-
-Kind Regards,
-Constantinos
-
-
-[1] http://www.synnefo.org
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
