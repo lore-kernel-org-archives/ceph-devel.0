@@ -1,92 +1,213 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to test ?
- :p
-Date: Tue, 23 Apr 2013 14:09:35 -0600
-Message-ID: <5176961F02000099000F6C70@collaborate.seakr.com>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
- <51704AF4.7060908@42on.com>
- <CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
- <67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
- <CAF6-1L50V3cn0Sqcw-LajZh=dO=x91HTe4mL2yQ-k5yiGeJ2sg@mail.gmail.com>
- <517664AD02000099000F6C41@collaborate.seakr.com>
- <CAF6-1L4HPK0A_T-PmsonFCFUmA5ugT8Y_CXmwdG7-erRnfEhSA@mail.gmail.com>
+From: "Christopher LILJENSTOLPE" <cdl@asgaard.org>
+Subject: Re: erasure coding (sorry)
+Date: Tue, 23 Apr 2013 21:35:26 -0700
+Message-ID: <42B6DB32-5E25-4223-AFBA-88C71F9805C9@asgaard.org>
+References: <20130418162842.0c61d1e2@dieter-t420s>
+ <alpine.DEB.2.00.1304181345300.10005@cobra.newdream.net>
+ <517060B2.80706@inktank.com> <51706120.2060702@inktank.com>
+ <20130418173113.74a53769@dieter-t420s>
+ <8232544E-56F5-40BF-899D-2A2D4735FD54@asgaard.org>
+ <5174F08F.2070001@dachary.org>
+ <0AEB5F22-B38F-4702-95A1-B18938FE7F7C@asgaard.org>
+ <alpine.DEB.2.00.1304220805100.14056@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed;
+ boundary="=_MailMate_2AB7FD57-EB20-4736-8A3D-A4B0CBCA1B80_=";
+ micalg=pgp-sha1; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:45454 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753053Ab3DWUJj convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:4:1>);
-	Tue, 23 Apr 2013 16:09:39 -0400
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.14.3/8.14.3/Debian-9.4) with ESMTP id r3NK92Ve012404
-	for <ceph-devel@vger.kernel.org>; Tue, 23 Apr 2013 14:09:03 -0600
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 29A9A44DE9
-	for <ceph-devel@vger.kernel.org>; Tue, 23 Apr 2013 14:09:37 -0600 (MDT)
-In-Reply-To: <CAF6-1L4HPK0A_T-PmsonFCFUmA5ugT8Y_CXmwdG7-erRnfEhSA@mail.gmail.com>
-Content-Disposition: inline
+Received: from smtp4.emailarray.com ([65.39.216.22]:64052 "EHLO
+	smtp4.emailarray.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750890Ab3DXEf4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Apr 2013 00:35:56 -0400
+In-Reply-To: <alpine.DEB.2.00.1304220805100.14056@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: Wido den Hollander <wido@42on.com>, pasik@iki.fi, Bernard Grymonpon <bernard@openminds.be>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
->>> On 2013/04/23 at 12:51, Sylvain Munaut <s.munaut@whatever-company.com> wrote: 
-> Hi,
-> 
->> My distro (openSuSE 12.1) has /usr/sbin/tapdisk for original tapdisk v1, and 
-> /usr/sbin/tapdisk2 for version 2 stuff.  I'm replacing /usr/sbin/tapdisk2.
-> 
-> Mm, do you know where I could find the source for those tapdisk binaries ?
+This is an OpenPGP/MIME signed message (RFC 3156 and 4880).
 
-It looks to me like openSuSE is just using the blktap stuff included with the Xen source code.  If I grab the xen 4.1.4 tarball from xen.org and unpack it, go to tools, there are two directories "blktap" and "blktap2" under that directory that generate the tapdisk and tapdisk2 binaries, along with several other tapdisk-related binaries.  openSuSE uses this with a few minor patches.
+--=_MailMate_2AB7FD57-EB20-4736-8A3D-A4B0CBCA1B80_=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-> 
-> 
->> This is attempting to just use "tap2:aio" for the image format 
-> ("tap2:tapdisk:aio" fails identically, as does "tap2:rbd:rbd/test").  In my 
-> /var/log/messages file, I see the following:
->> Apr 23 10:34:51 se004922 kernel: [ 6328.409708] blktap_control_allocate_tap: 
-> allocated tap ffff8807a4898800
->> Apr 23 10:34:51 se004922 tapdisk[32464]: tapdisk-control: init, 10 x 4k 
-> buffers
->> Apr 23 10:34:51 se004922 tapdisk[32464]: I/O queue driver: lio
->> Apr 23 10:34:51 se004922 tapdisk[32464]: tapdisk-log: started, level 0
->> Apr 23 10:34:51 se004922 tapdisk[32464]: nbd: Set up local unix domain 
-> socket on path '/var/run/blktap-control/nbdclient32464'
->> Apr 23 10:34:53 se004922 tapdisk[32464]: ERROR: errno -5 at 
-> tapdisk_control_read_message: failure reading message at offset 280/536
->> Apr 23 10:34:53 se004922 tap-ctl: tap-err:tap_ctl_read_message: failure 
-> reading message
->> Apr 23 10:34:53 se004922 tap-ctl: tap-err:tap_ctl_send_and_receive: failed to 
-> receive 'unknown' message
+Supposedly, on 2013-Apr-22, at 08.09 PDT(-0700), someone claiming to be S=
+age Weil scribed:
+
+> On Mon, 22 Apr 2013, Christopher LILJENSTOLPE wrote:
+>> Supposedly, on 2013-Apr-22, at 01.10 PDT(-0700), someone claiming to b=
+e Loic Dachary scribed:
 >>
->> That "nbd" portion is particularly puzzling - why would it try to start nbd 
-> when I've specified a simple tap2:aio image?
-> 
-> The tree I used seem to init some of the NBD logic in all cases (nbd
-> is integrated in the core rather than purely in the driver).
+>>> Hi Christopher,
+>>>
+>>> You wrote "A modified client/library could be used to store objects t=
+hat should be sharded, vs "standard" ceph treatment.  In this model, each=
+ shard would be written to a seperate PG, and each PG would we stored on =
+exactly one OSD.  " but there is no way for a client to enforce the fact =
+that two objects are stored in separate PG.
+>>
+>> Poorly worded.  The idea is that each shard becomes a seperate object,=
+ and the encoder/sharder would use CRUSH to identify the OSDs to hold the=
+ shards.  However, the OSDs would treat the shard as an n=3D1 replication=
+ and just store locally.
+>>
+>> Actually, looking at this this morning, this is actually harder than t=
+he prefered alternative (i.e. grafting a encode/decode into the (e)OSD.  =
+It was meant to cover the alternative approaches.  I didn't like this one=
+, but it now appears to be more difficult, and non-deterministic of the p=
+lacement.
+>>
+>> One question on CRUSH (it's been too long since I read the paper), if =
+x is the same for two objects, and, using an n=3D3 returns R=3D{OSD18,OSD=
+45,OSD97}, if an object is handed to OSD45 that matches x, but has an n=3D=
+1, would OSD45 store it, or would it forward it to OSD18 to store?  If it=
+ would this idea is DOA.  Also, if x is held invariant, but n changes, do=
+es the same R set get returned (truncated to n members)?
+>
+> It would go to osd18, the first item in the sequence that CRUSH generat=
+es.
 
-Okay, makes sense.
+That's what I thought - then it is a non-starter
 
-> 
-> My guess is that the tree I used is close enough to the debian source
-> for it to work with just switching tapdisk, but different from
-> opensuse package.
-> Can you try to ./configure --prefix=/usr  and then make install ?
-> This will replace all the binaries including tap-ctl. If they're in a
-> distinct package, you can pre-uninstall the blktap-utils from your
-> distro.
-> '
-> 
+>
+> As Loic observes, not having control of placement from above the librad=
+os
+> level makes this more or less a non-started.  The only thing that might=
 
-I tried doing the --prefix=/usr, but did not do a make install...I'll have to give that a shot and see what happens.  I need to get a test system set up here, since the one I was working on is someone else's workstation and I don't want to completely destroy it :-).
+> work at that layer is to set up ~5 or more pools, each with a distinct =
+set
+> of OSDs, and put each shard/fragment in a different pool.  I don't thin=
+k
+> that is a particularly good approach.
 
--Nick
+Pretty much of a kludge - I would agree
+
+>
+> If we are going to do parity encoding (and I think we should!), I think=
+ we
+> should fully integrate it into the OSD.
+>
+> The simplest approach:
+>
+> - we create a new PG type for 'parity' or 'erasure' or whatever (type
+> fields already exist)
+> - those PGs use the parity ('INDEP') crush mode so that placement is
+> intelligent
+> - all reads and writes go to the 'primary'
+> - the primary does the shard encoding and distributes the write pieces =
+to
+> the other replicas
+> - same for reads
+
+Yup - that's basically what I was trying to outline for the single-tier m=
+odel.  I called them eOSD's.
+>
+> There will be a pile of patches to move code around between PG and
+> ReplicatedPG, which will be annoying, but hopefully not too painful.  T=
+he
+> class structure and data types were set up with this in mind long ago.
+>
+> Several key challenges:
+>
+> - come up with a scheme for internal naming to keep shards distinct
+> - safely rewriting a stripe when there is a partial overwrite.  probabl=
+y
+> want to write new stripes to distinct new objects (cloning old data as
+> needed) and clean up the old ones once enough copies are present.
+> - recovery logic
+
+Been giving this some thought - I'll try and get them into the blueprint.=
+  Is the blueprint, as it is, reasonable to include in the design summit,=
+ knowing that it will continue to evolve?
+>
+> sage
+>
+Christopher
+
+>
+>>
+>> 	Thx
+>> 	Christopher
+>>
+>>
+>>
+>>>
+>>> Am I missing something ?
+>>>
+>>> On 04/22/2013 09:23 AM, Christopher LILJENSTOLPE wrote:
+>>>> Supposedly, on 2013-Apr-18, at 14.31 PDT(-0700), someone claiming to=
+ be Plaetinck, Dieter scribed:
+>>>>
+>>>>> On Thu, 18 Apr 2013 16:09:52 -0500
+>>>>> Mark Nelson <mark.nelson@inktank.com> wrote:
+>>>>
+>>>>>>
+>>>>>
+>>>>> @Bryan: I did come across cleversafe.  all the articles around it s=
+eemed promising,
+>>>>> but unfortunately it seems everything related to the cleversafe ope=
+n source project
+>>>>> somehow vanished from the internet.  (e.g. http://www.cleversafe.or=
+g/) quite weird...
+>>>>>
+>>>>> @Sage: interesting. I thought it would be more relatively simple if=
+ one assumes
+>>>>> the restriction of immutable files.  I'm not familiar with those ce=
+ph specifics you're mentioning.
+>>>>> When building an erasure codes-based system, maybe there's ways to =
+reuse existing ceph
+>>>>> code and/or allow some integration with replication based objects, =
+without aiming for full integration or
+>>>>> full support of the rados api, based on some tradeoffs.
+>>>>>
+>>>>> @Josh, that sounds like an interesting approach.  Too bad that page=
+ doesn't contain any information yet :)
+>>>>
+>>>> Greetings - it does now - see what you all think?
+>>>>
+>>>> 	Christopher
+>>>>
+>>>>>
+>>>>> Dieter
+>>>>
+>>>>
+>>>> --
+>>>> ???
+>>>> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+>>>> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+>>>> Check my calendar availability: https://tungle.me/cdl
+>>>
+>>> --
+>>> Lo?c Dachary, Artisan Logiciel Libre
+>>
+>>
+>> --
+>> ???
+>> Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+>> Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+>> Check my calendar availability: https://tungle.me/cdl
 
 
+--
+=E6=9D=8E=E6=9F=AF=E7=9D=BF
+Check my PGP key here: https://www.asgaard.org/~cdl/cdl.asc
+Current vCard here: https://www.asgaard.org/~cdl/cdl.vcf
+Check my calendar availability: https://tungle.me/cdl
+--=_MailMate_2AB7FD57-EB20-4736-8A3D-A4B0CBCA1B80_=
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename=signature.asc
+Content-Type: application/pgp-signature; name=signature.asc
 
---------
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
 
-This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
+iQEcBAEBAgAGBQJRd2EOAAoJEGmx2Mt/+Iw/NS8H/R4+3j3oFTYSzEc9llbS7/5T
+xuwuK5+C10fUbNsYlVX+UiZIIs4yt1CGpigxiZdROH2HxTUBFI1XBq8uk1xoFvPO
+KUt4NOgchxTL7qLSl5Y8G0ZAS+gPrER+HBkrdx9gdkebBJ21QifWfPyxpu5aub24
+RR5H5wAUxcrOC5I7lElujsdTynBjIb1fRHB3hnJOom8AY8mRJ/4Nm/BBPMyuijVQ
+iO+MUfokCbClETvgZ8LakR+Q167AY4sREsAsbLdSh1BjwS6AR23NWIiIdpIjGd9F
+e+7XwmRzus6WIZI8cFQNJyeZor5Lp8RVC7fiuEQSlSPxaF9lYlFYvcyXoe1ruco=
+=sd6j
+-----END PGP SIGNATURE-----
+
+--=_MailMate_2AB7FD57-EB20-4736-8A3D-A4B0CBCA1B80_=--
