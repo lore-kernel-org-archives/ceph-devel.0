@@ -1,97 +1,101 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSD abstract class
-Date: Thu, 25 Apr 2013 12:47:08 -0700
-Message-ID: <CAPYLRzg__S87=WTByxrKDnxRmx+PqtxibYLQGUC51hJ4dSsMow@mail.gmail.com>
-References: <5178E6AE.6060609@dachary.org>
-	<CAPYLRzirdWRaAEDP7UrrgV-AGcj3KoEoHOtC+A7DFYJD7BQbCA@mail.gmail.com>
-	<517975D6.1020904@dachary.org>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: [PATCH v4] radosgw: receiving unexpected error code while
+ accessing an non-existing object by authorized not-owner user
+Date: Thu, 25 Apr 2013 13:16:11 -0700
+Message-ID: <CABBk=J_u1QbNAQgA14MWF8rYLLNxc0jg0Qmyu-PBOz-vEW5pZA@mail.gmail.com>
+References: <1366904216-7097-1-git-send-email-liwang@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:57733 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759025Ab3DYTrJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 15:47:09 -0400
-Received: by mail-wg0-f44.google.com with SMTP id a12so1679709wgh.11
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Apr 2013 12:47:08 -0700 (PDT)
-In-Reply-To: <517975D6.1020904@dachary.org>
+Received: from mail-vc0-f169.google.com ([209.85.220.169]:53354 "EHLO
+	mail-vc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932087Ab3DYUQN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 16:16:13 -0400
+Received: by mail-vc0-f169.google.com with SMTP id gd11so3258061vcb.28
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Apr 2013 13:16:12 -0700 (PDT)
+In-Reply-To: <1366904216-7097-1-git-send-email-liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-On Thu, Apr 25, 2013 at 11:28 AM, Loic Dachary <loic@dachary.org> wrote=
-:
+On Thu, Apr 25, 2013 at 8:36 AM, Li Wang <liwang@ubuntukylin.com> wrote:
+> This patch fixes a bug in radosgw swift compatibility code,
+> that is, if a not-owner but authorized user access a non-existing
+> object in a container, he wiil receive unexpected error code,
+> to repeat this bug, do the following steps,
 >
+> 1 User1 creates a container, and grants the read/write permission to user2
 >
-> On 04/25/2013 06:45 PM, Gregory Farnum wrote:
->> On Thu, Apr 25, 2013 at 1:17 AM, Loic Dachary <loic@dachary.org> wro=
-te:
->>> Hi,
->>>
->>> In the context of the implementation of
->>>
->>> http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
-ing_as_a_storage_backend
->>>
->>> I'm preparing tests to assert that the modifications that will be m=
-ade to the existing PG and ReplicatedPG will not introduce regressions.=
- Unless I'm mistaken, there are no unit tests or functional tests for P=
-G or ReplicatedPG at the moment. I thought that it might be useful to a=
-dd an abstract OSD class from which OSD is derived, to allow a test to =
-derive from it to implement synthetic behavior.
->>>
->>>
->>> I gave it a try and it passes make check successfully. It is a litt=
-le hairy because I commented out the code instead of removing it to hel=
-p with rebasing.
->>>
->>> https://github.com/dachary/ceph/commit/a9eb690a3537c3f844b47e76cde0=
-48b084e314eb
->>>
->>> I'll now try to use it to implement some tests for ReplicatedPG.
->>>
->>> I would very much appreciate if someone has an advice on the best w=
-ay to proceed. Even if it's to say : "you're crazy, don't go there ! yo=
-u're wasting your time, there is a much simpler way !" ;-)
->>
->> What's your plot here? The OSD is fairly large to be doing unit test=
-s
->> on (although it's not insensible) =97 but if we want to form a new P=
-G it
->> might be best to start out by making abstract PG implementations.
->>
+> curl -X PUT -i -k -H "X-Auth-Token: $user1_token" $url/$container
+> curl -X POST -i -k -H "X-Auth-Token: $user1_token" -H "X-Container-Read:
+> $user2" -H "X-Container-Write: $user2" $url/$container
 >
-> My reasoning was that to for a new PG it was enough to rely on
+> 2 User2 queries the object 'obj' in the newly created container
+> by using HEAD instruction, note the container currently is empty
 >
-> https://github.com/ceph/ceph/blob/master/src/osd/PG.h
+> curl -X HEAD -i -k -H "X-Auth-Token: $user2_token" $url/$container/obj
 >
-> and create a new ErasureEncodingPG.{cc,h} after
+> 3 The response received by user2 is '401 Authorization Required',
+> rather than the expected '404 Not Found', the details are as follows,
 >
-> https://github.com/ceph/ceph/blob/master/src/osd/ReplicatedPG.cc
+> HTTP/1.1 401 Authorization Required
+> Date: Tue, 16 Apr 2013 01:52:49 GMT
+> Server: Apache/2.2.22 (Ubuntu)
+> Accept-Ranges: bytes
+> Content-Length: 12
+> Vary: Accept-Encoding
 >
-> Since ReplicatedPG is the only class derived from PG, I assumed there=
- will be a need to move code from ReplicatedPG to PG and vice versa to =
-make sure PG can actually be the base class of two different implementa=
-tions. Are you suggesting that PG should be abstracted ? Is there a rea=
-son why it would not be a good base class for a new ErasureEncodedPG ?
+> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+> Reviewed-by: Yehuda Sadeh <yehuda@inktank.com>
+> ---
+>  src/rgw/rgw_acl.cc    |    4 ++--
+>  src/rgw/rgw_common.cc |    8 --------
+>  2 files changed, 2 insertions(+), 10 deletions(-)
+>
+> diff --git a/src/rgw/rgw_acl.cc b/src/rgw/rgw_acl.cc
+> index 1a90649..6357d4b 100644
+> --- a/src/rgw/rgw_acl.cc
+> +++ b/src/rgw/rgw_acl.cc
+> @@ -92,7 +92,7 @@ int RGWAccessControlPolicy::get_perm(string& id, int perm_mask) {
+>
+>  bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask, int perm)
+>  {
+> -  int test_perm = perm;
+> +  int test_perm = perm | RGW_PERM_READ_OBJS | RGW_PERM_WRITE_OBJS;
+>
+>    int policy_perm = get_perm(uid, test_perm);
+>
+> @@ -107,7 +107,7 @@ bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask,
+>      policy_perm |= (RGW_PERM_READ | RGW_PERM_READ_ACP);
+>    }
+>
+> -  int acl_perm = policy_perm & user_perm_mask;
+> +  int acl_perm = policy_perm & perm & user_perm_mask;
+>
+>    ldout(cct, 10) << " uid=" << uid << " requested perm (type)=" << perm << ", policy perm=" << policy_perm << ", user_perm_mask=" << user_perm_mask << ", acl perm=" << acl_perm << dendl;
+>
+> diff --git a/src/rgw/rgw_common.cc b/src/rgw/rgw_common.cc
+> index d9c0a80..2cd4e6f 100644
+> --- a/src/rgw/rgw_common.cc
+> +++ b/src/rgw/rgw_common.cc
+> @@ -515,14 +515,6 @@ bool verify_bucket_permission(struct req_state *s, int perm)
+>    if ((perm & (int)s->perm_mask) != perm)
+>      return false;
+>
+> -  if (s->bucket_acl->verify_permission(s->user.user_id, perm, perm))
+> -    return true;
+> -
+> -  if (perm & (RGW_PERM_READ | RGW_PERM_READ_ACP))
+> -    perm |= RGW_PERM_READ_OBJS;
+> -  if (perm & RGW_PERM_WRITE)
+> -    perm |= RGW_PERM_WRITE_OBJS;
+> -
+>    return s->bucket_acl->verify_permission(s->user.user_id, perm, perm);
+>  }
 
-Oh, it *should* be the base class, but the distinction between PG and
-ReplicatedPG right now is...vanishing. I had a quick chat about this
-with Sam a couple days ago and we agreed the first task here is going
-to be properly slicing them up somehow (the current state of affairs
-is not a good model, even, from what he's told me).
+Looks good, merged into next.
 
-
-I'm not saying the OSD is a bad plan, just that I'm not sure what kind
-of useful tests we could produce by abstracting it =97 whereas the unit
-tests we can write against a PG seem a lot simpler and more obvious. I
-could well be missing something, though.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Yehuda
