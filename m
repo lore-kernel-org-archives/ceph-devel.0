@@ -1,23 +1,18 @@
-From: Anders Saaby <as@one.com>
+From: Anders Saaby <anders@saaby.com>
 Subject: placement group sizing
-Date: Thu, 25 Apr 2013 14:36:45 +0200
-Message-ID: <64829650-86C1-4BF2-87B0-19ED8EB808C1@one.com>
+Date: Thu, 25 Apr 2013 14:39:46 +0200
+Message-ID: <02E999F2-8374-4D47-88DC-D8DC30547068@saaby.com>
 Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from kontorsmtp1.one.com ([195.47.247.16]:50274 "EHLO
-	kontorsmtp1.one.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756034Ab3DYMmP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 08:42:15 -0400
-Received: from [172.16.16.22] (unknown [46.30.211.29])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by kontorsmtp1.one.com (Postfix) with ESMTP id C1DF3800361CA
-	for <ceph-devel@vger.kernel.org>; Thu, 25 Apr 2013 14:36:45 +0200 (CEST)
+Received: from mail.saaby.com ([95.170.88.191]:44807 "EHLO mail.saaby.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758319Ab3DYMs7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 08:48:59 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi,
 
@@ -34,3 +29,4 @@ Thanks in advance,
 Anders
 
 1: http://ceph.com/docs/master/rados/operations/placement-groups/
+
