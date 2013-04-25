@@ -1,93 +1,70 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH v4] radosgw: receiving unexpected error code while accessing an  non-existing object by authorized not-owner user
-Date: Thu, 25 Apr 2013 23:36:56 +0800
-Message-ID: <1366904216-7097-1-git-send-email-liwang@ubuntukylin.com>
+From: Ian Colle <ian.colle@inktank.com>
+Subject: Re: cuttlefish countdown
+Date: Thu, 25 Apr 2013 10:05:01 -0600
+Message-ID: <CD9EB01A.A3AE%ian.colle@inktank.com>
+References: <20130425100330.GL19438@kdecherf.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:54355 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758286Ab3DYPiZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 11:38:25 -0400
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:58319 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758384Ab3DYQFB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 12:05:01 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so3814190iea.32
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Apr 2013 09:05:00 -0700 (PDT)
+In-Reply-To: <20130425100330.GL19438@kdecherf.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: Kevin Decherf <kevin@kdecherf.com>, Wido den Hollander <wido@42on.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-This patch fixes a bug in radosgw swift compatibility code,
-that is, if a not-owner but authorized user access a non-existing
-object in a container, he wiil receive unexpected error code,
-to repeat this bug, do the following steps,
 
-1 User1 creates a container, and grants the read/write permission to user2
+On 4/25/13 4:03 AM, "Kevin Decherf" <kevin@kdecherf.com> wrote:
 
-curl -X PUT -i -k -H "X-Auth-Token: $user1_token" $url/$container
-curl -X POST -i -k -H "X-Auth-Token: $user1_token" -H "X-Container-Read:
-$user2" -H "X-Container-Write: $user2" $url/$container
+>Hi,
+>
+>On Thu, Apr 25, 2013 at 10:17:47AM +0200, Wido den Hollander wrote:
+>> Hi,
+>> 
+>> On 04/25/2013 01:46 AM, Sage Weil wrote:
+>> >Hi everyone-
+>> >
+>> >We are down to a handful of urgent bugs (3!) and a cuttlefish release
+>>date
+>> >that is less than a week away.  Thank you to everyone who has been
+>> >involved in coding, testing, and stabilizing this release.  We are
+>>close!
+>> >
+>> 
+>> I'm trying to find the 3 urgent bugs for Cuttlefish, but I can't
+>> seem to fetch them out of Redmine:
+>> http://tracker.ceph.com/projects/1/issues?sort=position
+>> 
+>> That doesn't show me any open urgent bugs? Trying to figure out
+>> what's still open.
+>
+>http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f
+>[]=status_id&op[status_id]=o&f[]=fixed_version_id&op[fixed_version_id]=%3D
+>&v[fixed_version_id][]=138&f[]=&c[]=project&c[]=tracker&c[]=status&c[]=pri
+>ority&c[]=subject&c[]=assigned_to&c[]=updated_on&c[]=category&c[]=fixed_ve
+>rsion&c[]=story_points&c[]=cf_3&c[]=cf_4&group_by=
+>
+>That's what you are looking for?
 
-2 User2 queries the object 'obj' in the newly created container
-by using HEAD instruction, note the container currently is empty
+Try the Bug Queue filter:
+http://tracker.ceph.com/projects/ceph/issues?query_id=27
 
-curl -X HEAD -i -k -H "X-Auth-Token: $user2_token" $url/$container/obj
 
-3 The response received by user2 is '401 Authorization Required',
-rather than the expected '404 Not Found', the details are as follows,
-
-HTTP/1.1 401 Authorization Required
-Date: Tue, 16 Apr 2013 01:52:49 GMT
-Server: Apache/2.2.22 (Ubuntu)
-Accept-Ranges: bytes
-Content-Length: 12
-Vary: Accept-Encoding
-
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-Reviewed-by: Yehuda Sadeh <yehuda@inktank.com>
----
- src/rgw/rgw_acl.cc    |    4 ++--
- src/rgw/rgw_common.cc |    8 --------
- 2 files changed, 2 insertions(+), 10 deletions(-)
-
-diff --git a/src/rgw/rgw_acl.cc b/src/rgw/rgw_acl.cc
-index 1a90649..6357d4b 100644
---- a/src/rgw/rgw_acl.cc
-+++ b/src/rgw/rgw_acl.cc
-@@ -92,7 +92,7 @@ int RGWAccessControlPolicy::get_perm(string& id, int perm_mask) {
- 
- bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask, int perm)
- {
--  int test_perm = perm;
-+  int test_perm = perm | RGW_PERM_READ_OBJS | RGW_PERM_WRITE_OBJS;
- 
-   int policy_perm = get_perm(uid, test_perm);
- 
-@@ -107,7 +107,7 @@ bool RGWAccessControlPolicy::verify_permission(string& uid, int user_perm_mask,
-     policy_perm |= (RGW_PERM_READ | RGW_PERM_READ_ACP);
-   }
-    
--  int acl_perm = policy_perm & user_perm_mask;
-+  int acl_perm = policy_perm & perm & user_perm_mask;
- 
-   ldout(cct, 10) << " uid=" << uid << " requested perm (type)=" << perm << ", policy perm=" << policy_perm << ", user_perm_mask=" << user_perm_mask << ", acl perm=" << acl_perm << dendl;
- 
-diff --git a/src/rgw/rgw_common.cc b/src/rgw/rgw_common.cc
-index d9c0a80..2cd4e6f 100644
---- a/src/rgw/rgw_common.cc
-+++ b/src/rgw/rgw_common.cc
-@@ -515,14 +515,6 @@ bool verify_bucket_permission(struct req_state *s, int perm)
-   if ((perm & (int)s->perm_mask) != perm)
-     return false;
- 
--  if (s->bucket_acl->verify_permission(s->user.user_id, perm, perm))
--    return true;
--
--  if (perm & (RGW_PERM_READ | RGW_PERM_READ_ACP))
--    perm |= RGW_PERM_READ_OBJS;
--  if (perm & RGW_PERM_WRITE)
--    perm |= RGW_PERM_WRITE_OBJS;
--
-   return s->bucket_acl->verify_permission(s->user.user_id, perm, perm);
- }
- 
--- 
-1.7.9.5
+>
+>-- 
+>Kevin Decherf - @Kdecherf
+>GPG C610 FE73 E706 F968 612B E4B2 108A BD75 A81E 6E2F
+>http://kdecherf.com
+>--
+>To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>the body of a message to majordomo@vger.kernel.org
+>More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
