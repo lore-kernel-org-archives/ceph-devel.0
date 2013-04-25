@@ -1,74 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: OSD abstract class
-Date: Thu, 25 Apr 2013 10:17:50 +0200
-Message-ID: <5178E6AE.6060609@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: cuttlefish countdown
+Date: Thu, 25 Apr 2013 10:17:47 +0200
+Message-ID: <5178E6AB.4020403@42on.com>
+References: <alpine.DEB.2.00.1304241527220.2772@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigF56D070BD2CAACD1507AE5D2"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:57254 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756458Ab3DYIRy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Apr 2013 04:17:54 -0400
-Received: from [10.8.0.50] (unknown [10.8.0.50])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id B891B26395
-	for <ceph-devel@vger.kernel.org>; Thu, 25 Apr 2013 10:17:51 +0200 (CEST)
+Received: from websrv.42on.com ([31.25.102.167]:33154 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756396Ab3DYIRx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Apr 2013 04:17:53 -0400
+In-Reply-To: <alpine.DEB.2.00.1304241527220.2772@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigF56D070BD2CAACD1507AE5D2
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
 Hi,
 
-In the context of the implementation of
+On 04/25/2013 01:46 AM, Sage Weil wrote:
+> Hi everyone-
+>
+> We are down to a handful of urgent bugs (3!) and a cuttlefish release date
+> that is less than a week away.  Thank you to everyone who has been
+> involved in coding, testing, and stabilizing this release.  We are close!
+>
 
-http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encoding_as=
-_a_storage_backend
+I'm trying to find the 3 urgent bugs for Cuttlefish, but I can't seem to 
+fetch them out of Redmine: 
+http://tracker.ceph.com/projects/1/issues?sort=position
 
-I'm preparing tests to assert that the modifications that will be made to=
- the existing PG and ReplicatedPG will not introduce regressions. Unless =
-I'm mistaken, there are no unit tests or functional tests for PG or Repli=
-catedPG at the moment. I thought that it might be useful to add an abstra=
-ct OSD class from which OSD is derived, to allow a test to derive from it=
- to implement synthetic behavior.=20
+That doesn't show me any open urgent bugs? Trying to figure out what's 
+still open.
+
+Wido
+
+> If you would like to test the current release candidate, your efforts
+> would be much appreciated!  For deb systems, you can do
+>
+>   wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc' | sudo apt-key add -
+>   echo deb http://gitbuilder.ceph.com/ceph-deb-$(lsb_release -sc)-x86_64-basic/ref/next $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+>
+> For rpm users you can find packages at
+>
+>   http://gitbuilder.ceph.com/ceph-rpm-centos6-x86_64-basic/ref/next/
+>   http://gitbuilder.ceph.com/ceph-rpm-fc17-x86_64-basic/ref/next/
+>   http://gitbuilder.ceph.com/ceph-rpm-fc18-x86_64-basic/ref/next/
+>
+> A draft of the release notes is up at
+>
+>   http://ceph.com/docs/master/release-notes/#v0-61
+>
+> Let me know if I've missed anything!
+>
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
-I gave it a try and it passes make check successfully. It is a little hai=
-ry because I commented out the code instead of removing it to help with r=
-ebasing.=20
+-- 
+Wido den Hollander
+42on B.V.
 
-https://github.com/dachary/ceph/commit/a9eb690a3537c3f844b47e76cde048b084=
-e314eb
-
-I'll now try to use it to implement some tests for ReplicatedPG.=20
-
-I would very much appreciate if someone has an advice on the best way to =
-proceed. Even if it's to say : "you're crazy, don't go there ! you're was=
-ting your time, there is a much simpler way !" ;-)
-
-Cheers
-=20
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---------------enigF56D070BD2CAACD1507AE5D2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlF45q8ACgkQ8dLMyEl6F22tlwCgvIj4pPu24QvXe7EVo2hd8kaQ
-DBcAoI5ftNjMoVJNooXVjAviJbcWsonr
-=KywN
------END PGP SIGNATURE-----
-
---------------enigF56D070BD2CAACD1507AE5D2--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
