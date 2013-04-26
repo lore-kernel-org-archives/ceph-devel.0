@@ -1,118 +1,121 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: [ceph-users] cuttlefish countdown -- OSD doesn't get marked out
-Date: Fri, 26 Apr 2013 10:50:26 +0200
-Message-ID: <517A3FD2.6080801@tuxadero.com>
-References: <alpine.DEB.2.00.1304241527220.2772@cobra.newdream.net> <51791C83.3010403@tuxadero.com> <alpine.DEB.2.00.1304250916430.4411@cobra.newdream.net> <51795BE9.60601@tuxadero.com> <541D0EAA-5D6F-42A1-9FF3-1E41815AB73A@inktank.com>
+From: Roman Alekseev <rs.alekseev@gmail.com>
+Subject: cluster and public network configuration.
+Date: Fri, 26 Apr 2013 15:32:23 +0400
+Message-ID: <517A65C7.9090502@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:60724 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757622Ab3DZIu2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 04:50:28 -0400
-In-Reply-To: <541D0EAA-5D6F-42A1-9FF3-1E41815AB73A@inktank.com>
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:65154 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754724Ab3DZLc0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 07:32:26 -0400
+Received: by mail-lb0-f172.google.com with SMTP id d10so813040lbj.3
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 04:32:24 -0700 (PDT)
+Received: from [192.168.1.116] ([81.195.203.34])
+        by mx.google.com with ESMTPSA id t6sm4534098lae.3.2013.04.26.04.32.23
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Fri, 26 Apr 2013 04:32:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi David,
+Hi,
 
-did you test it with more than one rack as well? In my first problem I
-used two racks, with a custom crushmap, so that the replicas are in the
-two racks (replicationlevel = 2). Than I took one osd down, and expected
-that the remaining osds in this rack would get the now missing replicas
-from the osd of the other rack.
-But nothing happened, the cluster stayed degraded.
+I've configured my ceph cluster to use cluster and public networks, but 
+looks like this configuration doesn't work correctly because when rados 
+bench returns the following test's result:
 
--martin
+  Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
+  Object prefix: benchmark_data_srv64_4661
+    sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat avg lat
+      0       0         0         0         0         0 -         0
+      1      16        16         0         0         0 -         0
+      2      16        17         1   1.99975         2   1.17015 1.17015
+      3      16        17         1   1.33317         0         - 1.17015
+      4      16        17         1  0.999894         0         - 1.17015
+      5      16        17         1  0.799913         0         - 1.17015
 
 
-On 26.04.2013 02:22, David Zafman wrote:
-> 
-> I filed tracker bug 4822 and have wip-4822 with a fix.  My manual testing shows that it works.  I'm building a teuthology test.
-> 
-> Given your osd tree has a single rack it should always mark OSDs down after 5 minutes by default.
-> 
-> David Zafman
-> Senior Developer
-> http://www.inktank.com
-> 
-> 
-> 
-> 
-> On Apr 25, 2013, at 9:38 AM, Martin Mailand <martin@tuxadero.com> wrote:
-> 
->> Hi Sage,
->>
->> On 25.04.2013 18:17, Sage Weil wrote:
->>> What is the output from 'ceph osd tree' and the contents of your 
->>> [mon*] sections of ceph.conf?
->>>
->>> Thanks!
->>> sage
->>
->>
->> root@store1:~# ceph osd tree
->>
->> # id	weight	type name	up/down	reweight
->> -1	24	root default
->> -3	24		rack unknownrack
->> -2	4			host store1
->> 0	1				osd.0	up	1	
->> 1	1				osd.1	down	1	
->> 2	1				osd.2	up	1	
->> 3	1				osd.3	up	1	
->> -4	4			host store3
->> 10	1				osd.10	up	1	
->> 11	1				osd.11	up	1	
->> 8	1				osd.8	up	1	
->> 9	1				osd.9	up	1	
->> -5	4			host store4
->> 12	1				osd.12	up	1	
->> 13	1				osd.13	up	1	
->> 14	1				osd.14	up	1	
->> 15	1				osd.15	up	1	
->> -6	4			host store5
->> 16	1				osd.16	up	1	
->> 17	1				osd.17	up	1	
->> 18	1				osd.18	up	1	
->> 19	1				osd.19	up	1	
->> -7	4			host store6
->> 20	1				osd.20	up	1	
->> 21	1				osd.21	up	1	
->> 22	1				osd.22	up	1	
->> 23	1				osd.23	up	1	
->> -8	4			host store2
->> 4	1				osd.4	up	1	
->> 5	1				osd.5	up	1	
->> 6	1				osd.6	up	1	
->> 7	1				osd.7	up	1	
->>
->>
->>
->> [global]
->>        auth cluster requierd = none
->>        auth service required = none
->>        auth client required = none
->> #       log file = ""
->>        log_max_recent=100
->>        log_max_new=100
->>
->> [mon]
->>        mon data = /data/mon.$id
->> [mon.a]
->>        mon host = store1
->>        mon addr = 192.168.195.31:6789
->> [mon.b]
->>        mon host = store3
->>        mon addr = 192.168.195.33:6789
->> [mon.c]
->>        mon host = store5
->>        mon addr = 192.168.195.35:6789
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
+------------------------------------------------------------------------------------
+eth0 - public network
+eth1 - cluster network
+
+ceph.conf:
+
+[global]
+
+         public network = 10.8.0.0/24
+         cluster network = 192.168.102.0/24
+
+[osd.0]
+        host = srv95
+        cluster addr = 192.168.102.95
+        public addr = 10.8.0.95
+        devs = /dev/sdb
+
+[osd.1]
+
+        host = srv115
+        cluster addr = 192.168.102.115
+        public addr = 10.8.0.115
+        devs = /dev/sda6
+
+[osd.2]
+         host = srv6
+         cluster addr = 192.168.102.6
+         public addr = 10.8.0.6
+         devs = /dev/sda6
+
+[osd.3]
+         host = srv140
+         cluster addr = 192.168.102.140
+         public addr = 10.8.0.140
+         devs = /dev/sda6
+
+[osd.4]
+         host = srv140
+         cluster addr = 192.168.102.140
+         public addr = 10.8.0.140
+         devs = /dev/sdb6
+
+[osd.5]
+        host = srv6
+        cluster addr = 192.168.102.6
+        public addr = 10.8.0.6
+        devs = /dev/sdb6
+
+[osd.6]
+        host = srv115
+        cluster addr = 192.168.102.115
+        public addr = 10.8.0.115
+        devs = /dev/sdb6
+
+
+# id    weight    type name    up/down    reweight
+-1    7    root default
+-3    7        rack unknownrack
+-2    1            host srv95
+0    1                osd.0    up    1
+-4    2            host srv115
+1    1                osd.1    up    1
+6    1                osd.6    up    1
+-5    2            host srv6
+2    1                osd.2    up    1
+5    1                osd.5    up    1
+-6    2            host srv140
+3    1                osd.3    up    1
+4    1                osd.4    up    1
+------------------------------------------------------------------------------------
+
+My question is: How to set up cluster network correctly?
+
+Thanks
+
+
+-- 
+Kind regards,
+
+R. Alekseev
+
