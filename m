@@ -1,79 +1,83 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 5/7] rbd: make rbd_dev_destroy() match rbd_dev_create()
-Date: Fri, 26 Apr 2013 13:00:48 -0500
-Message-ID: <517AC0D0.30708@inktank.com>
+Subject: [PATCH 6/7] rbd: rename rbd_dev_probe()
+Date: Fri, 26 Apr 2013 13:01:01 -0500
+Message-ID: <517AC0DD.5060602@inktank.com>
 References: <517AC047.6060000@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:36703 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755834Ab3DZSAu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 14:00:50 -0400
-Received: by mail-ie0-f182.google.com with SMTP id bn7so5258247ieb.13
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 11:00:50 -0700 (PDT)
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:63900 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755834Ab3DZSBD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 14:01:03 -0400
+Received: by mail-ie0-f181.google.com with SMTP id tp5so5151225ieb.40
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 11:01:03 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id in10sm4404248igc.1.2013.04.26.11.00.48
+        by mx.google.com with ESMTPSA id wn10sm4049103igb.2.2013.04.26.11.01.01
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 26 Apr 2013 11:00:49 -0700 (PDT)
+        Fri, 26 Apr 2013 11:01:02 -0700 (PDT)
 In-Reply-To: <517AC047.6060000@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Currently, rbd_dev_destroy() does more than just the inverse of what
-rbd_dev_create() does.  Stop doing that, and move the two extra
-things it does into the three call sites.
+Rename rbd_dev_probe() to be rbd_dev_probe_image().  Its purpose
+will eventually be to probe for the existence of a valid rbd image
+for the rbd device--focusing only on the ceph side and not the Linux
+device side of initialization.
+
+For now the two "sides" are not fully separated, and this function
+is still the entry point for initializing the full rbd device.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |    8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/block/rbd.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 63040fd..0356bba 100644
+index 0356bba..f65310c6 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3425,8 +3425,6 @@ static struct rbd_device *rbd_dev_create(struct
-rbd_client *rbdc,
+@@ -365,7 +365,7 @@ static ssize_t rbd_add(struct bus_type *bus, const
+char *buf,
+ 		       size_t count);
+ static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
+ 			  size_t count);
+-static int rbd_dev_probe(struct rbd_device *rbd_dev);
++static int rbd_dev_probe_image(struct rbd_device *rbd_dev);
 
- static void rbd_dev_destroy(struct rbd_device *rbd_dev)
- {
--	rbd_spec_put(rbd_dev->parent_spec);
--	kfree(rbd_dev->header_name);
- 	rbd_put_client(rbd_dev->rbd_client);
- 	rbd_spec_put(rbd_dev->spec);
- 	kfree(rbd_dev);
-@@ -4784,6 +4782,8 @@ static int rbd_dev_probe_finish(struct rbd_device
+ static struct bus_attribute rbd_bus_attrs[] = {
+ 	__ATTR(add, S_IWUSR, NULL, rbd_add),
+@@ -4762,7 +4762,7 @@ static int rbd_dev_probe_finish(struct rbd_device
 *rbd_dev)
- 	return ret;
+ 		}
+ 		rbdc = NULL;		/* parent now owns reference */
+ 		parent_spec = NULL;	/* parent now owns reference */
+-		ret = rbd_dev_probe(parent);
++		ret = rbd_dev_probe_image(parent);
+ 		if (ret < 0)
+ 			goto err_out_parent;
+ 		rbd_dev->parent = parent;
+@@ -4811,7 +4811,7 @@ err_out_snaps:
+  * device.  For format 2 images this includes determining the image
+  * id.
+  */
+-static int rbd_dev_probe(struct rbd_device *rbd_dev)
++static int rbd_dev_probe_image(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
 
- err_out_parent:
-+	rbd_spec_put(rbd_dev->parent_spec);
-+	kfree(rbd_dev->header_name);
- 	rbd_dev_destroy(parent);
- err_out_spec:
- 	rbd_spec_put(parent_spec);
-@@ -4905,6 +4905,8 @@ static ssize_t rbd_add(struct bus_type *bus,
+@@ -4899,7 +4899,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 	kfree(rbd_opts);
+ 	rbd_opts = NULL;	/* done with this */
 
- 	return count;
- err_out_rbd_dev:
-+	rbd_spec_put(rbd_dev->parent_spec);
-+	kfree(rbd_dev->header_name);
- 	rbd_dev_destroy(rbd_dev);
- err_out_client:
- 	rbd_put_client(rbdc);
-@@ -4955,6 +4957,8 @@ static void rbd_dev_release(struct device *dev)
- 	/* done with the id, and with the rbd_dev */
- 	rbd_dev_id_put(rbd_dev);
- 	rbd_assert(rbd_dev->rbd_client != NULL);
-+	rbd_spec_put(rbd_dev->parent_spec);
-+	kfree(rbd_dev->header_name);
- 	rbd_dev_destroy(rbd_dev);
+-	rc = rbd_dev_probe(rbd_dev);
++	rc = rbd_dev_probe_image(rbd_dev);
+ 	if (rc < 0)
+ 		goto err_out_rbd_dev;
 
- 	/* release module ref */
 -- 
 1.7.9.5
 
