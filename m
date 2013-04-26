@@ -1,148 +1,214 @@
-From: Mike Dawson <mike.dawson@scholarstack.com>
-Subject: Re: [ceph-users] cuttlefish countdown -- OSD doesn't get marked out
-Date: Fri, 26 Apr 2013 09:44:51 -0400
-Message-ID: <517A84D3.1010906@scholarstack.com>
-References: <alpine.DEB.2.00.1304241527220.2772@cobra.newdream.net> <51791C83.3010403@tuxadero.com> <alpine.DEB.2.00.1304250916430.4411@cobra.newdream.net> <51795BE9.60601@tuxadero.com> <541D0EAA-5D6F-42A1-9FF3-1E41815AB73A@inktank.com> <517A3FD2.6080801@tuxadero.com>
+From: Mike Dawson <mike.dawson-9dgm/EUDD3RBYT3KYJiKsA@public.gmane.org>
+Subject: Re: cuttlefish countdown -- OSD doesn't get marked out
+Date: Fri, 26 Apr 2013 09:55:57 -0400
+Message-ID: <517A876D.2090909@scholarstack.com>
+References: <alpine.DEB.2.00.1304241527220.2772@cobra.newdream.net>
+	<51791C83.3010403@tuxadero.com>
+	<alpine.DEB.2.00.1304250916430.4411@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:45844 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756215Ab3DZNov (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 09:44:51 -0400
-Received: by mail-ie0-f179.google.com with SMTP id 16so4934230iea.10
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 06:44:51 -0700 (PDT)
-In-Reply-To: <517A3FD2.6080801@tuxadero.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>, David Zafman <david.zafman@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1304250916430.4411-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-David / Martin,
+Sage,
 
-I can confirm this issue. At present I am running monitors only with 
-100% of my OSD processes shutdown down. For the past couple hours, Ceph 
-has reported:
+I confirm this issue. The requested info is listed below.
 
-osdmap e1323: 66 osds: 19 up, 66 in
+*Note that due to the pre-Cuttlefish monitor sync issues, this 
+deployment has been running three monitors (mon.b and mon.c working 
+properly in quorum. mon.a stuck forever synchronizing).
 
-I can mark them down manually using
+For the past two hours, no OSD processes have been running on any host, 
+yet some OSDs are still marked as up.
 
-ceph osd down 0
+http://www.gammacode.com/upload/ceph-osd-tree
 
-as expected, but they never get marked down automatically. Like Martin, 
-I also have a custom crushmap, but this cluster is operating with a 
-single rack. I'll be happy to provide any documentation / configs / logs 
-you would like.
 
-I am currently running ceph version 0.60-666-ga5cade1 
+The mon* sections of ceph.conf are:
+
+[mon]
+     debug mon = 20
+     debug paxos = 20
+     debug ms = 1
+
+[mon.a]
+     host = node2
+     mon addr = 10.1.0.3:6789
+
+[mon.b]
+     host = node26
+     mon addr = 10.1.0.67:6789
+
+[mon.c]
+     host = node49
+     mon addr = 10.1.0.130:6789
+
+root@controller1:~# ceph -s
+    health HEALTH_WARN 43 pgs degraded; 13308 pgs peering; 27932 pgs 
+stale; 13308 pgs stuck inactive; 27932 pgs stuck stale; 13582 pgs stuck 
+unclean; recovery 7264/7986546 degraded (0.091%); 47/66 in osds are 
+down; 1 mons down, quorum 1,2 b,c
+    monmap e1: 3 mons at 
+{a=10.1.0.3:6789/0,b=10.1.0.67:6789/0,c=10.1.0.130:6789/0}, election 
+epoch 1428, quorum 1,2 b,c
+    osdmap e1323: 66 osds: 19 up, 66 in
+     pgmap v427324: 28864 pgs: 257 active+clean, 231 stale+active, 15025 
+stale+active+clean, 675 peering, 12633 stale+peering, 43 
+stale+active+degraded; 448 GB data, 1402 GB used, 178 TB / 180 TB avail; 
+7264/7986546 degraded (0.091%)
+    mdsmap e1: 0/0/1 up
+
+For reference, this is ceph version 0.60-666-ga5cade1 
 (a5cade1fe7338602fb2bbfa867433d825f337c87) from gitbuilder.
 
-- Mike
+Thanks,
+Mike
 
-On 4/26/2013 4:50 AM, Martin Mailand wrote:
-> Hi David,
+On 4/25/2013 12:17 PM, Sage Weil wrote:
+> On Thu, 25 Apr 2013, Martin Mailand wrote:
+>> Hi,
+>>
+>> if I shutdown an OSD, the OSD gets marked down after 20 seconds, after
+>> 300 seconds the osd should get marked out, an the cluster should resync.
+>> But that doesn't happened, the OSD stays in the status down/in forever,
+>> therefore the cluster stays forever degraded.
+>> I can reproduce it with a new installed cluster.
+>>
+>> If I manually set the osd out (ceph osd out 1), the cluster resync
+>> starts immediately.
+>>
+>> I think thats a release critical bug, because the cluster health is not
+>> automatically recovered.
 >
-> did you test it with more than one rack as well? In my first problem I
-> used two racks, with a custom crushmap, so that the replicas are in the
-> two racks (replicationlevel = 2). Than I took one osd down, and expected
-> that the remaining osds in this rack would get the now missing replicas
-> from the osd of the other rack.
-> But nothing happened, the cluster stayed degraded.
+> What is the output from 'ceph osd tree' and the contents of your
+> [mon*] sections of ceph.conf?
 >
-> -martin
+> Thanks!
+> sage
 >
 >
-> On 26.04.2013 02:22, David Zafman wrote:
 >>
->> I filed tracker bug 4822 and have wip-4822 with a fix.  My manual testing shows that it works.  I'm building a teuthology test.
+>> And I reported this behavior a while ago
+>> http://article.gmane.org/gmane.comp.file-systems.ceph.user/603/
 >>
->> Given your osd tree has a single rack it should always mark OSDs down after 5 minutes by default.
->>
->> David Zafman
->> Senior Developer
->> http://www.inktank.com
+>> -martin
 >>
 >>
+>> Log:
 >>
 >>
->> On Apr 25, 2013, at 9:38 AM, Martin Mailand <martin@tuxadero.com> wrote:
+>> root@store1:~# ceph -s
+>>     health HEALTH_OK
+>>     monmap e1: 3 mons at
+>> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
+>> election epoch 82, quorum 0,1,2 a,b,c
+>>     osdmap e204: 24 osds: 24 up, 24 in
+>>      pgmap v106709: 5056 pgs: 5056 active+clean; 526 GB data, 1068 GB
+>> used, 173 TB / 174 TB avail
+>>     mdsmap e1: 0/0/1 up
 >>
->>> Hi Sage,
+>> root@store1:~# ceph --version
+>> ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
+>> root@store1:~# /etc/init.d/ceph stop osd.1
+>> === osd.1 ===
+>> Stopping Ceph osd.1 on store1...bash: warning: setlocale: LC_ALL: cannot
+>> change locale (en_GB.utf8)
+>> kill 5492...done
+>> root@store1:~# ceph -s
+>>     health HEALTH_OK
+>>     monmap e1: 3 mons at
+>> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
+>> election epoch 82, quorum 0,1,2 a,b,c
+>>     osdmap e204: 24 osds: 24 up, 24 in
+>>      pgmap v106709: 5056 pgs: 5056 active+clean; 526 GB data, 1068 GB
+>> used, 173 TB / 174 TB avail
+>>     mdsmap e1: 0/0/1 up
+>>
+>> root@store1:~# date -R
+>> Thu, 25 Apr 2013 13:09:54 +0200
+>>
+>>
+>>
+>> root@store1:~# ceph -s && date -R
+>>     health HEALTH_WARN 423 pgs degraded; 423 pgs stuck unclean; recovery
+>> 10999/269486 degraded (4.081%); 1/24 in osds are down
+>>     monmap e1: 3 mons at
+>> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
+>> election epoch 82, quorum 0,1,2 a,b,c
+>>     osdmap e206: 24 osds: 23 up, 24 in
+>>      pgmap v106715: 5056 pgs: 4633 active+clean, 423 active+degraded; 526
+>> GB data, 1068 GB used, 173 TB / 174 TB avail; 10999/269486 degraded (4.081%)
+>>     mdsmap e1: 0/0/1 up
+>>
+>> Thu, 25 Apr 2013 13:10:14 +0200
+>>
+>>
+>> root@store1:~# ceph -s && date -R
+>>     health HEALTH_WARN 423 pgs degraded; 423 pgs stuck unclean; recovery
+>> 10999/269486 degraded (4.081%); 1/24 in osds are down
+>>     monmap e1: 3 mons at
+>> {a=192.168.195.31:6789/0,b=192.168.195.33:6789/0,c=192.168.195.35:6789/0},
+>> election epoch 82, quorum 0,1,2 a,b,c
+>>     osdmap e206: 24 osds: 23 up, 24 in
+>>      pgmap v106719: 5056 pgs: 4633 active+clean, 423 active+degraded; 526
+>> GB data, 1068 GB used, 173 TB / 174 TB avail; 10999/269486 degraded (4.081%)
+>>     mdsmap e1: 0/0/1 up
+>>
+>> Thu, 25 Apr 2013 13:23:01 +0200
+>>
+>> On 25.04.2013 01:46, Sage Weil wrote:
+>>> Hi everyone-
 >>>
->>> On 25.04.2013 18:17, Sage Weil wrote:
->>>> What is the output from 'ceph osd tree' and the contents of your
->>>> [mon*] sections of ceph.conf?
->>>>
->>>> Thanks!
->>>> sage
+>>> We are down to a handful of urgent bugs (3!) and a cuttlefish release date
+>>> that is less than a week away.  Thank you to everyone who has been
+>>> involved in coding, testing, and stabilizing this release.  We are close!
 >>>
+>>> If you would like to test the current release candidate, your efforts
+>>> would be much appreciated!  For deb systems, you can do
 >>>
->>> root@store1:~# ceph osd tree
+>>>   wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc' | sudo apt-key add -
+>>>   echo deb http://gitbuilder.ceph.com/ceph-deb-$(lsb_release -sc)-x86_64-basic/ref/next $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
 >>>
->>> # id	weight	type name	up/down	reweight
->>> -1	24	root default
->>> -3	24		rack unknownrack
->>> -2	4			host store1
->>> 0	1				osd.0	up	1	
->>> 1	1				osd.1	down	1	
->>> 2	1				osd.2	up	1	
->>> 3	1				osd.3	up	1	
->>> -4	4			host store3
->>> 10	1				osd.10	up	1	
->>> 11	1				osd.11	up	1	
->>> 8	1				osd.8	up	1	
->>> 9	1				osd.9	up	1	
->>> -5	4			host store4
->>> 12	1				osd.12	up	1	
->>> 13	1				osd.13	up	1	
->>> 14	1				osd.14	up	1	
->>> 15	1				osd.15	up	1	
->>> -6	4			host store5
->>> 16	1				osd.16	up	1	
->>> 17	1				osd.17	up	1	
->>> 18	1				osd.18	up	1	
->>> 19	1				osd.19	up	1	
->>> -7	4			host store6
->>> 20	1				osd.20	up	1	
->>> 21	1				osd.21	up	1	
->>> 22	1				osd.22	up	1	
->>> 23	1				osd.23	up	1	
->>> -8	4			host store2
->>> 4	1				osd.4	up	1	
->>> 5	1				osd.5	up	1	
->>> 6	1				osd.6	up	1	
->>> 7	1				osd.7	up	1	
+>>> For rpm users you can find packages at
 >>>
+>>>   http://gitbuilder.ceph.com/ceph-rpm-centos6-x86_64-basic/ref/next/
+>>>   http://gitbuilder.ceph.com/ceph-rpm-fc17-x86_64-basic/ref/next/
+>>>   http://gitbuilder.ceph.com/ceph-rpm-fc18-x86_64-basic/ref/next/
 >>>
+>>> A draft of the release notes is up at
 >>>
->>> [global]
->>>         auth cluster requierd = none
->>>         auth service required = none
->>>         auth client required = none
->>> #       log file = ""
->>>         log_max_recent=100
->>>         log_max_new=100
+>>>   http://ceph.com/docs/master/release-notes/#v0-61
 >>>
->>> [mon]
->>>         mon data = /data/mon.$id
->>> [mon.a]
->>>         mon host = store1
->>>         mon addr = 192.168.195.31:6789
->>> [mon.b]
->>>         mon host = store3
->>>         mon addr = 192.168.195.33:6789
->>> [mon.c]
->>>         mon host = store5
->>>         mon addr = 192.168.195.35:6789
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>> Let me know if I've missed anything!
+>>>
+>>> sage
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
