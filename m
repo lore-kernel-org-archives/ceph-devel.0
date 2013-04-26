@@ -1,26 +1,24 @@
 From: Anders Saaby <anders@saaby.com>
 Subject: Re: placement group sizing
-Date: Fri, 26 Apr 2013 19:07:13 +0200
-Message-ID: <BE9322CA-90F7-4D71-9EB0-6FD7FA61E4AD@saaby.com>
-References: <02E999F2-8374-4D47-88DC-D8DC30547068@saaby.com> <517A718E.2000203@42on.com>
+Date: Fri, 26 Apr 2013 19:09:36 +0200
+Message-ID: <8119AA08-0CA8-414E-B9B6-FD33C8588CBA@saaby.com>
+References: <02E999F2-8374-4D47-88DC-D8DC30547068@saaby.com> <517A7E7C.8070602@inktank.com>
 Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.saaby.com ([95.170.88.191]:46078 "EHLO mail.saaby.com"
+Received: from mail.saaby.com ([95.170.88.191]:46091 "EHLO mail.saaby.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751420Ab3DZRHT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 13:07:19 -0400
-In-Reply-To: <517A718E.2000203@42on.com>
+	id S1751387Ab3DZRJj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 13:09:39 -0400
+In-Reply-To: <517A7E7C.8070602@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 26/04/2013, at 14.22, Wido den Hollander <wido@42on.com> wrote:
-> Hello,
-> 
-> On 04/25/2013 02:39 PM, Anders Saaby wrote:
+On 26/04/2013, at 15.17, Mark Nelson <mark.nelson@inktank.com> wrote:
+> On 04/25/2013 07:39 AM, Anders Saaby wrote:
 >> Hi,
 >> 
 >> We are working on prototype infrastructure for RADOS clusters, and are now ready to deploy the first production size storage pool. One question remains; How many placement groups will we need, balancing memory footprint and ability to level data placement and data reads. - And still keeping stuff within sane limits.
@@ -30,32 +28,18 @@ On 26/04/2013, at 14.22, Wido den Hollander <wido@42on.com> wrote:
 >> Acording to the documentation 1), we should have: 3.000 OSDs * 100 / 3 replicas == 100.000 placement groups.
 >> 
 >> From the maillist, 100.000 PG's is way more than I have seen, so, do you have any insights and advises on pg_num for a RADOS pool with these characteristics? Also, will it be a problem with a pg_num size this bit, if the pool is started out with only ~100 OSDs, and then grown to 3.000.
->> 
 > 
-> While the example says 100, the text above it says:
-> 
-> "We recommend approximately 50-100 placement groups per OSD to balance out memory and CPU requirements and per-OSD load"
-> 
-> So the question is, what is the workload going to be? What kind of data are you going to store? Will this be something with RBD or will it be a plain RADOS store?
+> I pretty regularly test single-mon configurations with 64k PGs.  ~100k PGs tends to be starting to get a bit intense, but with a larger mon cluster and some tweaking it should be doable.
 
-Right. Here goes;
+OK, that sounds encouraging. So, 40K-64K pgs should be doable with ~1GB mem per OSD?
 
-Workload will come from one of our applications using librados directly, so no RBD, no FS and no gateways. Low velocity I/O, should be well within SATA limits.
+> I don't mean to push anything on you, but if you guys are really thinking about deploying multiple 4PB pools, you might want to talk to us about some kind of support/consulting agreement.  That's a lot of storage!
 
-> How many OSDs per machine do you have and how much memory do you have per machine?
 
-12 OSD's per machine. A bit over 1GB memory per OSD. (16GB per machine)
-
-> The more PGs you have, the more peering PGs you will have when an OSD boots again, so that could be heavy for the CPU in the machines.
-
-Right.
-
-> The question also is, how many pools are you expecting? If you start creating 10 pools with 100.000 pgs each you'd get an insane amount of PGs.
-
-Plan is, for now, to only have one pool (4PB) per cluster, and then just scale with the appropriate amount of clusters.
-
-Our initial guesses for pgs, is in the 40K-64K range, that should give us the balancing we need, but we are not sure that is within sane memory consumption ranges.
+I agree.
 
 
 best regards,
 Anders
+
+
