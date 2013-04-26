@@ -1,121 +1,319 @@
-From: Roman Alekseev <rs.alekseev@gmail.com>
-Subject: cluster and public network configuration.
-Date: Fri, 26 Apr 2013 15:32:23 +0400
-Message-ID: <517A65C7.9090502@gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: don't create sysfs entries for non-mapped snapshots
+Date: Fri, 26 Apr 2013 06:56:05 -0500
+Message-ID: <517A6B55.1010009@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:65154 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754724Ab3DZLc0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 07:32:26 -0400
-Received: by mail-lb0-f172.google.com with SMTP id d10so813040lbj.3
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 04:32:24 -0700 (PDT)
-Received: from [192.168.1.116] ([81.195.203.34])
-        by mx.google.com with ESMTPSA id t6sm4534098lae.3.2013.04.26.04.32.23
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:35674 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755746Ab3DZL4H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 07:56:07 -0400
+Received: by mail-ia0-f173.google.com with SMTP id 21so217648iay.4
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 04:56:07 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
+        by mx.google.com with ESMTPSA id hi4sm2779464igc.6.2013.04.26.04.56.05
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 26 Apr 2013 04:32:24 -0700 (PDT)
+        Fri, 26 Apr 2013 04:56:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+When an rbd image gets mapped a device entry gets created for it
+under /sys/bus/rbd/devices/<id>/.  Inside that directory there are
+sysfs files that contain information about the image: its size,
+feature bits, major device number, and so on.
 
-I've configured my ceph cluster to use cluster and public networks, but 
-looks like this configuration doesn't work correctly because when rados 
-bench returns the following test's result:
+Additionally, if that image has any snapshots, a device entry gets
+created for each of those as a "child" of the mapped device.  Each
+of these is a subdirectory of the mapped device, and each directory
+contains a few files with information about the snapshot (its
+snapshot id, size, and feature mask).
 
-  Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
-  Object prefix: benchmark_data_srv64_4661
-    sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat avg lat
-      0       0         0         0         0         0 -         0
-      1      16        16         0         0         0 -         0
-      2      16        17         1   1.99975         2   1.17015 1.17015
-      3      16        17         1   1.33317         0         - 1.17015
-      4      16        17         1  0.999894         0         - 1.17015
-      5      16        17         1  0.799913         0         - 1.17015
+There is no clear benefit to having those device entries for the
+snapshots.  The information provided via sysfs of of little real
+value--and all of it is available via rbd CLI commands.  If we
+still wanted to see the kernel's view of this information it could
+be done much more simply by including it in a single sysfs file for
+the mapped image.
 
+But there *is* a clear cost to supporting them.  Every time a snapshot
+context changes, these entries need to be updated (deleted snapshots
+removed, new snapshots created).  The rbd driver is notified of
+changes to the snapshot context via callbacks from an osd, and care
+must be taken to coordinate removal of snapshot data structures
+with the possibility of one these notifications occurring.
 
-------------------------------------------------------------------------------------
-eth0 - public network
-eth1 - cluster network
+Things would be considerably simpler if we just didn't have to
+maintain device entries for the snapshots.
 
-ceph.conf:
+So get rid of them.
 
-[global]
+The ability to map a snapshot of an rbd image will remain; the only
+thing lost will be the ability to query these sysfs directories for
+information about snapshots of mapped images.
 
-         public network = 10.8.0.0/24
-         cluster network = 192.168.102.0/24
+This resolves:
+    http://tracker.ceph.com/issues/4796
 
-[osd.0]
-        host = srv95
-        cluster addr = 192.168.102.95
-        public addr = 10.8.0.95
-        devs = /dev/sdb
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ Documentation/ABI/testing/sysfs-bus-rbd |   20 -----
+ drivers/block/rbd.c                     |  137
++------------------------------
+ 2 files changed, 4 insertions(+), 153 deletions(-)
 
-[osd.1]
+diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
+b/Documentation/ABI/testing/sysfs-bus-rbd
+index cd9213c..0a30647 100644
+--- a/Documentation/ABI/testing/sysfs-bus-rbd
++++ b/Documentation/ABI/testing/sysfs-bus-rbd
+@@ -66,27 +66,7 @@ current_snap
 
-        host = srv115
-        cluster addr = 192.168.102.115
-        public addr = 10.8.0.115
-        devs = /dev/sda6
+ 	The current snapshot for which the device is mapped.
 
-[osd.2]
-         host = srv6
-         cluster addr = 192.168.102.6
-         public addr = 10.8.0.6
-         devs = /dev/sda6
+-snap_*
+-
+-	A directory per each snapshot
+-
+ parent
 
-[osd.3]
-         host = srv140
-         cluster addr = 192.168.102.140
-         public addr = 10.8.0.140
-         devs = /dev/sda6
+ 	Information identifying the pool, image, and snapshot id for
+ 	the parent image in a layered rbd image (format 2 only).
+-
+-Entries under /sys/bus/rbd/devices/<dev-id>/snap_<snap-name>
+--------------------------------------------------------------
+-
+-snap_id
+-
+-	The rados internal snapshot id assigned for this snapshot
+-
+-snap_size
+-
+-	The size of the image when this snapshot was taken.
+-
+-snap_features
+-
+-	A hexadecimal encoding of the feature bits for this snapshot.
+-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 4d99d40..515fbf9 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -272,7 +272,6 @@ struct rbd_img_request {
+ 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
 
-[osd.4]
-         host = srv140
-         cluster addr = 192.168.102.140
-         public addr = 10.8.0.140
-         devs = /dev/sdb6
+ struct rbd_snap {
+-	struct	device		dev;
+ 	const char		*name;
+ 	u64			size;
+ 	struct list_head	node;
+@@ -358,7 +357,6 @@ static DEFINE_SPINLOCK(rbd_client_list_lock);
+ static int rbd_img_request_submit(struct rbd_img_request *img_request);
 
-[osd.5]
-        host = srv6
-        cluster addr = 192.168.102.6
-        public addr = 10.8.0.6
-        devs = /dev/sdb6
+ static int rbd_dev_snaps_update(struct rbd_device *rbd_dev);
+-static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
 
-[osd.6]
-        host = srv115
-        cluster addr = 192.168.102.115
-        public addr = 10.8.0.115
-        devs = /dev/sdb6
+ static void rbd_dev_release(struct device *dev);
+ static void rbd_remove_snap_dev(struct rbd_snap *snap);
+@@ -3069,8 +3067,6 @@ static int rbd_dev_v1_refresh(struct rbd_device
+*rbd_dev, u64 *hver)
+ 	kfree(h.object_prefix);
 
+ 	ret = rbd_dev_snaps_update(rbd_dev);
+-	if (!ret)
+-		ret = rbd_dev_snaps_register(rbd_dev);
 
-# id    weight    type name    up/down    reweight
--1    7    root default
--3    7        rack unknownrack
--2    1            host srv95
-0    1                osd.0    up    1
--4    2            host srv115
-1    1                osd.1    up    1
-6    1                osd.6    up    1
--5    2            host srv6
-2    1                osd.2    up    1
-5    1                osd.5    up    1
--6    2            host srv140
-3    1                osd.3    up    1
-4    1                osd.4    up    1
-------------------------------------------------------------------------------------
+ 	up_write(&rbd_dev->header_rwsem);
 
-My question is: How to set up cluster network correctly?
+@@ -3344,71 +3340,6 @@ static struct device_type rbd_device_type = {
+ 	.release	= rbd_sysfs_dev_release,
+ };
 
-Thanks
+-
+-/*
+-  sysfs - snapshots
+-*/
+-
+-static ssize_t rbd_snap_size_show(struct device *dev,
+-				  struct device_attribute *attr,
+-				  char *buf)
+-{
+-	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
+-
+-	return sprintf(buf, "%llu\n", (unsigned long long)snap->size);
+-}
+-
+-static ssize_t rbd_snap_id_show(struct device *dev,
+-				struct device_attribute *attr,
+-				char *buf)
+-{
+-	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
+-
+-	return sprintf(buf, "%llu\n", (unsigned long long)snap->id);
+-}
+-
+-static ssize_t rbd_snap_features_show(struct device *dev,
+-				struct device_attribute *attr,
+-				char *buf)
+-{
+-	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
+-
+-	return sprintf(buf, "0x%016llx\n",
+-			(unsigned long long) snap->features);
+-}
+-
+-static DEVICE_ATTR(snap_size, S_IRUGO, rbd_snap_size_show, NULL);
+-static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
+-static DEVICE_ATTR(snap_features, S_IRUGO, rbd_snap_features_show, NULL);
+-
+-static struct attribute *rbd_snap_attrs[] = {
+-	&dev_attr_snap_size.attr,
+-	&dev_attr_snap_id.attr,
+-	&dev_attr_snap_features.attr,
+-	NULL,
+-};
+-
+-static struct attribute_group rbd_snap_attr_group = {
+-	.attrs = rbd_snap_attrs,
+-};
+-
+-static void rbd_snap_dev_release(struct device *dev)
+-{
+-	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
+-	kfree(snap->name);
+-	kfree(snap);
+-}
+-
+-static const struct attribute_group *rbd_snap_attr_groups[] = {
+-	&rbd_snap_attr_group,
+-	NULL
+-};
+-
+-static struct device_type rbd_snap_device_type = {
+-	.groups		= rbd_snap_attr_groups,
+-	.release	= rbd_snap_dev_release,
+-};
+-
+ static struct rbd_spec *rbd_spec_get(struct rbd_spec *spec)
+ {
+ 	kref_get(&spec->kref);
+@@ -3483,38 +3414,11 @@ static void rbd_dev_destroy(struct rbd_device
+*rbd_dev)
+ 	kfree(rbd_dev);
+ }
 
+-static bool rbd_snap_registered(struct rbd_snap *snap)
+-{
+-	bool ret = snap->dev.type == &rbd_snap_device_type;
+-	bool reg = device_is_registered(&snap->dev);
+-
+-	rbd_assert(!ret ^ reg);
+-
+-	return ret;
+-}
+-
+ static void rbd_remove_snap_dev(struct rbd_snap *snap)
+ {
+ 	list_del(&snap->node);
+-	if (device_is_registered(&snap->dev))
+-		device_unregister(&snap->dev);
+-}
+-
+-static int rbd_register_snap_dev(struct rbd_snap *snap,
+-				  struct device *parent)
+-{
+-	struct device *dev = &snap->dev;
+-	int ret;
+-
+-	dev->type = &rbd_snap_device_type;
+-	dev->parent = parent;
+-	dev->release = rbd_snap_dev_release;
+-	dev_set_name(dev, "%s%s", RBD_SNAP_DEV_NAME_PREFIX, snap->name);
+-	dout("%s: registering device for snapshot %s\n", __func__, snap->name);
+-
+-	ret = device_register(dev);
+-
+-	return ret;
++	kfree(snap->name);
++	kfree(snap);
+ }
 
+ static struct rbd_snap *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
+@@ -4089,8 +3993,6 @@ static int rbd_dev_v2_refresh(struct rbd_device
+*rbd_dev, u64 *hver)
+ 	dout("rbd_dev_snaps_update returned %d\n", ret);
+ 	if (ret)
+ 		goto out;
+-	ret = rbd_dev_snaps_register(rbd_dev);
+-	dout("rbd_dev_snaps_register returned %d\n", ret);
+ out:
+ 	up_write(&rbd_dev->header_rwsem);
+
+@@ -4145,11 +4047,11 @@ static int rbd_dev_snaps_update(struct
+rbd_device *rbd_dev)
+ 			 */
+ 			if (rbd_dev->spec->snap_id == snap->id)
+ 				clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+-			rbd_remove_snap_dev(snap);
+-			dout("%ssnap id %llu has been removed\n",
++			dout("removing %ssnap id %llu\n",
+ 				rbd_dev->spec->snap_id == snap->id ?
+ 							"mapped " : "",
+ 				(unsigned long long) snap->id);
++			rbd_remove_snap_dev(snap);
+
+ 			/* Done with this list entry; advance */
+
+@@ -4209,31 +4111,6 @@ static int rbd_dev_snaps_update(struct rbd_device
+*rbd_dev)
+ 	return 0;
+ }
+
+-/*
+- * Scan the list of snapshots and register the devices for any that
+- * have not already been registered.
+- */
+-static int rbd_dev_snaps_register(struct rbd_device *rbd_dev)
+-{
+-	struct rbd_snap *snap;
+-	int ret = 0;
+-
+-	dout("%s:\n", __func__);
+-	if (WARN_ON(!device_is_registered(&rbd_dev->dev)))
+-		return -EIO;
+-
+-	list_for_each_entry(snap, &rbd_dev->snaps, node) {
+-		if (!rbd_snap_registered(snap)) {
+-			ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
+-			if (ret < 0)
+-				break;
+-		}
+-	}
+-	dout("%s: returning %d\n", __func__, ret);
+-
+-	return ret;
+-}
+-
+ static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
+ {
+ 	struct device *dev;
+@@ -4840,12 +4717,6 @@ static int rbd_dev_probe_finish(struct rbd_device
+*rbd_dev)
+ 		rbd_dev->parent = parent;
+ 	}
+
+-	down_write(&rbd_dev->header_rwsem);
+-	ret = rbd_dev_snaps_register(rbd_dev);
+-	up_write(&rbd_dev->header_rwsem);
+-	if (ret)
+-		goto err_out_bus;
+-
+ 	ret = rbd_dev_header_watch_sync(rbd_dev, 1);
+ 	if (ret)
+ 		goto err_out_bus;
 -- 
-Kind regards,
-
-R. Alekseev
+1.7.9.5
 
