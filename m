@@ -1,74 +1,42 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: placement group sizing
-Date: Fri, 26 Apr 2013 14:22:38 +0200
-Message-ID: <517A718E.2000203@42on.com>
-References: <02E999F2-8374-4D47-88DC-D8DC30547068@saaby.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to test ? :p
+Date: Fri, 26 Apr 2013 15:07:41 +0200
+Message-ID: <CAF6-1L4J_VoEBPO1MmF5KMkqrperc3E-QNoXEnK4ied9G3goFg@mail.gmail.com>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<51704AF4.7060908@42on.com>
+	<CAF6-1L5uhOknmR7O6TtrYoiE6Sqb1FbN1-U2cpDbAR31-i2=5A@mail.gmail.com>
+	<67AC8E8B-C295-49EA-BD52-39F06E3C5A37@openminds.be>
+	<CAF6-1L50V3cn0Sqcw-LajZh=dO=x91HTe4mL2yQ-k5yiGeJ2sg@mail.gmail.com>
+	<517664AD02000099000F6C41@collaborate.seakr.com>
+	<CAF6-1L4HPK0A_T-PmsonFCFUmA5ugT8Y_CXmwdG7-erRnfEhSA@mail.gmail.com>
+	<5176961F02000099000F6C70@collaborate.seakr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:34143 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751090Ab3DZMWk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 26 Apr 2013 08:22:40 -0400
-In-Reply-To: <02E999F2-8374-4D47-88DC-D8DC30547068@saaby.com>
+Received: from mail-bk0-f50.google.com ([209.85.214.50]:48614 "EHLO
+	mail-bk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753246Ab3DZNHo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 09:07:44 -0400
+Received: by mail-bk0-f50.google.com with SMTP id ik5so1740029bkc.9
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 06:07:42 -0700 (PDT)
+In-Reply-To: <5176961F02000099000F6C70@collaborate.seakr.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Anders Saaby <anders@saaby.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nick Couchman <Nick.Couchman@seakr.com>, Wido den Hollander <wido@42on.com>, pasik@iki.fi, Bernard Grymonpon <bernard@openminds.be>
+Cc: ceph-devel@vger.kernel.org
 
-Hello,
-
-On 04/25/2013 02:39 PM, Anders Saaby wrote:
-> Hi,
->
-> We are working on prototype infrastructure for RADOS clusters, and are now ready to deploy the first production size storage pool. One question remains; How many placement groups will we need, balancing memory footprint and ability to level data placement and data reads. - And still keeping stuff within sane limits.
->
-> Our initial plan is to deploy 4PB pools, based on 4TB drives with 3 replicas (One OSD/disk). So, 3.000 disks per pool.
->
-> Acording to the documentation 1), we should have: 3.000 OSDs * 100 / 3 replicas == 100.000 placement groups.
->
->  From the maillist, 100.000 PG's is way more than I have seen, so, do you have any insights and advises on pg_num for a RADOS pool with these characteristics? Also, will it be a problem with a pg_num size this bit, if the pool is started out with only ~100 OSDs, and then grown to 3.000.
->
-
-While the example says 100, the text above it says:
-
-"We recommend approximately 50-100 placement groups per OSD to balance 
-out memory and CPU requirements and per-OSD load"
-
-So the question is, what is the workload going to be? What kind of data 
-are you going to store? Will this be something with RBD or will it be a 
-plain RADOS store?
-
-How many OSDs per machine do you have and how much memory do you have 
-per machine?
-
-The more PGs you have, the more peering PGs you will have when an OSD 
-boots again, so that could be heavy for the CPU in the machines.
-
-The question also is, how many pools are you expecting? If you start 
-creating 10 pools with 100.000 pgs each you'd get an insane amount of PGs.
-
-Could you shed some light on this?
-
-Wido
-
->
-> Thanks in advance,
-> Anders
->
-> 1: http://ceph.com/docs/master/rados/operations/placement-groups/
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Hi,
 
 
--- 
-Wido den Hollander
-42on B.V.
+I just wanted to mention that I implemented a simple request merging
+strategy to counter-act the request splitting done by the Xen block if
+protocol.
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+The results are pretty good. When comparing to using the rbd kernel
+module, I can now get 2-4x better write performance and 2x read
+performance.
+
+
+Cheers,
+
+    Sylvain
