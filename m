@@ -1,319 +1,42 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] rbd: don't create sysfs entries for non-mapped snapshots
-Date: Fri, 26 Apr 2013 06:56:05 -0500
-Message-ID: <517A6B55.1010009@inktank.com>
+Subject: [PATCH 0/6] rbd: cleanup and plug leaks
+Date: Fri, 26 Apr 2013 07:04:09 -0500
+Message-ID: <517A6D39.80000@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f173.google.com ([209.85.210.173]:35674 "EHLO
-	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755746Ab3DZL4H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 07:56:07 -0400
-Received: by mail-ia0-f173.google.com with SMTP id 21so217648iay.4
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 04:56:07 -0700 (PDT)
+Received: from mail-ia0-f174.google.com ([209.85.210.174]:49944 "EHLO
+	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751480Ab3DZMEK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Apr 2013 08:04:10 -0400
+Received: by mail-ia0-f174.google.com with SMTP id h23so3551694iae.5
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Apr 2013 05:04:10 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id hi4sm2779464igc.6.2013.04.26.04.56.05
+        by mx.google.com with ESMTPSA id dy5sm2862038igc.1.2013.04.26.05.04.09
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 26 Apr 2013 04:56:06 -0700 (PDT)
+        Fri, 26 Apr 2013 05:04:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-When an rbd image gets mapped a device entry gets created for it
-under /sys/bus/rbd/devices/<id>/.  Inside that directory there are
-sysfs files that contain information about the image: its size,
-feature bits, major device number, and so on.
+(This series, and the patch I just posted, are available
+in the "review/wip-rbd-cleanup" branch of the ceph-client
+git repository.)
 
-Additionally, if that image has any snapshots, a device entry gets
-created for each of those as a "child" of the mapped device.  Each
-of these is a subdirectory of the mapped device, and each directory
-contains a few files with information about the snapshot (its
-snapshot id, size, and feature mask).
+This series is one of several I expect to be posting that
+are mostly small tweaks and polish to the rbd code.  I'm
+doing a review of the whole thing with an eye toward
+verifying error paths and finding memory leaks.  Along
+the way I'm making small changes to improve overall
+consistency and perhaps shore up some coding style issues.
 
-There is no clear benefit to having those device entries for the
-snapshots.  The information provided via sysfs of of little real
-value--and all of it is available via rbd CLI commands.  If we
-still wanted to see the kernel's view of this information it could
-be done much more simply by including it in a single sysfs file for
-the mapped image.
+					-Alex
 
-But there *is* a clear cost to supporting them.  Every time a snapshot
-context changes, these entries need to be updated (deleted snapshots
-removed, new snapshots created).  The rbd driver is notified of
-changes to the snapshot context via callbacks from an osd, and care
-must be taken to coordinate removal of snapshot data structures
-with the possibility of one these notifications occurring.
-
-Things would be considerably simpler if we just didn't have to
-maintain device entries for the snapshots.
-
-So get rid of them.
-
-The ability to map a snapshot of an rbd image will remain; the only
-thing lost will be the ability to query these sysfs directories for
-information about snapshots of mapped images.
-
-This resolves:
-    http://tracker.ceph.com/issues/4796
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- Documentation/ABI/testing/sysfs-bus-rbd |   20 -----
- drivers/block/rbd.c                     |  137
-+------------------------------
- 2 files changed, 4 insertions(+), 153 deletions(-)
-
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd
-b/Documentation/ABI/testing/sysfs-bus-rbd
-index cd9213c..0a30647 100644
---- a/Documentation/ABI/testing/sysfs-bus-rbd
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -66,27 +66,7 @@ current_snap
-
- 	The current snapshot for which the device is mapped.
-
--snap_*
--
--	A directory per each snapshot
--
- parent
-
- 	Information identifying the pool, image, and snapshot id for
- 	the parent image in a layered rbd image (format 2 only).
--
--Entries under /sys/bus/rbd/devices/<dev-id>/snap_<snap-name>
---------------------------------------------------------------
--
--snap_id
--
--	The rados internal snapshot id assigned for this snapshot
--
--snap_size
--
--	The size of the image when this snapshot was taken.
--
--snap_features
--
--	A hexadecimal encoding of the feature bits for this snapshot.
--
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4d99d40..515fbf9 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -272,7 +272,6 @@ struct rbd_img_request {
- 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
-
- struct rbd_snap {
--	struct	device		dev;
- 	const char		*name;
- 	u64			size;
- 	struct list_head	node;
-@@ -358,7 +357,6 @@ static DEFINE_SPINLOCK(rbd_client_list_lock);
- static int rbd_img_request_submit(struct rbd_img_request *img_request);
-
- static int rbd_dev_snaps_update(struct rbd_device *rbd_dev);
--static int rbd_dev_snaps_register(struct rbd_device *rbd_dev);
-
- static void rbd_dev_release(struct device *dev);
- static void rbd_remove_snap_dev(struct rbd_snap *snap);
-@@ -3069,8 +3067,6 @@ static int rbd_dev_v1_refresh(struct rbd_device
-*rbd_dev, u64 *hver)
- 	kfree(h.object_prefix);
-
- 	ret = rbd_dev_snaps_update(rbd_dev);
--	if (!ret)
--		ret = rbd_dev_snaps_register(rbd_dev);
-
- 	up_write(&rbd_dev->header_rwsem);
-
-@@ -3344,71 +3340,6 @@ static struct device_type rbd_device_type = {
- 	.release	= rbd_sysfs_dev_release,
- };
-
--
--/*
--  sysfs - snapshots
--*/
--
--static ssize_t rbd_snap_size_show(struct device *dev,
--				  struct device_attribute *attr,
--				  char *buf)
--{
--	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
--
--	return sprintf(buf, "%llu\n", (unsigned long long)snap->size);
--}
--
--static ssize_t rbd_snap_id_show(struct device *dev,
--				struct device_attribute *attr,
--				char *buf)
--{
--	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
--
--	return sprintf(buf, "%llu\n", (unsigned long long)snap->id);
--}
--
--static ssize_t rbd_snap_features_show(struct device *dev,
--				struct device_attribute *attr,
--				char *buf)
--{
--	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
--
--	return sprintf(buf, "0x%016llx\n",
--			(unsigned long long) snap->features);
--}
--
--static DEVICE_ATTR(snap_size, S_IRUGO, rbd_snap_size_show, NULL);
--static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
--static DEVICE_ATTR(snap_features, S_IRUGO, rbd_snap_features_show, NULL);
--
--static struct attribute *rbd_snap_attrs[] = {
--	&dev_attr_snap_size.attr,
--	&dev_attr_snap_id.attr,
--	&dev_attr_snap_features.attr,
--	NULL,
--};
--
--static struct attribute_group rbd_snap_attr_group = {
--	.attrs = rbd_snap_attrs,
--};
--
--static void rbd_snap_dev_release(struct device *dev)
--{
--	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
--	kfree(snap->name);
--	kfree(snap);
--}
--
--static const struct attribute_group *rbd_snap_attr_groups[] = {
--	&rbd_snap_attr_group,
--	NULL
--};
--
--static struct device_type rbd_snap_device_type = {
--	.groups		= rbd_snap_attr_groups,
--	.release	= rbd_snap_dev_release,
--};
--
- static struct rbd_spec *rbd_spec_get(struct rbd_spec *spec)
- {
- 	kref_get(&spec->kref);
-@@ -3483,38 +3414,11 @@ static void rbd_dev_destroy(struct rbd_device
-*rbd_dev)
- 	kfree(rbd_dev);
- }
-
--static bool rbd_snap_registered(struct rbd_snap *snap)
--{
--	bool ret = snap->dev.type == &rbd_snap_device_type;
--	bool reg = device_is_registered(&snap->dev);
--
--	rbd_assert(!ret ^ reg);
--
--	return ret;
--}
--
- static void rbd_remove_snap_dev(struct rbd_snap *snap)
- {
- 	list_del(&snap->node);
--	if (device_is_registered(&snap->dev))
--		device_unregister(&snap->dev);
--}
--
--static int rbd_register_snap_dev(struct rbd_snap *snap,
--				  struct device *parent)
--{
--	struct device *dev = &snap->dev;
--	int ret;
--
--	dev->type = &rbd_snap_device_type;
--	dev->parent = parent;
--	dev->release = rbd_snap_dev_release;
--	dev_set_name(dev, "%s%s", RBD_SNAP_DEV_NAME_PREFIX, snap->name);
--	dout("%s: registering device for snapshot %s\n", __func__, snap->name);
--
--	ret = device_register(dev);
--
--	return ret;
-+	kfree(snap->name);
-+	kfree(snap);
- }
-
- static struct rbd_snap *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
-@@ -4089,8 +3993,6 @@ static int rbd_dev_v2_refresh(struct rbd_device
-*rbd_dev, u64 *hver)
- 	dout("rbd_dev_snaps_update returned %d\n", ret);
- 	if (ret)
- 		goto out;
--	ret = rbd_dev_snaps_register(rbd_dev);
--	dout("rbd_dev_snaps_register returned %d\n", ret);
- out:
- 	up_write(&rbd_dev->header_rwsem);
-
-@@ -4145,11 +4047,11 @@ static int rbd_dev_snaps_update(struct
-rbd_device *rbd_dev)
- 			 */
- 			if (rbd_dev->spec->snap_id == snap->id)
- 				clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
--			rbd_remove_snap_dev(snap);
--			dout("%ssnap id %llu has been removed\n",
-+			dout("removing %ssnap id %llu\n",
- 				rbd_dev->spec->snap_id == snap->id ?
- 							"mapped " : "",
- 				(unsigned long long) snap->id);
-+			rbd_remove_snap_dev(snap);
-
- 			/* Done with this list entry; advance */
-
-@@ -4209,31 +4111,6 @@ static int rbd_dev_snaps_update(struct rbd_device
-*rbd_dev)
- 	return 0;
- }
-
--/*
-- * Scan the list of snapshots and register the devices for any that
-- * have not already been registered.
-- */
--static int rbd_dev_snaps_register(struct rbd_device *rbd_dev)
--{
--	struct rbd_snap *snap;
--	int ret = 0;
--
--	dout("%s:\n", __func__);
--	if (WARN_ON(!device_is_registered(&rbd_dev->dev)))
--		return -EIO;
--
--	list_for_each_entry(snap, &rbd_dev->snaps, node) {
--		if (!rbd_snap_registered(snap)) {
--			ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
--			if (ret < 0)
--				break;
--		}
--	}
--	dout("%s: returning %d\n", __func__, ret);
--
--	return ret;
--}
--
- static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
- {
- 	struct device *dev;
-@@ -4840,12 +4717,6 @@ static int rbd_dev_probe_finish(struct rbd_device
-*rbd_dev)
- 		rbd_dev->parent = parent;
- 	}
-
--	down_write(&rbd_dev->header_rwsem);
--	ret = rbd_dev_snaps_register(rbd_dev);
--	up_write(&rbd_dev->header_rwsem);
--	if (ret)
--		goto err_out_bus;
--
- 	ret = rbd_dev_header_watch_sync(rbd_dev, 1);
- 	if (ret)
- 		goto err_out_bus;
--- 
-1.7.9.5
-
+[PATCH 1/6] rbd: fix leak of snapshots during initial probe
+[PATCH 2/6] rbd: make snap_size order parameter optional
+[PATCH 3/6] rbd: only update values on snap_info success
+[PATCH 4/6] rbd: rename __rbd_add_snap_dev()
+[PATCH 5/6] rbd: fix leak of format 2 snapshot names
+[PATCH 6/6] rbd: use rbd_obj_method_sync() return value
