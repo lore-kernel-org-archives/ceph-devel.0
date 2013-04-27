@@ -1,159 +1,75 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: PG statechart
-Date: Sat, 27 Apr 2013 11:16:22 +0200
-Message-ID: <517B9766.3060409@dachary.org>
-References: <517A9B3A.3080806@dachary.org> <281AE624-F6F6-4376-8130-77608D174646@inktank.com> <517B523D.8000503@dachary.org> <D58A1729-FB75-4F68-9E14-E1E3F4532336@inktank.com> <CA+4uBUbAuXPRyG_EuH12yXkLSu6_my1HzqcUmXvKCRkA50vWFA@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: fix a bug in resizing a mapping
+Date: Sat, 27 Apr 2013 07:18:39 -0500
+Message-ID: <517BC21F.4030002@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigE0311D89DC03A5C192C0BA6D"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:54252 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754356Ab3D0JQ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Apr 2013 05:16:26 -0400
-In-Reply-To: <CA+4uBUbAuXPRyG_EuH12yXkLSu6_my1HzqcUmXvKCRkA50vWFA@mail.gmail.com>
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:60696 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752637Ab3D0MSl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Apr 2013 08:18:41 -0400
+Received: by mail-ia0-f173.google.com with SMTP id 21so1036074iay.32
+        for <ceph-devel@vger.kernel.org>; Sat, 27 Apr 2013 05:18:41 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
+        by mx.google.com with ESMTPSA id c2sm7717611igv.1.2013.04.27.05.18.39
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sat, 27 Apr 2013 05:18:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE0311D89DC03A5C192C0BA6D
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+When a snapshot context update occurs, rbd_update_mapping_size() is
+called to set the capacity of the disk to record the updated
+size of the image in case it has changed.
 
-Hi Sam,
+There's a bug though.  The mapping size is in units of *bytes*.  The
+code that updates the mapping size field is assigning a value that
+has been scaled down to *sectors*.
 
-I missed this one, thanks for the link :-) It is also a little easier bec=
-ause
-http://rtime.felk.cvut.cz/statechart-viewer/
-complains about missing react for NullEvt and requires the following hack=
- to work
+Fix that.  Also, check to see if the size has actually changed, and
+don't bother updating things (specifically, calling set_capacity())
+if it has not.
 
-diff --git a/src/osd/PG.h b/src/osd/PG.h
-index 578afd3..f6446a9 100644
---- a/src/osd/PG.h
-+++ b/src/osd/PG.h
-@@ -1332,6 +1332,7 @@ public:
-       boost::statechart::result react(const Load&);
-       boost::statechart::result react(const MNotifyRec&);
-       boost::statechart::result react(const MInfoRec&);
-+      boost::statechart::result react(const NullEvt&);
-       boost::statechart::result react(const MLogRec&);
-       boost::statechart::result react(const boost::statechart::event_bas=
-e&) {
-        return discard_event();
-@@ -1353,6 +1354,7 @@ public:
-       boost::statechart::result react(const QueryState& q);
-       boost::statechart::result react(const AdvMap&);
-       boost::statechart::result react(const ActMap&);
-+      boost::statechart::result react(const NullEvt&);
-       boost::statechart::result react(const FlushedEvt&);
-       boost::statechart::result react(const boost::statechart::event_bas=
-e&) {
-        return discard_event();
-@@ -1374,6 +1376,7 @@ public:
-        > reactions;
-       boost::statechart::result react(const QueryState& q);
-       boost::statechart::result react(const AdvMap&);
-+      boost::statechart::result react(const NullEvt&);
-       boost::statechart::result react(const FlushedEvt&);
-       boost::statechart::result react(const boost::statechart::event_bas=
-e&) {
-        return discard_event();
+This resolves:
+    http://tracker.ceph.com/issues/4833
 
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-Cheers
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 5918e0b..37d9349 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3034,15 +3034,17 @@ static void rbd_remove_all_snaps(struct
+rbd_device *rbd_dev)
 
-On 04/27/2013 10:08 AM, Samuel Just wrote:
-> There is actually a peering state diagram generated with the docs:
-> http://ceph.com/docs/master/dev/peering/
->=20
-> Unfortunately, the image comes out rather small, you can generate it
-> for yourself with the script at doc/scripts/gen_state_diagram.py.
->>From admin/build_doc:
->=20
-> cat src/osd/PG.h src/osd/PG.cc | doc/scripts/gen_state_diagram.py >
-> doc/dev/peering_graph.generated.dot
->=20
-> It's similar to the boost generated one, but also includes most of the
-> state transitions from within the custom_reaction state chart
-> reactions.
-> -Sam
->=20
-> On Fri, Apr 26, 2013 at 9:49 PM, Noah Watkins <noah.watkins@inktank.com=
-> wrote:
->> Very cool!
->>
->> On Apr 26, 2013, at 9:21 PM, Loic Dachary <loic@dachary.org> wrote:
->>
->>> Hi Noah,
->>>
->>> Nice tool :-) Here is the statechart generated from PG.h.
->>>
->>> Cheers
->>>
->>> On 04/26/2013 06:07 PM, Noah Watkins wrote:
->>>> Boost Statechart Viewer generates GraphViz:
->>>>
->>>>  http://rtime.felk.cvut.cz/statechart-viewer/
->>>>
->>>> Having trouble with my LLVM environment on 12.04, so I haven't teste=
-d it.
->>>>
->>>> -Noah
->>>>
->>>> On Apr 26, 2013, at 8:20 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>
->>>>> Hi,
->>>>>
->>>>> I was considering drawing a statechart ( http://www.math-cs.gordon.=
-edu/courses/cs211/ATMExample/SessionStatechart.gif ) to better understand=
- the transitions of PG
->>>>>
->>>>> https://github.com/ceph/ceph/blob/master/src/osd/PG.h#L1341
->>>>>
->>>>> and realized that it probably already exists somewhere. Does it ?
->>>>>
->>>>> /me hopefull ;-)
->>>>>
->>>>> --
->>>>> Lo=C4=8Fc Dachary, Artisan Logiciel Libre
->>>>>
->>>>
->>>
->>> --
->>> Lo=C4=8Fc Dachary, Artisan Logiciel Libre
->>> <PG.pdf>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ static void rbd_update_mapping_size(struct rbd_device *rbd_dev)
+ {
+-	sector_t size;
+-
+ 	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
+ 		return;
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+-	size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
+-	dout("setting size to %llu sectors", (unsigned long long) size);
+-	rbd_dev->mapping.size = (u64) size;
+-	set_capacity(rbd_dev->disk, size);
++	if (rbd_dev->mapping.size != rbd_dev->header.image_size) {
++		sector_t size;
++
++		rbd_dev->mapping.size = rbd_dev->header.image_size;
++		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
++		dout("setting size to %llu sectors", (unsigned long long)size);
++		set_capacity(rbd_dev->disk, size);
++	}
+ }
 
+ /*
+-- 
+1.7.9.5
 
---------------enigE0311D89DC03A5C192C0BA6D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlF7l2YACgkQ8dLMyEl6F20A3wCeJdWQOeaUfD+/Rzk5ndKOWwV4
-LsIAnj06IhIH7Zys9S44/mMsVmvYDYix
-=53vu
------END PGP SIGNATURE-----
-
---------------enigE0311D89DC03A5C192C0BA6D--
