@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: avoid dropping extra reference in rbd_free_disk()
-Date: Mon, 29 Apr 2013 08:33:15 -0700
-Message-ID: <517E92BB.6060106@inktank.com>
-References: <517A944C.1090503@inktank.com>
+Subject: Re: [PATCH 1/7] rbd: make rbd spec names pointer to const
+Date: Mon, 29 Apr 2013 08:34:29 -0700
+Message-ID: <517E9305.4060201@inktank.com>
+References: <517AC047.6060000@inktank.com> <517AC09F.1020900@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f182.google.com ([209.85.192.182]:46936 "EHLO
-	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754511Ab3D2Pc4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:32:56 -0400
-Received: by mail-pd0-f182.google.com with SMTP id 14so2114741pdj.41
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 08:32:55 -0700 (PDT)
-In-Reply-To: <517A944C.1090503@inktank.com>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:47362 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752549Ab3D2PeK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:34:10 -0400
+Received: by mail-pb0-f50.google.com with SMTP id um15so1999852pbc.23
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 08:34:09 -0700 (PDT)
+In-Reply-To: <517AC09F.1020900@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -21,52 +21,59 @@ Cc: ceph-devel@vger.kernel.org
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 04/26/2013 07:50 AM, Alex Elder wrote:
-> I found during some failure injection testing that the call to
-> rbd_free_disk() in the error path of rbd_dev_probe_finish() was
-> dropping an extra reference to the disk queue.  The problem
-> occurred when put_disk tried to drop a reference to the disk's
-> queue.  A call to blk_cleanup_queue() just prior to that will have
-> also dropped a reference to the queue.
->
-> The problem is that the reference dropped by put_disk() is assumed
-> to have been taken by add_disk().  Our code has error paths that can
-> occur after the disk and its queue are initialized, but before the
-> call to add_disk(), and in those paths we won't have that extra
-> reference.
->
-> The fix is easy though.  In rbd_free_disk() we're already checking
-> the disk's GENHD_FL_UP flag.  That flag is an indication that
-> add_disk() has been called, so just call blk_cleanup_queue()
-> conditional on that flag being set.
->
-> This resolves:
->      http://tracker.ceph.com/issues/4800
+On 04/26/2013 10:59 AM, Alex Elder wrote:
+> Make the names and image id in an rbd_spec be pointers to constant
+> data.  This required the use of a local variable to hold the
+> snapshot name in rbd_add_parse_args() to avoid a warning.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |    8 +++++---
->   1 file changed, 5 insertions(+), 3 deletions(-)
+>   drivers/block/rbd.c |   16 +++++++++-------
+>   1 file changed, 9 insertions(+), 7 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index dcd8e58..9e38967 100644
+> index cacbc30..d989914 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2844,10 +2844,12 @@ static void rbd_free_disk(struct rbd_device
-> *rbd_dev)
->   	if (!disk)
->   		return;
+> @@ -138,13 +138,13 @@ struct rbd_image_header {
+>    */
+>   struct rbd_spec {
+>   	u64		pool_id;
+> -	char		*pool_name;
+> +	const char	*pool_name;
 >
-> -	if (disk->flags & GENHD_FL_UP)
-> +	rbd_dev->disk = NULL;
-> +	if (disk->flags & GENHD_FL_UP) {
->   		del_gendisk(disk);
-> -	if (disk->queue)
-> -		blk_cleanup_queue(disk->queue);
-> +		if (disk->queue)
-> +			blk_cleanup_queue(disk->queue);
-> +	}
->   	put_disk(disk);
->   }
+> -	char		*image_id;
+> -	char		*image_name;
+> +	const char	*image_id;
+> +	const char	*image_name;
+>
+>   	u64		snap_id;
+> -	char		*snap_name;
+> +	const char	*snap_name;
+>
+>   	struct kref	kref;
+>   };
+> @@ -4375,6 +4375,7 @@ static int rbd_add_parse_args(const char *buf,
+>   	size_t len;
+>   	char *options;
+>   	const char *mon_addrs;
+> +	char *snap_name;
+>   	size_t mon_addrs_size;
+>   	struct rbd_spec *spec = NULL;
+>   	struct rbd_options *rbd_opts = NULL;
+> @@ -4433,10 +4434,11 @@ static int rbd_add_parse_args(const char *buf,
+>   		ret = -ENAMETOOLONG;
+>   		goto out_err;
+>   	}
+> -	spec->snap_name = kmemdup(buf, len + 1, GFP_KERNEL);
+> -	if (!spec->snap_name)
+> +	snap_name = kmemdup(buf, len + 1, GFP_KERNEL);
+> +	if (!snap_name)
+>   		goto out_mem;
+> -	*(spec->snap_name + len) = '\0';
+> +	*(snap_name + len) = '\0';
+> +	spec->snap_name = snap_name;
+>
+>   	/* Initialize all rbd options to the defaults */
 >
 
