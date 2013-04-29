@@ -1,179 +1,90 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 7/7] rbd: refactor rbd_dev_probe_update_spec()
-Date: Mon, 29 Apr 2013 09:04:41 -0700
-Message-ID: <517E9A19.6090709@inktank.com>
-References: <517AC047.6060000@inktank.com> <517AC0E8.3070701@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: fix a bug in resizing a mapping
+Date: Mon, 29 Apr 2013 12:51:04 -0500
+Message-ID: <517EB308.6020503@inktank.com>
+References: <517BC21F.4030002@inktank.com> <517BC6EE.7020502@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:45185 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757091Ab3D2QE1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 12:04:27 -0400
-Received: by mail-pb0-f41.google.com with SMTP id md4so417293pbc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 09:04:26 -0700 (PDT)
-In-Reply-To: <517AC0E8.3070701@inktank.com>
+Received: from mail-qa0-f52.google.com ([209.85.216.52]:61692 "EHLO
+	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758524Ab3D2RvJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 13:51:09 -0400
+Received: by mail-qa0-f52.google.com with SMTP id hg5so1169268qab.4
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 10:51:07 -0700 (PDT)
+In-Reply-To: <517BC6EE.7020502@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Josh Durgin <josh.durgin@inktank.com>
 
-On 04/26/2013 11:01 AM, Alex Elder wrote:
-> Fairly straightforward refactoring of rbd_dev_probe_update_spec().
-> The name is changed to rbd_dev_spec_update().
->
-> Rearrange it so nothing gets assigned to the spec until all of the
-> names have been successfully acquired.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   81
-> ++++++++++++++++++++++++++-------------------------
->   1 file changed, 42 insertions(+), 39 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index f65310c6..5918e0b 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3774,83 +3774,86 @@ out:
->   }
->
->   /*
-> - * When a parent image gets probed, we only have the pool, image,
-> - * and snapshot ids but not the names of any of them.  This call
-> - * is made later to fill in those names.  It has to be done after
-> - * rbd_dev_snaps_update() has completed because some of the
-> - * information (in particular, snapshot name) is not available
-> - * until then.
-> + * When an rbd image has a parent image, it is identified by the
-> + * pool, image, and snapshot ids (not names).  This function fills
-> + * in the names for those ids.  (It's OK if we can't figure out the
-> + * name for an image id, but the pool and snapshot ids should always
-> + * exist and have names.)  All names in an rbd spec are dynamically
-> + * allocated.
->    *
->    * When an image being mapped (not a parent) is probed, we have the
->    * pool name and pool id, image name and image id, and the snapshot
->    * name.  The only thing we're missing is the snapshot id.
-> + *
-> + * The set of snapshots for an image is not known until they have
-> + * been read by rbd_dev_snaps_update(), so we can't completely fill
-> + * in this information until after that has been called.
->    */
-> -static int rbd_dev_probe_update_spec(struct rbd_device *rbd_dev)
-> +static int rbd_dev_spec_update(struct rbd_device *rbd_dev)
->   {
-> -	struct ceph_osd_client *osdc;
-> -	const char *name;
-> -	void *reply_buf = NULL;
-> +	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-> +	struct rbd_spec *spec = rbd_dev->spec;
-> +	const char *pool_name;
-> +	const char *image_name;
-> +	const char *snap_name;
->   	int ret;
->
->   	/*
->   	 * An image being mapped will have the pool name (etc.), but
->   	 * we need to look up the snapshot id.
->   	 */
-> -	if (rbd_dev->spec->pool_name) {
-> -		if (strcmp(rbd_dev->spec->snap_name, RBD_SNAP_HEAD_NAME)) {
-> +	if (spec->pool_name) {
-> +		if (strcmp(spec->snap_name, RBD_SNAP_HEAD_NAME)) {
->   			struct rbd_snap *snap;
->
-> -			snap = snap_by_name(rbd_dev, rbd_dev->spec->snap_name);
-> +			snap = snap_by_name(rbd_dev, spec->snap_name);
->   			if (!snap)
->   				return -ENOENT;
-> -			rbd_dev->spec->snap_id = snap->id;
-> +			spec->snap_id = snap->id;
->   		} else {
-> -			rbd_dev->spec->snap_id = CEPH_NOSNAP;
-> +			spec->snap_id = CEPH_NOSNAP;
->   		}
->
->   		return 0;
->   	}
->
-> -	/* Look up the pool name */
-> +	/* Get the pool name; we have to make our own copy of this */
->
-> -	osdc = &rbd_dev->rbd_client->client->osdc;
-> -	name = ceph_pg_pool_name_by_id(osdc->osdmap, rbd_dev->spec->pool_id);
-> -	if (!name) {
-> -		rbd_warn(rbd_dev, "there is no pool with id %llu",
-> -			rbd_dev->spec->pool_id);	/* Really a BUG() */
-> +	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, spec->pool_id);
-> +	if (!pool_name) {
-> +		rbd_warn(rbd_dev, "no pool with id %llu", spec->pool_id);
->   		return -EIO;
->   	}
-> -
-> -	rbd_dev->spec->pool_name = kstrdup(name, GFP_KERNEL);
-> -	if (!rbd_dev->spec->pool_name)
-> +	pool_name = kstrdup(pool_name, GFP_KERNEL);
-> +	if (!pool_name)
->   		return -ENOMEM;
->
->   	/* Fetch the image name; tolerate failure here */
->
-> -	name = rbd_dev_image_name(rbd_dev);
-> -	if (name)
-> -		rbd_dev->spec->image_name = (char *)name;
-> -	else
-> +	image_name = rbd_dev_image_name(rbd_dev);
-> +	if (!image_name)
->   		rbd_warn(rbd_dev, "unable to get image name");
->
-> -	/* Look up the snapshot name. */
-> +	/* Look up the snapshot name, and make a copy */
->
-> -	name = rbd_snap_name(rbd_dev, rbd_dev->spec->snap_id);
-> -	if (!name) {
-> -		rbd_warn(rbd_dev, "no snapshot with id %llu",
-> -			rbd_dev->spec->snap_id);	/* Really a BUG() */
-> +	snap_name = rbd_snap_name(rbd_dev, spec->snap_id);
-> +	if (!snap_name) {
-> +		rbd_warn(rbd_dev, "no snapshot with id %llu", spec->snap_id);
->   		ret = -EIO;
->   		goto out_err;
->   	}
-> -	rbd_dev->spec->snap_name = kstrdup(name, GFP_KERNEL);
-> -	if(!rbd_dev->spec->snap_name)
-> +	snap_name = kstrdup(snap_name, GFP_KERNEL);
-> +	if (!snap_name)
+On 04/27/2013 07:39 AM, Alex Elder wrote:
+> On 04/27/2013 07:18 AM, Alex Elder wrote:
+>> When a snapshot context update occurs, rbd_update_mapping_size() is
+>> called to set the capacity of the disk to record the updated
+>> size of the image in case it has changed.
 
-Probably want ret = -ENOMEM here. With that fixed:
+I have updated a few patches in this series, based on a problem
+or two I saw while working with some follow-on patches.  Since
+they have not yet been reviewed, I'm no going to bother describing
+what has changed, I've just updated the "review/wip-rbd-cleanup-3"
+branch to contain the new code.
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+					-Alex
 
->   		goto out_err;
->
-> +	spec->pool_name = pool_name;
-> +	spec->image_name = image_name;
-> +	spec->snap_name = snap_name;
-> +
->   	return 0;
->   out_err:
-> -	kfree(reply_buf);
-> -	kfree(rbd_dev->spec->pool_name);
-> -	rbd_dev->spec->pool_name = NULL;
-> +	kfree(image_name);
-> +	kfree(pool_name);
->
->   	return ret;
->   }
-> @@ -4706,7 +4709,7 @@ static int rbd_dev_probe_finish(struct rbd_device
-> *rbd_dev)
->   	if (ret)
->   		return ret;
->
-> -	ret = rbd_dev_probe_update_spec(rbd_dev);
-> +	ret = rbd_dev_spec_update(rbd_dev);
->   	if (ret)
->   		goto err_out_snaps;
->
+> This patch, as well as the series of 4 and the series of 6 that
+> I posted after it, are avaialble in the "review/wip-rbd-cleanup-3"
+> branch of the ceph-client git respository.
+> 
+> 					-Alex
+> 
+> 
+>> There's a bug though.  The mapping size is in units of *bytes*.  The
+>> code that updates the mapping size field is assigning a value that
+>> has been scaled down to *sectors*.
+>>
+>> Fix that.  Also, check to see if the size has actually changed, and
+>> don't bother updating things (specifically, calling set_capacity())
+>> if it has not.
+>>
+>> This resolves:
+>>     http://tracker.ceph.com/issues/4833
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>  drivers/block/rbd.c |   14 ++++++++------
+>>  1 file changed, 8 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 5918e0b..37d9349 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -3034,15 +3034,17 @@ static void rbd_remove_all_snaps(struct
+>> rbd_device *rbd_dev)
+>>
+>>  static void rbd_update_mapping_size(struct rbd_device *rbd_dev)
+>>  {
+>> -	sector_t size;
+>> -
+>>  	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
+>>  		return;
+>>
+>> -	size = (sector_t) rbd_dev->header.image_size / SECTOR_SIZE;
+>> -	dout("setting size to %llu sectors", (unsigned long long) size);
+>> -	rbd_dev->mapping.size = (u64) size;
+>> -	set_capacity(rbd_dev->disk, size);
+>> +	if (rbd_dev->mapping.size != rbd_dev->header.image_size) {
+>> +		sector_t size;
+>> +
+>> +		rbd_dev->mapping.size = rbd_dev->header.image_size;
+>> +		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+>> +		dout("setting size to %llu sectors", (unsigned long long)size);
+>> +		set_capacity(rbd_dev->disk, size);
+>> +	}
+>>  }
+>>
+>>  /*
+>>
+> 
 
