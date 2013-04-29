@@ -1,46 +1,179 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: mount.ceph: modprobe failed
-Date: Mon, 29 Apr 2013 08:59:25 -0700
-Message-ID: <CAPYLRzhM0J_ZmBUkLGqF=jpT5nUWO3oMTFZht142z9EJPCO75Q@mail.gmail.com>
-References: <def4bfdc122665143a614f7487f0b553@pl1.haspere.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 7/7] rbd: refactor rbd_dev_probe_update_spec()
+Date: Mon, 29 Apr 2013 09:04:41 -0700
+Message-ID: <517E9A19.6090709@inktank.com>
+References: <517AC047.6060000@inktank.com> <517AC0E8.3070701@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:52256 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757353Ab3D2P70 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:59:26 -0400
-Received: by mail-qa0-f53.google.com with SMTP id p6so1114227qad.5
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 08:59:25 -0700 (PDT)
-In-Reply-To: <def4bfdc122665143a614f7487f0b553@pl1.haspere.com>
+Received: from mail-pb0-f41.google.com ([209.85.160.41]:45185 "EHLO
+	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757091Ab3D2QE1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 12:04:27 -0400
+Received: by mail-pb0-f41.google.com with SMTP id md4so417293pbc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 09:04:26 -0700 (PDT)
+In-Reply-To: <517AC0E8.3070701@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: YS3fpFE2ykfB@dyweni.com
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Apr 29, 2013 at 4:49 AM, Dyweni - Ceph-Devel
-<YS3fpFE2ykfB@dyweni.com> wrote:
-> Hello List!
+On 04/26/2013 11:01 AM, Alex Elder wrote:
+> Fairly straightforward refactoring of rbd_dev_probe_update_spec().
+> The name is changed to rbd_dev_spec_update().
 >
+> Rearrange it so nothing gets assigned to the spec until all of the
+> names have been successfully acquired.
 >
-> I'd like to report the following bug.
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   81
+> ++++++++++++++++++++++++++-------------------------
+>   1 file changed, 42 insertions(+), 39 deletions(-)
 >
-> # ceph -v
-> ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index f65310c6..5918e0b 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -3774,83 +3774,86 @@ out:
+>   }
 >
-> Mount.ceph command still attempts to load the ceph (ceph fs) kernel module
-> even though it has been compiled into the kernel.  I would recommend that
-> the command check /proc/filesystems for the presence of the 'ceph' file
-> system, and then only attempt to load the module if it isn't present.
+>   /*
+> - * When a parent image gets probed, we only have the pool, image,
+> - * and snapshot ids but not the names of any of them.  This call
+> - * is made later to fill in those names.  It has to be done after
+> - * rbd_dev_snaps_update() has completed because some of the
+> - * information (in particular, snapshot name) is not available
+> - * until then.
+> + * When an rbd image has a parent image, it is identified by the
+> + * pool, image, and snapshot ids (not names).  This function fills
+> + * in the names for those ids.  (It's OK if we can't figure out the
+> + * name for an image id, but the pool and snapshot ids should always
+> + * exist and have names.)  All names in an rbd spec are dynamically
+> + * allocated.
+>    *
+>    * When an image being mapped (not a parent) is probed, we have the
+>    * pool name and pool id, image name and image id, and the snapshot
+>    * name.  The only thing we're missing is the snapshot id.
+> + *
+> + * The set of snapshots for an image is not known until they have
+> + * been read by rbd_dev_snaps_update(), so we can't completely fill
+> + * in this information until after that has been called.
+>    */
+> -static int rbd_dev_probe_update_spec(struct rbd_device *rbd_dev)
+> +static int rbd_dev_spec_update(struct rbd_device *rbd_dev)
+>   {
+> -	struct ceph_osd_client *osdc;
+> -	const char *name;
+> -	void *reply_buf = NULL;
+> +	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> +	struct rbd_spec *spec = rbd_dev->spec;
+> +	const char *pool_name;
+> +	const char *image_name;
+> +	const char *snap_name;
+>   	int ret;
 >
+>   	/*
+>   	 * An image being mapped will have the pool name (etc.), but
+>   	 * we need to look up the snapshot id.
+>   	 */
+> -	if (rbd_dev->spec->pool_name) {
+> -		if (strcmp(rbd_dev->spec->snap_name, RBD_SNAP_HEAD_NAME)) {
+> +	if (spec->pool_name) {
+> +		if (strcmp(spec->snap_name, RBD_SNAP_HEAD_NAME)) {
+>   			struct rbd_snap *snap;
 >
-> The confusing part of the whole bug is that despite the nasty 'modprobe
-> failed, exit status 1' message, the command still succeeds to mount the ceph
-> fs.  This caught me by surprise.
+> -			snap = snap_by_name(rbd_dev, rbd_dev->spec->snap_name);
+> +			snap = snap_by_name(rbd_dev, spec->snap_name);
+>   			if (!snap)
+>   				return -ENOENT;
+> -			rbd_dev->spec->snap_id = snap->id;
+> +			spec->snap_id = snap->id;
+>   		} else {
+> -			rbd_dev->spec->snap_id = CEPH_NOSNAP;
+> +			spec->snap_id = CEPH_NOSNAP;
+>   		}
+>
+>   		return 0;
+>   	}
+>
+> -	/* Look up the pool name */
+> +	/* Get the pool name; we have to make our own copy of this */
+>
+> -	osdc = &rbd_dev->rbd_client->client->osdc;
+> -	name = ceph_pg_pool_name_by_id(osdc->osdmap, rbd_dev->spec->pool_id);
+> -	if (!name) {
+> -		rbd_warn(rbd_dev, "there is no pool with id %llu",
+> -			rbd_dev->spec->pool_id);	/* Really a BUG() */
+> +	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, spec->pool_id);
+> +	if (!pool_name) {
+> +		rbd_warn(rbd_dev, "no pool with id %llu", spec->pool_id);
+>   		return -EIO;
+>   	}
+> -
+> -	rbd_dev->spec->pool_name = kstrdup(name, GFP_KERNEL);
+> -	if (!rbd_dev->spec->pool_name)
+> +	pool_name = kstrdup(pool_name, GFP_KERNEL);
+> +	if (!pool_name)
+>   		return -ENOMEM;
+>
+>   	/* Fetch the image name; tolerate failure here */
+>
+> -	name = rbd_dev_image_name(rbd_dev);
+> -	if (name)
+> -		rbd_dev->spec->image_name = (char *)name;
+> -	else
+> +	image_name = rbd_dev_image_name(rbd_dev);
+> +	if (!image_name)
+>   		rbd_warn(rbd_dev, "unable to get image name");
+>
+> -	/* Look up the snapshot name. */
+> +	/* Look up the snapshot name, and make a copy */
+>
+> -	name = rbd_snap_name(rbd_dev, rbd_dev->spec->snap_id);
+> -	if (!name) {
+> -		rbd_warn(rbd_dev, "no snapshot with id %llu",
+> -			rbd_dev->spec->snap_id);	/* Really a BUG() */
+> +	snap_name = rbd_snap_name(rbd_dev, spec->snap_id);
+> +	if (!snap_name) {
+> +		rbd_warn(rbd_dev, "no snapshot with id %llu", spec->snap_id);
+>   		ret = -EIO;
+>   		goto out_err;
+>   	}
+> -	rbd_dev->spec->snap_name = kstrdup(name, GFP_KERNEL);
+> -	if(!rbd_dev->spec->snap_name)
+> +	snap_name = kstrdup(snap_name, GFP_KERNEL);
+> +	if (!snap_name)
 
-Hmm, you're right. Looks like the source is catching the errors, too,
-so it should be pretty easy to whitelist if it's already loaded. Can
-you put a bug in the tracker? (tracker.ceph.com)
-Thanks for the report!
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Probably want ret = -ENOMEM here. With that fixed:
+
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+>   		goto out_err;
+>
+> +	spec->pool_name = pool_name;
+> +	spec->image_name = image_name;
+> +	spec->snap_name = snap_name;
+> +
+>   	return 0;
+>   out_err:
+> -	kfree(reply_buf);
+> -	kfree(rbd_dev->spec->pool_name);
+> -	rbd_dev->spec->pool_name = NULL;
+> +	kfree(image_name);
+> +	kfree(pool_name);
+>
+>   	return ret;
+>   }
+> @@ -4706,7 +4709,7 @@ static int rbd_dev_probe_finish(struct rbd_device
+> *rbd_dev)
+>   	if (ret)
+>   		return ret;
+>
+> -	ret = rbd_dev_probe_update_spec(rbd_dev);
+> +	ret = rbd_dev_spec_update(rbd_dev);
+>   	if (ret)
+>   		goto err_out_snaps;
+>
+
