@@ -1,57 +1,44 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: Re: fecpp C++ forward error correction library
-Date: Mon, 29 Apr 2013 15:06:09 +0100
-Message-ID: <DCA8968A-375A-4E51-84D3-425E22E81375@tchpc.tcd.ie>
-References: <sfid-H20130422-141929-+033.82-1@marduk.tchpc.tcd.ie> <517538D7.6050706@dachary.org>  (sfid-H20130422-141929-+033.82-1@marduk.tchpc.tcd.ie)
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=iso-8859-1
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: A question regarding the unlink() code
+Date: Mon, 29 Apr 2013 07:23:18 -0700
+Message-ID: <CABBk=J-qa5G_uWBSLLkxyHQUwsTFcymFxi2MMYMUAFy80MXgtg@mail.gmail.com>
+References: <AMwANwD0AHhPZuIM2rKvAaq2.1.1367163784204.Hmail.liwang@ubuntukylin.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:45458 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751501Ab3D2ONf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 10:13:35 -0400
-In-Reply-To: <517538D7.6050706@dachary.org>  (sfid-H20130422-141929-+033.82-1@marduk.tchpc.tcd.ie)
+Received: from mail-vb0-f42.google.com ([209.85.212.42]:58762 "EHLO
+	mail-vb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756837Ab3D2OXT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 10:23:19 -0400
+Received: by mail-vb0-f42.google.com with SMTP id w15so1813848vbf.15
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 07:23:18 -0700 (PDT)
+In-Reply-To: <AMwANwD0AHhPZuIM2rKvAaq2.1.1367163784204.Hmail.liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Christopher LILJENSTOLPE <cdl@asgaard.org>, Ceph Development <ceph-devel@vger.kernel.org>, Jack Lloyd <lloyd@randombit.net>
+To: =?UTF-8?B?5rGq6buO?= <liwang@ubuntukylin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Sun, Apr 28, 2013 at 8:43 AM, =E6=B1=AA=E9=BB=8E <liwang@ubuntukylin=
+=2Ecom> wrote:
+> Hi Yehuda, We have a code question to consult. For unlink() system ca=
+ll to delete a file, does the Ceph kernel client go through ceph_unlink=
+()? If so, it seems from the code tht client only communicate with MDS =
+for metadata operation, client seems not contact with OSD to delete the=
+ object. So, is that MDS takeing the responsibility of deleting file da=
+ta? And, we find the definition of CEPH_OSD_OP_DELETE (include\linux\ce=
+ph\rados.h), however, it seems it never actually used in the kernel cli=
+ent code, is it left for future? Thanks for your time. Regards, Li Wang
+>
 
-On 22 Apr 2013, at 14:19, Loic Dachary wrote:
+Lets keep this discussion on the mailing list so everyone can benefit
+from the discussion, cc'ing it here.
 
-> Hi Christopher,
->=20
-> Jack Lloyd is the author of fecpp ( http://www.randombit.net/code/fec=
-pp/ ) and he tells me someone sent him a new SIMD approach a few weeks =
-ago. I'm not sure what SIMD means yet, but I'll figure it out ;-). I te=
-nd to favor fecpp because it is more self contained and may be easier t=
-o embed than https://pypi.python.org/pypi/zfec
->=20
-> Cheers
->=20
-> --=20
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
+As for your questions, the MDS is responsible for removing the
+objects. The kernel fs client code has probably no need for that
+operation.
 
-
-Having played with zfec (more the underlying fec.[c,h] file) it's well =
-written and self-contained as I remember it; but you will need to write=
- a bunch of wrapper functions to chunk up data and pad out blocks and o=
-f course turn it into a library before you can use the underlying zfec =
-implementation for ceph. If my memory is right, zfec's c code requires =
-a C90 or C99 compiler to build it, I'm not sure if you care about that.
-
-Regards,
-Jimmy Tang
-
---
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-High Performance & Research Computing, IS Services
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/ | jtang@tchpc.tcd.ie
-Tel: +353-1-896-3847
-
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
