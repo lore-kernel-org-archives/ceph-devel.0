@@ -1,194 +1,59 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/6] rbd: fix leak of snapshots during initial probe
-Date: Mon, 29 Apr 2013 08:12:23 -0700
-Message-ID: <517E8DD7.2000207@inktank.com>
-References: <517A6D39.80000@inktank.com> <517A6D94.9000008@inktank.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: A question regarding the unlink() code
+Date: Mon, 29 Apr 2013 23:12:17 +0800
+Message-ID: <517E8DD1.4010805@ubuntukylin.com>
+References: <AMwANwD0AHhPZuIM2rKvAaq2.1.1367163784204.Hmail.liwang@ubuntukylin.com> <CABBk=J-qa5G_uWBSLLkxyHQUwsTFcymFxi2MMYMUAFy80MXgtg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:47447 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752537Ab3D2PME (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:12:04 -0400
-Received: by mail-pa0-f49.google.com with SMTP id hk2so673832pac.22
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 08:12:04 -0700 (PDT)
-In-Reply-To: <517A6D94.9000008@inktank.com>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:49256 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752188Ab3D2PMX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:12:23 -0400
+In-Reply-To: <CABBk=J-qa5G_uWBSLLkxyHQUwsTFcymFxi2MMYMUAFy80MXgtg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+HI Yehuda,
+     Thanks for the answer. We are planning to use the=20
+CEPH_OSD_OP_DELETE to implement
+fallocate/hole punching, the details are described in the blueprint=20
+(wiki.ceph.com). Your comments/suggestions
+are appreciated.
 
-On 04/26/2013 05:05 AM, Alex Elder wrote:
-> When an rbd image is initially mapped, its snapshot context is
-> collected, and then a list of snapshot entries representing the
-> snapshots in that context is created.  The list is created using
-> rbd_dev_snaps_update().  (This function also supports updating an
-> existing snapshot list based on a new snapshot context.)
+Regards,
+Li Wang
+
+On 04/29/2013 10:23 PM, Yehuda Sadeh wrote:
+> On Sun, Apr 28, 2013 at 8:43 AM, =E6=B1=AA=E9=BB=8E <liwang@ubuntukyl=
+in.com> wrote:
+>> Hi Yehuda, We have a code question to consult. For unlink() system c=
+all to delete a file, does the Ceph kernel client go through ceph_unlin=
+k()? If so, it seems from the code tht client only communicate with MDS=
+ for metadata operation, client seems not contact with OSD to delete th=
+e object. So, is that MDS takeing the responsibility of deleting file d=
+ata? And, we find the definition of CEPH_OSD_OP_DELETE (include\linux\c=
+eph\rados.h), however, it seems it never actually used in the kernel cl=
+ient code, is it left for future? Thanks for your time. Regards, Li Wan=
+g
+>>
+> Lets keep this discussion on the mailing list so everyone can benefit
+> from the discussion, cc'ing it here.
 >
-> If an error occurs, updating the list is aborted, and the list is
-> currently left as-is, in an inconsistent state.  At that point,
-> there may be a partially-constructed list, but the calling functions
-> (rbd_dev_probe_finish() from rbd_dev_probe() from rbd_add()) never
-> clean them up.  So this constitutes a leak.
+> As for your questions, the MDS is responsible for removing the
+> objects. The kernel fs client code has probably no need for that
+> operation.
 >
-> A snapshot list that is inconsistent with the current snapshot
-> context is of no use, and might even be actively bad.  So rather
-> than just having the caller clean it up, have rbd_dev_snaps_update()
-> just clear out the entire snapshot list in the event an error
-> occurs.
->
-> The other place rbd_dev_snaps_update() is used is when a refresh is
-> triggered, either because of a watch callback or via a write to the
-> /sys/bus/rbd/devices/<id>/refresh interface.  An error while
-> updating the snapshots has no substantive effect in either of those
-> cases, but one of them issues a warning.  Move that warning to the
-> common rbd_dev_refresh() function so it gets issued regardless of
-> how it got initiated.
->
-> This is part of:
->      http://tracker.ceph.com/issues/4803
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   50
-> ++++++++++++++++++++++++++++++--------------------
->   1 file changed, 30 insertions(+), 20 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 515fbf9..28b652c 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2521,7 +2521,6 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-> u8 opcode, void *data)
->   {
->   	struct rbd_device *rbd_dev = (struct rbd_device *)data;
->   	u64 hver;
-> -	int rc;
->
->   	if (!rbd_dev)
->   		return;
-> @@ -2529,10 +2528,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-> u8 opcode, void *data)
->   	dout("%s: \"%s\" notify_id %llu opcode %u\n", __func__,
->   		rbd_dev->header_name, (unsigned long long) notify_id,
->   		(unsigned int) opcode);
-> -	rc = rbd_dev_refresh(rbd_dev, &hver);
-> -	if (rc)
-> -		rbd_warn(rbd_dev, "got notification but failed to "
-> -			   " update snaps: %d\n", rc);
-> +	(void)rbd_dev_refresh(rbd_dev, &hver);
->
->   	rbd_obj_notify_ack(rbd_dev, hver, notify_id);
->   }
-> @@ -3085,6 +3081,9 @@ static int rbd_dev_refresh(struct rbd_device
-> *rbd_dev, u64 *hver)
->   		ret = rbd_dev_v2_refresh(rbd_dev, hver);
->   	mutex_unlock(&ctl_mutex);
->   	revalidate_disk(rbd_dev->disk);
-> +	if (ret)
-> +		rbd_warn(rbd_dev, "got notification but failed to "
-> +			   " update snaps: %d\n", ret);
->
->   	return ret;
->   }
-> @@ -4010,6 +4009,11 @@ out:
->    * Assumes the snapshots in the snapshot context are sorted by
->    * snapshot id, highest id first.  (Snapshots in the rbd_dev's list
->    * are also maintained in that order.)
-> + *
-> + * Note that any error occurs while updating the snapshot list
-> + * aborts the update, and the entire list is cleared.  The snapshot
-> + * list becomes inconsistent at that point anyway, so it might as
-> + * well be empty.
->    */
->   static int rbd_dev_snaps_update(struct rbd_device *rbd_dev)
->   {
-> @@ -4018,8 +4022,9 @@ static int rbd_dev_snaps_update(struct rbd_device
-> *rbd_dev)
->   	struct list_head *head = &rbd_dev->snaps;
->   	struct list_head *links = head->next;
->   	u32 index = 0;
-> +	int ret = 0;
->
-> -	dout("%s: snap count is %u\n", __func__, (unsigned int) snap_count);
-> +	dout("%s: snap count is %u\n", __func__, (unsigned int)snap_count);
->   	while (index < snap_count || links != head) {
->   		u64 snap_id;
->   		struct rbd_snap *snap;
-> @@ -4040,17 +4045,17 @@ static int rbd_dev_snaps_update(struct
-> rbd_device *rbd_dev)
->   			 * A previously-existing snapshot is not in
->   			 * the new snap context.
->   			 *
-> -			 * If the now missing snapshot is the one the
-> -			 * image is mapped to, clear its exists flag
-> -			 * so we can avoid sending any more requests
-> -			 * to it.
-> +			 * If the now-missing snapshot is the one
-> +			 * the image represents, clear its existence
-> +			 * flag so we can avoid sending any more
-> +			 * requests to it.
->   			 */
->   			if (rbd_dev->spec->snap_id == snap->id)
->   				clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
->   			dout("removing %ssnap id %llu\n",
->   				rbd_dev->spec->snap_id == snap->id ?
->   							"mapped " : "",
-> -				(unsigned long long) snap->id);
-> +				(unsigned long long)snap->id);
->   			rbd_remove_snap_dev(snap);
->
->   			/* Done with this list entry; advance */
-> @@ -4061,11 +4066,14 @@ static int rbd_dev_snaps_update(struct
-> rbd_device *rbd_dev)
->
->   		snap_name = rbd_dev_snap_info(rbd_dev, index,
->   					&snap_size, &snap_features);
-> -		if (IS_ERR(snap_name))
-> -			return PTR_ERR(snap_name);
-> +		if (IS_ERR(snap_name)) {
-> +			ret = PTR_ERR(snap_name);
-> +			dout("failed to get snap info, error %d\n", ret);
-> +			goto out_err;
-> +		}
->
-> -		dout("entry %u: snap_id = %llu\n", (unsigned int) snap_count,
-> -			(unsigned long long) snap_id);
-> +		dout("entry %u: snap_id = %llu\n", (unsigned int)snap_count,
-> +			(unsigned long long)snap_id);
->   		if (!snap || (snap_id != CEPH_NOSNAP && snap->id < snap_id)) {
->   			struct rbd_snap *new_snap;
->
-> @@ -4074,11 +4082,9 @@ static int rbd_dev_snaps_update(struct rbd_device
-> *rbd_dev)
->   			new_snap = __rbd_add_snap_dev(rbd_dev, snap_name,
->   					snap_id, snap_size, snap_features);
->   			if (IS_ERR(new_snap)) {
-> -				int err = PTR_ERR(new_snap);
-> -
-> -				dout("  failed to add dev, error %d\n", err);
-> -
-> -				return err;
-> +				ret = PTR_ERR(new_snap);
-> +				dout("  failed to add dev, error %d\n", ret);
-> +				goto out_err;
->   			}
->
->   			/* New goes before existing, or at end of list */
-> @@ -4109,6 +4115,10 @@ static int rbd_dev_snaps_update(struct rbd_device
-> *rbd_dev)
->   	dout("%s: done\n", __func__);
->
->   	return 0;
-> +out_err:
-> +	rbd_remove_all_snaps(rbd_dev);
-> +
-> +	return ret;
->   }
->
->   static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
+> Yehuda
 >
 
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
