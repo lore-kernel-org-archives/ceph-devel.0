@@ -1,59 +1,64 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: A question regarding the unlink() code
-Date: Mon, 29 Apr 2013 23:12:17 +0800
-Message-ID: <517E8DD1.4010805@ubuntukylin.com>
-References: <AMwANwD0AHhPZuIM2rKvAaq2.1.1367163784204.Hmail.liwang@ubuntukylin.com> <CABBk=J-qa5G_uWBSLLkxyHQUwsTFcymFxi2MMYMUAFy80MXgtg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 2/6] rbd: make snap_size order parameter optional
+Date: Mon, 29 Apr 2013 08:14:46 -0700
+Message-ID: <517E8E66.8030504@inktank.com>
+References: <517A6D39.80000@inktank.com> <517A6DA1.90809@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:49256 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752188Ab3D2PMX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:12:23 -0400
-In-Reply-To: <CABBk=J-qa5G_uWBSLLkxyHQUwsTFcymFxi2MMYMUAFy80MXgtg@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:58538 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751633Ab3D2PO1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Apr 2013 11:14:27 -0400
+Received: by mail-pa0-f46.google.com with SMTP id ld11so1438323pab.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Apr 2013 08:14:26 -0700 (PDT)
+In-Reply-To: <517A6DA1.90809@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-HI Yehuda,
-     Thanks for the answer. We are planning to use the=20
-CEPH_OSD_OP_DELETE to implement
-fallocate/hole punching, the details are described in the blueprint=20
-(wiki.ceph.com). Your comments/suggestions
-are appreciated.
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-Regards,
-Li Wang
-
-On 04/29/2013 10:23 PM, Yehuda Sadeh wrote:
-> On Sun, Apr 28, 2013 at 8:43 AM, =E6=B1=AA=E9=BB=8E <liwang@ubuntukyl=
-in.com> wrote:
->> Hi Yehuda, We have a code question to consult. For unlink() system c=
-all to delete a file, does the Ceph kernel client go through ceph_unlin=
-k()? If so, it seems from the code tht client only communicate with MDS=
- for metadata operation, client seems not contact with OSD to delete th=
-e object. So, is that MDS takeing the responsibility of deleting file d=
-ata? And, we find the definition of CEPH_OSD_OP_DELETE (include\linux\c=
-eph\rados.h), however, it seems it never actually used in the kernel cl=
-ient code, is it left for future? Thanks for your time. Regards, Li Wan=
-g
->>
-> Lets keep this discussion on the mailing list so everyone can benefit
-> from the discussion, cc'ing it here.
+On 04/26/2013 05:05 AM, Alex Elder wrote:
+> Only one of the two callers of _rbd_dev_v2_snap_size() needs the
+> order value returned.  So make that an optional argument--a null
+> pointer if the caller doesn't need it.
 >
-> As for your questions, the MDS is responsible for removing the
-> objects. The kernel fs client code has probably no need for that
-> operation.
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |    6 +++---
+>   1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> Yehuda
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 28b652c..1e01f0d 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -3494,7 +3494,8 @@ static int _rbd_dev_v2_snap_size(struct rbd_device
+> *rbd_dev, u64 snap_id,
+>   	if (ret < sizeof (size_buf))
+>   		return -ERANGE;
+>
+> -	*order = size_buf.order;
+> +	if (order)
+> +		*order = size_buf.order;
+>   	*snap_size = le64_to_cpu(size_buf.size);
+>
+>   	dout("  snap_id 0x%016llx order = %u, snap_size = %llu\n",
+> @@ -3939,11 +3940,10 @@ static char *rbd_dev_v2_snap_info(struct
+> rbd_device *rbd_dev, u32 which,
+>   		u64 *snap_size, u64 *snap_features)
+>   {
+>   	u64 snap_id;
+> -	u8 order;
+>   	int ret;
+>
+>   	snap_id = rbd_dev->header.snapc->snaps[which];
+> -	ret = _rbd_dev_v2_snap_size(rbd_dev, snap_id, &order, snap_size);
+> +	ret = _rbd_dev_v2_snap_size(rbd_dev, snap_id, NULL, snap_size);
+>   	if (ret)
+>   		return ERR_PTR(ret);
+>   	ret = _rbd_dev_v2_snap_features(rbd_dev, snap_id, snap_features);
 >
 
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
