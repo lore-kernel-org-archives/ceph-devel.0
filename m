@@ -1,49 +1,76 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 0/2] libceph: define ceph_create_snap_context()
-Date: Tue, 30 Apr 2013 07:45:16 -0500
-Message-ID: <517FBCDC.9080205@inktank.com>
-References: <517FB65D.5040309@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] libceph: fix "safe" completion
+Date: Tue, 30 Apr 2013 21:17:44 +0800
+Message-ID: <1367327864-21408-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:37721 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760220Ab3D3MvV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 08:51:21 -0400
-Received: by mail-ie0-f180.google.com with SMTP id to1so506087ieb.25
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 05:51:20 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id qn10sm22310809igc.6.2013.04.30.05.45.16
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 30 Apr 2013 05:45:17 -0700 (PDT)
-In-Reply-To: <517FB65D.5040309@inktank.com>
+Received: from mga14.intel.com ([143.182.124.37]:33650 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760613Ab3D3NRw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 30 Apr 2013 09:17:52 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On 04/30/2013 07:17 AM, Alex Elder wrote:
-> While reviewing a recent rbd change Josh suggested that a
-> function I created for creating a snapshot context really
-> belonged in libceph.  These patches do that.  The first
-> defines the function in a new source file, and the second
-> puts it to work.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-These patches are available in the "review/wip-rbd-cleanup-6"
-branch of the ceph-client git repository, which is based on
-branch "review/wip-rbd-cleanup-5".
+complete_request() is never called if the first OSD replay doesn't
+have ONDISK flag.
 
-All of the patches that I just posted are available there as
-well:
-    [PATCH 0/3] rbd: a few small issues
-    [PATCH 0/5] rbd: eliminate object version tracking
-    [PATCH 0/4] rbd: get rid of the snapshot list
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ include/linux/ceph/osd_client.h |  1 -
+ net/ceph/osd_client.c           | 16 ++++++++--------
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
-					-Alex
-> 					-Alex
-> 
-> [PATCH 1/2] libceph: create source file "net/ceph/snapshot.c"
-> [PATCH 2/2] ceph: use ceph_create_snap_context()
-> 
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 4191cd2..70f79fb 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -145,7 +145,6 @@ struct ceph_osd_request {
+ 	s32               r_reply_op_result[CEPH_OSD_MAX_OP];
+ 	int               r_got_reply;
+ 	int		  r_linger;
+-	int		  r_completed;
+ 
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 57d8db5..8a5fc37 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1522,6 +1522,8 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+ 	for (i = 0; i < numops; i++)
+ 		req->r_reply_op_result[i] = ceph_decode_32(&p);
+ 
++	already_completed = req->r_got_reply;
++
+ 	if (!req->r_got_reply) {
+ 
+ 		req->r_result = result;
+@@ -1552,16 +1554,14 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+ 	    ((flags & CEPH_OSD_FLAG_WRITE) == 0))
+ 		__unregister_request(osdc, req);
+ 
+-	already_completed = req->r_completed;
+-	req->r_completed = 1;
+ 	mutex_unlock(&osdc->request_mutex);
+-	if (already_completed)
+-		goto done;
+ 
+-	if (req->r_callback)
+-		req->r_callback(req, msg);
+-	else
+-		complete_all(&req->r_completion);
++	if (!already_completed) {
++		if (req->r_callback)
++			req->r_callback(req, msg);
++		else
++			complete_all(&req->r_completion);
++	}
+ 
+ 	if (flags & CEPH_OSD_FLAG_ONDISK)
+ 		complete_request(req);
+-- 
+1.8.1.4
 
