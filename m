@@ -1,41 +1,38 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: rbd: enforce parent overlap
-Date: Tue, 30 Apr 2013 10:24:10 +0300
-Message-ID: <20130430072410.GA7237@elgon.mountain>
+From: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
+Subject: kernel 3.9 / new networking options for RADOS
+Date: Tue, 30 Apr 2013 09:52:28 +0200
+Message-ID: <20130430075228.GA11012@oder>
+References: <alpine.DEB.2.00.1304290837260.644@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:17613 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751586Ab3D3HYS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 03:24:18 -0400
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:42972 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752668Ab3D3HxW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 03:53:22 -0400
 Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1304290837260.644@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Kasper Dieter <Dieter.Kasper@ts.fujitsu.com>
 
-Hello Alex Elder,
+What are the options for RADOS to make use of the new
+networking feature in Kernel 3.9 ?
 
-This is a semi-automatic email about new static checker warnings.
+http://www.h-online.com/open/features/What-s-new-in-Linux-3-9-1845705.html
 
-The patch 64548e0638af: "rbd: enforce parent overlap" from Apr 21,
-2013, leads to the following Smatch complaint:
+TCP and UDP sockets now support a SO_REUSEPORT option that allows multiple
+sockets to listen on the same port. This enables, for example, multiple
+web server processes or threads to open individual sockets to listen
+on port 80; any connections that come in on this port will be evenly
+distributed across the sockets by the kernel.
 
-drivers/block/rbd.c:1449 rbd_osd_read_callback()
-	 error: we previously assumed 'img_request' could be null (see line 1448)
+This approach aims to improve the way workloads are distributed across the
+available processor cores. (...) this extension can help avoid bottlenecks
+that appear in certain situations when only one thread accepts new
+connections and then distributes them across other threads. (...)
 
-drivers/block/rbd.c
-  1447			img_request = obj_request->img_request;
-  1448			layered = img_request && img_request_layered_test(img_request);
-                                  ^^^^^^^^^^^
-Old check.
-  1449			rbd_dev = img_request->rbd_dev;
-                                  ^^^^^^^^^^^^^^^^^^^^
-New dereference.
 
-  1450		}
-  1451	
-
-regards,
-dan carpenter
+Kind Regards,
+-Dieter
