@@ -1,193 +1,156 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 3/5] rbd: more version parameter removal
-Date: Tue, 30 Apr 2013 07:32:27 -0500
-Message-ID: <517FB9DB.7040800@inktank.com>
+Subject: [PATCH 4/5] rbd: drop rbd_obj_method_sync() version parameter
+Date: Tue, 30 Apr 2013 07:32:35 -0500
+Message-ID: <517FB9E3.7060605@inktank.com>
 References: <517FB909.40309@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:43536 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760235Ab3D3Mc3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 08:32:29 -0400
-Received: by mail-ie0-f182.google.com with SMTP id bn7so487658ieb.41
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 05:32:29 -0700 (PDT)
+Received: from mail-ia0-f169.google.com ([209.85.210.169]:59153 "EHLO
+	mail-ia0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760554Ab3D3Mcg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 08:32:36 -0400
+Received: by mail-ia0-f169.google.com with SMTP id l29so392335iag.14
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 05:32:36 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id xc3sm6912635igb.10.2013.04.30.05.32.27
+        by mx.google.com with ESMTPSA id q3sm24452304igw.0.2013.04.30.05.32.35
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 30 Apr 2013 05:32:28 -0700 (PDT)
+        Tue, 30 Apr 2013 05:32:35 -0700 (PDT)
 In-Reply-To: <517FB909.40309@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Continued from the last patch, more parameters that can go away
-because we no longer have a need to track object versions.
+Only NULL is passed as the version argument to rbd_obj_method_sync(),
+so get rid of it.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   39 ++++++++++++++++++---------------------
- 1 file changed, 18 insertions(+), 21 deletions(-)
+ drivers/block/rbd.c |   24 +++++++++++-------------
+ 1 file changed, 11 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 0bfc3e9..e405c61 100644
+index e405c61..ddf4305 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -429,8 +429,8 @@ static int rbd_img_obj_request_submit(struct
-rbd_obj_request *obj_request);
- static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
- static void rbd_dev_remove_parent(struct rbd_device *rbd_dev);
+@@ -1,3 +1,4 @@
++
+ /*
+    rbd.c -- Export ceph rados objects as a Linux block device
 
--static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver);
--static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver);
-+static int rbd_dev_refresh(struct rbd_device *rbd_dev);
-+static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev);
-
- static int rbd_open(struct block_device *bdev, fmode_t mode)
- {
-@@ -2468,8 +2468,7 @@ out_err:
- 	obj_request_done_set(obj_request);
- }
-
--static int rbd_obj_notify_ack(struct rbd_device *rbd_dev,
--				   u64 ver, u64 notify_id)
-+static int rbd_obj_notify_ack(struct rbd_device *rbd_dev, u64 notify_id)
- {
- 	struct rbd_obj_request *obj_request;
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-@@ -2487,7 +2486,7 @@ static int rbd_obj_notify_ack(struct rbd_device
+@@ -2602,8 +2603,7 @@ static int rbd_obj_method_sync(struct rbd_device
 *rbd_dev,
- 	obj_request->callback = rbd_obj_request_put;
-
- 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_NOTIFY_ACK,
--					notify_id, ver, 0);
-+					notify_id, 0, 0);
- 	rbd_osd_req_format_read(obj_request);
-
- 	ret = rbd_obj_request_submit(osdc, obj_request);
-@@ -2501,17 +2500,16 @@ out:
- static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
+ 			     const void *outbound,
+ 			     size_t outbound_size,
+ 			     void *inbound,
+-			     size_t inbound_size,
+-			     u64 *version)
++			     size_t inbound_size)
  {
- 	struct rbd_device *rbd_dev = (struct rbd_device *)data;
--	u64 hver;
-
- 	if (!rbd_dev)
- 		return;
-
- 	dout("%s: \"%s\" notify_id %llu opcode %u\n", __func__,
--		rbd_dev->header_name, (unsigned long long) notify_id,
--		(unsigned int) opcode);
--	(void)rbd_dev_refresh(rbd_dev, &hver);
-+		rbd_dev->header_name, (unsigned long long)notify_id,
-+		(unsigned int)opcode);
-+	(void)rbd_dev_refresh(rbd_dev);
-
--	rbd_obj_notify_ack(rbd_dev, hver, notify_id);
-+	rbd_obj_notify_ack(rbd_dev, notify_id);
- }
-
- /*
-@@ -3014,7 +3012,7 @@ static void rbd_update_mapping_size(struct
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+@@ -2669,8 +2669,6 @@ static int rbd_obj_method_sync(struct rbd_device
+*rbd_dev,
+ 	rbd_assert(obj_request->xferred < (u64)INT_MAX);
+ 	ret = (int)obj_request->xferred;
+ 	ceph_copy_from_page_vector(pages, inbound, 0, obj_request->xferred);
+-	if (version)
+-		*version = obj_request->version;
+ out:
+ 	if (obj_request)
+ 		rbd_obj_request_put(obj_request);
+@@ -3463,7 +3461,7 @@ static int _rbd_dev_v2_snap_size(struct rbd_device
+*rbd_dev, u64 snap_id,
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_size",
+ 				&snapid, sizeof (snapid),
+-				&size_buf, sizeof (size_buf), NULL);
++				&size_buf, sizeof (size_buf));
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		return ret;
+@@ -3500,7 +3498,7 @@ static int rbd_dev_v2_object_prefix(struct
 rbd_device *rbd_dev)
- /*
-  * only read the first part of the ondisk header, without the snaps info
-  */
--static int rbd_dev_v1_refresh(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_v1_refresh(struct rbd_device *rbd_dev)
- {
- 	int ret;
- 	struct rbd_image_header h;
-@@ -3051,7 +3049,7 @@ static int rbd_dev_v1_refresh(struct rbd_device
-*rbd_dev, u64 *hver)
- 	return ret;
- }
-
--static int rbd_dev_refresh(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_refresh(struct rbd_device *rbd_dev)
- {
- 	u64 image_size;
- 	int ret;
-@@ -3060,9 +3058,9 @@ static int rbd_dev_refresh(struct rbd_device
-*rbd_dev, u64 *hver)
- 	image_size = rbd_dev->header.image_size;
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 	if (rbd_dev->image_format == 1)
--		ret = rbd_dev_v1_refresh(rbd_dev, hver);
-+		ret = rbd_dev_v1_refresh(rbd_dev);
- 	else
--		ret = rbd_dev_v2_refresh(rbd_dev, hver);
-+		ret = rbd_dev_v2_refresh(rbd_dev);
- 	mutex_unlock(&ctl_mutex);
- 	if (ret)
- 		rbd_warn(rbd_dev, "got notification but failed to "
-@@ -3271,7 +3269,7 @@ static ssize_t rbd_image_refresh(struct device *dev,
- 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
- 	int ret;
-
--	ret = rbd_dev_refresh(rbd_dev, NULL);
-+	ret = rbd_dev_refresh(rbd_dev);
-
- 	return ret < 0 ? ret : size;
- }
-@@ -3824,7 +3822,7 @@ out_err:
- 	return ret;
- }
-
--static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev, u64 *ver)
-+static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev)
- {
- 	size_t size;
- 	int ret;
-@@ -3850,7 +3848,7 @@ static int rbd_dev_v2_snap_context(struct
-rbd_device *rbd_dev, u64 *ver)
 
  	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
- 				"rbd", "get_snapcontext", NULL, 0,
--				reply_buf, size, ver);
-+				reply_buf, size, NULL);
+ 				"rbd", "get_object_prefix", NULL, 0,
+-				reply_buf, RBD_OBJ_PREFIX_LEN_MAX, NULL);
++				reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
  	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
  	if (ret < 0)
  		goto out;
-@@ -3978,7 +3976,7 @@ static const char *rbd_dev_snap_info(struct
-rbd_device *rbd_dev, u32 which,
- 	return ERR_PTR(-EINVAL);
- }
+@@ -3536,7 +3534,7 @@ static int _rbd_dev_v2_snap_features(struct
+rbd_device *rbd_dev, u64 snap_id,
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_features",
+ 				&snapid, sizeof (snapid),
+-				&features_buf, sizeof (features_buf), NULL);
++				&features_buf, sizeof (features_buf));
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		return ret;
+@@ -3593,7 +3591,7 @@ static int rbd_dev_v2_parent_info(struct
+rbd_device *rbd_dev)
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_parent",
+ 				&snapid, sizeof (snapid),
+-				reply_buf, size, NULL);
++				reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		goto out_err;
+@@ -3650,7 +3648,7 @@ static int rbd_dev_v2_striping_info(struct
+rbd_device *rbd_dev)
 
--static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev, u64 *hver)
-+static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev)
- {
- 	int ret;
-
-@@ -3989,7 +3987,7 @@ static int rbd_dev_v2_refresh(struct rbd_device
-*rbd_dev, u64 *hver)
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_stripe_unit_count", NULL, 0,
+-				(char *)&striping_info_buf, size, NULL);
++				(char *)&striping_info_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
+ 		return ret;
+@@ -3717,7 +3715,7 @@ static char *rbd_dev_image_name(struct rbd_device
+*rbd_dev)
+ 	ret = rbd_obj_method_sync(rbd_dev, RBD_DIRECTORY,
+ 				"rbd", "dir_get_name",
+ 				image_id, image_id_size,
+-				reply_buf, size, NULL);
++				reply_buf, size);
+ 	if (ret < 0)
  		goto out;
- 	rbd_update_mapping_size(rbd_dev);
+ 	p = reply_buf;
+@@ -3848,7 +3846,7 @@ static int rbd_dev_v2_snap_context(struct
+rbd_device *rbd_dev)
 
--	ret = rbd_dev_v2_snap_context(rbd_dev, hver);
-+	ret = rbd_dev_v2_snap_context(rbd_dev);
- 	dout("rbd_dev_v2_snap_context returned %d\n", ret);
- 	if (ret)
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_snapcontext", NULL, 0,
+-				reply_buf, size, NULL);
++				reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0)
  		goto out;
-@@ -4591,7 +4589,6 @@ out_err:
- static int rbd_dev_v2_probe(struct rbd_device *rbd_dev)
- {
- 	int ret;
--	u64 ver = 0;
-
- 	ret = rbd_dev_v2_image_size(rbd_dev);
- 	if (ret)
-@@ -4641,7 +4638,7 @@ static int rbd_dev_v2_probe(struct rbd_device
+@@ -3913,7 +3911,7 @@ static const char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_snapshot_name",
+ 				&snap_id, sizeof (snap_id),
+-				reply_buf, size, NULL);
++				reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0) {
+ 		snap_name = ERR_PTR(ret);
+@@ -4506,7 +4504,7 @@ static int rbd_dev_image_id(struct rbd_device
 *rbd_dev)
 
- 	/* Get the snapshot context, plus the header version */
-
--	ret = rbd_dev_v2_snap_context(rbd_dev, &ver);
-+	ret = rbd_dev_v2_snap_context(rbd_dev);
- 	if (ret)
- 		goto out_err;
-
+ 	ret = rbd_obj_method_sync(rbd_dev, object_name,
+ 				"rbd", "get_id", NULL, 0,
+-				response, RBD_IMAGE_ID_LEN_MAX, NULL);
++				response, RBD_IMAGE_ID_LEN_MAX);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret == -ENOENT) {
+ 		image_id = kstrdup("", GFP_KERNEL);
 -- 
 1.7.9.5
 
