@@ -1,91 +1,63 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: fecpp C++ forward error correction library
-Date: Tue, 30 Apr 2013 10:11:59 +0200
-Message-ID: <517F7CCF.1020107@dachary.org>
-References: <517538D7.6050706@dachary.org> <DA7579B5-A82E-431B-99A0-89C4EE58A87E@asgaard.org>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: rbd: enforce parent overlap
+Date: Tue, 30 Apr 2013 06:57:14 -0500
+Message-ID: <517FB19A.9070703@inktank.com>
+References: <20130430072410.GA7237@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig387928F38C1A858519CFEA84"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:39846 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757879Ab3D3IMD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 04:12:03 -0400
-In-Reply-To: <DA7579B5-A82E-431B-99A0-89C4EE58A87E@asgaard.org>
+Received: from mail-ia0-f171.google.com ([209.85.210.171]:44299 "EHLO
+	mail-ia0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759488Ab3D3L5Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 07:57:16 -0400
+Received: by mail-ia0-f171.google.com with SMTP id r13so363357iar.16
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 04:57:15 -0700 (PDT)
+In-Reply-To: <20130430072410.GA7237@elgon.mountain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christopher LILJENSTOLPE <cdl@asgaard.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jack Lloyd <lloyd@randombit.net>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig387928F38C1A858519CFEA84
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On 04/30/2013 02:24 AM, Dan Carpenter wrote:
+> Hello Alex Elder,
+> 
+> This is a semi-automatic email about new static checker warnings.
 
+Cool, I've never used smatch before.  Great to get these
+automated warnings.
 
+I looked at this, and this is not a problem.  An earlier
+commit, about 10 before that one:
+    rbd: always check IMG_DATA flag
+implements a comparable check.  Any rbd object request
+with the IMG_DATA flag set (obj_request_img_data_test()
+returns true) will have a non-null image_request pointer.
 
-On 04/30/2013 02:08 AM, Christopher LILJENSTOLPE wrote:
-> Supposedly, on 2013-Apr-22, at 06.19 PDT(-0700), someone claiming to be=
- Loic Dachary scribed:
->=20
->> Hi Christopher,
->>
->> Jack Lloyd is the author of fecpp ( http://www.randombit.net/code/fecp=
-p/ ) and he tells me someone sent him a new SIMD approach a few weeks ago=
-=2E I'm not sure what SIMD means yet, but I'll figure it out ;-). I tend =
-to favor fecpp because it is more self contained and may be easier to emb=
-ed than https://pypi.python.org/pypi/zfec
->=20
-> I'll defer, provided that we don't incur a performance penalty (which i=
-s one of the negatives in sharding).  As far as SIMD: Single Instruction =
-Multiple Data.  Basically, if you think of a tiled processor (like a GPU)=
-, then you set all the tiles to do the same instruction, and stream diffe=
-rent data to each tile.  As opposed to MIMD, where each tile runs a diffe=
-rent instruction on different data.   You don't need parallel processing =
-CPUs to make use of SIMD, but you can get them going screamingly fast if =
-you do=E2=80=A6
+I suppose I should have asserted it was non-null, I do
+that all over the place...
 
-Hi Christopher,
+					-Alex
 
-Thanks for explaining :-) Although it seems disk / network I/O are the bo=
-ttleneck, it's good to be able to reduce the processing footprint to a mi=
-nimum.
+> The patch 64548e0638af: "rbd: enforce parent overlap" from Apr 21,
+> 2013, leads to the following Smatch complaint:
+> 
+> drivers/block/rbd.c:1449 rbd_osd_read_callback()
+> 	 error: we previously assumed 'img_request' could be null (see line 1448)
+> 
+> drivers/block/rbd.c
+>   1447			img_request = obj_request->img_request;
+>   1448			layered = img_request && img_request_layered_test(img_request);
+>                                   ^^^^^^^^^^^
+> Old check.
+>   1449			rbd_dev = img_request->rbd_dev;
+>                                   ^^^^^^^^^^^^^^^^^^^^
+> New dereference.
+> 
+>   1450		}
+>   1451	
+> 
+> regards,
+> dan carpenter
+> 
 
-Cheers
-
->=20
-> 	Christopher
->=20
->>
->> Cheers
->>
->> --=20
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
-> --
-> =E6=9D=8E=E6=9F=AF=E7=9D=BF
-> Check my PGP key here: http://www.asgaard.org/cdl/cdl.asc
-> Current vCard here: http://www.asgaard.org/cdl/cdl.vcf
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
-
---------------enig387928F38C1A858519CFEA84
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlF/fM8ACgkQ8dLMyEl6F22LPQCaAhno1eoRVOq+fBHRVn0nMuVz
-gnIAoMLxNSUJUwadhOrnZGdcCNlCvPFo
-=UiUx
------END PGP SIGNATURE-----
-
---------------enig387928F38C1A858519CFEA84--
