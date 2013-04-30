@@ -1,111 +1,236 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/4] rbd: look up snapshot name in names buffer
-Date: Tue, 30 Apr 2013 07:42:33 -0500
-Message-ID: <517FBC39.9040702@inktank.com>
+Subject: [PATCH 2/4] rbd: use snap_id not index to look up snap info
+Date: Tue, 30 Apr 2013 07:42:46 -0500
+Message-ID: <517FBC46.3010107@inktank.com>
 References: <517FBBF0.9020904@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:50253 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760555Ab3D3Mmf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 08:42:35 -0400
-Received: by mail-ie0-f182.google.com with SMTP id bn7so498712ieb.41
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 05:42:34 -0700 (PDT)
+Received: from mail-ia0-f178.google.com ([209.85.210.178]:37873 "EHLO
+	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760119Ab3D3Mms (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 08:42:48 -0400
+Received: by mail-ia0-f178.google.com with SMTP id j38so390034iad.23
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 05:42:48 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id w8sm7695849igl.9.2013.04.30.05.42.33
+        by mx.google.com with ESMTPSA id p10sm19595131igj.5.2013.04.30.05.42.46
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 30 Apr 2013 05:42:33 -0700 (PDT)
+        Tue, 30 Apr 2013 05:42:46 -0700 (PDT)
 In-Reply-To: <517FBBF0.9020904@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Rather than scanning the list of snapshot structures for it, scan
-the snapshot context buffer containing snapshot names in order to
-determine for a format 1 image the name associated with a given
-snapshot id.
+In order to align with what was needed for format 1 rbd images,
+rbd_dev_v2_snap_info() was set up to take as argument an index into
+the array of snapshot ids in a rbd device's snapshot context.
 
-Pull out the part of rbd_dev_v1_snap_info() that does this scan into
-a new function, _rbd_dev_v1_snap_name().  Have that function return
-a dynamically-allocated copy of the name, and don't duplicate it in
-rbd_dev_v1_snap_info().
+This switches that around, so we pass the snapshot id instead.
+In doing this, rbd_snap_name() now returns a dynamically-allocated
+string rather than a fixed one, so there's no need to make a
+duplicate in its caller, rbd_dev_spec_update().
+
+This means the following functions take a snapshot id where they
+previously used an index value:
+    rbd_dev_snap_info()
+    rbd_dev_v1_snap_info()
+    rbd_dev_v2_snap_info()
+
+A new function, rbd_dev_snap_index(), determines the snap index for
+format 1 images and uses it to look up the name.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   40 ++++++++++++++++++++++++++++++----------
- 1 file changed, 30 insertions(+), 10 deletions(-)
+ drivers/block/rbd.c |   68
+++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 37 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 15e84d8..98033e7 100644
+index 98033e7..b1e1d12 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -66,6 +66,8 @@
+@@ -433,6 +433,8 @@ static void rbd_dev_remove_parent(struct rbd_device
+*rbd_dev);
 
- #define RBD_SNAP_HEAD_NAME	"-"
+ static int rbd_dev_refresh(struct rbd_device *rbd_dev);
+ static int rbd_dev_v2_refresh(struct rbd_device *rbd_dev);
++static const char *rbd_dev_v2_snap_name(struct rbd_device *rbd_dev,
++					u64 snap_id);
 
-+#define	BAD_SNAP_INDEX	U32_MAX		/* invalid index into snap array */
-+
- /* This allows a single page to hold an image name sent by OSD */
- #define RBD_IMAGE_NAME_LEN_MAX	(PAGE_SIZE - sizeof (__le32) - 1)
- #define RBD_IMAGE_ID_LEN_MAX	64
-@@ -809,6 +811,33 @@ out_err:
- 	return -ENOMEM;
+ static int rbd_open(struct block_device *bdev, fmode_t mode)
+ {
+@@ -838,18 +840,27 @@ static u32 rbd_dev_snap_index(struct rbd_device
+*rbd_dev, u64 snap_id)
+ 	return BAD_SNAP_INDEX;
  }
 
-+static const char *_rbd_dev_v1_snap_name(struct rbd_device *rbd_dev,
-u32 which)
-+{
-+	const char *snap_name;
-+
-+	rbd_assert(which < rbd_dev->header.snapc->num_snaps);
-+
-+	/* Skip over names until we find the one we are looking for */
-+
-+	snap_name = rbd_dev->header.snap_names;
-+	while (which--)
-+		snap_name += strlen(snap_name) + 1;
-+
-+	return kstrdup(snap_name, GFP_KERNEL);
-+}
-+
-+static u32 rbd_dev_snap_index(struct rbd_device *rbd_dev, u64 snap_id)
-+{
-+	struct ceph_snap_context *snapc = rbd_dev->header.snapc;
-+	u32 which;
-+
-+	for (which = 0; which < snapc->num_snaps; which++)
-+		if (snapc->snaps[which] == snap_id)
-+			return which;
-+
-+	return BAD_SNAP_INDEX;
-+}
-+
- static const char *rbd_snap_name(struct rbd_device *rbd_dev, u64 snap_id)
+-static const char *rbd_snap_name(struct rbd_device *rbd_dev, u64 snap_id)
++static const char *rbd_dev_v1_snap_name(struct rbd_device *rbd_dev, u64
+snap_id)
  {
- 	struct rbd_snap *snap;
-@@ -3421,17 +3450,8 @@ static const char *rbd_dev_v1_snap_info(struct
-rbd_device *rbd_dev, u32 which,
- 		u64 *snap_size, u64 *snap_features)
+-	struct rbd_snap *snap;
++	u32 which;
+
++	which = rbd_dev_snap_index(rbd_dev, snap_id);
++	if (which == BAD_SNAP_INDEX)
++		return NULL;
++
++	return _rbd_dev_v1_snap_name(rbd_dev, which);
++}
++
++static const char *rbd_snap_name(struct rbd_device *rbd_dev, u64 snap_id)
++{
+ 	if (snap_id == CEPH_NOSNAP)
+ 		return RBD_SNAP_HEAD_NAME;
+
+-	list_for_each_entry(snap, &rbd_dev->snaps, node)
+-		if (snap_id == snap->id)
+-			return snap->name;
++	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
++	if (rbd_dev->image_format == 1)
++		return rbd_dev_v1_snap_name(rbd_dev, snap_id);
+
+-	return NULL;
++	return rbd_dev_v2_snap_name(rbd_dev, snap_id);
+ }
+
+ static struct rbd_snap *snap_by_name(struct rbd_device *rbd_dev,
+@@ -3446,11 +3457,15 @@ static struct rbd_snap *rbd_snap_create(struct
+rbd_device *rbd_dev,
+  * Returns a dynamically-allocated snapshot name if successful, or a
+  * pointer-coded error otherwise.
+  */
+-static const char *rbd_dev_v1_snap_info(struct rbd_device *rbd_dev, u32
+which,
+-		u64 *snap_size, u64 *snap_features)
++static const char *rbd_dev_v1_snap_info(struct rbd_device *rbd_dev,
++			u64 snap_id, u64 *snap_size, u64 *snap_features)
  {
  	const char *snap_name;
--	int i;
--
--	rbd_assert(which < rbd_dev->header.snapc->num_snaps);
--
--	/* Skip over names until we find the one we are looking for */
++	u32 which;
 
--	snap_name = rbd_dev->header.snap_names;
--	for (i = 0; i < which; i++)
--		snap_name += strlen(snap_name) + 1;
--
--	snap_name = kstrdup(snap_name, GFP_KERNEL);
-+	snap_name = _rbd_dev_v1_snap_name(rbd_dev, which);
++	which = rbd_dev_snap_index(rbd_dev, snap_id);
++	if (which == BAD_SNAP_INDEX)
++		return ERR_PTR(-ENOENT);
+ 	snap_name = _rbd_dev_v1_snap_name(rbd_dev, which);
  	if (!snap_name)
  		return ERR_PTR(-ENOMEM);
+@@ -3816,12 +3831,6 @@ static int rbd_dev_spec_update(struct rbd_device
+*rbd_dev)
 
+ 	snap_name = rbd_snap_name(rbd_dev, spec->snap_id);
+ 	if (!snap_name) {
+-		rbd_warn(rbd_dev, "no snapshot with id %llu", spec->snap_id);
+-		ret = -EIO;
+-		goto out_err;
+-	}
+-	snap_name = kstrdup(snap_name, GFP_KERNEL);
+-	if (!snap_name) {
+ 		ret = -ENOMEM;
+ 		goto out_err;
+ 	}
+@@ -3909,11 +3918,12 @@ out:
+ 	return ret;
+ }
+
+-static const char *rbd_dev_v2_snap_name(struct rbd_device *rbd_dev, u32
+which)
++static const char *rbd_dev_v2_snap_name(struct rbd_device *rbd_dev,
++					u64 snap_id)
+ {
+ 	size_t size;
+ 	void *reply_buf;
+-	__le64 snap_id;
++	__le64 snapid;
+ 	int ret;
+ 	void *p;
+ 	void *end;
+@@ -3924,11 +3934,10 @@ static const char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+ 	if (!reply_buf)
+ 		return ERR_PTR(-ENOMEM);
+
+-	rbd_assert(which < rbd_dev->header.snapc->num_snaps);
+-	snap_id = cpu_to_le64(rbd_dev->header.snapc->snaps[which]);
++	snapid = cpu_to_le64(snap_id);
+ 	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+ 				"rbd", "get_snapshot_name",
+-				&snap_id, sizeof (snap_id),
++				&snapid, sizeof (snapid),
+ 				reply_buf, size);
+ 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
+ 	if (ret < 0) {
+@@ -3943,24 +3952,21 @@ static const char *rbd_dev_v2_snap_name(struct
+rbd_device *rbd_dev, u32 which)
+ 		goto out;
+
+ 	dout("  snap_id 0x%016llx snap_name = %s\n",
+-		(unsigned long long)le64_to_cpu(snap_id), snap_name);
++		(unsigned long long)snap_id, snap_name);
+ out:
+ 	kfree(reply_buf);
+
+ 	return snap_name;
+ }
+
+-static const char *rbd_dev_v2_snap_info(struct rbd_device *rbd_dev, u32
+which,
+-		u64 *snap_size, u64 *snap_features)
++static const char *rbd_dev_v2_snap_info(struct rbd_device *rbd_dev,
++			u64 snap_id, u64 *snap_size, u64 *snap_features)
+ {
+-	u64 snap_id;
+ 	u64 size;
+ 	u64 features;
+ 	const char *snap_name;
+ 	int ret;
+
+-	rbd_assert(which < rbd_dev->header.snapc->num_snaps);
+-	snap_id = rbd_dev->header.snapc->snaps[which];
+ 	ret = _rbd_dev_v2_snap_size(rbd_dev, snap_id, NULL, &size);
+ 	if (ret)
+ 		goto out_err;
+@@ -3969,7 +3975,7 @@ static const char *rbd_dev_v2_snap_info(struct
+rbd_device *rbd_dev, u32 which,
+ 	if (ret)
+ 		goto out_err;
+
+-	snap_name = rbd_dev_v2_snap_name(rbd_dev, which);
++	snap_name = rbd_dev_v2_snap_name(rbd_dev, snap_id);
+ 	if (!IS_ERR(snap_name)) {
+ 		*snap_size = size;
+ 		*snap_features = features;
+@@ -3980,14 +3986,14 @@ out_err:
+ 	return ERR_PTR(ret);
+ }
+
+-static const char *rbd_dev_snap_info(struct rbd_device *rbd_dev, u32 which,
+-		u64 *snap_size, u64 *snap_features)
++static const char *rbd_dev_snap_info(struct rbd_device *rbd_dev,
++		u64 snap_id, u64 *snap_size, u64 *snap_features)
+ {
+ 	if (rbd_dev->image_format == 1)
+-		return rbd_dev_v1_snap_info(rbd_dev, which,
++		return rbd_dev_v1_snap_info(rbd_dev, snap_id,
+ 					snap_size, snap_features);
+ 	if (rbd_dev->image_format == 2)
+-		return rbd_dev_v2_snap_info(rbd_dev, which,
++		return rbd_dev_v2_snap_info(rbd_dev, snap_id,
+ 					snap_size, snap_features);
+ 	return ERR_PTR(-EINVAL);
+ }
+@@ -4085,7 +4091,7 @@ static int rbd_dev_snaps_update(struct rbd_device
+*rbd_dev)
+ 			continue;
+ 		}
+
+-		snap_name = rbd_dev_snap_info(rbd_dev, index,
++		snap_name = rbd_dev_snap_info(rbd_dev, snap_id,
+ 					&snap_size, &snap_features);
+ 		if (IS_ERR(snap_name)) {
+ 			ret = PTR_ERR(snap_name);
 -- 
 1.7.9.5
 
