@@ -1,46 +1,148 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: rbd: enforce parent overlap
-Date: Tue, 30 Apr 2013 16:20:18 +0300
-Message-ID: <20130430132018.GL5123@mwanda>
-References: <20130430072410.GA7237@elgon.mountain>
- <517FB19A.9070703@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [PATCH] libceph: fix "safe" completion
+Date: Tue, 30 Apr 2013 10:04:55 -0700
+Message-ID: <CAPYLRzgvUHhFVBFz9wrstO+EE_QkG1Oj-uQtb+iPL=7fpm8UTQ@mail.gmail.com>
+References: <1367327864-21408-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:26725 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760460Ab3D3NUV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 09:20:21 -0400
-Content-Disposition: inline
-In-Reply-To: <517FB19A.9070703@inktank.com>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:50851 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933285Ab3D3RLh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 13:11:37 -0400
+Received: by mail-qa0-f49.google.com with SMTP id bs12so392249qab.1
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 10:11:36 -0700 (PDT)
+In-Reply-To: <1367327864-21408-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alex Elder <elder@inktank.com>
 
-On Tue, Apr 30, 2013 at 06:57:14AM -0500, Alex Elder wrote:
-> On 04/30/2013 02:24 AM, Dan Carpenter wrote:
-> > Hello Alex Elder,
-> > 
-> > This is a semi-automatic email about new static checker warnings.
-> 
-> Cool, I've never used smatch before.  Great to get these
-> automated warnings.
-> 
-> I looked at this, and this is not a problem.  An earlier
-> commit, about 10 before that one:
->     rbd: always check IMG_DATA flag
-> implements a comparable check.  Any rbd object request
-> with the IMG_DATA flag set (obj_request_img_data_test()
-> returns true) will have a non-null image_request pointer.
-> 
-> I suppose I should have asserted it was non-null, I do
-> that all over the place...
+I was looking at this code recently and had similar thoughts; I've
+included the relevant parts of a conversation on this topic below. In
+light of that I'm not sure if this patch is appropriate or not (it
+might be; it certainly needs some cleanup IMO).
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-If Smatch knows a variable is never NULL then it ignores
-inconsistent NULL checking but it would be better to just remove the
-unneeded check.
 
-regards,
-dan carpenter
+---------- Forwarded message ----------
+From: Sage Weil <sage@inktank.com>
+Date: Thu, Apr 18, 2013 at 1:41 PM
+Subject: Re: use of osd_client's r_callback
+To: Gregory Farnum <greg@inktank.com>
+Cc: Alex Elder <elder@inktank.com>, Josh Durgin <josh.durgin@inktank.com>
 
+
+It is a bit fragile, but not broken AFAICS.  We only se the FLAG_ACK flag
+on the request (which controls whether we get an ACK in addition to a
+COMMIT reply from the osd) for the sync write path (O_DIRECT and O_SYNC
+writes).. and in that case, the callback is expecting to be called on the
+ack and the commit is just clenaing up that safe/unsafe list for fsync.
+
+I think we could clean this code up so that the names and meanings of the
+callbacks are more consistent (e.g., r_commit_callback vs
+r_ack_callback)...
+
+s
+
+On Thu, 18 Apr 2013, Gregory Farnum wrote:
+
+> The recent series of patches to deal with deadlocks has me spending a
+> little bit more time looking at the kernel client, especially after I
+> didn't understand some of the comments going back and forth about safe
+> and unsafe lists and callbacks (specifically, compared to their
+> meanings in userspace). This investigation has left me concerned, and
+> maybe confused, about when we're reporting writes as done.
+>
+> In particular, following on from change to "unsafe" so it no longer
+> indicates any communication from the OSD (which might be fine?), I
+> spent some time looking at how the other callback is handled. As best
+> I can tell, the osdc's "r_callback" is used, from the caller's
+> perspective (drivers/block/rbd.c and fs/ceph/*), to indicate that a
+> write is permanent and it can forget the data/unlock the pages/etc ?
+> this matches what the userspace clients do with a "safe" response.
+> However, in looking at the handle_reply() function, it sure looks to
+> me as if r_callback() is invoked on the first reply from an OSD ?
+> which can in many cases be an "unsafe" reply meaning that the data
+> hasn't been persisted yet! The only reference I can find to it seeing
+> if the reply is a safe or unsafe reply happens during duplicate
+> response checking, on the second (or subsequent) responses.
+>
+> Am I missing something here, or is the kernel client broken under OSD
+> failures? (I note that these issues aren't going to turn up when the
+> OSDs are running xfs/ext4 because on those FSes the first reply will
+> always be the "safe" response, which explains why we haven't detected
+> them if there are no other reasons.)
+> -Greg
+>
+>
+
+
+On Tue, Apr 30, 2013 at 6:17 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>
+> complete_request() is never called if the first OSD replay doesn't
+> have ONDISK flag.
+>
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  include/linux/ceph/osd_client.h |  1 -
+>  net/ceph/osd_client.c           | 16 ++++++++--------
+>  2 files changed, 8 insertions(+), 9 deletions(-)
+>
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 4191cd2..70f79fb 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -145,7 +145,6 @@ struct ceph_osd_request {
+>         s32               r_reply_op_result[CEPH_OSD_MAX_OP];
+>         int               r_got_reply;
+>         int               r_linger;
+> -       int               r_completed;
+>
+>         struct ceph_osd_client *r_osdc;
+>         struct kref       r_kref;
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 57d8db5..8a5fc37 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1522,6 +1522,8 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+>         for (i = 0; i < numops; i++)
+>                 req->r_reply_op_result[i] = ceph_decode_32(&p);
+>
+> +       already_completed = req->r_got_reply;
+> +
+>         if (!req->r_got_reply) {
+>
+>                 req->r_result = result;
+> @@ -1552,16 +1554,14 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+>             ((flags & CEPH_OSD_FLAG_WRITE) == 0))
+>                 __unregister_request(osdc, req);
+>
+> -       already_completed = req->r_completed;
+> -       req->r_completed = 1;
+>         mutex_unlock(&osdc->request_mutex);
+> -       if (already_completed)
+> -               goto done;
+>
+> -       if (req->r_callback)
+> -               req->r_callback(req, msg);
+> -       else
+> -               complete_all(&req->r_completion);
+> +       if (!already_completed) {
+> +               if (req->r_callback)
+> +                       req->r_callback(req, msg);
+> +               else
+> +                       complete_all(&req->r_completion);
+> +       }
+>
+>         if (flags & CEPH_OSD_FLAG_ONDISK)
+>                 complete_request(req);
+> --
+> 1.8.1.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
