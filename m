@@ -1,46 +1,41 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/5] rbd: only set up Linux files for mapped devices
-Date: Tue, 30 Apr 2013 18:15:03 -0700
-Message-ID: <51806C97.5030707@inktank.com>
-References: <517EB4F0.1070607@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 0/4] rbd: get rid of the snapshot list
+Date: Tue, 30 Apr 2013 20:16:37 -0500
+Message-ID: <51806CF5.2080703@inktank.com>
+References: <517FBBF0.9020904@inktank.com> <5180688F.1020703@inktank.com> <51806C07.60007@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:55847 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933347Ab3EABP6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 21:15:58 -0400
-Received: by mail-pb0-f53.google.com with SMTP id un1so525280pbc.26
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 18:15:58 -0700 (PDT)
-In-Reply-To: <517EB4F0.1070607@inktank.com>
+Received: from mail-ve0-f170.google.com ([209.85.128.170]:37282 "EHLO
+	mail-ve0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933347Ab3EABQj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Apr 2013 21:16:39 -0400
+Received: by mail-ve0-f170.google.com with SMTP id 15so937600vea.15
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 18:16:38 -0700 (PDT)
+In-Reply-To: <51806C07.60007@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 04/29/2013 10:59 AM, Alex Elder wrote:
-> This series does a few more things to separate the
-> ceph and Linux side of rbd device initialization,
-> and to make sure things get cleaned up in a sane
-> way when errors occur.  The last patch makes it so
-> only the rbd image getting mapped has Linux device
-> and sysfs stuff associated with them.  The parent
-> rbd devices for layered images never needed this
-> stuff, and things have now been rearranged such
-> that we can do away with that.
->
-> These patches are available in the ceph-client git
-> repository in the branch "review/wip-rbd-cleanup-5".
->
-> 					-Alex
-> [PATCH 1/5] rbd: drop module later
-> [PATCH 2/5] rbd: don't destroy rbd_dev in device release function
-> [PATCH 3/5] rbd: define rbd_dev_unprobe()
-> [PATCH 4/5] rbd: don't have device release destroy rbd_dev
-> [PATCH 5/5] rbd: set up devices only for mapped images
+On 04/30/2013 08:12 PM, Alex Elder wrote:
+> On that, the only thing inefficient is looking up the
+> snapshot id given its name.  It is so inefficient it
+> might be worth offering an op that does that for us,
+> because as it is we have to do a sequential search
+> to find out a snapshot's name.  (Maybe it's not that
+> important to track the name for parent snapshots but
+> users might be interested.)
 
-A couple notes on 3/5, otherwise looks good.
+Looking at this, I was confused as I wrote it...
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+For a v2 snapshot, we iterate across snapshot ids in
+the context, and fetch the name for each.  Only
+when we find the name that matches the one sought
+do we know which id it's associated with.
 
+Anyway, once we know the id it's a direct query
+for all the other info.
+
+					-Alex
