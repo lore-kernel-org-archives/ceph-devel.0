@@ -1,34 +1,104 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/5] rbd: define rbd_dev_unprobe()
-Date: Tue, 30 Apr 2013 23:57:23 -0500
-Message-ID: <5180A0B3.6030401@inktank.com>
-References: <517EB4F0.1070607@inktank.com> <517EB54D.8090807@inktank.com> <51806BB4.2060901@inktank.com>
+From: Constantinos Venetsanopoulos <cven-Sqt7GMbKoOQ@public.gmane.org>
+Subject: Better RADOS support in Ganeti @ GSoC 2013
+Date: Wed, 01 May 2013 12:23:24 +0300
+Message-ID: <5180DF0C.3050002@grnet.gr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/mixed; boundary="===============0463087728=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+This is a multi-part message in MIME format.
+--===============0463087728==
+Content-Type: multipart/alternative;
+ boundary="------------000106020401000307020902"
+
+This is a multi-part message in MIME format.
+--------------000106020401000307020902
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f182.google.com ([209.85.210.182]:43236 "EHLO
-	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751486Ab3EAE50 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 May 2013 00:57:26 -0400
-Received: by mail-ia0-f182.google.com with SMTP id w33so1112609iag.27
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Apr 2013 21:57:25 -0700 (PDT)
-In-Reply-To: <51806BB4.2060901@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
 
-On 04/30/2013 08:11 PM, Josh Durgin wrote:
-> There are a couple calls that look unnecessary noted below.
+Hello everybody,
 
-You were correct, in the two places that you mentioned,
-rbd_parent_remove() should go away.  I'll do that before
-I commit.
+I'm sending this here in case someone from the list is interested.
+Ganeti [1] is a mentoring organization in this year's Google Summer
+of Code and one of the Ideas proposed is:
 
-					-Alex
+"Better support for RADOS/Ceph in Ganeti"
 
-> Other than that:
-> 
-> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Please see here:
+http://code.google.com/p/ganeti/wiki/SummerOfCode2013Ideas
 
+Currently, Ganeti supports VM disks inside RADOS natively, using
+the rbd kernel driver and the rbd tools. The idea's primary target
+is to also support the qemu-rbd driver, so that everything happens
+on userspace.
+
+Kind Regards,
+Constantinos
+
+
+[1]?code.google.com/p/ganeti/?
+
+
+--------------000106020401000307020902
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    Hello everybody,<br>
+    <br>
+    I'm sending this here in case someone from the list is interested.<br>
+    Ganeti [1] is a mentoring organization in this year's Google Summer<br>
+    of Code and one of the Ideas proposed is:<br>
+    <br>
+    "Better support for RADOS/Ceph in Ganeti"<br>
+    <br>
+    Please see here:<br>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <a class="moz-txt-link-freetext" href="http://code.google.com/p/ganeti/wiki/SummerOfCode2013Ideas">http://code.google.com/p/ganeti/wiki/SummerOfCode2013Ideas</a><br>
+    <br>
+    Currently, Ganeti supports VM disks inside RADOS natively, using<br>
+    the rbd kernel driver and the rbd tools. The idea's primary target<br>
+    is to also support the qemu-rbd driver, so that everything happens<br>
+    on userspace.<br>
+    <br>
+    Kind Regards,<br>
+    Constantinos<br>
+    <br>
+    <br>
+    [1]<cite> </cite><cite></cite>&#8206;code.google.com/p/ganeti/&#8206;<br>
+    <br>
+  </body>
+</html>
+
+--------------000106020401000307020902--
+
+--===============0463087728==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0463087728==--
