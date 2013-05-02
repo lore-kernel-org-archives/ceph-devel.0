@@ -1,55 +1,66 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: fix image request leak on parent read
-Date: Thu, 02 May 2013 10:06:58 -0700
-Message-ID: <51829D32.1050102@inktank.com>
-References: <5182532C.80400@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+From: Ross Turk <ross@inktank.com>
+Subject: Developer Summit Schedule & Details
+Date: Thu, 2 May 2013 11:17:05 -0700
+Message-ID: <FE64A5BB-F3F0-4816-9DDB-5AF52FD0FB11@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:63566 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758913Ab3EBRGi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 13:06:38 -0400
-Received: by mail-pd0-f169.google.com with SMTP id 14so465309pdc.14
-        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 10:06:38 -0700 (PDT)
-In-Reply-To: <5182532C.80400@inktank.com>
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:40324 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761362Ab3EBSRJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 14:17:09 -0400
+Received: by mail-pb0-f47.google.com with SMTP id uo1so479186pbc.6
+        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 11:17:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 05/02/2013 04:51 AM, Alex Elder wrote:
-> When a read for a layered image object finds the target object
-> doesn't exist, a read image request for the parent image is created
-> and submitted.  When that completes, the callback routine was
-> not releasing that parent image request.  Fix that.
->
-> The slab allocation stuff just added has greatly simplified the
-> search for the source of this memory leak.
->
-> This resolves:
->      http://tracker.ceph.com/issues/4803
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    1 +
->   1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 8d9aeef..d669f71 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2547,6 +2547,7 @@ static void rbd_img_parent_read_callback(struct
-> rbd_img_request *img_request)
->   		obj_request->xferred = img_request->xferred;
->   	}
->   out:
-> +	rbd_img_request_put(img_request);
->   	rbd_img_obj_request_read_callback(obj_request);
->   	rbd_obj_request_complete(obj_request);
->   }
->
+Hi everyone!  I would like to share the schedule and some logistical
+details for next week's Ceph Developer Summit.
+
+The Summit is happening next Tuesday, May 7, from 8:00am to 2:00pm.  That
+ends up being 16:00-22:00 in Europe and (unfortunately) the middle of the
+night in Asia.
+
+The schedule is available on the wiki:
+
+http://wiki.ceph.com/01Planning/Ceph_Developer_Summit
+
+We're going to be setting up IRC channels, Google Hangouts, and Etherpads
+for each sesssion and adding links to the schedule for them.  We can only
+have 10 "speakers" in each Google Hangout, so we need to identify who
+those people should be.
+
+Here's what you need to do:
+
+1) If you are the owner of a blueprint that is on the schedule, please be
+prepared to moderate your discussion.  Let us know if you would like to
+nominate a different moderator or if you need to switch something around to
+fit your schedule.
+
+2) If you are interested in being one of the "speakers" for a session
+(i.e., you want to be able to say stuff on the Google Hangout, not just
+watch and interact via IRC), add your name to the Interested Parties field
+of the related blueprint and we'll make sure you get an invite.
+
+That's it!  On the day of the summit, just show up to the Google Hangout
+and IRC channel for the sessions you're interested in.  The goal of these
+sessions is to discuss each blueprint, identify work items, and begin to
+coordinate the work amongst interested parties.  After the summit, we will
+be publishing videos and chat logs for those who couldn't make it.
+
+Keep in mind that this is our first summit, so let's be ready for a few
+small bumps along the way.  Drop me or Patrick a line if you have any
+questions - see you next week!
+
+Cheers,
+Ross
+
+--
+Ross Turk
+Community, Inktank
+
+@rossturk @inktank @ceph
 
