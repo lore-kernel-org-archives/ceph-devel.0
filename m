@@ -1,40 +1,55 @@
-From: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
-Subject: Version compatibility between Ceph Kernel and Userland
-Date: Thu, 2 May 2013 11:26:45 +0200
-Message-ID: <20130502092645.GB28701@oder.mch.fsc.net>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: fix image request leak on parent read
+Date: Thu, 02 May 2013 06:51:08 -0500
+Message-ID: <5182532C.80400@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:55182 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753927Ab3EBJ1k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 05:27:40 -0400
-Content-Disposition: inline
+Received: from mail-ia0-f179.google.com ([209.85.210.179]:64454 "EHLO
+	mail-ia0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756090Ab3EBLvK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 07:51:10 -0400
+Received: by mail-ia0-f179.google.com with SMTP id g4so391569iae.10
+        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 04:51:09 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
+        by mx.google.com with ESMTPSA id xc3sm16865248igb.10.2013.05.02.04.51.08
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Thu, 02 May 2013 04:51:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Kasper Dieter <Dieter.Kasper@ts.fujitsu.com>
+To: ceph-devel@vger.kernel.org
 
-Sage,
+When a read for a layered image object finds the target object
+doesn't exist, a read image request for the parent image is created
+and submitted.  When that completes, the callback routine was
+not releasing that parent image request.  Fix that.
 
-can you please create and foster a compatibility matrix
-between Ceph Kernel-components and the Ceph Userland-components ?
-Also the naming of restrictions and/or additional features for specific combinations
-would be very much appreciated.
-e.g.
+The slab allocation stuff just added has greatly simplified the
+search for the source of this memory leak.
 
-Ceph Kernel	3.0 | 3.1 | ... | 3.7 | 3.8 | 3.9 |
-Ceph 0.48.x	 ?  | (1) | ... |  ?  |  ?  |  ?  |
-Ceph 0.56.x	 ?  |  ?  | ... |  ?  |  ?  |  ?  |
-     0.57-0.60	 ?  |  ?  | ... |  ?  |  ?  |  ?  |
-Ceph 0.61.x	 ?  |  ?  | ... |  ?  | (2) |  ?  |
-     0.62-0.66	 ?  |  ?  | ... |  ?  |  ?  |  ?  |
-Ceph 0.67.x	 ?  |  ?  | ... |  ?  |  ?  |  ?  |
+This resolves:
+    http://tracker.ceph.com/issues/4803
 
-just examples ...
-(1) no support of ceph.ko
-(2) support OSD format-2
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 8d9aeef..d669f71 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2547,6 +2547,7 @@ static void rbd_img_parent_read_callback(struct
+rbd_img_request *img_request)
+ 		obj_request->xferred = img_request->xferred;
+ 	}
+ out:
++	rbd_img_request_put(img_request);
+ 	rbd_img_obj_request_read_callback(obj_request);
+ 	rbd_obj_request_complete(obj_request);
+ }
+-- 
+1.7.9.5
 
-Thanks,
--Dieter
