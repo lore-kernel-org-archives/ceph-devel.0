@@ -1,98 +1,95 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/2] rbd: clear EXISTS flag if mapped snapshot disappears
-Date: Thu, 02 May 2013 09:41:55 -0700
-Message-ID: <51829753.9070808@inktank.com>
-References: <51818945.1040002@inktank.com> <518189F9.3070603@inktank.com>
+Subject: Re: [PATCH 2/2] rbd: use binary search for snapshot lookup
+Date: Thu, 02 May 2013 09:47:20 -0700
+Message-ID: <51829898.3090904@inktank.com>
+References: <51818945.1040002@inktank.com> <51818A04.5040809@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f43.google.com ([209.85.210.43]:44719 "EHLO
-	mail-da0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759615Ab3EBQlg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 12:41:36 -0400
-Received: by mail-da0-f43.google.com with SMTP id u7so393687dae.2
-        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 09:41:35 -0700 (PDT)
-In-Reply-To: <518189F9.3070603@inktank.com>
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:60984 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755512Ab3EBQrB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 12:47:01 -0400
+Received: by mail-pb0-f52.google.com with SMTP id xa7so441065pbc.25
+        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 09:47:00 -0700 (PDT)
+In-Reply-To: <51818A04.5040809@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
 On 05/01/2013 02:32 PM, Alex Elder wrote:
-> This functionality inadvertently disappeared in the last patch.
->
-> Image snapshots can get removed at just about any time.  In
-> particular it can disappear even if it is in use by an rbd
-> client as a mapped image.
->
-> The rbd client deals with such a disappearance by responding to new
-> requests with ENXIO.  This is implemented by each rbd device
-> maintaining an EXISTS flag, which is normally set but cleared if a
-> snapshot disappears.
->
-> This patch (re-)implements the clearing of that flag.
->
-> Whenever mapped image header information is refreshed, if the
-> mapping is for a snapshot, verify the mapped snapshot is still
-> present in the updated snapshot context.  If it is not, clear the
-> flag.
->
-> It is not necessary to check this in the initial probe, because the
-> probe will not succeed if the snapshot doesn't exist.
->
-> This resolves:
->      http://tracker.ceph.com/issues/4880
+> Use bsearch(3) to make snapshot lookup by id more efficient.  (There
+> could be thousands of snapshots, and conceivably many more.)
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   23 +++++++++++++++++++++++
->   1 file changed, 23 insertions(+)
+>   drivers/block/rbd.c |   34 +++++++++++++++++++++++++++++-----
+>   1 file changed, 29 insertions(+), 5 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 0ca959f..3f58aba 100644
+> index 3f58aba..a6e5fe3 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -3114,6 +3114,25 @@ static int rbd_dev_v1_refresh(struct rbd_device
-> *rbd_dev)
->   	return ret;
+> @@ -33,6 +33,7 @@
+>   #include <linux/ceph/mon_client.h>
+>   #include <linux/ceph/decode.h>
+>   #include <linux/parser.h>
+> +#include <linux/bsearch.h>
+>
+>   #include <linux/kernel.h>
+>   #include <linux/device.h>
+> @@ -819,16 +820,39 @@ static const char *_rbd_dev_v1_snap_name(struct
+> rbd_device *rbd_dev, u32 which)
+>   	return kstrdup(snap_name, GFP_KERNEL);
 >   }
 >
 > +/*
-> + * Clear the rbd device's EXISTS flag if the snapshot it's mapped to
-> + * has disappeared from the (just updated) snapshot context.
+> + * Snapshot id comparison function for use with qsort()/bsearch().
+> + * Note that result is for snapshots in *descending* order.
 > + */
-> +static void rbd_exists_validate(struct rbd_device *rbd_dev)
+> +static int snapid_compare_reverse(const void *s1, const void *s2)
 > +{
-> +	u64 snap_id;
+> +	u64 snap_id1 = *(u64 *)s1;
+> +	u64 snap_id2 = *(u64 *)s2;
 > +
-> +	if (!test_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags))
-> +		return;
-> +
-> +	snap_id = rbd_dev->spec->snap_id;
-> +	if (snap_id == CEPH_NOSNAP)
-> +		return;
-> +
-> +	if (rbd_dev_snap_index(rbd_dev, snap_id) == BAD_SNAP_INDEX)
-> +		clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+> +	if (snap_id1 < snap_id2)
+> +		return 1;
+
+I think this 1 should be -1. Looks good otherwise.
+
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+> +	return snap_id1 == snap_id2 ? 0 : 1;
 > +}
 > +
->   static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+> +/*
+> + * Search a snapshot context to see if the given snapshot id is
+> + * present.
+> + *
+> + * Returns the position of the snapshot id in the array if it's found,
+> + * or BAD_SNAP_INDEX otherwise.
+> + *
+> + * Note: The snapshot array is in kept sorted (by the osd) in
+> + * reverse order, highest snapshot id first.
+> + */
+>   static u32 rbd_dev_snap_index(struct rbd_device *rbd_dev, u64 snap_id)
 >   {
->   	u64 image_size;
-> @@ -3126,6 +3145,10 @@ static int rbd_dev_refresh(struct rbd_device
-> *rbd_dev)
->   		ret = rbd_dev_v1_refresh(rbd_dev);
->   	else
->   		ret = rbd_dev_v2_refresh(rbd_dev);
-> +
-> +	/* If it's a mapped snapshot, validate its EXISTS flag */
-> +
-> +	rbd_exists_validate(rbd_dev);
->   	mutex_unlock(&ctl_mutex);
->   	if (ret)
->   		rbd_warn(rbd_dev, "got notification but failed to "
+>   	struct ceph_snap_context *snapc = rbd_dev->header.snapc;
+> -	u32 which;
+> +	u64 *found;
+>
+> -	for (which = 0; which < snapc->num_snaps; which++)
+> -		if (snapc->snaps[which] == snap_id)
+> -			return which;
+> +	found = bsearch(&snap_id, &snapc->snaps, snapc->num_snaps,
+> +				sizeof (snap_id), snapid_compare_reverse);
+>
+> -	return BAD_SNAP_INDEX;
+> +	return found ? (u32)(found - &snapc->snaps[0]) : BAD_SNAP_INDEX;
+>   }
+>
+>   static const char *rbd_dev_v1_snap_name(struct rbd_device *rbd_dev,
 >
 
