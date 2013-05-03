@@ -1,51 +1,35 @@
-From: Sage Weil <sage@inktank.com>
-Subject: sysvinit script vs ceph-deploy, chef
-Date: Thu, 2 May 2013 18:01:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305021754250.10494@cobra.newdream.net>
+From: "dennis chen" <xschen@tnsoft.com.cn>
+Subject: AIX client for ceph cluster?
+Date: Fri, 3 May 2013 15:16:31 +0800
+Message-ID: <001501ce47ce$236a09b0$6a3e1d10$@com.cn>
+References: <5183625B.8080509@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55795 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752609Ab3ECBBI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 21:01:08 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id DC41C8044B
-	for <ceph-devel@vger.kernel.org>; Thu,  2 May 2013 18:01:07 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id B9E838044B
-	for <ceph-devel@vger.kernel.org>; Thu,  2 May 2013 18:01:07 -0700 (PDT)
+Received: from smtpbg56.qq.com ([64.71.138.45]:43489 "HELO smtpbg56.qq.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1761352Ab3ECHQd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 3 May 2013 03:16:33 -0400
+In-Reply-To: <5183625B.8080509@tnsoft.com.cn>
+Content-Language: zh-cn
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: 'Dennis Chen' <xschen@tnsoft.com.cn>
 
-The upstart scripts have also updated the OSD's position in the CRUSH map 
-by default on startup.  This is part of the hotplugging capability that 
-lets you move drives around between hosts, and also moves the burden away 
-from chef and ceph-deploy when adding OSDs.
+Hi All,
 
-We forgot to add the parallel capability to the sysvinit script, which is 
-what legacy clusters use, and what is used on Debian and RHEL/CentOS.  
-That prevents ceph-deploy from fully bringing up OSDs (they are added to 
-the cluster but not the CRUSH map).
+Recently I want to use IBM AIX as the ceph client to take use of the cephFS
+and rbd service from ceph, 
+but after some investigation, seem there's no support for AIX as the 
+ceph client. Is there some clues about this? or is there some workaround
+that I can map a block device created
+from ceph cluster to the AIX system client?
 
-wip-sysvinit makes it all match the upstart behavior, but old clusters 
-will now have the osd position update to be under a node host=`hostname` 
-on startup.  By default.  You can turn this off by setting 'osd crush 
-update on start = false'.  it's always default to true, but never done 
-anything for sysvinit (and legacy mkcephfs)-based clusters.
+BRs,
+Dennis
 
-Alternatively, we could maek ceph-deploy and chef users now enable that 
-explicitly, and make the default false.  That means *thsoe* users have to 
-change their configs.
 
-Or, we could make it try to magically detect what kind of user you are and 
-behave accordingly.  This strikes me as dangerous.
-
-Right now I'm leaning toward a prominent warning that on upgrade, any 
-legacy clusters that don't put the osds under a node host=`hostname` need 
-to add that optoin to avoid having their CRUSH map modfiied.
-
-Thoughts?
-sage
 
