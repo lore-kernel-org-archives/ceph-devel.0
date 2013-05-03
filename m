@@ -1,66 +1,51 @@
-From: Ross Turk <ross@inktank.com>
-Subject: Developer Summit Schedule & Details
-Date: Thu, 2 May 2013 11:17:05 -0700
-Message-ID: <FE64A5BB-F3F0-4816-9DDB-5AF52FD0FB11@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@inktank.com>
+Subject: sysvinit script vs ceph-deploy, chef
+Date: Thu, 2 May 2013 18:01:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305021754250.10494@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:40324 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761362Ab3EBSRJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 14:17:09 -0400
-Received: by mail-pb0-f47.google.com with SMTP id uo1so479186pbc.6
-        for <ceph-devel@vger.kernel.org>; Thu, 02 May 2013 11:17:09 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:55795 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752609Ab3ECBBI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 May 2013 21:01:08 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id DC41C8044B
+	for <ceph-devel@vger.kernel.org>; Thu,  2 May 2013 18:01:07 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id B9E838044B
+	for <ceph-devel@vger.kernel.org>; Thu,  2 May 2013 18:01:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org
 
+The upstart scripts have also updated the OSD's position in the CRUSH map 
+by default on startup.  This is part of the hotplugging capability that 
+lets you move drives around between hosts, and also moves the burden away 
+from chef and ceph-deploy when adding OSDs.
 
-Hi everyone!  I would like to share the schedule and some logistical
-details for next week's Ceph Developer Summit.
+We forgot to add the parallel capability to the sysvinit script, which is 
+what legacy clusters use, and what is used on Debian and RHEL/CentOS.  
+That prevents ceph-deploy from fully bringing up OSDs (they are added to 
+the cluster but not the CRUSH map).
 
-The Summit is happening next Tuesday, May 7, from 8:00am to 2:00pm.  That
-ends up being 16:00-22:00 in Europe and (unfortunately) the middle of the
-night in Asia.
+wip-sysvinit makes it all match the upstart behavior, but old clusters 
+will now have the osd position update to be under a node host=`hostname` 
+on startup.  By default.  You can turn this off by setting 'osd crush 
+update on start = false'.  it's always default to true, but never done 
+anything for sysvinit (and legacy mkcephfs)-based clusters.
 
-The schedule is available on the wiki:
+Alternatively, we could maek ceph-deploy and chef users now enable that 
+explicitly, and make the default false.  That means *thsoe* users have to 
+change their configs.
 
-http://wiki.ceph.com/01Planning/Ceph_Developer_Summit
+Or, we could make it try to magically detect what kind of user you are and 
+behave accordingly.  This strikes me as dangerous.
 
-We're going to be setting up IRC channels, Google Hangouts, and Etherpads
-for each sesssion and adding links to the schedule for them.  We can only
-have 10 "speakers" in each Google Hangout, so we need to identify who
-those people should be.
+Right now I'm leaning toward a prominent warning that on upgrade, any 
+legacy clusters that don't put the osds under a node host=`hostname` need 
+to add that optoin to avoid having their CRUSH map modfiied.
 
-Here's what you need to do:
-
-1) If you are the owner of a blueprint that is on the schedule, please be
-prepared to moderate your discussion.  Let us know if you would like to
-nominate a different moderator or if you need to switch something around to
-fit your schedule.
-
-2) If you are interested in being one of the "speakers" for a session
-(i.e., you want to be able to say stuff on the Google Hangout, not just
-watch and interact via IRC), add your name to the Interested Parties field
-of the related blueprint and we'll make sure you get an invite.
-
-That's it!  On the day of the summit, just show up to the Google Hangout
-and IRC channel for the sessions you're interested in.  The goal of these
-sessions is to discuss each blueprint, identify work items, and begin to
-coordinate the work amongst interested parties.  After the summit, we will
-be publishing videos and chat logs for those who couldn't make it.
-
-Keep in mind that this is our first summit, so let's be ready for a few
-small bumps along the way.  Drop me or Patrick a line if you have any
-questions - see you next week!
-
-Cheers,
-Ross
-
---
-Ross Turk
-Community, Inktank
-
-@rossturk @inktank @ceph
+Thoughts?
+sage
 
