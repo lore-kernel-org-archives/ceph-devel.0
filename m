@@ -1,64 +1,84 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: Request for ceph.conf environment extension
-Date: Mon, 06 May 2013 15:48:35 +0200
-Message-ID: <5187B4B3.1080304@mermaidconsulting.dk>
-References: <20130506091822.GA26022@upset.ux.pdb.fsc.net> <CAJH6TXgHoRocVNDvThbK6Wc65POD9E_bLSoOGuVJswGt7EqW=w@mail.gmail.com> <5187AEDC.6070202@inktank.com> <CAJH6TXiCQdL-vdwGVQoEa5nJYg9i9RZYVaGEJCqeiSsfjMcvsA@mail.gmail.com>
+Date: Mon, 06 May 2013 09:59:34 -0500
+Message-ID: <5187C556.6050406@inktank.com>
+References: <20130506091822.GA26022@upset.ux.pdb.fsc.net> <CAJH6TXgHoRocVNDvThbK6Wc65POD9E_bLSoOGuVJswGt7EqW=w@mail.gmail.com> <5187AEDC.6070202@inktank.com> <CAJH6TXiCQdL-vdwGVQoEa5nJYg9i9RZYVaGEJCqeiSsfjMcvsA@mail.gmail.com> <5187B4B3.1080304@mermaidconsulting.dk> <CAJH6TXiWz6Z_gqzEWD-T+FQkd4qD_pTodq7x1=Ur0j1SA38uqQ@mail.gmail.com> <5187B5CC.8020901@mermaidconsulting.dk> <CAJH6TXiU=h-mm+ypm_=dNDzFFNTj0bVe_a2=L82p-WzNSyMPBQ@mail.gmail.com> <5187B832.70504@mermaidconsulting.dk> <CAJH6TXgwzTiULJzb=6a96kX21xzoPknKdabJiRK154dnaifr9g@mail.gmail.com> <5187BB9F.4020301@mermaidconsulting.dk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [193.189.92.131] ([193.189.92.131]:53701 "EHLO mail2.mdc.dk"
-	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1751811Ab3EFOSr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 May 2013 10:18:47 -0400
-In-Reply-To: <CAJH6TXiCQdL-vdwGVQoEa5nJYg9i9RZYVaGEJCqeiSsfjMcvsA@mail.gmail.com>
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:36211 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753611Ab3EFO7h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 May 2013 10:59:37 -0400
+Received: by mail-ie0-f179.google.com with SMTP id c13so4208465ieb.10
+        for <ceph-devel@vger.kernel.org>; Mon, 06 May 2013 07:59:37 -0700 (PDT)
+In-Reply-To: <5187BB9F.4020301@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On 05/06/2013 09:18 AM, Jens Kristian S=F8gaard wrote:
+> Hi,
+>
+>> I'm just supposing, i'm also evaluating the same network topology
+>> like you.
+>
+> I have tested my current setup for a while with just triple-bonded Gb=
+E,
+> and haven't found the need for more features. I might be wrong ofcour=
+se :-)
+>
+>> There is a lowcost. 12x 10GbaseT switch from Netgear.
+>
+> I was looking at the Netgear XS708E which is very low cost compared t=
+o
+> what the prices were 6 months ago when I looked at it last.
 
-> Yes, but IB costs 1/4 than 10GbE and will be much expandible in futur=
-e.
+I'm really not up to speed on the capabilities of cheap 10GbE switches.=
+=20
+I'm sure other people will have comments about what features are=20
+worthwhile, etc.  Just from a raw performance perspective, you might=20
+want to make sure that the switch can handle lots of randomly=20
+distributed traffic between all of the ports well.  I'd expect that it=20
+shouldn't be too terrible, but who knows.  I expect most IB switches yo=
+u=20
+run into should deal with this kind of pattern competently enough for=20
+Ceph workloads to do OK.  On the front end portion of the network you'l=
+l=20
+always have client<->server communication, so the pattern there will be=
+=20
+less all-to-all than the backend traffic (more 1st half <-> 2nd half).
 
-I'm testing Ceph currently with bonded 1 GbE links and contemplating=20
-moving to 10 GbE or IB. I have to pay for the costs out of my own=20
-pocket, so price is a major factor.
+On really big deployments, static routing becomes a pretty big issue.=20
+Dynamic routing, or at least well optimized routes can make a huge=20
+difference.  ORNL has done some work in this area for their Lustre IB=20
+networks and I think LLNL is investigating it as well.
 
-I have noted that just recently it has become possible to buy 10 GbE=20
-switches for a lot less than before. I don't know what IB equipment=20
-costs, mainly because I don't know much about IB and hence don't know=20
-which equipment to buy.
+Mark
 
-My costs for a cobber-based 10 GbE setup per server would be approximat=
-e:
-
-   Switch: 115$
-   NIC: 345$
-   Cable: 2$
-
-   Total: 462$ (per server)
-
-If anyone could comment on how that compares to IB pricing, I would=20
-appreciate it.
-
-Is it possible to quantify how much Ceph would benefit of the improved=20
-latency between 1 GbE and 10 GbE? (i.e. assuming that 1 GbE gives me=20
-enough bandwidth, would I see any gains from lower latency?)
-
-And similarly, would there be a significant gain from lower latency whe=
-n=20
-comparing 10 GbE to IB? (I assume that IB has lower latency than 10 GbE=
-)
-
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://wwww.mermaidconsulting.com/
-
+>
+> What I don't know is how those prices compare to IB pricing.
+>
+>> on cluster network and IB to public network). Do you think will be
+>> possible to use all ceph services (RBD, RGW, CephFS, QEMU, ...) via
+>> SDP/rsockets ?
+>
+> I haven't tried SDP/rsocket, so I don't know. From what I have
+> experienced in the past, these things doesn't seem to be completely
+> "drop in and forget about it" - there's always something that is not
+> completely compatible with ordinary TCP/IP sockets.
+>
+>> On ebay there are many IB switches sold at 1000-1500$ with 24 or 36
+>> DDR ports. If used with SDP/rsockets you should archieve more or les=
+s
+>> 18Gbps
+>
+> That sounds cheap yes, but I assume that is used equipment?
+> I was looking at costs for new equipment.
+>
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
