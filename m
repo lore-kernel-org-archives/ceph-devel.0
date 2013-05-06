@@ -1,79 +1,59 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Java bindings for RADOS and RBD
-Date: Mon, 06 May 2013 17:21:34 +0200
-Message-ID: <5187CA7E.2050508@42on.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Request for ceph.conf environment extension
+Date: Mon, 06 May 2013 10:40:06 -0500
+Message-ID: <5187CED6.5020307@inktank.com>
+References: <20130506091822.GA26022@upset.ux.pdb.fsc.net> <CAJH6TXgHoRocVNDvThbK6Wc65POD9E_bLSoOGuVJswGt7EqW=w@mail.gmail.com> <5187AEDC.6070202@inktank.com> <CAJH6TXiCQdL-vdwGVQoEa5nJYg9i9RZYVaGEJCqeiSsfjMcvsA@mail.gmail.com> <5187B4B3.1080304@mermaidconsulting.dk> <CAJH6TXiWz6Z_gqzEWD-T+FQkd4qD_pTodq7x1=Ur0j1SA38uqQ@mail.gmail.com> <5187B5CC.8020901@mermaidconsulting.dk> <CAJH6TXiU=h-mm+ypm_=dNDzFFNTj0bVe_a2=L82p-WzNSyMPBQ@mail.gmail.com> <5187B832.70504@mermaidconsulting.dk> <CAJH6TXgwzTiULJzb=6a96kX21xzoPknKdabJiRK154dnaifr9g@mail.gmail.com> <5187BB9F.4020301@mermaidconsulting.dk> <5187C556.6050406@inktank.com> <5187C96A.8060504@mermaidconsulting.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:51326 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754306Ab3EFPVg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 May 2013 11:21:36 -0400
-Received: from [IPv6:2a00:f10:11c:ab:b0f1:3750:60f3:b514] (unknown [IPv6:2a00:f10:11c:ab:b0f1:3750:60f3:b514])
-	by websrv.42on.com (Postfix) with ESMTPSA id E0A63BFA4B
-	for <ceph-devel@vger.kernel.org>; Mon,  6 May 2013 17:21:34 +0200 (CEST)
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:33621 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754997Ab3EFPkJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 May 2013 11:40:09 -0400
+Received: by mail-ie0-f176.google.com with SMTP id at1so2917307iec.35
+        for <ceph-devel@vger.kernel.org>; Mon, 06 May 2013 08:40:09 -0700 (PDT)
+In-Reply-To: <5187C96A.8060504@mermaidconsulting.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens@mermaidconsulting.dk>
+Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+On 05/06/2013 10:16 AM, Jens Kristian S=F8gaard wrote:
+> Hi,
+>
+>> Just from a raw performance perspective, you might
+>> want to make sure that the switch can handle lots of randomly
+>> distributed traffic between all of the ports well.  I'd expect that =
+it
+>> shouldn't be too terrible, but who knows.
+>
+> It has been many years since I've seen a switch have problems with th=
+at.
+> This switch has a 160 Gb/s backplane, so I don't foresee any problems=
+=2E
+>
+> Especially considering that I'm mixing the public and private network=
+s
+> on the same switch.
+>
+>> On really big deployments, static routing becomes a pretty big issue=
+=2E
+>> Dynamic routing, or at least well optimized routes can make a huge
+>
+> I use dedicated routers for routing, the switch is just a "dumb" L2-s=
+witch.
+>
+> I'm looking at a very small deployment (probably 8 servers).
 
-For the Apache CloudStack project I'm working on implementing the 
-snapshotting and cloning features for RBD.
+Ha, ok.  I suspect you'll be fine.  Nothing like over-thinking the=20
+problem right? :)
 
-We (the project) want to stay away from invoking binaries like 'rbd' or 
-'qemu-img' in the background since parsing the output and handling exit 
-statuses can be hard to deal with.
+>
 
-So work around this I started working on Java JNA [0] bindings for 
-librados and librbd [1]
-
-The reason to use JNA is that it allows us to simply drop the bindings 
-and run them without having them compiled against the librados or librbd 
-headers.
-
-The bindings are currently aimed at providing the functionality which 
-CloudStack needs, which is mainly focused at RBD, but I've also 
-implemented multiple RADOS operations.
-
-I've chosen to implement both RADOS and RBD into the same package and 
-using com.ceph.rados and com.ceph.rbd for as the package name. It could 
-be splitted into different projects, but I think that won't benefit 
-anybody. Having it all in one package seem easy, since RBD needs a RADOS 
-IoCTX to work anyway.
-
-I'd like to get some feedback on the bindings about the way they are 
-now. They are still work-in-progress, but my Unit Testing shows me they 
-are in a reasonable shape already.
-
-Once the bindings reach a more mature state (which probably isn't that 
-far away) I'd like to donate them to the Ceph project so they can live 
-on Ceph's Github page instead of my personal one.
-
-Getting them into Maven Central [2] won't be that easy, so I'd like to 
-request space for that on ceph.com, for example ceph.com/download/maven 
-and users will have to manually add that to their pom.xml configuration.
-
-The request for a Maven repository is a bit selfish, since CloudStack 
-uses Maven to build and during building it will need some place where it 
-can fetch the artifacts.
-
-So that's it for now, feedback and suggestions are more then welcome! 
-(Patches / pull requests ditto!)
-
-Related issues in the tracker:
-- #4231
-- #4232
-
-[0]: https://github.com/twall/jna
-[1]: https://github.com/wido/rados-java
-[2]: 
-http://maven.apache.org/guides/mini/guide-central-repository-upload.html
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
