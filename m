@@ -1,101 +1,142 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/6] rbd: update capacity in rbd_dev_refresh()
-Date: Tue, 07 May 2013 15:49:24 -0700
-Message-ID: <518984F4.5030509@inktank.com>
-References: <51885A97.9070005@inktank.com> <51885AD8.1050105@inktank.com>
+Subject: Re: [PATCH 6/6] rbd: always set read-only flag in rbd_add()
+Date: Tue, 07 May 2013 15:51:35 -0700
+Message-ID: <51898577.7040509@inktank.com>
+References: <51885A97.9070005@inktank.com> <51885B13.4070900@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:33733 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755748Ab3EGWua (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 May 2013 18:50:30 -0400
-Received: by mail-pd0-f175.google.com with SMTP id y14so755037pdi.6
-        for <ceph-devel@vger.kernel.org>; Tue, 07 May 2013 15:50:29 -0700 (PDT)
-In-Reply-To: <51885AD8.1050105@inktank.com>
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:33829 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750772Ab3EGWwk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 May 2013 18:52:40 -0400
+Received: by mail-pd0-f181.google.com with SMTP id p11so756006pdj.40
+        for <ceph-devel@vger.kernel.org>; Tue, 07 May 2013 15:52:40 -0700 (PDT)
+In-Reply-To: <51885B13.4070900@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 05/06/2013 06:37 PM, Alex Elder wrote:
-> When a mapped image changes size, we change the capacity recorded
-> for the Linux disk associated with it, in rbd_update_mapping_size().
-> That function is called in two places--the format 1 and format 2
-> refresh routines.
->
-> There is no need to set the capacity while holding the header
-> semaphore.  Instead, do it in the common rbd_dev_refresh(), using
-> the logic that's already there to initiate disk revalidation.
->
-> Add handling in the request function, just in case a request
-> that exceeds the capacity of the device comes in (perhaps one
-> that was started before a refresh shrunk the device).
+On 05/06/2013 06:38 PM, Alex Elder wrote:
+> Hold off setting the read-only flag in rbd_add() for an image being
+> mapped until we have successfully probed the image.  At that point
+> we know whether it's a snapshot mapping or not, so we can set the
+> read-only flag in that one place rather than doing so (for
+> snapshots) in rbd_dev_mapping_set().  To do this, pass a flag to the
+> image probe routine indicating whether we want a read-only mapping.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   23 +++++++++++++++--------
->   1 file changed, 15 insertions(+), 8 deletions(-)
+>   drivers/block/rbd.c |   28 ++++++++++++++--------------
+>   1 file changed, 14 insertions(+), 14 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 5d5e3f0..a0f1fe5 100644
+> index 530793a..0c72643 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2874,6 +2874,13 @@ static void rbd_request_fn(struct request_queue *q)
->   			goto end_request;	/* Shouldn't happen */
->   		}
+> @@ -359,7 +359,7 @@ static ssize_t rbd_add(struct bus_type *bus, const
+> char *buf,
+>   		       size_t count);
+>   static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
+>   			  size_t count);
+> -static int rbd_dev_image_probe(struct rbd_device *rbd_dev);
+> +static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool read_only);
 >
-> +		result = -ENOSPC;
+>   static struct bus_attribute rbd_bus_attrs[] = {
+>   	__ATTR(add, S_IWUSR, NULL, rbd_add),
+> @@ -951,11 +951,6 @@ static int rbd_dev_mapping_set(struct rbd_device
+> *rbd_dev)
+>   	rbd_dev->mapping.size = size;
+>   	rbd_dev->mapping.features = features;
+>
+> -	/* If we are mapping a snapshot it must be marked read-only */
+> -
+> -	if (snap_id != CEPH_NOSNAP)
+> -		rbd_dev->mapping.read_only = true;
+> -
+>   	return 0;
+>   }
+>
+> @@ -963,7 +958,6 @@ static void rbd_dev_mapping_clear(struct rbd_device
+> *rbd_dev)
+>   {
+>   	rbd_dev->mapping.size = 0;
+>   	rbd_dev->mapping.features = 0;
+> -	rbd_dev->mapping.read_only = true;
+>   }
+>
+>   static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+> @@ -4620,7 +4614,7 @@ static int rbd_dev_probe_parent(struct rbd_device
+> *rbd_dev)
+>   	if (!parent)
+>   		goto out_err;
+>
+> -	ret = rbd_dev_image_probe(parent);
+> +	ret = rbd_dev_image_probe(parent, true);
+>   	if (ret < 0)
+>   		goto out_err;
+>   	rbd_dev->parent = parent;
+> @@ -4743,7 +4737,7 @@ static void rbd_dev_image_release(struct
+> rbd_device *rbd_dev)
+>    * device.  For format 2 images this includes determining the image
+>    * id.
+>    */
+> -static int rbd_dev_image_probe(struct rbd_device *rbd_dev)
+> +static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool read_only)
+>   {
+>   	int ret;
+>   	int tmp;
+> @@ -4778,6 +4772,12 @@ static int rbd_dev_image_probe(struct rbd_device
+> *rbd_dev)
+>   	if (ret)
+>   		goto err_out_probe;
+>
+> +	/* If we are mapping a snapshot it must be marked read-only */
+> +
+> +	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
+> +		read_only = true;
+> +	rbd_dev->mapping.read_only = read_only;
+> +
+>   	ret = rbd_dev_probe_parent(rbd_dev);
+>   	if (!ret)
+>   		return 0;
+> @@ -4811,6 +4811,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	struct rbd_spec *spec = NULL;
+>   	struct rbd_client *rbdc;
+>   	struct ceph_osd_client *osdc;
+> +	bool read_only;
+>   	int rc = -ENOMEM;
+>
+>   	if (!try_module_get(THIS_MODULE))
+> @@ -4820,6 +4821,9 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	rc = rbd_add_parse_args(buf, &ceph_opts, &rbd_opts, &spec);
+>   	if (rc < 0)
+>   		goto err_out_module;
+> +	read_only = rbd_opts->read_only;
+> +	kfree(rbd_opts);
+> +	rbd_opts = NULL;	/* done with this */
+>
+>   	rbdc = rbd_get_client(ceph_opts);
+>   	if (IS_ERR(rbdc)) {
+> @@ -4850,11 +4854,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   	rbdc = NULL;		/* rbd_dev now owns this */
+>   	spec = NULL;		/* rbd_dev now owns this */
+>
+> -	rbd_dev->mapping.read_only = rbd_opts->read_only;
+> -	kfree(rbd_opts);
+> -	rbd_opts = NULL;	/* done with this */
 
-blk-core.c usually uses -EIO for this case. That's more expected from a
-read anyway, so I think -EIO would be better.
+It looks like this was moved accidentally? Maybe needed
+by a later patch?
 
-With that change:
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-> +		if (offset + length > rbd_dev->mapping.size) {
-> +			rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)\n",
-> +				offset, length, rbd_dev->mapping.size);
-> +			goto end_request;
-> +		}
-> +
->   		result = -ENOMEM;
->   		img_request = rbd_img_request_create(rbd_dev, offset, length,
->   							write_request, false);
-> @@ -3116,14 +3123,8 @@ static void rbd_update_mapping_size(struct
-> rbd_device *rbd_dev)
->   	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
->   		return;
->
-> -	if (rbd_dev->mapping.size != rbd_dev->header.image_size) {
-> -		sector_t size;
 > -
-> +	if (rbd_dev->mapping.size != rbd_dev->header.image_size)
->   		rbd_dev->mapping.size = rbd_dev->header.image_size;
-> -		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
-> -		dout("setting size to %llu sectors", (unsigned long long)size);
-> -		set_capacity(rbd_dev->disk, size);
-> -	}
->   }
->
->   /*
-> @@ -3200,8 +3201,14 @@ static int rbd_dev_refresh(struct rbd_device
-> *rbd_dev)
->
->   	rbd_exists_validate(rbd_dev);
->   	mutex_unlock(&ctl_mutex);
-> -	if (mapping_size != rbd_dev->mapping.size)
-> +	if (mapping_size != rbd_dev->mapping.size) {
-> +		sector_t size;
-> +
-> +		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
-> +		dout("setting size to %llu sectors", (unsigned long long)size);
-> +		set_capacity(rbd_dev->disk, size);
->   		revalidate_disk(rbd_dev->disk);
-> +	}
->
->   	return ret;
->   }
+> -	rc = rbd_dev_image_probe(rbd_dev);
+> +	rc = rbd_dev_image_probe(rbd_dev, read_only);
+>   	if (rc < 0)
+>   		goto err_out_rbd_dev;
 >
 
