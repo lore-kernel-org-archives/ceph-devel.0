@@ -1,56 +1,101 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW object purging in upstream caches
-Date: Tue, 7 May 2013 15:25:01 -0700
-Message-ID: <CAC-hyiEPxT-=Vt3Zh0b00VrQ1bzW4tHLqrDkhBcyM-+zoJkgJg@mail.gmail.com>
-References: <50FEC144.2050304@widodh.nl>
-	<6E8D5B25-841F-4130-A22F-A0AFA5CFD936@jnielsen.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/6] rbd: update capacity in rbd_dev_refresh()
+Date: Tue, 07 May 2013 15:49:24 -0700
+Message-ID: <518984F4.5030509@inktank.com>
+References: <51885A97.9070005@inktank.com> <51885AD8.1050105@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f180.google.com ([209.85.210.180]:60559 "EHLO
-	mail-ia0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750968Ab3EGWZC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 May 2013 18:25:02 -0400
-Received: by mail-ia0-f180.google.com with SMTP id 21so1208918iay.25
-        for <ceph-devel@vger.kernel.org>; Tue, 07 May 2013 15:25:01 -0700 (PDT)
-In-Reply-To: <6E8D5B25-841F-4130-A22F-A0AFA5CFD936@jnielsen.net>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:33733 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755748Ab3EGWua (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 May 2013 18:50:30 -0400
+Received: by mail-pd0-f175.google.com with SMTP id y14so755037pdi.6
+        for <ceph-devel@vger.kernel.org>; Tue, 07 May 2013 15:50:29 -0700 (PDT)
+In-Reply-To: <51885AD8.1050105@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Nielsen <lists@jnielsen.net>
-Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 7, 2013 at 12:45 PM, John Nielsen <lists@jnielsen.net> wrote:
-> On Jan 22, 2013, at 9:41 AM, Wido den Hollander <wido@widodh.nl> wrote:
+On 05/06/2013 06:37 PM, Alex Elder wrote:
+> When a mapped image changes size, we change the capacity recorded
+> for the Linux disk associated with it, in rbd_update_mapping_size().
+> That function is called in two places--the format 1 and format 2
+> refresh routines.
 >
->> To improve performance I still think using a proxy like Varnish or Nginx can help a lot.
->>
->> Now, when running just one Varnish instance which does loadbalancing over multiple RGW instances is not a real problem. When it sees a PUT operation it can "purge" (called banning in Varnish) the object from it's cache.
->>
->> When looking at the scenario where you have multiple caches you run into the cache-consistency problem. If an object is modified the caches are not notified and will continue to serve an outdated object.
->>
->> Looking at the Last-Modified header is not an option since the cache will not contact RGW when serving out of it's cache.
->>
->> To handle this there has to be some kind of "hook" inside RGW that can notify Varnish (or some other cache) when an object changes.
->>
->> Is this something that's on the roadmap? Thoughts?
+> There is no need to set the capacity while holding the header
+> semaphore.  Instead, do it in the common rbd_dev_refresh(), using
+> the logic that's already there to initiate disk revalidation.
 >
-> Responding to an old thread, but I've been thinking about this again lately.
+> Add handling in the request function, just in case a request
+> that exceeds the capacity of the device comes in (perhaps one
+> that was started before a refresh shrunk the device).
 >
-> I agree it would be nice for an upstream cache to know when its content is invalid. I realized today that RGW already does this for itself--multiple gateways on the same RADOS cluster share cache state with each other by updating and rados_watch()ing the notify_oid's in the .rgw.control pool.
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   23 +++++++++++++++--------
+>   1 file changed, 15 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 5d5e3f0..a0f1fe5 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -2874,6 +2874,13 @@ static void rbd_request_fn(struct request_queue *q)
+>   			goto end_request;	/* Shouldn't happen */
+>   		}
+>
+> +		result = -ENOSPC;
 
-Not quite. The gateway only caches metadata, not data. I don't think
-doing it for data would make much sense, performance wise.
+blk-core.c usually uses -EIO for this case. That's more expected from a
+read anyway, so I think -EIO would be better.
+
+With that change:
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+> +		if (offset + length > rbd_dev->mapping.size) {
+> +			rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)\n",
+> +				offset, length, rbd_dev->mapping.size);
+> +			goto end_request;
+> +		}
+> +
+>   		result = -ENOMEM;
+>   		img_request = rbd_img_request_create(rbd_dev, offset, length,
+>   							write_request, false);
+> @@ -3116,14 +3123,8 @@ static void rbd_update_mapping_size(struct
+> rbd_device *rbd_dev)
+>   	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
+>   		return;
 >
-> I would like to see a small "RGW cache notifier" utility that just does the "watch" half. It could be a standalone read-only librados client with configurable output. You would tell it what pool to watch (i.e. ".rgw.control") and it would spit out event details as they happen. A small amount of scripting or other glue could turn this utility in to a real-time cache invalidator for Varnish or anything else.
+> -	if (rbd_dev->mapping.size != rbd_dev->header.image_size) {
+> -		sector_t size;
+> -
+> +	if (rbd_dev->mapping.size != rbd_dev->header.image_size)
+>   		rbd_dev->mapping.size = rbd_dev->header.image_size;
+> -		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+> -		dout("setting size to %llu sectors", (unsigned long long)size);
+> -		set_capacity(rbd_dev->disk, size);
+> -	}
+>   }
 >
-> Any comments or volunteers? If I'm not mistaken (which is by no means certain), someone familiar with the code could add such a utility by creating a new .cc file with a simple main() function and a modified RGWCache::watch_cb() function, then linking it to the build with a stanza in Makefile.am similar to that for radosgw-admin. I might even take a crack at it myself but my C++ is more than a bit rusty.
+>   /*
+> @@ -3200,8 +3201,14 @@ static int rbd_dev_refresh(struct rbd_device
+> *rbd_dev)
 >
-> In any case, comments welcome.
+>   	rbd_exists_validate(rbd_dev);
+>   	mutex_unlock(&ctl_mutex);
+> -	if (mapping_size != rbd_dev->mapping.size)
+> +	if (mapping_size != rbd_dev->mapping.size) {
+> +		sector_t size;
+> +
+> +		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+> +		dout("setting size to %llu sectors", (unsigned long long)size);
+> +		set_capacity(rbd_dev->disk, size);
+>   		revalidate_disk(rbd_dev->disk);
+> +	}
 >
-> JN
+>   	return ret;
+>   }
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
