@@ -1,141 +1,133 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 6/6] rbd: always set read-only flag in rbd_add()
-Date: Mon, 06 May 2013 20:38:27 -0500
-Message-ID: <51885B13.4070900@inktank.com>
-References: <51885A97.9070005@inktank.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: General Protection Fault in 3.8.5
+Date: Mon, 6 May 2013 21:48:24 -0400
+Message-ID: <CACkq2mpBF4pPmBox4uNv5xcd1aO5cyMviBruFHrij6ourByj9g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:44654 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756983Ab3EGBi2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 May 2013 21:38:28 -0400
-Received: by mail-ie0-f179.google.com with SMTP id c13so56856ieb.10
-        for <ceph-devel@vger.kernel.org>; Mon, 06 May 2013 18:38:28 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id q3sm6667330igw.0.2013.05.06.18.38.27
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Mon, 06 May 2013 18:38:27 -0700 (PDT)
-In-Reply-To: <51885A97.9070005@inktank.com>
+Received: from mail-bk0-f41.google.com ([209.85.214.41]:56437 "EHLO
+	mail-bk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759637Ab3EGBsq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 May 2013 21:48:46 -0400
+Received: by mail-bk0-f41.google.com with SMTP id jc3so18493bkc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 06 May 2013 18:48:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hold off setting the read-only flag in rbd_add() for an image being
-mapped until we have successfully probed the image.  At that point
-we know whether it's a snapshot mapping or not, so we can set the
-read-only flag in that one place rather than doing so (for
-snapshots) in rbd_dev_mapping_set().  To do this, pass a flag to the
-image probe routine indicating whether we want a read-only mapping.
+Hey folks,
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   28 ++++++++++++++--------------
- 1 file changed, 14 insertions(+), 14 deletions(-)
+We have two servers that map a lot of RBDs (20 to 30 each so far),
+using the RBD kernel module.  They are running Ubuntu 12.10, and I
+originally saw a lot of kernel panics (obviously from Ceph) when
+running a 3.5.7 kernel.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 530793a..0c72643 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -359,7 +359,7 @@ static ssize_t rbd_add(struct bus_type *bus, const
-char *buf,
- 		       size_t count);
- static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
- 			  size_t count);
--static int rbd_dev_image_probe(struct rbd_device *rbd_dev);
-+static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool read_only);
+I upgrade a while back to a 3.8.5 kernel to get a much newer RBD
+module, and the kernel panics from Ceph went away...and were replaced
+by these nebulous "General Protection Faults" that I couldn't really
+tell what was causing them.
 
- static struct bus_attribute rbd_bus_attrs[] = {
- 	__ATTR(add, S_IWUSR, NULL, rbd_add),
-@@ -951,11 +951,6 @@ static int rbd_dev_mapping_set(struct rbd_device
-*rbd_dev)
- 	rbd_dev->mapping.size = size;
- 	rbd_dev->mapping.features = features;
+Today we saw one that actually had a Ceph backtrace in it, so I wanted
+to throw it on here:
 
--	/* If we are mapping a snapshot it must be marked read-only */
--
--	if (snap_id != CEPH_NOSNAP)
--		rbd_dev->mapping.read_only = true;
--
- 	return 0;
- }
+May  6 23:02:58 nfs1 kernel: [295972.423165] general protection fault:
+0000 [#3] SMP
+May  6 23:02:58 nfs1 kernel: [295972.428252] Modules linked in: rbd
+libceph libcrc32c coretemp nfsd kvm nfs_acl auth_rpcgss nfs fscache
+lockd sunrpc gpio_ich psmouse microcode serio_raw i7core_edac ipmi_si
+edac_core lpc_ich ioatdma ipmi_devintf mac_hid ipmi_msghandler bonding
+lp parport tcp_bic raid10 raid456 async_pq async_xor xor async_memcpy
+async_raid6_recov hid_generic raid6_pq usbhid async_tx hid igb raid1
+myri10ge raid0 ahci ptp libahci dca pps_core multipath linear
+May  6 23:02:58 nfs1 kernel: [295972.468114] CPU 17
+May  6 23:02:58 nfs1 kernel: [295972.470133] Pid: 15920, comm:
+kworker/17:2 Tainted: G      D      3.8.5-030805-generic #201303281651
+Penguin Computing Relion 1751/X8DTU
+May  6 23:02:58 nfs1 kernel: [295972.482635] RIP:
+0010:[<ffffffff811851ff>]  [<ffffffff811851ff>]
+kmem_cache_alloc_trace+0x5f/0x140
+May  6 23:02:58 nfs1 kernel: [295972.491686] RSP:
+0018:ffff880624cb1a98  EFLAGS: 00010202
+May  6 23:02:58 nfs1 kernel: [295972.497074] RAX: 0000000000000000
+RBX: ffff88032ddc46d0 RCX: 000000000003c867
+May  6 23:02:58 nfs1 kernel: [295972.504283] RDX: 000000000003c866
+RSI: 0000000000008050 RDI: 0000000000016c80
+May  6 23:02:58 nfs1 kernel: [295972.511490] RBP: ffff880624cb1ae8
+R08: ffff880333d76c80 R09: 0000000000000002
+May  6 23:02:58 nfs1 kernel: [295972.518697] R10: ffff88032ce40070
+R11: 000000000000000d R12: ffff880333802200
+May  6 23:02:58 nfs1 kernel: [295972.525906] R13: 2e0460b9275465f2
+R14: ffffffffa023901e R15: 0000000000008050
+May  6 23:02:58 nfs1 kernel: [295972.533113] FS:
+0000000000000000(0000) GS:ffff880333d60000(0000)
+knlGS:0000000000000000
+May  6 23:02:58 nfs1 kernel: [295972.541274] CS:  0010 DS: 0000 ES:
+0000 CR0: 000000008005003b
+May  6 23:02:58 nfs1 kernel: [295972.547095] CR2: 00007fbf9467f2b0
+CR3: 0000000001c0d000 CR4: 00000000000007e0
+May  6 23:02:58 nfs1 kernel: [295972.554305] DR0: 0000000000000000
+DR1: 0000000000000000 DR2: 0000000000000000
+May  6 23:02:58 nfs1 kernel: [295972.561512] DR3: 0000000000000000
+DR6: 00000000ffff0ff0 DR7: 0000000000000400
+May  6 23:02:58 nfs1 kernel: [295972.568720] Process kworker/17:2
+(pid: 15920, threadinfo ffff880624cb0000, task ffff88032b600000)
+May  6 23:02:58 nfs1 kernel: [295972.577656] Stack:
+May  6 23:02:58 nfs1 kernel: [295972.579756]  0000000000000000
+0000000000000000 0000000000000060 0000000000000000
+May  6 23:02:58 nfs1 kernel: [295972.587292]  0000000000000000
+ffff88032ddc46d0 0000000000000004 ffff88032ddc46c0
+May  6 23:02:58 nfs1 kernel: [295972.594819]  ffff88032b432b30
+0000000000000000 ffff880624cb1b28 ffffffffa023901e
+May  6 23:02:58 nfs1 kernel: [295972.602347] Call Trace:
+May  6 23:02:58 nfs1 kernel: [295972.604886]  [<ffffffffa023901e>]
+get_ticket_handler.isra.4+0x5e/0xc0 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.612271]  [<ffffffffa02394b4>]
+ceph_x_proc_ticket_reply+0x274/0x440 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.619740]  [<ffffffffa023973d>]
+ceph_x_handle_reply+0xbd/0x110 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.626696]  [<ffffffffa023765c>]
+ceph_handle_auth_reply+0x18c/0x200 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.633988]  [<ffffffffa022d590>]
+handle_auth_reply.isra.12+0xa0/0x230 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.641457]  [<ffffffffa022e87d>]
+dispatch+0xbd/0x120 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.647450]  [<ffffffffa0228205>]
+process_message+0xa5/0xc0 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.653966]  [<ffffffffa022c1b1>]
+try_read+0x2e1/0x430 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.660048]  [<ffffffffa022c38f>]
+con_work+0x8f/0x140 [libceph]
+May  6 23:02:58 nfs1 kernel: [295972.666043]  [<ffffffff81078c31>]
+process_one_work+0x141/0x490
+May  6 23:02:58 nfs1 kernel: [295972.671952]  [<ffffffff81079b08>]
+worker_thread+0x168/0x400
+May  6 23:02:58 nfs1 kernel: [295972.677601]  [<ffffffff810799a0>] ?
+manage_workers+0x120/0x120
+May  6 23:02:58 nfs1 kernel: [295972.683513]  [<ffffffff8107eff0>]
+kthread+0xc0/0xd0
+May  6 23:02:58 nfs1 kernel: [295972.688469]  [<ffffffff8107ef30>] ?
+flush_kthread_worker+0xb0/0xb0
+May  6 23:02:58 nfs1 kernel: [295972.694726]  [<ffffffff816f532c>]
+ret_from_fork+0x7c/0xb0
+May  6 23:02:58 nfs1 kernel: [295972.700203]  [<ffffffff8107ef30>] ?
+flush_kthread_worker+0xb0/0xb0
+May  6 23:02:58 nfs1 kernel: [295972.706456] Code: 00 4d 8b 04 24 65
+4c 03 04 25 08 dc 00 00 49 8b 50 08 4d 8b 28 4d 85 ed 0f 84 cf 00 00
+00 49 63 44 24 20 49 8b 3c 24 48 8d 4a 01 <49> 8b 5c 05 00 4c 89 e8 65
+48 0f c7 0f 0f 94 c0 84 c0 74 c2 49
+May  6 23:02:58 nfs1 kernel: [295972.726468] RIP  [<ffffffff811851ff>]
+kmem_cache_alloc_trace+0x5f/0x140
+May  6 23:02:58 nfs1 kernel: [295972.733182]  RSP <ffff880624cb1a98>
+May  6 23:02:58 nfs1 kernel: [295972.736838] ---[ end trace
+20e9b6a1bb611aba ]---
 
-@@ -963,7 +958,6 @@ static void rbd_dev_mapping_clear(struct rbd_device
-*rbd_dev)
- {
- 	rbd_dev->mapping.size = 0;
- 	rbd_dev->mapping.features = 0;
--	rbd_dev->mapping.read_only = true;
- }
+I'm not sure whether the problem started here or not.  I mentioned
+that the previous GPFs were nebulous -- one thing most of them have
+had in common is that it's almost always from nfsd (this one isn't --
+first and only time I've seen this one).  Howevever, I am using NFS to
+re-export some RBDs (to provide access to multiple clients) so Ceph is
+still in the picture on those.
 
- static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
-@@ -4620,7 +4614,7 @@ static int rbd_dev_probe_parent(struct rbd_device
-*rbd_dev)
- 	if (!parent)
- 		goto out_err;
+I know its not a lot to go on, but any advice would be appreciated.
 
--	ret = rbd_dev_image_probe(parent);
-+	ret = rbd_dev_image_probe(parent, true);
- 	if (ret < 0)
- 		goto out_err;
- 	rbd_dev->parent = parent;
-@@ -4743,7 +4737,7 @@ static void rbd_dev_image_release(struct
-rbd_device *rbd_dev)
-  * device.  For format 2 images this includes determining the image
-  * id.
-  */
--static int rbd_dev_image_probe(struct rbd_device *rbd_dev)
-+static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool read_only)
- {
- 	int ret;
- 	int tmp;
-@@ -4778,6 +4772,12 @@ static int rbd_dev_image_probe(struct rbd_device
-*rbd_dev)
- 	if (ret)
- 		goto err_out_probe;
-
-+	/* If we are mapping a snapshot it must be marked read-only */
-+
-+	if (rbd_dev->spec->snap_id != CEPH_NOSNAP)
-+		read_only = true;
-+	rbd_dev->mapping.read_only = read_only;
-+
- 	ret = rbd_dev_probe_parent(rbd_dev);
- 	if (!ret)
- 		return 0;
-@@ -4811,6 +4811,7 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	struct rbd_spec *spec = NULL;
- 	struct rbd_client *rbdc;
- 	struct ceph_osd_client *osdc;
-+	bool read_only;
- 	int rc = -ENOMEM;
-
- 	if (!try_module_get(THIS_MODULE))
-@@ -4820,6 +4821,9 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	rc = rbd_add_parse_args(buf, &ceph_opts, &rbd_opts, &spec);
- 	if (rc < 0)
- 		goto err_out_module;
-+	read_only = rbd_opts->read_only;
-+	kfree(rbd_opts);
-+	rbd_opts = NULL;	/* done with this */
-
- 	rbdc = rbd_get_client(ceph_opts);
- 	if (IS_ERR(rbdc)) {
-@@ -4850,11 +4854,7 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	rbdc = NULL;		/* rbd_dev now owns this */
- 	spec = NULL;		/* rbd_dev now owns this */
-
--	rbd_dev->mapping.read_only = rbd_opts->read_only;
--	kfree(rbd_opts);
--	rbd_opts = NULL;	/* done with this */
--
--	rc = rbd_dev_image_probe(rbd_dev);
-+	rc = rbd_dev_image_probe(rbd_dev, read_only);
- 	if (rc < 0)
- 		goto err_out_rbd_dev;
-
--- 
-1.7.9.5
-
+ - Travis
