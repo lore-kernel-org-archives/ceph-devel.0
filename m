@@ -1,57 +1,114 @@
-From: Ross David Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Ceph Dev Summit: Final Details
-Date: Mon, 6 May 2013 18:55:20 -0700
-Message-ID: <20588A25-21FB-4C63-9D8C-13E22690B8A3@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@inktank.com>
+Subject: 0.61 Cuttlefish released
+Date: Mon, 6 May 2013 19:51:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305061744430.9909@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:47034 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758590Ab3EGCv0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 May 2013 22:51:26 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
+Spring has arrived (at least for some of us), and a new stable release of 
+Ceph is ready!  Thank you to everyone who has contributed to this release!
 
-Hi!  Our first Ceph Developer Summit starts tomorrow at 8am.  This email
-contains some last minute details that you may find useful if you're
-planning to attend.
+Bigger ticket items since v0.56.x "Bobtail":
 
-The schedule for the Summit can be found here:
-http://wiki.ceph.com/01Planning/Developer_Summit
+ * ceph-deploy: our new deployment tool to replace 'mkcephfs'
+ * robust RHEL/CentOS support
+ * ceph-disk: many improvements to support hot-plugging devices via chef 
+   and ceph-deploy
+ * ceph-disk: dm-crypt support for OSD disks
+ * ceph-disk: 'list' command to see available (and used) disks
+ * rbd: incremental backups
+ * rbd-fuse: access RBD images via fuse
+ * librbd: autodetection of VM flush support to allow safe enablement of 
+   the writeback cache
+ * osd: improved small write, snap trimming, and overall performance
+ * osd: PG splitting
+ * osd: per-pool quotas (object and byte)
+ * osd: tool for importing, exporting, removing PGs from OSD data store
+ * osd: improved clean-shutdown behavior
+ * osd: noscrub, nodeepscrub options
+ * osd: more robust scrubbing, repair, ENOSPC handling
+ * osd: improved memory usage, log trimming
+ * osd: improved journal corruption detection
+ * ceph: new 'df' command
+ * mon: new storage backend (leveldb)
+ * mon: config-keys service
+ * mon, crush: new commands to manage CRUSH entirely via CLI
+ * mon: avoid marking entire subtrees (e.g., racks) out automatically
+ * rgw: CORS support
+ * rgw: misc API fixes
+ * rgw: ability to listen to fastcgi on a port
+ * sysvinit, upstart: improved support for standardized data locations
+ * mds: backpointers on all data and metadata objects
+ * mds: faster fail-over
+ * mds: many many bug fixes
+ * ceph-fuse: many stability improvements
 
-Links to the blueprint, hangout, etherpad, and IRC channel have been
-embedded in the schedule, so they should all be in one place when you need
-them.
+Notable changes since v0.60:
 
-We have set up two hangouts, one for each track.  If you've identified
-yourself as an owner or interested party of a blueprint, you will receive
-an invite to your track's hangout shortly before your session starts.  If
-not, you can easily be invited to the hangout by getting our attention on
-IRC (rturk or scuttlemonkey).  If you just want to observe, you don't have
-to do anything except click on the event link in the schedule to open the
-live video stream.
+ * rbd: incremental backups
+ * rbd: only set STRIPINGV2 feature if striping parameters are 
+   incompatible with old versions
+ * rbd: require allow-shrink for resizing images down
+ * librbd: many bug fixes
+ * rgw: fix object corruption on COPY to self
+ * rgw: new sysvinit script for rpm-based systems
+ * rgw: allow buckets with _
+ * rgw: CORS support
+ * mon: many fixes
+ * mon: improved trimming behavior
+ * mon: fix data conversion/upgrade problem (from bobtail)
+ * mon: ability to tune leveldb
+ * mon: config-keys service to store arbitrary data on monitor
+ * mon: osd crush add|link|unlink|add-bucket ... commands
+ * mon: trigger leveldb compaction on trim
+ * osd: per-rados pool quotas (objects, bytes)
+ * osd: tool to export, import, and delete PGs from an individual OSD data 
+   store
+ * osd: notify mon on clean shutdown to avoid IO stall
+ * osd: improved detection of corrupted journals
+ * osd: ability to tune leveldb
+ * osd: improve client request throttling
+ * osd, librados: fixes to the LIST_SNAPS operation
+ * osd: improvements to scrub error repair
+ * osd: better prevention of wedging OSDs with ENOSPC
+ * osd: many small fixes
+ * mds: fix xattr handling on root inode
+ * mds: fixed bugs in journal replay
+ * mds: many fixes
+ * librados: clean up snapshot constant definitions
+ * libcephfs: calls to query CRUSH topology (used by Hadoop)
+ * ceph-fuse, libcephfs: misc fixes to mds session management
+ * ceph-fuse: disabled cache invalidation (again) due to potential 
+   deadlock with kernel
+ * sysvinit: try to start all daemons despite early failures
+ * ceph-disk: new list command
+ * ceph-disk: hotplug fixes for RHEL/CentOS
+ * ceph-disk: fix creation of OSD data partitions on >2TB disks
+ * osd: fix udev rules for RHEL/CentOS systems
+ * fix daemon logging during initial startup
 
-After the summit, we'll be publishing videos and IRC logs for those who
-couldn't make it.
+There are a few things to keep in mind when upgrading from Bobtail, 
+specifically with the monitor daemons.  Please see the upgrade guide 
+and/or the complete release notes.  In short: upgrade all of your monitors 
+(more or less) at once.
 
-Sage's intro will cover some housekeeping items and establish the summit's
-general process and objectives.  I suggest attending, if you can - it's a
-good opportunity to get everyone on the same page before we begin.
+Cuttlefish is the first Ceph release on our new three-month stable release 
+cycle.  We are very pleased to have pulled everything together on schedule 
+(well, only a week later than planned).  The next stable release, which 
+will be code-named Dumpling, is slated for three months from now 
+(beginning of August).
 
-If you have any questions, please let me know.  Talk to you tomorrow!
+You can download v0.61 Cuttlefish from the usual locations:
 
-Cheers,
-Ross
-
---
-Ross Turk
-Community, Inktank
-
-@rossturk @inktank @ceph
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
