@@ -1,48 +1,39 @@
-From: Henning Verbeek <hankipanky@gmail.com>
-Subject: Cuttlefish installation on debian 6.0 squeeze depends on cryptsetup-bin
-Date: Wed, 8 May 2013 10:09:33 +0200
-Message-ID: <CAOVDbHa2qS7-O1AyyQSPRcnb8DSrGxf_iKzBWUDkJLVf+uAuSA@mail.gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Debian package dependencies across version
+Date: Wed, 8 May 2013 10:21:27 +0200
+Message-ID: <CAF6-1L7-VwTQMrB5Mqd4d+fBeiA17UwKFwRkbWeK4K4JR-hZRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:57068 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751925Ab3EHIJf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 04:09:35 -0400
-Received: by mail-wi0-f169.google.com with SMTP id h11so4950735wiv.4
-        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 01:09:33 -0700 (PDT)
+Received: from mail-bk0-f53.google.com ([209.85.214.53]:43576 "EHLO
+	mail-bk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751439Ab3EHIV2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 04:21:28 -0400
+Received: by mail-bk0-f53.google.com with SMTP id i18so719536bkv.26
+        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 01:21:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Dear ceph developers,
+Hi,
 
-I just tried to upgrade my ceph installation from bobtail to
-cuttlefish on a debian 6.0 squeeze installation. The installation of
-package 'ceph' failed due to missing package 'cryptsetup-bin':
 
-  $ sudo apt-get -y install ceph
-  Reading package lists... Done
-  Building dependency tree
-  Reading state information... Done
-  Some packages could not be installed. This may mean that you have
-  requested an impossible situation or if you are using the unstable
-  distribution that some required packages have not yet been created
-  or been moved out of Incoming.
-  The following information may help to resolve the situation:
+In the debian/control file, the dependency from one ceph package to
+the other doesn't always specify that version should match.
+For example the 'ceph' package depends on 'ceph-common' but not on
+'ceph-common (= ${binary:Version})'.
 
-  The following packages have unmet dependencies:
-   ceph : Depends: cryptsetup-bin but it is not installable
-          Recommends: ceph-mds but it is not going to be installed
-  E: Broken packages
+The result is that when I did a "apt-get install ceph" to upgrade it (
+apt-get upgrade wouldn't have updated it automatically because it had
+new dependencies ), it only updated the 'ceph' package and not
+librados/ceph-common/...  and I had to make another "apt-get upgrade"
+to finish the upgrade.
 
-Package 'cryptsetup-bin' is available only from wheezy onwards:
-http://packages.debian.org/search?keywords=cryptsetup-bin
+And if you don't pay attention you could end up with mixed version installed.
 
-On squeeze, the package is called 'cryptsetup'.
+Is there a reason not to force all version of installed ceph package to match ?
 
-Can I suggest that the dependency be changed for the squeeze packages?
-Thank you.
 
 Cheers,
-Henning
+
+   Sylvain
