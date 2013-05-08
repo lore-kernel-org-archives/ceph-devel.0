@@ -1,64 +1,67 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] rbd: Use min_t() to fix comparison of distinct pointer
- types warning
-Date: Wed, 08 May 2013 15:36:27 -0500
-Message-ID: <518AB74B.50401@inktank.com>
-References: <1368043353-21896-1-git-send-email-geert@linux-m68k.org>
+Subject: Re: [PATCH 0/7] rbd: use common code for probe and refresh
+Date: Wed, 08 May 2013 15:39:56 -0500
+Message-ID: <518AB81C.9060307@inktank.com>
+References: <51885E06.8020201@inktank.com> <518AA788.7000801@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ia0-f178.google.com ([209.85.210.178]:61738 "EHLO
-	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756476Ab3EHUg2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 16:36:28 -0400
-Received: by mail-ia0-f178.google.com with SMTP id t29so2345783iag.23
-        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 13:36:28 -0700 (PDT)
-In-Reply-To: <1368043353-21896-1-git-send-email-geert@linux-m68k.org>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:58925 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755781Ab3EHUj5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 16:39:57 -0400
+Received: by mail-ie0-f169.google.com with SMTP id u16so4192870iet.28
+        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 13:39:57 -0700 (PDT)
+In-Reply-To: <518AA788.7000801@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/08/2013 03:02 PM, Geert Uytterhoeven wrote:
-> drivers/block/rbd.c: In function =E2=80=98zero_pages=E2=80=99:
-> drivers/block/rbd.c:1102: warning: comparison of distinct pointer typ=
-es lacks a cast
->=20
-> Remove the hackish casts and use min_t() to fix this.
+On 05/08/2013 02:29 PM, Josh Durgin wrote:
+> On 05/06/2013 06:51 PM, Alex Elder wrote:
+>> This is some work I had nearly done a long time ago.  It didn't even
+>> have a bug associated with it.  I resurrected it over the weekend
+>> and ported it to the new code.
+>>
+>> It's basically cleanup though.  For format 1 rbd images, when
+>> probing an image, header information for it is read in and
+>> translated directly into the rbd_dev->header structure.
+>>
+>> For an image refresh, instead, we use a stack structure to
+>> hold the translated header, and then in a second step we
+>> copy that into rbd_dev->header.
+>>
+>> This series gets rid of the local variable, and always just
+>> puts things directly into rbd_dev->header.  It also simplifies
+>> probe and refresh for both format 1 and format 2, using a
+>> common rbd_dev_vX_header_info() function for both purposes.
+>>
+>> This set of patches, as well as the two single patches
+>> and series of six I just posted, are available in the
+>> "review/wip-rbd-cleanup-1" branch of the ceph-client git
+>> repository.
+>>
+>>                     -Alex
+>>
+>> [PATCH 1/7] rbd: set the mapping size and features later
+>> [PATCH 2/7] rbd: zero format 1 header structure earlier
+>> [PATCH 3/7] rbd: refactor rbd_header_from_disk()
+>> [PATCH 4/7] rbd: update in-core header directly
+>> [PATCH 5/7] rbd: simplify rbd_dev_v1_probe()
+>> [PATCH 6/7] rbd: get rid of trivial v1 header wrappers
+>> [PATCH 7/7] rbd: define rbd_dev_v1_header_info()
+> 
+> These all look good.
+> The last one leaves the only call to rbd_dev_v2_parent_info() in
+> rbd_dev_v2_header_onetime(), but I'm guessing you already moved it
+> in your upcoming flatten-handling patches.
 
-Looks good to me.  I'm not sure why I didn't use that to
-begin with.
+It took me a minute to figure out your point, but yes, I move
+that into rbd_dev_v2_header_info() in an upcoming patch.
 
-I'll pull this into the ceph tree.  Thanks a lot.
+					-Alex
 
-Reviewed-by: Alex Elder <elder@inktank.com>
+> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> ---
->  drivers/block/rbd.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 22ffd5d..1318c6b 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1098,8 +1098,8 @@ static void zero_pages(struct page **pages, u64=
- offset, u64 end)
->  		unsigned long flags;
->  		void *kaddr;
-> =20
-> -		page_offset =3D (size_t)(offset & ~PAGE_MASK);
-> -		length =3D min(PAGE_SIZE - page_offset, (size_t)(end - offset));
-> +		page_offset =3D offset & ~PAGE_MASK;
-> +		length =3D min_t(size_t, PAGE_SIZE - page_offset, end - offset);
->  		local_irq_save(flags);
->  		kaddr =3D kmap_atomic(*page);
->  		memset(kaddr + page_offset, 0, length);
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
