@@ -1,62 +1,57 @@
 From: Gary Lowell <gary.lowell@inktank.com>
-Subject: Re: Cuttlefish installation on debian 6.0 squeeze depends on cryptsetup-bin
-Date: Wed, 8 May 2013 08:39:49 -0700
-Message-ID: <6ADBB999-4C42-4B7F-ACDE-831589FF3F41@inktank.com>
-References: <CAOVDbHa2qS7-O1AyyQSPRcnb8DSrGxf_iKzBWUDkJLVf+uAuSA@mail.gmail.com>
+Subject: Re: Debian package dependencies across version
+Date: Wed, 8 May 2013 08:51:13 -0700
+Message-ID: <75293AA6-E3AA-482D-8185-5622A29AFC05@inktank.com>
+References: <CAF6-1L7-VwTQMrB5Mqd4d+fBeiA17UwKFwRkbWeK4K4JR-hZRA@mail.gmail.com>
 Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f182.google.com ([209.85.192.182]:39224 "EHLO
-	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754360Ab3EHPjv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 11:39:51 -0400
-Received: by mail-pd0-f182.google.com with SMTP id 3so1327851pdj.13
-        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 08:39:51 -0700 (PDT)
-In-Reply-To: <CAOVDbHa2qS7-O1AyyQSPRcnb8DSrGxf_iKzBWUDkJLVf+uAuSA@mail.gmail.com>
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:51258 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756835Ab3EHPvS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 11:51:18 -0400
+Received: by mail-pa0-f53.google.com with SMTP id kq12so1420530pab.12
+        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 08:51:17 -0700 (PDT)
+In-Reply-To: <CAF6-1L7-VwTQMrB5Mqd4d+fBeiA17UwKFwRkbWeK4K4JR-hZRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henning Verbeek <hankipanky@gmail.com>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: ceph-devel@vger.kernel.org
 
-Thanks for letting us know.  I'll incorporate Wido's fix.
 
-Cheers,
+The version requirements were relaxed a couple releases ago to allow the installation of newer libraries.   Occasionally folks want to run a newer library to pick up a specific fix before upgrading all of ceph.
+
+We definitely want installation and upgrade to be surprise free.  Maybe it is reasonable to require all the packages to be the same or greater version than the ceph package ?
+
+Thanks,
 Gary
 
-On May 8, 2013, at 1:09 AM, Henning Verbeek wrote:
 
-> Dear ceph developers,
+On May 8, 2013, at 1:21 AM, Sylvain Munaut wrote:
+
+> Hi,
 > 
-> I just tried to upgrade my ceph installation from bobtail to
-> cuttlefish on a debian 6.0 squeeze installation. The installation of
-> package 'ceph' failed due to missing package 'cryptsetup-bin':
 > 
->  $ sudo apt-get -y install ceph
->  Reading package lists... Done
->  Building dependency tree
->  Reading state information... Done
->  Some packages could not be installed. This may mean that you have
->  requested an impossible situation or if you are using the unstable
->  distribution that some required packages have not yet been created
->  or been moved out of Incoming.
->  The following information may help to resolve the situation:
+> In the debian/control file, the dependency from one ceph package to
+> the other doesn't always specify that version should match.
+> For example the 'ceph' package depends on 'ceph-common' but not on
+> 'ceph-common (= ${binary:Version})'.
 > 
->  The following packages have unmet dependencies:
->   ceph : Depends: cryptsetup-bin but it is not installable
->          Recommends: ceph-mds but it is not going to be installed
->  E: Broken packages
+> The result is that when I did a "apt-get install ceph" to upgrade it (
+> apt-get upgrade wouldn't have updated it automatically because it had
+> new dependencies ), it only updated the 'ceph' package and not
+> librados/ceph-common/...  and I had to make another "apt-get upgrade"
+> to finish the upgrade.
 > 
-> Package 'cryptsetup-bin' is available only from wheezy onwards:
-> http://packages.debian.org/search?keywords=cryptsetup-bin
+> And if you don't pay attention you could end up with mixed version installed.
 > 
-> On squeeze, the package is called 'cryptsetup'.
+> Is there a reason not to force all version of installed ceph package to match ?
 > 
-> Can I suggest that the dependency be changed for the squeeze packages?
-> Thank you.
 > 
 > Cheers,
-> Henning
+> 
+>   Sylvain
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
