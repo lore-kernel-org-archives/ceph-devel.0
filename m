@@ -1,43 +1,39 @@
-From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Use-after-free error in rbd_add()
-Date: Thu, 9 May 2013 16:42:01 -0600
-Message-ID: <CAErSpo79gvppE0xb6c1OB65ia6vSO-f8KunH4wrF_EGP2DdD4Q@mail.gmail.com>
+From: Leen Besselink <leen@consolejunkie.net>
+Subject: On Developer Summit topic Ceph stats and monitoring tools
+Date: Fri, 10 May 2013 00:35:43 +0200
+Message-ID: <20130509223528.GD8377@apia.perrit.net>
+Reply-To: leen@consolejunkie.net
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:59880 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756685Ab3EIWmW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 18:42:22 -0400
-Received: by mail-ob0-f176.google.com with SMTP id wc20so3465578obb.7
-        for <ceph-devel@vger.kernel.org>; Thu, 09 May 2013 15:42:21 -0700 (PDT)
+Received: from mta2.perrit.net ([194.213.15.114]:40603 "EHLO mta2.perrit.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932165Ab3EIWpE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 May 2013 18:45:04 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Kyle Bader <kyle.bader@dreamhost.com>
 
-I think b536f69a3a5 "rbd: set up devices only for mapped images"
-introduced a use-after-free error in rbd_add():
+Hi Folks,
 
-@@ -4964,9 +4960,12 @@ static ssize_t rbd_add(struct bus_type *bus,
-        if (rc < 0)
-                goto err_out_rbd_dev;
+Today I looked at the blueprint and video on Ceph stats and monitoring tools.
 
--       return count;
-+       rc = rbd_dev_device_setup(rbd_dev);
-+       if (!rc)
-+               return count;
-+
-+       rbd_dev_image_release(rbd_dev);
- err_out_rbd_dev:
--       kfree(rbd_dev->header_name);
-        rbd_dev_destroy(rbd_dev);
+And I'm thinking if you want to push data into Ganglia did you consider using sFlow instead ?
 
-If rbd_dev_device_setup() returns an error, we call
-rbd_dev_image_release(), which ultimately kfrees rbd_dev.  Then we
-call rbd_dev_destroy(), which references fields in the already-freed
-rbd_dev struct before kfreeing it again.
+I've been looking at using sFlow and Ganglia for many different uses, just like they are blogging about:
 
-Found by Coverity (CID 1020653).
+http://blog.sflow.com/
 
-Bjorn
+The advantage of sFlow is that many applications/programs, including network switches and parts that I would use to build OpenStack already support it.
+
+And sFlow doesn't just sent statistics, but also samples in real time. So you actually get much more information.
+
+Supposedly it is easy to add sFlow to an application/daemon/programs with very little overhead, but haven't looked into it.
+
+Have a nice day,
+	Leen.
+
+PS Kyle: I added you to the CC, I thought you might not be on ceph-devel and you seem to be sort
+of a lead of this project.
