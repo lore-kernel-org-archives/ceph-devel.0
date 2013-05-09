@@ -1,293 +1,52 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: [PATCH] libceph: ceph_pagelist_append might sleep while atomic
-Date: Thu,  9 May 2013 08:42:45 -0600
-Message-ID: <1368110565-125922-1-git-send-email-jaschut@sandia.gov>
+From: Sage Weil <sage@inktank.com>
+Subject: summit: teuthology, build, testing/release
+Date: Thu, 9 May 2013 08:10:08 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305090803430.26155@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:45987 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753190Ab3EIOne (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 10:43:34 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:53999 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753181Ab3EIPKI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 11:10:08 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0BBFA80454
+	for <ceph-devel@vger.kernel.org>; Thu,  9 May 2013 08:10:08 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 09B9980454
+	for <ceph-devel@vger.kernel.org>; Thu,  9 May 2013 08:10:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Jim Schutt <jaschut@sandia.gov>
+To: ceph-devel@vger.kernel.org
 
-Ceph's encode_caps_cb() worked hard to not call __page_cache_alloc while
-holding a lock, but it's spoiled because ceph_pagelist_addpage() always
-calls kmap(), which might sleep.  Here's the result:
+We did a session during the summit on build and testing tools, which 
+mostly focused around what we need to do to teuthology to expand our 
+testing coverage for dumpling.  For anyone who is working with the ceph 
+code, I suggset taking a quick look at the etherpad to see what was 
+discussed.
 
-[13439.295457] ceph: mds0 reconnect start
-[13439.300572] BUG: sleeping function called from invalid context at include/linux/highmem.h:58
-[13439.309243] in_atomic(): 1, irqs_disabled(): 0, pid: 12059, name: kworker/1:1
-[13439.316464] 5 locks held by kworker/1:1/12059:
-[13439.320998]  #0:  (ceph-msgr){......}, at: [<ffffffff810609f8>] process_one_work+0x218/0x480
-[13439.329701]  #1:  ((&(&con->work)->work)){......}, at: [<ffffffff810609f8>] process_one_work+0x218/0x480
-[13439.339446]  #2:  (&s->s_mutex){......}, at: [<ffffffffa046273c>] send_mds_reconnect+0xec/0x450 [ceph]
-[13439.349081]  #3:  (&mdsc->snap_rwsem){......}, at: [<ffffffffa04627be>] send_mds_reconnect+0x16e/0x450 [ceph]
-[13439.359278]  #4:  (file_lock_lock){......}, at: [<ffffffff811cadf5>] lock_flocks+0x15/0x20
-[13439.367816] Pid: 12059, comm: kworker/1:1 Tainted: G        W    3.9.0-00358-g308ae61 #557
-[13439.376225] Call Trace:
-[13439.378757]  [<ffffffff81076f4c>] __might_sleep+0xfc/0x110
-[13439.384353]  [<ffffffffa03f4ce0>] ceph_pagelist_append+0x120/0x1b0 [libceph]
-[13439.391491]  [<ffffffffa0448fe9>] ceph_encode_locks+0x89/0x190 [ceph]
-[13439.398035]  [<ffffffff814ee849>] ? _raw_spin_lock+0x49/0x50
-[13439.403775]  [<ffffffff811cadf5>] ? lock_flocks+0x15/0x20
-[13439.409277]  [<ffffffffa045e2af>] encode_caps_cb+0x41f/0x4a0 [ceph]
-[13439.415622]  [<ffffffff81196748>] ? igrab+0x28/0x70
-[13439.420610]  [<ffffffffa045e9f8>] ? iterate_session_caps+0xe8/0x250 [ceph]
-[13439.427584]  [<ffffffffa045ea25>] iterate_session_caps+0x115/0x250 [ceph]
-[13439.434499]  [<ffffffffa045de90>] ? set_request_path_attr+0x2d0/0x2d0 [ceph]
-[13439.441646]  [<ffffffffa0462888>] send_mds_reconnect+0x238/0x450 [ceph]
-[13439.448363]  [<ffffffffa0464542>] ? ceph_mdsmap_decode+0x5e2/0x770 [ceph]
-[13439.455250]  [<ffffffffa0462e42>] check_new_map+0x352/0x500 [ceph]
-[13439.461534]  [<ffffffffa04631ad>] ceph_mdsc_handle_map+0x1bd/0x260 [ceph]
-[13439.468432]  [<ffffffff814ebc7e>] ? mutex_unlock+0xe/0x10
-[13439.473934]  [<ffffffffa043c612>] extra_mon_dispatch+0x22/0x30 [ceph]
-[13439.480464]  [<ffffffffa03f6c2c>] dispatch+0xbc/0x110 [libceph]
-[13439.486492]  [<ffffffffa03eec3d>] process_message+0x1ad/0x1d0 [libceph]
-[13439.493190]  [<ffffffffa03f1498>] ? read_partial_message+0x3e8/0x520 [libceph]
-[13439.500583]  [<ffffffff81415184>] ? kernel_recvmsg+0x44/0x60
-[13439.506324]  [<ffffffffa03ef3a8>] ? ceph_tcp_recvmsg+0x48/0x60 [libceph]
-[13439.513140]  [<ffffffffa03f2aae>] try_read+0x5fe/0x7e0 [libceph]
-[13439.519246]  [<ffffffffa03f39f8>] con_work+0x378/0x4a0 [libceph]
-[13439.525345]  [<ffffffff8107792f>] ? finish_task_switch+0x3f/0x110
-[13439.531515]  [<ffffffff81060a95>] process_one_work+0x2b5/0x480
-[13439.537439]  [<ffffffff810609f8>] ? process_one_work+0x218/0x480
-[13439.543526]  [<ffffffff81064185>] worker_thread+0x1f5/0x320
-[13439.549191]  [<ffffffff81063f90>] ? manage_workers+0x170/0x170
-[13439.555102]  [<ffffffff81069641>] kthread+0xe1/0xf0
-[13439.560075]  [<ffffffff81069560>] ? __init_kthread_worker+0x70/0x70
-[13439.566419]  [<ffffffff814f7edc>] ret_from_fork+0x7c/0xb0
-[13439.571918]  [<ffffffff81069560>] ? __init_kthread_worker+0x70/0x70
-[13439.587132] ceph: mds0 reconnect success
-[13490.720032] ceph: mds0 caps stale
-[13501.235257] ceph: mds0 recovery completed
-[13501.300419] ceph: mds0 caps renewed
+In particular, we're interested in doing what we can to make the 
+teuthology testing tool more easily consumable and useful to developers, 
+both to expand the overall testing effort and to make contribution in the 
+area of tests and test coverage easier.
 
-Fix it up by encoding locks into a buffer first, and when the
-number of encoded locks is stable, copy that into a ceph_pagelist.
+A few things we discussed:
 
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- fs/ceph/locks.c      |   73 +++++++++++++++++++++++++++++++++----------------
- fs/ceph/mds_client.c |   62 ++++++++++++++++++++++--------------------
- fs/ceph/super.h      |    9 +++++-
- 3 files changed, 88 insertions(+), 56 deletions(-)
+ - How useful would it be to make teuthology allocate testing machines via 
+a standard API like EC2 or openstack?
 
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 202dd3d..9a46161 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -191,27 +191,23 @@ void ceph_count_locks(struct inode *inode, int *fcntl_count, int *flock_count)
- }
- 
- /**
-- * Encode the flock and fcntl locks for the given inode into the pagelist.
-- * Format is: #fcntl locks, sequential fcntl locks, #flock locks,
-- * sequential flock locks.
-- * Must be called with lock_flocks() already held.
-- * If we encounter more of a specific lock type than expected,
-- * we return the value 1.
-+ * Encode the flock and fcntl locks for the given inode into the ceph_filelock
-+ * array. Must be called with lock_flocks() already held.
-+ * If we encounter more of a specific lock type than expected, return -ENOSPC.
-  */
--int ceph_encode_locks(struct inode *inode, struct ceph_pagelist *pagelist,
--		      int num_fcntl_locks, int num_flock_locks)
-+int ceph_encode_locks_to_buffer(struct inode *inode,
-+				struct ceph_filelock *flocks,
-+				int num_fcntl_locks, int num_flock_locks)
- {
- 	struct file_lock *lock;
--	struct ceph_filelock cephlock;
- 	int err = 0;
- 	int seen_fcntl = 0;
- 	int seen_flock = 0;
-+	int l = 0;
- 
- 	dout("encoding %d flock and %d fcntl locks", num_flock_locks,
- 	     num_fcntl_locks);
--	err = ceph_pagelist_append(pagelist, &num_fcntl_locks, sizeof(u32));
--	if (err)
--		goto fail;
-+
- 	for (lock = inode->i_flock; lock != NULL; lock = lock->fl_next) {
- 		if (lock->fl_flags & FL_POSIX) {
- 			++seen_fcntl;
-@@ -219,19 +215,12 @@ int ceph_encode_locks(struct inode *inode, struct ceph_pagelist *pagelist,
- 				err = -ENOSPC;
- 				goto fail;
- 			}
--			err = lock_to_ceph_filelock(lock, &cephlock);
-+			err = lock_to_ceph_filelock(lock, &flocks[l]);
- 			if (err)
- 				goto fail;
--			err = ceph_pagelist_append(pagelist, &cephlock,
--					   sizeof(struct ceph_filelock));
-+			++l;
- 		}
--		if (err)
--			goto fail;
- 	}
--
--	err = ceph_pagelist_append(pagelist, &num_flock_locks, sizeof(u32));
--	if (err)
--		goto fail;
- 	for (lock = inode->i_flock; lock != NULL; lock = lock->fl_next) {
- 		if (lock->fl_flags & FL_FLOCK) {
- 			++seen_flock;
-@@ -239,12 +228,48 @@ int ceph_encode_locks(struct inode *inode, struct ceph_pagelist *pagelist,
- 				err = -ENOSPC;
- 				goto fail;
- 			}
--			err = lock_to_ceph_filelock(lock, &cephlock);
-+			err = lock_to_ceph_filelock(lock, &flocks[l]);
- 			if (err)
- 				goto fail;
--			err = ceph_pagelist_append(pagelist, &cephlock,
--					   sizeof(struct ceph_filelock));
-+			++l;
- 		}
-+	}
-+fail:
-+	return err;
-+}
-+
-+/**
-+ * Copy the encoded flock and fcntl locks into the pagelist.
-+ * Format is: #fcntl locks, sequential fcntl locks, #flock locks,
-+ * sequential flock locks.
-+ * Returns zero on success.
-+ */
-+int ceph_locks_to_pagelist(struct ceph_filelock *flocks,
-+			   struct ceph_pagelist *pagelist,
-+			   int num_fcntl_locks, int num_flock_locks)
-+{
-+	int err = 0;
-+	int l;
-+
-+	err = ceph_pagelist_append(pagelist, &num_fcntl_locks, sizeof(u32));
-+	if (err)
-+		goto fail;
-+
-+	for (l = 0; l < num_fcntl_locks; l++) {
-+		err = ceph_pagelist_append(pagelist, &flocks[l],
-+					   sizeof(struct ceph_filelock));
-+		if (err)
-+			goto fail;
-+	}
-+
-+	err = ceph_pagelist_append(pagelist, &num_flock_locks, sizeof(u32));
-+	if (err)
-+		goto fail;
-+
-+	for (l = 0; l < num_flock_locks; l++) {
-+		err = ceph_pagelist_append(pagelist,
-+					   &flocks[num_fcntl_locks + l],
-+					   sizeof(struct ceph_filelock));
- 		if (err)
- 			goto fail;
- 	}
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 4f22671..be87c36 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2478,39 +2478,41 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
- 
- 	if (recon_state->flock) {
- 		int num_fcntl_locks, num_flock_locks;
--		struct ceph_pagelist_cursor trunc_point;
--
--		ceph_pagelist_set_cursor(pagelist, &trunc_point);
--		do {
--			lock_flocks();
--			ceph_count_locks(inode, &num_fcntl_locks,
--					 &num_flock_locks);
--			rec.v2.flock_len = (2*sizeof(u32) +
--					    (num_fcntl_locks+num_flock_locks) *
--					    sizeof(struct ceph_filelock));
--			unlock_flocks();
--
--			/* pre-alloc pagelist */
--			ceph_pagelist_truncate(pagelist, &trunc_point);
--			err = ceph_pagelist_append(pagelist, &rec, reclen);
--			if (!err)
--				err = ceph_pagelist_reserve(pagelist,
--							    rec.v2.flock_len);
--
--			/* encode locks */
--			if (!err) {
--				lock_flocks();
--				err = ceph_encode_locks(inode,
--							pagelist,
--							num_fcntl_locks,
--							num_flock_locks);
--				unlock_flocks();
--			}
--		} while (err == -ENOSPC);
-+		struct ceph_filelock *flocks;
-+
-+encode_again:
-+		lock_flocks();
-+		ceph_count_locks(inode, &num_fcntl_locks, &num_flock_locks);
-+		unlock_flocks();
-+		flocks = kmalloc((num_fcntl_locks+num_flock_locks) *
-+				 sizeof(struct ceph_filelock), GFP_NOFS);
-+		if (!flocks)
-+			goto out_free;
-+
-+		lock_flocks();
-+		err = ceph_encode_locks_to_buffer(inode, flocks,
-+						  num_fcntl_locks,
-+						  num_flock_locks);
-+		unlock_flocks();
-+		if (err) {
-+			kfree(flocks);
-+			goto encode_again;
-+		}
-+		/*
-+		 * number of encoded locks is stable, so copy to pagelist
-+		 */
-+		rec.v2.flock_len = (2*sizeof(u32) +
-+				    (num_fcntl_locks+num_flock_locks) *
-+				    sizeof(struct ceph_filelock));
-+		err = ceph_pagelist_append(pagelist, &rec, reclen);
-+		if (!err)
-+			err = ceph_locks_to_pagelist(flocks, pagelist,
-+						     num_fcntl_locks,
-+						     num_flock_locks);
-+		kfree(flocks);
- 	} else {
- 		err = ceph_pagelist_append(pagelist, &rec, reclen);
- 	}
--
- out_free:
- 	kfree(path);
- out_dput:
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 8696be2..7ccfdb4 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -822,8 +822,13 @@ extern const struct export_operations ceph_export_ops;
- extern int ceph_lock(struct file *file, int cmd, struct file_lock *fl);
- extern int ceph_flock(struct file *file, int cmd, struct file_lock *fl);
- extern void ceph_count_locks(struct inode *inode, int *p_num, int *f_num);
--extern int ceph_encode_locks(struct inode *i, struct ceph_pagelist *p,
--			     int p_locks, int f_locks);
-+extern int ceph_encode_locks_to_buffer(struct inode *inode,
-+				       struct ceph_filelock *flocks,
-+				       int num_fcntl_locks,
-+				       int num_flock_locks);
-+extern int ceph_locks_to_pagelist(struct ceph_filelock *flocks,
-+				  struct ceph_pagelist *pagelist,
-+				  int num_fcntl_locks, int num_flock_locks);
- extern int lock_to_ceph_filelock(struct file_lock *fl, struct ceph_filelock *c);
- 
- /* debugfs.c */
--- 
-1.7.8.2
+ - How can we expand teuthology to gather information about performance 
+and resource utilization to more easily track those sorts of regressions 
+and improvements?
+
+ - What areas ar emost in need of documentation to let users get up and 
+running with teuthology?
+
+If anyone is interested in these topics (or teuthology or our test efforts 
+in general), let us know!  If you'd like to get involved, there is lots to 
+be done.  There is a daily standup (google hangouts) that you are welcome 
+to join, and a healthy backlog of work to be done; see
+
+	http://tracker.ceph.com/projects/teuthology/issues?query_id=36
 
 
