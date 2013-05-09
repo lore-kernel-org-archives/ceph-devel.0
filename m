@@ -1,117 +1,43 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: summit: erasure coding
-Date: Thu, 09 May 2013 23:14:24 +0200
-Message-ID: <518C11B0.9030606@dachary.org>
-References: <alpine.DEB.2.00.1305090816130.26155@cobra.newdream.net>
+From: Bjorn Helgaas <bhelgaas@google.com>
+Subject: Use-after-free error in rbd_add()
+Date: Thu, 9 May 2013 16:42:01 -0600
+Message-ID: <CAErSpo79gvppE0xb6c1OB65ia6vSO-f8KunH4wrF_EGP2DdD4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigFA3551FAFA9BD97E5F226BAD"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:38410 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752071Ab3EIVO0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 17:14:26 -0400
-In-Reply-To: <alpine.DEB.2.00.1305090816130.26155@cobra.newdream.net>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:59880 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756685Ab3EIWmW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 18:42:22 -0400
+Received: by mail-ob0-f176.google.com with SMTP id wc20so3465578obb.7
+        for <ceph-devel@vger.kernel.org>; Thu, 09 May 2013 15:42:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigFA3551FAFA9BD97E5F226BAD
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I think b536f69a3a5 "rbd: set up devices only for mapped images"
+introduced a use-after-free error in rbd_add():
 
-Hi Sage,
+@@ -4964,9 +4960,12 @@ static ssize_t rbd_add(struct bus_type *bus,
+        if (rc < 0)
+                goto err_out_rbd_dev;
 
-I've created "PG/ReplicatedPG API" ( http://tracker.ceph.com/issues/4928 =
-) for the first action item:
+-       return count;
++       rc = rbd_dev_device_setup(rbd_dev);
++       if (!rc)
++               return count;
++
++       rbd_dev_image_release(rbd_dev);
+ err_out_rbd_dev:
+-       kfree(rbd_dev->header_name);
+        rbd_dev_destroy(rbd_dev);
 
->  - clean up the OSD -> PG interface
+If rbd_dev_device_setup() returns an error, we call
+rbd_dev_image_release(), which ultimately kfrees rbd_dev.  Then we
+call rbd_dev_destroy(), which references fields in the already-freed
+rbd_dev struct before kfreeing it again.
 
-and started with IPG class to be used in place of PG/ReplicatedPG ( https=
-://github.com/dachary/ceph/commit/66d798753fc90e0daa7d8ce92ef7b692e259484=
-f ).
+Found by Coverity (CID 1020653).
 
-I'll join the standup tomorrow ( past two days were hollidays in France ;=
--)
-
-Cheers
-
-On 05/09/2013 05:23 PM, Sage Weil wrote:
-> We have a great session with Loic, Christopher, Sam, and Greg that=20
-> discussed how to move forward with erasure coding support.  The high-le=
-vel=20
-> consensus on approach:
->=20
->  - it is possible to do erasure coding above rados across distinct pool=
-s,=20
-> but it is harder, and less useful.
->  - we should have an ErasureCodedPG that takes advantage of CRUSH's=20
-> placement to place shards
->  - we can support a limited subset of rados operations for such pools a=
-nd=20
-> still be useful (write_full, or write/append on block boundaries)
->  - this will be used in conjuction with a replicated pool as a second t=
-ier=20
-> of storage, or by applications that are happy with a limited subset of =
-
-> commands.
->=20
-> That said, the implementation will be non-trivial.  But, we identified =
-
-> several areas where code cleanup will move us down the right path.  By =
-
-> factoring our useful components of PG and ReplicatedPG into separate=20
-> classes, we clean up the current interfaces and can also build unit tes=
-ts=20
-> for them as we do so for immediate benefit.
->=20
-> Initial focus areas:
->=20
->  - clean up the OSD -> PG interface (PG -> OSD is already reasonably we=
-ll=20
->    captured by teh OSDService class)
->  - ObjectContext tracking
->  - PG log handling
->  - PG missing
->  - RepOp state
->  - Peering state machine
->=20
-> The last one willb e most tricky (and saved for last).  In each case,=20
-> we'll have to think carefully about how well things generalize from=20
-> replication to erasure coding.
->=20
-> Loic has volunteered to own this work, and Sam and I will be supporting=
-=2E =20
-> He'll also be joining our daily core standup.  Yay!
->=20
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigFA3551FAFA9BD97E5F226BAD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlGMEbAACgkQ8dLMyEl6F22d+ACfbq9xEury9SRbEqA0qETU1+3O
-GngAoJ+g19ElzXryq6olOrqcVpkasQfg
-=3z3A
------END PGP SIGNATURE-----
-
---------------enigFA3551FAFA9BD97E5F226BAD--
+Bjorn
