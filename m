@@ -1,36 +1,44 @@
-From: Sage Weil <sage@inktank.com>
-Subject: coverity scan - a plea for help!
-Date: Thu, 9 May 2013 09:26:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: v0.61.1 released
+Date: Thu, 9 May 2013 10:06:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305091004170.32690@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54780 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752232Ab3EIQ0v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 12:26:51 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id CDABC80068
-	for <ceph-devel@vger.kernel.org>; Thu,  9 May 2013 09:26:50 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id CB8F380068
-	for <ceph-devel@vger.kernel.org>; Thu,  9 May 2013 09:26:50 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-We were added to coverity's awesome scan program a while back, which gives 
-free access to their static analysis tool to open source projects.
+This release fixes a problem when upgrading a bobtail cluster that had 
+snapshots to cuttlefish.  Please use this instead of v0.61 if you are 
+upgrading to avoid possible ceph-osd daemon crashes.  There is also fix 
+for a problem deploying monitors and generating new authentication keys.
 
-Currently it identifies 421 issues.  We've already taken care of the ones 
-that are highest impact, but the usefulness of periodic scans is limited 
-until we can eliminate the noise from the remaining issues and easily see 
-when new problems come up.
+Notable changes:
 
-If anybody is interested in helping out in the cleanup effort, let me know 
-and I'll share the login info.  This would provide significant value to 
-our overall quality efforts and is a pretty easy way to make a meaningful 
-contribution to the project without a huge investment in understanding the 
-code and architecture!
+ * osd: handle upgrade when legacy snap collections are present; repair 
+   from previous failed restart
+ * ceph-create-keys: fix race with ceph-mon startup (which broke 
+   'ceph-deploy gatherkeys ...')
+ * ceph-create-keys: gracefully handle bad response from ceph-osd
+ * sysvinit: do not assume default osd_data when automatically weighting 
+   OSD
+ * osd: avoid crash from ill-behaved classes using getomapvals
+ * debian: fix squeeze dependency
+ * mon: debug options to log or dump leveldb transactactions
 
-sage
+You can get v0.61.1 from the usual places:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.1.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
