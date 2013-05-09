@@ -1,39 +1,37 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/5] rbd: fix some bugs
-Date: Wed, 08 May 2013 16:24:19 -0700
-Message-ID: <518ADEA3.2040702@inktank.com>
-References: <518ACC55.7090100@inktank.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Developer Summit - Summary and Videos
+Date: Thu, 9 May 2013 10:36:23 -0400
+Message-ID: <CAP8Oy=L7vtSFeu5aDwsQvQS2Y21+XLOmOS1QRp_kcRo6NfUQPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:61451 "EHLO
-	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753060Ab3EHXZ1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 May 2013 19:25:27 -0400
-Received: by mail-pd0-f174.google.com with SMTP id u10so1584277pdi.33
-        for <ceph-devel@vger.kernel.org>; Wed, 08 May 2013 16:25:25 -0700 (PDT)
-In-Reply-To: <518ACC55.7090100@inktank.com>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:50428 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752961Ab3EIOgY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 10:36:24 -0400
+Received: by mail-pd0-f177.google.com with SMTP id g10so2026854pdj.8
+        for <ceph-devel@vger.kernel.org>; Thu, 09 May 2013 07:36:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On 05/08/2013 03:06 PM, Alex Elder wrote:
-> This series is mostly bug fixes of varying degrees of importance.
-> The last one is a simple cleanup.  These patches are available in
-> the "review/wip-rbd-cleanup-2" branch of the ceph-client git
-> git repository.
->
-> 					-Alex
->
-> [PATCH 1/5] rbd: fix an incorrect assertion condition
-> [PATCH 2/5] rbd: support reading parent page data
-> [PATCH 3/5] rbd: set mapping read-only flag in rbd_add()
-> [PATCH 4/5] rbd: only set up watch for mapped images
-> [PATCH 5/5] rbd: kill rbd_img_request_get()
+Greetings!
 
-These all look good.
+The videos, blueprints, etherpads, and irc logs from the developer
+summit this week have been posted on both the original wiki page as
+well as in an aggregated blog post:
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+http://ceph.com/events/ceph-developer-summit-summary-and-session-videos/
 
+Thanks to everyone who came and made this a truly great first summit.
+If you have questions or feedback please feel free to send them my
+way.  See you in a few months for the next one!
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
