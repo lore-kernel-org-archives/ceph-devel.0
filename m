@@ -1,155 +1,64 @@
-From: Dave Spano <dspano-O2u36FF/GObuufBYgWm87A@public.gmane.org>
-Subject: Re: e release
-Date: Fri, 10 May 2013 15:59:54 -0400 (EDT)
-Message-ID: <5029039.185.1368216057964.JavaMail.dspano@it1>
-References: <alpine.DEB.2.00.1305101117090.27355@cobra.newdream.net>
+From: =?ISO-8859-1?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
+Subject: Re: 0.56.6: MDS asserts on restart
+Date: Fri, 10 May 2013 22:02:34 +0200
+Message-ID: <518D525A.6020900@filoo.de>
+References: <518CF45B.7010402@de-punkt.de> <alpine.DEB.2.00.1305100841001.25318@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1849528287=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1305101117090.27355-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============1849528287==
-Content-Type: multipart/alternative;
-	boundary="----=_Part_184_11461951.1368216057963"
-
-------=_Part_184_11461951.1368216057963
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-2.de-punkt.de ([93.190.64.238]:37338 "EHLO
+	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753918Ab3EJUM3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 May 2013 16:12:29 -0400
+In-Reply-To: <alpine.DEB.2.00.1305100841001.25318@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Christopher Kunz <chrislist@de-punkt.de>, ceph-devel@vger.kernel.org
 
-I found the eye flash squid. 
+Am 10.05.2013 17:41, schrieb Sage Weil:
+> On Fri, 10 May 2013, Christopher Kunz wrote:
+>> Hi all,
+>>
+>> after our update to 0.56.6, all MDSes assert and crash on start. This is
+>> not essential for our setup, but still not great. We assume this might
+>> be due to a bug - see the nopaste below for a trace.
+>>
+>> http://nopaste.info/aa06c50a2f.html
+> Do you have the stack trace from the mds log file?  There should be an
+> assertion message and a line number.
+>
+> Thanks!
+> sage
+>
 
-http://www.bio.davidson.edu/people/midorcas/animalphysiology/websites/2005/plekon/eyeflashsquid.htm 
+Hi Sage,
 
+here is the assertion message:
 
-Dave Spano 
+2013-05-10 14:43:26.910355 7f97d7eff700  1 mds.0.15  waiting for osdmap 
+54251 (which blacklists prior instance)
+2013-05-10 14:43:26.910402 7f97d7eff700  1 mds.0.cache 
+handle_mds_failure mds.0 : recovery peers are
+2013-05-10 14:43:26.912222 7f97d66fc700 -1 mds/MDSTable.cc: In function 
+'void MDSTable::load_2(int, ceph::bufferlist&, Context*)' thread 
+7f97d66fc700 time 2013-05-10 14:43:26.911096
+mds/MDSTable.cc: 150: FAILED assert(0)
 
+  ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+  1: (MDSTable::load_2(int, ceph::buffer::list&, Context*)+0x421) [0x679b91]
+  2: (Context::complete(int)+0xa) [0x4ab36a]
+  3: (Objecter::check_op_pool_dne(Objecter::Op*)+0xdd) [0x6c6ccd]
+  4: (Objecter::C_Op_Map_Latest::finish(int)+0x27a) [0x6c725a]
+  5: (Finisher::finisher_thread_entry()+0x1c0) [0x7ed100]
+  6: (()+0x7e9a) [0x7f97dcaede9a]
+  7: (clone()+0x6d) [0x7f97db98eccd]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
 
+Do you need something more ?
 
------ Original Message -----
-
-From: "Sage Weil" <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> 
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org 
-Sent: Friday, May 10, 2013 2:31:57 PM 
-Subject: [ceph-users] e release 
-
-We need a cephalopod name that starts with 'e', and trolling through 
-taxonomies seems like a great thing to crowdsource. :) So far I've found 
-a few latin names, but the main problem is that I can't find a single 
-large list of species with the common names listed. Wikipedia's taxonomy 
-seems the best so far, but it's still a lot of browsing required as 
-cephalopoda is a huge class. 
-
-The only common name I've found is elbow (elbow squid), but elbow is not a 
-very fun name. 
-
-Suggestions welcome! 
-
-elbow (elbow squid) 
-https://www.google.com/search?q=enteroctopus&source=lnms&tbm=isch&sa=X&ei=pzuNUd37McnjigLfu4D4Dw&ved=0CAoQ_AUoAQ&biw=1916&bih=1082#tbm=isch&sa=1&q=elbow+squid&oq=elbow+squid&gs_l=img.3..0j0i24.80753.82074.2.82218.11.8.0.3.3.0.72.416.8.8.0...0.0...1c.1.12.img.U2rs4lakA-A&bav=on.2,or.r_cp.r_qf.&bvm=bv.46340616,d.cGE&fp=aa2ea750bee51b45&biw=1916&bih=1082 
-http://en.wikipedia.org/wiki/Bigfin_squid 
-http://news.nationalgeographic.com/news/2008/11/081124-giant-squid-magnapinna.html 
-
-enteroctopus (giant octopus) 
-http://en.wikipedia.org/wiki/Giant_octopus 
-http://eol.org/pages/61628/overview 
-https://www.google.com/search?q=enteroctopus&source=lnms&tbm=isch&sa=X&ei=pzuNUd37McnjigLfu4D4Dw&ved=0CAoQ_AUoAQ&biw=1916&bih=1082 
-
-elegent or elegans (sepia elegans, elegent cuttlefish) 
-http://en.wikipedia.org/wiki/File:Sepia_elegans.jpg 
-http://en.wikipedia.org/wiki/Sepia_(genus) (see sepia elegans, elegant cuttlefish) 
-it's another cuttlefish, though, so, meh. 
-
-eledone 
-http://eol.org/pages/51263/overview 
-https://www.google.com/search?q=enteroctopus&source=lnms&tbm=isch&sa=X&ei=pzuNUd37McnjigLfu4D4Dw&ved=0CAoQ_AUoAQ&biw=1916&bih=1082#tbm=isch&sa=1&q=eledone&oq=eledone&gs_l=img.3..0l3j0i24.15244.15821.0.15909.7.6.0.0.0.0.145.442.5j1.6.0...0.0...1c.1.12.img.VazRyuNNsiQ&bav=on.2,or.r_cp.r_qf.&bvm=bv.46340616,d.cGE&fp=aa2ea750bee51b45&biw=1916&bih=1082 
-
-euaxoctopus 
-http://eol.org/pages/49675/overview 
-
-exannulatus (octopus exannulatus) 
-http://eol.org/pages/491114/overview 
-
-_______________________________________________ 
-ceph-users mailing list 
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com 
+Jens
 
 
-------=_Part_184_11461951.1368216057963
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<html><head><style type=3D'text/css'>p { margin: 0; }</style></head><body><=
-div style=3D'font-family: arial,helvetica,sans-serif; font-size: 10pt; colo=
-r: #000000'>I found the eye flash squid. <br><br><a href=3D"http://www.bio.=
-davidson.edu/people/midorcas/animalphysiology/websites/2005/plekon/eyeflash=
-squid.htm">http://www.bio.davidson.edu/people/midorcas/animalphysiology/web=
-sites/2005/plekon/eyeflashsquid.htm</a><br><br><div><span name=3D"x"></span=
->Dave Spano<br><br><br><span name=3D"x"></span><br></div><hr id=3D"zwchr"><=
-div style=3D"color: rgb(0, 0, 0); font-weight: normal; font-style: normal; =
-text-decoration: none; font-family: Helvetica,Arial,sans-serif; font-size: =
-12pt;"><b>From: </b>"Sage Weil" &lt;sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org&gt;<br><b>To: </b>ceph=
--devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org<br><b>Sent: </b>Friday, May 10,=
- 2013 2:31:57 PM<br><b>Subject: </b>[ceph-users] e release<br><br>We need a=
- cephalopod name that starts with 'e', and trolling through <br>taxonomies =
-seems like a great thing to crowdsource. &nbsp;:) &nbsp;So far I've found <=
-br>a few latin names, but the main problem is that I can't find a single <b=
-r>large list of species with the common names listed. &nbsp;Wikipedia's tax=
-onomy <br>seems the best so far, but it's still a lot of browsing required =
-as <br>cephalopoda is a huge class.<br><br>The only common name I've found =
-is elbow (elbow squid), but elbow is not a <br>very fun name.<br><br>Sugges=
-tions welcome!<br><br>elbow (elbow squid)<br>&nbsp;https://www.google.com/s=
-earch?q=3Denteroctopus&amp;source=3Dlnms&amp;tbm=3Disch&amp;sa=3DX&amp;ei=
-=3DpzuNUd37McnjigLfu4D4Dw&amp;ved=3D0CAoQ_AUoAQ&amp;biw=3D1916&amp;bih=3D10=
-82#tbm=3Disch&amp;sa=3D1&amp;q=3Delbow+squid&amp;oq=3Delbow+squid&amp;gs_l=
-=3Dimg.3..0j0i24.80753.82074.2.82218.11.8.0.3.3.0.72.416.8.8.0...0.0...1c.1=
-.12.img.U2rs4lakA-A&amp;bav=3Don.2,or.r_cp.r_qf.&amp;bvm=3Dbv.46340616,d.cG=
-E&amp;fp=3Daa2ea750bee51b45&amp;biw=3D1916&amp;bih=3D1082<br>&nbsp;http://e=
-n.wikipedia.org/wiki/Bigfin_squid<br>&nbsp;http://news.nationalgeographic.c=
-om/news/2008/11/081124-giant-squid-magnapinna.html<br><br>enteroctopus (gia=
-nt octopus)<br>&nbsp;http://en.wikipedia.org/wiki/Giant_octopus<br>&nbsp;ht=
-tp://eol.org/pages/61628/overview<br>&nbsp;https://www.google.com/search?q=
-=3Denteroctopus&amp;source=3Dlnms&amp;tbm=3Disch&amp;sa=3DX&amp;ei=3DpzuNUd=
-37McnjigLfu4D4Dw&amp;ved=3D0CAoQ_AUoAQ&amp;biw=3D1916&amp;bih=3D1082<br><br=
->elegent or elegans (sepia elegans, elegent cuttlefish)<br>&nbsp;http://en.=
-wikipedia.org/wiki/File:Sepia_elegans.jpg<br>&nbsp;http://en.wikipedia.org/=
-wiki/Sepia_(genus) (see sepia elegans, elegant cuttlefish)<br>&nbsp;&nbsp;i=
-t's another cuttlefish, though, so, meh.<br><br>eledone<br>&nbsp;http://eol=
-.org/pages/51263/overview<br>&nbsp;https://www.google.com/search?q=3Dentero=
-ctopus&amp;source=3Dlnms&amp;tbm=3Disch&amp;sa=3DX&amp;ei=3DpzuNUd37McnjigL=
-fu4D4Dw&amp;ved=3D0CAoQ_AUoAQ&amp;biw=3D1916&amp;bih=3D1082#tbm=3Disch&amp;=
-sa=3D1&amp;q=3Deledone&amp;oq=3Deledone&amp;gs_l=3Dimg.3..0l3j0i24.15244.15=
-821.0.15909.7.6.0.0.0.0.145.442.5j1.6.0...0.0...1c.1.12.img.VazRyuNNsiQ&amp=
-;bav=3Don.2,or.r_cp.r_qf.&amp;bvm=3Dbv.46340616,d.cGE&amp;fp=3Daa2ea750bee5=
-1b45&amp;biw=3D1916&amp;bih=3D1082<br><br>euaxoctopus<br>&nbsp;http://eol.o=
-rg/pages/49675/overview<br><br>exannulatus (octopus exannulatus)<br>&nbsp;h=
-ttp://eol.org/pages/491114/overview<br><br>________________________________=
-_______________<br>ceph-users mailing list<br>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>=
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com<br></div><br></div><=
-/body></html>
-------=_Part_184_11461951.1368216057963--
-
---===============1849528287==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1849528287==--
