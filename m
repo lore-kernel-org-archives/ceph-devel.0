@@ -1,54 +1,51 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: Use-after-free error in rbd_add()
-Date: Thu, 09 May 2013 21:09:35 -0500
-Message-ID: <518C56DF.70206@inktank.com>
-References: <CAErSpo79gvppE0xb6c1OB65ia6vSO-f8KunH4wrF_EGP2DdD4Q@mail.gmail.com>
+From: Yann ROBIN <yann.robin@youscribe.com>
+Subject: Seg Fault on rgw 0.61.1 with cluster in 0.61
+Date: Fri, 10 May 2013 08:51:11 +0000
+Message-ID: <367CC0B0FC02EE47BF7482398BD623C55E230EFF@DB3PRD0311MB416.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:36045 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755007Ab3EJCJj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 May 2013 22:09:39 -0400
-Received: by mail-ie0-f181.google.com with SMTP id x12so7056958ief.12
-        for <ceph-devel@vger.kernel.org>; Thu, 09 May 2013 19:09:38 -0700 (PDT)
-In-Reply-To: <CAErSpo79gvppE0xb6c1OB65ia6vSO-f8KunH4wrF_EGP2DdD4Q@mail.gmail.com>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:36332
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752227Ab3EJIvQ convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 May 2013 04:51:16 -0400
+Received: from mail113-ch1 (localhost [127.0.0.1])	by
+ mail113-ch1-R.bigfish.com (Postfix) with ESMTP id 8D8AC3A026E	for
+ <ceph-devel@vger.kernel.org>; Fri, 10 May 2013 08:51:15 +0000 (UTC)
+Received: from CH1EHSMHS023.bigfish.com (snatpool3.int.messaging.microsoft.com
+ [10.43.68.226])	by mail113-ch1.bigfish.com (Postfix) with ESMTP id
+ A3EC714004B	for <ceph-devel@vger.kernel.org>; Fri, 10 May 2013 08:51:12 +0000
+ (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bjorn Helgaas <bhelgaas@google.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/09/2013 05:42 PM, Bjorn Helgaas wrote:
-> I think b536f69a3a5 "rbd: set up devices only for mapped images"
-> introduced a use-after-free error in rbd_add():
-> 
-> @@ -4964,9 +4960,12 @@ static ssize_t rbd_add(struct bus_type *bus,
->         if (rc < 0)
->                 goto err_out_rbd_dev;
-> 
-> -       return count;
-> +       rc = rbd_dev_device_setup(rbd_dev);
-> +       if (!rc)
-> +               return count;
-> +
-> +       rbd_dev_image_release(rbd_dev);
->  err_out_rbd_dev:
-> -       kfree(rbd_dev->header_name);
->         rbd_dev_destroy(rbd_dev);
-> 
-> If rbd_dev_device_setup() returns an error, we call
-> rbd_dev_image_release(), which ultimately kfrees rbd_dev.  Then we
-> call rbd_dev_destroy(), which references fields in the already-freed
-> rbd_dev struct before kfreeing it again.
+Hi,
 
-Thank you.  I think you're right, I'll try to
-have a fix prepared tomorrow.
+I've tried to update the rgw to 0.61.1 and now I have a segfault while connecting to the 0.61 cluster.
+The rgw with version 0.61 run fine.
 
-					-Alex
+*** Caught signal (Segmentation fault) **
+ in thread 7fc1fec79780
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: /usr/bin/radosgw() [0x4f19da]
+ 2: (()+0xfcb0) [0x7fc1fcf0dcb0]
+ 3: (ceph::crypto::init(CephContext*)+0xf) [0x7fc1fdfeb2ef]
+ 4: (common_init_finish(CephContext*)+0x23) [0x7fc1fdfc33f3]
+ 5: (librados::RadosClient::connect()+0x1d) [0x7fc1fde1d48d]
+ 6: (RGWRados::initialize()+0x53) [0x5b5c03]
+ 7: (RGWStoreManager::init_storage_provider(CephContext*, bool)+0x2c9) [0x5b9b39]
+ 8: (main()+0x2d7) [0x4b4ed7]
+ 9: (__libc_start_main()+0xed) [0x7fc1fb90176d]
+ 10: /usr/bin/radosgw() [0x4b6db1]
+2013-05-10 10:36:39.749439 7fc1fec79780 -1 *** Caught signal (Segmentation fault) **
+ in thread 7fc1fec79780
 
-> Found by Coverity (CID 1020653).
-> 
-> Bjorn
-> 
+-- 
+Yann ROBIN
+YouScribe
+
 
