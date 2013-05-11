@@ -1,79 +1,93 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] rbd: re-submit flattened write request (part 2)
-Date: Sat, 11 May 2013 12:47:46 -0500
-Message-ID: <518E8442.9020305@inktank.com>
-References: <518E83D3.4050709@inktank.com>
+Subject: Re: [PATCH] libceph: init sent and completed when starting
+Date: Sat, 11 May 2013 12:48:37 -0500
+Message-ID: <518E8475.6010608@inktank.com>
+References: <518E81BC.5020702@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:56766 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751038Ab3EKRrr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:47:47 -0400
-Received: by mail-ie0-f172.google.com with SMTP id 16so10109908iea.31
-        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:47:47 -0700 (PDT)
+Received: from mail-ia0-f178.google.com ([209.85.210.178]:62606 "EHLO
+	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751416Ab3EKRsi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:48:38 -0400
+Received: by mail-ia0-f178.google.com with SMTP id i9so1961862iad.23
+        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:48:38 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id wx2sm6117415igb.4.2013.05.11.10.47.45
+        by mx.google.com with ESMTPSA id xf4sm5658029igb.8.2013.05.11.10.48.37
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Sat, 11 May 2013 10:47:46 -0700 (PDT)
-In-Reply-To: <518E83D3.4050709@inktank.com>
+        Sat, 11 May 2013 10:48:37 -0700 (PDT)
+In-Reply-To: <518E81BC.5020702@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Add code to rbd_img_obj_exists_callback() to detect when a clone's
-parent image has disappeared, and re-submit the original write
-request in that case.
+On 05/11/2013 12:37 PM, Alex Elder wrote:
+> The rbd code has a need to be able to restart an osd request that
+> has already been started and completed once before.  This currently
+> wouldn't work right because the osd client code assumes an osd
+> request will be started exactly once  Certain fields in a request
+> are never cleared and this leads to trouble if you try to reuse it.
 
-Kill off some redundant assertions.
+This patch and the next two, and the two series of patches
+that follow them, are available in the "review/wip-flatten"
+branch of the ceph-glient git repository.
 
-This completes the resolution for:
-    http://tracker.ceph.com/issues/3763
+					-Alex
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index dfa6bfc..59bf75a 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2508,6 +2508,7 @@ out_err:
- static void rbd_img_obj_exists_callback(struct rbd_obj_request
-*obj_request)
- {
- 	struct rbd_obj_request *orig_request;
-+	struct rbd_device *rbd_dev;
- 	int result;
-
- 	rbd_assert(!obj_request_img_data_test(obj_request));
-@@ -2530,8 +2531,20 @@ static void rbd_img_obj_exists_callback(struct
-rbd_obj_request *obj_request)
- 		obj_request->xferred, obj_request->length);
- 	rbd_obj_request_put(obj_request);
-
--	rbd_assert(orig_request);
--	rbd_assert(orig_request->img_request);
-+	/*
-+	 * If the overlap has become 0 (most likely because the
-+	 * image has been flattened) we need to free the pages
-+	 * and re-submit the original write request.
-+	 */
-+	rbd_dev = orig_request->img_request->rbd_dev;
-+	if (!rbd_dev->parent_overlap) {
-+		struct ceph_osd_client *osdc;
-+
-+		osdc = &rbd_dev->rbd_client->client->osdc;
-+		result = rbd_obj_request_submit(osdc, orig_request);
-+		if (!result)
-+			return;
-+	}
-
- 	/*
- 	 * Our only purpose here is to determine whether the object
--- 
-1.7.9.5
+> Specifically, the r_sent, r_got_reply, and r_completed fields are
+> never cleared.  The r_sent field records the osd incarnation at the
+> time the request was sent to that osd.  If that's non-zero, the
+> message won't get re-mapped to a target osd properly, and won't be
+> put on the unsafe requests list the first time it's sent as it
+> should.  The r_got_reply field is used in handle_reply() to ensure
+> the reply to a request is processed only once.  And the r_completed
+> field is used for lingering requests to avoid calling the callback
+> function every time the osd client re-sends the request on behalf of
+> its initiator.
+> 
+> Each osd request passes through ceph_osdc_start_request() when
+> responsibility for the request is handed over to the osd client for
+> completion.  We can safely zero these three fields there each time a
+> request gets started.
+> 
+> One last related change--clear the r_linger flag when a request
+> is no longer registered as a linger request.
+> 
+> This resolves:
+>     http://tracker.ceph.com/issues/5026
+> 
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>  net/ceph/osd_client.c |    5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index a3395fd..d5953b8 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1204,6 +1204,7 @@ void ceph_osdc_unregister_linger_request(struct
+> ceph_osd_client *osdc,
+>  	mutex_lock(&osdc->request_mutex);
+>  	if (req->r_linger) {
+>  		__unregister_linger_request(osdc, req);
+> +		req->r_linger = 0;
+>  		ceph_osdc_put_request(req);
+>  	}
+>  	mutex_unlock(&osdc->request_mutex);
+> @@ -2120,7 +2121,9 @@ int ceph_osdc_start_request(struct ceph_osd_client
+> *osdc,
+>  	down_read(&osdc->map_sem);
+>  	mutex_lock(&osdc->request_mutex);
+>  	__register_request(osdc, req);
+> -	WARN_ON(req->r_sent);
+> +	req->r_sent = 0;
+> +	req->r_got_reply = 0;
+> +	req->r_completed = 0;
+>  	rc = __map_request(osdc, req, 0);
+>  	if (rc < 0) {
+>  		if (nofail) {
+> 
 
