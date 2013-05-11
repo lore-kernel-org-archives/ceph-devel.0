@@ -1,84 +1,95 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: init sent and completed when starting
-Date: Sat, 11 May 2013 12:37:00 -0500
-Message-ID: <518E81BC.5020702@inktank.com>
+Subject: [PATCH] rbd: support reading parent page data for writes
+Date: Sat, 11 May 2013 12:37:37 -0500
+Message-ID: <518E81E1.2000806@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:60229 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753777Ab3EKRhD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:37:03 -0400
-Received: by mail-ie0-f173.google.com with SMTP id k5so10047305iea.18
-        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:37:02 -0700 (PDT)
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:60302 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753777Ab3EKRhl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:37:41 -0400
+Received: by mail-ie0-f180.google.com with SMTP id ar20so10128252iec.11
+        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:37:40 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id xf4sm5593890igb.8.2013.05.11.10.37.00
+        by mx.google.com with ESMTPSA id c11sm6120889igv.1.2013.05.11.10.37.37
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Sat, 11 May 2013 10:37:01 -0700 (PDT)
+        Sat, 11 May 2013 10:37:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The rbd code has a need to be able to restart an osd request that
-has already been started and completed once before.  This currently
-wouldn't work right because the osd client code assumes an osd
-request will be started exactly once  Certain fields in a request
-are never cleared and this leads to trouble if you try to reuse it.
+Currently, rbd_img_obj_parent_read_full() assumes the incoming
+object request contains bio data.  But if a layered image is part of
+a multi-layer stack of images it will result in read requests of
+page data to parent images.
 
-Specifically, the r_sent, r_got_reply, and r_completed fields are
-never cleared.  The r_sent field records the osd incarnation at the
-time the request was sent to that osd.  If that's non-zero, the
-message won't get re-mapped to a target osd properly, and won't be
-put on the unsafe requests list the first time it's sent as it
-should.  The r_got_reply field is used in handle_reply() to ensure
-the reply to a request is processed only once.  And the r_completed
-field is used for lingering requests to avoid calling the callback
-function every time the osd client re-sends the request on behalf of
-its initiator.
-
-Each osd request passes through ceph_osdc_start_request() when
-responsibility for the request is handed over to the osd client for
-completion.  We can safely zero these three fields there each time a
-request gets started.
-
-One last related change--clear the r_linger flag when a request
-is no longer registered as a linger request.
+This is handling the same kind of issue as was resolved by this
+commit:
+    5b2ab72d  rbd: support reading parent page data
 
 This resolves:
-    http://tracker.ceph.com/issues/5026
+    http://tracker.ceph.com/issues/5027
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/osd_client.c |    5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/block/rbd.c |   21 ++++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index a3395fd..d5953b8 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1204,6 +1204,7 @@ void ceph_osdc_unregister_linger_request(struct
-ceph_osd_client *osdc,
- 	mutex_lock(&osdc->request_mutex);
- 	if (req->r_linger) {
- 		__unregister_linger_request(osdc, req);
-+		req->r_linger = 0;
- 		ceph_osdc_put_request(req);
- 	}
- 	mutex_unlock(&osdc->request_mutex);
-@@ -2120,7 +2121,9 @@ int ceph_osdc_start_request(struct ceph_osd_client
-*osdc,
- 	down_read(&osdc->map_sem);
- 	mutex_lock(&osdc->request_mutex);
- 	__register_request(osdc, req);
--	WARN_ON(req->r_sent);
-+	req->r_sent = 0;
-+	req->r_got_reply = 0;
-+	req->r_completed = 0;
- 	rc = __map_request(osdc, req, 0);
- 	if (rc < 0) {
- 		if (nofail) {
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 51c45e7..b9221a0 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2160,7 +2160,8 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+ 	struct page **pages;
+ 	int result;
+ 	u64 obj_size;
+-	u64 xferred;
++	u64 offset;
++	u64 length;
+
+ 	rbd_assert(img_request_child_test(img_request));
+
+@@ -2172,10 +2173,10 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+
+ 	orig_request = img_request->obj_request;
+ 	rbd_assert(orig_request != NULL);
+-	rbd_assert(orig_request->type == OBJ_REQUEST_BIO);
++	rbd_assert(obj_request_type_valid(orig_request->type));
+ 	result = img_request->result;
+ 	obj_size = img_request->length;
+-	xferred = img_request->xferred;
++	rbd_assert(obj_size == img_request->xferred);
+ 	rbd_img_request_put(img_request);
+
+ 	rbd_assert(orig_request->img_request);
+@@ -2204,11 +2205,17 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+
+ 	/* Then the original write request op */
+
++	offset = orig_request->offset;
++	length = orig_request->length;
+ 	osd_req_op_extent_init(osd_req, 1, CEPH_OSD_OP_WRITE,
+-					orig_request->offset,
+-					orig_request->length, 0, 0);
+-	osd_req_op_extent_osd_data_bio(osd_req, 1, orig_request->bio_list,
+-					orig_request->length);
++					offset, length, 0, 0);
++	if (orig_request->type == OBJ_REQUEST_BIO)
++		osd_req_op_extent_osd_data_bio(osd_req, 1,
++					orig_request->bio_list, length);
++	else
++		osd_req_op_extent_osd_data_pages(osd_req, 1,
++					orig_request->pages, length,
++					offset & ~PAGE_MASK, false, false);
+
+ 	rbd_osd_req_format_write(orig_request);
+
 -- 
 1.7.9.5
 
