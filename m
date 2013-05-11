@@ -1,87 +1,93 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/5] rbd: don't release write request until necessary
-Date: Sat, 11 May 2013 12:44:02 -0500
-Message-ID: <518E8362.30906@inktank.com>
+Subject: [PATCH 3/5] rbd: define rbd_dev_unparent()
+Date: Sat, 11 May 2013 12:44:12 -0500
+Message-ID: <518E836C.9010404@inktank.com>
 References: <518E831E.6000206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:60879 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754227Ab3EKRoD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:44:03 -0400
-Received: by mail-ie0-f172.google.com with SMTP id 16so10176342iea.3
-        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:44:03 -0700 (PDT)
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:57468 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754227Ab3EKRoN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:44:13 -0400
+Received: by mail-ie0-f179.google.com with SMTP id c13so10146110ieb.10
+        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:44:13 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
-        by mx.google.com with ESMTPSA id ve9sm6126444igb.3.2013.05.11.10.44.01
+        by mx.google.com with ESMTPSA id kc10sm5817132igb.0.2013.05.11.10.44.12
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Sat, 11 May 2013 10:44:02 -0700 (PDT)
+        Sat, 11 May 2013 10:44:12 -0700 (PDT)
 In-Reply-To: <518E831E.6000206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Previously when a layered write was going to involve a copyup
-request, the original osd request was released before submitting the
-parent full-object read.  The osd request for the copyup would then
-be allocated in rbd_img_obj_parent_read_full_callback().
-
-Shortly we will be handling the event of mapped layered images
-getting flattened, and when that occurs we need to resubmit the
-original request.  We therefore don't want to release the osd
-request until we really konw we're going to replace it--in the
-callback function.
+Define rbd_dev_unparent() to encapsulate cleaning up parent data
+structures from a layered rbd image.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   19 +++++++------------
- 1 file changed, 7 insertions(+), 12 deletions(-)
+ drivers/block/rbd.c |   22 ++++++++++++++--------
+ 1 file changed, 14 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 06d49b5..ac3f4e7 100644
+index ac3f4e7..607c536 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2187,13 +2187,17 @@ rbd_img_obj_parent_read_full_callback(struct
-rbd_img_request *img_request)
- 	if (result)
- 		goto out_err;
+@@ -1835,6 +1835,17 @@ static void rbd_obj_request_destroy(struct kref
+*kref)
+ 	kmem_cache_free(rbd_obj_request_cache, obj_request);
+ }
 
--	/* Allocate the new copyup osd request for the original request */
--
-+	/*
-+	 * The original osd request is of no use to use any more.
-+	 * We need a new one that can hold the two ops in a copyup
-+	 * request.  Allocate the new copyup osd request for the
-+	 * original request, and release the old one.
-+	 */
- 	result = -ENOMEM;
--	rbd_assert(!orig_request->osd_req);
- 	osd_req = rbd_osd_req_create_copyup(orig_request);
- 	if (!osd_req)
- 		goto out_err;
-+	rbd_osd_req_destroy(orig_request->osd_req);
- 	orig_request->osd_req = osd_req;
- 	orig_request->copyup_pages = pages;
++/* It's OK to call this for a device with no parent */
++
++static void rbd_spec_put(struct rbd_spec *spec);
++static void rbd_dev_unparent(struct rbd_device *rbd_dev)
++{
++	rbd_dev_remove_parent(rbd_dev);
++	rbd_spec_put(rbd_dev->parent_spec);
++	rbd_dev->parent_spec = NULL;
++	rbd_dev->parent_overlap = 0;
++}
++
+ /*
+  * Caller is responsible for filling in the list of object requests
+  * that comprises the image request, and the Linux request pointer
+@@ -4062,9 +4073,7 @@ out_err:
+ 	rbd_dev->mapping.size = 0;
+ 	rbd_dev->header.image_size = 0;
+ 	rbd_dev->header.obj_order = 0;
+-	rbd_dev->parent_overlap = 0;
+-	rbd_spec_put(rbd_dev->parent_spec);
+-	rbd_dev->parent_spec = NULL;
++	rbd_dev_unparent(rbd_dev);
+ 	rbd_dev->header.stripe_count = 0;
+ 	rbd_dev->header.stripe_unit = 0;
+ 	rbd_dev->header.features = 0;
+@@ -4492,10 +4501,7 @@ static void rbd_dev_unprobe(struct rbd_device
+*rbd_dev)
+ {
+ 	struct rbd_image_header	*header;
 
-@@ -2269,15 +2273,6 @@ static int rbd_img_obj_parent_read_full(struct
-rbd_obj_request *obj_request)
- 	rbd_assert(rbd_dev->parent != NULL);
+-	rbd_dev_remove_parent(rbd_dev);
+-	rbd_spec_put(rbd_dev->parent_spec);
+-	rbd_dev->parent_spec = NULL;
+-	rbd_dev->parent_overlap = 0;
++	rbd_dev_unparent(rbd_dev);
 
- 	/*
--	 * First things first.  The original osd request is of no
--	 * use to use any more, we'll need a new one that can hold
--	 * the two ops in a copyup request.  We'll get that later,
--	 * but for now we can release the old one.
--	 */
--	rbd_osd_req_destroy(obj_request->osd_req);
--	obj_request->osd_req = NULL;
--
--	/*
- 	 * Determine the byte range covered by the object in the
- 	 * child image to which the original request was to be sent.
- 	 */
+ 	/* Free dynamic fields from the header, then zero it out */
+
+@@ -4571,7 +4577,7 @@ static int rbd_dev_probe_parent(struct rbd_device
+*rbd_dev)
+ 	return 0;
+ out_err:
+ 	if (parent) {
+-		rbd_spec_put(rbd_dev->parent_spec);
++		rbd_dev_unparent(rbd_dev);
+ 		kfree(rbd_dev->header_name);
+ 		rbd_dev_destroy(parent);
+ 	} else {
 -- 
 1.7.9.5
 
