@@ -1,118 +1,84 @@
-From: Yann ROBIN <yann.robin@youscribe.com>
-Subject: RE: Seg Fault on rgw 0.61.1 with cluster in 0.61
-Date: Sat, 11 May 2013 10:02:44 +0000
-Message-ID: <367CC0B0FC02EE47BF7482398BD623C55E232423@DB3PRD0311MB416.eurprd03.prod.outlook.com>
-References: <367CC0B0FC02EE47BF7482398BD623C55E230EFF@DB3PRD0311MB416.eurprd03.prod.outlook.com>
- <367CC0B0FC02EE47BF7482398BD623C55E230F45@DB3PRD0311MB416.eurprd03.prod.outlook.com>
- <alpine.DEB.2.00.1305100825050.23708@cobra.newdream.net>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] libceph: init sent and completed when starting
+Date: Sat, 11 May 2013 12:37:00 -0500
+Message-ID: <518E81BC.5020702@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:45359
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754113Ab3EKKCz convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 11 May 2013 06:02:55 -0400
-In-Reply-To: <alpine.DEB.2.00.1305100825050.23708@cobra.newdream.net>
-Content-Language: fr-FR
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:60229 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753777Ab3EKRhD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 13:37:03 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k5so10047305iea.18
+        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 10:37:02 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net. [71.195.31.37])
+        by mx.google.com with ESMTPSA id xf4sm5593890igb.8.2013.05.11.10.37.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sat, 11 May 2013 10:37:01 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+The rbd code has a need to be able to restart an osd request that
+has already been started and completed once before.  This currently
+wouldn't work right because the osd client code assumes an osd
+request will be started exactly once  Certain fields in a request
+are never cleared and this leads to trouble if you try to reuse it.
 
-We're using ubuntu 12.04.2 with kernel 3.2.0-41-virtual.
-I'll try changing removing the dbg package and install your branch Mond=
-ay.
+Specifically, the r_sent, r_got_reply, and r_completed fields are
+never cleared.  The r_sent field records the osd incarnation at the
+time the request was sent to that osd.  If that's non-zero, the
+message won't get re-mapped to a target osd properly, and won't be
+put on the unsafe requests list the first time it's sent as it
+should.  The r_got_reply field is used in handle_reply() to ensure
+the reply to a request is processed only once.  And the r_completed
+field is used for lingering requests to avoid calling the callback
+function every time the osd client re-sends the request on behalf of
+its initiator.
 
+Each osd request passes through ceph_osdc_start_request() when
+responsibility for the request is handed over to the osd client for
+completion.  We can safely zero these three fields there each time a
+request gets started.
 
------Message d'origine-----
-De=A0: Sage Weil [mailto:sage@inktank.com]=20
-Envoy=E9=A0: vendredi 10 mai 2013 17:30
-=C0=A0: Yann ROBIN
-Cc=A0: ceph-devel@vger.kernel.org
-Objet=A0: RE: Seg Fault on rgw 0.61.1 with cluster in 0.61
+One last related change--clear the r_linger flag when a request
+is no longer registered as a linger request.
 
-On Fri, 10 May 2013, Yann ROBIN wrote:
-> I've downgraded the rgw to 0.60 and I still had the same issue.
+This resolves:
+    http://tracker.ceph.com/issues/5026
 
-Yeah, the radosgw code is essentially identical between the two version=
-s (there is a new config option but it is unused).
-=20
-> I returned to 0.61.1 and noticed that sometimes (1 on 10) the radosgw=
- start normally.
-> I've installed debug package of librados to do some debugging and now=
- it always works...
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/osd_client.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-That is disconcerting.
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index a3395fd..d5953b8 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1204,6 +1204,7 @@ void ceph_osdc_unregister_linger_request(struct
+ceph_osd_client *osdc,
+ 	mutex_lock(&osdc->request_mutex);
+ 	if (req->r_linger) {
+ 		__unregister_linger_request(osdc, req);
++		req->r_linger = 0;
+ 		ceph_osdc_put_request(req);
+ 	}
+ 	mutex_unlock(&osdc->request_mutex);
+@@ -2120,7 +2121,9 @@ int ceph_osdc_start_request(struct ceph_osd_client
+*osdc,
+ 	down_read(&osdc->map_sem);
+ 	mutex_lock(&osdc->request_mutex);
+ 	__register_request(osdc, req);
+-	WARN_ON(req->r_sent);
++	req->r_sent = 0;
++	req->r_got_reply = 0;
++	req->r_completed = 0;
+ 	rc = __map_request(osdc, req, 0);
+ 	if (rc < 0) {
+ 		if (nofail) {
+-- 
+1.7.9.5
 
-I've pushed wip-rgw-crash that prints some debug information in ceph::c=
-rypto::init... do you mind instaling that (without debug packages
-:) and seeing if you can reproduce the problem?  it should print out a =
-couple of lines to stdout, but you need to run radosgw with the '-f'=20
-option (which prevents fork).  hopefully the problem is reproducible in=
- that case.
-
-What distro are you running?
-sage
-
-
- >=20
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org=20
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Yann ROBIN
-> Sent: vendredi 10 mai 2013 10:51
-> To: ceph-devel@vger.kernel.org
-> Subject: Seg Fault on rgw 0.61.1 with cluster in 0.61
->=20
-> Hi,
->=20
-> I've tried to update the rgw to 0.61.1 and now I have a segfault whil=
-e connecting to the 0.61 cluster.
-> The rgw with version 0.61 run fine.
->=20
-> *** Caught signal (Segmentation fault) **  in thread 7fc1fec79780 =20
-> ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
->  1: /usr/bin/radosgw() [0x4f19da]
->  2: (()+0xfcb0) [0x7fc1fcf0dcb0]
->  3: (ceph::crypto::init(CephContext*)+0xf) [0x7fc1fdfeb2ef]
->  4: (common_init_finish(CephContext*)+0x23) [0x7fc1fdfc33f3]
->  5: (librados::RadosClient::connect()+0x1d) [0x7fc1fde1d48d]
->  6: (RGWRados::initialize()+0x53) [0x5b5c03]
->  7: (RGWStoreManager::init_storage_provider(CephContext*, bool)+0x2c9=
-)=20
-> [0x5b9b39]
->  8: (main()+0x2d7) [0x4b4ed7]
->  9: (__libc_start_main()+0xed) [0x7fc1fb90176d]
->  10: /usr/bin/radosgw() [0x4b6db1]
-> 2013-05-10 10:36:39.749439 7fc1fec79780 -1 *** Caught signal=20
-> (Segmentation fault) **  in thread 7fc1fec79780
->=20
-> --
-> Yann ROBIN
-> YouScribe
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
