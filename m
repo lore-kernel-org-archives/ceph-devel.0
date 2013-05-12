@@ -1,237 +1,600 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 1/5] rbd: get parent info on refresh
-Date: Sat, 11 May 2013 16:52:36 -0500
-Message-ID: <518EBDA4.6080807@inktank.com>
-References: <518E831E.6000206@inktank.com> <518E8357.7010506@inktank.com> <518EB11D.9050600@inktank.com>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
+Subject: monitor upgrade from 0.56.6 to 0.61.1 on squeeze
+	failed!
+Date: Sun, 12 May 2013 04:57:27 +0200
+Message-ID: <518F0517.7060601@smart-weblications.de>
+Reply-To: f.wiessner-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:38950 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754277Ab3EKVwi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 May 2013 17:52:38 -0400
-Received: by mail-ie0-f180.google.com with SMTP id ar20so10318414iec.11
-        for <ceph-devel@vger.kernel.org>; Sat, 11 May 2013 14:52:38 -0700 (PDT)
-In-Reply-To: <518EB11D.9050600@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-15"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 05/11/2013 03:59 PM, Josh Durgin wrote:
-> On 05/11/2013 10:43 AM, Alex Elder wrote:
->> Get parent info for format 2 images on every refresh (rather than
->> just during the initial probe).  This will be needed to detect the
->> disappearance of the parent image in the event a mapped image
->> becomes unlayered (i.e., flattened).
->>
->> Switch to using a non-zero parent overlap value rather than the
->> existence of a parent (a non-null parent_spec pointer) to determine
->> whether to mark a request layered.  It will soon be possible for
->> a layered image to become unlayered while a request is in flight.
->>
->> This means that the layered flag for an image request indicates that
->> there was a non-zero parent overlap at the time the image request
->> was created.  The parent overlap can change thereafter, which may
->> lead to special handling at request submission or completion time.
->>
->> Flesh out and fix the rbd_dev_v2_header_info() error handling path.
->>
->> This and the next several pages are related to:
->>      http://tracker.ceph.com/issues/3763
->>
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>   drivers/block/rbd.c |   72
->> ++++++++++++++++++++++++++++++++-------------------
->>   1 file changed, 45 insertions(+), 27 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 3a8135f..06d49b5 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -1871,7 +1871,7 @@ static struct rbd_img_request
->> *rbd_img_request_create(
->>       }
->>       if (child_request)
->>           img_request_child_set(img_request);
->> -    if (rbd_dev->parent_spec)
->> +    if (rbd_dev->parent_overlap)
->>           img_request_layered_set(img_request);
->>       spin_lock_init(&img_request->completion_lock);
->>       img_request->next_completion = 0;
->> @@ -4021,20 +4021,60 @@ static int rbd_dev_v2_header_info(struct
->> rbd_device *rbd_dev)
->>       if (first_time) {
->>           ret = rbd_dev_v2_header_onetime(rbd_dev);
->>           if (ret)
->> -            goto out;
->> +            goto out_err;
->> +    }
->> +
->> +    /*
->> +     * If the image supports layering, get the parent info.  We
->> +     * need to probe the first time regardless.  Thereafter we
->> +     * only need to if there's a parent, to see if it has
->> +     * disappeared due to the mapped image getting flattened.
->> +     */
->> +    if (rbd_dev->header.features & RBD_FEATURE_LAYERING &&
->> +            (first_time || rbd_dev->parent_spec)) {
->> +        bool warn;
->> +
->> +        ret = rbd_dev_v2_parent_info(rbd_dev);
->> +        if (ret)
->> +            goto out_err;
->> +
->> +        /*
->> +         * Print a warning if this is the initial probe and
->> +         * the image has a parent.  Don't print it if the
->> +         * image now being probed is itself a parent.  We
->> +         * can tell at this point because we won't know its
->> +         * pool name yet (just its pool id).
->> +         */
->> +        warn = rbd_dev->parent_spec && rbd_dev->spec->pool_name;
->> +        if (first_time && warn)
->> +            rbd_warn(rbd_dev, "WARNING: kernel layering "
->> +                    "is EXPERIMENTAL!");
->>       }
->>
->>       ret = rbd_dev_v2_image_size(rbd_dev);
->>       if (ret)
->> -        goto out;
->> +        goto out_err;
->> +
->>       if (rbd_dev->spec->snap_id == CEPH_NOSNAP)
->>           if (rbd_dev->mapping.size != rbd_dev->header.image_size)
->>               rbd_dev->mapping.size = rbd_dev->header.image_size;
->>
->>       ret = rbd_dev_v2_snap_context(rbd_dev);
->>       dout("rbd_dev_v2_snap_context returned %d\n", ret);
->> -    if (ret)
->> +    if (!ret)
->>           goto out;
->> +out_err:
->> +    rbd_dev->mapping.size = 0;
->> +    rbd_dev->header.image_size = 0;
->> +    rbd_dev->header.obj_order = 0;
->> +    rbd_dev->parent_overlap = 0;
->> +    rbd_spec_put(rbd_dev->parent_spec);
->> +    rbd_dev->parent_spec = NULL;
->> +    rbd_dev->header.stripe_count = 0;
->> +    rbd_dev->header.stripe_unit = 0;
->> +    rbd_dev->header.features = 0;
->> +    kfree(rbd_dev->header.object_prefix);
->> +    rbd_dev->header.object_prefix = NULL;
-> 
-> There should probably be some warning here, since the device isn't
-> usable anymore after this.
+Hi,
 
-That is a very good point.  I obviously hadn't thought
-this through.  And looking again at how this is used (two
-callers--probe and refresh), the refresh case really doesn't
-do anything with errors--just issues a warning.
+i upgraded from 0.56.6 to 0.61.1 and tried to restart one monitor:
 
-If refreshing due to a request from /sys/bus/.../refresh then
-we could safely just ignore an error.  But if doing so in
-response to an event notification we probably need to shut
-down the device--probably using a flag as you suggest--don't
-you think?  We could conceivably re-enable it again if we
-could manage to retry and succeed after that (but I'm not
-going to implement that today).
-
-For starters, I will simply get rid of this block of code that
-clears everything out, and rely on an eventual other error
-to clean it all up in the process of tearing down data
-structures.
-
-Now about your suggestion of using a flag:
-
-The fields that get updated here (if not the first time) are:
-- parent info (parent spec and parent overlap)
-- image size and object order
-- snapshot context
-
-(And now that I look I see the old parent spec leaks when we
-update the parent info--another fix to come.)
-
-If a flag were created to mark a header invalid, we'd need
-to check it whenever these fields were referenced.
-
-- parent_spec isn't really a problem, it is really only used
-  to determine whether to probe for a parent.
-- parent overlap is used quite a few places but they're
-  basically in rbd_img_obj_request_submit() and in the
-  parent-related callback functions.
-- image size isn't really used except to set mapping.size,
-  which is then used to set the device capacity, so
-  protecting that should be easy.
-- The snapshot is used a little more than that, but it
-  may be that some higher-level organization (like trapping
-  this at object request submit time) might cover it.
-
-I'll take a look at implementing this.  But it's unfortunately
-going to have to wait, I've run out of time today.
-
-Thanks a lot for the review.
-
-					-Alex
+/etc/init.d/ceph start mon
+=3D=3D=3D mon.4 =3D=3D=3D
+Starting Ceph mon.4 on node05...
+[16366]: (33) Numerical argument out of domain
+failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i 4 --pid-file
+/var/run/ceph/mon.4.pid -c /etc/ceph/ceph.conf '
+root@node05:/data/ceph/mon# ps aux|grep ceph-mon
+root     16568  0.0  0.0   7596   840 pts/1    S+   04:16   0:00 grep ceph-=
+mon
 
 
-> I'm nervous about clearing these fields without locking around
-> their use. For example, rbd_request_fn() should skip new requests now
-> since mapping.size == 0, but it does not read the field safely, so
-> requests could still get through, and possibly use the new object
-> prefix (null) to create new objects that would not be cleaned up
-> by removing the image (since they used an irregular prefix).
-> 
-> There might be other less obvious effects for in-flight requests too.
-> Maybe a new flag indicating whether the header is valid would be
-> more useful than relying on individual fields being handled correctly
-> after an error reading the header occurs.
-> 
->>   out:
->>       up_write(&rbd_dev->header_rwsem);
->>
->> @@ -4488,24 +4528,6 @@ static int rbd_dev_v2_header_onetime(struct
->> rbd_device *rbd_dev)
->>       if (ret)
->>           goto out_err;
->>
->> -    /* If the image supports layering, get the parent info */
->> -
->> -    if (rbd_dev->header.features & RBD_FEATURE_LAYERING) {
->> -        ret = rbd_dev_v2_parent_info(rbd_dev);
->> -        if (ret)
->> -            goto out_err;
->> -        /*
->> -         * Print a warning if this image has a parent.
->> -         * Don't print it if the image now being probed
->> -         * is itself a parent.  We can tell at this point
->> -         * because we won't know its pool name yet (just its
->> -         * pool id).
->> -         */
->> -        if (rbd_dev->parent_spec && rbd_dev->spec->pool_name)
->> -            rbd_warn(rbd_dev, "WARNING: kernel layering "
->> -                    "is EXPERIMENTAL!");
->> -    }
->> -
->>       /* If the image supports fancy striping, get its parameters */
->>
->>       if (rbd_dev->header.features & RBD_FEATURE_STRIPINGV2) {
->> @@ -4517,11 +4539,7 @@ static int rbd_dev_v2_header_onetime(struct
->> rbd_device *rbd_dev)
->>
->>       return 0;
->>   out_err:
->> -    rbd_dev->parent_overlap = 0;
->> -    rbd_spec_put(rbd_dev->parent_spec);
->> -    rbd_dev->parent_spec = NULL;
->> -    kfree(rbd_dev->header_name);
->> -    rbd_dev->header_name = NULL;
->> +    rbd_dev->header.features = 0;
->>       kfree(rbd_dev->header.object_prefix);
->>       rbd_dev->header.object_prefix = NULL;
->>
-> 
+I read the log and found out that conversion seemed to have failed, so i re=
+moved
+store.db and tried again, without success, always saying:
 
+0 _convert_machines mdsmap gv 31535406 already exists
+
+
+Full log:
+
+2013-05-12 04:04:54.266783 7fa95a3a6780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 11398
+2013-05-12 04:04:54.339686 7fa95a3a6780  1 unable to open monitor store at
+/data/ceph/mon
+2013-05-12 04:04:54.339698 7fa95a3a6780  1 check for old monitor store form=
+at
+2013-05-12 04:04:54.339700 7fa95a3a6780  1 store(/data/ceph/mon) mount
+2013-05-12 04:04:54.347528 7fa95a3a6780  1 found old GV monitor store forma=
+t --
+should convert!
+2013-05-12 04:04:54.353621 7fa95a3a6780  1 store(/data/ceph/mon) mount
+2013-05-12 04:06:51.530091 7fa95a3a6780  0 _convert_machines mdsmap gv 3153=
+5406
+already exists
+2013-05-12 04:06:51.547889 7fa95a3a6780 -1 mon/Monitor.cc: In function 'void
+Monitor::StoreConverter::_convert_machines(std::string)' thread 7fa95a3a6780
+time 2013-05-12 04:06:51.530115
+mon/Monitor.cc: 4413: FAILED assert(0 =3D=3D "Duplicate GV -- something is =
+wrong!")
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b0=
+ed]
+ 2: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 3: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 4: (main()+0x7ca) [0x47593a]
+ 5: (__libc_start_main()+0xfd) [0x7fa95b00dc8d]
+ 6: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- begin dump of recent events ---
+   -26> 2013-05-12 04:04:54.263903 7fa95a3a6780  5 asok(0x13f3000)
+register_command perfcounters_dump hook 0x13e7010
+   -25> 2013-05-12 04:04:54.263925 7fa95a3a6780  5 asok(0x13f3000)
+register_command 1 hook 0x13e7010
+   -24> 2013-05-12 04:04:54.263928 7fa95a3a6780  5 asok(0x13f3000)
+register_command perf dump hook 0x13e7010
+   -23> 2013-05-12 04:04:54.263935 7fa95a3a6780  5 asok(0x13f3000)
+register_command perfcounters_schema hook 0x13e7010
+   -22> 2013-05-12 04:04:54.263939 7fa95a3a6780  5 asok(0x13f3000)
+register_command 2 hook 0x13e7010
+   -21> 2013-05-12 04:04:54.263941 7fa95a3a6780  5 asok(0x13f3000)
+register_command perf schema hook 0x13e7010
+   -20> 2013-05-12 04:04:54.263946 7fa95a3a6780  5 asok(0x13f3000)
+register_command config show hook 0x13e7010
+   -19> 2013-05-12 04:04:54.263951 7fa95a3a6780  5 asok(0x13f3000)
+register_command config set hook 0x13e7010
+   -18> 2013-05-12 04:04:54.263956 7fa95a3a6780  5 asok(0x13f3000)
+register_command log flush hook 0x13e7010
+   -17> 2013-05-12 04:04:54.263961 7fa95a3a6780  5 asok(0x13f3000)
+register_command log dump hook 0x13e7010
+   -16> 2013-05-12 04:04:54.263966 7fa95a3a6780  5 asok(0x13f3000)
+register_command log reopen hook 0x13e7010
+   -15> 2013-05-12 04:04:54.266783 7fa95a3a6780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 11398
+   -14> 2013-05-12 04:04:54.267348 7fa95a3a6780  1 finished global_init_dae=
+monize
+   -13> 2013-05-12 04:04:54.322995 7fa95a3a6780  5 asok(0x13f3000) init
+/var/run/ceph/ceph-mon.4.asok
+   -12> 2013-05-12 04:04:54.323018 7fa95a3a6780  5 asok(0x13f3000)
+bind_and_listen /var/run/ceph/ceph-mon.4.asok
+   -11> 2013-05-12 04:04:54.323059 7fa95a3a6780  5 asok(0x13f3000)
+register_command 0 hook 0x13e60b8
+   -10> 2013-05-12 04:04:54.323065 7fa95a3a6780  5 asok(0x13f3000)
+register_command version hook 0x13e60b8
+    -9> 2013-05-12 04:04:54.323070 7fa95a3a6780  5 asok(0x13f3000)
+register_command git_version hook 0x13e60b8
+    -8> 2013-05-12 04:04:54.323072 7fa95a3a6780  5 asok(0x13f3000)
+register_command help hook 0x13e70b0
+    -7> 2013-05-12 04:04:54.323105 7fa958c79700  5 asok(0x13f3000) entry st=
+art
+    -6> 2013-05-12 04:04:54.339686 7fa95a3a6780  1 unable to open monitor s=
+tore
+at /data/ceph/mon
+    -5> 2013-05-12 04:04:54.339698 7fa95a3a6780  1 check for old monitor st=
+ore
+format
+    -4> 2013-05-12 04:04:54.339700 7fa95a3a6780  1 store(/data/ceph/mon) mo=
+unt
+    -3> 2013-05-12 04:04:54.347528 7fa95a3a6780  1 found old GV monitor sto=
+re
+format -- should convert!
+    -2> 2013-05-12 04:04:54.353621 7fa95a3a6780  1 store(/data/ceph/mon) mo=
+unt
+    -1> 2013-05-12 04:06:51.530091 7fa95a3a6780  0 _convert_machines mdsmap=
+ gv
+31535406 already exists
+     0> 2013-05-12 04:06:51.547889 7fa95a3a6780 -1 mon/Monitor.cc: In funct=
+ion
+'void Monitor::StoreConverter::_convert_machines(std::string)' thread
+7fa95a3a6780 time 2013-05-12 04:06:51.530115
+mon/Monitor.cc: 4413: FAILED assert(0 =3D=3D "Duplicate GV -- something is =
+wrong!")
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b0=
+ed]
+ 2: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 3: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 4: (main()+0x7ca) [0x47593a]
+ 5: (__libc_start_main()+0xfd) [0x7fa95b00dc8d]
+ 6: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   1/ 5 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 5 ms
+   1/ 5 mon
+   0/10 monc
+   0/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/ 5 hadoop
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+  -2/-2 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent     10000
+  max_new         1000
+  log_file /var/log/ceph/ceph-mon.4.log
+--- end dump of recent events ---
+2013-05-12 04:06:51.628590 7fa95a3a6780 -1 *** Caught signal (Aborted) **
+ in thread 7fa95a3a6780
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: /usr/bin/ceph-mon() [0x593939]
+ 2: (()+0xeff0) [0x7fa95c3cfff0]
+ 3: (gsignal()+0x35) [0x7fa95b0211b5]
+ 4: (abort()+0x180) [0x7fa95b023fc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fa95b8b5dc5]
+ 6: (()+0xcb166) [0x7fa95b8b4166]
+ 7: (()+0xcb193) [0x7fa95b8b4193]
+ 8: (()+0xcb28e) [0x7fa95b8b428e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x7c9)
+[0x5b9439]
+ 10: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b=
+0ed]
+ 11: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 12: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 13: (main()+0x7ca) [0x47593a]
+ 14: (__libc_start_main()+0xfd) [0x7fa95b00dc8d]
+ 15: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- begin dump of recent events ---
+     0> 2013-05-12 04:06:51.628590 7fa95a3a6780 -1 *** Caught signal (Abort=
+ed) **
+ in thread 7fa95a3a6780
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: /usr/bin/ceph-mon() [0x593939]
+ 2: (()+0xeff0) [0x7fa95c3cfff0]
+ 3: (gsignal()+0x35) [0x7fa95b0211b5]
+ 4: (abort()+0x180) [0x7fa95b023fc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fa95b8b5dc5]
+ 6: (()+0xcb166) [0x7fa95b8b4166]
+ 7: (()+0xcb193) [0x7fa95b8b4193]
+ 8: (()+0xcb28e) [0x7fa95b8b428e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x7c9)
+[0x5b9439]
+ 10: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b=
+0ed]
+ 11: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 12: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 13: (main()+0x7ca) [0x47593a]
+ 14: (__libc_start_main()+0xfd) [0x7fa95b00dc8d]
+ 15: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   1/ 5 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 5 ms
+   1/ 5 mon
+   0/10 monc
+   0/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/ 5 hadoop
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+  -2/-2 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent     10000
+  max_new         1000
+  log_file /var/log/ceph/ceph-mon.4.log
+--- end dump of recent events ---
+2013-05-12 04:07:39.810663 7fa768024780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 12619
+2013-05-12 04:07:40.495728 7fa768024780 -1 there is an on-going (maybe abor=
+ted?)
+conversion.
+2013-05-12 04:07:40.495799 7fa768024780 -1 you should check what happened
+2013-05-12 04:07:40.495881 7fa768024780 -1 found errors while attempting to
+convert the monitor store: (17) File exists
+2013-05-12 04:08:46.941045 7f100844f780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 13220
+2013-05-12 04:08:46.948838 7f100844f780 -1 there is an on-going (maybe abor=
+ted?)
+conversion.
+2013-05-12 04:08:46.948870 7f100844f780 -1 you should check what happened
+2013-05-12 04:08:46.948939 7f100844f780 -1 found errors while attempting to
+convert the monitor store: (17) File exists
+2013-05-12 04:08:56.611068 7ff5f5a1a780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 13299
+2013-05-12 04:08:56.618116 7ff5f5a1a780 -1 there is an on-going (maybe abor=
+ted?)
+conversion.
+2013-05-12 04:08:56.618168 7ff5f5a1a780 -1 you should check what happened
+2013-05-12 04:08:56.618410 7ff5f5a1a780 -1 found errors while attempting to
+convert the monitor store: (17) File exists
+2013-05-12 04:16:18.371051 7f13aedc2780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 16366
+2013-05-12 04:16:18.432357 7f13aedc2780  1 unable to open monitor store at
+/data/ceph/mon
+2013-05-12 04:16:18.432447 7f13aedc2780  1 check for old monitor store form=
+at
+2013-05-12 04:16:18.592858 7f13aedc2780  1 store(/data/ceph/mon) mount
+2013-05-12 04:16:18.682615 7f13aedc2780  1 found old GV monitor store forma=
+t --
+should convert!
+2013-05-12 04:16:18.748504 7f13aedc2780  1 store(/data/ceph/mon) mount
+2013-05-12 04:16:30.422238 7f13aedc2780  0 _convert_machines mdsmap gv 3153=
+5406
+already exists
+2013-05-12 04:16:30.476963 7f13aedc2780 -1 mon/Monitor.cc: In function 'void
+Monitor::StoreConverter::_convert_machines(std::string)' thread 7f13aedc2780
+time 2013-05-12 04:16:30.422295
+mon/Monitor.cc: 4413: FAILED assert(0 =3D=3D "Duplicate GV -- something is =
+wrong!")
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b0=
+ed]
+ 2: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 3: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 4: (main()+0x7ca) [0x47593a]
+ 5: (__libc_start_main()+0xfd) [0x7f13afa29c8d]
+ 6: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- begin dump of recent events ---
+   -26> 2013-05-12 04:16:18.369105 7f13aedc2780  5 asok(0x1f6c000)
+register_command perfcounters_dump hook 0x1f60010
+   -25> 2013-05-12 04:16:18.369126 7f13aedc2780  5 asok(0x1f6c000)
+register_command 1 hook 0x1f60010
+   -24> 2013-05-12 04:16:18.369128 7f13aedc2780  5 asok(0x1f6c000)
+register_command perf dump hook 0x1f60010
+   -23> 2013-05-12 04:16:18.369135 7f13aedc2780  5 asok(0x1f6c000)
+register_command perfcounters_schema hook 0x1f60010
+   -22> 2013-05-12 04:16:18.369242 7f13aedc2780  5 asok(0x1f6c000)
+register_command 2 hook 0x1f60010
+   -21> 2013-05-12 04:16:18.369247 7f13aedc2780  5 asok(0x1f6c000)
+register_command perf schema hook 0x1f60010
+   -20> 2013-05-12 04:16:18.369249 7f13aedc2780  5 asok(0x1f6c000)
+register_command config show hook 0x1f60010
+   -19> 2013-05-12 04:16:18.369251 7f13aedc2780  5 asok(0x1f6c000)
+register_command config set hook 0x1f60010
+   -18> 2013-05-12 04:16:18.369253 7f13aedc2780  5 asok(0x1f6c000)
+register_command log flush hook 0x1f60010
+   -17> 2013-05-12 04:16:18.369255 7f13aedc2780  5 asok(0x1f6c000)
+register_command log dump hook 0x1f60010
+   -16> 2013-05-12 04:16:18.369257 7f13aedc2780  5 asok(0x1f6c000)
+register_command log reopen hook 0x1f60010
+   -15> 2013-05-12 04:16:18.371051 7f13aedc2780  0 ceph version 0.61.1
+(56c4847ba82a92023700e2d4920b59cdaf23428d), process ceph-mon, pid 16366
+   -14> 2013-05-12 04:16:18.371980 7f13aedc2780  1 finished global_init_dae=
+monize
+   -13> 2013-05-12 04:16:18.431919 7f13aedc2780  5 asok(0x1f6c000) init
+/var/run/ceph/ceph-mon.4.asok
+   -12> 2013-05-12 04:16:18.431948 7f13aedc2780  5 asok(0x1f6c000)
+bind_and_listen /var/run/ceph/ceph-mon.4.asok
+   -11> 2013-05-12 04:16:18.431997 7f13aedc2780  5 asok(0x1f6c000)
+register_command 0 hook 0x1f5f0b8
+   -10> 2013-05-12 04:16:18.432004 7f13aedc2780  5 asok(0x1f6c000)
+register_command version hook 0x1f5f0b8
+    -9> 2013-05-12 04:16:18.432009 7f13aedc2780  5 asok(0x1f6c000)
+register_command git_version hook 0x1f5f0b8
+    -8> 2013-05-12 04:16:18.432014 7f13aedc2780  5 asok(0x1f6c000)
+register_command help hook 0x1f600b0
+    -7> 2013-05-12 04:16:18.432043 7f13ad695700  5 asok(0x1f6c000) entry st=
+art
+    -6> 2013-05-12 04:16:18.432357 7f13aedc2780  1 unable to open monitor s=
+tore
+at /data/ceph/mon
+    -5> 2013-05-12 04:16:18.432447 7f13aedc2780  1 check for old monitor st=
+ore
+format
+    -4> 2013-05-12 04:16:18.592858 7f13aedc2780  1 store(/data/ceph/mon) mo=
+unt
+    -3> 2013-05-12 04:16:18.682615 7f13aedc2780  1 found old GV monitor sto=
+re
+format -- should convert!
+    -2> 2013-05-12 04:16:18.748504 7f13aedc2780  1 store(/data/ceph/mon) mo=
+unt
+    -1> 2013-05-12 04:16:30.422238 7f13aedc2780  0 _convert_machines mdsmap=
+ gv
+31535406 already exists
+     0> 2013-05-12 04:16:30.476963 7f13aedc2780 -1 mon/Monitor.cc: In funct=
+ion
+'void Monitor::StoreConverter::_convert_machines(std::string)' thread
+7f13aedc2780 time 2013-05-12 04:16:30.422295
+mon/Monitor.cc: 4413: FAILED assert(0 =3D=3D "Duplicate GV -- something is =
+wrong!")
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b0=
+ed]
+ 2: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 3: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 4: (main()+0x7ca) [0x47593a]
+ 5: (__libc_start_main()+0xfd) [0x7f13afa29c8d]
+ 6: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   1/ 5 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 5 ms
+   1/ 5 mon
+   0/10 monc
+   0/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/ 5 hadoop
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+  -2/-2 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent     10000
+  max_new         1000
+  log_file /var/log/ceph/ceph-mon.4.log
+--- end dump of recent events ---
+2013-05-12 04:16:30.501642 7f13aedc2780 -1 *** Caught signal (Aborted) **
+ in thread 7f13aedc2780
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: /usr/bin/ceph-mon() [0x593939]
+ 2: (()+0xeff0) [0x7f13b0debff0]
+ 3: (gsignal()+0x35) [0x7f13afa3d1b5]
+ 4: (abort()+0x180) [0x7f13afa3ffc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f13b02d1dc5]
+ 6: (()+0xcb166) [0x7f13b02d0166]
+ 7: (()+0xcb193) [0x7f13b02d0193]
+ 8: (()+0xcb28e) [0x7f13b02d028e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x7c9)
+[0x5b9439]
+ 10: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b=
+0ed]
+ 11: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 12: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 13: (main()+0x7ca) [0x47593a]
+ 14: (__libc_start_main()+0xfd) [0x7f13afa29c8d]
+ 15: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- begin dump of recent events ---
+     0> 2013-05-12 04:16:30.501642 7f13aedc2780 -1 *** Caught signal (Abort=
+ed) **
+ in thread 7f13aedc2780
+
+ ceph version 0.61.1 (56c4847ba82a92023700e2d4920b59cdaf23428d)
+ 1: /usr/bin/ceph-mon() [0x593939]
+ 2: (()+0xeff0) [0x7f13b0debff0]
+ 3: (gsignal()+0x35) [0x7f13afa3d1b5]
+ 4: (abort()+0x180) [0x7f13afa3ffc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f13b02d1dc5]
+ 6: (()+0xcb166) [0x7f13b02d0166]
+ 7: (()+0xcb193) [0x7f13b02d0193]
+ 8: (()+0xcb28e) [0x7f13b02d028e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x7c9)
+[0x5b9439]
+ 10: (Monitor::StoreConverter::_convert_machines(std::string)+0xcad) [0x49b=
+0ed]
+ 11: (Monitor::StoreConverter::_convert_machines()+0xd7) [0x49be17]
+ 12: (Monitor::StoreConverter::convert()+0x2e0) [0x49c210]
+ 13: (main()+0x7ca) [0x47593a]
+ 14: (__libc_start_main()+0xfd) [0x7f13afa29c8d]
+ 15: /usr/bin/ceph-mon() [0x473e39]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   1/ 5 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 5 ms
+   1/ 5 mon
+   0/10 monc
+   0/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/ 5 hadoop
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+  -2/-2 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent     10000
+  max_new         1000
+  log_file /var/log/ceph/ceph-mon.4.log
+--- end dump of recent events ---
+
+
+
+
+-- =
+
+
+Mit freundlichen Gr=FC=DFen,
+
+Florian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
