@@ -1,69 +1,76 @@
-From: Greg <itooo-xVucS5mfmt0AvxtiuMwx3w@public.gmane.org>
-Subject: Re: RBD vs RADOS benchmark performance
-Date: Mon, 13 May 2013 14:26:01 +0200
-Message-ID: <5190DBD9.9070500@itooo.com>
-References: <518D2B76.9040706@itooo.com> <1368423516.6771.2.camel@localhost>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: question about ceph and FC SAN LUN data IO path
+Date: Mon, 13 May 2013 14:34:11 +0200
+Message-ID: <5190DDC3.7030604@42on.com>
+References: <5190DB83.9010007@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1368423516.6771.2.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:57917 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751819Ab3EMMeN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 13 May 2013 08:34:13 -0400
+In-Reply-To: <5190DB83.9010007@tnsoft.com.cn>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dennis Chen <xschen@tnsoft.com.cn>
+Cc: ceph-devel@vger.kernel.org
 
-TGUgMTMvMDUvMjAxMyAwNzozOCwgT2xpdmllciBCb252YWxldCBhIMOpY3JpdCA6Cj4gTGUgdmVu
-ZHJlZGkgMTAgbWFpIDIwMTMgw6AgMTk6MTYgKzAyMDAsIEdyZWcgYSDDqWNyaXQgOgo+PiBIZWxs
-byBmb2xrcywKPj4KPj4gSSdtIGluIHRoZSBwcm9jZXNzIG9mIHRlc3RpbmcgQ0VQSCBhbmQgUkJE
-LCBJIGhhdmUgc2V0IHVwIGEgc21hbGwKPj4gY2x1c3RlciBvZiAgaG9zdHMgcnVubmluZyBlYWNo
-IGEgTU9OIGFuZCBhbiBPU0Qgd2l0aCBib3RoIGpvdXJuYWwgYW5kCj4+IGRhdGEgb24gdGhlIHNh
-bWUgU1NEIChvayB0aGlzIGlzIHN0dXBpZCBidXQgdGhpcyBpcyBzaW1wbGUgdG8gdmVyaWZ5IHRo
-ZQo+PiBkaXNrcyBhcmUgbm90IHRoZSBib3R0bGVuZWNrIGZvciAxIGNsaWVudCkuIEFsbCBub2Rl
-cyBhcmUgY29ubmVjdGVkIG9uIGEKPj4gMUdiIG5ldHdvcmsgKG5vIGRlZGljYXRlZCBuZXR3b3Jr
-IGZvciBPU0RzLCBzaGFtZSBvbiBtZSA6KS4KPj4KPj4gU3VtbWFyeSA6IHRoZSBSQkQgcGVyZm9y
-bWFuY2UgaXMgcG9vciBjb21wYXJlZCB0byBiZW5jaG1hcmsKPj4KPj4gQSA1IHNlY29uZHMgc2Vx
-IHJlYWQgYmVuY2htYXJrIHNob3dzIHNvbWV0aGluZyBsaWtlIHRoaXMgOgo+Pj4gICAgIHNlYyBD
-dXIgb3BzICAgc3RhcnRlZCAgZmluaXNoZWQgIGF2ZyBNQi9zICBjdXIgTUIvcyAgbGFzdCBsYXQg
-ICBhdmcgbGF0Cj4+PiAgICAgICAwICAgICAgIDAgICAgICAgICAwICAgICAgICAgMCAgICAgICAg
-IDAgMCAgICAgICAgIC0gICAgICAgICAwCj4+PiAgICAgICAxICAgICAgMTYgICAgICAgIDM5ICAg
-ICAgICAyMyAgIDkxLjk1ODYgICAgICAgIDkyIDAuOTY2MTE3ICAwLjQzMTI0OQo+Pj4gICAgICAg
-MiAgICAgIDE2ICAgICAgICA2NCAgICAgICAgNDggICA5NS45NjAyICAgICAgIDEwMCAwLjUxMzQz
-NSAgIDAuNTM4NDkKPj4+ICAgICAgIDMgICAgICAxNiAgICAgICAgOTAgICAgICAgIDc0ICAgOTgu
-NjMxNyAgICAgICAxMDQgMC4yNTYzMSAgIDAuNTU0OTQKPj4+ICAgICAgIDQgICAgICAxMSAgICAg
-ICAgOTUgICAgICAgIDg0ICAgODMuOTczNSAgICAgICAgNDAgMS44MDAzOCAgIDAuNTg3MTIKPj4+
-ICAgVG90YWwgdGltZSBydW46ICAgICAgICA0LjE2NTc0Nwo+Pj4gVG90YWwgcmVhZHMgbWFkZTog
-ICAgIDk1Cj4+PiBSZWFkIHNpemU6ICAgICAgICAgICAgNDE5NDMwNAo+Pj4gQmFuZHdpZHRoIChN
-Qi9zZWMpOiAgICA5MS4yMjAKPj4+Cj4+PiBBdmVyYWdlIExhdGVuY3k6ICAgICAgIDAuNjc4OTAx
-Cj4+PiBNYXggbGF0ZW5jeTogICAgICAgICAgIDEuODAwMzgKPj4+IE1pbiBsYXRlbmN5OiAgICAg
-ICAgICAgMC4xMDQ3MTkKPj4gOTFNQiByZWFkIHBlcmZvcm1hbmNlLCBxdWl0ZSBnb29kICEKPj4K
-Pj4gTm93IHRoZSBSQkQgcGVyZm9ybWFuY2UgOgo+Pj4gcm9vdEBjbGllbnQ6fiMgZGQgaWY9L2Rl
-di9yYmQxIG9mPS9kZXYvbnVsbCBicz00TSBjb3VudD0xMDAKPj4+IDEwMCswIHJlY29yZHMgaW4K
-Pj4+IDEwMCswIHJlY29yZHMgb3V0Cj4+PiA0MTk0MzA0MDAgYnl0ZXMgKDQxOSBNQikgY29waWVk
-LCAxMy4wNTY4IHMsIDMyLjEgTUIvcwo+PiBUaGVyZSBpcyBhIDN4IHBlcmZvcm1hbmNlIGZhY3Rv
-ciAoc2FtZSBmb3Igd3JpdGU6IH42ME0gYmVuY2htYXJrLCB+MjBNCj4+IGRkIG9uIGJsb2NrIGRl
-dmljZSkKPj4KPj4gVGhlIG5ldHdvcmsgaXMgb2ssIHRoZSBDUFUgaXMgYWxzbyBvayBvbiBhbGwg
-T1NEcy4KPj4gQ0VQSCBpcyBCb2J0YWlsIDAuNTYuNCwgbGludXggaXMgMy44LjEgYXJtICh2YW5p
-bGxhIHJlbGVhc2UgKyBzb21lCj4+IHBhdGNoZXMgZm9yIHRoZSBTb0MgYmVpbmcgdXNlZCkKPj4K
-Pj4gQ2FuIHlvdSBzaG93IG1lIHRoZSBzdGFydGluZyBwb2ludCBmb3IgZGlnZ2luZyBpbnRvIHRo
-aXMgPwo+IFlvdSBzaG91bGQgdHJ5IHRvIGluY3JlYXNlIHJlYWRfYWhlYWQgdG8gNTEySyBpbnN0
-ZWFkIG9mIHRoZSBkZWZhdWx0cwo+IDEyOEsgKC9zeXMvYmxvY2svKi9xdWV1ZS9yZWFkX2FoZWFk
-X2tiKS4gSSBoYXZlIHNlZW4gYSBodWdlIGRpZmZlcmVuY2UKPiBvbiByZWFkcyB3aXRoIHRoYXQu
-Cj4KT2xpdmllciwKCnRoYW5rcyBhIGxvdCBmb3IgcG9pbnRpbmcgdGhpcyBvdXQsIGl0IGluZGVl
-ZCBtYWtlcyBhICpodWdlKiBkaWZmZXJlbmNlICEKPiAjIGRkIGlmPS9tbnQvdC8xIG9mPS9kZXYv
-emVybyBicz00TSBjb3VudD0xMDAKPiAxMDArMCByZWNvcmRzIGluCj4gMTAwKzAgcmVjb3JkcyBv
-dXQKPiA0MTk0MzA0MDAgYnl0ZXMgKDQxOSBNQikgY29waWVkLCA1LjEyNzY4IHMsIDgxLjggTUIv
-cwooY2FjaGVzIGRyb3BwZWQgYmVmb3JlIGVhY2ggdGVzdCBvZiBjb3Vyc2UpCgpNYXJrLCB0aGlz
-IGlzIHByb2JhYmx5IHNvbWV0aGluZyB5b3Ugd2lsbCB3YW50IHRvIGludmVzdGlnYXRlIGFuZCAK
-ZXhwbGFpbiBpbiBhICJ0d2Vha2luZyIgdG9waWMgb2YgdGhlIGRvY3VtZW50YXRpb24uCgpSZWdh
-cmRzLApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
-LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On 05/13/2013 02:24 PM, Dennis Chen wrote:
+> Hi,
+>
+> If I have an OSD attached by a FC SAN device with the connection like this:
+> OSD HBA-->FC Switch-->SAN storage device.
+>
+> Then Map a LUN in the SAN to the OSD as its only disk device to save
+> data. if I have a client also has an HBA and the topology diagram looks
+> like:
+>
+>                    osd                                         client
+>          -------        -------                            ------- -------
+>         | HBA |      | NIC |  <---------------> | NIC |   | HBA |
+>          ---+---      --------                            ------- -------
+> \                                                            /
+>                    \ /
+>                         \                                   /
+>                                \    --------------
+>                                    | FC Switch |
+>                                     --------------
+>                                            |
+>                                         SAN
+>
+> Suppose the created LUN above for OSD can be accessed by both osd and
+> client though FC I/F, the question is:
+> if I create a rbd block device in osd and map it to client, make a file
+> system and mount it in client side, then create a file in the mounted
+> FS. The read/write operation followed for this file will transfer data
+> though ethernet path or FC path?
+>
+
+That will follow the Ethernet path.
+
+I'm also trying to figure out why you would Ceph here and use RBD? If 
+the client has direct access to the FC, why not have the client access 
+that direcly?
+
+Ceph makes sense when you are running it on multiple fully separated 
+machines, but not if you run it all one one FC SAN imho.
+
+Wido
+
+> BRs,
+> Dennis
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
