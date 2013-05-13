@@ -1,44 +1,177 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [ceph-users] shared images
-Date: Mon, 13 May 2013 09:55:24 -0700
-Message-ID: <CAPYLRzjU6f0HqmKOpX=Ct2WQNCT-ukxYUEVr7VNXSYOpKPW7rA@mail.gmail.com>
-References: <1368461414.21953.4.camel@lde-hro-01>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH] rbd: fix parent request size assumption
+Date: Mon, 13 May 2013 12:58:41 -0500
+Message-ID: <519129D1.7050807@inktank.com>
+References: <518E81E1.2000806@inktank.com> <518E9B84.20100@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:57892 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751052Ab3EMQzZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 12:55:25 -0400
-Received: by mail-lb0-f178.google.com with SMTP id p10so2946168lbv.37
-        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 09:55:24 -0700 (PDT)
-In-Reply-To: <1368461414.21953.4.camel@lde-hro-01>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:34590 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752121Ab3EMR6o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 13:58:44 -0400
+Received: by mail-oa0-f51.google.com with SMTP id f4so7831618oah.24
+        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 10:58:43 -0700 (PDT)
+In-Reply-To: <518E9B84.20100@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Harald_R=F6=DFler?= <Harald.Roessler@btd.de>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, May 13, 2013 at 9:10 AM, Harald R=F6=DFler <Harald.Roessler@btd=
-=2Ede> wrote:
->
-> Hi Together
->
-> is there a description of how a shared image works in detail? Can suc=
-h
-> an image can be used for a shared file system on two virtual machine
-> (KVM) to mount. In my case, write on one machine and read only on the
-> other KVM.Are the changes are visible on the read only KVM?
+I have inserted this patch into a series I posted over the
+weekend to address an issue that Josh's comment raised in
+the review for:
+    [PATCH] rbd: support reading parent page data for writes
+This patch, along with the updated series, is available in the
+"review/wip-flatten-1" branch of the ceph-client git repository.
 
-The image is just striped across RADOS objects. In general you can
-think of it behaving exactly like a hard drive connected to your
-computer over iSCSI =97 a proper shared FS (eg, OCFS2) will work on top
-of it, but there's no magic that makes running an ext4 mount on two
-machines work...
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+
+The code that reads object data from the parent for a copyup on
+write request currently assumes that the size of that request is the
+size of a "full" object from the original target image.
+
+That is not necessarily the case.  The parent overlap could reduce
+the request size below that.  To fix that assumption we need to
+record the number of pages in the copyup_pages array, for both an
+image request and an object request.  Rename a local variable in
+rbd_img_obj_parent_read_full_callback() to reflect we're recording
+the length of the parent read request, not the size of the target
+object.
+
+This resolves:
+    http://tracker.ceph.com/issues/5038
+
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 51c45e7..597b9bb 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -224,6 +224,7 @@ struct rbd_obj_request {
+ 		};
+ 	};
+ 	struct page		**copyup_pages;
++	u32			copyup_page_count;
+
+ 	struct ceph_osd_request	*osd_req;
+
+@@ -256,6 +257,7 @@ struct rbd_img_request {
+ 		struct rbd_obj_request	*obj_request;	/* obj req initiator */
+ 	};
+ 	struct page		**copyup_pages;
++	u32			copyup_page_count;
+ 	spinlock_t		completion_lock;/* protects next_completion */
+ 	u32			next_completion;
+ 	rbd_img_callback_t	callback;
+@@ -2119,7 +2121,7 @@ rbd_img_obj_copyup_callback(struct rbd_obj_request
+*obj_request)
+ {
+ 	struct rbd_img_request *img_request;
+ 	struct rbd_device *rbd_dev;
+-	u64 length;
++	struct page **pages;
+ 	u32 page_count;
+
+ 	rbd_assert(obj_request->type == OBJ_REQUEST_BIO);
+@@ -2129,12 +2131,14 @@ rbd_img_obj_copyup_callback(struct
+rbd_obj_request *obj_request)
+
+ 	rbd_dev = img_request->rbd_dev;
+ 	rbd_assert(rbd_dev);
+-	length = (u64)1 << rbd_dev->header.obj_order;
+-	page_count = (u32)calc_pages_for(0, length);
+
+-	rbd_assert(obj_request->copyup_pages);
+-	ceph_release_page_vector(obj_request->copyup_pages, page_count);
++	pages = obj_request->copyup_pages;
++	rbd_assert(pages != NULL);
+ 	obj_request->copyup_pages = NULL;
++	page_count = obj_request->copyup_page_count;
++	rbd_assert(page_count);
++	obj_request->copyup_page_count = 0;
++	ceph_release_page_vector(pages, page_count);
+
+ 	/*
+ 	 * We want the transfer count to reflect the size of the
+@@ -2158,9 +2162,9 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+ 	struct ceph_osd_client *osdc;
+ 	struct rbd_device *rbd_dev;
+ 	struct page **pages;
++	u32 page_count;
+ 	int result;
+-	u64 obj_size;
+-	u64 xferred;
++	u64 parent_length;
+
+ 	rbd_assert(img_request_child_test(img_request));
+
+@@ -2169,19 +2173,21 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+ 	pages = img_request->copyup_pages;
+ 	rbd_assert(pages != NULL);
+ 	img_request->copyup_pages = NULL;
++	page_count = img_request->copyup_page_count;
++	rbd_assert(page_count);
++	img_request->copyup_page_count = 0;
+
+ 	orig_request = img_request->obj_request;
+ 	rbd_assert(orig_request != NULL);
+ 	rbd_assert(orig_request->type == OBJ_REQUEST_BIO);
+ 	result = img_request->result;
+-	obj_size = img_request->length;
+-	xferred = img_request->xferred;
++	parent_length = img_request->length;
++	rbd_assert(parent_length == img_request->xferred);
+ 	rbd_img_request_put(img_request);
+
+ 	rbd_assert(orig_request->img_request);
+ 	rbd_dev = orig_request->img_request->rbd_dev;
+ 	rbd_assert(rbd_dev);
+-	rbd_assert(obj_size == (u64)1 << rbd_dev->header.obj_order);
+
+ 	if (result)
+ 		goto out_err;
+@@ -2195,11 +2201,12 @@ rbd_img_obj_parent_read_full_callback(struct
+rbd_img_request *img_request)
+ 		goto out_err;
+ 	orig_request->osd_req = osd_req;
+ 	orig_request->copyup_pages = pages;
++	orig_request->copyup_page_count = page_count;
+
+ 	/* Initialize the copyup op */
+
+ 	osd_req_op_cls_init(osd_req, 0, CEPH_OSD_OP_CALL, "rbd", "copyup");
+-	osd_req_op_cls_request_data_pages(osd_req, 0, pages, obj_size, 0,
++	osd_req_op_cls_request_data_pages(osd_req, 0, pages, parent_length, 0,
+ 						false, false);
+
+ 	/* Then the original write request op */
+@@ -2312,6 +2319,7 @@ static int rbd_img_obj_parent_read_full(struct
+rbd_obj_request *obj_request)
+ 	if (result)
+ 		goto out_err;
+ 	parent_request->copyup_pages = pages;
++	parent_request->copyup_page_count = page_count;
+
+ 	parent_request->callback = rbd_img_obj_parent_read_full_callback;
+ 	result = rbd_img_request_submit(parent_request);
+@@ -2319,6 +2327,7 @@ static int rbd_img_obj_parent_read_full(struct
+rbd_obj_request *obj_request)
+ 		return 0;
+
+ 	parent_request->copyup_pages = NULL;
++	parent_request->copyup_page_count = 0;
+ 	parent_request->obj_request = NULL;
+ 	rbd_obj_request_put(obj_request);
+ out_err:
+-- 
+1.7.9.5
+
