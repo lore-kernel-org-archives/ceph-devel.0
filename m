@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: fix parent request size assumption
-Date: Mon, 13 May 2013 11:48:18 -0700
-Message-ID: <51913572.80204@inktank.com>
-References: <518E81E1.2000806@inktank.com> <518E9B84.20100@inktank.com> <519129D1.7050807@inktank.com>
+Subject: Re: [PATCH 1/5, v2] rbd: get parent info on refresh
+Date: Mon, 13 May 2013 12:34:32 -0700
+Message-ID: <51914048.1080007@inktank.com>
+References: <518E831E.6000206@inktank.com> <518E8357.7010506@inktank.com> <518EB11D.9050600@inktank.com> <519129D4.30109@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-da0-f41.google.com ([209.85.210.41]:49293 "EHLO
-	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753593Ab3EMStc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 14:49:32 -0400
-Received: by mail-da0-f41.google.com with SMTP id y19so3782777dan.0
-        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 11:49:31 -0700 (PDT)
-In-Reply-To: <519129D1.7050807@inktank.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:56606 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752841Ab3EMTfp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 15:35:45 -0400
+Received: by mail-pa0-f44.google.com with SMTP id jh10so4887089pab.31
+        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 12:35:44 -0700 (PDT)
+In-Reply-To: <519129D4.30109@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -22,158 +22,184 @@ Cc: ceph-devel@vger.kernel.org
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 05/13/2013 10:58 AM, Alex Elder wrote:
-> I have inserted this patch into a series I posted over the
-> weekend to address an issue that Josh's comment raised in
-> the review for:
->      [PATCH] rbd: support reading parent page data for writes
-> This patch, along with the updated series, is available in the
-> "review/wip-flatten-1" branch of the ceph-client git repository.
+> Get parent info for format 2 images on every refresh (rather than
+> just during the initial probe).  This will be needed to detect the
+> disappearance of the parent image in the event a mapped image
+> becomes unlayered (i.e., flattened).  Avoid leaking the previous
+> parent spec on the second and subsequent times this information is
+> requested by dropping the previous one (if any) before updating it.
+> (Also, extract the pool id into a local variable before assigning
+> it into the parent spec.)
 >
+> Switch to using a non-zero parent overlap value rather than the
+> existence of a parent (a non-null parent_spec pointer) to determine
+> whether to mark a request layered.  It will soon be possible for
+> a layered image to become unlayered while a request is in flight.
 >
+> This means that the layered flag for an image request indicates that
+> there was a non-zero parent overlap at the time the image request
+> was created.  The parent overlap can change thereafter, which may
+> lead to special handling at request submission or completion time.
 >
+> This and the next several patches are related to:
+>      http://tracker.ceph.com/issues/3763
 >
->
-> The code that reads object data from the parent for a copyup on
-> write request currently assumes that the size of that request is the
-> size of a "full" object from the original target image.
->
-> That is not necessarily the case.  The parent overlap could reduce
-> the request size below that.  To fix that assumption we need to
-> record the number of pages in the copyup_pages array, for both an
-> image request and an object request.  Rename a local variable in
-> rbd_img_obj_parent_read_full_callback() to reflect we're recording
-> the length of the parent read request, not the size of the target
-> object.
->
-> This resolves:
->      http://tracker.ceph.com/issues/5038
+> NOTE:
+> If an error occurs while refreshing the parent info (i.e.,
+> requesting it after initial probe), the old parent info will
+> persist.  This is not really correct, and is a scenario that needs
+> to be addressed.  For now we'll assert that the failure mode is
+> unlikely, but the issue has been documented in tracker issue 5040.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   31 ++++++++++++++++++++-----------
->   1 file changed, 20 insertions(+), 11 deletions(-)
+> v2: no longer clean up rbd_dev and header on error in refresh
+>
+>   drivers/block/rbd.c |   67
+> ++++++++++++++++++++++++++++-----------------------
+>   1 file changed, 37 insertions(+), 30 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 51c45e7..597b9bb 100644
+> index b67ecda..fcef63c 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -224,6 +224,7 @@ struct rbd_obj_request {
->   		};
->   	};
->   	struct page		**copyup_pages;
-> +	u32			copyup_page_count;
+> @@ -1873,7 +1873,7 @@ static struct rbd_img_request *rbd_img_request_create(
+>   	}
+>   	if (child_request)
+>   		img_request_child_set(img_request);
+> -	if (rbd_dev->parent_spec)
+> +	if (rbd_dev->parent_overlap)
+>   		img_request_layered_set(img_request);
+>   	spin_lock_init(&img_request->completion_lock);
+>   	img_request->next_completion = 0;
+> @@ -3613,6 +3613,7 @@ static int rbd_dev_v2_parent_info(struct
+> rbd_device *rbd_dev)
+>   	__le64 snapid;
+>   	void *p;
+>   	void *end;
+> +	u64 pool_id;
+>   	char *image_id;
+>   	u64 overlap;
+>   	int ret;
+> @@ -3643,18 +3644,19 @@ static int rbd_dev_v2_parent_info(struct
+> rbd_device *rbd_dev)
+>   	p = reply_buf;
+>   	end = reply_buf + ret;
+>   	ret = -ERANGE;
+> -	ceph_decode_64_safe(&p, end, parent_spec->pool_id, out_err);
+> -	if (parent_spec->pool_id == CEPH_NOPOOL)
+> +	ceph_decode_64_safe(&p, end, pool_id, out_err);
+> +	if (pool_id == CEPH_NOPOOL)
+>   		goto out;	/* No parent?  No problem. */
 >
->   	struct ceph_osd_request	*osd_req;
+>   	/* The ceph file layout needs to fit pool id in 32 bits */
 >
-> @@ -256,6 +257,7 @@ struct rbd_img_request {
->   		struct rbd_obj_request	*obj_request;	/* obj req initiator */
->   	};
->   	struct page		**copyup_pages;
-> +	u32			copyup_page_count;
->   	spinlock_t		completion_lock;/* protects next_completion */
->   	u32			next_completion;
->   	rbd_img_callback_t	callback;
-> @@ -2119,7 +2121,7 @@ rbd_img_obj_copyup_callback(struct rbd_obj_request
-> *obj_request)
->   {
->   	struct rbd_img_request *img_request;
->   	struct rbd_device *rbd_dev;
-> -	u64 length;
-> +	struct page **pages;
->   	u32 page_count;
->
->   	rbd_assert(obj_request->type == OBJ_REQUEST_BIO);
-> @@ -2129,12 +2131,14 @@ rbd_img_obj_copyup_callback(struct
-> rbd_obj_request *obj_request)
->
->   	rbd_dev = img_request->rbd_dev;
->   	rbd_assert(rbd_dev);
-> -	length = (u64)1 << rbd_dev->header.obj_order;
-> -	page_count = (u32)calc_pages_for(0, length);
->
-> -	rbd_assert(obj_request->copyup_pages);
-> -	ceph_release_page_vector(obj_request->copyup_pages, page_count);
-> +	pages = obj_request->copyup_pages;
-> +	rbd_assert(pages != NULL);
->   	obj_request->copyup_pages = NULL;
-> +	page_count = obj_request->copyup_page_count;
-> +	rbd_assert(page_count);
-> +	obj_request->copyup_page_count = 0;
-> +	ceph_release_page_vector(pages, page_count);
->
->   	/*
->   	 * We want the transfer count to reflect the size of the
-> @@ -2158,9 +2162,9 @@ rbd_img_obj_parent_read_full_callback(struct
-> rbd_img_request *img_request)
->   	struct ceph_osd_client *osdc;
->   	struct rbd_device *rbd_dev;
->   	struct page **pages;
-> +	u32 page_count;
->   	int result;
-> -	u64 obj_size;
-> -	u64 xferred;
-> +	u64 parent_length;
->
->   	rbd_assert(img_request_child_test(img_request));
->
-> @@ -2169,19 +2173,21 @@ rbd_img_obj_parent_read_full_callback(struct
-> rbd_img_request *img_request)
->   	pages = img_request->copyup_pages;
->   	rbd_assert(pages != NULL);
->   	img_request->copyup_pages = NULL;
-> +	page_count = img_request->copyup_page_count;
-> +	rbd_assert(page_count);
-> +	img_request->copyup_page_count = 0;
->
->   	orig_request = img_request->obj_request;
->   	rbd_assert(orig_request != NULL);
->   	rbd_assert(orig_request->type == OBJ_REQUEST_BIO);
->   	result = img_request->result;
-> -	obj_size = img_request->length;
-> -	xferred = img_request->xferred;
-> +	parent_length = img_request->length;
-> +	rbd_assert(parent_length == img_request->xferred);
->   	rbd_img_request_put(img_request);
->
->   	rbd_assert(orig_request->img_request);
->   	rbd_dev = orig_request->img_request->rbd_dev;
->   	rbd_assert(rbd_dev);
-> -	rbd_assert(obj_size == (u64)1 << rbd_dev->header.obj_order);
->
->   	if (result)
+>   	ret = -EIO;
+> -	if (parent_spec->pool_id > (u64)U32_MAX) {
+> +	if (pool_id > (u64)U32_MAX) {
+>   		rbd_warn(NULL, "parent pool id too large (%llu > %u)\n",
+> -			(unsigned long long)parent_spec->pool_id, U32_MAX);
+> +			(unsigned long long)pool_id, U32_MAX);
 >   		goto out_err;
-> @@ -2195,11 +2201,12 @@ rbd_img_obj_parent_read_full_callback(struct
-> rbd_img_request *img_request)
+>   	}
+> +	parent_spec->pool_id = pool_id;
+>
+>   	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
+>   	if (IS_ERR(image_id)) {
+> @@ -3666,6 +3668,7 @@ static int rbd_dev_v2_parent_info(struct
+> rbd_device *rbd_dev)
+>   	ceph_decode_64_safe(&p, end, overlap, out_err);
+>
+>   	if (overlap) {
+> +		rbd_spec_put(rbd_dev->parent_spec);
+>   		rbd_dev->parent_spec = parent_spec;
+>   		parent_spec = NULL;	/* rbd_dev now owns this */
+>   		rbd_dev->parent_overlap = overlap;
+> @@ -4034,17 +4037,43 @@ static int rbd_dev_v2_header_info(struct
+> rbd_device *rbd_dev)
+>   			goto out;
+>   	}
+>
+> +	/*
+> +	 * If the image supports layering, get the parent info.  We
+> +	 * need to probe the first time regardless.  Thereafter we
+> +	 * only need to if there's a parent, to see if it has
+> +	 * disappeared due to the mapped image getting flattened.
+> +	 */
+> +	if (rbd_dev->header.features & RBD_FEATURE_LAYERING &&
+> +			(first_time || rbd_dev->parent_spec)) {
+> +		bool warn;
+> +
+> +		ret = rbd_dev_v2_parent_info(rbd_dev);
+> +		if (ret)
+> +			goto out;
+> +
+> +		/*
+> +		 * Print a warning if this is the initial probe and
+> +		 * the image has a parent.  Don't print it if the
+> +		 * image now being probed is itself a parent.  We
+> +		 * can tell at this point because we won't know its
+> +		 * pool name yet (just its pool id).
+> +		 */
+> +		warn = rbd_dev->parent_spec && rbd_dev->spec->pool_name;
+> +		if (first_time && warn)
+> +			rbd_warn(rbd_dev, "WARNING: kernel layering "
+> +					"is EXPERIMENTAL!");
+> +	}
+> +
+>   	ret = rbd_dev_v2_image_size(rbd_dev);
+>   	if (ret)
+>   		goto out;
+> +
+>   	if (rbd_dev->spec->snap_id == CEPH_NOSNAP)
+>   		if (rbd_dev->mapping.size != rbd_dev->header.image_size)
+>   			rbd_dev->mapping.size = rbd_dev->header.image_size;
+>
+>   	ret = rbd_dev_v2_snap_context(rbd_dev);
+>   	dout("rbd_dev_v2_snap_context returned %d\n", ret);
+> -	if (ret)
+> -		goto out;
+>   out:
+>   	up_write(&rbd_dev->header_rwsem);
+>
+> @@ -4498,24 +4527,6 @@ static int rbd_dev_v2_header_onetime(struct
+> rbd_device *rbd_dev)
+>   	if (ret)
 >   		goto out_err;
->   	orig_request->osd_req = osd_req;
->   	orig_request->copyup_pages = pages;
-> +	orig_request->copyup_page_count = page_count;
 >
->   	/* Initialize the copyup op */
+> -	/* If the image supports layering, get the parent info */
+> -
+> -	if (rbd_dev->header.features & RBD_FEATURE_LAYERING) {
+> -		ret = rbd_dev_v2_parent_info(rbd_dev);
+> -		if (ret)
+> -			goto out_err;
+> -		/*
+> -		 * Print a warning if this image has a parent.
+> -		 * Don't print it if the image now being probed
+> -		 * is itself a parent.  We can tell at this point
+> -		 * because we won't know its pool name yet (just its
+> -		 * pool id).
+> -		 */
+> -		if (rbd_dev->parent_spec && rbd_dev->spec->pool_name)
+> -			rbd_warn(rbd_dev, "WARNING: kernel layering "
+> -					"is EXPERIMENTAL!");
+> -	}
+> -
+>   	/* If the image supports fancy striping, get its parameters */
 >
->   	osd_req_op_cls_init(osd_req, 0, CEPH_OSD_OP_CALL, "rbd", "copyup");
-> -	osd_req_op_cls_request_data_pages(osd_req, 0, pages, obj_size, 0,
-> +	osd_req_op_cls_request_data_pages(osd_req, 0, pages, parent_length, 0,
->   						false, false);
+>   	if (rbd_dev->header.features & RBD_FEATURE_STRIPINGV2) {
+> @@ -4527,11 +4538,7 @@ static int rbd_dev_v2_header_onetime(struct
+> rbd_device *rbd_dev)
 >
->   	/* Then the original write request op */
-> @@ -2312,6 +2319,7 @@ static int rbd_img_obj_parent_read_full(struct
-> rbd_obj_request *obj_request)
->   	if (result)
->   		goto out_err;
->   	parent_request->copyup_pages = pages;
-> +	parent_request->copyup_page_count = page_count;
->
->   	parent_request->callback = rbd_img_obj_parent_read_full_callback;
->   	result = rbd_img_request_submit(parent_request);
-> @@ -2319,6 +2327,7 @@ static int rbd_img_obj_parent_read_full(struct
-> rbd_obj_request *obj_request)
->   		return 0;
->
->   	parent_request->copyup_pages = NULL;
-> +	parent_request->copyup_page_count = 0;
->   	parent_request->obj_request = NULL;
->   	rbd_obj_request_put(obj_request);
+>   	return 0;
 >   out_err:
+> -	rbd_dev->parent_overlap = 0;
+> -	rbd_spec_put(rbd_dev->parent_spec);
+> -	rbd_dev->parent_spec = NULL;
+> -	kfree(rbd_dev->header_name);
+> -	rbd_dev->header_name = NULL;
+> +	rbd_dev->header.features = 0;
+>   	kfree(rbd_dev->header.object_prefix);
+>   	rbd_dev->header.object_prefix = NULL;
 >
 
