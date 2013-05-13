@@ -1,163 +1,113 @@
-From: Rick Richardson <rick.richardson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: e release
-Date: Mon, 13 May 2013 09:32:23 -0400
-Message-ID: <CA+kMGwCfpfeheER99A6h33wNjv6BdxvCG2DWK59MND4sd_BFRQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1305101117090.27355@cobra.newdream.net>
-	<CABZ+qqmKMN2rr4aFRNOPGL+Og8sqfygZPf1N+sim25-KbD8JxQ@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: [ceph-users] RBD vs RADOS benchmark performance
+Date: Mon, 13 May 2013 08:55:42 -0500
+Message-ID: <5190F0DE.8010604@inktank.com>
+References: <518D2B76.9040706@itooo.com> <1368423516.6771.2.camel@localhost> <5190DBD9.9070500@itooo.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0568619953=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqmKMN2rr4aFRNOPGL+Og8sqfygZPf1N+sim25-KbD8JxQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:62268 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751436Ab3EMNzn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 09:55:43 -0400
+Received: by mail-ob0-f169.google.com with SMTP id vb8so680872obc.28
+        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 06:55:42 -0700 (PDT)
+In-Reply-To: <5190DBD9.9070500@itooo.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Greg <itooo@itooo.com>
+Cc: ceph-devel@vger.kernel.org, Olivier Bonvalet <ceph.list@daevel.fr>, ceph-users@ceph.com
 
---===============0568619953==
-Content-Type: multipart/alternative; boundary=f46d04430642fd55a104dc998b80
-
---f46d04430642fd55a104dc998b80
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-This might be taking some artistic license, but "Elegant Eledone " has a
-nice ring to it.
- On May 13, 2013 3:42 AM, "Dan van der Ster" <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
-
-> On Fri, May 10, 2013 at 8:31 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > So far I've found
-> > a few latin names, but the main problem is that I can't find a single
-> > large list of species with the common names listed.
+On 05/13/2013 07:26 AM, Greg wrote:
+> Le 13/05/2013 07:38, Olivier Bonvalet a =C3=A9crit :
+>> Le vendredi 10 mai 2013 =C3=A0 19:16 +0200, Greg a =C3=A9crit :
+>>> Hello folks,
+>>>
+>>> I'm in the process of testing CEPH and RBD, I have set up a small
+>>> cluster of  hosts running each a MON and an OSD with both journal a=
+nd
+>>> data on the same SSD (ok this is stupid but this is simple to verif=
+y the
+>>> disks are not the bottleneck for 1 client). All nodes are connected=
+ on a
+>>> 1Gb network (no dedicated network for OSDs, shame on me :).
+>>>
+>>> Summary : the RBD performance is poor compared to benchmark
+>>>
+>>> A 5 seconds seq read benchmark shows something like this :
+>>>>     sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat
+>>>> avg lat
+>>>>       0       0         0         0         0 0         -         =
+0
+>>>>       1      16        39        23   91.9586        92 0.966117
+>>>> 0.431249
+>>>>       2      16        64        48   95.9602       100 0.513435
+>>>> 0.53849
+>>>>       3      16        90        74   98.6317       104 0.25631
+>>>> 0.55494
+>>>>       4      11        95        84   83.9735        40 1.80038
+>>>> 0.58712
+>>>>   Total time run:        4.165747
+>>>> Total reads made:     95
+>>>> Read size:            4194304
+>>>> Bandwidth (MB/sec):    91.220
+>>>>
+>>>> Average Latency:       0.678901
+>>>> Max latency:           1.80038
+>>>> Min latency:           0.104719
+>>> 91MB read performance, quite good !
+>>>
+>>> Now the RBD performance :
+>>>> root@client:~# dd if=3D/dev/rbd1 of=3D/dev/null bs=3D4M count=3D10=
+0
+>>>> 100+0 records in
+>>>> 100+0 records out
+>>>> 419430400 bytes (419 MB) copied, 13.0568 s, 32.1 MB/s
+>>> There is a 3x performance factor (same for write: ~60M benchmark, ~=
+20M
+>>> dd on block device)
+>>>
+>>> The network is ok, the CPU is also ok on all OSDs.
+>>> CEPH is Bobtail 0.56.4, linux is 3.8.1 arm (vanilla release + some
+>>> patches for the SoC being used)
+>>>
+>>> Can you show me the starting point for digging into this ?
+>> You should try to increase read_ahead to 512K instead of the default=
+s
+>> 128K (/sys/block/*/queue/read_ahead_kb). I have seen a huge differen=
+ce
+>> on reads with that.
+>>
+> Olivier,
 >
-> Go here: http://www.marinespecies.org/aphia.php?p=3Dsearch
-> Search for common name begins with e
-> Taxon rank lower or equal to Class
-> Limit to
-> taxa belonging to Cephalopoda.
+> thanks a lot for pointing this out, it indeed makes a *huge* differen=
+ce !
+>> # dd if=3D/mnt/t/1 of=3D/dev/zero bs=3D4M count=3D100
+>> 100+0 records in
+>> 100+0 records out
+>> 419430400 bytes (419 MB) copied, 5.12768 s, 81.8 MB/s
+> (caches dropped before each test of course)
 >
-> Then you'll get:
+> Mark, this is probably something you will want to investigate and
+> explain in a "tweaking" topic of the documentation.
 >
-> East Pacific red octopus
-> el=E9done
-> el=E9done
-> elegant bobtail
-> elegant bobtail squid
-> elegant cuttlefish
-> elongate jewell squid
-> emperor nautilus
-> encornet
-> encornet de Forbes
-> encornet oiseau
-> encornet vein=E8
-> encornet volant
-> esp=EDrula
-> Europ=E6isk loligo
-> European common squid
-> European common squid
-> European flying squid
-> European squid
-> eye-flash squid
->
-> Also found some latin not yet posted:
->
-> "Ellesmere" - http://en.wikipedia.org/wiki/Ellesmerocerida
-> "Endo" - http://en.wikipedia.org/wiki/Endocerida
->
-> --
-> Dan
-> CERN IT
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> Regards,
 
---f46d04430642fd55a104dc998b80
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Out of curiosity, has your rados bench performance improved as well?=20
+We've also seen improvements for sequential read throughput when=20
+increasing read_ahead_kb. (it may decrease random iops in some cases=20
+though!)  The reason I didn't think to mention it here though is becaus=
+e=20
+I was just focused on the difference between rados bench and rbd.  It=20
+would be interesting to know if rbd has improved more dramatically than=
+=20
+rados bench.
 
-<p>This might be taking some artistic license, but &quot;Elegant Eledone &q=
-uot; has a nice ring to it. <br>
-</p>
-<div class=3D"gmail_quote">On May 13, 2013 3:42 AM, &quot;Dan van der Ster&=
-quot; &lt;<a href=3D"mailto:dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org">dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org</a>&gt; =
-wrote:<br type=3D"attribution"><blockquote class=3D"gmail_quote" style=3D"m=
-argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-On Fri, May 10, 2013 at 8:31 PM, Sage Weil &lt;<a href=3D"mailto:sage@inkta=
-nk.com">sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt; wrote:<br>
-&gt; So far I&#39;ve found<br>
-&gt; a few latin names, but the main problem is that I can&#39;t find a sin=
-gle<br>
-&gt; large list of species with the common names listed.<br>
-<br>
-Go here: <a href=3D"http://www.marinespecies.org/aphia.php?p=3Dsearch" targ=
-et=3D"_blank">http://www.marinespecies.org/aphia.php?p=3Dsearch</a><br>
-Search for common name begins with e<br>
-Taxon rank lower or equal to Class<br>
-Limit to<br>
-taxa belonging to Cephalopoda.<br>
-<br>
-Then you&#39;ll get:<br>
-<br>
-East Pacific red octopus<br>
-el=E9done<br>
-el=E9done<br>
-elegant bobtail<br>
-elegant bobtail squid<br>
-elegant cuttlefish<br>
-elongate jewell squid<br>
-emperor nautilus<br>
-encornet<br>
-encornet de Forbes<br>
-encornet oiseau<br>
-encornet vein=E8<br>
-encornet volant<br>
-esp=EDrula<br>
-Europ=E6isk loligo<br>
-European common squid<br>
-European common squid<br>
-European flying squid<br>
-European squid<br>
-eye-flash squid<br>
-<br>
-Also found some latin not yet posted:<br>
-<br>
-&quot;Ellesmere&quot; - <a href=3D"http://en.wikipedia.org/wiki/Ellesmeroce=
-rida" target=3D"_blank">http://en.wikipedia.org/wiki/Ellesmerocerida</a><br=
->
-&quot;Endo&quot; - <a href=3D"http://en.wikipedia.org/wiki/Endocerida" targ=
-et=3D"_blank">http://en.wikipedia.org/wiki/Endocerida</a><br>
-<br>
---<br>
-Dan<br>
-CERN IT<br>
---<br>
-To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
-uot; in<br>
-the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">major=
-domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
-More majordomo info at =A0<a href=3D"http://vger.kernel.org/majordomo-info.=
-html" target=3D"_blank">http://vger.kernel.org/majordomo-info.html</a><br>
-</blockquote></div>
-
---f46d04430642fd55a104dc998b80--
-
---===============0568619953==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0568619953==--
+Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
