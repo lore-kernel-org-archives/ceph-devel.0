@@ -1,55 +1,75 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: [PATCH] rbd: fix leak of format 2 snapshot context
-Date: Tue, 07 May 2013 07:12:01 -0700
-Message-ID: <3e7468bd-dbc0-4896-b0d5-b3cda700b91f@email.android.com>
-References: <518859F7.8060708@inktank.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: [ceph-users] e release
+Date: Mon, 13 May 2013 09:33:37 +0200
+Message-ID: <CABZ+qqmKMN2rr4aFRNOPGL+Og8sqfygZPf1N+sim25-KbD8JxQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1305101117090.27355@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:54672 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750859Ab3ELWcX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 May 2013 18:32:23 -0400
-In-Reply-To: <518859F7.8060708@inktank.com>
+Received: from mail-da0-f51.google.com ([209.85.210.51]:43311 "EHLO
+	mail-da0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754066Ab3EMHeV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 May 2013 03:34:21 -0400
+Received: by mail-da0-f51.google.com with SMTP id h15so1276482dan.38
+        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 00:34:21 -0700 (PDT)
+Received: from mail-pa0-f43.google.com (mail-pa0-f43.google.com [209.85.220.43])
+        by mx.google.com with ESMTPSA id zy5sm12950609pbb.43.2013.05.13.00.34.18
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Mon, 13 May 2013 00:34:19 -0700 (PDT)
+Received: by mail-pa0-f43.google.com with SMTP id hz10so4451041pad.16
+        for <ceph-devel@vger.kernel.org>; Mon, 13 May 2013 00:34:17 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1305101117090.27355@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
 
-Alex Elder <elder@inktank.com> wrote:
+On Fri, May 10, 2013 at 8:31 PM, Sage Weil <sage@inktank.com> wrote:
+> So far I've found
+> a few latin names, but the main problem is that I can't find a single
+> large list of species with the common names listed.
 
->When rbd_dev_v2_refresh() is called, the rbd device already has a
->snapshot context associated with it.  But that never gets freed,
->the pointer just gets overwritten.
->
->Fix this by dropping the rbd device's reference to the snapshot
->context before overwriting the pointer.
->
->Because ceph_put_snap_context() already handles for a null pointer
->we don't need to check for that (for the probe case, where no
->context has yet been assigned).
->
->This resolves:
->    http://tracker.ceph.com/issues/4912
->
->Signed-off-by: Alex Elder <elder@inktank.com>
->---
-> drivers/block/rbd.c |    1 +
-> 1 file changed, 1 insertion(+)
->
->diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->index c2ca181..4263743 100644
->--- a/drivers/block/rbd.c
->+++ b/drivers/block/rbd.c
->@@ -4004,6 +4004,7 @@ static int rbd_dev_v2_snap_context(struct
->rbd_device *rbd_dev)
-> 	for (i = 0; i < snap_count; i++)
-> 		snapc->snaps[i] = ceph_decode_64(&p);
->
->+	ceph_put_snap_context(rbd_dev->header.snapc);
-> 	rbd_dev->header.snapc = snapc;
->
-> 	dout("  snap context seq = %llu, snap_count = %u\n",
+Go here: http://www.marinespecies.org/aphia.php?p=3Dsearch
+Search for common name begins with e
+Taxon rank lower or equal to Class
+Limit to
+taxa belonging to Cephalopoda.
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Then you'll get:
+
+East Pacific red octopus
+el=E9done
+el=E9done
+elegant bobtail
+elegant bobtail squid
+elegant cuttlefish
+elongate jewell squid
+emperor nautilus
+encornet
+encornet de Forbes
+encornet oiseau
+encornet vein=E8
+encornet volant
+esp=EDrula
+Europ=E6isk loligo
+European common squid
+European common squid
+European flying squid
+European squid
+eye-flash squid
+
+Also found some latin not yet posted:
+
+"Ellesmere" - http://en.wikipedia.org/wiki/Ellesmerocerida
+"Endo" - http://en.wikipedia.org/wiki/Endocerida
+
+--
+Dan
+CERN IT
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
