@@ -1,15 +1,15 @@
-From: Greg <itooo-xVucS5mfmt0AvxtiuMwx3w@public.gmane.org>
+From: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: RBD vs RADOS benchmark performance
-Date: Mon, 13 May 2013 17:10:37 +0200
-Message-ID: <5191026D.4030004@itooo.com>
+Date: Mon, 13 May 2013 10:17:20 -0500
+Message-ID: <51910400.9080607@inktank.com>
 References: <518D2B76.9040706@itooo.com> <1368423516.6771.2.camel@localhost>
-	<5190DBD9.9070500@itooo.com>
-	<CAJH6TXhcgNOLE53eJoJamwE3i-FSfBf9LzpRACHwp_hEriH5zA@mail.gmail.com>
+	<5190DBD9.9070500@itooo.com> <5190F0DE.8010604@inktank.com>
+	<5190FE49.1030307@itooo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJH6TXhcgNOLE53eJoJamwE3i-FSfBf9LzpRACHwp_hEriH5zA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <5190FE49.1030307-xVucS5mfmt0AvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -19,24 +19,83 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Gandalf Corvotempesta <gandalf.corvotempesta-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: Greg <itooo-xVucS5mfmt0AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Le 13/05/2013 17:01, Gandalf Corvotempesta a =E9crit :
-> 2013/5/13 Greg <itooo-xVucS5mfmt0AvxtiuMwx3w@public.gmane.org>:
->> thanks a lot for pointing this out, it indeed makes a *huge* difference !
->>> # dd if=3D/mnt/t/1 of=3D/dev/zero bs=3D4M count=3D100
->>>
->>> 100+0 records in
->>> 100+0 records out
->>> 419430400 bytes (419 MB) copied, 5.12768 s, 81.8 MB/s
->> (caches dropped before each test of course)
-> What if you set 1024 or greater value ?
-> Is bandwidth relative to the read ahead size?
-Setting the value too high degrades performance, especially random IO =
-
-performance.
-You have to determine  the right choice for your usage.
-
-Cheers,
+T24gMDUvMTMvMjAxMyAwOTo1MiBBTSwgR3JlZyB3cm90ZToKPiBMZSAxMy8wNS8yMDEzIDE1OjU1
+LCBNYXJrIE5lbHNvbiBhIMOpY3JpdCA6Cj4+IE9uIDA1LzEzLzIwMTMgMDc6MjYgQU0sIEdyZWcg
+d3JvdGU6Cj4+PiBMZSAxMy8wNS8yMDEzIDA3OjM4LCBPbGl2aWVyIEJvbnZhbGV0IGEgw6ljcml0
+IDoKPj4+PiBMZSB2ZW5kcmVkaSAxMCBtYWkgMjAxMyDDoCAxOToxNiArMDIwMCwgR3JlZyBhIMOp
+Y3JpdCA6Cj4+Pj4+IEhlbGxvIGZvbGtzLAo+Pj4+Pgo+Pj4+PiBJJ20gaW4gdGhlIHByb2Nlc3Mg
+b2YgdGVzdGluZyBDRVBIIGFuZCBSQkQsIEkgaGF2ZSBzZXQgdXAgYSBzbWFsbAo+Pj4+PiBjbHVz
+dGVyIG9mICBob3N0cyBydW5uaW5nIGVhY2ggYSBNT04gYW5kIGFuIE9TRCB3aXRoIGJvdGggam91
+cm5hbCBhbmQKPj4+Pj4gZGF0YSBvbiB0aGUgc2FtZSBTU0QgKG9rIHRoaXMgaXMgc3R1cGlkIGJ1
+dCB0aGlzIGlzIHNpbXBsZSB0bwo+Pj4+PiB2ZXJpZnkgdGhlCj4+Pj4+IGRpc2tzIGFyZSBub3Qg
+dGhlIGJvdHRsZW5lY2sgZm9yIDEgY2xpZW50KS4gQWxsIG5vZGVzIGFyZSBjb25uZWN0ZWQKPj4+
+Pj4gb24gYQo+Pj4+PiAxR2IgbmV0d29yayAobm8gZGVkaWNhdGVkIG5ldHdvcmsgZm9yIE9TRHMs
+IHNoYW1lIG9uIG1lIDopLgo+Pj4+Pgo+Pj4+PiBTdW1tYXJ5IDogdGhlIFJCRCBwZXJmb3JtYW5j
+ZSBpcyBwb29yIGNvbXBhcmVkIHRvIGJlbmNobWFyawo+Pj4+Pgo+Pj4+PiBBIDUgc2Vjb25kcyBz
+ZXEgcmVhZCBiZW5jaG1hcmsgc2hvd3Mgc29tZXRoaW5nIGxpa2UgdGhpcyA6Cj4+Pj4+PiAgICAg
+c2VjIEN1ciBvcHMgICBzdGFydGVkICBmaW5pc2hlZCBhdmcgTUIvcyAgY3VyIE1CL3MgIGxhc3Qg
+bGF0Cj4+Pj4+PiBhdmcgbGF0Cj4+Pj4+PiAgICAgICAwICAgICAgIDAgICAgICAgICAwICAgICAg
+ICAgMCAgICAgICAgIDAgMCAtICAgICAgICAgMAo+Pj4+Pj4gICAgICAgMSAgICAgIDE2ICAgICAg
+ICAzOSAgICAgICAgMjMgICA5MS45NTg2ICAgICAgICA5MiAwLjk2NjExNwo+Pj4+Pj4gMC40MzEy
+NDkKPj4+Pj4+ICAgICAgIDIgICAgICAxNiAgICAgICAgNjQgICAgICAgIDQ4ICAgOTUuOTYwMiAg
+ICAgICAxMDAgMC41MTM0MzUKPj4+Pj4+IDAuNTM4NDkKPj4+Pj4+ICAgICAgIDMgICAgICAxNiAg
+ICAgICAgOTAgICAgICAgIDc0ICAgOTguNjMxNyAgICAgICAxMDQgMC4yNTYzMQo+Pj4+Pj4gMC41
+NTQ5NAo+Pj4+Pj4gICAgICAgNCAgICAgIDExICAgICAgICA5NSAgICAgICAgODQgICA4My45NzM1
+ICAgICAgICA0MCAxLjgwMDM4Cj4+Pj4+PiAwLjU4NzEyCj4+Pj4+PiAgIFRvdGFsIHRpbWUgcnVu
+OiAgICAgICAgNC4xNjU3NDcKPj4+Pj4+IFRvdGFsIHJlYWRzIG1hZGU6ICAgICA5NQo+Pj4+Pj4g
+UmVhZCBzaXplOiAgICAgICAgICAgIDQxOTQzMDQKPj4+Pj4+IEJhbmR3aWR0aCAoTUIvc2VjKTog
+ICAgOTEuMjIwCj4+Pj4+Pgo+Pj4+Pj4gQXZlcmFnZSBMYXRlbmN5OiAgICAgICAwLjY3ODkwMQo+
+Pj4+Pj4gTWF4IGxhdGVuY3k6ICAgICAgICAgICAxLjgwMDM4Cj4+Pj4+PiBNaW4gbGF0ZW5jeTog
+ICAgICAgICAgIDAuMTA0NzE5Cj4+Pj4+IDkxTUIgcmVhZCBwZXJmb3JtYW5jZSwgcXVpdGUgZ29v
+ZCAhCj4+Pj4+Cj4+Pj4+IE5vdyB0aGUgUkJEIHBlcmZvcm1hbmNlIDoKPj4+Pj4+IHJvb3RAY2xp
+ZW50On4jIGRkIGlmPS9kZXYvcmJkMSBvZj0vZGV2L251bGwgYnM9NE0gY291bnQ9MTAwCj4+Pj4+
+PiAxMDArMCByZWNvcmRzIGluCj4+Pj4+PiAxMDArMCByZWNvcmRzIG91dAo+Pj4+Pj4gNDE5NDMw
+NDAwIGJ5dGVzICg0MTkgTUIpIGNvcGllZCwgMTMuMDU2OCBzLCAzMi4xIE1CL3MKPj4+Pj4gVGhl
+cmUgaXMgYSAzeCBwZXJmb3JtYW5jZSBmYWN0b3IgKHNhbWUgZm9yIHdyaXRlOiB+NjBNIGJlbmNo
+bWFyaywgfjIwTQo+Pj4+PiBkZCBvbiBibG9jayBkZXZpY2UpCj4+Pj4+Cj4+Pj4+IFRoZSBuZXR3
+b3JrIGlzIG9rLCB0aGUgQ1BVIGlzIGFsc28gb2sgb24gYWxsIE9TRHMuCj4+Pj4+IENFUEggaXMg
+Qm9idGFpbCAwLjU2LjQsIGxpbnV4IGlzIDMuOC4xIGFybSAodmFuaWxsYSByZWxlYXNlICsgc29t
+ZQo+Pj4+PiBwYXRjaGVzIGZvciB0aGUgU29DIGJlaW5nIHVzZWQpCj4+Pj4+Cj4+Pj4+IENhbiB5
+b3Ugc2hvdyBtZSB0aGUgc3RhcnRpbmcgcG9pbnQgZm9yIGRpZ2dpbmcgaW50byB0aGlzID8KPj4+
+PiBZb3Ugc2hvdWxkIHRyeSB0byBpbmNyZWFzZSByZWFkX2FoZWFkIHRvIDUxMksgaW5zdGVhZCBv
+ZiB0aGUgZGVmYXVsdHMKPj4+PiAxMjhLICgvc3lzL2Jsb2NrLyovcXVldWUvcmVhZF9haGVhZF9r
+YikuIEkgaGF2ZSBzZWVuIGEgaHVnZSBkaWZmZXJlbmNlCj4+Pj4gb24gcmVhZHMgd2l0aCB0aGF0
+Lgo+Pj4+Cj4+PiBPbGl2aWVyLAo+Pj4KPj4+IHRoYW5rcyBhIGxvdCBmb3IgcG9pbnRpbmcgdGhp
+cyBvdXQsIGl0IGluZGVlZCBtYWtlcyBhICpodWdlKgo+Pj4gZGlmZmVyZW5jZSAhCj4+Pj4gIyBk
+ZCBpZj0vbW50L3QvMSBvZj0vZGV2L3plcm8gYnM9NE0gY291bnQ9MTAwCj4+Pj4gMTAwKzAgcmVj
+b3JkcyBpbgo+Pj4+IDEwMCswIHJlY29yZHMgb3V0Cj4+Pj4gNDE5NDMwNDAwIGJ5dGVzICg0MTkg
+TUIpIGNvcGllZCwgNS4xMjc2OCBzLCA4MS44IE1CL3MKPj4+IChjYWNoZXMgZHJvcHBlZCBiZWZv
+cmUgZWFjaCB0ZXN0IG9mIGNvdXJzZSkKPj4+Cj4+PiBNYXJrLCB0aGlzIGlzIHByb2JhYmx5IHNv
+bWV0aGluZyB5b3Ugd2lsbCB3YW50IHRvIGludmVzdGlnYXRlIGFuZAo+Pj4gZXhwbGFpbiBpbiBh
+ICJ0d2Vha2luZyIgdG9waWMgb2YgdGhlIGRvY3VtZW50YXRpb24uCj4+Pgo+Pj4gUmVnYXJkcywK
+Pj4KPj4gT3V0IG9mIGN1cmlvc2l0eSwgaGFzIHlvdXIgcmFkb3MgYmVuY2ggcGVyZm9ybWFuY2Ug
+aW1wcm92ZWQgYXMgd2VsbD8KPj4gV2UndmUgYWxzbyBzZWVuIGltcHJvdmVtZW50cyBmb3Igc2Vx
+dWVudGlhbCByZWFkIHRocm91Z2hwdXQgd2hlbgo+PiBpbmNyZWFzaW5nIHJlYWRfYWhlYWRfa2Iu
+IChpdCBtYXkgZGVjcmVhc2UgcmFuZG9tIGlvcHMgaW4gc29tZSBjYXNlcwo+PiB0aG91Z2ghKSAg
+VGhlIHJlYXNvbiBJIGRpZG4ndCB0aGluayB0byBtZW50aW9uIGl0IGhlcmUgdGhvdWdoIGlzCj4+
+IGJlY2F1c2UgSSB3YXMganVzdCBmb2N1c2VkIG9uIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gcmFk
+b3MgYmVuY2ggYW5kCj4+IHJiZC4gIEl0IHdvdWxkIGJlIGludGVyZXN0aW5nIHRvIGtub3cgaWYg
+cmJkIGhhcyBpbXByb3ZlZCBtb3JlCj4+IGRyYW1hdGljYWxseSB0aGFuIHJhZG9zIGJlbmNoLgo+
+IE1hcmssIHRoZSByZWFkIGFoZWFkIGlzIHNldCBvbiB0aGUgUkJEIGJsb2NrIGRldmljZSAob24g
+dGhlIGNsaWVudCksIHNvCj4gaXQgZG9lc24ndCBpbXByb3ZlIGJlbmNobWFyayByZXN1bHRzIGFz
+IHRoZSBiZW5jaG1hcmsgZG9lc24ndCB1c2UgdGhlCj4gYmxvY2sgbGF5ZXIuCgpBaCwgSSB3YXMg
+dGhpbmtpbmcgeW91IGhhZCBpbmNyZWFzZWQgaXQgb24gdGhlIE9TRHMgKHdoaWNoIGNhbiBhbHNv
+IApoZWxwKS4gIE9uIHRoZSBPU0Qgc2lkZSwgaWYgeW91IGFyZSB0YXJnZXRpbmcgc3Bpbm5pbmcg
+ZGlza3MsIGl0IGNhbiAKZGVwZW5kIGEgbG90IG9uIGhvdyBtdWNoIGRhdGEgaXMgc3RvcmVkIHBl
+ciB0cmFjayBhbmQgdGhlIGNvc3Qgb2YgaGVhZCAKc3dpdGNoZXMgYW5kIHRyYWNrIHN3aXRjaGVz
+LgoKPgo+IDEgcXVlc3Rpb24gcmVtYWlucyA6IHdoeSBkaWQgSSBoYXZlIHBvb3IgcGVyZm9ybWFu
+Y2Ugd2l0aCAxIHNpbmdsZQo+IHdyaXRpbmcgdGhyZWFkID8KCkluIGdlbmVyYWwsIHBhcmFsbGVs
+aXNtIGlzIHJlYWxseSBoZWxwZnVsIGJlY2F1c2UgaXQgaGlkZXMgbGF0ZW5jeSBhbmQgCmFsc28g
+aGVscHMgeW91IHNwcmVhZCB0aGUgbG9hZCBvdmVyIGFsbCBvZiB5b3VyIE9TRHMuICBFdmVuIG9u
+IGEgc2luZ2xlIApkaXNrLCBoYXZpbmcgY29uY3VycmVudCByZXF1ZXN0cyBsZXRzIHRoZSBzY2hl
+ZHVsZXIvY29udHJvbGxlciBkbyBhIApiZXR0ZXIgam9iIG9mIG9yZGVyaW5nIHJlcXVlc3RzLiAg
+RXZlbiBvbiBoaWdoIHBlcmZvcm1hbmNlIGRpc3RyaWJ1dGVkIApmaWxlIHN5c3RlbXMgbGlrZSBs
+dXN0cmUgeW91IGdlbmVyYWxseSBhcmUgZ29pbmcgdG8gZG8gYmVzdCB3aXRoIGxvdHMgb2YgCklP
+IG5vZGVzIHJlYWRpbmcvd3JpdGluZyBtdWx0aXBsZSBmaWxlcy4KCj4KPiBSZWdhcmRzLAoKX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBt
+YWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5j
+b20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
