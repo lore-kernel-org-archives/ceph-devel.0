@@ -1,93 +1,80 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: QCOW2 to RBD format 2 in one step
-Date: Tue, 14 May 2013 22:37:31 +0200
-Message-ID: <855527822.511.1368563851103.open-xchange@websrv.42on.com>
-References: <51920F00.406@42on.com> <51929725.9060807@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph fixes for -rc2
+Date: Tue, 14 May 2013 13:51:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305141334510.9090@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:60150 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758111Ab3ENUhc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 May 2013 16:37:32 -0400
-In-Reply-To: <51929725.9060807@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Op 14 mei 2013 om 21:59 heeft "Josh Durgin" <josh.durgin@inktank.com> het volgende geschreven:
+Hi Linus,
 
-> On 05/14/2013 03:16 AM, Wido den Hollander wrote:
->> Hi,
->> 
->> While working on the CloudStack code for 4.2 I'm running into some
->> problems with QCOW2 and RBD format 2.
->> 
->> A quick cap of the problem:
->> 
->> CloudStack stores all the templates on "Secondary Storage" as QCOW2 files.
->> 
->> When a VM is deployed, this image will be copied (once) from Secondary
->> Storage to Primary Storage, this is done by qemu-img which does the
->> conversion.
->> 
->> When the image is on Primary Storage it will be copied to the
->> destination volume and the Instance/VM is started.
->> 
->> In that last step I want to use layering, but the problem is that my
->> image is RBD format 1 due to the qemu-img copy.
->> 
->> I can skip the qemu-img copy, but I have to find a way to go from QCOW2
->> to RBD format 2 in preferably one step. There is a issue about this in
->> the tracker [0], but that won't be finished on time.
->> 
->> Another idea would be to do QCOW2 -> RAW -> RBD format 2, but that extra
->> step will take a lot of time. It would also require some temporary
->> storage on the hypervisor.
->> 
->> I also thought of creating the RBD image prior to converting to it, but
->> that fails, since qemu-img won't let you convert to a already existing
->> image.
->> 
->> Any brights ideas? Maybe even doing the QCOW2 -> RAW format in memory?
->> In Java?
-> 
-> One way that wouldn't require a change in qemu would be adding ceph
-> configuration options to change the behavior of librbd's rbd_create[2|3]().
-> 
-> For example, there could be just:
-> 
-> rbd_create_default_format UINT default 1
-> 
-> or we could add other options to adjust the rest of the image creation
-> parameters i.e.:
-> 
-> rbd_create_default_object_order INT default 22
-> 
-> // these only apply to format 2
-> rbd_create_default_features     UINT64 default 1 # 1 for layering, 3 for layering+stripingv2
-> rbd_create_default_stripe_count UINT64 default 1 # changing requires stripingv2 feature
-> rbd_create_default_stripe_unit  UINT64 default 4194304 # changing to non-object size requires stripingv2 feature
-> 
-> For backwards compatibility, the default values preserve the existing
-> behavior of rbd_create(), but when you run qemu-img you could change
-> them to create format 2 images and potentially change the striping
-> as well. These options could be easily backported to cuttlefish
-> and bobtail.
-> 
-> What do you think?
+Please pull the following patches from
 
-Something like that crossed my mind for a moment and seems like a very good solution!
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-On existing Ubuntu systems you could simply upgrade librbd and have it all working.
+Yes, this is a much larger pull than I would like after -rc1.  There are a 
+few things included:
 
-Wido
+ - a few fixes for leaks and incorrect assertions
+ - a few patches fixing behavior when mapped images are resized
+ - handling for cloned/layered images that are flattened out from 
+   underneath the client
 
-> 
->> The goal is to go from QCOW2 to RBD format 2 in one step.
->> 
->> [0]: http://tracker.ceph.com/issues/4897
-> 
+The last bit was non-trivial, and there is some code movement and 
+associated cleanup mixed in.  This was ready and was meant to go in last 
+week but I missed the boat on Friday.  My only excuse is that I was 
+waiting for an all clear from the testing and there were many other shiny 
+things to distract me.
+
+Strictly speaking, handling the flatten case isn't a regression and could 
+wait, so if you like we can try to pull the series apart, but Alex and I 
+would much prefer to have it all in as it is a case real users will hit 
+with 3.10.
+
+Thanks!
+sage
+
+
+----------------------------------------------------------------
+Alex Elder (33):
+      rbd: fix leak of format 2 snapshot context
+      rbd: revalidate only for mapping size changes
+      rbd: update capacity in rbd_dev_refresh()
+      rbd: kill rbd_update_mapping_size()
+      rbd: don't print warning if not mapping a parent
+      rbd: don't look up snapshot id in rbd_dev_mapping_set()
+      rbd: kill rbd_dev_clear_mapping()
+      rbd: always set read-only flag in rbd_add()
+      rbd: set the mapping size and features later
+      rbd: zero format 1 header structure earlier
+      rbd: refactor rbd_header_from_disk()
+      rbd: update in-core header directly
+      rbd: simplify rbd_dev_v1_probe()
+      rbd: get rid of trivial v1 header wrappers
+      rbd: define rbd_dev_v2_header_info()
+      rbd: fix an incorrect assertion condition
+      rbd: support reading parent page data
+      rbd: set mapping read-only flag in rbd_add()
+      rbd: only set up watch for mapped images
+      rbd: kill rbd_img_request_get()
+      libceph: init sent and completed when starting
+      rbd: fix parent request size assumption
+      rbd: support reading parent page data for writes
+      rbd: ignore zero-overlap parent
+      rbd: get parent info on refresh
+      rbd: don't release write request until necessary
+      rbd: define rbd_dev_unparent()
+      rbd: define parent image request routines
+      rbd: reference count parent requests
+      rbd: detect when clone image is flattened
+      rbd: re-submit read request for flattened clone
+      rbd: re-submit write request for flattened clone
+      rbd: re-submit flattened write request (part 2)
+
+ drivers/block/rbd.c   | 935 +++++++++++++++++++++++++++++---------------------
+ net/ceph/osd_client.c |   5 +-
+ 2 files changed, 553 insertions(+), 387 deletions(-)
