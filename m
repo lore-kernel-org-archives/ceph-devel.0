@@ -1,36 +1,61 @@
-From: Sage Weil <sage@inktank.com>
-Subject: zero-copy bufferlists
-Date: Tue, 14 May 2013 09:25:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305140922380.26786@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59599 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754537Ab3ENQZV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 May 2013 12:25:21 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 44F45800BA
-	for <ceph-devel@vger.kernel.org>; Tue, 14 May 2013 09:25:21 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 14A1F800BA
-	for <ceph-devel@vger.kernel.org>; Tue, 14 May 2013 09:25:21 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Lukas Czerner <lczerner@redhat.com>
+Subject: [PATCH v4 07/20] ceph: use ->invalidatepage() length argument
+Date: Tue, 14 May 2013 18:37:21 +0200
+Message-ID: <1368549454-8930-8-git-send-email-lczerner@redhat.com>
+References: <1368549454-8930-1-git-send-email-lczerner@redhat.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1368549454-8930-1-git-send-email-lczerner@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org
+Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, akpm@linux-foundation.org, hughd@google.com, lczerner@redhat.com, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-I wrote up a quick blueprint
+->invalidatepage() aop now accepts range to invalidate so we can make
+use of it in ceph_invalidatepage().
 
-  http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/zero-copy_bufferlists
+Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+Acked-by: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
+---
+ fs/ceph/addr.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
 
-on extending bufferlists to do zero-copy between kernel/userspace using 
-splice(2) and friends.  This should be a fun piece of work that is 
-relatively self-contained and has potentially significant performance 
-payout.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 168a35a..d953afd 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -164,20 +164,20 @@ static void ceph_invalidatepage(struct page *page, unsigned int offset,
+ 	if (!PageDirty(page))
+ 		pr_err("%p invalidatepage %p page not dirty\n", inode, page);
+ 
+-	if (offset == 0)
++	if (offset == 0 && length == PAGE_CACHE_SIZE)
+ 		ClearPageChecked(page);
+ 
+ 	ci = ceph_inode(inode);
+-	if (offset == 0) {
+-		dout("%p invalidatepage %p idx %lu full dirty page %u\n",
+-		     inode, page, page->index, offset);
++	if (offset == 0 && length == PAGE_CACHE_SIZE) {
++		dout("%p invalidatepage %p idx %lu full dirty page\n",
++		     inode, page, page->index);
+ 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 		ceph_put_snap_context(snapc);
+ 		page->private = 0;
+ 		ClearPagePrivate(page);
+ 	} else {
+-		dout("%p invalidatepage %p idx %lu partial dirty page\n",
+-		     inode, page, page->index);
++		dout("%p invalidatepage %p idx %lu partial dirty page %u(%u)\n",
++		     inode, page, page->index, offset, length);
+ 	}
+ }
+ 
+-- 
+1.7.7.6
 
-There is also the possibility of taking the result and building a 
-shared library out of it that other projects can consume.  Ceph's 
-bufferlists are pretty cool IMHO, and having working zero-copy support 
-on Linux would make them even cooler.
-
-sage
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
