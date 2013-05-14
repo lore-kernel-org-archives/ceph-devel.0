@@ -1,17 +1,17 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: OSD state flipping when cluster-network in high
  utilization
-Date: Tue, 14 May 2013 23:13:50 +0000
-Message-ID: <6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
+Date: Tue, 14 May 2013 16:22:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
 References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
 	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
 	<519259C5.3000109@inktank.com>
+	<6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <519259C5.3000109-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Content-Language: zh-CN
+In-Reply-To: <6AC1548D-DE2C-4E71-AC73-3903B57C76C6-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -21,42 +21,65 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SSBsaWtlIHRoZSBpZGVhIHRvIGxlYXZlIHBpbmcgaW4gY2x1c3RlciBuZXR3b3JrIGJlY2F1c2Ug
-aXQgY2FuIGhlbHAgdXMgZGV0ZWN0IHN3aXRjaKOvbmljIGZhaWx1cmUuDQoNCldoYXQgY29uZnVz
-ZSBtZSBpcyBJIGtlZXAgcGluZ2luZyBldmVyeSBjZXBoIG5vZGUncyBjbHVzdGVyIGlwo6xpdCBp
-cyBPSyBkdXJpbmcgdGhlIHdob2xlIHJ1biB3aXRoIGxlc3MgdGhhbiAxIG1zIGxhdGVuY3mjrHdo
-eSB0aGUgaGVhcnRiZWF0IHN0aWxsIHN1ZmZlcqO/IFRPUCBzaG93IG15IGNwdSBub3QgMTAwJSB1
-dGlsaXplZKOod2l0aCCjvjMwJSBpbyB3YWl0o6kuRW5hYmxpbmcganVtYm8gZnJhbWUgKipzZWVt
-cyoqIG1ha2UgdGhpbmdzIHdvcnRoLihqdXN0IGZlZWxpbmcubm8gZGF0YSBzdXBwb3J0cykNCg0K
-t6LX1M7StcQgaVBob25lDQoNCtTaIDIwMTMtNS0xNKOsMjM6MzajrCJNYXJrIE5lbHNvbiIgPG1h
-cmsubmVsc29uQGlua3RhbmsuY29tPiDQtLXAo7oNCg0KPiBPbiAwNS8xNC8yMDEzIDEwOjMwIEFN
-LCBTYWdlIFdlaWwgd3JvdGU6DQo+PiBPbiBUdWUsIDE0IE1heSAyMDEzLCBDaGVuLCBYaWFveGkg
-d3JvdGU6DQo+Pj4gDQo+Pj4gSGkNCj4+PiANCj4+PiAgIFdlIGFyZSBzdWZmZXJpbmcgb3VyIE9T
-RCBmbGlwcGluZyBiZXR3ZWVuIHVwIGFuZCBkb3duICggT1NEIFggYmUgdm90ZWQgdG8NCj4+PiBk
-b3duIGR1ZSB0byAzIG1pc3NpbmcgcGluZywgYW5kIGFmdGVyIGEgd2hpbGUgaXQgdGVsbHMgdGhl
-IG1vbml0b3IgP21hcCB4eHgNCj4+PiB3cm9uZ2x5IG1hcmsgbWUgZG93bj8gKS4gQmVjYXVzZSB3
-ZSBhcmUgcnVubmluZyBzZXF1ZW50aWFsIHdyaXRlIHBlcmZvcm1hbmNlDQo+Pj4gdGVzdCBvbiB0
-b3Agb2YgUkJEcywgYW5kIHRoZSBjbHVzdGVyIG5ldHdvcmsgbmljcyBpcyByZWFsbHkgaW4gaGln
-aA0KPj4+IHV0aWxpemF0aW9uICg4R2IvcysgZm9yIGEgMTBHYiBuZXR3b3JrKS4NCj4+PiANCj4+
-PiAgICAgICAgICBJcyB0aGlzIGEgZXhwZWN0ZWQgYmVoYXZpb3IgPyBvciBob3cgY2FuIEkgcHJl
-dmVudCB0aGlzIGhhcHBlbj8NCj4+IA0KPj4gWW91IGFuIGluY3JlYXNlIHRoZSBoZWFydGJlYXQg
-Z3JhY2UgcGVyaW9kLiAgVGhlIHBpbmdzIGFyZSBoYW5kbGVkIGJ5IGENCj4+IHNlcGFyYXRlIHRo
-cmVhZCBvbiB0aGUgYmFja3NpZGUgaW50ZXJmYWNlIChpZiB0aGVyZSBpcyBvbmUpLiAgSWYgeW91
-IGFyZQ0KPj4gbWlzc2luZyBwaW5ncyB0aGVuIHRoZSBuZXR3b3JrIG9yIHNjaGVkdWxlciBpcyBw
-cmV2ZW50aW5nIHRob3NlIChzbWFsbCkNCj4+IG1lc3NhZ2VzIGZyb20gYmVpbmcgcHJvY2Vzc2Vk
-ICh0aGVyZSBpcyBhbG1vc3Qgbm8gbG9jayBjb250ZW50aW9uIGluIHRoYXQNCj4+IHBhdGgpLiAg
-V2hpY2ggbWVhbnMgaXQgcmVhbGx5IGlzIHRha2luZyB+MjAgc2Vjb25kcyBvciB3YWh0ZXZlciB0
-byBoYW5kbGUNCj4+IHRob3NlIG1lc3NhZ2VzLiAgSXQncyByZWFsbHkgYSBxdWVzdGluIG9mIGhv
-dyB1bnJlc3BvbnNpdmUgeW91IHdhbnQgdG8NCj4+IHBlcm1pdCB0aGUgT1NEcyB0byBiZSBiZWZv
-cmUgeW91IGNvbnNpZGVyIGl0IGEgZmFpbHVyZS4uDQo+PiANCj4+IHNhZ2UNCj4+IA0KPj4gDQo+
-IA0KPiBJdCBtaWdodCBiZSB3b3J0aCB0ZXN0aW5nIG91dCBob3cgbG9uZyBwaW5ncyBvciBvdGhl
-ciBuZXR3b3JrIHRyYWZmaWMgYXJlIHRha2luZyBkdXJpbmcgdGhlc2UgdGVzdHMuICBUaGVyZSBt
-YXkgYmUgc29tZSB0Y3AgdHVubmluZyB5b3UgY2FuIGRvIGhlcmUsIG9yIGV2ZW4gY29uc2lkZXIg
-dXNpbmcgYSBzZXBhcmF0ZSBuZXR3b3JrIGZvciB0aGUgbW9ucy4NCj4gDQo+IE1hcmsNCl9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFp
-bGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29t
-L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On Tue, 14 May 2013, Chen, Xiaoxi wrote:
+> I like the idea to leave ping in cluster network because it can help us 
+> detect switch?nic failure.
+> 
+> What confuse me is I keep pinging every ceph node's cluster ip?it is OK 
+> during the whole run with less than 1 ms latency?why the heartbeat still 
+> suffer? TOP show my cpu not 100% utilized?with ?30% io wait?.Enabling 
+> jumbo frame **seems** make things worth.(just feeling.no data supports)
+
+I say "ping" in teh general sense.. it's not using ICMP, but sending 
+small messages over a TCP session, doing some minimal processing on the 
+other end, and sending them back.  If the machine is heavily loaded and 
+that thread doesn't get scheduled or somehow blocks, it may be 
+problematic.
+
+How responsive generally is the machine under load?  Is there available 
+CPU?
+
+We can try to enable debugging to see what is going on.. 'debug ms = 1' 
+and 'debug osd = 20' is everything we would need, but will incur 
+additoinal load itself and may spoil the experiment...
+
+sage
+
+> 
+> ???? iPhone
+> 
+> ? 2013-5-14?23:36?"Mark Nelson" <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> ???
+> 
+> > On 05/14/2013 10:30 AM, Sage Weil wrote:
+> >> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
+> >>> 
+> >>> Hi
+> >>> 
+> >>>   We are suffering our OSD flipping between up and down ( OSD X be voted to
+> >>> down due to 3 missing ping, and after a while it tells the monitor ?map xxx
+> >>> wrongly mark me down? ). Because we are running sequential write performance
+> >>> test on top of RBDs, and the cluster network nics is really in high
+> >>> utilization (8Gb/s+ for a 10Gb network).
+> >>> 
+> >>>          Is this a expected behavior ? or how can I prevent this happen?
+> >> 
+> >> You an increase the heartbeat grace period.  The pings are handled by a
+> >> separate thread on the backside interface (if there is one).  If you are
+> >> missing pings then the network or scheduler is preventing those (small)
+> >> messages from being processed (there is almost no lock contention in that
+> >> path).  Which means it really is taking ~20 seconds or wahtever to handle
+> >> those messages.  It's really a questin of how unresponsive you want to
+> >> permit the OSDs to be before you consider it a failure..
+> >> 
+> >> sage
+> >> 
+> >> 
+> > 
+> > It might be worth testing out how long pings or other network traffic are taking during these tests.  There may be some tcp tunning you can do here, or even consider using a separate network for the mons.
+> > 
+> > Mark
+> 
