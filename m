@@ -1,41 +1,62 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.62 released
-Date: Tue, 14 May 2013 16:00:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305141557310.19562@cobra.newdream.net>
+From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: OSD state flipping when cluster-network in high
+ utilization
+Date: Tue, 14 May 2013 23:13:50 +0000
+Message-ID: <6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
+	<519259C5.3000109@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37743 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758431Ab3ENXAd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 May 2013 19:00:33 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 75B69800BA
-	for <ceph-devel@vger.kernel.org>; Tue, 14 May 2013 16:00:32 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 5C447800BA
-	for <ceph-devel@vger.kernel.org>; Tue, 14 May 2013 16:00:32 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <519259C5.3000109-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is the first release after cuttlefish.  Since most of this window was 
-spent on stabilization, there isn't a lot of new stuff here aside from 
-cleanups and fixes (most of which are backported to v0.61). v0.63 is due 
-out in 2 weeks and will have more goodness.
-
- * mon: fix validation of mds ids from CLI commands
- * osd: fix for an op ordering bug
- * osd, mon: optionally dump leveldb transactions to a log
- * osd: fix handling for split after upgrade from bobtail
- * debian, specfile: packaging cleanups
- * radosgw-admin: create keys for new users by default
- * librados python binding cleanups
- * misc code cleanups
-
-You can get v0.62 from the usual places:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.62.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+SSBsaWtlIHRoZSBpZGVhIHRvIGxlYXZlIHBpbmcgaW4gY2x1c3RlciBuZXR3b3JrIGJlY2F1c2Ug
+aXQgY2FuIGhlbHAgdXMgZGV0ZWN0IHN3aXRjaKOvbmljIGZhaWx1cmUuDQoNCldoYXQgY29uZnVz
+ZSBtZSBpcyBJIGtlZXAgcGluZ2luZyBldmVyeSBjZXBoIG5vZGUncyBjbHVzdGVyIGlwo6xpdCBp
+cyBPSyBkdXJpbmcgdGhlIHdob2xlIHJ1biB3aXRoIGxlc3MgdGhhbiAxIG1zIGxhdGVuY3mjrHdo
+eSB0aGUgaGVhcnRiZWF0IHN0aWxsIHN1ZmZlcqO/IFRPUCBzaG93IG15IGNwdSBub3QgMTAwJSB1
+dGlsaXplZKOod2l0aCCjvjMwJSBpbyB3YWl0o6kuRW5hYmxpbmcganVtYm8gZnJhbWUgKipzZWVt
+cyoqIG1ha2UgdGhpbmdzIHdvcnRoLihqdXN0IGZlZWxpbmcubm8gZGF0YSBzdXBwb3J0cykNCg0K
+t6LX1M7StcQgaVBob25lDQoNCtTaIDIwMTMtNS0xNKOsMjM6MzajrCJNYXJrIE5lbHNvbiIgPG1h
+cmsubmVsc29uQGlua3RhbmsuY29tPiDQtLXAo7oNCg0KPiBPbiAwNS8xNC8yMDEzIDEwOjMwIEFN
+LCBTYWdlIFdlaWwgd3JvdGU6DQo+PiBPbiBUdWUsIDE0IE1heSAyMDEzLCBDaGVuLCBYaWFveGkg
+d3JvdGU6DQo+Pj4gDQo+Pj4gSGkNCj4+PiANCj4+PiAgIFdlIGFyZSBzdWZmZXJpbmcgb3VyIE9T
+RCBmbGlwcGluZyBiZXR3ZWVuIHVwIGFuZCBkb3duICggT1NEIFggYmUgdm90ZWQgdG8NCj4+PiBk
+b3duIGR1ZSB0byAzIG1pc3NpbmcgcGluZywgYW5kIGFmdGVyIGEgd2hpbGUgaXQgdGVsbHMgdGhl
+IG1vbml0b3IgP21hcCB4eHgNCj4+PiB3cm9uZ2x5IG1hcmsgbWUgZG93bj8gKS4gQmVjYXVzZSB3
+ZSBhcmUgcnVubmluZyBzZXF1ZW50aWFsIHdyaXRlIHBlcmZvcm1hbmNlDQo+Pj4gdGVzdCBvbiB0
+b3Agb2YgUkJEcywgYW5kIHRoZSBjbHVzdGVyIG5ldHdvcmsgbmljcyBpcyByZWFsbHkgaW4gaGln
+aA0KPj4+IHV0aWxpemF0aW9uICg4R2IvcysgZm9yIGEgMTBHYiBuZXR3b3JrKS4NCj4+PiANCj4+
+PiAgICAgICAgICBJcyB0aGlzIGEgZXhwZWN0ZWQgYmVoYXZpb3IgPyBvciBob3cgY2FuIEkgcHJl
+dmVudCB0aGlzIGhhcHBlbj8NCj4+IA0KPj4gWW91IGFuIGluY3JlYXNlIHRoZSBoZWFydGJlYXQg
+Z3JhY2UgcGVyaW9kLiAgVGhlIHBpbmdzIGFyZSBoYW5kbGVkIGJ5IGENCj4+IHNlcGFyYXRlIHRo
+cmVhZCBvbiB0aGUgYmFja3NpZGUgaW50ZXJmYWNlIChpZiB0aGVyZSBpcyBvbmUpLiAgSWYgeW91
+IGFyZQ0KPj4gbWlzc2luZyBwaW5ncyB0aGVuIHRoZSBuZXR3b3JrIG9yIHNjaGVkdWxlciBpcyBw
+cmV2ZW50aW5nIHRob3NlIChzbWFsbCkNCj4+IG1lc3NhZ2VzIGZyb20gYmVpbmcgcHJvY2Vzc2Vk
+ICh0aGVyZSBpcyBhbG1vc3Qgbm8gbG9jayBjb250ZW50aW9uIGluIHRoYXQNCj4+IHBhdGgpLiAg
+V2hpY2ggbWVhbnMgaXQgcmVhbGx5IGlzIHRha2luZyB+MjAgc2Vjb25kcyBvciB3YWh0ZXZlciB0
+byBoYW5kbGUNCj4+IHRob3NlIG1lc3NhZ2VzLiAgSXQncyByZWFsbHkgYSBxdWVzdGluIG9mIGhv
+dyB1bnJlc3BvbnNpdmUgeW91IHdhbnQgdG8NCj4+IHBlcm1pdCB0aGUgT1NEcyB0byBiZSBiZWZv
+cmUgeW91IGNvbnNpZGVyIGl0IGEgZmFpbHVyZS4uDQo+PiANCj4+IHNhZ2UNCj4+IA0KPj4gDQo+
+IA0KPiBJdCBtaWdodCBiZSB3b3J0aCB0ZXN0aW5nIG91dCBob3cgbG9uZyBwaW5ncyBvciBvdGhl
+ciBuZXR3b3JrIHRyYWZmaWMgYXJlIHRha2luZyBkdXJpbmcgdGhlc2UgdGVzdHMuICBUaGVyZSBt
+YXkgYmUgc29tZSB0Y3AgdHVubmluZyB5b3UgY2FuIGRvIGhlcmUsIG9yIGV2ZW4gY29uc2lkZXIg
+dXNpbmcgYSBzZXBhcmF0ZSBuZXR3b3JrIGZvciB0aGUgbW9ucy4NCj4gDQo+IE1hcmsNCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFp
+bGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29t
+L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
