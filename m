@@ -1,73 +1,89 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [PATCH] libceph: ceph_pagelist_append might sleep while
- atomic
-Date: Tue, 14 May 2013 11:44:22 -0600
-Message-ID: <519277F6.4060808@sandia.gov>
-References: <1368110565-125922-1-git-send-email-jaschut@sandia.gov>
- <519269F2.1000907@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: QCOW2 to RBD format 2 in one step
+Date: Tue, 14 May 2013 12:57:25 -0700
+Message-ID: <51929725.9060807@inktank.com>
+References: <51920F00.406@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:60779 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751530Ab3ENRom (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 May 2013 13:44:42 -0400
-In-Reply-To: <519269F2.1000907@inktank.com>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:39727 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755376Ab3ENT6l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 May 2013 15:58:41 -0400
+Received: by mail-pd0-f175.google.com with SMTP id y14so709290pdi.6
+        for <ceph-devel@vger.kernel.org>; Tue, 14 May 2013 12:58:40 -0700 (PDT)
+In-Reply-To: <51920F00.406@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/14/2013 10:44 AM, Alex Elder wrote:
-> On 05/09/2013 09:42 AM, Jim Schutt wrote:
->> Ceph's encode_caps_cb() worked hard to not call __page_cache_alloc while
->> holding a lock, but it's spoiled because ceph_pagelist_addpage() always
->> calls kmap(), which might sleep.  Here's the result:
-> 
-> I finally took a close look at this today, Jim.  Sorry
-> for the delay.
-> 
+On 05/14/2013 03:16 AM, Wido den Hollander wrote:
+> Hi,
+>
+> While working on the CloudStack code for 4.2 I'm running into some
+> problems with QCOW2 and RBD format 2.
+>
+> A quick cap of the problem:
+>
+> CloudStack stores all the templates on "Secondary Storage" as QCOW2 files.
+>
+> When a VM is deployed, this image will be copied (once) from Secondary
+> Storage to Primary Storage, this is done by qemu-img which does the
+> conversion.
+>
+> When the image is on Primary Storage it will be copied to the
+> destination volume and the Instance/VM is started.
+>
+> In that last step I want to use layering, but the problem is that my
+> image is RBD format 1 due to the qemu-img copy.
+>
+> I can skip the qemu-img copy, but I have to find a way to go from QCOW2
+> to RBD format 2 in preferably one step. There is a issue about this in
+> the tracker [0], but that won't be finished on time.
+>
+> Another idea would be to do QCOW2 -> RAW -> RBD format 2, but that extra
+> step will take a lot of time. It would also require some temporary
+> storage on the hypervisor.
+>
+> I also thought of creating the RBD image prior to converting to it, but
+> that fails, since qemu-img won't let you convert to a already existing
+> image.
+>
+> Any brights ideas? Maybe even doing the QCOW2 -> RAW format in memory?
+> In Java?
 
-No worries - thanks for taking a look.
+One way that wouldn't require a change in qemu would be adding ceph
+configuration options to change the behavior of librbd's rbd_create[2|3]().
 
-> The issue is formatting the reconnect message--which will
-> hold an arbitrary amount of data and therefore which we'll
-> need to do some allocation (and kmap) for--in the face of
-> having to hold the flock spinlock while doing so.
-> 
-> And as you found, ceph_pagelist_addpage(), which is called
-> by ceph_pagelist_append(), calls kmap() even if it doesn't
-> need to allocate anything.  This means that despite reserving
-> the pages, those pages are in the free list and because they'll
-> need to be the subject of kmap() their preallocation doesn't
-> help.
-> 
-> Your solution was to pre-allocate a buffer, format the locks
-> into that buffer while holding the lock, then append the
-> buffer contents to a pagelist after releasing the lock.  You
-> check for a changing (increasing) lock count while you format
-> the locks, which is good.
-> 
-> So...  Given that, I think your change looks good.  It's a shame
-> we can't format directly into the pagelist buffer but this won't
-> happen much so it's not a big deal.  I have a few small suggestions,
-> below.
-> 
-> I do find some byte order bugs though.   They aren't your doing,
-> but I think they ought to be fixed first, as a separate patch
-> that would precede this one.  The bug is that the lock counts
-> that are put into the buffer (num_fcntl_locks and num_flock_locks)
-> are not properly byte-swapped.  I'll point it out inline
-> in your code, below.
-> 
-> I'll say that what you have is OK.  Consider my suggestions, and
-> if you choose not to fix the byte order bugs, please let me know.
+For example, there could be just:
 
-I'll happily fix up a v2 series with your suggestions addressed.
-Thanks for catching those issues.  Stay tuned...
+rbd_create_default_format UINT default 1
 
-Thanks -- Jim
+or we could add other options to adjust the rest of the image creation
+parameters i.e.:
 
+rbd_create_default_object_order INT default 22
+
+// these only apply to format 2
+rbd_create_default_features     UINT64 default 1 # 1 for layering, 3 for 
+layering+stripingv2
+rbd_create_default_stripe_count UINT64 default 1 # changing requires 
+stripingv2 feature
+rbd_create_default_stripe_unit  UINT64 default 4194304 # changing to 
+non-object size requires stripingv2 feature
+
+For backwards compatibility, the default values preserve the existing
+behavior of rbd_create(), but when you run qemu-img you could change
+them to create format 2 images and potentially change the striping
+as well. These options could be easily backported to cuttlefish
+and bobtail.
+
+What do you think?
+
+> The goal is to go from QCOW2 to RBD format 2 in one step.
+>
+> [0]: http://tracker.ceph.com/issues/4897
+>
 
