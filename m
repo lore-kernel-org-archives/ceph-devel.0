@@ -1,93 +1,81 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [ceph-users] OSD state flipping when cluster-network in
- high utilization
-Date: Wed, 15 May 2013 09:38:40 -0600
-Message-ID: <5193AC00.5020408@sandia.gov>
-References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
- <519259C5.3000109@inktank.com>
- <6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
- <alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC0145F746@SHSMSX102.ccr.corp.intel.com>,<5193A44F.1060509@sandia.gov>
- <1D3D7B6A-7C8B-4D7B-8B4E-8355F8512F47@intel.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: 0.61 Cuttlefish / ceph-deploy missing
+Date: Wed, 15 May 2013 08:48:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305150846330.14301@cobra.newdream.net>
+References: <alpine.DEB.2.00.1305061744430.9909@cobra.newdream.net>
+	<20130515110842.GA28468@oder.mch.fsc.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:58785 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757009Ab3EOPjL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 May 2013 11:39:11 -0400
-In-Reply-To: <1D3D7B6A-7C8B-4D7B-8B4E-8355F8512F47@intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: Sage Weil <sage@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20130515110842.GA28468-tbq9f/Eh0BZ9QGbx8OrcVQ@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Kasper Dieter <dieter.kasper-RJz4owOZxyXQFUHtdCDX3A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 05/15/2013 09:12 AM, Chen, Xiaoxi wrote:
-> Thanks=EF=BC=8C but i am not quite understand how to determine weathe=
-r monitor overloaded=EF=BC=9F
+On Wed, 15 May 2013, Kasper Dieter wrote:
+> Hi Sage,
+> I'm a little bit confused about 'ceph-deploy' in 0.61:
+> 
+> . the 0.61 release note says: "ceph-deploy: our new deployment tool to replace 'mkcephfs'"
+> . http://ceph.com/docs/master/rados/deployment/mkcephfs/
+> 	says "To deploy a test or development cluster, you can use the mkcephfs tool. 
+> 	We do not recommend using this tool for production environments."
 
-I've also found it difficult, and a process of elimination.
+Adjustd this in the docs, thanks!
 
-Make sure your mon debugging is minimal.  If it's not,
-lower it and see if it helps.
+> . http://ceph.com/docs/master/rados/deployment/
+> 	says "MKCEPHFS (DEPRECATED)
+> 	(...) As of Ceph v0.60, it is deprecated in favor of ceph-deploy."
+> 
+> But, /usr/sbin/mkcephfs is provided by the ceph*0.61.2*rpm(s)
+> whereas ceph-deploy is missing.
 
-Watch your mon host with vmstat or iostat, to see what
-it's disk write rate is during the periods you're having
-trouble with OSDs having heartbeat issues.  If it's near
-what you think the limiting rate is for whatever device
-is holding the mon's store.db directory, that might be
-your bottleneck.
+ceph-deploy is packaged separately as it is designed to deploy any version 
+of Ceph (>= bobtail).  The ceph-deploy package should be in the same repos 
+as the ceph packages; if they are missing, let us know.  We are still 
+streamlining the build process for that package so that updates and fixes 
+(for the deployment tool) get published more quickly.
 
-> and if yes=EF=BC=8Cwill start several monitor help=EF=BC=9F
+> The only way to get ceph-deploy seems to be using git:
+> git clone https://github.com/ceph/ceph-deploy.git
 
-Sage or one of the other Ceph developers can speak better
-to this.  I will note that with three monitors, if one
-is too busy, it'll miss renewing its lease.  The result of
-that will be an election to get a new quorum.  If you run
-multiple mons and they hold frequent elections where a mon
-drops out of quorum, then comes back in on the next election,
-I've found that to be a sign that my mons are too busy.
+This also works.
 
--- Jim
-
->=20
-> =E5=8F=91=E8=87=AA=E6=88=91=E7=9A=84 iPhone
->=20
-> =E5=9C=A8 2013-5-15=EF=BC=8C23:07=EF=BC=8C"Jim Schutt" <jaschut@sandi=
-a.gov> =E5=86=99=E9=81=93=EF=BC=9A
->=20
->> On 05/14/2013 09:23 PM, Chen, Xiaoxi wrote:
->>>> How responsive generally is the machine under load?  Is there avai=
-lable CPU?
->>>    The machine works well, and the issued OSDs are likely the same,=
- seems because they have relative slower disk( disk type are the same b=
-ut the latency is a bit higher ,8ms -> 10ms).
->>>   =20
->>>    Top show no idle % but still have 30+% of io_wait,  my colleague=
- educate me that io_wait can be treated as free.
->>>
->>> Another information is offload the heartbeat to 1Gb nic doesn't sol=
-ve the problem, what's more, when we doing random write test, we can st=
-ill see this flipping happen. So I would like to say it may related wit=
-h CPU scheduler ? The heartbeat thread (in busy OSD ) failed to get eno=
-ugh cpu cycle.
->>>
->>
->> FWIW, also take a close look at your monitor daemons, and
->> whether they show any signs of being overloaded.
->>
->> I frequently see OSDs wrongly marked down when my
->> mons cannot keep up with their workload.
->>
->> -- Jim
->>
->>
+Thanks!
+sage
 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> Is this the way it should be ?
+> When will ceph-deploy be included in the Cuttlefish rpms ?
+> 
+> 
+> Best Regards,
+> -Dieter
+> 
+> 
+> On Tue, May 07, 2013 at 04:51:25AM +0200, Sage Weil wrote:
+> > Spring has arrived (at least for some of us), and a new stable release of 
+> > Ceph is ready!  Thank you to everyone who has contributed to this release!
+> > 
+> > Bigger ticket items since v0.56.x "Bobtail":
+> > 
+> >  * ceph-deploy: our new deployment tool to replace 'mkcephfs'
+> (...)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
