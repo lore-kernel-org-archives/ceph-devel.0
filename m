@@ -1,85 +1,71 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: OSD state flipping when cluster-network in high
- utilization
-Date: Tue, 14 May 2013 16:22:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
-References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
-	<519259C5.3000109@inktank.com>
-	<6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <6AC1548D-DE2C-4E71-AC73-3903B57C76C6-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Wales Wang <wormwang@yahoo.com>
+Subject: Re: [ceph-users] OSD state flipping when cluster-network in high utilization
+Date: Wed, 15 May 2013 08:52:50 +0800
+Message-ID: <BACB626D-7FF0-42C5-95EE-FE493828B1B1__35449.7203989469$1368579510$gmane$org@yahoo.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from nm35.bullet.mail.sg3.yahoo.com ([106.10.151.30]:32359 "HELO
+	nm35.bullet.mail.sg3.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1758286Ab3EOA6V convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 14 May 2013 20:58:21 -0400
+In-Reply-To: <alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On Tue, 14 May 2013, Chen, Xiaoxi wrote:
-> I like the idea to leave ping in cluster network because it can help us 
-> detect switch?nic failure.
-> 
-> What confuse me is I keep pinging every ceph node's cluster ip?it is OK 
-> during the whole run with less than 1 ms latency?why the heartbeat still 
-> suffer? TOP show my cpu not 100% utilized?with ?30% io wait?.Enabling 
-> jumbo frame **seems** make things worth.(just feeling.no data supports)
+My advice is leverage Linux cgroup to isolate some resource for critica=
+l part of Ceph.
+Such as state of heartbeat, replication of OSDs.
+Even the timeout set to many minutes, there always are bigger heavy loa=
+ding on Ceph.
 
-I say "ping" in teh general sense.. it's not using ICMP, but sending 
-small messages over a TCP session, doing some minimal processing on the 
-other end, and sending them back.  If the machine is heavily loaded and 
-that thread doesn't get scheduled or somehow blocks, it may be 
-problematic.
+Wales Wang
 
-How responsive generally is the machine under load?  Is there available 
-CPU?
+=D4=DA 2013-5-14=A3=AC=CF=C2=CE=E711:30=A3=ACSage Weil <sage@inktank.co=
+m> =D0=B4=B5=C0=A3=BA
 
-We can try to enable debugging to see what is going on.. 'debug ms = 1' 
-and 'debug osd = 20' is everything we would need, but will incur 
-additoinal load itself and may spoil the experiment...
-
-sage
-
-> 
-> ???? iPhone
-> 
-> ? 2013-5-14?23:36?"Mark Nelson" <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> ???
-> 
-> > On 05/14/2013 10:30 AM, Sage Weil wrote:
-> >> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
-> >>> 
-> >>> Hi
-> >>> 
-> >>>   We are suffering our OSD flipping between up and down ( OSD X be voted to
-> >>> down due to 3 missing ping, and after a while it tells the monitor ?map xxx
-> >>> wrongly mark me down? ). Because we are running sequential write performance
-> >>> test on top of RBDs, and the cluster network nics is really in high
-> >>> utilization (8Gb/s+ for a 10Gb network).
-> >>> 
-> >>>          Is this a expected behavior ? or how can I prevent this happen?
-> >> 
-> >> You an increase the heartbeat grace period.  The pings are handled by a
-> >> separate thread on the backside interface (if there is one).  If you are
-> >> missing pings then the network or scheduler is preventing those (small)
-> >> messages from being processed (there is almost no lock contention in that
-> >> path).  Which means it really is taking ~20 seconds or wahtever to handle
-> >> those messages.  It's really a questin of how unresponsive you want to
-> >> permit the OSDs to be before you consider it a failure..
-> >> 
-> >> sage
-> >> 
-> >> 
-> > 
-> > It might be worth testing out how long pings or other network traffic are taking during these tests.  There may be some tcp tunning you can do here, or even consider using a separate network for the mons.
-> > 
-> > Mark
-> 
+> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
+>>=20
+>> Hi
+>>=20
+>>   We are suffering our OSD flipping between up and down ( OSD X be v=
+oted to
+>> down due to 3 missing ping, and after a while it tells the monitor ?=
+map xxx
+>> wrongly mark me down? ). Because we are running sequential write per=
+formance
+>> test on top of RBDs, and the cluster network nics is really in high
+>> utilization (8Gb/s+ for a 10Gb network).
+>>=20
+>>          Is this a expected behavior ? or how can I prevent this hap=
+pen?
+>=20
+> You an increase the heartbeat grace period.  The pings are handled by=
+ a=20
+> separate thread on the backside interface (if there is one).  If you =
+are=20
+> missing pings then the network or scheduler is preventing those (smal=
+l)=20
+> messages from being processed (there is almost no lock contention in =
+that=20
+> path).  Which means it really is taking ~20 seconds or wahtever to ha=
+ndle=20
+> those messages.  It's really a questin of how unresponsive you want t=
+o=20
+> permit the OSDs to be before you consider it a failure..
+>=20
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
