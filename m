@@ -1,74 +1,45 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH] Fix some little/big endian issues
-Date: Wed, 15 May 2013 22:56:04 +0800
-Message-ID: <1368629764-10838-1-git-send-email-liwang@ubuntukylin.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:52623 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932197Ab3EOO5a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 May 2013 10:57:30 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, Yehuda Sadeh <yehuda@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+From: "Jim Schutt" <jaschut-4OHPYypu0djtX7QSmKvirg@public.gmane.org>
+Subject: Re: OSD state flipping when cluster-network in high
+ utilization
+Date: Wed, 15 May 2013 09:05:51 -0600
+Message-ID: <5193A44F.1060509@sandia.gov>
+References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
+	<519259C5.3000109@inktank.com>
+	<6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
+	<alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
+	<6F3FA899187F0043BA1827A69DA2F7CC0145F746@SHSMSX102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC0145F746-0J0gbvR4kTiiAffOGbnezLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Ceph uses little endian, this patch fixes some endian issues
-while Ceph running on big endian machine.
+On 05/14/2013 09:23 PM, Chen, Xiaoxi wrote:
+>> How responsive generally is the machine under load?  Is there available CPU?
+> 	The machine works well, and the issued OSDs are likely the same, seems because they have relative slower disk( disk type are the same but the latency is a bit higher ,8ms -> 10ms).
+> 	
+> 	Top show no idle % but still have 30+% of io_wait,  my colleague educate me that io_wait can be treated as free.
+> 
+> Another information is offload the heartbeat to 1Gb nic doesn't solve the problem, what's more, when we doing random write test, we can still see this flipping happen. So I would like to say it may related with CPU scheduler ? The heartbeat thread (in busy OSD ) failed to get enough cpu cycle.
+> 
 
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
----
- src/include/encoding.h |   12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
+FWIW, also take a close look at your monitor daemons, and
+whether they show any signs of being overloaded.
 
-diff --git a/src/include/encoding.h b/src/include/encoding.h
-index eb445e3..67c9af5 100644
---- a/src/include/encoding.h
-+++ b/src/include/encoding.h
-@@ -88,11 +88,12 @@ inline void decode(bool &v, bufferlist::iterator& p) {
- 
- #define WRITE_INTTYPE_ENCODER(type, etype)				\
-   inline void encode(type v, bufferlist& bl, uint64_t features=0) {	\
--    __##etype e = init_##etype(v);					\
-+    ceph_##etype e;					                \
-+    e = v;                                                              \
-     encode_raw(e, bl);							\
-   }									\
-   inline void decode(type &v, bufferlist::iterator& p) {		\
--    __##etype e;							\
-+    ceph_##etype e;							\
-     decode_raw(e, p);							\
-     v = e;								\
-   }
-@@ -338,7 +339,7 @@ inline void encode(const std::list<T>& ls, bufferlist& bl)
-       n++;
-       encode(*p, bl);
-     }
--    __le32 en;
-+    ceph_le32 en;
-     en = n;
-     bl.copy_in(pos, sizeof(en), (char*)&en);
-   } else {
-@@ -373,7 +374,7 @@ inline void encode(const std::list<std::tr1::shared_ptr<T> >& ls, bufferlist& bl
-       n++;
-       encode(**p, bl);
-     }
--    __le32 en;
-+    ceph_le32 en;
-     en = n;
-     bl.copy_in(pos, sizeof(en), (char*)&en);
-   } else {
-@@ -696,7 +697,8 @@ inline void decode(std::deque<T>& ls, bufferlist::iterator& p)
-   __u8 struct_v = v, struct_compat = compat;		     \
-   ::encode(struct_v, bl);				     \
-   ::encode(struct_compat, bl);				     \
--  __le32 struct_len = 0;				     \
-+  ceph_le32 struct_len;				             \
-+  struct_len = 0;                                            \
-   ::encode(struct_len, bl);				     \
-   buffer::list::iterator struct_len_it = bl.end();	     \
-   struct_len_it.advance(-4);				     \
--- 
-1.7.9.5
+I frequently see OSDs wrongly marked down when my
+mons cannot keep up with their workload.
 
-
+-- Jim
