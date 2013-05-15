@@ -1,71 +1,98 @@
-From: Wales Wang <wormwang@yahoo.com>
-Subject: Re: [ceph-users] OSD state flipping when cluster-network in high utilization
-Date: Wed, 15 May 2013 08:52:50 +0800
-Message-ID: <BACB626D-7FF0-42C5-95EE-FE493828B1B1__35449.7203989469$1368579510$gmane$org@yahoo.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nm35.bullet.mail.sg3.yahoo.com ([106.10.151.30]:32359 "HELO
-	nm35.bullet.mail.sg3.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1758286Ab3EOA6V convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 14 May 2013 20:58:21 -0400
-In-Reply-To: <alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: OSD state flipping when cluster-network in high
+ utilization
+Date: Wed, 15 May 2013 03:23:19 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0145F746@SHSMSX102.ccr.corp.intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
+	<519259C5.3000109@inktank.com>
+	<6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
+	<alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1305141620410.12954-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-My advice is leverage Linux cgroup to isolate some resource for critica=
-l part of Ceph.
-Such as state of heartbeat, replication of OSDs.
-Even the timeout set to many minutes, there always are bigger heavy loa=
-ding on Ceph.
-
-Wales Wang
-
-=D4=DA 2013-5-14=A3=AC=CF=C2=CE=E711:30=A3=ACSage Weil <sage@inktank.co=
-m> =D0=B4=B5=C0=A3=BA
-
-> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
->>=20
->> Hi
->>=20
->>   We are suffering our OSD flipping between up and down ( OSD X be v=
-oted to
->> down due to 3 missing ping, and after a while it tells the monitor ?=
-map xxx
->> wrongly mark me down? ). Because we are running sequential write per=
-formance
->> test on top of RBDs, and the cluster network nics is really in high
->> utilization (8Gb/s+ for a 10Gb network).
->>=20
->>          Is this a expected behavior ? or how can I prevent this hap=
-pen?
->=20
-> You an increase the heartbeat grace period.  The pings are handled by=
- a=20
-> separate thread on the backside interface (if there is one).  If you =
-are=20
-> missing pings then the network or scheduler is preventing those (smal=
-l)=20
-> messages from being processed (there is almost no lock contention in =
-that=20
-> path).  Which means it really is taking ~20 seconds or wahtever to ha=
-ndle=20
-> those messages.  It's really a questin of how unresponsive you want t=
-o=20
-> permit the OSDs to be before you consider it a failure..
->=20
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PkhvdyByZXNwb25zaXZlIGdlbmVyYWxseSBpcyB0aGUgbWFjaGluZSB1bmRlciBsb2FkPyAgSXMg
+dGhlcmUgYXZhaWxhYmxlIENQVT8NCglUaGUgbWFjaGluZSB3b3JrcyB3ZWxsLCBhbmQgdGhlIGlz
+c3VlZCBPU0RzIGFyZSBsaWtlbHkgdGhlIHNhbWUsIHNlZW1zIGJlY2F1c2UgdGhleSBoYXZlIHJl
+bGF0aXZlIHNsb3dlciBkaXNrKCBkaXNrIHR5cGUgYXJlIHRoZSBzYW1lIGJ1dCB0aGUgbGF0ZW5j
+eSBpcyBhIGJpdCBoaWdoZXIgLDhtcyAtPiAxMG1zKS4NCgkNCglUb3Agc2hvdyBubyBpZGxlICUg
+YnV0IHN0aWxsIGhhdmUgMzArJSBvZiBpb193YWl0LCAgbXkgY29sbGVhZ3VlIGVkdWNhdGUgbWUg
+dGhhdCBpb193YWl0IGNhbiBiZSB0cmVhdGVkIGFzIGZyZWUuDQoNCkFub3RoZXIgaW5mb3JtYXRp
+b24gaXMgb2ZmbG9hZCB0aGUgaGVhcnRiZWF0IHRvIDFHYiBuaWMgZG9lc24ndCBzb2x2ZSB0aGUg
+cHJvYmxlbSwgd2hhdCdzIG1vcmUsIHdoZW4gd2UgZG9pbmcgcmFuZG9tIHdyaXRlIHRlc3QsIHdl
+IGNhbiBzdGlsbCBzZWUgdGhpcyBmbGlwcGluZyBoYXBwZW4uIFNvIEkgd291bGQgbGlrZSB0byBz
+YXkgaXQgbWF5IHJlbGF0ZWQgd2l0aCBDUFUgc2NoZWR1bGVyID8gVGhlIGhlYXJ0YmVhdCB0aHJl
+YWQgKGluIGJ1c3kgT1NEICkgZmFpbGVkIHRvIGdldCBlbm91Z2ggY3B1IGN5Y2xlLg0KDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
+bmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
+bGYgT2YgU2FnZSBXZWlsDQpTZW50OiAyMDEzxOo11MIxNcjVIDc6MjMNClRvOiBDaGVuLCBYaWFv
+eGkNCkNjOiBNYXJrIE5lbHNvbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNl
+cnNAY2VwaC5jb20NClN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gT1NEIHN0YXRlIGZsaXBwaW5n
+IHdoZW4gY2x1c3Rlci1uZXR3b3JrIGluIGhpZ2ggdXRpbGl6YXRpb24NCg0KT24gVHVlLCAxNCBN
+YXkgMjAxMywgQ2hlbiwgWGlhb3hpIHdyb3RlOg0KPiBJIGxpa2UgdGhlIGlkZWEgdG8gbGVhdmUg
+cGluZyBpbiBjbHVzdGVyIG5ldHdvcmsgYmVjYXVzZSBpdCBjYW4gaGVscCANCj4gdXMgZGV0ZWN0
+IHN3aXRjaD9uaWMgZmFpbHVyZS4NCj4gDQo+IFdoYXQgY29uZnVzZSBtZSBpcyBJIGtlZXAgcGlu
+Z2luZyBldmVyeSBjZXBoIG5vZGUncyBjbHVzdGVyIGlwP2l0IGlzIA0KPiBPSyBkdXJpbmcgdGhl
+IHdob2xlIHJ1biB3aXRoIGxlc3MgdGhhbiAxIG1zIGxhdGVuY3k/d2h5IHRoZSBoZWFydGJlYXQg
+DQo+IHN0aWxsIHN1ZmZlcj8gVE9QIHNob3cgbXkgY3B1IG5vdCAxMDAlIHV0aWxpemVkP3dpdGgg
+PzMwJSBpbyANCj4gd2FpdD8uRW5hYmxpbmcganVtYm8gZnJhbWUgKipzZWVtcyoqIG1ha2UgdGhp
+bmdzIHdvcnRoLihqdXN0IA0KPiBmZWVsaW5nLm5vIGRhdGEgc3VwcG9ydHMpDQoNCkkgc2F5ICJw
+aW5nIiBpbiB0ZWggZ2VuZXJhbCBzZW5zZS4uIGl0J3Mgbm90IHVzaW5nIElDTVAsIGJ1dCBzZW5k
+aW5nIHNtYWxsIG1lc3NhZ2VzIG92ZXIgYSBUQ1Agc2Vzc2lvbiwgZG9pbmcgc29tZSBtaW5pbWFs
+IHByb2Nlc3Npbmcgb24gdGhlIG90aGVyIGVuZCwgYW5kIHNlbmRpbmcgdGhlbSBiYWNrLiAgSWYg
+dGhlIG1hY2hpbmUgaXMgaGVhdmlseSBsb2FkZWQgYW5kIHRoYXQgdGhyZWFkIGRvZXNuJ3QgZ2V0
+IHNjaGVkdWxlZCBvciBzb21laG93IGJsb2NrcywgaXQgbWF5IGJlIHByb2JsZW1hdGljLg0KDQpI
+b3cgcmVzcG9uc2l2ZSBnZW5lcmFsbHkgaXMgdGhlIG1hY2hpbmUgdW5kZXIgbG9hZD8gIElzIHRo
+ZXJlIGF2YWlsYWJsZSBDUFU/DQoNCldlIGNhbiB0cnkgdG8gZW5hYmxlIGRlYnVnZ2luZyB0byBz
+ZWUgd2hhdCBpcyBnb2luZyBvbi4uICdkZWJ1ZyBtcyA9IDEnIA0KYW5kICdkZWJ1ZyBvc2QgPSAy
+MCcgaXMgZXZlcnl0aGluZyB3ZSB3b3VsZCBuZWVkLCBidXQgd2lsbCBpbmN1ciBhZGRpdG9pbmFs
+IGxvYWQgaXRzZWxmIGFuZCBtYXkgc3BvaWwgdGhlIGV4cGVyaW1lbnQuLi4NCg0Kc2FnZQ0KDQo+
+IA0KPiA/Pz8/IGlQaG9uZQ0KPiANCj4gPyAyMDEzLTUtMTQ/MjM6MzY/Ik1hcmsgTmVsc29uIiA8
+bWFyay5uZWxzb25AaW5rdGFuay5jb20+ID8/Pw0KPiANCj4gPiBPbiAwNS8xNC8yMDEzIDEwOjMw
+IEFNLCBTYWdlIFdlaWwgd3JvdGU6DQo+ID4+IE9uIFR1ZSwgMTQgTWF5IDIwMTMsIENoZW4sIFhp
+YW94aSB3cm90ZToNCj4gPj4+IA0KPiA+Pj4gSGkNCj4gPj4+IA0KPiA+Pj4gICBXZSBhcmUgc3Vm
+ZmVyaW5nIG91ciBPU0QgZmxpcHBpbmcgYmV0d2VlbiB1cCBhbmQgZG93biAoIE9TRCBYIGJlIA0K
+PiA+Pj4gdm90ZWQgdG8gZG93biBkdWUgdG8gMyBtaXNzaW5nIHBpbmcsIGFuZCBhZnRlciBhIHdo
+aWxlIGl0IHRlbGxzIA0KPiA+Pj4gdGhlIG1vbml0b3IgP21hcCB4eHggd3JvbmdseSBtYXJrIG1l
+IGRvd24/ICkuIEJlY2F1c2Ugd2UgYXJlIA0KPiA+Pj4gcnVubmluZyBzZXF1ZW50aWFsIHdyaXRl
+IHBlcmZvcm1hbmNlIHRlc3Qgb24gdG9wIG9mIFJCRHMsIGFuZCB0aGUgDQo+ID4+PiBjbHVzdGVy
+IG5ldHdvcmsgbmljcyBpcyByZWFsbHkgaW4gaGlnaCB1dGlsaXphdGlvbiAoOEdiL3MrIGZvciBh
+IDEwR2IgbmV0d29yaykuDQo+ID4+PiANCj4gPj4+ICAgICAgICAgIElzIHRoaXMgYSBleHBlY3Rl
+ZCBiZWhhdmlvciA/IG9yIGhvdyBjYW4gSSBwcmV2ZW50IHRoaXMgaGFwcGVuPw0KPiA+PiANCj4g
+Pj4gWW91IGFuIGluY3JlYXNlIHRoZSBoZWFydGJlYXQgZ3JhY2UgcGVyaW9kLiAgVGhlIHBpbmdz
+IGFyZSBoYW5kbGVkIA0KPiA+PiBieSBhIHNlcGFyYXRlIHRocmVhZCBvbiB0aGUgYmFja3NpZGUg
+aW50ZXJmYWNlIChpZiB0aGVyZSBpcyBvbmUpLiAgDQo+ID4+IElmIHlvdSBhcmUgbWlzc2luZyBw
+aW5ncyB0aGVuIHRoZSBuZXR3b3JrIG9yIHNjaGVkdWxlciBpcyANCj4gPj4gcHJldmVudGluZyB0
+aG9zZSAoc21hbGwpIG1lc3NhZ2VzIGZyb20gYmVpbmcgcHJvY2Vzc2VkICh0aGVyZSBpcyANCj4g
+Pj4gYWxtb3N0IG5vIGxvY2sgY29udGVudGlvbiBpbiB0aGF0IHBhdGgpLiAgV2hpY2ggbWVhbnMg
+aXQgcmVhbGx5IGlzIA0KPiA+PiB0YWtpbmcgfjIwIHNlY29uZHMgb3Igd2FodGV2ZXIgdG8gaGFu
+ZGxlIHRob3NlIG1lc3NhZ2VzLiAgSXQncyANCj4gPj4gcmVhbGx5IGEgcXVlc3RpbiBvZiBob3cg
+dW5yZXNwb25zaXZlIHlvdSB3YW50IHRvIHBlcm1pdCB0aGUgT1NEcyB0byBiZSBiZWZvcmUgeW91
+IGNvbnNpZGVyIGl0IGEgZmFpbHVyZS4uDQo+ID4+IA0KPiA+PiBzYWdlDQo+ID4+IA0KPiA+PiAN
+Cj4gPiANCj4gPiBJdCBtaWdodCBiZSB3b3J0aCB0ZXN0aW5nIG91dCBob3cgbG9uZyBwaW5ncyBv
+ciBvdGhlciBuZXR3b3JrIHRyYWZmaWMgYXJlIHRha2luZyBkdXJpbmcgdGhlc2UgdGVzdHMuICBU
+aGVyZSBtYXkgYmUgc29tZSB0Y3AgdHVubmluZyB5b3UgY2FuIGRvIGhlcmUsIG9yIGV2ZW4gY29u
+c2lkZXIgdXNpbmcgYSBzZXBhcmF0ZSBuZXR3b3JrIGZvciB0aGUgbW9ucy4NCj4gPiANCj4gPiBN
+YXJrDQo+IA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
+ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdl
+ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCl9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNl
+cnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
+LXVzZXJzLWNlcGguY29tCg==
