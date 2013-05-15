@@ -1,19 +1,19 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: OSD state flipping when cluster-network in high
  utilization
-Date: Wed, 15 May 2013 03:23:19 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0145F746@SHSMSX102.ccr.corp.intel.com>
+Date: Tue, 14 May 2013 20:40:26 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305142039520.23131@cobra.newdream.net>
 References: <6F3FA899187F0043BA1827A69DA2F7CC0145EFF6@SHSMSX102.ccr.corp.intel.com>
 	<alpine.DEB.2.00.1305140828550.22973@cobra.newdream.net>,
 	<519259C5.3000109@inktank.com>
 	<6AC1548D-DE2C-4E71-AC73-3903B57C76C6@intel.com>
 	<alpine.DEB.2.00.1305141620410.12954@cobra.newdream.net>
+	<6F3FA899187F0043BA1827A69DA2F7CC0145F746@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1305141620410.12954-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC0145F746-0J0gbvR4kTiiAffOGbnezLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -23,76 +23,89 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-PkhvdyByZXNwb25zaXZlIGdlbmVyYWxseSBpcyB0aGUgbWFjaGluZSB1bmRlciBsb2FkPyAgSXMg
-dGhlcmUgYXZhaWxhYmxlIENQVT8NCglUaGUgbWFjaGluZSB3b3JrcyB3ZWxsLCBhbmQgdGhlIGlz
-c3VlZCBPU0RzIGFyZSBsaWtlbHkgdGhlIHNhbWUsIHNlZW1zIGJlY2F1c2UgdGhleSBoYXZlIHJl
-bGF0aXZlIHNsb3dlciBkaXNrKCBkaXNrIHR5cGUgYXJlIHRoZSBzYW1lIGJ1dCB0aGUgbGF0ZW5j
-eSBpcyBhIGJpdCBoaWdoZXIgLDhtcyAtPiAxMG1zKS4NCgkNCglUb3Agc2hvdyBubyBpZGxlICUg
-YnV0IHN0aWxsIGhhdmUgMzArJSBvZiBpb193YWl0LCAgbXkgY29sbGVhZ3VlIGVkdWNhdGUgbWUg
-dGhhdCBpb193YWl0IGNhbiBiZSB0cmVhdGVkIGFzIGZyZWUuDQoNCkFub3RoZXIgaW5mb3JtYXRp
-b24gaXMgb2ZmbG9hZCB0aGUgaGVhcnRiZWF0IHRvIDFHYiBuaWMgZG9lc24ndCBzb2x2ZSB0aGUg
-cHJvYmxlbSwgd2hhdCdzIG1vcmUsIHdoZW4gd2UgZG9pbmcgcmFuZG9tIHdyaXRlIHRlc3QsIHdl
-IGNhbiBzdGlsbCBzZWUgdGhpcyBmbGlwcGluZyBoYXBwZW4uIFNvIEkgd291bGQgbGlrZSB0byBz
-YXkgaXQgbWF5IHJlbGF0ZWQgd2l0aCBDUFUgc2NoZWR1bGVyID8gVGhlIGhlYXJ0YmVhdCB0aHJl
-YWQgKGluIGJ1c3kgT1NEICkgZmFpbGVkIHRvIGdldCBlbm91Z2ggY3B1IGN5Y2xlLg0KDQoNCi0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
-bmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
-bGYgT2YgU2FnZSBXZWlsDQpTZW50OiAyMDEzxOo11MIxNcjVIDc6MjMNClRvOiBDaGVuLCBYaWFv
-eGkNCkNjOiBNYXJrIE5lbHNvbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNl
-cnNAY2VwaC5jb20NClN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gT1NEIHN0YXRlIGZsaXBwaW5n
-IHdoZW4gY2x1c3Rlci1uZXR3b3JrIGluIGhpZ2ggdXRpbGl6YXRpb24NCg0KT24gVHVlLCAxNCBN
-YXkgMjAxMywgQ2hlbiwgWGlhb3hpIHdyb3RlOg0KPiBJIGxpa2UgdGhlIGlkZWEgdG8gbGVhdmUg
-cGluZyBpbiBjbHVzdGVyIG5ldHdvcmsgYmVjYXVzZSBpdCBjYW4gaGVscCANCj4gdXMgZGV0ZWN0
-IHN3aXRjaD9uaWMgZmFpbHVyZS4NCj4gDQo+IFdoYXQgY29uZnVzZSBtZSBpcyBJIGtlZXAgcGlu
-Z2luZyBldmVyeSBjZXBoIG5vZGUncyBjbHVzdGVyIGlwP2l0IGlzIA0KPiBPSyBkdXJpbmcgdGhl
-IHdob2xlIHJ1biB3aXRoIGxlc3MgdGhhbiAxIG1zIGxhdGVuY3k/d2h5IHRoZSBoZWFydGJlYXQg
-DQo+IHN0aWxsIHN1ZmZlcj8gVE9QIHNob3cgbXkgY3B1IG5vdCAxMDAlIHV0aWxpemVkP3dpdGgg
-PzMwJSBpbyANCj4gd2FpdD8uRW5hYmxpbmcganVtYm8gZnJhbWUgKipzZWVtcyoqIG1ha2UgdGhp
-bmdzIHdvcnRoLihqdXN0IA0KPiBmZWVsaW5nLm5vIGRhdGEgc3VwcG9ydHMpDQoNCkkgc2F5ICJw
-aW5nIiBpbiB0ZWggZ2VuZXJhbCBzZW5zZS4uIGl0J3Mgbm90IHVzaW5nIElDTVAsIGJ1dCBzZW5k
-aW5nIHNtYWxsIG1lc3NhZ2VzIG92ZXIgYSBUQ1Agc2Vzc2lvbiwgZG9pbmcgc29tZSBtaW5pbWFs
-IHByb2Nlc3Npbmcgb24gdGhlIG90aGVyIGVuZCwgYW5kIHNlbmRpbmcgdGhlbSBiYWNrLiAgSWYg
-dGhlIG1hY2hpbmUgaXMgaGVhdmlseSBsb2FkZWQgYW5kIHRoYXQgdGhyZWFkIGRvZXNuJ3QgZ2V0
-IHNjaGVkdWxlZCBvciBzb21laG93IGJsb2NrcywgaXQgbWF5IGJlIHByb2JsZW1hdGljLg0KDQpI
-b3cgcmVzcG9uc2l2ZSBnZW5lcmFsbHkgaXMgdGhlIG1hY2hpbmUgdW5kZXIgbG9hZD8gIElzIHRo
-ZXJlIGF2YWlsYWJsZSBDUFU/DQoNCldlIGNhbiB0cnkgdG8gZW5hYmxlIGRlYnVnZ2luZyB0byBz
-ZWUgd2hhdCBpcyBnb2luZyBvbi4uICdkZWJ1ZyBtcyA9IDEnIA0KYW5kICdkZWJ1ZyBvc2QgPSAy
-MCcgaXMgZXZlcnl0aGluZyB3ZSB3b3VsZCBuZWVkLCBidXQgd2lsbCBpbmN1ciBhZGRpdG9pbmFs
-IGxvYWQgaXRzZWxmIGFuZCBtYXkgc3BvaWwgdGhlIGV4cGVyaW1lbnQuLi4NCg0Kc2FnZQ0KDQo+
-IA0KPiA/Pz8/IGlQaG9uZQ0KPiANCj4gPyAyMDEzLTUtMTQ/MjM6MzY/Ik1hcmsgTmVsc29uIiA8
-bWFyay5uZWxzb25AaW5rdGFuay5jb20+ID8/Pw0KPiANCj4gPiBPbiAwNS8xNC8yMDEzIDEwOjMw
-IEFNLCBTYWdlIFdlaWwgd3JvdGU6DQo+ID4+IE9uIFR1ZSwgMTQgTWF5IDIwMTMsIENoZW4sIFhp
-YW94aSB3cm90ZToNCj4gPj4+IA0KPiA+Pj4gSGkNCj4gPj4+IA0KPiA+Pj4gICBXZSBhcmUgc3Vm
-ZmVyaW5nIG91ciBPU0QgZmxpcHBpbmcgYmV0d2VlbiB1cCBhbmQgZG93biAoIE9TRCBYIGJlIA0K
-PiA+Pj4gdm90ZWQgdG8gZG93biBkdWUgdG8gMyBtaXNzaW5nIHBpbmcsIGFuZCBhZnRlciBhIHdo
-aWxlIGl0IHRlbGxzIA0KPiA+Pj4gdGhlIG1vbml0b3IgP21hcCB4eHggd3JvbmdseSBtYXJrIG1l
-IGRvd24/ICkuIEJlY2F1c2Ugd2UgYXJlIA0KPiA+Pj4gcnVubmluZyBzZXF1ZW50aWFsIHdyaXRl
-IHBlcmZvcm1hbmNlIHRlc3Qgb24gdG9wIG9mIFJCRHMsIGFuZCB0aGUgDQo+ID4+PiBjbHVzdGVy
-IG5ldHdvcmsgbmljcyBpcyByZWFsbHkgaW4gaGlnaCB1dGlsaXphdGlvbiAoOEdiL3MrIGZvciBh
-IDEwR2IgbmV0d29yaykuDQo+ID4+PiANCj4gPj4+ICAgICAgICAgIElzIHRoaXMgYSBleHBlY3Rl
-ZCBiZWhhdmlvciA/IG9yIGhvdyBjYW4gSSBwcmV2ZW50IHRoaXMgaGFwcGVuPw0KPiA+PiANCj4g
-Pj4gWW91IGFuIGluY3JlYXNlIHRoZSBoZWFydGJlYXQgZ3JhY2UgcGVyaW9kLiAgVGhlIHBpbmdz
-IGFyZSBoYW5kbGVkIA0KPiA+PiBieSBhIHNlcGFyYXRlIHRocmVhZCBvbiB0aGUgYmFja3NpZGUg
-aW50ZXJmYWNlIChpZiB0aGVyZSBpcyBvbmUpLiAgDQo+ID4+IElmIHlvdSBhcmUgbWlzc2luZyBw
-aW5ncyB0aGVuIHRoZSBuZXR3b3JrIG9yIHNjaGVkdWxlciBpcyANCj4gPj4gcHJldmVudGluZyB0
-aG9zZSAoc21hbGwpIG1lc3NhZ2VzIGZyb20gYmVpbmcgcHJvY2Vzc2VkICh0aGVyZSBpcyANCj4g
-Pj4gYWxtb3N0IG5vIGxvY2sgY29udGVudGlvbiBpbiB0aGF0IHBhdGgpLiAgV2hpY2ggbWVhbnMg
-aXQgcmVhbGx5IGlzIA0KPiA+PiB0YWtpbmcgfjIwIHNlY29uZHMgb3Igd2FodGV2ZXIgdG8gaGFu
-ZGxlIHRob3NlIG1lc3NhZ2VzLiAgSXQncyANCj4gPj4gcmVhbGx5IGEgcXVlc3RpbiBvZiBob3cg
-dW5yZXNwb25zaXZlIHlvdSB3YW50IHRvIHBlcm1pdCB0aGUgT1NEcyB0byBiZSBiZWZvcmUgeW91
-IGNvbnNpZGVyIGl0IGEgZmFpbHVyZS4uDQo+ID4+IA0KPiA+PiBzYWdlDQo+ID4+IA0KPiA+PiAN
-Cj4gPiANCj4gPiBJdCBtaWdodCBiZSB3b3J0aCB0ZXN0aW5nIG91dCBob3cgbG9uZyBwaW5ncyBv
-ciBvdGhlciBuZXR3b3JrIHRyYWZmaWMgYXJlIHRha2luZyBkdXJpbmcgdGhlc2UgdGVzdHMuICBU
-aGVyZSBtYXkgYmUgc29tZSB0Y3AgdHVubmluZyB5b3UgY2FuIGRvIGhlcmUsIG9yIGV2ZW4gY29u
-c2lkZXIgdXNpbmcgYSBzZXBhcmF0ZSBuZXR3b3JrIGZvciB0aGUgbW9ucy4NCj4gPiANCj4gPiBN
-YXJrDQo+IA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
-ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCg==
+On Wed, 15 May 2013, Chen, Xiaoxi wrote:
+
+> >How responsive generally is the machine under load?  Is there available CPU?
+> 	The machine works well, and the issued OSDs are likely the same, seems because they have relative slower disk( disk type are the same but the latency is a bit higher ,8ms -> 10ms).
+> 	
+> 	Top show no idle % but still have 30+% of io_wait,  my colleague educate me that io_wait can be treated as free.
+> 
+> Another information is offload the heartbeat to 1Gb nic doesn't solve 
+> the problem, what's more, when we doing random write test, we can still 
+> see this flipping happen. So I would like to say it may related with CPU 
+> scheduler ? The heartbeat thread (in busy OSD ) failed to get enough cpu 
+> cycle.
+
+Can you try reproducing with logs?  If we can reproduce that will give us 
+some clues.
+
+sage
+
+> 
+> -----Original Message-----
+> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Sage Weil
+> Sent: 2013?5?15? 7:23
+> To: Chen, Xiaoxi
+> Cc: Mark Nelson; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org
+> Subject: Re: [ceph-users] OSD state flipping when cluster-network in high utilization
+> 
+> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
+> > I like the idea to leave ping in cluster network because it can help 
+> > us detect switch?nic failure.
+> > 
+> > What confuse me is I keep pinging every ceph node's cluster ip?it is 
+> > OK during the whole run with less than 1 ms latency?why the heartbeat 
+> > still suffer? TOP show my cpu not 100% utilized?with ?30% io 
+> > wait?.Enabling jumbo frame **seems** make things worth.(just 
+> > feeling.no data supports)
+> 
+> I say "ping" in teh general sense.. it's not using ICMP, but sending small messages over a TCP session, doing some minimal processing on the other end, and sending them back.  If the machine is heavily loaded and that thread doesn't get scheduled or somehow blocks, it may be problematic.
+> 
+> How responsive generally is the machine under load?  Is there available CPU?
+> 
+> We can try to enable debugging to see what is going on.. 'debug ms = 1' 
+> and 'debug osd = 20' is everything we would need, but will incur additoinal load itself and may spoil the experiment...
+> 
+> sage
+> 
+> > 
+> > ???? iPhone
+> > 
+> > ? 2013-5-14?23:36?"Mark Nelson" <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> ???
+> > 
+> > > On 05/14/2013 10:30 AM, Sage Weil wrote:
+> > >> On Tue, 14 May 2013, Chen, Xiaoxi wrote:
+> > >>> 
+> > >>> Hi
+> > >>> 
+> > >>>   We are suffering our OSD flipping between up and down ( OSD X be 
+> > >>> voted to down due to 3 missing ping, and after a while it tells 
+> > >>> the monitor ?map xxx wrongly mark me down? ). Because we are 
+> > >>> running sequential write performance test on top of RBDs, and the 
+> > >>> cluster network nics is really in high utilization (8Gb/s+ for a 10Gb network).
+> > >>> 
+> > >>>          Is this a expected behavior ? or how can I prevent this happen?
+> > >> 
+> > >> You an increase the heartbeat grace period.  The pings are handled 
+> > >> by a separate thread on the backside interface (if there is one).  
+> > >> If you are missing pings then the network or scheduler is 
+> > >> preventing those (small) messages from being processed (there is 
+> > >> almost no lock contention in that path).  Which means it really is 
+> > >> taking ~20 seconds or wahtever to handle those messages.  It's 
+> > >> really a questin of how unresponsive you want to permit the OSDs to be before you consider it a failure..
+> > >> 
+> > >> sage
+> > >> 
+> > >> 
+> > > 
+> > > It might be worth testing out how long pings or other network traffic are taking during these tests.  There may be some tcp tunning you can do here, or even consider using a separate network for the mons.
+> > > 
+> > > Mark
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> N????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
