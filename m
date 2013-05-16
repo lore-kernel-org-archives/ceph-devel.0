@@ -1,96 +1,88 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v2 2/3] ceph: add missing cpu_to_le32() calls when encoding
- a reconnect capability
-Date: Wed, 15 May 2013 17:10:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305151709120.26171@cobra.newdream.net>
-References: <1368635894-114707-1-git-send-email-jaschut@sandia.gov> <1368635894-114707-3-git-send-email-jaschut@sandia.gov> <5193BB40.4000501@inktank.com>
+Subject: Re: [PATCH] Fix some little/big endian issues
+Date: Wed, 15 May 2013 23:03:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305152303390.26171@cobra.newdream.net>
+References: <1368629764-10838-1-git-send-email-liwang@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36015 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:52952 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751414Ab3EPAKH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 May 2013 20:10:07 -0400
-In-Reply-To: <5193BB40.4000501@inktank.com>
+	with ESMTP id S1754571Ab3EPGDv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 May 2013 02:03:51 -0400
+In-Reply-To: <1368629764-10838-1-git-send-email-liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: Jim Schutt <jaschut@sandia.gov>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@inktank.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-On Wed, 15 May 2013, Alex Elder wrote:
-> On 05/15/2013 11:38 AM, Jim Schutt wrote:
-> > In his review, Alex Elder mentioned that he hadn't checked that num_fcntl_locks
-> > and num_flock_locks were properly decoded on the server side, from a le32
-> > over-the-wire type to a cpu type.  I checked, and AFAICS it is done; those
-> > interested can consult Locker::_do_cap_update() in src/mds/Locker.cc and
-> > src/include/encoding.h in the Ceph server code (git://github.com/ceph/ceph).
-> > 
-> > I also checked the server side for flock_len decoding, and I believe that
-> > also happens correctly, by virtue of having been declared __le32 in
-> > struct ceph_mds_cap_reconnect, in src/include/ceph_fs.h.
-> > 
-> > Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+Merged this into master, thanks!  Will backport after it cycles through 
+qa.
+
+sage
+
+
+On Wed, 15 May 2013, Li Wang wrote:
+
+> Ceph uses little endian, this patch fixes some endian issues
+> while Ceph running on big endian machine.
 > 
-> Looks good, but I'd like to get someone else to confirm
-> the other end is doing it right (i.e., expecting little
-> endian values).
-
-The server-side endianness conversions are all done through the magic of 
-C++ for the __le* types.  Should be good!
-
-sge
-
-
+> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+> ---
+>  src/include/encoding.h |   12 +++++++-----
+>  1 file changed, 7 insertions(+), 5 deletions(-)
 > 
-> Reviewed-by: Alex Elder <elder@inktank.com>
+> diff --git a/src/include/encoding.h b/src/include/encoding.h
+> index eb445e3..67c9af5 100644
+> --- a/src/include/encoding.h
+> +++ b/src/include/encoding.h
+> @@ -88,11 +88,12 @@ inline void decode(bool &v, bufferlist::iterator& p) {
+>  
+>  #define WRITE_INTTYPE_ENCODER(type, etype)				\
+>    inline void encode(type v, bufferlist& bl, uint64_t features=0) {	\
+> -    __##etype e = init_##etype(v);					\
+> +    ceph_##etype e;					                \
+> +    e = v;                                                              \
+>      encode_raw(e, bl);							\
+>    }									\
+>    inline void decode(type &v, bufferlist::iterator& p) {		\
+> -    __##etype e;							\
+> +    ceph_##etype e;							\
+>      decode_raw(e, p);							\
+>      v = e;								\
+>    }
+> @@ -338,7 +339,7 @@ inline void encode(const std::list<T>& ls, bufferlist& bl)
+>        n++;
+>        encode(*p, bl);
+>      }
+> -    __le32 en;
+> +    ceph_le32 en;
+>      en = n;
+>      bl.copy_in(pos, sizeof(en), (char*)&en);
+>    } else {
+> @@ -373,7 +374,7 @@ inline void encode(const std::list<std::tr1::shared_ptr<T> >& ls, bufferlist& bl
+>        n++;
+>        encode(**p, bl);
+>      }
+> -    __le32 en;
+> +    ceph_le32 en;
+>      en = n;
+>      bl.copy_in(pos, sizeof(en), (char*)&en);
+>    } else {
+> @@ -696,7 +697,8 @@ inline void decode(std::deque<T>& ls, bufferlist::iterator& p)
+>    __u8 struct_v = v, struct_compat = compat;		     \
+>    ::encode(struct_v, bl);				     \
+>    ::encode(struct_compat, bl);				     \
+> -  __le32 struct_len = 0;				     \
+> +  ceph_le32 struct_len;				             \
+> +  struct_len = 0;                                            \
+>    ::encode(struct_len, bl);				     \
+>    buffer::list::iterator struct_len_it = bl.end();	     \
+>    struct_len_it.advance(-4);				     \
+> -- 
+> 1.7.9.5
 > 
-> > ---
-> >  fs/ceph/locks.c      |    7 +++++--
-> >  fs/ceph/mds_client.c |    2 +-
-> >  2 files changed, 6 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> > index ffc86cb..4518313 100644
-> > --- a/fs/ceph/locks.c
-> > +++ b/fs/ceph/locks.c
-> > @@ -206,10 +206,12 @@ int ceph_encode_locks(struct inode *inode, struct ceph_pagelist *pagelist,
-> >  	int err = 0;
-> >  	int seen_fcntl = 0;
-> >  	int seen_flock = 0;
-> > +	__le32 nlocks;
-> >  
-> >  	dout("encoding %d flock and %d fcntl locks", num_flock_locks,
-> >  	     num_fcntl_locks);
-> > -	err = ceph_pagelist_append(pagelist, &num_fcntl_locks, sizeof(u32));
-> > +	nlocks = cpu_to_le32(num_fcntl_locks);
-> > +	err = ceph_pagelist_append(pagelist, &nlocks, sizeof(nlocks));
-> >  	if (err)
-> >  		goto fail;
-> >  	for (lock = inode->i_flock; lock != NULL; lock = lock->fl_next) {
-> > @@ -229,7 +231,8 @@ int ceph_encode_locks(struct inode *inode, struct ceph_pagelist *pagelist,
-> >  			goto fail;
-> >  	}
-> >  
-> > -	err = ceph_pagelist_append(pagelist, &num_flock_locks, sizeof(u32));
-> > +	nlocks = cpu_to_le32(num_flock_locks);
-> > +	err = ceph_pagelist_append(pagelist, &nlocks, sizeof(nlocks));
-> >  	if (err)
-> >  		goto fail;
-> >  	for (lock = inode->i_flock; lock != NULL; lock = lock->fl_next) {
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index 4f22671..d9ca152 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -2485,7 +2485,7 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
-> >  			lock_flocks();
-> >  			ceph_count_locks(inode, &num_fcntl_locks,
-> >  					 &num_flock_locks);
-> > -			rec.v2.flock_len = (2*sizeof(u32) +
-> > +			rec.v2.flock_len = cpu_to_le32(2*sizeof(u32) +
-> >  					    (num_fcntl_locks+num_flock_locks) *
-> >  					    sizeof(struct ceph_filelock));
-> >  			unlock_flocks();
-> > 
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
