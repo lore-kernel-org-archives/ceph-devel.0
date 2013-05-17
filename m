@@ -1,94 +1,109 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: don't destroy ceph_opts in rbd_add()
-Date: Thu, 16 May 2013 18:20:11 -0700
-Message-ID: <519585CB.30006@inktank.com>
-References: <51954FA8.6030306@inktank.com>
+Subject: Re: [PATCH, v2] rbd: fix cleanup in rbd_add()
+Date: Thu, 16 May 2013 18:36:09 -0700
+Message-ID: <51958989.3000003@inktank.com>
+References: <519195B4.1080802@inktank.com> <51954FAD.2090206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:62204 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750698Ab3EQBV3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 May 2013 21:21:29 -0400
-Received: by mail-pb0-f51.google.com with SMTP id jt11so1758365pbb.24
-        for <ceph-devel@vger.kernel.org>; Thu, 16 May 2013 18:21:29 -0700 (PDT)
-In-Reply-To: <51954FA8.6030306@inktank.com>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:38853 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751220Ab3EQBh0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 May 2013 21:37:26 -0400
+Received: by mail-pd0-f177.google.com with SMTP id g10so2869841pdj.36
+        for <ceph-devel@vger.kernel.org>; Thu, 16 May 2013 18:37:26 -0700 (PDT)
+In-Reply-To: <51954FAD.2090206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-
 On 05/16/2013 02:29 PM, Alex Elder wrote:
-> (Note: this patch and the two I'm about to re-post are available
-> in the "review/wip-4559" branch of the ceph-client git repository.)
+> Bjorn Helgaas pointed out that a recent commit introduced a
+> use-after-free condition in an error path for rbd_add().
+> He correctly stated:
 >
+>      I think b536f69a3a5 "rbd: set up devices only for mapped images"
+>      introduced a use-after-free error in rbd_add():
+> 	...
+>      If rbd_dev_device_setup() returns an error, we call
+>      rbd_dev_image_release(), which ultimately kfrees rbd_dev.
+>      Then we call rbd_dev_destroy(), which references fields in
+>      the already-freed rbd_dev struct before kfreeing it again.
 >
+> The simple fix is to return the error code after the call to
+> rbd_dev_image_release().
 >
-> Whether rbd_client_create() successfully creates a new client or
-> not, it takes responsibility for getting the ceph_opts structure
-> it's passed destroyed.  If successful, the structure becomes
-> associated with the created client; if not, rbd_client_create()
-> will destroy it.
+> Closer examination revealed that there's no need to clean up
+> rbd_opts in that function, so fix that too.
 >
-> Previously, rbd_get_client() would call ceph_destroy_options()
-> if rbd_get_client() failed, and that meant it got called twice.
-> That led freeing various pointers more than once, which is never a
-> good idea.
+> Update some other comments that have also become out of date.
 >
-> This resolves:
->      http://tracker.ceph.com/issues/4559
->
-> Reported-by: Dan van der Ster <dan@vanderster.com>
+> Reported-by: Bjorn Helgaas <bhelgaas@google.com>
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   10 ++++------
->   1 file changed, 4 insertions(+), 6 deletions(-)
+> v2: call to ceph_destroy_options() moved to its own patch
+>
+>   drivers/block/rbd.c |   17 +++++++++++------
+>   1 file changed, 11 insertions(+), 6 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index e8d4693..ade30dd 100644
+> index ade30dd..fdbcf04 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -521,8 +521,8 @@ static const struct block_device_operations
-> rbd_bd_ops = {
->   };
+> @@ -4700,8 +4700,10 @@ out:
+>   	return ret;
+>   }
 >
->   /*
-> - * Initialize an rbd client instance.
-> - * We own *ceph_opts.
-> + * Initialize an rbd client instance.  Success or not, this function
-> + * consumes ceph_opts.
->    */
->   static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts)
+> -/* Undo whatever state changes are made by v1 or v2 image probe */
+> -
+> +/*
+> + * Undo whatever state changes are made by v1 or v2 header info
+> + * call.
+> + */
+>   static void rbd_dev_unprobe(struct rbd_device *rbd_dev)
 >   {
-> @@ -677,7 +677,8 @@ static int parse_rbd_opts_token(char *c, void *private)
+>   	struct rbd_image_header	*header;
+> @@ -4905,9 +4907,10 @@ static int rbd_dev_image_probe(struct rbd_device
+> *rbd_dev, bool mapping)
+>   	int tmp;
 >
->   /*
->    * Get a ceph client with specific addr and configuration, if one does
-> - * not exist create it.
-> + * not exist create it.  Either way, ceph_opts is consumed by this
-> + * function.
->    */
->   static struct rbd_client *rbd_get_client(struct ceph_options *ceph_opts)
->   {
-> @@ -4994,7 +4995,6 @@ static ssize_t rbd_add(struct bus_type *bus,
->   		rc = PTR_ERR(rbdc);
->   		goto err_out_args;
->   	}
-> -	ceph_opts = NULL;	/* rbd_dev client now owns this */
+>   	/*
+> -	 * Get the id from the image id object.  If it's not a
+> -	 * format 2 image, we'll get ENOENT back, and we'll assume
+> -	 * it's a format 1 image.
+> +	 * Get the id from the image id object.  Unless there's an
+> +	 * error, rbd_dev->spec->image_id will be filled in with
+> +	 * a dynamically-allocated string, and rbd_dev->image_format
+> +	 * will be set to either 1 or 2.
+>   	 */
+>   	ret = rbd_dev_image_id(rbd_dev);
+>   	if (ret)
+> @@ -5033,12 +5036,14 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   		return count;
 >
->   	/* pick the pool */
->   	osdc = &rbdc->client->osdc;
-> @@ -5038,8 +5038,6 @@ err_out_rbd_dev:
+>   	rbd_dev_image_release(rbd_dev);
+
+It looks like rbd_dev_image_release() does all the needed cleanup
+except the module_put(). Just adding a module_put() here would do the
+trick I think, since rbd_dev_image_release() is also used for parent
+images that don't call module_get() and module_put().
+
+With that change:
+
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+> +
+> +	return rc;
+> +
+>   err_out_rbd_dev:
+>   	rbd_dev_destroy(rbd_dev);
 >   err_out_client:
 >   	rbd_put_client(rbdc);
 >   err_out_args:
-> -	if (ceph_opts)
-> -		ceph_destroy_options(ceph_opts);
->   	kfree(rbd_opts);
+> -	kfree(rbd_opts);
 >   	rbd_spec_put(spec);
 >   err_out_module:
->
+>   	module_put(THIS_MODULE);
 
