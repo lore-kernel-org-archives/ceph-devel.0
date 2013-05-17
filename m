@@ -1,40 +1,81 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: PG down & incomplete
-Date: Fri, 17 May 2013 07:32:02 +0200
-Message-ID: <1368768722.22569.1.camel@localhost>
+From: John Wilkins <john.wilkins@inktank.com>
+Subject: Re: [ceph-users] PG down & incomplete
+Date: Fri, 17 May 2013 00:14:15 -0700
+Message-ID: <CAM2gkg4znKDOp-D=z459G2MCQcGzkHrLWF_Ox8uGexZNcMUM3Q@mail.gmail.com>
 References: <1368569751.5157.5.camel@localhost>
+	<1368768722.22569.1.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1368569751.5157.5.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:44125 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753505Ab3EQHOQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 May 2013 03:14:16 -0400
+Received: by mail-vc0-f173.google.com with SMTP id ht10so3408936vcb.4
+        for <ceph-devel@vger.kernel.org>; Fri, 17 May 2013 00:14:15 -0700 (PDT)
+In-Reply-To: <1368768722.22569.1.camel@localhost>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-TGUgbWVyY3JlZGkgMTUgbWFpIDIwMTMgw6AgMDA6MTUgKzAyMDAsIE9saXZpZXIgQm9udmFsZXQg
-YSDDqWNyaXQgOgo+IEhpLAo+IAo+IEkgaGF2ZSBzb21lIFBHIGluIHN0YXRlIGRvd24gYW5kL29y
-IGluY29tcGxldGUgb24gbXkgY2x1c3RlciwgYmVjYXVzZSBJCj4gbG9vc2UgMiBPU0QgYW5kIGEg
-cG9vbCB3YXMgaGF2aW5nIG9ubHkgMiByZXBsaWNhcy4gU28gb2YgY291cnNlIHRoYXQKPiBkYXRh
-IGlzIGxvc3QuCj4gCj4gTXkgcHJvYmxlbSBub3cgaXMgdGhhdCBJIGNhbid0IHJldHJlaXZlIGEg
-IkhFQUxUSF9PSyIgc3RhdHVzIDogaWYgSSB0cnkKPiB0byByZW1vdmUsIHJlYWQgb3Igb3Zlcndy
-aXRlIHRoZSBjb3JyZXNwb25kaW5nIFJCRCBpbWFnZXMsIG5lYXIgYWxsIE9TRAo+IGhhbmcgKHdl
-bGwuLi4gdGhleSBkb24ndCBkbyBhbnl0aGluZyBhbmQgcmVxdWVzdHMgc3RheSBpbiBhIGdyb3dp
-bmcKPiBxdWV1ZSwgdW50aWwgdGhlIHByb2R1Y3Rpb24gd2lsbCBiZSBkb25lKS4KPiAKPiBTbywg
-d2hhdCBjYW4gSSBkbyB0byByZW1vdmUgdGhhdCBjb3JydXB0cyBpbWFnZXMgPwo+IAo+IF9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBt
-YWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNl
-cGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gCgpVcC4gTm9ib2R5IGNh
-biBoZWxwIG1lIG9uIHRoYXQgcHJvYmxlbSA/CgpUaGFua3MsCgpPbGl2aWVyCgpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+If you can follow the documentation here:
+http://ceph.com/docs/master/rados/operations/monitoring-osd-pg/  and
+http://ceph.com/docs/master/rados/troubleshooting/  to provide some
+additional information, we may be better able to help you.
+
+=46or example, "ceph osd tree" would help us understand the status of
+your cluster a bit better.
+
+On Thu, May 16, 2013 at 10:32 PM, Olivier Bonvalet <ceph.list@daevel.fr=
+> wrote:
+> Le mercredi 15 mai 2013 =C3=A0 00:15 +0200, Olivier Bonvalet a =C3=A9=
+crit :
+>> Hi,
+>>
+>> I have some PG in state down and/or incomplete on my cluster, becaus=
+e I
+>> loose 2 OSD and a pool was having only 2 replicas. So of course that
+>> data is lost.
+>>
+>> My problem now is that I can't retreive a "HEALTH_OK" status : if I =
+try
+>> to remove, read or overwrite the corresponding RBD images, near all =
+OSD
+>> hang (well... they don't do anything and requests stay in a growing
+>> queue, until the production will be done).
+>>
+>> So, what can I do to remove that corrupts images ?
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>
+> Up. Nobody can help me on that problem ?
+>
+> Thanks,
+>
+> Olivier
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+
+
+--=20
+John Wilkins
+Senior Technical Writer
+Intank
+john.wilkins@inktank.com
+(415) 425-9599
+http://inktank.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
