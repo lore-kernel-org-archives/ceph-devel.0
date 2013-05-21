@@ -1,89 +1,51 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: Segmentation faults in ceph-osd
-Date: Tue, 21 May 2013 12:00:28 -0700
-Message-ID: <CA+4uBUbH6QXjZrAed5PetFYoRj+nPf-scBhFgCemVAo5KZSLyQ@mail.gmail.com>
-References: <CANBLGcybBofQqpP2wetuN+QDPO_QaX2s8AhM2WebcvW7njBd4Q@mail.gmail.com>
-	<CAPYLRziXri6RYPZGCqQbnVS87XrnH1Bq2deX3yY4A8G5g3Yk5Q@mail.gmail.com>
-	<CANBLGcwPMCSpXDgsXKBDQ2p-FhQNYg-FqagrUCrpa=BMTcogEg@mail.gmail.com>
-	<CAPYLRzjiBJ7dBTibfLhPwRhCu+vEVcBCB_1dQpOKL+VT_TY2bw@mail.gmail.com>
-	<CANBLGcyp9htDc=qZYP6iga-oSC7cGV-68F8UgWvR3rRKQhCX9A@mail.gmail.com>
-	<CAPYLRzgd7ikRn=MoQUgazHJYUMUbzRwoH6PYJMcaBckbvdMLgg@mail.gmail.com>
-	<98EBE255-FB43-4390-A53B-CE14CD2FE62B@saaby.com>
-	<CA+4uBUY4YkSGJ-9rC0JpMfP-vE5uL2gbPOoEynK8ZSzs1StjGw@mail.gmail.com>
-	<CANBLGcw+=8JMi0ihwm-qgALE9LjqzViB2t7OcQKb3g5QsMXDWQ@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: OSD memory leak when scrubbing [0.56.6]
+Date: Tue, 21 May 2013 21:29:25 +0200
+Message-ID: <519BCB15.8070502@profihost.ag>
+References: <519B9196.5090402@filoo.de> <CAF6-1L6E6s_wP6012ifwTRwZA4bp5+OLmYo92Y5QbmS20uxReA@mail.gmail.com> <FB4F06C0-410B-43C0-A5CE-64AFD18B29D0@profihost.ag> <alpine.DEB.2.00.1305210841410.30656@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:52207 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752265Ab3EUTAa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 15:00:30 -0400
-Received: by mail-ee0-f46.google.com with SMTP id e49so623324eek.5
-        for <ceph-devel@vger.kernel.org>; Tue, 21 May 2013 12:00:29 -0700 (PDT)
-In-Reply-To: <CANBLGcw+=8JMi0ihwm-qgALE9LjqzViB2t7OcQKb3g5QsMXDWQ@mail.gmail.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:43138 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752054Ab3EUT32 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 15:29:28 -0400
+In-Reply-To: <alpine.DEB.2.00.1305210841410.30656@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Emil Renner Berthing <ceph@esmil.dk>
-Cc: Anders Saaby <anders@saaby.com>, Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-How large are the xattrs?
--Sam
-
-On Tue, May 21, 2013 at 10:13 AM, Emil Renner Berthing <ceph@esmil.dk> =
-wrote:
-> On 21 May 2013 19:05, Samuel Just <sam.just@inktank.com> wrote:
->> Do you use xattrs at all?
->
-> Yes, on each object we set between 2 to 4 attributes at write time
-> which are then left unchanged.
-> /Emil
->
->> -Sam
+Am 21.05.2013 17:44, schrieb Sage Weil:
+> On Tue, 21 May 2013, Stefan Priebe - Profihost AG wrote:
+>> Am 21.05.2013 um 17:35 schrieb Sylvain Munaut <s.munaut@whatever-company.com>:
 >>
->> On Tue, May 21, 2013 at 9:34 AM, Anders Saaby <anders@saaby.com> wro=
-te:
->>> On 21/05/2013, at 18.19, Gregory Farnum <greg@inktank.com> wrote:
->>>> On Tue, May 21, 2013 at 9:01 AM, Emil Renner Berthing <ceph@esmil.=
-dk> wrote:
->>>>> On 21 May 2013 17:55, Gregory Farnum <greg@inktank.com> wrote:
->>>>>> On Tue, May 21, 2013 at 8:44 AM, Emil Renner Berthing <ceph@esmi=
-l.dk> wrote:
->>>>>>> Hi Greg,
->>>>>>>
->>>>>>> Here are some more stats on our servers:
->>>>>>> - each server has 64GB ram,
->>>>>>> - there are 12 OSDs pr. server,
->>>>>>> - each OSD uses around 1.5 GB of memory,
->>>>>>> - we have 18432 PGs,
->>>>>>> - around 5 to 10 MB writes/s is written to each OSD and almost =
-no reads (yet).
->>>>>>
->>>>>> What interface are you writing with? How many OSD servers are th=
-ere?
->>>>>
->>>>> We're using librados and there are 132 OSDs so far.
+>>> Hi,
+>>>
+>>>> subject seems familiar, version was 0.48.3 in the last mail.
 >>>>
->>>> Okay, so the allocation is happening in the depths of LevelDB =97 =
-maybe
->>>> the issue is there somewhere. Are you doing anything weird with om=
-ap,
->>>> snapshots, or xattrs?
+>>>> Not anyone else with perhaps large pg's experiencing such behaviour?
+>>>>
+>>>> Any advice on how to proceed?
 >>>
->>> I can help; No, we are not using omap, snaps or weird stuff with xa=
-ttrs.
+>>> I had the same behavior in both argonaut and bobtail, raising sharply
+>>> ~ 100M or so at each scrub (every 24h).
 >>>
->>> We are storing objects of sizes from few KB to GBs. Also, we have a=
- quirk in the application design right now, which means that we store a=
-n object, write it again under a new name and delete the original objec=
-t. - if that is of any potential value to finding this.
+>>> It's now resolved in cuttlefish AFAICT.
 >>>
->>>
->>> --
->>> Anders
->>>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> However given the mon leveldb issues I'm having with cuttlefish, I'm
+>>> not sure I'd recommend upgrading ...
+>>
+>> I thought all mon leveldb issues were solved?
+>
+> Not quite.  I'm now able to reproduce the leveldb growth from Mike
+> Dawson's trace (thanks!) but we don't have a fix yet.
+
+Oh OK. Is there a tracker id?
+
+> I thought the scrub memory issues were addressed by
+> f80f64cf024bd7519d5a1fb2a5698db97a003ce8 in 0.56.4... :(
+>
+> sage
+>
