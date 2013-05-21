@@ -1,37 +1,35 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: [ceph-users] mon IO usage
-Date: Tue, 21 May 2013 08:56:47 -0700
-Message-ID: <CAPYLRzjJHZireZOA8G2Msq3dzHYDM=3TUfeKnZ1hxTgRGNYONQ@mail.gmail.com>
-References: <CAF6-1L4oWCwNxywALb=cUNP_pbD=ND631MJqvCWyvAfvNdWauQ@mail.gmail.com>
-	<519B6F28.9000400@scholarstack.com>
-	<519B75B2.4070405@scholarstack.com>
-	<CAF6-1L4NHhtaaGGB4vBwWWqEa0pVR4T44-Xx_eTmkUEEXHsfgA@mail.gmail.com>
+Date: Tue, 21 May 2013 08:57:34 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305210854320.16413@cobra.newdream.net>
+References: <CAF6-1L4oWCwNxywALb=cUNP_pbD=ND631MJqvCWyvAfvNdWauQ@mail.gmail.com> <519B6F28.9000400@scholarstack.com> <519B75B2.4070405@scholarstack.com> <CAF6-1L4NHhtaaGGB4vBwWWqEa0pVR4T44-Xx_eTmkUEEXHsfgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:48590 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752612Ab3EUP4t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 11:56:49 -0400
-Received: by mail-lb0-f178.google.com with SMTP id w10so980403lbi.37
-        for <ceph-devel@vger.kernel.org>; Tue, 21 May 2013 08:56:48 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:39870 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754456Ab3EUP5f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 11:57:35 -0400
 In-Reply-To: <CAF6-1L4NHhtaaGGB4vBwWWqEa0pVR4T44-Xx_eTmkUEEXHsfgA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: Mike Dawson <mike.dawson@scholarstack.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Mike Dawson <mike.dawson@scholarstack.com>, ceph-users@lists.ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, May 21, 2013 at 8:52 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
+On Tue, 21 May 2013, Sylvain Munaut wrote:
 > So, AFAICT, the bulk of the write would be writing out the pgmap to
 > disk every second or so.
->
+
+It should be writing out the full map only every N commits... see 'paxos 
+stash full interval', which defaults to 25.
+
 > Is it really needed to write it in full ? It doesn't change all that
 > much AFAICT, so writing incremental changes with only periodic flush
 > might be a better option ?
 
-Yeah; this is definitely in our heads as work we'd like to get done.
-LevelDB is costing us more throughput than we were expecting so people
-are running into trouble much earlier than we expected.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Right.  It works this way now only because we haven't fully transitioned 
+from the old scheme.  The next step is to store the PGMap over lots of 
+leveldb keys (one per pg) so that there is no big encode/decode of the 
+entire PGMap structure...
+
+sage
