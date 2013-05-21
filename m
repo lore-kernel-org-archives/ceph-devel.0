@@ -1,125 +1,62 @@
-From: Emil Renner Berthing <ceph@esmil.dk>
-Subject: Re: Segmentation faults in ceph-osd
-Date: Tue, 21 May 2013 18:01:53 +0200
-Message-ID: <CANBLGcyp9htDc=qZYP6iga-oSC7cGV-68F8UgWvR3rRKQhCX9A@mail.gmail.com>
-References: <CANBLGcybBofQqpP2wetuN+QDPO_QaX2s8AhM2WebcvW7njBd4Q@mail.gmail.com>
- <CAPYLRziXri6RYPZGCqQbnVS87XrnH1Bq2deX3yY4A8G5g3Yk5Q@mail.gmail.com>
- <CANBLGcwPMCSpXDgsXKBDQ2p-FhQNYg-FqagrUCrpa=BMTcogEg@mail.gmail.com> <CAPYLRzjiBJ7dBTibfLhPwRhCu+vEVcBCB_1dQpOKL+VT_TY2bw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Mike Dawson <mdawson@gammacode.com>
+Subject: Re: OSD memory leak when scrubbing [0.56.6]
+Date: Tue, 21 May 2013 12:04:19 -0400
+Message-ID: <D08A95C8-CCB6-4BE1-A7B2-65658444B7FB@gammacode.com>
+References: <519B9196.5090402@filoo.de> <CAF6-1L6E6s_wP6012ifwTRwZA4bp5+OLmYo92Y5QbmS20uxReA@mail.gmail.com> <FB4F06C0-410B-43C0-A5CE-64AFD18B29D0@profihost.ag> <alpine.DEB.2.00.1305210841410.30656@cobra.newdream.net>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f50.google.com ([209.85.212.50]:63240 "EHLO
-	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753809Ab3EUQCO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 12:02:14 -0400
-Received: by mail-vb0-f50.google.com with SMTP id w16so548952vbb.9
-        for <ceph-devel@vger.kernel.org>; Tue, 21 May 2013 09:02:13 -0700 (PDT)
-In-Reply-To: <CAPYLRzjiBJ7dBTibfLhPwRhCu+vEVcBCB_1dQpOKL+VT_TY2bw@mail.gmail.com>
+Received: from 23-25-46-103-static.hfc.comcastbusiness.net ([23.25.46.103]:58729
+	"EHLO mail1.gammacode.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753608Ab3EUQEc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 12:04:32 -0400
+In-Reply-To: <alpine.DEB.2.00.1305210841410.30656@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Sylvain Munaut <s.munaut@whatever-company.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 21 May 2013 17:55, Gregory Farnum <greg@inktank.com> wrote:
-> On Tue, May 21, 2013 at 8:44 AM, Emil Renner Berthing <ceph@esmil.dk> wrote:
->> Hi Greg,
->>
->> Here are some more stats on our servers:
->> - each server has 64GB ram,
->> - there are 12 OSDs pr. server,
->> - each OSD uses around 1.5 GB of memory,
->> - we have 18432 PGs,
->> - around 5 to 10 MB writes/s is written to each OSD and almost no reads (yet).
->
-> What interface are you writing with? How many OSD servers are there?
+Sage,
 
-We're using librados and there are 132 OSDs so far.
+Great news! My mons are growing again, but are significantly smaller right now. If you need a smaller set of data, I can probably get you something today.
 
-/Emil
+Mike
 
-> -Greg
->
->
->>
->> /Emil
->>
->> On 21 May 2013 17:10, Gregory Farnum <greg@inktank.com> wrote:
->>> That looks like an attempt at a 370MB memory allocation. :? What's the
->>> memory use like on those nodes, and what's your workload?
->>> -Greg
->>>
->>>
->>> On Tuesday, May 21, 2013, Emil Renner Berthing wrote:
->>>>
->>>> Hi,
->>>>
->>>> We're experiencing random segmentation faults in the osd daemon from
->>>> the 0.61.2-1~bpo70+1 debian packages. It happens across all our
->>>> servers and we've seen around 40 crashes in the last week.
->>>>
->>>> It seems to happen more often on loaded servers, but at least they all
->>>> return the same error in the logs. An example can be found here:
->>>> http://esmil.dk/osdcrash.txt
->>>>
->>>> Here is the backtrace from the core dump:
->>>>
->>>> #0  0x00007f87b148eefb in raise () from
->>>> /lib/x86_64-linux-gnu/libpthread.so.0
->>>> #1  0x0000000000853a89 in reraise_fatal (signum=11) at
->>>> global/signal_handler.cc:58
->>>> #2  handle_fatal_signal (signum=11) at global/signal_handler.cc:104
->>>> #3  <signal handler called>
->>>> #4  0x00007f87b06a96f3 in do_malloc (size=388987616) at
->>>> src/tcmalloc.cc:1059
->>>> #5  cpp_alloc (nothrow=false, size=388987616) at src/tcmalloc.cc:1354
->>>> #6  tc_new (size=388987616) at src/tcmalloc.cc:1530
->>>> #7  0x00007f87a60c89b0 in ?? ()
->>>> #8  0x00000000172f7ae0 in ?? ()
->>>> #9  0x00007f87b0459b21 in ?? () from
->>>> /usr/lib/x86_64-linux-gnu/libleveldb.so.1
->>>> #10 0x00007f87b0456ba8 in ?? () from
->>>> /usr/lib/x86_64-linux-gnu/libleveldb.so.1
->>>> #11 0x00007f87b04424d4 in ?? () from
->>>> /usr/lib/x86_64-linux-gnu/libleveldb.so.1
->>>> #12 0x0000000000840977 in
->>>> LevelDBStore::LevelDBWholeSpaceIteratorImpl::lower_bound
->>>> (this=0x20910a20, prefix=..., to=...) at os/LevelDBStore.h:204
->>>> #13 0x000000000083f351 in LevelDBStore::get (this=<optimized out>,
->>>> prefix=..., keys=..., out=0x7f87a60c8d00) at os/LevelDBStore.cc:106
->>>> #14 0x0000000000838449 in DBObjectMap::_lookup_map_header
->>>> (this=this@entry=0x316d4a0, hoid=...) at os/DBObjectMap.cc:1080
->>>> #15 0x000000000083e4a9 in DBObjectMap::lookup_map_header
->>>> (this=this@entry=0x316d4a0, hoid=...) at os/DBObjectMap.h:404
->>>> #16 0x0000000000839e06 in DBObjectMap::rm_keys (this=0x316d4a0,
->>>> hoid=..., to_clear=..., spos=0x7f87a60c9400) at os/DBObjectMap.cc:696
->>>> #17 0x00000000007f40c1 in FileStore::_omap_rmkeys
->>>> (this=this@entry=0x3188000, cid=..., hoid=..., keys=..., spos=...) at
->>>> os/FileStore.cc:4765
->>>> #18 0x000000000080f610 in FileStore::_do_transaction
->>>> (this=this@entry=0x3188000, t=..., op_seq=op_seq@entry=4760123,
->>>> trans_num=trans_num@entry=0) at os/FileStore.cc:2595
->>>> #19 0x0000000000812999 in FileStore::_do_transactions
->>>> (this=this@entry=0x3188000, tls=..., op_seq=4760123,
->>>> handle=handle@entry=0x7f87a60c9b80) at os/FileStore.cc:2151
->>>> #20 0x0000000000812b2e in FileStore::_do_op (this=0x3188000,
->>>> osr=<optimized out>, handle=...) at os/FileStore.cc:1985
->>>> #21 0x00000000008f52ea in ThreadPool::worker (this=0x3188a08,
->>>> wt=0x319c3e0) at common/WorkQueue.cc:119
->>>> #22 0x00000000008f6590 in ThreadPool::WorkThread::entry
->>>> (this=<optimized out>) at common/WorkQueue.h:316
->>>> #23 0x00007f87b1486b50 in start_thread () from
->>>> /lib/x86_64-linux-gnu/libpthread.so.0
->>>> #24 0x00007f87af9c2a7d in clone () from /lib/x86_64-linux-gnu/libc.so.6
->>>> #25 0x0000000000000000 in ?? ()
->>>>
->>>> Please let me know if can provide any other info to help find this bug.
->>>> /Emil
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Software Engineer #42 @ http://inktank.com | http://ceph.com
+Sent from my iPhone
+
+On May 21, 2013, at 11:44 AM, Sage Weil <sage@inktank.com> wrote:
+
+> On Tue, 21 May 2013, Stefan Priebe - Profihost AG wrote:
+>> Am 21.05.2013 um 17:35 schrieb Sylvain Munaut <s.munaut@whatever-company.com>:
+>> 
+>>> Hi,
+>>> 
+>>>> subject seems familiar, version was 0.48.3 in the last mail.
+>>>> 
+>>>> Not anyone else with perhaps large pg's experiencing such behaviour?
+>>>> 
+>>>> Any advice on how to proceed?
+>>> 
+>>> I had the same behavior in both argonaut and bobtail, raising sharply
+>>> ~ 100M or so at each scrub (every 24h).
+>>> 
+>>> It's now resolved in cuttlefish AFAICT.
+>>> 
+>>> However given the mon leveldb issues I'm having with cuttlefish, I'm
+>>> not sure I'd recommend upgrading ...
+>> 
+>> I thought all mon leveldb issues were solved?
+> 
+> Not quite.  I'm now able to reproduce the leveldb growth from Mike 
+> Dawson's trace (thanks!) but we don't have a fix yet.
+> 
+> I thought the scrub memory issues were addressed by 
+> f80f64cf024bd7519d5a1fb2a5698db97a003ce8 in 0.56.4... :(
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
