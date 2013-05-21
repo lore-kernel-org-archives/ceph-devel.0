@@ -1,86 +1,71 @@
-From: Mike Dawson <mike.dawson-9dgm/EUDD3RBYT3KYJiKsA@public.gmane.org>
-Subject: Re: mon IO usage
-Date: Tue, 21 May 2013 09:25:06 -0400
-Message-ID: <519B75B2.4070405@scholarstack.com>
-References: <CAF6-1L4oWCwNxywALb=cUNP_pbD=ND631MJqvCWyvAfvNdWauQ@mail.gmail.com>
-	<519B6F28.9000400@scholarstack.com>
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: OSD memory leak when scrubbing [0.56.6]
+Date: Tue, 21 May 2013 17:24:06 +0200
+Message-ID: <519B9196.5090402@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <519B6F28.9000400-9dgm/EUDD3RBYT3KYJiKsA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sylvain Munaut <s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-1.de-punkt.de ([93.190.64.237]:37320 "EHLO
+	mail-1.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754063Ab3EUPbO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 May 2013 11:31:14 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail-1.de-punkt.de (Postfix) with ESMTP id 7B86E3A3B6
+	for <ceph-devel@vger.kernel.org>; Tue, 21 May 2013 17:24:06 +0200 (CEST)
+Received: from mail-1.de-punkt.de ([127.0.0.1])
+	by localhost (mail-10.de-punkt.de [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 1raTW0bv+-EN for <ceph-devel@vger.kernel.org>;
+	Tue, 21 May 2013 17:24:06 +0200 (CEST)
+Received: from [192.168.1.152] (p4FECEC7E.dip0.t-ipconnect.de [79.236.236.126])
+	(Authenticated sender: oliver.francke@filoo.de)
+	by mail-1.de-punkt.de (Postfix) with ESMTPSA id 54A5D3A249
+	for <ceph-devel@vger.kernel.org>; Tue, 21 May 2013 17:24:06 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks for the correction on IRC. I should have written that this issue 
-started with 0.59 (when the monitor changes hit).
+Well,
 
-http://ceph.com/dev-notes/cephs-new-monitor-changes/
+subject seems familiar, version was 0.48.3 in the last mail.
 
-The writeup and release notes sometimes say they went in for 0.58, but I 
-believe they were actually released in 0.59.
+Some more of the story. Before successful upgrade to latest bobtail=20
+everything with regards to scrubbing was disabled.
+That is via:
+     ceph osd tell \* injectargs '--osd-max-scrubs 0'
 
-Thanks for the correction Sylvain.
+We are running fine now since 9th of may. Fine means though, not have=20
+ran any scrubbing for ages.
+This morning I re-started scrubbing. After a couple of hours I detected=
+=20
+the first OSD's eating up memory.
+Top-scorer was running with 23GiB rss. After stopping scrubbing again=20
+there was no regain of memory.
 
-- Mike
+Not anyone else with perhaps large pg's experiencing such behaviour?
 
-On 5/21/2013 8:57 AM, Mike Dawson wrote:
-> Sylvain,
->
-> I can confirm I see a similar traffic pattern.
->
-> Any time I have lots of writes going to my cluster (like heavy writes
-> from RBD or remapping/backfilling after losing an OSD), I see all sorts
-> of monitor issues.
->
-> If my monitor leveldb store.db directories grow past some unknown point
-> (maybe ~1GB or so), 'compact on trim' is insufficiently slow. The
-> store.db grows faster than compact can trim the garbage. After that
-> point, the only hope to rein in the store.db size is to stop the OSDs
-> and get leveldb to compact without any ongoing writes.
->
-> I sent Sage and Joao a transaction dump of the growth yesterday. Sage
-> looked, but the files are so large it is tough to get useful info.
->
-> http://tracker.ceph.com/issues/4895
->
-> I believe this issue has existed since 0.48.
->
-> - Mike
->
-> On 5/21/2013 8:16 AM, Sylvain Munaut wrote:
->> Hi,
->>
->>
->> I've just added some monitoring to the IO usage of mon (trying to
->> track down that growing mon issue), and I'm kind of surprised by the
->> amount of IO generated by the monitor process.
->>
->> I get continuous 4 Mo/s / 75 iops with added big spikes at each
->> compaction every 3 min or so.
->>
->> Is there a description somewhere of what the monitor does exactly ?  I
->> mean the monmap / pgmap / osdmap / mdsmap / election epoch don't
->> change that often (pgmap is like 1 per second and that's the fastest
->> change by several orders of magnitude). So what exactly does the
->> monitor do with all that IO ???
->>
->>
->> Cheers,
->>
->>      Sylvain
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
+Any advice on how to proceed?
+
+Thnx in advance,
+
+Oliver.
+
+--=20
+
+Oliver Francke
+
+filoo GmbH
+Moltkestra=DFe 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
+
+Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
+
+=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
