@@ -1,58 +1,47 @@
-From: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>
-Subject: Re: OSD memory leak when scrubbing [0.56.6]
-Date: Wed, 22 May 2013 08:21:18 +0200
-Message-ID: <519C63DE.7070404@risc-software.at>
-References: <519B9196.5090402@filoo.de>
+From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
+Subject: Re: scrub error: found clone without head
+Date: Wed, 22 May 2013 09:00:51 +0200
+Message-ID: <1369206051.19425.21.camel@localhost>
+References: <5188F8D2.5040303@bspu.unibel.by>
+	<1369001190.9705.37.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from email.edvz.uni-linz.ac.at ([140.78.3.65]:40063 "EHLO
-	email.uni-linz.ac.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754845Ab3EVGVG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 May 2013 02:21:06 -0400
-In-Reply-To: <519B9196.5090402@filoo.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1369001190.9705.37.camel@localhost>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-
-On 05/21/2013 05:24 PM, Oliver Francke wrote:
-> Well,
-
-> 
-> Not anyone else with perhaps large pg's experiencing such behaviour?
-
-100pg's per pool, 3 pools. deep-scrub adds about 200M to every OSD, it
-get's worse in time. it gets better when using syslog instead of direct
-logging, interestingly enougy.
-
-> Any advice on how to proceed?
-
-in my cast it is: wait until they say: the cuttlefish swims into a
-stable direction. and restart osd's every now and then...
-
-> Thnx in advance,
-> 
-> Oliver.
-> 
-
-
--- 
-DI (FH) Wolfgang Hennerbichler
-Software Development
-Unit Advanced Computing Technologies
-RISC Software GmbH
-A company of the Johannes Kepler University Linz
-
-IT-Center
-Softwarepark 35
-4232 Hagenberg
-Austria
-
-Phone: +43 7236 3343 245
-Fax: +43 7236 3343 250
-wolfgang.hennerbichler@risc-software.at
-http://www.risc-software.at
+CkxlIGx1bmRpIDIwIG1haSAyMDEzIMOgIDAwOjA2ICswMjAwLCBPbGl2aWVyIEJvbnZhbGV0IGEg
+w6ljcml0IDoKPiBMZSBtYXJkaSAwNyBtYWkgMjAxMyDDoCAxNTo1MSArMDMwMCwgRHppYW5pcyBL
+YWhhbm92aWNoIGEgw6ljcml0IDoKPiA+IEkgaGF2ZSA0IHNjcnViIGVycm9ycyAoMyBQR3MgLSAi
+Zm91bmQgY2xvbmUgd2l0aG91dCBoZWFkIiksIG9uIG9uZSBPU0QuIE5vdAo+ID4gcmVwYWlyaW5n
+LiBIb3cgdG8gcmVwYWlyIGl0IGV4Y2x1ZGUgcmUtY3JlYXRpbmcgb2YgT1NEPwo+ID4gCj4gPiBO
+b3cgaXQgImVhc3kiIHRvIGNsZWFuK2NyZWF0ZSBPU0QsIGJ1dCBpbiB0aGVvcnkgLSBpbiBjYXNl
+IHRoZXJlIGFyZSBtdWx0aXBsZQo+ID4gT1NEcyAtIGl0IG1heSBjYXVzZSBkYXRhIGxvc3QuCj4g
+PiAKPiA+IC0tIAo+ID4gV0JSLCBEemlhbmlzIEthaGFub3ZpY2ggQUtBIERlbmlzIEthZ2Fub3Zp
+Y2gsIGh0dHA6Ly9tYWhhdG1hLmJzcHUudW5pYmVsLmJ5Lwo+ID4gX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+Cj4gPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20v
+bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPiA+IAo+IAo+IAo+IEhpLAo+IAo+IEkg
+aGF2ZSBzYW1lIHByb2JsZW0gOiA4IG9iamVjdHMgKDQgUEcpIHdpdGggZXJyb3IgImZvdW5kIGNs
+b25lIHdpdGhvdXQKPiBoZWFkIi4gSG93IGNhbiBJIGZpeCB0aGF0ID8KPiAKPiB0aGFua3MsCj4g
+T2xpdmllcgo+IAo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
+Cj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
+CgpIaSwKCnNpbmNlICJwZyByZXBhaXIiIGRvZXNuJ3QgaGFuZGxlIHRoYXQga2luZCBvZiBlcnJv
+cnMsIGlzIHRoZXJlIGEgd2F5IHRvCm1hbnVhbGx5IGZpeCB0aGF0ID8gKGl0J3MgYSBwcm9kdWN0
+aW9uIGNsdXN0ZXIpCgp0aGFua3MgaW4gYWR2YW5jZSwKT2xpdmllcgoKX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
+Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
