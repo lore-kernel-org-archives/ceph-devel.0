@@ -1,117 +1,170 @@
-From: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: scrub error: found clone without head
-Date: Wed, 22 May 2013 12:00:05 -0700
-Message-ID: <CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
+From: Olivier Bonvalet <ceph.list@daevel.fr>
+Subject: Re: [ceph-users] scrub error: found clone without head
+Date: Wed, 22 May 2013 21:18:23 +0200
+Message-ID: <1369250303.22520.45.camel@localhost>
 References: <5188F8D2.5040303@bspu.unibel.by>
-	<1369001190.9705.37.camel@localhost>
-	<1369206051.19425.21.camel@localhost>
-	<519CBC66.9030607@bspu.unibel.by>
-	<CA+4uBUYKNnGfH2JnDBmyRy86RovFEOV=pbW2cdhQ2kV0spijXg@mail.gmail.com>
-	<1369247156.22520.42.camel@localhost>
+	 <1369001190.9705.37.camel@localhost> <1369206051.19425.21.camel@localhost>
+	 <519CBC66.9030607@bspu.unibel.by>
+	 <CA+4uBUYKNnGfH2JnDBmyRy86RovFEOV=pbW2cdhQ2kV0spijXg@mail.gmail.com>
+	 <1369247156.22520.42.camel@localhost>
+	 <CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1369247156.22520.42.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Denis Kaganovich <mahatma-cw37gHAUgAY@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from licorne.daevel.fr ([178.32.94.222]:38137 "EHLO
+	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754882Ab3EVTS1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 May 2013 15:18:27 -0400
+In-Reply-To: <CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Denis Kaganovich <mahatma@eu.by>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-V2hhdCB2ZXJzaW9uIGFyZSB5b3UgcnVubmluZz8KLVNhbQoKT24gV2VkLCBNYXkgMjIsIDIwMTMg
-YXQgMTE6MjUgQU0sIE9saXZpZXIgQm9udmFsZXQgPGNlcGgubGlzdEBkYWV2ZWwuZnI+IHdyb3Rl
-Ogo+IElzIGl0IGVub3VnaCA/Cj4KPiAjIHRhaWwgLW41MDAgLWYgL3Zhci9sb2cvY2VwaC9vc2Qu
-MjgubG9nIHwgZ3JlcCAtQTUgLUI1ICdmb3VuZCBjbG9uZSB3aXRob3V0IGhlYWQnCj4gMjAxMy0w
-NS0yMiAxNTo0MzowOS4zMDgzNTIgN2Y3MDdkZDY0NzAwICAwIGxvZyBbSU5GXSA6IDkuMTA1IHNj
-cnViIG9rCj4gMjAxMy0wNS0yMiAxNTo0NDoyMS4wNTQ4OTMgN2Y3MDdkZDY0NzAwICAwIGxvZyBb
-SU5GXSA6IDkuNDUxIHNjcnViIG9rCj4gMjAxMy0wNS0yMiAxNTo0NDo1Mi44OTg3ODQgN2Y3MDdj
-ZDYyNzAwICAwIGxvZyBbSU5GXSA6IDkuNzg0IHNjcnViIG9rCj4gMjAxMy0wNS0yMiAxNTo0Nzo0
-My4xNDg1MTUgN2Y3MDdjZDYyNzAwICAwIGxvZyBbSU5GXSA6IDkuM2MzIHNjcnViIG9rCj4gMjAx
-My0wNS0yMiAxNTo0Nzo0NS43MTcwODUgN2Y3MDdkZDY0NzAwICAwIGxvZyBbSU5GXSA6IDkuM2Qw
-IHNjcnViIG9rCj4gMjAxMy0wNS0yMiAxNTo1MjoxNC41NzM4MTUgN2Y3MDdkZDY0NzAwICAwIGxv
-ZyBbRVJSXSA6IHNjcnViIDMuNmIgYWRlM2MxNmIvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAw
-MDkyMjEvMTJkNy8vMyBmb3VuZCBjbG9uZSB3aXRob3V0IGhlYWQKPiAyMDEzLTA1LTIyIDE1OjU1
-OjA3LjIzMDExNCA3ZjcwN2Q1NjM3MDAgIDAgbG9nIFtFUlJdIDogc2NydWIgMy42YiAyNjFjYzBl
-Yi9yYi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwMzY3MS8xMmQ3Ly8zIGZvdW5kIGNsb25lIHdp
-dGhvdXQgaGVhZAo+IDIwMTMtMDUtMjIgMTU6NTY6NTYuNDU2MjQyIDdmNzA3ZDU2MzcwMCAgMCBs
-b2cgW0VSUl0gOiBzY3J1YiAzLjZiIGIxMGRlYWViL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAw
-MDA4NmEyLzEyZDcvLzMgZm91bmQgY2xvbmUgd2l0aG91dCBoZWFkCj4gMjAxMy0wNS0yMiAxNTo1
-Nzo1MS42NjcwODUgN2Y3MDdkZDY0NzAwICAwIGxvZyBbRVJSXSA6IDMuNmIgc2NydWIgMyBlcnJv
-cnMKPiAyMDEzLTA1LTIyIDE1OjU3OjU1LjI0MTIyNCA3ZjcwN2RkNjQ3MDAgIDAgbG9nIFtJTkZd
-IDogOS40NTAgc2NydWIgb2sKPiAyMDEzLTA1LTIyIDE1OjU3OjU5LjgwMDM4MyA3ZjcwN2NkNjI3
-MDAgIDAgbG9nIFtJTkZdIDogOS40NjUgc2NydWIgb2sKPiAyMDEzLTA1LTIyIDE1OjU5OjU1LjAy
-NDA2NSA3ZjcwNzY2MWE3MDAgIDAgLS0gMTkyLjE2OC40Mi4zOjY4MDMvMTIxNDIgPj4gMTkyLjE2
-OC40Mi41OjY4MjgvMzE0OTAgcGlwZSgweDJhNjg5MDAwIHNkPTEwOCA6NjgwMyBzPTIgcGdzPTIw
-MDY1MiBjcz03MyBsPTApLmZhdWx0IHdpdGggbm90aGluZyB0byBzZW5kLCBnb2luZyB0byBzdGFu
-ZGJ5Cj4gMjAxMy0wNS0yMiAxNjowMTo0NS41NDI1NzkgN2Y3MDIyNzcwNzAwICAwIC0tIDE5Mi4x
-NjguNDIuMzo2ODAzLzEyMTQyID4+IDE5Mi4xNjguNDIuNTo2ODI4LzMxNDkwIHBpcGUoMHgyYTY4
-OTI4MCBzZD05OSA6NjgwMyBzPTAgcGdzPTAgY3M9MCBsPTApLmFjY2VwdCBjb25uZWN0X3NlcSA3
-NCB2cyBleGlzdGluZyA3MyBzdGF0ZSBzdGFuZGJ5Cj4gLS0KPiAyMDEzLTA1LTIyIDE2OjI5OjQ5
-LjU0NDMxMCA3ZjcwN2RkNjQ3MDAgIDAgbG9nIFtJTkZdIDogOS40ZWIgc2NydWIgb2sKPiAyMDEz
-LTA1LTIyIDE2OjI5OjUzLjE5MDIzMyA3ZjcwN2RkNjQ3MDAgIDAgbG9nIFtJTkZdIDogOS40ZjQg
-c2NydWIgb2sKPiAyMDEzLTA1LTIyIDE2OjI5OjU5LjQ3ODczNiA3ZjcwN2RkNjQ3MDAgIDAgbG9n
-IFtJTkZdIDogOC42YmIgc2NydWIgb2sKPiAyMDEzLTA1LTIyIDE2OjM1OjEyLjI0MDI0NiA3Zjcw
-MjI3NzA3MDAgIDAgLS0gMTkyLjE2OC40Mi4zOjY4MDMvMTIxNDIgPj4gMTkyLjE2OC40Mi41OjY4
-MjgvMzE0OTAgcGlwZSgweDJhNjg5MjgwIHNkPTk5IDo2ODAzIHM9MiBwZ3M9MjAwNjY3IGNzPTc1
-IGw9MCkuZmF1bHQgd2l0aCBub3RoaW5nIHRvIHNlbmQsIGdvaW5nIHRvIHN0YW5kYnkKPiAyMDEz
-LTA1LTIyIDE2OjM1OjE5LjUxOTAxOSA3ZjcwN2Q1NjM3MDAgIDAgbG9nIFtJTkZdIDogOC43MDAg
-c2NydWIgb2sKPiAyMDEzLTA1LTIyIDE2OjM5OjE1LjQyMjUzMiA3ZjcwN2RkNjQ3MDAgIDAgbG9n
-IFtFUlJdIDogc2NydWIgMy4xIGIxODY5MzAxL3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDAw
-ODM2LzEyZDcvLzMgZm91bmQgY2xvbmUgd2l0aG91dCBoZWFkCj4gMjAxMy0wNS0yMiAxNjo0MDow
-NC45OTUyNTYgN2Y3MDdjZDYyNzAwICAwIGxvZyBbRVJSXSA6IHNjcnViIDMuMSBiY2NhZDcwMS9y
-Yi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwOWEwMC8xMmQ3Ly8zIGZvdW5kIGNsb25lIHdpdGhv
-dXQgaGVhZAo+IDIwMTMtMDUtMjIgMTY6NDE6MDcuMDA4NzE3IDdmNzA3ZDU2MzcwMCAgMCBsb2cg
-W0VSUl0gOiBzY3J1YiAzLjEgOGE5YmVjMDEvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAwMDk4
-MjAvMTJkNy8vMyBmb3VuZCBjbG9uZSB3aXRob3V0IGhlYWQKPiAyMDEzLTA1LTIyIDE2OjQxOjQy
-LjQ2MDI4MCA3ZjcwN2M1NjE3MDAgIDAgbG9nIFtFUlJdIDogMy4xIHNjcnViIDMgZXJyb3JzCj4g
-MjAxMy0wNS0yMiAxNjo0NjoxMi4zODU2NzggN2Y3MDc3NzM1NzAwICAwIC0tIDE5Mi4xNjguNDIu
-Mzo2ODAzLzEyMTQyID4+IDE5Mi4xNjguNDIuNTo2ODI4LzMxNDkwIHBpcGUoMHgyYTY4OWM4MCBz
-ZD0xMzcgOjY4MDMgcz0wIHBncz0wIGNzPTAgbD0wKS5hY2NlcHQgY29ubmVjdF9zZXEgNzYgdnMg
-ZXhpc3RpbmcgNzUgc3RhdGUgc3RhbmRieQo+IDIwMTMtMDUtMjIgMTY6NTg6MzYuMDc5MDEwIDdm
-NzA3NjYxYTcwMCAgMCAtLSAxOTIuMTY4LjQyLjM6NjgwMy8xMjE0MiA+PiAxOTIuMTY4LjQyLjM6
-NjgwMS8xMTc0NSBwaXBlKDB4MmE2ODlhMDAgc2Q9NDQgOjY4MDMgcz0wIHBncz0wIGNzPTAgbD0w
-KS5hY2NlcHQgY29ubmVjdF9zZXEgNDAgdnMgZXhpc3RpbmcgMzkgc3RhdGUgc3RhbmRieQo+IDIw
-MTMtMDUtMjIgMTY6NTg6MzYuNzk4MDM4IDdmNzA3ZDU2MzcwMCAgMCBsb2cgW0lORl0gOiA5LjUw
-YyBzY3J1YiBvawo+IDIwMTMtMDUtMjIgMTY6NTg6NDAuMTA0MTU5IDdmNzA3YzU2MTcwMCAgMCBs
-b2cgW0lORl0gOiA5LjUyNiBzY3J1YiBvawo+Cj4KPiBOb3RlIDogSSBoYXZlIDggc2NydWIgZXJy
-b3JzIGxpa2UgdGhhdCwgb24gNCBpbXBhY3RlZCBQRywgYW5kIGFsbCBpbXBhY3RlZCBvYmplY3Rz
-IGFyZSBhYm91dCB0aGUgc2FtZSBSQkQgaW1hZ2UgKHJiLjAuMTVjMjYuMjM4ZTFmMjkpLgo+Cj4K
-Pgo+IExlIG1lcmNyZWRpIDIyIG1haSAyMDEzIMOgIDExOjAxIC0wNzAwLCBTYW11ZWwgSnVzdCBh
-IMOpY3JpdCA6Cj4+IENhbiB5b3UgcG9zdCB5b3VyIGNlcGgubG9nIHdpdGggdGhlIHBlcmlvZCBp
-bmNsdWRpbmcgYWxsIG9mIHRoZXNlIGVycm9ycz8KPj4gLVNhbQo+Pgo+PiBPbiBXZWQsIE1heSAy
-MiwgMjAxMyBhdCA1OjM5IEFNLCBEemlhbmlzIEthaGFub3ZpY2gKPj4gPG1haGF0bWFAYnNwdS51
-bmliZWwuYnk+IHdyb3RlOgo+PiA+IE9saXZpZXIgQm9udmFsZXQg0L/QuNGI0LXRgjoKPj4gPj4K
-Pj4gPj4gTGUgbHVuZGkgMjAgbWFpIDIwMTMgw6AgMDA6MDYgKzAyMDAsIE9saXZpZXIgQm9udmFs
-ZXQgYSDDqWNyaXQgOgo+PiA+Pj4gTGUgbWFyZGkgMDcgbWFpIDIwMTMgw6AgMTU6NTEgKzAzMDAs
-IER6aWFuaXMgS2FoYW5vdmljaCBhIMOpY3JpdCA6Cj4+ID4+Pj4gSSBoYXZlIDQgc2NydWIgZXJy
-b3JzICgzIFBHcyAtICJmb3VuZCBjbG9uZSB3aXRob3V0IGhlYWQiKSwgb24gb25lIE9TRC4gTm90
-Cj4+ID4+Pj4gcmVwYWlyaW5nLiBIb3cgdG8gcmVwYWlyIGl0IGV4Y2x1ZGUgcmUtY3JlYXRpbmcg
-b2YgT1NEPwo+PiA+Pj4+Cj4+ID4+Pj4gTm93IGl0ICJlYXN5IiB0byBjbGVhbitjcmVhdGUgT1NE
-LCBidXQgaW4gdGhlb3J5IC0gaW4gY2FzZSB0aGVyZSBhcmUgbXVsdGlwbGUKPj4gPj4+PiBPU0Rz
-IC0gaXQgbWF5IGNhdXNlIGRhdGEgbG9zdC4KPj4gPj4+Cj4+ID4+PiBJIGhhdmUgc2FtZSBwcm9i
-bGVtIDogOCBvYmplY3RzICg0IFBHKSB3aXRoIGVycm9yICJmb3VuZCBjbG9uZSB3aXRob3V0Cj4+
-ID4+PiBoZWFkIi4gSG93IGNhbiBJIGZpeCB0aGF0ID8KPj4gPj4gc2luY2UgInBnIHJlcGFpciIg
-ZG9lc24ndCBoYW5kbGUgdGhhdCBraW5kIG9mIGVycm9ycywgaXMgdGhlcmUgYSB3YXkgdG8KPj4g
-Pj4gbWFudWFsbHkgZml4IHRoYXQgPyAoaXQncyBhIHByb2R1Y3Rpb24gY2x1c3RlcikKPj4gPgo+
-PiA+IFRyeWluZyB0byBmaXggbWFudWFsbHkgSSBjYXVzZSBhc3NlcnRpb25zIGluIHRyaW1taW5n
-IHByb2Nlc3MgKGRpZWQgT1NEKS4gQW5kCj4+ID4gbWFueSBvdGhlcnMgdHJvdWJsZXMuIFNvLCBp
-ZiB5b3Ugd2FudCB0byBrZWVwIGNsdXN0ZXIgcnVubmluZywgd2FpdCBmb3IKPj4gPiBkZXZlbG9w
-ZXJzIGFuc3dlci4gSU1ITy4KPj4gPgo+PiA+IEFib3V0IG1hbnVhbCByZXBhaXIgYXR0ZW1wdDog
-c2VlIGlzc3VlICM0OTM3LiBBbHNvIHNpbWlsYXIgcmVzdWx0cyAtIGluIHN1YmplY3QKPj4gPiAi
-SW5jb25zaXN0ZW50IFBHJ3MsIHJlcGFpciBpbmVmZmVjdGl2ZSIuCj4+ID4KPj4gPiAtLQo+PiA+
-IFdCUiwgRHppYW5pcyBLYWhhbm92aWNoIEFLQSBEZW5pcyBLYWdhbm92aWNoLCBodHRwOi8vbWFo
-YXRtYS5ic3B1LnVuaWJlbC5ieS8KPj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwo+PiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+ID4gY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbQo+PiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pgo+Cj4KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20K
+0.61-11-g3b94f03 (0.61-1.1), but the bug occured with bobtail.
+
+
+Le mercredi 22 mai 2013 =C3=A0 12:00 -0700, Samuel Just a =C3=A9crit :
+> What version are you running?
+> -Sam
+>=20
+> On Wed, May 22, 2013 at 11:25 AM, Olivier Bonvalet <ceph.list@daevel.=
+fr> wrote:
+> > Is it enough ?
+> >
+> > # tail -n500 -f /var/log/ceph/osd.28.log | grep -A5 -B5 'found clon=
+e without head'
+> > 2013-05-22 15:43:09.308352 7f707dd64700  0 log [INF] : 9.105 scrub =
+ok
+> > 2013-05-22 15:44:21.054893 7f707dd64700  0 log [INF] : 9.451 scrub =
+ok
+> > 2013-05-22 15:44:52.898784 7f707cd62700  0 log [INF] : 9.784 scrub =
+ok
+> > 2013-05-22 15:47:43.148515 7f707cd62700  0 log [INF] : 9.3c3 scrub =
+ok
+> > 2013-05-22 15:47:45.717085 7f707dd64700  0 log [INF] : 9.3d0 scrub =
+ok
+> > 2013-05-22 15:52:14.573815 7f707dd64700  0 log [ERR] : scrub 3.6b a=
+de3c16b/rb.0.15c26.238e1f29.000000009221/12d7//3 found clone without he=
+ad
+> > 2013-05-22 15:55:07.230114 7f707d563700  0 log [ERR] : scrub 3.6b 2=
+61cc0eb/rb.0.15c26.238e1f29.000000003671/12d7//3 found clone without he=
+ad
+> > 2013-05-22 15:56:56.456242 7f707d563700  0 log [ERR] : scrub 3.6b b=
+10deaeb/rb.0.15c26.238e1f29.0000000086a2/12d7//3 found clone without he=
+ad
+> > 2013-05-22 15:57:51.667085 7f707dd64700  0 log [ERR] : 3.6b scrub 3=
+ errors
+> > 2013-05-22 15:57:55.241224 7f707dd64700  0 log [INF] : 9.450 scrub =
+ok
+> > 2013-05-22 15:57:59.800383 7f707cd62700  0 log [INF] : 9.465 scrub =
+ok
+> > 2013-05-22 15:59:55.024065 7f707661a700  0 -- 192.168.42.3:6803/121=
+42 >> 192.168.42.5:6828/31490 pipe(0x2a689000 sd=3D108 :6803 s=3D2 pgs=3D=
+200652 cs=3D73 l=3D0).fault with nothing to send, going to standby
+> > 2013-05-22 16:01:45.542579 7f7022770700  0 -- 192.168.42.3:6803/121=
+42 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D0 pgs=3D=
+0 cs=3D0 l=3D0).accept connect_seq 74 vs existing 73 state standby
+> > --
+> > 2013-05-22 16:29:49.544310 7f707dd64700  0 log [INF] : 9.4eb scrub =
+ok
+> > 2013-05-22 16:29:53.190233 7f707dd64700  0 log [INF] : 9.4f4 scrub =
+ok
+> > 2013-05-22 16:29:59.478736 7f707dd64700  0 log [INF] : 8.6bb scrub =
+ok
+> > 2013-05-22 16:35:12.240246 7f7022770700  0 -- 192.168.42.3:6803/121=
+42 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D2 pgs=3D=
+200667 cs=3D75 l=3D0).fault with nothing to send, going to standby
+> > 2013-05-22 16:35:19.519019 7f707d563700  0 log [INF] : 8.700 scrub =
+ok
+> > 2013-05-22 16:39:15.422532 7f707dd64700  0 log [ERR] : scrub 3.1 b1=
+869301/rb.0.15c26.238e1f29.000000000836/12d7//3 found clone without hea=
+d
+> > 2013-05-22 16:40:04.995256 7f707cd62700  0 log [ERR] : scrub 3.1 bc=
+cad701/rb.0.15c26.238e1f29.000000009a00/12d7//3 found clone without hea=
+d
+> > 2013-05-22 16:41:07.008717 7f707d563700  0 log [ERR] : scrub 3.1 8a=
+9bec01/rb.0.15c26.238e1f29.000000009820/12d7//3 found clone without hea=
+d
+> > 2013-05-22 16:41:42.460280 7f707c561700  0 log [ERR] : 3.1 scrub 3 =
+errors
+> > 2013-05-22 16:46:12.385678 7f7077735700  0 -- 192.168.42.3:6803/121=
+42 >> 192.168.42.5:6828/31490 pipe(0x2a689c80 sd=3D137 :6803 s=3D0 pgs=3D=
+0 cs=3D0 l=3D0).accept connect_seq 76 vs existing 75 state standby
+> > 2013-05-22 16:58:36.079010 7f707661a700  0 -- 192.168.42.3:6803/121=
+42 >> 192.168.42.3:6801/11745 pipe(0x2a689a00 sd=3D44 :6803 s=3D0 pgs=3D=
+0 cs=3D0 l=3D0).accept connect_seq 40 vs existing 39 state standby
+> > 2013-05-22 16:58:36.798038 7f707d563700  0 log [INF] : 9.50c scrub =
+ok
+> > 2013-05-22 16:58:40.104159 7f707c561700  0 log [INF] : 9.526 scrub =
+ok
+> >
+> >
+> > Note : I have 8 scrub errors like that, on 4 impacted PG, and all i=
+mpacted objects are about the same RBD image (rb.0.15c26.238e1f29).
+> >
+> >
+> >
+> > Le mercredi 22 mai 2013 =C3=A0 11:01 -0700, Samuel Just a =C3=A9cri=
+t :
+> >> Can you post your ceph.log with the period including all of these =
+errors?
+> >> -Sam
+> >>
+> >> On Wed, May 22, 2013 at 5:39 AM, Dzianis Kahanovich
+> >> <mahatma@bspu.unibel.by> wrote:
+> >> > Olivier Bonvalet =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >> >>
+> >> >> Le lundi 20 mai 2013 =C3=A0 00:06 +0200, Olivier Bonvalet a =C3=
+=A9crit :
+> >> >>> Le mardi 07 mai 2013 =C3=A0 15:51 +0300, Dzianis Kahanovich a =
+=C3=A9crit :
+> >> >>>> I have 4 scrub errors (3 PGs - "found clone without head"), o=
+n one OSD. Not
+> >> >>>> repairing. How to repair it exclude re-creating of OSD?
+> >> >>>>
+> >> >>>> Now it "easy" to clean+create OSD, but in theory - in case th=
+ere are multiple
+> >> >>>> OSDs - it may cause data lost.
+> >> >>>
+> >> >>> I have same problem : 8 objects (4 PG) with error "found clone=
+ without
+> >> >>> head". How can I fix that ?
+> >> >> since "pg repair" doesn't handle that kind of errors, is there =
+a way to
+> >> >> manually fix that ? (it's a production cluster)
+> >> >
+> >> > Trying to fix manually I cause assertions in trimming process (d=
+ied OSD). And
+> >> > many others troubles. So, if you want to keep cluster running, w=
+ait for
+> >> > developers answer. IMHO.
+> >> >
+> >> > About manual repair attempt: see issue #4937. Also similar resul=
+ts - in subject
+> >> > "Inconsistent PG's, repair ineffective".
+> >> >
+> >> > --
+> >> > WBR, Dzianis Kahanovich AKA Denis Kaganovich, http://mahatma.bsp=
+u.unibel.by/
+> >> > _______________________________________________
+> >> > ceph-users mailing list
+> >> > ceph-users@lists.ceph.com
+> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>
+> >
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
