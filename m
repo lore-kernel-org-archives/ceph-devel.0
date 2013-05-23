@@ -1,535 +1,199 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: [PATCH 2/2] Enable fscache as an optional feature of ceph.
-Date: Thu, 23 May 2013 17:55:36 -0400
-Message-ID: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: [ceph-users] scrub error: found clone without head
+Date: Thu, 23 May 2013 15:17:17 -0700
+Message-ID: <CA+4uBUYPFWBgYqqS7qN1eoQ5ies1S5_R=CCUZoeFPY3Fe+=_mA@mail.gmail.com>
+References: <5188F8D2.5040303@bspu.unibel.by>
+	<1369001190.9705.37.camel@localhost>
+	<1369206051.19425.21.camel@localhost>
+	<519CBC66.9030607@bspu.unibel.by>
+	<CA+4uBUYKNnGfH2JnDBmyRy86RovFEOV=pbW2cdhQ2kV0spijXg@mail.gmail.com>
+	<1369247156.22520.42.camel@localhost>
+	<CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
+	<1369250303.22520.45.camel@localhost>
+	<CA+4uBUZcsi5eK31p8t+-7jZaERu40O1LSRW6wJOkfho_FwYXkg@mail.gmail.com>
+	<1369310447.19425.43.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:65281 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759650Ab3EWVzi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 17:55:38 -0400
-Received: by mail-wg0-f44.google.com with SMTP id a12so2307999wgh.23
-        for <ceph-devel@vger.kernel.org>; Thu, 23 May 2013 14:55:36 -0700 (PDT)
+Received: from mail-ea0-f182.google.com ([209.85.215.182]:36659 "EHLO
+	mail-ea0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759719Ab3EWWTf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 18:19:35 -0400
+Received: by mail-ea0-f182.google.com with SMTP id r16so2246841ead.13
+        for <ceph-devel@vger.kernel.org>; Thu, 23 May 2013 15:19:34 -0700 (PDT)
+In-Reply-To: <1369310447.19425.43.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, linux-cachefs@redhat.com
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: Denis Kaganovich <mahatma@eu.by>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Enable fscache as an optional feature of ceph.
+Do all of the affected PGs share osd.28 as the primary?  I think the
+only recovery is probably to manually remove the orphaned clones.
+-Sam
 
-Adding support for fscache to the Ceph filesystem. This would bring it to on
-par with some of the other network filesystems in Linux (like NFS, AFS, etc...)
-
-This exploits the existing Ceph cache & lazyio capabilities.
-
-Signed-off-by: Milosz Tanski <milosz@adfin.com>
----
- fs/ceph/Kconfig  |    9 ++++++
- fs/ceph/Makefile |    2 ++
- fs/ceph/addr.c   |   85 ++++++++++++++++++++++++++++++++++++++++--------------
- fs/ceph/caps.c   |   21 +++++++++++++-
- fs/ceph/file.c   |    9 ++++++
- fs/ceph/inode.c  |   25 ++++++++++++++--
- fs/ceph/super.c  |   25 ++++++++++++++--
- fs/ceph/super.h  |   12 ++++++++
- 8 files changed, 162 insertions(+), 26 deletions(-)
-
-diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
-index 49bc782..ac9a2ef 100644
---- a/fs/ceph/Kconfig
-+++ b/fs/ceph/Kconfig
-@@ -16,3 +16,12 @@ config CEPH_FS
-
-   If unsure, say N.
-
-+if CEPH_FS
-+config CEPH_FSCACHE
-+ bool "Enable Ceph client caching support"
-+ depends on CEPH_FS=m && FSCACHE || CEPH_FS=y && FSCACHE=y
-+ help
-+  Choose Y here to enable persistent, read-only local
-+  caching support for Ceph clients using FS-Cache
-+
-+endif
-diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-index bd35212..0af0678 100644
---- a/fs/ceph/Makefile
-+++ b/fs/ceph/Makefile
-@@ -9,3 +9,5 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
-  mds_client.o mdsmap.o strings.o ceph_frag.o \
-  debugfs.o
-
-+ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
-+
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 3e68ac1..fd3a1cc 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -11,6 +11,7 @@
-
- #include "super.h"
- #include "mds_client.h"
-+#include "cache.h"
- #include <linux/ceph/osd_client.h>
-
- /*
-@@ -149,11 +150,26 @@ static void ceph_invalidatepage(struct page
-*page, unsigned long offset)
-  struct ceph_inode_info *ci;
-  struct ceph_snap_context *snapc = page_snap_context(page);
-
-- BUG_ON(!PageLocked(page));
-- BUG_ON(!PagePrivate(page));
-  BUG_ON(!page->mapping);
-
-  inode = page->mapping->host;
-+ ci = ceph_inode(inode);
-+
-+ if (offset != 0) {
-+ dout("%p invalidatepage %p idx %lu partial dirty page\n",
-+     inode, page, page->index);
-+ return;
-+ }
-+
-+#ifdef CONFIG_CEPH_FSCACHE
-+ if (PageFsCache(page))
-+ ceph_invalidate_fscache_page(inode, page);
-+#endif
-+
-+ if (!PagePrivate(page))
-+ return;
-+
-+ BUG_ON(!PageLocked(page));
-
-  /*
-  * We can get non-dirty pages here due to races between
-@@ -163,31 +179,32 @@ static void ceph_invalidatepage(struct page
-*page, unsigned long offset)
-  if (!PageDirty(page))
-  pr_err("%p invalidatepage %p page not dirty\n", inode, page);
-
-- if (offset == 0)
-- ClearPageChecked(page);
-+ ClearPageChecked(page);
-
-- ci = ceph_inode(inode);
-- if (offset == 0) {
-- dout("%p invalidatepage %p idx %lu full dirty page %lu\n",
--     inode, page, page->index, offset);
-- ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-- ceph_put_snap_context(snapc);
-- page->private = 0;
-- ClearPagePrivate(page);
-- } else {
-- dout("%p invalidatepage %p idx %lu partial dirty page\n",
--     inode, page, page->index);
-- }
-+ dout("%p invalidatepage %p idx %lu full dirty page %lu\n",
-+     inode, page, page->index, offset);
-+
-+ ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-+ ceph_put_snap_context(snapc);
-+ page->private = 0;
-+ ClearPagePrivate(page);
- }
-
--/* just a sanity check */
- static int ceph_releasepage(struct page *page, gfp_t g)
- {
-  struct inode *inode = page->mapping ? page->mapping->host : NULL;
-  dout("%p releasepage %p idx %lu\n", inode, page, page->index);
-  WARN_ON(PageDirty(page));
-- WARN_ON(PagePrivate(page));
-- return 0;
-+
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* Can we release the page from the cache? */
-+ if (PageFsCache(page) && ceph_release_fscache_page(page, g) == 0)
-+ return 0;
-+#endif
-+ if (PagePrivate(page))
-+ return 0;
-+
-+ return 1;
- }
-
- /*
-@@ -197,11 +214,18 @@ static int readpage_nounlock(struct file *filp,
-struct page *page)
- {
-  struct inode *inode = file_inode(filp);
-  struct ceph_inode_info *ci = ceph_inode(inode);
-- struct ceph_osd_client *osdc =
-+ struct ceph_osd_client *osdc =
-  &ceph_inode_to_client(inode)->client->osdc;
-  int err = 0;
-  u64 len = PAGE_CACHE_SIZE;
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ err = ceph_readpage_from_fscache(inode, page);
-+
-+ if (err == 0)
-+ goto out;
-+#endif
-+
-  dout("readpage inode %p file %p page %p index %lu\n",
-      inode, filp, page, page->index);
-  err = ceph_osdc_readpages(osdc, ceph_vino(inode), &ci->i_layout,
-@@ -219,6 +243,10 @@ static int readpage_nounlock(struct file *filp,
-struct page *page)
-  }
-  SetPageUptodate(page);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ceph_readpage_to_fscache(inode, page);
-+#endif
-+
- out:
-  return err < 0 ? err : 0;
- }
-@@ -262,6 +290,9 @@ static void finish_read(struct ceph_osd_request
-*req, struct ceph_msg *msg)
-  flush_dcache_page(page);
-  SetPageUptodate(page);
-  unlock_page(page);
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ceph_readpage_to_fscache(inode, page);
-+#endif
-  page_cache_release(page);
-  bytes -= PAGE_CACHE_SIZE;
-  }
-@@ -330,7 +361,7 @@ static int start_read(struct inode *inode, struct
-list_head *page_list, int max)
-  page = list_entry(page_list->prev, struct page, lru);
-  BUG_ON(PageLocked(page));
-  list_del(&page->lru);
--
-+
-  dout("start_read %p adding %p idx %lu\n", inode, page,
-      page->index);
-  if (add_to_page_cache_lru(page, &inode->i_data, page->index,
-@@ -377,6 +408,14 @@ static int ceph_readpages(struct file *file,
-struct address_space *mapping,
-  int rc = 0;
-  int max = 0;
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ rc = ceph_readpages_from_fscache(mapping->host, mapping, page_list,
-+ &nr_pages);
-+
-+ if (rc == 0)
-+ goto out;
-+#endif
-+
-  if (fsc->mount_options->rsize >= PAGE_CACHE_SIZE)
-  max = (fsc->mount_options->rsize + PAGE_CACHE_SIZE - 1)
-  >> PAGE_SHIFT;
-@@ -490,6 +529,10 @@ static int writepage_nounlock(struct page *page,
-struct writeback_control *wbc)
-     CONGESTION_ON_THRESH(fsc->mount_options->congestion_kb))
-  set_bdi_congested(&fsc->backing_dev_info, BLK_RW_ASYNC);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ceph_readpage_to_fscache(inode, page);
-+#endif
-+
-  set_page_writeback(page);
-  err = ceph_osdc_writepages(osdc, ceph_vino(inode),
-    &ci->i_layout, snapc,
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index da0f9b8..7e8d8d3 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -10,6 +10,7 @@
-
- #include "super.h"
- #include "mds_client.h"
-+#include "cache.h"
- #include <linux/ceph/decode.h>
- #include <linux/ceph/messenger.h>
-
-@@ -486,8 +487,14 @@ static void __check_cap_issue(struct
-ceph_inode_info *ci, struct ceph_cap *cap,
-  * i_rdcache_gen.
-  */
-  if ((issued & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
--    (had & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0)
-+    (had & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0) {
-  ci->i_rdcache_gen++;
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* Invalidate the cache for the whole file. */
-+ dout("Invalidating inode data cache: %p", &ci->vfs_inode);
-+ fscache_invalidate(ci->fscache);
-+#endif
-+ }
-
-  /*
-  * if we are newly issued FILE_SHARED, mark dir not complete; we
-@@ -2356,6 +2363,12 @@ static void handle_cap_grant(struct inode
-*inode, struct ceph_mds_caps *grant,
-  if (((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
-     (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
-     !ci->i_wrbuffer_ref) {
-+
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* Close the fscache on inode */
-+ ceph_fscache_unregister_inode_cookie(ci);
-+#endif
-+
-  if (try_nonblocking_invalidate(inode) == 0) {
-  revoked_rdcache = 1;
-  } else {
-@@ -2425,6 +2438,12 @@ static void handle_cap_grant(struct inode
-*inode, struct ceph_mds_caps *grant,
-  wake = 1;
-  }
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* Register cache (if needed); perform this after amny size change. */
-+ if ((issued & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)))
-+ ceph_fscache_register_inode_cookie(session->s_mdsc->fsc, ci);
-+#endif
-+
-  /* check cap bits */
-  wanted = __ceph_caps_wanted(ci);
-  used = __ceph_caps_used(ci);
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 656e169..e7ecc04 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -11,6 +11,7 @@
-
- #include "super.h"
- #include "mds_client.h"
-+#include "cache.h"
-
- /*
-  * Ceph file operations
-@@ -67,10 +68,17 @@ out:
- static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
- {
-  struct ceph_file_info *cf;
-+ struct ceph_inode_info *ci = ceph_inode(inode);
-+ struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
-  int ret = 0;
-
-  switch (inode->i_mode & S_IFMT) {
-  case S_IFREG:
-+#ifdef CONFIG_CEPH_FSCACHE
-+ spin_lock(&ci->i_ceph_lock);
-+ ceph_fscache_register_inode_cookie(fsc, ci);
-+ spin_lock(&ci->i_ceph_lock);
-+#endif
-  case S_IFDIR:
-  dout("init_file %p %p 0%o (regular)\n", inode, file,
-      inode->i_mode);
-@@ -181,6 +189,7 @@ int ceph_open(struct inode *inode, struct file *file)
-  spin_unlock(&ci->i_ceph_lock);
-  return ceph_init_file(inode, file, fmode);
-  }
-+
-  spin_unlock(&ci->i_ceph_lock);
-
-  dout("open fmode %d wants %s\n", fmode, ceph_cap_string(wanted));
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index be0f7e2..620b84c 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -12,6 +12,7 @@
-
- #include "super.h"
- #include "mds_client.h"
-+#include "cache.h"
- #include <linux/ceph/decode.h>
-
- /*
-@@ -377,6 +378,10 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
-
-  INIT_WORK(&ci->i_vmtruncate_work, ceph_vmtruncate_work);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ci->fscache = NULL;
-+#endif
-+
-  return &ci->vfs_inode;
- }
-
-@@ -396,6 +401,10 @@ void ceph_destroy_inode(struct inode *inode)
-
-  dout("destroy_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ceph_fscache_unregister_inode_cookie(ci);
-+#endif
-+
-  ceph_queue_caps_release(inode);
-
-  /*
-@@ -430,7 +439,6 @@ void ceph_destroy_inode(struct inode *inode)
-  call_rcu(&inode->i_rcu, ceph_i_callback);
- }
-
--
- /*
-  * Helpers to fill in size, ctime, mtime, and atime.  We have to be
-  * careful because either the client or MDS may have more up to date
-@@ -633,6 +641,14 @@ static int fill_inode(struct inode *inode,
-     le32_to_cpu(info->time_warp_seq),
-     &ctime, &mtime, &atime);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* Notify the cache that size has changed */
-+ if (queue_trunc && ci->fscache) {
-+ pr_info("size changed inode: %p cap flags\n", &ci->vfs_inode);
-+ fscache_attr_changed(ci->fscache);
-+ }
-+#endif
-+
-  /* only update max_size on auth cap */
-  if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
-     ci->i_max_size != le64_to_cpu(info->max_size)) {
-@@ -1066,7 +1082,7 @@ int ceph_fill_trace(struct super_block *sb,
-struct ceph_mds_request *req,
-  * complete.
-  */
-  ceph_set_dentry_offset(req->r_old_dentry);
-- dout("dn %p gets new offset %lld\n", req->r_old_dentry,
-+ dout("dn %p gets new offset %lld\n", req->r_old_dentry,
-      ceph_dentry(req->r_old_dentry)->offset);
-
-  dn = req->r_old_dentry;  /* use old_dentry */
-@@ -1430,6 +1446,11 @@ static void ceph_invalidate_work(struct
-work_struct *work)
-  orig_gen = ci->i_rdcache_gen;
-  spin_unlock(&ci->i_ceph_lock);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ pr_info("cache invalidating inode: %p cap flags\n", &ci->vfs_inode);
-+ fscache_invalidate(ci->fscache);
-+#endif
-+
-  truncate_inode_pages(&inode->i_data, 0);
-
-  spin_lock(&ci->i_ceph_lock);
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 7d377c9..7847ef7 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -17,6 +17,7 @@
-
- #include "super.h"
- #include "mds_client.h"
-+#include "cache.h"
-
- #include <linux/ceph/ceph_features.h>
- #include <linux/ceph/decode.h>
-@@ -530,6 +531,11 @@ static struct ceph_fs_client
-*create_fs_client(struct ceph_mount_options *fsopt,
-  if (!fsc->wb_pagevec_pool)
-  goto fail_trunc_wq;
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ /* fscache */
-+ ceph_fscache_register_fsid_cookie(fsc);
-+#endif
-+
-  /* caps */
-  fsc->min_caps = fsopt->max_readdir;
-
-@@ -554,6 +560,10 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
- {
-  dout("destroy_fs_client %p\n", fsc);
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ ceph_fscache_unregister_fsid_cookie(fsc);
-+#endif
-+
-  destroy_workqueue(fsc->wb_wq);
-  destroy_workqueue(fsc->pg_inv_wq);
-  destroy_workqueue(fsc->trunc_wq);
-@@ -588,6 +598,8 @@ static void ceph_inode_init_once(void *foo)
-
- static int __init init_caches(void)
- {
-+ int error = -ENOMEM;
-+
-  ceph_inode_cachep = kmem_cache_create("ceph_inode_info",
-       sizeof(struct ceph_inode_info),
-       __alignof__(struct ceph_inode_info),
-@@ -611,15 +623,19 @@ static int __init init_caches(void)
-  if (ceph_file_cachep == NULL)
-  goto bad_file;
-
-- return 0;
-+#ifdef CONFIG_CEPH_FSCACHE
-+ if ((error = fscache_register_netfs(&ceph_cache_netfs)))
-+ goto bad_file;
-+#endif
-
-+ return 0;
- bad_file:
-  kmem_cache_destroy(ceph_dentry_cachep);
- bad_dentry:
-  kmem_cache_destroy(ceph_cap_cachep);
- bad_cap:
-  kmem_cache_destroy(ceph_inode_cachep);
-- return -ENOMEM;
-+ return error;
- }
-
- static void destroy_caches(void)
-@@ -629,10 +645,15 @@ static void destroy_caches(void)
-  * destroy cache.
-  */
-  rcu_barrier();
-+
-  kmem_cache_destroy(ceph_inode_cachep);
-  kmem_cache_destroy(ceph_cap_cachep);
-  kmem_cache_destroy(ceph_dentry_cachep);
-  kmem_cache_destroy(ceph_file_cachep);
-+
-+#ifdef CONFIG_CEPH_FSCACHE
-+ fscache_unregister_netfs(&ceph_cache_netfs);
-+#endif
- }
-
-
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 8696be2..2980337 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -16,6 +16,10 @@
-
- #include <linux/ceph/libceph.h>
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+#include <linux/fscache.h>
-+#endif
-+
- /* f_type in struct statfs */
- #define CEPH_SUPER_MAGIC 0x00c36400
-
-@@ -90,6 +94,10 @@ struct ceph_fs_client {
-  struct dentry *debugfs_bdi;
-  struct dentry *debugfs_mdsc, *debugfs_mdsmap;
- #endif
-+
-+#ifdef CONFIG_CEPH_FSCACHE
-+ struct fscache_cookie *fscache;
-+#endif
- };
-
-
-@@ -319,6 +327,10 @@ struct ceph_inode_info {
-
-  struct work_struct i_vmtruncate_work;
-
-+#ifdef CONFIG_CEPH_FSCACHE
-+ struct fscache_cookie *fscache;
-+#endif
-+
-  struct inode vfs_inode; /* at end */
- };
-
+On Thu, May 23, 2013 at 5:00 AM, Olivier Bonvalet <ceph.list@daevel.fr>=
+ wrote:
+> Not yet. I keep it for now.
+>
+> Le mercredi 22 mai 2013 =C3=A0 15:50 -0700, Samuel Just a =C3=A9crit =
+:
+>> rb.0.15c26.238e1f29
+>>
+>> Has that rbd volume been removed?
+>> -Sam
+>>
+>> On Wed, May 22, 2013 at 12:18 PM, Olivier Bonvalet <ceph.list@daevel=
+=2Efr> wrote:
+>> > 0.61-11-g3b94f03 (0.61-1.1), but the bug occured with bobtail.
+>> >
+>> >
+>> > Le mercredi 22 mai 2013 =C3=A0 12:00 -0700, Samuel Just a =C3=A9cr=
+it :
+>> >> What version are you running?
+>> >> -Sam
+>> >>
+>> >> On Wed, May 22, 2013 at 11:25 AM, Olivier Bonvalet <ceph.list@dae=
+vel.fr> wrote:
+>> >> > Is it enough ?
+>> >> >
+>> >> > # tail -n500 -f /var/log/ceph/osd.28.log | grep -A5 -B5 'found =
+clone without head'
+>> >> > 2013-05-22 15:43:09.308352 7f707dd64700  0 log [INF] : 9.105 sc=
+rub ok
+>> >> > 2013-05-22 15:44:21.054893 7f707dd64700  0 log [INF] : 9.451 sc=
+rub ok
+>> >> > 2013-05-22 15:44:52.898784 7f707cd62700  0 log [INF] : 9.784 sc=
+rub ok
+>> >> > 2013-05-22 15:47:43.148515 7f707cd62700  0 log [INF] : 9.3c3 sc=
+rub ok
+>> >> > 2013-05-22 15:47:45.717085 7f707dd64700  0 log [INF] : 9.3d0 sc=
+rub ok
+>> >> > 2013-05-22 15:52:14.573815 7f707dd64700  0 log [ERR] : scrub 3.=
+6b ade3c16b/rb.0.15c26.238e1f29.000000009221/12d7//3 found clone withou=
+t head
+>> >> > 2013-05-22 15:55:07.230114 7f707d563700  0 log [ERR] : scrub 3.=
+6b 261cc0eb/rb.0.15c26.238e1f29.000000003671/12d7//3 found clone withou=
+t head
+>> >> > 2013-05-22 15:56:56.456242 7f707d563700  0 log [ERR] : scrub 3.=
+6b b10deaeb/rb.0.15c26.238e1f29.0000000086a2/12d7//3 found clone withou=
+t head
+>> >> > 2013-05-22 15:57:51.667085 7f707dd64700  0 log [ERR] : 3.6b scr=
+ub 3 errors
+>> >> > 2013-05-22 15:57:55.241224 7f707dd64700  0 log [INF] : 9.450 sc=
+rub ok
+>> >> > 2013-05-22 15:57:59.800383 7f707cd62700  0 log [INF] : 9.465 sc=
+rub ok
+>> >> > 2013-05-22 15:59:55.024065 7f707661a700  0 -- 192.168.42.3:6803=
+/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689000 sd=3D108 :6803 s=3D2 =
+pgs=3D200652 cs=3D73 l=3D0).fault with nothing to send, going to standb=
+y
+>> >> > 2013-05-22 16:01:45.542579 7f7022770700  0 -- 192.168.42.3:6803=
+/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D0 p=
+gs=3D0 cs=3D0 l=3D0).accept connect_seq 74 vs existing 73 state standby
+>> >> > --
+>> >> > 2013-05-22 16:29:49.544310 7f707dd64700  0 log [INF] : 9.4eb sc=
+rub ok
+>> >> > 2013-05-22 16:29:53.190233 7f707dd64700  0 log [INF] : 9.4f4 sc=
+rub ok
+>> >> > 2013-05-22 16:29:59.478736 7f707dd64700  0 log [INF] : 8.6bb sc=
+rub ok
+>> >> > 2013-05-22 16:35:12.240246 7f7022770700  0 -- 192.168.42.3:6803=
+/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D2 p=
+gs=3D200667 cs=3D75 l=3D0).fault with nothing to send, going to standby
+>> >> > 2013-05-22 16:35:19.519019 7f707d563700  0 log [INF] : 8.700 sc=
+rub ok
+>> >> > 2013-05-22 16:39:15.422532 7f707dd64700  0 log [ERR] : scrub 3.=
+1 b1869301/rb.0.15c26.238e1f29.000000000836/12d7//3 found clone without=
+ head
+>> >> > 2013-05-22 16:40:04.995256 7f707cd62700  0 log [ERR] : scrub 3.=
+1 bccad701/rb.0.15c26.238e1f29.000000009a00/12d7//3 found clone without=
+ head
+>> >> > 2013-05-22 16:41:07.008717 7f707d563700  0 log [ERR] : scrub 3.=
+1 8a9bec01/rb.0.15c26.238e1f29.000000009820/12d7//3 found clone without=
+ head
+>> >> > 2013-05-22 16:41:42.460280 7f707c561700  0 log [ERR] : 3.1 scru=
+b 3 errors
+>> >> > 2013-05-22 16:46:12.385678 7f7077735700  0 -- 192.168.42.3:6803=
+/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689c80 sd=3D137 :6803 s=3D0 =
+pgs=3D0 cs=3D0 l=3D0).accept connect_seq 76 vs existing 75 state standb=
+y
+>> >> > 2013-05-22 16:58:36.079010 7f707661a700  0 -- 192.168.42.3:6803=
+/12142 >> 192.168.42.3:6801/11745 pipe(0x2a689a00 sd=3D44 :6803 s=3D0 p=
+gs=3D0 cs=3D0 l=3D0).accept connect_seq 40 vs existing 39 state standby
+>> >> > 2013-05-22 16:58:36.798038 7f707d563700  0 log [INF] : 9.50c sc=
+rub ok
+>> >> > 2013-05-22 16:58:40.104159 7f707c561700  0 log [INF] : 9.526 sc=
+rub ok
+>> >> >
+>> >> >
+>> >> > Note : I have 8 scrub errors like that, on 4 impacted PG, and a=
+ll impacted objects are about the same RBD image (rb.0.15c26.238e1f29).
+>> >> >
+>> >> >
+>> >> >
+>> >> > Le mercredi 22 mai 2013 =C3=A0 11:01 -0700, Samuel Just a =C3=A9=
+crit :
+>> >> >> Can you post your ceph.log with the period including all of th=
+ese errors?
+>> >> >> -Sam
+>> >> >>
+>> >> >> On Wed, May 22, 2013 at 5:39 AM, Dzianis Kahanovich
+>> >> >> <mahatma@bspu.unibel.by> wrote:
+>> >> >> > Olivier Bonvalet =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+>> >> >> >>
+>> >> >> >> Le lundi 20 mai 2013 =C3=A0 00:06 +0200, Olivier Bonvalet a=
+ =C3=A9crit :
+>> >> >> >>> Le mardi 07 mai 2013 =C3=A0 15:51 +0300, Dzianis Kahanovic=
+h a =C3=A9crit :
+>> >> >> >>>> I have 4 scrub errors (3 PGs - "found clone without head"=
+), on one OSD. Not
+>> >> >> >>>> repairing. How to repair it exclude re-creating of OSD?
+>> >> >> >>>>
+>> >> >> >>>> Now it "easy" to clean+create OSD, but in theory - in cas=
+e there are multiple
+>> >> >> >>>> OSDs - it may cause data lost.
+>> >> >> >>>
+>> >> >> >>> I have same problem : 8 objects (4 PG) with error "found c=
+lone without
+>> >> >> >>> head". How can I fix that ?
+>> >> >> >> since "pg repair" doesn't handle that kind of errors, is th=
+ere a way to
+>> >> >> >> manually fix that ? (it's a production cluster)
+>> >> >> >
+>> >> >> > Trying to fix manually I cause assertions in trimming proces=
+s (died OSD). And
+>> >> >> > many others troubles. So, if you want to keep cluster runnin=
+g, wait for
+>> >> >> > developers answer. IMHO.
+>> >> >> >
+>> >> >> > About manual repair attempt: see issue #4937. Also similar r=
+esults - in subject
+>> >> >> > "Inconsistent PG's, repair ineffective".
+>> >> >> >
+>> >> >> > --
+>> >> >> > WBR, Dzianis Kahanovich AKA Denis Kaganovich, http://mahatma=
+=2Ebspu.unibel.by/
+>> >> >> > _______________________________________________
+>> >> >> > ceph-users mailing list
+>> >> >> > ceph-users@lists.ceph.com
+>> >> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> >> >>
+>> >> >
+>> >> >
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+>> >>
+>> >
+>> >
+>>
+>
 --
-1.7.9.5
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
