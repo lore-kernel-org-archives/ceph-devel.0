@@ -1,131 +1,407 @@
-From: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: scrub error: found clone without head
-Date: Wed, 22 May 2013 15:50:23 -0700
-Message-ID: <CA+4uBUZcsi5eK31p8t+-7jZaERu40O1LSRW6wJOkfho_FwYXkg@mail.gmail.com>
-References: <5188F8D2.5040303@bspu.unibel.by>
-	<1369001190.9705.37.camel@localhost>
-	<1369206051.19425.21.camel@localhost>
-	<519CBC66.9030607@bspu.unibel.by>
-	<CA+4uBUYKNnGfH2JnDBmyRy86RovFEOV=pbW2cdhQ2kV0spijXg@mail.gmail.com>
-	<1369247156.22520.42.camel@localhost>
-	<CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
-	<1369250303.22520.45.camel@localhost>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1369250303.22520.45.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Denis Kaganovich <mahatma-cw37gHAUgAY@public.gmane.org>
+From: Waiman Long <Waiman.Long@hp.com>
+Subject: [PATCH 1/3 v3] dcache: Don't take unnecessary lock in d_count update
+Date: Wed, 22 May 2013 21:37:26 -0400
+Message-ID: <1369273048-60256-2-git-send-email-Waiman.Long@hp.com>
+References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
+Return-path: <autofs-owner@vger.kernel.org>
+In-Reply-To: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
+Sender: autofs-owner@vger.kernel.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>
+Cc: Waiman Long <Waiman.Long@hp.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>, Andi Kleen <andi@firstfloor.org>, Dave Chinner <david@fromorbit.com>
 List-Id: ceph-devel.vger.kernel.org
 
-cmIuMC4xNWMyNi4yMzhlMWYyOQoKSGFzIHRoYXQgcmJkIHZvbHVtZSBiZWVuIHJlbW92ZWQ/Ci1T
-YW0KCk9uIFdlZCwgTWF5IDIyLCAyMDEzIGF0IDEyOjE4IFBNLCBPbGl2aWVyIEJvbnZhbGV0IDxj
-ZXBoLmxpc3RAZGFldmVsLmZyPiB3cm90ZToKPiAwLjYxLTExLWczYjk0ZjAzICgwLjYxLTEuMSks
-IGJ1dCB0aGUgYnVnIG9jY3VyZWQgd2l0aCBib2J0YWlsLgo+Cj4KPiBMZSBtZXJjcmVkaSAyMiBt
-YWkgMjAxMyDDoCAxMjowMCAtMDcwMCwgU2FtdWVsIEp1c3QgYSDDqWNyaXQgOgo+PiBXaGF0IHZl
-cnNpb24gYXJlIHlvdSBydW5uaW5nPwo+PiAtU2FtCj4+Cj4+IE9uIFdlZCwgTWF5IDIyLCAyMDEz
-IGF0IDExOjI1IEFNLCBPbGl2aWVyIEJvbnZhbGV0IDxjZXBoLmxpc3RAZGFldmVsLmZyPiB3cm90
-ZToKPj4gPiBJcyBpdCBlbm91Z2ggPwo+PiA+Cj4+ID4gIyB0YWlsIC1uNTAwIC1mIC92YXIvbG9n
-L2NlcGgvb3NkLjI4LmxvZyB8IGdyZXAgLUE1IC1CNSAnZm91bmQgY2xvbmUgd2l0aG91dCBoZWFk
-Jwo+PiA+IDIwMTMtMDUtMjIgMTU6NDM6MDkuMzA4MzUyIDdmNzA3ZGQ2NDcwMCAgMCBsb2cgW0lO
-Rl0gOiA5LjEwNSBzY3J1YiBvawo+PiA+IDIwMTMtMDUtMjIgMTU6NDQ6MjEuMDU0ODkzIDdmNzA3
-ZGQ2NDcwMCAgMCBsb2cgW0lORl0gOiA5LjQ1MSBzY3J1YiBvawo+PiA+IDIwMTMtMDUtMjIgMTU6
-NDQ6NTIuODk4Nzg0IDdmNzA3Y2Q2MjcwMCAgMCBsb2cgW0lORl0gOiA5Ljc4NCBzY3J1YiBvawo+
-PiA+IDIwMTMtMDUtMjIgMTU6NDc6NDMuMTQ4NTE1IDdmNzA3Y2Q2MjcwMCAgMCBsb2cgW0lORl0g
-OiA5LjNjMyBzY3J1YiBvawo+PiA+IDIwMTMtMDUtMjIgMTU6NDc6NDUuNzE3MDg1IDdmNzA3ZGQ2
-NDcwMCAgMCBsb2cgW0lORl0gOiA5LjNkMCBzY3J1YiBvawo+PiA+IDIwMTMtMDUtMjIgMTU6NTI6
-MTQuNTczODE1IDdmNzA3ZGQ2NDcwMCAgMCBsb2cgW0VSUl0gOiBzY3J1YiAzLjZiIGFkZTNjMTZi
-L3JiLjAuMTVjMjYuMjM4ZTFmMjkuMDAwMDAwMDA5MjIxLzEyZDcvLzMgZm91bmQgY2xvbmUgd2l0
-aG91dCBoZWFkCj4+ID4gMjAxMy0wNS0yMiAxNTo1NTowNy4yMzAxMTQgN2Y3MDdkNTYzNzAwICAw
-IGxvZyBbRVJSXSA6IHNjcnViIDMuNmIgMjYxY2MwZWIvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAw
-MDAwMDM2NzEvMTJkNy8vMyBmb3VuZCBjbG9uZSB3aXRob3V0IGhlYWQKPj4gPiAyMDEzLTA1LTIy
-IDE1OjU2OjU2LjQ1NjI0MiA3ZjcwN2Q1NjM3MDAgIDAgbG9nIFtFUlJdIDogc2NydWIgMy42YiBi
-MTBkZWFlYi9yYi4wLjE1YzI2LjIzOGUxZjI5LjAwMDAwMDAwODZhMi8xMmQ3Ly8zIGZvdW5kIGNs
-b25lIHdpdGhvdXQgaGVhZAo+PiA+IDIwMTMtMDUtMjIgMTU6NTc6NTEuNjY3MDg1IDdmNzA3ZGQ2
-NDcwMCAgMCBsb2cgW0VSUl0gOiAzLjZiIHNjcnViIDMgZXJyb3JzCj4+ID4gMjAxMy0wNS0yMiAx
-NTo1Nzo1NS4yNDEyMjQgN2Y3MDdkZDY0NzAwICAwIGxvZyBbSU5GXSA6IDkuNDUwIHNjcnViIG9r
-Cj4+ID4gMjAxMy0wNS0yMiAxNTo1Nzo1OS44MDAzODMgN2Y3MDdjZDYyNzAwICAwIGxvZyBbSU5G
-XSA6IDkuNDY1IHNjcnViIG9rCj4+ID4gMjAxMy0wNS0yMiAxNTo1OTo1NS4wMjQwNjUgN2Y3MDc2
-NjFhNzAwICAwIC0tIDE5Mi4xNjguNDIuMzo2ODAzLzEyMTQyID4+IDE5Mi4xNjguNDIuNTo2ODI4
-LzMxNDkwIHBpcGUoMHgyYTY4OTAwMCBzZD0xMDggOjY4MDMgcz0yIHBncz0yMDA2NTIgY3M9NzMg
-bD0wKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29pbmcgdG8gc3RhbmRieQo+PiA+IDIw
-MTMtMDUtMjIgMTY6MDE6NDUuNTQyNTc5IDdmNzAyMjc3MDcwMCAgMCAtLSAxOTIuMTY4LjQyLjM6
-NjgwMy8xMjE0MiA+PiAxOTIuMTY4LjQyLjU6NjgyOC8zMTQ5MCBwaXBlKDB4MmE2ODkyODAgc2Q9
-OTkgOjY4MDMgcz0wIHBncz0wIGNzPTAgbD0wKS5hY2NlcHQgY29ubmVjdF9zZXEgNzQgdnMgZXhp
-c3RpbmcgNzMgc3RhdGUgc3RhbmRieQo+PiA+IC0tCj4+ID4gMjAxMy0wNS0yMiAxNjoyOTo0OS41
-NDQzMTAgN2Y3MDdkZDY0NzAwICAwIGxvZyBbSU5GXSA6IDkuNGViIHNjcnViIG9rCj4+ID4gMjAx
-My0wNS0yMiAxNjoyOTo1My4xOTAyMzMgN2Y3MDdkZDY0NzAwICAwIGxvZyBbSU5GXSA6IDkuNGY0
-IHNjcnViIG9rCj4+ID4gMjAxMy0wNS0yMiAxNjoyOTo1OS40Nzg3MzYgN2Y3MDdkZDY0NzAwICAw
-IGxvZyBbSU5GXSA6IDguNmJiIHNjcnViIG9rCj4+ID4gMjAxMy0wNS0yMiAxNjozNToxMi4yNDAy
-NDYgN2Y3MDIyNzcwNzAwICAwIC0tIDE5Mi4xNjguNDIuMzo2ODAzLzEyMTQyID4+IDE5Mi4xNjgu
-NDIuNTo2ODI4LzMxNDkwIHBpcGUoMHgyYTY4OTI4MCBzZD05OSA6NjgwMyBzPTIgcGdzPTIwMDY2
-NyBjcz03NSBsPTApLmZhdWx0IHdpdGggbm90aGluZyB0byBzZW5kLCBnb2luZyB0byBzdGFuZGJ5
-Cj4+ID4gMjAxMy0wNS0yMiAxNjozNToxOS41MTkwMTkgN2Y3MDdkNTYzNzAwICAwIGxvZyBbSU5G
-XSA6IDguNzAwIHNjcnViIG9rCj4+ID4gMjAxMy0wNS0yMiAxNjozOToxNS40MjI1MzIgN2Y3MDdk
-ZDY0NzAwICAwIGxvZyBbRVJSXSA6IHNjcnViIDMuMSBiMTg2OTMwMS9yYi4wLjE1YzI2LjIzOGUx
-ZjI5LjAwMDAwMDAwMDgzNi8xMmQ3Ly8zIGZvdW5kIGNsb25lIHdpdGhvdXQgaGVhZAo+PiA+IDIw
-MTMtMDUtMjIgMTY6NDA6MDQuOTk1MjU2IDdmNzA3Y2Q2MjcwMCAgMCBsb2cgW0VSUl0gOiBzY3J1
-YiAzLjEgYmNjYWQ3MDEvcmIuMC4xNWMyNi4yMzhlMWYyOS4wMDAwMDAwMDlhMDAvMTJkNy8vMyBm
-b3VuZCBjbG9uZSB3aXRob3V0IGhlYWQKPj4gPiAyMDEzLTA1LTIyIDE2OjQxOjA3LjAwODcxNyA3
-ZjcwN2Q1NjM3MDAgIDAgbG9nIFtFUlJdIDogc2NydWIgMy4xIDhhOWJlYzAxL3JiLjAuMTVjMjYu
-MjM4ZTFmMjkuMDAwMDAwMDA5ODIwLzEyZDcvLzMgZm91bmQgY2xvbmUgd2l0aG91dCBoZWFkCj4+
-ID4gMjAxMy0wNS0yMiAxNjo0MTo0Mi40NjAyODAgN2Y3MDdjNTYxNzAwICAwIGxvZyBbRVJSXSA6
-IDMuMSBzY3J1YiAzIGVycm9ycwo+PiA+IDIwMTMtMDUtMjIgMTY6NDY6MTIuMzg1Njc4IDdmNzA3
-NzczNTcwMCAgMCAtLSAxOTIuMTY4LjQyLjM6NjgwMy8xMjE0MiA+PiAxOTIuMTY4LjQyLjU6Njgy
-OC8zMTQ5MCBwaXBlKDB4MmE2ODljODAgc2Q9MTM3IDo2ODAzIHM9MCBwZ3M9MCBjcz0wIGw9MCku
-YWNjZXB0IGNvbm5lY3Rfc2VxIDc2IHZzIGV4aXN0aW5nIDc1IHN0YXRlIHN0YW5kYnkKPj4gPiAy
-MDEzLTA1LTIyIDE2OjU4OjM2LjA3OTAxMCA3ZjcwNzY2MWE3MDAgIDAgLS0gMTkyLjE2OC40Mi4z
-OjY4MDMvMTIxNDIgPj4gMTkyLjE2OC40Mi4zOjY4MDEvMTE3NDUgcGlwZSgweDJhNjg5YTAwIHNk
-PTQ0IDo2ODAzIHM9MCBwZ3M9MCBjcz0wIGw9MCkuYWNjZXB0IGNvbm5lY3Rfc2VxIDQwIHZzIGV4
-aXN0aW5nIDM5IHN0YXRlIHN0YW5kYnkKPj4gPiAyMDEzLTA1LTIyIDE2OjU4OjM2Ljc5ODAzOCA3
-ZjcwN2Q1NjM3MDAgIDAgbG9nIFtJTkZdIDogOS41MGMgc2NydWIgb2sKPj4gPiAyMDEzLTA1LTIy
-IDE2OjU4OjQwLjEwNDE1OSA3ZjcwN2M1NjE3MDAgIDAgbG9nIFtJTkZdIDogOS41MjYgc2NydWIg
-b2sKPj4gPgo+PiA+Cj4+ID4gTm90ZSA6IEkgaGF2ZSA4IHNjcnViIGVycm9ycyBsaWtlIHRoYXQs
-IG9uIDQgaW1wYWN0ZWQgUEcsIGFuZCBhbGwgaW1wYWN0ZWQgb2JqZWN0cyBhcmUgYWJvdXQgdGhl
-IHNhbWUgUkJEIGltYWdlIChyYi4wLjE1YzI2LjIzOGUxZjI5KS4KPj4gPgo+PiA+Cj4+ID4KPj4g
-PiBMZSBtZXJjcmVkaSAyMiBtYWkgMjAxMyDDoCAxMTowMSAtMDcwMCwgU2FtdWVsIEp1c3QgYSDD
-qWNyaXQgOgo+PiA+PiBDYW4geW91IHBvc3QgeW91ciBjZXBoLmxvZyB3aXRoIHRoZSBwZXJpb2Qg
-aW5jbHVkaW5nIGFsbCBvZiB0aGVzZSBlcnJvcnM/Cj4+ID4+IC1TYW0KPj4gPj4KPj4gPj4gT24g
-V2VkLCBNYXkgMjIsIDIwMTMgYXQgNTozOSBBTSwgRHppYW5pcyBLYWhhbm92aWNoCj4+ID4+IDxt
-YWhhdG1hQGJzcHUudW5pYmVsLmJ5PiB3cm90ZToKPj4gPj4gPiBPbGl2aWVyIEJvbnZhbGV0INC/
-0LjRiNC10YI6Cj4+ID4+ID4+Cj4+ID4+ID4+IExlIGx1bmRpIDIwIG1haSAyMDEzIMOgIDAwOjA2
-ICswMjAwLCBPbGl2aWVyIEJvbnZhbGV0IGEgw6ljcml0IDoKPj4gPj4gPj4+IExlIG1hcmRpIDA3
-IG1haSAyMDEzIMOgIDE1OjUxICswMzAwLCBEemlhbmlzIEthaGFub3ZpY2ggYSDDqWNyaXQgOgo+
-PiA+PiA+Pj4+IEkgaGF2ZSA0IHNjcnViIGVycm9ycyAoMyBQR3MgLSAiZm91bmQgY2xvbmUgd2l0
-aG91dCBoZWFkIiksIG9uIG9uZSBPU0QuIE5vdAo+PiA+PiA+Pj4+IHJlcGFpcmluZy4gSG93IHRv
-IHJlcGFpciBpdCBleGNsdWRlIHJlLWNyZWF0aW5nIG9mIE9TRD8KPj4gPj4gPj4+Pgo+PiA+PiA+
-Pj4+IE5vdyBpdCAiZWFzeSIgdG8gY2xlYW4rY3JlYXRlIE9TRCwgYnV0IGluIHRoZW9yeSAtIGlu
-IGNhc2UgdGhlcmUgYXJlIG11bHRpcGxlCj4+ID4+ID4+Pj4gT1NEcyAtIGl0IG1heSBjYXVzZSBk
-YXRhIGxvc3QuCj4+ID4+ID4+Pgo+PiA+PiA+Pj4gSSBoYXZlIHNhbWUgcHJvYmxlbSA6IDggb2Jq
-ZWN0cyAoNCBQRykgd2l0aCBlcnJvciAiZm91bmQgY2xvbmUgd2l0aG91dAo+PiA+PiA+Pj4gaGVh
-ZCIuIEhvdyBjYW4gSSBmaXggdGhhdCA/Cj4+ID4+ID4+IHNpbmNlICJwZyByZXBhaXIiIGRvZXNu
-J3QgaGFuZGxlIHRoYXQga2luZCBvZiBlcnJvcnMsIGlzIHRoZXJlIGEgd2F5IHRvCj4+ID4+ID4+
-IG1hbnVhbGx5IGZpeCB0aGF0ID8gKGl0J3MgYSBwcm9kdWN0aW9uIGNsdXN0ZXIpCj4+ID4+ID4K
-Pj4gPj4gPiBUcnlpbmcgdG8gZml4IG1hbnVhbGx5IEkgY2F1c2UgYXNzZXJ0aW9ucyBpbiB0cmlt
-bWluZyBwcm9jZXNzIChkaWVkIE9TRCkuIEFuZAo+PiA+PiA+IG1hbnkgb3RoZXJzIHRyb3VibGVz
-LiBTbywgaWYgeW91IHdhbnQgdG8ga2VlcCBjbHVzdGVyIHJ1bm5pbmcsIHdhaXQgZm9yCj4+ID4+
-ID4gZGV2ZWxvcGVycyBhbnN3ZXIuIElNSE8uCj4+ID4+ID4KPj4gPj4gPiBBYm91dCBtYW51YWwg
-cmVwYWlyIGF0dGVtcHQ6IHNlZSBpc3N1ZSAjNDkzNy4gQWxzbyBzaW1pbGFyIHJlc3VsdHMgLSBp
-biBzdWJqZWN0Cj4+ID4+ID4gIkluY29uc2lzdGVudCBQRydzLCByZXBhaXIgaW5lZmZlY3RpdmUi
-Lgo+PiA+PiA+Cj4+ID4+ID4gLS0KPj4gPj4gPiBXQlIsIER6aWFuaXMgS2FoYW5vdmljaCBBS0Eg
-RGVuaXMgS2FnYW5vdmljaCwgaHR0cDovL21haGF0bWEuYnNwdS51bmliZWwuYnkvCj4+ID4+ID4g
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPj4gPj4gPiBj
-ZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+PiA+PiA+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20K
-Pj4gPj4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20KPj4gPj4KPj4gPgo+PiA+Cj4+IC0tCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+PiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+PiBNb3JlIG1ham9y
-ZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwK
-Pj4KPgo+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNl
-cGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xp
-c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+The current code takes the dentry's d_lock lock whenever the d_count
+reference count is being updated. In reality, nothing big really
+happens until d_count goes to 0 in dput(). So it is not necessary to
+take the lock if the reference count won't go to 0.
+
+Without using a lock, multiple threads may update d_count
+simultaneously.  Therefore, atomic instructions must be used to
+ensure consistency except in shrink_dcache_for_umount*() where the
+whole superblock is being dismounted and locking is not needed.
+
+The worst case scenarios are:
+
+1. d_lock taken in dput with d_count = 2 in one thread and another
+   thread comes in to atomically decrement d_count without taking
+   the lock. This may result in a d_count of 0 with no deleting
+   action taken.
+
+2. d_lock taken in dput with d_count = 1 in one thread and another
+   thread comes in to atomically increment d_count without taking
+   the lock. This may result in the dentry in the deleted state while
+   having a d_count of 1.
+
+Without taking a lock, we need to make sure the decrementing or
+incrementing action should not be taken while other threads are
+updating d_count simultaneously. This can be done by using the
+atomic cmpxchg instruction which will fail if the underlying value
+is changed.  If the lock is taken, it should be safe to use a simpler
+atomic increment or decrement instruction.
+
+To make sure that the above worst case scenarios will not happen,
+the dget() function must take the lock if d_count <= 1. Similarly,
+the dput() function must take the lock if d_count <= 2. The cmpxchg()
+call to update d_count will be tried twice before falling back to
+using the lock as there is a fairly good chance that the cmpxchg()
+may fail in a busy situation.
+
+Finally, the CPU must have an instructional level cmpxchg instruction
+or the emulated cmpxchg() function may be too expensive to
+use. Therefore, the above mentioned changes will only be applied if
+the __HAVE_ARCH_CMPXCHG flag is set. Most of the major architectures
+supported by Linux have this flag set with the notation exception
+of ARM.
+
+As for the performance of the updated reference counting code, it
+all depends on whether the cmpxchg instruction is used or not. The
+original code has 2 atomic instructions to lock and unlock the
+spinlock. The new code path has either 1 atomic cmpxchg instruction
+or 3 atomic instructions if the lock has to be taken. Depending on
+how frequent the cmpxchg instruction is used (d_count > 1 or 2),
+the new code can be faster or slower than the original one.
+
+This patch has a particular big impact on the short workload of the
+AIM7 benchmark with ramdisk filesystem. The table below show the
+performance improvement to the JPM (jobs per minutes) throughput due
+to this patch on an 8-socket 80-core x86-64 system with a 3.10-rc1
+kernel in a 1/2/4/8 node configuration by using numactl to restrict
+the execution of the workload on certain nodes.
+
++-----------------+----------------+-----------------+----------+
+|  Configuration  |    Mean JPM    |    Mean JPM     | % Change |
+|                 | Rate w/o patch | Rate with patch |          |
++-----------------+---------------------------------------------+
+|                 |              User Range 10 - 100            |
++-----------------+---------------------------------------------+
+| 8 nodes, HT off |    1546813     |     5080126     | +228.4%  |
+| 4 nodes, HT off |    1663439     |     4703083     | +182.7%  |
+| 2 nodes, HT off |    2545389     |     3790995     |  +48.9%  |
+| 1 node , HT off |    2374488     |     2394846     |   +0.9%  |
++-----------------+---------------------------------------------+
+|                 |              User Range 200 - 1000          |
++-----------------+---------------------------------------------+
+| 8 nodes, HT off |    1064184     |     7391382     | +594.6%  |
+| 4 nodes, HT off |    1362447     |     7325475     | +437.7%  |
+| 2 nodes, HT off |    1851198     |     4539511     | +145.2%  |
+| 1 node , HT off |    2477537     |     2457513     |   -0.8%  |
++-----------------+---------------------------------------------+
+|                 |              User Range 1100 - 2000         |
++-----------------+---------------------------------------------+
+| 8 nodes, HT off |    1056243     |     7067282     | +569.1%  |
+| 4 nodes, HT off |    1354505     |     6930437     | +411.7%  |
+| 2 nodes, HT off |    1735881     |     4581847     | +164.0%  |
+| 1 node , HT off |    2511547     |     2496594     |   -0.6%  |
++-----------------+----------------+-----------------+----------+
+
+It can be seen that with 20 CPUs (2 nodes) or more, this patch can
+significantly improve the short workload performance. With only 1
+node, the performance is similar with or without the patch. The short
+workload also scales pretty well up to 4 nodes with this patch.
+
+A perf call-graph report of the short workload at 1500 users without
+the patch on 8 nodes indicates that about 79% of the workload's total
+time were spent in the _raw_spin_lock() function. Almost all of which
+can be attributed to the following 2 kernel functions:
+ 1. dget_parent (49.91%)
+ 2. dput (49.82%)
+
+With this patch on, the time spent on _raw_spin_lock() is only 1.38%
+which is a huge improvement. Of the 1.38%, only a small portion of it
+is related to the dcache lock. However, the _raw_spin_lock_irqsave()
+of the tty_ldisc_lock now dominates with 24.5% of the total time.
+
+This impact of this patch on other AIM7 workloads were much more
+modest.  The table below show the mean %change due to this patch on
+the same 8-socket system with a 3.10-rc1 kernel.
+
++--------------+---------------+----------------+-----------------+
+|   Workload   | mean % change | mean % change  | mean % change   |
+|              | 10-100 users  | 200-1000 users | 1100-2000 users |
++--------------+---------------+----------------+-----------------+
+| alltests     |     -0.2%     |     -0.5%      |     -2.7%       |
+| five_sec     |     -1.0%     |     +2.6%      |     +2.4%       |
+| fserver      |     +1.3%     |     +1.9%      |     +1.0%       |
+| high_systime |     +0.1%     |     +1.3%      |     +4.8%       |
+| new_fserver  |     -1.5%     |     +0.8%      |     +1.1%       |
+| shared       |     +0.5%     |     +0.4%      |     -0.1%       |
++--------------+---------------+----------------+-----------------+
+
+Signed-off-by: Waiman Long <Waiman.Long@hp.com>
+---
+ fs/dcache.c            |   37 ++++++++---------
+ fs/namei.c             |    2 +-
+ include/linux/dcache.h |  101 ++++++++++++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 117 insertions(+), 23 deletions(-)
+
+diff --git a/fs/dcache.c b/fs/dcache.c
+index f09b908..470b06f 100644
+--- a/fs/dcache.c
++++ b/fs/dcache.c
+@@ -467,7 +467,7 @@ relock:
+ 	}
+ 
+ 	if (ref)
+-		dentry->d_count--;
++		dcount_dec(dentry);
+ 	/*
+ 	 * inform the fs via d_prune that this dentry is about to be
+ 	 * unhashed and destroyed.
+@@ -515,10 +515,13 @@ void dput(struct dentry *dentry)
+ repeat:
+ 	if (dentry->d_count == 1)
+ 		might_sleep();
++	if (dcount_dec_cmpxchg(dentry))
++		return;
++
+ 	spin_lock(&dentry->d_lock);
+ 	BUG_ON(!dentry->d_count);
+ 	if (dentry->d_count > 1) {
+-		dentry->d_count--;
++		dcount_dec(dentry);
+ 		spin_unlock(&dentry->d_lock);
+ 		return;
+ 	}
+@@ -535,7 +538,7 @@ repeat:
+ 	dentry->d_flags |= DCACHE_REFERENCED;
+ 	dentry_lru_add(dentry);
+ 
+-	dentry->d_count--;
++	dcount_dec(dentry);
+ 	spin_unlock(&dentry->d_lock);
+ 	return;
+ 
+@@ -606,11 +609,13 @@ EXPORT_SYMBOL(d_invalidate);
+ /* This must be called with d_lock held */
+ static inline void __dget_dlock(struct dentry *dentry)
+ {
+-	dentry->d_count++;
++	dcount_inc(dentry);
+ }
+ 
+ static inline void __dget(struct dentry *dentry)
+ {
++	if (dcount_inc_cmpxchg(dentry))
++		return;
+ 	spin_lock(&dentry->d_lock);
+ 	__dget_dlock(dentry);
+ 	spin_unlock(&dentry->d_lock);
+@@ -620,22 +625,16 @@ struct dentry *dget_parent(struct dentry *dentry)
+ {
+ 	struct dentry *ret;
+ 
+-repeat:
+-	/*
+-	 * Don't need rcu_dereference because we re-check it was correct under
+-	 * the lock.
+-	 */
+ 	rcu_read_lock();
+-	ret = dentry->d_parent;
+-	spin_lock(&ret->d_lock);
+-	if (unlikely(ret != dentry->d_parent)) {
+-		spin_unlock(&ret->d_lock);
++	ret = rcu_dereference(dentry->d_parent);
++	if (dcount_inc_cmpxchg(ret)) {
+ 		rcu_read_unlock();
+-		goto repeat;
++		return ret;
+ 	}
++	spin_lock(&ret->d_lock);
+ 	rcu_read_unlock();
+ 	BUG_ON(!ret->d_count);
+-	ret->d_count++;
++	dcount_inc(ret);
+ 	spin_unlock(&ret->d_lock);
+ 	return ret;
+ }
+@@ -765,7 +764,7 @@ static void try_prune_one_dentry(struct dentry *dentry)
+ 	while (dentry) {
+ 		spin_lock(&dentry->d_lock);
+ 		if (dentry->d_count > 1) {
+-			dentry->d_count--;
++			dcount_dec(dentry);
+ 			spin_unlock(&dentry->d_lock);
+ 			return;
+ 		}
+@@ -1970,7 +1969,7 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
+ 				goto next;
+ 		}
+ 
+-		dentry->d_count++;
++		dcount_inc(dentry);
+ 		found = dentry;
+ 		spin_unlock(&dentry->d_lock);
+ 		break;
+@@ -2937,7 +2936,7 @@ resume:
+ 		}
+ 		if (!(dentry->d_flags & DCACHE_GENOCIDE)) {
+ 			dentry->d_flags |= DCACHE_GENOCIDE;
+-			dentry->d_count--;
++			dcount_dec(dentry);
+ 		}
+ 		spin_unlock(&dentry->d_lock);
+ 	}
+@@ -2945,7 +2944,7 @@ resume:
+ 		struct dentry *child = this_parent;
+ 		if (!(this_parent->d_flags & DCACHE_GENOCIDE)) {
+ 			this_parent->d_flags |= DCACHE_GENOCIDE;
+-			this_parent->d_count--;
++			dcount_dec(this_parent);
+ 		}
+ 		this_parent = try_to_ascend(this_parent, locked, seq);
+ 		if (!this_parent)
+diff --git a/fs/namei.c b/fs/namei.c
+index 85e40d1..03dcaed 100644
+--- a/fs/namei.c
++++ b/fs/namei.c
+@@ -537,7 +537,7 @@ static int unlazy_walk(struct nameidata *nd, struct dentry *dentry)
+ 		 */
+ 		BUG_ON(!IS_ROOT(dentry) && dentry->d_parent != parent);
+ 		BUG_ON(!parent->d_count);
+-		parent->d_count++;
++		dcount_inc(parent);
+ 		spin_unlock(&dentry->d_lock);
+ 	}
+ 	spin_unlock(&parent->d_lock);
+diff --git a/include/linux/dcache.h b/include/linux/dcache.h
+index 1a6bb81..99da5e2 100644
+--- a/include/linux/dcache.h
++++ b/include/linux/dcache.h
+@@ -258,6 +258,99 @@ extern int have_submounts(struct dentry *);
+ extern void d_rehash(struct dentry *);
+ 
+ /**
++ * 	dcount_inc, dcount_dec - increment or decrement the dentry reference
++ * 				 count
++ * 	@dentry: dentry to get a reference to
++ */
++static inline void dcount_inc(struct dentry *dentry)
++{
++#ifdef  __HAVE_ARCH_CMPXCHG
++	atomic_inc((atomic_t *)&dentry->d_count);
++#else
++	dentry->d_count++;
++#endif
++}
++
++static inline void dcount_dec(struct dentry *dentry)
++{
++#ifdef  __HAVE_ARCH_CMPXCHG
++	atomic_dec((atomic_t *)&dentry->d_count);
++#else
++	dentry->d_count--;
++#endif
++}
++
++/**
++ * 	dcount_inc_cmpxchg - increment dentry reference count using cmpxchg
++ * 	@dentry: dentry to get a reference to
++ * 	Return : 0 on failure, else 1
++ *
++ * 	N.B. For architectures that do not have a cmpxchg instruction, the
++ * 	     substitute code may not perform better than taking the lock.
++ * 	     So this cmpxchg code path is disabled for those cases.
++ */
++static inline int dcount_inc_cmpxchg(struct dentry *dentry)
++{
++#ifdef	__HAVE_ARCH_CMPXCHG
++	int oldc, newc;
++
++	if ((oldc = dentry->d_count) > 1) {
++		/*
++		 * If reference count > 1, we can safely increment its
++		 * value using atomic cmpxchg without locking. If the
++		 * operation fails, fall back to using the lock.
++		 */
++		newc = oldc + 1;
++		if (cmpxchg(&dentry->d_count, oldc, newc) == oldc)
++			return 1;
++		cpu_relax();
++		/* Retry one more time */
++		if (likely((oldc = ACCESS_ONCE(dentry->d_count)) > 1)) {
++			newc = oldc + 1;
++			if (cmpxchg(&dentry->d_count, oldc, newc) == oldc)
++				return 1;
++			cpu_relax();
++		}
++	}
++#endif
++	return 0;
++}
++
++/**
++ * 	dcount_dec_cmpxchg - decrement dentry reference count using cmpxchg
++ * 	@dentry: dentry to get a reference to
++ * 	Return : 0 on failure, else 1
++ */
++static inline int dcount_dec_cmpxchg(struct dentry *dentry)
++{
++#ifdef	__HAVE_ARCH_CMPXCHG
++	int	oldc, newc;
++
++	/*
++	 * If d_count is bigger than 2, we can safely decrement the
++	 * reference count using atomic cmpxchg instruction without locking.
++	 * Even if d_lock is taken by a thread running dput() with a parallel
++	 * atomic_dec(), the reference count won't go to 0 without anyone
++	 * noticing.
++	 */
++	if ((oldc = dentry->d_count) > 2) {
++		newc = oldc - 1;
++		if (cmpxchg(&dentry->d_count, oldc, newc) == oldc)
++			return 1;
++		cpu_relax();
++		/* Retry one more time */
++		if (likely((oldc = ACCESS_ONCE(dentry->d_count)) > 2)) {
++			newc = oldc - 1;
++			if (cmpxchg(&dentry->d_count, oldc, newc) == oldc)
++				return 1;
++			cpu_relax();
++		}
++	}
++#endif
++	return 0;
++}
++
++/**
+  * d_add - add dentry to hash queues
+  * @entry: dentry to add
+  * @inode: The inode to attach to this dentry
+@@ -319,7 +412,7 @@ static inline int __d_rcu_to_refcount(struct dentry *dentry, unsigned seq)
+ 	assert_spin_locked(&dentry->d_lock);
+ 	if (!read_seqcount_retry(&dentry->d_seq, seq)) {
+ 		ret = 1;
+-		dentry->d_count++;
++		dcount_inc(dentry);
+ 	}
+ 
+ 	return ret;
+@@ -340,7 +433,6 @@ extern char *dentry_path_raw(struct dentry *, char *, int);
+ extern char *dentry_path(struct dentry *, char *, int);
+ 
+ /* Allocation counts.. */
+-
+ /**
+  *	dget, dget_dlock -	get a reference to a dentry
+  *	@dentry: dentry to get a reference to
+@@ -352,13 +444,16 @@ extern char *dentry_path(struct dentry *, char *, int);
+ static inline struct dentry *dget_dlock(struct dentry *dentry)
+ {
+ 	if (dentry)
+-		dentry->d_count++;
++		dcount_inc(dentry);
+ 	return dentry;
+ }
+ 
+ static inline struct dentry *dget(struct dentry *dentry)
+ {
+ 	if (dentry) {
++		if (dcount_inc_cmpxchg(dentry))
++			return dentry;
++
+ 		spin_lock(&dentry->d_lock);
+ 		dget_dlock(dentry);
+ 		spin_unlock(&dentry->d_lock);
+-- 
+1.7.1
+
