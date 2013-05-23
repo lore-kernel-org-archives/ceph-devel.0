@@ -1,449 +1,239 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 27/30] mds: remove old backtrace handling
-Date: Thu, 23 May 2013 15:46:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305231543040.29396@cobra.newdream.net>
-References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-28-git-send-email-zheng.z.yan@intel.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: [ceph-users] scrub error: found clone without head
+Date: Thu, 23 May 2013 15:53:48 -0700
+Message-ID: <CA+4uBUbMu-iJ8EPqaVe9smL0Ri2jT86puviFoc3b5di2Uop==A@mail.gmail.com>
+References: <5188F8D2.5040303@bspu.unibel.by>
+	<1369001190.9705.37.camel@localhost>
+	<1369206051.19425.21.camel@localhost>
+	<519CBC66.9030607@bspu.unibel.by>
+	<CA+4uBUYKNnGfH2JnDBmyRy86RovFEOV=pbW2cdhQ2kV0spijXg@mail.gmail.com>
+	<1369247156.22520.42.camel@localhost>
+	<CA+4uBUaAseMNOumZdmRi=XMRifaqLF=JWWFEe9hT+LRduuQJpQ@mail.gmail.com>
+	<1369250303.22520.45.camel@localhost>
+	<CA+4uBUZcsi5eK31p8t+-7jZaERu40O1LSRW6wJOkfho_FwYXkg@mail.gmail.com>
+	<1369310447.19425.43.camel@localhost>
+	<CA+4uBUYPFWBgYqqS7qN1eoQ5ies1S5_R=CCUZoeFPY3Fe+=_mA@mail.gmail.com>
+	<1369348073.3440.3.camel@localhost>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45688 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759752Ab3EWWqK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 18:46:10 -0400
-In-Reply-To: <1369296418-14871-28-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-ee0-f54.google.com ([74.125.83.54]:50142 "EHLO
+	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759763Ab3EWWxu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 18:53:50 -0400
+Received: by mail-ee0-f54.google.com with SMTP id e50so2295730eek.13
+        for <ceph-devel@vger.kernel.org>; Thu, 23 May 2013 15:53:49 -0700 (PDT)
+In-Reply-To: <1369348073.3440.3.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: Denis Kaganovich <mahatma@eu.by>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 23 May 2013, Yan, Zheng wrote:
+Can you send the filenames in the pg directories for those 4 pgs?
+-Sam
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  src/mds/LogSegment.h       |  23 --------
->  src/mds/MDLog.cc           |   1 -
->  src/mds/Server.cc          |  45 --------------
->  src/mds/events/EMetaBlob.h |  10 ----
->  src/mds/journal.cc         | 144 +++------------------------------------------
->  5 files changed, 7 insertions(+), 216 deletions(-)
-> 
-> diff --git a/src/mds/LogSegment.h b/src/mds/LogSegment.h
-> index d42e352..44c7942 100644
-> --- a/src/mds/LogSegment.h
-> +++ b/src/mds/LogSegment.h
-> @@ -33,19 +33,6 @@ class CDentry;
->  class MDS;
->  class MDSlaveUpdate;
->  
-> -// The backtrace info struct here is used to maintain the backtrace in
-> -// a queue that we will eventually want to write out (on journal segment
-> -// expiry).
-> -class BacktraceInfo {
-> -public:
-> -  int64_t location;
-> -  int64_t pool;
-> -  struct inode_backtrace_t bt;
-> -  elist<BacktraceInfo*>::item item_logseg;
-> -  BacktraceInfo(int64_t l, CInode *i, LogSegment *ls, int64_t p = -1);
-> -  ~BacktraceInfo();
-> -};
-> -
->  class LogSegment {
->   public:
->    uint64_t offset, end;
-> @@ -63,8 +50,6 @@ class LogSegment {
->    elist<CInode*>  dirty_dirfrag_nest;
->    elist<CInode*>  dirty_dirfrag_dirfragtree;
->  
-> -  elist<BacktraceInfo*> update_backtraces;
-> -
->    elist<MDSlaveUpdate*> slave_updates;
->    
->    set<CInode*> truncating_inodes;
-> @@ -95,17 +80,9 @@ class LogSegment {
->      dirty_dirfrag_dir(member_offset(CInode, item_dirty_dirfrag_dir)),
->      dirty_dirfrag_nest(member_offset(CInode, item_dirty_dirfrag_nest)),
->      dirty_dirfrag_dirfragtree(member_offset(CInode, item_dirty_dirfrag_dirfragtree)),
-> -    update_backtraces(member_offset(BacktraceInfo, item_logseg)),
->      slave_updates(0), // passed to begin() manually
->      inotablev(0), sessionmapv(0)
->    { }
-> -
-> -  // backtrace handling
-> -  void queue_backtrace_update(CInode *in, int64_t location, int64_t pool = -1);
-> -  void remove_pending_backtraces(inodeno_t ino, int64_t pool);
-> -  void store_backtrace_update(MDS *mds, BacktraceInfo *info, Context *fin);
-> -  void _stored_backtrace(BacktraceInfo *info, Context *fin);
-> -  unsigned encode_parent_mutation(ObjectOperation& m, BacktraceInfo *info);
->  };
->  
->  #endif
-> diff --git a/src/mds/MDLog.cc b/src/mds/MDLog.cc
-> index 84d2612..c477313 100644
-> --- a/src/mds/MDLog.cc
-> +++ b/src/mds/MDLog.cc
-> @@ -623,7 +623,6 @@ void MDLog::standby_trim_segments()
->      seg->dirty_dirfrag_dir.clear_list();
->      seg->dirty_dirfrag_nest.clear_list();
->      seg->dirty_dirfrag_dirfragtree.clear_list();
-> -    seg->update_backtraces.clear_list();
->      remove_oldest_segment();
->      removed_segment = true;
->    }
-> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> index e88f627..d89a083 100644
-> --- a/src/mds/Server.cc
-> +++ b/src/mds/Server.cc
-> @@ -2698,8 +2698,6 @@ public:
->  
->      mds->balancer->hit_inode(mdr->now, newi, META_POP_IWR);
->  
-> -    mdr->ls->queue_backtrace_update(newi, newi->inode.layout.fl_pg_pool);
-> -
->      MClientReply *reply = new MClientReply(mdr->client_request, 0);
->      reply->set_extra_bl(mdr->reply_extra_bl);
->      mds->server->reply_request(mdr, reply);
-> @@ -3106,8 +3104,6 @@ public:
->    void finish(int r) {
->      assert(r == 0);
->  
-> -    int64_t old_pool = in->inode.layout.fl_pg_pool;
-> -
->      // apply
->      in->pop_and_dirty_projected_inode(mdr->ls);
->      mdr->apply();
-> @@ -3124,16 +3120,6 @@ public:
->  
->      if (changed_ranges)
->        mds->locker->share_inode_max_size(in);
-> -
-> -    // if pool changed, queue a new backtrace and set forward pointer on old
-> -    if (old_pool != in->inode.layout.fl_pg_pool) {
-> -      mdr->ls->remove_pending_backtraces(in->ino(), in->inode.layout.fl_pg_pool);
-> -      mdr->ls->queue_backtrace_update(in, in->inode.layout.fl_pg_pool);
-> -
-> -      // set forwarding pointer on old backtrace
-> -      mdr->ls->remove_pending_backtraces(in->ino(), old_pool);
-> -      mdr->ls->queue_backtrace_update(in, old_pool, in->inode.layout.fl_pg_pool);
-> -    }
->    }
->  };
->  
-> @@ -3514,8 +3500,6 @@ void Server::handle_client_setlayout(MDRequest *mdr)
->    EUpdate *le = new EUpdate(mdlog, "setlayout");
->    mdlog->start_entry(le);
->    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_client_tid());
-> -  // add the old pool to the metablob to indicate the pool changed with this event
-> -  le->metablob.add_old_pool(old_pool);
->    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PREDIRTY_PRIMARY, false);
->    mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
->    
-> @@ -3781,10 +3765,6 @@ void Server::handle_set_vxattr(MDRequest *mdr, CInode *cur,
->      EUpdate *le = new EUpdate(mdlog, "set vxattr layout");
->      mdlog->start_entry(le);
->      le->metablob.add_client_req(req->get_reqid(), req->get_oldest_client_tid());
-> -    if (cur->is_file()) {
-> -      assert(old_pool != -1);
-> -      le->metablob.add_old_pool(old_pool);
-> -    }
->      mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PREDIRTY_PRIMARY, false);
->      mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
->  
-> @@ -4037,15 +4017,6 @@ public:
->      // hit pop
->      mds->balancer->hit_inode(mdr->now, newi, META_POP_IWR);
->  
-> -    // store the backtrace on the 'parent' xattr
-> -    if (newi->inode.is_dir()) {
-> -      // if its a dir, put it in the metadata pool
-> -      mdr->ls->queue_backtrace_update(newi, mds->mdsmap->get_metadata_pool());
-> -    } else {
-> -      // if its a file, put it in the data pool for that file
-> -      mdr->ls->queue_backtrace_update(newi, newi->inode.layout.fl_pg_pool);
-> -    }
-> -
->      // reply
->      MClientReply *reply = new MClientReply(mdr->client_request, 0);
->      reply->set_result(0);
-> @@ -5982,20 +5953,6 @@ void Server::_rename_finish(MDRequest *mdr, CDentry *srcdn, CDentry *destdn, CDe
->    // did we import srci?  if so, explicitly ack that import that, before we unlock and reply.
->  
->    assert(g_conf->mds_kill_rename_at != 7);
-> -  // backtrace
-> -  if (destdnl->inode->is_dir()) {
-> -    // replace previous backtrace on this inode with myself
-> -    mdr->ls->remove_pending_backtraces(destdnl->inode->ino(), mds->mdsmap->get_metadata_pool());
-> -    // queue an updated backtrace
-> -    mdr->ls->queue_backtrace_update(destdnl->inode, mds->mdsmap->get_metadata_pool());
-> -
-> -  } else {
-> -    // remove all pending backtraces going to the same pool
-> -    mdr->ls->remove_pending_backtraces(destdnl->inode->ino(), destdnl->inode->inode.layout.fl_pg_pool);
-> -    // queue an updated backtrace
-> -    mdr->ls->queue_backtrace_update(destdnl->inode, destdnl->inode->inode.layout.fl_pg_pool);
-> -  }
-> -  assert(g_conf->mds_kill_rename_at != 8);
->  
->    // reply
->    MClientReply *reply = new MClientReply(mdr->client_request, 0);
-> @@ -6391,8 +6348,6 @@ void Server::_rename_prepare(MDRequest *mdr,
->    if (srci->is_dir())
->      mdcache->project_subtree_rename(srci, srcdn->get_dir(), destdn->get_dir());
->  
-> -  // always update the backtrace
-> -  metablob->update_backtrace();
->  }
->  
->  
-> diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
-> index f393097..973d277 100644
-> --- a/src/mds/events/EMetaBlob.h
-> +++ b/src/mds/events/EMetaBlob.h
-> @@ -324,9 +324,6 @@ private:
->    // idempotent op(s)
->    list<pair<metareqid_t,uint64_t> > client_reqs;
->  
-> -  int64_t old_pool;
-> -  bool update_bt;
-> -
->   public:
->    void encode(bufferlist& bl) const;
->    void decode(bufferlist::iterator& bl);
-> @@ -542,13 +539,6 @@ private:
->    static const int TO_ROOT = 1;
->    
->    void add_dir_context(CDir *dir, int mode = TO_AUTH_SUBTREE_ROOT);
-> - 
-> -  void add_old_pool(int64_t pool) {
-> -    old_pool = pool;
-> -  }
-> -  void update_backtrace() {
-> -    update_bt = true;
-> -  }
->  
->    void print(ostream& out) const {
->      out << "[metablob";
-> diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-> index da88a36..3019339 100644
-> --- a/src/mds/journal.cc
-> +++ b/src/mds/journal.cc
-> @@ -196,10 +196,6 @@ void LogSegment::try_to_expire(MDS *mds, C_GatherBuilder &gather_bld)
->        in->add_waiter(CInode::WAIT_UNFREEZE, gather_bld.new_sub());
->      }
->    }
-> -  for (elist<BacktraceInfo*>::iterator p = update_backtraces.begin(); !p.end(); ++p) {
-> -    BacktraceInfo *btinfo = *p;
-> -    store_backtrace_update(mds, btinfo, gather_bld.new_sub());
-> -  }
->  
->    assert(g_conf->mds_kill_journal_expire_at != 4);
->  
-> @@ -278,101 +274,6 @@ void LogSegment::try_to_expire(MDS *mds, C_GatherBuilder &gather_bld)
->    }
->  }
->  
-> -// ----------------------------
-> -// backtrace handling
-> -
-> -// BacktraceInfo is used for keeping the
-> -// current state of the backtrace to be stored later on
-> -// logsegment expire.  Constructing a BacktraceInfo
-> -// automatically puts it on the LogSegment list that is passed in,
-> -// after building the backtrace based on the current state of the inode.  We
-> -// construct the backtrace here to avoid keeping a ref to the inode.
-> -BacktraceInfo::BacktraceInfo(
-> -    int64_t l, CInode *i, LogSegment *ls, int64_t p) :
-> -        location(l), pool(p) {
-> -
-> -  // on setlayout cases, forward pointers mean
-> -  // pool != location, but for all others it does
-> -  if (pool == -1) pool = location;
-> -
-> -  bt.pool = pool;
-> -  i->build_backtrace(l, &bt);
-> -  ls->update_backtraces.push_back(&item_logseg);
-> -}
-> -
-> -// When the info_t is destroyed, it just needs to remove itself
-> -// from the LogSegment list
-> -BacktraceInfo::~BacktraceInfo() {
-> -  item_logseg.remove_myself();
-> -}
-> -
-> -// Queue a backtrace for later
-> -void LogSegment::queue_backtrace_update(CInode *inode, int64_t location, int64_t pool) {
-> -    // allocating a pointer here and not setting it to anything
-> -    // might look strange, but the constructor adds itself to the backtraces
-> -    // list of this LogSegment, which is how we keep track of it
-> -    new BacktraceInfo(location, inode, this, pool);
-> -}
-> -
-> -void LogSegment::remove_pending_backtraces(inodeno_t ino, int64_t pool) {
-> -  elist<BacktraceInfo*>::iterator i = update_backtraces.begin();
-> -  while(!i.end()) {
-> -    ++i;
-> -    if((*i)->bt.ino == ino && (*i)->location == pool) {
-> -      delete (*i);
-> -    }
-> -  }
-> -}
-> -
-> -unsigned LogSegment::encode_parent_mutation(ObjectOperation& m, BacktraceInfo *info)
-> -{
-> -  bufferlist parent;
-> -  ::encode(info->bt, parent);
-> -  m.setxattr("parent", parent);
-> -  return parent.length();
-> -}
-> -
-> -struct C_LogSegment_StoredBacktrace : public Context {
-> -  LogSegment *ls;
-> -  BacktraceInfo *info;
-> -  Context *fin;
-> -  C_LogSegment_StoredBacktrace(LogSegment *l, BacktraceInfo *c,
-> -			       Context *f) : ls(l), info(c), fin(f) {}
-> -  void finish(int r) {
-> -    ls->_stored_backtrace(info, fin);
-> -  }
-> -};
-> -
-> -void LogSegment::store_backtrace_update(MDS *mds, BacktraceInfo *info, Context *fin)
-> -{
-> -  ObjectOperation m;
-> -  // prev_pool will be the target pool on create,mkdir,etc.
-> -  encode_parent_mutation(m, info);
-> -
-> -  // write it.
-> -  SnapContext snapc;
-> -
-> -  object_t oid = CInode::get_object_name(info->bt.ino, frag_t(), "");
-> -
-> -  dout(10) << "store_parent for oid " << oid << " location " << info->location << " pool " << info->pool << dendl;
-> -
-> -  // store the backtrace in the specified pool
-> -  object_locator_t oloc(info->location);
-> -
-> -  mds->objecter->mutate(oid, oloc, m, snapc, ceph_clock_now(g_ceph_context), 0,
-> -		        NULL, new C_LogSegment_StoredBacktrace(this, info, fin) );
-> -
-> -}
-> -
-> -void LogSegment::_stored_backtrace(BacktraceInfo *info, Context *fin)
-> -{
-> -  delete info;
-> -  if (fin) {
-> -    fin->finish(0);
-> -    delete fin;
-> -  }
-> -}
-> -
->  #undef DOUT_COND
->  #define DOUT_COND(cct, l) (l<=cct->_conf->debug_mds || l <= cct->_conf->debug_mds_log)
->  
-> @@ -383,8 +284,6 @@ void LogSegment::_stored_backtrace(BacktraceInfo *info, Context *fin)
->  EMetaBlob::EMetaBlob(MDLog *mdlog) : opened_ino(0), renamed_dirino(0),
->  				     inotablev(0), sessionmapv(0),
->  				     allocated_ino(0),
-> -				     old_pool(-1),
-> -				     update_bt(false),
->  				     last_subtree_map(mdlog ? mdlog->get_last_segment_offset() : 0),
->  				     my_offset(mdlog ? mdlog->get_write_pos() : 0) //, _segment(0)
->  { }
-> @@ -842,7 +741,7 @@ void EMetaBlob::dirlump::generate_test_instances(list<dirlump*>& ls)
->   */
->  void EMetaBlob::encode(bufferlist& bl) const
->  {
-> -  ENCODE_START(6, 5, bl);
-> +  ENCODE_START(7, 5, bl);
->    ::encode(lump_order, bl);
->    ::encode(lump_map, bl);
->    ::encode(roots, bl);
-> @@ -860,13 +759,11 @@ void EMetaBlob::encode(bufferlist& bl) const
->    ::encode(client_reqs, bl);
->    ::encode(renamed_dirino, bl);
->    ::encode(renamed_dir_frags, bl);
-> -  ::encode(old_pool, bl);
-> -  ::encode(update_bt, bl);
-
-We can't remove fields without making this an incompatible change.  In 
-this case we don't want that.. so just encode dummy values that will be 
-ignored below
-
->    ENCODE_FINISH(bl);
->  }
->  void EMetaBlob::decode(bufferlist::iterator &bl)
->  {
-> -  DECODE_START_LEGACY_COMPAT_LEN(6, 5, 5, bl);
-> +  DECODE_START_LEGACY_COMPAT_LEN(7, 5, 5, bl);
->    ::decode(lump_order, bl);
->    ::decode(lump_map, bl);
->    if (struct_v >= 4) {
-> @@ -904,9 +801,11 @@ void EMetaBlob::decode(bufferlist::iterator &bl)
->      ::decode(renamed_dirino, bl);
->      ::decode(renamed_dir_frags, bl);
->    }
-> -  if (struct_v >= 6) {
-> -    ::decode(old_pool, bl);
-> -    ::decode(update_bt, bl);
-> +  if (struct_v == 6) {
-
-if (struct_v >= 6) {
-   // ignore
-
-like so.
-
-
-> +    int64_t i;
-> +    bool b;
-> +    ::decode(i, bl);
-> +    ::decode(b, bl);
->    }
->    DECODE_FINISH(bl);
->  }
-> @@ -1191,35 +1090,6 @@ void EMetaBlob::replay(MDS *mds, LogSegment *logseg, MDSlaveUpdate *slaveup)
->        assert(g_conf->mds_kill_journal_replay_at != 2);
->        if (p->is_dirty_parent())
->  	in->_mark_dirty_parent(logseg, p->is_dirty_pool());
-> -
-> -      // store backtrace for allocated inos (create, mkdir, symlink, mknod)
-> -      if (allocated_ino || used_preallocated_ino) {
-> -	if (in->inode.is_dir()) {
-> -	  logseg->queue_backtrace_update(in, mds->mdsmap->get_metadata_pool());
-> -	} else {
-> -	  logseg->queue_backtrace_update(in, in->inode.layout.fl_pg_pool);
-> -	}
-> -      }
-> -      // handle change of pool with backtrace update
-> -      if (old_pool != -1 && old_pool != in->inode.layout.fl_pg_pool) {
-> -	// update backtrace on new data pool
-> -	logseg->queue_backtrace_update(in, in->inode.layout.fl_pg_pool);
-> -
-> -	// set forwarding pointer on old backtrace
-> -	logseg->queue_backtrace_update(in, old_pool, in->inode.layout.fl_pg_pool);
-> -      }
-> -      // handle backtrace update if specified (used by rename)
-> -      if (update_bt) {
-> -	if (in->is_dir()) {
-> -	  // replace previous backtrace on this inode with myself
-> -	  logseg->remove_pending_backtraces(in->ino(), mds->mdsmap->get_metadata_pool());
-> -	  logseg->queue_backtrace_update(in, mds->mdsmap->get_metadata_pool());
-> -	} else {
-> -	  // remove all pending backtraces going to the same pool
-> -	  logseg->remove_pending_backtraces(in->ino(), in->inode.layout.fl_pg_pool);
-> -	  logseg->queue_backtrace_update(in, in->inode.layout.fl_pg_pool);
-> -	}
-> -      }
->      }
->  
->      // remote dentries
-> -- 
-> 1.8.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Thu, May 23, 2013 at 3:27 PM, Olivier Bonvalet <ceph.list@daevel.fr>=
+ wrote:
+> No :
+> pg 3.7c is active+clean+inconsistent, acting [24,13,39]
+> pg 3.6b is active+clean+inconsistent, acting [28,23,5]
+> pg 3.d is active+clean+inconsistent, acting [29,4,11]
+> pg 3.1 is active+clean+inconsistent, acting [28,19,5]
+>
+> But I suppose that all PG *was* having the osd.25 as primary (on the
+> same host), which is (disabled) buggy OSD.
+>
+> Question : "12d7" in object path is the snapshot id, right ? If it's =
+the
+> case, I haven't got any snapshot with this id for the
+> rb.0.15c26.238e1f29 image.
+>
+> So, which files should I remove ?
+>
+> Thanks for your help.
+>
+>
+> Le jeudi 23 mai 2013 =C3=A0 15:17 -0700, Samuel Just a =C3=A9crit :
+>> Do all of the affected PGs share osd.28 as the primary?  I think the
+>> only recovery is probably to manually remove the orphaned clones.
+>> -Sam
+>>
+>> On Thu, May 23, 2013 at 5:00 AM, Olivier Bonvalet <ceph.list@daevel.=
+fr> wrote:
+>> > Not yet. I keep it for now.
+>> >
+>> > Le mercredi 22 mai 2013 =C3=A0 15:50 -0700, Samuel Just a =C3=A9cr=
+it :
+>> >> rb.0.15c26.238e1f29
+>> >>
+>> >> Has that rbd volume been removed?
+>> >> -Sam
+>> >>
+>> >> On Wed, May 22, 2013 at 12:18 PM, Olivier Bonvalet <ceph.list@dae=
+vel.fr> wrote:
+>> >> > 0.61-11-g3b94f03 (0.61-1.1), but the bug occured with bobtail.
+>> >> >
+>> >> >
+>> >> > Le mercredi 22 mai 2013 =C3=A0 12:00 -0700, Samuel Just a =C3=A9=
+crit :
+>> >> >> What version are you running?
+>> >> >> -Sam
+>> >> >>
+>> >> >> On Wed, May 22, 2013 at 11:25 AM, Olivier Bonvalet <ceph.list@=
+daevel.fr> wrote:
+>> >> >> > Is it enough ?
+>> >> >> >
+>> >> >> > # tail -n500 -f /var/log/ceph/osd.28.log | grep -A5 -B5 'fou=
+nd clone without head'
+>> >> >> > 2013-05-22 15:43:09.308352 7f707dd64700  0 log [INF] : 9.105=
+ scrub ok
+>> >> >> > 2013-05-22 15:44:21.054893 7f707dd64700  0 log [INF] : 9.451=
+ scrub ok
+>> >> >> > 2013-05-22 15:44:52.898784 7f707cd62700  0 log [INF] : 9.784=
+ scrub ok
+>> >> >> > 2013-05-22 15:47:43.148515 7f707cd62700  0 log [INF] : 9.3c3=
+ scrub ok
+>> >> >> > 2013-05-22 15:47:45.717085 7f707dd64700  0 log [INF] : 9.3d0=
+ scrub ok
+>> >> >> > 2013-05-22 15:52:14.573815 7f707dd64700  0 log [ERR] : scrub=
+ 3.6b ade3c16b/rb.0.15c26.238e1f29.000000009221/12d7//3 found clone wit=
+hout head
+>> >> >> > 2013-05-22 15:55:07.230114 7f707d563700  0 log [ERR] : scrub=
+ 3.6b 261cc0eb/rb.0.15c26.238e1f29.000000003671/12d7//3 found clone wit=
+hout head
+>> >> >> > 2013-05-22 15:56:56.456242 7f707d563700  0 log [ERR] : scrub=
+ 3.6b b10deaeb/rb.0.15c26.238e1f29.0000000086a2/12d7//3 found clone wit=
+hout head
+>> >> >> > 2013-05-22 15:57:51.667085 7f707dd64700  0 log [ERR] : 3.6b =
+scrub 3 errors
+>> >> >> > 2013-05-22 15:57:55.241224 7f707dd64700  0 log [INF] : 9.450=
+ scrub ok
+>> >> >> > 2013-05-22 15:57:59.800383 7f707cd62700  0 log [INF] : 9.465=
+ scrub ok
+>> >> >> > 2013-05-22 15:59:55.024065 7f707661a700  0 -- 192.168.42.3:6=
+803/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689000 sd=3D108 :6803 s=3D=
+2 pgs=3D200652 cs=3D73 l=3D0).fault with nothing to send, going to stan=
+dby
+>> >> >> > 2013-05-22 16:01:45.542579 7f7022770700  0 -- 192.168.42.3:6=
+803/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D=
+0 pgs=3D0 cs=3D0 l=3D0).accept connect_seq 74 vs existing 73 state stan=
+dby
+>> >> >> > --
+>> >> >> > 2013-05-22 16:29:49.544310 7f707dd64700  0 log [INF] : 9.4eb=
+ scrub ok
+>> >> >> > 2013-05-22 16:29:53.190233 7f707dd64700  0 log [INF] : 9.4f4=
+ scrub ok
+>> >> >> > 2013-05-22 16:29:59.478736 7f707dd64700  0 log [INF] : 8.6bb=
+ scrub ok
+>> >> >> > 2013-05-22 16:35:12.240246 7f7022770700  0 -- 192.168.42.3:6=
+803/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689280 sd=3D99 :6803 s=3D=
+2 pgs=3D200667 cs=3D75 l=3D0).fault with nothing to send, going to stan=
+dby
+>> >> >> > 2013-05-22 16:35:19.519019 7f707d563700  0 log [INF] : 8.700=
+ scrub ok
+>> >> >> > 2013-05-22 16:39:15.422532 7f707dd64700  0 log [ERR] : scrub=
+ 3.1 b1869301/rb.0.15c26.238e1f29.000000000836/12d7//3 found clone with=
+out head
+>> >> >> > 2013-05-22 16:40:04.995256 7f707cd62700  0 log [ERR] : scrub=
+ 3.1 bccad701/rb.0.15c26.238e1f29.000000009a00/12d7//3 found clone with=
+out head
+>> >> >> > 2013-05-22 16:41:07.008717 7f707d563700  0 log [ERR] : scrub=
+ 3.1 8a9bec01/rb.0.15c26.238e1f29.000000009820/12d7//3 found clone with=
+out head
+>> >> >> > 2013-05-22 16:41:42.460280 7f707c561700  0 log [ERR] : 3.1 s=
+crub 3 errors
+>> >> >> > 2013-05-22 16:46:12.385678 7f7077735700  0 -- 192.168.42.3:6=
+803/12142 >> 192.168.42.5:6828/31490 pipe(0x2a689c80 sd=3D137 :6803 s=3D=
+0 pgs=3D0 cs=3D0 l=3D0).accept connect_seq 76 vs existing 75 state stan=
+dby
+>> >> >> > 2013-05-22 16:58:36.079010 7f707661a700  0 -- 192.168.42.3:6=
+803/12142 >> 192.168.42.3:6801/11745 pipe(0x2a689a00 sd=3D44 :6803 s=3D=
+0 pgs=3D0 cs=3D0 l=3D0).accept connect_seq 40 vs existing 39 state stan=
+dby
+>> >> >> > 2013-05-22 16:58:36.798038 7f707d563700  0 log [INF] : 9.50c=
+ scrub ok
+>> >> >> > 2013-05-22 16:58:40.104159 7f707c561700  0 log [INF] : 9.526=
+ scrub ok
+>> >> >> >
+>> >> >> >
+>> >> >> > Note : I have 8 scrub errors like that, on 4 impacted PG, an=
+d all impacted objects are about the same RBD image (rb.0.15c26.238e1f2=
+9).
+>> >> >> >
+>> >> >> >
+>> >> >> >
+>> >> >> > Le mercredi 22 mai 2013 =C3=A0 11:01 -0700, Samuel Just a =C3=
+=A9crit :
+>> >> >> >> Can you post your ceph.log with the period including all of=
+ these errors?
+>> >> >> >> -Sam
+>> >> >> >>
+>> >> >> >> On Wed, May 22, 2013 at 5:39 AM, Dzianis Kahanovich
+>> >> >> >> <mahatma@bspu.unibel.by> wrote:
+>> >> >> >> > Olivier Bonvalet =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+>> >> >> >> >>
+>> >> >> >> >> Le lundi 20 mai 2013 =C3=A0 00:06 +0200, Olivier Bonvale=
+t a =C3=A9crit :
+>> >> >> >> >>> Le mardi 07 mai 2013 =C3=A0 15:51 +0300, Dzianis Kahano=
+vich a =C3=A9crit :
+>> >> >> >> >>>> I have 4 scrub errors (3 PGs - "found clone without he=
+ad"), on one OSD. Not
+>> >> >> >> >>>> repairing. How to repair it exclude re-creating of OSD=
+?
+>> >> >> >> >>>>
+>> >> >> >> >>>> Now it "easy" to clean+create OSD, but in theory - in =
+case there are multiple
+>> >> >> >> >>>> OSDs - it may cause data lost.
+>> >> >> >> >>>
+>> >> >> >> >>> I have same problem : 8 objects (4 PG) with error "foun=
+d clone without
+>> >> >> >> >>> head". How can I fix that ?
+>> >> >> >> >> since "pg repair" doesn't handle that kind of errors, is=
+ there a way to
+>> >> >> >> >> manually fix that ? (it's a production cluster)
+>> >> >> >> >
+>> >> >> >> > Trying to fix manually I cause assertions in trimming pro=
+cess (died OSD). And
+>> >> >> >> > many others troubles. So, if you want to keep cluster run=
+ning, wait for
+>> >> >> >> > developers answer. IMHO.
+>> >> >> >> >
+>> >> >> >> > About manual repair attempt: see issue #4937. Also simila=
+r results - in subject
+>> >> >> >> > "Inconsistent PG's, repair ineffective".
+>> >> >> >> >
+>> >> >> >> > --
+>> >> >> >> > WBR, Dzianis Kahanovich AKA Denis Kaganovich, http://maha=
+tma.bspu.unibel.by/
+>> >> >> >> > _______________________________________________
+>> >> >> >> > ceph-users mailing list
+>> >> >> >> > ceph-users@lists.ceph.com
+>> >> >> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> >> >> >>
+>> >> >> >
+>> >> >> >
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph=
+-devel" in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.=
+html
+>> >> >>
+>> >> >
+>> >> >
+>> >>
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
