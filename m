@@ -1,74 +1,150 @@
-From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
-Subject: Ceph newbie questions
-Date: Thu, 23 May 2013 17:14:43 +0000
-Message-ID: <5EFBD28BA42C604BB012164C72CA5604502FD7F5@SMBXKO5.cgm.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 13/30] mds: export CInode::STATE_NEEDSRECOVER
+Date: Thu, 23 May 2013 10:59:39 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305231057380.32642@cobra.newdream.net>
+References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-14-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smxko3.compugroup.com ([193.47.161.188]:54600 "EHLO
-	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757965Ab3EWRWX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 13:22:23 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by SMXKO3.compugroup.com (Postfix) with ESMTP id EAE90602C
-	for <ceph-devel@vger.kernel.org>; Thu, 23 May 2013 19:14:45 +0200 (CEST)
-Received: from SMXKO3.compugroup.com ([127.0.0.1])
-	by localhost (SMXKO3.compugroup.com [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id 5gu0F1lfMLa3 for <ceph-devel@vger.kernel.org>;
-	Thu, 23 May 2013 19:14:45 +0200 (CEST)
-Received: from SCASKO4.cgm.ag (unknown [10.0.0.84])
-	by SMXKO3.compugroup.com (Postfix) with ESMTPS id AB2376026
-	for <ceph-devel@vger.kernel.org>; Thu, 23 May 2013 19:14:45 +0200 (CEST)
-Content-Language: de-DE
+Received: from cobra.newdream.net ([66.33.216.30]:42056 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759792Ab3EWR7k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 13:59:40 -0400
+In-Reply-To: <1369296418-14871-14-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
 
-Hello, 
+On Thu, 23 May 2013, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  src/mds/CDir.cc     |  1 +
+>  src/mds/CInode.cc   | 14 +++++++++-----
+>  src/mds/CInode.h    |  5 +++++
+>  src/mds/Migrator.cc | 11 ++++-------
+>  4 files changed, 19 insertions(+), 12 deletions(-)
+> 
+> diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+> index 9b49c10..10b4bf4 100644
+> --- a/src/mds/CDir.cc
+> +++ b/src/mds/CDir.cc
+> @@ -2142,6 +2142,7 @@ void CDir::encode_export(bufferlist& bl)
+>  
+>  void CDir::finish_export(utime_t now)
+>  {
+> +  state &= MASK_STATE_EXPORT_KEPT;
+>    pop_auth_subtree_nested.sub(now, cache->decayrate, pop_auth_subtree);
+>    pop_me.zero(now);
+>    pop_auth_subtree.zero(now);
+> diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
+> index 781ed72..857e5cc 100644
+> --- a/src/mds/CInode.cc
+> +++ b/src/mds/CInode.cc
+> @@ -2992,8 +2992,7 @@ void CInode::encode_export(bufferlist& bl)
+>    ENCODE_START(3, 3, bl)
+>    _encode_base(bl);
+>  
+> -  bool dirty = is_dirty();
+> -  ::encode(dirty, bl);
+> +  ::encode(state, bl);
 
-Problem1:
+This changes the format of the encoding.  The version needs to be bumped 
+in the 
 
-Ceph health says HEALTH_WARN clock skew detected on mon.b, mon.c
+   DECODE_START_LEGACY_COMPAT_LEN(3, 3, 3, p);
 
-But:
+lines.. pbly just simplify to 
 
-root@hcmonko1:~# date && ssh hcmonko3 date && ssh hcmonko2 date
-Thu May 23 18:19:38 CEST 2013
-Thu May 23 18:19:38 CEST 2013
-Thu May 23 18:19:38 CEST 2013
+   DECODE_START(4, 4, p);
 
-Seems to be ok, ntp configured. Restarted all the servers, still the same.
+and then the protocol rev needs to be bumped in MDS.h.
 
-
-Problem 2:
-
-Service ceph -a works seriell, not parallel.
-Situation: every osd and mon is offline via service ceph -a stop. When I want to bring them online with "service ceph -a start", it begins with mon a, then mon b, then osd0, osd1 etc.
-But the procedure hangs at the point ceph-create keys for the first mon in the row.
-
-root@hcosdko1:~# service ceph -a start
-=== mon.a ===
-Starting Ceph mon.a on hcmonko1...
-Starting ceph-create-keys on hcmonko1...
-
-I get to know via your irc-channel that ceph-create-keys needs the mon quorum to proceed. I think the ceph -a start script is designed to not make it serial, rather it has to do it parallel for all mons+osd.
-But in my scenario it hangs at this point: ceph is started on mon1, hangs at the keys because there is no quorum => ceph will not start on mon2,mon3, osd0 and so on. (when I type "service ceph -a start on mon1, it will begin on the host itself, create the keys, proceed with starting ceph on mon2 and can create the keys there, because there is a quorum because ceph is started already on mon1).
-
-
-Question1
-For testing we have only 1 osd node at this moment, there will follow 2 other nodes, perhaps we will add certain osd hdds in one server/node.
-when i want to add a node or only an osd.. is it right, that i change the ceph.conf, copy it via ssh to each node(mon,osd,..) and then make ceph -a start to reload the new config, so the new servers,osds,mons etc are activated?
-When I wants to add an osd (hdd), I have to type makecephfs --mkfs.. will it destroy the data on the already existing osd-hdds?
-
-Question2
-when i have to restart 1 server, i think the ceph mechanism will start replicating the data to the other hosts directly. is it possible to define a server/osd for maintenance mode, so rados does not begin to start replicating the data, only because 1 osd is restarting?
-
-
-Thank you very much!
-
-Regards
-Philipp
-
-
-
+>  
+>    ::encode(pop, bl);
+>  
+> @@ -3024,6 +3023,8 @@ void CInode::encode_export(bufferlist& bl)
+>  
+>  void CInode::finish_export(utime_t now)
+>  {
+> +  state &= MASK_STATE_EXPORT_KEPT;
+> +
+>    pop.zero(now);
+>  
+>    // just in case!
+> @@ -3041,10 +3042,13 @@ void CInode::decode_import(bufferlist::iterator& p,
+>  
+>    _decode_base(p);
+>  
+> -  bool dirty;
+> -  ::decode(dirty, p);
+> -  if (dirty) 
+> +  unsigned s;
+> +  ::decode(s, p);
+> +  state |= (s & MASK_STATE_EXPORTED);
+> +  if (is_dirty()) {
+> +    get(PIN_DIRTY);
+>      _mark_dirty(ls);
+> +  }
+>  
+>    ::decode(pop, ceph_clock_now(g_ceph_context), p);
+>  
+> diff --git a/src/mds/CInode.h b/src/mds/CInode.h
+> index 7c63593..47973c2 100644
+> --- a/src/mds/CInode.h
+> +++ b/src/mds/CInode.h
+> @@ -155,6 +155,11 @@ public:
+>    static const int STATE_STRAYPINNED = (1<<16);
+>    static const int STATE_FROZENAUTHPIN = (1<<17);
+>  
+> +  static const int MASK_STATE_EXPORTED =
+> +    (STATE_DIRTY|STATE_NEEDSRECOVER);
+> +  static const int MASK_STATE_EXPORT_KEPT =
+> +    (STATE_FROZEN|STATE_AMBIGUOUSAUTH|STATE_EXPORTINGCAPS);
+> +
+>    // -- waiters --
+>    static const uint64_t WAIT_DIR         = (1<<0);
+>    static const uint64_t WAIT_ANCHORED    = (1<<1);
+> diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
+> index 59abb31..5cc26a3 100644
+> --- a/src/mds/Migrator.cc
+> +++ b/src/mds/Migrator.cc
+> @@ -1066,10 +1066,6 @@ void Migrator::finish_export_inode(CInode *in, utime_t now, list<Context*>& fini
+>  {
+>    dout(12) << "finish_export_inode " << *in << dendl;
+>  
+> -  in->finish_export(now);
+> -
+> -  finish_export_inode_caps(in);
+> -
+>    // clean
+>    if (in->is_dirty())
+>      in->mark_clean();
+> @@ -1103,7 +1099,11 @@ void Migrator::finish_export_inode(CInode *in, utime_t now, list<Context*>& fini
+>  
+>    // waiters
+>    in->take_waiting(CInode::WAIT_ANY_MASK, finished);
+> +
+> +  in->finish_export(now);
+>    
+> +  finish_export_inode_caps(in);
+> +
+>    // *** other state too?
+>  
+>    // move to end of LRU so we drop out of cache quickly!
+> @@ -1218,9 +1218,6 @@ void Migrator::finish_export_dir(CDir *dir, list<Context*>& finished, utime_t no
+>  
+>    if (dir->is_dirty())
+>      dir->mark_clean();
+> -  
+> -  // discard most dir state
+> -  dir->state &= CDir::MASK_STATE_EXPORT_KEPT;  // i only retain a few things.
+>  
+>    // suck up all waiters
+>    dir->take_waiting(CDir::WAIT_ANY_MASK, finished);    // all dir waiters
+> -- 
+> 1.8.1.4
+> 
+> 
