@@ -1,96 +1,53 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as storage-backend
-Date: Fri, 24 May 2013 22:57:24 +0200
-Message-ID: <38D2560F-4164-47DE-973F-2C1BD97EAD3A@filoo.de>
-References: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: [doc] strange navigation error
+Date: Fri, 24 May 2013 17:16:31 -0400
+Message-ID: <CACkq2mqVR3znk3TE6cdDvwrq6t1T=nBY7YRnT1PzMriFLka0oQ@mail.gmail.com>
+References: <CACkq2mo6nRDYxDYEEbWJYGmVfiKcEEL8dMKrEYz_Yqx9MbVR1Q@mail.gmail.com>
+ <519FD3D8.6040309@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-2.de-punkt.de ([93.190.64.238]:42413 "EHLO
-	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755214Ab3EXU5a convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 16:57:30 -0400
-In-Reply-To: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
+Received: from mail-qe0-f44.google.com ([209.85.128.44]:55812 "EHLO
+	mail-qe0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755097Ab3EXVQw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 17:16:52 -0400
+Received: by mail-qe0-f44.google.com with SMTP id 6so2855508qeb.17
+        for <ceph-devel@vger.kernel.org>; Fri, 24 May 2013 14:16:51 -0700 (PDT)
+In-Reply-To: <519FD3D8.6040309@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
+To: Dan Mick <dan.mick@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Alexandre,
+On Fri, May 24, 2013 at 4:55 PM, Dan Mick <dan.mick@inktank.com> wrote:
+>
+>
+> On 05/24/2013 10:05 AM, Travis Rhoden wrote:
+>>
+>> I stumbled across a weird TOC/navigation error in the docs.
+>>
+>> On the page:
+>> http://ceph.com/docs/master/rados/deployment/ceph-deploy-mds/,
+>> if you hover over "next" on the top right, it wants to go to
+>> mds-config-ref, even though the TOC on the left says the next entry
+>> should be ceph-deploy-purge.
+>
+>
+> Ah.  That's because the TOC *also* says that the next is MDS Configuration
+> (under CephFS).  I guess we're sharing the Add/Remove MDS page at two places
+> in the hierarchy.
 
-Am 24.05.2013 um 17:37 schrieb Alexandre DERUMIER <aderumier@odiso.com>=
-:
+Yes, that is exactly what is happening.  Since the Add/Remove MDS page
+is specific to ceph-deploy, I would think you want to keep it in the
+ceph-deploy section, and not add it ot the TOC a second time from the
+CephFS section.  We could instead a reference/link to it, but a page
+should really only ever be in one TOC.  If someone says that is okay
+to do, I can send a pull-request with the offending line removed (and
+potentially a reference/link instead).
 
-> Hi,
->=20
-> For Proxmox, we have made some patchs to split the savevm process,
->=20
-> to be able to save the memory to an external volume. (and not the cur=
-rent volume).
->=20
-> For rbd, we create a new rbd volume to store the memory.
->=20
-> qemu patch is here :
-> https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/pat=
-ches/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc1c=
-53b25578;hb=3DHEAD
->=20
-> ----- Mail original -----
->=20
-
-wow, sounds very interesting, being on the road for the next 3 days I w=
-ill have a closer look next week.
-
-Thnx n regards,
-
-Oliver.
-
-> De: "Wido den Hollander" <wido@42on.com>
-> =C0: "Oliver Francke" <Oliver.Francke@filoo.de>
-> Cc: ceph-devel@vger.kernel.org
-> Envoy=E9: Vendredi 24 Mai 2013 17:08:35
-> Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd=
- as storage-backend
->=20
-> On 05/24/2013 09:46 AM, Oliver Francke wrote:
->> Hi,
->>=20
->> with a running VM I encounter this strange behaviour, former
->> qemu-versions don't show up such an error.
->> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination
->> with ceph-0.56.6? Therefore my
->> crosspost.
->>=20
->> Even if I have no real live-snapshot avail - they know of this
->> restriction -, it's more work for the customers
->> to perform a shutdown before the wonna do some changes to their VM ;=
-)
->>=20
->=20
-> Doesn't Qemu try to save the memory state to RBD here as well? That
-> doesn't work and fails.
->=20
->> Any hints welcome,
->>=20
->> Oliver.
->>=20
->=20
->=20
+ - Travis
+>
 > --
-> Wido den Hollander
-> 42on B.V.
->=20
-> Phone: +31 (0)20 700 9902
-> Skype: contact42on
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Dan Mick, Filesystem Engineering
+> Inktank Storage, Inc.   http://inktank.com
+> Ceph docs: http://ceph.com/docs
