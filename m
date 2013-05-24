@@ -1,82 +1,44 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as storage-backend
-Date: Fri, 24 May 2013 17:37:53 +0200 (CEST)
-Message-ID: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
-References: <519F8273.1000307@42on.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: [doc] strange navigation error
+Date: Fri, 24 May 2013 13:05:59 -0400
+Message-ID: <CACkq2mo6nRDYxDYEEbWJYGmVfiKcEEL8dMKrEYz_Yqx9MbVR1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:55909 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752208Ab3EXPiG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 11:38:06 -0400
-In-Reply-To: <519F8273.1000307@42on.com>
+Received: from mail-qe0-f48.google.com ([209.85.128.48]:59150 "EHLO
+	mail-qe0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756865Ab3EXRGU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 13:06:20 -0400
+Received: by mail-qe0-f48.google.com with SMTP id 2so2020305qea.7
+        for <ceph-devel@vger.kernel.org>; Fri, 24 May 2013 10:06:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel@vger.kernel.org, Oliver Francke <Oliver.Francke@filoo.de>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+I stumbled across a weird TOC/navigation error in the docs.
 
-=46or Proxmox, we have made some patchs to split the savevm process,
+On the page: http://ceph.com/docs/master/rados/deployment/ceph-deploy-mds/,
+if you hover over "next" on the top right, it wants to go to
+mds-config-ref, even though the TOC on the left says the next entry
+should be ceph-deploy-purge.  You can get to ceph-deploy-purge by
+clicking the link in the left-hand TOC, but you can't navigate to it
+by going "next, next, next" through all docs.  I find this to be a
+little weird, as I was trying to read through all the ceph-deploy docs
 
-to be able to save the memory to an external volume. (and not the curre=
-nt volume).
+Weirdly, once on ceph-deploy-purge, the navigation is fine --
+including that "previous" takes you to ceph-deploy-mds.  Weird.  I
+looked at all the .rst files and didn't see anything obvious.
 
-=46or rbd, we create a new rbd volume to store the memory.
+I finally tracked down the issue to doc/cephfs/index.rst, which has
+this in its TOC.  From my perspective, this makes the navigation
+confusing, and I would remove it.  But I figured I'd bring it to
+John's attention first before submitting a pull-request.
 
-qemu patch is here :=20
-https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/patch=
-es/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc1c53=
-b25578;hb=3DHEAD
+And that came in with commit:
+decf342c (John Wilkins 2013-05-17 15:56:59 -0700 46), with the comment
+doc: Minor improvements to Ceph FS landing page.
 
------ Mail original -----=20
+While it may help the CephFS landing page, I think it makes navigation
+through the ceph-deploy docs not very intuitive.
 
-De: "Wido den Hollander" <wido@42on.com>=20
-=C3=80: "Oliver Francke" <Oliver.Francke@filoo.de>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Vendredi 24 Mai 2013 17:08:35=20
-Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd a=
-s storage-backend=20
-
-On 05/24/2013 09:46 AM, Oliver Francke wrote:=20
-> Hi,=20
->=20
-> with a running VM I encounter this strange behaviour, former=20
-> qemu-versions don't show up such an error.=20
-> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination=20
-> with ceph-0.56.6? Therefore my=20
-> crosspost.=20
->=20
-> Even if I have no real live-snapshot avail - they know of this=20
-> restriction -, it's more work for the customers=20
-> to perform a shutdown before the wonna do some changes to their VM ;)=
-=20
->=20
-
-Doesn't Qemu try to save the memory state to RBD here as well? That=20
-doesn't work and fails.=20
-
-> Any hints welcome,=20
->=20
-> Oliver.=20
->=20
-
-
---=20
-Wido den Hollander=20
-42on B.V.=20
-
-Phone: +31 (0)20 700 9902=20
-Skype: contact42on=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ - Travis
