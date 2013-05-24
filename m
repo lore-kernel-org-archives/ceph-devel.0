@@ -1,86 +1,51 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 25/30] mds: bring back old style backtrace handling
-Date: Thu, 23 May 2013 18:01:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305231801070.29396@cobra.newdream.net>
-References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-26-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305231549010.29396@cobra.newdream.net> <519EBB15.30203@intel.com>
+Subject: libcephfs/Client api changes
+Date: Thu, 23 May 2013 19:42:53 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305231934560.11264@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46836 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47993 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758150Ab3EXBBs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 21:01:48 -0400
-In-Reply-To: <519EBB15.30203@intel.com>
+	with ESMTP id S1759688Ab3EXCmx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 22:42:53 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
+To: ceph-devel@vger.kernel.org, matt@linuxbox.com
+Cc: david.zafman@inktank.com
 
-On Fri, 24 May 2013, Yan, Zheng wrote:
-> On 05/24/2013 06:58 AM, Sage Weil wrote:
-> > On Thu, 23 May 2013, Yan, Zheng wrote:
-> > [snip]
-> >> +
-> >> +void CInode::store_backtrace(Context *fin)
-> >> +{
-> >> +  dout(10) << "store_backtrace on " << *this << dendl;
-> >> +  assert(is_dirty_parent());
-> >> +
-> >> +  auth_pin(this);
-> >> +
-> >> +  int64_t pool;
-> >> +  if (is_dir())
-> >> +    pool = mdcache->mds->mdsmap->get_metadata_pool();
-> >> +  else
-> >> +    pool = inode.layout.fl_pg_pool;
-> >> +
-> >> +  inode_backtrace_t bt;
-> >> +  build_backtrace(pool, &bt);
-> >> +  bufferlist bl;
-> >> +  ::encode(bt, bl);
-> >> +
-> >> +  // write it.
-> >> +  SnapContext snapc;
-> >> +  object_t oid = get_object_name(ino(), frag_t(), "");
-> >> +  object_locator_t oloc(pool);
-> >> +  Context *fin2 = new C_Inode_StoredBacktrace(this, inode.backtrace_version, fin);
-> >> +
-> >> +  if (!state_test(STATE_DIRTYPOOL)) {
-> >> +    mdcache->mds->objecter->setxattr(oid, oloc, "parent", snapc, bl,
-> >> +				     ceph_clock_now(g_ceph_context),
-> >> +				     0, NULL, fin2);
-> >> +    return;
-> >> +  }
-> >> +
-> >> +  C_GatherBuilder gather(g_ceph_context, fin2);
-> >> +  mdcache->mds->objecter->setxattr(oid, oloc, "parent", snapc, bl,
-> >> +				   ceph_clock_now(g_ceph_context),
-> >> +				   0, NULL, gather.new_sub());
-> >> +  for (set<int64_t>::iterator p = bt.old_pools.begin();
-> >> +       p != bt.old_pools.end();
-> >> +       ++p) {
-> >> +    object_locator_t oloc2(*p);
-> >> +    mdcache->mds->objecter->setxattr(oid, oloc2, "parent", snapc, bl,
-> >> +				     ceph_clock_now(g_ceph_context),
-> >> +				     0, NULL, gather.new_sub());
-> >> +  }
-> > 
-> > I think for both of theese operations we need an ObjectWriteOperation that 
-> > does a touch() and then tsetxattr to ensure the object actually exists.
-> > 
-> will add it
-> 
-> > Also, if one mds has a backtrace write in flight, exports teh inode, and 
-> > the second mds needs to update it, we need to make sure they don't race 
-> > and overwrite a newer trace with an older one.  That could be done with a 
-> > parent_version xattr with the backttrace_version in it and a generic rados 
-> > cmpxattr guard, I believe.  Even then we may race with an unlink, but that 
-> > may be something we just tolerate...
-> > 
-> my code calls auth_pin() in CInode::store_backtrace(). I think it also avoid
-> the race.
+Hi Matt!
 
-even better.  sounds good!
+I took a closer look at the libcephfs branch you guys have.  A copy is in 
+wip-libcephfs in the main ceph.git, and I opened a pull request on github 
+just to capture review comments.  Please take a look at 
 
+	https://github.com/ceph/ceph/pull/318
+
+Lots of small questions and issues, but overall the appraoch looks great.  
+I also rebased/squashed teh changes into a separate set of patches that 
+try to capture the logical changes (instead of the patchset evolution).. 
+these are in wip-libcephfs-rebased.
+
+Can you take a look?
+
+I think the ideal path forward (at least from my perspective :) would be:
+
+- diff the rebased branch with yours to make sure the things i dropped 
+  aren't important.
+- make sure teh 'reject' patches are unimportant, and drop them from the 
+  series.  the objecter change would fall into this category..
+- address the review comments, modifying the rebased patches as 
+  appropriate
+- fix up the patch changelogs to have proper authorship and (where 
+  appropriate) any background/justification for the change.  (in several 
+  cases I was guessing what the change was about)
+- rebase onto current master branch
+- submit a new github pull request
+- profit!
+
+One way or another, I'd love to get this stuff upstream.
+
+Thanks-
 sage
 
