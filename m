@@ -1,86 +1,80 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as
- storage-backend
-Date: Fri, 24 May 2013 17:15:36 +0200
-Message-ID: <519F8418.6080707@filoo.de>
-References: <519F1AED.80005@filoo.de> <519F8273.1000307@42on.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as storage-backend
+Date: Fri, 24 May 2013 17:37:53 +0200 (CEST)
+Message-ID: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
+References: <519F8273.1000307@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-1.de-punkt.de ([93.190.64.237]:42739 "EHLO
-	mail-1.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755033Ab3EXPPi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 11:15:38 -0400
+Received: from mailpro.odiso.net ([89.248.209.98]:55909 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752208Ab3EXPiG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 11:38:06 -0400
 In-Reply-To: <519F8273.1000307@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@42on.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org, Oliver Francke <Oliver.Francke@filoo.de>
 
-Well,
+Hi,
 
-On 05/24/2013 05:08 PM, Wido den Hollander wrote:
-> On 05/24/2013 09:46 AM, Oliver Francke wrote:
->> Hi,
->>
->> with a running VM I encounter this strange behaviour, former
->> qemu-versions don't show up such an error.
->> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination
->> with ceph-0.56.6? Therefore my
->> crosspost.
->>
->> Even if I have no real live-snapshot avail - they know of this
->> restriction -, it's more work for the customers
->> to perform a shutdown before the wonna do some changes to their VM ;=
-)
->>
->
-> Doesn't Qemu try to save the memory state to RBD here as well? That=20
-> doesn't work and fails.
+=46or Proxmox, we have made some patchs to split the savevm process,
 
-true, but that should qemu try in version 1.4.x, too, but that succeeds=
- ;)
+to be able to save the memory to an external volume. (and not the curre=
+nt volume).
 
-Tried to figure out some corresponding QMP-commands, found some=20
-references like:
+=46or rbd, we create a new rbd volume to store the memory.
 
-{"execute": "snapshot-create", "arguments": {"name": "vm_before_upgrade=
-"} }
+qemu patch is here :=20
+https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/patch=
+es/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc1c53=
+b25578;hb=3DHEAD
 
+----- Mail original -----=20
 
-but that fails with unknown command.
+De: "Wido den Hollander" <wido@42on.com>=20
+=C3=80: "Oliver Francke" <Oliver.Francke@filoo.de>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Vendredi 24 Mai 2013 17:08:35=20
+Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd a=
+s storage-backend=20
 
-The convenience for a monitoring-command would be, that qemu cares for=20
-all mounted block-devs, well,
-it _should_ exclude some "ide-cd0" devices, where I get another error=20
-with an inserted CD, but... other error,
+On 05/24/2013 09:46 AM, Oliver Francke wrote:=20
+> Hi,=20
+>=20
+> with a running VM I encounter this strange behaviour, former=20
+> qemu-versions don't show up such an error.=20
+> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination=20
+> with ceph-0.56.6? Therefore my=20
+> crosspost.=20
+>=20
+> Even if I have no real live-snapshot avail - they know of this=20
+> restriction -, it's more work for the customers=20
+> to perform a shutdown before the wonna do some changes to their VM ;)=
+=20
+>=20
 
-Oliver.
+Doesn't Qemu try to save the memory state to RBD here as well? That=20
+doesn't work and fails.=20
 
->
->> Any hints welcome,
->>
->> Oliver.
->>
->
->
+> Any hints welcome,=20
+>=20
+> Oliver.=20
+>=20
 
 
 --=20
+Wido den Hollander=20
+42on B.V.=20
 
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
+Phone: +31 (0)20 700 9902=20
+Skype: contact42on=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
