@@ -1,51 +1,65 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as storage-backend
-Date: Fri, 24 May 2013 09:46:53 +0200
-Message-ID: <519F1AED.80005@filoo.de>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 0/30] mds: lookup-by-ino & fixes
+Date: Fri, 24 May 2013 16:44:27 +0800
+Message-ID: <519F286B.2@intel.com>
+References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305231118510.32642@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-1.de-punkt.de ([93.190.64.237]:52253 "EHLO
-	mail-1.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759956Ab3EXHq5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 03:46:57 -0400
+Received: from mga03.intel.com ([143.182.124.21]:49201 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759970Ab3EXIob (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 24 May 2013 04:44:31 -0400
+In-Reply-To: <alpine.DEB.2.00.1305231118510.32642@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "qemu@nongnu.org" <qemu-devel@nongnu.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
 
-Hi,
+On 05/24/2013 02:22 AM, Sage Weil wrote:
+> On Thu, 23 May 2013, Yan, Zheng wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>
+>> Patch 1~21 are random fixes for MDS cluster. Patch 22~28 rework
+>> the backtrace handling. Patch 29 introduces lookup-by-ino helper.
+>> Path 30 uses the lookup-by-ino helper to fix issue #4850.
+>>
+>> This patch series are also in:
+>>   git://github.com/ukernel/ceph.git wip-mds
+> 
+> Awesome!  I pushed this to wip-mds in ceph.git for now.  Note that 
+> gitbuilders are picking up a failure due to the encoding changes.  For the 
+> types and messages that change, can you mark them in the 
+> ceph-object-corpus.git tree?  Look for the forward_incompat/ dirs and 
+> follow that example.
+> 
+Could you be more specific. Change in patch 14 should only affect MExportDir
+and MExportCaps, object-corpus does not contain objects for these two messages.
+Patch 27 looks suspicious, does the incompatible change you mentioned cause the
+failure?
 
-with a running VM I encounter this strange behaviour, former=20
-qemu-versions don't show up such an error.
-Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination=20
-with ceph-0.56.6? Therefore my
-crosspost.
 
-Even if I have no real live-snapshot avail - they know of this=20
-restriction -, it's more work for the customers
-to perform a shutdown before the wonna do some changes to their VM ;)
+> I reviewed up until the backtrace patch before I ran out of time (catching 
+> a plane).  If you can address the comments we can get at least that 
+> much merged.  I'll defer to Greg for now on the backtrace changes, though, 
+> as he is more familiar with that original code.
+> 
+> Can't wait to get the lookup-by-ino into tree... I think the ganesha guys 
+> will be happy about that too.  Do you have any stress tests for that?  
+> There is a wip-cephfs branch (incomplete and not quite ready yet, but..) 
+> branch that adds a handle-based API to libcephfs.  Soon we should build 
+> some tests for the ino lookup based on that (or something similar) so we 
+> can hammer the mds cluster under various load/stress conditions.
+> 
+The only test case I have is patch 30. My environment has 3 active MDS and
+2 clients running fsstress and blogbench. I restart random MDS every 2 minutes.
+Each time MDS restarts, the lookup-by-ino function need open about 300 missing
+inodes. I have run the restart test more than 1000 passes. No unsolved bug in
+the lookup-by-ino function.
 
-Any hints welcome,
+I have updated all patches you have comments, re-push them to:
+  https://github.com/ukernel/ceph.git wip-mds
 
-Oliver.
-
---=20
-
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards
+Yan, Zheng
