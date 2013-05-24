@@ -1,51 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: libcephfs/Client api changes
-Date: Thu, 23 May 2013 19:42:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305231934560.11264@cobra.newdream.net>
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as storage-backend
+Date: Fri, 24 May 2013 09:46:53 +0200
+Message-ID: <519F1AED.80005@filoo.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47993 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759688Ab3EXCmx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 May 2013 22:42:53 -0400
+Received: from mail-1.de-punkt.de ([93.190.64.237]:52253 "EHLO
+	mail-1.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759956Ab3EXHq5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 May 2013 03:46:57 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, matt@linuxbox.com
-Cc: david.zafman@inktank.com
+To: "qemu@nongnu.org" <qemu-devel@nongnu.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Matt!
+Hi,
 
-I took a closer look at the libcephfs branch you guys have.  A copy is in 
-wip-libcephfs in the main ceph.git, and I opened a pull request on github 
-just to capture review comments.  Please take a look at 
+with a running VM I encounter this strange behaviour, former=20
+qemu-versions don't show up such an error.
+Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination=20
+with ceph-0.56.6? Therefore my
+crosspost.
 
-	https://github.com/ceph/ceph/pull/318
+Even if I have no real live-snapshot avail - they know of this=20
+restriction -, it's more work for the customers
+to perform a shutdown before the wonna do some changes to their VM ;)
 
-Lots of small questions and issues, but overall the appraoch looks great.  
-I also rebased/squashed teh changes into a separate set of patches that 
-try to capture the logical changes (instead of the patchset evolution).. 
-these are in wip-libcephfs-rebased.
+Any hints welcome,
 
-Can you take a look?
+Oliver.
 
-I think the ideal path forward (at least from my perspective :) would be:
+--=20
 
-- diff the rebased branch with yours to make sure the things i dropped 
-  aren't important.
-- make sure teh 'reject' patches are unimportant, and drop them from the 
-  series.  the objecter change would fall into this category..
-- address the review comments, modifying the rebased patches as 
-  appropriate
-- fix up the patch changelogs to have proper authorship and (where 
-  appropriate) any background/justification for the change.  (in several 
-  cases I was guessing what the change was about)
-- rebase onto current master branch
-- submit a new github pull request
-- profit!
+Oliver Francke
 
-One way or another, I'd love to get this stuff upstream.
+filoo GmbH
+Moltkestra=DFe 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
 
-Thanks-
-sage
+Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
 
+=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
