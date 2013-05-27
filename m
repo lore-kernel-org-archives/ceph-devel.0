@@ -1,70 +1,49 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/30] mds: lookup-by-ino & fixes
-Date: Mon, 27 May 2013 12:21:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305271219350.1350@cobra.newdream.net>
-References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305231118510.32642@cobra.newdream.net> <519F286B.2@intel.com>
+From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
+Subject: Numerical argument out of domain
+Date: Mon, 27 May 2013 19:31:09 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA56045030CBB3@SMBXKO5.cgm.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34767 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756579Ab3E0TVH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 May 2013 15:21:07 -0400
-In-Reply-To: <519F286B.2@intel.com>
+Received: from smxko3.compugroup.com ([193.47.161.188]:58686 "EHLO
+	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755494Ab3E0Tb4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 May 2013 15:31:56 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by SMXKO3.compugroup.com (Postfix) with ESMTP id 43BA815724
+	for <ceph-devel@vger.kernel.org>; Mon, 27 May 2013 21:31:46 +0200 (CEST)
+Received: from SMXKO3.compugroup.com ([127.0.0.1])
+	by localhost (SMXKO3.compugroup.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id jslzvQMFaAAN for <ceph-devel@vger.kernel.org>;
+	Mon, 27 May 2013 21:31:46 +0200 (CEST)
+Received: from SCASKO1.cgm.ag (scasko1.cgm.ag [10.0.0.81])
+	by SMXKO3.compugroup.com (Postfix) with ESMTPS id 1787415722
+	for <ceph-devel@vger.kernel.org>; Mon, 27 May 2013 21:31:46 +0200 (CEST)
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 24 May 2013, Yan, Zheng wrote:
-> On 05/24/2013 02:22 AM, Sage Weil wrote:
-> > On Thu, 23 May 2013, Yan, Zheng wrote:
-> >> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> >>
-> >> Patch 1~21 are random fixes for MDS cluster. Patch 22~28 rework
-> >> the backtrace handling. Patch 29 introduces lookup-by-ino helper.
-> >> Path 30 uses the lookup-by-ino helper to fix issue #4850.
-> >>
-> >> This patch series are also in:
-> >>   git://github.com/ukernel/ceph.git wip-mds
-> > 
-> > Awesome!  I pushed this to wip-mds in ceph.git for now.  Note that 
-> > gitbuilders are picking up a failure due to the encoding changes.  For the 
-> > types and messages that change, can you mark them in the 
-> > ceph-object-corpus.git tree?  Look for the forward_incompat/ dirs and 
-> > follow that example.
-> > 
-> Could you be more specific. Change in patch 14 should only affect MExportDir
-> and MExportCaps, object-corpus does not contain objects for these two messages.
-> Patch 27 looks suspicious, does the incompatible change you mentioned cause the
-> failure?
+Hello,
 
-http://gitbuilder.sepia.ceph.com/gitbuilder-oneiric-amd64/log.cgi?log=f8499e07035fbff063b50b13ac295432884c7e27
+i've set up a rados cluster, but the second of three mons will not start:
 
-is the one I saw, but there are likely others; run 'make check-local' to 
-run the encoding checks.
+[19057]: (33) Numerical argument out of domain 
+failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i d --pid-file /var/run/ceph/mon.d.pid -c /etc/ceph/ceph.conf '
 
-> > I reviewed up until the backtrace patch before I ran out of time (catching 
-> > a plane).  If you can address the comments we can get at least that 
-> > much merged.  I'll defer to Greg for now on the backtrace changes, though, 
-> > as he is more familiar with that original code.
-> > 
-> > Can't wait to get the lookup-by-ino into tree... I think the ganesha guys 
-> > will be happy about that too.  Do you have any stress tests for that?  
-> > There is a wip-cephfs branch (incomplete and not quite ready yet, but..) 
-> > branch that adds a handle-based API to libcephfs.  Soon we should build 
-> > some tests for the ino lookup based on that (or something similar) so we 
-> > can hammer the mds cluster under various load/stress conditions.
-> > 
-> The only test case I have is patch 30. My environment has 3 active MDS and
-> 2 clients running fsstress and blogbench. I restart random MDS every 2 minutes.
-> Each time MDS restarts, the lookup-by-ino function need open about 300 missing
-> inodes. I have run the restart test more than 1000 passes. No unsolved bug in
-> the lookup-by-ino function.
-> 
-> I have updated all patches you have comments, re-push them to:
->   https://github.com/ukernel/ceph.git wip-mds
 
-Great, looking!
+Added a 4. Mon, same problem. 
+Tested with Ubuntu 12.04LTS and Debian 7.
+ceph version 0.61.2
 
-sage
+Also when I type in "usr/bin/ceph-mon -I d" only, I get the error message and the mon service does not start.
+
+Do you know where the problem is?
+
+Thank you very much
+
+
+Regards
+
+Philipp
