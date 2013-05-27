@@ -1,239 +1,150 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Ceph backfilling explained ( maybe )
-Date: Sun, 26 May 2013 13:45:16 +0200
-Message-ID: <51A1F5CC.2010309@dachary.org>
-References: <51A0A6B2.9060105@dachary.org> <20130525123315.GA13595@apia.perrit.net> <51A0CA44.5000609@dachary.org> <20130525144818.GC32615@apia.perrit.net> <51A0F6D9.8080905@dachary.org> <CA+4uBUY2TRTTQxPhsA9tdES0HdZph03a8XNLghSTUNRuXa1OKw@mail.gmail.com> <51A10DD3.7000609@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigB0963B44231ED2411B14D49D"
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] mds: use "open-by-ino" function to open remote link
+Date: Mon, 27 May 2013 09:55:10 +0800
+Message-ID: <1369619710-3448-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:36585 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752532Ab3EZLpW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 May 2013 07:45:22 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id EA66526395
-	for <ceph-devel@vger.kernel.org>; Sun, 26 May 2013 13:45:16 +0200 (CEST)
-In-Reply-To: <51A10DD3.7000609@dachary.org>
+Received: from mga01.intel.com ([192.55.52.88]:56671 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755718Ab3E0BzO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 26 May 2013 21:55:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigB0963B44231ED2411B14D49D
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Hi,
+Also add a new config option "mds_open_remote_link_mode". The anchor
+approach is used by default. If mode is non-zero, use the open-by-ino
+function. In case open-by-ino function fails, if mode is 1, retry
+using the anchor approach, otherwise trigger assertion.
 
-Although I am yet to fully understand the logic of the placement group re=
-covery ( I'm eager to read Sam's doc/dev/osd_internals/pg_recovery.rst :-=
-), I wrote down my understanding of backfilling : http://dachary.org/?p=3D=
-2009 .=20
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/common/config_opts.h |  1 +
+ src/mds/MDCache.cc       | 51 +++++++++++++++++++++++++++++++-----------------
+ src/mds/MDCache.h        |  7 +++++--
+ 3 files changed, 39 insertions(+), 20 deletions(-)
 
-Cheers
+diff --git a/src/common/config_opts.h b/src/common/config_opts.h
+index 776ac1c..a4755ea 100644
+--- a/src/common/config_opts.h
++++ b/src/common/config_opts.h
+@@ -338,6 +338,7 @@ OPTION(mds_kill_openc_at, OPT_INT, 0)
+ OPTION(mds_kill_journal_at, OPT_INT, 0)
+ OPTION(mds_kill_journal_expire_at, OPT_INT, 0)
+ OPTION(mds_kill_journal_replay_at, OPT_INT, 0)
++OPTION(mds_open_remote_link_mode, OPT_INT, 0)
+ OPTION(mds_inject_traceless_reply_probability, OPT_DOUBLE, 0) /* percentage
+ 				of MDS modify replies to skip sending the
+ 				client a trace on [0-1]*/
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index db322d2..8c96608 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -7342,8 +7342,8 @@ int MDCache::path_traverse(MDRequest *mdr, Message *req, Context *fin,     // wh
+ 	} else {
+           dout(7) << "remote link to " << dnl->get_remote_ino() << ", which i don't have" << dendl;
+ 	  assert(mdr);  // we shouldn't hit non-primary dentries doing a non-mdr traversal!
+-          open_remote_ino(dnl->get_remote_ino(), _get_waiter(mdr, req, fin),
+-			  (null_okay && depth == path.depth() - 1));
++          open_remote_dentry(dn, true, _get_waiter(mdr, req, fin),
++			     (null_okay && depth == path.depth() - 1));
+ 	  if (mds->logger) mds->logger->inc(l_mds_trino);
+           return 1;
+         }        
+@@ -7790,36 +7790,51 @@ void MDCache::open_remote_ino_2(inodeno_t ino, vector<Anchor>& anchortrace, bool
+ struct C_MDC_OpenRemoteDentry : public Context {
+   MDCache *mdc;
+   CDentry *dn;
+-  bool projected;
++  inodeno_t ino;
+   Context *onfinish;
+-  C_MDC_OpenRemoteDentry(MDCache *m, CDentry *d, bool p, Context *f) :
+-    mdc(m), dn(d), projected(p), onfinish(f) {}
++  bool want_xlocked;
++  int mode;
++  C_MDC_OpenRemoteDentry(MDCache *m, CDentry *d, inodeno_t i, Context *f,
++			 bool wx, int md) :
++    mdc(m), dn(d), ino(i), onfinish(f), want_xlocked(wx), mode(md) {}
+   void finish(int r) {
+-    mdc->_open_remote_dentry_finish(r, dn, projected, onfinish);
++    mdc->_open_remote_dentry_finish(dn, ino, onfinish, want_xlocked, mode, r);
+   }
+ };
+ 
+-void MDCache::open_remote_dentry(CDentry *dn, bool projected, Context *fin)
++void MDCache::open_remote_dentry(CDentry *dn, bool projected, Context *fin, bool want_xlocked)
+ {
+   dout(10) << "open_remote_dentry " << *dn << dendl;
+   CDentry::linkage_t *dnl = projected ? dn->get_projected_linkage() : dn->get_linkage();
+-  open_remote_ino(dnl->get_remote_ino(), 
+-		  new C_MDC_OpenRemoteDentry(this, dn, projected, fin));
++  inodeno_t ino = dnl->get_remote_ino();
++  int mode = g_conf->mds_open_remote_link_mode;
++  Context *fin2 =  new C_MDC_OpenRemoteDentry(this, dn, ino, fin, want_xlocked, mode);
++  if (mode == 0)
++    open_remote_ino(ino, fin2, want_xlocked); // anchor
++  else
++    open_ino(ino, -1, fin2, true, want_xlocked); // backtrace
+ }
+ 
+-void MDCache::_open_remote_dentry_finish(int r, CDentry *dn, bool projected, Context *fin)
++void MDCache::_open_remote_dentry_finish(CDentry *dn, inodeno_t ino, Context *fin,
++					 bool want_xlocked, int mode, int r)
+ {
+-  if (r == -ENOENT) {
+-    dout(0) << "open_remote_dentry_finish bad remote dentry " << *dn << dendl;
+-    dn->state_set(CDentry::STATE_BADREMOTEINO);
+-  } else if (r != 0)
+-    assert(0);
+-  fin->finish(r);
+-  delete fin;
++  if (r < 0) {
++    if (mode == 0) {
++      dout(0) << "open_remote_dentry_finish bad remote dentry " << *dn << dendl;
++      dn->state_set(CDentry::STATE_BADREMOTEINO);
++    } else {
++      dout(7) << "open_remote_dentry_finish failed to open ino " << ino
++	      << " for " << *dn << ", retry using anchortable" << dendl;
++      assert(mode == 1);
++      Context *fin2 =  new C_MDC_OpenRemoteDentry(this, dn, ino, fin, want_xlocked, 0);
++      open_remote_ino(ino, fin2, want_xlocked);
++      return;
++    }
++  }
++  fin->complete(r < 0 ? r : 0);
+ }
+ 
+ 
+-
+ void MDCache::make_trace(vector<CDentry*>& trace, CInode *in)
+ {
+   // empty trace if we're a base inode
+diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
+index 5870749..3da8a36 100644
+--- a/src/mds/MDCache.h
++++ b/src/mds/MDCache.h
+@@ -754,14 +754,17 @@ public:
+   void open_remote_ino_2(inodeno_t ino,
+ 			 vector<Anchor>& anchortrace, bool want_xlocked,
+ 			 inodeno_t hadino, version_t hadv, Context *onfinish);
+-  void open_remote_dentry(CDentry *dn, bool projected, Context *fin);
+-  void _open_remote_dentry_finish(int r, CDentry *dn, bool projected, Context *fin);
+ 
+   bool parallel_fetch(map<inodeno_t,filepath>& pathmap, set<inodeno_t>& missing);
+   bool parallel_fetch_traverse_dir(inodeno_t ino, filepath& path, 
+ 				   set<CDir*>& fetch_queue, set<inodeno_t>& missing,
+ 				   C_GatherBuilder &gather_bld);
+ 
++  void open_remote_dentry(CDentry *dn, bool projected, Context *fin,
++			  bool want_xlocked=false);
++  void _open_remote_dentry_finish(CDentry *dn, inodeno_t ino, Context *fin,
++				  bool want_xlocked, int mode, int r);
++
+   void make_trace(vector<CDentry*>& trace, CInode *in);
+ 
+ protected:
+-- 
+1.8.1.4
 
-On 05/25/2013 09:15 PM, Loic Dachary wrote:
-> Hi !
->=20
-> On 05/25/2013 08:06 PM, Samuel Just wrote:
->> Hi, thanks for taking the time to try to get all this documented!
->>
->> Placement groups are assigned to a set of OSDs by crush.
->>
->> (4.1, osdmap(e 1)) --CRUSH--> [3,1,2]
->>
->> where the primary is 3.  When 3 dies, the osdmap is updated to reflect=
- this
->> and we get a new mapping for pg 4.1:
->>
->> (4,1, osdmap(e 2)) --CRUSH--> [1,2,4]
->>
->> Here, 1 and 2 already have up-to-date copies of 4.1.  osd 4, however, =
-needs
->> to be brought up to date.  During peering, osd 1 will learn that osd 4=
-
->> falls into
->> 1 of 2 cases.
->>
->> Case 1 is that osd 4 already had an old copy of pg 4.1 AND its pg log =
-for pg
->> 4.1 happens to overlap osd 1's pg log for pg 4.1.  In that case, by ru=
-nning
->> through the log of operations, we can determine exactly which objects =
-need
->> to be copied over.  We usually refer to this as just "recovery" (or lo=
-g based
->> recovery).
->>
->> In case 2, either osd 4's pg log does not overlap that of osd 1.  In t=
-his case,
->> we cannot determine from the log which objects need to be copied over.=
-
->> To bring osd 4 up to date, we therefore need to backfill.
->>
->> Backfill involves the primary and the backfill peer (there is only eve=
-r one in
->> the acting set at a time, see PG::choose_acting) scanning over their p=
-g stores
->> and copying the objects which are different or missing from the primar=
-y to the
->> backfill peer.  Because this may take a long time, we track the a last=
-_backfill
->> attribute for each local pg copy indicating how far the local copy has=
- been
->> backfilled.  In the case that the copy is complete, last_backfill is
->> hobject_t::max().
->=20
-> Is it true that if two osd briefly disconnect while backfilling, they m=
-ay be in the case 1 above (i.e. log based recovery ) and then backfilling=
- again when done, starting from last_backfill and up ?=20
->=20
->> More exactly, a local pg copy is described by a few pieces of informat=
-ion:
->> 1) the local pg log
->=20
-> pg_log_t https://github.com/ceph/ceph/blob/master/src/osd/osd_types.h#L=
-1371
-> pg_log_entry_t https://github.com/ceph/ceph/blob/master/src/osd/osd_typ=
-es.h#L1277
->=20
->> 2) the local last_backfill
->=20
-> pg_info_t::last_backfill https://github.com/ceph/ceph/blob/master/src/o=
-sd/osd_types.h#L1102
->=20
->> 3) the local last_complete
->=20
-> pg_info_t::last_complete https://github.com/ceph/ceph/blob/master/src/o=
-sd/osd_types.h#L1089
->=20
->> 4) the local missing set
->=20
-> pg_missing_t https://github.com/ceph/ceph/blob/master/src/osd/osd_types=
-=2Eh#L1468
->=20
->> The local pg store reflects all updates up to version last_complete on=
- all
->=20
-> I assume you mean 'local pg log' instead of 'local pg log'.=20
->=20
->> hobject_ts hoid such that hoid < last_backfill AND hoid is not in the =
-missing
->> set.  Comparing the pg logs is used to fill in the missing set for OSD=
-s which
->> were only down for a brief period thus avoiding a costly backfill in m=
-any cases.
->=20
-> The pg logs are trimmed ( https://github.com/ceph/ceph/blob/master/src/=
-osd/PG.cc#L216 ), this is why the pg logs of two OSDs that have been disc=
-onnected for too long are unlikely to overlap ? And therefore require a b=
-ackfill because the two pg logs cannot be compared ?
->=20
->> This is a bit of a rough brain dump and may be somewhat misleading/wro=
-ng.
->=20
-> It is very helpful as it is, thanks :-)
->=20
->> I'll get it cleaned up and put it into
->> doc/dev/osd_internals/pg_recovery.rst next
->> week.
->>
->=20
-> That would be great.=20
->=20
->> Also, rados objects currently have three pieces:
->> 1) data - read, write, writefull, etc.
->> 2) xattrs
->> 3) omap
->> The omap is much like the xattrs except that it can generally store a =
-much
->> larger number of keys and support efficient scans.  It's used at the m=
-oment
->> for a few things including rgw bucket indices.  The omap entries are c=
-opied
->> over along with the rest of the object in recovery.  Behind the scenes=
-, all
->> omap entries for all objects stored on an OSD are stored prefixed in a=
- single
->> big leveldb instance.
->>
->> omap operations probably shouldn't be supported on objects in an
->> ErasureCodedPG :)
->=20
-> I thought omap / xattrs were mutually exclusive. I did not realize both=
- could be used at the same time.
->=20
-> Cheers
->=20
->> -Sam
->>
->> On Sat, May 25, 2013 at 10:37 AM, Loic Dachary <loic@dachary.org> wrot=
-e:
->>>
->>>
->>> On 05/25/2013 04:48 PM, Leen Besselink wrote:
->>>> On Sat, May 25, 2013 at 04:27:16PM +0200, Loic Dachary wrote:
->>>>>
->>>>>
->>>>> On 05/25/2013 02:33 PM, Leen Besselink wrote:
->>>>> Hi Leen,
->>>>>
->>>>>> - a Cehp object can store keys/values, not just data
->>>>>
->>>>> I did not know that. Could you explain or give me the URL ?
->>>>>
->>>>
->>>> Well, I got that impression from some of the earlier talks and from =
-this blog post:
->>>>
->>>> http://ceph.com/community/my-first-impressions-of-ceph-as-a-summer-i=
-ntern/
->>>>
->>>> But I haven't read it in while.
->>>>
->>>> But at this time I only see something like:
->>>>
->>>> http://ceph.com/docs/master/rados/api/librados/?highlight=3Drados_ge=
-txattr#rados_getxattr
->>>>
->>>> Which looks like it is storing it in filesystem attributes.
->>>>
->>>> So maybe an object can be a piece of data or a key/value store.
->>>
->>> Thanks for explaining: I did not know about the works of Eleanor Cawt=
-hon. I knew about the objects xattributes but I thought you meant that th=
-e data inside of the object could be structured as key/value pairs. My ba=
-d :-)
->>>
->>> Cheers
->>>
->>> --
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>> All that is necessary for the triumph of evil is that good people do =
-nothing.
->>>
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigB0963B44231ED2411B14D49D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlGh9cwACgkQ8dLMyEl6F203NgCdFV32Y7ansDiqqMS2raEE0WUu
-dd0AoKllyNfAI1QYX893BFALpbjk7hR0
-=1j4y
------END PGP SIGNATURE-----
-
---------------enigB0963B44231ED2411B14D49D--
