@@ -1,131 +1,151 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
-Date: Mon, 27 May 2013 12:09:04 +1000
-Message-ID: <20130527020903.GR29466@dastard>
-References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
- <20130523094201.GA24543@dastard>
- <519E8B5F.3080905@hp.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 13/30] mds: export CInode::STATE_NEEDSRECOVER
+Date: Mon, 27 May 2013 10:11:15 +0800
+Message-ID: <51A2C0C3.7060702@intel.com>
+References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-14-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305231057380.32642@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <autofs-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <519E8B5F.3080905@hp.com>
-Sender: autofs-owner@vger.kernel.org
-To: Waiman Long <waiman.long@hp.com>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>, Andi Kleen <andi@firstfloor.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:62089 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755779Ab3E0CLg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 26 May 2013 22:11:36 -0400
+In-Reply-To: <alpine.DEB.2.00.1305231057380.32642@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com
 
-On Thu, May 23, 2013 at 05:34:23PM -0400, Waiman Long wrote:
-> On 05/23/2013 05:42 AM, Dave Chinner wrote:
-> >On Wed, May 22, 2013 at 09:37:25PM -0400, Waiman Long wrote:
-> >>Change log:
-> >>
-> >>v2->v3
-> >>  - Fix the RCU lock problem found by Al Viro.
-> >>  - Rebase the code to the latest v3.10-rc1 linux mainline.
-> >>  - Remove patch 4 which may be problematic if the dentry is deleted.
-> >>  - Rerun performance measurement using 3.10-rc1 kernel.
-> >>
-> >>v1->v2
-> >>  - Include performance improvement in the AIM7 benchmark results because
-> >>    of this patch.
-> >>  - Modify dget_parent() to avoid taking the lock, if possible, to further
-> >>    improve AIM7 benchmark results.
-> >>
-> >>During some perf-record sessions of the kernel running the high_systime
-> >>workload of the AIM7 benchmark, it was found that quite a large portion
-> >>of the spinlock contention was due to the perf_event_mmap_event()
-> >>function itself. This perf kernel function calls d_path() which,
-> >>in turn, call path_get() and dput() indirectly. These 3 functions
-> >>were the hottest functions shown in the perf-report output of
-> >>the _raw_spin_lock() function in an 8-socket system with 80 cores
-> >>(hyperthreading off) with a 3.10-rc1 kernel:
-> >What was it I said about this patchset when you posted it to speed
-> >up an Oracle benchmark back in february? I'll repeat:
-> >
-> >"Nobody should be doing reverse dentry-to-name lookups in a quantity
-> >sufficient for it to become a performance limiting factor."
-> 
-> Thank for the comment, but my point is that it is the d_lock
-> contention is skewing the data about how much spin lock contention
-> had actually happened in the workload and it makes it harder to
-> pinpoint problem areas to look at. This is not about performance, it
-> is about accurate representation of performance data. Ideally, we
-> want the overhead of turning on perf instrumentation to be as low as
-> possible.
+updated version
+---
+From d11994e8487d9adbe0ea340b7e67c80a806bd615 Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Mon, 6 May 2013 09:00:19 +0800
+Subject: [PATCH 13/33] mds: export CInode::STATE_NEEDSRECOVER
 
-Right. But d_path will never be "low overhead", and as such it
-shouldn't be used by perf.
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/CDir.cc     |  1 +
+ src/mds/CInode.cc   | 18 +++++++++++-------
+ src/mds/CInode.h    |  5 +++++
+ src/mds/Migrator.cc | 11 ++++-------
+ 4 files changed, 21 insertions(+), 14 deletions(-)
 
-> >And that makes whatever that tracepoint is doing utterly stupid.
-> >Dumping out full paths in a tracepoint is hardly "low overhead", and
-> >that tracepoint should be stomped on from a great height. Sure,
-> >print the filename straight out of the dentry into a tracepoint,
-> >but repeated calculating the full path (probably for the same set of
-> >dentries) is just a dumb thing to do.
-> >
-> >Anyway, your numbers show that a single AIM7 microbenchmark goes
-> >better under tracing the specific mmap event that uses d_path(), but
-> >the others are on average a little bit slower. That doesn't convince
-> >me that this is worth doing. Indeed, what happens to performance
-> >when you aren't tracing?
-> >
-> >Indeed, have you analysed what makes that
-> >microbenchmark contend so much on the dentry lock while reverse
-> >lookups are occuring? Dentry lock contention does not necessarily
-> >indicate a problem with the dentry locks, and without knowing why
-> >there is contention occuring (esp. compared to the other benchmarks)
-> >we can't really determine if this is a good solution or not...
-> 
-> What made it contend so much was the large number of CPUs available
-> in my test system which is a 8-socket Westmere EX machines with 80
-> cores. As perf was collecting data from every core, the threads will
-> unavoidably bump into each other to translate dentries back to the
-> full paths. The current code only allows one CPU in the d_path()
-> critical path. My patch will allow all of them to be in the critical
-> path concurrently.
-
-Yes, I know *how* contention occurs and what your patch does. I'm
-asking you to explain *why* we need to fix this specific workload,
-and why the tracepoint that calls d_path() actually needs to do
-that.
-
-Your numbers indicate that your patchset decreases peformance in the
-common, non-d_path intensive workloads, so why should we add all
-this complexity to optimise a slow path at the expense of
-significant complexity and lower performance in the fast
-path?
-
-> The upcoming Ivy-Bridge EX can have up to 15 cores per socket. So
-> even a 4-socket machine will have up to 60 cores or 120 virtual CPUs
-> if hyperthreading is turned on.
-
-I don't see why that matters. I've been dealing with systems much
-larger than that since early 2002, adn the process for delaing with
-lock contention hasn't changed much in the last 10 years. First we
-need to determine what you are doing is something that is sane,
-determining whether there's a simpler fix than changing locking, and
-whether it's actually any faster in the common case we care
-about....
-
-> >IOWs, you need more than one microbenchmark that interacts with
-> >some naive monitoring code to justify the complexity these locking
-> >changes introduce....
-> The first patch can also independently improve the performance of a
-> number of AIM7 workloads including almost 7X improvement in the
-> short workload. More detailed information of these types of
-> performance benefit was discussed in the patch description of the
-> first patch. I will try to collect more performance improvement data
-> on other workloads too.
-> 
-> Thank for the review.
-
-I haven't reviewed anything. All I've made comments about you
-needing to justifying the complexity of the change.
-
-Cheers,
-
-Dave.
+diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+index 9b49c10..10b4bf4 100644
+--- a/src/mds/CDir.cc
++++ b/src/mds/CDir.cc
+@@ -2142,6 +2142,7 @@ void CDir::encode_export(bufferlist& bl)
+ 
+ void CDir::finish_export(utime_t now)
+ {
++  state &= MASK_STATE_EXPORT_KEPT;
+   pop_auth_subtree_nested.sub(now, cache->decayrate, pop_auth_subtree);
+   pop_me.zero(now);
+   pop_auth_subtree.zero(now);
+diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
+index 781ed72..655088b 100644
+--- a/src/mds/CInode.cc
++++ b/src/mds/CInode.cc
+@@ -2989,11 +2989,10 @@ void CInode::_decode_locks_rejoin(bufferlist::iterator& p, list<Context*>& waite
+ 
+ void CInode::encode_export(bufferlist& bl)
+ {
+-  ENCODE_START(3, 3, bl)
++  ENCODE_START(4, 4, bl)
+   _encode_base(bl);
+ 
+-  bool dirty = is_dirty();
+-  ::encode(dirty, bl);
++  ::encode(state, bl);
+ 
+   ::encode(pop, bl);
+ 
+@@ -3024,6 +3023,8 @@ void CInode::encode_export(bufferlist& bl)
+ 
+ void CInode::finish_export(utime_t now)
+ {
++  state &= MASK_STATE_EXPORT_KEPT;
++
+   pop.zero(now);
+ 
+   // just in case!
+@@ -3037,14 +3038,17 @@ void CInode::finish_export(utime_t now)
+ void CInode::decode_import(bufferlist::iterator& p,
+ 			   LogSegment *ls)
+ {
+-  DECODE_START_LEGACY_COMPAT_LEN(3, 3, 3, p);
++  DECODE_START_LEGACY_COMPAT_LEN(4, 4, 4, p);
+ 
+   _decode_base(p);
+ 
+-  bool dirty;
+-  ::decode(dirty, p);
+-  if (dirty) 
++  unsigned s;
++  ::decode(s, p);
++  state |= (s & MASK_STATE_EXPORTED);
++  if (is_dirty()) {
++    get(PIN_DIRTY);
+     _mark_dirty(ls);
++  }
+ 
+   ::decode(pop, ceph_clock_now(g_ceph_context), p);
+ 
+diff --git a/src/mds/CInode.h b/src/mds/CInode.h
+index 7c63593..47973c2 100644
+--- a/src/mds/CInode.h
++++ b/src/mds/CInode.h
+@@ -155,6 +155,11 @@ public:
+   static const int STATE_STRAYPINNED = (1<<16);
+   static const int STATE_FROZENAUTHPIN = (1<<17);
+ 
++  static const int MASK_STATE_EXPORTED =
++    (STATE_DIRTY|STATE_NEEDSRECOVER);
++  static const int MASK_STATE_EXPORT_KEPT =
++    (STATE_FROZEN|STATE_AMBIGUOUSAUTH|STATE_EXPORTINGCAPS);
++
+   // -- waiters --
+   static const uint64_t WAIT_DIR         = (1<<0);
+   static const uint64_t WAIT_ANCHORED    = (1<<1);
+diff --git a/src/mds/Migrator.cc b/src/mds/Migrator.cc
+index 59abb31..5cc26a3 100644
+--- a/src/mds/Migrator.cc
++++ b/src/mds/Migrator.cc
+@@ -1066,10 +1066,6 @@ void Migrator::finish_export_inode(CInode *in, utime_t now, list<Context*>& fini
+ {
+   dout(12) << "finish_export_inode " << *in << dendl;
+ 
+-  in->finish_export(now);
+-
+-  finish_export_inode_caps(in);
+-
+   // clean
+   if (in->is_dirty())
+     in->mark_clean();
+@@ -1103,7 +1099,11 @@ void Migrator::finish_export_inode(CInode *in, utime_t now, list<Context*>& fini
+ 
+   // waiters
+   in->take_waiting(CInode::WAIT_ANY_MASK, finished);
++
++  in->finish_export(now);
+   
++  finish_export_inode_caps(in);
++
+   // *** other state too?
+ 
+   // move to end of LRU so we drop out of cache quickly!
+@@ -1218,9 +1218,6 @@ void Migrator::finish_export_dir(CDir *dir, list<Context*>& finished, utime_t no
+ 
+   if (dir->is_dirty())
+     dir->mark_clean();
+-  
+-  // discard most dir state
+-  dir->state &= CDir::MASK_STATE_EXPORT_KEPT;  // i only retain a few things.
+ 
+   // suck up all waiters
+   dir->take_waiting(CDir::WAIT_ANY_MASK, finished);    // all dir waiters
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.1.4
+
