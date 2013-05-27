@@ -1,150 +1,161 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] mds: use "open-by-ino" function to open remote link
-Date: Mon, 27 May 2013 09:55:10 +0800
-Message-ID: <1369619710-3448-1-git-send-email-zheng.z.yan@intel.com>
+Subject: Re: [PATCH 07/30] mds: fix straydn race
+Date: Mon, 27 May 2013 10:09:47 +0800
+Message-ID: <51A2C06B.7000802@intel.com>
+References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-8-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305230943310.32642@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:56671 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:6331 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755718Ab3E0BzO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 May 2013 21:55:14 -0400
+	id S1755779Ab3E0CJu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 26 May 2013 22:09:50 -0400
+In-Reply-To: <alpine.DEB.2.00.1305230943310.32642@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com
 
+updated version
+---
+From 6cd1c8c076d7afa1c4e2bd247e34cee45b3ef562 Mon Sep 17 00:00:00 2001
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Fri, 5 Apr 2013 19:50:35 +0800
+Subject: [PATCH 07/33] mds: fix straydn race
 
-Also add a new config option "mds_open_remote_link_mode". The anchor
-approach is used by default. If mode is non-zero, use the open-by-ino
-function. In case open-by-ino function fails, if mode is 1, retry
-using the anchor approach, otherwise trigger assertion.
+For unlink/rename request, the target dentry's linkage may change
+before all locks are acquired. So we need check if the existing stray
+dentry is valid.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/common/config_opts.h |  1 +
- src/mds/MDCache.cc       | 51 +++++++++++++++++++++++++++++++-----------------
- src/mds/MDCache.h        |  7 +++++--
- 3 files changed, 39 insertions(+), 20 deletions(-)
+ src/mds/Mutation.cc |  7 +++++++
+ src/mds/Mutation.h  |  1 +
+ src/mds/Server.cc   | 49 ++++++++++++++++++++++++++++++-------------------
+ src/mds/Server.h    |  1 +
+ 4 files changed, 39 insertions(+), 19 deletions(-)
 
-diff --git a/src/common/config_opts.h b/src/common/config_opts.h
-index 776ac1c..a4755ea 100644
---- a/src/common/config_opts.h
-+++ b/src/common/config_opts.h
-@@ -338,6 +338,7 @@ OPTION(mds_kill_openc_at, OPT_INT, 0)
- OPTION(mds_kill_journal_at, OPT_INT, 0)
- OPTION(mds_kill_journal_expire_at, OPT_INT, 0)
- OPTION(mds_kill_journal_replay_at, OPT_INT, 0)
-+OPTION(mds_open_remote_link_mode, OPT_INT, 0)
- OPTION(mds_inject_traceless_reply_probability, OPT_DOUBLE, 0) /* percentage
- 				of MDS modify replies to skip sending the
- 				client a trace on [0-1]*/
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index db322d2..8c96608 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -7342,8 +7342,8 @@ int MDCache::path_traverse(MDRequest *mdr, Message *req, Context *fin,     // wh
- 	} else {
-           dout(7) << "remote link to " << dnl->get_remote_ino() << ", which i don't have" << dendl;
- 	  assert(mdr);  // we shouldn't hit non-primary dentries doing a non-mdr traversal!
--          open_remote_ino(dnl->get_remote_ino(), _get_waiter(mdr, req, fin),
--			  (null_okay && depth == path.depth() - 1));
-+          open_remote_dentry(dn, true, _get_waiter(mdr, req, fin),
-+			     (null_okay && depth == path.depth() - 1));
- 	  if (mds->logger) mds->logger->inc(l_mds_trino);
-           return 1;
-         }        
-@@ -7790,36 +7790,51 @@ void MDCache::open_remote_ino_2(inodeno_t ino, vector<Anchor>& anchortrace, bool
- struct C_MDC_OpenRemoteDentry : public Context {
-   MDCache *mdc;
-   CDentry *dn;
--  bool projected;
-+  inodeno_t ino;
-   Context *onfinish;
--  C_MDC_OpenRemoteDentry(MDCache *m, CDentry *d, bool p, Context *f) :
--    mdc(m), dn(d), projected(p), onfinish(f) {}
-+  bool want_xlocked;
-+  int mode;
-+  C_MDC_OpenRemoteDentry(MDCache *m, CDentry *d, inodeno_t i, Context *f,
-+			 bool wx, int md) :
-+    mdc(m), dn(d), ino(i), onfinish(f), want_xlocked(wx), mode(md) {}
-   void finish(int r) {
--    mdc->_open_remote_dentry_finish(r, dn, projected, onfinish);
-+    mdc->_open_remote_dentry_finish(dn, ino, onfinish, want_xlocked, mode, r);
-   }
- };
- 
--void MDCache::open_remote_dentry(CDentry *dn, bool projected, Context *fin)
-+void MDCache::open_remote_dentry(CDentry *dn, bool projected, Context *fin, bool want_xlocked)
- {
-   dout(10) << "open_remote_dentry " << *dn << dendl;
-   CDentry::linkage_t *dnl = projected ? dn->get_projected_linkage() : dn->get_linkage();
--  open_remote_ino(dnl->get_remote_ino(), 
--		  new C_MDC_OpenRemoteDentry(this, dn, projected, fin));
-+  inodeno_t ino = dnl->get_remote_ino();
-+  int mode = g_conf->mds_open_remote_link_mode;
-+  Context *fin2 =  new C_MDC_OpenRemoteDentry(this, dn, ino, fin, want_xlocked, mode);
-+  if (mode == 0)
-+    open_remote_ino(ino, fin2, want_xlocked); // anchor
-+  else
-+    open_ino(ino, -1, fin2, true, want_xlocked); // backtrace
+diff --git a/src/mds/Mutation.cc b/src/mds/Mutation.cc
+index 4e4f69c..3916b2a 100644
+--- a/src/mds/Mutation.cc
++++ b/src/mds/Mutation.cc
+@@ -30,6 +30,13 @@ void Mutation::pin(MDSCacheObject *o)
+   }      
  }
  
--void MDCache::_open_remote_dentry_finish(int r, CDentry *dn, bool projected, Context *fin)
-+void MDCache::_open_remote_dentry_finish(CDentry *dn, inodeno_t ino, Context *fin,
-+					 bool want_xlocked, int mode, int r)
- {
--  if (r == -ENOENT) {
--    dout(0) << "open_remote_dentry_finish bad remote dentry " << *dn << dendl;
--    dn->state_set(CDentry::STATE_BADREMOTEINO);
--  } else if (r != 0)
--    assert(0);
--  fin->finish(r);
--  delete fin;
-+  if (r < 0) {
-+    if (mode == 0) {
-+      dout(0) << "open_remote_dentry_finish bad remote dentry " << *dn << dendl;
-+      dn->state_set(CDentry::STATE_BADREMOTEINO);
-+    } else {
-+      dout(7) << "open_remote_dentry_finish failed to open ino " << ino
-+	      << " for " << *dn << ", retry using anchortable" << dendl;
-+      assert(mode == 1);
-+      Context *fin2 =  new C_MDC_OpenRemoteDentry(this, dn, ino, fin, want_xlocked, 0);
-+      open_remote_ino(ino, fin2, want_xlocked);
-+      return;
-+    }
-+  }
-+  fin->complete(r < 0 ? r : 0);
- }
- 
- 
--
- void MDCache::make_trace(vector<CDentry*>& trace, CInode *in)
- {
-   // empty trace if we're a base inode
-diff --git a/src/mds/MDCache.h b/src/mds/MDCache.h
-index 5870749..3da8a36 100644
---- a/src/mds/MDCache.h
-+++ b/src/mds/MDCache.h
-@@ -754,14 +754,17 @@ public:
-   void open_remote_ino_2(inodeno_t ino,
- 			 vector<Anchor>& anchortrace, bool want_xlocked,
- 			 inodeno_t hadino, version_t hadv, Context *onfinish);
--  void open_remote_dentry(CDentry *dn, bool projected, Context *fin);
--  void _open_remote_dentry_finish(int r, CDentry *dn, bool projected, Context *fin);
- 
-   bool parallel_fetch(map<inodeno_t,filepath>& pathmap, set<inodeno_t>& missing);
-   bool parallel_fetch_traverse_dir(inodeno_t ino, filepath& path, 
- 				   set<CDir*>& fetch_queue, set<inodeno_t>& missing,
- 				   C_GatherBuilder &gather_bld);
- 
-+  void open_remote_dentry(CDentry *dn, bool projected, Context *fin,
-+			  bool want_xlocked=false);
-+  void _open_remote_dentry_finish(CDentry *dn, inodeno_t ino, Context *fin,
-+				  bool want_xlocked, int mode, int r);
++void Mutation::unpin(MDSCacheObject *o)
++{
++  assert(pins.count(o));
++  o->put(MDSCacheObject::PIN_REQUEST);
++  pins.erase(o);
++}
 +
-   void make_trace(vector<CDentry*>& trace, CInode *in);
+ void Mutation::set_stickydirs(CInode *in)
+ {
+   if (stickydirs.count(in) == 0) {
+diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
+index de122a5..c0bea19 100644
+--- a/src/mds/Mutation.h
++++ b/src/mds/Mutation.h
+@@ -113,6 +113,7 @@ struct Mutation {
  
- protected:
+   // pin items in cache
+   void pin(MDSCacheObject *o);
++  void unpin(MDSCacheObject *o);
+   void set_stickydirs(CInode *in);
+   void drop_pins();
+ 
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 63401e8..42db7ad 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -1797,6 +1797,24 @@ CDentry* Server::prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dn
+   return dn;
+ }
+ 
++CDentry* Server::prepare_stray_dentry(MDRequest *mdr, CInode *in)
++{
++  CDentry *straydn = mdr->straydn;
++  if (straydn) {
++    string name;
++    in->name_stray_dentry(name);
++    if (straydn->get_name() == name)
++      return straydn;
++
++    assert(!mdr->done_locking);
++    mdr->unpin(straydn);
++  }
++
++  straydn = mdcache->get_or_create_stray_dentry(in);
++  mdr->straydn = straydn;
++  mdr->pin(straydn);
++  return straydn;
++}
+ 
+ /** prepare_new_inode
+  *
+@@ -4899,18 +4917,14 @@ void Server::handle_client_unlink(MDRequest *mdr)
+   }
+ 
+   // -- create stray dentry? --
+-  CDentry *straydn = mdr->straydn;
++  CDentry *straydn = NULL;
+   if (dnl->is_primary()) {
+-    if (!straydn) {
+-      straydn = mdcache->get_or_create_stray_dentry(dnl->get_inode());
+-      mdr->pin(straydn);
+-      mdr->straydn = straydn;
+-    }
+-  } else if (straydn)
+-    straydn = NULL;
+-  if (straydn)
++    straydn = prepare_stray_dentry(mdr, dnl->get_inode());
+     dout(10) << " straydn is " << *straydn << dendl;
+-
++  } else if (mdr->straydn) {
++    mdr->unpin(mdr->straydn);
++    mdr->straydn = NULL;
++  }
+ 
+   // lock
+   set<SimpleLock*> rdlocks, wrlocks, xlocks;
+@@ -5650,17 +5664,14 @@ void Server::handle_client_rename(MDRequest *mdr)
+     dout(10) << " this is a link merge" << dendl;
+ 
+   // -- create stray dentry? --
+-  CDentry *straydn = mdr->straydn;
++  CDentry *straydn = NULL;
+   if (destdnl->is_primary() && !linkmerge) {
+-    if (!straydn) {
+-      straydn = mdcache->get_or_create_stray_dentry(destdnl->get_inode());
+-      mdr->pin(straydn);
+-      mdr->straydn = straydn;
+-    }
+-  } else if (straydn)
+-    straydn = NULL;
+-  if (straydn)
++    straydn = prepare_stray_dentry(mdr, destdnl->get_inode());
+     dout(10) << " straydn is " << *straydn << dendl;
++  } else if (mdr->straydn) {
++    mdr->unpin(mdr->straydn);
++    mdr->straydn = NULL;
++  }
+ 
+   // -- prepare witness list --
+   /*
+diff --git a/src/mds/Server.h b/src/mds/Server.h
+index 15c8077..ffe9256 100644
+--- a/src/mds/Server.h
++++ b/src/mds/Server.h
+@@ -120,6 +120,7 @@ public:
+   CDir *validate_dentry_dir(MDRequest *mdr, CInode *diri, const string& dname);
+   CDir *traverse_to_auth_dir(MDRequest *mdr, vector<CDentry*> &trace, filepath refpath);
+   CDentry *prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dname, bool okexist=false);
++  CDentry *prepare_stray_dentry(MDRequest *mdr, CInode *in);
+   CInode* prepare_new_inode(MDRequest *mdr, CDir *dir, inodeno_t useino, unsigned mode,
+ 			    ceph_file_layout *layout=NULL);
+   void journal_allocated_inos(MDRequest *mdr, EMetaBlob *blob);
 -- 
 1.8.1.4
 
