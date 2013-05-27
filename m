@@ -1,161 +1,131 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 07/30] mds: fix straydn race
-Date: Mon, 27 May 2013 10:09:47 +0800
-Message-ID: <51A2C06B.7000802@intel.com>
-References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <1369296418-14871-8-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305230943310.32642@cobra.newdream.net>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
+Date: Mon, 27 May 2013 12:09:04 +1000
+Message-ID: <20130527020903.GR29466@dastard>
+References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
+ <20130523094201.GA24543@dastard>
+ <519E8B5F.3080905@hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:6331 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755779Ab3E0CJu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 May 2013 22:09:50 -0400
-In-Reply-To: <alpine.DEB.2.00.1305230943310.32642@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <autofs-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <519E8B5F.3080905@hp.com>
+Sender: autofs-owner@vger.kernel.org
+To: Waiman Long <waiman.long@hp.com>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>, Andi Kleen <andi@firstfloor.org>
+List-Id: ceph-devel.vger.kernel.org
 
-updated version
----
-From 6cd1c8c076d7afa1c4e2bd247e34cee45b3ef562 Mon Sep 17 00:00:00 2001
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Date: Fri, 5 Apr 2013 19:50:35 +0800
-Subject: [PATCH 07/33] mds: fix straydn race
+On Thu, May 23, 2013 at 05:34:23PM -0400, Waiman Long wrote:
+> On 05/23/2013 05:42 AM, Dave Chinner wrote:
+> >On Wed, May 22, 2013 at 09:37:25PM -0400, Waiman Long wrote:
+> >>Change log:
+> >>
+> >>v2->v3
+> >>  - Fix the RCU lock problem found by Al Viro.
+> >>  - Rebase the code to the latest v3.10-rc1 linux mainline.
+> >>  - Remove patch 4 which may be problematic if the dentry is deleted.
+> >>  - Rerun performance measurement using 3.10-rc1 kernel.
+> >>
+> >>v1->v2
+> >>  - Include performance improvement in the AIM7 benchmark results because
+> >>    of this patch.
+> >>  - Modify dget_parent() to avoid taking the lock, if possible, to further
+> >>    improve AIM7 benchmark results.
+> >>
+> >>During some perf-record sessions of the kernel running the high_systime
+> >>workload of the AIM7 benchmark, it was found that quite a large portion
+> >>of the spinlock contention was due to the perf_event_mmap_event()
+> >>function itself. This perf kernel function calls d_path() which,
+> >>in turn, call path_get() and dput() indirectly. These 3 functions
+> >>were the hottest functions shown in the perf-report output of
+> >>the _raw_spin_lock() function in an 8-socket system with 80 cores
+> >>(hyperthreading off) with a 3.10-rc1 kernel:
+> >What was it I said about this patchset when you posted it to speed
+> >up an Oracle benchmark back in february? I'll repeat:
+> >
+> >"Nobody should be doing reverse dentry-to-name lookups in a quantity
+> >sufficient for it to become a performance limiting factor."
+> 
+> Thank for the comment, but my point is that it is the d_lock
+> contention is skewing the data about how much spin lock contention
+> had actually happened in the workload and it makes it harder to
+> pinpoint problem areas to look at. This is not about performance, it
+> is about accurate representation of performance data. Ideally, we
+> want the overhead of turning on perf instrumentation to be as low as
+> possible.
 
-For unlink/rename request, the target dentry's linkage may change
-before all locks are acquired. So we need check if the existing stray
-dentry is valid.
+Right. But d_path will never be "low overhead", and as such it
+shouldn't be used by perf.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/Mutation.cc |  7 +++++++
- src/mds/Mutation.h  |  1 +
- src/mds/Server.cc   | 49 ++++++++++++++++++++++++++++++-------------------
- src/mds/Server.h    |  1 +
- 4 files changed, 39 insertions(+), 19 deletions(-)
+> >And that makes whatever that tracepoint is doing utterly stupid.
+> >Dumping out full paths in a tracepoint is hardly "low overhead", and
+> >that tracepoint should be stomped on from a great height. Sure,
+> >print the filename straight out of the dentry into a tracepoint,
+> >but repeated calculating the full path (probably for the same set of
+> >dentries) is just a dumb thing to do.
+> >
+> >Anyway, your numbers show that a single AIM7 microbenchmark goes
+> >better under tracing the specific mmap event that uses d_path(), but
+> >the others are on average a little bit slower. That doesn't convince
+> >me that this is worth doing. Indeed, what happens to performance
+> >when you aren't tracing?
+> >
+> >Indeed, have you analysed what makes that
+> >microbenchmark contend so much on the dentry lock while reverse
+> >lookups are occuring? Dentry lock contention does not necessarily
+> >indicate a problem with the dentry locks, and without knowing why
+> >there is contention occuring (esp. compared to the other benchmarks)
+> >we can't really determine if this is a good solution or not...
+> 
+> What made it contend so much was the large number of CPUs available
+> in my test system which is a 8-socket Westmere EX machines with 80
+> cores. As perf was collecting data from every core, the threads will
+> unavoidably bump into each other to translate dentries back to the
+> full paths. The current code only allows one CPU in the d_path()
+> critical path. My patch will allow all of them to be in the critical
+> path concurrently.
 
-diff --git a/src/mds/Mutation.cc b/src/mds/Mutation.cc
-index 4e4f69c..3916b2a 100644
---- a/src/mds/Mutation.cc
-+++ b/src/mds/Mutation.cc
-@@ -30,6 +30,13 @@ void Mutation::pin(MDSCacheObject *o)
-   }      
- }
- 
-+void Mutation::unpin(MDSCacheObject *o)
-+{
-+  assert(pins.count(o));
-+  o->put(MDSCacheObject::PIN_REQUEST);
-+  pins.erase(o);
-+}
-+
- void Mutation::set_stickydirs(CInode *in)
- {
-   if (stickydirs.count(in) == 0) {
-diff --git a/src/mds/Mutation.h b/src/mds/Mutation.h
-index de122a5..c0bea19 100644
---- a/src/mds/Mutation.h
-+++ b/src/mds/Mutation.h
-@@ -113,6 +113,7 @@ struct Mutation {
- 
-   // pin items in cache
-   void pin(MDSCacheObject *o);
-+  void unpin(MDSCacheObject *o);
-   void set_stickydirs(CInode *in);
-   void drop_pins();
- 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 63401e8..42db7ad 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -1797,6 +1797,24 @@ CDentry* Server::prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dn
-   return dn;
- }
- 
-+CDentry* Server::prepare_stray_dentry(MDRequest *mdr, CInode *in)
-+{
-+  CDentry *straydn = mdr->straydn;
-+  if (straydn) {
-+    string name;
-+    in->name_stray_dentry(name);
-+    if (straydn->get_name() == name)
-+      return straydn;
-+
-+    assert(!mdr->done_locking);
-+    mdr->unpin(straydn);
-+  }
-+
-+  straydn = mdcache->get_or_create_stray_dentry(in);
-+  mdr->straydn = straydn;
-+  mdr->pin(straydn);
-+  return straydn;
-+}
- 
- /** prepare_new_inode
-  *
-@@ -4899,18 +4917,14 @@ void Server::handle_client_unlink(MDRequest *mdr)
-   }
- 
-   // -- create stray dentry? --
--  CDentry *straydn = mdr->straydn;
-+  CDentry *straydn = NULL;
-   if (dnl->is_primary()) {
--    if (!straydn) {
--      straydn = mdcache->get_or_create_stray_dentry(dnl->get_inode());
--      mdr->pin(straydn);
--      mdr->straydn = straydn;
--    }
--  } else if (straydn)
--    straydn = NULL;
--  if (straydn)
-+    straydn = prepare_stray_dentry(mdr, dnl->get_inode());
-     dout(10) << " straydn is " << *straydn << dendl;
--
-+  } else if (mdr->straydn) {
-+    mdr->unpin(mdr->straydn);
-+    mdr->straydn = NULL;
-+  }
- 
-   // lock
-   set<SimpleLock*> rdlocks, wrlocks, xlocks;
-@@ -5650,17 +5664,14 @@ void Server::handle_client_rename(MDRequest *mdr)
-     dout(10) << " this is a link merge" << dendl;
- 
-   // -- create stray dentry? --
--  CDentry *straydn = mdr->straydn;
-+  CDentry *straydn = NULL;
-   if (destdnl->is_primary() && !linkmerge) {
--    if (!straydn) {
--      straydn = mdcache->get_or_create_stray_dentry(destdnl->get_inode());
--      mdr->pin(straydn);
--      mdr->straydn = straydn;
--    }
--  } else if (straydn)
--    straydn = NULL;
--  if (straydn)
-+    straydn = prepare_stray_dentry(mdr, destdnl->get_inode());
-     dout(10) << " straydn is " << *straydn << dendl;
-+  } else if (mdr->straydn) {
-+    mdr->unpin(mdr->straydn);
-+    mdr->straydn = NULL;
-+  }
- 
-   // -- prepare witness list --
-   /*
-diff --git a/src/mds/Server.h b/src/mds/Server.h
-index 15c8077..ffe9256 100644
---- a/src/mds/Server.h
-+++ b/src/mds/Server.h
-@@ -120,6 +120,7 @@ public:
-   CDir *validate_dentry_dir(MDRequest *mdr, CInode *diri, const string& dname);
-   CDir *traverse_to_auth_dir(MDRequest *mdr, vector<CDentry*> &trace, filepath refpath);
-   CDentry *prepare_null_dentry(MDRequest *mdr, CDir *dir, const string& dname, bool okexist=false);
-+  CDentry *prepare_stray_dentry(MDRequest *mdr, CInode *in);
-   CInode* prepare_new_inode(MDRequest *mdr, CDir *dir, inodeno_t useino, unsigned mode,
- 			    ceph_file_layout *layout=NULL);
-   void journal_allocated_inos(MDRequest *mdr, EMetaBlob *blob);
+Yes, I know *how* contention occurs and what your patch does. I'm
+asking you to explain *why* we need to fix this specific workload,
+and why the tracepoint that calls d_path() actually needs to do
+that.
+
+Your numbers indicate that your patchset decreases peformance in the
+common, non-d_path intensive workloads, so why should we add all
+this complexity to optimise a slow path at the expense of
+significant complexity and lower performance in the fast
+path?
+
+> The upcoming Ivy-Bridge EX can have up to 15 cores per socket. So
+> even a 4-socket machine will have up to 60 cores or 120 virtual CPUs
+> if hyperthreading is turned on.
+
+I don't see why that matters. I've been dealing with systems much
+larger than that since early 2002, adn the process for delaing with
+lock contention hasn't changed much in the last 10 years. First we
+need to determine what you are doing is something that is sane,
+determining whether there's a simpler fix than changing locking, and
+whether it's actually any faster in the common case we care
+about....
+
+> >IOWs, you need more than one microbenchmark that interacts with
+> >some naive monitoring code to justify the complexity these locking
+> >changes introduce....
+> The first patch can also independently improve the performance of a
+> number of AIM7 workloads including almost 7X improvement in the
+> short workload. More detailed information of these types of
+> performance benefit was discussed in the patch description of the
+> first patch. I will try to collect more performance improvement data
+> on other workloads too.
+> 
+> Thank for the review.
+
+I haven't reviewed anything. All I've made comments about you
+needing to justifying the complexity of the change.
+
+Cheers,
+
+Dave.
 -- 
-1.8.1.4
-
+Dave Chinner
+david@fromorbit.com
