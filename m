@@ -1,74 +1,54 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: cuttlefish ceph-fuse writes make for frequent inconsistent pgs
-Date: Mon, 27 May 2013 17:34:08 -0300
-Message-ID: <orzjvgi2m7.fsf@livre.home>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 0/30] mds: lookup-by-ino & fixes
+Date: Tue, 28 May 2013 11:03:17 +0800
+Message-ID: <51A41E75.8000801@intel.com>
+References: <1369296418-14871-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1305231118510.32642@cobra.newdream.net> <519F286B.2@intel.com> <alpine.DEB.2.00.1305271219350.1350@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:46993 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757482Ab3E0UsP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 May 2013 16:48:15 -0400
-Received: from freie (home.lxoliva.fsfla.org [172.31.160.22])
-	by linux-libre.fsfla.org (8.14.3/8.14.3/Debian-9.1ubuntu1) with ESMTP id r4RKYPtK008873
-	for <ceph-devel@vger.kernel.org>; Mon, 27 May 2013 20:34:26 GMT
+Received: from mga02.intel.com ([134.134.136.20]:14703 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758698Ab3E1DDT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 May 2013 23:03:19 -0400
+In-Reply-To: <alpine.DEB.2.00.1305271219350.1350@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, greg@inktank.com, sam.lang@inktank.com
 
-I've used ceph.ko for most of my cephfs operations these days, but I've
-recently used a ceph-fuse mountpoint for a while, and results were odd:
-a number of PGs were flagged as inconsistent upon their subsequent
-scrub, and I could determine that all affected files had been written to
-during the brief period in which I used the ceph-fuse mountpoint.
+On 05/28/2013 03:21 AM, Sage Weil wrote:
+> On Fri, 24 May 2013, Yan, Zheng wrote:
+>> On 05/24/2013 02:22 AM, Sage Weil wrote:
+>>> On Thu, 23 May 2013, Yan, Zheng wrote:
+>>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>>>
+>>>> Patch 1~21 are random fixes for MDS cluster. Patch 22~28 rework
+>>>> the backtrace handling. Patch 29 introduces lookup-by-ino helper.
+>>>> Path 30 uses the lookup-by-ino helper to fix issue #4850.
+>>>>
+>>>> This patch series are also in:
+>>>>   git://github.com/ukernel/ceph.git wip-mds
+>>>
+>>> Awesome!  I pushed this to wip-mds in ceph.git for now.  Note that 
+>>> gitbuilders are picking up a failure due to the encoding changes.  For the 
+>>> types and messages that change, can you mark them in the 
+>>> ceph-object-corpus.git tree?  Look for the forward_incompat/ dirs and 
+>>> follow that example.
+>>>
+>> Could you be more specific. Change in patch 14 should only affect MExportDir
+>> and MExportCaps, object-corpus does not contain objects for these two messages.
+>> Patch 27 looks suspicious, does the incompatible change you mentioned cause the
+>> failure?
+> 
+> http://gitbuilder.sepia.ceph.com/gitbuilder-oneiric-amd64/log.cgi?log=f8499e07035fbff063b50b13ac295432884c7e27
+> 
+> is the one I saw, but there are likely others; run 'make check-local' to 
+> run the encoding checks.
+> 
 
-Although I had some 10 osd files go inconsistent out of perhaps a
-thousand files written to, I only investigated closely what happened to
-two of them.
+It turned out to be a bug in path "mds: journal backtrace update in EMetaBlob::fullbit"
+I forgot to initialize 'state' when decoding old format.
 
-One was a ~2KiB text file I'd rsynced into the ceph-fuse mountpoint.
-The OSDs holding the 3 replicas of the PG in which the entire file ended
-up had 4MiB files, instead of ~2KiB files.  The first ~2KiB correctly
-held the file data on all 3 replicas, but the rest of the file was
-random garbage, and it was different on each replica.  Most
-inconsistencies I got were of this kind, and they could all be fixed by
-truncating the file and writing it back.
-
-The one exception to this rule was a torrent download of a DVD image of
-a GNU/Linux-libre distribution.  A deep-scrub part-way through the
-download identified an inconsistency, days after the file had been last
-modified (the download was paused for unrelated reasons), and comparing
-the inconsistent 4MiB file, I identified a small portion (less than 512
-bytes) that was different random binary garbage in two of the replicas,
-and base64-encoded junk in the other.  I presume this may have started
-just like the first case above, with a small write to part of a new 4MiB
-chunk, with the random junk in each part being overwritten as the
-download progressed, leaving just a small portion of the torrent that
-hadn't been downloaded yet, and that therefore remained with junk.
-
-
-What strikes me as the oddest part of this picture is that, while this
-behavior was triggered several times during a brief use of ceph-fuse, it
-does not seem to happen with ceph.ko mounts.  Now, I don't see why the
-osds should care what kind of client is sending write ops to them before
-they send the newly-created file (or a small part thereof) to the
-replicas, but since different behavior is observed, there must be some
-difference, and that difference must be a bug, for either the master osd
-is sending *different* junk to each of the replicas, or each replica is
-receiving only part of the file and filling the rest of the file with
-junk of its own making.  But only when the write came from ceph-fuse
-and, even then, only for a small fraction of the writes.
-
-An uninitialized buffer being partially overwritten by the small write,
-on either side of each replication pair, would explain the random junk,
-and perhaps even why each replica gets different random junk, but it
-wouldn't explain why the heck several small files ended up taking up an
-entire 4MiB chunk on the OSDs.
-
-Thoughts?
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Regards
+Yan, Zheng
