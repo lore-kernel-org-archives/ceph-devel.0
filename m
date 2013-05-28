@@ -1,36 +1,50 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: cuttlefish ceph-fuse writes make for frequent inconsistent pgs
-Date: Tue, 28 May 2013 06:50:19 -0300
-Message-ID: <ord2sbigbo.fsf@livre.home>
-References: <orzjvgi2m7.fsf@livre.home>
-	<CA+4uBUZFR8a3LL5q5pNMv64P8zv4DKOTjhigm0qeMzYUoNYJ+Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Emil Goode <emilgoode@gmail.com>
+Subject: [PATCH] ceph: improve error handling in ceph_mdsmap_decode
+Date: Tue, 28 May 2013 16:59:00 +0200
+Message-ID: <1369753140-28802-1-git-send-email-emilgoode@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:47740 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751348Ab3E1Juk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 May 2013 05:50:40 -0400
-In-Reply-To: <CA+4uBUZFR8a3LL5q5pNMv64P8zv4DKOTjhigm0qeMzYUoNYJ+Q@mail.gmail.com>
-	(Samuel Just's message of "Mon, 27 May 2013 19:44:28 -0700")
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:53809 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934269Ab3E1O7V (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 May 2013 10:59:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: sage@inktank.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org, Emil Goode <emilgoode@gmail.com>
 
-On May 27, 2013, Samuel Just <sam.just@inktank.com> wrote:
+This patch makes the following improvements to the error handling
+in the ceph_mdsmap_decode function:
 
-> Thanks for the detailed information!  Xfs?
+- Add a NULL check for return value from kcalloc
+- Make use of the variable err
 
-btrfs.
+Signed-off-by: Emil Goode <emilgoode@gmail.com>
+---
+ fs/ceph/mdsmap.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-> Were there any osd restarts/power cycles?
-
-I can't rule that out, but I'm afraid it was a while ago, and my logs
-don't go that far back.
-
+diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+index 9278dec..d4d3897 100644
+--- a/fs/ceph/mdsmap.c
++++ b/fs/ceph/mdsmap.c
+@@ -138,6 +138,8 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
+ 				m->m_info[mds].export_targets =
+ 					kcalloc(num_export_targets, sizeof(u32),
+ 						GFP_NOFS);
++				if (m->m_info[mds].export_targets == NULL)
++					goto badmem;
+ 				for (j = 0; j < num_export_targets; j++)
+ 					m->m_info[mds].export_targets[j] =
+ 					       ceph_decode_32(&pexport_targets);
+@@ -170,7 +172,7 @@ bad:
+ 		       DUMP_PREFIX_OFFSET, 16, 1,
+ 		       start, end - start, true);
+ 	ceph_mdsmap_destroy(m);
+-	return ERR_PTR(-EINVAL);
++	return ERR_PTR(err);
+ }
+ 
+ void ceph_mdsmap_destroy(struct ceph_mdsmap *m)
 -- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+1.7.10.4
+
