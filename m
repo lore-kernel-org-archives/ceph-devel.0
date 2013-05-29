@@ -1,135 +1,126 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: Fscache support for Ceph
-Date: Wed, 29 May 2013 09:35:48 -0400
-Message-ID: <CANP1eJG1EoC916mBXMvh2vk8m0cQzxQ92Dh2qQq8fg+eQzLaMA@mail.gmail.com>
-References: <CANP1eJHjpUJ1ZFszAy=ZsAvZKpPDFMHjNj7JRRUhV88yuH0dyg@mail.gmail.com>
-	<CAKxz0mwqStYgeHnCvYokizsJXoe_cOccMSjx8L=EO9rFPyaK_A@mail.gmail.com>
+From: Waiman Long <waiman.long@hp.com>
+Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
+Date: Wed, 29 May 2013 11:55:14 -0400
+Message-ID: <51A624E2.3000301@hp.com>
+References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com> <20130523094201.GA24543@dastard> <519E8B5F.3080905@hp.com> <20130527020903.GR29466@dastard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:46016 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759457Ab3E2Nfs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 May 2013 09:35:48 -0400
-Received: by mail-ie0-f174.google.com with SMTP id aq17so1594719iec.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 06:35:48 -0700 (PDT)
-In-Reply-To: <CAKxz0mwqStYgeHnCvYokizsJXoe_cOccMSjx8L=EO9rFPyaK_A@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Elso Andras <elso.andras@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-cachefs@redhat.com
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <autofs-owner@vger.kernel.org>
+In-Reply-To: <20130527020903.GR29466@dastard>
+Sender: autofs-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>, Andi Kleen <andi@firstfloor.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Elbandi,
+On 05/26/2013 10:09 PM, Dave Chinner wrote:
+> On Thu, May 23, 2013 at 05:34:23PM -0400, Waiman Long wrote:
+>> On 05/23/2013 05:42 AM, Dave Chinner wrote:
+>>>
+>>> What was it I said about this patchset when you posted it to speed
+>>> up an Oracle benchmark back in february? I'll repeat:
+>>>
+>>> "Nobody should be doing reverse dentry-to-name lookups in a quantity
+>>> sufficient for it to become a performance limiting factor."
+>> Thank for the comment, but my point is that it is the d_lock
+>> contention is skewing the data about how much spin lock contention
+>> had actually happened in the workload and it makes it harder to
+>> pinpoint problem areas to look at. This is not about performance, it
+>> is about accurate representation of performance data. Ideally, we
+>> want the overhead of turning on perf instrumentation to be as low as
+>> possible.
+> Right. But d_path will never be "low overhead", and as such it
+> shouldn't be used by perf.
 
-Thanks to your stack trace I see the bug. I'll send you a fix as soon
-as I get back to my office. Apparently, I spent too much time testing
-it in UP vms and UML.
+The d_path() is called by perf_event_mmap_event() which translates VMA 
+to its file path for memory segments backed by files. As perf is not 
+just for sampling data within the kernel, it can also be used for 
+checking access pattern in the user space. As a result, it needs to map 
+VMAs back to the backing files to access their symbols information. If 
+d_path() is not the right function to call for this purpose, what other 
+alternatives do we have?
 
-Thanks,
--- Milosz
+There may be ways to reduce calls to d_path() by doing some kind of 
+caching, but that will certainly increase the complexity of the perf code.
 
-On Wed, May 29, 2013 at 5:47 AM, Elso Andras <elso.andras@gmail.com> wrote:
-> Hi,
->
-> I try your fscache patch on my test cluster. the client node is a
-> ubuntu lucid (10.4) with 3.8 kernel (*) + your patch.
-> Little after i mount the cephfs, i got this:
->
-> [  316.303851] Pid: 1565, comm: lighttpd Not tainted 3.8.0-22-fscache
-> #33 HP ProLiant DL160 G6
-> [  316.303853] RIP: 0010:[<ffffffff81045c42>]  [<ffffffff81045c42>]
-> __ticket_spin_lock+0x22/0x30
-> [  316.303861] RSP: 0018:ffff8804180e79f8  EFLAGS: 00000297
-> [  316.303863] RAX: 0000000000000004 RBX: ffffffffa0224e53 RCX: 0000000000000004
-> [  316.303865] RDX: 0000000000000005 RSI: 00000000000000d0 RDI: ffff88041eb29a50
-> [  316.303866] RBP: ffff8804180e79f8 R08: ffffe8ffffa40150 R09: 0000000000000000
-> [  316.303868] R10: 0000000000000001 R11: 0000000000000001 R12: ffff88041da75050
-> [  316.303869] R13: ffff880428ef0000 R14: ffffffff81702b86 R15: ffff8804180e7968
-> [  316.303871] FS:  00007fbcca138700(0000) GS:ffff88042f240000(0000)
-> knlGS:0000000000000000
-> [  316.303873] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [  316.303875] CR2: 00007f5c96649f00 CR3: 00000004180c9000 CR4: 00000000000007e0
-> [  316.303877] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [  316.303878] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-> [  316.303880] Process lighttpd (pid: 1565, threadinfo
-> ffff8804180e6000, task ffff88041cc22e80)
-> [  316.303881] Stack:
-> [  316.303883]  ffff8804180e7a08 ffffffff817047ae ffff8804180e7a58
-> ffffffffa02c816a
-> [  316.303886]  ffff8804180e7a58 ffff88041eb29a50 0000000000000000
-> ffff88041eb29d50
-> [  316.303889]  ffff88041eb29a50 ffff88041b29ed00 ffff88041eb29a40
-> 0000000000000d01
-> [  316.303892] Call Trace:
-> [  316.303898]  [<ffffffff817047ae>] _raw_spin_lock+0xe/0x20
-> [  316.303910]  [<ffffffffa02c816a>] ceph_init_file+0xca/0x1c0 [ceph]
-> [  316.303917]  [<ffffffffa02c83e1>] ceph_open+0x181/0x3c0 [ceph]
-> [  316.303925]  [<ffffffffa02c8260>] ? ceph_init_file+0x1c0/0x1c0 [ceph]
-> [  316.303930]  [<ffffffff8119a62e>] do_dentry_open+0x21e/0x2a0
-> [  316.303933]  [<ffffffff8119a6e5>] finish_open+0x35/0x50
-> [  316.303940]  [<ffffffffa02c9304>] ceph_atomic_open+0x214/0x2f0 [ceph]
-> [  316.303944]  [<ffffffff811b416f>] ? __d_alloc+0x5f/0x180
-> [  316.303948]  [<ffffffff811a7fa1>] atomic_open+0xf1/0x460
-> [  316.303951]  [<ffffffff811a86f4>] lookup_open+0x1a4/0x1d0
-> [  316.303954]  [<ffffffff811a8fad>] do_last+0x30d/0x820
-> [  316.303958]  [<ffffffff811ab413>] path_openat+0xb3/0x4d0
-> [  316.303962]  [<ffffffff815da87d>] ? sock_aio_read+0x2d/0x40
-> [  316.303965]  [<ffffffff8119c333>] ? do_sync_read+0xa3/0xe0
-> [  316.303968]  [<ffffffff811ac232>] do_filp_open+0x42/0xa0
-> [  316.303971]  [<ffffffff811b9eb5>] ? __alloc_fd+0xe5/0x170
-> [  316.303974]  [<ffffffff8119be8a>] do_sys_open+0xfa/0x250
-> [  316.303977]  [<ffffffff8119cacd>] ? vfs_read+0x10d/0x180
-> [  316.303980]  [<ffffffff8119c001>] sys_open+0x21/0x30
-> [  316.303983]  [<ffffffff8170d61d>] system_call_fastpath+0x1a/0x1f
->
-> And the console print this lines forever, server is freezed:
-> [  376.305754] BUG: soft lockup - CPU#2 stuck for 22s! [lighttpd:1565]
-> [  404.294735] BUG: soft lockup - CPU#1 stuck for 22s! [kworker/1:1:39]
-> [  404.306735] BUG: soft lockup - CPU#2 stuck for 22s! [lighttpd:1565]
-> [  432.295716] BUG: soft lockup - CPU#1 stuck for 22s! [kworker/1:1:39]
->
-> Have you any idea?
->
-> Elbandi
->
-> * http://packages.ubuntu.com/raring/linux-image-3.8.0-19-generic
->
-> 2013/5/23 Milosz Tanski <milosz@adfin.com>:
->> This is my first at adding fscache support for the Ceph Linux module.
->>
->> My motivation for doing this work was speedup our distributed database
->> that uses the Ceph filesystem as a backing store. By far more of the
->> workload that our application is doing is read only and latency is our
->> biggest challenge. Being able to cache frequently used blocks on the
->> SSD drives that our machines use dramatically speeds up our query
->> setup time when we're fetching multiple compressed indexes and then
->> navigating the block tree.
->>
->> The branch containing the two patches is here:
->> https://bitbucket.org/adfin/linux-fs.git in the forceph branch.
->>
->> If you want to review it in your browser here is the bitbucket url:
->> https://bitbucket.org/adfin/linux-fs/commits/branch/forceph
->>
->> I've tested this both in mainline and in the branch that features
->> upcoming fscache changes. The patches are broken into two pieces.
->>
->> 01 - Setups the facility for fscache in it's independent files
->> 02 - Enables fscache in the ceph filesystem and adds a new configuration option
->>
->> The patches will follow in the new few emails as well.
->>
->> Future wise; there's some new work being done to add write-back
->> caching to fscache & NFS. When that's done I'd like to integrated the
->> Ceph fscache implementation. From the benchmarks of the author of that
->> it seams like it has much the same benefit for write to NFS as bcache
->> does.
->>
->> I'd like to get this into ceph, and I'm looking for feedback.
->>
->> Thanks,
->> - Milosz
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> And that makes whatever that tracepoint is doing utterly stupid.
+>>> Dumping out full paths in a tracepoint is hardly "low overhead", and
+>>> that tracepoint should be stomped on from a great height. Sure,
+>>> print the filename straight out of the dentry into a tracepoint,
+>>> but repeated calculating the full path (probably for the same set of
+>>> dentries) is just a dumb thing to do.
+>>>
+>>> Anyway, your numbers show that a single AIM7 microbenchmark goes
+>>> better under tracing the specific mmap event that uses d_path(), but
+>>> the others are on average a little bit slower. That doesn't convince
+>>> me that this is worth doing. Indeed, what happens to performance
+>>> when you aren't tracing?
+>>>
+>>> Indeed, have you analysed what makes that
+>>> microbenchmark contend so much on the dentry lock while reverse
+>>> lookups are occuring? Dentry lock contention does not necessarily
+>>> indicate a problem with the dentry locks, and without knowing why
+>>> there is contention occuring (esp. compared to the other benchmarks)
+>>> we can't really determine if this is a good solution or not...
+>> What made it contend so much was the large number of CPUs available
+>> in my test system which is a 8-socket Westmere EX machines with 80
+>> cores. As perf was collecting data from every core, the threads will
+>> unavoidably bump into each other to translate dentries back to the
+>> full paths. The current code only allows one CPU in the d_path()
+>> critical path. My patch will allow all of them to be in the critical
+>> path concurrently.
+> Yes, I know *how* contention occurs and what your patch does. I'm
+> asking you to explain *why* we need to fix this specific workload,
+> and why the tracepoint that calls d_path() actually needs to do
+> that.
+
+My patch set consists of 2 different changes. The first one is to avoid 
+taking the d_lock lock when updating the reference count in the 
+dentries. This particular change also benefit some other workloads that 
+are filesystem intensive. One particular example is the short workload 
+in the AIM7 benchmark. One of the job type in the short workload is 
+"misc_rtns_1" which calls security functions like getpwnam(), 
+getpwuid(), getgrgid() a couple of times. These functions open the 
+/etc/passwd or /etc/group files, read their content and close the files. 
+It is the intensive open/read/close sequence from multiple threads that 
+is causing 80%+ contention in the d_lock on a system with large number 
+of cores. The MIT's MOSBench paper also outlined dentry reference 
+counting as a scalability roadblock for its Apache and Exim tests. So 
+that change will certainly help workloads that are dcache reference 
+counting intensive.
+
+The second rename_lock change is mainly for reducing the d_path lock 
+contention for perf and some other applications that may need to access 
+/proc system files like maps or numa_maps frequently. If you think the 
+rename_lock change is not worth the effort to just benefit perf, I would 
+still like to see the first one go in as it can certainly benefit other 
+workload.
+
+> Your numbers indicate that your patchset decreases peformance in the
+> common, non-d_path intensive workloads, so why should we add all
+> this complexity to optimise a slow path at the expense of
+> significant complexity and lower performance in the fast
+> path?
+
+My numbers didn't actually indicate a performance regression in other 
+common workloads. They just indicate that there wasn't a significant 
+changes in performance as + or - a few percentages here and there are 
+within the margin of errors for the tests that I used.
+
+>> The upcoming Ivy-Bridge EX can have up to 15 cores per socket. So
+>> even a 4-socket machine will have up to 60 cores or 120 virtual CPUs
+>> if hyperthreading is turned on.
+> I don't see why that matters. I've been dealing with systems much
+> larger than that since early 2002, adn the process for delaing with
+> lock contention hasn't changed much in the last 10 years. First we
+> need to determine what you are doing is something that is sane,
+> determining whether there's a simpler fix than changing locking, and
+> whether it's actually any faster in the common case we care
+> about....
+
+I certainly agree with that. My testing indicated no change in 
+performance for the common case, but significant speed-up in some 
+scenarios with large number of CPUs.
+
+Regards,
+Longman
