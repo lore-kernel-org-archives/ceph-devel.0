@@ -1,75 +1,158 @@
-From: Simo Sorce <simo@redhat.com>
-Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
-Date: Wed, 29 May 2013 13:03:12 -0400
-Message-ID: <1369846992.2769.149.camel@willson.li.ssimo.org>
-References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
-	 <20130523094201.GA24543@dastard> <519E8B5F.3080905@hp.com>
-	 <20130527020903.GR29466@dastard> <51A624E2.3000301@hp.com>
-	 <1369844289.2769.146.camel@willson.li.ssimo.org>
-	 <20130529165603.GL6123@two.firstfloor.org>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: Fscache support for Ceph
+Date: Wed, 29 May 2013 13:46:21 -0400
+Message-ID: <CANP1eJGpQ=Y4+ivLXVM+8ResYC5nYh=3eK=ZoJAoe_8gOaTWrQ@mail.gmail.com>
+References: <CANP1eJHjpUJ1ZFszAy=ZsAvZKpPDFMHjNj7JRRUhV88yuH0dyg@mail.gmail.com>
+	<CAKxz0mwqStYgeHnCvYokizsJXoe_cOccMSjx8L=EO9rFPyaK_A@mail.gmail.com>
+	<CANP1eJG1EoC916mBXMvh2vk8m0cQzxQ92Dh2qQq8fg+eQzLaMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:30310 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755417Ab3E2RDh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 May 2013 13:03:37 -0400
-In-Reply-To: <20130529165603.GL6123@two.firstfloor.org>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:58652 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933163Ab3E2RqW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 May 2013 13:46:22 -0400
+Received: by mail-ie0-f180.google.com with SMTP id b11so11366989iee.39
+        for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 10:46:22 -0700 (PDT)
+In-Reply-To: <CANP1eJG1EoC916mBXMvh2vk8m0cQzxQ92Dh2qQq8fg+eQzLaMA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andi Kleen <andi@firstfloor.org>
-Cc: Waiman Long <waiman.long@hp.com>, Dave Chinner <david@fromorbit.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>
+To: Elso Andras <elso.andras@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-cachefs@redhat.com
 
-On Wed, 2013-05-29 at 18:56 +0200, Andi Kleen wrote:
-> On Wed, May 29, 2013 at 12:18:09PM -0400, Simo Sorce wrote:
-> > On Wed, 2013-05-29 at 11:55 -0400, Waiman Long wrote:
-> > 
-> > > My patch set consists of 2 different changes. The first one is to avoid 
-> > > taking the d_lock lock when updating the reference count in the 
-> > > dentries. This particular change also benefit some other workloads that 
-> > > are filesystem intensive. One particular example is the short workload 
-> > > in the AIM7 benchmark. One of the job type in the short workload is 
-> > > "misc_rtns_1" which calls security functions like getpwnam(), 
-> > > getpwuid(), getgrgid() a couple of times. These functions open the 
-> > > /etc/passwd or /etc/group files, read their content and close the files. 
-> > > It is the intensive open/read/close sequence from multiple threads that 
-> > > is causing 80%+ contention in the d_lock on a system with large number 
-> > > of cores.
-> > 
-> > To be honest a workload base on /etc/passwd or /etc/group is completely
-> > artificial, in actual usage, if you really have  such access you use
-> > nscd or sssd with their shared memory caches to completely remove most
-> > of the file access.
-> 
-> I don't fully agree at this point. A lot of things can be tuned away,
-> but in practice we want things to perform well out of the box without
-> needing all kinds of magic tuning that only 
+Elso,
 
-Phrase seem cut mid-sentence ?
+I have both good and bad news for you.
 
-> Also this is just normal file access, nothing special about it.
-> It simply has to scale. For all kinds of workloads.
-> 
-> And it does, just d_path messes it up.
+First, the good news is that I fixed this particular issue. You can
+find the changes needed here:
+https://bitbucket.org/adfin/linux-fs/commits/339c82d37ec0223733778f83111f29599f220e35.
+As you can see it's a simple fix. I also put another patch in my tree
+that makes fscache a mount option.
 
-Well there are reasonable workloads and artificial ones, I am just
-warning not to use 'that' specific test as a good indicator, if you have
-other reasonable workloads that show a similar flow feel free to bring
-it up.
+The bad news is that when working with the ubuntu 3.8.9-22 kernel on
+LTS there an sporadic crash. This is due to a bug in the upstream
+kernel code. There is a fix for it in David Howells tree:
+http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/commit/?h=fscache&id=82958c45e35963c93fc6cbe6a27752e2d97e9f9a
 
-> > I have no beef on the rest but repeated access to Nsswitch information
-> > is not something you need to optimize at the file system layer and
-> > should not be brought up as a point in favor.
-> 
-> This is about repeated access to arbitrary files.
+I can't repro this under normal conditions but I can repo it forcing
+the kernel to drop caches.
 
-Ok. I do not want to start a discussion on this, I just pointed out the
-specific point was not really a good example hopefully there are others
-that justify the patchset.
+Best,
+- Milosz
 
-Simo.
-
--- 
-Simo Sorce * Red Hat, Inc * New York
-
+On Wed, May 29, 2013 at 9:35 AM, Milosz Tanski <milosz@adfin.com> wrote:
+> Elbandi,
+>
+> Thanks to your stack trace I see the bug. I'll send you a fix as soon
+> as I get back to my office. Apparently, I spent too much time testing
+> it in UP vms and UML.
+>
+> Thanks,
+> -- Milosz
+>
+> On Wed, May 29, 2013 at 5:47 AM, Elso Andras <elso.andras@gmail.com> wrote:
+>> Hi,
+>>
+>> I try your fscache patch on my test cluster. the client node is a
+>> ubuntu lucid (10.4) with 3.8 kernel (*) + your patch.
+>> Little after i mount the cephfs, i got this:
+>>
+>> [  316.303851] Pid: 1565, comm: lighttpd Not tainted 3.8.0-22-fscache
+>> #33 HP ProLiant DL160 G6
+>> [  316.303853] RIP: 0010:[<ffffffff81045c42>]  [<ffffffff81045c42>]
+>> __ticket_spin_lock+0x22/0x30
+>> [  316.303861] RSP: 0018:ffff8804180e79f8  EFLAGS: 00000297
+>> [  316.303863] RAX: 0000000000000004 RBX: ffffffffa0224e53 RCX: 0000000000000004
+>> [  316.303865] RDX: 0000000000000005 RSI: 00000000000000d0 RDI: ffff88041eb29a50
+>> [  316.303866] RBP: ffff8804180e79f8 R08: ffffe8ffffa40150 R09: 0000000000000000
+>> [  316.303868] R10: 0000000000000001 R11: 0000000000000001 R12: ffff88041da75050
+>> [  316.303869] R13: ffff880428ef0000 R14: ffffffff81702b86 R15: ffff8804180e7968
+>> [  316.303871] FS:  00007fbcca138700(0000) GS:ffff88042f240000(0000)
+>> knlGS:0000000000000000
+>> [  316.303873] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> [  316.303875] CR2: 00007f5c96649f00 CR3: 00000004180c9000 CR4: 00000000000007e0
+>> [  316.303877] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+>> [  316.303878] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+>> [  316.303880] Process lighttpd (pid: 1565, threadinfo
+>> ffff8804180e6000, task ffff88041cc22e80)
+>> [  316.303881] Stack:
+>> [  316.303883]  ffff8804180e7a08 ffffffff817047ae ffff8804180e7a58
+>> ffffffffa02c816a
+>> [  316.303886]  ffff8804180e7a58 ffff88041eb29a50 0000000000000000
+>> ffff88041eb29d50
+>> [  316.303889]  ffff88041eb29a50 ffff88041b29ed00 ffff88041eb29a40
+>> 0000000000000d01
+>> [  316.303892] Call Trace:
+>> [  316.303898]  [<ffffffff817047ae>] _raw_spin_lock+0xe/0x20
+>> [  316.303910]  [<ffffffffa02c816a>] ceph_init_file+0xca/0x1c0 [ceph]
+>> [  316.303917]  [<ffffffffa02c83e1>] ceph_open+0x181/0x3c0 [ceph]
+>> [  316.303925]  [<ffffffffa02c8260>] ? ceph_init_file+0x1c0/0x1c0 [ceph]
+>> [  316.303930]  [<ffffffff8119a62e>] do_dentry_open+0x21e/0x2a0
+>> [  316.303933]  [<ffffffff8119a6e5>] finish_open+0x35/0x50
+>> [  316.303940]  [<ffffffffa02c9304>] ceph_atomic_open+0x214/0x2f0 [ceph]
+>> [  316.303944]  [<ffffffff811b416f>] ? __d_alloc+0x5f/0x180
+>> [  316.303948]  [<ffffffff811a7fa1>] atomic_open+0xf1/0x460
+>> [  316.303951]  [<ffffffff811a86f4>] lookup_open+0x1a4/0x1d0
+>> [  316.303954]  [<ffffffff811a8fad>] do_last+0x30d/0x820
+>> [  316.303958]  [<ffffffff811ab413>] path_openat+0xb3/0x4d0
+>> [  316.303962]  [<ffffffff815da87d>] ? sock_aio_read+0x2d/0x40
+>> [  316.303965]  [<ffffffff8119c333>] ? do_sync_read+0xa3/0xe0
+>> [  316.303968]  [<ffffffff811ac232>] do_filp_open+0x42/0xa0
+>> [  316.303971]  [<ffffffff811b9eb5>] ? __alloc_fd+0xe5/0x170
+>> [  316.303974]  [<ffffffff8119be8a>] do_sys_open+0xfa/0x250
+>> [  316.303977]  [<ffffffff8119cacd>] ? vfs_read+0x10d/0x180
+>> [  316.303980]  [<ffffffff8119c001>] sys_open+0x21/0x30
+>> [  316.303983]  [<ffffffff8170d61d>] system_call_fastpath+0x1a/0x1f
+>>
+>> And the console print this lines forever, server is freezed:
+>> [  376.305754] BUG: soft lockup - CPU#2 stuck for 22s! [lighttpd:1565]
+>> [  404.294735] BUG: soft lockup - CPU#1 stuck for 22s! [kworker/1:1:39]
+>> [  404.306735] BUG: soft lockup - CPU#2 stuck for 22s! [lighttpd:1565]
+>> [  432.295716] BUG: soft lockup - CPU#1 stuck for 22s! [kworker/1:1:39]
+>>
+>> Have you any idea?
+>>
+>> Elbandi
+>>
+>> * http://packages.ubuntu.com/raring/linux-image-3.8.0-19-generic
+>>
+>> 2013/5/23 Milosz Tanski <milosz@adfin.com>:
+>>> This is my first at adding fscache support for the Ceph Linux module.
+>>>
+>>> My motivation for doing this work was speedup our distributed database
+>>> that uses the Ceph filesystem as a backing store. By far more of the
+>>> workload that our application is doing is read only and latency is our
+>>> biggest challenge. Being able to cache frequently used blocks on the
+>>> SSD drives that our machines use dramatically speeds up our query
+>>> setup time when we're fetching multiple compressed indexes and then
+>>> navigating the block tree.
+>>>
+>>> The branch containing the two patches is here:
+>>> https://bitbucket.org/adfin/linux-fs.git in the forceph branch.
+>>>
+>>> If you want to review it in your browser here is the bitbucket url:
+>>> https://bitbucket.org/adfin/linux-fs/commits/branch/forceph
+>>>
+>>> I've tested this both in mainline and in the branch that features
+>>> upcoming fscache changes. The patches are broken into two pieces.
+>>>
+>>> 01 - Setups the facility for fscache in it's independent files
+>>> 02 - Enables fscache in the ceph filesystem and adds a new configuration option
+>>>
+>>> The patches will follow in the new few emails as well.
+>>>
+>>> Future wise; there's some new work being done to add write-back
+>>> caching to fscache & NFS. When that's done I'd like to integrated the
+>>> Ceph fscache implementation. From the benchmarks of the author of that
+>>> it seams like it has much the same benefit for write to NFS as bcache
+>>> does.
+>>>
+>>> I'd like to get this into ceph, and I'm looking for feedback.
+>>>
+>>> Thanks,
+>>> - Milosz
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
