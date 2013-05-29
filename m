@@ -1,50 +1,48 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.63 released
-Date: Tue, 28 May 2013 21:05:05 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305282104180.20845@cobra.newdream.net>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Speed up 'rbd rm'
+Date: Wed, 29 May 2013 15:59:42 +1000
+Message-ID: <20130529055942.GA3977@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:42947 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754406Ab3E2GH5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 May 2013 02:07:57 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id 9FD7E61498
+	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:46 +1000 (EST)
+Received: from smtp1.onthe.net.au ([127.0.0.1])
+	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id L1Gqzs+kMnYC for <ceph-devel@vger.kernel.org>;
+	Wed, 29 May 2013 15:59:42 +1000 (EST)
+Received: from o1.office.otn.net.au (unknown [180.148.179.26])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id 924A061465
+	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:42 +1000 (EST)
+Received: from achates.office.onthe.net.au (achates.office.onthe.net.au [10.1.32.53])
+	by o1.office.otn.net.au (Postfix) with ESMTP id CF40F2AA7A7
+	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:42 +1000 (EST)
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Another sprint, and v0.63 is here.  This release features librbd 
-improvements, mon fixes, osd robustness, and packaging fixes.
+Hi,
 
-Notable features in this release include:
+I know 'rbd rm' is notoriously slow, even on never-written devices:
 
- * librbd: parallelize delete, rollback, flatten, copy, resize
- * librbd: ability to read from local replicas
- * osd: resurrect partially deleted PGs
- * osd: prioritize recovery for degraded PGs
- * osd: fix internal heartbeart timeouts when scrubbing very large objects
- * osd: close narrow journal race
- * rgw: fix usage log scanning for large, untrimmed logs
- * rgw: fix locking issue, user operation mask,
- * initscript: fix osd crush weight calculation when using -a
- * initscript: fix enumeration of local daemons
- * mon: several fixes to paxos, sync
- * mon: new --extract-monmap to aid disaster recovery
- * mon: fix leveldb compression, trimming
- * add 'config get' admin socket command
- * rados: clonedata command for cli
- * debian: stop daemons on uninstall; fix dependencies
- * debian wheezy: fix udev rules
- * many many small fixes from coverity scan
+http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/6740
+http://tracker.ceph.com/issues/2256
 
-You can get v0.63 from the usual places:
+I fat fingered an 'rbd create' and accidentally created a 1.5 PB device,
+and it's going to take some considerable time to remove this!
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.63.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+I see there's a new commit to speed up an 'rbd rm':
+
+http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
+
+Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
+
+Cheers,
+
+Chris
