@@ -1,48 +1,83 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Speed up 'rbd rm'
-Date: Wed, 29 May 2013 15:59:42 +1000
-Message-ID: <20130529055942.GA3977@onthe.net.au>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [patch] ceph: tidy ceph_mdsmap_decode() a little
+Date: Wed, 29 May 2013 09:22:13 +0300
+Message-ID: <20130529062213.GF23932@mwanda>
+References: <1369753140-28802-1-git-send-email-emilgoode@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:42947 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754406Ab3E2GH5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 May 2013 02:07:57 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 9FD7E61498
-	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:46 +1000 (EST)
-Received: from smtp1.onthe.net.au ([127.0.0.1])
-	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id L1Gqzs+kMnYC for <ceph-devel@vger.kernel.org>;
-	Wed, 29 May 2013 15:59:42 +1000 (EST)
-Received: from o1.office.otn.net.au (unknown [180.148.179.26])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 924A061465
-	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:42 +1000 (EST)
-Received: from achates.office.onthe.net.au (achates.office.onthe.net.au [10.1.32.53])
-	by o1.office.otn.net.au (Postfix) with ESMTP id CF40F2AA7A7
-	for <ceph-devel@vger.kernel.org>; Wed, 29 May 2013 15:59:42 +1000 (EST)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+In-Reply-To: <1369753140-28802-1-git-send-email-emilgoode@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org, Emil Goode <emilgoode@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+I introduced a new temporary variable "info" instead of
+"m->m_info[mds]".  Also I reversed the if condition and pulled
+everything in one indent level.
 
-I know 'rbd rm' is notoriously slow, even on never-written devices:
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+---
+This goes on top of Emil Goode's patch.
 
-http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/6740
-http://tracker.ceph.com/issues/2256
-
-I fat fingered an 'rbd create' and accidentally created a 1.5 PB device,
-and it's going to take some considerable time to remove this!
-
-I see there's a new commit to speed up an 'rbd rm':
-
-http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
-
-Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
-
-Cheers,
-
-Chris
+diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+index d4d3897..132b64e 100644
+--- a/fs/ceph/mdsmap.c
++++ b/fs/ceph/mdsmap.c
+@@ -92,6 +92,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
+ 		u32 num_export_targets;
+ 		void *pexport_targets = NULL;
+ 		struct ceph_timespec laggy_since;
++		struct ceph_mds_info *info;
+ 
+ 		ceph_decode_need(p, end, sizeof(u64)*2 + 1 + sizeof(u32), bad);
+ 		global_id = ceph_decode_64(p);
+@@ -126,26 +127,27 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
+ 		     i+1, n, global_id, mds, inc,
+ 		     ceph_pr_addr(&addr.in_addr),
+ 		     ceph_mds_state_name(state));
+-		if (mds >= 0 && mds < m->m_max_mds && state > 0) {
+-			m->m_info[mds].global_id = global_id;
+-			m->m_info[mds].state = state;
+-			m->m_info[mds].addr = addr;
+-			m->m_info[mds].laggy =
+-				(laggy_since.tv_sec != 0 ||
+-				 laggy_since.tv_nsec != 0);
+-			m->m_info[mds].num_export_targets = num_export_targets;
+-			if (num_export_targets) {
+-				m->m_info[mds].export_targets =
+-					kcalloc(num_export_targets, sizeof(u32),
+-						GFP_NOFS);
+-				if (m->m_info[mds].export_targets == NULL)
+-					goto badmem;
+-				for (j = 0; j < num_export_targets; j++)
+-					m->m_info[mds].export_targets[j] =
+-					       ceph_decode_32(&pexport_targets);
+-			} else {
+-				m->m_info[mds].export_targets = NULL;
+-			}
++
++		if (mds < 0 || mds >= m->m_max_mds || state <= 0)
++			continue;
++
++		info = &m->m_info[mds];
++		info->global_id = global_id;
++		info->state = state;
++		info->addr = addr;
++		info->laggy = (laggy_since.tv_sec != 0 ||
++			       laggy_since.tv_nsec != 0);
++		info->num_export_targets = num_export_targets;
++		if (num_export_targets) {
++			info->export_targets = kcalloc(num_export_targets,
++						       sizeof(u32), GFP_NOFS);
++			if (info->export_targets == NULL)
++				goto badmem;
++			for (j = 0; j < num_export_targets; j++)
++				info->export_targets[j] =
++				       ceph_decode_32(&pexport_targets);
++		} else {
++			info->export_targets = NULL;
+ 		}
+ 	}
+ 
