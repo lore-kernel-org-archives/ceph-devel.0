@@ -1,49 +1,58 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
 Subject: Re: Speed up 'rbd rm'
-Date: Thu, 30 May 2013 13:50:14 -0700
-Message-ID: <51A7BB86.3020106@inktank.com>
-References: <20130529055942.GA3977@onthe.net.au> <51A65523.10107@inktank.com> <20130530022307.GA27809@onthe.net.au>
+Date: Thu, 30 May 2013 23:09:29 +0200
+Message-ID: <51A7C009.7060409@smart-weblications.de>
+References: <20130529055942.GA3977@onthe.net.au> <51A65523.10107@inktank.com> <20130530022307.GA27809@onthe.net.au> <51A7BB86.3020106@inktank.com>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:35624 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750811Ab3E3UuT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 16:50:19 -0400
-Received: by mail-pb0-f52.google.com with SMTP id xa12so1008709pbc.25
-        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 13:50:19 -0700 (PDT)
-In-Reply-To: <20130530022307.GA27809@onthe.net.au>
+Received: from mx02.smart-weblications.de ([188.65.144.37]:59172 "EHLO
+	mx02.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754224Ab3E3VJy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 May 2013 17:09:54 -0400
+In-Reply-To: <51A7BB86.3020106@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Chris Dunlop <chris@onthe.net.au>, ceph-devel@vger.kernel.org
 
-On 05/29/2013 07:23 PM, Chris Dunlop wrote:
-> On Wed, May 29, 2013 at 12:21:07PM -0700, Josh Durgin wrote:
->> On 05/28/2013 10:59 PM, Chris Dunlop wrote:
->>> I see there's a new commit to speed up an 'rbd rm':
->>>
->>> http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
->>>
->>> Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
+Am 30.05.2013 22:50, schrieb Josh Durgin:
+
+>=20
+>> Perhaps as a low-churn high-impact (for those that need it) change,
+>> this is a candidate to be back-patched into 0.61.3 and perhaps 0.56.=
+7 ?
 >>
->> You'll need 537386d906b8c0e395433461dcb03a82eb33f34f as well. It should
->> apply cleanly to 0.61.2, and probably 0.56.6 too.
->
-> Thanks. I'll see how I go, I may just leave the 'rm' running all
-> weekend rather than futzing around recompiling ceph and getting
-> off the mainline track.
 
-If you're mainly interested in getting rid of the accidentally 1.5PB
-image, you can just delete the header (and id object if it's format 2)
-and then 'rbd rm' will just remove it from the rbd_directory index, and
-not try to delete all the non-existent data objects.
++1
 
-> Perhaps as a low-churn high-impact (for those that need it) change,
-> this is a candidate to be back-patched into 0.61.3 and perhaps 0.56.7 ?
->
-> Cheers,
->
-> Chris.
 
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
