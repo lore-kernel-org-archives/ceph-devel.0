@@ -1,66 +1,39 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
-Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
-Date: Thu, 30 May 2013 11:11:27 -0400
-Message-ID: <20130530151127.GA13756@logfs.org>
-References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
- <20130523094201.GA24543@dastard>
- <519E8B5F.3080905@hp.com>
- <20130527020903.GR29466@dastard>
- <51A624E2.3000301@hp.com>
- <20130529184640.GA3243@fieldses.org>
- <20130529203700.GM6123@two.firstfloor.org>
- <20130529211917.GB6658@logfs.org>
- <51A774E2.9050307@hp.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: 5GB object limit in the RADOS Gateway
+Date: Thu, 30 May 2013 19:42:28 +0200
+Message-ID: <51A78F84.1000607@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <51A774E2.9050307@hp.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Waiman Long <waiman.long@hp.com>
-Cc: Andi Kleen <andi@firstfloor.org>, "J. Bruce Fields" <bfields@fieldses.org>, Dave Chinner <david@fromorbit.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:57126 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965710Ab3E3Rma (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 May 2013 13:42:30 -0400
+Received: from [IPv6:2a00:f10:11c:ab:8de:cb16:103e:7f1d] (unknown [IPv6:2a00:f10:11c:ab:8de:cb16:103e:7f1d])
+	by websrv.42on.com (Postfix) with ESMTPSA id 5CA03C181C
+	for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 19:42:28 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 30 May 2013 11:48:50 -0400, Waiman Long wrote:
-> On 05/29/2013 05:19 PM, J=C3=B6rn Engel wrote:
-> >On Wed, 29 May 2013 22:37:00 +0200, Andi Kleen wrote:
-> >>>As Dave said before, is the last path component sufficient?  Or ho=
-w
-> >>>about an inode number?
-> >>Neither works, the profiler needs to find the file and read it.
-> >Ignoring all the complexity this would cause downstream, you could d=
-o
-> >the path lookup just once, attach some cookie to it and return the
-> >cookie ever-after.  Maybe some combination of i_sb and i_ino would b=
-e
-> >good enough as a cookie.
->=20
-> Still, it is just shifting the complexity from the d_path code to
-> the perf kernel subsystem as it needs to keep track of what paths
-> have been sent up before.
+Hi,
 
-That sounds like a good thing to have.  Every single linux user
-depends on the dcache.  Only a relatively small subset cares about
-perf.  Having dcache pay the cost for perf's special needs is a
-classical externality.
+I was checking the source code today and found this macro:
 
-> It also have complications in case the
-> tracked files are being deleted or moved around in the filesystem.
-> Some kind of notification mechanism has to be implemented in the
-> dentry layer to notify the perf subsystem.
+#define RGW_MAX_PUT_SIZE        (5ULL*1024*1024*1024)
 
-Agreed.  The whole approach is based on getting the 99% case right and
-occasionally being wrong.  For perf this may be acceptable, not sure.
+Why is that limit in place? Was that to mimic Amazon S3? (Which is at 5T 
+now).
 
-J=C3=B6rn
+I know that object size limit something that should be there, but just 
+trying to find the reasoning behind this limit.
 
---
-Without a major sea change, nothing that is under copyright today will
-ever come out from under it and fall into the public domain.
--- Jake Edge
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Couldn't we make this  configurable at least?
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
