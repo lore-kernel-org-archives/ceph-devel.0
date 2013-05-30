@@ -1,87 +1,49 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Fwd: Java bindings for RADOS and RBD
-Date: Thu, 30 May 2013 13:01:01 -0700
-Message-ID: <CA+Hcz5_ZcdbNAXTvOA86L=3_GeLSStnPyeO0f1pVyZ=eVTAGEw@mail.gmail.com>
-References: <5187CA7E.2050508@42on.com>
-	<CA+Hcz5_6Z2fwHmkKSMOPugh8B5Osu=m7FM1eQkVmvwrn1E4TZg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Speed up 'rbd rm'
+Date: Thu, 30 May 2013 13:50:14 -0700
+Message-ID: <51A7BB86.3020106@inktank.com>
+References: <20130529055942.GA3977@onthe.net.au> <51A65523.10107@inktank.com> <20130530022307.GA27809@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f47.google.com ([209.85.214.47]:61180 "EHLO
-	mail-bk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757030Ab3E3UBD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 16:01:03 -0400
-Received: by mail-bk0-f47.google.com with SMTP id jg9so13155bkc.34
-        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 13:01:01 -0700 (PDT)
-In-Reply-To: <CA+Hcz5_6Z2fwHmkKSMOPugh8B5Osu=m7FM1eQkVmvwrn1E4TZg@mail.gmail.com>
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:35624 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750811Ab3E3UuT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 16:50:19 -0400
+Received: by mail-pb0-f52.google.com with SMTP id xa12so1008709pbc.25
+        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 13:50:19 -0700 (PDT)
+In-Reply-To: <20130530022307.GA27809@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Wido den Hollander <wido@42on.com>
+To: Chris Dunlop <chris@onthe.net.au>
+Cc: ceph-devel@vger.kernel.org
 
-Resending. HTML+vger issue.
-
----------- Forwarded message ----------
-From: Noah Watkins <noah.watkins@inktank.com>
-Date: Thu, May 30, 2013 at 12:59 PM
-Subject: Re: Java bindings for RADOS and RBD
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-
-
-On Mon, May 6, 2013 at 8:21 AM, Wido den Hollander <wido@42on.com> wrote:
+On 05/29/2013 07:23 PM, Chris Dunlop wrote:
+> On Wed, May 29, 2013 at 12:21:07PM -0700, Josh Durgin wrote:
+>> On 05/28/2013 10:59 PM, Chris Dunlop wrote:
+>>> I see there's a new commit to speed up an 'rbd rm':
+>>>
+>>> http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
+>>>
+>>> Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
+>>
+>> You'll need 537386d906b8c0e395433461dcb03a82eb33f34f as well. It should
+>> apply cleanly to 0.61.2, and probably 0.56.6 too.
 >
+> Thanks. I'll see how I go, I may just leave the 'rm' running all
+> weekend rather than futzing around recompiling ceph and getting
+> off the mainline track.
+
+If you're mainly interested in getting rid of the accidentally 1.5PB
+image, you can just delete the header (and id object if it's format 2)
+and then 'rbd rm' will just remove it from the rbd_directory index, and
+not try to delete all the non-existent data objects.
+
+> Perhaps as a low-churn high-impact (for those that need it) change,
+> this is a candidate to be back-patched into 0.61.3 and perhaps 0.56.7 ?
 >
-> The reason to use JNA is that it allows us to simply drop the bindings and run them without having them compiled against the librados or librbd headers.
-
-
-Nice. The JNA stuff is very easy to use. We originally looked at it
-for the CephFS bindings, but there was some concern about dependencies
-and licensing w.r.t. Hadoop.
-
+> Cheers,
 >
-> I've chosen to implement both RADOS and RBD into the same package and using com.ceph.rados and com.ceph.rbd for as the package name. It could be splitted into different projects, but I think that won't benefit anybody. Having it all in one package seem easy, since RBD needs a RADOS IoCTX to work anyway.
+> Chris.
 
-
-Cool. We have the com.ceph.fs and com.ceph.crush namespaces right now.
-
->
-> I'd like to get some feedback on the bindings about the way they are now. They are still work-in-progress, but my Unit Testing shows me they are in a reasonable shape already.
-
-
-They look like a really good start. Here is some feedback in no
-particular order.
-
-1. Enforcing rados usage assumptions
-
-Unlike with the C interface where users are expected to behave, we
-want to avoid ever crashing the JVM. So, stuff like "what happens if I
-create an IoCTX, then destroy the Rados object and use the IoCTX?"
-comes to mind. I think this would correspond to the GC running
-finalize on an out of scope Rados object.
-
-2. Making IoCTX safer to use
-
-I've used the library now to bring the IoCTX into a completely
-separate RADOS project. Designing for that to be common would be
-great. For instance, that may be _very_ common for users of
-IoCTX.Exec() since they will have completely distinct libraries.
-
-A first step might be to expose a constant/read-only pointer. I'm not
-a JNA expert, but after reading a bit, it seems as though we can
-subclass IoCTX from Structure or maybe PointerType to make IoCTX
-behave.
-
-3. Async
-
-Getting one or two async wrappers put it in the library might help
-reveal any challenges early on, even if the API coverage expands
-slowly.
-
-
-> Getting them into Maven Central [2] won't be that easy, so I'd like to request space for that on ceph.com, for example ceph.com/download/maven and users will have to manually add that to their pom.xml configuration.
-
-
-This would be really nice. I dunno what people expect from Maven
-projects that rely on native libraries. At least getting debian
-packages would be a good step.
