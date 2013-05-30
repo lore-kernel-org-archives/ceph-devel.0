@@ -1,138 +1,45 @@
-From: "=?gb18030?B?5aSn5qS/?=" <ngugc-9uewiaClKEY@public.gmane.org>
-Subject: Re: v0.63 released
-Date: Thu, 30 May 2013 21:26:20 +0800
-Message-ID: <tencent_04DD166D74BC763F01820685@qq.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph gets stopped but never started...
+Date: Thu, 30 May 2013 08:46:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1305300845230.18453@cobra.newdream.net>
+References: <51A7383D.4060309@profihost.ag> <CAF6-1L70z8xpZVQtDXJj4h+SY7TxrN2rAz-OAR-BXkJR_4DjxQ@mail.gmail.com> <51A74D9F.7000206@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0954917146=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: =?gb18030?B?U2FnZSBXZWls?= <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, =?gb18030?B?Y2VwaC1kZXZlbA==?= <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?gb18030?B?Y2VwaC11c2Vycw==?= <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:43605 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756361Ab3E3Pqf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 11:46:35 -0400
+In-Reply-To: <51A74D9F.7000206@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is a multi-part message in MIME format.
+On Thu, 30 May 2013, Stefan Priebe - Profihost AG wrote:
+> Am 30.05.2013 14:57, schrieb Sylvain Munaut:
+> > Hi
+> > 
+> >> since commit 85fb422a084785176af3b694882964841e02195d in cuttle fish
+> >> cherry-picked from 2f193fb931ed09d921e6fa5a985ab87aa4874589 ceph gets
+> >> stopped on debian while upgrading but it never gets started again??
+> >>
+> >> Does this really makes sense?
+> >>
+> >> Should the admin handle the stop / start / restart on upgrade?
+> > 
+> > Yes, personally I think so.
+> > 
+> > I mean , I usually restart osd sequentially "by hand" while the
+> > upgrade is usually done cluster wide by some automation but for the
+> > service to stay up, the restart needs to be handled manually.
+> 
+> Same for me.
 
---===============0954917146==
-Content-Type: multipart/alternative;
-	boundary="----=_NextPart_51A7537C_0918C388_24AFE837"
-Content-Transfer-Encoding: 7bit
+This was unintentional.  The goal is for the daemons to get stopped when 
+the package is uninstalled, not on upgrade.  Will fix this up 
+immediately.
 
-This is a multi-part message in MIME format.
+Thanks!
+sage
 
-------=_NextPart_51A7537C_0918C388_24AFE837
-Content-Type: text/plain;
-	charset="gb18030"
-Content-Transfer-Encoding: base64
-
-SGksIFNhZ2UuDQoNCg0KSSBkaWRuJ3QgZmluZCB0aGUgMC42MyB1cGRhdGUgZm9yIERlYmlh
-bi9VbmJ1bnR1IGluIGh0dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2RlYmlh
-bi4gDQpUaGUgcGFja2FnZSB2ZXJzaW9uIGlzIHN0aWxsIDAuNjEuMiAuDQoNCg0KVGhhbmtz
-IQ0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLSBPcmlnaW5hbCAtLS0tLS0tLS0tLS0tLS0tLS0N
-CkZyb206ICAiU2FnZSBXZWlsIjxzYWdlQGlua3RhbmsuY29tPjsNCkRhdGU6ICBXZWQsIE1h
-eSAyOSwgMjAxMyAxMjowNSBQTQ0KVG86ICAiY2VwaC1kZXZlbCI8Y2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmc+OyAiY2VwaC11c2VycyI8Y2VwaC11c2Vyc0BjZXBoLmNvbT47IA0KDQpT
-dWJqZWN0OiAgW2NlcGgtdXNlcnNdIHYwLjYzIHJlbGVhc2VkDQoNCg0KDQpBbm90aGVyIHNw
-cmludCwgYW5kIHYwLjYzIGlzIGhlcmUuICBUaGlzIHJlbGVhc2UgZmVhdHVyZXMgbGlicmJk
-IA0KaW1wcm92ZW1lbnRzLCBtb24gZml4ZXMsIG9zZCByb2J1c3RuZXNzLCBhbmQgcGFja2Fn
-aW5nIGZpeGVzLg0KDQpOb3RhYmxlIGZlYXR1cmVzIGluIHRoaXMgcmVsZWFzZSBpbmNsdWRl
-Og0KDQogKiBsaWJyYmQ6IHBhcmFsbGVsaXplIGRlbGV0ZSwgcm9sbGJhY2ssIGZsYXR0ZW4s
-IGNvcHksIHJlc2l6ZQ0KICogbGlicmJkOiBhYmlsaXR5IHRvIHJlYWQgZnJvbSBsb2NhbCBy
-ZXBsaWNhcw0KICogb3NkOiByZXN1cnJlY3QgcGFydGlhbGx5IGRlbGV0ZWQgUEdzDQogKiBv
-c2Q6IHByaW9yaXRpemUgcmVjb3ZlcnkgZm9yIGRlZ3JhZGVkIFBHcw0KICogb3NkOiBmaXgg
-aW50ZXJuYWwgaGVhcnRiZWFydCB0aW1lb3V0cyB3aGVuIHNjcnViYmluZyB2ZXJ5IGxhcmdl
-IG9iamVjdHMNCiAqIG9zZDogY2xvc2UgbmFycm93IGpvdXJuYWwgcmFjZQ0KICogcmd3OiBm
-aXggdXNhZ2UgbG9nIHNjYW5uaW5nIGZvciBsYXJnZSwgdW50cmltbWVkIGxvZ3MNCiAqIHJn
-dzogZml4IGxvY2tpbmcgaXNzdWUsIHVzZXIgb3BlcmF0aW9uIG1hc2ssDQogKiBpbml0c2Ny
-aXB0OiBmaXggb3NkIGNydXNoIHdlaWdodCBjYWxjdWxhdGlvbiB3aGVuIHVzaW5nIC1hDQog
-KiBpbml0c2NyaXB0OiBmaXggZW51bWVyYXRpb24gb2YgbG9jYWwgZGFlbW9ucw0KICogbW9u
-OiBzZXZlcmFsIGZpeGVzIHRvIHBheG9zLCBzeW5jDQogKiBtb246IG5ldyAtLWV4dHJhY3Qt
-bW9ubWFwIHRvIGFpZCBkaXNhc3RlciByZWNvdmVyeQ0KICogbW9uOiBmaXggbGV2ZWxkYiBj
-b21wcmVzc2lvbiwgdHJpbW1pbmcNCiAqIGFkZCAnY29uZmlnIGdldCcgYWRtaW4gc29ja2V0
-IGNvbW1hbmQNCiAqIHJhZG9zOiBjbG9uZWRhdGEgY29tbWFuZCBmb3IgY2xpDQogKiBkZWJp
-YW46IHN0b3AgZGFlbW9ucyBvbiB1bmluc3RhbGw7IGZpeCBkZXBlbmRlbmNpZXMNCiAqIGRl
-YmlhbiB3aGVlenk6IGZpeCB1ZGV2IHJ1bGVzDQogKiBtYW55IG1hbnkgc21hbGwgZml4ZXMg
-ZnJvbSBjb3Zlcml0eSBzY2FuDQoNCllvdSBjYW4gZ2V0IHYwLjYzIGZyb20gdGhlIHVzdWFs
-IHBsYWNlczoNCg0KICogR2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdA0K
-ICogVGFyYmFsbCBhdCBodHRwOi8vY2VwaC5jb20vZG93bmxvYWQvY2VwaC0wLjYzLnRhci5n
-eg0KICogRm9yIERlYmlhbi9VYnVudHUgcGFja2FnZXMsIHNlZSBodHRwOi8vY2VwaC5jb20v
-ZG9jcy9tYXN0ZXIvaW5zdGFsbC9kZWJpYW4NCiAqIEZvciBSUE1zLCBzZWUgaHR0cDovL2Nl
-cGguY29tL2RvY3MvbWFzdGVyL2luc3RhbGwvcnBtDQoNCl9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0K
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
-bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQou
-
-------=_NextPart_51A7537C_0918C388_24AFE837
-Content-Type: text/html;
-	charset="gb18030"
-Content-Transfer-Encoding: base64
-
-PGRpdj48YnI+PC9kaXY+PGRpdj48ZGl2PkhpLCBTYWdlLjwvZGl2PjxkaXY+PGJyPjwvZGl2
-PjxkaXY+SSBkaWRuJ3QgZmluZCB0aGUgMC42MyB1cGRhdGUgZm9yIERlYmlhbi9VbmJ1bnR1
-IGluJm5ic3A7PHNwYW4gc3R5bGU9ImxpbmUtaGVpZ2h0OiAxLjU7Ij5odHRwOi8vY2VwaC5j
-b20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9kZWJpYW4uJm5ic3A7PC9zcGFuPjwvZGl2PjxkaXY+
-VGhlIHBhY2thZ2UgdmVyc2lvbiBpcyBzdGlsbCAwLjYxLjIgLjwvZGl2PjxkaXY+PGJyPjwv
-ZGl2PjxkaXY+VGhhbmtzITwvZGl2PjxkaXY+PGJyPjwvZGl2PjxkaXYgc3R5bGU9ImZvbnQt
-c2l6ZTogMTJweDtmb250LWZhbWlseTogQXJpYWwgTmFycm93O3BhZGRpbmc6MnB4IDAgMnB4
-IDA7Ij4tLS0tLS0tLS0tLS0tLS0tLS0mbmJzcDtPcmlnaW5hbCZuYnNwOy0tLS0tLS0tLS0t
-LS0tLS0tLTwvZGl2PjxkaXYgc3R5bGU9ImZvbnQtc2l6ZTogMTJweDtiYWNrZ3JvdW5kOiNl
-ZmVmZWY7cGFkZGluZzo4cHg7Ij48ZGl2PjxiPkZyb206IDwvYj4mbmJzcDsiU2FnZSBXZWls
-IiZsdDtzYWdlQGlua3RhbmsuY29tJmd0Ozs8L2Rpdj48ZGl2PjxiPkRhdGU6IDwvYj4mbmJz
-cDtXZWQsIE1heSAyOSwgMjAxMyAxMjowNSBQTTwvZGl2PjxkaXY+PGI+VG86IDwvYj4mbmJz
-cDsiY2VwaC1kZXZlbCImbHQ7Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcmZ3Q7OyAiY2Vw
-aC11c2VycyImbHQ7Y2VwaC11c2Vyc0BjZXBoLmNvbSZndDs7IDx3YnI+PC9kaXY+PGRpdj48
-L2Rpdj48ZGl2PjxiPlN1YmplY3Q6IDwvYj4mbmJzcDtbY2VwaC11c2Vyc10gdjAuNjMgcmVs
-ZWFzZWQ8L2Rpdj48L2Rpdj48ZGl2Pjxicj48L2Rpdj5Bbm90aGVyIHNwcmludCwgYW5kIHYw
-LjYzIGlzIGhlcmUuJm5ic3A7IFRoaXMgcmVsZWFzZSBmZWF0dXJlcyBsaWJyYmQgPGJyPmlt
-cHJvdmVtZW50cywgbW9uIGZpeGVzLCBvc2Qgcm9idXN0bmVzcywgYW5kIHBhY2thZ2luZyBm
-aXhlcy48YnI+PGJyPk5vdGFibGUgZmVhdHVyZXMgaW4gdGhpcyByZWxlYXNlIGluY2x1ZGU6
-PGJyPjxicj4mbmJzcDsqIGxpYnJiZDogcGFyYWxsZWxpemUgZGVsZXRlLCByb2xsYmFjaywg
-ZmxhdHRlbiwgY29weSwgcmVzaXplPGJyPiZuYnNwOyogbGlicmJkOiBhYmlsaXR5IHRvIHJl
-YWQgZnJvbSBsb2NhbCByZXBsaWNhczxicj4mbmJzcDsqIG9zZDogcmVzdXJyZWN0IHBhcnRp
-YWxseSBkZWxldGVkIFBHczxicj4mbmJzcDsqIG9zZDogcHJpb3JpdGl6ZSByZWNvdmVyeSBm
-b3IgZGVncmFkZWQgUEdzPGJyPiZuYnNwOyogb3NkOiBmaXggaW50ZXJuYWwgaGVhcnRiZWFy
-dCB0aW1lb3V0cyB3aGVuIHNjcnViYmluZyB2ZXJ5IGxhcmdlIG9iamVjdHM8YnI+Jm5ic3A7
-KiBvc2Q6IGNsb3NlIG5hcnJvdyBqb3VybmFsIHJhY2U8YnI+Jm5ic3A7KiByZ3c6IGZpeCB1
-c2FnZSBsb2cgc2Nhbm5pbmcgZm9yIGxhcmdlLCB1bnRyaW1tZWQgbG9nczxicj4mbmJzcDsq
-IHJndzogZml4IGxvY2tpbmcgaXNzdWUsIHVzZXIgb3BlcmF0aW9uIG1hc2ssPGJyPiZuYnNw
-OyogaW5pdHNjcmlwdDogZml4IG9zZCBjcnVzaCB3ZWlnaHQgY2FsY3VsYXRpb24gd2hlbiB1
-c2luZyAtYTxicj4mbmJzcDsqIGluaXRzY3JpcHQ6IGZpeCBlbnVtZXJhdGlvbiBvZiBsb2Nh
-bCBkYWVtb25zPGJyPiZuYnNwOyogbW9uOiBzZXZlcmFsIGZpeGVzIHRvIHBheG9zLCBzeW5j
-PGJyPiZuYnNwOyogbW9uOiBuZXcgLS1leHRyYWN0LW1vbm1hcCB0byBhaWQgZGlzYXN0ZXIg
-cmVjb3Zlcnk8YnI+Jm5ic3A7KiBtb246IGZpeCBsZXZlbGRiIGNvbXByZXNzaW9uLCB0cmlt
-bWluZzxicj4mbmJzcDsqIGFkZCAnY29uZmlnIGdldCcgYWRtaW4gc29ja2V0IGNvbW1hbmQ8
-YnI+Jm5ic3A7KiByYWRvczogY2xvbmVkYXRhIGNvbW1hbmQgZm9yIGNsaTxicj4mbmJzcDsq
-IGRlYmlhbjogc3RvcCBkYWVtb25zIG9uIHVuaW5zdGFsbDsgZml4IGRlcGVuZGVuY2llczxi
-cj4mbmJzcDsqIGRlYmlhbiB3aGVlenk6IGZpeCB1ZGV2IHJ1bGVzPGJyPiZuYnNwOyogbWFu
-eSBtYW55IHNtYWxsIGZpeGVzIGZyb20gY292ZXJpdHkgc2Nhbjxicj48YnI+WW91IGNhbiBn
-ZXQgdjAuNjMgZnJvbSB0aGUgdXN1YWwgcGxhY2VzOjxicj48YnI+Jm5ic3A7KiBHaXQgYXQg
-Z2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0PGJyPiZuYnNwOyogVGFyYmFsbCBhdCBo
-dHRwOi8vY2VwaC5jb20vZG93bmxvYWQvY2VwaC0wLjYzLnRhci5nejxicj4mbmJzcDsqIEZv
-ciBEZWJpYW4vVWJ1bnR1IHBhY2thZ2VzLCBzZWUgaHR0cDovL2NlcGguY29tL2RvY3MvbWFz
-dGVyL2luc3RhbGwvZGViaWFuPGJyPiZuYnNwOyogRm9yIFJQTXMsIHNlZSBodHRwOi8vY2Vw
-aC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9ycG08YnI+PGJyPl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fPGJyPmNlcGgtdXNlcnMgbWFpbGluZyBs
-aXN0PGJyPmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb208YnI+aHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tPGJyPi48YnI+PC9kaXY+
-
-------=_NextPart_51A7537C_0918C388_24AFE837--
-
-
---===============0954917146==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0954917146==--
