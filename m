@@ -1,45 +1,37 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph gets stopped but never started...
-Date: Thu, 30 May 2013 08:46:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305300845230.18453@cobra.newdream.net>
-References: <51A7383D.4060309@profihost.ag> <CAF6-1L70z8xpZVQtDXJj4h+SY7TxrN2rAz-OAR-BXkJR_4DjxQ@mail.gmail.com> <51A74D9F.7000206@profihost.ag>
+From: Waiman Long <waiman.long@hp.com>
+Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
+Date: Thu, 30 May 2013 11:48:50 -0400
+Message-ID: <51A774E2.9050307@hp.com>
+References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com> <20130523094201.GA24543@dastard> <519E8B5F.3080905@hp.com> <20130527020903.GR29466@dastard> <51A624E2.3000301@hp.com> <20130529184640.GA3243@fieldses.org> <20130529203700.GM6123@two.firstfloor.org> <20130529211917.GB6658@logfs.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43605 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756361Ab3E3Pqf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 11:46:35 -0400
-In-Reply-To: <51A74D9F.7000206@profihost.ag>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Sylvain Munaut <s.munaut@whatever-company.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <autofs-owner@vger.kernel.org>
+In-Reply-To: <20130529211917.GB6658@logfs.org>
+Sender: autofs-owner@vger.kernel.org
+To: =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>
+Cc: Andi Kleen <andi@firstfloor.org>, "J. Bruce Fields" <bfields@fieldses.org>, Dave Chinner <david@fromorbit.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 30 May 2013, Stefan Priebe - Profihost AG wrote:
-> Am 30.05.2013 14:57, schrieb Sylvain Munaut:
-> > Hi
-> > 
-> >> since commit 85fb422a084785176af3b694882964841e02195d in cuttle fish
-> >> cherry-picked from 2f193fb931ed09d921e6fa5a985ab87aa4874589 ceph gets
-> >> stopped on debian while upgrading but it never gets started again??
-> >>
-> >> Does this really makes sense?
-> >>
-> >> Should the admin handle the stop / start / restart on upgrade?
-> > 
-> > Yes, personally I think so.
-> > 
-> > I mean , I usually restart osd sequentially "by hand" while the
-> > upgrade is usually done cluster wide by some automation but for the
-> > service to stay up, the restart needs to be handled manually.
-> 
-> Same for me.
+On 05/29/2013 05:19 PM, J=C3=B6rn Engel wrote:
+> On Wed, 29 May 2013 22:37:00 +0200, Andi Kleen wrote:
+>>> As Dave said before, is the last path component sufficient?  Or how
+>>> about an inode number?
+>> Neither works, the profiler needs to find the file and read it.
+> Ignoring all the complexity this would cause downstream, you could do
+> the path lookup just once, attach some cookie to it and return the
+> cookie ever-after.  Maybe some combination of i_sb and i_ino would be
+> good enough as a cookie.
 
-This was unintentional.  The goal is for the daemons to get stopped when 
-the package is uninstalled, not on upgrade.  Will fix this up 
-immediately.
+Still, it is just shifting the complexity from the d_path code to the=20
+perf kernel subsystem as it needs to keep track of what paths have been=
+=20
+sent up before. It also have complications in case the tracked files ar=
+e=20
+being deleted or moved around in the filesystem. Some kind of=20
+notification mechanism has to be implemented in the dentry layer to=20
+notify the perf subsystem.
 
-Thanks!
-sage
-
+Regards,
+Longman
