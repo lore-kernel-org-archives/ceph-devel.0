@@ -1,138 +1,87 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: [PATCH] rbd: clean up a few things in the refresh path
-Date: Thu, 30 May 2013 10:35:38 -0700
-Message-ID: <0b2ec7a2-c373-4984-88b3-844f075a20a0@email.android.com>
-References: <51A66A0A.3010909@inktank.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Fwd: Java bindings for RADOS and RBD
+Date: Thu, 30 May 2013 13:01:01 -0700
+Message-ID: <CA+Hcz5_ZcdbNAXTvOA86L=3_GeLSStnPyeO0f1pVyZ=eVTAGEw@mail.gmail.com>
+References: <5187CA7E.2050508@42on.com>
+	<CA+Hcz5_6Z2fwHmkKSMOPugh8B5Osu=m7FM1eQkVmvwrn1E4TZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:58297 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756339Ab3E3Sgs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 14:36:48 -0400
-In-Reply-To: <51A66A0A.3010909@inktank.com>
+Received: from mail-bk0-f47.google.com ([209.85.214.47]:61180 "EHLO
+	mail-bk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757030Ab3E3UBD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 16:01:03 -0400
+Received: by mail-bk0-f47.google.com with SMTP id jg9so13155bkc.34
+        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 13:01:01 -0700 (PDT)
+In-Reply-To: <CA+Hcz5_6Z2fwHmkKSMOPugh8B5Osu=m7FM1eQkVmvwrn1E4TZg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Wido den Hollander <wido@42on.com>
 
-Alex Elder <elder@inktank.com> wrote:
+Resending. HTML+vger issue.
 
->(This and the next two patches I'm about to post are available in
->the "review/wip-rbd" branch of the ceph-client git repository.)
->
->This includes a few relatively small fixes I found while examining
->the code that refreshes image information.
->
->This resolves:
->    http://tracker.ceph.com/issues/5040
->
->Signed-off-by: Alex Elder <elder@inktank.com>
->---
-> drivers/block/rbd.c |   53
->+++++++++++++++++++++++++++++++++++++++++----------
-> 1 file changed, 43 insertions(+), 10 deletions(-)
->
->diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->index f860dd6..aec2438 100644
->--- a/drivers/block/rbd.c
->+++ b/drivers/block/rbd.c
->@@ -2876,7 +2876,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
->u8 opcode, void *data)
-> 		(unsigned int)opcode);
-> 	ret = rbd_dev_refresh(rbd_dev);
-> 	if (ret)
->-		rbd_warn(rbd_dev, ": header refresh error (%d)\n", ret);
->+		rbd_warn(rbd_dev, "header refresh error (%d)\n", ret);
->
-> 	rbd_obj_notify_ack(rbd_dev, notify_id);
-> }
->@@ -3356,8 +3356,8 @@ static int rbd_dev_refresh(struct rbd_device
->*rbd_dev)
-> 	int ret;
->
-> 	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
->-	mapping_size = rbd_dev->mapping.size;
-> 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
->+	mapping_size = rbd_dev->mapping.size;
-> 	if (rbd_dev->image_format == 1)
-> 		ret = rbd_dev_v1_header_info(rbd_dev);
-> 	else
->@@ -3830,6 +3830,7 @@ static int rbd_dev_v2_parent_info(struct
->rbd_device *rbd_dev)
-> 	void *end;
-> 	u64 pool_id;
-> 	char *image_id;
->+	u64 snap_id;
-> 	u64 overlap;
-> 	int ret;
->
->@@ -3889,24 +3890,56 @@ static int rbd_dev_v2_parent_info(struct
->rbd_device *rbd_dev)
-> 			(unsigned long long)pool_id, U32_MAX);
-> 		goto out_err;
-> 	}
->-	parent_spec->pool_id = pool_id;
->
-> 	image_id = ceph_extract_encoded_string(&p, end, NULL, GFP_KERNEL);
-> 	if (IS_ERR(image_id)) {
-> 		ret = PTR_ERR(image_id);
-> 		goto out_err;
-> 	}
->-	parent_spec->image_id = image_id;
->-	ceph_decode_64_safe(&p, end, parent_spec->snap_id, out_err);
->+	ceph_decode_64_safe(&p, end, snap_id, out_err);
-> 	ceph_decode_64_safe(&p, end, overlap, out_err);
->
->-	if (overlap) {
->-		rbd_spec_put(rbd_dev->parent_spec);
->+	/*
->+	 * The parent won't change (except when the clone is
->+	 * flattened, already handled that).  So we only need to
->+	 * record the parent spec we have not already done so.
->+	 */
->+	if (!rbd_dev->parent_spec) {
->+		parent_spec->pool_id = pool_id;
->+		parent_spec->image_id = image_id;
->+		parent_spec->snap_id = snap_id;
-> 		rbd_dev->parent_spec = parent_spec;
-> 		parent_spec = NULL;	/* rbd_dev now owns this */
->-		rbd_dev->parent_overlap = overlap;
->-	} else {
->-		rbd_warn(rbd_dev, "ignoring parent of clone with overlap 0\n");
->+	}
->+
->+	/*
->+	 * We always update the parent overlap.  If it's zero we
->+	 * treat it specially.
->+	 */
->+	rbd_dev->parent_overlap = overlap;
->+	smp_mb();
->+	if (!overlap) {
->+
->+		/* A null parent_spec indicates it's the initial probe */
->+
->+		if (parent_spec) {
->+			/*
->+			 * The overlap has become zero, so the clone
->+			 * must have been resized down to 0 at some
->+			 * point.  Treat this the same as a flatten.
->+			 */
->+			rbd_dev_parent_put(rbd_dev);
->+			pr_info("%s: clone image now standalone\n",
->+				rbd_dev->disk->disk_name);
->+		} else {
->+			/*
->+			 * For the initial probe, if we find the
->+			 * overlap is zero we just pretend there was
->+			 * no parent image.
->+			 */
->+			rbd_warn(rbd_dev, "ignoring parent of "
->+						"clone with overlap 0\n");
->+		}
-> 	}
-> out:
-> 	ret = 0;
+---------- Forwarded message ----------
+From: Noah Watkins <noah.watkins@inktank.com>
+Date: Thu, May 30, 2013 at 12:59 PM
+Subject: Re: Java bindings for RADOS and RBD
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+On Mon, May 6, 2013 at 8:21 AM, Wido den Hollander <wido@42on.com> wrote:
+>
+>
+> The reason to use JNA is that it allows us to simply drop the bindings and run them without having them compiled against the librados or librbd headers.
+
+
+Nice. The JNA stuff is very easy to use. We originally looked at it
+for the CephFS bindings, but there was some concern about dependencies
+and licensing w.r.t. Hadoop.
+
+>
+> I've chosen to implement both RADOS and RBD into the same package and using com.ceph.rados and com.ceph.rbd for as the package name. It could be splitted into different projects, but I think that won't benefit anybody. Having it all in one package seem easy, since RBD needs a RADOS IoCTX to work anyway.
+
+
+Cool. We have the com.ceph.fs and com.ceph.crush namespaces right now.
+
+>
+> I'd like to get some feedback on the bindings about the way they are now. They are still work-in-progress, but my Unit Testing shows me they are in a reasonable shape already.
+
+
+They look like a really good start. Here is some feedback in no
+particular order.
+
+1. Enforcing rados usage assumptions
+
+Unlike with the C interface where users are expected to behave, we
+want to avoid ever crashing the JVM. So, stuff like "what happens if I
+create an IoCTX, then destroy the Rados object and use the IoCTX?"
+comes to mind. I think this would correspond to the GC running
+finalize on an out of scope Rados object.
+
+2. Making IoCTX safer to use
+
+I've used the library now to bring the IoCTX into a completely
+separate RADOS project. Designing for that to be common would be
+great. For instance, that may be _very_ common for users of
+IoCTX.Exec() since they will have completely distinct libraries.
+
+A first step might be to expose a constant/read-only pointer. I'm not
+a JNA expert, but after reading a bit, it seems as though we can
+subclass IoCTX from Structure or maybe PointerType to make IoCTX
+behave.
+
+3. Async
+
+Getting one or two async wrappers put it in the library might help
+reveal any challenges early on, even if the API coverage expands
+slowly.
+
+
+> Getting them into Maven Central [2] won't be that easy, so I'd like to request space for that on ceph.com, for example ceph.com/download/maven and users will have to manually add that to their pom.xml configuration.
+
+
+This would be really nice. I dunno what people expect from Maven
+projects that rely on native libraries. At least getting debian
+packages would be a good step.
