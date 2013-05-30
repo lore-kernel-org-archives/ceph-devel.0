@@ -1,58 +1,54 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: 5GB object limit in the RADOS Gateway
-Date: Thu, 30 May 2013 19:50:49 +0200
-Message-ID: <51A79179.9080501@42on.com>
-References: <51A78F84.1000607@42on.com> <CAPYLRzgFTgv3pPUdLny3MdiZCpFPCfSY-aj5+3sf16jBtL7T-Q@mail.gmail.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [PATCH] libceph: print more info for short message header
+Date: Thu, 30 May 2013 10:36:55 -0700
+Message-ID: <7fdbb481-4a02-4091-a1e3-7c906c920cea@email.android.com>
+References: <51A66A3F.4040707@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:57170 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S966082Ab3E3Ruv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 May 2013 13:50:51 -0400
-In-Reply-To: <CAPYLRzgFTgv3pPUdLny3MdiZCpFPCfSY-aj5+3sf16jBtL7T-Q@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:58284 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753544Ab3E3Sgm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 14:36:42 -0400
+In-Reply-To: <51A66A3F.4040707@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
 
-On 05/30/2013 07:47 PM, Gregory Farnum wrote:
-> On Thu, May 30, 2013 at 10:42 AM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> I was checking the source code today and found this macro:
->>
->> #define RGW_MAX_PUT_SIZE        (5ULL*1024*1024*1024)
->>
->> Why is that limit in place? Was that to mimic Amazon S3? (Which is at 5T
->> now).
->>
->> I know that object size limit something that should be there, but just
->> trying to find the reasoning behind this limit.
->>
->> Couldn't we make this  configurable at least?
+Alex Elder <elder@inktank.com> wrote:
+
+>If an osd client response message arrives that has a front section
+>that's too big for the buffer set aside to receive it, a warning
+>gets reported and a new buffer is allocated.
 >
-> That's the limit on an individual HTTP PUT operation. You can make
-> larger objects, but they need to be placed with multi-part uploads.
-> (I'm not sure what the actual limit is, if there is one.)
-> -Greg
-
-Heh? My client gave me an error today and I thought that was really 
-doing multipart uploads.
-
-Checking again I see that s3cmd doesn't do multipart. That confused me
-
-So it doesn't seem there is an object size limitation after all, so you 
-can store object as large as you like.
-
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>The warning says nothing about which connection had the problem.
+>Add the peer type and number to what gets reported, to be a bit more
+>informative.
 >
+>Signed-off-by: Alex Elder <elder@inktank.com>
+>---
+> net/ceph/osd_client.c |    6 ++++--
+> 1 file changed, 4 insertions(+), 2 deletions(-)
+>
+>diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>index e0abb83..61147fe 100644
+>--- a/net/ceph/osd_client.c
+>+++ b/net/ceph/osd_client.c
+>@@ -2454,8 +2454,10 @@ static struct ceph_msg *get_reply(struct
+>ceph_connection *con,
+> 	ceph_msg_revoke_incoming(req->r_reply);
+>
+> 	if (front > req->r_reply->front.iov_len) {
+>-		pr_warning("get_reply front %d > preallocated %d\n",
+>-			   front, (int)req->r_reply->front.iov_len);
+>+		pr_warning("get_reply front %d > preallocated %d (%u#%llu)\n",
+>+			   front, (int)req->r_reply->front.iov_len,
+>+			   (unsigned int)con->peer_name.type,
+>+			   le64_to_cpu(con->peer_name.num));
+> 		m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front, GFP_NOFS, false);
+> 		if (!m)
+> 			goto out;
 
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
