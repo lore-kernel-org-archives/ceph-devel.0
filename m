@@ -1,54 +1,96 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: [PATCH] libceph: print more info for short message header
-Date: Thu, 30 May 2013 10:36:55 -0700
-Message-ID: <7fdbb481-4a02-4091-a1e3-7c906c920cea@email.android.com>
-References: <51A66A3F.4040707@inktank.com>
+Subject: Re: [PATCH] rbd: protect against duplicate client creation
+Date: Thu, 30 May 2013 10:36:02 -0700
+Message-ID: <aa580b87-575e-4e9d-908a-260794579ff5@email.android.com>
+References: <51A66A29.6060805@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:58284 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:58289 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753544Ab3E3Sgm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 14:36:42 -0400
-In-Reply-To: <51A66A3F.4040707@inktank.com>
+	with ESMTP id S1754671Ab3E3Sgp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 14:36:45 -0400
+In-Reply-To: <51A66A29.6060805@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 Alex Elder <elder@inktank.com> wrote:
 
->If an osd client response message arrives that has a front section
->that's too big for the buffer set aside to receive it, a warning
->gets reported and a new buffer is allocated.
+>If more than one rbd image has the same ceph cluster configuration
+>(same options, same set of monitors, same keys) they normally share
+>a single rbd client.
 >
->The warning says nothing about which connection had the problem.
->Add the peer type and number to what gets reported, to be a bit more
->informative.
+>When an image is getting mapped, rbd looks to see if an existing
+>client can be used, and creates a new one if not.
+>
+>The lookup and creation are not done under a common lock though, so
+>mapping two images concurrently could lead to duplicate clients
+>getting set up needlessly.  This isn't a major problem, but it's
+>wasteful and different from what's intended.
+>
+>This patch fixes that by using the control mutex to protect
+>both the lookup and (if needed) creation of the client.  It
+>was previously used just when creating.
+>
+>This resolves:
+>    http://tracker.ceph.com/issues/3094
 >
 >Signed-off-by: Alex Elder <elder@inktank.com>
 >---
-> net/ceph/osd_client.c |    6 ++++--
-> 1 file changed, 4 insertions(+), 2 deletions(-)
+> drivers/block/rbd.c |    7 +++----
+> 1 file changed, 3 insertions(+), 4 deletions(-)
 >
->diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->index e0abb83..61147fe 100644
->--- a/net/ceph/osd_client.c
->+++ b/net/ceph/osd_client.c
->@@ -2454,8 +2454,10 @@ static struct ceph_msg *get_reply(struct
->ceph_connection *con,
-> 	ceph_msg_revoke_incoming(req->r_reply);
+>diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>index aec2438..d255541 100644
+>--- a/drivers/block/rbd.c
+>+++ b/drivers/block/rbd.c
+>@@ -522,7 +522,7 @@ static const struct block_device_operations
+>rbd_bd_ops = {
 >
-> 	if (front > req->r_reply->front.iov_len) {
->-		pr_warning("get_reply front %d > preallocated %d\n",
->-			   front, (int)req->r_reply->front.iov_len);
->+		pr_warning("get_reply front %d > preallocated %d (%u#%llu)\n",
->+			   front, (int)req->r_reply->front.iov_len,
->+			   (unsigned int)con->peer_name.type,
->+			   le64_to_cpu(con->peer_name.num));
-> 		m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front, GFP_NOFS, false);
-> 		if (!m)
-> 			goto out;
+> /*
+>  * Initialize an rbd client instance.  Success or not, this function
+>- * consumes ceph_opts.
+>+ * consumes ceph_opts.  Caller holds ctl_mutex
+>  */
+>static struct rbd_client *rbd_client_create(struct ceph_options
+>*ceph_opts)
+> {
+>@@ -537,8 +537,6 @@ static struct rbd_client *rbd_client_create(struct
+>ceph_options *ceph_opts)
+> 	kref_init(&rbdc->kref);
+> 	INIT_LIST_HEAD(&rbdc->node);
+>
+>-	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+>-
+> 	rbdc->client = ceph_create_client(ceph_opts, rbdc, 0, 0);
+> 	if (IS_ERR(rbdc->client))
+> 		goto out_mutex;
+>@@ -552,7 +550,6 @@ static struct rbd_client *rbd_client_create(struct
+>ceph_options *ceph_opts)
+> 	list_add_tail(&rbdc->node, &rbd_client_list);
+> 	spin_unlock(&rbd_client_list_lock);
+>
+>-	mutex_unlock(&ctl_mutex);
+> 	dout("%s: rbdc %p\n", __func__, rbdc);
+>
+> 	return rbdc;
+>@@ -684,11 +681,13 @@ static struct rbd_client *rbd_get_client(struct
+>ceph_options *ceph_opts)
+> {
+> 	struct rbd_client *rbdc;
+>
+>+	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+> 	rbdc = rbd_client_find(ceph_opts);
+> 	if (rbdc)	/* using an existing client */
+> 		ceph_destroy_options(ceph_opts);
+> 	else
+> 		rbdc = rbd_client_create(ceph_opts);
+>+	mutex_unlock(&ctl_mutex);
+>
+> 	return rbdc;
+> }
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
