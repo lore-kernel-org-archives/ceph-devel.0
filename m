@@ -1,31 +1,27 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: radosgw: Files left over after deletion (even after the gc period/process)
-Date: Thu, 30 May 2013 12:21:23 +0200
-Message-ID: <CAF6-1L6pC8UqoFrqMzpZXKrZctwKELw_iKpHDtwvq6ZvRsx_FQ@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: ceph gets stopped but never started...
+Date: Thu, 30 May 2013 13:30:05 +0200
+Message-ID: <51A7383D.4060309@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f50.google.com ([209.85.214.50]:64609 "EHLO
-	mail-bk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S968150Ab3E3KVZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 06:21:25 -0400
-Received: by mail-bk0-f50.google.com with SMTP id ik5so40729bkc.23
-        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 03:21:24 -0700 (PDT)
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:49333 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751843Ab3E3LaK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 07:30:10 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hello list,
 
-The basic operation I did was :
+since commit 85fb422a084785176af3b694882964841e02195d in cuttle fish
+cherry-picked from 2f193fb931ed09d921e6fa5a985ab87aa4874589 ceph gets
+stopped on debian while upgrading but it never gets started again??
 
- - Upload a file using multi-part upload
- - Copy that file to a new key
- - Delete that original file (which only creates a new head)
- - Delete the copy
+Does this really makes sense?
 
-And it seems all the multipart & shadow files are not properly deleted.
+Should the admin handle the stop / start / restart on upgrade?
 
-Cheers,
-
-    Sylvain
+Stefan
