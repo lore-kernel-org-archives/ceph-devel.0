@@ -1,45 +1,39 @@
-From: Sage Weil <sage@inktank.com>
-Subject: mon load..
-Date: Thu, 30 May 2013 19:50:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1305301817310.26396@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: Speed up 'rbd rm'
+Date: Fri, 31 May 2013 08:40:50 +0200
+Message-ID: <51A845F2.8050001@profihost.ag>
+References: <20130529055942.GA3977@onthe.net.au> <51A65523.10107@inktank.com> <20130530022307.GA27809@onthe.net.au> <51A7BB86.3020106@inktank.com> <20130531014049.GA424@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50522 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751684Ab3EaCus (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 22:50:48 -0400
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:48273 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751852Ab3EaGk5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 May 2013 02:40:57 -0400
+In-Reply-To: <20130531014049.GA424@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: joao.luis@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: Chris Dunlop <chris@onthe.net.au>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-I'm playing with Mark's cluster, where he is seeing high ceph-mon cpu 
-utilization when he creates new big pools.  I'm able to fairly reliably 
-reproduce a livelock where it is stuck checking is_readable on queued auth 
-requests long enough that it times out on the election and has to start 
-all over again.
+Am 31.05.2013 03:40, schrieb Chris Dunlop:
+> On Thu, May 30, 2013 at 01:50:14PM -0700, Josh Durgin wrote:
+>> On 05/29/2013 07:23 PM, Chris Dunlop wrote:
+>>> On Wed, May 29, 2013 at 12:21:07PM -0700, Josh Durgin wrote:
+>>>> On 05/28/2013 10:59 PM, Chris Dunlop wrote:
+>>>>> I see there's a new commit to speed up an 'rbd rm':
+>>>>>
+>>>>> http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
+>>>>>
+>>>>> Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
+>>>>
+>>>> You'll need 537386d906b8c0e395433461dcb03a82eb33f34f as well. It should
+>>>> apply cleanly to 0.61.2, and probably 0.56.6 too.
 
-I see two issues:
+I cherry picked both on top of cuttlefish it works but not very good.
+rbd command finishes but rbd image is still in rbd ls and just gets
+deleted later. I also saw a variant, where rbd rm outputs errors even
+though the image was there but it still got deleted...
 
-- The PaxosService stuff is pulling values directly out of leveldb, and 
-that is slow in this case.  Not completely sure why (compaction in teh 
-background?  who knows.)  But, it's also unnecessary.. except that there 
-is currently not a notification of the PaxosService instances when the 
-underlying data changes.  That most easily plugs into a fwe places in teh 
-Paxos class and on startup, but the way the layering is structured it's 
-not very clean.  Not sure what teh right way to fix this up is.. but I 
-think we do want some sort of PaxosService::refresh() that tells us 
-whenever things changed; it can be the one to call the child's 
-pdate_from_paxos().
-
-- We should be able to discard those auth messages (and others!) if the 
-original connection they came from has disconnected.. which is normally 
-will after the client disconnects after 3 seconds (by default).
-
-There is also wip-mon-trim that will lower the trim periodicity (and 
-compaction) for the paxos states; that ought to help some as well, but I 
-haven't tried it yet...
-
-sage
-
+Stefan
