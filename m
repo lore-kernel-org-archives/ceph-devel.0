@@ -1,60 +1,99 @@
-From: christophe courtaut <christophe.courtaut@gmail.com>
-Subject: [PATCH] rgw: Do not assume rest connection to be established
-Date: Fri, 31 May 2013 10:07:09 +0200
-Message-ID: <CAA8043ghxcjqcUha0A+CbWPuSkeSN5RkraT1rJOJJ5r+_wwSVA@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: caller_ops.size error messages upstream/cuttlefish
+Date: Fri, 31 May 2013 13:48:20 +0200
+Message-ID: <51A88E04.5040405@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=089e0111bd1036f7a104ddff1b37
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:37780 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753432Ab3EaIHa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 May 2013 04:07:30 -0400
-Received: by mail-ob0-f178.google.com with SMTP id fb19so2422979obc.37
-        for <ceph-devel@vger.kernel.org>; Fri, 31 May 2013 01:07:29 -0700 (PDT)
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:53866 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751152Ab3EaLs1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 May 2013 07:48:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---089e0111bd1036f7a104ddff1b37
-Content-Type: text/plain; charset=ISO-8859-1
+Hi,
 
-This patch fixes a bug in the wip-rgw-geo-2 branch.
+yesterday i updated to current upstream/cuttlefish while restarting an
+OSD. The log gets spammed with these messages:
 
-The bug is that if you do not have a region map, the rest connection
-will not be established, and reaching this code will lead to a
-segmentation fault.
+13-05-31 13:42:44.342142 osd.54 [ERR] 4.97d caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.362058 osd.11 [ERR] 4.d15 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.365393 osd.11 [ERR] 4.af4 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.381021 osd.11 [ERR] 4.bc9 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.432011 osd.54 [ERR] 4.651 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.451333 osd.54 [ERR] 4.332 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.458137 osd.11 [ERR] 4.b87 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.552218 osd.54 [ERR] 4.9ea caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.573992 osd.54 [ERR] 4.d56 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.576582 osd.11 [ERR] 4.8ce caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.667815 osd.54 [ERR] 4.ba5 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.684187 osd.54 [ERR] 4.8b2 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.736891 osd.41 [ERR] 4.3e7 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.740904 osd.41 [ERR] 4.dd1 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.753944 osd.54 [ERR] 4.73c caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.771081 osd.54 [ERR] 4.d6 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.839867 osd.41 [ERR] 4.6ff caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.885132 osd.54 [ERR] 4.389 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.947816 osd.12 [ERR] 4.e12 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.956446 osd.54 [ERR] 4.a34 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:44.981324 osd.54 [ERR] 4.86 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.204110 osd.12 [ERR] 4.375 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.223636 osd.12 [ERR] 4.f75 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.300544 mon.0 [INF] osdmap e90849: 24 osds: 20 up, 24 in
+2013-05-31 13:42:45.601838 osd.11 [ERR] 4.3e6 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.734445 osd.11 [ERR] 4.94d caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.755154 osd.11 [ERR] 4.3dd caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.779688 osd.11 [ERR] 4.815 caller_ops.size 3002 > log
+size 3001
+2013-05-31 13:42:45.931451 osd.54 [ERR] 4.47c caller_ops.size 3002 > log
+size 3001
 
-This patch prevents it.
+Then it also starts to have a lot of slow old requests (from the OSDs
+which are down) and the I/O on my qemu guests gets stalled.
 
-Best regards.
+2013-05-31 13:43:40.732750 osd.3 [WRN] slow request 45.152737 seconds
+old, received at 2013-05-31 13:42:55.579934:
+osd_op(client.9439559.0:3387070 rbd_data.5039256b8b4567.000000000000290f
+[write 2043904~8192] 4.f4a3cae1 RETRY=1 snapc 4da2=[] e90858) v4
+currently reached pg
+2013-05-31 13:43:40.732752 osd.3 [WRN] slow request 45.152716 seconds
+old, received at 2013-05-31 13:42:55.579955:
+osd_op(client.9439559.0:3387071 rbd_data.5039256b8b4567.000000000000290f
+[write 2568192~12288] 4.f4a3cae1 RETRY=1 snapc 4da2=[] e90858) v4
+currently reached pg
 
---
-Christophe Courtaut
+I've never seen this with bobtail. And i think this is not a wanted
+"feature"... Can someone please comment on it?
 
---089e0111bd1036f7a104ddff1b37
-Content-Type: application/octet-stream;
-	name="0001-Do-not-assum-rest-connection-to-be-established.patch"
-Content-Disposition: attachment;
-	filename="0001-Do-not-assum-rest-connection-to-be-established.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hhd38yeq0
+Thanks!
 
-RnJvbSBmYWUwODZhZmMwNTIwNWZjYzVkZjRmYmY1MjU0MzQyNWQ2N2Q1ZWQzIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlIENvdXJ0YXV0IDxjaHJpc3RvcGhlLmNvdXJ0
-YXV0QGdtYWlsLmNvbT4KRGF0ZTogRnJpLCAzMSBNYXkgMjAxMyAwOTo1NToyNyArMDIwMApTdWJq
-ZWN0OiBbUEFUQ0hdIHJndzogRG8gbm90IGFzc3VtIHJlc3QgY29ubmVjdGlvbiB0byBiZSBlc3Rh
-Ymxpc2hlZAoKQWRkZWQgYSBjaGVjayB0byB2ZXJpZnkgdGhhdCByZXN0IGNvbm5lY3Rpb24gaXMg
-Y29ycmVjdGx5IGluaXRpYWxpemVkLApwcmV2ZW50aW5nIGEgc2VnbWVudGF0aW9uIGZhdWx0LgoK
-U2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZSBDb3VydGF1dCA8Y2hyaXN0b3BoZS5jb3VydGF1dEBn
-bWFpbC5jb20+Ci0tLQogc3JjL3Jndy9yZ3dfb3AuY2MgfCA2ICsrKysrKwogMSBmaWxlIGNoYW5n
-ZWQsIDYgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL3NyYy9yZ3cvcmd3X29wLmNjIGIvc3Jj
-L3Jndy9yZ3dfb3AuY2MKaW5kZXggMGUzMTNlYy4uMjZhNjVhOSAxMDA2NDQKLS0tIGEvc3JjL3Jn
-dy9yZ3dfb3AuY2MKKysrIGIvc3JjL3Jndy9yZ3dfb3AuY2MKQEAgLTg2NSw2ICs4NjUsMTIgQEAg
-dm9pZCBSR1dDcmVhdGVCdWNrZXQ6OmV4ZWN1dGUoKQogICAgICAgcmV0dXJuOwogICAgIH0KIAor
-ICAgIGlmIChzdG9yZS0+cmVzdF9jb25uID09IDApCisgICAgeworICAgICAgbGRvdXQocy0+Y2N0
-LCAwKSA8PCAicmVzdCBjb25uZWN0aW9uIGlzIGludmFsaWQiIDw8IGRlbmRsOworICAgICAgcmV0
-ID0gLUVJTlZBTDsKKyAgICAgIHJldHVybjsKKyAgICB9CiAgICAgbGRvdXQocy0+Y2N0LCAwKSA8
-PCAic2VuZGluZyBjcmVhdGVfYnVja2V0IHJlcXVlc3QgdG8gbWFzdGVyIHJlZ2lvbiIgPDwgZGVu
-ZGw7CiAgICAgcmV0ID0gc3RvcmUtPnJlc3RfY29ubi0+Zm9yd2FyZChzLT51c2VyLnVzZXJfaWQs
-IHMtPmluZm8sICZpbl9kYXRhKTsKICAgICBpZiAocmV0IDwgMCkKLS0gCjEuOC4xLjIKCg==
---089e0111bd1036f7a104ddff1b37--
+Stefan
