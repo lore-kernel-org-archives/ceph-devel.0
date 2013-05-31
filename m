@@ -1,39 +1,60 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Speed up 'rbd rm'
-Date: Fri, 31 May 2013 08:40:50 +0200
-Message-ID: <51A845F2.8050001@profihost.ag>
-References: <20130529055942.GA3977@onthe.net.au> <51A65523.10107@inktank.com> <20130530022307.GA27809@onthe.net.au> <51A7BB86.3020106@inktank.com> <20130531014049.GA424@onthe.net.au>
+From: christophe courtaut <christophe.courtaut@gmail.com>
+Subject: [PATCH] rgw: Do not assume rest connection to be established
+Date: Fri, 31 May 2013 10:07:09 +0200
+Message-ID: <CAA8043ghxcjqcUha0A+CbWPuSkeSN5RkraT1rJOJJ5r+_wwSVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=089e0111bd1036f7a104ddff1b37
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:48273 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751852Ab3EaGk5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 May 2013 02:40:57 -0400
-In-Reply-To: <20130531014049.GA424@onthe.net.au>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:37780 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753432Ab3EaIHa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 May 2013 04:07:30 -0400
+Received: by mail-ob0-f178.google.com with SMTP id fb19so2422979obc.37
+        for <ceph-devel@vger.kernel.org>; Fri, 31 May 2013 01:07:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Am 31.05.2013 03:40, schrieb Chris Dunlop:
-> On Thu, May 30, 2013 at 01:50:14PM -0700, Josh Durgin wrote:
->> On 05/29/2013 07:23 PM, Chris Dunlop wrote:
->>> On Wed, May 29, 2013 at 12:21:07PM -0700, Josh Durgin wrote:
->>>> On 05/28/2013 10:59 PM, Chris Dunlop wrote:
->>>>> I see there's a new commit to speed up an 'rbd rm':
->>>>>
->>>>> http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
->>>>>
->>>>> Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
->>>>
->>>> You'll need 537386d906b8c0e395433461dcb03a82eb33f34f as well. It should
->>>> apply cleanly to 0.61.2, and probably 0.56.6 too.
+--089e0111bd1036f7a104ddff1b37
+Content-Type: text/plain; charset=ISO-8859-1
 
-I cherry picked both on top of cuttlefish it works but not very good.
-rbd command finishes but rbd image is still in rbd ls and just gets
-deleted later. I also saw a variant, where rbd rm outputs errors even
-though the image was there but it still got deleted...
+This patch fixes a bug in the wip-rgw-geo-2 branch.
 
-Stefan
+The bug is that if you do not have a region map, the rest connection
+will not be established, and reaching this code will lead to a
+segmentation fault.
+
+This patch prevents it.
+
+Best regards.
+
+--
+Christophe Courtaut
+
+--089e0111bd1036f7a104ddff1b37
+Content-Type: application/octet-stream;
+	name="0001-Do-not-assum-rest-connection-to-be-established.patch"
+Content-Disposition: attachment;
+	filename="0001-Do-not-assum-rest-connection-to-be-established.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hhd38yeq0
+
+RnJvbSBmYWUwODZhZmMwNTIwNWZjYzVkZjRmYmY1MjU0MzQyNWQ2N2Q1ZWQzIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlIENvdXJ0YXV0IDxjaHJpc3RvcGhlLmNvdXJ0
+YXV0QGdtYWlsLmNvbT4KRGF0ZTogRnJpLCAzMSBNYXkgMjAxMyAwOTo1NToyNyArMDIwMApTdWJq
+ZWN0OiBbUEFUQ0hdIHJndzogRG8gbm90IGFzc3VtIHJlc3QgY29ubmVjdGlvbiB0byBiZSBlc3Rh
+Ymxpc2hlZAoKQWRkZWQgYSBjaGVjayB0byB2ZXJpZnkgdGhhdCByZXN0IGNvbm5lY3Rpb24gaXMg
+Y29ycmVjdGx5IGluaXRpYWxpemVkLApwcmV2ZW50aW5nIGEgc2VnbWVudGF0aW9uIGZhdWx0LgoK
+U2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZSBDb3VydGF1dCA8Y2hyaXN0b3BoZS5jb3VydGF1dEBn
+bWFpbC5jb20+Ci0tLQogc3JjL3Jndy9yZ3dfb3AuY2MgfCA2ICsrKysrKwogMSBmaWxlIGNoYW5n
+ZWQsIDYgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL3NyYy9yZ3cvcmd3X29wLmNjIGIvc3Jj
+L3Jndy9yZ3dfb3AuY2MKaW5kZXggMGUzMTNlYy4uMjZhNjVhOSAxMDA2NDQKLS0tIGEvc3JjL3Jn
+dy9yZ3dfb3AuY2MKKysrIGIvc3JjL3Jndy9yZ3dfb3AuY2MKQEAgLTg2NSw2ICs4NjUsMTIgQEAg
+dm9pZCBSR1dDcmVhdGVCdWNrZXQ6OmV4ZWN1dGUoKQogICAgICAgcmV0dXJuOwogICAgIH0KIAor
+ICAgIGlmIChzdG9yZS0+cmVzdF9jb25uID09IDApCisgICAgeworICAgICAgbGRvdXQocy0+Y2N0
+LCAwKSA8PCAicmVzdCBjb25uZWN0aW9uIGlzIGludmFsaWQiIDw8IGRlbmRsOworICAgICAgcmV0
+ID0gLUVJTlZBTDsKKyAgICAgIHJldHVybjsKKyAgICB9CiAgICAgbGRvdXQocy0+Y2N0LCAwKSA8
+PCAic2VuZGluZyBjcmVhdGVfYnVja2V0IHJlcXVlc3QgdG8gbWFzdGVyIHJlZ2lvbiIgPDwgZGVu
+ZGw7CiAgICAgcmV0ID0gc3RvcmUtPnJlc3RfY29ubi0+Zm9yd2FyZChzLT51c2VyLnVzZXJfaWQs
+IHMtPmluZm8sICZpbl9kYXRhKTsKICAgICBpZiAocmV0IDwgMCkKLS0gCjEuOC4xLjIKCg==
+--089e0111bd1036f7a104ddff1b37--
