@@ -1,103 +1,53 @@
-From: edison su <sudison@gmail.com>
-Subject: Re: Java bindings for RADOS and RBD
-Date: Thu, 30 May 2013 17:06:05 -0700
-Message-ID: <CADOmhZxAr-1L1aVUTzw357HRGaz66LGDZE6hxwWRxO4HZCPm1w@mail.gmail.com>
-References: <5187CA7E.2050508@42on.com>
-	<CA+Hcz5_6Z2fwHmkKSMOPugh8B5Osu=m7FM1eQkVmvwrn1E4TZg@mail.gmail.com>
-	<CA+Hcz5_ZcdbNAXTvOA86L=3_GeLSStnPyeO0f1pVyZ=eVTAGEw@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Speed up 'rbd rm'
+Date: Fri, 31 May 2013 11:40:49 +1000
+Message-ID: <20130531014049.GA424@onthe.net.au>
+References: <20130529055942.GA3977@onthe.net.au>
+ <51A65523.10107@inktank.com>
+ <20130530022307.GA27809@onthe.net.au>
+ <51A7BB86.3020106@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:36939 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751095Ab3EaAGH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 20:06:07 -0400
-Received: by mail-la0-f43.google.com with SMTP id ez20so844029lab.16
-        for <ceph-devel@vger.kernel.org>; Thu, 30 May 2013 17:06:05 -0700 (PDT)
-In-Reply-To: <CA+Hcz5_ZcdbNAXTvOA86L=3_GeLSStnPyeO0f1pVyZ=eVTAGEw@mail.gmail.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:39929 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751210Ab3EaBpO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 May 2013 21:45:14 -0400
+Content-Disposition: inline
+In-Reply-To: <51A7BB86.3020106@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Wido den Hollander <wido@42on.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, May 30, 2013 at 1:01 PM, Noah Watkins <noah.watkins@inktank.com> wrote:
-> Resending. HTML+vger issue.
->
-> ---------- Forwarded message ----------
-> From: Noah Watkins <noah.watkins@inktank.com>
-> Date: Thu, May 30, 2013 at 12:59 PM
-> Subject: Re: Java bindings for RADOS and RBD
-> To: Wido den Hollander <wido@42on.com>
-> Cc: ceph-devel <ceph-devel@vger.kernel.org>
->
->
-> On Mon, May 6, 2013 at 8:21 AM, Wido den Hollander <wido@42on.com> wrote:
+On Thu, May 30, 2013 at 01:50:14PM -0700, Josh Durgin wrote:
+> On 05/29/2013 07:23 PM, Chris Dunlop wrote:
+>> On Wed, May 29, 2013 at 12:21:07PM -0700, Josh Durgin wrote:
+>>> On 05/28/2013 10:59 PM, Chris Dunlop wrote:
+>>>> I see there's a new commit to speed up an 'rbd rm':
+>>>>
+>>>> http://tracker.ceph.com/projects/ceph/repository/revisions/40956410169709c32a282d9b872cb5f618a48926
+>>>>
+>>>> Is it safe to cherry-pick this commit on top of 0.56.6 (or, if not, v0.61.2) to speed up the remove?
+>>>
+>>> You'll need 537386d906b8c0e395433461dcb03a82eb33f34f as well. It should
+>>> apply cleanly to 0.61.2, and probably 0.56.6 too.
 >>
->>
->> The reason to use JNA is that it allows us to simply drop the bindings and run them without having them compiled against the librados or librbd headers.
->
->
-> Nice. The JNA stuff is very easy to use. We originally looked at it
-> for the CephFS bindings, but there was some concern about dependencies
-> and licensing w.r.t. Hadoop.
->
->>
->> I've chosen to implement both RADOS and RBD into the same package and using com.ceph.rados and com.ceph.rbd for as the package name. It could be splitted into different projects, but I think that won't benefit anybody. Having it all in one package seem easy, since RBD needs a RADOS IoCTX to work anyway.
->
->
-> Cool. We have the com.ceph.fs and com.ceph.crush namespaces right now.
->
->>
->> I'd like to get some feedback on the bindings about the way they are now. They are still work-in-progress, but my Unit Testing shows me they are in a reasonable shape already.
->
->
-> They look like a really good start. Here is some feedback in no
-> particular order.
->
-> 1. Enforcing rados usage assumptions
->
-> Unlike with the C interface where users are expected to behave, we
-> want to avoid ever crashing the JVM. So, stuff like "what happens if I
-> create an IoCTX, then destroy the Rados object and use the IoCTX?"
-> comes to mind. I think this would correspond to the GC running
-> finalize on an out of scope Rados object.
->
-> 2. Making IoCTX safer to use
->
-> I've used the library now to bring the IoCTX into a completely
-> separate RADOS project. Designing for that to be common would be
-> great. For instance, that may be _very_ common for users of
-> IoCTX.Exec() since they will have completely distinct libraries.
->
-> A first step might be to expose a constant/read-only pointer. I'm not
-> a JNA expert, but after reading a bit, it seems as though we can
-> subclass IoCTX from Structure or maybe PointerType to make IoCTX
-> behave.
->
-> 3. Async
->
-> Getting one or two async wrappers put it in the library might help
-> reveal any challenges early on, even if the API coverage expands
-> slowly.
+>> Thanks. I'll see how I go, I may just leave the 'rm' running all
+>> weekend rather than futzing around recompiling ceph and getting
+>> off the mainline track.
+> 
+> If you're mainly interested in getting rid of the accidentally 1.5PB
+> image, you can just delete the header (and id object if it's format 2)
+> and then 'rbd rm' will just remove it from the rbd_directory index, and
+> not try to delete all the non-existent data objects.
 
-+1 on the Async support.
-
->
->
->> Getting them into Maven Central [2] won't be that easy, so I'd like to request space for that on ceph.com, for example ceph.com/download/maven and users will have to manually add that to their pom.xml configuration.
->
->
-> This would be really nice. I dunno what people expect from Maven
-> projects that rely on native libraries. At least getting debian
-> packages would be a good step.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes, that's my main interest. Sorry, I haven't yet delved far
+into the details of how the rbd stuff hangs together: can you
+give me a hint or point me towards any docs regarding what
+"delete the header (and id object" would look like?
 
 
+Cheers,
 
---
-Best Regards,
-Edison
+Chris.
