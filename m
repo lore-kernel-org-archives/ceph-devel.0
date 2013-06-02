@@ -1,137 +1,93 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v1 07/11] locks: only pull entries off of
-	blocked_list when they are really unblocked
-Date: Fri, 31 May 2013 23:07:30 -0400
-Message-ID: <1370056054-25449-8-git-send-email-jlayton@redhat.com>
-References: <1370056054-25449-1-git-send-email-jlayton@redhat.com>
-Return-path: <cluster-devel-bounces@redhat.com>
-In-Reply-To: <1370056054-25449-1-git-send-email-jlayton@redhat.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
-To: viro@zeniv.linux.org.uk, matthew@wil.cx, bfields@fieldses.org
-Cc: linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, cluster-devel@redhat.com, sage@inktank.com, samba-technical@lists.samba.org, Trond.Myklebust@netapp.com, linux-kernel@vger.kernel.org, piastryyy@gmail.com, linux-afs@lists.infradead.org, dhowells@redhat.com, smfrench@gmail.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, akpm@linux-foundation.org
-List-Id: ceph-devel.vger.kernel.org
+From: Loic Dachary <loic@dachary.org>
+Subject: rationale for a PGLog::merge_old_entry case
+Date: Sun, 02 Jun 2013 13:09:55 +0200
+Message-ID: <51AB2803.9010807@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig0354007AEE79BC0321560A71"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:42000 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750983Ab3FBLJ7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Jun 2013 07:09:59 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Currently, when there is a lot of lock contention the kernel spends an
-inordinate amount of time taking blocked locks off of the global
-blocked_list and then putting them right back on again. When all of this
-code was protected by a single lock, then it didn't matter much, but now
-it means a lot of file_lock_lock thrashing.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig0354007AEE79BC0321560A71
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Optimize this a bit by deferring the removal from the blocked_list until
-we're either applying or cancelling the lock. By doing this, and using a
-lockless list_empty check, we can avoid taking the file_lock_lock in
-many cases.
+Hi Sam,
 
-Because the fl_link check is lockless, we must ensure that only the task
-that "owns" the request manipulates the fl_link. Also, with this change,
-it's possible that we'll see an entry on the blocked_list that has a
-NULL fl_next pointer. In that event, just ignore it and continue walking
-the list.
+TL;DR:
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- fs/locks.c |   29 +++++++++++++++++++++++------
- 1 files changed, 23 insertions(+), 6 deletions(-)
+When there no new entry, what is the rationale for merge_old_entry to rem=
+ove the object from missing only if the tail is eversion_t() and the obje=
+ct prior_version is also eversion_t() ?
+https://github.com/dachary/ceph/blob/f58299db098d5f18c817b516fa6ffaa76245=
+e57d/src/osd/PGLog.cc#L330
 
-diff --git a/fs/locks.c b/fs/locks.c
-index 055c06c..fc35b9e 100644
---- a/fs/locks.c
-+++ b/fs/locks.c
-@@ -520,7 +520,6 @@ locks_delete_global_locks(struct file_lock *waiter)
- static void __locks_delete_block(struct file_lock *waiter)
- {
- 	list_del_init(&waiter->fl_block);
--	locks_delete_global_blocked(waiter);
- 	waiter->fl_next = NULL;
- }
- 
-@@ -704,13 +703,16 @@ EXPORT_SYMBOL(posix_test_lock);
- /* Find a lock that the owner of the given block_fl is blocking on. */
- static struct file_lock *what_owner_is_waiting_for(struct file_lock *block_fl)
- {
--	struct file_lock *fl;
-+	struct file_lock *fl, *ret = NULL;
- 
- 	list_for_each_entry(fl, &blocked_list, fl_link) {
--		if (posix_same_owner(fl, block_fl))
--			return fl->fl_next;
-+		if (posix_same_owner(fl, block_fl)) {
-+			ret = fl->fl_next;
-+			if (likely(ret))
-+				break;
-+		}
- 	}
--	return NULL;
-+	return ret;
- }
- 
- static int posix_locks_deadlock(struct file_lock *caller_fl,
-@@ -865,7 +867,8 @@ static int __posix_lock_file(struct inode *inode, struct file_lock *request, str
- 				goto out;
- 			error = FILE_LOCK_DEFERRED;
- 			locks_insert_block(fl, request);
--			locks_insert_global_blocked(request);
-+			if (list_empty(&request->fl_link))
-+				locks_insert_global_blocked(request);
- 			goto out;
-   		}
-   	}
-@@ -876,6 +879,16 @@ static int __posix_lock_file(struct inode *inode, struct file_lock *request, str
- 		goto out;
- 
- 	/*
-+	 * Now that we know the request is no longer blocked, we can take it
-+	 * off the global list. Some callers send down partially initialized
-+	 * requests, so we only do this if FL_SLEEP is set. Also, avoid taking
-+	 * the lock if the list is empty, as that indicates a request that
-+	 * never blocked.
-+	 */
-+	if ((request->fl_flags & FL_SLEEP) && !list_empty(&request->fl_link))
-+		locks_delete_global_blocked(request);
-+
-+	/*
- 	 * Find the first old lock with the same owner as the new lock.
- 	 */
- 	
-@@ -1069,6 +1082,7 @@ int posix_lock_file_wait(struct file *filp, struct file_lock *fl)
- 			continue;
- 
- 		locks_delete_block(fl);
-+		locks_delete_global_blocked(fl);
- 		break;
- 	}
- 	return error;
-@@ -1147,6 +1161,7 @@ int locks_mandatory_area(int read_write, struct inode *inode,
- 		}
- 
- 		locks_delete_block(&fl);
-+		locks_delete_global_blocked(&fl);
- 		break;
- 	}
- 
-@@ -1859,6 +1874,7 @@ static int do_lock_file_wait(struct file *filp, unsigned int cmd,
- 			continue;
- 
- 		locks_delete_block(fl);
-+		locks_delete_global_blocked(fl);
- 		break;
- 	}
- 
-@@ -2160,6 +2176,7 @@ posix_unblock_lock(struct file *filp, struct file_lock *waiter)
- 	else
- 		status = -ENOENT;
- 	spin_unlock(&inode->i_lock);
-+	locks_delete_global_blocked(waiter);
- 	return status;
- }
- 
--- 
-1.7.1
+Long version:
+
+The conditions are created with:
+
+    info.log_tail =3D eversion_t();
+    oe.soid.hash =3D 1;
+    oe.op =3D pg_log_entry_t::DELETE;
+    oe.prior_version =3D eversion_t();
+   =20
+    missing.add(oe.soid, eversion_t(1,1), eversion_t());
+
+as shown in
+https://github.com/dachary/ceph/blob/f58299db098d5f18c817b516fa6ffaa76245=
+e57d/src/test/osd/TestPGLog.cc#L467
+I double checked with gdb and when called with
+
+EXPECT_FALSE(merge_old_entry(t, oe, info, remove_snap, dirty_log));
+https://github.com/dachary/ceph/blob/f58299db098d5f18c817b516fa6ffaa76245=
+e57d/src/test/osd/TestPGLog.cc#L481
+
+it reaches
+
+missing.rm(oe.soid, missing.missing[oe.soid].need);
+https://github.com/dachary/ceph/blob/f58299db098d5f18c817b516fa6ffaa76245=
+e57d/src/osd/PGLog.cc#L330
+
+and the expected side effects are observed:
+
+    EXPECT_FALSE(dirty_log);
+    EXPECT_TRUE(remove_snap.empty());
+    EXPECT_TRUE(t.empty());
+    EXPECT_FALSE(missing.have_missing());
+    EXPECT_TRUE(log.empty());
+    EXPECT_EQ(0U, ondisklog.length());
+https://github.com/dachary/ceph/blob/f58299db098d5f18c817b516fa6ffaa76245=
+e57d/src/test/osd/TestPGLog.cc#L483
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig0354007AEE79BC0321560A71
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlGrKAMACgkQ8dLMyEl6F23OFQCbBRmxcm9f8OjMjpZGcMo5a+9C
+DF8AnjJ75+tTVvZemPrwgGyR/sYDzhVQ
+=sngw
+-----END PGP SIGNATURE-----
+
+--------------enig0354007AEE79BC0321560A71--
