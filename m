@@ -1,34 +1,46 @@
 From: Roman Alekseev <rs.alekseev@gmail.com>
-Subject: rbd image association
-Date: Mon, 03 Jun 2013 10:52:14 +0400
-Message-ID: <51AC3D1E.2000800@gmail.com>
+Subject: Re: rbd image association
+Date: Mon, 03 Jun 2013 11:17:16 +0400
+Message-ID: <51AC42FC.1040703@gmail.com>
+References: <51AC3D1E.2000800@gmail.com> <20130603070836.GA2422@nix.wogri.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:47224 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751505Ab3FCGwR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jun 2013 02:52:17 -0400
-Received: by mail-lb0-f173.google.com with SMTP id t10so3396189lbi.4
-        for <ceph-devel@vger.kernel.org>; Sun, 02 Jun 2013 23:52:16 -0700 (PDT)
-Received: from [192.168.1.116] ([81.195.203.34])
-        by mx.google.com with ESMTPSA id i2sm1685271lah.5.2013.06.02.23.52.14
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Sun, 02 Jun 2013 23:52:15 -0700 (PDT)
+Received: from mail-la0-f42.google.com ([209.85.215.42]:55057 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750999Ab3FCHRT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jun 2013 03:17:19 -0400
+Received: by mail-la0-f42.google.com with SMTP id fg20so3128235lab.15
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Jun 2013 00:17:17 -0700 (PDT)
+In-Reply-To: <20130603070836.GA2422@nix.wogri.at>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wolfgang Hennerbichler <wolfgang.hennerbichler@risc-software.at>, ceph-devel@vger.kernel.org
 
-Hi,
+On 03.06.2013 11:08, Wolfgang Hennerbichler wrote:
+> On Mon, Jun 03, 2013 at 10:52:14AM +0400, Roman Alekseev wrote:
+>> Hi,
+>>
+>> Is it possible to associate certain rbd device with the appropriate
+>> rbd image (for example : image1 > /dev/rbd0)?
+>> We always need to map image1 to /dev/rbd0, image2 to /dev/rbd1 etc.
+>> Because I'm using /dev/rbd* in some configuration files.
+> Hi,
+>
+> I can't remember exactly, but I think there is something like /dev/rbd/<pool>/<imagename> which simply symlinks to /dev/rbdX. This should solve your issue.
+>   
+>> Thanks
+> HTH
+> Wolfgang
+>
+Dear Wolfgang,
 
-Is it possible to associate certain rbd device with the appropriate rbd 
-image (for example : image1 > /dev/rbd0)?
-We always need to map image1 to /dev/rbd0, image2 to /dev/rbd1 etc. 
-Because I'm using /dev/rbd* in some configuration files.
+I was trying to use the command ln -s /dev/rbd1 image1 but it creates 
+wrong symlink. Most likely there is more specific command to symlink the 
+image and device correctly.
 
-Thanks
+Thanks.
 
 -- 
 Kind regards,
