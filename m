@@ -1,85 +1,56 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW and Keystone
-Date: Tue, 4 Jun 2013 08:04:37 -0700
-Message-ID: <CABBk=J-GB3U7HSjdmsHF9xWUGwi4QkO-57SjjNnORWUJ07oJ1Q@mail.gmail.com>
-References: <CAPeWyqwZO6E8qtc9teerxY9ZyYg+Qe_46kw6UHkwVD98Uk7ctA@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH v1 11/11] locks: give the blocked_hash its own spinlock
+Date: Tue, 4 Jun 2013 11:15:02 -0400
+Message-ID: <20130604111502.6231d010@corrin.poochiereds.net>
+References: <1370056054-25449-1-git-send-email-jlayton@redhat.com>
+	<1370056054-25449-12-git-send-email-jlayton@redhat.com>
+	<51ADF789.70906@samba.org>
+	<20130604144640.GA7730@infradead.org>
+	<20130604145322.GH2109@fieldses.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:44486 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753109Ab3FDPEj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 11:04:39 -0400
-Received: by mail-vc0-f170.google.com with SMTP id hf12so257617vcb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Jun 2013 08:04:38 -0700 (PDT)
-In-Reply-To: <CAPeWyqwZO6E8qtc9teerxY9ZyYg+Qe_46kw6UHkwVD98Uk7ctA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Chmouel Boudjnah <chmouel@enovance.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130604145322.GH2109@fieldses.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "J. Bruce Fields" <bfields@fieldses.org>
+Cc: Christoph Hellwig <hch@infradead.org>, "Stefan (metze) Metzmacher" <metze@samba.org>, viro@zeniv.linux.org.uk, matthew@wil.cx, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, cluster-devel@redhat.com, sage@inktank.com, samba-technical@lists.samba.org, Trond.Myklebust@netapp.com, linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org, dhowells@redhat.com, smfrench@gmail.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, akpm@linux-foundation.org, swhiteho@redhat.com
+List-Id: ceph-devel.vger.kernel.org
 
-(resending due to formatting)
+On Tue, 4 Jun 2013 10:53:22 -0400
+"J. Bruce Fields" <bfields@fieldses.org> wrote:
 
-I'm not Florian, but I think I can help here.
+> On Tue, Jun 04, 2013 at 07:46:40AM -0700, Christoph Hellwig wrote:
+> > Having RCU for modification mostly workloads never is a good idea, so
+> > I don't think it makes sense to mention it here.
+> > 
+> > If you care about the overhead it's worth trying to use per-cpu lists,
+> > though.
+> 
+> Yes.  The lock and unlock could happen on different CPU's--but I think
+> you can make the rule that the lock stays associated with the list it
+> was first put on, and then it's correct in general and hopefully quick
+> in the common case.
+> 
 
-The radosgw user-tenant model is (currently) different from the swift
-one. It's more like the S3 model, where users live in a single
-namespace. So the current Swift user mapping is not perfect. We
-created 'subusers' to emulate that, but in the end all accounts reside
-under the same tenant (in the swift jargon).
-That been said, I've prototyped a real multi-tenancy solution not too
-long ago that will encapsulate both the swift and the S3 user cases
-(wip-5073-2 for the brave ones). It might still be missing some
-pieces, but most of it is there. I also have a new blueprint on my
-to-do list.
+It's important to distinguish between the blocked_list/hash and the
+file_lock_list. Yes, they use the same embedded list_head or hlist_node
+in the file_lock, but they have very different characteristics and use
+cases.
 
-Yehuda
+In the testing I did, having a hashtable for the blocked locks helped a
+lot more than a percpu list. The trick with deadlock detection is to
+ensure that you don't spend a lot of time walking the lists. Since we
+do deadlock detection frequently, we need to optimize for that case.
 
-On Tue, Jun 4, 2013 at 2:44 AM, Chmouel Boudjnah <chmouel@enovance.com> wrote:
-> Hello Florian,
->
-> I was wondering how the Keystone integration with ceph, I have been
-> reading the documentation of the way it shows how to configure the
-> keystone endpoints here :
->
-> http://ceph.com/docs/next/radosgw/config/
->
-> and I don't see how the part :
->
-> keystone endpoint-create --service-id <id> --publicurl
-> http://radosgw.example.com/swift/v1 \
->         --internalurl http://radosgw.example.com/swift/v1 --adminurl
-> http://radosgw.example.com/swift/v1
->
-> would work with multiple tenancies since user a or user b putting an
-> object called bar in container foo would always end up with the same
-> URL like :
->
-> http://radosgw.example.com/swift/v1/foo/bar
->
-> The way we do that in Swift is to have in keystone this type of URL :
->
->  --publicurl 'http://192.168.206.130:8888/v1/AUTH_%(tenant_id)s' \
->
-> and the keystoneauth make sure the token validated match the
-> %(tenant_id) in URL, i.e:
->
-> https://github.com/openstack/swift/blob/master/swift/common/middleware/keystoneauth.py#L204
->
-> am I totally off track or the keystone support support only a single tenant?
->
-> digging into the code I don't see any trickeries to make this works
-> properly it just check for the roles assigned to the user/tenant
-> matching the configuration (which is good) but don't do much more
-> after that :
->
-> https://github.com/ceph/ceph/blob/master/src/rgw/rgw_swift.cc#L500
->
-> Let me know what do you think.
->
-> Cheers,
-> Chmouel.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+For the file_lock_list, it might make sense to have percpu hlists with
+an lglock however. The thing to note here is that the file_lock_list is
+almost never read. Only /proc/locks uses it, so anything we can do to
+optimize the list manipulation is probably worth it.
+
+All that said, I'm leery about changing too much of this code too fast.
+It's pretty old and poorly understood, so I think we need to be
+cautious and take an incremental approach to changing it.
+
+-- 
+Jeff Layton <jlayton@redhat.com>
