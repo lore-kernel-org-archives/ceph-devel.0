@@ -1,15 +1,15 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Ceph killed by OS because of OOM under high load
-Date: Tue, 4 Jun 2013 06:20:46 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E0E96C@SHSMSX102.ccr.corp.intel.com>
+Date: Tue, 4 Jun 2013 16:08:05 +0800
+Message-ID: <CAAM7YAkUertwE_zpJ+rwAKKa9MUVFwnjn6x2TmqtmGd2xDPmCw@mail.gmail.com>
 References: <6F3FA899187F0043BA1827A69DA2F7CC01E0E095@SHSMSX102.ccr.corp.intel.com>
 	<CAPYLRzgmPEkzGBYW31XzSAjm44MBK6jNct-QjpJnVWXUXJR1gw@mail.gmail.com>
+	<6F3FA899187F0043BA1827A69DA2F7CC01E0E96C@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPYLRzgmPEkzGBYW31XzSAjm44MBK6jNct-QjpJnVWXUXJR1gw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E0E96C-0J0gbvR4kTiiAffOGbnezLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -19,93 +19,32 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGkgR3JlZywNCglZZXMsIFRoYW5rcyBmb3IgeW91ciBhZHZpY2UgLHdlIGRvIHR1cm4gZG93biB0
-aGUgb3NkX2NsaWVudF9tZXNzYWdlX3NpemVfY2FwIHRvIDEwME1CL09TRCAsYm90aCBKb3VybmFs
-IHF1ZXVlIGFuZCBmaWxlc3RvcmUgcXVldWUgYXJlIHNldCB0byAxMDBNQiBhbHNvLg0KCVRoYXQn
-cyAzMDBNQi9PU0QgaW4gdG90YWwsIGJ1dCBmcm9tIFRPUCB3ZSBzZWU6DQoJCTE2NTI3ICAgICAx
-ICAxNDo0OS4wMSAgICAgMCAgNy4xICAyMCAgIDAgUyAxMTQ3bSAgICAwIDUzMm0gICAgIDAgY2Vw
-aC1vc2QNCgkJMTc1MDUgICAgIDEgIDEwOjU0LjMyICAgICAwICA2LjUgIDIwICAgMCBTIDExMTFt
-ICAgIDAgNDgybSAgICAgMCBjZXBoLW9zZA0KCQkxODAxNSAgICAgMSAgMTI6MjEuNzkgICAgIDAg
-IDYuMCAgMjAgICAwIFMgMTA0MW0gICAgMCA0NDltICAgICAwIGNlcGgtb3NkDQoJCTE3Nzk5ICAg
-ICAxICAxMzoyOS45MiAgICAgMCAgNS45ICAyMCAgIDAgUyAxMDg1bSAgICAwIDQzN20gICAgIDAg
-Y2VwaC1vc2QNCgkJMTczMjAgICAgIDEgIDEyOjE5LjI1ICAgICAwICA1LjggIDIwICAgMCBTIDEw
-NzltICAgIDAgNDM0bSAgICAgMCBjZXBoLW9zZA0KCQkxODk0NiAgICAgMSAgMTI6MzguMDEgICAg
-IDAgIDUuNyAgMjAgICAwIFMgMTA4Mm0gICAgMCA0MjhtICAgICAwIGNlcGgtb3NkDQoJCTE2OTgz
-ICAgICAxICAxMjowNC45NyAgICAgMCAgNS4xICAyMCAgIDAgUyAxMDQ1bSAgICAwIDM4M20gICAg
-IDAgY2VwaC1vc2QNCgkJMTkxMjAgICAgIDEgIDEyOjU3Ljg0ICAgICAwICA0LjkgIDIwICAgMCBT
-IDEwMDNtICAgIDAgMzY3bSAgICAgMCBjZXBoLW9zZA0KCQkxNjMwMCAgICAgMSAgMTI6MTcuMTgg
-ICAgIDAgIDQuOCAgMjAgICAwIFMgIDk3OW0gICAgMCAzNjFtICAgICAwIGNlcGgtb3NkDQoJCTE4
-NDk0ICAgICAxICAxMzoxMy4wNCAgICAgMCAgNC41ICAyMCAgIDAgUyAgOTUwbSAgICAwIDMzOW0g
-ICAgIDAgY2VwaC1vc2QNCgkJMTY2NjIgICAgIDEgIDEzOjE0Ljg0ICAgICAwICA0LjMgIDIwICAg
-MCBTICA5NjRtICAgIDAgMzE4bSAgICAgMCBjZXBoLW9zZA0KCQkxODI4NSAgICAgMSAgMTE6MDcu
-NzkgICAgIDAgIDMuNyAgMjAgICAwIFMgIDg5NW0gICAgMCAyNzZtICAgICAwIGNlcGgtb3MNCg0K
-CU1vc3Qgb2YgdGhlIE9TRCBkYWVtb25zIGFyZSBzbGlnaHRseSBleGNlZWQgMzAwTUIsICwgc28g
-d2hhdCBwYXJ0IG9mIGNvZGUvbW9kdWxlcyB0YWtlIG91dCB0aGVzZSBtZW1vcnk/IA0KCU9yIGlu
-IGFub3RoZXIgd29yZCwgYSBtb3JlIGdlbmVyYWwgcXVlc3Rpb24sIGlzIGl0IGFibGUgdG8gZHJh
-dyBvdXQgYSBwaWUgY2hhcnQsIHNob3dpbmcgcGVyY2VudGFnZXMgb2YgbWVtb3J5IHVzZWQgYnkg
-ZWFjaCBtb2R1bGVzIGluIE9TRD8NCg0KCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJWGlhb3hpDQot
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpn
-cmVnQGlua3RhbmsuY29tXSANClNlbnQ6IDIwMTPE6jbUwjTI1SAwOjM3DQpUbzogQ2hlbiwgWGlh
-b3hpDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IE1hcmsgTmVsc29uIChtYXJrLm5l
-bHNvbkBpbmt0YW5rLmNvbSk7IGNlcGgtdXNlcnNAY2VwaC5jb20NClN1YmplY3Q6IFJlOiBbY2Vw
-aC11c2Vyc10gQ2VwaCBraWxsZWQgYnkgT1MgYmVjYXVzZSBvZiBPT00gdW5kZXIgaGlnaCBsb2Fk
-DQoNCk9uIE1vbiwgSnVuIDMsIDIwMTMgYXQgODo0NyBBTSwgQ2hlbiwgWGlhb3hpIDx4aWFveGku
-Y2hlbkBpbnRlbC5jb20+IHdyb3RlOg0KPiBIaSwNCj4gICAgICAgICBBcyBteSBwcmV2aW91cyBt
-YWlsIHJlcG9ydGVkIHNvbWUgd2Vla3MgYWdvICx3ZSBhcmUgc3VmZmVyaW5nIGZyb20gT1NEIGNy
-YXNoLyBPU0QgRmxpcHBpbmcgLyBTeXN0ZW0gcmVib290IGFuZCBldGMsIGFsbCB0aGVzZSB1bnN0
-YWJsZSBpc3N1ZSByZWFsbHkgc3RvcCB1cyBmcm9tIGRpZ2dpbmcgZnVydGhlciBpbnRvIGNlcGgg
-Y2hhcmFjdGVyaXphdGlvbi4NCj4gICAgICAgICBHb29kIG5ld3MgaXMgdGhhdCB3ZSBzZWVtcyBm
-aW5kIG91dCB0aGUgY2F1c2UsIEkgZXhwbGFpbiBvdXIgZXhwZXJpbWVudHMgYmVsb3c6DQo+DQo+
-ICAgICAgICAgRW52aXJvbm1lbnQ6DQo+ICAgICAgICAgICAgICAgICBXZSBoYXZlIDIgbWFjaGlu
-ZXMsIG9uZSBmb3IgY2xpZW50IGFuZCBvbmUgZm9yIGNlcGgsIGNvbm5lY3RlZCB2aWEgMTBHYkUu
-DQo+ICAgICAgICAgICAgICAgICBUaGUgY2xpZW50IG1hY2hpbmUgaXMgdmVyeSBwb3dlcmZ1bCwg
-d2l0aCA2NCBDb3JlcyBhbmQgMjU2RyBSQU0uDQo+ICAgICAgICAgICAgICAgICBUaGUgY2VwaCBt
-YWNoaW5lIHdpdGggMzIgQ29yZXMgYW5kIDY0RyBSQU0sIGJ1dCB3ZSBsaW1pdGVkIHRoZSBhdmFp
-bGFibGUgUkFNIHRvIDhHQiBieSB0aGUgZ3J1YiBjb25maWd1cmF0aW9uLjEyIE9TRHMgb24gdG9w
-IG9mIDEyKiA1NDAwIFJQTSAxVCBkaXNrICwgNCogRENTIDM3MDAgU1NEcyBhcyBqb3VybmFscy4N
-Cj4gICAgICAgICAgICAgICAgIEJvdGggY2xpZW50IGFuZCBjZXBoIGFyZSB2MC42MS4yLg0KPiAg
-ICAgICAgICAgICAgICAgV2UgcnVuIDEyIHJhZG9zIGJlbmNoIGluc3RhbmNlcyBpbiBjbGllbnQg
-bm9kZSBhcyBhIHN0cmVzcyB0byBjZXBoIG5vZGUsIGVhY2ggaW5zdGFuY2Ugd2l0aCAyNTYgY29u
-Y3VycmVudC4NCj4gICAgICAgICBFeHBlcmltZW50IGFuZCByZXN1bHQ6DQo+ICAgICAgICAgICAg
-ICAgICAxLmRlZmF1bHQgY2VwaCArIGRlZmF1bHQgY2xpZW50ICwgICBPSw0KPiAgICAgICAgICAg
-ICAgICAgMi50dW5lZCBjZXBoICArIGRlZmF1bHQgY2xpZW50ICAgIEZBSUwsT25lIG9zZCBraWxs
-ZWQgYnkgT1MgZHVlIHRvIE9PTSwgYW5kIGFsbCBzd2FwIHNwYWNlIGlzIHJ1biBvdXQuICh0dW5p
-bmc6IExhcmdlIHF1ZXVlIG9wcy9MYXJnZSBxdWV1ZSBieXRlcy8uTm8gZmx1c2hlci9zeW5jX2Zs
-dXNoID10cnVlKQ0KPiAgICAgICAgICAgICAgICAgMy50dW5lZCBjZXBoIFdJVEhPVVQgbGFyZ2Ug
-cXVldWUgYnl0ZXMgICsgZGVmYXVsdCBjbGllbnQgICBPSw0KPiAgICAgICAgICAgICAgICAgNC50
-dW5lZCBjZXBoIFdJVEhPVVQgbGFyZ2UgcXVldWUgYnl0ZXMgICsgYWdncmVzc2l2ZSANCj4gY2xp
-ZW50ICBGQUlMRUQsIE9uZSBvc2Qga2lsbGVkIGJ5IE9PTSBhbmQgb25lIHN1aWNpZGUgYmVjYXVz
-ZSAxNTBzIG9wIA0KPiB0aHJlYWQgdGltZW91dC4gIChhZ2dyZXNzaXZlIGNsaWVudDogb2JqZWN0
-ZXJfaW5mbGlnaHRfb3BzLCANCj4gb3BqZWN0ZXJfaW5mbGlnaHRfYnl0ZXMgYXJlIGJvdGggc2V0
-IHRvIDEwWCBvZiBkZWZhdWx0KQ0KPg0KPiAgICAgICAgIENvbmNsdXNpb24uDQo+ICAgICAgICAg
-ICAgICAgICBXZSB3b3VsZCBsaWtlIHRvIHNheSwNCj4gICAgICAgICAgICAgICAgIGEuICAgICAg
-dW5kZXIgaGVhdnkgbG9hZCwgc29tZSB0dW5pbmcgd2lsbCBtYWtlIGNlcGggdW5zdGFibGUgLGVz
-cGVjaWFsbHkgcXVldWUgYnl0ZXMgcmVsYXRlZCAoIGRlZHVjZSBmcm9tIDErMiszKQ0KPiAgICAg
-ICAgICAgICAgICAgYi4gICAgICBDZXBoIGRvZXNuJ3QgZG8gYW55IGNvbnRyb2wgb24gdGhlIGxl
-bnRoIG9mIE9TRCBRdWV1ZSwgdGhpcyBpcyBhIGNyaXRpY2FsIGlzc3VlLCB3aXRoIGFnZ3Jlc3Np
-dmUgY2xpZW50IG9yIGEgbG90IG9mIGNvbmN1cnJlbnQgY2xpZW50cywgdGhlIG9zZCBxdWV1ZSB3
-aWxsIGJlY29tZSB0b28gbG9uZyB0byBmaXQgaW4gbWVtb3J5ICx0aHVzIHJlc3VsdCBpbiBvc2Qg
-ZGFlbW9uIGJlaW5nIGtpbGxlZC4oZGVkdWNlIGZyb20gMys0KQ0KPiAgICAgICAgICAgICAgICAg
-Yy4gICBBbiBvYnNlcnZhdGlvbiB0byBvc2QgZGFlbW9uIG1lbW9yeSB1c2FnZSBzaG93IHRoYXQs
-IGlmIEkgdXNlICJraWxsYWxsIHJhZG9zIiB0byBraWxsIGFsbCB0aGUgcmFkb3MgYmVuY2ggaW5z
-dGFuY2VzLCB0aGUgY2VwaCBvc2QgZGFlbW9uIGNhbm5vdCBmcmVlIHRoZSBhbGxvY2F0ZWQgbWVt
-b3J5LCBpbnN0ZWFkLCBpdCBzdGlsbCByZW1haW4gdmVyeSBoaWdoIG1lbW9yeSB1c2FnZShhIG5l
-dyBzdGFydGVkIGNlcGggdXNlZCB+MC41IEdCICwgYW5kIHdpdGggbG9hZCBpdCB1c2VkIH4gNkdC
-ICwgaWYga2lsbGVkIHJhZG9zLCBpdCBzdGlsbCByZW1haW4gNX42R0IsIHJlc3RhcnQgY2VwaCBj
-YW4gc29sdmUgdGhpcyBpc3N1ZSkNCg0KWW91IGRvbid0IGhhdmUgZW5vdWdoIFJBTSBmb3IgeW91
-ciBPU0RzLiBXZSByZWFsbHkgcmVjb21tZW5kIDEtMkdCIHBlciBkYWVtb247IDYwME1CL2RhZW1v
-biBpcyBkYW5nZXJvdXMuIFlvdSBtaWdodCBiZSBhYmxlIHRvIG1ha2UgaXQgd29yaywgYnV0IHlv
-dSdsbCBkZWZpbml0ZWx5IG5lZWQgdG8gY2hhbmdlIHRoZSBxdWV1ZSBsZW5ndGhzIGFuZCB0aGlu
-Z3MuDQpTcGVha2luZyBvZiB3aGljaC4uLnllcywgdGhlIE9TRHMgZG8gY29udHJvbCB0aGVpciBx
-dWV1ZSBsZW5ndGhzLCBidXQgaXQncyBub3QgZHluYW1pYyB0dW5pbmcgYW5kIGJ5IGRlZmF1bHQg
-aXQgd2lsbCBsZXQgY2xpZW50cyBzdGFjayB1cCA1MDBNQiBvZiBpbi1wcm9ncmVzcyB3cml0ZXMu
-IFdpdGggc3VjaCB3aW1weSBzeXN0ZW1zIHlvdSdsbCB3YW50IHRvIHR1cm4gdGhhdCBkb3duLCBw
-cm9iYWJseSBhbG9uZ3NpZGUgdmFyaW91cyBqb3VybmFsIGFuZCBkaXNrIHdhaXQgcXVldWVzLg0K
-LUdyZWcNClNvZnR3YXJlIEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNvbSB8IGh0dHA6
-Ly9jZXBoLmNvbQ0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Tue, Jun 4, 2013 at 2:20 PM, Chen, Xiaoxi <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> Hi Greg,
+>         Yes, Thanks for your advice ,we do turn down the osd_client_message_size_cap to 100MB/OSD ,both Journal queue and filestore queue are set to 100MB also.
+>         That's 300MB/OSD in total, but from TOP we see:
+>                 16527     1  14:49.01     0  7.1  20   0 S 1147m    0 532m     0 ceph-osd
+>                 17505     1  10:54.32     0  6.5  20   0 S 1111m    0 482m     0 ceph-osd
+>                 18015     1  12:21.79     0  6.0  20   0 S 1041m    0 449m     0 ceph-osd
+>                 17799     1  13:29.92     0  5.9  20   0 S 1085m    0 437m     0 ceph-osd
+>                 17320     1  12:19.25     0  5.8  20   0 S 1079m    0 434m     0 ceph-osd
+>                 18946     1  12:38.01     0  5.7  20   0 S 1082m    0 428m     0 ceph-osd
+>                 16983     1  12:04.97     0  5.1  20   0 S 1045m    0 383m     0 ceph-osd
+>                 19120     1  12:57.84     0  4.9  20   0 S 1003m    0 367m     0 ceph-osd
+>                 16300     1  12:17.18     0  4.8  20   0 S  979m    0 361m     0 ceph-osd
+>                 18494     1  13:13.04     0  4.5  20   0 S  950m    0 339m     0 ceph-osd
+>                 16662     1  13:14.84     0  4.3  20   0 S  964m    0 318m     0 ceph-osd
+>                 18285     1  11:07.79     0  3.7  20   0 S  895m    0 276m     0 ceph-os
+>
+>         Most of the OSD daemons are slightly exceed 300MB, , so what part of code/modules take out these memory?
+>         Or in another word, a more general question, is it able to draw out a pie chart, showing percentages of memory used by each modules in OSD?
+>
+
+http://google-perftools.googlecode.com/svn/trunk/doc/heapprofile.html
+
+Regards
+Yan, Zheng
