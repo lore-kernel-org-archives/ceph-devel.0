@@ -1,35 +1,85 @@
-From: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v1 11/11] locks: give the blocked_hash its own spinlock
-Date: Tue, 4 Jun 2013 10:56:56 -0400
-Message-ID: <20130604105656.18663efa@corrin.poochiereds.net>
-References: <1370056054-25449-1-git-send-email-jlayton@redhat.com>
-	<1370056054-25449-12-git-send-email-jlayton@redhat.com>
-	<51ADF789.70906@samba.org>
-	<20130604144640.GA7730@infradead.org>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: RGW and Keystone
+Date: Tue, 4 Jun 2013 08:04:37 -0700
+Message-ID: <CABBk=J-GB3U7HSjdmsHF9xWUGwi4QkO-57SjjNnORWUJ07oJ1Q@mail.gmail.com>
+References: <CAPeWyqwZO6E8qtc9teerxY9ZyYg+Qe_46kw6UHkwVD98Uk7ctA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130604144640.GA7730-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: "Stefan (metze) Metzmacher" <metze-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:44486 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753109Ab3FDPEj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 11:04:39 -0400
+Received: by mail-vc0-f170.google.com with SMTP id hf12so257617vcb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Jun 2013 08:04:38 -0700 (PDT)
+In-Reply-To: <CAPeWyqwZO6E8qtc9teerxY9ZyYg+Qe_46kw6UHkwVD98Uk7ctA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Chmouel Boudjnah <chmouel@enovance.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 4 Jun 2013 07:46:40 -0700
-Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
+(resending due to formatting)
 
-> Having RCU for modification mostly workloads never is a good idea, so
-> I don't think it makes sense to mention it here.
-> 
-> If you care about the overhead it's worth trying to use per-cpu lists,
-> though.
-> 
+I'm not Florian, but I think I can help here.
 
-Yeah, I looked at those too in an earlier set and it did help some.
-Moving to a hashtable for the blocked_list really seemed to help the
-most there, but percpu lists with lglocks or something might help a lot
-on the file_lock_list.
+The radosgw user-tenant model is (currently) different from the swift
+one. It's more like the S3 model, where users live in a single
+namespace. So the current Swift user mapping is not perfect. We
+created 'subusers' to emulate that, but in the end all accounts reside
+under the same tenant (in the swift jargon).
+That been said, I've prototyped a real multi-tenancy solution not too
+long ago that will encapsulate both the swift and the S3 user cases
+(wip-5073-2 for the brave ones). It might still be missing some
+pieces, but most of it is there. I also have a new blueprint on my
+to-do list.
 
--- 
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Yehuda
+
+On Tue, Jun 4, 2013 at 2:44 AM, Chmouel Boudjnah <chmouel@enovance.com> wrote:
+> Hello Florian,
+>
+> I was wondering how the Keystone integration with ceph, I have been
+> reading the documentation of the way it shows how to configure the
+> keystone endpoints here :
+>
+> http://ceph.com/docs/next/radosgw/config/
+>
+> and I don't see how the part :
+>
+> keystone endpoint-create --service-id <id> --publicurl
+> http://radosgw.example.com/swift/v1 \
+>         --internalurl http://radosgw.example.com/swift/v1 --adminurl
+> http://radosgw.example.com/swift/v1
+>
+> would work with multiple tenancies since user a or user b putting an
+> object called bar in container foo would always end up with the same
+> URL like :
+>
+> http://radosgw.example.com/swift/v1/foo/bar
+>
+> The way we do that in Swift is to have in keystone this type of URL :
+>
+>  --publicurl 'http://192.168.206.130:8888/v1/AUTH_%(tenant_id)s' \
+>
+> and the keystoneauth make sure the token validated match the
+> %(tenant_id) in URL, i.e:
+>
+> https://github.com/openstack/swift/blob/master/swift/common/middleware/keystoneauth.py#L204
+>
+> am I totally off track or the keystone support support only a single tenant?
+>
+> digging into the code I don't see any trickeries to make this works
+> properly it just check for the roles assigned to the user/tenant
+> matching the configuration (which is good) but don't do much more
+> after that :
+>
+> https://github.com/ceph/ceph/blob/master/src/rgw/rgw_swift.cc#L500
+>
+> Let me know what do you think.
+>
+> Cheers,
+> Chmouel.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
