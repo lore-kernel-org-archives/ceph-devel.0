@@ -1,56 +1,39 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v1 11/11] locks: give the blocked_hash its own spinlock
-Date: Tue, 4 Jun 2013 11:15:02 -0400
-Message-ID: <20130604111502.6231d010@corrin.poochiereds.net>
-References: <1370056054-25449-1-git-send-email-jlayton@redhat.com>
-	<1370056054-25449-12-git-send-email-jlayton@redhat.com>
-	<51ADF789.70906@samba.org>
-	<20130604144640.GA7730@infradead.org>
-	<20130604145322.GH2109@fieldses.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: flatten rbd export / export-diff ?
+Date: Tue, 4 Jun 2013 08:23:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306040821550.12900@cobra.newdream.net>
+References: <51ADEE2B.4050403@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130604145322.GH2109@fieldses.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "J. Bruce Fields" <bfields@fieldses.org>
-Cc: Christoph Hellwig <hch@infradead.org>, "Stefan (metze) Metzmacher" <metze@samba.org>, viro@zeniv.linux.org.uk, matthew@wil.cx, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, cluster-devel@redhat.com, sage@inktank.com, samba-technical@lists.samba.org, Trond.Myklebust@netapp.com, linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org, dhowells@redhat.com, smfrench@gmail.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, akpm@linux-foundation.org, swhiteho@redhat.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55088 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751173Ab3FDPXG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 11:23:06 -0400
+In-Reply-To: <51ADEE2B.4050403@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 4 Jun 2013 10:53:22 -0400
-"J. Bruce Fields" <bfields@fieldses.org> wrote:
-
-> On Tue, Jun 04, 2013 at 07:46:40AM -0700, Christoph Hellwig wrote:
-> > Having RCU for modification mostly workloads never is a good idea, so
-> > I don't think it makes sense to mention it here.
-> > 
-> > If you care about the overhead it's worth trying to use per-cpu lists,
-> > though.
+On Tue, 4 Jun 2013, Stefan Priebe - Profihost AG wrote:
+> Hi,
 > 
-> Yes.  The lock and unlock could happen on different CPU's--but I think
-> you can make the rule that the lock stays associated with the list it
-> was first put on, and then it's correct in general and hopefully quick
-> in the common case.
+> is there a way to flatten the rbd export-diff to a "new" image FILE. Or
+> do i always have to:
 > 
+> rbd import "OLD BASE IMAGE"
+> rbd import-diff diff1
+> rbd import-diff diff1-2
+> rbd import-diff diff2-3
+> rbd import-diff diff3-4
+> rbd import-diff diff4-5
+> ...
+> and so on?
+> 
+> I would like to apply the diffs on local disk and then import the new file.
 
-It's important to distinguish between the blocked_list/hash and the
-file_lock_list. Yes, they use the same embedded list_head or hlist_node
-in the file_lock, but they have very different characteristics and use
-cases.
+Not currently.  The format is very simple, though; it should be pretty 
+simple to implement a subcommand in the rbd tool to do it.
 
-In the testing I did, having a hashtable for the blocked locks helped a
-lot more than a percpu list. The trick with deadlock detection is to
-ensure that you don't spend a lot of time walking the lists. Since we
-do deadlock detection frequently, we need to optimize for that case.
-
-For the file_lock_list, it might make sense to have percpu hlists with
-an lglock however. The thing to note here is that the file_lock_list is
-almost never read. Only /proc/locks uses it, so anything we can do to
-optimize the list manipulation is probably worth it.
-
-All that said, I'm leery about changing too much of this code too fast.
-It's pretty old and poorly understood, so I think we need to be
-cautious and take an incremental approach to changing it.
-
--- 
-Jeff Layton <jlayton@redhat.com>
+sage
