@@ -1,427 +1,352 @@
 From: Filippos Giannakos <philipgian@grnet.gr>
-Subject: [PATCH 1/2 v2] Add RADOS lock mechanism to the librados C/C++ API.
-Date: Tue,  4 Jun 2013 12:52:07 +0300
-Message-ID: <1370339528-26872-2-git-send-email-philipgian@grnet.gr>
+Subject: [PATCH 2/2 v2] Add RADOS API lock tests
+Date: Tue,  4 Jun 2013 12:52:08 +0300
+Message-ID: <1370339528-26872-3-git-send-email-philipgian@grnet.gr>
 References: <1370339528-26872-1-git-send-email-philipgian@grnet.gr>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:41102 "EHLO
 	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752641Ab3FDJw4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 05:52:56 -0400
+	by vger.kernel.org with ESMTP id S1752665Ab3FDJw6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 05:52:58 -0400
 In-Reply-To: <1370339528-26872-1-git-send-email-philipgian@grnet.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: josh.durgin@inktank.com, synnefo-devel@googlegroups.com, Filippos Giannakos <philipgian@grnet.gr>
 
-Add functions to the librados C/C++ API, to take advantage and utilize the
-advisory locking system offered by RADOS.
+Add tests for the advisory locking API calls.
 
 Signed-off-by: Filippos Giannakos <philipgian@grnet.gr>
 ---
- src/Makefile.am                |    5 +-
- src/include/rados/librados.h   |  102 ++++++++++++++++++++++-
- src/include/rados/librados.hpp |   29 +++++++
- src/librados/librados.cc       |  180 ++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 314 insertions(+), 2 deletions(-)
+ src/Makefile.am           |    6 +
+ src/test/librados/lock.cc |  301 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 307 insertions(+)
+ create mode 100644 src/test/librados/lock.cc
 
 diff --git a/src/Makefile.am b/src/Makefile.am
-index 5e17687..3b95662 100644
+index 3b95662..ccabf19 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -357,7 +357,10 @@ librados_SOURCES = \
- 	librados/RadosClient.cc \
- 	librados/IoCtxImpl.cc \
- 	osdc/Objecter.cc \
--	osdc/Striper.cc
-+	osdc/Striper.cc \
-+	cls/lock/cls_lock_client.cc \
-+	cls/lock/cls_lock_types.cc \
-+	cls/lock/cls_lock_ops.cc
- librados_la_SOURCES = ${librados_SOURCES}
- librados_la_CFLAGS = ${CRYPTO_CFLAGS} ${AM_CFLAGS}
- librados_la_CXXFLAGS = ${AM_CXXFLAGS}
-diff --git a/src/include/rados/librados.h b/src/include/rados/librados.h
-index a575042..cf38e01 100644
---- a/src/include/rados/librados.h
-+++ b/src/include/rados/librados.h
-@@ -24,7 +24,7 @@ extern "C" {
- #endif
+@@ -1015,6 +1015,12 @@ ceph_test_rados_api_misc_LDADD =  librados.la ${UNITTEST_STATIC_LDADD}
+ ceph_test_rados_api_misc_CXXFLAGS = ${AM_CXXFLAGS} ${UNITTEST_CXXFLAGS}
+ bin_DEBUGPROGRAMS += ceph_test_rados_api_misc
  
- #define LIBRADOS_VER_MAJOR 0
--#define LIBRADOS_VER_MINOR 52
-+#define LIBRADOS_VER_MINOR 53
- #define LIBRADOS_VER_EXTRA 0
- 
- #define LIBRADOS_VERSION(maj, min, extra) ((maj << 16) + (min << 8) + extra)
-@@ -33,6 +33,11 @@ extern "C" {
- 
- #define LIBRADOS_SUPPORTS_WATCH 1
- 
-+/* RADOS lock flags
-+ * They are also defined in cls_lock_types.h. Keep them in sync!
-+ */
-+#define LIBRADOS_LOCK_FLAG_RENEW 0x1
++ceph_test_rados_api_lock_SOURCES = test/librados/lock.cc test/librados/test.cc
++ceph_test_rados_api_lock_LDFLAGS = ${AM_LDFLAGS}
++ceph_test_rados_api_lock_LDADD =  librados.la ${UNITTEST_STATIC_LDADD}
++ceph_test_rados_api_lock_CXXFLAGS = ${AM_CXXFLAGS} ${UNITTEST_CXXFLAGS}
++bin_DEBUGPROGRAMS += ceph_test_rados_api_lock
 +
- /**
-  * @defgroup librados_h_xattr_comp xattr comparison operations
-  * @note BUG: there's no way to use these in the C api
-@@ -1571,6 +1576,101 @@ int rados_notify(rados_ioctx_t io, const char *o, uint64_t ver, const char *buf,
- 
- /** @} Watch/Notify */
- 
-+/**
-+ * Take an exclusive lock on an object.
-+ *
-+ * @param io the context to operate in
-+ * @param oid the name of the object
-+ * @param name the name of the lock
-+ * @param cookie user-defined identifier for this instance of the lock
-+ * @param desc user-defined lock description
-+ * @param duration the duration of the lock. Set to NULL for infinite duration.
-+ * @param flags lock flags
-+ * @returns 0 on success, negative error code on failure
-+ * @returns -EBUSY if the lock is already held by another (client, cookie) pair
-+ * @returns -EEXIST if the lock is already held by the same (client, cookie) pair
-+ */
-+int rados_lock_exclusive(rados_ioctx_t io, const char * o, const char * name,
-+	       const char * cookie, const char * desc, struct timeval * duration,
-+	       uint8_t flags);
+ ceph_test_libcephfs_SOURCES = test/libcephfs/test.cc test/libcephfs/readdir_r_cb.cc test/libcephfs/caps.cc
+ ceph_test_libcephfs_LDFLAGS = $(PTHREAD_CFLAGS) ${AM_LDFLAGS}
+ ceph_test_libcephfs_LDADD =  ${UNITTEST_STATIC_LDADD} libcephfs.la
+diff --git a/src/test/librados/lock.cc b/src/test/librados/lock.cc
+new file mode 100644
+index 0000000..1d33d46
+--- /dev/null
++++ b/src/test/librados/lock.cc
+@@ -0,0 +1,301 @@
++#include "include/rados/librados.h"
++#include "include/rados/librados.hpp"
++#include "test/librados/test.h"
++#include "cls/lock/cls_lock_client.h"
 +
-+/**
-+ * Take a shared lock on an object.
-+ *
-+ * @param io the context to operate in
-+ * @param o the name of the object
-+ * @param name the name of the lock
-+ * @param cookie user-defined identifier for this instance of the lock
-+ * @param tag The tag of the lock
-+ * @param desc user-defined lock description
-+ * @param duration the duration of the lock. Set to NULL for infinite duration.
-+ * @param flags lock flags
-+ * @returns 0 on success, negative error code on failure
-+ * @returns -EBUSY if the lock is already held by another (client, cookie) pair
-+ * @returns -EEXIST if the lock is already held by the same (client, cookie) pair
-+ */
-+int rados_lock_shared(rados_ioctx_t io, const char * o, const char * name,
-+	       const char * cookie, const char * tag, const char * desc,
-+	       struct timeval * duration, uint8_t flags);
++#include <algorithm>
++#include <errno.h>
++#include "gtest/gtest.h"
++#include <sys/time.h>
 +
-+/**
-+ * Release a shared or exclusive lock on an object.
-+ *
-+ * @param io the context to operate in
-+ * @param o the name of the object
-+ * @param name the name of the lock
-+ * @param cookie user-defined identifier for the instance of the lock
-+ * @returns 0 on success, negative error code on failure
-+ * @returns -ENOENT if the lock is not held by the specified (client, cookie) pair
-+ */
-+int rados_unlock(rados_ioctx_t io, const char *o, const char *name,
-+		 const char *cookie);
++using namespace librados;
 +
-+/**
-+ * List clients that have locked the named object lock and information about
-+ * the lock.
-+ *
-+ * The number of bytes required in each buffer is put in the
-+ * corresponding size out parameter. If any of the provided buffers
-+ * are too short, -ERANGE is returned after these sizes are filled in.
-+ *
-+ * @param io the context to operate in
-+ * @param o the name of the object
-+ * @param name the name of the lock
-+ * @param exclusive where to store whether the lock is exclusive (1) or shared (0)
-+ * @param tag where to store the tag associated with the object lock
-+ * @param tag_len number of bytes in tag buffer
-+ * @param clients buffer in which locker clients are stored, separated by '\0'
-+ * @param clients_len number of bytes in the clients buffer
-+ * @param cookies buffer in which locker cookies are stored, separated by '\0'
-+ * @param cookies_len number of bytes in the cookies buffer
-+ * @param addrs buffer in which locker addresses are stored, separated by '\0'
-+ * @param addrs_len number of bytes in the clients buffer
-+ * @returns number of lockers on success, negative error code on failure
-+ * @returns -ERANGE if any of the buffers are too short
-+ */
-+ssize_t rados_list_lockers(rados_ioctx_t io, const char *o,
-+			   const char *name, int *exclusive,
-+			   char *tag, size_t *tag_len,
-+			   char *clients, size_t *clients_len,
-+			   char *cookies, size_t *cookies_len,
-+			   char *addrs, size_t *addrs_len);
-+
-+/**
-+ * Releases a shared or exclusive lock on an object, which was taken by the
-+ * specified client.
-+ *
-+ * @param io the context to operate in
-+ * @param o the name of the object
-+ * @param name the name of the lock
-+ * @param client the client currently holding the lock
-+ * @param cookie user-defined identifier for the instance of the lock
-+ * @returns 0 on success, negative error code on failure
-+ * @returns -ENOENT if the lock is not held by the specified (client, cookie) pair
-+ * @returns -EINVAL if the client cannot be parsed
-+ */
-+int rados_break_lock(rados_ioctx_t io, const char *o, const char *name,
-+		     const char *client, const char *cookie);
- #ifdef __cplusplus
- }
- #endif
-diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hpp
-index af14a18..cbb2d3f 100644
---- a/src/include/rados/librados.hpp
-+++ b/src/include/rados/librados.hpp
-@@ -47,6 +47,12 @@ namespace librados
-     uint64_t num_rd, num_rd_kb, num_wr, num_wr_kb;
-   };
- 
-+  typedef struct {
-+    std::string client;
-+    std::string cookie;
-+    std::string address;
-+  } locker_t;
-+
-   typedef std::map<std::string, pool_stat_t> stats_map;
- 
-   typedef void *completion_t;
-@@ -488,6 +494,29 @@ namespace librados
- 
-     int selfmanaged_snap_rollback(const std::string& oid, uint64_t snapid);
- 
-+    // Advisory locking on rados objects.
-+    int lock_exclusive(const std::string &oid, const std::string &name,
-+		       const std::string &cookie,
-+		       const std::string &description,
-+		       struct timeval * duration, uint8_t flags);
-+
-+    int lock_shared(const std::string &oid, const std::string &name,
-+		    const std::string &cookie, const std::string &tag,
-+		    const std::string &description,
-+		    struct timeval * duration, uint8_t flags);
-+
-+    int unlock(const std::string &oid, const std::string &name,
-+	       const std::string &cookie);
-+
-+    int break_lock(const std::string &oid, const std::string &name,
-+		   const std::string &client, const std::string &cookie);
-+
-+    int list_lockers(const std::string &oid, const std::string &name,
-+		     int *exclusive,
-+		     std::string *tag,
-+		     std::list<librados::locker_t> *lockers);
-+
-+
-     ObjectIterator objects_begin();
-     const ObjectIterator& objects_end() const;
- 
-diff --git a/src/librados/librados.cc b/src/librados/librados.cc
-index 5e8b38f..79f9ad8 100644
---- a/src/librados/librados.cc
-+++ b/src/librados/librados.cc
-@@ -19,11 +19,13 @@
- #include "include/rados/librados.h"
- #include "include/rados/librados.hpp"
- #include "include/types.h"
-+#include <include/stringify.h>
- 
- #include "librados/AioCompletionImpl.h"
- #include "librados/IoCtxImpl.h"
- #include "librados/PoolAsyncCompletionImpl.h"
- #include "librados/RadosClient.h"
-+#include <cls/lock/cls_lock_client.h>
- 
- #include <string>
- #include <map>
-@@ -981,6 +983,83 @@ int librados::IoCtx::selfmanaged_snap_rollback(const std::string& oid, uint64_t
- 						       snapid);
- }
- 
-+int librados::IoCtx::lock_exclusive(const std::string &oid, const std::string &name,
-+				    const std::string &cookie,
-+				    const std::string &description,
-+				    struct timeval * duration, uint8_t flags)
-+{
-+  utime_t dur = utime_t();
-+  if (duration)
-+    dur.set_from_timeval(duration);
-+
-+  return rados::cls::lock::lock(this, oid, name, LOCK_EXCLUSIVE, cookie, "",
-+		  		description, dur, flags);
++TEST(LibRadosLock, LockExclusive) {
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL,  0));
++  ASSERT_EQ(-EEXIST, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
 +}
 +
-+int librados::IoCtx::lock_shared(const std::string &oid, const std::string &name,
-+				 const std::string &cookie, const std::string &tag,
-+				 const std::string &description,
-+				 struct timeval * duration, uint8_t flags)
-+{
-+  utime_t dur = utime_t();
-+  if (duration)
-+    dur.set_from_timeval(duration);
-+
-+  return rados::cls::lock::lock(this, oid, name, LOCK_SHARED, cookie, tag,
-+		  		description, dur, flags);
++TEST(LibRadosLock, LockExclusivePP) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL,  0));
++  ASSERT_EQ(-EEXIST, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
 +}
 +
-+int librados::IoCtx::unlock(const std::string &oid, const std::string &name,
-+			    const std::string &cookie)
-+{
-+  return rados::cls::lock::unlock(this, oid, name, cookie);
++TEST(LibRadosLock, LockShared) {
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ASSERT_EQ(-EEXIST, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
 +}
 +
-+int librados::IoCtx::break_lock(const std::string &oid, const std::string &name,
-+				const std::string &client, const std::string &cookie)
-+{
-+  entity_name_t locker;
-+  if (!locker.parse(client))
-+    return -EINVAL;
-+  return rados::cls::lock::break_lock(this, oid, name, cookie, locker);
++TEST(LibRadosLock, LockSharedPP) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ASSERT_EQ(-EEXIST, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
 +}
 +
-+int librados::IoCtx::list_lockers(const std::string &oid, const std::string &name,
-+				  int *exclusive,
-+				  std::string *tag,
-+				  std::list<librados::locker_t> *lockers)
-+{
-+  std::list<librados::locker_t> tmp_lockers;
-+  map<rados::cls::lock::locker_id_t, rados::cls::lock::locker_info_t> rados_lockers;
-+  std::string tmp_tag;
-+  ClsLockType tmp_type;
-+  int r = rados::cls::lock::get_lock_info(this, oid, name, &rados_lockers, &tmp_type, &tmp_tag);
-+  if (r < 0)
-+	  return r;
++TEST(LibRadosLock, LockExclusiveDur) {
++  struct timeval tv;
++  tv.tv_sec = 1;
++  tv.tv_usec = 0;
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", &tv,  0));
++  sleep(1);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
++}
 +
-+  map<rados::cls::lock::locker_id_t, rados::cls::lock::locker_info_t>::iterator map_it;
-+  for (map_it = rados_lockers.begin(); map_it != rados_lockers.end(); ++map_it) {
-+    librados::locker_t locker;
-+    locker.client = stringify(map_it->first.locker);
-+    locker.cookie = map_it->first.cookie;
-+    locker.address = stringify(map_it->second.addr);
-+    tmp_lockers.push_back(locker);
++TEST(LibRadosLock, LockExclusiveDurPP) {
++  struct timeval tv;
++  tv.tv_sec = 1;
++  tv.tv_usec = 0;
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", &tv,  0));
++  sleep(1);
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
++}
++
++TEST(LibRadosLock, LockSharedDur) {
++  struct timeval tv;
++  tv.tv_sec = 1;
++  tv.tv_usec = 0;
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", &tv, 0));
++  sleep(1);
++  ASSERT_EQ(0, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
++}
++
++TEST(LibRadosLock, LockSharedDurPP) {
++  struct timeval tv;
++  tv.tv_sec = 1;
++  tv.tv_usec = 0;
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", &tv, 0));
++  sleep(1);
++  ASSERT_EQ(0, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
++}
++
++TEST(LibRadosLock, LockRenew) {
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(-EEXIST, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, LOCK_FLAG_RENEW));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
++}
++
++TEST(LibRadosLock, LockRenewPP) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(-EEXIST, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, LOCK_FLAG_RENEW));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
++}
++
++TEST(LibRadosLock, Unlock) {
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(0, rados_unlock(ioctx, "foo", "TestLock", "Cookie"));
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL,  0));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
++}
++
++TEST(LibRadosLock, UnlockPP) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(0, ioctx.unlock("foo", "TestLock", "Cookie"));
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie", "", NULL, 0));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
++}
++
++TEST(LibRadosLock, ListLockers) {
++  int exclusive;
++  char tag[1024];
++  char clients[1024];
++  char cookies[1024];
++  char addresses[1024];
++  size_t tag_len = 1024;
++  size_t clients_len = 1024;
++  size_t cookies_len = 1024;
++  size_t addresses_len = 1024;
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  std::stringstream sstm;
++  sstm << "client." << rados_get_instance_id(cluster);
++  std::string me = sstm.str();
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ASSERT_EQ(0, rados_unlock(ioctx, "foo", "TestLock", "Cookie"));
++  ASSERT_EQ(0, rados_list_lockers(ioctx, "foo", "TestLock", &exclusive, tag, &tag_len, clients, &clients_len, cookies, &cookies_len, addresses, &addresses_len ));
++  ASSERT_EQ(0, rados_lock_shared(ioctx, "foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ASSERT_EQ(-34, rados_list_lockers(ioctx, "foo", "TestLock", &exclusive, tag, &tag_len, clients, &clients_len, cookies, &cookies_len, addresses, &addresses_len ));
++  tag_len = 1024;
++  clients_len = 1024;
++  cookies_len = 1024;
++  addresses_len = 1024;
++  ASSERT_EQ(1, rados_list_lockers(ioctx, "foo", "TestLock", &exclusive, tag, &tag_len, clients, &clients_len, cookies, &cookies_len, addresses, &addresses_len ));
++  ASSERT_EQ(0, exclusive);
++  ASSERT_EQ(0, strcmp(tag, "Tag"));
++  ASSERT_EQ(strlen("Tag") + 1, tag_len);
++  ASSERT_EQ(0, strcmp(me.c_str(), clients));
++  ASSERT_EQ(me.size() + 1, clients_len);
++  ASSERT_EQ(0, strcmp(cookies, "Cookie"));
++  ASSERT_EQ(strlen("Cookie") + 1, cookies_len);
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
++}
++
++TEST(LibRadosLock, ListLockersPP) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  std::stringstream sstm;
++  sstm << "client." << cluster.get_instance_id();
++  std::string me = sstm.str();
++  ASSERT_EQ(0, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  ASSERT_EQ(0, ioctx.unlock("foo", "TestLock", "Cookie"));
++  {
++    int exclusive;
++    std::string tag;
++    std::list<librados::locker_t> lockers;
++    ASSERT_EQ(0, ioctx.list_lockers("foo", "TestLock", &exclusive, &tag, &lockers));
 +  }
-+
-+  if (lockers)
-+    *lockers = tmp_lockers;
-+  if (tag)
-+    *tag = tmp_tag;
-+  if (exclusive) {
-+    if (tmp_type == LOCK_EXCLUSIVE)
-+      *exclusive = 1;
-+    else
-+      *exclusive = 0;
++  ASSERT_EQ(0, ioctx.lock_shared("foo", "TestLock", "Cookie", "Tag", "", NULL, 0));
++  {
++    int exclusive;
++    std::string tag;
++    std::list<librados::locker_t> lockers;
++    ASSERT_EQ(1, ioctx.list_lockers("foo", "TestLock", &exclusive, &tag, &lockers));
++    std::list<librados::locker_t>::iterator it = lockers.begin();
++    ASSERT_FALSE(lockers.end() == it);
++    ASSERT_EQ(me, it->client);
++    ASSERT_EQ("Cookie", it->cookie);
 +  }
-+
-+  return tmp_lockers.size();
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
 +}
 +
- librados::ObjectIterator librados::IoCtx::objects_begin()
- {
-   rados_list_ctx_t listh;
-@@ -2366,3 +2445,104 @@ int rados_notify(rados_ioctx_t io, const char *o, uint64_t ver, const char *buf,
-   }
-   return ctx->notify(oid, ver, bl);
- }
-+
-+extern "C" int rados_lock_exclusive(rados_ioctx_t io, const char * o,
-+			  const char * name, const char * cookie,
-+			  const char * desc, struct timeval * duration,
-+			  uint8_t flags)
-+{
-+  librados::IoCtx ctx;
-+  librados::IoCtx::from_rados_ioctx_t(io, ctx);
-+
-+  return ctx.lock_exclusive(o, name, cookie, desc, duration, flags);
++TEST(LibRadosLock, BreakLock) {
++  int exclusive;
++  char tag[1024];
++  char clients[1024];
++  char cookies[1024];
++  char addresses[1024];
++  size_t tag_len = 1024;
++  size_t clients_len = 1024;
++  size_t cookies_len = 1024;
++  size_t addresses_len = 1024;
++  rados_t cluster;
++  rados_ioctx_t ioctx;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool(pool_name, &cluster));
++  std::stringstream sstm;
++  sstm << "client." << rados_get_instance_id(cluster);
++  std::string me = sstm.str();
++  rados_ioctx_create(cluster, pool_name.c_str(), &ioctx);
++  ASSERT_EQ(0, rados_lock_exclusive(ioctx, "foo", "TestLock", "Cookie", "", NULL, 0));
++  ASSERT_EQ(1, rados_list_lockers(ioctx, "foo", "TestLock", &exclusive, tag, &tag_len, clients, &clients_len, cookies, &cookies_len, addresses, &addresses_len ));
++  ASSERT_EQ(1, exclusive);
++  ASSERT_EQ(0, strcmp(tag, ""));
++  ASSERT_EQ(1U, tag_len);
++  ASSERT_EQ(0, strcmp(me.c_str(), clients));
++  ASSERT_EQ(me.size() + 1, clients_len);
++  ASSERT_EQ(0, strcmp(cookies, "Cookie"));
++  ASSERT_EQ(strlen("Cookie") + 1, cookies_len);
++  ASSERT_EQ(0, rados_break_lock(ioctx, "foo", "TestLock", clients, "Cookie"));
++  rados_ioctx_destroy(ioctx);
++  ASSERT_EQ(0, destroy_one_pool(pool_name, &cluster));
 +}
 +
-+extern "C" int rados_lock_shared(rados_ioctx_t io, const char * o,
-+			  const char * name, const char * cookie,
-+			  const char * tag, const char * desc,
-+			  struct timeval * duration, uint8_t flags)
-+{
-+  librados::IoCtx ctx;
-+  librados::IoCtx::from_rados_ioctx_t(io, ctx);
-+
-+  return ctx.lock_shared(o, name, cookie, tag, desc, duration, flags);
-+}
-+extern "C" int rados_unlock(rados_ioctx_t io, const char *o, const char *name,
-+			    const char *cookie)
-+{
-+  librados::IoCtx ctx;
-+  librados::IoCtx::from_rados_ioctx_t(io, ctx);
-+
-+  return ctx.unlock(o, name, cookie);
-+
-+}
-+
-+extern "C" ssize_t rados_list_lockers(rados_ioctx_t io, const char *o,
-+				      const char *name, int *exclusive,
-+				      char *tag, size_t *tag_len,
-+				      char *clients, size_t *clients_len,
-+				      char *cookies, size_t *cookies_len,
-+				      char *addrs, size_t *addrs_len)
-+{
-+  librados::IoCtx ctx;
-+  librados::IoCtx::from_rados_ioctx_t(io, ctx);
-+  std::string name_str = name;
-+  std::string oid = o;
-+  std::string tag_str;
-+  int tmp_exclusive;
++TEST(LibRadosLock, BreakLockPP) {
++  int exclusive;
++  std::string tag;
 +  std::list<librados::locker_t> lockers;
-+  int r = ctx.list_lockers(oid, name_str, &tmp_exclusive, &tag_str, &lockers);
-+  if (r < 0)
-+	  return r;
-+
-+  size_t clients_total = 0;
-+  size_t cookies_total = 0;
-+  size_t addrs_total = 0;
-+  list<librados::locker_t>::const_iterator it;
-+  for (it = lockers.begin(); it != lockers.end(); ++it) {
-+    clients_total += it->client.length() + 1;
-+    cookies_total += it->cookie.length() + 1;
-+    addrs_total += it->address.length() + 1;
-+  }
-+
-+  bool too_short = ((clients_total > *clients_len) ||
-+                    (cookies_total > *cookies_len) ||
-+                    (addrs_total > *addrs_len) ||
-+                    (tag_str.length() + 1 > *tag_len));
-+  *clients_len = clients_total;
-+  *cookies_len = cookies_total;
-+  *addrs_len = addrs_total;
-+  *tag_len = tag_str.length() + 1;
-+  if (too_short)
-+    return -ERANGE;
-+
-+  strcpy(tag, tag_str.c_str());
-+  char *clients_p = clients;
-+  char *cookies_p = cookies;
-+  char *addrs_p = addrs;
-+  for (it = lockers.begin(); it != lockers.end(); ++it) {
-+    strcpy(clients_p, it->client.c_str());
-+    clients_p += it->client.length() + 1;
-+    strcpy(cookies_p, it->cookie.c_str());
-+    cookies_p += it->cookie.length() + 1;
-+    strcpy(addrs_p, it->address.c_str());
-+    addrs_p += it->address.length() + 1;
-+  }
-+  if (tmp_exclusive)
-+    *exclusive = 1;
-+  else
-+    *exclusive = 0;
-+
-+  return lockers.size();
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++  std::stringstream sstm;
++  sstm << "client." << cluster.get_instance_id();
++  std::string me = sstm.str();
++  ASSERT_EQ(0, ioctx.lock_exclusive("foo", "TestLock", "Cookie",  "", NULL, 0));
++  ASSERT_EQ(1, ioctx.list_lockers("foo", "TestLock", &exclusive, &tag, &lockers));
++  std::list<librados::locker_t>::iterator it = lockers.begin();
++  ASSERT_FALSE(lockers.end() == it);
++  ASSERT_EQ(me, it->client);
++  ASSERT_EQ("Cookie", it->cookie);
++  ASSERT_EQ(0, ioctx.break_lock("foo", "TestLock", it->client, "Cookie"));
++  ioctx.close();
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
 +}
-+
-+extern "C" int rados_break_lock(rados_ioctx_t io, const char *o,
-+				const char *name, const char *client,
-+				const char *cookie)
-+{
-+  librados::IoCtx ctx;
-+  librados::IoCtx::from_rados_ioctx_t(io, ctx);
-+
-+  return ctx.break_lock(o, name, client, cookie);
-+}
-+
 -- 
 1.7.10.4
 
