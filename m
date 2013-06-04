@@ -1,29 +1,37 @@
-From: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
-Subject: libcephfs: Open-By-Handle API question
-Date: Tue, 4 Jun 2013 10:14:32 +0000
-Message-ID: <941FC8BE87ADE64D90E4EB6CD55451770B4DE972@EPBYMINSA0032.epam.com>
+From: Roman Alekseev <rs.alekseev@gmail.com>
+Subject: Operation per second meanining
+Date: Tue, 04 Jun 2013 14:26:09 +0400
+Message-ID: <51ADC0C1.5000105@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from evbyminsa0039.epam.com ([217.21.63.35]:8218 "EHLO
-	EVBYMINSA0039.epam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752968Ab3FDKUE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 06:20:04 -0400
-Content-Language: ru-RU
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:45463 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751281Ab3FDK0N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jun 2013 06:26:13 -0400
+Received: by mail-lb0-f170.google.com with SMTP id t11so466296lbd.29
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Jun 2013 03:26:10 -0700 (PDT)
+Received: from [192.168.1.116] ([81.195.203.34])
+        by mx.google.com with ESMTPSA id c1sm11970029lae.9.2013.06.04.03.26.09
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 04 Jun 2013 03:26:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Ceph developers,
+Hello,
 
-in order to represent NFS-frontend to CephFS data storage we are trying to use innovative Open-By-Handle API from 'src/include/cephfs/libcephfs.h' file, which is of 'wip-libcephfs' branch at the moment. API looks quite consistent and useful but we couldn't find a method to get a pointer to root inode of the mounted Ceph filesystem.
+Please help me to understand op/s (operation per second) value in 'pgmap 
+v71520: 3352 pgs: 3352 active+clean; 212 GB data, 429 GB used, 23444 GB 
+/ 23874 GB avail; 89237KB/s wr, 24op/s' line?
+What does "operation" mean?
 
-At the moment we have found only one place, where it could be fetched from: an 'Inode* root' member from the 'Client' class ('src/client/Client.h') but it is in 'protected' section, so some hack is needed (e.g. to introduce a Client's descendant, which is providing a method to acces this protected member). Do you know, how to fetch a pointer to the root inode of the mounted Ceph filesystem without any hacking (using just an official CephFS API only)?
+Thanks
 
-Thank you and best wishes,
-Ilya V. Storozhilov
-EPAM Systems
-Lead Software Engineer
+-- 
+Kind regards,
 
-P.S. What do you think about to make 'Open-By-Handle' API to be a primary and not low-level API to CephFS and to make POSIX-like API to be just a helper addendum to it?
+R. Alekseev
+
