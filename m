@@ -1,53 +1,52 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/2 v2] librados: Add RADOS locks to the C/C++ API
-Date: Wed, 05 Jun 2013 13:40:35 -0700
-Message-ID: <51AFA243.9060609@inktank.com>
-References: <1370339528-26872-1-git-send-email-philipgian@grnet.gr>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: Re: two osd stack on peereng after start osd to recovery
+Date: Thu, 6 Jun 2013 01:20:31 +0200
+Message-ID: <CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw@mail.gmail.com>
+References: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:35078 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757338Ab3FEUks (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jun 2013 16:40:48 -0400
-Received: by mail-pd0-f173.google.com with SMTP id v10so2353160pde.32
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Jun 2013 13:40:47 -0700 (PDT)
-In-Reply-To: <1370339528-26872-1-git-send-email-philipgian@grnet.gr>
+Received: from mail-qe0-f41.google.com ([209.85.128.41]:54323 "EHLO
+	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757711Ab3FEXUd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jun 2013 19:20:33 -0400
+Received: by mail-qe0-f41.google.com with SMTP id b4so1501177qen.28
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Jun 2013 16:20:31 -0700 (PDT)
+In-Reply-To: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Filippos Giannakos <philipgian@grnet.gr>
-Cc: ceph-devel@vger.kernel.org, synnefo-devel@googlegroups.com
+To: ceph-devel@vger.kernel.org
 
-On 06/04/2013 02:52 AM, Filippos Giannakos wrote:
-> Hi team,
->
-> This set of patches export the RADOS advisory locking functionality to the C/C++
-> API.
-> They have been refactored to incorporate Josh suggestions from his review:
->   * Always set tag to "" for exclusive lock
->   * Add duration argument to lock_{exclusive, shared}
->   * Add lock flags to librados.h
->   * Return -EINVAL on client parsing error
->   * Remove unneeded std::string convertions
->   * Typos/style fixes
->
-> Kind Regards,
-> Filippos
->
-> Filippos Giannakos (2):
->    Add RADOS lock mechanism to the librados C/C++ API.
->    Add RADOS API lock tests
->
->   src/Makefile.am                |   11 +-
->   src/include/rados/librados.h   |  102 +++++++++++++-
->   src/include/rados/librados.hpp |   29 ++++
->   src/librados/librados.cc       |  180 ++++++++++++++++++++++++
->   src/test/librados/lock.cc      |  301 ++++++++++++++++++++++++++++++++++++++++
->   5 files changed, 621 insertions(+), 2 deletions(-)
->   create mode 100644 src/test/librados/lock.cc
->
+hi,
+I have again the same problem.
+Have you got any idea?
 
-Applied, thanks!
+--
+Regards
+Dominik
 
-Josh
+2013/5/23 Dominik Mostowiec <dominikmostowiec@gmail.com>:
+> Hi,
+> I changed disk after failure (osd.155).
+> When osd.155 start on empty disk, and starts recovery, two osd stack
+> on peering (108 and 71).
+> Logs in attachment.
+> Restart (osd 108,71) helps.
+> ceph -v
+> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+>
+> setup:
+>
+> 6 servers x 26 osd
+> 6 x mons
+> journal and data on the same disk
+>
+> Regards
+>
+> Dominik
+
+
+
+-- 
+Pozdrawiam
+Dominik
