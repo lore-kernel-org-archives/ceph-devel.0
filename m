@@ -1,67 +1,54 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.61.3 released
-Date: Thu, 6 Jun 2013 11:56:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306050828260.18873@cobra.newdream.net>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Re: How many Pipe per Ceph OSD daemon will keep?
+Date: Thu, 6 Jun 2013 22:37:41 +0000
+Message-ID: <4D5925EB-1AE8-4641-8369-0ED8881476F1@intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC01E172F6@SHSMSX102.ccr.corp.intel.com>,<CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35839 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752601Ab3FFS4u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jun 2013 14:56:50 -0400
+Received: from mga11.intel.com ([192.55.52.93]:16415 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753015Ab3FFWho (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 6 Jun 2013 18:37:44 -0400
+In-Reply-To: <CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-This is a much-anticipated point release for the v0.61 Cuttlefish stable 
-series. It resolves a number of issues, primarily with monitor stability 
-and leveldb trimming. All v0.61.x uses are encouraged to upgrade.
-
-Upgrading from bobtail:
-
- * There is one known problem with mon upgrades from bobtail. If the 
-   ceph-mon conversion on startup is aborted or fails for some reason, we 
-   do not correctly error out, but instead continue with (in certain cases) odd 
-   results. Please be careful if you have to restart the mons during the 
-   upgrade. A 0.61.4 release with a fix will be out shortly.
- * In the meantime, for current cuttlefish users, 0.61.3 is safe to use.
-
-Notable changes since v0.61.2:
-
- * mon: paxos state trimming fix (resolves runaway disk usage)
- * mon: finer-grained compaction on trim
- * mon: discard messages from disconnected clients (lowers load)
- * mon: leveldb compaction and other stats available via admin socket
- * mon: async compaction (lower overhead)
- * mon: fix bug incorrectly marking osds down with insufficient failure 
-   reports
- * osd: fixed small bug in pg request map
- * osd: avoid rewriting pg info on every osdmap
- * osd: avoid internal heartbeta timeouts when scrubbing very large objects
- * osd: fix narrow race with journal replay
- * mon: fixed narrow pg split race
- * rgw: fix leaked space when copying object
- * rgw: fix iteration over large/untrimmed usage logs
- * rgw: fix locking issue with ops log socket
- * rgw: require matching version of librados
- * librbd: make image creation defaults configurable (e.g., create format 2 
-   images via qemu-img)
- * fix units in 'ceph df' output
- * debian: fix prerm/postinst hooks to start/stop daemons appropriately
- * upstart: allow uppercase daemons names (and thus hostnames)
- * sysvinit: fix enumeration of local daemons by type
- * sysvinit: fix osd weight calcuation when using -a
- * fix build on unsigned char platforms (e.g., arm)
-
-For more detailed information, see the release notes and 
-complete changelog:
-
- * http://ceph.com/docs/master/release-notes/#v0-61-2-cuttlefish
- * http://ceph.com/docs/master/_downloads/v0.61.3.txt
-
-You can get v0.61.3 from the usual places:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.61.3.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+QnV0IGluIGNlcGhfdXNlcixNYXJrLCBhbmQgc29tZSB1c2VycyBhcmUgcmVhbGx5IGRpc2N1c3Np
+bmcgc29tZSBzdXBlcm1pY3JvIGNoYXNzaXMgdGhhdCBjYW4gaGF2ZSAyNCBzcGluZGxlcyBwZXIg
+MnUgb3IgMzYvNDggc3BpbmRsZXMgcGVyIDRVDQoNCmV2ZW4gd2l0aCAyMCBvc2RzIHBlciBub2Rl
+LHRoZSB0aHJlYWQgbnVtIHdpbGwgbW9yZSB0aGFuIDUwMDAsYW5kIGlmIHRha2UgaW50ZXJuYWwg
+aGVhcnRiZWF0L3JlcGxpY2F0aW9uIHBpcGUgaW50byBhY2NvdW50LCBpdCBzaG91bGQgYmUgYXJv
+dW5kIDEwSyB0aHJlYWRzLiBUaGlzIGlzIHN0aWxsIHRvbyBoaWdoIGZvciA4IGNvcmUgb3IgMTYg
+Y29yZSBjcHUvY3B1cyBhbmQgd2lsbCB3YXN0ZSBhIGxvdCBvZiBjeWNsZXMgaW4gY29udGV4dCBz
+d2l0Y2hpbmguDQoNCrei19TO0rXEIGlQaG9uZQ0KDQrU2iAyMDEzLTYtN6OsMDoyMaOsIkdyZWdv
+cnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4g0LS1wKO6DQoNCj4gT24gVGh1LCBKdW4gNiwg
+MjAxMyBhdCAxMjoyNSBBTSwgQ2hlbiwgWGlhb3hpIDx4aWFveGkuY2hlbkBpbnRlbC5jb20+IHdy
+b3RlOg0KPj4gDQo+PiBIaSwNCj4+ICAgICAgICAgRnJvbSB0aGUgY29kZSwgZWFjaCBwaXBlIChj
+b250YWlucyBhIFRDUCBzb2NrZXQpIHdpbGwgZm9yayAyIHRocmVhZHMsIGEgcmVhZGVyIGFuZCBh
+IHdyaXRlci4gV2UgcmVhbGx5IG9ic2VydmUgMTAwKyB0aHJlYWRzIHBlciBPU0QgZGFlbW9uIHdp
+dGggMzAgaW5zdGFuY2VzIG9mIHJhZG9zIGJlbmNoIGFzIGNsaWVudHMuDQo+PiAgICAgICAgIEJ1
+dCB0aGlzIG51bWJlciBzZWVtcyBhIGJpdCBjcmF6eSwgaWYgSSBoYXZlIGEgNDAgZGlza3Mgbm9k
+ZSwgdGh1cyBJIHdpbGwgaGF2ZSA0MCBPU0RzLCB3ZSBwbGFuIHRvIGhhdmUgNiBzdWNoIG5vZGVz
+IHRvIHNlcnZlIDEyMCBWTXMgZnJvbSBPcGVuU3RhY2suICBTaW5jZSBhIFJCRCBpcyBkaXN0cmli
+dXRlZCBhY3Jvc3MgYWxsIHRoZSBPU0RzLCB3ZSBjYW4gZXhwZWN0LCBmb3IgZXZlcnkgc2luZ2xl
+IE9TRCBkYWVtb24sIHdlIHdpbGwgaGF2ZSAxMjAgVENQIHNvY2tldCwgdGhhdCBtZWFucyAyNDAg
+dGhyZWFkcy4gVGh1cyBmb3IgNDAgT1NEcyBwZXIgbm9kZSwgd2Ugd2lsbCBoYXZlIDk2MDAgdGhy
+ZWFkcyBwZXIgbm9kZS4gVGhpcyB0aHJlYWQgbnVtYmVyIHNlZW1zIGluY3JlZGlibGUuDQo+PiAg
+ICAgICAgIElzIHRoZXJlIGFueSBpbnRlcm5hbCBtZWNoYW5pc20gdG8gdHJhY2sgYW5kIG1hbmFn
+ZSB0aGUgbnVtYmVyIG9mIHBpcGVzID8gYW5kIGFub3RoZXIgcXVlc3Rpb24gbWF5IGJlICwgd2h5
+IHdlIG5lZWQgc3VjaCBhIGxvdCB0aHJlYWRzID8gd2h5IG5vdCBlcG9sbD8NCj4gWWVwLCByaWdo
+dCBub3cgdGhlIE9TRCBtYWludGFpbnMgdHdvIHRocmVhZHMgcGVyIGNvbm5lY3Rpb24uIFRoYXQN
+Cj4gaGFzbid0IGJlZW4gYSBwcm9ibGVtIHNvIGZhciAodGhleSdyZSBmYWlybHkgY2hlYXAgdGhy
+ZWFkcykgYW5kIHBlb3BsZQ0KPiBydW4gaW50byBvdGhlciBsaW1pdHMgbXVjaCBlYXJsaWVyIKGq
+IDQwIE9TRHMvbm9kZSBmb3IgaW5zdGFuY2Ugd291bGQNCj4gcmVxdWlyZSBhIGxvdCBvZiBjb21w
+dXRlIHBvd2VyIGFueXdheS4NCj4gZXBvbGwgaXMgYSBnb29kIGlkZWEgYW5kIGlzIHNvbWV0aGlu
+ZyB3ZSdyZSBhd2FyZSBvZiwgYnV0IGl0IGhhc24ndA0KPiBiZWVuIG5lY2Vzc2FyeSB5ZXQgYW5k
+IHdvdWxkIGludm9sdmUgbXVja2luZyBhcm91bmQgd2l0aCBzb21lIGZhaXJseQ0KPiBzZW5zaXRp
+dmUgY29yZSBjb2RlIHNvIGl0IGhhc24ndCByaXNlbiB0byB0aGUgdG9wIG9mIGFueWJvZHkncyBx
+dWV1ZS4NCj4gLUdyZWcNCj4gU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3Rhbmsu
+Y29tIHwgaHR0cDovL2NlcGguY29tDQo=
