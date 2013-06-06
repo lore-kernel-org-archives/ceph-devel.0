@@ -1,58 +1,67 @@
-From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: two osd stack on peereng after start osd to
-	recovery
-Date: Thu, 6 Jun 2013 11:21:39 -0700
-Message-ID: <CAPYLRzjKJtVFbD43ZVsSY0DPu3EQhfXU71CWrp5B0b1JG6LUqQ@mail.gmail.com>
-References: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
-	<CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.61.3 released
+Date: Thu, 6 Jun 2013 11:56:47 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306050828260.18873@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35839 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752601Ab3FFS4u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jun 2013 14:56:50 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-We don't have your logs (vger doesn't forward them). Can you describe
-the situation more completely in terms of what failures occurred and
-what steps you took?
-(Also, this should go on ceph-users. Adding that to the recipients list.)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+This is a much-anticipated point release for the v0.61 Cuttlefish stable 
+series. It resolves a number of issues, primarily with monitor stability 
+and leveldb trimming. All v0.61.x uses are encouraged to upgrade.
 
+Upgrading from bobtail:
 
-On Wed, Jun 5, 2013 at 4:20 PM, Dominik Mostowiec
-<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> hi,
-> I have again the same problem.
-> Have you got any idea?
->
-> --
-> Regards
-> Dominik
->
-> 2013/5/23 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
->> Hi,
->> I changed disk after failure (osd.155).
->> When osd.155 start on empty disk, and starts recovery, two osd stack
->> on peering (108 and 71).
->> Logs in attachment.
->> Restart (osd 108,71) helps.
->> ceph -v
->> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
->>
->> setup:
->>
->> 6 servers x 26 osd
->> 6 x mons
->> journal and data on the same disk
+ * There is one known problem with mon upgrades from bobtail. If the 
+   ceph-mon conversion on startup is aborted or fails for some reason, we 
+   do not correctly error out, but instead continue with (in certain cases) odd 
+   results. Please be careful if you have to restart the mons during the 
+   upgrade. A 0.61.4 release with a fix will be out shortly.
+ * In the meantime, for current cuttlefish users, 0.61.3 is safe to use.
+
+Notable changes since v0.61.2:
+
+ * mon: paxos state trimming fix (resolves runaway disk usage)
+ * mon: finer-grained compaction on trim
+ * mon: discard messages from disconnected clients (lowers load)
+ * mon: leveldb compaction and other stats available via admin socket
+ * mon: async compaction (lower overhead)
+ * mon: fix bug incorrectly marking osds down with insufficient failure 
+   reports
+ * osd: fixed small bug in pg request map
+ * osd: avoid rewriting pg info on every osdmap
+ * osd: avoid internal heartbeta timeouts when scrubbing very large objects
+ * osd: fix narrow race with journal replay
+ * mon: fixed narrow pg split race
+ * rgw: fix leaked space when copying object
+ * rgw: fix iteration over large/untrimmed usage logs
+ * rgw: fix locking issue with ops log socket
+ * rgw: require matching version of librados
+ * librbd: make image creation defaults configurable (e.g., create format 2 
+   images via qemu-img)
+ * fix units in 'ceph df' output
+ * debian: fix prerm/postinst hooks to start/stop daemons appropriately
+ * upstart: allow uppercase daemons names (and thus hostnames)
+ * sysvinit: fix enumeration of local daemons by type
+ * sysvinit: fix osd weight calcuation when using -a
+ * fix build on unsigned char platforms (e.g., arm)
+
+For more detailed information, see the release notes and 
+complete changelog:
+
+ * http://ceph.com/docs/master/release-notes/#v0-61-2-cuttlefish
+ * http://ceph.com/docs/master/_downloads/v0.61.3.txt
+
+You can get v0.61.3 from the usual places:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.3.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
