@@ -1,51 +1,58 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: How many Pipe per Ceph OSD daemon will keep?
-Date: Thu, 6 Jun 2013 09:21:27 -0700
-Message-ID: <CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E172F6@SHSMSX102.ccr.corp.intel.com>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: two osd stack on peereng after start osd to
+	recovery
+Date: Thu, 6 Jun 2013 11:21:39 -0700
+Message-ID: <CAPYLRzjKJtVFbD43ZVsSY0DPu3EQhfXU71CWrp5B0b1JG6LUqQ@mail.gmail.com>
+References: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
+	<CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:40670 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751190Ab3FFQV2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jun 2013 12:21:28 -0400
-Received: by mail-lb0-f176.google.com with SMTP id z5so3237497lbh.21
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Jun 2013 09:21:27 -0700 (PDT)
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E172F6@SHSMSX102.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Jun 6, 2013 at 12:25 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> w=
-rote:
->
-> Hi,
->          From the code, each pipe (contains a TCP socket) will fork 2=
- threads, a reader and a writer. We really observe 100+ threads per OSD=
- daemon with 30 instances of rados bench as clients.
->          But this number seems a bit crazy, if I have a 40 disks node=
-, thus I will have 40 OSDs, we plan to have 6 such nodes to serve 120 V=
-Ms from OpenStack.  Since a RBD is distributed across all the OSDs, we =
-can expect, for every single OSD daemon, we will have 120 TCP socket, t=
-hat means 240 threads. Thus for 40 OSDs per node, we will have 9600 thr=
-eads per node. This thread number seems incredible.
->          Is there any internal mechanism to track and manage the numb=
-er of pipes ? and another question may be , why we need such a lot thre=
-ads ? why not epoll?
-Yep, right now the OSD maintains two threads per connection. That
-hasn't been a problem so far (they're fairly cheap threads) and people
-run into other limits much earlier =97 40 OSDs/node for instance would
-require a lot of compute power anyway.
-epoll is a good idea and is something we're aware of, but it hasn't
-been necessary yet and would involve mucking around with some fairly
-sensitive core code so it hasn't risen to the top of anybody's queue.
+We don't have your logs (vger doesn't forward them). Can you describe
+the situation more completely in terms of what failures occurred and
+what steps you took?
+(Also, this should go on ceph-users. Adding that to the recipients list.)
 -Greg
 Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+On Wed, Jun 5, 2013 at 4:20 PM, Dominik Mostowiec
+<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> hi,
+> I have again the same problem.
+> Have you got any idea?
+>
+> --
+> Regards
+> Dominik
+>
+> 2013/5/23 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>> Hi,
+>> I changed disk after failure (osd.155).
+>> When osd.155 start on empty disk, and starts recovery, two osd stack
+>> on peering (108 and 71).
+>> Logs in attachment.
+>> Restart (osd 108,71) helps.
+>> ceph -v
+>> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+>>
+>> setup:
+>>
+>> 6 servers x 26 osd
+>> 6 x mons
+>> journal and data on the same disk
