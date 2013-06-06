@@ -1,54 +1,40 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: How many Pipe per Ceph OSD daemon will keep?
-Date: Thu, 6 Jun 2013 22:37:41 +0000
-Message-ID: <4D5925EB-1AE8-4641-8369-0ED8881476F1@intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E172F6@SHSMSX102.ccr.corp.intel.com>,<CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
+Date: Thu, 6 Jun 2013 15:45:47 -0700
+Message-ID: <CAPYLRzhcXGFvz+4mK45f738xbSSjhxi4veUZZ9vURtLWW=8mag@mail.gmail.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC01E172F6@SHSMSX102.ccr.corp.intel.com>
+	<CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
+	<4D5925EB-1AE8-4641-8369-0ED8881476F1@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:16415 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753015Ab3FFWho (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 6 Jun 2013 18:37:44 -0400
-In-Reply-To: <CAPYLRzjLtvcp3ZDmtT4YRH7itYz1o_1P92uUKMeGj1mETscEJw@mail.gmail.com>
-Content-Language: zh-CN
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <4D5925EB-1AE8-4641-8369-0ED8881476F1-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-QnV0IGluIGNlcGhfdXNlcixNYXJrLCBhbmQgc29tZSB1c2VycyBhcmUgcmVhbGx5IGRpc2N1c3Np
-bmcgc29tZSBzdXBlcm1pY3JvIGNoYXNzaXMgdGhhdCBjYW4gaGF2ZSAyNCBzcGluZGxlcyBwZXIg
-MnUgb3IgMzYvNDggc3BpbmRsZXMgcGVyIDRVDQoNCmV2ZW4gd2l0aCAyMCBvc2RzIHBlciBub2Rl
-LHRoZSB0aHJlYWQgbnVtIHdpbGwgbW9yZSB0aGFuIDUwMDAsYW5kIGlmIHRha2UgaW50ZXJuYWwg
-aGVhcnRiZWF0L3JlcGxpY2F0aW9uIHBpcGUgaW50byBhY2NvdW50LCBpdCBzaG91bGQgYmUgYXJv
-dW5kIDEwSyB0aHJlYWRzLiBUaGlzIGlzIHN0aWxsIHRvbyBoaWdoIGZvciA4IGNvcmUgb3IgMTYg
-Y29yZSBjcHUvY3B1cyBhbmQgd2lsbCB3YXN0ZSBhIGxvdCBvZiBjeWNsZXMgaW4gY29udGV4dCBz
-d2l0Y2hpbmguDQoNCrei19TO0rXEIGlQaG9uZQ0KDQrU2iAyMDEzLTYtN6OsMDoyMaOsIkdyZWdv
-cnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4g0LS1wKO6DQoNCj4gT24gVGh1LCBKdW4gNiwg
-MjAxMyBhdCAxMjoyNSBBTSwgQ2hlbiwgWGlhb3hpIDx4aWFveGkuY2hlbkBpbnRlbC5jb20+IHdy
-b3RlOg0KPj4gDQo+PiBIaSwNCj4+ICAgICAgICAgRnJvbSB0aGUgY29kZSwgZWFjaCBwaXBlIChj
-b250YWlucyBhIFRDUCBzb2NrZXQpIHdpbGwgZm9yayAyIHRocmVhZHMsIGEgcmVhZGVyIGFuZCBh
-IHdyaXRlci4gV2UgcmVhbGx5IG9ic2VydmUgMTAwKyB0aHJlYWRzIHBlciBPU0QgZGFlbW9uIHdp
-dGggMzAgaW5zdGFuY2VzIG9mIHJhZG9zIGJlbmNoIGFzIGNsaWVudHMuDQo+PiAgICAgICAgIEJ1
-dCB0aGlzIG51bWJlciBzZWVtcyBhIGJpdCBjcmF6eSwgaWYgSSBoYXZlIGEgNDAgZGlza3Mgbm9k
-ZSwgdGh1cyBJIHdpbGwgaGF2ZSA0MCBPU0RzLCB3ZSBwbGFuIHRvIGhhdmUgNiBzdWNoIG5vZGVz
-IHRvIHNlcnZlIDEyMCBWTXMgZnJvbSBPcGVuU3RhY2suICBTaW5jZSBhIFJCRCBpcyBkaXN0cmli
-dXRlZCBhY3Jvc3MgYWxsIHRoZSBPU0RzLCB3ZSBjYW4gZXhwZWN0LCBmb3IgZXZlcnkgc2luZ2xl
-IE9TRCBkYWVtb24sIHdlIHdpbGwgaGF2ZSAxMjAgVENQIHNvY2tldCwgdGhhdCBtZWFucyAyNDAg
-dGhyZWFkcy4gVGh1cyBmb3IgNDAgT1NEcyBwZXIgbm9kZSwgd2Ugd2lsbCBoYXZlIDk2MDAgdGhy
-ZWFkcyBwZXIgbm9kZS4gVGhpcyB0aHJlYWQgbnVtYmVyIHNlZW1zIGluY3JlZGlibGUuDQo+PiAg
-ICAgICAgIElzIHRoZXJlIGFueSBpbnRlcm5hbCBtZWNoYW5pc20gdG8gdHJhY2sgYW5kIG1hbmFn
-ZSB0aGUgbnVtYmVyIG9mIHBpcGVzID8gYW5kIGFub3RoZXIgcXVlc3Rpb24gbWF5IGJlICwgd2h5
-IHdlIG5lZWQgc3VjaCBhIGxvdCB0aHJlYWRzID8gd2h5IG5vdCBlcG9sbD8NCj4gWWVwLCByaWdo
-dCBub3cgdGhlIE9TRCBtYWludGFpbnMgdHdvIHRocmVhZHMgcGVyIGNvbm5lY3Rpb24uIFRoYXQN
-Cj4gaGFzbid0IGJlZW4gYSBwcm9ibGVtIHNvIGZhciAodGhleSdyZSBmYWlybHkgY2hlYXAgdGhy
-ZWFkcykgYW5kIHBlb3BsZQ0KPiBydW4gaW50byBvdGhlciBsaW1pdHMgbXVjaCBlYXJsaWVyIKGq
-IDQwIE9TRHMvbm9kZSBmb3IgaW5zdGFuY2Ugd291bGQNCj4gcmVxdWlyZSBhIGxvdCBvZiBjb21w
-dXRlIHBvd2VyIGFueXdheS4NCj4gZXBvbGwgaXMgYSBnb29kIGlkZWEgYW5kIGlzIHNvbWV0aGlu
-ZyB3ZSdyZSBhd2FyZSBvZiwgYnV0IGl0IGhhc24ndA0KPiBiZWVuIG5lY2Vzc2FyeSB5ZXQgYW5k
-IHdvdWxkIGludm9sdmUgbXVja2luZyBhcm91bmQgd2l0aCBzb21lIGZhaXJseQ0KPiBzZW5zaXRp
-dmUgY29yZSBjb2RlIHNvIGl0IGhhc24ndCByaXNlbiB0byB0aGUgdG9wIG9mIGFueWJvZHkncyBx
-dWV1ZS4NCj4gLUdyZWcNCj4gU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3Rhbmsu
-Y29tIHwgaHR0cDovL2NlcGguY29tDQo=
+On Thu, Jun 6, 2013 at 3:37 PM, Chen, Xiaoxi <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> But in ceph_user,Mark, and some users are really discussing some supermicro chassis that can have 24 spindles per 2u or 36/48 spindles per 4U
+>
+> even with 20 osds per node,the thread num will more than 5000,and if take internal heartbeat/replication pipe into account, it should be around 10K threads. This is still too high for 8 core or 16 core cpu/cpus and will waste a lot of cycles in context switchinh.
+
+If it makes you feel better, these messenger threads spend most of
+their time sleeping on poll() or a condition variable. They will
+certainly turn out to be a problem at some point and we're prepared to
+handle that, but like I said, it's just not an issue anybody's hit yet
+and we have a lot of other feature work to be getting on with. If
+somebody would like to contribute code the Pipe stuff, while
+complicated, is at least relatively isolated, and we'd be more than
+happy to go over it!
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
