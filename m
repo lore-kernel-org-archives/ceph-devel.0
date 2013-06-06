@@ -1,52 +1,38 @@
-From: Dominik Mostowiec <dominikmostowiec@gmail.com>
-Subject: Re: two osd stack on peereng after start osd to recovery
-Date: Thu, 6 Jun 2013 01:20:31 +0200
-Message-ID: <CAMNMNTxAT6esZ70OjeKTcW5rEL0Y5Tv8Xcs2x23Tj=Cx2Apudw@mail.gmail.com>
-References: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 0/3 v3] dcache: make it more scalable on large system
+Date: Thu, 6 Jun 2013 13:48:32 +1000
+Message-ID: <20130606034832.GV29338@dastard>
+References: <1369273048-60256-1-git-send-email-Waiman.Long@hp.com>
+ <20130523094201.GA24543@dastard>
+ <519E8B5F.3080905@hp.com>
+ <20130527020903.GR29466@dastard>
+ <51A624E2.3000301@hp.com>
+ <20130529184640.GA3243@fieldses.org>
+ <20130529203700.GM6123@two.firstfloor.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f41.google.com ([209.85.128.41]:54323 "EHLO
-	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757711Ab3FEXUd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jun 2013 19:20:33 -0400
-Received: by mail-qe0-f41.google.com with SMTP id b4so1501177qen.28
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Jun 2013 16:20:31 -0700 (PDT)
-In-Reply-To: <CAMNMNTyzChZPCgf-aOWJCzg-0=J9qRj3YknuBrtzWHKWFT9P8Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <autofs-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20130529203700.GM6123@two.firstfloor.org>
+Sender: autofs-owner@vger.kernel.org
+To: Andi Kleen <andi@firstfloor.org>
+Cc: "J. Bruce Fields" <bfields@fieldses.org>, Waiman Long <waiman.long@hp.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ian Kent <raven@themaw.net>, Sage Weil <sage@inktank.com>, Steve French <sfrench@samba.org>, Trond Myklebust <Trond.Myklebust@netapp.com>, Eric Paris <eparis@redhat.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, autofs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>
+List-Id: ceph-devel.vger.kernel.org
 
-hi,
-I have again the same problem.
-Have you got any idea?
+On Wed, May 29, 2013 at 10:37:00PM +0200, Andi Kleen wrote:
+> > As Dave said before, is the last path component sufficient?  Or how
+> > about an inode number?
+> 
+> Neither works, the profiler needs to find the file and read it.
+> 
+> inode searching would be incredible expensive, unless the file system
+> provided a "open-by-inode" primitive
 
---
-Regards
-Dominik
+That's effectively what fs/fhandle.c gives you.
 
-2013/5/23 Dominik Mostowiec <dominikmostowiec@gmail.com>:
-> Hi,
-> I changed disk after failure (osd.155).
-> When osd.155 start on empty disk, and starts recovery, two osd stack
-> on peering (108 and 71).
-> Logs in attachment.
-> Restart (osd 108,71) helps.
-> ceph -v
-> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
->
-> setup:
->
-> 6 servers x 26 osd
-> 6 x mons
-> journal and data on the same disk
->
-> Regards
->
-> Dominik
+Cheers,
 
-
-
+Dave.
 -- 
-Pozdrawiam
-Dominik
+Dave Chinner
+david@fromorbit.com
