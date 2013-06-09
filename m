@@ -1,108 +1,88 @@
-From: Kent Overstreet <koverstreet@google.com>
-Subject: [PATCH 12/26] rbd: Refactor bio cloning, don't clone biovecs
-Date: Sat,  8 Jun 2013 19:18:54 -0700
-Message-ID: <1370744348-15407-13-git-send-email-koverstreet@google.com>
-References: <1370744348-15407-1-git-send-email-koverstreet@google.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1370744348-15407-1-git-send-email-koverstreet@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: axboe@kernel.dk, tytso@mit.edu, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Cc: Kent Overstreet <koverstreet@google.com>, Yehuda Sadeh <yehuda@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 2/9] libceph: call r_unsafe_callback when unsafe reply
+ is received
+Date: Sat, 8 Jun 2013 23:19:39 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306082319140.18155@cobra.newdream.net>
+References: <1370315998-10418-1-git-send-email-zheng.z.yan@intel.com> <1370315998-10418-3-git-send-email-zheng.z.yan@intel.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:48456 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750931Ab3FIGTk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Jun 2013 02:19:40 -0400
+In-Reply-To: <1370315998-10418-3-git-send-email-zheng.z.yan@intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, elder@inktank.com
 
-Now that we've got drivers converted to the new immutable bvec
-primitives, bio splitting becomes much easier. In a few patches,
-bio_clone() will be changed to share the old bio's bvec instead of
-copying it, and bio_split() will do exactly what's being done here.
+This one I need to review more carefully, as I didn't fully grok the last 
+change here.
 
-Signed-off-by: Kent Overstreet <koverstreet@google.com>
-Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
----
- drivers/block/rbd.c | 64 ++---------------------------------------------------
- 1 file changed, 2 insertions(+), 62 deletions(-)
+On Tue, 4 Jun 2013, Yan, Zheng wrote:
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2a27dca..ed17d33 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1170,73 +1170,13 @@ static struct bio *bio_clone_range(struct bio *bio_src,
- 					unsigned int len,
- 					gfp_t gfpmask)
- {
--	struct bio_vec bv;
--	struct bvec_iter iter;
--	struct bvec_iter end_iter;
--	unsigned int resid;
--	unsigned int voff;
--	unsigned short vcnt;
- 	struct bio *bio;
- 
--	/* Handle the easy case for the caller */
--
--	if (!offset && len == bio_src->bi_iter.bi_size)
--		return bio_clone(bio_src, gfpmask);
--
--	if (WARN_ON_ONCE(!len))
--		return NULL;
--	if (WARN_ON_ONCE(len > bio_src->bi_iter.bi_size))
--		return NULL;
--	if (WARN_ON_ONCE(offset > bio_src->bi_iter.bi_size - len))
--		return NULL;
--
--	/* Find first affected segment... */
--
--	resid = offset;
--	bio_for_each_segment(bv, bio_src, iter) {
--		if (resid < bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	voff = resid;
--
--	/* ...and the last affected segment */
--
--	resid += len;
--	__bio_for_each_segment(bv, bio_src, end_iter, iter) {
--		if (resid <= bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	vcnt = end_iter.bi_idx = iter.bi_idx + 1;
--
--	/* Build the clone */
--
--	bio = bio_alloc(gfpmask, (unsigned int) vcnt);
-+	bio = bio_clone(bio_src, gfpmask);
- 	if (!bio)
- 		return NULL;	/* ENOMEM */
- 
--	bio->bi_bdev = bio_src->bi_bdev;
--	bio->bi_iter.bi_sector = bio_src->bi_iter.bi_sector +
--		(offset >> SECTOR_SHIFT);
--	bio->bi_rw = bio_src->bi_rw;
--	bio->bi_flags |= 1 << BIO_CLONED;
--
--	/*
--	 * Copy over our part of the bio_vec, then update the first
--	 * and last (or only) entries.
--	 */
--	memcpy(&bio->bi_io_vec[0], &bio_src->bi_io_vec[iter.bi_idx],
--			vcnt * sizeof (struct bio_vec));
--	bio->bi_io_vec[0].bv_offset += voff;
--	if (vcnt > 1) {
--		bio->bi_io_vec[0].bv_len -= voff;
--		bio->bi_io_vec[vcnt - 1].bv_len = resid;
--	} else {
--		bio->bi_io_vec[0].bv_len = len;
--	}
--
--	bio->bi_vcnt = vcnt;
-+	bio_advance(bio, offset);
- 	bio->bi_iter.bi_size = len;
- 
- 	return bio;
--- 
-1.8.3.rc1
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> We can't use !req->r_sent to check if OSD request is sent for the
+> first time, this is because __cancel_request() zeros req->r_sent
+> when OSD map changes. Rather than adding a new variable to
+> ceph_osd_request to indicate if it's sent for the first time, We
+> can call the unsafe callback only when unsafe OSD reply is received.
+> If OSD's first reply is safe, just skip calling the unsafe callback.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  net/ceph/osd_client.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 536c0e5..6972d17 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1338,10 +1338,6 @@ static void __send_request(struct ceph_osd_client *osdc,
+>  
+>  	ceph_msg_get(req->r_request); /* send consumes a ref */
+>  
+> -	/* Mark the request unsafe if this is the first timet's being sent. */
+> -
+> -	if (!req->r_sent && req->r_unsafe_callback)
+> -		req->r_unsafe_callback(req, true);
+>  	req->r_sent = req->r_osd->o_incarnation;
+>  
+>  	ceph_con_send(&req->r_osd->o_con, req->r_request);
+> @@ -1432,8 +1428,6 @@ static void handle_osds_timeout(struct work_struct *work)
+>  
+>  static void complete_request(struct ceph_osd_request *req)
+>  {
+> -	if (req->r_unsafe_callback)
+> -		req->r_unsafe_callback(req, false);
+>  	complete_all(&req->r_safe_completion);  /* fsync waiter */
+>  }
+>  
+> @@ -1560,14 +1554,20 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+>  	mutex_unlock(&osdc->request_mutex);
+>  
+>  	if (!already_completed) {
+> +		if (req->r_unsafe_callback &&
+> +		    result >= 0 && !(flags & CEPH_OSD_FLAG_ONDISK))
+> +			req->r_unsafe_callback(req, true);
+>  		if (req->r_callback)
+>  			req->r_callback(req, msg);
+>  		else
+>  			complete_all(&req->r_completion);
+>  	}
+>  
+> -	if (flags & CEPH_OSD_FLAG_ONDISK)
+> +	if (flags & CEPH_OSD_FLAG_ONDISK) {
+> +		if (req->r_unsafe_callback && already_completed)
+> +			req->r_unsafe_callback(req, false);
+>  		complete_request(req);
+> +	}
+>  
+>  done:
+>  	dout("req=%p req->r_linger=%d\n", req, req->r_linger);
+> -- 
+> 1.8.1.4
+> 
+> 
