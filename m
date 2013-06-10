@@ -1,248 +1,309 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 10 Jun 2013 08:00:17 -0700 (PDT)
-Message-ID: <20130610150017.0AFE6281E53@teuthology.front.sepia.ceph.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: General Protection Fault in 3.8.5
+Date: Mon, 10 Jun 2013 15:26:13 -0400
+Message-ID: <CACkq2mrVtCcgHyfY-ZxT2-mY4SyPqeyQagLAh9xy9LK1qJAW8A@mail.gmail.com>
+References: <CACkq2mpBF4pPmBox4uNv5xcd1aO5cyMviBruFHrij6ourByj9g@mail.gmail.com>
+ <alpine.DEB.2.00.1305061952350.11520@cobra.newdream.net> <CACkq2mp34xJhGVN747uYzMyKZ+wk7wsTxFDzJdk06ssWg=0Bmg@mail.gmail.com>
+ <CACkq2moyYMFRUEShMQffnC3tPxaagH5j8quy5q5bJeappV4oyQ@mail.gmail.com>
+ <alpine.DEB.2.00.1305200928420.16413@cobra.newdream.net> <52FF44F0-F32E-4331-AC44-A87E785A7C4B@profihost.ag>
+ <alpine.DEB.2.00.1305201118370.16413@cobra.newdream.net> <CACkq2mqdKbbmtt-9+OdaxYY=kvGZdqiw7V-2SoXzFBUg-2h91w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:23491 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751497Ab3FJPBG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 10 Jun 2013 11:01:06 -0400
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:63888 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751023Ab3FJT0f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jun 2013 15:26:35 -0400
+Received: by mail-qc0-f180.google.com with SMTP id a1so1841648qcx.39
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Jun 2013 12:26:33 -0700 (PDT)
+In-Reply-To: <CACkq2mqdKbbmtt-9+OdaxYY=kvGZdqiw7V-2SoXzFBUg-2h91w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, ceph-devel <ceph-devel@vger.kernel.org>
 
--- All Branches --
+Any idea if these patches have been merged upstream yet?  I've been
+keeping an eye out for them.
 
-Alex Elder <elder@inktank.com>
-	2013-06-07 10:15:51 -0500   wip-rbd-tests
+3.4.48 and 3.9.5 ubuntu kernel builds each came out last Friday, but I
+still haven't seen any Ceph/RBD updates in the newer builds.
 
-Babu Shanmugam <anbu@enovance.com>
-	2013-05-30 10:28:23 +0530   wip-rgw-geo-enovance
-
-Dan Mick <dan.mick@inktank.com>
-	2012-12-18 12:27:36 -0800   wip-rbd-striping
-	2013-03-15 17:27:54 -0700   wip-cephtool-stderr
-	2013-06-07 22:50:09 -0700   wip-doc
-
-David Zafman <david.zafman@inktank.com>
-	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
-	2013-03-22 18:14:10 -0700   wip-snap-test-fix
-
-Gary Lowell <gary.lowell@inktank.com>
-	2013-05-28 13:58:22 -0700   last
-
-Gary Lowell <glowell@inktank.com>
-	2013-01-28 22:49:45 -0800   wip-3930
-	2013-02-05 19:29:11 -0800   wip.cppchecker
-	2013-02-10 22:21:52 -0800   wip-3955
-	2013-02-26 19:28:48 -0800   wip-system-leveldb
-	2013-02-27 22:32:57 -0800   bobtail-leveldb
-	2013-03-01 18:55:35 -0800   wip-da-spec-1
-	2013-03-19 11:28:15 -0700   wip-3921
-	2013-04-11 23:00:05 -0700   wip-init-radosgw
-	2013-04-17 23:30:11 -0700   wip-4725
-	2013-04-21 22:06:37 -0700   wip-4752
-	2013-04-22 14:11:37 -0700   wip-4632
-	2013-05-31 11:20:40 -0700   wip-doc-prereq
-	2013-06-06 22:31:54 -0700   wip-build-doc
-
-Greg Farnum <greg@inktank.com>
-	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
-	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
-	2013-05-01 17:06:27 -0700   wip-optracker-4354
-	2013-05-31 13:28:31 -0700   wip-rgw-geo-rebase-test
-	2013-05-31 17:08:27 -0700   wip-rgw-geo-rebase
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2013-04-18 00:01:24 +0100   wip-4521-tool
-	2013-04-22 15:14:28 +0100   wip-4748
-	2013-04-24 16:42:11 +0100   wip-4521
-	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
-	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
-	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
-	2013-05-31 18:54:38 +0100   wip-mon-trim
-	2013-05-31 21:00:28 +0100   wip-mon-trim-b
-
-Joe Buck <jbbuck@gmail.com>
-	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
-	2013-05-30 23:02:32 -0700   wip-rgw-geo-enovance-buck
-	2013-06-05 12:42:28 -0700   wip-rgw-geo-buck
-
-John Wilkins <john.wilkins@inktank.com>
-	2012-12-21 15:14:37 -0800   wip-mon-docs
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-04-29 14:32:00 -0700   wip-rbd-close-image
-
-Matt Benjamin <matt@linuxbox.com>
-	2013-05-21 09:45:30 -0700   wip-libcephfs
-
-Noah Watkins <noahwatkins@gmail.com>
-	2013-01-05 11:58:38 -0800   wip-localized-read-tests
-	2013-01-11 12:49:28 -0800   wip-osx-upstream
-	2013-01-11 13:01:11 -0800   wip-osx
-	2013-02-01 10:28:26 -0800   wip-java-deb-warning
-	2013-04-22 15:23:09 -0700   wip-cls-lua
-	2013-05-30 13:29:42 -0700   wip-hadoop-doc
-
-Roald van Loon <roaldvanloon@gmail.com>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-07-14 17:40:21 -0700   wip-osd-redirect
-	2012-07-28 13:56:47 -0700   wip-journal
-	2012-11-13 08:58:57 -0800   wip-fd-simple-cache
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2012-12-07 14:38:46 -0800   wip-osd-alloc
-	2012-12-12 22:18:02 -0800   automake-python
-	2012-12-14 17:11:31 -0800   wip_cur_perf_journal
-	2012-12-27 13:38:52 -0800   wip-linuxbox
-	2013-01-06 20:39:37 -0800   wip-msg-refs
-	2013-01-16 11:39:28 -0800   wip-client-layout-temp
-	2013-01-27 11:06:08 -0800   wip-argonaut-leveldb
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-02-08 10:07:54 -0800   wip-bobtail-logrotate
-	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
-	2013-02-12 08:29:29 -0800   wip-dump
-	2013-02-12 23:17:11 -0800   wip-monc
-	2013-02-18 20:50:57 -0800   wip-osd-scrub
-	2013-02-19 13:18:13 -0800   wip-4116-workaround
-	2013-03-11 17:27:15 -0700   wip-deploy-rgw
-	2013-03-15 17:10:24 -0700   wip-log-4192
-	2013-04-15 20:34:47 -0700   bobtail-dc
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-04-25 10:38:45 -0700   wip-init2
-	2013-04-26 12:25:58 -0700   wip-mon-fwd
-	2013-05-02 14:50:38 -0700   wip-rbd-clear-layering
-	2013-05-03 09:01:53 -0700   wip-leveldb-reopen
-	2013-05-07 15:56:57 -0700   wip-ceph-tool
-	2013-05-08 09:46:53 -0700   wip-4578-bobtail
-	2013-05-08 13:39:25 -0700   wip-4951
-	2013-05-10 08:28:50 -0700   wip-rgw-crash
-	2013-05-22 09:03:53 -0700   wip-4895-cuttlefish
-	2013-05-22 10:33:35 -0700   unstable
-	2013-05-22 13:39:58 -0700   wip-notcmalloc
-	2013-05-23 19:32:56 -0700   wip-libcephfs-rebased
-	2013-05-27 12:45:33 -0700   wip-mon-compaction
-	2013-05-27 12:45:41 -0700   wip-cuttlefish-mon
-	2013-05-28 10:51:23 -0700   wip-mds-scan
-	2013-05-28 20:46:51 -0700   wip-mds-authpins
-	2013-05-29 09:25:09 -0700   wip-bobtail-fsx
-	2013-05-29 10:27:59 -0700   wip-5021
-	2013-06-01 13:26:50 -0700   wip-5176-cuttlefish
-	2013-06-02 15:29:26 -0700   wip-log-rewrite
-	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
-	2013-06-04 15:40:58 -0700   wip-4976
-	2013-06-04 22:43:04 -0700   wip-osd-push
-	2013-06-07 11:51:11 -0700   wip-mon
-	2013-06-07 16:10:53 -0700   wip-osd-scrub-chunk
-	2013-06-07 17:09:05 -0700   wip-var-run
-	2013-06-07 17:15:13 -0700   bobtail
-	2013-06-08 08:29:19 -0700   wip-5248-cuttlefish-workaround
-	2013-06-08 08:46:53 -0700   wip-5286
-	2013-06-08 22:25:19 -0700   cuttlefish
-	2013-06-08 22:25:47 -0700   wip-cap-release
-	2013-06-09 20:21:49 -0700   wip-refs
-
-Sam Lang <sam.lang@inktank.com>
-	2012-11-27 15:01:58 -0600   wip-mtime-incr
-
-Samuel Just <sam.just@inktank.com>
-	2012-11-21 11:05:24 -0800   wip_stable_smalliobench
-	2012-11-28 17:32:59 -0800   wip_next_smalliobench
-	2012-12-05 13:29:22 -0800   wip_recovery
-	2012-12-18 18:34:47 -0800   wip_auth_551_backport
-	2013-01-25 13:39:20 -0800   wip_argonaut_snap
-	2013-02-07 10:38:52 -0800   wip_actmap_dirty_info
-	2013-02-07 11:53:31 -0800   wip_temp_coll
-	2013-02-07 16:05:19 -0800   wip_check_snapcolls
-	2013-02-11 12:55:24 -0800   wip_rmcoll_idempotent
-	2013-02-14 14:16:36 -0800   wip-bobtail-load_pgs-workaround
-	2013-03-04 14:20:17 -0800   wip_omap_snaps_transactions
-	2013-03-11 14:55:02 -0700   wip_4144
-	2013-03-13 16:04:55 -0700   wip_sam_test
-	2013-03-15 11:06:25 -0700   wip_4196
-	2013-03-15 15:31:57 -0700   wip_feature_warning
-	2013-03-20 12:08:57 -0700   wip_osd_shutdown
-	2013-03-22 14:01:53 -0700   wip_4534
-	2013-03-27 11:32:29 -0700   wip_4538
-	2013-04-08 15:43:53 -0700   wip_4627
-	2013-04-09 10:27:50 -0700   wip_4687
-	2013-04-10 11:58:01 -0700   wip_4654
-	2013-04-10 14:13:12 -0700   wip_4701
-	2013-04-18 10:57:54 -0700   wip-debug-xattr
-	2013-04-19 09:04:17 -0700   wip_4704
-	2013-04-19 11:06:04 -0700   wip_4662_clean
-	2013-04-19 11:06:42 -0700   wip_4662
-	2013-04-23 15:16:20 -0700   wip_loadpgs_workaround
-	2013-05-02 21:18:40 -0700   wip_mon_dump_ops
-	2013-05-06 10:56:53 -0700   wip_4910
-	2013-05-07 21:05:05 -0700   wip_split_upgrade
-	2013-05-15 11:17:39 -0700   wip_5020
-	2013-05-23 15:53:34 -0700   wip_hashpspool
-	2013-05-24 17:55:04 -0700   wip_5172
-	2013-05-30 15:44:57 -0700   wip-5046
-	2013-05-31 12:18:07 -0700   wip_cuttlefish_pg_epoch
-	2013-05-31 12:18:33 -0700   wip_bobtail_pg_epoch
-	2013-06-05 15:09:37 -0700   wip_5238
-	2013-06-06 11:51:04 -0700   wip_bench_num
-	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-07 13:40:12 -0800   wip-rgw-dr
-	2012-12-10 13:29:37 -0800   wip-multipart-size
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-14 12:44:21 -0700   wip-rgw-bucketlog-3
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-05-31 14:35:49 -0700   wip-rgw-geo
-	2013-06-06 18:50:57 -0700   wip-rgw-geo-2
-
-caleb miles <caleb.miles@inktank.com>
-	2013-04-05 09:31:56 -0700   wip-4600
-
-caleb miles <caselim@gmail.com>
-	2013-01-07 07:39:02 -0500   wip-3735
-	2013-01-10 08:29:30 -0500   wip-3682
-	2013-02-14 14:28:11 -0500   wip-content-type
-	2013-02-20 00:15:18 -0500   wip-3669
-	2013-03-11 15:51:48 -0400   wip-rgw-user2
-	2013-03-25 13:51:29 -0400   wip-rgw-bucket
-	2013-03-26 10:05:17 -0400   wip-rest-user
-	2013-03-26 10:05:17 -0400   wip-rgw-usre
-	2013-03-26 11:39:11 -0400   wip-rgw-user
-	2013-04-05 14:38:00 -0400   wip-admin-api
-	2013-04-10 15:00:06 -0400   wip-4702
-	2013-04-22 13:01:47 -0400   wip-rest-admin
-
-
-
-Grouped by committer, ordered by commit time stamp.
+On Tue, May 21, 2013 at 11:53 AM, Travis Rhoden <trhoden@gmail.com> wrote:
+> Roger. Thanks for the heads-up on that.
+>
+> On Mon, May 20, 2013 at 2:18 PM, Sage Weil <sage@inktank.com> wrote:
+>> On Mon, 20 May 2013, Stefan Priebe - Profihost AG wrote:
+>>> Am 20.05.2013 um 18:29 schrieb Sage Weil <sage@inktank.com>:
+>>>
+>>> > Hi Travis,
+>>> >
+>>> > The fixes for this locking just went upstream for 3.10.  We'll be sending
+>>> > to Greg KH for the stable kernels shortly.
+>>> >
+>>> > sage
+>>>
+>>> But this won't change anything for 3.8 as this is eol.
+>>
+>> Yeah, it'll go to 3.9 and 3.4.
+>>
+>> sage
+>>
+>>
+>>>
+>>> >
+>>> >
+>>> > On Mon, 20 May 2013, Travis Rhoden wrote:
+>>> >
+>>> >> Sage,
+>>> >>
+>>> >> Did a patch for the auth code get submitted for the 3.8 kernel?  I hit
+>>> >> this again over the weekend.  Looks slightly different than the last
+>>> >> one, but still in the auth code.
+>>> >>
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.730733] BUG: unable to handle
+>>> >> kernel paging request at ffff880640000000
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.737818] IP: [<ffffffff8135ca9d>]
+>>> >> memcpy+0xd/0x110
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.742974] PGD 1c0e063 PUD 0
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.746150] Oops: 0000 [#1] SMP
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.749498] Modules linked in: btrfs
+>>> >> zlib_deflate ufs qnx4 hfsplus hfs minix ntfs msdos jfs xfs reiserfs
+>>> >> ext2 rbd libceph libcrc32c nfsd nfs_acl auth_rpcgss nfs fscache lockd
+>>> >> coretemp sunrpc kvm gpio_ich psmouse microcode serio_raw i7core_edac
+>>> >> ioatdma lpc_ich edac_core ipmi_si mac_hid ipmi_devintf ipmi_msghandler
+>>> >> bonding lp parport tcp_bic raid10 raid456 async_pq async_xor xor
+>>> >> async_memcpy async_raid6_recov hid_generic usbhid hid raid6_pq
+>>> >> async_tx igb ahci myri10ge raid1 ptp libahci raid0 dca pps_core
+>>> >> multipath linear
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.796421] CPU 0
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.798353] Pid: 26234, comm:
+>>> >> kworker/0:0 Not tainted 3.8.5-030805-generic #201303281651 Penguin
+>>> >> Computing Relion 1751/X8DTU
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.809827] RIP:
+>>> >> 0010:[<ffffffff8135ca9d>]  [<ffffffff8135ca9d>] memcpy+0xd/0x110
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.817403] RSP:
+>>> >> 0018:ffff88062dc3dc40  EFLAGS: 00010246
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.822794] RAX: ffffc90017f4301a
+>>> >> RBX: ffff880323ba4300 RCX: 1ffff100c2f035b2
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.830003] RDX: 0000000000000000
+>>> >> RSI: ffff880640000000 RDI: ffffc9002c335952
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.837209] RBP: ffff88062dc3dc98
+>>> >> R08: ffffc90043b52000 R09: ffff88062dc3dad4
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.844417] R10: ffff88027a45f0e8
+>>> >> R11: ffff88033fffbec0 R12: ffffc90017f4301a
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.851626] R13: 000000002bc0d708
+>>> >> R14: ffff880628407120 R15: 000000002bc0d6c8
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.858834] FS:
+>>> >> 0000000000000000(0000) GS:ffff880333c00000(0000)
+>>> >> knlGS:0000000000000000
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.867000] CS:  0010 DS: 0000 ES:
+>>> >> 0000 CR0: 000000008005003b
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.872824] CR2: ffff880640000000
+>>> >> CR3: 0000000001c0d000 CR4: 00000000000007f0
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.880032] DR0: 0000000000000000
+>>> >> DR1: 0000000000000000 DR2: 0000000000000000
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.887239] DR3: 0000000000000000
+>>> >> DR6: 00000000ffff0ff0 DR7: 0000000000000400
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.894446] Process kworker/0:0 (pid:
+>>> >> 26234, threadinfo ffff88062dc3c000, task ffff88032d8845c0)
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.903298] Stack:
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.905399]  ffffffffa0368a54
+>>> >> ffffffffa035b60d 2bc0d6c8a0368d12 0000000000000098
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.912942]  00000000000000c0
+>>> >> ffffffffa03687bc ffff880323ba4300 ffff880322fec4d8
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.920471]  ffff880628407120
+>>> >> ffff88032bdf5c40 ffff880322fec420 ffff88062dc3dcd8
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.928016] Call Trace:
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.930561]  [<ffffffffa0368a54>] ?
+>>> >> ceph_x_build_authorizer.isra.6+0x144/0x1e0 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.938727]  [<ffffffffa035b60d>] ?
+>>> >> ceph_buffer_release+0x2d/0x50 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.945761]  [<ffffffffa03687bc>] ?
+>>> >> ceph_x_destroy_authorizer+0x2c/0x40 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.953315]  [<ffffffffa0368d2e>]
+>>> >> ceph_x_create_authorizer+0x6e/0xd0 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.960609]  [<ffffffffa035db49>]
+>>> >> get_authorizer+0x89/0xc0 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.967035]  [<ffffffffa0357704>]
+>>> >> prepare_write_connect+0xb4/0x210 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.974161]  [<ffffffffa035b2a5>]
+>>> >> try_read+0x3d5/0x430 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.980249]  [<ffffffffa035b38f>]
+>>> >> con_work+0x8f/0x140 [libceph]
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.986242]  [<ffffffff81078c31>]
+>>> >> process_one_work+0x141/0x490
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.992153]  [<ffffffff81079b08>]
+>>> >> worker_thread+0x168/0x400
+>>> >> May 18 13:26:15 nfs1 kernel: [999560.997800]  [<ffffffff810799a0>] ?
+>>> >> manage_workers+0x120/0x120
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.003713]  [<ffffffff8107eff0>]
+>>> >> kthread+0xc0/0xd0
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.008669]  [<ffffffff8107ef30>] ?
+>>> >> flush_kthread_worker+0xb0/0xb0
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.014927]  [<ffffffff816f532c>]
+>>> >> ret_from_fork+0x7c/0xb0
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.020401]  [<ffffffff8107ef30>] ?
+>>> >> flush_kthread_worker+0xb0/0xb0
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.026657] Code: 2b 43 50 88 43 4e
+>>> >> 48 83 c4 08 5b 5d c3 90 e8 fb fd ff ff eb e6 90 90 90 90 90 90 90 90
+>>> >> 90 48 89 f8 48 89 d1 48 c1 e9 03 83 e2 07 <f3> 48 a5 89 d1 f3 a4 c3 20
+>>> >> 4c 8b 06 4c 8b 4e 08 4c 8b 56 10 4c
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.046667] RIP  [<ffffffff8135ca9d>]
+>>> >> memcpy+0xd/0x110
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.051903]  RSP <ffff88062dc3dc40>
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.055477] CR2: ffff880640000000
+>>> >> May 18 13:26:15 nfs1 kernel: [999561.058894] ---[ end trace
+>>> >> 2fa4f8a71fe96709 ]---
+>>> >>
+>>> >> Thanks!
+>>> >>
+>>> >> - Travis
+>>> >>
+>>> >> On Tue, May 7, 2013 at 10:54 AM, Travis Rhoden <trhoden@gmail.com> wrote:
+>>> >>> Thanks Sage, I'll monitor the 3.8 point releases and update when I see
+>>> >>> a release with those changes.
+>>> >>>
+>>> >>> - Travis
+>>> >>>
+>>> >>> On Mon, May 6, 2013 at 10:54 PM, Sage Weil <sage@inktank.com> wrote:
+>>> >>>> On Mon, 6 May 2013, Travis Rhoden wrote:
+>>> >>>>> Hey folks,
+>>> >>>>>
+>>> >>>>> We have two servers that map a lot of RBDs (20 to 30 each so far),
+>>> >>>>> using the RBD kernel module.  They are running Ubuntu 12.10, and I
+>>> >>>>> originally saw a lot of kernel panics (obviously from Ceph) when
+>>> >>>>> running a 3.5.7 kernel.
+>>> >>>>>
+>>> >>>>> I upgrade a while back to a 3.8.5 kernel to get a much newer RBD
+>>> >>>>> module, and the kernel panics from Ceph went away...and were replaced
+>>> >>>>> by these nebulous "General Protection Faults" that I couldn't really
+>>> >>>>> tell what was causing them.
+>>> >>>>>
+>>> >>>>> Today we saw one that actually had a Ceph backtrace in it, so I wanted
+>>> >>>>> to throw it on here:
+>>> >>>>>
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.423165] general protection fault:
+>>> >>>>> 0000 [#3] SMP
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.428252] Modules linked in: rbd
+>>> >>>>> libceph libcrc32c coretemp nfsd kvm nfs_acl auth_rpcgss nfs fscache
+>>> >>>>> lockd sunrpc gpio_ich psmouse microcode serio_raw i7core_edac ipmi_si
+>>> >>>>> edac_core lpc_ich ioatdma ipmi_devintf mac_hid ipmi_msghandler bonding
+>>> >>>>> lp parport tcp_bic raid10 raid456 async_pq async_xor xor async_memcpy
+>>> >>>>> async_raid6_recov hid_generic raid6_pq usbhid async_tx hid igb raid1
+>>> >>>>> myri10ge raid0 ahci ptp libahci dca pps_core multipath linear
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.468114] CPU 17
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.470133] Pid: 15920, comm:
+>>> >>>>> kworker/17:2 Tainted: G      D      3.8.5-030805-generic #201303281651
+>>> >>>>> Penguin Computing Relion 1751/X8DTU
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.482635] RIP:
+>>> >>>>> 0010:[<ffffffff811851ff>]  [<ffffffff811851ff>]
+>>> >>>>> kmem_cache_alloc_trace+0x5f/0x140
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.491686] RSP:
+>>> >>>>> 0018:ffff880624cb1a98  EFLAGS: 00010202
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.497074] RAX: 0000000000000000
+>>> >>>>> RBX: ffff88032ddc46d0 RCX: 000000000003c867
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.504283] RDX: 000000000003c866
+>>> >>>>> RSI: 0000000000008050 RDI: 0000000000016c80
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.511490] RBP: ffff880624cb1ae8
+>>> >>>>> R08: ffff880333d76c80 R09: 0000000000000002
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.518697] R10: ffff88032ce40070
+>>> >>>>> R11: 000000000000000d R12: ffff880333802200
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.525906] R13: 2e0460b9275465f2
+>>> >>>>> R14: ffffffffa023901e R15: 0000000000008050
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.533113] FS:
+>>> >>>>> 0000000000000000(0000) GS:ffff880333d60000(0000)
+>>> >>>>> knlGS:0000000000000000
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.541274] CS:  0010 DS: 0000 ES:
+>>> >>>>> 0000 CR0: 000000008005003b
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.547095] CR2: 00007fbf9467f2b0
+>>> >>>>> CR3: 0000000001c0d000 CR4: 00000000000007e0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.554305] DR0: 0000000000000000
+>>> >>>>> DR1: 0000000000000000 DR2: 0000000000000000
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.561512] DR3: 0000000000000000
+>>> >>>>> DR6: 00000000ffff0ff0 DR7: 0000000000000400
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.568720] Process kworker/17:2
+>>> >>>>> (pid: 15920, threadinfo ffff880624cb0000, task ffff88032b600000)
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.577656] Stack:
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.579756]  0000000000000000
+>>> >>>>> 0000000000000000 0000000000000060 0000000000000000
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.587292]  0000000000000000
+>>> >>>>> ffff88032ddc46d0 0000000000000004 ffff88032ddc46c0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.594819]  ffff88032b432b30
+>>> >>>>> 0000000000000000 ffff880624cb1b28 ffffffffa023901e
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.602347] Call Trace:
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.604886]  [<ffffffffa023901e>]
+>>> >>>>> get_ticket_handler.isra.4+0x5e/0xc0 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.612271]  [<ffffffffa02394b4>]
+>>> >>>>> ceph_x_proc_ticket_reply+0x274/0x440 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.619740]  [<ffffffffa023973d>]
+>>> >>>>> ceph_x_handle_reply+0xbd/0x110 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.626696]  [<ffffffffa023765c>]
+>>> >>>>> ceph_handle_auth_reply+0x18c/0x200 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.633988]  [<ffffffffa022d590>]
+>>> >>>>> handle_auth_reply.isra.12+0xa0/0x230 [libceph]
+>>> >>>>
+>>> >>>> Ah, this is in the auth code.  There was a series of patches that fixed
+>>> >>>> the locking and a few other things that jsut went upstream for 3.10.  I'll
+>>> >>>> prepare some patches to backport those fixes to stable kernels (3.8 and
+>>> >>>> 3.4).  It could easily explain your crashes.
+>>> >>>>
+>>> >>>> Thanks!
+>>> >>>> sage
+>>> >>>>
+>>> >>>>
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.641457]  [<ffffffffa022e87d>]
+>>> >>>>> dispatch+0xbd/0x120 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.647450]  [<ffffffffa0228205>]
+>>> >>>>> process_message+0xa5/0xc0 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.653966]  [<ffffffffa022c1b1>]
+>>> >>>>> try_read+0x2e1/0x430 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.660048]  [<ffffffffa022c38f>]
+>>> >>>>> con_work+0x8f/0x140 [libceph]
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.666043]  [<ffffffff81078c31>]
+>>> >>>>> process_one_work+0x141/0x490
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.671952]  [<ffffffff81079b08>]
+>>> >>>>> worker_thread+0x168/0x400
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.677601]  [<ffffffff810799a0>] ?
+>>> >>>>> manage_workers+0x120/0x120
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.683513]  [<ffffffff8107eff0>]
+>>> >>>>> kthread+0xc0/0xd0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.688469]  [<ffffffff8107ef30>] ?
+>>> >>>>> flush_kthread_worker+0xb0/0xb0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.694726]  [<ffffffff816f532c>]
+>>> >>>>> ret_from_fork+0x7c/0xb0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.700203]  [<ffffffff8107ef30>] ?
+>>> >>>>> flush_kthread_worker+0xb0/0xb0
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.706456] Code: 00 4d 8b 04 24 65
+>>> >>>>> 4c 03 04 25 08 dc 00 00 49 8b 50 08 4d 8b 28 4d 85 ed 0f 84 cf 00 00
+>>> >>>>> 00 49 63 44 24 20 49 8b 3c 24 48 8d 4a 01 <49> 8b 5c 05 00 4c 89 e8 65
+>>> >>>>> 48 0f c7 0f 0f 94 c0 84 c0 74 c2 49
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.726468] RIP  [<ffffffff811851ff>]
+>>> >>>>> kmem_cache_alloc_trace+0x5f/0x140
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.733182]  RSP <ffff880624cb1a98>
+>>> >>>>> May  6 23:02:58 nfs1 kernel: [295972.736838] ---[ end trace
+>>> >>>>> 20e9b6a1bb611aba ]---
+>>> >>>>>
+>>> >>>>> I'm not sure whether the problem started here or not.  I mentioned
+>>> >>>>> that the previous GPFs were nebulous -- one thing most of them have
+>>> >>>>> had in common is that it's almost always from nfsd (this one isn't --
+>>> >>>>> first and only time I've seen this one).  Howevever, I am using NFS to
+>>> >>>>> re-export some RBDs (to provide access to multiple clients) so Ceph is
+>>> >>>>> still in the picture on those.
+>>> >>>>>
+>>> >>>>> I know its not a lot to go on, but any advice would be appreciated.
+>>> >>>>>
+>>> >>>>> - Travis
+>>> >>>>> --
+>>> >>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> >>>>> the body of a message to majordomo@vger.kernel.org
+>>> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> > --
+>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> > the body of a message to majordomo@vger.kernel.org
+>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
