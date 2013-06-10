@@ -1,13 +1,13 @@
-From: ceph branch robot <nobody@teuthology.front.sepia.ceph.com>
+From: ceph branch robot <nobody@ceph.com>
 Subject: ceph branch status
-Date: Mon, 10 Jun 2013 08:00:11 -0700 (PDT)
-Message-ID: <20130610150018.8508AA39A2@teuthology.front.sepia.ceph.com>
+Date: Mon, 10 Jun 2013 08:00:17 -0700 (PDT)
+Message-ID: <20130610150017.0AFE6281E53@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:23490 "EHLO
+Received: from gw.sepia.ceph.com ([64.90.32.34]:23491 "EHLO
 	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751429Ab3FJO7Y (ORCPT
+	by vger.kernel.org with ESMTP id S1751497Ab3FJPBG (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 10 Jun 2013 10:59:24 -0400
+	Mon, 10 Jun 2013 11:01:06 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
