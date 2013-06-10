@@ -1,42 +1,38 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/9] fixes for kclient
-Date: Sat, 8 Jun 2013 23:23:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306082322010.18155@cobra.newdream.net>
-References: <1370315998-10418-1-git-send-email-zheng.z.yan@intel.com>
+From: Ta Ba Tuan <tuantb@vccloud.vn>
+Subject: (unknown)
+Date: Mon, 10 Jun 2013 16:53:01 +0700
+Message-ID: <51B5A1FD.8080107@vccloud.vn>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48492 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750993Ab3FIGXb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Jun 2013 02:23:31 -0400
-In-Reply-To: <1370315998-10418-1-git-send-email-zheng.z.yan@intel.com>
+Received: from vccloud.vn ([222.255.27.61]:52268 "EHLO mail.vccloud.vn"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751257Ab3FJJxH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 10 Jun 2013 05:53:07 -0400
+Received: from localhost (mail.vccloud.vn [127.0.0.1])
+	by mail.vccloud.vn (Postfix) with ESMTP id 04A7F3A0080
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Jun 2013 16:53:03 +0700 (ICT)
+Received: from mail.vccloud.vn ([127.0.0.1])
+	by localhost (mail.vccloud.vn [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id Qc4utRrvqU80 for <ceph-devel@vger.kernel.org>;
+	Mon, 10 Jun 2013 16:53:03 +0700 (ICT)
+Received: from [192.168.25.69] (unknown [113.160.0.14])
+	by mail.vccloud.vn (Postfix) with ESMTPSA id 9FDF43A007D
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Jun 2013 16:53:02 +0700 (ICT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, elder@inktank.com
+To: ceph-devel@vger.kernel.org
 
-I pulled these into the testing branch, with the exception of #2, which 
-needs a closer look.
+subscribe ceph-devel
 
-We should really be checking the userspace client for these same issues 
-(the logic ones at least) to avoid fixing the same or similar bugs later..
+Hi Everyone
 
-Thanks!
-sage
+I am TuanTB (full name: Tuan Ta Ba),
+I 'm  working about the Cloud Computing
+Were are using the Ceph, and I'm a new Ceph'member
+so, I hope to be joined "ceph-delvel"mailist.
 
-On Tue, 4 Jun 2013, Yan, Zheng wrote:
+Thank you so much
+--TuanTB
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> this patch series are also in:
->   git://github.com/ukernel/linux.git wip-ceph
-> 
-> Regards
-> Yan, Zheng
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
