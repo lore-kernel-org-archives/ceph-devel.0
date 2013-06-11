@@ -1,105 +1,54 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd as
- storage-backend
-Date: Tue, 11 Jun 2013 13:51:40 +0200
-Message-ID: <51B70F4C.5020902@filoo.de>
-References: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
+From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
+Subject: radosrgw performance problems
+Date: Tue, 11 Jun 2013 13:27:25 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBAAA4@SMBXKO3.cgm.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-2.de-punkt.de ([93.190.64.238]:39651 "EHLO
-	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752530Ab3FKLvo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jun 2013 07:51:44 -0400
-In-Reply-To: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro>
+Received: from smxko1.compugroup.com ([193.47.161.177]:47313 "EHLO
+	SMXKO1.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752194Ab3FKN1e convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jun 2013 09:27:34 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by SMXKO1.compugroup.com (Postfix) with ESMTP id 68F86613B
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Jun 2013 15:27:27 +0200 (CEST)
+Received: from SMXKO1.compugroup.com ([127.0.0.1])
+	by localhost (smxko1.compugroup.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id QopiECf2nY9J for <ceph-devel@vger.kernel.org>;
+	Tue, 11 Jun 2013 15:27:27 +0200 (CEST)
+Received: from SCASKO1.cgm.ag (scasko1.cgm.ag [10.0.0.81])
+	by SMXKO1.compugroup.com (Postfix) with ESMTPS id 3769E6120
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Jun 2013 15:27:27 +0200 (CEST)
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, "qemu@nongnu.org" <qemu-devel@nongnu.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Alexandre, Josh,
+Hello,
 
-sorry for coming back so very late, I tried the patch and though I coul=
-d=20
-not get it to work properly - very likely my fault - how would it be to=
-=20
-integrate it into the rbd-handler of qemu?
+we have a performance problem with radosrgw.
+Only 8mb/s-9 per upload, also tested with s3cmd on the rgw itself. 
+(2 uploads at the same time: combined 15mb/s, 3 uploads at the same time: comb. 21mb/s)
+But when putting a file via rados rbd , we get 40mb/s upload, so no network or other problem in general.
 
-Josh? I think you are CC'd from another qemu-ticket anyway?
+Same speed with the inktank apache/fastcgi and the original one. Hardware also fast enough. We use Ubuntu 12.04 lts, ceph 0.61.2
 
-I could just ignore the EOPNOTSUPP or whatever it's called, but a smoot=
-h=20
-integration of live-snapshots would be so cool ;)
+So have you any idea why the rgw is so slow? How can we identify where the problem is?
 
-Kind regards,
+(I've heard something about the rgw admin socket to check perfcounters, but it seems that this is deprecated? Because when i type ceph --admin-daemon ... it says unknown command and I cannot find it in the ceph docu. Then i wanted to bench via rest-bench, but it says "ERROR: failed to create bucket: XmlParseFailure -failed initializing benchmark", so I could not bench the speed.)
 
-Oliver.
+Ceph.conf- rgw part:
 
-On 05/24/2013 05:37 PM, Alexandre DERUMIER wrote:
-> Hi,
->
-> For Proxmox, we have made some patchs to split the savevm process,
->
-> to be able to save the memory to an external volume. (and not the cur=
-rent volume).
->
-> For rbd, we create a new rbd volume to store the memory.
->
-> qemu patch is here :
-> https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/pat=
-ches/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc1c=
-53b25578;hb=3DHEAD
->
-> ----- Mail original -----
->
-> De: "Wido den Hollander" <wido@42on.com>
-> =C3=80: "Oliver Francke" <Oliver.Francke@filoo.de>
-> Cc: ceph-devel@vger.kernel.org
-> Envoy=C3=A9: Vendredi 24 Mai 2013 17:08:35
-> Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rbd=
- as storage-backend
->
-> On 05/24/2013 09:46 AM, Oliver Francke wrote:
->> Hi,
->>
->> with a running VM I encounter this strange behaviour, former
->> qemu-versions don't show up such an error.
->> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combination
->> with ceph-0.56.6? Therefore my
->> crosspost.
->>
->> Even if I have no real live-snapshot avail - they know of this
->> restriction -, it's more work for the customers
->> to perform a shutdown before the wonna do some changes to their VM ;=
-)
->>
-> Doesn't Qemu try to save the memory state to RBD here as well? That
-> doesn't work and fails.
->
->> Any hints welcome,
->>
->> Oliver.
->>
->
+[client.radosgw.connect2]
+host = hcrgwko2
+rgw socket path = /tmp/connect2.sock
+log file = /var/log/ceph/connect2.log
+rgw dns name =  FQDN
+
+Thank you very much.
 
 
---=20
+Regards
 
-Oliver Francke
-
-filoo GmbH
-Moltkestra=C3=9Fe 25a
-33330 G=C3=BCtersloh
-HRB4355 AG G=C3=BCtersloh
-
-Gesch=C3=A4ftsf=C3=BChrer: S.Grewing | J.Rehp=C3=B6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Philipp
