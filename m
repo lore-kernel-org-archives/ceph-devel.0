@@ -1,23 +1,45 @@
 From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
 Subject: AW: radosrgw performance problems
-Date: Wed, 12 Jun 2013 08:22:12 +0000
-Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag>
+Date: Wed, 12 Jun 2013 10:52:42 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBACE5@SMBXKO3.cgm.ag>
 References: <5EFBD28BA42C604BB012164C72CA560450CBAAA4@SMBXKO3.cgm.ag>
  <51B7365E.1090101@inktank.com>
+ <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smxko3.compugroup.com ([193.47.161.188]:42943 "EHLO
-	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754369Ab3FLIWZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 04:22:25 -0400
-In-Reply-To: <51B7365E.1090101@inktank.com>
+Received: from smxko1.compugroup.com ([193.47.161.177]:33697 "EHLO
+	SMXKO1.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756044Ab3FLKwy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 06:52:54 -0400
+In-Reply-To: <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag>
 Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hello,
+
+identified the problem.
+
+When I deactivate SSL in Apache Config, and connect via http, I get the=
+ 40MB/s. (with ssl 8mb/s)
+Have you experience with SSL? Is this normal?
+
+Thanks
+
+Regards
+
+
+
+-----Urspr=FCngliche Nachricht-----
+Von: J=E4ger, Philipp=20
+Gesendet: Mittwoch, 12. Juni 2013 10:22
+An: 'Mark Nelson'
+Cc: ceph-devel@vger.kernel.org
+Betreff: AW: radosrgw performance problems
 
 Hello,
 
@@ -30,7 +52,7 @@ Regards
 Philipp
 
 -----Urspr=FCngliche Nachricht-----
-Von: Mark Nelson [mailto:mark.nelson@inktank.com]=20
+Von: Mark Nelson [mailto:mark.nelson@inktank.com]
 Gesendet: Dienstag, 11. Juni 2013 16:38
 An: J=E4ger, Philipp
 Cc: ceph-devel@vger.kernel.org
@@ -41,7 +63,7 @@ On 06/11/2013 08:27 AM, J=E4ger, Philipp wrote:
 >
 > we have a performance problem with radosrgw.
 > Only 8mb/s-9 per upload, also tested with s3cmd on the rgw itself.
-> (2 uploads at the same time: combined 15mb/s, 3 uploads at the same=20
+> (2 uploads at the same time: combined 15mb/s, 3 uploads at the same
 > time: comb. 21mb/s) But when putting a file via rados rbd , we get 40=
 mb/s upload, so no network or other problem in general.
 
@@ -53,21 +75,21 @@ emely low.
 m. (30 osds)=20
 
 >
-> Same speed with the inktank apache/fastcgi and the original one. Hard=
-ware also fast enough. We use Ubuntu 12.04 lts, ceph 0.61.2
+> Same speed with the inktank apache/fastcgi and the original one.=20
+> Hardware also fast enough. We use Ubuntu 12.04 lts, ceph 0.61.2
 >
 > So have you any idea why the rgw is so slow? How can we identify wher=
 e the problem is?
 
-RBD is pretty streamlined so you can get good performance with it.  On=20
-my test setup I'm seeing 80-90% of the performance of raw rados object=20
+RBD is pretty streamlined so you can get good performance with it.  On =
+my test setup I'm seeing 80-90% of the performance of raw rados object =
 writes/reads (and in some cases much faster with RBD cache enabled!).=20
-RGW, Apache, fastcgi, and simply the requirements of supporting the S3=20
-protocol itself add a lot of overhead.  MD5 calculations by themselves=20
-start chewing up a ton of CPU once you try to support high throughput=20
-scenarios and there is a non-trivial amount of extra latency added as=20
-well.  You may be able to improve things with some tweaks, but I=20
-wouldn't be surprised if RBD is always going to be faster to an extent.
+RGW, Apache, fastcgi, and simply the requirements of supporting the S3 =
+protocol itself add a lot of overhead.  MD5 calculations by themselves =
+start chewing up a ton of CPU once you try to support high throughput s=
+cenarios and there is a non-trivial amount of extra latency added as we=
+ll.  You may be able to improve things with some tweaks, but I wouldn't=
+ be surprised if RBD is always going to be faster to an extent.
 
 [Philipp]We are talking about 9mb/s per rgw, which is less then 1/4 of =
 rbd (rados put: 40mb/s), with the rados bench we get actually: Bandwidt=
@@ -76,10 +98,8 @@ So I think we are not talking about tweaking, rather a general problem?
 
 
 =46or folks who want really fast object storage I think directly utiliz=
-ing=20
-rados is probably the way to go, but that requires modifying the app an=
-d=20
-it's not for everyone.
+ing rados is probably the way to go, but that requires modifying the ap=
+p and it's not for everyone.
 
 >
 > (I've heard something about the rgw admin socket to check perfcounter=
