@@ -1,80 +1,139 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: krbd + format=2 ?
-Date: Wed, 12 Jun 2013 14:59:49 +1000
-Message-ID: <20130612045949.GA13654@onthe.net.au>
-References: <20130603092428.GB28293@onthe.net.au>
- <51B2103C.7040402@inktank.com>
- <20130608024852.GA31065@onthe.net.au>
+From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
+Subject: AW: radosrgw performance problems
+Date: Wed, 12 Jun 2013 08:22:12 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag>
+References: <5EFBD28BA42C604BB012164C72CA560450CBAAA4@SMBXKO3.cgm.ag>
+ <51B7365E.1090101@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:36150 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752266Ab3FLE75 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 00:59:57 -0400
-Content-Disposition: inline
-In-Reply-To: <20130608024852.GA31065@onthe.net.au>
+Received: from smxko3.compugroup.com ([193.47.161.188]:42943 "EHLO
+	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754369Ab3FLIWZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 04:22:25 -0400
+In-Reply-To: <51B7365E.1090101@inktank.com>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hello,
+
+i've added my answers below.
+
+Thanks
+
+Regards
+
+Philipp
+
+-----Urspr=FCngliche Nachricht-----
+Von: Mark Nelson [mailto:mark.nelson@inktank.com]=20
+Gesendet: Dienstag, 11. Juni 2013 16:38
+An: J=E4ger, Philipp
 Cc: ceph-devel@vger.kernel.org
+Betreff: Re: radosrgw performance problems
 
-On Sat, Jun 08, 2013 at 12:48:52PM +1000, Chris Dunlop wrote:
-> On Fri, Jun 07, 2013 at 11:54:20AM -0500, Alex Elder wrote:
->> On 06/03/2013 04:24 AM, Chris Dunlop wrote:
->>> I pulled the for-linus branch (@ 3abef3b) on top of 3.10.0-rc4, and it's
->>> letting me map a format=2 image (created under bobtail), however reading
->>> from the block device returns zeros rather than the data. The same image
->>> correctly shows data (NTFS filesystem) when mounted into kvm using librbd.
->> 
->> Have you tried using a format 2 image that you created using
->> the Linux rbd environment?  It would be good to know whether
->> that works for you.
-> 
-> Sorry, how to you mean "created using the Linux rbd environment"?
-> The one I was trying was created using:
-> 
-> rbd create --format 2 xxx --size nnnnn
-> 
-> ...then populated using qemu/librbd.
+On 06/11/2013 08:27 AM, J=E4ger, Philipp wrote:
+> Hello,
+>
+> we have a performance problem with radosrgw.
+> Only 8mb/s-9 per upload, also tested with s3cmd on the rgw itself.
+> (2 uploads at the same time: combined 15mb/s, 3 uploads at the same=20
+> time: comb. 21mb/s) But when putting a file via rados rbd , we get 40=
+mb/s upload, so no network or other problem in general.
 
-Looks like the kernel rbd and librbd aren't compatible, as at
-3.10.0-rc4+ceph-client/for-linus@3abef3b vs librbd1 0.56.6-1~bpo70+1.
+One thing to check is to make sure that the rgw pool you are writing to=
+ has enough placement groups for your cluster.  The default may be extr=
+emely low.
 
-I can create a format=2 rbd image, map it, format and populate it using the
-mapped device. I can then see that data after unmounting unmapping, then
-re-mapping and re-mounting. However if I then attach that image via librbd to a
-qemu-1.5.0~rc3 vm using the invocation below, the vm sees the whole device as
-zeros.
+[Philipp] We don't use standard pool, new pool with 1500pg, same proble=
+m. (30 osds)=20
 
-Likewise, if I create a new format=2 rbd image, attach it via librbd to a
-qemu-1.5.0~rc3 vm, format it and populate it, that data is thereafter visible
-in the vm (e.g. after remounting etc.). But if I map that image using the
-kernel client, again I get a device full of zeros.
+>
+> Same speed with the inktank apache/fastcgi and the original one. Hard=
+ware also fast enough. We use Ubuntu 12.04 lts, ceph 0.61.2
+>
+> So have you any idea why the rgw is so slow? How can we identify wher=
+e the problem is?
 
-# dpkg -l \*ceph\* \*rbd\* \*rados\* | grep ^i
-ii  ceph           0.56.6-1~bpo70+1  amd64  distributed storage and file system
-ii  ceph-common    0.56.6-1~bpo70+1  amd64  common utilities to mount and interact with a ceph storage cluster
-ii  librados2      0.56.6-1~bpo70+1  amd64  RADOS distributed object store client library
-ii  librbd1        0.56.6-1~bpo70+1  amd64  RADOS block device client library
+RBD is pretty streamlined so you can get good performance with it.  On=20
+my test setup I'm seeing 80-90% of the performance of raw rados object=20
+writes/reads (and in some cases much faster with RBD cache enabled!).=20
+RGW, Apache, fastcgi, and simply the requirements of supporting the S3=20
+protocol itself add a lot of overhead.  MD5 calculations by themselves=20
+start chewing up a ton of CPU once you try to support high throughput=20
+scenarios and there is a non-trivial amount of extra latency added as=20
+well.  You may be able to improve things with some tweaks, but I=20
+wouldn't be surprised if RBD is always going to be faster to an extent.
 
-##
-## Attach disk to vm
-##
-# virsh attach-device test <(cat <<END
-    <disk type='network' device='disk'>
-      <driver name='qemu' type='raw'/>
-      <auth username='vm'>
-        <secret type='ceph' uuid='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'/>
-      </auth> 
-      <source protocol='rbd' name='rbd/crd-test'/>
-      <target dev='vdc' bus='virtio'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x7' function='0x0'/>
-    </disk>
-END
-)
+[Philipp]We are talking about 9mb/s per rgw, which is less then 1/4 of =
+rbd (rados put: 40mb/s), with the rados bench we get actually: Bandwidt=
+h (MB/sec):     171.744.
+So I think we are not talking about tweaking, rather a general problem?
 
 
-Cheers,
+=46or folks who want really fast object storage I think directly utiliz=
+ing=20
+rados is probably the way to go, but that requires modifying the app an=
+d=20
+it's not for everyone.
 
-Chris
+>
+> (I've heard something about the rgw admin socket to check perfcounter=
+s, but it seems that this is deprecated? Because when i type ceph --adm=
+in-daemon ... it says unknown command and I cannot find it in the ceph =
+docu. Then i wanted to bench via rest-bench, but it says "ERROR: failed=
+ to create bucket: XmlParseFailure -failed initializing benchmark", so =
+I could not bench the speed.)
+
+connecting with the admin daemon should still be supported.=20
+Documentation is here:
+
+http://ceph.com/docs/next/radosgw/troubleshooting/
+
+If this doesn't work please let me know!
+
+[Philipp] How can you activate a rgw admin socket? I think we have to a=
+dd an entry in the ceph.conf?  The admin socket is not the "rgw socket =
+path" I think?
+
+
+Also, I've created a bug for the rest-bench issue:
+
+http://tracker.ceph.com/issues/5302
+
+Personally I've been using swift-bench for most of my recent rgw testin=
+g.
+
+Mark
+
+>
+> Ceph.conf- rgw part:
+>
+> [client.radosgw.connect2]
+> host =3D hcrgwko2
+> rgw socket path =3D /tmp/connect2.sock
+> log file =3D /var/log/ceph/connect2.log
+> rgw dns name =3D  FQDN
+>
+> Thank you very much.
+>
+>
+> Regards
+>
+> Philipp
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
