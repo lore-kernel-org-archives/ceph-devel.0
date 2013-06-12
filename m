@@ -1,29 +1,73 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: AW: radosrgw performance problems
-Date: Wed, 12 Jun 2013 09:53:21 -0500
-Message-ID: <51B88B61.9060305@inktank.com>
-References: <5EFBD28BA42C604BB012164C72CA560450CBAAA4@SMBXKO3.cgm.ag> <51B7365E.1090101@inktank.com> <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag> <5EFBD28BA42C604BB012164C72CA560450CBACE5@SMBXKO3.cgm.ag>
+From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
+Subject: AW: AW: radosrgw performance problems
+Date: Wed, 12 Jun 2013 15:14:34 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBADE8@SMBXKO3.cgm.ag>
+References: <5EFBD28BA42C604BB012164C72CA560450CBAAA4@SMBXKO3.cgm.ag>
+ <51B7365E.1090101@inktank.com>
+ <5EFBD28BA42C604BB012164C72CA560450CBAC50@SMBXKO3.cgm.ag>
+ <5EFBD28BA42C604BB012164C72CA560450CBACE5@SMBXKO3.cgm.ag>
+ <51B88B61.9060305@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:53533 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752306Ab3FLOxV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 10:53:21 -0400
-Received: by mail-ie0-f180.google.com with SMTP id f4so17941502iea.25
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 07:53:21 -0700 (PDT)
-In-Reply-To: <5EFBD28BA42C604BB012164C72CA560450CBACE5@SMBXKO3.cgm.ag>
+Received: from smxko3.compugroup.com ([193.47.161.188]:51417 "EHLO
+	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751476Ab3FLPOq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 11:14:46 -0400
+In-Reply-To: <51B88B61.9060305@inktank.com>
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?=22J=E4ger=2C_Philipp=22?= <Philipp.Jaeger@cgm.com>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Interesting.  Was Apache using excessive CPU?  Do your processors and=20
-libraries support AES-NI?  Seems strange that at this level that would=20
-be the limiting factor, but I've seen stranger things...  Glad you=20
-figured it out!
+No, not really:
+
+30239 www-data  20   0  751m 7556 2036 S   10  0.4   0:03.67 apache2
+ 1955 root      20   0 2048m  10m 4352 S    6  0.5   2:14.54 radosgw
+
+10% cpu usage apache, load was 0.4. Also less than 15% usage via vcente=
+r performance graph.
+We are setting up a physical server right now at this moment, because w=
+e thought also about missing instruction sets of the cpu.
+
+Another perf question:
+
+As I said we can write about 170mb/s with the rados bench:
+rados bench -p test 100 write:
+Bandwidth (MB/sec):     171.744.
+
+With rbd or rgw (w/o https) we get less than 40mb/s:
+(time rados -p connect put 600mb.iso 600mb.iso
+real    0m15.846s
+ user    0m0.640s
+sys     0m0.836s)
+
+I think you can also close the bug! Because of https I have to type the=
+ protocol, and then I get the message "bad protocol"( like here: http:/=
+/tracker.ceph.com/issues/3968 ) , so not possible to bench at the momen=
+t with rest-bench.
+
+Ive configured the admin socket, but I don't know who to "read" the out=
+put of perfcounters in a sensefull way...
+
+
+Thank you very much so far.
+
+Philipp
+
+-----Urspr=FCngliche Nachricht-----
+Von: Mark Nelson [mailto:mark.nelson@inktank.com]=20
+Gesendet: Mittwoch, 12. Juni 2013 16:53
+An: J=E4ger, Philipp
+Cc: ceph-devel@vger.kernel.org
+Betreff: Re: AW: radosrgw performance problems
+
+Interesting.  Was Apache using excessive CPU?  Do your processors and l=
+ibraries support AES-NI?  Seems strange that at this level that would b=
+e the limiting factor, but I've seen stranger things...  Glad you figur=
+ed it out!
 
 Mark
 
@@ -32,9 +76,9 @@ On 06/12/2013 05:52 AM, J=E4ger, Philipp wrote:
 >
 > identified the problem.
 >
-> When I deactivate SSL in Apache Config, and connect via http, I get t=
-he 40MB/s. (with ssl 8mb/s)
-> Have you experience with SSL? Is this normal?
+> When I deactivate SSL in Apache Config, and connect via http, I get=20
+> the 40MB/s. (with ssl 8mb/s) Have you experience with SSL? Is this no=
+rmal?
 >
 > Thanks
 >
@@ -79,8 +123,8 @@ he 40MB/s. (with ssl 8mb/s)
 to has enough placement groups for your cluster.  The default may be ex=
 tremely low.
 >
-> [Philipp] We don't use standard pool, new pool with 1500pg, same prob=
-lem. (30 osds)
+> [Philipp] We don't use standard pool, new pool with 1500pg, same=20
+> problem. (30 osds)
 >
 >>
 >> Same speed with the inktank apache/fastcgi and the original one.
@@ -111,12 +155,13 @@ ing rados is probably the way to go, but that requires modifying the ap=
 p and it's not for everyone.
 >
 >>
->> (I've heard something about the rgw admin socket to check perfcounte=
-rs, but it seems that this is deprecated? Because when i type ceph --ad=
-min-daemon ... it says unknown command and I cannot find it in the ceph=
- docu. Then i wanted to bench via rest-bench, but it says "ERROR: faile=
-d to create bucket: XmlParseFailure -failed initializing benchmark", so=
- I could not bench the speed.)
+>> (I've heard something about the rgw admin socket to check=20
+>> perfcounters, but it seems that this is deprecated? Because when i=20
+>> type ceph --admin-daemon ... it says unknown command and I cannot=20
+>> find it in the ceph docu. Then i wanted to bench via rest-bench, but=
+=20
+>> it says "ERROR: failed to create bucket: XmlParseFailure -failed=20
+>> initializing benchmark", so I could not bench the speed.)
 >
 > connecting with the admin daemon should still be supported.
 > Documentation is here:
@@ -145,8 +190,7 @@ ing.
 >> [client.radosgw.connect2]
 >> host =3D hcrgwko2
 >> rgw socket path =3D /tmp/connect2.sock
->> log file =3D /var/log/ceph/connect2.log
->> rgw dns name =3D  FQDN
+>> log file =3D /var/log/ceph/connect2.log rgw dns name =3D  FQDN
 >>
 >> Thank you very much.
 >>
@@ -156,9 +200,10 @@ ing.
 >> Philipp
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+"=20
+>> in the body of a message to majordomo@vger.kernel.org More majordomo=
+=20
+>> info at  http://vger.kernel.org/majordomo-info.html
 >>
 >
 
