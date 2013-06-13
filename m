@@ -1,125 +1,162 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: rbd rm <image> results in osd marked down wrongly
- with 0.61.3
-Date: Thu, 13 Jun 2013 07:59:25 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306130753200.21994@cobra.newdream.net>
-References: <51B731F7.2050002@smart-weblications.de>
-	<51B9BA40.6040901@smart-weblications.de>
+From: "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH v2 11/14] locks: add a new "lm_owner_key" lock operation
+Date: Thu, 13 Jun 2013 11:00:33 -0400
+Message-ID: <20130613150033.GA20666@fieldses.org>
+References: <1370948948-31784-1-git-send-email-jlayton@redhat.com>
+ <1370948948-31784-12-git-send-email-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51B9BA40.6040901-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Smart Weblications GmbH - Florian Wiessner <f.wiessner-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1370948948-31784-12-git-send-email-jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, piastryyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Florian,
-
-Sorry, I missed this one.  Since this is fully reproducible, can you 
-generate a log of the crash by doing something like
-
- ceph osd tell \* injectargs '--debug-osd 20 --debug-filestore 20 --debug-ms 20'
-
-(that is a lot of logging, btw), triggering a crash, and then sending us 
-the log on the failed osd?  You'll want to turn the logs down again after 
-with
-
- ceph osd tell \* injectargs '--debug-osd 0 --debug-filestore 0 --debug-ms 0'
-
-I've opened a ticket for this,
-
-Thanks!
-sage
-
-
-On Thu, 13 Jun 2013, Smart Weblications GmbH - Florian Wiessner wrote:
-
-> Hi,
+On Tue, Jun 11, 2013 at 07:09:05AM -0400, Jeff Layton wrote:
+> Currently, the hashing that the locking code uses to add these values
+> to the blocked_hash is simply calculated using fl_owner field. That's
+> valid in most cases except for server-side lockd, which validates the
+> owner of a lock based on fl_owner and fl_pid.
 > 
-> Is really no one on the list interrested in fixing this? Or am i the only one
-> having this kind of bug/problem?
+> In the case where you have a small number of NFS clients doing a lot
+> of locking between different processes, you could end up with all
+> the blocked requests sitting in a very small number of hash buckets.
 > 
-> Am 11.06.2013 16:19, schrieb Smart Weblications GmbH - Florian Wiessner:
-> > Hi List,
-> > 
-> > i observed that an rbd rm <image> results in some osds mark one osd as down
-> > wrongly in cuttlefish.
-> > 
-> > The situation gets even worse if there are more than one rbd rm <image> running
-> > in parallel.
-> > 
-> > Please see attached logfiles. The rbd rm command was issued on 20:24:00 via
-> > cronjob, 40 seconds later the osd 6 got marked down...
-> > 
-> > 
-> > ceph osd tree
-> > 
-> > # id    weight  type name       up/down reweight
-> > -1      7       pool default
-> > -3      7               rack unknownrack
-> > -2      1                       host node01
-> > 0       1                               osd.0   up      1
-> > -4      1                       host node02
-> > 1       1                               osd.1   up      1
-> > -5      1                       host node03
-> > 2       1                               osd.2   up      1
-> > -6      1                       host node04
-> > 3       1                               osd.3   up      1
-> > -7      1                       host node06
-> > 5       1                               osd.5   up      1
-> > -8      1                       host node05
-> > 4       1                               osd.4   up      1
-> > -9      1                       host node07
-> > 6       1                               osd.6   up      1
-> > 
-> > 
-> > I have seen some patches to parallelize rbd rm, but i think there must be some
-> > other issue, as my clients seem to not be able to do IO when ceph is
-> > recovering... I think this has worked better in 0.56.x - there was IO while
-> > recovering.
-> > 
-> > I also observed in the log of osd.6 that after heartbeat_map reset_timeout, the
-> > osd tries to connect to the other osds, but it retries so fast that you could
-> > think this is a DoS attack...
-> > 
-> > 
-> > Please advise..
-> > 
+> Add a new lm_owner_key operation to the lock_manager_operations that
+> will generate an unsigned long to use as the key in the hashtable.
+> That function is only implemented for server-side lockd, and simply
+> XORs the fl_owner and fl_pid.
+
+Like I've said I think we should look into defining a lock_owner struct
+that lockd can allocate as necessary so that the lock code can just do a
+pointer comparison on struct lock_owner *'s.  But maybe that doesn't
+work out and in any case it can be future work, so looks fine, ACK.
+
+--b.
+
 > 
+> Signed-off-by: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  Documentation/filesystems/Locking |   18 +++++++++++-------
+>  fs/lockd/svclock.c                |   12 ++++++++++++
+>  fs/locks.c                        |   12 ++++++++++--
+>  include/linux/fs.h                |    1 +
+>  4 files changed, 34 insertions(+), 9 deletions(-)
 > 
+> diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
+> index 13f91ab..ee351ac 100644
+> --- a/Documentation/filesystems/Locking
+> +++ b/Documentation/filesystems/Locking
+> @@ -351,6 +351,7 @@ fl_release_private:	maybe		no
+>  ----------------------- lock_manager_operations ---------------------------
+>  prototypes:
+>  	int (*lm_compare_owner)(struct file_lock *, struct file_lock *);
+> +	unsigned long (*lm_owner_key)(struct file_lock *);
+>  	void (*lm_notify)(struct file_lock *);  /* unblock callback */
+>  	int (*lm_grant)(struct file_lock *, struct file_lock *, int);
+>  	void (*lm_break)(struct file_lock *); /* break_lease callback */
+> @@ -360,18 +361,21 @@ locking rules:
+>  
+>  			inode->i_lock	file_lock_lock	may block
+>  lm_compare_owner:	yes		maybe		no
+> +lm_owner_key		yes		yes		no
+>  lm_notify:		yes		no		no
+>  lm_grant:		no		no		no
+>  lm_break:		yes		no		no
+>  lm_change		yes		no		no
+>  
+> -	->lm_compare_owner is generally called with *an* inode->i_lock
+> -held. It may not be the i_lock of the inode for either file_lock being
+> -compared! This is the case with deadlock detection, since the code has
+> -to chase down the owners of locks that may be entirely unrelated to the
+> -one on which the lock is being acquired. For deadlock detection however,
+> -the file_lock_lock is also held. The locks primarily ensure that neither
+> -file_lock disappear out from under you while doing the comparison.
+> +	->lm_compare_owner and ->lm_owner_key are generally called with
+> +*an* inode->i_lock held. It may not be the i_lock of the inode
+> +associated with either file_lock argument! This is the case with deadlock
+> +detection, since the code has to chase down the owners of locks that may
+> +be entirely unrelated to the one on which the lock is being acquired.
+> +For deadlock detection however, the file_lock_lock is also held. The
+> +fact that these locks are held ensures that the file_locks do not
+> +disappear out from under you while doing the comparison or generating an
+> +owner key.
+>  
+>  --------------------------- buffer_head -----------------------------------
+>  prototypes:
+> diff --git a/fs/lockd/svclock.c b/fs/lockd/svclock.c
+> index e703318..ce2cdab 100644
+> --- a/fs/lockd/svclock.c
+> +++ b/fs/lockd/svclock.c
+> @@ -744,8 +744,20 @@ static int nlmsvc_same_owner(struct file_lock *fl1, struct file_lock *fl2)
+>  	return fl1->fl_owner == fl2->fl_owner && fl1->fl_pid == fl2->fl_pid;
+>  }
+>  
+> +/*
+> + * Since NLM uses two "keys" for tracking locks, we need to hash them down
+> + * to one for the blocked_hash. Here, we're just xor'ing the host address
+> + * with the pid in order to create a key value for picking a hash bucket.
+> + */
+> +static unsigned long
+> +nlmsvc_owner_key(struct file_lock *fl)
+> +{
+> +	return (unsigned long)fl->fl_owner ^ (unsigned long)fl->fl_pid;
+> +}
+> +
+>  const struct lock_manager_operations nlmsvc_lock_operations = {
+>  	.lm_compare_owner = nlmsvc_same_owner,
+> +	.lm_owner_key = nlmsvc_owner_key,
+>  	.lm_notify = nlmsvc_notify_blocked,
+>  	.lm_grant = nlmsvc_grant_deferred,
+>  };
+> diff --git a/fs/locks.c b/fs/locks.c
+> index 76fb7af..11e7784 100644
+> --- a/fs/locks.c
+> +++ b/fs/locks.c
+> @@ -481,11 +481,19 @@ static int posix_same_owner(struct file_lock *fl1, struct file_lock *fl2)
+>  	return fl1->fl_owner == fl2->fl_owner;
+>  }
+>  
+> +static unsigned long
+> +posix_owner_key(struct file_lock *fl)
+> +{
+> +	if (fl->fl_lmops && fl->fl_lmops->lm_owner_key)
+> +		return fl->fl_lmops->lm_owner_key(fl);
+> +	return (unsigned long)fl->fl_owner;
+> +}
+> +
+>  /* Remove a blocker or lock from one of the global lists */
+>  static inline void
+>  locks_insert_global_blocked(struct file_lock *waiter)
+>  {
+> -	hash_add(blocked_hash, &waiter->fl_link, (unsigned long)waiter->fl_owner);
+> +	hash_add(blocked_hash, &waiter->fl_link, posix_owner_key(waiter));
+>  }
+>  
+>  static inline void
+> @@ -739,7 +747,7 @@ static struct file_lock *what_owner_is_waiting_for(struct file_lock *block_fl)
+>  {
+>  	struct file_lock *fl;
+>  
+> -	hash_for_each_possible(blocked_hash, fl, fl_link, (unsigned long)block_fl->fl_owner) {
+> +	hash_for_each_possible(blocked_hash, fl, fl_link, posix_owner_key(block_fl)) {
+>  		if (posix_same_owner(fl, block_fl))
+>  			return fl->fl_next;
+>  	}
+> diff --git a/include/linux/fs.h b/include/linux/fs.h
+> index 3b340f7..232a345 100644
+> --- a/include/linux/fs.h
+> +++ b/include/linux/fs.h
+> @@ -908,6 +908,7 @@ struct file_lock_operations {
+>  
+>  struct lock_manager_operations {
+>  	int (*lm_compare_owner)(struct file_lock *, struct file_lock *);
+> +	unsigned long (*lm_owner_key)(struct file_lock *);
+>  	void (*lm_notify)(struct file_lock *);	/* unblock callback */
+>  	int (*lm_grant)(struct file_lock *, struct file_lock *, int);
+>  	void (*lm_break)(struct file_lock *);
 > -- 
-> 
-> Mit freundlichen Gr??en,
-> 
-> Florian Wiessner
-> 
-> Smart Weblications GmbH
-> Martinsberger Str. 1
-> D-95119 Naila
-> 
-> fon.: +49 9282 9638 200
-> fax.: +49 9282 9638 205
-> 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-> http://www.smart-weblications.de
-> 
-> --
-> Sitz der Gesellschaft: Naila
-> Gesch?ftsf?hrer: Florian Wiessner
-> HRB-Nr.: HRB 3840 Amtsgericht Hof
-> *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> 1.7.1
 > 
