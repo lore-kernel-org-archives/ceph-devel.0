@@ -1,46 +1,59 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.64 released
-Date: Wed, 12 Jun 2013 15:30:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306121528460.1439@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: [PATCH 2/2] rbd: use the correct length for format 2 object names
+Date: Wed, 12 Jun 2013 20:10:46 -0700
+Message-ID: <1371093046-5814-2-git-send-email-josh.durgin@inktank.com>
+References: <1371093046-5814-1-git-send-email-josh.durgin@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48782 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757986Ab3FLWae (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 18:30:34 -0400
+Received: from mail.hq.newdream.net ([66.33.206.127]:43449 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758233Ab3FMDkj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 23:40:39 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id A92D6260A1
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 20:41:45 -0700 (PDT)
+Received: from vit.ops.newdream.net (unknown [38.122.20.226])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id A68BF2609D
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 20:41:45 -0700 (PDT)
+In-Reply-To: <1371093046-5814-1-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: ceph-devel@vger.kernel.org
 
-A new development release of Ceph is out.  Notable changes include:
+Format 2 objects use 16 characters for the object name suffix to be
+able to express the full 64-bit range of object numbers. Format 1
+images only use 12 characters for this. Using 12-character names for
+format 2 caused userspace and kernel rbd clients to read differently
+named objects, which made an image written by one client look empty to
+the other client.
 
- * osd: monitor both front and back interfaces
- * osd: verify both front and back network are working before rejoining 
-   cluster
- * osd: fix memory/network inefficiency during deep scrub
- * osd: fix incorrect mark-down of osds
- * mon: fix start fork behavior
- * mon: fix election timeout
- * mon: better trim/compaction behavior
- * mon: fix units in 'ceph df' output
- * mon, osd: misc memory leaks
- * librbd: make default options/features for newly created images (e.g., 
-   via qemu-img) configurable
- * mds: many fixes for mds clustering
- * mds: fix rare hang after client restart
- * ceph-fuse: add ioctl support
- * ceph-fuse/libcephfs: fix for cap release/hang
- * rgw: handle deep uri resources
- * rgw: fix CORS bugs
- * ceph-disk: add '[un]suppress-active DEV' command
- * debian: rgw: stop daemon on uninstall
- * debian: fix upstart behavior with upgrades
+Reported-by: Chris Dunlop <chris@onthe.net.au>
+Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+---
+ drivers/block/rbd.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
 
-You can get v0.64 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.64.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 9f72125..39ee017 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1028,12 +1028,16 @@ static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+ 	char *name;
+ 	u64 segment;
+ 	int ret;
++	char *name_format;
+ 
+ 	name = kmem_cache_alloc(rbd_segment_name_cache, GFP_NOIO);
+ 	if (!name)
+ 		return NULL;
+ 	segment = offset >> rbd_dev->header.obj_order;
+-	ret = snprintf(name, MAX_OBJ_NAME_SIZE + 1, "%s.%012llx",
++	name_format = "%s.%012llx";
++	if (rbd_dev->image_format == 2)
++		name_format = "%s.%016llx";
++	ret = snprintf(name, MAX_OBJ_NAME_SIZE + 1, name_format,
+ 			rbd_dev->header.object_prefix, segment);
+ 	if (ret < 0 || ret > MAX_OBJ_NAME_SIZE) {
+ 		pr_err("error formatting segment name for #%llu (%d)\n",
+-- 
+1.7.2.5
 
