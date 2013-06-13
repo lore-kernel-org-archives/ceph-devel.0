@@ -1,60 +1,50 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH 1/2] rbd: fetch object order before using it
-Date: Wed, 12 Jun 2013 20:10:45 -0700
-Message-ID: <1371093046-5814-1-git-send-email-josh.durgin@inktank.com>
+Subject: Re: krbd + format=2 ?
+Date: Wed, 12 Jun 2013 20:56:50 -0700
+Message-ID: <51B94302.1010104@inktank.com>
+References: <20130603092428.GB28293@onthe.net.au> <51B2103C.7040402@inktank.com> <20130608024852.GA31065@onthe.net.au> <20130612045949.GA13654@onthe.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:43450 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758254Ab3FMDkj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 23:40:39 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 6C1682609B
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 20:41:35 -0700 (PDT)
-Received: from vit.ops.newdream.net (unknown [38.122.20.226])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 667212608C
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 20:41:35 -0700 (PDT)
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:50665 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756659Ab3FMD4e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jun 2013 23:56:34 -0400
+Received: by mail-gh0-f174.google.com with SMTP id r17so1384668ghr.33
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Jun 2013 20:56:33 -0700 (PDT)
+In-Reply-To: <20130612045949.GA13654@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Chris Dunlop <chris@onthe.net.au>
+Cc: Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
 
-rbd_dev_v2_header_onetime() fetches striping information, and
-checks whether the image can be read by compariing the stripe unit
-to the object size. It determines the object size by shifting
-the object order, which is 0 at this point since it has not been
-read yet. Move the call to get the image size and object order
-before rbd_dev_v2_header_onetime() so it is set before use.
+On 06/11/2013 09:59 PM, Chris Dunlop wrote:
+> On Sat, Jun 08, 2013 at 12:48:52PM +1000, Chris Dunlop wrote:
+>> On Fri, Jun 07, 2013 at 11:54:20AM -0500, Alex Elder wrote:
+>>> On 06/03/2013 04:24 AM, Chris Dunlop wrote:
+>>>> I pulled the for-linus branch (@ 3abef3b) on top of 3.10.0-rc4, and it's
+>>>> letting me map a format=2 image (created under bobtail), however reading
+>>>> from the block device returns zeros rather than the data. The same image
+>>>> correctly shows data (NTFS filesystem) when mounted into kvm using librbd.
+>>>
+>>> Have you tried using a format 2 image that you created using
+>>> the Linux rbd environment?  It would be good to know whether
+>>> that works for you.
+>>
+>> Sorry, how to you mean "created using the Linux rbd environment"?
+>> The one I was trying was created using:
+>>
+>> rbd create --format 2 xxx --size nnnnn
+>>
+>> ...then populated using qemu/librbd.
+>
+> Looks like the kernel rbd and librbd aren't compatible, as at
+> 3.10.0-rc4+ceph-client/for-linus@3abef3b vs librbd1 0.56.6-1~bpo70+1.
 
-Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
----
- drivers/block/rbd.c |    8 ++++----
- 1 files changed, 4 insertions(+), 4 deletions(-)
+Thanks for the detailed report Chris. The kernel client was using the
+wrong object names for format 2 (zero-padding them with a different
+length than librbd). I just posted a patch fixing this.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index cecf5c6..9f72125 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -4286,6 +4286,10 @@ static int rbd_dev_v2_header_info(struct rbd_device *rbd_dev)
- 	bool first_time = rbd_dev->header.object_prefix == NULL;
- 	int ret;
- 
-+	ret = rbd_dev_v2_image_size(rbd_dev);
-+	if (ret)
-+		return ret;
-+
- 	if (first_time) {
- 		ret = rbd_dev_v2_header_onetime(rbd_dev);
- 		if (ret)
-@@ -4319,10 +4323,6 @@ static int rbd_dev_v2_header_info(struct rbd_device *rbd_dev)
- 					"is EXPERIMENTAL!");
- 	}
- 
--	ret = rbd_dev_v2_image_size(rbd_dev);
--	if (ret)
--		return ret;
--
- 	if (rbd_dev->spec->snap_id == CEPH_NOSNAP)
- 		if (rbd_dev->mapping.size != rbd_dev->header.image_size)
- 			rbd_dev->mapping.size = rbd_dev->header.image_size;
--- 
-1.7.2.5
+Josh
 
