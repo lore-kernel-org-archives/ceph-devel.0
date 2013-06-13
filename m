@@ -1,128 +1,125 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH v2 10/14] locks: turn the blocked_list into a hashtable
-Date: Thu, 13 Jun 2013 10:50:09 -0400
-Message-ID: <20130613145009.GB20235@fieldses.org>
-References: <1370948948-31784-1-git-send-email-jlayton@redhat.com>
- <1370948948-31784-11-git-send-email-jlayton@redhat.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: rbd rm <image> results in osd marked down wrongly
+ with 0.61.3
+Date: Thu, 13 Jun 2013 07:59:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306130753200.21994@cobra.newdream.net>
+References: <51B731F7.2050002@smart-weblications.de>
+	<51B9BA40.6040901@smart-weblications.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1370948948-31784-11-git-send-email-jlayton@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@redhat.com>
-Cc: viro@zeniv.linux.org.uk, matthew@wil.cx, dhowells@redhat.com, sage@inktank.com, smfrench@gmail.com, swhiteho@redhat.com, Trond.Myklebust@netapp.com, akpm@linux-foundation.org, linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, piastryyy@gmail.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <51B9BA40.6040901-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Smart Weblications GmbH - Florian Wiessner <f.wiessner-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jun 11, 2013 at 07:09:04AM -0400, Jeff Layton wrote:
-> Break up the blocked_list into a hashtable, using the fl_owner as a key.
-> This speeds up searching the hash chains, which is especially significant
-> for deadlock detection.
-> 
-> Note that the initial implementation assumes that hashing on fl_owner is
-> sufficient. In most cases it should be, with the notable exception being
-> server-side lockd, which compares ownership using a tuple of the
-> nlm_host and the pid sent in the lock request. So, this may degrade to a
-> single hash bucket when you only have a single NFS client. That will be
-> addressed in a later patch.
-> 
-> The careful observer may note that this patch leaves the file_lock_list
-> alone. There's much less of a case for turning the file_lock_list into a
-> hashtable. The only user of that list is the code that generates
-> /proc/locks, and it always walks the entire list.
+Hi Florian,
 
-Makes sense to me, ACK to this and the previous patch.--b.
+Sorry, I missed this one.  Since this is fully reproducible, can you 
+generate a log of the crash by doing something like
 
+ ceph osd tell \* injectargs '--debug-osd 20 --debug-filestore 20 --debug-ms 20'
+
+(that is a lot of logging, btw), triggering a crash, and then sending us 
+the log on the failed osd?  You'll want to turn the logs down again after 
+with
+
+ ceph osd tell \* injectargs '--debug-osd 0 --debug-filestore 0 --debug-ms 0'
+
+I've opened a ticket for this,
+
+Thanks!
+sage
+
+
+On Thu, 13 Jun 2013, Smart Weblications GmbH - Florian Wiessner wrote:
+
+> Hi,
 > 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  fs/locks.c |   25 ++++++++++++++++++-------
->  1 files changed, 18 insertions(+), 7 deletions(-)
+> Is really no one on the list interrested in fixing this? Or am i the only one
+> having this kind of bug/problem?
 > 
-> diff --git a/fs/locks.c b/fs/locks.c
-> index 28959bc..76fb7af 100644
-> --- a/fs/locks.c
-> +++ b/fs/locks.c
-> @@ -126,6 +126,7 @@
->  #include <linux/time.h>
->  #include <linux/rcupdate.h>
->  #include <linux/pid_namespace.h>
-> +#include <linux/hashtable.h>
->  
->  #include <asm/uaccess.h>
->  
-> @@ -153,10 +154,19 @@ int lease_break_time = 45;
->  #define for_each_lock(inode, lockp) \
->  	for (lockp = &inode->i_flock; *lockp != NULL; lockp = &(*lockp)->fl_next)
->  
-> +/*
-> + * By breaking up the blocked locks list into a hashtable, we speed up the
-> + * deadlock detection.
-> + *
-> + * FIXME: make this value scale via some heuristic?
-> + */
-> +#define BLOCKED_HASH_BITS	7
-> +
-> +static DEFINE_HASHTABLE(blocked_hash, BLOCKED_HASH_BITS);
-> +
->  static HLIST_HEAD(file_lock_list);
-> -static HLIST_HEAD(blocked_list);
->  
-> -/* Protects the two list heads above */
-> +/* Protects the file_lock_list and the blocked_hash */
->  static DEFINE_SPINLOCK(file_lock_lock);
->  
->  static struct kmem_cache *filelock_cache __read_mostly;
-> @@ -475,13 +485,13 @@ static int posix_same_owner(struct file_lock *fl1, struct file_lock *fl2)
->  static inline void
->  locks_insert_global_blocked(struct file_lock *waiter)
->  {
-> -	hlist_add_head(&waiter->fl_link, &blocked_list);
-> +	hash_add(blocked_hash, &waiter->fl_link, (unsigned long)waiter->fl_owner);
->  }
->  
->  static inline void
->  __locks_delete_global_blocked(struct file_lock *waiter)
->  {
-> -	hlist_del_init(&waiter->fl_link);
-> +	hash_del(&waiter->fl_link);
->  }
->  
->  static inline void
-> @@ -729,7 +739,7 @@ static struct file_lock *what_owner_is_waiting_for(struct file_lock *block_fl)
->  {
->  	struct file_lock *fl;
->  
-> -	hlist_for_each_entry(fl, &blocked_list, fl_link) {
-> +	hash_for_each_possible(blocked_hash, fl, fl_link, (unsigned long)block_fl->fl_owner) {
->  		if (posix_same_owner(fl, block_fl))
->  			return fl->fl_next;
->  	}
-> @@ -865,7 +875,7 @@ static int __posix_lock_file(struct inode *inode, struct file_lock *request, str
->  	/*
->  	 * New lock request. Walk all POSIX locks and look for conflicts. If
->  	 * there are any, either return error or put the request on the
-> -	 * blocker's list of waiters and the global blocked_list.
-> +	 * blocker's list of waiters and the global blocked_hash.
->  	 */
->  	if (request->fl_type != F_UNLCK) {
->  		for_each_lock(inode, before) {
-> @@ -2284,13 +2294,14 @@ static void lock_get_status(struct seq_file *f, struct file_lock *fl,
->  
->  static int locks_show(struct seq_file *f, void *v)
->  {
-> +	int bkt;
->  	struct file_lock *fl, *bfl;
->  
->  	fl = hlist_entry(v, struct file_lock, fl_link);
->  
->  	lock_get_status(f, fl, *((loff_t *)f->private), "");
->  
-> -	hlist_for_each_entry(bfl, &blocked_list, fl_link) {
-> +	hash_for_each(blocked_hash, bkt, bfl, fl_link) {
->  		if (bfl->fl_next == fl)
->  			lock_get_status(f, bfl, *((loff_t *)f->private), " ->");
->  	}
+> Am 11.06.2013 16:19, schrieb Smart Weblications GmbH - Florian Wiessner:
+> > Hi List,
+> > 
+> > i observed that an rbd rm <image> results in some osds mark one osd as down
+> > wrongly in cuttlefish.
+> > 
+> > The situation gets even worse if there are more than one rbd rm <image> running
+> > in parallel.
+> > 
+> > Please see attached logfiles. The rbd rm command was issued on 20:24:00 via
+> > cronjob, 40 seconds later the osd 6 got marked down...
+> > 
+> > 
+> > ceph osd tree
+> > 
+> > # id    weight  type name       up/down reweight
+> > -1      7       pool default
+> > -3      7               rack unknownrack
+> > -2      1                       host node01
+> > 0       1                               osd.0   up      1
+> > -4      1                       host node02
+> > 1       1                               osd.1   up      1
+> > -5      1                       host node03
+> > 2       1                               osd.2   up      1
+> > -6      1                       host node04
+> > 3       1                               osd.3   up      1
+> > -7      1                       host node06
+> > 5       1                               osd.5   up      1
+> > -8      1                       host node05
+> > 4       1                               osd.4   up      1
+> > -9      1                       host node07
+> > 6       1                               osd.6   up      1
+> > 
+> > 
+> > I have seen some patches to parallelize rbd rm, but i think there must be some
+> > other issue, as my clients seem to not be able to do IO when ceph is
+> > recovering... I think this has worked better in 0.56.x - there was IO while
+> > recovering.
+> > 
+> > I also observed in the log of osd.6 that after heartbeat_map reset_timeout, the
+> > osd tries to connect to the other osds, but it retries so fast that you could
+> > think this is a DoS attack...
+> > 
+> > 
+> > Please advise..
+> > 
+> 
+> 
 > -- 
-> 1.7.1
+> 
+> Mit freundlichen Gr??en,
+> 
+> Florian Wiessner
+> 
+> Smart Weblications GmbH
+> Martinsberger Str. 1
+> D-95119 Naila
+> 
+> fon.: +49 9282 9638 200
+> fax.: +49 9282 9638 205
+> 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+> http://www.smart-weblications.de
+> 
+> --
+> Sitz der Gesellschaft: Naila
+> Gesch?ftsf?hrer: Florian Wiessner
+> HRB-Nr.: HRB 3840 Amtsgericht Hof
+> *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > 
