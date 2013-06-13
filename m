@@ -1,202 +1,74 @@
-From: "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 14/14] locks: move file_lock_list to a set of percpu
- hlist_heads and convert file_lock_lock to an lglock
-Date: Thu, 13 Jun 2013 11:37:42 -0400
-Message-ID: <20130613153742.GE20666@fieldses.org>
-References: <1370948948-31784-1-git-send-email-jlayton@redhat.com>
- <1370948948-31784-15-git-send-email-jlayton@redhat.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 1/2] rbd: fetch object order before using it
+Date: Thu, 13 Jun 2013 08:52:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306130851250.24708@cobra.newdream.net>
+References: <1371093046-5814-1-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1370948948-31784-15-git-send-email-jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, piastryyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:36008 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758375Ab3FMPwD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Jun 2013 11:52:03 -0400
+In-Reply-To: <1371093046-5814-1-git-send-email-josh.durgin@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Jun 11, 2013 at 07:09:08AM -0400, Jeff Layton wrote:
-> The file_lock_list is only used for /proc/locks. The vastly common case
-> is for locks to be put onto the list and come off again, without ever
-> being traversed.
-> 
-> Help optimize for this use-case by moving to percpu hlist_head-s. At the
-> same time, we can make the locking less contentious by moving to an
-> lglock. When iterating over the lists for /proc/locks, we must take the
-> global lock and then iterate over each CPU's list in turn.
-> 
-> This change necessitates a new fl_link_cpu field to keep track of which
-> CPU the entry is on. On x86_64 at least, this field is placed within an
-> existing hole in the struct to avoid growing its real size.
+Both of these look good; pushing to testing branch shortly.  The name 
+length one I also tagged for 3.9 stable (this one didn't apply cleanly).
 
-ACK.--b.
+Thanks!
+sage
 
+
+On Wed, 12 Jun 2013, Josh Durgin wrote:
+
+> rbd_dev_v2_header_onetime() fetches striping information, and
+> checks whether the image can be read by compariing the stripe unit
+> to the object size. It determines the object size by shifting
+> the object order, which is 0 at this point since it has not been
+> read yet. Move the call to get the image size and object order
+> before rbd_dev_v2_header_onetime() so it is set before use.
 > 
-> Signed-off-by: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
->  fs/locks.c         |   57 +++++++++++++++++++++++++++++++++++----------------
->  include/linux/fs.h |    1 +
->  2 files changed, 40 insertions(+), 18 deletions(-)
+>  drivers/block/rbd.c |    8 ++++----
+>  1 files changed, 4 insertions(+), 4 deletions(-)
 > 
-> diff --git a/fs/locks.c b/fs/locks.c
-> index 8124fc1..094eb4d 100644
-> --- a/fs/locks.c
-> +++ b/fs/locks.c
-> @@ -127,6 +127,8 @@
->  #include <linux/rcupdate.h>
->  #include <linux/pid_namespace.h>
->  #include <linux/hashtable.h>
-> +#include <linux/percpu.h>
-> +#include <linux/lglock.h>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index cecf5c6..9f72125 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -4286,6 +4286,10 @@ static int rbd_dev_v2_header_info(struct rbd_device *rbd_dev)
+>  	bool first_time = rbd_dev->header.object_prefix == NULL;
+>  	int ret;
 >  
->  #include <asm/uaccess.h>
->  
-> @@ -165,8 +167,8 @@ int lease_break_time = 45;
->  static DEFINE_SPINLOCK(blocked_hash_lock);
->  static DEFINE_HASHTABLE(blocked_hash, BLOCKED_HASH_BITS);
->  
-> -static DEFINE_SPINLOCK(file_lock_lock);
-> -static HLIST_HEAD(file_lock_list);
-> +DEFINE_STATIC_LGLOCK(file_lock_lglock);
-> +static DEFINE_PER_CPU(struct hlist_head, file_lock_list);
->  
->  static struct kmem_cache *filelock_cache __read_mostly;
->  
-> @@ -512,17 +514,21 @@ locks_delete_global_blocked(struct file_lock *waiter)
->  static inline void
->  locks_insert_global_locks(struct file_lock *waiter)
->  {
-> -	spin_lock(&file_lock_lock);
-> -	hlist_add_head(&waiter->fl_link, &file_lock_list);
-> -	spin_unlock(&file_lock_lock);
-> +	lg_local_lock(&file_lock_lglock);
-> +	waiter->fl_link_cpu = smp_processor_id();
-> +	hlist_add_head(&waiter->fl_link, this_cpu_ptr(&file_lock_list));
-> +	lg_local_unlock(&file_lock_lglock);
->  }
->  
->  static inline void
->  locks_delete_global_locks(struct file_lock *waiter)
->  {
-> -	spin_lock(&file_lock_lock);
-> +	/* avoid taking lock if already unhashed */
-> +	if (hlist_unhashed(&waiter->fl_link))
-> +		return;
-> +	lg_local_lock_cpu(&file_lock_lglock, waiter->fl_link_cpu);
->  	hlist_del_init(&waiter->fl_link);
-> -	spin_unlock(&file_lock_lock);
-> +	lg_local_unlock_cpu(&file_lock_lglock, waiter->fl_link_cpu);
->  }
->  
->  /* Remove waiter from blocker's block list.
-> @@ -2228,6 +2234,11 @@ EXPORT_SYMBOL_GPL(vfs_cancel_lock);
->  #include <linux/proc_fs.h>
->  #include <linux/seq_file.h>
->  
-> +struct locks_iterator {
-> +	int	li_cpu;
-> +	loff_t	li_pos;
-> +};
+> +	ret = rbd_dev_v2_image_size(rbd_dev);
+> +	if (ret)
+> +		return ret;
 > +
->  static void lock_get_status(struct seq_file *f, struct file_lock *fl,
->  			    loff_t id, char *pfx)
->  {
-> @@ -2302,16 +2313,17 @@ static void lock_get_status(struct seq_file *f, struct file_lock *fl,
->  static int locks_show(struct seq_file *f, void *v)
->  {
->  	int bkt;
-> +	struct locks_iterator *iter = f->private;
->  	struct file_lock *fl, *bfl;
->  
->  	fl = hlist_entry(v, struct file_lock, fl_link);
->  
-> -	lock_get_status(f, fl, *((loff_t *)f->private), "");
-> +	lock_get_status(f, fl, iter->li_pos, "");
->  
->  	spin_lock(&blocked_hash_lock);
->  	hash_for_each(blocked_hash, bkt, bfl, fl_link) {
->  		if (bfl->fl_next == fl)
-> -			lock_get_status(f, bfl, *((loff_t *)f->private), " ->");
-> +			lock_get_status(f, bfl, iter->li_pos, " ->");
+>  	if (first_time) {
+>  		ret = rbd_dev_v2_header_onetime(rbd_dev);
+>  		if (ret)
+> @@ -4319,10 +4323,6 @@ static int rbd_dev_v2_header_info(struct rbd_device *rbd_dev)
+>  					"is EXPERIMENTAL!");
 >  	}
->  	spin_unlock(&blocked_hash_lock);
 >  
-> @@ -2320,23 +2332,24 @@ static int locks_show(struct seq_file *f, void *v)
->  
->  static void *locks_start(struct seq_file *f, loff_t *pos)
->  {
-> -	loff_t *p = f->private;
-> +	struct locks_iterator *iter = f->private;
->  
-> -	spin_lock(&file_lock_lock);
-> -	*p = (*pos + 1);
-> -	return seq_hlist_start(&file_lock_list, *pos);
-> +	iter->li_pos = *pos + 1;
-> +	lg_global_lock(&file_lock_lglock);
-> +	return seq_hlist_start_percpu(&file_lock_list, &iter->li_cpu, *pos);
->  }
->  
->  static void *locks_next(struct seq_file *f, void *v, loff_t *pos)
->  {
-> -	loff_t *p = f->private;
-> -	++*p;
-> -	return seq_hlist_next(v, &file_lock_list, pos);
-> +	struct locks_iterator *iter = f->private;
-> +
-> +	++iter->li_pos;
-> +	return seq_hlist_next_percpu(v, &file_lock_list, &iter->li_cpu, pos);
->  }
->  
->  static void locks_stop(struct seq_file *f, void *v)
->  {
-> -	spin_unlock(&file_lock_lock);
-> +	lg_global_unlock(&file_lock_lglock);
->  }
->  
->  static const struct seq_operations locks_seq_operations = {
-> @@ -2348,7 +2361,8 @@ static const struct seq_operations locks_seq_operations = {
->  
->  static int locks_open(struct inode *inode, struct file *filp)
->  {
-> -	return seq_open_private(filp, &locks_seq_operations, sizeof(loff_t));
-> +	return seq_open_private(filp, &locks_seq_operations,
-> +					sizeof(struct locks_iterator));
->  }
->  
->  static const struct file_operations proc_locks_operations = {
-> @@ -2448,9 +2462,16 @@ EXPORT_SYMBOL(lock_may_write);
->  
->  static int __init filelock_init(void)
->  {
-> +	int i;
-> +
->  	filelock_cache = kmem_cache_create("file_lock_cache",
->  			sizeof(struct file_lock), 0, SLAB_PANIC, NULL);
->  
-> +	lg_lock_init(&file_lock_lglock, "file_lock_lglock");
-> +
-> +	for_each_possible_cpu(i)
-> +		INIT_HLIST_HEAD(per_cpu_ptr(&file_lock_list, i));
-> +
->  	return 0;
->  }
->  
-> diff --git a/include/linux/fs.h b/include/linux/fs.h
-> index 232a345..18e59b8 100644
-> --- a/include/linux/fs.h
-> +++ b/include/linux/fs.h
-> @@ -953,6 +953,7 @@ struct file_lock {
->  	unsigned int fl_flags;
->  	unsigned char fl_type;
->  	unsigned int fl_pid;
-> +	int fl_link_cpu;		/* what cpu's list is this on? */
->  	struct pid *fl_nspid;
->  	wait_queue_head_t fl_wait;
->  	struct file *fl_file;
+> -	ret = rbd_dev_v2_image_size(rbd_dev);
+> -	if (ret)
+> -		return ret;
+> -
+>  	if (rbd_dev->spec->snap_id == CEPH_NOSNAP)
+>  		if (rbd_dev->mapping.size != rbd_dev->header.image_size)
+>  			rbd_dev->mapping.size = rbd_dev->header.image_size;
 > -- 
-> 1.7.1
+> 1.7.2.5
 > 
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
