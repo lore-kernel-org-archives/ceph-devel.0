@@ -1,7 +1,7 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 1/2] Punch hole support against 3.8-rc3
-Date: Fri, 14 Jun 2013 23:38:03 +0800
-Message-ID: <1371224283-4886-1-git-send-email-liwang@ubuntukylin.com>
+Subject: [PATCH 2/2] Punch hole support against 3.10-rc5
+Date: Fri, 14 Jun 2013 23:39:00 +0800
+Message-ID: <1371224340-4926-1-git-send-email-liwang@ubuntukylin.com>
 References: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com>
@@ -11,28 +11,28 @@ Cc: Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org, Li Wang <liwang@
 List-Id: ceph-devel.vger.kernel.org
 
 This patch implements punch hole (fallocate) support against
-Linux kernel 3.8-rc3.
+Linux kernel 3.10-rc5.
 
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 ---
- fs/ceph/file.c        |  248 +++++++++++++++++++++++++++++++++++++++++++++++++
- net/ceph/osd_client.c |   17 +++-
- 2 files changed, 260 insertions(+), 5 deletions(-)
+ fs/ceph/file.c        |  245 +++++++++++++++++++++++++++++++++++++++++++++++++
+ net/ceph/osd_client.c |    8 +-
+ 2 files changed, 251 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index e51558f..7fb9c6d 100644
+index 656e169..e092b69 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -7,6 +7,7 @@
- #include <linux/mount.h>
+@@ -8,6 +8,7 @@
  #include <linux/namei.h>
  #include <linux/writeback.h>
+ #include <linux/aio.h>
 +#include <linux/falloc.h>
  
  #include "super.h"
  #include "mds_client.h"
-@@ -848,6 +849,252 @@ out:
+@@ -882,6 +883,249 @@ out:
  	return offset;
  }
  
@@ -106,11 +106,10 @@ index e51558f..7fb9c6d 100644
 +	for (offset = lstart; offset <= lend; offset += length) {		
 +		req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
 +                                    ceph_vino(inode), offset, &length,
-+                                    CEPH_OSD_OP_DELETE, CEPH_OSD_FLAG_ONDISK,
++                                    1, CEPH_OSD_OP_DELETE, CEPH_OSD_FLAG_ONDISK,
 +                                    NULL,
-+                                    0,
 +                                    ci->i_truncate_seq, ci->i_truncate_size,
-+                                    NULL, false, 1, 0);
++                                    false);
 +		if (IS_ERR(req)) {
 +        	ret = PTR_ERR(req);
 +			goto out;
@@ -137,7 +136,6 @@ index e51558f..7fb9c6d 100644
 +	struct ceph_inode_info *ci = ceph_inode(inode);
 +	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);	
 +	struct ceph_osd_request *req;
-+	struct timespec mtime = CURRENT_TIME;
 +	int want, got = 0, ret = 0;
 +	
 +	if (length <= 0)
@@ -158,12 +156,11 @@ index e51558f..7fb9c6d 100644
 +		goto out;
 +	}
 +	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
-+                                    ceph_vino(inode), offset, &length,
++                                    ceph_vino(inode), offset, &length, 1,
 +                                    CEPH_OSD_OP_ZERO, CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
 +                                    NULL,
-+                                    0,
 +                                    ci->i_truncate_seq, ci->i_truncate_size,
-+                                    &mtime, false, 1, 0);
++                                    false);
 +	if (IS_ERR(req)) {
 +    	ret = PTR_ERR(req);
 +		goto out;
@@ -285,7 +282,7 @@ index e51558f..7fb9c6d 100644
  const struct file_operations ceph_file_fops = {
  	.open = ceph_open,
  	.release = ceph_release,
-@@ -864,5 +1111,6 @@ const struct file_operations ceph_file_fops = {
+@@ -898,5 +1142,6 @@ const struct file_operations ceph_file_fops = {
  	.splice_write = generic_file_splice_write,
  	.unlocked_ioctl = ceph_ioctl,
  	.compat_ioctl	= ceph_ioctl,
@@ -293,57 +290,37 @@ index e51558f..7fb9c6d 100644
  };
  
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index eb9a444..da69cfd 100644
+index 3a246a6..a6d9671 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -230,7 +230,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+@@ -503,7 +503,8 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
+ 	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
+ 	size_t payload_len = 0;
  
- 	req->r_flags = flags;
+-	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE);
++	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
++			opcode != CEPH_OSD_OP_DELETE && opcode != CEPH_OSD_OP_ZERO);
  
--	WARN_ON((flags & (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE)) == 0);
-+	WARN_ON((flags & (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE|CEPH_OSD_FLAG_ONDISK)) == 0);
- 
- 	/* create reply message */
- 	if (use_mempool)
-@@ -291,14 +291,16 @@ static void osd_req_encode_op(struct ceph_osd_request *req,
- 	switch (src->op) {
+ 	op->extent.offset = offset;
+ 	op->extent.length = length;
+@@ -631,6 +632,8 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 		break;
  	case CEPH_OSD_OP_READ:
  	case CEPH_OSD_OP_WRITE:
--		dst->extent.offset =
--			cpu_to_le64(src->extent.offset);
--		dst->extent.length =
--			cpu_to_le64(src->extent.length);
- 		dst->extent.truncate_size =
- 			cpu_to_le64(src->extent.truncate_size);
- 		dst->extent.truncate_seq =
- 			cpu_to_le32(src->extent.truncate_seq);
 +	case CEPH_OSD_OP_DELETE:
 +	case CEPH_OSD_OP_ZERO:
-+		dst->extent.length =
-+			cpu_to_le64(src->extent.length);
-+		dst->extent.offset =
-+			cpu_to_le64(src->extent.offset);		
- 		break;
+ 		if (src->op == CEPH_OSD_OP_WRITE)
+ 			request_data_len = src->extent.length;
+ 		dst->extent.offset = cpu_to_le64(src->extent.offset);
+@@ -715,7 +718,8 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 	u64 object_base;
+ 	int r;
  
- 	case CEPH_OSD_OP_GETXATTR:
-@@ -471,6 +473,10 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
- 	ops[0].extent.truncate_size = truncate_size;
- 	ops[0].payload_len = 0;
+-	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE);
++	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
++			opcode != CEPH_OSD_OP_DELETE && opcode != CEPH_OSD_OP_ZERO);
  
-+	if (opcode == CEPH_OSD_OP_ZERO || opcode == CEPH_OSD_OP_DELETE) {
-+		ops[0].extent.offset = off;
-+		ops[0].extent.length = *plen;
-+	}
- 	if (do_sync) {
- 		ops[1].op = CEPH_OSD_OP_STARTSYNC;
- 		ops[1].payload_len = 0;
-@@ -1181,6 +1187,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
- 	if (req == NULL) {
- 		dout("handle_reply tid %llu dne\n", tid);
- 		mutex_unlock(&osdc->request_mutex);
-+		printk(KERN_INFO"handle pm\n");
- 		return;
- 	}
- 	ceph_osdc_get_request(req);
+ 	req = ceph_osdc_alloc_request(osdc, snapc, num_ops, use_mempool,
+ 					GFP_NOFS);
 -- 
 1.7.9.5
