@@ -1,59 +1,44 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Writing to RBD image while it's snapshot is being created causes
- I/O errors
-Date: Fri, 14 Jun 2013 08:56:55 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306140855170.26467@cobra.newdream.net>
-References: <1881883.Fj0UjQGoA9@karol-esprimo-p5925>
+Subject: Re: [PATCH 0/2] Kernel file system client support for punch hole
+Date: Fri, 14 Jun 2013 09:02:42 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306140858460.26467@cobra.newdream.net>
+References: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50673 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50751 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750930Ab3FNP44 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jun 2013 11:56:56 -0400
-In-Reply-To: <1881883.Fj0UjQGoA9@karol-esprimo-p5925>
+	with ESMTP id S1751024Ab3FNQCm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jun 2013 12:02:42 -0400
+In-Reply-To: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karol Jurak <karol.jurak@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Fri, 14 Jun 2013, Karol Jurak wrote:
-> Hi,
-> 
-> I noticed that writing to RBD image using kernel driver while it's snapshot 
-> is being created causes I/O errors and the filesystem (reiserfs) eventually 
-> aborts and remounts itself in read-only mode:
-> 
-> [192507.327359] end_request: I/O error, dev rbd7, sector 818528
-> [192507.331510] end_request: I/O error, dev rbd7, sector 819200
-> [192507.348478] end_request: I/O error, dev rbd7, sector 408
-> [192507.352647] REISERFS abort (device rbd7): Journal write error in 
-> flush_commit_list
-> 
-> Is this happening by design or is it a bug? I know that I should freeze the 
-> filesystem before attempting to create a snapshot but these I/O errors seem 
-> unnecessary to me. If it's really impossible to write to an image while it's 
-> snapshot is being created couldn't write requests be blocked until 
-> snapshotting completes?
-> 
-> I'm using ceph 0.56.6 and kernel 3.4.48.
+On Fri, 14 Jun 2013, Li Wang wrote:
+> This patch implements punch hole (fallocate) support for Ceph kernel
+> file system client.
+> We prepared two patches based on different kernel versions, one against
+> kernel 3.8-rc3, the other against the latest 3.10-rc5. It is because
+> unfortunately, we failed to set up a workable Ceph system with the client
+> based on the lastest code from Linux kernel git tree, for the server
+> side, we tried both the latest code from Ceph git tree and
+> the latest v0.61.3 release. The client will easily hang there without
+> any response, unless rebooting the machine.
 
-This is definitely a bug; you should be able to create a snapshot at any 
-time.  After a rollback, it should look (to the fs) like a crash or power 
-cycle.
+This is odd; was there anything in dmesg?  We test this nightly (currently 
+on 3.10-rc5).
 
-How easy is this to reproduce?  Does it happen every time?
+> We managed to set up a Ceph system with the client based on Linux 
+> kernel 3.8-rc3 and the server based on Ceph v0.61.3, so the patch 
+> against v3.8-rc3 has been under preliminary tests. However, the one 
+> against v3.10-rc5 not.
 
+Do they differ substantially?  The one against the latest kernel is what 
+we'll ultimately apply and merge.
+
+Comments inline...
+
+Thanks!
 sage
-
-
-
-> 
-> -- 
-> Karol Jurak
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
