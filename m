@@ -1,79 +1,54 @@
-From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
-Subject: AW: radosgw- bind user to pool
-Date: Fri, 14 Jun 2013 17:02:21 +0000
-Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBBEE8@SMBXKO3.cgm.ag>
-References: <5EFBD28BA42C604BB012164C72CA560450CBBE16@SMBXKO3.cgm.ag>
- <CAC-hyiFxX+d-DtWEJROZett7dW4ShGyFuwsM26PX_Drtpjxamg@mail.gmail.com>
+From: "Martin Flyvbjerg" <martinflyvbjerg@gmx.com>
+Subject: Comments on Ceph distributed parity implementation
+Date: Fri, 14 Jun 2013 22:13:26 +0200
+Message-ID: <20130614201327.70240@gmx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smxko3.compugroup.com ([193.47.161.188]:56287 "EHLO
-	SMXKO3.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752890Ab3FNRC3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jun 2013 13:02:29 -0400
-In-Reply-To: <CAC-hyiFxX+d-DtWEJROZett7dW4ShGyFuwsM26PX_Drtpjxamg@mail.gmail.com>
-Content-Language: de-DE
+Received: from mout.gmx.net ([212.227.17.22]:63078 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753611Ab3FNUNb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 14 Jun 2013 16:13:31 -0400
+Received: from mailout-eu.gmx.com ([10.1.101.212]) by mrigmx.server.lan
+ (mrigmx002) with ESMTP (Nemesis) id 0M6PTB-1UObfm07Vz-00yR8H for
+ <ceph-devel@vger.kernel.org>; Fri, 14 Jun 2013 22:13:29 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hello,
+Dear Community
+I am a young engineer (not software or math, please bare with me) with some suggestions regarding erasure codes. I never used Ceph before or any other distributed file system.
 
-thank you very much, I would like it very much.
+I stumped upon the suggestion for adding erasure codes to Ceph, as
+described in this article
+http://wiki.Ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encoding_as_a_storage_backend
 
-Regards
+first I would like to say great initiative to add erasure codes to Ceph.
+Ceph needs its own implementation and it have to be done right, I cannot stress this enough, suggested software mentioned in that article would result in very low performance.
 
-Philipp
+Why?
+Reed-Solomon is normally something regarded as being very slow compared to other erasure codes, because the underlying Galois-Field multiplication is slow. Please see video at usenix.org forexplanation.
 
------Urspr=FCngliche Nachricht-----
-Von: yehudasa@gmail.com [mailto:yehudasa@gmail.com] Im Auftrag von Yehu=
-da Sadeh
-Gesendet: Freitag, 14. Juni 2013 17:23
-An: J=E4ger, Philipp
-Cc: ceph-devel@vger.kernel.org
-Betreff: Re: radosgw- bind user to pool
+The implementations of Zfec library and other suggested software the others rely on the Vandermonde matrix, a matrix used in in Reed-Solomon erasure codes, a faster approach would be to use the Cauchy-Reed-Solomon implementation. Please see [1,2,3]
+Although there is something even better, by using the Intel SSE2/3 SIMD instructions it is possible to do the as fast as any other XOR based erasure codes (RaptorQ LT-codes, LDPC etc.).
 
-On Fri, Jun 14, 2013 at 6:59 AM, J=E4ger, Philipp <Philipp.Jaeger@cgm.c=
-om> wrote:
-> Hello,
->
-> We have several projects, which needs to save data to a rados object =
-store via radosgw.
->
-> Is it possible to bind a rgw user to a specific pool?
+The suggested FECpp lib uses the optimisation but with a relative small Galois-field only 2^8, since Ceph aimes at unlimited scalability increasing the size of the Galois-Field would improve performance [4]. Of course the configured Ceph Object Size and/or Stripe width have to be taken into account.
+Please see
+https://www.usenix.org/conference/fast13/screaming-fast-galois-field-arithmetic-using-sse2-extensions
 
-No, not at the moment. You can pre-create buckets for the users while c=
-ontrolling the bucket placement settings, but that's probably not what =
-you're looking for.
 
->
-> Perhaps it is also possible to bind a whole rgw to a specific pool? W=
-e have set up 2 rgws, but when I add a certain pool in rgw1, it's synch=
-ronized in the other one/ rgw2 . It's the same with the user database. =
-So is it possible to separate it? We thought about 1RGW per project, bu=
-t because of the sync, it's not possible I think?
+The solution
+Using the GF-Complete open source library [4] to implement Reed-Solomon in Ceph in order to allow Ceph to scale to infinity.
+James S. Plank the author of GF-complete have developed a library implementing various Reed-Solomon codes called Jerasure. http://web.eecs.utk.edu/~plank/plank/www/software.html
+Jerasure 2.0 using the GF-complete artimetric based in Intel SSE SIMD instructions, is current in development expected release august 2013. Will be released under the new BSD license. Jerasure 2.0 also supports arbitrary Galois-field sizes 8,16,32,64 or 128 bit.
 
-Currently, the only way to do it right now is to create separate zones =
-and point each gateway at a different zone. However, you'll have to cre=
-ate a completely separate set of users, and I'm having trouble recommen=
-ding actually doing that as it contradicts the direction we're going (d=
-ifferent regions that share users). We can make the list of available p=
-ools configurable, so that you could control it on a per-gateway basis.=
- That's a pretty straight forward change. I opened issue #5344 for that=
-=2E
+The limit of this implementation would be the processors L2/L3 cache not the underlying arithmetic. 
 
->
-> When you add more than one pool to the radosgw, in which pool will da=
-ta be written? Is it random?
->
+Best Regards
+Martin Flyvbjerg
 
-It's being selected randomly from the available data pools.
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] http://web.eecs.utk.edu/~plank/plank/papers/CS-05-569.pdf
+[2] http://web.eecs.utk.edu/~plank/plank/papers/CS-08-625.pdf
+[3] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2009.pdf
+[4] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2013-GF.pdf
