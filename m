@@ -1,52 +1,53 @@
-From: Luke Jing Yuan <jyluke@mimos.my>
-Subject: Issues with ceph-deploy/deph-disk
-Date: Fri, 14 Jun 2013 09:57:29 +0000
-Message-ID: <E0E280CCE0E1A44898C992A9190D929A49E50C@MBX01-TPM.mimos.local>
+From: =?iso-8859-1?Q?J=E4ger=2C_Philipp?= <Philipp.Jaeger@cgm.com>
+Subject: radosgw- bind user to pool
+Date: Fri, 14 Jun 2013 13:59:01 +0000
+Message-ID: <5EFBD28BA42C604BB012164C72CA560450CBBE16@SMBXKO3.cgm.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from imperial.mimos.my ([192.228.137.109]:53348 "EHLO
-	IMPERIAL.MIMOS.MY" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752009Ab3FNJ5b convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jun 2013 05:57:31 -0400
-Content-Language: en-US
+Received: from smxko1.compugroup.com ([193.47.161.177]:51752 "EHLO
+	SMXKO1.compugroup.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751363Ab3FNN7N convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jun 2013 09:59:13 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by SMXKO1.compugroup.com (Postfix) with ESMTP id 50A7C6125
+	for <ceph-devel@vger.kernel.org>; Fri, 14 Jun 2013 15:59:01 +0200 (CEST)
+Received: from SMXKO1.compugroup.com ([127.0.0.1])
+	by localhost (smxko1.compugroup.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id T+ORG4zvXhUG for <ceph-devel@vger.kernel.org>;
+	Fri, 14 Jun 2013 15:59:01 +0200 (CEST)
+Received: from SCASKO2.cgm.ag (unknown [10.0.0.162])
+	by SMXKO1.compugroup.com (Postfix) with ESMTPS id 25C196079
+	for <ceph-devel@vger.kernel.org>; Fri, 14 Jun 2013 15:59:01 +0200 (CEST)
+Content-Language: de-DE
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Dear developers,
+Hello,
 
-I had tried asking similar question in ceph-users but had not had any reply so please forgive me for posting here.
+We have several projects, which needs to save data to a rados object st=
+ore via radosgw.
 
-I had a slight issue with ceph-deploy (aside from the bug #4984) specifically during osd prepare and activate. I am trying to build cluster using some old HP servers and Ubuntu Precise, but unfortunately the devices in these HP came out as /dev/cciss/c0d0 and so on (or /dev/cciss/c0d0p1 if with partitions). So is there any possible workaround or where I can make changes since the ceph-deploy/ceph-disk is expecting something like /dev/sda instead? 
+Is it possible to bind a rgw user to a specific pool?
 
-Thanks in advance.
+Perhaps it is also possible to bind a whole rgw to a specific pool? We =
+have set up 2 rgws, but when I add a certain pool in rgw1, it's synchro=
+nized in the other one/ rgw2 . It's the same with the user database. So=
+ is it possible to separate it? We thought about 1RGW per project, but =
+because of the sync, it's not possible I think?
 
-Regards,
-Luke
+When you add more than one pool to the radosgw, in which pool will data=
+ be written? Is it random?
 
+Thank you very much.
 
-------------------------------------------------------------------
--
--
-DISCLAIMER: 
+Regards
 
-This e-mail (including any attachments) is for the addressee(s) 
-only and may contain confidential information. If you are not the 
-intended recipient, please note that any dealing, review, 
-distribution, printing, copying or use of this e-mail is strictly 
-prohibited. If you have received this email in error, please notify 
-the sender  immediately and delete the original message. 
-MIMOS Berhad is a research and development institution under 
-the purview of the Malaysian Ministry of Science, Technology and 
-Innovation. Opinions, conclusions and other information in this e-
-mail that do not relate to the official business of MIMOS Berhad 
-and/or its subsidiaries shall be understood as neither given nor 
-endorsed by MIMOS Berhad and/or its subsidiaries and neither 
-MIMOS Berhad nor its subsidiaries accepts responsibility for the 
-same. All liability arising from or in connection with computer 
-viruses and/or corrupted e-mails is excluded to the fullest extent 
-permitted by law.
-
-
+Philipp J=E4ger
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
