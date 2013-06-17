@@ -1,58 +1,21 @@
-From: Paul Bolle <pebolle@tiscali.nl>
-Subject: [PATCH] rbd: remove RBD_DEBUG
-Date: Mon, 17 Jun 2013 12:15:51 +0200
-Message-ID: <1371464151.26299.12.camel@x61.thuisdomein>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 0/8] misc fixes for mds
+Date: Mon, 17 Jun 2013 20:10:21 +0800
+Message-ID: <1371471029-10589-1-git-send-email-zheng.z.yan@intel.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:6759 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932725Ab3FQMKl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 17 Jun 2013 08:10:41 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The RBD_DEBUG macro is always defined, so it serves no purpose.
-Removing it has the benefit that readers of the code won't be tricked
-into thinking that rbd_assert() will compile away because they didn't
-define RBD_DEBUG themselves.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Signed-off-by: Paul Bolle <pebolle@tiscali.nl>
----
-Compile tested only.
+these patches are also in:
+  git://github.com/ukernel/ceph.git wip-mds
 
- drivers/block/rbd.c | 6 ------
- 1 file changed, 6 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b8a58178..d3869b4 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -44,8 +44,6 @@
- 
- #include "rbd_types.h"
- 
--#define RBD_DEBUG	/* Activate rbd_assert() calls */
--
- /*
-  * The basic unit of block I/O is a sector.  It is interpreted in a
-  * number of contexts in Linux (blk, bio, genhd), but the default is
-@@ -444,7 +442,6 @@ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
- 	va_end(args);
- }
- 
--#ifdef RBD_DEBUG
- #define rbd_assert(expr)						\
- 		if (unlikely(!(expr))) {				\
- 			printk(KERN_ERR "\nAssertion failure in %s() "	\
-@@ -453,9 +450,6 @@ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
- 					__func__, __LINE__, #expr);	\
- 			BUG();						\
- 		}
--#else /* !RBD_DEBUG */
--#  define rbd_assert(expr)	((void) 0)
--#endif /* !RBD_DEBUG */
- 
- static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request);
- static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
--- 
-1.8.1.4
+Regards
+Yan, Zheng
