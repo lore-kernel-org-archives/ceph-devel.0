@@ -1,101 +1,121 @@
-From: =?ISO-8859-1?Q?Beno=EEt_Parrein?=
-	<benoit.parrein@polytech.univ-nantes.fr>
-Subject: Re: Comments on Ceph distributed parity implementation
-Date: Mon, 17 Jun 2013 18:48:51 +0200
-Message-ID: <51BF3DF3.80407@polytech.univ-nantes.fr>
-References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org>
+From: Elso Andras <elso.andras@gmail.com>
+Subject: Re: [PATCH 2/2] Enable fscache as an optional feature of ceph.
+Date: Mon, 17 Jun 2013 19:09:08 +0200
+Message-ID: <CAKxz0mzgBYTd+bXGkP1jT5K0dcF-eL4H=vESM6CDe5gOPWBeAg@mail.gmail.com>
+References: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
+ <alpine.DEB.2.00.1305281010270.16097@cobra.newdream.net> <CANP1eJGsCZcR00Bfbfswsfpz9gabXL57smTU3++QZdn_grQ7MA@mail.gmail.com>
+ <CAKxz0mzP8p94hMc0RTzaa_gA-PwCoWFUkTba9zNc65+A6VEtLQ@mail.gmail.com>
+ <CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
+ <CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com> <CANP1eJGxbfdYhJcwz5uPWdQWTWMhHcueQcuhh3kQduyB5Y+ULg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------040102070709000004040002"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:35532 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753362Ab3FQRAD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 13:00:03 -0400
-In-Reply-To: <51BE2EB1.2020807@dachary.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:34245 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222Ab3FQRJb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 13:09:31 -0400
+Received: by mail-wi0-f170.google.com with SMTP id ey16so4300206wid.1
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Jun 2013 10:09:29 -0700 (PDT)
+In-Reply-To: <CANP1eJGxbfdYhJcwz5uPWdQWTWMhHcueQcuhh3kQduyB5Y+ULg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel@vger.kernel.org, "James S. Plank" <plank@cs.utk.edu>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------040102070709000004040002
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 8bit
+Hi,
 
-Hi Loïc,
+Oh, i forgot about this daemon... but this daemon cache the data to
+file. Thus it's useless, the caching to disk is more slow than the
+whole osds.
 
-totaly agree about performances. honestly, we don't experiment yet any 
-trouble in our erasure coding implementation (which is just software 
-optimized for the moment). the bottleneck is more located at the network 
-(basically at 1Gbit/s) and at the disks i/o levels. and, I guess it is 
-the same conclusion for well optimized libraries like Jerasure.
-to continue about Mojette transform, this erasure code is in fact 
-(1+epsilon)MDS with a linear complexity both in coding and decoding (we 
-just need addition and subtraction in any field). furthermore, it is 
-well implemented in RozoFS. th epsilon (the overhead) is very negligible 
-for normal use cases.
+Elbandi
 
-best,
-bp
-
-
-Le 16/06/2013 23:31, Loic Dachary a écrit :
-> Hi Benoît,
+2013/6/17 Milosz Tanski <milosz@adfin.com>:
+> Elbandi,
 >
->  From the ( naïve ) point of view of engineering, performances are important. The recent works of James Plank ( cc'ed ) greatly improved them
->   and I'm looking forward to the next version of jerasure ( http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627.html ). Rozofs Mojette Transform implementation ( https://github.com/rozofs/rozofs/blob/master/rozofs/common/transform.h & https://github.com/rozofs/rozofs/blob/master/rozofs/common/transform.cc ) does not seem to make use of SIMD. Is it because the performances are good enough to not require them ?
+> It looks like it's trying to use fscache (from the stats) but there's
+> no data. Did you install, configure and enable the cachefilesd daemon?
+> It's the user-space component of fscache. It's the only officially
+> supported fsache backed by Ubuntu, RHEL & SUSE. I'm guessing that's
+> your problem since I don't see any of the bellow lines in your dmesg
+> snippet.
 >
-> Cheers
+> [2049099.198234] CacheFiles: Loaded
+> [2049099.541721] FS-Cache: Cache "mycache" added (type cachefiles)
+> [2049099.541727] CacheFiles: File cache on md0 registered
 >
-> On 06/16/2013 09:51 PM, Benoît Parrein wrote:
->> Paul Von-Stamwitz <PVonStamwitz <at> us.fujitsu.com> writes:
->>
->> Hi Paul,
->>
->>> Loic, I know nothing about Mojette Transforms. From what little I gleaned,
->> it might be good for repair
->>> (needing only a subset of chunks within a range to recalculate a missing
->> chunk) but I'm worried about the
->>> storage efficiency. RozoFS claims 1.5x. I'd like to do better than that.
->>>
->>> All the best,
->>> Paul
->>>
->> If you want to do better than that you will probably lose in availability.
->> 1.5x give the same availability than 3 replicats and that for any kind of
->> erasure coding.
->> FYI, Mojette transform has no constraint in terms of Galois fields. It is the
->> big advantage to use discrete geometry rather than algebra.
->>
->> best regards,
->> bp
+> - Milosz
+>
+> On Mon, Jun 17, 2013 at 11:47 AM, Elso Andras <elso.andras@gmail.com> wrote:
+>> Hi,
 >>
 >>
+>>> 1) In the graphs you attached what am I looking at? My best guess is that
+>>> it's traffic on a 10gigE card, but I can't tell from the graph since there's
+>>> no labels.
+>> Yes, 10G traffic on switch port. So "incoming" means server-to-switch,
+>> "outgoing" means switch-to-server. No separated card for ceph traffic
+>> :(
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---------------040102070709000004040002
-Content-Type: text/x-vcard; charset=utf-8;
- name="benoit_parrein.vcf"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="benoit_parrein.vcf"
-
-begin:vcard
-fn;quoted-printable:Beno=C3=AEt Parrein
-n;quoted-printable:Parrein;Beno=C3=AEt
-org;quoted-printable:Polytech Nantes, Universit=C3=A9 de Nantes, IRCCyN lab
-adr;quoted-printable:;;=C3=A9quipe Image Vid=C3=A9o Communication;;;;France
-email;internet:benoit.parrein@polytech.univ-nantes.fr
-title;quoted-printable:Ma=C3=AEtre de Conf=C3=A9rences
-tel;work:+33 2 40 68 30 50
-version:2.1
-end:vcard
-
-
---------------040102070709000004040002--
+>>> 2) Can you give me more info about your serving case. What application are
+>>> you using to serve the video (http server)? Are you serving static mp4 files
+>>> from Ceph filesystem?
+>> lighttpd server with mp4 streaming mod
+>> (http://h264.code-shop.com/trac/wiki/Mod-H264-Streaming-Lighttpd-Version2),
+>> the files lives on cephfs.
+>> there is a speed limit, controlled by mp4 mod. the bandwidth is the
+>> video bitrate value.
+>>
+>> mount options:
+>> name=test,rsize=0,rasize=131072,noshare,fsc,key=client.test
+>>
+>> rsize=0 and rasize=131072 is a tested, with other values there was 4x
+>> incoming (from osd) traffic than outgoing (to internet) traffic.
+>>
+>>> 3) What's the hardware, most importantly how big is your partition that
+>>> cachefilesd is on and what kind of disk are you hosting it on (rotating,
+>>> SSD)?
+>> there are 5 osd servers: HP DL380 G6, 32G ram, 16 X HP sas disk (10k
+>> rpm) with raid0. bonding two 1G interface together.
+>> (In previous life, this hw could serve the ~2.3G traffic with raid5
+>> and three bonding interface)
+>>
+>>> 4) Statistics from fscache. Can you paste the output /proc/fs/fscache/stats
+>>> and /proc/fs/fscache/histogram.
+>>
+>> FS-Cache statistics
+>> Cookies: idx=1 dat=8001 spc=0
+>> Objects: alc=0 nal=0 avl=0 ded=0
+>> ChkAux : non=0 ok=0 upd=0 obs=0
+>> Pages  : mrk=0 unc=0
+>> Acquire: n=8002 nul=0 noc=0 ok=8002 nbf=0 oom=0
+>> Lookups: n=0 neg=0 pos=0 crt=0 tmo=0
+>> Invals : n=0 run=0
+>> Updates: n=0 nul=0 run=0
+>> Relinqs: n=2265 nul=0 wcr=0 rtr=0
+>> AttrChg: n=0 ok=0 nbf=0 oom=0 run=0
+>> Allocs : n=0 ok=0 wt=0 nbf=0 int=0
+>> Allocs : ops=0 owt=0 abt=0
+>> Retrvls: n=2983745 ok=0 wt=0 nod=0 nbf=2983745 int=0 oom=0
+>> Retrvls: ops=0 owt=0 abt=0
+>> Stores : n=0 ok=0 agn=0 nbf=0 oom=0
+>> Stores : ops=0 run=0 pgs=0 rxd=0 olm=0
+>> VmScan : nos=0 gon=0 bsy=0 can=0 wt=0
+>> Ops    : pend=0 run=0 enq=0 can=0 rej=0
+>> Ops    : dfr=0 rel=0 gc=0
+>> CacheOp: alo=0 luo=0 luc=0 gro=0
+>> CacheOp: inv=0 upo=0 dro=0 pto=0 atc=0 syn=0
+>> CacheOp: rap=0 ras=0 alp=0 als=0 wrp=0 ucp=0 dsp=0
+>>
+>> No histogram, i try to build to enable this.
+>>
+>>> 5) dmesg lines for ceph/fscache/cachefiles like:
+>> [  264.186887] FS-Cache: Loaded
+>> [  264.223851] Key type ceph registered
+>> [  264.223902] libceph: loaded (mon/osd proto 15/24)
+>> [  264.246334] FS-Cache: Netfs 'ceph' registered for caching
+>> [  264.246341] ceph: loaded (mds proto 32)
+>> [  264.249497] libceph: client31274 fsid 1d78ebe5-f254-44ff-81c1-f641bb2036b6
+>>
+>>
+>> Elbandi
