@@ -1,128 +1,94 @@
-From: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v3 06/13] locks: protect most of the file_lock handling
- with i_lock
-Date: Mon, 17 Jun 2013 11:46:09 -0400
-Message-ID: <20130617114609.708a336b@tlielax.poochiereds.net>
-References: <1371482036-15958-1-git-send-email-jlayton@redhat.com>
-	<1371482036-15958-7-git-send-email-jlayton@redhat.com>
+From: Elso Andras <elso.andras@gmail.com>
+Subject: Re: [PATCH 2/2] Enable fscache as an optional feature of ceph.
+Date: Mon, 17 Jun 2013 17:47:18 +0200
+Message-ID: <CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com>
+References: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
+ <alpine.DEB.2.00.1305281010270.16097@cobra.newdream.net> <CANP1eJGsCZcR00Bfbfswsfpz9gabXL57smTU3++QZdn_grQ7MA@mail.gmail.com>
+ <CAKxz0mzP8p94hMc0RTzaa_gA-PwCoWFUkTba9zNc65+A6VEtLQ@mail.gmail.com> <CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1371482036-15958-7-git-send-email-jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, piastryyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-we0-f169.google.com ([74.125.82.169]:54845 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750903Ab3FQPrj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 11:47:39 -0400
+Received: by mail-we0-f169.google.com with SMTP id n57so2533357wev.14
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Jun 2013 08:47:38 -0700 (PDT)
+In-Reply-To: <CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 17 Jun 2013 11:13:49 -0400
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> Having a global lock that protects all of this code is a clear
-> scalability problem. Instead of doing that, move most of the code to be
-> protected by the i_lock instead. The exceptions are the global lists
-> that the ->fl_link sits on, and the ->fl_block list.
-> 
-> ->fl_link is what connects these structures to the
-> global lists, so we must ensure that we hold those locks when iterating
-> over or updating these lists.
-> 
-> Furthermore, sound deadlock detection requires that we hold the
-> blocked_list state steady while checking for loops. We also must ensure
-> that the search and update to the list are atomic.
-> 
-> For the checking and insertion side of the blocked_list, push the
-> acquisition of the global lock into __posix_lock_file and ensure that
-> checking and update of the  blocked_list is done without dropping the
-> lock in between.
-> 
-> On the removal side, when waking up blocked lock waiters, take the
-> global lock before walking the blocked list and dequeue the waiters from
-> the global list prior to removal from the fl_block list.
-> 
-> With this, deadlock detection should be race free while we minimize
-> excessive file_lock_lock thrashing.
-> 
-> Finally, in order to avoid a lock inversion problem when handling
-> /proc/locks output we must ensure that manipulations of the fl_block
-> list are also protected by the file_lock_lock.
-> 
-> Signed-off-by: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  Documentation/filesystems/Locking |   21 ++++--
->  fs/afs/flock.c                    |    5 +-
->  fs/ceph/locks.c                   |    2 +-
->  fs/ceph/mds_client.c              |    8 +-
->  fs/cifs/cifsfs.c                  |    2 +-
->  fs/cifs/file.c                    |   13 ++--
->  fs/gfs2/file.c                    |    2 +-
->  fs/lockd/svcsubs.c                |   12 ++--
->  fs/locks.c                        |  151 ++++++++++++++++++++++---------------
->  fs/nfs/delegation.c               |   10 +-
->  fs/nfs/nfs4state.c                |    8 +-
->  fs/nfsd/nfs4state.c               |    8 +-
->  include/linux/fs.h                |   11 ---
->  13 files changed, 140 insertions(+), 113 deletions(-)
-> 
-
-[...]
-
-> @@ -1231,7 +1254,7 @@ int __break_lease(struct inode *inode, unsigned int mode)
->  	if (IS_ERR(new_fl))
->  		return PTR_ERR(new_fl);
->  
-> -	lock_flocks();
-> +	spin_lock(&inode->i_lock);
->  
->  	time_out_leases(inode);
->  
-> @@ -1281,11 +1304,11 @@ restart:
->  			break_time++;
->  	}
->  	locks_insert_block(flock, new_fl);
-> -	unlock_flocks();
-> +	spin_unlock(&inode->i_lock);
->  	error = wait_event_interruptible_timeout(new_fl->fl_wait,
->  						!new_fl->fl_next, break_time);
-> -	lock_flocks();
-> -	__locks_delete_block(new_fl);
-> +	spin_lock(&inode->i_lock);
-> +	locks_delete_block(new_fl);
-
-Doh -- bug here. This should not have been changed to
-locks_delete_block(). My apologies.
-
->  	if (error >= 0) {
->  		if (error == 0)
->  			time_out_leases(inode);
-
-[...]
-
->  posix_unblock_lock(struct file *filp, struct file_lock *waiter)
->  {
-> +	struct inode *inode = file_inode(filp);
->  	int status = 0;
->  
-> -	lock_flocks();
-> +	spin_lock(&inode->i_lock);
->  	if (waiter->fl_next)
-> -		__locks_delete_block(waiter);
-> +		locks_delete_block(waiter);
+Hi,
 
 
-Ditto here...
+> 1) In the graphs you attached what am I looking at? My best guess is that
+> it's traffic on a 10gigE card, but I can't tell from the graph since there's
+> no labels.
+Yes, 10G traffic on switch port. So "incoming" means server-to-switch,
+"outgoing" means switch-to-server. No separated card for ceph traffic
+:(
 
->  	else
->  		status = -ENOENT;
-> -	unlock_flocks();
-> +	spin_unlock(&inode->i_lock);
->  	return status;
->  }
->  
+> 2) Can you give me more info about your serving case. What application are
+> you using to serve the video (http server)? Are you serving static mp4 files
+> from Ceph filesystem?
+lighttpd server with mp4 streaming mod
+(http://h264.code-shop.com/trac/wiki/Mod-H264-Streaming-Lighttpd-Version2),
+the files lives on cephfs.
+there is a speed limit, controlled by mp4 mod. the bandwidth is the
+video bitrate value.
 
--- 
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+mount options:
+name=test,rsize=0,rasize=131072,noshare,fsc,key=client.test
+
+rsize=0 and rasize=131072 is a tested, with other values there was 4x
+incoming (from osd) traffic than outgoing (to internet) traffic.
+
+> 3) What's the hardware, most importantly how big is your partition that
+> cachefilesd is on and what kind of disk are you hosting it on (rotating,
+> SSD)?
+there are 5 osd servers: HP DL380 G6, 32G ram, 16 X HP sas disk (10k
+rpm) with raid0. bonding two 1G interface together.
+(In previous life, this hw could serve the ~2.3G traffic with raid5
+and three bonding interface)
+
+> 4) Statistics from fscache. Can you paste the output /proc/fs/fscache/stats
+> and /proc/fs/fscache/histogram.
+
+FS-Cache statistics
+Cookies: idx=1 dat=8001 spc=0
+Objects: alc=0 nal=0 avl=0 ded=0
+ChkAux : non=0 ok=0 upd=0 obs=0
+Pages  : mrk=0 unc=0
+Acquire: n=8002 nul=0 noc=0 ok=8002 nbf=0 oom=0
+Lookups: n=0 neg=0 pos=0 crt=0 tmo=0
+Invals : n=0 run=0
+Updates: n=0 nul=0 run=0
+Relinqs: n=2265 nul=0 wcr=0 rtr=0
+AttrChg: n=0 ok=0 nbf=0 oom=0 run=0
+Allocs : n=0 ok=0 wt=0 nbf=0 int=0
+Allocs : ops=0 owt=0 abt=0
+Retrvls: n=2983745 ok=0 wt=0 nod=0 nbf=2983745 int=0 oom=0
+Retrvls: ops=0 owt=0 abt=0
+Stores : n=0 ok=0 agn=0 nbf=0 oom=0
+Stores : ops=0 run=0 pgs=0 rxd=0 olm=0
+VmScan : nos=0 gon=0 bsy=0 can=0 wt=0
+Ops    : pend=0 run=0 enq=0 can=0 rej=0
+Ops    : dfr=0 rel=0 gc=0
+CacheOp: alo=0 luo=0 luc=0 gro=0
+CacheOp: inv=0 upo=0 dro=0 pto=0 atc=0 syn=0
+CacheOp: rap=0 ras=0 alp=0 als=0 wrp=0 ucp=0 dsp=0
+
+No histogram, i try to build to enable this.
+
+> 5) dmesg lines for ceph/fscache/cachefiles like:
+[  264.186887] FS-Cache: Loaded
+[  264.223851] Key type ceph registered
+[  264.223902] libceph: loaded (mon/osd proto 15/24)
+[  264.246334] FS-Cache: Netfs 'ceph' registered for caching
+[  264.246341] ceph: loaded (mds proto 32)
+[  264.249497] libceph: client31274 fsid 1d78ebe5-f254-44ff-81c1-f641bb2036b6
+
+
+Elbandi
