@@ -1,63 +1,58 @@
 From: Paul Bolle <pebolle@tiscali.nl>
-Subject: [PATCH] rbd: silence GCC warnings
-Date: Mon, 17 Jun 2013 12:12:43 +0200
-Message-ID: <1371463963.26299.9.camel@x61.thuisdomein>
+Subject: [PATCH] rbd: remove RBD_DEBUG
+Date: Mon, 17 Jun 2013 12:15:51 +0200
+Message-ID: <1371464151.26299.12.camel@x61.thuisdomein>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Building rbd.o triggers two GCC warnings:
-    drivers/block/rbd.c: In function =E2=80=98rbd_img_request_fill=E2=80=
-=99:
-    drivers/block/rbd.c:1272:22: warning: =E2=80=98bio_list=E2=80=99 ma=
-y be used uninitialized in this function [-Wmaybe-uninitialized]
-    drivers/block/rbd.c:2170:14: note: =E2=80=98bio_list=E2=80=99 was d=
-eclared here
-    drivers/block/rbd.c:2231:10: warning: =E2=80=98pages=E2=80=99 may b=
-e used uninitialized in this function [-Wmaybe-uninitialized]
-
-Apparently GCC has trouble determining that "bio_list" is unused if "ty=
-pe"
-is "OBJ_REQUEST_PAGES" and, conversely, that "pages" will be unused if
-"type" is "OBJ_REQUEST_BIO". Add harmless initializations to NULL to
-help GCC.
+The RBD_DEBUG macro is always defined, so it serves no purpose.
+Removing it has the benefit that readers of the code won't be tricked
+into thinking that rbd_assert() will compile away because they didn't
+define RBD_DEBUG themselves.
 
 Signed-off-by: Paul Bolle <pebolle@tiscali.nl>
 ---
-0) Compile tested only.
+Compile tested only.
 
-1) These warnings were introduced in v3.10-rc1, apparently through
-commit f1a4739f33 ("rbd: support page array image requests").=20
-
-2) Note that
-    rbd_assert(type =3D=3D OBJ_REQUEST_PAGES);
-
-seems redundant. I see no way that this assertion could ever be false.=20
-
- drivers/block/rbd.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/block/rbd.c | 6 ------
+ 1 file changed, 6 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3063452..b8a58178 100644
+index b8a58178..d3869b4 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2185,9 +2185,11 @@ static int rbd_img_request_fill(struct rbd_img_r=
-equest *img_request,
- 	if (type =3D=3D OBJ_REQUEST_BIO) {
- 		bio_list =3D data_desc;
- 		rbd_assert(img_offset =3D=3D bio_list->bi_sector << SECTOR_SHIFT);
-+		pages =3D NULL;
- 	} else {
- 		rbd_assert(type =3D=3D OBJ_REQUEST_PAGES);
- 		pages =3D data_desc;
-+		bio_list =3D NULL;
- 	}
-=20
- 	while (resid) {
---=20
+@@ -44,8 +44,6 @@
+ 
+ #include "rbd_types.h"
+ 
+-#define RBD_DEBUG	/* Activate rbd_assert() calls */
+-
+ /*
+  * The basic unit of block I/O is a sector.  It is interpreted in a
+  * number of contexts in Linux (blk, bio, genhd), but the default is
+@@ -444,7 +442,6 @@ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
+ 	va_end(args);
+ }
+ 
+-#ifdef RBD_DEBUG
+ #define rbd_assert(expr)						\
+ 		if (unlikely(!(expr))) {				\
+ 			printk(KERN_ERR "\nAssertion failure in %s() "	\
+@@ -453,9 +450,6 @@ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
+ 					__func__, __LINE__, #expr);	\
+ 			BUG();						\
+ 		}
+-#else /* !RBD_DEBUG */
+-#  define rbd_assert(expr)	((void) 0)
+-#endif /* !RBD_DEBUG */
+ 
+ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request);
+ static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
+-- 
 1.8.1.4
