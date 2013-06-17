@@ -1,95 +1,113 @@
-From: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v3 07/13] locks: avoid taking global lock if possible
- when waking up blocked waiters
-Date: Mon, 17 Jun 2013 11:55:08 -0400
-Message-ID: <20130617115508.4db5e5f9@tlielax.poochiereds.net>
-References: <1371482036-15958-1-git-send-email-jlayton@redhat.com>
-	<1371482036-15958-8-git-send-email-jlayton@redhat.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 2/2] Enable fscache as an optional feature of ceph.
+Date: Mon, 17 Jun 2013 12:00:57 -0400
+Message-ID: <CANP1eJGxbfdYhJcwz5uPWdQWTWMhHcueQcuhh3kQduyB5Y+ULg@mail.gmail.com>
+References: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
+	<alpine.DEB.2.00.1305281010270.16097@cobra.newdream.net>
+	<CANP1eJGsCZcR00Bfbfswsfpz9gabXL57smTU3++QZdn_grQ7MA@mail.gmail.com>
+	<CAKxz0mzP8p94hMc0RTzaa_gA-PwCoWFUkTba9zNc65+A6VEtLQ@mail.gmail.com>
+	<CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
+	<CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1371482036-15958-8-git-send-email-jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, piastryyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:36238 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751090Ab3FQQA5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 12:00:57 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k13so7397648iea.18
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Jun 2013 09:00:57 -0700 (PDT)
+In-Reply-To: <CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Elso Andras <elso.andras@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 17 Jun 2013 11:13:50 -0400
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+Elbandi,
 
-> Since we always hold the i_lock when inserting a new waiter onto the
-> fl_block list, we can avoid taking the global lock at all if we find
-> that it's empty when we go to wake up blocked waiters.
-> 
-> Signed-off-by: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  fs/locks.c |   17 ++++++++++++++---
->  1 files changed, 14 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/locks.c b/fs/locks.c
-> index 8f56651..a8f3b33 100644
-> --- a/fs/locks.c
-> +++ b/fs/locks.c
-> @@ -532,7 +532,10 @@ static void locks_delete_block(struct file_lock *waiter)
->   * the order they blocked. The documentation doesn't require this but
->   * it seems like the reasonable thing to do.
->   *
-> - * Must be called with file_lock_lock held!
-> + * Must be called with both the i_lock and file_lock_lock held. The fl_block
-> + * list itself is protected by the file_lock_list, but by ensuring that the
-> + * i_lock is also held on insertions we can avoid taking the file_lock_lock
-> + * in some cases when we see that the fl_block list is empty.
->   */
->  static void __locks_insert_block(struct file_lock *blocker,
->  					struct file_lock *waiter)
-> @@ -560,8 +563,16 @@ static void locks_insert_block(struct file_lock *blocker,
->   */
->  static void locks_wake_up_blocks(struct file_lock *blocker)
->  {
-> +	/*
-> +	 * Avoid taking global lock if list is empty. This is safe since new
-> +	 * blocked requests are only added to the list under the i_lock, and
-> +	 * the i_lock is always held here.
-> +	 */
-> +	if (list_empty(&blocker->fl_block))
-> +		return;
-> +
+It looks like it's trying to use fscache (from the stats) but there's
+no data. Did you install, configure and enable the cachefilesd daemon?
+It's the user-space component of fscache. It's the only officially
+supported fsache backed by Ubuntu, RHEL & SUSE. I'm guessing that's
+your problem since I don't see any of the bellow lines in your dmesg
+snippet.
 
+[2049099.198234] CacheFiles: Loaded
+[2049099.541721] FS-Cache: Cache "mycache" added (type cachefiles)
+[2049099.541727] CacheFiles: File cache on md0 registered
 
-Ok, potential race here. We hold the i_lock when we check list_empty()
-above, but it's possible for the fl_block list to become empty between
-that check and when we take the spinlock below. locks_delete_block does
-not require that you hold the i_lock, and some callers don't hold it.
+- Milosz
 
-This is trivially fixable by just keeping this as a while() loop. We'll
-do the list_empty() check twice in that case, but that shouldn't change
-the performance here much.
-
-I'll fix that in my tree and it'll be in the next resend. Sorry for the
-noise...
-
->  	spin_lock(&file_lock_lock);
-> -	while (!list_empty(&blocker->fl_block)) {
-> +	do {
-
->  		struct file_lock *waiter;
->  
->  		waiter = list_first_entry(&blocker->fl_block,
-> @@ -571,7 +582,7 @@ static void locks_wake_up_blocks(struct file_lock *blocker)
->  			waiter->fl_lmops->lm_notify(waiter);
->  		else
->  			wake_up(&waiter->fl_wait);
-> -	}
-> +	} while (!list_empty(&blocker->fl_block));
->  	spin_unlock(&file_lock_lock);
->  }
->  
-
-
--- 
-Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Jun 17, 2013 at 11:47 AM, Elso Andras <elso.andras@gmail.com> wrote:
+> Hi,
+>
+>
+>> 1) In the graphs you attached what am I looking at? My best guess is that
+>> it's traffic on a 10gigE card, but I can't tell from the graph since there's
+>> no labels.
+> Yes, 10G traffic on switch port. So "incoming" means server-to-switch,
+> "outgoing" means switch-to-server. No separated card for ceph traffic
+> :(
+>
+>> 2) Can you give me more info about your serving case. What application are
+>> you using to serve the video (http server)? Are you serving static mp4 files
+>> from Ceph filesystem?
+> lighttpd server with mp4 streaming mod
+> (http://h264.code-shop.com/trac/wiki/Mod-H264-Streaming-Lighttpd-Version2),
+> the files lives on cephfs.
+> there is a speed limit, controlled by mp4 mod. the bandwidth is the
+> video bitrate value.
+>
+> mount options:
+> name=test,rsize=0,rasize=131072,noshare,fsc,key=client.test
+>
+> rsize=0 and rasize=131072 is a tested, with other values there was 4x
+> incoming (from osd) traffic than outgoing (to internet) traffic.
+>
+>> 3) What's the hardware, most importantly how big is your partition that
+>> cachefilesd is on and what kind of disk are you hosting it on (rotating,
+>> SSD)?
+> there are 5 osd servers: HP DL380 G6, 32G ram, 16 X HP sas disk (10k
+> rpm) with raid0. bonding two 1G interface together.
+> (In previous life, this hw could serve the ~2.3G traffic with raid5
+> and three bonding interface)
+>
+>> 4) Statistics from fscache. Can you paste the output /proc/fs/fscache/stats
+>> and /proc/fs/fscache/histogram.
+>
+> FS-Cache statistics
+> Cookies: idx=1 dat=8001 spc=0
+> Objects: alc=0 nal=0 avl=0 ded=0
+> ChkAux : non=0 ok=0 upd=0 obs=0
+> Pages  : mrk=0 unc=0
+> Acquire: n=8002 nul=0 noc=0 ok=8002 nbf=0 oom=0
+> Lookups: n=0 neg=0 pos=0 crt=0 tmo=0
+> Invals : n=0 run=0
+> Updates: n=0 nul=0 run=0
+> Relinqs: n=2265 nul=0 wcr=0 rtr=0
+> AttrChg: n=0 ok=0 nbf=0 oom=0 run=0
+> Allocs : n=0 ok=0 wt=0 nbf=0 int=0
+> Allocs : ops=0 owt=0 abt=0
+> Retrvls: n=2983745 ok=0 wt=0 nod=0 nbf=2983745 int=0 oom=0
+> Retrvls: ops=0 owt=0 abt=0
+> Stores : n=0 ok=0 agn=0 nbf=0 oom=0
+> Stores : ops=0 run=0 pgs=0 rxd=0 olm=0
+> VmScan : nos=0 gon=0 bsy=0 can=0 wt=0
+> Ops    : pend=0 run=0 enq=0 can=0 rej=0
+> Ops    : dfr=0 rel=0 gc=0
+> CacheOp: alo=0 luo=0 luc=0 gro=0
+> CacheOp: inv=0 upo=0 dro=0 pto=0 atc=0 syn=0
+> CacheOp: rap=0 ras=0 alp=0 als=0 wrp=0 ucp=0 dsp=0
+>
+> No histogram, i try to build to enable this.
+>
+>> 5) dmesg lines for ceph/fscache/cachefiles like:
+> [  264.186887] FS-Cache: Loaded
+> [  264.223851] Key type ceph registered
+> [  264.223902] libceph: loaded (mon/osd proto 15/24)
+> [  264.246334] FS-Cache: Netfs 'ceph' registered for caching
+> [  264.246341] ceph: loaded (mds proto 32)
+> [  264.249497] libceph: client31274 fsid 1d78ebe5-f254-44ff-81c1-f641bb2036b6
+>
+>
+> Elbandi
