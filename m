@@ -1,113 +1,109 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 2/2] Enable fscache as an optional feature of ceph.
-Date: Mon, 17 Jun 2013 12:00:57 -0400
-Message-ID: <CANP1eJGxbfdYhJcwz5uPWdQWTWMhHcueQcuhh3kQduyB5Y+ULg@mail.gmail.com>
-References: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
-	<alpine.DEB.2.00.1305281010270.16097@cobra.newdream.net>
-	<CANP1eJGsCZcR00Bfbfswsfpz9gabXL57smTU3++QZdn_grQ7MA@mail.gmail.com>
-	<CAKxz0mzP8p94hMc0RTzaa_gA-PwCoWFUkTba9zNc65+A6VEtLQ@mail.gmail.com>
-	<CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
-	<CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: Comments on Ceph distributed parity implementation
+Date: Mon, 17 Jun 2013 09:55:30 -0700
+Message-ID: <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
+References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org>
+ <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local>
+ <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:36238 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751090Ab3FQQA5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 12:00:57 -0400
-Received: by mail-ie0-f173.google.com with SMTP id k13so7397648iea.18
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Jun 2013 09:00:57 -0700 (PDT)
-In-Reply-To: <CAKxz0mxQzYOk0uazXc9KjT1yr=-fk3YCprATChBPeqtv62_gug@mail.gmail.com>
+Received: from fujitsu24.fnanic.fujitsu.com ([192.240.6.14]:59345 "EHLO
+	fujitsu24.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753173Ab3FQQx1 convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 17 Jun 2013 12:53:27 -0400
+In-Reply-To: <51BE2EB1.2020807@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Elso Andras <elso.andras@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>, =?iso-8859-1?Q?Beno=EEt_Parrein?= <benoit.parrein@polytech.univ-nantes.fr>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "James S. Plank" <plank@cs.utk.edu>
 
-Elbandi,
+Loic,
 
-It looks like it's trying to use fscache (from the stats) but there's
-no data. Did you install, configure and enable the cachefilesd daemon?
-It's the user-space component of fscache. It's the only officially
-supported fsache backed by Ubuntu, RHEL & SUSE. I'm guessing that's
-your problem since I don't see any of the bellow lines in your dmesg
-snippet.
+As Benoit points out, Mojette uses discrete geometry rather than algebr=
+a, so simple XOR is all that is needed.
 
-[2049099.198234] CacheFiles: Loaded
-[2049099.541721] FS-Cache: Cache "mycache" added (type cachefiles)
-[2049099.541727] CacheFiles: File cache on md0 registered
+Benoit,
 
-- Milosz
+Microsoft's paper states that their [12,2,2] LRC provides better availa=
+bility than 3x replication with 1.33x efficiency. 1.5x is certainly a g=
+ood number. I'm just pointing out that better efficiency can be had wit=
+hout losing availibity.
 
-On Mon, Jun 17, 2013 at 11:47 AM, Elso Andras <elso.andras@gmail.com> wrote:
-> Hi,
->
->
->> 1) In the graphs you attached what am I looking at? My best guess is that
->> it's traffic on a 10gigE card, but I can't tell from the graph since there's
->> no labels.
-> Yes, 10G traffic on switch port. So "incoming" means server-to-switch,
-> "outgoing" means switch-to-server. No separated card for ceph traffic
-> :(
->
->> 2) Can you give me more info about your serving case. What application are
->> you using to serve the video (http server)? Are you serving static mp4 files
->> from Ceph filesystem?
-> lighttpd server with mp4 streaming mod
-> (http://h264.code-shop.com/trac/wiki/Mod-H264-Streaming-Lighttpd-Version2),
-> the files lives on cephfs.
-> there is a speed limit, controlled by mp4 mod. the bandwidth is the
-> video bitrate value.
->
-> mount options:
-> name=test,rsize=0,rasize=131072,noshare,fsc,key=client.test
->
-> rsize=0 and rasize=131072 is a tested, with other values there was 4x
-> incoming (from osd) traffic than outgoing (to internet) traffic.
->
->> 3) What's the hardware, most importantly how big is your partition that
->> cachefilesd is on and what kind of disk are you hosting it on (rotating,
->> SSD)?
-> there are 5 osd servers: HP DL380 G6, 32G ram, 16 X HP sas disk (10k
-> rpm) with raid0. bonding two 1G interface together.
-> (In previous life, this hw could serve the ~2.3G traffic with raid5
-> and three bonding interface)
->
->> 4) Statistics from fscache. Can you paste the output /proc/fs/fscache/stats
->> and /proc/fs/fscache/histogram.
->
-> FS-Cache statistics
-> Cookies: idx=1 dat=8001 spc=0
-> Objects: alc=0 nal=0 avl=0 ded=0
-> ChkAux : non=0 ok=0 upd=0 obs=0
-> Pages  : mrk=0 unc=0
-> Acquire: n=8002 nul=0 noc=0 ok=8002 nbf=0 oom=0
-> Lookups: n=0 neg=0 pos=0 crt=0 tmo=0
-> Invals : n=0 run=0
-> Updates: n=0 nul=0 run=0
-> Relinqs: n=2265 nul=0 wcr=0 rtr=0
-> AttrChg: n=0 ok=0 nbf=0 oom=0 run=0
-> Allocs : n=0 ok=0 wt=0 nbf=0 int=0
-> Allocs : ops=0 owt=0 abt=0
-> Retrvls: n=2983745 ok=0 wt=0 nod=0 nbf=2983745 int=0 oom=0
-> Retrvls: ops=0 owt=0 abt=0
-> Stores : n=0 ok=0 agn=0 nbf=0 oom=0
-> Stores : ops=0 run=0 pgs=0 rxd=0 olm=0
-> VmScan : nos=0 gon=0 bsy=0 can=0 wt=0
-> Ops    : pend=0 run=0 enq=0 can=0 rej=0
-> Ops    : dfr=0 rel=0 gc=0
-> CacheOp: alo=0 luo=0 luc=0 gro=0
-> CacheOp: inv=0 upo=0 dro=0 pto=0 atc=0 syn=0
-> CacheOp: rap=0 ras=0 alp=0 als=0 wrp=0 ucp=0 dsp=0
->
-> No histogram, i try to build to enable this.
->
->> 5) dmesg lines for ceph/fscache/cachefiles like:
-> [  264.186887] FS-Cache: Loaded
-> [  264.223851] Key type ceph registered
-> [  264.223902] libceph: loaded (mon/osd proto 15/24)
-> [  264.246334] FS-Cache: Netfs 'ceph' registered for caching
-> [  264.246341] ceph: loaded (mds proto 32)
-> [  264.249497] libceph: client31274 fsid 1d78ebe5-f254-44ff-81c1-f641bb2036b6
->
->
-> Elbandi
+All the best,
+Paul
+
+On 6/16/2013 02:31 PM Loic Dachary wrote:
+> Hi Beno=EEt,
+>=20
+> From the ( na=EFve ) point of view of engineering, performances are
+> important. The recent works of James Plank ( cc'ed ) greatly improved=
+ them
+>  and I'm looking forward to the next version of jerasure
+> ( http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627.html ). Rozof=
+s
+> Mojette Transform implementation
+> ( https://github.com/rozofs/rozofs/blob/master/rozofs/common/transfor=
+m.h &
+> https://github.com/rozofs/rozofs/blob/master/rozofs/common/transform.=
+cc )
+> does not seem to make use of SIMD. Is it because the performances are=
+ good
+> enough to not require them ?
+>=20
+> Cheers
+>=20
+> On 06/16/2013 09:51 PM, Beno=EEt Parrein wrote:
+> > Paul Von-Stamwitz <PVonStamwitz <at> us.fujitsu.com> writes:
+> >
+> > Hi Paul,
+> >
+> >>
+> >> Loic, I know nothing about Mojette Transforms. From what little I
+> gleaned,
+> > it might be good for repair
+> >> (needing only a subset of chunks within a range to recalculate a
+> missing
+> > chunk) but I'm worried about the
+> >> storage efficiency. RozoFS claims 1.5x. I'd like to do better than=
+ that.
+> >>
+> >> All the best,
+> >> Paul
+> >>
+> >
+> > If you want to do better than that you will probably lose in
+> availability.
+> > 1.5x give the same availability than 3 replicats and that for any k=
+ind
+> of
+> > erasure coding.
+> > FYI, Mojette transform has no constraint in terms of Galois fields.=
+ It
+> is the
+> > big advantage to use discrete geometry rather than algebra.
+> >
+> > best regards,
+> > bp
+> >
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+> All that is necessary for the triumph of evil is that good people do
+> nothing.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
