@@ -1,251 +1,146 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 17 Jun 2013 08:00:16 -0700 (PDT)
-Message-ID: <20130617150016.4A0CB281E53@teuthology.front.sepia.ceph.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:23490 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751086Ab3FQPBN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 17 Jun 2013 11:01:13 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v3 10/13] locks: add a new "lm_owner_key" lock operation
+Date: Mon, 17 Jun 2013 11:13:53 -0400
+Message-ID: <1371482036-15958-11-git-send-email-jlayton@redhat.com>
+References: <1371482036-15958-1-git-send-email-jlayton@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1371482036-15958-1-git-send-email-jlayton@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: viro@zeniv.linux.org.uk, matthew@wil.cx, bfields@fieldses.org
+Cc: dhowells@redhat.com, sage@inktank.com, smfrench@gmail.com, swhiteho@redhat.com, Trond.Myklebust@netapp.com, akpm@linux-foundation.org, linux-kernel@vger.kernel.org, linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, piastryyy@gmail.com
+List-Id: ceph-devel.vger.kernel.org
 
--- All Branches --
+Currently, the hashing that the locking code uses to add these values
+to the blocked_hash is simply calculated using fl_owner field. That's
+valid in most cases except for server-side lockd, which validates the
+owner of a lock based on fl_owner and fl_pid.
 
-Babu Shanmugam <anbu@enovance.com>
-	2013-05-30 10:28:23 +0530   wip-rgw-geo-enovance
+In the case where you have a small number of NFS clients doing a lot
+of locking between different processes, you could end up with all
+the blocked requests sitting in a very small number of hash buckets.
 
-Dan Mick <dan.mick@inktank.com>
-	2012-12-18 12:27:36 -0800   wip-rbd-striping
-	2013-06-11 18:38:50 -0700   wip-fuse-ioctl
+Add a new lm_owner_key operation to the lock_manager_operations that
+will generate an unsigned long to use as the key in the hashtable.
+That function is only implemented for server-side lockd, and simply
+XORs the fl_owner and fl_pid.
 
-David Zafman <david.zafman@inktank.com>
-	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
-	2013-03-22 18:14:10 -0700   wip-snap-test-fix
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Acked-by: J. Bruce Fields <bfields@fieldses.org>
+---
+ Documentation/filesystems/Locking |   16 +++++++++++-----
+ fs/lockd/svclock.c                |   12 ++++++++++++
+ fs/locks.c                        |   12 ++++++++++--
+ include/linux/fs.h                |    1 +
+ 4 files changed, 34 insertions(+), 7 deletions(-)
 
-Gary Lowell <gary.lowell@inktank.com>
-	2013-06-12 09:54:06 -0700   last
-
-Gary Lowell <glowell@inktank.com>
-	2013-01-28 22:49:45 -0800   wip-3930
-	2013-02-05 19:29:11 -0800   wip.cppchecker
-	2013-02-10 22:21:52 -0800   wip-3955
-	2013-02-26 19:28:48 -0800   wip-system-leveldb
-	2013-02-27 22:32:57 -0800   bobtail-leveldb
-	2013-03-01 18:55:35 -0800   wip-da-spec-1
-	2013-03-19 11:28:15 -0700   wip-3921
-	2013-04-11 23:00:05 -0700   wip-init-radosgw
-	2013-04-17 23:30:11 -0700   wip-4725
-	2013-04-21 22:06:37 -0700   wip-4752
-	2013-04-22 14:11:37 -0700   wip-4632
-	2013-05-31 11:20:40 -0700   wip-doc-prereq
-	2013-06-06 22:31:54 -0700   wip-build-doc
-
-Greg Farnum <greg@inktank.com>
-	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
-	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
-	2013-05-01 17:06:27 -0700   wip-optracker-4354
-	2013-05-31 13:28:31 -0700   wip-rgw-geo-rebase-test
-	2013-05-31 17:08:27 -0700   wip-rgw-geo-rebase
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2013-04-18 00:01:24 +0100   wip-4521-tool
-	2013-04-22 15:14:28 +0100   wip-4748
-	2013-04-24 16:42:11 +0100   wip-4521
-	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
-	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
-	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
-	2013-05-31 18:54:38 +0100   wip-mon-trim
-	2013-05-31 21:00:28 +0100   wip-mon-trim-b
-	2013-06-12 18:27:05 +0100   wip-mon-sync-fixes
-
-Joe Buck <jbbuck@gmail.com>
-	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
-	2013-05-30 23:02:32 -0700   wip-rgw-geo-enovance-buck
-	2013-06-13 22:29:17 -0700   wip-rgw-geo-buck
-
-John Wilkins <john.wilkins@inktank.com>
-	2012-12-21 15:14:37 -0800   wip-mon-docs
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-04-29 14:32:00 -0700   wip-rbd-close-image
-
-Matt Benjamin <matt@linuxbox.com>
-	2013-05-21 09:45:30 -0700   wip-libcephfs
-
-Noah Watkins <noahwatkins@gmail.com>
-	2013-01-05 11:58:38 -0800   wip-localized-read-tests
-	2013-01-11 12:49:28 -0800   wip-osx-upstream
-	2013-01-11 13:01:11 -0800   wip-osx
-	2013-02-01 10:28:26 -0800   wip-java-deb-warning
-	2013-04-22 15:23:09 -0700   wip-cls-lua
-	2013-05-30 13:29:42 -0700   wip-hadoop-doc
-
-Roald van Loon <roaldvanloon@gmail.com>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-07-14 17:40:21 -0700   wip-osd-redirect
-	2012-07-28 13:56:47 -0700   wip-journal
-	2012-11-13 08:58:57 -0800   wip-fd-simple-cache
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2012-12-07 14:38:46 -0800   wip-osd-alloc
-	2012-12-12 22:18:02 -0800   automake-python
-	2012-12-14 17:11:31 -0800   wip_cur_perf_journal
-	2012-12-27 13:38:52 -0800   wip-linuxbox
-	2013-01-06 20:39:37 -0800   wip-msg-refs
-	2013-01-16 11:39:28 -0800   wip-client-layout-temp
-	2013-01-27 11:06:08 -0800   wip-argonaut-leveldb
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-02-08 10:07:54 -0800   wip-bobtail-logrotate
-	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
-	2013-02-12 08:29:29 -0800   wip-dump
-	2013-02-12 23:17:11 -0800   wip-monc
-	2013-02-18 20:50:57 -0800   wip-osd-scrub
-	2013-02-19 13:18:13 -0800   wip-4116-workaround
-	2013-03-11 17:27:15 -0700   wip-deploy-rgw
-	2013-03-15 17:10:24 -0700   wip-log-4192
-	2013-04-15 20:34:47 -0700   bobtail-dc
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-04-25 10:38:45 -0700   wip-init2
-	2013-04-26 12:25:58 -0700   wip-mon-fwd
-	2013-05-02 14:50:38 -0700   wip-rbd-clear-layering
-	2013-05-03 09:01:53 -0700   wip-leveldb-reopen
-	2013-05-07 15:56:57 -0700   wip-ceph-tool
-	2013-05-08 09:46:53 -0700   wip-4578-bobtail
-	2013-05-08 13:39:25 -0700   wip-4951
-	2013-05-10 08:28:50 -0700   wip-rgw-crash
-	2013-05-22 09:03:53 -0700   wip-4895-cuttlefish
-	2013-05-22 10:33:35 -0700   unstable
-	2013-05-22 13:39:58 -0700   wip-notcmalloc
-	2013-05-23 19:32:56 -0700   wip-libcephfs-rebased
-	2013-05-27 12:45:33 -0700   wip-mon-compaction
-	2013-05-27 12:45:41 -0700   wip-cuttlefish-mon
-	2013-05-28 10:51:23 -0700   wip-mds-scan
-	2013-05-28 20:46:51 -0700   wip-mds-authpins
-	2013-05-29 09:25:09 -0700   wip-bobtail-fsx
-	2013-05-29 10:27:59 -0700   wip-5021
-	2013-06-01 13:26:50 -0700   wip-5176-cuttlefish
-	2013-06-02 15:29:26 -0700   wip-log-rewrite
-	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
-	2013-06-04 15:40:58 -0700   wip-4976
-	2013-06-04 22:43:04 -0700   wip-osd-push
-	2013-06-08 08:29:19 -0700   wip-5248-cuttlefish-workaround
-	2013-06-08 08:46:53 -0700   wip-5286
-	2013-06-08 22:25:47 -0700   wip-cap-release
-	2013-06-10 22:22:23 -0700   wip-mon
-	2013-06-13 10:53:07 -0700   wip-refs
-	2013-06-15 08:14:40 -0700   wip-exit-foo
-	2013-06-15 08:48:47 -0700   wip-client-revoke
-	2013-06-15 08:50:29 -0700   wip-client-revoke-cuttlefish
-	2013-06-15 20:06:33 -0700   wip-5194
-	2013-06-15 20:48:24 -0700   cuttlefish
-	2013-06-16 21:01:14 -0700   wip-client-sync
-
-Sam Lang <sam.lang@inktank.com>
-	2012-11-27 15:01:58 -0600   wip-mtime-incr
-
-Samuel Just <sam.just@inktank.com>
-	2012-11-21 11:05:24 -0800   wip_stable_smalliobench
-	2012-11-28 17:32:59 -0800   wip_next_smalliobench
-	2012-12-05 13:29:22 -0800   wip_recovery
-	2012-12-18 18:34:47 -0800   wip_auth_551_backport
-	2013-01-25 13:39:20 -0800   wip_argonaut_snap
-	2013-02-07 10:38:52 -0800   wip_actmap_dirty_info
-	2013-02-07 11:53:31 -0800   wip_temp_coll
-	2013-02-07 16:05:19 -0800   wip_check_snapcolls
-	2013-02-11 12:55:24 -0800   wip_rmcoll_idempotent
-	2013-02-14 14:16:36 -0800   wip-bobtail-load_pgs-workaround
-	2013-03-04 14:20:17 -0800   wip_omap_snaps_transactions
-	2013-03-11 14:55:02 -0700   wip_4144
-	2013-03-13 16:04:55 -0700   wip_sam_test
-	2013-03-15 11:06:25 -0700   wip_4196
-	2013-03-15 15:31:57 -0700   wip_feature_warning
-	2013-03-20 12:08:57 -0700   wip_osd_shutdown
-	2013-03-22 14:01:53 -0700   wip_4534
-	2013-03-27 11:32:29 -0700   wip_4538
-	2013-04-08 15:43:53 -0700   wip_4627
-	2013-04-09 10:27:50 -0700   wip_4687
-	2013-04-10 11:58:01 -0700   wip_4654
-	2013-04-10 14:13:12 -0700   wip_4701
-	2013-04-18 10:57:54 -0700   wip-debug-xattr
-	2013-04-19 09:04:17 -0700   wip_4704
-	2013-04-19 11:06:04 -0700   wip_4662_clean
-	2013-04-19 11:06:42 -0700   wip_4662
-	2013-04-23 15:16:20 -0700   wip_loadpgs_workaround
-	2013-05-02 21:18:40 -0700   wip_mon_dump_ops
-	2013-05-06 10:56:53 -0700   wip_4910
-	2013-05-07 21:05:05 -0700   wip_split_upgrade
-	2013-05-15 11:17:39 -0700   wip_5020
-	2013-05-23 15:53:34 -0700   wip_hashpspool
-	2013-05-24 17:55:04 -0700   wip_5172
-	2013-05-30 15:44:57 -0700   wip-5046
-	2013-05-31 12:18:07 -0700   wip_cuttlefish_pg_epoch
-	2013-05-31 12:18:33 -0700   wip_bobtail_pg_epoch
-	2013-06-06 11:51:04 -0700   wip_bench_num
-	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
-	2013-06-14 14:53:38 -0700   wip-log-rewrite-sam
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-07 13:40:12 -0800   wip-rgw-dr
-	2012-12-10 13:29:37 -0800   wip-multipart-size
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-14 12:44:21 -0700   wip-rgw-bucketlog-3
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-06-10 14:28:03 -0700   wip-rgw-geo
-	2013-06-14 14:53:54 -0700   wip-5362
-	2013-06-15 22:06:33 -0700   wip-rgw-geo-2
-
-caleb miles <caleb.miles@inktank.com>
-	2013-04-05 09:31:56 -0700   wip-4600
-
-caleb miles <caselim@gmail.com>
-	2013-01-07 07:39:02 -0500   wip-3735
-	2013-01-10 08:29:30 -0500   wip-3682
-	2013-02-14 14:28:11 -0500   wip-content-type
-	2013-02-20 00:15:18 -0500   wip-3669
-	2013-03-11 15:51:48 -0400   wip-rgw-user2
-	2013-03-25 13:51:29 -0400   wip-rgw-bucket
-	2013-03-26 10:05:17 -0400   wip-rest-user
-	2013-03-26 10:05:17 -0400   wip-rgw-usre
-	2013-03-26 11:39:11 -0400   wip-rgw-user
-	2013-04-05 14:38:00 -0400   wip-admin-api
-	2013-04-10 15:00:06 -0400   wip-4702
-	2013-04-22 13:01:47 -0400   wip-rest-admin
-
-tamil <tamil.muthamizhan@inktank.com>
-	2013-06-13 13:50:56 -0700   bobtail
-
-
-
-Grouped by committer, ordered by commit time stamp.
+diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
+index 413685f..dfeb01b 100644
+--- a/Documentation/filesystems/Locking
++++ b/Documentation/filesystems/Locking
+@@ -351,6 +351,7 @@ fl_release_private:	maybe		no
+ ----------------------- lock_manager_operations ---------------------------
+ prototypes:
+ 	int (*lm_compare_owner)(struct file_lock *, struct file_lock *);
++	unsigned long (*lm_owner_key)(struct file_lock *);
+ 	void (*lm_notify)(struct file_lock *);  /* unblock callback */
+ 	int (*lm_grant)(struct file_lock *, struct file_lock *, int);
+ 	void (*lm_break)(struct file_lock *); /* break_lease callback */
+@@ -360,16 +361,21 @@ locking rules:
+ 
+ 			inode->i_lock	file_lock_lock	may block
+ lm_compare_owner:	yes[1]		maybe		no
++lm_owner_key		yes[1]		yes		no
+ lm_notify:		yes		yes		no
+ lm_grant:		no		no		no
+ lm_break:		yes		no		no
+ lm_change		yes		no		no
+ 
+-[1]:	->lm_compare_owner is generally called with *an* inode->i_lock held. It
+-may not be the i_lock of the inode for either file_lock being compared! This is
+-the case with deadlock detection, since the code has to chase down the owners
+-of locks that may be entirely unrelated to the one on which the lock is being
+-acquired. When doing a search for deadlocks, the file_lock_lock is also held.
++[1]:	->lm_compare_owner and ->lm_owner_key are generally called with
++*an* inode->i_lock held. It may not be the i_lock of the inode
++associated with either file_lock argument! This is the case with deadlock
++detection, since the code has to chase down the owners of locks that may
++be entirely unrelated to the one on which the lock is being acquired.
++For deadlock detection however, the file_lock_lock is also held. The
++fact that these locks are held ensures that the file_locks do not
++disappear out from under you while doing the comparison or generating an
++owner key.
+ 
+ --------------------------- buffer_head -----------------------------------
+ prototypes:
+diff --git a/fs/lockd/svclock.c b/fs/lockd/svclock.c
+index e703318..ce2cdab 100644
+--- a/fs/lockd/svclock.c
++++ b/fs/lockd/svclock.c
+@@ -744,8 +744,20 @@ static int nlmsvc_same_owner(struct file_lock *fl1, struct file_lock *fl2)
+ 	return fl1->fl_owner == fl2->fl_owner && fl1->fl_pid == fl2->fl_pid;
+ }
+ 
++/*
++ * Since NLM uses two "keys" for tracking locks, we need to hash them down
++ * to one for the blocked_hash. Here, we're just xor'ing the host address
++ * with the pid in order to create a key value for picking a hash bucket.
++ */
++static unsigned long
++nlmsvc_owner_key(struct file_lock *fl)
++{
++	return (unsigned long)fl->fl_owner ^ (unsigned long)fl->fl_pid;
++}
++
+ const struct lock_manager_operations nlmsvc_lock_operations = {
+ 	.lm_compare_owner = nlmsvc_same_owner,
++	.lm_owner_key = nlmsvc_owner_key,
+ 	.lm_notify = nlmsvc_notify_blocked,
+ 	.lm_grant = nlmsvc_grant_deferred,
+ };
+diff --git a/fs/locks.c b/fs/locks.c
+index d93b291..55f3af7 100644
+--- a/fs/locks.c
++++ b/fs/locks.c
+@@ -505,10 +505,18 @@ locks_delete_global_locks(struct file_lock *waiter)
+ 	spin_unlock(&file_lock_lock);
+ }
+ 
++static unsigned long
++posix_owner_key(struct file_lock *fl)
++{
++	if (fl->fl_lmops && fl->fl_lmops->lm_owner_key)
++		return fl->fl_lmops->lm_owner_key(fl);
++	return (unsigned long)fl->fl_owner;
++}
++
+ static inline void
+ locks_insert_global_blocked(struct file_lock *waiter)
+ {
+-	hash_add(blocked_hash, &waiter->fl_link, (unsigned long)waiter->fl_owner);
++	hash_add(blocked_hash, &waiter->fl_link, posix_owner_key(waiter));
+ }
+ 
+ static inline void
+@@ -739,7 +747,7 @@ static struct file_lock *what_owner_is_waiting_for(struct file_lock *block_fl)
+ {
+ 	struct file_lock *fl;
+ 
+-	hash_for_each_possible(blocked_hash, fl, fl_link, (unsigned long)block_fl->fl_owner) {
++	hash_for_each_possible(blocked_hash, fl, fl_link, posix_owner_key(block_fl)) {
+ 		if (posix_same_owner(fl, block_fl))
+ 			return fl->fl_next;
+ 	}
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 3b340f7..232a345 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -908,6 +908,7 @@ struct file_lock_operations {
+ 
+ struct lock_manager_operations {
+ 	int (*lm_compare_owner)(struct file_lock *, struct file_lock *);
++	unsigned long (*lm_owner_key)(struct file_lock *);
+ 	void (*lm_notify)(struct file_lock *);	/* unblock callback */
+ 	int (*lm_grant)(struct file_lock *, struct file_lock *, int);
+ 	void (*lm_break)(struct file_lock *);
+-- 
+1.7.1
