@@ -1,636 +1,251 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Fwd: [PATCH 2/2] Enable fscache as an optional feature of ceph.
-Date: Mon, 17 Jun 2013 10:31:07 -0400
-Message-ID: <CANP1eJGukEUs1NDzGVtK+Fj-n=ksb1AsjD7vkgNefY_zh4VNaA@mail.gmail.com>
-References: <CANP1eJHwS2gjP=adgr-iJz3pw4LvZMs7PKDqrkTM2c4OimEeTg@mail.gmail.com>
-	<alpine.DEB.2.00.1305281010270.16097@cobra.newdream.net>
-	<CANP1eJGsCZcR00Bfbfswsfpz9gabXL57smTU3++QZdn_grQ7MA@mail.gmail.com>
-	<CAKxz0mzP8p94hMc0RTzaa_gA-PwCoWFUkTba9zNc65+A6VEtLQ@mail.gmail.com>
-	<CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 17 Jun 2013 08:00:16 -0700 (PDT)
+Message-ID: <20130617150016.4A0CB281E53@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:56772 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751071Ab3FQObH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jun 2013 10:31:07 -0400
-Received: by mail-ie0-f182.google.com with SMTP id s9so7109948iec.41
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Jun 2013 07:31:07 -0700 (PDT)
-In-Reply-To: <CANP1eJHZskoMVa3KBGMHvxEfNcAJQdDK4ou47meaBDYzPVa=xg@mail.gmail.com>
+Received: from gw.sepia.ceph.com ([64.90.32.34]:23490 "EHLO
+	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751086Ab3FQPBN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 17 Jun 2013 11:01:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Elso Andras <elso.andras@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Elbandi,
+-- All Branches --
 
-Can you give me some info about your test case so I can figure out
-what's going on.
+Babu Shanmugam <anbu@enovance.com>
+	2013-05-30 10:28:23 +0530   wip-rgw-geo-enovance
 
-1) In the graphs you attached what am I looking at? My best guess is
-that it's traffic on a 10gigE card, but I can't tell from the graph
-since there's no labels.
-2) Can you give me more info about your serving case. What application
-are you using to serve the video (http server)? Are you serving static
-mp4 files from Ceph filesystem?
-3) What's the hardware, most importantly how big is your partition
-that cachefilesd is on and what kind of disk are you hosting it on
-(rotating, SSD)?
-4) Statistics from fscache. Can you paste the output
-/proc/fs/fscache/stats and /proc/fs/fscache/histogram.
-5) dmesg lines for ceph/fscache/cachefiles like:
+Dan Mick <dan.mick@inktank.com>
+	2012-12-18 12:27:36 -0800   wip-rbd-striping
+	2013-06-11 18:38:50 -0700   wip-fuse-ioctl
 
-[2049099.198234] CacheFiles: Loaded
-[2049099.541721] FS-Cache: Cache "mycache" added (type cachefiles)
-[2049099.541727] CacheFiles: File cache on md0 registered
-[2049120.650897] Key type ceph registered
-[2049120.651015] libceph: loaded (mon/osd proto 15/24)
-[2049120.673202] FS-Cache: Netfs 'ceph' registered for caching
-[2049120.673207] ceph: loaded (mds proto 32)
-[2049120.680919] libceph: client6473 fsid e23a1bfc-8328-46bf-bc59-1209df3f5434
-[2049120.683397] libceph: mon0 10.0.5.226:6789 session established
+David Zafman <david.zafman@inktank.com>
+	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
+	2013-03-22 18:14:10 -0700   wip-snap-test-fix
 
-I think with these answers I'll be better able to diagnose what's
-going on for you.
+Gary Lowell <gary.lowell@inktank.com>
+	2013-06-12 09:54:06 -0700   last
 
-- Milosz
+Gary Lowell <glowell@inktank.com>
+	2013-01-28 22:49:45 -0800   wip-3930
+	2013-02-05 19:29:11 -0800   wip.cppchecker
+	2013-02-10 22:21:52 -0800   wip-3955
+	2013-02-26 19:28:48 -0800   wip-system-leveldb
+	2013-02-27 22:32:57 -0800   bobtail-leveldb
+	2013-03-01 18:55:35 -0800   wip-da-spec-1
+	2013-03-19 11:28:15 -0700   wip-3921
+	2013-04-11 23:00:05 -0700   wip-init-radosgw
+	2013-04-17 23:30:11 -0700   wip-4725
+	2013-04-21 22:06:37 -0700   wip-4752
+	2013-04-22 14:11:37 -0700   wip-4632
+	2013-05-31 11:20:40 -0700   wip-doc-prereq
+	2013-06-06 22:31:54 -0700   wip-build-doc
 
-On Mon, Jun 17, 2013 at 9:16 AM, Elso Andras <elso.andras@gmail.com> wrote:
->
-> Hi,
->
-> I tested your patches on a ubuntu lucid system, but ubuntu raring
-> kernel (3.8), but with for-linus branch from ceph-client and your
-> fscache. There was no probs in heavy load.
-> But i dont see any difference with/without fscache on our "test" case
-> (mp4 video streaming, ~5500 connections):
-> with fscache: http://imageshack.us/photo/my-images/109/xg5a.png/
-> without fscache: http://imageshack.us/photo/my-images/5/xak.png/
->
-> Elbandi
->
-> 2013/5/29 Milosz Tanski <milosz@adfin.com>:
-> > Sage,
-> >
-> > Thanks for taking a look at this. No worries about the timing.
-> >
-> > I added two extra changes into my branch located here:
-> > https://bitbucket.org/adfin/linux-fs/commits/branch/forceph. The first
-> > one is a fix for kernel deadlock. The second one makes fsc cache a
-> > non-default mount option (akin to NFS).
-> >
-> > Finally, I observed an occasional oops in the fscache that's fixed in
-> > David's branch that's waiting to get into mainline. The fix for the
-> > issue is here: http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/commit/?h=fscache&id=82958c45e35963c93fc6cbe6a27752e2d97e9f9a.
-> > I can only cause that issue by forcing the kernel to drop it's caches
-> > in some cases.
-> >
-> > Let me know if you any other feedback, or if I can help in anyway.
-> >
-> > Thanks,
-> > - Milosz
-> >
-> > On Tue, May 28, 2013 at 1:11 PM, Sage Weil <sage@inktank.com> wrote:
-> >> Hi Milosz,
-> >>
-> >> Just a heads up that I hope to take a closer look at the patch this
-> >> afternoon or tomorrow.  Just catching up after the long weekend.
-> >>
-> >> Thanks!
-> >> sage
-> >>
-> >>
-> >> On Thu, 23 May 2013, Milosz Tanski wrote:
-> >>
-> >>> Enable fscache as an optional feature of ceph.
-> >>>
-> >>> Adding support for fscache to the Ceph filesystem. This would bring it to on
-> >>> par with some of the other network filesystems in Linux (like NFS, AFS, etc...)
-> >>>
-> >>> This exploits the existing Ceph cache & lazyio capabilities.
-> >>>
-> >>> Signed-off-by: Milosz Tanski <milosz@adfin.com>
-> >>> ---
-> >>>  fs/ceph/Kconfig  |    9 ++++++
-> >>>  fs/ceph/Makefile |    2 ++
-> >>>  fs/ceph/addr.c   |   85 ++++++++++++++++++++++++++++++++++++++++--------------
-> >>>  fs/ceph/caps.c   |   21 +++++++++++++-
-> >>>  fs/ceph/file.c   |    9 ++++++
-> >>>  fs/ceph/inode.c  |   25 ++++++++++++++--
-> >>>  fs/ceph/super.c  |   25 ++++++++++++++--
-> >>>  fs/ceph/super.h  |   12 ++++++++
-> >>>  8 files changed, 162 insertions(+), 26 deletions(-)
-> >>>
-> >>> diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
-> >>> index 49bc782..ac9a2ef 100644
-> >>> --- a/fs/ceph/Kconfig
-> >>> +++ b/fs/ceph/Kconfig
-> >>> @@ -16,3 +16,12 @@ config CEPH_FS
-> >>>
-> >>>    If unsure, say N.
-> >>>
-> >>> +if CEPH_FS
-> >>> +config CEPH_FSCACHE
-> >>> + bool "Enable Ceph client caching support"
-> >>> + depends on CEPH_FS=m && FSCACHE || CEPH_FS=y && FSCACHE=y
-> >>> + help
-> >>> +  Choose Y here to enable persistent, read-only local
-> >>> +  caching support for Ceph clients using FS-Cache
-> >>> +
-> >>> +endif
-> >>> diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-> >>> index bd35212..0af0678 100644
-> >>> --- a/fs/ceph/Makefile
-> >>> +++ b/fs/ceph/Makefile
-> >>> @@ -9,3 +9,5 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
-> >>>   mds_client.o mdsmap.o strings.o ceph_frag.o \
-> >>>   debugfs.o
-> >>>
-> >>> +ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
-> >>> +
-> >>> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> >>> index 3e68ac1..fd3a1cc 100644
-> >>> --- a/fs/ceph/addr.c
-> >>> +++ b/fs/ceph/addr.c
-> >>> @@ -11,6 +11,7 @@
-> >>>
-> >>>  #include "super.h"
-> >>>  #include "mds_client.h"
-> >>> +#include "cache.h"
-> >>>  #include <linux/ceph/osd_client.h>
-> >>>
-> >>>  /*
-> >>> @@ -149,11 +150,26 @@ static void ceph_invalidatepage(struct page
-> >>> *page, unsigned long offset)
-> >>>   struct ceph_inode_info *ci;
-> >>>   struct ceph_snap_context *snapc = page_snap_context(page);
-> >>>
-> >>> - BUG_ON(!PageLocked(page));
-> >>> - BUG_ON(!PagePrivate(page));
-> >>>   BUG_ON(!page->mapping);
-> >>>
-> >>>   inode = page->mapping->host;
-> >>> + ci = ceph_inode(inode);
-> >>> +
-> >>> + if (offset != 0) {
-> >>> + dout("%p invalidatepage %p idx %lu partial dirty page\n",
-> >>> +     inode, page, page->index);
-> >>> + return;
-> >>> + }
-> >>> +
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + if (PageFsCache(page))
-> >>> + ceph_invalidate_fscache_page(inode, page);
-> >>> +#endif
-> >>> +
-> >>> + if (!PagePrivate(page))
-> >>> + return;
-> >>> +
-> >>> + BUG_ON(!PageLocked(page));
-> >>>
-> >>>   /*
-> >>>   * We can get non-dirty pages here due to races between
-> >>> @@ -163,31 +179,32 @@ static void ceph_invalidatepage(struct page
-> >>> *page, unsigned long offset)
-> >>>   if (!PageDirty(page))
-> >>>   pr_err("%p invalidatepage %p page not dirty\n", inode, page);
-> >>>
-> >>> - if (offset == 0)
-> >>> - ClearPageChecked(page);
-> >>> + ClearPageChecked(page);
-> >>>
-> >>> - ci = ceph_inode(inode);
-> >>> - if (offset == 0) {
-> >>> - dout("%p invalidatepage %p idx %lu full dirty page %lu\n",
-> >>> -     inode, page, page->index, offset);
-> >>> - ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-> >>> - ceph_put_snap_context(snapc);
-> >>> - page->private = 0;
-> >>> - ClearPagePrivate(page);
-> >>> - } else {
-> >>> - dout("%p invalidatepage %p idx %lu partial dirty page\n",
-> >>> -     inode, page, page->index);
-> >>> - }
-> >>> + dout("%p invalidatepage %p idx %lu full dirty page %lu\n",
-> >>> +     inode, page, page->index, offset);
-> >>> +
-> >>> + ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-> >>> + ceph_put_snap_context(snapc);
-> >>> + page->private = 0;
-> >>> + ClearPagePrivate(page);
-> >>>  }
-> >>>
-> >>> -/* just a sanity check */
-> >>>  static int ceph_releasepage(struct page *page, gfp_t g)
-> >>>  {
-> >>>   struct inode *inode = page->mapping ? page->mapping->host : NULL;
-> >>>   dout("%p releasepage %p idx %lu\n", inode, page, page->index);
-> >>>   WARN_ON(PageDirty(page));
-> >>> - WARN_ON(PagePrivate(page));
-> >>> - return 0;
-> >>> +
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* Can we release the page from the cache? */
-> >>> + if (PageFsCache(page) && ceph_release_fscache_page(page, g) == 0)
-> >>> + return 0;
-> >>> +#endif
-> >>> + if (PagePrivate(page))
-> >>> + return 0;
-> >>> +
-> >>> + return 1;
-> >>>  }
-> >>>
-> >>>  /*
-> >>> @@ -197,11 +214,18 @@ static int readpage_nounlock(struct file *filp,
-> >>> struct page *page)
-> >>>  {
-> >>>   struct inode *inode = file_inode(filp);
-> >>>   struct ceph_inode_info *ci = ceph_inode(inode);
-> >>> - struct ceph_osd_client *osdc =
-> >>> + struct ceph_osd_client *osdc =
-> >>>   &ceph_inode_to_client(inode)->client->osdc;
-> >>>   int err = 0;
-> >>>   u64 len = PAGE_CACHE_SIZE;
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + err = ceph_readpage_from_fscache(inode, page);
-> >>> +
-> >>> + if (err == 0)
-> >>> + goto out;
-> >>> +#endif
-> >>> +
-> >>>   dout("readpage inode %p file %p page %p index %lu\n",
-> >>>       inode, filp, page, page->index);
-> >>>   err = ceph_osdc_readpages(osdc, ceph_vino(inode), &ci->i_layout,
-> >>> @@ -219,6 +243,10 @@ static int readpage_nounlock(struct file *filp,
-> >>> struct page *page)
-> >>>   }
-> >>>   SetPageUptodate(page);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ceph_readpage_to_fscache(inode, page);
-> >>> +#endif
-> >>> +
-> >>>  out:
-> >>>   return err < 0 ? err : 0;
-> >>>  }
-> >>> @@ -262,6 +290,9 @@ static void finish_read(struct ceph_osd_request
-> >>> *req, struct ceph_msg *msg)
-> >>>   flush_dcache_page(page);
-> >>>   SetPageUptodate(page);
-> >>>   unlock_page(page);
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ceph_readpage_to_fscache(inode, page);
-> >>> +#endif
-> >>>   page_cache_release(page);
-> >>>   bytes -= PAGE_CACHE_SIZE;
-> >>>   }
-> >>> @@ -330,7 +361,7 @@ static int start_read(struct inode *inode, struct
-> >>> list_head *page_list, int max)
-> >>>   page = list_entry(page_list->prev, struct page, lru);
-> >>>   BUG_ON(PageLocked(page));
-> >>>   list_del(&page->lru);
-> >>> -
-> >>> +
-> >>>   dout("start_read %p adding %p idx %lu\n", inode, page,
-> >>>       page->index);
-> >>>   if (add_to_page_cache_lru(page, &inode->i_data, page->index,
-> >>> @@ -377,6 +408,14 @@ static int ceph_readpages(struct file *file,
-> >>> struct address_space *mapping,
-> >>>   int rc = 0;
-> >>>   int max = 0;
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + rc = ceph_readpages_from_fscache(mapping->host, mapping, page_list,
-> >>> + &nr_pages);
-> >>> +
-> >>> + if (rc == 0)
-> >>> + goto out;
-> >>> +#endif
-> >>> +
-> >>>   if (fsc->mount_options->rsize >= PAGE_CACHE_SIZE)
-> >>>   max = (fsc->mount_options->rsize + PAGE_CACHE_SIZE - 1)
-> >>>   >> PAGE_SHIFT;
-> >>> @@ -490,6 +529,10 @@ static int writepage_nounlock(struct page *page,
-> >>> struct writeback_control *wbc)
-> >>>      CONGESTION_ON_THRESH(fsc->mount_options->congestion_kb))
-> >>>   set_bdi_congested(&fsc->backing_dev_info, BLK_RW_ASYNC);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ceph_readpage_to_fscache(inode, page);
-> >>> +#endif
-> >>> +
-> >>>   set_page_writeback(page);
-> >>>   err = ceph_osdc_writepages(osdc, ceph_vino(inode),
-> >>>     &ci->i_layout, snapc,
-> >>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> >>> index da0f9b8..7e8d8d3 100644
-> >>> --- a/fs/ceph/caps.c
-> >>> +++ b/fs/ceph/caps.c
-> >>> @@ -10,6 +10,7 @@
-> >>>
-> >>>  #include "super.h"
-> >>>  #include "mds_client.h"
-> >>> +#include "cache.h"
-> >>>  #include <linux/ceph/decode.h>
-> >>>  #include <linux/ceph/messenger.h>
-> >>>
-> >>> @@ -486,8 +487,14 @@ static void __check_cap_issue(struct
-> >>> ceph_inode_info *ci, struct ceph_cap *cap,
-> >>>   * i_rdcache_gen.
-> >>>   */
-> >>>   if ((issued & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
-> >>> -    (had & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0)
-> >>> +    (had & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0) {
-> >>>   ci->i_rdcache_gen++;
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* Invalidate the cache for the whole file. */
-> >>> + dout("Invalidating inode data cache: %p", &ci->vfs_inode);
-> >>> + fscache_invalidate(ci->fscache);
-> >>> +#endif
-> >>> + }
-> >>>
-> >>>   /*
-> >>>   * if we are newly issued FILE_SHARED, mark dir not complete; we
-> >>> @@ -2356,6 +2363,12 @@ static void handle_cap_grant(struct inode
-> >>> *inode, struct ceph_mds_caps *grant,
-> >>>   if (((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
-> >>>      (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
-> >>>      !ci->i_wrbuffer_ref) {
-> >>> +
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* Close the fscache on inode */
-> >>> + ceph_fscache_unregister_inode_cookie(ci);
-> >>> +#endif
-> >>> +
-> >>>   if (try_nonblocking_invalidate(inode) == 0) {
-> >>>   revoked_rdcache = 1;
-> >>>   } else {
-> >>> @@ -2425,6 +2438,12 @@ static void handle_cap_grant(struct inode
-> >>> *inode, struct ceph_mds_caps *grant,
-> >>>   wake = 1;
-> >>>   }
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* Register cache (if needed); perform this after amny size change. */
-> >>> + if ((issued & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)))
-> >>> + ceph_fscache_register_inode_cookie(session->s_mdsc->fsc, ci);
-> >>> +#endif
-> >>> +
-> >>>   /* check cap bits */
-> >>>   wanted = __ceph_caps_wanted(ci);
-> >>>   used = __ceph_caps_used(ci);
-> >>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> >>> index 656e169..e7ecc04 100644
-> >>> --- a/fs/ceph/file.c
-> >>> +++ b/fs/ceph/file.c
-> >>> @@ -11,6 +11,7 @@
-> >>>
-> >>>  #include "super.h"
-> >>>  #include "mds_client.h"
-> >>> +#include "cache.h"
-> >>>
-> >>>  /*
-> >>>   * Ceph file operations
-> >>> @@ -67,10 +68,17 @@ out:
-> >>>  static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
-> >>>  {
-> >>>   struct ceph_file_info *cf;
-> >>> + struct ceph_inode_info *ci = ceph_inode(inode);
-> >>> + struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
-> >>>   int ret = 0;
-> >>>
-> >>>   switch (inode->i_mode & S_IFMT) {
-> >>>   case S_IFREG:
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + spin_lock(&ci->i_ceph_lock);
-> >>> + ceph_fscache_register_inode_cookie(fsc, ci);
-> >>> + spin_lock(&ci->i_ceph_lock);
-> >>> +#endif
-> >>>   case S_IFDIR:
-> >>>   dout("init_file %p %p 0%o (regular)\n", inode, file,
-> >>>       inode->i_mode);
-> >>> @@ -181,6 +189,7 @@ int ceph_open(struct inode *inode, struct file *file)
-> >>>   spin_unlock(&ci->i_ceph_lock);
-> >>>   return ceph_init_file(inode, file, fmode);
-> >>>   }
-> >>> +
-> >>>   spin_unlock(&ci->i_ceph_lock);
-> >>>
-> >>>   dout("open fmode %d wants %s\n", fmode, ceph_cap_string(wanted));
-> >>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> >>> index be0f7e2..620b84c 100644
-> >>> --- a/fs/ceph/inode.c
-> >>> +++ b/fs/ceph/inode.c
-> >>> @@ -12,6 +12,7 @@
-> >>>
-> >>>  #include "super.h"
-> >>>  #include "mds_client.h"
-> >>> +#include "cache.h"
-> >>>  #include <linux/ceph/decode.h>
-> >>>
-> >>>  /*
-> >>> @@ -377,6 +378,10 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
-> >>>
-> >>>   INIT_WORK(&ci->i_vmtruncate_work, ceph_vmtruncate_work);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ci->fscache = NULL;
-> >>> +#endif
-> >>> +
-> >>>   return &ci->vfs_inode;
-> >>>  }
-> >>>
-> >>> @@ -396,6 +401,10 @@ void ceph_destroy_inode(struct inode *inode)
-> >>>
-> >>>   dout("destroy_inode %p ino %llx.%llx\n", inode, ceph_vinop(inode));
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ceph_fscache_unregister_inode_cookie(ci);
-> >>> +#endif
-> >>> +
-> >>>   ceph_queue_caps_release(inode);
-> >>>
-> >>>   /*
-> >>> @@ -430,7 +439,6 @@ void ceph_destroy_inode(struct inode *inode)
-> >>>   call_rcu(&inode->i_rcu, ceph_i_callback);
-> >>>  }
-> >>>
-> >>> -
-> >>>  /*
-> >>>   * Helpers to fill in size, ctime, mtime, and atime.  We have to be
-> >>>   * careful because either the client or MDS may have more up to date
-> >>> @@ -633,6 +641,14 @@ static int fill_inode(struct inode *inode,
-> >>>      le32_to_cpu(info->time_warp_seq),
-> >>>      &ctime, &mtime, &atime);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* Notify the cache that size has changed */
-> >>> + if (queue_trunc && ci->fscache) {
-> >>> + pr_info("size changed inode: %p cap flags\n", &ci->vfs_inode);
-> >>> + fscache_attr_changed(ci->fscache);
-> >>> + }
-> >>> +#endif
-> >>> +
-> >>>   /* only update max_size on auth cap */
-> >>>   if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
-> >>>      ci->i_max_size != le64_to_cpu(info->max_size)) {
-> >>> @@ -1066,7 +1082,7 @@ int ceph_fill_trace(struct super_block *sb,
-> >>> struct ceph_mds_request *req,
-> >>>   * complete.
-> >>>   */
-> >>>   ceph_set_dentry_offset(req->r_old_dentry);
-> >>> - dout("dn %p gets new offset %lld\n", req->r_old_dentry,
-> >>> + dout("dn %p gets new offset %lld\n", req->r_old_dentry,
-> >>>       ceph_dentry(req->r_old_dentry)->offset);
-> >>>
-> >>>   dn = req->r_old_dentry;  /* use old_dentry */
-> >>> @@ -1430,6 +1446,11 @@ static void ceph_invalidate_work(struct
-> >>> work_struct *work)
-> >>>   orig_gen = ci->i_rdcache_gen;
-> >>>   spin_unlock(&ci->i_ceph_lock);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + pr_info("cache invalidating inode: %p cap flags\n", &ci->vfs_inode);
-> >>> + fscache_invalidate(ci->fscache);
-> >>> +#endif
-> >>> +
-> >>>   truncate_inode_pages(&inode->i_data, 0);
-> >>>
-> >>>   spin_lock(&ci->i_ceph_lock);
-> >>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> >>> index 7d377c9..7847ef7 100644
-> >>> --- a/fs/ceph/super.c
-> >>> +++ b/fs/ceph/super.c
-> >>> @@ -17,6 +17,7 @@
-> >>>
-> >>>  #include "super.h"
-> >>>  #include "mds_client.h"
-> >>> +#include "cache.h"
-> >>>
-> >>>  #include <linux/ceph/ceph_features.h>
-> >>>  #include <linux/ceph/decode.h>
-> >>> @@ -530,6 +531,11 @@ static struct ceph_fs_client
-> >>> *create_fs_client(struct ceph_mount_options *fsopt,
-> >>>   if (!fsc->wb_pagevec_pool)
-> >>>   goto fail_trunc_wq;
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + /* fscache */
-> >>> + ceph_fscache_register_fsid_cookie(fsc);
-> >>> +#endif
-> >>> +
-> >>>   /* caps */
-> >>>   fsc->min_caps = fsopt->max_readdir;
-> >>>
-> >>> @@ -554,6 +560,10 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
-> >>>  {
-> >>>   dout("destroy_fs_client %p\n", fsc);
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + ceph_fscache_unregister_fsid_cookie(fsc);
-> >>> +#endif
-> >>> +
-> >>>   destroy_workqueue(fsc->wb_wq);
-> >>>   destroy_workqueue(fsc->pg_inv_wq);
-> >>>   destroy_workqueue(fsc->trunc_wq);
-> >>> @@ -588,6 +598,8 @@ static void ceph_inode_init_once(void *foo)
-> >>>
-> >>>  static int __init init_caches(void)
-> >>>  {
-> >>> + int error = -ENOMEM;
-> >>> +
-> >>>   ceph_inode_cachep = kmem_cache_create("ceph_inode_info",
-> >>>        sizeof(struct ceph_inode_info),
-> >>>        __alignof__(struct ceph_inode_info),
-> >>> @@ -611,15 +623,19 @@ static int __init init_caches(void)
-> >>>   if (ceph_file_cachep == NULL)
-> >>>   goto bad_file;
-> >>>
-> >>> - return 0;
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + if ((error = fscache_register_netfs(&ceph_cache_netfs)))
-> >>> + goto bad_file;
-> >>> +#endif
-> >>>
-> >>> + return 0;
-> >>>  bad_file:
-> >>>   kmem_cache_destroy(ceph_dentry_cachep);
-> >>>  bad_dentry:
-> >>>   kmem_cache_destroy(ceph_cap_cachep);
-> >>>  bad_cap:
-> >>>   kmem_cache_destroy(ceph_inode_cachep);
-> >>> - return -ENOMEM;
-> >>> + return error;
-> >>>  }
-> >>>
-> >>>  static void destroy_caches(void)
-> >>> @@ -629,10 +645,15 @@ static void destroy_caches(void)
-> >>>   * destroy cache.
-> >>>   */
-> >>>   rcu_barrier();
-> >>> +
-> >>>   kmem_cache_destroy(ceph_inode_cachep);
-> >>>   kmem_cache_destroy(ceph_cap_cachep);
-> >>>   kmem_cache_destroy(ceph_dentry_cachep);
-> >>>   kmem_cache_destroy(ceph_file_cachep);
-> >>> +
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + fscache_unregister_netfs(&ceph_cache_netfs);
-> >>> +#endif
-> >>>  }
-> >>>
-> >>>
-> >>> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> >>> index 8696be2..2980337 100644
-> >>> --- a/fs/ceph/super.h
-> >>> +++ b/fs/ceph/super.h
-> >>> @@ -16,6 +16,10 @@
-> >>>
-> >>>  #include <linux/ceph/libceph.h>
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> +#include <linux/fscache.h>
-> >>> +#endif
-> >>> +
-> >>>  /* f_type in struct statfs */
-> >>>  #define CEPH_SUPER_MAGIC 0x00c36400
-> >>>
-> >>> @@ -90,6 +94,10 @@ struct ceph_fs_client {
-> >>>   struct dentry *debugfs_bdi;
-> >>>   struct dentry *debugfs_mdsc, *debugfs_mdsmap;
-> >>>  #endif
-> >>> +
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + struct fscache_cookie *fscache;
-> >>> +#endif
-> >>>  };
-> >>>
-> >>>
-> >>> @@ -319,6 +327,10 @@ struct ceph_inode_info {
-> >>>
-> >>>   struct work_struct i_vmtruncate_work;
-> >>>
-> >>> +#ifdef CONFIG_CEPH_FSCACHE
-> >>> + struct fscache_cookie *fscache;
-> >>> +#endif
-> >>> +
-> >>>   struct inode vfs_inode; /* at end */
-> >>>  };
-> >>>
-> >>> --
-> >>> 1.7.9.5
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>
-> >>>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Greg Farnum <greg@inktank.com>
+	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
+	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
+	2013-05-01 17:06:27 -0700   wip-optracker-4354
+	2013-05-31 13:28:31 -0700   wip-rgw-geo-rebase-test
+	2013-05-31 17:08:27 -0700   wip-rgw-geo-rebase
+
+James Page <james.page@ubuntu.com>
+	2013-02-27 22:50:38 +0000   wip-debhelper-8
+
+Joao Eduardo Luis <joao.luis@inktank.com>
+	2013-04-18 00:01:24 +0100   wip-4521-tool
+	2013-04-22 15:14:28 +0100   wip-4748
+	2013-04-24 16:42:11 +0100   wip-4521
+	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
+	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
+	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
+	2013-05-31 18:54:38 +0100   wip-mon-trim
+	2013-05-31 21:00:28 +0100   wip-mon-trim-b
+	2013-06-12 18:27:05 +0100   wip-mon-sync-fixes
+
+Joe Buck <jbbuck@gmail.com>
+	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
+	2013-05-30 23:02:32 -0700   wip-rgw-geo-enovance-buck
+	2013-06-13 22:29:17 -0700   wip-rgw-geo-buck
+
+John Wilkins <john.wilkins@inktank.com>
+	2012-12-21 15:14:37 -0800   wip-mon-docs
+
+Josh Durgin <josh.durgin@inktank.com>
+	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
+	2013-04-29 14:32:00 -0700   wip-rbd-close-image
+
+Matt Benjamin <matt@linuxbox.com>
+	2013-05-21 09:45:30 -0700   wip-libcephfs
+
+Noah Watkins <noahwatkins@gmail.com>
+	2013-01-05 11:58:38 -0800   wip-localized-read-tests
+	2013-01-11 12:49:28 -0800   wip-osx-upstream
+	2013-01-11 13:01:11 -0800   wip-osx
+	2013-02-01 10:28:26 -0800   wip-java-deb-warning
+	2013-04-22 15:23:09 -0700   wip-cls-lua
+	2013-05-30 13:29:42 -0700   wip-hadoop-doc
+
+Roald van Loon <roaldvanloon@gmail.com>
+	2012-12-24 22:26:56 +0000   wip-dout
+
+Sage Weil <sage@inktank.com>
+	2012-07-14 17:40:21 -0700   wip-osd-redirect
+	2012-07-28 13:56:47 -0700   wip-journal
+	2012-11-13 08:58:57 -0800   wip-fd-simple-cache
+	2012-11-30 13:47:27 -0800   wip-osd-readhole
+	2012-12-07 14:38:46 -0800   wip-osd-alloc
+	2012-12-12 22:18:02 -0800   automake-python
+	2012-12-14 17:11:31 -0800   wip_cur_perf_journal
+	2012-12-27 13:38:52 -0800   wip-linuxbox
+	2013-01-06 20:39:37 -0800   wip-msg-refs
+	2013-01-16 11:39:28 -0800   wip-client-layout-temp
+	2013-01-27 11:06:08 -0800   wip-argonaut-leveldb
+	2013-01-29 13:46:02 -0800   wip-readdir
+	2013-02-08 10:07:54 -0800   wip-bobtail-logrotate
+	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
+	2013-02-12 08:29:29 -0800   wip-dump
+	2013-02-12 23:17:11 -0800   wip-monc
+	2013-02-18 20:50:57 -0800   wip-osd-scrub
+	2013-02-19 13:18:13 -0800   wip-4116-workaround
+	2013-03-11 17:27:15 -0700   wip-deploy-rgw
+	2013-03-15 17:10:24 -0700   wip-log-4192
+	2013-04-15 20:34:47 -0700   bobtail-dc
+	2013-04-18 13:51:36 -0700   argonaut
+	2013-04-25 10:38:45 -0700   wip-init2
+	2013-04-26 12:25:58 -0700   wip-mon-fwd
+	2013-05-02 14:50:38 -0700   wip-rbd-clear-layering
+	2013-05-03 09:01:53 -0700   wip-leveldb-reopen
+	2013-05-07 15:56:57 -0700   wip-ceph-tool
+	2013-05-08 09:46:53 -0700   wip-4578-bobtail
+	2013-05-08 13:39:25 -0700   wip-4951
+	2013-05-10 08:28:50 -0700   wip-rgw-crash
+	2013-05-22 09:03:53 -0700   wip-4895-cuttlefish
+	2013-05-22 10:33:35 -0700   unstable
+	2013-05-22 13:39:58 -0700   wip-notcmalloc
+	2013-05-23 19:32:56 -0700   wip-libcephfs-rebased
+	2013-05-27 12:45:33 -0700   wip-mon-compaction
+	2013-05-27 12:45:41 -0700   wip-cuttlefish-mon
+	2013-05-28 10:51:23 -0700   wip-mds-scan
+	2013-05-28 20:46:51 -0700   wip-mds-authpins
+	2013-05-29 09:25:09 -0700   wip-bobtail-fsx
+	2013-05-29 10:27:59 -0700   wip-5021
+	2013-06-01 13:26:50 -0700   wip-5176-cuttlefish
+	2013-06-02 15:29:26 -0700   wip-log-rewrite
+	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
+	2013-06-04 15:40:58 -0700   wip-4976
+	2013-06-04 22:43:04 -0700   wip-osd-push
+	2013-06-08 08:29:19 -0700   wip-5248-cuttlefish-workaround
+	2013-06-08 08:46:53 -0700   wip-5286
+	2013-06-08 22:25:47 -0700   wip-cap-release
+	2013-06-10 22:22:23 -0700   wip-mon
+	2013-06-13 10:53:07 -0700   wip-refs
+	2013-06-15 08:14:40 -0700   wip-exit-foo
+	2013-06-15 08:48:47 -0700   wip-client-revoke
+	2013-06-15 08:50:29 -0700   wip-client-revoke-cuttlefish
+	2013-06-15 20:06:33 -0700   wip-5194
+	2013-06-15 20:48:24 -0700   cuttlefish
+	2013-06-16 21:01:14 -0700   wip-client-sync
+
+Sam Lang <sam.lang@inktank.com>
+	2012-11-27 15:01:58 -0600   wip-mtime-incr
+
+Samuel Just <sam.just@inktank.com>
+	2012-11-21 11:05:24 -0800   wip_stable_smalliobench
+	2012-11-28 17:32:59 -0800   wip_next_smalliobench
+	2012-12-05 13:29:22 -0800   wip_recovery
+	2012-12-18 18:34:47 -0800   wip_auth_551_backport
+	2013-01-25 13:39:20 -0800   wip_argonaut_snap
+	2013-02-07 10:38:52 -0800   wip_actmap_dirty_info
+	2013-02-07 11:53:31 -0800   wip_temp_coll
+	2013-02-07 16:05:19 -0800   wip_check_snapcolls
+	2013-02-11 12:55:24 -0800   wip_rmcoll_idempotent
+	2013-02-14 14:16:36 -0800   wip-bobtail-load_pgs-workaround
+	2013-03-04 14:20:17 -0800   wip_omap_snaps_transactions
+	2013-03-11 14:55:02 -0700   wip_4144
+	2013-03-13 16:04:55 -0700   wip_sam_test
+	2013-03-15 11:06:25 -0700   wip_4196
+	2013-03-15 15:31:57 -0700   wip_feature_warning
+	2013-03-20 12:08:57 -0700   wip_osd_shutdown
+	2013-03-22 14:01:53 -0700   wip_4534
+	2013-03-27 11:32:29 -0700   wip_4538
+	2013-04-08 15:43:53 -0700   wip_4627
+	2013-04-09 10:27:50 -0700   wip_4687
+	2013-04-10 11:58:01 -0700   wip_4654
+	2013-04-10 14:13:12 -0700   wip_4701
+	2013-04-18 10:57:54 -0700   wip-debug-xattr
+	2013-04-19 09:04:17 -0700   wip_4704
+	2013-04-19 11:06:04 -0700   wip_4662_clean
+	2013-04-19 11:06:42 -0700   wip_4662
+	2013-04-23 15:16:20 -0700   wip_loadpgs_workaround
+	2013-05-02 21:18:40 -0700   wip_mon_dump_ops
+	2013-05-06 10:56:53 -0700   wip_4910
+	2013-05-07 21:05:05 -0700   wip_split_upgrade
+	2013-05-15 11:17:39 -0700   wip_5020
+	2013-05-23 15:53:34 -0700   wip_hashpspool
+	2013-05-24 17:55:04 -0700   wip_5172
+	2013-05-30 15:44:57 -0700   wip-5046
+	2013-05-31 12:18:07 -0700   wip_cuttlefish_pg_epoch
+	2013-05-31 12:18:33 -0700   wip_bobtail_pg_epoch
+	2013-06-06 11:51:04 -0700   wip_bench_num
+	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
+	2013-06-14 14:53:38 -0700   wip-log-rewrite-sam
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2012-11-16 11:09:34 -0800   wip-mongoose
+	2012-12-07 13:40:12 -0800   wip-rgw-dr
+	2012-12-10 13:29:37 -0800   wip-multipart-size
+	2012-12-13 18:09:37 -0800   wip-2169
+	2013-02-12 09:40:12 -0800   wip-json-decode
+	2013-02-22 15:04:37 -0800   wip-4247
+	2013-02-22 16:19:37 -0800   wip-rgw-zone
+	2013-02-26 18:01:46 -0800   wip-cls-version
+	2013-02-28 09:56:43 -0800   wip-librados-exec
+	2013-03-07 09:46:49 -0800   wip-4363
+	2013-03-07 09:47:56 -0800   wip-4363-next
+	2013-03-07 11:38:06 -0800   wip-4247-bobtail
+	2013-03-12 12:56:01 -0700   wip-4425
+	2013-03-13 10:13:29 -0700   wip-4425-next
+	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
+	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
+	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
+	2013-04-22 13:01:20 -0700   wip-4776-bobtail
+	2013-04-23 09:26:33 -0700   wip-4755
+	2013-04-26 09:41:39 -0700   wip-4760
+	2013-05-02 22:08:37 -0700   wip-4716
+	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
+	2013-05-07 14:03:04 -0700   wip-4600-bobtail
+	2013-05-07 14:03:37 -0700   wip-4600-argonaut
+	2013-05-14 12:44:21 -0700   wip-rgw-bucketlog-3
+	2013-05-16 09:08:46 -0700   wip-5073-2
+	2013-05-22 21:34:52 -0700   wip-5152
+	2013-05-30 09:34:21 -0700   wip-5204
+	2013-05-30 13:04:27 -0700   wip-5209
+	2013-06-10 14:28:03 -0700   wip-rgw-geo
+	2013-06-14 14:53:54 -0700   wip-5362
+	2013-06-15 22:06:33 -0700   wip-rgw-geo-2
+
+caleb miles <caleb.miles@inktank.com>
+	2013-04-05 09:31:56 -0700   wip-4600
+
+caleb miles <caselim@gmail.com>
+	2013-01-07 07:39:02 -0500   wip-3735
+	2013-01-10 08:29:30 -0500   wip-3682
+	2013-02-14 14:28:11 -0500   wip-content-type
+	2013-02-20 00:15:18 -0500   wip-3669
+	2013-03-11 15:51:48 -0400   wip-rgw-user2
+	2013-03-25 13:51:29 -0400   wip-rgw-bucket
+	2013-03-26 10:05:17 -0400   wip-rest-user
+	2013-03-26 10:05:17 -0400   wip-rgw-usre
+	2013-03-26 11:39:11 -0400   wip-rgw-user
+	2013-04-05 14:38:00 -0400   wip-admin-api
+	2013-04-10 15:00:06 -0400   wip-4702
+	2013-04-22 13:01:47 -0400   wip-rest-admin
+
+tamil <tamil.muthamizhan@inktank.com>
+	2013-06-13 13:50:56 -0700   bobtail
+
+
+
+Grouped by committer, ordered by commit time stamp.
