@@ -1,98 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Comments on Ceph distributed parity implementation
-Date: Sun, 16 Jun 2013 23:31:29 +0200
-Message-ID: <51BE2EB1.2020807@dachary.org>
-References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 9/9] ceph: move inode to proper flushing list when auth
+ MDS changes
+Date: Mon, 17 Jun 2013 10:45:11 +0800
+Message-ID: <51BE7837.7060405@intel.com>
+References: <1370315998-10418-1-git-send-email-zheng.z.yan@intel.com> <1370315998-10418-10-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1306102307090.18349@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigA2A3C90E76481DCCA04A8C21"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:59476 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847Ab3FPVbd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Jun 2013 17:31:33 -0400
-In-Reply-To: <loom.20130616T214215-201@post.gmane.org>
+Received: from mga02.intel.com ([134.134.136.20]:31456 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755007Ab3FQCpN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 16 Jun 2013 22:45:13 -0400
+In-Reply-To: <alpine.DEB.2.00.1306102307090.18349@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Beno=EEt_Parrein?= <benoit.parrein@polytech.univ-nantes.fr>
-Cc: ceph-devel@vger.kernel.org, "James S. Plank" <plank@cs.utk.edu>
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigA2A3C90E76481DCCA04A8C21
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+updated patch, use cap->session instead of local session pointer
 
-Hi Beno=EEt,
+---
+From 2675b6cc7afe25c9b7e644396df3b54bec003ab2 Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Fri, 31 May 2013 16:40:24 +0800
+Subject: [PATCH 1/3] ceph: move inode to proper flushing list when auth MDS
+ changes
 
-=46rom the ( na=EFve ) point of view of engineering, performances are imp=
-ortant. The recent works of James Plank ( cc'ed ) greatly improved them
- and I'm looking forward to the next version of jerasure ( http://web.eec=
-s.utk.edu/~plank/plank/papers/CS-08-627.html ). Rozofs Mojette Transform =
-implementation ( https://github.com/rozofs/rozofs/blob/master/rozofs/comm=
-on/transform.h & https://github.com/rozofs/rozofs/blob/master/rozofs/comm=
-on/transform.cc ) does not seem to make use of SIMD. Is it because the pe=
-rformances are good enough to not require them ?
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-Cheers
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 790f88b..9a5ccc9 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1982,8 +1982,15 @@ static void kick_flushing_inode_caps(struct ceph_mds_client *mdsc,
+ 	cap = ci->i_auth_cap;
+ 	dout("kick_flushing_inode_caps %p flushing %s flush_seq %lld\n", inode,
+ 	     ceph_cap_string(ci->i_flushing_caps), ci->i_cap_flush_seq);
++
+ 	__ceph_flush_snaps(ci, &session, 1);
++
+ 	if (ci->i_flushing_caps) {
++		spin_lock(&mdsc->cap_dirty_lock);
++		list_move_tail(&ci->i_flushing_item,
++			       &cap->session->s_cap_flushing);
++		spin_unlock(&mdsc->cap_dirty_lock);
++
+ 		delayed = __send_cap(mdsc, cap, CEPH_CAP_OP_FLUSH,
+ 				     __ceph_caps_used(ci),
+ 				     __ceph_caps_wanted(ci),
+-- 
+1.8.1.4
 
-On 06/16/2013 09:51 PM, Beno=EEt Parrein wrote:
-> Paul Von-Stamwitz <PVonStamwitz <at> us.fujitsu.com> writes:
->=20
-> Hi Paul,=20
->=20
->>
->> Loic, I know nothing about Mojette Transforms. From what little I glea=
-ned,=20
-> it might be good for repair
->> (needing only a subset of chunks within a range to recalculate a missi=
-ng=20
-> chunk) but I'm worried about the
->> storage efficiency. RozoFS claims 1.5x. I'd like to do better than tha=
-t.
->>
->> All the best,
->> Paul
->>
->=20
-> If you want to do better than that you will probably lose in availabili=
-ty.=20
-> 1.5x give the same availability than 3 replicats and that for any kind =
-of=20
-> erasure coding.
-> FYI, Mojette transform has no constraint in terms of Galois fields. It =
-is the=20
-> big advantage to use discrete geometry rather than algebra.
->=20
-> best regards,
-> bp
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigA2A3C90E76481DCCA04A8C21
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlG+LrEACgkQ8dLMyEl6F20JbACdErjMvLzvIr4tLUcajL22FqtI
-1J0AnRDAHpU6DE8wcHoEMzFqZJTAiQ7j
-=K1I4
------END PGP SIGNATURE-----
-
---------------enigA2A3C90E76481DCCA04A8C21--
