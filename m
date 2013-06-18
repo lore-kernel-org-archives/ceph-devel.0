@@ -1,314 +1,102 @@
-From: Harvey Skinner <hpmpec2a@gmail.com>
-Subject: Re: Comments on Ceph distributed parity implementation
-Date: Tue, 18 Jun 2013 09:31:23 -0500
-Message-ID: <CAJOObieUVDQwXVeM68ybuXBmPkZsb57b-gwyVwNVC6VQaat4Zw@mail.gmail.com>
-References: <20130614201327.70240@gmx.com>
-	<51BB9FC3.8040102@dachary.org>
-	<622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local>
-	<C395B77B849187439280E1CF5FE1F2FA8990491B@G9W0337.americas.hpqcorp.net>
-	<CAJOObidVdjtiwk+xk5rwZi4=DBZ9GvTQnAkteCC0OhB_vyg6pg@mail.gmail.com>
-	<CAJOObicNGkweZbVSR-V8NA9YXaZucUpNm0y8Ph3X7EkE=pRG5g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: fix sleeping function called from invalid
+ context.
+Date: Tue, 18 Jun 2013 08:10:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306180807210.23632@cobra.newdream.net>
+References: <201306181930448773810@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f65.google.com ([209.85.128.65]:56499 "EHLO
-	mail-qe0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754646Ab3FROsm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 10:48:42 -0400
-Received: by mail-qe0-f65.google.com with SMTP id 1so1495349qec.0
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Jun 2013 07:48:42 -0700 (PDT)
-In-Reply-To: <CAJOObicNGkweZbVSR-V8NA9YXaZucUpNm0y8Ph3X7EkE=pRG5g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39083 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755047Ab3FRPKP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 11:10:15 -0400
+In-Reply-To: <201306181930448773810@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-all,
+On Tue, 18 Jun 2013, majianpeng wrote:
+> [ 1121.231883] BUG: sleeping function called from invalid context at kernel/rwsem.c:20
+> [ 1121.231935] in_atomic(): 1, irqs_disabled(): 0, pid: 9831, name: mv
+> [ 1121.231971] 1 lock held by mv/9831:
+> [ 1121.231973]  #0:  (&(&ci->i_ceph_lock)->rlock){+.+...}, at:[<ffffffffa02bbd38>] ceph_getxattr+0x58/0x1d0 [ceph]
+> [ 1121.231998] CPU: 3 PID: 9831 Comm: mv Not tainted 3.10.0-rc6+ #215
+> [ 1121.232000] Hardware name: To Be Filled By O.E.M. To Be Filled By
+> O.E.M./To be filled by O.E.M., BIOS 080015  11/09/2011
+> [ 1121.232027]  ffff88006d355a80 ffff880092f69ce0 ffffffff8168348c ffff880092f69cf8
+> [ 1121.232045]  ffffffff81070435 ffff88006d355a20 ffff880092f69d20 ffffffff816899ba
+> [ 1121.232052]  0000000300000004 ffff8800b76911d0 ffff88006d355a20 ffff880092f69d68
+> [ 1121.232056] Call Trace:
+> [ 1121.232062]  [<ffffffff8168348c>] dump_stack+0x19/0x1b
+> [ 1121.232067]  [<ffffffff81070435>] __might_sleep+0xe5/0x110
+> [ 1121.232071]  [<ffffffff816899ba>] down_read+0x2a/0x98
+> [ 1121.232080]  [<ffffffffa02baf70>] ceph_vxattrcb_layout+0x60/0xf0 [ceph]
+> [ 1121.232088]  [<ffffffffa02bbd7f>] ceph_getxattr+0x9f/0x1d0 [ceph]
+> [ 1121.232093]  [<ffffffff81188d28>] vfs_getxattr+0xa8/0xd0
+> [ 1121.232097]  [<ffffffff8118900b>] getxattr+0xab/0x1c0
+> [ 1121.232100]  [<ffffffff811704f2>] ? final_putname+0x22/0x50
+> [ 1121.232104]  [<ffffffff81155f80>] ? kmem_cache_free+0xb0/0x260
+> [ 1121.232107]  [<ffffffff811704f2>] ? final_putname+0x22/0x50
+> [ 1121.232110]  [<ffffffff8109e63d>] ? trace_hardirqs_on+0xd/0x10
+> [ 1121.232114]  [<ffffffff816957a7>] ? sysret_check+0x1b/0x56
+> [ 1121.232120]  [<ffffffff81189c9c>] SyS_fgetxattr+0x6c/0xc0
+> [ 1121.232125]  [<ffffffff81695782>] system_call_fastpath+0x16/0x1b
+> [ 1121.232129] BUG: scheduling while atomic: mv/9831/0x10000002
+> [ 1121.232154] 1 lock held by mv/9831:
+> [ 1121.232156]  #0:  (&(&ci->i_ceph_lock)->rlock){+.+...}, at:
+> [<ffffffffa02bbd38>] ceph_getxattr+0x58/0x1d0 [ceph]
+> 
+> I think move the ci->i_ceph_lock down is safe because we can't free
+> ceph_inode_info at there.
+> 
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/xattr.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index 9b6b2b6..4efde06 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -675,7 +675,6 @@ ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+>         if (!ceph_is_valid_xattr(name))
+>                 return -ENODATA;
+>  
+> -       spin_lock(&ci->i_ceph_lock);
+>         dout("getxattr %p ver=%lld index_ver=%lld\n", inode,
+>              ci->i_xattrs.version, ci->i_xattrs.index_version);
 
+Unfortunately these intervening lines neext i_ceph_lock to prevent the 
+i_xattrs struct contents from shifting underneath us.  It is more 
+expensive for the general getxattr case, but a simpler fix is to take 
+map_sem outside of i_ceph_lock.
 
-nice discussion on implementing  erasure-encoding as an option in Ceph =
-for
-object store.   THis will be a great feature option.   I would recommen=
-d
-that a good default be implemented  as being discussed here, but also t=
-hat
-an API or plug-in be architected at the same time so the deployment cou=
-ld
-also use some other form of parity/erasure-encoding if required/desired=
-=2E
-Governments and other vendors will push/convince (or have hardcoded in =
-an
-RFP) that some other algorithm be used and allowing an API/plug-in
-capability will allow Ceph to still be applicable. There are some
-proprietary object store solutions today which allow other
-erasure-encode/parity plug-ins which you will want to be competitive wi=
-th.
+I think the best solution would be to pass an argument to teh vxattrcb 
+callbacks indicating whether map_sem is held.  If the callback needs to 
+look at the map (for the layout xattr) and it isn't held yet, return 
+EAGAIN and have teh caller take the lock and retry.  Alternatively, it 
+could check the xattr name in the caller and decide whether to take the 
+lock, although that is a bit less elegant and maintainable.  Either way, I 
+think the right solution here is conditionally taking map_sem in 
+ceph_getxattr...
 
-I would see initial deployments of erasure-encoded object store be used=
- for
-static data objects; block device usage would come later if proved to b=
-e as
-performant as replicated objects.   Replication as done now in Ceph may
-still be a better block storage solution choice for DR strategies,
-configuring replicas to be at different DR site(s).
+sage
 
-just my view of course =85
-
-Harvey
-
-
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Paul Von-Stamw=
-itz
-> Sent: Friday, June 14, 2013 6:12 PM
-> To: Loic Dachary; Martin Flyvbjerg
-> Cc: ceph-devel@vger.kernel.org
-> Subject: RE: Comments on Ceph distributed parity implementation
->
-> Hi Loic and Martin,
->
-> This is a great discussion and I agree that the performance ramificat=
-ions
-> of erasure coding need to be thought out very carefully. Since chunks=
- are
-> not only encoded, but distributed across the cluster, we need to pay
-> attention to the network overhead as well as the arithmetic involved =
-in the
-> encoding/decoding.
->
-> If I understand the proposal correctly, objects begin their life's jo=
-urney
-> replicated as normal. As it grows cold, it gets transformed to an enc=
-ode PG
-> in another pool. Subsequent reads will be redirected (ehh). Subsequen=
-t
-> writes will first decode the original object and re-replicate it (ouc=
-h!).
-> Client writes never are encoded on the fly; they are always replicate=
-d
-> (nice).
->
-> So...
-> encode() is run as a low-priority background process probably once a =
-week
-> during deep scrubs.
-> decode() should be rare (if not, the object shouldn't have been encod=
-ed in
-> the first place.) If the cluster is healthy no arithmetic is needed, =
-just
-> concatenation, but a lot of network activity.
-> repair() operations will be the most prevalent and may occur at any t=
-ime
-> during normal self-healing/rebalancing operations.
->
-> Therefore, in my opinion, the algorithm that we choose must be optimi=
-zed
-> for repairing damaged and missing chunks. The main problem I have wit=
-h
-> Reed-Solomon is that it uses MDS codes which maximize network activit=
-y for
-> recalculations. Pyramid codes have the same write (encode) overhead, =
-but
-> have better read (repair) overhead.
->
-> Loic, I know nothing about Mojette Transforms. From what little I gle=
-aned,
-> it might be good for repair (needing only a subset of chunks within a=
- range
-> to recalculate a missing chunk) but I'm worried about the storage
-> efficiency. RozoFS claims 1.5x. I'd like to do better than that.
->
-> All the best,
-> Paul
->
-> On 06/14/2013 3:57 PM, Loic Dachary wrote:
-> > Hi Martin,
-> >
-> > Your explanations are very helpful to better understand the tradeof=
-fs
-> > of the existing implementations. To be honest I was looking forward=
- to
-> > your intervention. Not you specifically, of course :-) But someone
-> > with a good theoretical background to be a judge of what's best in =
-the
-> > context of Ceph.
-> > If you say it's the upcoming library to be released in August 2013,
-> > I'll take your word for it.
-> >
-> > The work currently being done within Ceph is to architecture to
-> > storage backend ( namely placement groups ) to make room for distri=
-buted
-> > parity.
-> > My initial idea was to isolate the low level library under an API t=
-hat
-> > takes a region ( 16KB for instance, as in gf_unit.c found in
-> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
-> > 703/gf_complete_0.1.tar ) as input and outputs chunks that can then=
- be
-> > written on different hosts. For instance
-> >
-> >       encode(char* region, char** chuncks) =3D> encode the region i=
-nto N
-> > chuncks
-> >       decode(char** chunks, char* region) =3D> decode the N chuncks=
- into a
-> > region
-> >         repair(char** chunks, int damaged) =3D> repair the damaged
-> > chunck
-> >
-> > Do you think it is a sensible approach ? And if you do, will I find
-> > examples of such higher level functions in
-> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
-> > 703/gf_complete_0.1.tar ? Or elsewhere ?
-> >
-> > I'm a little confused about the relation between GF complete ( as
-> > found at
-> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
-> > 703/gf_complete_0.1.tar ) which is very recent ( 2013 ) and Jerasur=
-e (
-> > as found at
-> > http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627/Jerasure-
-> > 1.2.tar )  which is comparatively older ( 2008 ). Do you know how
-> > Jerasure
-> > 2.0 relates to GF complete ?
-> >
-> > For completeness, here is a thread with pointers to Mojette Transfo=
-rm
-> > that's being used as part of Rozofs.
-> >
-> > http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg14666.htm=
-l
-> >
-> > I'm not able to compare it with the other libraries because it seem=
-s
-> > to take a completely different approach. Do you have an opinion abo=
-ut it
-> > ?
-> >
-> > As Patrick mentioned, I'll be at http://www.oscon.com/oscon2013 nex=
-t
-> > month but I'd love to understand more about this as soon as possibl=
-e
-> > :-)
-> >
-> > Cheers
-> >
-> > P.S. Updated
-> > http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
-ing
-> > _as_ a_storage_backend#Erasure_Encoded_Storage with a link to
-> > http://web.eecs.utk.edu/~plank/plank/www/software.html for the reco=
-rd
-> >
-> > On 06/14/2013 10:13 PM, Martin Flyvbjerg wrote:
-> > > Dear Community
-> > > I am a young engineer (not software or math, please bare with me)
-> > > with
-> > some suggestions regarding erasure codes. I never used Ceph before =
-or
-> > any other distributed file system.
-> > >
-> > > I stumped upon the suggestion for adding erasure codes to Ceph, a=
-s
-> > > described in this article
-> > >
-> > http://wiki.Ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
-ing
-> > _as_
-> > a_storage_backend
-> > >
-> > > first I would like to say great initiative to add erasure codes t=
-o
-> > > Ceph.
-> > > Ceph needs its own implementation and it have to be done right, I
-> > > cannot
-> > stress this enough, suggested software mentioned in that article wo=
-uld
-> > result in very low performance.
-> > >
-> > > Why?
-> > > Reed-Solomon is normally something regarded as being very slow
-> > > compared
-> > to other erasure codes, because the underlying Galois-Field
-> > multiplication is slow. Please see video at usenix.org forexplanati=
-on.
-> > >
-> > > The implementations of Zfec library and other suggested software =
-the
-> > others rely on the Vandermonde matrix, a matrix used in in
-> > Reed-Solomon erasure codes, a faster approach would be to use the
-> > Cauchy-Reed-Solomon implementation. Please see [1,2,3]
-> > > Although there is something even better, by using the Intel SSE2/=
-3
-> > > SIMD
-> > instructions it is possible to do the as fast as any other XOR base=
-d
-> > erasure codes (RaptorQ LT-codes, LDPC etc.).
-> > >
-> > > The suggested FECpp lib uses the optimisation but with a relative
-> > > small
-> > Galois-field only 2^8, since Ceph aimes at unlimited scalability
-> > increasing the size of the Galois-Field would improve performance [=
-4].
-> > Of course the configured Ceph Object Size and/or Stripe width have =
-to
-> > be taken into account.
-> > > Please see
-> > > https://www.usenix.org/conference/fast13/screaming-fast-galois-fi=
-eld
-> > > -
-> > arithmetic-using-sse2-extensions
-> > >
-> > >
-> > > The solution
-> > > Using the GF-Complete open source library [4] to implement
-> > > Reed-Solomon
-> > in Ceph in order to allow Ceph to scale to infinity.
-> > > James S. Plank the author of GF-complete have developed a library
-> > implementing various Reed-Solomon codes called Jerasure.
-> > http://web.eecs.utk.edu/~plank/plank/www/software.html
-> > > Jerasure 2.0 using the GF-complete artimetric based in Intel SSE
-> > > SIMD
-> > instructions, is current in development expected release august 201=
-3.
-> > Will be released under the new BSD license. Jerasure 2.0 also suppo=
-rts
-> > arbitrary Galois-field sizes 8,16,32,64 or 128 bit.
-> > >
-> > > The limit of this implementation would be the processors L2/L3 ca=
-che
-> > > not
-> > the underlying arithmetic.
-> > >
-> > > Best Regards
-> > > Martin Flyvbjerg
-> > >
-> > > [1] http://web.eecs.utk.edu/~plank/plank/papers/CS-05-569.pdf
-> > > [2] http://web.eecs.utk.edu/~plank/plank/papers/CS-08-625.pdf
-> > > [3] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2009.pdf
-> > > [4] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2013-GF.pdf
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
-> >
-> > --
-> > Lo=EFc Dachary, Artisan Logiciel Libre
-> > All that is necessary for the triumph of evil is that good people d=
-o
-> > nothing.
-> >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at
-> http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  
+> @@ -683,9 +682,10 @@ ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+>         vxattr = ceph_match_vxattr(inode, name);
+>         if (vxattr && !(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
+>                 err = vxattr->getxattr_cb(ci, value, size);
+> -               goto out;
+> +               return err;
+>         }
+>  
+> +       spin_lock(&ci->i_ceph_lock);
+>         if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1) &&
+>             (ci->i_xattrs.index_version >= ci->i_xattrs.version)) {
+>                 goto get_xattr;
+> -- 
+> 1.8.3.rc1.44.gb387c77
+> 
