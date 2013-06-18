@@ -1,74 +1,72 @@
-From: =?ISO-8859-1?Q?Beno=EEt_Parrein?=
-	<benoit.parrein@polytech.univ-nantes.fr>
-Subject: Re: Comments on Ceph distributed parity implementation
-Date: Tue, 18 Jun 2013 09:44:27 +0200
-Message-ID: <51C00FDB.6030803@polytech.univ-nantes.fr>
-References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: fix sleeping function called from invalid context.
+Date: Tue, 18 Jun 2013 19:30:55 +0800
+Message-ID: <201306181930448773810@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------070604050509070301030800"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:42962 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752186Ab3FRHoa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 03:44:30 -0400
-In-Reply-To: <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "James S. Plank" <plank@cs.utk.edu>
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------070604050509070301030800
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 8bit
-
-Hi Paul,
-
-thank you for your message
-
-from my point, LRC focuses on the repairing problem. how to reconstruct 
-destroyed node to maintain the same availability by the distributed system?
-in this context they can even go below 1x rate by introducing local 
-parity on classical Reed Solomon blocks (but they pay a supplementary 
-overhead). see excellent Alex Dimakis's papers for that. but, still from 
-my point, the same relationship between redundancy and availability 
-occurs (if you consider binomial model for your loses).
-
-best
-bp
-
-
-Le 17/06/2013 18:55, Paul Von-Stamwitz a écrit :
-> Loic,
->
-> As Benoit points out, Mojette uses discrete geometry rather than algebra, so simple XOR is all that is needed.
->
-> Benoit,
->
-> Microsoft's paper states that their [12,2,2] LRC provides better availability than 3x replication with 1.33x efficiency. 1.5x is certainly a good number. I'm just pointing out that better efficiency can be had without losing availibity.
->
-> All the best,
-> Paul
-
-
---------------070604050509070301030800
-Content-Type: text/x-vcard; charset=utf-8;
- name="benoit_parrein.vcf"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="benoit_parrein.vcf"
-
-begin:vcard
-fn;quoted-printable:Beno=C3=AEt Parrein
-n;quoted-printable:Parrein;Beno=C3=AEt
-org;quoted-printable:Polytech Nantes, Universit=C3=A9 de Nantes, IRCCyN lab
-adr;quoted-printable:;;=C3=A9quipe Image Vid=C3=A9o Communication;;;;France
-email;internet:benoit.parrein@polytech.univ-nantes.fr
-title;quoted-printable:Ma=C3=AEtre de Conf=C3=A9rences
-tel;work:+33 2 40 68 30 50
-version:2.1
-end:vcard
-
-
---------------070604050509070301030800--
+WyAxMTIxLjIzMTg4M10gQlVHOiBzbGVlcGluZyBmdW5jdGlvbiBjYWxsZWQgZnJvbSBpbnZhbGlk
+IGNvbnRleHQgYXQga2VybmVsL3J3c2VtLmM6MjANClsgMTEyMS4yMzE5MzVdIGluX2F0b21pYygp
+OiAxLCBpcnFzX2Rpc2FibGVkKCk6IDAsIHBpZDogOTgzMSwgbmFtZTogbXYNClsgMTEyMS4yMzE5
+NzFdIDEgbG9jayBoZWxkIGJ5IG12Lzk4MzE6DQpbIDExMjEuMjMxOTczXSAgIzA6ICAoJigmY2kt
+PmlfY2VwaF9sb2NrKS0+cmxvY2speysuKy4uLn0sIGF0Ols8ZmZmZmZmZmZhMDJiYmQzOD5dIGNl
+cGhfZ2V0eGF0dHIrMHg1OC8weDFkMCBbY2VwaF0NClsgMTEyMS4yMzE5OThdIENQVTogMyBQSUQ6
+IDk4MzEgQ29tbTogbXYgTm90IHRhaW50ZWQgMy4xMC4wLXJjNisgIzIxNQ0KWyAxMTIxLjIzMjAw
+MF0gSGFyZHdhcmUgbmFtZTogVG8gQmUgRmlsbGVkIEJ5IE8uRS5NLiBUbyBCZSBGaWxsZWQgQnkN
+Ck8uRS5NLi9UbyBiZSBmaWxsZWQgYnkgTy5FLk0uLCBCSU9TIDA4MDAxNSAgMTEvMDkvMjAxMQ0K
+WyAxMTIxLjIzMjAyN10gIGZmZmY4ODAwNmQzNTVhODAgZmZmZjg4MDA5MmY2OWNlMCBmZmZmZmZm
+ZjgxNjgzNDhjIGZmZmY4ODAwOTJmNjljZjgNClsgMTEyMS4yMzIwNDVdICBmZmZmZmZmZjgxMDcw
+NDM1IGZmZmY4ODAwNmQzNTVhMjAgZmZmZjg4MDA5MmY2OWQyMCBmZmZmZmZmZjgxNjg5OWJhDQpb
+IDExMjEuMjMyMDUyXSAgMDAwMDAwMDMwMDAwMDAwNCBmZmZmODgwMGI3NjkxMWQwIGZmZmY4ODAw
+NmQzNTVhMjAgZmZmZjg4MDA5MmY2OWQ2OA0KWyAxMTIxLjIzMjA1Nl0gQ2FsbCBUcmFjZToNClsg
+MTEyMS4yMzIwNjJdICBbPGZmZmZmZmZmODE2ODM0OGM+XSBkdW1wX3N0YWNrKzB4MTkvMHgxYg0K
+WyAxMTIxLjIzMjA2N10gIFs8ZmZmZmZmZmY4MTA3MDQzNT5dIF9fbWlnaHRfc2xlZXArMHhlNS8w
+eDExMA0KWyAxMTIxLjIzMjA3MV0gIFs8ZmZmZmZmZmY4MTY4OTliYT5dIGRvd25fcmVhZCsweDJh
+LzB4OTgNClsgMTEyMS4yMzIwODBdICBbPGZmZmZmZmZmYTAyYmFmNzA+XSBjZXBoX3Z4YXR0cmNi
+X2xheW91dCsweDYwLzB4ZjAgW2NlcGhdDQpbIDExMjEuMjMyMDg4XSAgWzxmZmZmZmZmZmEwMmJi
+ZDdmPl0gY2VwaF9nZXR4YXR0cisweDlmLzB4MWQwIFtjZXBoXQ0KWyAxMTIxLjIzMjA5M10gIFs8
+ZmZmZmZmZmY4MTE4OGQyOD5dIHZmc19nZXR4YXR0cisweGE4LzB4ZDANClsgMTEyMS4yMzIwOTdd
+ICBbPGZmZmZmZmZmODExODkwMGI+XSBnZXR4YXR0cisweGFiLzB4MWMwDQpbIDExMjEuMjMyMTAw
+XSAgWzxmZmZmZmZmZjgxMTcwNGYyPl0gPyBmaW5hbF9wdXRuYW1lKzB4MjIvMHg1MA0KWyAxMTIx
+LjIzMjEwNF0gIFs8ZmZmZmZmZmY4MTE1NWY4MD5dID8ga21lbV9jYWNoZV9mcmVlKzB4YjAvMHgy
+NjANClsgMTEyMS4yMzIxMDddICBbPGZmZmZmZmZmODExNzA0ZjI+XSA/IGZpbmFsX3B1dG5hbWUr
+MHgyMi8weDUwDQpbIDExMjEuMjMyMTEwXSAgWzxmZmZmZmZmZjgxMDllNjNkPl0gPyB0cmFjZV9o
+YXJkaXJxc19vbisweGQvMHgxMA0KWyAxMTIxLjIzMjExNF0gIFs8ZmZmZmZmZmY4MTY5NTdhNz5d
+ID8gc3lzcmV0X2NoZWNrKzB4MWIvMHg1Ng0KWyAxMTIxLjIzMjEyMF0gIFs8ZmZmZmZmZmY4MTE4
+OWM5Yz5dIFN5U19mZ2V0eGF0dHIrMHg2Yy8weGMwDQpbIDExMjEuMjMyMTI1XSAgWzxmZmZmZmZm
+ZjgxNjk1NzgyPl0gc3lzdGVtX2NhbGxfZmFzdHBhdGgrMHgxNi8weDFiDQpbIDExMjEuMjMyMTI5
+XSBCVUc6IHNjaGVkdWxpbmcgd2hpbGUgYXRvbWljOiBtdi85ODMxLzB4MTAwMDAwMDINClsgMTEy
+MS4yMzIxNTRdIDEgbG9jayBoZWxkIGJ5IG12Lzk4MzE6DQpbIDExMjEuMjMyMTU2XSAgIzA6ICAo
+JigmY2ktPmlfY2VwaF9sb2NrKS0+cmxvY2speysuKy4uLn0sIGF0Og0KWzxmZmZmZmZmZmEwMmJi
+ZDM4Pl0gY2VwaF9nZXR4YXR0cisweDU4LzB4MWQwIFtjZXBoXQ0KDQpJIHRoaW5rIG1vdmUgdGhl
+IGNpLT5pX2NlcGhfbG9jayBkb3duIGlzIHNhZmUgYmVjYXVzZSB3ZSBjYW4ndCBmcmVlDQpjZXBo
+X2lub2RlX2luZm8gYXQgdGhlcmUuDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWpp
+YW5wZW5nQGdtYWlsLmNvbT4NCi0tLQ0KIGZzL2NlcGgveGF0dHIuYyB8IDQgKystLQ0KIDEgZmls
+ZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQg
+YS9mcy9jZXBoL3hhdHRyLmMgYi9mcy9jZXBoL3hhdHRyLmMNCmluZGV4IDliNmIyYjYuLjRlZmRl
+MDYgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL3hhdHRyLmMNCisrKyBiL2ZzL2NlcGgveGF0dHIuYw0K
+QEAgLTY3NSw3ICs2NzUsNiBAQCBzc2l6ZV90IGNlcGhfZ2V0eGF0dHIoc3RydWN0IGRlbnRyeSAq
+ZGVudHJ5LCBjb25zdCBjaGFyICpuYW1lLCB2b2lkICp2YWx1ZSwNCiAgICAgICAgaWYgKCFjZXBo
+X2lzX3ZhbGlkX3hhdHRyKG5hbWUpKQ0KICAgICAgICAgICAgICAgIHJldHVybiAtRU5PREFUQTsN
+CiANCi0gICAgICAgc3Bpbl9sb2NrKCZjaS0+aV9jZXBoX2xvY2spOw0KICAgICAgICBkb3V0KCJn
+ZXR4YXR0ciAlcCB2ZXI9JWxsZCBpbmRleF92ZXI9JWxsZFxuIiwgaW5vZGUsDQogICAgICAgICAg
+ICAgY2ktPmlfeGF0dHJzLnZlcnNpb24sIGNpLT5pX3hhdHRycy5pbmRleF92ZXJzaW9uKTsNCiAN
+CkBAIC02ODMsOSArNjgyLDEwIEBAIHNzaXplX3QgY2VwaF9nZXR4YXR0cihzdHJ1Y3QgZGVudHJ5
+ICpkZW50cnksIGNvbnN0IGNoYXIgKm5hbWUsIHZvaWQgKnZhbHVlLA0KICAgICAgICB2eGF0dHIg
+PSBjZXBoX21hdGNoX3Z4YXR0cihpbm9kZSwgbmFtZSk7DQogICAgICAgIGlmICh2eGF0dHIgJiYg
+ISh2eGF0dHItPmV4aXN0c19jYiAmJiAhdnhhdHRyLT5leGlzdHNfY2IoY2kpKSkgew0KICAgICAg
+ICAgICAgICAgIGVyciA9IHZ4YXR0ci0+Z2V0eGF0dHJfY2IoY2ksIHZhbHVlLCBzaXplKTsNCi0g
+ICAgICAgICAgICAgICBnb3RvIG91dDsNCisgICAgICAgICAgICAgICByZXR1cm4gZXJyOw0KICAg
+ICAgICB9DQogDQorICAgICAgIHNwaW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCiAgICAgICAg
+aWYgKF9fY2VwaF9jYXBzX2lzc3VlZF9tYXNrKGNpLCBDRVBIX0NBUF9YQVRUUl9TSEFSRUQsIDEp
+ICYmDQogICAgICAgICAgICAoY2ktPmlfeGF0dHJzLmluZGV4X3ZlcnNpb24gPj0gY2ktPmlfeGF0
+dHJzLnZlcnNpb24pKSB7DQogICAgICAgICAgICAgICAgZ290byBnZXRfeGF0dHI7DQotLSANCjEu
+OC4zLnJjMS40NC5nYjM4N2M3Nw0K
