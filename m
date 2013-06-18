@@ -1,104 +1,85 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Erasure code library summary
-Date: Tue, 18 Jun 2013 14:22:59 +0200
-Message-ID: <51C05123.8000002@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig4E7B3A98EA16FDC2354DA1FF"
+From: James Plank <plank@cs.utk.edu>
+Subject: Re: Comments on Ceph distributed parity implementation
+Date: Tue, 18 Jun 2013 10:22:31 -0400
+Message-ID: <3E438C2F-0779-4824-9C05-ABE4B5803E05@cs.utk.edu>
+References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local> <51C00FDB.6030803@polytech.univ-nantes.fr>
+Mime-Version: 1.0 (Apple Message framework v1085)
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:42910 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755385Ab3FRMXB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 08:23:01 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 72F5D26394
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Jun 2013 14:22:59 +0200 (CEST)
+Received: from smtp2.eecs.utk.edu ([160.36.58.82]:48753 "EHLO
+	smtp2.eecs.utk.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756039Ab3FRO3E convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 10:29:04 -0400
+In-Reply-To: <51C00FDB.6030803@polytech.univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?iso-8859-1?Q?Beno=EEt_Parrein?= <benoit.parrein@polytech.univ-nantes.fr>
+Cc: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>, Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig4E7B3A98EA16FDC2354DA1FF
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi all -- thank you for including me on this thread, although I have li=
+ttle substantive to add.  At the moment, my sole focus is finishing a j=
+ournal paper about GF implementations, with a concomitant GF-complete r=
+elease to accompany it.  I agree that the CPU burden of the GF arithmet=
+ic will not be a bottleneck in your system, regardless of which impleme=
+ntation you use, as long as you stay at or below GF(2^16).  If you want=
+ to go higher, GF-complete will help.  When we put out a new release (t=
+he code will be ready within two weeks, however, the documentation is l=
+agging), I'll let you know.  I think LRC is a nice coding paradigm, alt=
+hough I imagine that it has IP issues with Microsoft.  I don't have fir=
+st-hand experience with network/regenerating codes, and I'll be honest =
+-- there have been so many papers in that realm that I am not up to dat=
+e on them.
 
-Hi Ceph,
+Is there a question on which you'd like some help?  It sounds as though=
+ you are at two decision points: What code should you use, and at which=
+ point on the space-overhead/fault-tolerance curve would you like to be=
+?
 
-TL;DR: use jerasure 1.2 with Reed-Solomon to code/decode/repair an object=
-, and upgrade to 2.0 when available.
+Best wishes,
 
-Disclaimer: I'm no expert ;-) The terms are explained in wikipedia[1].
+Jim
+----------
 
-Using Reed-Solomon object O is encoded by dividing it into consecutive ch=
-uncks O1, O2, ... ON and computing parity blocks P1, P2, ... PK.  Reading=
- the original content of object O is a simple concatenation of O1, O2, ..=
-=2E ON. If O2 or P2 are lost, they can be repaired/reconstructed using O1=
- ... ON and P1 ... PK. If the use case is mostly reading objects and repa=
-irs are at least 1000 times less likely than normal operations, being abl=
-e to read the object from non-coded chuncks is attractive.=20
+On Jun 18, 2013, at 3:44 AM, Beno=EEt Parrein wrote:
 
-Reed-Solomon is significantly more expensive to encode ( 100MB/s order of=
- magnitude on a single 2.5Ghz core ) than fountain codes with the current=
- jerasure implementation[2]. However, gf-complete[3] that will be used in=
- the upcoming version of jerasure significantly improves performances ( 2=
- to 10 times faster ) and the difference becomes negligible.=20
+> Hi Paul,
+>=20
+> thank you for your message
+>=20
+> from my point, LRC focuses on the repairing problem. how to reconstru=
+ct destroyed node to maintain the same availability by the distributed =
+system?
+> in this context they can even go below 1x rate by introducing local p=
+arity on classical Reed Solomon blocks (but they pay a supplementary ov=
+erhead). see excellent Alex Dimakis's papers for that. but, still from =
+my point, the same relationship between redundancy and availability occ=
+urs (if you consider binomial model for your loses).
+>=20
+> best
+> bp
+>=20
+>=20
+> Le 17/06/2013 18:55, Paul Von-Stamwitz a =E9crit :
+>> Loic,
+>>=20
+>> As Benoit points out, Mojette uses discrete geometry rather than alg=
+ebra, so simple XOR is all that is needed.
+>>=20
+>> Benoit,
+>>=20
+>> Microsoft's paper states that their [12,2,2] LRC provides better ava=
+ilability than 3x replication with 1.33x efficiency. 1.5x is certainly =
+a good number. I'm just pointing out that better efficiency can be had =
+without losing availibity.
+>>=20
+>> All the best,
+>> Paul
+>=20
+> <benoit_parrein.vcf>
 
-Reed-Solomon coding family is the only one that can keep the chuncks unen=
-coded and therefore concatenable.
-
-The jerasure library is packaged and being worked on by the author at the=
- moment. All other Free Software implementations are either not packaged =
-or not maintained.=20
-
-The license[4] of jerasure is compatible with the license of Ceph.
-
-Performances depend on the parameters to the Reed-Solomon functions but t=
-hey will also be influenced by the buffer sizes used when calling the enc=
-oding functions: smaller buffers will mean more calls and more overhead.
-
-Open questions:
-
-* Does Mojette Transform [5] have compelling qualities compared to other =
-code families ?
-* Do hierarchical codes [6] have compelling qualities ? Implementing them=
- would require a different API. To be effective they need to take into ac=
-count the context in which an object is stored where the other code only =
-require the object itself.
-* I have not experiemented with the jerasure API yet
-
-Feedback and criticisms are welcome :-)
-
-[1] http://en.wikipedia.org/wiki/Erasure_code
-[2] jerasure 1.2 http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627.ht=
-ml
-[3] gf-complete http://web.eecs.utk.edu/~plank/plank/papers/CS-13-703.htm=
-l
-[4] jerasure license https://github.com/tsuraan/Jerasure/blob/master/Lice=
-nse.txt
-[5] Mojette Transform http://en.wikipedia.org/wiki/Mojette_Transform
-[6] hierarchical codes http://www.e-biersack.eu/BPublished/nc_springer.pd=
-f
-
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig4E7B3A98EA16FDC2354DA1FF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlHAUSMACgkQ8dLMyEl6F23zxQCeMWXZZd7RxQc09Znt9+ZA22JT
-GIEAoLhT34uya3sZcRK1SsR6oUnllp1D
-=wrZ1
------END PGP SIGNATURE-----
-
---------------enig4E7B3A98EA16FDC2354DA1FF--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
