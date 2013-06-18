@@ -1,116 +1,65 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: rbd rm <image> results in osd marked down wrongly
- with 0.61.3
-Date: Mon, 17 Jun 2013 15:50:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306171549520.7888@cobra.newdream.net>
-References: <51B731F7.2050002@smart-weblications.de>
-	<51B9BA40.6040901@smart-weblications.de>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Writing to RBD image while it's snapshot is being created causes
+ I/O errors
+Date: Mon, 17 Jun 2013 21:25:49 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306172125170.27409@cobra.newdream.net>
+References: <1881883.Fj0UjQGoA9@karol-esprimo-p5925> <alpine.DEB.2.00.1306140855170.26467@cobra.newdream.net> <2147065.fKZgxGNGTf@karol-esprimo-p5925>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51B9BA40.6040901-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Smart Weblications GmbH - Florian Wiessner <f.wiessner-o+pLhCRhXQuTURD7UP6EnqXJknND6eY5@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34166 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750912Ab3FREZu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 00:25:50 -0400
+In-Reply-To: <2147065.fKZgxGNGTf@karol-esprimo-p5925>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Karol Jurak <karol.jurak@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Florian,
+On Mon, 17 Jun 2013, Karol Jurak wrote:
+> On Friday 14 of June 2013 08:56:55 Sage Weil wrote:
+> > On Fri, 14 Jun 2013, Karol Jurak wrote:
+> > > I noticed that writing to RBD image using kernel driver while it's
+> > > snapshot is being created causes I/O errors and the filesystem
+> > > (reiserfs) eventually aborts and remounts itself in read-only mode:
+> > 
+> > This is definitely a bug; you should be able to create a snapshot at any
+> > time.  After a rollback, it should look (to the fs) like a crash or power
+> > cycle.
+> > 
+> > How easy is this to reproduce?  Does it happen every time?
+> 
+> I can reproduce it in the following way:
+> 
+> # rbd create -s 10240 test
+> # rbd map test
+> # mkfs -t reiserfs /dev/rbd/rbd/test
+> # mount /dev/rbd/rbd/test /mnt/test
+> # dd if=/dev/zero of=/mnt/test/a bs=1M count=1024
+> 
+> and in another shell while dd is running:
+> 
+> # rbd snap create test@snap1
+> 
+> After 2 or 3 seconds dmesg shows I/O errors:
+> 
+> [429532.259910] end_request: I/O error, dev rbd1, sector 1384448
+> [429532.272554] end_request: I/O error, dev rbd1, sector 872
+> [429532.275556] REISERFS abort (device rbd1): Journal write error in 
+> flush_commit_list
+> 
+> and dd fails:
+> 
+> dd: writing `/mnt/test/a': Cannot allocate memory
+> 590+0 records in
+> 589+0 records out
+> 618225664 bytes (618 MB) copied, 15.8701 s, 39.0 MB/s
+> 
+> This happens every time I repeat the test.
 
-If you can trigger this with logs, we're very eager to see what they say 
-about this!  The http://tracker.ceph.com/issues/5336 bug is open to track 
-this issue.
+What kernel version are you using?  I'm not able to reproduce this with 
+ext4 or reiserfs and many snapshots over several minutes of write 
+workload.
 
-Thanks!
 sage
-
-
-On Thu, 13 Jun 2013, Smart Weblications GmbH - Florian Wiessner wrote:
-
-> Hi,
-> 
-> Is really no one on the list interrested in fixing this? Or am i the only one
-> having this kind of bug/problem?
-> 
-> Am 11.06.2013 16:19, schrieb Smart Weblications GmbH - Florian Wiessner:
-> > Hi List,
-> > 
-> > i observed that an rbd rm <image> results in some osds mark one osd as down
-> > wrongly in cuttlefish.
-> > 
-> > The situation gets even worse if there are more than one rbd rm <image> running
-> > in parallel.
-> > 
-> > Please see attached logfiles. The rbd rm command was issued on 20:24:00 via
-> > cronjob, 40 seconds later the osd 6 got marked down...
-> > 
-> > 
-> > ceph osd tree
-> > 
-> > # id    weight  type name       up/down reweight
-> > -1      7       pool default
-> > -3      7               rack unknownrack
-> > -2      1                       host node01
-> > 0       1                               osd.0   up      1
-> > -4      1                       host node02
-> > 1       1                               osd.1   up      1
-> > -5      1                       host node03
-> > 2       1                               osd.2   up      1
-> > -6      1                       host node04
-> > 3       1                               osd.3   up      1
-> > -7      1                       host node06
-> > 5       1                               osd.5   up      1
-> > -8      1                       host node05
-> > 4       1                               osd.4   up      1
-> > -9      1                       host node07
-> > 6       1                               osd.6   up      1
-> > 
-> > 
-> > I have seen some patches to parallelize rbd rm, but i think there must be some
-> > other issue, as my clients seem to not be able to do IO when ceph is
-> > recovering... I think this has worked better in 0.56.x - there was IO while
-> > recovering.
-> > 
-> > I also observed in the log of osd.6 that after heartbeat_map reset_timeout, the
-> > osd tries to connect to the other osds, but it retries so fast that you could
-> > think this is a DoS attack...
-> > 
-> > 
-> > Please advise..
-> > 
-> 
-> 
-> -- 
-> 
-> Mit freundlichen Gr??en,
-> 
-> Florian Wiessner
-> 
-> Smart Weblications GmbH
-> Martinsberger Str. 1
-> D-95119 Naila
-> 
-> fon.: +49 9282 9638 200
-> fax.: +49 9282 9638 205
-> 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-> http://www.smart-weblications.de
-> 
-> --
-> Sitz der Gesellschaft: Naila
-> Gesch?ftsf?hrer: Florian Wiessner
-> HRB-Nr.: HRB 3840 Amtsgericht Hof
-> *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
-> 
