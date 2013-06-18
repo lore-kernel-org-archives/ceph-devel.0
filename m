@@ -1,65 +1,74 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Writing to RBD image while it's snapshot is being created causes
- I/O errors
-Date: Mon, 17 Jun 2013 21:25:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306172125170.27409@cobra.newdream.net>
-References: <1881883.Fj0UjQGoA9@karol-esprimo-p5925> <alpine.DEB.2.00.1306140855170.26467@cobra.newdream.net> <2147065.fKZgxGNGTf@karol-esprimo-p5925>
+From: =?ISO-8859-1?Q?Beno=EEt_Parrein?=
+	<benoit.parrein@polytech.univ-nantes.fr>
+Subject: Re: Comments on Ceph distributed parity implementation
+Date: Tue, 18 Jun 2013 09:44:27 +0200
+Message-ID: <51C00FDB.6030803@polytech.univ-nantes.fr>
+References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed;
+ boundary="------------070604050509070301030800"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34166 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750912Ab3FREZu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 00:25:50 -0400
-In-Reply-To: <2147065.fKZgxGNGTf@karol-esprimo-p5925>
+Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:42962 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752186Ab3FRHoa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 03:44:30 -0400
+In-Reply-To: <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karol Jurak <karol.jurak@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "James S. Plank" <plank@cs.utk.edu>
 
-On Mon, 17 Jun 2013, Karol Jurak wrote:
-> On Friday 14 of June 2013 08:56:55 Sage Weil wrote:
-> > On Fri, 14 Jun 2013, Karol Jurak wrote:
-> > > I noticed that writing to RBD image using kernel driver while it's
-> > > snapshot is being created causes I/O errors and the filesystem
-> > > (reiserfs) eventually aborts and remounts itself in read-only mode:
-> > 
-> > This is definitely a bug; you should be able to create a snapshot at any
-> > time.  After a rollback, it should look (to the fs) like a crash or power
-> > cycle.
-> > 
-> > How easy is this to reproduce?  Does it happen every time?
-> 
-> I can reproduce it in the following way:
-> 
-> # rbd create -s 10240 test
-> # rbd map test
-> # mkfs -t reiserfs /dev/rbd/rbd/test
-> # mount /dev/rbd/rbd/test /mnt/test
-> # dd if=/dev/zero of=/mnt/test/a bs=1M count=1024
-> 
-> and in another shell while dd is running:
-> 
-> # rbd snap create test@snap1
-> 
-> After 2 or 3 seconds dmesg shows I/O errors:
-> 
-> [429532.259910] end_request: I/O error, dev rbd1, sector 1384448
-> [429532.272554] end_request: I/O error, dev rbd1, sector 872
-> [429532.275556] REISERFS abort (device rbd1): Journal write error in 
-> flush_commit_list
-> 
-> and dd fails:
-> 
-> dd: writing `/mnt/test/a': Cannot allocate memory
-> 590+0 records in
-> 589+0 records out
-> 618225664 bytes (618 MB) copied, 15.8701 s, 39.0 MB/s
-> 
-> This happens every time I repeat the test.
+This is a multi-part message in MIME format.
+--------------070604050509070301030800
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 8bit
 
-What kernel version are you using?  I'm not able to reproduce this with 
-ext4 or reiserfs and many snapshots over several minutes of write 
-workload.
+Hi Paul,
 
-sage
+thank you for your message
+
+from my point, LRC focuses on the repairing problem. how to reconstruct 
+destroyed node to maintain the same availability by the distributed system?
+in this context they can even go below 1x rate by introducing local 
+parity on classical Reed Solomon blocks (but they pay a supplementary 
+overhead). see excellent Alex Dimakis's papers for that. but, still from 
+my point, the same relationship between redundancy and availability 
+occurs (if you consider binomial model for your loses).
+
+best
+bp
+
+
+Le 17/06/2013 18:55, Paul Von-Stamwitz a écrit :
+> Loic,
+>
+> As Benoit points out, Mojette uses discrete geometry rather than algebra, so simple XOR is all that is needed.
+>
+> Benoit,
+>
+> Microsoft's paper states that their [12,2,2] LRC provides better availability than 3x replication with 1.33x efficiency. 1.5x is certainly a good number. I'm just pointing out that better efficiency can be had without losing availibity.
+>
+> All the best,
+> Paul
+
+
+--------------070604050509070301030800
+Content-Type: text/x-vcard; charset=utf-8;
+ name="benoit_parrein.vcf"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="benoit_parrein.vcf"
+
+begin:vcard
+fn;quoted-printable:Beno=C3=AEt Parrein
+n;quoted-printable:Parrein;Beno=C3=AEt
+org;quoted-printable:Polytech Nantes, Universit=C3=A9 de Nantes, IRCCyN lab
+adr;quoted-printable:;;=C3=A9quipe Image Vid=C3=A9o Communication;;;;France
+email;internet:benoit.parrein@polytech.univ-nantes.fr
+title;quoted-printable:Ma=C3=AEtre de Conf=C3=A9rences
+tel;work:+33 2 40 68 30 50
+version:2.1
+end:vcard
+
+
+--------------070604050509070301030800--
