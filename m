@@ -1,72 +1,31 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] ceph: fix sleeping function called from invalid context.
-Date: Tue, 18 Jun 2013 19:30:55 +0800
-Message-ID: <201306181930448773810@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Karol Jurak <karol.jurak@gmail.com>
+Subject: Re: Writing to RBD image while it's snapshot is being created causes I/O errors
+Date: Tue, 18 Jun 2013 13:35:55 +0200
+Message-ID: <10409403.4UItZS4bTH@karol-esprimo-p5925>
+References: <1881883.Fj0UjQGoA9@karol-esprimo-p5925> <2147065.fKZgxGNGTf@karol-esprimo-p5925> <alpine.DEB.2.00.1306172125170.27409@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ea0-f178.google.com ([209.85.215.178]:46798 "EHLO
+	mail-ea0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754762Ab3FRLfQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 07:35:16 -0400
+Received: by mail-ea0-f178.google.com with SMTP id l15so2411258eak.23
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Jun 2013 04:35:14 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1306172125170.27409@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-WyAxMTIxLjIzMTg4M10gQlVHOiBzbGVlcGluZyBmdW5jdGlvbiBjYWxsZWQgZnJvbSBpbnZhbGlk
-IGNvbnRleHQgYXQga2VybmVsL3J3c2VtLmM6MjANClsgMTEyMS4yMzE5MzVdIGluX2F0b21pYygp
-OiAxLCBpcnFzX2Rpc2FibGVkKCk6IDAsIHBpZDogOTgzMSwgbmFtZTogbXYNClsgMTEyMS4yMzE5
-NzFdIDEgbG9jayBoZWxkIGJ5IG12Lzk4MzE6DQpbIDExMjEuMjMxOTczXSAgIzA6ICAoJigmY2kt
-PmlfY2VwaF9sb2NrKS0+cmxvY2speysuKy4uLn0sIGF0Ols8ZmZmZmZmZmZhMDJiYmQzOD5dIGNl
-cGhfZ2V0eGF0dHIrMHg1OC8weDFkMCBbY2VwaF0NClsgMTEyMS4yMzE5OThdIENQVTogMyBQSUQ6
-IDk4MzEgQ29tbTogbXYgTm90IHRhaW50ZWQgMy4xMC4wLXJjNisgIzIxNQ0KWyAxMTIxLjIzMjAw
-MF0gSGFyZHdhcmUgbmFtZTogVG8gQmUgRmlsbGVkIEJ5IE8uRS5NLiBUbyBCZSBGaWxsZWQgQnkN
-Ck8uRS5NLi9UbyBiZSBmaWxsZWQgYnkgTy5FLk0uLCBCSU9TIDA4MDAxNSAgMTEvMDkvMjAxMQ0K
-WyAxMTIxLjIzMjAyN10gIGZmZmY4ODAwNmQzNTVhODAgZmZmZjg4MDA5MmY2OWNlMCBmZmZmZmZm
-ZjgxNjgzNDhjIGZmZmY4ODAwOTJmNjljZjgNClsgMTEyMS4yMzIwNDVdICBmZmZmZmZmZjgxMDcw
-NDM1IGZmZmY4ODAwNmQzNTVhMjAgZmZmZjg4MDA5MmY2OWQyMCBmZmZmZmZmZjgxNjg5OWJhDQpb
-IDExMjEuMjMyMDUyXSAgMDAwMDAwMDMwMDAwMDAwNCBmZmZmODgwMGI3NjkxMWQwIGZmZmY4ODAw
-NmQzNTVhMjAgZmZmZjg4MDA5MmY2OWQ2OA0KWyAxMTIxLjIzMjA1Nl0gQ2FsbCBUcmFjZToNClsg
-MTEyMS4yMzIwNjJdICBbPGZmZmZmZmZmODE2ODM0OGM+XSBkdW1wX3N0YWNrKzB4MTkvMHgxYg0K
-WyAxMTIxLjIzMjA2N10gIFs8ZmZmZmZmZmY4MTA3MDQzNT5dIF9fbWlnaHRfc2xlZXArMHhlNS8w
-eDExMA0KWyAxMTIxLjIzMjA3MV0gIFs8ZmZmZmZmZmY4MTY4OTliYT5dIGRvd25fcmVhZCsweDJh
-LzB4OTgNClsgMTEyMS4yMzIwODBdICBbPGZmZmZmZmZmYTAyYmFmNzA+XSBjZXBoX3Z4YXR0cmNi
-X2xheW91dCsweDYwLzB4ZjAgW2NlcGhdDQpbIDExMjEuMjMyMDg4XSAgWzxmZmZmZmZmZmEwMmJi
-ZDdmPl0gY2VwaF9nZXR4YXR0cisweDlmLzB4MWQwIFtjZXBoXQ0KWyAxMTIxLjIzMjA5M10gIFs8
-ZmZmZmZmZmY4MTE4OGQyOD5dIHZmc19nZXR4YXR0cisweGE4LzB4ZDANClsgMTEyMS4yMzIwOTdd
-ICBbPGZmZmZmZmZmODExODkwMGI+XSBnZXR4YXR0cisweGFiLzB4MWMwDQpbIDExMjEuMjMyMTAw
-XSAgWzxmZmZmZmZmZjgxMTcwNGYyPl0gPyBmaW5hbF9wdXRuYW1lKzB4MjIvMHg1MA0KWyAxMTIx
-LjIzMjEwNF0gIFs8ZmZmZmZmZmY4MTE1NWY4MD5dID8ga21lbV9jYWNoZV9mcmVlKzB4YjAvMHgy
-NjANClsgMTEyMS4yMzIxMDddICBbPGZmZmZmZmZmODExNzA0ZjI+XSA/IGZpbmFsX3B1dG5hbWUr
-MHgyMi8weDUwDQpbIDExMjEuMjMyMTEwXSAgWzxmZmZmZmZmZjgxMDllNjNkPl0gPyB0cmFjZV9o
-YXJkaXJxc19vbisweGQvMHgxMA0KWyAxMTIxLjIzMjExNF0gIFs8ZmZmZmZmZmY4MTY5NTdhNz5d
-ID8gc3lzcmV0X2NoZWNrKzB4MWIvMHg1Ng0KWyAxMTIxLjIzMjEyMF0gIFs8ZmZmZmZmZmY4MTE4
-OWM5Yz5dIFN5U19mZ2V0eGF0dHIrMHg2Yy8weGMwDQpbIDExMjEuMjMyMTI1XSAgWzxmZmZmZmZm
-ZjgxNjk1NzgyPl0gc3lzdGVtX2NhbGxfZmFzdHBhdGgrMHgxNi8weDFiDQpbIDExMjEuMjMyMTI5
-XSBCVUc6IHNjaGVkdWxpbmcgd2hpbGUgYXRvbWljOiBtdi85ODMxLzB4MTAwMDAwMDINClsgMTEy
-MS4yMzIxNTRdIDEgbG9jayBoZWxkIGJ5IG12Lzk4MzE6DQpbIDExMjEuMjMyMTU2XSAgIzA6ICAo
-JigmY2ktPmlfY2VwaF9sb2NrKS0+cmxvY2speysuKy4uLn0sIGF0Og0KWzxmZmZmZmZmZmEwMmJi
-ZDM4Pl0gY2VwaF9nZXR4YXR0cisweDU4LzB4MWQwIFtjZXBoXQ0KDQpJIHRoaW5rIG1vdmUgdGhl
-IGNpLT5pX2NlcGhfbG9jayBkb3duIGlzIHNhZmUgYmVjYXVzZSB3ZSBjYW4ndCBmcmVlDQpjZXBo
-X2lub2RlX2luZm8gYXQgdGhlcmUuDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWpp
-YW5wZW5nQGdtYWlsLmNvbT4NCi0tLQ0KIGZzL2NlcGgveGF0dHIuYyB8IDQgKystLQ0KIDEgZmls
-ZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQg
-YS9mcy9jZXBoL3hhdHRyLmMgYi9mcy9jZXBoL3hhdHRyLmMNCmluZGV4IDliNmIyYjYuLjRlZmRl
-MDYgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL3hhdHRyLmMNCisrKyBiL2ZzL2NlcGgveGF0dHIuYw0K
-QEAgLTY3NSw3ICs2NzUsNiBAQCBzc2l6ZV90IGNlcGhfZ2V0eGF0dHIoc3RydWN0IGRlbnRyeSAq
-ZGVudHJ5LCBjb25zdCBjaGFyICpuYW1lLCB2b2lkICp2YWx1ZSwNCiAgICAgICAgaWYgKCFjZXBo
-X2lzX3ZhbGlkX3hhdHRyKG5hbWUpKQ0KICAgICAgICAgICAgICAgIHJldHVybiAtRU5PREFUQTsN
-CiANCi0gICAgICAgc3Bpbl9sb2NrKCZjaS0+aV9jZXBoX2xvY2spOw0KICAgICAgICBkb3V0KCJn
-ZXR4YXR0ciAlcCB2ZXI9JWxsZCBpbmRleF92ZXI9JWxsZFxuIiwgaW5vZGUsDQogICAgICAgICAg
-ICAgY2ktPmlfeGF0dHJzLnZlcnNpb24sIGNpLT5pX3hhdHRycy5pbmRleF92ZXJzaW9uKTsNCiAN
-CkBAIC02ODMsOSArNjgyLDEwIEBAIHNzaXplX3QgY2VwaF9nZXR4YXR0cihzdHJ1Y3QgZGVudHJ5
-ICpkZW50cnksIGNvbnN0IGNoYXIgKm5hbWUsIHZvaWQgKnZhbHVlLA0KICAgICAgICB2eGF0dHIg
-PSBjZXBoX21hdGNoX3Z4YXR0cihpbm9kZSwgbmFtZSk7DQogICAgICAgIGlmICh2eGF0dHIgJiYg
-ISh2eGF0dHItPmV4aXN0c19jYiAmJiAhdnhhdHRyLT5leGlzdHNfY2IoY2kpKSkgew0KICAgICAg
-ICAgICAgICAgIGVyciA9IHZ4YXR0ci0+Z2V0eGF0dHJfY2IoY2ksIHZhbHVlLCBzaXplKTsNCi0g
-ICAgICAgICAgICAgICBnb3RvIG91dDsNCisgICAgICAgICAgICAgICByZXR1cm4gZXJyOw0KICAg
-ICAgICB9DQogDQorICAgICAgIHNwaW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCiAgICAgICAg
-aWYgKF9fY2VwaF9jYXBzX2lzc3VlZF9tYXNrKGNpLCBDRVBIX0NBUF9YQVRUUl9TSEFSRUQsIDEp
-ICYmDQogICAgICAgICAgICAoY2ktPmlfeGF0dHJzLmluZGV4X3ZlcnNpb24gPj0gY2ktPmlfeGF0
-dHJzLnZlcnNpb24pKSB7DQogICAgICAgICAgICAgICAgZ290byBnZXRfeGF0dHI7DQotLSANCjEu
-OC4zLnJjMS40NC5nYjM4N2M3Nw0K
+On Monday 17 of June 2013 21:25:49 Sage Weil wrote:
+> What kernel version are you using?  I'm not able to reproduce this with
+> ext4 or reiserfs and many snapshots over several minutes of write
+> workload.
+
+I'm using vanilla 3.4.48. However, this bug must already have been fixed in 
+3.6.11 because everything worked fine when I tested this version today.
+
+-- 
+Karol Jurak
