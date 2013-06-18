@@ -1,83 +1,312 @@
-From: James Plank <plank@cs.utk.edu>
+From: Harvey Skinner <hpmpec2a@gmail.com>
 Subject: Re: Comments on Ceph distributed parity implementation
-Date: Tue, 18 Jun 2013 10:22:31 -0400
-Message-ID: <3E438C2F-0779-4824-9C05-ABE4B5803E05@cs.utk.edu>
-References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local> <51C00FDB.6030803@polytech.univ-nantes.fr>
-Mime-Version: 1.0 (Apple Message framework v1085)
-Content-Type: text/plain; charset=iso-8859-1
+Date: Tue, 18 Jun 2013 09:31:23 -0500
+Message-ID: <CAJOObieUVDQwXVeM68ybuXBmPkZsb57b-gwyVwNVC6VQaat4Zw@mail.gmail.com>
+References: <20130614201327.70240@gmx.com>
+	<51BB9FC3.8040102@dachary.org>
+	<622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local>
+	<C395B77B849187439280E1CF5FE1F2FA8990491B@G9W0337.americas.hpqcorp.net>
+	<CAJOObidVdjtiwk+xk5rwZi4=DBZ9GvTQnAkteCC0OhB_vyg6pg@mail.gmail.com>
+	<CAJOObicNGkweZbVSR-V8NA9YXaZucUpNm0y8Ph3X7EkE=pRG5g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.eecs.utk.edu ([160.36.58.82]:48753 "EHLO
-	smtp2.eecs.utk.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756039Ab3FRO3E convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 10:29:04 -0400
-In-Reply-To: <51C00FDB.6030803@polytech.univ-nantes.fr>
+Received: from mail-qe0-f65.google.com ([209.85.128.65]:56499 "EHLO
+	mail-qe0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754646Ab3FROsm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 10:48:42 -0400
+Received: by mail-qe0-f65.google.com with SMTP id 1so1495349qec.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Jun 2013 07:48:42 -0700 (PDT)
+In-Reply-To: <CAJOObicNGkweZbVSR-V8NA9YXaZucUpNm0y8Ph3X7EkE=pRG5g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-1?Q?Beno=EEt_Parrein?= <benoit.parrein@polytech.univ-nantes.fr>
-Cc: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>, Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi all -- thank you for including me on this thread, although I have li=
-ttle substantive to add.  At the moment, my sole focus is finishing a j=
-ournal paper about GF implementations, with a concomitant GF-complete r=
-elease to accompany it.  I agree that the CPU burden of the GF arithmet=
-ic will not be a bottleneck in your system, regardless of which impleme=
-ntation you use, as long as you stay at or below GF(2^16).  If you want=
- to go higher, GF-complete will help.  When we put out a new release (t=
-he code will be ready within two weeks, however, the documentation is l=
-agging), I'll let you know.  I think LRC is a nice coding paradigm, alt=
-hough I imagine that it has IP issues with Microsoft.  I don't have fir=
-st-hand experience with network/regenerating codes, and I'll be honest =
--- there have been so many papers in that realm that I am not up to dat=
-e on them.
+all,
 
-Is there a question on which you'd like some help?  It sounds as though=
- you are at two decision points: What code should you use, and at which=
- point on the space-overhead/fault-tolerance curve would you like to be=
-?
 
-Best wishes,
+nice discussion on implementing  erasure-encoding as an option in Ceph =
+for
+object store.   THis will be a great feature option.   I would recommen=
+d
+that a good default be implemented  as being discussed here, but also t=
+hat
+an API or plug-in be architected at the same time so the deployment cou=
+ld
+also use some other form of parity/erasure-encoding if required/desired=
+=2E
+Governments and other vendors will push/convince (or have hardcoded in =
+an
+RFP) that some other algorithm be used and allowing an API/plug-in
+capability will allow Ceph to still be applicable. There are some
+proprietary object store solutions today which allow other
+erasure-encode/parity plug-ins which you will want to be competitive wi=
+th.
 
-Jim
-----------
+I would see initial deployments of erasure-encoded object store be used=
+ for
+static data objects; block device usage would come later if proved to b=
+e as
+performant as replicated objects.   Replication as done now in Ceph may
+still be a better block storage solution choice for DR strategies,
+configuring replicas to be at different DR site(s).
 
-On Jun 18, 2013, at 3:44 AM, Beno=EEt Parrein wrote:
+just my view of course =85
 
-> Hi Paul,
->=20
-> thank you for your message
->=20
-> from my point, LRC focuses on the repairing problem. how to reconstru=
-ct destroyed node to maintain the same availability by the distributed =
-system?
-> in this context they can even go below 1x rate by introducing local p=
-arity on classical Reed Solomon blocks (but they pay a supplementary ov=
-erhead). see excellent Alex Dimakis's papers for that. but, still from =
-my point, the same relationship between redundancy and availability occ=
-urs (if you consider binomial model for your loses).
->=20
-> best
-> bp
->=20
->=20
-> Le 17/06/2013 18:55, Paul Von-Stamwitz a =E9crit :
->> Loic,
->>=20
->> As Benoit points out, Mojette uses discrete geometry rather than alg=
-ebra, so simple XOR is all that is needed.
->>=20
->> Benoit,
->>=20
->> Microsoft's paper states that their [12,2,2] LRC provides better ava=
-ilability than 3x replication with 1.33x efficiency. 1.5x is certainly =
-a good number. I'm just pointing out that better efficiency can be had =
-without losing availibity.
->>=20
->> All the best,
->> Paul
->=20
-> <benoit_parrein.vcf>
+Harvey
 
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Paul Von-Stamw=
+itz
+> Sent: Friday, June 14, 2013 6:12 PM
+> To: Loic Dachary; Martin Flyvbjerg
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: Comments on Ceph distributed parity implementation
+>
+> Hi Loic and Martin,
+>
+> This is a great discussion and I agree that the performance ramificat=
+ions
+> of erasure coding need to be thought out very carefully. Since chunks=
+ are
+> not only encoded, but distributed across the cluster, we need to pay
+> attention to the network overhead as well as the arithmetic involved =
+in the
+> encoding/decoding.
+>
+> If I understand the proposal correctly, objects begin their life's jo=
+urney
+> replicated as normal. As it grows cold, it gets transformed to an enc=
+ode PG
+> in another pool. Subsequent reads will be redirected (ehh). Subsequen=
+t
+> writes will first decode the original object and re-replicate it (ouc=
+h!).
+> Client writes never are encoded on the fly; they are always replicate=
+d
+> (nice).
+>
+> So...
+> encode() is run as a low-priority background process probably once a =
+week
+> during deep scrubs.
+> decode() should be rare (if not, the object shouldn't have been encod=
+ed in
+> the first place.) If the cluster is healthy no arithmetic is needed, =
+just
+> concatenation, but a lot of network activity.
+> repair() operations will be the most prevalent and may occur at any t=
+ime
+> during normal self-healing/rebalancing operations.
+>
+> Therefore, in my opinion, the algorithm that we choose must be optimi=
+zed
+> for repairing damaged and missing chunks. The main problem I have wit=
+h
+> Reed-Solomon is that it uses MDS codes which maximize network activit=
+y for
+> recalculations. Pyramid codes have the same write (encode) overhead, =
+but
+> have better read (repair) overhead.
+>
+> Loic, I know nothing about Mojette Transforms. From what little I gle=
+aned,
+> it might be good for repair (needing only a subset of chunks within a=
+ range
+> to recalculate a missing chunk) but I'm worried about the storage
+> efficiency. RozoFS claims 1.5x. I'd like to do better than that.
+>
+> All the best,
+> Paul
+>
+> On 06/14/2013 3:57 PM, Loic Dachary wrote:
+> > Hi Martin,
+> >
+> > Your explanations are very helpful to better understand the tradeof=
+fs
+> > of the existing implementations. To be honest I was looking forward=
+ to
+> > your intervention. Not you specifically, of course :-) But someone
+> > with a good theoretical background to be a judge of what's best in =
+the
+> > context of Ceph.
+> > If you say it's the upcoming library to be released in August 2013,
+> > I'll take your word for it.
+> >
+> > The work currently being done within Ceph is to architecture to
+> > storage backend ( namely placement groups ) to make room for distri=
+buted
+> > parity.
+> > My initial idea was to isolate the low level library under an API t=
+hat
+> > takes a region ( 16KB for instance, as in gf_unit.c found in
+> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
+> > 703/gf_complete_0.1.tar ) as input and outputs chunks that can then=
+ be
+> > written on different hosts. For instance
+> >
+> >       encode(char* region, char** chuncks) =3D> encode the region i=
+nto N
+> > chuncks
+> >       decode(char** chunks, char* region) =3D> decode the N chuncks=
+ into a
+> > region
+> >         repair(char** chunks, int damaged) =3D> repair the damaged
+> > chunck
+> >
+> > Do you think it is a sensible approach ? And if you do, will I find
+> > examples of such higher level functions in
+> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
+> > 703/gf_complete_0.1.tar ? Or elsewhere ?
+> >
+> > I'm a little confused about the relation between GF complete ( as
+> > found at
+> > http://web.eecs.utk.edu/~plank/plank/papers/CS-13-
+> > 703/gf_complete_0.1.tar ) which is very recent ( 2013 ) and Jerasur=
+e (
+> > as found at
+> > http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627/Jerasure-
+> > 1.2.tar )  which is comparatively older ( 2008 ). Do you know how
+> > Jerasure
+> > 2.0 relates to GF complete ?
+> >
+> > For completeness, here is a thread with pointers to Mojette Transfo=
+rm
+> > that's being used as part of Rozofs.
+> >
+> > http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg14666.htm=
+l
+> >
+> > I'm not able to compare it with the other libraries because it seem=
+s
+> > to take a completely different approach. Do you have an opinion abo=
+ut it
+> > ?
+> >
+> > As Patrick mentioned, I'll be at http://www.oscon.com/oscon2013 nex=
+t
+> > month but I'd love to understand more about this as soon as possibl=
+e
+> > :-)
+> >
+> > Cheers
+> >
+> > P.S. Updated
+> > http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
+ing
+> > _as_ a_storage_backend#Erasure_Encoded_Storage with a link to
+> > http://web.eecs.utk.edu/~plank/plank/www/software.html for the reco=
+rd
+> >
+> > On 06/14/2013 10:13 PM, Martin Flyvbjerg wrote:
+> > > Dear Community
+> > > I am a young engineer (not software or math, please bare with me)
+> > > with
+> > some suggestions regarding erasure codes. I never used Ceph before =
+or
+> > any other distributed file system.
+> > >
+> > > I stumped upon the suggestion for adding erasure codes to Ceph, a=
+s
+> > > described in this article
+> > >
+> > http://wiki.Ceph.com/01Planning/02Blueprints/Dumpling/Erasure_encod=
+ing
+> > _as_
+> > a_storage_backend
+> > >
+> > > first I would like to say great initiative to add erasure codes t=
+o
+> > > Ceph.
+> > > Ceph needs its own implementation and it have to be done right, I
+> > > cannot
+> > stress this enough, suggested software mentioned in that article wo=
+uld
+> > result in very low performance.
+> > >
+> > > Why?
+> > > Reed-Solomon is normally something regarded as being very slow
+> > > compared
+> > to other erasure codes, because the underlying Galois-Field
+> > multiplication is slow. Please see video at usenix.org forexplanati=
+on.
+> > >
+> > > The implementations of Zfec library and other suggested software =
+the
+> > others rely on the Vandermonde matrix, a matrix used in in
+> > Reed-Solomon erasure codes, a faster approach would be to use the
+> > Cauchy-Reed-Solomon implementation. Please see [1,2,3]
+> > > Although there is something even better, by using the Intel SSE2/=
+3
+> > > SIMD
+> > instructions it is possible to do the as fast as any other XOR base=
+d
+> > erasure codes (RaptorQ LT-codes, LDPC etc.).
+> > >
+> > > The suggested FECpp lib uses the optimisation but with a relative
+> > > small
+> > Galois-field only 2^8, since Ceph aimes at unlimited scalability
+> > increasing the size of the Galois-Field would improve performance [=
+4].
+> > Of course the configured Ceph Object Size and/or Stripe width have =
+to
+> > be taken into account.
+> > > Please see
+> > > https://www.usenix.org/conference/fast13/screaming-fast-galois-fi=
+eld
+> > > -
+> > arithmetic-using-sse2-extensions
+> > >
+> > >
+> > > The solution
+> > > Using the GF-Complete open source library [4] to implement
+> > > Reed-Solomon
+> > in Ceph in order to allow Ceph to scale to infinity.
+> > > James S. Plank the author of GF-complete have developed a library
+> > implementing various Reed-Solomon codes called Jerasure.
+> > http://web.eecs.utk.edu/~plank/plank/www/software.html
+> > > Jerasure 2.0 using the GF-complete artimetric based in Intel SSE
+> > > SIMD
+> > instructions, is current in development expected release august 201=
+3.
+> > Will be released under the new BSD license. Jerasure 2.0 also suppo=
+rts
+> > arbitrary Galois-field sizes 8,16,32,64 or 128 bit.
+> > >
+> > > The limit of this implementation would be the processors L2/L3 ca=
+che
+> > > not
+> > the underlying arithmetic.
+> > >
+> > > Best Regards
+> > > Martin Flyvbjerg
+> > >
+> > > [1] http://web.eecs.utk.edu/~plank/plank/papers/CS-05-569.pdf
+> > > [2] http://web.eecs.utk.edu/~plank/plank/papers/CS-08-625.pdf
+> > > [3] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2009.pdf
+> > > [4] http://web.eecs.utk.edu/~plank/plank/papers/FAST-2013-GF.pdf
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe
+> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+> >
+> > --
+> > Lo=EFc Dachary, Artisan Logiciel Libre
+> > All that is necessary for the triumph of evil is that good people d=
+o
+> > nothing.
+> >
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at
+> http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
