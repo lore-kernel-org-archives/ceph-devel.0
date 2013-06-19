@@ -1,445 +1,354 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v2] Ceph: Punch hole support
-Date: Wed, 19 Jun 2013 09:31:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306190929350.27900@cobra.newdream.net>
-References: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com> <1371224340-4926-1-git-send-email-liwang@ubuntukylin.com> <alpine.DEB.2.00.1306140902490.26467@cobra.newdream.net> <51C1DB17.6040803@ubuntukylin.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 7/8] mds: fix race between scatter gather and dirfrag
+ export
+Date: Thu, 20 Jun 2013 02:01:31 +0800
+Message-ID: <51C1F1FB.6090408@intel.com>
+References: <1371471029-10589-1-git-send-email-zheng.z.yan@intel.com> <1371471029-10589-8-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1306190822400.26222@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <51C1DB17.6040803@ubuntukylin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, linux-fsdevel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga14.intel.com ([143.182.124.37]:19548 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S934815Ab3FSSBj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 Jun 2013 14:01:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1306190822400.26222@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Li,
+previous patch is buggy. please review this one.
 
-There is a version of fsx.c floating around that tests hole punching... 
-have you tried running that on top of this patch?  Ideally, we should 
-build a test (ceph.git/qa/workunits/rbd/hole_punch.sh or similar) that 
-tests the hole punch both with a default file layout and with a more 
-complicated striping pattern (e.g. object_size=1048576 stripe_unit=65536 
-stripe_count=7).
+"git://github.com/ukernel/ceph.git wip-mds" is also updated.
 
-sage
+Regards
+Yan, Zheng
 
-On Thu, 20 Jun 2013, Li Wang wrote:
+---
+From 15a5d37a90daca11d9dc0a581417d2a07b9d14ad Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Sun, 16 Jun 2013 07:01:52 +0800
+Subject: [PATCH 1/2] mds: fix race between scatter gather and dirfrag export
 
-> This patch implements punch hole (fallocate) support for Ceph.
-> 
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> Signed-off-by: Yunchuan Wen <wenyunchuan@ubuntukylin.com>
-> ---
->  fs/ceph/file.c        |  313
-> +++++++++++++++++++++++++++++++++++++++++++++++++
->  net/ceph/osd_client.c |    8 +-
->  2 files changed, 319 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 656e169..578e5fd 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -8,6 +8,7 @@
->  #include <linux/namei.h>
->  #include <linux/writeback.h>
->  #include <linux/aio.h>
-> +#include <linux/falloc.h>
-> 
->  #include "super.h"
->  #include "mds_client.h"
-> @@ -882,6 +883,317 @@ out:
->  	return offset;
->  }
-> 
-> +static inline void ceph_zero_partial_page(struct inode *inode, pgoff_t index,
-> unsigned start, unsigned size)
-> +{
-> +	struct page *page;
-> +
-> +	page = find_lock_page(inode->i_mapping, index);
-> +	if (page) {
-> +		zero_user(page, start, size);
-> +		unlock_page(page);
-> +		page_cache_release(page);
-> +	}	
-> +}
-> +
-> +static void ceph_truncate_and_zero_page_cache(struct inode *inode, loff_t
-> offset, loff_t length)
-> +{
-> +	loff_t first_page;
-> +	loff_t last_page;
-> +	loff_t zero_len;
-> +
-> +	first_page =((offset + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT) <<
-> PAGE_CACHE_SHIFT;
-> +	last_page = ((offset + length) >> PAGE_CACHE_SHIFT) <<
-> PAGE_CACHE_SHIFT;
-> +	if (last_page > first_page) {
-> +		truncate_pagecache_range(inode, first_page, last_page - 1);
-> +	}
-> +	if (first_page > last_page) {
-> +		ceph_zero_partial_page(inode, offset >> PAGE_CACHE_SHIFT,
-> offset & (PAGE_CACHE_SIZE - 1), length);
-> +		return;
-> +	}
-> +	/*
-> +	 * zero out the partial page that contains
-> +	 * the start of the hole
-> +	 */	
-> +	zero_len  = first_page - offset;
-> +	if (zero_len > 0) {
-> +		ceph_zero_partial_page(inode, offset >> PAGE_CACHE_SHIFT,
-> offset & (PAGE_CACHE_SIZE -1), zero_len);
-> +	}
-> +	/*
-> +	 * zero out the partial page that contains
-> +	 * the end of the hole
-> +	 */
-> +	zero_len = offset + length - last_page;
-> +	if (zero_len > 0) {
-> +		ceph_zero_partial_page(inode, (offset + length) >>
-> PAGE_CACHE_SHIFT, 0, zero_len);
-> +	}
-> +	/*
-> +	 * If i_size is contained in the last page, we need to
-> +	 * zero the partial page after i_size
-> +	 */
-> +	if (inode->i_size >> PAGE_CACHE_SHIFT == (offset + length) >>
-> PAGE_CACHE_SHIFT && inode->i_size % PAGE_CACHE_SIZE != 0) {
-> +		zero_len = PAGE_CACHE_SIZE -
-> +			(inode->i_size & (PAGE_CACHE_SIZE - 1));
-> +		if (zero_len > 0) {
-> +			ceph_zero_partial_page(inode, inode->i_size >>
-> PAGE_CACHE_SHIFT, inode->i_size & (PAGE_CACHE_SIZE -1), zero_len);
-> +		}
-> +	}
-> +}
-> +
-> +static inline __u32 ceph_calculate_shift(__s64 size)
-> +{
-> +	int shift;
-> +	
-> +	if (size <= 0)
-> +		return -1;
-> +	if (size == 1)
-> +		return 0;
-> +	for (shift = 0; ;shift++) {
-> +		if (2 << shift == size)
-> +			break;
-> +	}
-> +	shift++;
-> +	
-> +	return shift;
-> +}
-> +
-> +static int ceph_delete_object(struct inode *inode, u64 offset, u64 *length)
-> +{
-> +	struct ceph_inode_info *ci = ceph_inode(inode);
-> +    struct ceph_fs_client *fsc = ceph_inode_to_client(inode);	
-> +	struct ceph_osd_request *req;
-> +	int ret = 0;
-> +	
-> +	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
-> +                                    ceph_vino(inode), offset, length, 1,
-> +                                    CEPH_OSD_OP_DELETE, CEPH_OSD_FLAG_ONDISK,
-> +                                    NULL,
-> +                                    ci->i_truncate_seq, ci->i_truncate_size,
-> +                                    false);
-> +	if (IS_ERR(req)) {
-> +    	ret = PTR_ERR(req);
-> +		goto out;
-> +	}
-> +
-> +    ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-> +    if (!ret) {
-> +        ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> +    }
-> +	ceph_osdc_put_request(req);
-> +
-> +	out:
-> +	return ret;
-> +}
-> +
-> +static int ceph_zero_partial_object(struct inode *inode, loff_t offset,
-> loff_t *length)
-> +{
-> +	struct ceph_inode_info *ci = ceph_inode(inode);
-> +	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
-> +	struct ceph_osd_request *req;
-> +	int ret = 0;
-> +	
-> +	if (length <= 0)
-> +		goto out;
-> +
-> +	
-> +	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
-> +                                    ceph_vino(inode), offset, length, 1,
-> +                                    CEPH_OSD_OP_ZERO, CEPH_OSD_FLAG_WRITE |
-> CEPH_OSD_FLAG_ONDISK,
-> +                                    NULL,
-> +                                    ci->i_truncate_seq, ci->i_truncate_size,
-> +                                    false);
-> +	if (IS_ERR(req)) {
-> +    	ret = PTR_ERR(req);
-> +		goto out;
-> +	}
-> +
-> +    ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-> +    if (!ret) {
-> +        ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> +    }
-> +	ceph_osdc_put_request(req); 	
-> +
-> +	out:
-> +	return ret;
-> +}
-> +
-> +static int ceph_zero_partial_object_set(struct inode *inode, loff_t start,
-> loff_t end)
-> +{
-> +	struct ceph_inode_info *ci = ceph_inode(inode);
-> +	__s32 stripe_unit_size = ceph_file_layout_su(ci->i_layout);	
-> +	__u32 stripe_unit_shift = ceph_calculate_shift(stripe_unit_size);
-> +	loff_t first_stripe_unit = ((start + stripe_unit_size -1 ) >>
-> stripe_unit_shift) << stripe_unit_shift;
-> +	loff_t last_stripe_unit = ((end + 1) >> stripe_unit_shift) <<
-> stripe_unit_shift;
-> +	u64 i;
-> +	loff_t length;
-> +	int ret = 0;
-> +
-> +	if (last_stripe_unit > first_stripe_unit) {
-> +		for (i = first_stripe_unit; i < last_stripe_unit; i +=
-> stripe_unit_size) {
-> +			length = (u64) stripe_unit_size;
-> +			ret = ceph_zero_partial_object(inode, i, &length);
-> +			if (ret)
-> +				goto out;
-> +		}
-> +	}
-> +	if (first_stripe_unit > last_stripe_unit) {
-> +			length = end - start + 1;			
-> +			ret = ceph_zero_partial_object(inode, start, &length);
-> +			goto out;
-> +	}
-> +	length = first_stripe_unit - start;
-> +	if (length > 0) {			
-> +		ret = ceph_zero_partial_object(inode, start, &length);
-> +		if (ret)
-> +			goto out;
-> +	}
-> +	length =  end - last_stripe_unit + 1;
-> +	if (length > 0) {			
-> +		ret = ceph_zero_partial_object(inode, last_stripe_unit,
-> &length);
-> +	}
-> +
-> +	out:
-> +	return ret;
-> +}
-> +
-> +static int ceph_delete_and_zero_objects(struct file *file, loff_t offset,
-> loff_t length)
-> +{
-> +	struct ceph_file_info *fi = file->private_data;	
-> +	struct inode *inode = file->f_dentry->d_inode;
-> +	struct ceph_inode_info *ci = ceph_inode(inode);
-> +	__s32 stripe_unit_size = ceph_file_layout_su(ci->i_layout);
-> +	__s32 stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
-> +	unsigned stripe_width = ceph_file_layout_stripe_width(&ci->i_layout);
-> +	__s32 object_size = ceph_file_layout_object_size(ci->i_layout);
-> +	__s32 object_set_size = object_size * stripe_count;
-> +	__u32 object_set_shift = ceph_calculate_shift(object_set_size);
-> +	__u32 stripe_unit_count_per_object = object_size / stripe_unit_size;
-> +	loff_t first_object_set = ((offset + object_set_size - 1) >>
-> object_set_shift) << object_set_shift;
-> +	loff_t last_object_set = ((offset + length) >> object_set_shift) <<
-> object_set_shift;
-> +	loff_t i, j;	
-> +	int want, got = 0;
-> +	int dirty;
-> +	u64 len;
-> +	int ret = 0;
-> +
-> +	if (fi->fmode & CEPH_FILE_MODE_LAZY)
-> +		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
-> +	else
-> +		want = CEPH_CAP_FILE_BUFFER;
-> +		
-> +	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, offset +
-> length);
-> +	if (ret < 0)
-> +		return ret;
-> +	if (!(got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO))) {
-> +		ret = -EAGAIN;
-> +		goto out;
-> +	}
-> +
-> +	/* [offset, offset+length] does not across object set bundary.
-> +	  * Yes, there are possibilities to delete some objects within
-> +	  * a object set, however, we want to keep it simple, not to incur
-> +	  * comprehensive calculation, so for a partial hole within a object
-> +	  * set, we zero only
-> +	  */
-> +	if (first_object_set > last_object_set) {
-> +		ret = ceph_zero_partial_object_set(inode, offset, offset +
-> length - 1);
-> +		goto out;
-> +	}
-> +	/* [offset, offset+length] contains at least one complete object set
-> */
-> +	if (last_object_set > first_object_set) {		
-> +		len = (u64)stripe_unit_size;
-> +		/*
-> +		  * For the very first object, zero it instead of deleting it,
-> +		  * since there are attached metada on it
-> +		  */
-> +		if (first_object_set == 0) {
-> +			for (i = 0; i < stripe_unit_count_per_object; i++) {
-> +				ret = ceph_zero_partial_object(inode,
-> first_object_set + i*stripe_width, &len);
-> +				if (ret)
-> +					goto out;
-> +			}
-> +		}
-> +		for (i = first_object_set; i < last_object_set; i +=
-> object_set_size) {
-> +			for (j = i; j < i + stripe_width; j +=
-> stripe_unit_size) {
-> +				/* skip the very first object */
-> +				if (j == 0)
-> +					continue;
-> +				ret = ceph_delete_object(inode, j, &len);
-> +				/* object already deleted */
-> +				if (ret == -ENOENT)
-> +					ret = 0;
-> +				if (ret)
-> +					goto out;
-> +			}
-> +		}
-> +	}
-> +
-> +	/* deal with the object set contains the start or the end of the hole
-> */
-> +	if (first_object_set - offset > 0) {
-> +		ret = ceph_zero_partial_object_set(inode, offset,
-> first_object_set - 1);
-> +		if (ret)
-> +			goto out;
-> +	}
-> +	if (offset + length - last_object_set > 0) {
-> +		ret = ceph_zero_partial_object_set(inode, last_object_set,
-> offset + length - 1);
-> +	}
-> +	
-> +	out:
-> +	if (ret == 0) {
-> +		spin_lock(&ci->i_ceph_lock);
-> +		dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
-> +		spin_unlock(&ci->i_ceph_lock);
-> +		if (dirty)
-> +			__mark_inode_dirty(inode, dirty);
-> +	}
-> +	ceph_put_cap_refs(ci, got);
-> +	return ret;
-> +}
-> +
-> +static int ceph_punch_hole(struct file *file, loff_t offset, loff_t length)
-> +{
-> +	struct inode *inode = file->f_dentry->d_inode;
-> +	int ret = 0;
-> +
-> +    if (!S_ISREG(inode->i_mode)) {
-> +        return -EOPNOTSUPP;
-> +	}
-> +	if (IS_SWAPFILE(inode)) {
-> +		return -ETXTBSY;
-> +	}
-> +	mutex_lock(&inode->i_mutex);
-> +
-> +	/* No need to punch hole beyond i_size */
-> +	if (offset >= inode->i_size)
-> +		goto out_unlock;
-> +
-> +	/*
-> +	 * If the hole extends beyond i_size, set the hole
-> +	 * to end after the page that contains i_size
-> +	 */
-> +	if (offset + length > inode->i_size) {
-> +		length = inode->i_size +
-> +		   PAGE_CACHE_SIZE - (inode->i_size & (PAGE_CACHE_SIZE - 1)) -
-> +		   offset;
-> +	}
-> +
-> +	ceph_truncate_and_zero_page_cache(inode, offset, length);
-> +	ret = ceph_delete_and_zero_objects(file, offset, length);
-> +	
-> +	out_unlock:
-> +	mutex_unlock(&inode->i_mutex);
-> +	return ret;
-> +}
-> +
-> +static long ceph_fallocate(struct file *file, int mode, loff_t offset, loff_t
-> length)
-> +{
-> +	/* FALLOC_FL_PUNCH_HOLE must be used with FALLOC_FL_KEEP_SIZE */
-> +	if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE))
-> +		return -EOPNOTSUPP;
-> +	if (mode & FALLOC_FL_PUNCH_HOLE)
-> +		return ceph_punch_hole(file, offset, length);
-> +	return -EOPNOTSUPP;
-> +}
-> +
->  const struct file_operations ceph_file_fops = {
->  	.open = ceph_open,
->  	.release = ceph_release,
-> @@ -898,5 +1210,6 @@ const struct file_operations ceph_file_fops = {
->  	.splice_write = generic_file_splice_write,
->  	.unlocked_ioctl = ceph_ioctl,
->  	.compat_ioctl	= ceph_ioctl,
-> +	.fallocate = ceph_fallocate,
->  };
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 3a246a6..a6d9671 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -503,7 +503,8 @@ void osd_req_op_extent_init(struct ceph_osd_request
-> *osd_req,
->  	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
->  	size_t payload_len = 0;
-> 
-> -	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE);
-> +	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
-> +			opcode != CEPH_OSD_OP_DELETE && opcode !=
-> CEPH_OSD_OP_ZERO);
-> 
->  	op->extent.offset = offset;
->  	op->extent.length = length;
-> @@ -631,6 +632,8 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
->  		break;
->  	case CEPH_OSD_OP_READ:
->  	case CEPH_OSD_OP_WRITE:
-> +	case CEPH_OSD_OP_DELETE:
-> +	case CEPH_OSD_OP_ZERO:
->  		if (src->op == CEPH_OSD_OP_WRITE)
->  			request_data_len = src->extent.length;
->  		dst->extent.offset = cpu_to_le64(src->extent.offset);
-> @@ -715,7 +718,8 @@ struct ceph_osd_request *ceph_osdc_new_request(struct
-> ceph_osd_client *osdc,
->  	u64 object_base;
->  	int r;
-> 
-> -	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE);
-> +	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
-> +			opcode != CEPH_OSD_OP_DELETE && opcode !=
-> CEPH_OSD_OP_ZERO);
-> 
->  	req = ceph_osdc_alloc_request(osdc, snapc, num_ops, use_mempool,
->  					GFP_NOFS);
-> -- 
-> 1.7.9.5
-> 
-> 
-> 
+If we gather dirty scatter lock state while corresponding dirfrag
+is been exporting, we may receive different dirfrag states from
+two MDS and we need to find which one is the newest. The solution
+is adding a new variable "migrate seq" to dirfrag, increase it by
+one when dirfrag's auth MDS changes. When gathering dirty scatter
+lock state, use "migrate seq" to find the newest dirfrag state.
+
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/CDir.cc    |  4 ++++
+ src/mds/CDir.h     |  4 +++-
+ src/mds/CInode.cc  | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ src/mds/CInode.h   |  1 +
+ src/mds/Locker.cc  | 19 +++++++++++++------
+ src/mds/MDCache.cc |  9 +++++++--
+ src/mds/MDS.h      |  2 +-
+ 7 files changed, 77 insertions(+), 10 deletions(-)
+
+diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+index 8c83eba..2b991d7 100644
+--- a/src/mds/CDir.cc
++++ b/src/mds/CDir.cc
+@@ -154,6 +154,7 @@ ostream& CDir::print_db_line_prefix(ostream& out)
+ // CDir
+ 
+ CDir::CDir(CInode *in, frag_t fg, MDCache *mdcache, bool auth) :
++  mseq(0),
+   dirty_rstat_inodes(member_offset(CInode, dirty_rstat_item)),
+   item_dirty(this), item_new(this),
+   pop_me(ceph_clock_now(g_ceph_context)),
+@@ -2121,6 +2122,8 @@ void CDir::_committed(version_t v)
+ void CDir::encode_export(bufferlist& bl)
+ {
+   assert(!is_projected());
++  ceph_seq_t seq = mseq + 1;
++  ::encode(seq, bl);
+   ::encode(first, bl);
+   ::encode(fnode, bl);
+   ::encode(dirty_old_rstat, bl);
+@@ -2150,6 +2153,7 @@ void CDir::finish_export(utime_t now)
+ 
+ void CDir::decode_import(bufferlist::iterator& blp, utime_t now, LogSegment *ls)
+ {
++  ::decode(mseq, blp);
+   ::decode(first, blp);
+   ::decode(fnode, blp);
+   ::decode(dirty_old_rstat, blp);
+diff --git a/src/mds/CDir.h b/src/mds/CDir.h
+index 87c79c2..11f4a76 100644
+--- a/src/mds/CDir.h
++++ b/src/mds/CDir.h
+@@ -170,6 +170,7 @@ public:
+ 
+   fnode_t fnode;
+   snapid_t first;
++  ceph_seq_t mseq; // migrate sequence
+   map<snapid_t,old_rstat_t> dirty_old_rstat;  // [value.first,key]
+ 
+   // my inodes with dirty rstat data
+@@ -547,7 +548,8 @@ public:
+   // -- import/export --
+   void encode_export(bufferlist& bl);
+   void finish_export(utime_t now);
+-  void abort_export() { 
++  void abort_export() {
++    mseq += 2;
+     put(PIN_TEMPEXPORTING);
+   }
+   void decode_import(bufferlist::iterator& blp, utime_t now, LogSegment *ls);
+diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
+index 8936acd..4852994 100644
+--- a/src/mds/CInode.cc
++++ b/src/mds/CInode.cc
+@@ -1222,6 +1222,7 @@ void CInode::encode_lock_state(int type, bufferlist& bl)
+ 	  dout(20) << fg << "           fragstat " << pf->fragstat << dendl;
+ 	  dout(20) << fg << " accounted_fragstat " << pf->accounted_fragstat << dendl;
+ 	  ::encode(fg, tmp);
++	  ::encode(dir->mseq, tmp);
+ 	  ::encode(dir->first, tmp);
+ 	  ::encode(pf->fragstat, tmp);
+ 	  ::encode(pf->accounted_fragstat, tmp);
+@@ -1255,6 +1256,7 @@ void CInode::encode_lock_state(int type, bufferlist& bl)
+ 	  dout(10) << fg << " " << pf->rstat << dendl;
+ 	  dout(10) << fg << " " << dir->dirty_old_rstat << dendl;
+ 	  ::encode(fg, tmp);
++	  ::encode(dir->mseq, tmp);
+ 	  ::encode(dir->first, tmp);
+ 	  ::encode(pf->rstat, tmp);
+ 	  ::encode(pf->accounted_rstat, tmp);
+@@ -1404,10 +1406,12 @@ void CInode::decode_lock_state(int type, bufferlist& bl)
+       dout(10) << " ...got " << n << " fragstats on " << *this << dendl;
+       while (n--) {
+ 	frag_t fg;
++	ceph_seq_t mseq;
+ 	snapid_t fgfirst;
+ 	frag_info_t fragstat;
+ 	frag_info_t accounted_fragstat;
+ 	::decode(fg, p);
++	::decode(mseq, p);
+ 	::decode(fgfirst, p);
+ 	::decode(fragstat, p);
+ 	::decode(accounted_fragstat, p);
+@@ -1420,6 +1424,12 @@ void CInode::decode_lock_state(int type, bufferlist& bl)
+ 	  assert(dir);                // i am auth; i had better have this dir open
+ 	  dout(10) << fg << " first " << dir->first << " -> " << fgfirst
+ 		   << " on " << *dir << dendl;
++	  if (dir->fnode.fragstat.version == get_projected_inode()->dirstat.version &&
++	      ceph_seq_cmp(mseq, dir->mseq) < 0) {
++	    dout(10) << " mseq " << mseq << " < " << dir->mseq << ", ignoring" << dendl;
++	    continue;
++	  }
++	  dir->mseq = mseq;
+ 	  dir->first = fgfirst;
+ 	  dir->fnode.fragstat = fragstat;
+ 	  dir->fnode.accounted_fragstat = accounted_fragstat;
+@@ -1462,11 +1472,13 @@ void CInode::decode_lock_state(int type, bufferlist& bl)
+       ::decode(n, p);
+       while (n--) {
+ 	frag_t fg;
++	ceph_seq_t mseq;
+ 	snapid_t fgfirst;
+ 	nest_info_t rstat;
+ 	nest_info_t accounted_rstat;
+ 	map<snapid_t,old_rstat_t> dirty_old_rstat;
+ 	::decode(fg, p);
++	::decode(mseq, p);
+ 	::decode(fgfirst, p);
+ 	::decode(rstat, p);
+ 	::decode(accounted_rstat, p);
+@@ -1481,6 +1493,12 @@ void CInode::decode_lock_state(int type, bufferlist& bl)
+ 	  assert(dir);                // i am auth; i had better have this dir open
+ 	  dout(10) << fg << " first " << dir->first << " -> " << fgfirst
+ 		   << " on " << *dir << dendl;
++	  if (dir->fnode.rstat.version == get_projected_inode()->rstat.version &&
++	      ceph_seq_cmp(mseq, dir->mseq) < 0) {
++	    dout(10) << " mseq " << mseq << " < " << dir->mseq << ", ignoring" << dendl;
++	    continue;
++	  }
++	  dir->mseq = mseq;
+ 	  dir->first = fgfirst;
+ 	  dir->fnode.rstat = rstat;
+ 	  dir->fnode.accounted_rstat = accounted_rstat;
+@@ -1606,6 +1624,36 @@ void CInode::start_scatter(ScatterLock *lock)
+   }
+ }
+ 
++/*
++ * set dirfrag_version to inode_version - 1. so that we can use dirfrag version
++ * to check if we have gathered scatter state for a given dirfrag.
++ */
++void CInode::start_scatter_gather(ScatterLock *lock, int auth)
++{
++  assert(is_auth());
++  inode_t *pi = get_projected_inode();
++
++  for (map<frag_t,CDir*>::iterator p = dirfrags.begin();
++       p != dirfrags.end();
++       ++p) {
++    CDir *dir = p->second;
++
++    if (dir->is_auth())
++      continue;
++    if (auth >= 0 && dir->authority().first != auth)
++      continue;
++
++    switch (lock->get_type()) {
++      case CEPH_LOCK_IFILE:
++	dir->fnode.fragstat.version = pi->dirstat.version - 1;
++	break;
++      case CEPH_LOCK_INEST:
++	dir->fnode.rstat.version = pi->rstat.version - 1;
++	break;
++    }
++  }
++}
++
+ struct C_Inode_FragUpdate : public Context {
+   CInode *in;
+   CDir *dir;
+diff --git a/src/mds/CInode.h b/src/mds/CInode.h
+index 779bb63..82c2347 100644
+--- a/src/mds/CInode.h
++++ b/src/mds/CInode.h
+@@ -651,6 +651,7 @@ public:
+   void clear_scatter_dirty();  // on rejoin ack
+ 
+   void start_scatter(ScatterLock *lock);
++  void start_scatter_gather(ScatterLock *lock, int auth=-1);
+   void finish_scatter_update(ScatterLock *lock, CDir *dir,
+ 			     version_t inode_version, version_t dir_accounted_version);
+   void finish_scatter_gather_update(int type);
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index 8065207..30e014a 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -731,8 +731,9 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, list<C
+ 	  lock->get_parent()->is_replicated()) {
+ 	dout(10) << " finished (local) gather for mix->lock, now gathering from replicas" << dendl;
+ 	send_lock_message(lock, LOCK_AC_LOCK);
+-	lock->init_gather();
+ 	lock->set_state(LOCK_MIX_LOCK2);
++	lock->init_gather();
++	in->start_scatter_gather(static_cast<ScatterLock *>(lock));
+ 	return;
+       }
+ 
+@@ -3430,7 +3431,7 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
+   assert(lock->is_stable());
+ 
+   CInode *in = 0;
+-  if (lock->get_cap_shift())
++  if (lock->get_type() != CEPH_LOCK_DN)
+     in = static_cast<CInode *>(lock->get_parent());
+ 
+   int old_state = lock->get_state();
+@@ -3453,10 +3454,11 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
+     if (lock->get_parent()->is_replicated() && old_state == LOCK_MIX) {
+       send_lock_message(lock, LOCK_AC_SYNC);
+       lock->init_gather();
++      in->start_scatter_gather(static_cast<ScatterLock *>(lock));
+       gather++;
+     }
+     
+-    if (in && in->is_head()) {
++    if (lock->get_cap_shift() && in->is_head()) {
+       if (in->issued_caps_need_gather(lock)) {
+ 	if (need_issue)
+ 	  *need_issue = true;
+@@ -3568,7 +3570,7 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
+   assert(lock->get_state() != LOCK_LOCK);
+   
+   CInode *in = 0;
+-  if (lock->get_cap_shift())
++  if (lock->get_type() != CEPH_LOCK_DN)
+     in = static_cast<CInode *>(lock->get_parent());
+ 
+   int old_state = lock->get_state();
+@@ -3596,7 +3598,7 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
+   }
+   if (lock->is_rdlocked())
+     gather++;
+-  if (in && in->is_head()) {
++  if (lock->get_cap_shift() && in->is_head()) {
+     if (in->issued_caps_need_gather(lock)) {
+       if (need_issue)
+ 	*need_issue = true;
+@@ -3629,6 +3631,8 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
+       gather++;
+       send_lock_message(lock, LOCK_AC_LOCK);
+       lock->init_gather();
++      if (lock->get_state() == LOCK_MIX_LOCK2)
++	in->start_scatter_gather(static_cast<ScatterLock *>(lock));
+     }
+   }
+ 
+@@ -4034,8 +4038,9 @@ void Locker::scatter_tempsync(ScatterLock *lock, bool *need_issue)
+ 
+   if (lock->get_state() == LOCK_MIX_TSYN &&
+       in->is_replicated()) {
+-    lock->init_gather();
+     send_lock_message(lock, LOCK_AC_LOCK);
++    lock->init_gather();
++    in->start_scatter_gather(static_cast<ScatterLock *>(lock));
+     gather++;
+   }
+ 
+@@ -4364,6 +4369,8 @@ void Locker::file_excl(ScatterLock *lock, bool *need_issue)
+       lock->get_state() != LOCK_XSYN_EXCL) {  // if we were lock, replicas are already lock.
+     send_lock_message(lock, LOCK_AC_LOCK);
+     lock->init_gather();
++    if (lock->get_state() == LOCK_MIX_EXCL)
++      in->start_scatter_gather(static_cast<ScatterLock *>(lock));
+     gather++;
+   }
+   if (lock->is_leased()) {
+diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+index 2b0029f..f2068e5 100644
+--- a/src/mds/MDCache.cc
++++ b/src/mds/MDCache.cc
+@@ -3764,6 +3764,7 @@ void MDCache::rejoin_walk(CDir *dir, MMDSCacheRejoin *rejoin)
+     dout(15) << " add_strong_dirfrag " << *dir << dendl;
+     rejoin->add_strong_dirfrag(dir->dirfrag(), dir->get_replica_nonce(), dir->get_dir_rep());
+     dir->state_set(CDir::STATE_REJOINING);
++    dir->mseq = 0;
+ 
+     for (CDir::map_t::iterator p = dir->items.begin();
+ 	 p != dir->items.end();
+@@ -3913,11 +3914,15 @@ void MDCache::handle_cache_rejoin_weak(MMDSCacheRejoin *weak)
+        ++p) {
+     CInode *in = get_inode(p->first);
+     assert(in);
++    if (survivor) {
++      in->start_scatter_gather(&in->filelock, from);
++      in->start_scatter_gather(&in->nestlock, from);
++    } else {
++      rejoin_potential_updated_scatterlocks.insert(in);
++    }
+     in->decode_lock_state(CEPH_LOCK_IFILE, p->second.file);
+     in->decode_lock_state(CEPH_LOCK_INEST, p->second.nest);
+     in->decode_lock_state(CEPH_LOCK_IDFT, p->second.dft);
+-    if (!survivor)
+-      rejoin_potential_updated_scatterlocks.insert(in);
+   }
+ 
+   // recovering peer may send incorrect dirfrags here.  we need to
+diff --git a/src/mds/MDS.h b/src/mds/MDS.h
+index 9e3e2da..b99815d 100644
+--- a/src/mds/MDS.h
++++ b/src/mds/MDS.h
+@@ -35,7 +35,7 @@
+ #include "SessionMap.h"
+ 
+ 
+-#define CEPH_MDS_PROTOCOL    17 /* cluster internal */
++#define CEPH_MDS_PROTOCOL    18 /* cluster internal */
+ 
+ 
+ enum {
+-- 
+1.8.1.4
+
