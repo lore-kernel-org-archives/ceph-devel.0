@@ -1,54 +1,61 @@
-From: Sage Weil <sage@inktank.com>
-Subject: mon caps
-Date: Wed, 19 Jun 2013 13:15:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306191309500.7285@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Wed, 19 Jun 2013 23:03:39 +0200
+Message-ID: <51C21CAB.40303@dachary.org>
+References: <alpine.DEB.2.00.1306191235300.27900@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig387A07592731D0EE0586FAC2"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54742 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756847Ab3FSUP4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 16:15:56 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 5E274803BB
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Jun 2013 13:15:56 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 3041B803BB
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Jun 2013 13:15:56 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:40057 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964788Ab3FSVDm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 17:03:42 -0400
+In-Reply-To: <alpine.DEB.2.00.1306191235300.27900@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-A huge pile of changes to the mon and CLI has recently landed in master 
-and will reach users for the first time in v0.65.  This includes, among 
-other things, a complete (!) 'ceph -h' usage dump and (real soon now) 
-super-smart bash completion.  All of this is part of changes in the 
-admin/mon protocol to support the REST management API endpoint which will 
-arrive in dumpling.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig387A07592731D0EE0586FAC2
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Other nice bits of this include:
+Hi Sage,
 
- ceph daemon osd.0 ...
-instead of
- ceph --admin-daemon /var/run/ceph/ceph-osd.0.asok ...
+I believe
+https://github.com/ceph/ceph/pull/366
+fixes the issue. It was introduced by
+https://github.com/ceph/ceph/commit/b16fdf23e5325623874ee1a02e134f577c5a7=
+dcd#L0R364
+which was merged in master yesterday.
 
-and
+Cheers
 
- ceph tell mon.\* ...
- ceph tell osd.\* ...
-instead of
- ceph mon tell \* ...
- ceph osd tell \* ...
+On 06/19/2013 09:36 PM, Sage Weil wrote:
+> Dereferencing iterator "p" though it is already past the end of its con=
+tainer.
 
-One of the changes that came along with this, though, is that the syntax 
-of the mon 'caps' changed.  In short, daemons now have mon caps that look 
-like 'allow profile osd' or 'allow profile bootstrap-osd' instead of the 
-explicit and more confusing values they had before.  This shouldn't affect 
-any normal users (the caps are auto-converted when you upgrade the mons), 
-but if you are have written your own custom scripts that have been 
-creating keys and auth entries manually (e.g., to do something like 
-'allow command foo ...') they may need to be updated.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
-These changes are all included in v0.65.  Get ready!
 
-sage
+--------------enig387A07592731D0EE0586FAC2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlHCHKsACgkQ8dLMyEl6F20x0wCfaRmnluD1Ck+Ih1pJeRA9u33y
+giYAoJ5PWyGwHnk7rBZSQi3sAEtydcPM
+=XdBw
+-----END PGP SIGNATURE-----
+
+--------------enig387A07592731D0EE0586FAC2--
