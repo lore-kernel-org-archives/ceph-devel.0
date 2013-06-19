@@ -1,42 +1,64 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: dynamically move busy pg's to fast storage
-Date: Wed, 19 Jun 2013 10:46:08 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B5C218596@BITCOM1.int.sbss.com.au>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Erasure code library summary
+Date: Wed, 19 Jun 2013 06:33:12 -0500
+Message-ID: <51C196F8.4080501@inktank.com>
+References: <51C05123.8000002@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:53575 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933830Ab3FSKqL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 06:46:11 -0400
-Received: from [2001:388:e000:712:a5ca:4fd3:14f:ad5d] (helo=BITCOM1.int.sbss.com.au)
-	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1UpFty-0004HG-A9
-	for ceph-devel@vger.kernel.org; Wed, 19 Jun 2013 20:46:10 +1000
-Content-Language: en-US
+Received: from mail-ie0-f170.google.com ([209.85.223.170]:53274 "EHLO
+	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934584Ab3FSLdO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 07:33:14 -0400
+Received: by mail-ie0-f170.google.com with SMTP id e11so13098223iej.15
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Jun 2013 04:33:13 -0700 (PDT)
+In-Reply-To: <51C05123.8000002@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Suppose you had two classes of OSD, one fast (eg SSD's or 15K SAS drives) and the other slow (eg 7200RPM SATA drives). The fast storage is expensive so you might not have so much of it. Rather than try and map whole volumes to the best class of storage (eg fast for databases, slow for user files), it would be nice if ceph could monitor activity and move busy pg's to the fast OSD's, and move idle pg's to the slower OSD's.
+On 06/18/2013 07:22 AM, Loic Dachary wrote:
+> Hi Ceph,
+>
+> TL;DR: use jerasure 1.2 with Reed-Solomon to code/decode/repair an object, and upgrade to 2.0 when available.
+>
+> Disclaimer: I'm no expert ;-) The terms are explained in wikipedia[1].
+>
+> Using Reed-Solomon object O is encoded by dividing it into consecutive chuncks O1, O2, ... ON and computing parity blocks P1, P2, ... PK.  Reading the original content of object O is a simple concatenation of O1, O2, ... ON. If O2 or P2 are lost, they can be repaired/reconstructed using O1 ... ON and P1 ... PK. If the use case is mostly reading objects and repairs are at least 1000 times less likely than normal operations, being able to read the object from non-coded chuncks is attractive.
+>
+> Reed-Solomon is significantly more expensive to encode ( 100MB/s order of magnitude on a single 2.5Ghz core ) than fountain codes with the current jerasure implementation[2]. However, gf-complete[3] that will be used in the upcoming version of jerasure significantly improves performances ( 2 to 10 times faster ) and the difference becomes negligible.
 
-What I had in mind initially was a daemon external to ceph that would monitor the statistics to determine what pg's were currently being hit hard, and make decisions about placement, moving pg's around to maximise performance. As a minimum such a daemon would need access to the following information:
-. read and write count for each pg (to determine io rate)
-. class of each osd (fast/slow/etc). Ideally this would be defined as part of the osd definition but an external config file would suffice for a proof of concept.
-. an api to actually manually place pg's and not have ceph make its own decisions and move them back (this may the sticking point...)
-. a way to make sure that moving pg's didn't break the desired redundancy (tricky?)
+One thing that we might consider is that ARM is very quickly becoming an 
+option for Ceph.  It may be very important to have our erasure coding 
+scheme be viable on that platform and CPU is going to be the primary 
+bottleneck.  It may be worth a quick look at NEON to see if there are 
+any things we should be thinking about now.
 
-A pg with a high write rate would need the primary pg and all replica's on fast storage. A pg with low write but high read rate could have the primary on fast storage and the replica's on slow storage.
-
-From reading the docs it seems ceph doesn't do this already. There is a reweight-by-utilization command which may give some of the same benefit.
-
-Obviously there is a cost to moving pg's around, but it should be fairly easy to balance the cost of moving vs the benefit of having the busy pg's on a fast osd. None of the decisions to move pg's would need to be made particularly quickly, and the rate at which move requests were initiated would be limited to minimise impact.
-
-Is something like this possible? Or useful? (I think it would be if you want to maximise the use of your expensive SSD's) Is a pg a small enough unit for this or too coarse?
-
-Thanks
-
-James
+>
+> Reed-Solomon coding family is the only one that can keep the chuncks unencoded and therefore concatenable.
+>
+> The jerasure library is packaged and being worked on by the author at the moment. All other Free Software implementations are either not packaged or not maintained.
+>
+> The license[4] of jerasure is compatible with the license of Ceph.
+>
+> Performances depend on the parameters to the Reed-Solomon functions but they will also be influenced by the buffer sizes used when calling the encoding functions: smaller buffers will mean more calls and more overhead.
+>
+> Open questions:
+>
+> * Does Mojette Transform [5] have compelling qualities compared to other code families ?
+> * Do hierarchical codes [6] have compelling qualities ? Implementing them would require a different API. To be effective they need to take into account the context in which an object is stored where the other code only require the object itself.
+> * I have not experiemented with the jerasure API yet
+>
+> Feedback and criticisms are welcome :-)
+>
+> [1] http://en.wikipedia.org/wiki/Erasure_code
+> [2] jerasure 1.2 http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627.html
+> [3] gf-complete http://web.eecs.utk.edu/~plank/plank/papers/CS-13-703.html
+> [4] jerasure license https://github.com/tsuraan/Jerasure/blob/master/License.txt
+> [5] Mojette Transform http://en.wikipedia.org/wiki/Mojette_Transform
+> [6] hierarchical codes http://www.e-biersack.eu/BPublished/nc_springer.pdf
+>
+>
 
