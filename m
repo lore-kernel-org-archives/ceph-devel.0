@@ -1,83 +1,33 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Issue with RGW API
-Date: Wed, 19 Jun 2013 08:37:30 -0700
-Message-ID: <CABBk=J9F6iWywXprR=-nnB6kG4AxaH3AGaGmObao8UcCY6Ks4w@mail.gmail.com>
-References: <CAPeWyqwZO6E8qtc9teerxY9ZyYg+Qe_46kw6UHkwVD98Uk7ctA@mail.gmail.com>
-	<CABBk=J-GB3U7HSjdmsHF9xWUGwi4QkO-57SjjNnORWUJ07oJ1Q@mail.gmail.com>
-	<C0B54484-F2D6-4FE3-87A4-F06C2B20903E@enovance.com>
-	<51C18153.8040704@canoncial.com>
-	<51C181F1.4080500@gmail.com>
-	<CABBk=J-UfWB+wTU1GmDbhx8gnB17w3RjOcdymO6x59oz3y-nog@mail.gmail.com>
-	<51C1CC83.7070206@canoncial.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: squeeze tcmalloc memory leak
+Date: Wed, 19 Jun 2013 08:39:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306190836120.27150@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f172.google.com ([209.85.128.172]:50886 "EHLO
-	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756651Ab3FSPhb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 11:37:31 -0400
-Received: by mail-ve0-f172.google.com with SMTP id jz10so4185413veb.31
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jun 2013 08:37:31 -0700 (PDT)
-In-Reply-To: <51C1CC83.7070206@canoncial.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Edward Hope-Morley <edward.hope-morley@canonical.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, John Wilkins <john.wilkins@inktank.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jun 19, 2013 at 8:21 AM, Edward Hope-Morley
-<edward.hope-morley@canonical.com> wrote:
-> Yehuda,
->
-> Thanks for your reply. Is this not a bit un-Swift like? I came across
-> this while testing the backup service for Openstack Cinder. Cinder
-> currently supports backup to Swift so I tested this against Rados
-> Gateway but it does not work because the it uses the standard
-> http://<server>/<version>/<account> format.
+Hi all-
 
-The url should not be built directly, but rather use the returned
-storage-url that it got when authenticated with the auth service.
-Swift happens to build it in that format.
+Just a quick note to Debian squeeze users: in the course of debugging 
+ceph-mon memory growth over time, we've determined that (at least in 
+Stefan Priebe's environment) the tcmalloc (google perftools) library on 
+Debian squeeze is leaking memory.  If you are a Ceph user on squeeze, be 
+aware, and consider upgrading to wheezy.
 
->
-> Also, there is an issue with PUTs where RGW returns a "411 Length
-> Required" in case the content-length is not specified. Is content-length
-> mandatory? Swift does not seem to complain. What are your thoughts on this?
->
-A PUT without content length needs to be chunked. If the missing
-content-length is missing, we require 'Transfer-Encoding: chunked'.
+Thanks, Stefan, for tacking this down!
 
+sage
 
-> (updated the subject since it was wrong)
->
-> Ed.
->
-> On 19/06/13 16:08, Yehuda Sadeh wrote:
->> On Wed, Jun 19, 2013 at 3:03 AM, Edward Hope-Morley
->> <opentastic@gmail.com> wrote:
->>> Apologies, premature send ;)
->>>
->>> On 19/06/13 11:00, Edward Hope-Morley wrote:
->>>> Hi guys, I'm having the following issue with the RGW swift API:
->>>>
->>>> The docs at http://ceph.com/docs/next/radosgw/swift/serviceops say that
->>>> for a GET request to list account contents I should do (as with Swift):
->>>>
->>>> GET /{api version}/{account} HTTP/1.1
->>>>
->>>>
->>>> but, if I put the account RGW treats this as a bucket.
->>>>
->>>> So the following works fine:
->>>>
->>>> curl -i http://192.168.1.201:80/swift/v1 -X GET -H "X-Auth-Token: $token"
->>>>
->>>> But this does not:
->>> curl -i http://192.168.1.201:80/swift/v1/$account -X GET -H
->>> "X-Auth-Token: $token"
->>>
->>> Am I doing something wrong or is this an anomaly in the RGW API?
->>>
->> The docs are wrong there, the account is determined by the auth token.
->>
->> Yehuda
->
+http://tracker.ceph.com/issues/5375
