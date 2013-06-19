@@ -1,67 +1,82 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: ceph in linux-next
-Date: Wed, 19 Jun 2013 10:13:41 +1000
-Message-ID: <20130619101341.4873c5030311c3526054b4a0@canb.auug.org.au>
-References: <alpine.DEB.2.00.1306181009140.31132@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH] ceph: fix sleeping function called from invalid context.
+Date: Wed, 19 Jun 2013 08:38:02 +0800
+Message-ID: <201306190837590546663@gmail.com>
+References: <201306181930448773810@gmail.com>,
+	<alpine.DEB.2.00.1306180807210.23632@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA256";
- boundary="Signature=_Wed__19_Jun_2013_10_13_41_+1000_mX/tqxahGQ8tDdJn"
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from haggis.pcug.org.au ([203.10.76.10]:49021 "EHLO
-	members.tip.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933187Ab3FSANv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 20:13:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1306181009140.31132@cobra.newdream.net>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:62006 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932824Ab3FSAiG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 20:38:06 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: linux-next@vger.kernel.org, ceph-devel@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
---Signature=_Wed__19_Jun_2013_10_13_41_+1000_mX/tqxahGQ8tDdJn
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Pk9uIFR1ZSwgMTggSnVuIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBbIDExMjEuMjMxODgz
+XSBCVUc6IHNsZWVwaW5nIGZ1bmN0aW9uIGNhbGxlZCBmcm9tIGludmFsaWQgY29udGV4dCBhdCBr
+ZXJuZWwvcndzZW0uYzoyMA0KPj4gWyAxMTIxLjIzMTkzNV0gaW5fYXRvbWljKCk6IDEsIGlycXNf
+ZGlzYWJsZWQoKTogMCwgcGlkOiA5ODMxLCBuYW1lOiBtdg0KPj4gWyAxMTIxLjIzMTk3MV0gMSBs
+b2NrIGhlbGQgYnkgbXYvOTgzMToNCj4+IFsgMTEyMS4yMzE5NzNdICAjMDogICgmKCZjaS0+aV9j
+ZXBoX2xvY2spLT5ybG9jayl7Ky4rLi4ufSwgYXQ6WzxmZmZmZmZmZmEwMmJiZDM4Pl0gY2VwaF9n
+ZXR4YXR0cisweDU4LzB4MWQwIFtjZXBoXQ0KPj4gWyAxMTIxLjIzMTk5OF0gQ1BVOiAzIFBJRDog
+OTgzMSBDb21tOiBtdiBOb3QgdGFpbnRlZCAzLjEwLjAtcmM2KyAjMjE1DQo+PiBbIDExMjEuMjMy
+MDAwXSBIYXJkd2FyZSBuYW1lOiBUbyBCZSBGaWxsZWQgQnkgTy5FLk0uIFRvIEJlIEZpbGxlZCBC
+eQ0KPj4gTy5FLk0uL1RvIGJlIGZpbGxlZCBieSBPLkUuTS4sIEJJT1MgMDgwMDE1ICAxMS8wOS8y
+MDExDQo+PiBbIDExMjEuMjMyMDI3XSAgZmZmZjg4MDA2ZDM1NWE4MCBmZmZmODgwMDkyZjY5Y2Uw
+IGZmZmZmZmZmODE2ODM0OGMgZmZmZjg4MDA5MmY2OWNmOA0KPj4gWyAxMTIxLjIzMjA0NV0gIGZm
+ZmZmZmZmODEwNzA0MzUgZmZmZjg4MDA2ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDIwIGZmZmZmZmZm
+ODE2ODk5YmENCj4+IFsgMTEyMS4yMzIwNTJdICAwMDAwMDAwMzAwMDAwMDA0IGZmZmY4ODAwYjc2
+OTExZDAgZmZmZjg4MDA2ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDY4DQo+PiBbIDExMjEuMjMyMDU2
+XSBDYWxsIFRyYWNlOg0KPj4gWyAxMTIxLjIzMjA2Ml0gIFs8ZmZmZmZmZmY4MTY4MzQ4Yz5dIGR1
+bXBfc3RhY2srMHgxOS8weDFiDQo+PiBbIDExMjEuMjMyMDY3XSAgWzxmZmZmZmZmZjgxMDcwNDM1
+Pl0gX19taWdodF9zbGVlcCsweGU1LzB4MTEwDQo+PiBbIDExMjEuMjMyMDcxXSAgWzxmZmZmZmZm
+ZjgxNjg5OWJhPl0gZG93bl9yZWFkKzB4MmEvMHg5OA0KPj4gWyAxMTIxLjIzMjA4MF0gIFs8ZmZm
+ZmZmZmZhMDJiYWY3MD5dIGNlcGhfdnhhdHRyY2JfbGF5b3V0KzB4NjAvMHhmMCBbY2VwaF0NCj4+
+IFsgMTEyMS4yMzIwODhdICBbPGZmZmZmZmZmYTAyYmJkN2Y+XSBjZXBoX2dldHhhdHRyKzB4OWYv
+MHgxZDAgW2NlcGhdDQo+PiBbIDExMjEuMjMyMDkzXSAgWzxmZmZmZmZmZjgxMTg4ZDI4Pl0gdmZz
+X2dldHhhdHRyKzB4YTgvMHhkMA0KPj4gWyAxMTIxLjIzMjA5N10gIFs8ZmZmZmZmZmY4MTE4OTAw
+Yj5dIGdldHhhdHRyKzB4YWIvMHgxYzANCj4+IFsgMTEyMS4yMzIxMDBdICBbPGZmZmZmZmZmODEx
+NzA0ZjI+XSA/IGZpbmFsX3B1dG5hbWUrMHgyMi8weDUwDQo+PiBbIDExMjEuMjMyMTA0XSAgWzxm
+ZmZmZmZmZjgxMTU1ZjgwPl0gPyBrbWVtX2NhY2hlX2ZyZWUrMHhiMC8weDI2MA0KPj4gWyAxMTIx
+LjIzMjEwN10gIFs8ZmZmZmZmZmY4MTE3MDRmMj5dID8gZmluYWxfcHV0bmFtZSsweDIyLzB4NTAN
+Cj4+IFsgMTEyMS4yMzIxMTBdICBbPGZmZmZmZmZmODEwOWU2M2Q+XSA/IHRyYWNlX2hhcmRpcnFz
+X29uKzB4ZC8weDEwDQo+PiBbIDExMjEuMjMyMTE0XSAgWzxmZmZmZmZmZjgxNjk1N2E3Pl0gPyBz
+eXNyZXRfY2hlY2srMHgxYi8weDU2DQo+PiBbIDExMjEuMjMyMTIwXSAgWzxmZmZmZmZmZjgxMTg5
+YzljPl0gU3lTX2ZnZXR4YXR0cisweDZjLzB4YzANCj4+IFsgMTEyMS4yMzIxMjVdICBbPGZmZmZm
+ZmZmODE2OTU3ODI+XSBzeXN0ZW1fY2FsbF9mYXN0cGF0aCsweDE2LzB4MWINCj4+IFsgMTEyMS4y
+MzIxMjldIEJVRzogc2NoZWR1bGluZyB3aGlsZSBhdG9taWM6IG12Lzk4MzEvMHgxMDAwMDAwMg0K
+Pj4gWyAxMTIxLjIzMjE1NF0gMSBsb2NrIGhlbGQgYnkgbXYvOTgzMToNCj4+IFsgMTEyMS4yMzIx
+NTZdICAjMDogICgmKCZjaS0+aV9jZXBoX2xvY2spLT5ybG9jayl7Ky4rLi4ufSwgYXQ6DQo+PiBb
+PGZmZmZmZmZmYTAyYmJkMzg+XSBjZXBoX2dldHhhdHRyKzB4NTgvMHgxZDAgW2NlcGhdDQo+PiAN
+Cj4+IEkgdGhpbmsgbW92ZSB0aGUgY2ktPmlfY2VwaF9sb2NrIGRvd24gaXMgc2FmZSBiZWNhdXNl
+IHdlIGNhbid0IGZyZWUNCj4+IGNlcGhfaW5vZGVfaW5mbyBhdCB0aGVyZS4NCj4+IA0KPj4gU2ln
+bmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+
+PiAgZnMvY2VwaC94YXR0ci5jIHwgNCArKy0tDQo+PiAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0
+aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4+IA0KPj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgveGF0
+dHIuYyBiL2ZzL2NlcGgveGF0dHIuYw0KPj4gaW5kZXggOWI2YjJiNi4uNGVmZGUwNiAxMDA2NDQN
+Cj4+IC0tLSBhL2ZzL2NlcGgveGF0dHIuYw0KPj4gKysrIGIvZnMvY2VwaC94YXR0ci5jDQo+PiBA
+QCAtNjc1LDcgKzY3NSw2IEBAIHNzaXplX3QgY2VwaF9nZXR4YXR0cihzdHJ1Y3QgZGVudHJ5ICpk
+ZW50cnksIGNvbnN0IGNoYXIgKm5hbWUsIHZvaWQgKnZhbHVlLA0KPj4gICAgICAgICBpZiAoIWNl
+cGhfaXNfdmFsaWRfeGF0dHIobmFtZSkpDQo+PiAgICAgICAgICAgICAgICAgcmV0dXJuIC1FTk9E
+QVRBOw0KPj4gIA0KPj4gLSAgICAgICBzcGluX2xvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+PiAg
+ICAgICAgIGRvdXQoImdldHhhdHRyICVwIHZlcj0lbGxkIGluZGV4X3Zlcj0lbGxkXG4iLCBpbm9k
+ZSwNCj4+ICAgICAgICAgICAgICBjaS0+aV94YXR0cnMudmVyc2lvbiwgY2ktPmlfeGF0dHJzLmlu
+ZGV4X3ZlcnNpb24pOw0KPg0KPlVuZm9ydHVuYXRlbHkgdGhlc2UgaW50ZXJ2ZW5pbmcgbGluZXMg
+bmVleHQgaV9jZXBoX2xvY2sgdG8gcHJldmVudCB0aGUgDQo+aV94YXR0cnMgc3RydWN0IGNvbnRl
+bnRzIGZyb20gc2hpZnRpbmcgdW5kZXJuZWF0aCB1cy4gIEl0IGlzIG1vcmUgDQpJTUhPLGZvciB0
+aG9zZSBsaW5lDQo+ICAgICAgICAgdnhhdHRyID0gY2VwaF9tYXRjaF92eGF0dHIoaW5vZGUsIG5h
+bWUpOw0KPiAgICAgICAgIGlmICh2eGF0dHIgJiYgISh2eGF0dHItPmV4aXN0c19jYiAmJiAhdnhh
+dHRyLT5leGlzdHNfY2IoY2kpKSkgew0KPiAgICAgICAgICAgICAgICAgZXJyID0gdnhhdHRyLT5n
+ZXR4YXR0cl9jYihjaSwgdmFsdWUsIHNpemUpOw0KSXQncyBubyBuZWVkIHRvIHByb3RlY3QgYnkg
+aV9jZXBoX2xvY2suDQpDYW4geW91IGV4cGFsaW4gaW4gZGV0YWlsPw0KPmV4cGVuc2l2ZSBmb3Ig
+dGhlIGdlbmVyYWwgZ2V0eGF0dHIgY2FzZSwgYnV0IGEgc2ltcGxlciBmaXggaXMgdG8gdGFrZSAN
+Cj5tYXBfc2VtIG91dHNpZGUgb2YgaV9jZXBoX2xvY2suDQpbc25pcF0NCg0KDQpUaGFua3MNCkpp
+YW5wZW5nIE1h
 
-Hi Sage,
-
-On Tue, 18 Jun 2013 10:12:30 -0700 (PDT) Sage Weil <sage@inktank.com> wrote:
->
-> A while back I asked to switch the ceph branch in linux-next from master=
-=20
-> to testing, but upon further reflection I'd like to switch it back: we're=
-=20
-> hitting various cases where we want to carry patches that we're running=20
-> through our QA that aren't destined for the next merge window.
->=20
-> That is,
->=20
->   git://github.com/ceph/ceph-client.git master
-
-OK, done.
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-
---Signature=_Wed__19_Jun_2013_10_13_41_+1000_mX/tqxahGQ8tDdJn
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-
-iQIcBAEBCAAGBQJRwPe5AAoJEECxmPOUX5FEAZUP/iThMZOYAZ8KIeqF/sKAwgw6
-MQEpsMxpvcNo+nmfrPxk0bzaDbYzNxaLYI2alhFj7V8WCG7y6A1Ftoytc9WbAc1k
-pqIBltX2Gz1KmAGx39foJStwT6vczpHFU2OOc8m/7tWpOtTip3fUSbt+wP4MPPmq
-Sf4COIlJxBw1fjM2LQcuzcceVHWFlwX869DK263+cjwZbeRhglKJpjOZ7gsUf34s
-PY4YbMxCzHFxHaIoQonzOeFDZWtOOWALfrQ20FTBBjAY1paU9/FrlJ+L9XsSxvUr
-lSW+iZjtGi6X1qLcupOA1UB3NHQIdcDQ44gSngknlid7HrQ8P0XPTxbNZsEvB31H
-8fTw+GOVqAI/q0zjHTFBWbF0rqd7axauveQR73Tqom+45ViSYFi4ufLOSTwWaNjM
-DSU0vy+JzPvCmPTtXpHlXDBUuX7tXqjftoe2r6AodvRnFzh81WX+IG8/RbOrQJ19
-Wbox02qlulgZ4oL7MM9FtMPFfV+oSaFW8WjpOw6Yotiz9ZLBP+Q3KecbI84NKX9B
-sA3Hdj7ykxirgVlkk6u8io0TrIQd23xMZ+fMwwz3VcKL+CJgIOqPC+uUWoC1dfm2
-F1r1OX2KjrvzlpH7F7hgyY41n5DM0yDlJGMPnQN2MWWPK275g25qVtg9200iHOsh
-0hxsZMumE2Mwd6/uUvyc
-=HRdK
------END PGP SIGNATURE-----
-
---Signature=_Wed__19_Jun_2013_10_13_41_+1000_mX/tqxahGQ8tDdJn--
