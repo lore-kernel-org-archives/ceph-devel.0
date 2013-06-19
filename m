@@ -1,79 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Erasure code library summary
-Date: Wed, 19 Jun 2013 08:56:06 +0200
-Message-ID: <51C15606.4010105@dachary.org>
-References: <51C05123.8000002@dachary.org> <kpr0dn$3cr$1@ger.gmane.org>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH V1] ceph: fix sleeping function called from invalid context.
+Date: Wed, 19 Jun 2013 14:58:10 +0800
+Message-ID: <201306191458048052860@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigE93691C3D4E78C2AE62750AB"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:51418 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933154Ab3FSG4J (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 02:56:09 -0400
-In-Reply-To: <kpr0dn$3cr$1@ger.gmane.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elsayed <eternaleye@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE93691C3D4E78C2AE62750AB
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 06/19/2013 03:10 AM, Alex Elsayed wrote:
-> Loic Dachary wrote:
->=20
->> Hi Ceph,
->>
-> <snip>
->> Reed-Solomon coding family is the only one that can keep the chuncks
->> unencoded and therefore concatenable.
-> <snip>
->=20
-> In my understanding, this is not strictly true - any 'systematic' code =
-will=20
-> have the unencoded chunks remain available in this manner, and any non-=
-
-> systematic linear code can be transformed into a systematic code with t=
-he=20
-> same minimum distance. Fountain codes are often explicitly constructed =
-to=20
-> maintain this property, as in the case of RaptorQ [RFC 6330].
->=20
-> https://en.wikipedia.org/wiki/Systematic_code
-
-Thanks for correcting my mistake :-)
-
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigE93691C3D4E78C2AE62750AB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlHBVgYACgkQ8dLMyEl6F21j5gCgt8BoSUeFYkgvOIajGHzOyfQe
-maIAn1lHNSNDDZ2/8Cx0gh5bHklS09UG
-=8msY
------END PGP SIGNATURE-----
-
---------------enigE93691C3D4E78C2AE62750AB--
+WyAxMTIxLjIzMTg4M10gQlVHOiBzbGVlcGluZyBmdW5jdGlvbiBjYWxsZWQgZnJvbSBpbnZhbGlk
+IGNvbnRleHQgYXQga2VybmVsL3J3c2VtLmM6MjANClsgMTEyMS4yMzE5MzVdIGluX2F0b21pYygp
+OiAxLCBpcnFzX2Rpc2FibGVkKCk6IDAsIHBpZDogOTgzMSwgbmFtZTogbXYNClsgMTEyMS4yMzE5
+NzFdIDEgbG9jayBoZWxkIGJ5IG12Lzk4MzE6DQpbIDExMjEuMjMxOTczXSAgIzA6ICAoJigmY2kt
+PmlfY2VwaF9sb2NrKS0+cmxvY2speysuKy4uLn0sYXQ6WzxmZmZmZmZmZmEwMmJiZDM4Pl0gY2Vw
+aF9nZXR4YXR0cisweDU4LzB4MWQwIFtjZXBoXQ0KWyAxMTIxLjIzMTk5OF0gQ1BVOiAzIFBJRDog
+OTgzMSBDb21tOiBtdiBOb3QgdGFpbnRlZCAzLjEwLjAtcmM2KyAjMjE1DQpbIDExMjEuMjMyMDAw
+XSBIYXJkd2FyZSBuYW1lOiBUbyBCZSBGaWxsZWQgQnkgTy5FLk0uIFRvIEJlIEZpbGxlZCBCeQ0K
+Ty5FLk0uL1RvIGJlIGZpbGxlZCBieSBPLkUuTS4sIEJJT1MgMDgwMDE1ICAxMS8wOS8yMDExDQpb
+IDExMjEuMjMyMDI3XSAgZmZmZjg4MDA2ZDM1NWE4MCBmZmZmODgwMDkyZjY5Y2UwIGZmZmZmZmZm
+ODE2ODM0OGMgZmZmZjg4MDA5MmY2OWNmOA0KWyAxMTIxLjIzMjA0NV0gIGZmZmZmZmZmODEwNzA0
+MzUgZmZmZjg4MDA2ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDIwIGZmZmZmZmZmODE2ODk5YmENClsg
+MTEyMS4yMzIwNTJdICAwMDAwMDAwMzAwMDAwMDA0IGZmZmY4ODAwYjc2OTExZDAgZmZmZjg4MDA2
+ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDY4DQpbIDExMjEuMjMyMDU2XSBDYWxsIFRyYWNlOg0KWyAx
+MTIxLjIzMjA2Ml0gIFs8ZmZmZmZmZmY4MTY4MzQ4Yz5dIGR1bXBfc3RhY2srMHgxOS8weDFiDQpb
+IDExMjEuMjMyMDY3XSAgWzxmZmZmZmZmZjgxMDcwNDM1Pl0gX19taWdodF9zbGVlcCsweGU1LzB4
+MTEwDQpbIDExMjEuMjMyMDcxXSAgWzxmZmZmZmZmZjgxNjg5OWJhPl0gZG93bl9yZWFkKzB4MmEv
+MHg5OA0KWyAxMTIxLjIzMjA4MF0gIFs8ZmZmZmZmZmZhMDJiYWY3MD5dIGNlcGhfdnhhdHRyY2Jf
+bGF5b3V0KzB4NjAvMHhmMCBbY2VwaF0NClsgMTEyMS4yMzIwODhdICBbPGZmZmZmZmZmYTAyYmJk
+N2Y+XSBjZXBoX2dldHhhdHRyKzB4OWYvMHgxZDAgW2NlcGhdDQpbIDExMjEuMjMyMDkzXSAgWzxm
+ZmZmZmZmZjgxMTg4ZDI4Pl0gdmZzX2dldHhhdHRyKzB4YTgvMHhkMA0KWyAxMTIxLjIzMjA5N10g
+IFs8ZmZmZmZmZmY4MTE4OTAwYj5dIGdldHhhdHRyKzB4YWIvMHgxYzANClsgMTEyMS4yMzIxMDBd
+ICBbPGZmZmZmZmZmODExNzA0ZjI+XSA/IGZpbmFsX3B1dG5hbWUrMHgyMi8weDUwDQpbIDExMjEu
+MjMyMTA0XSAgWzxmZmZmZmZmZjgxMTU1ZjgwPl0gPyBrbWVtX2NhY2hlX2ZyZWUrMHhiMC8weDI2
+MA0KWyAxMTIxLjIzMjEwN10gIFs8ZmZmZmZmZmY4MTE3MDRmMj5dID8gZmluYWxfcHV0bmFtZSsw
+eDIyLzB4NTANClsgMTEyMS4yMzIxMTBdICBbPGZmZmZmZmZmODEwOWU2M2Q+XSA/IHRyYWNlX2hh
+cmRpcnFzX29uKzB4ZC8weDEwDQpbIDExMjEuMjMyMTE0XSAgWzxmZmZmZmZmZjgxNjk1N2E3Pl0g
+PyBzeXNyZXRfY2hlY2srMHgxYi8weDU2DQpbIDExMjEuMjMyMTIwXSAgWzxmZmZmZmZmZjgxMTg5
+YzljPl0gU3lTX2ZnZXR4YXR0cisweDZjLzB4YzANClsgMTEyMS4yMzIxMjVdICBbPGZmZmZmZmZm
+ODE2OTU3ODI+XSBzeXN0ZW1fY2FsbF9mYXN0cGF0aCsweDE2LzB4MWINClsgMTEyMS4yMzIxMjld
+IEJVRzogc2NoZWR1bGluZyB3aGlsZSBhdG9taWM6IG12Lzk4MzEvMHgxMDAwMDAwMg0KWyAxMTIx
+LjIzMjE1NF0gMSBsb2NrIGhlbGQgYnkgbXYvOTgzMToNClsgMTEyMS4yMzIxNTZdICAjMDogICgm
+KCZjaS0+aV9jZXBoX2xvY2spLT5ybG9jayl7Ky4rLi4ufSwgYXQ6DQpbPGZmZmZmZmZmYTAyYmJk
+Mzg+XSBjZXBoX2dldHhhdHRyKzB4NTgvMHgxZDAgW2NlcGhdDQoNCkkgdGhpbmsgbW92ZSB0aGUg
+Y2ktPmlfY2VwaF9sb2NrIGRvd24gaXMgc2FmZSBiZWNhdXNlIHdlIGNhbid0IGZyZWUNCmNlcGhf
+aW5vZGVfaW5mbyBhdCB0aGVyZS4NCg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlh
+bnBlbmdAZ21haWwuY29tPg0KLS0tDQogZnMvY2VwaC94YXR0ci5jIHwgOSArKysrKy0tLS0NCiAx
+IGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0t
+Z2l0IGEvZnMvY2VwaC94YXR0ci5jIGIvZnMvY2VwaC94YXR0ci5jDQppbmRleCA5YjZiMmI2Li5i
+ZTY2MWQ4IDEwMDY0NA0KLS0tIGEvZnMvY2VwaC94YXR0ci5jDQorKysgYi9mcy9jZXBoL3hhdHRy
+LmMNCkBAIC02NzUsMTcgKzY3NSwxOCBAQCBzc2l6ZV90IGNlcGhfZ2V0eGF0dHIoc3RydWN0IGRl
+bnRyeSAqZGVudHJ5LCBjb25zdCBjaGFyICpuYW1lLCB2b2lkICp2YWx1ZSwNCiAJaWYgKCFjZXBo
+X2lzX3ZhbGlkX3hhdHRyKG5hbWUpKQ0KIAkJcmV0dXJuIC1FTk9EQVRBOw0KIA0KLQlzcGluX2xv
+Y2soJmNpLT5pX2NlcGhfbG9jayk7DQotCWRvdXQoImdldHhhdHRyICVwIHZlcj0lbGxkIGluZGV4
+X3Zlcj0lbGxkXG4iLCBpbm9kZSwNCi0JICAgICBjaS0+aV94YXR0cnMudmVyc2lvbiwgY2ktPmlf
+eGF0dHJzLmluZGV4X3ZlcnNpb24pOw0KIA0KIAkvKiBsZXQncyBzZWUgaWYgYSB2aXJ0dWFsIHhh
+dHRyIHdhcyByZXF1ZXN0ZWQgKi8NCiAJdnhhdHRyID0gY2VwaF9tYXRjaF92eGF0dHIoaW5vZGUs
+IG5hbWUpOw0KIAlpZiAodnhhdHRyICYmICEodnhhdHRyLT5leGlzdHNfY2IgJiYgIXZ4YXR0ci0+
+ZXhpc3RzX2NiKGNpKSkpIHsNCiAJCWVyciA9IHZ4YXR0ci0+Z2V0eGF0dHJfY2IoY2ksIHZhbHVl
+LCBzaXplKTsNCi0JCWdvdG8gb3V0Ow0KKwkJcmV0dXJuIGVycjsNCiAJfQ0KIA0KKwlzcGluX2xv
+Y2soJmNpLT5pX2NlcGhfbG9jayk7DQorCWRvdXQoImdldHhhdHRyICVwIHZlcj0lbGxkIGluZGV4
+X3Zlcj0lbGxkXG4iLCBpbm9kZSwNCisJICAgICBjaS0+aV94YXR0cnMudmVyc2lvbiwgY2ktPmlf
+eGF0dHJzLmluZGV4X3ZlcnNpb24pOw0KKw0KIAlpZiAoX19jZXBoX2NhcHNfaXNzdWVkX21hc2so
+Y2ksIENFUEhfQ0FQX1hBVFRSX1NIQVJFRCwgMSkgJiYNCiAJICAgIChjaS0+aV94YXR0cnMuaW5k
+ZXhfdmVyc2lvbiA+PSBjaS0+aV94YXR0cnMudmVyc2lvbikpIHsNCiAJCWdvdG8gZ2V0X3hhdHRy
+Ow0KLS0gDQoxLjguMy5yYzEuNDQuZ2IzODdjNzcNCg==
