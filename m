@@ -1,82 +1,91 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH] ceph: fix sleeping function called from invalid context.
-Date: Wed, 19 Jun 2013 08:38:02 +0800
-Message-ID: <201306190837590546663@gmail.com>
-References: <201306181930448773810@gmail.com>,
-	<alpine.DEB.2.00.1306180807210.23632@cobra.newdream.net>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Re: [PATCH] ceph: fix sleeping function called from invalid
+ context.
+Date: Tue, 18 Jun 2013 17:52:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306181750040.18947@cobra.newdream.net>
+References: <201306181930448773810@gmail.com>,  <alpine.DEB.2.00.1306180807210.23632@cobra.newdream.net> <201306190837590546663@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f50.google.com ([209.85.160.50]:62006 "EHLO
-	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932824Ab3FSAiG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jun 2013 20:38:06 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201306190837590546663@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: majianpeng <majianpeng@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Pk9uIFR1ZSwgMTggSnVuIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBbIDExMjEuMjMxODgz
-XSBCVUc6IHNsZWVwaW5nIGZ1bmN0aW9uIGNhbGxlZCBmcm9tIGludmFsaWQgY29udGV4dCBhdCBr
-ZXJuZWwvcndzZW0uYzoyMA0KPj4gWyAxMTIxLjIzMTkzNV0gaW5fYXRvbWljKCk6IDEsIGlycXNf
-ZGlzYWJsZWQoKTogMCwgcGlkOiA5ODMxLCBuYW1lOiBtdg0KPj4gWyAxMTIxLjIzMTk3MV0gMSBs
-b2NrIGhlbGQgYnkgbXYvOTgzMToNCj4+IFsgMTEyMS4yMzE5NzNdICAjMDogICgmKCZjaS0+aV9j
-ZXBoX2xvY2spLT5ybG9jayl7Ky4rLi4ufSwgYXQ6WzxmZmZmZmZmZmEwMmJiZDM4Pl0gY2VwaF9n
-ZXR4YXR0cisweDU4LzB4MWQwIFtjZXBoXQ0KPj4gWyAxMTIxLjIzMTk5OF0gQ1BVOiAzIFBJRDog
-OTgzMSBDb21tOiBtdiBOb3QgdGFpbnRlZCAzLjEwLjAtcmM2KyAjMjE1DQo+PiBbIDExMjEuMjMy
-MDAwXSBIYXJkd2FyZSBuYW1lOiBUbyBCZSBGaWxsZWQgQnkgTy5FLk0uIFRvIEJlIEZpbGxlZCBC
-eQ0KPj4gTy5FLk0uL1RvIGJlIGZpbGxlZCBieSBPLkUuTS4sIEJJT1MgMDgwMDE1ICAxMS8wOS8y
-MDExDQo+PiBbIDExMjEuMjMyMDI3XSAgZmZmZjg4MDA2ZDM1NWE4MCBmZmZmODgwMDkyZjY5Y2Uw
-IGZmZmZmZmZmODE2ODM0OGMgZmZmZjg4MDA5MmY2OWNmOA0KPj4gWyAxMTIxLjIzMjA0NV0gIGZm
-ZmZmZmZmODEwNzA0MzUgZmZmZjg4MDA2ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDIwIGZmZmZmZmZm
-ODE2ODk5YmENCj4+IFsgMTEyMS4yMzIwNTJdICAwMDAwMDAwMzAwMDAwMDA0IGZmZmY4ODAwYjc2
-OTExZDAgZmZmZjg4MDA2ZDM1NWEyMCBmZmZmODgwMDkyZjY5ZDY4DQo+PiBbIDExMjEuMjMyMDU2
-XSBDYWxsIFRyYWNlOg0KPj4gWyAxMTIxLjIzMjA2Ml0gIFs8ZmZmZmZmZmY4MTY4MzQ4Yz5dIGR1
-bXBfc3RhY2srMHgxOS8weDFiDQo+PiBbIDExMjEuMjMyMDY3XSAgWzxmZmZmZmZmZjgxMDcwNDM1
-Pl0gX19taWdodF9zbGVlcCsweGU1LzB4MTEwDQo+PiBbIDExMjEuMjMyMDcxXSAgWzxmZmZmZmZm
-ZjgxNjg5OWJhPl0gZG93bl9yZWFkKzB4MmEvMHg5OA0KPj4gWyAxMTIxLjIzMjA4MF0gIFs8ZmZm
-ZmZmZmZhMDJiYWY3MD5dIGNlcGhfdnhhdHRyY2JfbGF5b3V0KzB4NjAvMHhmMCBbY2VwaF0NCj4+
-IFsgMTEyMS4yMzIwODhdICBbPGZmZmZmZmZmYTAyYmJkN2Y+XSBjZXBoX2dldHhhdHRyKzB4OWYv
-MHgxZDAgW2NlcGhdDQo+PiBbIDExMjEuMjMyMDkzXSAgWzxmZmZmZmZmZjgxMTg4ZDI4Pl0gdmZz
-X2dldHhhdHRyKzB4YTgvMHhkMA0KPj4gWyAxMTIxLjIzMjA5N10gIFs8ZmZmZmZmZmY4MTE4OTAw
-Yj5dIGdldHhhdHRyKzB4YWIvMHgxYzANCj4+IFsgMTEyMS4yMzIxMDBdICBbPGZmZmZmZmZmODEx
-NzA0ZjI+XSA/IGZpbmFsX3B1dG5hbWUrMHgyMi8weDUwDQo+PiBbIDExMjEuMjMyMTA0XSAgWzxm
-ZmZmZmZmZjgxMTU1ZjgwPl0gPyBrbWVtX2NhY2hlX2ZyZWUrMHhiMC8weDI2MA0KPj4gWyAxMTIx
-LjIzMjEwN10gIFs8ZmZmZmZmZmY4MTE3MDRmMj5dID8gZmluYWxfcHV0bmFtZSsweDIyLzB4NTAN
-Cj4+IFsgMTEyMS4yMzIxMTBdICBbPGZmZmZmZmZmODEwOWU2M2Q+XSA/IHRyYWNlX2hhcmRpcnFz
-X29uKzB4ZC8weDEwDQo+PiBbIDExMjEuMjMyMTE0XSAgWzxmZmZmZmZmZjgxNjk1N2E3Pl0gPyBz
-eXNyZXRfY2hlY2srMHgxYi8weDU2DQo+PiBbIDExMjEuMjMyMTIwXSAgWzxmZmZmZmZmZjgxMTg5
-YzljPl0gU3lTX2ZnZXR4YXR0cisweDZjLzB4YzANCj4+IFsgMTEyMS4yMzIxMjVdICBbPGZmZmZm
-ZmZmODE2OTU3ODI+XSBzeXN0ZW1fY2FsbF9mYXN0cGF0aCsweDE2LzB4MWINCj4+IFsgMTEyMS4y
-MzIxMjldIEJVRzogc2NoZWR1bGluZyB3aGlsZSBhdG9taWM6IG12Lzk4MzEvMHgxMDAwMDAwMg0K
-Pj4gWyAxMTIxLjIzMjE1NF0gMSBsb2NrIGhlbGQgYnkgbXYvOTgzMToNCj4+IFsgMTEyMS4yMzIx
-NTZdICAjMDogICgmKCZjaS0+aV9jZXBoX2xvY2spLT5ybG9jayl7Ky4rLi4ufSwgYXQ6DQo+PiBb
-PGZmZmZmZmZmYTAyYmJkMzg+XSBjZXBoX2dldHhhdHRyKzB4NTgvMHgxZDAgW2NlcGhdDQo+PiAN
-Cj4+IEkgdGhpbmsgbW92ZSB0aGUgY2ktPmlfY2VwaF9sb2NrIGRvd24gaXMgc2FmZSBiZWNhdXNl
-IHdlIGNhbid0IGZyZWUNCj4+IGNlcGhfaW5vZGVfaW5mbyBhdCB0aGVyZS4NCj4+IA0KPj4gU2ln
-bmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+
-PiAgZnMvY2VwaC94YXR0ci5jIHwgNCArKy0tDQo+PiAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0
-aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4+IA0KPj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgveGF0
-dHIuYyBiL2ZzL2NlcGgveGF0dHIuYw0KPj4gaW5kZXggOWI2YjJiNi4uNGVmZGUwNiAxMDA2NDQN
-Cj4+IC0tLSBhL2ZzL2NlcGgveGF0dHIuYw0KPj4gKysrIGIvZnMvY2VwaC94YXR0ci5jDQo+PiBA
-QCAtNjc1LDcgKzY3NSw2IEBAIHNzaXplX3QgY2VwaF9nZXR4YXR0cihzdHJ1Y3QgZGVudHJ5ICpk
-ZW50cnksIGNvbnN0IGNoYXIgKm5hbWUsIHZvaWQgKnZhbHVlLA0KPj4gICAgICAgICBpZiAoIWNl
-cGhfaXNfdmFsaWRfeGF0dHIobmFtZSkpDQo+PiAgICAgICAgICAgICAgICAgcmV0dXJuIC1FTk9E
-QVRBOw0KPj4gIA0KPj4gLSAgICAgICBzcGluX2xvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+PiAg
-ICAgICAgIGRvdXQoImdldHhhdHRyICVwIHZlcj0lbGxkIGluZGV4X3Zlcj0lbGxkXG4iLCBpbm9k
-ZSwNCj4+ICAgICAgICAgICAgICBjaS0+aV94YXR0cnMudmVyc2lvbiwgY2ktPmlfeGF0dHJzLmlu
-ZGV4X3ZlcnNpb24pOw0KPg0KPlVuZm9ydHVuYXRlbHkgdGhlc2UgaW50ZXJ2ZW5pbmcgbGluZXMg
-bmVleHQgaV9jZXBoX2xvY2sgdG8gcHJldmVudCB0aGUgDQo+aV94YXR0cnMgc3RydWN0IGNvbnRl
-bnRzIGZyb20gc2hpZnRpbmcgdW5kZXJuZWF0aCB1cy4gIEl0IGlzIG1vcmUgDQpJTUhPLGZvciB0
-aG9zZSBsaW5lDQo+ICAgICAgICAgdnhhdHRyID0gY2VwaF9tYXRjaF92eGF0dHIoaW5vZGUsIG5h
-bWUpOw0KPiAgICAgICAgIGlmICh2eGF0dHIgJiYgISh2eGF0dHItPmV4aXN0c19jYiAmJiAhdnhh
-dHRyLT5leGlzdHNfY2IoY2kpKSkgew0KPiAgICAgICAgICAgICAgICAgZXJyID0gdnhhdHRyLT5n
-ZXR4YXR0cl9jYihjaSwgdmFsdWUsIHNpemUpOw0KSXQncyBubyBuZWVkIHRvIHByb3RlY3QgYnkg
-aV9jZXBoX2xvY2suDQpDYW4geW91IGV4cGFsaW4gaW4gZGV0YWlsPw0KPmV4cGVuc2l2ZSBmb3Ig
-dGhlIGdlbmVyYWwgZ2V0eGF0dHIgY2FzZSwgYnV0IGEgc2ltcGxlciBmaXggaXMgdG8gdGFrZSAN
-Cj5tYXBfc2VtIG91dHNpZGUgb2YgaV9jZXBoX2xvY2suDQpbc25pcF0NCg0KDQpUaGFua3MNCkpp
-YW5wZW5nIE1h
+On Wed, 19 Jun 2013, majianpeng wrote:
+> >On Tue, 18 Jun 2013, majianpeng wrote:
+> >> [ 1121.231883] BUG: sleeping function called from invalid context at kernel/rwsem.c:20
+> >> [ 1121.231935] in_atomic(): 1, irqs_disabled(): 0, pid: 9831, name: mv
+> >> [ 1121.231971] 1 lock held by mv/9831:
+> >> [ 1121.231973]  #0:  (&(&ci->i_ceph_lock)->rlock){+.+...}, at:[<ffffffffa02bbd38>] ceph_getxattr+0x58/0x1d0 [ceph]
+> >> [ 1121.231998] CPU: 3 PID: 9831 Comm: mv Not tainted 3.10.0-rc6+ #215
+> >> [ 1121.232000] Hardware name: To Be Filled By O.E.M. To Be Filled By
+> >> O.E.M./To be filled by O.E.M., BIOS 080015  11/09/2011
+> >> [ 1121.232027]  ffff88006d355a80 ffff880092f69ce0 ffffffff8168348c ffff880092f69cf8
+> >> [ 1121.232045]  ffffffff81070435 ffff88006d355a20 ffff880092f69d20 ffffffff816899ba
+> >> [ 1121.232052]  0000000300000004 ffff8800b76911d0 ffff88006d355a20 ffff880092f69d68
+> >> [ 1121.232056] Call Trace:
+> >> [ 1121.232062]  [<ffffffff8168348c>] dump_stack+0x19/0x1b
+> >> [ 1121.232067]  [<ffffffff81070435>] __might_sleep+0xe5/0x110
+> >> [ 1121.232071]  [<ffffffff816899ba>] down_read+0x2a/0x98
+> >> [ 1121.232080]  [<ffffffffa02baf70>] ceph_vxattrcb_layout+0x60/0xf0 [ceph]
+> >> [ 1121.232088]  [<ffffffffa02bbd7f>] ceph_getxattr+0x9f/0x1d0 [ceph]
+> >> [ 1121.232093]  [<ffffffff81188d28>] vfs_getxattr+0xa8/0xd0
+> >> [ 1121.232097]  [<ffffffff8118900b>] getxattr+0xab/0x1c0
+> >> [ 1121.232100]  [<ffffffff811704f2>] ? final_putname+0x22/0x50
+> >> [ 1121.232104]  [<ffffffff81155f80>] ? kmem_cache_free+0xb0/0x260
+> >> [ 1121.232107]  [<ffffffff811704f2>] ? final_putname+0x22/0x50
+> >> [ 1121.232110]  [<ffffffff8109e63d>] ? trace_hardirqs_on+0xd/0x10
+> >> [ 1121.232114]  [<ffffffff816957a7>] ? sysret_check+0x1b/0x56
+> >> [ 1121.232120]  [<ffffffff81189c9c>] SyS_fgetxattr+0x6c/0xc0
+> >> [ 1121.232125]  [<ffffffff81695782>] system_call_fastpath+0x16/0x1b
+> >> [ 1121.232129] BUG: scheduling while atomic: mv/9831/0x10000002
+> >> [ 1121.232154] 1 lock held by mv/9831:
+> >> [ 1121.232156]  #0:  (&(&ci->i_ceph_lock)->rlock){+.+...}, at:
+> >> [<ffffffffa02bbd38>] ceph_getxattr+0x58/0x1d0 [ceph]
+> >> 
+> >> I think move the ci->i_ceph_lock down is safe because we can't free
+> >> ceph_inode_info at there.
+> >> 
+> >> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> >> ---
+> >>  fs/ceph/xattr.c | 4 ++--
+> >>  1 file changed, 2 insertions(+), 2 deletions(-)
+> >> 
+> >> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> >> index 9b6b2b6..4efde06 100644
+> >> --- a/fs/ceph/xattr.c
+> >> +++ b/fs/ceph/xattr.c
+> >> @@ -675,7 +675,6 @@ ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+> >>         if (!ceph_is_valid_xattr(name))
+> >>                 return -ENODATA;
+> >>  
+> >> -       spin_lock(&ci->i_ceph_lock);
+> >>         dout("getxattr %p ver=%lld index_ver=%lld\n", inode,
+> >>              ci->i_xattrs.version, ci->i_xattrs.index_version);
+> >
+> >Unfortunately these intervening lines neext i_ceph_lock to prevent the 
+> >i_xattrs struct contents from shifting underneath us.  It is more 
+> IMHO,for those line
+> >         vxattr = ceph_match_vxattr(inode, name);
+> >         if (vxattr && !(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
+> >                 err = vxattr->getxattr_cb(ci, value, size);
+> It's no need to protect by i_ceph_lock.
+> Can you expalin in detail?
 
+Oh!  You're totally right.  I got distracted by the dout() line that 
+prints i_xattrs.* fields; *that* needs to move that too to stay inside the 
+lock.  Care to update the patch?
+
+Thanks!
+sage
+
+
+> >expensive for the general getxattr case, but a simpler fix is to take 
+> >map_sem outside of i_ceph_lock.
+> [snip]
+> 
+> 
+> Thanks
+> Jianpeng Ma
