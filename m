@@ -1,61 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: New Defects reported by Coverity Scan for ceph (fwd)
-Date: Wed, 19 Jun 2013 23:03:39 +0200
-Message-ID: <51C21CAB.40303@dachary.org>
-References: <alpine.DEB.2.00.1306191235300.27900@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig387A07592731D0EE0586FAC2"
+From: John Nielsen <lists@jnielsen.net>
+Subject: Re: recent osd changes
+Date: Wed, 19 Jun 2013 15:46:50 -0600
+Message-ID: <158BDFA0-46FF-43D6-9FC5-1F3BC9EDBABF@jnielsen.net>
+References: <alpine.DEB.2.00.1306191259430.6742@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:40057 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964788Ab3FSVDm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 17:03:42 -0400
-In-Reply-To: <alpine.DEB.2.00.1306191235300.27900@cobra.newdream.net>
+Received: from secure.freebsdsolutions.net ([69.55.234.48]:58981 "EHLO
+	ns1.jnielsen.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S935070Ab3FSWNr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 18:13:47 -0400
+In-Reply-To: <alpine.DEB.2.00.1306191259430.6742@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig387A07592731D0EE0586FAC2
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Thanks for the update (and, as always, the great work)!
 
-Hi Sage,
+Could you also indicate for each change which development and stable release(s) they (will) appear in?
 
-I believe
-https://github.com/ceph/ceph/pull/366
-fixes the issue. It was introduced by
-https://github.com/ceph/ceph/commit/b16fdf23e5325623874ee1a02e134f577c5a7=
-dcd#L0R364
-which was merged in master yesterday.
+On Jun 19, 2013, at 2:04 PM, Sage Weil <sage@inktank.com> wrote:
 
-Cheers
+> The OSDs used to only heartbeat on teh cluster interface.  Since they 
+> actually talk to clients on the public interface this didn't detect 
+> certain assymetrical network failures; this was fixed in the last release.
+> 
+> We also fixed a long-standing isue where the failure of the backend 
+> network would cause an OSD to be marked down, but it would mark itself 
+> back up by talking to the mon on the public interface.  It now verifies 
+> that the backend network is working (by pinging random other osds) before 
+> marking itself back up to avoid the problem.
+> 
+> The last change was a more robust writeback model.  We have a general 
+> problem where we are journaling writes and then applying them to the file 
+> system, but the two devices/targets may go at different speeds.  We don't 
+> want to journal to get too far ahead of the fs or else request latency 
+> become erratic/bursty and the eventual fs commit can take a very long 
+> time.  Sam put togther a simple model of how much work the fs has pending 
+> for the next commit (based on dirty bytes, dirty files, dirty inodes) and 
+> bases throttling decisions on that instead of the very rough limits that 
+> used to be in place.  This resolves many 'slow request' warnings and even 
+> OSD failures (due to op_tp timeouts from very deep queues) on certain 
+> torturous workload (ffsb).
 
-On 06/19/2013 09:36 PM, Sage Weil wrote:
-> Dereferencing iterator "p" though it is already past the end of its con=
-tainer.
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig387A07592731D0EE0586FAC2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAlHCHKsACgkQ8dLMyEl6F20x0wCfaRmnluD1Ck+Ih1pJeRA9u33y
-giYAoJ5PWyGwHnk7rBZSQi3sAEtydcPM
-=XdBw
------END PGP SIGNATURE-----
-
---------------enig387A07592731D0EE0586FAC2--
