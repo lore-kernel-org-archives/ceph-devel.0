@@ -1,73 +1,139 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: dynamically move busy pg's to fast storage
-Date: Wed, 19 Jun 2013 06:57:59 -0500
-Message-ID: <51C19CC7.2010203@inktank.com>
-References: <6035A0D088A63A46850C3988ED045A4B5C218596@BITCOM1.int.sbss.com.au>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Erasure code library summary
+Date: Wed, 19 Jun 2013 14:10:25 +0200
+Message-ID: <51C19FB1.7000700@dachary.org>
+References: <51C05123.8000002@dachary.org> <51C196F8.4080501@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig79270C3D29413C4F3BD4C4EF"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:45968 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934052Ab3FSL6B (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 07:58:01 -0400
-Received: by mail-ie0-f179.google.com with SMTP id c10so13115172ieb.10
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jun 2013 04:58:01 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B5C218596@BITCOM1.int.sbss.com.au>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:53992 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934297Ab3FSMK2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jun 2013 08:10:28 -0400
+In-Reply-To: <51C196F8.4080501@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 06/19/2013 05:46 AM, James Harper wrote:
-> Suppose you had two classes of OSD, one fast (eg SSD's or 15K SAS drives) and the other slow (eg 7200RPM SATA drives). The fast storage is expensive so you might not have so much of it. Rather than try and map whole volumes to the best class of storage (eg fast for databases, slow for user files), it would be nice if ceph could monitor activity and move busy pg's to the fast OSD's, and move idle pg's to the slower OSD's.
->
-> What I had in mind initially was a daemon external to ceph that would monitor the statistics to determine what pg's were currently being hit hard, and make decisions about placement, moving pg's around to maximise performance. As a minimum such a daemon would need access to the following information:
-> . read and write count for each pg (to determine io rate)
-> . class of each osd (fast/slow/etc). Ideally this would be defined as part of the osd definition but an external config file would suffice for a proof of concept.
-> . an api to actually manually place pg's and not have ceph make its own decisions and move them back (this may the sticking point...)
-> . a way to make sure that moving pg's didn't break the desired redundancy (tricky?)
->
-> A pg with a high write rate would need the primary pg and all replica's on fast storage. A pg with low write but high read rate could have the primary on fast storage and the replica's on slow storage.
->
->  From reading the docs it seems ceph doesn't do this already. There is a reweight-by-utilization command which may give some of the same benefit.
->
-> Obviously there is a cost to moving pg's around, but it should be fairly easy to balance the cost of moving vs the benefit of having the busy pg's on a fast osd. None of the decisions to move pg's would need to be made particularly quickly, and the rate at which move requests were initiated would be limited to minimise impact.
->
-> Is something like this possible? Or useful? (I think it would be if you want to maximise the use of your expensive SSD's) Is a pg a small enough unit for this or too coarse?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig79270C3D29413C4F3BD4C4EF
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Note:  I just woke up and haven't had coffee. :)
 
-My thought here is that data distribution to PGs in a pool should be 
-psuedo-random, so ideally all of the PGs should be getting hit more or 
-less evenly if your pools are well distributed.  This doesn't always 
-work out to be true all the time, but it's the general goal.  Some edge 
-cases are when you are doing something like small random reads from a 
-small set of objects that all just happen to be on the same PGs, but 
-cache should quickly handle that with sufficient read ahead.
 
-I think the way I would handle this would be to have multiple pools that 
-target PGs on different backend hardware and have some kind of automatic 
-tiering between pools.  That lets you do things like set different 
-replication levels (or even erasure coding!) for each tier.  It's also 
-at the object level rather than at the PG level so you aren't 
-indiscriminately moving around both cold and hot data based on the 
-overall PG utilization.
+On 06/19/2013 01:33 PM, Mark Nelson wrote:
+> On 06/18/2013 07:22 AM, Loic Dachary wrote:
+>> Hi Ceph,
+>>
+>> TL;DR: use jerasure 1.2 with Reed-Solomon to code/decode/repair an obj=
+ect, and upgrade to 2.0 when available.
+>>
+>> Disclaimer: I'm no expert ;-) The terms are explained in wikipedia[1].=
 
-If you look at our roadmap, this is more or less what we are planning on 
-doing:
+>>
+>> Using Reed-Solomon object O is encoded by dividing it into consecutive=
+ chuncks O1, O2, ... ON and computing parity blocks P1, P2, ... PK.  Read=
+ing the original content of object O is a simple concatenation of O1, O2,=
+ ... ON. If O2 or P2 are lost, they can be repaired/reconstructed using O=
+1 ... ON and P1 ... PK. If the use case is mostly reading objects and rep=
+airs are at least 1000 times less likely than normal operations, being ab=
+le to read the object from non-coded chuncks is attractive.
+>>
+>> Reed-Solomon is significantly more expensive to encode ( 100MB/s order=
+ of magnitude on a single 2.5Ghz core ) than fountain codes with the curr=
+ent jerasure implementation[2]. However, gf-complete[3] that will be used=
+ in the upcoming version of jerasure significantly improves performances =
+( 2 to 10 times faster ) and the difference becomes negligible.
+>=20
+> One thing that we might consider is that ARM is very quickly becoming a=
+n option for Ceph.  It may be very important to have our erasure coding s=
+cheme be viable on that platform and CPU is going to be the primary bottl=
+eneck.  It may be worth a quick look at NEON to see if there are any thin=
+gs we should be thinking about now.
 
-http://www.inktank.com/about-inktank/roadmap/
+Hi Mark,
 
-Input is welcome! :)
->
-> Thanks
->
-> James
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+In another thread James Plank wrote that CPU usage is not going to be a p=
+roblem as long as we're not trying to slice an object into more than 2^16=
+ chunks ( the actual sentence is "I agree that the CPU burden of the GF a=
+rithmetic will not be a bottleneck in your system, regardless of which im=
+plementation you use, as long as you stay at or below GF(2^16)." http://a=
+rticle.gmane.org/gmane.comp.file-systems.ceph.devel/15650 ). It looks lik=
+e we're aiming for something in the order of 10 data chunks + 5 parity ch=
+unks, i.e. much lower than 2^16. My hunch is that using more than 100 OSD=
+s to code a single object would be problematic for reasons that are unrel=
+ated to the maths involved in coding it anyway.
 
+That being said I can look for/write benchmark code based on jerasure to =
+run on ARM and get a rough idea of the CPU footprint, if you think it's w=
+orth it.=20
+
+Cheers
+>=20
+>>
+>> Reed-Solomon coding family is the only one that can keep the chuncks u=
+nencoded and therefore concatenable.
+>>
+>> The jerasure library is packaged and being worked on by the author at =
+the moment. All other Free Software implementations are either not packag=
+ed or not maintained.
+>>
+>> The license[4] of jerasure is compatible with the license of Ceph.
+>>
+>> Performances depend on the parameters to the Reed-Solomon functions bu=
+t they will also be influenced by the buffer sizes used when calling the =
+encoding functions: smaller buffers will mean more calls and more overhea=
+d.
+>>
+>> Open questions:
+>>
+>> * Does Mojette Transform [5] have compelling qualities compared to oth=
+er code families ?
+>> * Do hierarchical codes [6] have compelling qualities ? Implementing t=
+hem would require a different API. To be effective they need to take into=
+ account the context in which an object is stored where the other code on=
+ly require the object itself.
+>> * I have not experiemented with the jerasure API yet
+>>
+>> Feedback and criticisms are welcome :-)
+>>
+>> [1] http://en.wikipedia.org/wiki/Erasure_code
+>> [2] jerasure 1.2 http://web.eecs.utk.edu/~plank/plank/papers/CS-08-627=
+=2Ehtml
+>> [3] gf-complete http://web.eecs.utk.edu/~plank/plank/papers/CS-13-703.=
+html
+>> [4] jerasure license https://github.com/tsuraan/Jerasure/blob/master/L=
+icense.txt
+>> [5] Mojette Transform http://en.wikipedia.org/wiki/Mojette_Transform
+>> [6] hierarchical codes http://www.e-biersack.eu/BPublished/nc_springer=
+=2Epdf
+>>
+>>
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+--------------enig79270C3D29413C4F3BD4C4EF
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlHBn7EACgkQ8dLMyEl6F20ehgCggKHzj2/nB+n9IBT870aI8OLh
+bhUAn37v9qeSmcvAZKzqpiL8b/BIg1gn
+=9Ayc
+-----END PGP SIGNATURE-----
+
+--------------enig79270C3D29413C4F3BD4C4EF--
