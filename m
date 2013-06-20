@@ -1,577 +1,289 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] osdc: re-calculate truncate_size for strip objects
-Date: Thu, 20 Jun 2013 15:50:18 +0800
-Message-ID: <1371714618-495-1-git-send-email-zheng.z.yan@intel.com>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: rbd: assertion failure in rbd_img_obj_callback()
+Date: Thu, 20 Jun 2013 10:40:04 +0200
+Message-ID: <20130620104004.10574583@doppio>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="MP_/eT=m7S1JenMYNNuD/7XO4il"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:43990 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753619Ab3FTHuW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 20 Jun 2013 03:50:22 -0400
+Received: from port-212-202-108-184.static.qsc.de ([212.202.108.184]:34593
+	"EHLO mail.itxperts.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S935296Ab3FTIkJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 04:40:09 -0400
+Received: from itxmail.itxperts.de (qgate_dmz.itxperts.de [192.168.160.1])
+	by mail.itxperts.de (8.14.0/8.14.0) with ESMTP id r5K8fbiu020296
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 10:41:37 +0200
+Received: from doppio (doppio.itxperts.de [192.168.140.7])
+	by itxmail.itxperts.de (Postfix) with ESMTP id 9E77513F02
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 11:43:12 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+--MP_/eT=m7S1JenMYNNuD/7XO4il
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Fixes #5380
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/client/Client.cc     |  8 ++++----
- src/librbd/ImageCtx.cc   |  4 ++--
- src/librbd/internal.cc   | 10 +++++-----
- src/osd/osd_types.h      |  6 ++++--
- src/osdc/Filer.cc        |  2 +-
- src/osdc/Filer.h         | 12 ++++++------
- src/osdc/ObjectCacher.cc | 28 ++++++++++++++--------------
- src/osdc/ObjectCacher.h  | 17 ++++++++++-------
- src/osdc/Objecter.h      |  8 ++++----
- src/osdc/Striper.cc      | 45 ++++++++++++++++++++++++++++++++++++++++++---
- src/osdc/Striper.h       | 11 +++++++----
- src/test/test_striper.cc |  5 ++++-
- 12 files changed, 103 insertions(+), 53 deletions(-)
+Hi,
 
-diff --git a/src/client/Client.cc b/src/client/Client.cc
-index 80cce8a..45ad949 100644
---- a/src/client/Client.cc
-+++ b/src/client/Client.cc
-@@ -2665,7 +2665,7 @@ void Client::_invalidate_inode_cache(Inode *in, int64_t off, int64_t len, bool k
-   // invalidate our userspace inode cache
-   if (cct->_conf->client_oc) {
-     vector<ObjectExtent> ls;
--    Striper::file_to_extents(cct, in->ino, &in->layout, off, len, ls);
-+    Striper::file_to_extents(cct, in->ino, &in->layout, off, len, in->truncate_size, ls);
-     objectcacher->discard_set(&in->oset, ls);
-   }
- 
-@@ -7740,7 +7740,7 @@ int Client::get_file_extent_osds(int fd, loff_t off, loff_t *len, vector<int>& o
-   Inode *in = f->inode;
- 
-   vector<ObjectExtent> extents;
--  Striper::file_to_extents(cct, in->ino, &in->layout, off, 1, extents);
-+  Striper::file_to_extents(cct, in->ino, &in->layout, off, 1, in->truncate_size, extents);
-   assert(extents.size() == 1);
- 
-   pg_t pg = osdmap->object_locator_to_pg(extents[0].oid, extents[0].oloc);
-@@ -7787,7 +7787,7 @@ int Client::get_file_stripe_address(int fd, loff_t offset, vector<entity_addr_t>
- 
-   // which object?
-   vector<ObjectExtent> extents;
--  Striper::file_to_extents(cct, in->ino, &in->layout, offset, 1, extents);
-+  Striper::file_to_extents(cct, in->ino, &in->layout, offset, 1, in->truncate_size, extents);
-   assert(extents.size() == 1);
- 
-   // now we have the object and its 'layout'
-@@ -7828,7 +7828,7 @@ int Client::enumerate_layout(int fd, vector<ObjectExtent>& result,
-   Inode *in = f->inode;
- 
-   // map to a list of extents
--  Striper::file_to_extents(cct, in->ino, &in->layout, offset, length, result);
-+  Striper::file_to_extents(cct, in->ino, &in->layout, offset, length, in->truncate_size, result);
- 
-   ldout(cct, 3) << "enumerate_layout(" << fd << ", " << length << ", " << offset << ") = 0" << dendl;
-   return 0;
-diff --git a/src/librbd/ImageCtx.cc b/src/librbd/ImageCtx.cc
-index 6796bc8..2ab5fd9 100644
---- a/src/librbd/ImageCtx.cc
-+++ b/src/librbd/ImageCtx.cc
-@@ -475,7 +475,7 @@ namespace librbd {
-     snap_lock.get_read();
-     ObjectCacher::OSDRead *rd = object_cacher->prepare_read(snap_id, bl, 0);
-     snap_lock.put_read();
--    ObjectExtent extent(o, 0 /* a lie */, off, len);
-+    ObjectExtent extent(o, 0 /* a lie */, off, len, 0);
-     extent.oloc.pool = data_ctx.get_id();
-     extent.buffer_extents.push_back(make_pair(0, len));
-     rd->extents.push_back(extent);
-@@ -492,7 +492,7 @@ namespace librbd {
-     ObjectCacher::OSDWrite *wr = object_cacher->prepare_write(snapc, bl,
- 							      utime_t(), 0);
-     snap_lock.put_read();
--    ObjectExtent extent(o, 0, off, len);
-+    ObjectExtent extent(o, 0, off, len, 0);
-     extent.oloc.pool = data_ctx.get_id();
-     extent.buffer_extents.push_back(make_pair(0, len));
-     wr->extents.push_back(extent);
-diff --git a/src/librbd/internal.cc b/src/librbd/internal.cc
-index 789ef86..1fd7942 100644
---- a/src/librbd/internal.cc
-+++ b/src/librbd/internal.cc
-@@ -184,7 +184,7 @@ namespace librbd {
-     if (delete_off > newsize) {
-       vector<ObjectExtent> extents;
-       Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout,
--			       newsize, delete_off - newsize, extents);
-+			       newsize, delete_off - newsize, 0, extents);
- 
-       for (vector<ObjectExtent>::iterator p = extents.begin();
- 	   p != extents.end(); ++p) {
-@@ -2482,7 +2482,7 @@ reprotect_and_return_err:
-       // map to extents
-       map<object_t,vector<ObjectExtent> > object_extents;
-       Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout,
--			       off, read_len, object_extents, 0);
-+			       off, read_len, 0, object_extents, 0);
- 
-       // get snap info for each object
-       for (map<object_t,vector<ObjectExtent> >::iterator p = object_extents.begin();
-@@ -2880,7 +2880,7 @@ reprotect_and_return_err:
- 
-     // map
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout, off, mylen, extents);
-+    Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout, off, mylen, 0, extents);
- 
-     c->get();
-     c->init_time(ictx, AIO_TYPE_WRITE);
-@@ -2960,7 +2960,7 @@ reprotect_and_return_err:
- 
-     // map
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout, off, len, extents);
-+    Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout, off, len, 0, extents);
- 
-     c->get();
-     c->init_time(ictx, AIO_TYPE_DISCARD);
-@@ -3056,7 +3056,7 @@ reprotect_and_return_err:
- 	return r;
- 
-       Striper::file_to_extents(ictx->cct, ictx->format_string, &ictx->layout,
--			       p->first, len, object_extents, buffer_ofs);
-+			       p->first, len, 0, object_extents, buffer_ofs);
-       buffer_ofs += len;
-     }
- 
-diff --git a/src/osd/osd_types.h b/src/osd/osd_types.h
-index a266fff..a0b6455 100644
---- a/src/osd/osd_types.h
-+++ b/src/osd/osd_types.h
-@@ -1637,13 +1637,15 @@ class ObjectExtent {
-   uint64_t    objectno;
-   uint64_t    offset;    // in object
-   uint64_t    length;    // in object
-+  uint64_t    truncate_size;	// in object
- 
-   object_locator_t oloc;   // object locator (pool etc)
- 
-   vector<pair<uint64_t,uint64_t> >  buffer_extents;  // off -> len.  extents in buffer being mapped (may be fragmented bc of striping!)
-   
--  ObjectExtent() : objectno(0), offset(0), length(0) {}
--  ObjectExtent(object_t o, uint64_t ono, uint64_t off, uint64_t l) : oid(o), objectno(ono), offset(off), length(l) { }
-+  ObjectExtent() : objectno(0), offset(0), length(0), truncate_size(0) {}
-+  ObjectExtent(object_t o, uint64_t ono, uint64_t off, uint64_t l, uint64_t ts) :
-+    oid(o), objectno(ono), offset(off), length(l), truncate_size(ts) { }
- };
- 
- inline ostream& operator<<(ostream& out, const ObjectExtent &ex)
-diff --git a/src/osdc/Filer.cc b/src/osdc/Filer.cc
-index aec2910..7eb4ad6 100644
---- a/src/osdc/Filer.cc
-+++ b/src/osdc/Filer.cc
-@@ -102,7 +102,7 @@ void Filer::_probe(Probe *probe)
-   probe->known_size.clear();
-   probe->probing.clear();
-   Striper::file_to_extents(cct, probe->ino, &probe->layout,
--			   probe->probing_off, probe->probing_len, probe->probing);
-+			   probe->probing_off, probe->probing_len, 0, probe->probing);
-   
-   for (vector<ObjectExtent>::iterator p = probe->probing.begin();
-        p != probe->probing.end();
-diff --git a/src/osdc/Filer.h b/src/osdc/Filer.h
-index cde4502..86ff601 100644
---- a/src/osdc/Filer.h
-+++ b/src/osdc/Filer.h
-@@ -107,7 +107,7 @@ class Filer {
-            Context *onfinish) {
-     assert(snap);  // (until there is a non-NOSNAP write)
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
-     objecter->sg_read(extents, snap, bl, flags, onfinish);
-     return 0;
-   }
-@@ -124,7 +124,7 @@ class Filer {
-            Context *onfinish) {
-     assert(snap);  // (until there is a non-NOSNAP write)
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, truncate_size, extents);
-     objecter->sg_read_trunc(extents, snap, bl, flags,
- 			    truncate_size, truncate_seq, onfinish);
-     return 0;
-@@ -141,7 +141,7 @@ class Filer {
-             Context *onack,
-             Context *oncommit) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
-     objecter->sg_write(extents, snapc, bl, mtime, flags, onack, oncommit);
-     return 0;
-   }
-@@ -159,7 +159,7 @@ class Filer {
-             Context *onack,
-             Context *oncommit) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, truncate_size, extents);
-     objecter->sg_write_trunc(extents, snapc, bl, mtime, flags,
- 		       truncate_size, truncate_seq, onack, oncommit);
-     return 0;
-@@ -176,7 +176,7 @@ class Filer {
- 	       Context *onack,
- 	       Context *oncommit) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
-     if (extents.size() == 1) {
-       vector<OSDOp> ops(1);
-       ops[0].op.op = CEPH_OSD_OP_TRIMTRUNC;
-@@ -211,7 +211,7 @@ class Filer {
-            Context *onack,
-            Context *oncommit) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
-     if (extents.size() == 1) {
-       if (extents[0].offset == 0 && extents[0].length == layout->fl_object_size)
- 	objecter->remove(extents[0].oid, extents[0].oloc, 
-diff --git a/src/osdc/ObjectCacher.cc b/src/osdc/ObjectCacher.cc
-index 56c56d6..0481c6c 100644
---- a/src/osdc/ObjectCacher.cc
-+++ b/src/osdc/ObjectCacher.cc
-@@ -555,19 +555,25 @@ void ObjectCacher::perf_stop()
- 
- /* private */
- ObjectCacher::Object *ObjectCacher::get_object(sobject_t oid, ObjectSet *oset,
--                                 object_locator_t &l)
-+					       object_locator_t &l,
-+					       uint64_t truncate_size,
-+					       uint64_t truncate_seq)
- {
-   assert(lock.is_locked());
-   // have it?
-   if ((uint32_t)l.pool < objects.size()) {
--    if (objects[l.pool].count(oid))
--      return objects[l.pool][oid];
-+    if (objects[l.pool].count(oid)) {
-+      Object *o = objects[l.pool][oid];
-+      o->truncate_size = truncate_size;
-+      o->truncate_seq = truncate_seq;
-+      return o;
-+    }
-   } else {
-     objects.resize(l.pool+1);
-   }
- 
-   // create it.
--  Object *o = new Object(this, oid, oset, l);
-+  Object *o = new Object(this, oid, oset, l, truncate_size, truncate_seq);
-   objects[l.pool][oid] = o;
-   ob_lru.lru_insert_top(o);
-   return o;
-@@ -600,13 +606,10 @@ void ObjectCacher::bh_read(BufferHead *bh)
-   // finisher
-   C_ReadFinish *onfinish = new C_ReadFinish(this, bh->ob,
- 					    bh->start(), bh->length());
--
--  ObjectSet *oset = bh->ob->oset;
--
-   // go
-   writeback_handler.read(bh->ob->get_oid(), bh->ob->get_oloc(),
- 			 bh->start(), bh->length(), bh->ob->get_snap(),
--			 &onfinish->bl, oset->truncate_size, oset->truncate_seq,
-+			 &onfinish->bl, bh->ob->truncate_size, bh->ob->truncate_seq,
- 			 onfinish);
-   ++reads_outstanding;
- }
-@@ -786,14 +789,11 @@ void ObjectCacher::bh_write(BufferHead *bh)
-   // finishers
-   C_WriteCommit *oncommit = new C_WriteCommit(this, bh->ob->oloc.pool,
-                                               bh->ob->get_soid(), bh->start(), bh->length());
--
--  ObjectSet *oset = bh->ob->oset;
--
-   // go
-   tid_t tid = writeback_handler.write(bh->ob->get_oid(), bh->ob->get_oloc(),
- 				      bh->start(), bh->length(),
- 				      bh->snapc, bh->bl, bh->last_write,
--				      oset->truncate_size, oset->truncate_seq,
-+				      bh->ob->truncate_size, bh->ob->truncate_seq,
- 				      oncommit);
-   ldout(cct, 20) << " tid " << tid << " on " << bh->ob->get_oid() << dendl;
- 
-@@ -1022,7 +1022,7 @@ int ObjectCacher::_readx(OSDRead *rd, ObjectSet *oset, Context *onfinish,
- 
-     // get Object cache
-     sobject_t soid(ex_it->oid, rd->snap);
--    Object *o = get_object(soid, oset, ex_it->oloc);
-+    Object *o = get_object(soid, oset, ex_it->oloc, ex_it->truncate_size, oset->truncate_seq);
-     touch_ob(o);
- 
-     // does not exist and no hits?
-@@ -1256,7 +1256,7 @@ int ObjectCacher::writex(OSDWrite *wr, ObjectSet *oset, Mutex& wait_on_lock,
-        ++ex_it) {
-     // get object cache
-     sobject_t soid(ex_it->oid, CEPH_NOSNAP);
--    Object *o = get_object(soid, oset, ex_it->oloc);
-+    Object *o = get_object(soid, oset, ex_it->oloc, ex_it->truncate_size, oset->truncate_seq);
- 
-     // map it all into a single bufferhead.
-     BufferHead *bh = o->map_write(wr);
-diff --git a/src/osdc/ObjectCacher.h b/src/osdc/ObjectCacher.h
-index 80a90bd..4441cfa 100644
---- a/src/osdc/ObjectCacher.h
-+++ b/src/osdc/ObjectCacher.h
-@@ -171,6 +171,7 @@ class ObjectCacher {
-     ObjectSet *oset;
-     xlist<Object*>::item set_item;
-     object_locator_t oloc;
-+    uint64_t truncate_size, truncate_seq;
-     
-     bool complete;
-     bool exists;
-@@ -190,10 +191,12 @@ class ObjectCacher {
-     Object(const Object& other);
-     const Object& operator=(const Object& other);
- 
--    Object(ObjectCacher *_oc, sobject_t o, ObjectSet *os, object_locator_t& l) : 
-+    Object(ObjectCacher *_oc, sobject_t o, ObjectSet *os, object_locator_t& l,
-+	   uint64_t ts, uint64_t tq) :
-       ref(0),
-       oc(_oc),
-       oid(o), oset(os), set_item(this), oloc(l),
-+      truncate_size(ts), truncate_seq(tq),
-       complete(false), exists(true),
-       last_write_tid(0), last_commit_tid(0),
-       dirty_or_tx(0) {
-@@ -363,8 +366,8 @@ class ObjectCacher {
-     return NULL;
-   }
- 
--  Object *get_object(sobject_t oid, ObjectSet *oset,
--                     object_locator_t &l);
-+  Object *get_object(sobject_t oid, ObjectSet *oset, object_locator_t &l,
-+		     uint64_t truncate_size, uint64_t truncate_seq);
-   void close_object(Object *ob);
- 
-   // bh stats
-@@ -626,7 +629,7 @@ public:
-   int file_is_cached(ObjectSet *oset, ceph_file_layout *layout, snapid_t snapid,
- 		     loff_t offset, uint64_t len) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, oset->ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, extents);
-     return is_cached(oset, extents, snapid);
-   }
- 
-@@ -636,7 +639,7 @@ public:
- 		int flags,
-                 Context *onfinish) {
-     OSDRead *rd = prepare_read(snapid, bl, flags);
--    Striper::file_to_extents(cct, oset->ino, layout, offset, len, rd->extents);
-+    Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, rd->extents);
-     return readx(rd, oset, onfinish);
-   }
- 
-@@ -645,14 +648,14 @@ public:
-                  bufferlist& bl, utime_t mtime, int flags,
- 		 Mutex& wait_on_lock) {
-     OSDWrite *wr = prepare_write(snapc, bl, mtime, flags);
--    Striper::file_to_extents(cct, oset->ino, layout, offset, len, wr->extents);
-+    Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, wr->extents);
-     return writex(wr, oset, wait_on_lock, NULL);
-   }
- 
-   bool file_flush(ObjectSet *oset, ceph_file_layout *layout, const SnapContext& snapc,
-                   loff_t offset, uint64_t len, Context *onfinish) {
-     vector<ObjectExtent> extents;
--    Striper::file_to_extents(cct, oset->ino, layout, offset, len, extents);
-+    Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, extents);
-     return flush_set(oset, extents, onfinish);
-   }
- };
-diff --git a/src/osdc/Objecter.h b/src/osdc/Objecter.h
-index bc4b0ae..b4086f6 100644
---- a/src/osdc/Objecter.h
-+++ b/src/osdc/Objecter.h
-@@ -1696,14 +1696,14 @@ public:
- 		uint64_t trunc_size, __u32 trunc_seq, Context *onfinish) {
-     if (extents.size() == 1) {
-       read_trunc(extents[0].oid, extents[0].oloc, extents[0].offset, extents[0].length,
--	   snap, bl, flags, trunc_size, trunc_seq, onfinish);
-+	   snap, bl, flags, extents[0].truncate_size, trunc_seq, onfinish);
-     } else {
-       C_GatherBuilder gather(cct);
-       vector<bufferlist> resultbl(extents.size());
-       int i=0;
-       for (vector<ObjectExtent>::iterator p = extents.begin(); p != extents.end(); ++p) {
- 	read_trunc(p->oid, p->oloc, p->offset, p->length,
--	     snap, &resultbl[i++], flags, trunc_size, trunc_seq, gather.new_sub());
-+	     snap, &resultbl[i++], flags, p->truncate_size, trunc_seq, gather.new_sub());
-       }
-       gather.set_finisher(new C_SGRead(this, extents, resultbl, bl, onfinish));
-       gather.activate();
-@@ -1719,7 +1719,7 @@ public:
- 		Context *onack, Context *oncommit) {
-     if (extents.size() == 1) {
-       write_trunc(extents[0].oid, extents[0].oloc, extents[0].offset, extents[0].length,
--	    snapc, bl, mtime, flags, trunc_size, trunc_seq, onack, oncommit);
-+	    snapc, bl, mtime, flags, extents[0].truncate_size, trunc_seq, onack, oncommit);
-     } else {
-       C_GatherBuilder gack(cct, onack);
-       C_GatherBuilder gcom(cct, oncommit);
-@@ -1731,7 +1731,7 @@ public:
- 	  bl.copy(bit->first, bit->second, cur);
- 	assert(cur.length() == p->length);
- 	write_trunc(p->oid, p->oloc, p->offset, p->length, 
--	      snapc, cur, mtime, flags, trunc_size, trunc_seq,
-+	      snapc, cur, mtime, flags, p->truncate_size, trunc_seq,
- 	      onack ? gack.new_sub():0,
- 	      oncommit ? gcom.new_sub():0);
-       }
-diff --git a/src/osdc/Striper.cc b/src/osdc/Striper.cc
-index b062845..bde3284 100644
---- a/src/osdc/Striper.cc
-+++ b/src/osdc/Striper.cc
-@@ -28,18 +28,19 @@
- 
- void Striper::file_to_extents(CephContext *cct, const char *object_format,
- 			    ceph_file_layout *layout,
--			    uint64_t offset, uint64_t len,
-+			    uint64_t offset, uint64_t len, uint64_t trunc_size,
- 			    vector<ObjectExtent>& extents,
- 			    uint64_t buffer_offset)
- {
-   map<object_t,vector<ObjectExtent> > object_extents;
--  file_to_extents(cct, object_format, layout, offset, len, object_extents, buffer_offset);
-+  file_to_extents(cct, object_format, layout, offset, len, trunc_size,
-+		  object_extents, buffer_offset);
-   assimilate_extents(object_extents, extents);
- }
- 
- void Striper::file_to_extents(CephContext *cct, const char *object_format,
- 			      ceph_file_layout *layout,
--			      uint64_t offset, uint64_t len,
-+			      uint64_t offset, uint64_t len, uint64_t trunc_size,
- 			      map<object_t,vector<ObjectExtent> >& object_extents,
- 			      uint64_t buffer_offset)
- {
-@@ -108,6 +109,8 @@ void Striper::file_to_extents(CephContext *cct, const char *object_format,
- 
-       ex->offset = x_offset;
-       ex->length = x_len;
-+      ex->truncate_size = object_truncate_size(cct, layout, objectno, trunc_size);
-+
-       ldout(cct, 20) << " added new " << *ex << dendl;
-     } else {
-       // add to extent
-@@ -174,6 +177,42 @@ void Striper::extent_to_file(CephContext *cct, ceph_file_layout *layout,
-   }
- }
- 
-+uint64_t Striper::object_truncate_size(CephContext *cct, ceph_file_layout *layout,
-+				       uint64_t objectno, uint64_t trunc_size)
-+{
-+  uint64_t obj_trunc_size;
-+  if (trunc_size == 0 || trunc_size == (uint64_t)-1) {
-+    obj_trunc_size = trunc_size;
-+  } else {
-+    __u32 object_size = layout->fl_object_size;
-+    __u32 su = layout->fl_stripe_unit;
-+    __u32 stripe_count = layout->fl_stripe_count;
-+    assert(object_size >= su);
-+    uint64_t stripes_per_object = object_size / su;
-+
-+    uint64_t objectsetno = objectno / stripe_count;
-+    uint64_t trunc_objectsetno = trunc_size / object_size / stripe_count;
-+    if (objectsetno > trunc_objectsetno)
-+      obj_trunc_size = 0;
-+    else if (objectsetno < trunc_objectsetno)
-+      obj_trunc_size = object_size;
-+    else {
-+      uint64_t trunc_blockno = trunc_size / su;
-+      uint64_t trunc_stripeno = trunc_blockno / stripe_count;
-+      uint64_t trunc_stripepos = trunc_blockno % stripe_count;
-+      uint64_t trunc_objectno = trunc_objectsetno * stripe_count + trunc_stripepos;
-+      if (objectno < trunc_objectno)
-+	obj_trunc_size = ((trunc_stripeno % stripes_per_object) + 1) * su;
-+      else if (objectno > trunc_objectno)
-+	obj_trunc_size = (trunc_stripeno % stripes_per_object) * su;
-+      else
-+	obj_trunc_size = (trunc_stripeno % stripes_per_object) * su + (trunc_size % su);
-+    }
-+  }
-+  ldout(cct, 20) << "object_truncate_size " << objectno << " "
-+		 << trunc_size << "->" << obj_trunc_size << dendl;
-+  return obj_trunc_size;
-+}
- 
- // StripedReadResult
- 
-diff --git a/src/osdc/Striper.h b/src/osdc/Striper.h
-index 9f05635..bd61fc8 100644
---- a/src/osdc/Striper.h
-+++ b/src/osdc/Striper.h
-@@ -30,25 +30,25 @@ class CephContext;
-      */
-     static void file_to_extents(CephContext *cct, const char *object_format,
- 				ceph_file_layout *layout,
--				uint64_t offset, uint64_t len,
-+				uint64_t offset, uint64_t len, uint64_t trunc_size,
- 				map<object_t, vector<ObjectExtent> >& extents,
- 				uint64_t buffer_offset=0);
- 
-     static void file_to_extents(CephContext *cct, const char *object_format,
- 				ceph_file_layout *layout,
--				uint64_t offset, uint64_t len,
-+				uint64_t offset, uint64_t len, uint64_t trunc_size,
- 				vector<ObjectExtent>& extents,
- 				uint64_t buffer_offset=0);
- 
-     static void file_to_extents(CephContext *cct, inodeno_t ino,
- 				ceph_file_layout *layout,
--				uint64_t offset, uint64_t len,
-+				uint64_t offset, uint64_t len, uint64_t trunc_size,
- 				vector<ObjectExtent>& extents) {
-       // generate prefix/format
-       char buf[32];
-       snprintf(buf, sizeof(buf), "%llx.%%08llx", (long long unsigned)ino);
- 
--      file_to_extents(cct, buf, layout, offset, len, extents);
-+      file_to_extents(cct, buf, layout, offset, len, trunc_size, extents);
-     }
- 
-     static void assimilate_extents(map<object_t,vector<ObjectExtent> >& object_extents,
-@@ -61,6 +61,9 @@ class CephContext;
- 			       uint64_t objectno, uint64_t off, uint64_t len,
- 			       vector<pair<uint64_t, uint64_t> >& extents);
- 
-+    static uint64_t object_truncate_size(CephContext *cct, ceph_file_layout *layout,
-+					 uint64_t objectno, uint64_t trunc_size);
-+
-     /*
-      * helper to assemble a striped result
-      */
-diff --git a/src/test/test_striper.cc b/src/test/test_striper.cc
-index d3e9285..262fba3 100644
---- a/src/test/test_striper.cc
-+++ b/src/test/test_striper.cc
-@@ -16,11 +16,14 @@ TEST(Striper, Stripe1)
-   l.fl_stripe_count = 3;
- 
-   vector<ObjectExtent> ex;
--  Striper::file_to_extents(g_ceph_context, 1, &l, 5006035, 46419, ex);
-+  Striper::file_to_extents(g_ceph_context, 1, &l, 5006035, 46419, 5006035, ex);
- 
-   cout << "result " << ex << std::endl;
- 
-   ASSERT_EQ(3u, ex.size());
-+  ASSERT_EQ(98304u, ex[0].truncate_size);
-+  ASSERT_EQ(ex[1].offset, ex[1].truncate_size);
-+  ASSERT_EQ(94208u, ex[2].truncate_size);
- }
- 
- 
+when working on a large rbd image, I am hitting an
+assertion failure in rbd kernel module; the
+assertion is in rbd_img_obj_callback()
+
+            rbd_assert(img_request != NULL);
+
+The test is a sequential write on an rbd
+image, format 1. The size of the image is 1 TByte,
+order is 22 (i.e. default object size).
+
+The code of the rbd (and libceph) kernel modules is
+from kernel.org, 3.10-rc6, running on a 3.0.80-0.5 kernel.
+
+The problem looks like the rbd_obj_request structure in
+question has been released already when processing of
+the reponse to the original request takes place.
+
+Please find attached some more details on this problem.
+
+Is this a known issue already?
+
+
+
+Best Regards
+
+Andreas Bluemle
+
 -- 
-1.8.1.4
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
 
+Company details: http://www.itxperts.de/imprint.htm
+
+--MP_/eT=m7S1JenMYNNuD/7XO4il
+Content-Type: application/octet-stream; name=README.rbd_img_obj_callback-panic
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=README.rbd_img_obj_callback-panic
+
+UGFuaWMgaW4gcmJkX2ltZ19vYmpfY2FsbGJhY2soKTogYXNzZXJ0aW9uIGZhaWx1cmUKCnN0YXRp
+YyB2b2lkIHJiZF9pbWdfb2JqX2NhbGxiYWNrKHN0cnVjdCByYmRfb2JqX3JlcXVlc3QgKm9ial9y
+ZXF1ZXN0KQp7CiAgICAgICAgc3RydWN0IHJiZF9pbWdfcmVxdWVzdCAqaW1nX3JlcXVlc3Q7CiAg
+ICAgICAgdTMyIHdoaWNoID0gb2JqX3JlcXVlc3QtPndoaWNoOwogICAgICAgIGJvb2wgbW9yZSA9
+IHRydWU7CgogICAgICAgIHJiZF9hc3NlcnQob2JqX3JlcXVlc3RfaW1nX2RhdGFfdGVzdChvYmpf
+cmVxdWVzdCkpOwogICAgICAgIGltZ19yZXF1ZXN0ID0gb2JqX3JlcXVlc3QtPmltZ19yZXF1ZXN0
+OwoKICAgICAgICBkb3V0KCIlczogaW1nICVwIG9iaiAlcFxuIiwgX19mdW5jX18sIGltZ19yZXF1
+ZXN0LCBvYmpfcmVxdWVzdCk7Cj4+Pj4+ICAgcmJkX2Fzc2VydChpbWdfcmVxdWVzdCAhPSBOVUxM
+KTsKICAgICAgICByYmRfYXNzZXJ0KGltZ19yZXF1ZXN0LT5vYmpfcmVxdWVzdF9jb3VudCA+IDAp
+OwogICAgICAgIHJiZF9hc3NlcnQod2hpY2ggIT0gQkFEX1dISUNIKTsKICAgICAgICByYmRfYXNz
+ZXJ0KHdoaWNoIDwgaW1nX3JlcXVlc3QtPm9ial9yZXF1ZXN0X2NvdW50KTsKICAgICAgICByYmRf
+YXNzZXJ0KHdoaWNoID49IGltZ19yZXF1ZXN0LT5uZXh0X2NvbXBsZXRpb24pOwouLi4uCgoKVGVz
+dDogc2luZ2xlIHRocmVhZCBzZXF1ZW50aWFsIHdyaXRlIHRvIHJiZCBpbWFnZSBvZiBzaXplIDEg
+VEIuCgoKRnJvbSBjcmFzaDoKICAgICAgS0VSTkVMOiAuL3ZtbGludXgtMy4wLjgwLTAuNS1kZWZh
+dWx0ICAgICAgCiAgIERFQlVHSU5GTzogLi8vdm1saW51eC0zLjAuODAtMC41LWRlZmF1bHQuZGVi
+dWcKICAgIERVTVBGSUxFOiB2bWNvcmUKICAgICAgICBDUFVTOiAzMgogICAgICAgIERBVEU6IFR1
+ZSBKdW4gMTggMTg6MDk6NDAgMjAxMwogICAgICBVUFRJTUU6IDAyOjU1OjM4CkxPQUQgQVZFUkFH
+RTogMy4wNSwgMy4wNCwgNC4yNAogICAgICAgVEFTS1M6IDQ0NQogICAgTk9ERU5BTUU6IGNpYmRi
+MgogICAgIFJFTEVBU0U6IDMuMC44MC0wLjUtZGVmYXVsdAogICAgIFZFUlNJT046ICMxIFNNUCBG
+cmkgTWF5IDMxIDIwOjA0OjM3IFVUQyAyMDEzIChmNWEwZTFmKQogICAgIE1BQ0hJTkU6IHg4Nl82
+NCAgKDI1OTkgTWh6KQogICAgICBNRU1PUlk6IDI1NiBHQgogICAgICAgUEFOSUM6ICJbMTA1MTYu
+ODQ3ODE2XSBrZXJuZWwgQlVHIGF0IC9ob21lL2FmcmllL3JwbS9CVUlMRC9jZXBoLWttcC0zLjEw
+LXJjNi9kZWZhdWx0L3JiZC5jOjIxNDYhIgogICAgICAgICBQSUQ6IDc1OTcKICAgICBDT01NQU5E
+OiAia3dvcmtlci91OjE2IgogICAgICAgIFRBU0s6IGZmZmY4ODEzY2UzMDI0NDAgIFtUSFJFQURf
+SU5GTzogZmZmZjg4MTNjZTMwNDAwMF0KICAgICAgICAgQ1BVOiAwCiAgICAgICBTVEFURTogVEFT
+S19SVU5OSU5HIChQQU5JQykKCmNyYXNoPiBidApQSUQ6IDc1OTcgICBUQVNLOiBmZmZmODgxM2Nl
+MzAyNDQwICBDUFU6IDAgICBDT01NQU5EOiAia3dvcmtlci91OjE2IgogIzAgW2ZmZmY4ODEzY2Uz
+MDU5OTBdIG1hY2hpbmVfa2V4ZWMgYXQgZmZmZmZmZmY4MTAyNjdiZQogIzEgW2ZmZmY4ODEzY2Uz
+MDU5ZTBdIGNyYXNoX2tleGVjIGF0IGZmZmZmZmZmODEwYTNlNGEKICMyIFtmZmZmODgxM2NlMzA1
+YWIwXSBvb3BzX2VuZCBhdCBmZmZmZmZmZjgxNDQ4NGE4CiAjMyBbZmZmZjg4MTNjZTMwNWFkMF0g
+ZG9faW52YWxpZF9vcCBhdCBmZmZmZmZmZjgxMDAzNWY0CiAjNCBbZmZmZjg4MTNjZTMwNWI3MF0g
+aW52YWxpZF9vcCBhdCBmZmZmZmZmZjgxNDRmY2JiCiAgICBbZXhjZXB0aW9uIFJJUDogcmJkX2lt
+Z19vYmpfY2FsbGJhY2srNzExXQogICAgUklQOiBmZmZmZmZmZmEwNmVjMGU3ICBSU1A6IGZmZmY4
+ODEzY2UzMDVjMjAgIFJGTEFHUzogMDAwMTAyODYKICAgIFJBWDogMDAwMDAwMDAwMDAwMDBiYyAg
+UkJYOiBmZmZmODgxNWQ5MTIwYTI4ICBSQ1g6IDAwMDAwMDAwMDAwMDFhNmQKICAgIFJEWDogMDAw
+MDAwMDAwMDAwMWE2ZCAgUlNJOiAwMDAwMDAwMDAwMDAwMDA3ICBSREk6IDAwMDAwMDAwMDAwMDAy
+NDYKICAgIFJCUDogZmZmZjg4MDgxMzAwYzExOCAgIFI4OiBmZmZmZmZmZjgxZDhmYWMwICAgUjk6
+IDAwMDAwMDAwMDAwMDAwMDAKICAgIFIxMDogMDAwMDAwMDAwMDAwMDAwMyAgUjExOiAwMDAwMDAw
+MGZmZmZmZmZmICBSMTI6IDAwMDAwMDAwMDAwMDAwMDAKICAgIFIxMzogMDAwMDAwMDAwMDAwMDAw
+MSAgUjE0OiAwMDAwMDAwMDAyNDNjMWNhICBSMTU6IDAwMDAwMDAwMDAwMDAwMDAKICAgIE9SSUdf
+UkFYOiBmZmZmZmZmZmZmZmZmZmZmICBDUzogMDAxMCAgU1M6IDAwMTgKICM1IFtmZmZmODgxM2Nl
+MzA1YzU4XSBoYW5kbGVfcmVwbHkgYXQgZmZmZmZmZmZhMDZhODZjNSBbbGliY2VwaF0KICM2IFtm
+ZmZmODgxM2NlMzA1Yzc4XSBrZXJuZWxfcmVjdm1zZyBhdCBmZmZmZmZmZjgxMzc3MmZjCiAjNyBb
+ZmZmZjg4MTNjZTMwNWNmOF0gZGlzcGF0Y2ggYXQgZmZmZmZmZmZhMDZhYTYxMyBbbGliY2VwaF0K
+ICM4IFtmZmZmODgxM2NlMzA1ZDE4XSBwcm9jZXNzX21lc3NhZ2UgYXQgZmZmZmZmZmZhMDY5Zjk3
+NSBbbGliY2VwaF0KICM5IFtmZmZmODgxM2NlMzA1ZGE4XSB0cnlfcmVhZCBhdCBmZmZmZmZmZmEw
+NmEyNjhiIFtsaWJjZXBoXQojMTAgW2ZmZmY4ODEzY2UzMDVkZjhdIGNvbl93b3JrIGF0IGZmZmZm
+ZmZmYTA2YTM0YjUgW2xpYmNlcGhdCiMxMSBbZmZmZjg4MTNjZTMwNWUyOF0gcHJvY2Vzc19vbmVf
+d29yayBhdCBmZmZmZmZmZjgxMDc0N2NjCiMxMiBbZmZmZjg4MTNjZTMwNWU3OF0gd29ya2VyX3Ro
+cmVhZCBhdCBmZmZmZmZmZjgxMDc3MzBhCiMxMyBbZmZmZjg4MTNjZTMwNWVlOF0ga3RocmVhZCBh
+dCBmZmZmZmZmZjgxMDdiNjQ2CiMxNCBbZmZmZjg4MTNjZTMwNWY0OF0ga2VybmVsX3RocmVhZF9o
+ZWxwZXIgYXQgZmZmZmZmZmY4MTQ0ZmU0NAoKCkFuYWx5c2lzOgpyYmQgY29kZSBoYWQgc2V0IHVw
+IGFuIHJiZF9vYmpfcmVxdWVzdCwgd3JhcHBlZCB3aXRoIGFuCmNlcGhfb3NkX3JlcXVlc3QgYW5k
+IHBhc3NlZCB0aGF0IHRvIG9zZF9jbGllbnQgY29kZS4KClRoZSBhbnN3ZXIgZm9yIHRoYXQgcmVx
+dWVzdCBpcyBoYW5kbGVkIGF0IHRoZSBvc2RfY2xpZW50IGxheWVyLApidXQgdGhlIHJlZmVyZW5j
+ZSB0byB0aGUgcmJkX29ial9yZXF1ZXN0IHNlZW1zIHRvIGJlIGludmFsaWQKYXQgdGhlIHRpbWUg
+b2YgcHJvY2Vzc2luZyB0aGUgYW5zd2VyLgoKCnRhaWwgb2YgY3Jhc2ggbG9nIG91dHB1dCBCRUdJ
+TiB7CgpbMTA1MTYuODQ3ODE2XSBrZXJuZWwgQlVHIGF0IC9ob21lL2FmcmllL3JwbS9CVUlMRC9j
+ZXBoLWttcC0zLjEwLXJjNi9kZWZhdWx0L3JiZC5jOjIxNDYhClsxMDUxNi44NjUyMjddIGludmFs
+aWQgb3Bjb2RlOiAwMDAwIFsjMV0gU01QIApbMTA1MTYuODc0MzQ2XSBDUFUgMCAKWzEwNTE2Ljg3
+ODM4MF0gTW9kdWxlcyBsaW5rZWQgaW46IHJiZCBsaWJjZXBoIGVkZCBhZl9wYWNrZXQgcmRtYV91
+Y20gaWJfc3JwIHNjc2lfdHJhbnNwb3J0X3NycCBzY3NpX3RndCBpYl9zZHAoTikgcmRtYV8KY20g
+aXdfY20gaWJfYWRkciBpYl9pcG9pYiBpYl9jbSBpYl9zYSBpYl91dmVyYnMgaWJfdW1hZCBpd19j
+eGdiMyBjeGdiMyBtZGlvIG1seDRfZW4gbWx4NF9pYiBpYl9tdGhjYSBpYl9tYWQgaWJfY29yZSBj
+cHUKZnJlcV9jb25zZXJ2YXRpdmUgY3B1ZnJlcV91c2Vyc3BhY2UgY3B1ZnJlcV9wb3dlcnNhdmUg
+YWNwaV9jcHVmcmVxIG1wZXJmIG1pY3JvY29kZSBmdXNlIHhmcyBsb29wIGRtX21vZCBidHJmcyB6
+bGliX2RlZmwKYXRlIGNyYzMyYyBsaWJjcmMzMmMgaWdiIGlUQ09fd2R0IGlwdjYgc3JfbW9kIGlw
+djZfbGliIGFjIGkyY19pODAxIGpveWRldiBpVENPX3ZlbmRvcl9zdXBwb3J0IGRjYSBydGNfY21v
+cyBjZHJvbSBtbHg0X2MKb3JlIHNnIGkyY19jb3JlIGNvbnRhaW5lciBidXR0b24gcGNzcGtyIGFj
+cGlfcG93ZXJfbWV0ZXIgd21pIGV4dDMgamJkIG1iY2FjaGUgdXNiaGlkIGhpZCB1c2Jfc3RvcmFn
+ZSBlaGNpX2hjZCBpc2NpKFgpIHUKc2Jjb3JlIGxpYnNhcyBzY3NpX3RyYW5zcG9ydF9zYXMgdXNi
+X2NvbW1vbiBzZF9tb2QgY3JjX3QxMGRpZiBwcm9jZXNzb3IgdGhlcm1hbF9zeXMgaHdtb24gc2Nz
+aV9kaF9lbWMgc2NzaV9kaF9ocF9zdyBzY3MKaV9kaF9hbHVhIHNjc2lfZGhfcmRhYyBzY3NpX2Ro
+IGFoY2kgbGliYWhjaSBsaWJhdGEgbWVnYXJhaWRfc2FzIHNjc2lfbW9kClsxMDUxNy4wMzIxNDld
+IFN1cHBvcnRlZDogTm8sIFVuc3VwcG9ydGVkIG1vZHVsZXMgYXJlIGxvYWRlZApbMTA1MTcuMDQ0
+MTIwXSAKWzEwNTE3LjA0NzQ2N10gUGlkOiA3NTk3LCBjb21tOiBrd29ya2VyL3U6MTYgVGFpbnRl
+ZDogRyAgICAgICAgICAgTlggMy4wLjgwLTAuNS1kZWZhdWx0ICMxIEZVSklUU1UgUFJJTUVSR1kg
+UlgzMDAgUzcvRDIKOTM5LUExClsxMDUxNy4wNzIwMDVdIFJJUDogMDAxMDpbPGZmZmZmZmZmYTA2
+ZWMwZTc+XSAgWzxmZmZmZmZmZmEwNmVjMGU3Pl0gcmJkX2ltZ19vYmpfY2FsbGJhY2srMHgyYzcv
+MHgzOTAgW3JiZF0KWzEwNTE3LjA5Mjg4N10gUlNQOiAwMDE4OmZmZmY4ODEzY2UzMDVjMjAgIEVG
+TEFHUzogMDAwMTAyODYKWzEwNTE3LjEwNDY3Ml0gUkFYOiAwMDAwMDAwMDAwMDAwMGJjIFJCWDog
+ZmZmZjg4MTVkOTEyMGEyOCBSQ1g6IDAwMDAwMDAwMDAwMDFhNmQKWzEwNTE3LjEyMDUwMF0gUkRY
+OiAwMDAwMDAwMDAwMDAxYTZkIFJTSTogMDAwMDAwMDAwMDAwMDAwNyBSREk6IDAwMDAwMDAwMDAw
+MDAyNDYKWzEwNTE3LjEzNjMyNl0gUkJQOiBmZmZmODgwODEzMDBjMTE4IFIwODogZmZmZmZmZmY4
+MWQ4ZmFjMCBSMDk6IDAwMDAwMDAwMDAwMDAwMDAKWzEwNTE3LjE1MjE0M10gUjEwOiAwMDAwMDAw
+MDAwMDAwMDAzIFIxMTogMDAwMDAwMDBmZmZmZmZmZiBSMTI6IDAwMDAwMDAwMDAwMDAwMDAKWzEw
+NTE3LjE2Nzk2MV0gUjEzOiAwMDAwMDAwMDAwMDAwMDAxIFIxNDogMDAwMDAwMDAwMjQzYzFjYSBS
+MTU6IDAwMDAwMDAwMDAwMDAwMDAKWzEwNTE3LjE4Mzc3MF0gRlM6ICAwMDAwMDAwMDAwMDAwMDAw
+KDAwMDApIEdTOmZmZmY4ODIwN2ZjMDAwMDAoMDAwMCkga25sR1M6MDAwMDAwMDAwMDAwMDAwMApb
+MTA1MTcuMjAxNzU5XSBDUzogIDAwMTAgRFM6IDAwMDAgRVM6IDAwMDAgQ1IwOiAwMDAwMDAwMDgw
+MDUwMDNiClsxMDUxNy4yMTQ0OTZdIENSMjogMDAwMDdmNTg2ZWFlZjAwMCBDUjM6IDAwMDAwMDFm
+YjJmYWYwMDAgQ1I0OiAwMDAwMDAwMDAwMDQwNmYwClsxMDUxNy4yMzAzMDBdIERSMDogMDAwMDAw
+MDAwMDAwMDAwMCBEUjE6IDAwMDAwMDAwMDAwMDAwMDAgRFIyOiAwMDAwMDAwMDAwMDAwMDAwClsx
+MDUxNy4yNDYxMDNdIERSMzogMDAwMDAwMDAwMDAwMDAwMCBEUjY6IDAwMDAwMDAwZmZmZjBmZjAg
+RFI3OiAwMDAwMDAwMDAwMDAwNDAwClsxMDUxNy4yNjE5MDZdIFByb2Nlc3Mga3dvcmtlci91OjE2
+IChwaWQ6IDc1OTcsIHRocmVhZGluZm8gZmZmZjg4MTNjZTMwNDAwMCwgdGFzayBmZmZmODgxM2Nl
+MzAyNDQwKQpbMTA1MTcuMjgxNDIyXSBTdGFjazoKWzEwNTE3LjI4NTkxOV0gIGZmZmY4ODE1ZDkx
+MjBhNDAgMDAwMDAwMDAwMDAwMDAwMCBmZmZmODgwODEzMDBjMTE4IGZmZmY4ODFlYmNkYjJhNzAK
+WzEwNTE3LjMwMjQxN10gIDAwMDAwMDAwMDAwMDAwMjUgMDAwMDAwMDAwMjQzYzFjYSAwMDAwMDAw
+MDAwMDAwMDAwIGZmZmZmZmZmYTA2YTg2YzUKWzEwNTE3LjMxODkxOV0gIGZmZmZmZmZmZmZmZmZm
+ZmYgMDAwMDAwMDAwMDAwMDAwZCAwMDAwMDAwMDAwMDAwMDAwIGZmZmZmZmZmODEzNzcyZmMKWzEw
+NTE3LjMzNTQzOV0gQ2FsbCBUcmFjZToKWzEwNTE3LjM0MDkxNF0gIFs8ZmZmZmZmZmZhMDZhODZj
+NT5dIGhhbmRsZV9yZXBseSsweDQwNS8weDY2MCBbbGliY2VwaF0KWzEwNTE3LjM1NTAwMF0gIFs8
+ZmZmZmZmZmZhMDZhYTYxMz5dIGRpc3BhdGNoKzB4OTMvMHhiMCBbbGliY2VwaF0KWzEwNTE3LjM2
+Nzk0MV0gIFs8ZmZmZmZmZmZhMDY5Zjk3NT5dIHByb2Nlc3NfbWVzc2FnZSsweDk1LzB4MTYwIFts
+aWJjZXBoXQpbMTA1MTcuMzgyNDI1XSAgWzxmZmZmZmZmZmEwNmEyNjhiPl0gdHJ5X3JlYWQrMHgz
+OGIvMHg3MjAgW2xpYmNlcGhdClsxMDUxNy4zOTU3NDRdICBbPGZmZmZmZmZmYTA2YTM0YjU+XSBj
+b25fd29yaysweGI1LzB4MzkwIFtsaWJjZXBoXQpbMTA1MTcuNDA4ODY5XSAgWzxmZmZmZmZmZjgx
+MDc0N2NjPl0gcHJvY2Vzc19vbmVfd29yaysweDE2Yy8weDM1MApbMTA1MTcuNDIxODAxXSAgWzxm
+ZmZmZmZmZjgxMDc3MzBhPl0gd29ya2VyX3RocmVhZCsweDE3YS8weDQxMApbMTA1MTcuNDM0MTU2
+XSAgWzxmZmZmZmZmZjgxMDdiNjQ2Pl0ga3RocmVhZCsweDk2LzB4YTAKWzEwNTE3LjQ0NDk3OV0g
+IFs8ZmZmZmZmZmY4MTQ0ZmU0ND5dIGtlcm5lbF90aHJlYWRfaGVscGVyKzB4NC8weDEwClsxMDUx
+Ny40NTgxMDJdIENvZGU6IGMwIGU4IDg4IDgxIGQ1IGUwIDBmIDBiIGViIGZlIDQ4IGM3IGMxIGFm
+IDEwIDZmIGEwIGJhIDYyIDA4IDAwIDAwIDQ4IGM3IGM2IGMwIDMzIDZmIGEwIDQ4IGM3IGM3IDkw
+CiAxYSA2ZiBhMCAzMSBjMCBlOCA2MyA4MSBkNSBlMCA8MGY+IDBiIGViIGZlIDQ5IDg5IGY4IDRj
+IDg5IGUxIDQ4IGM3IGMyIGMwIDMzIDZmIGEwIDQ4IGM3IGM2IDFhIApbMTA1MTcuNTAwODIxXSBS
+SVAgIFs8ZmZmZmZmZmZhMDZlYzBlNz5dIHJiZF9pbWdfb2JqX2NhbGxiYWNrKzB4MmM3LzB4Mzkw
+IFtyYmRdClsxMDUxNy41MTY0NDNdICBSU1AgPGZmZmY4ODEzY2UzMDVjMjA+Cgp9ICBFTkQgdGFp
+bCBvZiBjcmFzaCBsb2cgb3V0cHV0CgoKY2FsbCBmbG93IGFuZCBkYXRhIGFuYWx5c2lzICBCRUdJ
+TiB7CmRpc2Fzc2VtYmx5IG9mIGhhbmRsZV9yZXBseSBzaG93cwoKMHhmZmZmZmZmZmEwNmE4NmFk
+IDxoYW5kbGVfcmVwbHkrMTAwNT46IG1vdiAgICAweDI4MCglcmJwKSwlcmF4CjB4ZmZmZmZmZmZh
+MDZhODZiNCA8aGFuZGxlX3JlcGx5KzEwMTI+OiB0ZXN0ICAgJXJheCwlcmF4CjB4ZmZmZmZmZmZh
+MDZhODZiNyA8aGFuZGxlX3JlcGx5KzEwMTU+OiBqZSAgICAgMHhmZmZmZmZmZmEwNmE4N2NjCjB4
+ZmZmZmZmZmZhMDZhODZiZCA8aGFuZGxlX3JlcGx5KzEwMjE+OiBtb3YgICAgJXIxMiwlcnNpCjB4
+ZmZmZmZmZmZhMDZhODZjMCA8aGFuZGxlX3JlcGx5KzEwMjQ+OiBtb3YgICAgJXJicCwlcmRpCjB4
+ZmZmZmZmZmZhMDZhODZjMyA8aGFuZGxlX3JlcGx5KzEwMjc+OiBjYWxscSAgKiVyYXgKMHhmZmZm
+ZmZmZmEwNmE4NmM1IDxoYW5kbGVfcmVwbHkrMTAyOT46IGFuZCAgICAkMHg0LCVyMTNkCgpoYW5k
+bGVfcmVwbHkrMTAyOSA9PSBoYW5kbGVfcmVwbHkrMHg0MDUgYXMgc2hvd24gaW4gdGhlIHN0YWNr
+IGJhY2t0cmFjZS4KVGhpcyBpcyB0aGUgcmV0dXJuIGFkZHJlc3MgYWZ0ZXIgdGhlIGNhbGwgdG8g
+cl9jYWxsYmFjayBpbgp0aGUgY3VycmVudCBjZXBoX29zZF9yZXF1ZXN0IHN0cnVjdHVyZS4KCgpS
+QlAgcmVnaXN0ZXIgaG9sZHMgdGhlIHJlZmVyZW5jZSB0byB0aGUgY2VwaF9vc2RfcmVxdWVzdCBz
+dHJ1Y3R1cmUsCndpdGggb2Zmc2V0IDB4MjgwIHBvaW50aW5nIGF0IHRoZSByX2NhbGxiYWNrIGVs
+ZW1lbnQuCgoweGZmZmY4ODA4MTMwMGMxMTg6ICAgICAweDAwMDAwMDAwMDI0M2MxY2EgICAgICAw
+eGZmZmY4ODE0ZjBmOGQxODAKMHhmZmZmODgwODEzMDBjMTI4OiAgICAgMHgwMDAwMDAwMDAwMDAw
+MDAwICAgICAgMHgwMDAwMDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzEzODogICAgIDB4ZmZm
+Zjg4MDgxMzAwYzEzOCAgICAgIDB4ZmZmZjg4MDgxMzAwYzEzOAoweGZmZmY4ODA4MTMwMGMxNDg6
+ICAgICAweGZmZmY4ODA4MTMwMGMxNDggICAgICAweGZmZmY4ODA4MTMwMGMxNDgKMHhmZmZmODgw
+ODEzMDBjMTU4OiAgICAgMHhmZmZmODgwODEzMDBjMTU4ICAgICAgMHhmZmZmODgwODEzMDBjMTU4
+CjB4ZmZmZjg4MDgxMzAwYzE2ODogICAgIDB4ZmZmZjg4MDgxMzAwYzE2OCAgICAgIDB4ZmZmZjg4
+MDgxMzAwYzE2OAoweGZmZmY4ODA4MTMwMGMxNzg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAg
+ICAweDAwMDAwMDAwMDAwMDAwMDIKMHhmZmZmODgwODEzMDBjMTg4OiAgICAgMHhmZmZmODgxZmZh
+NzhhY2Y4ICAgICAgMHgwMDAwMDBkOTAwMDAwMDdiCjB4ZmZmZjg4MDgxMzAwYzE5ODogICAgIDB4
+MDAwMDAwMDAwMDAwMDAwMCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODA4MTMwMGMx
+YTg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhmZmZm
+ODgwODEzMDBjMWI4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAwMDAwMDAwMDAw
+MDAwCjB4ZmZmZjg4MDgxMzAwYzFjODogICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAgICAgIDB4MDAw
+MDAwMDAwMDAwMDAwMgoweGZmZmY4ODA4MTMwMGMxZDg6ICAgICAweGZmZmY4ODEzNWY0N2Y5ODgg
+ICAgICAweGZmZmY4ODFlYmNkYjJhNzAKMHhmZmZmODgwODEzMDBjMWU4OiAgICAgMHgwMDAwMDAw
+MTAwMDAwMDI0ICAgICAgMHgwMDAwMDAwMDAwMDAwMDAxCjB4ZmZmZjg4MDgxMzAwYzFmODogICAg
+IDB4MDAwMDEwMDAwMDAwMjIwMSAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODA4MTMw
+MGMyMDg6ICAgICAweDAwMDAwMDAwMDAwMDEwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhm
+ZmZmODgwODEzMDBjMjE4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAwMDAwMDAw
+MDAwMDAzCjB4ZmZmZjg4MDgxMzAwYzIyODogICAgIDB4ZmZmZjg4MTRmNTU5MGM4MCAgICAgIDB4
+MDAwMDAwMDAwMDAwMTAwMAoweGZmZmY4ODA4MTMwMGMyMzg6ICAgICAweDAwMDAwMDAwMDAwMDAw
+MDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhmZmZmODgwODEzMDBjMjQ4OiAgICAgMHgwMDAw
+MDAwMDAwMDAwMDAwICAgICAgMHgwMDAwMDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzI1ODog
+ICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODA4
+MTMwMGMyNjg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAK
+MHhmZmZmODgwODEzMDBjMjc4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAwMDAw
+MDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzI4ODogICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAgICAg
+IDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODA4MTMwMGMyOTg6ICAgICAweDAwMDAwMDAwMDAw
+MDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhmZmZmODgwODEzMDBjMmE4OiAgICAgMHgw
+MDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAwMDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzJi
+ODogICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4
+ODA4MTMwMGMyYzg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAw
+MDAKMHhmZmZmODgwODEzMDBjMmQ4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAw
+MDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzJlODogICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAg
+ICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODA4MTMwMGMyZjg6ICAgICAweGZmZmY4ODBl
+NTE0MmY4ODQgICAgICAweGZmZmY4ODBlNTE0MmY4ODgKMHhmZmZmODgwODEzMDBjMzA4OiAgICAg
+MHhmZmZmODgwZTUxNDJmOGE2ICAgICAgMHhmZmZmODgwZTUxNDJmOGI3CjB4ZmZmZjg4MDgxMzAw
+YzMxODogICAgIDB4ZmZmZjg4MGU1MTQyZjkyNiAgICAgIDB4ZmZmZjg4MGU1MTQyZjg5NAoweGZm
+ZmY4ODA4MTMwMGMzMjg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAw
+MDAwMDAKMHhmZmZmODgwODEzMDBjMzM4OiAgICAgMHgwMDAwMDAwMTAwMDAwMDAwICAgICAgMHgw
+MDAwMDAwMTAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzM0ODogICAgIDB4ZmZmZjg4MWZiMmZhYzcx
+OCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMQoweGZmZmY4ODA4MTMwMGMzNTg6ICAgICAweDAwMDAw
+MDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhmZmZmODgwODEzMDBjMzY4OiAg
+ICAgMHhmZmZmODgwODEzMDBjMzY4ICAgICAgMHhmZmZmODgwODEzMDBjMzY4CjB4ZmZmZjg4MDgx
+MzAwYzM3ODogICAgIDB4MDAwMDAwMDAwMDAwMDAwMCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAow
+eGZmZmY4ODA4MTMwMGMzODg6ICAgICAweGZmZmY4ODA4MTMwMGMzODggICAgICAweGZmZmY4ODA4
+MTMwMGMzODgKMHhmZmZmODgwODEzMDBjMzk4OiAgICAgMHhmZmZmZmZmZmEwNmVkNmEwICAgICAg
+MHgwMDAwMDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzNhODogICAgIDB4MDAwMDAwMDAwMDAw
+NmU3YyAgICAgIDB4MDAwMDAwMDAwMDAwMDFiZgoweGZmZmY4ODA4MTMwMGMzYjg6ICAgICAweGZm
+ZmY4ODA4MTMwMGMzYjggICAgICAweGZmZmY4ODA4MTMwMGMzYjgKMHhmZmZmODgwODEzMDBjM2M4
+OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHhmZmZmODgxNWQ5MTIwYTI4CjB4ZmZmZjg4
+MDgxMzAwYzNkODogICAgIDB4NjYzMDMxMmUzMDJlNjI3MiAgICAgIDB4MzUzNDYyMzg2MjM2MmUz
+MAoweGZmZmY4ODA4MTMwMGMzZTg6ICAgICAweDMwMzAzMDMwMzAyZTM3MzYgICAgICAweDAwNjIz
+NjM5Mzg2NjY1MzAKMHhmZmZmODgwODEzMDBjM2Y4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAg
+ICAgMHgwMDAwMDAwMDAwMDAwMDAwCjB4ZmZmZjg4MDgxMzAwYzQwODogICAgIDB4MDAwMDAwMDAw
+MDAwMDAwMCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoKMHhmZmZmODgwODEzMDBjMTE4ICsgMHgy
+ODAgPSAweGZmZmY4ODA4MTMwMGMzOTg6IDB4ZmZmZmZmZmZhMDZlZDZhMApjcmFzaD4gZGlzIDB4
+ZmZmZmZmZmZhMDZlZDZhMAoweGZmZmZmZmZmYTA2ZWQ2YTAgPHJiZF9vc2RfcmVxX2NhbGxiYWNr
+PjogICAgICBwdXNoICAgJXIxMwoKSGVuY2U6IHRoZSByX2NhbGxiYWNrIGZ1bmN0aW9uIGlzIHJi
+ZF9vc2RfcmVxX2NhbGxiYWNrKCkuClRoaXMgd2lsbCBpbiB0dXJuIGludm9rZSB0aGUgY2FsbGJh
+Y2sgZnVuY3Rpb24gZm9yIHRoZSByYmRfb2JqX3JlcXVlc3Q6CnRoZSByYmRfb2JqX3JlcXVlc3Qg
+aXMgY29udGFpbmVkIGluIGVsZW1lbnQgcl9wcml2IG9mIGNlcGhfb3NkX3JlcXVlc3QKYXQgb2Zm
+c2V0IDB4MmI4CgoweGZmZmY4ODA4MTMwMGMxMTggKyAweDJiOCA9IDB4ZmZmZjg4MDgxMzAwYzNk
+MDogMHhmZmZmODgxNWQ5MTIwYTI4CgpjcmFzaD4gZ2RiIHgvMjB4ZyAweGZmZmY4ODE1ZDkxMjBh
+MjgKMHhmZmZmODgxNWQ5MTIwYTI4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHgwMDAw
+MDAwMDAwMDAwMDAwCjB4ZmZmZjg4MTVkOTEyMGEzODogICAgIDB4MDAwMDAwMDAwMDAwMTAwMCAg
+ICAgIDB4MDAwMDAwMDAwMDAwMDAwMwoweGZmZmY4ODE1ZDkxMjBhNDg6ICAgICAweDAwMDAwMDAw
+MDAwMDAwMDAgICAgICAweDAwMDAwMGVmODk2YjAwMDAKMHhmZmZmODgxNWQ5MTIwYTU4OiAgICAg
+MHhkZWFkMDAwMDAwMTAwMTAwICAgICAgMHhkZWFkMDAwMDAwMjAwMjAwCjB4ZmZmZjg4MTVkOTEy
+MGE2ODogICAgIDB4MDAwMDAwMDFmZmZmZmZmZiAgICAgIDB4ZmZmZjg4MTRmNTU5MGM4MAoweGZm
+ZmY4ODE1ZDkxMjBhNzg6ICAgICAweDAwMDAwMDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAw
+MDAwMDAKMHhmZmZmODgxNWQ5MTIwYTg4OiAgICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHhm
+ZmZmODgwODEzMDBjMTE4CjB4ZmZmZjg4MTVkOTEyMGE5ODogICAgIDB4MDAwMDAwMDAwMDAwMTAw
+MCAgICAgIDB4MDAwMDAwMDAwMDAwMDAwMAoweGZmZmY4ODE1ZDkxMjBhYTg6ICAgICAweDAwMDAw
+MDAwMDAwMDAwMDAgICAgICAweDAwMDAwMDAwMDAwMDAwMDAKMHhmZmZmODgxNWQ5MTIwYWI4OiAg
+ICAgMHgwMDAwMDAwMDAwMDAwMDAwICAgICAgMHhmZmZmODgxNWQ5MTIwYWMwCgpUaGUgaW1nX3Jl
+cXVlc3QgZmllbGQgYXQgMHhmZmZmODgxNWQ5MTIwYTQ4IGlzIE5VTEw6IHRoaXMgaXMgdGhlIGNh
+dXNlCmZvciB0aGUgYXNzZXJ0aW9uLgoKVGhlIGltZ19vZmZzZXQgaXMgYSB2YWxpZCBvZmZzZXQg
+aW50byB0aGUgMSBUQnl0ZSByYmQgaW1hZ2UgdW5kZXIgdGVzdDoKMHhlZjg5NmIwMDAwIDwgMHgx
+MDAwMDAwMDAwMCAoMSBUQnl0ZSkuClRoZSBpbnZhbGlkIHBvaW50ZXJzIGluIHRoZSBsaW5rcyBv
+ZiB0aGUgcmJkX29ial9yZXF1ZXN0ICh3aGljaCBpcwphIGxpc3RfaGVhZCBzdHJ1Y3R1cmUpIGFy
+ZSBtYXJrZWQgYXMgaW52YWxpZDoKCjB4ZmZmZjg4MTVkOTEyMGE1ODogICAgIDB4ZGVhZDAwMDAw
+MDEwMDEwMCAgICAgIDB4ZGVhZDAwMDAwMDIwMDIwMAoKClRoaXMgc3VnZ2VzdHMgdGhhdCB0aGUg
+cmJkX29ial9yZXF1ZXN0IGhhZCBiZWVuIGludmFsaWRhdGVkIGFscmVhZHkKYmVmb3JlIHRoZSBw
+cm9jZXNzaW5nIG9mIHRoZSBhbnN3ZXIgdG8gdGhlIGNvcnJlc3Nwb25kaW5nIHJlcXVlc3QKcHJv
+Y2Vzc2luZyB0YWtlcyBwbGFjZS4KCgp9IEVORCBjYWxsIGZsb3cgYW5kIGRhdGEgYW5hbHlzaXMK
+
+--MP_/eT=m7S1JenMYNNuD/7XO4il--
