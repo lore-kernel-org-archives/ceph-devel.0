@@ -1,41 +1,58 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH] rgw: Added an encoder for time_t to fix compilation
-Date: Thu, 20 Jun 2013 13:44:02 -0700
-Message-ID: <CABBk=J8J_tKY-Wy-sWb2=GREauqN0GfaJaHk14jzRVM0fx59Bg@mail.gmail.com>
-References: <CAA8043gcmGmpNba7OEbh8Vo7-SgUN_R_CcGpsi_Vt9pgmmhirw@mail.gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: rbd: refactor rbd_header_from_disk()
+Date: Fri, 21 Jun 2013 00:11:58 +0300
+Message-ID: <20130620211158.GA31274@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f172.google.com ([209.85.128.172]:36025 "EHLO
-	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161213Ab3FTUoE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 16:44:04 -0400
-Received: by mail-ve0-f172.google.com with SMTP id jz10so5560024veb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 13:44:03 -0700 (PDT)
-In-Reply-To: <CAA8043gcmGmpNba7OEbh8Vo7-SgUN_R_CcGpsi_Vt9pgmmhirw@mail.gmail.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:21021 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161153Ab3FTVMI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 17:12:08 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: christophe courtaut <christophe.courtaut@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: elder@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jun 20, 2013 at 6:57 AM, christophe courtaut
-<christophe.courtaut@gmail.com> wrote:
-> On the rgw-wip-geo-2 branch, the encode decode function are called
-> with time_t now,
-> but there is no encode/decode function created for time_t type.
->
-> http://tracker.ceph.com/issues/5402 refs #5402
->
-> This patch adds a WRITE_RAW_ENCODER to support this type.
->
-> --
-> Christophe Courtaut
+Hello Alex Elder,
 
+The patch bb23e37acb2a: "rbd: refactor rbd_header_from_disk()" from 
+May 6, 2013, has some integer overflow bugs:
 
-The problem here is that we can't use the generic encoder / decoder as
-time_t may have different size on different architectures. We should
-just have a fixed size encoding for it (probably 64 bit albeit the
-waste).
+drivers/block/rbd.c
+   793          snap_count = le32_to_cpu(ondisk->snap_count);
+   794          snapc = ceph_create_snap_context(snap_count, GFP_KERNEL);
 
-Thanks,
-Yehuda
+snap_count comes from the disk.  On 32 bit systems there is an integer
+overflow problem inside ceph_create_snap_context() so snapc could be
+smaller than intended.
+
+   795          if (!snapc)
+   796                  goto out_err;
+   797          snapc->seq = le64_to_cpu(ondisk->snap_seq);
+   798          if (snap_count) {
+   799                  struct rbd_image_snap_ondisk *snaps;
+   800                  u64 snap_names_len = le64_to_cpu(ondisk->snap_names_len);
+   801  
+   802                  /* We'll keep a copy of the snapshot names... */
+   803  
+   804                  if (snap_names_len > (u64)SIZE_MAX)
+   805                          goto out_2big;
+   806                  snap_names = kmalloc(snap_names_len, GFP_KERNEL);
+   807                  if (!snap_names)
+   808                          goto out_err;
+   809  
+   810                  /* ...as well as the array of their sizes. */
+   811  
+   812                  size = snap_count * sizeof (*header->snap_sizes);
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There is a second integer overflow bug here.
+
+   813                  snap_sizes = kmalloc(size, GFP_KERNEL);
+   814                  if (!snap_sizes)
+   815                          goto out_err;
+
+regards,
+dan carpenter
+
