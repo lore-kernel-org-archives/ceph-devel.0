@@ -1,58 +1,100 @@
-From: christophe courtaut <christophe.courtaut@gmail.com>
-Subject: [PATCH] rgw: Added an encoder for time_t to fix compilation
-Date: Thu, 20 Jun 2013 15:57:19 +0200
-Message-ID: <CAA8043gcmGmpNba7OEbh8Vo7-SgUN_R_CcGpsi_Vt9pgmmhirw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: PGLog API : missing
+Date: Thu, 20 Jun 2013 16:38:29 +0200
+Message-ID: <51C313E5.8020408@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=047d7b2ed7c14de23f04df965412
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig9A8D4804735AABA96F232BE5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:34264 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965557Ab3FTN5k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 09:57:40 -0400
-Received: by mail-oa0-f52.google.com with SMTP id g12so8094100oah.11
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 06:57:39 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:45375 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755984Ab3FTOic (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 10:38:32 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Samuel Just <sam.just@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
---047d7b2ed7c14de23f04df965412
-Content-Type: text/plain; charset=ISO-8859-1
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig9A8D4804735AABA96F232BE5
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-On the rgw-wip-geo-2 branch, the encode decode function are called
-with time_t now,
-but there is no encode/decode function created for time_t type.
+Hi Sam,
 
-http://tracker.ceph.com/issues/5402 refs #5402
+I tried to consider the part of the API of PGLog related to pg_missing_t,=
+ looking at what it currently is and what it should be. At the moment it =
+is ( not considering the methods that have a side effect on both missing =
+and log ):
 
-This patch adds a WRITE_RAW_ENCODER to support this type.
+Accessor:
 
---
-Christophe Courtaut
+  const pg_missing_t& get_missing() const { return missing; }
 
---047d7b2ed7c14de23f04df965412
-Content-Type: application/octet-stream;
-	name="0001-rgw-Added-an-encoder-for-time_t-to-fix-compilation.patch"
-Content-Disposition: attachment;
-	filename="0001-rgw-Added-an-encoder-for-time_t-to-fix-compilation.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hi60j20d0
+Actors:
 
-RnJvbSAxMjVjZWNkMzExOTRhOGM5MjEwNzFiZWQwYjFkM2VjNDBiMDg2YTlkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlIENvdXJ0YXV0IDxjaHJpc3RvcGhlLmNvdXJ0
-YXV0QGdtYWlsLmNvbT4KRGF0ZTogVGh1LCAyMCBKdW4gMjAxMyAxNTo1MDozNCArMDIwMApTdWJq
-ZWN0OiBbUEFUQ0hdIHJndzogQWRkZWQgYW4gZW5jb2RlciBmb3IgdGltZV90IHRvIGZpeCBjb21w
-aWxhdGlvbgoKVGhlIGVuY29kZSBkZWNvZGUgZnVuY3Rpb24gYXJlIGNhbGxlZCB3aXRoIHRpbWVf
-dCBub3csCmJ1dCB0aGVyZSBpcyBubyBlbmNvZGUvZGVjb2RlIGZ1bmN0aW9uIGNyZWF0ZWQgZm9y
-IHRpbWVfdCB0eXBlLgoKaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzU0MDIgcmVmcyAj
-NTQwMgoKVGhpcyBwYXRjaCBhZGRzIGEgV1JJVEVfUkFXX0VOQ09ERVIgdG8gc3VwcG9ydCB0aGlz
-IHR5cGUuCgpTaWduZWQtb2ZmLWJ5OiBDaHJpc3RvcGhlIENvdXJ0YXV0IDxjaHJpc3RvcGhlLmNv
-dXJ0YXV0QGdtYWlsLmNvbT4KLS0tCiBzcmMvaW5jbHVkZS9lbmNvZGluZy5oIHwgMSArCiAxIGZp
-bGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKykKCmRpZmYgLS1naXQgYS9zcmMvaW5jbHVkZS9lbmNv
-ZGluZy5oIGIvc3JjL2luY2x1ZGUvZW5jb2RpbmcuaAppbmRleCBlYjQ0NWUzLi40ZTlmNzIyIDEw
-MDY0NAotLS0gYS9zcmMvaW5jbHVkZS9lbmNvZGluZy5oCisrKyBiL3NyYy9pbmNsdWRlL2VuY29k
-aW5nLmgKQEAgLTY3LDYgKzY3LDcgQEAgV1JJVEVfUkFXX0VOQ09ERVIoY2hhcikKIFdSSVRFX1JB
-V19FTkNPREVSKGNlcGhfbGU2NCkKIFdSSVRFX1JBV19FTkNPREVSKGNlcGhfbGUzMikKIFdSSVRF
-X1JBV19FTkNPREVSKGNlcGhfbGUxNikKK1dSSVRFX1JBV19FTkNPREVSKHRpbWVfdCkKIAogLy8g
-RklYTUU6IHdlIG5lZWQgdG8gY2hvb3NlIHNvbWUgcG9ydGFibGUgZmxvYXRpbmcgcG9pbnQgZW5j
-b2RpbmcgaGVyZQogV1JJVEVfUkFXX0VOQ09ERVIoZmxvYXQpCi0tIAoxLjguMS4yCgo=
---047d7b2ed7c14de23f04df965412--
+  void missing_add(const hobject_t& oid, eversion_t need, eversion_t have=
+)
+  void revise_need(hobject_t oid, eversion_t need)   void revise_have(hob=
+ject_t oid, eversion_t have)
+
+  void missing_got(map<hobject_t, pg_missing_t::item>::const_iterator m)
+  void missing_rm(map<hobject_t, pg_missing_t::item>::const_iterator m)
+
+The get_missing read only accessor is used in PG.{cc,h}, OSD.{cc,h}, Repl=
+icated.{cc,h} It is used in dozen of different ways and I'm not sure if i=
+t would make sense to define an API to replace them. I fail to see a patt=
+ern that would be useful.
+
+The missing_add method is used by ReplicatedPG::recover_object_replicas a=
+nd  PG::repair_object The revise_have method is used by ReplicatedPG::sub=
+mit_push_data
+The revise_need method is used by ReplicatedPG::mark_all_unfound_lost whe=
+n handling pg_log_entry_t::LOST_REVERT
+The missing_got method is used by ReplicatedPG::mark_all_unfound_lost whe=
+n handling pg_log_entry_t::LOST_MARK
+The missing_rm method is used by ReplicatedPG::mark_all_unfound_lost when=
+ handling pg_log_entry_t::LOST_DELETE
+
+All these make sense to me. But I'm looking at what is currently in place=
+ rather than thinking about what it should become to accomodate for erasu=
+re coding.
+
+With erasure_coding one OSD contains a chunk. If it is lost, it will not =
+be copied from another OSD, it will be repaired by using the content of o=
+ther OSDs. For instance; if the chunk object 4 version 1,2 is not in OSD =
+3 the other chunks objects will be fetched from the remaining OSDs, the r=
+epair function will then be called using their content to create the chun=
+k object 4 version 1,2. Instead of fetching a copy of the missing object =
+from one OSD, the code would fetch chunk objects from multiple OSDs to be=
+ able to repair.
+Because pg_missing_t is dealing with the missing objects for a single OSD=
+, it may not need to be modified when used in the context of erasure codi=
+ng.
+
+Am I making any sense ? I'm not sure ;-)
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+
+--------------enig9A8D4804735AABA96F232BE5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlHDE+UACgkQ8dLMyEl6F23hEwCgoOkQhZNjeLXgXbb4iXhxfvR+
+lUUAnRCn60Jh0uc4grZswZosSA38rd4D
+=rY5/
+-----END PGP SIGNATURE-----
+
+--------------enig9A8D4804735AABA96F232BE5--
