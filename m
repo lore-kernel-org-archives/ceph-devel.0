@@ -1,61 +1,92 @@
-From: Sage Weil <sage@inktank.com>
-Subject: simple key management for dm-crypt
-Date: Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306202249260.30991@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/2] mds: use "open-by-ino" helper to handle LOOKUPINO request
+Date: Fri, 21 Jun 2013 14:39:26 +0800
+Message-ID: <1371796767-16205-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47144 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161146Ab3FUGAc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jun 2013 02:00:32 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 3C01E803BB
-	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 1560F803BB
-	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
+Received: from mga01.intel.com ([192.55.52.88]:50145 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161442Ab3FUGoX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 21 Jun 2013 02:44:23 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, greg@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-A set of simple dm-crypt hooks were included in cuttlefish that allow you 
-to easily use dm-crypt beneath the disks consumed by ceph-osd.  The 
-current solution is pretty limited in that the dm-crypt keys are just 
-stored in /etc/ceph.  They don't help if a machine is stolen, but they do 
-allow you to throw away data disks without worrying about data being 
-compromised.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The monitor has a simple key/value storage service that we can use to 
-store the dm-crypt keys.  Having them stored by a simple keyserver (the 
-mon) means the boot disk can be discard along with the data disks, 
-provided an attacker doesn't have access to the network before the keys 
-are revoked.  The challenge is deciding how to manage them all.
+Fixes #3541
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ src/mds/Server.cc | 38 ++++++++------------------------------
+ src/mds/Server.h  |  1 -
+ 2 files changed, 8 insertions(+), 31 deletions(-)
 
-There are at least two keys:
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 1d16d04..e84626b 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2483,41 +2483,19 @@ void Server::handle_client_lookup_ino(MDRequest *mdr)
+ void Server::_lookup_ino(MDRequest *mdr)
+ {
+   inodeno_t ino = mdr->client_request->get_filepath().get_ino();
+-  dout(10) << "_lookup_ino " << mdr << " checking peers for ino " << ino << dendl;
+-  mdcache->find_ino_peers(ino,
+-			  new C_MDS_LookupIno2(this, mdr), -1);
++  dout(10) << "_lookup_ino " << mdr << " opening ino " << ino << dendl;
++  mdcache->open_ino(ino, (int64_t)-1, new C_MDS_LookupIno2(this, mdr), false);
+ }
+ 
+-struct C_MDS_LookupIno3 : public Context {
+-  Server *server;
+-  MDRequest *mdr;
+-  C_MDS_LookupIno3(Server *s, MDRequest *r) : server(s), mdr(r) {}
+-  void finish(int r) {
+-    server->_lookup_ino_3(mdr, r);
+-  }
+-};
+-
+ void Server::_lookup_ino_2(MDRequest *mdr, int r)
+ {
+   inodeno_t ino = mdr->client_request->get_filepath().get_ino();
+-  dout(10) << "_lookup_ino_2 " << mdr << " checked peers for ino " << ino
+-	   << " and got r=" << r << dendl;
+-  if (r == 0) {
+-    dispatch_client_request(mdr);
+-    return;
+-  }
+-
+-  // okay fine, maybe it's a directory though...
+-  mdcache->find_ino_dir(ino, new C_MDS_LookupIno3(this, mdr));
+-}
+-
+-void Server::_lookup_ino_3(MDRequest *mdr, int r)
+-{
+-  inodeno_t ino = mdr->client_request->get_filepath().get_ino();
+-  dout(10) << "_lookup_ino_3 " << mdr << " checked dir obj for ino " << ino
+-	   << " and got r=" << r << dendl;
+-  if (r == 0) {
+-    dispatch_client_request(mdr);
++  dout(10) << "_lookup_ino_2 " << mdr << " ino " << ino << " r=" << r << dendl;
++  if (r >= 0) {
++    if (r == mds->get_nodeid())
++      dispatch_client_request(mdr);
++    else
++      mdcache->request_forward(mdr, r);
+     return;
+   }
+ 
+diff --git a/src/mds/Server.h b/src/mds/Server.h
+index 269b286..2da4055 100644
+--- a/src/mds/Server.h
++++ b/src/mds/Server.h
+@@ -146,7 +146,6 @@ public:
+   void handle_client_lookup_ino(MDRequest *mdr);
+   void _lookup_ino(MDRequest *mdr);
+   void _lookup_ino_2(MDRequest *mdr, int r);
+-  void _lookup_ino_3(MDRequest *mdr, int r);
+   void handle_client_readdir(MDRequest *mdr);
+   void handle_client_file_setlock(MDRequest *mdr);
+   void handle_client_file_readlock(MDRequest *mdr);
+-- 
+1.8.1.4
 
- 1) $osd_data/keyring has the cephx key that ceph-osd uses to authenticate 
-    and join the cluster.  It's normally stored in the data dir, and would 
-    thus be encrypted and inaccessible without the dm-crypt key.
- 2) The dm-crypt key is used to decrypt the block device so that the osd 
-    data and/or journal can be mounted.
-
-If we store the dm-crypt key on the mon, then there is also a third key:
-
- 3) A second cephx key should be used to access the monitor to obtain the 
-    dm-crypt key for the local disks.
-
-I'm not sure what the best way to handle #3 is.  A per-host key could be 
-used here, but it makes it harder to move disks around between hosts, 
-unless all host key scould access any disk key (which seems unwise). 
-Alternatively, a #3 key could be stored in a tiny unencrypted partition of 
-the osd/data disk.  This isn't really my area, but I think this is roughly 
-how most 'key management systems' would work.  Disks are useless without 
-access to the mon/keyserver, which provides admins with a safe centralized 
-place to revoke keys.
-
-Are there any users who are looking for this type of protection?  I don't 
-want to spend any time putting this together until we have a clearer 
-picture of what people's real requirements are...
-
-sage
