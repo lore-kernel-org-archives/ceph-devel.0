@@ -1,83 +1,44 @@
-From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: rbd: refactor rbd_header_from_disk()
-Date: Thu, 20 Jun 2013 16:23:13 -0500
-Message-ID: <51C372C1.7010607@linaro.org>
-References: <20130620211158.GA31274@elgon.mountain>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: Comments on Ceph distributed parity implementation
+Date: Thu, 20 Jun 2013 18:23:16 -0700
+Message-ID: <622F4407872BA447A16110F65453358C01A4D8066EE7@FMSAMAIL.fmsa.local>
+References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org>
+ <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local>
+ <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org>
+ <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
+ <51C00FDB.6030803@polytech.univ-nantes.fr>
+ <3E438C2F-0779-4824-9C05-ABE4B5803E05@cs.utk.edu>
+ <51C34932.4080304@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:50080 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758204Ab3FTVXD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jun 2013 17:23:03 -0400
-Received: by mail-ie0-f172.google.com with SMTP id 16so17933844iea.31
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 14:23:03 -0700 (PDT)
-In-Reply-To: <20130620211158.GA31274@elgon.mountain>
+Received: from fujitsu24.fnanic.fujitsu.com ([192.240.6.14]:38228 "EHLO
+	fujitsu24.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1423019Ab3FUBUJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Jun 2013 21:20:09 -0400
+In-Reply-To: <51C34932.4080304@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: elder@inktank.com, ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/20/2013 04:11 PM, Dan Carpenter wrote:
-> Hello Alex Elder,
+
+On 06/20/2013 11:26 PM, Loic Dachary wrote:
 > 
-> The patch bb23e37acb2a: "rbd: refactor rbd_header_from_disk()" from 
-> May 6, 2013, has some integer overflow bugs:
-> 
-> drivers/block/rbd.c
->    793          snap_count = le32_to_cpu(ondisk->snap_count);
->    794          snapc = ceph_create_snap_context(snap_count, GFP_KERNEL);
-> 
-> snap_count comes from the disk.  On 32 bit systems there is an integer
-> overflow problem inside ceph_create_snap_context() so snapc could be
-> smaller than intended.
+> I wrote down a short description of the read/write path I plan to
+> implement in ceph :
+https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/erasure-code.rst.
+> A quick look at the drawings will hopefully give you an idea. Each OSD is > a disk connected to the others over the network. Although I chose K+M = 5 > I suspect the most common use case will be around K+M = 7+3 = 10
 
-Is it true that fixing ceph_create_snap_context() would resolve
-the issues you describe here?
+Hi Loic,
 
-I believe inserting this at the top of that function would
-resolve the potential overflow:
+A couple questions regarding your proposal:
 
-        if (snap_count > SNAP_COUNT_MAX)
-                return NULL;
+Where would encode/decode occur? Client or OSD? Previous discussions seemed to want it at the OSD level. Your proposal seems that it could be either.
 
-Where SNAP_COUNT_MAX would be defined as:
+What about partial reads? For example, if only 'H' was requested, would you decode the entire object first? Or, read from OSD1 and reconstruct on error?
 
-#define SNAP_COUNT_MAX \
-        ((SIZE_MAX - sizeof (struct ceph_snap_context)) / sizeof (u64))
-
-Do you agree, or is there something else you would recommend?
-Thanks.
-
-					-Alex
-> 
->    795          if (!snapc)
->    796                  goto out_err;
->    797          snapc->seq = le64_to_cpu(ondisk->snap_seq);
->    798          if (snap_count) {
->    799                  struct rbd_image_snap_ondisk *snaps;
->    800                  u64 snap_names_len = le64_to_cpu(ondisk->snap_names_len);
->    801  
->    802                  /* We'll keep a copy of the snapshot names... */
->    803  
->    804                  if (snap_names_len > (u64)SIZE_MAX)
->    805                          goto out_2big;
->    806                  snap_names = kmalloc(snap_names_len, GFP_KERNEL);
->    807                  if (!snap_names)
->    808                          goto out_err;
->    809  
->    810                  /* ...as well as the array of their sizes. */
->    811  
->    812                  size = snap_count * sizeof (*header->snap_sizes);
->                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> There is a second integer overflow bug here.
-> 
->    813                  snap_sizes = kmalloc(size, GFP_KERNEL);
->    814                  if (!snap_sizes)
->    815                          goto out_err;
-> 
-> regards,
-> dan carpenter
-> 
-
+Thanks,
+Paul
