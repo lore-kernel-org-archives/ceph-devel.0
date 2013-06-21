@@ -1,49 +1,61 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH v2] Ceph: Punch hole support
-Date: Thu, 20 Jun 2013 15:56:38 -0500
-Message-ID: <1371761798.2776.134@driftwood>
-References: <1371224186-4809-1-git-send-email-liwang@ubuntukylin.com>
-	<1371224340-4926-1-git-send-email-liwang@ubuntukylin.com>
-	<alpine.DEB.2.00.1306140902490.26467@cobra.newdream.net>
-	<51C1DB17.6040803@ubuntukylin.com>
+From: Sage Weil <sage@inktank.com>
+Subject: simple key management for dm-crypt
+Date: Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306202249260.30991@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; DelSp=Yes; Format=Flowed
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <51C1DB17.6040803@ubuntukylin.com> (from liwang@ubuntukylin.com
-	on Wed Jun 19 11:23:51 2013)
-Content-Disposition: inline
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, linux-fsdevel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:47144 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161146Ab3FUGAc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jun 2013 02:00:32 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 3C01E803BB
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 1560F803BB
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Jun 2013 23:00:32 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 06/19/2013 11:23:51 AM, Li Wang wrote:
-> This patch implements punch hole (fallocate) support for Ceph.
-> 
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> Signed-off-by: Yunchuan Wen <wenyunchuan@ubuntukylin.com>
+A set of simple dm-crypt hooks were included in cuttlefish that allow you 
+to easily use dm-crypt beneath the disks consumed by ceph-osd.  The 
+current solution is pretty limited in that the dm-crypt keys are just 
+stored in /etc/ceph.  They don't help if a machine is stolen, but they do 
+allow you to throw away data disks without worrying about data being 
+compromised.
 
-> +static int ceph_delete_object(struct inode *inode, u64 offset, u64  
-> *length)
-> +{
-> +	struct ceph_inode_info *ci = ceph_inode(inode);
-> +    struct ceph_fs_client *fsc = ceph_inode_to_client(inode);	
-> +	struct ceph_osd_request *req;
+The monitor has a simple key/value storage service that we can use to 
+store the dm-crypt keys.  Having them stored by a simple keyserver (the 
+mon) means the boot disk can be discard along with the data disks, 
+provided an attacker doesn't have access to the network before the keys 
+are revoked.  The challenge is deciding how to manage them all.
 
-Mixing tabs and spaces.
+There are at least two keys:
 
+ 1) $osd_data/keyring has the cephx key that ceph-osd uses to authenticate 
+    and join the cluster.  It's normally stored in the data dir, and would 
+    thus be encrypted and inaccessible without the dm-crypt key.
+ 2) The dm-crypt key is used to decrypt the block device so that the osd 
+    data and/or journal can be mounted.
 
-> +static int ceph_punch_hole(struct file *file, loff_t offset, loff_t  
-> length)
-> +{
-> +	struct inode *inode = file->f_dentry->d_inode;
-> +	int ret = 0;
-> +
-> +    if (!S_ISREG(inode->i_mode)) {
-> +        return -EOPNOTSUPP;
-> +	}
+If we store the dm-crypt key on the mon, then there is also a third key:
 
-And again.
+ 3) A second cephx key should be used to access the monitor to obtain the 
+    dm-crypt key for the local disks.
 
-Rob
+I'm not sure what the best way to handle #3 is.  A per-host key could be 
+used here, but it makes it harder to move disks around between hosts, 
+unless all host key scould access any disk key (which seems unwise). 
+Alternatively, a #3 key could be stored in a tiny unencrypted partition of 
+the osd/data disk.  This isn't really my area, but I think this is roughly 
+how most 'key management systems' would work.  Disks are useless without 
+access to the mon/keyserver, which provides admins with a safe centralized 
+place to revoke keys.
+
+Are there any users who are looking for this type of protection?  I don't 
+want to spend any time putting this together until we have a clearer 
+picture of what people's real requirements are...
+
+sage
