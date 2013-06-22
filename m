@@ -1,112 +1,107 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/2] mds: use "open-by-ino" helper to handle LOOKUPINO
- request
-Date: Fri, 21 Jun 2013 17:38:46 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306211737590.18500@cobra.newdream.net>
-References: <1371796767-16205-1-git-send-email-zheng.z.yan@intel.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Comments on Ceph distributed parity implementation
+Date: Sat, 22 Jun 2013 10:26:44 +0200
+Message-ID: <51C55FC4.7050205@dachary.org>
+References: <20130614201327.70240@gmx.com> <51BB9FC3.8040102@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local> <loom.20130616T214215-201@post.gmane.org> <51BE2EB1.2020807@dachary.org> <622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local> <51C00FDB.6030803@polytech.univ-nantes.fr> <3E438C2F-0779-4824-9C05-ABE4B5803E05@cs.utk.edu> <51C34932.4080304@dachary.org> <622F4407872BA447A16110F65453358C01A4D8066EE7@FMSAMAIL.fmsa.local> <51C40EDD.9090909@dachary.org> <622F4407872BA447A16110F65453358C01A4D8066F49@FMSAMAIL.fmsa.local>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig86867D64916C4DF55FD16B6D"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57769 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161521Ab3FVAir (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jun 2013 20:38:47 -0400
-In-Reply-To: <1371796767-16205-1-git-send-email-zheng.z.yan@intel.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:37377 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751204Ab3FVI0r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 22 Jun 2013 04:26:47 -0400
+In-Reply-To: <622F4407872BA447A16110F65453358C01A4D8066F49@FMSAMAIL.fmsa.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, greg@inktank.com
+To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Harvey Skinner <hpmpec2a@gmail.com>
 
-Applied both of these, and merged in your wip-mds branch.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig86867D64916C4DF55FD16B6D
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-This is great!  NFS reexport from a kernel cephfs mount should now be 
-reliable (no more ESTALE errors).
 
-sage
+>> The first, simplest implementation is likely to be fit to use with RGW=
+ and
+>> probably too slow to use with RBD. Do you think we should try to optim=
+ize
+>> for RBD right now ?
+>=20
+> Yes, RGW is the obvious best candidate for the first implementation. We=
+ don't need to implement for RBD and CephFS now, but we should consider h=
+ow the design would handle other applications in the future. The alternat=
+ive is to optimize purely for RGW and provide an API/plug-in capability s=
+uggested by Harvey Skinner to make way for optimized solutions for other =
+applications.
+>=20
 
-On Fri, 21 Jun 2013, Yan, Zheng wrote:
+I agree that the design should make room to plug in optimizations in the =
+future. I've tried to figure out where the API/plug-in should fit.=20
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> Fixes #3541
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  src/mds/Server.cc | 38 ++++++++------------------------------
->  src/mds/Server.h  |  1 -
->  2 files changed, 8 insertions(+), 31 deletions(-)
-> 
-> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-> index 1d16d04..e84626b 100644
-> --- a/src/mds/Server.cc
-> +++ b/src/mds/Server.cc
-> @@ -2483,41 +2483,19 @@ void Server::handle_client_lookup_ino(MDRequest *mdr)
->  void Server::_lookup_ino(MDRequest *mdr)
->  {
->    inodeno_t ino = mdr->client_request->get_filepath().get_ino();
-> -  dout(10) << "_lookup_ino " << mdr << " checking peers for ino " << ino << dendl;
-> -  mdcache->find_ino_peers(ino,
-> -			  new C_MDS_LookupIno2(this, mdr), -1);
-> +  dout(10) << "_lookup_ino " << mdr << " opening ino " << ino << dendl;
-> +  mdcache->open_ino(ino, (int64_t)-1, new C_MDS_LookupIno2(this, mdr), false);
->  }
->  
-> -struct C_MDS_LookupIno3 : public Context {
-> -  Server *server;
-> -  MDRequest *mdr;
-> -  C_MDS_LookupIno3(Server *s, MDRequest *r) : server(s), mdr(r) {}
-> -  void finish(int r) {
-> -    server->_lookup_ino_3(mdr, r);
-> -  }
-> -};
-> -
->  void Server::_lookup_ino_2(MDRequest *mdr, int r)
->  {
->    inodeno_t ino = mdr->client_request->get_filepath().get_ino();
-> -  dout(10) << "_lookup_ino_2 " << mdr << " checked peers for ino " << ino
-> -	   << " and got r=" << r << dendl;
-> -  if (r == 0) {
-> -    dispatch_client_request(mdr);
-> -    return;
-> -  }
-> -
-> -  // okay fine, maybe it's a directory though...
-> -  mdcache->find_ino_dir(ino, new C_MDS_LookupIno3(this, mdr));
-> -}
-> -
-> -void Server::_lookup_ino_3(MDRequest *mdr, int r)
-> -{
-> -  inodeno_t ino = mdr->client_request->get_filepath().get_ino();
-> -  dout(10) << "_lookup_ino_3 " << mdr << " checked dir obj for ino " << ino
-> -	   << " and got r=" << r << dendl;
-> -  if (r == 0) {
-> -    dispatch_client_request(mdr);
-> +  dout(10) << "_lookup_ino_2 " << mdr << " ino " << ino << " r=" << r << dendl;
-> +  if (r >= 0) {
-> +    if (r == mds->get_nodeid())
-> +      dispatch_client_request(mdr);
-> +    else
-> +      mdcache->request_forward(mdr, r);
->      return;
->    }
->  
-> diff --git a/src/mds/Server.h b/src/mds/Server.h
-> index 269b286..2da4055 100644
-> --- a/src/mds/Server.h
-> +++ b/src/mds/Server.h
-> @@ -146,7 +146,6 @@ public:
->    void handle_client_lookup_ino(MDRequest *mdr);
->    void _lookup_ino(MDRequest *mdr);
->    void _lookup_ino_2(MDRequest *mdr, int r);
-> -  void _lookup_ino_3(MDRequest *mdr, int r);
->    void handle_client_readdir(MDRequest *mdr);
->    void handle_client_file_setlock(MDRequest *mdr);
->    void handle_client_file_readlock(MDRequest *mdr);
-> -- 
-> 1.8.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+a) pluggable placement group
+b) pluggable erasure code library
+
+The pluggable placement group capability is what I'm working on right now=
+=2E It requires some re-architecture of the current code and the API is s=
+tarting to emerge. The implementation should eventually be in a separate =
+shared library ( say ErasureCodePG ) loaded at run time and selected with=
+ a configuration option when creating a pool. I suspect that experimentin=
+g with new optimization strategies is going to be done by hacking Erasure=
+CodePG and create new pools using it.=20
+
+Let say we find a way to optimize for RBD and implement that in the RBDEr=
+asureCodePG placement group. And we configure the RBD pool to use this pl=
+acement group backend while keeping the ErasureCodePG placement group bac=
+kend for RGW. Later on it may make sense to merge the two or make sure th=
+ey share similar code for maintainance purposes. But that probably leaves=
+ all the room we need to experiment until a general solution is found.
+
+The pluggable erasure code library API will be something like what is des=
+cribed in http://pad.ceph.com/p/Erasure_encoding_as_a_storage_backend
+
+    context(k, m, reed-solomon|...) =3D> context* c=20
+    encode(context* c, void* data) =3D> void* chunks[k+m]
+    decode(context* c, void* chunk[k+m], int* indices_of_erased_chunks) =3D=
+> void* data // erased chunks are not used
+    repair(context* c, void* chunk[k+m], int* indices_of_erased_chunks) =3D=
+> void* chunks[k+m] // erased chunks are rebuilt
+
+It won't be enough for hierarchical codes but they don't seem to be consi=
+dered attractive at the moment. It should be enough for LRC ( http://anrg=
+=2Eusc.edu/~maheswaran/Xorbas.pdf ) since it only requires an additional =
+argument to the context ( the number of chunks required to do a local rep=
+air ).
+
+The need for another API ( in addition to pluggable placement groups and =
+pluggable erasure code library ) may appear in the future. I can't see it=
+ right now. I try to refrain from over-engineering while making sure we d=
+on't need to re-architecture because something obvious was overlooked. Th=
+is discussion is helping a lot :-)=20
+
+What do you think ?
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+--------------enig86867D64916C4DF55FD16B6D
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlHFX8QACgkQ8dLMyEl6F23tSQCfUZx+d+YMP1ZUE8/pbpbKNPxE
+HKgAoJJL2/2aZvx60bFub/8oe1XChTiS
+=0MDo
+-----END PGP SIGNATURE-----
+
+--------------enig86867D64916C4DF55FD16B6D--
