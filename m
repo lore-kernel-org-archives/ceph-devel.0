@@ -1,46 +1,50 @@
-From: "Holger Hoffstaette" <holger.hoffstaette@googlemail.com>
-Subject: Re: ceph-mon vs leveldb status
-Date: Mon, 24 Jun 2013 12:51:37 +0200
-Message-ID: <pan.2013.06.24.10.51.37.437785@googlemail.com>
-References: <alpine.DEB.2.00.1306191304230.7089@cobra.newdream.net>
+From: Andreas Friedrich <andreas.friedrich@ts.fujitsu.com>
+Subject: Missing SLES11 packages
+Date: Mon, 24 Jun 2013 14:20:41 +0200
+Message-ID: <20130624122041.GA2789@upset.ux.pdb.fsc.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51308 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751949Ab3FXKzI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Jun 2013 06:55:08 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Ur4QJ-00033h-4l
-	for ceph-devel@vger.kernel.org; Mon, 24 Jun 2013 12:55:03 +0200
-Received: from p548760b8.dip0.t-ipconnect.de ([84.135.96.184])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 12:55:03 +0200
-Received: from holger.hoffstaette by p548760b8.dip0.t-ipconnect.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 12:55:03 +0200
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:28859 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751072Ab3FXMVG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Jun 2013 08:21:06 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Dieter Kasper <dieter.kasper@ts.fujitsu.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
 
-On Wed, 19 Jun 2013 13:09:42 -0700, Sage Weil wrote:
+Hello Sage,
 
-[snip]
+I'm trying to install Ceph on a SLES11 system using the packages from
+  (a) http://ceph.com/rpm-cuttlefish/sles11/
 
-> Meanwhile, the next development release will be changing the way all the
-> pg metadata in the monitor is stored to be much more efficient and to take
-> advantage of leveldb's capabilities; this will be present in 0.66
-> (dumpling - 1).
+When calling
+  rpm -i ceph-0.61.4-0.x86_64.rpm \
+         libcephfs1-0.61.4-0.x86_64.rpm \
+         librados2-0.61.4-0.x86_64.rpm \
+         librbd1-0.61.4-0.x86_64.rpm
 
-Have you considered using one of the recently annoucned LevelDB forks? The
-HyperDex folks recently published their HyperLevelDB fork (still
-compatible though) and it has significantly improved behaviour, less
-performance variance etc.
-See http://hyperdex.org/performance/leveldb/ or github.
+I got the following dependency errors
+  error: Failed dependencies:
+          python-lockfile is needed by ceph-0.61.4-0.x86_64
+          scsirastools is needed by ceph-0.61.4-0.x86_64
+          libtcmalloc.so.0()(64bit) is needed by ceph-0.61.4-0.x86_64
 
--h
+The python-lockfile dependency is new with 0.61.4. But also the
+scsirastools and libtcmalloc packages are not part of SLES11 and are
+not listed below (a). So how to install Ceph on a SLES11 system?
 
-
+Best regards
+Andreas Friedrich
+----------------------------------------------------------------------
+FUJITSU
+Fujitsu Technology Solutions GmbH
+Heinz-Nixdorf-Ring 1, 33106 Paderborn, Germany
+Tel: +49 (5251) 525-1512
+Fax: +49 (5251) 525-321512
+Email: andreas.friedrich@ts.fujitsu.com
+Web: ts.fujitsu.com
+Company details: de.ts.fujitsu.com/imprint
+----------------------------------------------------------------------
