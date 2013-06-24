@@ -1,132 +1,100 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Separating Peering from PG
-Date: Mon, 24 Jun 2013 17:03:48 +0200
-Message-ID: <51C85FD4.7030801@dachary.org>
-References: <51C4570F.70206@dachary.org> <CA+4uBUYTieHXeOWQXtqvRg6jX-fS1cedt74H2-v36FZhSwqo0A@mail.gmail.com> <51C48916.7090102@dachary.org> <51C49287.2020907@dachary.org>
+From: christophe courtaut <christophe.courtaut@gmail.com>
+Subject: Re: [PATCH] rgw: Added an encoder for time_t to fix compilation
+Date: Mon, 24 Jun 2013 17:13:32 +0200
+Message-ID: <CAA8043gJKa-t_DWeHE-OeGThNGwdMjb83Ve4ENSxcUU3nSFM6Q@mail.gmail.com>
+References: <CAA8043gcmGmpNba7OEbh8Vo7-SgUN_R_CcGpsi_Vt9pgmmhirw@mail.gmail.com>
+ <CABBk=J8J_tKY-Wy-sWb2=GREauqN0GfaJaHk14jzRVM0fx59Bg@mail.gmail.com> <CAA8043j7SpO-93KEgk1JQD=BYV=H8GwQVZYz=2LhkSZgVF+dBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig28A848F1A795726B55D6CBC9"
+Content-Type: multipart/mixed; boundary=089e01294e564b5bf704dfe7dca3
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:45545 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752003Ab3FXPDv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Jun 2013 11:03:51 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 4E04926396
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 17:03:50 +0200 (CEST)
-In-Reply-To: <51C49287.2020907@dachary.org>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:39010 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751901Ab3FXPNx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Jun 2013 11:13:53 -0400
+Received: by mail-ob0-f176.google.com with SMTP id v19so10717795obq.7
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 08:13:53 -0700 (PDT)
+In-Reply-To: <CAA8043j7SpO-93KEgk1JQD=BYV=H8GwQVZYz=2LhkSZgVF+dBA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig28A848F1A795726B55D6CBC9
+--089e01294e564b5bf704dfe7dca3
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Sorry, wrong patch attached.
 
-The refactor suggested below is implemented and compiles ( does not link =
-yet ).=20
+Here comes the updated version.
 
-https://github.com/dachary/ceph/commit/03b18a5f4b985781316e9aa9f1e73d3300=
-b95a91
-from the branch
-https://github.com/dachary/ceph/tree/wip-5433
+Best regards.
 
-I hope it will help clarify my intentions. I created a task to track this=
- work : http://tracker.ceph.com/issues/5433
-
-Cheers
-
-On 06/21/2013 07:51 PM, Loic Dachary wrote:
-> Hi Sam,
->=20
-> This draft commit may clarify what I mean
->=20
-> https://github.com/dachary/ceph/commit/5c6678385eed4f8769d0f5ee38ad629e=
-32b902a6
->=20
-> Cheers
->=20
-> On 06/21/2013 07:10 PM, Loic Dachary wrote:
->>
->>
->> On 06/21/2013 06:38 PM, Samuel Just wrote:
->>> I'm not sure I understand, by PG::RecoveryStats, do you mean PG::Reco=
-veryState?
->>
->> Yes I do, sorry for the confusion. Fixed the typos for clarity, hopefu=
-lly.
->>
->> * Move PG::RecoveryState in PGRecoveryState.{cc,h}
->> * Create PGInterface : an abstract base class for PG enumerating all P=
-G methods used by PGRecoveryState
->> * Move Peering states / methods out of PGRecoveryState.{cc,h} and into=
- PGPeering.{cc,h}
->> * Write tests for PGPeering.{cc,h}, using a fixture derived from PGInt=
-erface
->>
->> Cheers
->>
->>> -Sam
+On Mon, Jun 24, 2013 at 4:36 PM, christophe courtaut
+<christophe.courtaut@gmail.com> wrote:
+> Here come a new patch.
+>
+> I do not generate an encoder/decoder using WRITE_RAW_ENCODER anymore.
+>
+> Instead i added a encoder/decoder for time_t using a __u64.
+>
+> On Thu, Jun 20, 2013 at 10:44 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>> On Thu, Jun 20, 2013 at 6:57 AM, christophe courtaut
+>> <christophe.courtaut@gmail.com> wrote:
+>>> On the rgw-wip-geo-2 branch, the encode decode function are called
+>>> with time_t now,
+>>> but there is no encode/decode function created for time_t type.
 >>>
->>> On Fri, Jun 21, 2013 at 6:37 AM, Loic Dachary <loic@dachary.org> wrot=
-e:
->>>> Hi Sage,
->>>>
->>>> In order to move the PG peering code out of PG.{cc,h} (which is the =
-next step in refactoring PGs as suggested by Sam http://pad.ceph.com/p/Er=
-asure_encoding_as_a_storage_backend ) I think it would be sensible to:
->>>>
->>>> * Move PG::RecoveryStats in PGRecoveryStat.{cc,h}
->>>> * Create PGInterface : an abstract base class for PG enumerating all=
- PG methods used by PGRecoveryStats
->>>> * Move Peering states / methods out of PGRecoveryStat.{cc,h} and int=
-o PGPeering.{cc,h}
->>>> * Write tests for PGPeering.{cc,h}, using a fixture derived from PGI=
-nterface
->>>>
->>>> Because this approach not only moves the peering out of PG.{cc,h} bu=
-t also the rest of the state logic, I would like to know if this seems se=
-nsible to you. Also, introducing an abstract base class to help isolate t=
-he PG interface and facilitate writing fixtures has not been discussed ye=
-t.
->>>>
->>>> Cheers
->>>>
->>>> --
->>>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>> All that is necessary for the triumph of evil is that good people do=
- nothing.
->>>>
+>>> http://tracker.ceph.com/issues/5402 refs #5402
+>>>
+>>> This patch adds a WRITE_RAW_ENCODER to support this type.
+>>>
 >>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Christophe Courtaut
 >>
->=20
+>>
+>> The problem here is that we can't use the generic encoder / decoder as
+>> time_t may have different size on different architectures. We should
+>> just have a fixed size encoding for it (probably 64 bit albeit the
+>> waste).
+>>
+>> Thanks,
+>> Yehuda
+>
+>
+>
+> --
+> Christophe Courtaut
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
 
 
---------------enig28A848F1A795726B55D6CBC9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+-- 
+Christophe Courtaut
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+--089e01294e564b5bf704dfe7dca3
+Content-Type: application/octet-stream;
+	name="0001-rgw-Added-an-encoder-for-time_t-to-fix-compilation.patch"
+Content-Disposition: attachment;
+	filename="0001-rgw-Added-an-encoder-for-time_t-to-fix-compilation.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hibrzizc1
 
-iEYEARECAAYFAlHIX9UACgkQ8dLMyEl6F21amwCdHNqCK5AqbcmKQQK47riF7S4K
-bQYAnjAKBPJQdv7wqJVDCvOyrZb1qFJX
-=NPeD
------END PGP SIGNATURE-----
-
---------------enig28A848F1A795726B55D6CBC9--
+RnJvbSAzNmQzMmI0YWY2ZDM3YTQyNmNkMjU1YWRlNTA2MjBjYTQxNWNhMmFhIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlIENvdXJ0YXV0IDxjaHJpc3RvcGhlLmNvdXJ0
+YXV0QGdtYWlsLmNvbT4KRGF0ZTogVGh1LCAyMCBKdW4gMjAxMyAxNTo1MDozNCArMDIwMApTdWJq
+ZWN0OiBbUEFUQ0hdIHJndzogQWRkZWQgYW4gZW5jb2RlciBmb3IgdGltZV90IHRvIGZpeCBjb21w
+aWxhdGlvbgoKVGhlIGVuY29kZSBkZWNvZGUgZnVuY3Rpb24gYXJlIGNhbGxlZCB3aXRoIHRpbWVf
+dCBub3csCmJ1dCB0aGVyZSBpcyBubyBlbmNvZGUvZGVjb2RlIGZ1bmN0aW9uIGNyZWF0ZWQgZm9y
+IHRpbWVfdCB0eXBlLgoKaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzU0MDIgcmVmcyAj
+NTQwMgoKVGhpcyBwYXRjaCBhZGRzIGEgZml4ZWQgc2l6ZWQgZW5jb2Rlci9kZWNvZGVyIG9uIDY0
+Yml0cyB0byBzdXBwb3J0IHRoaXMgdHlwZS4KClNpZ25lZC1vZmYtYnk6IENocmlzdG9waGUgQ291
+cnRhdXQgPGNocmlzdG9waGUuY291cnRhdXRAZ21haWwuY29tPgotLS0KIHNyYy9pbmNsdWRlL2Vu
+Y29kaW5nLmggfCA5ICsrKysrKysrKwogMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKQoK
+ZGlmZiAtLWdpdCBhL3NyYy9pbmNsdWRlL2VuY29kaW5nLmggYi9zcmMvaW5jbHVkZS9lbmNvZGlu
+Zy5oCmluZGV4IGViNDQ1ZTMuLjdhMWNmYWQgMTAwNjQ0Ci0tLSBhL3NyYy9pbmNsdWRlL2VuY29k
+aW5nLmgKKysrIGIvc3JjL2luY2x1ZGUvZW5jb2RpbmcuaApAQCAtODIsNiArODIsMTUgQEAgaW5s
+aW5lIHZvaWQgZGVjb2RlKGJvb2wgJnYsIGJ1ZmZlcmxpc3Q6Oml0ZXJhdG9yJiBwKSB7CiAgIHYg
+PSB2djsKIH0KIAoraW5saW5lIHZvaWQgZW5jb2RlKGNvbnN0IHRpbWVfdCAmdiwgYnVmZmVybGlz
+dCYgYmwpIHsKKyAgX191NjQgdnYgPSB2OworICBlbmNvZGVfcmF3KHZ2LCBibCk7Cit9Citpbmxp
+bmUgdm9pZCBkZWNvZGUodGltZV90ICZ2LCBidWZmZXJsaXN0OjppdGVyYXRvciYgcCkgeworICBf
+X3U2NCB2djsKKyAgZGVjb2RlX3Jhdyh2diwgcCk7CisgIHYgPSB2djsKK30KIAogLy8gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIC8vIGludCB0eXBlcwotLSAKMS44LjEuMgoK
+--089e01294e564b5bf704dfe7dca3--
