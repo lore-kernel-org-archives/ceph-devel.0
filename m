@@ -1,101 +1,92 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH] rgw: Added an encoder for time_t to fix compilation
-Date: Mon, 24 Jun 2013 10:30:53 -0700
-Message-ID: <CABBk=J8OpPiBpeykkhUJT9ci4K=__zcBWLFQF-_unv8XgezoCA@mail.gmail.com>
-References: <CAA8043gcmGmpNba7OEbh8Vo7-SgUN_R_CcGpsi_Vt9pgmmhirw@mail.gmail.com>
-	<CABBk=J8J_tKY-Wy-sWb2=GREauqN0GfaJaHk14jzRVM0fx59Bg@mail.gmail.com>
-	<CAA8043j7SpO-93KEgk1JQD=BYV=H8GwQVZYz=2LhkSZgVF+dBA@mail.gmail.com>
-	<CAA8043gJKa-t_DWeHE-OeGThNGwdMjb83Ve4ENSxcUU3nSFM6Q@mail.gmail.com>
-	<alpine.DEB.2.00.1306241017140.29802@cobra.newdream.net>
+From: "Holger Hoffstaette" <holger.hoffstaette@googlemail.com>
+Subject: Re: ceph-mon vs leveldb status
+Date: Mon, 24 Jun 2013 20:57:29 +0200
+Message-ID: <pan.2013.06.24.18.57.29.146860@googlemail.com>
+References: <alpine.DEB.2.00.1306191304230.7089@cobra.newdream.net> <pan.2013.06.24.10.51.37.437785@googlemail.com> <alpine.DEB.2.00.1306240955180.29802@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f175.google.com ([209.85.128.175]:58980 "EHLO
-	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751129Ab3FXRay (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Jun 2013 13:30:54 -0400
-Received: by mail-ve0-f175.google.com with SMTP id da11so9083471veb.34
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 10:30:53 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1306241017140.29802@cobra.newdream.net>
+Received: from plane.gmane.org ([80.91.229.3]:48462 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751412Ab3FXS5k (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Jun 2013 14:57:40 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1UrBxL-0002A2-D7
+	for ceph-devel@vger.kernel.org; Mon, 24 Jun 2013 20:57:39 +0200
+Received: from p548760b8.dip0.t-ipconnect.de ([84.135.96.184])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 20:57:39 +0200
+Received: from holger.hoffstaette by p548760b8.dip0.t-ipconnect.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 20:57:39 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: christophe courtaut <christophe.courtaut@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I'd be happier if we could avoid time_t altogether and use utime_t.
-The problem is that librados and the objecter interface who require
-time_t for stat() and mtime(), so we just mirror that. Is there a
-reason why not to use utime_t? That'll allow us to have better time
-resolution when the underlying file system allows that.
+On Mon, 24 Jun 2013 09:56:40 -0700, Sage Weil wrote:
 
-On Mon, Jun 24, 2013 at 10:19 AM, Sage Weil <sage@inktank.com> wrote:
->> Sorry, wrong patch attached.
->>
->> Here comes the updated version.
->
-> This might work, but I'm worried that utime_t is probably typedef'd to a
-> unsigned long or something and we may accidentally call into the uint32_t
-> or uint64_t method (whichever it is for that platform).  I would prefer
-> something like
->
->
-> Mything::encode(bufferlist& bl) const
-> {
->   ...
->   uint64_t t = time;
->   ::encode(t, bl);
->   ...
-> }
->
-> and similarly in decode to
->
->   uint64_t t;
->   ::decode(t, bl);
->   time = t;
->
-> sage
->
->>
->> Best regards.
->>
->> On Mon, Jun 24, 2013 at 4:36 PM, christophe courtaut
->> <christophe.courtaut@gmail.com> wrote:
->> > Here come a new patch.
->> >
->> > I do not generate an encoder/decoder using WRITE_RAW_ENCODER anymore.
->> >
->> > Instead i added a encoder/decoder for time_t using a __u64.
->> >
->> > On Thu, Jun 20, 2013 at 10:44 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
->> >> On Thu, Jun 20, 2013 at 6:57 AM, christophe courtaut
->> >> <christophe.courtaut@gmail.com> wrote:
->> >>> On the rgw-wip-geo-2 branch, the encode decode function are called
->> >>> with time_t now,
->> >>> but there is no encode/decode function created for time_t type.
->> >>>
->> >>> http://tracker.ceph.com/issues/5402 refs #5402
->> >>>
->> >>> This patch adds a WRITE_RAW_ENCODER to support this type.
->> >>>
->> >>> --
->> >>> Christophe Courtaut
->> >>
->> >>
->> >> The problem here is that we can't use the generic encoder / decoder as
->> >> time_t may have different size on different architectures. We should
->> >> just have a fixed size encoding for it (probably 64 bit albeit the
->> >> waste).
->> >>
->> >> Thanks,
->> >> Yehuda
->> >
->> >
->> >
->> > --
->> > Christophe Courtaut
->>
->>
->>
->> --
->> Christophe Courtaut
->>
+> On Mon, 24 Jun 2013, Holger Hoffstaette wrote:
+>> On Wed, 19 Jun 2013 13:09:42 -0700, Sage Weil wrote:
+>> 
+>> [snip]
+>> 
+>> > Meanwhile, the next development release will be changing the way all
+>> > the pg metadata in the monitor is stored to be much more efficient and
+>> > to take advantage of leveldb's capabilities; this will be present in
+>> > 0.66 (dumpling - 1).
+>> 
+>> Have you considered using one of the recently annoucned LevelDB forks?
+>> The HyperDex folks recently published their HyperLevelDB fork (still
+>> compatible though) and it has significantly improved behaviour, less
+>> performance variance etc.
+>> See http://hyperdex.org/performance/leveldb/ or github.
+> 
+> The two issues are packaging and QA.  Ideally we (or someone) would build
+> packages that provide libleveldb so that users can drop in whichever
+> leveldb variant they want on their machines.  The other issue here,
+
+As much as I understand, I think for something as critical as a metadata
+store for ceph this way lies madness, and that you will sooner or later be
+forced to fork/bundle/QA yourself anyway..maybe that's just me being old.
+Trust me when I say that as a Gentoo user & developer I am painfully
+familiar with all the issues around bundling/unbundling/upstreaming etc.,
+not the least because of the absurd HN discussion last week, which was
+about LevelDB as well.
+
+As much as I hope this gets rolled back upstream I'm pessimistic
+simply based on Google's track record of properly managing their open
+source projects.
+
+That being said, the HyperLevelDB fork is actively maintained and upstream
+patches, as well as test cases, are merged. It also explicitly has a
+different soname, precisely to avoid the confusion that could come from an
+improved fork with the same name.
+
+> though, is that these are new variants that haven't seen as much usage, so
+> we have no idea how stable they are with Ceph workloads.
+
+After looking at the LevelDB bugtracker I don't think things can really
+get much worse.. :/
+
+The real reason I posted this was that I've been lurking here and noticed
+a lot of postings about timeouts, performance drops etc. The thing is that
+HyperLevelDB should give back breathing room for the case where a system
+is over ~80% utilization (the part of the hockey curve where things go
+north in terms of latency). Improving bandwith, reducing contention and
+thus latency & pause times etc. can have an incredibly stabilizing effect
+on a system. Very often a lot of weird and hard to diagnose queueing
+effects (convoying, unintentional synchronisation leading to stalls etc.)
+can be traced to this. I'm not saying this is the case..just that it can
+never hurt to have more predictable performance characteristics in the
+metadata store for a distributed filesystem.
+
+Also, who doesn't enjoy more efficient software? Think of the little ARM
+cores.. :)
+
+cheers
+Holger
+
+
