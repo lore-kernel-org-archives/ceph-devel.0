@@ -1,68 +1,46 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 2/3] mds: fix cap revoke race
-Date: Mon, 24 Jun 2013 16:19:52 +0800
-Message-ID: <51C80128.6070408@intel.com>
-References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com> <1372056089-11603-2-git-send-email-zheng.z.yan@intel.com>
+From: "Holger Hoffstaette" <holger.hoffstaette@googlemail.com>
+Subject: Re: ceph-mon vs leveldb status
+Date: Mon, 24 Jun 2013 12:51:37 +0200
+Message-ID: <pan.2013.06.24.10.51.37.437785@googlemail.com>
+References: <alpine.DEB.2.00.1306191304230.7089@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:37585 "EHLO mga14.intel.com"
+Received: from plane.gmane.org ([80.91.229.3]:51308 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752647Ab3FXIUQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Jun 2013 04:20:16 -0400
-In-Reply-To: <1372056089-11603-2-git-send-email-zheng.z.yan@intel.com>
+	id S1751949Ab3FXKzI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Jun 2013 06:55:08 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Ur4QJ-00033h-4l
+	for ceph-devel@vger.kernel.org; Mon, 24 Jun 2013 12:55:03 +0200
+Received: from p548760b8.dip0.t-ipconnect.de ([84.135.96.184])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 12:55:03 +0200
+Received: from holger.hoffstaette by p548760b8.dip0.t-ipconnect.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 12:55:03 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, alex.elder@linaro.org
 
-This patch's title is wrong, please ignore it.
+On Wed, 19 Jun 2013 13:09:42 -0700, Sage Weil wrote:
 
-Thanks
-Yan, Zheng
+[snip]
 
-On 06/24/2013 02:41 PM, Yan, Zheng wrote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> If caps are been revoking by the auth MDS, don't consider them as
-> issued even they are still issued by non-auth MDS. The non-auth
-> MDS should also be revoking/exporting these caps, the client just
-> hasn't received the cap revoke/export message.
-> 
-> The race I encountered is: When caps are exporting to new MDS, the
-> client receives cap import message and cap revoke message from the
-> new MDS, then receives cap export message from the old MDS. When
-> the client receives cap revoke message from the new MDS, the revoking
-> caps are still issued by the old MDS, so the client does nothing.
-> Later when the cap export message is received, the client removes
-> the caps issued by the old MDS. (Another way to fix the race is
-> calling ceph_check_caps() in handle_cap_export())
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/caps.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 9a5ccc9..a8c616b 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -697,6 +697,15 @@ int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented)
->  		if (implemented)
->  			*implemented |= cap->implemented;
->  	}
-> +	/*
-> +	 * exclude caps issued by non-auth MDS, but are been revoking
-> +	 * by the auth MDS. The non-auth MDS should be revoking/exporting
-> +	 * these caps, but the message is delayed.
-> +	 */
-> +	if (ci->i_auth_cap) {
-> +		cap = ci->i_auth_cap;
-> +		have &= ~cap->implemented | cap->issued;
-> +	}
->  	return have;
->  }
->  
-> 
+> Meanwhile, the next development release will be changing the way all the
+> pg metadata in the monitor is stored to be much more efficient and to take
+> advantage of leveldb's capabilities; this will be present in 0.66
+> (dumpling - 1).
+
+Have you considered using one of the recently annoucned LevelDB forks? The
+HyperDex folks recently published their HyperLevelDB fork (still
+compatible though) and it has significantly improved behaviour, less
+performance variance etc.
+See http://hyperdex.org/performance/leveldb/ or github.
+
+-h
+
 
