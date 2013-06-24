@@ -1,29 +1,115 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] libceph: Call con->ops->put(con) if cancel_delayed_work(&con->work) worked.
-Date: Mon, 24 Jun 2013 09:22:19 +0800
-Message-ID: <201306240921544358210@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Harvey Skinner <hpmpec2a@gmail.com>
+Subject: Re: Comments on Ceph distributed parity implementation
+Date: Sun, 23 Jun 2013 19:26:38 -0700
+Message-ID: <CAJOObidmf+SeRFWEP25Qc-f=LznUxjd8JP=7LJrDS0n-+Tmdyg@mail.gmail.com>
+References: <20130614201327.70240@gmx.com>
+	<51BB9FC3.8040102@dachary.org>
+	<622F4407872BA447A16110F65453358C01A4D3D29CB3@FMSAMAIL.fmsa.local>
+	<loom.20130616T214215-201@post.gmane.org>
+	<51BE2EB1.2020807@dachary.org>
+	<622F4407872BA447A16110F65453358C01A4D3D29CEE@FMSAMAIL.fmsa.local>
+	<51C00FDB.6030803@polytech.univ-nantes.fr>
+	<3E438C2F-0779-4824-9C05-ABE4B5803E05@cs.utk.edu>
+	<51C34932.4080304@dachary.org>
+	<622F4407872BA447A16110F65453358C01A4D8066EE7@FMSAMAIL.fmsa.local>
+	<51C40EDD.9090909@dachary.org>
+	<622F4407872BA447A16110F65453358C01A4D8066F49@FMSAMAIL.fmsa.local>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, davem <davem@davemloft.net>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qa0-f66.google.com ([209.85.216.66]:64684 "EHLO
+	mail-qa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752455Ab3FXC0j (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Jun 2013 22:26:39 -0400
+Received: by mail-qa0-f66.google.com with SMTP id d13so1069013qak.5
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Jun 2013 19:26:39 -0700 (PDT)
+In-Reply-To: <622F4407872BA447A16110F65453358C01A4D8066F49@FMSAMAIL.fmsa.local>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, hpmpec2a@gmail.com
 
-QmVjYXVzZSBpbiBmdW5jIHF1ZXVlX2Nvbl9kZWxheSwgaXQgd2lsbCBjYWxsIGNvbi0+b3BzLT5n
-ZXQoY29uKS4NClNvIGlmIHdlIGNhbmNlbCB0aGUgd29yayBzdWNjZXNzZnVsbHksd2UgbXVzdCBj
-YWxsIGNvbi0+b3BzLT5wdXQoY29uKS4NCk90aGVyd2lzZSBzb21lIHJlc291cmNlIGNhbid0IGZy
-ZWUgbGlrZSAnc3RydWN0IGNlcGhfbWRzX3Nlc3Npb24nLg0KDQpTaWduZWQtb2ZmLWJ5OiBKaWFu
-cGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQotLS0NCiBuZXQvY2VwaC9tZXNzZW5nZXIu
-YyB8IDMgKystDQogMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigt
-KQ0KDQpkaWZmIC0tZ2l0IGEvbmV0L2NlcGgvbWVzc2VuZ2VyLmMgYi9uZXQvY2VwaC9tZXNzZW5n
-ZXIuYw0KaW5kZXggZWIwYTQ2YS4uODIwN2IzNyAxMDA2NDQNCi0tLSBhL25ldC9jZXBoL21lc3Nl
-bmdlci5jDQorKysgYi9uZXQvY2VwaC9tZXNzZW5nZXIuYw0KQEAgLTY2MSw3ICs2NjEsOCBAQCB2
-b2lkIGNlcGhfY29uX2Nsb3NlKHN0cnVjdCBjZXBoX2Nvbm5lY3Rpb24gKmNvbikNCiANCiAJcmVz
-ZXRfY29ubmVjdGlvbihjb24pOw0KIAljb24tPnBlZXJfZ2xvYmFsX3NlcSA9IDA7DQotCWNhbmNl
-bF9kZWxheWVkX3dvcmsoJmNvbi0+d29yayk7DQorCWlmIChjYW5jZWxfZGVsYXllZF93b3JrKCZj
-b24tPndvcmspKQ0KKwkJY29uLT5vcHMtPnB1dChjb24pOw0KIAljb25fY2xvc2Vfc29ja2V0KGNv
-bik7DQogCW11dGV4X3VubG9jaygmY29uLT5tdXRleCk7DQogfQ0KLS0gDQoxLjguMS4yDQo=
+hi all,
+
+I agree that the OSD level (storage nodes) is where the
+encoding/reconstruct should be.   From an overall solution
+perspective, client nodes are sized for the apps they are deploying.
+It would be a real push to get them to also over provision app/client
+servers to take on the additional processing needed for encoding, etc.
+  Better to have this as part of the storage node sizing criteria; is
+the end user is going to use erasure-encoding or replication or both
+(different pools) on the same storage node platform.
+
+Harvey
+
+On Fri, Jun 21, 2013 at 5:08 PM, Paul Von-Stamwitz
+<PVonStamwitz@us.fujitsu.com> wrote:
+>
+> On 06/21/2013 1:29 AM, Loic Dachary wrote:
+>>
+>> On 06/21/2013 03:23 AM, Paul Von-Stamwitz wrote:
+>> >
+>> > On 06/20/2013 11:26 PM, Loic Dachary wrote:
+>> >>
+>> >> I wrote down a short description of the read/write path I plan to
+>> >> implement in ceph :
+>> > https://github.com/dachary/ceph/blob/wip-
+>> 4929/doc/dev/osd_internals/erasure-code.rst.
+>> >> A quick look at the drawings will hopefully give you an idea. Each OSD
+>> is > a disk connected to the others over the network. Although I chose
+>> K+M
+>> = 5 > I suspect the most common use case will be around K+M = 7+3 = 10
+>> >
+>> > Hi Loic,
+>> >
+>> > A couple questions regarding your proposal:
+>> >
+>> > Where would encode/decode occur? Client or OSD? Previous discussions
+>> seemed to want it at the OSD level. Your proposal seems that it could be
+>> either.
+>>
+>> I think it should be in the OSD. Although it would be possible to
+>> implement it in the client, it would have to be implemented in the OSD
+>> anyway for scrubbing. Therefore I think it is simpler to implement it in
+>> the OSD as a first step.
+>
+> Agreed. Encode/decode/reconstruction belongs in the OSD layer. There is a
+> possibility that the client and OSDs can work in tandem. For example, the
+> client already does sharding. But, the OSD is currently responsible for
+> replication, so it should be responsible for parity. For now, we should
+> strive for encoding to be transparent to the client.
+>
+>>
+>> >
+>> > What about partial reads? For example, if only 'H' was requested, would
+>> you decode the entire object first?
+>>
+>> Unless you see a good reason to implement this optimization from the
+>> start,
+>> I think the entire object would be decoded.
+>>
+>> > Or, read from OSD1 and reconstruct on error?
+>>
+>> I think that's what we want, ultimately. And also to encode / decode
+>> large
+>> objects (1GB for instance) as a sequence of independant regions (4MB for
+>> instance or smaller).
+>>
+>> I updated https://github.com/dachary/ceph/blob/wip-
+>> 4929/doc/dev/osd_internals/erasure-code.rst to reflect our discussion.
+>>
+>> The first, simplest implementation is likely to be fit to use with RGW
+>> and
+>> probably too slow to use with RBD. Do you think we should try to optimize
+>> for RBD right now ?
+>
+> Yes, RGW is the obvious best candidate for the first implementation. We
+> don't need to implement for RBD and CephFS now, but we should consider how
+> the design would handle other applications in the future. The alternative is
+> to optimize purely for RGW and provide an API/plug-in capability suggested
+> by Harvey Skinner to make way for optimized solutions for other
+> applications.
+>
+> All the best
+> pvs
+>
