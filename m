@@ -1,48 +1,83 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: Call con->ops->put(con) if cancel_delayed_work(&con->work)
- worked.
-Date: Sun, 23 Jun 2013 20:30:03 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306232029480.20076@cobra.newdream.net>
-References: <201306240921544358210@gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201306240921544358210@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: majianpeng <majianpeng@gmail.com>
-Cc: davem <davem@davemloft.net>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply is received
+Date: Mon, 24 Jun 2013 14:41:27 +0800
+Message-ID: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:55048 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752064Ab3FXGlr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Jun 2013 02:41:47 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, alex.elder@linaro.org, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Mon, 24 Jun 2013, majianpeng wrote:
-> Because in func queue_con_delay, it will call con->ops->get(con).
-> So if we cancel the work successfully,we must call con->ops->put(con).
-> Otherwise some resource can't free like 'struct ceph_mds_session'.
-> 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Looks good, applied to the testing branch.
+We can't use !req->r_sent to check if OSD request is sent for the
+first time, this is because __cancel_request() zeros req->r_sent
+when OSD map changes. Rather than adding a new variable to struct
+ceph_osd_request to indicate if it's sent for the first time, We
+can call the unsafe callback only when unsafe OSD reply is received.
+If OSD's first reply is safe, just skip calling the unsafe callback.
 
-Thanks!
-sage
+The purpose of unsafe callback is adding unsafe request to a list,
+so that fsync(2) can wait for the safe reply. fsync(2) doesn't need
+to wait for a write(2) that hasn't returned yet. So it's OK to add
+request to the unsafe list when the first OSD reply is received.
+(ceph_sync_write() returns after receiving the first OSD reply)
 
-> ---
->  net/ceph/messenger.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index eb0a46a..8207b37 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -661,7 +661,8 @@ void ceph_con_close(struct ceph_connection *con)
->  
->  	reset_connection(con);
->  	con->peer_global_seq = 0;
-> -	cancel_delayed_work(&con->work);
-> +	if (cancel_delayed_work(&con->work))
-> +		con->ops->put(con);
->  	con_close_socket(con);
->  	mutex_unlock(&con->mutex);
->  }
-> -- 
-> 1.8.1.2
-> 
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ net/ceph/osd_client.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 540dd29..dd47889 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1337,10 +1337,6 @@ static void __send_request(struct ceph_osd_client *osdc,
+ 
+ 	ceph_msg_get(req->r_request); /* send consumes a ref */
+ 
+-	/* Mark the request unsafe if this is the first timet's being sent. */
+-
+-	if (!req->r_sent && req->r_unsafe_callback)
+-		req->r_unsafe_callback(req, true);
+ 	req->r_sent = req->r_osd->o_incarnation;
+ 
+ 	ceph_con_send(&req->r_osd->o_con, req->r_request);
+@@ -1431,8 +1427,6 @@ static void handle_osds_timeout(struct work_struct *work)
+ 
+ static void complete_request(struct ceph_osd_request *req)
+ {
+-	if (req->r_unsafe_callback)
+-		req->r_unsafe_callback(req, false);
+ 	complete_all(&req->r_safe_completion);  /* fsync waiter */
+ }
+ 
+@@ -1559,14 +1553,20 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+ 	mutex_unlock(&osdc->request_mutex);
+ 
+ 	if (!already_completed) {
++		if (req->r_unsafe_callback &&
++		    result >= 0 && !(flags & CEPH_OSD_FLAG_ONDISK))
++			req->r_unsafe_callback(req, true);
+ 		if (req->r_callback)
+ 			req->r_callback(req, msg);
+ 		else
+ 			complete_all(&req->r_completion);
+ 	}
+ 
+-	if (flags & CEPH_OSD_FLAG_ONDISK)
++	if (flags & CEPH_OSD_FLAG_ONDISK) {
++		if (req->r_unsafe_callback && already_completed)
++			req->r_unsafe_callback(req, false);
+ 		complete_request(req);
++	}
+ 
+ done:
+ 	dout("req=%p req->r_linger=%d\n", req, req->r_linger);
+-- 
+1.8.1.4
+
