@@ -1,271 +1,174 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] Ceph-fuse: Punch hole support
-Date: Mon, 24 Jun 2013 21:46:27 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306242144180.8175@cobra.newdream.net>
-References: <1371698253-5875-1-git-send-email-liwang@ubuntukylin.com>
+Subject: Re: [PATCH] Add rc script for rbd map/unmap
+Date: Mon, 24 Jun 2013 21:53:11 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306242149240.9788@cobra.newdream.net>
+References: <1371827829-1025-1-git-send-email-laurent@ksperis.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37997 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:38055 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750784Ab3FYEq1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 00:46:27 -0400
-In-Reply-To: <1371698253-5875-1-git-send-email-liwang@ubuntukylin.com>
+	with ESMTP id S1750957Ab3FYExM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 00:53:12 -0400
+In-Reply-To: <1371827829-1025-1-git-send-email-laurent@ksperis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@inktank.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: Laurent Barbe <laurent@ksperis.com>, dan.mick@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi Li,
+Hi Laurent,
 
-[Sorry, can't remember if I already replied to this, but:]
+I opened a github pull request for this at
 
-This patch looks ok, but the last step we need is to make sure it passes 
-the fsx test with hole punching enabled.  I'm not sure if the versin of 
-fsx run by ceph.git/qa/workunits/suites/fsx.sh tests hole punch or not.. 
-if so, we just need to adjust the arguments in that script.  If not, we 
-should pull the fsx.c file from our mirror of xfstests.git at ceph.com/git 
-and use that version instead (by adjusting the fsx.sh script).
+	https://github.com/ceph/ceph/pull/378
 
-If this patch passes that test, we can merge it in and this code will get 
-regularly tested.
+We might consider putting /etc/rbdmap in /etc/ceph/rbdmap to avoid 
+polluting /etc... Dan, can you take a look?
 
 Thanks!
 sage
 
 
-On Thu, 20 Jun 2013, Li Wang wrote:
+On Fri, 21 Jun 2013, Laurent Barbe wrote:
 
-> This patch implements punch hole support for ceph-fuse.
+> Init script for mapping/unmapping rbd device on startup and shutdown.
+> On start, map rbd dev according to /etc/rbdmap, and force mount -a
+> On stop, umount file system depending on rbd and unmap all rbd
+> Since some distribution use symlink for /etc/mtab, the user-space attribute _netdev is not enough to umount file system before rbd dev.
+> (also concern: #1790)
 > 
-> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+> Signed-off-by: Laurent Barbe <laurent@ksperis.com>
 > ---
->  src/client/Client.cc           |   85 ++++++++++++++++++++++++++++++++++++++++
->  src/client/Client.h            |    4 ++
->  src/client/fuse_ll.cc          |   23 +++++++++++
->  src/include/cephfs/libcephfs.h |   13 ++++++
->  src/libcephfs.cc               |    8 ++++
->  5 files changed, 133 insertions(+)
+>  src/init-rbdmap | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  src/rbdmap      |   3 ++
+>  2 files changed, 106 insertions(+)
+>  create mode 100755 src/init-rbdmap
+>  create mode 100644 src/rbdmap
 > 
-> diff --git a/src/client/Client.cc b/src/client/Client.cc
-> index 43cc83d..31d9c93 100644
-> --- a/src/client/Client.cc
-> +++ b/src/client/Client.cc
-> @@ -22,6 +22,7 @@
->  #include <sys/stat.h>
->  #include <sys/param.h>
->  #include <fcntl.h>
-> +#include <linux/falloc.h>
->  
->  #include <sys/statvfs.h>
->  
-> @@ -7647,6 +7648,90 @@ int Client::ll_fsync(Fh *fh, bool syncdataonly)
->    return _fsync(fh, syncdataonly);
->  }
->  
-> +int Client::_punch_hole(Fh *fh, int64_t offset, int64_t length)
-> +{
-> +  if (osdmap->test_flag(CEPH_OSDMAP_FULL))
-> +    return -ENOSPC;
+> diff --git a/src/init-rbdmap b/src/init-rbdmap
+> new file mode 100755
+> index 0000000..a2187ce
+> --- /dev/null
+> +++ b/src/init-rbdmap
+> @@ -0,0 +1,103 @@
+> +#!/bin/bash
 > +
-> +  Inode *in = fh->inode;
+> +### BEGIN INIT INFO
+> +# Provides:          rbdmap
+> +# Required-Start:    $network
+> +# Required-Stop:     $network
+> +# Default-Start:     2 3 4 5
+> +# Default-Stop:      0 1 6
+> +# Short-Description: Ceph RBD Mapping
+> +# Description:       Ceph RBD Mapping
+> +### END INIT INFO
 > +
-> +  assert(in->snapid == CEPH_NOSNAP);
+> +DESC="RBD Mapping"
+> +RBDMAPFILE="/etc/rbdmap"
 > +
-> +  if ((fh->mode & CEPH_FILE_MODE_WR) == 0)
-> +    return -EBADF;
+> +. /lib/lsb/init-functions
 > +
-> +  int have;
-> +  int r = get_caps(in, CEPH_CAP_FILE_WR, CEPH_CAP_FILE_BUFFER, &have, -1);
-> +  if (r < 0)
-> +    return r;
+> +do_map() {
+> +	if [ ! -f "$RBDMAPFILE" ]; then
+> +		log_warning_msg "$DESC : No $RBDMAPFILE found."	
+> +		exit 0
+> +	fi
 > +
-> +  Mutex flock("Client::_punch_hole flock");
-> +  Cond cond;
-> +  bool done = false;
-> +  Context *onfinish = new C_SafeCond(&flock, &cond, &done);
-> +  Context *onsafe = new C_Client_SyncCommit(this, in);
+> +	log_daemon_msg "Starting $DESC"
+> +	# Read /etc/rbdtab to create non-existant mapping
+> +	newrbd=
+> +	RET=0
+> +	while read DEV PARAMS; do
+> +		case "$DEV" in
+> +		  ""|\#*)
+> +			continue
+> +			;;
+> +		  */*)
+> +			;;
+> +		  *)
+> +			DEV=rbd/$DEV
+> +			;;
+> +		esac
+> +		OIFS=$IFS
+> +		IFS=','
+> +		for PARAM in ${PARAMS[@]}; do
+> +			CMDPARAMS="$CMDPARAMS --$(echo $PARAM | tr '=' ' ')"
+> +		done
+> +		IFS=$OIFS
+> +		if [ ! -b /dev/rbd/$DEV ]; then
+> +			log_progress_msg $DEV
+> +			rbd map $DEV $CMDPARAMS
+> +			[ $? -ne "0" ] && RET=1
+> +			newrbd="yes"
+> +		fi
+> +	done < $RBDMAPFILE
+> +	log_end_msg $RET
 > +
-> +  unsafe_sync_write++;
-> +  get_cap_ref(in, CEPH_CAP_FILE_BUFFER);
-> +
-> +  _invalidate_inode_cache(in, offset, length, true);
-> +  r = filer->zero(in->ino, &in->layout,
-> +                  in->snaprealm->get_snap_context(),
-> +                  offset, length,
-> +                  ceph_clock_now(cct),
-> +                  0, onfinish, onsafe);
-> +  if (r < 0)
-> +    goto done;
-> +
-> +  client_lock.Unlock();
-> +  flock.Lock();
-> +  while (!done)
-> +    cond.Wait(flock);
-> +  flock.Unlock();
-> +  client_lock.Lock();
-> +
-> +  in->mtime = ceph_clock_now(cct);
-> +  mark_caps_dirty(in, CEPH_CAP_FILE_WR);
-> +
-> +done:
-> +  put_cap_ref(in, CEPH_CAP_FILE_WR);
-> +  return r;
+> +	# Mount new rbd
+> +	if [ "$newrbd" ]; then
+> +                log_action_begin_msg "Mounting all filesystems"
+> +		mount -a
+> +               	log_action_end_msg $?
+> +	fi
 > +}
 > +
-> +int Client::_fallocate(Fh *fh, int mode, loff_t offset, loff_t length)
-> +{
-> +  if (offset < 0 || length < 0)
-> +    return -EINVAL;
-> +
-> +  if (!(mode & FALLOC_FL_KEEP_SIZE))
-> +    return -EOPNOTSUPP;
-> +
-> +  if (!(mode & FALLOC_FL_PUNCH_HOLE))
-> +    return 0; //No need to say EOPNOTSUPP;
-> +
-> +  return _punch_hole(fh, offset, length);
+> +do_unmap() {
+> +	log_daemon_msg "Stopping $DESC"
+> +	RET=0
+> +	# Unmap all rbd device
+> +	for DEV in /dev/rbd[0-9]*; do
+> +		log_progress_msg $DEV
+> +		# Umount before unmap
+> +		MNTDEP=$(findmnt --mtab --source $DEV --output TARGET | sed 1,1d | sort -r)
+> +		for MNT in $MNTDEP; do
+> +			umount $MNT || sleep 1 && umount -l $DEV
+> +		done 
+> +		rbd unmap $DEV
+> +		[ $? -ne "0" ] && RET=1
+> +	done
+> +	log_end_msg $RET
 > +}
 > +
-> +int Client::ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length)
-> +{
-> +  Mutex::Locker lock(client_lock);
-> +  ldout(cct, 3) << "ll_fallocate " << fh << " " << fh->inode->ino << " " << dendl;
-> +  tout(cct) << "ll_fallocate " << mode << " " << offset << " " << length << std::endl;
-> +  tout(cct) << (unsigned long)fh << std::endl;
 > +
-> +  return _fallocate(fh, mode, offset, length);
-> +}
+> +case "$1" in
+> +  start)
+> +	do_map
+> +	;;
 > +
-> +int Client::fallocate(int fd, int mode, loff_t offset, loff_t length)
-> +{
-> +  Mutex::Locker lock(client_lock);
-> +  tout(cct) << "fallocate " << " " << fd << mode << " " << offset << " " << length << std::endl;
+> +  stop)
+> +	do_unmap
+> +	;;
 > +
-> +  Fh *fh = get_filehandle(fd);
-> +  if (!fh)
-> +    return -EBADF;
-> +  return _fallocate(fh, mode, offset, length);
-> +}
->  
->  int Client::ll_release(Fh *fh)
->  {
-> diff --git a/src/client/Client.h b/src/client/Client.h
-> index 22c6852..8ed7f23 100644
-> --- a/src/client/Client.h
-> +++ b/src/client/Client.h
-> @@ -553,6 +553,8 @@ private:
->    int _flush(Fh *fh);
->    int _fsync(Fh *fh, bool syncdataonly);
->    int _sync_fs();
-> +  int _punch_hole(Fh *fh, int64_t offset, int64_t length);
-> +  int _fallocate(Fh *fh, int mode, int64_t offset, int64_t length);
->  
->    int get_or_create(Inode *dir, const char* name,
->  		    Dentry **pdn, bool expect_null=false);
-> @@ -651,6 +653,7 @@ public:
->    int ftruncate(int fd, loff_t size);
->    int fsync(int fd, bool syncdataonly);
->    int fstat(int fd, struct stat *stbuf);
-> +  int fallocate(int fd, int mode, loff_t offset, loff_t length);
->  
->    // full path xattr ops
->    int getxattr(const char *path, const char *name, void *value, size_t size);
-> @@ -720,6 +723,7 @@ public:
->    int ll_write(Fh *fh, loff_t off, loff_t len, const char *data);
->    int ll_flush(Fh *fh);
->    int ll_fsync(Fh *fh, bool syncdataonly);
-> +  int ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length);
->    int ll_release(Fh *fh);
->    int ll_statfs(vinodeno_t vino, struct statvfs *stbuf);
->  
-> diff --git a/src/client/fuse_ll.cc b/src/client/fuse_ll.cc
-> index 46480e6..0a77001 100644
-> --- a/src/client/fuse_ll.cc
-> +++ b/src/client/fuse_ll.cc
-> @@ -369,6 +369,20 @@ static void fuse_ll_flush(fuse_req_t req, fuse_ino_t ino, struct fuse_file_info
->    fuse_reply_err(req, 0);
->  }
->  
-> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
+> +  reload)
+> +	do_map
+> +	;;
 > +
-> +static void fuse_ll_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
-> +                              off_t offset, off_t length,
-> +                              struct fuse_file_info *fi)
-> +{
-> +  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
-> +  Fh *fh = (Fh*)fi->fh;
-> +  int r = cfuse->client->ll_fallocate(fh, mode, offset, length);
-> +  fuse_reply_err(req, -r);
-> +}
+> +  status)
+> +	rbd showmapped
+> +	;;
 > +
-> +#endif
+> +  *)
+> +	log_success_msg "Usage: rbdmap {start|stop|reload|status}"
+> +	exit 1
+> +	;;
+> +esac
 > +
->  static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino, int cmd, void *arg, struct fuse_file_info *fi,
->                            unsigned flags, const void *in_buf, size_t in_bufsz, size_t out_bufsz)
->  {
-> @@ -598,6 +612,15 @@ const static struct fuse_lowlevel_ops fuse_ll_oper = {
->   setlk: 0,
->   bmap: 0,
->   ioctl: fuse_ll_ioctl
-> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
-> + ,
-> + poll: 0,
-> + write_buf: 0,
-> + retrieve_reply: 0,
-> + forget_multi: 0,
-> + flock: 0,
-> + fallocate: fuse_ll_fallocate
-> +#endif
->  };
->  
->  
-> diff --git a/src/include/cephfs/libcephfs.h b/src/include/cephfs/libcephfs.h
-> index 93e86e7..25a4861 100644
-> --- a/src/include/cephfs/libcephfs.h
-> +++ b/src/include/cephfs/libcephfs.h
-> @@ -709,6 +709,19 @@ int ceph_ftruncate(struct ceph_mount_info *cmount, int fd, loff_t size);
->  int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataonly);
->  
->  /**
-> + * Prefallocate or delete blocks in an open file.
-> + *
-> + * @param cmount the ceph mount handle to use for performing the fallocate.
-> + * @param fd the file descriptor of the file to sync.
-> + * @param mode a flags determines the operation to be performed on the given range.
-> + * @param offset the offset of the file which the range begin.
-> + * @param length the length of the range.
-> + * @return 0 on success or a negative error code on failure.
-> + */
-> +int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
-> +	                      loff_t offset, loff_t length);
+> +exit 0
+> diff --git a/src/rbdmap b/src/rbdmap
+> new file mode 100644
+> index 0000000..9d34e9e
+> --- /dev/null
+> +++ b/src/rbdmap
+> @@ -0,0 +1,3 @@
+> +# RbdDevice		Parameters
+> +#rbd/rbddevice		id=client,keyring=/etc/ceph/ceph.client.keyring
 > +
-> +/**
->   * Get the open file's statistics.
->   *
->   * @param cmount the ceph mount handle to use for performing the fstat.
-> diff --git a/src/libcephfs.cc b/src/libcephfs.cc
-> index 16b130a..306c4ba 100644
-> --- a/src/libcephfs.cc
-> +++ b/src/libcephfs.cc
-> @@ -700,6 +700,14 @@ extern "C" int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataon
->    return cmount->get_client()->fsync(fd, syncdataonly);
->  }
->  
-> +extern "C" int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
-> +	                      loff_t offset, loff_t length)
-> +{
-> +  if (!cmount->is_mounted())
-> +    return -ENOTCONN;
-> +  return cmount->get_client()->fallocate(fd, mode, offset, length);
-> +}
-> +
->  extern "C" int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf)
->  {
->    if (!cmount->is_mounted())
 > -- 
-> 1.7.9.5
+> 1.8.1.2
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
