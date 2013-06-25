@@ -1,49 +1,30 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH][TRIVIAL] ceph: Free mdsc if alloc mdsc->mdsmap failed.
-Date: Tue, 25 Jun 2013 08:24:57 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306250824530.2998@cobra.newdream.net>
-References: <201306251448154186071@gmail.com>
+Subject: Re: Can't restart ceph-mon
+Date: Tue, 25 Jun 2013 08:25:24 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306250825070.2998@cobra.newdream.net>
+References: <CAJiejCT4ALLi5nTqjtyL+bzhy=qkQUk34J=y8iJB=jqTh_fXDA@mail.gmail.com> <alpine.DEB.2.00.1306242034230.8175@cobra.newdream.net> <CAJiejCTHEwXDbUHeN33dFORuiwSMWnpkGT-eBO2xk2CS-b3kQA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43446 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43469 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751182Ab3FYPY6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 11:24:58 -0400
-In-Reply-To: <201306251448154186071@gmail.com>
+	with ESMTP id S1751698Ab3FYPZZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 11:25:25 -0400
+In-Reply-To: <CAJiejCTHEwXDbUHeN33dFORuiwSMWnpkGT-eBO2xk2CS-b3kQA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Drunkard Zhang <gongfan193@gmail.com>
+Cc: maillist-linux <ceph-devel@vger.kernel.org>
 
-Applied, thanks!
+On Tue, 25 Jun 2013, Drunkard Zhang wrote:
+> 2013/6/25 Sage Weil <sage@inktank.com>:
+> > What version of ceph is this?
+> >
+> c16 ~ # ceph -v
+> ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
 
+Please try v0.61.4.. this and many other bugs have been fixed since then.
+
+Thanks!
 sage
 
-
-On Tue, 25 Jun 2013, majianpeng wrote:
-
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/mds_client.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 4d29203..9fb58f6 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3040,8 +3040,10 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
->  	fsc->mdsc = mdsc;
->  	mutex_init(&mdsc->mutex);
->  	mdsc->mdsmap = kzalloc(sizeof(*mdsc->mdsmap), GFP_NOFS);
-> -	if (mdsc->mdsmap == NULL)
-> +	if (mdsc->mdsmap == NULL) {
-> +		kfree(mdsc);
->  		return -ENOMEM;
-> +	}
->  
->  	init_completion(&mdsc->safe_umount_waiters);
->  	init_waitqueue_head(&mdsc->session_close_wq);
-> -- 
-> 1.8.1.2
-> 
