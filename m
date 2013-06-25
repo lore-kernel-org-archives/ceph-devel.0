@@ -1,92 +1,68 @@
-From: "Holger Hoffstaette" <holger.hoffstaette@googlemail.com>
-Subject: Re: ceph-mon vs leveldb status
-Date: Mon, 24 Jun 2013 20:57:29 +0200
-Message-ID: <pan.2013.06.24.18.57.29.146860@googlemail.com>
-References: <alpine.DEB.2.00.1306191304230.7089@cobra.newdream.net> <pan.2013.06.24.10.51.37.437785@googlemail.com> <alpine.DEB.2.00.1306240955180.29802@cobra.newdream.net>
+From: Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>
+Subject: Re: [PATCH v4 06/14] locks: encapsulate the fl_link list handling
+Date: Tue, 25 Jun 2013 11:37:04 +1000
+Message-ID: <20130625113704.89a686a55dcec684e5e99434@canb.auug.org.au>
+References: <1371819502-26363-1-git-send-email-jlayton@redhat.com>
+	<1371819502-26363-7-git-send-email-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:48462 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751412Ab3FXS5k (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Jun 2013 14:57:40 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1UrBxL-0002A2-D7
-	for ceph-devel@vger.kernel.org; Mon, 24 Jun 2013 20:57:39 +0200
-Received: from p548760b8.dip0.t-ipconnect.de ([84.135.96.184])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 20:57:39 +0200
-Received: from holger.hoffstaette by p548760b8.dip0.t-ipconnect.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 20:57:39 +0200
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA256";
+ boundary="Signature=_Tue__25_Jun_2013_11_37_04_+1000_dzYhDLAz_=0wCCci"
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1371819502-26363-7-git-send-email-jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew-Ztpu424NOJ8@public.gmane.org, bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, smfrench-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, piastryyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 24 Jun 2013 09:56:40 -0700, Sage Weil wrote:
+--Signature=_Tue__25_Jun_2013_11_37_04_+1000_dzYhDLAz_=0wCCci
+Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> On Mon, 24 Jun 2013, Holger Hoffstaette wrote:
->> On Wed, 19 Jun 2013 13:09:42 -0700, Sage Weil wrote:
->> 
->> [snip]
->> 
->> > Meanwhile, the next development release will be changing the way all
->> > the pg metadata in the monitor is stored to be much more efficient and
->> > to take advantage of leveldb's capabilities; this will be present in
->> > 0.66 (dumpling - 1).
->> 
->> Have you considered using one of the recently annoucned LevelDB forks?
->> The HyperDex folks recently published their HyperLevelDB fork (still
->> compatible though) and it has significantly improved behaviour, less
->> performance variance etc.
->> See http://hyperdex.org/performance/leveldb/ or github.
-> 
-> The two issues are packaging and QA.  Ideally we (or someone) would build
-> packages that provide libleveldb so that users can drop in whichever
-> leveldb variant they want on their machines.  The other issue here,
+Hi Jeff,
 
-As much as I understand, I think for something as critical as a metadata
-store for ceph this way lies madness, and that you will sooner or later be
-forced to fork/bundle/QA yourself anyway..maybe that's just me being old.
-Trust me when I say that as a Gentoo user & developer I am painfully
-familiar with all the issues around bundling/unbundling/upstreaming etc.,
-not the least because of the absurd HN discussion last week, which was
-about LevelDB as well.
+Thanks for doing all this work!
 
-As much as I hope this gets rolled back upstream I'm pessimistic
-simply based on Google's track record of properly managing their open
-source projects.
+Trivial comments below.
 
-That being said, the HyperLevelDB fork is actively maintained and upstream
-patches, as well as test cases, are merged. It also explicitly has a
-different soname, precisely to avoid the confusion that could come from an
-improved fork with the same name.
+On Fri, 21 Jun 2013 08:58:14 -0400 Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>
+> +static inline void
+> +locks_insert_global_locks(struct file_lock *fl)
+> +{
+> +	list_add_tail(&fl->fl_link, &file_lock_list);
+> +}
 
-> though, is that these are new variants that haven't seen as much usage, so
-> we have no idea how stable they are with Ceph workloads.
+We generally do not use "inline" in C files any more and leave it to the
+compiler to do that.  Also, without the "inline" these function headers
+should all be able to fit on single lines like the others here i.e.
 
-After looking at the LevelDB bugtracker I don't think things can really
-get much worse.. :/
+static void locks_insert_global_locks(struct file_lock *fl)
 
-The real reason I posted this was that I've been lurking here and noticed
-a lot of postings about timeouts, performance drops etc. The thing is that
-HyperLevelDB should give back breathing room for the case where a system
-is over ~80% utilization (the part of the hockey curve where things go
-north in terms of latency). Improving bandwith, reducing contention and
-thus latency & pause times etc. can have an incredibly stabilizing effect
-on a system. Very often a lot of weird and hard to diagnose queueing
-effects (convoying, unintentional synchronisation leading to stalls etc.)
-can be traced to this. I'm not saying this is the case..just that it can
-never hurt to have more predictable performance characteristics in the
-metadata store for a distributed filesystem.
+--=20
+Cheers,
+Stephen Rothwell                    sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org
 
-Also, who doesn't enjoy more efficient software? Think of the little ARM
-cores.. :)
+--Signature=_Tue__25_Jun_2013_11_37_04_+1000_dzYhDLAz_=0wCCci
+Content-Type: application/pgp-signature
 
-cheers
-Holger
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
 
+iQIcBAEBCAAGBQJRyPREAAoJEECxmPOUX5FEfWIP/1Fcte7TTx0cYdMFqxD6iYFF
+I5QuoxOCEek37xGFhXwztvoI+llIdSH4xYaZXtVyC01jxfejNfGOW6JOuxRWrMCW
+4o0doZNE7fX1CaPJv+O8HS0qGVGVL4En0ZJJrPtjImbrUP1rg+bKAI4GwTZTcxfH
+eDr8Oey4xzzSFR/am+e7IyEjAW4gA7EIOpG4PjcMP+LEbTKOaybUDZBs+IwRBiPL
+ERyuwyW1mdAh5Cd5rssT72osOSq36WvK7f0w7hdzenmJFj5SUY4mmWdQz25J79ZC
+5LOfPxcgZWAv48F4VmmKh0v555f7hVGdtf1eE4cwckzWDQAvvPY27xSFNaYWwvd9
+jpDVPR0CcJeJkRR4qpGE6OO9dRGCoq8aNAmln0ix4ehb7+rGt4KMO0vOplFmfb1y
+oiL/Uzc2WuoFJDQCU1f7Z3EmcBKZBxS+Hs67xuvulBAubLY4r0uYMcA6RLgsbHB7
+k/eyUk9Rsce39jdPNPkFM1AB92F5AvdmaqROH2NKRh9lNOmZDNxxQ3v/9XU9oY6t
+1uNs9dL7H9f2MaMeG4Yx9ircj+NdB7vwbauYlAv/9D1fxRhqoKO1M292CbWhv/l0
+OwcF9Nz9e6aHHZc8HnZzlKjzRaoqJ83eFekWk4RZbmNhEmlLDzHUXfqrke6fn8pn
+Y1vM5HPDCfSDb/sVAmbd
+=q+vx
+-----END PGP SIGNATURE-----
 
+--Signature=_Tue__25_Jun_2013_11_37_04_+1000_dzYhDLAz_=0wCCci--
