@@ -1,53 +1,66 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH][TRIVIAL] ceph: Free the previous caps if alloc failed.
-Date: Tue, 25 Jun 2013 08:27:19 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306250825470.2998@cobra.newdream.net>
-References: <201306251527405618532@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Erasure coding implementation : high level description
+Date: Tue, 25 Jun 2013 19:41:51 +0200
+Message-ID: <51C9D65F.8000507@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig2F30CE10BD517907ADBAC444"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43489 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751505Ab3FYP1U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 11:27:20 -0400
-In-Reply-To: <201306251527405618532@gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:35144 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751697Ab3FYRly (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 13:41:54 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I think in this case we don't want to drop other caps.  This basically 
-means we weren't able to maintain the desired level of reserves, but we 
-will continue to try to fill it periodically, and not reaching the desired 
-point is not a reason to throw out what we have.  You'll note that the one 
-caller ignores the return value..
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig2F30CE10BD517907ADBAC444
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-sage
+Hi Sage,
+
+Paraphrasing what you suggested today :=20
+
+The logic for writing a stripe ( i.e. all the chunks created by the erasu=
+re encoding function for a given object or part of a given object if it e=
+xceeds the maximum size of a stripe ) for a single object is going to be =
+done in a way that is not the same as what we currently have for replicat=
+ed objects. The object is consistent when all chunks ( or at least K if K=
++M ) are committed to disk. It may make sense to start writing all the ch=
+unks in parallel and when they are acknowledged, send a pg_log event that=
+ says : now switch to this new version of the object. To avoid ending up =
+with chunks that are partially for one version of the object and other ch=
+unks partially for another version of the object and we can't repair any =
+of them.=20
+
+I will try to sketch the path for implementing the erasure coding ( inclu=
+ding the above ) by adding to https://github.com/dachary/ceph/blob/wip-49=
+29/doc/dev/osd_internals/erasure-code.rst
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-On Tue, 25 Jun 2013, majianpeng wrote:
+--------------enig2F30CE10BD517907ADBAC444
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/caps.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index da0f9b8..626b0ec 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -203,6 +203,11 @@ out_alloc_count:
->  	/* we didn't manage to reserve as much as we needed */
->  	pr_warning("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
->  		   ctx, need, have);
-> +	if (alloc) {
-> +		struct ceph_cap *tmp;
-> +		list_for_each_entry_safe(cap, tmp, &newcaps, caps_item)
-> +			kmem_cache_free(ceph_cap_cachep, cap);
-> +	}
->  	return ret;
->  }
->  
-> -- 
-> 1.8.1.2
-> 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAlHJ1l8ACgkQ8dLMyEl6F211MwCfReevZwwvtudYb+CE6aTn9V2Y
+g3wAoKBRHrEd6cwW/q8ZjF8XjzV0s26D
+=70LH
+-----END PGP SIGNATURE-----
+
+--------------enig2F30CE10BD517907ADBAC444--
