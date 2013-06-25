@@ -1,26 +1,33 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Can't restart ceph-mon
-Date: Tue, 25 Jun 2013 14:48:49 +0800
-Message-ID: <CAJiejCTHEwXDbUHeN33dFORuiwSMWnpkGT-eBO2xk2CS-b3kQA@mail.gmail.com>
-References: <CAJiejCT4ALLi5nTqjtyL+bzhy=qkQUk34J=y8iJB=jqTh_fXDA@mail.gmail.com>
- <alpine.DEB.2.00.1306242034230.8175@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH][TRIVIAL] ceph: Free the previous caps if alloc failed.
+Date: Tue, 25 Jun 2013 15:27:44 +0800
+Message-ID: <201306251527405618532@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:46735 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751320Ab3FYGtK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 02:49:10 -0400
-Received: by mail-qc0-f180.google.com with SMTP id a1so7043291qcx.11
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Jun 2013 23:49:09 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1306242034230.8175@cobra.newdream.net>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:58427 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751028Ab3FYH1r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 03:27:47 -0400
+Received: by mail-pa0-f47.google.com with SMTP id kl14so12142732pab.6
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Jun 2013 00:27:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: maillist-linux <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2013/6/25 Sage Weil <sage@inktank.com>:
-> What version of ceph is this?
->
-c16 ~ # ceph -v
-ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
+U2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0tDQog
+ZnMvY2VwaC9jYXBzLmMgfCA1ICsrKysrDQogMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygr
+KQ0KDQpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9jYXBzLmMgYi9mcy9jZXBoL2NhcHMuYw0KaW5kZXgg
+ZGEwZjliOC4uNjI2YjBlYyAxMDA2NDQNCi0tLSBhL2ZzL2NlcGgvY2Fwcy5jDQorKysgYi9mcy9j
+ZXBoL2NhcHMuYw0KQEAgLTIwMyw2ICsyMDMsMTEgQEAgb3V0X2FsbG9jX2NvdW50Og0KIAkvKiB3
+ZSBkaWRuJ3QgbWFuYWdlIHRvIHJlc2VydmUgYXMgbXVjaCBhcyB3ZSBuZWVkZWQgKi8NCiAJcHJf
+d2FybmluZygicmVzZXJ2ZSBjYXBzIGN0eD0lcCBFTk9NRU0gbmVlZD0lZCBnb3Q9JWRcbiIsDQog
+CQkgICBjdHgsIG5lZWQsIGhhdmUpOw0KKwlpZiAoYWxsb2MpIHsNCisJCXN0cnVjdCBjZXBoX2Nh
+cCAqdG1wOw0KKwkJbGlzdF9mb3JfZWFjaF9lbnRyeV9zYWZlKGNhcCwgdG1wLCAmbmV3Y2Fwcywg
+Y2Fwc19pdGVtKQ0KKwkJCWttZW1fY2FjaGVfZnJlZShjZXBoX2NhcF9jYWNoZXAsIGNhcCk7DQor
+CX0NCiAJcmV0dXJuIHJldDsNCiB9DQogDQotLSANCjEuOC4xLjINCg==
+
