@@ -1,34 +1,69 @@
-From: Drunkard Zhang <gongfan193@gmail.com>
-Subject: Re: Can't restart ceph-mon
-Date: Wed, 26 Jun 2013 08:10:05 +0800
-Message-ID: <CAJiejCSHa0XoYOet7nFpJJC50G4yD9Mc2sfdwVsMSvreMN_u3A@mail.gmail.com>
-References: <CAJiejCT4ALLi5nTqjtyL+bzhy=qkQUk34J=y8iJB=jqTh_fXDA@mail.gmail.com>
- <alpine.DEB.2.00.1306242034230.8175@cobra.newdream.net> <CAJiejCTHEwXDbUHeN33dFORuiwSMWnpkGT-eBO2xk2CS-b3kQA@mail.gmail.com>
- <alpine.DEB.2.00.1306250825070.2998@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH][TRIVIAL] ceph: Free the previous caps if alloc failed.
+Date: Wed, 26 Jun 2013 08:29:54 +0800
+Message-ID: <201306260829496656833@gmail.com>
+References: <201306251527405618532@gmail.com>,
+	<alpine.DEB.2.00.1306250825470.2998@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f51.google.com ([209.85.128.51]:63581 "EHLO
-	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751746Ab3FZAK0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:10:26 -0400
-Received: by mail-qe0-f51.google.com with SMTP id a11so760995qen.24
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Jun 2013 17:10:25 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1306250825070.2998@cobra.newdream.net>
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:54113 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751590Ab3FZA3z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:29:55 -0400
+Received: by mail-pa0-f41.google.com with SMTP id bj3so13508180pad.28
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Jun 2013 17:29:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: maillist-linux <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2013/6/25 Sage Weil <sage@inktank.com>:
-> On Tue, 25 Jun 2013, Drunkard Zhang wrote:
->> 2013/6/25 Sage Weil <sage@inktank.com>:
->> > What version of ceph is this?
->> >
->> c16 ~ # ceph -v
->> ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
->
-> Please try v0.61.4.. this and many other bugs have been fixed since then.
->
-Thanks for your reply, I'm just providing information in case there
-was a bug, and I'm planning to upgrade whole cluster to v0.61.* too :)
+PkkgdGhpbmsgaW4gdGhpcyBjYXNlIHdlIGRvbid0IHdhbnQgdG8gZHJvcCBvdGhlciBjYXBzLiAg
+VGhpcyBiYXNpY2FsbHkgDQo+bWVhbnMgd2Ugd2VyZW4ndCBhYmxlIHRvIG1haW50YWluIHRoZSBk
+ZXNpcmVkIGxldmVsIG9mIHJlc2VydmVzLCBidXQgd2UgDQo+d2lsbCBjb250aW51ZSB0byB0cnkg
+dG8gZmlsbCBpdCBwZXJpb2RpY2FsbHksIGFuZCBub3QgcmVhY2hpbmcgdGhlIGRlc2lyZWQgDQo+
+cG9pbnQgaXMgbm90IGEgcmVhc29uIHRvIHRocm93IG91dCB3aGF0IHdlIGhhdmUuICBZb3UnbGwg
+bm90ZSB0aGF0IHRoZSBvbmUgDQo+Y2FsbGVyIGlnbm9yZXMgdGhlIHJldHVybiB2YWx1ZS4uDQo+
+DQpJIHNlZS5CdXQgdGhlIGNvZGUgZG9uJ3QuDQo+ICAgICAgIGZvciAoaSA9IGhhdmU7IGkgPCBu
+ZWVkOyBpKyspIHsNCj4gICAgICAgICAgICAgICAgY2FwID0ga21lbV9jYWNoZV9hbGxvYyhjZXBo
+X2NhcF9jYWNoZXAsIEdGUF9OT0ZTKTsNCj4gICAgICAgICAgICAgICAgaWYgKCFjYXApIHsNCj4g
+ICAgICAgICAgICAgICAgICAgICAgICByZXQgPSAtRU5PTUVNOw0KPiAgICAgICAgICAgICAgICAg
+ICAgICAgIGdvdG8gb3V0X2FsbG9jX2NvdW50Ow0KPiAgICAgICAgICAgICAgICB9ICAgIA0KPiAg
+ICAgICAgICAgICAgICBsaXN0X2FkZCgmY2FwLT5jYXBzX2l0ZW0sICZuZXdjYXBzKTsNCj4gICAg
+ICAgICAgICAgICAgYWxsb2MrKzsNCj4gICAgICAgIH0gICAgDQo+ICAgICAgICBCVUdfT04oaGF2
+ZSArIGFsbG9jICE9IG5lZWQpOw0KRm9yIHRoZSBjYXBzIHdoaWNoIGFsbG9jYXRlZCwgdGhvc2Ug
+Y2FuJ3QgYWRkIGludG8gICcmbWRzYy0+Y2Fwc19saXN0Jy4NClNvIGlmIGFsbG9jYXRlIGZhaWxl
+ZCxpdCB3aWxsIGNhdXNlIG1lbW9yeSBsZWFrLg0KQnkgeW91ciB0aG91Z2h0LCB0aGUgY29kZSBt
+YXliZSBsaWtlDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2NhcHMuYyBiL2ZzL2NlcGgvY2Fwcy5j
+DQppbmRleCBkYTBmOWI4Li5kNWQ1ZWNhIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9jYXBzLmMNCisr
+KyBiL2ZzL2NlcGgvY2Fwcy5jDQpAQCAtMTc2LDEyICsxNzYsMTEgQEAgaW50IGNlcGhfcmVzZXJ2
+ZV9jYXBzKHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsDQogICAgICAgICAgICAgICAgY2Fw
+ID0ga21lbV9jYWNoZV9hbGxvYyhjZXBoX2NhcF9jYWNoZXAsIEdGUF9OT0ZTKTsNCiAgICAgICAg
+ICAgICAgICBpZiAoIWNhcCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgcmV0ID0gLUVOT01F
+TTsNCi0gICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0X2FsbG9jX2NvdW50Ow0KKyAgICAg
+ICAgICAgICAgICAgICAgICAgYnJlYWs7DQogICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAg
+ICAgIGxpc3RfYWRkKCZjYXAtPmNhcHNfaXRlbSwgJm5ld2NhcHMpOw0KICAgICAgICAgICAgICAg
+IGFsbG9jKys7DQogICAgICAgIH0NCi0gICAgICAgQlVHX09OKGhhdmUgKyBhbGxvYyAhPSBuZWVk
+KTsNCiANCiAgICAgICAgc3Bpbl9sb2NrKCZtZHNjLT5jYXBzX2xpc3RfbG9jayk7DQogICAgICAg
+IG1kc2MtPmNhcHNfdG90YWxfY291bnQgKz0gYWxsb2M7DQoNCkJUWSwgVGhlIGZ1bmN0aW9uIHdo
+aWNoIGNhbGwgY2VwaF9yZXNlcnZlX2NhcHMgZG9uJ3QgY2FyZSB0aGUgcmVzdWx0Lg0KQW5kIGZy
+b20geW91IGNvbW1lbnQsIHRoaXMgd2lsbCBwZXJpb2RpY2FsbHkgZG8uU28gaSB0aGluayB0aGUg
+ZnVuY3Rpb24gcHJvdG8gd2lsbCBiZQ0KdmlvZCAgY2VwaF9yZXNlcnZlX2NhcHMoKQ0Kew0KfQ0K
+SG93IGFib3V0IHRoaXM/DQoNClRoYW5rcyENCkppYW5wZW5nICBNYQ0KDQoNCg0KPnNhZ2UNCj4N
+Cj4NCj5PbiBUdWUsIDI1IEp1biAyMDEzLCBtYWppYW5wZW5nIHdyb3RlOg0KPg0KPj4gU2lnbmVk
+LW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+PiAg
+ZnMvY2VwaC9jYXBzLmMgfCA1ICsrKysrDQo+PiAgMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9u
+cygrKQ0KPj4gDQo+PiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9jYXBzLmMgYi9mcy9jZXBoL2NhcHMu
+Yw0KPj4gaW5kZXggZGEwZjliOC4uNjI2YjBlYyAxMDA2NDQNCj4+IC0tLSBhL2ZzL2NlcGgvY2Fw
+cy5jDQo+PiArKysgYi9mcy9jZXBoL2NhcHMuYw0KPj4gQEAgLTIwMyw2ICsyMDMsMTEgQEAgb3V0
+X2FsbG9jX2NvdW50Og0KPj4gIAkvKiB3ZSBkaWRuJ3QgbWFuYWdlIHRvIHJlc2VydmUgYXMgbXVj
+aCBhcyB3ZSBuZWVkZWQgKi8NCj4+ICAJcHJfd2FybmluZygicmVzZXJ2ZSBjYXBzIGN0eD0lcCBF
+Tk9NRU0gbmVlZD0lZCBnb3Q9JWRcbiIsDQo+PiAgCQkgICBjdHgsIG5lZWQsIGhhdmUpOw0KPj4g
+KwlpZiAoYWxsb2MpIHsNCj4+ICsJCXN0cnVjdCBjZXBoX2NhcCAqdG1wOw0KPj4gKwkJbGlzdF9m
+b3JfZWFjaF9lbnRyeV9zYWZlKGNhcCwgdG1wLCAmbmV3Y2FwcywgY2Fwc19pdGVtKQ0KPj4gKwkJ
+CWttZW1fY2FjaGVfZnJlZShjZXBoX2NhcF9jYWNoZXAsIGNhcCk7DQo+PiArCX0NCj4+ICAJcmV0
+dXJuIHJldDsNCj4+ICB9DQo+PiAgDQo+PiAtLSANCj4+IDEuOC4xLjINCj4+IA==
+
