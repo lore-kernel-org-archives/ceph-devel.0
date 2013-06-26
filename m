@@ -1,62 +1,99 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] ceph: Reconstruct the func ceph_reserve_caps.
-Date: Wed, 26 Jun 2013 11:15:27 +0800
-Message-ID: <201306261115191951258@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: Reconstruct the func ceph_reserve_caps.
+Date: Tue, 25 Jun 2013 21:00:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306252100030.9788@cobra.newdream.net>
+References: <201306261115191951258@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201306261115191951258@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: sage <sage@inktank.com>
+To: majianpeng <majianpeng@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-U2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0tDQog
-ZnMvY2VwaC9jYXBzLmMgIHwgMjEgKysrKysrKy0tLS0tLS0tLS0tLS0tDQogZnMvY2VwaC9zdXBl
-ci5oIHwgIDIgKy0NCiAyIGZpbGVzIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgMTUgZGVsZXRp
-b25zKC0pDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2NhcHMuYyBiL2ZzL2NlcGgvY2Fwcy5jDQpp
-bmRleCBkYTBmOWI4Li42ZDI2NTVjIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9jYXBzLmMNCisrKyBi
-L2ZzL2NlcGgvY2Fwcy5jDQpAQCAtMTQ3LDcgKzE0Nyw3IEBAIHZvaWQgY2VwaF9hZGp1c3RfbWlu
-X2NhcHMoc3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywgaW50IGRlbHRhKQ0KIAlzcGluX3Vu
-bG9jaygmbWRzYy0+Y2Fwc19saXN0X2xvY2spOw0KIH0NCiANCi1pbnQgY2VwaF9yZXNlcnZlX2Nh
-cHMoc3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywNCit2b2lkIGNlcGhfcmVzZXJ2ZV9jYXBz
-KHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsDQogCQkgICAgICBzdHJ1Y3QgY2VwaF9jYXBf
-cmVzZXJ2YXRpb24gKmN0eCwgaW50IG5lZWQpDQogew0KIAlpbnQgaTsNCkBAIC0xNTUsNyArMTU1
-LDYgQEAgaW50IGNlcGhfcmVzZXJ2ZV9jYXBzKHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2Ms
-DQogCWludCBoYXZlOw0KIAlpbnQgYWxsb2MgPSAwOw0KIAlMSVNUX0hFQUQobmV3Y2Fwcyk7DQot
-CWludCByZXQgPSAwOw0KIA0KIAlkb3V0KCJyZXNlcnZlIGNhcHMgY3R4PSVwIG5lZWQ9JWRcbiIs
-IGN0eCwgbmVlZCk7DQogDQpAQCAtMTc0LDE0ICsxNzMsMTUgQEAgaW50IGNlcGhfcmVzZXJ2ZV9j
-YXBzKHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsDQogDQogCWZvciAoaSA9IGhhdmU7IGkg
-PCBuZWVkOyBpKyspIHsNCiAJCWNhcCA9IGttZW1fY2FjaGVfYWxsb2MoY2VwaF9jYXBfY2FjaGVw
-LCBHRlBfTk9GUyk7DQotCQlpZiAoIWNhcCkgew0KLQkJCXJldCA9IC1FTk9NRU07DQotCQkJZ290
-byBvdXRfYWxsb2NfY291bnQ7DQotCQl9DQorCQlpZiAoIWNhcCkNCisJCQlicmVhazsNCiAJCWxp
-c3RfYWRkKCZjYXAtPmNhcHNfaXRlbSwgJm5ld2NhcHMpOw0KIAkJYWxsb2MrKzsNCiAJfQ0KLQlC
-VUdfT04oaGF2ZSArIGFsbG9jICE9IG5lZWQpOw0KKwkvKiB3ZSBkaWRuJ3QgbWFuYWdlIHRvIHJl
-c2VydmUgYXMgbXVjaCBhcyB3ZSBuZWVkZWQgKi8NCisJaWYgKGhhdmUgKyBhbGxvYyAhPSBuZWVk
-KQ0KKwkJcHJfd2FybigicmVzZXJ2ZSBjYXBzIGN0eD0lcCBFTk9NRU0gbmVlZD0lZCBnb3Q9JWRc
-biIsDQorCQkJY3R4LCBuZWVkLCBoYXZlICsgYWxsb2MpOw0KIA0KIAlzcGluX2xvY2soJm1kc2Mt
-PmNhcHNfbGlzdF9sb2NrKTsNCiAJbWRzYy0+Y2Fwc190b3RhbF9jb3VudCArPSBhbGxvYzsNCkBA
-IC0xOTcsMTMgKzE5Nyw2IEBAIGludCBjZXBoX3Jlc2VydmVfY2FwcyhzdHJ1Y3QgY2VwaF9tZHNf
-Y2xpZW50ICptZHNjLA0KIAlkb3V0KCJyZXNlcnZlIGNhcHMgY3R4PSVwICVkID0gJWQgdXNlZCAr
-ICVkIHJlc3YgKyAlZCBhdmFpbFxuIiwNCiAJICAgICBjdHgsIG1kc2MtPmNhcHNfdG90YWxfY291
-bnQsIG1kc2MtPmNhcHNfdXNlX2NvdW50LA0KIAkgICAgIG1kc2MtPmNhcHNfcmVzZXJ2ZV9jb3Vu
-dCwgbWRzYy0+Y2Fwc19hdmFpbF9jb3VudCk7DQotCXJldHVybiAwOw0KLQ0KLW91dF9hbGxvY19j
-b3VudDoNCi0JLyogd2UgZGlkbid0IG1hbmFnZSB0byByZXNlcnZlIGFzIG11Y2ggYXMgd2UgbmVl
-ZGVkICovDQotCXByX3dhcm5pbmcoInJlc2VydmUgY2FwcyBjdHg9JXAgRU5PTUVNIG5lZWQ9JWQg
-Z290PSVkXG4iLA0KLQkJICAgY3R4LCBuZWVkLCBoYXZlKTsNCi0JcmV0dXJuIHJldDsNCiB9DQog
-DQogaW50IGNlcGhfdW5yZXNlcnZlX2NhcHMoc3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywN
-CmRpZmYgLS1naXQgYS9mcy9jZXBoL3N1cGVyLmggYi9mcy9jZXBoL3N1cGVyLmgNCmluZGV4IDdj
-Y2ZkYjQuLmRmYmI3MjkgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL3N1cGVyLmgNCisrKyBiL2ZzL2Nl
-cGgvc3VwZXIuaA0KQEAgLTUzNCw3ICs1MzQsNyBAQCBleHRlcm4gaW50IF9fY2VwaF9jYXBzX21k
-c193YW50ZWQoc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAqY2kpOw0KIGV4dGVybiB2b2lkIGNlcGhf
-Y2Fwc19pbml0KHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MpOw0KIGV4dGVybiB2b2lkIGNl
-cGhfY2Fwc19maW5hbGl6ZShzdHJ1Y3QgY2VwaF9tZHNfY2xpZW50ICptZHNjKTsNCiBleHRlcm4g
-dm9pZCBjZXBoX2FkanVzdF9taW5fY2FwcyhzdHJ1Y3QgY2VwaF9tZHNfY2xpZW50ICptZHNjLCBp
-bnQgZGVsdGEpOw0KLWV4dGVybiBpbnQgY2VwaF9yZXNlcnZlX2NhcHMoc3RydWN0IGNlcGhfbWRz
-X2NsaWVudCAqbWRzYywNCitleHRlcm4gdm9pZCBjZXBoX3Jlc2VydmVfY2FwcyhzdHJ1Y3QgY2Vw
-aF9tZHNfY2xpZW50ICptZHNjLA0KIAkJCSAgICAgc3RydWN0IGNlcGhfY2FwX3Jlc2VydmF0aW9u
-ICpjdHgsIGludCBuZWVkKTsNCiBleHRlcm4gaW50IGNlcGhfdW5yZXNlcnZlX2NhcHMoc3RydWN0
-IGNlcGhfbWRzX2NsaWVudCAqbWRzYywNCiAJCQkgICAgICAgc3RydWN0IGNlcGhfY2FwX3Jlc2Vy
-dmF0aW9uICpjdHgpOw0KLS0gDQoxLjguMS4yDQo=
+looks good, applied to the testing branch. 
+
+thanks!
+sage
+
+On Wed, 26 Jun 2013, majianpeng wrote:
+
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/caps.c  | 21 +++++++--------------
+>  fs/ceph/super.h |  2 +-
+>  2 files changed, 8 insertions(+), 15 deletions(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index da0f9b8..6d2655c 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -147,7 +147,7 @@ void ceph_adjust_min_caps(struct ceph_mds_client *mdsc, int delta)
+>  	spin_unlock(&mdsc->caps_list_lock);
+>  }
+>  
+> -int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+> +void ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>  		      struct ceph_cap_reservation *ctx, int need)
+>  {
+>  	int i;
+> @@ -155,7 +155,6 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>  	int have;
+>  	int alloc = 0;
+>  	LIST_HEAD(newcaps);
+> -	int ret = 0;
+>  
+>  	dout("reserve caps ctx=%p need=%d\n", ctx, need);
+>  
+> @@ -174,14 +173,15 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>  
+>  	for (i = have; i < need; i++) {
+>  		cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
+> -		if (!cap) {
+> -			ret = -ENOMEM;
+> -			goto out_alloc_count;
+> -		}
+> +		if (!cap)
+> +			break;
+>  		list_add(&cap->caps_item, &newcaps);
+>  		alloc++;
+>  	}
+> -	BUG_ON(have + alloc != need);
+> +	/* we didn't manage to reserve as much as we needed */
+> +	if (have + alloc != need)
+> +		pr_warn("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
+> +			ctx, need, have + alloc);
+>  
+>  	spin_lock(&mdsc->caps_list_lock);
+>  	mdsc->caps_total_count += alloc;
+> @@ -197,13 +197,6 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>  	dout("reserve caps ctx=%p %d = %d used + %d resv + %d avail\n",
+>  	     ctx, mdsc->caps_total_count, mdsc->caps_use_count,
+>  	     mdsc->caps_reserve_count, mdsc->caps_avail_count);
+> -	return 0;
+> -
+> -out_alloc_count:
+> -	/* we didn't manage to reserve as much as we needed */
+> -	pr_warning("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
+> -		   ctx, need, have);
+> -	return ret;
+>  }
+>  
+>  int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 7ccfdb4..dfbb729 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -534,7 +534,7 @@ extern int __ceph_caps_mds_wanted(struct ceph_inode_info *ci);
+>  extern void ceph_caps_init(struct ceph_mds_client *mdsc);
+>  extern void ceph_caps_finalize(struct ceph_mds_client *mdsc);
+>  extern void ceph_adjust_min_caps(struct ceph_mds_client *mdsc, int delta);
+> -extern int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+> +extern void ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>  			     struct ceph_cap_reservation *ctx, int need);
+>  extern int ceph_unreserve_caps(struct ceph_mds_client *mdsc,
+>  			       struct ceph_cap_reservation *ctx);
+> -- 
+> 1.8.1.2
+> N????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
