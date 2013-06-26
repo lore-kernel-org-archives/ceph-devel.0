@@ -1,68 +1,34 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.65 released
-Date: Tue, 25 Jun 2013 14:26:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306251424580.20428@cobra.newdream.net>
+From: Drunkard Zhang <gongfan193@gmail.com>
+Subject: Re: Can't restart ceph-mon
+Date: Wed, 26 Jun 2013 08:10:05 +0800
+Message-ID: <CAJiejCSHa0XoYOet7nFpJJC50G4yD9Mc2sfdwVsMSvreMN_u3A@mail.gmail.com>
+References: <CAJiejCT4ALLi5nTqjtyL+bzhy=qkQUk34J=y8iJB=jqTh_fXDA@mail.gmail.com>
+ <alpine.DEB.2.00.1306242034230.8175@cobra.newdream.net> <CAJiejCTHEwXDbUHeN33dFORuiwSMWnpkGT-eBO2xk2CS-b3kQA@mail.gmail.com>
+ <alpine.DEB.2.00.1306250825070.2998@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qe0-f51.google.com ([209.85.128.51]:63581 "EHLO
+	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751746Ab3FZAK0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:10:26 -0400
+Received: by mail-qe0-f51.google.com with SMTP id a11so760995qen.24
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Jun 2013 17:10:25 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1306250825070.2998@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: maillist-linux <ceph-devel@vger.kernel.org>
 
-Our next development release v0.65 is out, with a few big changes. First 
-and foremost, this release includes a complete revamp of the architecture 
-for the command line interface in order to lay the groundwork for our 
-ongoing REST management API work. The 'ceph' command line tool is now a 
-thin python wrapper around librados. Note that this set of changes 
-includes several small incompatible changes in the interface that tools or 
-scripts utilizing the CLI should be aware of; these are detailed in the 
-complete release notes.
-
-Other notable changes:
- * mon, ceph: huge revamp of CLI and internal admin API. (Dan Mick)
- * mon: new capability syntax
- * osd: do not use fadvise(DONTNEED) on XFS (data corruption on power 
-   cycle)
- * osd: recovery and peering performance improvements
- * osd: new writeback throttling (for less bursty write performance) (Sam 
-   Just)
- * osd: ping/heartbeat on public and private interfaces
- * osd: avoid osd flapping from asymmetric network failure
- * osd: re-use partially deleted PG contents when present (Sam Just)
- * osd: break blacklisted client watches (David Zafman)
- * mon: many stability fixes (Joao Luis)
- * mon, osd: many memory leaks fixed
- * mds: misc stability fixes (Yan, Zheng, Greg Farnum)
- * mds: many backpointer improvements (Yan, Zheng)
- * mds: new robust open-by-ino support (Yan, Zheng)
- * ceph-fuse, libcephfs: fix a few caps revocation bugs
- * librados: new calls to administer the cluster
- * librbd: locking tests (Josh Durgin)
- * ceph-disk: improved handling of odd device names
- * ceph-disk: many fixes for RHEL/CentOS, Fedora, wheezy
- * many many fixes from static code analysis (Danny Al-Gaaf)
- * daemons: create /var/run/ceph as needed
-
-The complete release notes, including upgrade notes, can be found at:
-
-   http://ceph.com/docs/master/release-notes/#v0-65
-
-We have one more sprint to go before the Dumpling feature freeze. Big 
-items include monitor performance and stability improvements and 
-multi-site and disaster recovery features for radosgw. Lots of radosgw has 
-already appeard in rgw-next but these changes will not land until v0.67.
-
-You can get v0.65 from the usual locations:
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.65.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+2013/6/25 Sage Weil <sage@inktank.com>:
+> On Tue, 25 Jun 2013, Drunkard Zhang wrote:
+>> 2013/6/25 Sage Weil <sage@inktank.com>:
+>> > What version of ceph is this?
+>> >
+>> c16 ~ # ceph -v
+>> ceph version 0.60 (f26f7a39021dbf440c28d6375222e21c94fe8e5c)
+>
+> Please try v0.61.4.. this and many other bugs have been fixed since then.
+>
+Thanks for your reply, I'm just providing information in case there
+was a bug, and I'm planning to upgrade whole cluster to v0.61.* too :)
