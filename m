@@ -1,122 +1,115 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [ceph-users] rbd rm <image> results in osd marked down wrongly
- with 0.61.3
-Date: Tue, 25 Jun 2013 17:30:14 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306251729550.4761@cobra.newdream.net>
-References: <51B731F7.2050002@smart-weblications.de> <51B9BA40.6040901@smart-weblications.de> <alpine.DEB.2.00.1306171549520.7888@cobra.newdream.net>
+Subject: Re: Re: [PATCH][TRIVIAL] ceph: Free the previous caps if alloc
+ failed.
+Date: Tue, 25 Jun 2013 17:34:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306251733420.4761@cobra.newdream.net>
+References: <201306251527405618532@gmail.com>,  <alpine.DEB.2.00.1306250825470.2998@cobra.newdream.net> <201306260829496656833@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52359 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:52439 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751687Ab3FZAaP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:30:15 -0400
-In-Reply-To: <alpine.DEB.2.00.1306171549520.7888@cobra.newdream.net>
+	with ESMTP id S1751646Ab3FZAec (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:34:32 -0400
+In-Reply-To: <201306260829496656833@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Smart Weblications GmbH - Florian Wiessner <f.wiessner@smart-weblications.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 17 Jun 2013, Sage Weil wrote:
-> Hi Florian,
+On Wed, 26 Jun 2013, majianpeng wrote:
+> >I think in this case we don't want to drop other caps.  This basically 
+> >means we weren't able to maintain the desired level of reserves, but we 
+> >will continue to try to fill it periodically, and not reaching the desired 
+> >point is not a reason to throw out what we have.  You'll note that the one 
+> >caller ignores the return value..
+> >
+> I see.But the code don't.
+> >       for (i = have; i < need; i++) {
+> >                cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
+> >                if (!cap) {
+> >                        ret = -ENOMEM;
+> >                        goto out_alloc_count;
+> >                }    
+> >                list_add(&cap->caps_item, &newcaps);
+> >                alloc++;
+> >        }    
+> >        BUG_ON(have + alloc != need);
+> For the caps which allocated, those can't add into  '&mdsc->caps_list'.
+> So if allocate failed,it will cause memory leak.
+
+Ah, I see.
+
+> By your thought, the code maybe like
 > 
-> If you can trigger this with logs, we're very eager to see what they say 
-> about this!  The http://tracker.ceph.com/issues/5336 bug is open to track 
-> this issue.
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index da0f9b8..d5d5eca 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -176,12 +176,11 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+>                 cap = kmem_cache_alloc(ceph_cap_cachep, GFP_NOFS);
+>                 if (!cap) {
+>                         ret = -ENOMEM;
+> -                       goto out_alloc_count;
+> +                       break;
+>                 }
+>                 list_add(&cap->caps_item, &newcaps);
+>                 alloc++;
+>         }
+> -       BUG_ON(have + alloc != need);
+>  
+>         spin_lock(&mdsc->caps_list_lock);
+>         mdsc->caps_total_count += alloc;
+> 
 
-Downgrading this bug until we hear back.
+That looks good.  Can we add a check later though that if have + alloc < 
+need we still pr_warning?
 
+> BTY, The function which call ceph_reserve_caps don't care the result.
+> And from you comment, this will periodically do.So i think the function proto will be
+> viod  ceph_reserve_caps()
+> {
+> }
+> How about this?
+
+Yeah, sounds good to me.
+
+Thanks!
 sage
+
 
 > 
 > Thanks!
-> sage
+> Jianpeng  Ma
 > 
 > 
-> On Thu, 13 Jun 2013, Smart Weblications GmbH - Florian Wiessner wrote:
 > 
-> > Hi,
-> > 
-> > Is really no one on the list interrested in fixing this? Or am i the only one
-> > having this kind of bug/problem?
-> > 
-> > Am 11.06.2013 16:19, schrieb Smart Weblications GmbH - Florian Wiessner:
-> > > Hi List,
-> > > 
-> > > i observed that an rbd rm <image> results in some osds mark one osd as down
-> > > wrongly in cuttlefish.
-> > > 
-> > > The situation gets even worse if there are more than one rbd rm <image> running
-> > > in parallel.
-> > > 
-> > > Please see attached logfiles. The rbd rm command was issued on 20:24:00 via
-> > > cronjob, 40 seconds later the osd 6 got marked down...
-> > > 
-> > > 
-> > > ceph osd tree
-> > > 
-> > > # id    weight  type name       up/down reweight
-> > > -1      7       pool default
-> > > -3      7               rack unknownrack
-> > > -2      1                       host node01
-> > > 0       1                               osd.0   up      1
-> > > -4      1                       host node02
-> > > 1       1                               osd.1   up      1
-> > > -5      1                       host node03
-> > > 2       1                               osd.2   up      1
-> > > -6      1                       host node04
-> > > 3       1                               osd.3   up      1
-> > > -7      1                       host node06
-> > > 5       1                               osd.5   up      1
-> > > -8      1                       host node05
-> > > 4       1                               osd.4   up      1
-> > > -9      1                       host node07
-> > > 6       1                               osd.6   up      1
-> > > 
-> > > 
-> > > I have seen some patches to parallelize rbd rm, but i think there must be some
-> > > other issue, as my clients seem to not be able to do IO when ceph is
-> > > recovering... I think this has worked better in 0.56.x - there was IO while
-> > > recovering.
-> > > 
-> > > I also observed in the log of osd.6 that after heartbeat_map reset_timeout, the
-> > > osd tries to connect to the other osds, but it retries so fast that you could
-> > > think this is a DoS attack...
-> > > 
-> > > 
-> > > Please advise..
-> > > 
-> > 
-> > 
-> > -- 
-> > 
-> > Mit freundlichen Gr??en,
-> > 
-> > Florian Wiessner
-> > 
-> > Smart Weblications GmbH
-> > Martinsberger Str. 1
-> > D-95119 Naila
-> > 
-> > fon.: +49 9282 9638 200
-> > fax.: +49 9282 9638 205
-> > 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-> > http://www.smart-weblications.de
-> > 
-> > --
-> > Sitz der Gesellschaft: Naila
-> > Gesch?ftsf?hrer: Florian Wiessner
-> > HRB-Nr.: HRB 3840 Amtsgericht Hof
-> > *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users@lists.ceph.com
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > 
-> > 
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
-> 
+> >sage
+> >
+> >
+> >On Tue, 25 Jun 2013, majianpeng wrote:
+> >
+> >> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> >> ---
+> >>  fs/ceph/caps.c | 5 +++++
+> >>  1 file changed, 5 insertions(+)
+> >> 
+> >> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> >> index da0f9b8..626b0ec 100644
+> >> --- a/fs/ceph/caps.c
+> >> +++ b/fs/ceph/caps.c
+> >> @@ -203,6 +203,11 @@ out_alloc_count:
+> >>  	/* we didn't manage to reserve as much as we needed */
+> >>  	pr_warning("reserve caps ctx=%p ENOMEM need=%d got=%d\n",
+> >>  		   ctx, need, have);
+> >> +	if (alloc) {
+> >> +		struct ceph_cap *tmp;
+> >> +		list_for_each_entry_safe(cap, tmp, &newcaps, caps_item)
+> >> +			kmem_cache_free(ceph_cap_cachep, cap);
+> >> +	}
+> >>  	return ret;
+> >>  }
+> >>  
+> >> -- 
+> >> 1.8.1.2
+> >> 
