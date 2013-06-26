@@ -1,69 +1,122 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH][TRIVIAL] ceph: Free the previous caps if alloc failed.
-Date: Wed, 26 Jun 2013 08:29:54 +0800
-Message-ID: <201306260829496656833@gmail.com>
-References: <201306251527405618532@gmail.com>,
-	<alpine.DEB.2.00.1306250825470.2998@cobra.newdream.net>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [ceph-users] rbd rm <image> results in osd marked down wrongly
+ with 0.61.3
+Date: Tue, 25 Jun 2013 17:30:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306251729550.4761@cobra.newdream.net>
+References: <51B731F7.2050002@smart-weblications.de> <51B9BA40.6040901@smart-weblications.de> <alpine.DEB.2.00.1306171549520.7888@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:54113 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751590Ab3FZA3z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:29:55 -0400
-Received: by mail-pa0-f41.google.com with SMTP id bj3so13508180pad.28
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Jun 2013 17:29:55 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:52359 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751687Ab3FZAaP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jun 2013 20:30:15 -0400
+In-Reply-To: <alpine.DEB.2.00.1306171549520.7888@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Smart Weblications GmbH - Florian Wiessner <f.wiessner@smart-weblications.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
 
-PkkgdGhpbmsgaW4gdGhpcyBjYXNlIHdlIGRvbid0IHdhbnQgdG8gZHJvcCBvdGhlciBjYXBzLiAg
-VGhpcyBiYXNpY2FsbHkgDQo+bWVhbnMgd2Ugd2VyZW4ndCBhYmxlIHRvIG1haW50YWluIHRoZSBk
-ZXNpcmVkIGxldmVsIG9mIHJlc2VydmVzLCBidXQgd2UgDQo+d2lsbCBjb250aW51ZSB0byB0cnkg
-dG8gZmlsbCBpdCBwZXJpb2RpY2FsbHksIGFuZCBub3QgcmVhY2hpbmcgdGhlIGRlc2lyZWQgDQo+
-cG9pbnQgaXMgbm90IGEgcmVhc29uIHRvIHRocm93IG91dCB3aGF0IHdlIGhhdmUuICBZb3UnbGwg
-bm90ZSB0aGF0IHRoZSBvbmUgDQo+Y2FsbGVyIGlnbm9yZXMgdGhlIHJldHVybiB2YWx1ZS4uDQo+
-DQpJIHNlZS5CdXQgdGhlIGNvZGUgZG9uJ3QuDQo+ICAgICAgIGZvciAoaSA9IGhhdmU7IGkgPCBu
-ZWVkOyBpKyspIHsNCj4gICAgICAgICAgICAgICAgY2FwID0ga21lbV9jYWNoZV9hbGxvYyhjZXBo
-X2NhcF9jYWNoZXAsIEdGUF9OT0ZTKTsNCj4gICAgICAgICAgICAgICAgaWYgKCFjYXApIHsNCj4g
-ICAgICAgICAgICAgICAgICAgICAgICByZXQgPSAtRU5PTUVNOw0KPiAgICAgICAgICAgICAgICAg
-ICAgICAgIGdvdG8gb3V0X2FsbG9jX2NvdW50Ow0KPiAgICAgICAgICAgICAgICB9ICAgIA0KPiAg
-ICAgICAgICAgICAgICBsaXN0X2FkZCgmY2FwLT5jYXBzX2l0ZW0sICZuZXdjYXBzKTsNCj4gICAg
-ICAgICAgICAgICAgYWxsb2MrKzsNCj4gICAgICAgIH0gICAgDQo+ICAgICAgICBCVUdfT04oaGF2
-ZSArIGFsbG9jICE9IG5lZWQpOw0KRm9yIHRoZSBjYXBzIHdoaWNoIGFsbG9jYXRlZCwgdGhvc2Ug
-Y2FuJ3QgYWRkIGludG8gICcmbWRzYy0+Y2Fwc19saXN0Jy4NClNvIGlmIGFsbG9jYXRlIGZhaWxl
-ZCxpdCB3aWxsIGNhdXNlIG1lbW9yeSBsZWFrLg0KQnkgeW91ciB0aG91Z2h0LCB0aGUgY29kZSBt
-YXliZSBsaWtlDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2NhcHMuYyBiL2ZzL2NlcGgvY2Fwcy5j
-DQppbmRleCBkYTBmOWI4Li5kNWQ1ZWNhIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9jYXBzLmMNCisr
-KyBiL2ZzL2NlcGgvY2Fwcy5jDQpAQCAtMTc2LDEyICsxNzYsMTEgQEAgaW50IGNlcGhfcmVzZXJ2
-ZV9jYXBzKHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsDQogICAgICAgICAgICAgICAgY2Fw
-ID0ga21lbV9jYWNoZV9hbGxvYyhjZXBoX2NhcF9jYWNoZXAsIEdGUF9OT0ZTKTsNCiAgICAgICAg
-ICAgICAgICBpZiAoIWNhcCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgcmV0ID0gLUVOT01F
-TTsNCi0gICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0X2FsbG9jX2NvdW50Ow0KKyAgICAg
-ICAgICAgICAgICAgICAgICAgYnJlYWs7DQogICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAg
-ICAgIGxpc3RfYWRkKCZjYXAtPmNhcHNfaXRlbSwgJm5ld2NhcHMpOw0KICAgICAgICAgICAgICAg
-IGFsbG9jKys7DQogICAgICAgIH0NCi0gICAgICAgQlVHX09OKGhhdmUgKyBhbGxvYyAhPSBuZWVk
-KTsNCiANCiAgICAgICAgc3Bpbl9sb2NrKCZtZHNjLT5jYXBzX2xpc3RfbG9jayk7DQogICAgICAg
-IG1kc2MtPmNhcHNfdG90YWxfY291bnQgKz0gYWxsb2M7DQoNCkJUWSwgVGhlIGZ1bmN0aW9uIHdo
-aWNoIGNhbGwgY2VwaF9yZXNlcnZlX2NhcHMgZG9uJ3QgY2FyZSB0aGUgcmVzdWx0Lg0KQW5kIGZy
-b20geW91IGNvbW1lbnQsIHRoaXMgd2lsbCBwZXJpb2RpY2FsbHkgZG8uU28gaSB0aGluayB0aGUg
-ZnVuY3Rpb24gcHJvdG8gd2lsbCBiZQ0KdmlvZCAgY2VwaF9yZXNlcnZlX2NhcHMoKQ0Kew0KfQ0K
-SG93IGFib3V0IHRoaXM/DQoNClRoYW5rcyENCkppYW5wZW5nICBNYQ0KDQoNCg0KPnNhZ2UNCj4N
-Cj4NCj5PbiBUdWUsIDI1IEp1biAyMDEzLCBtYWppYW5wZW5nIHdyb3RlOg0KPg0KPj4gU2lnbmVk
-LW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+PiAg
-ZnMvY2VwaC9jYXBzLmMgfCA1ICsrKysrDQo+PiAgMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9u
-cygrKQ0KPj4gDQo+PiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9jYXBzLmMgYi9mcy9jZXBoL2NhcHMu
-Yw0KPj4gaW5kZXggZGEwZjliOC4uNjI2YjBlYyAxMDA2NDQNCj4+IC0tLSBhL2ZzL2NlcGgvY2Fw
-cy5jDQo+PiArKysgYi9mcy9jZXBoL2NhcHMuYw0KPj4gQEAgLTIwMyw2ICsyMDMsMTEgQEAgb3V0
-X2FsbG9jX2NvdW50Og0KPj4gIAkvKiB3ZSBkaWRuJ3QgbWFuYWdlIHRvIHJlc2VydmUgYXMgbXVj
-aCBhcyB3ZSBuZWVkZWQgKi8NCj4+ICAJcHJfd2FybmluZygicmVzZXJ2ZSBjYXBzIGN0eD0lcCBF
-Tk9NRU0gbmVlZD0lZCBnb3Q9JWRcbiIsDQo+PiAgCQkgICBjdHgsIG5lZWQsIGhhdmUpOw0KPj4g
-KwlpZiAoYWxsb2MpIHsNCj4+ICsJCXN0cnVjdCBjZXBoX2NhcCAqdG1wOw0KPj4gKwkJbGlzdF9m
-b3JfZWFjaF9lbnRyeV9zYWZlKGNhcCwgdG1wLCAmbmV3Y2FwcywgY2Fwc19pdGVtKQ0KPj4gKwkJ
-CWttZW1fY2FjaGVfZnJlZShjZXBoX2NhcF9jYWNoZXAsIGNhcCk7DQo+PiArCX0NCj4+ICAJcmV0
-dXJuIHJldDsNCj4+ICB9DQo+PiAgDQo+PiAtLSANCj4+IDEuOC4xLjINCj4+IA==
+On Mon, 17 Jun 2013, Sage Weil wrote:
+> Hi Florian,
+> 
+> If you can trigger this with logs, we're very eager to see what they say 
+> about this!  The http://tracker.ceph.com/issues/5336 bug is open to track 
+> this issue.
 
+Downgrading this bug until we hear back.
+
+sage
+
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Thu, 13 Jun 2013, Smart Weblications GmbH - Florian Wiessner wrote:
+> 
+> > Hi,
+> > 
+> > Is really no one on the list interrested in fixing this? Or am i the only one
+> > having this kind of bug/problem?
+> > 
+> > Am 11.06.2013 16:19, schrieb Smart Weblications GmbH - Florian Wiessner:
+> > > Hi List,
+> > > 
+> > > i observed that an rbd rm <image> results in some osds mark one osd as down
+> > > wrongly in cuttlefish.
+> > > 
+> > > The situation gets even worse if there are more than one rbd rm <image> running
+> > > in parallel.
+> > > 
+> > > Please see attached logfiles. The rbd rm command was issued on 20:24:00 via
+> > > cronjob, 40 seconds later the osd 6 got marked down...
+> > > 
+> > > 
+> > > ceph osd tree
+> > > 
+> > > # id    weight  type name       up/down reweight
+> > > -1      7       pool default
+> > > -3      7               rack unknownrack
+> > > -2      1                       host node01
+> > > 0       1                               osd.0   up      1
+> > > -4      1                       host node02
+> > > 1       1                               osd.1   up      1
+> > > -5      1                       host node03
+> > > 2       1                               osd.2   up      1
+> > > -6      1                       host node04
+> > > 3       1                               osd.3   up      1
+> > > -7      1                       host node06
+> > > 5       1                               osd.5   up      1
+> > > -8      1                       host node05
+> > > 4       1                               osd.4   up      1
+> > > -9      1                       host node07
+> > > 6       1                               osd.6   up      1
+> > > 
+> > > 
+> > > I have seen some patches to parallelize rbd rm, but i think there must be some
+> > > other issue, as my clients seem to not be able to do IO when ceph is
+> > > recovering... I think this has worked better in 0.56.x - there was IO while
+> > > recovering.
+> > > 
+> > > I also observed in the log of osd.6 that after heartbeat_map reset_timeout, the
+> > > osd tries to connect to the other osds, but it retries so fast that you could
+> > > think this is a DoS attack...
+> > > 
+> > > 
+> > > Please advise..
+> > > 
+> > 
+> > 
+> > -- 
+> > 
+> > Mit freundlichen Gr??en,
+> > 
+> > Florian Wiessner
+> > 
+> > Smart Weblications GmbH
+> > Martinsberger Str. 1
+> > D-95119 Naila
+> > 
+> > fon.: +49 9282 9638 200
+> > fax.: +49 9282 9638 205
+> > 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+> > http://www.smart-weblications.de
+> > 
+> > --
+> > Sitz der Gesellschaft: Naila
+> > Gesch?ftsf?hrer: Florian Wiessner
+> > HRB-Nr.: HRB 3840 Amtsgericht Hof
+> > *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > 
+> > 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
