@@ -1,45 +1,36 @@
-From: Karol Jurak <karol.jurak@gmail.com>
-Subject: Re: Modifying RBD image changes it's snapshot
-Date: Thu, 27 Jun 2013 14:13:02 +0200
-Message-ID: <1492235.pCU3O3CnoC@karol-esprimo-p5925>
-References: <1805042.yIbHV06QAO@karol-esprimo-p5925> <51CB2FC6.6070803@inktank.com> <51CB6043.5020109@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Wireshark
+Date: Thu, 27 Jun 2013 05:33:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306270532560.14059@cobra.newdream.net>
+References: <51CC127A.3090701@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:49553 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751199Ab3F0MMM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 08:12:12 -0400
-Received: by mail-ee0-f46.google.com with SMTP id d41so351217eek.33
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Jun 2013 05:12:10 -0700 (PDT)
-In-Reply-To: <51CB6043.5020109@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44024 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752037Ab3F0MdW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 08:33:22 -0400
+In-Reply-To: <51CC127A.3090701@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Kevin Jones <k.j.jonez@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Wednesday 26 of June 2013 14:42:27 Josh Durgin wrote:
-> On 06/26/2013 11:15 AM, Josh Durgin wrote:
-> > On 06/26/2013 05:40 AM, Karol Jurak wrote:
-> >> Hi,
-> >> 
-> >> I'm using ceph 0.56.6 and kernel 3.9.7 and it looks like modifying RBD
-> >> image
-> >> also changes it's snapshot. I can reproduce this as follows:
-> > 
-> > Just reproduced on 3.10-rc7 as well. It seems the snapshot context
-> > loading is broken for format 1 a t least, since unmapping and mapping
-> > after the snapshot exists still has the same problem. I added
-> > http://tracker.ceph.com/issues/5464 to track this.
-> > 
-> > Apparently the regression test for this hasn't been running, or we
-> > would've caught this sooner.
+On Thu, 27 Jun 2013, Kevin Jones wrote:
+> Hi,
 > 
-> There's a fix for this on the stable kernel in the wip-snapc-3.9.y
-> branch of ceph-client.git.
+> I have done some work on a version of the Wireshark plugin to re-structure it
+> so it may be possible to push upstream at some point. At the moment it handles
+> connection establishment, setting up some conversational state tracking and
+> decoding a few of the message types. Supporting other message types is now
+> fairly straight forward but will take some time to work through to double
+> check the decoding logic is up to date and change to a new decoding style.
+> 
+> At this point I was thinking maybe would be better to check-in as an
+> alternative to the existing plugin so there is a base to work incrementally
+> towards the upstream goal. Sound like a good approach?
 
-Thanks for the fix. Snapshots work as expected now.
+Sounds great!  I can't wait to see this make its way upstream.  :)
 
--- 
-Karol Jurak
+Thanks!
+sage
