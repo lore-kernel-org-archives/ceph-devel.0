@@ -1,40 +1,45 @@
-From: Kevin Jones <k.j.jonez@gmail.com>
-Subject: Wireshark
-Date: Thu, 27 Jun 2013 11:22:50 +0100
-Message-ID: <51CC127A.3090701@gmail.com>
+From: Karol Jurak <karol.jurak@gmail.com>
+Subject: Re: Modifying RBD image changes it's snapshot
+Date: Thu, 27 Jun 2013 14:13:02 +0200
+Message-ID: <1492235.pCU3O3CnoC@karol-esprimo-p5925>
+References: <1805042.yIbHV06QAO@karol-esprimo-p5925> <51CB2FC6.6070803@inktank.com> <51CB6043.5020109@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f48.google.com ([74.125.83.48]:41662 "EHLO
-	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752959Ab3F0KW6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 06:22:58 -0400
-Received: by mail-ee0-f48.google.com with SMTP id b47so287692eek.35
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Jun 2013 03:22:57 -0700 (PDT)
-Received: from [192.168.0.128] (0546e7d0.skybroadband.com. [5.70.231.208])
-        by mx.google.com with ESMTPSA id w43sm2930847eez.6.2013.06.27.03.22.55
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 27 Jun 2013 03:22:56 -0700 (PDT)
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:49553 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751199Ab3F0MMM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 08:12:12 -0400
+Received: by mail-ee0-f46.google.com with SMTP id d41so351217eek.33
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Jun 2013 05:12:10 -0700 (PDT)
+In-Reply-To: <51CB6043.5020109@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Wednesday 26 of June 2013 14:42:27 Josh Durgin wrote:
+> On 06/26/2013 11:15 AM, Josh Durgin wrote:
+> > On 06/26/2013 05:40 AM, Karol Jurak wrote:
+> >> Hi,
+> >> 
+> >> I'm using ceph 0.56.6 and kernel 3.9.7 and it looks like modifying RBD
+> >> image
+> >> also changes it's snapshot. I can reproduce this as follows:
+> > 
+> > Just reproduced on 3.10-rc7 as well. It seems the snapshot context
+> > loading is broken for format 1 a t least, since unmapping and mapping
+> > after the snapshot exists still has the same problem. I added
+> > http://tracker.ceph.com/issues/5464 to track this.
+> > 
+> > Apparently the regression test for this hasn't been running, or we
+> > would've caught this sooner.
+> 
+> There's a fix for this on the stable kernel in the wip-snapc-3.9.y
+> branch of ceph-client.git.
 
-I have done some work on a version of the Wireshark plugin to 
-re-structure it so it may be possible to push upstream at some point. At 
-the moment it handles connection establishment, setting up some 
-conversational state tracking and decoding a few of the message types. 
-Supporting other message types is now fairly straight forward but will 
-take some time to work through to double check the decoding logic is up 
-to date and change to a new decoding style.
+Thanks for the fix. Snapshots work as expected now.
 
-At this point I was thinking maybe would be better to check-in as an 
-alternative to the existing plugin so there is a base to work 
-incrementally towards the upstream goal. Sound like a good approach?
-
-Regards
-Kev
-
+-- 
+Karol Jurak
