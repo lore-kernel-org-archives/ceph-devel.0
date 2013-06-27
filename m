@@ -1,70 +1,189 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Modifying RBD image changes it's snapshot
-Date: Wed, 26 Jun 2013 14:42:27 -0700
-Message-ID: <51CB6043.5020109@inktank.com>
-References: <1805042.yIbHV06QAO@karol-esprimo-p5925> <51CB2FC6.6070803@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] Add rc script for rbd map/unmap
+Date: Wed, 26 Jun 2013 22:16:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306262213540.22797@cobra.newdream.net>
+References: <1371827829-1025-1-git-send-email-laurent@ksperis.com> <alpine.DEB.2.00.1306242149240.9788@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f48.google.com ([209.85.160.48]:54031 "EHLO
-	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752251Ab3FZVnJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jun 2013 17:43:09 -0400
-Received: by mail-pb0-f48.google.com with SMTP id ma3so14716759pbc.35
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Jun 2013 14:43:09 -0700 (PDT)
-In-Reply-To: <51CB2FC6.6070803@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41007 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750739Ab3F0FQd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 01:16:33 -0400
+In-Reply-To: <alpine.DEB.2.00.1306242149240.9788@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karol Jurak <karol.jurak@gmail.com>
+To: Laurent Barbe <laurent@ksperis.com>, dan.mick@inktank.com
 Cc: ceph-devel@vger.kernel.org
 
-On 06/26/2013 11:15 AM, Josh Durgin wrote:
-> On 06/26/2013 05:40 AM, Karol Jurak wrote:
->> Hi,
->>
->> I'm using ceph 0.56.6 and kernel 3.9.7 and it looks like modifying RBD
->> image
->> also changes it's snapshot. I can reproduce this as follows:
->>
->> # create and map an image
->> rbd create --size 128 test-1
->> rbd map test-1
->>
->> # write some data to the image
->> dd if=/dev/zero of=/dev/rbd/rbd/test-1 bs=1M count=128
->>
->> # create and map a snapshot
->> rbd snap create test-1@snap-1
->> rbd map test-1@snap-1
->>
->> # verify that image and snapshot are identical
->> md5sum /dev/rbd/rbd/test-1 /dev/rbd/rbd/test-1@snap-1
->> fde9e0818281836e4fc0edfede2b8762  /dev/rbd/rbd/test-1
->> fde9e0818281836e4fc0edfede2b8762  /dev/rbd/rbd/test-1@snap-1
->>
->> # modify the image
->> dd if=/dev/urandom of=/dev/rbd/rbd/test-1 bs=512 count=1
->>
->> # compare checksums again
->> md5sum /dev/rbd/rbd/test-1 /dev/rbd/rbd/test-1@snap-1
->> 1d942c8a5bc7480cecb945ea0d020eed  /dev/rbd/rbd/test-1
->> 1d942c8a5bc7480cecb945ea0d020eed  /dev/rbd/rbd/test-1@snap-1
->>
->> Checksums are identical although the snapshot isn't supposed to be
->> modified.
->>
->
-> Just reproduced on 3.10-rc7 as well. It seems the snapshot context
-> loading is broken for format 1 a t least, since unmapping and mapping
-> after the snapshot exists still has the same problem. I added
-> http://tracker.ceph.com/issues/5464 to track this.
->
-> Apparently the regression test for this hasn't been running, or we
-> would've caught this sooner.
+Hi Laurent,
 
-There's a fix for this on the stable kernel in the wip-snapc-3.9.y
-branch of ceph-client.git.
+I went ahead and merged this.
 
-Josh
+Thanks!
+sage
 
+On Mon, 24 Jun 2013, Sage Weil wrote:
+
+> Hi Laurent,
+> 
+> I opened a github pull request for this at
+> 
+> 	https://github.com/ceph/ceph/pull/378
+> 
+> We might consider putting /etc/rbdmap in /etc/ceph/rbdmap to avoid 
+> polluting /etc... Dan, can you take a look?
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Fri, 21 Jun 2013, Laurent Barbe wrote:
+> 
+> > Init script for mapping/unmapping rbd device on startup and shutdown.
+> > On start, map rbd dev according to /etc/rbdmap, and force mount -a
+> > On stop, umount file system depending on rbd and unmap all rbd
+> > Since some distribution use symlink for /etc/mtab, the user-space attribute _netdev is not enough to umount file system before rbd dev.
+> > (also concern: #1790)
+> > 
+> > Signed-off-by: Laurent Barbe <laurent@ksperis.com>
+> > ---
+> >  src/init-rbdmap | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  src/rbdmap      |   3 ++
+> >  2 files changed, 106 insertions(+)
+> >  create mode 100755 src/init-rbdmap
+> >  create mode 100644 src/rbdmap
+> > 
+> > diff --git a/src/init-rbdmap b/src/init-rbdmap
+> > new file mode 100755
+> > index 0000000..a2187ce
+> > --- /dev/null
+> > +++ b/src/init-rbdmap
+> > @@ -0,0 +1,103 @@
+> > +#!/bin/bash
+> > +
+> > +### BEGIN INIT INFO
+> > +# Provides:          rbdmap
+> > +# Required-Start:    $network
+> > +# Required-Stop:     $network
+> > +# Default-Start:     2 3 4 5
+> > +# Default-Stop:      0 1 6
+> > +# Short-Description: Ceph RBD Mapping
+> > +# Description:       Ceph RBD Mapping
+> > +### END INIT INFO
+> > +
+> > +DESC="RBD Mapping"
+> > +RBDMAPFILE="/etc/rbdmap"
+> > +
+> > +. /lib/lsb/init-functions
+> > +
+> > +do_map() {
+> > +	if [ ! -f "$RBDMAPFILE" ]; then
+> > +		log_warning_msg "$DESC : No $RBDMAPFILE found."	
+> > +		exit 0
+> > +	fi
+> > +
+> > +	log_daemon_msg "Starting $DESC"
+> > +	# Read /etc/rbdtab to create non-existant mapping
+> > +	newrbd=
+> > +	RET=0
+> > +	while read DEV PARAMS; do
+> > +		case "$DEV" in
+> > +		  ""|\#*)
+> > +			continue
+> > +			;;
+> > +		  */*)
+> > +			;;
+> > +		  *)
+> > +			DEV=rbd/$DEV
+> > +			;;
+> > +		esac
+> > +		OIFS=$IFS
+> > +		IFS=','
+> > +		for PARAM in ${PARAMS[@]}; do
+> > +			CMDPARAMS="$CMDPARAMS --$(echo $PARAM | tr '=' ' ')"
+> > +		done
+> > +		IFS=$OIFS
+> > +		if [ ! -b /dev/rbd/$DEV ]; then
+> > +			log_progress_msg $DEV
+> > +			rbd map $DEV $CMDPARAMS
+> > +			[ $? -ne "0" ] && RET=1
+> > +			newrbd="yes"
+> > +		fi
+> > +	done < $RBDMAPFILE
+> > +	log_end_msg $RET
+> > +
+> > +	# Mount new rbd
+> > +	if [ "$newrbd" ]; then
+> > +                log_action_begin_msg "Mounting all filesystems"
+> > +		mount -a
+> > +               	log_action_end_msg $?
+> > +	fi
+> > +}
+> > +
+> > +do_unmap() {
+> > +	log_daemon_msg "Stopping $DESC"
+> > +	RET=0
+> > +	# Unmap all rbd device
+> > +	for DEV in /dev/rbd[0-9]*; do
+> > +		log_progress_msg $DEV
+> > +		# Umount before unmap
+> > +		MNTDEP=$(findmnt --mtab --source $DEV --output TARGET | sed 1,1d | sort -r)
+> > +		for MNT in $MNTDEP; do
+> > +			umount $MNT || sleep 1 && umount -l $DEV
+> > +		done 
+> > +		rbd unmap $DEV
+> > +		[ $? -ne "0" ] && RET=1
+> > +	done
+> > +	log_end_msg $RET
+> > +}
+> > +
+> > +
+> > +case "$1" in
+> > +  start)
+> > +	do_map
+> > +	;;
+> > +
+> > +  stop)
+> > +	do_unmap
+> > +	;;
+> > +
+> > +  reload)
+> > +	do_map
+> > +	;;
+> > +
+> > +  status)
+> > +	rbd showmapped
+> > +	;;
+> > +
+> > +  *)
+> > +	log_success_msg "Usage: rbdmap {start|stop|reload|status}"
+> > +	exit 1
+> > +	;;
+> > +esac
+> > +
+> > +exit 0
+> > diff --git a/src/rbdmap b/src/rbdmap
+> > new file mode 100644
+> > index 0000000..9d34e9e
+> > --- /dev/null
+> > +++ b/src/rbdmap
+> > @@ -0,0 +1,3 @@
+> > +# RbdDevice		Parameters
+> > +#rbd/rbddevice		id=client,keyring=/etc/ceph/ceph.client.keyring
+> > +
+> > -- 
+> > 1.8.1.2
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
