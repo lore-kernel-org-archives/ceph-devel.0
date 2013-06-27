@@ -1,189 +1,40 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] Add rc script for rbd map/unmap
-Date: Wed, 26 Jun 2013 22:16:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306262213540.22797@cobra.newdream.net>
-References: <1371827829-1025-1-git-send-email-laurent@ksperis.com> <alpine.DEB.2.00.1306242149240.9788@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: Don't use ceph-sync-mode for synchronous-fs.
+Date: Thu, 27 Jun 2013 15:56:06 +0800
+Message-ID: <201306271556037311581@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41007 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750739Ab3F0FQd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 01:16:33 -0400
-In-Reply-To: <alpine.DEB.2.00.1306242149240.9788@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent Barbe <laurent@ksperis.com>, dan.mick@inktank.com
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Laurent,
-
-I went ahead and merged this.
-
-Thanks!
-sage
-
-On Mon, 24 Jun 2013, Sage Weil wrote:
-
-> Hi Laurent,
-> 
-> I opened a github pull request for this at
-> 
-> 	https://github.com/ceph/ceph/pull/378
-> 
-> We might consider putting /etc/rbdmap in /etc/ceph/rbdmap to avoid 
-> polluting /etc... Dan, can you take a look?
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Fri, 21 Jun 2013, Laurent Barbe wrote:
-> 
-> > Init script for mapping/unmapping rbd device on startup and shutdown.
-> > On start, map rbd dev according to /etc/rbdmap, and force mount -a
-> > On stop, umount file system depending on rbd and unmap all rbd
-> > Since some distribution use symlink for /etc/mtab, the user-space attribute _netdev is not enough to umount file system before rbd dev.
-> > (also concern: #1790)
-> > 
-> > Signed-off-by: Laurent Barbe <laurent@ksperis.com>
-> > ---
-> >  src/init-rbdmap | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  src/rbdmap      |   3 ++
-> >  2 files changed, 106 insertions(+)
-> >  create mode 100755 src/init-rbdmap
-> >  create mode 100644 src/rbdmap
-> > 
-> > diff --git a/src/init-rbdmap b/src/init-rbdmap
-> > new file mode 100755
-> > index 0000000..a2187ce
-> > --- /dev/null
-> > +++ b/src/init-rbdmap
-> > @@ -0,0 +1,103 @@
-> > +#!/bin/bash
-> > +
-> > +### BEGIN INIT INFO
-> > +# Provides:          rbdmap
-> > +# Required-Start:    $network
-> > +# Required-Stop:     $network
-> > +# Default-Start:     2 3 4 5
-> > +# Default-Stop:      0 1 6
-> > +# Short-Description: Ceph RBD Mapping
-> > +# Description:       Ceph RBD Mapping
-> > +### END INIT INFO
-> > +
-> > +DESC="RBD Mapping"
-> > +RBDMAPFILE="/etc/rbdmap"
-> > +
-> > +. /lib/lsb/init-functions
-> > +
-> > +do_map() {
-> > +	if [ ! -f "$RBDMAPFILE" ]; then
-> > +		log_warning_msg "$DESC : No $RBDMAPFILE found."	
-> > +		exit 0
-> > +	fi
-> > +
-> > +	log_daemon_msg "Starting $DESC"
-> > +	# Read /etc/rbdtab to create non-existant mapping
-> > +	newrbd=
-> > +	RET=0
-> > +	while read DEV PARAMS; do
-> > +		case "$DEV" in
-> > +		  ""|\#*)
-> > +			continue
-> > +			;;
-> > +		  */*)
-> > +			;;
-> > +		  *)
-> > +			DEV=rbd/$DEV
-> > +			;;
-> > +		esac
-> > +		OIFS=$IFS
-> > +		IFS=','
-> > +		for PARAM in ${PARAMS[@]}; do
-> > +			CMDPARAMS="$CMDPARAMS --$(echo $PARAM | tr '=' ' ')"
-> > +		done
-> > +		IFS=$OIFS
-> > +		if [ ! -b /dev/rbd/$DEV ]; then
-> > +			log_progress_msg $DEV
-> > +			rbd map $DEV $CMDPARAMS
-> > +			[ $? -ne "0" ] && RET=1
-> > +			newrbd="yes"
-> > +		fi
-> > +	done < $RBDMAPFILE
-> > +	log_end_msg $RET
-> > +
-> > +	# Mount new rbd
-> > +	if [ "$newrbd" ]; then
-> > +                log_action_begin_msg "Mounting all filesystems"
-> > +		mount -a
-> > +               	log_action_end_msg $?
-> > +	fi
-> > +}
-> > +
-> > +do_unmap() {
-> > +	log_daemon_msg "Stopping $DESC"
-> > +	RET=0
-> > +	# Unmap all rbd device
-> > +	for DEV in /dev/rbd[0-9]*; do
-> > +		log_progress_msg $DEV
-> > +		# Umount before unmap
-> > +		MNTDEP=$(findmnt --mtab --source $DEV --output TARGET | sed 1,1d | sort -r)
-> > +		for MNT in $MNTDEP; do
-> > +			umount $MNT || sleep 1 && umount -l $DEV
-> > +		done 
-> > +		rbd unmap $DEV
-> > +		[ $? -ne "0" ] && RET=1
-> > +	done
-> > +	log_end_msg $RET
-> > +}
-> > +
-> > +
-> > +case "$1" in
-> > +  start)
-> > +	do_map
-> > +	;;
-> > +
-> > +  stop)
-> > +	do_unmap
-> > +	;;
-> > +
-> > +  reload)
-> > +	do_map
-> > +	;;
-> > +
-> > +  status)
-> > +	rbd showmapped
-> > +	;;
-> > +
-> > +  *)
-> > +	log_success_msg "Usage: rbdmap {start|stop|reload|status}"
-> > +	exit 1
-> > +	;;
-> > +esac
-> > +
-> > +exit 0
-> > diff --git a/src/rbdmap b/src/rbdmap
-> > new file mode 100644
-> > index 0000000..9d34e9e
-> > --- /dev/null
-> > +++ b/src/rbdmap
-> > @@ -0,0 +1,3 @@
-> > +# RbdDevice		Parameters
-> > +#rbd/rbddevice		id=client,keyring=/etc/ceph/ceph.client.keyring
-> > +
-> > -- 
-> > 1.8.1.2
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+QXQgbm93IGZvciBzeW5jaHJvbm91cy1mcywgYWxsIHdyaXRlLW9wZXJhdGlvbnMgdXNlIGNlcGhf
+c3luY19tb2RlLg0KQnV0IGZvciB0aGUgZmlsZSB3aGljaCBvcGVuZWQgd2l0aCBPX1NZTkMsIGl0
+IGRvbid0IHVzZSBzeW5jX21vZGUuDQpUaGUgYmVoYXZpb3VyIG9mIHRoZW0gc2hvdWxkIGJlIHRo
+ZSBzYW1lLg0KRm9yIGZzIHdoaWNoIG1vdW50ZWQgdXNpbmcgJy1vIHN5bmMnLCBpdCB3YW50IGFs
+bCBJL08gdG8gdGhlIGZpbGVzeXN0ZW0NCnNob3VsZCBiZSBkb25lIHN5bmNocm9ub3VzbHkuQnV0
+IHRoZSBjZXBoLXN5bmMtbW9kZSBkb24ndCBiZSBzdWl0ZnVsDQpmb3IuRm9yIGV4YW1wbGUsdXNp
+bmcgY2VwaC1zeW5jLW1vZGUgdGhlIGNvbnRlbnQgb2YgZmlsZSBkb24ndCBoYXZlIGluDQptZW1v
+cnkuVGhpcyB3aWxsIGNhdXNlIHRoZSBmb2xsb3dpbmcgcmVhZCBvbmx5IGZyb20gb3NkIHJhdGhl
+ciB0aGFuDQptZW1vcnkuDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5n
+QGdtYWlsLmNvbT4NCi0tLQ0KIGZzL2NlcGgvZmlsZS5jIHwgMiAtLQ0KIDEgZmlsZSBjaGFuZ2Vk
+LCAyIGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBo
+L2ZpbGUuYw0KaW5kZXggNjU2ZTE2OS4uNDQ2NzBhZCAxMDA2NDQNCi0tLSBhL2ZzL2NlcGgvZmls
+ZS5jDQorKysgYi9mcy9jZXBoL2ZpbGUuYw0KQEAgLTY1OSw3ICs2NTksNiBAQCBhZ2FpbjoNCiAN
+CiAJaWYgKChnb3QgJiAoQ0VQSF9DQVBfRklMRV9DQUNIRXxDRVBIX0NBUF9GSUxFX0xBWllJTykp
+ID09IDAgfHwNCiAJICAgIChpb2NiLT5raV9maWxwLT5mX2ZsYWdzICYgT19ESVJFQ1QpIHx8DQot
+CSAgICAoaW5vZGUtPmlfc2ItPnNfZmxhZ3MgJiBNU19TWU5DSFJPTk9VUykgfHwNCiAJICAgIChm
+aS0+ZmxhZ3MgJiBDRVBIX0ZfU1lOQykpDQogCQkvKiBobW0sIHRoaXMgaXNuJ3QgcmVhbGx5IGFz
+eW5jLi4uICovDQogCQlyZXQgPSBjZXBoX3N5bmNfcmVhZChmaWxwLCBiYXNlLCBsZW4sIHBwb3Ms
+ICZjaGVja2VvZik7DQpAQCAtNzY0LDcgKzc2Myw2IEBAIHJldHJ5X3NuYXA6DQogDQogCWlmICgo
+Z290ICYgKENFUEhfQ0FQX0ZJTEVfQlVGRkVSfENFUEhfQ0FQX0ZJTEVfTEFaWUlPKSkgPT0gMCB8
+fA0KIAkgICAgKGlvY2ItPmtpX2ZpbHAtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgfHwNCi0JICAgIChp
+bm9kZS0+aV9zYi0+c19mbGFncyAmIE1TX1NZTkNIUk9OT1VTKSB8fA0KIAkgICAgKGZpLT5mbGFn
+cyAmIENFUEhfRl9TWU5DKSkgew0KIAkJbXV0ZXhfdW5sb2NrKCZpbm9kZS0+aV9tdXRleCk7DQog
+CQl3cml0dGVuID0gY2VwaF9zeW5jX3dyaXRlKGZpbGUsIGlvdi0+aW92X2Jhc2UsIGNvdW50LA0K
+LS0gDQoxLjguMS4yDQo=
