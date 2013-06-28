@@ -1,46 +1,49 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: wip-libcephfs rebase
-Date: Thu, 27 Jun 2013 12:48:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1306271246440.397@cobra.newdream.net>
-References: <466224703.168.1372355669107.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Ross Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: =?utf-8?q?Speakers_needed=3A_Ceph_Days_=28US_and_UK?=
+	=?utf-8?q?=29?=
+Date: Fri, 28 Jun 2013 15:59:04 -0700
+Message-ID: <etPan.51ce1538.46e87ccd.6acb@zed.local>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48082 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753288Ab3F0Tsh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jun 2013 15:48:37 -0400
-In-Reply-To: <466224703.168.1372355669107.JavaMail.root@thunderbeast.private.linuxbox.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@linuxbox.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, aemerson <aemerson@linuxbox.com>, David Zafman <david.zafman@inktank.com>, Ilya Storozhilov <Ilya_Storozhilov@epam.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: 
+References: 
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "=?UTF-8?Q?ceph-devel=40vger.kernel.org_ceph-devel=40vger.kernel.org?=" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 27 Jun 2013, Matt W. Benjamin wrote:
-> Just to confirm what Adam and I are doing on this end, ie, this is our plan to rebase wip-libcephfs following wip-libcephfs-rebase.
-> 
-> * proceeding commit-wise on wip-libcephfs-rebase, mapping each change back to a commit in wip-libcephfs
-
-I wouldn't worry about referencing the original commits unless it is 
-important to you guys (it isn't to me).  Those commits won't appear in the 
-canonical ceph.git source tree anyway.
-
-> ** striking out anything marked reject in rebase
-> ** striking out anything marked "whitespace"
-> *** (unless you want these)
-
-We can keep the whitespace fixes, as long as they are in spearate patches 
-from real changes
-
-> ** either striking out or motivating in commit message anything marked "why"
-> ** updating commit messages of every commit which remains
-> *** with author, signed off by, SHAs of the source commit(s), updated commit message (background authors)
-> * test, fix, and rebase as necessary
-> * cherry-pick changes from Ilya
-> ** adapt anything we propose to adjust in new commits
-> * rebase on head
-> * push to our Ceph repo for review/pull when ready
-
-Sounds good!
-
-sage
+SGksIGFsbCEKCklua3RhbmsgaXMgcHJlcGFyaW5nIGEgc2VyaWVzIG9mIENlcGggRGF5cyB0aGlz
+IGZhbGwgaW4gdGhlIFVTIGFuZCBFdXJvcGUsCmludGVuZGVkIGZvciB1c2VycyBhbmQgZGV2ZWxv
+cGVycyB3aG8gd2FudCB0byBsZWFybiBhYm91dCBDZXBoIGFuZCBtZWV0Cm90aGVyIG1lbWJlcnMg
+b2YgdGhlIGNvbW11bml0eS4gwqBPdXIgY3VycmVudCB3b3JraW5nIGFnZW5kYSBjb250YWlucyBh
+IGxvb2sKaW50byB0aGUgZnV0dXJlIG9mIENlcGgsIHN0b3JpZXMgZnJvbSByZWFsIHdvcmxkIHVz
+ZXJzLCBhbiBpbnN0YWxsCndvcmtzaG9wLCBhbmQgcGxlbnR5IG9mIHRpbWUgZm9yIGZhY2UtdG8t
+ZmFjZSBuZXR3b3JraW5nIGFuZCBjb252ZXJzYXRpb24uCgpBdWd1c3QgMSwgMjAxMyAtIE5ldyBZ
+b3JrIENpdHkKU2VwdGVtYmVyIDEyLCAyMDEzIC0gU2FudGEgQ2xhcmEsIENBCk9jdG9iZXIgOSwg
+MjAxMyAtIExvbmRvbgoKV2UnbGwgYmUgYW5ub3VuY2luZyBleGFjdCBsb2NhdGlvbnMgYW5kIG9w
+ZW5pbmcgcmVnaXN0cmF0aW9uIHNvb24gZm9yIHRob3NlCndobyB3aXNoIHRvIGF0dGVuZC4KCkZp
+cnN0LCB0aG91Z2gsIHdlJ2QgbGlrZSB0byBpZGVudGlmeSBjb21tdW5pdHkgbWVtYmVycyB3aG8g
+bWlnaHQgYmUKaW50ZXJlc3RlZCBpbiBzcGVha2luZyEgwqBJZiB5b3UncmUgd29ya2luZyBvbiBh
+biBpbm5vdmF0aXZlIHByb2plY3QsIGhhdmUKYSB1bmlxdWUgdXNlIGNhc2UsIG9yIGhhdmUgYnVp
+bHQgYW4gaW50ZWdyYXRpb24geW91J2QgbGlrZSB0byBzaGFyZSwgZHJvcCBhCmxpbmUgdG8gY29t
+bXVuaXR5QGNlcGguY29tIGFuZCBsZXQgdXMga25vdy4gwqBFYWNoIG9mIHRoZXNlIGV2ZW50cyB3
+aWxsIGxhc3QKYSBzaW5nbGUgZGF5IG9ubHksIHNvIHNwZWFraW5nIHNsb3RzIG1pZ2h0IGVuZCB1
+cCBiZWluZyBhIGJpdCBsaW1pdGVkLCBidXQKd2UnZCBsb3ZlIHRvwqBoZWFyIGZyb20geW91LgoK
+SG9wZSB0byBzZWUgeW91IGFsbCB0aGVyZSA6KQoKKE9oISDCoEp1c3QgdG8gcHJldmVudCBjb25m
+dXNpb246IG91ciBxdWFydGVybHkgQ2VwaCBEZXZlbG9wZXIgU3VtbWl0cyBhcmUKdG90YWxseSBz
+ZXBhcmF0ZSBmcm9tIHRoaXMuIMKgSSdtIHB1dHRpbmcgdG9nZXRoZXIgYSByb3VnaCBzY2hlZHVs
+ZSBmb3IgdGhlCkVtcGVyb3IgQ0RTIC0gZXhwZWN0IGl0IHNvb24hIMKgV2UnbGwgc3RpbGwgYmUg
+ZG9pbmcgQ0RTIHZpcnR1YWxseSwgc28KZXZlcnlvbmUgY2FuIHBhcnRpY2lwYXRlLikKCkNoZWVy
+cywKUm9zcwoKLS3CoApSb3NzIFR1cmsKVlAgQ29tbXVuaXR5LCBJbmt0YW5rCgpAcm9zc3R1cmsg
+QGNlcGggQGlua3RhbmsKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
