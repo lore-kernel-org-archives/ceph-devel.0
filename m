@@ -1,49 +1,32 @@
-From: Ross Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: =?utf-8?q?Speakers_needed=3A_Ceph_Days_=28US_and_UK?=
-	=?utf-8?q?=29?=
-Date: Fri, 28 Jun 2013 15:59:04 -0700
-Message-ID: <etPan.51ce1538.46e87ccd.6acb@zed.local>
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph fix for 3.10
+Date: Fri, 28 Jun 2013 17:31:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1306281726140.1830@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: 
-References: 
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "=?UTF-8?Q?ceph-devel=40vger.kernel.org_ceph-devel=40vger.kernel.org?=" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGksIGFsbCEKCklua3RhbmsgaXMgcHJlcGFyaW5nIGEgc2VyaWVzIG9mIENlcGggRGF5cyB0aGlz
-IGZhbGwgaW4gdGhlIFVTIGFuZCBFdXJvcGUsCmludGVuZGVkIGZvciB1c2VycyBhbmQgZGV2ZWxv
-cGVycyB3aG8gd2FudCB0byBsZWFybiBhYm91dCBDZXBoIGFuZCBtZWV0Cm90aGVyIG1lbWJlcnMg
-b2YgdGhlIGNvbW11bml0eS4gwqBPdXIgY3VycmVudCB3b3JraW5nIGFnZW5kYSBjb250YWlucyBh
-IGxvb2sKaW50byB0aGUgZnV0dXJlIG9mIENlcGgsIHN0b3JpZXMgZnJvbSByZWFsIHdvcmxkIHVz
-ZXJzLCBhbiBpbnN0YWxsCndvcmtzaG9wLCBhbmQgcGxlbnR5IG9mIHRpbWUgZm9yIGZhY2UtdG8t
-ZmFjZSBuZXR3b3JraW5nIGFuZCBjb252ZXJzYXRpb24uCgpBdWd1c3QgMSwgMjAxMyAtIE5ldyBZ
-b3JrIENpdHkKU2VwdGVtYmVyIDEyLCAyMDEzIC0gU2FudGEgQ2xhcmEsIENBCk9jdG9iZXIgOSwg
-MjAxMyAtIExvbmRvbgoKV2UnbGwgYmUgYW5ub3VuY2luZyBleGFjdCBsb2NhdGlvbnMgYW5kIG9w
-ZW5pbmcgcmVnaXN0cmF0aW9uIHNvb24gZm9yIHRob3NlCndobyB3aXNoIHRvIGF0dGVuZC4KCkZp
-cnN0LCB0aG91Z2gsIHdlJ2QgbGlrZSB0byBpZGVudGlmeSBjb21tdW5pdHkgbWVtYmVycyB3aG8g
-bWlnaHQgYmUKaW50ZXJlc3RlZCBpbiBzcGVha2luZyEgwqBJZiB5b3UncmUgd29ya2luZyBvbiBh
-biBpbm5vdmF0aXZlIHByb2plY3QsIGhhdmUKYSB1bmlxdWUgdXNlIGNhc2UsIG9yIGhhdmUgYnVp
-bHQgYW4gaW50ZWdyYXRpb24geW91J2QgbGlrZSB0byBzaGFyZSwgZHJvcCBhCmxpbmUgdG8gY29t
-bXVuaXR5QGNlcGguY29tIGFuZCBsZXQgdXMga25vdy4gwqBFYWNoIG9mIHRoZXNlIGV2ZW50cyB3
-aWxsIGxhc3QKYSBzaW5nbGUgZGF5IG9ubHksIHNvIHNwZWFraW5nIHNsb3RzIG1pZ2h0IGVuZCB1
-cCBiZWluZyBhIGJpdCBsaW1pdGVkLCBidXQKd2UnZCBsb3ZlIHRvwqBoZWFyIGZyb20geW91LgoK
-SG9wZSB0byBzZWUgeW91IGFsbCB0aGVyZSA6KQoKKE9oISDCoEp1c3QgdG8gcHJldmVudCBjb25m
-dXNpb246IG91ciBxdWFydGVybHkgQ2VwaCBEZXZlbG9wZXIgU3VtbWl0cyBhcmUKdG90YWxseSBz
-ZXBhcmF0ZSBmcm9tIHRoaXMuIMKgSSdtIHB1dHRpbmcgdG9nZXRoZXIgYSByb3VnaCBzY2hlZHVs
-ZSBmb3IgdGhlCkVtcGVyb3IgQ0RTIC0gZXhwZWN0IGl0IHNvb24hIMKgV2UnbGwgc3RpbGwgYmUg
-ZG9pbmcgQ0RTIHZpcnR1YWxseSwgc28KZXZlcnlvbmUgY2FuIHBhcnRpY2lwYXRlLikKCkNoZWVy
-cywKUm9zcwoKLS3CoApSb3NzIFR1cmsKVlAgQ29tbXVuaXR5LCBJbmt0YW5rCgpAcm9zc3R1cmsg
-QGNlcGggQGlua3RhbmsKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
-dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Hi Linus,
+
+Please pull the following patch from
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+This is a recently spotted regression in the snapshot behavior.... it 
+turns out several tests weren't being run in the nightlies so this took a 
+while to spot.
+
+Thanks!
+sage
+
+
+----------------------------------------------------------------
+Josh Durgin (1):
+      rbd: send snapshot context with writes
+
+ drivers/block/rbd.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
