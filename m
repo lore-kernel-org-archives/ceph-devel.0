@@ -1,88 +1,82 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: avoid accessing invalid memory
-Date: Mon, 1 Jul 2013 15:55:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307011554490.13163@cobra.newdream.net>
-References: <1372718019-16549-1-git-send-email-sasha.levin@oracle.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Erasure coding library API
+Date: Tue, 02 Jul 2013 01:00:19 +0200
+Message-ID: <51D20A03.1030204@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1372718019-16549-1-git-send-email-sasha.levin@oracle.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sasha Levin <sasha.levin@oracle.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig6808857DEE6526D9263FB773"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:52148 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755100Ab3GAXAV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 19:00:21 -0400
+Received: from [10.8.0.22] (unknown [10.8.0.22])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 5433326394
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Jul 2013 01:00:20 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 1 Jul 2013, Sasha Levin wrote:
-> when mounting ceph with a dev name that starts with a slash, ceph
-> would attempt to access the character before that slash. Since we
-> don't actually own that byte of memory, we would trigger an
-> invalid access:
-> 
-> [   43.499934] BUG: unable to handle kernel paging request at ffff880fa3a97fff
-> [   43.500984] IP: [<ffffffff818f3884>] parse_mount_options+0x1a4/0x300
-> [   43.501491] PGD 743b067 PUD 10283c4067 PMD 10282a6067 PTE 8000000fa3a97060
-> [   43.502301] Oops: 0000 [#1] PREEMPT SMP DEBUG_PAGEALLOC
-> [   43.503006] Dumping ftrace buffer:
-> [   43.503596]    (ftrace buffer empty)
-> [   43.504046] CPU: 0 PID: 10879 Comm: mount Tainted: G        W    3.10.0-sasha #1129
-> [   43.504851] task: ffff880fa625b000 ti: ffff880fa3412000 task.ti: ffff880fa3412000
-> [   43.505608] RIP: 0010:[<ffffffff818f3884>]  [<ffffffff818f3884>] parse_mount_options$
-> [   43.506552] RSP: 0018:ffff880fa3413d08  EFLAGS: 00010286
-> [   43.507133] RAX: ffff880fa3a98000 RBX: ffff880fa3a98000 RCX: 0000000000000000
-> [   43.507893] RDX: ffff880fa3a98001 RSI: 000000000000002f RDI: ffff880fa3a98000
-> [   43.508610] RBP: ffff880fa3413d58 R08: 0000000000001f99 R09: ffff880fa3fe64c0
-> [   43.509426] R10: ffff880fa3413d98 R11: ffff880fa38710d8 R12: ffff880fa3413da0
-> [   43.509792] R13: ffff880fa3a97fff R14: 0000000000000000 R15: ffff880fa3413d90
-> [   43.509792] FS:  00007fa9c48757e0(0000) GS:ffff880fd2600000(0000) knlGS:000000000000$
-> [   43.509792] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-> [   43.509792] CR2: ffff880fa3a97fff CR3: 0000000fa3bb9000 CR4: 00000000000006b0
-> [   43.509792] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [   43.509792] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-> [   43.509792] Stack:
-> [   43.509792]  0000e5180000000e ffffffff85ca1900 ffff880fa38710d8 ffff880fa3413d98
-> [   43.509792]  0000000000000120 0000000000000000 ffff880fa3a98000 0000000000000000
-> [   43.509792]  ffffffff85cf32a0 0000000000000000 ffff880fa3413dc8 ffffffff818f3c72
-> [   43.509792] Call Trace:
-> [   43.509792]  [<ffffffff818f3c72>] ceph_mount+0xa2/0x390
-> [   43.509792]  [<ffffffff81226314>] ? pcpu_alloc+0x334/0x3c0
-> [   43.509792]  [<ffffffff81282f8d>] mount_fs+0x8d/0x1a0
-> [   43.509792]  [<ffffffff812263d0>] ? __alloc_percpu+0x10/0x20
-> [   43.509792]  [<ffffffff8129f799>] vfs_kern_mount+0x79/0x100
-> [   43.509792]  [<ffffffff812a224d>] do_new_mount+0xcd/0x1c0
-> [   43.509792]  [<ffffffff812a2e8d>] do_mount+0x15d/0x210
-> [   43.509792]  [<ffffffff81220e55>] ? strndup_user+0x45/0x60
-> [   43.509792]  [<ffffffff812a2fdd>] SyS_mount+0x9d/0xe0
-> [   43.509792]  [<ffffffff83fd816c>] tracesys+0xdd/0xe2
-> [   43.509792] Code: 4c 8b 5d c0 74 0a 48 8d 50 01 49 89 14 24 eb 17 31 c0 48 83 c9 ff $
-> [   43.509792] RIP  [<ffffffff818f3884>] parse_mount_options+0x1a4/0x300
-> [   43.509792]  RSP <ffff880fa3413d08>
-> [   43.509792] CR2: ffff880fa3a97fff
-> [   43.509792] ---[ end trace 22469cd81e93af51 ]---
-> 
-> Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig6808857DEE6526D9263FB773
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Looks good!  Reviewed-by: and added to the tree.  Thanks!
-sage
+Hi,
+
+Today Sam pointed out that the API for LRC ( Xorbas Hadoop Project Page, =
+Locally Repairable Codes (LRC) http://smahesh.com/HadoopUSC/ for instance=
+ ) would need to be different from the one initialy proposed:
+
+    context(k, m, reed-solomon|...) =3D> context* c=20
+    encode(context* c, void* data) =3D> void* chunks[k+m]
+    decode(context* c, void* chunk[k+m], int* indices_of_erased_chunks) =3D=
+> void* data // erased chunks are
+not used
+    repair(context* c, void* chunk[k+m], int* indices_of_erased_chunks) =3D=
+> void* chunks[k+m] // erased
+chunks are rebuilt
+
+The decode function must allow for partial read:
+
+    decode(context* c, int offset, int length, void* chunk[k+m], int* ind=
+ices_of_erased_chunks, int* missing_chunks) =3D> void* data=20
+
+If there are not enough chunks to recover the desired data range [offset,=
+ offset+length) the function returns NULL and sets missing_chunks to the =
+list of chunks that must be retrieved in order to be able to read the des=
+ired data.
+
+If decode is called to read just 1 chunk and it is missing, reed-solomon =
+would return on error and ask for all other chunks to repair. If the unde=
+rlying library implements LRC, it would ask for a subset of the chunks.=20
+
+An implementation allowing only full reads and using jerasure ( which doe=
+s not do LRC ) requires that offset is always zero, length is the size of=
+ the object and returns a copy of indices_of_erased_chunks if there are n=
+ot enough chunks to rebuild the missing ones.=20
+
+Comments are welcome :-)
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-> ---
->  fs/ceph/super.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 7d377c9..6627b26 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -357,7 +357,7 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
->  	}
->  	err = -EINVAL;
->  	dev_name_end--;		/* back up to ':' separator */
-> -	if (*dev_name_end != ':') {
-> +	if (dev_name_end < dev_name || *dev_name_end != ':') {
->  		pr_err("device name is missing path (no : separator in %s)\n",
->  				dev_name);
->  		goto out;
-> -- 
-> 1.7.10.4
-> 
-> 
+--------------enig6808857DEE6526D9263FB773
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlHSCgMACgkQ8dLMyEl6F21msgCdGEvoY8OcidZ9kwlK4kdgyyrv
+sP8An2kxLWjGlHrsP63Nyyp7UmjDrLZM
+=LMjB
+-----END PGP SIGNATURE-----
+
+--------------enig6808857DEE6526D9263FB773--
