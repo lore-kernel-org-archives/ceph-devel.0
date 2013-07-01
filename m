@@ -1,130 +1,76 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Erasure coding implementation : high level description
-Date: Mon, 01 Jul 2013 23:45:25 +0200
-Message-ID: <51D1F875.3080002@dachary.org>
-References: <51C9D65F.8000507@dachary.org> <51CF11A8.2070208@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig4364B818BF8F230BDD3542D5"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:37468 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754828Ab3GAVp3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 17:45:29 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 4676526394
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Jul 2013 23:45:27 +0200 (CEST)
-In-Reply-To: <51CF11A8.2070208@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+From: Sasha Levin <sasha.levin@oracle.com>
+Subject: [PATCH] ceph: avoid accessing invalid memory
+Date: Mon,  1 Jul 2013 18:33:39 -0400
+Message-ID: <1372718019-16549-1-git-send-email-sasha.levin@oracle.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sage@inktank.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Sasha Levin <sasha.levin@oracle.com>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig4364B818BF8F230BDD3542D5
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+when mounting ceph with a dev name that starts with a slash, ceph
+would attempt to access the character before that slash. Since we
+don't actually own that byte of memory, we would trigger an
+invalid access:
 
-For the record,
+[   43.499934] BUG: unable to handle kernel paging request at ffff880fa3a97fff
+[   43.500984] IP: [<ffffffff818f3884>] parse_mount_options+0x1a4/0x300
+[   43.501491] PGD 743b067 PUD 10283c4067 PMD 10282a6067 PTE 8000000fa3a97060
+[   43.502301] Oops: 0000 [#1] PREEMPT SMP DEBUG_PAGEALLOC
+[   43.503006] Dumping ftrace buffer:
+[   43.503596]    (ftrace buffer empty)
+[   43.504046] CPU: 0 PID: 10879 Comm: mount Tainted: G        W    3.10.0-sasha #1129
+[   43.504851] task: ffff880fa625b000 ti: ffff880fa3412000 task.ti: ffff880fa3412000
+[   43.505608] RIP: 0010:[<ffffffff818f3884>]  [<ffffffff818f3884>] parse_mount_options$
+[   43.506552] RSP: 0018:ffff880fa3413d08  EFLAGS: 00010286
+[   43.507133] RAX: ffff880fa3a98000 RBX: ffff880fa3a98000 RCX: 0000000000000000
+[   43.507893] RDX: ffff880fa3a98001 RSI: 000000000000002f RDI: ffff880fa3a98000
+[   43.508610] RBP: ffff880fa3413d58 R08: 0000000000001f99 R09: ffff880fa3fe64c0
+[   43.509426] R10: ffff880fa3413d98 R11: ffff880fa38710d8 R12: ffff880fa3413da0
+[   43.509792] R13: ffff880fa3a97fff R14: 0000000000000000 R15: ffff880fa3413d90
+[   43.509792] FS:  00007fa9c48757e0(0000) GS:ffff880fd2600000(0000) knlGS:000000000000$
+[   43.509792] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+[   43.509792] CR2: ffff880fa3a97fff CR3: 0000000fa3bb9000 CR4: 00000000000006b0
+[   43.509792] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[   43.509792] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+[   43.509792] Stack:
+[   43.509792]  0000e5180000000e ffffffff85ca1900 ffff880fa38710d8 ffff880fa3413d98
+[   43.509792]  0000000000000120 0000000000000000 ffff880fa3a98000 0000000000000000
+[   43.509792]  ffffffff85cf32a0 0000000000000000 ffff880fa3413dc8 ffffffff818f3c72
+[   43.509792] Call Trace:
+[   43.509792]  [<ffffffff818f3c72>] ceph_mount+0xa2/0x390
+[   43.509792]  [<ffffffff81226314>] ? pcpu_alloc+0x334/0x3c0
+[   43.509792]  [<ffffffff81282f8d>] mount_fs+0x8d/0x1a0
+[   43.509792]  [<ffffffff812263d0>] ? __alloc_percpu+0x10/0x20
+[   43.509792]  [<ffffffff8129f799>] vfs_kern_mount+0x79/0x100
+[   43.509792]  [<ffffffff812a224d>] do_new_mount+0xcd/0x1c0
+[   43.509792]  [<ffffffff812a2e8d>] do_mount+0x15d/0x210
+[   43.509792]  [<ffffffff81220e55>] ? strndup_user+0x45/0x60
+[   43.509792]  [<ffffffff812a2fdd>] SyS_mount+0x9d/0xe0
+[   43.509792]  [<ffffffff83fd816c>] tracesys+0xdd/0xe2
+[   43.509792] Code: 4c 8b 5d c0 74 0a 48 8d 50 01 49 89 14 24 eb 17 31 c0 48 83 c9 ff $
+[   43.509792] RIP  [<ffffffff818f3884>] parse_mount_options+0x1a4/0x300
+[   43.509792]  RSP <ffff880fa3413d08>
+[   43.509792] CR2: ffff880fa3a97fff
+[   43.509792] ---[ end trace 22469cd81e93af51 ]---
 
-Sam suggested today that the chunks of a stripe ( an object if we limit o=
-urselves to full writes ) are written without deleting the chunks from a =
-previous version of the object. i.e. for instance
+Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+---
+ fs/ceph/super.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-object A1 contains "ABCDEFGHI" =3D> version 1 of the object is written as=
- chunks "ABC" "DEF" "GHI" and "XYZ" parity on OSD1, OSD2, OSD3, OSD4 resp=
-ectively.
-object A1 is updated to "ABCDEF123" =3D> version 2 of the object is writt=
-en as chunks "ABC" "DEF" "123" and "KLM" parity on OSD1, OSD2, OSD3, OSD4=
- respectively.
-
-At some point OSD3 contains both "GHI" ( chunk 3 object A1 version 1 ) an=
-d "123" ( chunk 3 object A1 version 2 ).
-
-When the PG receives an update of last_complete ( which should happen whe=
-n the PG becomes active ) it knows that all objects with a version lower =
-than last_complete can be discarded. It can then trim the objects stored =
-on the OSD that have a version older than last_complete. With ReplicatedP=
-G this does not need to be done because the new version of the object ove=
-rrides the previous one. It could be done together with pg_log trimming b=
-ut it would waste more disk space because the default log size it by defa=
-ult 3000 meaning a chunk would only be deleted from disk after 3000 pg_lo=
-g_entry were added to pg_log.=20
-
-The object name does not currently contain the version number and this wo=
-uld need to be changed to avoid name clashes.
-
-Cheers
-
-On 29/06/2013 18:56, Loic Dachary wrote:
-> Hi Sage,
->=20
-> The level of understanding of ReplicatedPG/PG/OSD required to sketch th=
-e path for implementing the erasure coding is beyond me at the moment. A =
-few hours of browsing demonstrated that a number of important areas are s=
-till unknown to me. A meaningfull example is probably the logic associate=
-d with=20
->=20
-> struct AccessMode {
->=20
-> https://github.com/ceph/ceph/blob/962b64a83037ff79855c5261325de0cd1541f=
-582/src/osd/ReplicatedPG.h#L114
->=20
-> I suspect there are a number of similarities with the erasure code that=
- would be relevant to ensure that a stripe is fully written to disk ( i.e=
-=2E in relation with the "ondisk" acknowledgment probably ) before removi=
-ng the previous version of the same stripe from all OSDs supporting it.
->=20
-> The time spent during this exploration was not wasted, I learnt a few t=
-hings that will be useful :-) But I think it would be more useful for me =
-to work on a more modest task to move in the direction of the erasure cod=
-ing implementation.
->=20
-> Cheers
->=20
-> On 06/25/2013 07:41 PM, Loic Dachary wrote:
->> Hi Sage,
->>
->> Paraphrasing what you suggested today :=20
->>
->> The logic for writing a stripe ( i.e. all the chunks created by the er=
-asure encoding function for a given object or part of a given object if i=
-t exceeds the maximum size of a stripe ) for a single object is going to =
-be done in a way that is not the same as what we currently have for repli=
-cated objects. The object is consistent when all chunks ( or at least K i=
-f K+M ) are committed to disk. It may make sense to start writing all the=
- chunks in parallel and when they are acknowledged, send a pg_log event t=
-hat says : now switch to this new version of the object. To avoid ending =
-up with chunks that are partially for one version of the object and other=
- chunks partially for another version of the object and we can't repair a=
-ny of them.=20
->>
->> I will try to sketch the path for implementing the erasure coding ( in=
-cluding the above ) by adding to https://github.com/dachary/ceph/blob/wip=
--4929/doc/dev/osd_internals/erasure-code.rst
->>
->> Cheers
->>
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig4364B818BF8F230BDD3542D5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlHR+HUACgkQ8dLMyEl6F23xPgCeJ1rbE18PuJQ/5RoVZ85ltoRn
-7v8An0QxctiENkDGs0jo7GXaq1yxs+3+
-=y7oY
------END PGP SIGNATURE-----
-
---------------enig4364B818BF8F230BDD3542D5--
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 7d377c9..6627b26 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -357,7 +357,7 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
+ 	}
+ 	err = -EINVAL;
+ 	dev_name_end--;		/* back up to ':' separator */
+-	if (*dev_name_end != ':') {
++	if (dev_name_end < dev_name || *dev_name_end != ':') {
+ 		pr_err("device name is missing path (no : separator in %s)\n",
+ 				dev_name);
+ 		goto out;
+-- 
+1.7.10.4
