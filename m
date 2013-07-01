@@ -1,101 +1,117 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply
- is received
-Date: Mon, 1 Jul 2013 12:46:00 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307011245410.11177@cobra.newdream.net>
-References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com> <51D12FA7.1090605@intel.com>
+From: christophe courtaut <christophe.courtaut@gmail.com>
+Subject: Re: Contribution
+Date: Mon, 1 Jul 2013 21:52:40 +0200
+Message-ID: <CAA8043iF3GFwQLonGvCY=A=_mKWYX1zAXEYFFMJ1cyuw1ZOspw@mail.gmail.com>
+References: <CAA8043idUL1qbWfrBffhYXL8JX0LZ+WsMseUypatret7PrxBGw@mail.gmail.com>
+ <CABBk=J9-hrMgGJ6ofvR0uuzX_gTfKJhH_TFCS4fR6m6gD=UBmg@mail.gmail.com> <CAA8043g_vkZvx_ErHZbF8eq12T2bvvXGWA_u=NRdwEWnmaqaug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40213 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754867Ab3GATqA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 15:46:00 -0400
-In-Reply-To: <51D12FA7.1090605@intel.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:49065 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755010Ab3GATxC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 15:53:02 -0400
+Received: by mail-oa0-f46.google.com with SMTP id h1so5391319oag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Jul 2013 12:53:01 -0700 (PDT)
+In-Reply-To: <CAA8043g_vkZvx_ErHZbF8eq12T2bvvXGWA_u=NRdwEWnmaqaug@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, alex.elder@linaro.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 1 Jul 2013, Yan, Zheng wrote:
-> ping
-> 
-> I think this patch should goes into 3.11 or fix the issue by other means
+Hi,
 
-Applied this to the testing branch, thanks.  Let me know if there are any 
-others I missed!
+I updated my pull request and looking forward #5416, and asked for
+more information on the tracker.
 
-sage
+Nowadays, i'm iterating on the tracker to find issues i can fix.
+I currently proposed fixes for #1779, #5228 and #5324.
 
-> 
-> 
-> On 06/24/2013 02:41 PM, Yan, Zheng wrote:
-> > From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> > 
-> > We can't use !req->r_sent to check if OSD request is sent for the
-> > first time, this is because __cancel_request() zeros req->r_sent
-> > when OSD map changes. Rather than adding a new variable to struct
-> > ceph_osd_request to indicate if it's sent for the first time, We
-> > can call the unsafe callback only when unsafe OSD reply is received.
-> > If OSD's first reply is safe, just skip calling the unsafe callback.
-> > 
-> > The purpose of unsafe callback is adding unsafe request to a list,
-> > so that fsync(2) can wait for the safe reply. fsync(2) doesn't need
-> > to wait for a write(2) that hasn't returned yet. So it's OK to add
-> > request to the unsafe list when the first OSD reply is received.
-> > (ceph_sync_write() returns after receiving the first OSD reply)
-> > 
-> > Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> > ---
-> >  net/ceph/osd_client.c | 14 +++++++-------
-> >  1 file changed, 7 insertions(+), 7 deletions(-)
-> > 
-> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> > index 540dd29..dd47889 100644
-> > --- a/net/ceph/osd_client.c
-> > +++ b/net/ceph/osd_client.c
-> > @@ -1337,10 +1337,6 @@ static void __send_request(struct ceph_osd_client *osdc,
-> >  
-> >  	ceph_msg_get(req->r_request); /* send consumes a ref */
-> >  
-> > -	/* Mark the request unsafe if this is the first timet's being sent. */
-> > -
-> > -	if (!req->r_sent && req->r_unsafe_callback)
-> > -		req->r_unsafe_callback(req, true);
-> >  	req->r_sent = req->r_osd->o_incarnation;
-> >  
-> >  	ceph_con_send(&req->r_osd->o_con, req->r_request);
-> > @@ -1431,8 +1427,6 @@ static void handle_osds_timeout(struct work_struct *work)
-> >  
-> >  static void complete_request(struct ceph_osd_request *req)
-> >  {
-> > -	if (req->r_unsafe_callback)
-> > -		req->r_unsafe_callback(req, false);
-> >  	complete_all(&req->r_safe_completion);  /* fsync waiter */
-> >  }
-> >  
-> > @@ -1559,14 +1553,20 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
-> >  	mutex_unlock(&osdc->request_mutex);
-> >  
-> >  	if (!already_completed) {
-> > +		if (req->r_unsafe_callback &&
-> > +		    result >= 0 && !(flags & CEPH_OSD_FLAG_ONDISK))
-> > +			req->r_unsafe_callback(req, true);
-> >  		if (req->r_callback)
-> >  			req->r_callback(req, msg);
-> >  		else
-> >  			complete_all(&req->r_completion);
-> >  	}
-> >  
-> > -	if (flags & CEPH_OSD_FLAG_ONDISK)
-> > +	if (flags & CEPH_OSD_FLAG_ONDISK) {
-> > +		if (req->r_unsafe_callback && already_completed)
-> > +			req->r_unsafe_callback(req, false);
-> >  		complete_request(req);
-> > +	}
-> >  
-> >  done:
-> >  	dout("req=%p req->r_linger=%d\n", req, req->r_linger);
-> > 
-> 
-> 
+I'm not very familiar with tests, and it might be a little too big for
+me to start with.
+Btw, I was also in contact with Joe Buck to properly setup a fake cluster
+suitable to make tests, as i was having trouble in doing that.
+
+To get started, i'm looking for things a bit smaller, that could fit in a day.
+
+I would be glad if you could point me to some specific tasks,
+even if they are not specially related to the geo-replication blueprint,
+the best for me remaining rgw related tasks as it's what i am trying to learn.
+
+Best regards.
+
+On Thu, Jun 27, 2013 at 5:25 PM, christophe courtaut
+<christophe.courtaut@gmail.com> wrote:
+> ---------- Forwarded message ----------
+> From: Yehuda Sadeh <yehuda@inktank.com>
+> Date: Thu, Jun 27, 2013 at 5:21 PM
+> Subject: Re: Contribution
+> To: christophe courtaut <christophe.courtaut@gmail.com>
+>
+>
+> On Thu, Jun 27, 2013 at 7:30 AM, christophe courtaut
+> <christophe.courtaut@gmail.com> wrote:
+>> Hi Yehuda,
+>>
+>> I went thru http://tracker.ceph.com/projects/rgw/issues today ( all 22
+>> of them ;-) and contributed a patch to
+>> http://tracker.ceph.com/issues/5324 ( that was an easy one ). I'd be
+>> happy to either fix more bugs on the current development branch or
+>> contribute to the geo-replication
+>> https://github.com/ceph/ceph/commits/wip-rgw-geo-2
+>>
+>> The amount of work going on with wip-rgw-geo is impressive and I'm not
+>> sure what I could do to help. It would be most convenient for me to
+>> pick from a list of self contained tasks in the tracker. I would be
+>> happy to spend a few days on each of them, one at a time. Since I'm
+>> still new to the code base, working on a tasks that would require
+>> weeks of work is probably too ambitious at this point. However, I very
+>> much understand that the definition of such tasks requires a fair
+>> amount of work on your part. And if noone works on these tasks, this
+>> would be a waste of your time. If that helps, I promise to diligently
+>> work on them, full time :-)
+>>
+>
+> Hi,
+>
+>    I saw your pull request, and also commented on the commit. There's
+> a similar easy issue (#5416) that you can take a look at now if you'd
+> like.
+> I think that at the moment with regard to the geo-replication, the
+> most helpful thing would be to test the different APIs, make sure they
+> work as expected as we're on a tight schedule, and planning a feature
+> freeze by the end of next week.
+> The API specifications are in the wiki
+> (http://wiki.ceph.com/RESTful_API_for_DR_%2F%2F_Geo-Replication).
+> Specifically I'm interested in data sync, as it's the path less
+> tested. If you could simulate (even manually) a scenario, where you
+> put an object in a bucket, check to see whether bucket is listed in
+> the data log, then go to the bucket index log, see the change entry in
+> the bucket index log, then generate a copy of that object from the
+> master zone to the secondary zone. Look at the operation state log to
+> see whether this operation is marked as completed.
+> Check to see whether the object appears in the secondary zone, check
+> its attributes.
+> That tests a wide range of the new APIs, and it'll be really helpful.
+> If you could somewhat automate it and create a script that does it,
+> it'll be extra helpful.
+>
+> Most of the other DR/geo-replication tasks are either done (waiting
+> for review and merge) or being implemented now. There are other
+> non-geo-replication issues that I can assign to you if you want to get
+> your feet dipped in the rgw code. Even if these are not a direct
+> geo-replication issues it may help us getting geo-replication out the
+> door faster as it'll free me to work on geo-replication. Let me know
+> if you're interested.
+>
+> Thanks!
+> Yehuda
+>
+>
+> --
+> Christophe Courtaut
+
+
+
+-- 
+Christophe Courtaut
