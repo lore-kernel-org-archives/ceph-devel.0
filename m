@@ -1,140 +1,130 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Contribution
-Date: Mon, 1 Jul 2013 13:23:31 -0700
-Message-ID: <CABBk=J812X6RKR0cBo1mPF2Xm4agHHJrRMjgqpOEn9uosBt6-Q@mail.gmail.com>
-References: <CAA8043idUL1qbWfrBffhYXL8JX0LZ+WsMseUypatret7PrxBGw@mail.gmail.com>
-	<CABBk=J9-hrMgGJ6ofvR0uuzX_gTfKJhH_TFCS4fR6m6gD=UBmg@mail.gmail.com>
-	<CAA8043g_vkZvx_ErHZbF8eq12T2bvvXGWA_u=NRdwEWnmaqaug@mail.gmail.com>
-	<CAA8043iF3GFwQLonGvCY=A=_mKWYX1zAXEYFFMJ1cyuw1ZOspw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Erasure coding implementation : high level description
+Date: Mon, 01 Jul 2013 23:45:25 +0200
+Message-ID: <51D1F875.3080002@dachary.org>
+References: <51C9D65F.8000507@dachary.org> <51CF11A8.2070208@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig4364B818BF8F230BDD3542D5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f172.google.com ([209.85.128.172]:45600 "EHLO
-	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755343Ab3GAUXc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 16:23:32 -0400
-Received: by mail-ve0-f172.google.com with SMTP id jz10so4251559veb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jul 2013 13:23:31 -0700 (PDT)
-In-Reply-To: <CAA8043iF3GFwQLonGvCY=A=_mKWYX1zAXEYFFMJ1cyuw1ZOspw@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:37468 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754828Ab3GAVp3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jul 2013 17:45:29 -0400
+Received: from [10.8.0.22] (unknown [10.8.0.22])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 4676526394
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Jul 2013 23:45:27 +0200 (CEST)
+In-Reply-To: <51CF11A8.2070208@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: christophe courtaut <christophe.courtaut@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig4364B818BF8F230BDD3542D5
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jul 1, 2013 at 12:52 PM, christophe courtaut
-<christophe.courtaut@gmail.com> wrote:
-> Hi,
->
-> I updated my pull request and looking forward #5416, and asked for
-> more information on the tracker.
->
-> Nowadays, i'm iterating on the tracker to find issues i can fix.
-> I currently proposed fixes for #1779, #5228 and #5324.
+For the record,
 
-I pulled your fix for 1779. I commented on 5228 (a similar fix for
-that issue already went in, but your fix does some other things). I
-will pull 5324 (already commented on that at github).
+Sam suggested today that the chunks of a stripe ( an object if we limit o=
+urselves to full writes ) are written without deleting the chunks from a =
+previous version of the object. i.e. for instance
 
->
-> I'm not very familiar with tests, and it might be a little too big for
-> me to start with.
-> Btw, I was also in contact with Joe Buck to properly setup a fake cluster
-> suitable to make tests, as i was having trouble in doing that.
->
-> To get started, i'm looking for things a bit smaller, that could fit in a day.
->
-> I would be glad if you could point me to some specific tasks,
-> even if they are not specially related to the geo-replication blueprint,
-> the best for me remaining rgw related tasks as it's what i am trying to learn.
+object A1 contains "ABCDEFGHI" =3D> version 1 of the object is written as=
+ chunks "ABC" "DEF" "GHI" and "XYZ" parity on OSD1, OSD2, OSD3, OSD4 resp=
+ectively.
+object A1 is updated to "ABCDEF123" =3D> version 2 of the object is writt=
+en as chunks "ABC" "DEF" "123" and "KLM" parity on OSD1, OSD2, OSD3, OSD4=
+ respectively.
 
+At some point OSD3 contains both "GHI" ( chunk 3 object A1 version 1 ) an=
+d "123" ( chunk 3 object A1 version 2 ).
 
-Here are a few (ordered by complexity):
+When the PG receives an update of last_complete ( which should happen whe=
+n the PG becomes active ) it knows that all objects with a version lower =
+than last_complete can be discarded. It can then trim the objects stored =
+on the OSD that have a version older than last_complete. With ReplicatedP=
+G this does not need to be done because the new version of the object ove=
+rrides the previous one. It could be done together with pg_log trimming b=
+ut it would waste more disk space because the default log size it by defa=
+ult 3000 meaning a chunk would only be deleted from disk after 3000 pg_lo=
+g_entry were added to pg_log.=20
 
- - 3074 (trivial)
- - swift temp URLs (there's already a similar mechanism for S3)
- - 5374
- - 4365
+The object name does not currently contain the version number and this wo=
+uld need to be changed to avoid name clashes.
 
-Thanks!
-Yehuda
+Cheers
 
->
-> Best regards.
->
-> On Thu, Jun 27, 2013 at 5:25 PM, christophe courtaut
-> <christophe.courtaut@gmail.com> wrote:
->> ---------- Forwarded message ----------
->> From: Yehuda Sadeh <yehuda@inktank.com>
->> Date: Thu, Jun 27, 2013 at 5:21 PM
->> Subject: Re: Contribution
->> To: christophe courtaut <christophe.courtaut@gmail.com>
+On 29/06/2013 18:56, Loic Dachary wrote:
+> Hi Sage,
+>=20
+> The level of understanding of ReplicatedPG/PG/OSD required to sketch th=
+e path for implementing the erasure coding is beyond me at the moment. A =
+few hours of browsing demonstrated that a number of important areas are s=
+till unknown to me. A meaningfull example is probably the logic associate=
+d with=20
+>=20
+> struct AccessMode {
+>=20
+> https://github.com/ceph/ceph/blob/962b64a83037ff79855c5261325de0cd1541f=
+582/src/osd/ReplicatedPG.h#L114
+>=20
+> I suspect there are a number of similarities with the erasure code that=
+ would be relevant to ensure that a stripe is fully written to disk ( i.e=
+=2E in relation with the "ondisk" acknowledgment probably ) before removi=
+ng the previous version of the same stripe from all OSDs supporting it.
+>=20
+> The time spent during this exploration was not wasted, I learnt a few t=
+hings that will be useful :-) But I think it would be more useful for me =
+to work on a more modest task to move in the direction of the erasure cod=
+ing implementation.
+>=20
+> Cheers
+>=20
+> On 06/25/2013 07:41 PM, Loic Dachary wrote:
+>> Hi Sage,
 >>
+>> Paraphrasing what you suggested today :=20
 >>
->> On Thu, Jun 27, 2013 at 7:30 AM, christophe courtaut
->> <christophe.courtaut@gmail.com> wrote:
->>> Hi Yehuda,
->>>
->>> I went thru http://tracker.ceph.com/projects/rgw/issues today ( all 22
->>> of them ;-) and contributed a patch to
->>> http://tracker.ceph.com/issues/5324 ( that was an easy one ). I'd be
->>> happy to either fix more bugs on the current development branch or
->>> contribute to the geo-replication
->>> https://github.com/ceph/ceph/commits/wip-rgw-geo-2
->>>
->>> The amount of work going on with wip-rgw-geo is impressive and I'm not
->>> sure what I could do to help. It would be most convenient for me to
->>> pick from a list of self contained tasks in the tracker. I would be
->>> happy to spend a few days on each of them, one at a time. Since I'm
->>> still new to the code base, working on a tasks that would require
->>> weeks of work is probably too ambitious at this point. However, I very
->>> much understand that the definition of such tasks requires a fair
->>> amount of work on your part. And if noone works on these tasks, this
->>> would be a waste of your time. If that helps, I promise to diligently
->>> work on them, full time :-)
->>>
+>> The logic for writing a stripe ( i.e. all the chunks created by the er=
+asure encoding function for a given object or part of a given object if i=
+t exceeds the maximum size of a stripe ) for a single object is going to =
+be done in a way that is not the same as what we currently have for repli=
+cated objects. The object is consistent when all chunks ( or at least K i=
+f K+M ) are committed to disk. It may make sense to start writing all the=
+ chunks in parallel and when they are acknowledged, send a pg_log event t=
+hat says : now switch to this new version of the object. To avoid ending =
+up with chunks that are partially for one version of the object and other=
+ chunks partially for another version of the object and we can't repair a=
+ny of them.=20
 >>
->> Hi,
+>> I will try to sketch the path for implementing the erasure coding ( in=
+cluding the above ) by adding to https://github.com/dachary/ceph/blob/wip=
+-4929/doc/dev/osd_internals/erasure-code.rst
 >>
->>    I saw your pull request, and also commented on the commit. There's
->> a similar easy issue (#5416) that you can take a look at now if you'd
->> like.
->> I think that at the moment with regard to the geo-replication, the
->> most helpful thing would be to test the different APIs, make sure they
->> work as expected as we're on a tight schedule, and planning a feature
->> freeze by the end of next week.
->> The API specifications are in the wiki
->> (http://wiki.ceph.com/RESTful_API_for_DR_%2F%2F_Geo-Replication).
->> Specifically I'm interested in data sync, as it's the path less
->> tested. If you could simulate (even manually) a scenario, where you
->> put an object in a bucket, check to see whether bucket is listed in
->> the data log, then go to the bucket index log, see the change entry in
->> the bucket index log, then generate a copy of that object from the
->> master zone to the secondary zone. Look at the operation state log to
->> see whether this operation is marked as completed.
->> Check to see whether the object appears in the secondary zone, check
->> its attributes.
->> That tests a wide range of the new APIs, and it'll be really helpful.
->> If you could somewhat automate it and create a script that does it,
->> it'll be extra helpful.
+>> Cheers
 >>
->> Most of the other DR/geo-replication tasks are either done (waiting
->> for review and merge) or being implemented now. There are other
->> non-geo-replication issues that I can assign to you if you want to get
->> your feet dipped in the rgw code. Even if these are not a direct
->> geo-replication issues it may help us getting geo-replication out the
->> door faster as it'll free me to work on geo-replication. Let me know
->> if you're interested.
->>
->> Thanks!
->> Yehuda
->>
->>
->> --
->> Christophe Courtaut
->
->
->
-> --
-> Christophe Courtaut
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig4364B818BF8F230BDD3542D5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlHR+HUACgkQ8dLMyEl6F23xPgCeJ1rbE18PuJQ/5RoVZ85ltoRn
+7v8An0QxctiENkDGs0jo7GXaq1yxs+3+
+=y7oY
+-----END PGP SIGNATURE-----
+
+--------------enig4364B818BF8F230BDD3542D5--
