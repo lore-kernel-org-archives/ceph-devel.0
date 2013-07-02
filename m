@@ -1,64 +1,148 @@
-From: "Atchley, Scott" <atchleyes@ornl.gov>
-Subject: Re: Erasure coding library API
-Date: Tue, 2 Jul 2013 10:07:23 -0400
-Message-ID: <68444BDD-2068-4850-998D-C65449C20353@ornl.gov>
-References: <51D20A03.1030204@dachary.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply is received
+Date: Tue, 2 Jul 2013 22:27:46 +0800
+Message-ID: <CAAM7YAnnZC9f-R2r7XSqr6FwQk1f5ojkwcGQgy2gJdqEkfGxhA@mail.gmail.com>
+References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
+	<51D2D09D.8070808@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta02.ornl.gov ([128.219.177.12]:27760 "EHLO mta02.ornl.gov"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752055Ab3GBOQ5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 10:16:57 -0400
-In-Reply-To: <51D20A03.1030204@dachary.org>
-Content-Language: en-US
+Received: from mail-la0-f53.google.com ([209.85.215.53]:34312 "EHLO
+	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752811Ab3GBO1s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 10:27:48 -0400
+Received: by mail-la0-f53.google.com with SMTP id fs12so5682709lab.12
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jul 2013 07:27:46 -0700 (PDT)
+In-Reply-To: <51D2D09D.8070808@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alex Elder <alex.elder@linaro.org>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On Jul 1, 2013, at 7:00 PM, Loic Dachary <loic@dachary.org> wrote:
+On Tue, Jul 2, 2013 at 9:07 PM, Alex Elder <alex.elder@linaro.org> wrote:
+> On 06/24/2013 01:41 AM, Yan, Zheng wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>
+> Sorry it took so long, I intended to take a look at this
+> for you sooner.
+>
+> I would also like to thank you for this nice clear
+> description.  It made it very easy to understand
+> why you were proposing the change, and to focus in
+> on exactly which parts of the design it's affecting.
+>
+>> We can't use !req->r_sent to check if OSD request is sent for the
+>> first time, this is because __cancel_request() zeros req->r_sent
+>> when OSD map changes. Rather than adding a new variable to struct
+>
+> You're right.
+>
+>> ceph_osd_request to indicate if it's sent for the first time, We
+>> can call the unsafe callback only when unsafe OSD reply is received.
+>> If OSD's first reply is safe, just skip calling the unsafe callback.
+>
+> This seems reasonable, but it's different from the way I
+> thought about what constituted "unsafe."  But I may be
+> wrong, and the way this is used by the file system might
+> do something that addresses my concern.
+>
+> The way I interpreted "unsafe" was simply that it was possible
+> a write *could* have been made persistent, even if the client
+> doesn't know about it.  A request could have made it to its
+> target osd, been written, and the response could be in flight
+> at the point something (maybe a router?) crashes and the response
+> gets lost.  During that time window, the stored data may not be
+> in a state that's consistent with the client's view of it.
+>
+> So I thought of "unsafe" as meaning that a write is in flight,
+> and until we get a successful response, the storage might
+> contain the old data or it might contain the new data; the
+> client has no way of knowing which.
+>
+> With that interpretation, a request becomes unsafe the
+> instant it leaves the client, and becomes safe again
+> the instant a response arrives.
+>
+> If my interpretation is correct, this change is wrong.
+>
+> But I may be wrong, and there may really be no need to
+> worry about a possible modification of data until after
+> an acknowledgement response is received.  In that case,
+> I've looked at your patch and it looks good.
+>
+> Can you explain why I'm wrong about what is "unsafe?"
 
-> Hi,
-> 
-> Today Sam pointed out that the API for LRC ( Xorbas Hadoop Project Page, Locally Repairable Codes (LRC) http://smahesh.com/HadoopUSC/ for instance ) would need to be different from the one initialy proposed:
+I didn't say you are wrong.  the reason I changed the meaning of the
+unsafe callback is that the "unsafe' callback is only used for fsync(2).
+I think it's OK to change it as long as the change does not break
+fsync(2).
 
-An interesting video. Not as entertaining as Jim Plank's video. ;-)
+regards
+yan, zheng
 
-While Plank's focused on the processor requirements for encoding/decoding, this video focuses on the network and disk I/O requirements.
-
->    context(k, m, reed-solomon|...) => context* c 
->    encode(context* c, void* data) => void* chunks[k+m]
->    decode(context* c, void* chunk[k+m], int* indices_of_erased_chunks) => void* data // erased chunks are
-> not used
->    repair(context* c, void* chunk[k+m], int* indices_of_erased_chunks) => void* chunks[k+m] // erased
-> chunks are rebuilt
-> 
-> The decode function must allow for partial read:
-> 
->    decode(context* c, int offset, int length, void* chunk[k+m], int* indices_of_erased_chunks, int* missing_chunks) => void* data 
-> 
-> If there are not enough chunks to recover the desired data range [offset, offset+length) the function returns NULL and sets missing_chunks to the list of chunks that must be retrieved in order to be able to read the desired data.
-> 
-> If decode is called to read just 1 chunk and it is missing, reed-solomon would return on error and ask for all other chunks to repair. If the underlying library implements LRC, it would ask for a subset of the chunks. 
-> 
-> An implementation allowing only full reads and using jerasure ( which does not do LRC ) requires that offset is always zero, length is the size of the object and returns a copy of indices_of_erased_chunks if there are not enough chunks to rebuild the missing ones. 
-> 
-> Comments are welcome :-)
-
-I have loosely followed this discussion and I have not looked closely at the proposed API nor at the jerasure interface. My apologies if this has already been addressed.
-
-It is not clear to me from the above proposed API (ignoring the partial read) what it would do. Was the original intent to encode the entire file using k+m blocks irregardless of the file size and of the rados object size?
-
-If so, how will you map rados objects to the logical k+m objects and vice versa?
-
-If not, then the initial API needed an offset and length (either logical or rados object).
-
-I would assume that you would want to operate on rados sized objects. Given a fixed k+m, then you may have more than one set of k+m objects per file. This is ignoring the LRC "local" parity blocks. For example, if the rados object size if 1 MB and k = 10 and m = 4 (as in the Xorbas video), then for a 20 MB file one would need two sets of encoding blocks. The first for objects 1-10 and the second for objects 11-20.
-
-Perhaps, this is what the context is above. If so, it should have the logical offset and rados object size, no?
-
-I see value in the Xorbas concept and I wonder if the jerasure library can be modified to generate the local parity blocks such that they can be used to generate the global parity blocks. That would be a question for Jim Plank.
-
-Scott
+>
+>                                         -Alex
+>
+>> The purpose of unsafe callback is adding unsafe request to a list,
+>> so that fsync(2) can wait for the safe reply. fsync(2) doesn't need
+>> to wait for a write(2) that hasn't returned yet. So it's OK to add
+>> request to the unsafe list when the first OSD reply is received.
+>> (ceph_sync_write() returns after receiving the first OSD reply)
+>>
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> ---
+>>  net/ceph/osd_client.c | 14 +++++++-------
+>>  1 file changed, 7 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 540dd29..dd47889 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -1337,10 +1337,6 @@ static void __send_request(struct ceph_osd_client *osdc,
+>>
+>>       ceph_msg_get(req->r_request); /* send consumes a ref */
+>>
+>> -     /* Mark the request unsafe if this is the first timet's being sent. */
+>> -
+>> -     if (!req->r_sent && req->r_unsafe_callback)
+>> -             req->r_unsafe_callback(req, true);
+>>       req->r_sent = req->r_osd->o_incarnation;
+>>
+>>       ceph_con_send(&req->r_osd->o_con, req->r_request);
+>> @@ -1431,8 +1427,6 @@ static void handle_osds_timeout(struct work_struct *work)
+>>
+>>  static void complete_request(struct ceph_osd_request *req)
+>>  {
+>> -     if (req->r_unsafe_callback)
+>> -             req->r_unsafe_callback(req, false);
+>>       complete_all(&req->r_safe_completion);  /* fsync waiter */
+>>  }
+>>
+>> @@ -1559,14 +1553,20 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+>>       mutex_unlock(&osdc->request_mutex);
+>>
+>>       if (!already_completed) {
+>> +             if (req->r_unsafe_callback &&
+>> +                 result >= 0 && !(flags & CEPH_OSD_FLAG_ONDISK))
+>> +                     req->r_unsafe_callback(req, true);
+>>               if (req->r_callback)
+>>                       req->r_callback(req, msg);
+>>               else
+>>                       complete_all(&req->r_completion);
+>>       }
+>>
+>> -     if (flags & CEPH_OSD_FLAG_ONDISK)
+>> +     if (flags & CEPH_OSD_FLAG_ONDISK) {
+>> +             if (req->r_unsafe_callback && already_completed)
+>> +                     req->r_unsafe_callback(req, false);
+>>               complete_request(req);
+>> +     }
+>>
+>>  done:
+>>       dout("req=%p req->r_linger=%d\n", req, req->r_linger);
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
