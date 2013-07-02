@@ -1,152 +1,66 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/3] ceph: fix pending vmtruncate race
-Date: Tue, 2 Jul 2013 09:16:03 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307020914590.1067@cobra.newdream.net>
-References: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com>
+Subject: Re: [PATCH 2/3] ceph: fix cap revoke race
+Date: Tue, 2 Jul 2013 09:18:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307020918320.1067@cobra.newdream.net>
+References: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com> <1372740021-7980-2-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50915 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50966 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752776Ab3GBQQD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 12:16:03 -0400
-In-Reply-To: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com>
+	with ESMTP id S1752776Ab3GBQSk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 12:18:40 -0400
+In-Reply-To: <1372740021-7980-2-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zheng.z.yan@intel.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, 2 Jul 2013, Yan, Zheng wrote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> The locking order for pending vmtruncate is wrong, it can lead to
-> following race:
-> 
->         write                  wmtruncate work
-> ------------------------    ----------------------
-> lock i_mutex
-> check i_truncate_pending   check i_truncate_pending
-> truncate_inode_pages()     lock i_mutex (blocked)
-> copy data to page cache
-> unlock i_mutex
->                            truncate_inode_pages()
-> 
-> The fix is take i_mutex before calling __ceph_do_pending_vmtruncate()
-> 
-> Fixes: #5453
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/caps.c  |  6 +++++-
->  fs/ceph/file.c  |  2 +-
->  fs/ceph/inode.c | 14 ++++++--------
->  fs/ceph/super.h |  2 +-
->  4 files changed, 13 insertions(+), 11 deletions(-)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 8ec27b1..16266f3 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2057,7 +2057,11 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
->  	/* finish pending truncate */
->  	while (ci->i_truncate_pending) {
->  		spin_unlock(&ci->i_ceph_lock);
-> -		__ceph_do_pending_vmtruncate(inode, !(need & CEPH_CAP_FILE_WR));
-> +		if (!(need & CEPH_CAP_FILE_WR))
-> +			mutex_lock(&inode->i_mutex);
-> +		__ceph_do_pending_vmtruncate(inode);
-> +		if (!(need & CEPH_CAP_FILE_WR))
-> +			mutex_unlock(&inode->i_mutex);
-
-At some point I think we should make this implicit "if you need WR you 
-must have already locked i_mutex" behavior more explicit (locked_imutex 
-flag arg to try_get_cap_refs() maybe).  This is no worse than before, 
-though.
-
 Reviewed-by: Sage Weil <sage@inktank.com>
 
->  		spin_lock(&ci->i_ceph_lock);
+On Tue, 2 Jul 2013, Yan, Zheng wrote:
+
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> If caps are been revoking by the auth MDS, don't consider them as
+> issued even they are still issued by non-auth MDS. The non-auth
+> MDS should also be revoking/exporting these caps, the client just
+> hasn't received the cap revoke/export message.
+> 
+> The race I encountered is: When caps are exporting to new MDS, the
+> client receives cap import message and cap revoke message from the
+> new MDS, then receives cap export message from the old MDS. When
+> the client receives cap revoke message from the new MDS, the revoking
+> caps are still issued by the old MDS, so the client does nothing.
+> Later when the cap export message is received, the client removes
+> the caps issued by the old MDS. (Another way to fix the race is
+> calling ceph_check_caps() in handle_cap_export())
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/caps.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 16266f3..7045a8d 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -690,6 +690,15 @@ int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented)
+>  		if (implemented)
+>  			*implemented |= cap->implemented;
 >  	}
->  
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 7c69f4f..a44d515 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -822,7 +822,7 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
->  	int ret;
->  
->  	mutex_lock(&inode->i_mutex);
-> -	__ceph_do_pending_vmtruncate(inode, false);
-> +	__ceph_do_pending_vmtruncate(inode);
->  
->  	if (whence == SEEK_END || whence == SEEK_DATA || whence == SEEK_HOLE) {
->  		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index be0f7e2..4906ada 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1465,7 +1465,9 @@ static void ceph_vmtruncate_work(struct work_struct *work)
->  	struct inode *inode = &ci->vfs_inode;
->  
->  	dout("vmtruncate_work %p\n", inode);
-> -	__ceph_do_pending_vmtruncate(inode, true);
-> +	mutex_lock(&inode->i_mutex);
-> +	__ceph_do_pending_vmtruncate(inode);
-> +	mutex_unlock(&inode->i_mutex);
->  	iput(inode);
+> +	/*
+> +	 * exclude caps issued by non-auth MDS, but are been revoking
+> +	 * by the auth MDS. The non-auth MDS should be revoking/exporting
+> +	 * these caps, but the message is delayed.
+> +	 */
+> +	if (ci->i_auth_cap) {
+> +		cap = ci->i_auth_cap;
+> +		have &= ~cap->implemented | cap->issued;
+> +	}
+>  	return have;
 >  }
 >  
-> @@ -1492,7 +1494,7 @@ void ceph_queue_vmtruncate(struct inode *inode)
->   * Make sure any pending truncation is applied before doing anything
->   * that may depend on it.
->   */
-> -void __ceph_do_pending_vmtruncate(struct inode *inode, bool needlock)
-> +void __ceph_do_pending_vmtruncate(struct inode *inode)
->  {
->  	struct ceph_inode_info *ci = ceph_inode(inode);
->  	u64 to;
-> @@ -1525,11 +1527,7 @@ retry:
->  	     ci->i_truncate_pending, to);
->  	spin_unlock(&ci->i_ceph_lock);
->  
-> -	if (needlock)
-> -		mutex_lock(&inode->i_mutex);
->  	truncate_inode_pages(inode->i_mapping, to);
-> -	if (needlock)
-> -		mutex_unlock(&inode->i_mutex);
->  
->  	spin_lock(&ci->i_ceph_lock);
->  	if (to == ci->i_truncate_size) {
-> @@ -1588,7 +1586,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->  	if (ceph_snap(inode) != CEPH_NOSNAP)
->  		return -EROFS;
->  
-> -	__ceph_do_pending_vmtruncate(inode, false);
-> +	__ceph_do_pending_vmtruncate(inode);
->  
->  	err = inode_change_ok(inode, attr);
->  	if (err != 0)
-> @@ -1770,7 +1768,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->  	     ceph_cap_string(dirtied), mask);
->  
->  	ceph_mdsc_put_request(req);
-> -	__ceph_do_pending_vmtruncate(inode, false);
-> +	__ceph_do_pending_vmtruncate(inode);
->  	return err;
->  out:
->  	spin_unlock(&ci->i_ceph_lock);
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index dfbb729..cbded57 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -692,7 +692,7 @@ extern int ceph_readdir_prepopulate(struct ceph_mds_request *req,
->  extern int ceph_inode_holds_cap(struct inode *inode, int mask);
->  
->  extern int ceph_inode_set_size(struct inode *inode, loff_t size);
-> -extern void __ceph_do_pending_vmtruncate(struct inode *inode, bool needlock);
-> +extern void __ceph_do_pending_vmtruncate(struct inode *inode);
->  extern void ceph_queue_vmtruncate(struct inode *inode);
->  
->  extern void ceph_queue_invalidate(struct inode *inode);
 > -- 
 > 1.8.1.4
 > 
