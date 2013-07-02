@@ -1,67 +1,41 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [RFC PATCH] ceph: send the ctime of file/snap when send a cap msg.
-Date: Tue, 2 Jul 2013 17:29:15 +0800
-Message-ID: <201307021700280328740@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Simon Leinen <simon.leinen@switch.ch>
+Subject: [PATCH] mds: man page: Fixed probable cut & paste error
+Date: Tue, 2 Jul 2013 13:44:41 +0200
+Message-ID: <20946.48425.471856.153193@Simons-MacBook-Air-34571.local>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:49459 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753623Ab3GBJ3S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 05:29:18 -0400
+Received: from presunto.switch.ch ([130.59.138.52]:50964 "EHLO
+	presunto.switch.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751085Ab3GBLuG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 07:50:06 -0400
+Received: from albris.switch.ch (albris.switch.ch [IPv6:2001:620:0:a::8])
+	by presunto.switch.ch (8.14.3/8.14.3/Debian-9.4) with ESMTP id r62BieaD014531
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Tue, 2 Jul 2013 13:44:41 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Tm93LHdoZW4gc2VudCBhIGNhcCBtc2cgdG8gaW5vZGUvc25hcCwgaXQgZG9uJ3QgaW5jbHVkZSB0
-aGUgY3RpbWUgb2YNCmlub2RlL3NuYXAuU28gbWFrZSB0aGUgbXRpbWUgYWhlYWQgb2YgY3RpbWUu
-DQoNCkJUWSxmb3Igc25hcCwgaSdtIG5vdCBleGFjdGx5IHNlbmQgdGhlIGN0aW1lIG9mIHNuYXAg
-b3IgbnVsbC4NCg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwu
-Y29tPg0KLS0tDQogZnMvY2VwaC9jYXBzLmMgfCAxMSArKysrKysrLS0tLQ0KIDEgZmlsZSBjaGFu
-Z2VkLCA3IGluc2VydGlvbnMoKyksIDQgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9mcy9j
-ZXBoL2NhcHMuYyBiL2ZzL2NlcGgvY2Fwcy5jDQppbmRleCBkYTBmOWI4Li44NzM1MTA4IDEwMDY0
-NA0KLS0tIGEvZnMvY2VwaC9jYXBzLmMNCisrKyBiL2ZzL2NlcGgvY2Fwcy5jDQpAQCAtOTQzLDcg
-Kzk0Myw3IEBAIHN0YXRpYyBpbnQgc2VuZF9jYXBfbXNnKHN0cnVjdCBjZXBoX21kc19zZXNzaW9u
-ICpzZXNzaW9uLA0KIAkJCXUzMiBzZXEsIHU2NCBmbHVzaF90aWQsIHUzMiBpc3N1ZV9zZXEsIHUz
-MiBtc2VxLA0KIAkJCXU2NCBzaXplLCB1NjQgbWF4X3NpemUsDQogCQkJc3RydWN0IHRpbWVzcGVj
-ICptdGltZSwgc3RydWN0IHRpbWVzcGVjICphdGltZSwNCi0JCQl1NjQgdGltZV93YXJwX3NlcSwN
-CisJCQlzdHJ1Y3QgdGltZXNwZWMgKmN0aW1lLCB1NjQgdGltZV93YXJwX3NlcSwNCiAJCQlrdWlk
-X3QgdWlkLCBrZ2lkX3QgZ2lkLCB1bW9kZV90IG1vZGUsDQogCQkJdTY0IHhhdHRyX3ZlcnNpb24s
-DQogCQkJc3RydWN0IGNlcGhfYnVmZmVyICp4YXR0cnNfYnVmLA0KQEAgLTk4Niw2ICs5ODYsOCBA
-QCBzdGF0aWMgaW50IHNlbmRfY2FwX21zZyhzdHJ1Y3QgY2VwaF9tZHNfc2Vzc2lvbiAqc2Vzc2lv
-biwNCiAJCWNlcGhfZW5jb2RlX3RpbWVzcGVjKCZmYy0+bXRpbWUsIG10aW1lKTsNCiAJaWYgKGF0
-aW1lKQ0KIAkJY2VwaF9lbmNvZGVfdGltZXNwZWMoJmZjLT5hdGltZSwgYXRpbWUpOw0KKwlpZiAo
-Y3RpbWUpDQorCQljZXBoX2VuY29kZV90aW1lc3BlYygmZmMtPmN0aW1lLCBjdGltZSk7DQogCWZj
-LT50aW1lX3dhcnBfc2VxID0gY3B1X3RvX2xlMzIodGltZV93YXJwX3NlcSk7DQogDQogCWZjLT51
-aWQgPSBjcHVfdG9fbGUzMihmcm9tX2t1aWQoJmluaXRfdXNlcl9ucywgdWlkKSk7DQpAQCAtMTA5
-Miw3ICsxMDk0LDcgQEAgc3RhdGljIGludCBfX3NlbmRfY2FwKHN0cnVjdCBjZXBoX21kc19jbGll
-bnQgKm1kc2MsIHN0cnVjdCBjZXBoX2NhcCAqY2FwLA0KIAlpbnQgaGVsZCwgcmV2b2tpbmcsIGRy
-b3BwaW5nLCBrZWVwOw0KIAl1NjQgc2VxLCBpc3N1ZV9zZXEsIG1zZXEsIHRpbWVfd2FycF9zZXEs
-IGZvbGxvd3M7DQogCXU2NCBzaXplLCBtYXhfc2l6ZTsNCi0Jc3RydWN0IHRpbWVzcGVjIG10aW1l
-LCBhdGltZTsNCisJc3RydWN0IHRpbWVzcGVjIG10aW1lLCBhdGltZSwgY3RpbWU7DQogCWludCB3
-YWtlID0gMDsNCiAJdW1vZGVfdCBtb2RlOw0KIAlrdWlkX3QgdWlkOw0KQEAgLTExNzYsNiArMTE3
-OCw3IEBAIHN0YXRpYyBpbnQgX19zZW5kX2NhcChzdHJ1Y3QgY2VwaF9tZHNfY2xpZW50ICptZHNj
-LCBzdHJ1Y3QgY2VwaF9jYXAgKmNhcCwNCiAJY2ktPmlfcmVxdWVzdGVkX21heF9zaXplID0gbWF4
-X3NpemU7DQogCW10aW1lID0gaW5vZGUtPmlfbXRpbWU7DQogCWF0aW1lID0gaW5vZGUtPmlfYXRp
-bWU7DQorCWN0aW1lID0gaW5vZGUtPmlfY3RpbWU7DQogCXRpbWVfd2FycF9zZXEgPSBjaS0+aV90
-aW1lX3dhcnBfc2VxOw0KIAl1aWQgPSBpbm9kZS0+aV91aWQ7DQogCWdpZCA9IGlub2RlLT5pX2dp
-ZDsNCkBAIC0xMTkxLDcgKzExOTQsNyBAQCBzdGF0aWMgaW50IF9fc2VuZF9jYXAoc3RydWN0IGNl
-cGhfbWRzX2NsaWVudCAqbWRzYywgc3RydWN0IGNlcGhfY2FwICpjYXAsDQogDQogCXJldCA9IHNl
-bmRfY2FwX21zZyhzZXNzaW9uLCBjZXBoX3Zpbm8oaW5vZGUpLmlubywgY2FwX2lkLA0KIAkJb3As
-IGtlZXAsIHdhbnQsIGZsdXNoaW5nLCBzZXEsIGZsdXNoX3RpZCwgaXNzdWVfc2VxLCBtc2VxLA0K
-LQkJc2l6ZSwgbWF4X3NpemUsICZtdGltZSwgJmF0aW1lLCB0aW1lX3dhcnBfc2VxLA0KKwkJc2l6
-ZSwgbWF4X3NpemUsICZtdGltZSwgJmF0aW1lLCAmY3RpbWUsIHRpbWVfd2FycF9zZXEsDQogCQl1
-aWQsIGdpZCwgbW9kZSwgeGF0dHJfdmVyc2lvbiwgeGF0dHJfYmxvYiwNCiAJCWZvbGxvd3MpOw0K
-IAlpZiAocmV0IDwgMCkgew0KQEAgLTEzMTAsNyArMTMxMyw3IEBAIHJldHJ5Og0KIAkJCSAgICAg
-Q0VQSF9DQVBfT1BfRkxVU0hTTkFQLCBjYXBzbmFwLT5pc3N1ZWQsIDAsDQogCQkJICAgICBjYXBz
-bmFwLT5kaXJ0eSwgMCwgY2Fwc25hcC0+Zmx1c2hfdGlkLCAwLCBtc2VxLA0KIAkJCSAgICAgY2Fw
-c25hcC0+c2l6ZSwgMCwNCi0JCQkgICAgICZjYXBzbmFwLT5tdGltZSwgJmNhcHNuYXAtPmF0aW1l
-LA0KKwkJCSAgICAgJmNhcHNuYXAtPm10aW1lLCAmY2Fwc25hcC0+YXRpbWUsICZjYXBzbmFwLT5j
-dGltZSwNCiAJCQkgICAgIGNhcHNuYXAtPnRpbWVfd2FycF9zZXEsDQogCQkJICAgICBjYXBzbmFw
-LT51aWQsIGNhcHNuYXAtPmdpZCwgY2Fwc25hcC0+bW9kZSwNCiAJCQkgICAgIGNhcHNuYXAtPnhh
-dHRyX3ZlcnNpb24sIGNhcHNuYXAtPnhhdHRyX2Jsb2IsDQotLSANCjEuOC4xLjINCg==
+---
+ man/ceph-mds.8 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/man/ceph-mds.8 b/man/ceph-mds.8
+index 0d34f75..5399308 100644
+--- a/man/ceph-mds.8
++++ b/man/ceph-mds.8
+@@ -81,7 +81,7 @@ Connect to specified monitor (instead of looking through
+ .UNINDENT
+ .SH AVAILABILITY
+ .sp
+-\fBceph\-mon\fP is part of the Ceph distributed file system. Please refer to the Ceph documentation at
++\fBceph\-mds\fP is part of the Ceph distributed file system. Please refer to the Ceph documentation at
+ \fI\%http://ceph.com/docs\fP for more information.
+ .SH SEE ALSO
+ .sp
+-- 
+1.8.1.2
+
+	Signed-off-by: Simon Leinen <simon.leinen@switch.ch>
