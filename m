@@ -1,93 +1,79 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 3/3] ceph: fix race between cap issue and revoke
-Date: Tue, 2 Jul 2013 09:40:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307020939560.1067@cobra.newdream.net>
-References: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com> <1372740021-7980-3-git-send-email-zheng.z.yan@intel.com>
+Subject: Re: [PATCH 1/3] mds: update atime if client can read.
+Date: Tue, 2 Jul 2013 09:48:18 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307020946520.1067@cobra.newdream.net>
+References: <201307021345090019137@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51155 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752430Ab3GBQkC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 12:40:02 -0400
-In-Reply-To: <1372740021-7980-3-git-send-email-zheng.z.yan@intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201307021345090019137@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+On Tue, 2 Jul 2013, majianpeng wrote:
+> Now, update atime only for CEPH_CAP_FILE_EXCL.Change this if
+> CEPH_CAP_FILE_RD.
 
-On Tue, 2 Jul 2013, Yan, Zheng wrote:
+Can we introduce a global config optoin (bool mds_atime in 
+common/config_opts.h, maybe) so that users can turn this off?  And/or add 
+a 'relatime' option?  More users won't want this as it is very expensive 
+to maintain this extra level of metadata.
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> If we receive new caps from the auth MDS and the non-auth MDS is
-> revoking the newly issued caps, we should release the caps from
-> the non-auth MDS. The scenario is filelock's state changes from
-> SYNC to LOCK. Non-auth MDS revokes Fc cap, the client gets Fc cap
-> from the auth MDS at the same time.
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+That aside, this approach looks right to me. :)
+
+Thanks!
+sage
+
+
+ > 
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
 > ---
->  fs/ceph/caps.c | 29 ++++++++++++++++++++---------
->  1 file changed, 20 insertions(+), 9 deletions(-)
+>  src/mds/Locker.cc | 15 +++++++++------
+>  1 file changed, 9 insertions(+), 6 deletions(-)
 > 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 7045a8d..25442b4 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -806,22 +806,28 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
->  /*
->   * Return true if mask caps are currently being revoked by an MDS.
->   */
-> -int ceph_caps_revoking(struct ceph_inode_info *ci, int mask)
-> +int __ceph_caps_revoking_other(struct ceph_inode_info *ci,
-> +			       struct ceph_cap *ocap, int mask)
+> diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+> index 30e014a..58f953f 100644
+> --- a/src/mds/Locker.cc
+> +++ b/src/mds/Locker.cc
+> @@ -2676,8 +2676,9 @@ void Locker::_do_snap_update(CInode *in, snapid_t snap, int dirty, snapid_t foll
+>  void Locker::_update_cap_fields(CInode *in, int dirty, MClientCaps *m, inode_t *pi)
 >  {
-> -	struct inode *inode = &ci->vfs_inode;
->  	struct ceph_cap *cap;
->  	struct rb_node *p;
-> -	int ret = 0;
->  
-> -	spin_lock(&ci->i_ceph_lock);
->  	for (p = rb_first(&ci->i_caps); p; p = rb_next(p)) {
->  		cap = rb_entry(p, struct ceph_cap, ci_node);
-> -		if (__cap_is_valid(cap) &&
-> -		    (cap->implemented & ~cap->issued & mask)) {
-> -			ret = 1;
-> -			break;
-> -		}
-> +		if (cap != ocap && __cap_is_valid(cap) &&
-> +		    (cap->implemented & ~cap->issued & mask))
-> +			return 1;
->  	}
-> +	return 0;
-> +}
+>    // file
+> +  utime_t atime = m->get_atime();
 > +
-> +int ceph_caps_revoking(struct ceph_inode_info *ci, int mask)
-> +{
-> +	struct inode *inode = &ci->vfs_inode;
-> +	int ret;
-> +
-> +	spin_lock(&ci->i_ceph_lock);
-> +	ret = __ceph_caps_revoking_other(ci, NULL, mask);
->  	spin_unlock(&ci->i_ceph_lock);
->  	dout("ceph_caps_revoking %p %s = %d\n", inode,
->  	     ceph_cap_string(mask), ret);
-> @@ -2488,6 +2494,11 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
->  	} else {
->  		dout("grant: %s -> %s\n", ceph_cap_string(cap->issued),
->  		     ceph_cap_string(newcaps));
-> +		/* non-auth MDS is revoking the newly grant caps ? */
-> +		if (cap == ci->i_auth_cap &&
-> +		    __ceph_caps_revoking_other(ci, cap, newcaps))
-> +		    check_caps = 2;
-> +
->  		cap->issued = newcaps;
->  		cap->implemented |= newcaps; /* add bits only, to
->  					      * avoid stepping on a
+>    if (dirty & (CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
+> -    utime_t atime = m->get_atime();
+>      utime_t mtime = m->get_mtime();
+>      utime_t ctime = m->get_ctime();
+>      uint64_t size = m->get_size();
+> @@ -2700,11 +2701,7 @@ void Locker::_update_cap_fields(CInode *in, int dirty, MClientCaps *m, inode_t *
+>        pi->size = size;
+>        pi->rstat.rbytes = size;
+>      }
+> -    if ((dirty & CEPH_CAP_FILE_EXCL) && atime != pi->atime) {
+> -      dout(7) << "  atime " << pi->atime << " -> " << atime
+> -	      << " for " << *in << dendl;
+> -      pi->atime = atime;
+> -    }
+> +    
+>      if ((dirty & CEPH_CAP_FILE_EXCL) &&
+>  	ceph_seq_cmp(pi->time_warp_seq, m->get_time_warp_seq()) < 0) {
+>        dout(7) << "  time_warp_seq " << pi->time_warp_seq << " -> " << m->get_time_warp_seq()
+> @@ -2712,6 +2709,12 @@ void Locker::_update_cap_fields(CInode *in, int dirty, MClientCaps *m, inode_t *
+>        pi->time_warp_seq = m->get_time_warp_seq();
+>      }
+>    }
+> +  
+> +  if ((dirty & CEPH_CAP_FILE_RD) && atime > pi->atime) {
+> +      dout(7) << "  atime " << pi->atime << " -> " << atime
+> +	      << " for " << *in << dendl;
+> +      pi->atime = atime;
+> +  }
+>    // auth
+>    if (dirty & CEPH_CAP_AUTH_EXCL) {
+>      if (m->head.uid != pi->uid) {
 > -- 
-> 1.8.1.4
-> 
+> 1.8.3.rc1.44.gb387c77
 > 
