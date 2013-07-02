@@ -1,16 +1,16 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/3] ceph: fix cap revoke race
-Date: Tue, 2 Jul 2013 09:18:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307020918320.1067@cobra.newdream.net>
-References: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com> <1372740021-7980-2-git-send-email-zheng.z.yan@intel.com>
+Subject: Re: [PATCH 3/3] ceph: fix race between cap issue and revoke
+Date: Tue, 2 Jul 2013 09:40:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307020939560.1067@cobra.newdream.net>
+References: <1372740021-7980-1-git-send-email-zheng.z.yan@intel.com> <1372740021-7980-3-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50966 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:51155 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752776Ab3GBQSk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 12:18:40 -0400
-In-Reply-To: <1372740021-7980-2-git-send-email-zheng.z.yan@intel.com>
+	with ESMTP id S1752430Ab3GBQkC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 12:40:02 -0400
+In-Reply-To: <1372740021-7980-3-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zheng.z.yan@intel.com>
@@ -22,45 +22,71 @@ On Tue, 2 Jul 2013, Yan, Zheng wrote:
 
 > From: "Yan, Zheng" <zheng.z.yan@intel.com>
 > 
-> If caps are been revoking by the auth MDS, don't consider them as
-> issued even they are still issued by non-auth MDS. The non-auth
-> MDS should also be revoking/exporting these caps, the client just
-> hasn't received the cap revoke/export message.
-> 
-> The race I encountered is: When caps are exporting to new MDS, the
-> client receives cap import message and cap revoke message from the
-> new MDS, then receives cap export message from the old MDS. When
-> the client receives cap revoke message from the new MDS, the revoking
-> caps are still issued by the old MDS, so the client does nothing.
-> Later when the cap export message is received, the client removes
-> the caps issued by the old MDS. (Another way to fix the race is
-> calling ceph_check_caps() in handle_cap_export())
+> If we receive new caps from the auth MDS and the non-auth MDS is
+> revoking the newly issued caps, we should release the caps from
+> the non-auth MDS. The scenario is filelock's state changes from
+> SYNC to LOCK. Non-auth MDS revokes Fc cap, the client gets Fc cap
+> from the auth MDS at the same time.
 > 
 > Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 > ---
->  fs/ceph/caps.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
+>  fs/ceph/caps.c | 29 ++++++++++++++++++++---------
+>  1 file changed, 20 insertions(+), 9 deletions(-)
 > 
 > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 16266f3..7045a8d 100644
+> index 7045a8d..25442b4 100644
 > --- a/fs/ceph/caps.c
 > +++ b/fs/ceph/caps.c
-> @@ -690,6 +690,15 @@ int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented)
->  		if (implemented)
->  			*implemented |= cap->implemented;
->  	}
-> +	/*
-> +	 * exclude caps issued by non-auth MDS, but are been revoking
-> +	 * by the auth MDS. The non-auth MDS should be revoking/exporting
-> +	 * these caps, but the message is delayed.
-> +	 */
-> +	if (ci->i_auth_cap) {
-> +		cap = ci->i_auth_cap;
-> +		have &= ~cap->implemented | cap->issued;
-> +	}
->  	return have;
->  }
+> @@ -806,22 +806,28 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
+>  /*
+>   * Return true if mask caps are currently being revoked by an MDS.
+>   */
+> -int ceph_caps_revoking(struct ceph_inode_info *ci, int mask)
+> +int __ceph_caps_revoking_other(struct ceph_inode_info *ci,
+> +			       struct ceph_cap *ocap, int mask)
+>  {
+> -	struct inode *inode = &ci->vfs_inode;
+>  	struct ceph_cap *cap;
+>  	struct rb_node *p;
+> -	int ret = 0;
 >  
+> -	spin_lock(&ci->i_ceph_lock);
+>  	for (p = rb_first(&ci->i_caps); p; p = rb_next(p)) {
+>  		cap = rb_entry(p, struct ceph_cap, ci_node);
+> -		if (__cap_is_valid(cap) &&
+> -		    (cap->implemented & ~cap->issued & mask)) {
+> -			ret = 1;
+> -			break;
+> -		}
+> +		if (cap != ocap && __cap_is_valid(cap) &&
+> +		    (cap->implemented & ~cap->issued & mask))
+> +			return 1;
+>  	}
+> +	return 0;
+> +}
+> +
+> +int ceph_caps_revoking(struct ceph_inode_info *ci, int mask)
+> +{
+> +	struct inode *inode = &ci->vfs_inode;
+> +	int ret;
+> +
+> +	spin_lock(&ci->i_ceph_lock);
+> +	ret = __ceph_caps_revoking_other(ci, NULL, mask);
+>  	spin_unlock(&ci->i_ceph_lock);
+>  	dout("ceph_caps_revoking %p %s = %d\n", inode,
+>  	     ceph_cap_string(mask), ret);
+> @@ -2488,6 +2494,11 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  	} else {
+>  		dout("grant: %s -> %s\n", ceph_cap_string(cap->issued),
+>  		     ceph_cap_string(newcaps));
+> +		/* non-auth MDS is revoking the newly grant caps ? */
+> +		if (cap == ci->i_auth_cap &&
+> +		    __ceph_caps_revoking_other(ci, cap, newcaps))
+> +		    check_caps = 2;
+> +
+>  		cap->issued = newcaps;
+>  		cap->implemented |= newcaps; /* add bits only, to
+>  					      * avoid stepping on a
 > -- 
 > 1.8.1.4
 > 
