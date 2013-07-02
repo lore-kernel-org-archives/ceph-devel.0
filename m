@@ -1,41 +1,135 @@
-From: Simon Leinen <simon.leinen@switch.ch>
-Subject: [PATCH] mds: man page: Fixed probable cut & paste error
-Date: Tue, 2 Jul 2013 13:44:41 +0200
-Message-ID: <20946.48425.471856.153193@Simons-MacBook-Air-34571.local>
+From: Alex Elder <alex.elder@linaro.org>
+Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply
+ is received
+Date: Tue, 02 Jul 2013 08:07:41 -0500
+Message-ID: <51D2D09D.8070808@linaro.org>
+References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from presunto.switch.ch ([130.59.138.52]:50964 "EHLO
-	presunto.switch.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751085Ab3GBLuG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 07:50:06 -0400
-Received: from albris.switch.ch (albris.switch.ch [IPv6:2001:620:0:a::8])
-	by presunto.switch.ch (8.14.3/8.14.3/Debian-9.4) with ESMTP id r62BieaD014531
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Tue, 2 Jul 2013 13:44:41 +0200
+Received: from mail-ie0-f173.google.com ([209.85.223.173]:44022 "EHLO
+	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751691Ab3GBNHm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 09:07:42 -0400
+Received: by mail-ie0-f173.google.com with SMTP id k13so12387018iea.32
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jul 2013 06:07:41 -0700 (PDT)
+In-Reply-To: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
----
- man/ceph-mds.8 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On 06/24/2013 01:41 AM, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-diff --git a/man/ceph-mds.8 b/man/ceph-mds.8
-index 0d34f75..5399308 100644
---- a/man/ceph-mds.8
-+++ b/man/ceph-mds.8
-@@ -81,7 +81,7 @@ Connect to specified monitor (instead of looking through
- .UNINDENT
- .SH AVAILABILITY
- .sp
--\fBceph\-mon\fP is part of the Ceph distributed file system. Please refer to the Ceph documentation at
-+\fBceph\-mds\fP is part of the Ceph distributed file system. Please refer to the Ceph documentation at
- \fI\%http://ceph.com/docs\fP for more information.
- .SH SEE ALSO
- .sp
--- 
-1.8.1.2
+Sorry it took so long, I intended to take a look at this
+for you sooner.
 
-	Signed-off-by: Simon Leinen <simon.leinen@switch.ch>
+I would also like to thank you for this nice clear
+description.  It made it very easy to understand
+why you were proposing the change, and to focus in
+on exactly which parts of the design it's affecting.
+
+> We can't use !req->r_sent to check if OSD request is sent for the
+> first time, this is because __cancel_request() zeros req->r_sent
+> when OSD map changes. Rather than adding a new variable to struct
+
+You're right.
+
+> ceph_osd_request to indicate if it's sent for the first time, We
+> can call the unsafe callback only when unsafe OSD reply is received.
+> If OSD's first reply is safe, just skip calling the unsafe callback.
+
+This seems reasonable, but it's different from the way I
+thought about what constituted "unsafe."  But I may be
+wrong, and the way this is used by the file system might
+do something that addresses my concern.
+
+The way I interpreted "unsafe" was simply that it was possible
+a write *could* have been made persistent, even if the client
+doesn't know about it.  A request could have made it to its
+target osd, been written, and the response could be in flight
+at the point something (maybe a router?) crashes and the response
+gets lost.  During that time window, the stored data may not be
+in a state that's consistent with the client's view of it.
+
+So I thought of "unsafe" as meaning that a write is in flight,
+and until we get a successful response, the storage might
+contain the old data or it might contain the new data; the
+client has no way of knowing which.
+
+With that interpretation, a request becomes unsafe the
+instant it leaves the client, and becomes safe again
+the instant a response arrives.
+
+If my interpretation is correct, this change is wrong.
+
+But I may be wrong, and there may really be no need to
+worry about a possible modification of data until after
+an acknowledgement response is received.  In that case,
+I've looked at your patch and it looks good.
+
+Can you explain why I'm wrong about what is "unsafe?"
+
+					-Alex
+
+> The purpose of unsafe callback is adding unsafe request to a list,
+> so that fsync(2) can wait for the safe reply. fsync(2) doesn't need
+> to wait for a write(2) that hasn't returned yet. So it's OK to add
+> request to the unsafe list when the first OSD reply is received.
+> (ceph_sync_write() returns after receiving the first OSD reply)
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  net/ceph/osd_client.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 540dd29..dd47889 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1337,10 +1337,6 @@ static void __send_request(struct ceph_osd_client *osdc,
+>  
+>  	ceph_msg_get(req->r_request); /* send consumes a ref */
+>  
+> -	/* Mark the request unsafe if this is the first timet's being sent. */
+> -
+> -	if (!req->r_sent && req->r_unsafe_callback)
+> -		req->r_unsafe_callback(req, true);
+>  	req->r_sent = req->r_osd->o_incarnation;
+>  
+>  	ceph_con_send(&req->r_osd->o_con, req->r_request);
+> @@ -1431,8 +1427,6 @@ static void handle_osds_timeout(struct work_struct *work)
+>  
+>  static void complete_request(struct ceph_osd_request *req)
+>  {
+> -	if (req->r_unsafe_callback)
+> -		req->r_unsafe_callback(req, false);
+>  	complete_all(&req->r_safe_completion);  /* fsync waiter */
+>  }
+>  
+> @@ -1559,14 +1553,20 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
+>  	mutex_unlock(&osdc->request_mutex);
+>  
+>  	if (!already_completed) {
+> +		if (req->r_unsafe_callback &&
+> +		    result >= 0 && !(flags & CEPH_OSD_FLAG_ONDISK))
+> +			req->r_unsafe_callback(req, true);
+>  		if (req->r_callback)
+>  			req->r_callback(req, msg);
+>  		else
+>  			complete_all(&req->r_completion);
+>  	}
+>  
+> -	if (flags & CEPH_OSD_FLAG_ONDISK)
+> +	if (flags & CEPH_OSD_FLAG_ONDISK) {
+> +		if (req->r_unsafe_callback && already_completed)
+> +			req->r_unsafe_callback(req, false);
+>  		complete_request(req);
+> +	}
+>  
+>  done:
+>  	dout("req=%p req->r_linger=%d\n", req, req->r_linger);
+> 
+
