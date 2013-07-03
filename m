@@ -1,64 +1,164 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH 1/3] mds: update atime if client can read.
-Date: Wed, 3 Jul 2013 09:25:39 +0800
-Message-ID: <201307030925331606702@gmail.com>
-References: <201307021345090019137@gmail.com>,
-	<alpine.DEB.2.00.1307020946520.1067@cobra.newdream.net>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: Erasure coding library API
+Date: Tue, 2 Jul 2013 19:12:44 -0700
+Message-ID: <622F4407872BA447A16110F65453358C01A4D8067419@FMSAMAIL.fmsa.local>
+References: <51D20A03.1030204@dachary.org>
+	<68444BDD-2068-4850-998D-C65449C20353@ornl.gov>
+	<14B8F72D-C792-4829-9F9B-1175CB27F3EA@ornl.gov>
+ <CA+4uBUavSx4SKYB0BQbqz+NqPTy2_WYiFTUWSAXcSJQzJQ9TGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from fujitsu25.fnanic.fujitsu.com ([192.240.6.15]:52153 "EHLO
+	fujitsu25.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751634Ab3GCCJY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jul 2013 22:09:24 -0400
+In-Reply-To: <CA+4uBUavSx4SKYB0BQbqz+NqPTy2_WYiFTUWSAXcSJQzJQ9TGQ@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>, "Atchley, Scott" <atchleyes@ornl.gov>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Pk9uIFR1ZSwgMiBKdWwgMjAxMywgbWFqaWFucGVuZyB3cm90ZToNCj4+IE5vdywgdXBkYXRlIGF0
-aW1lIG9ubHkgZm9yIENFUEhfQ0FQX0ZJTEVfRVhDTC5DaGFuZ2UgdGhpcyBpZg0KPj4gQ0VQSF9D
-QVBfRklMRV9SRC4NCj4NCj5DYW4gd2UgaW50cm9kdWNlIGEgZ2xvYmFsIGNvbmZpZyBvcHRvaW4g
-KGJvb2wgbWRzX2F0aW1lIGluIA0KPmNvbW1vbi9jb25maWdfb3B0cy5oLCBtYXliZSkgc28gdGhh
-dCB1c2VycyBjYW4gdHVybiB0aGlzIG9mZj8gIEFuZC9vciBhZGQgDQo+YSAncmVsYXRpbWUnIG9w
-dGlvbj8gIE1vcmUgdXNlcnMgd29uJ3Qgd2FudCB0aGlzIGFzIGl0IGlzIHZlcnkgZXhwZW5zaXZl
-IA0KPnRvIG1haW50YWluIHRoaXMgZXh0cmEgbGV2ZWwgb2YgbWV0YWRhdGEuDQo+DQpJIGRvbid0
-IGtub3cgb3RoZXIgY2xpZW50IGV4Y2VwdCBjZXBoZnMuU28gdGhlIHBhdGNoIGlzIGZyb20gdGhl
-IHZpZXcgb2YgdXNpbmcgY2VwaGZzLg0KRm9yIGNlcGhmcyx3ZSBjYW4gbW91bnQgdXNpbmcgJ25v
-YXRpbWUnIHRvIGluZGljYXRlIGRvbid0IHVwZGF0ZSBhdGltZS4NCkJ1dCBmb3IgdGhlIG90aGVy
-IGNsaWVudCwgaSBkb24ndCBrbm93Lg0KSSB0aGluayB0aGlzIHNob3VsZCBjb250cm9sZWQgYnkg
-Y2xpZW50IG5vdCBzZXJ2ZXIuDQoNCj5UaGF0IGFzaWRlLCB0aGlzIGFwcHJvYWNoIGxvb2tzIHJp
-Z2h0IHRvIG1lLiA6KQ0KPg0KPlRoYW5rcyENCj5zYWdlDQo+DQo+DQo+ID4gDQo+PiBTaWduZWQt
-b2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQo+PiAtLS0NCj4+ICBz
-cmMvbWRzL0xvY2tlci5jYyB8IDE1ICsrKysrKysrKy0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFuZ2Vk
-LCA5IGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pDQo+PiANCj4+IGRpZmYgLS1naXQgYS9z
-cmMvbWRzL0xvY2tlci5jYyBiL3NyYy9tZHMvTG9ja2VyLmNjDQo+PiBpbmRleCAzMGUwMTRhLi41
-OGY5NTNmIDEwMDY0NA0KPj4gLS0tIGEvc3JjL21kcy9Mb2NrZXIuY2MNCj4+ICsrKyBiL3NyYy9t
-ZHMvTG9ja2VyLmNjDQo+PiBAQCAtMjY3Niw4ICsyNjc2LDkgQEAgdm9pZCBMb2NrZXI6Ol9kb19z
-bmFwX3VwZGF0ZShDSW5vZGUgKmluLCBzbmFwaWRfdCBzbmFwLCBpbnQgZGlydHksIHNuYXBpZF90
-IGZvbGwNCj4+ICB2b2lkIExvY2tlcjo6X3VwZGF0ZV9jYXBfZmllbGRzKENJbm9kZSAqaW4sIGlu
-dCBkaXJ0eSwgTUNsaWVudENhcHMgKm0sIGlub2RlX3QgKnBpKQ0KPj4gIHsNCj4+ICAgIC8vIGZp
-bGUNCj4+ICsgIHV0aW1lX3QgYXRpbWUgPSBtLT5nZXRfYXRpbWUoKTsNCj4+ICsNCj4+ICAgIGlm
-IChkaXJ0eSAmIChDRVBIX0NBUF9GSUxFX0VYQ0x8Q0VQSF9DQVBfRklMRV9XUikpIHsNCj4+IC0g
-ICAgdXRpbWVfdCBhdGltZSA9IG0tPmdldF9hdGltZSgpOw0KPj4gICAgICB1dGltZV90IG10aW1l
-ID0gbS0+Z2V0X210aW1lKCk7DQo+PiAgICAgIHV0aW1lX3QgY3RpbWUgPSBtLT5nZXRfY3RpbWUo
-KTsNCj4+ICAgICAgdWludDY0X3Qgc2l6ZSA9IG0tPmdldF9zaXplKCk7DQo+PiBAQCAtMjcwMCwx
-MSArMjcwMSw3IEBAIHZvaWQgTG9ja2VyOjpfdXBkYXRlX2NhcF9maWVsZHMoQ0lub2RlICppbiwg
-aW50IGRpcnR5LCBNQ2xpZW50Q2FwcyAqbSwgaW5vZGVfdCAqDQo+PiAgICAgICAgcGktPnNpemUg
-PSBzaXplOw0KPj4gICAgICAgIHBpLT5yc3RhdC5yYnl0ZXMgPSBzaXplOw0KPj4gICAgICB9DQo+
-PiAtICAgIGlmICgoZGlydHkgJiBDRVBIX0NBUF9GSUxFX0VYQ0wpICYmIGF0aW1lICE9IHBpLT5h
-dGltZSkgew0KPj4gLSAgICAgIGRvdXQoNykgPDwgIiAgYXRpbWUgIiA8PCBwaS0+YXRpbWUgPDwg
-IiAtPiAiIDw8IGF0aW1lDQo+PiAtCSAgICAgIDw8ICIgZm9yICIgPDwgKmluIDw8IGRlbmRsOw0K
-Pj4gLSAgICAgIHBpLT5hdGltZSA9IGF0aW1lOw0KPj4gLSAgICB9DQo+PiArICAgIA0KPj4gICAg
-ICBpZiAoKGRpcnR5ICYgQ0VQSF9DQVBfRklMRV9FWENMKSAmJg0KPj4gIAljZXBoX3NlcV9jbXAo
-cGktPnRpbWVfd2FycF9zZXEsIG0tPmdldF90aW1lX3dhcnBfc2VxKCkpIDwgMCkgew0KPj4gICAg
-ICAgIGRvdXQoNykgPDwgIiAgdGltZV93YXJwX3NlcSAiIDw8IHBpLT50aW1lX3dhcnBfc2VxIDw8
-ICIgLT4gIiA8PCBtLT5nZXRfdGltZV93YXJwX3NlcSgpDQo+PiBAQCAtMjcxMiw2ICsyNzA5LDEy
-IEBAIHZvaWQgTG9ja2VyOjpfdXBkYXRlX2NhcF9maWVsZHMoQ0lub2RlICppbiwgaW50IGRpcnR5
-LCBNQ2xpZW50Q2FwcyAqbSwgaW5vZGVfdCAqDQo+PiAgICAgICAgcGktPnRpbWVfd2FycF9zZXEg
-PSBtLT5nZXRfdGltZV93YXJwX3NlcSgpOw0KPj4gICAgICB9DQo+PiAgICB9DQo+PiArICANCj4+
-ICsgIGlmICgoZGlydHkgJiBDRVBIX0NBUF9GSUxFX1JEKSAmJiBhdGltZSA+IHBpLT5hdGltZSkg
-ew0KPj4gKyAgICAgIGRvdXQoNykgPDwgIiAgYXRpbWUgIiA8PCBwaS0+YXRpbWUgPDwgIiAtPiAi
-IDw8IGF0aW1lDQo+PiArCSAgICAgIDw8ICIgZm9yICIgPDwgKmluIDw8IGRlbmRsOw0KPj4gKyAg
-ICAgIHBpLT5hdGltZSA9IGF0aW1lOw0KPj4gKyAgfQ0KPj4gICAgLy8gYXV0aA0KPj4gICAgaWYg
-KGRpcnR5ICYgQ0VQSF9DQVBfQVVUSF9FWENMKSB7DQo+PiAgICAgIGlmIChtLT5oZWFkLnVpZCAh
-PSBwaS0+dWlkKSB7DQo+PiAtLSANCj4+IDEuOC4zLnJjMS40NC5nYjM4N2M3Nw0KPj4g
+Scott,
+
+You make a good point comparing (5/3) RS with Xorbas, but a small nit:
+
+"The I/O to recover from a single failure for both schemes is 5 blocks so it is as efficient as Xorbas."
+
+Maybe not. You would probably issue I/O to all the remaining 7 blocks to cover for the possibility of double errors. The time to reconstruct would be about the same, but there could be more disk and network I/O. (LRC will need to issue I/O to the rest of the global stripe if it detected multiple local errors.)
+
+What I like about Xorbas is that it is an extension of a (x,y) RS. You can start with traditional RS. If degraded reads and repaired blocks are causing a problem, you can add the LRC. If capacity is an issue, you can take it out. 
+
+Best,
+Paul
+
+On Tue, Jul 2, 2013 at 2:33 PM, Samuel Just wrote:
+> I think we should be able to cover most cases by adding an interface like:
+> 
+> set<int> minimum_to_read(const set<int> &want_to_read, const set<int>
+> &available_chunks);
+> 
+> which returns the smallest set required to read/rebuild the chunks in
+> want_to_read given the chunks in available_chunks.  Alternately, we might
+> include a "cost" for reading each chunk like
+> 
+> set<int> minimum_to_read_with_cost(const set<int> &want_to_read, const
+> map<int, int> &available)
+> 
+> which returns the minimum cost set required to read the specified chunks
+> given a mapping of available chunks to costs.  The costs might allow us to
+> consider the difference between reading local chunks vs remote chunks.
+> This should be sufficient to cover the read case (esp the degraded read
+> case) and the repair case.
+> -Sam
+> 
+> On Tue, Jul 2, 2013 at 10:14 AM, Atchley, Scott <atchleyes@ornl.gov>
+> wrote:
+> > On Jul 2, 2013, at 10:07 AM, "Atchley, Scott" <atchleyes@ornl.gov>
+> wrote:
+> >
+> >> On Jul 1, 2013, at 7:00 PM, Loic Dachary <loic@dachary.org> wrote:
+> >>
+> >>> Hi,
+> >>>
+> >>> Today Sam pointed out that the API for LRC ( Xorbas Hadoop Project
+> Page, Locally Repairable Codes (LRC) http://smahesh.com/HadoopUSC/ for
+> instance ) would need to be different from the one initialy proposed:
+> >>
+> >> An interesting video. Not as entertaining as Jim Plank's video. ;-)
+> >>
+> >> While Plank's focused on the processor requirements for
+> encoding/decoding, this video focuses on the network and disk I/O
+> requirements.
+> >>
+> >>>   context(k, m, reed-solomon|...) => context* c
+> >>>   encode(context* c, void* data) => void* chunks[k+m]
+> >>>   decode(context* c, void* chunk[k+m], int*
+> >>> indices_of_erased_chunks) => void* data // erased chunks are not used
+> >>>   repair(context* c, void* chunk[k+m], int*
+> >>> indices_of_erased_chunks) => void* chunks[k+m] // erased chunks are
+> >>> rebuilt
+> >>>
+> >>> The decode function must allow for partial read:
+> >>>
+> >>>   decode(context* c, int offset, int length, void* chunk[k+m], int*
+> >>> indices_of_erased_chunks, int* missing_chunks) => void* data
+> >>>
+> >>> If there are not enough chunks to recover the desired data range
+> [offset, offset+length) the function returns NULL and sets missing_chunks
+> to the list of chunks that must be retrieved in order to be able to read
+> the desired data.
+> >>>
+> >>> If decode is called to read just 1 chunk and it is missing, reed-
+> solomon would return on error and ask for all other chunks to repair. If
+> the underlying library implements LRC, it would ask for a subset of the
+> chunks.
+> >>>
+> >>> An implementation allowing only full reads and using jerasure ( which
+> does not do LRC ) requires that offset is always zero, length is the size
+> of the object and returns a copy of indices_of_erased_chunks if there are
+> not enough chunks to rebuild the missing ones.
+> >>>
+> >>> Comments are welcome :-)
+> >>
+> >> I have loosely followed this discussion and I have not looked closely
+> at the proposed API nor at the jerasure interface. My apologies if this
+> has already been addressed.
+> >>
+> >> It is not clear to me from the above proposed API (ignoring the partial
+> read) what it would do. Was the original intent to encode the entire file
+> using k+m blocks irregardless of the file size and of the rados object
+> size?
+> >>
+> >> If so, how will you map rados objects to the logical k+m objects and
+> vice versa?
+> >>
+> >> If not, then the initial API needed an offset and length (either
+> logical or rados object).
+> >>
+> >> I would assume that you would want to operate on rados sized objects.
+> Given a fixed k+m, then you may have more than one set of k+m objects per
+> file. This is ignoring the LRC "local" parity blocks. For example, if the
+> rados object size if 1 MB and k = 10 and m = 4 (as in the Xorbas video),
+> then for a 20 MB file one would need two sets of encoding blocks. The
+> first for objects 1-10 and the second for objects 11-20.
+> >>
+> >> Perhaps, this is what the context is above. If so, it should have the
+> logical offset and rados object size, no?
+> >>
+> >> I see value in the Xorbas concept and I wonder if the jerasure library
+> can be modified to generate the local parity blocks such that they can be
+> used to generate the global parity blocks. That would be a question for
+> Jim Plank.
+> >
+> > The benefits of the Xorbas concept is reduced network and disk I/O for
+> failures while maintaining traditional RS's higher fault-tolerance than 3x
+> replication while using less space.
+> >
+> > You can do almost the same thing with jerasure without modifying it at
+> all. Using the values from the Xorbas video, they have k data blocks, m
+> global parity blocks, and 2 local parity blocks (generated from k/2 data
+> blocks) for a total of k+m+2 blocks on disk that can tolerate any m
+> failures. In their example, k = 10 and m = 4. They store 16 blocks for
+> each 10 data blocks.
+> >
+> > If you use traditional RS encoding via jerasure and used the same amount
+> of storage (16 blocks for each 10 data blocks), you could encode 3 parity
+> blocks for each 5 data blocks. This would consume 16 data blocks for each
+> 10 data blocks and the fault-tolerance would be variable from 3-6 failures
+> depending on how the failures fell between the two groups of 5 blocks
+> which is higher than the static 4 failures for the Xorbas code. The I/O to
+> recover from a single failure for both schemes is 5 blocks so it is as
+> efficient as Xorbas. On average, it provides more fault-tolerance, but it
+> can be less (four failures from one group of 5 data + 3 parity blocks),
+> but that worst case is the same as 3x replication.
+> >
+> > Scott--
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
