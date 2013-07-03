@@ -1,39 +1,27 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply is received
-Date: Thu, 4 Jul 2013 06:43:30 +0800
-Message-ID: <CAAM7YAnVZhTa6LQWo9KzMGHdkYCrwAQJLweJUBEm=dUaVqA5bA@mail.gmail.com>
-References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
-	<51D12FA7.1090605@intel.com>
-	<alpine.DEB.2.00.1307011245410.11177@cobra.newdream.net>
-	<alpine.DEB.2.00.1307031455220.3375@cobra.newdream.net>
-	<CANP1eJFe+d-UM4vSOSLiFP07NrbXGUeD1TNaXusSLrEo8HEXTQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH] ceph: Add FScache support
+Date: Thu, 04 Jul 2013 00:52:31 +0100
+Message-ID: <27575.1372895551@warthog.procyon.org.uk>
+References: <CANP1eJFQgoLBjZ7-vCTzRb62H2P6hX5ZD8u2XyMQAjwZtFJDJQ@mail.gmail.com> <20130629035155.GA7975@gmail.com> <CANP1eJGJ4eAn1BtXSnKLu5egDAtK5DFAX9S1nWtBFnbLKWDtJA@mail.gmail.com> <CANP1eJGouH+_FXEbaRsrqt1QMY5HEPj6bLV2Pw7LhY5v37Hapw@mail.gmail.com> <11954.1372792498@warthog.procyon.org.uk> <CANP1eJGQqiijOVsX+sz1WY6CwViYweh3fo0N0VUznmTGVQCJzQ@mail.gmail.com> <12577.1372793962@warthog.procyon.org.uk> <CANP1eJGqq0ocQQUS5sBsvdT35qADSMoFLC71uprt_qw7=Pphrg@mail.gmail.com> <1074.1372798161@warthog.procyon.org.uk> <CANP1eJH9PU3wX8m9auNjHrRt=rQWKCMmnFjfQ+V4tSG7mBBoEg@mail.gmail.com> <3869.1372808417@warthog.procyon.org.uk>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:50869 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932278Ab3GCWnb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 18:43:31 -0400
-Received: by mail-la0-f46.google.com with SMTP id eg20so650316lab.19
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jul 2013 15:43:30 -0700 (PDT)
-In-Reply-To: <CANP1eJFe+d-UM4vSOSLiFP07NrbXGUeD1TNaXusSLrEo8HEXTQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:20446 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755123Ab3GCXwj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Jul 2013 19:52:39 -0400
+In-Reply-To: <CANP1eJFQgoLBjZ7-vCTzRb62H2P6hX5ZD8u2XyMQAjwZtFJDJQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Milosz Tanski <milosz@adfin.com>
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Alex Elder <alex.elder@linaro.org>, Sage Weil <sage@inktank.com>
+Cc: dhowells@redhat.com, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, linux-cachefs@redhat.com
 
-On Thu, Jul 4, 2013 at 6:07 AM, Milosz Tanski <milosz@adfin.com> wrote:
-> Yan,
->
-> Can you help me understand how this change fixes:
-> http://tracker.ceph.com/issues/2019 ? The symptom on the client is
-> that the processes get stuck waiting in ceph_mdsc_do_request according
-> to /proc/PID/stack.
+Milosz Tanski <milosz@adfin.com> wrote:
 
-The bug this patch fixes is that ceph_sync_write_unsafe can be called
-multiple times
-with parameter unsafe=true. The bug prevents the kclient from
-releasing Fw cap, further
-lead to filelock stuck in unstable state forever and request hang.
+> > Looking at your index structure, ceph has per-fsid indices under the top
+> > "ceph" index and then per-inode indices under those?  Are fsids universally
+> > unique - or just for a given server/cell/whatever?
+> 
+> It's my understanding that's a guuid assigned to the cluster.
 
-Yan, Zheng
+What's the likelyhood of two clusters throwing up the same guuid?
+
+David
