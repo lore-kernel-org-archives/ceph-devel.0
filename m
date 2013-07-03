@@ -1,102 +1,64 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH] ceph: Add FScache support
-Date: Wed, 03 Jul 2013 00:40:17 +0100
-Message-ID: <3869.1372808417@warthog.procyon.org.uk>
-References: <CANP1eJH9PU3wX8m9auNjHrRt=rQWKCMmnFjfQ+V4tSG7mBBoEg@mail.gmail.com> <20130629035155.GA7975@gmail.com> <CANP1eJGJ4eAn1BtXSnKLu5egDAtK5DFAX9S1nWtBFnbLKWDtJA@mail.gmail.com> <CANP1eJGouH+_FXEbaRsrqt1QMY5HEPj6bLV2Pw7LhY5v37Hapw@mail.gmail.com> <11954.1372792498@warthog.procyon.org.uk> <CANP1eJGQqiijOVsX+sz1WY6CwViYweh3fo0N0VUznmTGVQCJzQ@mail.gmail.com> <12577.1372793962@warthog.procyon.org.uk> <CANP1eJGqq0ocQQUS5sBsvdT35qADSMoFLC71uprt_qw7=Pphrg@mail.gmail.com> <1074.1372798161@warthog.procyon.org.uk>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:24012 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753445Ab3GBXk0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 2 Jul 2013 19:40:26 -0400
-In-Reply-To: <CANP1eJH9PU3wX8m9auNjHrRt=rQWKCMmnFjfQ+V4tSG7mBBoEg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: dhowells@redhat.com, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, linux-cachefs@redhat.com
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH 1/3] mds: update atime if client can read.
+Date: Wed, 3 Jul 2013 09:25:39 +0800
+Message-ID: <201307030925331606702@gmail.com>
+References: <201307021345090019137@gmail.com>,
+	<alpine.DEB.2.00.1307020946520.1067@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-Okay, my analysis of the patch:
-
-Looking at your index structure, ceph has per-fsid indices under the top
-"ceph" index and then per-inode indices under those?  Are fsids universally
-unique - or just for a given server/cell/whatever?
-
-> +#ifdef CONFIG_CEPH_FSCACHE
-> +	if (PageFsCache(page))
-> +		ceph_invalidate_fscache_page(inode, page);
-> +#endif
-
-The PageFsCache() test here should be folded into the header file.  You
-actually have a redundant test:
-
-	+static inline void ceph_invalidate_fscache_page(struct inode *inode,
-	+						struct page *page)
-	+{
-	+	if (ceph_inode(inode)->fscache == NULL)
-	+		return;
-	+
-	+	if (PageFsCache(page))
-	+		return __ceph_invalidate_fscache_page(inode, page);
-	+}
-
-> +#ifdef CONFIG_CEPH_FSCACHE
-> +	/* Can we release the page from the cache? */
-> +	if (PageFsCache(page) && ceph_release_fscache_page(page, g) == 0)
-> +		return 0;
-> +#endif
-
-The PageFsCache() test here is also redundant as fscache_maybe_release_page()
-also does it - though I acknowledge it does it after doing the "is this cookie
-valid" test.  The reason I put that test first is that if CONFIG_FSCACHE=n
-then the "is this cookie valid" test just evaluates immediately to false at
-compile time.
-
-> +void ceph_fscache_inode_get_cookie(struct inode *inode);
-
-No such function?
-
-> +static inline void ceph_fsxache_async_uncache_inode(struct inode* inode)
-
-Misspelling?
-
-> +static inline int ceph_readpage_from_fscache(struct inode *inode,
-> +					     struct page *page)
-> +{
-> +	if (ceph_inode(inode)->fscache == NULL)
-> +		return -ENOBUFS;
-> +
-> +	return __ceph_readpage_from_fscache(inode, page);
-> +}
-
-Looking at functions like this, if you wrap:
-
-	ceph_inode(inode)->fscache
-
-as, say:
-
-	struct fscache_cookie *ceph_inode_cookie(struct inode *inode)
-	{
-	#ifdef CONFIG_CEPH_FSCACHE
-		return ceph_inode(inode)->fscache;
-	#else
-		return NULL;
-	#endif
-	}
-
-then you can get rid of a lot of cpp conditionals and just rely on gcc's
-optimiser (see what I did in include/linux/fscache.h).  Note that anything in
-fs/ceph/cache.c wouldn't need to use this.
-
->  static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
-> ...
-> +#ifdef CONFIG_CEPH_FSCACHE
-> +		spin_lock(&ci->i_ceph_lock);
-> +		ceph_fscache_register_inode_cookie(fsc, ci);
-> +		spin_unlock(&ci->i_ceph_lock);
-> +#endif
-
-Ummm...  ceph_fscache_register_inode_cookie() calls fscache_acquire_cookie()
-which allocates GFP_KERNEL and grabs fscache_addremove_sem.  You can't wrap
-this call in a spinlock.  Do you use lockdep?
-
-David
+Pk9uIFR1ZSwgMiBKdWwgMjAxMywgbWFqaWFucGVuZyB3cm90ZToNCj4+IE5vdywgdXBkYXRlIGF0
+aW1lIG9ubHkgZm9yIENFUEhfQ0FQX0ZJTEVfRVhDTC5DaGFuZ2UgdGhpcyBpZg0KPj4gQ0VQSF9D
+QVBfRklMRV9SRC4NCj4NCj5DYW4gd2UgaW50cm9kdWNlIGEgZ2xvYmFsIGNvbmZpZyBvcHRvaW4g
+KGJvb2wgbWRzX2F0aW1lIGluIA0KPmNvbW1vbi9jb25maWdfb3B0cy5oLCBtYXliZSkgc28gdGhh
+dCB1c2VycyBjYW4gdHVybiB0aGlzIG9mZj8gIEFuZC9vciBhZGQgDQo+YSAncmVsYXRpbWUnIG9w
+dGlvbj8gIE1vcmUgdXNlcnMgd29uJ3Qgd2FudCB0aGlzIGFzIGl0IGlzIHZlcnkgZXhwZW5zaXZl
+IA0KPnRvIG1haW50YWluIHRoaXMgZXh0cmEgbGV2ZWwgb2YgbWV0YWRhdGEuDQo+DQpJIGRvbid0
+IGtub3cgb3RoZXIgY2xpZW50IGV4Y2VwdCBjZXBoZnMuU28gdGhlIHBhdGNoIGlzIGZyb20gdGhl
+IHZpZXcgb2YgdXNpbmcgY2VwaGZzLg0KRm9yIGNlcGhmcyx3ZSBjYW4gbW91bnQgdXNpbmcgJ25v
+YXRpbWUnIHRvIGluZGljYXRlIGRvbid0IHVwZGF0ZSBhdGltZS4NCkJ1dCBmb3IgdGhlIG90aGVy
+IGNsaWVudCwgaSBkb24ndCBrbm93Lg0KSSB0aGluayB0aGlzIHNob3VsZCBjb250cm9sZWQgYnkg
+Y2xpZW50IG5vdCBzZXJ2ZXIuDQoNCj5UaGF0IGFzaWRlLCB0aGlzIGFwcHJvYWNoIGxvb2tzIHJp
+Z2h0IHRvIG1lLiA6KQ0KPg0KPlRoYW5rcyENCj5zYWdlDQo+DQo+DQo+ID4gDQo+PiBTaWduZWQt
+b2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQo+PiAtLS0NCj4+ICBz
+cmMvbWRzL0xvY2tlci5jYyB8IDE1ICsrKysrKysrKy0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFuZ2Vk
+LCA5IGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pDQo+PiANCj4+IGRpZmYgLS1naXQgYS9z
+cmMvbWRzL0xvY2tlci5jYyBiL3NyYy9tZHMvTG9ja2VyLmNjDQo+PiBpbmRleCAzMGUwMTRhLi41
+OGY5NTNmIDEwMDY0NA0KPj4gLS0tIGEvc3JjL21kcy9Mb2NrZXIuY2MNCj4+ICsrKyBiL3NyYy9t
+ZHMvTG9ja2VyLmNjDQo+PiBAQCAtMjY3Niw4ICsyNjc2LDkgQEAgdm9pZCBMb2NrZXI6Ol9kb19z
+bmFwX3VwZGF0ZShDSW5vZGUgKmluLCBzbmFwaWRfdCBzbmFwLCBpbnQgZGlydHksIHNuYXBpZF90
+IGZvbGwNCj4+ICB2b2lkIExvY2tlcjo6X3VwZGF0ZV9jYXBfZmllbGRzKENJbm9kZSAqaW4sIGlu
+dCBkaXJ0eSwgTUNsaWVudENhcHMgKm0sIGlub2RlX3QgKnBpKQ0KPj4gIHsNCj4+ICAgIC8vIGZp
+bGUNCj4+ICsgIHV0aW1lX3QgYXRpbWUgPSBtLT5nZXRfYXRpbWUoKTsNCj4+ICsNCj4+ICAgIGlm
+IChkaXJ0eSAmIChDRVBIX0NBUF9GSUxFX0VYQ0x8Q0VQSF9DQVBfRklMRV9XUikpIHsNCj4+IC0g
+ICAgdXRpbWVfdCBhdGltZSA9IG0tPmdldF9hdGltZSgpOw0KPj4gICAgICB1dGltZV90IG10aW1l
+ID0gbS0+Z2V0X210aW1lKCk7DQo+PiAgICAgIHV0aW1lX3QgY3RpbWUgPSBtLT5nZXRfY3RpbWUo
+KTsNCj4+ICAgICAgdWludDY0X3Qgc2l6ZSA9IG0tPmdldF9zaXplKCk7DQo+PiBAQCAtMjcwMCwx
+MSArMjcwMSw3IEBAIHZvaWQgTG9ja2VyOjpfdXBkYXRlX2NhcF9maWVsZHMoQ0lub2RlICppbiwg
+aW50IGRpcnR5LCBNQ2xpZW50Q2FwcyAqbSwgaW5vZGVfdCAqDQo+PiAgICAgICAgcGktPnNpemUg
+PSBzaXplOw0KPj4gICAgICAgIHBpLT5yc3RhdC5yYnl0ZXMgPSBzaXplOw0KPj4gICAgICB9DQo+
+PiAtICAgIGlmICgoZGlydHkgJiBDRVBIX0NBUF9GSUxFX0VYQ0wpICYmIGF0aW1lICE9IHBpLT5h
+dGltZSkgew0KPj4gLSAgICAgIGRvdXQoNykgPDwgIiAgYXRpbWUgIiA8PCBwaS0+YXRpbWUgPDwg
+IiAtPiAiIDw8IGF0aW1lDQo+PiAtCSAgICAgIDw8ICIgZm9yICIgPDwgKmluIDw8IGRlbmRsOw0K
+Pj4gLSAgICAgIHBpLT5hdGltZSA9IGF0aW1lOw0KPj4gLSAgICB9DQo+PiArICAgIA0KPj4gICAg
+ICBpZiAoKGRpcnR5ICYgQ0VQSF9DQVBfRklMRV9FWENMKSAmJg0KPj4gIAljZXBoX3NlcV9jbXAo
+cGktPnRpbWVfd2FycF9zZXEsIG0tPmdldF90aW1lX3dhcnBfc2VxKCkpIDwgMCkgew0KPj4gICAg
+ICAgIGRvdXQoNykgPDwgIiAgdGltZV93YXJwX3NlcSAiIDw8IHBpLT50aW1lX3dhcnBfc2VxIDw8
+ICIgLT4gIiA8PCBtLT5nZXRfdGltZV93YXJwX3NlcSgpDQo+PiBAQCAtMjcxMiw2ICsyNzA5LDEy
+IEBAIHZvaWQgTG9ja2VyOjpfdXBkYXRlX2NhcF9maWVsZHMoQ0lub2RlICppbiwgaW50IGRpcnR5
+LCBNQ2xpZW50Q2FwcyAqbSwgaW5vZGVfdCAqDQo+PiAgICAgICAgcGktPnRpbWVfd2FycF9zZXEg
+PSBtLT5nZXRfdGltZV93YXJwX3NlcSgpOw0KPj4gICAgICB9DQo+PiAgICB9DQo+PiArICANCj4+
+ICsgIGlmICgoZGlydHkgJiBDRVBIX0NBUF9GSUxFX1JEKSAmJiBhdGltZSA+IHBpLT5hdGltZSkg
+ew0KPj4gKyAgICAgIGRvdXQoNykgPDwgIiAgYXRpbWUgIiA8PCBwaS0+YXRpbWUgPDwgIiAtPiAi
+IDw8IGF0aW1lDQo+PiArCSAgICAgIDw8ICIgZm9yICIgPDwgKmluIDw8IGRlbmRsOw0KPj4gKyAg
+ICAgIHBpLT5hdGltZSA9IGF0aW1lOw0KPj4gKyAgfQ0KPj4gICAgLy8gYXV0aA0KPj4gICAgaWYg
+KGRpcnR5ICYgQ0VQSF9DQVBfQVVUSF9FWENMKSB7DQo+PiAgICAgIGlmIChtLT5oZWFkLnVpZCAh
+PSBwaS0+dWlkKSB7DQo+PiAtLSANCj4+IDEuOC4zLnJjMS40NC5nYjM4N2M3Nw0KPj4g
