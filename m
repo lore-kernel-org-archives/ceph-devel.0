@@ -1,34 +1,25 @@
 From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH 1/2] ceph: update atime after read.
-Date: Wed, 3 Jul 2013 13:34:56 +0800
-Message-ID: <201307031334515420104@gmail.com>
+Subject: [PATCH 2/2] ceph: for sync_read, call file_accessed to update atime.
+Date: Wed, 3 Jul 2013 14:11:48 +0800
+Message-ID: <201307031334535261195@gmail.com>
 Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="gb2312"
 Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:50785 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751512Ab3GCFfA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 01:35:00 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: sage <sage@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Tm93IGNlcGggZG9uJ3QgdXBkYXRlIGF0aW1lIGFmdGVyIHJlYWQuU28gYWRkIHRoaXMgZnVuY3Rp
-b24uDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4N
-Ci0tLQ0KIGZzL2NlcGgvZmlsZS5jIHwgOSArKysrKysrKysNCiAxIGZpbGUgY2hhbmdlZCwgOSBp
-bnNlcnRpb25zKCspDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmls
-ZS5jDQppbmRleCA2NTZlMTY5Li5mYTc0ZTZmIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9maWxlLmMN
-CisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAtNjY5LDYgKzY2OSwxNSBAQCBhZ2FpbjoNCiBvdXQ6
-DQogCWRvdXQoImFpb19yZWFkICVwICVsbHguJWxseCBkcm9wcGluZyBjYXAgcmVmcyBvbiAlcyA9
-ICVkXG4iLA0KIAkgICAgIGlub2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwgY2VwaF9jYXBfc3RyaW5n
-KGdvdCksIChpbnQpcmV0KTsNCisNCisJaWYgKHJldCA+IDApIHsNCisJCWludCBkaXJ0eTsNCisJ
-CXNwaW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCisJCWRpcnR5ID0gX19jZXBoX21hcmtfZGly
-dHlfY2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9SRCk7DQorCQlzcGluX3VubG9jaygmY2ktPmlfY2Vw
-aF9sb2NrKTsNCisJCWlmIChkaXJ0eSkNCisJCQlfX21hcmtfaW5vZGVfZGlydHkoaW5vZGUsIGRp
-cnR5KTsNCisJfQ0KIAljZXBoX3B1dF9jYXBfcmVmcyhjaSwgZ290KTsNCiANCiAJaWYgKGNoZWNr
-ZW9mICYmIHJldCA+PSAwKSB7DQotLSANCjEuOC4xLjINCg==
-
+Rm9yIGNlcGhfc3luY19yZWFkLGl0IGRvbid0IGNhbGwgZmlsZV9hY2Nlc3NlZCB0byB1cGRhdGUg
+YXRpbWUuQnV0IHRoZQ0KYnVmZmVyX3JlYWQgZG8gaXQgLlNvIGFkZCBpdC4NCg0KU2lnbmVkLW9m
+Zi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0tDQogZnMvY2VwaC9m
+aWxlLmMgfCAxICsNCiAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKykNCg0KZGlmZiAtLWdp
+dCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCmluZGV4IGZhNzRlNmYuLmIwZTZm
+MGIgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBA
+IC00NDIsNiArNDQyLDcgQEAgZG9uZToNCiAJCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBu
+dW1fcGFnZXMsIHRydWUpOw0KIAllbHNlDQogCQljZXBoX3JlbGVhc2VfcGFnZV92ZWN0b3IocGFn
+ZXMsIG51bV9wYWdlcyk7DQorCWZpbGVfYWNjZXNzZWQoZmlsZSk7DQogCWRvdXQoInN5bmNfcmVh
+ZCByZXN1bHQgJWRcbiIsIHJldCk7DQogCXJldHVybiByZXQ7DQogfQ0KLS0gDQoxLjguMS4yDQo=
