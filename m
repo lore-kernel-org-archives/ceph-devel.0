@@ -1,49 +1,39 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply
- is received
-Date: Wed, 3 Jul 2013 15:32:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307031530330.3375@cobra.newdream.net>
-References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com> <51D12FA7.1090605@intel.com> <alpine.DEB.2.00.1307011245410.11177@cobra.newdream.net> <alpine.DEB.2.00.1307031455220.3375@cobra.newdream.net> <CAAM7YAkrSWGiGL8NAj81jsvQuMeUABSRMpScFXU6x3JEyjHSGA@mail.gmail.com>
- <alpine.DEB.2.00.1307031526030.3375@cobra.newdream.net>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply is received
+Date: Thu, 4 Jul 2013 06:43:30 +0800
+Message-ID: <CAAM7YAnVZhTa6LQWo9KzMGHdkYCrwAQJLweJUBEm=dUaVqA5bA@mail.gmail.com>
+References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
+	<51D12FA7.1090605@intel.com>
+	<alpine.DEB.2.00.1307011245410.11177@cobra.newdream.net>
+	<alpine.DEB.2.00.1307031455220.3375@cobra.newdream.net>
+	<CANP1eJFe+d-UM4vSOSLiFP07NrbXGUeD1TNaXusSLrEo8HEXTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38897 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754979Ab3GCWcF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 18:32:05 -0400
-In-Reply-To: <alpine.DEB.2.00.1307031526030.3375@cobra.newdream.net>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:50869 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932278Ab3GCWnb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 18:43:31 -0400
+Received: by mail-la0-f46.google.com with SMTP id eg20so650316lab.19
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Jul 2013 15:43:30 -0700 (PDT)
+In-Reply-To: <CANP1eJFe+d-UM4vSOSLiFP07NrbXGUeD1TNaXusSLrEo8HEXTQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Alex Elder <alex.elder@linaro.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Alex Elder <alex.elder@linaro.org>, Sage Weil <sage@inktank.com>
 
-On Wed, 3 Jul 2013, Sage Weil wrote:
-> On Thu, 4 Jul 2013, Yan, Zheng wrote:
-> > On Thu, Jul 4, 2013 at 5:57 AM, Sage Weil <sage@inktank.com> wrote:
-> > > Hi Yan-
-> > >
-> > > On Mon, 1 Jul 2013, Sage Weil wrote:
-> > >> On Mon, 1 Jul 2013, Yan, Zheng wrote:
-> > >> > ping
-> > >> >
-> > >> > I think this patch should goes into 3.11 or fix the issue by other means
-> > >>
-> > >> Applied this to the testing branch, thanks.  Let me know if there are any
-> > >> others I missed!
-> > >
-> > > This broke rbd, which was using the unsafe callback. I pushed a patch to
-> > > simplify that (testing-next^); care to take a look?
-> > >
-> > 
-> > the patch looks good. looks like issue #5146 actually does not exist.
-> > Alex, could you take a look.
-> 
-> Yeah, i'll close.
+On Thu, Jul 4, 2013 at 6:07 AM, Milosz Tanski <milosz@adfin.com> wrote:
+> Yan,
+>
+> Can you help me understand how this change fixes:
+> http://tracker.ceph.com/issues/2019 ? The symptom on the client is
+> that the processes get stuck waiting in ceph_mdsc_do_request according
+> to /proc/PID/stack.
 
-Ok, I just realized that my patch is essentially reverting 12166906, which 
-AFAICS was based on the assumption that ONDISK would get an ACK but not 
-ONDISK reply from the OSD, but in reality we get only the ONDISK.  We 
-should just drop them both...
+The bug this patch fixes is that ceph_sync_write_unsafe can be called
+multiple times
+with parameter unsafe=true. The bug prevents the kclient from
+releasing Fw cap, further
+lead to filelock stuck in unstable state forever and request hang.
 
-sage
+Yan, Zheng
