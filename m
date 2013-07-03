@@ -1,27 +1,55 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH] ceph: Add FScache support
-Date: Thu, 04 Jul 2013 00:52:31 +0100
-Message-ID: <27575.1372895551@warthog.procyon.org.uk>
-References: <CANP1eJFQgoLBjZ7-vCTzRb62H2P6hX5ZD8u2XyMQAjwZtFJDJQ@mail.gmail.com> <20130629035155.GA7975@gmail.com> <CANP1eJGJ4eAn1BtXSnKLu5egDAtK5DFAX9S1nWtBFnbLKWDtJA@mail.gmail.com> <CANP1eJGouH+_FXEbaRsrqt1QMY5HEPj6bLV2Pw7LhY5v37Hapw@mail.gmail.com> <11954.1372792498@warthog.procyon.org.uk> <CANP1eJGQqiijOVsX+sz1WY6CwViYweh3fo0N0VUznmTGVQCJzQ@mail.gmail.com> <12577.1372793962@warthog.procyon.org.uk> <CANP1eJGqq0ocQQUS5sBsvdT35qADSMoFLC71uprt_qw7=Pphrg@mail.gmail.com> <1074.1372798161@warthog.procyon.org.uk> <CANP1eJH9PU3wX8m9auNjHrRt=rQWKCMmnFjfQ+V4tSG7mBBoEg@mail.gmail.com> <3869.1372808417@warthog.procyon.org.uk>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:20446 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755123Ab3GCXwj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Jul 2013 19:52:39 -0400
-In-Reply-To: <CANP1eJFQgoLBjZ7-vCTzRb62H2P6hX5ZD8u2XyMQAjwZtFJDJQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: dhowells@redhat.com, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, linux-cachefs@redhat.com
+From: Ross Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: =?utf-8?q?Ceph_Developer_Summit=3A_Emperor?=
+Date: Wed, 3 Jul 2013 16:58:48 -0700
+Message-ID: <etPan.51d4bab8.327b23c6.bbf9@Music-Mac-Pro.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: 
+References: 
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "=?UTF-8?Q?ceph-devel=40vger.kernel.org_ceph-devel=40vger.kernel.org?=" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Milosz Tanski <milosz@adfin.com> wrote:
-
-> > Looking at your index structure, ceph has per-fsid indices under the top
-> > "ceph" index and then per-inode indices under those?  Are fsids universally
-> > unique - or just for a given server/cell/whatever?
-> 
-> It's my understanding that's a guuid assigned to the cluster.
-
-What's the likelyhood of two clusters throwing up the same guuid?
-
-David
+SGksIGFsbCEKCkl0J3MgdGltZSB0byBzdGFydCBwbGFubmluZyBvdXIgQ2VwaCBEZXZlbG9wZXIg
+U3VtbWl0IGFnYWluISDCoFRoaXMgc3VtbWl0CmlzIHdoZXJlIHBsYW5uaW5nIGZvciB0aGUgdXBj
+b21pbmcgRW1wZXJvciByZWxlYXNlIHdpbGwgaGFwcGVuLCBhbmQKYXR0ZW5kYW5jZSBpcyAoYXMg
+YWx3YXlzKSBvcGVuIHRvIGFsbC4gSXQgd2lsbCBiZSBhIHZpcnR1YWwgc3VtbWl0IHVzaW5nCklS
+QywgRXRoZXJwYWRzLCBhbmQgR29vZ2xlIEhhbmdvdXRzLgoKSGVyZSdzIG91ciBoaWdoLWxldmVs
+IHN1bW1pdCBjYWxlbmRhcjoKCkp1bCAzOiBCbHVlcHJpbnQgc3VibWlzc2lvbiBvcGVucwpKdWwg
+MzA6IEJsdWVwcmludCBzdWJtaXNzaW9uIGNsb3NlcwpBdWcgMTogRmluYWwgc3VtbWl0IGFnZW5k
+YSBhbm5vdW5jZWQKQXVnIDUtNjogU3VtbWl0IQoKWW91IG1heSBoYXZlIG5vdGljZWQgdGhhdCB3
+ZSdyZSBhaW1pbmcgZm9yIGEgdHdvLWRheSBzdW1taXQgdGhpcyB0aW1lLiBJdAp3YXMgZGlmZmlj
+dWx0IGZvciBmb2xrcyBpbiBBc2lhIHRvIHBhcnRpY2lwYXRlIGluIHRoZSBEdW1wbGluZyBzdW1t
+aXQgZHVlCnRvIHRoZSBob3VyLCBzbyBJJ2QgbGlrZSB0byB0cnkgdHdvIGhhbGYtZGF5IHN1bW1p
+dHM6IG9uZSBmb3IgdGhlIEFtZXJpY2FzCmFuZCBBc2lhIGFuZCBvbmUgZm9yIHRoZSBBbWVyaWNh
+cyBhbmQgRXVyb3BlLiBJdCBtaWdodCBzdGlsbCBiZSBkaWZmaWN1bHQKZm9yIGJsdWVwcmludHMg
+d2l0aCBzdGFrZWhvbGRlcnMgaW4gYWxsIHRocmVlIHJlZ2lvbnMsIGJ1dCBJIHRoaW5rIHdlCnNo
+b3VsZCBnaXZlIGl0IGEgdHJ5ISBDb21tZW50cyBhbmQgc3VnZ2VzdGlvbnMgd2VsY29tZS4KCkJs
+dWVwcmludHM6CgpCZXR3ZWVuIG5vdyBhbmQgSnVseSAzMCwgd2UncmUgZ2F0aGVyaW5nIGJsdWVw
+cmludHMgZm9yIENlcGggRW1wZXJvci4gQQpibHVlcHJpbnQgaXMgYSBkb2N1bWVudCB0aGF0IGRl
+c2NyaWJlcyB3b3JrIHNvbWVvbmUgaW50ZW5kcyB0byBkbywgdXN1YWxseQpyZXNlcnZlZCBmb3Ig
+bGFyZ2VyIGZlYXR1cmVzIHRoYXQgcmVxdWlyZSBkaXNjdXNzaW9uLiBJZiB0aGVyZSdzIGEgZmVh
+dHVyZQp5b3UgdGhpbmsgQ2VwaCBzaG91bGQgaGF2ZSwgd2UgZW5jb3VyYWdlIHlvdSB0byB3cml0
+ZSB5b3VyIHRob3VnaHRzIGFuZApwbGFucyBpbiBhIGJsdWVwcmludC4gVGhlbiBtYWtlIHN1cmUg
+dG8gYXR0ZW5kIHRoZSBzdW1taXQgdG8gZGlzY3VzcyBpdHMKaW1wbGVtZW50YXRpb24gd2l0aCBv
+dGhlcnMgaW4gdGhlIGNvbW11bml0eS4KCkJsdWVwcmludHMgc2hvdWxkIGJlIGNyZWF0ZWQgb24g
+dGhlIENlcGggd2lraS4gWW91IGNhbiBmaW5kIGEgImNyZWF0ZQpibHVlcHJpbnQiIGJ1dHRvbiBv
+biB0aGUgbGluayBiZWxvdy4gSWYgeW91IGhhdmUgYSBibHVlcHJpbnQgZnJvbSBEdW1wbGluZwp0
+aGF0IHNob3VsZCBiZSBkaXNjdXNzZWQgYWdhaW4gYXQgdGhpcyBzdW1taXQsIHBsZWFzZSBtb3Zl
+IHRoZSBwYWdlIGludG8KdGhlIEVtcGVyb3Igc2VjdGlvbi4KCmh0dHA6Ly93aWtpLmNlcGguY29t
+LzAxUGxhbm5pbmcvQ0RTL0VtcGVyb3IKCklmIHlvdSBoYXZlIGFueSBxdWVzdGlvbnMsIGRyb3Ag
+dXMgYSBsaW5lIGF0IGNvbW11bml0eUBjZXBoLmNvbS4gVGhhbmtzIQoKQ2hlZXJzLApSb3NzCgot
+LcKgClJvc3MgVHVyawpDb21tdW5pdHkswqBJbmt0YW5rCgpAcm9zc3R1cmsgQGlua3RhbmsgQGNl
+cGgKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
