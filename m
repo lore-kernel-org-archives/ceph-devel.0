@@ -1,141 +1,419 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH] ceph: Add FScache support
-Date: Wed, 3 Jul 2013 15:02:05 -0400
-Message-ID: <CANP1eJFQgoLBjZ7-vCTzRb62H2P6hX5ZD8u2XyMQAjwZtFJDJQ@mail.gmail.com>
-References: <20130629035155.GA7975@gmail.com>
-	<CANP1eJGJ4eAn1BtXSnKLu5egDAtK5DFAX9S1nWtBFnbLKWDtJA@mail.gmail.com>
-	<CANP1eJGouH+_FXEbaRsrqt1QMY5HEPj6bLV2Pw7LhY5v37Hapw@mail.gmail.com>
-	<11954.1372792498@warthog.procyon.org.uk>
-	<CANP1eJGQqiijOVsX+sz1WY6CwViYweh3fo0N0VUznmTGVQCJzQ@mail.gmail.com>
-	<12577.1372793962@warthog.procyon.org.uk>
-	<CANP1eJGqq0ocQQUS5sBsvdT35qADSMoFLC71uprt_qw7=Pphrg@mail.gmail.com>
-	<1074.1372798161@warthog.procyon.org.uk>
-	<CANP1eJH9PU3wX8m9auNjHrRt=rQWKCMmnFjfQ+V4tSG7mBBoEg@mail.gmail.com>
-	<3869.1372808417@warthog.procyon.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:36598 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965048Ab3GCTCG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 15:02:06 -0400
-Received: by mail-ie0-f180.google.com with SMTP id f4so1262019iea.25
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jul 2013 12:02:05 -0700 (PDT)
-In-Reply-To: <3869.1372808417@warthog.procyon.org.uk>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: David Howells <dhowells@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, linux-cachefs@redhat.com
+From: Waiman Long <Waiman.Long@hp.com>
+Subject: [PATCH v3 09/25] ceph-fs: Change how dentry's d_lock and d_count fields are accessed
+Date: Wed,  3 Jul 2013 16:20:57 -0400
+Message-ID: <1372882857-22813-1-git-send-email-Waiman.Long@hp.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>, Jeff Layton <jlayton@redhat.com>, Miklos Szeredi <mszeredi@suse.cz>, Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Waiman Long <Waiman.Long@hp.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Steven Rostedt <rostedt@goodmis.org>, Linus Torvalds <torvalds@linux-foundation.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Andi Kleen <andi@firstfloor.org>, "Chandramouleeswaran, Aswin" <aswin@hp.com>, "Norton, Scott J" <scott.norton@hp.com>
+List-Id: ceph-devel.vger.kernel.org
 
-David,
+Because of the changes made in dcache.h header file, files that use
+the d_lock and d_count fields of the dentry structure need to be
+changed accordingly.  All the d_lock's spin_lock() and spin_unlock()
+calls are replaced by the corresponding d_lock() and d_unlock() calls.
+References to d_count are replaced by the d_ret_count() calls.
+There is no change in logic and everything should just work.
 
-I took your suggestions and updated my wip branch (on bitbucket) with
-a handful of fixes except for the locking around registering the
-cookie. I'm not sure what's the correct thing to do there.
+Signed-off-by: Waiman Long <Waiman.Long@hp.com>
+---
+ fs/ceph/caps.c       |    8 ++++----
+ fs/ceph/debugfs.c    |    8 ++++----
+ fs/ceph/dir.c        |   34 +++++++++++++++++-----------------
+ fs/ceph/export.c     |    4 ++--
+ fs/ceph/inode.c      |   24 ++++++++++++------------
+ fs/ceph/mds_client.c |   22 +++++++++++-----------
+ 6 files changed, 50 insertions(+), 50 deletions(-)
 
-On Tue, Jul 2, 2013 at 7:40 PM, David Howells <dhowells@redhat.com> wrote:
->
-> Okay, my analysis of the patch:
->
-> Looking at your index structure, ceph has per-fsid indices under the top
-> "ceph" index and then per-inode indices under those?  Are fsids universally
-> unique - or just for a given server/cell/whatever?
-
-It's my understanding that's a guuid assigned to the cluster.
-
->
->> +#ifdef CONFIG_CEPH_FSCACHE
->> +     if (PageFsCache(page))
->> +             ceph_invalidate_fscache_page(inode, page);
->> +#endif
->
-> The PageFsCache() test here should be folded into the header file.  You
-> actually have a redundant test:
->
->         +static inline void ceph_invalidate_fscache_page(struct inode *inode,
->         +                                               struct page *page)
->         +{
->         +       if (ceph_inode(inode)->fscache == NULL)
->         +               return;
->         +
->         +       if (PageFsCache(page))
->         +               return __ceph_invalidate_fscache_page(inode, page);
->         +}
->
->> +#ifdef CONFIG_CEPH_FSCACHE
->> +     /* Can we release the page from the cache? */
->> +     if (PageFsCache(page) && ceph_release_fscache_page(page, g) == 0)
->> +             return 0;
->> +#endif
->
-> The PageFsCache() test here is also redundant as fscache_maybe_release_page()
-> also does it - though I acknowledge it does it after doing the "is this cookie
-> valid" test.  The reason I put that test first is that if CONFIG_FSCACHE=n
-> then the "is this cookie valid" test just evaluates immediately to false at
-> compile time.
->
->> +void ceph_fscache_inode_get_cookie(struct inode *inode);
->
-> No such function?
-
-Fixed.
-
->
->> +static inline void ceph_fsxache_async_uncache_inode(struct inode* inode)
->
-> Misspelling?
-
-Fixed.
-
->
->> +static inline int ceph_readpage_from_fscache(struct inode *inode,
->> +                                          struct page *page)
->> +{
->> +     if (ceph_inode(inode)->fscache == NULL)
->> +             return -ENOBUFS;
->> +
->> +     return __ceph_readpage_from_fscache(inode, page);
->> +}
->
-> Looking at functions like this, if you wrap:
->
->         ceph_inode(inode)->fscache
->
-> as, say:
->
->         struct fscache_cookie *ceph_inode_cookie(struct inode *inode)
->         {
->         #ifdef CONFIG_CEPH_FSCACHE
->                 return ceph_inode(inode)->fscache;
->         #else
->                 return NULL;
->         #endif
->         }
->
-> then you can get rid of a lot of cpp conditionals and just rely on gcc's
-> optimiser (see what I did in include/linux/fscache.h).  Note that anything in
-> fs/ceph/cache.c wouldn't need to use this.
-
-Per your suggestion I implemented this. This helped me to get rid of
-some of the CONFIG_CEPH_FSCACHE checks (but not all).
-
->
->>  static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
->> ...
->> +#ifdef CONFIG_CEPH_FSCACHE
->> +             spin_lock(&ci->i_ceph_lock);
->> +             ceph_fscache_register_inode_cookie(fsc, ci);
->> +             spin_unlock(&ci->i_ceph_lock);
->> +#endif
->
-> Ummm...  ceph_fscache_register_inode_cookie() calls fscache_acquire_cookie()
-> which allocates GFP_KERNEL and grabs fscache_addremove_sem.  You can't wrap
-> this call in a spinlock.  Do you use lockdep?
-
-I took a look at the nfs code it seams like there isn't any kind of
-locking in nfs_open around acquiring of the cookie. Then looking back
-at Ceph code it seams like extensively locks in the open code. I'm not
-sure if I have open worry about open races.
-
->
-> David
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index da0f9b8..4703347 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3098,14 +3098,14 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 	 * doesn't have to be perfect; the mds will revoke anything we don't
+ 	 * release.
+ 	 */
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	if (di->lease_session && di->lease_session->s_mds == mds)
+ 		force = 1;
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 
+ 	ret = ceph_encode_inode_release(p, dir, mds, drop, unless, force);
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	if (ret && di->lease_session && di->lease_session->s_mds == mds) {
+ 		dout("encode_dentry_release %p mds%d seq %d\n",
+ 		     dentry, mds, (int)di->lease_seq);
+@@ -3115,6 +3115,6 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 		rel->dname_seq = cpu_to_le32(di->lease_seq);
+ 		__ceph_mdsc_drop_dentry_lease(dentry);
+ 	}
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 	return ret;
+ }
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 6d59006..3575341 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -82,13 +82,13 @@ static int mdsc_show(struct seq_file *s, void *p)
+ 						    &pathbase, 0);
+ 			if (IS_ERR(path))
+ 				path = NULL;
+-			spin_lock(&req->r_dentry->d_lock);
++			d_lock(req->r_dentry);
+ 			seq_printf(s, " #%llx/%.*s (%s)",
+ 				   ceph_ino(req->r_dentry->d_parent->d_inode),
+ 				   req->r_dentry->d_name.len,
+ 				   req->r_dentry->d_name.name,
+ 				   path ? path : "");
+-			spin_unlock(&req->r_dentry->d_lock);
++			d_unlock(req->r_dentry);
+ 			kfree(path);
+ 		} else if (req->r_path1) {
+ 			seq_printf(s, " #%llx/%s", req->r_ino1.ino,
+@@ -100,13 +100,13 @@ static int mdsc_show(struct seq_file *s, void *p)
+ 						    &pathbase, 0);
+ 			if (IS_ERR(path))
+ 				path = NULL;
+-			spin_lock(&req->r_old_dentry->d_lock);
++			d_lock(req->r_old_dentry);
+ 			seq_printf(s, " #%llx/%.*s (%s)",
+ 			   ceph_ino(req->r_old_dentry_dir),
+ 				   req->r_old_dentry->d_name.len,
+ 				   req->r_old_dentry->d_name.name,
+ 				   path ? path : "");
+-			spin_unlock(&req->r_old_dentry->d_lock);
++			d_unlock(req->r_old_dentry);
+ 			kfree(path);
+ 		} else if (req->r_path2) {
+ 			if (req->r_ino2.ino)
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index f02d82b..91c420d 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -44,7 +44,7 @@ int ceph_init_dentry(struct dentry *dentry)
+ 	if (!di)
+ 		return -ENOMEM;          /* oh well */
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	if (dentry->d_fsdata) {
+ 		/* lost a race */
+ 		kmem_cache_free(ceph_dentry_cachep, di);
+@@ -66,7 +66,7 @@ int ceph_init_dentry(struct dentry *dentry)
+ 	dentry->d_fsdata = di;
+ 	ceph_dentry_lru_add(dentry);
+ out_unlock:
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 	return 0;
+ }
+ 
+@@ -77,12 +77,12 @@ struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry)
+ 	if (!dentry)
+ 		return NULL;
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	if (!IS_ROOT(dentry)) {
+ 		inode = dentry->d_parent->d_inode;
+ 		ihold(inode);
+ 	}
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 	return inode;
+ }
+ 
+@@ -129,7 +129,7 @@ static int __dcache_readdir(struct file *filp,
+ 	dout("__dcache_readdir %p at %llu (last %p)\n", dir, filp->f_pos,
+ 	     last);
+ 
+-	spin_lock(&parent->d_lock);
++	d_lock(parent);
+ 
+ 	/* start at beginning? */
+ 	if (filp->f_pos == 2 || last == NULL ||
+@@ -153,7 +153,7 @@ more:
+ 			fi->flags |= CEPH_F_ATEND;
+ 			goto out_unlock;
+ 		}
+-		spin_lock_nested(&dentry->d_lock, DENTRY_D_LOCK_NESTED);
++		d_lock_nested(dentry, DENTRY_D_LOCK_NESTED);
+ 		if (!d_unhashed(dentry) && dentry->d_inode &&
+ 		    ceph_snap(dentry->d_inode) != CEPH_SNAPDIR &&
+ 		    ceph_ino(dentry->d_inode) != CEPH_INO_CEPH &&
+@@ -163,15 +163,15 @@ more:
+ 		     dentry->d_name.len, dentry->d_name.name, di->offset,
+ 		     filp->f_pos, d_unhashed(dentry) ? " unhashed" : "",
+ 		     !dentry->d_inode ? " null" : "");
+-		spin_unlock(&dentry->d_lock);
++		d_unlock(dentry);
+ 		p = p->prev;
+ 		dentry = list_entry(p, struct dentry, d_u.d_child);
+ 		di = ceph_dentry(dentry);
+ 	}
+ 
+ 	dget_dlock(dentry);
+-	spin_unlock(&dentry->d_lock);
+-	spin_unlock(&parent->d_lock);
++	d_unlock(dentry);
++	d_unlock(parent);
+ 
+ 	dout(" %llu (%llu) dentry %p %.*s %p\n", di->offset, filp->f_pos,
+ 	     dentry, dentry->d_name.len, dentry->d_name.name, dentry->d_inode);
+@@ -204,12 +204,12 @@ more:
+ 		goto out;
+ 	}
+ 
+-	spin_lock(&parent->d_lock);
++	d_lock(parent);
+ 	p = p->prev;	/* advance to next dentry */
+ 	goto more;
+ 
+ out_unlock:
+-	spin_unlock(&parent->d_lock);
++	d_unlock(parent);
+ out:
+ 	if (last)
+ 		dput(last);
+@@ -927,10 +927,10 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+  */
+ void ceph_invalidate_dentry_lease(struct dentry *dentry)
+ {
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	dentry->d_time = jiffies;
+ 	ceph_dentry(dentry)->lease_shared_gen = 0;
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ }
+ 
+ /*
+@@ -948,7 +948,7 @@ static int dentry_lease_is_valid(struct dentry *dentry)
+ 	struct inode *dir = NULL;
+ 	u32 seq = 0;
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	di = ceph_dentry(dentry);
+ 	if (di->lease_session) {
+ 		s = di->lease_session;
+@@ -972,7 +972,7 @@ static int dentry_lease_is_valid(struct dentry *dentry)
+ 			}
+ 		}
+ 	}
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 
+ 	if (session) {
+ 		ceph_mdsc_lease_send_msg(session, dir, dentry,
+@@ -1070,7 +1070,7 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+  * When the VFS prunes a dentry from the cache, we need to clear the
+  * complete flag on the parent directory.
+  *
+- * Called under dentry->d_lock.
++ * Called under d_ret_lock(dentry)
+  */
+ static void ceph_d_prune(struct dentry *dentry)
+ {
+@@ -1085,7 +1085,7 @@ static void ceph_d_prune(struct dentry *dentry)
+ 		return;
+ 
+ 	/*
+-	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
++	 * we hold d_ret_lock(), so d_parent is stable, and d_fsdata is never
+ 	 * cleared until d_release
+ 	 */
+ 	ceph_dir_clear_complete(dentry->d_parent->d_inode);
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 16796be..18c4e04 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -68,7 +68,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 	/* if we found an alias, generate a connectable fh */
+ 	if (*max_len >= connected_handle_length && dentry) {
+ 		dout("encode_fh %p connectable\n", dentry);
+-		spin_lock(&dentry->d_lock);
++		d_lock(dentry);
+ 		parent = dentry->d_parent;
+ 		cfh->ino = ceph_ino(inode);
+ 		cfh->parent_ino = ceph_ino(parent->d_inode);
+@@ -76,7 +76,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 							 dentry);
+ 		*max_len = connected_handle_length;
+ 		type = 2;
+-		spin_unlock(&dentry->d_lock);
++		d_unlock(dentry);
+ 	} else if (*max_len >= handle_length) {
+ 		if (parent_inode) {
+ 			/* nfsd wants connectable */
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index be0f7e2..a704972 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -807,7 +807,7 @@ static void update_dentry_lease(struct dentry *dentry,
+ 	if (dentry->d_op != &ceph_dentry_ops)
+ 		return;
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	dout("update_dentry_lease %p duration %lu ms ttl %lu\n",
+ 	     dentry, duration, ttl);
+ 
+@@ -835,7 +835,7 @@ static void update_dentry_lease(struct dentry *dentry,
+ 	di->lease_renew_from = 0;
+ 	dentry->d_time = ttl;
+ out_unlock:
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 	return;
+ }
+ 
+@@ -865,13 +865,13 @@ static void ceph_set_dentry_offset(struct dentry *dn)
+ 	di->offset = ceph_inode(inode)->i_max_offset++;
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	spin_lock(&dir->d_lock);
+-	spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
++	d_lock(dir);
++	d_lock_nested(dn, DENTRY_D_LOCK_NESTED);
+ 	list_move(&dn->d_u.d_child, &dir->d_subdirs);
+ 	dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
+ 	     dn->d_u.d_child.prev, dn->d_u.d_child.next);
+-	spin_unlock(&dn->d_lock);
+-	spin_unlock(&dir->d_lock);
++	d_unlock(dn);
++	d_unlock(dir);
+ }
+ 
+ /*
+@@ -903,8 +903,8 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
+ 	} else if (realdn) {
+ 		dout("dn %p (%d) spliced with %p (%d) "
+ 		     "inode %p ino %llx.%llx\n",
+-		     dn, dn->d_count,
+-		     realdn, realdn->d_count,
++		     dn, d_ret_count(dn),
++		     realdn, d_ret_count(realdn),
+ 		     realdn->d_inode, ceph_vinop(realdn->d_inode));
+ 		dput(dn);
+ 		dn = realdn;
+@@ -1294,11 +1294,11 @@ retry_lookup:
+ 			goto retry_lookup;
+ 		} else {
+ 			/* reorder parent's d_subdirs */
+-			spin_lock(&parent->d_lock);
+-			spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
++			d_lock(parent);
++			d_lock_nested(dn, DENTRY_D_LOCK_NESTED);
+ 			list_move(&dn->d_u.d_child, &parent->d_subdirs);
+-			spin_unlock(&dn->d_lock);
+-			spin_unlock(&parent->d_lock);
++			d_unlock(dn);
++			d_unlock(parent);
+ 		}
+ 
+ 		di = dn->d_fsdata;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 4d29203..24ac9c5 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1515,25 +1515,25 @@ retry:
+ 	for (temp = dentry; !IS_ROOT(temp) && pos != 0; ) {
+ 		struct inode *inode;
+ 
+-		spin_lock(&temp->d_lock);
++		d_lock(temp);
+ 		inode = temp->d_inode;
+ 		if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
+ 			dout("build_path path+%d: %p SNAPDIR\n",
+ 			     pos, temp);
+ 		} else if (stop_on_nosnap && inode &&
+ 			   ceph_snap(inode) == CEPH_NOSNAP) {
+-			spin_unlock(&temp->d_lock);
++			d_unlock(temp);
+ 			break;
+ 		} else {
+ 			pos -= temp->d_name.len;
+ 			if (pos < 0) {
+-				spin_unlock(&temp->d_lock);
++				d_unlock(temp);
+ 				break;
+ 			}
+ 			strncpy(path + pos, temp->d_name.name,
+ 				temp->d_name.len);
+ 		}
+-		spin_unlock(&temp->d_lock);
++		d_unlock(temp);
+ 		if (pos)
+ 			path[--pos] = '/';
+ 		temp = temp->d_parent;
+@@ -1553,7 +1553,7 @@ retry:
+ 	*base = ceph_ino(temp->d_inode);
+ 	*plen = len;
+ 	dout("build_path on %p %d built %llx '%.*s'\n",
+-	     dentry, dentry->d_count, *base, len, path);
++	     dentry, d_ret_count(dentry), *base, len, path);
+ 	return path;
+ }
+ 
+@@ -2742,7 +2742,7 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+  */
+ 
+ /*
+- * caller must hold session s_mutex, dentry->d_lock
++ * caller must hold session s_mutex, d_ret_lock(dentry)
+  */
+ void __ceph_mdsc_drop_dentry_lease(struct dentry *dentry)
+ {
+@@ -2806,7 +2806,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
+ 	if (!dentry)
+ 		goto release;
+ 
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	di = ceph_dentry(dentry);
+ 	switch (h->action) {
+ 	case CEPH_MDS_LEASE_REVOKE:
+@@ -2834,7 +2834,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
+ 		}
+ 		break;
+ 	}
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 	dput(dentry);
+ 
+ 	if (!release)
+@@ -2907,7 +2907,7 @@ void ceph_mdsc_lease_release(struct ceph_mds_client *mdsc, struct inode *inode,
+ 	BUG_ON(dentry == NULL);
+ 
+ 	/* is dentry lease valid? */
+-	spin_lock(&dentry->d_lock);
++	d_lock(dentry);
+ 	di = ceph_dentry(dentry);
+ 	if (!di || !di->lease_session ||
+ 	    di->lease_session->s_mds < 0 ||
+@@ -2916,7 +2916,7 @@ void ceph_mdsc_lease_release(struct ceph_mds_client *mdsc, struct inode *inode,
+ 		dout("lease_release inode %p dentry %p -- "
+ 		     "no lease\n",
+ 		     inode, dentry);
+-		spin_unlock(&dentry->d_lock);
++		d_unlock(dentry);
+ 		return;
+ 	}
+ 
+@@ -2924,7 +2924,7 @@ void ceph_mdsc_lease_release(struct ceph_mds_client *mdsc, struct inode *inode,
+ 	session = ceph_get_mds_session(di->lease_session);
+ 	seq = di->lease_seq;
+ 	__ceph_mdsc_drop_dentry_lease(dentry);
+-	spin_unlock(&dentry->d_lock);
++	d_unlock(dentry);
+ 
+ 	dout("lease_release inode %p dentry %p to mds%d\n",
+ 	     inode, dentry, session->s_mds);
+-- 
+1.7.1
