@@ -1,176 +1,102 @@
-From: "Atchley, Scott" <atchleyes@ornl.gov>
-Subject: Re: Erasure coding library API
-Date: Wed, 3 Jul 2013 07:53:00 -0400
-Message-ID: <487BCFAF-6093-4E0D-BE80-26D8D919EF4D@ornl.gov>
-References: <51D20A03.1030204@dachary.org>
- <68444BDD-2068-4850-998D-C65449C20353@ornl.gov>
- <14B8F72D-C792-4829-9F9B-1175CB27F3EA@ornl.gov>
- <CA+4uBUavSx4SKYB0BQbqz+NqPTy2_WYiFTUWSAXcSJQzJQ9TGQ@mail.gmail.com>
- <622F4407872BA447A16110F65453358C01A4D8067419@FMSAMAIL.fmsa.local>
+From: Colin Guthrie <gmane@colin.guthr.ie>
+Subject: Re: LSB Requires-Start: ... $network ... vs
+	network.service
+Date: Wed, 03 Jul 2013 14:52:28 +0100
+Message-ID: <51D42C9C.4040304@colin.guthr.ie>
+References: <alpine.DEB.2.00.1307022001130.31293@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta02.ornl.gov ([128.219.177.12]:63118 "EHLO mta02.ornl.gov"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755939Ab3GCLxD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jul 2013 07:53:03 -0400
-In-Reply-To: <622F4407872BA447A16110F65453358C01A4D8067419@FMSAMAIL.fmsa.local>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Cc: Samuel Just <sam.just@inktank.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org>
+In-Reply-To: <alpine.DEB.2.00.1307022001130.31293@cobra.newdream.net>
+List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/systemd-devel>,
+	<mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <http://lists.freedesktop.org/archives/systemd-devel>
+List-Post: <mailto:systemd-devel@lists.freedesktop.org>
+List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
+	<mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
+Sender: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
+Errors-To: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, systemd-devel@lists.freedesktop.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Jul 2, 2013, at 10:12 PM, Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com> wrote:
-
-> Scott,
+'Twas brillig, and Sage Weil at 03/07/13 04:06 did gyre and gimble:
+> Hi everyone,
 > 
-> You make a good point comparing (5/3) RS with Xorbas, but a small nit:
+> I have a sysvinit script on fedora 18 (systemd 195) with
 > 
-> "The I/O to recover from a single failure for both schemes is 5 blocks so it is as efficient as Xorbas."
+>  ### BEGIN INIT INFO
+>  # Provides:          ceph
+>  # Default-Start:     2 3 4 5
+>  # Default-Stop:      0 1 6
+>  # Required-Start:    $remote_fs $named $network $time
+>  # Required-Stop:     $remote_fs $named $network $time
+>  # Short-Description: Start Ceph distributed file system daemons at boot  time
+>  # Description:       Enable Ceph distributed file system services.
+>  ### END INIT INFO
 > 
-> Maybe not. You would probably issue I/O to all the remaining 7 blocks to cover for the possibility of double errors. The time to reconstruct would be about the same, but there could be more disk and network I/O. (LRC will need to issue I/O to the rest of the global stripe if it detected multiple local errors.)
-
-Why would you request more than five? If one cannot be read, request another.
-
-Also, I am not sure that you want to request five at once since it will lead to spikes in network traffic and require memory for all five blocks. You will need at least two buffers. Request the first two and start the decoding. You may want a third buffer to overlap the decoding of the current block with the communication for the next block. It may be that the decode time is less than the communication and, in that case, you will want to request all of the blocks at once.
-
-> What I like about Xorbas is that it is an extension of a (x,y) RS. You can start with traditional RS. If degraded reads and repaired blocks are causing a problem, you can add the LRC. If capacity is an issue, you can take it out. 
-
-I like it too and Microsoft has something similar with Pyramid codes. That said, my example using traditional RS can provide more fault-tolerance on average given the same amount of storage overhead.
-
+> and my daemon keeps failing on startup to bind to it's ip:port.  I 
+> modified the script to dump systemctl -a output and I see
 > 
-> Best,
-> Paul
+>  network.service           loaded inactive   dead            LSB: Bring up/down networking
+>  NetworkM...online.service loaded inactive   dead            Network Manager Wait Online
+>  NetworkManager.service    loaded active     running         Network Manager
 > 
-> On Tue, Jul 2, 2013 at 2:33 PM, Samuel Just wrote:
->> I think we should be able to cover most cases by adding an interface like:
->> 
->> set<int> minimum_to_read(const set<int> &want_to_read, const set<int>
->> &available_chunks);
->> 
->> which returns the smallest set required to read/rebuild the chunks in
->> want_to_read given the chunks in available_chunks.  Alternately, we might
->> include a "cost" for reading each chunk like
->> 
->> set<int> minimum_to_read_with_cost(const set<int> &want_to_read, const
->> map<int, int> &available)
->> 
->> which returns the minimum cost set required to read the specified chunks
->> given a mapping of available chunks to costs.  The costs might allow us to
->> consider the difference between reading local chunks vs remote chunks.
->> This should be sufficient to cover the read case (esp the degraded read
->> case) and the repair case.
->> -Sam
->> 
->> On Tue, Jul 2, 2013 at 10:14 AM, Atchley, Scott <atchleyes@ornl.gov>
->> wrote:
->>> On Jul 2, 2013, at 10:07 AM, "Atchley, Scott" <atchleyes@ornl.gov>
->> wrote:
->>> 
->>>> On Jul 1, 2013, at 7:00 PM, Loic Dachary <loic@dachary.org> wrote:
->>>> 
->>>>> Hi,
->>>>> 
->>>>> Today Sam pointed out that the API for LRC ( Xorbas Hadoop Project
->> Page, Locally Repairable Codes (LRC) http://smahesh.com/HadoopUSC/ for
->> instance ) would need to be different from the one initialy proposed:
->>>> 
->>>> An interesting video. Not as entertaining as Jim Plank's video. ;-)
->>>> 
->>>> While Plank's focused on the processor requirements for
->> encoding/decoding, this video focuses on the network and disk I/O
->> requirements.
->>>> 
->>>>>  context(k, m, reed-solomon|...) => context* c
->>>>>  encode(context* c, void* data) => void* chunks[k+m]
->>>>>  decode(context* c, void* chunk[k+m], int*
->>>>> indices_of_erased_chunks) => void* data // erased chunks are not used
->>>>>  repair(context* c, void* chunk[k+m], int*
->>>>> indices_of_erased_chunks) => void* chunks[k+m] // erased chunks are
->>>>> rebuilt
->>>>> 
->>>>> The decode function must allow for partial read:
->>>>> 
->>>>>  decode(context* c, int offset, int length, void* chunk[k+m], int*
->>>>> indices_of_erased_chunks, int* missing_chunks) => void* data
->>>>> 
->>>>> If there are not enough chunks to recover the desired data range
->> [offset, offset+length) the function returns NULL and sets missing_chunks
->> to the list of chunks that must be retrieved in order to be able to read
->> the desired data.
->>>>> 
->>>>> If decode is called to read just 1 chunk and it is missing, reed-
->> solomon would return on error and ask for all other chunks to repair. If
->> the underlying library implements LRC, it would ask for a subset of the
->> chunks.
->>>>> 
->>>>> An implementation allowing only full reads and using jerasure ( which
->> does not do LRC ) requires that offset is always zero, length is the size
->> of the object and returns a copy of indices_of_erased_chunks if there are
->> not enough chunks to rebuild the missing ones.
->>>>> 
->>>>> Comments are welcome :-)
->>>> 
->>>> I have loosely followed this discussion and I have not looked closely
->> at the proposed API nor at the jerasure interface. My apologies if this
->> has already been addressed.
->>>> 
->>>> It is not clear to me from the above proposed API (ignoring the partial
->> read) what it would do. Was the original intent to encode the entire file
->> using k+m blocks irregardless of the file size and of the rados object
->> size?
->>>> 
->>>> If so, how will you map rados objects to the logical k+m objects and
->> vice versa?
->>>> 
->>>> If not, then the initial API needed an offset and length (either
->> logical or rados object).
->>>> 
->>>> I would assume that you would want to operate on rados sized objects.
->> Given a fixed k+m, then you may have more than one set of k+m objects per
->> file. This is ignoring the LRC "local" parity blocks. For example, if the
->> rados object size if 1 MB and k = 10 and m = 4 (as in the Xorbas video),
->> then for a 20 MB file one would need two sets of encoding blocks. The
->> first for objects 1-10 and the second for objects 11-20.
->>>> 
->>>> Perhaps, this is what the context is above. If so, it should have the
->> logical offset and rados object size, no?
->>>> 
->>>> I see value in the Xorbas concept and I wonder if the jerasure library
->> can be modified to generate the local parity blocks such that they can be
->> used to generate the global parity blocks. That would be a question for
->> Jim Plank.
->>> 
->>> The benefits of the Xorbas concept is reduced network and disk I/O for
->> failures while maintaining traditional RS's higher fault-tolerance than 3x
->> replication while using less space.
->>> 
->>> You can do almost the same thing with jerasure without modifying it at
->> all. Using the values from the Xorbas video, they have k data blocks, m
->> global parity blocks, and 2 local parity blocks (generated from k/2 data
->> blocks) for a total of k+m+2 blocks on disk that can tolerate any m
->> failures. In their example, k = 10 and m = 4. They store 16 blocks for
->> each 10 data blocks.
->>> 
->>> If you use traditional RS encoding via jerasure and used the same amount
->> of storage (16 blocks for each 10 data blocks), you could encode 3 parity
->> blocks for each 5 data blocks. This would consume 16 data blocks for each
->> 10 data blocks and the fault-tolerance would be variable from 3-6 failures
->> depending on how the failures fell between the two groups of 5 blocks
->> which is higher than the static 4 failures for the Xorbas code. The I/O to
->> recover from a single failure for both schemes is 5 blocks so it is as
->> efficient as Xorbas. On average, it provides more fault-tolerance, but it
->> can be less (four failures from one group of 5 data + 3 parity blocks),
->> but that worst case is the same as 3x replication.
->>> 
->>> Scott--
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
+> I know next to nothing about systemd (or Fedora, for that matter), but I 
+> would expect the $network bit in Required-Start to make the job wait for 
+> network.service. 
 
+Almost, but not quite!
+
+Anything prefixed with a $ in LSB headers doesn't refer to a single
+service, but rather a collection of services all working towareds
+providing that. Some LSB headers may have "Provides: $network" for
+example. In systemd, this concept is generally translated to "targets"
+and thus $network actually corresponds to network.target in systemd, not
+network.service.
+
+More info here:
+
+http://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/
+
+
+In your setup (from the output above) it looks like network.service is
+actually disabled and you're using NetworkManager.service instead to
+initialise your network.
+
+When this happens network.target will be complete pretty much at the
+same moment that NetworkManager has finished starting. This is because
+network.target doesn't have any built in knowledge of when a network is
+considered "up" (see the link above for several examples of what
+different people may consider "up").
+
+In order to actually wait for your network to be up, you need to enable
+the NetworkManager-wait-online.service. This will then delay the point
+at which network.target becomes started until after that service exits.
+This should cause your network dependant service to be started later and
+you'll be happy!
+
+Of course this doesn't help when the network disappears and comes back
+later, so the *real* solution here is to patch ceph to be aware of the
+rtnetlink events. It then doesn't have any solid dep on a fairly loosely
+defined and unreliable "point in time" when the network is ready and
+remains available forever more!
+
+Hope that helps.
+
+Col
+
+-- 
+
+Colin Guthrie
+gmane(at)colin.guthr.ie
+http://colin.guthr.ie/
+
+Day Job:
+  Tribalogic Limited http://www.tribalogic.net/
+Open Source:
+  Mageia Contributor http://www.mageia.org/
+  PulseAudio Hacker http://www.pulseaudio.org/
+  Trac Hacker http://trac.edgewall.org/
