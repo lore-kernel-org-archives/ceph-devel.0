@@ -1,380 +1,217 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Erasure coding library API
-Date: Thu, 04 Jul 2013 15:24:20 +0200
-Message-ID: <51D57784.8080005@dachary.org>
-References: <51D20A03.1030204@dachary.org> <68444BDD-2068-4850-998D-C65449C20353@ornl.gov> <14B8F72D-C792-4829-9F9B-1175CB27F3EA@ornl.gov> <CA+4uBUavSx4SKYB0BQbqz+NqPTy2_WYiFTUWSAXcSJQzJQ9TGQ@mail.gmail.com> <622F4407872BA447A16110F65453358C01A4D8067419@FMSAMAIL.fmsa.local> <487BCFAF-6093-4E0D-BE80-26D8D919EF4D@ornl.gov> <622F4407872BA447A16110F65453358C01A4D80674CF@FMSAMAIL.fmsa.local>
+From: christophe courtaut <christophe.courtaut@gmail.com>
+Subject: Re: Contribution
+Date: Thu, 4 Jul 2013 15:58:53 +0200
+Message-ID: <CAA8043gZQFHNONx1dQsOYUtBRN-khc0JaWd4LbMsRNuQn0=byA@mail.gmail.com>
+References: <CAA8043idUL1qbWfrBffhYXL8JX0LZ+WsMseUypatret7PrxBGw@mail.gmail.com>
+ <CABBk=J9-hrMgGJ6ofvR0uuzX_gTfKJhH_TFCS4fR6m6gD=UBmg@mail.gmail.com>
+ <CAA8043g_vkZvx_ErHZbF8eq12T2bvvXGWA_u=NRdwEWnmaqaug@mail.gmail.com>
+ <CAA8043iF3GFwQLonGvCY=A=_mKWYX1zAXEYFFMJ1cyuw1ZOspw@mail.gmail.com> <CABBk=J812X6RKR0cBo1mPF2Xm4agHHJrRMjgqpOEn9uosBt6-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigD88B16CA84F6766B46FB7DF6"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:54113 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752186Ab3GDNYX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jul 2013 09:24:23 -0400
-In-Reply-To: <622F4407872BA447A16110F65453358C01A4D80674CF@FMSAMAIL.fmsa.local>
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:42681 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752708Ab3GDN7O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jul 2013 09:59:14 -0400
+Received: by mail-oa0-f53.google.com with SMTP id k14so1946293oag.26
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jul 2013 06:59:13 -0700 (PDT)
+In-Reply-To: <CABBk=J812X6RKR0cBo1mPF2Xm4agHHJrRMjgqpOEn9uosBt6-Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigD88B16CA84F6766B46FB7DF6
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Yehuda,
 
-Hi,
+Thanks for pointing out tasks to me.
 
-I was thinking about scrubbing of erasure coded chunks and realized I don=
-'t know the answer to this very simple question : what happens when a chu=
-nk is corrupted ? I.e. if AB is coded with 2+1 into A + B ( data ) + Z (p=
-arity ) and Z is replaced with Q. Would reed-solomon ignore/discard the c=
-orrupted chunk ? If that's the case I think it slightly changes what the =
-API should be.
+I have lately worked on theses tasks.
+We are done with #1779, #5228 and #5324.
 
-Cheers
+#Issue #1779:
 
-On 04/07/2013 05:06, Paul Von-Stamwitz wrote:
-> Scott, et al.
->=20
-> Here is an interesting paper from Usenix HotStorage Conference which pr=
-ovides local codes without additional capacity overhead.
->=20
-> Check it out. (abstract with links to paper and slides)
-> https://www.usenix.org/conference/hotstorage13/solution-network-challen=
-ges-data-recovery-erasure-coded-distributed-storage
->=20
-> Cheers,
-> pvs
->=20
->> On Jul 3, 2013, at 11:19 AM, Paul Von-Stamwitz wrote:
->>
->> Hi Scott,
->>
->> Point taken.
->>
->> I was thinking about Loic's decode description where k+m was requested=
- and
->> data was decoded when k blocks were received. But he was referring to =
-full
->> stripe reads where all the memory is allocated.
->>
->> Degraded reads and block repair are a different matter.
->>
->> pvs
->>
->>> On Jul 3, 2013, at 4:53 AM Scott Atchley wrote:
->>>
->>> On Jul 2, 2013, at 10:12 PM, Paul Von-Stamwitz
->>> <PVonStamwitz@us.fujitsu.com> wrote:
->>>
->>>> Scott,
->>>>
->>>> You make a good point comparing (5/3) RS with Xorbas, but a small ni=
-t:
->>>>
->>>> "The I/O to recover from a single failure for both schemes is 5 bloc=
-ks
->>> so it is as efficient as Xorbas."
->>>>
->>>> Maybe not. You would probably issue I/O to all the remaining 7 block=
-s
->> to
->>> cover for the possibility of double errors. The time to reconstruct
->> would
->>> be about the same, but there could be more disk and network I/O. (LRC=
+This issue has been marked has resolved, but as Greg pointed out here
+http://tracker.ceph.com/issues/1779,
+it might be backported.
 
->> will
->>> need to issue I/O to the rest of the global stripe if it detected
->> multiple
->>> local errors.)
->>>
->>> Why would you request more than five? If one cannot be read, request
->>> another.
->>>
->>> Also, I am not sure that you want to request five at once since it wi=
-ll
->>> lead to spikes in network traffic and require memory for all five blo=
-cks.
->>> You will need at least two buffers. Request the first two and start t=
-he
->>> decoding. You may want a third buffer to overlap the decoding of the
->>> current block with the communication for the next block. It may be th=
-at
->>> the decode time is less than the communication and, in that case, you=
+Do you agree? If so, where should it be backported?
 
->> will
->>> want to request all of the blocks at once.
->>>
->>>> What I like about Xorbas is that it is an extension of a (x,y) RS. Y=
-ou
->>> can start with traditional RS. If degraded reads and repaired blocks =
-are
->>> causing a problem, you can add the LRC. If capacity is an issue, you =
-can
->>> take it out.
->>>
->>> I like it too and Microsoft has something similar with Pyramid codes.=
+Issue #3074:
 
->> That
->>> said, my example using traditional RS can provide more fault-toleranc=
-e
->> on
->>> average given the same amount of storage overhead.
->>>
->>>>
->>>> Best,
->>>> Paul
->>>>
->>>> On Tue, Jul 2, 2013 at 2:33 PM, Samuel Just wrote:
->>>>> I think we should be able to cover most cases by adding an interfac=
-e
->>> like:
->>>>>
->>>>> set<int> minimum_to_read(const set<int> &want_to_read, const set<in=
-t>
->>>>> &available_chunks);
->>>>>
->>>>> which returns the smallest set required to read/rebuild the chunks =
-in
->>>>> want_to_read given the chunks in available_chunks.  Alternately, we=
+I started looking at #3074, which one seems to be trivial,
+but as commented on the issue http://tracker.ceph.com/issues/3074,
+the options that should be in the help does not only belong to radosgw,
+but seems to be a generic option parsed in many binaries.
+i would need more info to step forward.
 
->>> might
->>>>> include a "cost" for reading each chunk like
->>>>>
->>>>> set<int> minimum_to_read_with_cost(const set<int> &want_to_read,
->> const
->>>>> map<int, int> &available)
->>>>>
->>>>> which returns the minimum cost set required to read the specified
->>> chunks
->>>>> given a mapping of available chunks to costs.  The costs might allo=
-w
->> us
->>> to
->>>>> consider the difference between reading local chunks vs remote chun=
-ks.
->>>>> This should be sufficient to cover the read case (esp the degraded
->> read
->>>>> case) and the repair case.
->>>>> -Sam
->>>>>
->>>>> On Tue, Jul 2, 2013 at 10:14 AM, Atchley, Scott <atchleyes@ornl.gov=
+Do we duplicate the option help in each binaries supporting it?
+Do we use generic help? Or something else maybe?
+
+Issue #5416:
+
+I digged into ceph code to find about the --rgw-zone option, but i had
+no chance in finding where this option is parsed, so i'll be able to write help
+for it.
+As you told me too, i looked into cuttlefish branch, and many others,
+but still can't find it.
+It would be great if you could point me out where exactly does this
+option lives.
+
+Issue #5374:
+
+A pull request has been made for the #5374, and you commented on it.
+Btw i think the #5374 should be sandboxed to this issue and we should open
+a new one for the feature you request about S3 keystone.
+
+S3 Keystone:
+
+As i am new to keystone and s3, i need more explanation on the work to
+be done here.
+I'm not familiar with the authentication process in S3, and on how it could rely
+on keystone. Do you have any ideas on what should be done?
+
+temp URLs:
+
+You mentionned earlier a mecanism of temp URLs, already present in S3.
+How does it works? What are there purpose?
+
+Issue #4365:
+
+For the #4365 issue, i think i miss some info about
+what to do exactly. Do you have any hints on how wildcard role works?
+How does rgw need to integrate this wildcard roles? new Rest API command?
+
+Vstart documentation:
+
+I also submitted another pull request on vstart documentation.
+As i previously written a manpage a while ago, i have been told
+that a manpage is not the good way to document vstart.
+I now propose a new documentation page.
+
+All feedbacks are very welcome.
+
+Best regards.
+
+On Mon, Jul 1, 2013 at 10:23 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+> Hi,
 >
->>>>> wrote:
->>>>>> On Jul 2, 2013, at 10:07 AM, "Atchley, Scott" <atchleyes@ornl.gov>=
-
->>>>> wrote:
->>>>>>
->>>>>>> On Jul 1, 2013, at 7:00 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->>>>>>>
->>>>>>>> Hi,
->>>>>>>>
->>>>>>>> Today Sam pointed out that the API for LRC ( Xorbas Hadoop Proje=
-ct
->>>>> Page, Locally Repairable Codes (LRC) http://smahesh.com/HadoopUSC/
->> for
->>>>> instance ) would need to be different from the one initialy propose=
-d:
->>>>>>>
->>>>>>> An interesting video. Not as entertaining as Jim Plank's video. ;=
--)
->>>>>>>
->>>>>>> While Plank's focused on the processor requirements for
->>>>> encoding/decoding, this video focuses on the network and disk I/O
->>>>> requirements.
->>>>>>>
->>>>>>>>  context(k, m, reed-solomon|...) =3D> context* c
->>>>>>>>  encode(context* c, void* data) =3D> void* chunks[k+m]
->>>>>>>>  decode(context* c, void* chunk[k+m], int*
->>>>>>>> indices_of_erased_chunks) =3D> void* data // erased chunks are n=
-ot
->>> used
->>>>>>>>  repair(context* c, void* chunk[k+m], int*
->>>>>>>> indices_of_erased_chunks) =3D> void* chunks[k+m] // erased chunk=
-s
->> are
->>>>>>>> rebuilt
->>>>>>>>
->>>>>>>> The decode function must allow for partial read:
->>>>>>>>
->>>>>>>>  decode(context* c, int offset, int length, void* chunk[k+m], in=
-t*
->>>>>>>> indices_of_erased_chunks, int* missing_chunks) =3D> void* data
->>>>>>>>
->>>>>>>> If there are not enough chunks to recover the desired data range=
-
->>>>> [offset, offset+length) the function returns NULL and sets
->>> missing_chunks
->>>>> to the list of chunks that must be retrieved in order to be able to=
-
->>> read
->>>>> the desired data.
->>>>>>>>
->>>>>>>> If decode is called to read just 1 chunk and it is missing, reed=
--
->>>>> solomon would return on error and ask for all other chunks to repai=
-r.
->>> If
->>>>> the underlying library implements LRC, it would ask for a subset of=
-
->> the
->>>>> chunks.
->>>>>>>>
->>>>>>>> An implementation allowing only full reads and using jerasure
->>> ( which
->>>>> does not do LRC ) requires that offset is always zero, length is th=
-e
->>> size
->>>>> of the object and returns a copy of indices_of_erased_chunks if the=
-re
->>> are
->>>>> not enough chunks to rebuild the missing ones.
->>>>>>>>
->>>>>>>> Comments are welcome :-)
->>>>>>>
->>>>>>> I have loosely followed this discussion and I have not looked
->> closely
->>>>> at the proposed API nor at the jerasure interface. My apologies if
->> this
->>>>> has already been addressed.
->>>>>>>
->>>>>>> It is not clear to me from the above proposed API (ignoring the
->>> partial
->>>>> read) what it would do. Was the original intent to encode the entir=
-e
->>> file
->>>>> using k+m blocks irregardless of the file size and of the rados
->> object
->>>>> size?
->>>>>>>
->>>>>>> If so, how will you map rados objects to the logical k+m objects
->> and
->>>>> vice versa?
->>>>>>>
->>>>>>> If not, then the initial API needed an offset and length (either
->>>>> logical or rados object).
->>>>>>>
->>>>>>> I would assume that you would want to operate on rados sized
->> objects.
->>>>> Given a fixed k+m, then you may have more than one set of k+m objec=
-ts
->>> per
->>>>> file. This is ignoring the LRC "local" parity blocks. For example, =
-if
->>> the
->>>>> rados object size if 1 MB and k =3D 10 and m =3D 4 (as in the Xorba=
-s
->> video),
->>>>> then for a 20 MB file one would need two sets of encoding blocks. T=
-he
->>>>> first for objects 1-10 and the second for objects 11-20.
->>>>>>>
->>>>>>> Perhaps, this is what the context is above. If so, it should have=
-
->> the
->>>>> logical offset and rados object size, no?
->>>>>>>
->>>>>>> I see value in the Xorbas concept and I wonder if the jerasure
->>> library
->>>>> can be modified to generate the local parity blocks such that they
->> can
->>> be
->>>>> used to generate the global parity blocks. That would be a question=
-
->> for
->>>>> Jim Plank.
->>>>>>
->>>>>> The benefits of the Xorbas concept is reduced network and disk I/O=
-
->> for
->>>>> failures while maintaining traditional RS's higher fault-tolerance
->> than
->>> 3x
->>>>> replication while using less space.
->>>>>>
->>>>>> You can do almost the same thing with jerasure without modifying i=
-t
->> at
->>>>> all. Using the values from the Xorbas video, they have k data block=
-s,
->> m
->>>>> global parity blocks, and 2 local parity blocks (generated from k/2=
-
->>> data
->>>>> blocks) for a total of k+m+2 blocks on disk that can tolerate any m=
-
->>>>> failures. In their example, k =3D 10 and m =3D 4. They store 16 blo=
-cks
->> for
->>>>> each 10 data blocks.
->>>>>>
->>>>>> If you use traditional RS encoding via jerasure and used the same
->>> amount
->>>>> of storage (16 blocks for each 10 data blocks), you could encode 3
->>> parity
->>>>> blocks for each 5 data blocks. This would consume 16 data blocks fo=
-r
->>> each
->>>>> 10 data blocks and the fault-tolerance would be variable from 3-6
->>> failures
->>>>> depending on how the failures fell between the two groups of 5 bloc=
-ks
->>>>> which is higher than the static 4 failures for the Xorbas code. The=
-
->> I/O
->>> to
->>>>> recover from a single failure for both schemes is 5 blocks so it is=
-
->> as
->>>>> efficient as Xorbas. On average, it provides more fault-tolerance,
->> but
->>> it
->>>>> can be less (four failures from one group of 5 data + 3 parity
->> blocks),
->>>>> but that worst case is the same as 3x replication.
->>>>>>
->>>>>> Scott--
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
->> devel"
->>>>>> in the body of a message to majordomo@vger.kernel.org More majordo=
-mo
->>>>>> info at  http://vger.kernel.org/majordomo-info.html
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in
->>>>> the body of a message to majordomo@vger.kernel.org More majordomo
->> info
->>> at
->>>>> http://vger.kernel.org/majordomo-info.html
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+> On Mon, Jul 1, 2013 at 12:52 PM, christophe courtaut
+> <christophe.courtaut@gmail.com> wrote:
+>> Hi,
+>>
+>> I updated my pull request and looking forward #5416, and asked for
+>> more information on the tracker.
+>>
+>> Nowadays, i'm iterating on the tracker to find issues i can fix.
+>> I currently proposed fixes for #1779, #5228 and #5324.
+>
+> I pulled your fix for 1779. I commented on 5228 (a similar fix for
+> that issue already went in, but your fix does some other things). I
+> will pull 5324 (already commented on that at github).
+>
+>>
+>> I'm not very familiar with tests, and it might be a little too big for
+>> me to start with.
+>> Btw, I was also in contact with Joe Buck to properly setup a fake cluster
+>> suitable to make tests, as i was having trouble in doing that.
+>>
+>> To get started, i'm looking for things a bit smaller, that could fit in a day.
+>>
+>> I would be glad if you could point me to some specific tasks,
+>> even if they are not specially related to the geo-replication blueprint,
+>> the best for me remaining rgw related tasks as it's what i am trying to learn.
+>
+>
+> Here are a few (ordered by complexity):
+>
+>  - 3074 (trivial)
+>  - swift temp URLs (there's already a similar mechanism for S3)
+>  - 5374
+>  - 4365
+>
+> Thanks!
+> Yehuda
+>
+>>
+>> Best regards.
+>>
+>> On Thu, Jun 27, 2013 at 5:25 PM, christophe courtaut
+>> <christophe.courtaut@gmail.com> wrote:
+>>> ---------- Forwarded message ----------
+>>> From: Yehuda Sadeh <yehuda@inktank.com>
+>>> Date: Thu, Jun 27, 2013 at 5:21 PM
+>>> Subject: Re: Contribution
+>>> To: christophe courtaut <christophe.courtaut@gmail.com>
+>>>
+>>>
+>>> On Thu, Jun 27, 2013 at 7:30 AM, christophe courtaut
+>>> <christophe.courtaut@gmail.com> wrote:
+>>>> Hi Yehuda,
+>>>>
+>>>> I went thru http://tracker.ceph.com/projects/rgw/issues today ( all 22
+>>>> of them ;-) and contributed a patch to
+>>>> http://tracker.ceph.com/issues/5324 ( that was an easy one ). I'd be
+>>>> happy to either fix more bugs on the current development branch or
+>>>> contribute to the geo-replication
+>>>> https://github.com/ceph/ceph/commits/wip-rgw-geo-2
+>>>>
+>>>> The amount of work going on with wip-rgw-geo is impressive and I'm not
+>>>> sure what I could do to help. It would be most convenient for me to
+>>>> pick from a list of self contained tasks in the tracker. I would be
+>>>> happy to spend a few days on each of them, one at a time. Since I'm
+>>>> still new to the code base, working on a tasks that would require
+>>>> weeks of work is probably too ambitious at this point. However, I very
+>>>> much understand that the definition of such tasks requires a fair
+>>>> amount of work on your part. And if noone works on these tasks, this
+>>>> would be a waste of your time. If that helps, I promise to diligently
+>>>> work on them, full time :-)
+>>>>
+>>>
+>>> Hi,
+>>>
+>>>    I saw your pull request, and also commented on the commit. There's
+>>> a similar easy issue (#5416) that you can take a look at now if you'd
+>>> like.
+>>> I think that at the moment with regard to the geo-replication, the
+>>> most helpful thing would be to test the different APIs, make sure they
+>>> work as expected as we're on a tight schedule, and planning a feature
+>>> freeze by the end of next week.
+>>> The API specifications are in the wiki
+>>> (http://wiki.ceph.com/RESTful_API_for_DR_%2F%2F_Geo-Replication).
+>>> Specifically I'm interested in data sync, as it's the path less
+>>> tested. If you could simulate (even manually) a scenario, where you
+>>> put an object in a bucket, check to see whether bucket is listed in
+>>> the data log, then go to the bucket index log, see the change entry in
+>>> the bucket index log, then generate a copy of that object from the
+>>> master zone to the secondary zone. Look at the operation state log to
+>>> see whether this operation is marked as completed.
+>>> Check to see whether the object appears in the secondary zone, check
+>>> its attributes.
+>>> That tests a wide range of the new APIs, and it'll be really helpful.
+>>> If you could somewhat automate it and create a script that does it,
+>>> it'll be extra helpful.
+>>>
+>>> Most of the other DR/geo-replication tasks are either done (waiting
+>>> for review and merge) or being implemented now. There are other
+>>> non-geo-replication issues that I can assign to you if you want to get
+>>> your feet dipped in the rgw code. Even if these are not a direct
+>>> geo-replication issues it may help us getting geo-replication out the
+>>> door faster as it'll free me to work on geo-replication. Let me know
+>>> if you're interested.
+>>>
+>>> Thanks!
+>>> Yehuda
+>>>
+>>>
+>>> --
+>>> Christophe Courtaut
+>>
+>>
+>>
+>> --
+>> Christophe Courtaut
 
 
---------------enigD88B16CA84F6766B46FB7DF6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlHVd4QACgkQ8dLMyEl6F23n7gCgmqPTVqZUSVFbtQ24LWh4b+Kc
-SXgAn18HxOyfUc6ZhT16b1wGYD/vQoCK
-=6hJN
------END PGP SIGNATURE-----
-
---------------enigD88B16CA84F6766B46FB7DF6--
+-- 
+Christophe Courtaut
