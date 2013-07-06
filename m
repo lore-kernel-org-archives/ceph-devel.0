@@ -1,117 +1,97 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: PGLog API : missing
-Date: Sat, 06 Jul 2013 01:33:50 +0200
-Message-ID: <51D757DE.4010304@dachary.org>
-References: <51C313E5.8020408@dachary.org>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: CEPH Erasure Encoding + OSD Scalability
+Date: Sat, 6 Jul 2013 13:45:03 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E494B06CCB@PLOXCHG04.cern.ch>
+References: <3472A07E6605974CBC9BC573F1BC02E494B06990@PLOXCHG04.cern.ch>,<51D73960.3070303@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig6FFBBD4434DEE547908A96BA"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:40046 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751224Ab3GEXdx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jul 2013 19:33:53 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 53F5026394
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Jul 2013 01:33:51 +0200 (CEST)
-In-Reply-To: <51C313E5.8020408@dachary.org>
+Received: from cernmx30.cern.ch ([137.138.144.177]:34829 "EHLO
+	CERNMX30.cern.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750857Ab3GFNpJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jul 2013 09:45:09 -0400
+In-Reply-To: <51D73960.3070303@dachary.org>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig6FFBBD4434DEE547908A96BA
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+HI Loic,=A0
+(C)RS stands for the Cauchy Reed-Solomon codes which are based on pure =
+parity operations, while the standard Reed-Solomon codes need more mult=
+iplications and are slower.
 
-For the record:
+Considering the checksumming ... for comparison the CRC32 code from lib=
+z run's on a 8-core Xeon at ~730 MB/s for small block sizes while SSE4.=
+2 CRC32C checksum run's at ~2GByte/s.
 
-On 06/21/2013 06:42 PM, Samuel Just wrote:
-> That seems like a reasonable break down for the missing set.  Rather
-> than representing a full object, the missing set could be understood
-> to represent whether an OSD has or is missing it's own piece of an
-> object, whether that is a full copy or an erasure coded chunk.  The
-> primary would use the missing sets to determine which osds are missing
-> which chunks.
+Cheers Andreas.
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 05 July 2013 23:23
+To: Andreas Joachim Peters
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: CEPH Erasure Encoding + OSD Scalability
 
+Hi Andreas,
 
-On 20/06/2013 16:38, Loic Dachary wrote:
-> Hi Sam,
->=20
-> I tried to consider the part of the API of PGLog related to pg_missing_=
-t, looking at what it currently is and what it should be. At the moment i=
-t is ( not considering the methods that have a side effect on both missin=
-g and log ):
->=20
-> Accessor:
->=20
->   const pg_missing_t& get_missing() const { return missing; }
->=20
-> Actors:
->=20
->   void missing_add(const hobject_t& oid, eversion_t need, eversion_t ha=
-ve)
->   void revise_need(hobject_t oid, eversion_t need)   void revise_have(h=
-object_t oid, eversion_t have)
->=20
->   void missing_got(map<hobject_t, pg_missing_t::item>::const_iterator m=
-)
->   void missing_rm(map<hobject_t, pg_missing_t::item>::const_iterator m)=
+On 04/07/2013 23:01, Andreas Joachim Peters wrote:> Hi Loic,
+> thanks for the responses!
+>
+> Maybe this is useful for your erasure code discussion:
+>
+> as an example in our RS implementation we chunk a data block of e.g. =
+4M into 4 data chunks of 1M. Then we create a 2 parity chunks.
+>
+> Data & parity chunks are split into 4k blocks and these 4k blocks get=
+ a CRC32C block checksum each (SSE4.2 CPU extension =3D> MIT library or=
+ BTRFS). This creates 0.1% volume overhead (4 bytes per 4096 bytes) - n=
+othing compared to the parity overhead ...
+>
+> You can now easily detect data corruption using the local checksums a=
+nd avoid to read any parity information and (C)RS decoding if there is =
+no corruption detected. Moreover CRC32C computation is distributed over=
+ several (in this case 4) machines while (C)RS decoding would run on a =
+single machine where you assemble a block ... and CRC32C is faster than=
+ (C)RS decoding (with SSE4.2) ...
 
->=20
-> The get_missing read only accessor is used in PG.{cc,h}, OSD.{cc,h}, Re=
-plicated.{cc,h} It is used in dozen of different ways and I'm not sure if=
- it would make sense to define an API to replace them. I fail to see a pa=
-ttern that would be useful.
->=20
-> The missing_add method is used by ReplicatedPG::recover_object_replicas=
- and  PG::repair_object The revise_have method is used by ReplicatedPG::s=
-ubmit_push_data
-> The revise_need method is used by ReplicatedPG::mark_all_unfound_lost w=
-hen handling pg_log_entry_t::LOST_REVERT
-> The missing_got method is used by ReplicatedPG::mark_all_unfound_lost w=
-hen handling pg_log_entry_t::LOST_MARK
-> The missing_rm method is used by ReplicatedPG::mark_all_unfound_lost wh=
-en handling pg_log_entry_t::LOST_DELETE
->=20
-> All these make sense to me. But I'm looking at what is currently in pla=
-ce rather than thinking about what it should become to accomodate for era=
-sure coding.
->=20
-> With erasure_coding one OSD contains a chunk. If it is lost, it will no=
-t be copied from another OSD, it will be repaired by using the content of=
- other OSDs. For instance; if the chunk object 4 version 1,2 is not in OS=
-D 3 the other chunks objects will be fetched from the remaining OSDs, the=
- repair function will then be called using their content to create the ch=
-unk object 4 version 1,2. Instead of fetching a copy of the missing objec=
-t from one OSD, the code would fetch chunk objects from multiple OSDs to =
-be able to repair.
-> Because pg_missing_t is dealing with the missing objects for a single O=
-SD, it may not need to be modified when used in the context of erasure co=
-ding.
->=20
-> Am I making any sense ? I'm not sure ;-)
->=20
+What does (C)RS mean ? (C)Reed-Solomon ?
 
---=20
+> In our case we write this checksum information separate from the orig=
+inal data ... while in a block-based storage like CEPH it would be prob=
+ably inlined in the data chunk.
+> If an OSD detects to run on BRTFS or ZFS one could disable automatica=
+lly the CRC32C code.
+
+Nice. I did not know that was built-in :-)
+https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/era=
+sure-code.rst#scrubbing
+
+> (wouldn't CRC32C be also useful for normal CEPH block replication? )
+
+I don't know the details of scrubbing but it seems CRC is already used =
+by deep scrubbing
+
+https://github.com/ceph/ceph/blob/master/src/osd/PG.cc#L2731
+
+Cheers
+
+> As far as I know with the RS CODEC we use you can either miss stripes=
+ (data =3D0) in the decoding process but you cannot inject corrupted st=
+ripes into the decoding process, so the block checksumming is important=
+=2E
+>
+> Cheers Andreas.
+
+--
 Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+All that is necessary for the triumph of evil is that good people do no=
+thing.
 
-
---------------enig6FFBBD4434DEE547908A96BA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlHXV94ACgkQ8dLMyEl6F23MlACghiFVUlJXETAwVOIWNFefeoRW
-GCwAoKXmBAI4JktDqwMJvLbwJMb/FB5m
-=E2xH
------END PGP SIGNATURE-----
-
---------------enig6FFBBD4434DEE547908A96BA--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
