@@ -1,72 +1,53 @@
-From: Sage Weil <sage@inktank.com>
-Subject: mon fixes
-Date: Sun, 7 Jul 2013 21:48:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307072130250.22858@cobra.newdream.net>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: Possible bug in src/Makefile.am
+Date: Mon, 08 Jul 2013 18:51:16 +1200
+Message-ID: <51DA6164.6090304@catalyst.net.nz>
+References: <51D8F96B.5040902@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54566 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753532Ab3GHEsn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jul 2013 00:48:43 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id E06948004B
-	for <ceph-devel@vger.kernel.org>; Sun,  7 Jul 2013 21:48:42 -0700 (PDT)
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:50329 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753446Ab3GHGvV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jul 2013 02:51:21 -0400
 Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id AF1108004B
-	for <ceph-devel@vger.kernel.org>; Sun,  7 Jul 2013 21:48:42 -0700 (PDT)
+	by mail.catalyst.net.nz (Postfix) with ESMTP id D50C433074
+	for <ceph-devel@vger.kernel.org>; Mon,  8 Jul 2013 18:51:17 +1200 (NZST)
+Received: from mail.catalyst.net.nz ([127.0.0.1])
+	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 5g+NYiFzVLqO for <ceph-devel@vger.kernel.org>;
+	Mon,  8 Jul 2013 18:51:16 +1200 (NZST)
+Received: from [192.168.1.64] (122-60-64-230.jetstream.xtra.co.nz [122.60.64.230])
+	(Authenticated sender: mark.kirkwood)
+	by mail.catalyst.net.nz (Postfix) with ESMTPSA id D765633073
+	for <ceph-devel@vger.kernel.org>; Mon,  8 Jul 2013 18:51:16 +1200 (NZST)
+In-Reply-To: <51D8F96B.5040902@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-I spent a lot of time over the last couple days tracking down monitor sync 
-problems which resulted in several different patches and branches that are 
-ready for review, merge, and backporting.  This includes a bunch of new 
-tests, mon scrubbing, and a few teuthology changes.
+It seems this has been noted previously (just...):
 
-This order probably makes the most sense:
+http://tracker.ceph.com/issues/5492
 
-scrub: dirt-simple scrubbing of mon stores to verify they are storing the 
-right thing (and, e.g, sync works as expected).  not performant enough for 
-automatic background scrubbing, but good enough for dev or teuthology to 
-use to verify things are working properly.
+Blast, I was just a bit slow :-) , should have posted when I first 
+noticed this a week or so ago!
 
- review wip-mon-scrub (next)
- https://github.com/ceph/ceph/pull/404
-  + backport to cuttlefish (includes feature bit patches)
+Regards
 
-  There's a version of htis i tested on cuttlefish and reproduced the 
-  bug below, but the branch needs to be redone after the master commit is 
-  finalized/reviewed/etc.
+Mark
 
- review teuthology.git wip-mon-thrash patches (better mon thrashing, triggers scrub)
- https://github.com/ceph/teuthology/pull/17
-  + backport to cuttlefish
-
- ceph-qa-suite wip-mon tests
-
-
-full map bug (this was turned up by scrub):
-
- review wip-mon-fix-osdmap-sync
- https://github.com/ceph/ceph/pull/405
-  + backport to cuttlefish
-
-  The new tests + scrub reliably reproduce this, and pass with the fix, 
-  both on master and cuttlefish.
-
-
-new mon sync is a simpler implementation of mon sync.  this needs careful 
-review, but is passing all of my tests and appears to be less bug-prone.
-
- https://github.com/ceph/ceph/pull/400
-
-
-mon sync improvements for cuttlefish.  this is a cleaned-up version of the 
-changes we needed for a customer cluster to make a very long-running sync 
-complete.  several config values adjusted, and sync behavior made more 
-reliable/robust... luckily without changing the protocol compatibility
-with cuttlefish.  reviewed by joao, but should get another set of eyes.
-
- https://github.com/ceph/ceph/pull/399
+On 07/07/13 17:15, Mark Kirkwood wrote:
+> I noticed when building with prefix=/usr/local that the install step
+> produced an usr/local/sbin hierarchy *under* /usr/local (i.e
+> /usr/local/usr/local/sbin) with ceph_disk and friends (i.e
+> ceph_sbin_SCRIPTS) therein. I am guessing that these should actually be
+> installed in /usr/local/sbin (i.e prefix/sbin).
+>
+> The attached patch does this.
+>
+> Regards
+>
+> Mark
 
