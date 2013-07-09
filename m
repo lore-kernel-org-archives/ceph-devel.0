@@ -1,72 +1,47 @@
-From: Johannes Erdfelt <johannes@erdfelt.com>
-Subject: [PATCH] Python Ioctx.get_xattrs does not take xattr_name
-Date: Tue, 9 Jul 2013 08:15:33 -0700
-Message-ID: <20130709151533.GN2650@sventech.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: assertion failure in update_from_paxos
+Date: Tue, 9 Jul 2013 08:37:33 -0700
+Message-ID: <CA+Hcz5_EeKy=stHHKUvL4QkpGT8KsMc7dpr7KAppwBcDAMjLug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from murphy.sventech.com ([208.68.36.220]:42902 "EHLO
-	murphy.sventech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751549Ab3GIPYQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jul 2013 11:24:16 -0400
-Received: from mail.sventech.com (mail.sventech.com [199.168.103.203])
-	by murphy.sventech.com (Postfix) with ESMTP id 9462A2600A3
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Jul 2013 15:15:34 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-ve0-f181.google.com ([209.85.128.181]:41724 "EHLO
+	mail-ve0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751999Ab3GIPhe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jul 2013 11:37:34 -0400
+Received: by mail-ve0-f181.google.com with SMTP id db10so4765275veb.12
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jul 2013 08:37:33 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Fixes bug 5528
+I'm getting the following failure when running a vstart instance with
+1 of each daemon.
 
-Since it returns all xattrs, it does not take an xattr_name. Also,
-add unit tests for the Object xattrs methods.
+--
 
-Signed-off-by: Johannes Erdfelt <johannes@erdfelt.com>
----
- src/pybind/rados.py           |  4 ++--
- src/test/pybind/test_rados.py | 12 ++++++++++++
- 2 files changed, 14 insertions(+), 2 deletions(-)
+0> 2013-07-09 08:30:43.213345 7fdc289e97c0 -1 mon/OSDMonitor.cc: In
+function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
+7fdc289e97c0 time 2013-07-09 08:30:43.207686
+mon/OSDMonitor.cc: 129: FAILED assert(latest_bl.length() != 0)
 
-diff --git a/src/pybind/rados.py b/src/pybind/rados.py
-index 13badc9..0ba8184 100644
---- a/src/pybind/rados.py
-+++ b/src/pybind/rados.py
-@@ -1566,9 +1566,9 @@ class Object(object):
-         return self.ioctx.get_xattr(self.key, xattr_name)
- 
-     @set_object_locator
--    def get_xattrs(self, xattr_name):
-+    def get_xattrs(self):
-         self.require_object_exists()
--        return self.ioctx.get_xattrs(self.key, xattr_name)
-+        return self.ioctx.get_xattrs(self.key)
- 
-     @set_object_locator
-     def set_xattr(self, xattr_name, xattr_value):
-diff --git a/src/test/pybind/test_rados.py b/src/test/pybind/test_rados.py
-index f182524..01b6a21 100644
---- a/src/test/pybind/test_rados.py
-+++ b/src/test/pybind/test_rados.py
-@@ -117,6 +117,18 @@ class TestIoctx(object):
-             stored_xattrs[key] = value
-         eq(stored_xattrs, xattrs)
- 
-+    def test_obj_xattrs(self):
-+        xattrs = dict(a='1', b='2', c='3', d='a\0b', e='\0')
-+        self.ioctx.write('abc', '')
-+        obj = list(self.ioctx.list_objects())[0]
-+        for key, value in xattrs.iteritems():
-+            obj.set_xattr(key, value)
-+            eq(obj.get_xattr(key), value)
-+        stored_xattrs = {}
-+        for key, value in obj.get_xattrs():
-+            stored_xattrs[key] = value
-+        eq(stored_xattrs, xattrs)
-+
-     def test_create_snap(self):
-         assert_raises(ObjectNotFound, self.ioctx.remove_snap, 'foo')
-         self.ioctx.create_snap('foo')
--- 
-1.8.3.1
-
+ ceph version 0.65-307-g0e93dd9 (0e93dd93e5439fb82c416cb8eec7f36598ae7b48)
+ 1: (OSDMonitor::update_from_paxos(bool*)+0x16bd) [0x5ad5ed]
+ 2: (PaxosService::refresh(bool*)+0x143) [0x592963]
+ 3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x536c87]
+ 4: (Paxos::finish_proposal()+0x3a) [0x58c13a]
+ 5: (Paxos::begin(ceph::buffer::list&)+0x82c) [0x58bbac]
+ 6: (Paxos::propose_queued()+0xd9) [0x58be79]
+ 7: (Paxos::propose_new_value(ceph::buffer::list&, Context*)+0x140) [0x58d230]
+ 8: (PaxosService::propose_pending()+0x6c8) [0x593c28]
+ 9: (PaxosService::_active()+0x58b) [0x5956fb]
+ 10: (PaxosService::election_finished()+0x328) [0x595c38]
+ 11: (Monitor::win_election(unsigned int, std::set<int,
+std::less<int>, std::allocator<int> >&, unsigned long)+0x2e5)
+[0x55ae05]
+ 12: (Monitor::win_standalone_election()+0x197) [0x55b027]
+ 13: (Monitor::bootstrap()+0x84b) [0x55b8fb]
+ 14: (Monitor::init()+0xad) [0x55bbcd]
+ 15: (main()+0x1ac7) [0x5296b7]
+ 16: (__libc_start_main()+0xf5) [0x3f2dc21b75]
+ 17: ./ceph-mon() [0x52e259]
