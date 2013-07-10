@@ -1,42 +1,49 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: 4x write amplification?
-Date: Wed, 10 Jul 2013 10:43:18 -0700
-Message-ID: <CAPYLRzj_8WvEXs55e5DuD3kaiLH17en=HVtgCS1bm0Q84PGcQg@mail.gmail.com>
-References: <51DCC225.1050700@ubuntukylin.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: wip-libcephfs-rebased-v65 ready for pull
+Date: Wed, 10 Jul 2013 15:19:21 -0400 (EDT)
+Message-ID: <289628364.92.1373483961468.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:38075 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754728Ab3GJRnU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jul 2013 13:43:20 -0400
-Received: by mail-wi0-f180.google.com with SMTP id c10so6620016wiw.13
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 10:43:19 -0700 (PDT)
-In-Reply-To: <51DCC225.1050700@ubuntukylin.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:4503 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751300Ab3GJTTY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Jul 2013 15:19:24 -0400
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by aa.linuxbox.com (8.13.1/8.13.1/SuSE Linux 0.7) with ESMTP id r6AJJNWh003423
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 15:19:23 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 2CDA73FC8497
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 15:19:23 -0400 (EDT)
+Received: from thunderbeast.private.linuxbox.com ([127.0.0.1])
+	by localhost (thunderbeast.private.linuxbox.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id sKsf5nLR6Pwy for <ceph-devel@vger.kernel.org>;
+	Wed, 10 Jul 2013 15:19:22 -0400 (EDT)
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 2CA943FC848B
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 15:19:22 -0400 (EDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 9, 2013 at 7:08 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> Hi,
->   We did a simple throughput test on Ceph with 2 OSD nodes configured
-> with one replica policy. For each OSD node, the throughput measured by 'dd'
-> run locally is 117MB/s. Therefore, in theory, the two OSDs could provide
-> 200+MB/s throughput. However, using 'iozone' from clients we only get a peak
-> throughput at around 40MB/s. Is that because a write will incur 2 replica *
-> 2 journal write? That is, writing into journal
-> and replica doubled the traffic, respectively, which results in a total
-> 4x write amplification. Is that true, or our understanding is wrong,
-> and some performance tuning hint?
+Hi,
 
-Well, that write amplification is certainly happening. However, I'd
-expect to get a better ratio out of the disk than that. Couple things
-to check:
-1) is your benchmark dispatching multiple requests at a time, or just
-one? (the latency on a single request is going to make throughput
-numbers come out badly.)
-2) How do your disks handle two simultaneous write streams? (Most
-disks should be fine, but sometimes they struggle.)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+We tracked down the refcount issue found Sat., and have rebased/pushed wip-libcephfs-rebased-v65
+with the fix.
+
+Thanks!
+
+Matt
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
