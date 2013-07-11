@@ -1,51 +1,81 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: Don't do set_layout for file which has been
- written.
-Date: Thu, 11 Jul 2013 11:54:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307111154260.5149@cobra.newdream.net>
-References: <201307111004467716774@gmail.com>
+Subject: Re: wip-libcephfs rebased and pulled up to v.65
+Date: Thu, 11 Jul 2013 12:01:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307111201000.5149@cobra.newdream.net>
+References: <941FC8BE87ADE64D90E4EB6CD5545177100231F4@EPBYMINSA0032.epam.com>, <78k3kyfjv2.wl%aemerson@linuxbox.com> <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44300 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44375 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932118Ab3GKSyv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 14:54:51 -0400
-In-Reply-To: <201307111004467716774@gmail.com>
+	with ESMTP id S1752113Ab3GKTB7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 15:01:59 -0400
+In-Reply-To: <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
+Cc: "Adam C. Emerson" <aemerson@linuxbox.com>, "Matt W. Benjamin" <matt@linuxbox.com>, David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org
 
-On Thu, 11 Jul 2013, majianpeng wrote:
-> Cephfs don't change the layout which has been written.So add this check
-> before do.
+Please check out the current wip=libcephfs branch and let me know how it 
+looks/works for you guys.  I cleaned up your patches a bit and fixed teh 
+root cause of the xattr issue you were seeing.
 
-This could conceivaably change in the future, and I'm not sure there is 
-harm is the MDS round trip to get the error code here...?
-
+Thanks!
 sage
 
+
+On Thu, 11 Jul 2013, Ilya Storozhilov wrote:
+
+> Hi Adam (CC: Sage, Matt and David),
 > 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/ioctl.c | 3 +++
->  1 file changed, 3 insertions(+)
+> it seems to me we have choosen a bad commit description, where instead of "FIX: readlink not copy link path to user's buffer" there should be something like "FIX: ceph_ll_readlink() now fills user provided buffer with the link data instead of returning a pointer to the libcephfs internal memory location". Take a look to the sourcecode - it does actually what you are talking about (see https://github.com/ferustigris/ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc):
 > 
-> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-> index e0b4ef3..cbea896 100644
-> --- a/fs/ceph/ioctl.c
-> +++ b/fs/ceph/ioctl.c
-> @@ -72,6 +72,9 @@ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
->  	struct ceph_ioctl_layout nl;
->  	int err;
->  
-> +	/*Only for file which has never been written*/
-> +	if (i_size_read(inode) > 0 || ci->i_truncate_seq > 1)
-> +		return -ENOTEMPTY;
->  	if (copy_from_user(&l, arg, sizeof(l)))
->  		return -EFAULT;
->  
-> -- 
-> 1.8.1.2
-> N????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
+> -----------------------------------------------------------------------
+> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char *buf, size_t bufsiz, int uid, int gid)
+> {
+>   const char *value = NULL;
+>   int res = (cmount->get_client()->ll_readlink(in, &value, uid, gid));
+>   if (res < 0)
+>     return res;
+>   if (bufsiz < (size_t)res)
+>     return ENAMETOOLONG;
+>   memcpy(buf, value, res);  // <-- Here we are copying a link data to the user provided buffer. This is what you want us to do.
+>   return res;
+> }
+> -----------------------------------------------------------------------
+> 
+> In your branch (see https://github.com/linuxbox2/linuxbox-ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc) this function does not copy link data to the user-provided buffer, but passes back a pointer to the internal libcephfs structure, which is not good solution, as you mentioned below:
+> 
+> -----------------------------------------------------------------------
+> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char **value, int uid, int gid)
+> {
+>   return (cmount->get_client()->ll_readlink(in, (const char**) value, uid, gid));
+> }
+> -----------------------------------------------------------------------
+> 
+> Regards,
+> Ilya
+> 
+> ________________________________________
+> ??: Adam C. Emerson [aemerson@linuxbox.com]
+> ??????????: 10 ???? 2013 ?. 20:41
+> To: Ilya Storozhilov
+> Cc: Sage Weil; Matt W. Benjamin; David Zafman
+> ????: Re: wip-libcephfs rebased and pulled up to v.65
+> 
+> At Wed, 10 Jul 2013 12:17:24 +0000, Ilya Storozhilov wrote:
+> [snip]
+> > ?wip-libcephfs-rebased-v65? branch of the https://github.com/linuxbox2/linuxbox-ceph repository has not been branched from the ?wip-libcephfs? branch of https://github.com/ceph/ceph as it was made with our ?open_by_handle_api? branch of the https://github.com/ferustigris/ceph repo. That is why we were not able to automatically ?cherry-pick? our changes using respective git command. So we have manually applied our changes to the ?wip-libcephfs-rebased-v65? branch in https://github.com/ferustigris/ceph repo as one commit - you can check it out here: https://github.com/ferustigris/ceph/commit/c3f4940b2cfcfd3ea9a004e6f07f1aa3c0b6c419.
+> [snip]
+> 
+> Good afternoon, sir.
+> 
+> I was looking at your patch and Matt and I have concerns about the
+> change you made to readlink.  By passing back a pointer to a buffer
+> rather than copying the link into a supplied buffer, we're opening
+> ourselves up to the content changing, being deallocated, or otherwise
+> having something bad happen to it.
+> 
+> Thanks.
+> 
+> 
