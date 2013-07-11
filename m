@@ -1,63 +1,54 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph:Update the file time after mmap-write.
-Date: Thu, 11 Jul 2013 09:42:38 +0800
-Message-ID: <CAAM7YA=3stCqYppd6YAwk9tC_rHMzraqge_L6gGZkzaG8LH6Ag@mail.gmail.com>
-References: <201307110917146231510@gmail.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH] ceph:Update the file time after mmap-write.
+Date: Thu, 11 Jul 2013 09:49:21 +0800
+Message-ID: <201307110949190107103@gmail.com>
+References: <201307110917146231510@gmail.com>,
+	<CAAM7YA=3stCqYppd6YAwk9tC_rHMzraqge_L6gGZkzaG8LH6Ag@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:41634 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754752Ab3GKBmk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jul 2013 21:42:40 -0400
-Received: by mail-la0-f50.google.com with SMTP id ep20so1923938lab.9
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 18:42:38 -0700 (PDT)
-In-Reply-To: <201307110917146231510@gmail.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:44299 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754326Ab3GKBtd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jul 2013 21:49:33 -0400
+Received: by mail-pa0-f44.google.com with SMTP id lj1so7331522pab.17
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 18:49:32 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
 Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 11, 2013 at 9:17 AM, majianpeng <majianpeng@gmail.com> wrote:
-> Although, mmap-write of ceph update the time of file using
-> file_update_time.Because it don't mark the relative cap so the time
-> can't save.
+Pk9uIFRodSwgSnVsIDExLCAyMDEzIGF0IDk6MTcgQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+IEFsdGhvdWdoLCBtbWFwLXdyaXRlIG9mIGNlcGggdXBkYXRl
+IHRoZSB0aW1lIG9mIGZpbGUgdXNpbmcNCj4+IGZpbGVfdXBkYXRlX3RpbWUuQmVjYXVzZSBpdCBk
+b24ndCBtYXJrIHRoZSByZWxhdGl2ZSBjYXAgc28gdGhlIHRpbWUNCj4+IGNhbid0IHNhdmUuDQo+
+DQo+SSB0aGluayBjZXBoZnMnIG1tYXAgSU8gc3VwcG9ydCBpcyBzdGlsbCBicm9rZW4uIG1tYXAg
+SU8gZG9lcyBub3QgcmVzcGVjdA0KPmNlcGggY2FwYWJpbGl0aWVzIGF0IGFsbC4gSXQncyBwb3Nz
+aWJsZSB0aGF0IHRoZSBrY2xpZW50IGhhcyBubyBGdyBjYXAgd2hlbg0KPmNlcGhfcGFnZV9ta3dy
+aXRlIGlzIGNhbGxlZC4NCj4NClRoYW5rcywgaSdsbCBhZGQgdGhpcyBjaGVjayBhbmQgcmVzZW50
+Lg0KDQpKaWFucGVuZyBNYQ0KPllhbiwgWmhlbmcNCj4NCj4NCj4+DQo+PiBTaWduZWQtb2ZmLWJ5
+OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQo+PiAtLS0NCj4+ICBmcy9jZXBo
+L2FkZHIuYyB8IDggKysrKysrKysNCj4+ICAxIGZpbGUgY2hhbmdlZCwgOCBpbnNlcnRpb25zKCsp
+DQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvYWRkci5jIGIvZnMvY2VwaC9hZGRyLmMNCj4+
+IGluZGV4IDM4YjVjMWIuLjUyZjdjN2MgMTAwNjQ0DQo+PiAtLS0gYS9mcy9jZXBoL2FkZHIuYw0K
+Pj4gKysrIGIvZnMvY2VwaC9hZGRyLmMNCj4+IEBAIC0xMjMxLDEwICsxMjMxLDE4IEBAIHN0YXRp
+YyBpbnQgY2VwaF9wYWdlX21rd3JpdGUoc3RydWN0IHZtX2FyZWFfc3RydWN0ICp2bWEsIHN0cnVj
+dCB2bV9mYXVsdCAqdm1mKQ0KPj4NCj4+ICAgICAgICAgcmV0ID0gY2VwaF91cGRhdGVfd3JpdGVh
+YmxlX3BhZ2Uodm1hLT52bV9maWxlLCBvZmYsIGxlbiwgcGFnZSk7DQo+PiAgICAgICAgIGlmIChy
+ZXQgPT0gMCkgew0KPj4gKyAgICAgICAgICAgICAgIGludCBkaXJ0eTsNCj4+ICsgICAgICAgICAg
+ICAgICBzdHJ1Y3QgY2VwaF9pbm9kZV9pbmZvICpjaSA9IGNlcGhfaW5vZGUoaW5vZGUpOw0KPj4g
+ICAgICAgICAgICAgICAgIC8qIHN1Y2Nlc3MuICB3ZSdsbCBrZWVwIHRoZSBwYWdlIGxvY2tlZC4g
+Ki8NCj4+ICAgICAgICAgICAgICAgICBzZXRfcGFnZV9kaXJ0eShwYWdlKTsNCj4+ICAgICAgICAg
+ICAgICAgICB1cF9yZWFkKCZtZHNjLT5zbmFwX3J3c2VtKTsNCj4+ICAgICAgICAgICAgICAgICBy
+ZXQgPSBWTV9GQVVMVF9MT0NLRUQ7DQo+PiArDQo+PiArICAgICAgICAgICAgICAgc3Bpbl9sb2Nr
+KCZjaS0+aV9jZXBoX2xvY2spOw0KPj4gKyAgICAgICAgICAgICAgIGRpcnR5ID0gX19jZXBoX21h
+cmtfZGlydHlfY2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9XUik7DQo+PiArICAgICAgICAgICAgICAg
+c3Bpbl91bmxvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+PiArICAgICAgICAgICAgICAgaWYgKGRp
+cnR5KQ0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgX19tYXJrX2lub2RlX2RpcnR5KGlub2Rl
+LCBkaXJ0eSk7DQo+PiAgICAgICAgIH0gZWxzZSB7DQo+PiAgICAgICAgICAgICAgICAgaWYgKHJl
+dCA9PSAtRU5PTUVNKQ0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgcmV0ID0gVk1fRkFVTFRf
+T09NOw0KPj4gLS0NCj4+IDEuOC4xLjI=
 
-I think cephfs' mmap IO support is still broken. mmap IO does not respect
-ceph capabilities at all. It's possible that the kclient has no Fw cap when
-ceph_page_mkwrite is called.
-
-Yan, Zheng
-
-
->
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/addr.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 38b5c1b..52f7c7c 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1231,10 +1231,18 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
->
->         ret = ceph_update_writeable_page(vma->vm_file, off, len, page);
->         if (ret == 0) {
-> +               int dirty;
-> +               struct ceph_inode_info *ci = ceph_inode(inode);
->                 /* success.  we'll keep the page locked. */
->                 set_page_dirty(page);
->                 up_read(&mdsc->snap_rwsem);
->                 ret = VM_FAULT_LOCKED;
-> +
-> +               spin_lock(&ci->i_ceph_lock);
-> +               dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
-> +               spin_unlock(&ci->i_ceph_lock);
-> +               if (dirty)
-> +                       __mark_inode_dirty(inode, dirty);
->         } else {
->                 if (ret == -ENOMEM)
->                         ret = VM_FAULT_OOM;
-> --
-> 1.8.1.2
