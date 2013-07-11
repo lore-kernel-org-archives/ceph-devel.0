@@ -1,84 +1,37 @@
-From: Ranjan Sarpangala Venkatesh <ranjansv@soe.ucsc.edu>
-Subject: Re: Using valgrind_osd option
-Date: Wed, 10 Jul 2013 23:21:50 -0700
-Message-ID: <CA+bvTtkDCOVMO3vXWsU+V00Q_4rO=ZZstxmi+SAedg0o6Cc2hw@mail.gmail.com>
-References: <CA+bvTtnt_GZEiwHgsmW_uWvjhFxE3QxyUTWX=nM6hs5E6ikLuQ@mail.gmail.com>
- <51DCB596.4040800@inktank.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH] ceph:Update the file time after mmap-write.
+Date: Thu, 11 Jul 2013 15:53:53 +0800
+Message-ID: <201307111553503594177@gmail.com>
+References: <201307110917146231510@gmail.com>,
+	<CAAM7YA=3stCqYppd6YAwk9tC_rHMzraqge_L6gGZkzaG8LH6Ag@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f177.google.com ([74.125.82.177]:59579 "EHLO
-	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755088Ab3GKGWL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 02:22:11 -0400
-Received: by mail-we0-f177.google.com with SMTP id m19so6363325wev.8
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jul 2013 23:22:10 -0700 (PDT)
-In-Reply-To: <51DCB596.4040800@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:33405 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754774Ab3GKHyF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 03:54:05 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rq2so7645980pbb.33
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jul 2013 00:54:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Mark,
+Pk9uIFRodSwgSnVsIDExLCAyMDEzIGF0IDk6MTcgQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+IEFsdGhvdWdoLCBtbWFwLXdyaXRlIG9mIGNlcGggdXBkYXRl
+IHRoZSB0aW1lIG9mIGZpbGUgdXNpbmcNCj4+IGZpbGVfdXBkYXRlX3RpbWUuQmVjYXVzZSBpdCBk
+b24ndCBtYXJrIHRoZSByZWxhdGl2ZSBjYXAgc28gdGhlIHRpbWUNCj4+IGNhbid0IHNhdmUuDQo+
+DQo+SSB0aGluayBjZXBoZnMnIG1tYXAgSU8gc3VwcG9ydCBpcyBzdGlsbCBicm9rZW4uIG1tYXAg
+SU8gZG9lcyBub3QgcmVzcGVjdA0KPmNlcGggY2FwYWJpbGl0aWVzIGF0IGFsbC4gSXQncyBwb3Nz
+aWJsZSB0aGF0IHRoZSBrY2xpZW50IGhhcyBubyBGdyBjYXAgd2hlbg0KPmNlcGhfcGFnZV9ta3dy
+aXRlIGlzIGNhbGxlZC4NCj4NCj5ZYW4sIFpoZW5nDQo+DQo+DQpIaSBZYW4sDQoJRm9yIHRoZSBy
+ZWFkIG9mIG1tYXAsIGkgdGhpbmsgd2UgYWxzbyBhZGQgY2FwLWNoZWNrLg0KQW5kIGkgdGhpbmsg
+d2UgY2FuIHJld3JpdGUgdGhlIGZpbGVtYXBfZmF1bHQgZWN0IGNlcGhfZmlsZW1hcF9mYXVsdC4N
+CkluIGNlcGhfZmlsZW1hcF9mYXVsdCwgbW9zdCBjb2RlIGZyb20gZmlsZW1hcF9mYXVsdCwgd2Ug
+b25seSBhZGQgY2FwLWNoZWNrIGZvciByZWFkLW9wZXJhdGlvbi4NCkhvdyBhYm91dCB0aGlzIG9y
+IGNhbiB5b3Ugc3VnZ2VzdCBhbnRob3IgbWV0aG9kPw0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
 
-I upgraded valgrind to 3.8.1 and also used
---soname-synonyms=somalloc=*tcmalloc* option. However, no massif.out
-file was created.
-
-Kindly let me know if i am missing something.
-
-With regards
-Ranjan
-
-On Tue, Jul 9, 2013 at 6:15 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
-> Hi,
->
-> I ran into this problem a while back and it was because I was trying to use
-> a version of valgrind that didn't support tcmalloc (which Ceph was compiled
-> to use).  Try upgrading valgrind to 3.8.0 or newer.  You'll also need to
-> pass something like:
->
-> --soname-synonyms=somalloc=*tcmalloc*
->
-> Mark
->
->
-> On 07/09/2013 08:10 PM, Ranjan Sarpangala Venkatesh wrote:
->>
->> Hi,
->>
->> I am trying to collect memory of the OSD daemon with the following
->>
->> ./vstart.sh -n -x -l --valgrind_osd 'massif'
->>
->> However, when I print massif.out file there is nothing
->>
->> cat massif.out.15391
->>
->> desc: (none)
->> cmd: ./ceph-osd -i 0 -c ceph.conf -f
->> time_unit: i
->> #-----------
->> snapshot=0
->> #-----------
->> time=0
->> mem_heap_B=0
->> mem_heap_extra_B=0
->> mem_stacks_B=0
->> heap_tree=empty
->>
->> --
->> With regards,
->> Ranjan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-
-
-
--- 
-With regards,
-Ranjan
