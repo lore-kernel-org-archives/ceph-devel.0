@@ -1,43 +1,60 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: Set object mtime
-Date: Thu, 11 Jul 2013 15:56:15 +0200
-Message-ID: <CAF6-1L7R1T8icOcC+sguevBV-WigA=jZLEVCRP8HX0YXgGTK+g@mail.gmail.com>
-References: <CAFtEh-e6GWeU-hP==zPjcXDuxfWkmeZo0wDwY-R82SJR2JZnzQ@mail.gmail.com>
-	<5150A306.6030509@42on.com>
-	<CAFtEh-d6r4S+1G1LLhWnzJXhKR1maQXJYrVK8nn+3UjjchoSZw@mail.gmail.com>
-	<alpine.DEB.2.00.1303251237090.12444@cobra.newdream.net>
-	<CAFtEh-dNzjj5yXmw+qej2a67yRW_YbjPk5uVQKhiK00kFRZysg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: wip-libcephfs-rebased-v65 ready for pull
+Date: Thu, 11 Jul 2013 11:50:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307111149050.5149@cobra.newdream.net>
+References: <289628364.92.1373483961468.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:37989 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932442Ab3GKN4Q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 09:56:16 -0400
-Received: by mail-bk0-f46.google.com with SMTP id na10so3336547bkb.33
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Jul 2013 06:56:15 -0700 (PDT)
-In-Reply-To: <CAFtEh-dNzjj5yXmw+qej2a67yRW_YbjPk5uVQKhiK00kFRZysg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44246 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756475Ab3GKSu7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 14:50:59 -0400
+In-Reply-To: <289628364.92.1373483961468.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Damien Churchill <damoxc@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Matt W. Benjamin" <matt@linuxbox.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
 
-> Okay thanks! A call in the C API would be handy. I was wanting to look
-> at creating a tool to sync RADOS between clusters. Is that anything
-> that's in the development plan already?
+I've rebased this on master, and cherry-picked the fixes from Ilya on top.  
+The exception is the xattr changes, which turned out to be an MDS bug 
+turned by up the unit test.
 
-I was just thinking of the same thing.
+Is there a particular need for this to be in dumpling?  I'm inclined to 
+delay a release to avoid potentially destabliizing things this late in the 
+game.
 
-Basically I want rsync between pools, mostly to allow changing the
-number of PG with minimum down time. The current method is to copy the
-pool but that implies nothing is writing to it in the mean time and I
-can't shutdown operations for that long.
-
-Did you end up writing that tool ?
+Thanks!
+sage
 
 
-Cheers,
+On Wed, 10 Jul 2013, Matt W. Benjamin wrote:
 
-    Sylvain
+> Hi,
+> 
+> We tracked down the refcount issue found Sat., and have rebased/pushed wip-libcephfs-rebased-v65
+> with the fix.
+> 
+> Thanks!
+> 
+> Matt
+> 
+> -- 
+> Matt Benjamin
+> The Linux Box
+> 206 South Fifth Ave. Suite 150
+> Ann Arbor, MI  48104
+> 
+> http://linuxbox.com
+> 
+> tel.  734-761-4689 
+> fax.  734-769-8938 
+> cel.  734-216-5309 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
