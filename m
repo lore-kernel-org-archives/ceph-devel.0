@@ -1,81 +1,87 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: wip-libcephfs rebased and pulled up to v.65
-Date: Thu, 11 Jul 2013 12:01:59 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307111201000.5149@cobra.newdream.net>
-References: <941FC8BE87ADE64D90E4EB6CD5545177100231F4@EPBYMINSA0032.epam.com>, <78k3kyfjv2.wl%aemerson@linuxbox.com> <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: Re: wip-libcephfs-rebased-v65 ready for pull
+Date: Thu, 11 Jul 2013 15:11:00 -0400 (EDT)
+Message-ID: <669764413.145.1373569860896.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <1375543209.143.1373569719851.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44375 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752113Ab3GKTB7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jul 2013 15:01:59 -0400
-In-Reply-To: <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:3794 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751050Ab3GKTLJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Jul 2013 15:11:09 -0400
+In-Reply-To: <1375543209.143.1373569719851.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
-Cc: "Adam C. Emerson" <aemerson@linuxbox.com>, "Matt W. Benjamin" <matt@linuxbox.com>, David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Please check out the current wip=libcephfs branch and let me know how it 
-looks/works for you guys.  I cleaned up your patches a bit and fixed teh 
-root cause of the xattr issue you were seeing.
+Hi Sage,
 
-Thanks!
-sage
+It's up to you folks.  If the next window works better, let's just enter it early.
 
+Matt
 
-On Thu, 11 Jul 2013, Ilya Storozhilov wrote:
+----- "Sage Weil" <sage@inktank.com> wrote:
 
-> Hi Adam (CC: Sage, Matt and David),
+> Hi,
 > 
-> it seems to me we have choosen a bad commit description, where instead of "FIX: readlink not copy link path to user's buffer" there should be something like "FIX: ceph_ll_readlink() now fills user provided buffer with the link data instead of returning a pointer to the libcephfs internal memory location". Take a look to the sourcecode - it does actually what you are talking about (see https://github.com/ferustigris/ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc):
+> I've rebased this on master, and cherry-picked the fixes from Ilya on
+> top.  
+> The exception is the xattr changes, which turned out to be an MDS bug
 > 
-> -----------------------------------------------------------------------
-> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char *buf, size_t bufsiz, int uid, int gid)
-> {
->   const char *value = NULL;
->   int res = (cmount->get_client()->ll_readlink(in, &value, uid, gid));
->   if (res < 0)
->     return res;
->   if (bufsiz < (size_t)res)
->     return ENAMETOOLONG;
->   memcpy(buf, value, res);  // <-- Here we are copying a link data to the user provided buffer. This is what you want us to do.
->   return res;
-> }
-> -----------------------------------------------------------------------
+> turned by up the unit test.
 > 
-> In your branch (see https://github.com/linuxbox2/linuxbox-ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc) this function does not copy link data to the user-provided buffer, but passes back a pointer to the internal libcephfs structure, which is not good solution, as you mentioned below:
+> Is there a particular need for this to be in dumpling?  I'm inclined
+> to 
+> delay a release to avoid potentially destabliizing things this late in
+> the 
+> game.
 > 
-> -----------------------------------------------------------------------
-> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char **value, int uid, int gid)
-> {
->   return (cmount->get_client()->ll_readlink(in, (const char**) value, uid, gid));
-> }
-> -----------------------------------------------------------------------
-> 
-> Regards,
-> Ilya
-> 
-> ________________________________________
-> ??: Adam C. Emerson [aemerson@linuxbox.com]
-> ??????????: 10 ???? 2013 ?. 20:41
-> To: Ilya Storozhilov
-> Cc: Sage Weil; Matt W. Benjamin; David Zafman
-> ????: Re: wip-libcephfs rebased and pulled up to v.65
-> 
-> At Wed, 10 Jul 2013 12:17:24 +0000, Ilya Storozhilov wrote:
-> [snip]
-> > ?wip-libcephfs-rebased-v65? branch of the https://github.com/linuxbox2/linuxbox-ceph repository has not been branched from the ?wip-libcephfs? branch of https://github.com/ceph/ceph as it was made with our ?open_by_handle_api? branch of the https://github.com/ferustigris/ceph repo. That is why we were not able to automatically ?cherry-pick? our changes using respective git command. So we have manually applied our changes to the ?wip-libcephfs-rebased-v65? branch in https://github.com/ferustigris/ceph repo as one commit - you can check it out here: https://github.com/ferustigris/ceph/commit/c3f4940b2cfcfd3ea9a004e6f07f1aa3c0b6c419.
-> [snip]
-> 
-> Good afternoon, sir.
-> 
-> I was looking at your patch and Matt and I have concerns about the
-> change you made to readlink.  By passing back a pointer to a buffer
-> rather than copying the link into a supplied buffer, we're opening
-> ourselves up to the content changing, being deallocated, or otherwise
-> having something bad happen to it.
-> 
-> Thanks.
+> Thanks!
+> sage
 > 
 > 
+> On Wed, 10 Jul 2013, Matt W. Benjamin wrote:
+> 
+> > Hi,
+> > 
+> > We tracked down the refcount issue found Sat., and have
+> rebased/pushed wip-libcephfs-rebased-v65
+> > with the fix.
+> > 
+> > Thanks!
+> > 
+> > Matt
+> > 
+> > -- 
+> > Matt Benjamin
+> > The Linux Box
+> > 206 South Fifth Ave. Suite 150
+> > Ann Arbor, MI  48104
+> > 
+> > http://linuxbox.com
+> > 
+> > tel.  734-761-4689 
+> > fax.  734-769-8938 
+> > cel.  734-216-5309 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> >
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
