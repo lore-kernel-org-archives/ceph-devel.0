@@ -1,105 +1,91 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: wip-libcephfs rebased and pulled up to v.65
-Date: Fri, 12 Jul 2013 08:50:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307120850280.25223@cobra.newdream.net>
-References: <941FC8BE87ADE64D90E4EB6CD5545177100231F4@EPBYMINSA0032.epam.com>,  <78k3kyfjv2.wl%aemerson@linuxbox.com> <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>, <alpine.DEB.2.00.1307111201000.5149@cobra.newdream.net>
- <941FC8BE87ADE64D90E4EB6CD5545177100234DD@EPBYMINSA0032.epam.com>
+From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
+	<jens@mermaidconsulting.dk>
+Subject: Segmentation fault due to lacking NULL-check
+Date: Fri, 12 Jul 2013 17:50:57 +0200
+Message-ID: <51E025E1.8050103@mermaidconsulting.dk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54494 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933072Ab3GLPum (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jul 2013 11:50:42 -0400
-In-Reply-To: <941FC8BE87ADE64D90E4EB6CD5545177100234DD@EPBYMINSA0032.epam.com>
+Received: from mx03.stofanet.dk ([212.10.10.13]:49382 "EHLO mx03.stofanet.dk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933072Ab3GLP6b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Jul 2013 11:58:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
-Cc: "Adam C. Emerson" <aemerson@linuxbox.com>, "Matt W. Benjamin" <matt@linuxbox.com>, David Zafman <david.zafman@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 12 Jul 2013, Ilya Storozhilov wrote:
-> Hi Sage, Adam, Matt and David,
-> 
-> we have resolved a couple of compilation issues in 'wip-libcephfs' 
-> branch and have created a respective pull request, see 
-> https://github.com/ceph/ceph/pull/424
+Hi,
 
-Thanks, i'll squash these down into the relevant commits.
-> 
-> Regards,
-> Ilya
-> 
-> P.S. I'm going on vacation for the next week, so keep connected with Andrey Kuznetsov (Andrey_Kuznetsov@epam.com) during this period, please.
-> 
-> ________________________________________
-> ??: Sage Weil [sage@inktank.com]
-> ??????????: 11 ???? 2013 ?. 23:01
-> To: Ilya Storozhilov
-> Cc: Adam C. Emerson; Matt W. Benjamin; David Zafman; ceph-devel@vger.kernel.org
-> ????: Re: wip-libcephfs rebased and pulled up to v.65
-> 
-> Please check out the current wip=libcephfs branch and let me know how it
-> looks/works for you guys.  I cleaned up your patches a bit and fixed teh
-> root cause of the xattr issue you were seeing.
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Thu, 11 Jul 2013, Ilya Storozhilov wrote:
-> 
-> > Hi Adam (CC: Sage, Matt and David),
-> >
-> > it seems to me we have choosen a bad commit description, where instead of "FIX: readlink not copy link path to user's buffer" there should be something like "FIX: ceph_ll_readlink() now fills user provided buffer with the link data instead of returning a pointer to the libcephfs internal memory location". Take a look to the sourcecode - it does actually what you are talking about (see https://github.com/ferustigris/ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc):
-> >
-> > -----------------------------------------------------------------------
-> > extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char *buf, size_t bufsiz, int uid, int gid)
-> > {
-> >   const char *value = NULL;
-> >   int res = (cmount->get_client()->ll_readlink(in, &value, uid, gid));
-> >   if (res < 0)
-> >     return res;
-> >   if (bufsiz < (size_t)res)
-> >     return ENAMETOOLONG;
-> >   memcpy(buf, value, res);  // <-- Here we are copying a link data to the user provided buffer. This is what you want us to do.
-> >   return res;
-> > }
-> > -----------------------------------------------------------------------
-> >
-> > In your branch (see https://github.com/linuxbox2/linuxbox-ceph/blob/wip-libcephfs-rebased-v65/src/libcephfs.cc) this function does not copy link data to the user-provided buffer, but passes back a pointer to the internal libcephfs structure, which is not good solution, as you mentioned below:
-> >
-> > -----------------------------------------------------------------------
-> > extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode *in, char **value, int uid, int gid)
-> > {
-> >   return (cmount->get_client()->ll_readlink(in, (const char**) value, uid, gid));
-> > }
-> > -----------------------------------------------------------------------
-> >
-> > Regards,
-> > Ilya
-> >
-> > ________________________________________
-> > ??: Adam C. Emerson [aemerson@linuxbox.com]
-> > ??????????: 10 ???? 2013 ?. 20:41
-> > To: Ilya Storozhilov
-> > Cc: Sage Weil; Matt W. Benjamin; David Zafman
-> > ????: Re: wip-libcephfs rebased and pulled up to v.65
-> >
-> > At Wed, 10 Jul 2013 12:17:24 +0000, Ilya Storozhilov wrote:
-> > [snip]
-> > > ?wip-libcephfs-rebased-v65? branch of the https://github.com/linuxbox2/linuxbox-ceph repository has not been branched from the ?wip-libcephfs? branch of https://github.com/ceph/ceph as it was made with our ?open_by_handle_api? branch of the https://github.com/ferustigris/ceph repo. That is why we were not able to automatically ?cherry-pick? our changes using respective git command. So we have manually applied our changes to the ?wip-libcephfs-rebased-v65? branch in https://github.com/ferustigris/ceph repo as one commit - you can check it out here: https://github.com/ferustigris/ceph/commit/c3f4940b2cfcfd3ea9a004e6f07f1aa3c0b6c419.
-> > [snip]
-> >
-> > Good afternoon, sir.
-> >
-> > I was looking at your patch and Matt and I have concerns about the
-> > change you made to readlink.  By passing back a pointer to a buffer
-> > rather than copying the link into a supplied buffer, we're opening
-> > ourselves up to the content changing, being deallocated, or otherwise
-> > having something bad happen to it.
-> >
-> > Thanks.
-> >
-> >
-> 
-> 
+I have done a fresh install of Ubuntu 13.04 where I installed Ceph=20
+0.61.4 from the binary packages on ceph.com.
+
+I then installed Qemu 1.4.2 and tried to start a VM with an image on=20
+RBD. Qemu segfaults with this backtrace:
+
+#0  librbd::aio_flush (ictx=3D0x0, c=3D0x7f5f37ec6580) at=20
+librbd/internal.cc:2693
+#1  0x00007f5f360e67d8 in rbd_aio_flush (image=3D<optimized out>,=20
+c=3D<optimized out>) at librbd/librbd.cc:1128
+#2  0x00007f5f36d3bb5f in rbd_aio_flush_wrapper (comp=3D<optimized out>=
+,=20
+image=3D<optimized out>) at block/rbd.c:665
+#3  rbd_start_aio (bs=3D<optimized out>, sector_num=3Dsector_num@entry=3D=
+0,=20
+qiov=3Dqiov@entry=3D0x0, nb_sectors=3Dnb_sectors@entry=3D0, cb=3D<optim=
+ized out>,=20
+opaque=3D<optimized out>, cmd=3Dcmd@entry=3DRBD_AIO_FLUSH) at block/rbd=
+=2Ec:736
+#4  0x00007f5f36d3bc2c in qemu_rbd_aio_flush (bs=3D<optimized out>,=20
+cb=3D<optimized out>, opaque=3D<optimized out>) at block/rbd.c:782
+#5  0x00007f5f36d1fdbb in bdrv_co_flush (bs=3D0x7f5f37e9e500) at block.=
+c:4050
+#6  bdrv_co_flush (bs=3D0x7f5f37e9e500) at block.c:4021
+#7  0x00007f5f36d1fe00 in bdrv_flush_co_entry (opaque=3D0x7fffd5d21610)=
+ at=20
+block.c:4018
+#8  0x00007f5f36d517da in coroutine_trampoline (i0=3D<optimized out>,=20
+i1=3D<optimized out>) at coroutine-ucontext.c:138
+#9  0x00007f5f329f44c0 in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+#10 0x00007fffd5d20e80 in ?? ()
+
+
+Looking at the source code, I see that internal.cc does not check the=20
+ictx parameter before it dereferences it in line 2693:
+
+       CephContext *cct =3D ictx->cct;
+
+As ictx has value NULL, the segfaults happens.
+
+
+Another thing is that I don't understand what could cause qemu to call=20
+this function with a NULL-parameter?
+
+I have tested this also on another server running Ubuntu 12.10 and I se=
+e=20
+the exact same problem and backtrace.
+
+By suggestion on IRC from joelio, I trying mapping the rbd with the=20
+kernel mapper. This failed with the following:
+
+[23504.239286] libceph: mon1 10.0.0.2:6789 feature set mismatch, my=20
+40002 < server's 2040002, missing 2000000
+[23504.239852] libceph: mon1 10.0.0.2:6789 socket error on read
+
+What could this be caused by?
+
+I have 0.61.4 on the client, and all osds and mons are also running 0.6=
+1.4.
+
+
+Thanks in advance,
+--=20
+Jens Kristian S=F8gaard, Mermaid Consulting ApS,
+jens@mermaidconsulting.dk,
+http://www.mermaidconsulting.com/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
