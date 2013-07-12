@@ -1,68 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: Don't get layout from mds for regular file which
- has been written.
-Date: Fri, 12 Jul 2013 14:06:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307121400470.25223@cobra.newdream.net>
-References: <201307111659490192618@gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: Set object mtime
+Date: Fri, 12 Jul 2013 23:26:56 +0200
+Message-ID: <CAF6-1L4LNeuBG_MdDYykDKVZ7ghmbNe_5=z8mxyh-rme6v3Hxw@mail.gmail.com>
+References: <CAFtEh-e6GWeU-hP==zPjcXDuxfWkmeZo0wDwY-R82SJR2JZnzQ@mail.gmail.com>
+	<5150A306.6030509@42on.com>
+	<CAFtEh-d6r4S+1G1LLhWnzJXhKR1maQXJYrVK8nn+3UjjchoSZw@mail.gmail.com>
+	<alpine.DEB.2.00.1303251237090.12444@cobra.newdream.net>
+	<CAFtEh-dNzjj5yXmw+qej2a67yRW_YbjPk5uVQKhiK00kFRZysg@mail.gmail.com>
+	<CAF6-1L7R1T8icOcC+sguevBV-WigA=jZLEVCRP8HX0YXgGTK+g@mail.gmail.com>
+	<CAPYLRzjppMNGXqryMbQc5fk-5w4QB2hc5OPi=Af4M4mbUttXZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57531 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965359Ab3GLVGg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jul 2013 17:06:36 -0400
-In-Reply-To: <201307111659490192618@gmail.com>
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:63883 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965441Ab3GLV06 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jul 2013 17:26:58 -0400
+Received: by mail-bk0-f42.google.com with SMTP id jk13so3965049bkc.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Jul 2013 14:26:56 -0700 (PDT)
+In-Reply-To: <CAPYLRzjppMNGXqryMbQc5fk-5w4QB2hc5OPi=Af4M4mbUttXZw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Damien Churchill <damoxc@gmail.com>, Sage Weil <sage@inktank.com>, Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 11 Jul 2013, majianpeng wrote:
-> For regular file which has been written, it can't change layout.
-> So it can get layout from local rather than mds.
-> 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/ioctl.c | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-> index e0b4ef3..2b74879 100644
-> --- a/fs/ceph/ioctl.c
-> +++ b/fs/ceph/ioctl.c
-> @@ -17,10 +17,16 @@
->  static long ceph_ioctl_get_layout(struct file *file, void __user *arg)
->  {
->  	struct ceph_inode_info *ci = ceph_inode(file_inode(file));
-> +	struct inode *inode = file_inode(file);
->  	struct ceph_ioctl_layout l;
-> -	int err;
-> +	int err = 0;
-> +
-> +	/*For regular file which has been written,it can't change layout
-> +	 * So it don't get layout from mds*/
+Hi,
 
-style nit: space after /* and before */
+> Why do you want to copy the data to change the PG count? PG splitting
+> is supported now, so unless you need to do merging for some reason you
+> should be good to go. :)
 
-> +	if (!(S_ISREG(inode->i_mode) && (i_size_read(inode) > 0 ||
-> +		ci->i_truncate_seq > 1)))
-> +		err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT);
+I need to do merging :)
 
-I think a more defensive approach would be to use the helper to see if we 
-are holding any of the Fcrwbl caps; if so, we can assume the layout is 
-valid.
+At the time the PG count formula wasn't too clear and I got too many
+PGs which tend to slow things down, slow down peering and things like
+that. Also non-power of two seem to have less favorable data
+distributions.
 
-Note that we should be doing the same thing in getxattr when exposing the 
-ceph.file.layout[.*] xattrs.. right now they are blindingly assuming that 
-whatever is in cache is correct, which isn't strictly true.  :/
+It also seems to be the only way to enable that flag to hash the pool
+id at the moment.
 
-sage
+Cheers,
 
-
-> -	err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT);
->  	if (!err) {
->  		l.stripe_unit = ceph_file_layout_su(ci->i_layout);
->  		l.stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
-> -- 
-> 1.8.1.2
-> 
+    Sylvain
