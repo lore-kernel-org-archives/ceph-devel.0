@@ -1,135 +1,117 @@
-From: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
-Subject: HA: wip-libcephfs rebased and pulled up to v.65
-Date: Fri, 12 Jul 2013 05:44:01 +0000
-Message-ID: <941FC8BE87ADE64D90E4EB6CD554517710023467@EPBYMINSA0032.epam.com>
-References: <941FC8BE87ADE64D90E4EB6CD5545177100231F4@EPBYMINSA0032.epam.com>,
- <78k3kyfjv2.wl%aemerson@linuxbox.com>
- <941FC8BE87ADE64D90E4EB6CD554517710023305@EPBYMINSA0032.epam.com>,<alpine.DEB.2.00.1307111201000.5149@cobra.newdream.net>
+From: Ranjan Sarpangala Venkatesh <ranjansv@soe.ucsc.edu>
+Subject: Re: Using valgrind_osd option
+Date: Thu, 11 Jul 2013 23:45:08 -0700
+Message-ID: <CA+bvTtn-Wut4W-iss3=Eq0n3PeLFp0z3Csywqf9iUC-Fx7yXzw@mail.gmail.com>
+References: <CA+bvTtnt_GZEiwHgsmW_uWvjhFxE3QxyUTWX=nM6hs5E6ikLuQ@mail.gmail.com>
+ <51DCB596.4040800@inktank.com> <CA+bvTtkDCOVMO3vXWsU+V00Q_4rO=ZZstxmi+SAedg0o6Cc2hw@mail.gmail.com>
+ <51DF13D5.3020204@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from evbyminsa0038.epam.com ([217.21.63.34]:21403 "EHLO
-	EVBYMINSA0038.epam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751920Ab3GLFta convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jul 2013 01:49:30 -0400
-In-Reply-To: <alpine.DEB.2.00.1307111201000.5149@cobra.newdream.net>
-Content-Language: ru-RU
+Received: from mail-wg0-f53.google.com ([74.125.82.53]:49909 "EHLO
+	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752208Ab3GLGpa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Jul 2013 02:45:30 -0400
+Received: by mail-wg0-f53.google.com with SMTP id y10so7876142wgg.20
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jul 2013 23:45:29 -0700 (PDT)
+In-Reply-To: <51DF13D5.3020204@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Adam C. Emerson" <aemerson@linuxbox.com>, "Matt W. Benjamin" <matt@linuxbox.com>, David Zafman <david.zafman@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Sage, Adam, Matt and David,
+Hi Sage,Mike
 
-this branch is looking good at the first blush. We will check out how i=
-t works and report to you till the EOD.
+I reverted back to valgrind version 3.7.0, did what Sage suggested and
+it worked. However, with valgrind 3.8.1 no massif.out file was created
+even while running a build with no tcmalloc. Not sure why this is
+happening.
 
-Regards,
-Ilya
-________________________________________
-=EF=D4: Sage Weil [sage@inktank.com]
-=EF=D4=D0=D2=C1=D7=CC=C5=CE=CF: 11 =C9=C0=CC=D1 2013 =C7. 23:01
-To: Ilya Storozhilov
-Cc: Adam C. Emerson; Matt W. Benjamin; David Zafman; ceph-devel@vger.ke=
-rnel.org
-=F4=C5=CD=C1: Re: wip-libcephfs rebased and pulled up to v.65
+Thanks Sage and Mark for your help.
 
-Please check out the current wip=3Dlibcephfs branch and let me know how=
- it
-looks/works for you guys.  I cleaned up your patches a bit and fixed te=
-h
-root cause of the xattr issue you were seeing.
+With regards
+Ranjan
 
-Thanks!
-sage
+On Thu, Jul 11, 2013 at 1:21 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> Hrm, I think I answered too quickly.  I use that directly with valgrind
+> launching the daemon, not through vstart.  Not sure if it passes it through
+> properly.  Maybe try Sage's suggestion or see if valgrind works when you
+> launch the daemon directly?
+>
+> Mark
+>
+>
+> On 07/11/2013 01:21 AM, Ranjan Sarpangala Venkatesh wrote:
+>>
+>> Hi Mark,
+>>
+>> I upgraded valgrind to 3.8.1 and also used
+>> --soname-synonyms=somalloc=*tcmalloc* option. However, no massif.out
+>> file was created.
+>>
+>> Kindly let me know if i am missing something.
+>>
+>> With regards
+>> Ranjan
+>>
+>> On Tue, Jul 9, 2013 at 6:15 PM, Mark Nelson <mark.nelson@inktank.com>
+>> wrote:
+>>>
+>>> Hi,
+>>>
+>>> I ran into this problem a while back and it was because I was trying to
+>>> use
+>>> a version of valgrind that didn't support tcmalloc (which Ceph was
+>>> compiled
+>>> to use).  Try upgrading valgrind to 3.8.0 or newer.  You'll also need to
+>>> pass something like:
+>>>
+>>> --soname-synonyms=somalloc=*tcmalloc*
+>>>
+>>> Mark
+>>>
+>>>
+>>> On 07/09/2013 08:10 PM, Ranjan Sarpangala Venkatesh wrote:
+>>>>
+>>>>
+>>>> Hi,
+>>>>
+>>>> I am trying to collect memory of the OSD daemon with the following
+>>>>
+>>>> ./vstart.sh -n -x -l --valgrind_osd 'massif'
+>>>>
+>>>> However, when I print massif.out file there is nothing
+>>>>
+>>>> cat massif.out.15391
+>>>>
+>>>> desc: (none)
+>>>> cmd: ./ceph-osd -i 0 -c ceph.conf -f
+>>>> time_unit: i
+>>>> #-----------
+>>>> snapshot=0
+>>>> #-----------
+>>>> time=0
+>>>> mem_heap_B=0
+>>>> mem_heap_extra_B=0
+>>>> mem_stacks_B=0
+>>>> heap_tree=empty
+>>>>
+>>>> --
+>>>> With regards,
+>>>> Ranjan
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>>
+>>
+>>
+>
 
 
-On Thu, 11 Jul 2013, Ilya Storozhilov wrote:
 
-> Hi Adam (CC: Sage, Matt and David),
->
-> it seems to me we have choosen a bad commit description, where instea=
-d of "FIX: readlink not copy link path to user's buffer" there should b=
-e something like "FIX: ceph_ll_readlink() now fills user provided buffe=
-r with the link data instead of returning a pointer to the libcephfs in=
-ternal memory location". Take a look to the sourcecode - it does actual=
-ly what you are talking about (see https://github.com/ferustigris/ceph/=
-blob/wip-libcephfs-rebased-v65/src/libcephfs.cc):
->
-> ---------------------------------------------------------------------=
---
-> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode=
- *in, char *buf, size_t bufsiz, int uid, int gid)
-> {
->   const char *value =3D NULL;
->   int res =3D (cmount->get_client()->ll_readlink(in, &value, uid, gid=
-));
->   if (res < 0)
->     return res;
->   if (bufsiz < (size_t)res)
->     return ENAMETOOLONG;
->   memcpy(buf, value, res);  // <-- Here we are copying a link data to=
- the user provided buffer. This is what you want us to do.
->   return res;
-> }
-> ---------------------------------------------------------------------=
---
->
-> In your branch (see https://github.com/linuxbox2/linuxbox-ceph/blob/w=
-ip-libcephfs-rebased-v65/src/libcephfs.cc) this function does not copy =
-link data to the user-provided buffer, but passes back a pointer to the=
- internal libcephfs structure, which is not good solution, as you menti=
-oned below:
->
-> ---------------------------------------------------------------------=
---
-> extern "C" int ceph_ll_readlink(struct ceph_mount_info *cmount, Inode=
- *in, char **value, int uid, int gid)
-> {
->   return (cmount->get_client()->ll_readlink(in, (const char**) value,=
- uid, gid));
-> }
-> ---------------------------------------------------------------------=
---
->
-> Regards,
-> Ilya
->
-> ________________________________________
-> ??: Adam C. Emerson [aemerson@linuxbox.com]
-> ??????????: 10 ???? 2013 ?. 20:41
-> To: Ilya Storozhilov
-> Cc: Sage Weil; Matt W. Benjamin; David Zafman
-> ????: Re: wip-libcephfs rebased and pulled up to v.65
->
-> At Wed, 10 Jul 2013 12:17:24 +0000, Ilya Storozhilov wrote:
-> [snip]
-> > ?wip-libcephfs-rebased-v65? branch of the https://github.com/linuxb=
-ox2/linuxbox-ceph repository has not been branched from the ?wip-libcep=
-hfs? branch of https://github.com/ceph/ceph as it was made with our ?op=
-en_by_handle_api? branch of the https://github.com/ferustigris/ceph rep=
-o. That is why we were not able to automatically ?cherry-pick? our chan=
-ges using respective git command. So we have manually applied our chang=
-es to the ?wip-libcephfs-rebased-v65? branch in https://github.com/feru=
-stigris/ceph repo as one commit - you can check it out here: https://gi=
-thub.com/ferustigris/ceph/commit/c3f4940b2cfcfd3ea9a004e6f07f1aa3c0b6c4=
-19.
-> [snip]
->
-> Good afternoon, sir.
->
-> I was looking at your patch and Matt and I have concerns about the
-> change you made to readlink.  By passing back a pointer to a buffer
-> rather than copying the link into a supplied buffer, we're opening
-> ourselves up to the content changing, being deallocated, or otherwise
-> having something bad happen to it.
->
-> Thanks.
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+With regards,
+Ranjan
