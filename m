@@ -1,21 +1,22 @@
 From: wanhai zhu <wanhaizhu@gmail.com>
-Subject: OSD recovery failed because of "leveldb: Corruption : checksum mismatch"
-Date: Tue, 16 Jul 2013 10:26:44 +0800
-Message-ID: <CAODg2UsJz1BSTkDj4hJHCJtBNYYX81BkykhAXU+NJG+OZaM43A@mail.gmail.com>
+Subject: Fwd: OSD recovery failed because of "leveldb: Corruption : checksum mismatch"
+Date: Tue, 16 Jul 2013 15:11:42 +0800
+Message-ID: <CAODg2UsX2WWNnk8QZHogCsm8GOYsN6_pp5=sCXW=t-=A1FHcig@mail.gmail.com>
+References: <CAODg2UsJz1BSTkDj4hJHCJtBNYYX81BkykhAXU+NJG+OZaM43A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:34079 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753697Ab3GPC0q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jul 2013 22:26:46 -0400
-Received: by mail-bk0-f46.google.com with SMTP id na10so42855bkb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Jul 2013 19:26:45 -0700 (PDT)
+Received: from mail-bk0-f43.google.com ([209.85.214.43]:43348 "EHLO
+	mail-bk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751517Ab3GPHLn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jul 2013 03:11:43 -0400
+Received: by mail-bk0-f43.google.com with SMTP id jm2so103609bkc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 00:11:42 -0700 (PDT)
+In-Reply-To: <CAODg2UsJz1BSTkDj4hJHCJtBNYYX81BkykhAXU+NJG+OZaM43A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sage@inktank.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
 Dear  guys :
 
