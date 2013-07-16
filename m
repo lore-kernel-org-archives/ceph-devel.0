@@ -1,63 +1,35 @@
-From: David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
-Subject: Re: Capacity proplem when mount CephFS with Ubuntu
-	14.04
-Date: Tue, 16 Jul 2013 11:35:37 +0100
-Message-ID: <51E521F9.5050606@cam.ac.uk>
-References: <51E505D6.1030700@vccloud.vn>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: Don't forget the 'up_read(&osdc->map_sem)' if met error.
+Date: Tue, 16 Jul 2013 19:36:21 +0800
+Message-ID: <201307161936127882610@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51E505D6.1030700-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:62388 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932108Ab3GPLi1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jul 2013 07:38:27 -0400
+Received: by mail-pd0-f173.google.com with SMTP id v14so582404pde.18
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 04:38:27 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 16/07/13 09:35, Ta Ba Tuan wrote:
-> Hi everyone,
-> 
-> OSDs capacity sumary is 144TB, and *when I mount CephFS on Ubuntu 14.04
-> then it only display **576GB*, (Currently, I'm using replicate 3 for
-> data pools)
-> (using: mount -t ceph Monitor_IP:/ /ceph -o name=admin,secret=xxxxxxxxxx")
-> 
-> I don't think capacity is too small?, please explain this help me!!!!!
-> 
-> *on Ubuntu 14.04*
-> Filesystem                Size  Used Avail Use% Mounted on
-> 192.168.32.90:/    576GB  20G  556GB  1%  /tmp/ceph_mount
-> 
-> But when mounting on Ubuntu 12.04:
-> *on Ubuntu 12.04*
-> Filesystem                Size  Used Avail Use% Mounted on
-> 192.168.32.90:/    144T  800G  113.6T   1%  /tmp/ceph_mount
+U2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0tDQog
+ZnMvY2VwaC9pb2N0bC5jIHwgNCArKystDQogMSBmaWxlIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygr
+KSwgMSBkZWxldGlvbigtKQ0KDQpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9pb2N0bC5jIGIvZnMvY2Vw
+aC9pb2N0bC5jDQppbmRleCBlMGI0ZWYzLi5hNWNlNjJlIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9p
+b2N0bC5jDQorKysgYi9mcy9jZXBoL2lvY3RsLmMNCkBAIC0xOTYsOCArMTk2LDEwIEBAIHN0YXRp
+YyBsb25nIGNlcGhfaW9jdGxfZ2V0X2RhdGFsb2Moc3RydWN0IGZpbGUgKmZpbGUsIHZvaWQgX191
+c2VyICphcmcpDQogCXIgPSBjZXBoX2NhbGNfZmlsZV9vYmplY3RfbWFwcGluZygmY2ktPmlfbGF5
+b3V0LCBkbC5maWxlX29mZnNldCwgbGVuLA0KIAkJCQkJICAmZGwub2JqZWN0X25vLCAmZGwub2Jq
+ZWN0X29mZnNldCwNCiAJCQkJCSAgJm9sZW4pOw0KLQlpZiAociA8IDApDQorCWlmIChyIDwgMCkg
+ew0KKwkJdXBfcmVhZCgmb3NkYy0+bWFwX3NlbSk7DQogCQlyZXR1cm4gLUVJTzsNCisJfQ0KIAlk
+bC5maWxlX29mZnNldCAtPSBkbC5vYmplY3Rfb2Zmc2V0Ow0KIAlkbC5vYmplY3Rfc2l6ZSA9IGNl
+cGhfZmlsZV9sYXlvdXRfb2JqZWN0X3NpemUoY2ktPmlfbGF5b3V0KTsNCiAJZGwuYmxvY2tfc2l6
+ZSA9IGNlcGhfZmlsZV9sYXlvdXRfc3UoY2ktPmlfbGF5b3V0KTsNCi0tIA0KMS44LjEuMg==
 
-This is most likely:
-
- http://tracker.ceph.com/issues/3793
-
-This is caused by using a more modern version of coreutils; that,
-coupled with the numbers reported by Ceph for filesystem blocksizes in
-older kernels, results in the above error.
-
-To fix, either use a recent version of the fuse driver or upgrade your
-kernel to a newer one that includes the commit "ceph: fix statvfs fr_size":
-
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=92a49fb0f79f3300e6e50ddf56238e70678e4202
-
-(Kernels 3.9-rc1 and later should include it.)
-
-Cheers,
-David
--- 
-David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
-Unix Specialist, University Computing Service
