@@ -1,90 +1,64 @@
-From: Hemanth Kumar <hemanthkumar51@gmail.com>
-Subject: Fwd: Error while running teuthology
-Date: Wed, 17 Jul 2013 11:54:47 +0530
-Message-ID: <CAG_LFoC9vErfwQ+Ggkaps7r2L2G36z4Gw3=CM0TnDnjwayiqhA@mail.gmail.com>
-References: <CAG_LFoCDv8NvzuzQrutUBgb+yDocfuP89EYKqaat3321LcNfzw@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: Any concern about Ceph on CentOS
+Date: Wed, 17 Jul 2013 06:27:52 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E44584@SHSMSX102.ccr.corp.intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC01E43F83@SHSMSX102.ccr.corp.intel.com>
+	<20130717061655.GB13122@oder.mch.fsc.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:58031 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751445Ab3GQGYs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jul 2013 02:24:48 -0400
-Received: by mail-ie0-f171.google.com with SMTP id qd12so3280279ieb.30
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 23:24:47 -0700 (PDT)
-In-Reply-To: <CAG_LFoCDv8NvzuzQrutUBgb+yDocfuP89EYKqaat3321LcNfzw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20130717061655.GB13122-tbq9f/Eh0BZ9QGbx8OrcVQ@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Kasper Dieter <dieter.kasper-RJz4owOZxyXQFUHtdCDX3A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I am beginner and would like to contribute ceph-qa
-I amtrying to run teuthology with 1 server-node and 1 client-node, i
-am stuck with an error can any one point out the mistake i am doing
+Hi Dieter,
+    Thanks a lot for the information. Could I learn more about your use case ? Would you care performance ?
+    And may I know why you want CentOS+ Custom kernel ? I thought people use CentOS for stability concern but if using CentOS + Custom Kernel, why don't you just use Ubuntu or Fedora(although Fedora is usually too aggressive).
+                                                                      Xiaoxi
 
-following is my ceph configuration:
-I have 1 server : ceph-server 192.168.100.102 with ceph cludter
-[mon.a, mds.a, osd.1, osd.2]
-1 client : 192.168.100.103 with configured RBD n CEPFS
+-----Original Message-----
+From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Kasper Dieter
+Sent: Wednesday, July 17, 2013 2:17 PM
+To: Chen, Xiaoxi
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Subject: Re: Any concern about Ceph on CentOS
 
-root@ceph-node1:~/testing/teuthology# nano test.yaml
-root@ceph-node1:~/testing/teuthology# ./virtualenv/bin/teuthology test.yaml
-INFO:teuthology.run_tasks:Running task internal.save_config...
-INFO:teuthology.task.internal:Saving configuration
-INFO:teuthology.run_tasks:Running task internal.check_lock...
-INFO:teuthology.task.internal:Lock checking disabled.
-INFO:teuthology.run_tasks:Running task internal.connect...
-INFO:teuthology.task.internal:Opening connections...
-INFO:teuthology.task.internal:roles: ceph@ceph-server - ['mon.a',
-'mds.a', 'osd.0', 'osd.1']
-INFO:teuthology.run_tasks:Running task internal.check_conflict...
-INFO:teuthology.task.internal:Checking for old test directory...
-ERROR:teuthology.run_tasks:Saw exception from tasks
-Traceback (most recent call last):
-  File "/root/testing/teuthology/teuthology/run_tasks.py", line 25, in run_tasks
-    manager = _run_one_task(taskname, ctx=ctx, config=config)
-  File "/root/testing/teuthology/teuthology/run_tasks.py", line 14, in
-_run_one_task
-    return fn(**kwargs)
-  File "/root/testing/teuthology/teuthology/task/internal.py", line
-254, in check_conflict
-    testdir = teuthology.get_testdir(ctx)
-  File "/root/testing/teuthology/teuthology/misc.py", line 42, in get_testdir
-    status = lockstatus.get_status(ctx, machine)
-  File "/root/testing/teuthology/teuthology/lockstatus.py", line 25,
-in get_status
-    return json.loads(content)
-  File "/usr/lib/python2.7/json/__init__.py", line 326, in loads
-    return _default_decoder.decode(s)
-  File "/usr/lib/python2.7/json/decoder.py", line 366, in decode
-    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-  File "/usr/lib/python2.7/json/decoder.py", line 384, in raw_decode
-    raise ValueError("No JSON object could be decoded")
-ValueError: No JSON object could be decoded
-INFO:teuthology.run:Summary data:
-{failure_reason: No JSON object could be decoded, owner:
-root@ceph-node1, success: false}
+Hi Xiaoxi,
 
-INFO:teuthology.run:FAIL
+we are really running Ceph on CentOS-6.4
+(6 server nodes, 3 client nodes, 160 OSDs).
 
-test.yaml
+We put a 3.8.13 Kernel on top and installed the ceph-0.61.4 cluster with mkcephfs, because ceph-deploy seems to be still very buggy and has big dependencies to the newest python.
 
-check-locks: false
-roles:
-- [mon.a, mds.a, osd.0, osd.1]
-targets:
-  ceph@ceph-server: ssh-rsa
-AAAAB3NzaC1yc2EAAAADAQABAAABAQC18Vm9HABtFv2BjuFNFxLSwJH0ZcP0pzhJJUTCLQ/181osbhNP0kkqMWaoddjmNNdvpBY6YMvM06GlE3TdMkF$
-tasks:
-- install:
-- ceph:
-- interactive:
+ceph.ko
+rbd.ko
+and ceph-fuse are running fast, well and stable (so far ;-) ).
 
+Cheers,
+-Dieter
+
+On Wed, Jul 17, 2013 at 03:18:22AM +0200, Chen, Xiaoxi wrote:
+> Hi list,
+>    I would like to ask if anyone really run Ceph on CentOS/RHEL? 
+>    Since the kernel version for Cent/RHEL is much older than that of Ubuntu, 
+>    I am thinking about whether we have some known performance/functionality issue?
+>    Thanks for everyone could share your insight for Ceph+CentOS.
+> 																												Xiaoxi
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 --
-Thanks,
-Hemanth Kumar H C
-
-
-
---
-Thanks,
-Hemanth Kumar H C
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
