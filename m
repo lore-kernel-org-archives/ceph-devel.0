@@ -1,26 +1,84 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Any concern about Ceph on CentOS
-Date: Wed, 17 Jul 2013 01:18:22 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E43F83@SHSMSX102.ccr.corp.intel.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH 2/2] libceph: Remap notarget requests in handle_timeout.
+Date: Wed, 17 Jul 2013 09:30:50 +0800
+Message-ID: <201307170930486154813@gmail.com>
+References: <2013071615454946640410@gmail.com>,
+	<alpine.DEB.2.00.1307161744050.21178@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:34977 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750971Ab3GQBa4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jul 2013 21:30:56 -0400
+Received: by mail-pa0-f48.google.com with SMTP id kp12so1377875pab.35
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 18:30:55 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi list,
-   I would like to ask if anyone really run Ceph on CentOS/RHEL? Since the kernel version for Cent/RHEL is much older than that of Ubuntu, I am thinking about whether we have some known performance/functionality issue?
-   Thanks for everyone could share your insight for Ceph+CentOS.
-																												Xiaoxi 
+Pk9uIFR1ZSwgMTYgSnVsIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBJZiBfX21hcF9yZXF1
+ZXN0IGZhaWxlZCAsdGhlIHJlcXVlc3QgY2FuJ3Qgc2VuZCBhbmQgaW4gbGlzdCByZXFfbm90YXJn
+ZXQuDQo+PiBGb3IgdGhvc2UsIHRoZXkgb25seSByZW1hcGVkIGluIGZ1bmMgY2VwaF9vc2RjX2hh
+bmRsZV9tYXAgd2hpY2ggdXBkYXRlDQo+PiB0aGUgZXBvY2ggb2Ygb3NkbWFwLlRoZXJlIGFyZSBz
+b21lIHJlYXNvbnMgbGlrZSBFTk9NRU0gd2hpY2ggY2FuJ3QgY2F1c2UNCj4+IHVwZGF0ZSBlcG9j
+aCBvZiBvc2RtYXAuU28gdGhlIG5vdGFyZ2V0IHJlcXVlc3RlZCBjYW4ndCByZW1hcCBmb3IgZXZl
+ci4NCj4+IA0KPj4gQWRkIGEgY2hhbmNlIGluIGhhbmRsZV90aW1lb3V0IHRvIHJlbWFwIHRob3Nl
+Lg0KPg0KPklzIHRoaXMgYSBzY2VuYXJpbyB5b3UgaGF2ZSBhY3R1YWxseSBzZWVuIGluIHByYWN0
+aWNlPw0KPg0KTm8sIEkgc2ltdWxhdGUgdGhlIGVycm9yLg0KPldoYXQgdG8gZG8gd2hlbiB3ZSBn
+ZXQgbWFwIHVwZGF0ZXMgYW5kIHJ1biBpbnRvIEVOT01FTSBpcyBhIGdlbmVyYWwgDQo+cHJvYmxl
+bSBmb3IgdXMsIGFuZCBub3Qgb25lIHRoYXQgaXMgaGFuZGxlZCB3ZWxsLiAgSSdtIHVuc3VyZSB0
+aGF0IHRoaXMgDQo+d2lsbCBlbmQgdXAgaGVscGluZyB1cyBiZWN1YXNlIEknbSBub3Qgc3VyZSB0
+aGF0IG91ciBvc2RtYXAgdXBkYXRlIGNvZGUgDQo+d2hlbiB3ZSBnZXQgYW4gaW5jcmVtZW50YWwg
+bWFwIGFuZCB0cnkgdG8gYXBwbHkgaXQgaXMgY2FyZWZ1bCBhYm91dCANCj5mYWxsaW5nIGJhY2sg
+dG8gb3VyIHByZXZpb3VzIG1hcCBpZiB3ZSBydW4gaW50byBFTk9NRU0gcGFydHdheSB0aHJvdWdo
+LiAgDQo+V2UgcmVhbGx5IG1pZ2h0IGJlIGJldHRlciBvZmYgcmVzZXJ2aW5nIGEgcG9vbCBvZiBt
+ZW1vcnkgZm9yIG1hcHMgKHVuZGVyIA0KPnRoZSBhc3N1bXB0aW9uIHRoYXQgdGhleSB3aWxsIG5l
+dmVyIG1vcmUgdGhhbiAxMHggaW4gc2l6ZSwgc2F5KSBhbmQgDQo+YXZvaWRpbmcgdGhlc2Ugc29y
+dHMgb2YgY29tcGxleCB3b3JrYXJvdW5kcy4uLg0KPg0KTWF5YmUgdGhlIGV4YW1wbGUgZG9uJ3Qg
+ZXhhY3RseS5CdXQgZm9yIHJlYXNvbnMgY2F1c2VkIF9fbWFwX3JlcXVlc3QgZmFpbGVkLGJ1dCBk
+b24ndCBjYWxsIG9zZG1hcCB1cGRhdGUuDQpUaGUgbm90YXJnZXQgcmVxdWVzdCB3aWxsbid0IHJl
+bWFwIGZvcmV2ZXIuTWF5YmUgdGhpcyBlcnJvciBzZWxkb20gb2NjdXIuDQoNCj5JJ20gb3BlbiB0
+byBvdGhlciBvcGluaW9ucywgYnV0IHdvdWxkIHJhdGhlciBmb3JtIHNvbWUgc29ydCBvZiBvdmVy
+YWxsIA0KPnN0cmF0ZWd5IGJlZm9yZSBjaGlwcGluZyBhd2F5IGF0IHN5bXB0b21zLg0KPg0KPlRo
+YW5rcyENCj5zYWdlDQo+DQo+DQo+PiANCj4+IFNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxt
+YWppYW5wZW5nQGdtYWlsLmNvbT4NCj4+IC0tLQ0KPj4gIG5ldC9jZXBoL29zZF9jbGllbnQuYyB8
+IDM2ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0KPj4gIDEgZmlsZSBjaGFu
+Z2VkLCAzNiBpbnNlcnRpb25zKCspDQo+PiANCj4+IGRpZmYgLS1naXQgYS9uZXQvY2VwaC9vc2Rf
+Y2xpZW50LmMgYi9uZXQvY2VwaC9vc2RfY2xpZW50LmMNCj4+IGluZGV4IDdkNDBhNjEuLmYwZGVl
+ZDAgMTAwNjQ0DQo+PiAtLS0gYS9uZXQvY2VwaC9vc2RfY2xpZW50LmMNCj4+ICsrKyBiL25ldC9j
+ZXBoL29zZF9jbGllbnQuYw0KPj4gQEAgLTEzNTUsNiArMTM1NSw0MSBAQCBzdGF0aWMgdm9pZCBf
+X3NlbmRfcXVldWVkKHN0cnVjdCBjZXBoX29zZF9jbGllbnQgKm9zZGMpDQo+PiAgfQ0KPj4gIA0K
+Pj4gIC8qDQo+PiArICogUmVzZW5kIGFueSByZXF1ZXN0cyBpbiB0aGUgcXVldWUocmVxX25vdGFy
+Z2V0KQ0KPj4gKyAqIEFmdGVyIHRoaXMgZnVuY3Rpb24saXQgc2hvdWxkIGNhbGwgX19zZW5kX3F1
+ZXVlZCB0byBkbw0KPj4gKyAqIHJlYWwgc2VuZCBvcGVyYXRpb24NCj4+ICsgKi8NCj4+ICtzdGF0
+aWMgdm9pZCBfX3NlbmRfbm90YXJnZXQoc3RydWN0IGNlcGhfb3NkX2NsaWVudCAqb3NkYykNCj4+
+ICt7DQo+PiArCXN0cnVjdCBjZXBoX29zZF9yZXF1ZXN0ICpyZXEsICp0bXA7DQo+PiArCWludCBy
+YywgbmVlZG1hcCA9IDA7DQo+PiArDQo+PiArCWRvdXQoIl9fc2VuZF9ub3RhcmdldFxuIik7DQo+
+PiArCWxpc3RfZm9yX2VhY2hfZW50cnlfc2FmZShyZXEsIHRtcCwgJm9zZGMtPnJlcV9ub3Rhcmdl
+dCwNCj4+ICsJCXJfcmVxX2xydV9pdGVtKSB7DQo+PiArCQlyYyA9IF9fbWFwX3JlcXVlc3Qob3Nk
+YywgcmVxLCAwKTsNCj4+ICsJCWlmIChyYyA8IDApDQo+PiArCQkJZG91dCgiX19zZW5kX25vdGFy
+Z2V0IGZhaWxlZCBtYXAsICINCj4+ICsJCQkJIiB3aWxsIHJldHJ5ICVsbGRcbiIsIHJlcS0+cl90
+aWQpOw0KPj4gKwkJaWYgKHJlcS0+cl9vc2QgPT0gTlVMTCkgew0KPj4gKwkJCWRvdXQoIl9fc2Vu
+ZF9ub3RhcmdldCAlcCBubyB1cCBvc2RzIGluIHBnXG4iLCByZXEpOw0KPj4gKwkJCW5lZWRtYXAr
+KzsNCj4+ICsJCX0gZWxzZSBpZiAocmMgPiAwKSB7DQo+PiArCQkJaWYgKCFyZXEtPnJfbGluZ2Vy
+KSB7DQo+PiArCQkJCWRvdXQoIiVwIHRpZCAlbGx1IHJlcXVldWVkIG9uIG9zZCVkXG4iLCByZXEs
+DQo+PiArCQkJCSAgICAgcmVxLT5yX3RpZCwNCj4+ICsJCQkJICAgICByZXEtPnJfb3NkID8gcmVx
+LT5yX29zZC0+b19vc2QgOiAtMSk7DQo+PiArCQkJCXJlcS0+cl9mbGFncyB8PSBDRVBIX09TRF9G
+TEFHX1JFVFJZOw0KPj4gKwkJCX0NCj4+ICsJCX0NCj4+ICsNCj4+ICsJfQ0KPj4gKw0KPj4gKwlp
+ZiAobmVlZG1hcCkNCj4+ICsJCWNlcGhfbW9uY19yZXF1ZXN0X25leHRfb3NkbWFwKCZvc2RjLT5j
+bGllbnQtPm1vbmMpOw0KPj4gK30NCj4+ICsNCj4+ICsvKg0KPj4gICAqIFRpbWVvdXQgY2FsbGJh
+Y2ssIGNhbGxlZCBldmVyeSBOIHNlY29uZHMgd2hlbiAxIG9yIG1vcmUgb3NkDQo+PiAgICogcmVx
+dWVzdHMgaGFzIGJlZW4gYWN0aXZlIGZvciBtb3JlIHRoYW4gTiBzZWNvbmRzLiAgV2hlbiB0aGlz
+DQo+PiAgICogaGFwcGVucywgd2UgcGluZyBhbGwgT1NEcyB3aXRoIHJlcXVlc3RzIHdobyBoYXZl
+IHRpbWVkIG91dCB0bw0KPj4gQEAgLTE0MDMsNiArMTQzOCw3IEBAIHN0YXRpYyB2b2lkIGhhbmRs
+ZV90aW1lb3V0KHN0cnVjdCB3b3JrX3N0cnVjdCAqd29yaykNCj4+ICAJfQ0KPj4gIA0KPj4gIAlf
+X3NjaGVkdWxlX29zZF90aW1lb3V0KG9zZGMpOw0KPj4gKwlfX3NlbmRfbm90YXJnZXQob3NkYyk7
+DQo+PiAgCV9fc2VuZF9xdWV1ZWQob3NkYyk7DQo+PiAgCW11dGV4X3VubG9jaygmb3NkYy0+cmVx
+dWVzdF9tdXRleCk7DQo+PiAgCXVwX3JlYWQoJm9zZGMtPm1hcF9zZW0pOw0KPj4gLS0gDQo+PiAx
+LjguMS4yDQo+PiA=
+
