@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 2/6] mds: revoke GSHARED cap when finishing xlock
-Date: Wed, 17 Jul 2013 16:28:39 +0800
-Message-ID: <1374049723-19274-3-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 1/6] mds: fix cap revoke confirmation
+Date: Wed, 17 Jul 2013 16:28:38 +0800
+Message-ID: <1374049723-19274-2-git-send-email-zheng.z.yan@intel.com>
 References: <1374049723-19274-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga14.intel.com ([143.182.124.37]:14679 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752513Ab3GQI2t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Jul 2013 04:28:49 -0400
+	id S1753062Ab3GQI2s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Jul 2013 04:28:48 -0400
 In-Reply-To: <1374049723-19274-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,89 +16,97 @@ Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-If lock state is LOCK_XLOCKDONE, the xlocker can have GSHARED cap.
-So when finishing xlock, we may need to revoke the GSHARED cap.
+There are several issues in the Capability::confirm_receipt()
 
-In most cases Locker::_finish_xlock() directly set lock state to
-LOCK_LOCK or LOCK_EXCL, which hides the issue. If 'num_rdlock > 0'
-or 'num_wrlock > 0' when finishing xlock, the issue reveals.
-(lock get stuck in LOCK_XLOCKDONE forever)
+1. when receiving a client caps message with 'seq == last_sent',
+   it doesn't mean we finish revoking caps. The client can send
+   caps message that only flushes dirty metadata.
+
+2. When receiving a client caps message with 'seq == N', we should
+   forget pending revocations whose seq numbers are less than N.
+   This is because, when revoking caps, we create a revoke_info
+   structure and set its seq number to 'last_sent', then increase
+   the 'last_sent'.
+
+3. When client actively releases caps (by request), the code only
+   works for the 'seq == last_sent' case. If there are pending
+   revocations, we should update them as if the release message
+   is received before we revoke the corresponding caps.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- src/mds/Locker.cc | 42 +++++++++++++++---------------------------
- 1 file changed, 15 insertions(+), 27 deletions(-)
+ src/mds/Capability.h | 44 ++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 34 insertions(+), 10 deletions(-)
 
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 30e014a..afaac1c 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -547,8 +547,6 @@ void Locker::cancel_locking(Mutation *mut, set<CInode*> *pneed_issue)
-       bool need_issue = false;
-       if (lock->get_state() == LOCK_PREXLOCK)
- 	_finish_xlock(lock, &need_issue);
--      if (lock->is_stable())
--	eval(lock, &need_issue);
-       if (need_issue)
- 	pneed_issue->insert(static_cast<CInode *>(lock->get_parent()));
-     }
-@@ -1461,16 +1459,21 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequest *mut)
- void Locker::_finish_xlock(SimpleLock *lock, bool *pneed_issue)
- {
-   assert(!lock->is_stable());
--  if (lock->get_type() != CEPH_LOCK_DN && (static_cast<CInode*>(lock->get_parent())->get_loner()) >= 0)
-+  if (lock->get_num_rdlocks() == 0 &&
-+      lock->get_num_wrlocks() == 0 &&
-+      lock->get_num_client_lease() == 0 &&
-+      lock->get_type() != CEPH_LOCK_DN &&
-+      (static_cast<CInode*>(lock->get_parent())->get_loner()) >= 0) {
-     lock->set_state(LOCK_EXCL);
--  else
--    lock->set_state(LOCK_LOCK);
--  if (lock->get_type() == CEPH_LOCK_DN && lock->get_parent()->is_replicated() &&
--      !lock->is_waiter_for(SimpleLock::WAIT_WR))
--    simple_sync(lock, pneed_issue);
--  if (lock->get_cap_shift())
--    *pneed_issue = true;
--  lock->get_parent()->auth_unpin(lock);
-+    lock->get_parent()->auth_unpin(lock);
-+    lock->finish_waiters(SimpleLock::WAIT_STABLE|SimpleLock::WAIT_WR|SimpleLock::WAIT_RD);
-+    if (lock->get_cap_shift())
-+      *pneed_issue = true;
-+  } else {
-+    // the xlocker may have CEPH_CAP_GSHARED, need to revoke it
-+    // if next state is LOCK_LOCK
-+    eval_gather(lock, true, pneed_issue);
-+  }
- }
- 
- void Locker::xlock_finish(SimpleLock *lock, Mutation *mut, bool *pneed_issue)
-@@ -1508,24 +1511,9 @@ void Locker::xlock_finish(SimpleLock *lock, Mutation *mut, bool *pneed_issue)
- 			 SimpleLock::WAIT_WR | 
- 			 SimpleLock::WAIT_RD, 0); 
-   } else {
--    if (lock->get_num_xlocks() == 0 &&
--	lock->get_num_rdlocks() == 0 &&
--	lock->get_num_wrlocks() == 0 &&
--	lock->get_num_client_lease() == 0) {
-+    if (lock->get_num_xlocks() == 0)
-       _finish_xlock(lock, &do_issue);
--    }
--
--    // others waiting?
--    lock->finish_waiters(SimpleLock::WAIT_STABLE |
--			 SimpleLock::WAIT_WR | 
--			 SimpleLock::WAIT_RD, 0); 
+diff --git a/src/mds/Capability.h b/src/mds/Capability.h
+index fdecb90..d56bdc9 100644
+--- a/src/mds/Capability.h
++++ b/src/mds/Capability.h
+@@ -142,13 +142,11 @@ public:
+       _pending = c;
+       _issued |= c;
+     } else if (~_pending & c) {
+-      // adding bits only.  remove obsolete revocations?
++      // note prior caps if there are pending revocations
++      if (!_revokes.empty())
++	_revokes.push_back(revoke_info(_pending, last_sent, last_issue));
+       _pending |= c;
+       _issued |= c;
+-      // drop old _revokes with no bits we don't have
+-      while (!_revokes.empty() &&
+-	     (_revokes.back().before & ~_pending) == 0)
+-	_revokes.pop_back();
+     } else {
+       // no change.
+       assert(_pending == c);
+@@ -169,16 +167,42 @@ public:
+     for (list<revoke_info>::iterator p = _revokes.begin(); p != _revokes.end(); ++p)
+       _issued |= p->before;
    }
--    
--  // eval?
--  if (!lock->is_stable())
--    eval_gather(lock, false, &do_issue);
--  else if (lock->get_parent()->is_auth())
--    try_eval(lock, &do_issue);
-   
-   if (do_issue) {
-     CInode *in = static_cast<CInode*>(lock->get_parent());
++  void _update_revokes(ceph_seq_t seq, unsigned caps) {
++    // can i forget any revocations?
++    while (!_revokes.empty() && _revokes.front().seq < seq)
++      _revokes.pop_front();
++
++    if (!_revokes.empty() && _revokes.front().seq == seq) {
++      list<revoke_info>::iterator p = _revokes.begin();
++      unsigned prev_pending = p->before;
++      p->before = caps;
++      // client actively released caps?
++      unsigned release = prev_pending & ~caps;
++      if (release) {
++	for (++p; p != _revokes.end(); ++p) {
++	  // we issued new caps to client?
++	  release &= prev_pending | ~(p->before);
++	  if (release == 0)
++	    break;
++	  prev_pending = p->before;
++	  p->before &= ~release;
++	}
++	if (release) {
++	  // we issued new caps to client?
++	  release &= prev_pending | ~_pending;
++	  _pending &= ~release;
++	}
++      }
++    }
++  }
+   void confirm_receipt(ceph_seq_t seq, unsigned caps) {
+     if (seq == last_sent) {
+-      _pending = caps;
+       _revokes.clear();
+       _issued = caps;
++      // don't add bits
++      _pending &= caps;
+     } else {
+-      // can i forget any revocations?
+-      while (!_revokes.empty() &&
+-	     _revokes.front().seq <= seq)
+-	_revokes.pop_front();
++      _update_revokes(seq, caps);
+       _calc_issued();
+     }
+     //check_rdcaps_list();
 -- 
 1.8.1.4
 
