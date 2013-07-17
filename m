@@ -1,78 +1,90 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Any concern about Ceph on CentOS
-Date: Wed, 17 Jul 2013 14:22:32 +0800
-Message-ID: <F638260E-BF37-460E-AEEE-C18C7879076A@gmail.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E43F83@SHSMSX102.ccr.corp.intel.com> <20130717061655.GB13122@oder.mch.fsc.net>
-Mime-Version: 1.0 (Mac OS X Mail 6.5 \(1508\))
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Hemanth Kumar <hemanthkumar51@gmail.com>
+Subject: Fwd: Error while running teuthology
+Date: Wed, 17 Jul 2013 11:54:47 +0530
+Message-ID: <CAG_LFoC9vErfwQ+Ggkaps7r2L2G36z4Gw3=CM0TnDnjwayiqhA@mail.gmail.com>
+References: <CAG_LFoCDv8NvzuzQrutUBgb+yDocfuP89EYKqaat3321LcNfzw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f49.google.com ([209.85.160.49]:36223 "EHLO
-	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751298Ab3GQGWj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jul 2013 02:22:39 -0400
-Received: by mail-pb0-f49.google.com with SMTP id jt11so1524616pbb.36
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 23:22:38 -0700 (PDT)
-In-Reply-To: <20130717061655.GB13122@oder.mch.fsc.net>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:58031 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751445Ab3GQGYs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jul 2013 02:24:48 -0400
+Received: by mail-ie0-f171.google.com with SMTP id qd12so3280279ieb.30
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jul 2013 23:24:47 -0700 (PDT)
+In-Reply-To: <CAG_LFoCDv8NvzuzQrutUBgb+yDocfuP89EYKqaat3321LcNfzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org
 
-Hi Kasper,
+I am beginner and would like to contribute ceph-qa
+I amtrying to run teuthology with 1 server-node and 1 client-node, i
+am stuck with an error can any one point out the mistake i am doing
 
-Can you talk about how you make use of Ceph and detail information on C=
-entOS?
+following is my ceph configuration:
+I have 1 server : ceph-server 192.168.100.102 with ceph cludter
+[mon.a, mds.a, osd.1, osd.2]
+1 client : 192.168.100.103 with configured RBD n CEPFS
 
-I guess that you use the CephFS on Ceph Cluster?
+root@ceph-node1:~/testing/teuthology# nano test.yaml
+root@ceph-node1:~/testing/teuthology# ./virtualenv/bin/teuthology test.yaml
+INFO:teuthology.run_tasks:Running task internal.save_config...
+INFO:teuthology.task.internal:Saving configuration
+INFO:teuthology.run_tasks:Running task internal.check_lock...
+INFO:teuthology.task.internal:Lock checking disabled.
+INFO:teuthology.run_tasks:Running task internal.connect...
+INFO:teuthology.task.internal:Opening connections...
+INFO:teuthology.task.internal:roles: ceph@ceph-server - ['mon.a',
+'mds.a', 'osd.0', 'osd.1']
+INFO:teuthology.run_tasks:Running task internal.check_conflict...
+INFO:teuthology.task.internal:Checking for old test directory...
+ERROR:teuthology.run_tasks:Saw exception from tasks
+Traceback (most recent call last):
+  File "/root/testing/teuthology/teuthology/run_tasks.py", line 25, in run_tasks
+    manager = _run_one_task(taskname, ctx=ctx, config=config)
+  File "/root/testing/teuthology/teuthology/run_tasks.py", line 14, in
+_run_one_task
+    return fn(**kwargs)
+  File "/root/testing/teuthology/teuthology/task/internal.py", line
+254, in check_conflict
+    testdir = teuthology.get_testdir(ctx)
+  File "/root/testing/teuthology/teuthology/misc.py", line 42, in get_testdir
+    status = lockstatus.get_status(ctx, machine)
+  File "/root/testing/teuthology/teuthology/lockstatus.py", line 25,
+in get_status
+    return json.loads(content)
+  File "/usr/lib/python2.7/json/__init__.py", line 326, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 366, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python2.7/json/decoder.py", line 384, in raw_decode
+    raise ValueError("No JSON object could be decoded")
+ValueError: No JSON object could be decoded
+INFO:teuthology.run:Summary data:
+{failure_reason: No JSON object could be decoded, owner:
+root@ceph-node1, success: false}
 
-Best regards,
-Wheats
+INFO:teuthology.run:FAIL
 
+test.yaml
 
-
-=D4=DA 2013-7-17=A3=AC=CF=C2=CE=E72:16=A3=ACKasper Dieter <dieter.kaspe=
-r@ts.fujitsu.com> =D0=B4=B5=C0=A3=BA
-
-> Hi Xiaoxi,
->=20
-> we are really running Ceph on CentOS-6.4
-> (6 server nodes, 3 client nodes, 160 OSDs).
->=20
-> We put a 3.8.13 Kernel on top and installed the ceph-0.61.4 cluster w=
-ith mkcephfs,=20
-> because ceph-deploy seems to be still very buggy and has big dependen=
-cies to the newest python.
->=20
-> ceph.ko
-> rbd.ko
-> and ceph-fuse are running fast, well and stable (so far ;-) ).
->=20
-> Cheers,
-> -Dieter
->=20
-> On Wed, Jul 17, 2013 at 03:18:22AM +0200, Chen, Xiaoxi wrote:
->> Hi list,
->>   I would like to ask if anyone really run Ceph on CentOS/RHEL?=20
->>   Since the kernel version for Cent/RHEL is much older than that of =
-Ubuntu,=20
->>   I am thinking about whether we have some known performance/functio=
-nality issue?
->>   Thanks for everyone could share your insight for Ceph+CentOS.
->> 																												Xiaoxi=20
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+check-locks: false
+roles:
+- [mon.a, mds.a, osd.0, osd.1]
+targets:
+  ceph@ceph-server: ssh-rsa
+AAAAB3NzaC1yc2EAAAADAQABAAABAQC18Vm9HABtFv2BjuFNFxLSwJH0ZcP0pzhJJUTCLQ/181osbhNP0kkqMWaoddjmNNdvpBY6YMvM06GlE3TdMkF$
+tasks:
+- install:
+- ceph:
+- interactive:
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Hemanth Kumar H C
+
+
+
+--
+Thanks,
+Hemanth Kumar H C
