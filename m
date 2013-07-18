@@ -1,46 +1,58 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Internal Qemu snapshots with RBD and libvirt
-Date: Thu, 18 Jul 2013 17:21:01 +0200
-Message-ID: <51E807DD.5050805@42on.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: v0.61.5 Cuttlefish update released
+Date: Thu, 18 Jul 2013 09:45:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:49775 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756756Ab3GRP2f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Jul 2013 11:28:35 -0400
-Received: from [IPv6:2001:980:7936:0:45ad:97de:546b:8fc5] (unknown [IPv6:2001:980:7936:0:45ad:97de:546b:8fc5])
-	by websrv.42on.com (Postfix) with ESMTPSA id 83EB4C43F2
-	for <ceph-devel@vger.kernel.org>; Thu, 18 Jul 2013 17:21:00 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+We've prepared another update for the Cuttlefish v0.61.x series. This 
+release primarily contains monitor stability improvements, although there 
+are also some important fixes for ceph-osd for large clusters and a few 
+important CephFS fixes. We recommend that all v0.61.x users upgrade.
 
-I'm working on the RBD integration for CloudStack 4.2 and now I got to 
-the point snapshotting.
+ * mon: misc sync improvements (faster, more reliable, better tuning)
+ * mon: enable leveldb cache by default (big performance improvement)
+ * mon: new scrub feature (primarily for diagnostic, testing purposes)
+ * mon: fix occasional leveldb assertion on startup
+ * mon: prevent reads until initial state is committed
+ * mon: improved logic for trimming old osdmaps
+ * mon: fix pick_addresses bug when expanding mon cluster
+ * mon: several small paxos fixes, improvements
+ * mon: fix bug osdmap trim behavior
+ * osd: fix several bugs with PG stat reporting
+ * osd: limit number of maps shared with peers (which could cause domino failures)
+ * rgw: fix radosgw-admin buckets list (for all buckets)
+ * mds: fix occasional client failure to reconnect
+ * mds: fix bad list traversal after unlink
+ * mds: fix underwater dentry cleanup (occasional crash after mds restart)
+ * libcephfs, ceph-fuse: fix occasional hangs on umount
+ * libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
+ * ceph-disk: more robust journal device detection on RHEL/CentOS
+ * ceph-disk: better, simpler locking
+ * ceph-disk: do not inadvertantely mount over existing osd mounts
+ * ceph-disk: better handling for unusual device names
+ * sysvinit, upstart: handle symlinks in /var/lib/ceph/*
 
-The "problem" is that CloudStack uses libvirt for snapshotting 
-Instances, but Qemu/libvirt also tries to store the memory contents of 
-the domain to assure the snapshot is consistent.
+Please also refer to the complete release notes:
 
-So the way libvirt tries to do it is not possible with RBD right now, 
-since there is no way to store the internal memory.
+   http://ceph.com/docs/master/release-notes/#v0-61-5-cuttlefish
 
-I was thinking about using the Java librbd bindings to create the 
-snapshot, but that will not be consistent thus not 100% safe, so I'd 
-rather avoid that.
+You can get v0.61.5 from the usual locations:
 
-How is this done in OpenStack? Or are you facing similar issues?
-
-P.S.: I'm testing with libvirt 1.0.6 from the Ubuntu Cloud Team archive 
-with packages for OpenStack Havana.
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.5.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
