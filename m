@@ -1,57 +1,73 @@
-From: Ta Ba Tuan <tuantb@vccloud.vn>
-Subject: Re: [ceph-users] ceph -w warning "I don't have pgid 0.2c8"?
-Date: Fri, 19 Jul 2013 01:24:46 +0700
-Message-ID: <51E832EE.6070905@vccloud.vn>
-References: <51E64EE7.3090902@vccloud.vn> <CA+4uBUbASJWUME+zOZRh=NrZLEGdJcmwXMoMWvvmgGRzG04C0w@mail.gmail.com> <51E75166.9000308@vccloud.vn> <51E75958.10806@vccloud.vn> <CA+4uBUZgjxObUp9a9=+meY=td4DY7x=KfUzCP81sFxS3fv4cwg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: v0.61.5 Cuttlefish update released
+Date: Thu, 18 Jul 2013 22:59:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307182254010.28090@cobra.newdream.net>
+References: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from vccloud.vn ([222.255.27.61]:50840 "EHLO mail.vccloud.vn"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1758266Ab3GRSY7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Jul 2013 14:24:59 -0400
-Received: from localhost (mail.vccloud.vn [127.0.0.1])
-	by mail.vccloud.vn (Postfix) with ESMTP id 7D0F83A0086
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Jul 2013 01:24:57 +0700 (ICT)
-Received: from mail.vccloud.vn ([127.0.0.1])
-	by localhost (mail.vccloud.vn [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id aYhX2U8mKg9e for <ceph-devel@vger.kernel.org>;
-	Fri, 19 Jul 2013 01:24:53 +0700 (ICT)
-In-Reply-To: <CA+4uBUZgjxObUp9a9=+meY=td4DY7x=KfUzCP81sFxS3fv4cwg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:49067 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751310Ab3GSF7p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Jul 2013 01:59:45 -0400
+In-Reply-To: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hi Samuel,
+A note on upgrading:
 
-Output logs from : ceph pg dump | grep 'stale\|creating'
+One of the fixes in 0.61.5 is with a 32bit vs 64bit bug with the feature 
+bits.  We did not realize it before, but the fix will prevent 0.61.4 (or 
+earlier) from forming a quorum with 0.61.5. This is similar to the upgrade 
+from bobtail (and the future upgrade to dumpling). As such, we recommend 
+you upgrade all monitors at once to avoid the potential for discruption in 
+service.
 
-0.f4f 0 0 0 0 0 0 0 stale+creating 2013-07-17 16:35:06.882419 0'0 0'0 [=
-]=20
-[68,12] 0=E2=94=82'0 0.000000 0'0 0.000000 =E2=94=82
-2.f4d 0 0 0 0 0 0 0 stale+creating 2013-07-17 16:35:22.826552 0'0 0'0 [=
-]=20
-[68,12] 0=E2=94=82
-'0 0.000000 0'0 0.000000 =E2=94=82
-0.2c8 0 0 0 0 0 0 0 stale+creating 2013-07-17 14:30:54.280454 0'0 0'0 [=
-]=20
-[68,5] 0=E2=94=82
-'0 0.000000 0'0 0.000000 =E2=94=82
-2.2c6 0 0 0 0 0 0 0 stale+creating 2013-07-17 16:35:28.445878 0'0 0'0 [=
-]=20
-[68,5] 0=E2=94=82
-'0 0.000000 0'0 0.000000
+I'm adding a note to the release notes.
 
 Thanks!
+sage
 
-On 07/19/2013 01:16 AM, Samuel Just wrote:
-> ceph pg dump | grep 'stale\|creating'
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Thu, 18 Jul 2013, Sage Weil wrote:
+
+> We've prepared another update for the Cuttlefish v0.61.x series. This 
+> release primarily contains monitor stability improvements, although there 
+> are also some important fixes for ceph-osd for large clusters and a few 
+> important CephFS fixes. We recommend that all v0.61.x users upgrade.
+> 
+>  * mon: misc sync improvements (faster, more reliable, better tuning)
+>  * mon: enable leveldb cache by default (big performance improvement)
+>  * mon: new scrub feature (primarily for diagnostic, testing purposes)
+>  * mon: fix occasional leveldb assertion on startup
+>  * mon: prevent reads until initial state is committed
+>  * mon: improved logic for trimming old osdmaps
+>  * mon: fix pick_addresses bug when expanding mon cluster
+>  * mon: several small paxos fixes, improvements
+>  * mon: fix bug osdmap trim behavior
+>  * osd: fix several bugs with PG stat reporting
+>  * osd: limit number of maps shared with peers (which could cause domino failures)
+>  * rgw: fix radosgw-admin buckets list (for all buckets)
+>  * mds: fix occasional client failure to reconnect
+>  * mds: fix bad list traversal after unlink
+>  * mds: fix underwater dentry cleanup (occasional crash after mds restart)
+>  * libcephfs, ceph-fuse: fix occasional hangs on umount
+>  * libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
+>  * ceph-disk: more robust journal device detection on RHEL/CentOS
+>  * ceph-disk: better, simpler locking
+>  * ceph-disk: do not inadvertantely mount over existing osd mounts
+>  * ceph-disk: better handling for unusual device names
+>  * sysvinit, upstart: handle symlinks in /var/lib/ceph/*
+> 
+> Please also refer to the complete release notes:
+> 
+>    http://ceph.com/docs/master/release-notes/#v0-61-5-cuttlefish
+> 
+> You can get v0.61.5 from the usual locations:
+> 
+>  * Git at git://github.com/ceph/ceph.git
+>  * Tarball at http://ceph.com/download/ceph-0.61.5.tar.gz
+>  * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+>  * For RPMs, see http://ceph.com/docs/master/install/rpm
+> 
