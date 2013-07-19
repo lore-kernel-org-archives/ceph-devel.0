@@ -1,189 +1,125 @@
-From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: v0.61.5 Cuttlefish update released
-Date: Fri, 19 Jul 2013 22:25:51 +0200
-Message-ID: <51E9A0CF.3010509@profihost.ag>
-References: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net>
-	<alpine.DEB.2.00.1307182254010.28090@cobra.newdream.net>
-	<51E8E3B3.8020300@profihost.ag> <51E8E409.8020201@profihost.ag>
-	<alpine.DEB.2.00.1307190813570.10870@cobra.newdream.net>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: [PATCH] mon:  use first_commited instead of latest_full map if
+ latest_bl.length() == 0
+Date: Fri, 19 Jul 2013 22:26:05 +0200
+Message-ID: <51E9A0DD.8090102@profihost.ag>
+References: <1374222696-7100-1-git-send-email-s.priebe@profihost.ag> <51E93700.1040908@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1307190813570.10870-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:53183 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750992Ab3GSUZ6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Jul 2013 16:25:58 -0400
+In-Reply-To: <51E93700.1040908@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Joao Eduardo Luis <joao.luis@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
 Hi,
 
-sorry as all my mons were down with the same error - i was in a hurry 
-made sadly no copy of the mons and workaround by hack ;-( but i posted a 
+sorry as all my mons were down with the same error - i was in a hurry=20
+made sadly no copy of the mons and workaround by hack ;-( but i posted =
+a=20
 log to pastebin with debug mon 20. (see last email)
 
 Stefan
-Am 19.07.2013 17:14, schrieb Sage Weil:
-> On Fri, 19 Jul 2013, Stefan Priebe - Profihost AG wrote:
->> crash is this one:
->
-> Can you post a full lost (debug mon = 20, debug paxos = 20, debug ms = 1),
-> and/or hit us up on irc?
->
+
+Mit freundlichen Gr=FC=DFen
+   Stefan Priebe
+Bachelor of Science in Computer Science (BSCS)
+Vorstand (CTO)
+
+-------------------------------
+Profihost AG
+Am Mittelfelde 29
+30519 Hannover
+Deutschland
+
+Tel.: +49 (511) 5151 8181     | Fax.: +49 (511) 5151 8282
+URL: http://www.profihost.com | E-Mail: info@profihost.com
+
+Sitz der Gesellschaft: Hannover, USt-IdNr. DE813460827
+Registergericht: Amtsgericht Hannover, Register-Nr.: HRB 202350
+Vorstand: Cristoph Bluhm, Sebastian Bluhm, Stefan Priebe
+Aufsichtsrat: Prof. Dr. iur. Winfried Huck (Vorsitzender)
+
+Am 19.07.2013 14:54, schrieb Joao Eduardo Luis:
+> On 07/19/2013 09:31 AM, Stefan Priebe wrote:
+>> this fixes a failure like:
+>>       0> 2013-07-19 09:29:16.803918 7f7fb5f31780 -1 mon/OSDMonitor.c=
+c:
+>> In function 'virtual void OSDMonitor::update_from_paxos(bool*)' thre=
+ad
+>> 7f7fb5f31780 time 2013-07-19 09:29:16.803439
+>> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() !=3D 0)
 >>
->> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
->> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
->
-> What are the 17 patches on top? Anything in the mon?
->
-> Thanks!
-> sage
->
->> ceph-mon, pid 22172
->> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
->> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
->> 7f484a872780 time 2013-07-19 08:59:32.173506
->> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
->>
->>   ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
->>   1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
->>   2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
+>>   ceph version 0.61.5-15-g72c7c74
+>> (72c7c74e1f160e6be39b6edf30bce09b770fa777)
+>>   1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d121]
+>>   2: (PaxosService::refresh(bool*)+0xe6) [0x4f2a46]
 >>   3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
 >>   4: (Monitor::init_paxos()+0xe5) [0x48f955]
->>   5: (Monitor::preinit()+0x679) [0x4bba79]
+>>   5: (Monitor::preinit()+0x679) [0x4b1cf9]
 >>   6: (main()+0x36b0) [0x484bb0]
->>   7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
+>>   7: (__libc_start_main()+0xfd) [0x7f7fb408dc8d]
 >>   8: /usr/bin/ceph-mon() [0x4801e9]
 >>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
 >> needed to interpret this.
+>> ---
+>>   src/mon/OSDMonitor.cc |    6 ++++++
+>>   1 file changed, 6 insertions(+)
 >>
->> --- begin dump of recent events ---
->>     -13> 2013-07-19 08:59:32.136172 7f484a872780  5 asok(0x131a000)
->> register_command perfcounters_dump hook 0x1304010
->>     -12> 2013-07-19 08:59:32.136191 7f484a872780  5 asok(0x131a000)
->> register_command 1 hook 0x1304010
->>     -11> 2013-07-19 08:59:32.136194 7f484a872780  5 asok(0x131a000)
->> register_command perf dump hook 0x1304010
->>     -10> 2013-07-19 08:59:32.136200 7f484a872780  5 asok(0x131a000)
->> register_command perfcounters_schema hook 0x1304010
->>      -9> 2013-07-19 08:59:32.136204 7f484a872780  5 asok(0x131a000)
->> register_command 2 hook 0x1304010
->>      -8> 2013-07-19 08:59:32.136206 7f484a872780  5 asok(0x131a000)
->> register_command perf schema hook 0x1304010
->>      -7> 2013-07-19 08:59:32.136208 7f484a872780  5 asok(0x131a000)
->> register_command config show hook 0x1304010
->>      -6> 2013-07-19 08:59:32.136211 7f484a872780  5 asok(0x131a000)
->> register_command config set hook 0x1304010
->>      -5> 2013-07-19 08:59:32.136214 7f484a872780  5 asok(0x131a000)
->> register_command log flush hook 0x1304010
->>      -4> 2013-07-19 08:59:32.136216 7f484a872780  5 asok(0x131a000)
->> register_command log dump hook 0x1304010
->>      -3> 2013-07-19 08:59:32.136219 7f484a872780  5 asok(0x131a000)
->> register_command log reopen hook 0x1304010
->>      -2> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
->> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
->> ceph-mon, pid 22172
->>      -1> 2013-07-19 08:59:32.137967 7f484a872780  1 finished
->> global_init_daemonize
->>       0> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
->> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
->> 7f484a872780 time 2013-07-19 08:59:32.173506
->> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
+>> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
+>> index 9c854cd..ab3b8ec 100644
+>> --- a/src/mon/OSDMonitor.cc
+>> +++ b/src/mon/OSDMonitor.cc
+>> @@ -129,6 +129,12 @@ void OSDMonitor::update_from_paxos(bool
+>> *need_bootstrap)
+>>     if ((latest_full > 0) && (latest_full > osdmap.epoch)) {
+>>       bufferlist latest_bl;
+>>       get_version_full(latest_full, latest_bl);
+>> +
+>> +    if (latest_bl.length() =3D=3D 0 && latest_full !=3D 0 &&
+>> get_first_committed() > 1) {
+>
+> latest_full is always > 0 here, following the previous if check.
+>
+>> +        dout(0) << __func__ << " latest_bl.length() =3D=3D 0 use
+>> first_commited instead of latest_full" << dendl;
+>> +        latest_full =3D get_first_committed();
+>> +        get_version_full(latest_full, latest_bl);
+>> +    }
+>>       assert(latest_bl.length() !=3D 0);
+>>       dout(7) << __func__ << " loading latest full map e" <<
+>> latest_full << dendl;
+>>       osdmap.decode(latest_bl);
 >>
->>   ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
->>   1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
->>   2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->>   3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->>   4: (Monitor::init_paxos()+0xe5) [0x48f955]
->>   5: (Monitor::preinit()+0x679) [0x4bba79]
->>   6: (main()+0x36b0) [0x484bb0]
->>   7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
->>   8: /usr/bin/ceph-mon() [0x4801e9]
->>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> Mi
->>
->> Am 19.07.2013 08:58, schrieb Stefan Priebe - Profihost AG:
->>> All mons do not work anymore:
->>>
->>> === mon.a ===
->>> Starting Ceph mon.a on ccad...
->>> [21207]: (33) Numerical argument out of domain
->>> failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i a --pid-file
->>> /var/run/ceph/mon.a.pid -c /etc/ceph/ceph.conf '
->>>
->>> Stefan
->>>
->>> Am 19.07.2013 07:59, schrieb Sage Weil:
->>>> A note on upgrading:
->>>>
->>>> One of the fixes in 0.61.5 is with a 32bit vs 64bit bug with the feature
->>>> bits.  We did not realize it before, but the fix will prevent 0.61.4 (or
->>>> earlier) from forming a quorum with 0.61.5. This is similar to the upgrade
->>>> from bobtail (and the future upgrade to dumpling). As such, we recommend
->>>> you upgrade all monitors at once to avoid the potential for discruption in
->>>> service.
->>>>
->>>> I'm adding a note to the release notes.
->>>>
->>>> Thanks!
->>>> sage
->>>>
->>>>
->>>> On Thu, 18 Jul 2013, Sage Weil wrote:
->>>>
->>>>> We've prepared another update for the Cuttlefish v0.61.x series. This
->>>>> release primarily contains monitor stability improvements, although there
->>>>> are also some important fixes for ceph-osd for large clusters and a few
->>>>> important CephFS fixes. We recommend that all v0.61.x users upgrade.
->>>>>
->>>>>   * mon: misc sync improvements (faster, more reliable, better tuning)
->>>>>   * mon: enable leveldb cache by default (big performance improvement)
->>>>>   * mon: new scrub feature (primarily for diagnostic, testing purposes)
->>>>>   * mon: fix occasional leveldb assertion on startup
->>>>>   * mon: prevent reads until initial state is committed
->>>>>   * mon: improved logic for trimming old osdmaps
->>>>>   * mon: fix pick_addresses bug when expanding mon cluster
->>>>>   * mon: several small paxos fixes, improvements
->>>>>   * mon: fix bug osdmap trim behavior
->>>>>   * osd: fix several bugs with PG stat reporting
->>>>>   * osd: limit number of maps shared with peers (which could cause domino failures)
->>>>>   * rgw: fix radosgw-admin buckets list (for all buckets)
->>>>>   * mds: fix occasional client failure to reconnect
->>>>>   * mds: fix bad list traversal after unlink
->>>>>   * mds: fix underwater dentry cleanup (occasional crash after mds restart)
->>>>>   * libcephfs, ceph-fuse: fix occasional hangs on umount
->>>>>   * libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
->>>>>   * ceph-disk: more robust journal device detection on RHEL/CentOS
->>>>>   * ceph-disk: better, simpler locking
->>>>>   * ceph-disk: do not inadvertantely mount over existing osd mounts
->>>>>   * ceph-disk: better handling for unusual device names
->>>>>   * sysvinit, upstart: handle symlinks in /var/lib/ceph/*
->>>>>
->>>>> Please also refer to the complete release notes:
->>>>>
->>>>>     http://ceph.com/docs/master/release-notes/#v0-61-5-cuttlefish
->>>>>
->>>>> You can get v0.61.5 from the usual locations:
->>>>>
->>>>>   * Git at git://github.com/ceph/ceph.git
->>>>>   * Tarball at http://ceph.com/download/ceph-0.61.5.tar.gz
->>>>>   * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
->>>>>   * For RPMs, see http://ceph.com/docs/master/install/rpm
->>>>>
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>
->>
->>
+>
+> Although appreciated, this patch fixes the symptom leading to the cra=
+sh.
+>   The bug itself seems to be that there is a latest_full version that=
+ is
+> empty.  Until we know for sure what is happening and what is leading =
+to
+> such state, fixing the symptom is not advisable, as it is not only
+> masking the real issue but it may also have unforeseen long-term effe=
+cts.
+>
+> Stefan, do you still have the store state on which this was triggered=
+?
+> If so, can you share it with us (or dig a bit into it yourself if you
+> can't share the store, in which case I'll let you know what to look f=
+or).
+>
+>    -Joao
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
