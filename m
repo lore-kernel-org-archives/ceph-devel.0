@@ -1,10 +1,16 @@
-From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Subject: Optimize Ceph cluster (kernel, osd, rbd)
-Date: Sat, 20 Jul 2013 02:11:30 +0700
-Message-ID: <51E98F62.8050800@vccloud.vn>
+From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Subject: Re: v0.61.5 Cuttlefish update released
+Date: Fri, 19 Jul 2013 22:25:51 +0200
+Message-ID: <51E9A0CF.3010509@profihost.ag>
+References: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net>
+	<alpine.DEB.2.00.1307182254010.28090@cobra.newdream.net>
+	<51E8E3B3.8020300@profihost.ag> <51E8E409.8020201@profihost.ag>
+	<alpine.DEB.2.00.1307190813570.10870@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1576932015=="
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1307190813570.10870-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -14,217 +20,170 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, MinhCD <minhcd-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---===============1576932015==
-Content-Type: multipart/alternative;
- boundary="------------060108000204000509050801"
+Hi,
 
-This is a multi-part message in MIME format.
---------------060108000204000509050801
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+sorry as all my mons were down with the same error - i was in a hurry 
+made sadly no copy of the mons and workaround by hack ;-( but i posted a 
+log to pastebin with debug mon 20. (see last email)
 
-Hi everyone,
-
-I have *3 nodes (running MON and MDS)*
-and *6 data nodes ( 84 OSDs**)*
-Each data nodes has configuraions:
-   - CPU: 24 processor * Core Intel(R) Xeon(R) CPU E5-2620 0 @ 2.00GHz
-   - RAM: 32GB
-   - Disk: 14*4TB
-(14disks *4TB *6 data nodes= 84 OSDs)
-
-To optimize Ceph Cluster, *I adjusted some kernel arguments* (nr_request 
-in queue and increated read throughput):
-
-#Adjust nr_request in queue (staying in mem - default is 128)
-     echo 1024 > /sys/block/sdb/queue/nr_requests
-     echo noop > /sys/block/sda/queue/scheduler   (default= noop 
-deadline [cfq])
-#Increase read throughput  (default: 128)
-     echo "512" > /sys/block/*/queue/read_ahead_kb
-
-And, *tuning Ceph configuraion options below:*
-
-[client]
-
-      rbd cache = true
-      rbd cache size = 536870912
-      rbd cache max dirty = 134217728
-      rbd cache target dirty = 33554432
-      rbd cache max dirty age = 5
-
-[osd]
-     osd data = /var/lib/ceph/osd/cloud-$id
-     osd journal = /var/lib/ceph/osd/cloud-$id/journal
-     osd journal size = 10000
-     osd mkfs type = xfs
-     osd mkfs options xfs = "-f -i size=2048"
-     osd mount options xfs = "rw,noatime,inode64,logbsize=250k"
-
-     keyring = /var/lib/ceph/osd/cloud-$id/keyring.osd.$id
-#increasing the number may increase the request processing rate
-     osd op threads = 24
-#The number of disk threads, which are used to perform background disk 
-intensive OSD operations such as scrubbing and snap trimming
-     osd disk threads =24
-#The number of active recovery requests per OSD at one time. More 
-requests will accelerate recovery, but the requests places an increased 
-load on the cluster.
-     osd recovery max active =1
-#writing direct to the journal.
-#Allow use of libaio to do asynchronous writes
-     journal dio = true
-     journal aio = true
-#Synchronization interval:
-#The maximum/minimum interval in seconds for synchronizing the filestore.
-     filestore max sync interval = 100
-     filestore min sync interval = 50
-#Defines the maximum number of in progress operations the file store 
-accepts before blocking on queuing new operations.
-     filestore queue max ops = 2000
-#The maximum number of bytes for an operation
-     filestore queue max bytes = 536870912
-#The maximum number of operations the filestore can commit.
-     filestore queue committing max ops = 2000 (default =500)
-#The maximum number of bytes the filestore can commit.
-     filestore queue committing max bytes = 536870912
-#When you add or remove Ceph OSD Daemons to a cluster, the CRUSH 
-algorithm will want to rebalance the cluster by moving placement groups 
-to or from Ceph OSD Daemons to restore the balance. The process of 
-migrating placement groups and the objects they contain can reduce the 
-cluster's operational performance considerably. To maintain operational 
-performance, Ceph performs this migration with 'backfilling', which 
-allows Ceph to set backfill operations to a lower priority than requests 
-to read or write data.
-     osd max backfills = 1
-
-
-Tomorrow, I'm going to implement Ceph Cluster,
-I have very little experience in managing Ceph. So, I hope someone give 
-me advices about above arguments and guide me how to best optimize ceph 
-cluster?
-
-Thank you so much!
---tuantaba
-
-
-
-
---------------060108000204000509050801
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-
-<html>
-  <head>
-
-    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-  </head>
-  <body text="#000000" bgcolor="#FFFFFF">
-    Hi everyone,<br>
-    <br>
-    I have <b>3 nodes (running MON and MDS)</b><br>
-    and&nbsp; <b>6 data nodes ( 84 OSDs</b><b> )</b><br>
-    Each data nodes has configuraions:<br>
-    &nbsp; - CPU: 24 processor * Core Intel(R) Xeon(R) CPU E5-2620 0 @
-    2.00GHz<br>
-    &nbsp; - RAM: 32GB<br>
-    &nbsp; - Disk: 14*4TB<br>
-    (14disks *4TB *6 data nodes= 84 OSDs)<br>
-    <br>
-    To optimize Ceph Cluster, <b>I adjusted some kernel arguments</b>
-    (nr_request in queue and increated read throughput):<br>
-    <br>
-    #Adjust nr_request in queue (staying in mem - default is 128) <br>
-    &nbsp;&nbsp;&nbsp; echo 1024 &gt; /sys/block/sdb/queue/nr_requests<br>
-    &nbsp;&nbsp;&nbsp; echo noop &gt; /sys/block/sda/queue/scheduler&nbsp;&nbsp; (default= noop
-    deadline [cfq])<br>
-    #Increase read throughput&nbsp; (default: 128)<br>
-    &nbsp;&nbsp;&nbsp; echo "512" &gt; /sys/block/*/queue/read_ahead_kb<br>
-    <br>
-    And, <b>tuning Ceph configuraion options below:</b><br>
-    <br>
-    [client]<br>
-    <blockquote>&nbsp;rbd cache = true<br>
-      &nbsp;rbd cache size = 536870912<br>
-      &nbsp;rbd cache max dirty = 134217728<br>
-      &nbsp;rbd cache target dirty = 33554432<br>
-      &nbsp;rbd cache max dirty age = 5<br>
-    </blockquote>
-    [osd]<br>
-    &nbsp;&nbsp;&nbsp; osd data = /var/lib/ceph/osd/cloud-$id<br>
-    &nbsp;&nbsp;&nbsp; osd journal = /var/lib/ceph/osd/cloud-$id/journal<br>
-    &nbsp;&nbsp;&nbsp; osd journal size = 10000<br>
-    &nbsp;&nbsp;&nbsp; osd mkfs type = xfs<br>
-    &nbsp;&nbsp;&nbsp; osd mkfs options xfs = "-f -i size=2048"<br>
-    &nbsp;&nbsp;&nbsp; osd mount options xfs = "rw,noatime,inode64,logbsize=250k"<br>
-    <br>
-    &nbsp;&nbsp;&nbsp; keyring = /var/lib/ceph/osd/cloud-$id/keyring.osd.$id<br>
-    #increasing the number may increase the request processing rate<br>
-    &nbsp;&nbsp;&nbsp; osd op threads = 24<br>
-    #The number of disk threads, which are used to perform background
-    disk intensive OSD operations such as scrubbing and snap trimming<br>
-    &nbsp;&nbsp;&nbsp; osd disk threads =24<br>
-    #The number of active recovery requests per OSD at one time. More
-    requests will accelerate recovery, but the requests places an
-    increased load on the cluster.<br>
-    &nbsp;&nbsp;&nbsp; osd recovery max active =1<br>
-    #writing direct to the journal.<br>
-    #Allow use of libaio to do asynchronous writes<br>
-    &nbsp;&nbsp;&nbsp; journal dio = true<br>
-    &nbsp;&nbsp;&nbsp; journal aio = true<br>
-    #Synchronization interval:<br>
-    #The maximum/minimum interval in seconds for synchronizing the
-    filestore.<br>
-    &nbsp;&nbsp;&nbsp; filestore max sync interval = 100<br>
-    &nbsp;&nbsp;&nbsp; filestore min sync interval = 50<br>
-    #Defines the maximum number of in progress operations the file store
-    accepts before blocking on queuing new operations.<br>
-    &nbsp;&nbsp;&nbsp; filestore queue max ops = 2000<br>
-    #The maximum number of bytes for an operation<br>
-    &nbsp;&nbsp;&nbsp; filestore queue max bytes = 536870912<br>
-    #The maximum number of operations the filestore can commit.<br>
-    &nbsp;&nbsp;&nbsp; filestore queue committing max ops = 2000 (default =500)<br>
-    #The maximum number of bytes the filestore can commit.<br>
-    &nbsp;&nbsp;&nbsp; filestore queue committing max bytes = 536870912<br>
-    #When you add or remove Ceph OSD Daemons to a cluster, the CRUSH
-    algorithm will want to rebalance the cluster by moving placement
-    groups to or from Ceph OSD Daemons to restore the balance. The
-    process of migrating placement groups and the objects they contain
-    can reduce the cluster&#8217;s operational performance considerably. To
-    maintain operational performance, Ceph performs this migration with
-    &#8216;backfilling&#8217;, which allows Ceph to set backfill operations to a
-    lower priority than requests to read or write data.<br>
-    &nbsp;&nbsp;&nbsp; osd max backfills = 1<br>
-    <br>
-    <br>
-    Tomorrow, I'm going to implement Ceph Cluster,<br>
-    I have very little experience in managing Ceph. So, I hope someone
-    give me advices about above arguments and guide me how to best
-    optimize ceph cluster?<br>
-    <br>
-    Thank you so much!<br>
-    --tuantaba<br>
-    <br>
-    <br>
-    <br>
-  </body>
-</html>
-
---------------060108000204000509050801--
-
---===============1576932015==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1576932015==--
+Stefan
+Am 19.07.2013 17:14, schrieb Sage Weil:
+> On Fri, 19 Jul 2013, Stefan Priebe - Profihost AG wrote:
+>> crash is this one:
+>
+> Can you post a full lost (debug mon = 20, debug paxos = 20, debug ms = 1),
+> and/or hit us up on irc?
+>
+>>
+>> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
+>> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
+>
+> What are the 17 patches on top? Anything in the mon?
+>
+> Thanks!
+> sage
+>
+>> ceph-mon, pid 22172
+>> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
+>> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
+>> 7f484a872780 time 2013-07-19 08:59:32.173506
+>> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
+>>
+>>   ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
+>>   1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
+>>   2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
+>>   3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
+>>   4: (Monitor::init_paxos()+0xe5) [0x48f955]
+>>   5: (Monitor::preinit()+0x679) [0x4bba79]
+>>   6: (main()+0x36b0) [0x484bb0]
+>>   7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
+>>   8: /usr/bin/ceph-mon() [0x4801e9]
+>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- begin dump of recent events ---
+>>     -13> 2013-07-19 08:59:32.136172 7f484a872780  5 asok(0x131a000)
+>> register_command perfcounters_dump hook 0x1304010
+>>     -12> 2013-07-19 08:59:32.136191 7f484a872780  5 asok(0x131a000)
+>> register_command 1 hook 0x1304010
+>>     -11> 2013-07-19 08:59:32.136194 7f484a872780  5 asok(0x131a000)
+>> register_command perf dump hook 0x1304010
+>>     -10> 2013-07-19 08:59:32.136200 7f484a872780  5 asok(0x131a000)
+>> register_command perfcounters_schema hook 0x1304010
+>>      -9> 2013-07-19 08:59:32.136204 7f484a872780  5 asok(0x131a000)
+>> register_command 2 hook 0x1304010
+>>      -8> 2013-07-19 08:59:32.136206 7f484a872780  5 asok(0x131a000)
+>> register_command perf schema hook 0x1304010
+>>      -7> 2013-07-19 08:59:32.136208 7f484a872780  5 asok(0x131a000)
+>> register_command config show hook 0x1304010
+>>      -6> 2013-07-19 08:59:32.136211 7f484a872780  5 asok(0x131a000)
+>> register_command config set hook 0x1304010
+>>      -5> 2013-07-19 08:59:32.136214 7f484a872780  5 asok(0x131a000)
+>> register_command log flush hook 0x1304010
+>>      -4> 2013-07-19 08:59:32.136216 7f484a872780  5 asok(0x131a000)
+>> register_command log dump hook 0x1304010
+>>      -3> 2013-07-19 08:59:32.136219 7f484a872780  5 asok(0x131a000)
+>> register_command log reopen hook 0x1304010
+>>      -2> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
+>> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
+>> ceph-mon, pid 22172
+>>      -1> 2013-07-19 08:59:32.137967 7f484a872780  1 finished
+>> global_init_daemonize
+>>       0> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
+>> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
+>> 7f484a872780 time 2013-07-19 08:59:32.173506
+>> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
+>>
+>>   ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
+>>   1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
+>>   2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
+>>   3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
+>>   4: (Monitor::init_paxos()+0xe5) [0x48f955]
+>>   5: (Monitor::preinit()+0x679) [0x4bba79]
+>>   6: (main()+0x36b0) [0x484bb0]
+>>   7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
+>>   8: /usr/bin/ceph-mon() [0x4801e9]
+>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> Mi
+>>
+>> Am 19.07.2013 08:58, schrieb Stefan Priebe - Profihost AG:
+>>> All mons do not work anymore:
+>>>
+>>> === mon.a ===
+>>> Starting Ceph mon.a on ccad...
+>>> [21207]: (33) Numerical argument out of domain
+>>> failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i a --pid-file
+>>> /var/run/ceph/mon.a.pid -c /etc/ceph/ceph.conf '
+>>>
+>>> Stefan
+>>>
+>>> Am 19.07.2013 07:59, schrieb Sage Weil:
+>>>> A note on upgrading:
+>>>>
+>>>> One of the fixes in 0.61.5 is with a 32bit vs 64bit bug with the feature
+>>>> bits.  We did not realize it before, but the fix will prevent 0.61.4 (or
+>>>> earlier) from forming a quorum with 0.61.5. This is similar to the upgrade
+>>>> from bobtail (and the future upgrade to dumpling). As such, we recommend
+>>>> you upgrade all monitors at once to avoid the potential for discruption in
+>>>> service.
+>>>>
+>>>> I'm adding a note to the release notes.
+>>>>
+>>>> Thanks!
+>>>> sage
+>>>>
+>>>>
+>>>> On Thu, 18 Jul 2013, Sage Weil wrote:
+>>>>
+>>>>> We've prepared another update for the Cuttlefish v0.61.x series. This
+>>>>> release primarily contains monitor stability improvements, although there
+>>>>> are also some important fixes for ceph-osd for large clusters and a few
+>>>>> important CephFS fixes. We recommend that all v0.61.x users upgrade.
+>>>>>
+>>>>>   * mon: misc sync improvements (faster, more reliable, better tuning)
+>>>>>   * mon: enable leveldb cache by default (big performance improvement)
+>>>>>   * mon: new scrub feature (primarily for diagnostic, testing purposes)
+>>>>>   * mon: fix occasional leveldb assertion on startup
+>>>>>   * mon: prevent reads until initial state is committed
+>>>>>   * mon: improved logic for trimming old osdmaps
+>>>>>   * mon: fix pick_addresses bug when expanding mon cluster
+>>>>>   * mon: several small paxos fixes, improvements
+>>>>>   * mon: fix bug osdmap trim behavior
+>>>>>   * osd: fix several bugs with PG stat reporting
+>>>>>   * osd: limit number of maps shared with peers (which could cause domino failures)
+>>>>>   * rgw: fix radosgw-admin buckets list (for all buckets)
+>>>>>   * mds: fix occasional client failure to reconnect
+>>>>>   * mds: fix bad list traversal after unlink
+>>>>>   * mds: fix underwater dentry cleanup (occasional crash after mds restart)
+>>>>>   * libcephfs, ceph-fuse: fix occasional hangs on umount
+>>>>>   * libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
+>>>>>   * ceph-disk: more robust journal device detection on RHEL/CentOS
+>>>>>   * ceph-disk: better, simpler locking
+>>>>>   * ceph-disk: do not inadvertantely mount over existing osd mounts
+>>>>>   * ceph-disk: better handling for unusual device names
+>>>>>   * sysvinit, upstart: handle symlinks in /var/lib/ceph/*
+>>>>>
+>>>>> Please also refer to the complete release notes:
+>>>>>
+>>>>>     http://ceph.com/docs/master/release-notes/#v0-61-5-cuttlefish
+>>>>>
+>>>>> You can get v0.61.5 from the usual locations:
+>>>>>
+>>>>>   * Git at git://github.com/ceph/ceph.git
+>>>>>   * Tarball at http://ceph.com/download/ceph-0.61.5.tar.gz
+>>>>>   * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+>>>>>   * For RPMs, see http://ceph.com/docs/master/install/rpm
+>>>>>
+>>>> _______________________________________________
+>>>> ceph-users mailing list
+>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>
+>>
+>>
