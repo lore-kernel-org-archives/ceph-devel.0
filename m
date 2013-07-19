@@ -1,173 +1,262 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [ceph-users] v0.61.5 Cuttlefish update released
-Date: Fri, 19 Jul 2013 08:14:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307190813570.10870@cobra.newdream.net>
-References: <alpine.DEB.2.00.1307180944270.7945@cobra.newdream.net> <alpine.DEB.2.00.1307182254010.28090@cobra.newdream.net> <51E8E3B3.8020300@profihost.ag> <51E8E409.8020201@profihost.ag>
+Subject: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Fri, 19 Jul 2013 11:04:42 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307191104240.795@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1697561686-1374257082=:795"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53117 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54637 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755886Ab3GSPOt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Jul 2013 11:14:49 -0400
-In-Reply-To: <51E8E409.8020201@profihost.ag>
+	with ESMTP id S1759982Ab3GSSEn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Jul 2013 14:04:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: yehuda@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, 19 Jul 2013, Stefan Priebe - Profihost AG wrote:
-> crash is this one:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Can you post a full lost (debug mon = 20, debug paxos = 20, debug ms = 1), 
-and/or hit us up on irc?
+--557981400-1697561686-1374257082=:795
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 
-> 
-> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
-> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
+Several new rgw issues from the recent merge...
+--557981400-1697561686-1374257082=:795
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <alpine.DEB.2.00.1307191104250.795@cobra.newdream.net>
+Content-Description: Forwarded Message
+Content-Disposition: inline
 
-What are the 17 patches on top? Anything in the mon?
+Return-Path: <scan-admin@coverity.com>
+X-Original-To: sage@cobra.newdream.net
+Delivered-To: sage@cobra.newdream.net
+Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
+	by cobra.newdream.net (Postfix) with ESMTP id 057778004F
+	for <sage@cobra.newdream.net>; Fri, 19 Jul 2013 11:03:18 -0700 (PDT)
+Received: by destro.newdream.net (Postfix)
+	id C94FC12089F; Fri, 19 Jul 2013 11:05:46 -0700 (PDT)
+Delivered-To: sage@destro.newdream.net
+Received: from alc-junkmail-backend3.dreamhost.com (mailbigip.dreamhost.com
+	[208.97.132.5])
+	by destro.newdream.net (Postfix) with ESMTP id C7B0112023C
+	for <sage@newdream.net>; Fri, 19 Jul 2013 11:05:46 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by alc-junkmail-backend3.dreamhost.com (Postfix) with ESMTP id
+	EFCC3161613F
+	for <sage@newdream.net>; Fri, 19 Jul 2013 11:03:17 -0700 (PDT)
+X-DH-Virus-Scanned: Debian amavisd-new at alc-junkmail-backend3.dreamhost.com
+X-Spam-Flag: NO
+X-Spam-Score: 0
+X-Spam-Level: 
+X-Spam-Status: No, score=x tagged_above=-999 required=999 WHITELISTED tests=[]
+Received: from terminator.dreamhost.com ([208.97.132.145])
+	by localhost (alc-junkmail-backend3.dreamhost.com [208.97.132.104])
+	(amavisd-new, port 10024)
+	with ESMTP id HkYSZqDocSB9 for <sage@newdream.net>;
+	Fri, 19 Jul 2013 11:03:17 -0700 (PDT)
+Received: from build-l3.scan.coverity.com (unknown [208.69.177.216])
+	by terminator.dreamhost.com (Postfix) with ESMTP id 95BE22884065
+	for <sage@newdream.net>; Fri, 19 Jul 2013 11:03:17 -0700 (PDT)
+Received: from localhost ([127.0.0.1] helo=build-l3.scan.coverity.com)
+	by build-l3.scan.coverity.com with esmtp (Exim 4.69)
+	(envelope-from <scan-admin@coverity.com>)
+	id 1V0F1Q-00022u-Fe; Fri, 19 Jul 2013 11:03:17 -0700
+From: scan-admin@coverity.com
+To: sage@newdream.net
+CC: 
+Subject: New Defects reported by Coverity Scan for ceph
+Message-Id: <E1V0F1Q-00022u-Fe@build-l3.scan.coverity.com>
+Date: Fri, 19 Jul 2013 11:03:16 -0700
+X-Spambayes-Classification: ham; 0.00
 
-Thanks!
-sage
 
-> ceph-mon, pid 22172
-> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
-> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
-> 7f484a872780 time 2013-07-19 08:59:32.173506
-> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
-> 
->  ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
->  1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
->  2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->  3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->  4: (Monitor::init_paxos()+0xe5) [0x48f955]
->  5: (Monitor::preinit()+0x679) [0x4bba79]
->  6: (main()+0x36b0) [0x484bb0]
->  7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
->  8: /usr/bin/ceph-mon() [0x4801e9]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> --- begin dump of recent events ---
->    -13> 2013-07-19 08:59:32.136172 7f484a872780  5 asok(0x131a000)
-> register_command perfcounters_dump hook 0x1304010
->    -12> 2013-07-19 08:59:32.136191 7f484a872780  5 asok(0x131a000)
-> register_command 1 hook 0x1304010
->    -11> 2013-07-19 08:59:32.136194 7f484a872780  5 asok(0x131a000)
-> register_command perf dump hook 0x1304010
->    -10> 2013-07-19 08:59:32.136200 7f484a872780  5 asok(0x131a000)
-> register_command perfcounters_schema hook 0x1304010
->     -9> 2013-07-19 08:59:32.136204 7f484a872780  5 asok(0x131a000)
-> register_command 2 hook 0x1304010
->     -8> 2013-07-19 08:59:32.136206 7f484a872780  5 asok(0x131a000)
-> register_command perf schema hook 0x1304010
->     -7> 2013-07-19 08:59:32.136208 7f484a872780  5 asok(0x131a000)
-> register_command config show hook 0x1304010
->     -6> 2013-07-19 08:59:32.136211 7f484a872780  5 asok(0x131a000)
-> register_command config set hook 0x1304010
->     -5> 2013-07-19 08:59:32.136214 7f484a872780  5 asok(0x131a000)
-> register_command log flush hook 0x1304010
->     -4> 2013-07-19 08:59:32.136216 7f484a872780  5 asok(0x131a000)
-> register_command log dump hook 0x1304010
->     -3> 2013-07-19 08:59:32.136219 7f484a872780  5 asok(0x131a000)
-> register_command log reopen hook 0x1304010
->     -2> 2013-07-19 08:59:32.137646 7f484a872780  0 ceph version
-> 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b), process
-> ceph-mon, pid 22172
->     -1> 2013-07-19 08:59:32.137967 7f484a872780  1 finished
-> global_init_daemonize
->      0> 2013-07-19 08:59:32.173975 7f484a872780 -1 mon/OSDMonitor.cc: In
-> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
-> 7f484a872780 time 2013-07-19 08:59:32.173506
-> mon/OSDMonitor.cc: 132: FAILED assert(latest_bl.length() != 0)
-> 
->  ceph version 0.61.5-17-g83f8b88 (83f8b88e5be41371cb77b39c0966e79cad92087b)
->  1: (OSDMonitor::update_from_paxos(bool*)+0x16e1) [0x51d341]
->  2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->  3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->  4: (Monitor::init_paxos()+0xe5) [0x48f955]
->  5: (Monitor::preinit()+0x679) [0x4bba79]
->  6: (main()+0x36b0) [0x484bb0]
->  7: (__libc_start_main()+0xfd) [0x7f48489cec8d]
->  8: /usr/bin/ceph-mon() [0x4801e9]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> Mi
-> 
-> Am 19.07.2013 08:58, schrieb Stefan Priebe - Profihost AG:
-> > All mons do not work anymore:
-> > 
-> > === mon.a ===
-> > Starting Ceph mon.a on ccad...
-> > [21207]: (33) Numerical argument out of domain
-> > failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i a --pid-file
-> > /var/run/ceph/mon.a.pid -c /etc/ceph/ceph.conf '
-> > 
-> > Stefan
-> > 
-> > Am 19.07.2013 07:59, schrieb Sage Weil:
-> >> A note on upgrading:
-> >>
-> >> One of the fixes in 0.61.5 is with a 32bit vs 64bit bug with the feature 
-> >> bits.  We did not realize it before, but the fix will prevent 0.61.4 (or 
-> >> earlier) from forming a quorum with 0.61.5. This is similar to the upgrade 
-> >> from bobtail (and the future upgrade to dumpling). As such, we recommend 
-> >> you upgrade all monitors at once to avoid the potential for discruption in 
-> >> service.
-> >>
-> >> I'm adding a note to the release notes.
-> >>
-> >> Thanks!
-> >> sage
-> >>
-> >>
-> >> On Thu, 18 Jul 2013, Sage Weil wrote:
-> >>
-> >>> We've prepared another update for the Cuttlefish v0.61.x series. This 
-> >>> release primarily contains monitor stability improvements, although there 
-> >>> are also some important fixes for ceph-osd for large clusters and a few 
-> >>> important CephFS fixes. We recommend that all v0.61.x users upgrade.
-> >>>
-> >>>  * mon: misc sync improvements (faster, more reliable, better tuning)
-> >>>  * mon: enable leveldb cache by default (big performance improvement)
-> >>>  * mon: new scrub feature (primarily for diagnostic, testing purposes)
-> >>>  * mon: fix occasional leveldb assertion on startup
-> >>>  * mon: prevent reads until initial state is committed
-> >>>  * mon: improved logic for trimming old osdmaps
-> >>>  * mon: fix pick_addresses bug when expanding mon cluster
-> >>>  * mon: several small paxos fixes, improvements
-> >>>  * mon: fix bug osdmap trim behavior
-> >>>  * osd: fix several bugs with PG stat reporting
-> >>>  * osd: limit number of maps shared with peers (which could cause domino failures)
-> >>>  * rgw: fix radosgw-admin buckets list (for all buckets)
-> >>>  * mds: fix occasional client failure to reconnect
-> >>>  * mds: fix bad list traversal after unlink
-> >>>  * mds: fix underwater dentry cleanup (occasional crash after mds restart)
-> >>>  * libcephfs, ceph-fuse: fix occasional hangs on umount
-> >>>  * libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
-> >>>  * ceph-disk: more robust journal device detection on RHEL/CentOS
-> >>>  * ceph-disk: better, simpler locking
-> >>>  * ceph-disk: do not inadvertantely mount over existing osd mounts
-> >>>  * ceph-disk: better handling for unusual device names
-> >>>  * sysvinit, upstart: handle symlinks in /var/lib/ceph/*
-> >>>
-> >>> Please also refer to the complete release notes:
-> >>>
-> >>>    http://ceph.com/docs/master/release-notes/#v0-61-5-cuttlefish
-> >>>
-> >>> You can get v0.61.5 from the usual locations:
-> >>>
-> >>>  * Git at git://github.com/ceph/ceph.git
-> >>>  * Tarball at http://ceph.com/download/ceph-0.61.5.tar.gz
-> >>>  * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
-> >>>  * For RPMs, see http://ceph.com/docs/master/install/rpm
-> >>>
-> >> _______________________________________________
-> >> ceph-users mailing list
-> >> ceph-users@lists.ceph.com
-> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >>
-> 
-> 
+
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan
+
+Defect(s) Reported-by: Coverity Scan
+Showing 7 of 61 defects
+	
+** CID 1049252: Wrapper object use after free (WRAPPER_ESCAPE)
+/rgw/rgw_rest_replica_log.h: 79
+
+** CID 1049251: Wrapper object use after free (WRAPPER_ESCAPE)
+/rgw/rgw_rest_replica_log.h: 59
+
+** CID 1049250: Wrapper object use after free (WRAPPER_ESCAPE)
+/rgw/rgw_rest_replica_log.h: 39
+
+** CID 1049249: Missing varargs init or cleanup (VARARGS)
+/test/librbd/test_librbd.cc: 315
+
+** CID 1049248: Use after free (USE_AFTER_FREE)
+/test/test_rgw_admin_log.cc: 782
+
+** CID 1049247: Use after free (USE_AFTER_FREE)
+/test/cls_version/test_cls_version.cc: 79
+
+** CID 1049246: Use after free (USE_AFTER_FREE)
+/rgw/rgw_rest_s3.cc: 415
+
+
+________________________________________________________________________
+CID 1049252: Wrapper object use after free (WRAPPER_ESCAPE)
+
+/rgw/rgw_rest_replica_log.h: 79 ( escape)
+   76        string s = "replica";
+   77        s.append(obj_type);
+   78        s.append("_deletebound");
+>>> CID 1049252: Wrapper object use after free (WRAPPER_ESCAPE)
+>>> The internal representation of "s" escapes, but is destroyed when it exits scope.
+   79        return s.c_str();
+   80      }
+   81    };
+   82    
+   83    class RGWOp_BILog_GetBounds : public RGWRESTOp {
+  
+________________________________________________________________________
+CID 1049251: Wrapper object use after free (WRAPPER_ESCAPE)
+
+/rgw/rgw_rest_replica_log.h: 59 ( escape)
+   56        string s = "replica";
+   57        s.append(obj_type);
+   58        s.append("_updatebounds");
+>>> CID 1049251: Wrapper object use after free (WRAPPER_ESCAPE)
+>>> The internal representation of "s" escapes, but is destroyed when it exits scope.
+   59        return s.c_str();
+   60      }
+   61    };
+   62    
+   63    class RGWOp_OBJLog_DeleteBounds : public RGWRESTOp {
+  
+________________________________________________________________________
+CID 1049250: Wrapper object use after free (WRAPPER_ESCAPE)
+
+/rgw/rgw_rest_replica_log.h: 39 ( escape)
+   36        string s = "replica";
+   37        s.append(obj_type);
+   38        s.append("_getbounds");
+>>> CID 1049250: Wrapper object use after free (WRAPPER_ESCAPE)
+>>> The internal representation of "s" escapes, but is destroyed when it exits scope.
+   39        return s.c_str();
+   40      }
+   41    };
+   42    
+   43    class RGWOp_OBJLog_SetBounds : public RGWRESTOp {
+  
+________________________________________________________________________
+CID 1049249: Missing varargs init or cleanup (VARARGS)
+
+/test/librbd/test_librbd.cc: 305 ( va_init)
+   302        cout << "image: " << names[i] << endl;
+   303      }
+   304    
+>>> Initializing va_list "ap".
+   305      va_start(ap, num_expected);
+   306      for (i = num_expected; i > 0; i--) {
+   307        char *expected = va_arg(ap, char *);
+   308        cout << "expected = " << expected << endl;
+   309        vector<string>::iterator listed_name = find(names.begin(), names.end(), string(expected));
+  
+
+/test/librbd/test_librbd.cc: 315 ( missing_va_end)
+   312      }
+   313      assert(names.empty());
+   314    
+>>> CID 1049249: Missing varargs init or cleanup (VARARGS)
+>>> va_end was not called for "ap".
+   315      return num;
+   316    }
+   317    
+   318    TEST(LibRBD, TestCreateLsDeletePP)
+   319    {
+  
+________________________________________________________________________
+CID 1049248: Use after free (USE_AFTER_FREE)
+
+/test/test_rgw_admin_log.cc: 750 ( freed_arg)
+   747      char *bucket_obj = (char *)malloc(TEST_BUCKET_OBJECT_SIZE);
+   748      ASSERT_TRUE(bucket_obj != NULL);
+   749      EXPECT_EQ(put_bucket_obj(TEST_BUCKET_OBJECT, bucket_obj, TEST_BUCKET_OBJECT_SIZE), 0);
+>>> "free(void *)" frees "bucket_obj".
+   750      free(bucket_obj);
+   751      sleep(1); 
+   752      ss << "/admin/log?type=data&id=" << shard_id << "&start-time=" << start_time;
+   753      rest_req = ss.str();
+   754      g_test->send_request(string("GET"), rest_req);
+  
+
+/test/test_rgw_admin_log.cc: 782 ( pass_freed_arg)
+   779      }
+   780    
+   781      sleep(1);
+>>> CID 1049248: Use after free (USE_AFTER_FREE)
+>>> Passing freed pointer "bucket_obj" as an argument to function "put_bucket_obj(char const *, char *, unsigned int)".
+   782      EXPECT_EQ(put_bucket_obj(TEST_BUCKET_OBJECT, bucket_obj, TEST_BUCKET_OBJECT_SIZE), 0);
+   783      sleep(20);
+   784      ss.str("");
+   785      ss << "/admin/log?type=data&id=" << shard_id << "&start-time=" << start_time;
+   786      rest_req = ss.str();
+  
+________________________________________________________________________
+CID 1049247: Use after free (USE_AFTER_FREE)
+
+/test/cls_version/test_cls_version.cc: 68 ( freed_arg)
+   65      ASSERT_GT((long long)ver2.ver, (long long)ver.ver);
+   66      ASSERT_EQ(0, (int)ver2.tag.compare(ver.tag));
+   67    
+>>> "operator delete(void *)" frees "op".
+   68      delete op;
+   69    
+   70      obj_version ver3;
+   71    
+   72      librados::ObjectReadOperation *rop = new_rop();
+  
+
+/test/cls_version/test_cls_version.cc: 79 ( deref_arg)
+   76      ASSERT_EQ(ver2.ver, ver3.ver);
+   77      ASSERT_EQ(1, (long long)ver2.compare(&ver3));
+   78    
+>>> CID 1049247: Use after free (USE_AFTER_FREE)
+>>> Calling "librados::ObjectWriteOperation::~ObjectWriteOperation()" dereferences freed pointer "op". (The dereference happens because this is a virtual function call.)
+   79      delete op;
+   80    }
+   81    
+   82    
+   83    TEST(cls_rgw, test_version_set)
+  
+________________________________________________________________________
+CID 1049246: Use after free (USE_AFTER_FREE)
+
+/rgw/rgw_rest_s3.cc: 412 ( freed_arg)
+   409    
+   410        bool success = parser.parse(data, len, 1);
+   411        ldout(s->cct, 20) << "create bucket input data=" << data << dendl;
+>>> "free(void *)" frees "data".
+   412        free(data);
+   413    
+   414        if (!success) {
+   415          ldout(s->cct, 0) << "failed to parse input: " << data << dendl;
+   416          return -EINVAL;
+  
+
+/rgw/rgw_rest_s3.cc: 415 ( deref_arg)
+   412        free(data);
+   413    
+   414        if (!success) {
+>>> CID 1049246: Use after free (USE_AFTER_FREE)
+>>> Calling "std::operator << <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> > &, char const *)" dereferences freed pointer "data".
+   415          ldout(s->cct, 0) << "failed to parse input: " << data << dendl;
+   416          return -EINVAL;
+   417        }
+   418    
+   419        if (!parser.get_location_constraint(location_constraint)) {
+  
+________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+--557981400-1697561686-1374257082=:795--
