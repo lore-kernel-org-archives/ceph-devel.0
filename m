@@ -1,122 +1,247 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Internal Qemu snapshots with RBD and libvirt
-Date: Sat, 20 Jul 2013 10:42:41 +0200
-Message-ID: <51EA4D81.5050800@42on.com>
-References: <51E807DD.5050805@42on.com> <51E9BE0E.7020609@inktank.com> <alpine.DEB.2.00.1307191537260.795@cobra.newdream.net> <CALFpzo61shKeSA60ig9c5Ad+3WbTJgkHJRrmg5eEwEOdvjE-KQ@mail.gmail.com> <51E9DE68.40707@inktank.com>
+From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+Subject: Re: Optimize Ceph cluster (kernel, osd, rbd)
+Date: Sat, 20 Jul 2013 23:35:12 +0700
+Message-ID: <51EABC40.3010702@vccloud.vn>
+References: <51E98F62.8050800@vccloud.vn>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1242573343=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <51E98F62.8050800-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+This is a multi-part message in MIME format.
+--===============1242573343==
+Content-Type: multipart/alternative;
+ boundary="------------010800020801020808020708"
+
+This is a multi-part message in MIME format.
+--------------010800020801020808020708
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:52028 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751727Ab3GTImo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 20 Jul 2013 04:42:44 -0400
-In-Reply-To: <51E9DE68.40707@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Marcus Sorensen <shadowsor@gmail.com>, Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 07/20/2013 02:48 AM, Josh Durgin wrote:
-> On 07/19/2013 03:47 PM, Marcus Sorensen wrote:
->> Does RBD not honor barriers and do proper sync flushes? Or does this
->> have to do with RBD caching? Just wondering why online snapshots
->> aren't safe.
+Please help me!
+
+
+On 07/20/2013 02:11 AM, Ta Ba Tuan wrote:
+> Hi everyone,
 >
-> They're safe at the filesystem level, but I think Wido's after
-> more application level consistency. If the fs journaled the metadata
-> for a file but didn't save the data yet, it'd be nice to be able to
-> restore the complete file.
+> I have *3 nodes (running MON and MDS)*
+> and *6 data nodes ( 84 OSDs**)*
+> Each data nodes has configuraions:
+>   - CPU: 24 processor * Core Intel(R) Xeon(R) CPU E5-2620 0 @ 2.00GHz
+>   - RAM: 32GB
+>   - Disk: 14*4TB
+> (14disks *4TB *6 data nodes= 84 OSDs)
+>
+> To optimize Ceph Cluster, *I adjusted some kernel arguments* 
+> (nr_request in queue and increated read throughput):
+>
+> #Adjust nr_request in queue (staying in mem - default is 128)
+>     echo 1024 > /sys/block/sdb/queue/nr_requests
+>     echo noop > /sys/block/sda/queue/scheduler   (default= noop 
+> deadline [cfq])
+> #Increase read throughput  (default: 128)
+>     echo "512" > /sys/block/*/queue/read_ahead_kb
+>
+> And, *tuning Ceph configuraion options below:*
+>
+> [client]
+>
+>      rbd cache = true
+>      rbd cache size = 536870912
+>      rbd cache max dirty = 134217728
+>      rbd cache target dirty = 33554432
+>      rbd cache max dirty age = 5
+>
+> [osd]
+>     osd data = /var/lib/ceph/osd/cloud-$id
+>     osd journal = /var/lib/ceph/osd/cloud-$id/journal
+>     osd journal size = 10000
+>     osd mkfs type = xfs
+>     osd mkfs options xfs = "-f -i size=2048"
+>     osd mount options xfs = "rw,noatime,inode64,logbsize=250k"
+>
+>     keyring = /var/lib/ceph/osd/cloud-$id/keyring.osd.$id
+> #increasing the number may increase the request processing rate
+>     osd op threads = 24
+> #The number of disk threads, which are used to perform background disk 
+> intensive OSD operations such as scrubbing and snap trimming
+>     osd disk threads =24
+> #The number of active recovery requests per OSD at one time. More 
+> requests will accelerate recovery, but the requests places an 
+> increased load on the cluster.
+>     osd recovery max active =1
+> #writing direct to the journal.
+> #Allow use of libaio to do asynchronous writes
+>     journal dio = true
+>     journal aio = true
+> #Synchronization interval:
+> #The maximum/minimum interval in seconds for synchronizing the filestore.
+>     filestore max sync interval = 100
+>     filestore min sync interval = 50
+> #Defines the maximum number of in progress operations the file store 
+> accepts before blocking on queuing new operations.
+>     filestore queue max ops = 2000
+> #The maximum number of bytes for an operation
+>     filestore queue max bytes = 536870912
+> #The maximum number of operations the filestore can commit.
+>     filestore queue committing max ops = 2000 (default =500)
+> #The maximum number of bytes the filestore can commit.
+>     filestore queue committing max bytes = 536870912
+> #When you add or remove Ceph OSD Daemons to a cluster, the CRUSH 
+> algorithm will want to rebalance the cluster by moving placement 
+> groups to or from Ceph OSD Daemons to restore the balance. The process 
+> of migrating placement groups and the objects they contain can reduce 
+> the cluster's operational performance considerably. To maintain 
+> operational performance, Ceph performs this migration with 
+> 'backfilling', which allows Ceph to set backfill operations to a lower 
+> priority than requests to read or write data.
+>     osd max backfills = 1
+>
+>
+> Tomorrow, I'm going to implement Ceph Cluster,
+> I have very little experience in managing Ceph. So, I hope someone 
+> give me advices about above arguments and guide me how to best 
+> optimize ceph cluster?
+>
+> Thank you so much!
+> --tuantaba
+>
+>
 >
 
-Indeed, I'm about application level consistency. I'm now implementing a 
-PoC where I simply snapshot the RBD image while the Instance is running.
 
-Since CloudStack uses cache=none and RBD cache isn't enabled either it 
-shouldn't hurt that much.
+--------------010800020801020808020708
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 
->> Qcow2 can keep snapshots internally, but qemu is also capable of doing
->> external dumps for other backing stores. I was thinking about this,
->> and it seems like you'd put the memory dump on secondary storage, like
->> a rados gateway or nfs share, so it can be read wherever the VM is
->> restored to. It would require some work in tracking that location,
->> however.
->
-> This sounds like a good idea to me.
->
+<html>
+  <head>
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+    <div class="moz-cite-prefix">Please help me!<br>
+      <br>
+      <br>
+      On 07/20/2013 02:11 AM, Ta Ba Tuan wrote:<br>
+    </div>
+    <blockquote cite="mid:51E98F62.8050800-QlevPasa8l681eZEIcUDRw@public.gmane.org" type="cite">
+      <meta http-equiv="content-type" content="text/html;
+        charset=ISO-8859-1">
+      Hi everyone,<br>
+      <br>
+      I have <b>3 nodes (running MON and MDS)</b><br>
+      and&nbsp; <b>6 data nodes ( 84 OSDs</b><b> )</b><br>
+      Each data nodes has configuraions:<br>
+      &nbsp; - CPU: 24 processor * Core Intel(R) Xeon(R) CPU E5-2620 0 @
+      2.00GHz<br>
+      &nbsp; - RAM: 32GB<br>
+      &nbsp; - Disk: 14*4TB<br>
+      (14disks *4TB *6 data nodes= 84 OSDs)<br>
+      <br>
+      To optimize Ceph Cluster, <b>I adjusted some kernel arguments</b>
+      (nr_request in queue and increated read throughput):<br>
+      <br>
+      #Adjust nr_request in queue (staying in mem - default is 128) <br>
+      &nbsp;&nbsp;&nbsp; echo 1024 &gt; /sys/block/sdb/queue/nr_requests<br>
+      &nbsp;&nbsp;&nbsp; echo noop &gt; /sys/block/sda/queue/scheduler&nbsp;&nbsp; (default= noop
+      deadline [cfq])<br>
+      #Increase read throughput&nbsp; (default: 128)<br>
+      &nbsp;&nbsp;&nbsp; echo "512" &gt; /sys/block/*/queue/read_ahead_kb<br>
+      <br>
+      And, <b>tuning Ceph configuraion options below:</b><br>
+      <br>
+      [client]<br>
+      <blockquote>&nbsp;rbd cache = true<br>
+        &nbsp;rbd cache size = 536870912<br>
+        &nbsp;rbd cache max dirty = 134217728<br>
+        &nbsp;rbd cache target dirty = 33554432<br>
+        &nbsp;rbd cache max dirty age = 5<br>
+      </blockquote>
+      [osd]<br>
+      &nbsp;&nbsp;&nbsp; osd data = /var/lib/ceph/osd/cloud-$id<br>
+      &nbsp;&nbsp;&nbsp; osd journal = /var/lib/ceph/osd/cloud-$id/journal<br>
+      &nbsp;&nbsp;&nbsp; osd journal size = 10000<br>
+      &nbsp;&nbsp;&nbsp; osd mkfs type = xfs<br>
+      &nbsp;&nbsp;&nbsp; osd mkfs options xfs = "-f -i size=2048"<br>
+      &nbsp;&nbsp;&nbsp; osd mount options xfs = "rw,noatime,inode64,logbsize=250k"<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; keyring = /var/lib/ceph/osd/cloud-$id/keyring.osd.$id<br>
+      #increasing the number may increase the request processing rate<br>
+      &nbsp;&nbsp;&nbsp; osd op threads = 24<br>
+      #The number of disk threads, which are used to perform background
+      disk intensive OSD operations such as scrubbing and snap trimming<br>
+      &nbsp;&nbsp;&nbsp; osd disk threads =24<br>
+      #The number of active recovery requests per OSD at one time. More
+      requests will accelerate recovery, but the requests places an
+      increased load on the cluster.<br>
+      &nbsp;&nbsp;&nbsp; osd recovery max active =1<br>
+      #writing direct to the journal.<br>
+      #Allow use of libaio to do asynchronous writes<br>
+      &nbsp;&nbsp;&nbsp; journal dio = true<br>
+      &nbsp;&nbsp;&nbsp; journal aio = true<br>
+      #Synchronization interval:<br>
+      #The maximum/minimum interval in seconds for synchronizing the
+      filestore.<br>
+      &nbsp;&nbsp;&nbsp; filestore max sync interval = 100<br>
+      &nbsp;&nbsp;&nbsp; filestore min sync interval = 50<br>
+      #Defines the maximum number of in progress operations the file
+      store accepts before blocking on queuing new operations.<br>
+      &nbsp;&nbsp;&nbsp; filestore queue max ops = 2000<br>
+      #The maximum number of bytes for an operation<br>
+      &nbsp;&nbsp;&nbsp; filestore queue max bytes = 536870912<br>
+      #The maximum number of operations the filestore can commit.<br>
+      &nbsp;&nbsp;&nbsp; filestore queue committing max ops = 2000 (default =500)<br>
+      #The maximum number of bytes the filestore can commit.<br>
+      &nbsp;&nbsp;&nbsp; filestore queue committing max bytes = 536870912<br>
+      #When you add or remove Ceph OSD Daemons to a cluster, the CRUSH
+      algorithm will want to rebalance the cluster by moving placement
+      groups to or from Ceph OSD Daemons to restore the balance. The
+      process of migrating placement groups and the objects they contain
+      can reduce the cluster&#8217;s operational performance considerably. To
+      maintain operational performance, Ceph performs this migration
+      with &#8216;backfilling&#8217;, which allows Ceph to set backfill operations
+      to a lower priority than requests to read or write data.<br>
+      &nbsp;&nbsp;&nbsp; osd max backfills = 1<br>
+      <br>
+      <br>
+      Tomorrow, I'm going to implement Ceph Cluster,<br>
+      I have very little experience in managing Ceph. So, I hope someone
+      give me advices about above arguments and guide me how to best
+      optimize ceph cluster?<br>
+      <br>
+      Thank you so much!<br>
+      --tuantaba<br>
+      <br>
+      <br>
+      <br>
+    </blockquote>
+    <br>
+  </body>
+</html>
 
-I haven't looked into that, but that seems like a libvirt thing other 
-then CloudStack since libvirt is the one talking to Qemu.
+--------------010800020801020808020708--
 
-I however think it should be generic, somebody wanting to snapshot a 
-running RBD guest via libvirt shouldn't have to go through all kinds of 
-trouble to get the Instance snapshotted.
+--===============1242573343==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-But the question then indeed, where to store the memory contents? Create 
-a new RBD image?
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-<orig rbd img name>.memory.<snapshot name>
-
-Like that?
-
-Wido
-
-> Josh
->
->> On Fri, Jul 19, 2013 at 4:41 PM, Sage Weil <sage@inktank.com> wrote:
->>> On Fri, 19 Jul 2013, Josh Durgin wrote:
->>>> On 07/18/2013 08:21 AM, Wido den Hollander wrote:
->>>>> Hi,
->>>>>
->>>>> I'm working on the RBD integration for CloudStack 4.2 and now I got to
->>>>> the point snapshotting.
->>>>>
->>>>> The "problem" is that CloudStack uses libvirt for snapshotting
->>>>> Instances, but Qemu/libvirt also tries to store the memory contents of
->>>>> the domain to assure the snapshot is consistent.
->>>>>
->>>>> So the way libvirt tries to do it is not possible with RBD right now,
->>>>> since there is no way to store the internal memory.
->>>
->>> It seems like the way to view this is that to snapshot a VM, we need to
->>> snapshot all N block devices attached to it, plus the internal memory.
->>> It's not that there is something missing from the RBD block device
->>> snapshot function, but that it is not clear where to put the memory at
->>> all.
->>>
->>> Maybe the libvirt or qemu VM metadata should specify a separate image
->>> target for the RAM?  How is this normally done when you're using, say,
->>> qcow2?  It is assumed that it can be somehow stored with the first block
->>> device or something?
->>>
->>> sage
->>>
->>>>>
->>>>> I was thinking about using the Java librbd bindings to create the
->>>>> snapshot, but that will not be consistent thus not 100% safe, so I'd
->>>>> rather avoid that.
->>>>>
->>>>> How is this done in OpenStack? Or are you facing similar issues?
->>>>
->>>> OpenStack doesn't store the memory contents of a domain. For volume
->>>> snapshots, it requires that the volume is detached, so there can be
->>>> no inconsistency, and the actual snapshot handling is done by the
->>>> volume
->>>> driver in cinder, so libvirt is not involved at all. It just uses the
->>>> rbd command (or now the python bindings).
->>>>
->>>>> P.S.: I'm testing with libvirt 1.0.6 from the Ubuntu Cloud Team
->>>>> archive
->>>>> with packages for OpenStack Havana.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+--===============1242573343==--
