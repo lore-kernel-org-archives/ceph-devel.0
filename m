@@ -1,44 +1,27 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 1/2] mds: notify clients about deleted inode
-Date: Sun, 21 Jul 2013 10:21:13 +0800
-Message-ID: <1374373274-3457-2-git-send-email-zheng.z.yan@intel.com>
-References: <1374373274-3457-1-git-send-email-zheng.z.yan@intel.com>
+From: Mag Gam <magawake@gmail.com>
+Subject: Mag Gam
+Date: Sun, 21 Jul 2013 02:21:42 -0400
+Message-ID: <CAPG7Zsg7NDpGQbBgrz3=7pK3zVi554Kvsc9QdzxChYEkLPM0dw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:36648 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754220Ab3GUCV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 20 Jul 2013 22:21:27 -0400
-In-Reply-To: <1374373274-3457-1-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:46325 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752252Ab3GUGVo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 21 Jul 2013 02:21:44 -0400
+Received: by mail-wg0-f44.google.com with SMTP id l18so83308wgh.35
+        for <ceph-devel@vger.kernel.org>; Sat, 20 Jul 2013 23:21:43 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Norman.Morse@opensfs.org, tjreedy@udel.edu, D.T.Shield@liverpool.ac.uk, drsalists@gmail.com, ceph-devel@vger.kernel.org, python@mrabarnett.plus.com, do_not_reply@virtualbox.org, subscription@kkeane.com, support@audio-dvd-creator.com
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+http://tyo-germany.org/iouwef/zsscu.ejgveewiq
 
-To make sure clients trim the deleted inode from the their cache
-ASAP. After all clients release the inode, we can reclaim space.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- src/mds/Locker.cc | 4 ++++
- 1 file changed, 4 insertions(+)
 
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 30e014a..7bbb749 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -1776,6 +1776,10 @@ bool Locker::issue_caps(CInode *in, Capability *only_cap)
-       continue;
-     }
- 
-+    // notify clients about deleted inode, to make sure they release caps ASAP.
-+    if (in->inode.nlink == 0)
-+      wanted |= CEPH_CAP_LINK_SHARED;
-+
-     // are there caps that the client _wants_ and can have, but aren't pending?
-     // or do we need to revoke?
-     if (((wanted & allowed) & ~pending) ||  // missing wanted+allowed caps
--- 
-1.8.1.4
 
+
+Mag Gam
+
+
+7/21/2013 7:21:38 AM
