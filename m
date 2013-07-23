@@ -1,127 +1,116 @@
-From: Dan Mick <dan.mick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Optimize Ceph cluster (kernel, osd, rbd)
-Date: Mon, 22 Jul 2013 14:12:05 -0700
-Message-ID: <51EDA025.7090202@inktank.com>
-References: <51E98F62.8050800@vccloud.vn> <51EABC40.3010702@vccloud.vn>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: trim deleted inode
+Date: Mon, 22 Jul 2013 18:41:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307221838490.6532@cobra.newdream.net>
+References: <1374373274-3457-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51EABC40.3010702-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:59710 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753320Ab3GWBl4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jul 2013 21:41:56 -0400
+In-Reply-To: <1374373274-3457-1-git-send-email-zheng.z.yan@intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-I would get the cluster up and running and do some experiments before I =
+On Sun, 21 Jul 2013, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> The MDS uses caps message to notify clients about deleted inode.
+> when receiving a such message, invalidate any alias of the inode.
+> This makes the kernel release the inode ASAP.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/caps.c | 31 ++++++++++++++++++++++++++++++-
+>  1 file changed, 30 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 25442b4..b446fdd 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2334,6 +2334,28 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+>  }
+>  
+>  /*
+> + * Invalidate unlinked inode's aliases, so we can drop the inode
+> + * from the cache ASAP.
+> + */
+> +static void invalidate_aliases(struct inode *inode)
+> +{
+> +	struct dentry *dn;
+> +
+> +	dout("invalidate_aliases inode %p\n", inode);
+> +	d_prune_aliases(inode);
+> +	while ((dn = d_find_alias(inode))) {
+> +		d_delete(dn);
+> +		dput(dn);
 
-spent any time on optimization, much less all this.
+I don't think this loop is safe.  d_delete() won't unlink the inode if 
+there are other refs to the dentry, which would make this get stuck in a 
+loop.  Maybe simple checking if we get the same dentry back from 
+d_find_alias() as the previous call?
 
-On 07/20/2013 09:35 AM, Ta Ba Tuan wrote:
-> Please help me!
->
->
-> On 07/20/2013 02:11 AM, Ta Ba Tuan wrote:
->> Hi everyone,
->>
->> I have *3 nodes (running MON and MDS)*
->> and *6 data nodes ( 84 OSDs**)*
->> Each data nodes has configuraions:
->>   - CPU: 24 processor * Core Intel(R) Xeon(R) CPU E5-2620 0 @ 2.00GHz
->>   - RAM: 32GB
->>   - Disk: 14*4TB
->> (14disks *4TB *6 data nodes=3D 84 OSDs)
->>
->> To optimize Ceph Cluster, *I adjusted some kernel arguments*
->> (nr_request in queue and increated read throughput):
->>
->> #Adjust nr_request in queue (staying in mem - default is 128)
->>     echo 1024 > /sys/block/sdb/queue/nr_requests
->>     echo noop > /sys/block/sda/queue/scheduler   (default=3D noop
->> deadline [cfq])
->> #Increase read throughput  (default: 128)
->>     echo "512" > /sys/block/*/queue/read_ahead_kb
->>
->> And, *tuning Ceph configuraion options below:*
->>
->> [client]
->>
->>      rbd cache =3D true
->>      rbd cache size =3D 536870912
->>      rbd cache max dirty =3D 134217728
->>      rbd cache target dirty =3D 33554432
->>      rbd cache max dirty age =3D 5
->>
->> [osd]
->>     osd data =3D /var/lib/ceph/osd/cloud-$id
->>     osd journal =3D /var/lib/ceph/osd/cloud-$id/journal
->>     osd journal size =3D 10000
->>     osd mkfs type =3D xfs
->>     osd mkfs options xfs =3D "-f -i size=3D2048"
->>     osd mount options xfs =3D "rw,noatime,inode64,logbsize=3D250k"
->>
->>     keyring =3D /var/lib/ceph/osd/cloud-$id/keyring.osd.$id
->> #increasing the number may increase the request processing rate
->>     osd op threads =3D 24
->> #The number of disk threads, which are used to perform background disk
->> intensive OSD operations such as scrubbing and snap trimming
->>     osd disk threads =3D24
->> #The number of active recovery requests per OSD at one time. More
->> requests will accelerate recovery, but the requests places an
->> increased load on the cluster.
->>     osd recovery max active =3D1
->> #writing direct to the journal.
->> #Allow use of libaio to do asynchronous writes
->>     journal dio =3D true
->>     journal aio =3D true
->> #Synchronization interval:
->> #The maximum/minimum interval in seconds for synchronizing the filestore.
->>     filestore max sync interval =3D 100
->>     filestore min sync interval =3D 50
->> #Defines the maximum number of in progress operations the file store
->> accepts before blocking on queuing new operations.
->>     filestore queue max ops =3D 2000
->> #The maximum number of bytes for an operation
->>     filestore queue max bytes =3D 536870912
->> #The maximum number of operations the filestore can commit.
->>     filestore queue committing max ops =3D 2000 (default =3D500)
->> #The maximum number of bytes the filestore can commit.
->>     filestore queue committing max bytes =3D 536870912
->> #When you add or remove Ceph OSD Daemons to a cluster, the CRUSH
->> algorithm will want to rebalance the cluster by moving placement
->> groups to or from Ceph OSD Daemons to restore the balance. The process
->> of migrating placement groups and the objects they contain can reduce
->> the cluster=92s operational performance considerably. To maintain
->> operational performance, Ceph performs this migration with
->> =91backfilling=92, which allows Ceph to set backfill operations to a low=
-er
->> priority than requests to read or write data.
->>     osd max backfills =3D 1
->>
->>
->> Tomorrow, I'm going to implement Ceph Cluster,
->> I have very little experience in managing Ceph. So, I hope someone
->> give me advices about above arguments and guide me how to best
->> optimize ceph cluster?
->>
->> Thank you so much!
->> --tuantaba
->>
->>
->>
->
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+> +		/*
+> +		 * for dir inode, d_find_alias() can return
+> +		 * disconnected dentry
+> +		 */
+> +		if (S_ISDIR(inode->i_mode))
+> +			break;
+> +	}
+
+If we handle the more general case, I'm not sure we need any special case 
+here for the directory... although I confess I'm not sure why disconnected 
+dentries should be treated specially at all.
+
+> +}
+> +
+> +/*
+>   * Handle a cap GRANT message from the MDS.  (Note that a GRANT may
+>   * actually be a revocation if it specifies a smaller cap set.)
+>   *
+> @@ -2363,6 +2385,7 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  	int writeback = 0;
+>  	int revoked_rdcache = 0;
+>  	int queue_invalidate = 0;
+> +	int deleted_inode = 0;
+>  
+>  	dout("handle_cap_grant inode %p cap %p mds%d seq %d %s\n",
+>  	     inode, cap, mds, seq, ceph_cap_string(newcaps));
+> @@ -2407,8 +2430,12 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  		     from_kgid(&init_user_ns, inode->i_gid));
+>  	}
+>  
+> -	if ((issued & CEPH_CAP_LINK_EXCL) == 0)
+> +	if ((issued & CEPH_CAP_LINK_EXCL) == 0) {
+>  		set_nlink(inode, le32_to_cpu(grant->nlink));
+> +		if (inode->i_nlink == 0 &&
+> +		    (newcaps & (CEPH_CAP_LINK_SHARED | CEPH_CAP_LINK_EXCL)))
+> +			deleted_inode = 1;
+> +	}
+>  
+>  	if ((issued & CEPH_CAP_XATTR_EXCL) == 0 && grant->xattr_len) {
+>  		int len = le32_to_cpu(grant->xattr_len);
+> @@ -2517,6 +2544,8 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  		ceph_queue_writeback(inode);
+>  	if (queue_invalidate)
+>  		ceph_queue_invalidate(inode);
+> +	if (deleted_inode)
+> +		invalidate_aliases(inode);
+>  	if (wake)
+>  		wake_up_all(&ci->i_cap_wq);
+
+This looks good, though.
+
+Thanks!
+sage
+
+
+>  
+> -- 
+> 1.8.1.4
+> 
+> 
