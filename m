@@ -1,16 +1,15 @@
-From: =?iso-8859-2?Q?Studzi=F1ski_Krzysztof?=
-	<krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: Flapping osd / continuously reported as failed
-Date: Wed, 24 Jul 2013 00:20:57 +0200
-Message-ID: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
+Date: Tue, 23 Jul 2013 15:28:12 -0700
+Message-ID: <CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
 References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
 	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: pl-PL
+In-Reply-To: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1-K9pFWFEelezFe27LHpJFGNHuzzzSOjJt@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -20,99 +19,107 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+To: =?ISO-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-> On Tue, Jul 23, 2013 at 2:50 PM, Studzi=F1ski Krzysztof
-> <krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org> wrote:
-> > Hi,
-> > We've got some problem with our cluster - it continuously reports failed
-> one osd and after auto-rebooting everything seems to work fine for some
-> time (few minutes). CPU util of this osd is max 8%, iostat is very low. W=
-e tried
-> to "ceph osd out" such flapping osd, but after recovering this behavior
-> returned on different osd. This osd has also much more read operations th=
-an
-> others (see file osd_reads.png linked at the bottom of the email; at about
-> 16:00 we switched off osd.57 and osd.72 started to misbehave. Osd.108
-> works while recovering).
-> >
-> > Extract from ceph.log:
-> >
-> > 2013-07-23 22:43:57.425839 mon.0 10.177.64.4:6789/0 24690 : [INF] osd.72
-> 10.177.64.8:6803/22584 boot
-> > 2013-07-23 22:43:56.298467 osd.72 10.177.64.8:6803/22584 415 : [WRN] map
-> e41730 wrongly marked me down
-> > 2013-07-23 22:50:27.572110 mon.0 10.177.64.4:6789/0 25081 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.9 10.177.64.4:6946/5124
-> > 2013-07-23 22:50:27.595044 mon.0 10.177.64.4:6789/0 25082 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.78 10.177.64.5:6854/5604
-> > 2013-07-23 22:50:27.611964 mon.0 10.177.64.4:6789/0 25083 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.10 10.177.64.4:6814/26192
-> > 2013-07-23 22:50:27.612009 mon.0 10.177.64.4:6789/0 25084 : [INF] osd.72
-> 10.177.64.8:6803/22584 failed (3 reports from 3 peers after 2013-07-23
-> 22:50:43.611939 >=3D grace 20.000000)
-> > 2013-07-23 22:50:30.367398 7f8adb837700  0 log [WRN] : 3 slow requests,=
- 3
-> included below; oldest blocked for > 30.688891 secs
-> > 2013-07-23 22:50:30.367408 7f8adb837700  0 log [WRN] : slow request
-> 30.688891 seconds old, received at 2013-07-23 22:49:59.678453:
-> sd_op(client.44290048.0:125899 .dir.4168.2 [call rgw.bucket_prepare_op]
-> 3.9447554d) v4 currently no flag points reached
-> > 2013-07-23 22:50:30.367412 7f8adb837700  0 log [WRN] : slow request
-> 30.179044 seconds old, received at 2013-07-23 22:50:00.188300:
-> sd_op(client.44205530.0:189270 .dir.4168.2 [call rgw.bucket_list] 3.94475=
-54d)
-> v4 currently no flag points reached
-> > 2013-07-23 22:50:30.367415 7f8adb837700  0 log [WRN] : slow request
-> 30.171968 seconds old, received at 2013-07-23 22:50:00.195376:
-> sd_op(client.44203484.0:192902 .dir.4168.2 [call rgw.bucket_list] 3.94475=
-54d)
-> v4 currently no flag points reached
-> > 2013-07-23 22:51:36.082303 mon.0 10.177.64.4:6789/0 25159 : [INF] osd.72
-> 10.177.64.8:6803/22584 boot
-> > 2013-07-23 22:51:35.238164 osd.72 10.177.64.8:6803/22584 420 : [WRN] map
-> e41738 wrongly marked me down
-> > 2013-07-23 22:52:05.582969 mon.0 10.177.64.4:6789/0 25191 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.20 10.177.64.4:6913/4101
-> > 2013-07-23 22:52:05.587388 mon.0 10.177.64.4:6789/0 25192 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.9 10.177.64.4:6946/5124
-> > 2013-07-23 22:52:05.610925 mon.0 10.177.64.4:6789/0 25193 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.78 10.177.64.5:6854/5604
-> > 2013-07-23 22:52:05.610951 mon.0 10.177.64.4:6789/0 25194 : [INF] osd.72
-> 10.177.64.8:6803/22584 failed (3 reports from 3 peers after 2013-07-23
-> 22:52:20.610895 >=3D grace 20.000000)
-> > 2013-07-23 22:52:05.630821 mon.0 10.177.64.4:6789/0 25195 : [DBG] osd.72
-> 10.177.64.8:6803/22584 reported failed by osd.10 10.177.64.4:6814/26192
-> > 2013-07-23 22:53:47.203352 mon.0 10.177.64.4:6789/0 25300 : [INF] osd.72
-> 10.177.64.8:6803/22584 boot
-> > 2013-07-23 22:53:46.417106 osd.72 10.177.64.8:6803/22584 474 : [WRN] map
-> e41742 wrongly marked me down
-> >
-> > Could you please take a look at our config and suggest some
-> improvements?
-> > See attached "ceph pg <pg_id> query" for two groups during recovery and
-> parts of our config file.
-> > Our cluster's size: 6 hosts, 26 HDD each, 156 osds, 6488 pgs, mostly in=
- one
-> bucket having 9M objects, 3342 GB data, 11173 GB used, 31690 GB / 42864 GB
-> avail.
-> =
-
-> I'm surprised you're running into it at 9m objects but this is almost
-> certainly the problem. Right now the index for each RGW bucket lives
-> on a single OSD; you're probably having issues with whichever OSD is
-> receiving the bucket index reads. Is it feasible for you to shard the
-> contents into multiple buckets and see if things calm down?
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-
-I was afraid of that answer. :-/
-We'll try to delete some objects for the beginning (as they are transformed=
- other objects and can be re-created when needed) and then try to shard it =
-as you suggest.
-What is your opinion about max number of objects in one bucket ?
-
-Best regards,
-Krzysztof Studzinski
+T24gVHVlLCBKdWwgMjMsIDIwMTMgYXQgMzoyMCBQTSwgU3R1ZHppxYRza2kgS3J6eXN6dG9mCjxr
+cnp5c3p0b2Yuc3R1ZHppbnNraUBncnVwYW9uZXQucGw+IHdyb3RlOgo+PiBPbiBUdWUsIEp1bCAy
+MywgMjAxMyBhdCAyOjUwIFBNLCBTdHVkemnFhHNraSBLcnp5c3p0b2YKPj4gPGtyenlzenRvZi5z
+dHVkemluc2tpQGdydXBhb25ldC5wbD4gd3JvdGU6Cj4+ID4gSGksCj4+ID4gV2UndmUgZ290IHNv
+bWUgcHJvYmxlbSB3aXRoIG91ciBjbHVzdGVyIC0gaXQgY29udGludW91c2x5IHJlcG9ydHMgZmFp
+bGVkCj4+IG9uZSBvc2QgYW5kIGFmdGVyIGF1dG8tcmVib290aW5nIGV2ZXJ5dGhpbmcgc2VlbXMg
+dG8gd29yayBmaW5lIGZvciBzb21lCj4+IHRpbWUgKGZldyBtaW51dGVzKS4gQ1BVIHV0aWwgb2Yg
+dGhpcyBvc2QgaXMgbWF4IDglLCBpb3N0YXQgaXMgdmVyeSBsb3cuIFdlIHRyaWVkCj4+IHRvICJj
+ZXBoIG9zZCBvdXQiIHN1Y2ggZmxhcHBpbmcgb3NkLCBidXQgYWZ0ZXIgcmVjb3ZlcmluZyB0aGlz
+IGJlaGF2aW9yCj4+IHJldHVybmVkIG9uIGRpZmZlcmVudCBvc2QuIFRoaXMgb3NkIGhhcyBhbHNv
+IG11Y2ggbW9yZSByZWFkIG9wZXJhdGlvbnMgdGhhbgo+PiBvdGhlcnMgKHNlZSBmaWxlIG9zZF9y
+ZWFkcy5wbmcgbGlua2VkIGF0IHRoZSBib3R0b20gb2YgdGhlIGVtYWlsOyBhdCBhYm91dAo+PiAx
+NjowMCB3ZSBzd2l0Y2hlZCBvZmYgb3NkLjU3IGFuZCBvc2QuNzIgc3RhcnRlZCB0byBtaXNiZWhh
+dmUuIE9zZC4xMDgKPj4gd29ya3Mgd2hpbGUgcmVjb3ZlcmluZykuCj4+ID4KPj4gPiBFeHRyYWN0
+IGZyb20gY2VwaC5sb2c6Cj4+ID4KPj4gPiAyMDEzLTA3LTIzIDIyOjQzOjU3LjQyNTgzOSBtb24u
+MCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjQ2OTAgOiBbSU5GXSBvc2QuNzIKPj4gMTAuMTc3LjY0Ljg6
+NjgwMy8yMjU4NCBib290Cj4+ID4gMjAxMy0wNy0yMyAyMjo0Mzo1Ni4yOTg0Njcgb3NkLjcyIDEw
+LjE3Ny42NC44OjY4MDMvMjI1ODQgNDE1IDogW1dSTl0gbWFwCj4+IGU0MTczMCB3cm9uZ2x5IG1h
+cmtlZCBtZSBkb3duCj4+ID4gMjAxMy0wNy0yMyAyMjo1MDoyNy41NzIxMTAgbW9uLjAgMTAuMTc3
+LjY0LjQ6Njc4OS8wIDI1MDgxIDogW0RCR10gb3NkLjcyCj4+IDEwLjE3Ny42NC44OjY4MDMvMjI1
+ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5IG9zZC45IDEwLjE3Ny42NC40OjY5NDYvNTEyNAo+PiA+IDIw
+MTMtMDctMjMgMjI6NTA6MjcuNTk1MDQ0IG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4MiA6
+IFtEQkddIG9zZC43Mgo+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IHJlcG9ydGVkIGZhaWxlZCBi
+eSBvc2QuNzggMTAuMTc3LjY0LjU6Njg1NC81NjA0Cj4+ID4gMjAxMy0wNy0yMyAyMjo1MDoyNy42
+MTE5NjQgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MDgzIDogW0RCR10gb3NkLjcyCj4+IDEw
+LjE3Ny42NC44OjY4MDMvMjI1ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5IG9zZC4xMCAxMC4xNzcuNjQu
+NDo2ODE0LzI2MTkyCj4+ID4gMjAxMy0wNy0yMyAyMjo1MDoyNy42MTIwMDkgbW9uLjAgMTAuMTc3
+LjY0LjQ6Njc4OS8wIDI1MDg0IDogW0lORl0gb3NkLjcyCj4+IDEwLjE3Ny42NC44OjY4MDMvMjI1
+ODQgZmFpbGVkICgzIHJlcG9ydHMgZnJvbSAzIHBlZXJzIGFmdGVyIDIwMTMtMDctMjMKPj4gMjI6
+NTA6NDMuNjExOTM5ID49IGdyYWNlIDIwLjAwMDAwMCkKPj4gPiAyMDEzLTA3LTIzIDIyOjUwOjMw
+LjM2NzM5OCA3ZjhhZGI4Mzc3MDAgIDAgbG9nIFtXUk5dIDogMyBzbG93IHJlcXVlc3RzLCAzCj4+
+IGluY2x1ZGVkIGJlbG93OyBvbGRlc3QgYmxvY2tlZCBmb3IgPiAzMC42ODg4OTEgc2Vjcwo+PiA+
+IDIwMTMtMDctMjMgMjI6NTA6MzAuMzY3NDA4IDdmOGFkYjgzNzcwMCAgMCBsb2cgW1dSTl0gOiBz
+bG93IHJlcXVlc3QKPj4gMzAuNjg4ODkxIHNlY29uZHMgb2xkLCByZWNlaXZlZCBhdCAyMDEzLTA3
+LTIzIDIyOjQ5OjU5LjY3ODQ1MzoKPj4gc2Rfb3AoY2xpZW50LjQ0MjkwMDQ4LjA6MTI1ODk5IC5k
+aXIuNDE2OC4yIFtjYWxsIHJndy5idWNrZXRfcHJlcGFyZV9vcF0KPj4gMy45NDQ3NTU0ZCkgdjQg
+Y3VycmVudGx5IG5vIGZsYWcgcG9pbnRzIHJlYWNoZWQKPj4gPiAyMDEzLTA3LTIzIDIyOjUwOjMw
+LjM2NzQxMiA3ZjhhZGI4Mzc3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyByZXF1ZXN0Cj4+IDMwLjE3
+OTA0NCBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wNy0yMyAyMjo1MDowMC4xODgzMDA6
+Cj4+IHNkX29wKGNsaWVudC40NDIwNTUzMC4wOjE4OTI3MCAuZGlyLjQxNjguMiBbY2FsbCByZ3cu
+YnVja2V0X2xpc3RdIDMuOTQ0NzU1NGQpCj4+IHY0IGN1cnJlbnRseSBubyBmbGFnIHBvaW50cyBy
+ZWFjaGVkCj4+ID4gMjAxMy0wNy0yMyAyMjo1MDozMC4zNjc0MTUgN2Y4YWRiODM3NzAwICAwIGxv
+ZyBbV1JOXSA6IHNsb3cgcmVxdWVzdAo+PiAzMC4xNzE5Njggc2Vjb25kcyBvbGQsIHJlY2VpdmVk
+IGF0IDIwMTMtMDctMjMgMjI6NTA6MDAuMTk1Mzc2Ogo+PiBzZF9vcChjbGllbnQuNDQyMDM0ODQu
+MDoxOTI5MDIgLmRpci40MTY4LjIgW2NhbGwgcmd3LmJ1Y2tldF9saXN0XSAzLjk0NDc1NTRkKQo+
+PiB2NCBjdXJyZW50bHkgbm8gZmxhZyBwb2ludHMgcmVhY2hlZAo+PiA+IDIwMTMtMDctMjMgMjI6
+NTE6MzYuMDgyMzAzIG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTE1OSA6IFtJTkZdIG9zZC43
+Mgo+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IGJvb3QKPj4gPiAyMDEzLTA3LTIzIDIyOjUxOjM1
+LjIzODE2NCBvc2QuNzIgMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCA0MjAgOiBbV1JOXSBtYXAKPj4g
+ZTQxNzM4IHdyb25nbHkgbWFya2VkIG1lIGRvd24KPj4gPiAyMDEzLTA3LTIzIDIyOjUyOjA1LjU4
+Mjk2OSBtb24uMCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjUxOTEgOiBbREJHXSBvc2QuNzIKPj4gMTAu
+MTc3LjY0Ljg6NjgwMy8yMjU4NCByZXBvcnRlZCBmYWlsZWQgYnkgb3NkLjIwIDEwLjE3Ny42NC40
+OjY5MTMvNDEwMQo+PiA+IDIwMTMtMDctMjMgMjI6NTI6MDUuNTg3Mzg4IG1vbi4wIDEwLjE3Ny42
+NC40OjY3ODkvMCAyNTE5MiA6IFtEQkddIG9zZC43Mgo+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0
+IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuOSAxMC4xNzcuNjQuNDo2OTQ2LzUxMjQKPj4gPiAyMDEz
+LTA3LTIzIDIyOjUyOjA1LjYxMDkyNSBtb24uMCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjUxOTMgOiBb
+REJHXSBvc2QuNzIKPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCByZXBvcnRlZCBmYWlsZWQgYnkg
+b3NkLjc4IDEwLjE3Ny42NC41OjY4NTQvNTYwNAo+PiA+IDIwMTMtMDctMjMgMjI6NTI6MDUuNjEw
+OTUxIG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTE5NCA6IFtJTkZdIG9zZC43Mgo+PiAxMC4x
+NzcuNjQuODo2ODAzLzIyNTg0IGZhaWxlZCAoMyByZXBvcnRzIGZyb20gMyBwZWVycyBhZnRlciAy
+MDEzLTA3LTIzCj4+IDIyOjUyOjIwLjYxMDg5NSA+PSBncmFjZSAyMC4wMDAwMDApCj4+ID4gMjAx
+My0wNy0yMyAyMjo1MjowNS42MzA4MjEgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MTk1IDog
+W0RCR10gb3NkLjcyCj4+IDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5
+IG9zZC4xMCAxMC4xNzcuNjQuNDo2ODE0LzI2MTkyCj4+ID4gMjAxMy0wNy0yMyAyMjo1Mzo0Ny4y
+MDMzNTIgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MzAwIDogW0lORl0gb3NkLjcyCj4+IDEw
+LjE3Ny42NC44OjY4MDMvMjI1ODQgYm9vdAo+PiA+IDIwMTMtMDctMjMgMjI6NTM6NDYuNDE3MTA2
+IG9zZC43MiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IDQ3NCA6IFtXUk5dIG1hcAo+PiBlNDE3NDIg
+d3JvbmdseSBtYXJrZWQgbWUgZG93bgo+PiA+Cj4+ID4gQ291bGQgeW91IHBsZWFzZSB0YWtlIGEg
+bG9vayBhdCBvdXIgY29uZmlnIGFuZCBzdWdnZXN0IHNvbWUKPj4gaW1wcm92ZW1lbnRzPwo+PiA+
+IFNlZSBhdHRhY2hlZCAiY2VwaCBwZyA8cGdfaWQ+IHF1ZXJ5IiBmb3IgdHdvIGdyb3VwcyBkdXJp
+bmcgcmVjb3ZlcnkgYW5kCj4+IHBhcnRzIG9mIG91ciBjb25maWcgZmlsZS4KPj4gPiBPdXIgY2x1
+c3RlcidzIHNpemU6IDYgaG9zdHMsIDI2IEhERCBlYWNoLCAxNTYgb3NkcywgNjQ4OCBwZ3MsIG1v
+c3RseSBpbiBvbmUKPj4gYnVja2V0IGhhdmluZyA5TSBvYmplY3RzLCAzMzQyIEdCIGRhdGEsIDEx
+MTczIEdCIHVzZWQsIDMxNjkwIEdCIC8gNDI4NjQgR0IKPj4gYXZhaWwuCj4+Cj4+IEknbSBzdXJw
+cmlzZWQgeW91J3JlIHJ1bm5pbmcgaW50byBpdCBhdCA5bSBvYmplY3RzIGJ1dCB0aGlzIGlzIGFs
+bW9zdAo+PiBjZXJ0YWlubHkgdGhlIHByb2JsZW0uIFJpZ2h0IG5vdyB0aGUgaW5kZXggZm9yIGVh
+Y2ggUkdXIGJ1Y2tldCBsaXZlcwo+PiBvbiBhIHNpbmdsZSBPU0Q7IHlvdSdyZSBwcm9iYWJseSBo
+YXZpbmcgaXNzdWVzIHdpdGggd2hpY2hldmVyIE9TRCBpcwo+PiByZWNlaXZpbmcgdGhlIGJ1Y2tl
+dCBpbmRleCByZWFkcy4gSXMgaXQgZmVhc2libGUgZm9yIHlvdSB0byBzaGFyZCB0aGUKPj4gY29u
+dGVudHMgaW50byBtdWx0aXBsZSBidWNrZXRzIGFuZCBzZWUgaWYgdGhpbmdzIGNhbG0gZG93bj8K
+Pj4gLUdyZWcKPj4gU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3RhbmsuY29tIHwg
+aHR0cDovL2NlcGguY29tCj4KPiBJIHdhcyBhZnJhaWQgb2YgdGhhdCBhbnN3ZXIuIDotLwo+IFdl
+J2xsIHRyeSB0byBkZWxldGUgc29tZSBvYmplY3RzIGZvciB0aGUgYmVnaW5uaW5nIChhcyB0aGV5
+IGFyZSB0cmFuc2Zvcm1lZCBvdGhlciBvYmplY3RzIGFuZCBjYW4gYmUgcmUtY3JlYXRlZCB3aGVu
+IG5lZWRlZCkgYW5kIHRoZW4gdHJ5IHRvIHNoYXJkIGl0IGFzIHlvdSBzdWdnZXN0Lgo+IFdoYXQg
+aXMgeW91ciBvcGluaW9uIGFib3V0IG1heCBudW1iZXIgb2Ygb2JqZWN0cyBpbiBvbmUgYnVja2V0
+ID8KCkl0IGRlcGVuZHMgbW9yZSBvbiBob3cgbXVjaCBhY3Rpdml0eSB5b3UncmUgdGhyb3dpbmcg
+YXQgdGhlIGJ1Y2tldCwgSQp0aGluay4gV2UgaGF2ZW4ndCBkb25lIGFueSBsYXJnZS1zY2FsZSB0
+ZXN0cyBhbmQgcGVyaGFwcyB3ZSBuZWVkIHRvLgpMZXZlbGRiICh3aGljaCB3ZSdyZSB1c2luZyB1
+bmRlciB0aGUgY292ZXJzIHRvIHN0b3JlIHRoaXMgc3R1ZmYpCnNob3VsZCBub3QgaGF2ZSBhbnkg
+dHJvdWJsZSB3aXRoIHRoZSBhbW91bnQgb2YgZGF0YSB0aGF0J3MgaW4gdGhlcmUsCmJ1dCBpZiB5
+b3UncmUgdHJ5aW5nIHRvIGRvIGZyZXF1ZW50IGVub3VnaCBvYmplY3QgbG9va3VwcyBvciBwdXRz
+IHRoZW4KeW91IG1pZ2h0IGp1c3Qgc2F0dXJhdGUgdGhlIGRpc2svbm9kZSdzIGFiaWxpdHkgdG8g
+a2VlcCB1cC4gSSBzaG91bGQKbWVudGlvbiB0aGF0IFllaHVkYSBqdXN0IHN0YXJ0ZWQgYSBkaXNj
+dXNzaW9uIG9uIGhhbmRsaW5nIHRoaXMgaW4gdGhlCnRocmVhZCAiW2NlcGgtdXNlcnNdIHJndyBi
+dWNrZXQgaW5kZXgiLgoKV2hlbiBkaWQgeW91IHN0YXJ0IG5vdGljaW5nIHRoaXMgdHJvdWJsZT8K
+LUdyZWcKU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDov
+L2NlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
+L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
