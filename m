@@ -1,40 +1,106 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.61.6 Cuttlefish update released
-Date: Tue, 23 Jul 2013 21:47:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307232146370.334@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: fix freeing inode vs removing session caps race
+Date: Wed, 24 Jul 2013 13:48:14 +0800
+Message-ID: <1374644894-9817-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46645 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750985Ab3GXErw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 00:47:52 -0400
+Received: from mga11.intel.com ([192.55.52.93]:30363 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750843Ab3GXFsS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Jul 2013 01:48:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-There was a problem with the monitor daemons in v0.61.5 that would prevent 
-them from restarting after some period of time.  This release fixes the 
-bug and works around the issue to allow affected monitors to restart.  
-All v0.61.5 users are strongly recommended to upgrade.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Thanks everyone who helped track the problem down!
+remove_session_caps() uses iterate_session_caps() to remove caps,
+but iterate_session_caps() skips inodes that are being deleted.
+So session->s_nr_caps can be non-zero after iterate_session_caps()
+return.
 
-Notable changes:
+We can fix the issue by waiting until deletions are complete.
+__wait_on_freeing_inode() is designed for the job, but it is not
+exported, so we use lookup inode function to access it.
 
- * mon: record latest full osdmap
- * mon: work around previous bug in which latest full osdmap was not 
-   recorded
- * mon: avoid scrub while paxos is updating
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/inode.c      |  8 ++++++++
+ fs/ceph/mds_client.c | 28 ++++++++++++++++++++++++++++
+ fs/ceph/super.h      |  2 ++
+ 3 files changed, 38 insertions(+)
 
-For more information please see the complete release notes:
-
- * http://ceph.com/docs/master/release-notes/#v0-61-6-cuttlefish
-
-You can get v0.61.6 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.61.6.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 5437e76..de839f4 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -61,6 +61,14 @@ struct inode *ceph_get_inode(struct super_block *sb, struct ceph_vino vino)
+ 	return inode;
+ }
  
++struct inode *ceph_lookup_inode(struct super_block *sb, struct ceph_vino vino)
++{
++	struct inode *inode;
++	ino_t t = ceph_vino_to_ino(vino);
++	inode = ilookup5_nowait(sb, t, ceph_ino_compare, &vino);
++	return inode;
++}
++
+ /*
+  * get/constuct snapdir inode for a given directory
+  */
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 3eb1b44..8e9d29a 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1028,6 +1028,34 @@ static void remove_session_caps(struct ceph_mds_session *session)
+ {
+ 	dout("remove_session_caps on %p\n", session);
+ 	iterate_session_caps(session, remove_session_caps_cb, NULL);
++
++	spin_lock(&session->s_cap_lock);
++	if (session->s_nr_caps > 0) {
++		struct super_block *sb = session->s_mdsc->fsc->sb;
++		struct inode *inode;
++		struct ceph_cap *cap;
++		struct ceph_vino vino;
++		/*
++		 * iterate_session_caps() skips inodes that are being
++		 * deleted, we need to wait until deletions are complete.
++		 * __wait_on_freeing_inode() is designed for the job,
++		 * but it is not exported, so use lookup inode function
++		 * to access it.
++		 */
++		while (list_empty(&session->s_caps)) {
++			cap = list_entry(session->s_caps.next,
++					struct ceph_cap, session_caps);
++			vino = cap->ci->i_vino;
++			spin_unlock(&session->s_cap_lock);
++
++			inode = ceph_lookup_inode(sb, vino);
++			iput(inode);
++
++			spin_lock(&session->s_cap_lock);
++		}
++	}
++	spin_unlock(&session->s_cap_lock);
++
+ 	BUG_ON(session->s_nr_caps > 0);
+ 	BUG_ON(!list_empty(&session->s_cap_flushing));
+ 	cleanup_cap_releases(session);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index e81c0b6..f1e4e47 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -678,6 +678,8 @@ extern void ceph_destroy_inode(struct inode *inode);
+ 
+ extern struct inode *ceph_get_inode(struct super_block *sb,
+ 				    struct ceph_vino vino);
++extern struct inode *ceph_lookup_inode(struct super_block *sb,
++				       struct ceph_vino vino);
+ extern struct inode *ceph_get_snapdir(struct inode *parent);
+ extern int ceph_fill_file_size(struct inode *inode, int issued,
+ 			       u32 truncate_seq, u64 truncate_size, u64 size);
+-- 
+1.8.1.4
+
