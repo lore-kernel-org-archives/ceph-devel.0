@@ -1,35 +1,27 @@
-From: Alex Bligh <alex@alex.org.uk>
-Subject: Re: [ceph-users] v0.61.6 Cuttlefish update released
-Date: Wed, 24 Jul 2013 14:18:18 +0100
-Message-ID: <DBBFE481-F602-44BB-B824-FB088419D115@alex.org.uk>
-References: <alpine.DEB.2.00.1307232146370.334@cobra.newdream.net>
-Mime-Version: 1.0 (Apple Message framework v1085)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
+Date: Wed, 24 Jul 2013 08:29:55 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307240829080.15546@cobra.newdream.net>
+References: <51EF7CC8.9070507@profihost.ag> <51EF843D.1070107@profihost.ag> <51EFB650.6050506@inktank.com> <51EFC061.6090802@profihost.ag>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.avalus.com ([89.16.176.221]:49498 "EHLO mail.avalus.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750933Ab3GXNSa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Jul 2013 09:18:30 -0400
-In-Reply-To: <alpine.DEB.2.00.1307232146370.334@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:50975 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752631Ab3GXP34 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 11:29:56 -0400
+In-Reply-To: <51EFC061.6090802@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Alex Bligh <alex@alex.org.uk>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Joao Eduardo Luis <joao.luis@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Wed, 24 Jul 2013, Stefan Priebe - Profihost AG wrote:
+> What i don't understand is WHY the hell the OSDs haven't used the 2nd or
+> 3rd monitor which wasn't restarted?
 
-On 24 Jul 2013, at 05:47, Sage Weil wrote:
+Double check the ceph.conf's on the OSD machines and make sure all mons 
+are listed?  If the remaining mons have a quorum and the OSDs (or any 
+client) are able to reach any one of them they will discover the others.
 
-> There was a problem with the monitor daemons in v0.61.5 that would prevent 
-> them from restarting after some period of time.  This release fixes the 
-> bug and works around the issue to allow affected monitors to restart.  
-> All v0.61.5 users are strongly recommended to upgrade.
-
-Was this bug also in 0.61.4?
-
--- 
-Alex Bligh
-
-
-
-
+sage
