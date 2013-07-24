@@ -1,59 +1,40 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH] ceph: Don't use ceph-sync-mode for synchronous-fs.
-Date: Wed, 24 Jul 2013 12:46:44 +0800
-Message-ID: <201307241246395750351@gmail.com>
-References: <201306271556037311581@gmail.com>,
-	<201307161949279533980@gmail.com> <201307240828220999500@gmail.com>,
-	<alpine.DEB.2.00.1307231812280.8332@cobra.newdream.net>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.61.6 Cuttlefish update released
+Date: Tue, 23 Jul 2013 21:47:52 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307232146370.334@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46645 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750985Ab3GXErw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 00:47:52 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-PkhpLA0KPg0KPlNvcnJ5IGZvciB0aGUgc2xvdyByZXZpZXcuICBUaGUgcGF0Y2ggbG9va3MgZ29v
-ZCwgYnV0IEkgaGF2ZSBhIGhhcmQgdGltZSANCj51bmRlcnN0YW5kaW5nIHlvdXIgY2hhbmdlbG9n
-Li4uIGlzIGl0IG9rYXkgaWYgSSBjaGFuZ2UgaXQgdG8gc29tZXRoaW5nIA0KPmxpa2U6DQo+DQo+
-DQo+U2VuZGluZyByZWFkcyBhbmQgd3JpdGVzIHRocm91Z2ggdGhlIHN5bmMgcmVhZC93cml0ZSBw
-YXRocyBieXBhc3NlcyB0aGUgDQo+cGFnZSBjYWNoZSwgd2hpY2ggaXMgbm90IGV4cGVjdGVkIG9y
-IGdlbmVyYWxseSBhIGdvb2QgaWRlYS4gIFJlbW92aW5nIA0KPnRoZSB3cml0ZSBjaGVjayBpcyBz
-YWZlIGFzIHRoZXJlIGlzIGEgY29uZGl0aW9uYWwgdmZzX2ZzeW5jX3JhbmdlKCkgbGF0ZXIgDQo+
-aW4gY2VwaF9haW9fd3JpdGUgdGhhdCBhbHJlYWR5IGNoZWNrcyBmb3IgdGhlIHNhbWUgZmxhZyAo
-dmlhIA0KPklTX1NZTkMoaW5vZGUpKS4NCj4NClZlcnkgZ29vZC4NCkl0J3MgbXkgZmF1bHQuIEkg
-d2lsbCBub3RpY2UgdGhlIG1lc3NhZ2UgbGF0ZXIuDQoNClRoYW5rcyAhDQpKaWFucGVuZyBNYQ0K
-Pj8NCj4NCj5UaGFua3MhDQo+c2FnZQ0KPg0KPg0KPk9uIFdlZCwgMjQgSnVsIDIwMTMsIG1hamlh
-bnBlbmcgd3JvdGU6DQo+DQo+PiBQaW5nDQo+PiA+SGkgc2FnZSwNCj4+ID4JSG93IGFib3V0IHRo
-aXMgcGF0Y2g/Q2FuIHlvdSBnaXZlIHNvbWUgYWR2aXNlbWVudD8NCj4+ID5UaGFua3MhDQo+PiA+
-SmlhbnBlbmcgTWENCj4+ID4+QXQgbm93IGZvciBzeW5jaHJvbm91cy1mcywgYWxsIHdyaXRlLW9w
-ZXJhdGlvbnMgdXNlIGNlcGhfc3luY19tb2RlLg0KPj4gPj5CdXQgZm9yIHRoZSBmaWxlIHdoaWNo
-IG9wZW5lZCB3aXRoIE9fU1lOQywgaXQgZG9uJ3QgdXNlIHN5bmNfbW9kZS4NCj4+ID4+VGhlIGJl
-aGF2aW91ciBvZiB0aGVtIHNob3VsZCBiZSB0aGUgc2FtZS4NCj4+ID4+Rm9yIGZzIHdoaWNoIG1v
-dW50ZWQgdXNpbmcgJy1vIHN5bmMnLCBpdCB3YW50IGFsbCBJL08gdG8gdGhlIGZpbGVzeXN0ZW0N
-Cj4+ID4+c2hvdWxkIGJlIGRvbmUgc3luY2hyb25vdXNseS5CdXQgdGhlIGNlcGgtc3luYy1tb2Rl
-IGRvbid0IGJlIHN1aXRmdWwNCj4+ID4+Zm9yLkZvciBleGFtcGxlLHVzaW5nIGNlcGgtc3luYy1t
-b2RlIHRoZSBjb250ZW50IG9mIGZpbGUgZG9uJ3QgaGF2ZSBpbg0KPj4gPj5tZW1vcnkuVGhpcyB3
-aWxsIGNhdXNlIHRoZSBmb2xsb3dpbmcgcmVhZCBvbmx5IGZyb20gb3NkIHJhdGhlciB0aGFuDQo+
-PiA+Pm1lbW9yeS4NCj4+ID4+DQo+PiA+PlNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWpp
-YW5wZW5nQGdtYWlsLmNvbT4NCj4+ID4+LS0tDQo+PiA+PiBmcy9jZXBoL2ZpbGUuYyB8IDIgLS0N
-Cj4+ID4+IDEgZmlsZSBjaGFuZ2VkLCAyIGRlbGV0aW9ucygtKQ0KPj4gPj4NCj4+ID4+ZGlmZiAt
-LWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCj4+ID4+aW5kZXggNjU2ZTE2
-OS4uNDQ2NzBhZCAxMDA2NDQNCj4+ID4+LS0tIGEvZnMvY2VwaC9maWxlLmMNCj4+ID4+KysrIGIv
-ZnMvY2VwaC9maWxlLmMNCj4+ID4+QEAgLTY1OSw3ICs2NTksNiBAQCBhZ2FpbjoNCj4+ID4+IA0K
-Pj4gPj4gCWlmICgoZ290ICYgKENFUEhfQ0FQX0ZJTEVfQ0FDSEV8Q0VQSF9DQVBfRklMRV9MQVpZ
-SU8pKSA9PSAwIHx8DQo+PiA+PiAJICAgIChpb2NiLT5raV9maWxwLT5mX2ZsYWdzICYgT19ESVJF
-Q1QpIHx8DQo+PiA+Pi0JICAgIChpbm9kZS0+aV9zYi0+c19mbGFncyAmIE1TX1NZTkNIUk9OT1VT
-KSB8fA0KPj4gPj4gCSAgICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZTkMpKQ0KPj4gPj4gCQkvKiBo
-bW0sIHRoaXMgaXNuJ3QgcmVhbGx5IGFzeW5jLi4uICovDQo+PiA+PiAJCXJldCA9IGNlcGhfc3lu
-Y19yZWFkKGZpbHAsIGJhc2UsIGxlbiwgcHBvcywgJmNoZWNrZW9mKTsNCj4+ID4+QEAgLTc2NCw3
-ICs3NjMsNiBAQCByZXRyeV9zbmFwOg0KPj4gPj4gDQo+PiA+PiAJaWYgKChnb3QgJiAoQ0VQSF9D
-QVBfRklMRV9CVUZGRVJ8Q0VQSF9DQVBfRklMRV9MQVpZSU8pKSA9PSAwIHx8DQo+PiA+PiAJICAg
-IChpb2NiLT5raV9maWxwLT5mX2ZsYWdzICYgT19ESVJFQ1QpIHx8DQo+PiA+Pi0JICAgIChpbm9k
-ZS0+aV9zYi0+c19mbGFncyAmIE1TX1NZTkNIUk9OT1VTKSB8fA0KPj4gPj4gCSAgICAoZmktPmZs
-YWdzICYgQ0VQSF9GX1NZTkMpKSB7DQo+PiA+PiAJCW11dGV4X3VubG9jaygmaW5vZGUtPmlfbXV0
-ZXgpOw0KPj4gPj4gCQl3cml0dGVuID0gY2VwaF9zeW5jX3dyaXRlKGZpbGUsIGlvdi0+aW92X2Jh
-c2UsIGNvdW50LA0KPj4gPj4tLSANCj4+ID4+MS44LjEuMg==
+There was a problem with the monitor daemons in v0.61.5 that would prevent 
+them from restarting after some period of time.  This release fixes the 
+bug and works around the issue to allow affected monitors to restart.  
+All v0.61.5 users are strongly recommended to upgrade.
+
+Thanks everyone who helped track the problem down!
+
+Notable changes:
+
+ * mon: record latest full osdmap
+ * mon: work around previous bug in which latest full osdmap was not 
+   recorded
+ * mon: avoid scrub while paxos is updating
+
+For more information please see the complete release notes:
+
+ * http://ceph.com/docs/master/release-notes/#v0-61-6-cuttlefish
+
+You can get v0.61.6 from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.6.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
+ 
