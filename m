@@ -1,177 +1,165 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
-Date: Wed, 24 Jul 2013 09:37:33 +0200
-Message-ID: <51EF843D.1070107@profihost.ag>
-References: <51EF7CC8.9070507@profihost.ag>
+From: =?utf-8?B?U3R1ZHppxYRza2kgS3J6eXN6dG9m?=
+	<krzysztof.studzinski@grupaonet.pl>
+Subject: RE: [ceph-users] Flapping osd / continuously reported as failed
+Date: Wed, 24 Jul 2013 09:48:27 +0200
+Message-ID: <0D057B737C42FC4AB3F22773A5C9425F259DBDF026@MXMBON06.grupa.onet>
+References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
+	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
+ <CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:38781 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752068Ab3GXHhk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 03:37:40 -0400
-In-Reply-To: <51EF7CC8.9070507@profihost.ag>
+Received: from onsmg01.portal.onet.pl ([213.180.147.237]:61939 "EHLO
+	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751579Ab3GXHse (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 03:48:34 -0400
+Content-Language: pl-PL
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>, Yehuda Sadeh <yehuda@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Mostowiec Dominik <Dominik.Mostowiec@grupaonet.pl>
 
-Hi,
-
-i uploaded my ceph mon store to cephdrop
-/home/cephdrop/ceph-mon-failed-assert-0.61.6/mon.tar.gz.
-
-So hopefully someone can find the culprit soon.
-
-It fails in OSDMonitor.cc here:
-
-   // if we trigger this, then there's something else going with the store
-    // state, and we shouldn't want to work around it without knowing what
-    // exactly happened.
-    assert(latest_full > 0);
-
-Stefan
-
-Am 24.07.2013 09:05, schrieb Stefan Priebe - Profihost AG:
-> Hi,
-> 
-> today i wanted to upgrade from 0.61.5 to 0.61.6 to get rid of the mon bug.
-> 
-> But this ended in a complete desaster.
-> 
-> What i've done:
-> 1.) recompiled ceph tagged with 0.61.6
-> 2.) installed new ceph version on all machines
-> 3.) JUST tried to restart ONE mon
-> 
-> this failed with:
-> [1774]: (33) Numerical argument out of domain
-> failed: 'ulimit -n 8192;  /usr/bin/ceph-mon -i a --pid-file
-> /var/run/ceph/mon.a.pid -c /etc/ceph/ceph.conf '
-> 
-> 2013-07-24 08:41:43.086951 7f53c185d700 -1 mon.a@0(leader) e1 *** Got
-> Signal Terminated ***
-> 2013-07-24 08:41:43.088090 7f53c185d700  0 quorum service shutdown
-> 2013-07-24 08:41:43.088094 7f53c185d700  0 mon.a@0(???).health(3840)
-> HealthMonitor::service_shutdown 1 services
-> 2013-07-24 08:41:43.088097 7f53c185d700  0 quorum service shutdown
-> 2013-07-24 08:41:44.224104 7fae6384a780  0 ceph version
-> 0.61.6-15-g85db066 (85db0667307ac803c753d16fa374dd2fc29d76f3), process
-> ceph-mon, pid 29871
-> 2013-07-24 08:41:56.097385 7fae6384a780 -1 mon/OSDMonitor.cc: In
-> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
-> 7fae6384a780 time 2013-07-24 08:41:56.096683
-> mon/OSDMonitor.cc: 156: FAILED assert(latest_full > 0)
-> 
->  ceph version 0.61.6-15-g85db066 (85db0667307ac803c753d16fa374dd2fc29d76f3)
->  1: (OSDMonitor::update_from_paxos(bool*)+0x2413) [0x50f5a3]
->  2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->  3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->  4: (Monitor::init_paxos()+0xe5) [0x48f955]
->  5: (Monitor::preinit()+0x679) [0x4bba79]
->  6: (main()+0x36b0) [0x484bb0]
->  7: (__libc_start_main()+0xfd) [0x7fae619a6c8d]
->  8: /usr/bin/ceph-mon() [0x4801e9]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> --- begin dump of recent events ---
->    -13> 2013-07-24 08:41:44.222821 7fae6384a780  5 asok(0x2698000)
-> register_command perfcounters_dump hook 0x2682010
->    -12> 2013-07-24 08:41:44.222835 7fae6384a780  5 asok(0x2698000)
-> register_command 1 hook 0x2682010
->    -11> 2013-07-24 08:41:44.222837 7fae6384a780  5 asok(0x2698000)
-> register_command perf dump hook 0x2682010
->    -10> 2013-07-24 08:41:44.222842 7fae6384a780  5 asok(0x2698000)
-> register_command perfcounters_schema hook 0x2682010
->     -9> 2013-07-24 08:41:44.222845 7fae6384a780  5 asok(0x2698000)
-> register_command 2 hook 0x2682010
->     -8> 2013-07-24 08:41:44.222847 7fae6384a780  5 asok(0x2698000)
-> register_command perf schema hook 0x2682010
->     -7> 2013-07-24 08:41:44.222849 7fae6384a780  5 asok(0x2698000)
-> register_command config show hook 0x2682010
->     -6> 2013-07-24 08:41:44.222852 7fae6384a780  5 asok(0x2698000)
-> register_command config set hook 0x2682010
->     -5> 2013-07-24 08:41:44.222854 7fae6384a780  5 asok(0x2698000)
-> register_command log flush hook 0x2682010
->     -4> 2013-07-24 08:41:44.222856 7fae6384a780  5 asok(0x2698000)
-> register_command log dump hook 0x2682010
->     -3> 2013-07-24 08:41:44.222859 7fae6384a780  5 asok(0x2698000)
-> register_command log reopen hook 0x2682010
->     -2> 2013-07-24 08:41:44.224104 7fae6384a780  0 ceph version
-> 0.61.6-15-g85db066 (85db0667307ac803c753d16fa374dd2fc29d76f3), process
-> ceph-mon, pid 29871
->     -1> 2013-07-24 08:41:44.224397 7fae6384a780  1 finished
-> global_init_daemonize
->      0> 2013-07-24 08:41:56.097385 7fae6384a780 -1 mon/OSDMonitor.cc: In
-> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
-> 7fae6384a780 time 2013-07-24 08:41:56.096683
-> mon/OSDMonitor.cc: 156: FAILED assert(latest_full > 0)
-> 
->  ceph version 0.61.6-15-g85db066 (85db0667307ac803c753d16fa374dd2fc29d76f3)
->  1: (OSDMonitor::update_from_paxos(bool*)+0x2413) [0x50f5a3]
->  2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->  3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->  4: (Monitor::init_paxos()+0xe5) [0x48f955]
->  5: (Monitor::preinit()+0x679) [0x4bba79]
->  6: (main()+0x36b0) [0x484bb0]
->  7: (__libc_start_main()+0xfd) [0x7fae619a6c8d]
->  8: /usr/bin/ceph-mon() [0x4801e9]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> 4.) i thought no problem mon.b and mon.c are still running. BUT all OSDs
-> were still trying to reach mon.a
-> 
-> 2013-07-24 08:41:43.088997 7f011268f700  0 monclient: hunting for new mon
-> 2013-07-24 08:41:56.792449 7f0109e7e700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x489e000 sd=286 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:42:02.792990 7f0116b6c700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x3c02780 sd=256 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:42:11.793525 7f0109d7d700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x84ec280 sd=256 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:42:23.794315 7f0109e7e700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x44c7b80 sd=286 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:42:27.621336 7f0122d2e700  0 log [WRN] : 5 slow requests,
-> 5 included below; oldest blocked for > 30.378391 secs
-> 2013-07-24 08:42:27.621344 7f0122d2e700  0 log [WRN] : slow request
-> 30.378391 seconds old, received at 2013-07-24 08:41:57.242902:
-> osd_op(client.14727601.0:3839848
-> rbd_data.e0b5b26b8b4567.0000000000005b5a [write 684032~4096] 5.816d89d1
-> snapc bef=[bef] e142137) v4 currently wait for new map
-> 2013-07-24 08:42:27.621348 7f0122d2e700  0 log [WRN] : slow request
-> 30.195074 seconds old, received at 2013-07-24 08:41:57.426219:
-> osd_op(client.14828945.0:1088870
-> rbd_data.e245696b8b4567.000000000000140e [write 988160~7168] 5.ed959c36
-> snapc b80=[b80] e142137) v4 currently wait for new map
-> 2013-07-24 08:42:27.621350 7f0122d2e700  0 log [WRN] : slow request
-> 30.148871 seconds old, received at 2013-07-24 08:41:57.472422:
-> osd_op(client.14667314.0:2818172
-> rbd_data.dfcaa86b8b4567.0000000000000a13 [write 1654784~4096] 5.6972a67e
-> snapc baa=[baa] e142137) v4 currently wait for new map
-> 2013-07-24 08:42:27.621351 7f0122d2e700  0 log [WRN] : slow request
-> 30.148829 seconds old, received at 2013-07-24 08:41:57.472464:
-> osd_op(client.14667314.0:2818173
-> rbd_data.dfcaa86b8b4567.0000000000000a13 [write 1957888~4096] 5.6972a67e
-> snapc baa=[baa] e142137) v4 currently wait for new map
-> 2013-07-24 08:42:27.621352 7f0122d2e700  0 log [WRN] : slow request
-> 30.148784 seconds old, received at 2013-07-24 08:41:57.472509:
-> osd_op(client.14667314.0:2818174
-> rbd_data.dfcaa86b8b4567.0000000000000a13 [write 1966080~4096] 5.6972a67e
-> snapc baa=[baa] e142137) v4 currently wait for new map
-> 
-> ...
-> 
-> 2013-07-24 08:50:20.826687 7f00ee6d9700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0xdf02280 sd=288 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:50:26.826914 7f00f1697700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x465a000 sd=229 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:50:40.713100 7f00ee6d9700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x4383680 sd=281 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:50:44.828164 7f011392a700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x41ecf00 sd=281 :0 s=1 pgs=0 cs=0 l=1).fault
-> 2013-07-24 08:51:02.829357 7f00f1697700  0 -- 10.255.0.82:6802/29397 >>
-> 10.255.0.100:6789/0 pipe(0x1d8b180 sd=281 :0 s=1 pgs=0 cs=0 l=1).fault
-> 
-> Stefan
-> 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTdHVkemnFhHNraSBLcnp5c3p0
+b2YNCj4gU2VudDogV2VkbmVzZGF5LCBKdWx5IDI0LCAyMDEzIDE6MTggQU0NCj4gVG86ICdHcmVn
+b3J5IEZhcm51bSc7IFllaHVkYSBTYWRlaA0KPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
+cmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb207IE1vc3Rvd2llYw0KPiBEb21pbmlrDQo+IFN1
+YmplY3Q6IFJFOiBbY2VwaC11c2Vyc10gRmxhcHBpbmcgb3NkIC8gY29udGludW91c2x5IHJlcG9y
+dGVkIGFzIGZhaWxlZA0KPiANCj4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZy
+b206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z3JlZ0Bpbmt0YW5rLmNvbV0NCj4gPiBTZW50OiBX
+ZWRuZXNkYXksIEp1bHkgMjQsIDIwMTMgMTI6MjggQU0NCj4gPiBUbzogU3R1ZHppxYRza2kgS3J6
+eXN6dG9mOyBZZWh1ZGEgU2FkZWgNCj4gPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7
+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb207IE1vc3Rvd2llYw0KPiA+IERvbWluaWsNCj4gPiBT
+dWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIEZsYXBwaW5nIG9zZCAvIGNvbnRpbnVvdXNseSByZXBv
+cnRlZCBhcyBmYWlsZWQNCj4gPg0KPiA+IE9uIFR1ZSwgSnVsIDIzLCAyMDEzIGF0IDM6MjAgUE0s
+IFN0dWR6acWEc2tpIEtyenlzenRvZg0KPiA+IDxrcnp5c3p0b2Yuc3R1ZHppbnNraUBncnVwYW9u
+ZXQucGw+IHdyb3RlOg0KPiA+ID4+IE9uIFR1ZSwgSnVsIDIzLCAyMDEzIGF0IDI6NTAgUE0sIFN0
+dWR6acWEc2tpIEtyenlzenRvZg0KPiA+ID4+IDxrcnp5c3p0b2Yuc3R1ZHppbnNraUBncnVwYW9u
+ZXQucGw+IHdyb3RlOg0KPiA+ID4+ID4gSGksDQo+ID4gPj4gPiBXZSd2ZSBnb3Qgc29tZSBwcm9i
+bGVtIHdpdGggb3VyIGNsdXN0ZXIgLSBpdCBjb250aW51b3VzbHkgcmVwb3J0cw0KPiBmYWlsZWQN
+Cj4gPiA+PiBvbmUgb3NkIGFuZCBhZnRlciBhdXRvLXJlYm9vdGluZyBldmVyeXRoaW5nIHNlZW1z
+IHRvIHdvcmsgZmluZSBmb3INCj4gc29tZQ0KPiA+ID4+IHRpbWUgKGZldyBtaW51dGVzKS4gQ1BV
+IHV0aWwgb2YgdGhpcyBvc2QgaXMgbWF4IDglLCBpb3N0YXQgaXMgdmVyeSBsb3cuIFdlDQo+ID4g
+dHJpZWQNCj4gPiA+PiB0byAiY2VwaCBvc2Qgb3V0IiBzdWNoIGZsYXBwaW5nIG9zZCwgYnV0IGFm
+dGVyIHJlY292ZXJpbmcgdGhpcyBiZWhhdmlvcg0KPiA+ID4+IHJldHVybmVkIG9uIGRpZmZlcmVu
+dCBvc2QuIFRoaXMgb3NkIGhhcyBhbHNvIG11Y2ggbW9yZSByZWFkIG9wZXJhdGlvbnMNCj4gPiB0
+aGFuDQo+ID4gPj4gb3RoZXJzIChzZWUgZmlsZSBvc2RfcmVhZHMucG5nIGxpbmtlZCBhdCB0aGUg
+Ym90dG9tIG9mIHRoZSBlbWFpbDsgYXQNCj4gYWJvdXQNCj4gPiA+PiAxNjowMCB3ZSBzd2l0Y2hl
+ZCBvZmYgb3NkLjU3IGFuZCBvc2QuNzIgc3RhcnRlZCB0byBtaXNiZWhhdmUuIE9zZC4xMDgNCj4g
+PiA+PiB3b3JrcyB3aGlsZSByZWNvdmVyaW5nKS4NCj4gPiA+PiA+DQo+ID4gPj4gPiBFeHRyYWN0
+IGZyb20gY2VwaC5sb2c6DQo+ID4gPj4gPg0KPiA+ID4+ID4gMjAxMy0wNy0yMyAyMjo0Mzo1Ny40
+MjU4MzkgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI0NjkwIDogW0lORl0NCj4gPiBvc2QuNzIN
+Cj4gPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IGJvb3QNCj4gPiA+PiA+IDIwMTMtMDctMjMg
+MjI6NDM6NTYuMjk4NDY3IG9zZC43MiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IDQxNSA6IFtXUk5d
+DQo+ID4gbWFwDQo+ID4gPj4gZTQxNzMwIHdyb25nbHkgbWFya2VkIG1lIGRvd24NCj4gPiA+PiA+
+IDIwMTMtMDctMjMgMjI6NTA6MjcuNTcyMTEwIG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4
+MSA6IFtEQkddDQo+ID4gb3NkLjcyDQo+ID4gPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCByZXBv
+cnRlZCBmYWlsZWQgYnkgb3NkLjkgMTAuMTc3LjY0LjQ6Njk0Ni81MTI0DQo+ID4gPj4gPiAyMDEz
+LTA3LTIzIDIyOjUwOjI3LjU5NTA0NCBtb24uMCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjUwODIgOiBb
+REJHXQ0KPiA+IG9zZC43Mg0KPiA+ID4+IDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgcmVwb3J0ZWQg
+ZmFpbGVkIGJ5IG9zZC43OCAxMC4xNzcuNjQuNTo2ODU0LzU2MDQNCj4gPiA+PiA+IDIwMTMtMDct
+MjMgMjI6NTA6MjcuNjExOTY0IG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4MyA6IFtEQkdd
+DQo+ID4gb3NkLjcyDQo+ID4gPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCByZXBvcnRlZCBmYWls
+ZWQgYnkgb3NkLjEwDQo+IDEwLjE3Ny42NC40OjY4MTQvMjYxOTINCj4gPiA+PiA+IDIwMTMtMDct
+MjMgMjI6NTA6MjcuNjEyMDA5IG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4NCA6IFtJTkZd
+DQo+ID4gb3NkLjcyDQo+ID4gPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCBmYWlsZWQgKDMgcmVw
+b3J0cyBmcm9tIDMgcGVlcnMgYWZ0ZXIgMjAxMy0wNy0yMw0KPiA+ID4+IDIyOjUwOjQzLjYxMTkz
+OSA+PSBncmFjZSAyMC4wMDAwMDApDQo+ID4gPj4gPiAyMDEzLTA3LTIzIDIyOjUwOjMwLjM2NzM5
+OCA3ZjhhZGI4Mzc3MDAgIDAgbG9nIFtXUk5dIDogMyBzbG93DQo+IHJlcXVlc3RzLA0KPiA+IDMN
+Cj4gPiA+PiBpbmNsdWRlZCBiZWxvdzsgb2xkZXN0IGJsb2NrZWQgZm9yID4gMzAuNjg4ODkxIHNl
+Y3MNCj4gPiA+PiA+IDIwMTMtMDctMjMgMjI6NTA6MzAuMzY3NDA4IDdmOGFkYjgzNzcwMCAgMCBs
+b2cgW1dSTl0gOiBzbG93IHJlcXVlc3QNCj4gPiA+PiAzMC42ODg4OTEgc2Vjb25kcyBvbGQsIHJl
+Y2VpdmVkIGF0IDIwMTMtMDctMjMgMjI6NDk6NTkuNjc4NDUzOg0KPiA+ID4+IHNkX29wKGNsaWVu
+dC40NDI5MDA0OC4wOjEyNTg5OSAuZGlyLjQxNjguMiBbY2FsbA0KPiByZ3cuYnVja2V0X3ByZXBh
+cmVfb3BdDQo+ID4gPj4gMy45NDQ3NTU0ZCkgdjQgY3VycmVudGx5IG5vIGZsYWcgcG9pbnRzIHJl
+YWNoZWQNCj4gPiA+PiA+IDIwMTMtMDctMjMgMjI6NTA6MzAuMzY3NDEyIDdmOGFkYjgzNzcwMCAg
+MCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QNCj4gPiA+PiAzMC4xNzkwNDQgc2Vjb25kcyBvbGQs
+IHJlY2VpdmVkIGF0IDIwMTMtMDctMjMgMjI6NTA6MDAuMTg4MzAwOg0KPiA+ID4+IHNkX29wKGNs
+aWVudC40NDIwNTUzMC4wOjE4OTI3MCAuZGlyLjQxNjguMiBbY2FsbCByZ3cuYnVja2V0X2xpc3Rd
+DQo+ID4gMy45NDQ3NTU0ZCkNCj4gPiA+PiB2NCBjdXJyZW50bHkgbm8gZmxhZyBwb2ludHMgcmVh
+Y2hlZA0KPiA+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MDozMC4zNjc0MTUgN2Y4YWRiODM3NzAwICAw
+IGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdA0KPiA+ID4+IDMwLjE3MTk2OCBzZWNvbmRzIG9sZCwg
+cmVjZWl2ZWQgYXQgMjAxMy0wNy0yMyAyMjo1MDowMC4xOTUzNzY6DQo+ID4gPj4gc2Rfb3AoY2xp
+ZW50LjQ0MjAzNDg0LjA6MTkyOTAyIC5kaXIuNDE2OC4yIFtjYWxsIHJndy5idWNrZXRfbGlzdF0N
+Cj4gPiAzLjk0NDc1NTRkKQ0KPiA+ID4+IHY0IGN1cnJlbnRseSBubyBmbGFnIHBvaW50cyByZWFj
+aGVkDQo+ID4gPj4gPiAyMDEzLTA3LTIzIDIyOjUxOjM2LjA4MjMwMyBtb24uMCAxMC4xNzcuNjQu
+NDo2Nzg5LzAgMjUxNTkgOiBbSU5GXQ0KPiA+IG9zZC43Mg0KPiA+ID4+IDEwLjE3Ny42NC44OjY4
+MDMvMjI1ODQgYm9vdA0KPiA+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MTozNS4yMzgxNjQgb3NkLjcy
+IDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgNDIwIDogW1dSTl0NCj4gPiBtYXANCj4gPiA+PiBlNDE3
+Mzggd3JvbmdseSBtYXJrZWQgbWUgZG93bg0KPiA+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MjowNS41
+ODI5NjkgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MTkxIDogW0RCR10NCj4gPiBvc2QuNzIN
+Cj4gPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuMjAg
+MTAuMTc3LjY0LjQ6NjkxMy80MTAxDQo+ID4gPj4gPiAyMDEzLTA3LTIzIDIyOjUyOjA1LjU4NzM4
+OCBtb24uMCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjUxOTIgOiBbREJHXQ0KPiA+IG9zZC43Mg0KPiA+
+ID4+IDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5IG9zZC45IDEwLjE3
+Ny42NC40OjY5NDYvNTEyNA0KPiA+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MjowNS42MTA5MjUgbW9u
+LjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MTkzIDogW0RCR10NCj4gPiBvc2QuNzINCj4gPiA+PiAx
+MC4xNzcuNjQuODo2ODAzLzIyNTg0IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuNzggMTAuMTc3LjY0
+LjU6Njg1NC81NjA0DQo+ID4gPj4gPiAyMDEzLTA3LTIzIDIyOjUyOjA1LjYxMDk1MSBtb24uMCAx
+MC4xNzcuNjQuNDo2Nzg5LzAgMjUxOTQgOiBbSU5GXQ0KPiA+IG9zZC43Mg0KPiA+ID4+IDEwLjE3
+Ny42NC44OjY4MDMvMjI1ODQgZmFpbGVkICgzIHJlcG9ydHMgZnJvbSAzIHBlZXJzIGFmdGVyIDIw
+MTMtMDctMjMNCj4gPiA+PiAyMjo1MjoyMC42MTA4OTUgPj0gZ3JhY2UgMjAuMDAwMDAwKQ0KPiA+
+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MjowNS42MzA4MjEgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8w
+IDI1MTk1IDogW0RCR10NCj4gPiBvc2QuNzINCj4gPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0
+IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuMTANCj4gMTAuMTc3LjY0LjQ6NjgxNC8yNjE5Mg0KPiA+
+ID4+ID4gMjAxMy0wNy0yMyAyMjo1Mzo0Ny4yMDMzNTIgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8w
+IDI1MzAwIDogW0lORl0NCj4gPiBvc2QuNzINCj4gPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0
+IGJvb3QNCj4gPiA+PiA+IDIwMTMtMDctMjMgMjI6NTM6NDYuNDE3MTA2IG9zZC43MiAxMC4xNzcu
+NjQuODo2ODAzLzIyNTg0IDQ3NCA6IFtXUk5dDQo+ID4gbWFwDQo+ID4gPj4gZTQxNzQyIHdyb25n
+bHkgbWFya2VkIG1lIGRvd24NCj4gPiA+PiA+DQo+ID4gPj4gPiBDb3VsZCB5b3UgcGxlYXNlIHRh
+a2UgYSBsb29rIGF0IG91ciBjb25maWcgYW5kIHN1Z2dlc3Qgc29tZQ0KPiA+ID4+IGltcHJvdmVt
+ZW50cz8NCj4gPiA+PiA+IFNlZSBhdHRhY2hlZCAiY2VwaCBwZyA8cGdfaWQ+IHF1ZXJ5IiBmb3Ig
+dHdvIGdyb3VwcyBkdXJpbmcgcmVjb3ZlcnkNCj4gPiBhbmQNCj4gPiA+PiBwYXJ0cyBvZiBvdXIg
+Y29uZmlnIGZpbGUuDQo+ID4gPj4gPiBPdXIgY2x1c3RlcidzIHNpemU6IDYgaG9zdHMsIDI2IEhE
+RCBlYWNoLCAxNTYgb3NkcywgNjQ4OCBwZ3MsIG1vc3RseSBpbg0KPiA+IG9uZQ0KPiA+ID4+IGJ1
+Y2tldCBoYXZpbmcgOU0gb2JqZWN0cywgMzM0MiBHQiBkYXRhLCAxMTE3MyBHQiB1c2VkLCAzMTY5
+MCBHQiAvDQo+IDQyODY0DQo+ID4gR0INCj4gPiA+PiBhdmFpbC4NCj4gPiA+Pg0KPiA+ID4+IEkn
+bSBzdXJwcmlzZWQgeW91J3JlIHJ1bm5pbmcgaW50byBpdCBhdCA5bSBvYmplY3RzIGJ1dCB0aGlz
+IGlzIGFsbW9zdA0KPiA+ID4+IGNlcnRhaW5seSB0aGUgcHJvYmxlbS4gUmlnaHQgbm93IHRoZSBp
+bmRleCBmb3IgZWFjaCBSR1cgYnVja2V0IGxpdmVzDQo+ID4gPj4gb24gYSBzaW5nbGUgT1NEOyB5
+b3UncmUgcHJvYmFibHkgaGF2aW5nIGlzc3VlcyB3aXRoIHdoaWNoZXZlciBPU0QgaXMNCj4gPiA+
+PiByZWNlaXZpbmcgdGhlIGJ1Y2tldCBpbmRleCByZWFkcy4gSXMgaXQgZmVhc2libGUgZm9yIHlv
+dSB0byBzaGFyZCB0aGUNCj4gPiA+PiBjb250ZW50cyBpbnRvIG11bHRpcGxlIGJ1Y2tldHMgYW5k
+IHNlZSBpZiB0aGluZ3MgY2FsbSBkb3duPw0KPiA+ID4+IC1HcmVnDQo+ID4gPj4gU29mdHdhcmUg
+RW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQo+ID4g
+Pg0KPiA+ID4gSSB3YXMgYWZyYWlkIG9mIHRoYXQgYW5zd2VyLiA6LS8NCj4gPiA+IFdlJ2xsIHRy
+eSB0byBkZWxldGUgc29tZSBvYmplY3RzIGZvciB0aGUgYmVnaW5uaW5nIChhcyB0aGV5IGFyZQ0K
+PiB0cmFuc2Zvcm1lZA0KPiA+IG90aGVyIG9iamVjdHMgYW5kIGNhbiBiZSByZS1jcmVhdGVkIHdo
+ZW4gbmVlZGVkKSBhbmQgdGhlbiB0cnkgdG8gc2hhcmQgaXQNCj4gPiBhcyB5b3Ugc3VnZ2VzdC4N
+Cj4gPiA+IFdoYXQgaXMgeW91ciBvcGluaW9uIGFib3V0IG1heCBudW1iZXIgb2Ygb2JqZWN0cyBp
+biBvbmUgYnVja2V0ID8NCj4gPg0KPiA+IEl0IGRlcGVuZHMgbW9yZSBvbiBob3cgbXVjaCBhY3Rp
+dml0eSB5b3UncmUgdGhyb3dpbmcgYXQgdGhlIGJ1Y2tldCwgSQ0KPiA+IHRoaW5rLiBXZSBoYXZl
+bid0IGRvbmUgYW55IGxhcmdlLXNjYWxlIHRlc3RzIGFuZCBwZXJoYXBzIHdlIG5lZWQgdG8uDQo+
+ID4gTGV2ZWxkYiAod2hpY2ggd2UncmUgdXNpbmcgdW5kZXIgdGhlIGNvdmVycyB0byBzdG9yZSB0
+aGlzIHN0dWZmKQ0KPiA+IHNob3VsZCBub3QgaGF2ZSBhbnkgdHJvdWJsZSB3aXRoIHRoZSBhbW91
+bnQgb2YgZGF0YSB0aGF0J3MgaW4gdGhlcmUsDQo+ID4gYnV0IGlmIHlvdSdyZSB0cnlpbmcgdG8g
+ZG8gZnJlcXVlbnQgZW5vdWdoIG9iamVjdCBsb29rdXBzIG9yIHB1dHMgdGhlbg0KPiA+IHlvdSBt
+aWdodCBqdXN0IHNhdHVyYXRlIHRoZSBkaXNrL25vZGUncyBhYmlsaXR5IHRvIGtlZXAgdXAuIEkg
+c2hvdWxkDQo+ID4gbWVudGlvbiB0aGF0IFllaHVkYSBqdXN0IHN0YXJ0ZWQgYSBkaXNjdXNzaW9u
+IG9uIGhhbmRsaW5nIHRoaXMgaW4gdGhlDQo+ID4gdGhyZWFkICJbY2VwaC11c2Vyc10gcmd3IGJ1
+Y2tldCBpbmRleCIuDQo+ID4NCj4gPiBXaGVuIGRpZCB5b3Ugc3RhcnQgbm90aWNpbmcgdGhpcyB0
+cm91YmxlPw0KPiANCj4gTW9zdCBvZiBvdXIgb2JqZWN0cyBhcmUgaW1hZ2VzOiBvcmlnaW5hbHMg
+KG1vc3RseSA1LTEwTUIpIGFuZCBpdHMNCj4gdHJhbnNmb3JtYXRpb25zIChjb21wcmVzc2VkLCBj
+cm9wcywgZmlsdGVycywgZXRjLCB1c3VhbGx5IDw8MU1CKS4gV2UgYWxzbw0KPiBoYXZlIHBsZW50
+eSBvZiBzbWFsbCB0ZXh0IGZpbGVzLiBXZSBtb3N0bHkgcmVhZCB0aGVtIChvYmplY3RzIGFyZSBj
+YWNoZWQgYnkNCj4gbmdpbnggb3V0c2lkZSB0aGUgY2x1c3RlciksIGJ1dCB5ZXN0ZXJkYXkgKDE1
+aCBhZ28pIHdlIGhhZCBwcmV0dHkgbGFyZ2UNCj4gZGVwbG95bWVudCBvZiBuZXcgc2VydmljZSB0
+aGF0IGNvdWxkIGNyZWF0ZSBwbGVudHkgb2YgdHJhbnNmb3JtZWQgaW1hZ2VzDQo+IHdpdGggZGlm
+ZmVyZW50IHNpemVzLiBVbmZvcnR1bmF0ZWx5IEkgY2Fubm90IHNheSByaWdodCBub3cgd2hhdCBp
+cyB0aGUNCj4gZGlmZmVyZW5jZSBpbiBidWNrZXQgc2l6ZSBiZXR3ZWVuIG5vdyBhbmQgeWVzdGVy
+ZGF5LCBJIHdpbGwgdHJ5IHRvIGNoZWNrIGl0DQo+IG91dC4NCj4gDQo+IEZyb20gbXkgc3RhdHMg
+SSBjYW4gc2VlIHRoYXQgaW4gcGVha3Mgd2UgaGFkIGFib3V0IDEuNUsgUFVUIGFuZCA4SyBHRVQN
+Cj4gb3BlcmF0aW9ucyBwZXIgbWludXRlLiBNb3N0IGNvbW1vbiB1c2UtY2FzZSB3aGlsZSBQVVR0
+aW5nIGFuIG9iamVjdCBpbg0KPiBvdXIgYXBwcyBpcyB0aGlzIHNlcXVlbmNlOg0KPiAtIEhFQUQg
+KGNoZWNraW5nIGlmIHRyYW5zZm9ybWVkIG9iamVjdCBhbHJlYWR5IGV4aXN0KSwNCj4gLSBHRVQg
+IHRoZSBvcmlnaW5hbA0KPiAtIFBVVCB0cmFuc2Zvcm1lZCBvYmplY3QgYW5kIGl0cyBtZXRhLWRh
+dGENCj4gV2UgYWxzbyBoYXZlIHNvbWUgYW1vdW50IG9mIFBVVHMgb2YgbmV3IG9iamVjdHMsIGJ1
+dCBJIHRoaW5rIHRoZXJlIHdvbid0DQo+IGJlIG1hbnkgYnkgbm93ICAoaXQgaXMgMWFtIGluIFBv
+bGFuZCkuDQo+IFJpZ2h0IG5vdyB0aGVyZSBhcmUgODAgUFVUIGFuZCAxLjVLIEdFVCBvcGVyYXRp
+b25zIHBlciBtaW51dGUgYW5kIHRoZSBvc2QNCj4gaXMgc3RpbGwgZmxhcHBpbmcuDQoNCkFkZGl0
+aW9uYWwgaW5mbyBhYm91dCBvdXIgaW5kZXggZ3Jvd3RoOiB0aGUgZGVwbG95bWVudCBJIG1lbnRp
+b25lZCBpbiBwcmV2aW91cyBtYWlsIGRpZG4ndCBpbmZsdWVuY2UgdGhlIHNwZWVkIG9mIGluZGV4
+IGdyb3cuIEN1cnJlbnRseSB3ZSBoYXZlIDYwSyBvZiBuZXcgb2JqZWN0cyBkYWlseSwgdGhhdCBz
+cGVlZCBpcyBhbG1vc3QgY29uc3RhbnQgZm9yIHRoZSBsYXN0IDcgZGF5cy4NCiAtLQ0KIEJlc3Qg
+cmVnYXJkcywNCiBLcnp5c3p0b2YgU3R1ZHppbnNraQ0KDQo=
