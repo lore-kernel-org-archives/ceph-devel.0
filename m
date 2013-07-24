@@ -1,27 +1,65 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
-Date: Wed, 24 Jul 2013 08:29:55 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307240829080.15546@cobra.newdream.net>
-References: <51EF7CC8.9070507@profihost.ag> <51EF843D.1070107@profihost.ag> <51EFB650.6050506@inktank.com> <51EFC061.6090802@profihost.ag>
+From: Loic Dachary <loic@dachary.org>
+Subject: sharedptr_registry.hpp unit tests
+Date: Wed, 24 Jul 2013 10:01:57 -0700
+Message-ID: <51F00885.1040801@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig6CCA120A3B937F708EFF38EA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50975 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752631Ab3GXP34 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 11:29:56 -0400
-In-Reply-To: <51EFC061.6090802@profihost.ag>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:34666 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751935Ab3GXRCD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 13:02:03 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Joao Eduardo Luis <joao.luis@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 24 Jul 2013, Stefan Priebe - Profihost AG wrote:
-> What i don't understand is WHY the hell the OSDs haven't used the 2nd or
-> 3rd monitor which wasn't restarted?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig6CCA120A3B937F708EFF38EA
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Double check the ceph.conf's on the OSD machines and make sure all mons 
-are listed?  If the remaining mons have a quorum and the OSDs (or any 
-client) are able to reach any one of them they will discover the others.
+Hi Sam,
 
-sage
+I added a commit=20
+
+https://github.com/dachary/ceph/commit/14ab122b43fd028ccfeecbd7b03243ca45=
+0501ce
+
+to the pull request=20
+
+https://github.com/ceph/ceph/pull/425
+
+to address your comment
+
+https://github.com/dachary/ceph/commit/a5bde96db5ea52e56fbe94accb3538aee4=
+729aa3#commitcomment-3698471
+
+I figured it would be easier for you to review the commit instead of a re=
+base but I'd be happy to squash the two into a single one if you prefer.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig6CCA120A3B937F708EFF38EA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlHwCIUACgkQ8dLMyEl6F20z1wCbBfbX2cOWxVcqwaoicNDWJZDc
+UiEAoMJt1tIrryWo2z3zZKr0TSWwlxe0
+=5Ju5
+-----END PGP SIGNATURE-----
+
+--------------enig6CCA120A3B937F708EFF38EA--
