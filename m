@@ -1,158 +1,69 @@
-From: =?utf-8?B?U3R1ZHppxYRza2kgS3J6eXN6dG9m?=
-	<krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
-Subject: Re: Flapping osd / continuously reported as failed
-Date: Wed, 24 Jul 2013 01:18:22 +0200
-Message-ID: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD2@MXMBON06.grupa.onet>
-References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
-	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
-	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
-	<CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [parch] ceph: cleanup types in striped_read()
+Date: Tue, 23 Jul 2013 18:09:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307231809520.8332@cobra.newdream.net>
+References: <20130723134801.GA15116@longonot.mountain> <51EEB711.3030506@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: pl-PL
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <51EEB711.3030506@linaro.org>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Alex Elder <alex.elder@linaro.org>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFp
-bHRvOmdyZWdAaW5rdGFuay5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVseSAyNCwgMjAxMyAx
-MjoyOCBBTQ0KPiBUbzogU3R1ZHppxYRza2kgS3J6eXN6dG9mOyBZZWh1ZGEgU2FkZWgNCj4gQ2M6
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBN
-b3N0b3dpZWMNCj4gRG9taW5paw0KPiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIEZsYXBwaW5n
-IG9zZCAvIGNvbnRpbnVvdXNseSByZXBvcnRlZCBhcyBmYWlsZWQNCj4gDQo+IE9uIFR1ZSwgSnVs
-IDIzLCAyMDEzIGF0IDM6MjAgUE0sIFN0dWR6acWEc2tpIEtyenlzenRvZg0KPiA8a3J6eXN6dG9m
-LnN0dWR6aW5za2lAZ3J1cGFvbmV0LnBsPiB3cm90ZToNCj4gPj4gT24gVHVlLCBKdWwgMjMsIDIw
-MTMgYXQgMjo1MCBQTSwgU3R1ZHppxYRza2kgS3J6eXN6dG9mDQo+ID4+IDxrcnp5c3p0b2Yuc3R1
-ZHppbnNraUBncnVwYW9uZXQucGw+IHdyb3RlOg0KPiA+PiA+IEhpLA0KPiA+PiA+IFdlJ3ZlIGdv
-dCBzb21lIHByb2JsZW0gd2l0aCBvdXIgY2x1c3RlciAtIGl0IGNvbnRpbnVvdXNseSByZXBvcnRz
-IGZhaWxlZA0KPiA+PiBvbmUgb3NkIGFuZCBhZnRlciBhdXRvLXJlYm9vdGluZyBldmVyeXRoaW5n
-IHNlZW1zIHRvIHdvcmsgZmluZSBmb3Igc29tZQ0KPiA+PiB0aW1lIChmZXcgbWludXRlcykuIENQ
-VSB1dGlsIG9mIHRoaXMgb3NkIGlzIG1heCA4JSwgaW9zdGF0IGlzIHZlcnkgbG93LiBXZQ0KPiB0
-cmllZA0KPiA+PiB0byAiY2VwaCBvc2Qgb3V0IiBzdWNoIGZsYXBwaW5nIG9zZCwgYnV0IGFmdGVy
-IHJlY292ZXJpbmcgdGhpcyBiZWhhdmlvcg0KPiA+PiByZXR1cm5lZCBvbiBkaWZmZXJlbnQgb3Nk
-LiBUaGlzIG9zZCBoYXMgYWxzbyBtdWNoIG1vcmUgcmVhZCBvcGVyYXRpb25zDQo+IHRoYW4NCj4g
-Pj4gb3RoZXJzIChzZWUgZmlsZSBvc2RfcmVhZHMucG5nIGxpbmtlZCBhdCB0aGUgYm90dG9tIG9m
-IHRoZSBlbWFpbDsgYXQgYWJvdXQNCj4gPj4gMTY6MDAgd2Ugc3dpdGNoZWQgb2ZmIG9zZC41NyBh
-bmQgb3NkLjcyIHN0YXJ0ZWQgdG8gbWlzYmVoYXZlLiBPc2QuMTA4DQo+ID4+IHdvcmtzIHdoaWxl
-IHJlY292ZXJpbmcpLg0KPiA+PiA+DQo+ID4+ID4gRXh0cmFjdCBmcm9tIGNlcGgubG9nOg0KPiA+
-PiA+DQo+ID4+ID4gMjAxMy0wNy0yMyAyMjo0Mzo1Ny40MjU4MzkgbW9uLjAgMTAuMTc3LjY0LjQ6
-Njc4OS8wIDI0NjkwIDogW0lORl0NCj4gb3NkLjcyDQo+ID4+IDEwLjE3Ny42NC44OjY4MDMvMjI1
-ODQgYm9vdA0KPiA+PiA+IDIwMTMtMDctMjMgMjI6NDM6NTYuMjk4NDY3IG9zZC43MiAxMC4xNzcu
-NjQuODo2ODAzLzIyNTg0IDQxNSA6IFtXUk5dDQo+IG1hcA0KPiA+PiBlNDE3MzAgd3JvbmdseSBt
-YXJrZWQgbWUgZG93bg0KPiA+PiA+IDIwMTMtMDctMjMgMjI6NTA6MjcuNTcyMTEwIG1vbi4wIDEw
-LjE3Ny42NC40OjY3ODkvMCAyNTA4MSA6IFtEQkddDQo+IG9zZC43Mg0KPiA+PiAxMC4xNzcuNjQu
-ODo2ODAzLzIyNTg0IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuOSAxMC4xNzcuNjQuNDo2OTQ2LzUx
-MjQNCj4gPj4gPiAyMDEzLTA3LTIzIDIyOjUwOjI3LjU5NTA0NCBtb24uMCAxMC4xNzcuNjQuNDo2
-Nzg5LzAgMjUwODIgOiBbREJHXQ0KPiBvc2QuNzINCj4gPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4
-NCByZXBvcnRlZCBmYWlsZWQgYnkgb3NkLjc4IDEwLjE3Ny42NC41OjY4NTQvNTYwNA0KPiA+PiA+
-IDIwMTMtMDctMjMgMjI6NTA6MjcuNjExOTY0IG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4
-MyA6IFtEQkddDQo+IG9zZC43Mg0KPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IHJlcG9ydGVk
-IGZhaWxlZCBieSBvc2QuMTAgMTAuMTc3LjY0LjQ6NjgxNC8yNjE5Mg0KPiA+PiA+IDIwMTMtMDct
-MjMgMjI6NTA6MjcuNjEyMDA5IG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTA4NCA6IFtJTkZd
-DQo+IG9zZC43Mg0KPiA+PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IGZhaWxlZCAoMyByZXBvcnRz
-IGZyb20gMyBwZWVycyBhZnRlciAyMDEzLTA3LTIzDQo+ID4+IDIyOjUwOjQzLjYxMTkzOSA+PSBn
-cmFjZSAyMC4wMDAwMDApDQo+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MDozMC4zNjczOTggN2Y4YWRi
-ODM3NzAwICAwIGxvZyBbV1JOXSA6IDMgc2xvdyByZXF1ZXN0cywNCj4gMw0KPiA+PiBpbmNsdWRl
-ZCBiZWxvdzsgb2xkZXN0IGJsb2NrZWQgZm9yID4gMzAuNjg4ODkxIHNlY3MNCj4gPj4gPiAyMDEz
-LTA3LTIzIDIyOjUwOjMwLjM2NzQwOCA3ZjhhZGI4Mzc3MDAgIDAgbG9nIFtXUk5dIDogc2xvdyBy
-ZXF1ZXN0DQo+ID4+IDMwLjY4ODg5MSBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMy0wNy0y
-MyAyMjo0OTo1OS42Nzg0NTM6DQo+ID4+IHNkX29wKGNsaWVudC40NDI5MDA0OC4wOjEyNTg5OSAu
-ZGlyLjQxNjguMiBbY2FsbCByZ3cuYnVja2V0X3ByZXBhcmVfb3BdDQo+ID4+IDMuOTQ0NzU1NGQp
-IHY0IGN1cnJlbnRseSBubyBmbGFnIHBvaW50cyByZWFjaGVkDQo+ID4+ID4gMjAxMy0wNy0yMyAy
-Mjo1MDozMC4zNjc0MTIgN2Y4YWRiODM3NzAwICAwIGxvZyBbV1JOXSA6IHNsb3cgcmVxdWVzdA0K
-PiA+PiAzMC4xNzkwNDQgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTMtMDctMjMgMjI6NTA6
-MDAuMTg4MzAwOg0KPiA+PiBzZF9vcChjbGllbnQuNDQyMDU1MzAuMDoxODkyNzAgLmRpci40MTY4
-LjIgW2NhbGwgcmd3LmJ1Y2tldF9saXN0XQ0KPiAzLjk0NDc1NTRkKQ0KPiA+PiB2NCBjdXJyZW50
-bHkgbm8gZmxhZyBwb2ludHMgcmVhY2hlZA0KPiA+PiA+IDIwMTMtMDctMjMgMjI6NTA6MzAuMzY3
-NDE1IDdmOGFkYjgzNzcwMCAgMCBsb2cgW1dSTl0gOiBzbG93IHJlcXVlc3QNCj4gPj4gMzAuMTcx
-OTY4IHNlY29uZHMgb2xkLCByZWNlaXZlZCBhdCAyMDEzLTA3LTIzIDIyOjUwOjAwLjE5NTM3NjoN
-Cj4gPj4gc2Rfb3AoY2xpZW50LjQ0MjAzNDg0LjA6MTkyOTAyIC5kaXIuNDE2OC4yIFtjYWxsIHJn
-dy5idWNrZXRfbGlzdF0NCj4gMy45NDQ3NTU0ZCkNCj4gPj4gdjQgY3VycmVudGx5IG5vIGZsYWcg
-cG9pbnRzIHJlYWNoZWQNCj4gPj4gPiAyMDEzLTA3LTIzIDIyOjUxOjM2LjA4MjMwMyBtb24uMCAx
-MC4xNzcuNjQuNDo2Nzg5LzAgMjUxNTkgOiBbSU5GXQ0KPiBvc2QuNzINCj4gPj4gMTAuMTc3LjY0
-Ljg6NjgwMy8yMjU4NCBib290DQo+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MTozNS4yMzgxNjQgb3Nk
-LjcyIDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgNDIwIDogW1dSTl0NCj4gbWFwDQo+ID4+IGU0MTcz
-OCB3cm9uZ2x5IG1hcmtlZCBtZSBkb3duDQo+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MjowNS41ODI5
-NjkgbW9uLjAgMTAuMTc3LjY0LjQ6Njc4OS8wIDI1MTkxIDogW0RCR10NCj4gb3NkLjcyDQo+ID4+
-IDEwLjE3Ny42NC44OjY4MDMvMjI1ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5IG9zZC4yMCAxMC4xNzcu
-NjQuNDo2OTEzLzQxMDENCj4gPj4gPiAyMDEzLTA3LTIzIDIyOjUyOjA1LjU4NzM4OCBtb24uMCAx
-MC4xNzcuNjQuNDo2Nzg5LzAgMjUxOTIgOiBbREJHXQ0KPiBvc2QuNzINCj4gPj4gMTAuMTc3LjY0
-Ljg6NjgwMy8yMjU4NCByZXBvcnRlZCBmYWlsZWQgYnkgb3NkLjkgMTAuMTc3LjY0LjQ6Njk0Ni81
-MTI0DQo+ID4+ID4gMjAxMy0wNy0yMyAyMjo1MjowNS42MTA5MjUgbW9uLjAgMTAuMTc3LjY0LjQ6
-Njc4OS8wIDI1MTkzIDogW0RCR10NCj4gb3NkLjcyDQo+ID4+IDEwLjE3Ny42NC44OjY4MDMvMjI1
-ODQgcmVwb3J0ZWQgZmFpbGVkIGJ5IG9zZC43OCAxMC4xNzcuNjQuNTo2ODU0LzU2MDQNCj4gPj4g
-PiAyMDEzLTA3LTIzIDIyOjUyOjA1LjYxMDk1MSBtb24uMCAxMC4xNzcuNjQuNDo2Nzg5LzAgMjUx
-OTQgOiBbSU5GXQ0KPiBvc2QuNzINCj4gPj4gMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCBmYWlsZWQg
-KDMgcmVwb3J0cyBmcm9tIDMgcGVlcnMgYWZ0ZXIgMjAxMy0wNy0yMw0KPiA+PiAyMjo1MjoyMC42
-MTA4OTUgPj0gZ3JhY2UgMjAuMDAwMDAwKQ0KPiA+PiA+IDIwMTMtMDctMjMgMjI6NTI6MDUuNjMw
-ODIxIG1vbi4wIDEwLjE3Ny42NC40OjY3ODkvMCAyNTE5NSA6IFtEQkddDQo+IG9zZC43Mg0KPiA+
-PiAxMC4xNzcuNjQuODo2ODAzLzIyNTg0IHJlcG9ydGVkIGZhaWxlZCBieSBvc2QuMTAgMTAuMTc3
-LjY0LjQ6NjgxNC8yNjE5Mg0KPiA+PiA+IDIwMTMtMDctMjMgMjI6NTM6NDcuMjAzMzUyIG1vbi4w
-IDEwLjE3Ny42NC40OjY3ODkvMCAyNTMwMCA6IFtJTkZdDQo+IG9zZC43Mg0KPiA+PiAxMC4xNzcu
-NjQuODo2ODAzLzIyNTg0IGJvb3QNCj4gPj4gPiAyMDEzLTA3LTIzIDIyOjUzOjQ2LjQxNzEwNiBv
-c2QuNzIgMTAuMTc3LjY0Ljg6NjgwMy8yMjU4NCA0NzQgOiBbV1JOXQ0KPiBtYXANCj4gPj4gZTQx
-NzQyIHdyb25nbHkgbWFya2VkIG1lIGRvd24NCj4gPj4gPg0KPiA+PiA+IENvdWxkIHlvdSBwbGVh
-c2UgdGFrZSBhIGxvb2sgYXQgb3VyIGNvbmZpZyBhbmQgc3VnZ2VzdCBzb21lDQo+ID4+IGltcHJv
-dmVtZW50cz8NCj4gPj4gPiBTZWUgYXR0YWNoZWQgImNlcGggcGcgPHBnX2lkPiBxdWVyeSIgZm9y
-IHR3byBncm91cHMgZHVyaW5nIHJlY292ZXJ5DQo+IGFuZA0KPiA+PiBwYXJ0cyBvZiBvdXIgY29u
-ZmlnIGZpbGUuDQo+ID4+ID4gT3VyIGNsdXN0ZXIncyBzaXplOiA2IGhvc3RzLCAyNiBIREQgZWFj
-aCwgMTU2IG9zZHMsIDY0ODggcGdzLCBtb3N0bHkgaW4NCj4gb25lDQo+ID4+IGJ1Y2tldCBoYXZp
-bmcgOU0gb2JqZWN0cywgMzM0MiBHQiBkYXRhLCAxMTE3MyBHQiB1c2VkLCAzMTY5MCBHQiAvIDQy
-ODY0DQo+IEdCDQo+ID4+IGF2YWlsLg0KPiA+Pg0KPiA+PiBJJ20gc3VycHJpc2VkIHlvdSdyZSBy
-dW5uaW5nIGludG8gaXQgYXQgOW0gb2JqZWN0cyBidXQgdGhpcyBpcyBhbG1vc3QNCj4gPj4gY2Vy
-dGFpbmx5IHRoZSBwcm9ibGVtLiBSaWdodCBub3cgdGhlIGluZGV4IGZvciBlYWNoIFJHVyBidWNr
-ZXQgbGl2ZXMNCj4gPj4gb24gYSBzaW5nbGUgT1NEOyB5b3UncmUgcHJvYmFibHkgaGF2aW5nIGlz
-c3VlcyB3aXRoIHdoaWNoZXZlciBPU0QgaXMNCj4gPj4gcmVjZWl2aW5nIHRoZSBidWNrZXQgaW5k
-ZXggcmVhZHMuIElzIGl0IGZlYXNpYmxlIGZvciB5b3UgdG8gc2hhcmQgdGhlDQo+ID4+IGNvbnRl
-bnRzIGludG8gbXVsdGlwbGUgYnVja2V0cyBhbmQgc2VlIGlmIHRoaW5ncyBjYWxtIGRvd24/DQo+
-ID4+IC1HcmVnDQo+ID4+IFNvZnR3YXJlIEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNv
-bSB8IGh0dHA6Ly9jZXBoLmNvbQ0KPiA+DQo+ID4gSSB3YXMgYWZyYWlkIG9mIHRoYXQgYW5zd2Vy
-LiA6LS8NCj4gPiBXZSdsbCB0cnkgdG8gZGVsZXRlIHNvbWUgb2JqZWN0cyBmb3IgdGhlIGJlZ2lu
-bmluZyAoYXMgdGhleSBhcmUgdHJhbnNmb3JtZWQNCj4gb3RoZXIgb2JqZWN0cyBhbmQgY2FuIGJl
-IHJlLWNyZWF0ZWQgd2hlbiBuZWVkZWQpIGFuZCB0aGVuIHRyeSB0byBzaGFyZCBpdA0KPiBhcyB5
-b3Ugc3VnZ2VzdC4NCj4gPiBXaGF0IGlzIHlvdXIgb3BpbmlvbiBhYm91dCBtYXggbnVtYmVyIG9m
-IG9iamVjdHMgaW4gb25lIGJ1Y2tldCA/DQo+IA0KPiBJdCBkZXBlbmRzIG1vcmUgb24gaG93IG11
-Y2ggYWN0aXZpdHkgeW91J3JlIHRocm93aW5nIGF0IHRoZSBidWNrZXQsIEkNCj4gdGhpbmsuIFdl
-IGhhdmVuJ3QgZG9uZSBhbnkgbGFyZ2Utc2NhbGUgdGVzdHMgYW5kIHBlcmhhcHMgd2UgbmVlZCB0
-by4NCj4gTGV2ZWxkYiAod2hpY2ggd2UncmUgdXNpbmcgdW5kZXIgdGhlIGNvdmVycyB0byBzdG9y
-ZSB0aGlzIHN0dWZmKQ0KPiBzaG91bGQgbm90IGhhdmUgYW55IHRyb3VibGUgd2l0aCB0aGUgYW1v
-dW50IG9mIGRhdGEgdGhhdCdzIGluIHRoZXJlLA0KPiBidXQgaWYgeW91J3JlIHRyeWluZyB0byBk
-byBmcmVxdWVudCBlbm91Z2ggb2JqZWN0IGxvb2t1cHMgb3IgcHV0cyB0aGVuDQo+IHlvdSBtaWdo
-dCBqdXN0IHNhdHVyYXRlIHRoZSBkaXNrL25vZGUncyBhYmlsaXR5IHRvIGtlZXAgdXAuIEkgc2hv
-dWxkDQo+IG1lbnRpb24gdGhhdCBZZWh1ZGEganVzdCBzdGFydGVkIGEgZGlzY3Vzc2lvbiBvbiBo
-YW5kbGluZyB0aGlzIGluIHRoZQ0KPiB0aHJlYWQgIltjZXBoLXVzZXJzXSByZ3cgYnVja2V0IGlu
-ZGV4Ii4NCj4gDQo+IFdoZW4gZGlkIHlvdSBzdGFydCBub3RpY2luZyB0aGlzIHRyb3VibGU/DQoN
-Ck1vc3Qgb2Ygb3VyIG9iamVjdHMgYXJlIGltYWdlczogb3JpZ2luYWxzIChtb3N0bHkgNS0xME1C
-KSBhbmQgaXRzIHRyYW5zZm9ybWF0aW9ucyAoY29tcHJlc3NlZCwgY3JvcHMsIGZpbHRlcnMsIGV0
-YywgdXN1YWxseSA8PDFNQikuIFdlIGFsc28gaGF2ZSBwbGVudHkgb2Ygc21hbGwgdGV4dCBmaWxl
-cy4gV2UgbW9zdGx5IHJlYWQgdGhlbSAob2JqZWN0cyBhcmUgY2FjaGVkIGJ5IG5naW54IG91dHNp
-ZGUgdGhlIGNsdXN0ZXIpLCBidXQgeWVzdGVyZGF5ICgxNWggYWdvKSB3ZSBoYWQgcHJldHR5IGxh
-cmdlIGRlcGxveW1lbnQgb2YgbmV3IHNlcnZpY2UgdGhhdCBjb3VsZCBjcmVhdGUgcGxlbnR5IG9m
-IHRyYW5zZm9ybWVkIGltYWdlcyB3aXRoIGRpZmZlcmVudCBzaXplcy4gVW5mb3J0dW5hdGVseSBJ
-IGNhbm5vdCBzYXkgcmlnaHQgbm93IHdoYXQgaXMgdGhlIGRpZmZlcmVuY2UgaW4gYnVja2V0IHNp
-emUgYmV0d2VlbiBub3cgYW5kIHllc3RlcmRheSwgSSB3aWxsIHRyeSB0byBjaGVjayBpdCBvdXQu
-DQoNCkZyb20gbXkgc3RhdHMgSSBjYW4gc2VlIHRoYXQgaW4gcGVha3Mgd2UgaGFkIGFib3V0IDEu
-NUsgUFVUIGFuZCA4SyBHRVQgb3BlcmF0aW9ucyBwZXIgbWludXRlLiBNb3N0IGNvbW1vbiB1c2Ut
-Y2FzZSB3aGlsZSBQVVR0aW5nIGFuIG9iamVjdCBpbiBvdXIgYXBwcyBpcyB0aGlzIHNlcXVlbmNl
-Og0KLSBIRUFEIChjaGVja2luZyBpZiB0cmFuc2Zvcm1lZCBvYmplY3QgYWxyZWFkeSBleGlzdCks
-IA0KLSBHRVQgIHRoZSBvcmlnaW5hbA0KLSBQVVQgdHJhbnNmb3JtZWQgb2JqZWN0IGFuZCBpdHMg
-bWV0YS1kYXRhIA0KV2UgYWxzbyBoYXZlIHNvbWUgYW1vdW50IG9mIFBVVHMgb2YgbmV3IG9iamVj
-dHMsIGJ1dCBJIHRoaW5rIHRoZXJlIHdvbid0IGJlIG1hbnkgYnkgbm93ICAoaXQgaXMgMWFtIGlu
-IFBvbGFuZCkuIA0KUmlnaHQgbm93IHRoZXJlIGFyZSA4MCBQVVQgYW5kIDEuNUsgR0VUIG9wZXJh
-dGlvbnMgcGVyIG1pbnV0ZSBhbmQgdGhlIG9zZCBpcyBzdGlsbCBmbGFwcGluZy4NCg0KLS0NCkJl
-c3QgcmVnYXJkcywNCktyenlzenRvZiBTdHVkemluc2tpDQoNCl9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgt
-dXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
-ZXBoLXVzZXJzLWNlcGguY29tCg==
+Applied, thanks guys!
+
+On Tue, 23 Jul 2013, Alex Elder wrote:
+
+> On 07/23/2013 08:48 AM, Dan Carpenter wrote:
+> > We pass in a u64 value for "len" and then immediately truncate away the
+> > upper 32 bits.
+> > 
+> > Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> 
+> Looks good.
+> 
+> Reviewed-by: Alex Elder <alex.elder@linaro.org>
+> 
+> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > index 2ddf061..93e53c8 100644
+> > --- a/fs/ceph/file.c
+> > +++ b/fs/ceph/file.c
+> > @@ -313,9 +313,9 @@ static int striped_read(struct inode *inode,
+> >  {
+> >  	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+> >  	struct ceph_inode_info *ci = ceph_inode(inode);
+> > -	u64 pos, this_len;
+> > +	u64 pos, this_len, left;
+> >  	int io_align, page_align;
+> > -	int left, pages_left;
+> > +	int pages_left;
+> >  	int read;
+> >  	struct page **page_pos;
+> >  	int ret;
+> > @@ -346,7 +346,7 @@ more:
+> >  		ret = 0;
+> >  	hit_stripe = this_len < left;
+> >  	was_short = ret >= 0 && ret < this_len;
+> > -	dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
+> > +	dout("striped_read %llu~%llu (read %u) got %d%s%s\n", pos, left, read,
+> >  	     ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+> >  
+> >  	if (ret > 0) {
+> > @@ -378,7 +378,7 @@ more:
+> >  			if (pos + left > inode->i_size)
+> >  				left = inode->i_size - pos;
+> >  
+> > -			dout("zero tail %d\n", left);
+> > +			dout("zero tail %llu\n", left);
+> >  			ceph_zero_page_vector_range(page_align + read, left,
+> >  						    pages);
+> >  			read += left;
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> 
