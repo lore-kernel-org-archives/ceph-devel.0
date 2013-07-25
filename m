@@ -1,52 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: LFS & Ceph
-Date: Wed, 24 Jul 2013 17:00:10 -0700
-Message-ID: <51F06A8A.3050401@dachary.org>
+From: majianpeng <majianpeng@gmail.com>
+Subject: question about  striped_read
+Date: Thu, 25 Jul 2013 08:52:33 +0800
+Message-ID: <201307250852310158703@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig7998B40BE33678891A020E37"
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:36917 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753346Ab3GYAAO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 20:00:14 -0400
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:48494 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753048Ab3GYAwh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jul 2013 20:52:37 -0400
+Received: by mail-pb0-f48.google.com with SMTP id md4so61395pbc.21
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Jul 2013 17:52:36 -0700 (PDT)
+Received: from majianpeng ([218.242.10.182])
+        by mx.google.com with ESMTPSA id yk10sm9038983pac.16.2013.07.24.17.52.32
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=RC4-SHA bits=128/128);
+        Wed, 24 Jul 2013 17:52:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chmouel Boudjnah <chmouel@chmouel.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig7998B40BE33678891A020E37
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+SGkgYWxsLA0KCUkgbWV0IGEgcHJvYmxlbSBhbmQgYXNrIHNvbWVib2R5IGNvdWxkIGhlbHAgbWUu
+DQpJbiBmdW5jIHN0cmlwZWRfcmVhZCgpDQo+IGlmIChyZXQgPiAwKSB7DQo+ICAgICAgICAgICAg
+ICAgIGludCBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+PiBQQUdFX0NBQ0hFX1NISUZU
+Ow0KDQo+ICAgICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+ICAgICAgICAg
+ICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBvZmYgKyByZWFk
+LCBwb3MpOw0KPiAgICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19wYWdlX3ZlY3Rvcl9y
+YW5nZShwYWdlX2FsaWduICsgcmVhZCwNCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPiAgICAgICAg
+ICAgICAgICB9ICAgDQo+ICAgICAgICAgICAgICAgIHBvcyArPSByZXQ7DQo+ICAgICAgICAgICAg
+ICAgcmVhZCA9IHBvcyAtIG9mZjsNCg0KQXQgZmlyc3QgLCBwb3MgPSBvZmYgYW5kIG9mZiBkb24n
+dCBtb2RpZnkuDQpXaHkgZG9lcyBpdCBqdWRnZSAncmVhZCA8IHBvcyAtb2ZmICcgPw0KQmVjYXVz
+ZSB0aGUgcmVhZCA9IHBvcyAtb2ZmLCBzbyB0aGUgcmVhZCBtdXN0IGVxdWFsIHBvcyAtb2ZmLg0K
+DQpUaGFuc2shDQpKaWFucGVuZyBNYQ==
 
-Hi,
-
-Thanks for take the time to discuss LFS today @ OSCON :-) Would you be so=
- kind as to send links to the current discussion about the LFS driver API=
- ?=20
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig7998B40BE33678891A020E37
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlHwaooACgkQ8dLMyEl6F218HACggi5cpmvyS/qp3y7xcW/kM06Z
-qSUAn2dK2oegse4kPqKkOaZUTm5QSUNH
-=tQb7
------END PGP SIGNATURE-----
-
---------------enig7998B40BE33678891A020E37--
