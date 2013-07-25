@@ -1,55 +1,76 @@
-From: peter@2force.nl
-Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
-Date: Thu, 25 Jul 2013 13:19:35 +0200
-Message-ID: <fac262a41d5df6360f3106a38b9a6a79@2force.nl>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Thu, 25 Jul 2013 20:27:00 +0800
+Message-ID: <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
+References: <201307250852310158703@gmail.com>
+	<alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
+	<201307251455102701172@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [217.78.241.10] ([217.78.241.10]:40651 "EHLO
-	cpanel01.schosting.nl" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1755193Ab3GYMDC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 08:03:02 -0400
-Received: from localhost ([127.0.0.1]:48530 helo=cpanel01.schosting.nl)
-	by cpanel01.schosting.nl with esmtpa (Exim 4.80.1)
-	(envelope-from <peter@2force.nl>)
-	id 1V2Ja3-0002ZS-FL
-	for ceph-devel@vger.kernel.org; Thu, 25 Jul 2013 13:19:35 +0200
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:47974 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755358Ab3GYM1D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 08:27:03 -0400
+Received: by mail-lb0-f170.google.com with SMTP id u10so1490279lbi.15
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 05:27:01 -0700 (PDT)
+In-Reply-To: <201307251455102701172@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-We did not upgrade from bobtail to cuttlefish and are still seeing this 
-issue. I posted this on the ceph-users mailinglist and I missed this 
-thread (sorry!) so I didn't know.
+On Thu, Jul 25, 2013 at 2:55 PM, majianpeng <majianpeng@gmail.com> wrote:
+>>On Thu, 25 Jul 2013, majianpeng wrote:
+>>> Hi all,
+>>>      I met a problem and ask somebody could help me.
+>>> In func striped_read()
+>>> > if (ret > 0) {
+>>> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
+>>>
+>>> >                if (read < pos - off) {
+>>> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
+>>> >                        ceph_zero_page_vector_range(page_align + read,
+>>> >                                                    pos - off - read, pages);
+>>> >                }
+>>> >                pos += ret;
 
-Either way, I also have an osd crashing after upgrading to 0.61.6. As 
-said on the other list, I'm more than happy to share log files etc with 
-you guys.
+I think you are right. probably above line should be 'pos += this_len'
 
-Thanks,
+regards
+yan, zheng
 
-Peter
 
-> This is fixed in the cuttlefish branch as of earlier this afternoon.  
-> I've
-> spent most of the day expanding the automated test suite to include
-> upgrade combinations to trigger this and *finally* figured out that 
-> this
-> particular problem seems to surface on clusters that upgraded from 
-> bobtail
-> -> cuttlefish but not clusters created on cuttlefish.
-
-> If you've run into this issue, please use the cuttlefish branch build 
-> for
-> now.  We will have a release out in the next day or so that includes 
-> this
-> and a few other pending fixes.
-
-> I'm sorry we missed this one!  The upgrade test matrix I've been 
-> working
-> on today should catch this type of issue in the future.
-
+>>> >               read = pos - off;
+>>>
+>>> At first , pos = off and off don't modify.
+>>> Why does it judge 'read < pos -off ' ?
+>>> Because the read = pos -off, so the read must equal pos -off.
+>>
+>>This block triggers if we hit a stripe.  off is always the original
+>>starting offset.  pos is the current position that we just tried to read
+>>from.  We might:
+>>
+>> - try to read a big extent from off == pos
+>> - readpages truncates this to the end of the object
+>> - we get a short read (not a complete object)
+> What's the mean of not a complete object?
+> FYI,a short read maybe  met the boundry of stripe(object) or the EOF of file.
+> For the hole of file, i don't know how to handle.
+>> - read is some partial amount
+>> - pos is off + read + a gap
+> From the code : read = pos - off; after that, the pos don't change.
+> So the a gap where is from?
+>
 > Thanks!
-> sage
+> Jianpeng Ma
+>> - we try to read from the next object and there is data
+>>   => there was a hole and we need to zero the gap
+>>
+>>If, on the other hand, there isn't data in the next object, then we don't
+>>want to zero the hole.. and least not until we decide where EOF is.
+>>That's why this block is where it is, and never triggers on the first
+>>iteration.
+>>
+>>Does that make sense?
+>>sage
