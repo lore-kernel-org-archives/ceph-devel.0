@@ -1,36 +1,36 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: Anyone in NYC next week?
-Date: Thu, 25 Jul 2013 17:18:49 -0400
-Message-ID: <CACkq2mpBG4QbLpMtX=6POs4+eGA8rNnraQhC9ZqvE7zrPdX6Ww@mail.gmail.com>
-References: <alpine.DEB.2.00.1307242117320.22861@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.61.7 Cuttlefish update released
+Date: Thu, 25 Jul 2013 15:13:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307251508220.23376@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:35631 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932140Ab3GYVTL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 17:19:11 -0400
-Received: by mail-qc0-f175.google.com with SMTP id k14so1207238qcv.20
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 14:19:10 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1307242117320.22861@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:39519 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756778Ab3GYWN2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 18:13:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-useres@inktank.com
 
-I'm already signed up.  Looking forward to it!
+This release fixes another regression preventing monitors to start after 
+undergoing certain upgrade sequences, as well as some corner cases with 
+Paxos and unusual device names in ceph-disk/cephde-loy.
 
- - Travis
+Notable changes:
 
-On Thu, Jul 25, 2013 at 12:19 AM, Sage Weil <sage@inktank.com> wrote:
-> I'm going to be in NYC next week at our first Ceph Day of the summer.  If
-> you're in town and want to hear more about what we're doing, you should
-> join us!
->
-> http://www.inktank.com/CEPHdays/
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ * mon: fix regression in latest full osdmap retrieval
+ * mon: fix a long-standing bug with a paxos corner case
+ * ceph-disk: improved support for unusual device names (e.g., 
+   /dev/cciss/c0d0p1)
+
+For more information see the full release notes at
+
+ * http://ceph.com/docs/master/release-notes/#v0-61-7-cuttlefish
+
+You can get v0.61.7 from the usual places:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.7.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
