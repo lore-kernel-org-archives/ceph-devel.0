@@ -1,88 +1,126 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Re: question about striped_read
-Date: Thu, 25 Jul 2013 08:50:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
-References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
+From: peter@2force.nl
+Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
+Date: Thu, 25 Jul 2013 18:12:47 +0200
+Message-ID: <f03ce22908265e69355583a9e5415dd5@2force.nl>
+References: <fac262a41d5df6360f3106a38b9a6a79@2force.nl>
+ <alpine.DEB.2.00.1307250845140.29435@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35508 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755678Ab3GYPup (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 11:50:45 -0400
-In-Reply-To: <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
+Received: from cpanel01.schosting.nl ([217.78.241.10]:44374 "EHLO
+	cpanel01.schosting.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755778Ab3GYQMx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 12:12:53 -0400
+Received: from localhost ([127.0.0.1]:53057 helo=cpanel01.schosting.nl)
+	by cpanel01.schosting.nl with esmtpa (Exim 4.80.1)
+	(envelope-from <peter@2force.nl>)
+	id 1V2O9n-0001bN-IW
+	for ceph-devel@vger.kernel.org; Thu, 25 Jul 2013 18:12:47 +0200
+In-Reply-To: <alpine.DEB.2.00.1307250845140.29435@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: majianpeng <majianpeng@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, 25 Jul 2013, Yan, Zheng wrote:
-> On Thu, Jul 25, 2013 at 2:55 PM, majianpeng <majianpeng@gmail.com> wrote:
-> >>On Thu, 25 Jul 2013, majianpeng wrote:
-> >>> Hi all,
-> >>>      I met a problem and ask somebody could help me.
-> >>> In func striped_read()
-> >>> > if (ret > 0) {
-> >>> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> >>>
-> >>> >                if (read < pos - off) {
-> >>> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
-> >>> >                        ceph_zero_page_vector_range(page_align + read,
-> >>> >                                                    pos - off - read, pages);
-> >>> >                }
-> >>> >                pos += ret;
+On 2013-07-25 17:46, Sage Weil wrote:
+> On Thu, 25 Jul 2013, peter@2force.nl wrote:
+>> We did not upgrade from bobtail to cuttlefish and are still seeing 
+>> this issue.
+>> I posted this on the ceph-users mailinglist and I missed this thread 
+>> (sorry!)
+>> so I didn't know.
 > 
-> I think you are right. probably above line should be 'pos += this_len'
-
-It should be easy to construct a simple test for this.  E.g., something 
-like
-
- pwrite(fd, buf, 0, 3000000);
- pwrite(fd, buf, 4194304, 1000);
- pread(fd, buf, 0, 6000000);
- ...
-
-and whatever else to verify that pos was in fact advanced properly?
-
-sage
-
+> That's interesting; a bobtail upgraded cluster was the only way I was 
+> able
+> to reproduce it, but I'm also working with relatively short-lived 
+> clusters
+> in a test environment so there may very well be a possibility I 
+> missed.
+> Can you summarize what the lineage of your cluster is?  (What version 
+> was
+> it installed with, and when was it upgraded and to what versions?)
 > 
-> regards
-> yan, zheng
+
+Here is what I found:
+
+2013-06-17 17:12:57
+===================
+0.61.3-1precise
+
+2013-06-20 17:27:50
+===================
+0.61.3-1precise -> 0.61.4-1precise
+
+2013-07-19 14:04:30
+===================
+0.61.4-1precise -> 0.61.5-1precise
+
+2013-07-23 17:51:40
+===================
+0.61.5-1precise -> 0.61.5-2-g7ab701a-1precise
+
+2013-07-24 09:16:52
+===================
+0.61.5-2-g7ab701a-1precise -> 0.61.6-1precise
+
+2013-07-25 16:35:59
+===================
+0.61.6-1-g28720b0-1precise -> 0.61.6-15-g24a56a9-1precise
+
+Hope this helps...
+
+>> Either way, I also have an osd crashing after upgrading to 0.61.6. As 
+>> said on
+>> the other list, I'm more than happy to share log files etc with you 
+>> guys.
 > 
+> Will take a look.
 > 
-> >>> >               read = pos - off;
-> >>>
-> >>> At first , pos = off and off don't modify.
-> >>> Why does it judge 'read < pos -off ' ?
-> >>> Because the read = pos -off, so the read must equal pos -off.
-> >>
-> >>This block triggers if we hit a stripe.  off is always the original
-> >>starting offset.  pos is the current position that we just tried to read
-> >>from.  We might:
-> >>
-> >> - try to read a big extent from off == pos
-> >> - readpages truncates this to the end of the object
-> >> - we get a short read (not a complete object)
-> > What's the mean of not a complete object?
-> > FYI,a short read maybe  met the boundry of stripe(object) or the EOF of file.
-> > For the hole of file, i don't know how to handle.
-> >> - read is some partial amount
-> >> - pos is off + read + a gap
-> > From the code : read = pos - off; after that, the pos don't change.
-> > So the a gap where is from?
-> >
-> > Thanks!
-> > Jianpeng Ma
-> >> - we try to read from the next object and there is data
-> >>   => there was a hole and we need to zero the gap
-> >>
-> >>If, on the other hand, there isn't data in the next object, then we don't
-> >>want to zero the hole.. and least not until we decide where EOF is.
-> >>That's why this block is where it is, and never triggers on the first
-> >>iteration.
-> >>
-> >>Does that make sense?
-> >>sage
+> Thanks!
+> sage
+
+Thanks alot!
+
+Peter
+
 > 
 > 
+>> 
+>> Thanks,
+>> 
+>> Peter
+>> 
+>>> This is fixed in the cuttlefish branch as of earlier this afternoon. 
+>>> I've
+>>> spent most of the day expanding the automated test suite to include
+>>> upgrade combinations to trigger this and *finally* figured out that 
+>>> this
+>>> particular problem seems to surface on clusters that upgraded from 
+>>> bobtail
+>>> -> cuttlefish but not clusters created on cuttlefish.
+>> 
+>>> If you've run into this issue, please use the cuttlefish branch 
+>>> build for
+>>> now.  We will have a release out in the next day or so that includes 
+>>> this
+>>> and a few other pending fixes.
+>> 
+>>> I'm sorry we missed this one!  The upgrade test matrix I've been 
+>>> working
+>>> on today should catch this type of issue in the future.
+>> 
+>>> Thanks!
+>>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+>> in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
+>> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
