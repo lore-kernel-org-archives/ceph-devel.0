@@ -1,57 +1,57 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
-Date: Thu, 25 Jul 2013 08:19:59 +0200
-Message-ID: <51F0C38F.1080408@profihost.ag>
-References: <51EF7CC8.9070507@profihost.ag> <alpine.DEB.2.00.1307241616040.32311@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about  striped_read
+Date: Thu, 25 Jul 2013 14:55:12 +0800
+Message-ID: <201307251455102701172@gmail.com>
+References: <201307250852310158703@gmail.com>,
+	<alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:32792 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753005Ab3GYGUI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 02:20:08 -0400
-In-Reply-To: <alpine.DEB.2.00.1307241616040.32311@cobra.newdream.net>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:49392 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751700Ab3GYGzP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 02:55:15 -0400
+Received: by mail-pb0-f50.google.com with SMTP id wz7so384105pbc.9
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Jul 2013 23:55:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 25.07.2013 01:19, schrieb Sage Weil:
-> On Wed, 24 Jul 2013, Stefan Priebe - Profihost AG wrote:
->> 2013-07-24 08:41:56.097385 7fae6384a780 -1 mon/OSDMonitor.cc: In
->> function 'virtual void OSDMonitor::update_from_paxos(bool*)' thread
->> 7fae6384a780 time 2013-07-24 08:41:56.096683
->> mon/OSDMonitor.cc: 156: FAILED assert(latest_full > 0)
->>
->>  ceph version 0.61.6-15-g85db066 (85db0667307ac803c753d16fa374dd2fc29d76f3)
->>  1: (OSDMonitor::update_from_paxos(bool*)+0x2413) [0x50f5a3]
->>  2: (PaxosService::refresh(bool*)+0xe6) [0x4f2c66]
->>  3: (Monitor::refresh_from_paxos(bool*)+0x57) [0x48f7b7]
->>  4: (Monitor::init_paxos()+0xe5) [0x48f955]
->>  5: (Monitor::preinit()+0x679) [0x4bba79]
->>  6: (main()+0x36b0) [0x484bb0]
->>  7: (__libc_start_main()+0xfd) [0x7fae619a6c8d]
->>  8: /usr/bin/ceph-mon() [0x4801e9]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
-> 
-> This is fixed in the cuttlefish branch as of earlier this afternoon.  I've 
-> spent most of the day expanding the automated test suite to include 
-> upgrade combinations to trigger this and *finally* figured out that this 
-> particular problem seems to surface on clusters that upgraded from bobtail 
-> -> cuttlefish but not clusters created on cuttlefish.
+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBIaSBhbGwsDQo+PiAJ
+SSBtZXQgYSBwcm9ibGVtIGFuZCBhc2sgc29tZWJvZHkgY291bGQgaGVscCBtZS4NCj4+IEluIGZ1
+bmMgc3RyaXBlZF9yZWFkKCkNCj4+ID4gaWYgKHJldCA+IDApIHsNCj4+ID4gICAgICAgICAgICAg
+ICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7
+DQo+PiANCj4+ID4gICAgICAgICAgICAgICAgaWYgKHJlYWQgPCBwb3MgLSBvZmYpIHsNCj4+ID4g
+ICAgICAgICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJvIGdhcCAlbGx1IHRvICVsbHVcbiIsIG9m
+ZiArIHJlYWQsIHBvcyk7DQo+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3Bh
+Z2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gPiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3MgLSBvZmYgLSByZWFkLCBwYWdl
+cyk7DQo+PiA+ICAgICAgICAgICAgICAgIH0gICANCj4+ID4gICAgICAgICAgICAgICAgcG9zICs9
+IHJldDsNCj4+ID4gICAgICAgICAgICAgICByZWFkID0gcG9zIC0gb2ZmOw0KPj4gDQo+PiBBdCBm
+aXJzdCAsIHBvcyA9IG9mZiBhbmQgb2ZmIGRvbid0IG1vZGlmeS4NCj4+IFdoeSBkb2VzIGl0IGp1
+ZGdlICdyZWFkIDwgcG9zIC1vZmYgJyA/DQo+PiBCZWNhdXNlIHRoZSByZWFkID0gcG9zIC1vZmYs
+IHNvIHRoZSByZWFkIG11c3QgZXF1YWwgcG9zIC1vZmYuDQo+DQo+VGhpcyBibG9jayB0cmlnZ2Vy
+cyBpZiB3ZSBoaXQgYSBzdHJpcGUuICBvZmYgaXMgYWx3YXlzIHRoZSBvcmlnaW5hbCANCj5zdGFy
+dGluZyBvZmZzZXQuICBwb3MgaXMgdGhlIGN1cnJlbnQgcG9zaXRpb24gdGhhdCB3ZSBqdXN0IHRy
+aWVkIHRvIHJlYWQgDQo+ZnJvbS4gIFdlIG1pZ2h0Og0KPg0KPiAtIHRyeSB0byByZWFkIGEgYmln
+IGV4dGVudCBmcm9tIG9mZiA9PSBwb3MNCj4gLSByZWFkcGFnZXMgdHJ1bmNhdGVzIHRoaXMgdG8g
+dGhlIGVuZCBvZiB0aGUgb2JqZWN0DQo+IC0gd2UgZ2V0IGEgc2hvcnQgcmVhZCAobm90IGEgY29t
+cGxldGUgb2JqZWN0KQ0KV2hhdCdzIHRoZSBtZWFuIG9mIG5vdCBhIGNvbXBsZXRlIG9iamVjdD8N
+CkZZSSxhIHNob3J0IHJlYWQgbWF5YmUgIG1ldCB0aGUgYm91bmRyeSBvZiBzdHJpcGUob2JqZWN0
+KSBvciB0aGUgRU9GIG9mIGZpbGUuDQpGb3IgdGhlIGhvbGUgb2YgZmlsZSwgaSBkb24ndCBrbm93
+IGhvdyB0byBoYW5kbGUuDQo+IC0gcmVhZCBpcyBzb21lIHBhcnRpYWwgYW1vdW50DQo+IC0gcG9z
+IGlzIG9mZiArIHJlYWQgKyBhIGdhcA0KRnJvbSB0aGUgY29kZSA6CXJlYWQgPSBwb3MgLSBvZmY7
+IGFmdGVyIHRoYXQsIHRoZSBwb3MgZG9uJ3QgY2hhbmdlLg0KU28gdGhlIGEgZ2FwIHdoZXJlIGlz
+IGZyb20/DQoNClRoYW5rcyENCkppYW5wZW5nIE1hDQo+IC0gd2UgdHJ5IHRvIHJlYWQgZnJvbSB0
+aGUgbmV4dCBvYmplY3QgYW5kIHRoZXJlIGlzIGRhdGENCj4gICA9PiB0aGVyZSB3YXMgYSBob2xl
+IGFuZCB3ZSBuZWVkIHRvIHplcm8gdGhlIGdhcA0KPg0KPklmLCBvbiB0aGUgb3RoZXIgaGFuZCwg
+dGhlcmUgaXNuJ3QgZGF0YSBpbiB0aGUgbmV4dCBvYmplY3QsIHRoZW4gd2UgZG9uJ3QgDQo+d2Fu
+dCB0byB6ZXJvIHRoZSBob2xlLi4gYW5kIGxlYXN0IG5vdCB1bnRpbCB3ZSBkZWNpZGUgd2hlcmUg
+RU9GIGlzLiAgDQo+VGhhdCdzIHdoeSB0aGlzIGJsb2NrIGlzIHdoZXJlIGl0IGlzLCBhbmQgbmV2
+ZXIgdHJpZ2dlcnMgb24gdGhlIGZpcnN0IA0KPml0ZXJhdGlvbi4NCj4NCj5Eb2VzIHRoYXQgbWFr
+ZSBzZW5zZT8NCj5zYWdl
 
-Thanks!
-
-
-> If you've run into this issue, please use the cuttlefish branch build for 
-> now.  We will have a release out in the next day or so that includes this 
-> and a few other pending fixes.
-> 
-> I'm sorry we missed this one!  The upgrade test matrix I've been working 
-> on today should catch this type of issue in the future.
-
-Thanks!
-
-Stefan
