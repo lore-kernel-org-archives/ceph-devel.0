@@ -1,67 +1,56 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.67-rc2 dumpling release candidate
-Date: Wed, 24 Jul 2013 22:45:55 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307230903030.17756@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: question about  striped_read
+Date: Wed, 24 Jul 2013 22:54:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
+References: <201307250852310158703@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:58654 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751504Ab3GYFy5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 01:54:57 -0400
+In-Reply-To: <201307250852310158703@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+On Thu, 25 Jul 2013, majianpeng wrote:
+> Hi all,
+> 	I met a problem and ask somebody could help me.
+> In func striped_read()
+> > if (ret > 0) {
+> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
+> 
+> >                if (read < pos - off) {
+> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
+> >                        ceph_zero_page_vector_range(page_align + read,
+> >                                                    pos - off - read, pages);
+> >                }   
+> >                pos += ret;
+> >               read = pos - off;
+> 
+> At first , pos = off and off don't modify.
+> Why does it judge 'read < pos -off ' ?
+> Because the read = pos -off, so the read must equal pos -off.
 
-We have a release candidate for v0.67 dumpling!  There are a handful of 
-remaining known issues (which I suppose means it is technically *not* an 
-actual candidate for the final release), but for the most part we are 
-happy with the stability so far, and encourage anyone with test clusters 
-to give it a try.
+This block triggers if we hit a stripe.  off is always the original 
+starting offset.  pos is the current position that we just tried to read 
+from.  We might:
 
-Known issues include:
+ - try to read a big extent from off == pos
+ - readpages truncates this to the end of the object
+ - we get a short read (not a complete object)
+ - read is some partial amount
+ - pos is off + read + a gap
+ - we try to read from the next object and there is data
+   => there was a hole and we need to zero the gap
 
- * There is a known performance regression due to non-optimal tuning 
-   values for the writeback throttling.  We are still playing with the 
-   numbers to get good results across all workloads, but do not be 
-   surprised if you see throughput drop slightly with -rc1.
- * The metadata sync agent for multi-region radosgw clusters is not quite 
-   ready yet.
- * Creating swift containers in the non-master region does not work; fix 
-   is already in next.
+If, on the other hand, there isn't data in the next object, then we don't 
+want to zero the hole.. and least not until we decide where EOF is.  
+That's why this block is where it is, and never triggers on the first 
+iteration.
 
-The v0.67-rc2 release candidate packages are available from:
-
- http://ceph.com/debian-testing/
- http://ceph.com/rpm-testing/
-
-Note that at any time you can move from this -rc1 to the latest 
-pre-dumpling code by switching to the 'next' branch, available at
-
- http://gitbuilder.ceph.com/ceph-deb-$distro-x86_64-basic/ref/next/
-
-for example,
-
- http://gitbuilder.ceph.com/ceph-deb-precise-x86_64-basic/ref/next/
-
-The draft release notes for v0.67 dumpling are at
-
- http://ceph.com/docs/master/release-notes/
-
-You can see our bug queue at
-
- http://tracker.ceph.com/projects/ceph/issues?query_id=27
-
-Note that 'Pending backport' means it is fixed in next but the cuttlefish 
-backport has not landed yet.  Also note that the kernel bugs (kcephfs, 
-krbd) are not related to the dumpling release.
-
-Go forth and test!
+Does that make sense?
 sage
