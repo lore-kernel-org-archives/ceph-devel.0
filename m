@@ -1,60 +1,122 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [ceph-users] Flapping osd / continuously reported as failed
-Date: Thu, 25 Jul 2013 10:32:23 -0700
-Message-ID: <CAPYLRzghUwEvu_f0aV2Q37JqnyCJ=46cTWiteTwN4=Tmqxd3HA@mail.gmail.com>
-References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
-	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
-	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
-	<CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
-	<0D057B737C42FC4AB3F22773A5C9425F259DBDF026@MXMBON06.grupa.onet>
-	<ADBDB4FFB0814748AF32D0A1EE6E10AF228296D145@MXMBON06.grupa.onet>
+From: Sage Weil <sage@inktank.com>
+Subject: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Thu, 25 Jul 2013 13:31:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307251330580.32741@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-887729713-1374784265=:32741"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:44798 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756533Ab3GYRcY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 13:32:24 -0400
-Received: by mail-wi0-f172.google.com with SMTP id c10so5922511wiw.5
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 10:32:23 -0700 (PDT)
-In-Reply-To: <ADBDB4FFB0814748AF32D0A1EE6E10AF228296D145@MXMBON06.grupa.onet>
+Received: from cobra.newdream.net ([66.33.216.30]:38562 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752685Ab3GYUbG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 16:31:06 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 55C998004F
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 13:31:05 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 2AB078004F
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 13:31:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mostowiec Dominik <Dominik.Mostowiec@grupaonet.pl>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, =?ISO-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski@grupaonet.pl>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Jul 25, 2013 at 12:47 AM, Mostowiec Dominik
-<Dominik.Mostowiec@grupaonet.pl> wrote:
-> Hi
-> We found something else.
-> After osd.72 flapp, one PG '3.54d' was recovering long time.
->
-> --
-> ceph health details
-> HEALTH_WARN 1 pgs recovering; recovery 1/39821745 degraded (0.000%)
-> pg 3.54d is active+recovering, acting [72,108,23]
-> recovery 1/39821745 degraded (0.000%)
-> --
->
-> Last flap down/up osd.72 was 00:45.
-> In logs we found:
-> 2013-07-24 00:45:02.736740 7f8ac1e04700  0 log [INF] : 3.54d deep-scrub ok
-> After this time is ok.
->
-> It is possible that reason of flapping this osd was scrubbing?
->
-> We have default scrubbing settings (ceph version 0.56.6).
-> If scrubbig is the trouble-maker, can we make it a little more light by changing config?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-It's possible, as deep scrub in particular will add a bit of load (it
-goes through and compares the object contents). Are you not having any
-flapping issues any more, and did you try and find when it started the
-scrub to see if it matched up with your troubles?
+--557981400-887729713-1374784265=:32741
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 
-I'd be hesitant to turn it off as scrubbing can uncover corrupt
-objects etc, but you can configure it with the settings at
-http://ceph.com/docs/master/rados/configuration/osd-config-ref/#scrubbing.
-(Always check the surprisingly-helpful docs when you need to do some
-config or operations work!)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+--557981400-887729713-1374784265=:32741
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <alpine.DEB.2.00.1307251331000.32741@cobra.newdream.net>
+Content-Description: Forwarded Message
+Content-Disposition: inline
+
+Return-Path: <scan-admin@coverity.com>
+X-Original-To: sage@cobra.newdream.net
+Delivered-To: sage@cobra.newdream.net
+Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
+	by cobra.newdream.net (Postfix) with ESMTP id 242528004F
+	for <sage@cobra.newdream.net>; Thu, 25 Jul 2013 13:22:10 -0700 (PDT)
+Received: by destro.newdream.net (Postfix)
+	id BDD0B120837; Thu, 25 Jul 2013 13:26:23 -0700 (PDT)
+Delivered-To: sage@destro.newdream.net
+Received: from madmax.dreamhost.com (caiajhbdccac.dreamhost.com
+	[208.97.132.202])
+	by destro.newdream.net (Postfix) with ESMTP id BAF4212023F
+	for <sage@newdream.net>; Thu, 25 Jul 2013 13:26:23 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by madmax.dreamhost.com (Postfix) with ESMTP id 14976FD699B
+	for <sage@newdream.net>; Thu, 25 Jul 2013 13:22:10 -0700 (PDT)
+X-DH-Virus-Scanned: Debian amavisd-new at madmax.dreamhost.com
+X-Spam-Flag: NO
+X-Spam-Score: 0
+X-Spam-Level: 
+X-Spam-Status: No, score=x tagged_above=-999 required=999 WHITELISTED tests=[]
+	autolearn=unavailable
+Received: from godfather.dreamhost.com ([208.97.132.119])
+	by localhost (madmax.dreamhost.com [208.97.132.139]) (amavisd-new,
+	port 10024) with ESMTP id XaWh-805Edjp for <sage@newdream.net>;
+	Thu, 25 Jul 2013 13:22:09 -0700 (PDT)
+Received: from build-l3.scan.coverity.com (unknown [208.69.177.216])
+	by godfather.dreamhost.com (Postfix) with ESMTP id BF7EC1B00A9
+	for <sage@newdream.net>; Thu, 25 Jul 2013 13:22:09 -0700 (PDT)
+Received: from localhost ([127.0.0.1] helo=build-l3.scan.coverity.com)
+	by build-l3.scan.coverity.com with esmtp (Exim 4.69)
+	(envelope-from <scan-admin@coverity.com>)
+	id 1V2S37-0000Aw-Ac; Thu, 25 Jul 2013 13:22:09 -0700
+From: scan-admin@coverity.com
+To: sage@newdream.net
+CC: 
+Subject: New Defects reported by Coverity Scan for ceph
+Message-Id: <E1V2S37-0000Aw-Ac@build-l3.scan.coverity.com>
+Date: Thu, 25 Jul 2013 13:22:09 -0700
+X-Spambayes-Classification: ham; 0.00
+
+
+
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan
+
+Defect(s) Reported-by: Coverity Scan
+
+	
+** CID 1057291: Resource leak (RESOURCE_LEAK)
+/rgw/rgw_rados.cc: 2643
+
+
+________________________________________________________________________
+CID 1057291: Resource leak (RESOURCE_LEAK)
+
+/rgw/rgw_rados.cc: 2641 ( alloc_arg)
+   2638    
+   2639        RGWRESTStreamWriteRequest *out_stream_req;
+   2640    
+>>> "RGWRESTConn::put_obj_init(std::string const &, rgw_obj &, uint64_t, std::map<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, ceph::buffer::list, std::less<std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char> > const, ceph::buffer::list> > > &, RGWRESTStreamWriteRequest **)" allocates memory that is stored into "out_stream_req".
+   2641        int ret = rest_master_conn->put_obj_init(user_id, dest_obj, astate->size, src_attrs, &out_stream_req);
+   2642        if (ret < 0)
+   2643          return ret;
+   2644    
+   2645        ret = get_obj_iterate(ctx, &handle, src_obj, 0, astate->size - 1, out_stream_req->get_out_cb());
+  
+
+/rgw/rgw_rados.cc: 2643 ( leaked_storage)
+   2640    
+   2641        int ret = rest_master_conn->put_obj_init(user_id, dest_obj, astate->size, src_attrs, &out_stream_req);
+   2642        if (ret < 0)
+>>> CID 1057291: Resource leak (RESOURCE_LEAK)
+>>> Variable "out_stream_req" going out of scope leaks the storage it points to.
+   2643          return ret;
+   2644    
+   2645        ret = get_obj_iterate(ctx, &handle, src_obj, 0, astate->size - 1, out_stream_req->get_out_cb());
+   2646        if (ret < 0)
+   2647          return ret;
+  
+________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+--557981400-887729713-1374784265=:32741--
