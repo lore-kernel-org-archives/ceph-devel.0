@@ -1,76 +1,60 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Re: question about striped_read
-Date: Thu, 25 Jul 2013 20:27:00 +0800
-Message-ID: <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
-References: <201307250852310158703@gmail.com>
-	<alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
-	<201307251455102701172@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: LFS & Ceph
+Date: Thu, 25 Jul 2013 06:48:44 -0700
+Message-ID: <51F12CBC.4080308@dachary.org>
+References: <51F06A8A.3050401@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigE87F8E4F9BF95699BF449BC4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:47974 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755358Ab3GYM1D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 08:27:03 -0400
-Received: by mail-lb0-f170.google.com with SMTP id u10so1490279lbi.15
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 05:27:01 -0700 (PDT)
-In-Reply-To: <201307251455102701172@gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:56985 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755438Ab3GYNsu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 09:48:50 -0400
+In-Reply-To: <51F06A8A.3050401@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Chmouel Boudjnah <chmouel@chmouel.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 25, 2013 at 2:55 PM, majianpeng <majianpeng@gmail.com> wrote:
->>On Thu, 25 Jul 2013, majianpeng wrote:
->>> Hi all,
->>>      I met a problem and ask somebody could help me.
->>> In func striped_read()
->>> > if (ret > 0) {
->>> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
->>>
->>> >                if (read < pos - off) {
->>> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
->>> >                        ceph_zero_page_vector_range(page_align + read,
->>> >                                                    pos - off - read, pages);
->>> >                }
->>> >                pos += ret;
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigE87F8E4F9BF95699BF449BC4
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I think you are right. probably above line should be 'pos += this_len'
+s/for take the time/for taking the time/
 
-regards
-yan, zheng
+:-)
+
+On 24/07/2013 17:00, Loic Dachary wrote:
+> Hi,
+>=20
+> Thanks for take the time to discuss LFS today @ OSCON :-) Would you be =
+so kind as to send links to the current discussion about the LFS driver A=
+PI ?=20
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
->>> >               read = pos - off;
->>>
->>> At first , pos = off and off don't modify.
->>> Why does it judge 'read < pos -off ' ?
->>> Because the read = pos -off, so the read must equal pos -off.
->>
->>This block triggers if we hit a stripe.  off is always the original
->>starting offset.  pos is the current position that we just tried to read
->>from.  We might:
->>
->> - try to read a big extent from off == pos
->> - readpages truncates this to the end of the object
->> - we get a short read (not a complete object)
-> What's the mean of not a complete object?
-> FYI,a short read maybe  met the boundry of stripe(object) or the EOF of file.
-> For the hole of file, i don't know how to handle.
->> - read is some partial amount
->> - pos is off + read + a gap
-> From the code : read = pos - off; after that, the pos don't change.
-> So the a gap where is from?
->
-> Thanks!
-> Jianpeng Ma
->> - we try to read from the next object and there is data
->>   => there was a hole and we need to zero the gap
->>
->>If, on the other hand, there isn't data in the next object, then we don't
->>want to zero the hole.. and least not until we decide where EOF is.
->>That's why this block is where it is, and never triggers on the first
->>iteration.
->>
->>Does that make sense?
->>sage
+--------------enigE87F8E4F9BF95699BF449BC4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlHxLLwACgkQ8dLMyEl6F2352wCgr55TBn4yrCkVCcgC5tnUlHx4
+DKcAoKfESq5vHnMMgtWzFw9NX2sg8kQj
+=WyjA
+-----END PGP SIGNATURE-----
+
+--------------enigE87F8E4F9BF95699BF449BC4--
