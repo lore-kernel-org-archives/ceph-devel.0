@@ -1,70 +1,64 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 1/3] libceph: call r_unsafe_callback when unsafe reply is received
-Date: Thu, 25 Jul 2013 11:43:33 -0400
-Message-ID: <CANP1eJEi5utUmnr8kB-g6qVRydWqntJ=Hea1qV_QgUS=FuUQtA@mail.gmail.com>
-References: <1372056089-11603-1-git-send-email-zheng.z.yan@intel.com>
-	<51D12FA7.1090605@intel.com>
-	<alpine.DEB.2.00.1307011245410.11177@cobra.newdream.net>
-	<alpine.DEB.2.00.1307031455220.3375@cobra.newdream.net>
-	<CANP1eJFe+d-UM4vSOSLiFP07NrbXGUeD1TNaXusSLrEo8HEXTQ@mail.gmail.com>
-	<CAAM7YAnVZhTa6LQWo9KzMGHdkYCrwAQJLweJUBEm=dUaVqA5bA@mail.gmail.com>
-	<CANP1eJFzM-61iXyreZpMHH6Bp5ZV5vJZYtQretg8Xx+C3njjBw@mail.gmail.com>
-	<CANP1eJEBepbExdz9srBPDaXCd8MC1vBnDv_nN6FFJuapir-nKQ@mail.gmail.com>
-	<CAAM7YAmgOB3_+xdYV758K5yWGTaQ3MQLYeJ-L=WWmm=w6Sn+PA@mail.gmail.com>
-	<CANP1eJGf2_XbXYnUxWsGFrVfSpYQ0mZOFGWW1HTVnaUZSghd6A@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Upgrading from 0.61.5 to 0.61.6 ended in disaster
+Date: Thu, 25 Jul 2013 08:46:46 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307250845140.29435@cobra.newdream.net>
+References: <fac262a41d5df6360f3106a38b9a6a79@2force.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:43421 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755910Ab3GYPne (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 11:43:34 -0400
-Received: by mail-wi0-f175.google.com with SMTP id m6so5796685wiv.8
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 08:43:33 -0700 (PDT)
-In-Reply-To: <CANP1eJGf2_XbXYnUxWsGFrVfSpYQ0mZOFGWW1HTVnaUZSghd6A@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35463 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756402Ab3GYPqq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 11:46:46 -0400
+In-Reply-To: <fac262a41d5df6360f3106a38b9a6a79@2force.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Alex Elder <alex.elder@linaro.org>, Sage Weil <sage@inktank.com>
+To: peter@2force.nl
+Cc: ceph-devel@vger.kernel.org
 
-I just wanted to follow up to say that after applying these patches
-and running it for a few weeks we're I haven't seen another lock up
-under load.
+On Thu, 25 Jul 2013, peter@2force.nl wrote:
+> We did not upgrade from bobtail to cuttlefish and are still seeing this issue.
+> I posted this on the ceph-users mailinglist and I missed this thread (sorry!)
+> so I didn't know.
 
-- Milosz
+That's interesting; a bobtail upgraded cluster was the only way I was able 
+to reproduce it, but I'm also working with relatively short-lived clusters 
+in a test environment so there may very well be a possibility I missed.  
+Can you summarize what the lineage of your cluster is?  (What version was 
+it installed with, and when was it upgraded and to what versions?)
 
-On Mon, Jul 8, 2013 at 5:16 PM, Milosz Tanski <milosz@adfin.com> wrote:
-> In this case (unlike last week) the restart did unlock my clients.
->
-> - M
->
-> On Mon, Jul 8, 2013 at 4:30 PM, Yan, Zheng <ukernel@gmail.com> wrote:
->> On Tue, Jul 9, 2013 at 3:58 AM, Milosz Tanski <milosz@adfin.com> wrote:
->>> Yan,
->>>
->>> Actually after playing some more today I have another one of my
->>> clients stuck in this spot. When I look at the kernel stacks this is
->>> what I see for all the threads:
->>>
->>> [<ffffffffa02d2bab>] ceph_mdsc_do_request+0xcb/0x1a0 [ceph]
->>> [<ffffffffa02c018f>] ceph_do_getattr+0xdf/0x120 [ceph]
->>> [<ffffffffa02c01f4>] ceph_getattr+0x24/0x100 [ceph]
->>> [<ffffffff811775fd>] vfs_getattr+0x4d/0x80
->>> [<ffffffff8117784d>] vfs_fstat+0x3d/0x70
->>> [<ffffffff81177895>] SYSC_newfstat+0x15/0x30
->>> [<ffffffff8117794e>] SyS_newfstat+0xe/0x10
->>> [<ffffffff8155dd59>] system_call_fastpath+0x16/0x1b
->>> [<ffffffffffffffff>] 0xffffffffffffffff
->>>
->>>
->>> Anything I can do on my end to debug this issue?
->>>
->>
->> find the hang request (and inode) through /sys/kernel/debug/ceph/xxx/mdsc,
->> use 'ceph mds tell \* dumpcache' to dump mds cache.
->> open /cachedump.xxx and check the inode's state.
->>
->> does your kernel include all fixes in testing branch of ceph-client ?
->> does restarting the mds resolve the hang ?
->>
->> yan, zheng
+> Either way, I also have an osd crashing after upgrading to 0.61.6. As said on
+> the other list, I'm more than happy to share log files etc with you guys.
+
+Will take a look.
+
+Thanks!
+sage
+
+
+> 
+> Thanks,
+> 
+> Peter
+> 
+> > This is fixed in the cuttlefish branch as of earlier this afternoon.  I've
+> > spent most of the day expanding the automated test suite to include
+> > upgrade combinations to trigger this and *finally* figured out that this
+> > particular problem seems to surface on clusters that upgraded from bobtail
+> > -> cuttlefish but not clusters created on cuttlefish.
+> 
+> > If you've run into this issue, please use the cuttlefish branch build for
+> > now.  We will have a release out in the next day or so that includes this
+> > and a few other pending fixes.
+> 
+> > I'm sorry we missed this one!  The upgrade test matrix I've been working
+> > on today should catch this type of issue in the future.
+> 
+> > Thanks!
+> > sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
