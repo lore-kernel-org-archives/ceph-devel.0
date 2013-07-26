@@ -1,108 +1,97 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
+From: majianpeng <majianpeng@gmail.com>
 Subject: Re: Re: question about striped_read
-Date: Fri, 26 Jul 2013 09:59:04 +0800
-Message-ID: <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com>
-References: <201307250852310158703@gmail.com>
-	<alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
-	<201307251455102701172@gmail.com>
-	<CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
-	<alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
-	<201307260848241340451@gmail.com>
-	<CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com>
-	<201307260922285205344@gmail.com>
-	<CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com>
-	<201307260938095935695@gmail.com>
+Date: Fri, 26 Jul 2013 10:07:03 +0800
+Message-ID: <201307261007003577701@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com>,
+	<CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:47351 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757898Ab3GZB7H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 21:59:07 -0400
-Received: by mail-lb0-f182.google.com with SMTP id v20so1505129lbc.13
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 18:59:04 -0700 (PDT)
-In-Reply-To: <201307260938095935695@gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:49154 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757980Ab3GZCHR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 22:07:17 -0400
+Received: by mail-pa0-f46.google.com with SMTP id fa1so2692803pad.5
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 19:07:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
 Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 26, 2013 at 9:38 AM, majianpeng <majianpeng@gmail.com> wrote:
->>On Fri, Jul 26, 2013 at 9:22 AM, majianpeng <majianpeng@gmail.com> wrote:
->>>>On Fri, Jul 26, 2013 at 8:48 AM, majianpeng <majianpeng@gmail.com> wrote:
->>>>>>On Thu, 25 Jul 2013, Yan, Zheng wrote:
->>>>>>> On Thu, Jul 25, 2013 at 2:55 PM, majianpeng <majianpeng@gmail.com> wrote:
->>>>>>> >>On Thu, 25 Jul 2013, majianpeng wrote:
->>>>>>> >>> Hi all,
->>>>>>> >>>      I met a problem and ask somebody could help me.
->>>>>>> >>> In func striped_read()
->>>>>>> >>> > if (ret > 0) {
->>>>>>> >>> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
->>>>>>> >>>
->>>>>>> >>> >                if (read < pos - off) {
->>>>>>> >>> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
->>>>>>> >>> >                        ceph_zero_page_vector_range(page_align + read,
->>>>>>> >>> >                                                    pos - off - read, pages);
->>>>>>> >>> >                }
->>>>>>> >>> >                pos += ret;
->>>>>>>
->>>>>>> I think you are right. probably above line should be 'pos += this_len'
->>>>>>
->>>>>>It should be easy to construct a simple test for this.  E.g., something
->>>>>>like
->>>>>>
->>>>>> pwrite(fd, buf, 0, 3000000);
->>>>>> pwrite(fd, buf, 4194304, 1000);
->>>>>> pread(fd, buf, 0, 6000000);
->>>>>> ...
->>>>>>
->>>>>>and whatever else to verify that pos was in fact advanced properly?
->>>>>>
->>>>> The following is my test code:
->>>>> void hole_test()
->>>>> {
->>>>>         char buf[4194304];
->>>>>         ssize_t ret;
->>>>>         int fd = open("/media/ceph/test", O_RDWR|O_CREAT|O_DIRECT|O_TRUNC);
->>>>>         if (fd < 0) {
->>>>>                 printf("open error %s\n", strerror(errno));
->>>>>                 return;
->>>>>         }
->>>>>
->>>>>         ret = pwrite(fd, buf, 0, 3000000);
->>>>>         ret = pwrite(fd, buf, 4194304, 1000);
->>>>>         ret = pread(fd, buf , 0, 6000000);
->>>>>         close(fd);
->>>>> }
->>>>>
->>>>> The debug message from striped_read are:
->>>>> [  267.530266] ceph:           file.c:356  : striped_read 6000000~0 (read 0) got 0
->>>>> [  267.530270] ceph:           file.c:396  : striped_read returns 0
->>>>>
->>>>> The result isn't what's your said.
->>>>> Am i missing something?
->>>>>
->>>>> BTW, i think Yan is ok,
->>>>> The code
->>>>> pos += ret; should pos += this_len.
->>>>> Because this_len can larger than ret.
->>>>> But the question is what's condition can cause this?
->>>>
->>>>by default, ceph strips file to 4M objects. In above example, the
->>>>first object only has
->>>>3M data, so 'ret = 3M'  and 'this_len = 4M'
->>> actually, in func calc_layout: the read length is the smaller between object and left.
->>>>
->>>>> And can the short_read operation handle this situation?
->>>>
->>>>I don't think it's good idea to short read unless we really reach EOF.
->>> Can you explain in detail?
->>>
->>
->>because some user program interpret short read as EOF reached. If we
->>return short
->>read they get confused.
-> The reason cause short-read is only EOF? or other reason?
->
+Pk9uIEZyaSwgSnVsIDI2LCAyMDEzIGF0IDk6MzggQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+Pk9uIEZyaSwgSnVsIDI2LCAyMDEzIGF0IDk6MjIgQU0sIG1h
+amlhbnBlbmcgPG1hamlhbnBlbmdAZ21haWwuY29tPiB3cm90ZToNCj4+Pj4+T24gRnJpLCBKdWwg
+MjYsIDIwMTMgYXQgODo0OCBBTSwgbWFqaWFucGVuZyA8bWFqaWFucGVuZ0BnbWFpbC5jb20+IHdy
+b3RlOg0KPj4+Pj4+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIFlhbiwgWmhlbmcgd3JvdGU6DQo+Pj4+
+Pj4+PiBPbiBUaHUsIEp1bCAyNSwgMjAxMyBhdCAyOjU1IFBNLCBtYWppYW5wZW5nIDxtYWppYW5w
+ZW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+Pj4+Pj4+PiA+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIG1h
+amlhbnBlbmcgd3JvdGU6DQo+Pj4+Pj4+PiA+Pj4gSGkgYWxsLA0KPj4+Pj4+Pj4gPj4+ICAgICAg
+SSBtZXQgYSBwcm9ibGVtIGFuZCBhc2sgc29tZWJvZHkgY291bGQgaGVscCBtZS4NCj4+Pj4+Pj4+
+ID4+PiBJbiBmdW5jIHN0cmlwZWRfcmVhZCgpDQo+Pj4+Pj4+PiA+Pj4gPiBpZiAocmV0ID4gMCkg
+ew0KPj4+Pj4+Pj4gPj4+ID4gICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxp
+Z24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQo+Pj4+Pj4+PiA+Pj4NCj4+Pj4+Pj4+ID4+
+PiA+ICAgICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+Pj4+Pj4+PiA+Pj4g
+PiAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwg
+b2ZmICsgcmVhZCwgcG9zKTsNCj4+Pj4+Pj4+ID4+PiA+ICAgICAgICAgICAgICAgICAgICAgICAg
+Y2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4+Pj4+Pj4g
+Pj4+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+cG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPj4+Pj4+Pj4gPj4+ID4gICAgICAgICAgICAgICAg
+fQ0KPj4+Pj4+Pj4gPj4+ID4gICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCj4+Pj4+Pj4+DQo+
+Pj4+Pj4+PiBJIHRoaW5rIHlvdSBhcmUgcmlnaHQuIHByb2JhYmx5IGFib3ZlIGxpbmUgc2hvdWxk
+IGJlICdwb3MgKz0gdGhpc19sZW4nDQo+Pj4+Pj4+DQo+Pj4+Pj4+SXQgc2hvdWxkIGJlIGVhc3kg
+dG8gY29uc3RydWN0IGEgc2ltcGxlIHRlc3QgZm9yIHRoaXMuICBFLmcuLCBzb21ldGhpbmcNCj4+
+Pj4+Pj5saWtlDQo+Pj4+Pj4+DQo+Pj4+Pj4+IHB3cml0ZShmZCwgYnVmLCAwLCAzMDAwMDAwKTsN
+Cj4+Pj4+Pj4gcHdyaXRlKGZkLCBidWYsIDQxOTQzMDQsIDEwMDApOw0KPj4+Pj4+PiBwcmVhZChm
+ZCwgYnVmLCAwLCA2MDAwMDAwKTsNCj4+Pj4+Pj4gLi4uDQo+Pj4+Pj4+DQo+Pj4+Pj4+YW5kIHdo
+YXRldmVyIGVsc2UgdG8gdmVyaWZ5IHRoYXQgcG9zIHdhcyBpbiBmYWN0IGFkdmFuY2VkIHByb3Bl
+cmx5Pw0KPj4+Pj4+Pg0KPj4+Pj4+IFRoZSBmb2xsb3dpbmcgaXMgbXkgdGVzdCBjb2RlOg0KPj4+
+Pj4+IHZvaWQgaG9sZV90ZXN0KCkNCj4+Pj4+PiB7DQo+Pj4+Pj4gICAgICAgICBjaGFyIGJ1Zls0
+MTk0MzA0XTsNCj4+Pj4+PiAgICAgICAgIHNzaXplX3QgcmV0Ow0KPj4+Pj4+ICAgICAgICAgaW50
+IGZkID0gb3BlbigiL21lZGlhL2NlcGgvdGVzdCIsIE9fUkRXUnxPX0NSRUFUfE9fRElSRUNUfE9f
+VFJVTkMpOw0KPj4+Pj4+ICAgICAgICAgaWYgKGZkIDwgMCkgew0KPj4+Pj4+ICAgICAgICAgICAg
+ICAgICBwcmludGYoIm9wZW4gZXJyb3IgJXNcbiIsIHN0cmVycm9yKGVycm5vKSk7DQo+Pj4+Pj4g
+ICAgICAgICAgICAgICAgIHJldHVybjsNCj4+Pj4+PiAgICAgICAgIH0NCj4+Pj4+Pg0KPj4+Pj4+
+ICAgICAgICAgcmV0ID0gcHdyaXRlKGZkLCBidWYsIDAsIDMwMDAwMDApOw0KPj4+Pj4+ICAgICAg
+ICAgcmV0ID0gcHdyaXRlKGZkLCBidWYsIDQxOTQzMDQsIDEwMDApOw0KPj4+Pj4+ICAgICAgICAg
+cmV0ID0gcHJlYWQoZmQsIGJ1ZiAsIDAsIDYwMDAwMDApOw0KPj4+Pj4+ICAgICAgICAgY2xvc2Uo
+ZmQpOw0KPj4+Pj4+IH0NCj4+Pj4+Pg0KPj4+Pj4+IFRoZSBkZWJ1ZyBtZXNzYWdlIGZyb20gc3Ry
+aXBlZF9yZWFkIGFyZToNCj4+Pj4+PiBbICAyNjcuNTMwMjY2XSBjZXBoOiAgICAgICAgICAgZmls
+ZS5jOjM1NiAgOiBzdHJpcGVkX3JlYWQgNjAwMDAwMH4wIChyZWFkIDApIGdvdCAwDQo+Pj4+Pj4g
+WyAgMjY3LjUzMDI3MF0gY2VwaDogICAgICAgICAgIGZpbGUuYzozOTYgIDogc3RyaXBlZF9yZWFk
+IHJldHVybnMgMA0KPj4+Pj4+DQo+Pj4+Pj4gVGhlIHJlc3VsdCBpc24ndCB3aGF0J3MgeW91ciBz
+YWlkLg0KPj4+Pj4+IEFtIGkgbWlzc2luZyBzb21ldGhpbmc/DQo+Pj4+Pj4NCj4+Pj4+PiBCVFcs
+IGkgdGhpbmsgWWFuIGlzIG9rLA0KPj4+Pj4+IFRoZSBjb2RlDQo+Pj4+Pj4gcG9zICs9IHJldDsg
+c2hvdWxkIHBvcyArPSB0aGlzX2xlbi4NCj4+Pj4+PiBCZWNhdXNlIHRoaXNfbGVuIGNhbiBsYXJn
+ZXIgdGhhbiByZXQuDQo+Pj4+Pj4gQnV0IHRoZSBxdWVzdGlvbiBpcyB3aGF0J3MgY29uZGl0aW9u
+IGNhbiBjYXVzZSB0aGlzPw0KPj4+Pj4NCj4+Pj4+YnkgZGVmYXVsdCwgY2VwaCBzdHJpcHMgZmls
+ZSB0byA0TSBvYmplY3RzLiBJbiBhYm92ZSBleGFtcGxlLCB0aGUNCj4+Pj4+Zmlyc3Qgb2JqZWN0
+IG9ubHkgaGFzDQo+Pj4+PjNNIGRhdGEsIHNvICdyZXQgPSAzTScgIGFuZCAndGhpc19sZW4gPSA0
+TScNCj4+Pj4gYWN0dWFsbHksIGluIGZ1bmMgY2FsY19sYXlvdXQ6IHRoZSByZWFkIGxlbmd0aCBp
+cyB0aGUgc21hbGxlciBiZXR3ZWVuIG9iamVjdCBhbmQgbGVmdC4NCj4+Pj4+DQo+Pj4+Pj4gQW5k
+IGNhbiB0aGUgc2hvcnRfcmVhZCBvcGVyYXRpb24gaGFuZGxlIHRoaXMgc2l0dWF0aW9uPw0KPj4+
+Pj4NCj4+Pj4+SSBkb24ndCB0aGluayBpdCdzIGdvb2QgaWRlYSB0byBzaG9ydCByZWFkIHVubGVz
+cyB3ZSByZWFsbHkgcmVhY2ggRU9GLg0KPj4+PiBDYW4geW91IGV4cGxhaW4gaW4gZGV0YWlsPw0K
+Pj4+Pg0KPj4+DQo+Pj5iZWNhdXNlIHNvbWUgdXNlciBwcm9ncmFtIGludGVycHJldCBzaG9ydCBy
+ZWFkIGFzIEVPRiByZWFjaGVkLiBJZiB3ZQ0KPj4+cmV0dXJuIHNob3J0DQo+Pj5yZWFkIHRoZXkg
+Z2V0IGNvbmZ1c2VkLg0KPj4gVGhlIHJlYXNvbiBjYXVzZSBzaG9ydC1yZWFkIGlzIG9ubHkgRU9G
+PyBvciBvdGhlciByZWFzb24/DQo+Pg0KPg0KPkkgdGhpbmsgeWVzLCAoYXQgbGVhc3QgZm9yIHJl
+YWRpbmcgZnJvbSBGUyBhbmQgcmVhZCBzaXplIGlzIG5vdCB2ZXJ5IGxhcmdlKQ0Kd2UgY2FuIHJl
+bW92ZSB0aG9zZSBjb2RlOg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9m
+aWxlLmMNCmluZGV4IDJkZGYwNjEuLjk0ZmEzNzggMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2ZpbGUu
+Yw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC0zNTIsMTEgKzM1Miw2IEBAIG1vcmU6DQogICAg
+ICAgIGlmIChyZXQgPiAwKSB7DQogICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2Vf
+YWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQogDQotICAgICAgICAgICAgICAgaWYg
+KHJlYWQgPCBwb3MgLSBvZmYpIHsNCi0gICAgICAgICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJv
+IGdhcCAlbGx1IHRvICVsbHVcbiIsIG9mZiArIHJlYWQsIHBvcyk7DQotICAgICAgICAgICAgICAg
+ICAgICAgICBjZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsDQot
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcG9zIC0g
+b2ZmIC0gcmVhZCwgcGFnZXMpOw0KLSAgICAgICAgICAgICAgIH0NCiAgICAgICAgICAgICAgICBw
+b3MgKz0gcmV0Ow0KICAgICAgICAgICAgICAgIHJlYWQgPSBwb3MgLSBvZmY7DQogICAgICAgICAg
+ICAgICAgbGVmdCAtPSByZXQ7DQoNCkJlY2FzZSBpbiBmdW4gc3RyaXBlZF9yZWFkLCB0aGUgc2hv
+cnQtcmVhZCBoYXZlIHR3byByZWFzb25zOmVvZiBvciBtZXQgYSBob2xlLg0KSW4gZWl0aGVyIGNh
+c2UgLHRoZSBsYXRlciB3YXNfc2hvcnQgaGFuZGxlciBjYW4gaGFuZGxlLg0KSXMgaXQgb2s/DQoN
+ClRoYW5rcw0KSmlhbnBlbmcgTWENCg0KDQo=
 
-I think yes, (at least for reading from FS and read size is not very large)
