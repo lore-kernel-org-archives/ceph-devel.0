@@ -1,41 +1,84 @@
-From: Sage Weil <sage@inktank.com>
-Subject: blueprint: osd: ceph on zfs
-Date: Thu, 25 Jul 2013 16:53:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Fri, 26 Jul 2013 08:48:28 +0800
+Message-ID: <201307260848241340451@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>,
+	<alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40449 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753586Ab3GYXxo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 19:53:44 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 55EC28004F
-	for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 16:53:44 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 1F4C78004F
-	for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 16:53:44 -0700 (PDT)
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:61609 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756531Ab3GZAsn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 20:48:43 -0400
+Received: by mail-pb0-f50.google.com with SMTP id wz7so1409053pbc.9
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 17:48:43 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: sage <sage@inktank.com>, =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
-
-We've done some preliminary testing and xattr debugging that allows 
-ceph-osd to run on zfsforlinux using the normal writeahead journaling mode 
-(the same mode used for xfs and ext4).  However, we aren't doing anything 
-special to take advantage of zfs's capabilities.
-
-This session would go over what is needed to make parallel journaling work 
-(which would leverage zfs snapshots).  I would also like to have a 
-discussion about whether other longer-term possibilities, such as storing 
-objects directly using the DMU, make sense given what ceph-osd's 
-ObjectStore interface really needs.  It might also be an appropriate time 
-to visit whether other snapshotting linux filesystems (like nilfs2) would 
-fit well into any generalization of the filestore code that comes out of 
-this effort.
-
-If anybody is interested in this, please add yourself to the interested 
-parties section (or claim ownership) of this blueprint!
-
+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIFlhbiwgWmhlbmcgd3JvdGU6DQo+PiBPbiBUaHUsIEp1bCAy
+NSwgMjAxMyBhdCAyOjU1IFBNLCBtYWppYW5wZW5nIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4gd3Jv
+dGU6DQo+PiA+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiA+Pj4g
+SGkgYWxsLA0KPj4gPj4+ICAgICAgSSBtZXQgYSBwcm9ibGVtIGFuZCBhc2sgc29tZWJvZHkgY291
+bGQgaGVscCBtZS4NCj4+ID4+PiBJbiBmdW5jIHN0cmlwZWRfcmVhZCgpDQo+PiA+Pj4gPiBpZiAo
+cmV0ID4gMCkgew0KPj4gPj4+ID4gICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2Vf
+YWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQo+PiA+Pj4NCj4+ID4+PiA+ICAgICAg
+ICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+PiA+Pj4gPiAgICAgICAgICAgICAg
+ICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwgb2ZmICsgcmVhZCwgcG9z
+KTsNCj4+ID4+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9y
+X3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gPj4+ID4gICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0K
+Pj4gPj4+ID4gICAgICAgICAgICAgICAgfQ0KPj4gPj4+ID4gICAgICAgICAgICAgICAgcG9zICs9
+IHJldDsNCj4+IA0KPj4gSSB0aGluayB5b3UgYXJlIHJpZ2h0LiBwcm9iYWJseSBhYm92ZSBsaW5l
+IHNob3VsZCBiZSAncG9zICs9IHRoaXNfbGVuJw0KPg0KPkl0IHNob3VsZCBiZSBlYXN5IHRvIGNv
+bnN0cnVjdCBhIHNpbXBsZSB0ZXN0IGZvciB0aGlzLiAgRS5nLiwgc29tZXRoaW5nIA0KPmxpa2UN
+Cj4NCj4gcHdyaXRlKGZkLCBidWYsIDAsIDMwMDAwMDApOw0KPiBwd3JpdGUoZmQsIGJ1ZiwgNDE5
+NDMwNCwgMTAwMCk7DQo+IHByZWFkKGZkLCBidWYsIDAsIDYwMDAwMDApOw0KPiAuLi4NCj4NCj5h
+bmQgd2hhdGV2ZXIgZWxzZSB0byB2ZXJpZnkgdGhhdCBwb3Mgd2FzIGluIGZhY3QgYWR2YW5jZWQg
+cHJvcGVybHk/DQo+DQpUaGUgZm9sbG93aW5nIGlzIG15IHRlc3QgY29kZToNCnZvaWQgaG9sZV90
+ZXN0KCkNCnsNCgljaGFyIGJ1Zls0MTk0MzA0XTsNCglzc2l6ZV90IHJldDsNCglpbnQgZmQgPSBv
+cGVuKCIvbWVkaWEvY2VwaC90ZXN0IiwgT19SRFdSfE9fQ1JFQVR8T19ESVJFQ1R8T19UUlVOQyk7
+DQoJaWYgKGZkIDwgMCkgew0KCQlwcmludGYoIm9wZW4gZXJyb3IgJXNcbiIsIHN0cmVycm9yKGVy
+cm5vKSk7DQoJCXJldHVybjsNCgl9DQoNCglyZXQgPSBwd3JpdGUoZmQsIGJ1ZiwgMCwgMzAwMDAw
+MCk7DQoJcmV0ID0gcHdyaXRlKGZkLCBidWYsIDQxOTQzMDQsIDEwMDApOw0KCXJldCA9IHByZWFk
+KGZkLCBidWYgLCAwLCA2MDAwMDAwKTsNCgljbG9zZShmZCk7DQp9DQoNClRoZSBkZWJ1ZyBtZXNz
+YWdlIGZyb20gc3RyaXBlZF9yZWFkIGFyZToNClsgIDI2Ny41MzAyNjZdIGNlcGg6ICAgICAgICAg
+ICBmaWxlLmM6MzU2ICA6IHN0cmlwZWRfcmVhZCA2MDAwMDAwfjAgKHJlYWQgMCkgZ290IDANClsg
+IDI2Ny41MzAyNzBdIGNlcGg6ICAgICAgICAgICBmaWxlLmM6Mzk2ICA6IHN0cmlwZWRfcmVhZCBy
+ZXR1cm5zIDANCg0KVGhlIHJlc3VsdCBpc24ndCB3aGF0J3MgeW91ciBzYWlkLg0KQW0gaSBtaXNz
+aW5nIHNvbWV0aGluZz8NCg0KQlRXLCBpIHRoaW5rIFlhbiBpcyBvaywNClRoZSBjb2RlIA0KcG9z
+ICs9IHJldDsgc2hvdWxkIHBvcyArPSB0aGlzX2xlbi4NCkJlY2F1c2UgdGhpc19sZW4gY2FuIGxh
+cmdlciB0aGFuIHJldC4NCkJ1dCB0aGUgcXVlc3Rpb24gaXMgd2hhdCdzIGNvbmRpdGlvbiBjYW4g
+Y2F1c2UgdGhpcz8NCkFuZCBjYW4gdGhlIHNob3J0X3JlYWQgb3BlcmF0aW9uIGhhbmRsZSB0aGlz
+IHNpdHVhdGlvbj8NCg0KPnNhZ2UNCj4NCj4+IA0KPj4gcmVnYXJkcw0KPj4geWFuLCB6aGVuZw0K
+Pj4gDQo+PiANCj4+ID4+PiA+ICAgICAgICAgICAgICAgcmVhZCA9IHBvcyAtIG9mZjsNCj4+ID4+
+Pg0KPj4gPj4+IEF0IGZpcnN0ICwgcG9zID0gb2ZmIGFuZCBvZmYgZG9uJ3QgbW9kaWZ5Lg0KPj4g
+Pj4+IFdoeSBkb2VzIGl0IGp1ZGdlICdyZWFkIDwgcG9zIC1vZmYgJyA/DQo+PiA+Pj4gQmVjYXVz
+ZSB0aGUgcmVhZCA9IHBvcyAtb2ZmLCBzbyB0aGUgcmVhZCBtdXN0IGVxdWFsIHBvcyAtb2ZmLg0K
+Pj4gPj4NCj4+ID4+VGhpcyBibG9jayB0cmlnZ2VycyBpZiB3ZSBoaXQgYSBzdHJpcGUuICBvZmYg
+aXMgYWx3YXlzIHRoZSBvcmlnaW5hbA0KPj4gPj5zdGFydGluZyBvZmZzZXQuICBwb3MgaXMgdGhl
+IGN1cnJlbnQgcG9zaXRpb24gdGhhdCB3ZSBqdXN0IHRyaWVkIHRvIHJlYWQNCj4+ID4+ZnJvbS4g
+IFdlIG1pZ2h0Og0KPj4gPj4NCj4+ID4+IC0gdHJ5IHRvIHJlYWQgYSBiaWcgZXh0ZW50IGZyb20g
+b2ZmID09IHBvcw0KPj4gPj4gLSByZWFkcGFnZXMgdHJ1bmNhdGVzIHRoaXMgdG8gdGhlIGVuZCBv
+ZiB0aGUgb2JqZWN0DQo+PiA+PiAtIHdlIGdldCBhIHNob3J0IHJlYWQgKG5vdCBhIGNvbXBsZXRl
+IG9iamVjdCkNCj4+ID4gV2hhdCdzIHRoZSBtZWFuIG9mIG5vdCBhIGNvbXBsZXRlIG9iamVjdD8N
+Cj4+ID4gRllJLGEgc2hvcnQgcmVhZCBtYXliZSAgbWV0IHRoZSBib3VuZHJ5IG9mIHN0cmlwZShv
+YmplY3QpIG9yIHRoZSBFT0Ygb2YgZmlsZS4NCj4+ID4gRm9yIHRoZSBob2xlIG9mIGZpbGUsIGkg
+ZG9uJ3Qga25vdyBob3cgdG8gaGFuZGxlLg0KPj4gPj4gLSByZWFkIGlzIHNvbWUgcGFydGlhbCBh
+bW91bnQNCj4+ID4+IC0gcG9zIGlzIG9mZiArIHJlYWQgKyBhIGdhcA0KPj4gPiBGcm9tIHRoZSBj
+b2RlIDogcmVhZCA9IHBvcyAtIG9mZjsgYWZ0ZXIgdGhhdCwgdGhlIHBvcyBkb24ndCBjaGFuZ2Uu
+DQo+PiA+IFNvIHRoZSBhIGdhcCB3aGVyZSBpcyBmcm9tPw0KPj4gPg0KPj4gPiBUaGFua3MhDQo+
+PiA+IEppYW5wZW5nIE1hDQo+PiA+PiAtIHdlIHRyeSB0byByZWFkIGZyb20gdGhlIG5leHQgb2Jq
+ZWN0IGFuZCB0aGVyZSBpcyBkYXRhDQo+PiA+PiAgID0+IHRoZXJlIHdhcyBhIGhvbGUgYW5kIHdl
+IG5lZWQgdG8gemVybyB0aGUgZ2FwDQo+PiA+Pg0KPj4gPj5JZiwgb24gdGhlIG90aGVyIGhhbmQs
+IHRoZXJlIGlzbid0IGRhdGEgaW4gdGhlIG5leHQgb2JqZWN0LCB0aGVuIHdlIGRvbid0DQo+PiA+
+PndhbnQgdG8gemVybyB0aGUgaG9sZS4uIGFuZCBsZWFzdCBub3QgdW50aWwgd2UgZGVjaWRlIHdo
+ZXJlIEVPRiBpcy4NCj4+ID4+VGhhdCdzIHdoeSB0aGlzIGJsb2NrIGlzIHdoZXJlIGl0IGlzLCBh
+bmQgbmV2ZXIgdHJpZ2dlcnMgb24gdGhlIGZpcnN0DQo+PiA+Pml0ZXJhdGlvbi4NCj4+ID4+DQo+
+PiA+PkRvZXMgdGhhdCBtYWtlIHNlbnNlPw0KPj4gPj5zYWdlDQo+PiANCj4+IA==
 
