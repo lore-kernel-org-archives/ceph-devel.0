@@ -1,71 +1,104 @@
-From: majianpeng <majianpeng@gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
 Subject: Re: Re: question about striped_read
-Date: Fri, 26 Jul 2013 09:22:32 +0800
-Message-ID: <201307260922285205344@gmail.com>
-References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com>,
+Date: Fri, 26 Jul 2013 09:36:15 +0800
+Message-ID: <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com>
+References: <201307250852310158703@gmail.com>
+	<alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net>
+	<201307251455102701172@gmail.com>
+	<CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com>
+	<alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
+	<201307260848241340451@gmail.com>
 	<CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+	<201307260922285205344@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:37709 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756978Ab3GZBWi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 21:22:38 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rq8so1424266pbb.5
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 18:22:37 -0700 (PDT)
+Received: from mail-la0-f41.google.com ([209.85.215.41]:63524 "EHLO
+	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756215Ab3GZBgR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jul 2013 21:36:17 -0400
+Received: by mail-la0-f41.google.com with SMTP id fn20so1909361lab.0
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jul 2013 18:36:15 -0700 (PDT)
+In-Reply-To: <201307260922285205344@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+To: majianpeng <majianpeng@gmail.com>
 Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Pk9uIEZyaSwgSnVsIDI2LCAyMDEzIGF0IDg6NDggQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
-Z21haWwuY29tPiB3cm90ZToNCj4+Pk9uIFRodSwgMjUgSnVsIDIwMTMsIFlhbiwgWmhlbmcgd3Jv
-dGU6DQo+Pj4+IE9uIFRodSwgSnVsIDI1LCAyMDEzIGF0IDI6NTUgUE0sIG1hamlhbnBlbmcgPG1h
-amlhbnBlbmdAZ21haWwuY29tPiB3cm90ZToNCj4+Pj4gPj5PbiBUaHUsIDI1IEp1bCAyMDEzLCBt
-YWppYW5wZW5nIHdyb3RlOg0KPj4+PiA+Pj4gSGkgYWxsLA0KPj4+PiA+Pj4gICAgICBJIG1ldCBh
-IHByb2JsZW0gYW5kIGFzayBzb21lYm9keSBjb3VsZCBoZWxwIG1lLg0KPj4+PiA+Pj4gSW4gZnVu
-YyBzdHJpcGVkX3JlYWQoKQ0KPj4+PiA+Pj4gPiBpZiAocmV0ID4gMCkgew0KPj4+PiA+Pj4gPiAg
-ICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFHRV9D
-QUNIRV9TSElGVDsNCj4+Pj4gPj4+DQo+Pj4+ID4+PiA+ICAgICAgICAgICAgICAgIGlmIChyZWFk
-IDwgcG9zIC0gb2ZmKSB7DQo+Pj4+ID4+PiA+ICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIg
-emVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBvZmYgKyByZWFkLCBwb3MpOw0KPj4+PiA+Pj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2Fs
-aWduICsgcmVhZCwNCj4+Pj4gPj4+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPj4+PiA+Pj4gPiAg
-ICAgICAgICAgICAgICB9DQo+Pj4+ID4+PiA+ICAgICAgICAgICAgICAgIHBvcyArPSByZXQ7DQo+
-Pj4+DQo+Pj4+IEkgdGhpbmsgeW91IGFyZSByaWdodC4gcHJvYmFibHkgYWJvdmUgbGluZSBzaG91
-bGQgYmUgJ3BvcyArPSB0aGlzX2xlbicNCj4+Pg0KPj4+SXQgc2hvdWxkIGJlIGVhc3kgdG8gY29u
-c3RydWN0IGEgc2ltcGxlIHRlc3QgZm9yIHRoaXMuICBFLmcuLCBzb21ldGhpbmcNCj4+Pmxpa2UN
-Cj4+Pg0KPj4+IHB3cml0ZShmZCwgYnVmLCAwLCAzMDAwMDAwKTsNCj4+PiBwd3JpdGUoZmQsIGJ1
-ZiwgNDE5NDMwNCwgMTAwMCk7DQo+Pj4gcHJlYWQoZmQsIGJ1ZiwgMCwgNjAwMDAwMCk7DQo+Pj4g
-Li4uDQo+Pj4NCj4+PmFuZCB3aGF0ZXZlciBlbHNlIHRvIHZlcmlmeSB0aGF0IHBvcyB3YXMgaW4g
-ZmFjdCBhZHZhbmNlZCBwcm9wZXJseT8NCj4+Pg0KPj4gVGhlIGZvbGxvd2luZyBpcyBteSB0ZXN0
-IGNvZGU6DQo+PiB2b2lkIGhvbGVfdGVzdCgpDQo+PiB7DQo+PiAgICAgICAgIGNoYXIgYnVmWzQx
-OTQzMDRdOw0KPj4gICAgICAgICBzc2l6ZV90IHJldDsNCj4+ICAgICAgICAgaW50IGZkID0gb3Bl
-bigiL21lZGlhL2NlcGgvdGVzdCIsIE9fUkRXUnxPX0NSRUFUfE9fRElSRUNUfE9fVFJVTkMpOw0K
-Pj4gICAgICAgICBpZiAoZmQgPCAwKSB7DQo+PiAgICAgICAgICAgICAgICAgcHJpbnRmKCJvcGVu
-IGVycm9yICVzXG4iLCBzdHJlcnJvcihlcnJubykpOw0KPj4gICAgICAgICAgICAgICAgIHJldHVy
-bjsNCj4+ICAgICAgICAgfQ0KPj4NCj4+ICAgICAgICAgcmV0ID0gcHdyaXRlKGZkLCBidWYsIDAs
-IDMwMDAwMDApOw0KPj4gICAgICAgICByZXQgPSBwd3JpdGUoZmQsIGJ1ZiwgNDE5NDMwNCwgMTAw
-MCk7DQo+PiAgICAgICAgIHJldCA9IHByZWFkKGZkLCBidWYgLCAwLCA2MDAwMDAwKTsNCj4+ICAg
-ICAgICAgY2xvc2UoZmQpOw0KPj4gfQ0KPj4NCj4+IFRoZSBkZWJ1ZyBtZXNzYWdlIGZyb20gc3Ry
-aXBlZF9yZWFkIGFyZToNCj4+IFsgIDI2Ny41MzAyNjZdIGNlcGg6ICAgICAgICAgICBmaWxlLmM6
-MzU2ICA6IHN0cmlwZWRfcmVhZCA2MDAwMDAwfjAgKHJlYWQgMCkgZ290IDANCj4+IFsgIDI2Ny41
-MzAyNzBdIGNlcGg6ICAgICAgICAgICBmaWxlLmM6Mzk2ICA6IHN0cmlwZWRfcmVhZCByZXR1cm5z
-IDANCj4+DQo+PiBUaGUgcmVzdWx0IGlzbid0IHdoYXQncyB5b3VyIHNhaWQuDQo+PiBBbSBpIG1p
-c3Npbmcgc29tZXRoaW5nPw0KPj4NCj4+IEJUVywgaSB0aGluayBZYW4gaXMgb2ssDQo+PiBUaGUg
-Y29kZQ0KPj4gcG9zICs9IHJldDsgc2hvdWxkIHBvcyArPSB0aGlzX2xlbi4NCj4+IEJlY2F1c2Ug
-dGhpc19sZW4gY2FuIGxhcmdlciB0aGFuIHJldC4NCj4+IEJ1dCB0aGUgcXVlc3Rpb24gaXMgd2hh
-dCdzIGNvbmRpdGlvbiBjYW4gY2F1c2UgdGhpcz8NCj4NCj5ieSBkZWZhdWx0LCBjZXBoIHN0cmlw
-cyBmaWxlIHRvIDRNIG9iamVjdHMuIEluIGFib3ZlIGV4YW1wbGUsIHRoZQ0KPmZpcnN0IG9iamVj
-dCBvbmx5IGhhcw0KPjNNIGRhdGEsIHNvICdyZXQgPSAzTScgIGFuZCAndGhpc19sZW4gPSA0TScN
-CmFjdHVhbGx5LCBpbiBmdW5jIGNhbGNfbGF5b3V0OiB0aGUgcmVhZCBsZW5ndGggaXMgdGhlIHNt
-YWxsZXIgYmV0d2VlbiBvYmplY3QgYW5kIGxlZnQuDQo+DQo+PiBBbmQgY2FuIHRoZSBzaG9ydF9y
-ZWFkIG9wZXJhdGlvbiBoYW5kbGUgdGhpcyBzaXR1YXRpb24/DQo+DQo+SSBkb24ndCB0aGluayBp
-dCdzIGdvb2QgaWRlYSB0byBzaG9ydCByZWFkIHVubGVzcyB3ZSByZWFsbHkgcmVhY2ggRU9GLg0K
-Q2FuIHlvdSBleHBsYWluIGluIGRldGFpbD8NCg0KVGhhbmtzDQpKaWFucGVuZyBNYQ0KPg0KPlJl
-Z2FyZHMNCj5ZYW4sIFpoZW5n
+On Fri, Jul 26, 2013 at 9:22 AM, majianpeng <majianpeng@gmail.com> wrote:
+>>On Fri, Jul 26, 2013 at 8:48 AM, majianpeng <majianpeng@gmail.com> wrote:
+>>>>On Thu, 25 Jul 2013, Yan, Zheng wrote:
+>>>>> On Thu, Jul 25, 2013 at 2:55 PM, majianpeng <majianpeng@gmail.com> wrote:
+>>>>> >>On Thu, 25 Jul 2013, majianpeng wrote:
+>>>>> >>> Hi all,
+>>>>> >>>      I met a problem and ask somebody could help me.
+>>>>> >>> In func striped_read()
+>>>>> >>> > if (ret > 0) {
+>>>>> >>> >                int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
+>>>>> >>>
+>>>>> >>> >                if (read < pos - off) {
+>>>>> >>> >                       dout(" zero gap %llu to %llu\n", off + read, pos);
+>>>>> >>> >                        ceph_zero_page_vector_range(page_align + read,
+>>>>> >>> >                                                    pos - off - read, pages);
+>>>>> >>> >                }
+>>>>> >>> >                pos += ret;
+>>>>>
+>>>>> I think you are right. probably above line should be 'pos += this_len'
+>>>>
+>>>>It should be easy to construct a simple test for this.  E.g., something
+>>>>like
+>>>>
+>>>> pwrite(fd, buf, 0, 3000000);
+>>>> pwrite(fd, buf, 4194304, 1000);
+>>>> pread(fd, buf, 0, 6000000);
+>>>> ...
+>>>>
+>>>>and whatever else to verify that pos was in fact advanced properly?
+>>>>
+>>> The following is my test code:
+>>> void hole_test()
+>>> {
+>>>         char buf[4194304];
+>>>         ssize_t ret;
+>>>         int fd = open("/media/ceph/test", O_RDWR|O_CREAT|O_DIRECT|O_TRUNC);
+>>>         if (fd < 0) {
+>>>                 printf("open error %s\n", strerror(errno));
+>>>                 return;
+>>>         }
+>>>
+>>>         ret = pwrite(fd, buf, 0, 3000000);
+>>>         ret = pwrite(fd, buf, 4194304, 1000);
+>>>         ret = pread(fd, buf , 0, 6000000);
+>>>         close(fd);
+>>> }
+>>>
+>>> The debug message from striped_read are:
+>>> [  267.530266] ceph:           file.c:356  : striped_read 6000000~0 (read 0) got 0
+>>> [  267.530270] ceph:           file.c:396  : striped_read returns 0
+>>>
+>>> The result isn't what's your said.
+>>> Am i missing something?
+>>>
+>>> BTW, i think Yan is ok,
+>>> The code
+>>> pos += ret; should pos += this_len.
+>>> Because this_len can larger than ret.
+>>> But the question is what's condition can cause this?
+>>
+>>by default, ceph strips file to 4M objects. In above example, the
+>>first object only has
+>>3M data, so 'ret = 3M'  and 'this_len = 4M'
+> actually, in func calc_layout: the read length is the smaller between object and left.
+>>
+>>> And can the short_read operation handle this situation?
+>>
+>>I don't think it's good idea to short read unless we really reach EOF.
+> Can you explain in detail?
+>
 
+because some user program interpret short read as EOF reached. If we
+return short
+read they get confused.
+
+Regards
+Yan, Zheng
