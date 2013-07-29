@@ -1,83 +1,55 @@
-From: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Subject: [PATCH] libceph: fix deadlock in ceph_build_auth()
-Date: Mon, 29 Jul 2013 06:58:08 +0400
-Message-ID: <1375066688-12367-1-git-send-email-khoroshilov@ispras.ru>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: Alexey Khoroshilov <khoroshilov@ispras.ru>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ldv-project@linuxtesting.org
-List-Id: ceph-devel.vger.kernel.org
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Mon, 29 Jul 2013 11:00:10 +0800
+Message-ID: <201307291100080913443@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com>,
+	<CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:34637 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752526Ab3G2DAP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Jul 2013 23:00:15 -0400
+Received: by mail-pb0-f52.google.com with SMTP id xa12so4061167pbc.11
+        for <ceph-devel@vger.kernel.org>; Sun, 28 Jul 2013 20:00:15 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-ceph_build_auth() locks ac->mutex and then calls ceph_auth_build_hello()
-that locks the same mutex, i.e. bring itself to deadlock.
+W3NuaXBdDQo+SSBkb24ndCB0aGluayB0aGUgbGF0ZXIgd2FzX3Nob3J0IGNhbiBoYW5kbGUgdGhl
+IGhvbGUgY2FzZS4gRm9yIHRoZSBob2xlIGNhc2UsDQo+d2Ugc2hvdWxkIHRyeSByZWFkaW5nIG5l
+eHQgc3RyaXAgb2JqZWN0IGluc3RlYWQgb2YgcmV0dXJuLiBob3cgYWJvdXQNCj5iZWxvdyBwYXRj
+aC4NCj4NCkhpIFlhbiwNCglpIHVlc2VkIHRoaXMgZGVtbyB0byB0ZXN0IGhvbGUgY2FzZS4NCmRk
+IGlmPS9kZXYvdXJhbmRvbSBicz00MDk2IGNvdW50PTIgb2Y9ZmlsZV93aXRoX2hvbGVzDQpkZCBp
+Zj0vZGV2L3VyYW5kb20gYnM9NDA5NiBzZWVrPTcgY291bnQ9MiBvZj1maWxlX3dpdGhfaG9sZXMN
+Cg0KZGQgaWY9ZmlsZV93aXRoX2hvbGVzIG9mPS9kZXYvbnVsbCBicz0xNmsgY291bnQ9MSBpZmxh
+Zz1kaXJlY3QNClVzaW5nIHRoZSBkeW5hbWljX2RlYnVnIGluIHN0cmlwZWRfcmVhZCwgIHRoZSBt
+ZXNzYWdlIGFyZToNCj5bIDg3NDMuNjYzNDk5XSBjZXBoOiAgICAgICAgICAgZmlsZS5jOjM1MCAg
+OiBzdHJpcGVkX3JlYWQgMH4xNjM4NCAocmVhZCAwKSBnb3QgMTYzODQNCj5bIDg3NDMuNjYzNTAy
+XSBjZXBoOiAgICAgICAgICAgZmlsZS5jOjM5MCAgOiBzdHJpcGVkX3JlYWQgcmV0dXJucyAxNjM4
+NA0KRnJvbSB0aGUgbWVzc2FnZXMsIHdlIGNhbiBzZWUgaXQgY2FuJ3QgaGl0IHRoZSBzaG9ydC1y
+ZWFkLg0KRm9yIHRoZSBjZXBoLWZpbGUtaG9sZSwgaG93IGRvZXMgdGhlIGNlcGggaGFuZGxlPw0K
+T3IgYW0gaSBtaXNzaW5nIHNvbWV0aGluZz8NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWENCg0KPlJl
+Z2FyZHMNCj5ZYW4sIFpoZW5nDQo+LS0tDQo+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIv
+ZnMvY2VwaC9maWxlLmMNCj5pbmRleCAyNzFhMzQ2Li42Y2EyOTIxIDEwMDY0NA0KPi0tLSBhL2Zz
+L2NlcGgvZmlsZS5jDQo+KysrIGIvZnMvY2VwaC9maWxlLmMNCj5AQCAtMzUwLDE2ICszNTAsMTcg
+QEAgbW9yZToNCj4gCSAgICAgcmV0LCBoaXRfc3RyaXBlID8gIiBISVRTVFJJUEUiIDogIiIsIHdh
+c19zaG9ydCA/ICIgU0hPUlQiIDogIiIpOw0KPg0KPiAJaWYgKHJldCA+IDApIHsNCj4tCQlpbnQg
+ZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFHRV9DQUNIRV9TSElGVDsNCj4rCQlp
+bnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHRoaXNfbGVuKSA+PiBQQUdFX0NBQ0hFX1NISUZU
+Ow0KPg0KPi0JCWlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+LQkJCWRvdXQoIiB6ZXJvIGdhcCAl
+bGx1IHRvICVsbHVcbiIsIG9mZiArIHJlYWQsIHBvcyk7DQo+LQkJCWNlcGhfemVyb19wYWdlX3Zl
+Y3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwNCj4tCQkJCQkJICAgIHBvcyAtIG9mZiAtIHJl
+YWQsIHBhZ2VzKTsNCj4rCQlpZiAod2FzX3Nob3J0KSB7DQo+KwkJCWRvdXQoIiB6ZXJvIGdhcCAl
+bGx1IHRvICVsbHVcbiIsDQo+KwkJCSAgICAgcG9zICsgcmV0LCBwb3MgKyB0aGlzX2xlbik7DQo+
+KwkJCWNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmV0LA0KPisJCQkJ
+CQkgICAgdGhpc19sZW4gLSByZXQsIHBhZ2VfcG9zKTsNCj4gCQl9DQo+LQkJcG9zICs9IHJldDsN
+Cj4rCQlwb3MgKz0gdGhpc19sZW47DQo+IAkJcmVhZCA9IHBvcyAtIG9mZjsNCj4tCQlsZWZ0IC09
+IHJldDsNCj4rCQlsZWZ0IC09IHRoaXNfbGVuOw0KPiAJCXBhZ2VfcG9zICs9IGRpZHBhZ2VzOw0K
+PiAJCXBhZ2VzX2xlZnQgLT0gZGlkcGFnZXM7DQo+DQo=
 
-The patch moves actual code from ceph_auth_build_hello() to
-ceph_build_hello_auth_request() that should be called with ac->mutex held
-and makes ceph_build_auth() calling it.
-ceph_auth_build_hello() is left with untouched semantics as a wrapper
-around ceph_build_hello_auth_request().
-
-Found by Linux Driver Verification project (linuxtesting.org).
-
-Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
----
- net/ceph/auth.c | 17 +++++++++++++----
- 1 file changed, 13 insertions(+), 4 deletions(-)
-
-diff --git a/net/ceph/auth.c b/net/ceph/auth.c
-index 6b923bc..59594a6 100644
---- a/net/ceph/auth.c
-+++ b/net/ceph/auth.c
-@@ -98,14 +98,14 @@ int ceph_entity_name_encode(const char *name, void **p, void *end)
-  * Initiate protocol negotiation with monitor.  Include entity name
-  * and list supported protocols.
-  */
--int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
-+static int ceph_build_hello_auth_request(struct ceph_auth_client *ac,
-+					 void *buf, size_t len)
- {
- 	struct ceph_mon_request_header *monhdr = buf;
- 	void *p = monhdr + 1, *end = buf + len, *lenp;
- 	int i, num;
- 	int ret;
- 
--	mutex_lock(&ac->mutex);
- 	dout("auth_build_hello\n");
- 	monhdr->have_version = 0;
- 	monhdr->session_mon = cpu_to_le16(-1);
-@@ -133,7 +133,6 @@ int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
- 	ceph_encode_32(&lenp, p - lenp - sizeof(u32));
- 	ret = p - buf;
- out:
--	mutex_unlock(&ac->mutex);
- 	return ret;
- 
- bad:
-@@ -141,6 +140,16 @@ bad:
- 	goto out;
- }
- 
-+int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
-+{
-+	int ret;
-+
-+	mutex_lock(&ac->mutex);
-+	ret = ceph_build_hello_auth_request(ac, buf, len);
-+	mutex_unlock(&ac->mutex);
-+	return ret;
-+}
-+
- static int ceph_build_auth_request(struct ceph_auth_client *ac,
- 				   void *msg_buf, size_t msg_len)
- {
-@@ -260,7 +269,7 @@ int ceph_build_auth(struct ceph_auth_client *ac,
- 
- 	mutex_lock(&ac->mutex);
- 	if (!ac->protocol)
--		ret = ceph_auth_build_hello(ac, msg_buf, msg_len);
-+		ret = ceph_build_hello_auth_request(ac, msg_buf, msg_len);
- 	else if (ac->ops->should_authenticate(ac))
- 		ret = ceph_build_auth_request(ac, msg_buf, msg_len);
- 	mutex_unlock(&ac->mutex);
--- 
-1.8.1.2
