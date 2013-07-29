@@ -1,44 +1,39 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: Anyone in NYC next week?
-Date: Mon, 29 Jul 2013 14:38:37 -0400
-Message-ID: <CANP1eJFhXp1w7m6pzORR_4WJtUTHO8jwkAP=cQyWkKVMa6gcmw@mail.gmail.com>
-References: <alpine.DEB.2.00.1307242117320.22861@cobra.newdream.net>
-	<CACkq2mpBG4QbLpMtX=6POs4+eGA8rNnraQhC9ZqvE7zrPdX6Ww@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: blueprint: object redirects
+Date: Mon, 29 Jul 2013 12:44:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307291239390.12830@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:41891 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754664Ab3G2Sii (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jul 2013 14:38:38 -0400
-Received: by mail-wg0-f42.google.com with SMTP id j13so3080547wgh.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jul 2013 11:38:37 -0700 (PDT)
-In-Reply-To: <CACkq2mpBG4QbLpMtX=6POs4+eGA8rNnraQhC9ZqvE7zrPdX6Ww@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53315 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751410Ab3G2ToD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jul 2013 15:44:03 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0864E8004F
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Jul 2013 12:44:03 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id D641C8004F
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Jul 2013 12:44:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Just signed up, looking forward to it.
+I have a draft blueprint up for supporting object redirects, a 
+basic building block that will be used for tiering in RADOS.  The basic 
+idea is that an object may have symlink-like semantics indicating that it 
+is stored in another pool.. maybe something slower, or erasure-encoded, or 
+whatever.  There will be basic librados functions to get redirect 
+metadata, safely/atomically demote objects to another pool (turn them into 
+a redirect), and promote objects back to the main pool.  Flags will let 
+you control whether promotion happens automatically on write or possibly 
+read.
 
-On Thu, Jul 25, 2013 at 5:18 PM, Travis Rhoden <trhoden@gmail.com> wrote:
-> I'm already signed up.  Looking forward to it!
->
->  - Travis
->
-> On Thu, Jul 25, 2013 at 12:19 AM, Sage Weil <sage@inktank.com> wrote:
->> I'm going to be in NYC next week at our first Ceph Day of the summer.  If
->> you're in town and want to hear more about what we're doing, you should
->> join us!
->>
->> http://www.inktank.com/CEPHdays/
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_object_redirects
+
+I'm not particularly happy with the complexity surrounding the tombstone 
+state.  Hopefully we can come up with a simple way to make the client-side 
+safely drive object deletion.
+
+If you're interested in discussing this at CDS, please add your name to 
+the blueprint so we can include you in the hangout!
