@@ -1,55 +1,35 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: question about striped_read
-Date: Mon, 29 Jul 2013 11:00:10 +0800
-Message-ID: <201307291100080913443@gmail.com>
-References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com>,
-	<CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: blueprint: mds memory efficiency
+Date: Sun, 28 Jul 2013 21:06:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1307282058080.12925@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:34637 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752526Ab3G2DAP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Jul 2013 23:00:15 -0400
-Received: by mail-pb0-f52.google.com with SMTP id xa12so4061167pbc.11
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Jul 2013 20:00:15 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:44991 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750704Ab3G2EGg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jul 2013 00:06:36 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E1A5F8004F
+	for <ceph-devel@vger.kernel.org>; Sun, 28 Jul 2013 21:06:35 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id BD73B8004F
+	for <ceph-devel@vger.kernel.org>; Sun, 28 Jul 2013 21:06:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-W3NuaXBdDQo+SSBkb24ndCB0aGluayB0aGUgbGF0ZXIgd2FzX3Nob3J0IGNhbiBoYW5kbGUgdGhl
-IGhvbGUgY2FzZS4gRm9yIHRoZSBob2xlIGNhc2UsDQo+d2Ugc2hvdWxkIHRyeSByZWFkaW5nIG5l
-eHQgc3RyaXAgb2JqZWN0IGluc3RlYWQgb2YgcmV0dXJuLiBob3cgYWJvdXQNCj5iZWxvdyBwYXRj
-aC4NCj4NCkhpIFlhbiwNCglpIHVlc2VkIHRoaXMgZGVtbyB0byB0ZXN0IGhvbGUgY2FzZS4NCmRk
-IGlmPS9kZXYvdXJhbmRvbSBicz00MDk2IGNvdW50PTIgb2Y9ZmlsZV93aXRoX2hvbGVzDQpkZCBp
-Zj0vZGV2L3VyYW5kb20gYnM9NDA5NiBzZWVrPTcgY291bnQ9MiBvZj1maWxlX3dpdGhfaG9sZXMN
-Cg0KZGQgaWY9ZmlsZV93aXRoX2hvbGVzIG9mPS9kZXYvbnVsbCBicz0xNmsgY291bnQ9MSBpZmxh
-Zz1kaXJlY3QNClVzaW5nIHRoZSBkeW5hbWljX2RlYnVnIGluIHN0cmlwZWRfcmVhZCwgIHRoZSBt
-ZXNzYWdlIGFyZToNCj5bIDg3NDMuNjYzNDk5XSBjZXBoOiAgICAgICAgICAgZmlsZS5jOjM1MCAg
-OiBzdHJpcGVkX3JlYWQgMH4xNjM4NCAocmVhZCAwKSBnb3QgMTYzODQNCj5bIDg3NDMuNjYzNTAy
-XSBjZXBoOiAgICAgICAgICAgZmlsZS5jOjM5MCAgOiBzdHJpcGVkX3JlYWQgcmV0dXJucyAxNjM4
-NA0KRnJvbSB0aGUgbWVzc2FnZXMsIHdlIGNhbiBzZWUgaXQgY2FuJ3QgaGl0IHRoZSBzaG9ydC1y
-ZWFkLg0KRm9yIHRoZSBjZXBoLWZpbGUtaG9sZSwgaG93IGRvZXMgdGhlIGNlcGggaGFuZGxlPw0K
-T3IgYW0gaSBtaXNzaW5nIHNvbWV0aGluZz8NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWENCg0KPlJl
-Z2FyZHMNCj5ZYW4sIFpoZW5nDQo+LS0tDQo+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIv
-ZnMvY2VwaC9maWxlLmMNCj5pbmRleCAyNzFhMzQ2Li42Y2EyOTIxIDEwMDY0NA0KPi0tLSBhL2Zz
-L2NlcGgvZmlsZS5jDQo+KysrIGIvZnMvY2VwaC9maWxlLmMNCj5AQCAtMzUwLDE2ICszNTAsMTcg
-QEAgbW9yZToNCj4gCSAgICAgcmV0LCBoaXRfc3RyaXBlID8gIiBISVRTVFJJUEUiIDogIiIsIHdh
-c19zaG9ydCA/ICIgU0hPUlQiIDogIiIpOw0KPg0KPiAJaWYgKHJldCA+IDApIHsNCj4tCQlpbnQg
-ZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFHRV9DQUNIRV9TSElGVDsNCj4rCQlp
-bnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHRoaXNfbGVuKSA+PiBQQUdFX0NBQ0hFX1NISUZU
-Ow0KPg0KPi0JCWlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+LQkJCWRvdXQoIiB6ZXJvIGdhcCAl
-bGx1IHRvICVsbHVcbiIsIG9mZiArIHJlYWQsIHBvcyk7DQo+LQkJCWNlcGhfemVyb19wYWdlX3Zl
-Y3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwNCj4tCQkJCQkJICAgIHBvcyAtIG9mZiAtIHJl
-YWQsIHBhZ2VzKTsNCj4rCQlpZiAod2FzX3Nob3J0KSB7DQo+KwkJCWRvdXQoIiB6ZXJvIGdhcCAl
-bGx1IHRvICVsbHVcbiIsDQo+KwkJCSAgICAgcG9zICsgcmV0LCBwb3MgKyB0aGlzX2xlbik7DQo+
-KwkJCWNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmV0LA0KPisJCQkJ
-CQkgICAgdGhpc19sZW4gLSByZXQsIHBhZ2VfcG9zKTsNCj4gCQl9DQo+LQkJcG9zICs9IHJldDsN
-Cj4rCQlwb3MgKz0gdGhpc19sZW47DQo+IAkJcmVhZCA9IHBvcyAtIG9mZjsNCj4tCQlsZWZ0IC09
-IHJldDsNCj4rCQlsZWZ0IC09IHRoaXNfbGVuOw0KPiAJCXBhZ2VfcG9zICs9IGRpZHBhZ2VzOw0K
-PiAJCXBhZ2VzX2xlZnQgLT0gZGlkcGFnZXM7DQo+DQo=
+One of the current problems with the ceph MDS is that the in-memory inode, 
+dentry, and dir structures (CInode, CDentry, CDir) are quite large.  They 
+contain lots of fields for tracking the somewhat complicated lifecycle 
+that modified metadata takes before it is fully committed.
 
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds:_reduce_memory_consumption
+
+This is an interesting project for someone who wants to get invovled in 
+the MDS C++ without having to immediate make difficult design decisions.  
+It will have a big impact on the memory (and subsequently cache) 
+performance but is mostly about following and enforcing good C++ coding 
+practices.
+
+sage
