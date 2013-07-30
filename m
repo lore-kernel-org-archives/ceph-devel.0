@@ -1,50 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
+From: Laurent Barbe <laurent@ksperis.com>
 Subject: Re: krbd & live resize
-Date: Tue, 30 Jul 2013 12:03:57 +0200
-Message-ID: <51F78F8D.6010606@dachary.org>
+Date: Tue, 30 Jul 2013 12:07:24 +0200
+Message-ID: <51F7905C.6050604@ksperis.com>
 References: <51F6E389.1040607@dachary.org> <51F78D74.803@ksperis.com> <51F78E0B.4030106@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig4FE3DD0E7567EAE714108CF3"
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:49561 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758921Ab3G3KD7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 06:03:59 -0400
+Received: from mail-we0-f169.google.com ([74.125.82.169]:63035 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758444Ab3G3KH2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 06:07:28 -0400
+Received: by mail-we0-f169.google.com with SMTP id n5so4216344wev.14
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 03:07:27 -0700 (PDT)
 In-Reply-To: <51F78E0B.4030106@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent Barbe <laurent@ksperis.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig4FE3DD0E7567EAE714108CF3
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Live resize has been added in 3.6.10 for krbd client.
 
-Hi,
-
-Tried on another machine running
-
- 3.8.0-25-generic #37~precise1-Ubuntu SMP
-
-and the behavior is the same.
+There is a need to do revalidate_disk() on rbd resize :
+https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/co=
+mmit/?id=3Dd98df63ea7e87d5df4dce0cece0210e2a777ac00
 
 Cheers
 
-On 30/07/2013 11:57, Loic Dachary wrote:
->=20
->=20
+Laurent
+
+
+Le 30/07/2013 11:57, Loic Dachary a =E9crit :
+>
+>
 > On 30/07/2013 11:55, Laurent Barbe wrote:
 >> Hello Loic,
 >>
 >> which version of kernel do you use for krbd ?
->=20
+>
 > Linux i-csnces-0000 3.2.0-41-generic #66-Ubuntu SMP
->=20
+>
 > That may explain a few things ... :-)
->=20
+>
 >>
 >> Laurent
 >>
@@ -55,22 +53,23 @@ On 30/07/2013 11:57, Loic Dachary wrote:
 >>> This works:
 >>>
 >>> lvcreate --name tmp --size 10G all
->>>    Logical volume "tmp" created
+>>>     Logical volume "tmp" created
 >>> mkfs.ext4 /dev/all/tmp
 >>> mount /dev/all/tmp /mnt
 >>> blockdev --getsize64 /dev/all/tmp
 >>> 10737418240
 >>> lvextend -L+1G /dev/all/tmp
->>>    Extending logical volume tmp to 11,00 GiB
->>>    Logical volume tmp successfully resized
+>>>     Extending logical volume tmp to 11,00 GiB
+>>>     Logical volume tmp successfully resized
 >>> blockdev --getsize64 /dev/all/tmp
 >>> 11811160064
 >>> resize2fs /dev/all/tmp
 >>> resize2fs 1.41.12 (17-May-2010)
->>> Filesystem at /dev/all/tmp is mounted on /mnt; on-line resizing requi=
-red
+>>> Filesystem at /dev/all/tmp is mounted on /mnt; on-line resizing req=
+uired
 >>> old desc_blocks =3D 1, new_desc_blocks =3D 1
->>> Performing an on-line resize of /dev/all/tmp to 2883584 (4k) blocks.
+>>> Performing an on-line resize of /dev/all/tmp to 2883584 (4k) blocks=
+=2E
 >>> The filesystem on /dev/all/tmp is now 2883584 blocks long.
 >>>
 >>> This does not work:
@@ -78,10 +77,10 @@ red
 >>> rbd create --size 10240 tmp
 >>> rbd info tmp
 >>> rbd image 'tmp':
->>>     size 10240 MB in 2560 objects
->>>     order 22 (4096 KB objects)
->>>     block_name_prefix: rb.0.12dd.238e1f29
->>>     format: 1
+>>>      size 10240 MB in 2560 objects
+>>>      order 22 (4096 KB objects)
+>>>      block_name_prefix: rb.0.12dd.238e1f29
+>>>      format: 1
 >>> rbd map tmp
 >>> mkfs.ext4 /dev/rbd1
 >>> mount /dev/rbd1 /mnt
@@ -104,37 +103,20 @@ red
 >>> Resizing the filesystem on /dev/rbd1 to 5120000 (4k) blocks.
 >>> The filesystem on /dev/rbd1 is now 5120000 blocks long.
 >>>
->>> I assume there should be "something" in KRBD to allow for the same be=
-havior as with LVM but I don't know enough about the kernel to be more sp=
-ecific. Maybe something similar to ioctl BLKRRPART ?
+>>> I assume there should be "something" in KRBD to allow for the same =
+behavior as with LVM but I don't know enough about the kernel to be mor=
+e specific. Maybe something similar to ioctl BLKRRPART ?
 >>>
 >>> Cheers
 >>>
->> --=20
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig4FE3DD0E7567EAE714108CF3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlH3j40ACgkQ8dLMyEl6F21P3gCeN8Tcjug9DV/795vnVKLppPSH
-lcgAoIhJYTQDdTO4bVouFkqkSDHEd/bx
-=TUXn
------END PGP SIGNATURE-----
-
---------------enig4FE3DD0E7567EAE714108CF3--
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
