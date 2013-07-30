@@ -1,147 +1,144 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: krbd & live resize
-Date: Tue, 30 Jul 2013 13:01:15 +0200
-Message-ID: <51F79CFB.7020207@dachary.org>
-References: <51F6E389.1040607@dachary.org> <51F78D74.803@ksperis.com> <51F78E0B.4030106@dachary.org> <51F7905C.6050604@ksperis.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Tue, 30 Jul 2013 19:01:43 +0800
+Message-ID: <201307301707312612641@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307242252080.10870@cobra.newdream.net> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com>,
+	<CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigF9524AC0BA12535955833DAB"
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:34045 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751194Ab3G3LBS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 07:01:18 -0400
-In-Reply-To: <51F7905C.6050604@ksperis.com>
+Received: from mail-pb0-f54.google.com ([209.85.160.54]:40461 "EHLO
+	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751194Ab3G3LBs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 07:01:48 -0400
+Received: by mail-pb0-f54.google.com with SMTP id ro12so2651892pbb.13
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 04:01:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent Barbe <laurent@ksperis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigF9524AC0BA12535955833DAB
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Pk9uIE1vbiwgSnVsIDI5LCAyMDEzIGF0IDExOjAwIEFNLCBtYWppYW5wZW5nIDxtYWppYW5wZW5n
+QGdtYWlsLmNvbT4gd3JvdGU6DQo+Pg0KPj4gW3NuaXBdDQo+PiA+SSBkb24ndCB0aGluayB0aGUg
+bGF0ZXIgd2FzX3Nob3J0IGNhbiBoYW5kbGUgdGhlIGhvbGUgY2FzZS4gRm9yIHRoZSBob2xlIGNh
+c2UsDQo+PiA+d2Ugc2hvdWxkIHRyeSByZWFkaW5nIG5leHQgc3RyaXAgb2JqZWN0IGluc3RlYWQg
+b2YgcmV0dXJuLiBob3cgYWJvdXQNCj4+ID5iZWxvdyBwYXRjaC4NCj4+ID4NCj4+IEhpIFlhbiwN
+Cj4+ICAgICAgICAgaSB1ZXNlZCB0aGlzIGRlbW8gdG8gdGVzdCBob2xlIGNhc2UuDQo+PiBkZCBp
+Zj0vZGV2L3VyYW5kb20gYnM9NDA5NiBjb3VudD0yIG9mPWZpbGVfd2l0aF9ob2xlcw0KPj4gZGQg
+aWY9L2Rldi91cmFuZG9tIGJzPTQwOTYgc2Vlaz03IGNvdW50PTIgb2Y9ZmlsZV93aXRoX2hvbGVz
+DQo+Pg0KPj4gZGQgaWY9ZmlsZV93aXRoX2hvbGVzIG9mPS9kZXYvbnVsbCBicz0xNmsgY291bnQ9
+MSBpZmxhZz1kaXJlY3QNCj4+IFVzaW5nIHRoZSBkeW5hbWljX2RlYnVnIGluIHN0cmlwZWRfcmVh
+ZCwgIHRoZSBtZXNzYWdlIGFyZToNCj4+ID5bIDg3NDMuNjYzNDk5XSBjZXBoOiAgICAgICAgICAg
+ZmlsZS5jOjM1MCAgOiBzdHJpcGVkX3JlYWQgMH4xNjM4NCAocmVhZCAwKSBnb3QgMTYzODQNCj4+
+ID5bIDg3NDMuNjYzNTAyXSBjZXBoOiAgICAgICAgICAgZmlsZS5jOjM5MCAgOiBzdHJpcGVkX3Jl
+YWQgcmV0dXJucyAxNjM4NA0KPj4gRnJvbSB0aGUgbWVzc2FnZXMsIHdlIGNhbiBzZWUgaXQgY2Fu
+J3QgaGl0IHRoZSBzaG9ydC1yZWFkLg0KPj4gRm9yIHRoZSBjZXBoLWZpbGUtaG9sZSwgaG93IGRv
+ZXMgdGhlIGNlcGggaGFuZGxlPw0KPj4gT3IgYW0gaSBtaXNzaW5nIHNvbWV0aGluZz8NCj4NCj50
+aGUgZGVmYXVsdCBzdHJpcCBzaXplIGlzIDRNLCBhbGwgZGF0YSBhcmUgd3JpdHRlbiB0byB0aGUg
+Zmlyc3Qgb2JqZWN0DQo+aW4geW91ciB0ZXN0IGNhc2UuDQo+Y291bGQgeW91IHRyeSBzb21ldGhp
+bmcgbGlrZSBiZWxvdy4NCj4NCg0KPmRkIGlmPS9kZXYvdXJhbmRvbSBicz0xTSBjb3VudD0yIG9m
+PWZpbGVfd2l0aF9ob2xlcw0KPmRkIGlmPS9kZXYvdXJhbmRvbSBicz0xTSBjb3VudD0yIHNlZWs9
+NCBvZj1maWxlX3dpdGhfaG9sZXMgY29udj1ub3RydW5jDQo+ZGQgaWY9ZmlsZV93aXRoX2hvbGVz
+IGJzPThNID4vZGV2L251bGwNCj4NCmRpZmYgLS1naXQgYS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2Nl
+cGgvZmlsZS5jDQppbmRleCAyZGRmMDYxLi4yMmE5OGU1IDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9m
+aWxlLmMNCisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAtMzQ5LDE3ICszNDksMTcgQEAgbW9yZToN
+CiAgICAgICAgZG91dCgic3RyaXBlZF9yZWFkICVsbHV+JXUgKHJlYWQgJXUpIGdvdCAlZCVzJXNc
+biIsIHBvcywgbGVmdCwgcmVhZCwNCiAgICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJ
+VFNUUklQRSIgOiAiIiwgd2FzX3Nob3J0ID8gIiBTSE9SVCIgOiAiIik7DQogDQotICAgICAgIGlm
+IChyZXQgPiAwKSB7DQotICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24g
+KyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQorICAgICAgIGlmIChyZXQgPj0gMCkgew0KKyAg
+ICAgICAgICAgICAgIGludCBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgdGhpc19sZW4pID4+IFBB
+R0VfQ0FDSEVfU0hJRlQ7DQogDQotICAgICAgICAgICAgICAgaWYgKHJlYWQgPCBwb3MgLSBvZmYp
+IHsNCi0gICAgICAgICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJvIGdhcCAlbGx1IHRvICVsbHVc
+biIsIG9mZiArIHJlYWQsIHBvcyk7DQotICAgICAgICAgICAgICAgICAgICAgICBjZXBoX3plcm9f
+cGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsDQotICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMp
+Ow0KKyAgICAgICAgICAgICAgIGlmICh3YXNfc2hvcnQpIHsNCisgICAgICAgICAgICAgICAgICAg
+ICAgIGRvdXQoIiB6ZXJvIGdhcCAlbGx1IHRvICVsbHVcbiIsIHBvcyArIHJldCwgcG9zICsgdGhp
+c19sZW4pOw0KKyAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3Jh
+bmdlKHBhZ2VfYWxpZ24gKyByZXQsDQorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgdGhpc19sZW4gLSByZXQsIHBhZ2VzKTsNCiAgICAgICAgICAgICAg
+ICB9DQotICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCisgICAgICAgICAgICAgICBwb3MgKz0g
+dGhpc19sZW47DQogICAgICAgICAgICAgICAgcmVhZCA9IHBvcyAtIG9mZjsNCi0gICAgICAgICAg
+ICAgICBsZWZ0IC09IHJldDsNCisgICAgICAgICAgICAgICBsZWZ0IC09IHRoaXNfbGVuOw0KICAg
+ICAgICAgICAgICAgIHBhZ2VfcG9zICs9IGRpZHBhZ2VzOw0KICAgICAgICAgICAgICAgIHBhZ2Vz
+X2xlZnQgLT0gZGlkcGFnZXM7DQoNClRoaXMgcGF0Y2ggY2FuIGRvIHRob3NlIGNhc2UuIEl0IG9u
+bHkgYWRkIHJldD09IDAgaW4ganVkZ2VtZW50ICdyZXQgPiAwIi4NCkJ1dCBpIHRoaW5rIGkgd2ls
+bCBhZGQgYSBwYXJhbWV0ZXIgYWJvdXQgaGl0X2hvbGUuIEl0IHdpbGwgbWFrZSB0aGUgY29kZSBl
+YXN5IHRvIHVuZGVyc3RhbmQuDQoNCg0KDQo+UmVnYXJkcw0KPllhbiwgWmhlbmcNCj4NCj4NCj4+
+DQo+Pg0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBlbmcgTWENCj4+DQo+PiA+UmVnYXJkcw0KPj4gPllh
+biwgWmhlbmcNCj4+ID4tLS0NCj4+ID5kaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9j
+ZXBoL2ZpbGUuYw0KPj4gPmluZGV4IDI3MWEzNDYuLjZjYTI5MjEgMTAwNjQ0DQo+PiA+LS0tIGEv
+ZnMvY2VwaC9maWxlLmMNCj4+ID4rKysgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gPkBAIC0zNTAsMTYg
+KzM1MCwxNyBAQCBtb3JlOg0KPj4gPiAgICAgICAgICAgIHJldCwgaGl0X3N0cmlwZSA/ICIgSElU
+U1RSSVBFIiA6ICIiLCB3YXNfc2hvcnQgPyAiIFNIT1JUIiA6ICIiKTsNCj4+ID4NCj4+ID4gICAg
+ICAgaWYgKHJldCA+IDApIHsNCj4+ID4tICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFn
+ZV9hbGlnbiArIHJldCkgPj4gUEFHRV9DQUNIRV9TSElGVDsNCj4+ID4rICAgICAgICAgICAgICBp
+bnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHRoaXNfbGVuKSA+PiBQQUdFX0NBQ0hFX1NISUZU
+Ow0KPj4gPg0KPj4gPi0gICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0gb2ZmKSB7DQo+PiA+
+LSAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBv
+ZmYgKyByZWFkLCBwb3MpOw0KPj4gPi0gICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3Bh
+Z2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gPi0gICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvcyAtIG9mZiAtIHJlYWQsIHBhZ2Vz
+KTsNCj4+ID4rICAgICAgICAgICAgICBpZiAod2FzX3Nob3J0KSB7DQo+PiA+KyAgICAgICAgICAg
+ICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLA0KPj4gPisgICAgICAg
+ICAgICAgICAgICAgICAgICAgICBwb3MgKyByZXQsIHBvcyArIHRoaXNfbGVuKTsNCj4+ID4rICAg
+ICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWdu
+ICsgcmV0LA0KPj4gPisgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIHRoaXNfbGVuIC0gcmV0LCBwYWdlX3Bvcyk7DQo+PiA+ICAgICAgICAgICAgICAgfQ0K
+Pj4gPi0gICAgICAgICAgICAgIHBvcyArPSByZXQ7DQo+PiA+KyAgICAgICAgICAgICAgcG9zICs9
+IHRoaXNfbGVuOw0KPj4gPiAgICAgICAgICAgICAgIHJlYWQgPSBwb3MgLSBvZmY7DQo+PiA+LSAg
+ICAgICAgICAgICAgbGVmdCAtPSByZXQ7DQo+PiA+KyAgICAgICAgICAgICAgbGVmdCAtPSB0aGlz
+X2xlbjsNCj4+ID4gICAgICAgICAgICAgICBwYWdlX3BvcyArPSBkaWRwYWdlczsNCj4+ID4gICAg
+ICAgICAgICAgICBwYWdlc19sZWZ0IC09IGRpZHBhZ2VzOw0KPj4gPg0KVGhhbmtzIQ0KSmlhbnBl
+bmcgTWENCj5PbiBNb24sIEp1bCAyOSwgMjAxMyBhdCAxMTowMCBBTSwgbWFqaWFucGVuZyA8bWFq
+aWFucGVuZ0BnbWFpbC5jb20+IHdyb3RlOg0KPj4NCj4+IFtzbmlwXQ0KPj4gPkkgZG9uJ3QgdGhp
+bmsgdGhlIGxhdGVyIHdhc19zaG9ydCBjYW4gaGFuZGxlIHRoZSBob2xlIGNhc2UuIEZvciB0aGUg
+aG9sZSBjYXNlLA0KPj4gPndlIHNob3VsZCB0cnkgcmVhZGluZyBuZXh0IHN0cmlwIG9iamVjdCBp
+bnN0ZWFkIG9mIHJldHVybi4gaG93IGFib3V0DQo+PiA+YmVsb3cgcGF0Y2guDQo+PiA+DQo+PiBI
+aSBZYW4sDQo+PiAgICAgICAgIGkgdWVzZWQgdGhpcyBkZW1vIHRvIHRlc3QgaG9sZSBjYXNlLg0K
+Pj4gZGQgaWY9L2Rldi91cmFuZG9tIGJzPTQwOTYgY291bnQ9MiBvZj1maWxlX3dpdGhfaG9sZXMN
+Cj4+IGRkIGlmPS9kZXYvdXJhbmRvbSBicz00MDk2IHNlZWs9NyBjb3VudD0yIG9mPWZpbGVfd2l0
+aF9ob2xlcw0KPj4NCj4+IGRkIGlmPWZpbGVfd2l0aF9ob2xlcyBvZj0vZGV2L251bGwgYnM9MTZr
+IGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+PiBVc2luZyB0aGUgZHluYW1pY19kZWJ1ZyBpbiBzdHJp
+cGVkX3JlYWQsICB0aGUgbWVzc2FnZSBhcmU6DQo+PiA+WyA4NzQzLjY2MzQ5OV0gY2VwaDogICAg
+ICAgICAgIGZpbGUuYzozNTAgIDogc3RyaXBlZF9yZWFkIDB+MTYzODQgKHJlYWQgMCkgZ290IDE2
+Mzg0DQo+PiA+WyA4NzQzLjY2MzUwMl0gY2VwaDogICAgICAgICAgIGZpbGUuYzozOTAgIDogc3Ry
+aXBlZF9yZWFkIHJldHVybnMgMTYzODQNCj4+IEZyb20gdGhlIG1lc3NhZ2VzLCB3ZSBjYW4gc2Vl
+IGl0IGNhbid0IGhpdCB0aGUgc2hvcnQtcmVhZC4NCj4+IEZvciB0aGUgY2VwaC1maWxlLWhvbGUs
+IGhvdyBkb2VzIHRoZSBjZXBoIGhhbmRsZT8NCj4+IE9yIGFtIGkgbWlzc2luZyBzb21ldGhpbmc/
+DQo+DQo+dGhlIGRlZmF1bHQgc3RyaXAgc2l6ZSBpcyA0TSwgYWxsIGRhdGEgYXJlIHdyaXR0ZW4g
+dG8gdGhlIGZpcnN0IG9iamVjdA0KPmluIHlvdXIgdGVzdCBjYXNlLg0KPmNvdWxkIHlvdSB0cnkg
+c29tZXRoaW5nIGxpa2UgYmVsb3cuDQo+DQo+ZGQgaWY9L2Rldi91cmFuZG9tIGJzPTFNIGNvdW50
+PTIgb2Y9ZmlsZV93aXRoX2hvbGVzDQo+ZGQgaWY9L2Rldi91cmFuZG9tIGJzPTFNIGNvdW50PTIg
+c2Vlaz00IG9mPWZpbGVfd2l0aF9ob2xlcyBjb252PW5vdHJ1bmMNCj5kZCBpZj1maWxlX3dpdGhf
+aG9sZXMgYnM9OE0gPi9kZXYvbnVsbA0KPg0KPlJlZ2FyZHMNCj5ZYW4sIFpoZW5nDQo+DQo+DQo+
+Pg0KPj4NCj4+IFRoYW5rcyENCj4+IEppYW5wZW5nIE1hDQo+Pg0KPj4gPlJlZ2FyZHMNCj4+ID5Z
+YW4sIFpoZW5nDQo+PiA+LS0tDQo+PiA+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMv
+Y2VwaC9maWxlLmMNCj4+ID5pbmRleCAyNzFhMzQ2Li42Y2EyOTIxIDEwMDY0NA0KPj4gPi0tLSBh
+L2ZzL2NlcGgvZmlsZS5jDQo+PiA+KysrIGIvZnMvY2VwaC9maWxlLmMNCj4+ID5AQCAtMzUwLDE2
+ICszNTAsMTcgQEAgbW9yZToNCj4+ID4gICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJ
+VFNUUklQRSIgOiAiIiwgd2FzX3Nob3J0ID8gIiBTSE9SVCIgOiAiIik7DQo+PiA+DQo+PiA+ICAg
+ICAgIGlmIChyZXQgPiAwKSB7DQo+PiA+LSAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBh
+Z2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQo+PiA+KyAgICAgICAgICAgICAg
+aW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyB0aGlzX2xlbikgPj4gUEFHRV9DQUNIRV9TSElG
+VDsNCj4+ID4NCj4+ID4tICAgICAgICAgICAgICBpZiAocmVhZCA8IHBvcyAtIG9mZikgew0KPj4g
+Pi0gICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwg
+b2ZmICsgcmVhZCwgcG9zKTsNCj4+ID4tICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19w
+YWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwNCj4+ID4tICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3MgLSBvZmYgLSByZWFkLCBwYWdl
+cyk7DQo+PiA+KyAgICAgICAgICAgICAgaWYgKHdhc19zaG9ydCkgew0KPj4gPisgICAgICAgICAg
+ICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwNCj4+ID4rICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgcG9zICsgcmV0LCBwb3MgKyB0aGlzX2xlbik7DQo+PiA+KyAg
+ICAgICAgICAgICAgICAgICAgICBjZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGln
+biArIHJldCwNCj4+ID4rICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICB0aGlzX2xlbiAtIHJldCwgcGFnZV9wb3MpOw0KPj4gPiAgICAgICAgICAgICAgIH0N
+Cj4+ID4tICAgICAgICAgICAgICBwb3MgKz0gcmV0Ow0KPj4gPisgICAgICAgICAgICAgIHBvcyAr
+PSB0aGlzX2xlbjsNCj4+ID4gICAgICAgICAgICAgICByZWFkID0gcG9zIC0gb2ZmOw0KPj4gPi0g
+ICAgICAgICAgICAgIGxlZnQgLT0gcmV0Ow0KPj4gPisgICAgICAgICAgICAgIGxlZnQgLT0gdGhp
+c19sZW47DQo+PiA+ICAgICAgICAgICAgICAgcGFnZV9wb3MgKz0gZGlkcGFnZXM7DQo+PiA+ICAg
+ICAgICAgICAgICAgcGFnZXNfbGVmdCAtPSBkaWRwYWdlczsNCj4+ID4=
 
-Hi Laurent,
-
-Thanks for the solution !
-
-On 30/07/2013 12:07, Laurent Barbe wrote:
-> Live resize has been added in 3.6.10 for krbd client.
->=20
-> There is a need to do revalidate_disk() on rbd resize :
-> https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/co=
-mmit/?id=3Dd98df63ea7e87d5df4dce0cece0210e2a777ac00
->=20
-> Cheers
->=20
-> Laurent
->=20
->=20
-> Le 30/07/2013 11:57, Loic Dachary a =E9crit :
->>
->>
->> On 30/07/2013 11:55, Laurent Barbe wrote:
->>> Hello Loic,
->>>
->>> which version of kernel do you use for krbd ?
->>
->> Linux i-csnces-0000 3.2.0-41-generic #66-Ubuntu SMP
->>
->> That may explain a few things ... :-)
->>
->>>
->>> Laurent
->>>
->>>
->>> Le 29/07/2013 23:50, Loic Dachary a =E9crit :
->>>> Hi,
->>>>
->>>> This works:
->>>>
->>>> lvcreate --name tmp --size 10G all
->>>>     Logical volume "tmp" created
->>>> mkfs.ext4 /dev/all/tmp
->>>> mount /dev/all/tmp /mnt
->>>> blockdev --getsize64 /dev/all/tmp
->>>> 10737418240
->>>> lvextend -L+1G /dev/all/tmp
->>>>     Extending logical volume tmp to 11,00 GiB
->>>>     Logical volume tmp successfully resized
->>>> blockdev --getsize64 /dev/all/tmp
->>>> 11811160064
->>>> resize2fs /dev/all/tmp
->>>> resize2fs 1.41.12 (17-May-2010)
->>>> Filesystem at /dev/all/tmp is mounted on /mnt; on-line resizing requ=
-ired
->>>> old desc_blocks =3D 1, new_desc_blocks =3D 1
->>>> Performing an on-line resize of /dev/all/tmp to 2883584 (4k) blocks.=
-
->>>> The filesystem on /dev/all/tmp is now 2883584 blocks long.
->>>>
->>>> This does not work:
->>>>
->>>> rbd create --size 10240 tmp
->>>> rbd info tmp
->>>> rbd image 'tmp':
->>>>      size 10240 MB in 2560 objects
->>>>      order 22 (4096 KB objects)
->>>>      block_name_prefix: rb.0.12dd.238e1f29
->>>>      format: 1
->>>> rbd map tmp
->>>> mkfs.ext4 /dev/rbd1
->>>> mount /dev/rbd1 /mnt
->>>> blockdev --getsize64 /dev/rbd1
->>>> 10737418240
->>>> rbd resize --size 20000 tmp
->>>> blockdev --getsize64 /dev/rbd1
->>>> 10737418240
->>>> resize2fs /dev/rbd1
->>>> resize2fs 1.42 (29-Nov-2011)
->>>> The filesystem is already 2621440 blocks long.  Nothing to do!
->>>>
->>>> It does work after umounting:
->>>>
->>>> umount /mnt
->>>> blockdev --getsize64 /dev/rbd1
->>>> fsck -f /dev/rbd1
->>>> resize2fs /dev/rbd1
->>>> resize2fs 1.42 (29-Nov-2011)
->>>> Resizing the filesystem on /dev/rbd1 to 5120000 (4k) blocks.
->>>> The filesystem on /dev/rbd1 is now 5120000 blocks long.
->>>>
->>>> I assume there should be "something" in KRBD to allow for the same b=
-ehavior as with LVM but I don't know enough about the kernel to be more s=
-pecific. Maybe something similar to ioctl BLKRRPART ?
->>>>
->>>> Cheers
->>>>
->>> --=20
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigF9524AC0BA12535955833DAB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlH3nPsACgkQ8dLMyEl6F22MHgCgpEAHJt7ybJZmghqEbkbsU5I6
-37gAnihPcXtZTv9Fyo8OXbXZq9Fx/nYm
-=w7x8
------END PGP SIGNATURE-----
-
---------------enigF9524AC0BA12535955833DAB--
