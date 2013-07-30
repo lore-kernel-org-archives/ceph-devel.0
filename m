@@ -1,48 +1,57 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: [PATCH 8/9] ceph: WQ_NON_REENTRANT is meaningless and going away
-Date: Tue, 30 Jul 2013 08:40:27 -0400
-Message-ID: <1375188028-11910-9-git-send-email-tj@kernel.org>
-References: <1375188028-11910-1-git-send-email-tj@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375188028-11910-1-git-send-email-tj@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, laijs@cn.fujitsu.com
-Cc: shli@kernel.org, Tejun Heo <tj@kernel.org>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: David McBride <dwm37@cam.ac.uk>
+Subject: Re: Negative degradation?
+Date: Tue, 30 Jul 2013 14:07:12 +0100
+Message-ID: <51F7BA80.4040800@cam.ac.uk>
+References: <CAN04cT7aidUFqHLPhQcT6s-A51KMQxY8hVNoOBYT9aobxTmjAw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ppsw-33.csi.cam.ac.uk ([131.111.8.133]:57335 "EHLO
+	ppsw-33.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753996Ab3G3NHO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 09:07:14 -0400
+In-Reply-To: <CAN04cT7aidUFqHLPhQcT6s-A51KMQxY8hVNoOBYT9aobxTmjAw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello,
+On 30/07/13 09:20, Roald van Loon wrote:
+> Came across it this morning when booting my development environment,
+> has anyone seen this before?
+>=20
+> It's with 0.67-rc2;
+>=20
+> 2013-07-30 08:09:09.230349 mon.0 [INF] pgmap v4172: 1216 pgs: 123
+> active, 219 active+clean, 161 active+clean+replay, 713 peering; 241 M=
+B
+> data, 630 MB used, 5483 MB / 6114 MB avail; -2/588 degraded (-0.340%)
 
-Please route this through the subsystem tree.  As written in the
-description, this shouldn't make any functional difference and just
-prepares for the removal of WQ_NON_REENTRANT which is already noop.
+I saw similar negative values when updating my test OSD host to 0.67-rc=
+2
+from 0.66 this morning; however, I've seen such negative values being
+reported at various times over a number of past releases.
 
-Thanks.
+I suspect there's a defect in signed-ness handling somewhere, or simila=
+r
+=E2=80=94 however, it appears to be cosmetic and disappears when the OS=
+D replay
+completes.
 
------- 8< -------
-dbf2576e37 ("workqueue: make all workqueues non-reentrant") made
-WQ_NON_REENTRANT no-op and the flag is going away.  Remove its usages.
+(I've likewise seen impossible values for other statistics being
+reported =E2=80=94 a while back I saw multiple EBs being reported as be=
+ing
+read/written during a resync between 4 disks, for example.  I suspect
+this is another manifestation of a similar problem.)
 
-This patch doesn't introduce any behavior changes.
-
-Signed-off-by: Tejun Heo <tj@kernel.org>
-Cc: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
----
- net/ceph/messenger.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index eb0a46a..dd9b585 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -290,7 +290,7 @@ int ceph_msgr_init(void)
- 	if (ceph_msgr_slab_init())
- 		return -ENOMEM;
- 
--	ceph_msgr_wq = alloc_workqueue("ceph-msgr", WQ_NON_REENTRANT, 0);
-+	ceph_msgr_wq = alloc_workqueue("ceph-msgr", 0, 0);
- 	if (ceph_msgr_wq)
- 		return 0;
- 
--- 
-1.8.3.1
+Cheers,
+David
+--=20
+David McBride <dwm37@cam.ac.uk>
+Unix Specialist, University Computing Service
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
