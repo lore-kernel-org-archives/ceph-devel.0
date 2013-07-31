@@ -1,132 +1,86 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Blueprint:  Add LevelDB support to ceph cluster backend store
-Date: Wed, 31 Jul 2013 14:38:11 +0800
-Message-ID: <D1BCFB84-8694-461C-A81B-2A7E1E8CF4D4@gmail.com>
-References: <C0D1D705-4B4F-4189-ACBF-4C39D80984DA@gmail.com> <alpine.DEB.2.00.1307302251510.24945@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 6.5 \(1508\))
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Wed, 31 Jul 2013 15:32:08 +0800
+Message-ID: <201307311532055128853@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com> <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_w
+ rvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com> <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com> <alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net> <201307310933358798964@gmail.com> <CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com> <2013073113222469570311@gmail.com>,
+	<CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:64491 "EHLO
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:59394 "EHLO
 	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751559Ab3GaGiS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 02:38:18 -0400
-Received: by mail-pd0-f174.google.com with SMTP id 10so381097pdc.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 23:38:17 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1307302251510.24945@cobra.newdream.net>
+	with ESMTP id S1754795Ab3GaHcN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 03:32:13 -0400
+Received: by mail-pd0-f174.google.com with SMTP id 10so432610pdc.33
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 00:32:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+IFtzbmlwXQ0KVGVzdCBjYXNlDQpBOiB0b3VjaCBmaWxlDQogICAgZGQgaWY9ZmlsZSBvZj0vZGV2
+L251bGwgYnM9NU0gY291bnQ9MSBpZmxhZz1kaXJlY3QNCkI6IFtkYXRhKDJNKXxob2xlKDJtKV1b
+ZGF0YSgyTSldDQogICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBicz04TSBjb3VudD0xIGlmbGFn
+PWRpcmVjdA0KQzogW2RhdGEoNE0pW2hvbGUoNE0pXVtob2xlKDRNKV1bZGF0YSgyTSldDQogIGRk
+IGlmPWZpbGUgb2Y9L2Rldi9udWxsIGJzPTE2TSBjb3VudD0xIGlmbGFnPWRpcmVjdA0KRDogdG91
+Y2ggZmlsZTt0cnVuY2F0ZSAtcyA1TSBmaWxlDQogIGRkIGlmPWZpbGUgb2Y9L2Rldi9udWxsIGJz
+PThNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQoNClRob3NlIGNhc2VzIGNhbiB3b3JrLg0KTm93IGkg
+bWFrZSBkaWZmZXJlbnQgcHJvY2Vzc2luZyAgZm9yIHNob3J0LXJlYWQgYmV0d2VlbiAncmV0ID4g
+MCcgYW5kICJyZXQgPTAiLg0KRm9yIHRoZSBzaG9ydC1yZWFkIHdoaWNoIHJldCA+IDAsIGl0IGRv
+bid0IGRvIHJlYWQtcGFnZSByYXRoZXIgdGhhbiB6ZXJvIHRoZSBsZWZ0IGFyZWEuDQpUaGlzIG1l
+YW5zIHJlZHVjZSBvbmUgbWVhbmluZ2xlc3MgcmVhZCBvcGVyYXRpb24uDQoNCmRpZmYgLS1naXQg
+YS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmlsZS5jDQppbmRleCAyZGRmMDYxLi5mNjQzZWM4
+IDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9maWxlLmMNCisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAt
+MzUwLDEzICszNTAsMTcgQEAgbW9yZToNCiAgICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAi
+IEhJVFNUUklQRSIgOiAiIiwgd2FzX3Nob3J0ID8gIiBTSE9SVCIgOiAiIik7DQogDQogICAgICAg
+IGlmIChyZXQgPiAwKSB7DQotICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxp
+Z24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQotDQotICAgICAgICAgICAgICAgaWYgKHJl
+YWQgPCBwb3MgLSBvZmYpIHsNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgv
+ZmlsZS5jDQppbmRleCAyZGRmMDYxLi5mNjQzZWM4IDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9maWxl
+LmMNCisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAtMzUwLDEzICszNTAsMTcgQEAgbW9yZToNCiAg
+ICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJVFNUUklQRSIgOiAiIiwgd2FzX3Nob3J0
+ID8gIiBTSE9SVCIgOiAiIik7DQogDQogICAgICAgIGlmIChyZXQgPiAwKSB7DQotICAgICAgICAg
+ICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJ
+RlQ7DQotDQotICAgICAgICAgICAgICAgaWYgKHJlYWQgPCBwb3MgLSBvZmYpIHsNCi0gICAgICAg
+ICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJvIGdhcCAlbGx1IHRvICVsbHVcbiIsIG9mZiArIHJl
+YWQsIHBvcyk7DQotICAgICAgICAgICAgICAgICAgICAgICBjZXBoX3plcm9fcGFnZV92ZWN0b3Jf
+cmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsDQotICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KKyAgICAgICAg
+ICAgICAgIGludCAgZGlkcGFnZXM7DQorDQorICAgICAgICAgICAgICAgaWYgKHdhc19zaG9ydCAm
+JiBwb3MgKyByZXQgPCBpbm9kZS0+aV9zaXplKSB7DQorICAgICAgICAgICAgICAgICAgICAgICAg
+dTY0IHRtcCA9IG1pbih0aGlzX2xlbiAtIHJldCwgDQorICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIAlpbm9kZS0+aV9zaXplIC0gcG9zIC0gcmV0KTsNCisgICAgICAgICAg
+ICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBwb3MgKyByZXQs
+IHBvcyArIHJldCArIHRtcCk7DQorICAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3Bh
+Z2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkICsgcmV0LA0KKyAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0bXAsIHBhZ2VzKTsNCisg
+ICAgICAgICAgICAgICAgICAgICAgICByZXQgKz0gdG1wOw0KICAgICAgICAgICAgICAgIH0NCisg
+ICAgICAgICAgICAgICBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+PiBQQUdFX0NBQ0hF
+X1NISUZUOw0KICAgICAgICAgICAgICAgIHBvcyArPSByZXQ7DQogICAgICAgICAgICAgICAgcmVh
+ZCA9IHBvcyAtIG9mZjsNCiAgICAgICAgICAgICAgICBsZWZ0IC09IHJldDsNCkBAIC0zNzUsMTMg
+KzM3OSwyNSBAQCBtb3JlOg0KIA0KICAgICAgICAgICAgICAgIC8qIHplcm8gdHJhaWxpbmcgYnl0
+ZXMgKGluc2lkZSBpX3NpemUpICovDQogICAgICAgICAgICAgICAgaWYgKGxlZnQgPiAwICYmIHBv
+cyA8IGlub2RlLT5pX3NpemUpIHsNCisgICAgICAgICAgICAgICAgICAgICAgIGludCBkaWRwYWdl
+czsNCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIChwb3MgKyBsZWZ0ID4gaW5vZGUtPmlfc2l6
+ZSkNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbGVmdCA9IGlub2RlLT5pX3NpemUg
+LSBwb3M7DQogDQotICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCJ6ZXJvIHRhaWwgJWRcbiIs
+IGxlZnQpOw0KLSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3Jh
+bmdlKHBhZ2VfYWxpZ24gKyByZWFkLCBsZWZ0LA0KKyAgICAgICAgICAgICAgICAgICAgICAgcmV0
+ID0gbWluKGxlZnQsIHRoaXNfbGVuKTsNCisgICAgICAgICAgICAgICAgICAgICAgIGRvdXQoInpl
+cm8gdGFpbCAlZFxuIiwgcmV0KTsNCisgICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19w
+YWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwgcmV0LA0KICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhZ2VzKTsNCi0gICAgICAgICAg
+ICAgICAgICAgICAgIHJlYWQgKz0gbGVmdDsNCisgICAgICAgICAgICAgICAgICAgICAgIGRpZHBh
+Z2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQorDQorICAgICAg
+ICAgICAgICAgICAgICAgICBwb3MgKz0gcmV0Ow0KKyAgICAgICAgICAgICAgICAgICAgICAgcmVh
+ZCA9IHBvcyAtIG9mZjsNCisgICAgICAgICAgICAgICAgICAgICAgIGxlZnQgLT0gcmV0Ow0KKyAg
+ICAgICAgICAgICAgICAgICAgICAgcGFnZV9wb3MgKz0gZGlkcGFnZXM7DQorICAgICAgICAgICAg
+ICAgICAgICAgICBwYWdlc19sZWZ0IC09IGRpZHBhZ2VzOw0KKw0KKyAgICAgICAgICAgICAgICAg
+ICAgICAgLyogaGl0IHN0cmlwZT8gKi8NCisgICAgICAgICAgICAgICAgICAgICAgIGlmIChsZWZ0
+ICYmIGhpdF9zdHJpcGUpDQorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gbW9y
+ZTsNCiAgICAgICAgICAgICAgICB9DQogICAgICAgIH0NCiA=
 
-2013-7-31=A3=AC 2:01=A3=AC Sage Weil <sage@inktank.com> wrote:
-
-> Hi Haomai,
->=20
-> On Wed, 31 Jul 2013, Haomai Wang wrote:
->> Every node of ceph cluster has a backend filesystem such as btrfs,
->> xfs and ext4 that provides storage for data objects, whose location
->> are determined by CRUSH algorithm. There should exists an abstract
->> interface sitting between osd and backend store, allowing different
->> backend store implementation. Currently, we only have general=20
->> POSIX interface. LevelDB is a fast key-value storage library written=
- at=20
->> Google that provides an ordered mapping from string keys to string=20
->> values. We could implement a LevelDB backend to support base=20
->> operations correspond to POSIX operations.  LevelDB driver enables=20
->> gateway to communicate with LevelDB to store objects on the node=20
->> basis.
->>=20
->>=20
->> LevelDB driver is attractive by the folks who own a special use case=
-=20
->> such as a write-heave system. If we can abstract a general interface=
-,=20
->> we can choose other DBM if you find it more suitable, such as Kyoto=20
->> Cabinet, BDB. Futhermore, we can choose backen store for each OSD
->> node. So we have different OSD type for special purpose.
->>=20
->> Expected Results: Objects can be stored reliably to LevelDB. The IO=20
->> performance and recovery process can be comparable to original=20
->> stores. And for special case, LevelDB driver should have much better=
-=20
->> performance than local filesystem backend driver. The snapshot and
->> any features you think of are optional.
->=20
-> I added a comment in the wiki, but I'll reply here.
->=20
-> Much of what you're talking about is already in place:
->=20
-> - There is an ObjectStore.h abstraction of the local storage.  The on=
-ly=20
->   up to date implementation is FileStore, which uses a combination=20
->   of a local file system and leveldb, but other backends have been us=
-ed=20
->   in the past, and new ones can we easily added in.
->=20
-> - We currently use leveldb for the 'omap' component of rados objects.=
- =20
->   That is, each rados object has a bytestream portion (like a file),=20
->   attr (like extended attributes), and an omap (keys/values).  All of=
-=20
->   none of those interfaces can be used for any given object, although=
-=20
->   most users only use one interface at a time.  The main limitation h=
-ere=20
->   if you want to use leveldb only is that we still have an inode in t=
-he=20
->   file system to represent each object, even when it contains only=20
->   key/value pairs.
->=20
-> - The use of leveldb itself is also well abstracted by a KeyValueDB=20
->   interface, so other key/value libraries could be swapped in in its=20
->   place.  The main other component is a middle layer that wraps the k=
-v=20
->   store to provide copy-on-write type semantics for each object's set=
- of=20
->   keys (to facilitate the snapshot functionality in rados/ceph).
->=20
-> If you have a workload that you want to be purgely key/value based, i=
-t=20
-> would be possible to write a much simpler ObjectStore implementation =
-that=20
-> ignores or trivially implements the byte and attr portions of the obj=
-ect=20
-> in leveldb (or the KeyValueDB abstraction).  It would have very diffe=
-rent=20
-> performance characteristics than what we're doing now, of course.  Yo=
-u=20
-> might also be interested in looking at the HyperLevelDB project, whic=
-h is=20
-> a fork of leveldb that focuses on multithreading and compaction=20
-> performance.
-I'm happy to hear it.=20
-
-I think there may exists one thing you may leave out.  If we abstract a=
- unified
-or more different interfaces, we can allow different pool to use in dif=
-ferent
-situation. For example, there exists two LevelDB backend OSD nodes form=
-ing
-up a distributed k/v store, three Btrfs OSD nodes forming up a traditio=
-nal use case.
-More imaging space will be given to users.
->=20
-> We've heard from other people who are interested in wiring different=20
-> key/value backends into the OSD, so any work to make it easier to do =
-that=20
-> would be great!
->=20
-> sage
-
-Best regards,
-Wheats
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
