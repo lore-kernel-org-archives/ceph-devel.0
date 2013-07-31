@@ -1,72 +1,53 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: question about striped_read
-Date: Wed, 31 Jul 2013 09:36:52 +0800
-Message-ID: <201307310933358798964@gmail.com>
-References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com>,
-	<CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_wrvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com>,
-	<alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com>,
-	<alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net>
-Reply-To: majianpeng <majianpeng@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Blueprint:  Add LevelDB support to ceph cluster backend store
+Date: Wed, 31 Jul 2013 11:10:38 +0800
+Message-ID: <C0D1D705-4B4F-4189-ACBF-4C39D80984DA@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.5 \(1508\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:48341 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752619Ab3GaBii (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 21:38:38 -0400
-Received: by mail-pa0-f44.google.com with SMTP id jh10so238269pab.31
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 18:38:38 -0700 (PDT)
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:51953 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751659Ab3GaDKn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 23:10:43 -0400
+Received: by mail-pd0-f177.google.com with SMTP id u10so129964pdi.8
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 20:10:43 -0700 (PDT)
+Received: from [10.96.24.99] (notes4.com. [106.187.36.73])
+        by mx.google.com with ESMTPSA id s5sm86213341pbo.38.2013.07.30.20.10.41
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 30 Jul 2013 20:10:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-W3NuaXBdDQpJIHRoaW5rIHRoaXMgcGF0Y2ggY2FuIGRvIHdvcms6DQpUaG9zZSBjYXNlIHdoaWNo
-IGkgdGVzdGVkDQpBOiBmaWxlc2l6ZT0wLCAgYnVmZmVyPTFNDQpCOiAgZGF0YVsyTV0gfCBob2xl
-fCBkYXRhWzJNXSwgYnM9IDZNLzdNDQpDOiBkYXRhWzRtXSB8IGhvbGUgfCBob2xlIHxkYXRhWzJN
-XSAgYnM9MTZNLzE4TQ0KDQpBcmUgdGhlcmUgc29tZSBjYXNlIGlnbm9yZT8NClRoYW5rcyENCkpp
-YW5wZW5nIE1hDQoNCg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxl
-LmMNCmluZGV4IDJkZGYwNjEuLjk2Y2U4OTMgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2ZpbGUuYw0K
-KysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC0zMTksNyArMzE5LDcgQEAgc3RhdGljIGludCBzdHJp
-cGVkX3JlYWQoc3RydWN0IGlub2RlICppbm9kZSwNCiAgICAgICAgaW50IHJlYWQ7DQogICAgICAg
-IHN0cnVjdCBwYWdlICoqcGFnZV9wb3M7DQogICAgICAgIGludCByZXQ7DQotICAgICAgIGJvb2wg
-aGl0X3N0cmlwZSwgd2FzX3Nob3J0Ow0KKyAgICAgICBib29sIGhpdF9zdHJpcGUsIHdhc19zaG9y
-dCwgaGl0X2hvbGUgPSBmYWxzZTsNCiANCiAgICAgICAgLyoNCiAgICAgICAgICogd2UgbWF5IG5l
-ZWQgdG8gZG8gbXVsdGlwbGUgcmVhZHMuICBub3QgYXRvbWljLCB1bmZvcnR1bmF0ZWx5Lg0KQEAg
-LTM0MiwyMSArMzQyLDMwIEBAIG1vcmU6DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgY2ktPmlfdHJ1bmNhdGVfc2VxLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IGNpLT5pX3RydW5jYXRlX3NpemUsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-cGFnZV9wb3MsIHBhZ2VzX2xlZnQsIHBhZ2VfYWxpZ24pOw0KLSAgICAgICBpZiAocmV0ID09IC1F
-Tk9FTlQpDQorDQorICAgICAgIGlmICgocmV0ID09IDAgIHx8IHJldCA9PSAtRU5PRU5UKSAmJiBw
-b3MgPCBpbm9kZS0+aV9zaXplKQ0KKyAgICAgICAgICAgICAgIGhpdF9ob2xlID0gdHJ1ZTsNCisg
-ICAgICAgZWxzZSBpZiAocmV0ID09IC1FTk9FTlQpDQogICAgICAgICAgICAgICAgcmV0ID0gMDsN
-CisgICAgICAgDQogICAgICAgIGhpdF9zdHJpcGUgPSB0aGlzX2xlbiA8IGxlZnQ7DQotICAgICAg
-IHdhc19zaG9ydCA9IHJldCA+PSAwICYmIHJldCA8IHRoaXNfbGVuOw0KLSAgICAgICBkb3V0KCJz
-dHJpcGVkX3JlYWQgJWxsdX4ldSAocmVhZCAldSkgZ290ICVkJXMlc1xuIiwgcG9zLCBsZWZ0LCBy
-ZWFkLA0KLSAgICAgICAgICAgIHJldCwgaGl0X3N0cmlwZSA/ICIgSElUU1RSSVBFIiA6ICIiLCB3
-YXNfc2hvcnQgPyAiIFNIT1JUIiA6ICIiKTsNCi0NCi0gICAgICAgaWYgKHJldCA+IDApIHsNCi0g
-ICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFHRV9D
-QUNIRV9TSElGVDsNCi0NCi0gICAgICAgICAgICAgICBpZiAocmVhZCA8IHBvcyAtIG9mZikgew0K
-LSAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwg
-b2ZmICsgcmVhZCwgcG9zKTsNCi0gICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19wYWdl
-X3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwNCi0gICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3MgLSBvZmYgLSByZWFkLCBwYWdlcyk7DQor
-ICAgICAgIHdhc19zaG9ydCA9IHJldCA+IDAgJiYgcmV0IDwgdGhpc19sZW47DQorICAgICAgIGRv
-dXQoInN0cmlwZWRfcmVhZCAlbGx1fiV1IChyZWFkICV1KSBnb3QgJWQlcyVzJXNcbiIsIHBvcywg
-bGVmdCwgcmVhZCwNCisgICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJVFNUUklQRSIg
-OiAiIiwgd2FzX3Nob3J0ID8gIiBTSE9SVCIgOiAiIiwNCisgICAgICAgICAgICBoaXRfaG9sZSA/
-ICIgSElUSE9MRSIgOiAiIik7DQorDQorICAgICAgIGlmIChyZXQgPiAwIHx8IGhpdF9ob2xlKSB7
-DQorICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzOw0KKyAgICAgICAgICAgICAgIA0KKyAgICAg
-ICAgICAgICAgIGlmIChoaXRfaG9sZSkgew0KKyAgICAgICAgICAgICAgICAgICAgICAgcmV0ID0g
-dGhpc19sZW47IA0KKyAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gaG9sZSAlbGx1
-IHRvICVsbHVcbiIsIHBvcyAsIHBvcyArIHJldCk7DQorICAgICAgICAgICAgICAgICAgICAgICBj
-ZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsIA0KKyAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXQsIHBhZ2Vz
-KTsNCisgICAgICAgICAgICAgICAgICAgICAgIGhpdF9ob2xlID0gZmFsc2U7DQogICAgICAgICAg
-ICAgICAgfQ0KKyAgICAgICAgICAgICAgIGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+
-IFBBR0VfQ0FDSEVfU0hJRlQ7DQorDQogICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCiAgICAg
-ICAgICAgICAgICByZWFkID0gcG9zIC0gb2ZmOw0KICAgICAgICAgICAgICAgIGxlZnQgLT0gcmV0
-Ow==
+Every node of ceph cluster has a backend filesystem such as btrfs,
+xfs and ext4 that provides storage for data objects, whose location
+are determined by CRUSH algorithm. There should exists an abstract
+interface sitting between osd and backend store, allowing different
+backend store implementation. Currently, we only have general 
+POSIX interface. LevelDB is a fast key-value storage library written at 
+Google that provides an ordered mapping from string keys to string 
+values. We could implement a LevelDB backend to support base 
+operations correspond to POSIX operations.  LevelDB driver enables 
+gateway to communicate with LevelDB to store objects on the node 
+basis.
+
+
+LevelDB driver is attractive by the folks who own a special use case 
+such as a write-heave system. If we can abstract a general interface, 
+we can choose other DBM if you find it more suitable, such as Kyoto 
+Cabinet, BDB. Futhermore, we can choose backen store for each OSD
+node. So we have different OSD type for special purpose.
+
+Expected Results: Objects can be stored reliably to LevelDB. The IO 
+performance and recovery process can be comparable to original 
+stores. And for special case, LevelDB driver should have much better 
+performance than local filesystem backend driver. The snapshot and
+any features you think of are optional.
+
+Best regards,
+Wheats
+
+
 
