@@ -1,170 +1,195 @@
-From: Sage Weil <sage@inktank.com>
+From: majianpeng <majianpeng@gmail.com>
 Subject: Re: Re: question about striped_read
-Date: Tue, 30 Jul 2013 17:40:30 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net>
-References: <201307250852310158703@gmail.com> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com>
- <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com>
- <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com>
- <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com>,  <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_wrvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com>
+Date: Wed, 31 Jul 2013 08:44:56 +0800
+Message-ID: <201307310844488455702@gmail.com>
+References: <201307250852310158703@gmail.com> <201307251455102701172@gmail.com> <CAAM7YAnDKvGBsXxzbcsFHTbTo7-7AgNnRXRCK+gEbvkwGuj5cg@mail.gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyN
+ mUfov6g@mail.gmail.com> <201307301941552785741@gmail.com>,
+	<CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_wrvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com>,
+	<alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43040 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754759Ab3GaAka (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 20:40:30 -0400
-In-Reply-To: <201307310827296030660@gmail.com>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:59381 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752113Ab3GaApE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jul 2013 20:45:04 -0400
+Received: by mail-pb0-f48.google.com with SMTP id ma3so90198pbc.7
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 17:45:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 31 Jul 2013, majianpeng wrote:
-> >On Tue, Jul 30, 2013 at 7:41 PM, majianpeng <majianpeng@gmail.com> wrote:
-> >>>>
-> >>>>>dd if=/dev/urandom bs=1M count=2 of=file_with_holes
-> >>>>>dd if=/dev/urandom bs=1M count=2 seek=4 of=file_with_holes conv=notrunc
-> >>>>>dd if=file_with_holes bs=8M >/dev/null
-> >>>>>
-> >>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> >>>> index 2ddf061..22a98e5 100644
-> >>>> --- a/fs/ceph/file.c
-> >>>> +++ b/fs/ceph/file.c
-> >>>> @@ -349,17 +349,17 @@ more:
-> >>>>         dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
-> >>>>              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
-> >>>>
-> >>>> -       if (ret > 0) {
-> >>>> -               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> >>>> +       if (ret >= 0) {
-> >>>> +               int didpages = (page_align + this_len) >> PAGE_CACHE_SHIFT;
-> >>>>
-> >>>> -               if (read < pos - off) {
-> >>>> -                       dout(" zero gap %llu to %llu\n", off + read, pos);
-> >>>> -                       ceph_zero_page_vector_range(page_align + read,
-> >>>> -                                                   pos - off - read, pages);
-> >>>> +               if (was_short) {
-> >>>> +                       dout(" zero gap %llu to %llu\n", pos + ret, pos + this_len);
-> >>>> +                       ceph_zero_page_vector_range(page_align + ret,
-> >>>> +                                                   this_len - ret, pages);
-> >>>>                 }
-> >>>> -               pos += ret;
-> >>>> +               pos += this_len;
-> >>>>                 read = pos - off;
-> >>>> -               left -= ret;
-> >>>> +               left -= this_len;
-> >>>>                 page_pos += didpages;
-> >>>>                 pages_left -= didpages;
-> >>>>
-> >>>> This patch can do those case. It only add ret== 0 in judgement 'ret > 0".
-> >>>
-> >>>maybe we should add a  i_size check. stop reading next strip object
-> >>>when 'pos > i_size'
-> >>>
-> >> I think we can't do this because i_size may smaller than real size in ceph.
-> >>
-> >ceph_aio_read() calls ceph_do_getattr() when 'checkeof = true', it
-> >handles the case.
-> >
-> >We must do i_size check in striped_read(), otherwise user program always gets as
-> >much data as it requests. For example
-> >
-> >dd if=/dev/urandom bs=1M count=1 of=file_with_holes
-> >dd if=file_with_holes bs=64M iflag=direct of=/dev/null
-> >
-> Before doing that, we must know the meaning of return value.
+Pk9uIFdlZCwgMzEgSnVsIDIwMTMsIG1hamlhbnBlbmcgd3JvdGU6DQo+PiA+T24gVHVlLCBKdWwg
+MzAsIDIwMTMgYXQgNzo0MSBQTSwgbWFqaWFucGVuZyA8bWFqaWFucGVuZ0BnbWFpbC5jb20+IHdy
+b3RlOg0KW3NuaXBdDQo+DQo+Rm9yIGNlcGhfb3NkY19yZWFkcGFnZXMoKSwNCj4NCj4+IEE6IHJl
+dCA9IEVOT0VOVA0KPg0KRnJvbSB0aGUgb3JpZ2luYWwgY29kZSwgZm9yIHRoaXMgY2FzZSB3ZSBz
+aG91bGQgemVybyB0aGUgYXJlYS4NCldoeT8NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWENCj5UaGUg
+b2JqZWN0IGRvZXMgbm90IGV4aXN0Lg0KPg0KPj4gQjogcmV0ID0gMA0KPg0KPlRoZSBvYmplY3Qg
+ZXhpc3RzIGJ1dCB3ZSByZWFkIDAgYnl0ZXMsIHdoaWNoIG1lYW5zIHdlIGFyZSBwYXN0IEVPRiBv
+ciB0aGUgDQo+b2JqZWN0IGhhcyBzaXplIDAgYnl0ZXMuICBFaXRoZXIgd2F5LCB3ZSBhcmUgZWl0
+aGVyIGluIGEgaG9sZSBvciBwYXN0IEVPRi4NCj4NCj5zYWdlDQo+DQo+PiANCj4+IE9ubHkgd2Ug
+a25vd2VkIHRoaXMsIHdlIGNhbiBoYW5kbGUgZXhhY3RseS4NCj4+IFNhZ2UsIGNhbiB5b3UgZXhw
+bGFpbiB0aG9zZSBtZWFuaW5nIGluIGRldGFpbD8NCj4+IA0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBl
+bmcgTWENCj4+IA0KPj4gPlJlZ2FyZHMNCj4+ID5ZYW4sIFpoZW5nDQo+PiA+DQo+PiA+DQo+PiA+
+Pj4+IEJ1dCBpIHRoaW5rIGkgd2lsbCBhZGQgYSBwYXJhbWV0ZXIgYWJvdXQgaGl0X2hvbGUuIEl0
+IHdpbGwgbWFrZSB0aGUgY29kZSBlYXN5IHRvIHVuZGVyc3RhbmQuDQo+PiA+Pj4+DQo+PiA+Pj4N
+Cj4+ID4+PiBpIHRoaW5rICd3YXNfc2hvcnQnIGlzIGVxdWFsIHRvICdoaXRfaG9sZScNCj4+ID4+
+Pg0KPj4gPltzbmlwXQ0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBlbmcgTWENCj4+ID5PbiBUdWUsIEp1
+bCAzMCwgMjAxMyBhdCA3OjQxIFBNLCBtYWppYW5wZW5nIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4g
+d3JvdGU6DQo+PiA+Pj4+DQo+PiA+Pj4+PmRkIGlmPS9kZXYvdXJhbmRvbSBicz0xTSBjb3VudD0y
+IG9mPWZpbGVfd2l0aF9ob2xlcw0KPj4gPj4+Pj5kZCBpZj0vZGV2L3VyYW5kb20gYnM9MU0gY291
+bnQ9MiBzZWVrPTQgb2Y9ZmlsZV93aXRoX2hvbGVzIGNvbnY9bm90cnVuYw0KPj4gPj4+Pj5kZCBp
+Zj1maWxlX3dpdGhfaG9sZXMgYnM9OE0gPi9kZXYvbnVsbA0KPj4gPj4+Pj4NCj4+ID4+Pj4gZGlm
+ZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gaW5kZXgg
+MmRkZjA2MS4uMjJhOThlNSAxMDA2NDQNCj4+ID4+Pj4gLS0tIGEvZnMvY2VwaC9maWxlLmMNCj4+
+ID4+Pj4gKysrIGIvZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gQEAgLTM0OSwxNyArMzQ5LDE3IEBA
+IG1vcmU6DQo+PiA+Pj4+ICAgICAgICAgZG91dCgic3RyaXBlZF9yZWFkICVsbHV+JXUgKHJlYWQg
+JXUpIGdvdCAlZCVzJXNcbiIsIHBvcywgbGVmdCwgcmVhZCwNCj4+ID4+Pj4gICAgICAgICAgICAg
+IHJldCwgaGl0X3N0cmlwZSA/ICIgSElUU1RSSVBFIiA6ICIiLCB3YXNfc2hvcnQgPyAiIFNIT1JU
+IiA6ICIiKTsNCj4+ID4+Pj4NCj4+ID4+Pj4gLSAgICAgICBpZiAocmV0ID4gMCkgew0KPj4gPj4+
+PiAtICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBB
+R0VfQ0FDSEVfU0hJRlQ7DQo+PiA+Pj4+ICsgICAgICAgaWYgKHJldCA+PSAwKSB7DQo+PiA+Pj4+
+ICsgICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHRoaXNfbGVuKSA+
+PiBQQUdFX0NBQ0hFX1NISUZUOw0KPj4gPj4+Pg0KPj4gPj4+PiAtICAgICAgICAgICAgICAgaWYg
+KHJlYWQgPCBwb3MgLSBvZmYpIHsNCj4+ID4+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgZG91
+dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwgb2ZmICsgcmVhZCwgcG9zKTsNCj4+ID4+Pj4g
+LSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2Vf
+YWxpZ24gKyByZWFkLA0KPj4gPj4+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPj4gPj4+PiArICAg
+ICAgICAgICAgICAgaWYgKHdhc19zaG9ydCkgew0KPj4gPj4+PiArICAgICAgICAgICAgICAgICAg
+ICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBwb3MgKyByZXQsIHBvcyArIHRo
+aXNfbGVuKTsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2Vf
+dmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZXQsDQo+PiA+Pj4+ICsgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0aGlzX2xlbiAtIHJldCwgcGFnZXMp
+Ow0KPj4gPj4+PiAgICAgICAgICAgICAgICAgfQ0KPj4gPj4+PiAtICAgICAgICAgICAgICAgcG9z
+ICs9IHJldDsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgIHBvcyArPSB0aGlzX2xlbjsNCj4+ID4+
+Pj4gICAgICAgICAgICAgICAgIHJlYWQgPSBwb3MgLSBvZmY7DQo+PiA+Pj4+IC0gICAgICAgICAg
+ICAgICBsZWZ0IC09IHJldDsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgIGxlZnQgLT0gdGhpc19s
+ZW47DQo+PiA+Pj4+ICAgICAgICAgICAgICAgICBwYWdlX3BvcyArPSBkaWRwYWdlczsNCj4+ID4+
+Pj4gICAgICAgICAgICAgICAgIHBhZ2VzX2xlZnQgLT0gZGlkcGFnZXM7DQo+PiA+Pj4+DQo+PiA+
+Pj4+IFRoaXMgcGF0Y2ggY2FuIGRvIHRob3NlIGNhc2UuIEl0IG9ubHkgYWRkIHJldD09IDAgaW4g
+anVkZ2VtZW50ICdyZXQgPiAwIi4NCj4+ID4+Pg0KPj4gPj4+bWF5YmUgd2Ugc2hvdWxkIGFkZCBh
+ICBpX3NpemUgY2hlY2suIHN0b3AgcmVhZGluZyBuZXh0IHN0cmlwIG9iamVjdA0KPj4gPj4+d2hl
+biAncG9zID4gaV9zaXplJw0KPj4gPj4+DQo+PiA+PiBJIHRoaW5rIHdlIGNhbid0IGRvIHRoaXMg
+YmVjYXVzZSBpX3NpemUgbWF5IHNtYWxsZXIgdGhhbiByZWFsIHNpemUgaW4gY2VwaC4NCj4+ID4+
+DQo+PiA+Y2VwaF9haW9fcmVhZCgpIGNhbGxzIGNlcGhfZG9fZ2V0YXR0cigpIHdoZW4gJ2NoZWNr
+ZW9mID0gdHJ1ZScsIGl0DQo+PiA+aGFuZGxlcyB0aGUgY2FzZS4NCj4+ID4NCj4+ID5XZSBtdXN0
+IGRvIGlfc2l6ZSBjaGVjayBpbiBzdHJpcGVkX3JlYWQoKSwgb3RoZXJ3aXNlIHVzZXIgcHJvZ3Jh
+bSBhbHdheXMgZ2V0cyBhcw0KPj4gPm11Y2ggZGF0YSBhcyBpdCByZXF1ZXN0cy4gRm9yIGV4YW1w
+bGUNCj4+ID4NCj4+ID5kZCBpZj0vZGV2L3VyYW5kb20gYnM9MU0gY291bnQ9MSBvZj1maWxlX3dp
+dGhfaG9sZXMNCj4+ID5kZCBpZj1maWxlX3dpdGhfaG9sZXMgYnM9NjRNIGlmbGFnPWRpcmVjdCBv
+Zj0vZGV2L251bGwNCj4+ID4NCj4+ID5SZWdhcmRzDQo+PiA+WWFuLCBaaGVuZw0KPj4gPg0KPj4g
+Pg0KPj4gPj4+PiBCdXQgaSB0aGluayBpIHdpbGwgYWRkIGEgcGFyYW1ldGVyIGFib3V0IGhpdF9o
+b2xlLiBJdCB3aWxsIG1ha2UgdGhlIGNvZGUgZWFzeSB0byB1bmRlcnN0YW5kLg0KPj4gPj4+Pg0K
+Pj4gPj4+DQo+PiA+Pj4gaSB0aGluayAnd2FzX3Nob3J0JyBpcyBlcXVhbCB0byAnaGl0X2hvbGUn
+DQo+PiA+Pj4NCj4+ID5bc25pcF0NClRoYW5rcyENCkppYW5wZW5nIE1hDQo+T24gV2VkLCAzMSBK
+dWwgMjAxMywgbWFqaWFucGVuZyB3cm90ZToNCj4+ID5PbiBUdWUsIEp1bCAzMCwgMjAxMyBhdCA3
+OjQxIFBNLCBtYWppYW5wZW5nIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+PiA+Pj4+
+DQo+PiA+Pj4+PmRkIGlmPS9kZXYvdXJhbmRvbSBicz0xTSBjb3VudD0yIG9mPWZpbGVfd2l0aF9o
+b2xlcw0KPj4gPj4+Pj5kZCBpZj0vZGV2L3VyYW5kb20gYnM9MU0gY291bnQ9MiBzZWVrPTQgb2Y9
+ZmlsZV93aXRoX2hvbGVzIGNvbnY9bm90cnVuYw0KPj4gPj4+Pj5kZCBpZj1maWxlX3dpdGhfaG9s
+ZXMgYnM9OE0gPi9kZXYvbnVsbA0KPj4gPj4+Pj4NCj4+ID4+Pj4gZGlmZiAtLWdpdCBhL2ZzL2Nl
+cGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gaW5kZXggMmRkZjA2MS4uMjJhOThl
+NSAxMDA2NDQNCj4+ID4+Pj4gLS0tIGEvZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gKysrIGIvZnMv
+Y2VwaC9maWxlLmMNCj4+ID4+Pj4gQEAgLTM0OSwxNyArMzQ5LDE3IEBAIG1vcmU6DQo+PiA+Pj4+
+ICAgICAgICAgZG91dCgic3RyaXBlZF9yZWFkICVsbHV+JXUgKHJlYWQgJXUpIGdvdCAlZCVzJXNc
+biIsIHBvcywgbGVmdCwgcmVhZCwNCj4+ID4+Pj4gICAgICAgICAgICAgIHJldCwgaGl0X3N0cmlw
+ZSA/ICIgSElUU1RSSVBFIiA6ICIiLCB3YXNfc2hvcnQgPyAiIFNIT1JUIiA6ICIiKTsNCj4+ID4+
+Pj4NCj4+ID4+Pj4gLSAgICAgICBpZiAocmV0ID4gMCkgew0KPj4gPj4+PiAtICAgICAgICAgICAg
+ICAgaW50IGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7
+DQo+PiA+Pj4+ICsgICAgICAgaWYgKHJldCA+PSAwKSB7DQo+PiA+Pj4+ICsgICAgICAgICAgICAg
+ICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHRoaXNfbGVuKSA+PiBQQUdFX0NBQ0hFX1NI
+SUZUOw0KPj4gPj4+Pg0KPj4gPj4+PiAtICAgICAgICAgICAgICAgaWYgKHJlYWQgPCBwb3MgLSBv
+ZmYpIHsNCj4+ID4+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVs
+bHUgdG8gJWxsdVxuIiwgb2ZmICsgcmVhZCwgcG9zKTsNCj4+ID4+Pj4gLSAgICAgICAgICAgICAg
+ICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0K
+Pj4gPj4+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPj4gPj4+PiArICAgICAgICAgICAgICAgaWYg
+KHdhc19zaG9ydCkgew0KPj4gPj4+PiArICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVy
+byBnYXAgJWxsdSB0byAlbGx1XG4iLCBwb3MgKyByZXQsIHBvcyArIHRoaXNfbGVuKTsNCj4+ID4+
+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBh
+Z2VfYWxpZ24gKyByZXQsDQo+PiA+Pj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICB0aGlzX2xlbiAtIHJldCwgcGFnZXMpOw0KPj4gPj4+PiAgICAg
+ICAgICAgICAgICAgfQ0KPj4gPj4+PiAtICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCj4+ID4+
+Pj4gKyAgICAgICAgICAgICAgIHBvcyArPSB0aGlzX2xlbjsNCj4+ID4+Pj4gICAgICAgICAgICAg
+ICAgIHJlYWQgPSBwb3MgLSBvZmY7DQo+PiA+Pj4+IC0gICAgICAgICAgICAgICBsZWZ0IC09IHJl
+dDsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgIGxlZnQgLT0gdGhpc19sZW47DQo+PiA+Pj4+ICAg
+ICAgICAgICAgICAgICBwYWdlX3BvcyArPSBkaWRwYWdlczsNCj4+ID4+Pj4gICAgICAgICAgICAg
+ICAgIHBhZ2VzX2xlZnQgLT0gZGlkcGFnZXM7DQo+PiA+Pj4+DQo+PiA+Pj4+IFRoaXMgcGF0Y2gg
+Y2FuIGRvIHRob3NlIGNhc2UuIEl0IG9ubHkgYWRkIHJldD09IDAgaW4ganVkZ2VtZW50ICdyZXQg
+PiAwIi4NCj4+ID4+Pg0KPj4gPj4+bWF5YmUgd2Ugc2hvdWxkIGFkZCBhICBpX3NpemUgY2hlY2su
+IHN0b3AgcmVhZGluZyBuZXh0IHN0cmlwIG9iamVjdA0KPj4gPj4+d2hlbiAncG9zID4gaV9zaXpl
+Jw0KPj4gPj4+DQo+PiA+PiBJIHRoaW5rIHdlIGNhbid0IGRvIHRoaXMgYmVjYXVzZSBpX3NpemUg
+bWF5IHNtYWxsZXIgdGhhbiByZWFsIHNpemUgaW4gY2VwaC4NCj4+ID4+DQo+PiA+Y2VwaF9haW9f
+cmVhZCgpIGNhbGxzIGNlcGhfZG9fZ2V0YXR0cigpIHdoZW4gJ2NoZWNrZW9mID0gdHJ1ZScsIGl0
+DQo+PiA+aGFuZGxlcyB0aGUgY2FzZS4NCj4+ID4NCj4+ID5XZSBtdXN0IGRvIGlfc2l6ZSBjaGVj
+ayBpbiBzdHJpcGVkX3JlYWQoKSwgb3RoZXJ3aXNlIHVzZXIgcHJvZ3JhbSBhbHdheXMgZ2V0cyBh
+cw0KPj4gPm11Y2ggZGF0YSBhcyBpdCByZXF1ZXN0cy4gRm9yIGV4YW1wbGUNCj4+ID4NCj4+ID5k
+ZCBpZj0vZGV2L3VyYW5kb20gYnM9MU0gY291bnQ9MSBvZj1maWxlX3dpdGhfaG9sZXMNCj4+ID5k
+ZCBpZj1maWxlX3dpdGhfaG9sZXMgYnM9NjRNIGlmbGFnPWRpcmVjdCBvZj0vZGV2L251bGwNCj4+
+ID4NCj4+IEJlZm9yZSBkb2luZyB0aGF0LCB3ZSBtdXN0IGtub3cgdGhlIG1lYW5pbmcgb2YgcmV0
+dXJuIHZhbHVlLg0KPg0KPkZvciBjZXBoX29zZGNfcmVhZHBhZ2VzKCksDQo+DQo+PiBBOiByZXQg
+PSBFTk9FTlQNCj4NCj5UaGUgb2JqZWN0IGRvZXMgbm90IGV4aXN0Lg0KPg0KPj4gQjogcmV0ID0g
+MA0KPg0KPlRoZSBvYmplY3QgZXhpc3RzIGJ1dCB3ZSByZWFkIDAgYnl0ZXMsIHdoaWNoIG1lYW5z
+IHdlIGFyZSBwYXN0IEVPRiBvciB0aGUgDQo+b2JqZWN0IGhhcyBzaXplIDAgYnl0ZXMuICBFaXRo
+ZXIgd2F5LCB3ZSBhcmUgZWl0aGVyIGluIGEgaG9sZSBvciBwYXN0IEVPRi4NCj4NCj5zYWdlDQo+
+DQo+PiANCj4+IE9ubHkgd2Uga25vd2VkIHRoaXMsIHdlIGNhbiBoYW5kbGUgZXhhY3RseS4NCj4+
+IFNhZ2UsIGNhbiB5b3UgZXhwbGFpbiB0aG9zZSBtZWFuaW5nIGluIGRldGFpbD8NCj4+IA0KPj4g
+VGhhbmtzIQ0KPj4gSmlhbnBlbmcgTWENCj4+IA0KPj4gPlJlZ2FyZHMNCj4+ID5ZYW4sIFpoZW5n
+DQo+PiA+DQo+PiA+DQo+PiA+Pj4+IEJ1dCBpIHRoaW5rIGkgd2lsbCBhZGQgYSBwYXJhbWV0ZXIg
+YWJvdXQgaGl0X2hvbGUuIEl0IHdpbGwgbWFrZSB0aGUgY29kZSBlYXN5IHRvIHVuZGVyc3RhbmQu
+DQo+PiA+Pj4+DQo+PiA+Pj4NCj4+ID4+PiBpIHRoaW5rICd3YXNfc2hvcnQnIGlzIGVxdWFsIHRv
+ICdoaXRfaG9sZScNCj4+ID4+Pg0KPj4gPltzbmlwXQ0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBlbmcg
+TWENCj4+ID5PbiBUdWUsIEp1bCAzMCwgMjAxMyBhdCA3OjQxIFBNLCBtYWppYW5wZW5nIDxtYWpp
+YW5wZW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+PiA+Pj4+DQo+PiA+Pj4+PmRkIGlmPS9kZXYvdXJh
+bmRvbSBicz0xTSBjb3VudD0yIG9mPWZpbGVfd2l0aF9ob2xlcw0KPj4gPj4+Pj5kZCBpZj0vZGV2
+L3VyYW5kb20gYnM9MU0gY291bnQ9MiBzZWVrPTQgb2Y9ZmlsZV93aXRoX2hvbGVzIGNvbnY9bm90
+cnVuYw0KPj4gPj4+Pj5kZCBpZj1maWxlX3dpdGhfaG9sZXMgYnM9OE0gPi9kZXYvbnVsbA0KPj4g
+Pj4+Pj4NCj4+ID4+Pj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxl
+LmMNCj4+ID4+Pj4gaW5kZXggMmRkZjA2MS4uMjJhOThlNSAxMDA2NDQNCj4+ID4+Pj4gLS0tIGEv
+ZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gKysrIGIvZnMvY2VwaC9maWxlLmMNCj4+ID4+Pj4gQEAg
+LTM0OSwxNyArMzQ5LDE3IEBAIG1vcmU6DQo+PiA+Pj4+ICAgICAgICAgZG91dCgic3RyaXBlZF9y
+ZWFkICVsbHV+JXUgKHJlYWQgJXUpIGdvdCAlZCVzJXNcbiIsIHBvcywgbGVmdCwgcmVhZCwNCj4+
+ID4+Pj4gICAgICAgICAgICAgIHJldCwgaGl0X3N0cmlwZSA/ICIgSElUU1RSSVBFIiA6ICIiLCB3
+YXNfc2hvcnQgPyAiIFNIT1JUIiA6ICIiKTsNCj4+ID4+Pj4NCj4+ID4+Pj4gLSAgICAgICBpZiAo
+cmV0ID4gMCkgew0KPj4gPj4+PiAtICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2Vf
+YWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQo+PiA+Pj4+ICsgICAgICAgaWYgKHJl
+dCA+PSAwKSB7DQo+PiA+Pj4+ICsgICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9h
+bGlnbiArIHRoaXNfbGVuKSA+PiBQQUdFX0NBQ0hFX1NISUZUOw0KPj4gPj4+Pg0KPj4gPj4+PiAt
+ICAgICAgICAgICAgICAgaWYgKHJlYWQgPCBwb3MgLSBvZmYpIHsNCj4+ID4+Pj4gLSAgICAgICAg
+ICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwgb2ZmICsgcmVh
+ZCwgcG9zKTsNCj4+ID4+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2Vf
+dmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gPj4+PiAtICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFn
+ZXMpOw0KPj4gPj4+PiArICAgICAgICAgICAgICAgaWYgKHdhc19zaG9ydCkgew0KPj4gPj4+PiAr
+ICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAlbGx1XG4iLCBw
+b3MgKyByZXQsIHBvcyArIHRoaXNfbGVuKTsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZXQsDQo+PiA+Pj4+
+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0aGlz
+X2xlbiAtIHJldCwgcGFnZXMpOw0KPj4gPj4+PiAgICAgICAgICAgICAgICAgfQ0KPj4gPj4+PiAt
+ICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCj4+ID4+Pj4gKyAgICAgICAgICAgICAgIHBvcyAr
+PSB0aGlzX2xlbjsNCj4+ID4+Pj4gICAgICAgICAgICAgICAgIHJlYWQgPSBwb3MgLSBvZmY7DQo+
+PiA+Pj4+IC0gICAgICAgICAgICAgICBsZWZ0IC09IHJldDsNCj4+ID4+Pj4gKyAgICAgICAgICAg
+ICAgIGxlZnQgLT0gdGhpc19sZW47DQo+PiA+Pj4+ICAgICAgICAgICAgICAgICBwYWdlX3BvcyAr
+PSBkaWRwYWdlczsNCj4+ID4+Pj4gICAgICAgICAgICAgICAgIHBhZ2VzX2xlZnQgLT0gZGlkcGFn
+ZXM7DQo+PiA+Pj4+DQo+PiA+Pj4+IFRoaXMgcGF0Y2ggY2FuIGRvIHRob3NlIGNhc2UuIEl0IG9u
+bHkgYWRkIHJldD09IDAgaW4ganVkZ2VtZW50ICdyZXQgPiAwIi4NCj4+ID4+Pg0KPj4gPj4+bWF5
+YmUgd2Ugc2hvdWxkIGFkZCBhICBpX3NpemUgY2hlY2suIHN0b3AgcmVhZGluZyBuZXh0IHN0cmlw
+IG9iamVjdA0KPj4gPj4+d2hlbiAncG9zID4gaV9zaXplJw0KPj4gPj4+DQo+PiA+PiBJIHRoaW5r
+IHdlIGNhbid0IGRvIHRoaXMgYmVjYXVzZSBpX3NpemUgbWF5IHNtYWxsZXIgdGhhbiByZWFsIHNp
+emUgaW4gY2VwaC4NCj4+ID4+DQo+PiA+Y2VwaF9haW9fcmVhZCgpIGNhbGxzIGNlcGhfZG9fZ2V0
+YXR0cigpIHdoZW4gJ2NoZWNrZW9mID0gdHJ1ZScsIGl0DQo+PiA+aGFuZGxlcyB0aGUgY2FzZS4N
+Cj4+ID4NCj4+ID5XZSBtdXN0IGRvIGlfc2l6ZSBjaGVjayBpbiBzdHJpcGVkX3JlYWQoKSwgb3Ro
+ZXJ3aXNlIHVzZXIgcHJvZ3JhbSBhbHdheXMgZ2V0cyBhcw0KPj4gPm11Y2ggZGF0YSBhcyBpdCBy
+ZXF1ZXN0cy4gRm9yIGV4YW1wbGUNCj4+ID4NCj4+ID5kZCBpZj0vZGV2L3VyYW5kb20gYnM9MU0g
+Y291bnQ9MSBvZj1maWxlX3dpdGhfaG9sZXMNCj4+ID5kZCBpZj1maWxlX3dpdGhfaG9sZXMgYnM9
+NjRNIGlmbGFnPWRpcmVjdCBvZj0vZGV2L251bGwNCj4+ID4NCj4+ID5SZWdhcmRzDQo+PiA+WWFu
+LCBaaGVuZw0KPj4gPg0KPj4gPg0KPj4gPj4+PiBCdXQgaSB0aGluayBpIHdpbGwgYWRkIGEgcGFy
+YW1ldGVyIGFib3V0IGhpdF9ob2xlLiBJdCB3aWxsIG1ha2UgdGhlIGNvZGUgZWFzeSB0byB1bmRl
+cnN0YW5kLg0KPj4gPj4+Pg0KPj4gPj4+DQo+PiA+Pj4gaSB0aGluayAnd2FzX3Nob3J0JyBpcyBl
+cXVhbCB0byAnaGl0X2hvbGUnDQo+PiA+Pj4NCj4+ID5bc25pcF0=
 
-For ceph_osdc_readpages(),
-
-> A: ret = ENOENT
-
-The object does not exist.
-
-> B: ret = 0
-
-The object exists but we read 0 bytes, which means we are past EOF or the 
-object has size 0 bytes.  Either way, we are either in a hole or past EOF.
-
-sage
-
-> 
-> Only we knowed this, we can handle exactly.
-> Sage, can you explain those meaning in detail?
-> 
-> Thanks!
-> Jianpeng Ma
-> 
-> >Regards
-> >Yan, Zheng
-> >
-> >
-> >>>> But i think i will add a parameter about hit_hole. It will make the code easy to understand.
-> >>>>
-> >>>
-> >>> i think 'was_short' is equal to 'hit_hole'
-> >>>
-> >[snip]
-> Thanks!
-> Jianpeng Ma
-> >On Tue, Jul 30, 2013 at 7:41 PM, majianpeng <majianpeng@gmail.com> wrote:
-> >>>>
-> >>>>>dd if=/dev/urandom bs=1M count=2 of=file_with_holes
-> >>>>>dd if=/dev/urandom bs=1M count=2 seek=4 of=file_with_holes conv=notrunc
-> >>>>>dd if=file_with_holes bs=8M >/dev/null
-> >>>>>
-> >>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> >>>> index 2ddf061..22a98e5 100644
-> >>>> --- a/fs/ceph/file.c
-> >>>> +++ b/fs/ceph/file.c
-> >>>> @@ -349,17 +349,17 @@ more:
-> >>>>         dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
-> >>>>              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
-> >>>>
-> >>>> -       if (ret > 0) {
-> >>>> -               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> >>>> +       if (ret >= 0) {
-> >>>> +               int didpages = (page_align + this_len) >> PAGE_CACHE_SHIFT;
-> >>>>
-> >>>> -               if (read < pos - off) {
-> >>>> -                       dout(" zero gap %llu to %llu\n", off + read, pos);
-> >>>> -                       ceph_zero_page_vector_range(page_align + read,
-> >>>> -                                                   pos - off - read, pages);
-> >>>> +               if (was_short) {
-> >>>> +                       dout(" zero gap %llu to %llu\n", pos + ret, pos + this_len);
-> >>>> +                       ceph_zero_page_vector_range(page_align + ret,
-> >>>> +                                                   this_len - ret, pages);
-> >>>>                 }
-> >>>> -               pos += ret;
-> >>>> +               pos += this_len;
-> >>>>                 read = pos - off;
-> >>>> -               left -= ret;
-> >>>> +               left -= this_len;
-> >>>>                 page_pos += didpages;
-> >>>>                 pages_left -= didpages;
-> >>>>
-> >>>> This patch can do those case. It only add ret== 0 in judgement 'ret > 0".
-> >>>
-> >>>maybe we should add a  i_size check. stop reading next strip object
-> >>>when 'pos > i_size'
-> >>>
-> >> I think we can't do this because i_size may smaller than real size in ceph.
-> >>
-> >ceph_aio_read() calls ceph_do_getattr() when 'checkeof = true', it
-> >handles the case.
-> >
-> >We must do i_size check in striped_read(), otherwise user program always gets as
-> >much data as it requests. For example
-> >
-> >dd if=/dev/urandom bs=1M count=1 of=file_with_holes
-> >dd if=file_with_holes bs=64M iflag=direct of=/dev/null
-> >
-> >Regards
-> >Yan, Zheng
-> >
-> >
-> >>>> But i think i will add a parameter about hit_hole. It will make the code easy to understand.
-> >>>>
-> >>>
-> >>> i think 'was_short' is equal to 'hit_hole'
-> >>>
-> >[snip]
