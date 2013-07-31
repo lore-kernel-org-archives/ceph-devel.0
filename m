@@ -1,58 +1,30 @@
-From: Luke Jing Yuan <jyluke-YhiXQ1Q1pWA@public.gmane.org>
-Subject: Re: Problem with MON after reboot
-Date: Wed, 31 Jul 2013 10:32:03 +0000
-Message-ID: <E0E280CCE0E1A44898C992A9190D929A4F9CB1@MBX02-TPM.mimos.local>
-References: <E0E280CCE0E1A44898C992A9190D929A4F9C66@MBX02-TPM.mimos.local>
-	<51F8E67A.90508@mermaidconsulting.dk>
+From: Luke Jing Yuan <jyluke@mimos.my>
+Subject: Problem with MON after reboot
+Date: Wed, 31 Jul 2013 10:25:36 +0000
+Message-ID: <E0E280CCE0E1A44898C992A9190D929A4F9C9D@MBX02-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51F8E67A.90508-jJARgUQTjRwyzzc7d281tkhOQHIQSc2V@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from hydrobot.mimos.my ([192.228.138.101]:63697 "HELO
+	hydrobot.mimos.my" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1756143Ab3GaKgk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 06:36:40 -0400
 Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: =?iso-8859-1?Q?Jens_Kristian_S=F8gaard?= <jens-jJARgUQTjRwyzzc7d281tkhOQHIQSc2V@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Dear all,
 
-This happened to me twice actually. Once before I upgraded, using 0.61.4 (I=
- solved it by removing the MON and then recreating it) and this time after =
-upgrading all nodes to 0.61.7. The surprising thing to me is that the node =
-is also running OSD as well but after the upgrade and reboot, the cluster i=
-s able to pick the OSD portion up but not the MON.
+I am having an issue with MON after reboot, I had originally 3 MONs but after rebooting one of them, the quorum cannot be established. Digging through the log of the problematic MON, I found the following messages:
+
+2013-07-31 18:04:18.536331 7f4f41bfd700  0 -- 10.4.132.18:6804/0 >> 10.4.131.21:6800/0 pipe(0x305da00 sd=28 :41077 s=1 pgs=0 cs=0 l=0).failed verifying authorize reply
+2013-07-31 18:04:20.536270 7f4f48b3e700  0 cephx: verify_reply coudln't decrypt with error: error decoding block for decryption
+2013-07-31 18:04:20.536276 7f4f48b3e700  0 -- 10.4.132.18:6804/0 >> 10.4.120.21:6789/0 pipe(0x305dc80 sd=27 :38003 s=1 pgs=0 cs=0 l=0).failed verifying authorize reply
+2013-07-31 18:04:20.536302 7f4f41bfd700  0 cephx: verify_reply coudln't decrypt with error: error decoding block for decryption
+
+Wonder if someone can shed some light on the issue and how to solve this problem. Thanks.
 
 Regards,
 Luke
-
------Original Message-----
-From: Jens Kristian S=F8gaard [mailto:jens-jJARgUQTjRwyzzc7d281tkhOQHIQSc2V@public.gmane.org] =
-
-Sent: Wednesday, 31 July, 2013 6:27 PM
-To: Luke Jing Yuan
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Subject: Re: [ceph-users] Problem with MON after reboot
-
-Hi,
-
-> I am having a issue with MON after reboot, I had originally 3 MONs but =
-
-> after rebooting one of them, the quorum cannot be established. Digging
-
-Did you happen to upgrade Ceph at some time where you haven't restarted the=
- daemon?
-
-Which version of Ceph do you run on each server?
-
---
-Jens Kristian S=F8gaard, Mermaid Consulting ApS, jens-jJARgUQTjRwyzzc7d281tkhOQHIQSc2V@public.gmane.org,=
- http://www.mermaidconsulting.com/
