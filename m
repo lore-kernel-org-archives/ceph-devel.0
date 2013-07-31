@@ -1,113 +1,158 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Read ahead affect Ceph read performance much
-Date: Wed, 31 Jul 2013 04:42:28 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E4CF9F@SHSMSX102.ccr.corp.intel.com>
-References: <51F642E2.3090201@ubuntukylin.com> <51F680CF.4050903@inktank.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Wed, 31 Jul 2013 13:46:52 +0800
+Message-ID: <2013073113222469570311@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com> <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_w
+ rvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com> <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com> <alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net> <201307310933358798964@gmail.com>,
+	<CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:31887 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751699Ab3GaEmd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 00:42:33 -0400
-In-Reply-To: <51F680CF.4050903@inktank.com>
-Content-Language: en-US
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:42830 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750839Ab3GaFq4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 01:46:56 -0400
+Received: by mail-pd0-f173.google.com with SMTP id p11so333914pdj.32
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jul 2013 22:46:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-My 0.02, we have done some readahead test tuning on server(ceph osd) side, the result showing that when readahead = 0.5 * object_size(4M in default), we can get max read throughput. Readahead value larger than this generally will not help, but also not harm the performance.
+Pk9uIFdlZCwgSnVsIDMxLCAyMDEzIGF0IDk6MzYgQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+IFtzbmlwXQ0KPj4gSSB0aGluayB0aGlzIHBhdGNoIGNhbiBk
+byB3b3JrOg0KPj4gVGhvc2UgY2FzZSB3aGljaCBpIHRlc3RlZA0KPj4gQTogZmlsZXNpemU9MCwg
+IGJ1ZmZlcj0xTQ0KPj4gQjogIGRhdGFbMk1dIHwgaG9sZXwgZGF0YVsyTV0sIGJzPSA2TS83TQ0K
+Pg0KPkkgZG9uJ3QgdGhpbmsgeW91ciB6ZXJvIGJ1ZmZlciBjaGFuZ2UgaXMgY29ycmVjdCBmb3Ig
+dGhpcyB0ZXN0IGNhc2UuDQo+DQpkZCBpZj0vZGV2L3VyYW5kb20gb2Y9ZmlsZSBicz0xTSBjb3Vu
+dD0yICBvZmxhZz1kaXJlY3QNCmRkIGlmPS9kZXYvdXJhbmRvbSBvZj1maWxlIGJzPTFNIGNvdW50
+PTIgc2Vlaz00ICBvZmxhZz1kaXJlY3QNCmxzIGZpbGUNCi1ydy1yLS1yLS0gMSByb290IHJvb3Qg
+IDYyOTE0NTYgSnVsIDMxIDEyOjQ2IGZpbGUNCg0KZGVidWcgbWVzc2FnZToNCls3ODM3MC40MDgy
+MjBdIGNlcGg6ICAgICAgICAgICBmaWxlLmM6MzU1ICA6IHN0cmlwZWRfcmVhZCAwfjczNDAwMzIg
+KHJlYWQgMCkgZ290IDIwOTcxNTIgSElUU1RSSVBFIFNIT1JUDQpbNzgzNzAuNDA5MTc5XSBjZXBo
+OiAgICAgICAgICAgZmlsZS5jOjM1NSAgOiBzdHJpcGVkX3JlYWQgMjA5NzE1Mn41MjQyODgwIChy
+ZWFkIDIwOTcxNTIpIGdvdCAwIEhJVFNUUklQRSBISVRIT0xFDQpbNzgzNzAuNDA5MTgyXSBjZXBo
+OiAgICAgICAgICAgZmlsZS5jOjM2MiAgOiAgemVybyBob2xlIDIwOTcxNTIgdG8gNDE5NDMwNA0K
+Wzc4MzcwLjQzMTI4OV0gY2VwaDogICAgICAgICAgIGZpbGUuYzozNTUgIDogc3RyaXBlZF9yZWFk
+IDQxOTQzMDR+MzE0NTcyOCAocmVhZCA0MTk0MzA0KSBnb3QgMjA5NzE1MiBTSE9SVA0KWzc4Mzcw
+LjQzMTI5NF0gY2VwaDogICAgICAgICAgIGZpbGUuYzozOTkgIDogc3RyaXBlZF9yZWFkIHJldHVy
+bnMgNjI5MTQ1Ng0KDQpBbSBpIG1pc3Npbmcgc29tZXRoaW5nPw0KDQo+PiBDOiBkYXRhWzRtXSB8
+IGhvbGUgfCBob2xlIHxkYXRhWzJNXSAgYnM9MTZNLzE4TQ0KPj4NCj4+IEFyZSB0aGVyZSBzb21l
+IGNhc2UgaWdub3JlPw0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBlbmcgTWENCj4+DQo+Pg0KPj4gZGlm
+ZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCj4+IGluZGV4IDJkZGYw
+NjEuLjk2Y2U4OTMgMTAwNjQ0DQo+PiAtLS0gYS9mcy9jZXBoL2ZpbGUuYw0KPj4gKysrIGIvZnMv
+Y2VwaC9maWxlLmMNCj4+IEBAIC0zMTksNyArMzE5LDcgQEAgc3RhdGljIGludCBzdHJpcGVkX3Jl
+YWQoc3RydWN0IGlub2RlICppbm9kZSwNCj4+ICAgICAgICAgaW50IHJlYWQ7DQo+PiAgICAgICAg
+IHN0cnVjdCBwYWdlICoqcGFnZV9wb3M7DQo+PiAgICAgICAgIGludCByZXQ7DQo+PiAtICAgICAg
+IGJvb2wgaGl0X3N0cmlwZSwgd2FzX3Nob3J0Ow0KPj4gKyAgICAgICBib29sIGhpdF9zdHJpcGUs
+IHdhc19zaG9ydCwgaGl0X2hvbGUgPSBmYWxzZTsNCj4+DQo+PiAgICAgICAgIC8qDQo+PiAgICAg
+ICAgICAqIHdlIG1heSBuZWVkIHRvIGRvIG11bHRpcGxlIHJlYWRzLiAgbm90IGF0b21pYywgdW5m
+b3J0dW5hdGVseS4NCj4+IEBAIC0zNDIsMjEgKzM0MiwzMCBAQCBtb3JlOg0KPj4gICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIGNpLT5pX3RydW5jYXRlX3NlcSwNCj4+ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBjaS0+aV90cnVuY2F0ZV9zaXplLA0KPj4gICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhZ2VfcG9zLCBwYWdlc19sZWZ0LCBwYWdlX2Fs
+aWduKTsNCj4+IC0gICAgICAgaWYgKHJldCA9PSAtRU5PRU5UKQ0KPj4gKw0KPj4gKyAgICAgICBp
+ZiAoKHJldCA9PSAwICB8fCByZXQgPT0gLUVOT0VOVCkgJiYgcG9zIDwgaW5vZGUtPmlfc2l6ZSkN
+Cj4+ICsgICAgICAgICAgICAgICBoaXRfaG9sZSA9IHRydWU7DQo+DQo+d2h5IGRvIHdlIG5lZWQg
+J2hpdF9ob2xlJywgaXQncyBlc3NlbnRpYWwgdGhlIHNhbWUgYXMgd2FzX3Nob3J0LiBUaGUgY29k
+ZQ0KPmlzIGFscmVhZHkgc28gbWVzc3kuDQo+SSBkb24ndCB0aGluayBhZGRpbmcgJ2hpdF9ob2xl
+JyBtYWtlIGl0IG1vcmUgcmVhZGFibGUuDQo+DQpoaXRfaG9sZSBtZWFucyByZXR1cm4gdmFsdWUg
+YXJlIEVOT0VOVCBvciB6ZXJvLg0KQnV0IHRoZSBzaG9ydC1yZWFkIGNvbnRhaW4gRU9GIGJlc2lk
+ZSBhYm92ZSB0d28gY2FzZS4NCj4+ICsgICAgICAgZWxzZSBpZiAocmV0ID09IC1FTk9FTlQpDQo+
+PiAgICAgICAgICAgICAgICAgcmV0ID0gMDsNCj4+ICsNCj4+ICAgICAgICAgaGl0X3N0cmlwZSA9
+IHRoaXNfbGVuIDwgbGVmdDsNCj4+IC0gICAgICAgd2FzX3Nob3J0ID0gcmV0ID49IDAgJiYgcmV0
+IDwgdGhpc19sZW47DQo+PiAtICAgICAgIGRvdXQoInN0cmlwZWRfcmVhZCAlbGx1fiV1IChyZWFk
+ICV1KSBnb3QgJWQlcyVzXG4iLCBwb3MsIGxlZnQsDQo+cmVhZCwNCj4+IC0gICAgICAgICAgICBy
+ZXQsIGhpdF9zdHJpcGUgPyAiIEhJVFNUUklQRSIgOiAiIiwgd2FzX3Nob3J0ID8gIiBTSE9SVCIg
+Og0KPiIiKTsNCj4+IC0NCj4+IC0gICAgICAgaWYgKHJldCA+IDApIHsNCj4+IC0gICAgICAgICAg
+ICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFHRV9DQUNIRV9TSElG
+VDsNCj4+IC0NCj4+IC0gICAgICAgICAgICAgICBpZiAocmVhZCA8IHBvcyAtIG9mZikgew0KPj4g
+LSAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwg
+b2ZmICsgcmVhZCwgcG9zKTsNCj4+IC0gICAgICAgICAgICAgICAgICAgICAgIGNlcGhfemVyb19w
+YWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwNCj4+IC0gICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3MgLSBvZmYgLSByZWFkLA0KPnBh
+Z2VzKTsNCj4+ICsgICAgICAgd2FzX3Nob3J0ID0gcmV0ID4gMCAmJiByZXQgPCB0aGlzX2xlbjsN
+Cj4+ICsgICAgICAgZG91dCgic3RyaXBlZF9yZWFkICVsbHV+JXUgKHJlYWQgJXUpIGdvdCAlZCVz
+JXMlc1xuIiwgcG9zLCBsZWZ0LA0KPnJlYWQsDQo+PiArICAgICAgICAgICAgcmV0LCBoaXRfc3Ry
+aXBlID8gIiBISVRTVFJJUEUiIDogIiIsIHdhc19zaG9ydCA/ICIgU0hPUlQiIDoNCj4iIiwNCj4+
+ICsgICAgICAgICAgICBoaXRfaG9sZSA/ICIgSElUSE9MRSIgOiAiIik7DQo+PiArDQo+PiArICAg
+ICAgIGlmIChyZXQgPiAwIHx8IGhpdF9ob2xlKSB7DQo+PiArICAgICAgICAgICAgICAgaW50IGRp
+ZHBhZ2VzOw0KPj4gKw0KPj4gKyAgICAgICAgICAgICAgIGlmIChoaXRfaG9sZSkgew0KPj4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgcmV0ID0gdGhpc19sZW47DQo+PiArICAgICAgICAgICAgICAg
+ICAgICAgICBkb3V0KCIgemVybyBob2xlICVsbHUgdG8gJWxsdVxuIiwgcG9zICwgcG9zICsNCj5y
+ZXQpOw0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3Jh
+bmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICByZXQsIHBhZ2VzKTsNCj4+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIGhpdF9ob2xlID0gZmFsc2U7DQo+dGhpcyBpcyBpbmNvcnJlY3QgZm9yIHRoZSAn
+cmV0ID4gMCcgYW5kICdyZXQgPSAtRU5PRU5UJyBjYXNlcy4NCj4NCkZvciB0aGUgcmV0ID4gMCwg
+aXQgY2FuJ3QgZG8gdGhvc2UuDQpGb3IgdGhlIHJldCA9IC1FTk9FTlQgYW5kICBwb3MgKyB0aGlz
+X2xlbiA+IGlfc2l6ZSBtZWFuICwgY2FuIHlvdSBnaXZlIG1lIGEgZXhhbXBsZSA/DQoNCkppYW5w
+ZW5nIE1hDQo+QmVzaWRlcywgaWYgJ3BvcyArIHRoaXNfbGVuID49IGlfc2l6ZScuIHdlIHNob3Vs
+ZCBkbyBub3RoaW5nIGhlcmUuIGxldCB0aGUNCj4nemVybyB0cmFpbGluZyBieXRlcycNCj5jb2Rl
+IGRvIHRoZSBqb2IuDQo+DQo+WWFuLCBaaGVuZw0KPg0KPj4gICAgICAgICAgICAgICAgIH0NCj4+
+ICsgICAgICAgICAgICAgICBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+PiBQQUdFX0NB
+Q0hFX1NISUZUOw0KPj4gKw0KPj4gICAgICAgICAgICAgICAgIHBvcyArPSByZXQ7DQo+PiAgICAg
+ICAgICAgICAgICAgcmVhZCA9IHBvcyAtIG9mZjsNCj4+ICAgICAgICAgICAgICAgICBsZWZ0IC09
+IHJldDsNCj4NClRoYW5rcyENCkppYW5wZW5nIE1hDQo+T24gV2VkLCBKdWwgMzEsIDIwMTMgYXQg
+OTozNiBBTSwgbWFqaWFucGVuZyA8bWFqaWFucGVuZ0BnbWFpbC5jb20+IHdyb3RlOg0KPj4gW3Nu
+aXBdDQo+PiBJIHRoaW5rIHRoaXMgcGF0Y2ggY2FuIGRvIHdvcms6DQo+PiBUaG9zZSBjYXNlIHdo
+aWNoIGkgdGVzdGVkDQo+PiBBOiBmaWxlc2l6ZT0wLCAgYnVmZmVyPTFNDQo+PiBCOiAgZGF0YVsy
+TV0gfCBob2xlfCBkYXRhWzJNXSwgYnM9IDZNLzdNDQo+DQo+SSBkb24ndCB0aGluayB5b3VyIHpl
+cm8gYnVmZmVyIGNoYW5nZSBpcyBjb3JyZWN0IGZvciB0aGlzIHRlc3QgY2FzZS4NCj4NCj4+IEM6
+IGRhdGFbNG1dIHwgaG9sZSB8IGhvbGUgfGRhdGFbMk1dICBicz0xNk0vMThNDQo+Pg0KPj4gQXJl
+IHRoZXJlIHNvbWUgY2FzZSBpZ25vcmU/DQo+PiBUaGFua3MhDQo+PiBKaWFucGVuZyBNYQ0KPj4N
+Cj4+DQo+PiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBoL2ZpbGUuYw0KPj4g
+aW5kZXggMmRkZjA2MS4uOTZjZTg5MyAxMDA2NDQNCj4+IC0tLSBhL2ZzL2NlcGgvZmlsZS5jDQo+
+PiArKysgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gQEAgLTMxOSw3ICszMTksNyBAQCBzdGF0aWMgaW50
+IHN0cmlwZWRfcmVhZChzdHJ1Y3QgaW5vZGUgKmlub2RlLA0KPj4gICAgICAgICBpbnQgcmVhZDsN
+Cj4+ICAgICAgICAgc3RydWN0IHBhZ2UgKipwYWdlX3BvczsNCj4+ICAgICAgICAgaW50IHJldDsN
+Cj4+IC0gICAgICAgYm9vbCBoaXRfc3RyaXBlLCB3YXNfc2hvcnQ7DQo+PiArICAgICAgIGJvb2wg
+aGl0X3N0cmlwZSwgd2FzX3Nob3J0LCBoaXRfaG9sZSA9IGZhbHNlOw0KPj4NCj4+ICAgICAgICAg
+LyoNCj4+ICAgICAgICAgICogd2UgbWF5IG5lZWQgdG8gZG8gbXVsdGlwbGUgcmVhZHMuICBub3Qg
+YXRvbWljLCB1bmZvcnR1bmF0ZWx5Lg0KPj4gQEAgLTM0MiwyMSArMzQyLDMwIEBAIG1vcmU6DQo+
+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY2ktPmlfdHJ1bmNhdGVfc2VxLA0K
+Pj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNpLT5pX3RydW5jYXRlX3NpemUs
+DQo+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcGFnZV9wb3MsIHBhZ2VzX2xl
+ZnQsIHBhZ2VfYWxpZ24pOw0KPj4gLSAgICAgICBpZiAocmV0ID09IC1FTk9FTlQpDQo+PiArDQo+
+PiArICAgICAgIGlmICgocmV0ID09IDAgIHx8IHJldCA9PSAtRU5PRU5UKSAmJiBwb3MgPCBpbm9k
+ZS0+aV9zaXplKQ0KPj4gKyAgICAgICAgICAgICAgIGhpdF9ob2xlID0gdHJ1ZTsNCj4NCj53aHkg
+ZG8gd2UgbmVlZCAnaGl0X2hvbGUnLCBpdCdzIGVzc2VudGlhbCB0aGUgc2FtZSBhcyB3YXNfc2hv
+cnQuIFRoZSBjb2RlDQo+aXMgYWxyZWFkeSBzbyBtZXNzeS4NCj5JIGRvbid0IHRoaW5rIGFkZGlu
+ZyAnaGl0X2hvbGUnIG1ha2UgaXQgbW9yZSByZWFkYWJsZS4NCj4NCj4+ICsgICAgICAgZWxzZSBp
+ZiAocmV0ID09IC1FTk9FTlQpDQo+PiAgICAgICAgICAgICAgICAgcmV0ID0gMDsNCj4+ICsNCj4+
+ICAgICAgICAgaGl0X3N0cmlwZSA9IHRoaXNfbGVuIDwgbGVmdDsNCj4+IC0gICAgICAgd2FzX3No
+b3J0ID0gcmV0ID49IDAgJiYgcmV0IDwgdGhpc19sZW47DQo+PiAtICAgICAgIGRvdXQoInN0cmlw
+ZWRfcmVhZCAlbGx1fiV1IChyZWFkICV1KSBnb3QgJWQlcyVzXG4iLCBwb3MsIGxlZnQsDQo+cmVh
+ZCwNCj4+IC0gICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJVFNUUklQRSIgOiAiIiwg
+d2FzX3Nob3J0ID8gIiBTSE9SVCIgOg0KPiIiKTsNCj4+IC0NCj4+IC0gICAgICAgaWYgKHJldCA+
+IDApIHsNCj4+IC0gICAgICAgICAgICAgICBpbnQgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJl
+dCkgPj4gUEFHRV9DQUNIRV9TSElGVDsNCj4+IC0NCj4+IC0gICAgICAgICAgICAgICBpZiAocmVh
+ZCA8IHBvcyAtIG9mZikgew0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAgZG91dCgiIHplcm8g
+Z2FwICVsbHUgdG8gJWxsdVxuIiwgb2ZmICsgcmVhZCwgcG9zKTsNCj4+IC0gICAgICAgICAgICAg
+ICAgICAgICAgIGNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsgcmVhZCwN
+Cj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBw
+b3MgLSBvZmYgLSByZWFkLA0KPnBhZ2VzKTsNCj4+ICsgICAgICAgd2FzX3Nob3J0ID0gcmV0ID4g
+MCAmJiByZXQgPCB0aGlzX2xlbjsNCj4+ICsgICAgICAgZG91dCgic3RyaXBlZF9yZWFkICVsbHV+
+JXUgKHJlYWQgJXUpIGdvdCAlZCVzJXMlc1xuIiwgcG9zLCBsZWZ0LA0KPnJlYWQsDQo+PiArICAg
+ICAgICAgICAgcmV0LCBoaXRfc3RyaXBlID8gIiBISVRTVFJJUEUiIDogIiIsIHdhc19zaG9ydCA/
+ICIgU0hPUlQiIDoNCj4iIiwNCj4+ICsgICAgICAgICAgICBoaXRfaG9sZSA/ICIgSElUSE9MRSIg
+OiAiIik7DQo+PiArDQo+PiArICAgICAgIGlmIChyZXQgPiAwIHx8IGhpdF9ob2xlKSB7DQo+PiAr
+ICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzOw0KPj4gKw0KPj4gKyAgICAgICAgICAgICAgIGlm
+IChoaXRfaG9sZSkgew0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgcmV0ID0gdGhpc19sZW47
+DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBob2xlICVsbHUgdG8gJWxs
+dVxuIiwgcG9zICwgcG9zICsNCj5yZXQpOw0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgY2Vw
+aF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXQsIHBhZ2Vz
+KTsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgIGhpdF9ob2xlID0gZmFsc2U7DQo+dGhpcyBp
+cyBpbmNvcnJlY3QgZm9yIHRoZSAncmV0ID4gMCcgYW5kICdyZXQgPSAtRU5PRU5UJyBjYXNlcy4N
+Cj4NCj5CZXNpZGVzLCBpZiAncG9zICsgdGhpc19sZW4gPj0gaV9zaXplJy4gd2Ugc2hvdWxkIGRv
+IG5vdGhpbmcgaGVyZS4gbGV0IHRoZQ0KPid6ZXJvIHRyYWlsaW5nIGJ5dGVzJw0KPmNvZGUgZG8g
+dGhlIGpvYi4NCj4NCj5ZYW4sIFpoZW5nDQo+DQo+PiAgICAgICAgICAgICAgICAgfQ0KPj4gKyAg
+ICAgICAgICAgICAgIGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVf
+U0hJRlQ7DQo+PiArDQo+PiAgICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCj4+ICAgICAgICAg
+ICAgICAgICByZWFkID0gcG9zIC0gb2ZmOw0KPj4gICAgICAgICAgICAgICAgIGxlZnQgLT0gcmV0
+Ow0KPg==
 
-For your case, seems your workload(HPC) are fully sequential, so larger read ahead and prefetch should be helpful, but for RBD part, it's a bit harder to so such tuning. 
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Monday, July 29, 2013 10:49 PM
-To: Li Wang
-Cc: ceph-devel@vger.kernel.org; Sage Weil
-Subject: Re: Read ahead affect Ceph read performance much
-
-On 07/29/2013 05:24 AM, Li Wang wrote:
-> We performed Iozone read test on a 32-node HPC server. Regarding the 
-> hardware of each node, the CPU is very powerful, so does the network, 
-> with a bandwidth > 1.5 GB/s. 64GB memory, the IO is relatively slow, 
-> the throughput measured by 'dd' locally is around 70MB/s. We 
-> configured a Ceph cluster with 24 OSDs on 24 nodes, one mds, one to 
-> four clients, one client per node. The performance is as follows,
->
->      Iozone sequential read throughput (MB/s)
-> Number of clients     1          2         4
-> Default resize    180.0954   324.4836   591.5851
-> Resize: 256MB     645.3347   1022.998    1267.631
->
-> The complete iozone parameter for one client is, iozone -t 1 -+m 
-> /tmp/iozone.nodelist.50305030 -s 64G -r 4M -i 0 -+n -w -c -e -b 
-> /tmp/iozone.nodelist.50305030.output, on each client node, only one 
-> thread is started.
->
-> for two clients, it is,
-> iozone -t 2 -+m /tmp/iozone.nodelist.50305030 -s 32G -r 4M -i 0 -+n -w 
-> -c -e -b /tmp/iozone.nodelist.50305030.output
->
-> As the data shown, a larger read ahead window could result in >300% 
-> speedup!
-
-Very interesting!  I've done some similar tests and saw somewhat different results (I actually in some cases saw improvement with lower readahead!).  I suspect that this may be very hardware dependent.  Were you using RBD or CephFS?  In either case, was it the kernel client or userland (IE QEMU/KVM or FUSE)?  Also, where did you adjust readahead? 
-Was this on the client volume or under the OSDs?
-
-I've got to prepare for the talk later this week, but I will try to get my readahead test results out soon as well.
-
->
-> Besides, Since the backend of Ceph is not the traditional hard disk, 
-> it is beneficial to capture the stride read prefetching. To prove 
-> this, we tested the stride read with the following program, as we 
-> know, the generic read ahead algorithm of Linux kernel will not 
-> capture stride-read prefetch, so we use fadvise() to manually force pretching.
-> the record size is 4MB. The result is even more surprising,
->
->              Stride read throughput (MB/s)
-> Number of records prefetched  0      1      4      16      64      128
-> Throughput                  42.82  100.74 217.41  497.73  854.48  950.18
->
-> As the data shown, with a read ahead size of 128*4MB, the speedup over 
-> without read ahead could be up to 950/42 > 2000%!
->
-> The core logic of the test program is below,
->
-> stride = 17
-> recordsize = 4MB
-> for (;;) {
->    for (i = 0; i < count; ++i) {
->      long long start = pos + (i + 1) * stride * recordsize;
->      printf("PRE READ %lld %lld\n", start, start + block);
->      posix_fadvise(fd, start, block, POSIX_FADV_WILLNEED);
->    }
->    len = read(fd, buf, block);
->    total += len;
->    printf("READ %lld %lld\n", pos, (pos + len));
->    pos += len;
->    lseek(fd, (stride - 1) * block, SEEK_CUR);
->    pos += (stride - 1) * block;
-> }
->
-> Given the above results and some more, We plan to submit a blue print 
-> to discuss the prefetching optimization of Ceph.
-
-Cool!
-
->
-> Cheers,
-> Li Wang
->
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
