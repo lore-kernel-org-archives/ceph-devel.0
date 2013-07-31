@@ -1,32 +1,47 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: Read ahead affect Ceph read performance much
-Date: Wed, 31 Jul 2013 23:27:16 +0800
-Message-ID: <51F92CD4.7030403@ubuntukylin.com>
-References: <51F642E2.3090201@ubuntukylin.com> <51F680CF.4050903@inktank.com> <6F3FA899187F0043BA1827A69DA2F7CC01E4CF9F@SHSMSX102.ccr.corp.intel.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Read ahead affect Ceph read performance much
+Date: Wed, 31 Jul 2013 15:48:46 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E4D96D@SHSMSX102.ccr.corp.intel.com>
+References: <51F642E2.3090201@ubuntukylin.com>
+ <51F680CF.4050903@inktank.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC01E4CF9F@SHSMSX102.ccr.corp.intel.com>
+ <51F92CD4.7030403@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:33986 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756679Ab3GaP1X (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 11:27:23 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E4CF9F@SHSMSX102.ccr.corp.intel.com>
+Received: from mga01.intel.com ([192.55.52.88]:31793 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756722Ab3GaPs6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 11:48:58 -0400
+In-Reply-To: <51F92CD4.7030403@ubuntukylin.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+To: Li Wang <liwang@ubuntukylin.com>
 Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-We are tuning the prefetching window from the client side by specifying 
-a different 'rasize' at mount time.
+Hi Li Wang,
+    >We are tuning the prefetching window from the client side by specifying a different 'rasize' at mount time.
+    By the term client, are you saying cephfs? Or your self-written client?
+    > We think how many OSDs is a file stored across also impact the performance, since that somehow determines how much optimization space are there. More OSDs, More performance potential to exploit, so maybe you could try more OSDs.
+    Basically not really, for HPC case, you have fewer client( 4) but much larger backend(24), so striping the file across many OSDs generaly do help. But for RBD/EBS side, with enough concurrent( #of RBDs = # of OSDs,it's common for this use case), it's not that ture to have a file stored a lot of OSDs. Actually we have even higher throughput(normalized by # of disks) than yours ( 1267/24=53MB/s for yours, 2472/40=62 for mine) even with much less sequential pattern ( we are doing 64K sequential read from VM, although it's sequential for a particular vm, but considered the large concurrency , the access pattern in OSD side is not that sequential)
+      Thanks again for the information. 
 
-The workload we are using is iozone, just the hardware is, to some 
-extent, for HPC.
+                           Xiaoxi
 
-We think how many OSDs is a file stored across also impact the 
-performance, since that somehow determines how much optimization space 
-are there. More OSDs, More performance potential to exploit, so maybe
-you could try more OSDs.
+-----Original Message---
+From: Li Wang [mailto:liwang@ubuntukylin.com] 
+Sent: Wednesday, July 31, 2013 11:27 PM
+To: Chen, Xiaoxi
+Cc: Mark Nelson; ceph-devel@vger.kernel.org; Sage Weil
+Subject: Re: Read ahead affect Ceph read performance much
+
+>We are tuning the prefetching window from the client side by specifying a different 'rasize' at mount time.
+
+The workload we are using is iozone, just the hardware is, to some extent, for HPC.
+
+We think how many OSDs is a file stored across also impact the performance, since that somehow determines how much optimization space are there. More OSDs, More performance potential to exploit, so maybe you could try more OSDs.
 
 Would like to hear your further test results.
 
@@ -39,18 +54,19 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 > For your case, seems your workload(HPC) are fully sequential, so larger read ahead and prefetch should be helpful, but for RBD part, it's a bit harder to so such tuning.
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
 > Sent: Monday, July 29, 2013 10:49 PM
 > To: Li Wang
 > Cc: ceph-devel@vger.kernel.org; Sage Weil
 > Subject: Re: Read ahead affect Ceph read performance much
 >
 > On 07/29/2013 05:24 AM, Li Wang wrote:
->> We performed Iozone read test on a 32-node HPC server. Regarding the
->> hardware of each node, the CPU is very powerful, so does the network,
->> with a bandwidth > 1.5 GB/s. 64GB memory, the IO is relatively slow,
->> the throughput measured by 'dd' locally is around 70MB/s. We
->> configured a Ceph cluster with 24 OSDs on 24 nodes, one mds, one to
+>> We performed Iozone read test on a 32-node HPC server. Regarding the 
+>> hardware of each node, the CPU is very powerful, so does the network, 
+>> with a bandwidth > 1.5 GB/s. 64GB memory, the IO is relatively slow, 
+>> the throughput measured by 'dd' locally is around 70MB/s. We 
+>> configured a Ceph cluster with 24 OSDs on 24 nodes, one mds, one to 
 >> four clients, one client per node. The performance is as follows,
 >>
 >>       Iozone sequential read throughput (MB/s)
@@ -59,15 +75,15 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 >> Resize: 256MB     645.3347   1022.998    1267.631
 >>
 >> The complete iozone parameter for one client is, iozone -t 1 -+m
->> /tmp/iozone.nodelist.50305030 -s 64G -r 4M -i 0 -+n -w -c -e -b
->> /tmp/iozone.nodelist.50305030.output, on each client node, only one
+>> /tmp/iozone.nodelist.50305030 -s 64G -r 4M -i 0 -+n -w -c -e -b 
+>> /tmp/iozone.nodelist.50305030.output, on each client node, only one 
 >> thread is started.
 >>
 >> for two clients, it is,
->> iozone -t 2 -+m /tmp/iozone.nodelist.50305030 -s 32G -r 4M -i 0 -+n -w
->> -c -e -b /tmp/iozone.nodelist.50305030.output
+>> iozone -t 2 -+m /tmp/iozone.nodelist.50305030 -s 32G -r 4M -i 0 -+n 
+>> -w -c -e -b /tmp/iozone.nodelist.50305030.output
 >>
->> As the data shown, a larger read ahead window could result in >300%
+>> As the data shown, a larger read ahead window could result in >300% 
 >> speedup!
 >
 > Very interesting!  I've done some similar tests and saw somewhat different results (I actually in some cases saw improvement with lower readahead!).  I suspect that this may be very hardware dependent.  Were you using RBD or CephFS?  In either case, was it the kernel client or userland (IE QEMU/KVM or FUSE)?  Also, where did you adjust readahead?
@@ -76,10 +92,10 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 > I've got to prepare for the talk later this week, but I will try to get my readahead test results out soon as well.
 >
 >>
->> Besides, Since the backend of Ceph is not the traditional hard disk,
->> it is beneficial to capture the stride read prefetching. To prove
->> this, we tested the stride read with the following program, as we
->> know, the generic read ahead algorithm of Linux kernel will not
+>> Besides, Since the backend of Ceph is not the traditional hard disk, 
+>> it is beneficial to capture the stride read prefetching. To prove 
+>> this, we tested the stride read with the following program, as we 
+>> know, the generic read ahead algorithm of Linux kernel will not 
 >> capture stride-read prefetch, so we use fadvise() to manually force pretching.
 >> the record size is 4MB. The result is even more surprising,
 >>
@@ -87,8 +103,8 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 >> Number of records prefetched  0      1      4      16      64      128
 >> Throughput                  42.82  100.74 217.41  497.73  854.48  950.18
 >>
->> As the data shown, with a read ahead size of 128*4MB, the speedup over
->> without read ahead could be up to 950/42 > 2000%!
+>> As the data shown, with a read ahead size of 128*4MB, the speedup 
+>> over without read ahead could be up to 950/42 > 2000%!
 >>
 >> The core logic of the test program is below,
 >>
@@ -108,7 +124,7 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 >>     pos += (stride - 1) * block;
 >> }
 >>
->> Given the above results and some more, We plan to submit a blue print
+>> Given the above results and some more, We plan to submit a blue print 
 >> to discuss the prefetching optimization of Ceph.
 >
 > Cool!
@@ -122,9 +138,10 @@ On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
 >>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
 >> info at  http://vger.kernel.org/majordomo-info.html
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
