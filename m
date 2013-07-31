@@ -1,150 +1,211 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Re: question about striped_read
-Date: Wed, 31 Jul 2013 16:26:19 +0800
-Message-ID: <CAAM7YA=Vr=6DgrQzsqxkAr8u-nBqdNH8y6_3TCJTEpdO4DayQA@mail.gmail.com>
-References: <201307250852310158703@gmail.com>
-	<alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
-	<201307260848241340451@gmail.com>
-	<CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com>
-	<201307260922285205344@gmail.com>
-	<CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com>
-	<201307260938095935695@gmail.com>
-	<CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com>
-	<201307261007003577701@gmail.com>
-	<CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com>
-	<201307291100080913443@gmail.com>
-	<CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com>
-	<201307301707312612641@gmail.com>
-	<CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com>
-	<201307301941552785741@gmail.com>
-	<CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_wrvYGkLg@mail.gmail.com>
-	<201307310827296030660@gmail.com>
-	<alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net>
-	<201307310844488455702@gmail.com>
-	<alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net>
-	<201307310933358798964@gmail.com>
-	<CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com>
-	<2013073113222469570311@gmail.com>
-	<CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com>
-	<201307311532055128853@gmail.com>
+From: Luke Jing Yuan <jyluke-YhiXQ1Q1pWA@public.gmane.org>
+Subject: Problem with MON after reboot
+Date: Wed, 31 Jul 2013 10:09:08 +0000
+Message-ID: <E0E280CCE0E1A44898C992A9190D929A4F9C66@MBX02-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f53.google.com ([209.85.215.53]:36419 "EHLO
-	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752794Ab3GaI0V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 04:26:21 -0400
-Received: by mail-la0-f53.google.com with SMTP id el20so287294lab.12
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 01:26:19 -0700 (PDT)
-In-Reply-To: <201307311532055128853@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1521396591=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jul 31, 2013 at 3:32 PM, majianpeng <majianpeng@gmail.com> wrote:
->
->  [snip]
-> Test case
-> A: touch file
->     dd if=file of=/dev/null bs=5M count=1 iflag=direct
-> B: [data(2M)|hole(2m)][data(2M)]
->    dd if=file of=/dev/null bs=8M count=1 iflag=direct
-> C: [data(4M)[hole(4M)][hole(4M)][data(2M)]
->   dd if=file of=/dev/null bs=16M count=1 iflag=direct
-> D: touch file;truncate -s 5M file
->   dd if=file of=/dev/null bs=8M count=1 iflag=direct
->
-> Those cases can work.
-> Now i make different processing  for short-read between 'ret > 0' and "ret =0".
-> For the short-read which ret > 0, it don't do read-page rather than zero the left area.
-> This means reduce one meaningless read operation.
->
+--===============1521396591==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_E0E280CCE0E1A44898C992A9190D929A4F9C66MBX02TPMmimosloca_"
 
-This patch looks good. But I still hope not to duplicate code.
+--_000_E0E280CCE0E1A44898C992A9190D929A4F9C66MBX02TPMmimosloca_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-how about change
- "hit_stripe = this_len < left;"
-to
- "hit_stripe = this_len < left && (ret == this_len || pos + this_len <
-inode->i_size);"
+Dear all,
 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 2ddf061..f643ec8 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -350,13 +350,17 @@ more:
->              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
->
->         if (ret > 0) {
+I am having a issue with MON after reboot, I had originally 3 MONs but afte=
+r rebooting one of them, the quorum cannot be established. Digging through =
+the log of the problematic MON, I found the following messages:
 
-changes this to "(ret >= 0)"
+2013-07-31 18:04:18.536331 7f4f41bfd700  0 -- 10.4.132.18:6804/0 >> 10.4.13=
+1.21:6800/0 pipe(0x305da00 sd=3D28 :41077 s=3D1 pgs=3D0 cs=3D0 l=3D0).faile=
+d verifying authorize reply
+2013-07-31 18:04:20.536270 7f4f48b3e700  0 cephx: verify_reply coudln't dec=
+rypt with error: error decoding block for decryption
+2013-07-31 18:04:20.536276 7f4f48b3e700  0 -- 10.4.132.18:6804/0 >> 10.4.12=
+0.21:6789/0 pipe(0x305dc80 sd=3D27 :38003 s=3D1 pgs=3D0 cs=3D0 l=3D0).faile=
+d verifying authorize reply
+2013-07-31 18:04:20.536302 7f4f41bfd700  0 cephx: verify_reply coudln't dec=
+rypt with error: error decoding block for decryption
 
-> -               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> -
-> -               if (read < pos - off) {
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 2ddf061..f643ec8 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -350,13 +350,17 @@ more:
->              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
->
->         if (ret > 0) {
-> -               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> -
-> -               if (read < pos - off) {
-> -                       dout(" zero gap %llu to %llu\n", off + read, pos);
-> -                       ceph_zero_page_vector_range(page_align + read,
-> -                                                   pos - off - read, pages);
-> +               int  didpages;
-> +
-> +               if (was_short && pos + ret < inode->i_size) {
-
-change this to "(was_short && hit_stripe)"
-
-by this way, we can avoid modifying the "zero trailing bytes" code.
+Wonder if someone can shed some light on the issue and how to solve this pr=
+oblem. Thanks.
 
 Regards,
-Yan, Zheng
+Luke
 
-> +                        u64 tmp = min(this_len - ret,
-> +                                               inode->i_size - pos - ret);
-> +                        dout(" zero gap %llu to %llu\n", pos + ret, pos + ret + tmp);
-> +                        ceph_zero_page_vector_range(page_align + read + ret,
-> +                                                       tmp, pages);
-> +                        ret += tmp;
->                 }
-> +               didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
->                 pos += ret;
->                 read = pos - off;
->                 left -= ret;
-> @@ -375,13 +379,25 @@ more:
+
+
+------------------------------------------------------------------
+-
+-
+DISCLAIMER: 
+
+This e-mail (including any attachments) is for the addressee(s) 
+only and may contain confidential information. If you are not the 
+intended recipient, please note that any dealing, review, 
+distribution, printing, copying or use of this e-mail is strictly 
+prohibited. If you have received this email in error, please notify 
+the sender  immediately and delete the original message. 
+MIMOS Berhad is a research and development institution under 
+the purview of the Malaysian Ministry of Science, Technology and 
+Innovation. Opinions, conclusions and other information in this e-
+mail that do not relate to the official business of MIMOS Berhad 
+and/or its subsidiaries shall be understood as neither given nor 
+endorsed by MIMOS Berhad and/or its subsidiaries and neither 
+MIMOS Berhad nor its subsidiaries accepts responsibility for the 
+same. All liability arising from or in connection with computer 
+viruses and/or corrupted e-mails is excluded to the fullest extent 
+permitted by law.
+
+
+--_000_E0E280CCE0E1A44898C992A9190D929A4F9C66MBX02TPMmimosloca_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
 >
->                 /* zero trailing bytes (inside i_size) */
->                 if (left > 0 && pos < inode->i_size) {
-> +                       int didpages;
->                         if (pos + left > inode->i_size)
->                                 left = inode->i_size - pos;
->
-> -                       dout("zero tail %d\n", left);
-> -                       ceph_zero_page_vector_range(page_align + read, left,
-> +                       ret = min(left, this_len);
-> +                       dout("zero tail %d\n", ret);
-> +                       ceph_zero_page_vector_range(page_align + read, ret,
->                                                     pages);
-> -                       read += left;
-> +                       didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> +
-> +                       pos += ret;
-> +                       read = pos - off;
-> +                       left -= ret;
-> +                       page_pos += didpages;
-> +                       pages_left -= didpages;
-> +
-> +                       /* hit stripe? */
-> +                       if (left && hit_stripe)
-> +                               goto more;
->                 }
->         }
->
+<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-MY" link=3D"blue" vlink=3D"purple">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Dear all,<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">I am having a issue with MON af=
+ter reboot, I had originally 3 MONs but after rebooting one of them, the qu=
+orum cannot be established. Digging through the log of the problematic MON,=
+ I found the following messages:<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">2013-07-31 18:04:18.536331 7f4f=
+41bfd700&nbsp; 0 -- 10.4.132.18:6804/0 &gt;&gt; 10.4.131.21:6800/0 pipe(0x3=
+05da00 sd=3D28 :41077 s=3D1 pgs=3D0 cs=3D0 l=3D0).failed verifying authoriz=
+e reply<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">2013-07-31 18:04:20.536270 7f4f=
+48b3e700&nbsp; 0 cephx: verify_reply coudln't decrypt with error: error dec=
+oding block for decryption<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">2013-07-31 18:04:20.536276 7f4f=
+48b3e700&nbsp; 0 -- 10.4.132.18:6804/0 &gt;&gt; 10.4.120.21:6789/0 pipe(0x3=
+05dc80 sd=3D27 :38003 s=3D1 pgs=3D0 cs=3D0 l=3D0).failed verifying authoriz=
+e reply<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">2013-07-31 18:04:20.536302 7f4f=
+41bfd700&nbsp; 0 cephx: verify_reply coudln't decrypt with error: error dec=
+oding block for decryption<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Wonder if someone can shed some=
+ light on the issue and how to solve this problem. Thanks.<o:p></o:p></span=
+></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Regards,<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Luke<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+</div>
+</body>
+</html>
+
+<p>
+
+------------------------------------------------------------------
+-
+-
+DISCLAIMER: 
+
+This e-mail (including any attachments) is for the addressee(s) 
+only and may contain confidential information. If you are not the 
+intended recipient, please note that any dealing, review, 
+distribution, printing, copying or use of this e-mail is strictly 
+prohibited. If you have received this email in error, please notify 
+the sender  immediately and delete the original message. 
+MIMOS Berhad is a research and development institution under 
+the purview of the Malaysian Ministry of Science, Technology and 
+Innovation. Opinions, conclusions and other information in this e-
+mail that do not relate to the official business of MIMOS Berhad 
+and/or its subsidiaries shall be understood as neither given nor 
+endorsed by MIMOS Berhad and/or its subsidiaries and neither 
+MIMOS Berhad nor its subsidiaries accepts responsibility for the 
+same. All liability arising from or in connection with computer 
+viruses and/or corrupted e-mails is excluded to the fullest extent 
+permitted by law.
+
+
+</p>
+--_000_E0E280CCE0E1A44898C992A9190D929A4F9C66MBX02TPMmimosloca_--
+
+--===============1521396591==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1521396591==--
