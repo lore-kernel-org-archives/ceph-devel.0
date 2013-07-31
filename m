@@ -1,44 +1,45 @@
-From: =?ISO-8859-1?Q?Jens_Kristian_S=F8gaard?=
-	<jens@mermaidconsulting.dk>
-Subject: Re: [ceph-users] Problem with MON after reboot
-Date: Wed, 31 Jul 2013 13:17:16 +0200
-Message-ID: <51F8F23C.8060306@mermaidconsulting.dk>
-References: <E0E280CCE0E1A44898C992A9190D929A4F9C66@MBX02-TPM.mimos.local> <51F8E67A.90508@mermaidconsulting.dk> <E0E280CCE0E1A44898C992A9190D929A4F9CB1@MBX02-TPM.mimos.local> <51F8E8E2.4040702@mermaidconsulting.dk> <E0E280CCE0E1A44898C992A9190D929A4F9D01@MBX02-TPM.mimos.local>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: Blueprint: inline data support (step 2)
+Date: Wed, 31 Jul 2013 22:34:22 +0800
+Message-ID: <51F9206E.9040604@ubuntukylin.com>
+References: <51F855D9.6070306@ubuntukylin.com> <51F857B5.5070409@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx02.stofanet.dk ([212.10.10.12]:51570 "EHLO mx02.stofanet.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755379Ab3GaLRV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 31 Jul 2013 07:17:21 -0400
-In-Reply-To: <E0E280CCE0E1A44898C992A9190D929A4F9D01@MBX02-TPM.mimos.local>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:52249 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752097Ab3GaOea (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 10:34:30 -0400
+In-Reply-To: <51F857B5.5070409@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luke Jing Yuan <jyluke@mimos.my>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Sure, just being busy with some other things, I will post it before the 
+summit.
 
-> However, in a previous situation I had (while all of them were still
-> running the older 0.61.4). Rebooting the same MON, did not restore
-> the quorum also, so I am not sure what may cause this but I supposed
-> it maybe some other reasons.
+Cheers,
+Li Wang
 
-Actually it is the same reason.
-
-When upgrading from a version before 0.61.4 to a later version, you'll=20
-need to restart all the monitors before they form a new quorum.
-
-This was mentioned in the release notes.
-
---=20
-Jens Kristian S=F8gaard, Mermaid Consulting ApS,
-jens@mermaidconsulting.dk,
-http://www.mermaidconsulting.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 07/31/2013 08:17 AM, Loic Dachary wrote:
+> Hi,
+>
+> It would be nice to have URLs to the current implementation and the benchmark results you got in the blueprint.
+>
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/Inline_data_support_%28Step_2%29
+>
+> Cheers
+>
+> On 31/07/2013 02:10, Li Wang wrote:
+>> We have worked out a preliminary implementation for inline data support, and observed obvious speed up for small file access.
+>>
+>> The step 2 will focus on (1) Try to make things simpler to eliminate the state of a file half-inlined; (2) To efficiently deal with the share write or read/write; (3) Protocal backword compatability
+>>
+>> We submitted a blueprint for this, anyone interested is welcome to join the discussion.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
