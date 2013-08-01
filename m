@@ -1,43 +1,40 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] mds: remove waiting lock before merging with
- neighbours
-Date: Thu, 1 Aug 2013 11:07:19 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308011106190.22584@cobra.newdream.net>
-References: <1375110344-26133-1-git-send-email-ddiss@suse.de> <20130801141112.2517c0c4@f163.suse.de>
+Subject: v0.67-rc3 Dumpling release candidate
+Date: Thu, 1 Aug 2013 11:11:55 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308011108420.22584@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36306 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36340 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752286Ab3HASHU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 14:07:20 -0400
-In-Reply-To: <20130801141112.2517c0c4@f163.suse.de>
+	with ESMTP id S1754315Ab3HASLz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 14:11:55 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-On Thu, 1 Aug 2013, David Disseldorp wrote:
-> Hi,
-> 
-> Did anyone get a chance to look at this change?
-> Any comments/feedback/ridicule would be appreciated.
+We've tagged and pushed out packages for another release candidate for 
+Dumpling.  At this point things are looking very good.  There are a few 
+odds and ends with the CLI changes but the core ceph functionality is 
+looking quite stable.  Please test!
 
-Sorry, not yet--and Greg just headed out for vacation yesterday.  It's on 
-my list to look at when I have some time tonight or tomorrow, though. 
-Thanks!  
+Packages are available in the -testing repos:
 
-I'm hopefully this will clear up some of the locking hangs we've seen with 
-the samba and flock tests...
+	http://ceph.com/debian-testing/
+	http://ceph.com/rpm-testing/
 
+Note that at any time you can also run the latest code for the pending 
+release from
+
+	http://gitbuilder.ceph.com/ceph-deb-$DISTRO-x86_64-basic/ref/next/
+
+The draft release notes for v0.67 dumpling are at
+
+	http://ceph.com/docs/master/release-notes/
+
+You can see our bug queue at
+
+	http://tracker.ceph.com/projects/ceph/issues?query_id=27
+
+Happy testing!
 sage
-
-
-> 
-> Cheers, David
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
