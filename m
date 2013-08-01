@@ -1,30 +1,50 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Thu, 1 Aug 2013 02:12:23 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<20130419064524.GQ11427@reaktio.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: Update FUSE_USE_VERSION from 26 to 30.
+Date: Thu, 1 Aug 2013 11:19:02 +0800
+Message-ID: <201308011109083820483@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <20130419064524.GQ11427@reaktio.net>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
-To: =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f42.google.com ([209.85.160.42]:51896 "EHLO
+	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752364Ab3HADUZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 23:20:25 -0400
+Received: by mail-pb0-f42.google.com with SMTP id un15so1011036pbc.1
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 20:20:25 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm about to start trying this out. Has anything changed since this email http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg13984.html ?
+V2hlbiBjb21waWxpbmcsIGl0IG1ldCB0aGlzIGVycm9yOg0KPkluIGZpbGUgaW5jbHVkZWQgZnJv
+bSAvdXNyL2xvY2FsL2luY2x1ZGUvZnVzZS9mdXNlLmg6MTk6MCwNCj4gICAgICAgICAgICAgICAg
+IGZyb20gY2xpZW50L2Z1c2VfbGwuY2M6MTc6DQo+L3Vzci9sb2NhbC9pbmNsdWRlL2Z1c2UvZnVz
+ZV9jb21tb24uaDo0NzQ6NDogZXJyb3I6ICNlcnJvciBvbmx5IEFQSQ0KPnZlcnNpb24gMzAgb3Ig
+Z3JlYXRlciBpcyBzdXBwb3J0ZWQNClVwZGF0ZSBGVVNFX1VTRV9WRVJTSU9OIGZyb20gMjYgdG8g
+MzAuDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4N
+Ci0tLQ0KIGZ1c2V0cmFjZS9mdXNldHJhY2VfbGwuY2MgfCAyICstDQogc3JjL2NsaWVudC9mdXNl
+X2xsLmNjICAgICB8IDIgKy0NCiBzcmMvcmJkX2Z1c2UvcmJkLWZ1c2UuYyAgIHwgMiArLQ0KIDMg
+ZmlsZXMgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0t
+Z2l0IGEvZnVzZXRyYWNlL2Z1c2V0cmFjZV9sbC5jYyBiL2Z1c2V0cmFjZS9mdXNldHJhY2VfbGwu
+Y2MNCmluZGV4IGViNzEwMGEuLjdmMmI4NDMgMTAwNjQ0DQotLS0gYS9mdXNldHJhY2UvZnVzZXRy
+YWNlX2xsLmNjDQorKysgYi9mdXNldHJhY2UvZnVzZXRyYWNlX2xsLmNjDQpAQCAtMTEsNyArMTEs
+NyBAQA0KICAgICBnY2MgLVdhbGwgYHBrZy1jb25maWcgZnVzZSAtLWNmbGFncyAtLWxpYnNgIC1s
+dWxvY2ttZ3IgZnVzZXhtcF9maC5jIC1vIGZ1c2V4bXBfZmgNCiAqLw0KIA0KLSNkZWZpbmUgRlVT
+RV9VU0VfVkVSU0lPTiAyNg0KKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAzMA0KIA0KICNpZmRl
+ZiBIQVZFX0NPTkZJR19IDQogI2luY2x1ZGUgPGNvbmZpZy5oPg0KZGlmZiAtLWdpdCBhL3NyYy9j
+bGllbnQvZnVzZV9sbC5jYyBiL3NyYy9jbGllbnQvZnVzZV9sbC5jYw0KaW5kZXggMDgxMmM5YS4u
+YzgyZDAwNCAxMDA2NDQNCi0tLSBhL3NyYy9jbGllbnQvZnVzZV9sbC5jYw0KKysrIGIvc3JjL2Ns
+aWVudC9mdXNlX2xsLmNjDQpAQCAtMTIsNyArMTIsNyBAQA0KICAqIA0KICAqLw0KIA0KLSNkZWZp
+bmUgRlVTRV9VU0VfVkVSU0lPTiAyNg0KKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAzMA0KIA0K
+ICNpbmNsdWRlIDxmdXNlL2Z1c2UuaD4NCiAjaW5jbHVkZSA8ZnVzZS9mdXNlX2xvd2xldmVsLmg+
+DQpkaWZmIC0tZ2l0IGEvc3JjL3JiZF9mdXNlL3JiZC1mdXNlLmMgYi9zcmMvcmJkX2Z1c2UvcmJk
+LWZ1c2UuYw0KaW5kZXggNWE0YmZlMi4uMTk1Y2I3NiAxMDA2NDQNCi0tLSBhL3NyYy9yYmRfZnVz
+ZS9yYmQtZnVzZS5jDQorKysgYi9zcmMvcmJkX2Z1c2UvcmJkLWZ1c2UuYw0KQEAgLTEsNyArMSw3
+IEBADQogLyoNCiAgKiByYmQtZnVzZQ0KICAqLw0KLSNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAy
+Ng0KKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAzMA0KIA0KICNpbmNsdWRlIDxzdGRpby5oPg0K
+ICNpbmNsdWRlIDxzdGRsaWIuaD4NCi0tIA0KMS44LjMucmMxLjQ0LmdiMzg3Yzc3DQoNCg0KVGhh
+bmtzIQ0KSmlhbnBlbmcgTWE=
 
-Thanks
-
-James
