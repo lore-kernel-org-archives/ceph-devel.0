@@ -1,91 +1,30 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: question about striped_read
-Date: Thu, 1 Aug 2013 09:45:16 +0800
-Message-ID: <201308010929458493571@gmail.com>
-References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com> <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_w
- rvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com> <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com> <alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net> <201307310933358798964@gmail.com> <CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com> <2013073113222469570311@gmail.com> <CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com> <201307311532055128853@gmail.com>,
-	<CAAM7YA=Vr=6DgrQzsqxkAr8u-nBqdNH8y6_3TCJTEpdO4DayQA@mail.gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: Re: Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Thu, 1 Aug 2013 02:12:23 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<20130419064524.GQ11427@reaktio.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f172.google.com ([209.85.192.172]:48960 "EHLO
-	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751246Ab3HABwt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 21:52:49 -0400
-Received: by mail-pd0-f172.google.com with SMTP id z11so680780pdj.3
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 18:52:48 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <20130419064524.GQ11427@reaktio.net>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
+To: =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Pk9uIFdlZCwgSnVsIDMxLCAyMDEzIGF0IDM6MzIgUE0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
-Z21haWwuY29tPiB3cm90ZToNCj4+DQo+PiAgW3NuaXBdDQo+PiBUZXN0IGNhc2UNCj4+IEE6IHRv
-dWNoIGZpbGUNCj4+ICAgICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBicz01TSBjb3VudD0xIGlm
-bGFnPWRpcmVjdA0KPj4gQjogW2RhdGEoMk0pfGhvbGUoMm0pXVtkYXRhKDJNKV0NCj4+ICAgIGRk
-IGlmPWZpbGUgb2Y9L2Rldi9udWxsIGJzPThNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+PiBDOiBb
-ZGF0YSg0TSlbaG9sZSg0TSldW2hvbGUoNE0pXVtkYXRhKDJNKV0NCj4+ICAgZGQgaWY9ZmlsZSBv
-Zj0vZGV2L251bGwgYnM9MTZNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+PiBEOiB0b3VjaCBmaWxl
-O3RydW5jYXRlIC1zIDVNIGZpbGUNCj4+ICAgZGQgaWY9ZmlsZSBvZj0vZGV2L251bGwgYnM9OE0g
-Y291bnQ9MSBpZmxhZz1kaXJlY3QNCj4+DQo+PiBUaG9zZSBjYXNlcyBjYW4gd29yay4NCj4+IE5v
-dyBpIG1ha2UgZGlmZmVyZW50IHByb2Nlc3NpbmcgIGZvciBzaG9ydC1yZWFkIGJldHdlZW4gJ3Jl
-dCA+IDAnIGFuZCAicmV0ID0wIi4NCj4+IEZvciB0aGUgc2hvcnQtcmVhZCB3aGljaCByZXQgPiAw
-LCBpdCBkb24ndCBkbyByZWFkLXBhZ2UgcmF0aGVyIHRoYW4gemVybyB0aGUgbGVmdCBhcmVhLg0K
-Pj4gVGhpcyBtZWFucyByZWR1Y2Ugb25lIG1lYW5pbmdsZXNzIHJlYWQgb3BlcmF0aW9uLg0KPj4N
-Cj4NCj5UaGlzIHBhdGNoIGxvb2tzIGdvb2QuIEJ1dCBJIHN0aWxsIGhvcGUgbm90IHRvIGR1cGxp
-Y2F0ZSBjb2RlLg0KPg0KPmhvdyBhYm91dCBjaGFuZ2UNCj4gImhpdF9zdHJpcGUgPSB0aGlzX2xl
-biA8IGxlZnQ7Ig0KPnRvDQo+ICJoaXRfc3RyaXBlID0gdGhpc19sZW4gPCBsZWZ0ICYmIChyZXQg
-PT0gdGhpc19sZW4gfHwgcG9zICsgdGhpc19sZW4gPA0KPmlub2RlLT5pX3NpemUpOyINCj4NClRv
-IG1ha2UgdGhlIGNvZGUgZWFzeSB0byB1bmRlcnN0YW5kLCBpIGRvbid0IGFwcGx5IHlvdXIgc3Vn
-Z2VzdGlvbi5CdXQgaSBhZGQgdGhpcyBjaGVjayBvbiB0aGUganVkZ2VtZW50IG9mDQp3aGV0aGVy
-IHJlYWQgbW9yZSBjb250ZW50cy4NClRoZSBmb2xsb3cgaXMgdGhlIGxhdGVzdCBwYXRjaC5DYW4g
-eW91IGNoZWNrPw0KDQpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBoL2ZpbGUu
-Yw0KaW5kZXggMmRkZjA2MS4uM2Q4ZDE0ZCAxMDA2NDQNCi0tLSBhL2ZzL2NlcGgvZmlsZS5jDQor
-KysgYi9mcy9jZXBoL2ZpbGUuYw0KQEAgLTM0OSw0NCArMzQ5LDM4IEBAIG1vcmU6DQogICAgICAg
-IGRvdXQoInN0cmlwZWRfcmVhZCAlbGx1fiV1IChyZWFkICV1KSBnb3QgJWQlcyVzXG4iLCBwb3Ms
-IGxlZnQsIHJlYWQsDQogICAgICAgICAgICAgcmV0LCBoaXRfc3RyaXBlID8gIiBISVRTVFJJUEUi
-IDogIiIsIHdhc19zaG9ydCA/ICIgU0hPUlQiIDogIiIpOw0KIA0KLSAgICAgICBpZiAocmV0ID4g
-MCkgew0KLSAgICAgICAgICAgICAgIGludCBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+
-PiBQQUdFX0NBQ0hFX1NISUZUOw0KLQ0KLSAgICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0g
-b2ZmKSB7DQotICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAl
-bGx1XG4iLCBvZmYgKyByZWFkLCBwb3MpOw0KLSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96
-ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KLSAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvcyAtIG9mZiAtIHJlYWQsIHBh
-Z2VzKTsNCisgICAgICAgaWYgKHJldCA+PSAwKSB7DQorICAgICAgICAgICAgICAgaW50ICBkaWRw
-YWdlczsNCisgICAgICAgICAgICAgICBpZiAod2FzX3Nob3J0ICYmIChwb3MgKyByZXQgPCBpbm9k
-ZS0+aV9zaXplKSkgew0KKyAgICAgICAgICAgICAgICAgICAgICAgdTY0IHRtcCA9IG1pbih0aGlz
-X2xlbiAtIHJldCwgDQorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbm9kZS0+aV9z
-aXplIC0gcG9zIC0gcmV0KTsNCisgICAgICAgICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJvIGdh
-cCAlbGx1IHRvICVsbHVcbiIsIA0KKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3Mg
-KyByZXQsIHBvcyArIHJldCArIHRtcCk7DQorICAgICAgICAgICAgICAgICAgICAgICBjZXBoX3pl
-cm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQgKyByZXQsDQorICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRtcCwgcGFnZXMp
-Ow0KKyAgICAgICAgICAgICAgICAgICAgICAgcmV0ICs9IHRtcDsNCiAgICAgICAgICAgICAgICB9
-DQorDQorICAgICAgICAgICAgICAgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFH
-RV9DQUNIRV9TSElGVDsNCiAgICAgICAgICAgICAgICBwb3MgKz0gcmV0Ow0KICAgICAgICAgICAg
-ICAgIHJlYWQgPSBwb3MgLSBvZmY7DQogICAgICAgICAgICAgICAgbGVmdCAtPSByZXQ7DQogICAg
-ICAgICAgICAgICAgcGFnZV9wb3MgKz0gZGlkcGFnZXM7DQogICAgICAgICAgICAgICAgcGFnZXNf
-bGVmdCAtPSBkaWRwYWdlczsNCiANCi0gICAgICAgICAgICAgICAvKiBoaXQgc3RyaXBlPyAqLw0K
-LSAgICAgICAgICAgICAgIGlmIChsZWZ0ICYmIGhpdF9zdHJpcGUpDQorICAgICAgICAgICAgICAg
-LyogaGl0IHN0cmlwZSBhbmQgbmVlZCBjb250aW51ZSovDQorICAgICAgICAgICAgICAgaWYgKGxl
-ZnQgJiYgaGl0X3N0cmlwZSAmJiBwb3MgPCBpbm9kZS0+aV9zaXplKSANCiAgICAgICAgICAgICAg
-ICAgICAgICAgIGdvdG8gbW9yZTsNCisNCiAgICAgICAgfQ0KIA0KLSAgICAgICBpZiAod2FzX3No
-b3J0KSB7DQorICAgICAgIGlmIChyZXQgPj0gMCkgew0KKyAgICAgICAgICAgICAgIHJldCA9IHJl
-YWQ7DQogICAgICAgICAgICAgICAgLyogZGlkIHdlIGJvdW5jZSBvZmYgZW9mPyAqLw0KICAgICAg
-ICAgICAgICAgIGlmIChwb3MgKyBsZWZ0ID4gaW5vZGUtPmlfc2l6ZSkNCiAgICAgICAgICAgICAg
-ICAgICAgICAgICpjaGVja2VvZiA9IDE7DQotDQotICAgICAgICAgICAgICAgLyogemVybyB0cmFp
-bGluZyBieXRlcyAoaW5zaWRlIGlfc2l6ZSkgKi8NCi0gICAgICAgICAgICAgICBpZiAobGVmdCA+
-IDAgJiYgcG9zIDwgaW5vZGUtPmlfc2l6ZSkgew0KLSAgICAgICAgICAgICAgICAgICAgICAgaWYg
-KHBvcyArIGxlZnQgPiBpbm9kZS0+aV9zaXplKQ0KLSAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBsZWZ0ID0gaW5vZGUtPmlfc2l6ZSAtIHBvczsNCi0NCi0gICAgICAgICAgICAgICAgICAg
-ICAgIGRvdXQoInplcm8gdGFpbCAlZFxuIiwgbGVmdCk7DQotICAgICAgICAgICAgICAgICAgICAg
-ICBjZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsIGxlZnQsDQot
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcGFnZXMp
-Ow0KLSAgICAgICAgICAgICAgICAgICAgICAgcmVhZCArPSBsZWZ0Ow0KLSAgICAgICAgICAgICAg
-IH0NCiAgICAgICAgfQ0KIA0KLSAgICAgICBpZiAocmV0ID49IDApDQotICAgICAgICAgICAgICAg
-cmV0ID0gcmVhZDsNCiAgICAgICAgZG91dCgic3RyaXBlZF9yZWFkIHJldHVybnMgJWRcbiIsIHJl
-dCk7DQogICAgICAgIHJldHVybiByZXQ7DQogfQ0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
+I'm about to start trying this out. Has anything changed since this email http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg13984.html ?
 
+Thanks
+
+James
