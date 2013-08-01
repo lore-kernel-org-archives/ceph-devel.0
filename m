@@ -1,43 +1,47 @@
-From: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] Add missing buildrequires for Fedora
-Date: Thu, 01 Aug 2013 15:14:08 +0200
-Message-ID: <51FA5F20.8070504@bisect.de>
-References: <51F770E9.6060004@logtenberg.eu>
-Reply-To: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: still recovery issues with cuttlefish
+Date: Thu, 1 Aug 2013 18:50:55 +0400
+Message-ID: <CABYiri_c4zO30veXsan5LzsKqAO70iPU+ubfqFwP8pt4RVRTWw@mail.gmail.com>
+References: <51FA1AC1.8040207@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <51F770E9.6060004-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Erik Logtenberg <erik-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oa0-f44.google.com ([209.85.219.44]:48320 "EHLO
+	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755725Ab3HAOvQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 10:51:16 -0400
+Received: by mail-oa0-f44.google.com with SMTP id l20so4611656oag.3
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Aug 2013 07:51:16 -0700 (PDT)
+In-Reply-To: <51FA1AC1.8040207@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Second this. Also for long-lasting snapshot problem and related
+performance issues I may say that cuttlefish improved things greatly,
+but creation/deletion of large snapshot (hundreds of gigabytes of
+commited data) still can bring down cluster for a minutes, despite
+usage of every possible optimization.
 
-I've opened a pull request with some additional fixes for this issue:
-https://github.com/ceph/ceph/pull/478
-
-Danny
-
-Am 30.07.2013 09:53, schrieb Erik Logtenberg:
+On Thu, Aug 1, 2013 at 12:22 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
 > Hi,
-> 
-> This patch adds two buildrequires to the ceph.spec file, that are needed
-> to build the rpms under Fedora. Danny Al-Gaaf commented that the
-> snappy-devel dependency should actually be added to the leveldb-devel
-> package. I will try to get that fixed too, in the mean time, this patch
-> does make sure Ceph builds on Fedora.
-> 
-> Signed-off-by: Erik Logtenberg <erik-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
-> ---
-> 
+>
+> i still have recovery issues with cuttlefish. After the OSD comes back
+> it seem to hang for around 2-4 minutes and then recovery seems to start
+> (pgs in recovery_wait start to decrement). This is with ceph 0.61.7. I
+> get a lot of slow request messages an hanging VMs.
+>
+> What i noticed today is that if i leave the OSD off as long as ceph
+> starts to backfill - the recovery and "re" backfilling wents absolutely
+> smooth without any issues and no slow request messages at all.
+>
+> Does anybody have an idea why?
+>
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
