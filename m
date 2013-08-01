@@ -1,74 +1,74 @@
-From: Chmouel Boudjnah <chmouel@chmouel.com>
-Subject: Re: LFS & Ceph
-Date: Thu, 1 Aug 2013 10:34:29 +0200
-Message-ID: <CAKSXASSpTK5itZbTo=jDw30WiRrDLgiiy=b+X2Ma+7NSrYAz2g@mail.gmail.com>
-References: <51F06A8A.3050401@dachary.org> <51F12CBC.4080308@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f47.google.com ([209.85.219.47]:63081 "EHLO
-	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750742Ab3HAIfD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 04:35:03 -0400
-Received: by mail-oa0-f47.google.com with SMTP id g12so3197298oah.20
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Aug 2013 01:35:02 -0700 (PDT)
-Received: from mail-oa0-x233.google.com (mail-oa0-x233.google.com [2607:f8b0:4003:c02::233])
-        by mx.google.com with ESMTPSA id jz7sm2001090obb.4.2013.08.01.01.35.00
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 01 Aug 2013 01:35:01 -0700 (PDT)
-Received: by mail-oa0-f51.google.com with SMTP id h1so792790oag.10
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Aug 2013 01:35:00 -0700 (PDT)
-In-Reply-To: <51F12CBC.4080308@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
+Date: Thu,  1 Aug 2013 19:51:32 +0800
+Message-ID: <1375357892-10188-1-git-send-email-handai.szj@taobao.com>
+References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
+Sender: owner-linux-mm@kvack.org
+To: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-mm@kvack.org, cgroups@vger.kernel.org
+Cc: sage@inktank.com, mhocko@suse.cz, kamezawa.hiroyu@jp.fujitsu.com, glommer@gmail.com, gthelen@google.com, fengguang.wu@intel.com, akpm@linux-foundation.org, Sha Zhengju <handai.szj@taobao.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hello,
+From: Sha Zhengju <handai.szj@taobao.com>
 
-Sorry for the late answer as I was travelling lately.
+Following we will begin to add memcg dirty page accounting around __set_page_dirty_
+{buffers,nobuffers} in vfs layer, so we'd better use vfs interface to avoid exporting
+those details to filesystems.
 
-The LFS works has been in a heavy state of work in progress by Peter
-(in CC) and others there is some documentation in this review :
+Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+---
+ fs/ceph/addr.c |   13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
 
-https://review.openstack.org/#/c/30051/
-
-(summarized in Pete's gist here
-https://gist.github.com/portante/5488238/raw/66b0bf2a91a8ca75301fa68dc0=
-fef2d3dc76e5a2/gistfile1.txt)
-
-some preliminary work here :
-
-https://review.openstack.org/#/c/35381/
-
-and some old documentation here :
-
-https://raw.github.com/zaitcev/swift-lfs/master/doc/source/lfs_plugin.r=
-st
-
-I am sure Pete would appreciate the feedback.
-
-Cheers,
-Chmouel.
-
-On 24/07/2013 17:00, Loic Dachary wrote:
-> Hi,
->
-> Thanks for take the time to discuss LFS today @ OSCON :-) Would you b=
-e so kind as to send links to the current discussion about the LFS driv=
-er API ?
->
-> Cheers
->
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 3e68ac1..1445bf1 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
+ 	if (unlikely(!mapping))
+ 		return !TestSetPageDirty(page);
+ 
+-	if (TestSetPageDirty(page)) {
++	if (!__set_page_dirty_nobuffers(page)) {
+ 		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+ 		     mapping->host, page, page->index);
+ 		return 0;
+@@ -107,14 +107,7 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+ 	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+ 		/*
+ 		 * Reference snap context in page->private.  Also set
+ 		 * PagePrivate so that we get invalidatepage callback.
+@@ -126,14 +119,10 @@ static int ceph_set_page_dirty(struct page *page)
+ 		undo = 1;
+ 	}
+ 
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+ 	if (undo)
+ 		/* whoops, we failed to dirty the page */
+ 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+-
+ 	BUG_ON(!PageDirty(page));
+ 	return 1;
+ }
+-- 
+1.7.9.5
 
 --
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do no=
-thing.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
