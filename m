@@ -1,147 +1,91 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Read ahead affect Ceph read performance much
-Date: Wed, 31 Jul 2013 15:48:46 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E4D96D@SHSMSX102.ccr.corp.intel.com>
-References: <51F642E2.3090201@ubuntukylin.com>
- <51F680CF.4050903@inktank.com>
- <6F3FA899187F0043BA1827A69DA2F7CC01E4CF9F@SHSMSX102.ccr.corp.intel.com>
- <51F92CD4.7030403@ubuntukylin.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: question about striped_read
+Date: Thu, 1 Aug 2013 09:45:16 +0800
+Message-ID: <201308010929458493571@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com> <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_w
+ rvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com> <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com> <alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net> <201307310933358798964@gmail.com> <CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com> <2013073113222469570311@gmail.com> <CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com> <201307311532055128853@gmail.com>,
+	<CAAM7YA=Vr=6DgrQzsqxkAr8u-nBqdNH8y6_3TCJTEpdO4DayQA@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:31793 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756722Ab3GaPs6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 11:48:58 -0400
-In-Reply-To: <51F92CD4.7030403@ubuntukylin.com>
-Content-Language: en-US
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:48960 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751246Ab3HABwt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 21:52:49 -0400
+Received: by mail-pd0-f172.google.com with SMTP id z11so680780pdj.3
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 18:52:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Li Wang,
-    >We are tuning the prefetching window from the client side by specifying a different 'rasize' at mount time.
-    By the term client, are you saying cephfs? Or your self-written client?
-    > We think how many OSDs is a file stored across also impact the performance, since that somehow determines how much optimization space are there. More OSDs, More performance potential to exploit, so maybe you could try more OSDs.
-    Basically not really, for HPC case, you have fewer client( 4) but much larger backend(24), so striping the file across many OSDs generaly do help. But for RBD/EBS side, with enough concurrent( #of RBDs = # of OSDs,it's common for this use case), it's not that ture to have a file stored a lot of OSDs. Actually we have even higher throughput(normalized by # of disks) than yours ( 1267/24=53MB/s for yours, 2472/40=62 for mine) even with much less sequential pattern ( we are doing 64K sequential read from VM, although it's sequential for a particular vm, but considered the large concurrency , the access pattern in OSD side is not that sequential)
-      Thanks again for the information. 
+Pk9uIFdlZCwgSnVsIDMxLCAyMDEzIGF0IDM6MzIgUE0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+DQo+PiAgW3NuaXBdDQo+PiBUZXN0IGNhc2UNCj4+IEE6IHRv
+dWNoIGZpbGUNCj4+ICAgICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBicz01TSBjb3VudD0xIGlm
+bGFnPWRpcmVjdA0KPj4gQjogW2RhdGEoMk0pfGhvbGUoMm0pXVtkYXRhKDJNKV0NCj4+ICAgIGRk
+IGlmPWZpbGUgb2Y9L2Rldi9udWxsIGJzPThNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+PiBDOiBb
+ZGF0YSg0TSlbaG9sZSg0TSldW2hvbGUoNE0pXVtkYXRhKDJNKV0NCj4+ICAgZGQgaWY9ZmlsZSBv
+Zj0vZGV2L251bGwgYnM9MTZNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+PiBEOiB0b3VjaCBmaWxl
+O3RydW5jYXRlIC1zIDVNIGZpbGUNCj4+ICAgZGQgaWY9ZmlsZSBvZj0vZGV2L251bGwgYnM9OE0g
+Y291bnQ9MSBpZmxhZz1kaXJlY3QNCj4+DQo+PiBUaG9zZSBjYXNlcyBjYW4gd29yay4NCj4+IE5v
+dyBpIG1ha2UgZGlmZmVyZW50IHByb2Nlc3NpbmcgIGZvciBzaG9ydC1yZWFkIGJldHdlZW4gJ3Jl
+dCA+IDAnIGFuZCAicmV0ID0wIi4NCj4+IEZvciB0aGUgc2hvcnQtcmVhZCB3aGljaCByZXQgPiAw
+LCBpdCBkb24ndCBkbyByZWFkLXBhZ2UgcmF0aGVyIHRoYW4gemVybyB0aGUgbGVmdCBhcmVhLg0K
+Pj4gVGhpcyBtZWFucyByZWR1Y2Ugb25lIG1lYW5pbmdsZXNzIHJlYWQgb3BlcmF0aW9uLg0KPj4N
+Cj4NCj5UaGlzIHBhdGNoIGxvb2tzIGdvb2QuIEJ1dCBJIHN0aWxsIGhvcGUgbm90IHRvIGR1cGxp
+Y2F0ZSBjb2RlLg0KPg0KPmhvdyBhYm91dCBjaGFuZ2UNCj4gImhpdF9zdHJpcGUgPSB0aGlzX2xl
+biA8IGxlZnQ7Ig0KPnRvDQo+ICJoaXRfc3RyaXBlID0gdGhpc19sZW4gPCBsZWZ0ICYmIChyZXQg
+PT0gdGhpc19sZW4gfHwgcG9zICsgdGhpc19sZW4gPA0KPmlub2RlLT5pX3NpemUpOyINCj4NClRv
+IG1ha2UgdGhlIGNvZGUgZWFzeSB0byB1bmRlcnN0YW5kLCBpIGRvbid0IGFwcGx5IHlvdXIgc3Vn
+Z2VzdGlvbi5CdXQgaSBhZGQgdGhpcyBjaGVjayBvbiB0aGUganVkZ2VtZW50IG9mDQp3aGV0aGVy
+IHJlYWQgbW9yZSBjb250ZW50cy4NClRoZSBmb2xsb3cgaXMgdGhlIGxhdGVzdCBwYXRjaC5DYW4g
+eW91IGNoZWNrPw0KDQpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBoL2ZpbGUu
+Yw0KaW5kZXggMmRkZjA2MS4uM2Q4ZDE0ZCAxMDA2NDQNCi0tLSBhL2ZzL2NlcGgvZmlsZS5jDQor
+KysgYi9mcy9jZXBoL2ZpbGUuYw0KQEAgLTM0OSw0NCArMzQ5LDM4IEBAIG1vcmU6DQogICAgICAg
+IGRvdXQoInN0cmlwZWRfcmVhZCAlbGx1fiV1IChyZWFkICV1KSBnb3QgJWQlcyVzXG4iLCBwb3Ms
+IGxlZnQsIHJlYWQsDQogICAgICAgICAgICAgcmV0LCBoaXRfc3RyaXBlID8gIiBISVRTVFJJUEUi
+IDogIiIsIHdhc19zaG9ydCA/ICIgU0hPUlQiIDogIiIpOw0KIA0KLSAgICAgICBpZiAocmV0ID4g
+MCkgew0KLSAgICAgICAgICAgICAgIGludCBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+
+PiBQQUdFX0NBQ0hFX1NISUZUOw0KLQ0KLSAgICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9zIC0g
+b2ZmKSB7DQotICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAl
+bGx1XG4iLCBvZmYgKyByZWFkLCBwb3MpOw0KLSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96
+ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KLSAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvcyAtIG9mZiAtIHJlYWQsIHBh
+Z2VzKTsNCisgICAgICAgaWYgKHJldCA+PSAwKSB7DQorICAgICAgICAgICAgICAgaW50ICBkaWRw
+YWdlczsNCisgICAgICAgICAgICAgICBpZiAod2FzX3Nob3J0ICYmIChwb3MgKyByZXQgPCBpbm9k
+ZS0+aV9zaXplKSkgew0KKyAgICAgICAgICAgICAgICAgICAgICAgdTY0IHRtcCA9IG1pbih0aGlz
+X2xlbiAtIHJldCwgDQorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbm9kZS0+aV9z
+aXplIC0gcG9zIC0gcmV0KTsNCisgICAgICAgICAgICAgICAgICAgICAgIGRvdXQoIiB6ZXJvIGdh
+cCAlbGx1IHRvICVsbHVcbiIsIA0KKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3Mg
+KyByZXQsIHBvcyArIHJldCArIHRtcCk7DQorICAgICAgICAgICAgICAgICAgICAgICBjZXBoX3pl
+cm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQgKyByZXQsDQorICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRtcCwgcGFnZXMp
+Ow0KKyAgICAgICAgICAgICAgICAgICAgICAgcmV0ICs9IHRtcDsNCiAgICAgICAgICAgICAgICB9
+DQorDQorICAgICAgICAgICAgICAgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJldCkgPj4gUEFH
+RV9DQUNIRV9TSElGVDsNCiAgICAgICAgICAgICAgICBwb3MgKz0gcmV0Ow0KICAgICAgICAgICAg
+ICAgIHJlYWQgPSBwb3MgLSBvZmY7DQogICAgICAgICAgICAgICAgbGVmdCAtPSByZXQ7DQogICAg
+ICAgICAgICAgICAgcGFnZV9wb3MgKz0gZGlkcGFnZXM7DQogICAgICAgICAgICAgICAgcGFnZXNf
+bGVmdCAtPSBkaWRwYWdlczsNCiANCi0gICAgICAgICAgICAgICAvKiBoaXQgc3RyaXBlPyAqLw0K
+LSAgICAgICAgICAgICAgIGlmIChsZWZ0ICYmIGhpdF9zdHJpcGUpDQorICAgICAgICAgICAgICAg
+LyogaGl0IHN0cmlwZSBhbmQgbmVlZCBjb250aW51ZSovDQorICAgICAgICAgICAgICAgaWYgKGxl
+ZnQgJiYgaGl0X3N0cmlwZSAmJiBwb3MgPCBpbm9kZS0+aV9zaXplKSANCiAgICAgICAgICAgICAg
+ICAgICAgICAgIGdvdG8gbW9yZTsNCisNCiAgICAgICAgfQ0KIA0KLSAgICAgICBpZiAod2FzX3No
+b3J0KSB7DQorICAgICAgIGlmIChyZXQgPj0gMCkgew0KKyAgICAgICAgICAgICAgIHJldCA9IHJl
+YWQ7DQogICAgICAgICAgICAgICAgLyogZGlkIHdlIGJvdW5jZSBvZmYgZW9mPyAqLw0KICAgICAg
+ICAgICAgICAgIGlmIChwb3MgKyBsZWZ0ID4gaW5vZGUtPmlfc2l6ZSkNCiAgICAgICAgICAgICAg
+ICAgICAgICAgICpjaGVja2VvZiA9IDE7DQotDQotICAgICAgICAgICAgICAgLyogemVybyB0cmFp
+bGluZyBieXRlcyAoaW5zaWRlIGlfc2l6ZSkgKi8NCi0gICAgICAgICAgICAgICBpZiAobGVmdCA+
+IDAgJiYgcG9zIDwgaW5vZGUtPmlfc2l6ZSkgew0KLSAgICAgICAgICAgICAgICAgICAgICAgaWYg
+KHBvcyArIGxlZnQgPiBpbm9kZS0+aV9zaXplKQ0KLSAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICBsZWZ0ID0gaW5vZGUtPmlfc2l6ZSAtIHBvczsNCi0NCi0gICAgICAgICAgICAgICAgICAg
+ICAgIGRvdXQoInplcm8gdGFpbCAlZFxuIiwgbGVmdCk7DQotICAgICAgICAgICAgICAgICAgICAg
+ICBjZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQsIGxlZnQsDQot
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcGFnZXMp
+Ow0KLSAgICAgICAgICAgICAgICAgICAgICAgcmVhZCArPSBsZWZ0Ow0KLSAgICAgICAgICAgICAg
+IH0NCiAgICAgICAgfQ0KIA0KLSAgICAgICBpZiAocmV0ID49IDApDQotICAgICAgICAgICAgICAg
+cmV0ID0gcmVhZDsNCiAgICAgICAgZG91dCgic3RyaXBlZF9yZWFkIHJldHVybnMgJWRcbiIsIHJl
+dCk7DQogICAgICAgIHJldHVybiByZXQ7DQogfQ0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
 
-                           Xiaoxi
-
------Original Message---
-From: Li Wang [mailto:liwang@ubuntukylin.com] 
-Sent: Wednesday, July 31, 2013 11:27 PM
-To: Chen, Xiaoxi
-Cc: Mark Nelson; ceph-devel@vger.kernel.org; Sage Weil
-Subject: Re: Read ahead affect Ceph read performance much
-
->We are tuning the prefetching window from the client side by specifying a different 'rasize' at mount time.
-
-The workload we are using is iozone, just the hardware is, to some extent, for HPC.
-
-We think how many OSDs is a file stored across also impact the performance, since that somehow determines how much optimization space are there. More OSDs, More performance potential to exploit, so maybe you could try more OSDs.
-
-Would like to hear your further test results.
-
-Cheers,
-Li Wang
-
-On 07/31/2013 12:42 PM, Chen, Xiaoxi wrote:
-> My 0.02, we have done some readahead test tuning on server(ceph osd) side, the result showing that when readahead = 0.5 * object_size(4M in default), we can get max read throughput. Readahead value larger than this generally will not help, but also not harm the performance.
->
-> For your case, seems your workload(HPC) are fully sequential, so larger read ahead and prefetch should be helpful, but for RBD part, it's a bit harder to so such tuning.
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Monday, July 29, 2013 10:49 PM
-> To: Li Wang
-> Cc: ceph-devel@vger.kernel.org; Sage Weil
-> Subject: Re: Read ahead affect Ceph read performance much
->
-> On 07/29/2013 05:24 AM, Li Wang wrote:
->> We performed Iozone read test on a 32-node HPC server. Regarding the 
->> hardware of each node, the CPU is very powerful, so does the network, 
->> with a bandwidth > 1.5 GB/s. 64GB memory, the IO is relatively slow, 
->> the throughput measured by 'dd' locally is around 70MB/s. We 
->> configured a Ceph cluster with 24 OSDs on 24 nodes, one mds, one to 
->> four clients, one client per node. The performance is as follows,
->>
->>       Iozone sequential read throughput (MB/s)
->> Number of clients     1          2         4
->> Default resize    180.0954   324.4836   591.5851
->> Resize: 256MB     645.3347   1022.998    1267.631
->>
->> The complete iozone parameter for one client is, iozone -t 1 -+m
->> /tmp/iozone.nodelist.50305030 -s 64G -r 4M -i 0 -+n -w -c -e -b 
->> /tmp/iozone.nodelist.50305030.output, on each client node, only one 
->> thread is started.
->>
->> for two clients, it is,
->> iozone -t 2 -+m /tmp/iozone.nodelist.50305030 -s 32G -r 4M -i 0 -+n 
->> -w -c -e -b /tmp/iozone.nodelist.50305030.output
->>
->> As the data shown, a larger read ahead window could result in >300% 
->> speedup!
->
-> Very interesting!  I've done some similar tests and saw somewhat different results (I actually in some cases saw improvement with lower readahead!).  I suspect that this may be very hardware dependent.  Were you using RBD or CephFS?  In either case, was it the kernel client or userland (IE QEMU/KVM or FUSE)?  Also, where did you adjust readahead?
-> Was this on the client volume or under the OSDs?
->
-> I've got to prepare for the talk later this week, but I will try to get my readahead test results out soon as well.
->
->>
->> Besides, Since the backend of Ceph is not the traditional hard disk, 
->> it is beneficial to capture the stride read prefetching. To prove 
->> this, we tested the stride read with the following program, as we 
->> know, the generic read ahead algorithm of Linux kernel will not 
->> capture stride-read prefetch, so we use fadvise() to manually force pretching.
->> the record size is 4MB. The result is even more surprising,
->>
->>               Stride read throughput (MB/s)
->> Number of records prefetched  0      1      4      16      64      128
->> Throughput                  42.82  100.74 217.41  497.73  854.48  950.18
->>
->> As the data shown, with a read ahead size of 128*4MB, the speedup 
->> over without read ahead could be up to 950/42 > 2000%!
->>
->> The core logic of the test program is below,
->>
->> stride = 17
->> recordsize = 4MB
->> for (;;) {
->>     for (i = 0; i < count; ++i) {
->>       long long start = pos + (i + 1) * stride * recordsize;
->>       printf("PRE READ %lld %lld\n", start, start + block);
->>       posix_fadvise(fd, start, block, POSIX_FADV_WILLNEED);
->>     }
->>     len = read(fd, buf, block);
->>     total += len;
->>     printf("READ %lld %lld\n", pos, (pos + len));
->>     pos += len;
->>     lseek(fd, (stride - 1) * block, SEEK_CUR);
->>     pos += (stride - 1) * block;
->> }
->>
->> Given the above results and some more, We plan to submit a blue print 
->> to discuss the prefetching optimization of Ceph.
->
-> Cool!
->
->>
->> Cheers,
->> Li Wang
->>
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo 
->> info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
