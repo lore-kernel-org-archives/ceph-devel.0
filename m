@@ -1,138 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface
- instead of doing it inside filesystem
-Date: Thu, 1 Aug 2013 11:27:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308011121080.22584@cobra.newdream.net>
-References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com> <1375357892-10188-1-git-send-email-handai.szj@taobao.com> <CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: still recovery issues with cuttlefish
+Date: Thu, 1 Aug 2013 11:34:07 -0700
+Message-ID: <CA+4uBUYPDyQrP=Hg9kCVNvnh4mNi9URbbrGg39AJOmBWjEbCAg@mail.gmail.com>
+References: <51FA1AC1.8040207@profihost.ag>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-154103058-1375381669=:22584"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Sha Zhengju <handai.szj@gmail.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, cgroups@vger.kernel.org, mhocko@suse.cz, kamezawa.hiroyu@jp.fujitsu.com, glommer@gmail.com, Greg Thelen <gthelen@google.com>, Wu Fengguang <fengguang.wu@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ve0-f178.google.com ([209.85.128.178]:62314 "EHLO
+	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751466Ab3HASeI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 14:34:08 -0400
+Received: by mail-ve0-f178.google.com with SMTP id ox1so2763724veb.9
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Aug 2013 11:34:08 -0700 (PDT)
+In-Reply-To: <51FA1AC1.8040207@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Can you reproduce and attach the ceph.log from before you stop the osd
+until after you have started the osd and it has recovered?
+-Sam
 
---557981400-154103058-1375381669=:22584
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, 1 Aug 2013, Yan, Zheng wrote:
-> On Thu, Aug 1, 2013 at 7:51 PM, Sha Zhengju <handai.szj@gmail.com> wrot=
-e:
-> > From: Sha Zhengju <handai.szj@taobao.com>
-> >
-> > Following we will begin to add memcg dirty page accounting around
-> __set_page_dirty_
-> > {buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
-> avoid exporting
-> > those details to filesystems.
-> >
-> > Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
-> > ---
-> > =A0fs/ceph/addr.c | =A0 13 +------------
-> > =A01 file changed, 1 insertion(+), 12 deletions(-)
-> >
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > index 3e68ac1..1445bf1 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
-> > =A0 =A0 =A0 =A0 if (unlikely(!mapping))
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return !TestSetPageDirty(page);
-> >
-> > - =A0 =A0 =A0 if (TestSetPageDirty(page)) {
-> > + =A0 =A0 =A0 if (!__set_page_dirty_nobuffers(page)) {
-> it's too early to set the radix tree tag here. We should set page's sna=
-pshot
-> context and increase the i_wrbuffer_ref first. This is because once the=
- tag
-> is set, writeback thread can find and start flushing the page.
-
-Unfortunately I only remember being frustrated by this code.  :)  Looking=
-=20
-at it now, though, it seems like the minimum fix is to set the=20
-page->private before marking the page dirty.  I don't know the locking=20
-rules around that, though.  If that is potentially racy, maybe the safest=
-=20
-thing would be if __set_page_dirty_nobuffers() took a void* to set=20
-page->private to atomically while holding the tree_lock.
-
-sage
-
->=20
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dout("%p set_page_dirty %p idx %lu --=
- already dirty\n",
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mapping->host, page, page-=
->index);
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
-> > @@ -107,14 +107,7 @@ static int ceph_set_page_dirty(struct page *page=
-)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0snapc, snapc->seq, snapc->num_snaps);
-> > =A0 =A0 =A0 =A0 spin_unlock(&ci->i_ceph_lock);
-> >
-> > - =A0 =A0 =A0 /* now adjust page */
-> > - =A0 =A0 =A0 spin_lock_irq(&mapping->tree_lock);
-> > =A0 =A0 =A0 =A0 if (page->mapping) { =A0 =A0/* Race with truncate? */
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 WARN_ON_ONCE(!PageUptodate(page));
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 account_page_dirtied(page, page->mappin=
-g);
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 radix_tree_tag_set(&mapping->page_tree,
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 page_in=
-dex(page), PAGECACHE_TAG_DIRTY);
-> > -
->=20
-> this code was coped from __set_page_dirty_nobuffers(). I think the reas=
-on
-> Sage did this is to handle the race described in
-> __set_page_dirty_nobuffers()'s comment. But I'm wonder if "page->mappin=
-g =3D=3D
-> NULL" can still happen here. Because truncate_inode_page() unmap page f=
-rom
-> processes's address spaces first, then delete page from page cache.
->=20
-> Regards
-> Yan, Zheng
->=20
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Reference snap context in page->=
-private. =A0Also set
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* PagePrivate so that we get inval=
-idatepage callback.
-> > @@ -126,14 +119,10 @@ static int ceph_set_page_dirty(struct page *pag=
-e)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 undo =3D 1;
-> > =A0 =A0 =A0 =A0 }
-> >
-> > - =A0 =A0 =A0 spin_unlock_irq(&mapping->tree_lock);
->=20
->=20
->=20
->=20
-> > -
-> > =A0 =A0 =A0 =A0 if (undo)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* whoops, we failed to dirty the pag=
-e */
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ceph_put_wrbuffer_cap_refs(ci, 1, sna=
-pc);
-> >
-> > - =A0 =A0 =A0 __mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
-> > -
-> > =A0 =A0 =A0 =A0 BUG_ON(!PageDirty(page));
-> > =A0 =A0 =A0 =A0 return 1;
-> > =A0}
-> > --
-> > 1.7.9.5
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
---557981400-154103058-1375381669=:22584--
+On Thu, Aug 1, 2013 at 1:22 AM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+> Hi,
+>
+> i still have recovery issues with cuttlefish. After the OSD comes back
+> it seem to hang for around 2-4 minutes and then recovery seems to start
+> (pgs in recovery_wait start to decrement). This is with ceph 0.61.7. I
+> get a lot of slow request messages an hanging VMs.
+>
+> What i noticed today is that if i leave the OSD off as long as ceph
+> starts to backfill - the recovery and "re" backfilling wents absolutely
+> smooth without any issues and no slow request messages at all.
+>
+> Does anybody have an idea why?
+>
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
