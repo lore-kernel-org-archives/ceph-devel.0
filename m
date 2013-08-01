@@ -1,74 +1,27 @@
-From: Sha Zhengju <handai.szj@gmail.com>
-Subject: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
-Date: Thu,  1 Aug 2013 19:51:32 +0800
-Message-ID: <1375357892-10188-1-git-send-email-handai.szj@taobao.com>
-References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
-Sender: owner-linux-mm@kvack.org
-To: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-mm@kvack.org, cgroups@vger.kernel.org
-Cc: sage@inktank.com, mhocko@suse.cz, kamezawa.hiroyu@jp.fujitsu.com, glommer@gmail.com, gthelen@google.com, fengguang.wu@intel.com, akpm@linux-foundation.org, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] mds: remove waiting lock before merging with neighbours
+Date: Thu, 1 Aug 2013 14:11:12 +0200
+Message-ID: <20130801141112.2517c0c4@f163.suse.de>
+References: <1375110344-26133-1-git-send-email-ddiss@suse.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:54396 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754748Ab3HAMKf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 1 Aug 2013 08:10:35 -0400
+Received: from relay2.suse.de (unknown [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 071BAA535B
+	for <ceph-devel@vger.kernel.org>; Thu,  1 Aug 2013 14:10:34 +0200 (CEST)
+In-Reply-To: <1375110344-26133-1-git-send-email-ddiss@suse.de>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-From: Sha Zhengju <handai.szj@taobao.com>
+Hi,
 
-Following we will begin to add memcg dirty page accounting around __set_page_dirty_
-{buffers,nobuffers} in vfs layer, so we'd better use vfs interface to avoid exporting
-those details to filesystems.
+Did anyone get a chance to look at this change?
+Any comments/feedback/ridicule would be appreciated.
 
-Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
----
- fs/ceph/addr.c |   13 +------------
- 1 file changed, 1 insertion(+), 12 deletions(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 3e68ac1..1445bf1 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
- 	if (unlikely(!mapping))
- 		return !TestSetPageDirty(page);
- 
--	if (TestSetPageDirty(page)) {
-+	if (!__set_page_dirty_nobuffers(page)) {
- 		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
- 		     mapping->host, page, page->index);
- 		return 0;
-@@ -107,14 +107,7 @@ static int ceph_set_page_dirty(struct page *page)
- 	     snapc, snapc->seq, snapc->num_snaps);
- 	spin_unlock(&ci->i_ceph_lock);
- 
--	/* now adjust page */
--	spin_lock_irq(&mapping->tree_lock);
- 	if (page->mapping) {	/* Race with truncate? */
--		WARN_ON_ONCE(!PageUptodate(page));
--		account_page_dirtied(page, page->mapping);
--		radix_tree_tag_set(&mapping->page_tree,
--				page_index(page), PAGECACHE_TAG_DIRTY);
--
- 		/*
- 		 * Reference snap context in page->private.  Also set
- 		 * PagePrivate so that we get invalidatepage callback.
-@@ -126,14 +119,10 @@ static int ceph_set_page_dirty(struct page *page)
- 		undo = 1;
- 	}
- 
--	spin_unlock_irq(&mapping->tree_lock);
--
- 	if (undo)
- 		/* whoops, we failed to dirty the page */
- 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
- 
--	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
--
- 	BUG_ON(!PageDirty(page));
- 	return 1;
- }
--- 
-1.7.9.5
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Cheers, David
