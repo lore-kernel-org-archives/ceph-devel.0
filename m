@@ -1,27 +1,43 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH] mds: remove waiting lock before merging with neighbours
-Date: Thu, 1 Aug 2013 14:11:12 +0200
-Message-ID: <20130801141112.2517c0c4@f163.suse.de>
-References: <1375110344-26133-1-git-send-email-ddiss@suse.de>
+From: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] Add missing buildrequires for Fedora
+Date: Thu, 01 Aug 2013 15:14:08 +0200
+Message-ID: <51FA5F20.8070504@bisect.de>
+References: <51F770E9.6060004@logtenberg.eu>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:54396 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754748Ab3HAMKf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 1 Aug 2013 08:10:35 -0400
-Received: from relay2.suse.de (unknown [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 071BAA535B
-	for <ceph-devel@vger.kernel.org>; Thu,  1 Aug 2013 14:10:34 +0200 (CEST)
-In-Reply-To: <1375110344-26133-1-git-send-email-ddiss@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <51F770E9.6060004-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Erik Logtenberg <erik-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
 
-Did anyone get a chance to look at this change?
-Any comments/feedback/ridicule would be appreciated.
+I've opened a pull request with some additional fixes for this issue:
+https://github.com/ceph/ceph/pull/478
 
-Cheers, David
+Danny
+
+Am 30.07.2013 09:53, schrieb Erik Logtenberg:
+> Hi,
+> 
+> This patch adds two buildrequires to the ceph.spec file, that are needed
+> to build the rpms under Fedora. Danny Al-Gaaf commented that the
+> snappy-devel dependency should actually be added to the leveldb-devel
+> package. I will try to get that fixed too, in the mean time, this patch
+> does make sure Ceph builds on Fedora.
+> 
+> Signed-off-by: Erik Logtenberg <erik-nLcryBYLV+bMkAkIaI5Geg@public.gmane.org>
+> ---
+> 
