@@ -1,157 +1,183 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
+From: majianpeng <majianpeng@gmail.com>
 Subject: Re: Re: question about striped_read
-Date: Thu, 1 Aug 2013 11:29:14 +0800
-Message-ID: <CAAM7YAkP5LAY5Q+6fmuJkV6t9c-GZtQrwrC3awxRZ=LcRpt4xg@mail.gmail.com>
-References: <201307250852310158703@gmail.com>
-	<alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net>
-	<201307260848241340451@gmail.com>
-	<CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com>
-	<201307260922285205344@gmail.com>
-	<CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com>
-	<201307260938095935695@gmail.com>
-	<CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com>
-	<201307261007003577701@gmail.com>
-	<CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com>
-	<201307291100080913443@gmail.com>
-	<CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com>
-	<201307301707312612641@gmail.com>
-	<CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com>
-	<201307301941552785741@gmail.com>
-	<CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_wrvYGkLg@mail.gmail.com>
-	<201307310827296030660@gmail.com>
-	<alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net>
-	<201307310844488455702@gmail.com>
-	<alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net>
-	<201307310933358798964@gmail.com>
-	<CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com>
-	<2013073113222469570311@gmail.com>
-	<CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com>
-	<201307311532055128853@gmail.com>
-	<CAAM7YA=Vr=6DgrQzsqxkAr8u-nBqdNH8y6_3TCJTEpdO4DayQA@mail.gmail.com>
-	<201308010929458493571@gmail.com>
+Date: Thu, 1 Aug 2013 14:30:49 +0800
+Message-ID: <201308011402430151561@gmail.com>
+References: <201307250852310158703@gmail.com> <alpine.DEB.2.00.1307250848160.29435@cobra.newdream.net> <201307260848241340451@gmail.com> <CAAM7YAm0VnhuYanC+gj7M==snc4XDvPd5q0qCK=DchvqPCcmDw@mail.gmail.com> <201307260922285205344@gmail.com> <CAAM7YAm5e98gzWrsEAQkvu_XEMdDTRND9=sPMOHyhFKAw-KJsw@mail.gmail.com> <201307260938095935695@gmail.com> <CAAM7YAmJgG3xPcNxw_q4HZXejZbRpMOn_ddxow7_pnyQgCrv2w@mail.gmail.com> <201307261007003577701@gmail.com> <CAAM7YAkNQA5PqVr15CXRQ5xPLk42VCCb3kf3U8ic9f6n3d9SGg@mail.gmail.com> <201307291100080913443@gmail.com> <CAAM7YAmB=o28DjT4N2KzQ73zo14miq8pDR2U6MKrGRo1MpawwQ@mail.gmail.com> <201307301707312612641@gmail.com> <CAAM7YAnRKN5APQys=G9jUyerPBRzTq7ejcHwagP9MyNmUfov6g@mail.gmail.com> <201307301941552785741@gmail.com> <CAAM7YAmmK1=F7h7ALSSCpngGNRkDk3B4doozd=YkY_w
+ rvYGkLg@mail.gmail.com> <201307310827296030660@gmail.com> <alpine.DEB.2.00.1307301738350.14027@cobra.newdream.net> <201307310844488455702@gmail.com> <alpine.DEB.2.00.1307301746030.14027@cobra.newdream.net> <201307310933358798964@gmail.com> <CAAM7YAnGaXcQm1LcaCUGL71FGRV5zfNx1iRObFkvXsyVpu91Ag@mail.gmail.com> <2013073113222469570311@gmail.com> <CAAM7YAmv6Ar_oTdYG31YSHnQwyUUYSNq3Zj_4fHcwMoOvno7Sw@mail.gmail.com> <201307311532055128853@gmail.com> <CAAM7YA=Vr=6DgrQzsqxkAr8u-nBqdNH8y6_3TCJTEpdO4DayQA@mail.gmail.com> <201308010929458493571@gmail.com>,
+	<CAAM7YAkP5LAY5Q+6fmuJkV6t9c-GZtQrwrC3awxRZ=LcRpt4xg@mail.gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:44007 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752594Ab3HAD3P (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Jul 2013 23:29:15 -0400
-Received: by mail-lb0-f177.google.com with SMTP id r11so1127650lbv.8
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 20:29:14 -0700 (PDT)
-In-Reply-To: <201308010929458493571@gmail.com>
+Received: from mail-pb0-f41.google.com ([209.85.160.41]:46920 "EHLO
+	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750742Ab3HAGa4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Aug 2013 02:30:56 -0400
+Received: by mail-pb0-f41.google.com with SMTP id rp2so1208779pbb.14
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Jul 2013 23:30:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
+To: =?gb2312?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
 Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 1, 2013 at 9:45 AM, majianpeng <majianpeng@gmail.com> wrote:
->>On Wed, Jul 31, 2013 at 3:32 PM, majianpeng <majianpeng@gmail.com> wrote:
->>>
->>>  [snip]
->>> Test case
->>> A: touch file
->>>     dd if=file of=/dev/null bs=5M count=1 iflag=direct
->>> B: [data(2M)|hole(2m)][data(2M)]
->>>    dd if=file of=/dev/null bs=8M count=1 iflag=direct
->>> C: [data(4M)[hole(4M)][hole(4M)][data(2M)]
->>>   dd if=file of=/dev/null bs=16M count=1 iflag=direct
->>> D: touch file;truncate -s 5M file
->>>   dd if=file of=/dev/null bs=8M count=1 iflag=direct
->>>
->>> Those cases can work.
->>> Now i make different processing  for short-read between 'ret > 0' and "ret =0".
->>> For the short-read which ret > 0, it don't do read-page rather than zero the left area.
->>> This means reduce one meaningless read operation.
->>>
->>
->>This patch looks good. But I still hope not to duplicate code.
->>
->>how about change
->> "hit_stripe = this_len < left;"
->>to
->> "hit_stripe = this_len < left && (ret == this_len || pos + this_len <
->>inode->i_size);"
->>
-> To make the code easy to understand, i don't apply your suggestion.But i add this check on the judgement of
-> whether read more contents.
-> The follow is the latest patch.Can you check?
->
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 2ddf061..3d8d14d 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -349,44 +349,38 @@ more:
->         dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
->              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
->
-> -       if (ret > 0) {
-> -               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> -
-> -               if (read < pos - off) {
-> -                       dout(" zero gap %llu to %llu\n", off + read, pos);
-> -                       ceph_zero_page_vector_range(page_align + read,
-> -                                                   pos - off - read, pages);
-> +       if (ret >= 0) {
-> +               int  didpages;
-> +               if (was_short && (pos + ret < inode->i_size)) {
-> +                       u64 tmp = min(this_len - ret,
-> +                                inode->i_size - pos - ret);
-> +                       dout(" zero gap %llu to %llu\n",
-> +                               pos + ret, pos + ret + tmp);
-> +                       ceph_zero_page_vector_range(page_align + read + ret,
-> +                                                       tmp, pages);
-> +                       ret += tmp;
->                 }
-> +
-> +               didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
->                 pos += ret;
->                 read = pos - off;
->                 left -= ret;
->                 page_pos += didpages;
->                 pages_left -= didpages;
->
-> -               /* hit stripe? */
-> -               if (left && hit_stripe)
-> +               /* hit stripe and need continue*/
-> +               if (left && hit_stripe && pos < inode->i_size)
->                         goto more;
-> +
->         }
->
-> -       if (was_short) {
-> +       if (ret >= 0) {
-> +               ret = read;
->                 /* did we bounce off eof? */
->                 if (pos + left > inode->i_size)
->                         *checkeof = 1;
-> -
-> -               /* zero trailing bytes (inside i_size) */
-> -               if (left > 0 && pos < inode->i_size) {
-> -                       if (pos + left > inode->i_size)
-> -                               left = inode->i_size - pos;
-> -
-> -                       dout("zero tail %d\n", left);
-> -                       ceph_zero_page_vector_range(page_align + read, left,
-> -                                                   pages);
-> -                       read += left;
-> -               }
->         }
->
-> -       if (ret >= 0)
-> -               ret = read;
+Pk9uIFRodSwgQXVnIDEsIDIwMTMgYXQgOTo0NSBBTSwgbWFqaWFucGVuZyA8bWFqaWFucGVuZ0Bn
+bWFpbC5jb20+IHdyb3RlOg0KPj4+T24gV2VkLCBKdWwgMzEsIDIwMTMgYXQgMzozMiBQTSwgbWFq
+aWFucGVuZyA8bWFqaWFucGVuZ0BnbWFpbC5jb20+IHdyb3RlOg0KPj4+Pg0KPj4+PiAgW3NuaXBd
+DQo+Pj4+IFRlc3QgY2FzZQ0KPj4+PiBBOiB0b3VjaCBmaWxlDQo+Pj4+ICAgICBkZCBpZj1maWxl
+IG9mPS9kZXYvbnVsbCBicz01TSBjb3VudD0xIGlmbGFnPWRpcmVjdA0KPj4+PiBCOiBbZGF0YSgy
+TSl8aG9sZSgybSldW2RhdGEoMk0pXQ0KPj4+PiAgICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBi
+cz04TSBjb3VudD0xIGlmbGFnPWRpcmVjdA0KPj4+PiBDOiBbZGF0YSg0TSlbaG9sZSg0TSldW2hv
+bGUoNE0pXVtkYXRhKDJNKV0NCj4+Pj4gICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBicz0xNk0g
+Y291bnQ9MSBpZmxhZz1kaXJlY3QNCj4+Pj4gRDogdG91Y2ggZmlsZTt0cnVuY2F0ZSAtcyA1TSBm
+aWxlDQo+Pj4+ICAgZGQgaWY9ZmlsZSBvZj0vZGV2L251bGwgYnM9OE0gY291bnQ9MSBpZmxhZz1k
+aXJlY3QNCj4+Pj4NCj4+Pj4gVGhvc2UgY2FzZXMgY2FuIHdvcmsuDQo+Pj4+IE5vdyBpIG1ha2Ug
+ZGlmZmVyZW50IHByb2Nlc3NpbmcgIGZvciBzaG9ydC1yZWFkIGJldHdlZW4gJ3JldCA+IDAnIGFu
+ZCAicmV0ID0wIi4NCj4+Pj4gRm9yIHRoZSBzaG9ydC1yZWFkIHdoaWNoIHJldCA+IDAsIGl0IGRv
+bid0IGRvIHJlYWQtcGFnZSByYXRoZXIgdGhhbiB6ZXJvIHRoZSBsZWZ0IGFyZWEuDQo+Pj4+IFRo
+aXMgbWVhbnMgcmVkdWNlIG9uZSBtZWFuaW5nbGVzcyByZWFkIG9wZXJhdGlvbi4NCj4+Pj4NCj4+
+Pg0KPj4+VGhpcyBwYXRjaCBsb29rcyBnb29kLiBCdXQgSSBzdGlsbCBob3BlIG5vdCB0byBkdXBs
+aWNhdGUgY29kZS4NCj4+Pg0KPj4+aG93IGFib3V0IGNoYW5nZQ0KPj4+ICJoaXRfc3RyaXBlID0g
+dGhpc19sZW4gPCBsZWZ0OyINCj4+PnRvDQo+Pj4gImhpdF9zdHJpcGUgPSB0aGlzX2xlbiA8IGxl
+ZnQgJiYgKHJldCA9PSB0aGlzX2xlbiB8fCBwb3MgKyB0aGlzX2xlbiA8DQo+Pj5pbm9kZS0+aV9z
+aXplKTsiDQo+Pj4NCj4+IFRvIG1ha2UgdGhlIGNvZGUgZWFzeSB0byB1bmRlcnN0YW5kLCBpIGRv
+bid0IGFwcGx5IHlvdXIgc3VnZ2VzdGlvbi5CdXQgaSBhZGQgdGhpcyBjaGVjayBvbiB0aGUganVk
+Z2VtZW50IG9mDQo+PiB3aGV0aGVyIHJlYWQgbW9yZSBjb250ZW50cy4NCj4+IFRoZSBmb2xsb3cg
+aXMgdGhlIGxhdGVzdCBwYXRjaC5DYW4geW91IGNoZWNrPw0KPj4NCj4+IGRpZmYgLS1naXQgYS9m
+cy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmlsZS5jDQo+PiBpbmRleCAyZGRmMDYxLi4zZDhkMTRk
+IDEwMDY0NA0KPj4gLS0tIGEvZnMvY2VwaC9maWxlLmMNCj4+ICsrKyBiL2ZzL2NlcGgvZmlsZS5j
+DQo+PiBAQCAtMzQ5LDQ0ICszNDksMzggQEAgbW9yZToNCj4+ICAgICAgICAgZG91dCgic3RyaXBl
+ZF9yZWFkICVsbHV+JXUgKHJlYWQgJXUpIGdvdCAlZCVzJXNcbiIsIHBvcywgbGVmdCwgcmVhZCwN
+Cj4+ICAgICAgICAgICAgICByZXQsIGhpdF9zdHJpcGUgPyAiIEhJVFNUUklQRSIgOiAiIiwgd2Fz
+X3Nob3J0ID8gIiBTSE9SVCIgOiAiIik7DQo+Pg0KPj4gLSAgICAgICBpZiAocmV0ID4gMCkgew0K
+Pj4gLSAgICAgICAgICAgICAgIGludCBkaWRwYWdlcyA9IChwYWdlX2FsaWduICsgcmV0KSA+PiBQ
+QUdFX0NBQ0hFX1NISUZUOw0KPj4gLQ0KPj4gLSAgICAgICAgICAgICAgIGlmIChyZWFkIDwgcG9z
+IC0gb2ZmKSB7DQo+PiAtICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxs
+dSB0byAlbGx1XG4iLCBvZmYgKyByZWFkLCBwb3MpOw0KPj4gLSAgICAgICAgICAgICAgICAgICAg
+ICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBhZ2VfYWxpZ24gKyByZWFkLA0KPj4gLSAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvcyAtIG9m
+ZiAtIHJlYWQsIHBhZ2VzKTsNCj4+ICsgICAgICAgaWYgKHJldCA+PSAwKSB7DQo+PiArICAgICAg
+ICAgICAgICAgaW50ICBkaWRwYWdlczsNCj4+ICsgICAgICAgICAgICAgICBpZiAod2FzX3Nob3J0
+ICYmIChwb3MgKyByZXQgPCBpbm9kZS0+aV9zaXplKSkgew0KPj4gKyAgICAgICAgICAgICAgICAg
+ICAgICAgdTY0IHRtcCA9IG1pbih0aGlzX2xlbiAtIHJldCwNCj4+ICsgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIGlub2RlLT5pX3NpemUgLSBwb3MgLSByZXQpOw0KPj4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgZG91dCgiIHplcm8gZ2FwICVsbHUgdG8gJWxsdVxuIiwNCj4+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgcG9zICsgcmV0LCBwb3MgKyByZXQgKyB0bXApOw0K
+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3JhbmdlKHBh
+Z2VfYWxpZ24gKyByZWFkICsgcmV0LA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICB0bXAsIHBhZ2VzKTsNCj4+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIHJldCArPSB0bXA7DQo+PiAgICAgICAgICAgICAgICAgfQ0KPj4gKw0KPj4gKyAg
+ICAgICAgICAgICAgIGRpZHBhZ2VzID0gKHBhZ2VfYWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVf
+U0hJRlQ7DQo+PiAgICAgICAgICAgICAgICAgcG9zICs9IHJldDsNCj4+ICAgICAgICAgICAgICAg
+ICByZWFkID0gcG9zIC0gb2ZmOw0KPj4gICAgICAgICAgICAgICAgIGxlZnQgLT0gcmV0Ow0KPj4g
+ICAgICAgICAgICAgICAgIHBhZ2VfcG9zICs9IGRpZHBhZ2VzOw0KPj4gICAgICAgICAgICAgICAg
+IHBhZ2VzX2xlZnQgLT0gZGlkcGFnZXM7DQo+Pg0KPj4gLSAgICAgICAgICAgICAgIC8qIGhpdCBz
+dHJpcGU/ICovDQo+PiAtICAgICAgICAgICAgICAgaWYgKGxlZnQgJiYgaGl0X3N0cmlwZSkNCj4+
+ICsgICAgICAgICAgICAgICAvKiBoaXQgc3RyaXBlIGFuZCBuZWVkIGNvbnRpbnVlKi8NCj4+ICsg
+ICAgICAgICAgICAgICBpZiAobGVmdCAmJiBoaXRfc3RyaXBlICYmIHBvcyA8IGlub2RlLT5pX3Np
+emUpDQo+PiAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG1vcmU7DQo+PiArDQo+PiAgICAg
+ICAgIH0NCj4+DQo+PiAtICAgICAgIGlmICh3YXNfc2hvcnQpIHsNCj4+ICsgICAgICAgaWYgKHJl
+dCA+PSAwKSB7DQo+PiArICAgICAgICAgICAgICAgcmV0ID0gcmVhZDsNCj4+ICAgICAgICAgICAg
+ICAgICAvKiBkaWQgd2UgYm91bmNlIG9mZiBlb2Y/ICovDQo+PiAgICAgICAgICAgICAgICAgaWYg
+KHBvcyArIGxlZnQgPiBpbm9kZS0+aV9zaXplKQ0KPj4gICAgICAgICAgICAgICAgICAgICAgICAg
+KmNoZWNrZW9mID0gMTsNCj4+IC0NCj4+IC0gICAgICAgICAgICAgICAvKiB6ZXJvIHRyYWlsaW5n
+IGJ5dGVzIChpbnNpZGUgaV9zaXplKSAqLw0KPj4gLSAgICAgICAgICAgICAgIGlmIChsZWZ0ID4g
+MCAmJiBwb3MgPCBpbm9kZS0+aV9zaXplKSB7DQo+PiAtICAgICAgICAgICAgICAgICAgICAgICBp
+ZiAocG9zICsgbGVmdCA+IGlub2RlLT5pX3NpemUpDQo+PiAtICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIGxlZnQgPSBpbm9kZS0+aV9zaXplIC0gcG9zOw0KPj4gLQ0KPj4gLSAgICAgICAg
+ICAgICAgICAgICAgICAgZG91dCgiemVybyB0YWlsICVkXG4iLCBsZWZ0KTsNCj4+IC0gICAgICAg
+ICAgICAgICAgICAgICAgIGNlcGhfemVyb19wYWdlX3ZlY3Rvcl9yYW5nZShwYWdlX2FsaWduICsg
+cmVhZCwgbGVmdCwNCj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBwYWdlcyk7DQo+PiAtICAgICAgICAgICAgICAgICAgICAgICByZWFkICs9IGxl
+ZnQ7DQo+PiAtICAgICAgICAgICAgICAgfQ0KPj4gICAgICAgICB9DQo+Pg0KPj4gLSAgICAgICBp
+ZiAocmV0ID49IDApDQo+PiAtICAgICAgICAgICAgICAgcmV0ID0gcmVhZDsNCj4NCj5JIHRoaW5r
+IHRoaXMgbGluZSBzaG91bGQgYmUgImlmIChyZWFkID4gMCkgcmV0ID0gcmVhZDsiLiBPdGhlciB0
+aGFuDQo+dGhpcywgeW91ciBwYXRjaCBsb29rcyBnb29kLg0KQmVjYXVzZSB5b3UgbWV0aW9uZWQg
+dGhpcywgSSBub3RpY2VkIGZvciBjZXBoX3N5bmNfcmVhZC93cml0ZSB0aGUgcmVzdWx0IGFyZSAm
+JiB0aGUgZXZlcnkgc3RyaXBlZCByZWFkL3dyaXRlLg0KVGhhdCBpcyBpZiB3ZSBtZXQgb25lIGVy
+cm9yLCB0aGUgdG90YWwgcmVzdWx0IGlzIGVycm9yLkl0IGNhbid0IHJldHVybiBwYXJ0aWFsIHJl
+c3VsdC4NCkkgdGhpbmsgaSBzaG91bGQgd3JpdGUgYW50aG9yIHBhdGNoIGZvciB0aGF0Lg0KPllv
+dSBjYW4gYWRkICJSZXZpZXdlZC1ieTogWWFuLCBaaGVuZyA8emhlbmcuei55YW5AaW50ZWwuY29t
+PiIgdG8geW91cg0KPmZvcm1hbCBwYXRjaC4NCk9rICx0aGFua3MgeW91ciB0aW1lcy4NCg0KVGhh
+bmtzIQ0KSmlhbnBlbmcgTWENCj4NCj5SZWdhcmRzDQo+WWFuLCBaaGVuZw0KPg0KPg0KPj4gICAg
+ICAgICBkb3V0KCJzdHJpcGVkX3JlYWQgcmV0dXJucyAlZFxuIiwgcmV0KTsNCj4+ICAgICAgICAg
+cmV0dXJuIHJldDsNCj4+ICB9DQo+Pg0KPj4gVGhhbmtzIQ0KPj4gSmlhbnBlbmcgTWENClRoYW5r
+cyENCkppYW5wZW5nIE1hDQo+T24gVGh1LCBBdWcgMSwgMjAxMyBhdCA5OjQ1IEFNLCBtYWppYW5w
+ZW5nIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+Pj5PbiBXZWQsIEp1bCAzMSwgMjAx
+MyBhdCAzOjMyIFBNLCBtYWppYW5wZW5nIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+
+Pj4+DQo+Pj4+ICBbc25pcF0NCj4+Pj4gVGVzdCBjYXNlDQo+Pj4+IEE6IHRvdWNoIGZpbGUNCj4+
+Pj4gICAgIGRkIGlmPWZpbGUgb2Y9L2Rldi9udWxsIGJzPTVNIGNvdW50PTEgaWZsYWc9ZGlyZWN0
+DQo+Pj4+IEI6IFtkYXRhKDJNKXxob2xlKDJtKV1bZGF0YSgyTSldDQo+Pj4+ICAgIGRkIGlmPWZp
+bGUgb2Y9L2Rldi9udWxsIGJzPThNIGNvdW50PTEgaWZsYWc9ZGlyZWN0DQo+Pj4+IEM6IFtkYXRh
+KDRNKVtob2xlKDRNKV1baG9sZSg0TSldW2RhdGEoMk0pXQ0KPj4+PiAgIGRkIGlmPWZpbGUgb2Y9
+L2Rldi9udWxsIGJzPTE2TSBjb3VudD0xIGlmbGFnPWRpcmVjdA0KPj4+PiBEOiB0b3VjaCBmaWxl
+O3RydW5jYXRlIC1zIDVNIGZpbGUNCj4+Pj4gICBkZCBpZj1maWxlIG9mPS9kZXYvbnVsbCBicz04
+TSBjb3VudD0xIGlmbGFnPWRpcmVjdA0KPj4+Pg0KPj4+PiBUaG9zZSBjYXNlcyBjYW4gd29yay4N
+Cj4+Pj4gTm93IGkgbWFrZSBkaWZmZXJlbnQgcHJvY2Vzc2luZyAgZm9yIHNob3J0LXJlYWQgYmV0
+d2VlbiAncmV0ID4gMCcgYW5kICJyZXQgPTAiLg0KPj4+PiBGb3IgdGhlIHNob3J0LXJlYWQgd2hp
+Y2ggcmV0ID4gMCwgaXQgZG9uJ3QgZG8gcmVhZC1wYWdlIHJhdGhlciB0aGFuIHplcm8gdGhlIGxl
+ZnQgYXJlYS4NCj4+Pj4gVGhpcyBtZWFucyByZWR1Y2Ugb25lIG1lYW5pbmdsZXNzIHJlYWQgb3Bl
+cmF0aW9uLg0KPj4+Pg0KPj4+DQo+Pj5UaGlzIHBhdGNoIGxvb2tzIGdvb2QuIEJ1dCBJIHN0aWxs
+IGhvcGUgbm90IHRvIGR1cGxpY2F0ZSBjb2RlLg0KPj4+DQo+Pj5ob3cgYWJvdXQgY2hhbmdlDQo+
+Pj4gImhpdF9zdHJpcGUgPSB0aGlzX2xlbiA8IGxlZnQ7Ig0KPj4+dG8NCj4+PiAiaGl0X3N0cmlw
+ZSA9IHRoaXNfbGVuIDwgbGVmdCAmJiAocmV0ID09IHRoaXNfbGVuIHx8IHBvcyArIHRoaXNfbGVu
+IDwNCj4+Pmlub2RlLT5pX3NpemUpOyINCj4+Pg0KPj4gVG8gbWFrZSB0aGUgY29kZSBlYXN5IHRv
+IHVuZGVyc3RhbmQsIGkgZG9uJ3QgYXBwbHkgeW91ciBzdWdnZXN0aW9uLkJ1dCBpIGFkZCB0aGlz
+IGNoZWNrIG9uIHRoZSBqdWRnZW1lbnQgb2YNCj4+IHdoZXRoZXIgcmVhZCBtb3JlIGNvbnRlbnRz
+Lg0KPj4gVGhlIGZvbGxvdyBpcyB0aGUgbGF0ZXN0IHBhdGNoLkNhbiB5b3UgY2hlY2s/DQo+Pg0K
+Pj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCj4+IGluZGV4
+IDJkZGYwNjEuLjNkOGQxNGQgMTAwNjQ0DQo+PiAtLS0gYS9mcy9jZXBoL2ZpbGUuYw0KPj4gKysr
+IGIvZnMvY2VwaC9maWxlLmMNCj4+IEBAIC0zNDksNDQgKzM0OSwzOCBAQCBtb3JlOg0KPj4gICAg
+ICAgICBkb3V0KCJzdHJpcGVkX3JlYWQgJWxsdX4ldSAocmVhZCAldSkgZ290ICVkJXMlc1xuIiwg
+cG9zLCBsZWZ0LCByZWFkLA0KPj4gICAgICAgICAgICAgIHJldCwgaGl0X3N0cmlwZSA/ICIgSElU
+U1RSSVBFIiA6ICIiLCB3YXNfc2hvcnQgPyAiIFNIT1JUIiA6ICIiKTsNCj4+DQo+PiAtICAgICAg
+IGlmIChyZXQgPiAwKSB7DQo+PiAtICAgICAgICAgICAgICAgaW50IGRpZHBhZ2VzID0gKHBhZ2Vf
+YWxpZ24gKyByZXQpID4+IFBBR0VfQ0FDSEVfU0hJRlQ7DQo+PiAtDQo+PiAtICAgICAgICAgICAg
+ICAgaWYgKHJlYWQgPCBwb3MgLSBvZmYpIHsNCj4+IC0gICAgICAgICAgICAgICAgICAgICAgIGRv
+dXQoIiB6ZXJvIGdhcCAlbGx1IHRvICVsbHVcbiIsIG9mZiArIHJlYWQsIHBvcyk7DQo+PiAtICAg
+ICAgICAgICAgICAgICAgICAgICBjZXBoX3plcm9fcGFnZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGln
+biArIHJlYWQsDQo+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgcG9zIC0gb2ZmIC0gcmVhZCwgcGFnZXMpOw0KPj4gKyAgICAgICBpZiAocmV0ID49
+IDApIHsNCj4+ICsgICAgICAgICAgICAgICBpbnQgIGRpZHBhZ2VzOw0KPj4gKyAgICAgICAgICAg
+ICAgIGlmICh3YXNfc2hvcnQgJiYgKHBvcyArIHJldCA8IGlub2RlLT5pX3NpemUpKSB7DQo+PiAr
+ICAgICAgICAgICAgICAgICAgICAgICB1NjQgdG1wID0gbWluKHRoaXNfbGVuIC0gcmV0LA0KPj4g
+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5vZGUtPmlfc2l6ZSAtIHBvcyAtIHJl
+dCk7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCIgemVybyBnYXAgJWxsdSB0byAl
+bGx1XG4iLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3MgKyByZXQsIHBv
+cyArIHJldCArIHRtcCk7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBjZXBoX3plcm9fcGFn
+ZV92ZWN0b3JfcmFuZ2UocGFnZV9hbGlnbiArIHJlYWQgKyByZXQsDQo+PiArICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRtcCwgcGFnZXMpOw0K
+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgcmV0ICs9IHRtcDsNCj4+ICAgICAgICAgICAgICAg
+ICB9DQo+PiArDQo+PiArICAgICAgICAgICAgICAgZGlkcGFnZXMgPSAocGFnZV9hbGlnbiArIHJl
+dCkgPj4gUEFHRV9DQUNIRV9TSElGVDsNCj4+ICAgICAgICAgICAgICAgICBwb3MgKz0gcmV0Ow0K
+Pj4gICAgICAgICAgICAgICAgIHJlYWQgPSBwb3MgLSBvZmY7DQo+PiAgICAgICAgICAgICAgICAg
+bGVmdCAtPSByZXQ7DQo+PiAgICAgICAgICAgICAgICAgcGFnZV9wb3MgKz0gZGlkcGFnZXM7DQo+
+PiAgICAgICAgICAgICAgICAgcGFnZXNfbGVmdCAtPSBkaWRwYWdlczsNCj4+DQo+PiAtICAgICAg
+ICAgICAgICAgLyogaGl0IHN0cmlwZT8gKi8NCj4+IC0gICAgICAgICAgICAgICBpZiAobGVmdCAm
+JiBoaXRfc3RyaXBlKQ0KPj4gKyAgICAgICAgICAgICAgIC8qIGhpdCBzdHJpcGUgYW5kIG5lZWQg
+Y29udGludWUqLw0KPj4gKyAgICAgICAgICAgICAgIGlmIChsZWZ0ICYmIGhpdF9zdHJpcGUgJiYg
+cG9zIDwgaW5vZGUtPmlfc2l6ZSkNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gbW9y
+ZTsNCj4+ICsNCj4+ICAgICAgICAgfQ0KPj4NCj4+IC0gICAgICAgaWYgKHdhc19zaG9ydCkgew0K
+Pj4gKyAgICAgICBpZiAocmV0ID49IDApIHsNCj4+ICsgICAgICAgICAgICAgICByZXQgPSByZWFk
+Ow0KPj4gICAgICAgICAgICAgICAgIC8qIGRpZCB3ZSBib3VuY2Ugb2ZmIGVvZj8gKi8NCj4+ICAg
+ICAgICAgICAgICAgICBpZiAocG9zICsgbGVmdCA+IGlub2RlLT5pX3NpemUpDQo+PiAgICAgICAg
+ICAgICAgICAgICAgICAgICAqY2hlY2tlb2YgPSAxOw0KPj4gLQ0KPj4gLSAgICAgICAgICAgICAg
+IC8qIHplcm8gdHJhaWxpbmcgYnl0ZXMgKGluc2lkZSBpX3NpemUpICovDQo+PiAtICAgICAgICAg
+ICAgICAgaWYgKGxlZnQgPiAwICYmIHBvcyA8IGlub2RlLT5pX3NpemUpIHsNCj4+IC0gICAgICAg
+ICAgICAgICAgICAgICAgIGlmIChwb3MgKyBsZWZ0ID4gaW5vZGUtPmlfc2l6ZSkNCj4+IC0gICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgbGVmdCA9IGlub2RlLT5pX3NpemUgLSBwb3M7DQo+
+PiAtDQo+PiAtICAgICAgICAgICAgICAgICAgICAgICBkb3V0KCJ6ZXJvIHRhaWwgJWRcbiIsIGxl
+ZnQpOw0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAgY2VwaF96ZXJvX3BhZ2VfdmVjdG9yX3Jh
+bmdlKHBhZ2VfYWxpZ24gKyByZWFkLCBsZWZ0LA0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhZ2VzKTsNCj4+IC0gICAgICAgICAgICAgICAg
+ICAgICAgIHJlYWQgKz0gbGVmdDsNCj4+IC0gICAgICAgICAgICAgICB9DQo+PiAgICAgICAgIH0N
+Cj4+DQo+PiAtICAgICAgIGlmIChyZXQgPj0gMCkNCj4+IC0gICAgICAgICAgICAgICByZXQgPSBy
+ZWFkOw0KPg0KPkkgdGhpbmsgdGhpcyBsaW5lIHNob3VsZCBiZSAiaWYgKHJlYWQgPiAwKSByZXQg
+PSByZWFkOyIuIE90aGVyIHRoYW4NCj50aGlzLCB5b3VyIHBhdGNoIGxvb2tzIGdvb2QuDQo+WW91
+IGNhbiBhZGQgIlJldmlld2VkLWJ5OiBZYW4sIFpoZW5nIDx6aGVuZy56LnlhbkBpbnRlbC5jb20+
+IiB0byB5b3VyDQo+Zm9ybWFsIHBhdGNoLg0KPg0KPlJlZ2FyZHMNCj5ZYW4sIFpoZW5nDQo+DQo+
+DQo+PiAgICAgICAgIGRvdXQoInN0cmlwZWRfcmVhZCByZXR1cm5zICVkXG4iLCByZXQpOw0KPj4g
+ICAgICAgICByZXR1cm4gcmV0Ow0KPj4gIH0NCj4+DQo+PiBUaGFua3MhDQo+PiBKaWFucGVuZyBN
+YQ==
 
-I think this line should be "if (read > 0) ret = read;". Other than
-this, your patch looks good.
-You can add "Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>" to your
-formal patch.
-
-Regards
-Yan, Zheng
-
-
->         dout("striped_read returns %d\n", ret);
->         return ret;
->  }
->
-> Thanks!
-> Jianpeng Ma
