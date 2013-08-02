@@ -1,60 +1,36 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: still recovery issues with cuttlefish
-Date: Fri, 2 Aug 2013 21:56:16 +0400
-Message-ID: <CABYiri9-i2qR+YZ2gstBXPnAhysyEmYWbeNG8YhTz=4Xu3F1ng@mail.gmail.com>
-References: <51FA1AC1.8040207@profihost.ag> <CABYiri_c4zO30veXsan5LzsKqAO70iPU+ubfqFwP8pt4RVRTWw@mail.gmail.com>
- <CA+4uBUa4OvUKrgaqR8RKJjT2Qtg5bvFUaq8QGN437CvcqJNBQg@mail.gmail.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: ceph-deploy progress and CDS session
+Date: Fri, 2 Aug 2013 11:02:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308021100150.22864@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:46758 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754088Ab3HBR4h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 13:56:37 -0400
-Received: by mail-ob0-f171.google.com with SMTP id tb18so1713970obb.2
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Aug 2013 10:56:36 -0700 (PDT)
-In-Reply-To: <CA+4uBUa4OvUKrgaqR8RKJjT2Qtg5bvFUaq8QGN437CvcqJNBQg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Created #5844.
+There is a session at CDS scheduled to discuss ceph-deploy (4:40pm PDT on 
+Monday).  We'll be going over what we currently have in backlog for 
+improvements, but if you have any opinions about what else ceph-deploy 
+should or should not do or areas where it is problematic, please reply to 
+this thread to let us know what you think, and/or join the CDS discussion 
+hangout.
 
-On Thu, Aug 1, 2013 at 10:38 PM, Samuel Just <sam.just@inktank.com> wrote:
-> Is there a bug open for this?  I suspect we don't sufficiently
-> throttle the snapshot removal work.
-> -Sam
->
-> On Thu, Aug 1, 2013 at 7:50 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> Second this. Also for long-lasting snapshot problem and related
->> performance issues I may say that cuttlefish improved things greatly,
->> but creation/deletion of large snapshot (hundreds of gigabytes of
->> commited data) still can bring down cluster for a minutes, despite
->> usage of every possible optimization.
->>
->> On Thu, Aug 1, 2013 at 12:22 PM, Stefan Priebe - Profihost AG
->> <s.priebe@profihost.ag> wrote:
->>> Hi,
->>>
->>> i still have recovery issues with cuttlefish. After the OSD comes back
->>> it seem to hang for around 2-4 minutes and then recovery seems to start
->>> (pgs in recovery_wait start to decrement). This is with ceph 0.61.7. I
->>> get a lot of slow request messages an hanging VMs.
->>>
->>> What i noticed today is that if i leave the OSD off as long as ceph
->>> starts to backfill - the recovery and "re" backfilling wents absolutely
->>> smooth without any issues and no slow request messages at all.
->>>
->>> Does anybody have an idea why?
->>>
->>> Greets,
->>> Stefan
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+For those who haven't noticed, we now have a full-time devoloper,
+Alfredo Deza, who is working on ceph-deploy.  He's been making huge
+progress over the last couple of weeks improving error reporting,
+visibility into what ceph-deploy is doing, and fixing various bugs.  We
+have a long list of things we want to do with the tool, but any feedback
+from users is helpful to make sure we're working on the right things 
+first!
+
+sage
