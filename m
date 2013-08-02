@@ -1,41 +1,27 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: ocf script for ceph quorum check and fs
-Date: Fri, 2 Aug 2013 11:40:29 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E74783@BITCOM1.int.sbss.com.au>
+From: Oleg Krasnianskiy <oleg.krasnianskiy@gmail.com>
+Subject: rados_clone_range for different pgs
+Date: Fri, 2 Aug 2013 15:53:30 +0300
+Message-ID: <CA+CdmLbW+Tb2Wz1+DNJ4yFZ7-gDG1XsPfvKGZ-H5iJZQJ=QvZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:52968 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751033Ab3HBLke convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 07:40:34 -0400
-Received: from bitcom1.int.sbss.com.au ([2001:388:e000:712:a5ca:4fd3:14f:ad5d])
-	by smtp1.bendigoit.com.au with esmtp (Exim 4.69)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1V5Dip-0003RP-Ja
-	for ceph-devel@vger.kernel.org; Fri, 02 Aug 2013 21:40:40 +1000
-Content-Language: en-US
+Received: from mail-ve0-f194.google.com ([209.85.128.194]:64893 "EHLO
+	mail-ve0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751662Ab3HBMxb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 08:53:31 -0400
+Received: by mail-ve0-f194.google.com with SMTP id 15so308124vea.5
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Aug 2013 05:53:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I want to mount ceph fs (using fuse) but /etc/fstab treats it as a local filesystem and so tries to mount it before ceph is started, or indeed before the network is even up.
+Hi
 
-Also, ceph tries to start before the network is up and fails because it can't bind to an address. I think this is because I'm using openvswitch which is starting later.
+I have asked this question in ceph-users, but did not get any
+response, so I'll test my luck again, but with ceph-devel =)
 
-Anyway, controlling it all via pacemaker seems like a much smarter thing to do as I can ensure that ceph doesn't start until the network is up (which it will be when pacemaker has quorum), and then the fs doesn't mount until ceph is started and the ceph cluster has quorum and maybe until an mds is running.
+Is there any way to copy part of one object into another one if they
+reside in different pgs?
+There is rados_clone_range, but it requires both objects to be inside one pg.
 
-So to do this I need ocf scripts for:
-
-. starting components of ceph, which appears to be provided by ceph-resource-agents.deb, but I haven't tested yet
-. checking ceph quorum - I guess I'd need to write a script for this like existing ping check
-. checking mds is available - maybe part of the mount script
-. mount using ceph-fuse. Existing fs scripts make assumptions about fs types and parameters and don't work
-
-Has anyone written a 'check_ceph_quorum' script? Or a fs mount script that is compatible with fuse? I don't want to re-invent any wheels!
-
-Thanks
-
-James
-
+Thanks!
