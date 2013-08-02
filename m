@@ -1,73 +1,39 @@
-From: Sha Zhengju <handai.szj@gmail.com>
-Subject: Re: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface
- instead of doing it inside filesystem
-Date: Fri, 2 Aug 2013 18:04:17 +0800
-Message-ID: <CAFj3OHVXvtr5BDMrGatHZi7M9y+dh1ZKRMQZGjZmNBcg3pNQtw@mail.gmail.com>
-References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
-	<1375357892-10188-1-git-send-email-handai.szj@taobao.com>
-	<CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
-	<alpine.DEB.2.00.1308011121080.22584@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: Add check returned value on func ceph_calc_ceph_pg.
+Date: Fri, 2 Aug 2013 18:14:48 +0800
+Message-ID: <201308021814466765843@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <alpine.DEB.2.00.1308011121080.22584@cobra.newdream.net>
-Sender: owner-linux-mm@kvack.org
-To: Sage Weil <sage@inktank.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, Cgroups <cgroups@vger.kernel.org>, Michal Hocko <mhocko@suse.cz>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Glauber Costa <glommer@gmail.com>, Greg Thelen <gthelen@google.com>, Wu Fengguang <fengguang.wu@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f41.google.com ([209.85.160.41]:54952 "EHLO
+	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030658Ab3HBKOw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 06:14:52 -0400
+Received: by mail-pb0-f41.google.com with SMTP id rp2so524661pbb.28
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Aug 2013 03:14:51 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Aug 2, 2013 at 2:27 AM, Sage Weil <sage@inktank.com> wrote:
-> On Thu, 1 Aug 2013, Yan, Zheng wrote:
->> On Thu, Aug 1, 2013 at 7:51 PM, Sha Zhengju <handai.szj@gmail.com> wrote:
->> > From: Sha Zhengju <handai.szj@taobao.com>
->> >
->> > Following we will begin to add memcg dirty page accounting around
->> __set_page_dirty_
->> > {buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
->> avoid exporting
->> > those details to filesystems.
->> >
->> > Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
->> > ---
->> >  fs/ceph/addr.c |   13 +------------
->> >  1 file changed, 1 insertion(+), 12 deletions(-)
->> >
->> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
->> > index 3e68ac1..1445bf1 100644
->> > --- a/fs/ceph/addr.c
->> > +++ b/fs/ceph/addr.c
->> > @@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
->> >         if (unlikely(!mapping))
->> >                 return !TestSetPageDirty(page);
->> >
->> > -       if (TestSetPageDirty(page)) {
->> > +       if (!__set_page_dirty_nobuffers(page)) {
->> it's too early to set the radix tree tag here. We should set page's snapshot
->> context and increase the i_wrbuffer_ref first. This is because once the tag
->> is set, writeback thread can find and start flushing the page.
->
-> Unfortunately I only remember being frustrated by this code.  :)  Looking
-> at it now, though, it seems like the minimum fix is to set the
-> page->private before marking the page dirty.  I don't know the locking
-> rules around that, though.  If that is potentially racy, maybe the safest
-> thing would be if __set_page_dirty_nobuffers() took a void* to set
-> page->private to atomically while holding the tree_lock.
->
+RnVuYyBjZXBoX2NhbGNfY2VwaF9wZyBtYXliZSBmYWlsZWQuU28gYWRkIGNoZWNrIGZvciByZXR1
+cm5lZCB2YWx1ZS4NCg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21h
+aWwuY29tPg0KLS0tDQogZnMvY2VwaC9pb2N0bC5jIHwgOCArKysrKystLQ0KIDEgZmlsZSBjaGFu
+Z2VkLCA2IGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9mcy9j
+ZXBoL2lvY3RsLmMgYi9mcy9jZXBoL2lvY3RsLmMNCmluZGV4IGUwYjRlZjMuLjhjNDYzZGQgMTAw
+NjQ0DQotLS0gYS9mcy9jZXBoL2lvY3RsLmMNCisrKyBiL2ZzL2NlcGgvaW9jdGwuYw0KQEAgLTIw
+OSw4ICsyMDksMTIgQEAgc3RhdGljIGxvbmcgY2VwaF9pb2N0bF9nZXRfZGF0YWxvYyhzdHJ1Y3Qg
+ZmlsZSAqZmlsZSwgdm9pZCBfX3VzZXIgKmFyZykNCiAJc25wcmludGYoZGwub2JqZWN0X25hbWUs
+IHNpemVvZihkbC5vYmplY3RfbmFtZSksICIlbGx4LiUwOGxseCIsDQogCQkgY2VwaF9pbm8oaW5v
+ZGUpLCBkbC5vYmplY3Rfbm8pOw0KIA0KLQljZXBoX2NhbGNfY2VwaF9wZygmcGdpZCwgZGwub2Jq
+ZWN0X25hbWUsIG9zZGMtPm9zZG1hcCwNCi0JCWNlcGhfZmlsZV9sYXlvdXRfcGdfcG9vbChjaS0+
+aV9sYXlvdXQpKTsNCisJciA9IGNlcGhfY2FsY19jZXBoX3BnKCZwZ2lkLCBkbC5vYmplY3RfbmFt
+ZSwgb3NkYy0+b3NkbWFwLA0KKwkJCQljZXBoX2ZpbGVfbGF5b3V0X3BnX3Bvb2woY2ktPmlfbGF5
+b3V0KSk7DQorCWlmIChyIDwgMCkgew0KKwkJdXBfcmVhZCgmb3NkYy0+bWFwX3NlbSk7DQorCQly
+ZXR1cm4gcjsNCisJfQ0KIA0KIAlkbC5vc2QgPSBjZXBoX2NhbGNfcGdfcHJpbWFyeShvc2RjLT5v
+c2RtYXAsIHBnaWQpOw0KIAlpZiAoZGwub3NkID49IDApIHsNCi0tIA0KMS44LjEuMg0KDQoNClRo
+YW5rcyENCkppYW5wZW5nIE1h
 
-Sorry, I don't catch the point of your last sentence... Could you
-please explain it again?
-
-I notice there is a check in __set_page_dirty_nobuffers():
-      WARN_ON_ONCE(!PagePrivate(page) && !PageUptodate(page));
-So does it mean we can only set page->private after it? but if so the
-__mark_inode_dirty is still ahead of setting snapc.
-
-
-Thanks,
-Sha
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
