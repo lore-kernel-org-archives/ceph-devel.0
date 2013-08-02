@@ -1,73 +1,86 @@
-From: Niklas Goerke <niklas@niklasgoerke.de>
-Subject: Re: Rados Protocoll
-Date: Fri, 02 Aug 2013 10:58:40 +0200
-Message-ID: <51FB74C0.3060706@niklasgoerke.de>
-References: <51FABE7F.90200@niklasgoerke.de> <CA+Hcz58MpW6w3-rv52orcUj+AEW-ccYhgcQAJ2GtHrn6=rDHQg@mail.gmail.com>
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: Re: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface
+ instead of doing it inside filesystem
+Date: Fri, 2 Aug 2013 17:04:33 +0800
+Message-ID: <CAFj3OHXR=PqHwLcXCub8YezcGFF7kbKX3X2dV=6FQM78K__D8g@mail.gmail.com>
+References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
+	<1375357892-10188-1-git-send-email-handai.szj@taobao.com>
+	<CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from niklasgoerke.de ([46.38.232.61]:40008 "EHLO niklasgoerke.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754442Ab3HBI6n (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 2 Aug 2013 04:58:43 -0400
-In-Reply-To: <CA+Hcz58MpW6w3-rv52orcUj+AEW-ccYhgcQAJ2GtHrn6=rDHQg@mail.gmail.com>
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:62019 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755010Ab3HBJEf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 05:04:35 -0400
+In-Reply-To: <CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, Cgroups <cgroups@vger.kernel.org>, Sage Weil <sage@inktank.com>, Michal Hocko <mhocko@suse.cz>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Glauber Costa <glommer@gmail.com>, Greg Thelen <gthelen@google.com>, Wu Fengguang <fengguang.wu@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Sha Zhengju <handai.szj@taobao.com>
 
-Hi Noah
-
-Thank you for your comments.
-My companies policy states that all software needs to go through a 
-security assessment to be allowed to use in production. As all our tools 
-are focused on java, a native implementation would be far easier to 
-handle than a java binding of librados (which uses jna, which is also 
-quite large).
-Also with a native java implementation there is no "technology-break" 
-using three different software packages from three maintainers as 
-compared to one native java implementation which only relies on the 
-RADOS Protocol.
-
-As for the documentation you referenced: I didn't find a documentation 
-of the RADOS Protocol which could be used to base an implementation of 
-librados upon. Does anything like this exist, or would I need to 
-"translate" the c implementation?
-
-Niklas
-
-
-Am 01.08.2013 23:53, schrieb Noah Watkins:
-> Hi Niklas,
->
-> The RADOS reference implementation in C++ is quite large. Reproducing
-> it all in another language would be interesting, but I'm curious if
-> wrapping the C interface is not an option for you? There are Java
-> bindings that are being worked on here:
-> https://github.com/wido/rados-java.
->
-> There are links on ceph.com/docs to some information about Ceph, as
-> well as videos on Youtube, and academic papers linked to.
->
-> -Noah
->
-> On Thu, Aug 1, 2013 at 1:01 PM, Niklas Goerke <niklas@niklasgoerke.de> wrote:
->> Hi,
+On Thu, Aug 1, 2013 at 11:19 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Thu, Aug 1, 2013 at 7:51 PM, Sha Zhengju <handai.szj@gmail.com> wrote:
+>> From: Sha Zhengju <handai.szj@taobao.com>
 >>
->> I was wondering why there is no native Java implementation of librados. I'm
->> thinking about creating one and I'm thus looking for a documentation of the
->> RADOS protocol.
->> Also the way I see it librados implements the crush algorithm. Is there a
->> documentation for it?
->> Also an educated guess about whether the RADOS Protocol is due to changes
->> would be very much appreciated.
+>> Following we will begin to add memcg dirty page accounting around
+>> __set_page_dirty_
+>> {buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
+>> avoid exporting
+>> those details to filesystems.
 >>
->> Thank you in advance
+>> Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+>> ---
+>>  fs/ceph/addr.c |   13 +------------
+>>  1 file changed, 1 insertion(+), 12 deletions(-)
 >>
->> Niklas
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+>> index 3e68ac1..1445bf1 100644
+>> --- a/fs/ceph/addr.c
+>> +++ b/fs/ceph/addr.c
+>> @@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
+>>         if (unlikely(!mapping))
+>>                 return !TestSetPageDirty(page);
+>>
+>> -       if (TestSetPageDirty(page)) {
+>> +       if (!__set_page_dirty_nobuffers(page)) {
+>
+> it's too early to set the radix tree tag here. We should set page's snapshot
+> context and increase the i_wrbuffer_ref first. This is because once the tag
+> is set, writeback thread can find and start flushing the page.
 
+OK, thanks for pointing it out.
+
+>
+>
+>>                 dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+>>                      mapping->host, page, page->index);
+>>                 return 0;
+>> @@ -107,14 +107,7 @@ static int ceph_set_page_dirty(struct page *page)
+>>              snapc, snapc->seq, snapc->num_snaps);
+>>         spin_unlock(&ci->i_ceph_lock);
+>>
+>> -       /* now adjust page */
+>> -       spin_lock_irq(&mapping->tree_lock);
+>>         if (page->mapping) {    /* Race with truncate? */
+>> -               WARN_ON_ONCE(!PageUptodate(page));
+>> -               account_page_dirtied(page, page->mapping);
+>> -               radix_tree_tag_set(&mapping->page_tree,
+>> -                               page_index(page), PAGECACHE_TAG_DIRTY);
+>> -
+>
+> this code was coped from __set_page_dirty_nobuffers(). I think the reason
+> Sage did this is to handle the race described in
+> __set_page_dirty_nobuffers()'s comment. But I'm wonder if "page->mapping ==
+> NULL" can still happen here. Because truncate_inode_page() unmap page from
+> processes's address spaces first, then delete page from page cache.
+
+But in non-mmap case, doesn't it has no relation to 'unmap page from
+address spaces'?
+The check is exactly avoiding racy with delete_from_page_cache(),
+since the two both need to hold mapping->tree_lock, and if truncate
+goes first then __set_page_dirty_nobuffers() may have NULL mapping.
+
+
+Thanks,
+Sha
