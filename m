@@ -1,141 +1,131 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: fix bugs about handling short-read for sync read
- mode.
-Date: Fri, 2 Aug 2013 13:16:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308021316010.1128@cobra.newdream.net>
-References: <201308020907510158900@gmail.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface
+ instead of doing it inside filesystem
+Date: Fri, 2 Aug 2013 13:30:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308021326080.1128@cobra.newdream.net>
+References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com> <1375357892-10188-1-git-send-email-handai.szj@taobao.com> <CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com> <alpine.DEB.2.00.1308011121080.22584@cobra.newdream.net>
+ <CAFj3OHVXvtr5BDMrGatHZi7M9y+dh1ZKRMQZGjZmNBcg3pNQtw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49825 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752132Ab3HBUQw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 16:16:52 -0400
-In-Reply-To: <201308020907510158900@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: "zheng.z.yan" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAFj3OHVXvtr5BDMrGatHZi7M9y+dh1ZKRMQZGjZmNBcg3pNQtw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, Cgroups <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, KAMEZAWA Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, Glauber Costa <glommer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Greg Thelen <gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Wu Fengguang <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-BTW, I was going to add this to the testing branch but it doesn't apply to 
-the current tree.  Can you rebase on top of ceph-client.git #testing?
+On Fri, 2 Aug 2013, Sha Zhengju wrote:
+> On Fri, Aug 2, 2013 at 2:27 AM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+> > On Thu, 1 Aug 2013, Yan, Zheng wrote:
+> >> On Thu, Aug 1, 2013 at 7:51 PM, Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >> > From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+> >> >
+> >> > Following we will begin to add memcg dirty page accounting around
+> >> __set_page_dirty_
+> >> > {buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
+> >> avoid exporting
+> >> > those details to filesystems.
+> >> >
+> >> > Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+> >> > ---
+> >> >  fs/ceph/addr.c |   13 +------------
+> >> >  1 file changed, 1 insertion(+), 12 deletions(-)
+> >> >
+> >> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> >> > index 3e68ac1..1445bf1 100644
+> >> > --- a/fs/ceph/addr.c
+> >> > +++ b/fs/ceph/addr.c
+> >> > @@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
+> >> >         if (unlikely(!mapping))
+> >> >                 return !TestSetPageDirty(page);
+> >> >
+> >> > -       if (TestSetPageDirty(page)) {
+> >> > +       if (!__set_page_dirty_nobuffers(page)) {
+> >> it's too early to set the radix tree tag here. We should set page's snapshot
+> >> context and increase the i_wrbuffer_ref first. This is because once the tag
+> >> is set, writeback thread can find and start flushing the page.
+> >
+> > Unfortunately I only remember being frustrated by this code.  :)  Looking
+> > at it now, though, it seems like the minimum fix is to set the
+> > page->private before marking the page dirty.  I don't know the locking
+> > rules around that, though.  If that is potentially racy, maybe the safest
+> > thing would be if __set_page_dirty_nobuffers() took a void* to set
+> > page->private to atomically while holding the tree_lock.
+> >
+> 
+> Sorry, I don't catch the point of your last sentence... Could you
+> please explain it again?
 
-Thanks!
+It didn't make much sense.  :)  I was worried about multiple callers to 
+set_page_dirty, but as understand it, this all happens under page->lock, 
+right?  (There is a mention of other special cases in mm/page-writeback.c, 
+but I'm hoping we don't need to worry about that.)
+
+In any case, I suspect what we actually want is something like the below 
+(untested) patch.  The snapc accounting can be ignored here because 
+invalidatepage will clean it up...
+
 sage
 
 
-On Fri, 2 Aug 2013, majianpeng wrote:
 
-> cephfs . show_layout
-> >layyout.data_pool:     0
-> >layout.object_size:   4194304
-> >layout.stripe_unit:   4194304
-> >layout.stripe_count:  1
-> 
-> TestA:
-> >dd if=/dev/urandom of=test bs=1M count=2 oflag=direct
-> >dd if=/dev/urandom of=test bs=1M count=2 seek=4  oflag=direct
-> >dd if=test of=/dev/null bs=6M count=1 iflag=direct
-> The messages from func striped_read are:
-> ceph:           file.c:350  : striped_read 0~6291456 (read 0) got 2097152 HITSTRIPE SHORT
-> ceph:           file.c:350  : striped_read 2097152~4194304 (read 2097152) got 0 HITSTRIPE SHORT
-> ceph:           file.c:381  : zero tail 4194304
-> ceph:           file.c:390  : striped_read returns 6291456
-> The hole of file is from 2M--4M.But actualy it zero the last 4M include
-> the last 2M area which isn't a hole.
-> Using this patch, the messages are:
-> ceph:           file.c:350  : striped_read 0~6291456 (read 0) got 2097152 HITSTRIPE SHORT
-> ceph:           file.c:358  :  zero gap 2097152 to 4194304
-> ceph:           file.c:350  : striped_read 4194304~2097152 (read 4194304) got 2097152
-> ceph:           file.c:384  : striped_read returns 6291456
-> 
-> TestB:
-> >echo majianpeng > test
-> >dd if=test of=/dev/null bs=2M count=1 iflag=direct
-> The messages are:
-> ceph:           file.c:350  : striped_read 0~6291456 (read 0) got 11 HITSTRIPE SHORT
-> ceph:           file.c:350  : striped_read 11~6291445 (read 11) got 0 HITSTRIPE SHORT
-> ceph:           file.c:390  : striped_read returns 11
-> For this case,it did once more striped_read.It's no meaningless.
-> Using this patch, the message are:
-> ceph:           file.c:350  : striped_read 0~6291456 (read 0) got 11 HITSTRIPE SHORT
-> ceph:           file.c:384  : striped_read returns 11
-> 
-> Big thanks to Yan Zheng for the patch.
-> 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/file.c | 40 +++++++++++++++++-----------------------
->  1 file changed, 17 insertions(+), 23 deletions(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 2ddf061..3d8d14d 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -349,44 +349,38 @@ more:
->  	dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
->  	     ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
->  
-> -	if (ret > 0) {
-> -		int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> -
-> -		if (read < pos - off) {
-> -			dout(" zero gap %llu to %llu\n", off + read, pos);
-> -			ceph_zero_page_vector_range(page_align + read,
-> -						    pos - off - read, pages);
-> +	if (ret >= 0) {
-> +		int  didpages;
-> +		if (was_short && (pos + ret < inode->i_size)) {
-> +			u64 tmp = min(this_len - ret,
-> +				 inode->i_size - pos - ret);
-> +			dout(" zero gap %llu to %llu\n",
-> +				pos + ret, pos + ret + tmp);
-> +			ceph_zero_page_vector_range(page_align + read + ret,
-> +							tmp, pages);
-> +			ret += tmp;
->  		}
-> +
-> +		didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
->  		pos += ret;
->  		read = pos - off;
->  		left -= ret;
->  		page_pos += didpages;
->  		pages_left -= didpages;
->  
-> -		/* hit stripe? */
-> -		if (left && hit_stripe)
-> +		/* hit stripe and need continue*/
-> +		if (left && hit_stripe && pos < inode->i_size)
->  			goto more;
-> +
->  	}
->  
-> -	if (was_short) {
-> +	if (ret >= 0) {
-> +		ret = read;
->  		/* did we bounce off eof? */
->  		if (pos + left > inode->i_size)
->  			*checkeof = 1;
-> -
-> -		/* zero trailing bytes (inside i_size) */
-> -		if (left > 0 && pos < inode->i_size) {
-> -			if (pos + left > inode->i_size)
-> -				left = inode->i_size - pos;
-> -
-> -			dout("zero tail %d\n", left);
-> -			ceph_zero_page_vector_range(page_align + read, left,
-> -						    pages);
-> -			read += left;
-> -		}
->  	}
->  
-> -	if (ret >= 0)
-> -		ret = read;
->  	dout("striped_read returns %d\n", ret);
->  	return ret;
->  }
-> -- 
-> 1.8.1.2
-> 
-> 
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index afb2fc2..7602e46 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -76,9 +76,10 @@ static int ceph_set_page_dirty(struct page *page)
+ 	if (unlikely(!mapping))
+ 		return !TestSetPageDirty(page);
+ 
+-	if (TestSetPageDirty(page)) {
++	if (PageDirty(page)) {
+ 		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+ 		     mapping->host, page, page->index);
++		BUG_ON(!PagePrivate(page));
+ 		return 0;
+ 	}
+ 
+@@ -107,35 +108,16 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+-	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+-		/*
+-		 * Reference snap context in page->private.  Also set
+-		 * PagePrivate so that we get invalidatepage callback.
+-		 */
+-		page->private = (unsigned long)snapc;
+-		SetPagePrivate(page);
+-	} else {
+-		dout("ANON set_page_dirty %p (raced truncate?)\n", page);
+-		undo = 1;
+-	}
+-
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+-	if (undo)
+-		/* whoops, we failed to dirty the page */
+-		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+-
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
++	/*
++	 * Reference snap context in page->private.  Also set
++	 * PagePrivate so that we get invalidatepage callback.
++	 */
++	BUG_ON(PagePrivate(page));
++	page->private = (unsigned long)snapc;
++	SetPagePrivate(page);
+ 
+-	BUG_ON(!PageDirty(page));
+-	return 1;
++	return __set_page_dirty_nobuffers(page);
+ }
+ 
+ /*
