@@ -1,67 +1,55 @@
-From: Eric Eastman <eric0e-YDxpq3io04c@public.gmane.org>
-Subject: Re: ceph-deploy progress and CDS session
-Date: Fri, 2 Aug 2013 15:44:43 -0400 (EDT)
-Message-ID: <8D05DCFDE66279C-C34-1DCE1@webmail-m101.sysops.aol.com>
-References: <alpine.DEB.2.00.1308021100150.22864@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: Add check returned value on func
+ ceph_calc_ceph_pg.
+Date: Fri, 2 Aug 2013 13:12:38 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308021312350.1128@cobra.newdream.net>
+References: <201308021814466765843@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1308021100150.22864-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:49776 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751090Ab3HBUMj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Aug 2013 16:12:39 -0400
+In-Reply-To: <201308021814466765843@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Applied, thanks!
 
-First I would like to state that with all its limitiation, I have 
-managed to build multiple
-clusters with ceph-deploy and without it, I would have been totally 
-lost.  Things
-that I feel would improve it include:
+On Fri, 2 Aug 2013, majianpeng wrote:
 
-A debug mode where it lists everything it is doing.  This will be 
-helpful in the future
-when I move to a more integrated tool then ceph-deploy, as I could see 
-exactly
-how ceph-deploy built my test cluster.
-
-To understand more types of linux storage devices. I have spent hours 
-trying to make it
-understand multipath devices, as I happen to have a large number of 
-these in my lab,
-but so far I have not made it work.
-
-Really good documentation on all the ceph-deploy options.
-
-Lastly, this is not just a ceph-deploy thing, but documentation 
-explaining how things
-boot up, and interact.  Ceph-deploy depends on tools like ceph-disk to 
-mount OSD
-disks on the servers during boot, and I learned the hard way that if a 
-OSD is on a LUN
-that is seen by more then one OSD node, you can corrupt data, as each 
-OSD node
-tries to mount all the ODS it can find.
-
->There is a session at CDS scheduled to discuss ceph-deploy (4:40pm PDT 
-on
->Monday).  We'll be going over what we currently have in backlog for
->improvements, but if you have any opinions about what else ceph-deploy
->should or should not do or areas where it is problematic, please reply 
-to
->this thread to let us know what you think, and/or join the CDS 
-discussion
->hangout.
-
-
-Thank
-Eric
+> Func ceph_calc_ceph_pg maybe failed.So add check for returned value.
+> 
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/ioctl.c | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+> index e0b4ef3..8c463dd 100644
+> --- a/fs/ceph/ioctl.c
+> +++ b/fs/ceph/ioctl.c
+> @@ -209,8 +209,12 @@ static long ceph_ioctl_get_dataloc(struct file *file, void __user *arg)
+>  	snprintf(dl.object_name, sizeof(dl.object_name), "%llx.%08llx",
+>  		 ceph_ino(inode), dl.object_no);
+>  
+> -	ceph_calc_ceph_pg(&pgid, dl.object_name, osdc->osdmap,
+> -		ceph_file_layout_pg_pool(ci->i_layout));
+> +	r = ceph_calc_ceph_pg(&pgid, dl.object_name, osdc->osdmap,
+> +				ceph_file_layout_pg_pool(ci->i_layout));
+> +	if (r < 0) {
+> +		up_read(&osdc->map_sem);
+> +		return r;
+> +	}
+>  
+>  	dl.osd = ceph_calc_pg_primary(osdc->osdmap, pgid);
+>  	if (dl.osd >= 0) {
+> -- 
+> 1.8.1.2
+> 
+> 
+> Thanks!
+> Jianpeng Ma
