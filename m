@@ -1,152 +1,63 @@
-From: Sha Zhengju <handai.szj@gmail.com>
-Subject: Re: [PATCH V5 2/8] fs/ceph: vfs __set_page_dirty_nobuffers interface
- instead of doing it inside filesystem
-Date: Sat, 3 Aug 2013 16:58:57 +0800
-Message-ID: <CAFj3OHVhX-bFKm1DE0G9T5NG2r6zbMzJBNCXX1AH5B1BQiTSoQ@mail.gmail.com>
-References: <1375357402-9811-1-git-send-email-handai.szj@taobao.com>
-	<1375357892-10188-1-git-send-email-handai.szj@taobao.com>
-	<CAAM7YAmxmmA6g2WPVtGN1-42rtDBYzLhF-gvNXxcBN6dUveBYQ@mail.gmail.com>
-	<alpine.DEB.2.00.1308011121080.22584@cobra.newdream.net>
-	<CAFj3OHVXvtr5BDMrGatHZi7M9y+dh1ZKRMQZGjZmNBcg3pNQtw@mail.gmail.com>
-	<alpine.DEB.2.00.1308021326080.1128@cobra.newdream.net>
+From: GLANT LOAN FIRM <saintfront@ecoleperigueux.fr>
+Subject: =?utf-8?B?0J/RgNC+0L/QvtC30LjRhtGW0Y8g0LrRgNC1?=
+ =?utf-8?B?0LTQuNGC0YMg0L3QsCAzJSDRgNGW0Yc=?=
+ =?utf-8?B?0L3QuNGFIC4uLi4g0J/QvtC00LDRgg==?=
+ =?utf-8?B?0Lgg0LfQsNGP0LLQutGDINC30LDRgNCw0Lcu?=
+Date: Sat, 3 Aug 2013 17:54:39 +0200 (CEST)
+Message-ID: <824356238.850824.1375545279267.JavaMail.root@VM-SVR18>
+Reply-To: GLANT LOAN FIRM <glantloanfirm@webadicta.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <alpine.DEB.2.00.1308021326080.1128@cobra.newdream.net>
-Sender: owner-linux-mm@kvack.org
-To: Sage Weil <sage@inktank.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, Cgroups <cgroups@vger.kernel.org>, Michal Hocko <mhocko@suse.cz>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Glauber Costa <glommer@gmail.com>, Greg Thelen <gthelen@google.com>, Wu Fengguang <fengguang.wu@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from monmail.perigueux.fr ([212.51.179.146]:28275 "EHLO
+	vm-svr18.mairie.local" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752106Ab3HCQFf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Aug 2013 12:05:35 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 
-On Sat, Aug 3, 2013 at 4:30 AM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 2 Aug 2013, Sha Zhengju wrote:
->> On Fri, Aug 2, 2013 at 2:27 AM, Sage Weil <sage@inktank.com> wrote:
->> > On Thu, 1 Aug 2013, Yan, Zheng wrote:
->> >> On Thu, Aug 1, 2013 at 7:51 PM, Sha Zhengju <handai.szj@gmail.com> wrote:
->> >> > From: Sha Zhengju <handai.szj@taobao.com>
->> >> >
->> >> > Following we will begin to add memcg dirty page accounting around
->> >> __set_page_dirty_
->> >> > {buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
->> >> avoid exporting
->> >> > those details to filesystems.
->> >> >
->> >> > Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
->> >> > ---
->> >> >  fs/ceph/addr.c |   13 +------------
->> >> >  1 file changed, 1 insertion(+), 12 deletions(-)
->> >> >
->> >> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
->> >> > index 3e68ac1..1445bf1 100644
->> >> > --- a/fs/ceph/addr.c
->> >> > +++ b/fs/ceph/addr.c
->> >> > @@ -76,7 +76,7 @@ static int ceph_set_page_dirty(struct page *page)
->> >> >         if (unlikely(!mapping))
->> >> >                 return !TestSetPageDirty(page);
->> >> >
->> >> > -       if (TestSetPageDirty(page)) {
->> >> > +       if (!__set_page_dirty_nobuffers(page)) {
->> >> it's too early to set the radix tree tag here. We should set page's snapshot
->> >> context and increase the i_wrbuffer_ref first. This is because once the tag
->> >> is set, writeback thread can find and start flushing the page.
->> >
->> > Unfortunately I only remember being frustrated by this code.  :)  Looking
->> > at it now, though, it seems like the minimum fix is to set the
->> > page->private before marking the page dirty.  I don't know the locking
->> > rules around that, though.  If that is potentially racy, maybe the safest
->> > thing would be if __set_page_dirty_nobuffers() took a void* to set
->> > page->private to atomically while holding the tree_lock.
->> >
->>
->> Sorry, I don't catch the point of your last sentence... Could you
->> please explain it again?
->
-> It didn't make much sense.  :)  I was worried about multiple callers to
-> set_page_dirty, but as understand it, this all happens under page->lock,
-> right?  (There is a mention of other special cases in mm/page-writeback.c,
-> but I'm hoping we don't need to worry about that.)
-
-I agree, page lock can handle the concurrent access.
-
->
-> In any case, I suspect what we actually want is something like the below
-> (untested) patch.  The snapc accounting can be ignored here because
-> invalidatepage will clean it up...
->
-> sage
->
->
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index afb2fc2..7602e46 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -76,9 +76,10 @@ static int ceph_set_page_dirty(struct page *page)
->         if (unlikely(!mapping))
->                 return !TestSetPageDirty(page);
->
-> -       if (TestSetPageDirty(page)) {
-> +       if (PageDirty(page)) {
->                 dout("%p set_page_dirty %p idx %lu -- already dirty\n",
->                      mapping->host, page, page->index);
-> +               BUG_ON(!PagePrivate(page));
->                 return 0;
->         }
->
-> @@ -107,35 +108,16 @@ static int ceph_set_page_dirty(struct page *page)
->              snapc, snapc->seq, snapc->num_snaps);
->         spin_unlock(&ci->i_ceph_lock);
->
-> -       /* now adjust page */
-> -       spin_lock_irq(&mapping->tree_lock);
-> -       if (page->mapping) {    /* Race with truncate? */
-> -               WARN_ON_ONCE(!PageUptodate(page));
-> -               account_page_dirtied(page, page->mapping);
-> -               radix_tree_tag_set(&mapping->page_tree,
-> -                               page_index(page), PAGECACHE_TAG_DIRTY);
-> -
-> -               /*
-> -                * Reference snap context in page->private.  Also set
-> -                * PagePrivate so that we get invalidatepage callback.
-> -                */
-> -               page->private = (unsigned long)snapc;
-> -               SetPagePrivate(page);
-> -       } else {
-> -               dout("ANON set_page_dirty %p (raced truncate?)\n", page);
-> -               undo = 1;
-> -       }
-> -
-> -       spin_unlock_irq(&mapping->tree_lock);
-> -
-> -       if (undo)
-> -               /* whoops, we failed to dirty the page */
-> -               ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-> -
-> -       __mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
-> +       /*
-> +        * Reference snap context in page->private.  Also set
-> +        * PagePrivate so that we get invalidatepage callback.
-> +        */
-> +       BUG_ON(PagePrivate(page));
-> +       page->private = (unsigned long)snapc;
-> +       SetPagePrivate(page);
->
-> -       BUG_ON(!PageDirty(page));
-> -       return 1;
-> +       return __set_page_dirty_nobuffers(page);
->  }
->
->  /*
-
-Looks good. Since page lock can avoid multiple access, the undo logic
-is also not necessary anymore. Thank you very much!
-
--- 
-Thanks,
-Sha
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+CgrQlNC+0LHRgNC40Lkg0LTQtdC90YwsCgogIEdMQU5UIExPQU4gRklSTSDQutGA0LXQtNC40YIg
+0L/RgNC40LfQvdCw0YfQtdC90LjQuSDQtNC70Y8g0LHRltC30L3QtdGB0YMg0LLQv9C70LjQstCw
+0Y7RgtGMINC90LAg0LbQuNGC0YLRjyDQu9GO0LTQtdC5INCyINGD0YHRjNC+0LzRgyDRgdCy0ZbR
+gtGWINC/0L7Qt9C40YLQuNCy0L3Qviwg0LzQuCDQv9GA0L7Qv9C+0L3Rg9GU0LzQviDQv9GA0LjQ
+stCw0YLQvdGWLCDQutC+0LzQtdGA0YbRltC50L3RliDRliDQv9C10YDRgdC+0L3QsNC70YzQvdGW
+INC60YDQtdC00LjRgtC4INC3INC00YPQttC1INC80ZbQvdGW0LzQsNC70YzQvdGWINCg0ZbRh9C9
+0ZYg0LLRltC00YHQvtGC0LrQvtCy0ZYg0YHRgtCw0LLQutC4INC30LAg0YbRltC90L7RjiDQstGW
+0LQgMyUg0LIg0LzQtdC20LDRhSDQstGW0LQgMSDQtNC+IDYg0YDQvtC60ZbQsiDRgtC10YDQvNGW
+0L0g0L/QvtCz0LDRiNC10L3QvdGPINC/0LXRgNGW0L7QtCDQsiDQsdGD0LTRjC3Rj9C60ZbQuSDR
+h9Cw0YHRgtC40L3RliDRgdCy0ZbRgtGDLiDQnNC4INCy0LjQtNCw0ZTQvNC+INC60YDQtdC00LjR
+gtGW0LIg0ZYg0L3QsNGIINC60YDQtdC00LjRgtC90LjQuSDQtNC+0LHRgNC1INC30LDRgdGC0YDQ
+sNGF0L7QstCw0L3RliDQvdCwINC80LDQutGB0LjQvNCw0LvRjNC90YMg0LHQtdC30L/QtdC60YMu
+CiAg0JLQuCDQstGC0YDQsNGC0LjQu9C4INGB0L7QvSDQvdC+0YfQsNC80Lgg0YLRg9GA0LHRg9GU
+LCDRj9C6INC+0YLRgNC40LzQsNGC0Lgg0LfQsNC60L7QvdC90LjQvCDQv9C+0LfQuNC60LgsINGJ
+0L7QsSDQv9C+0YfQsNGC0Lgg0YHQstGW0Lkg0LHRltC30L3QtdGBINCw0LHQviDRgNC+0LfRiNC4
+0YDQuNGC0Lgg0ZbRgdC90YPRjtGH0LjQuT8g0JLQuCDQutGD0YHQsNGC0Lgg0LLQsNGI0ZYg0L3R
+ltCz0YLRliwg0YnQvtCxINGI0LLQuNC00LrQvj8g0JfQsNC80ZbRgdGC0Ywg0YLQvtCz0L4sINGJ
+0L7QsSDQsdC40YLQuCDRgdC10LHQtSwg0YfQvtC80YMg0LEg0L3QtSDQt9CyJ9GP0LfQsNGC0LjR
+gdGPINC3INC90LDQvNC4INGB0YzQvtCz0L7QtNC90ZYg0LIgR0xBTlQg0KTQhtCg0JzQkCDQvNC4
+0YLRgtGU0LLQuNC5INC60YDQtdC00LjRgiDQvdCwINC90LDQtNCw0L3QvdGPINC60YDQtdC00LjR
+gtGDINC00L4g0LLQsNGBINC3INCy0YHRliDQttC40YLRgtGU0LLQviDQstCw0LbQu9C40LLRliDQ
+stC40LzQvtCz0LguINCc0Lgg0LTQvtC/0L7QvNC+0LPRgtC4INC30YPQv9C40L3QuNGC0Lgg0L/Q
+vtCz0LDQvdC+0Y4g0LrRgNC10LTQuNGC0L3QvtGOINGW0YHRgtC+0YDRltGU0Y4uINCS0ZbQtNC6
+0YDQuNCy0LDRjtGH0Lgg0LLQuNCz0YDQsNGI0L3QuNC8INGA0ZbRiNC10L3QvdGP0Lwg0L3QsNGI
+0LAg0LzRltGB0ZbRjy4g0K/QutGJ0L4g0LLQuCDQt9Cw0YbRltC60LDQstC70LXQvdGWINCyINCx
+0YPQtNGMLdGP0LrQvtC80YMg0LrRgNC10LTQuNGC0YMsINCx0YPQtNGMINC70LDRgdC60LAsINC3
+0LDQv9C+0LLQvdGW0YLRjCDRgtCwINC90LDQtNGW0YjQu9GW0YLRjCDRhtGOINGE0L7RgNC80YMg
+0LrRgNC10LTQuNGC0L3QvtGXINC30LDRj9Cy0LrQuCDQvdCw0LfQsNC0INC00L4g0L3QsNGBLgoK
+0IbQvCfRjzogLi4uLi4uLi4uLi4K0JDQtNGA0LXRgdCwOiAuLi4uLi4uLi4uLgrQlNCw0YLQsCDQ
+vdCw0YDQvtC00LbQtdC90L3RjzogLi4uLi4uLi4K0KHRgtCw0YLRjDogLi4uLi4uLi4uLi4uLi4u
+CtCi0LXQu9C10YTQvtC9OiAuLi4uLi4uLi4uLgrQoNGW0LQg0LfQsNC90Y/RgtGMOiAuLi4uLi4u
+Li4uLgrQnNGW0YHRj9GH0L3QuNC5INGA0ZbQstC10L3RjCDQtNC+0YXQvtC00ZbQsjogLi4uLi4u
+Li4K0KHRg9C80LAg0LrRgNC10LTQuNGC0YMg0J3QtdC+0LHRhdGW0LTQvdGWOiAuLi4uLi4uLgrQ
+otGA0LjQstCw0LvRltGB0YLRjDogLi4uLi4uLi4uLi4uLi4uCtCc0LXRgtCwOiAuLi4uLi4uLi4u
+CtCa0YDQsNGX0L3QsDogLi4uLi4uLi4uLi4uLi4uLi4uCtCa0YDQsNGX0L3QsDogLi4uLi4uLi4u
+LgrQn9C+0YjRgtC+0LLQuNC5INGW0L3QtNC10LrRgTogLi4uLi4uLi4uCgoK0J3QkNCo0IYg0JrQ
+ntCd0KLQkNCa0KLQndCGINCU0JDQndCGOgpFLU1BSUwg0JDQlNCg0JXQodCQOiBnbGFudGxvYW5m
+aXJtQHdlYmFkaWN0YS5vcmcK0JrQvtC90YLQsNC60YLQvdC40Lkg0YLQtdC70LXRhNC+0L06ICs0
+NDcwMzU5OTYzNDMKCgpHTEFOVCBMT0FOIEZJUk0g0L/RgNC40LfQvdCw0YfQtdC90LjQvCDQv9GA
+0LXQtNGB0YLQsNCy0L3QuNC60L7QvCBGSVNBICjRhNGW0L3QsNC90YHQuCDQk9Cw0LvRg9C30LXQ
+stGWINGB0YLQsNC90LTQsNGA0YLQuCDQsNGB0L7RhtGW0LDRhtGW0ZcpLCDRj9C60ZYg0LzQsNGO
+0YLRjCDQv9GA0LDQstC+INGWINGA0LXQs9GD0LvRjtGU0YLRjNGB0Y8g0KPQv9GA0LDQstC70ZbQ
+vdC90Y/QvCDQtyDRhNGW0L3QsNC90YHQvtCy0LjRhSDQv9C+0YHQu9GD0LMgKEZTQSkuCgoK0Jcg
+0YLQtdC/0LvQvtGC0L7RjiDQv9C+0LLQsNCz0L7RjiwK0JzRltGB0ZbRgSBCZWNreSBUb20u
