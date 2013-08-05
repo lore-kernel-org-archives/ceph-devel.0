@@ -1,66 +1,65 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: blueprint: osd: ceph on zfs
-Date: Sun, 4 Aug 2013 18:19:16 -0700
-Message-ID: <CA+Hcz58t+HX5q_cNQ_as47kR+R1+7B8OftUHr_4j1CYVdhDnug@mail.gmail.com>
-References: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net>
-	<CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com>
-	<CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] cephfs: Add a function which print pg name using cephfs.
+Date: Mon, 5 Aug 2013 10:50:40 +0800
+Message-ID: <201308051050384970885@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f176.google.com ([209.85.128.176]:51411 "EHLO
-	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754097Ab3HEBTR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 21:19:17 -0400
-Received: by mail-ve0-f176.google.com with SMTP id b10so2460501vea.21
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Aug 2013 18:19:17 -0700 (PDT)
-In-Reply-To: <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:37810 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754276Ab3HECuq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 22:50:46 -0400
+Received: by mail-pb0-f51.google.com with SMTP id jt11so2772645pbb.24
+        for <ceph-devel@vger.kernel.org>; Sun, 04 Aug 2013 19:50:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I was thinking along the lines of if it made sense to multi-purpose
-the BackFileSystem for non-Linux portability. In which case even
-things like posix_fallocate, xattr access, etc.. might fit in well,
-which may have equivalent functionality, under a different name.
+QXMgJ2NlcGhmcyBtYXAnIHByaW50LCBpdCBjYW4gcHJpbnQgcGdzLlNvIGFkZCB0aGlzIGZ1bmN0
+aW9uLg0KDQpTaWduZWQtb2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+
+DQotLS0NCiBzcmMvY2VwaGZzLmNjICAgICAgfCA5ICsrKysrLS0tLQ0KIHNyYy9jbGllbnQvaW9j
+dGwuaCB8IDEgKw0KIDIgZmlsZXMgY2hhbmdlZCwgNiBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9u
+cygtKQ0KDQpkaWZmIC0tZ2l0IGEvc3JjL2NlcGhmcy5jYyBiL3NyYy9jZXBoZnMuY2MNCmluZGV4
+IGYyNWQwMmEuLmFhYTZhZDQgMTAwNjQ0DQotLS0gYS9zcmMvY2VwaGZzLmNjDQorKysgYi9zcmMv
+Y2VwaGZzLmNjDQpAQCAtOTEsNiArOTEsNyBAQCBpbnQgbWFpbiAoaW50IGFyZ2MsIGNoYXIgKiph
+cmd2KSB7DQogICAgIGNvdXQgPDwgImxvY2F0aW9uLm9iamVjdF9ubzogICAgIiA8PCBsb2NhdGlv
+bi5vYmplY3Rfbm8gPDwgZW5kbDsNCiAgICAgY291dCA8PCAibG9jYXRpb24ub2JqZWN0X3NpemU6
+ICAiIDw8IGxvY2F0aW9uLm9iamVjdF9zaXplIDw8IGVuZGw7DQogICAgIGNvdXQgPDwgImxvY2F0
+aW9uLm9iamVjdF9uYW1lOiAgIiA8PCBsb2NhdGlvbi5vYmplY3RfbmFtZSA8PCBlbmRsOw0KKyAg
+ICBjb3V0IDw8ICJsb2NhdGlvbi5wZ19uYW1lOiAgICAgICIgPDwgbG9jYXRpb24ucGdfbmFtZSA8
+PCBlbmRsOw0KICAgICBjb3V0IDw8ICJsb2NhdGlvbi5ibG9ja19vZmZzZXQ6ICIgPDwgbG9jYXRp
+b24uYmxvY2tfb2Zmc2V0IDw8IGVuZGw7DQogICAgIGNvdXQgPDwgImxvY2F0aW9uLmJsb2NrX3Np
+emU6ICAgIiA8PCBsb2NhdGlvbi5ibG9ja19zaXplIDw8IGVuZGw7DQogICAgIGNvdXQgPDwgImxv
+Y2F0aW9uLm9zZDogICAgICAgICAgIiA8PCBsb2NhdGlvbi5vc2QgPDwgZW5kbDsNCkBAIC0xMjgs
+OCArMTI5LDggQEAgaW50IG1haW4gKGludCBhcmdjLCBjaGFyICoqYXJndikgew0KICAgICAgIHJl
+dHVybiAxOw0KICAgICB9DQogDQotICAgIHByaW50ZigiJTE1cyAgJTI0cyAgJTEycyAgJTEycyAg
+JXNcbiIsDQotCSAgICJGSUxFIE9GRlNFVCIsICJPQkpFQ1QiLCAiT0ZGU0VUIiwgIkxFTkdUSCIs
+ICJPU0QiKTsNCisgICAgcHJpbnRmKCIlMTVzICAlMjRzICAlMTJzICAlMTJzICAlMTJzICAlc1xu
+IiwNCisJICAgIkZJTEUgT0ZGU0VUIiwgIk9CSkVDVCIsICJQRyIsICJPRkZTRVQiLCAiTEVOR1RI
+IiwgIk9TRCIpOw0KIA0KICAgICBmb3IgKGxvbmcgbG9uZyBvZmYgPSAwOyBvZmYgPCBzdC5zdF9z
+aXplOyBvZmYgKz0gbGF5b3V0LnN0cmlwZV91bml0KSB7DQogICAgICAgc3RydWN0IGNlcGhfaW9j
+dGxfZGF0YWxvYyBsb2NhdGlvbjsNCkBAIC0xNDAsOCArMTQxLDggQEAgaW50IG1haW4gKGludCBh
+cmdjLCBjaGFyICoqYXJndikgew0KIAkgICAgIDw8IChlcnIgPT0gLTEgPyBzdHJlcnJvcihlcnJu
+bykgOiBzdHJlcnJvcigtZXJyKSkgPDwgZW5kbDsNCiAJcmV0dXJuIDE7DQogICAgICAgfQ0KLSAg
+ICAgIHByaW50ZigiJTE1bGxkICAlMjRzICAlMTJsbGQgICUxMmxsZCAgJWRcbiIsDQotCSAgICAg
+b2ZmLCBsb2NhdGlvbi5vYmplY3RfbmFtZSwgKGxvbmcgbG9uZylsb2NhdGlvbi5vYmplY3Rfb2Zm
+c2V0LA0KKyAgICAgIHByaW50ZigiJTE1bGxkICAlMjRzICAlMTJzICAlMTJsbGQgICUxMmxsZCAg
+JTNkXG4iLA0KKwkgICAgIG9mZiwgbG9jYXRpb24ub2JqZWN0X25hbWUsIGxvY2F0aW9uLnBnX25h
+bWUsIChsb25nIGxvbmcpbG9jYXRpb24ub2JqZWN0X29mZnNldCwNCiAJICAgICAobG9uZyBsb25n
+KWxvY2F0aW9uLmJsb2NrX3NpemUsIChpbnQpbG9jYXRpb24ub3NkKTsNCiAgICAgfQ0KIA0KZGlm
+ZiAtLWdpdCBhL3NyYy9jbGllbnQvaW9jdGwuaCBiL3NyYy9jbGllbnQvaW9jdGwuaA0KaW5kZXgg
+YzE1ZDMzNC4uOTYzZWU4NCAxMDA2NDQNCi0tLSBhL3NyYy9jbGllbnQvaW9jdGwuaA0KKysrIGIv
+c3JjL2NsaWVudC9pb2N0bC5oDQpAQCAtMzYsNiArMzYsNyBAQCBzdHJ1Y3QgY2VwaF9pb2N0bF9k
+YXRhbG9jIHsNCiAJX191NjQgb2JqZWN0X25vOyAgICAgICAgICAgICAvKiBvdXQ6IG9iamVjdCAj
+ICovDQogCV9fdTY0IG9iamVjdF9zaXplOyAgICAgICAgICAgLyogb3V0OiBvYmplY3Qgc2l6ZSAq
+Lw0KIAljaGFyIG9iamVjdF9uYW1lWzY0XTsgICAgICAgIC8qIG91dDogb2JqZWN0IG5hbWUgKi8N
+CisJY2hhciBwZ19uYW1lWzMyXTsJICAgICAvKiBvdXQ6IHBnIG5hbWUgKi8NCiAJX191NjQgYmxv
+Y2tfb2Zmc2V0OyAgICAgICAgICAvKiBvdXQ6IG9mZnNldCBpbiBibG9jayAqLw0KIAlfX3U2NCBi
+bG9ja19zaXplOyAgICAgICAgICAgIC8qIG91dDogYmxvY2sgbGVuZ3RoICovDQogCV9fczY0IG9z
+ZDsgICAgICAgICAgICAgICAgICAgLyogb3V0OiBvc2QgIyAqLw0KLS0gDQoxLjguMy5yYzEuNDQu
+Z2IzODdjNzcNCg0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
 
-On Sun, Aug 4, 2013 at 5:47 PM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Mon, Aug 5, 2013 at 7:39 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
->> It seems to make sense that fiemap should be part of the `class
->> BackingFileSystem` abstraction?
->>
->
-> FS_IOC_FIEMAP is a standard API, I think no need to implement it in `class
-> BackingFileSystem`.
->
->
->> On Thu, Jul 25, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
->>> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
->>>
->>> We've done some preliminary testing and xattr debugging that allows
->>> ceph-osd to run on zfsforlinux using the normal writeahead journaling mode
->>> (the same mode used for xfs and ext4).  However, we aren't doing anything
->>> special to take advantage of zfs's capabilities.
->>>
->>> This session would go over what is needed to make parallel journaling work
->>> (which would leverage zfs snapshots).  I would also like to have a
->>> discussion about whether other longer-term possibilities, such as storing
->>> objects directly using the DMU, make sense given what ceph-osd's
->>> ObjectStore interface really needs.  It might also be an appropriate time
->>> to visit whether other snapshotting linux filesystems (like nilfs2) would
->>> fit well into any generalization of the filestore code that comes out of
->>> this effort.
->>>
->>> If anybody is interested in this, please add yourself to the interested
->>> parties section (or claim ownership) of this blueprint!
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
