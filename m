@@ -1,51 +1,89 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: fix null pointer dereference
-Date: Sun, 4 Aug 2013 21:14:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308042113580.5645@cobra.newdream.net>
-References: <1375675470.19205.2.camel@lizardlounge>
+Subject: Re: [PATCH 2/2] ceph: Add pg_name filed in struct
+ ceph_ioctl_dataloc.
+Date: Sun, 4 Aug 2013 21:24:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308042117030.5645@cobra.newdream.net>
+References: <201308051051060248738@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375675470.19205.2.camel@lizardlounge>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nathaniel Yazdani <n1ght.4nd.d4y@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:40862 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592Ab3HEEYD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 00:24:03 -0400
+In-Reply-To: <201308051051060248738@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Looks right, applied to the testing branch.
+On Mon, 5 Aug 2013, majianpeng wrote:
+> As the 'ceph help' print, it will print pgs.But now it can't.
+> So we add this.There are two type name of pg, temp and stable.
+> Because the command 'ceph pg dump' print temp name,so we also print the
+> temp name of pg.
 
-Thanks!
+Unfortunately we can't modify the ioctl structure like this without 
+breaking the kernel/userspace ABI (a big no-no).  The usual way around 
+that is to make a new ioctl (like CEPH_IOC_GET_DATALOC2) and a new 
+structure (struct ceph_ioctl_dataloc2) with the additional fields.
+
+What is this going to be used for?  You can get the full info from the 
+montior with the 'ceph osd map <pool name> <object name> --format=json'.  
+Does it need to come from the kernel this way?
+
+Assuming we do want to go down this path, I would change a few things:
+
+> 
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/ioctl.c | 10 +++++++++-
+>  fs/ceph/ioctl.h |  1 +
+>  2 files changed, 10 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+> index e0b4ef3..1d0f24c 100644
+> --- a/fs/ceph/ioctl.c
+> +++ b/fs/ceph/ioctl.c
+> @@ -209,9 +209,17 @@ static long ceph_ioctl_get_dataloc(struct file *file, void __user *arg)
+>  	snprintf(dl.object_name, sizeof(dl.object_name), "%llx.%08llx",
+>  		 ceph_ino(inode), dl.object_no);
+>  
+> +	r = ceph_calc_ceph_temp_pg(&pgid, dl.object_name, osdc->osdmap,
+> +					ceph_file_layout_pg_pool(ci->i_layout));
+> +	if (r < 0) {
+> +		down_read(&osdc->map_sem);
+> +		return r;
+> +	}
+> +	snprintf(dl.pg_name, sizeof(dl.pg_name), "%llx.%08x",
+> +		 pgid.pool, pgid.seed);
+
+The pg name formatting is "%lld.%x", if we want this to match with the pg 
+names used throughout the rest of the code.  But it sounds like you're 
+actually after the raw hash seed, though, in which case I would drop the 
+string and instead do
+
+> @@ -58,6 +58,7 @@ struct ceph_ioctl_dataloc {
+>  	__u64 object_no;             /* out: object # */
+>  	__u64 object_size;           /* out: object size */
+>  	char object_name[64];        /* out: object name */
+> +	char pg_name[32];	     /* out: pg name*/
+
+	__u64 pg_raw_seed;           /* out: placement seed */
+	__u64 pg_num;                /* out: pg number */
+	__u64 pg_pool;               /* out: pool id */
+
+so that you get the raw value (which e.g. goes in the request) as well as 
+which pg that maps to and the pool id.
+
 sage
 
-
-On Sun, 4 Aug 2013, Nathaniel Yazdani wrote:
-
-> 	When register_session() is given an out-of-range argument for mds,
-> ceph_mdsmap_get_addr() will return a null pointer, which would be given to
-> ceph_con_open() & be dereferenced, causing a kernel oops. This fixes bug #4685
-> in the Ceph bug tracker <http://tracker.ceph.com/issues/4685>.
-> 
-> Signed-off-by: Nathaniel Yazdani <n1ght.4nd.d4y@gmail.com>
-> ---
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 187bf21..ddff072 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -414,6 +414,9 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
->  {
->  	struct ceph_mds_session *s;
->  
-> +	if (mds >= mdsc->mdsmap->m_max_mds)
-> +		return ERR_PTR(-EINVAL);
-> +
->  	s = kzalloc(sizeof(*s), GFP_NOFS);
->  	if (!s)
->  		return ERR_PTR(-ENOMEM);
+>  	__u64 block_offset;          /* out: offset in block */
+>  	__u64 block_size;            /* out: block length */
+>  	__s64 osd;                   /* out: osd # */
+> -- 
+> 1.8.3.rc1.44.gb387c77
 > 
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> Thanks!
+> Jianpeng MaN????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
