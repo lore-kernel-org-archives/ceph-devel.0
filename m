@@ -1,71 +1,45 @@
-From: Wei Liu <wei.liu2@citrix.com>
-Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Mon, 5 Aug 2013 16:32:42 +0100
-Message-ID: <20130805153242.GH27858@zion.uk.xensource.com>
-References: <CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
- <6035A0D088A63A46850C3988ED045A4B62E7E7E4@BITCOM1.int.sbss.com.au>
- <CAF6-1L6OrfOQssCWFqQL7KXTvMy+SyCd1XNrfme80p_7EEHj=Q@mail.gmail.com>
- <20130805111213.GM2924@reaktio.net>
- <CAF6-1L4vZeu69GVVoi4yg6irRVSPFZ-oeX=rQaMkmqy-09=Emg@mail.gmail.com>
- <CAFLBxZYT8aOJdKv9qY5HPrk3W6+BFvxpT6Ra6RYuB=rYxJ6uMQ@mail.gmail.com>
- <CAF6-1L6BJh3OMsCXocuTd_VV0orD2sUgP7KqD1hZhRyMeRO17A@mail.gmail.com>
- <51FFB0FF.7070607@eu.citrix.com>
- <20130805151814.GG27858@zion.uk.xensource.com>
- <51FFC2B4.6010100@eu.citrix.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Missing Option to give amount of PGs on pool creation with
+ librados
+Date: Mon, 5 Aug 2013 09:29:57 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308050929020.15886@cobra.newdream.net>
+References: <7717d2e3c2768d554dafe48cfe657778@niklasgoerke.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.citrix.com ([66.165.176.63]:35051 "EHLO
-	SMTP02.CITRIX.COM" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752645Ab3HEPco (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 11:32:44 -0400
-Content-Disposition: inline
-In-Reply-To: <51FFC2B4.6010100@eu.citrix.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46475 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753063Ab3HEQ35 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 12:29:57 -0400
+In-Reply-To: <7717d2e3c2768d554dafe48cfe657778@niklasgoerke.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: George Dunlap <george.dunlap@eu.citrix.com>
-Cc: Wei Liu <wei.liu2@citrix.com>, Sylvain Munaut <s.munaut@whatever-company.com>, Pasi =?iso-8859-1?Q?K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, James Harper <james.harper@bendigoit.com.au>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, Stefano Stabellini <stefano.stabellini@eu.citrix.com>, Roger Pau Monne <roger.pau@citrix.com>
+To: Niklas Goerke <niklas@niklasgoerke.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Aug 05, 2013 at 04:20:20PM +0100, George Dunlap wrote:
-> On 05/08/13 16:18, Wei Liu wrote:
-> >On Mon, Aug 05, 2013 at 03:04:47PM +0100, George Dunlap wrote:
-> >>On 05/08/13 14:55, Sylvain Munaut wrote:
-> >>>Hi George,
-> >>>
-> >>>
-> >>>>Yes; qemu knows how to be a Xen PV block back-end.
-> >>>Very interesting. Is there documentation about this somewhere ?
-> >>>I had a look some time ago and it was really not very clear.
-> >>>
-> >>>Things like what Xen version support this. And with which features (
-> >>>indirect descriptors, persistent grants, discard, flush, ...) and/or
-> >>>which limitation.
-> >>I don't think this is documented anywhere; you'll need to ask the
-> >>experts.  Stefano? Roger? Wei?
-> >>
-> >These are Linux features not Xen ones AFAICT. In theory they are not
-> >bound to specific Xen versions.
-> >
-> >For the network part I don't think new features depend on any specific
-> >hypercall. However for block Roger and Stefano seem to introduce
-> >new hypercalls for certain features (I might be wrong though).
+On Mon, 5 Aug 2013, Niklas Goerke wrote:
+> Hi there
 > 
-> We're talking about qemu; so the toolstack needs to know how to set
-> up qdisk, and I think qdisk would need to be programmed to use, for
-> example, persistent grants, yes?
+> The way I see it, there is no option to give the amount of PGs when creating a
+> new pool using librados [1]. Thus any pool created using librados has 8 PGs
+> (default). I don't see a reason for this behaviour. Is there any?
 > 
+> Otherwise I'll post a feature request for an option to give the amount of PGs.
 
-I don't think toolstack needs to involve in this. At least for the
-network part FE and BE negotiate what features to use. The general idea
-is that new feature will always be of benifit to enable so we make use
-of them whenever possible. Certain features do have sysfs entries to
-configure but that's not coded into libxl.
+You can also use the new mon_command call to feed a create command in
+json, which does let you specify the pg count (this is exactly what the 
+CLI does now).  Starting with 0.66, at least!
 
-I cannot speak for block drivers, but grepping the source code I don't
-think you can configure persistent grants via libxl either.
+sage
 
 
-Wei.
-
->  -G
+> 
+> Niklas
+> 
+> [1] http://ceph.com/docs/next/rados/api/librados/
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
