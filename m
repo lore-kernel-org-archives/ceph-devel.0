@@ -1,89 +1,76 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/2] ceph: Add pg_name filed in struct
- ceph_ioctl_dataloc.
-Date: Sun, 4 Aug 2013 21:24:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308042117030.5645@cobra.newdream.net>
-References: <201308051051060248738@gmail.com>
+From: Ross Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Session Swap: infiniband / rgw multitenancy
+Date: Sun, 4 Aug 2013 21:51:03 -0700
+Message-ID: <CAHb+bZJa77skjNFuhdW+zS8-ndr7+wKCtQAm1RzUPY=j1xyMPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40862 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751592Ab3HEEYD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 00:24:03 -0400
-In-Reply-To: <201308051051060248738@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0396165353=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 5 Aug 2013, majianpeng wrote:
-> As the 'ceph help' print, it will print pgs.But now it can't.
-> So we add this.There are two type name of pg, temp and stable.
-> Because the command 'ceph pg dump' print temp name,so we also print the
-> temp name of pg.
+--===============0396165353==
+Content-Type: multipart/alternative; boundary=f46d044402303570ec04e32c0ece
 
-Unfortunately we can't modify the ioctl structure like this without 
-breaking the kernel/userspace ABI (a big no-no).  The usual way around 
-that is to make a new ioctl (like CEPH_IOC_GET_DATALOC2) and a new 
-structure (struct ceph_ioctl_dataloc2) with the additional fields.
+--f46d044402303570ec04e32c0ece
+Content-Type: text/plain; charset=ISO-8859-1
 
-What is this going to be used for?  You can get the full info from the 
-montior with the 'ceph osd map <pool name> <object name> --format=json'.  
-Does it need to come from the kernel this way?
+Hi all!  Just a quick note to inform you that we've swapped the "msgr:
+implement infiniband support via rsockets" and "rgw: multitenancy" sessions.
 
-Assuming we do want to go down this path, I would change a few things:
+The new time for the infiniband via rsockets talk will be 11:45 AM
+PDT, 20:45 CEST, and 2:45 CST.
 
-> 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fs/ceph/ioctl.c | 10 +++++++++-
->  fs/ceph/ioctl.h |  1 +
->  2 files changed, 10 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-> index e0b4ef3..1d0f24c 100644
-> --- a/fs/ceph/ioctl.c
-> +++ b/fs/ceph/ioctl.c
-> @@ -209,9 +209,17 @@ static long ceph_ioctl_get_dataloc(struct file *file, void __user *arg)
->  	snprintf(dl.object_name, sizeof(dl.object_name), "%llx.%08llx",
->  		 ceph_ino(inode), dl.object_no);
->  
-> +	r = ceph_calc_ceph_temp_pg(&pgid, dl.object_name, osdc->osdmap,
-> +					ceph_file_layout_pg_pool(ci->i_layout));
-> +	if (r < 0) {
-> +		down_read(&osdc->map_sem);
-> +		return r;
-> +	}
-> +	snprintf(dl.pg_name, sizeof(dl.pg_name), "%llx.%08x",
-> +		 pgid.pool, pgid.seed);
+The new time for the rgw multitenancy talk will be 6:45 PM PDT, 3:45 CEST,
+and 9:45 CST.
 
-The pg name formatting is "%lld.%x", if we want this to match with the pg 
-names used throughout the rest of the code.  But it sounds like you're 
-actually after the raw hash seed, though, in which case I would drop the 
-string and instead do
+Talk to you all tomorrow!
 
-> @@ -58,6 +58,7 @@ struct ceph_ioctl_dataloc {
->  	__u64 object_no;             /* out: object # */
->  	__u64 object_size;           /* out: object size */
->  	char object_name[64];        /* out: object name */
-> +	char pg_name[32];	     /* out: pg name*/
+Cheers,
+Ross
 
-	__u64 pg_raw_seed;           /* out: placement seed */
-	__u64 pg_num;                /* out: pg number */
-	__u64 pg_pool;               /* out: pool id */
+--
+Ross Turk
+Community, Inktank
 
-so that you get the raw value (which e.g. goes in the request) as well as 
-which pg that maps to and the pool id.
+@rossturk @ceph @inktank
 
-sage
+--f46d044402303570ec04e32c0ece
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
->  	__u64 block_offset;          /* out: offset in block */
->  	__u64 block_size;            /* out: block length */
->  	__s64 osd;                   /* out: osd # */
-> -- 
-> 1.8.3.rc1.44.gb387c77
-> 
-> 
-> Thanks!
-> Jianpeng MaN????y????b?????v?????{.n??????z??ay????????j???f????????????????:+v??????????zZ+??????"?!?
+<div dir=3D"ltr"><div><br></div>Hi all! =A0Just a quick note to inform you =
+that we&#39;ve swapped the &quot;msgr: implement infiniband support via rso=
+ckets&quot; and &quot;rgw: multitenancy&quot; sessions.<div><br></div><div>=
+The new time for the infiniband via rsockets talk will be=A011:45 AM PDT,=
+=A020:45 CEST, and=A02:45 CST.<br>
+<div><div><br><div>The new time for the rgw multitenancy talk will be=A06:4=
+5 PM PDT,=A03:45 CEST, and=A09:45 CST.<br><div></div></div><div><br></div><=
+div>Talk to you all tomorrow!</div><div><br></div>Cheers,</div><div>Ross</d=
+iv>
+<div><br><div dir=3D"ltr">--<div>Ross Turk</div><div>Community, Inktank</di=
+v><div><br></div><div>@rossturk @ceph @inktank</div></div>
+</div></div></div></div>
+
+--f46d044402303570ec04e32c0ece--
+
+--===============0396165353==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0396165353==--
