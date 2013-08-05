@@ -1,59 +1,29 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: blueprint: osd: ceph on zfs
-Date: Mon, 5 Aug 2013 08:47:15 +0800
-Message-ID: <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
-References: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net>
-	<CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH] ceph: fix bugs about handling short-read for sync read
+ mode.
+Date: Mon, 05 Aug 2013 08:56:17 +0800
+Message-ID: <51FEF831.2070208@intel.com>
+References: <201308020907510158900@gmail.com>,  <alpine.DEB.2.00.1308021316010.1128@cobra.newdream.net> <201308050826095277010@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:43611 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754047Ab3HEArR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 20:47:17 -0400
-Received: by mail-lb0-f174.google.com with SMTP id w20so1660611lbh.33
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Aug 2013 17:47:15 -0700 (PDT)
-In-Reply-To: <CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com>
+Received: from mga03.intel.com ([143.182.124.21]:35879 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754049Ab3HEA4T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 4 Aug 2013 20:56:19 -0400
+In-Reply-To: <201308050826095277010@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 5, 2013 at 7:39 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
-> It seems to make sense that fiemap should be part of the `class
-> BackingFileSystem` abstraction?
->
+On 08/05/2013 08:26 AM, majianpeng wrote:
+>> BTW, I was going to add this to the testing branch but it doesn't apply to 
+>> the current tree.  Can you rebase on top of ceph-client.git #testing?
+>>
+> Sorry, Can you tell me the URL of ceph-client.git ?
+> 
 
-FS_IOC_FIEMAP is a standard API, I think no need to implement it in `class
-BackingFileSystem`.
+https://github.com/ceph/ceph-client
 
-
-> On Thu, Jul 25, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
->> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
->>
->> We've done some preliminary testing and xattr debugging that allows
->> ceph-osd to run on zfsforlinux using the normal writeahead journaling mode
->> (the same mode used for xfs and ext4).  However, we aren't doing anything
->> special to take advantage of zfs's capabilities.
->>
->> This session would go over what is needed to make parallel journaling work
->> (which would leverage zfs snapshots).  I would also like to have a
->> discussion about whether other longer-term possibilities, such as storing
->> objects directly using the DMU, make sense given what ceph-osd's
->> ObjectStore interface really needs.  It might also be an appropriate time
->> to visit whether other snapshotting linux filesystems (like nilfs2) would
->> fit well into any generalization of the filestore code that comes out of
->> this effort.
->>
->> If anybody is interested in this, please add yourself to the interested
->> parties section (or claim ownership) of this blueprint!
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
