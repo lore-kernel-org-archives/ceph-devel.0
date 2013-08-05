@@ -1,54 +1,77 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH 2/2] ceph: Add pg_name filed in struct ceph_ioctl_dataloc.
-Date: Mon, 5 Aug 2013 10:51:08 +0800
-Message-ID: <201308051051060248738@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: blueprint: osd: ceph on zfs
+Date: Sun, 4 Aug 2013 20:53:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308042051450.5645@cobra.newdream.net>
+References: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net> <CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com> <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+ <CA+Hcz58t+HX5q_cNQ_as47kR+R1+7B8OftUHr_4j1CYVdhDnug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:62841 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754439Ab3HECvN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 22:51:13 -0400
-Received: by mail-pa0-f52.google.com with SMTP id kq13so2693051pab.39
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Aug 2013 19:51:13 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:40647 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754249Ab3HEDxo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 23:53:44 -0400
+In-Reply-To: <CA+Hcz58t+HX5q_cNQ_as47kR+R1+7B8OftUHr_4j1CYVdhDnug@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-QXMgdGhlICdjZXBoIGhlbHAnIHByaW50LCBpdCB3aWxsIHByaW50IHBncy5CdXQgbm93IGl0IGNh
-bid0Lg0KU28gd2UgYWRkIHRoaXMuVGhlcmUgYXJlIHR3byB0eXBlIG5hbWUgb2YgcGcsIHRlbXAg
-YW5kIHN0YWJsZS4NCkJlY2F1c2UgdGhlIGNvbW1hbmQgJ2NlcGggcGcgZHVtcCcgcHJpbnQgdGVt
-cCBuYW1lLHNvIHdlIGFsc28gcHJpbnQgdGhlDQp0ZW1wIG5hbWUgb2YgcGcuDQoNClNpZ25lZC1v
-ZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4NCi0tLQ0KIGZzL2NlcGgv
-aW9jdGwuYyB8IDEwICsrKysrKysrKy0NCiBmcy9jZXBoL2lvY3RsLmggfCAgMSArDQogMiBmaWxl
-cyBjaGFuZ2VkLCAxMCBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQoNCmRpZmYgLS1naXQg
-YS9mcy9jZXBoL2lvY3RsLmMgYi9mcy9jZXBoL2lvY3RsLmMNCmluZGV4IGUwYjRlZjMuLjFkMGYy
-NGMgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2lvY3RsLmMNCisrKyBiL2ZzL2NlcGgvaW9jdGwuYw0K
-QEAgLTIwOSw5ICsyMDksMTcgQEAgc3RhdGljIGxvbmcgY2VwaF9pb2N0bF9nZXRfZGF0YWxvYyhz
-dHJ1Y3QgZmlsZSAqZmlsZSwgdm9pZCBfX3VzZXIgKmFyZykNCiAJc25wcmludGYoZGwub2JqZWN0
-X25hbWUsIHNpemVvZihkbC5vYmplY3RfbmFtZSksICIlbGx4LiUwOGxseCIsDQogCQkgY2VwaF9p
-bm8oaW5vZGUpLCBkbC5vYmplY3Rfbm8pOw0KIA0KKwlyID0gY2VwaF9jYWxjX2NlcGhfdGVtcF9w
-ZygmcGdpZCwgZGwub2JqZWN0X25hbWUsIG9zZGMtPm9zZG1hcCwNCisJCQkJCWNlcGhfZmlsZV9s
-YXlvdXRfcGdfcG9vbChjaS0+aV9sYXlvdXQpKTsNCisJaWYgKHIgPCAwKSB7DQorCQlkb3duX3Jl
-YWQoJm9zZGMtPm1hcF9zZW0pOw0KKwkJcmV0dXJuIHI7DQorCX0NCisJc25wcmludGYoZGwucGdf
-bmFtZSwgc2l6ZW9mKGRsLnBnX25hbWUpLCAiJWxseC4lMDh4IiwNCisJCSBwZ2lkLnBvb2wsIHBn
-aWQuc2VlZCk7DQorDQogCWNlcGhfY2FsY19jZXBoX3BnKCZwZ2lkLCBkbC5vYmplY3RfbmFtZSwg
-b3NkYy0+b3NkbWFwLA0KIAkJY2VwaF9maWxlX2xheW91dF9wZ19wb29sKGNpLT5pX2xheW91dCkp
-Ow0KLQ0KIAlkbC5vc2QgPSBjZXBoX2NhbGNfcGdfcHJpbWFyeShvc2RjLT5vc2RtYXAsIHBnaWQp
-Ow0KIAlpZiAoZGwub3NkID49IDApIHsNCiAJCXN0cnVjdCBjZXBoX2VudGl0eV9hZGRyICphID0N
-CmRpZmYgLS1naXQgYS9mcy9jZXBoL2lvY3RsLmggYi9mcy9jZXBoL2lvY3RsLmgNCmluZGV4IGM3
-NzAyOGEuLjYxOGVlZjIgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2lvY3RsLmgNCisrKyBiL2ZzL2Nl
-cGgvaW9jdGwuaA0KQEAgLTU4LDYgKzU4LDcgQEAgc3RydWN0IGNlcGhfaW9jdGxfZGF0YWxvYyB7
-DQogCV9fdTY0IG9iamVjdF9ubzsgICAgICAgICAgICAgLyogb3V0OiBvYmplY3QgIyAqLw0KIAlf
-X3U2NCBvYmplY3Rfc2l6ZTsgICAgICAgICAgIC8qIG91dDogb2JqZWN0IHNpemUgKi8NCiAJY2hh
-ciBvYmplY3RfbmFtZVs2NF07ICAgICAgICAvKiBvdXQ6IG9iamVjdCBuYW1lICovDQorCWNoYXIg
-cGdfbmFtZVszMl07CSAgICAgLyogb3V0OiBwZyBuYW1lKi8NCiAJX191NjQgYmxvY2tfb2Zmc2V0
-OyAgICAgICAgICAvKiBvdXQ6IG9mZnNldCBpbiBibG9jayAqLw0KIAlfX3U2NCBibG9ja19zaXpl
-OyAgICAgICAgICAgIC8qIG91dDogYmxvY2sgbGVuZ3RoICovDQogCV9fczY0IG9zZDsgICAgICAg
-ICAgICAgICAgICAgLyogb3V0OiBvc2QgIyAqLw0KLS0gDQoxLjguMy5yYzEuNDQuZ2IzODdjNzcN
-Cg0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
+On Sun, 4 Aug 2013, Noah Watkins wrote:
+> I was thinking along the lines of if it made sense to multi-purpose
+> the BackFileSystem for non-Linux portability. In which case even
+> things like posix_fallocate, xattr access, etc.. might fit in well,
+> which may have equivalent functionality, under a different name.
 
+Yeah.
+
+In the fiemap case, incidentally, we probably are better off using 
+SEEK_DATA/SEEK_HOLE for the extentmap stuff, since FIEMAP is/was buggy in 
+many common kernels, and only gives you meaningful data after an fsync().  
+Currently it's disabled.
+
+sage
+
+
+> 
+> On Sun, Aug 4, 2013 at 5:47 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+> > On Mon, Aug 5, 2013 at 7:39 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
+> >> It seems to make sense that fiemap should be part of the `class
+> >> BackingFileSystem` abstraction?
+> >>
+> >
+> > FS_IOC_FIEMAP is a standard API, I think no need to implement it in `class
+> > BackingFileSystem`.
+> >
+> >
+> >> On Thu, Jul 25, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
+> >>> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
+> >>>
+> >>> We've done some preliminary testing and xattr debugging that allows
+> >>> ceph-osd to run on zfsforlinux using the normal writeahead journaling mode
+> >>> (the same mode used for xfs and ext4).  However, we aren't doing anything
+> >>> special to take advantage of zfs's capabilities.
+> >>>
+> >>> This session would go over what is needed to make parallel journaling work
+> >>> (which would leverage zfs snapshots).  I would also like to have a
+> >>> discussion about whether other longer-term possibilities, such as storing
+> >>> objects directly using the DMU, make sense given what ceph-osd's
+> >>> ObjectStore interface really needs.  It might also be an appropriate time
+> >>> to visit whether other snapshotting linux filesystems (like nilfs2) would
+> >>> fit well into any generalization of the filestore code that comes out of
+> >>> this effort.
+> >>>
+> >>> If anybody is interested in this, please add yourself to the interested
+> >>> parties section (or claim ownership) of this blueprint!
+> >>>
+> >>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
