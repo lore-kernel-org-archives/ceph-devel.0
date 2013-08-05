@@ -1,52 +1,33 @@
-From: George Dunlap <george.dunlap@eu.citrix.com>
-Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Mon, 5 Aug 2013 15:04:47 +0100
-Message-ID: <51FFB0FF.7070607@eu.citrix.com>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com> <20130419064524.GQ11427@reaktio.net> <6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au> <CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B62E7E7E4@BITCOM1.int.sbss.com.au> <CAF6-1L6OrfOQssCWFqQL7KXTvMy+SyCd1XNrfme80p_7EEHj=Q@mail.gmail.com> <20130805111213.GM2924@reaktio.net> <CAF6-1L4vZeu69GVVoi4yg6irRVSPFZ-oeX=rQaMkmqy-09=Emg@mail.gmail.com> <CAFLBxZYT8aOJdKv9qY5HPrk3W6+BFvxpT6Ra6RYuB=rYxJ6uMQ@mail.gmail.com> <CAF6-1L6BJh3OMsCXocuTd_VV0orD2sUgP7KqD1hZhRyMeRO17A@mail.gmail.com>
+From: Niklas Goerke <niklas@niklasgoerke.de>
+Subject: Missing Option to give amount of PGs on pool creation with librados
+Date: Mon, 05 Aug 2013 16:14:08 +0200
+Message-ID: <7717d2e3c2768d554dafe48cfe657778@niklasgoerke.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.citrix.com ([66.165.176.63]:11111 "EHLO
-	SMTP02.CITRIX.COM" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753213Ab3HEOEz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 10:04:55 -0400
-In-Reply-To: <CAF6-1L6BJh3OMsCXocuTd_VV0orD2sUgP7KqD1hZhRyMeRO17A@mail.gmail.com>
+Received: from niklasgoerke.de ([46.38.232.61]:34626 "EHLO niklasgoerke.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751724Ab3HEOOK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 5 Aug 2013 10:14:10 -0400
+Received: from mail.niklasgoerke.de (localhost.localdomain [127.0.0.1])
+	by niklasgoerke.de (Postfix) with ESMTP id C926428DE004
+	for <ceph-devel@vger.kernel.org>; Mon,  5 Aug 2013 14:14:08 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: =?ISO-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, James Harper <james.harper@bendigoit.com.au>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, Stefano Stabellini <stefano.stabellini@eu.citrix.com>, Roger Pau Monne <roger.pau@citrix.com>, Wei Liu <Wei.Liu2@citrix.com>
+To: ceph-devel@vger.kernel.org
 
-On 05/08/13 14:55, Sylvain Munaut wrote:
-> Hi George,
->
->
->> Yes; qemu knows how to be a Xen PV block back-end.
-> Very interesting. Is there documentation about this somewhere ?
-> I had a look some time ago and it was really not very clear.
->
-> Things like what Xen version support this. And with which features (
-> indirect descriptors, persistent grants, discard, flush, ...) and/or
-> which limitation.
+Hi there
 
-I don't think this is documented anywhere; you'll need to ask the 
-experts.  Stefano? Roger? Wei?
+The way I see it, there is no option to give the amount of PGs when 
+creating a new pool using librados [1]. Thus any pool created using 
+librados has 8 PGs (default). I don't see a reason for this behaviour. 
+Is there any?
 
->
->
->> One of the reasons for stopping work on blktap3 (AIUI) was that it
->> should in theory have performance characteristics similar to blktap3,
-> And did anyone check the theory currently ? :)
+Otherwise I'll post a feature request for an option to give the amount 
+of PGs.
 
-I say "in theory" because they are using the same basic architecture: a 
-normal process running in dom0, with no special kernel support.  If 
-there were a performance difference, it would be something that should 
-(in theory) be able to be optimized.
+Niklas
 
-I don't think we have comparisons between qdisk (which is what we call 
-qemu-as-pv-backend in Xen) and blktap3 (and since blktap3 wasn't 
-finished they wouldn't mean much anyway); but I think qdisk compares 
-reasonably with blkback.
-
-  -George
+[1] http://ceph.com/docs/next/rados/api/librados/
