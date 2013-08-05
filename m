@@ -1,141 +1,66 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: kernel BUG at net/ceph/osd_client.c:2103
-Date: Mon, 05 Aug 2013 03:09:28 +0200
-Message-ID: <1375664968.16182.8.camel@localhost>
-References: <1375664836.16182.7.camel@localhost>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: blueprint: osd: ceph on zfs
+Date: Sun, 4 Aug 2013 18:19:16 -0700
+Message-ID: <CA+Hcz58t+HX5q_cNQ_as47kR+R1+7B8OftUHr_4j1CYVdhDnug@mail.gmail.com>
+References: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net>
+	<CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com>
+	<CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1375664836.16182.7.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ve0-f176.google.com ([209.85.128.176]:51411 "EHLO
+	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754097Ab3HEBTR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Aug 2013 21:19:17 -0400
+Received: by mail-ve0-f176.google.com with SMTP id b10so2460501vea.21
+        for <ceph-devel@vger.kernel.org>; Sun, 04 Aug 2013 18:19:17 -0700 (PDT)
+In-Reply-To: <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U29ycnksIHRoZSAiZGV2IiBsaXN0IGlzIHByb2JhYmx5IGEgYmV0dGVyIHBsYWNlIGZvciB0aGF0
-IG9uZS4KCkxlIGx1bmRpIDA1IGFvw7t0IDIwMTMgw6AgMDM6MDcgKzAyMDAsIE9saXZpZXIgQm9u
-dmFsZXQgYSDDqWNyaXQgOgo+IEhpLAo+IAo+IEkndmUganVzdCB1cGdyYWRlZCBhIFhlbiBEb20w
-IChEZWJpYW4gV2hlZXp5IHdpdGggWGVuIDQuMi4yKSBmcm9tIExpbnV4Cj4gMy45LjExIHRvIExp
-bnV4IDMuMTAuNSwgYW5kIG5vdyBJIGhhdmUga2VybmVsIHBhbmljIGFmdGVyIGxhdW5jaGluZyBz
-b21lCj4gVk0gd2hpY2ggdXNlIFJCRCBrZXJuZWwgY2xpZW50LiAKPiAKPiAKPiBJbiBrZXJuZWwg
-bG9ncywgSSBoYXZlIDoKPiAKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAg
-Mjg5LjIwNTY1Ml0ga2VybmVsIEJVRyBhdCBuZXQvY2VwaC9vc2RfY2xpZW50LmM6MjEwMyEKPiBB
-dWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIwNTcyNV0gaW52YWxpZCBv
-cGNvZGU6IDAwMDAgWyMxXSBTTVAgCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6
-IFsgIDI4OS4yMDU5MDhdIE1vZHVsZXMgbGlua2VkIGluOiBjYmMgcmJkIGxpYmNlcGggbGliY3Jj
-MzJjIHhlbl9nbnRkZXYgaXA2dGFibGVfbWFuZ2xlIGlwNnRfUkVKRUNUIGlwNnRhYmxlX2ZpbHRl
-ciBpcDZfdGFibGVzIHh0X0RTQ1AgaXB0YWJsZV9tYW5nbGUgeHRfTE9HIHh0X3BoeXNkZXYgaXB0
-X1JFSkVDVCB4dF90Y3B1ZHAgaXB0YWJsZV9maWx0ZXIgaXBfdGFibGVzIHhfdGFibGVzIGJyaWRn
-ZSBsb29wIGNvcmV0ZW1wIGdoYXNoX2NsbXVsbmlfaW50ZWwgYWVzbmlfaW50ZWwgYWVzX3g4Nl82
-NCBscncgZ2YxMjhtdWwgZ2x1ZV9oZWxwZXIgYWJsa19oZWxwZXIgY3J5cHRkIGlUQ09fd2R0IGlU
-Q09fdmVuZG9yX3N1cHBvcnQgZ3Bpb19pY2ggbWljcm9jb2RlIHNlcmlvX3JhdyBzYl9lZGFjIGVk
-YWNfY29yZSBldmRldiBscGNfaWNoIGkyY19pODAxIG1mZF9jb3JlIHdtaSBhYyBpb2F0ZG1hIHNo
-cGNocCBidXR0b24gZG1fbW9kIGhpZF9nZW5lcmljIHVzYmhpZCBoaWQgc2cgc2RfbW9kIGNyY190
-MTBkaWYgY3JjMzJjX2ludGVsIGlzY2kgbWVnYXJhaWRfc2FzIGxpYnNhcyBhaGNpIGxpYmFoY2kg
-ZWhjaV9wY2kgZWhjaV9oY2QgbGliYXRhIHNjc2lfdHJhbnNwb3J0X3NhcyBpZ2Igc2NzaV9tb2Qg
-aTJjX2FsZ29fYml0IGl4Z2JlIHVzYmNvcmUgaTJjX2NvcmUgZGNhIHVzYl9jb21tb24gcHRwIHBw
-c19jb3JlIG1kaW8KPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIx
-MDQ5OV0gQ1BVOiAyIFBJRDogNTMyNiBDb21tOiBibGtiYWNrLjMueHZkYSBOb3QgdGFpbnRlZCAz
-LjEwLWRhZS1kb20wICMxCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4
-OS4yMTA2MTddIEhhcmR3YXJlIG5hbWU6IFN1cGVybWljcm8gWDlEUlctN1RQRisvWDlEUlctN1RQ
-RissIEJJT1MgMi4wYSAwMy8xMS8yMDEzCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJu
-ZWw6IFsgIDI4OS4yMTA3MzhdIHRhc2s6IGZmZmY4ODAwMzdkMDEwNDAgdGk6IGZmZmY4ODAwMzgw
-M2EwMDAgdGFzay50aTogZmZmZjg4MDAzODAzYTAwMAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxs
-aWEga2VybmVsOiBbICAyODkuMjEwODU4XSBSSVA6IGUwMzA6WzxmZmZmZmZmZmEwMmQyMWQwPl0g
-IFs8ZmZmZmZmZmZhMDJkMjFkMD5dIGNlcGhfb3NkY19idWlsZF9yZXF1ZXN0KzB4MmJiLzB4M2M2
-IFtsaWJjZXBoXQo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjEx
-MDYyXSBSU1A6IGUwMmI6ZmZmZjg4MDAzODAzYjlmOCAgRUZMQUdTOiAwMDAxMDIxMgo+IEF1ZyAg
-NSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExMTU0XSBSQVg6IGZmZmY4ODAw
-MzNhMTgxYzAgUkJYOiBmZmZmODgwMDMzYTE4MmVjIFJDWDogMDAwMDAwMDAwMDAwMDAwMAo+IEF1
-ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExMjUxXSBSRFg6IGZmZmY4
-ODAwMzNhMTgyYWYgUlNJOiAwMDAwMDAwMDAwMDA4MDUwIFJESTogZmZmZjg4MDAzMGQzNDg4OAo+
-IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExMzQ3XSBSQlA6IDAw
-MDAwMDAwMDAwMDIwMDAgUjA4OiBmZmZmODgwMDM4MDNiYTU4IFIwOTogMDAwMDAwMDAwMDAwMDAw
-MAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExNDQ0XSBSMTA6
-IDAwMDAwMDAwMDAwMDAwMDAgUjExOiAwMDAwMDAwMDAwMDAwMDAwIFIxMjogZmZmZjg4MDAzM2Jh
-MzUwMAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExNTQxXSBS
-MTM6IDAwMDAwMDAwMDAwMDAwMDEgUjE0OiBmZmZmODgwMDM4NDdhYTc4IFIxNTogZmZmZjg4MDAz
-ODQ3YWI1OAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjExNjQ0
-XSBGUzogIDAwMDA3Zjc3NWRhOGM3MDAoMDAwMCkgR1M6ZmZmZjg4MDAzZjg0MDAwMCgwMDAwKSBr
-bmxHUzowMDAwMDAwMDAwMDAwMDAwCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6
-IFsgIDI4OS4yMTE3NjVdIENTOiAgZTAzMyBEUzogMDAwMCBFUzogMDAwMCBDUjA6IDAwMDAwMDAw
-ODAwNTAwMzMKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIxMTg1
-OF0gQ1IyOiAwMDAwN2ZhMjFlZTJjMDAwIENSMzogMDAwMDAwMDAyYmUxNDAwMCBDUjQ6IDAwMDAw
-MDAwMDAwNDI2NjAKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIx
-MTk1Nl0gRFIwOiAwMDAwMDAwMDAwMDAwMDAwIERSMTogMDAwMDAwMDAwMDAwMDAwMCBEUjI6IDAw
-MDAwMDAwMDAwMDAwMDAKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5
-LjIxMjA1Ml0gRFIzOiAwMDAwMDAwMDAwMDAwMDAwIERSNjogMDAwMDAwMDBmZmZmMGZmMCBEUjc6
-IDAwMDAwMDAwMDAwMDA0MDAKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAg
-Mjg5LjIxMjE0OF0gU3RhY2s6Cj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsg
-IDI4OS4yMTIyMzJdICAwMDAwMDAwMDAwMDAyMDAwIDAwMDAwMDI0Mzg0N2FhNzggMDAwMDAwMDAw
-MDAwMDAwMCBmZmZmODgwMDM5OTQ5YjQwCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJu
-ZWw6IFsgIDI4OS4yMTI1NzddICAwMDAwMDAwMDAwMDAyMjAxIGZmZmY4ODAwMzM4MTFkOTggZmZm
-Zjg4MDAzODAzYmE4MCBmZmZmODgwMDM4NDdhYTc4Cj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxp
-YSBrZXJuZWw6IFsgIDI4OS4yMTI5MjFdICBmZmZmODgwMDMwZjI0MzgwIGZmZmY4ODAwMDJhMzg0
-MDAgMDAwMDAwMDAwMDAwMjAwMCBmZmZmZmZmZmEwMjk1ODRjCj4gQXVnICA1IDAyOjUxOjIyIG11
-cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTMyNjRdIENhbGwgVHJhY2U6Cj4gQXVnICA1IDAyOjUx
-OjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTMzNThdICBbPGZmZmZmZmZmYTAyOTU4NGM+
-XSA/IHJiZF9vc2RfcmVxX2Zvcm1hdF93cml0ZSsweDcxLzB4N2MgW3JiZF0KPiBBdWcgIDUgMDI6
-NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIxMzQ1OV0gIFs8ZmZmZmZmZmZhMDI5NmYw
-NT5dID8gcmJkX2ltZ19yZXF1ZXN0X2ZpbGwrMHg2OTUvMHg3MzYgW3JiZF0KPiBBdWcgIDUgMDI6
-NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIxMzU2Ml0gIFs8ZmZmZmZmZmY4MTBjOTZh
-Nz5dID8gYXJjaF9sb2NhbF9pcnFfcmVzdG9yZSsweDcvMHg4Cj4gQXVnICA1IDAyOjUxOjIyIG11
-cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTM2NjddICBbPGZmZmZmZmZmODEzNTdmZjg+XSA/IGRv
-d25fcmVhZCsweDkvMHgxOQo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAy
-ODkuMjEzNzYzXSAgWzxmZmZmZmZmZmEwMjk4MjhhPl0gPyByYmRfcmVxdWVzdF9mbisweDE5MS8w
-eDIyZSBbcmJkXQo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjEz
-ODY0XSAgWzxmZmZmZmZmZjgxMTdhYzllPl0gPyBfX2Jsa19ydW5fcXVldWVfdW5jb25kKzB4MWUv
-MHgyNgo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjEzOTYyXSAg
-WzxmZmZmZmZmZjgxMTdiN2FhPl0gPyBibGtfZmx1c2hfcGx1Z19saXN0KzB4MWMxLzB4MWU0Cj4g
-QXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTQwNTldICBbPGZmZmZm
-ZmZmODExN2JhYWQ+XSA/IGJsa19maW5pc2hfcGx1ZysweGIvMHgyYQo+IEF1ZyAgNSAwMjo1MToy
-MiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjE0MTU3XSAgWzxmZmZmZmZmZjgxMjU1YzM2Pl0g
-PyBkaXNwYXRjaF9yd19ibG9ja19pbysweDMzZS8weDNmMAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJt
-aWxsaWEga2VybmVsOiBbICAyODkuMjE0MjU5XSAgWzxmZmZmZmZmZjgxMDU0ZjRiPl0gPyBmaW5k
-X2J1c2llc3RfZ3JvdXArMHgyOC8weDFkNAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2Vy
-bmVsOiBbICAyODkuMjE0MzU3XSAgWzxmZmZmZmZmZjgxMDU1MWIwPl0gPyBsb2FkX2JhbGFuY2Ur
-MHhiOS8weDVlMQo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjE0
-NDU0XSAgWzxmZmZmZmZmZjgxMDAxMjJhPl0gPyB4ZW5faHlwZXJjYWxsX3hlbl92ZXJzaW9uKzB4
-YS8weDIwCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTQ1NTJd
-ICBbPGZmZmZmZmZmODEyNTVmNDA+XSA/IF9fZG9fYmxvY2tfaW9fb3ArMHgyNTgvMHgzOTAKPiBB
-dWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5lbDogWyAgMjg5LjIxNDY0OV0gIFs8ZmZmZmZm
-ZmY4MTAwMjZmYT5dID8geGVuX2VuZF9jb250ZXh0X3N3aXRjaCsweGEvMHgxNAo+IEF1ZyAgNSAw
-Mjo1MToyMiBtdXJtaWxsaWEga2VybmVsOiBbICAyODkuMjE0NzQ3XSAgWzxmZmZmZmZmZjgxMDA3
-MThhPl0gPyBfX3N3aXRjaF90bysweDEzZS8weDNjMAo+IEF1ZyAgNSAwMjo1MToyMiBtdXJtaWxs
-aWEga2VybmVsOiBbICAyODkuMjE0ODQzXSAgWzxmZmZmZmZmZjgxMjU2NDIxPl0gPyB4ZW5fYmxr
-aWZfc2NoZWR1bGUrMHgzMGQvMHg0MTgKPiBBdWcgIDUgMDI6NTE6MjIgbXVybWlsbGlhIGtlcm5l
-bDogWyAgMjg5LjIxNDk0N10gIFs8ZmZmZmZmZmY4MTA0ODcxZT5dID8gZmluaXNoX3dhaXQrMHg2
-MC8weDYwCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTUwNDJd
-ICBbPGZmZmZmZmZmODEyNTYxMTQ+XSA/IHhlbl9ibGtpZl9iZV9pbnQrMHgyNS8weDI1Cj4gQXVn
-ICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTUxMzhdICBbPGZmZmZmZmZm
-ODEwNDdlN2M+XSA/IGt0aHJlYWQrMHg3ZC8weDg1Cj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxp
-YSBrZXJuZWw6IFsgIDI4OS4yMTUyMzJdICBbPGZmZmZmZmZmODEwNDdkZmY+XSA/IF9fa3RocmVh
-ZF9wYXJrbWUrMHg1OS8weDU5Cj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsg
-IDI4OS4yMTUzMzJdICBbPGZmZmZmZmZmODEzNWUxYmM+XSA/IHJldF9mcm9tX2ZvcmsrMHg3Yy8w
-eGIwCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTU0MjddICBb
-PGZmZmZmZmZmODEwNDdkZmY+XSA/IF9fa3RocmVhZF9wYXJrbWUrMHg1OS8weDU5Cj4gQXVnICA1
-IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTU1MjFdIENvZGU6IGMwIDAwIDAw
-IDAwIDhiIDRjIDI0IDEwIDY2IDg5IDQ4IDIyIDQ5IDhiIDg2IGMwIDAwIDAwIDAwIDhiIDE0IDI0
-IDg5IDUwIDFlIDQ5IDhiIDQ0IDI0IDQ4IDQ4IDg5IGMyIDQ5IDAzIDU0IDI0IDUwIDQ4IDM5IGQz
-IDc2IDAyIDwwZj4gMGIgNDggMjkgYzMgNDkgODkgNWMgMjQgNTAgNDEgODkgNWMgMjQgMTYgNDgg
-ODMgYzQgMjggNWIgNWQgCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4
-OS4yMTkzMDldIFJJUCAgWzxmZmZmZmZmZmEwMmQyMWQwPl0gY2VwaF9vc2RjX2J1aWxkX3JlcXVl
-c3QrMHgyYmIvMHgzYzYgW2xpYmNlcGhdCj4gQXVnICA1IDAyOjUxOjIyIG11cm1pbGxpYSBrZXJu
-ZWw6IFsgIDI4OS4yMTk0OTJdICBSU1AgPGZmZmY4ODAwMzgwM2I5Zjg+Cj4gQXVnICA1IDAyOjUx
-OjIyIG11cm1pbGxpYSBrZXJuZWw6IFsgIDI4OS4yMTk2MzFdIC0tLVsgZW5kIHRyYWNlIDMxNTRk
-ZjcyODczMWFjMDUgXS0tLQo+IAo+IAo+IAo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCj4gCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
-b20K
+I was thinking along the lines of if it made sense to multi-purpose
+the BackFileSystem for non-Linux portability. In which case even
+things like posix_fallocate, xattr access, etc.. might fit in well,
+which may have equivalent functionality, under a different name.
+
+On Sun, Aug 4, 2013 at 5:47 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Mon, Aug 5, 2013 at 7:39 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
+>> It seems to make sense that fiemap should be part of the `class
+>> BackingFileSystem` abstraction?
+>>
+>
+> FS_IOC_FIEMAP is a standard API, I think no need to implement it in `class
+> BackingFileSystem`.
+>
+>
+>> On Thu, Jul 25, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
+>>> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
+>>>
+>>> We've done some preliminary testing and xattr debugging that allows
+>>> ceph-osd to run on zfsforlinux using the normal writeahead journaling mode
+>>> (the same mode used for xfs and ext4).  However, we aren't doing anything
+>>> special to take advantage of zfs's capabilities.
+>>>
+>>> This session would go over what is needed to make parallel journaling work
+>>> (which would leverage zfs snapshots).  I would also like to have a
+>>> discussion about whether other longer-term possibilities, such as storing
+>>> objects directly using the DMU, make sense given what ceph-osd's
+>>> ObjectStore interface really needs.  It might also be an appropriate time
+>>> to visit whether other snapshotting linux filesystems (like nilfs2) would
+>>> fit well into any generalization of the filestore code that comes out of
+>>> this effort.
+>>>
+>>> If anybody is interested in this, please add yourself to the interested
+>>> parties section (or claim ownership) of this blueprint!
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
