@@ -1,86 +1,97 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: Update FUSE_USE_VERSION from 26 to 30.
-Date: Mon, 5 Aug 2013 13:26:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308051325330.18013@cobra.newdream.net>
-References: <201308011109083820483@gmail.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH] ceph: Update FUSE_USE_VERSION from 26 to 30.
+Date: Tue, 6 Aug 2013 08:56:26 +0800
+Message-ID: <201308060856240978896@gmail.com>
+References: <201308011109083820483@gmail.com>,
+	<alpine.DEB.2.00.1308051325330.18013@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48746 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754694Ab3HEU0s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 16:26:48 -0400
-In-Reply-To: <201308011109083820483@gmail.com>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:47304 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751846Ab3HFA43 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Aug 2013 20:56:29 -0400
+Received: by mail-pa0-f42.google.com with SMTP id lj1so47451pab.29
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Aug 2013 17:56:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
+To: sage <sage@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 1 Aug 2013, majianpeng wrote:
-> When compiling, it met this error:
-> >In file included from /usr/local/include/fuse/fuse.h:19:0,
-> >                 from client/fuse_ll.cc:17:
-> >/usr/local/include/fuse/fuse_common.h:474:4: error: #error only API
-> >version 30 or greater is supported
-> Update FUSE_USE_VERSION from 26 to 30.
+Pk9uIFRodSwgMSBBdWcgMjAxMywgbWFqaWFucGVuZyB3cm90ZToNCj4+IFdoZW4gY29tcGlsaW5n
+LCBpdCBtZXQgdGhpcyBlcnJvcjoNCj4+ID5JbiBmaWxlIGluY2x1ZGVkIGZyb20gL3Vzci9sb2Nh
+bC9pbmNsdWRlL2Z1c2UvZnVzZS5oOjE5OjAsDQo+PiA+ICAgICAgICAgICAgICAgICBmcm9tIGNs
+aWVudC9mdXNlX2xsLmNjOjE3Og0KPj4gPi91c3IvbG9jYWwvaW5jbHVkZS9mdXNlL2Z1c2VfY29t
+bW9uLmg6NDc0OjQ6IGVycm9yOiAjZXJyb3Igb25seSBBUEkNCj4+ID52ZXJzaW9uIDMwIG9yIGdy
+ZWF0ZXIgaXMgc3VwcG9ydGVkDQo+PiBVcGRhdGUgRlVTRV9VU0VfVkVSU0lPTiBmcm9tIDI2IHRv
+IDMwLg0KPg0KPldoYXQgcGxhdGZvcm0gd2FzIHRoaXMgb24/ICBJdCBsb29rcyBsaWtlIHRoaXMg
+Y2hhbmdlIGJ1aWxkcyBvbiBhbGwgdGhlIA0KPmdpdGJ1aWxkZXJzLCBidXQgSSdtIHdvcnJpZWQg
+dGhhdCB0aGVyZSBhcmUgb2xkZXIgZGlzdHJvcyB3ZSdyZSBtaXNzaW5nIA0KPnRoYXQgd2lsbCBs
+b3NlIG91dCBoZXJlLg0KQmVjYXVzZSBub3cgaSBhbSBzdHVkeSBmdXNlLCBzbyBpIGluc3RhbGwg
+dGhlIGxhdGVzdCBzb3VyY2UgY29kZSBvZiBmdXNlLg0KV2hlbiBpIGNvbXBpbGVkIHRoZSBjZXBo
+LCBpIG1ldCB0aGlzIGJ1Zy4NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWENCj4NCj5UaGFua3MhDQo+
+c2FnZQ0KPg0KPj4gDQo+PiBTaWduZWQtb2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0Bn
+bWFpbC5jb20+DQo+PiAtLS0NCj4+ICBmdXNldHJhY2UvZnVzZXRyYWNlX2xsLmNjIHwgMiArLQ0K
+Pj4gIHNyYy9jbGllbnQvZnVzZV9sbC5jYyAgICAgfCAyICstDQo+PiAgc3JjL3JiZF9mdXNlL3Ji
+ZC1mdXNlLmMgICB8IDIgKy0NCj4+ICAzIGZpbGVzIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKSwg
+MyBkZWxldGlvbnMoLSkNCj4+IA0KPj4gZGlmZiAtLWdpdCBhL2Z1c2V0cmFjZS9mdXNldHJhY2Vf
+bGwuY2MgYi9mdXNldHJhY2UvZnVzZXRyYWNlX2xsLmNjDQo+PiBpbmRleCBlYjcxMDBhLi43ZjJi
+ODQzIDEwMDY0NA0KPj4gLS0tIGEvZnVzZXRyYWNlL2Z1c2V0cmFjZV9sbC5jYw0KPj4gKysrIGIv
+ZnVzZXRyYWNlL2Z1c2V0cmFjZV9sbC5jYw0KPj4gQEAgLTExLDcgKzExLDcgQEANCj4+ICAgICAg
+Z2NjIC1XYWxsIGBwa2ctY29uZmlnIGZ1c2UgLS1jZmxhZ3MgLS1saWJzYCAtbHVsb2NrbWdyIGZ1
+c2V4bXBfZmguYyAtbyBmdXNleG1wX2ZoDQo+PiAgKi8NCj4+ICANCj4+IC0jZGVmaW5lIEZVU0Vf
+VVNFX1ZFUlNJT04gMjYNCj4+ICsjZGVmaW5lIEZVU0VfVVNFX1ZFUlNJT04gMzANCj4+ICANCj4+
+ICAjaWZkZWYgSEFWRV9DT05GSUdfSA0KPj4gICNpbmNsdWRlIDxjb25maWcuaD4NCj4+IGRpZmYg
+LS1naXQgYS9zcmMvY2xpZW50L2Z1c2VfbGwuY2MgYi9zcmMvY2xpZW50L2Z1c2VfbGwuY2MNCj4+
+IGluZGV4IDA4MTJjOWEuLmM4MmQwMDQgMTAwNjQ0DQo+PiAtLS0gYS9zcmMvY2xpZW50L2Z1c2Vf
+bGwuY2MNCj4+ICsrKyBiL3NyYy9jbGllbnQvZnVzZV9sbC5jYw0KPj4gQEAgLTEyLDcgKzEyLDcg
+QEANCj4+ICAgKiANCj4+ICAgKi8NCj4+ICANCj4+IC0jZGVmaW5lIEZVU0VfVVNFX1ZFUlNJT04g
+MjYNCj4+ICsjZGVmaW5lIEZVU0VfVVNFX1ZFUlNJT04gMzANCj4+ICANCj4+ICAjaW5jbHVkZSA8
+ZnVzZS9mdXNlLmg+DQo+PiAgI2luY2x1ZGUgPGZ1c2UvZnVzZV9sb3dsZXZlbC5oPg0KPj4gZGlm
+ZiAtLWdpdCBhL3NyYy9yYmRfZnVzZS9yYmQtZnVzZS5jIGIvc3JjL3JiZF9mdXNlL3JiZC1mdXNl
+LmMNCj4+IGluZGV4IDVhNGJmZTIuLjE5NWNiNzYgMTAwNjQ0DQo+PiAtLS0gYS9zcmMvcmJkX2Z1
+c2UvcmJkLWZ1c2UuYw0KPj4gKysrIGIvc3JjL3JiZF9mdXNlL3JiZC1mdXNlLmMNCj4+IEBAIC0x
+LDcgKzEsNyBAQA0KPj4gIC8qDQo+PiAgICogcmJkLWZ1c2UNCj4+ICAgKi8NCj4+IC0jZGVmaW5l
+IEZVU0VfVVNFX1ZFUlNJT04gMjYNCj4+ICsjZGVmaW5lIEZVU0VfVVNFX1ZFUlNJT04gMzANCj4+
+ICANCj4+ICAjaW5jbHVkZSA8c3RkaW8uaD4NCj4+ICAjaW5jbHVkZSA8c3RkbGliLmg+DQo+PiAt
+LSANCj4+IDEuOC4zLnJjMS40NC5nYjM4N2M3Nw0KPj4gDQo+PiANCj4+IFRoYW5rcyENCj4+IEpp
+YW5wZW5nIE1hDQpUaGFua3MhDQpKaWFucGVuZyBNYQ0KPk9uIFRodSwgMSBBdWcgMjAxMywgbWFq
+aWFucGVuZyB3cm90ZToNCj4+IFdoZW4gY29tcGlsaW5nLCBpdCBtZXQgdGhpcyBlcnJvcjoNCj4+
+ID5JbiBmaWxlIGluY2x1ZGVkIGZyb20gL3Vzci9sb2NhbC9pbmNsdWRlL2Z1c2UvZnVzZS5oOjE5
+OjAsDQo+PiA+ICAgICAgICAgICAgICAgICBmcm9tIGNsaWVudC9mdXNlX2xsLmNjOjE3Og0KPj4g
+Pi91c3IvbG9jYWwvaW5jbHVkZS9mdXNlL2Z1c2VfY29tbW9uLmg6NDc0OjQ6IGVycm9yOiAjZXJy
+b3Igb25seSBBUEkNCj4+ID52ZXJzaW9uIDMwIG9yIGdyZWF0ZXIgaXMgc3VwcG9ydGVkDQo+PiBV
+cGRhdGUgRlVTRV9VU0VfVkVSU0lPTiBmcm9tIDI2IHRvIDMwLg0KPg0KPldoYXQgcGxhdGZvcm0g
+d2FzIHRoaXMgb24/ICBJdCBsb29rcyBsaWtlIHRoaXMgY2hhbmdlIGJ1aWxkcyBvbiBhbGwgdGhl
+IA0KPmdpdGJ1aWxkZXJzLCBidXQgSSdtIHdvcnJpZWQgdGhhdCB0aGVyZSBhcmUgb2xkZXIgZGlz
+dHJvcyB3ZSdyZSBtaXNzaW5nIA0KPnRoYXQgd2lsbCBsb3NlIG91dCBoZXJlLg0KPg0KPlRoYW5r
+cyENCj5zYWdlDQo+DQo+PiANCj4+IFNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5w
+ZW5nQGdtYWlsLmNvbT4NCj4+IC0tLQ0KPj4gIGZ1c2V0cmFjZS9mdXNldHJhY2VfbGwuY2MgfCAy
+ICstDQo+PiAgc3JjL2NsaWVudC9mdXNlX2xsLmNjICAgICB8IDIgKy0NCj4+ICBzcmMvcmJkX2Z1
+c2UvcmJkLWZ1c2UuYyAgIHwgMiArLQ0KPj4gIDMgZmlsZXMgY2hhbmdlZCwgMyBpbnNlcnRpb25z
+KCspLCAzIGRlbGV0aW9ucygtKQ0KPj4gDQo+PiBkaWZmIC0tZ2l0IGEvZnVzZXRyYWNlL2Z1c2V0
+cmFjZV9sbC5jYyBiL2Z1c2V0cmFjZS9mdXNldHJhY2VfbGwuY2MNCj4+IGluZGV4IGViNzEwMGEu
+LjdmMmI4NDMgMTAwNjQ0DQo+PiAtLS0gYS9mdXNldHJhY2UvZnVzZXRyYWNlX2xsLmNjDQo+PiAr
+KysgYi9mdXNldHJhY2UvZnVzZXRyYWNlX2xsLmNjDQo+PiBAQCAtMTEsNyArMTEsNyBAQA0KPj4g
+ICAgICBnY2MgLVdhbGwgYHBrZy1jb25maWcgZnVzZSAtLWNmbGFncyAtLWxpYnNgIC1sdWxvY2tt
+Z3IgZnVzZXhtcF9maC5jIC1vIGZ1c2V4bXBfZmgNCj4+ICAqLw0KPj4gIA0KPj4gLSNkZWZpbmUg
+RlVTRV9VU0VfVkVSU0lPTiAyNg0KPj4gKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAzMA0KPj4g
+IA0KPj4gICNpZmRlZiBIQVZFX0NPTkZJR19IDQo+PiAgI2luY2x1ZGUgPGNvbmZpZy5oPg0KPj4g
+ZGlmZiAtLWdpdCBhL3NyYy9jbGllbnQvZnVzZV9sbC5jYyBiL3NyYy9jbGllbnQvZnVzZV9sbC5j
+Yw0KPj4gaW5kZXggMDgxMmM5YS4uYzgyZDAwNCAxMDA2NDQNCj4+IC0tLSBhL3NyYy9jbGllbnQv
+ZnVzZV9sbC5jYw0KPj4gKysrIGIvc3JjL2NsaWVudC9mdXNlX2xsLmNjDQo+PiBAQCAtMTIsNyAr
+MTIsNyBAQA0KPj4gICAqIA0KPj4gICAqLw0KPj4gIA0KPj4gLSNkZWZpbmUgRlVTRV9VU0VfVkVS
+U0lPTiAyNg0KPj4gKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAzMA0KPj4gIA0KPj4gICNpbmNs
+dWRlIDxmdXNlL2Z1c2UuaD4NCj4+ICAjaW5jbHVkZSA8ZnVzZS9mdXNlX2xvd2xldmVsLmg+DQo+
+PiBkaWZmIC0tZ2l0IGEvc3JjL3JiZF9mdXNlL3JiZC1mdXNlLmMgYi9zcmMvcmJkX2Z1c2UvcmJk
+LWZ1c2UuYw0KPj4gaW5kZXggNWE0YmZlMi4uMTk1Y2I3NiAxMDA2NDQNCj4+IC0tLSBhL3NyYy9y
+YmRfZnVzZS9yYmQtZnVzZS5jDQo+PiArKysgYi9zcmMvcmJkX2Z1c2UvcmJkLWZ1c2UuYw0KPj4g
+QEAgLTEsNyArMSw3IEBADQo+PiAgLyoNCj4+ICAgKiByYmQtZnVzZQ0KPj4gICAqLw0KPj4gLSNk
+ZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAyNg0KPj4gKyNkZWZpbmUgRlVTRV9VU0VfVkVSU0lPTiAz
+MA0KPj4gIA0KPj4gICNpbmNsdWRlIDxzdGRpby5oPg0KPj4gICNpbmNsdWRlIDxzdGRsaWIuaD4N
+Cj4+IC0tIA0KPj4gMS44LjMucmMxLjQ0LmdiMzg3Yzc3DQo+PiANCj4+IA0KPj4gVGhhbmtzIQ0K
+Pj4gSmlhbnBlbmcgTWE=
 
-What platform was this on?  It looks like this change builds on all the 
-gitbuilders, but I'm worried that there are older distros we're missing 
-that will lose out here.
-
-Thanks!
-sage
-
-> 
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  fusetrace/fusetrace_ll.cc | 2 +-
->  src/client/fuse_ll.cc     | 2 +-
->  src/rbd_fuse/rbd-fuse.c   | 2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fusetrace/fusetrace_ll.cc b/fusetrace/fusetrace_ll.cc
-> index eb7100a..7f2b843 100644
-> --- a/fusetrace/fusetrace_ll.cc
-> +++ b/fusetrace/fusetrace_ll.cc
-> @@ -11,7 +11,7 @@
->      gcc -Wall `pkg-config fuse --cflags --libs` -lulockmgr fusexmp_fh.c -o fusexmp_fh
->  */
->  
-> -#define FUSE_USE_VERSION 26
-> +#define FUSE_USE_VERSION 30
->  
->  #ifdef HAVE_CONFIG_H
->  #include <config.h>
-> diff --git a/src/client/fuse_ll.cc b/src/client/fuse_ll.cc
-> index 0812c9a..c82d004 100644
-> --- a/src/client/fuse_ll.cc
-> +++ b/src/client/fuse_ll.cc
-> @@ -12,7 +12,7 @@
->   * 
->   */
->  
-> -#define FUSE_USE_VERSION 26
-> +#define FUSE_USE_VERSION 30
->  
->  #include <fuse/fuse.h>
->  #include <fuse/fuse_lowlevel.h>
-> diff --git a/src/rbd_fuse/rbd-fuse.c b/src/rbd_fuse/rbd-fuse.c
-> index 5a4bfe2..195cb76 100644
-> --- a/src/rbd_fuse/rbd-fuse.c
-> +++ b/src/rbd_fuse/rbd-fuse.c
-> @@ -1,7 +1,7 @@
->  /*
->   * rbd-fuse
->   */
-> -#define FUSE_USE_VERSION 26
-> +#define FUSE_USE_VERSION 30
->  
->  #include <stdio.h>
->  #include <stdlib.h>
-> -- 
-> 1.8.3.rc1.44.gb387c77
-> 
-> 
-> Thanks!
-> Jianpeng Ma
