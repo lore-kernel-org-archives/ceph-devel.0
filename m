@@ -1,39 +1,41 @@
-From: Ross David Turk <ross-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: CDS Day One Videos
-Date: Mon, 5 Aug 2013 23:09:39 -0700
-Message-ID: <C78E74CE-65F0-4480-BCC4-0918F790F445@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1786.1\))
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.orgceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.orgceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: RGW getting revoked tokens from keystone not working
+Date: Tue, 6 Aug 2013 14:10:45 +0200
+Message-ID: <CAN04cT6ZeAYVGPthhfS0CyV6XGQt27H3VcJHEFKusqpVvCR19g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:48241 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756189Ab3HFMKq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Aug 2013 08:10:46 -0400
+Received: by mail-ob0-f182.google.com with SMTP id wo10so605592obc.27
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Aug 2013 05:10:45 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi ceph devs,
 
-Hi, all!  Thanks to those who attended the first day (unless you are in
-Europe, where they all happen on the same glorious day) of the Ceph
-Developer Summit.
+I was working with a RGW / keystone implementation, source tree from
+github master. I stumbled against this error from the radosgw log;
 
-For those of you who couldn=92t make it, I have added links to videos of
-the sessions to the wiki page - it=92s actually just three large videos,
-but the links should take you to the approximate start of each discussion.
+2013-08-06 14:00:02.523331 7f929c011780 10 allocated request req=0x1c31640
+2013-08-06 14:00:02.556052 7f923bfff700 10 request returned
+2013-08-06 14:00:02.556238 7f923bfff700  0 ERROR: keystone revocation
+processing returned error r=-22
 
-http://ceph.com/cds (click on the video links near each session)
+That was weird (nothing after the "request returned"), because I
+checked the request using curl and it actually returned data. Then I
+found this;
 
-Cheers,
-Ross
+https://github.com/ceph/ceph/blob/master/src/rgw/rgw_swift.cc#L307
 
---
-Ross Turk
-Community, Inktank
+Shouldn't read_data be receive_data, because the received_data is
+called by the curl_easy_perform? Or else the bufferlist in
+RGWSwift::check_revoked() will remain empty at all times.
 
-@rossturk @inktank @ceph
+I might be missing something, so that's why I'm mailing the question
+instead of mailing the patch...
+
+- Roald
