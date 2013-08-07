@@ -1,58 +1,45 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: ocf script for ceph quorum check and fs
-Date: Wed, 7 Aug 2013 03:45:02 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E82AFA@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B62E74783@BITCOM1.int.sbss.com.au>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: API request
+Date: Tue, 6 Aug 2013 23:46:19 -0400
+Message-ID: <CANP1eJG-QPi9Mfeh8yb08mDjKaRW-Jx4OsRYuJ5pyV==hKJ5+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:55333 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756886Ab3HGDpG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Aug 2013 23:45:06 -0400
-Received: from bitcom1.int.sbss.com.au ([2001:388:e000:712:a5ca:4fd3:14f:ad5d])
-	by smtp1.bendigoit.com.au with esmtp (Exim 4.69)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1V6ugT-0003ei-AQ
-	for ceph-devel@vger.kernel.org; Wed, 07 Aug 2013 13:45:13 +1000
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B62E74783@BITCOM1.int.sbss.com.au>
-Content-Language: en-US
+Received: from mail-we0-f182.google.com ([74.125.82.182]:56247 "EHLO
+	mail-we0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757092Ab3HGDqU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Aug 2013 23:46:20 -0400
+Received: by mail-we0-f182.google.com with SMTP id u55so1062769wes.41
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Aug 2013 20:46:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: linux-cachefs@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-> 
-> I want to mount ceph fs (using fuse) but /etc/fstab treats it as a local
-> filesystem and so tries to mount it before ceph is started, or indeed before
-> the network is even up.
-> 
-> Also, ceph tries to start before the network is up and fails because it can't
-> bind to an address. I think this is because I'm using openvswitch which is
-> starting later.
-> 
-> Anyway, controlling it all via pacemaker seems like a much smarter thing to
-> do as I can ensure that ceph doesn't start until the network is up (which it will
-> be when pacemaker has quorum), and then the fs doesn't mount until ceph
-> is started and the ceph cluster has quorum and maybe until an mds is
-> running.
-> 
-> So to do this I need ocf scripts for:
-> 
-> . starting components of ceph, which appears to be provided by ceph-
-> resource-agents.deb, but I haven't tested yet
-> . checking ceph quorum - I guess I'd need to write a script for this like existing
-> ping check
-> . checking mds is available - maybe part of the mount script
-> . mount using ceph-fuse. Existing fs scripts make assumptions about fs types
-> and parameters and don't work
-> 
-> Has anyone written a 'check_ceph_quorum' script? Or a fs mount script that
-> is compatible with fuse? I don't want to re-invent any wheels!
-> 
+David,
 
-I have written a ceph_check RA that sets a value in the CIB if the ceph cluster has quorum, and another to mount the fuse fs, although I think maybe it would be better to fix the bug in the existing pacemaker RA to allow mounting fuse properly.
+I would like to find out if you could add a new API for re-validating
+a cookie. My use case is still FSCache support for Ceph.
 
-Is anyone interested enough for me to clean it up a bit and post it?
+Ceph has a notion of capabilities (like CACHE cap) that can be
+granted, revoked or given up. For example the code there to give up
+the cache cap when the inode file reference count goes to 0. In that
+case it calls a invalidate on the data. Obviously. I would like to
+have to avoid invalidating the data since it's entirely likely when we
+re-open it next it'll still not have changed. There's also cases
 
-James
+I'm not sure if this would be the best solution, but what I imagined
+would be a new call to revalidate the data cookie
+(fscache_cookie_revalidate). The revalidate call could queue up task
+to validate the data (not allow any reads / writes till then) and if
+it's stale, then to invalidate the data. If an empty cookie it could
+skip all this work.
+
+I would use that functionality to re-validate my in memory cookie
+after getting a cache cap granted and avoid a whole lot of mess
+closing and opening the cookies (unless there's a local writer).
+
+What do you think?
+
+Thanks,
+- Milosz
