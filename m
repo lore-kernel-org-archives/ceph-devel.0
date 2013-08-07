@@ -1,98 +1,44 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: bug in /etc/init.d/ceph debian
-Date: Wed, 7 Aug 2013 03:35:17 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: David Howells <dhowells@redhat.com>
+Subject: Re: API request
+Date: Wed, 07 Aug 2013 11:05:57 +0100
+Message-ID: <28791.1375869957@warthog.procyon.org.uk>
+References: <CANP1eJG-QPi9Mfeh8yb08mDjKaRW-Jx4OsRYuJ5pyV==hKJ5+A@mail.gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:37070 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756336Ab3HGD5K convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Aug 2013 23:57:10 -0400
-Received: from bitcom1.int.sbss.com.au ([2001:388:e000:712:a5ca:4fd3:14f:ad5d])
-	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1V6uWt-0003LA-Kb
-	for ceph-devel@vger.kernel.org; Wed, 07 Aug 2013 13:35:19 +1000
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:47791 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932375Ab3HGKGC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 7 Aug 2013 06:06:02 -0400
+In-Reply-To: <CANP1eJG-QPi9Mfeh8yb08mDjKaRW-Jx4OsRYuJ5pyV==hKJ5+A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: dhowells@redhat.com, linux-cachefs@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
 
+Milosz Tanski <milosz@adfin.com> wrote:
+
+> I would like to find out if you could add a new API for re-validating
+> a cookie. My use case is still FSCache support for Ceph.
 > 
-> I'm running ceph 0.61.7-1~bpo70+1 and I think there is a bug in
-> /etc/init.d/ceph
-> 
-> The heartbeat RA expects that the init.d script will return 3 for "not running",
-> but if there is no agent (eg mds) defined for that host it will return 0 instead,
-> so pacemaker thinks the agent is running on a node where it isn't even
-> defined and presumably would then start doing stonith when it finds it
-> remains running after a stop command.
-> 
-> Or maybe that is the correct behaviour of the init.d script and the RA needs
-> to be modified?
-> 
+> Ceph has a notion of capabilities (like CACHE cap) that can be
+> granted, revoked or given up. For example the code there to give up
+> the cache cap when the inode file reference count goes to 0.
 
-Nobody interested in this?
+What exactly do you mean here?  When the last iput() happens and an inode is
+merely discarded from memory (and not necessarily deleted)?
 
-My proposed fix follows this email. Return status is:
-0 - everything tested is running
-1 - something wrong
-3 - something tested is stopped
+> In that case it calls a invalidate on the data. Obviously. I would like to
+> have to avoid invalidating the data since it's entirely likely when we
+> re-open it next it'll still not have changed.
 
-Without this patch, the resource agents report that the service is running if the service is not defined on the host.
+You could instead just cease calling on fscache for that inode rather than
+invalidating the cache object, perhaps by setting a flag to tell ceph's
+read/write ignore caching.  Ideally you'd release the cooie if you're not
+using it so that (a) it can be culled if the cache needs to make space and (b)
+it doesn't use up unswappable kernel resources.
 
-I'm not sure though if this is the right approach. Maybe the /etc/init.d/ceph should return 0 when checking the status of (say) mon, when there are no mons defined on this host?
+> There's also cases
 
-James
+There's an incomplete sentence here.  Was something missed or should this have
+been deleted?
 
---- ceph.orig   2013-08-07 13:28:25.000000000 +1000
-+++ ceph        2013-08-07 13:32:37.000000000 +1000
-@@ -170,6 +170,9 @@
- get_local_name_list
- get_name_list "$@"
-
-+running=0
-+dead=0
-+stopped=0
- for name in $what; do
-     type=`echo $name | cut -c 1-3`   # e.g. 'mon', if $item is 'mon1'
-     id=`echo $name | cut -c 4- | sed 's/^\\.//'`
-@@ -375,14 +378,15 @@
-            if daemon_is_running $name ceph-$type $id $pid_file; then
-                echo -n "$name: running "
-                do_cmd "$BINDIR/ceph --admin-daemon $asok version 2>/dev/null" || echo unknown
-+                running=1
-             elif [ -e "$pid_file" ]; then
-                 # daemon is dead, but pid file still exists
-                 echo "$name: dead."
--                EXIT_STATUS=1
-+                dead=1
-             else
-                 # daemon is dead, and pid file is gone
-                 echo "$name: not running."
--                EXIT_STATUS=3
-+                stopped=1
-             fi
-            ;;
-
-@@ -430,6 +434,16 @@
-     esac
- done
-
-+if [ "$command" = "status" ]; then
-+    if [ "$dead" = "1" ]; then
-+      EXIT_STATUS=1
-+    elif [ "$running" = "1" ]; then
-+      EXIT_STATUS=0
-+    else
-+      EXIT_STATUS=3
-+    fi
-+fi
-+
- # activate latent osds?
- if [ "$command" = "start" ]; then
-     if [ "$*" = "" ] || echo $* | grep -q ^osd\$ ; then
+David
