@@ -1,39 +1,60 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: /etc/init.d/ceph script will restart stop start the daemon
- twice
-Date: Wed, 7 Aug 2013 09:24:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308070923260.5427@cobra.newdream.net>
-References: <52026465.2020905@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Transcript: Erasure coded storage backend (step 2)
+Date: Wed, 07 Aug 2013 18:31:40 +0200
+Message-ID: <5202766C.9010109@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigBAE390E23AD00231DD6888A1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44526 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757200Ab3HGQYf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Aug 2013 12:24:35 -0400
-In-Reply-To: <52026465.2020905@gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:44048 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756352Ab3HGQbn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Aug 2013 12:31:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huangjun <hjwsm1989@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 7 Aug 2013, huangjun wrote:
-> hi,
-> we use the ceph 0.613, write all the and when
-> operate(restart|start|stop) the cluster daemon(osd|mds|mon), it will
-> excecute the operation twice.
-> from the code init-ceph.in:
-> get_localname_list
-> get_name_list "$@"
-> for name in $what; do
-> .....
-> done
-> so the result $what will include twice the local daemons, shall we only
-> use the get_name_list? what's get_localname_list do here?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigBAE390E23AD00231DD6888A1
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-It sounds like you have the osds listed in ceph.conf (with a host = ... 
-line) *and* have touched /var/lib/ceph/osd/*/sysvinit ?  You should only 
-do one or the other.. preferably touching the sysvinit file so that 
-ceph.conf is simple (this is what ceph-deploy does).
+Hi Patrick,
 
-sage
+I wrote a transcript of the "Erasure coded storage backend (step 2)" sess=
+ion at :
+
+http://wiki.ceph.com/01Planning/CDS/Emperor/Transcript_:_Erasure_coded_st=
+orage_backend_%28step_2%29
+
+It may be helpfull to add it as a [transcript] link next to the [video] l=
+ink. Listening and reading is convenient to fully understand the most dif=
+ficult parts.=20
+
+What do you think ?
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enigBAE390E23AD00231DD6888A1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlICdmwACgkQ8dLMyEl6F22PoACgj/l1LFYYYcjcSa9QbJ3RLQyk
+g4sAn3jtNcDdftuZeB+OlrbnBcJ2BEp6
+=6hNp
+-----END PGP SIGNATURE-----
+
+--------------enigBAE390E23AD00231DD6888A1--
