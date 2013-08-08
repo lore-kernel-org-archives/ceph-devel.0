@@ -1,68 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: github pull requests, comments and rebase
-Date: Thu, 08 Aug 2013 12:06:36 +0200
-Message-ID: <52036DAC.5040106@dachary.org>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: ceph admin command: debuggging
+Date: Thu, 8 Aug 2013 16:04:17 +0200
+Message-ID: <20130808160417.3589315c@doppio>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig9EEB9617284AF1301552FEFE"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:36044 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934100Ab3HHKGk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 06:06:40 -0400
+Received: from port-212-202-108-184.static.qsc.de ([212.202.108.184]:42048
+	"EHLO mail.itxperts.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S965571Ab3HHOEU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 10:04:20 -0400
+Received: from itxmail.itxperts.de (qgate_dmz.itxperts.de [192.168.160.1])
+	by mail.itxperts.de (8.14.0/8.14.0) with ESMTP id r78E5xSP023975
+	for <ceph-devel@vger.kernel.org>; Thu, 8 Aug 2013 16:05:59 +0200
+Received: from doppio (doppio.itxperts.de [192.168.140.7])
+	by itxmail.itxperts.de (Postfix) with ESMTP id E70FD13F02
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Aug 2013 17:07:24 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig9EEB9617284AF1301552FEFE
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Sage,
+maybe this is the wrong list - but I am looking for
+logging support for the /usr/bin/ceph adminstration
+comamand.
 
-During the discussions about continuous integration at the CDS this week =
-( http://youtu.be/cGosx5zD4FM?t=3D1h16m05s ) you mentionned that github w=
-as able to keep track of the successive versions of a pull request commit=
-, even in the case of a rebase. I just tried the following:
+This is build from the same source as the ceph daemons are.
 
-a) comment on commit associated to https://github.com/ceph/ceph/pull/455 =
-( both inline and at the end of the commit )
-b) Christophe rebased the associated commit against master and git push -=
--force to publish it
-c) The original commit  does not show up in https://github.com/ceph/ceph/=
-pull/455  and the new commit, result of the rebase, https://github.com/kr=
-i5/ceph/commit/051b0c3e15c98714b95fca5cb7838de9614dc8e3 does not display =
-my inline comments.
+For the daemons, logging is controlled for the different
+comoponents of a daemon on behalf of configuration file
+directives (e.g. "debug ms" for the message I/O).
 
-Do you to know a different workflow that would allow rebase and keep trac=
-k of the different versions / comments of the pull request ? Something si=
-milar to what you have in gerrit with https://review.openstack.org/#/c/22=
-708/ for example where you can see and compare the patch sets.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+Can this be applied to the /usr/bin/ceph command, too?
+And where would the log file go?
 
 
+Thanks for any help
 
---------------enig9EEB9617284AF1301552FEFE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Andreas Bluemle
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
 
-iEYEARECAAYFAlIDba0ACgkQ8dLMyEl6F222EQCcCZ9Knng8yZ1575fWV6pSFPBT
-wz0AnjCkv6DzwWvePLVrf70Cran9pSGQ
-=j7LI
------END PGP SIGNATURE-----
-
---------------enig9EEB9617284AF1301552FEFE--
+Company details: http://www.itxperts.de/imprint.htm
