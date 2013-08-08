@@ -1,43 +1,68 @@
-From: Ed Cashin <ecashin@coraid.com>
-Subject: Re: [PATCH 04/22] block: Abstract out bvec iterator
-Date: Wed, 7 Aug 2013 22:04:36 -0400
-Message-ID: <2D8F228B-65AE-4046-A910-6B354AF0058E@coraid.com>
-References: <1375912471-5106-1-git-send-email-kmo@daterainc.com>
-	<1375912471-5106-5-git-send-email-kmo@daterainc.com>
-Reply-To: device-mapper development <dm-devel@redhat.com>
-Mime-Version: 1.0 (Apple Message framework v1085)
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <dm-devel-bounces@redhat.com>
-In-Reply-To: <1375912471-5106-5-git-send-email-kmo@daterainc.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/dm-devel>
-List-Post: <mailto:dm-devel@redhat.com>
-List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=subscribe>
-Sender: dm-devel-bounces@redhat.com
-Errors-To: dm-devel-bounces@redhat.com
-To: Kent Overstreet <kmo@daterainc.com>
-Cc: Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Mike Snitzer <snitzer@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, Joshua Morris <josh.h.morris@us.ibm.com>, Trond@redhat.com, Geert Uytterhoeven <geert@linux-m68k.org>, Mel Gorman <mgorman@suse.de>, Nitin Gupta <ngupta@vflare.org>, Len Brown <len.brown@intel.com>, Sage Weil <sage@inktank.com>, Engel <joern@logfs.org>, Rusty Russell <rusty@rustcorp.com.au>, Sunil Mushran <sunil.mushran@gmail.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Heiko@redhat.com, Yehuda Sadeh <yehuda@inktank.com>, Geoff Levand <geoff@infradead.org>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Loic Dachary <loic@dachary.org>
+Subject: github pull requests, comments and rebase
+Date: Thu, 08 Aug 2013 12:06:36 +0200
+Message-ID: <52036DAC.5040106@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig9EEB9617284AF1301552FEFE"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:36044 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934100Ab3HHKGk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 06:06:40 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Aug 7, 2013, at 5:54 PM, Kent Overstreet wrote:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig9EEB9617284AF1301552FEFE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-> Immutable biovecs are going to require an explicit iterator. To
-> implement immutable bvecs, a later patch is going to add a bi_bvec_done
-> member to this struct; for now, this patch effectively just renames
-> things.
+Hi Sage,
 
-Hi, Kent Overstreet.  Thanks for Cc'ing me and for the promising work.
+During the discussions about continuous integration at the CDS this week =
+( http://youtu.be/cGosx5zD4FM?t=3D1h16m05s ) you mentionned that github w=
+as able to keep track of the successive versions of a pull request commit=
+, even in the case of a rebase. I just tried the following:
 
-Were you able to do sanity tests with aoe this time around?  Last time, basic I/O was not working with the immutable biovec patches applied.
+a) comment on commit associated to https://github.com/ceph/ceph/pull/455 =
+( both inline and at the end of the commit )
+b) Christophe rebased the associated commit against master and git push -=
+-force to publish it
+c) The original commit  does not show up in https://github.com/ceph/ceph/=
+pull/455  and the new commit, result of the rebase, https://github.com/kr=
+i5/ceph/commit/051b0c3e15c98714b95fca5cb7838de9614dc8e3 does not display =
+my inline comments.
 
-Here is my 28 June email about my experiences with git://evilpiepirate.org/~kent/linux-bcache.git at that time.  It also includes information about creating an easy software-only aoe test environment.
+Do you to know a different workflow that would allow rebase and keep trac=
+k of the different versions / comments of the pull request ? Something si=
+milar to what you have in gerrit with https://review.openstack.org/#/c/22=
+708/ for example where you can see and compare the patch sets.
 
-  http://thread.gmane.org/gmane.linux.kernel/1505222/focus=1517924
+Cheers
 
--- 
-  Ed Cashin
-  ecashin@coraid.com
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+--------------enig9EEB9617284AF1301552FEFE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlIDba0ACgkQ8dLMyEl6F222EQCcCZ9Knng8yZ1575fWV6pSFPBT
+wz0AnjCkv6DzwWvePLVrf70Cran9pSGQ
+=j7LI
+-----END PGP SIGNATURE-----
+
+--------------enig9EEB9617284AF1301552FEFE--
