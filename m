@@ -1,46 +1,43 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH TRIVIVAL] ceph: Move the place for EOLDSNAPC handle in ceph_aio_write to easily understand
-Date: Thu, 8 Aug 2013 15:32:19 +0800
-Message-ID: <201308081532168498411@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f45.google.com ([209.85.160.45]:42083 "EHLO
-	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751211Ab3HHHcY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 03:32:24 -0400
-Received: by mail-pb0-f45.google.com with SMTP id mc17so2833170pbc.32
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Aug 2013 00:32:23 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+From: Ed Cashin <ecashin@coraid.com>
+Subject: Re: [PATCH 04/22] block: Abstract out bvec iterator
+Date: Wed, 7 Aug 2013 22:04:36 -0400
+Message-ID: <2D8F228B-65AE-4046-A910-6B354AF0058E@coraid.com>
+References: <1375912471-5106-1-git-send-email-kmo@daterainc.com>
+	<1375912471-5106-5-git-send-email-kmo@daterainc.com>
+Reply-To: device-mapper development <dm-devel@redhat.com>
+Mime-Version: 1.0 (Apple Message framework v1085)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <dm-devel-bounces@redhat.com>
+In-Reply-To: <1375912471-5106-5-git-send-email-kmo@daterainc.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/dm-devel>
+List-Post: <mailto:dm-devel@redhat.com>
+List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=subscribe>
+Sender: dm-devel-bounces@redhat.com
+Errors-To: dm-devel-bounces@redhat.com
+To: Kent Overstreet <kmo@daterainc.com>
+Cc: Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Mike Snitzer <snitzer@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, Joshua Morris <josh.h.morris@us.ibm.com>, Trond@redhat.com, Geert Uytterhoeven <geert@linux-m68k.org>, Mel Gorman <mgorman@suse.de>, Nitin Gupta <ngupta@vflare.org>, Len Brown <len.brown@intel.com>, Sage Weil <sage@inktank.com>, Engel <joern@logfs.org>, Rusty Russell <rusty@rustcorp.com.au>, Sunil Mushran <sunil.mushran@gmail.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Heiko@redhat.com, Yehuda Sadeh <yehuda@inktank.com>, Geoff Levand <geoff@infradead.org>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-T25seSBmb3IgY2VwaF9zeW5jX3dyaXRlLCB0aGUgb3NkIGNhbiByZXR1cm4gRU9MRFNOQVBDLnNv
-IG1vdmUgdGhlDQpyZWxhdGVkIGNvZGVzIGFmdGVyIHRoZSBjYWxsIGNlcGhfc3luY193cml0ZS4N
-Cg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0t
-DQogZnMvY2VwaC9maWxlLmMgfCAxOCArKysrKysrKysrLS0tLS0tLS0NCiAxIGZpbGUgY2hhbmdl
-ZCwgMTAgaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2Nl
-cGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCmluZGV4IDJkZGYwNjEuLjMwZTk1OWYgMTAwNjQ0
-DQotLS0gYS9mcy9jZXBoL2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC03NjgsNiAr
-NzY4LDE1IEBAIHJldHJ5X3NuYXA6DQogCQltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsN
-CiAJCXdyaXR0ZW4gPSBjZXBoX3N5bmNfd3JpdGUoZmlsZSwgaW92LT5pb3ZfYmFzZSwgY291bnQs
-DQogCQkJCQkgIHBvcywgJmlvY2ItPmtpX3Bvcyk7DQorCQlpZiAod3JpdHRlbiA9PSAtRU9MRFNO
-QVBDKSB7DQorCQkJZG91dCgiYWlvX3dyaXRlICVwICVsbHguJWxseCAlbGx1fiV1Ig0KKwkJCQki
-Z290IEVPTERTTkFQQywgcmV0cnlpbmdcbiIsDQorCQkJCWlub2RlLCBjZXBoX3Zpbm9wKGlub2Rl
-KSwNCisJCQkJcG9zLCAodW5zaWduZWQpaW92LT5pb3ZfbGVuKTsNCisJCQltdXRleF9sb2NrKCZp
-bm9kZS0+aV9tdXRleCk7DQorCQkJaG9sZF9tdXRleCA9IHRydWU7DQorCQkJZ290byByZXRyeV9z
-bmFwOw0KKwkJfQ0KIAl9IGVsc2Ugew0KIAkJd3JpdHRlbiA9IGdlbmVyaWNfZmlsZV9idWZmZXJl
-ZF93cml0ZShpb2NiLCBpb3YsIG5yX3NlZ3MsDQogCQkJCQkJICAgICAgcG9zLCAmaW9jYi0+a2lf
-cG9zLA0KQEAgLTc5NywxNCArODA2LDcgQEAgcmV0cnlfc25hcDoNCiAJCWlmIChlcnIgPCAwKQ0K
-IAkJCXdyaXR0ZW4gPSBlcnI7DQogCX0NCi0NCi0JaWYgKHdyaXR0ZW4gPT0gLUVPTERTTkFQQykg
-ew0KLQkJZG91dCgiYWlvX3dyaXRlICVwICVsbHguJWxseCAlbGx1fiV1IGdvdCBFT0xEU05BUEMs
-IHJldHJ5aW5nXG4iLA0KLQkJICAgICBpbm9kZSwgY2VwaF92aW5vcChpbm9kZSksIHBvcywgKHVu
-c2lnbmVkKWlvdi0+aW92X2xlbik7DQotCQltdXRleF9sb2NrKCZpbm9kZS0+aV9tdXRleCk7DQot
-CQlob2xkX211dGV4ID0gdHJ1ZTsNCi0JCWdvdG8gcmV0cnlfc25hcDsNCi0JfQ0KKw0KIG91dDoN
-CiAJaWYgKGhvbGRfbXV0ZXgpDQogCQltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsNCi0t
-IA0KMS44LjMucmMxLjQ0LmdiMzg3Yzc3DQo=
+On Aug 7, 2013, at 5:54 PM, Kent Overstreet wrote:
 
+> Immutable biovecs are going to require an explicit iterator. To
+> implement immutable bvecs, a later patch is going to add a bi_bvec_done
+> member to this struct; for now, this patch effectively just renames
+> things.
+
+Hi, Kent Overstreet.  Thanks for Cc'ing me and for the promising work.
+
+Were you able to do sanity tests with aoe this time around?  Last time, basic I/O was not working with the immutable biovec patches applied.
+
+Here is my 28 June email about my experiences with git://evilpiepirate.org/~kent/linux-bcache.git at that time.  It also includes information about creating an easy software-only aoe test environment.
+
+  http://thread.gmane.org/gmane.linux.kernel/1505222/focus=1517924
+
+-- 
+  Ed Cashin
+  ecashin@coraid.com
