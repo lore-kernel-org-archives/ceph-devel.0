@@ -1,41 +1,46 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: bug in /etc/init.d/ceph debian
-Date: Wed, 7 Aug 2013 23:20:50 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
- <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH TRIVIVAL] ceph: Move the place for EOLDSNAPC handle in ceph_aio_write to easily understand
+Date: Thu, 8 Aug 2013 15:32:19 +0800
+Message-ID: <201308081532168498411@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:56305 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933689Ab3HGXUy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Aug 2013 19:20:54 -0400
-In-Reply-To: <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:42083 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751211Ab3HHHcY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 03:32:24 -0400
+Received: by mail-pb0-f45.google.com with SMTP id mc17so2833170pbc.32
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Aug 2013 00:32:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-> Hi James,
-> 
-> Here is a somewhat simpler patch; does this work for you?  Note that if
-> you something like /etc/init.d/ceph status osd.123 where osd.123 isn't in
-> ceph.conf then you get a status 1 instead of 3.  But for the
-> /etc/init.d/ceph status mds (or osd or mon) case where there are no
-> daemons of a particular type it works.
-> 
-> Perhaps the "does not exist" check should be also modified to return 3?
-> 
-
-Pacemaker will call the RA on every node to see what is running. On a node in an asymmetric cluster where ceph isn't configured, the RA just wants to know that it isn't running - it won't like an error being returned. For a node without even the RA script installed it would return not-installed, but I think that's okay too.
-
-Do you think maybe the 'ceph status' check and the RA check have conflicting requirements here? Maybe it would be better to leave the init.d script as-is and build the smarts into the RA script instead.
-
-Do idle mds's add any load to the system? Would it be useful to be able to have pacemaker bring up mds's on any two nodes so you always have exactly two running, without actually tying them to specific nodes?
-
-James
+T25seSBmb3IgY2VwaF9zeW5jX3dyaXRlLCB0aGUgb3NkIGNhbiByZXR1cm4gRU9MRFNOQVBDLnNv
+IG1vdmUgdGhlDQpyZWxhdGVkIGNvZGVzIGFmdGVyIHRoZSBjYWxsIGNlcGhfc3luY193cml0ZS4N
+Cg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0t
+DQogZnMvY2VwaC9maWxlLmMgfCAxOCArKysrKysrKysrLS0tLS0tLS0NCiAxIGZpbGUgY2hhbmdl
+ZCwgMTAgaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2Nl
+cGgvZmlsZS5jIGIvZnMvY2VwaC9maWxlLmMNCmluZGV4IDJkZGYwNjEuLjMwZTk1OWYgMTAwNjQ0
+DQotLS0gYS9mcy9jZXBoL2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC03NjgsNiAr
+NzY4LDE1IEBAIHJldHJ5X3NuYXA6DQogCQltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsN
+CiAJCXdyaXR0ZW4gPSBjZXBoX3N5bmNfd3JpdGUoZmlsZSwgaW92LT5pb3ZfYmFzZSwgY291bnQs
+DQogCQkJCQkgIHBvcywgJmlvY2ItPmtpX3Bvcyk7DQorCQlpZiAod3JpdHRlbiA9PSAtRU9MRFNO
+QVBDKSB7DQorCQkJZG91dCgiYWlvX3dyaXRlICVwICVsbHguJWxseCAlbGx1fiV1Ig0KKwkJCQki
+Z290IEVPTERTTkFQQywgcmV0cnlpbmdcbiIsDQorCQkJCWlub2RlLCBjZXBoX3Zpbm9wKGlub2Rl
+KSwNCisJCQkJcG9zLCAodW5zaWduZWQpaW92LT5pb3ZfbGVuKTsNCisJCQltdXRleF9sb2NrKCZp
+bm9kZS0+aV9tdXRleCk7DQorCQkJaG9sZF9tdXRleCA9IHRydWU7DQorCQkJZ290byByZXRyeV9z
+bmFwOw0KKwkJfQ0KIAl9IGVsc2Ugew0KIAkJd3JpdHRlbiA9IGdlbmVyaWNfZmlsZV9idWZmZXJl
+ZF93cml0ZShpb2NiLCBpb3YsIG5yX3NlZ3MsDQogCQkJCQkJICAgICAgcG9zLCAmaW9jYi0+a2lf
+cG9zLA0KQEAgLTc5NywxNCArODA2LDcgQEAgcmV0cnlfc25hcDoNCiAJCWlmIChlcnIgPCAwKQ0K
+IAkJCXdyaXR0ZW4gPSBlcnI7DQogCX0NCi0NCi0JaWYgKHdyaXR0ZW4gPT0gLUVPTERTTkFQQykg
+ew0KLQkJZG91dCgiYWlvX3dyaXRlICVwICVsbHguJWxseCAlbGx1fiV1IGdvdCBFT0xEU05BUEMs
+IHJldHJ5aW5nXG4iLA0KLQkJICAgICBpbm9kZSwgY2VwaF92aW5vcChpbm9kZSksIHBvcywgKHVu
+c2lnbmVkKWlvdi0+aW92X2xlbik7DQotCQltdXRleF9sb2NrKCZpbm9kZS0+aV9tdXRleCk7DQot
+CQlob2xkX211dGV4ID0gdHJ1ZTsNCi0JCWdvdG8gcmV0cnlfc25hcDsNCi0JfQ0KKw0KIG91dDoN
+CiAJaWYgKGhvbGRfbXV0ZXgpDQogCQltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsNCi0t
+IA0KMS44LjMucmMxLjQ0LmdiMzg3Yzc3DQo=
 
