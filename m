@@ -1,61 +1,54 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Could we introduce launchpad/gerrit for ceph
-Date: Fri, 9 Aug 2013 13:58:02 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E55325@SHSMSX102.ccr.corp.intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1308082200400.1479@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: RGW getting revoked tokens from keystone not working
+Date: Fri, 9 Aug 2013 07:19:57 -0700
+Message-ID: <CABBk=J_FViXdyDjhcFRQgxqijqx_MUEG-Ftm6aMZimVDPrh1ig@mail.gmail.com>
+References: <CAN04cT6ZeAYVGPthhfS0CyV6XGQt27H3VcJHEFKusqpVvCR19g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:16716 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752568Ab3HIN6S convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 09:58:18 -0400
-In-Reply-To: <alpine.DEB.2.00.1308082200400.1479@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:56132 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030611Ab3HIOT6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 10:19:58 -0400
+Received: by mail-vc0-f170.google.com with SMTP id kw10so1080427vcb.29
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Aug 2013 07:19:58 -0700 (PDT)
+In-Reply-To: <CAN04cT6ZeAYVGPthhfS0CyV6XGQt27H3VcJHEFKusqpVvCR19g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Roald van Loon <roaldvanloon@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I do think Launchpad is a mature alternative since there are big successful story such like Ubuntu and Openstack :)
-OpenStack has already use it for years, and seems everyone happy with it, I am also happy with it, but I am not familiar with jira so I cannot do a comparison. 
+Hi,
 
-Is there any estimate date or plan for when we will introduce these stuff?
------Original Message-----
-From: Sage Weil [mailto:sage@inktank.com] 
-Sent: Friday, August 09, 2013 1:06 PM
-To: Chen, Xiaoxi
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Could we introduce launchpad/gerrit for ceph
+   sorry for the late response.
 
-> Hi,
-> ??Now it?s a bit hard for us to track the bugs, review the submits, 
-> and track the blueprints. We do have a bug tracking system, but most 
-> of the time it doesn?t connect with a github submit link. We have 
-> email review , pull requests, and also some internal mechanism inside 
-> inktank , we do need a single entrance for doing a submission. We have 
-> wiki to track blueprints, but it?s really confusing if you want to 
-> know the status of a BP, and also ,the discussion around that BP. 
-> Basically I think Openstack did a good job to track all these things, 
-> I do really suggest Ceph could also introduce Launchpad for this.
+On Tue, Aug 6, 2013 at 5:10 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+> Hi ceph devs,
+>
+> I was working with a RGW / keystone implementation, source tree from
+> github master. I stumbled against this error from the radosgw log;
+>
+> 2013-08-06 14:00:02.523331 7f929c011780 10 allocated request req=0x1c31640
+> 2013-08-06 14:00:02.556052 7f923bfff700 10 request returned
+> 2013-08-06 14:00:02.556238 7f923bfff700  0 ERROR: keystone revocation
+> processing returned error r=-22
+>
+> That was weird (nothing after the "request returned"), because I
+> checked the request using curl and it actually returned data. Then I
+> found this;
+>
+> https://github.com/ceph/ceph/blob/master/src/rgw/rgw_swift.cc#L307
+>
+> Shouldn't read_data be receive_data, because the received_data is
+> called by the curl_easy_perform? Or else the bufferlist in
+> RGWSwift::check_revoked() will remain empty at all times.
+>
+> I might be missing something, so that's why I'm mailing the question
+> instead of mailing the patch...
 
-We had a discussion during CDS about this.  The general output of that seems to be:
+Looking at it now, this is a real issue. I recently renamed the
+read_data() to receive_data() to avoid any confusion and missed these.
+I'll fix it for dumpling.
 
-- gerrit workflow has a lot of good things
-- gerrit treatment of individual commits vs branches is very unpleasant
-- jenkins + gerrit integration is good
-- we want build + smoke tests to run automatically prior to merge
-
-- github pull requests are a decent alternative to gerrit if we
-  - have build and smoke test output added as comments on teh request
-    via the github apis
-  - have jenkins running tests on pull requests via the plugin api
-
-The bug tracker vs blueprint discussion also came up.  We are strongly considering a switch to jira (+ greenhopper etc) which has an integrated blueprint function and much better scrum stuff.
-
-I haven't used launchpad much.  Is that a viable alternative?
-
-sage
-
+Thanks,
+Yehuda
