@@ -1,66 +1,48 @@
 From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: bug in /etc/init.d/ceph debian
-Date: Fri, 9 Aug 2013 00:04:55 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
- <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net>
+Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Fri, 9 Aug 2013 00:12:41 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B62E86BF8@BITCOM1.int.sbss.com.au>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<20130419064524.GQ11427@reaktio.net>
+	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
+ <CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:45098 "EHLO
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:45472 "EHLO
 	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966505Ab3HIAFC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 20:05:02 -0400
-In-Reply-To: <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net>
+	with ESMTP id S966748Ab3HIAMw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 20:12:52 -0400
+In-Reply-To: <CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
-> On Wed, 7 Aug 2013, James Harper wrote:
-> > > Hi James,
-> > >
-> > > Here is a somewhat simpler patch; does this work for you?  Note that if
-> > > you something like /etc/init.d/ceph status osd.123 where osd.123 isn't in
-> > > ceph.conf then you get a status 1 instead of 3.  But for the
-> > > /etc/init.d/ceph status mds (or osd or mon) case where there are no
-> > > daemons of a particular type it works.
-> > >
-> > > Perhaps the "does not exist" check should be also modified to return 3?
-> > >
-> >
-> > Pacemaker will call the RA on every node to see what is running. On a node
-> in an asymmetric cluster where ceph isn't configured, the RA just wants to
-> know that it isn't running - it won't like an error being returned. For a node
-> without even the RA script installed it would return not-installed, but I think
-> that's okay too.
-> >
-> > Do you think maybe the 'ceph status' check and the RA check have
-> conflicting requirements here? Maybe it would be better to leave the init.d
-> script as-is and build the smarts into the RA script instead.
 > 
-> Maybe, but I'm not completely following what the RA's requirements are
-> here.  If it's just a matter of the init script returning a different
-> error code, though (as we've done so far), I don't see any problem.
+> Yes the procedure didn't change.
+> 
+> If you're on debian I could also sent your prebuilt .deb for blktap
+> and for a patched xen version that includes userspace RBD support.
+> 
+> If you have any issue, I can be found on ceph's IRC under 'tnt' nick.
 > 
 
-I haven't tried your patch yet, but can it ever return 0? It seems to set it to 3 initially, and then change it to 1 if it finds an error. I can't see that it ever sets it to 0 indicating that daemons are running. Easy enough to fix by setting the EXIT_STATUS=0 after the check of daemon_is_running, I think, but it still doesn't allow for the case where there are three OSD's, one is running, one is stopped, and one is failed. The EXIT_STATUS in that case appears to be based on the last daemon checked, eg basically random.
+I've had a few occasions where tapdisk has segfaulted:
 
-> > Do idle mds's add any load to the system? Would it be useful to be able to
-> > have pacemaker bring up mds's on any two nodes so you always have exactly
-> > two running, without actually tying them to specific nodes?
-> 
-> They don't add much load when they are standby, but they will if they end
-> up taking over.  There is also no reason to say 'exactly two' IMO.  If you
-> have a symmetric cluster I would be more inclined to run one on every node
-> for simplicity, recognizing that the active one will use some resources.
-> 
+tapdisk[9180]: segfault at 7f7e3a5c8c10 ip 00007f7e387532d4 sp 00007f7e3a5c8c10 error 4 in libpthread-2.13.so[7f7e38748000+17000]
+tapdisk:9180 blocked for more than 120 seconds.
+tapdisk         D ffff88043fc13540     0  9180      1 0x00000000
 
-Thanks for that clarification
+and then like:
+
+end_request: I/O error, dev tdc, sector 472008
+
+I can't be sure but I suspect that when this happened either one OSD was offline, or the cluster lost quorum briefly.
 
 James
+
+
