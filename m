@@ -1,67 +1,65 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: Could we introduce launchpad/gerrit for ceph
-Date: Fri, 09 Aug 2013 16:14:16 +0100
-Message-ID: <52050748.7060808@ubuntu.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1308082200400.1479@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC01E55325@SHSMSX102.ccr.corp.intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: RE: bug in /etc/init.d/ceph debian
+Date: Fri, 9 Aug 2013 08:19:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308090816520.12756@cobra.newdream.net>
+References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B62E8B318@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:34773 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934342Ab3HIPOY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 11:14:24 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E55325@SHSMSX102.ccr.corp.intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35246 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934081Ab3HIPTm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 11:19:42 -0400
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B62E8B318@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On Fri, 9 Aug 2013, James Harper wrote:
+> > > I haven't tried your patch yet, but can it ever return 0? It seems to
+> > > set it to 3 initially, and then change it to 1 if it finds an error. I
+> > > can't see that it ever sets it to 0 indicating that daemons are running.
+> > > Easy enough to fix by setting the EXIT_STATUS=0 after the check of
+> > > daemon_is_running, I think, but it still doesn't allow for the case
+> > > where there are three OSD's, one is running, one is stopped, and one is
+> > > failed. The EXIT_STATUS in that case appears to be based on the last
+> > > daemon checked, eg basically random.
+> > 
+> > What should it return in that case?
+> > 
+> 
+> I've been thinking about this some more and I'm still not sure. I think my patch says:
+> if _any_ are in error then return 1
+> else if any are running return 0
+> else if all are stopped return 3
+> 
+> But I think this still won't have the desired outcome if you have 2 OSD's. The possible situations if the resource is supposed to be running are:
+> . Both running => all good, pacemaker will do nothing
+> . Both stopped => all good, pacemaker will start the services
+> . One stopped one running => not good, pacemaker won't make any effort to start services
 
-On 09/08/13 14:58, Chen, Xiaoxi wrote:
-> I do think Launchpad is a mature alternative since there are big
-> successful story such like Ubuntu and Openstack :)
+If one daemon si stopped and one is running, returning 'not running' seems 
+ok to me, since 'start' at that point will do the right thing.
 
-Indeed
+> . One in error, one running => not good. I'm not sure exactly what will happen but it won't be what you expect.
 
-> OpenStack has already use it for years, and seems everyone happy
-> with it, I am also happy with it, but I am not familiar with jira
-> so I cannot do a comparison.
+I think it's fine for this to be an error condition.
 
-Bear in mind that the OpenStack project uses Launchpad for Blueprints,
-Bug Tracking and Release Management and github+gerrit for code
-management and reviews so its a bit of both worlds but it does seem to
-work pretty well.
+> 
+> The only solution I can see is to manage the services individually, in 
+> which case the init.d script with your patch + setting to 0 if running 
+> does the right thing anyway.
 
-Monty's OpenStack CI team did some magic in gerrit to make comments in
-reviews link back to bugs and blueprints.
+Yeah, managing individually is probably the most robust, but if it works 
+well enough in the generic configuration with no customization that is 
+good.
 
-HTH
+Anyway, I'm fine with whatever variation of your original or my patch you 
+think addresses this.  A comment block in the init-ceph script documenting 
+what the return codes mean (similar to the above) would be nice so that 
+it is clear to the next person who comes along.
 
-James
-
-- -- 
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iQIcBAEBCAAGBQJSBQdEAAoJEL/srsug59jDOHwP/j0P7izbsfggwSZItcgHB4nY
-iFJlCh1IEqPjJu1g09pjR/jCQJpAxhV6pMg9Q8u7N9Zwcoql/VIDWy4WZlL7Kgce
-7QGEFIOqqvrd+8AzqqV5tsCzcLggUJDIvBfUiz+K3YtDnZeBAgqAFAX1ykG0Ntoi
-kaeSkfEC7EDoLKcw1p1mJs9VE02IkSyN3Wl/dGr4SL5Cf8XwkVJEH9GItEEiQCMW
-go0n9gsR0HY7N7tXpxyiFLfZODZYKd3pXc3CyerlwAHNyoKOatIAQ7e2amnyvXaF
-mDljaRwtoSLEuj3xXaDKUxaoT5ZCMBFfooVtfca3h4YoZLvoOhFQ1YzObX+zqd7L
-TbU784cG0Q/l82kvTpliiZvs9lMMJdx2LlONmRVUni/YZAfh74JdEXKlF8G08uN1
-cgx4KrgbpgHHd/AA2fCjADzjeeklr8vsbyb6gPCPAGoKW6fAV6ehLe23eeQWPS7A
-0sNbRg1xTLD+TrjqNlXkEnIy4B5ZdBMIhc+fLeXTdHwJT26f/P0abQyCYyEUQiNo
-qRsm792+mbf9P0AluHiBi+a6/H05TTmPK5FbsAltPfUjOb0KHE5/UCGjiDLuIrV8
-8Ym2R7vOpmLnEs9/t1tAMIUDZdZZV4oYAGPg3IyPbgxMay3dcLt9m3ARj4mS3o+f
-iwAn2dOGJ3yJIOnla4kD
-=bq9T
------END PGP SIGNATURE-----
+Thanks!
+sage
