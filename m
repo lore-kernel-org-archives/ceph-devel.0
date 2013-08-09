@@ -1,81 +1,65 @@
-From: Sage Weil <sage@inktank.com>
-Subject: RE: bug in /etc/init.d/ceph debian
-Date: Thu, 8 Aug 2013 18:10:13 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net>
-References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH TRIVIVAL] ceph: Move the place for EOLDSNAPC handle in ceph_aio_write to easily understand
+Date: Fri, 9 Aug 2013 10:25:51 +0800
+Message-ID: <201308091025474608831@gmail.com>
+References: <201308081532168498411@gmail.com>,
+	<alpine.DEB.2.00.1308080940000.18359@cobra.newdream.net>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58565 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967053Ab3HIBKO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 21:10:14 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au>
+Received: from mail-pb0-f54.google.com ([209.85.160.54]:36391 "EHLO
+	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966749Ab3HICZ4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Aug 2013 22:25:56 -0400
+Received: by mail-pb0-f54.google.com with SMTP id ro12so4198585pbb.41
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Aug 2013 19:25:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 9 Aug 2013, James Harper wrote:
-> > On Wed, 7 Aug 2013, James Harper wrote:
-> > > > Hi James,
-> > > >
-> > > > Here is a somewhat simpler patch; does this work for you?  Note that if
-> > > > you something like /etc/init.d/ceph status osd.123 where osd.123 isn't in
-> > > > ceph.conf then you get a status 1 instead of 3.  But for the
-> > > > /etc/init.d/ceph status mds (or osd or mon) case where there are no
-> > > > daemons of a particular type it works.
-> > > >
-> > > > Perhaps the "does not exist" check should be also modified to return 3?
-> > > >
-> > >
-> > > Pacemaker will call the RA on every node to see what is running. On a node
-> > in an asymmetric cluster where ceph isn't configured, the RA just wants to
-> > know that it isn't running - it won't like an error being returned. For a node
-> > without even the RA script installed it would return not-installed, but I think
-> > that's okay too.
-> > >
-> > > Do you think maybe the 'ceph status' check and the RA check have
-> > conflicting requirements here? Maybe it would be better to leave the init.d
-> > script as-is and build the smarts into the RA script instead.
-> > 
-> > Maybe, but I'm not completely following what the RA's requirements are
-> > here.  If it's just a matter of the init script returning a different
-> > error code, though (as we've done so far), I don't see any problem.
-> > 
-> 
-> I haven't tried your patch yet, but can it ever return 0? It seems to 
-> set it to 3 initially, and then change it to 1 if it finds an error. I 
-> can't see that it ever sets it to 0 indicating that daemons are running. 
-> Easy enough to fix by setting the EXIT_STATUS=0 after the check of 
-> daemon_is_running, I think, but it still doesn't allow for the case 
-> where there are three OSD's, one is running, one is stopped, and one is 
-> failed. The EXIT_STATUS in that case appears to be based on the last 
-> daemon checked, eg basically random.
+Pkxvb2tzIGdvb2Q7IEkndmUgYXBwbGllZCB0aGlzIHRvIHRoZSB0cmVlLiAgQ2FueW91IHJldmll
+dyB0aGUgYmVsb3cgcGF0Y2ggDQo+d2hpbGUgd2UgYXJlIGxvb2tpbmcgYXQgdGhpcyBjb2RlPw0K
+Pg0KPlRoYW5rcyENCj5zYWdlDQo+DQo+RnJvbSAyNmQwZDdiMjEzZDg3ZGIwZWY0NmU4ODVhZTc0
+OWMyNzM5NWMxMWIxIE1vbiBTZXAgMTcgMDA6MDA6MDAgMjAwMQ0KPkZyb206IFNhZ2UgV2VpbCA8
+c2FnZUBpbmt0YW5rLmNvbT4NCj5EYXRlOiBUaHUsIDggQXVnIDIwMTMgMDk6Mzk6NDQgLTA3MDAN
+Cj5TdWJqZWN0OiBbUEFUQ0hdIGNlcGg6IHJlcGxhY2UgaG9sZF9tdXRleCBmbGFnIHdpdGggZ290
+bw0KPg0KPkFsbCBvZiB0aGUgZWFybHkgZXhpdCBwYXRocyBuZWVkIHRvIGRyb3AgdGhlIG11dGV4
+OyBpdCBpcyBvbmx5IHRoZSBub3JtYWwNCj5wYXRoIHRocm91Z2ggdGhlIGZ1bmN0aW9uIHRoYXQg
+ZG9lcyBub3QuICBTa2lwIHRoZSB1bmxvY2sgaW4gdGhhdCBjYXNlDQo+d2l0aCBhIGdvdG8gb3V0
+X3VubG9ja2VkLg0KPg0KPlNpZ25lZC1vZmYtYnk6IFNhZ2UgV2VpbCA8c2FnZUBpbmt0YW5rLmNv
+bT4NCj4tLS0NCj4gZnMvY2VwaC9maWxlLmMgfCAxMSArKysrLS0tLS0tLQ0KPiAxIGZpbGUgY2hh
+bmdlZCwgNCBpbnNlcnRpb25zKCspLCA3IGRlbGV0aW9ucygtKQ0KPg0KPmRpZmYgLS1naXQgYS9m
+cy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmlsZS5jDQo+aW5kZXggNzQ3OGQ1ZC4uYTE3ZmZlNCAx
+MDA2NDQNCj4tLS0gYS9mcy9jZXBoL2ZpbGUuYw0KPisrKyBiL2ZzL2NlcGgvZmlsZS5jDQo+QEAg
+LTcxMCwxMyArNzEwLDExIEBAIHN0YXRpYyBzc2l6ZV90IGNlcGhfYWlvX3dyaXRlKHN0cnVjdCBr
+aW9jYiAqaW9jYiwgY29uc3Qgc3RydWN0IGlvdmVjICppb3YsDQo+IAkJJmNlcGhfc2JfdG9fY2xp
+ZW50KGlub2RlLT5pX3NiKS0+Y2xpZW50LT5vc2RjOw0KPiAJc3NpemVfdCBjb3VudCwgd3JpdHRl
+biA9IDA7DQo+IAlpbnQgZXJyLCB3YW50LCBnb3Q7DQo+LQlib29sIGhvbGRfbXV0ZXg7DQo+IA0K
+PiAJaWYgKGNlcGhfc25hcChpbm9kZSkgIT0gQ0VQSF9OT1NOQVApDQo+IAkJcmV0dXJuIC1FUk9G
+UzsNCj4gDQo+IAltdXRleF9sb2NrKCZpbm9kZS0+aV9tdXRleCk7DQo+LQlob2xkX211dGV4ID0g
+dHJ1ZTsNCj4gDQo+IAllcnIgPSBnZW5lcmljX3NlZ21lbnRfY2hlY2tzKGlvdiwgJm5yX3NlZ3Ms
+ICZjb3VudCwgVkVSSUZZX1JFQUQpOw0KPiAJaWYgKGVycikNCj5AQCAtNzcyLDcgKzc3MCw2IEBA
+IHJldHJ5X3NuYXA6DQo+IAkJCQlpbm9kZSwgY2VwaF92aW5vcChpbm9kZSksDQo+IAkJCQlwb3Ms
+ICh1bnNpZ25lZClpb3YtPmlvdl9sZW4pOw0KPiAJCQltdXRleF9sb2NrKCZpbm9kZS0+aV9tdXRl
+eCk7DQo+LQkJCWhvbGRfbXV0ZXggPSB0cnVlOw0KPiAJCQlnb3RvIHJldHJ5X3NuYXA7DQo+IAkJ
+fQ0KPiAJfSBlbHNlIHsNCj5AQCAtNzgxLDcgKzc3OCw2IEBAIHJldHJ5X3NuYXA6DQo+IAkJCQkJ
+CSAgICAgIGNvdW50LCAwKTsNCj4gCQltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsNCj4g
+CX0NCj4tCWhvbGRfbXV0ZXggPSBmYWxzZTsNCj4gDQo+IAlpZiAod3JpdHRlbiA+PSAwKSB7DQo+
+IAkJaW50IGRpcnR5Ow0KPkBAIC04MDUsMTEgKzgwMSwxMiBAQCByZXRyeV9zbmFwOg0KPiAJCQl3
+cml0dGVuID0gZXJyOw0KPiAJfQ0KPiANCj4rCWdvdG8gb3V0X3VubG9ja2VkOw0KPisNCj4gb3V0
+Og0KPi0JaWYgKGhvbGRfbXV0ZXgpDQo+LQkJbXV0ZXhfdW5sb2NrKCZpbm9kZS0+aV9tdXRleCk7
+DQo+KwltdXRleF91bmxvY2soJmlub2RlLT5pX211dGV4KTsNCj4rb3V0X3VubG9ja2VkOg0KPiAJ
+Y3VycmVudC0+YmFja2luZ19kZXZfaW5mbyA9IE5VTEw7DQo+LQ0KPiAJcmV0dXJuIHdyaXR0ZW4g
+PyB3cml0dGVuIDogZXJyOw0KPiB9DQo+IA0KPi0tIA0KPjEuOC4xLjINCj4NCkhpIHNhZ2UsDQoJ
+SXQncyBvay4NCglCVFcsIGkgaGFkIGEgcXVlc3Rpb24gYWJvdXQgRU9MRFNOQVBDLk5vdyBmb3Ig
+YSBzeW5jLXdyaXRlLGlmIGl0IG1ldCBFT0xEU05BUEMsIGl0IHdpbGwgcmV0cnkuDQpUaGUgcmV3
+cml0ZSBpcyBmb3IgYWxsIGJpby5TdXBwb3J0ZWQgYSBzeW5jLXdyaXRlIGNyb3NzZWQgbXVsdGkg
+c3RyaXBlLg0KUTE6SXMgdGhlcmUgYSBjaGFuY2UgdGhhdCBmb3Igc29tZSBzdHJpcGUtd3JpdGUg
+aXQgZGluJ3QgbWV0IEVPTERTTkFQQyx0aGUgbGF0ZXIgbWV0Pw0KUTI6SWYgUTEgb2NjdXJlZCwg
+Y2FuIHdlIG9ubHkgcmV3cml0ZSB0aGUgc3RyaXBlIHdoaWNoIG1ldCBFT0xEU05BUENFPw0KDQpU
+aGFua3MhDQpKaWFucGVuZyBNYQ0KDQoJ
 
-What should it return in that case?
-
-sage
-
-> 
-> > > Do idle mds's add any load to the system? Would it be useful to be 
-> > > able to have pacemaker bring up mds's on any two nodes so you always 
-> > > have exactly two running, without actually tying them to specific 
-> > > nodes?
-> > 
-> > They don't add much load when they are standby, but they will if they end
-> > up taking over.  There is also no reason to say 'exactly two' IMO.  If you
-> > have a symmetric cluster I would be more inclined to run one on every node
-> > for simplicity, recognizing that the active one will use some resources.
-> > 
-> 
-> Thanks for that clarification
-> 
-> James
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
