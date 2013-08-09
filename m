@@ -1,80 +1,29 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: blueprint: osd: ceph on zfs
-Date: Thu, 8 Aug 2013 21:40:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308082135300.1479@cobra.newdream.net>
-References: <alpine.DEB.2.00.1307251649540.32741@cobra.newdream.net> <CA+Hcz59y0S31YJdP-MHQnUNKLjWo9Lezc4OWzJjx8i283=bAcQ@mail.gmail.com> <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Could we introduce launchpad/gerrit for ceph
+Date: Fri, 9 Aug 2013 04:51:34 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59970 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932114Ab3HIEk7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 00:40:59 -0400
-In-Reply-To: <CAAM7YAnXuMUk0ZA5=LCHQp=Bu8E3S7X1soQiBt87gmOChs9gwA@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:20697 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751028Ab3HIEvv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 9 Aug 2013 00:51:51 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Noah Watkins <noah.watkins@inktank.com>, behlendorf1@llnl.gov, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Yan,
-
-I just found the wip-zfs branch in your repo and noticed your comment on 
-the wiki; somehow I missed that (and your message in #ceph-summit) during 
-the actual session!
-
-This branch looks great!  My one suggestion is that the FileStore code 
-would be cleaner if we implement a GenericFileStoreBackend that does the 
-standard xfs/ext4 stuff and the things like the crufty chain of attempts 
-to call syncfs(2).  Separating out the refactor from the addition of the 
-ZFS backend into separate patches would also be nice.
-
-I'd love to pull this in even if you're still seeing zfs stability issues, 
-as the refactor is a good thing, and we can point Brian at the standalone 
-ceph_test_filestore_workloadgen tool which will hopefully also be 
-sufficient to make zfs break for him with minimal reproduction effort.  
-
-sage
-
-
-On Mon, 5 Aug 2013, Yan, Zheng wrote:
-
-> On Mon, Aug 5, 2013 at 7:39 AM, Noah Watkins <noah.watkins@inktank.com> wrote:
-> > It seems to make sense that fiemap should be part of the `class
-> > BackingFileSystem` abstraction?
-> >
-> 
-> FS_IOC_FIEMAP is a standard API, I think no need to implement it in `class
-> BackingFileSystem`.
-> 
-> 
-> > On Thu, Jul 25, 2013 at 4:53 PM, Sage Weil <sage@inktank.com> wrote:
-> >> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd:_ceph_on_zfs
-> >>
-> >> We've done some preliminary testing and xattr debugging that allows
-> >> ceph-osd to run on zfsforlinux using the normal writeahead journaling mode
-> >> (the same mode used for xfs and ext4).  However, we aren't doing anything
-> >> special to take advantage of zfs's capabilities.
-> >>
-> >> This session would go over what is needed to make parallel journaling work
-> >> (which would leverage zfs snapshots).  I would also like to have a
-> >> discussion about whether other longer-term possibilities, such as storing
-> >> objects directly using the DMU, make sense given what ceph-osd's
-> >> ObjectStore interface really needs.  It might also be an appropriate time
-> >> to visit whether other snapshotting linux filesystems (like nilfs2) would
-> >> fit well into any generalization of the filestore code that comes out of
-> >> this effort.
-> >>
-> >> If anybody is interested in this, please add yourself to the interested
-> >> parties section (or claim ownership) of this blueprint!
-> >>
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGksDQqhoaGhTm93IGl0oa9zIGEgYml0IGhhcmQgZm9yIHVzIHRvIHRyYWNrIHRoZSBidWdzLCBy
+ZXZpZXcgdGhlIHN1Ym1pdHMsIGFuZCB0cmFjayB0aGUgYmx1ZXByaW50cy4gV2UgZG8gaGF2ZSBh
+IGJ1ZyB0cmFja2luZyBzeXN0ZW0sIGJ1dCBtb3N0IG9mIHRoZSB0aW1lIGl0IGRvZXNuoa90IGNv
+bm5lY3Qgd2l0aCBhIGdpdGh1YiBzdWJtaXQgbGluay4gV2UgaGF2ZSBlbWFpbCByZXZpZXcgLCBw
+dWxsIHJlcXVlc3RzLCBhbmQgYWxzbyBzb21lIGludGVybmFsIG1lY2hhbmlzbSBpbnNpZGUgaW5r
+dGFuayAsIHdlIGRvIG5lZWQgYSBzaW5nbGUgZW50cmFuY2UgZm9yIGRvaW5nIGEgc3VibWlzc2lv
+bi4gV2UgaGF2ZSB3aWtpIHRvIHRyYWNrIGJsdWVwcmludHMsIGJ1dCBpdKGvcyByZWFsbHkgY29u
+ZnVzaW5nIGlmIHlvdSB3YW50IHRvIGtub3cgdGhlIHN0YXR1cyBvZiBhIEJQLCBhbmQgYWxzbyAs
+dGhlIGRpc2N1c3Npb24gYXJvdW5kIHRoYXQgQlAuIEJhc2ljYWxseSBJIHRoaW5rIE9wZW5zdGFj
+ayBkaWQgYSBnb29kIGpvYiB0byB0cmFjayBhbGwgdGhlc2UgdGhpbmdzLCBJIGRvIHJlYWxseSBz
+dWdnZXN0IENlcGggY291bGQgYWxzbyBpbnRyb2R1Y2UgTGF1bmNocGFkIGZvciB0aGlzLg0KoaGh
+oQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQlYaWFveGkNCg==
