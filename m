@@ -1,54 +1,67 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW getting revoked tokens from keystone not working
-Date: Fri, 9 Aug 2013 07:19:57 -0700
-Message-ID: <CABBk=J_FViXdyDjhcFRQgxqijqx_MUEG-Ftm6aMZimVDPrh1ig@mail.gmail.com>
-References: <CAN04cT6ZeAYVGPthhfS0CyV6XGQt27H3VcJHEFKusqpVvCR19g@mail.gmail.com>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: Could we introduce launchpad/gerrit for ceph
+Date: Fri, 09 Aug 2013 16:14:16 +0100
+Message-ID: <52050748.7060808@ubuntu.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com> <alpine.DEB.2.00.1308082200400.1479@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC01E55325@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:56132 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030611Ab3HIOT6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 10:19:58 -0400
-Received: by mail-vc0-f170.google.com with SMTP id kw10so1080427vcb.29
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Aug 2013 07:19:58 -0700 (PDT)
-In-Reply-To: <CAN04cT6ZeAYVGPthhfS0CyV6XGQt27H3VcJHEFKusqpVvCR19g@mail.gmail.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:34773 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934342Ab3HIPOY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 11:14:24 -0400
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E55325@SHSMSX102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-   sorry for the late response.
+On 09/08/13 14:58, Chen, Xiaoxi wrote:
+> I do think Launchpad is a mature alternative since there are big
+> successful story such like Ubuntu and Openstack :)
 
-On Tue, Aug 6, 2013 at 5:10 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
-> Hi ceph devs,
->
-> I was working with a RGW / keystone implementation, source tree from
-> github master. I stumbled against this error from the radosgw log;
->
-> 2013-08-06 14:00:02.523331 7f929c011780 10 allocated request req=0x1c31640
-> 2013-08-06 14:00:02.556052 7f923bfff700 10 request returned
-> 2013-08-06 14:00:02.556238 7f923bfff700  0 ERROR: keystone revocation
-> processing returned error r=-22
->
-> That was weird (nothing after the "request returned"), because I
-> checked the request using curl and it actually returned data. Then I
-> found this;
->
-> https://github.com/ceph/ceph/blob/master/src/rgw/rgw_swift.cc#L307
->
-> Shouldn't read_data be receive_data, because the received_data is
-> called by the curl_easy_perform? Or else the bufferlist in
-> RGWSwift::check_revoked() will remain empty at all times.
->
-> I might be missing something, so that's why I'm mailing the question
-> instead of mailing the patch...
+Indeed
 
-Looking at it now, this is a real issue. I recently renamed the
-read_data() to receive_data() to avoid any confusion and missed these.
-I'll fix it for dumpling.
+> OpenStack has already use it for years, and seems everyone happy
+> with it, I am also happy with it, but I am not familiar with jira
+> so I cannot do a comparison.
 
-Thanks,
-Yehuda
+Bear in mind that the OpenStack project uses Launchpad for Blueprints,
+Bug Tracking and Release Management and github+gerrit for code
+management and reviews so its a bit of both worlds but it does seem to
+work pretty well.
+
+Monty's OpenStack CI team did some magic in gerrit to make comments in
+reviews link back to bugs and blueprints.
+
+HTH
+
+James
+
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iQIcBAEBCAAGBQJSBQdEAAoJEL/srsug59jDOHwP/j0P7izbsfggwSZItcgHB4nY
+iFJlCh1IEqPjJu1g09pjR/jCQJpAxhV6pMg9Q8u7N9Zwcoql/VIDWy4WZlL7Kgce
+7QGEFIOqqvrd+8AzqqV5tsCzcLggUJDIvBfUiz+K3YtDnZeBAgqAFAX1ykG0Ntoi
+kaeSkfEC7EDoLKcw1p1mJs9VE02IkSyN3Wl/dGr4SL5Cf8XwkVJEH9GItEEiQCMW
+go0n9gsR0HY7N7tXpxyiFLfZODZYKd3pXc3CyerlwAHNyoKOatIAQ7e2amnyvXaF
+mDljaRwtoSLEuj3xXaDKUxaoT5ZCMBFfooVtfca3h4YoZLvoOhFQ1YzObX+zqd7L
+TbU784cG0Q/l82kvTpliiZvs9lMMJdx2LlONmRVUni/YZAfh74JdEXKlF8G08uN1
+cgx4KrgbpgHHd/AA2fCjADzjeeklr8vsbyb6gPCPAGoKW6fAV6ehLe23eeQWPS7A
+0sNbRg1xTLD+TrjqNlXkEnIy4B5ZdBMIhc+fLeXTdHwJT26f/P0abQyCYyEUQiNo
+qRsm792+mbf9P0AluHiBi+a6/H05TTmPK5FbsAltPfUjOb0KHE5/UCGjiDLuIrV8
+8Ym2R7vOpmLnEs9/t1tAMIUDZdZZV4oYAGPg3IyPbgxMay3dcLt9m3ARj4mS3o+f
+iwAn2dOGJ3yJIOnla4kD
+=bq9T
+-----END PGP SIGNATURE-----
