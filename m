@@ -1,48 +1,73 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/2] Cleanup invalidate page
-Date: Fri, 9 Aug 2013 10:44:22 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308091044000.12830@cobra.newdream.net>
-References: <cover.1375686804.git.milosz@adfin.com>
+Subject: Re: Blueprint: inline data support (step 2)
+Date: Fri, 9 Aug 2013 11:18:34 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308091105340.14125@cobra.newdream.net>
+References: <51F855D9.6070306@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <cover.1375686804.git.milosz@adfin.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, zheng.z.yan@intel.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:36735 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965075Ab3HISSf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 14:18:35 -0400
+In-Reply-To: <51F855D9.6070306@ubuntukylin.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Milosz,
+Hi Li,
 
-I pulled both these into the testing branch.  Thanks!
+Thanks for discussing this at the summit!  As I mentioned, I think email 
+will be the easiest way to detail my suggestion for handling the shared 
+writer or read/write case.  The notes from the summit are at
+
+  http://pad.ceph.com/p/mds-inline-data
+
+For the single-writer case, it is simple enough for the client to simply 
+dirty the buffer with the inline data and write it out with everything 
+else.  When it flushes the cap back to the MDS there will be some marker 
+(inline_version = 0?) indicating that the data is no longer inlined.
+
+For the multi-writer case:
+
+We normally do reads and writes synchronously to the OSD for simplicity.  
+Everything gets ordered there at the object.  I think we can do the same 
+for inline data: if there are shared writers, we uninline the data and 
+fall back to storing the data in the usual way.
+
+Each writer will have a copy of the *initial* inline data, issued by the 
+MDS when they got the capability allowing them to write (or read).
+
+On the *first* read or write operation, the client will first send an 
+operation to the object that looks like
+
+  ObjectOperation m;
+  m.create(true);   // exclusive create; fails if object exists
+  m.write_full(initial_inline_data);
+  objecter->mutate(...);
+
+The first client whose op reaches the osd will effectively un-inline the 
+data; any others will be no-ops.  This will be immediately followed by 
+the actual read or write operation that they are trying to do.
+
+As long as the inline_data size is smaller than the file layout stripe 
+unit, this will always be the first object.
+
+When the caps are released to the MDS, if *any* of the clients indicate 
+that they uninlined the object, it is uninlined.  (Some clients may not 
+have done any IO.)  If a client fails, we need to make the recovery path 
+see if the object exists and, if so, drop the inline data.
+
+The one wrinkle I see in this is that the m.create(true) call above isn't 
+quite right; the first object will often exist because of the backtrace 
+information that the MDS is maintaining (for NFS and future fsck).  We 
+need to replace that with some explicit flag on the object that the data 
+is inlined, which means some tricky updates and an m.cmpxattr() call.  
+Alternatively (and more simply), we can just check if the object has size 
+0.  There isn't a rados op that lets us do that right now, but it is 
+pretty simple to add.  cmpsize() or similar.
+
+What do you think?
 
 sage
-
-On Fri, 9 Aug 2013, Milosz Tanski wrote:
-
-> Currently ceph_invalidatepage has is overly eger with it's checks which are
-> moot. The second change cleans up the case where offset is non zero.
-> 
-> Please pull the from:
->   https://bitbucket.org/adfin/linux-fs.git wip-invalidatepage
-> 
-> This simple patchset came from the changes I made while working on fscache
-> support for cephfs. Per Sage's request I split this up into smaller bites for
-> testing and review.
-> 
-> Milosz Tanski (2):
->   ceph: Remove bogus check in invalidatepage
->   ceph: cleanup the logic in ceph_invalidatepage
-> 
->  fs/ceph/addr.c | 33 +++++++++++++++------------------
->  1 file changed, 15 insertions(+), 18 deletions(-)
-> 
-> -- 
-> 1.8.1.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
