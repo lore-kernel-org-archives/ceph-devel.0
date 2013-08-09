@@ -1,52 +1,56 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: bug in /etc/init.d/ceph debian
-Date: Fri, 9 Aug 2013 07:09:14 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B62E8B318@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
- <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net>
+From: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
+Subject: cephfs set_layout - EINVAL
+Date: Fri, 9 Aug 2013 09:44:57 +0200
+Message-ID: <20130809074457.GA27330@oder.mch.fsc.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:35701 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967344Ab3HIHJW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 03:09:22 -0400
-In-Reply-To: <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net>
-Content-Language: en-US
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:14586 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967517Ab3HIHpB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 03:45:01 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Kasper Dieter <Dieter.Kasper@ts.fujitsu.com>
 
-> > I haven't tried your patch yet, but can it ever return 0? It seems to
-> > set it to 3 initially, and then change it to 1 if it finds an error. I
-> > can't see that it ever sets it to 0 indicating that daemons are running.
-> > Easy enough to fix by setting the EXIT_STATUS=0 after the check of
-> > daemon_is_running, I think, but it still doesn't allow for the case
-> > where there are three OSD's, one is running, one is stopped, and one is
-> > failed. The EXIT_STATUS in that case appears to be based on the last
-> > daemon checked, eg basically random.
-> 
-> What should it return in that case?
-> 
+Hi,
 
-I've been thinking about this some more and I'm still not sure. I think my patch says:
-if _any_ are in error then return 1
-else if any are running return 0
-else if all are stopped return 3
+my goal is to set the 'object size' used in the distribution inside rados
+in an equal (or similar) way between RBD and CephFS.
 
-But I think this still won't have the desired outcome if you have 2 OSD's. The possible situations if the resource is supposed to be running are:
-. Both running => all good, pacemaker will do nothing
-. Both stopped => all good, pacemaker will start the services
-. One stopped one running => not good, pacemaker won't make any effort to start services
-. One in error, one running => not good. I'm not sure exactly what will happen but it won't be what you expect.
+To set obj_size=64k in RBD I use the command:
+rbd create --size 1024000 --pool SSD-r2 ssd2-1T-64k --order 16  
 
-The only solution I can see is to manage the services individually, in which case the init.d script with your patch + setting to 0 if running does the right thing anyway.
+On cephfs set_layout '-s 65536' runs into EINVAL:
+cephfs /mnt/cephfs/fio-64k/ set_layout -p 3 -s   65536 -u 4194304 -c 1
+Error setting layout: Invalid argument
 
-James
+cephfs /mnt/cephfs/fio-64k/ set_layout -p 3 -s   65536 -u 65536 -c 1
+cephfs /mnt/cephfs/fio-64k/ show_layout
+layout.data_pool:     3
+layout.object_size:   65536
+layout.stripe_unit:   65536
+layout.stripe_count:  1
+
+The man page of cephfs says
+---snip---
+       -u --stripe_unit
+              Set the size of each stripe
+
+       -c --stripe_count
+              Set the number of objects to stripe across
+
+       -s --object_size
+              Set the size of the objects to stripe across
+---snip---
+
+What is the equivalent command on cephfs to 'rbd create --order 16' ?
+Can you please give same explanation how "--stripe_unit --stripe_count --object_size"
+should be used in combination to achieve different layouts on CephFS directories
+(e.g. optimized for streaming, small sequential IOs, small random IOs)
+?
+
+Thanks,
+-Dieter
