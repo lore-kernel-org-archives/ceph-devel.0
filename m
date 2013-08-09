@@ -1,50 +1,52 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Could we introduce launchpad/gerrit for ceph
-Date: Thu, 8 Aug 2013 22:05:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308082200400.1479@cobra.newdream.net>
-References: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: bug in /etc/init.d/ceph debian
+Date: Fri, 9 Aug 2013 07:09:14 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B62E8B318@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B62E7617E@BITCOM1.int.sbss.com.au>
+ <6035A0D088A63A46850C3988ED045A4B62E82A96@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1308070822180.3006@cobra.newdream.net>
+ <6035A0D088A63A46850C3988ED045A4B62E84BA8@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1308080843400.18359@cobra.newdream.net>
+ <6035A0D088A63A46850C3988ED045A4B62E86B22@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60133 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753355Ab3HIFFi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 01:05:38 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC01E54E02@SHSMSX102.ccr.corp.intel.com>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:35701 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967344Ab3HIHJW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Aug 2013 03:09:22 -0400
+In-Reply-To: <alpine.DEB.2.00.1308081809410.11353@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> Hi,
-> ??Now it?s a bit hard for us to track the bugs, review the submits, and 
-> track the blueprints. We do have a bug tracking system, but most of the 
-> time it doesn?t connect with a github submit link. We have email review 
-> , pull requests, and also some internal mechanism inside inktank , we do 
-> need a single entrance for doing a submission. We have wiki to track 
-> blueprints, but it?s really confusing if you want to know the status of 
-> a BP, and also ,the discussion around that BP. Basically I think 
-> Openstack did a good job to track all these things, I do really suggest 
-> Ceph could also introduce Launchpad for this.
+> > I haven't tried your patch yet, but can it ever return 0? It seems to
+> > set it to 3 initially, and then change it to 1 if it finds an error. I
+> > can't see that it ever sets it to 0 indicating that daemons are running.
+> > Easy enough to fix by setting the EXIT_STATUS=0 after the check of
+> > daemon_is_running, I think, but it still doesn't allow for the case
+> > where there are three OSD's, one is running, one is stopped, and one is
+> > failed. The EXIT_STATUS in that case appears to be based on the last
+> > daemon checked, eg basically random.
+> 
+> What should it return in that case?
+> 
 
-We had a discussion during CDS about this.  The general output of that 
-seems to be:
+I've been thinking about this some more and I'm still not sure. I think my patch says:
+if _any_ are in error then return 1
+else if any are running return 0
+else if all are stopped return 3
 
-- gerrit workflow has a lot of good things
-- gerrit treatment of individual commits vs branches is very unpleasant
-- jenkins + gerrit integration is good
-- we want build + smoke tests to run automatically prior to merge
+But I think this still won't have the desired outcome if you have 2 OSD's. The possible situations if the resource is supposed to be running are:
+. Both running => all good, pacemaker will do nothing
+. Both stopped => all good, pacemaker will start the services
+. One stopped one running => not good, pacemaker won't make any effort to start services
+. One in error, one running => not good. I'm not sure exactly what will happen but it won't be what you expect.
 
-- github pull requests are a decent alternative to gerrit if we
-  - have build and smoke test output added as comments on teh request
-    via the github apis
-  - have jenkins running tests on pull requests via the plugin api
+The only solution I can see is to manage the services individually, in which case the init.d script with your patch + setting to 0 if running does the right thing anyway.
 
-The bug tracker vs blueprint discussion also came up.  We are strongly 
-considering a switch to jira (+ greenhopper etc) which has an integrated 
-blueprint function and much better scrum stuff.
-
-I haven't used launchpad much.  Is that a viable alternative?
-
-sage
-
+James
