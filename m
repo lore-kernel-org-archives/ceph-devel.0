@@ -1,179 +1,84 @@
-From: =?ISO-8859-1?Q?S=E9bastien_RICCIO?= <sr-dWg6jWm8wxMIjDr1QQGPvw@public.gmane.org>
-Subject: Re: [ANN] ceph-deploy v1.2 has been released!
-Date: Sat, 10 Aug 2013 07:04:25 +0200
-Message-ID: <5205C9D9.4020304@swisscenter.com>
-References: <CANtztVwkvhuGmSOBs=7EG2R8UQvBCoNG6nEqPp+YWY_WShySjQ@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: teuthology : ulimit: error
+Date: Fri, 09 Aug 2013 22:35:38 -0700
+Message-ID: <5205D12A.4090408@inktank.com>
+References: <52041335.9040009@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1710449661=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANtztVwkvhuGmSOBs=7EG2R8UQvBCoNG6nEqPp+YWY_WShySjQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
-This is a multi-part message in MIME format.
---===============1710449661==
-Content-Type: multipart/alternative;
- boundary="------------080802030204010701000502"
-
-This is a multi-part message in MIME format.
---------------080802030204010701000502
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: quoted-printable
-
-Hi!
-
-Awesome :)) Thanks for such a great work!
-
-Cheers,
-S=E9bastien
-
-On 10.08.2013 02:52, Alfredo Deza wrote:
-> I am very pleased to announce the release of ceph-deploy to the Python=20
-> Package Index.
->
-> The OS packages are yet to come, I will make sure to update this=20
-> thread when they do.
->
-> For now, if you are familiar with Python install tools, you can=20
-> install directly from PyPI with pip or easy_install:
->
->     pip install ceph-deploy
->
-> or
->
->     easy_install ceph-deploy
->
-> This release includes a massive effort for better error reporting and=20
-> granular information in remote hosts (for `install` and `mon create`=20
-> commands for now).
->
-> There were about 18 bug fixes and improvements too, including upstream=20
-> libraries that are used by ceph-deploy.
->
-> If you find any issues with ceph-deploy, please make sure you let me=20
-> know via this list or on irc at #ceph!
->
-> Enjoy!
->
-> -Alfredo
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
---------------080802030204010701000502
-Content-Type: text/html; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:56185 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753025Ab3HJFf5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Aug 2013 01:35:57 -0400
+Received: by mail-pb0-f50.google.com with SMTP id uo5so5200501pbc.37
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Aug 2013 22:35:56 -0700 (PDT)
+In-Reply-To: <52041335.9040009@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-<html>
-  <head>
-    <meta content="text/html; charset=ISO-8859-1"
-      http-equiv="Content-Type">
-  </head>
-  <body bgcolor="#FFFFFF" text="#000000">
-    <div class="moz-cite-prefix">Hi!<br>
-      <br>
-      Awesome :)) Thanks for such a great work!<br>
-      <br>
-      Cheers,<br>
-      S&eacute;bastien<br>
-      <br>
-      On 10.08.2013 02:52, Alfredo Deza wrote:<br>
-    </div>
-    <blockquote
-cite="mid:CANtztVwkvhuGmSOBs=7EG2R8UQvBCoNG6nEqPp+YWY_WShySjQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org"
-      type="cite">
-      <meta http-equiv="Context-Type" content="text/html;
-        charset=ISO-8859-1">
-      <div dir="ltr">
-        <div>
-          <div>
-            <div>
-              <div>
-                <div>
-                  <div>
-                    <div>
-                      <div>
-                        <div>
-                          <div>
-                            <div>I am very pleased to announce the
-                              release of ceph-deploy to the Python
-                              Package Index.<br>
-                              <br>
-                            </div>
-                            The OS packages are yet to come, I will make
-                            sure to update this thread when they do.<br>
-                            <br>
-                          </div>
-                          For now, if you are familiar with Python
-                          install tools, you can install directly from
-                          PyPI with pip or easy_install:<br>
-                          <br>
-                        </div>
-                        &nbsp;&nbsp;&nbsp; pip install ceph-deploy<br>
-                      </div>
-                      <br>
-                    </div>
-                    or<br>
-                    <br>
-                  </div>
-                  &nbsp;&nbsp;&nbsp; easy_install ceph-deploy<br>
-                  <br>
-                </div>
-                This release includes a massive effort for better error
-                reporting and granular information in remote hosts (for
-                `install` and `mon create` commands for now).<br>
-                <br>
-              </div>
-              There were about 18 bug fixes and improvements too,
-              including upstream libraries that are used by ceph-deploy.<br>
-              <br>
-            </div>
-            If you find any issues with ceph-deploy, please make sure
-            you let me know via this list or on irc at #ceph!<br>
-            <br>
-          </div>
-          Enjoy!<br>
-          <br>
-        </div>
-        -Alfredo<br>
-      </div>
-      <br>
-      <fieldset class="mimeAttachmentHeader"></fieldset>
-      <br>
-      <pre wrap="">_______________________________________________
-ceph-users mailing list
-<a class="moz-txt-link-abbreviated" href="mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>
-<a class="moz-txt-link-freetext" href="http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a>
-</pre>
-    </blockquote>
-    <br>
-  </body>
-</html>
+IIRC we had to adjust settings in /etc/security to allow ulimit 
+adjustment of at least core:
 
---------------080802030204010701000502--
+sed -i 's/^#\*.*soft.*core.*0/\*                soft    core 
+unlimited/g' /etc/security/limits.conf
 
---===============1710449661==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+or something like that.  That seems to apply to centos/fedora/redhat 
+systems.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1710449661==--
+On 08/08/2013 02:52 PM, Loic Dachary wrote:
+> Hi,
+>
+> Trying to use Ubuntu precise virtual machines as teuthology targets ( making sure they have 2GB of RAM because ceph-test-dbg will not even install with 1GB of RAM ;-) and installing the key with
+>
+> wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
+>
+> teuthology runs with
+>
+> ./virtualenv/bin/teuthology job.yaml
+>
+> where job.yaml is
+>
+> check-locks: false
+> roles:
+> - - mon.a
+>    - mon.c
+>    - osd.0
+> - - mon.b
+>    - osd.1
+>    - client.0
+> tasks:
+> - install:
+>     project: ceph
+>     branch: wip-5510
+> - ceph:
+>     fs: ext4
+> - workunit:
+>      clients:
+>        all:
+>        - filestore/filestore.sh
+> targets:
+>     ubuntu@91.121.254.229: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOSit20EyZ2AKCvk2tnMsdQ6LmVRutvBmZb0awV9Z2EduJa0fYPrReYRb9ZhGRq2PJe0zgpFPKr8s4gGay+tL0+dFkju5uyABqMGeITlJCifd+RhM0MCVllgIzekDwVb0n6ydTS8k7GVFyYv8ZC0TPgbfcDcEtSEgqJNRJ0o1Bh8swuTn+cipanNDRVK39tOqJdfptUxak+TD+5QY8CGFdXdEQYP7VsYJ+jQHw73O2xbuPgfv5Shbmt+qGWLToxFqKca3owMtkvFeONgYUdujgg9qr7Q9p0+HhCFCXB8v4N2I7NSbWNdpGqyJLdLqwJ70gEeNlOhm5F7IsXfVxTapB
+>     ubuntu@91.121.254.237: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCXVzhedORtmEmCeZJ4Ssg8wfqpYyH9W/Aa+j6CvPHSAkzZ48zXqVBATxm6S8sIIqfKkz1hWpNssx6uUotbm8k/ZatMddsd932+Di136l/HUhp6O8iIFze56kjWpyDpRPw2MM0V+OKmsiHZDfMj9ATt6ChgXfRsm23MUlmnoFHvtfwvFBnvBjcZPN7qxMpFHDamZzACNvnis/OINJrud9VprOgjhZZ7mxcTbcVZaVgcTcnyC4b9d9PRrMG2aCv0BO1eb/qnlmSogQPfoKEORJcwaUcLgabww+Taa9hJSZ9l8yEQamj+XIgr6yzGKgCvlG4lTdHM2tQdpgATZvR7/pBz
+>
+> and produces the following output
+>
+> INFO:teuthology.orchestra.run.err:[91.121.254.229]: /home/ubuntu/cephtest/lo1308082328/adjust-ulimits: 4: ulimit: error setting limit (Operation not permitted)
+>
+> and the full output is at
+>
+> http://pastealacon.com/32957
+>
+> as if
+>
+> /home/ubuntu/cephtest/lo1308082328/adjust-ulimits ceph-coverage /home/ubuntu/cephtest/lo1308082328/archive/coverage monmaptool --create --clobber --add a 91.121.254.229:6789 --add c 91.121.254.229:6790 --add b 91.121.254.237:6789 --print /home/ubuntu/cephtest/lo1308082328/monmap'
+>
+> was run without a leading sudo. I tried running sudo adjust-ulimits echo foo manually on the target and it works.
+>
+> I would very much appreciate a hint ;-)
+>
+> Cheers
+>
