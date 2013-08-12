@@ -1,73 +1,30 @@
-From: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Subject: Re: ceph admin command: debuggging
-Date: Mon, 12 Aug 2013 07:21:28 +0200
-Message-ID: <20130812072128.7a0bab97@andylap>
-References: <20130808160417.3589315c@doppio>
-	<alpine.DEB.2.00.1308081508360.986@cobra.newdream.net>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Correct usage of rbd_aio_release
+Date: Mon, 12 Aug 2013 15:36:28 +0200
+Message-ID: <CAF6-1L5nrco6oLq8xwnpymP+jLh8gi4O1WgvcOZimmCw4gFHiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from port-212-202-108-184.static.qsc.de ([212.202.108.184]:2526 "EHLO
-	mail.itxperts.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755070Ab3HLFVe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Aug 2013 01:21:34 -0400
-In-Reply-To: <alpine.DEB.2.00.1308081508360.986@cobra.newdream.net>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:43393 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756166Ab3HLNg3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Aug 2013 09:36:29 -0400
+Received: by mail-pa0-f46.google.com with SMTP id fa1so7524228pad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Aug 2013 06:36:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Sage,
-
-On Thu, 8 Aug 2013 15:09:27 -0700 (PDT)
-Sage Weil <sage@inktank.com> wrote:
-
-> On Thu, 8 Aug 2013, Andreas Bluemle wrote:
-> > Hi,
-> > 
-> > maybe this is the wrong list - but I am looking for
-> > logging support for the /usr/bin/ceph adminstration
-> > comamand.
-> > 
-> > This is build from the same source as the ceph daemons are.
-> > 
-> > For the daemons, logging is controlled for the different
-> > comoponents of a daemon on behalf of configuration file
-> > directives (e.g. "debug ms" for the message I/O).
-> > 
-> > Can this be applied to the /usr/bin/ceph command, too?
-> > And where would the log file go?
-> 
-> You are probably looking for:
-> 
->  --log-to-stderr     (make log output go to stderr)
->  --log-file <filename>
-> 
-> and you can make some noise with
-> 
->  --debug-ms 1
->  --debug-monc 10
-> 
-> (for example)
->
-
-Thanks; I'll give that a try.
-
-Andreas Bluemle
+Hi,
 
 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+When should / can rbd_aio_release be called exactly ?
 
+For example if I create a rbd_aio_create_completion then do a
+rbd_aio_XXX that fails, should I call rbd_aio_release ?
+I would think yes, but when looking at the qemu rbd code, it doesn't
+and I'm not sure if it's by design.
 
+Cheers,
 
--- 
-Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-Heinrich Boell Strasse 88           Phone: (+49) 89 4317582
-D-81829 Muenchen (Germany)          Mobil: (+49) 177 522 0151
+    Sylvain
