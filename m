@@ -1,8 +1,8 @@
 From: James Harper <james.harper@bendigoit.com.au>
 Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
  test ? :p
-Date: Tue, 13 Aug 2013 23:51:10 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B63896AF1@BITCOM1.int.sbss.com.au>
+Date: Tue, 13 Aug 2013 23:59:55 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B63896B4E@BITCOM1.int.sbss.com.au>
 References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
 	<20130419064524.GQ11427@reaktio.net>
 	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
@@ -20,36 +20,43 @@ References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
 	<CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
 	<6035A0D088A63A46850C3988ED045A4B63896A4D@BITCOM1.int.sbss.com.au>
  <CAF6-1L6_GFvOq3nyQ-n20uiZHC4pAQm88_G3RFG2QjujoYGLpA@mail.gmail.com>
+ <6035A0D088A63A46850C3988ED045A4B63896AF1@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:39729 "EHLO
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:40030 "EHLO
 	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754221Ab3HMXvU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 19:51:20 -0400
-In-Reply-To: <CAF6-1L6_GFvOq3nyQ-n20uiZHC4pAQm88_G3RFG2QjujoYGLpA@mail.gmail.com>
+	with ESMTP id S1758740Ab3HNAAD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 20:00:03 -0400
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B63896AF1@BITCOM1.int.sbss.com.au>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
+To: James Harper <james.harper@bendigoit.com.au>, Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: Frederik Thuysbaert <frederik.thuysbaert@gmail.com>, =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
 > 
-> On Wed, Aug 14, 2013 at 1:39 AM, James Harper
-> <james.harper@bendigoit.com.au> wrote:
-> > I think I have a separate problem too - tapdisk will segfault almost
-> immediately upon starting but seemingly only for Linux PV DomU's. Once it
-> has started doing this I have to wait a few hours to a day before it starts
-> working again. My Windows DomU's appear to be able to start normally
-> though.
+> >
+> > On Wed, Aug 14, 2013 at 1:39 AM, James Harper
+> > <james.harper@bendigoit.com.au> wrote:
+> > > I think I have a separate problem too - tapdisk will segfault almost
+> > immediately upon starting but seemingly only for Linux PV DomU's. Once it
+> > has started doing this I have to wait a few hours to a day before it starts
+> > working again. My Windows DomU's appear to be able to start normally
+> > though.
+> >
+> > What about other blktap driver ? like using blktap raw driver, does
+> > that work without issue ?
+> >
 > 
-> What about other blktap driver ? like using blktap raw driver, does
-> that work without issue ?
+> What's the syntax for that? I use tap2:tapdisk:rbd for rbd, but I don't know
+> how to specify raw and anything I try just says it doesn't understand
 > 
 
-What's the syntax for that? I use tap2:tapdisk:rbd for rbd, but I don't know how to specify raw and anything I try just says it doesn't understand
+I just tested with tap2:aio and that worked (had an old image of the VM on lvm still so just tested with that). Switching back to rbd and it crashes every time, just as postgres is starting in the vm. Booting into single user mode, waiting 30 seconds, then letting the boot continue it still crashes at the same point so I think it's not a timing thing - maybe postgres has a disk access pattern that is triggering the bug?
 
-Thanks
+Putting printf's in seems to make the problem go away sometimes, so it's hard to debug.
 
 James
+
