@@ -1,111 +1,38 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: still recovery issues with cuttlefish
-Date: Tue, 13 Aug 2013 16:11:46 -0700
-Message-ID: <CA+4uBUacvJhS1j_zE7QvidgWCYQcVwLqrz2D=OHdtE-Z05rt4A@mail.gmail.com>
-References: <51FA1AC1.8040207@profihost.ag>
-	<CA+4uBUYPDyQrP=Hg9kCVNvnh4mNi9URbbrGg39AJOmBWjEbCAg@mail.gmail.com>
-	<51FAAED3.3010509@cloudapt.com>
-	<51FAB20F.3030707@profihost.ag>
-	<CA+4uBUY079TZ7sm1EafO1pnXCpKSTkfc15KwqBLi8SyV=Z_29A@mail.gmail.com>
-	<51FB636B.5050301@profihost.ag>
-	<CA+4uBUbye9EOHxFgOYXah8Eg_6ZRtPY_MpgjbnNa=_ZrhFak_w@mail.gmail.com>
-	<51FBF765.9030700@profihost.ag>
-	<CA+4uBUZY-_jsnG+wfE4LXL-Dw2CtRkNuANwPMMJ4JyUU=4tdRQ@mail.gmail.com>
-	<51FBFE85.5040700@profihost.ag>
-	<5203A597.4060701@cloudapt.com>
-	<5203DFAE.9070100@profihost.ag>
-	<CA+4uBUYgLmP0EMv1+Gzd9ndR42o9ahTL6bnoAAD8QS+Cax7Yzg@mail.gmail.com>
-	<52068FB6.1080209@profihost.ag>
-	<CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com>
-	<673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag>
-	<CA+4uBUYBGnCj5Mbj+v8=cFNLYqPrBiR5VqNUJD6m+dXgeHSHzQ@mail.gmail.com>
-	<CA+4uBUaM2X4aR1vNqjHTdoBgbU0jRv9aKeZnbAuraWYWcFxEhQ@mail.gmail.com>
-	<A2DD558D-3934-4E85-8B03-C8FC1EF9B8B3@profihost.ag>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Tue, 13 Aug 2013 23:39:59 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B63896A4D@BITCOM1.int.sbss.com.au>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<20130419064524.GQ11427@reaktio.net>
+	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
+	<CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B62E86BF8@BITCOM1.int.sbss.com.au>
+	<CAF6-1L45U3DW4gRYaou1Ua5vvtzz+_XDz5B8WBBedhhM9igong@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B62F433FE@BITCOM1.int.sbss.com.au>
+	<6035A0D088A63A46850C3988ED045A4B62F43442@BITCOM1.int.sbss.com.au>
+	<CAF6-1L502OZGbPHp37vWzEU3H-wsK5z904ZtS7SEUmuM-GhLyA@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B63891798@BITCOM1.int.sbss.com.au>
+	<CAF6-1L4=rY7AJpHGB33KPMk6LfX7q8CHphPzh9amdqwbYzg3dQ@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B6389552A@BITCOM1.int.sbss.com.au>
+	<CAF6-1L6jJvYuHN+BoucU2RNzv2R9dpMhbD1UVF96mBPO25FM5g@mail.gmail.com>
+	<520A4945.1030907@gmail.com>
+ <CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f175.google.com ([209.85.220.175]:54271 "EHLO
-	mail-vc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752708Ab3HMXLr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 19:11:47 -0400
-Received: by mail-vc0-f175.google.com with SMTP id ia10so4444558vcb.20
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Aug 2013 16:11:47 -0700 (PDT)
-In-Reply-To: <A2DD558D-3934-4E85-8B03-C8FC1EF9B8B3@profihost.ag>
+Received: from mail.bendigoit.com.au ([203.16.207.99]:39849 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756055Ab3HMXkL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 19:40:11 -0400
+In-Reply-To: <CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Mike Dawson <mike.dawson@cloudapt.com>, "josh.durgin@inktank.com" <josh.durgin@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Stefan Hajnoczi <stefanha@redhat.com>
+To: Sylvain Munaut <s.munaut@whatever-company.com>, Frederik Thuysbaert <frederik.thuysbaert@gmail.com>
+Cc: =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
-I'm not sure, but your logs did show that you had >16 recovery ops in
-flight, so it's worth a try.  If it doesn't help, you should collect
-the same set of logs I'll look again.  Also, there are a few other
-patches between 61.7 and current cuttlefish which may help.
--Sam
+I think I have a separate problem too - tapdisk will segfault almost immediately upon starting but seemingly only for Linux PV DomU's. Once it has started doing this I have to wait a few hours to a day before it starts working again. My Windows DomU's appear to be able to start normally though.
 
-On Tue, Aug 13, 2013 at 2:03 PM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
->
-> Am 13.08.2013 um 22:43 schrieb Samuel Just <sam.just@inktank.com>:
->
->> I just backported a couple of patches from next to fix a bug where we
->> weren't respecting the osd_recovery_max_active config in some cases
->> (1ea6b56170fc9e223e7c30635db02fa2ad8f4b4e).  You can either try the
->> current cuttlefish branch or wait for a 61.8 release.
->
-> Thanks! Are you sure that this is the issue? I don't believe that but i'll give it a try. I already tested a branch from sage where he fixed a race regarding max active some weeks ago. So active recovering was max 1 but the issue didn't went away.
->
-> Stefan
->
->> -Sam
->>
->> On Mon, Aug 12, 2013 at 10:34 PM, Samuel Just <sam.just@inktank.com> wrote:
->>> I got swamped today.  I should be able to look tomorrow.  Sorry!
->>> -Sam
->>>
->>> On Mon, Aug 12, 2013 at 9:39 PM, Stefan Priebe - Profihost AG
->>> <s.priebe@profihost.ag> wrote:
->>>> Did you take a look?
->>>>
->>>> Stefan
->>>>
->>>> Am 11.08.2013 um 05:50 schrieb Samuel Just <sam.just@inktank.com>:
->>>>
->>>>> Great!  I'll take a look on Monday.
->>>>> -Sam
->>>>>
->>>>> On Sat, Aug 10, 2013 at 12:08 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
->>>>>> Hi Samual,
->>>>>>
->>>>>> Am 09.08.2013 23:44, schrieb Samuel Just:
->>>>>>
->>>>>>> I think Stefan's problem is probably distinct from Mike's.
->>>>>>>
->>>>>>> Stefan: Can you reproduce the problem with
->>>>>>>
->>>>>>> debug osd = 20
->>>>>>> debug filestore = 20
->>>>>>> debug ms = 1
->>>>>>> debug optracker = 20
->>>>>>>
->>>>>>> on a few osds (including the restarted osd), and upload those osd logs
->>>>>>> along with the ceph.log from before killing the osd until after the
->>>>>>> cluster becomes clean again?
->>>>>>
->>>>>>
->>>>>> done - you'll find the logs at cephdrop folder:
->>>>>> slow_requests_recovering_cuttlefish
->>>>>>
->>>>>> osd.52 was the one recovering
->>>>>>
->>>>>> Thanks!
->>>>>>
->>>>>> Greets,
->>>>>> Stefan
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+James
