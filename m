@@ -1,120 +1,74 @@
-From: "Hefty, Sean" <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
-Date: Tue, 13 Aug 2013 21:44:42 +0000
-Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
-References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
- <CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
- <20130812075513.43c338e1@andylap>
- <CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
- <20130812180644.447ca089@andylap>
- <CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
- <20130813075312.7cac0d46@andylap> <20130813160612.037ea9f2@andylap>
- <1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Tue, 13 Aug 2013 21:47:38 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B63896729@BITCOM1.int.sbss.com.au>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<20130419064524.GQ11427@reaktio.net>
+	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
+	<CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B62E86BF8@BITCOM1.int.sbss.com.au>
+	<CAF6-1L45U3DW4gRYaou1Ua5vvtzz+_XDz5B8WBBedhhM9igong@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B62F433FE@BITCOM1.int.sbss.com.au>
+	<6035A0D088A63A46850C3988ED045A4B62F43442@BITCOM1.int.sbss.com.au>
+	<CAF6-1L502OZGbPHp37vWzEU3H-wsK5z904ZtS7SEUmuM-GhLyA@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B63891798@BITCOM1.int.sbss.com.au>
+	<CAF6-1L4=rY7AJpHGB33KPMk6LfX7q8CHphPzh9amdqwbYzg3dQ@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B6389552A@BITCOM1.int.sbss.com.au>
+ <CAF6-1L6jJvYuHN+BoucU2RNzv2R9dpMhbD1UVF96mBPO25FM5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1978D1F9-C675-4A37-AA57-C7E1158B2F72-1Heg1YXhbW8@public.gmane.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:38507 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756986Ab3HMVr4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 17:47:56 -0400
+In-Reply-To: <CAF6-1L6jJvYuHN+BoucU2RNzv2R9dpMhbD1UVF96mBPO25FM5g@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Atchley, Scott" <atchleyes-1Heg1YXhbW8@public.gmane.org>, Andreas Bluemle <andreas.bluemle-jy6uzZffzV0b1SvskN2V4Q@public.gmane.org>
-Cc: Matthew Anderson <manderson8787-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
-> > I found a workaround for my (our) problem: in the librdmacm
-> > code, rsocket.c, there is a global constant polling_time, which
-> > is set to 10 microseconds at the moment.
-> >
-> > I raise this to 10000 - and all of a sudden things work nicely.
-> 
-> I am adding the linux-rdma list to CC so Sean might see this.
-> 
-> If I understand what you are describing, the caller to rpoll() spins for up to
-> 10 ms (10,000 us) before calling the real poll().
-> 
-> What is the purpose of the real poll() call? Is it simply a means to block the
-> caller and avoid spinning? Or does it actually expect to detect an event?
+Just noticed email subject "qemu-1.4.0 and onwards, linux kernel 3.2.x,=
+ ceph-RBD, heavy I/O leads to kernel_hung_tasks_timout_secs message and=
+ unresponsive qemu-process, [Qemu-devel] [Bug 1207686]" where Sage note=
+d that he has seen a completion called twice in the logs the OP posted.=
+ If that is actually happening (and not just an artefact of logging rin=
+g buffer overflowing or something) then I think that could easily cause=
+ a segfault in tapdisk rbd.
 
-When the real poll() is called, an event is expected on an fd associated with the CQ's completion channel.
- 
-> > I think we are looking at two issues here:
-> > 1. the thread structure of ceph messenger
-> >   For a given socket connection, there are 3 threads of interest
-> >   here: the main messenger thread, the Pipe::reader and the
-> >   Pipe::writer.
-> >
-> >   For a ceph client like the ceph admin command, I see the following
-> >   sequence
-> >     - the connection to the ceph monitor is created by the
-> >       main messenger  thread, the Pipe::reader and
-> >       Pipe::writer are instantiated.
-> >     - the requested command is sent to the ceph monitor, the
-> >       answer is read and printed
-> >     - at this point the Pipe::reader already has called
-> >       tcp_read_wait(), polling for more data or connection termination
-> >     - after the response had been printed, the main loop calls the
-> >       shutdown routines which in in turn shutdown() the socket
-> >
-> >    There is some time between the last two steps - and this gap is
-> >    long enough to open a race:
-> >
-> > 2. rpoll, ibv and poll
-> >   the rpoll implementation in rsockets is split in 2 phases:
-> >   - a busy loop which checks the state of the underlying ibv queue pair
-> >   - the call to real poll() system call (i.e. the uverbs(?)
-> >     implementation of poll() inside the kernel)
-> >
-> >   The busy loop has a maximum duration of polling_time (10 microseconds
-> >   by default) - and is able detect the local shutdown and returns a
-> >   POLLHUP.
-> >
-> >   The poll() system call (i.e. the uverbs implementation of poll()
-> >   in the kernel) does not detect the local shutdown - and only returns
-> >   after the caller supplied timeout expires.
+I'll try and see if I can log when that happens.
 
-It sounds like there's an issue here either with a message getting lost or a race.  Given that spinning longer works for you, it sounds like an event is getting lost, not being generated correctly, or not being configured to generate.
+James
 
-> > Increasing the rsockets polloing_time from 10 to 10000 microseconds
-> > results in the rpoll to detect the local shutdown within the busy loop.
-> >
-> > Decreasing the ceph "ms tcp read timeout" from the default of 900 to 5
-> > seconds serves a similar purpose, but is much coarser.
-> >
-> > From my understanding, the real issue is neither at the ceph nor at the
-> > rsockets level: it is related to the uverbs kernel module.
-> >
-> > An alternative way to address the current problem at the rsockets level
-> > would be w re-write of the rpoll(): instead of the busy loop at the
-> > beginning followed by the reall poll() call with the full user
-> > specificed timeout value ("ms tcp read timeout" in our case), I would
-> > embed the real poll()  into a loop, splitting the user specified timeout
-> > into smaller portions and doing the rsockets specific rs_poll_check()
-> > on every timeout of the real poll().
-> 
-> I have not looked at the rsocket code, so take the following with a grain of
-> salt. If the purpose of the real poll() is to simply block the user for a
-> specified time, then you can simply make it a short duration (taking into
-> consideration what granularity the OS provides) and then call ibv_poll_cq().
-> Keep in mind, polling will prevent your CPU from reducing power.
-> 
-> If the real poll() is actually checking for something (e.g. checking on the
-> RDMA channel's fd or the IB channel's fd), then you may not want to spin too
-> much.
-
-The real poll() call is intended to block the application until a timeout occurs or an event shows up.  Since increasing the spin time works for you, it makes me suspect that there is a bug in the CQ event handling in rsockets.
- 
-> >>> What's particularly weird is that the monitor receives a POLLHUP
-> >>> event when the ceph command shuts down it's socket but the ceph
-> >>> command never does. When using regular sockets both sides of the
-> >>> connection receive a POLLIN | POLLHUP | POLRDHUP event when the
-> >>> sockets are shut down. It would seem like there is a bug in rsockets
-> >>> that causes the side that calls shutdown first not to receive the
-> >>> correct rpoll events.
-
-rsockets does not support POLLRDHUP.
-
-- Sean
+> -----Original Message-----
+> From: Sylvain Munaut [mailto:s.munaut@whatever-company.com]
+> Sent: Tuesday, 13 August 2013 7:20 PM
+> To: James Harper
+> Cc: Pasi K=E4rkk=E4inen; ceph-devel@vger.kernel.org; xen-devel@lists.=
+xen.org
+> Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wan=
+ts to
+> test ? :p
+>=20
+> Hi,
+>=20
+> > I hope not. How could I tell? It's not something I've explicitly en=
+abled.
+>=20
+> It's disabled by default.
+>=20
+> So you'd have to have enabled it either in ceph.conf  or directly in
+> the device path in the xen config. (option is 'rbd cache',
+> http://ceph.com/docs/next/rbd/rbd-config-ref/ )
+>=20
+> Cheers,
+>=20
+>     Sylvain
 --
-To unsubscribe from this list: send the line "unsubscribe linux-rdma" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
