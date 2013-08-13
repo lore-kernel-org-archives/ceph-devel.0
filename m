@@ -1,61 +1,81 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+From: Samuel Just <sam.just@inktank.com>
 Subject: Re: still recovery issues with cuttlefish
-Date: Tue, 13 Aug 2013 06:39:42 +0200
-Message-ID: <673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag>
-References: <51FA1AC1.8040207@profihost.ag> <CA+4uBUYPDyQrP=Hg9kCVNvnh4mNi9URbbrGg39AJOmBWjEbCAg@mail.gmail.com> <51FAAED3.3010509@cloudapt.com> <51FAB20F.3030707@profihost.ag> <CA+4uBUY079TZ7sm1EafO1pnXCpKSTkfc15KwqBLi8SyV=Z_29A@mail.gmail.com> <51FB636B.5050301@profihost.ag> <CA+4uBUbye9EOHxFgOYXah8Eg_6ZRtPY_MpgjbnNa=_ZrhFak_w@mail.gmail.com> <51FBF765.9030700@profihost.ag> <CA+4uBUZY-_jsnG+wfE4LXL-Dw2CtRkNuANwPMMJ4JyUU=4tdRQ@mail.gmail.com> <51FBFE85.5040700@profihost.ag> <5203A597.4060701@cloudapt.com> <5203DFAE.9070100@profihost.ag> <CA+4uBUYgLmP0EMv1+Gzd9ndR42o9ahTL6bnoAAD8QS+Cax7Yzg@mail.gmail.com> <52068FB6.1080209@profihost.ag> <CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Date: Mon, 12 Aug 2013 22:34:55 -0700
+Message-ID: <CA+4uBUYBGnCj5Mbj+v8=cFNLYqPrBiR5VqNUJD6m+dXgeHSHzQ@mail.gmail.com>
+References: <51FA1AC1.8040207@profihost.ag>
+	<CA+4uBUYPDyQrP=Hg9kCVNvnh4mNi9URbbrGg39AJOmBWjEbCAg@mail.gmail.com>
+	<51FAAED3.3010509@cloudapt.com>
+	<51FAB20F.3030707@profihost.ag>
+	<CA+4uBUY079TZ7sm1EafO1pnXCpKSTkfc15KwqBLi8SyV=Z_29A@mail.gmail.com>
+	<51FB636B.5050301@profihost.ag>
+	<CA+4uBUbye9EOHxFgOYXah8Eg_6ZRtPY_MpgjbnNa=_ZrhFak_w@mail.gmail.com>
+	<51FBF765.9030700@profihost.ag>
+	<CA+4uBUZY-_jsnG+wfE4LXL-Dw2CtRkNuANwPMMJ4JyUU=4tdRQ@mail.gmail.com>
+	<51FBFE85.5040700@profihost.ag>
+	<5203A597.4060701@cloudapt.com>
+	<5203DFAE.9070100@profihost.ag>
+	<CA+4uBUYgLmP0EMv1+Gzd9ndR42o9ahTL6bnoAAD8QS+Cax7Yzg@mail.gmail.com>
+	<52068FB6.1080209@profihost.ag>
+	<CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com>
+	<673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:41539 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751704Ab3HMEjt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 00:39:49 -0400
-In-Reply-To: <CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com>
+Received: from mail-vb0-f47.google.com ([209.85.212.47]:37896 "EHLO
+	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754465Ab3HMFe4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 01:34:56 -0400
+Received: by mail-vb0-f47.google.com with SMTP id h10so6401105vbh.34
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Aug 2013 22:34:55 -0700 (PDT)
+In-Reply-To: <673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Cc: Mike Dawson <mike.dawson@cloudapt.com>, "josh.durgin@inktank.com" <josh.durgin@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Stefan Hajnoczi <stefanha@redhat.com>
 
-Did you take a look?
+I got swamped today.  I should be able to look tomorrow.  Sorry!
+-Sam
 
-Stefan
-
-Am 11.08.2013 um 05:50 schrieb Samuel Just <sam.just@inktank.com>:
-
-> Great!  I'll take a look on Monday.
-> -Sam
-> 
-> On Sat, Aug 10, 2013 at 12:08 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
->> Hi Samual,
->> 
->> Am 09.08.2013 23:44, schrieb Samuel Just:
->> 
->>> I think Stefan's problem is probably distinct from Mike's.
->>> 
->>> Stefan: Can you reproduce the problem with
->>> 
->>> debug osd = 20
->>> debug filestore = 20
->>> debug ms = 1
->>> debug optracker = 20
->>> 
->>> on a few osds (including the restarted osd), and upload those osd logs
->>> along with the ceph.log from before killing the osd until after the
->>> cluster becomes clean again?
->> 
->> 
->> done - you'll find the logs at cephdrop folder:
->> slow_requests_recovering_cuttlefish
->> 
->> osd.52 was the one recovering
->> 
->> Thanks!
->> 
->> Greets,
->> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Aug 12, 2013 at 9:39 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+> Did you take a look?
+>
+> Stefan
+>
+> Am 11.08.2013 um 05:50 schrieb Samuel Just <sam.just@inktank.com>:
+>
+>> Great!  I'll take a look on Monday.
+>> -Sam
+>>
+>> On Sat, Aug 10, 2013 at 12:08 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+>>> Hi Samual,
+>>>
+>>> Am 09.08.2013 23:44, schrieb Samuel Just:
+>>>
+>>>> I think Stefan's problem is probably distinct from Mike's.
+>>>>
+>>>> Stefan: Can you reproduce the problem with
+>>>>
+>>>> debug osd = 20
+>>>> debug filestore = 20
+>>>> debug ms = 1
+>>>> debug optracker = 20
+>>>>
+>>>> on a few osds (including the restarted osd), and upload those osd logs
+>>>> along with the ceph.log from before killing the osd until after the
+>>>> cluster becomes clean again?
+>>>
+>>>
+>>> done - you'll find the logs at cephdrop folder:
+>>> slow_requests_recovering_cuttlefish
+>>>
+>>> osd.52 was the one recovering
+>>>
+>>> Thanks!
+>>>
+>>> Greets,
+>>> Stefan
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
