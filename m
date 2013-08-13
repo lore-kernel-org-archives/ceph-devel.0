@@ -1,97 +1,75 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Call for participants : teuthology weekly meeting
-Date: Tue, 13 Aug 2013 14:56:46 +0200
-Message-ID: <520A2D0E.9060709@dachary.org>
-References: <52028301.70301@dachary.org>
+From: Luis Henriques <luis.henriques@canonical.com>
+Subject: Re: poll/sendmsg problem with 3.5.0-37-generic #58~precise1-Ubuntu
+Date: Tue, 13 Aug 2013 14:52:32 +0100
+Message-ID: <87fvud4s0v.fsf@canonical.com>
+References: <alpine.DEB.2.00.1308122111030.1479@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig85AB7F5A1CCB137565F8411E"
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:55340 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757989Ab3HMM4t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 08:56:49 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 7358F26394
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Aug 2013 14:56:47 +0200 (CEST)
-In-Reply-To: <52028301.70301@dachary.org>
+Received: from youngberry.canonical.com ([91.189.89.112]:57254 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757515Ab3HMNwg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 09:52:36 -0400
+In-Reply-To: <alpine.DEB.2.00.1308122111030.1479@cobra.newdream.net> (Sage
+	Weil's message of "Mon, 12 Aug 2013 21:34:56 -0700 (PDT)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: kernel-team@lists.ubuntu.com, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig85AB7F5A1CCB137565F8411E
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Sage Weil <sage@inktank.com> writes:
 
-Hi Ceph,
+> Hi,
+>
+> A ceph user hit a problem with the 3.5 precise kernel with symptoms 
+> exactly like an old poll(2) bug[1].  Basically, one end of a socket is 
+> blocked on sendmsg(2), and the other end is blocked on poll(2) waiting for 
+> data.  15 minutes later the poll(2) timeout triggers, we reset the 
+> connection, and ceph recovers and continues.  (For this user, the visible 
+> ceph symptoms were stuck peering, stuck recovery, or hung requests that 
+> *eventually* cleared themselves up.)
+>
+> In this case, it doesn't look like the 3.5.0-37 kernel has the old 
+> problematic patch (which first appeared in 3.6-rc1 and was fixed before 
+> 3.6 was released), but we see the exact same behavior (blocked writer, 
+> blocked reader/poller, but netstat showing bytes available on the socket), 
+> and upgrading the kernel to the current 3.8 precise package resolved the 
+> problem.  The 3.5 ubuntu kernel does have a few sendmsg patches[2] that 
+> (under the circumstances) appear suspicious.
+>
+> The one other detail in this case is that it seemed to only crop up 
+> connections involving one node in the system.
+>
+> I'm not sure where to go from here, since the user is happy to now have a 
+> working system, and I'm not sure if it is worth spending the time to 
+> reproduce the issue.  It might be simpler to just recommend users move off 
+> the 3.5 kernel.  In the meantime, though, I wanted to at least make 
+> everyone aware of the (potential) problem.
+>
+> sage
+>
+>
+> [1] http://marc.info/?l=ceph-devel&m=134540224811321&w=2
+> [2] https://launchpad.net/ubuntu/+source/linux-lts-quantal/3.5.0-37.58~precise1
 
-Teuthology was successfully installed & run as described here:
+I believe the suspicious commits you're referring to in the Quantal
+kernel are:
 
-http://dachary.org/?p=3D2204
+1be374a net: Block MSG_CMSG_COMPAT in send(m)msg and recv(m)msg
+a7526eb net: Unbreak compat_sys_{send,recv}msg
 
-with only two minor glitches:
+Both of these commits came in through upstream stable updates and are
+clean cherry-picks.  All the upstream stable kernels seem to contain
+it.
 
-"teuthology : ulimit: error" http://thread.gmane.org/gmane.comp.file-syst=
-ems.ceph.devel/16421
-"do not check the jobid if check-locks is False" https://github.com/ceph/=
-teuthology/pull/27
+[ Note however that most of the stable kernels have squashed these 2
+  commits in a single commit. ]
 
-Cheers
+This means that, if you're correct, it is likely that the Raring
+kernel will also have this issue: 3.8.0-27.40 Raring kernel has these
+2 commits as well.  Could you please confirm the user that reported
+this issue is running this kernel (or later)?
 
-On 07/08/2013 19:25, Loic Dachary wrote:
-> Hi Ceph,
->=20
-> During the Emperor summit this week, running and installing teuthology =
-with a minimum effort was discussed ( see http://youtu.be/hrQuYzyXvVg?t=3D=
-1h21m49s and http://pad.ceph.com/p/cds-teuthology ) I've installed it onc=
-e, back in January 2013 and that was not too difficult but required a few=
- hours and exchanging a few mails. More importantly, I soon discovered th=
-at the Inktank developers are modifying teuthology quite often and don't =
-really have the bandwidth to make sure any third party can install or upg=
-rade. It is still very much a tool internal to inktank.
->=20
-> There are a number of Ceph developers who, like me, would like to be ab=
-le to run teuthology on their own machines. But none of us has the time t=
-o make that happen on his / her own. However, if we get together, we may =
-be able to do it. The trick is to keep up with Inktank changes and we may=
- have found a way : meet online with the Inktank's teuthology developers =
-on a weekly basis to bridge the gap. That would not be forever : just unt=
-il there are enough teuthology users and Inktank is just one of them.
->=20
-> Of course that will require some work on our part ( non Inktank employe=
-es ) but the overall benefit of running integration tests is worth it. At=
- least it's enough incentive for me to dedicate at least 4 hours on a wee=
-kly basis.=20
->=20
-> This is an open discussion, nothing is set except the commitment of Ink=
-tank to participate in these meetings and my own commitment of at least 4=
- hours / week i.e. half a day doing just this. Including the meeting  ;-)=
-
->=20
-> Who's willing to join this effort ? Do you think there is a better way =
-?
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig85AB7F5A1CCB137565F8411E
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIKLQ4ACgkQ8dLMyEl6F23engCfQYyomkbk8vmUDDkW/Hfk0bUk
-a9cAn0QDKRnzyzpkn9Q4mIFN5ijJxnNI
-=aRsS
------END PGP SIGNATURE-----
-
---------------enig85AB7F5A1CCB137565F8411E--
+Cheers,
+-- 
+Luis
