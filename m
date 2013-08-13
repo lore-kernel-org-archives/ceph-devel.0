@@ -1,106 +1,103 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: teuthology : ulimit: error
-Date: Mon, 12 Aug 2013 19:53:36 -0700
-Message-ID: <52099FB0.1070301@inktank.com>
-References: <52041335.9040009@dachary.org> <5205D12A.4090408@inktank.com> <5205FB01.5040905@dachary.org>
+From: Matthew Anderson <manderson8787@gmail.com>
+Subject: Re: [ceph-users] Help needed porting Ceph to RSockets
+Date: Tue, 13 Aug 2013 12:27:19 +0800
+Message-ID: <CAJA05UmKu8EOT6KP+zoS4j3a+mhVFD58yfvHRTRWCe-Acvodqg@mail.gmail.com>
+References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
+	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
+	<20130812075513.43c338e1@andylap>
+	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
+	<20130812180644.447ca089@andylap>
+	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f45.google.com ([209.85.160.45]:40786 "EHLO
-	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756266Ab3HMCxk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Aug 2013 22:53:40 -0400
-Received: by mail-pb0-f45.google.com with SMTP id mc17so7428631pbc.32
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Aug 2013 19:53:39 -0700 (PDT)
-In-Reply-To: <5205FB01.5040905@dachary.org>
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:64615 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751120Ab3HME1U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Aug 2013 00:27:20 -0400
+Received: by mail-qc0-f180.google.com with SMTP id j10so3896248qcx.11
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Aug 2013 21:27:19 -0700 (PDT)
+In-Reply-To: <CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Cc: ceph-devel@vger.kernel.org
 
-Ah, there's another we apply universally to our test systems, apparently:
+Moving this conversation to ceph-devel where the dev's might be able
+to shed some light on this.
 
-'/etc/security/limits.d/ubuntu.conf'
+I've added some additional debug to my code to narrow the issue down a
+bit and the reader thread appears to be getting locked by
+tcp_read_wait() because rpoll never returns an event when the socket
+is shutdown. A hack way of proving this was to lower the timeout in
+rpoll to 5 seconds. When command like 'ceph osd tree' completes you
+can see it block for 5 seconds until rpoll times out and returns 0.
+The reader thread is then able to join and the pipe can be reaped.
 
-ubuntu hard nofile 16384
+Ceph log is here - http://pastebin.com/rHK4vYLZ
+Mon log is here - http://pastebin.com/WyAJEw0m
 
-and the tests run as user "ubuntu".  Line 4 of the script is the nofile 
-setting.
+What's particularly weird is that the monitor receives a POLLHUP event
+when the ceph command shuts down it's socket but the ceph command
+never does. When using regular sockets both sides of the connection
+receive a POLLIN | POLLHUP | POLRDHUP event when the sockets are shut
+down. It would seem like there is a bug in rsockets that causes the
+side that calls shutdown first not to receive the correct rpoll
+events.
 
-On 08/10/2013 01:34 AM, Loic Dachary wrote:
->
->
-> On 10/08/2013 07:35, Dan Mick wrote:
->> IIRC we had to adjust settings in /etc/security to allow ulimit adjustment of at least core:
+Can anyone comment on whether the above seems right?
+
+Thanks all
+-Matt
+
+
+> On Tue, Aug 13, 2013 at 12:06 AM, Andreas Bluemle
+> <andreas.bluemle@itxperts.de> wrote:
 >>
->> sed -i 's/^#\*.*soft.*core.*0/\*                soft    core unlimited/g' /etc/security/limits.conf
+>> Hi Matthew,
 >>
->> or something like that.  That seems to apply to centos/fedora/redhat systems.
->
-> Hi Dan,
->
-> This is Ubuntu and it does work with sudo. It probably is something about how it's called rather than a system limit.
->
-> Cheers
->
+>> I am not quite sure about the POLLRDHUP.
+>> On the server side (ceph-mon), tcp_read_wait does see the
+>> POLLHUP - which should be the indicator that the
+>> the other side is shutting down.
+>>
+>> I have also taken a brief look at the client side (ceph mon stat).
+>> It initiates a shutdown - but never finishes. See attached log file
+>> from "ceph --log-file ceph-mon-stat.rsockets --debug-ms 30 mon stat".
+>> I have also attached the corresponding log file for regualr TCP/IP
+>> sockets.
+>>
+>> It looks to me that in the rsockets case, the reaper is able to cleanup
+>> even though there is still sth. left to do - and hence the shutdown
+>> never completes.
 >>
 >>
->> On 08/08/2013 02:52 PM, Loic Dachary wrote:
->>> Hi,
->>>
->>> Trying to use Ubuntu precise virtual machines as teuthology targets ( making sure they have 2GB of RAM because ceph-test-dbg will not even install with 1GB of RAM ;-) and installing the key with
->>>
->>> wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
->>>
->>> teuthology runs with
->>>
->>> ./virtualenv/bin/teuthology job.yaml
->>>
->>> where job.yaml is
->>>
->>> check-locks: false
->>> roles:
->>> - - mon.a
->>>     - mon.c
->>>     - osd.0
->>> - - mon.b
->>>     - osd.1
->>>     - client.0
->>> tasks:
->>> - install:
->>>      project: ceph
->>>      branch: wip-5510
->>> - ceph:
->>>      fs: ext4
->>> - workunit:
->>>       clients:
->>>         all:
->>>         - filestore/filestore.sh
->>> targets:
->>>      ubuntu@91.121.254.229: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOSit20EyZ2AKCvk2tnMsdQ6LmVRutvBmZb0awV9Z2EduJa0fYPrReYRb9ZhGRq2PJe0zgpFPKr8s4gGay+tL0+dFkju5uyABqMGeITlJCifd+RhM0MCVllgIzekDwVb0n6ydTS8k7GVFyYv8ZC0TPgbfcDcEtSEgqJNRJ0o1Bh8swuTn+cipanNDRVK39tOqJdfptUxak+TD+5QY8CGFdXdEQYP7VsYJ+jQHw73O2xbuPgfv5Shbmt+qGWLToxFqKca3owMtkvFeONgYUdujgg9qr7Q9p0+HhCFCXB8v4N2I7NSbWNdpGqyJLdLqwJ70gEeNlOhm5F7IsXfVxTapB
->>>      ubuntu@91.121.254.237: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCXVzhedORtmEmCeZJ4Ssg8wfqpYyH9W/Aa+j6CvPHSAkzZ48zXqVBATxm6S8sIIqfKkz1hWpNssx6uUotbm8k/ZatMddsd932+Di136l/HUhp6O8iIFze56kjWpyDpRPw2MM0V+OKmsiHZDfMj9ATt6ChgXfRsm23MUlmnoFHvtfwvFBnvBjcZPN7qxMpFHDamZzACNvnis/OINJrud9VprOgjhZZ7mxcTbcVZaVgcTcnyC4b9d9PRrMG2aCv0BO1eb/qnlmSogQPfoKEORJcwaUcLgabww+Taa9hJSZ9l8yEQamj+XIgr6yzGKgCvlG4lTdHM2tQdpgATZvR7/pBz
->>>
->>> and produces the following output
->>>
->>> INFO:teuthology.orchestra.run.err:[91.121.254.229]: /home/ubuntu/cephtest/lo1308082328/adjust-ulimits: 4: ulimit: error setting limit (Operation not permitted)
->>>
->>> and the full output is at
->>>
->>> http://pastealacon.com/32957
->
-> Refreshed with a longer timeout.
->
-> http://pastealacon.com/32963
->>>
->>> as if
->>>
->>> /home/ubuntu/cephtest/lo1308082328/adjust-ulimits ceph-coverage /home/ubuntu/cephtest/lo1308082328/archive/coverage monmaptool --create --clobber --add a 91.121.254.229:6789 --add c 91.121.254.229:6790 --add b 91.121.254.237:6789 --print /home/ubuntu/cephtest/lo1308082328/monmap'
->>>
->>> was run without a leading sudo. I tried running sudo adjust-ulimits echo foo manually on the target and it works.
->>>
->>> I would very much appreciate a hint ;-)
->>>
->>> Cheers
->>>
->
+>> Best Regards
+>>
+>> Andreas Bluemle
+>>
+>>
+>> On Mon, 12 Aug 2013 15:11:47 +0800
+>> Matthew Anderson <manderson8787@gmail.com> wrote:
+>>
+>> > Hi Andreas,
+>> >
+>> > I think we're both working on the same thing, I've just changed the
+>> > function calls over to rsockets in the source instead of using the
+>> > pre-load library. It explains why we're having the exact same problem!
+>> >
+>> > From what I've been able to tell the entire problem revolves around
+>> > rsockets not supporting POLLRDHUP. As far as I can tell the pipe will
+>> > only be removed when tcp_read_wait returns -1. With rsockets it never
+>> > receives the POLLRDHUP event after shutdown_socket() is called so the
+>> > rpoll call blocks until timeout (900 seconds) and the pipe stays
+>> > active.
+>> >
+>> > The question then would be how can we destroy a pipe without relying
+>> > on POLLRDHUP? shutdown_socket() always gets called when the socket
+>> > should be closed so could there might be a way to trick
+>> > tcp_read_wait() into returning -1 by doing somethere in
+>> > shutdown_socket() but I'm not sure how to go about it.
+>> >
+>> > Any ideas?
+>> >
