@@ -1,49 +1,53 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: How to collect coverage with teuthology ?
-Date: Wed, 14 Aug 2013 09:47:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308140945050.22762@cobra.newdream.net>
-References: <520B668F.1070001@dachary.org>
+From: "Hefty, Sean" <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
+Date: Wed, 14 Aug 2013 17:04:10 +0000
+Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CA5D3E@ORSMSX109.amr.corp.intel.com>
+References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
+	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
+	<20130812075513.43c338e1@andylap>
+	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
+	<20130812180644.447ca089@andylap>
+	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
+	<20130813075312.7cac0d46@andylap>	<20130813160612.037ea9f2@andylap>
+	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
+	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
+ <20130814092124.3f8c3b03@doppio>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52005 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932716Ab3HNQrN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 12:47:13 -0400
-In-Reply-To: <520B668F.1070001@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130814092124.3f8c3b03@doppio>
+Content-Language: en-US
+Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andreas Bluemle <andreas.bluemle-jy6uzZffzV0b1SvskN2V4Q@public.gmane.org>
+Cc: "Atchley, Scott" <atchleyes-1Heg1YXhbW8@public.gmane.org>, Matthew Anderson <manderson8787-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 14 Aug 2013, Loic Dachary wrote:
-> Hi,
-> 
-> Although
-> 
-> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-gcov/log.cgi?log=26707923b23cb55583a7d6b46ef6deb9591fd165
-> 
-> claims to build packages with coverage ( -gcov in the name ), I can't figure out where it is nor how it is supposed to be used.
+> The first question I would have is: why is the rpoll() split into
+> these two pieces? There must have been some reason to do a busy
+> loop on some local state information rather than just call the
+> real poll() directly.
 
-That gitbuilder runs the gcov build script in autobuild-ceph.git to build 
-the package.
+As Scott mentioned in his email, this is done for performance reasons.  The cost of always dropping into the kernel is too high for HPC.
 
-To use it, you do coverage: true somewhere in the job yaml (i forget 
-exactly), teuthology will pull the packages from that gitbuilder instead 
-of the regular one, and... I don't know the rest actually; Josh knows 
-more.  We haven't done this in a while :(, but need to start doing it 
-again.  One of the main annoyances is that in order for gcov to write out 
-its info the process needs to shutdown cleanly, so there are a few changes 
-in how teuthology invokes the daemons.
+> I am looking at a multithreaded application here, and I believe that
+> the race is between thread A calling the rpoll() for POLLIN event and
+> thread B calling the shutdown(SHUT_RDWR) for reading and writing of
+> the (r)socket almost immediately afterwards.
 
-sage
+Ah - this is likely the issue.  I did not assume that rshutdown() would be called simultaneously with rpoll().  I need to think about how to solve this, so that rpoll() unblocks.
+ 
+> I think that the shutdown itself does not cause a POLLHUP event to be
+> generated from the kernel to interupt the real poll().
+> (BTW: which kernel module implements the poll() for rsockets?
+> Is that ib_uverbs.ko with ib_uverbs_poll_cq()?)
 
+The POLLHUP event in rsockets is just software indicating that such an 'event' occurred - basically when a call to rpoll() detects that the rsocket state is disconnected.
 
-> 
-> A hint would be much appreciated :-)
-> 
-> -- 
-> Lo?c Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do nothing.
-> 
-> 
+I believe that the real poll() call traps into ib_uverbs_event_poll() in the kernel.  The fd associated with the poll call corresponds to a 'completion channel', which is used to report events which occur on a CQ.  Connection related events don't actually go to that fd - only completions for data transfers.
+
+- Sean
+--
+To unsubscribe from this list: send the line "unsubscribe linux-rdma" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
