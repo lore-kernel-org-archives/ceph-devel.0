@@ -1,58 +1,31 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: How to collect coverage with teuthology ?
-Date: Wed, 14 Aug 2013 13:14:23 +0200
-Message-ID: <520B668F.1070001@dachary.org>
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: RGW blueprint for plugin architecture
+Date: Wed, 14 Aug 2013 14:57:41 +0200
+Message-ID: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig835D1B49A4B54A1C2750A105"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:47488 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759672Ab3HNLO0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 07:14:26 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id DF4D326394
-	for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 13:14:24 +0200 (CEST)
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:47123 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932369Ab3HNM5l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 08:57:41 -0400
+Received: by mail-oa0-f51.google.com with SMTP id h1so12996451oag.38
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 05:57:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig835D1B49A4B54A1C2750A105
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi all,
 
-Hi,
+For those interested;
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture
 
-Although
+I know a plugin architecture is a sensitive subject for a lot of
+people (it is for me at least), but I think it might be worthwhile
+discussing it.
 
-http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-gcov/l=
-og.cgi?log=3D26707923b23cb55583a7d6b46ef6deb9591fd165
+Please comment/flame away :-)
 
-claims to build packages with coverage ( -gcov in the name ), I can't fig=
-ure out where it is nor how it is supposed to be used.
+Roald
 
-A hint would be much appreciated :-)
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig835D1B49A4B54A1C2750A105
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlILZpAACgkQ8dLMyEl6F22b9wCgwZt9rdKkE6UDYTqOqpjbWZZu
-ZT4AoME9NpErIbLgAWtZBFTwrwoJqLbz
-=PXaa
------END PGP SIGNATURE-----
-
---------------enig835D1B49A4B54A1C2750A105--
+PS: congrats with the Dumpling release!
