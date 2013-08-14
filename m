@@ -1,84 +1,75 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: cephfs set_layout - tuning
-Date: Wed, 14 Aug 2013 13:47:06 -0700
-Message-ID: <CAPYLRzjXcO_zk4yJwWB5Qs_5Nd9xOXqzjp__Mv7KUdKTRV9f8w@mail.gmail.com>
-References: <20130809074457.GA27330@oder.mch.fsc.net>
-	<20130809090350.GB27330@oder.mch.fsc.net>
-	<CAPYLRzj2bisxFcATOt66tCfr5jnUU3eZ23kDiDA0sN_+50Am+Q@mail.gmail.com>
-	<20130814203801.GA27534@oder.mch.fsc.net>
+From: Lorieri <lorieri@gmail.com>
+Subject: Re: radosgw S3 api
+Date: Wed, 14 Aug 2013 20:34:40 -0300
+Message-ID: <CAPHxCcTij29h0AMBno=MHcKtcmEfPtc6vkx6B=B2qP1-zJiEjg@mail.gmail.com>
+References: <CAPHxCcSX7CRS2+-CWA7hGYAZKSm2PDn+hYd6+EtqHtSm+8fN3w@mail.gmail.com>
+	<CAC-hyiEzLgZ6LKt2hX43Ac9xWUETz0CP_XzL77aaFx6M+=JheA@mail.gmail.com>
+	<CAPHxCcQMLmBinmk88xGC6Fd02H2MyjDL3Ey063oh++8VmAW6Tg@mail.gmail.com>
+	<CAC-hyiECy_LOQjhaeX=k1zC5bT_MAn6e4Nq7emLCNkvXh_xJkQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:47020 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933004Ab3HNUrH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 16:47:07 -0400
-Received: by mail-wi0-f175.google.com with SMTP id hq12so2465941wib.14
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 13:47:06 -0700 (PDT)
-In-Reply-To: <20130814203801.GA27534@oder.mch.fsc.net>
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:55005 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758139Ab3HNXel (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 19:34:41 -0400
+Received: by mail-pd0-f172.google.com with SMTP id z10so105176pdj.31
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 16:34:40 -0700 (PDT)
+In-Reply-To: <CAC-hyiECy_LOQjhaeX=k1zC5bT_MAn6e4Nq7emLCNkvXh_xJkQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Aug 14, 2013 at 1:38 PM, Kasper Dieter
-<dieter.kasper@ts.fujitsu.com> wrote:
-> On Wed, Aug 14, 2013 at 10:17:24PM +0200, Gregory Farnum wrote:
->> On Fri, Aug 9, 2013 at 2:03 AM, Kasper Dieter
->> <dieter.kasper@ts.fujitsu.com> wrote:
->> > OK,
->> > I found this nice page: http://ceph.com/docs/next/dev/file-striping/
->> > which explains "--stripe_unit --stripe_count --object_size"
->> >
->> > But still I'm not sure about
->> > (1) what is the equivalent command on cephfs to 'rbd create --order 16' ?
->>
->> There's not a direct one; CephFS lets you specify arbitrary sizes
->> (--stripe-unit) while rbd restricts you to powers of two. If you want
->> a new file to use a 64KB object size you can just set the object_size
->> to be 64KB.
->>
->> > (2) how to use those parameters to achieve different optimized layouts on CephFS directories
->> >     (e.g. for streaming, small sequential IOs, small random IOs)
->>
->> If (as Yan suspects) you mean specifying how the directory is laid out
->> on disk, you can't ? CephFS directories aren't maintained that way and
->> it wouldn't make any sense. If you're talking about making all the
->> files underneath it use a new layout, you can specify a directory
->> layout which is applied to all new descendent files the same way as
->> you specify the layout on an individual file.
-> Thank you Greg,
+for the records:
+
+radosgw-admin key create --gen-secret --subuser=myuser:swift --key-type=swift
+git clone https://github.com/openstack/python-swiftclient.git
+cd python-swiftclient
+python setup.py install
+swift -v -A http://mycluster/auth/v1.0 -U myuser:swift
+--key='xxxxxxxxx' post mybucket -r .r:*
+
+
+On Thu, Mar 28, 2013 at 1:41 AM, Yehuda Sadeh <yehuda@inktank.com> wrote:
 >
-> my question was which parameters of "--stripe_unit --stripe_count --object_size"
-> would be optimal for new descendent files under directories
-> /mnt/cephfs/streaming
-> /mnt/cephfs/seq-IOs
-> /mnt/cephfs/rand-IOs
+> On Wed, Mar 27, 2013 at 9:32 PM, Lorieri <lorieri@gmail.com> wrote:
+> > great!
+> > I will try this.
+> > Will it affect objects later put through S3 api ?
 >
-> e.g.
-> cephfs /mnt/cephfs/streaming set_layout -p 3 -s 4194304 -u 4194304 -c 1
-> cephfs /mnt/cephfs/seq-IOs   set_layout -p 3 -s 4194304 -u   65536 -c 8
-> cephfs /mnt/cephfs/rand-IOs  set_layout -p 3 -s   65536 -u   65536 -c 1
-
-Ah. That will depend a lot on what your specific usage scenario looks
-like. The stripe unit is going to cap the size of an individual IO, so
-for large sequential IOs you'll want that to be large. The stripe
-count determines how many objects are involved over a specific number
-of stripes (eg, 64KB stripe units with a stripe count of 10 means the
-first 640KB of a file will all be on separate objects, before wrapping
-around to the first one).
-You might find that under certain benchmarking patterns your
-sequential IO will go up if you use smaller stripe units and stripe
-them across many objects, but if you've got a writeback cache in the
-way I suspect it will be fairly pointless since the cache can
-aggregate those into a single larger IO (which is preferable).
-For random IO you probably (depending on your macro workload) want to
-use smaller stripe units with a fairly wide stripe count, but perhaps
-increase the size of the objects (reducing the number of inodes the
-OSDs need to keep track of).
-
-But really you just need to experiment; the aggregate performance of
-different workloads against different striping policies is still not a
-very well-researched area in Ceph or elsewhere.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+> Yes. It sets a flag on the bucket, and reads through the S3 api will
+> be the same as through the Swift api. It's just not possible to set
+> that flag via the S3 api.
+>
+> Yehuda
+>
+> >
+> >
+> > On Wed, Mar 27, 2013 at 11:12 PM, Yehuda Sadeh <yehuda@inktank.com>
+> > wrote:
+> >>
+> >> On Wed, Mar 27, 2013 at 4:03 PM, Lorieri <lorieri@gmail.com> wrote:
+> >> > Hi,
+> >> >
+> >> > There is a behavior in AWS S3 I could not reproduce in radosgw.
+> >> >
+> >> > If you create an empty bucket and makes it public, any object you put
+> >> > there will be public too, and will automatically be possible to
+> >> > access
+> >> > it by its http url.
+> >> > It is very helpful when people use some tools and browsers plugins to
+> >> > upload content or do a bulk sync.
+> >> >
+> >> > am I missing something ?
+> >>
+> >> The S3 ACLs don't allow that. Amazon provides a different orthogonal
+> >> scheme (bucket policies) that we don't support and that makes it
+> >> possible.
+> >> With the rados gateway you can achieve that if you're using the swift
+> >> api and setting the bucket public through it.
+> >>
+> >>
+> >> Yehuda
+> >
+> >
