@@ -1,8 +1,8 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
  test ? :p
-Date: Wed, 14 Aug 2013 15:13:15 +0200
-Message-ID: <CAF6-1L42Fmuq3Ng_qD1Y99JQmtfCG1zzGQrbA2xBO-8JOyhk+g@mail.gmail.com>
+Date: Wed, 14 Aug 2013 13:16:08 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B6580E8FF@BITCOM1.int.sbss.com.au>
 References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
 	<20130419064524.GQ11427@reaktio.net>
 	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
@@ -22,32 +22,43 @@ References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
 	<CAF6-1L6_GFvOq3nyQ-n20uiZHC4pAQm88_G3RFG2QjujoYGLpA@mail.gmail.com>
 	<6035A0D088A63A46850C3988ED045A4B63896AF1@BITCOM1.int.sbss.com.au>
 	<6035A0D088A63A46850C3988ED045A4B63896B4E@BITCOM1.int.sbss.com.au>
+ <CAF6-1L42Fmuq3Ng_qD1Y99JQmtfCG1zzGQrbA2xBO-8JOyhk+g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:44639 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932282Ab3HNNNQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 09:13:16 -0400
-Received: by mail-pd0-f177.google.com with SMTP id y10so6321325pdj.22
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 06:13:15 -0700 (PDT)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B63896B4E@BITCOM1.int.sbss.com.au>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:39023 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757076Ab3HNNQY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 09:16:24 -0400
+In-Reply-To: <CAF6-1L42Fmuq3Ng_qD1Y99JQmtfCG1zzGQrbA2xBO-8JOyhk+g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: Frederik Thuysbaert <frederik.thuysbaert@gmail.com>, =?ISO-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: Frederik Thuysbaert <frederik.thuysbaert@gmail.com>, =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
-Hi,
+> 
+> Hi,
+> 
+> > I just tested with tap2:aio and that worked (had an old image of the VM on
+> lvm still so just tested with that). Switching back to rbd and it crashes every
+> time, just as postgres is starting in the vm. Booting into single user mode,
+> waiting 30 seconds, then letting the boot continue it still crashes at the same
+> point so I think it's not a timing thing - maybe postgres has a disk access
+> pattern that is triggering the bug?
+> 
+> Mmm, that's really interesting.
+> 
+> Could you try to disable request merging ? Just give option
+> max_merge_size=0 in the tap2 disk description. Something like
+> 'tap2:tapdisk:rbd:rbd/test:max_merge_size=0,xvda2,w'
+> 
 
-> I just tested with tap2:aio and that worked (had an old image of the VM on lvm still so just tested with that). Switching back to rbd and it crashes every time, just as postgres is starting in the vm. Booting into single user mode, waiting 30 seconds, then letting the boot continue it still crashes at the same point so I think it's not a timing thing - maybe postgres has a disk access pattern that is triggering the bug?
+Just as suddenly the problem went away and I can no longer reproduce the crash on startup. Very frustrating. Most likely it still crashed during heavy use but that can take days.
 
-Mmm, that's really interesting.
+I've just upgraded librbd to dumpling (from cuttlefish) on that one server and will see what it's doing by morning. I'll disable merging when I can reproduce it next.
 
-Could you try to disable request merging ? Just give option
-max_merge_size=0 in the tap2 disk description. Something like
-'tap2:tapdisk:rbd:rbd/test:max_merge_size=0,xvda2,w'
+Thanks
 
-Cheers,
-
-     Sylvain
+James
