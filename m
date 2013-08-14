@@ -1,60 +1,60 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: v0.67 Dumpling released
-Date: Wed, 14 Aug 2013 09:12:32 +0100
-Message-ID: <520B3BF0.8070704@ubuntu.com>
-References: <alpine.DEB.2.00.1308132222350.18836@cobra.newdream.net> <24E144B8C0207547AD09C467A8259F75590569E1@lisa.maurer-it.com>
+From: Frederik Thuysbaert <frederik.thuysbaert@gmail.com>
+Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Wed, 14 Aug 2013 10:43:37 +0200
+Message-ID: <520B4339.6090209@gmail.com>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com> <20130419064524.GQ11427@reaktio.net> <6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au> <CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B62E86BF8@BITCOM1.int.sbss.com.au> <CAF6-1L45U3DW4gRYaou1Ua5vvtzz+_XDz5B8WBBedhhM9igong@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B62F433FE@BITCOM1.int.sbss.com.au> <6035A0D088A63A46850C3988ED045A4B62F43442@BITCOM1.int.sbss.com.au> <CAF6-1L502OZGbPHp37vWzEU3H-wsK5z904ZtS7SEUmuM-GhLyA@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B63891798@BITCOM1.int.sbss.com.au> <CAF6-1L4=rY7AJpHGB33KPMk6LfX7q8CHphPzh9amdqwbYzg3dQ@mail.gmail.com> <6035A0D088A63A46850C3988ED045A4B6389552A@BITCOM1.int.sbss.com.au> <CAF
+ 6-1L6jJvYuHN+BoucU2RNzv2R9dpMhbD1UVF96mBPO25FM5g@mail.gmail.com> <520A4945.1030907@gmail.com> <CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:33686 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759410Ab3HNIMg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 04:12:36 -0400
-In-Reply-To: <24E144B8C0207547AD09C467A8259F75590569E1@lisa.maurer-it.com>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:50826 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759410Ab3HNInl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 04:43:41 -0400
+Received: by mail-wg0-f42.google.com with SMTP id j13so3441255wgh.3
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 01:43:40 -0700 (PDT)
+In-Reply-To: <CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dietmar Maurer <dietmar@proxmox.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: James Harper <james.harper@bendigoit.com.au>, =?ISO-8859-1?Q?Pasi_K?= =?ISO-8859-1?Q?=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On 13-08-13 17:39, Sylvain Munaut wrote:
+> Hi,
+>
+>> I have been testing this a while now, and just finished testing your
+>> untested patch. The rbd caching problem still persists.
+> Yes, I wouldn't expect to change anything for caching. But I still
+> don't understand why caching would change anything at all ... all of
+> it should be handled within the librbd lib.
+>
+>
+> Note that I would recommend against caching anyway. The blktap layer
+> doesn't pass through the FLUSH commands and so this make it completely
+> unsafe because the VM will think things are commited to disk durably
+> even though they are not ...
+>
+>
+>
+>> I will give the error messages of both dom0 and domU before and after I
+>> applied the patch.
+> It's actually strange that it changes anything at all.
+>
+> Can you try adding a ERROR("HERE\n");  in that error path processing
+> and check syslog to see if it's triggered at all ?
+I did this, and can confirm that it is not triggered.
+>
+> A traceback would be great if you can get a core file. And possibly
+> compile tapdisk with debug symbols.
+I'm not quite sure what u mean, can u give some more information on how 
+I do this? I compiled tapdisk with ./configure CFLAGS=-g, but I'm not 
+sure this is what u meant.
+>
+> Cheers,
+>
+>      Sylvain
+Regards
 
-On 14/08/13 08:37, Dietmar Maurer wrote:
->> Another three months have gone by, and the next stable release of
->> Ceph is ready: Dumpling!  Thank you to everyone who has
->> contributed to this release!
-> 
-> Seem there is a new dependency in the ceph-common debian package:
-> python-ceph
-> 
-> Is that really required (previous release does not depend on
-> that)?
-
-Sure is - the 'ceph' command line tool is now written in python and
-uses python-ceph to interact with ceph daemons.
-
-
-- -- 
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iQIcBAEBCAAGBQJSCzvwAAoJEL/srsug59jDTHwQAIxdWQy8yopDbn64heP+x5xt
-TmfdF457NN26aTsNjzTz+yZ2rmdImbFBXpoGSyCVe3XMB3BLtJqcRdN7NPkGSr2u
-xU8CvW8kumxgeuHMKAca19n1xYG62gGCNLVkWPv2sp8InpjQoGdd4bKi/b8T2peo
-/+gBJt+oRkhNV+bWEN2fadN6QSeJp+2BYxjSyWFCX/H0NpvzXbA59Ha6pUMMOygi
-j0YIgcj2snMXRMNQGoZwOlyHs7w8FhW3c9JnB6xmfk0N1cmSKrsN9H0Daum282to
-cMs6yhpSTC97HMKcQrRjuVcHT7DJ40Ua1TIu0x9TDXithvQOme+wqbjT5VUFfFGk
-aubWd/nFLEDkHp/dLyfGwJyMEgD7IYFcaArEBe4EThoKep7P/tOR51dxjg240x6U
-T5rnQCU+cfBRp6uRPge+0lYiO+tJJLg6QrAOfz4mexOQTX3qWhUJ+je+WsRQcJ0s
-B/eNYyvO7ZxTWF0ktolj8NDAtfVd/FTGrTVgWpB7h2iTgYFs9a2JUXPB2PV8KvD1
-v0HeWwGKmx/gO12Suiqx9/PGcXb7FIt0j+xnPcFcm0QOaQ09aB70QT1LlsHkWUhZ
-9q3TksEVo31UpW5qhh8swX6Eq4cqWyVJmMbVlqTOQ9HxElIzfEeJM4/BZgZZCd3M
-RHzgb2jHmj4XSDbhGVnp
-=Z7do
------END PGP SIGNATURE-----
+- Frederik
