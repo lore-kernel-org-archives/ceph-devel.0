@@ -1,53 +1,41 @@
-From: "Hefty, Sean" <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
-Date: Wed, 14 Aug 2013 17:04:10 +0000
-Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CA5D3E@ORSMSX109.amr.corp.intel.com>
-References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
-	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
-	<20130812075513.43c338e1@andylap>
-	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
-	<20130812180644.447ca089@andylap>
-	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
-	<20130813075312.7cac0d46@andylap>	<20130813160612.037ea9f2@andylap>
-	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
-	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
- <20130814092124.3f8c3b03@doppio>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: RGW blueprint for plugin architecture
+Date: Wed, 14 Aug 2013 10:17:37 -0700
+Message-ID: <CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
+References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130814092124.3f8c3b03@doppio>
-Content-Language: en-US
-Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andreas Bluemle <andreas.bluemle-jy6uzZffzV0b1SvskN2V4Q@public.gmane.org>
-Cc: "Atchley, Scott" <atchleyes-1Heg1YXhbW8@public.gmane.org>, Matthew Anderson <manderson8787-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vb0-f51.google.com ([209.85.212.51]:48732 "EHLO
+	mail-vb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758263Ab3HNRRi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 13:17:38 -0400
+Received: by mail-vb0-f51.google.com with SMTP id x16so7799101vbf.24
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 10:17:37 -0700 (PDT)
+In-Reply-To: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> The first question I would have is: why is the rpoll() split into
-> these two pieces? There must have been some reason to do a busy
-> loop on some local state information rather than just call the
-> real poll() directly.
+On Wed, Aug 14, 2013 at 5:57 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+> Hi all,
+>
+> For those interested;
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture
+>
+> I know a plugin architecture is a sensitive subject for a lot of
+> people (it is for me at least), but I think it might be worthwhile
+> discussing it.
+>
+> Please comment/flame away :-)
+>
 
-As Scott mentioned in his email, this is done for performance reasons.  The cost of always dropping into the kernel is too high for HPC.
+I'm all for having a modular architecture. In essence this is
+something we've been aiming at although the interfaces are not as
+clean and shiny as they should be. OTOH, there's the danger overdoing
+it and tying our hands behind our backs, so we need to be careful
+about what to get into a plugin/module, and what should stay as it is
+now (flexible, albeit monolithic).
 
-> I am looking at a multithreaded application here, and I believe that
-> the race is between thread A calling the rpoll() for POLLIN event and
-> thread B calling the shutdown(SHUT_RDWR) for reading and writing of
-> the (r)socket almost immediately afterwards.
-
-Ah - this is likely the issue.  I did not assume that rshutdown() would be called simultaneously with rpoll().  I need to think about how to solve this, so that rpoll() unblocks.
- 
-> I think that the shutdown itself does not cause a POLLHUP event to be
-> generated from the kernel to interupt the real poll().
-> (BTW: which kernel module implements the poll() for rsockets?
-> Is that ib_uverbs.ko with ib_uverbs_poll_cq()?)
-
-The POLLHUP event in rsockets is just software indicating that such an 'event' occurred - basically when a call to rpoll() detects that the rsocket state is disconnected.
-
-I believe that the real poll() call traps into ib_uverbs_event_poll() in the kernel.  The fd associated with the poll call corresponds to a 'completion channel', which is used to report events which occur on a CQ.  Connection related events don't actually go to that fd - only completions for data transfers.
-
-- Sean
---
-To unsubscribe from this list: send the line "unsubscribe linux-rdma" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yehuda
