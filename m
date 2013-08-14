@@ -1,310 +1,203 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: [PATCH v4] Ceph-fuse: Fallocate and punch hole support
-Date: Wed, 14 Aug 2013 15:06:12 +0800
-Message-ID: <520B2C64.3050002@ubuntukylin.com>
-References: <1376450637-15567-1-git-send-email-liwang@ubuntukylin.com> <alpine.DEB.2.00.1308132119310.1479@cobra.newdream.net>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: Re: [ceph-users] Help needed porting Ceph to RSockets
+Date: Wed, 14 Aug 2013 09:21:24 +0200
+Message-ID: <20130814092124.3f8c3b03@doppio>
+References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
+	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
+	<20130812075513.43c338e1@andylap>
+	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
+	<20130812180644.447ca089@andylap>
+	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
+	<20130813075312.7cac0d46@andylap>
+	<20130813160612.037ea9f2@andylap>
+	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
+	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:51018 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757219Ab3HNHGQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 03:06:16 -0400
-In-Reply-To: <alpine.DEB.2.00.1308132119310.1479@cobra.newdream.net>
+Received: from port-212-202-108-184.static.qsc.de ([212.202.108.184]:20414
+	"EHLO mail.itxperts.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756332Ab3HNHVh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 03:21:37 -0400
+In-Reply-To: <1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Hefty, Sean" <sean.hefty@intel.com>
+Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Matthew Anderson <manderson8787@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-rdma@vger.kernel.org (linux-rdma@vger.kernel.org)" <linux-rdma@vger.kernel.org>
 
-Ok, regarding the very 'FIRST' object, what does 'FIRST' refer to?
-Suppose the object size is 4MB, we open an empty file, write at [6MB, 
-7MB], then an object named something like 0001 generated. Is it the 
-first object? Then next time, if we write at [0MB, 1MB], then the object 
-named 0000 exists, at this time, who is the first? The order is file 
-location or generating time?
+Hi,
 
-On 08/14/2013 12:44 PM, Sage Weil wrote:
-> On Wed, 14 Aug 2013, Li Wang wrote:
->> This patch implements fallocate and punch hole support for Ceph fuse client.
->>
->> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
->> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
->> ---
->> Since the i_size is untrustable without Fs cap, we'd better let the fallocate go without checking if it beyond the EOF, since OSD will take care of the situation while truncating beyond end of object. In addition, during fallocate(), we do not change the i_size, so the file size recorded by MDS is kept unchanged, that meets the semantic requirement. Instead, if we thrink the hole to not beyond EOF, consider the following example:
->> Two clients, say, A and B
->> 1 Both A and B open the same empty file with O_RW
->> 2 A do a stat(), confirm the file size is zero
->> 3 B do writing, get the file bigger
->> 4 A do punch_hole [0, 999999]
->> 5 A close file
->> 6 B close file
->> Since the file size seen by A may always be zero, if limit the truncate not beyond EOF, the hole punching will always be cancelled, in spite of the file is no longer empty.s
->>
->> Does that make sense?
->
-> Yep, this sounds right.
->
-> BTW, it is pretty easy to write tests along the lines of
-> https://github.com/ceph/ceph/blob/master/qa/workunits/fs/multiclient_sync_read_eof.py
-> to verify this sort of behavior.  A simple python script that takes 2
-> mount points can be called from the QA harness.
->
->> Another question, do we need give a special consideration to the very
->> first object? For fuse code, filter->zero() does all the hard job, has
->> it already taken this into account?
->
-> Hmm, it looks like Filer is not smart enough to do that. I suggest adding
-> a flag that makes it not delete the first object.
->
-> In the meantime I'll pull all of this into wip-fallocate!
->
-> sage
->
->
->> ---
->>   src/client/Client.cc           |   93 ++++++++++++++++++++++++++++++++++++++++
->>   src/client/Client.h            |    3 ++
->>   src/client/fuse_ll.cc          |   26 +++++++++++
->>   src/include/cephfs/libcephfs.h |   18 ++++++++
->>   src/libcephfs.cc               |    8 ++++
->>   5 files changed, 148 insertions(+)
->>
->> diff --git a/src/client/Client.cc b/src/client/Client.cc
->> index ae7ddf6..b340df5 100644
->> --- a/src/client/Client.cc
->> +++ b/src/client/Client.cc
->> @@ -22,6 +22,7 @@
->>   #include <sys/stat.h>
->>   #include <sys/param.h>
->>   #include <fcntl.h>
->> +#include <linux/falloc.h>
->>
->>   #include <sys/statvfs.h>
->>
->> @@ -7664,6 +7665,98 @@ int Client::ll_fsync(Fh *fh, bool syncdataonly)
->>     return _fsync(fh, syncdataonly);
->>   }
->>
->> +int Client::_fallocate(Fh *fh, int mode, int64_t offset, int64_t length)
->> +{
->> +  if (offset < 0 || length <= 0)
->> +    return -EINVAL;
->> +
->> +  if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE))
->> +    return -EOPNOTSUPP;
->> +
->> +  if ((mode & FALLOC_FL_PUNCH_HOLE) && !(mode & FALLOC_FL_KEEP_SIZE))
->> +    return -EOPNOTSUPP;
->> +
->> +  if (osdmap->test_flag(CEPH_OSDMAP_FULL) && !(mode & FALLOC_FL_PUNCH_HOLE))
->> +    return -ENOSPC;
->> +
->> +  Inode *in = fh->inode;
->> +
->> +  if (in->snapid != CEPH_NOSNAP)
->> +    return -EROFS;
->> +
->> +  if ((fh->mode & CEPH_FILE_MODE_WR) == 0)
->> +    return -EBADF;
->> +
->> +  int have;
->> +  int r = get_caps(in, CEPH_CAP_FILE_WR, CEPH_CAP_FILE_BUFFER, &have, -1);
->> +  if (r < 0)
->> +    return r;
->> +
->> +  if (mode & FALLOC_FL_PUNCH_HOLE) {
->> +    Mutex flock("Client::_punch_hole flock");
->> +    Cond cond;
->> +    bool done = false;
->> +    Context *onfinish = new C_SafeCond(&flock, &cond, &done);
->> +    Context *onsafe = new C_Client_SyncCommit(this, in);
->> +
->> +    unsafe_sync_write++;
->> +    get_cap_ref(in, CEPH_CAP_FILE_BUFFER);
->> +
->> +    _invalidate_inode_cache(in, offset, length, true);
->> +    r = filer->zero(in->ino, &in->layout,
->> +                    in->snaprealm->get_snap_context(),
->> +                    offset, length,
->> +                    ceph_clock_now(cct),
->> +                    0, onfinish, onsafe);
->> +    if (r < 0)
->> +      goto done;
->> +
->> +    client_lock.Unlock();
->> +    flock.Lock();
->> +    while (!done)
->> +      cond.Wait(flock);
->> +    flock.Unlock();
->> +    client_lock.Lock();
->> +  } else if (!(mode & FALLOC_FL_KEEP_SIZE)) {
->> +    uint64_t size = offset + length;
->> +    if (size > in->size) {
->> +      in->size = size;
->> +      mark_caps_dirty(in, CEPH_CAP_FILE_WR);
->> +
->> +      if ((in->size << 1) >= in->max_size &&
->> +          (in->reported_size << 1) < in->max_size)
->> +        check_caps(in, false);
->> +    }
->> +  }
->> +
->> +  in->mtime = ceph_clock_now(cct);
->> +  mark_caps_dirty(in, CEPH_CAP_FILE_WR);
->> +
->> +done:
->> +  put_cap_ref(in, CEPH_CAP_FILE_WR);
->> +  return r;
->> +}
->> +
->> +int Client::ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length)
->> +{
->> +  Mutex::Locker lock(client_lock);
->> +  ldout(cct, 3) << "ll_fallocate " << fh << " " << fh->inode->ino << " " << dendl;
->> +  tout(cct) << "ll_fallocate " << mode << " " << offset << " " << length << std::endl;
->> +  tout(cct) << (unsigned long)fh << std::endl;
->> +
->> +  return _fallocate(fh, mode, offset, length);
->> +}
->> +
->> +int Client::fallocate(int fd, int mode, loff_t offset, loff_t length)
->> +{
->> +  Mutex::Locker lock(client_lock);
->> +  tout(cct) << "fallocate " << " " << fd << mode << " " << offset << " " << length << std::endl;
->> +
->> +  Fh *fh = get_filehandle(fd);
->> +  if (!fh)
->> +    return -EBADF;
->> +  return _fallocate(fh, mode, offset, length);
->> +}
->>
->>   int Client::ll_release(Fh *fh)
->>   {
->> diff --git a/src/client/Client.h b/src/client/Client.h
->> index 96e8937..218fe10 100644
->> --- a/src/client/Client.h
->> +++ b/src/client/Client.h
->> @@ -555,6 +555,7 @@ private:
->>     int _flush(Fh *fh);
->>     int _fsync(Fh *fh, bool syncdataonly);
->>     int _sync_fs();
->> +  int _fallocate(Fh *fh, int mode, int64_t offset, int64_t length);
->>
->>     int get_or_create(Inode *dir, const char* name,
->>   		    Dentry **pdn, bool expect_null=false);
->> @@ -653,6 +654,7 @@ public:
->>     int ftruncate(int fd, loff_t size);
->>     int fsync(int fd, bool syncdataonly);
->>     int fstat(int fd, struct stat *stbuf);
->> +  int fallocate(int fd, int mode, loff_t offset, loff_t length);
->>
->>     // full path xattr ops
->>     int getxattr(const char *path, const char *name, void *value, size_t size);
->> @@ -722,6 +724,7 @@ public:
->>     int ll_write(Fh *fh, loff_t off, loff_t len, const char *data);
->>     int ll_flush(Fh *fh);
->>     int ll_fsync(Fh *fh, bool syncdataonly);
->> +  int ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length);
->>     int ll_release(Fh *fh);
->>     int ll_statfs(vinodeno_t vino, struct statvfs *stbuf);
->>
->> diff --git a/src/client/fuse_ll.cc b/src/client/fuse_ll.cc
->> index 8339553..3eab648 100644
->> --- a/src/client/fuse_ll.cc
->> +++ b/src/client/fuse_ll.cc
->> @@ -399,6 +399,20 @@ static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino, int cmd, void *arg, st
->>   }
->>   #endif
->>
->> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
->> +
->> +static void fuse_ll_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
->> +                              off_t offset, off_t length,
->> +                              struct fuse_file_info *fi)
->> +{
->> +  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
->> +  Fh *fh = (Fh*)fi->fh;
->> +  int r = cfuse->client->ll_fallocate(fh, mode, offset, length);
->> +  fuse_reply_err(req, -r);
->> +}
->> +
->> +#endif
->> +
->>   static void fuse_ll_release(fuse_req_t req, fuse_ino_t ino, struct fuse_file_info *fi)
->>   {
->>     CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
->> @@ -599,8 +613,20 @@ const static struct fuse_lowlevel_ops fuse_ll_oper = {
->>    getlk: 0,
->>    setlk: 0,
->>    bmap: 0,
->> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 8)
->>   #ifdef FUSE_IOCTL_COMPAT
->>    ioctl: fuse_ll_ioctl,
->> +#else
->> + ioctl: 0,
->> +#endif
->> + poll: 0,
->> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
->> + write_buf: 0,
->> + retrieve_reply: 0,
->> + forget_multi: 0,
->> + flock: 0,
->> + fallocate: fuse_ll_fallocate
->> +#endif
->>   #endif
->>   };
->>
->> diff --git a/src/include/cephfs/libcephfs.h b/src/include/cephfs/libcephfs.h
->> index 93e86e7..9b74f63 100644
->> --- a/src/include/cephfs/libcephfs.h
->> +++ b/src/include/cephfs/libcephfs.h
->> @@ -709,6 +709,24 @@ int ceph_ftruncate(struct ceph_mount_info *cmount, int fd, loff_t size);
->>   int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataonly);
->>
->>   /**
->> + * Preallocate or release disk space for the file for the byte range.
->> + *
->> + * @param cmount the ceph mount handle to use for performing the fallocate.
->> + * @param fd the file descriptor of the file to fallocate.
->> + * @param mode the flags determines the operation to be performed on the given range.
->> + *        default operation (0) allocate and initialize to zero the file in the byte range,
->> + *        and the file size will be changed if offset + length is greater than
->> + *        the file size. if the FALLOC_FL_KEEP_SIZE flag is specified in the mode,
->> + *        the file size will not be changed. if the FALLOC_FL_PUNCH_HOLE flag is
->> + *        specified in the mode, the operation is deallocate space and zero the byte range.
->> + * @param offset the byte range starting.
->> + * @param length the length of the range.
->> + * @return 0 on success or a negative error code on failure.
->> + */
->> +int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
->> +	                      loff_t offset, loff_t length);
->> +
->> +/**
->>    * Get the open file's statistics.
->>    *
->>    * @param cmount the ceph mount handle to use for performing the fstat.
->> diff --git a/src/libcephfs.cc b/src/libcephfs.cc
->> index 16b130a..306c4ba 100644
->> --- a/src/libcephfs.cc
->> +++ b/src/libcephfs.cc
->> @@ -700,6 +700,14 @@ extern "C" int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataon
->>     return cmount->get_client()->fsync(fd, syncdataonly);
->>   }
->>
->> +extern "C" int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
->> +	                      loff_t offset, loff_t length)
->> +{
->> +  if (!cmount->is_mounted())
->> +    return -ENOTCONN;
->> +  return cmount->get_client()->fallocate(fd, mode, offset, length);
->> +}
->> +
->>   extern "C" int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf)
->>   {
->>     if (!cmount->is_mounted())
->> --
->> 1.7.9.5
->>
->>
->
+maybe some information about the environment I am
+working in:
+
+- CentOS 6.4 with custom kernel 3.8.13
+- librdmacm / librspreload from git, tag 1.0.17
+- application started with librspreload in LD_PRELOAD environment
+
+Currently, I have increased the value of the spin time by setting the
+default value for polling_time in the source code.
+
+I guess that the correct way to do this is via
+configuration in /etc/rdma/rsocket/polling_time?
+
+Concerning the rpoll() itself, some more comments/questions
+embedded below.
+
+On Tue, 13 Aug 2013 21:44:42 +0000
+"Hefty, Sean" <sean.hefty@intel.com> wrote:
+
+> > > I found a workaround for my (our) problem: in the librdmacm
+> > > code, rsocket.c, there is a global constant polling_time, which
+> > > is set to 10 microseconds at the moment.
+> > >
+> > > I raise this to 10000 - and all of a sudden things work nicely.
+> > 
+> > I am adding the linux-rdma list to CC so Sean might see this.
+> > 
+> > If I understand what you are describing, the caller to rpoll()
+> > spins for up to 10 ms (10,000 us) before calling the real poll().
+> > 
+> > What is the purpose of the real poll() call? Is it simply a means
+> > to block the caller and avoid spinning? Or does it actually expect
+> > to detect an event?
+> 
+> When the real poll() is called, an event is expected on an fd
+> associated with the CQ's completion channel. 
+
+The first question I would have is: why is the rpoll() split into
+these two pieces? There must have been some reason to do a busy
+loop on some local state information rather than just call the
+real poll() directly.
+
+> > > I think we are looking at two issues here:
+> > > 1. the thread structure of ceph messenger
+> > >   For a given socket connection, there are 3 threads of interest
+> > >   here: the main messenger thread, the Pipe::reader and the
+> > >   Pipe::writer.
+> > >
+> > >   For a ceph client like the ceph admin command, I see the
+> > > following sequence
+> > >     - the connection to the ceph monitor is created by the
+> > >       main messenger  thread, the Pipe::reader and
+> > >       Pipe::writer are instantiated.
+> > >     - the requested command is sent to the ceph monitor, the
+> > >       answer is read and printed
+> > >     - at this point the Pipe::reader already has called
+> > >       tcp_read_wait(), polling for more data or connection
+> > > termination
+> > >     - after the response had been printed, the main loop calls the
+> > >       shutdown routines which in in turn shutdown() the socket
+> > >
+> > >    There is some time between the last two steps - and this gap is
+> > >    long enough to open a race:
+> > >
+> > > 2. rpoll, ibv and poll
+> > >   the rpoll implementation in rsockets is split in 2 phases:
+> > >   - a busy loop which checks the state of the underlying ibv
+> > > queue pair
+> > >   - the call to real poll() system call (i.e. the uverbs(?)
+> > >     implementation of poll() inside the kernel)
+> > >
+> > >   The busy loop has a maximum duration of polling_time (10
+> > > microseconds by default) - and is able detect the local shutdown
+> > > and returns a POLLHUP.
+> > >
+> > >   The poll() system call (i.e. the uverbs implementation of poll()
+> > >   in the kernel) does not detect the local shutdown - and only
+> > > returns after the caller supplied timeout expires.
+> 
+> It sounds like there's an issue here either with a message getting
+> lost or a race.  Given that spinning longer works for you, it sounds
+> like an event is getting lost, not being generated correctly, or not
+> being configured to generate.
+> 
+
+I am looking at a multithreaded application here, and I believe that
+the race is between thread A calling the rpoll() for POLLIN event and
+thread B calling the shutdown(SHUT_RDWR) for reading and writing of
+the (r)socket almost immediately afterwards.
+
+I think that the shutdown itself does not cause a POLLHUP event to be
+generated from the kernel to interupt the real poll().
+(BTW: which kernel module implements the poll() for rsockets?
+Is that ib_uverbs.ko with ib_uverbs_poll_cq()?)
+
+> > > Increasing the rsockets polloing_time from 10 to 10000
+> > > microseconds results in the rpoll to detect the local shutdown
+> > > within the busy loop.
+> > >
+> > > Decreasing the ceph "ms tcp read timeout" from the default of 900
+> > > to 5 seconds serves a similar purpose, but is much coarser.
+> > >
+> > > From my understanding, the real issue is neither at the ceph nor
+> > > at the rsockets level: it is related to the uverbs kernel module.
+> > >
+> > > An alternative way to address the current problem at the rsockets
+> > > level would be w re-write of the rpoll(): instead of the busy
+> > > loop at the beginning followed by the reall poll() call with the
+> > > full user specificed timeout value ("ms tcp read timeout" in our
+> > > case), I would embed the real poll()  into a loop, splitting the
+> > > user specified timeout into smaller portions and doing the
+> > > rsockets specific rs_poll_check() on every timeout of the real
+> > > poll().
+> > 
+> > I have not looked at the rsocket code, so take the following with a
+> > grain of salt. If the purpose of the real poll() is to simply block
+> > the user for a specified time, then you can simply make it a short
+> > duration (taking into consideration what granularity the OS
+> > provides) and then call ibv_poll_cq(). Keep in mind, polling will
+> > prevent your CPU from reducing power.
+> > 
+> > If the real poll() is actually checking for something (e.g.
+> > checking on the RDMA channel's fd or the IB channel's fd), then you
+> > may not want to spin too much.
+> 
+> The real poll() call is intended to block the application until a
+> timeout occurs or an event shows up.  Since increasing the spin time
+> works for you, it makes me suspect that there is a bug in the CQ
+> event handling in rsockets. 
+
+> > >>> What's particularly weird is that the monitor receives a POLLHUP
+> > >>> event when the ceph command shuts down it's socket but the ceph
+> > >>> command never does. When using regular sockets both sides of the
+> > >>> connection receive a POLLIN | POLLHUP | POLRDHUP event when the
+> > >>> sockets are shut down. It would seem like there is a bug in
+> > >>> rsockets that causes the side that calls shutdown first not to
+> > >>> receive the correct rpoll events.
+> 
+> rsockets does not support POLLRDHUP.
+> 
+
+I don't think the issue is POLLRDHUP.
+I think the issue is POLLHUP and/or POLLIN.
+My impression is that on a local shutdown (r)socket, a poll
+for POLLIN event should at least return a POLLIN event and
+a subsequent read should return 0 bytes indicating EOF.
+But the POLLIN is not generated from the layer below 
+rsockets (ib_uverbs.ko?) as far as I can tell.
+
+See also: http://www.greenend.org.uk/rjk/tech/poll.html
+
+Best Regards
+
+Andreas Bluemle
+
+> - Sean
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-rdma"
+> in the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
+
+
+
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+
+Company details: http://www.itxperts.de/imprint.htm
