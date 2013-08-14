@@ -1,85 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: review request : ReplicatedPG::AccessMode::wake removal
-Date: Wed, 14 Aug 2013 19:30:23 +0200
-Message-ID: <520BBEAF.7080402@dachary.org>
-References: <520B5939.9050503@dachary.org>
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: Re: RGW blueprint for plugin architecture
+Date: Wed, 14 Aug 2013 20:24:08 +0200
+Message-ID: <CAN04cT6uOTYx7Mk0sMWBBwzy=Muf40ZkZDUpgYpQ6=9ZE=TvBw@mail.gmail.com>
+References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
+	<CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigB11A9F0C95095D22E28A0E31"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:48127 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759241Ab3HNRa0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 13:30:26 -0400
-In-Reply-To: <520B5939.9050503@dachary.org>
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:63641 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932719Ab3HNSYJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 14:24:09 -0400
+Received: by mail-oa0-f53.google.com with SMTP id k18so13297407oag.26
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Aug 2013 11:24:08 -0700 (PDT)
+In-Reply-To: <CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigB11A9F0C95095D22E28A0E31
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I most definitely agree, that's why I think a lightweight and
+extensible solution would be best. No big interface description but
+just a simple loader function with parameters depending on the type of
+'plugin'. If we need another type of plugin, we can add that later on
+(of course, we have to be extra careful not to make a mess of things
+and end up having to define another plugin type for every single
+plugin). That way we can end up having the best of both ways; modular
+and flexible.
 
-I removed the code in a minimal way instead of removing the data member i=
-tself, as you suggested.
+What do you think would be the best way to start? Probably to define
+types of plugins? I can think of two types of plugins right now:
 
-https://github.com/dachary/ceph/commit/2f73eea0b8d7d4633d5887ba725d258ce8=
-1f8ac0
+ - "API" (REST APIs): S3, Swift, (GS?) etc
+ - "AUTH" (Authentication backends): Rados/internal, Keystone
 
-On 14/08/2013 12:17, Loic Dachary wrote:
-> Hi Sam,
->=20
-> IIRC, a few weeks ago you told me that=20
->=20
-> https://github.com/ceph/ceph/blob/962b64a83037ff79855c5261325de0cd1541f=
-582/src/osd/ReplicatedPG.cc#L4626
->=20
->   if (mode.wake) {
->     requeue_ops(mode.waiting);
->     for (list<Cond*>::iterator p =3D mode.waiting_cond.begin(); p !=3D =
-mode.waiting_cond.end(); ++p)
->       (*p)->Signal();
->     mode.wake =3D false;
->   }=20
->=20
-> was not used and could be discarded. In the context of https://github.c=
-om/ceph/ceph/pull/414 I originally kept calling it wherever put_object_co=
-ntext() was called, just to make sure no opportunity to signal the waiter=
-s was missed.=20
->=20
-> Since that could lead to very subtle bugs if I misunderstood what you m=
-eant, I would very much appreciate a review of this specific commit.=20
->=20
-> https://github.com/dachary/ceph/commit/014997d55aa8d614fe38a1f86faa246d=
-3c13e21b
->=20
-> I've not hit anything suspicious yet while running teuthology. But that=
-'s really the only part of this patch series that worries me.
->=20
-> Cheers
->=20
+Implementing these will mostly require moving some code around. That
+would be doable IMHO. If we have at least the basic plugin framework
+up&running, people can start writing their stuff in plugins (instead
+of keeping a bunch of patches laying around like I do because they
+make no sense in the current monolithic code base).
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+I think we can do this without tying our hands behind our backs. And
+as longs as we keep it to simply moving existing code into plugins
+instead of adding new code until we have a plugin system with which we
+can live with, we can always go back without breaking functionality.
 
+Roald
 
---------------enigB11A9F0C95095D22E28A0E31
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlILvq8ACgkQ8dLMyEl6F22DxwCfcLMfcDlON5SKQE2x5CR+of3D
-awMAoLBaqPQrvnJEkWN5fy59OBeVQqgL
-=0xAq
------END PGP SIGNATURE-----
-
---------------enigB11A9F0C95095D22E28A0E31--
+On Wed, Aug 14, 2013 at 7:17 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+> On Wed, Aug 14, 2013 at 5:57 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+>> Hi all,
+>>
+>> For those interested;
+>> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture
+>>
+>> I know a plugin architecture is a sensitive subject for a lot of
+>> people (it is for me at least), but I think it might be worthwhile
+>> discussing it.
+>>
+>> Please comment/flame away :-)
+>>
+>
+> I'm all for having a modular architecture. In essence this is
+> something we've been aiming at although the interfaces are not as
+> clean and shiny as they should be. OTOH, there's the danger overdoing
+> it and tying our hands behind our backs, so we need to be careful
+> about what to get into a plugin/module, and what should stay as it is
+> now (flexible, albeit monolithic).
+>
+> Yehuda
