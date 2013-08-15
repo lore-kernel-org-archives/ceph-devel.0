@@ -1,12 +1,12 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH v4] Ceph: Punch hole support for kernel client
-Date: Thu, 15 Aug 2013 09:07:50 +0800
-Message-ID: <1376528870-3918-1-git-send-email-liwang@ubuntukylin.com>
+Subject: [PATCH v5] Ceph: Punch hole support for kernel client
+Date: Thu, 15 Aug 2013 11:51:44 +0800
+Message-ID: <1376538704-6659-1-git-send-email-liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:39163 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755381Ab3HOBIU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 21:08:20 -0400
+Received: from m199-177.yeah.net ([123.58.177.199]:42631 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758425Ab3HODwA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Aug 2013 23:52:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -17,16 +17,20 @@ This patch implements fallocate and punch hole support for Ceph kernel client.
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 ---
+Against v3:
+
 Passed the fsx test from xfstests.
 
 Truncate rather than delete the first object. Thanks go to Sage and Zheng for the explanation.
+
+Silence the OSD ENOENT complaints.
 ---
- fs/ceph/file.c        |  193 +++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/file.c        |  196 +++++++++++++++++++++++++++++++++++++++++++++++++
  net/ceph/osd_client.c |   11 ++-
- 2 files changed, 202 insertions(+), 2 deletions(-)
+ 2 files changed, 205 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 2ddf061..04201fb 100644
+index 2ddf061..e2bcd5c 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
 @@ -8,6 +8,7 @@
@@ -37,7 +41,7 @@ index 2ddf061..04201fb 100644
  
  #include "super.h"
  #include "mds_client.h"
-@@ -871,6 +872,197 @@ out:
+@@ -871,6 +872,200 @@ out:
  	return offset;
  }
  
@@ -111,8 +115,11 @@ index 2ddf061..04201fb 100644
 +				&inode->i_mtime);
 +
 +	ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-+	if (!ret)
++	if (!ret) {
 +		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
++		if (ret == -ENOENT)
++			ret = 0;
++	}
 +	ceph_osdc_put_request(req);
 +
 +out:
@@ -235,7 +242,7 @@ index 2ddf061..04201fb 100644
  const struct file_operations ceph_file_fops = {
  	.open = ceph_open,
  	.release = ceph_release,
-@@ -887,5 +1079,6 @@ const struct file_operations ceph_file_fops = {
+@@ -887,5 +1082,6 @@ const struct file_operations ceph_file_fops = {
  	.splice_write = generic_file_splice_write,
  	.unlocked_ioctl = ceph_ioctl,
  	.compat_ioctl	= ceph_ioctl,
