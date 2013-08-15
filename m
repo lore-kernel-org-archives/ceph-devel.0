@@ -1,36 +1,41 @@
-From: =?ISO-8859-1?Q?Mika=EBl_Cluseau?= <mcluseau-IjqRiDx9rwg@public.gmane.org>
-Subject: Re: v0.67 Dumpling released
-Date: Thu, 15 Aug 2013 16:54:13 +1100
-Message-ID: <520C6D05.2000208@isi.nc>
-References: <alpine.DEB.2.00.1308132222350.18836@cobra.newdream.net>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [patch 3/2] libceph: create_singlethread_workqueue() doesn't return
+ ERR_PTRs
+Date: Thu, 15 Aug 2013 08:58:59 +0300
+Message-ID: <20130815055859.GF23580@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1308132222350.18836-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: netdev-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi lists,
+create_singlethread_workqueue() returns NULL on error, and it doesn't
+return ERR_PTRs.
 
-in this release I see that the ceph command is not compatible with 
-python 3. The changes were not all trivial so I gave up, but for those 
-using gentoo, I made my ceph git repository available here with an 
-ebuild that forces the python version to 2.6 ou 2.7 :
+I tweaked the error handling a little to be consistent with earlier in
+the function.
 
-git clone https://git.isi.nc/cloud/cloud-overlay.git
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-I upgraded from cuttlefish without any problem so good job 
-ceph-contributors :)
-
-Have a nice day.
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index dbc0a73..02c5246 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2257,12 +2257,10 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
+ 	if (err < 0)
+ 		goto out_msgpool;
+ 
++	err = -ENOMEM;
+ 	osdc->notify_wq = create_singlethread_workqueue("ceph-watch-notify");
+-	if (IS_ERR(osdc->notify_wq)) {
+-		err = PTR_ERR(osdc->notify_wq);
+-		osdc->notify_wq = NULL;
++	if (!osdc->notify_wq)
+ 		goto out_msgpool;
+-	}
+ 	return 0;
+ 
+ out_msgpool:
