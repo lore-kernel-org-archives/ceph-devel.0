@@ -1,76 +1,84 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Deferred deletion of ObjectContext
-Date: Thu, 15 Aug 2013 16:12:55 +0200
-Message-ID: <520CE1E7.8070301@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Need some help with the RBD Java bindings
+Date: Thu, 15 Aug 2013 17:51:39 +0200
+Message-ID: <520CF90B.2070106@42on.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig481D219E3739E8126DC9520A"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:34200 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757675Ab3HOOM7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Aug 2013 10:12:59 -0400
+Received: from websrv.42on.com ([31.25.102.167]:51878 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757460Ab3HOPvo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 15 Aug 2013 11:51:44 -0400
+Received: from [IPv6:2001:980:7936:0:54f5:7c0a:be60:558d] (unknown [IPv6:2001:980:7936:0:54f5:7c0a:be60:558d])
+	by websrv.42on.com (Postfix) with ESMTPSA id 4E26BC44EE
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Aug 2013 17:51:39 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig481D219E3739E8126DC9520A
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Sam,
+I'm having some issues with the Java bindings for librbd and I'm not 
+sure what the problem is here.
 
-I've amended https://github.com/ceph/ceph/pull/414 with
+The problem is with listing snapshot of a RBD image. I test it in this 
+test case:
 
-https://github.com/dachary/ceph/commit/66e42d0ec29ffdd2edc225f4090a132a50=
-d9665b#L0R4668
+public void testCreateAndClone() {
+     try {
+         ..
+         ..
+         image.snapCreate(snapName);
+         image.snapProtect(snapName);
 
-  bool locked =3D is_locked();
-  if (!locked)
-    lock();
+         List<RbdSnapInfo> snaps = image.snapList();
+         assertEquals("There should only be one snapshot", 1, snaps.size());
+     ..
+     ..
+     }
+}
 
-  if (obc->ssc)
-    put_snapset_context(obc->ssc);
+This test fails 95% of the time with my whole JVM crashing.
 
-  if (object_contexts.empty())
-    kick();
+The code to blame is in RbdImage.java:
 
-  if (!locked)
-    unlock();
+public List<RbdSnapInfo> snapList() throws RbdException {
+     IntByReference numSnaps = new IntByReference(16);
+     PointerByReference snaps = new PointerByReference();
+     List<RbdSnapInfo> list = new ArrayList<RbdSnapInfo>();
+     RbdSnapInfo snapInfo, snapInfos[];
 
-This callback may be called at any time and it is not possible to assume =
-the PG is locked when it happens. With manual reference counting, this pa=
-rt of code was guaranteed to be called when the PG was locked. PG::lock()=
- is called at the beginning and PG::unlock() at the end to provide the sa=
-me guarantee.
+     while (true) {
+         int r = rbd.rbd_snap_list(this.getPointer(), snaps, numSnaps);
+         if (r >= 0) {
+             numSnaps.setValue(r);
+             break;
+         } else {
+             throw new RbdException("Failed listing snapshots", r);
+         }
+     }
 
-It runs ok with https://github.com/ceph/ceph/pull/414#issuecomment-227050=
-40 and https://github.com/ceph/ceph/pull/414#issuecomment-22705040 . If i=
-t sounds reasonable to you I'll schedule another rados suite.=20
+     Pointer p = snaps.getValue(); <<<< crash
+     snapInfo = new RbdSnapInfo(p);
 
-Cheers
+     ..
+     ..
+}
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+So it crashes when it wants to get the value of the snaps var.
 
+I can't figure out why this is happening and why it isn't consistent. 
+I'm not a real JNA expert and I was hoping somebody around here would be 
+able to figure out what I'm doing wrong.
 
---------------enig481D219E3739E8126DC9520A
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Any Java/JNA experts around who might have a clue?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
+The source of rados-java: https://github.com/wido/rados-java
 
-iEYEARECAAYFAlIM4ecACgkQ8dLMyEl6F23bJwCgkTY5oRKc8+FeQmjVlTedgruQ
-kPsAoKmhcXEBii16Aybf03MEpp8OdH4B
-=n9kb
------END PGP SIGNATURE-----
+-- 
+Wido den Hollander
+42on B.V.
 
---------------enig481D219E3739E8126DC9520A--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
