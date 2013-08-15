@@ -1,84 +1,67 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Need some help with the RBD Java bindings
-Date: Thu, 15 Aug 2013 17:51:39 +0200
-Message-ID: <520CF90B.2070106@42on.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: Deferred deletion of ObjectContext
+Date: Thu, 15 Aug 2013 09:54:41 -0700
+Message-ID: <CA+4uBUa7aMkATQFykWxjGKEJTfNJY58vfaJ=xpU+z-fsh2+xRw@mail.gmail.com>
+References: <520CE1E7.8070301@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:51878 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757460Ab3HOPvo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 15 Aug 2013 11:51:44 -0400
-Received: from [IPv6:2001:980:7936:0:54f5:7c0a:be60:558d] (unknown [IPv6:2001:980:7936:0:54f5:7c0a:be60:558d])
-	by websrv.42on.com (Postfix) with ESMTPSA id 4E26BC44EE
-	for <ceph-devel@vger.kernel.org>; Thu, 15 Aug 2013 17:51:39 +0200 (CEST)
+Received: from mail-ve0-f169.google.com ([209.85.128.169]:35917 "EHLO
+	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757806Ab3HOQyn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Aug 2013 12:54:43 -0400
+Received: by mail-ve0-f169.google.com with SMTP id db10so746530veb.14
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Aug 2013 09:54:42 -0700 (PDT)
+In-Reply-To: <520CE1E7.8070301@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+Commented on the commit.
+-Sam
 
-I'm having some issues with the Java bindings for librbd and I'm not 
-sure what the problem is here.
-
-The problem is with listing snapshot of a RBD image. I test it in this 
-test case:
-
-public void testCreateAndClone() {
-     try {
-         ..
-         ..
-         image.snapCreate(snapName);
-         image.snapProtect(snapName);
-
-         List<RbdSnapInfo> snaps = image.snapList();
-         assertEquals("There should only be one snapshot", 1, snaps.size());
-     ..
-     ..
-     }
-}
-
-This test fails 95% of the time with my whole JVM crashing.
-
-The code to blame is in RbdImage.java:
-
-public List<RbdSnapInfo> snapList() throws RbdException {
-     IntByReference numSnaps = new IntByReference(16);
-     PointerByReference snaps = new PointerByReference();
-     List<RbdSnapInfo> list = new ArrayList<RbdSnapInfo>();
-     RbdSnapInfo snapInfo, snapInfos[];
-
-     while (true) {
-         int r = rbd.rbd_snap_list(this.getPointer(), snaps, numSnaps);
-         if (r >= 0) {
-             numSnaps.setValue(r);
-             break;
-         } else {
-             throw new RbdException("Failed listing snapshots", r);
-         }
-     }
-
-     Pointer p = snaps.getValue(); <<<< crash
-     snapInfo = new RbdSnapInfo(p);
-
-     ..
-     ..
-}
-
-So it crashes when it wants to get the value of the snaps var.
-
-I can't figure out why this is happening and why it isn't consistent. 
-I'm not a real JNA expert and I was hoping somebody around here would be 
-able to figure out what I'm doing wrong.
-
-Any Java/JNA experts around who might have a clue?
-
-The source of rados-java: https://github.com/wido/rados-java
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+On Thu, Aug 15, 2013 at 7:12 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Sam,
+>
+> I've amended https://github.com/ceph/ceph/pull/414 with
+>
+> https://github.com/dachary/ceph/commit/66e42d0ec29ffdd2edc225f4090a13=
+2a50d9665b#L0R4668
+>
+>   bool locked =3D is_locked();
+>   if (!locked)
+>     lock();
+>
+>   if (obc->ssc)
+>     put_snapset_context(obc->ssc);
+>
+>   if (object_contexts.empty())
+>     kick();
+>
+>   if (!locked)
+>     unlock();
+>
+> This callback may be called at any time and it is not possible to ass=
+ume the PG is locked when it happens. With manual reference counting, t=
+his part of code was guaranteed to be called when the PG was locked. PG=
+::lock() is called at the beginning and PG::unlock() at the end to prov=
+ide the same guarantee.
+>
+> It runs ok with https://github.com/ceph/ceph/pull/414#issuecomment-22=
+705040 and https://github.com/ceph/ceph/pull/414#issuecomment-22705040 =
+=2E If it sounds reasonable to you I'll schedule another rados suite.
+>
+> Cheers
+>
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+> All that is necessary for the triumph of evil is that good people do =
+nothing.
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
