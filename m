@@ -1,38 +1,36 @@
-From: Sage Weil <sage@inktank.com>
-Subject: ceph-deploy mon pitfall..
-Date: Fri, 16 Aug 2013 09:47:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308160927320.27695@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: kclient: Missing directories
+Date: Fri, 16 Aug 2013 14:19:22 -0400
+Message-ID: <CANP1eJHZE0dFysqTraocaRSF=7-ieBag8hjNVYKTOJ8YqfmPdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46419 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754022Ab3HPQrn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 12:47:43 -0400
+Received: from mail-we0-f174.google.com ([74.125.82.174]:58442 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752821Ab3HPSTY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 14:19:24 -0400
+Received: by mail-we0-f174.google.com with SMTP id q54so1960970wes.33
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Aug 2013 11:19:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: alfredo.deza@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>
 
-A user complaining with the usual 'gatherkeys fails' showed up on IRC the 
-other night and I finally tracked it down to a stray keyring file in 
-/etc/ceph that was present prior to mon create.  Because the keyring file 
-was there, ceph-create-keys skips creating a new keyring.  And then it 
-can't do the next step because the keyring is wrong.
+I've been experiencing some weird issues with the kclient that I don't
+know how to debug. In some cases the kclient is only seeing part of
+the directory tree.
 
-I suspect the fix here is to make mon create complain and fail if there is 
-a keyring already present in /etc/ceph?  Maybe with a force flag?
+For example earlier today one clients was not seeing a top level
+directory (with around 100G of data) that's been created on the ceph
+cluster for 2 months now. After I removed another unrelated directory
+(also at the top level) in a different node this node started seeing
+this.
 
-The sequences we should consider:
+I don't really know how to debug this issue as it seams intermittent
+and comes and goes (as you see). Usually re-mounting helps.
 
-- fresh install, creating initial monitors (no conf or keyring should be 
-there)
+If you have any pointers how to deal / debug with this when file /
+directory becomes invisible I would greatly appreciate it.
 
-- adding a new mon to an existing cluster.  conf might be there, keyring 
-usually won't.  but it could be, if they did the 'ceph admin HOST' or 
-whatever it is to push out the keyring and config on that host at some 
-point previously.
-
-Probably a check and force option similar to the config will do the trick?
-
-sage
+Thanks,
+- Milosz
