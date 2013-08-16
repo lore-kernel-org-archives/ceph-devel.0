@@ -1,59 +1,34 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] Ceph: Remove useless variable revoked_rdcache
-Date: Thu, 15 Aug 2013 22:01:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308152159130.1479@cobra.newdream.net>
-References: <1376553278-8153-1-git-send-email-liwang@ubuntukylin.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: debugging librbd async
+Date: Fri, 16 Aug 2013 05:00:47 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B66498C5D@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40507 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750909Ab3HPFBH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 01:01:07 -0400
-In-Reply-To: <1376553278-8153-1-git-send-email-liwang@ubuntukylin.com>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:56198 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751178Ab3HPFBI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 01:01:08 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
 
-Applied to testing branch, Thanks!
+I'm testing out the tapdisk rbd that Sylvain wrote under Xen, and have been having all sorts of problems as the tapdisk process is segfaulting. To make matters worse, any attempt to use gdb on the resulting core just tells me it can't find the threads ('generic error'). Google tells me that I can get around this error by linking the main exe (tapdisk) with libpthread, but that doesn't help.
 
-sage
+With strategic printf's I have confirmed that in most cases the crash happens after a call to rbd_aio_read or rbd_aio_write and before the callback is called. Given the async nature of tapdisk it's impossible to be sure but I'm confident that the crash is not happening in any of the tapdisk code. It's possible that there is an off-by-one error in a buffer somewhere with the corruption showing up later but there really isn't a lot of code there and I've been over it very closely and it appears quite sound.
 
+I have also tested for multiple complete's for the same request, and corrupt pointers being passed into the completion routine, and nothing shows up there either.
 
-On Thu, 15 Aug 2013, Li Wang wrote:
+In most cases there is nothing pre-empting the crash, aside from a tendency to seemingly crash more often when the cluster is disturbed (eg a mon node is rebooted). I have one VM which will be unbootable for long periods of time with the crash happening during boot, typically when postgres starts. This can be reproduced for hours and is useful for debugging, but then suddenly the problem goes away spontaneously and I can no longer reproduce it even after hundreds of reboots.
 
-> Cleanup in handle_cap_grant()
-> 
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> ---
->  fs/ceph/caps.c |    5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 25442b4..8c90cae 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2361,7 +2361,6 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
->  	int check_caps = 0;
->  	int wake = 0;
->  	int writeback = 0;
-> -	int revoked_rdcache = 0;
->  	int queue_invalidate = 0;
->  
->  	dout("handle_cap_grant inode %p cap %p mds%d seq %d %s\n",
-> @@ -2377,9 +2376,7 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
->  	if (((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
->  	    (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
->  	    !ci->i_wrbuffer_ref) {
-> -		if (try_nonblocking_invalidate(inode) == 0) {
-> -			revoked_rdcache = 1;
-> -		} else {
-> +		if (try_nonblocking_invalidate(inode)) {
->  			/* there were locked pages.. invalidate later
->  			   in a separate thread. */
->  			if (ci->i_rdcache_revoking != ci->i_rdcache_gen) {
-> -- 
-> 1.7.9.5
-> 
-> 
+I'm using Debian and the problem exists with both the latest cuttlefish and dumpling deb's.
+
+So... does librbd have any internal self-checking options I can enable? If I'm going to start injecting printf's around the place, can anyone suggest what code paths are most likely to be causing the above?
+
+Thanks
+
+James
+
