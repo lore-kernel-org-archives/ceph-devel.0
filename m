@@ -1,66 +1,56 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: debugging librbd async
-Date: Fri, 16 Aug 2013 06:13:52 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B66498C5D@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308152206200.1479@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B66498DAD@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308152242310.1479@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Show outdated diffs on github
+Date: Fri, 16 Aug 2013 08:45:25 +0200
+Message-ID: <520DCA85.1020208@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigB0F90A8D0D5BCEED14E7E3A1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.bendigoit.com.au ([203.16.224.4]:59199 "EHLO
-	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751935Ab3HPGN6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 02:13:58 -0400
-In-Reply-To: <alpine.DEB.2.00.1308152242310.1479@cobra.newdream.net>
-Content-Language: en-US
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:51280 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750779Ab3HPGpt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 02:45:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> > > Of course, the old standby is to just crank up the logging detail and try
-> > > to narrow down where the crash happens.  Have you tried that yet?
-> >
-> > I haven't touched the rbd code. Is increased logging a compile-time
-> > option or a config option?
-> 
-> That is probably the first you should try then.  In the [client] section
-> of ceph.conf on the node where tapdisk is running add something like
-> 
->  [client]
->   debug rbd = 20
->   debug rados = 20
->   debug ms = 1
->   log file = /var/log/ceph/client.$name.$pid.log
-> 
-> and make sure the log directory is writeable.
-> 
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigB0F90A8D0D5BCEED14E7E3A1
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Excellent. How noisy are those levels likely to be?
+Hi Josh,
 
-Is it the consumer of librbd that reads those values? I mean all I need to do is restart tapdisk process and the logging should happen right?
+=46rom https://github.com/ceph/ceph/pull/504 I see that your comments per=
+sisted despite a rebase and show as=20
 
-> > > There is a probable issue with aio_flush and caching enabled that Mike
-> > > Dawson is trying to reproduce.  Are you running with caching on or off?
-> >
-> > I have not enabled caching, and I believe it's disabled by default.
-> 
-> There is a fix for an aio hang that just hit the cuttlefish branch today
-> that could conceivably be the issue.  It causes a hang on qemu but maybe
-> tapdisk is more sensitive?  I'd make sure you're running with that in any
-> case to rule it out.
-> 
+ jdurgin discussed an outdated diff 8 hours ago=20
 
-I switched to dumpling in the last few days to see if the problem existed there. Is the fix you mention in dumpling? I'm not yet running mission critical production code on ceph, just a secondary windows domain controller, secondary spam filter, and a few other machines that don't affect production if they crash.
+I would like to do the same but when I comment inline, it shows different=
+ly and gets trashed by a rebase. I'm curious to learn how you do it :-)
 
-I'm also testing valgrind at the moment, just basic memtest, but suddenly everything is quite stable even though it's under reasonable load right now. Stupid heisenbugs.
+Cheers
 
-Thanks
-
-James
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
+--------------enigB0F90A8D0D5BCEED14E7E3A1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlINyoUACgkQ8dLMyEl6F23HDQCgwzQH+jglDJnipdhQ2iOCx7Np
+1mwAmgNKQk8Kjwn+S4pnhSDkSp7hCAuq
+=sv8N
+-----END PGP SIGNATURE-----
+
+--------------enigB0F90A8D0D5BCEED14E7E3A1--
