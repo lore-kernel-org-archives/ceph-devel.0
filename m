@@ -1,68 +1,79 @@
 From: Sage Weil <sage@inktank.com>
-Subject: RE: debugging librbd async
-Date: Fri, 16 Aug 2013 08:57:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308160856010.26808@cobra.newdream.net>
-References: <6035A0D088A63A46850C3988ED045A4B66498C5D@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152206200.1479@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B66498DAD@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152242310.1479@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au>
+Subject: Re: Google recruitment spam
+Date: Fri, 16 Aug 2013 09:14:03 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308160912500.27695@cobra.newdream.net>
+References: <520DE403.1040908@dachary.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45926 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46064 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753344Ab3HPP5Q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 11:57:16 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au>
+	with ESMTP id S1752143Ab3HPQOD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 12:14:03 -0400
+In-Reply-To: <520DE403.1040908@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 16 Aug 2013, James Harper wrote:
-> > > > Of course, the old standby is to just crank up the logging detail and try
-> > > > to narrow down where the crash happens.  Have you tried that yet?
-> > >
-> > > I haven't touched the rbd code. Is increased logging a compile-time
-> > > option or a config option?
-> > 
-> > That is probably the first you should try then.  In the [client] section
-> > of ceph.conf on the node where tapdisk is running add something like
-> > 
-> >  [client]
-> >   debug rbd = 20
-> >   debug rados = 20
-> >   debug ms = 1
-> >   log file = /var/log/ceph/client.$name.$pid.log
-> > 
-> > and make sure the log directory is writeable.
-> > 
+On Fri, 16 Aug 2013, Loic Dachary wrote:
+> Hi Ceph,
 > 
-> Excellent. How noisy are those levels likely to be?
-> 
-> Is it the consumer of librbd that reads those values? I mean all I need 
-> to do is restart tapdisk process and the logging should happen right?
+> It looks like Google has a github bot harvesting mails from repositories and fishing for job applicants. I guess every committer got the exact same message addressed to the mail(s) that show in the commits. There is nothing to be done about it but it is worth mentioning, in public, that it is bad practice to try to disguise a mail as if it was written by someone who cares. I'm a somewhat ashamed to say that I was flattered to receive the mail, because I have a high opinion of Google technical skills and recruitment process. When I realized a bot was the source, I felt stupid. I'm not sure that's a profitable recruiting technique.
 
-That sound do it, yeah.
-
-> > > > There is a probable issue with aio_flush and caching enabled that Mike
-> > > > Dawson is trying to reproduce.  Are you running with caching on or off?
-> > >
-> > > I have not enabled caching, and I believe it's disabled by default.
-> > 
-> > There is a fix for an aio hang that just hit the cuttlefish branch today
-> > that could conceivably be the issue.  It causes a hang on qemu but maybe
-> > tapdisk is more sensitive?  I'd make sure you're running with that in any
-> > case to rule it out.
-> > 
-> 
-> I switched to dumpling in the last few days to see if the problem existed there. Is the fix you mention in dumpling? I'm not yet running mission critical production code on ceph, just a secondary windows domain controller, secondary spam filter, and a few other machines that don't affect production if they crash.
-
-The fix is in the dumpling branch, but not in v0.67.  It will be in 
-v0.67.1.
- 
-> I'm also testing valgrind at the moment, just basic memtest, but suddenly everything is quite stable even though it's under reasonable load right now. Stupid heisenbugs.
-
-Valgrind makes things go very slow (~10x?), which can have a huge effect 
-on timing. Sometimes that reveals new races, other times it hides others.  
-:/
+I think this is the first time I've seen (obviously) automated recruitment 
+spam.  I somewhat amusingly got this message on Monday, following a few 
+minutes later by an apology and second version with the blanks filled in. 
+Maybe they *should* stick to the robots.
 
 sage
+
+---->8----
+
+Subject: Engineering Opportunities with Google
+
+Hi Sage,
+
+Hello ____,
+
+I sent you an email about a month ago and I wanted to follow up with you
+to see if you would be interested in learning more about engineering
+opportunities at Google. I am very impressed with your profile especially,
+your background in the ____________ and your _________________ :-)
+
+I'd like to tell you more about the Google.com Engineering team, as well
+as answer any questions you may have about the teams here at Google.
+
+If now is not the right time for you, I completely understand. Please let
+me know and I will make sure to update our records.
+
+I look forward to hearing from you!
+
+
+
+
+> 
+> Cheers
+> 
+> --------------
+> Hi XXX,
+> 
+> How are you today? :-)
+> 
+> I'm Darren and I am part of the Google Engineering Recruitment team. I came across your profile previously through your commitment to Ceph and your personal site. Some of your other projects and experience are really interesting! 
+> 
+> Your experience of development with open source file systems looks excellent and you clearly have a passion for your open-source work which is awesome! 
+> 
+> Can I ask what languages do you code with usually?
+> 
+> I have a couple of roles in particular that I am hiring for and I was hoping you might be interested in speaking about some of these, would you be? 
+> 
+> Let me know and I would be happy to schedule a friendly call at a time that is convenient for you.
+> 
+> Many Thanks,
+> 
+> -- 
+> Lo?c Dachary, Artisan Logiciel Libre
+> All that is necessary for the triumph of evil is that good people do nothing.
+> 
+> 
