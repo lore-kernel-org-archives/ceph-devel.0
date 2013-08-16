@@ -1,85 +1,58 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Google recruitment spam
-Date: Fri, 16 Aug 2013 10:34:11 +0200
-Message-ID: <520DE403.1040908@dachary.org>
+From: Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
+Subject: Re: Flapping osd / continuously reported as failed
+Date: Fri, 16 Aug 2013 14:47:52 +0200
+Message-ID: <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C755@MXMBON06.grupa.onet>
+References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
+	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
+	<CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDF026@MXMBON06.grupa.onet>
+	<ADBDB4FFB0814748AF32D0A1EE6E10AF228296D145@MXMBON06.grupa.onet>
+	<CAPYLRzghUwEvu_f0aV2Q37JqnyCJ=46cTWiteTwN4=Tmqxd3HA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig311B47AB78ED02DAC6C3FF27"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:46166 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754351Ab3HPIeP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 04:34:15 -0400
-Received: from [10.8.0.22] (unknown [10.8.0.22])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 67C2026394
-	for <ceph-devel@vger.kernel.org>; Fri, 16 Aug 2013 10:34:12 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAPYLRzghUwEvu_f0aV2Q37JqnyCJ=46cTWiteTwN4=Tmqxd3HA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: pl-PL
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: =?iso-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sydor Bohdan <Bohdan.Sydor-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig311B47AB78ED02DAC6C3FF27
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
+Thanks for your response.
 
-Hi Ceph,
+> It's possible, as deep scrub in particular will add a bit of load (it
+> goes through and compares the object contents). 
 
-It looks like Google has a github bot harvesting mails from repositories =
-and fishing for job applicants. I guess every committer got the exact sam=
-e message addressed to the mail(s) that show in the commits. There is not=
-hing to be done about it but it is worth mentioning, in public, that it i=
-s bad practice to try to disguise a mail as if it was written by someone =
-who cares. I'm a somewhat ashamed to say that I was flattered to receive =
-the mail, because I have a high opinion of Google technical skills and re=
-cruitment process. When I realized a bot was the source, I felt stupid. I=
-'m not sure that's a profitable recruiting technique.
+It is possible that the scrubbing blocks access(RW or only W) to bucket index when check .dir... file?
+When rgw index is very large I guess it take some time.
 
-Cheers
+> Are you not having any
+> flapping issues any more, and did you try and find when it started the
+> scrub to see if it matched up with your troubles?
 
---------------
-Hi XXX,
+No, I didn't.
+But on our second cluster with the same problem, disable scrubbing also helps.
 
-How are you today? :-)
+> I'd be hesitant to turn it off as scrubbing can uncover corrupt
+> objects etc, but you can configure it with the settings at
+> http://ceph.com/docs/master/rados/configuration/osd-config-ref/#scrubbing.
+> (Always check the surprisingly-helpful docs when you need to do some
+> config or operations work!)
 
-I'm Darren and I am part of the Google Engineering Recruitment team. I ca=
-me across your profile previously through your commitment to Ceph and you=
-r personal site. Some of your other projects and experience are really in=
-teresting!=20
+I think change config scrub timeout or interval don't full remove issues.
+Change "osd deep scrub stride" to small value make scrubbing lightest?
 
-Your experience of development with open source file systems looks excell=
-ent and you clearly have a passion for your open-source work which is awe=
-some!=20
-
-Can I ask what languages do you code with usually?
-
-I have a couple of roles in particular that I am hiring for and I was hop=
-ing you might be interested in speaking about some of these, would you be=
-?=20
-
-Let me know and I would be happy to schedule a friendly call at a time th=
-at is convenient for you.
-
-Many Thanks,
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig311B47AB78ED02DAC6C3FF27
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIN5AMACgkQ8dLMyEl6F22otQCdFoVPCY72TAFy/5UuwTE49Au3
-BrIAn3g9+06XJ1U5sRntLPG/4k1i8vh0
-=pwBb
------END PGP SIGNATURE-----
-
---------------enig311B47AB78ED02DAC6C3FF27--
+--
+Regards
+Dominik
