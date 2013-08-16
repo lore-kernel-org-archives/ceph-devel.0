@@ -1,57 +1,68 @@
-From: Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
-Subject: large memory leak on scrubbing
-Date: Fri, 16 Aug 2013 15:11:30 +0200
-Message-ID: <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C75B@MXMBON06.grupa.onet>
+From: Sage Weil <sage@inktank.com>
+Subject: RE: debugging librbd async
+Date: Fri, 16 Aug 2013 08:57:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308160856010.26808@cobra.newdream.net>
+References: <6035A0D088A63A46850C3988ED045A4B66498C5D@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152206200.1479@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B66498DAD@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152242310.1479@cobra.newdream.net>
+ <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: pl-PL
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: =?iso-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>, Sydor Bohdan <Bohdan.Sydor-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:45926 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753344Ab3HPP5Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 11:57:16 -0400
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
 
-Hi,
-We noticed some issues on CEPH/S3 cluster, I think it related with scrubbing: large memory leaks.
+On Fri, 16 Aug 2013, James Harper wrote:
+> > > > Of course, the old standby is to just crank up the logging detail and try
+> > > > to narrow down where the crash happens.  Have you tried that yet?
+> > >
+> > > I haven't touched the rbd code. Is increased logging a compile-time
+> > > option or a config option?
+> > 
+> > That is probably the first you should try then.  In the [client] section
+> > of ceph.conf on the node where tapdisk is running add something like
+> > 
+> >  [client]
+> >   debug rbd = 20
+> >   debug rados = 20
+> >   debug ms = 1
+> >   log file = /var/log/ceph/client.$name.$pid.log
+> > 
+> > and make sure the log directory is writeable.
+> > 
+> 
+> Excellent. How noisy are those levels likely to be?
+> 
+> Is it the consumer of librbd that reads those values? I mean all I need 
+> to do is restart tapdisk process and the logging should happen right?
 
-Logs 09.xx: https://www.dropbox.com/s/4z1fzg239j43igs/ceph-osd.4.log_09xx.tar.gz
-From 09.30 to 09.44 (14 minutes) osd.4 proces grows up to 28G. 
+That sound do it, yeah.
 
-I think this is something curious:
-2013-08-16 09:43:48.801331 7f6570d2e700  0 log [WRN] : slow request 32.794125 seconds old, received at 2013-08-16 09:43:16.007104: osd_sub_op(unknown.0.0:0 16.113d 0//0//-1 [scrub-reserve] v 0'0 snapset=0=[]:[] snapc=0=[]) v7 currently no flag points reached
+> > > > There is a probable issue with aio_flush and caching enabled that Mike
+> > > > Dawson is trying to reproduce.  Are you running with caching on or off?
+> > >
+> > > I have not enabled caching, and I believe it's disabled by default.
+> > 
+> > There is a fix for an aio hang that just hit the cuttlefish branch today
+> > that could conceivably be the issue.  It causes a hang on qemu but maybe
+> > tapdisk is more sensitive?  I'd make sure you're running with that in any
+> > case to rule it out.
+> > 
+> 
+> I switched to dumpling in the last few days to see if the problem existed there. Is the fix you mention in dumpling? I'm not yet running mission critical production code on ceph, just a secondary windows domain controller, secondary spam filter, and a few other machines that don't affect production if they crash.
 
-We have large rgw index and a lot of large files than on this cluster.
-ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
-Setup: 
-- 12 servers x 12 OSD 
-- 3 mons
-Default scrubbing settings.
-Journal and filestore settings:
-        journal aio = true
-        filestore flush min = 0
-        filestore flusher = false
-        filestore fiemap = false
-        filestore op threads = 4
-        filestore queue max ops = 4096
-        filestore queue max bytes = 10485760
-        filestore queue committing max bytes = 10485760
-        journal max write bytes = 10485760
-        journal queue max bytes = 10485760
-        ms dispatch throttle bytes = 10485760
-        objecter infilght op bytes = 10485760
+The fix is in the dumpling branch, but not in v0.67.  It will be in 
+v0.67.1.
+ 
+> I'm also testing valgrind at the moment, just basic memtest, but suddenly everything is quite stable even though it's under reasonable load right now. Stupid heisenbugs.
 
-Is this a known bug in this version?
-(Do you know some workaround to fix this?)
+Valgrind makes things go very slow (~10x?), which can have a huge effect 
+on timing. Sometimes that reveals new races, other times it hides others.  
+:/
 
----
-Regards
-Dominik
+sage
