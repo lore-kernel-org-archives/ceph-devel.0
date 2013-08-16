@@ -1,48 +1,59 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Fri, 16 Aug 2013 01:02:40 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B66498703@BITCOM1.int.sbss.com.au>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<20130419064524.GQ11427@reaktio.net>
-	<6035A0D088A63A46850C3988ED045A4B62D9DA64@BITCOM1.int.sbss.com.au>
-	<CAF6-1L7P3490N-Y9NE1BmXfNP19d7E_btrkkV4CFC+ARTgAr4Q@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B62E86BF8@BITCOM1.int.sbss.com.au>
-	<CAF6-1L45U3DW4gRYaou1Ua5vvtzz+_XDz5B8WBBedhhM9igong@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B62F433FE@BITCOM1.int.sbss.com.au>
-	<6035A0D088A63A46850C3988ED045A4B62F43442@BITCOM1.int.sbss.com.au>
-	<CAF6-1L502OZGbPHp37vWzEU3H-wsK5z904ZtS7SEUmuM-GhLyA@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B63891798@BITCOM1.int.sbss.com.au>
-	<CAF6-1L4=rY7AJpHGB33KPMk6LfX7q8CHphPzh9amdqwbYzg3dQ@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B6389552A@BITCOM1.int.sbss.com.au>
-	<CAF6-1L6jJvYuHN+BoucU2RNzv2R9dpMhbD1UVF96mBPO25FM5g@mail.gmail.com>
-	<520A4945.1030907@gmail.com>
-	<CAF6-1L5mcB=Qs3=XpmFC_S2cPWHFaKChYP77ZhLh0+uvWhR3eQ@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B63896A4D@BITCOM1.int.sbss.com.au>
-	<CAF6-1L6_GFvOq3nyQ-n20uiZHC4pAQm88_G3RFG2QjujoYGLpA@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B63896AF1@BITCOM1.int.sbss.com.au>
-	<6035A0D088A63A46850C3988ED045A4B63896B4E@BITCOM1.int.sbss.com.au>
- <CAF6-1L42Fmuq3Ng_qD1Y99JQmtfCG1zzGQrbA2xBO-8JOyhk+g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] Ceph: Remove useless variable revoked_rdcache
+Date: Thu, 15 Aug 2013 22:01:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308152159130.1479@cobra.newdream.net>
+References: <1376553278-8153-1-git-send-email-liwang@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.bendigoit.com.au ([203.16.207.99]:34302 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752409Ab3HPBCy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Aug 2013 21:02:54 -0400
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:40507 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750909Ab3HPFBH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Aug 2013 01:01:07 -0400
+In-Reply-To: <1376553278-8153-1-git-send-email-liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: Frederik Thuysbaert <frederik.thuysbaert@gmail.com>, =?iso-8859-1?Q?Pasi_K=E4rkk=E4inen?= <pasik@iki.fi>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel@vger.kernel.org
+
+Applied to testing branch, Thanks!
+
+sage
 
 
+On Thu, 15 Aug 2013, Li Wang wrote:
+
+> Cleanup in handle_cap_grant()
 > 
-> I just had a crash since upgrading to dumpling, and will disable merging
-> tonight.
+> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+> ---
+>  fs/ceph/caps.c |    5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
 > 
-
-Still crashes with merging disabled.
-
-James
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 25442b4..8c90cae 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2361,7 +2361,6 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  	int check_caps = 0;
+>  	int wake = 0;
+>  	int writeback = 0;
+> -	int revoked_rdcache = 0;
+>  	int queue_invalidate = 0;
+>  
+>  	dout("handle_cap_grant inode %p cap %p mds%d seq %d %s\n",
+> @@ -2377,9 +2376,7 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+>  	if (((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
+>  	    (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
+>  	    !ci->i_wrbuffer_ref) {
+> -		if (try_nonblocking_invalidate(inode) == 0) {
+> -			revoked_rdcache = 1;
+> -		} else {
+> +		if (try_nonblocking_invalidate(inode)) {
+>  			/* there were locked pages.. invalidate later
+>  			   in a separate thread. */
+>  			if (ci->i_rdcache_revoking != ci->i_rdcache_gen) {
+> -- 
+> 1.7.9.5
+> 
+> 
