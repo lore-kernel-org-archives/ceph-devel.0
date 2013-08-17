@@ -1,49 +1,41 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.67.1 Dumpling released
-Date: Sat, 17 Aug 2013 08:43:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308170839520.14208@cobra.newdream.net>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: ceph-deploy mon create / gatherkeys problems
+Date: Sat, 17 Aug 2013 14:38:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308171435030.1479@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55536 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753509Ab3HQPnU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Aug 2013 11:43:20 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is a bug fix release for Dumpling that resolves a problem with the 
-librbd python bindings (triggered by OpenStack) and a hang in librbd when 
-caching is disabled.  OpenStack users are encouraged to upgrade.  No other 
-serious bugs have come up since v0.67 came out earlier this week.
+Hi everyone,
 
-Notable changes:
+We're trying to get to the bottom of the problems people have been having 
+with ceph-deploy mon create .. and ceph-deploy gatherkeys.  There seem to 
+be a series of common pitfalls that are causing these problems.  So far 
+we've been chasing them in emails on this list and in various bugs in the 
+tracker, but it is hard to keep track!
 
- * librados, librbd: fix constructor for python bindings with certain 
-   usages (in particular, that used by OpenStack)
- * librados, librbd: fix aio_flush wakeup when cache is disabled
- * librados: fix locking for aio completion refcounting
- * fixes 'ceph --admin-daemon ...' command error code on error
- * fixes 'ceph daemon ... config set ...' command for boolean config 
-   options.
+ * If you are still seeing any problems here, please reply to this thread!
 
-For more detailed information, see the complete release notes and 
-changelog:
+ * If you previously had a problem here and then realized you were doing 
+   something not quite right and got it working, please reply and share 
+   what it was so we can make sure others avoid the problem!
 
- * http://ceph.com/docs/master/release-notes/#v0-67-1-dumpling
- * http://ceph.com/docs/master/_downloads/v0.67.1.txt
+We have a couple of feature tickets open to streamline this process to be 
+simpler (1 or 2 steps instead of 4 or 5), but before we rush off and 
+implement it I want to make sure we fully understand where all of the 
+problems lay.
 
-You can download v0.67.1 Dumpling from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.67.1.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
-
-
- 
-
-
-
- 
+Thanks!
+sage
