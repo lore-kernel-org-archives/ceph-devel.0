@@ -1,57 +1,75 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [ceph-users]  Mds lock
-Date: Sat, 17 Aug 2013 08:05:54 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308170803570.1479@cobra.newdream.net>
-References: <97A897FA540C414C8CBBC5922950EEB3DEB8C3@CNMAILMBX05.lenovo.com>
+Subject: Re: [ceph-users] large memory leak on scrubbing
+Date: Sat, 17 Aug 2013 08:11:26 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308170808070.1479@cobra.newdream.net>
+References: <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C75B@MXMBON06.grupa.onet>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1646557540-1376751954=:1479"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55264 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:55314 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753538Ab3HQPFy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Aug 2013 11:05:54 -0400
-In-Reply-To: <97A897FA540C414C8CBBC5922950EEB3DEB8C3@CNMAILMBX05.lenovo.com>
+	with ESMTP id S1753444Ab3HQPL1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Aug 2013 11:11:27 -0400
+In-Reply-To: <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C75B@MXMBON06.grupa.onet>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jun Jun8 Liu <liujun8@lenovo.com>
-Cc: ceph-devel@vger.kernel.org
+To: Mostowiec Dominik <Dominik.Mostowiec@grupaonet.pl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, =?ISO-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski@grupaonet.pl>, Sydor Bohdan <Bohdan.Sydor@grupaonet.pl>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Dominic,
 
---557981400-1646557540-1376751954=:1479
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+There is a bug fixed a couple of months back that fixes excessive memory 
+consumption during scrub.  You can upgrade to the latest 'bobtail' branch.  
+See
 
-[moving to ceph-devel]
+ http://ceph.com/docs/master/install/debian/#development-testing-packages
 
-On Fri, 16 Aug 2013, Jun Jun8 Liu wrote:
->=20
-> Hi all, =A0=A0=A0=A0=A0
->=20
-> =A0=A0=A0=A0=A0=A0=A0=A0 I am doing some research about mds.
->=20
-> =A0=A0=A0=A0=A0=A0=A0=A0
->=20
-> =A0=A0=A0=A0=A0=A0=A0=A0 there are so many types lock and states .But I=
- don't found some
-> document to describe.
->=20
-> =A0
->=20
-> =A0=A0=A0=A0=A0=A0=A0=A0 Is there anybody tell me what is "loner" and "=
-lock_mix"
-
-'loner' tracks when a single client has some exclusive capabilities on=20
-the file.  For example, when it is the only client with the file open, it=
-=20
-can buffer reads and perform setattr operations locally.
-
-lock_mix (lock->mix) is a transition state from lock (primary mds copy=20
-exclusive lock, sort of) and mix (shared write lock between multiple=20
-mds's).  The MDS locking is quite complex, but unfortunately there is not=
-=20
-much in the way of documentation for the code. :(
+Installing that package should clear this up.
 
 sage
---557981400-1646557540-1376751954=:1479--
+
+
+On Fri, 16 Aug 2013, Mostowiec Dominik wrote:
+
+> Hi,
+> We noticed some issues on CEPH/S3 cluster, I think it related with scrubbing: large memory leaks.
+> 
+> Logs 09.xx: https://www.dropbox.com/s/4z1fzg239j43igs/ceph-osd.4.log_09xx.tar.gz
+> >From 09.30 to 09.44 (14 minutes) osd.4 proces grows up to 28G. 
+> 
+> I think this is something curious:
+> 2013-08-16 09:43:48.801331 7f6570d2e700  0 log [WRN] : slow request 32.794125 seconds old, received at 2013-08-16 09:43:16.007104: osd_sub_op(unknown.0.0:0 16.113d 0//0//-1 [scrub-reserve] v 0'0 snapset=0=[]:[] snapc=0=[]) v7 currently no flag points reached
+> 
+> We have large rgw index and a lot of large files than on this cluster.
+> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+> Setup: 
+> - 12 servers x 12 OSD 
+> - 3 mons
+> Default scrubbing settings.
+> Journal and filestore settings:
+>         journal aio = true
+>         filestore flush min = 0
+>         filestore flusher = false
+>         filestore fiemap = false
+>         filestore op threads = 4
+>         filestore queue max ops = 4096
+>         filestore queue max bytes = 10485760
+>         filestore queue committing max bytes = 10485760
+>         journal max write bytes = 10485760
+>         journal queue max bytes = 10485760
+>         ms dispatch throttle bytes = 10485760
+>         objecter infilght op bytes = 10485760
+> 
+> Is this a known bug in this version?
+> (Do you know some workaround to fix this?)
+> 
+> ---
+> Regards
+> Dominik
+> 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
