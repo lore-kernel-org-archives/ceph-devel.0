@@ -1,54 +1,44 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph-deploy mon create / gatherkeys problems
-Date: Sun, 18 Aug 2013 17:16:30 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308181715050.1479@cobra.newdream.net>
-References: <8D06A68A827BE16-FF0-46E32@webmail-d235.sysops.aol.com>
+Subject: Re: Review request : Erasure Code plugin loader implementation
+Date: Sun, 18 Aug 2013 17:24:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308181719340.1479@cobra.newdream.net>
+References: <5210F429.2020805@dachary.org> <alpine.DEB.2.00.1308181031580.1479@cobra.newdream.net> <521128ED.1080605@dachary.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40171 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40205 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752633Ab3HSAQb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Aug 2013 20:16:31 -0400
-In-Reply-To: <8D06A68A827BE16-FF0-46E32@webmail-d235.sysops.aol.com>
+	with ESMTP id S1754731Ab3HSAYm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Aug 2013 20:24:42 -0400
+In-Reply-To: <521128ED.1080605@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric Eastman <eric0e@aol.com>
-Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, 18 Aug 2013, Eric Eastman wrote:
-> It may be overkill, but my notes on starting over with loading ceph on
-> my test clusters is:
-> 
-> > From ceph00  (my admin node)
->  ceph-deploy -v purge ceph00 ceph01 ceph02 ceph03 ceph04 ...
-> 
-> Then on each system
->   rm -rf /var/lib/ceph /etc/ceph
+Hi Loic,
 
-This is what
+One other thought on http://tracker.ceph.com/issues/5878:
 
- ceph-deploy purgedata HOST1 ...
+The user interface there would let you adjust various parameters of the 
+pool's erasure coding scheme after the pool is created.  As a practical 
+matter, I suspect that many/most of these fields will be specified exactly 
+once (at pool creation time) and will be immutable properties of the pool 
+after that.  The m/k at a minimum need to match up with what we are 
+requesting out of crush.  And once there is data stored, I don't think it 
+will make sense to be able to change the encoding scheme for new objects 
+and still be able to deal with old objects.  (Or maybe it will be, if the 
+code metadata is in the object_info_t.)
 
-does, FWIW.
+Even if we do support changing some of these on the fly, though, I suspect 
+the most important interface, and the first we implement, will be 
+something like
 
-> Then reinstall the ceph software and configure it with ceph-deploy.
-> 
-> With ceph-deploy version 1.0-1 this solved problems with re-installing
-> ceph with ceph-deploy, as these directories were not fully cleaned
-> with the purge option.  Maybe we need a "distclean" option.
+ ceph osd pool create <name> [key=value ...]
 
-Is that what distclean means in other contexts?  We could make it an alias 
-for the same command.
+the various parameters listed, like EC algorithm, m, k, and pg_num.  We 
+can probably generalize the mon command interface to have a key/value list 
+type that will make this easy to plumb from the CLI (and trivial via 
+ceph-rest-api).
 
-> I am installing my first cluster built with ceph-deploy version 1.2.1
-> and I really like debug being the default, so I can see what
-> its doing. I will report if I find any issues with it.
-> 
-> * If you previously had a problem here and then realized you
-> were doing something not quite right and got it working, please
-> reply and share  what it was so we can make sure others avoid the problem!
-
-Thanks!
 sage
-
