@@ -1,52 +1,63 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.61.8 Cuttlefish released
-Date: Mon, 19 Aug 2013 12:56:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308191251390.11136@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: RGW blueprint for plugin architecture
+Date: Mon, 19 Aug 2013 13:05:01 -0700
+Message-ID: <CABBk=J_LXDxpv8shUVr9sf6De5wayQ9r1tPJC1rmzwdJfqnQHg@mail.gmail.com>
+References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
+	<CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
+	<CAN04cT6uOTYx7Mk0sMWBBwzy=Muf40ZkZDUpgYpQ6=9ZE=TvBw@mail.gmail.com>
+	<CABBk=J-LASxNT49pQ9oSK-p189FiuCQ0dA540v0MhCzmTf-Uzg@mail.gmail.com>
+	<CAN04cT6vHxCVWMPEZM1Ppqfbbv4Eqao7HwDNsuJgomYbugJ3Gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50378 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751074Ab3HST4I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 15:56:08 -0400
+Received: from mail-ve0-f178.google.com ([209.85.128.178]:52335 "EHLO
+	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751117Ab3HSUFC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 16:05:02 -0400
+Received: by mail-ve0-f178.google.com with SMTP id ox1so3293645veb.37
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Aug 2013 13:05:01 -0700 (PDT)
+In-Reply-To: <CAN04cT6vHxCVWMPEZM1Ppqfbbv4Eqao7HwDNsuJgomYbugJ3Gg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We've made another point release for Cuttlefish. This release contains a 
-number of fixes that are generally not individually critical, but do trip 
-up users from time to time, are non-intrusive, and have held up under 
-testing.
+On Mon, Aug 19, 2013 at 5:34 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+> Hi,
+>
+> I started out by defining the plugin system a bit more
+> (http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture).
+> I'd really appreciate any comments.
+>
+> On Wed, Aug 14, 2013 at 8:40 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>>>  - "AUTH" (Authentication backends): Rados/internal, Keystone
+>>
+>> That's probably the best place to start.
+>
+> I also started working on an "auth" type of plugin for all Keystone
+> support based on the plugin system currently described in the
+> blueprint (it's an extremely simple and flexible system and IMHO a
+> good way to start). Contrary to the "plugin system", the auth plugin
+> itself will move a lot of code around and will therefore have a much
+> greater impact. So it's probably better to separate these projects
+> completely. If we can reach consensus about the way the first version
+> of the plugin system should look like, I will separate these commits
+> into different branches so we can merge it one step at a time.
+>
 
-Notable changes include:
+I went over the blueprint, and partially through the code
+(wip-rgw-plugin). I'm not completely sure about the plugin <-> core
+interface that you had in mind. At the moment there's no clean
+interface, and it just links directly. For example, the keystone
+plugin needs to call rgw_store_user_info(), the KeystoneClient needs
+to inherit from RGWHTTPClient, etc.
+So on one hand we now move this code into external module, but otoh,
+it still need to link into the monolithic rgw core. Having a clean
+internal api might be a noble idea, but I'm not sure it's very
+practical (which is in line with what's there now).
+Having a linux-kernel like module model makes sense here. The
+modules/plugins will need to be compiled against the specific version
+in order for them to be able to load successfully.
+Also, I'm not sure that we need to bother with dynamic loading.
 
- * librados: fix async aio completion wakeup
- * librados: fix aio completion locking
- * librados: fix rare deadlock during shutdown
- * osd: fix race when queueing recovery operations
- * osd: fix possible race during recovery
- * osd: optionally preload rados classes on startup (disabled by default)
- * osd: fix journal replay corner condition
- * osd: limit size of peering work queue batch (to speed up peering)
- * mon: fix paxos recovery corner case
- * mon: fix rare hang when monmap updates during an election
- * mon: make osd pool mksnap ... avoid exposing uncommitted state
- * mon: make osd pool rmsnap ... not racy, avoid exposing uncommitted state
- * mon: fix bug during mon cluster expansion
- * rgw: fix crash during multi delete operation
- * msgr: fix race conditions during osd network reinitialization
- * ceph-disk: apply mount options when remounting
-
-For more detailed information, please see the detailed release notes and 
-complete changelog:
-
- * http://ceph.com/docs/master/release-notes/#v0-61-8-cuttlefish
- * http://ceph.com/docs/master/_downloads/v0.61.8.txt
-
-You can get v0.61.8 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.61.8.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
-
+Yehuda
