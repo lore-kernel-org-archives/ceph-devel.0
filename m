@@ -1,131 +1,54 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Review request : Erasure Code plugin loader implementation
-Date: Sun, 18 Aug 2013 17:01:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308181654560.1479@cobra.newdream.net>
-References: <5210F429.2020805@dachary.org> <alpine.DEB.2.00.1308181031580.1479@cobra.newdream.net> <521128ED.1080605@dachary.org>
+Subject: Re: ceph-deploy mon create / gatherkeys problems
+Date: Sun, 18 Aug 2013 17:16:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308181715050.1479@cobra.newdream.net>
+References: <8D06A68A827BE16-FF0-46E32@webmail-d235.sysops.aol.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40104 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40171 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755622Ab3HSABi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Aug 2013 20:01:38 -0400
-In-Reply-To: <521128ED.1080605@dachary.org>
+	with ESMTP id S1752633Ab3HSAQb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Aug 2013 20:16:31 -0400
+In-Reply-To: <8D06A68A827BE16-FF0-46E32@webmail-d235.sysops.aol.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Eric Eastman <eric0e@aol.com>
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
 
-On Sun, 18 Aug 2013, Loic Dachary wrote:
-> Hi Sage,
+On Sun, 18 Aug 2013, Eric Eastman wrote:
+> It may be overkill, but my notes on starting over with loading ceph on
+> my test clusters is:
 > 
-> Unless I misunderstood something ( which is still possible at this stage ;-) decode() is used both for recovery of missing chunks and retrieval of the original buffer. Decoding the M data chunks is a special case of decoding N <= M chunks out of the M+K chunks that were produced by encode(). It can be used to recover parity chunks as well as data chunks.
+> > From ceph00  (my admin node)
+>  ceph-deploy -v purge ceph00 ceph01 ceph02 ceph03 ceph04 ...
 > 
-> https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/erasure-code.rst#erasure-code-library-abstract-api
+> Then on each system
+>   rm -rf /var/lib/ceph /etc/ceph
+
+This is what
+
+ ceph-deploy purgedata HOST1 ...
+
+does, FWIW.
+
+> Then reinstall the ceph software and configure it with ceph-deploy.
 > 
->     map<int, buffer> decode(const set<int> &want_to_read, const map<int, buffer> &chunks)
+> With ceph-deploy version 1.0-1 this solved problems with re-installing
+> ceph with ceph-deploy, as these directories were not fully cleaned
+> with the purge option.  Maybe we need a "distclean" option.
+
+Is that what distclean means in other contexts?  We could make it an alias 
+for the same command.
+
+> I am installing my first cluster built with ceph-deploy version 1.2.1
+> and I really like debug being the default, so I can see what
+> its doing. I will report if I find any issues with it.
 > 
->     decode chunks to read the content of the want_to_read chunks and return a map associating the chunk number with its decoded content. For instance, in the simplest case M=2,K=1 for an encoded payload of data A and B with parity Z, calling
-> 
->     decode([1,2], { 1 => 'A', 2 => 'B', 3 => 'Z' })
->     => { 1 => 'A', 2 => 'B' }
-> 
->     If however, the chunk B is to be read but is missing it will be:
-> 
->     decode([2], { 1 => 'A', 3 => 'Z' })
->     => { 2 => 'B' }
+> * If you previously had a problem here and then realized you
+> were doing something not quite right and got it working, please
+> reply and share  what it was so we can make sure others avoid the problem!
 
-Ah, I guess this works when some of the chunks contain the original 
-data (as with a parity code).  There are codes that don't work that way, 
-although I suspect we won't use them.
-
-Regardless, I wonder if we should generalize slightly and have some 
-methods work in terms of (offset,length) of the original stripe to 
-generalize that bit.  Then we would have something like
-
-     map<int, buffer> transcode(const set<int> &want_to_read, const map<int, 
-            buffer>& chunks);
-
-to go from chunks -> chunks (as we would want to do with, say, a LRC-like 
-code where we can rebuild some shards from a subset of the other shards).  
-And then also have
-
-     int decode(const map<int, buffer>& chunks, unsigned offset, 
-         unsigned len, bufferlist *out);
-
-that recovers the original data.
-
-In our case, the read path would use decode, and for recovery we would use 
-transcode.  
-
-We'd also want to have alternate minimum_to_decode* methods, like
-
-    virtual set<int> minimum_to_decode(unsigned offset, unsigned len, const 
-         set<int> &available_chunks) = 0;
-
-What do you think?
-
+Thanks!
 sage
 
-
-
-
-> 
-> Cheers
-> 
-> On 18/08/2013 19:34, Sage Weil wrote:
-> > On Sun, 18 Aug 2013, Loic Dachary wrote:
-> >> Hi Ceph,
-> >>
-> >> I've implemented a draft of the Erasure Code plugin loader in the context of http://tracker.ceph.com/issues/5878. It has a trivial unit test and an example plugin. It would be great if someone could do a quick review. The general idea is that the erasure code pool calls something like:
-> >>
-> >> ErasureCodePlugin::factory(&erasure_code, "example", parameters)
-> >>
-> >> as shown at
-> >>
-> >> https://github.com/ceph/ceph/blob/5a2b1d66ae17b78addc14fee68c73985412f3c8c/src/test/osd/TestErasureCode.cc#L28
-> >>
-> >> to get an object implementing the interface
-> >>
-> >> https://github.com/ceph/ceph/blob/5a2b1d66ae17b78addc14fee68c73985412f3c8c/src/osd/ErasureCodeInterface.h
-> >>
-> >> which matches the proposal described at
-> >>
-> >> https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/erasure-code.rst#erasure-code-library-abstract-api
-> >>
-> >> The draft is at
-> >>
-> >> https://github.com/ceph/ceph/commit/5a2b1d66ae17b78addc14fee68c73985412f3c8c
-> >>
-> >> Thanks in advance :-)
-> > 
-> > I haven't been following this discussion too closely, but taking a look 
-> > now, the first 3 make sense, but
-> > 
-> >     virtual map<int, bufferptr> decode(const set<int> &want_to_read, const 
-> > map<int, bufferptr> &chunks) = 0;
-> > 
-> > it seems like this one should be more like
-> > 
-> >     virtual int decode(const map<int, bufferptr> &chunks, bufferlist *out);
-> > 
-> > As in, you'd decode the chunks you have to get the actual data.  If you 
-> > want to get (missing) chunks for recovery, you'd do
-> > 
-> >   minimum_to_decode(...);  // see what we need
-> >   <fetch those chunks from other nodes>
-> >   decode(...);   // reconstruct original buffer
-> >   encode(...);   // encode missing chunks from original data
-> > 
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> -- 
-> Lo?c Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do nothing.
-> 
-> 
