@@ -1,217 +1,219 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 19 Aug 2013 08:00:20 -0700 (PDT)
-Message-ID: <20130819150020.3FBB3281E5A@teuthology.front.sepia.ceph.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Review request : Erasure Code plugin loader implementation
+Date: Mon, 19 Aug 2013 17:06:59 +0200
+Message-ID: <52123493.80803@dachary.org>
+References: <5210F429.2020805@dachary.org> <alpine.DEB.2.00.1308181031580.1479@cobra.newdream.net> <521128ED.1080605@dachary.org> <alpine.DEB.2.00.1308181654560.1479@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig8E097CABC725CDC15256FB20"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:23490 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750782Ab3HSPAV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 19 Aug 2013 11:00:21 -0400
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:42905 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751108Ab3HSPHD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 11:07:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1308181654560.1479@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
--- All Branches --
-
-Alfredo Deza <alfredo.deza@inktank.com>
-	2013-08-16 16:30:35 -0400   wip-5900
-
-Dan Mick <dan.mick@inktank.com>
-	2012-12-18 12:27:36 -0800   wip-rbd-striping
-	2013-07-16 23:00:06 -0700   wip-5634
-
-David Zafman <david.zafman@inktank.com>
-	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
-	2013-03-22 18:14:10 -0700   wip-snap-test-fix
-
-Gary Lowell <gary.lowell@inktank.com>
-	2013-07-23 17:00:07 -0700   wip-build-test
-	2013-08-13 10:45:14 -0700   last
-	2013-08-18 23:54:49 -0700   cuttlefish
-
-Gary Lowell <glowell@inktank.com>
-	2013-01-28 22:49:45 -0800   wip-3930
-	2013-02-05 19:29:11 -0800   wip.cppchecker
-	2013-02-10 22:21:52 -0800   wip-3955
-	2013-02-26 19:28:48 -0800   wip-system-leveldb
-	2013-03-01 18:55:35 -0800   wip-da-spec-1
-	2013-03-19 11:28:15 -0700   wip-3921
-	2013-04-11 23:00:05 -0700   wip-init-radosgw
-	2013-04-17 23:30:11 -0700   wip-4725
-	2013-04-21 22:06:37 -0700   wip-4752
-	2013-04-22 14:11:37 -0700   wip-4632
-	2013-05-31 11:20:40 -0700   wip-doc-prereq
-	2013-06-06 22:31:54 -0700   wip-build-doc
-	2013-08-09 23:19:14 -0700   wip-libglobal
-
-Greg Farnum <greg@inktank.com>
-	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
-	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
-	2013-05-01 17:06:27 -0700   wip-optracker-4354
-	2013-08-16 16:38:23 -0700   wip-5905
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Joao Eduardo Luis <jecluis@gmail.com>
-	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2013-04-18 00:01:24 +0100   wip-4521-tool
-	2013-04-22 15:14:28 +0100   wip-4748
-	2013-04-24 16:42:11 +0100   wip-4521
-	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
-	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
-	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
-	2013-05-31 21:00:28 +0100   wip-mon-trim-b
-	2013-07-20 04:30:59 +0100   wip-mon-caps-test
-	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
-	2013-07-23 17:35:59 +0100   wip-5704
-	2013-08-02 22:54:42 +0100   wip-5648
-	2013-08-12 10:26:29 -0700   wip-store-tool
-
-Joe Buck <jbbuck@gmail.com>
-	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
-	2013-07-31 23:28:46 -0700   wip-buck-rgw-teuth
-
-John Wilkins <john.wilkins@inktank.com>
-	2012-12-21 15:14:37 -0800   wip-mon-docs
-	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-04-29 14:32:00 -0700   wip-rbd-close-image
-	2013-07-25 18:44:10 -0700   wip-5488-2
-	2013-08-14 15:51:04 -0700   wip-5970
-
-Loic Dachary <loic@dachary.org>
-	2013-08-15 23:42:36 +0200   wip-5510
-	2013-08-18 18:28:31 +0200   wip-5878
-
-Noah Watkins <noahwatkins@gmail.com>
-	2013-01-05 11:58:38 -0800   wip-localized-read-tests
-	2013-04-22 15:23:09 -0700   wip-cls-lua
-	2013-07-21 12:01:01 -0700   wip-osx-upstream
-	2013-08-05 13:50:36 -0700   wip-port
-
-Roald van Loon <roaldvanloon@gmail.com>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-07-14 17:40:21 -0700   wip-osd-redirect
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2012-12-07 14:38:46 -0800   wip-osd-alloc
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
-	2013-06-04 22:43:04 -0700   wip-osd-push
-	2013-06-18 17:00:00 -0700   wip-mon-refs
-	2013-06-21 17:59:58 -0700   wip-rgw-vstart
-	2013-06-28 12:54:08 -0700   wip-mds-snap
-	2013-07-01 17:48:09 -0700   wip-5021
-	2013-07-06 09:22:29 -0700   wip-mds-lazyio-cuttlefish
-	2013-07-06 13:00:51 -0700   wip-mds-lazyio-cuttlefish-minimal
-	2013-07-12 08:50:24 -0700   wip-libcephfs
-	2013-07-18 16:59:03 -0700   wip-refs
-	2013-07-19 21:13:09 -0700   wip-5692
-	2013-07-20 09:02:40 -0700   wip-5695
-	2013-07-21 17:16:10 -0700   wip-5672
-	2013-07-21 19:58:12 -0700   wip-before
-	2013-07-21 22:03:19 -0700   wip-cuttlefish-osdmap
-	2013-07-22 22:31:46 -0700   wip-5039
-	2013-07-23 09:46:55 -0700   wip-5488
-	2013-07-27 08:20:41 -0700   wip-5754
-	2013-08-02 15:47:32 -0700   wip-5648-b
-	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
-	2013-08-04 22:25:03 -0700   wip-5869
-	2013-08-05 14:10:27 -0700   wip-mon-global-id
-	2013-08-08 18:31:13 -0700   wip-erasure-coding-doc
-	2013-08-08 22:49:58 -0700   wip-fuse
-	2013-08-09 12:49:57 -0700   wip-gtest
-	2013-08-09 21:24:08 -0700   wip-ceph-disk
-	2013-08-11 15:18:31 -0700   wip-crush
-	2013-08-13 13:13:30 -0700   wip-5919
-	2013-08-13 14:39:34 -0700   wip-5955
-	2013-08-14 22:16:46 -0700   wip-5973
-	2013-08-15 18:04:24 -0700   wip-neon-crc32c
-	2013-08-15 22:20:21 -0700   wip-6004
-	2013-08-15 23:05:17 -0700   wip-fallocate
-	2013-08-17 10:07:10 -0700   wip-6045
-	2013-08-17 17:01:53 -0700   wip-6036
-	2013-08-18 11:36:06 -0700   bobtail
-	2013-08-18 11:45:44 -0700   dumpling
-
-Sam Lang <sam.lang@inktank.com>
-	2012-11-27 15:01:58 -0600   wip-mtime-incr
-
-Samuel Just <sam.just@inktank.com>
-	2013-06-06 11:51:04 -0700   wip_bench_num
-	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
-	2013-06-17 14:50:53 -0700   wip-log-rewrite-sam
-	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
-	2013-06-19 19:46:06 -0700   wip_observer
-	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
-	2013-08-13 15:38:35 -0700   wip-5869-DNM
-	2013-08-15 15:35:26 -0700   wip-5985
-	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-07 13:40:12 -0800   wip-rgw-dr
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-14 12:44:21 -0700   wip-rgw-bucketlog-3
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-06-14 14:53:54 -0700   wip-5362
-	2013-06-20 13:38:47 -0700   wip-rgw-geo-enovance
-	2013-06-25 15:30:44 -0700   wip-rgw-geo-bucketinstance
-	2013-06-26 11:36:59 -0700   wip-5455
-	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
-	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
-	2013-07-08 18:55:19 -0700   rgw-next-libcurl
-	2013-07-16 19:09:47 -0700   wip-5374
-	2013-07-22 14:46:30 -0700   wip-5664
-	2013-07-29 10:52:22 -0700   wip-5789
-	2013-07-29 10:54:02 -0700   wip-5793
-	2013-07-29 10:58:30 -0700   wip-5770
-	2013-07-30 13:53:53 -0700   wip-5808
-	2013-07-31 10:48:15 -0700   wip-rgw-next
-	2013-08-01 13:20:19 -0700   wip-5831
-	2013-08-01 18:23:49 -0700   wip-5810
-	2013-08-05 11:38:27 -0700   wip-5875
-	2013-08-12 10:38:17 -0700   wip-5931-next
-	2013-08-12 10:39:59 -0700   wip-5931-cuttlefish
-	2013-08-12 10:41:46 -0700   wip-5931-bobtail
-	2013-08-15 11:00:05 -0700   wip-5978
-	2013-08-15 14:00:13 -0700   wip-rgw-papercuts
-
-caleb miles <caselim@gmail.com>
-	2013-01-07 07:39:02 -0500   wip-3735
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig8E097CABC725CDC15256FB20
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
 
 
-Grouped by committer, ordered by commit time stamp.
+On 19/08/2013 02:01, Sage Weil wrote:
+> On Sun, 18 Aug 2013, Loic Dachary wrote:
+>> Hi Sage,
+>>
+>> Unless I misunderstood something ( which is still possible at this sta=
+ge ;-) decode() is used both for recovery of missing chunks and retrieval=
+ of the original buffer. Decoding the M data chunks is a special case of =
+decoding N <=3D M chunks out of the M+K chunks that were produced by enco=
+de(). It can be used to recover parity chunks as well as data chunks.
+>>
+>> https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/er=
+asure-code.rst#erasure-code-library-abstract-api
+>>
+>>     map<int, buffer> decode(const set<int> &want_to_read, const map<in=
+t, buffer> &chunks)
+>>
+>>     decode chunks to read the content of the want_to_read chunks and r=
+eturn a map associating the chunk number with its decoded content. For in=
+stance, in the simplest case M=3D2,K=3D1 for an encoded payload of data A=
+ and B with parity Z, calling
+>>
+>>     decode([1,2], { 1 =3D> 'A', 2 =3D> 'B', 3 =3D> 'Z' })
+>>     =3D> { 1 =3D> 'A', 2 =3D> 'B' }
+>>
+>>     If however, the chunk B is to be read but is missing it will be:
+>>
+>>     decode([2], { 1 =3D> 'A', 3 =3D> 'Z' })
+>>     =3D> { 2 =3D> 'B' }
+>=20
+> Ah, I guess this works when some of the chunks contain the original=20
+> data (as with a parity code).  There are codes that don't work that way=
+,=20
+> although I suspect we won't use them.
+>=20
+> Regardless, I wonder if we should generalize slightly and have some=20
+> methods work in terms of (offset,length) of the original stripe to=20
+> generalize that bit.  Then we would have something like
+>=20
+>      map<int, buffer> transcode(const set<int> &want_to_read, const map=
+<int,=20
+>             buffer>& chunks);
+>=20
+> to go from chunks -> chunks (as we would want to do with, say, a LRC-li=
+ke=20
+> code where we can rebuild some shards from a subset of the other shards=
+). =20
+> And then also have
+>=20
+>      int decode(const map<int, buffer>& chunks, unsigned offset,=20
+>          unsigned len, bufferlist *out);
+
+This function would be implemented more or less as:
+
+  set<int> want_to_read =3D range_to_chunks(offset, len) // compute what =
+chunks must be retrieved
+  set<int> available =3D the up set
+  set<int> minimum =3D minimum_to_decode(want_to_read, available);
+  map<int, buffer> available_chunks =3D retrieve_chunks_from_osds(minimum=
+);
+  map<int, buffer> chunks =3D transcode(want_to_read, available_chunks); =
+// repairs if necessary
+  out =3D bufferptr(concat_chunks(chunks), offset - offset of the first c=
+hunk, len)
+
+or do you have something else in mind ?
+
+>=20
+> that recovers the original data.
+>=20
+> In our case, the read path would use decode, and for recovery we would =
+use=20
+> transcode. =20
+>=20
+> We'd also want to have alternate minimum_to_decode* methods, like
+>=20
+>     virtual set<int> minimum_to_decode(unsigned offset, unsigned len, c=
+onst=20
+>          set<int> &available_chunks) =3D 0;
+
+I also have a convenience wrapper in mind for this but I feel I'm missing=
+ something.
+
+Cheers
+
+>=20
+> What do you think?
+>=20
+> sage
+>=20
+>=20
+>=20
+>=20
+>>
+>> Cheers
+>>
+>> On 18/08/2013 19:34, Sage Weil wrote:
+>>> On Sun, 18 Aug 2013, Loic Dachary wrote:
+>>>> Hi Ceph,
+>>>>
+>>>> I've implemented a draft of the Erasure Code plugin loader in the co=
+ntext of http://tracker.ceph.com/issues/5878. It has a trivial unit test =
+and an example plugin. It would be great if someone could do a quick revi=
+ew. The general idea is that the erasure code pool calls something like:
+>>>>
+>>>> ErasureCodePlugin::factory(&erasure_code, "example", parameters)
+>>>>
+>>>> as shown at
+>>>>
+>>>> https://github.com/ceph/ceph/blob/5a2b1d66ae17b78addc14fee68c7398541=
+2f3c8c/src/test/osd/TestErasureCode.cc#L28
+>>>>
+>>>> to get an object implementing the interface
+>>>>
+>>>> https://github.com/ceph/ceph/blob/5a2b1d66ae17b78addc14fee68c7398541=
+2f3c8c/src/osd/ErasureCodeInterface.h
+>>>>
+>>>> which matches the proposal described at
+>>>>
+>>>> https://github.com/dachary/ceph/blob/wip-4929/doc/dev/osd_internals/=
+erasure-code.rst#erasure-code-library-abstract-api
+>>>>
+>>>> The draft is at
+>>>>
+>>>> https://github.com/ceph/ceph/commit/5a2b1d66ae17b78addc14fee68c73985=
+412f3c8c
+>>>>
+>>>> Thanks in advance :-)
+>>>
+>>> I haven't been following this discussion too closely, but taking a lo=
+ok=20
+>>> now, the first 3 make sense, but
+>>>
+>>>     virtual map<int, bufferptr> decode(const set<int> &want_to_read, =
+const=20
+>>> map<int, bufferptr> &chunks) =3D 0;
+>>>
+>>> it seems like this one should be more like
+>>>
+>>>     virtual int decode(const map<int, bufferptr> &chunks, bufferlist =
+*out);
+>>>
+>>> As in, you'd decode the chunks you have to get the actual data.  If y=
+ou=20
+>>> want to get (missing) chunks for recovery, you'd do
+>>>
+>>>   minimum_to_decode(...);  // see what we need
+>>>   <fetch those chunks from other nodes>
+>>>   decode(...);   // reconstruct original buffer
+>>>   encode(...);   // encode missing chunks from original data
+>>>
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --=20
+>> Lo?c Dachary, Artisan Logiciel Libre
+>> All that is necessary for the triumph of evil is that good people do n=
+othing.
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig8E097CABC725CDC15256FB20
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlISNJMACgkQ8dLMyEl6F21+XgCeLeZqASmrXrTWPOTJ7YaeV1I6
+X1IAoJdWr7yRrI9gHHnKzmETMzvbQt9O
+=Mp8k
+-----END PGP SIGNATURE-----
+
+--------------enig8E097CABC725CDC15256FB20--
