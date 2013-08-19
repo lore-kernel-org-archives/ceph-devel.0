@@ -1,78 +1,62 @@
-From: "Hefty, Sean" <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
-Date: Mon, 19 Aug 2013 17:10:11 +0000
-Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CA6C27@ORSMSX109.amr.corp.intel.com>
-References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
-	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
-	<20130812075513.43c338e1@andylap>
-	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
-	<20130812180644.447ca089@andylap>
-	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
-	<20130813075312.7cac0d46@andylap>	<20130813160612.037ea9f2@andylap>
-	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
-	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
- <20130814092124.3f8c3b03@doppio>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [ceph-users] Flapping osd / continuously reported as failed
+Date: Mon, 19 Aug 2013 12:55:43 -0700
+Message-ID: <CAPYLRzi8YLvg=sRq06QS3ju1gLxvCONucsOufhFjcbBPU2Av4A@mail.gmail.com>
+References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet>
+	<CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet>
+	<CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com>
+	<0D057B737C42FC4AB3F22773A5C9425F259DBDF026@MXMBON06.grupa.onet>
+	<ADBDB4FFB0814748AF32D0A1EE6E10AF228296D145@MXMBON06.grupa.onet>
+	<CAPYLRzghUwEvu_f0aV2Q37JqnyCJ=46cTWiteTwN4=Tmqxd3HA@mail.gmail.com>
+	<ADBDB4FFB0814748AF32D0A1EE6E10AF228322C755@MXMBON06.grupa.onet>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130814092124.3f8c3b03@doppio>
-Content-Language: en-US
-Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andreas Bluemle <andreas.bluemle-jy6uzZffzV0b1SvskN2V4Q@public.gmane.org>
-Cc: "Atchley, Scott" <atchleyes-1Heg1YXhbW8@public.gmane.org>, Matthew Anderson <manderson8787-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:34666 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751074Ab3HSTzo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 15:55:44 -0400
+Received: by mail-wg0-f45.google.com with SMTP id x12so4012206wgg.24
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Aug 2013 12:55:43 -0700 (PDT)
+In-Reply-To: <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C755@MXMBON06.grupa.onet>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mostowiec Dominik <Dominik.Mostowiec@grupaonet.pl>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, =?ISO-8859-2?Q?Studzi=F1ski_Krzysztof?= <krzysztof.studzinski@grupaonet.pl>, Sydor Bohdan <Bohdan.Sydor@grupaonet.pl>
 
-Can you see if the patch below fixes the hang?
+On Fri, Aug 16, 2013 at 5:47 AM, Mostowiec Dominik
+<Dominik.Mostowiec@grupaonet.pl> wrote:
+> Hi,
+> Thanks for your response.
+>
+>> It's possible, as deep scrub in particular will add a bit of load (it
+>> goes through and compares the object contents).
+>
+> It is possible that the scrubbing blocks access(RW or only W) to bucket index when check .dir... file?
+> When rgw index is very large I guess it take some time.
 
-Signed-off-by: Sean Hefty <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- src/rsocket.c |   11 ++++++++++-
- 1 files changed, 10 insertions(+), 1 deletions(-)
+Yes, it definitely can as scrubbing takes locks on the PG, which will
+prevent reads or writes while the message is being processed (which
+will involve the rgw index being scanned).
 
-diff --git a/src/rsocket.c b/src/rsocket.c
-index d544dd0..e45b26d 100644
---- a/src/rsocket.c
-+++ b/src/rsocket.c
-@@ -2948,10 +2948,12 @@ static int rs_poll_events(struct pollfd *rfds, struct pollfd *fds, nfds_t nfds)
- 
- 		rs = idm_lookup(&idm, fds[i].fd);
- 		if (rs) {
-+			fastlock_acquire(&rs->cq_wait_lock);
- 			if (rs->type == SOCK_STREAM)
- 				rs_get_cq_event(rs);
- 			else
- 				ds_get_cq_event(rs);
-+			fastlock_release(&rs->cq_wait_lock);
- 			fds[i].revents = rs_poll_rs(rs, fds[i].events, 1, rs_poll_all);
- 		} else {
- 			fds[i].revents = rfds[i].revents;
-@@ -3098,7 +3100,8 @@ int rselect(int nfds, fd_set *readfds, fd_set *writefds,
- 
- /*
-  * For graceful disconnect, notify the remote side that we're
-- * disconnecting and wait until all outstanding sends complete.
-+ * disconnecting and wait until all outstanding sends complete, provided
-+ * that the remote side has not sent a disconnect message.
-  */
- int rshutdown(int socket, int how)
- {
-@@ -3138,6 +3141,12 @@ int rshutdown(int socket, int how)
- 	if (rs->state & rs_connected)
- 		rs_process_cq(rs, 0, rs_conn_all_sends_done);
- 
-+	if (rs->state & rs_disconnected) {
-+		/* Generate event by flushing receives to unblock rpoll */
-+		ibv_req_notify_cq(rs->cm_id->recv_cq, 0);
-+		rdma_disconnect(rs->cm_id);
-+	}
-+
- 	if ((rs->fd_flags & O_NONBLOCK) && (rs->state & rs_connected))
- 		rs_set_nonblocking(rs, rs->fd_flags);
- 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-rdma" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Are you not having any
+>> flapping issues any more, and did you try and find when it started the
+>> scrub to see if it matched up with your troubles?
+>
+> No, I didn't.
+> But on our second cluster with the same problem, disable scrubbing also helps.
+>
+>> I'd be hesitant to turn it off as scrubbing can uncover corrupt
+>> objects etc, but you can configure it with the settings at
+>> http://ceph.com/docs/master/rados/configuration/osd-config-ref/#scrubbing.
+>> (Always check the surprisingly-helpful docs when you need to do some
+>> config or operations work!)
+>
+> I think change config scrub timeout or interval don't full remove issues.
+> Change "osd deep scrub stride" to small value make scrubbing lightest?
+You probably don't want to change the scrub stride; that is used to
+keep reads at an appropriate size for the internal control threads but
+won't relate to the object read/write locking.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
