@@ -1,43 +1,59 @@
-From: "Hefty, Sean" <sean.hefty@intel.com>
-Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
-Date: Tue, 20 Aug 2013 15:04:42 +0000
-Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CA6F25@ORSMSX109.amr.corp.intel.com>
-References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
-	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
-	<20130812075513.43c338e1@andylap>
-	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
-	<20130812180644.447ca089@andylap>
-	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
-	<20130813075312.7cac0d46@andylap>	<20130813160612.037ea9f2@andylap>
-	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
-	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
-	<20130814092124.3f8c3b03@doppio>
-	<1828884A29C6694DAF28B7E6B8A8237388CA6C27@ORSMSX109.amr.corp.intel.com>
-	<20130820092113.612cf7a2@andylap> <20130820123046.2ceb5e77@andylap>
+From: Wido den Hollander <wido@42on.com>
+Subject: libvirt: Removing RBD volumes with snapshots, auto purge or not?
+Date: Tue, 20 Aug 2013 17:36:15 +0200
+Message-ID: <52138CEF.8010109@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:25323 "EHLO mga03.intel.com"
+Received: from websrv.42on.com ([31.25.102.167]:56247 "EHLO websrv.42on.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751111Ab3HTPEt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Aug 2013 11:04:49 -0400
-In-Reply-To: <20130820123046.2ceb5e77@andylap>
-Content-Language: en-US
+	id S1751306Ab3HTPgS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 Aug 2013 11:36:18 -0400
+Received: from [IPv6:2001:980:7936:0:bda9:9b05:bc36:8dd7] (unknown [IPv6:2001:980:7936:0:bda9:9b05:bc36:8dd7])
+	by websrv.42on.com (Postfix) with ESMTPSA id 464CBBF476
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Aug 2013 17:36:15 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Matthew Anderson <manderson8787@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-rdma@vger.kernel.org (linux-rdma@vger.kernel.org)" <linux-rdma@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-> I have added the patch and re-tested: I still encounter
-> hangs of my application. I am not quite sure whether the
-> I hit the same error on the shutdown because now I don't hit
-> the error always, but only every now and then.
+Hi,
 
-I guess this is at least some progress... :/
- 
-> WHen adding the patch to my code base (git tag v1.0.17) I notice
-> an offset of "-34 lines". Which code base are you using?
+The current [0] libvirt storage pool code simply calls "rbd_remove" 
+without anything else.
 
-This patch was generated against the tip of the git tree. 
+As far as I know rbd_remove will fail if the image still has snapshots, 
+you have to remove those snapshots first before you can remove the image.
 
+The problem is that libvirt's storage pools do not support listing 
+snapshots, so we can't integrate that.
+
+Libvirt however has a flag you can pass down to tell you want the device 
+to be zeroed.
+
+The normal procedure is that the device is filled with zeros before 
+actually removing it.
+
+I was thinking about "abusing" this flag to use it as a snap purge for RBD.
+
+So a regular volume removal will call only rbd_remove, but when the flag 
+VIR_STORAGE_VOL_DELETE_ZEROED is passed it will purge all snapshots 
+prior to calling rbd_remove.
+
+Another way would be to always purge snapshots, but I'm afraid that 
+could make somebody very unhappy at some point.
+
+Currently "virsh" doesn't support flags, but that could be fixed in a 
+different patch.
+
+Does my idea sound sane?
+
+[0]: 
+http://libvirt.org/git/?p=libvirt.git;a=blob;f=src/storage/storage_backend_rbd.c;h=e3340f63f412c22d025f615beb7cfed25f00107b;hb=master#l407
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
