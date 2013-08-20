@@ -1,61 +1,130 @@
-From: Roald van Loon <roaldvanloon@gmail.com>
-Subject: Re: RGW blueprint for plugin architecture
-Date: Tue, 20 Aug 2013 10:58:05 +0200
-Message-ID: <CAN04cT5PbuFUywG6OAovNPmraj-3mHn8=BLpAM2nWrsdtOR9BA@mail.gmail.com>
-References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
-	<CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
-	<CAN04cT6uOTYx7Mk0sMWBBwzy=Muf40ZkZDUpgYpQ6=9ZE=TvBw@mail.gmail.com>
-	<CABBk=J-LASxNT49pQ9oSK-p189FiuCQ0dA540v0MhCzmTf-Uzg@mail.gmail.com>
-	<CAN04cT6vHxCVWMPEZM1Ppqfbbv4Eqao7HwDNsuJgomYbugJ3Gg@mail.gmail.com>
-	<CABBk=J_LXDxpv8shUVr9sf6De5wayQ9r1tPJC1rmzwdJfqnQHg@mail.gmail.com>
-	<CAN04cT5jGGJThJgj47WZxrG9HB-0DywNY4Hw5kQkObOvWsjw8g@mail.gmail.com>
-	<CABBk=J_FYU+5Bf3ORyFJsNx0J1PoEkZWosijZJX6eVk-GwOTBw@mail.gmail.com>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: Re: [ceph-users] Help needed porting Ceph to RSockets
+Date: Tue, 20 Aug 2013 12:30:46 +0200
+Message-ID: <20130820123046.2ceb5e77@andylap>
+References: <CAJA05UmTDGze7S50_j8RgHmPFYonk2Z94Fi6CQtxND9QxgRr3g@mail.gmail.com>
+	<CAJA05Umgio7XftGZtQdRzyWq70pXBb3oEx2jrT3BxcBr6MLoVQ@mail.gmail.com>
+	<20130812075513.43c338e1@andylap>
+	<CAJA05U=i22jHy2xbvCUk+UVN0+hOFDgt-JMSHTWKmr1+DZu0Dg@mail.gmail.com>
+	<20130812180644.447ca089@andylap>
+	<CAJA05U=KqzYis14sYXusbpk-T-F=uqvNz1XPurutmdeRz6BAdg@mail.gmail.com>
+	<20130813075312.7cac0d46@andylap>
+	<20130813160612.037ea9f2@andylap>
+	<1978D1F9-C675-4A37-AA57-C7E1158B2F72@ornl.gov>
+	<1828884A29C6694DAF28B7E6B8A8237388CA5A0F@ORSMSX109.amr.corp.intel.com>
+	<20130814092124.3f8c3b03@doppio>
+	<1828884A29C6694DAF28B7E6B8A8237388CA6C27@ORSMSX109.amr.corp.intel.com>
+	<20130820092113.612cf7a2@andylap>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f53.google.com ([209.85.219.53]:56871 "EHLO
-	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751244Ab3HTI6H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Aug 2013 04:58:07 -0400
-Received: by mail-oa0-f53.google.com with SMTP id k18so184431oag.40
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Aug 2013 01:58:05 -0700 (PDT)
-In-Reply-To: <CABBk=J_FYU+5Bf3ORyFJsNx0J1PoEkZWosijZJX6eVk-GwOTBw@mail.gmail.com>
+Received: from port-212-202-108-184.static.qsc.de ([212.202.108.184]:32414
+	"EHLO mail.itxperts.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751039Ab3HTKdP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Aug 2013 06:33:15 -0400
+In-Reply-To: <20130820092113.612cf7a2@andylap>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Hefty, Sean" <sean.hefty@intel.com>
+Cc: "Atchley, Scott" <atchleyes@ornl.gov>, Matthew Anderson <manderson8787@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-rdma@vger.kernel.org (linux-rdma@vger.kernel.org)" <linux-rdma@vger.kernel.org>
 
-On Tue, Aug 20, 2013 at 2:58 AM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> Well, practically I'd like to have such work doing baby steps, rather
-> than swiping changes. Such changes have higher chances of getting
-> completed and eventually merged upstream.  That's why I prefer the
-> current model of directly linking the plugins (whether statically or
-> dynamically), with (relatively) minor internal adjustments.
+Hi,
 
-What current model of "directly linking plugins" do you refer to exactly?
+I have added the patch and re-tested: I still encounter
+hangs of my application. I am not quite sure whether the
+I hit the same error on the shutdown because now I don't hit
+the error always, but only every now and then.
 
-> Maybe start with thinking about the use cases, and then figure what
-> kind of api that would be. As I said, I'm not sure that an internal
-> api is the way to go, but rather exposing some lower level
-> functionality externally. The big difference is that with the former
-> we tie in the internal architecture, while the latter hides the [gory]
-> details.
+WHen adding the patch to my code base (git tag v1.0.17) I notice
+an offset of "-34 lines". Which code base are you using?
 
-The problem is that right now basically everything is 'lower level
-functionality', because a lot of generic stuff depends on S3 stuff,
-which in turn depends on generic stuff. Take for example the
-following;
 
-class RGWHandler_Usage : public RGWHandler_Auth_S3 { }
-class RGWHandler_Auth_S3 : public RGWHandler_ObjStore { }
+Best Regards
 
-This basically ties usage statistics collection + authentication
-handling + object store all together.
+Andreas Bluemle
 
-I think this needs to be completely unravelled, but before making all
-kinds of use cases (like, usage statistics collection or
-authentication in this case) it might be wise to know what the design
-decisions were to make the S3 API so very much integrated into
-everything else. Or is this just legacy?
+On Tue, 20 Aug 2013 09:21:13 +0200
+Andreas Bluemle <andreas.bluemle@itxperts.de> wrote:
 
-Roald
+> Hi Sean,
+> 
+> I will re-check until the end of the week; there is
+> some test scheduling issue with our test system, which
+> affects my access times.
+> 
+> Thanks
+> 
+> Andreas
+> 
+> 
+> On Mon, 19 Aug 2013 17:10:11 +0000
+> "Hefty, Sean" <sean.hefty@intel.com> wrote:
+> 
+> > Can you see if the patch below fixes the hang?
+> > 
+> > Signed-off-by: Sean Hefty <sean.hefty@intel.com>
+> > ---
+> >  src/rsocket.c |   11 ++++++++++-
+> >  1 files changed, 10 insertions(+), 1 deletions(-)
+> > 
+> > diff --git a/src/rsocket.c b/src/rsocket.c
+> > index d544dd0..e45b26d 100644
+> > --- a/src/rsocket.c
+> > +++ b/src/rsocket.c
+> > @@ -2948,10 +2948,12 @@ static int rs_poll_events(struct pollfd
+> > *rfds, struct pollfd *fds, nfds_t nfds) 
+> >  		rs = idm_lookup(&idm, fds[i].fd);
+> >  		if (rs) {
+> > +			fastlock_acquire(&rs->cq_wait_lock);
+> >  			if (rs->type == SOCK_STREAM)
+> >  				rs_get_cq_event(rs);
+> >  			else
+> >  				ds_get_cq_event(rs);
+> > +			fastlock_release(&rs->cq_wait_lock);
+> >  			fds[i].revents = rs_poll_rs(rs,
+> > fds[i].events, 1, rs_poll_all); } else {
+> >  			fds[i].revents = rfds[i].revents;
+> > @@ -3098,7 +3100,8 @@ int rselect(int nfds, fd_set *readfds, fd_set
+> > *writefds, 
+> >  /*
+> >   * For graceful disconnect, notify the remote side that we're
+> > - * disconnecting and wait until all outstanding sends complete.
+> > + * disconnecting and wait until all outstanding sends complete,
+> > provided
+> > + * that the remote side has not sent a disconnect message.
+> >   */
+> >  int rshutdown(int socket, int how)
+> >  {
+> > @@ -3138,6 +3141,12 @@ int rshutdown(int socket, int how)
+> >  	if (rs->state & rs_connected)
+> >  		rs_process_cq(rs, 0, rs_conn_all_sends_done);
+> >  
+> > +	if (rs->state & rs_disconnected) {
+> > +		/* Generate event by flushing receives to unblock
+> > rpoll */
+> > +		ibv_req_notify_cq(rs->cm_id->recv_cq, 0);
+> > +		rdma_disconnect(rs->cm_id);
+> > +	}
+> > +
+> >  	if ((rs->fd_flags & O_NONBLOCK) && (rs->state &
+> > rs_connected)) rs_set_nonblocking(rs, rs->fd_flags);
+> >  
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe
+> > linux-rdma" in the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+> 
+> 
+
+
+
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+Heinrich Boell Strasse 88           Phone: (+49) 89 4317582
+D-81829 Muenchen (Germany)          Mobil: (+49) 177 522 0151
