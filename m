@@ -1,51 +1,126 @@
-From: James Harper <james.harper-NMzNsA1hOHcW+bLBXbPJGg@public.gmane.org>
-Subject: Re: v0.61.8 Cuttlefish released
-Date: Mon, 19 Aug 2013 23:30:40 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B6649FF7F@BITCOM1.int.sbss.com.au>
-References: <alpine.DEB.2.00.1308191251390.11136@cobra.newdream.net>
-	<6035A0D088A63A46850C3988ED045A4B6649FD75@BITCOM1.int.sbss.com.au>
-	<alpine.DEB.2.00.1308191518150.11018@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: RGW blueprint for plugin architecture
+Date: Mon, 19 Aug 2013 17:58:59 -0700
+Message-ID: <CABBk=J_FYU+5Bf3ORyFJsNx0J1PoEkZWosijZJX6eVk-GwOTBw@mail.gmail.com>
+References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
+	<CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
+	<CAN04cT6uOTYx7Mk0sMWBBwzy=Muf40ZkZDUpgYpQ6=9ZE=TvBw@mail.gmail.com>
+	<CABBk=J-LASxNT49pQ9oSK-p189FiuCQ0dA540v0MhCzmTf-Uzg@mail.gmail.com>
+	<CAN04cT6vHxCVWMPEZM1Ppqfbbv4Eqao7HwDNsuJgomYbugJ3Gg@mail.gmail.com>
+	<CABBk=J_LXDxpv8shUVr9sf6De5wayQ9r1tPJC1rmzwdJfqnQHg@mail.gmail.com>
+	<CAN04cT5jGGJThJgj47WZxrG9HB-0DywNY4Hw5kQkObOvWsjw8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1308191518150.11018-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vc0-f177.google.com ([209.85.220.177]:55288 "EHLO
+	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751162Ab3HTA7A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 20:59:00 -0400
+Received: by mail-vc0-f177.google.com with SMTP id gf12so3432085vcb.8
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Aug 2013 17:58:59 -0700 (PDT)
+In-Reply-To: <CAN04cT5jGGJThJgj47WZxrG9HB-0DywNY4Hw5kQkObOvWsjw8g@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> On Mon, 19 Aug 2013, James Harper wrote:
-> > >
-> > > We've made another point release for Cuttlefish. This release contains a
-> > > number of fixes that are generally not individually critical, but do trip
-> > > up users from time to time, are non-intrusive, and have held up under
-> > > testing.
-> > >
-> > > Notable changes include:
-> > >
-> > >  * librados: fix async aio completion wakeup
-> > >  * librados: fix aio completion locking
-> > >  * librados: fix rare deadlock during shutdown
-> >
-> > Could any of these be causing the segfaults I'm seeing in tapdisk rbd?
-> > Are these fixes in dumpling?
-> 
-> They are also in the dumpling branch and 0.67.1.  They might explain it...
-> not a slam dunk though.
-> 
+On Mon, Aug 19, 2013 at 1:55 PM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+> Hi Yehuda,
+>
+> Thanks for the comments.
+>
+> Yeah, I created the wip-rgw-plugin to get a feeling of how it would
+> look like. It's probably better to see it as a sandbox, but it already
+> clearly shows some of the flaws that you point out.
+>
+> It doesn't need to link into the rgw binary of course, but yes the
+> dl'd .so still expects the (although unexported) symbols to be there.
+>
+> I personally am a *big* fan of a clean internal API and dynamically
+> loadable libraries, especially because I want the librgw to have this
+> feature in the future. For instance, I'd really like a nginx module
+> one day which links to librgw but not all of the APIs or all of the
+> authentication mechanism. The nginx module might want to load/unload
+> specific plugins when it needs to. Same goes for a python extension.
+> An import rgw should not always also be an import rgw.s3 etc. I'd
+> really like these features and mostly I'd really like these features
+> to be slim and not 50+ MB plus....
 
-Just upgraded to test and no joy - tapdisk still segfaults
+Right. However, that doesn't really mean we necessarily need to have
+tight internal api. It might mean that we'd need to define a different
+set of apis that will encapsulate these use cases. E.g., rgw data
+access api, direct user management, etc.
+By the way, the biggest problem with direct nginx integration is that
+nginx is event driven, whereas internally the gateway is synchronous
+(albeit threaded).
 
-Thanks
+>
+> I agree it's a lot of work (wouldn't call it noble though), but I
+> don't see that as an argument to not do it. However, I also agree that
+> the blueprint/internal API should be extended much more. That's why I
+> asked for comments to begin with :-)
 
-James
+Well, practically I'd like to have such work doing baby steps, rather
+than swiping changes. Such changes have higher chances of getting
+completed and eventually merged upstream.  That's why I prefer the
+current model of directly linking the plugins (whether statically or
+dynamically), with (relatively) minor internal adjustments.
+
+>
+> I'll start thinking about a design for an internal API but I'll
+> definitely need some help with that. I'm not a fulltime Ceph developer
+> :-)
+
+Maybe start with thinking about the use cases, and then figure what
+kind of api that would be. As I said, I'm not sure that an internal
+api is the way to go, but rather exposing some lower level
+functionality externally. The big difference is that with the former
+we tie in the internal architecture, while the latter hides the [gory]
+details.
+
+>
+> Roald
+>
+>
+>
+>
+> On Mon, Aug 19, 2013 at 10:05 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>> On Mon, Aug 19, 2013 at 5:34 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+>>> Hi,
+>>>
+>>> I started out by defining the plugin system a bit more
+>>> (http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture).
+>>> I'd really appreciate any comments.
+>>>
+>>> On Wed, Aug 14, 2013 at 8:40 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>>>>>  - "AUTH" (Authentication backends): Rados/internal, Keystone
+>>>>
+>>>> That's probably the best place to start.
+>>>
+>>> I also started working on an "auth" type of plugin for all Keystone
+>>> support based on the plugin system currently described in the
+>>> blueprint (it's an extremely simple and flexible system and IMHO a
+>>> good way to start). Contrary to the "plugin system", the auth plugin
+>>> itself will move a lot of code around and will therefore have a much
+>>> greater impact. So it's probably better to separate these projects
+>>> completely. If we can reach consensus about the way the first version
+>>> of the plugin system should look like, I will separate these commits
+>>> into different branches so we can merge it one step at a time.
+>>>
+>>
+>> I went over the blueprint, and partially through the code
+>> (wip-rgw-plugin). I'm not completely sure about the plugin <-> core
+>> interface that you had in mind. At the moment there's no clean
+>> interface, and it just links directly. For example, the keystone
+>> plugin needs to call rgw_store_user_info(), the KeystoneClient needs
+>> to inherit from RGWHTTPClient, etc.
+>> So on one hand we now move this code into external module, but otoh,
+>> it still need to link into the monolithic rgw core. Having a clean
+>> internal api might be a noble idea, but I'm not sure it's very
+>> practical (which is in line with what's there now).
+>> Having a linux-kernel like module model makes sense here. The
+>> modules/plugins will need to be compiled against the specific version
+>> in order for them to be able to load successfully.
+>> Also, I'm not sure that we need to bother with dynamic loading.
+>>
+>> Yehuda
