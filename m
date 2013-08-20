@@ -1,126 +1,352 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW blueprint for plugin architecture
-Date: Mon, 19 Aug 2013 17:58:59 -0700
-Message-ID: <CABBk=J_FYU+5Bf3ORyFJsNx0J1PoEkZWosijZJX6eVk-GwOTBw@mail.gmail.com>
-References: <CAN04cT4C-odh4_9OZ2xWx90aPWFTvJ_DgZJ-O88-dyXJy=jMGg@mail.gmail.com>
-	<CABBk=J-JTFB2Crb0NZfxbMDGMsVY=XhmjZT1D3MwQPaKrDy+Nw@mail.gmail.com>
-	<CAN04cT6uOTYx7Mk0sMWBBwzy=Muf40ZkZDUpgYpQ6=9ZE=TvBw@mail.gmail.com>
-	<CABBk=J-LASxNT49pQ9oSK-p189FiuCQ0dA540v0MhCzmTf-Uzg@mail.gmail.com>
-	<CAN04cT6vHxCVWMPEZM1Ppqfbbv4Eqao7HwDNsuJgomYbugJ3Gg@mail.gmail.com>
-	<CABBk=J_LXDxpv8shUVr9sf6De5wayQ9r1tPJC1rmzwdJfqnQHg@mail.gmail.com>
-	<CAN04cT5jGGJThJgj47WZxrG9HB-0DywNY4Hw5kQkObOvWsjw8g@mail.gmail.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: [PATCH v5] Ceph-fuse: Fallocate and punch hole support
+Date: Tue, 20 Aug 2013 12:26:51 +0800
+Message-ID: <5212F00B.9000001@ubuntukylin.com>
+References: <1376539443-6865-1-git-send-email-liwang@ubuntukylin.com> <alpine.DEB.2.00.1308152305490.1479@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f177.google.com ([209.85.220.177]:55288 "EHLO
-	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751162Ab3HTA7A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Aug 2013 20:59:00 -0400
-Received: by mail-vc0-f177.google.com with SMTP id gf12so3432085vcb.8
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Aug 2013 17:58:59 -0700 (PDT)
-In-Reply-To: <CAN04cT5jGGJThJgj47WZxrG9HB-0DywNY4Hw5kQkObOvWsjw8g@mail.gmail.com>
+Received: from m199-177.yeah.net ([123.58.177.199]:50962 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751862Ab3HTE1A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Aug 2013 00:27:00 -0400
+In-Reply-To: <alpine.DEB.2.00.1308152305490.1479@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-On Mon, Aug 19, 2013 at 1:55 PM, Roald van Loon <roaldvanloon@gmail.com> wrote:
-> Hi Yehuda,
->
-> Thanks for the comments.
->
-> Yeah, I created the wip-rgw-plugin to get a feeling of how it would
-> look like. It's probably better to see it as a sandbox, but it already
-> clearly shows some of the flaws that you point out.
->
-> It doesn't need to link into the rgw binary of course, but yes the
-> dl'd .so still expects the (although unexported) symbols to be there.
->
-> I personally am a *big* fan of a clean internal API and dynamically
-> loadable libraries, especially because I want the librgw to have this
-> feature in the future. For instance, I'd really like a nginx module
-> one day which links to librgw but not all of the APIs or all of the
-> authentication mechanism. The nginx module might want to load/unload
-> specific plugins when it needs to. Same goes for a python extension.
-> An import rgw should not always also be an import rgw.s3 etc. I'd
-> really like these features and mostly I'd really like these features
-> to be slim and not 50+ MB plus....
+Hi Sage,
+   In general, these look ok to us.
+   One thing to discuss is that for libcephfs, it works in its own way, 
+in spite of the FALLOC_FL_PUNCH_HOLE defined or not. Shall we limit it?
 
-Right. However, that doesn't really mean we necessarily need to have
-tight internal api. It might mean that we'd need to define a different
-set of apis that will encapsulate these use cases. E.g., rgw data
-access api, direct user management, etc.
-By the way, the biggest problem with direct nginx integration is that
-nginx is event driven, whereas internally the gateway is synchronous
-(albeit threaded).
+Cheers,
+Li Wang
 
+On 08/16/2013 02:06 PM, Sage Weil wrote:
+> Hi Li-
 >
-> I agree it's a lot of work (wouldn't call it noble though), but I
-> don't see that as an argument to not do it. However, I also agree that
-> the blueprint/internal API should be extended much more. That's why I
-> asked for comments to begin with :-)
-
-Well, practically I'd like to have such work doing baby steps, rather
-than swiping changes. Such changes have higher chances of getting
-completed and eventually merged upstream.  That's why I prefer the
-current model of directly linking the plugins (whether statically or
-dynamically), with (relatively) minor internal adjustments.
-
+> I pushed a couple small fixes on top of the wip-fallocate branch; let me
+> konw if they look ok to you.
 >
-> I'll start thinking about a design for an internal API but I'll
-> definitely need some help with that. I'm not a fulltime Ceph developer
-> :-)
-
-Maybe start with thinking about the use cases, and then figure what
-kind of api that would be. As I said, I'm not sure that an internal
-api is the way to go, but rather exposing some lower level
-functionality externally. The big difference is that with the former
-we tie in the internal architecture, while the latter hides the [gory]
-details.
-
+> 	https://github.com/ceph/ceph/commits/wip-fallocate
 >
-> Roald
+> Thanks!
+> sage
 >
 >
+> On Thu, 15 Aug 2013, Li Wang wrote:
 >
->
-> On Mon, Aug 19, 2013 at 10:05 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
->> On Mon, Aug 19, 2013 at 5:34 AM, Roald van Loon <roaldvanloon@gmail.com> wrote:
->>> Hi,
->>>
->>> I started out by defining the plugin system a bit more
->>> (http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rgw:_plugin_architecture).
->>> I'd really appreciate any comments.
->>>
->>> On Wed, Aug 14, 2013 at 8:40 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
->>>>>  - "AUTH" (Authentication backends): Rados/internal, Keystone
->>>>
->>>> That's probably the best place to start.
->>>
->>> I also started working on an "auth" type of plugin for all Keystone
->>> support based on the plugin system currently described in the
->>> blueprint (it's an extremely simple and flexible system and IMHO a
->>> good way to start). Contrary to the "plugin system", the auth plugin
->>> itself will move a lot of code around and will therefore have a much
->>> greater impact. So it's probably better to separate these projects
->>> completely. If we can reach consensus about the way the first version
->>> of the plugin system should look like, I will separate these commits
->>> into different branches so we can merge it one step at a time.
->>>
+>> This patch implements fallocate and punch hole support for Ceph fuse client.
 >>
->> I went over the blueprint, and partially through the code
->> (wip-rgw-plugin). I'm not completely sure about the plugin <-> core
->> interface that you had in mind. At the moment there's no clean
->> interface, and it just links directly. For example, the keystone
->> plugin needs to call rgw_store_user_info(), the KeystoneClient needs
->> to inherit from RGWHTTPClient, etc.
->> So on one hand we now move this code into external module, but otoh,
->> it still need to link into the monolithic rgw core. Having a clean
->> internal api might be a noble idea, but I'm not sure it's very
->> practical (which is in line with what's there now).
->> Having a linux-kernel like module model makes sense here. The
->> modules/plugins will need to be compiled against the specific version
->> in order for them to be able to load successfully.
->> Also, I'm not sure that we need to bother with dynamic loading.
+>> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+>> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+>> ---
+>> Enable libcephfs to not delete the first object by passing in a flag.
+>> ---
+>>   src/client/Client.cc           |   93 ++++++++++++++++++++++++++++++++++++++++
+>>   src/client/Client.h            |    3 ++
+>>   src/client/fuse_ll.cc          |   26 +++++++++++
+>>   src/include/cephfs/libcephfs.h |   18 ++++++++
+>>   src/libcephfs.cc               |    8 ++++
+>>   src/osdc/Filer.h               |   23 +++++++++-
+>>   6 files changed, 169 insertions(+), 2 deletions(-)
 >>
->> Yehuda
+>> diff --git a/src/client/Client.cc b/src/client/Client.cc
+>> index 7e26a43..fee0453 100644
+>> --- a/src/client/Client.cc
+>> +++ b/src/client/Client.cc
+>> @@ -22,6 +22,7 @@
+>>   #include <sys/stat.h>
+>>   #include <sys/param.h>
+>>   #include <fcntl.h>
+>> +#include <linux/falloc.h>
+>>
+>>   #include <sys/statvfs.h>
+>>
+>> @@ -7685,6 +7686,98 @@ int Client::ll_fsync(Fh *fh, bool syncdataonly)
+>>     return _fsync(fh, syncdataonly);
+>>   }
+>>
+>> +int Client::_fallocate(Fh *fh, int mode, int64_t offset, int64_t length)
+>> +{
+>> +  if (offset < 0 || length <= 0)
+>> +    return -EINVAL;
+>> +
+>> +  if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE))
+>> +    return -EOPNOTSUPP;
+>> +
+>> +  if ((mode & FALLOC_FL_PUNCH_HOLE) && !(mode & FALLOC_FL_KEEP_SIZE))
+>> +    return -EOPNOTSUPP;
+>> +
+>> +  if (osdmap->test_flag(CEPH_OSDMAP_FULL) && !(mode & FALLOC_FL_PUNCH_HOLE))
+>> +    return -ENOSPC;
+>> +
+>> +  Inode *in = fh->inode;
+>> +
+>> +  if (in->snapid != CEPH_NOSNAP)
+>> +    return -EROFS;
+>> +
+>> +  if ((fh->mode & CEPH_FILE_MODE_WR) == 0)
+>> +    return -EBADF;
+>> +
+>> +  int have;
+>> +  int r = get_caps(in, CEPH_CAP_FILE_WR, CEPH_CAP_FILE_BUFFER, &have, -1);
+>> +  if (r < 0)
+>> +    return r;
+>> +
+>> +  if (mode & FALLOC_FL_PUNCH_HOLE) {
+>> +    Mutex flock("Client::_punch_hole flock");
+>> +    Cond cond;
+>> +    bool done = false;
+>> +    Context *onfinish = new C_SafeCond(&flock, &cond, &done);
+>> +    Context *onsafe = new C_Client_SyncCommit(this, in);
+>> +
+>> +    unsafe_sync_write++;
+>> +    get_cap_ref(in, CEPH_CAP_FILE_BUFFER);
+>> +
+>> +    _invalidate_inode_cache(in, offset, length, true);
+>> +    r = filer->zero(in->ino, &in->layout,
+>> +                    in->snaprealm->get_snap_context(),
+>> +                    offset, length,
+>> +                    ceph_clock_now(cct),
+>> +                    0, true, onfinish, onsafe);
+>> +    if (r < 0)
+>> +      goto done;
+>> +
+>> +    client_lock.Unlock();
+>> +    flock.Lock();
+>> +    while (!done)
+>> +      cond.Wait(flock);
+>> +    flock.Unlock();
+>> +    client_lock.Lock();
+>> +  } else if (!(mode & FALLOC_FL_KEEP_SIZE)) {
+>> +    uint64_t size = offset + length;
+>> +    if (size > in->size) {
+>> +      in->size = size;
+>> +      mark_caps_dirty(in, CEPH_CAP_FILE_WR);
+>> +
+>> +      if ((in->size << 1) >= in->max_size &&
+>> +          (in->reported_size << 1) < in->max_size)
+>> +        check_caps(in, false);
+>> +    }
+>> +  }
+>> +
+>> +  in->mtime = ceph_clock_now(cct);
+>> +  mark_caps_dirty(in, CEPH_CAP_FILE_WR);
+>> +
+>> +done:
+>> +  put_cap_ref(in, CEPH_CAP_FILE_WR);
+>> +  return r;
+>> +}
+>> +
+>> +int Client::ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length)
+>> +{
+>> +  Mutex::Locker lock(client_lock);
+>> +  ldout(cct, 3) << "ll_fallocate " << fh << " " << fh->inode->ino << " " << dendl;
+>> +  tout(cct) << "ll_fallocate " << mode << " " << offset << " " << length << std::endl;
+>> +  tout(cct) << (unsigned long)fh << std::endl;
+>> +
+>> +  return _fallocate(fh, mode, offset, length);
+>> +}
+>> +
+>> +int Client::fallocate(int fd, int mode, loff_t offset, loff_t length)
+>> +{
+>> +  Mutex::Locker lock(client_lock);
+>> +  tout(cct) << "fallocate " << " " << fd << mode << " " << offset << " " << length << std::endl;
+>> +
+>> +  Fh *fh = get_filehandle(fd);
+>> +  if (!fh)
+>> +    return -EBADF;
+>> +  return _fallocate(fh, mode, offset, length);
+>> +}
+>>
+>>   int Client::ll_release(Fh *fh)
+>>   {
+>> diff --git a/src/client/Client.h b/src/client/Client.h
+>> index 1117ff3..5adc4bf 100644
+>> --- a/src/client/Client.h
+>> +++ b/src/client/Client.h
+>> @@ -560,6 +560,7 @@ private:
+>>     int _flush(Fh *fh);
+>>     int _fsync(Fh *fh, bool syncdataonly);
+>>     int _sync_fs();
+>> +  int _fallocate(Fh *fh, int mode, int64_t offset, int64_t length);
+>>
+>>     int get_or_create(Inode *dir, const char* name,
+>>   		    Dentry **pdn, bool expect_null=false);
+>> @@ -658,6 +659,7 @@ public:
+>>     int ftruncate(int fd, loff_t size);
+>>     int fsync(int fd, bool syncdataonly);
+>>     int fstat(int fd, struct stat *stbuf);
+>> +  int fallocate(int fd, int mode, loff_t offset, loff_t length);
+>>
+>>     // full path xattr ops
+>>     int getxattr(const char *path, const char *name, void *value, size_t size);
+>> @@ -727,6 +729,7 @@ public:
+>>     int ll_write(Fh *fh, loff_t off, loff_t len, const char *data);
+>>     int ll_flush(Fh *fh);
+>>     int ll_fsync(Fh *fh, bool syncdataonly);
+>> +  int ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length);
+>>     int ll_release(Fh *fh);
+>>     int ll_statfs(vinodeno_t vino, struct statvfs *stbuf);
+>>
+>> diff --git a/src/client/fuse_ll.cc b/src/client/fuse_ll.cc
+>> index 0812c9a..e62307d 100644
+>> --- a/src/client/fuse_ll.cc
+>> +++ b/src/client/fuse_ll.cc
+>> @@ -400,6 +400,20 @@ static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino, int cmd, void *arg, st
+>>   }
+>>   #endif
+>>
+>> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
+>> +
+>> +static void fuse_ll_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
+>> +                              off_t offset, off_t length,
+>> +                              struct fuse_file_info *fi)
+>> +{
+>> +  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
+>> +  Fh *fh = (Fh*)fi->fh;
+>> +  int r = cfuse->client->ll_fallocate(fh, mode, offset, length);
+>> +  fuse_reply_err(req, -r);
+>> +}
+>> +
+>> +#endif
+>> +
+>>   static void fuse_ll_release(fuse_req_t req, fuse_ino_t ino, struct fuse_file_info *fi)
+>>   {
+>>     CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
+>> @@ -602,8 +616,20 @@ const static struct fuse_lowlevel_ops fuse_ll_oper = {
+>>    getlk: 0,
+>>    setlk: 0,
+>>    bmap: 0,
+>> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 8)
+>>   #ifdef FUSE_IOCTL_COMPAT
+>>    ioctl: fuse_ll_ioctl,
+>> +#else
+>> + ioctl: 0,
+>> +#endif
+>> + poll: 0,
+>> +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
+>> + write_buf: 0,
+>> + retrieve_reply: 0,
+>> + forget_multi: 0,
+>> + flock: 0,
+>> + fallocate: fuse_ll_fallocate
+>> +#endif
+>>   #endif
+>>   };
+>>
+>> diff --git a/src/include/cephfs/libcephfs.h b/src/include/cephfs/libcephfs.h
+>> index 93e86e7..9b74f63 100644
+>> --- a/src/include/cephfs/libcephfs.h
+>> +++ b/src/include/cephfs/libcephfs.h
+>> @@ -709,6 +709,24 @@ int ceph_ftruncate(struct ceph_mount_info *cmount, int fd, loff_t size);
+>>   int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataonly);
+>>
+>>   /**
+>> + * Preallocate or release disk space for the file for the byte range.
+>> + *
+>> + * @param cmount the ceph mount handle to use for performing the fallocate.
+>> + * @param fd the file descriptor of the file to fallocate.
+>> + * @param mode the flags determines the operation to be performed on the given range.
+>> + *        default operation (0) allocate and initialize to zero the file in the byte range,
+>> + *        and the file size will be changed if offset + length is greater than
+>> + *        the file size. if the FALLOC_FL_KEEP_SIZE flag is specified in the mode,
+>> + *        the file size will not be changed. if the FALLOC_FL_PUNCH_HOLE flag is
+>> + *        specified in the mode, the operation is deallocate space and zero the byte range.
+>> + * @param offset the byte range starting.
+>> + * @param length the length of the range.
+>> + * @return 0 on success or a negative error code on failure.
+>> + */
+>> +int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
+>> +	                      loff_t offset, loff_t length);
+>> +
+>> +/**
+>>    * Get the open file's statistics.
+>>    *
+>>    * @param cmount the ceph mount handle to use for performing the fstat.
+>> diff --git a/src/libcephfs.cc b/src/libcephfs.cc
+>> index 16b130a..306c4ba 100644
+>> --- a/src/libcephfs.cc
+>> +++ b/src/libcephfs.cc
+>> @@ -700,6 +700,14 @@ extern "C" int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataon
+>>     return cmount->get_client()->fsync(fd, syncdataonly);
+>>   }
+>>
+>> +extern "C" int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
+>> +	                      loff_t offset, loff_t length)
+>> +{
+>> +  if (!cmount->is_mounted())
+>> +    return -ENOTCONN;
+>> +  return cmount->get_client()->fallocate(fd, mode, offset, length);
+>> +}
+>> +
+>>   extern "C" int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf)
+>>   {
+>>     if (!cmount->is_mounted())
+>> diff --git a/src/osdc/Filer.h b/src/osdc/Filer.h
+>> index 86ff601..c069259 100644
+>> --- a/src/osdc/Filer.h
+>> +++ b/src/osdc/Filer.h
+>> @@ -208,12 +208,14 @@ class Filer {
+>>              uint64_t len,
+>>   	   utime_t mtime,
+>>   	   int flags,
+>> +	   bool keep_first,
+>>              Context *onack,
+>>              Context *oncommit) {
+>>       vector<ObjectExtent> extents;
+>>       Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
+>>       if (extents.size() == 1) {
+>> -      if (extents[0].offset == 0 && extents[0].length == layout->fl_object_size)
+>> +      if (extents[0].offset == 0 && extents[0].length == layout->fl_object_size &&
+>> +      	  (!keep_first || extents[0].objectno != 0))
+>>   	objecter->remove(extents[0].oid, extents[0].oloc,
+>>   			 snapc, mtime, flags, onack, oncommit);
+>>         else
+>> @@ -223,7 +225,8 @@ class Filer {
+>>         C_GatherBuilder gack(cct, onack);
+>>         C_GatherBuilder gcom(cct, oncommit);
+>>         for (vector<ObjectExtent>::iterator p = extents.begin(); p != extents.end(); ++p) {
+>> -	if (p->offset == 0 && p->length == layout->fl_object_size)
+>> +	if (p->offset == 0 && p->length == layout->fl_object_size &&
+>> +	    (!keep_first || p->objectno != 0))
+>>   	  objecter->remove(p->oid, p->oloc,
+>>   			   snapc, mtime, flags,
+>>   			   onack ? gack.new_sub():0,
+>> @@ -240,6 +243,22 @@ class Filer {
+>>       return 0;
+>>     }
+>>
+>> +  int zero(inodeno_t ino,
+>> +	   ceph_file_layout *layout,
+>> +	   const SnapContext& snapc,
+>> +	   uint64_t offset,
+>> +           uint64_t len,
+>> +	   utime_t mtime,
+>> +	   int flags,
+>> +           Context *onack,
+>> +           Context *oncommit) {
+>> +
+>> +    return zero(ino, layout,
+>> +                snapc, offset,
+>> +                len, mtime,
+>> +                flags, false,
+>> +                onack, oncommit);
+>> +  }
+>>     // purge range of ino.### objects
+>>     int purge_range(inodeno_t ino,
+>>   		  ceph_file_layout *layout,
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>
