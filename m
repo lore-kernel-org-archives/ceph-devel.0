@@ -1,104 +1,99 @@
-From: Sha Zhengju <handai.szj@gmail.com>
-Subject: [PATCH V6] ceph: use vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
-Date: Wed, 21 Aug 2013 16:27:34 +0800
-Message-ID: <1377073654-6232-1-git-send-email-handai.szj@taobao.com>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, ukernel@gmail.com, mhocko@suse.cz, akpm@linux-foundation.org, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: app design recommendations
+Date: Wed, 21 Aug 2013 10:49:20 +0200
+Message-ID: <52147F10.3030509@42on.com>
+References: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:45357 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751848Ab3HUItX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Aug 2013 04:49:23 -0400
+In-Reply-To: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nulik Nol <nuliknol@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Following we will begin to add memcg dirty page accounting around
-__set_page_dirty_{buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
-avoid exporting those details to filesystems.
+On 08/20/2013 10:06 PM, Nulik Nol wrote:
+> Hi,
+> I am creating an email system which will handle whole company's email,
+> mostly internal mail. There will be thousands of companies and
+> hundreds of users per company. So I am planning to use one pool per
+> company to store email messages. Can Ceph manage thousands or maybe
+> hundred thousands of pools ? Could there be any slowdown at production
+> with such design after some growth?
+>
 
-Since vfs set_page_dirty() should be called under page lock, here we don't need elaborate
-codes to handle racy anymore, and two WARN_ON() are added to detect such exceptions.
-Thanks very much for Sage and Yan Zheng's coaching!
+No, Ceph dan not handle thousands or even hundreds of pools. For each 
+pool a certain (configurable) amount of placement groups is created. 
+Each PG has to be tracked through the cluster and will consume CPU en 
+Memory on your OSDs and even Monitors.
 
-I tested it in a two server's ceph environment that one is client and the other is
-mds/osd/mon, and run the following fsx test from xfstests:
+With a large amount of pools you will start consuming a huge amount of 
+memory and CPU power.
 
-  ./fsx   1MB -N 50000 -p 10000 -l 1048576
-  ./fsx  10MB -N 50000 -p 10000 -l 10485760
-  ./fsx 100MB -N 50000 -p 10000 -l 104857600
+To mitigate this RADOS namespaces have developed: 
+http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/rados_namespaces
 
-The fsx does lots of mmap-read/mmap-write/truncate operations and the tests completed
-successfully without triggering any of WARN_ON.
+That will allow you to separate data in a pool without having to create 
+multiple pools. Namespaces are cheap, so use them.
 
-Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
----
- fs/ceph/addr.c |   42 ++++++++++++++----------------------------
- 1 file changed, 14 insertions(+), 28 deletions(-)
+> Every email will be stored as an individual ceph object (emails will
+> average 512 bytes and rarely have attachments) , is it ok to store
+> them as a ceph objects or will it be less efficient than storing
+> multiple emails in a ceph object,? What is the optimal ceph object
+> size to store individually, so it would be preferable to do this
+> instead of writing through omap with leveldb? (kind of "ceph object vs
+> omap" benchmark question)
+>
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index afb2fc2..01891f4 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -72,13 +72,15 @@ static int ceph_set_page_dirty(struct page *page)
- 	struct ceph_inode_info *ci;
- 	int undo = 0;
- 	struct ceph_snap_context *snapc;
-+	int ret;
- 
- 	if (unlikely(!mapping))
- 		return !TestSetPageDirty(page);
- 
--	if (TestSetPageDirty(page)) {
-+	if (PageDirty(page)) {
- 		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
- 		     mapping->host, page, page->index);
-+		BUG_ON(!PagePrivate(page));
- 		return 0;
- 	}
- 
-@@ -107,35 +109,19 @@ static int ceph_set_page_dirty(struct page *page)
- 	     snapc, snapc->seq, snapc->num_snaps);
- 	spin_unlock(&ci->i_ceph_lock);
- 
--	/* now adjust page */
--	spin_lock_irq(&mapping->tree_lock);
--	if (page->mapping) {	/* Race with truncate? */
--		WARN_ON_ONCE(!PageUptodate(page));
--		account_page_dirtied(page, page->mapping);
--		radix_tree_tag_set(&mapping->page_tree,
--				page_index(page), PAGECACHE_TAG_DIRTY);
--
--		/*
--		 * Reference snap context in page->private.  Also set
--		 * PagePrivate so that we get invalidatepage callback.
--		 */
--		page->private = (unsigned long)snapc;
--		SetPagePrivate(page);
--	} else {
--		dout("ANON set_page_dirty %p (raced truncate?)\n", page);
--		undo = 1;
--	}
--
--	spin_unlock_irq(&mapping->tree_lock);
--
--	if (undo)
--		/* whoops, we failed to dirty the page */
--		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
-+	/*
-+	 * Reference snap context in page->private.  Also set
-+	 * PagePrivate so that we get invalidatepage callback.
-+	 */
-+	BUG_ON(PagePrivate(page));
-+	page->private = (unsigned long)snapc;
-+	SetPagePrivate(page);
- 
--	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
-+	ret = __set_page_dirty_nobuffers(page);
-+	WARN_ON(!PageLocked(page));
-+	WARN_ON(!page->mapping);
- 
--	BUG_ON(!PageDirty(page));
--	return 1;
-+	return ret;
- }
- 
- /*
+You can store billions of objects in a pool, that is not a problem. 
+Their size doesn't matter either.
+
+Larger objects might work better in recovery situations since you save 
+yourself the opening and closing of a vast amount of small files on the 
+OSD's filesystem. I have never benchmarked it though.
+
+> Also I will be putting mini-chat sessions between users in a ceph
+> object, each time a user sends a message to another user, I will
+> append the text to the ceph object, so my question is, will Ceph
+> rewrite the whole object into a new physical location on disk when I
+> do an append? Or will it just rewrite the block that was modified?
+>
+
+As long as you use rados_append it will append to the object and the 
+file on the OSD and it won't rewrite the complete file on the OSD's 
+filesystem.
+
+> And last questions: Which is faster, storing small key/value pairs in
+> omap or in xattrs ? Will storing key/value pairs in xattrs result in
+> space waste by allocating a block for zero-sized object on the OSD? (I
+> won't write any data to the object, just use xattrs)
+>
+
+I'm not sure about the answer on this one, but you are aware of the fact 
+that you can't search for objects? You can't ask RADOS to give you all 
+objects where attr X has value Y.
+
+Wido
+
+> Will appreciate very much your comments.
+>
+> Best Regards
+> Nulik
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
 -- 
-1.7.9.5
+Wido den Hollander
+42on B.V.
 
+Phone: +31 (0)20 700 9902
+Skype: contact42on
