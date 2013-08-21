@@ -1,99 +1,56 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: app design recommendations
-Date: Wed, 21 Aug 2013 10:49:20 +0200
-Message-ID: <52147F10.3030509@42on.com>
-References: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Jerasure & Ceph
+Date: Wed, 21 Aug 2013 11:32:42 +0200
+Message-ID: <5214893A.2020005@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigAE3AE9F752D1E6F74DD4F52B"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:45357 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751848Ab3HUItX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 Aug 2013 04:49:23 -0400
-In-Reply-To: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:54565 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751360Ab3HUJcs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 05:32:48 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nulik Nol <nuliknol@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "James S. Plank" <plank@cs.utk.edu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 08/20/2013 10:06 PM, Nulik Nol wrote:
-> Hi,
-> I am creating an email system which will handle whole company's email,
-> mostly internal mail. There will be thousands of companies and
-> hundreds of users per company. So I am planning to use one pool per
-> company to store email messages. Can Ceph manage thousands or maybe
-> hundred thousands of pools ? Could there be any slowdown at production
-> with such design after some growth?
->
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigAE3AE9F752D1E6F74DD4F52B
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-No, Ceph dan not handle thousands or even hundreds of pools. For each 
-pool a certain (configurable) amount of placement groups is created. 
-Each PG has to be tracked through the cluster and will consume CPU en 
-Memory on your OSDs and even Monitors.
+Hi James,
 
-With a large amount of pools you will start consuming a huge amount of 
-memory and CPU power.
+I'm working on adding jerasure as a plugin to Ceph. If I remember correct=
+ly the next version of jerasure was scheduled to be released this month. =
+Although using jerasure-1.2 ( as found at http://web.eecs.utk.edu/~plank/=
+plank/papers/CS-08-627.html ) would be perfectly fine, it may be worth wa=
+iting for a few days if a release is imminent.
 
-To mitigate this RADOS namespaces have developed: 
-http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/rados_namespaces
+Do you advise to wait for the next version of jerasure ?
 
-That will allow you to separate data in a pool without having to create 
-multiple pools. Namespaces are cheap, so use them.
+Cheers
 
-> Every email will be stored as an individual ceph object (emails will
-> average 512 bytes and rarely have attachments) , is it ok to store
-> them as a ceph objects or will it be less efficient than storing
-> multiple emails in a ceph object,? What is the optimal ceph object
-> size to store individually, so it would be preferable to do this
-> instead of writing through omap with leveldb? (kind of "ceph object vs
-> omap" benchmark question)
->
-
-You can store billions of objects in a pool, that is not a problem. 
-Their size doesn't matter either.
-
-Larger objects might work better in recovery situations since you save 
-yourself the opening and closing of a vast amount of small files on the 
-OSD's filesystem. I have never benchmarked it though.
-
-> Also I will be putting mini-chat sessions between users in a ceph
-> object, each time a user sends a message to another user, I will
-> append the text to the ceph object, so my question is, will Ceph
-> rewrite the whole object into a new physical location on disk when I
-> do an append? Or will it just rewrite the block that was modified?
->
-
-As long as you use rados_append it will append to the object and the 
-file on the OSD and it won't rewrite the complete file on the OSD's 
-filesystem.
-
-> And last questions: Which is faster, storing small key/value pairs in
-> omap or in xattrs ? Will storing key/value pairs in xattrs result in
-> space waste by allocating a block for zero-sized object on the OSD? (I
-> won't write any data to the object, just use xattrs)
->
-
-I'm not sure about the answer on this one, but you are aware of the fact 
-that you can't search for objects? You can't ask RADOS to give you all 
-objects where attr X has value Y.
-
-Wido
-
-> Will appreciate very much your comments.
->
-> Best Regards
-> Nulik
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
--- 
-Wido den Hollander
-42on B.V.
+--------------enigAE3AE9F752D1E6F74DD4F52B
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlIUiToACgkQ8dLMyEl6F23cAACfVvVJ2Itio73k/G9kSVv/fz1V
+RqQAn312xTzfdlaS/VXNccKS/jmSTw9D
+=xKXR
+-----END PGP SIGNATURE-----
+
+--------------enigAE3AE9F752D1E6F74DD4F52B--
