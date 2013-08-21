@@ -1,35 +1,73 @@
-From: Roald van Loon <roaldvanloon@gmail.com>
-Subject: Re: subdir-objects
-Date: Wed, 21 Aug 2013 23:01:57 +0200
-Message-ID: <CAN04cT74h7QjWhOCQqc3e7HM__qaw+BrbaCy3NW_ZzC1xzX4Kg@mail.gmail.com>
-References: <CAN04cT5zbp2oe9QvcbnQ4W=7ByA1UybzPEGGWvngjLogsqFaWA@mail.gmail.com>
-	<CA+Hcz5-uxiNMQiNXKfbETiQG0D6-nUrbV5oGpmMqn8oWi4DwGw@mail.gmail.com>
-	<alpine.DEB.2.00.1308211340020.28981@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: [PATCHv4 0/5] ceph: persistent caching with fscache
+Date: Wed, 21 Aug 2013 17:26:41 -0400
+Message-ID: <cover.1375999914.git.milosz@adfin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:58449 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752830Ab3HUVB5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 17:01:57 -0400
-Received: by mail-oa0-f46.google.com with SMTP id j10so1924468oah.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 14:01:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1308211340020.28981@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Noah Watkins <noah.watkins@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, zheng.z.yan@intel.com, dhowells@redhat.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Aug 21, 2013 at 10:41 PM, Sage Weil <sage@inktank.com> wrote:
-> Yes, the Makefile.am is in dire need of from TLC from someone who knows a
-> bit of autotools-fu.  It is only this way because in the beginning I
-> didn't know any better.
+This an updated version of the fscache support for the Ceph filesystem. What's
+changed since the last patchset:
 
-Well, my average knowledge of autotools could at least fix this
-particular issue and clean up a bit more. It's a start I guess and
-helps me to continue my RGW things.
+1. Sparater the readpages refactor into it's own patches. These were already
+   accepted into the testing branch.
 
-I'll send out a pull request when I've found some time to implement
-and test this.
+2. Tracked down the BUG in readahead cleanup code. We were returning with pages
+   marked as private_2 from readpages(). I added a simple convenience function
+   to the fscache netfs interface for cleaning up the page list at the end of
+   asop readpages(). I know other filesystems (NFS) have ran into that since
+   I've seen a few similar traces in Google search and the cachefs mailig list.
+   The second patch new make Ceph use this interface.
 
-Roald
+I've been running this code (minus the BUG fix) on clients for a couple weeks
+with moderate 24/7 use without issues. At this point in time I feel like it's
+solid enough to go into the ceph kclient.
+
+Please pull the code from my repository:
+https://bitbucket.org/adfin/linux-fs.git branch: wip-ceph-fscache
+
+The first two patches I included were not written by me but were written by 
+Hongyi Jia. He implemented the cookie re-validation scheme into fscache core.
+
+Finally, I CCed a couple other mailing lists (fsdevel, nfs) because the new
+fscache_readpages_cancel() should be used by other filesystems to avoid the
+same problem.
+
+
+Hongyi Jia (2):
+  new cachefiles interface to check cache consistency
+  new fscache interface to check cache consistency
+
+Milosz Tanski (3):
+  ceph: use fscache as a local presisent cache
+  fscache: netfs function for cleanup post readpages
+  ceph: clean PgPrivate2 on returning from readpages
+
+ fs/cachefiles/interface.c     |  19 +++
+ fs/cachefiles/internal.h      |   1 +
+ fs/cachefiles/xattr.c         |  39 ++++++
+ fs/ceph/Kconfig               |   9 ++
+ fs/ceph/Makefile              |   2 +
+ fs/ceph/addr.c                |  39 +++++-
+ fs/ceph/cache.c               | 311 ++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/cache.h               | 130 ++++++++++++++++++
+ fs/ceph/caps.c                |  19 ++-
+ fs/ceph/file.c                |  17 +++
+ fs/ceph/inode.c               |  66 ++++++++-
+ fs/ceph/super.c               |  47 ++++++-
+ fs/ceph/super.h               |  17 +++
+ fs/fscache/cookie.c           |  22 +++
+ fs/fscache/page.c             |  16 +++
+ include/linux/fscache-cache.h |   4 +
+ include/linux/fscache.h       |  39 ++++++
+ 17 files changed, 785 insertions(+), 12 deletions(-)
+ create mode 100644 fs/ceph/cache.c
+ create mode 100644 fs/ceph/cache.h
+
+-- 
+1.8.1.2
