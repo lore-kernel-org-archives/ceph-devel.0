@@ -1,92 +1,49 @@
 From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: Need some help with the RBD Java bindings
-Date: Wed, 21 Aug 2013 12:47:23 -0700
-Message-ID: <CA+Hcz5_uDJcOv_RiSswGmu6sfikp=rdX4=rn3WrxZA21DsHSMg@mail.gmail.com>
-References: <520CF90B.2070106@42on.com>
-	<CA+Hcz59PTw9u6s8J3pZpbPgyMdh78zd3qzkBmb_+S+w4_JjMOg@mail.gmail.com>
-	<CA+Hcz58M-fz_qq6ZgEvxovj3OEGF6zG8TSFtsOOMkKUo-YZznw@mail.gmail.com>
-	<5214AE76.7070304@42on.com>
+Subject: Re: subdir-objects
+Date: Wed, 21 Aug 2013 13:01:16 -0700
+Message-ID: <CA+Hcz5-uxiNMQiNXKfbETiQG0D6-nUrbV5oGpmMqn8oWi4DwGw@mail.gmail.com>
+References: <CAN04cT5zbp2oe9QvcbnQ4W=7ByA1UybzPEGGWvngjLogsqFaWA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f53.google.com ([209.85.212.53]:45371 "EHLO
-	mail-vb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752678Ab3HUTrY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 15:47:24 -0400
-Received: by mail-vb0-f53.google.com with SMTP id i3so617620vbh.40
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 12:47:23 -0700 (PDT)
-In-Reply-To: <5214AE76.7070304@42on.com>
+Received: from mail-ve0-f175.google.com ([209.85.128.175]:34653 "EHLO
+	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752589Ab3HUUBR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 16:01:17 -0400
+Received: by mail-ve0-f175.google.com with SMTP id oy10so777416veb.34
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 13:01:16 -0700 (PDT)
+In-Reply-To: <CAN04cT5zbp2oe9QvcbnQ4W=7ByA1UybzPEGGWvngjLogsqFaWA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Wido,
+On Wed, Aug 21, 2013 at 12:45 PM, Roald van Loon <roaldvanloon@gmail.com> wrote:
+>
+> from auto-registering the plugins in the RGW core. The only fix for
+> this is making the RGW core aware of the subdirs/plugins, but I think
+> that's nasty design. I'd like to have it in my make conf.
 
-How would you feel about creating two RbdSnapInfo objects. The first
-would be something like ceph.rbd.RbdSnapInfo and the second would be
-ceph.rbd.jna.RbdSnapInfo. The former is what will be exposed through
-the API, and the later is used only internally. That should address
-the hacky-ness of my snap listing fix: just create a copy of the
-SnapInfo into the public struct. it also means we can avoid exposing
-users to JNA structures.
+This patch will turn on the option (which should also fix your problem
+if I understand correctly?), and should probably be committed anyway
+as newer versions of autotools will complain loudly about our current
+Makefile structure.
 
-On Wed, Aug 21, 2013 at 5:11 AM, Wido den Hollander <wido@42on.com> wrote:
-> On 08/20/2013 11:26 PM, Noah Watkins wrote:
->>
->> Wido,
->>
->> I pushed up a patch to
->>
->>
->> https://github.com/ceph/rados-java/commit/ca16d82bc5b596620609880e429ec9f4eaa4d5ce
->>
->> That includes a fix for this problem. The fix is a bit hacky, but the
->> tests pass now. I included more details about the hack in the code.
->>
->
-> I see. Works like a charm for me now. I'll do some further testing with
-> CloudStack.
->
-> Wido
->
->> On Thu, Aug 15, 2013 at 9:57 AM, Noah Watkins <noah.watkins@inktank.com>
->> wrote:
->>>
->>> On Thu, Aug 15, 2013 at 8:51 AM, Wido den Hollander <wido@42on.com>
->>> wrote:
->>>>
->>>>
->>>> public List<RbdSnapInfo> snapList() throws RbdException {
->>>>      IntByReference numSnaps = new IntByReference(16);
->>>>      PointerByReference snaps = new PointerByReference();
->>>>      List<RbdSnapInfo> list = new ArrayList<RbdSnapInfo>();
->>>>      RbdSnapInfo snapInfo, snapInfos[];
->>>>
->>>>      while (true) {
->>>>          int r = rbd.rbd_snap_list(this.getPointer(), snaps, numSnaps);
->>>
->>>
->>> I think you need to allocate the memory for `snaps` yourself. Here is
->>> the RBD wrapper for Python which does that:
->>>
->>>    self.snaps = (rbd_snap_info_t * num_snaps.value)()
->>>    ret = self.librbd.rbd_snap_list(image.image, byref(self.snaps),
->>>                         byref(num_snaps))
->>>
->>> - Noah
->>
->> --
->>
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-> --
-> Wido den Hollander
-> 42on B.V.
->
-> Phone: +31 (0)20 700 9902
-> Skype: contact42on
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 93f3331..fb7c9dd 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -1,4 +1,4 @@
+-AUTOMAKE_OPTIONS = gnu
++AUTOMAKE_OPTIONS = gnu subdir-objects
+ SUBDIRS = ocf java
+ DIST_SUBDIRS = gtest ocf libs3 java
+
+> So, the question is; is there a reason why we don't use subdir objects?
+
+I believe it is just historical, and unfortunately has just been
+repeated over and over. Ideally I think that there should be a
+restructuring to place a Makefile.am in every subdirectory. This would
+address your issue and make it significantly easier to deal with
+situations where we want to build a subset of Ceph, such as just FUSE
+and librados, for example.
