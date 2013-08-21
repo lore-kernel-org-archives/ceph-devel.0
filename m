@@ -1,87 +1,133 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Fwd: app design recommendations
-Date: Wed, 21 Aug 2013 08:25:19 -0700
-Message-ID: <CA+4uBUaBU1jBfCKrm9gDCs51VpkWUbDmmchFBs7OVULxBxhtLg@mail.gmail.com>
-References: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
-	<CA+4uBUa9c=n632p7XdTV_XM=3AVF6WCNoX_XCzpJOVT4YpURjQ@mail.gmail.com>
+From: Mike Dawson <mike.dawson@cloudapt.com>
+Subject: Re: still recovery issues with cuttlefish
+Date: Wed, 21 Aug 2013 11:28:33 -0400
+Message-ID: <5214DCA1.3040003@cloudapt.com>
+References: <51FA1AC1.8040207@profihost.ag> <51FAAED3.3010509@cloudapt.com> <51FAB20F.3030707@profihost.ag> <CA+4uBUY079TZ7sm1EafO1pnXCpKSTkfc15KwqBLi8SyV=Z_29A@mail.gmail.com> <51FB636B.5050301@profihost.ag> <CA+4uBUbye9EOHxFgOYXah8Eg_6ZRtPY_MpgjbnNa=_ZrhFak_w@mail.gmail.com> <51FBF765.9030700@profihost.ag> <CA+4uBUZY-_jsnG+wfE4LXL-Dw2CtRkNuANwPMMJ4JyUU=4tdRQ@mail.gmail.com> <51FBFE85.5040700@profihost.ag> <5203A597.4060701@cloudapt.com> <5203DFAE.9070100@profihost.ag> <CA+4uBUYgLmP0EMv1+Gzd9ndR42o9ahTL6bnoAAD8QS+Cax7Yzg@mail.gmail.com> <52068FB6.1080209@profihost.ag> <CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com> <673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag> <CA+4uBUYBGnCj5Mbj+v8=cFNLYqPrBiR5VqNUJD6m+dXgeHSHzQ@mail.gmail.com> <CA+4uBUaM2X4aR1vNqjHTdoBgbU0jRv9a
+ KeZnbAuraWYWcFxEhQ@mail.gmail.com> <A2DD558D-3934-4E85-8B03-C8FC1EF9B8B3@profihost.ag> <CA+4uBUacvJhS1j_zE7QvidgWCYQcVwLqrz2D=OHdtE-Z05rt4A@mail.gmail.com> <520B2BF0.2030208@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f172.google.com ([209.85.128.172]:59699 "EHLO
-	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751550Ab3HUPZU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 11:25:20 -0400
-Received: by mail-ve0-f172.google.com with SMTP id oz10so472880veb.31
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 08:25:19 -0700 (PDT)
-In-Reply-To: <CA+4uBUa9c=n632p7XdTV_XM=3AVF6WCNoX_XCzpJOVT4YpURjQ@mail.gmail.com>
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:52251 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751823Ab3HUP2i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 11:28:38 -0400
+Received: by mail-oa0-f47.google.com with SMTP id g12so1154846oah.34
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 08:28:37 -0700 (PDT)
+In-Reply-To: <520B2BF0.2030208@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Samuel Just <sam.just@inktank.com>, "josh.durgin@inktank.com" <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Sam/Josh,
 
-Looks interesting.
+We upgraded from 0.61.7 to 0.67.1 during a maintenance window this 
+morning, hoping it would improve this situation, but there was no 
+appreciable change.
 
-On Tue, Aug 20, 2013 at 1:06 PM, Nulik Nol <nuliknol@gmail.com> wrote:
-> Hi,
-> I am creating an email system which will handle whole company's email,
-> mostly internal mail. There will be thousands of companies and
-> hundreds of users per company. So I am planning to use one pool per
-> company to store email messages. Can Ceph manage thousands or maybe
-> hundred thousands of pools ? Could there be any slowdown at production
-> with such design after some growth?
+One node in our cluster fsck'ed after a reboot and got a bit behind. Our 
+instances backed by RBD volumes were OK at that point, but once the node 
+booted fully and the OSDs started, all Windows instances with rbd 
+volumes experienced very choppy performance and were unable to ingest 
+video surveillance traffic and commit it to disk. Once the cluster got 
+back to HEALTH_OK, they resumed normal operation.
 
-You can't have thousands of pools.  Each pool shows up in the OSDMap,
-and each pool must have at least 1 pg.  However, we now have rados
-level namespaces which subdivide a pool.  You can have as many
-namespaces as objects if you want.  The main caveat is that you can't
-efficiently list the contents of a namespace.  We do support user
-capabilities on namespaces.
+I tried for a time with conservative recovery settings (osd max 
+backfills = 1, osd recovery op priority = 1, and osd recovery max active 
+= 1). No improvement for the guests. So I went to more aggressive 
+settings to get things moving faster. That decreased the duration of the 
+outage.
 
+During the entire period of recovery/backfill, the network looked 
+fine...no where close to saturation. iowait on all drives look fine as well.
+
+Any ideas?
+
+Thanks,
+Mike Dawson
+
+
+On 8/14/2013 3:04 AM, Stefan Priebe - Profihost AG wrote:
+> the same problem still occours. Will need to check when i've time to
+> gather logs again.
 >
-> Every email will be stored as an individual ceph object (emails will
-> average 512 bytes and rarely have attachments) , is it ok to store
-> them as a ceph objects or will it be less efficient than storing
-> multiple emails in a ceph object,? What is the optimal ceph object
-> size to store individually, so it would be preferable to do this
-> instead of writing through omap with leveldb? (kind of "ceph object vs
-> omap" benchmark question)
-
-I am unsure.  Each rados object will end up as a file on the backing
-filesystem, so there is some overhead there.  My first instinct for
-objects of 512 bytes might be to hash the key and use part of the
-hash to determine the object name and the rest to determine the omap
-key.  It might be fine to do 1 email per object though.
-
->
-> Also I will be putting mini-chat sessions between users in a ceph
-> object, each time a user sends a message to another user, I will
-> append the text to the ceph object, so my question is, will Ceph
-> rewrite the whole object into a new physical location on disk when I
-> do an append? Or will it just rewrite the block that was modified?
-
-Appends are performed using filesystem writes, so it won't overwrite
-the entire object.  Rados support partial overwrites just fine.
-
->
-> And last questions: Which is faster, storing small key/value pairs in
-> omap or in xattrs ? Will storing key/value pairs in xattrs result in
-> space waste by allocating a block for zero-sized object on the OSD? (I
-> won't write any data to the object, just use xattrs)
-
-Depending on the backing filesystem, xattrs are either stored as xattrs
-on the backing filesystem or as keys in leveldb (just like omap).  I
-suggest you reserve xattrs for small pieces of metadata and omap for
-large sets of keys.  zero sized objects are fine.
-
--Sam
-
->
-> Will appreciate very much your comments.
->
-> Best Regards
-> Nulik
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Am 14.08.2013 01:11, schrieb Samuel Just:
+>> I'm not sure, but your logs did show that you had >16 recovery ops in
+>> flight, so it's worth a try.  If it doesn't help, you should collect
+>> the same set of logs I'll look again.  Also, there are a few other
+>> patches between 61.7 and current cuttlefish which may help.
+>> -Sam
+>>
+>> On Tue, Aug 13, 2013 at 2:03 PM, Stefan Priebe - Profihost AG
+>> <s.priebe@profihost.ag> wrote:
+>>>
+>>> Am 13.08.2013 um 22:43 schrieb Samuel Just <sam.just@inktank.com>:
+>>>
+>>>> I just backported a couple of patches from next to fix a bug where we
+>>>> weren't respecting the osd_recovery_max_active config in some cases
+>>>> (1ea6b56170fc9e223e7c30635db02fa2ad8f4b4e).  You can either try the
+>>>> current cuttlefish branch or wait for a 61.8 release.
+>>>
+>>> Thanks! Are you sure that this is the issue? I don't believe that but i'll give it a try. I already tested a branch from sage where he fixed a race regarding max active some weeks ago. So active recovering was max 1 but the issue didn't went away.
+>>>
+>>> Stefan
+>>>
+>>>> -Sam
+>>>>
+>>>> On Mon, Aug 12, 2013 at 10:34 PM, Samuel Just <sam.just@inktank.com> wrote:
+>>>>> I got swamped today.  I should be able to look tomorrow.  Sorry!
+>>>>> -Sam
+>>>>>
+>>>>> On Mon, Aug 12, 2013 at 9:39 PM, Stefan Priebe - Profihost AG
+>>>>> <s.priebe@profihost.ag> wrote:
+>>>>>> Did you take a look?
+>>>>>>
+>>>>>> Stefan
+>>>>>>
+>>>>>> Am 11.08.2013 um 05:50 schrieb Samuel Just <sam.just@inktank.com>:
+>>>>>>
+>>>>>>> Great!  I'll take a look on Monday.
+>>>>>>> -Sam
+>>>>>>>
+>>>>>>> On Sat, Aug 10, 2013 at 12:08 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+>>>>>>>> Hi Samual,
+>>>>>>>>
+>>>>>>>> Am 09.08.2013 23:44, schrieb Samuel Just:
+>>>>>>>>
+>>>>>>>>> I think Stefan's problem is probably distinct from Mike's.
+>>>>>>>>>
+>>>>>>>>> Stefan: Can you reproduce the problem with
+>>>>>>>>>
+>>>>>>>>> debug osd = 20
+>>>>>>>>> debug filestore = 20
+>>>>>>>>> debug ms = 1
+>>>>>>>>> debug optracker = 20
+>>>>>>>>>
+>>>>>>>>> on a few osds (including the restarted osd), and upload those osd logs
+>>>>>>>>> along with the ceph.log from before killing the osd until after the
+>>>>>>>>> cluster becomes clean again?
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> done - you'll find the logs at cephdrop folder:
+>>>>>>>> slow_requests_recovering_cuttlefish
+>>>>>>>>
+>>>>>>>> osd.52 was the one recovering
+>>>>>>>>
+>>>>>>>> Thanks!
+>>>>>>>>
+>>>>>>>> Greets,
+>>>>>>>> Stefan
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
