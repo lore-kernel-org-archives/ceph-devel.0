@@ -1,42 +1,104 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] ceph: allow sync_read/write return partial successed size of read/write.
-Date: Wed, 21 Aug 2013 15:02:51 +0800
-Message-ID: <201308211502490443362@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:32883 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752318Ab3HUHCy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 03:02:54 -0400
-Received: by mail-pd0-f175.google.com with SMTP id q10so57222pdj.6
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 00:02:53 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: [PATCH V6] ceph: use vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
+Date: Wed, 21 Aug 2013 16:27:34 +0800
+Message-ID: <1377073654-6232-1-git-send-email-handai.szj@taobao.com>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, ukernel@gmail.com, mhocko@suse.cz, akpm@linux-foundation.org, Sha Zhengju <handai.szj@taobao.com>
+List-Id: ceph-devel.vger.kernel.org
 
-SGkgU2FnZToNCglUaGlzIHBhdGNoIGJhc2VkIG9uIG15IHByZXZpb3VzIHBhdGNoImNlcGg6IGZp
-eCBidWdzIGFib3V0IGhhbmRsaW5nIHNob3J0LXJlYWQgZm9yIHN5bmMgcmVhZCBtb2RlIi4NCkkg
-Y2FuJ3Qgc2VlIHRoaXMgcGF0Y2ggaW4gY2VwaC1jbGllbnQjdGVzdGluZy5NYXliZSB5b3UgZm9y
-Z2V0IGl0ID8NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWENCg0KRm9yIHN5bmNfcmVhZC93cml0ZSwg
-aXQgbWF5IGRvIG11bHRpIHN0cmlwZSBvcGVyYXRpb25zLklmIG9uZSBvZiB0aG9zZQ0KbWV0IGVy
-cm8sIHdlIHJldHVybiB0aGUgZm9ybWVyIHN1Y2Nlc3NlZCBzaXplIHJhdGhlciB0aGFuIGEgZXJy
-b3IgdmFsdWUuDQpUaGVyZSBpcyBhIGV4Y2VwdGlvbiBmb3Igd3JpdGUtb3BlcmF0aW9uIG1ldCAt
-RU9MRFNOQVBDLklmIHRoaXMgb2NjdXIsd2UNCnJldHJ5IHRoZSB3aG9sZSB3cml0ZSBhZ2Fpbi4N
-Cg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0t
-DQogZnMvY2VwaC9maWxlLmMgfCA1ICsrKy0tDQogMSBmaWxlIGNoYW5nZWQsIDMgaW5zZXJ0aW9u
-cygrKSwgMiBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMv
-Y2VwaC9maWxlLmMNCmluZGV4IDY5YzQ2NjkuLmRkNTI1YzUgMTAwNjQ0DQotLS0gYS9mcy9jZXBo
-L2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC0zNzMsNyArMzczLDcgQEAgbW9yZToN
-CiAJCQlnb3RvIG1vcmU7DQogCX0NCiANCi0JaWYgKHJldCA+PSAwKSB7DQorCWlmIChyZWFkID4g
-MCkgew0KIAkJcmV0ID0gcmVhZDsNCiAJCS8qIGRpZCB3ZSBib3VuY2Ugb2ZmIGVvZj8gKi8NCiAJ
-CWlmIChwb3MgKyBsZWZ0ID4gaW5vZGUtPmlfc2l6ZSkNCkBAIC02MTEsNyArNjExLDggQEAgb3V0
-Og0KIAkJaWYgKGNoZWNrX2NhcHMpDQogCQkJY2VwaF9jaGVja19jYXBzKGNlcGhfaW5vZGUoaW5v
-ZGUpLCBDSEVDS19DQVBTX0FVVEhPTkxZLA0KIAkJCQkJTlVMTCk7DQotCX0NCisJfSBlbHNlIGlm
-IChyZXQgIT0gLUVPTERTTkFQQyAmJiB3cml0dGVuID4gMCkNCisJCXJldCA9IHdyaXR0ZW47DQog
-CXJldHVybiByZXQ7DQogfQ0KIA0KLS0gDQoxLjguMS4yDQo=
+Following we will begin to add memcg dirty page accounting around
+__set_page_dirty_{buffers,nobuffers} in vfs layer, so we'd better use vfs interface to
+avoid exporting those details to filesystems.
+
+Since vfs set_page_dirty() should be called under page lock, here we don't need elaborate
+codes to handle racy anymore, and two WARN_ON() are added to detect such exceptions.
+Thanks very much for Sage and Yan Zheng's coaching!
+
+I tested it in a two server's ceph environment that one is client and the other is
+mds/osd/mon, and run the following fsx test from xfstests:
+
+  ./fsx   1MB -N 50000 -p 10000 -l 1048576
+  ./fsx  10MB -N 50000 -p 10000 -l 10485760
+  ./fsx 100MB -N 50000 -p 10000 -l 104857600
+
+The fsx does lots of mmap-read/mmap-write/truncate operations and the tests completed
+successfully without triggering any of WARN_ON.
+
+Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+---
+ fs/ceph/addr.c |   42 ++++++++++++++----------------------------
+ 1 file changed, 14 insertions(+), 28 deletions(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index afb2fc2..01891f4 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -72,13 +72,15 @@ static int ceph_set_page_dirty(struct page *page)
+ 	struct ceph_inode_info *ci;
+ 	int undo = 0;
+ 	struct ceph_snap_context *snapc;
++	int ret;
+ 
+ 	if (unlikely(!mapping))
+ 		return !TestSetPageDirty(page);
+ 
+-	if (TestSetPageDirty(page)) {
++	if (PageDirty(page)) {
+ 		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+ 		     mapping->host, page, page->index);
++		BUG_ON(!PagePrivate(page));
+ 		return 0;
+ 	}
+ 
+@@ -107,35 +109,19 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+-	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+-		/*
+-		 * Reference snap context in page->private.  Also set
+-		 * PagePrivate so that we get invalidatepage callback.
+-		 */
+-		page->private = (unsigned long)snapc;
+-		SetPagePrivate(page);
+-	} else {
+-		dout("ANON set_page_dirty %p (raced truncate?)\n", page);
+-		undo = 1;
+-	}
+-
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+-	if (undo)
+-		/* whoops, we failed to dirty the page */
+-		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
++	/*
++	 * Reference snap context in page->private.  Also set
++	 * PagePrivate so that we get invalidatepage callback.
++	 */
++	BUG_ON(PagePrivate(page));
++	page->private = (unsigned long)snapc;
++	SetPagePrivate(page);
+ 
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
++	ret = __set_page_dirty_nobuffers(page);
++	WARN_ON(!PageLocked(page));
++	WARN_ON(!page->mapping);
+ 
+-	BUG_ON(!PageDirty(page));
+-	return 1;
++	return ret;
+ }
+ 
+ /*
+-- 
+1.7.9.5
 
