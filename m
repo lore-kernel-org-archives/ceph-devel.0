@@ -1,144 +1,87 @@
-From: Ian Colle <ian.colle-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: do not upgrade bobtail -> dumpling directly until
-	0.67.2
-Date: Wed, 21 Aug 2013 07:52:39 -0600
-Message-ID: <E380FA05-7FF8-4CAC-BD56-F8F7D1681A02@inktank.com>
-References: <alpine.DEB.2.00.1308201655460.1479@cobra.newdream.net>
-	<CAHahqg0FK-LwtFtvbdncNfAeCWR8N-yR55WB=ob+pB3QvJr_yQ@mail.gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: multipart/mixed; boundary="===============1183614807=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAHahqg0FK-LwtFtvbdncNfAeCWR8N-yR55WB=ob+pB3QvJr_yQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Jeff Bachtel <jbachtel-ZeuxUiT9EukFoECaAgFIynS5uNuOjpZe@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Samuel Just <sam.just@inktank.com>
+Subject: Fwd: app design recommendations
+Date: Wed, 21 Aug 2013 08:25:19 -0700
+Message-ID: <CA+4uBUaBU1jBfCKrm9gDCs51VpkWUbDmmchFBs7OVULxBxhtLg@mail.gmail.com>
+References: <CAHO6xe-FSmZdFTqDq56U9_QQ_hoPMnPqbFLjT1CLGETz-hCs7A@mail.gmail.com>
+	<CA+4uBUa9c=n632p7XdTV_XM=3AVF6WCNoX_XCzpJOVT4YpURjQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ve0-f172.google.com ([209.85.128.172]:59699 "EHLO
+	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751550Ab3HUPZU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 11:25:20 -0400
+Received: by mail-ve0-f172.google.com with SMTP id oz10so472880veb.31
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 08:25:19 -0700 (PDT)
+In-Reply-To: <CA+4uBUa9c=n632p7XdTV_XM=3AVF6WCNoX_XCzpJOVT4YpURjQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi,
 
---===============1183614807==
-Content-Type: multipart/alternative;
-	boundary=Apple-Mail-B0EC70F7-EBF7-4D7A-B42D-392AE0F82A96
-Content-Transfer-Encoding: 7bit
+Looks interesting.
 
+On Tue, Aug 20, 2013 at 1:06 PM, Nulik Nol <nuliknol@gmail.com> wrote:
+> Hi,
+> I am creating an email system which will handle whole company's email,
+> mostly internal mail. There will be thousands of companies and
+> hundreds of users per company. So I am planning to use one pool per
+> company to store email messages. Can Ceph manage thousands or maybe
+> hundred thousands of pools ? Could there be any slowdown at production
+> with such design after some growth?
 
---Apple-Mail-B0EC70F7-EBF7-4D7A-B42D-392AE0F82A96
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+You can't have thousands of pools.  Each pool shows up in the OSDMap,
+and each pool must have at least 1 pg.  However, we now have rados
+level namespaces which subdivide a pool.  You can have as many
+namespaces as objects if you want.  The main caveat is that you can't
+efficiently list the contents of a namespace.  We do support user
+capabilities on namespaces.
 
-http://tracker.ceph.com/issues/6057
+>
+> Every email will be stored as an individual ceph object (emails will
+> average 512 bytes and rarely have attachments) , is it ok to store
+> them as a ceph objects or will it be less efficient than storing
+> multiple emails in a ceph object,? What is the optimal ceph object
+> size to store individually, so it would be preferable to do this
+> instead of writing through omap with leveldb? (kind of "ceph object vs
+> omap" benchmark question)
 
-Ian R. Colle
-Director of Engineering, Inktank
-Twitter: ircolle
-LinkedIn: www.linkedin.com/in/ircolle
+I am unsure.  Each rados object will end up as a file on the backing
+filesystem, so there is some overhead there.  My first instinct for
+objects of 512 bytes might be to hash the key and use part of the
+hash to determine the object name and the rest to determine the omap
+key.  It might be fine to do 1 email per object though.
 
-On Aug 21, 2013, at 6:41, Jeff Bachtel <jbachtel-ZeuxUiT9EukFoECaAgFIynS5uNuOjpZe@public.gmane.org> wro=
-te:
+>
+> Also I will be putting mini-chat sessions between users in a ceph
+> object, each time a user sends a message to another user, I will
+> append the text to the ceph object, so my question is, will Ceph
+> rewrite the whole object into a new physical location on disk when I
+> do an append? Or will it just rewrite the block that was modified?
 
-> Is there an issue ID associated with this? For those of us who made the lo=
-ng jump and want to avoid any unseen problems.
->=20
-> Thanks,
->=20
-> Jeff
->=20
->=20
-> On Tue, Aug 20, 2013 at 7:57 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
->> We've identified a problem when upgrading directly from bobtail to
->> dumpling; please wait until 0.67.2 before doing so.
->>=20
->> Upgrades from bobtail -> cuttlefish -> dumpling are fine.  It is only the=
+Appends are performed using filesystem writes, so it won't overwrite
+the entire object.  Rados support partial overwrites just fine.
 
->> long jump between versions that is problematic.
->>=20
->> The fix is already in the dumpling branch.  Another point release will be=
+>
+> And last questions: Which is faster, storing small key/value pairs in
+> omap or in xattrs ? Will storing key/value pairs in xattrs result in
+> space waste by allocating a block for zero-sized object on the OSD? (I
+> won't write any data to the object, just use xattrs)
 
->> out in the next day or two.
->>=20
->> Thanks!
->> sage
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Depending on the backing filesystem, xattrs are either stored as xattrs
+on the backing filesystem or as keys in leveldb (just like omap).  I
+suggest you reserve xattrs for small pieces of metadata and omap for
+large sets of keys.  zero sized objects are fine.
 
---Apple-Mail-B0EC70F7-EBF7-4D7A-B42D-392AE0F82A96
-Content-Type: text/html;
-	charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+-Sam
 
-<html><head><meta http-equiv=3D"content-type" content=3D"text/html; charset=3D=
-utf-8"></head><body dir=3D"auto"><div><span style=3D"font-family: '.Helvetic=
-aNeueUI'; font-size: 15px; line-height: 19px; white-space: nowrap; -webkit-t=
-ap-highlight-color: rgba(26, 26, 26, 0.296875); -webkit-composition-fill-col=
-or: rgba(175, 192, 227, 0.230469); -webkit-composition-frame-color: rgba(77,=
- 128, 180, 0.230469); -webkit-text-size-adjust: none; "><a href=3D"http://tr=
-acker.ceph.com/issues/6057">http://tracker.ceph.com/issues/6057</a></span><b=
-r><br>Ian R. Colle</div><div>Director of Engineering, Inktank<div><div>Twitt=
-er: ircolle</div><div>LinkedIn: <a href=3D"http://www.linkedin.com/in/ircoll=
-e">www.linkedin.com/in/ircolle</a></div></div></div><div><br>On Aug 21, 2013=
-, at 6:41, Jeff Bachtel &lt;<a href=3D"mailto:jbachtel-ZeuxUiT9EukFoECaAgFIyj68YFJDIIK6@public.gmane.org=
-m">jbachtel-ZeuxUiT9EukFoECaAgFIynS5uNuOjpZe@public.gmane.org</a>&gt; wrote:<br><br></div><blockquote t=
-ype=3D"cite"><div><div dir=3D"ltr">Is there an issue ID associated with this=
-? For those of us who made the long jump and want to avoid any unseen proble=
-ms.<div><br></div><div>Thanks,</div><div><br></div><div>Jeff</div></div><div=
- class=3D"gmail_extra">
-<br><br><div class=3D"gmail_quote">On Tue, Aug 20, 2013 at 7:57 PM, Sage Wei=
-l <span dir=3D"ltr">&lt;<a href=3D"mailto:sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" target=3D"_blank=
-">sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote=
-" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-We've identified a problem when upgrading directly from bobtail to<br>
-dumpling; please wait until 0.67.2 before doing so.<br>
-<br>
-Upgrades from bobtail -&gt; cuttlefish -&gt; dumpling are fine. &nbsp;It is o=
-nly the<br>
-long jump between versions that is problematic.<br>
-<br>
-The fix is already in the dumpling branch. &nbsp;Another point release will b=
-e<br>
-out in the next day or two.<br>
-<br>
-Thanks!<br>
-sage<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><b=
-r>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=3D=
-"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-</blockquote></div><br></div>
-</div></blockquote><blockquote type=3D"cite"><div><span>____________________=
-___________________________</span><br><span>ceph-users mailing list</span><b=
-r><span><a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFKIjjVqG0RrOw@public.gmane.org=
-om</a></span><br><span><a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-us=
-ers-ceph.com">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></sp=
-an><br></div></blockquote></body></html>=
-
---Apple-Mail-B0EC70F7-EBF7-4D7A-B42D-392AE0F82A96--
-
---===============1183614807==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1183614807==--
+>
+> Will appreciate very much your comments.
+>
+> Best Regards
+> Nulik
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
