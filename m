@@ -1,94 +1,69 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCHv4 0/5] ceph: persistent caching with fscache
-Date: Wed, 21 Aug 2013 22:05:17 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308212203320.1479@cobra.newdream.net>
-References: <cover.1375999914.git.milosz@adfin.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: allow sync_read/write return partial successed
+ size of read/write.
+Date: Wed, 21 Aug 2013 22:12:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308212211460.1479@cobra.newdream.net>
+References: <201308211502490443362@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1375999914.git.milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:51840 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753560Ab3HVFMw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Aug 2013 01:12:52 -0400
+In-Reply-To: <201308211502490443362@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>, zheng.z.yan@intel.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Milosz,
+On Wed, 21 Aug 2013, majianpeng wrote:
+> Hi Sage:
+> 	This patch based on my previous patch"ceph: fix bugs about handling short-read for sync read mode".
+> I can't see this patch in ceph-client#testing.Maybe you forget it ?
 
-I've pulled this into the ceph testing branch to make sure it holds up 
-in qa.
+Whoops, I did!  I've pulled both patches into the testing branch now. 
 
-David, are the fscache patches here ready for the next merge window?  Do 
-you have a preference for whose tree they go through?
-
-Thanks!
+Yan, did you want to look at this?
 sage
 
-
-On Wed, 21 Aug 2013, Milosz Tanski wrote:
-
-> This an updated version of the fscache support for the Ceph filesystem. What's
-> changed since the last patchset:
 > 
-> 1. Sparater the readpages refactor into it's own patches. These were already
->    accepted into the testing branch.
+> Thanks!
+> Jianpeng Ma
 > 
-> 2. Tracked down the BUG in readahead cleanup code. We were returning with pages
->    marked as private_2 from readpages(). I added a simple convenience function
->    to the fscache netfs interface for cleaning up the page list at the end of
->    asop readpages(). I know other filesystems (NFS) have ran into that since
->    I've seen a few similar traces in Google search and the cachefs mailig list.
->    The second patch new make Ceph use this interface.
+> For sync_read/write, it may do multi stripe operations.If one of those
+> met erro, we return the former successed size rather than a error value.
+> There is a exception for write-operation met -EOLDSNAPC.If this occur,we
+> retry the whole write again.
 > 
-> I've been running this code (minus the BUG fix) on clients for a couple weeks
-> with moderate 24/7 use without issues. At this point in time I feel like it's
-> solid enough to go into the ceph kclient.
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/file.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
 > 
-> Please pull the code from my repository:
-> https://bitbucket.org/adfin/linux-fs.git branch: wip-ceph-fscache
-> 
-> The first two patches I included were not written by me but were written by 
-> Hongyi Jia. He implemented the cookie re-validation scheme into fscache core.
-> 
-> Finally, I CCed a couple other mailing lists (fsdevel, nfs) because the new
-> fscache_readpages_cancel() should be used by other filesystems to avoid the
-> same problem.
-> 
-> 
-> Hongyi Jia (2):
->   new cachefiles interface to check cache consistency
->   new fscache interface to check cache consistency
-> 
-> Milosz Tanski (3):
->   ceph: use fscache as a local presisent cache
->   fscache: netfs function for cleanup post readpages
->   ceph: clean PgPrivate2 on returning from readpages
-> 
->  fs/cachefiles/interface.c     |  19 +++
->  fs/cachefiles/internal.h      |   1 +
->  fs/cachefiles/xattr.c         |  39 ++++++
->  fs/ceph/Kconfig               |   9 ++
->  fs/ceph/Makefile              |   2 +
->  fs/ceph/addr.c                |  39 +++++-
->  fs/ceph/cache.c               | 311 ++++++++++++++++++++++++++++++++++++++++++
->  fs/ceph/cache.h               | 130 ++++++++++++++++++
->  fs/ceph/caps.c                |  19 ++-
->  fs/ceph/file.c                |  17 +++
->  fs/ceph/inode.c               |  66 ++++++++-
->  fs/ceph/super.c               |  47 ++++++-
->  fs/ceph/super.h               |  17 +++
->  fs/fscache/cookie.c           |  22 +++
->  fs/fscache/page.c             |  16 +++
->  include/linux/fscache-cache.h |   4 +
->  include/linux/fscache.h       |  39 ++++++
->  17 files changed, 785 insertions(+), 12 deletions(-)
->  create mode 100644 fs/ceph/cache.c
->  create mode 100644 fs/ceph/cache.h
-> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 69c4669..dd525c5 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -373,7 +373,7 @@ more:
+>  			goto more;
+>  	}
+>  
+> -	if (ret >= 0) {
+> +	if (read > 0) {
+>  		ret = read;
+>  		/* did we bounce off eof? */
+>  		if (pos + left > inode->i_size)
+> @@ -611,7 +611,8 @@ out:
+>  		if (check_caps)
+>  			ceph_check_caps(ceph_inode(inode), CHECK_CAPS_AUTHONLY,
+>  					NULL);
+> -	}
+> +	} else if (ret != -EOLDSNAPC && written > 0)
+> +		ret = written;
+>  	return ret;
+>  }
+>  
 > -- 
 > 1.8.1.2
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> N?????r??y????b?X????v?^?)??{.n?+???z?]z???{ay??????,j??f???h???z??w??????j:+v???w?j?m????????zZ+???????j"??!?i
