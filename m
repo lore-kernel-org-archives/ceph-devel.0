@@ -1,111 +1,124 @@
-From: Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
-Subject: bucket count limit
-Date: Thu, 22 Aug 2013 16:08:55 +0200
-Message-ID: <ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFE@MXMBON06.grupa.onet>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] enable mds rejoin with active inodes' old parent
+ xattrs
+Date: Thu, 22 Aug 2013 08:16:53 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308220815120.12506@cobra.newdream.net>
+References: <orvc2ytei1.fsf@livre.home> <CAAM7YAk+1pZsn8=f-Z+wxzm+4-zkKQCN52gVTWot6e_OmHDSTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1322374254=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: pl-PL
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55972 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753362Ab3HVPQy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Aug 2013 11:16:54 -0400
+In-Reply-To: <CAAM7YAk+1pZsn8=f-Z+wxzm+4-zkKQCN52gVTWot6e_OmHDSTQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Alexandre Oliva <oliva@gnu.org>, ceph-devel <ceph-devel@vger.kernel.org>
 
---===============1322374254==
-Content-Language: pl-PL
-Content-Type: multipart/alternative;
-	boundary="_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_"
+Applied this to next and opened http://tracker.ceph.com/issues/6087 so we 
+don't forget to backport it.
 
---_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Is there any other change we want to make?  We could make the fetch code 
+write the directory backpointers if they are not already present, which 
+would at least clean up the dir objects (as they are touched).  :/
 
-Hi,
-I think about sharding s3 buckets in CEPH cluster, create bucket-per-XX (25=
-6 buckets) or even bucket-per-XXX (4096 buckets) where XXX is sign from obj=
-ect md5 url.
-Could this be the problem? (performance, or some limits)
+sage
 
---
-Regards
-Dominik
 
---_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
 
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40"><head><META HTTP-EQUIV=3D"Content-Type" CONTENT=
-=3D"text/html; charset=3Dus-ascii"><meta name=3DGenerator content=3D"Micros=
-oft Word 12 (filtered medium)"><style><!--
-/* Font Definitions */
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0cm;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:purple;
-	text-decoration:underline;}
-span.Stylwiadomocie-mail17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;}
-@page WordSection1
-	{size:612.0pt 792.0pt;
-	margin:70.85pt 70.85pt 70.85pt 70.85pt;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]--></head><body lang=3DPL link=3Dblue vlink=
-=3Dpurple><div class=3DWordSection1><p class=3DMsoNormal><span lang=3DEN-US=
->Hi,<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>I think a=
-bout sharding s3 buckets in CEPH cluster, create bucket-per-XX (256 buckets=
-) or even bucket-per-XXX (4096 buckets) where XXX is sign from object md5 u=
-rl.<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>Could this=
- be the problem? </span>(performance, or some limits)<o:p></o:p></p><p clas=
-s=3DMsoNormal><o:p>&nbsp;</o:p></p><p class=3DMsoNormal>--<o:p></o:p></p><p=
- class=3DMsoNormal>Regards<o:p></o:p></p><p class=3DMsoNormal>Dominik<o:p><=
-/o:p></p></div></body></html>=
-
---_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_--
-
---===============1322374254==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1322374254==--
+On Thu, 22 Aug 2013, Yan, Zheng wrote:
+> On Thu, Aug 22, 2013 at 2:40 PM, Alexandre Oliva <oliva@gnu.org> wrote:
+> > When the parent xattrs of active inodes that the mds attempts to open
+> > during rejoin lack pool info (struct_v < 5), this field will be filled
+> > in with -1, causing the mds to retry fetching a backtrace with a pool
+> > number that matches the expected value, which fails and causes the
+> > err==-ENOENT branch to be taken and retry pool 1, which succeeds, but
+> > with pool -1, and so keeps on bouncing between the two retry cases
+> > forever.
+> >
+> > This patch arranges for the mds to go along with pool -1 instead of
+> > insisting that it be refetched, enabling it to complete recovery
+> > instead of eating cpu, network bandwidth and metadata osd's resources
+> > like there's no tomorrow, in what AFAICT is an infinite and very busy
+> > loop.
+> >
+> > This is not a new problem: I've had it even before upgrading from
+> > Cuttlefish to Dumpling, I'd just never managed to track it down, and
+> > force-unmounting the filesystem and then restarting the mds was an
+> > easier (if inconvenient) work-around, particularly because it always
+> > hit when the filesystem was under active, heavy-ish use (or there
+> > wouldn't be much reason for caps recovery ;-)
+> >
+> My fault, I didn't do serious upgrade test for my code.  Thank you for nail
+> the issue down.
+> 
+> >
+> > There are two issues not addressed in this patch, however.  One is
+> > that nothing seems to proactively update the parent xattr when it is
+> > found to be outdated, so it remains out of date forever.  Not even
+> > renaming top-level directories causes the xattrs to be recursively
+> > rewritten.  AFAICT that's a bug.
+> 
+> This is not bug. Only the tail entry of the path encoded in the parent xattrs
+> need to be updated. (the entry for inode's parent directory)
+> 
+> >
+> > The other is that inodes that don't have a parent xattr (created by
+> > even older versions of ceph) are reported as non-existing in the mds
+> > rejoin message, because the absence of the parent xattr is signaled as
+> > a missing inode (?failed to reconnect caps for missing inodes?).  I
+> > suppose this may cause more serious recovery problems.
+> 
+> Cuttlefish also has this issue, it just does not print the error message
+> to console.
+> 
+> >
+> > I suppose a global pass over the filesystem tree updating parent
+> > xattrs that are out-of-date would be desirable, if we find any parent
+> > xattrs still lacking current information; it might make sense to
+> > activate it as a background thread from the backtrace decoding
+> > function, when it finds a parent xattr that's too out-of-date, or as a
+> > separate client (ceph-fsck?).
+> >
+> > Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+> > ---
+> >  src/mds/MDCache.cc |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
+> > index e592dde..b6c37aec 100644
+> > --- a/src/mds/MDCache.cc
+> > +++ b/src/mds/MDCache.cc
+> > @@ -7940,7 +7940,7 @@ void MDCache::_open_ino_backtrace_fetched(inodeno_t ino, bufferlist& bl, int err
+> >    inode_backtrace_t backtrace;
+> >    if (err == 0) {
+> >      ::decode(backtrace, bl);
+> > -    if (backtrace.pool != info.pool) {
+> > +    if (backtrace.pool != info.pool && backtrace.pool != -1) {
+> >        dout(10) << " old object in pool " << info.pool
+> >                << ", retrying pool " << backtrace.pool << dendl;
+> >        info.pool = backtrace.pool;
+> >
+> 
+> Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
+> 
+> Regards
+> Yan, Zheng
+> 
+> > --
+> > Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> > You must be the change you wish to see in the world. -- Gandhi
+> > Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> > Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
