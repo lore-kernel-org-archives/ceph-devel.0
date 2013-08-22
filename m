@@ -1,77 +1,111 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH] ceph: allow sync_read/write return partial successed
- size of read/write.
-Date: Thu, 22 Aug 2013 13:14:56 +0800
-Message-ID: <52159E50.7000601@intel.com>
-References: <201308211502490443362@gmail.com> <alpine.DEB.2.00.1308212211460.1479@cobra.newdream.net>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Need some help with the RBD Java bindings
+Date: Thu, 22 Aug 2013 08:20:41 +0200
+Message-ID: <5215ADB9.2010607@42on.com>
+References: <520CF90B.2070106@42on.com> <CA+Hcz59PTw9u6s8J3pZpbPgyMdh78zd3qzkBmb_+S+w4_JjMOg@mail.gmail.com> <CA+Hcz58M-fz_qq6ZgEvxovj3OEGF6zG8TSFtsOOMkKUo-YZznw@mail.gmail.com> <5214AE76.7070304@42on.com> <CA+Hcz5_uDJcOv_RiSswGmu6sfikp=rdX4=rn3WrxZA21DsHSMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:15205 "EHLO mga03.intel.com"
+Received: from websrv.42on.com ([31.25.102.167]:46233 "EHLO websrv.42on.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753672Ab3HVFPG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Aug 2013 01:15:06 -0400
-In-Reply-To: <alpine.DEB.2.00.1308212211460.1479@cobra.newdream.net>
+	id S1753162Ab3HVGUn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Aug 2013 02:20:43 -0400
+In-Reply-To: <CA+Hcz5_uDJcOv_RiSswGmu6sfikp=rdX4=rn3WrxZA21DsHSMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: majianpeng <majianpeng@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 08/22/2013 01:12 PM, Sage Weil wrote:
-> On Wed, 21 Aug 2013, majianpeng wrote:
->> Hi Sage:
->> 	This patch based on my previous patch"ceph: fix bugs about handling short-read for sync read mode".
->> I can't see this patch in ceph-client#testing.Maybe you forget it ?
-> 
-> Whoops, I did!  I've pulled both patches into the testing branch now. 
-> 
-> Yan, did you want to look at this?
+On 08/21/2013 09:47 PM, Noah Watkins wrote:
+> Wido,
+>
+> How would you feel about creating two RbdSnapInfo objects. The first
+> would be something like ceph.rbd.RbdSnapInfo and the second would be
+> ceph.rbd.jna.RbdSnapInfo. The former is what will be exposed through
+> the API, and the later is used only internally. That should address
+> the hacky-ness of my snap listing fix: just create a copy of the
+> SnapInfo into the public struct. it also means we can avoid exposing
+> users to JNA structures.
+>
 
-the patch looks good.
+Yes, seems like a good thing to do. I wasn't sure myself when I was 
+writing the bindings on how the packaging should be.
 
-Yan, Zheng
+One of the things I haven't tested thoroughly enough is if you as a user 
+of the bindings are able to crash the JVM. Since that should never happen.
 
-> sage
-> 
+Wido
+
+> On Wed, Aug 21, 2013 at 5:11 AM, Wido den Hollander <wido@42on.com> wrote:
+>> On 08/20/2013 11:26 PM, Noah Watkins wrote:
+>>>
+>>> Wido,
+>>>
+>>> I pushed up a patch to
+>>>
+>>>
+>>> https://github.com/ceph/rados-java/commit/ca16d82bc5b596620609880e429ec9f4eaa4d5ce
+>>>
+>>> That includes a fix for this problem. The fix is a bit hacky, but the
+>>> tests pass now. I included more details about the hack in the code.
+>>>
 >>
->> Thanks!
->> Jianpeng Ma
+>> I see. Works like a charm for me now. I'll do some further testing with
+>> CloudStack.
 >>
->> For sync_read/write, it may do multi stripe operations.If one of those
->> met erro, we return the former successed size rather than a error value.
->> There is a exception for write-operation met -EOLDSNAPC.If this occur,we
->> retry the whole write again.
+>> Wido
 >>
->> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
->> ---
->>  fs/ceph/file.c | 5 +++--
->>  1 file changed, 3 insertions(+), 2 deletions(-)
+>>> On Thu, Aug 15, 2013 at 9:57 AM, Noah Watkins <noah.watkins@inktank.com>
+>>> wrote:
+>>>>
+>>>> On Thu, Aug 15, 2013 at 8:51 AM, Wido den Hollander <wido@42on.com>
+>>>> wrote:
+>>>>>
+>>>>>
+>>>>> public List<RbdSnapInfo> snapList() throws RbdException {
+>>>>>       IntByReference numSnaps = new IntByReference(16);
+>>>>>       PointerByReference snaps = new PointerByReference();
+>>>>>       List<RbdSnapInfo> list = new ArrayList<RbdSnapInfo>();
+>>>>>       RbdSnapInfo snapInfo, snapInfos[];
+>>>>>
+>>>>>       while (true) {
+>>>>>           int r = rbd.rbd_snap_list(this.getPointer(), snaps, numSnaps);
+>>>>
+>>>>
+>>>> I think you need to allocate the memory for `snaps` yourself. Here is
+>>>> the RBD wrapper for Python which does that:
+>>>>
+>>>>     self.snaps = (rbd_snap_info_t * num_snaps.value)()
+>>>>     ret = self.librbd.rbd_snap_list(image.image, byref(self.snaps),
+>>>>                          byref(num_snaps))
+>>>>
+>>>> - Noah
+>>>
+>>> --
+>>>
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
 >>
->> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index 69c4669..dd525c5 100644
->> --- a/fs/ceph/file.c
->> +++ b/fs/ceph/file.c
->> @@ -373,7 +373,7 @@ more:
->>  			goto more;
->>  	}
->>  
->> -	if (ret >= 0) {
->> +	if (read > 0) {
->>  		ret = read;
->>  		/* did we bounce off eof? */
->>  		if (pos + left > inode->i_size)
->> @@ -611,7 +611,8 @@ out:
->>  		if (check_caps)
->>  			ceph_check_caps(ceph_inode(inode), CHECK_CAPS_AUTHONLY,
->>  					NULL);
->> -	}
->> +	} else if (ret != -EOLDSNAPC && written > 0)
->> +		ret = written;
->>  	return ret;
->>  }
->>  
->> -- 
->> 1.8.1.2
->> N?????r??y????b?X????v?^?)??{.n?+???z?]z???{ay??????,j??f???h???z??w??????j:+v???w?j?m????????zZ+???????j"??!?i
+>>
+>> --
+>> Wido den Hollander
+>> 42on B.V.
+>>
+>> Phone: +31 (0)20 700 9902
+>> Skype: contact42on
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
