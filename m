@@ -1,7 +1,7 @@
-From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: bucket count limit
-Date: Thu, 22 Aug 2013 16:17:43 +0200
-Message-ID: <CAMNMNTydR5GJPFnOOi2tJxtk3Z25uD--AxcQduCeYGBW7YDybw@mail.gmail.com>
+Date: Thu, 22 Aug 2013 07:25:23 -0700
+Message-ID: <CABBk=J__eM5NG4GB7QpEQ_3LnaEp-sTLsC=bjc28EL5hdrjWuA@mail.gmail.com>
 References: <CAMNMNTzJ+2sLGur-7QKz+r0FJijTm-iHGqeHTYBWgbUjxoQpvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -17,27 +17,30 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-I'm sorry for the spam :-(
-
---
-Dominik
-
-2013/8/22 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+On Thu, Aug 22, 2013 at 7:11 AM, Dominik Mostowiec
+<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 > Hi,
 > I think about sharding s3 buckets in CEPH cluster, create
 > bucket-per-XX (256 buckets) or even bucket-per-XXX (4096 buckets)
 > where XXX is sign from object md5 url.
 > Could this be the problem? (performance, or some limits)
 >
-> --
-> Regards
-> Dominik
 
+The two issues that I can think of. One is that there's usually a 1000
+buckets per user limitation. This can be easily modified though.
+The second issue is that you might end up with a huge number of
+buckets per user, and at that point listing buckets may just take too
+long. We've seen in the past cases where listing large number of
+buckets (> 500k) took more than the client timeout period, which in
+turn retried and retried, which snowballed into a very high load on
+the gateway (as the original requests were still processing
+internally). However, this might not be an issue anymore, I do
+remember we had a problem with streamlining the list bucket responses
+which I think is already fixed. In any case, if you're not planning to
+list all the user's buckets then this is moot.
 
-
--- 
-Pozdrawiam
-Dominik
+Yehuda
