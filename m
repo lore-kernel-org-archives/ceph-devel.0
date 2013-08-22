@@ -1,99 +1,111 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: radosgw-agent testing
-Date: Thu, 22 Aug 2013 08:08:15 -0700
-Message-ID: <CABBk=J_+76wWUgxHq=LEivbP7Ksp3a070DjCbcNsZXWtMScg7Q@mail.gmail.com>
-References: <CAA8043hiySh18_LR_v3opM=sMiSikciLr9o3+35M9=xs29t55g@mail.gmail.com>
+From: Mostowiec Dominik <Dominik.Mostowiec-Yw1TE0hTT7dz6jiHbVrK7g@public.gmane.org>
+Subject: bucket count limit
+Date: Thu, 22 Aug 2013 16:08:55 +0200
+Message-ID: <ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFE@MXMBON06.grupa.onet>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f176.google.com ([209.85.220.176]:41715 "EHLO
-	mail-vc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752631Ab3HVPIP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Aug 2013 11:08:15 -0400
-Received: by mail-vc0-f176.google.com with SMTP id ha11so1144940vcb.35
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Aug 2013 08:08:15 -0700 (PDT)
-In-Reply-To: <CAA8043hiySh18_LR_v3opM=sMiSikciLr9o3+35M9=xs29t55g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: christophe courtaut <christophe.courtaut@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1322374254=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: pl-PL
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 22, 2013 at 4:38 AM, christophe courtaut
-<christophe.courtaut@gmail.com> wrote:
-> Hi Yehuda,
->
-> I'm currently trying to test the radosgw-agent which lives in
-> https://github.com/ceph/radosgw-agent
->
-> I modified the vstart.sh script (you can see it here
-> https://github.com/ceph/ceph/pull/522) to be able to launch multiple
-> cluster with vstart.sh in different directories.
->
-> I created a little script to automate the launch of two clusters and
-> the setup of region and zone, so that i have a master and a slave
-> cluster.
->
-> With that setup, i encounter two problems:
->
-> First when i try to create a bucket after setup is done using s3cmd,
-> got this error
-> ERROR: Access to bucket 'TEST' was denied.
-> in the function open_bucket_pool_ctx, it tries to open the pool
-> .rgw.buckets.index, but this pool doesn't seems to exist.
-> Is this behaviour correct? Is it due to my setup? or should this pool
-> be created?
+--===============1322374254==
+Content-Language: pl-PL
+Content-Type: multipart/alternative;
+	boundary="_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_"
 
-This pool should have been automatically created (if didn't exist
-before). Not sure why it's not happening.
+--_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
->
-> Second, is that i get a 403 while using the radosgw-agent on the
-> previous setup, with the test.sh script.
-> Am i doing something wrong here?
+Hi,
+I think about sharding s3 buckets in CEPH cluster, create bucket-per-XX (25=
+6 buckets) or even bucket-per-XXX (4096 buckets) where XXX is sign from obj=
+ect md5 url.
+Could this be the problem? (performance, or some limits)
 
-Did you set the 'system' flag on the appropriate users?
->
-> To reproduce the first bug:
->
-> - Get the vstart.sh script from https://github.com/ceph/ceph/pull/522
-> - Get the script to launch cluster and the *.master *.zone files
-> - Launch the script
-> - Try to create a bucket with s3cmd
->
-> To reproduce the second one :
->
-> - Do the same setup as for the first one
-> - Get the radosgw-agent repo
-> - Get the test.sh script in this directory
-> - Launch the test.sh script
->
-> You can find below the various files i mentionned earlier
->
-> the script for launching clusters
-> http://pastebin.com/VSJhwRSs
->
-> master.region file
-> http://pastebin.com/pCrRpM3w
->
-> master.zone file
-> http://pastebin.com/gi1DDNvr
->
-> slave.region file
-> http://pastebin.com/idgMDYjj
->
-> slave.zone file
-> http://pastebin.com/m2KRnqdJ
+--
+Regards
+Dominik
 
-On both slave and master zone you didn't set the placement pools, so
-it resorts to the default. What does 'radosgw-admin zone get' show on
-both?
+--_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40"><head><META HTTP-EQUIV=3D"Content-Type" CONTENT=
+=3D"text/html; charset=3Dus-ascii"><meta name=3DGenerator content=3D"Micros=
+oft Word 12 (filtered medium)"><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.Stylwiadomocie-mail17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:70.85pt 70.85pt 70.85pt 70.85pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]--></head><body lang=3DPL link=3Dblue vlink=
+=3Dpurple><div class=3DWordSection1><p class=3DMsoNormal><span lang=3DEN-US=
+>Hi,<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>I think a=
+bout sharding s3 buckets in CEPH cluster, create bucket-per-XX (256 buckets=
+) or even bucket-per-XXX (4096 buckets) where XXX is sign from object md5 u=
+rl.<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>Could this=
+ be the problem? </span>(performance, or some limits)<o:p></o:p></p><p clas=
+s=3DMsoNormal><o:p>&nbsp;</o:p></p><p class=3DMsoNormal>--<o:p></o:p></p><p=
+ class=3DMsoNormal>Regards<o:p></o:p></p><p class=3DMsoNormal>Dominik<o:p><=
+/o:p></p></div></body></html>=
 
->
-> test.sh file
-> http://pastebin.com/gaitrPqX
+--_000_ADBDB4FFB0814748AF32D0A1EE6E10AF22835B2EFEMXMBON06grupa_--
 
-You can put most of these configurables in a yaml file and -c conf.yaml.
+--===============1322374254==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Yehuda
+--===============1322374254==--
