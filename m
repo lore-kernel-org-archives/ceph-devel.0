@@ -1,328 +1,94 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: still recovery issues with cuttlefish
-Date: Wed, 21 Aug 2013 20:34:36 -0700
-Message-ID: <CA+4uBUbLhpMgPPcmhxdv=DhRoXktmB61mtiMNn6X7wgBWZxksw@mail.gmail.com>
-References: <51FA1AC1.8040207@profihost.ag>
-	<51FBF765.9030700@profihost.ag>
-	<CA+4uBUZY-_jsnG+wfE4LXL-Dw2CtRkNuANwPMMJ4JyUU=4tdRQ@mail.gmail.com>
-	<51FBFE85.5040700@profihost.ag>
-	<5203A597.4060701@cloudapt.com>
-	<5203DFAE.9070100@profihost.ag>
-	<CA+4uBUYgLmP0EMv1+Gzd9ndR42o9ahTL6bnoAAD8QS+Cax7Yzg@mail.gmail.com>
-	<52068FB6.1080209@profihost.ag>
-	<CA+4uBUY9JiRG28MB_JqXSUe7OaK01uSOTOVCe+baFK2YuNLiaw@mail.gmail.com>
-	<673B805F-B036-4066-B8AD-770E6464B64C@profihost.ag>
-	<CA+4uBUYBGnCj5Mbj+v8=cFNLYqPrBiR5VqNUJD6m+dXgeHSHzQ@mail.gmail.com>
-	<CA+4uBUaM2X4aR1vNqjHTdoBgbU0jRv9aKeZnbAuraWYWcFxEhQ@mail.gmail.com>
-	<A2DD558D-3934-4E85-8B03-C8FC1EF9B8B3@profihost.ag>
-	<CA+4uBUacvJhS1j_zE7QvidgWCYQcVwLqrz2D=OHdtE-Z05rt4A@mail.gmail.com>
-	<520B2BF0.2030208@profihost.ag>
-	<5214DCA1.3040003@cloudapt.com>
-	<CA+4uBUY+XJzdW6SueB9iPLx4X=WUTgvpgrXM35ODV5cSkamE1Q@mail.gmail.com>
-	<52150513.8040908@profihost.ag>
-	<CA+4uBUbRiFdr5-SicQ5YJ3BvrwPyNt155XPCPFThfe6znMPnrw@mail.gmail.com>
-	<521516EE.9070405@profihost.ag>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCHv4 0/5] ceph: persistent caching with fscache
+Date: Wed, 21 Aug 2013 22:05:17 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308212203320.1479@cobra.newdream.net>
+References: <cover.1375999914.git.milosz@adfin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f54.google.com ([74.125.83.54]:45459 "EHLO
-	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752461Ab3HVDei (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Aug 2013 23:34:38 -0400
-Received: by mail-ee0-f54.google.com with SMTP id e53so628707eek.41
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Aug 2013 20:34:36 -0700 (PDT)
-In-Reply-To: <521516EE.9070405@profihost.ag>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Mike Dawson <mike.dawson@cloudapt.com>, "josh.durgin@inktank.com" <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.1375999914.git.milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-It's not really possible at this time to control that limit because
-changing the primary is actually fairly expensive and doing it
-unnecessarily would probably make the situation much worse (it's
-mostly necessary for backfilling, which is expensive anyway).  It
-seems like forwarding IO on an object which needs to be recovered to a
-replica with the object would be the next step.  Certainly something
-to consider for the future.
--Sam
+Hi Milosz,
 
-On Wed, Aug 21, 2013 at 12:37 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
-> Hi Sam,
-> Am 21.08.2013 21:13, schrieb Samuel Just:
->
->> As long as the request is for an object which is up to date on the
->> primary, the request will be served without waiting for recovery.
->
->
-> Sure but remember if you have VM random 4K workload a lot of objects go out
-> of date pretty soon.
->
->
->> A request only waits on recovery if the particular object being read or
->>
->> written must be recovered.
->
->
-> Yes but on 4k load this can be a lot.
->
->
->> Your issue was that recovering the
->> particular object being requested was unreasonably slow due to
->> silliness in the recovery code which you disabled by disabling
->> osd_recover_clone_overlap.
->
->
-> Yes and no. It's better now but far away from being good or perfect. My VMs
-> do not crash anymore but i still have a bunch of slow requests (just around
-> 10 messages) and still a VERY high I/O load on the disks during recovery.
->
->
->> In cases where the primary osd is significantly behind, we do make one
->> of the other osds primary during recovery in order to expedite
->> requests (pgs in this state are shown as remapped).
->
->
-> oh never seen that but at least in my case even 60s are a very long
-> timeframe and the OSD is very stressed during recovery. Is it possible for
-> me to set this value?
->
->
-> Stefan
->
->> -Sam
->>
->> On Wed, Aug 21, 2013 at 11:21 AM, Stefan Priebe <s.priebe@profihost.ag>
->> wrote:
->>>
->>> Am 21.08.2013 17:32, schrieb Samuel Just:
->>>
->>>> Have you tried setting osd_recovery_clone_overlap to false?  That
->>>> seemed to help with Stefan's issue.
->>>
->>>
->>>
->>> This might sound a bug harsh but maybe due to my limited english skills
->>> ;-)
->>>
->>> I still think that Cephs recovery system is broken by design. If an OSD
->>> comes back (was offline) all write requests regarding PGs where this one
->>> is
->>> primary are targeted immediatly to this OSD. If this one is not up2date
->>> for
->>> an PG it tries to recover that one immediatly which costs 4MB / block. If
->>> you have a lot of small write all over your OSDs and PGs you're sucked as
->>> your OSD has to recover ALL it's PGs immediatly or at least lots of them
->>> WHICH can't work. This is totally crazy.
->>>
->>> I think the right way would be:
->>> 1.) if an OSD goes down the replicas got primaries
->>>
->>> or
->>>
->>> 2.) an OSD which does not have an up2date PG should redirect to the OSD
->>> holding the secondary or third replica.
->>>
->>> Both results in being able to have a really smooth and slow recovery
->>> without
->>> any stress even under heavy 4K workloads like rbd backed VMs.
->>>
->>> Thanks for reading!
->>>
->>> Greets Stefan
->>>
->>>
->>>
->>>> -Sam
->>>>
->>>> On Wed, Aug 21, 2013 at 8:28 AM, Mike Dawson <mike.dawson@cloudapt.com>
->>>> wrote:
->>>>>
->>>>>
->>>>> Sam/Josh,
->>>>>
->>>>> We upgraded from 0.61.7 to 0.67.1 during a maintenance window this
->>>>> morning,
->>>>> hoping it would improve this situation, but there was no appreciable
->>>>> change.
->>>>>
->>>>> One node in our cluster fsck'ed after a reboot and got a bit behind.
->>>>> Our
->>>>> instances backed by RBD volumes were OK at that point, but once the
->>>>> node
->>>>> booted fully and the OSDs started, all Windows instances with rbd
->>>>> volumes
->>>>> experienced very choppy performance and were unable to ingest video
->>>>> surveillance traffic and commit it to disk. Once the cluster got back
->>>>> to
->>>>> HEALTH_OK, they resumed normal operation.
->>>>>
->>>>> I tried for a time with conservative recovery settings (osd max
->>>>> backfills
->>>>> =
->>>>> 1, osd recovery op priority = 1, and osd recovery max active = 1). No
->>>>> improvement for the guests. So I went to more aggressive settings to
->>>>> get
->>>>> things moving faster. That decreased the duration of the outage.
->>>>>
->>>>> During the entire period of recovery/backfill, the network looked
->>>>> fine...no
->>>>> where close to saturation. iowait on all drives look fine as well.
->>>>>
->>>>> Any ideas?
->>>>>
->>>>> Thanks,
->>>>> Mike Dawson
->>>>>
->>>>>
->>>>>
->>>>> On 8/14/2013 3:04 AM, Stefan Priebe - Profihost AG wrote:
->>>>>>
->>>>>>
->>>>>>
->>>>>> the same problem still occours. Will need to check when i've time to
->>>>>> gather logs again.
->>>>>>
->>>>>> Am 14.08.2013 01:11, schrieb Samuel Just:
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> I'm not sure, but your logs did show that you had >16 recovery ops in
->>>>>>> flight, so it's worth a try.  If it doesn't help, you should collect
->>>>>>> the same set of logs I'll look again.  Also, there are a few other
->>>>>>> patches between 61.7 and current cuttlefish which may help.
->>>>>>> -Sam
->>>>>>>
->>>>>>> On Tue, Aug 13, 2013 at 2:03 PM, Stefan Priebe - Profihost AG
->>>>>>> <s.priebe@profihost.ag> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> Am 13.08.2013 um 22:43 schrieb Samuel Just <sam.just@inktank.com>:
->>>>>>>>
->>>>>>>>> I just backported a couple of patches from next to fix a bug where
->>>>>>>>> we
->>>>>>>>> weren't respecting the osd_recovery_max_active config in some cases
->>>>>>>>> (1ea6b56170fc9e223e7c30635db02fa2ad8f4b4e).  You can either try the
->>>>>>>>> current cuttlefish branch or wait for a 61.8 release.
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> Thanks! Are you sure that this is the issue? I don't believe that
->>>>>>>> but
->>>>>>>> i'll give it a try. I already tested a branch from sage where he
->>>>>>>> fixed
->>>>>>>> a
->>>>>>>> race regarding max active some weeks ago. So active recovering was
->>>>>>>> max
->>>>>>>> 1 but
->>>>>>>> the issue didn't went away.
->>>>>>>>
->>>>>>>> Stefan
->>>>>>>>
->>>>>>>>> -Sam
->>>>>>>>>
->>>>>>>>> On Mon, Aug 12, 2013 at 10:34 PM, Samuel Just
->>>>>>>>> <sam.just@inktank.com>
->>>>>>>>> wrote:
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> I got swamped today.  I should be able to look tomorrow.  Sorry!
->>>>>>>>>> -Sam
->>>>>>>>>>
->>>>>>>>>> On Mon, Aug 12, 2013 at 9:39 PM, Stefan Priebe - Profihost AG
->>>>>>>>>> <s.priebe@profihost.ag> wrote:
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Did you take a look?
->>>>>>>>>>>
->>>>>>>>>>> Stefan
->>>>>>>>>>>
->>>>>>>>>>> Am 11.08.2013 um 05:50 schrieb Samuel Just
->>>>>>>>>>> <sam.just@inktank.com>:
->>>>>>>>>>>
->>>>>>>>>>>> Great!  I'll take a look on Monday.
->>>>>>>>>>>> -Sam
->>>>>>>>>>>>
->>>>>>>>>>>> On Sat, Aug 10, 2013 at 12:08 PM, Stefan Priebe
->>>>>>>>>>>> <s.priebe@profihost.ag> wrote:
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>> Hi Samual,
->>>>>>>>>>>>>
->>>>>>>>>>>>> Am 09.08.2013 23:44, schrieb Samuel Just:
->>>>>>>>>>>>>
->>>>>>>>>>>>>> I think Stefan's problem is probably distinct from Mike's.
->>>>>>>>>>>>>>
->>>>>>>>>>>>>> Stefan: Can you reproduce the problem with
->>>>>>>>>>>>>>
->>>>>>>>>>>>>> debug osd = 20
->>>>>>>>>>>>>> debug filestore = 20
->>>>>>>>>>>>>> debug ms = 1
->>>>>>>>>>>>>> debug optracker = 20
->>>>>>>>>>>>>>
->>>>>>>>>>>>>> on a few osds (including the restarted osd), and upload those
->>>>>>>>>>>>>> osd
->>>>>>>>>>>>>> logs
->>>>>>>>>>>>>> along with the ceph.log from before killing the osd until
->>>>>>>>>>>>>> after
->>>>>>>>>>>>>> the
->>>>>>>>>>>>>> cluster becomes clean again?
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>> done - you'll find the logs at cephdrop folder:
->>>>>>>>>>>>> slow_requests_recovering_cuttlefish
->>>>>>>>>>>>>
->>>>>>>>>>>>> osd.52 was the one recovering
->>>>>>>>>>>>>
->>>>>>>>>>>>> Thanks!
->>>>>>>>>>>>>
->>>>>>>>>>>>> Greets,
->>>>>>>>>>>>> Stefan
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> --
->>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>>>> ceph-devel" in
->>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>>>>> More majordomo info at
->>>>>>>>>>>> http://vger.kernel.org/majordomo-info.html
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> --
->>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>> ceph-devel"
->>>>>>>>> in
->>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>>> in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+I've pulled this into the ceph testing branch to make sure it holds up 
+in qa.
+
+David, are the fscache patches here ready for the next merge window?  Do 
+you have a preference for whose tree they go through?
+
+Thanks!
+sage
+
+
+On Wed, 21 Aug 2013, Milosz Tanski wrote:
+
+> This an updated version of the fscache support for the Ceph filesystem. What's
+> changed since the last patchset:
+> 
+> 1. Sparater the readpages refactor into it's own patches. These were already
+>    accepted into the testing branch.
+> 
+> 2. Tracked down the BUG in readahead cleanup code. We were returning with pages
+>    marked as private_2 from readpages(). I added a simple convenience function
+>    to the fscache netfs interface for cleaning up the page list at the end of
+>    asop readpages(). I know other filesystems (NFS) have ran into that since
+>    I've seen a few similar traces in Google search and the cachefs mailig list.
+>    The second patch new make Ceph use this interface.
+> 
+> I've been running this code (minus the BUG fix) on clients for a couple weeks
+> with moderate 24/7 use without issues. At this point in time I feel like it's
+> solid enough to go into the ceph kclient.
+> 
+> Please pull the code from my repository:
+> https://bitbucket.org/adfin/linux-fs.git branch: wip-ceph-fscache
+> 
+> The first two patches I included were not written by me but were written by 
+> Hongyi Jia. He implemented the cookie re-validation scheme into fscache core.
+> 
+> Finally, I CCed a couple other mailing lists (fsdevel, nfs) because the new
+> fscache_readpages_cancel() should be used by other filesystems to avoid the
+> same problem.
+> 
+> 
+> Hongyi Jia (2):
+>   new cachefiles interface to check cache consistency
+>   new fscache interface to check cache consistency
+> 
+> Milosz Tanski (3):
+>   ceph: use fscache as a local presisent cache
+>   fscache: netfs function for cleanup post readpages
+>   ceph: clean PgPrivate2 on returning from readpages
+> 
+>  fs/cachefiles/interface.c     |  19 +++
+>  fs/cachefiles/internal.h      |   1 +
+>  fs/cachefiles/xattr.c         |  39 ++++++
+>  fs/ceph/Kconfig               |   9 ++
+>  fs/ceph/Makefile              |   2 +
+>  fs/ceph/addr.c                |  39 +++++-
+>  fs/ceph/cache.c               | 311 ++++++++++++++++++++++++++++++++++++++++++
+>  fs/ceph/cache.h               | 130 ++++++++++++++++++
+>  fs/ceph/caps.c                |  19 ++-
+>  fs/ceph/file.c                |  17 +++
+>  fs/ceph/inode.c               |  66 ++++++++-
+>  fs/ceph/super.c               |  47 ++++++-
+>  fs/ceph/super.h               |  17 +++
+>  fs/fscache/cookie.c           |  22 +++
+>  fs/fscache/page.c             |  16 +++
+>  include/linux/fscache-cache.h |   4 +
+>  include/linux/fscache.h       |  39 ++++++
+>  17 files changed, 785 insertions(+), 12 deletions(-)
+>  create mode 100644 fs/ceph/cache.c
+>  create mode 100644 fs/ceph/cache.h
+> 
+> -- 
+> 1.8.1.2
+> 
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
