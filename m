@@ -1,158 +1,90 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: radosgw-agent testing
-Date: Thu, 22 Aug 2013 09:02:00 -0700
-Message-ID: <CABBk=J9HMwngLXYLZZJ9e-29gtiCMMZXBdzbHKLWeG0zWJJ63w@mail.gmail.com>
-References: <CAA8043hiySh18_LR_v3opM=sMiSikciLr9o3+35M9=xs29t55g@mail.gmail.com>
-	<CABBk=J_+76wWUgxHq=LEivbP7Ksp3a070DjCbcNsZXWtMScg7Q@mail.gmail.com>
-	<CAA8043iSY7uezUJBh3_=_8UUEX_nHmsiRXVYHBH49Ns2tpnp-Q@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Jerasure & Ceph
+Date: Thu, 22 Aug 2013 18:32:59 +0200
+Message-ID: <52163D3B.5050900@dachary.org>
+References: <5214893A.2020005@dachary.org> <52163BD5.1040509@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigBFF82E7A9C70E9AA7EC2ECAC"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f181.google.com ([209.85.128.181]:54507 "EHLO
-	mail-ve0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753036Ab3HVQCA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Aug 2013 12:02:00 -0400
-Received: by mail-ve0-f181.google.com with SMTP id jz10so1658727veb.40
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Aug 2013 09:02:00 -0700 (PDT)
-In-Reply-To: <CAA8043iSY7uezUJBh3_=_8UUEX_nHmsiRXVYHBH49Ns2tpnp-Q@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:56836 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752933Ab3HVQdD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Aug 2013 12:33:03 -0400
+In-Reply-To: <52163BD5.1040509@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: christophe courtaut <christophe.courtaut@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "James S. Plank" <plank@cs.utk.edu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 22, 2013 at 8:56 AM, christophe courtaut
-<christophe.courtaut@gmail.com> wrote:
->> On Thu, Aug 22, 2013 at 4:38 AM, christophe courtaut
->> <christophe.courtaut@gmail.com> wrote:
->>> Hi Yehuda,
->>>
->>> I'm currently trying to test the radosgw-agent which lives in
->>> https://github.com/ceph/radosgw-agent
->>>
->>> I modified the vstart.sh script (you can see it here
->>> https://github.com/ceph/ceph/pull/522) to be able to launch multiple
->>> cluster with vstart.sh in different directories.
->>>
->>> I created a little script to automate the launch of two clusters and
->>> the setup of region and zone, so that i have a master and a slave
->>> cluster.
->>>
->>> With that setup, i encounter two problems:
->>>
->>> First when i try to create a bucket after setup is done using s3cmd,
->>> got this error
->>> ERROR: Access to bucket 'TEST' was denied.
->>> in the function open_bucket_pool_ctx, it tries to open the pool
->>> .rgw.buckets.index, but this pool doesn't seems to exist.
->>> Is this behaviour correct? Is it due to my setup? or should this pool
->>> be created?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigBFF82E7A9C70E9AA7EC2ECAC
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi James,
+
+Thanks for the news and the manual :-)
+
+https://bitbucket.org/allenmcbride/gf-complete-summer redirects to
+https://bitbucket.org/allenmcbride/gf-complete-summer/wiki/Home which see=
+ms empty. Am I missing something ?
+
+If you are curious I started the jerasure ceph plugin based on jerasure-1=
+=2E2A at
+
+https://github.com/dachary/ceph/tree/wip-5879
+https://github.com/dachary/ceph/commit/83845a66ae1cba63c122c0ef7658b97b47=
+4c2bd2
+
+and I should be done by the end of next week.
+
+Cheers
+
+On 22/08/2013 18:27, Loic Dachary wrote:
+> James Plank reply:
+>=20
+> My new GF library called GF-complete is weeks away from being done.  Th=
+e most recent version is https://bitbucket.org/allenmcbride/gf-complete-s=
+ummer, and I doubt much of it will change between now and "release."  I'm=
+ including the PDF of the manual, which I have edited up to section 7.7, =
+so again, it's largely good to go -- the remaining changes are esoteric. =
+
+>=20
+> On 21/08/2013 11:32, Loic Dachary wrote:
+>> Hi James,
 >>
->> This pool should have been automatically created (if didn't exist
->> before). Not sure why it's not happening.
->
-> Ok. I don't know where the automatic creation of this pool should be
-> handled though.
->
->>>
->>> Second, is that i get a 403 while using the radosgw-agent on the
->>> previous setup, with the test.sh script.
->>> Am i doing something wrong here?
+>> I'm working on adding jerasure as a plugin to Ceph. If I remember corr=
+ectly the next version of jerasure was scheduled to be released this mont=
+h. Although using jerasure-1.2 ( as found at http://web.eecs.utk.edu/~pla=
+nk/plank/papers/CS-08-627.html ) would be perfectly fine, it may be worth=
+ waiting for a few days if a release is imminent.
 >>
->> Did you set the 'system' flag on the appropriate users?
->
-> No i did miss that point. btw the option was not mentionned in the
-> radosgw-admin help.
-> here comes a pull request for that : https://github.com/ceph/ceph/pull/528
->
->>> To reproduce the first bug:
->>>
->>> - Get the vstart.sh script from https://github.com/ceph/ceph/pull/522
->>> - Get the script to launch cluster and the *.master *.zone files
->>> - Launch the script
->>> - Try to create a bucket with s3cmd
->>>
->>> To reproduce the second one :
->>>
->>> - Do the same setup as for the first one
->>> - Get the radosgw-agent repo
->>> - Get the test.sh script in this directory
->>> - Launch the test.sh script
->>>
->>> You can find below the various files i mentionned earlier
->>>
->>> the script for launching clusters
->>> http://pastebin.com/VSJhwRSs
->>>
->>> master.region file
->>> http://pastebin.com/pCrRpM3w
->>>
->>> master.zone file
->>> http://pastebin.com/gi1DDNvr
->>>
->>> slave.region file
->>> http://pastebin.com/idgMDYjj
->>>
->>> slave.zone file
->>> http://pastebin.com/m2KRnqdJ
+>> Do you advise to wait for the next version of jerasure ?
 >>
->> On both slave and master zone you didn't set the placement pools, so
->> it resorts to the default. What does 'radosgw-admin zone get' show on
->> both?
->
-> radosgw-admin -c cluster-master/ceph.conf zone get
->
-> { "domain_root": ".rgw",
->   "control_pool": ".rgw.control",
->   "gc_pool": ".rgw.gc",
->   "log_pool": ".log",
->   "intent_log_pool": ".intent-log",
->   "usage_log_pool": ".usage",
->   "user_keys_pool": ".users",
->   "user_email_pool": ".users.email",
->   "user_swift_pool": ".users.swift",
->   "user_uid_pool": ".",
->   "system_key": { "access_key": "0555b35654ad1656d804",
->       "secret_key":
-> "h7GhxuBLTrlhVUyxSPUKUV8r\/2EI4ngqJxD7iBdBYLhwluN30JaT3Q=="},
->   "placement_pools": []}
->
-> radosgw-admin -c cluster-slave/ceph.conf zone get
->
-> { "domain_root": ".rgw",
->   "control_pool": ".rgw.control",
->   "gc_pool": ".rgw.gc",
->   "log_pool": ".log",
->   "intent_log_pool": ".intent-log",
->   "usage_log_pool": ".usage",
->   "user_keys_pool": ".users",
->   "user_email_pool": ".users.email",
->   "user_swift_pool": ".users.swift",
->   "user_uid_pool": ".",
->   "system_key": { "access_key": "0555b35654ad1656d804",
->       "secret_key":
-> "h7GhxuBLTrlhVUyxSPUKUV8r\/2EI4ngqJxD7iBdBYLhwluN30JaT3Q=="},
->   "placement_pools": []}
->
-> Indeed placement_pools seems empty.
-> Is this mandatory?
+>> Cheers
+>>
+>=20
 
-No, albeit recommended. Otherwise it reverts to the original pool
-placement system (probably what happened).
-
-> If so do i need to create the pools first?
-
-It's always recommended to create the pools first, that way you
-control the amount of pgs you want per pool. However, for such a test
-environment it shouldn't be an issue.
-
-> On Both cluster?
-
-Each zone is separate.
-
-> Should they be the same?
-
-Doesn't really matter, unless you're running everything on the same
-cluster, in which case each zone should have its own set of pools.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-Yehuda
+--------------enigBFF82E7A9C70E9AA7EC2ECAC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlIWPTsACgkQ8dLMyEl6F20goQCglhWzlFlDOxuAq/TFWyFJEyK+
+hsMAnjot1yw052xItUtoqnNnnqpA3D0j
+=qWEJ
+-----END PGP SIGNATURE-----
+
+--------------enigBFF82E7A9C70E9AA7EC2ECAC--
