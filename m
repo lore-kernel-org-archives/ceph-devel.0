@@ -1,41 +1,80 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: [ANN] ceph-deploy 1.2.2 released!
-Date: Fri, 23 Aug 2013 08:36:20 -0400
-Message-ID: <CANtztVzbVVJg93QOuAutpgMAp3H3frbHaYivBhqO4nF4X2y0dw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: jerasure-1.2A valgrind error
+Date: Fri, 23 Aug 2013 18:07:26 +0200
+Message-ID: <521788BE.1010404@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig1789907EA2FB545E29C50DB8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:35465 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754902Ab3HWMgV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 08:36:21 -0400
-Received: by mail-oa0-f46.google.com with SMTP id j10so653254oah.5
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Aug 2013 05:36:20 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:52876 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754623Ab3HWQH3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 12:07:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel@vger.kernel.org
+To: "James S. Plank" <plank@cs.utk.edu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig1789907EA2FB545E29C50DB8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-There is a new bug-fix release of ceph-deploy, the easy ceph deployment tool.
+Hi James,
 
-Installation instructions: https://github.com/ceph/ceph-deploy#installation
+I ran:
 
-This is the list of all fixes that went into this release which can
-also be found in the CHANGELOG.rst file in ceph-deploy's git repo:
+valgrind --tool=3Dmemcheck ./encoder F 2 2 reed_sol_van 8 0 310
 
-* Do not force usage of lsb_release, fallback to
-  ``platform.linux_distribution()``
-* Ease installation in CentOS/Scientific by adding the EPEL repo
-  before attempting to install Ceph.
-* Graceful handling of pushy connection issues due to host
-  address resolution
-* Honor the usage of ``--cluster`` when calling osd prepare.
+compiled from jerasure-1.2A as found at http://web.eecs.utk.edu/~plank/pl=
+ank/papers/Jerasure-1.2A.tar
+and compiled without modifications except for -g in the makefile to get t=
+he error lines.
+
+=3D=3D22001=3D=3D Use of uninitialised value of size 8
+=3D=3D22001=3D=3D    at 0x409CB1: galois_w08_region_multiply (galois.c:47=
+4)
+=3D=3D22001=3D=3D    by 0x4061CD: jerasure_matrix_dotprod (jerasure.c:628=
+)
+=3D=3D22001=3D=3D    by 0x404F06: jerasure_matrix_encode (jerasure.c:313)=
+
+=3D=3D22001=3D=3D    by 0x40259C: main (encoder.c:518)
+
+The input file contains (i.e. 310 bytes, no newline )
+
+ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJK=
+LMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUV=
+WXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefg=
+hijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr=
+stuvwxyz0123456789
+
+Should I be concerned about it ?
+
+valgrind --tool=3Dmemcheck ./encoder F 2 2 cauchy_good 8 8 310
+
+shows no error.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-Make sure you update!
+--------------enig1789907EA2FB545E29C50DB8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Thanks,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
 
+iEYEARECAAYFAlIXiL4ACgkQ8dLMyEl6F22ASQCggWjjDcIY9msxGH2wm+B94NHL
+rWwAn1TK6EMf3Hg2EuiCnAvbPO0Z3a/b
+=lYfG
+-----END PGP SIGNATURE-----
 
-Alfredo
+--------------enig1789907EA2FB545E29C50DB8--
