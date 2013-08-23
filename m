@@ -1,39 +1,31 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] mds: update backtrace when old format inode is touched
-Date: Fri, 23 Aug 2013 07:09:01 -0300
-Message-ID: <ortxigk9c2.fsf@livre.home>
-References: <1377222150-4238-1-git-send-email-zheng.z.yan@intel.com>
+From: "info@snsnl.com" <info@snsnl.com>
+Subject: re:
+Date: Thu, 22 Aug 2013 23:18:06 -0700
+Message-ID: <E1VCkh4-0002jV-8c@mail.moslift.ru>
+Reply-To: boucherdavid01@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:43795 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754074Ab3HWKJW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 06:09:22 -0400
-In-Reply-To: <1377222150-4238-1-git-send-email-zheng.z.yan@intel.com> (Zheng
-	Yan's message of "Fri, 23 Aug 2013 09:42:30 +0800")
+Received: from mail.moslift.ru ([62.117.117.19]:31888 "EHLO mail.moslift.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754450Ab3HWK1P convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 06:27:15 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: ceph-devel@vger.kernel.org
 
-On Aug 22, 2013, "Yan, Zheng" <zheng.z.yan@intel.com> wrote:
+Hello,
 
-> We updated inode format version to 7 when introducing inode backtrace.
-> If we found a inode's format version < 7 when fetching the inode, set
-> the inode's backtrace_version to 0, to indicate the inode's backtrace
-> is out of data. When touching a inode with backtrace_version == 0, we
-> also update its backtrace.
+Compliments and good day to you and your family.
 
-> +  if (pi->backtrace_version == 0)
-> +    pi->update_backtrace();
-   
-AFAICT all this does is to update the backtrace version number in the
-cached-in-memory inode.  What am I missing?  Or is the code missing
-something? :-)
+Without wasting much of your time i want to bring you into a business
+venture which i think should be of interest and concern to you, since it has
+to do with a perceived family member of yours. However i need to
+be sure that you must have received this communication so i will not divulge
+much information about it until i get a response from you.
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Kindly respond back to me.
+Regards,
+David
+
