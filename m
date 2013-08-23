@@ -1,294 +1,288 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH 3/3] ceph: rework trim caps code
-Date: Fri, 23 Aug 2013 13:27:36 -0700
-Message-ID: <CAPYLRzjA+K+7Z7vHLD=98rw17xuJwfsFokD3z4ejq+BXWDzctQ@mail.gmail.com>
-References: <1375683030-28305-1-git-send-email-zheng.z.yan@intel.com>
-	<1375683030-28305-10-git-send-email-zheng.z.yan@intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 2/2] client: trim deleted inode
+Date: Fri, 23 Aug 2013 13:36:03 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308231335530.28981@cobra.newdream.net>
+References: <1374373274-3457-1-git-send-email-zheng.z.yan@intel.com> <1374373274-3457-3-git-send-email-zheng.z.yan@intel.com> <CAPYLRzjCSaUUJLzEJtGpN-aDpQg9Zv6tX6+_wfTkoEW2GueZdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:50411 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755144Ab3HWU1i (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 16:27:38 -0400
-Received: by mail-wi0-f173.google.com with SMTP id ey16so1202195wid.0
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Aug 2013 13:27:36 -0700 (PDT)
-In-Reply-To: <1375683030-28305-10-git-send-email-zheng.z.yan@intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41466 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755161Ab3HWUgE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Aug 2013 16:36:04 -0400
+In-Reply-To: <CAPYLRzjCSaUUJLzEJtGpN-aDpQg9Zv6tX6+_wfTkoEW2GueZdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Did this patch get dropped on purpose? I also don't see it in our
-testing branch.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+On Fri, 23 Aug 2013, Gregory Farnum wrote:
+> Looks like this patch hasn't been merged in yet, although its partner
+> to make the MDS notify about deleted inodes was. Any particular
+> reason, or just still waiting for review? :)
+
+I got as far as pushing it to wip-fuse but didn't run any tests.
+
+sage
 
 
-On Sun, Aug 4, 2013 at 11:10 PM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->
-> The trim caps code that handles SESSION_RECALL_STATE message has
-> two issues. First, it uses d_prune_aliases() to prune dentries.
-> This confuses our 'dir complete' check, because d_prune_aliases()
-> unhashes dentries before calling our d_prune() callback. Second,
-> it only prune dentries, inodes with zero reference are still in
-> the icache unless there is memory pressure.
->
-> The fix is adding d_delete() and drop_inode() VFS callback. VFS
-> calls our d_delete()/drop_inode() callback when a dentry/inode's
-> last reference is dropped. If true is returned, VFS drop the
-> dentry/inode from the cache. When handling SESSION_RECALL_STATE
-> message, we mark inode with CEPH_I_TRIMCAPS flag. Our callbacks
-> check the flag and session->s_trim_caps to decide if VFS should
-> drop a dentry/inode. To trim an inode, we just need to reference
-> dentries associated with the inode, then release them.
->
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/caps.c       | 30 ++++++++++++++++++++++++++++++
->  fs/ceph/dir.c        | 12 ++++++++++++
->  fs/ceph/inode.c      | 11 +++++++++++
->  fs/ceph/mds_client.c | 37 ++++++++++++++++++++++++++++++-------
->  fs/ceph/mds_client.h |  4 ++--
->  fs/ceph/super.c      |  1 +
->  fs/ceph/super.h      |  3 +++
->  7 files changed, 89 insertions(+), 9 deletions(-)
->
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 49590a0..332dc8d 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -882,6 +882,36 @@ int __ceph_caps_mds_wanted(struct ceph_inode_info *ci)
->  }
->
->  /*
-> + * Used by ceph_d_delete()/ceph_drop_inode(). check if we should drop
-> + * the inode.
-> + */
-> +int ceph_trim_caps(struct ceph_inode_info *ci, int drop_inode)
-> +{
-> +       struct ceph_cap *cap;
-> +       struct rb_node *p;
-> +       int ret = 0;
-> +
-> +       if (!spin_trylock(&ci->i_ceph_lock))
-> +               return 0;
-> +
-> +       if (ci->i_ceph_flags & CEPH_I_TRIMCAPS) {
-> +               for (p = rb_first(&ci->i_caps); p; p = rb_next(p)) {
-> +                       cap = rb_entry(p, struct ceph_cap, ci_node);
-> +                       if (atomic_read(&cap->session->s_trim_caps) <= 0)
-> +                               continue;
-> +                       if (drop_inode)
-> +                               atomic_dec(&cap->session->s_trim_caps);
-> +                       ret = 1;
-> +               }
-> +               if (!ret)
-> +                       ci->i_ceph_flags &= ~CEPH_I_TRIMCAPS;
-> +       }
-> +
-> +       spin_unlock(&ci->i_ceph_lock);
-> +       return ret;
-> +}
-> +
-> +/*
->   * called under i_ceph_lock
->   */
->  static int __ceph_is_any_caps(struct ceph_inode_info *ci)
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 0e4da4a..9741f34 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -1043,6 +1043,17 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
->         return valid;
->  }
->
-> +static int ceph_d_delete(const struct dentry *dentry)
-> +{
-> +       if (dentry->d_inode) {
-> +               struct ceph_inode_info *ci = ceph_inode(dentry->d_inode);
-> +               /* need trim caps? */
-> +               if (ci->i_ceph_flags & CEPH_I_TRIMCAPS)
-> +                       return ceph_trim_caps(ci, false);
-> +       }
-> +       return 0;
-> +}
-> +
->  /*
->   * Release our ceph_dentry_info.
->   */
-> @@ -1300,6 +1311,7 @@ const struct inode_operations ceph_dir_iops = {
->
->  const struct dentry_operations ceph_dentry_ops = {
->         .d_revalidate = ceph_d_revalidate,
-> +       .d_delete = ceph_d_delete,
->         .d_release = ceph_d_release,
->         .d_prune = ceph_d_prune,
->  };
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 01e4db1..371590a 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -431,6 +431,17 @@ void ceph_destroy_inode(struct inode *inode)
->         call_rcu(&inode->i_rcu, ceph_i_callback);
->  }
->
-> +int ceph_drop_inode(struct inode *inode)
-> +{
-> +       struct ceph_inode_info *ci = ceph_inode(inode);
-> +       int ret = generic_drop_inode(inode);
-> +
-> +       /* need trim caps? */
-> +       if (!ret && (ci->i_ceph_flags & CEPH_I_TRIMCAPS))
-> +               ret = ceph_trim_caps(ci, true);
-> +
-> +       return ret ;
-> +}
->
->  /*
->   * Helpers to fill in size, ctime, mtime, and atime.  We have to be
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 2a42b5f..7c2b8d6 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -435,7 +435,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
->         s->s_renew_seq = 0;
->         INIT_LIST_HEAD(&s->s_caps);
->         s->s_nr_caps = 0;
-> -       s->s_trim_caps = 0;
-> +       atomic_set(&s->s_trim_caps, 0);
->         atomic_set(&s->s_ref, 1);
->         INIT_LIST_HEAD(&s->s_waiting);
->         INIT_LIST_HEAD(&s->s_unsafe);
-> @@ -1207,9 +1207,10 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
->  {
->         struct ceph_mds_session *session = arg;
->         struct ceph_inode_info *ci = ceph_inode(inode);
-> +       struct dentry *dentry;
->         int used, oissued, mine;
->
-> -       if (session->s_trim_caps <= 0)
-> +       if (atomic_read(&session->s_trim_caps) <= 0)
->                 return -1;
->
->         spin_lock(&ci->i_ceph_lock);
-> @@ -1225,16 +1226,39 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
->         if ((used & ~oissued) & mine)
->                 goto out;   /* we need these caps */
->
-> -       session->s_trim_caps--;
->         if (oissued) {
->                 /* we aren't the only cap.. just remove us */
->                 __queue_cap_release(session, ceph_ino(inode), cap->cap_id,
->                                     cap->mseq, cap->issue_seq);
->                 __ceph_remove_cap(cap);
-> +               atomic_dec(&session->s_trim_caps);
->         } else {
->                 /* try to drop referring dentries */
-> +               ci->i_ceph_flags |= CEPH_I_TRIMCAPS;
->                 spin_unlock(&ci->i_ceph_lock);
-> -               d_prune_aliases(inode);
-> +               /*
-> +                * can't use d_prune_aliases(), because it unhashes dentries
-> +                * before calling ceph_d_prune().
-> +                */
-> +restart:
-> +               spin_lock(&inode->i_lock);
-> +               hlist_for_each_entry(dentry, &inode->i_dentry, d_alias) {
-> +                       spin_lock(&dentry->d_lock);
-> +                       if (!dentry->d_count) {
-> +                               dget_dlock(dentry);
-> +                               spin_unlock(&dentry->d_lock);
-> +                               spin_unlock(&inode->i_lock);
-> +                               /*
-> +                                * our d_delete callback returns true when
-> +                                * CEPH_I_TRIMCAPS is set. This makes VFS
-> +                                * drop the dentry.
-> +                                */
-> +                               dput(dentry);
-> +                               goto restart;
-> +                       }
-> +                       spin_unlock(&dentry->d_lock);
-> +               }
-> +               spin_unlock(&inode->i_lock);
->                 dout("trim_caps_cb %p cap %p  pruned, count now %d\n",
->                      inode, cap, atomic_read(&inode->i_count));
->                 return 0;
-> @@ -1257,12 +1281,11 @@ static int trim_caps(struct ceph_mds_client *mdsc,
->         dout("trim_caps mds%d start: %d / %d, trim %d\n",
->              session->s_mds, session->s_nr_caps, max_caps, trim_caps);
->         if (trim_caps > 0) {
-> -               session->s_trim_caps = trim_caps;
-> +               atomic_set(&session->s_trim_caps, trim_caps);
->                 iterate_session_caps(session, trim_caps_cb, session);
->                 dout("trim_caps mds%d done: %d / %d, trimmed %d\n",
->                      session->s_mds, session->s_nr_caps, max_caps,
-> -                       trim_caps - session->s_trim_caps);
-> -               session->s_trim_caps = 0;
-> +                    trim_caps - atomic_read(&session->s_trim_caps));
->         }
->         return 0;
->  }
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index c2a19fb..d0e6566 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -130,8 +130,8 @@ struct ceph_mds_session {
->         /* protected by s_cap_lock */
->         spinlock_t        s_cap_lock;
->         struct list_head  s_caps;     /* all caps issued by this session */
-> -       int               s_nr_caps, s_trim_caps;
-> -       int               s_num_cap_releases;
-> +       int               s_nr_caps, s_num_cap_releases;
-> +       atomic_t          s_trim_caps;
->         struct list_head  s_cap_releases; /* waiting cap_release messages */
->         struct list_head  s_cap_releases_done; /* ready to send */
->         struct ceph_cap  *s_cap_iterator;
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 6627b26..bcf26bf 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -655,6 +655,7 @@ static const struct super_operations ceph_super_ops = {
->         .alloc_inode    = ceph_alloc_inode,
->         .destroy_inode  = ceph_destroy_inode,
->         .write_inode    = ceph_write_inode,
-> +       .drop_inode     = ceph_drop_inode,
->         .sync_fs        = ceph_sync_fs,
->         .put_super      = ceph_put_super,
->         .show_options   = ceph_show_options,
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index e81c0b6..b87691a 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -421,6 +421,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
->  /*
->   * Ceph inode.
->   */
-> +#define CEPH_I_TRIMCAPS  1  /* trim caps when possible */
->  #define CEPH_I_NODELAY   4  /* do not delay cap release */
->  #define CEPH_I_FLUSH     8  /* do not delay flush of dirty metadata */
->  #define CEPH_I_NOFLUSH  16  /* do not flush dirty caps */
-> @@ -487,6 +488,7 @@ extern int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented);
->  extern int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int t);
->  extern int __ceph_caps_issued_other(struct ceph_inode_info *ci,
->                                     struct ceph_cap *cap);
-> +extern int ceph_trim_caps(struct ceph_inode_info *ci, int drop_inode);
->
->  static inline int ceph_caps_issued(struct ceph_inode_info *ci)
->  {
-> @@ -675,6 +677,7 @@ extern const struct inode_operations ceph_file_iops;
->
->  extern struct inode *ceph_alloc_inode(struct super_block *sb);
->  extern void ceph_destroy_inode(struct inode *inode);
-> +extern int ceph_drop_inode(struct inode *inode);
->
->  extern struct inode *ceph_get_inode(struct super_block *sb,
->                                     struct ceph_vino vino);
-> --
-> 1.8.1.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> 
+> 
+> On Sat, Jul 20, 2013 at 7:21 PM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
+> > From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> >
+> > previous patch makes MDS send notification to clients when an inode
+> > is deleted. When receiving a such notification, we invalidate any
+> > dentry link to the deleted inode. If there is no other reference to
+> > the inode, the inode gets trimmed.
+> >
+> > For cephfs fuse client, we use fuse_lowlevel_notify_inval_entry() or
+> > fuse_lowlevel_notify_delete() to notify the kernel to trim the deleted
+> > inode. (this is not completely reliable because we play unlink/link
+> > tricks when  handle MDS replies. it's difficult to keep the user space
+> > cache and kernel dcache in sync)
+> >
+> > Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> > ---
+> >  src/client/Client.cc  | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++-
+> >  src/client/Client.h   | 14 +++++++++++
+> >  src/client/fuse_ll.cc | 19 ++++++++++++--
+> >  3 files changed, 99 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/src/client/Client.cc b/src/client/Client.cc
+> > index ae7ddf6..f9c4f2b 100644
+> > --- a/src/client/Client.cc
+> > +++ b/src/client/Client.cc
+> > @@ -141,9 +141,12 @@ Client::Client(Messenger *m, MonClient *mc)
+> >      timer(m->cct, client_lock),
+> >      ino_invalidate_cb(NULL),
+> >      ino_invalidate_cb_handle(NULL),
+> > +    dentry_invalidate_cb(NULL),
+> > +    dentry_invalidate_cb_handle(NULL),
+> >      getgroups_cb(NULL),
+> >      getgroups_cb_handle(NULL),
+> >      async_ino_invalidator(m->cct),
+> > +    async_dentry_invalidator(m->cct),
+> >      tick_event(NULL),
+> >      monclient(mc), messenger(m), whoami(m->get_myname().num()),
+> >      initialized(false), mounted(false), unmounting(false),
+> > @@ -403,11 +406,17 @@ void Client::shutdown()
+> >    admin_socket->unregister_command("dump_cache");
+> >
+> >    if (ino_invalidate_cb) {
+> > -    ldout(cct, 10) << "shutdown stopping invalidator finisher" << dendl;
+> > +    ldout(cct, 10) << "shutdown stopping cache invalidator finisher" << dendl;
+> >      async_ino_invalidator.wait_for_empty();
+> >      async_ino_invalidator.stop();
+> >    }
+> >
+> > +  if (dentry_invalidate_cb) {
+> > +    ldout(cct, 10) << "shutdown stopping dentry invalidator finisher" << dendl;
+> > +    async_dentry_invalidator.wait_for_empty();
+> > +    async_dentry_invalidator.stop();
+> > +  }
+> > +
+> >    objectcacher->stop();  // outside of client_lock! this does a join.
+> >
+> >    client_lock.Lock();
+> > @@ -3526,6 +3535,45 @@ void Client::handle_cap_flushsnap_ack(MetaSession *session, Inode *in, MClientCa
+> >    m->put();
+> >  }
+> >
+> > +class C_Client_DentryInvalidate : public Context  {
+> > +private:
+> > +  Client *client;
+> > +  vinodeno_t dirino;
+> > +  vinodeno_t ino;
+> > +  string name;
+> > +public:
+> > +  C_Client_DentryInvalidate(Client *c, Dentry *dn) :
+> > +                           client(c), dirino(dn->dir->parent_inode->vino()),
+> > +                           ino(dn->inode->vino()), name(dn->name) { }
+> > +  void finish(int r) {
+> > +    client->_async_dentry_invalidate(dirino, ino, name);
+> > +  }
+> > +};
+> > +
+> > +void Client::_async_dentry_invalidate(vinodeno_t dirino, vinodeno_t ino, string& name)
+> > +{
+> > +  ldout(cct, 10) << "_async_dentry_invalidate '" << name << "' ino " << ino
+> > +                << " in dir " << dirino << dendl;
+> > +  dentry_invalidate_cb(dentry_invalidate_cb_handle, dirino, ino, name);
+> > +}
+> > +
+> > +void Client::_schedule_invalidate_dentry_callback(Dentry *dn)
+> > +{
+> > +  if (dentry_invalidate_cb && dn->inode->ll_ref > 0)
+> > +    async_dentry_invalidator.queue(new C_Client_DentryInvalidate(this, dn));
+> > +}
+> > +
+> > +void Client::_invalidate_inode_parents(Inode *in)
+> > +{
+> > +  set<Dentry*>::iterator q = in->dn_set.begin();
+> > +  while (q != in->dn_set.end()) {
+> > +    Dentry *dn = *q++;
+> > +    // FIXME: we play lots of unlink/link tricks when handling MDS replies,
+> > +    //        so in->dn_set doesn't always reflect the state of kernel's dcache.
+> > +    _schedule_invalidate_dentry_callback(dn);
+> > +    unlink(dn, false);
+> > +  }
+> > +}
+> >
+> >  void Client::handle_cap_grant(MetaSession *session, Inode *in, Cap *cap, MClientCaps *m)
+> >  {
+> > @@ -3553,8 +3601,12 @@ void Client::handle_cap_grant(MetaSession *session, Inode *in, Cap *cap, MClient
+> >      in->uid = m->head.uid;
+> >      in->gid = m->head.gid;
+> >    }
+> > +  bool deleted_inode = false;
+> >    if ((issued & CEPH_CAP_LINK_EXCL) == 0) {
+> >      in->nlink = m->head.nlink;
+> > +    if (in->nlink == 0 &&
+> > +       (new_caps & (CEPH_CAP_LINK_SHARED | CEPH_CAP_LINK_EXCL)))
+> > +      deleted_inode = true;
+> >    }
+> >    if ((issued & CEPH_CAP_XATTR_EXCL) == 0 &&
+> >        m->xattrbl.length() &&
+> > @@ -3608,6 +3660,10 @@ void Client::handle_cap_grant(MetaSession *session, Inode *in, Cap *cap, MClient
+> >    if (new_caps)
+> >      signal_cond_list(in->waitfor_caps);
+> >
+> > +  // may drop inode's last ref
+> > +  if (deleted_inode)
+> > +    _invalidate_inode_parents(in);
+> > +
+> >    m->put();
+> >  }
+> >
+> > @@ -6294,6 +6350,17 @@ void Client::ll_register_ino_invalidate_cb(client_ino_callback_t cb, void *handl
+> >    async_ino_invalidator.start();
+> >  }
+> >
+> > +void Client::ll_register_dentry_invalidate_cb(client_dentry_callback_t cb, void *handle)
+> > +{
+> > +  Mutex::Locker l(client_lock);
+> > +  ldout(cct, 10) << "ll_register_dentry_invalidate_cb cb " << (void*)cb << " p " << (void*)handle << dendl;
+> > +  if (cb == NULL)
+> > +    return;
+> > +  dentry_invalidate_cb = cb;
+> > +  dentry_invalidate_cb_handle = handle;
+> > +  async_dentry_invalidator.start();
+> > +}
+> > +
+> >  void Client::ll_register_getgroups_cb(client_getgroups_callback_t cb, void *handle)
+> >  {
+> >    Mutex::Locker l(client_lock);
+> > diff --git a/src/client/Client.h b/src/client/Client.h
+> > index 96e8937..9579711 100644
+> > --- a/src/client/Client.h
+> > +++ b/src/client/Client.h
+> > @@ -119,6 +119,9 @@ class MetaRequest;
+> >
+> >  typedef void (*client_ino_callback_t)(void *handle, vinodeno_t ino, int64_t off, int64_t len);
+> >
+> > +typedef void (*client_dentry_callback_t)(void *handle, vinodeno_t dirino,
+> > +                                        vinodeno_t ino, string& name);
+> > +
+> >  typedef int (*client_getgroups_callback_t)(void *handle, uid_t uid, gid_t **sgids);
+> >
+> >  // ========================================================
+> > @@ -209,10 +212,14 @@ class Client : public Dispatcher {
+> >    client_ino_callback_t ino_invalidate_cb;
+> >    void *ino_invalidate_cb_handle;
+> >
+> > +  client_dentry_callback_t dentry_invalidate_cb;
+> > +  void *dentry_invalidate_cb_handle;
+> > +
+> >    client_getgroups_callback_t getgroups_cb;
+> >    void *getgroups_cb_handle;
+> >
+> >    Finisher async_ino_invalidator;
+> > +  Finisher async_dentry_invalidator;
+> >
+> >    Context *tick_event;
+> >    utime_t last_cap_renew;
+> > @@ -352,6 +359,7 @@ protected:
+> >
+> >    friend class C_Client_PutInode; // calls put_inode()
+> >    friend class C_Client_CacheInvalidate;  // calls ino_invalidate_cb
+> > +  friend class C_Client_DentryInvalidate;  // calls dentry_invalidate_cb
+> >
+> >    //int get_cache_size() { return lru.lru_get_size(); }
+> >    //void set_cache_size(int m) { lru.lru_set_max(m); }
+> > @@ -454,6 +462,10 @@ protected:
+> >    void finish_cap_snap(Inode *in, CapSnap *capsnap, int used);
+> >    void _flushed_cap_snap(Inode *in, snapid_t seq);
+> >
+> > +  void _schedule_invalidate_dentry_callback(Dentry *dn);
+> > +  void _async_dentry_invalidate(vinodeno_t dirino, vinodeno_t ino, string& name);
+> > +  void _invalidate_inode_parents(Inode *in);
+> > +
+> >    void _schedule_invalidate_callback(Inode *in, int64_t off, int64_t len, bool keep_caps);
+> >    void _invalidate_inode_cache(Inode *in, bool keep_caps);
+> >    void _invalidate_inode_cache(Inode *in, int64_t off, int64_t len, bool keep_caps);
+> > @@ -727,6 +739,8 @@ public:
+> >
+> >    void ll_register_ino_invalidate_cb(client_ino_callback_t cb, void *handle);
+> >
+> > +  void ll_register_dentry_invalidate_cb(client_dentry_callback_t cb, void *handle);
+> > +
+> >    void ll_register_getgroups_cb(client_getgroups_callback_t cb, void *handle);
+> >  };
+> >
+> > diff --git a/src/client/fuse_ll.cc b/src/client/fuse_ll.cc
+> > index 8339553..82761b9 100644
+> > --- a/src/client/fuse_ll.cc
+> > +++ b/src/client/fuse_ll.cc
+> > @@ -534,7 +534,7 @@ static int getgroups_cb(void *handle, uid_t uid, gid_t **sgids)
+> >    return 0;
+> >  }
+> >
+> > -static void invalidate_cb(void *handle, vinodeno_t vino, int64_t off, int64_t len)
+> > +static void ino_invalidate_cb(void *handle, vinodeno_t vino, int64_t off, int64_t len)
+> >  {
+> >    CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+> >    fuse_ino_t fino = cfuse->make_fake_ino(vino.ino, vino.snapid);
+> > @@ -543,6 +543,19 @@ static void invalidate_cb(void *handle, vinodeno_t vino, int64_t off, int64_t le
+> >  #endif
+> >  }
+> >
+> > +static void dentry_invalidate_cb(void *handle, vinodeno_t dirino,
+> > +                                vinodeno_t ino, string& name)
+> > +{
+> > +  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+> > +  fuse_ino_t fdirino = cfuse->make_fake_ino(dirino.ino, dirino.snapid);
+> > +#if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
+> > +  fuse_ino_t fino = cfuse->make_fake_ino(ino.ino, ino.snapid);
+> > +  fuse_lowlevel_notify_delete(cfuse->ch, fdirino, fino, name.c_str(), name.length());
+> > +#elif FUSE_VERSION >= FUSE_MAKE_VERSION(2, 8)
+> > +  fuse_lowlevel_notify_inval_entry(cfuse->ch, fdirino, name.c_str(), name.length());
+> > +#endif
+> > +}
+> > +
+> >  static void do_init(void *data, fuse_conn_info *bar)
+> >  {
+> >    CephFuse::Handle *cfuse = (CephFuse::Handle *)data;
+> > @@ -703,8 +716,10 @@ int CephFuse::Handle::init(int argc, const char *argv[])
+> >
+> >    client->ll_register_getgroups_cb(getgroups_cb, this);
+> >
+> > +  client->ll_register_dentry_invalidate_cb(dentry_invalidate_cb, this);
+> > +
+> >    if (g_conf->fuse_use_invalidate_cb)
+> > -    client->ll_register_ino_invalidate_cb(invalidate_cb, this);
+> > +    client->ll_register_ino_invalidate_cb(ino_invalidate_cb, this);
+> >
+> >  done:
+> >    fuse_opt_free_args(&args);
+> > --
+> > 1.8.1.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
