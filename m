@@ -1,54 +1,38 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] enable mds rejoin with active inodes' old parent xattrs
-Date: Sat, 24 Aug 2013 07:38:17 -0300
-Message-ID: <ory57ridba.fsf@livre.home>
-References: <orvc2ytei1.fsf@livre.home>
-	<CAAM7YAk+1pZsn8=f-Z+wxzm+4-zkKQCN52gVTWot6e_OmHDSTQ@mail.gmail.com>
-	<orppt4k6ys.fsf@livre.home>
-	<CAPYLRzjHPbRe-AKnzqb-M+jO78u9vMYdru+8kLGWmVEPNanfqA@mail.gmail.com>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] mds: remove waiting lock before merging with neighbours
+Date: Sat, 24 Aug 2013 14:02:49 +0200
+Message-ID: <20130824140249.7a6493c1@plati.site>
+References: <1375110344-26133-1-git-send-email-ddiss@suse.de>
+	<CAPYLRzgeWsdxyqWNRykH1Ac+TChQwFh4PKmP7D81jc89YOZJ9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:45823 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754092Ab3HXKic (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Aug 2013 06:38:32 -0400
-In-Reply-To: <CAPYLRzjHPbRe-AKnzqb-M+jO78u9vMYdru+8kLGWmVEPNanfqA@mail.gmail.com>
-	(Gregory Farnum's message of "Fri, 23 Aug 2013 13:11:14 -0700")
+Received: from cantor2.suse.de ([195.135.220.15]:48523 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754479Ab3HXMC7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 24 Aug 2013 08:02:59 -0400
+In-Reply-To: <CAPYLRzgeWsdxyqWNRykH1Ac+TChQwFh4PKmP7D81jc89YOZJ9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Aug 23, 2013, Gregory Farnum <greg@inktank.com> wrote:
+On Fri, 23 Aug 2013 13:58:56 -0700
+Gregory Farnum <greg@inktank.com> wrote:
 
-> On Fri, Aug 23, 2013 at 4:00 AM, Alexandre Oliva <oliva@gnu.org> wrote:
->> On Aug 22, 2013, "Yan, Zheng" <ukernel@gmail.com> wrote:
->> 
->>> This is not bug. Only the tail entry of the path encoded in the parent xattrs
->>> need to be updated. (the entry for inode's parent directory)
->> 
->> Why store the others, if they're not usable, then?  IMHO it just
->> introduces a risk of their being accidentally misused.
+>     When handling a lock request, the MDS calls adjust_locks() to merge
+>     the new lock with available neighbours. If the new lock is merged,
+>     then the waiting_locks entry is not located in the subsequent
+>     remove_waiting() call because adjust_locks changed the new lock to
+>     include the old locks.
+>     This fix ensures that the waiting_locks entry is removed prior to
+>     modification during merge.
 
-> We want to write a correct path whenever we touch the file, but we
-> don't want to have to go out to each file's object in order to
-> complete a directory rename. So for a given file object we consider
-> only the immediate parent to be authoritative, but keep around the
-> full path for disaster recovery.
+Looks good.
 
-Ok, so all this extra info is for disaster recovery only.  I guess that
-makes some sense to me, as long as that's clear to everone who might
-want to tap on that info.
+> And it's now merged into master and backported to dumpling. Thank you very much!
 
-> If we are touching the file's ancestor xattr and not updating the
-> whole thing, that would be a bug, but I don't think that's what you're
-> describing?
+Great, thanks Gregory.
 
-It was not, indeed.  Thanks for the clarification.
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Cheers, David
